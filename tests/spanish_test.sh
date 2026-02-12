@@ -1,7 +1,7 @@
 #!/bin/bash
 #/mnt/data_prod/vecinita/spanish_test.sh
 # Configuration
-API_URL="http://localhost:8000/ask" 
+API_URL="http://127.0.0.1:8080/ask"
 LOG_FILE="diagnostic_results.log"
 
 echo "=== Vecinita Diagnostic Test Suite ===" > $LOG_FILE

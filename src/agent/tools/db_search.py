@@ -1,95 +1,87 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-VECINITA-RIOS: Database Search Tool
-Path: src/agent/tools/db_search.py
-
-PURPOSE:
-Performs vector similarity search against Supabase document_chunks.
-1. Fixes the 401 'Model-as-Key' error using explicit keyword arguments.
-2. Uses verified 'langchain_core.tools' import for LangChain 1.2.x compatibility.
-3. Provides factory function required by src.agent.main.
-
-VERSION: 1.0.2 (Stable)
-"""
+# ############################################################################
+# FILE: db_search.py
+# PATH: src/agent/tools/db_search.py
+# ROLE: Production Vector Search Utility for Supabase/PostgreSQL.
+# DESCRIPTION: Performs semantic similarity search using Gemini Embeddings
+#              and Supabase pgvector 'match_documents' RPC.
+# ############################################################################
 
 import os
 import logging
-from typing import List, Dict, Any, Union
-from langchain_openai import OpenAIEmbeddings
-# Verified path for LangChain 1.2.x
-from langchain_core.tools import Tool 
-from sqlalchemy import create_engine, text
+from typing import List, Dict
+from supabase import create_client, Client
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
-# Setup logging
-logger = logging.getLogger(__name__)
+# Configure logging for production traceability
+logger = logging.getLogger("vecinita.db_search")
 
-def db_search(query: str, embedding_model: Any = "text-embedding-3-large") -> str:
+# --- DATABASE CONFIGURATION ---
+# These are injected via Docker Compose / .env
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY") 
+
+# --- EMBEDDING CONFIGURATION ---
+# Initializing the Google Embedding model (768 dimensions)
+# This model converts text queries into vectors for semantic matching.
+embeddings_model = GoogleGenerativeAIEmbeddings(
+    model="models/embedding-001",
+    google_api_key=os.getenv("GOOGLE_API_KEY")
+)
+
+def db_search(query: str, limit: int = 3) -> List[Dict]:
     """
-    Executes a RAG search. 
-    Explicitly handles the OpenAI API Key to prevent 401 errors.
+    Executes a semantic vector search against the Rhode Island resource database.
+    
+    Args:
+        query (str): The user's question (supports English or Spanish).
+        limit (int): Number of relevant document chunks to return.
+        
+    Returns:
+        List[Dict]: A list of dictionaries containing 'source' and 'content'.
     """
     try:
-        # 1. ORCHESTRATE EMBEDDINGS
-        # Ensure model name isn't treated as the API key
-        if isinstance(embedding_model, str):
-            logger.info(f"Initializing OpenAIEmbeddings with model: {embedding_model}")
-            embeddings = OpenAIEmbeddings(
-                model=embedding_model, 
-                openai_api_key=os.getenv("OPENAI_API_KEY")
-            )
-        else:
-            embeddings = embedding_model
+        # 1. Generate the semantic vector for the query
+        # Note: Even if the query is Spanish, the vector will match English 
+        # concepts due to the multilingual nature of embedding-001.
+        query_embedding = embeddings_model.embed_query(query)
 
-        # 2. GENERATE VECTOR
-        query_vector = embeddings.embed_query(query)
+        # 2. Establish connection to Supabase Client
+        supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-        # 3. DATABASE HANDSHAKE
-        conn_str = os.getenv("SUPABASE_CONN_STR")
-        if not conn_str:
-            raise ValueError("SUPABASE_CONN_STR not found in environment")
+        # 3. Call the 'match_documents' SQL function (RPC)
+        # We pass the embedding and thresholds for relevance.
+        response = supabase.rpc(
+            'match_documents', 
+            {
+                'query_embedding': query_embedding,
+                'match_threshold': 0.5, # Controls how 'close' a match must be
+                'match_count': limit,
+            }
+        ).execute()
 
-        engine = create_engine(conn_str)
-        
-        with engine.connect() as connection:
-            # Executes the RPC function defined in Supabase
-            search_query = text("""
-                SELECT content, source_url, similarity 
-                FROM search_similar_documents(
-                    query_embedding := :emb,
-                    match_threshold := 0.1,
-                    match_count := 5
-                )
-            """)
-            
-            result = connection.execute(search_query, {"emb": query_vector})
-            rows = result.fetchall()
+        # 4. Parse and Structure the results
+        # We ensure the orchestrator gets a clean list of context chunks.
+        results = []
+        if response.data:
+            for row in response.data:
+                # Metadata is expected to contain the source URL
+                results.append({
+                    "source": row.get("metadata", {}).get("source", "https://ri.gov"),
+                    "content": row.get("content", "Information not available.")
+                })
 
-        if not rows:
-            return "No relevant resources found in the directory for this query."
+        # Log a warning if no data was found for a valid query
+        if not results:
+            logger.warning(f"Semantic search returned 0 results for: {query}")
+            return [{"source": "System", "content": "No specific local resources matched your query."}]
 
-        # 4. FORMAT RESULTS
-        formatted_results = []
-        for row in rows:
-            formatted_results.append(f"Source: {row[1]}\nContent: {row[0]}")
-
-        return "\n\n---\n\n".join(formatted_results)
+        return results
 
     except Exception as e:
-        logger.critical(f"DB Search Error: {str(e)}")
-        return "Database search currently unavailable due to an internal processing error."
+        # Log the full stack trace for debugging without crashing the main app
+        logger.error(f"DATABASE SEARCH CRITICAL FAILURE: {e}", exc_info=True)
+        return [{"source": "Error", "content": "The search service is currently unavailable."}]
 
-def create_db_search_tool(supabase_client: Any = None, embedding_model: Any = None):
-    """
-    FACTORY FUNCTION: Now accepts 'supabase_client' and 'embedding_model' 
-    to match the call signature in src.agent.main.
-    """
-    return Tool(
-        name="db_search",
-        # We pass a lambda or partial if we need to inject the model, 
-        # but for now, the tool handles its own initialization.
-        func=lambda query: db_search(query, embedding_model=embedding_model) if embedding_model else db_search(query),
-        description="Search the Providence Resource Vault for health, school, and community resources."
-    )
-
-# -- end-of-file --
+# ############################################################################
+# END OF FILE: db_search.py
+# ############################################################################

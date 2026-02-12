@@ -1,7 +1,7 @@
 # ############################################################################
 # FILE: audit_rules.py
 # PATH: tests/audit_rules.py
-# ROLE: Detailed Linguistic Auditor. Handles Type-Safe String Analysis.
+# ROLE: High-Fidelity Linguistic Auditor. Dictionary-Aware Content Extraction.
 # ############################################################################
 
 import requests
@@ -10,17 +10,34 @@ import sys
 API_URL = "http://127.0.0.1:8080/ask"
 TEST_QUERY = "What are the requirements for the SNAP program in Rhode Island?"
 
+def extract_text(raw_data):
+    """
+    DATA MORPH: Deep Extraction.
+    Handles String, List[str], and List[Dict] formats to find the AI's answer.
+    """
+    if isinstance(raw_data, str):
+        return raw_data
+    if isinstance(raw_data, list):
+        # Extract content if it's a list of dicts (e.g., [{'content': '...'}])
+        extracted = []
+        for item in raw_data:
+            if isinstance(item, dict):
+                # Look for common keys where the text might hide
+                text_val = item.get("content") or item.get("text") or str(item)
+                extracted.append(text_val)
+            else:
+                extracted.append(str(item))
+        return "\n\n".join(extracted)
+    return str(raw_data)
+
 def run_audit():
-    print(f"\n🔍 Auditing Query: '{TEST_QUERY}'")
-    
     try:
         response = requests.get(API_URL, params={"question": TEST_QUERY}, timeout=30)
         response.raise_for_status()
         data = response.json()
         
-        # DATA MORPH: Ensure the answer is a string even if it arrives as a list
-        raw_answer = data.get("answer", "")
-        answer = " ".join(raw_answer) if isinstance(raw_answer, list) else str(raw_answer)
+        # --- THE FIX: DEEP EXTRACTION ---
+        answer = extract_text(data.get("answer", ""))
         
         # 1. BREVITY CHECK (Max 2 Paragraphs)
         paragraphs = [p for p in answer.split('\n\n') if p.strip()]
@@ -34,6 +51,7 @@ def run_audit():
         has_citation = "Source:" in answer or "http" in answer
 
         # --- RESULTS DISPLAY ---
+        print(f"\n🔍 Auditing Query: '{TEST_QUERY}'")
         print("-" * 50)
         print(f"{'RULE CRITERIA' : <30} | {'STATUS' : <10}")
         print("-" * 50)
@@ -50,7 +68,7 @@ def run_audit():
         sys.exit(0)
 
     except Exception as e:
-        print(f"❌ AUDIT CRASHED: {str(e)}")
+        print(f"\n❌ AUDIT CRASHED: {str(e)}")
         sys.exit(1)
 
 if __name__ == "__main__":

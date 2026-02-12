@@ -1,52 +1,57 @@
-##Filename: supabase_db_test.py
-# A simple script to test the connection to a Supabase database.
-# It loads credentials from a .env file, creates a client,
-# and attempts to fetch one row from a specified table.
+## Filename: supabase_db_test.py
+# Updated: 2026-02-09 - Rios VM Deployment Edition
+# Purpose: Validates Supabase connection using the .env Single Source of Truth.
 
 import os
+from pathlib import Path
 from supabase import create_client, Client
 from dotenv import load_dotenv
 
-# Load environment variables from a .env file in the same directory
-load_dotenv()
+# 1. Force load the .env from the project root (absolute path)
+env_path = Path(__file__).resolve().parent.parent.parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
-print("--- Starting database connection test ---")
+print(f"--- Starting database connection test (Source: {env_path}) ---")
 
 # --- Configuration ---
-# This MUST be a real table that exists in your Supabase project.
-# We are using "document_chunks" because we know it exists.
 TABLE_TO_QUERY = "document_chunks"
 
-# 1. Load credentials from environment variables
+# 2. Load credentials
 supabase_url = os.environ.get("SUPABASE_URL")
 supabase_key = os.environ.get("SUPABASE_KEY")
 
-# 2. Check if the environment variables were loaded
+# 3. Enhanced Key Validation
 if not supabase_url or not supabase_key:
-    print("❌ ERROR: SUPABASE_URL and SUPABASE_KEY environment variables must be set.")
-    print("Ensure you have a .env file in the same directory with these values.")
+    print("❌ ERROR: SUPABASE_URL and SUPABASE_KEY not found in .env.")
     exit(1)
 
-print("✅ Credentials loaded from environment.")
+if supabase_key.startswith("sb_secret"):
+    print("❌ ERROR: Your .env is using a Management Key (sb_secret...).")
+    print("   Please use the Service Role JWT (starts with 'eyJ').")
+    exit(1)
+
+print("✅ Credentials found. Key format is valid (JWT).")
 
 try:
-    # 3. Create the Supabase client
-    print(f"Attempting to connect to Supabase URL: {supabase_url[:25]}...")
+    # 4. Create the Supabase client
+    print(f"Connecting to: {supabase_url[:30]}...")
     supabase: Client = create_client(supabase_url, supabase_key)
-    print("✅ Supabase client created successfully.")
+    print("✅ Supabase client initialized.")
 
-    # 4. Perform a simple query to test the connection
-    print(f"Attempting to query table: '{TABLE_TO_QUERY}'...")
+    # 5. Perform the query
+    print(f"Checking table: '{TABLE_TO_QUERY}'...")
     response = supabase.table(TABLE_TO_QUERY).select("*").limit(1).execute()
     
-    # 5. Check the response and print the result
-    print("✅ Query executed successfully!")
+    # 6. Final Result
+    print("✅ Query successful!")
     print("\n--- TEST SUCCEEDED ---")
-    print("Data received:", response.data)
+    if response.data:
+        print(f"Data Sample: {str(response.data)[:100]}...")
+    else:
+        print("Note: Connection worked, but the table is currently empty.")
 
 except Exception as e:
     print("\n--- ❌ TEST FAILED ---")
-    print("An error occurred:", e)
+    print(f"Detailed Error: {e}")
     exit(1)
-
-#--end-of-file
+##END-OF-FILE

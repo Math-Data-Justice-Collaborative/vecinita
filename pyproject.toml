@@ -12,21 +12,25 @@ keywords = ["rag", "langgraph>=0.2.0", "langchain", "supabase", "fastapi", "ai",
 
 dependencies = [
     # Web Framework
-    "fastapi",
-    "uvicorn",
-    # LangChain & LangGraph
-    "langchain",
-    "langchain-community",
-    "langchain-core",
-    "langchain-openai",
-    "langchain-groq>=0.2.0",
+    "fastapi==0.109.0",
+    "uvicorn==0.27.0",
+    # LangChain & LangGraph - Updated for Gemini/OpenAI compatibility
+    "langchain>=0.2.0",
+    "langchain-community>=0.2.0",
+    "langchain-core>=0.2.0",
+    "langchain-openai>=0.1.0",
+    "langchain-google-genai>=1.0.10", # Added directly to source of truth
+    "langchain-groq>=0.1.0",
     "langchain-text-splitters",
     "langchain-huggingface",
     "langgraph>=0.2.0",
-    # Database & Vector Store
-    "supabase",
-    "psycopg2-binary",
-    # ML & Embeddings (sentence-transformers moved to optional-dependencies due to numpy 2.x conflict)
+    # Database & Utilities
+    "supabase==2.5.0",
+    "psycopg2-binary==2.9.9",
+    "python-dotenv",
+    "langdetect",
+    "playwright",
+    # ML & Embeddings
     "fastembed",
     # Document Processing
     "beautifulsoup4",
@@ -43,60 +47,41 @@ dependencies = [
     "gotrue>=2.0.0",
     "langchain-ollama>=1.0.0",
     "docker>=7.0.0",
-    # LangSmith for tracing and monitoring (now compatible with numpy 2.x)
     "langsmith>=0.4.56",
-    # Pin onnxruntime and tokenizers to stable versions to avoid Windows compatibility issues
-    # onnxruntime dev releases don't have Windows wheels
-    # tokenizers pre-releases require Rust compilation
+    # Platform-specific pins for stability
     "onnxruntime>=1.18.0,<1.24.0.dev; sys_platform == 'win32'",
     "tokenizers>=0.15.0,<0.22.0rc",
-    # Heavy ML libraries moved to optional extras to keep CI lean
-    # Install these only when needed locally or in production builds
 ]
 
 [project.optional-dependencies]
 embedding = [
-    # Local embeddings with SentenceTransformers (optional, use fastembed for main)
     "sentence-transformers>=5.1.2",
 ]
-
 ml = [
-    # Optional TensorFlow/Keras stack (pulls large CUDA libs on Linux runners)
     "tf-keras>=2.20.1",
 ]
-
 dev = [
-    # Testing Framework
     "pytest",
     "pytest-asyncio",
     "pytest-cov",
-    # FastAPI Testing
     "httpx",
     "fastapi",
-    # Code Quality Tools
     "black",
     "ruff",
     "mypy",
-    # Jupyter for experimentation
     "jupyter",
     "ipython",
 ]
-
 ci = [
-    # Minimal test dependencies for CI to avoid large installs
     "pytest",
     "pytest-asyncio",
     "pytest-cov",
-    # Keep httpx for API tests without launching browsers
     "httpx",
 ]
-
 visualization = [
-    # For graph visualization
     "graphviz",
     "pygraphviz",
 ]
-
 all = [
     "vecinita[dev,visualization,embedding]",
 ]
@@ -121,44 +106,26 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 
 [tool.pytest.ini_options]
-# PyTest configuration for Vecinita tests
 minversion = "6.0"
 testpaths = ["tests"]
 pythonpath = ["."]
-
-# Test discovery patterns
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-
-# Test output options
-addopts = [
-    "-v",
-    "--tb=short",
-    "--strict-markers",
-    "--disable-warnings",
-]
-
-# Markers for test categorization
+addopts = ["-v", "--tb=short", "--strict-markers", "--disable-warnings"]
 markers = [
-    "unit: Unit tests (fast, no external dependencies)",
-    "integration: Integration tests (may require external services)",
-    "ui: UI/API tests using FastAPI TestClient",
-    "slow: Tests that take a long time to run",
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "ui: UI/API tests",
+    "slow: Slow tests",
     "api: API endpoint tests",
-    "db: Database related tests",
+    "db: Database tests",
 ]
-
-# Logging
 log_cli = false
 log_cli_level = "INFO"
 log_file = "tests/pytest.log"
 log_file_level = "DEBUG"
-
-# Test output
 console_output_style = "progress"
-
-# Filter warnings
 filterwarnings = [
     "ignore::pydantic.warnings.PydanticDeprecatedSince20",
     "ignore::DeprecationWarning:supabase._sync.client",
@@ -171,8 +138,7 @@ target-version = ["py310", "py311", "py312"]
 include = '\.pyi?$'
 extend-exclude = '''
 /(
-  # directories
-  \.eggs
+    \.eggs
   | \.git
   | \.hg
   | \.mypy_cache
@@ -186,20 +152,8 @@ extend-exclude = '''
 [tool.ruff]
 line-length = 100
 target-version = "py310"
-select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "C",   # flake8-comprehensions
-    "B",   # flake8-bugbear
-    "UP",  # pyupgrade
-]
-ignore = [
-    "E501",  # line too long (handled by black)
-    "B008",  # do not perform function calls in argument defaults
-    "C901",  # too complex
-]
+select = ["E", "W", "F", "I", "C", "B", "UP"]
+ignore = ["E501", "B008", "C901"]
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401"]
@@ -209,7 +163,6 @@ python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
-disallow_incomplete_defs = false
 check_untyped_defs = true
 no_implicit_optional = true
 warn_redundant_casts = true
@@ -219,29 +172,9 @@ strict_equality = true
 
 [[tool.mypy.overrides]]
 module = [
-    "supabase.*",
-    "langchain.*",
-    "langchain_community.*",
-    "langchain_core.*",
-    "langchain_openai.*",
-    "langchain_groq.*",
-    "langchain_huggingface.*",
-    "langgraph.*",
-    "sentence_transformers.*",
-    "fastembed.*",
-    "unstructured.*",
-    "playwright.*",
+    "supabase.*", "langchain.*", "langchain_community.*", 
+    "langchain_core.*", "langchain_openai.*", "langchain_groq.*", 
+    "langchain_huggingface.*", "langgraph.*", "sentence_transformers.*", 
+    "fastembed.*", "unstructured.*", "playwright.*"
 ]
 ignore_missing_imports = true
-
-[tool.uv]
-# Ensure uv resolves stable versions to avoid Windows compatibility issues
-# - onnxruntime dev releases don't have Windows wheels
-# - tokenizers pre-releases require Rust compilation
-# See: uv.toml for detailed configuration
-
-[dependency-groups]
-dev = [
-    "pytest>=9.0.0",
-    "pytest-cov>=7.0.0",
-]

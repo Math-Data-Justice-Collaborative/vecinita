@@ -1,3 +1,13 @@
+################################################################################
+# PROJECT: Vecinita - Community Q&A Assistant
+# FILE: docker-compose.yml
+# VERSION: 2.4.0 (Rios VM Production Standard)
+# DATE: 2026-02-09
+# DESCRIPTION: Finalized orchestration for the Vecinita RAG engine.
+# This configuration strictly follows the "Single Source of Truth" principle,
+# pulling all secrets exclusively from the .env file.
+################################################################################
+
 services:
   vecinita-app:
     build:
@@ -5,52 +15,43 @@ services:
       dockerfile: Dockerfile
     image: vecinita-app:latest
     container_name: vecinita-app
-    # Map host port to container port exposed by uvicorn
+    
+    # --- SINGLE SOURCE OF TRUTH ---
+    # Injects all variables from .env (Supabase, Groq, OpenAI, etc.)
+    # This bypasses VM shell memory to prevent "Invalid API Key" errors.
+    env_file:
+      - .env
+
+    # --- PORT MIGRATION ---
+    # Standardizing on port 8080 for the RIOS VM environment
     ports:
-      - "8000:8000"
-    # Pass Supabase and app configuration via environment
+      - "8080:8080"
+    
+    # --- RUNTIME OVERRIDES ---
+    # Only non-sensitive operational flags are kept here.
     environment:
-      # Supabase and app configuration (matches .env)
-      SUPABASE_URL: ${SUPABASE_URL}
-      SUPABASE_KEY: ${SUPABASE_KEY}
-      DATABASE_URL: ${DATABASE_URL}
+      - PORT=8080
+      - PYTHONUNBUFFERED=1
 
-      # API keys
-      GROQ_API_KEY: ${GROQ_API_KEY}
-      OPEN_API_KEY: ${OPEN_API_KEY}
+    # --- PERSISTENCE & SYNC ---
+    # Mounts local source code for real-time updates without image rebuilds.
+    volumes:
+      - ./src:/app/src
 
-      # LangSmith tracing
-      LANGSMITH_TRACING: ${LANGSMITH_TRACING}
-      LANGSMITH_ENDPOINT: ${LANGSMITH_ENDPOINT}
-      LANGSMITH_API_KEY: ${LANGSMITH_API_KEY}
-      LANGSMITH_PROJECT: ${LANGSMITH_PROJECT}
-
-      # Embeddings and local LLM fallback
-      EMBEDDING_MODEL: ${EMBEDDING_MODEL}
-      USE_LOCAL_EMBEDDINGS: ${USE_LOCAL_EMBEDDINGS}
-      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL}
-      OLLAMA_MODEL: ${OLLAMA_MODEL}
-
-      # TensorFlow and Performance
-      TF_ENABLE_ONEDNN_OPTS: "0"
-
-      # App runtime
-      PORT: "8000"
-      PYTHONUNBUFFERED: "1"
-    # Ensure the container restarts if it crashes or the host reboots
+    # --- RELIABILITY ---
     restart: unless-stopped
-    # If your app writes to a local directory (e.g., logs, cache), mount it
-    # volumes:
-    #   - ./.data:/app/.data
-    #   - ./logs:/app/logs
-    # Healthcheck helps detect early failures
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health" ]
-      interval: 30s
-      timeout: 5s
-      retries: 5
 
-# Optional: define a network (Docker creates a default bridge network)
-# networks:
-#   default:
-#     name: vecinita-net
+    # --- HEALTHCHECK ---
+    # Monitors the FastAPI /health endpoint on the migrated port 8080.
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s # Ample time for LLM/Embedding models to load into RAM
+
+networks:
+  default:
+    name: vecinita-net
+
+# EOF - RIOS VM DEPLOYMENT STANDARD

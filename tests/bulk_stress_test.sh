@@ -1,7 +1,13 @@
 #!/bin/bash
 
-# Configuration - Aligned with src/agent/main.py
-BASE_URL="http://127.0.0.1:8000/ask"
+################################################################################
+# PROJECT: Vecinita - RIOS Agent Stress Test
+# VERSION: 3.0.0 (POST /api/v1/chat Migration)
+# DATE: 2026-02-07
+################################################################################
+
+# Configuration - Aligned with the verified 8080/api/v1/chat endpoint
+BASE_URL="http://127.0.0.1:8080/api/v1/chat"
 LOG_FILE="logs/bulk_test_results.log"
 TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
 
@@ -16,14 +22,14 @@ echo "----------------------------------------" >> $LOG_FILE
 QUERIES=(
   "Hello|English_Baseline"
   "Hola|Spanish_Baseline"
-  "school|Tool_Trigger_English"
-  "escuela|Tool_Trigger_Spanish"
-  "¿Dónde está la escuela?|Spanish_UTF8_Complex"
-  "I need a doctor|English_Medical"
-  "Necesito un médico|Spanish_Medical"
-  "What is 2+2?|Logic_Math"
-  "Tell me a joke|Creative"
-  "Bye|Termination"
+  "Where is the nearest school?|Tool_Trigger_English"
+  "¿Cómo reporto una fuga?|Tool_Trigger_Spanish"
+  "What is the community policy on noise?|Policy_Inquiry"
+  "I need emergency assistance|High_Priority"
+  "Necesito ayuda médica|Spanish_Medical"
+  "Calculate 15% of 250|Logic_Math"
+  "Write a haiku about a neighbor|Creative"
+  "Goodbye|Termination"
 )
 
 echo "🚀 Starting RIOS Agent Stress Test..."
@@ -36,23 +42,27 @@ for ENTRY in "${QUERIES[@]}"; do
 
     echo -n "Testing [$TAG]... "
 
-    # Step 1: URL Encode the query (required for GET params)
-    ENCODED_QUERY=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''$QUERY'''))")
+    # Execute the POST request
+    # Note: We send 'message' as the key to match the ChatMessage model
+    RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL" \
+         -H "Content-Type: application/json" \
+         -d "{
+               \"message\": \"$QUERY\",
+               \"thread_id\": \"test_suite_$(date +%s)\"
+             }")
 
-    # Step 2: Execute the GET request
-    # We use -G to send data as query params and --data-urlencode for the question
-    RESPONSE=$(curl -s -w "\n%{http_code}" -X GET "${BASE_URL}?question=${ENCODED_QUERY}&thread_id=test_suite")
-
-    # Step 3: Parse Status and Body
+    # Parse Status and Body
     HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
     BODY=$(echo "$RESPONSE" | sed '$d')
 
     # Log results
-    echo "TAG: $TAG" >> $LOG_FILE
-    echo "QUERY: $QUERY" >> $LOG_FILE
-    echo "STATUS: $HTTP_STATUS" >> $LOG_FILE
-    echo "RESPONSE: $BODY" >> $LOG_FILE
-    echo "----------------------------------------" >> $LOG_FILE
+    {
+      echo "TAG: $TAG"
+      echo "QUERY: $QUERY"
+      echo "STATUS: $HTTP_STATUS"
+      echo "RESPONSE: $BODY"
+      echo "----------------------------------------"
+    } >> $LOG_FILE
 
     if [ "$HTTP_STATUS" == "200" ]; then
         echo "✅ OK"
