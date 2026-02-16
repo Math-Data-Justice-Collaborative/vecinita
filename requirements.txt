@@ -1,16 +1,28 @@
-# VECINITA-RIOS: Production Requirements (Verified Stable 2026-02-10)
-fastapi==0.109.0
-uvicorn==0.27.0
-# Core AI components
-langchain==1.2.8
-langchain-core==1.2.9
-langchain-openai==1.1.7
-langchain-google-genai==1.0.10
-langchain-community==1.2.8
-angdetect==1.0.9
-# Database and Utilities
-sqlalchemy==2.0.25
-supabase==2.3.7
-psycopg2-binary==2.9.9
-python-dotenv==1.0.1
-openai==1.12.0
+# Web & API
+fastapi
+uvicorn
+pydantic
+python-dotenv
+
+# LangChain & AI (Modernized for 2026)
+langchain-core
+langchain-community
+langchain-google-genai
+langchain-huggingface
+google-genai
+
+# The "99% Availability" Engine
+# Using the stable 2026 version of sentence-transformers
+sentence-transformers>=3.0.0
+
+# Database & Storage
+# Keeping Supabase stable but allowing minor patches
+supabase>=2.20.0
+psycopg2-binary
+
+# Tools & Scrapers
+playwright
+unstructured
+beautifulsoup4
+pypdf
+langdetect

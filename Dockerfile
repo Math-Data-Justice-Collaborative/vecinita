@@ -19,6 +19,11 @@ COPY src/ ./src/
 # Copy the data directory for internal resource files
 COPY data/ ./data/
 
+#Copy where static files to the root /app where main.py expects them
+COPY src/agent/static/index.html /app/index.html
+COPY src/agent/static/favicon.ico /app/favicon.ico
+COPY tests/ /app/tests/
+
 # Install system dependencies required for building packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
