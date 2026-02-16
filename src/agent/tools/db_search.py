@@ -1,82 +1,96 @@
 # ############################################################################
 # FILE: db_search.py
 # PATH: src/agent/tools/db_search.py
-# ROLE: Production Vector Search with Graceful Fallback (99% Availability)
+# ROLE: Vector Search Router & Executor
+# DESCRIPTION: The primary entry point for context retrieval. It dynamically
+#              selects the embedding provider based on environment variables,
+#              validates dimensions, and queries Supabase via RPC.
 # ############################################################################
 
 import os
 import logging
 from typing import List, Dict
 from supabase import create_client, Client
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
-# Initialize logging for traceability
+# Importing the Pluggable Providers
+from .embedders.google_v1_provider import GoogleV1Provider
+from .embedders.local_hf_provider import LocalHFProvider
+
 logger = logging.getLogger("vecinita.db_search")
 
-# --- CONFIGURATION ---
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
-
-# The model name should be the one verified by your environment
-# If text-embedding-004 fails, fallback logic handles it.
-embeddings_model = GoogleGenerativeAIEmbeddings(
-    model="text-embedding-004", 
-    google_api_key=os.getenv("GOOGLE_API_KEY"),
-    task_type="retrieval_query"
-)
+def get_active_provider():
+    """
+    Factory function to select the embedding engine.
+    Strategy is determined by the EMBEDDING_STRATEGY env variable.
+    """
+    strategy = os.getenv("EMBEDDING_STRATEGY", "LOCAL").upper()
+    
+    if strategy == "GOOGLE":
+        logger.info("Routing to QUALITY strategy: GoogleV1")
+        return GoogleV1Provider()
+    
+    logger.info("Routing to AVAILABILITY strategy: LocalHF")
+    return LocalHFProvider()
 
 def db_search(query: str, limit: int = 3) -> List[Dict]:
     """
-    Executes a vector search against Supabase. 
-    If the API or DB fails, it triggers a 'Replacement Action' with static data.
+    Executes a semantic search against the Supabase vector store.
+    
+    Args:
+        query (str): The user's natural language question.
+        limit (int): Number of relevant document chunks to return.
+        
+    Returns:
+        List[Dict]: A list of source/content pairs for the LLM to use.
     """
     try:
-        # 1. PRIMARY ACTION: Semantic Search
-        # Generate embedding for the incoming query
-        query_embedding = embeddings_model.embed_query(query)
+        # 1. Initialize the Provider
+        provider = get_active_provider()
+        
+        # 2. Generate Embedding
+        query_embedding = provider.embed_query(query)
 
-        # Connect to Supabase Client
-        supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+        # 3. Structural Guard: Verify dimension matches database schema
+        expected_dim = int(os.getenv("VECTOR_DIMENSION", "384"))
+        if len(query_embedding) != expected_dim:
+            error_msg = f"DIMENSION MISMATCH: Model produced {len(query_embedding)}, DB expected {expected_dim}"
+            logger.error(error_msg)
+            # Graceful failure to avoid API crash
+            return [{"source": "System Error", "content": "The search service is currently undergoing dimension reconfiguration."}]
 
-        # Call the RPC function in Postgres
+        # 4. Supabase Connection
+        url: str = os.getenv("SUPABASE_URL")
+        key: str = os.getenv("SUPABASE_SERVICE_KEY")
+        supabase: Client = create_client(url, key)
+
+        # 5. Vector Similarity Search (RPC)
+        # Calls the 'match_documents' function in your Postgres DB
         response = supabase.rpc(
             'match_documents', 
             {
                 'query_embedding': query_embedding,
-                'match_threshold': 0.5,
+                'match_threshold': 0.4, # Adjust based on model sensitivity
                 'match_count': limit,
             }
         ).execute()
 
-        if response.data and len(response.data) > 0:
-            results = []
-            for row in response.data:
-                results.append({
-                    "source": row.get("metadata", {}).get("source", "https://ri.gov"),
-                    "content": row.get("content", "")
-                })
-            return results
+        if response.data:
+            return [
+                {
+                    "source": r["metadata"].get("source", "https://ri.gov"), 
+                    "content": r["content"]
+                } for r in response.data
+            ]
         
-        # If the search executes but finds nothing, we manually trigger the fallback
-        raise ValueError("No relevant documents found in database.")
+        return []
 
     except Exception as e:
-        # 2. REPLACEMENT ACTION: The Clue for the Watchdog
-        # We use a specific tag so the monitor script can alert you.
-        logger.error(f"[FALLBACK TRIGGERED] Reason: {str(e)}")
-
-        # 3. GRACEFUL DEGRADATION: High-Value Static Defaults
-        # This ensures the GUI 'Sources' section is never empty.
-        return [
-            {
-                "source": "https://health.ri.gov",
-                "content": "Portal oficial de salud de Rhode Island. Información sobre vacunas y clínicas locales."
-            },
-            {
-                "source": "https://dhs.ri.gov/programs-and-services/supplemental-nutrition-assistance-program-snap",
-                "content": "Asistencia alimentaria para familias de bajos ingresos (SNAP). Contacto: 1-855-MY-RIDHS."
-            }
-        ]
+        logger.error(f"[CRITICAL SEARCH FAILURE]: {e}")
+        # 99% Availability Fallback: Always return a baseline source
+        return [{
+            "source": "https://health.ri.gov", 
+            "content": "Rhode Island Department of Health general assistance portal."
+        }]
 
 # ############################################################################
 # END OF FILE: db_search.py
