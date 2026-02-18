@@ -7,8 +7,8 @@ Comprehensive technical documentation for the Vecinita bilingual Q&A assistant. 
 ## 🚀 Quick Navigation by Role
 
 ### 👤 **New Developer** - Start Here
-1. [QUICK_START.md](QUICK_START.md) - **5-minute setup guide** ⚡
-2. [../QUICKSTART.md](../QUICKSTART.md) - Original quick start
+1. [QUICKSTART.md](guides/QUICKSTART.md) - **5-minute setup guide** ⚡
+2. [guides/QUICKSTART.md](guides/QUICKSTART.md) - Original quick start
 3. [BACKEND_ENVIRONMENT_SETUP.md](BACKEND_ENVIRONMENT_SETUP.md) - Environment management
 4. [architecture/NEW_CODE_STRUCTURE.md](architecture/NEW_CODE_STRUCTURE.md) - Understand the codebase
 5. [../backend/README.md](../backend/README.md) - Backend details
@@ -31,12 +31,12 @@ Comprehensive technical documentation for the Vecinita bilingual Q&A assistant. 
 - [LOCAL_SUPABASE_SETUP.md](LOCAL_SUPABASE_SETUP.md) - Local development database
 - [BACKEND_ENVIRONMENT_SETUP.md](BACKEND_ENVIRONMENT_SETUP.md) - Switching dev/prod
 - [DEPLOYMENT_READY.md](DEPLOYMENT_READY.md) - Production checklist
-- [RENDER_DEPLOYMENT_THREE_SERVICES.md](RENDER_DEPLOYMENT_THREE_SERVICES.md) - Render.com setup
+- [RENDER_DEPLOYMENT_THREE_SERVICES.md](deployment/RENDER_DEPLOYMENT_THREE_SERVICES.md) - Render.com setup
 - [GCP_DEPLOYMENT.md](GCP_DEPLOYMENT.md) - Google Cloud setup
-- [GITHUB_CODESPACES_SECRETS_SETUP.md](GITHUB_CODESPACES_SECRETS_SETUP.md) - Codespaces config
+- [GITHUB_CODESPACES_SECRETS_SETUP.md](deployment/GITHUB_CODESPACES_SECRETS_SETUP.md) - Codespaces config
 
 ### 🐛 **Troubleshooting**
-- [DB_SEARCH_DIAGNOSTIC_GUIDE.md](DB_SEARCH_DIAGNOSTIC_GUIDE.md) - Database issues
+- [DB_SEARCH_DIAGNOSTIC_GUIDE.md](diagnostics/DB_SEARCH_DIAGNOSTIC_GUIDE.md) - Database issues
 - [guides/ENHANCED_LOGGING.md](guides/ENHANCED_LOGGING.md) - Debugging with logs
 - [guides/LOGGING_QUICK_REFERENCE.md](guides/LOGGING_QUICK_REFERENCE.md) - Logging reference
 
@@ -51,7 +51,7 @@ Comprehensive technical documentation for the Vecinita bilingual Q&A assistant. 
 | [TEST_COVERAGE_SUMMARY.md](TEST_COVERAGE_SUMMARY.md) | Testing strategy and results |
 | [LANGGRAPH_REFACTOR_SUMMARY.md](LANGGRAPH_REFACTOR_SUMMARY.md) | LangGraph agent architecture |
 | [architecture/NEW_CODE_STRUCTURE.md](architecture/NEW_CODE_STRUCTURE.md) | Overall project structure |
-| [ARCHITECTURE_MICROSERVICE.md](ARCHITECTURE_MICROSERVICE.md) | Microservice overview |
+| [ARCHITECTURE_MICROSERVICE.md](architecture/ARCHITECTURE_MICROSERVICE.md) | Microservice overview |
 
 ### 🏗️ **Architecture & Design** (architecture/)
 | Document | Purpose |
@@ -59,7 +59,7 @@ Comprehensive technical documentation for the Vecinita bilingual Q&A assistant. 
 | [architecture/NEW_CODE_STRUCTURE.md](architecture/NEW_CODE_STRUCTURE.md) | Project code organization |
 | [architecture/SCRAPER_ORGANIZATION.md](architecture/SCRAPER_ORGANIZATION.md) | Web scraper structure |
 | [architecture/SCRAPER_ORGANIZATION_SUMMARY.md](architecture/SCRAPER_ORGANIZATION_SUMMARY.md) | Scraper summary |
-| [EMBEDDING_SERVICE_ARCHITECTURE.md](EMBEDDING_SERVICE_ARCHITECTURE.md) | Embedding service design |
+| [EMBEDDING_SERVICE_ARCHITECTURE.md](architecture/EMBEDDING_SERVICE_ARCHITECTURE.md) | Embedding service design |
 
 ### ✨ **Features & Capabilities** (features/)
 | Document | Purpose |
@@ -89,7 +89,7 @@ Comprehensive technical documentation for the Vecinita bilingual Q&A assistant. 
 | Document | Purpose |
 |----------|---------|
 | [DEPLOYMENT_READY.md](DEPLOYMENT_READY.md) | Production readiness checklist |
-| [RENDER_DEPLOYMENT_THREE_SERVICES.md](RENDER_DEPLOYMENT_THREE_SERVICES.md) | Render.com free tier deployment |
+| [RENDER_DEPLOYMENT_THREE_SERVICES.md](deployment/RENDER_DEPLOYMENT_THREE_SERVICES.md) | Render.com free tier deployment |
 | [GCP_DEPLOYMENT.md](GCP_DEPLOYMENT.md) | Google Cloud Platform setup |
 | [EDGE_FUNCTION_ARCHITECTURE.md](EDGE_FUNCTION_ARCHITECTURE.md) | Edge function architecture |
 | [EDGE_FUNCTION_QUICK_START.md](EDGE_FUNCTION_QUICK_START.md) | Edge function quick start |
@@ -98,19 +98,19 @@ Comprehensive technical documentation for the Vecinita bilingual Q&A assistant. 
 ### 🔐 **Setup & Configuration**
 | Document | Purpose |
 |----------|---------|
-| [QUICK_START.md](QUICK_START.md) | **⚡ 5-minute setup guide (NEW)** |
+| [QUICKSTART.md](guides/QUICKSTART.md) | **⚡ 5-minute setup guide (NEW)** |
 | [BACKEND_ENVIRONMENT_SETUP.md](BACKEND_ENVIRONMENT_SETUP.md) | Dev/prod environment switching (NEW) |
 | [LOCAL_SUPABASE_SETUP.md](LOCAL_SUPABASE_SETUP.md) | Docker-based local database (NEW) |
-| [GITHUB_CODESPACES_SECRETS_SETUP.md](GITHUB_CODESPACES_SECRETS_SETUP.md) | GitHub Codespaces secrets |
-| [../PRIVACY_POLICY.md](../PRIVACY_POLICY.md) | Privacy & data handling policy |
+| [GITHUB_CODESPACES_SECRETS_SETUP.md](deployment/GITHUB_CODESPACES_SECRETS_SETUP.md) | GitHub Codespaces secrets |
+| [PRIVACY_POLICY.md](reference/PRIVACY_POLICY.md) | Privacy & data handling policy |
 
 ### 📋 **Additional Resources**
 | Document | Purpose |
 |----------|---------|
-| [DB_SEARCH_DIAGNOSTIC_GUIDE.md](DB_SEARCH_DIAGNOSTIC_GUIDE.md) | Database search troubleshooting |
+| [DB_SEARCH_DIAGNOSTIC_GUIDE.md](diagnostics/DB_SEARCH_DIAGNOSTIC_GUIDE.md) | Database search troubleshooting |
 | [CONFIGURATION_CONSISTENCY_REPORT.md](CONFIGURATION_CONSISTENCY_REPORT.md) | Config consistency analysis |
-| [API_INTEGRATION_SPEC.md](API_INTEGRATION_SPEC.md) | API specification |
-| [IMPLEMENTATION_COMPLETE.md](IMPLEMENTATION_COMPLETE.md) | Implementation milestone |
+| [API_INTEGRATION_SPEC.md](reference/API_INTEGRATION_SPEC.md) | API specification |
+| [IMPLEMENTATION_COMPLETE.md](reports/implementation/IMPLEMENTATION_COMPLETE.md) | Implementation milestone |
 | [STATUS_REPORT.md](STATUS_REPORT.md) | Detailed status report |
 | [QUICK_REFERENCE_MICROSERVICE.md](QUICK_REFERENCE_MICROSERVICE.md) | Microservice quick reference |
 
@@ -121,7 +121,7 @@ Comprehensive technical documentation for the Vecinita bilingual Q&A assistant. 
 ### ✅ "I want to..."
 
 **...get started quickly**
-- → [../QUICKSTART.md](../QUICKSTART.md)
+- → [guides/QUICKSTART.md](guides/QUICKSTART.md)
 - → [../backend/README.md](../backend/README.md)
 - → [../frontend/README.md](../frontend/README.md)
 
@@ -136,13 +136,13 @@ Comprehensive technical documentation for the Vecinita bilingual Q&A assistant. 
 - → [architecture/NEW_CODE_STRUCTURE.md](architecture/NEW_CODE_STRUCTURE.md)
 
 **...troubleshoot issues**
-- → [DB_SEARCH_DIAGNOSTIC_GUIDE.md](DB_SEARCH_DIAGNOSTIC_GUIDE.md)
+- → [DB_SEARCH_DIAGNOSTIC_GUIDE.md](diagnostics/DB_SEARCH_DIAGNOSTIC_GUIDE.md)
 - → [guides/ENHANCED_LOGGING.md](guides/ENHANCED_LOGGING.md)
 - → [guides/LOGGING_QUICK_REFERENCE.md](guides/LOGGING_QUICK_REFERENCE.md)
 
 **...deploy to production**
 - → [DEPLOYMENT_READY.md](DEPLOYMENT_READY.md)
-- → [RENDER_DEPLOYMENT_THREE_SERVICES.md](RENDER_DEPLOYMENT_THREE_SERVICES.md)
+- → [RENDER_DEPLOYMENT_THREE_SERVICES.md](deployment/RENDER_DEPLOYMENT_THREE_SERVICES.md)
 - → [GCP_DEPLOYMENT.md](GCP_DEPLOYMENT.md)
 
 **...run tests**

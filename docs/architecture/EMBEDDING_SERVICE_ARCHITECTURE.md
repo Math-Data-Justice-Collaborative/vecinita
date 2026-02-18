@@ -329,7 +329,7 @@ embedding_model = FastEmbedEmbeddings(model_name="fast-bge-small-en-v1.5")
 ## Related Documentation
 
 - [Architecture Overview](ARCHITECTURE_MICROSERVICE.md)
-- [Deployment Guide](RENDER_DEPLOYMENT_THREE_SERVICES.md)
+- [Deployment Guide](../deployment/RENDER_DEPLOYMENT_THREE_SERVICES.md)
 - [Quick Reference](QUICK_REFERENCE_MICROSERVICE.md)
 - [Embedding Service Source](../backend/src/embedding_service/)
 - [Embedding Client](../backend/src/embedding_service/client.py)

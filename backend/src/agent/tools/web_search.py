@@ -14,23 +14,6 @@ from langchain_core.tools import tool
 logger = logging.getLogger(__name__)
 
 
-@tool
-def web_search_tool(query: str) -> str:
-    """Search the web for information using Tavily or DuckDuckGo.
-
-    Args:
-        query: The search query to find information on the web.
-
-    Returns:
-        A JSON string of result dicts with 'title', 'content'/'snippet', and 'url'.
-    """
-    # Placeholder; real implementation provided by create_web_search_tool
-    raise NotImplementedError(
-        "This tool must be created via create_web_search_tool() to configure "
-        "the provider (Tavily or DuckDuckGo)."
-    )
-
-
 def create_web_search_tool(search_depth: str = "advanced", max_results: int = 5) -> tool:
     """Create a configured web_search tool using Tavily or DuckDuckGo.
 

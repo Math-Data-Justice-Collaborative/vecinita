@@ -8,7 +8,7 @@ This tool helps the agent ask follow-up questions when:
 - More context would improve search results
 
 Location-aware clarifications for:
-- Woonasquatucket River Watershed Council (Providence, RI)
+- Woonasquatucket River Watershed Council (Olneyville -- Providence, RI)
 - Rhode Island community resources
 """
 
@@ -21,7 +21,7 @@ log = logging.getLogger('vecinita_pipeline.agent.tools.clarify')
 # Location context for clarifications
 LOCATION_CONTEXT = {
     "organization": "Woonasquatucket River Watershed Council",
-    "location": "Providence, Rhode Island",
+    "location": "Olneyville -- Providence, Rhode Island",
     "region": "Rhode Island"
 }
 

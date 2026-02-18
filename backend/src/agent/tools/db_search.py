@@ -127,39 +127,6 @@ def _format_db_error(e: Exception) -> str:
     return "Unexpected database error"
 
 
-@tool
-def db_search_tool(query: str) -> str:
-    """Search the internal knowledge base for relevant information.
-
-    Use this tool to find information from the Vecinita document database.
-    It performs vector similarity search to retrieve the most relevant content
-    for answering the user's question.
-
-    Args:
-        query: The user's question or search query
-
-    Returns:
-        A JSON string containing a list of relevant documents. Parse the result
-        with json.loads() to get Python objects. Each document contains 'content',
-        'source_url', 'similarity', and position fields. Returns "[]" (empty JSON array)
-        if no relevant documents are found.
-
-    Example:
-        >>> results = db_search_tool("What community services are available?")
-        >>> import json
-        >>> docs = json.loads(results)  # Parse JSON string to Python list
-        >>> for doc in docs:
-        ...     print(f"Source: {doc['source_url']}")
-        ...     print(f"Content: {doc['content']}")
-    """
-    # This will be injected with actual clients at runtime
-    # For now, this is a placeholder that will be properly bound in main.py
-    raise NotImplementedError(
-        "This tool must be bound with Supabase client and embedding model. "
-        "Use create_db_search_tool() to create a properly configured instance."
-    )
-
-
 def create_db_search_tool(supabase_client, embedding_model, match_threshold: float = 0.3, match_count: int = 5):
     """Create a configured db_search tool with access to Supabase and embeddings.
 

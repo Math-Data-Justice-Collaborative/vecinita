@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Vecinita - Community Q&A Assistant</title>
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1em;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            display: none;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .answer-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 20px;
+        }
+
+        .answer-section h3 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .answer-text {
+            color: #555;
+            line-height: 1.6;
+            font-size: 1em;
+        }
+
+        .answer-text a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 1px solid #667eea;
+            transition: color 0.2s;
+        }
+
+        .answer-text a:hover {
+            color: #764ba2;
+            border-bottom-color: #764ba2;
+        }
+
+        .context-section {
+            margin-top: 20px;
+        }
+
+        .context-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .context-item {
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid #764ba2;
+        }
+
+        .context-item strong {
+            color: #764ba2;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.95em;
+        }
+
+        .context-item p {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #c62828;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 0.9em;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 25px;
+            }
+
+            .input-wrapper {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🏘️ Vecinita</h1>
+                <p>Community Q&A Assistant | Asistente de Preguntas
+                    Comunitarias</p>
+            </div>
+
+            <div class="content">
+                <div class="form-group">
+                    <label for="question">Ask a Question / Haz una
+                        Pregunta</label>
+                    <div class="input-wrapper">
+                        <input
+                            type="text"
+                            id="question"
+                            placeholder="e.g., What is Vecinita? / ¿Qué es Vecinita?"
+                            autocomplete="off">
+                        <button id="askBtn" onclick="askQuestion()">Ask /
+                            Preguntar</button>
+                    </div>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Searching for answers...</p>
+                </div>
+
+                <div class="error" id="error"></div>
+
+                <div class="results" id="results">
+                    <div class="answer-section">
+                        <h3>Answer / Respuesta</h3>
+                        <div class="answer-text" id="answerText"></div>
+                    </div>
+
+                    <div class="context-section" id="contextSection"
+                        style="display: none;">
+                        <h3>Sources / Fuentes</h3>
+                        <div id="contextItems"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>Powered by Vecinita RAG System | Powered by LangChain &
+                    Supabase</p>
+            </div>
+        </div>
+
+        <script>
+        const questionInput = document.getElementById('question');
+        const askBtn = document.getElementById('askBtn');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const error = document.getElementById('error');
+        const answerText = document.getElementById('answerText');
+        const contextSection = document.getElementById('contextSection');
+        const contextItems = document.getElementById('contextItems');
+
+        // Function to convert URLs to clickable links
+        function linkify(text) {
+            const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9][a-zA-Z0-9-]*\.[a-zA-Z]{2,}\/[^\s]*)/g;
+            return text.replace(urlRegex, function(url) {
+                // Ensure the URL has a protocol
+                let href = url;
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    href = 'https://' + url;
+                }
+                return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+            });
+        }
+
+        // Allow Enter key to submit
+        questionInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !askBtn.disabled) {
+                askQuestion();
+            }
+        });
+
+        async function askQuestion() {
+            const question = questionInput.value.trim();
+
+            if (!question) {
+                showError('Please enter a question / Por favor, ingresa una pregunta');
+                return;
+            }
+
+            // Disable button and show loading
+            askBtn.disabled = true;
+            loading.style.display = 'block';
+            results.style.display = 'none';
+            error.style.display = 'none';
+
+            try {
+                const response = await fetch(`/ask?question=${encodeURIComponent(question)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Display answer with clickable links
+                const answerWithLinks = linkify(data.answer);
+                answerText.innerHTML = answerWithLinks.replace(/\n/g, '<br>');
+
+                // Display context if available
+                if (data.context && data.context.length > 0) {
+                    contextItems.innerHTML = data.context
+                        .map(ctx => `
+                            <div class="context-item">
+                                <strong>📄 ${ctx.source || 'Unknown Source'}</strong>
+                                <p>${ctx.content.substring(0, 200)}${ctx.content.length > 200 ? '...' : ''}</p>
+                            </div>
+                        `)
+                        .join('');
+                    contextSection.style.display = 'block';
+                } else {
+                    contextSection.style.display = 'none';
+                }
+
+                results.style.display = 'block';
+                loading.style.display = 'none';
+
+            } catch (err) {
+                showError(`Error: ${err.message}`);
+            } finally {
+                askBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+
+        function showError(message) {
+            error.textContent = message;
+            error.style.display = 'block';
+            results.style.display = 'none';
+        }
+    </script>
+    </body>
+</html>

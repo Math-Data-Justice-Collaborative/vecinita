@@ -34,7 +34,7 @@ from langgraph.checkpoint.memory import MemorySaver
 
 # Import tools
 from .tools.db_search import create_db_search_tool
-from .tools.static_response import static_response_tool, FAQ_DATABASE
+from .tools.static_response import create_static_response_tool, FAQ_DATABASE
 from .tools.web_search import create_web_search_tool
 from .tools.clarify_question import create_clarify_question_tool
 
@@ -253,6 +253,7 @@ db_search_tool = create_db_search_tool(
     supabase, embedding_model, match_threshold=0.1, match_count=5)
 web_search_tool = create_web_search_tool()
 clarify_question_tool = create_clarify_question_tool()
+static_response_tool = create_static_response_tool()
 tools = [db_search_tool,
          static_response_tool,
          clarify_question_tool,

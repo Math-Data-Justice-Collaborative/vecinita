@@ -1,0 +1,8 @@
+{
+  "typeCheckingMode": "basic",
+  "include": ["src", "tests"],
+  "exclude": ["node_modules", ".venv", "venv", "build", "dist"],
+  "python": {
+    "version": "3.10"
+  }
+}

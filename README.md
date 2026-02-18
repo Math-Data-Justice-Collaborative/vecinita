@@ -177,7 +177,7 @@ npm run test:e2e                 # E2E tests (Playwright)
 ## Documentation
 
 ### Getting Started
-- **[QUICKSTART.md](QUICKSTART.md)** - Complete setup guide (Docker + Local development)
+- **[QUICKSTART.md](docs/guides/QUICKSTART.md)** - Complete setup guide (Docker + Local development)
 - **[backend/README.md](backend/README.md)** - Backend API and tools documentation
 - **[frontend/README.md](frontend/README.md)** - Frontend components and testing
 

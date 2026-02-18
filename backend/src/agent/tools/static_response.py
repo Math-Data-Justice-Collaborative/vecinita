@@ -71,3 +71,15 @@ def static_response_tool(query: str, language: str = "en") -> str:
     except Exception as e:
         logger.error(f"Static Response Error: {e}")
         return "Error checking FAQs."
+
+
+def create_static_response_tool():
+    """Create an instance of the static_response tool.
+    
+    The static response tool checks if a query matches a frequently asked question (FAQ)
+    and returns the predefined answer if found.
+    
+    Returns:
+        A configured tool function that can be used with LangGraph
+    """
+    return static_response_tool
