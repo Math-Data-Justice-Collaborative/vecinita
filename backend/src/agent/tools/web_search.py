@@ -38,8 +38,8 @@ def create_web_search_tool(search_depth: str = "advanced", max_results: int = 5)
 
     if use_tavily:
         try:
-            from langchain_community.tools.tavily_search import TavilySearchResults
-            tavily = TavilySearchResults(
+            from langchain_tavily import TavilySearch
+            tavily = TavilySearch(
                 max_results=max_results,
                 search_depth=search_depth,
                 include_answer=True,

@@ -22,7 +22,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 	pip install --prefix=/install --no-cache-dir --retries 5 --default-timeout=1000 \
 	fastapi uvicorn \
 	langchain langchain-community langchain-core \
-	langchain-openai langchain-groq langchain-text-splitters \
+	langchain-openai langchain-groq langchain-tavily langchain-text-splitters \
 	langchain-huggingface langgraph \
 	supabase psycopg2-binary \
 	beautifulsoup4 pypdf \
