@@ -5,11 +5,78 @@ to retrieve relevant document chunks for answering user questions.
 """
 
 import logging
-from typing import List, Dict, Any
+import os
+from contextvars import ContextVar, Token
+from typing import List, Dict, Any, Optional
 import json
+import re
 from langchain_core.tools import tool
+from supabase import create_client
 
 logger = logging.getLogger(__name__)
+
+_DEFAULT_DB_SEARCH = None
+
+_SEARCH_OPTIONS: ContextVar[Dict[str, Any]] = ContextVar(
+    "services_db_search_options",
+    default={
+        "tags": [],
+        "tag_match_mode": "any",
+        "include_untagged_fallback": True,
+        "rerank": False,
+        "rerank_top_k": 10,
+    },
+)
+
+
+def set_search_options(
+    *,
+    tags: Optional[List[str]] = None,
+    tag_match_mode: str = "any",
+    include_untagged_fallback: bool = True,
+    rerank: bool = False,
+    rerank_top_k: int = 10,
+) -> Token:
+    safe_mode = "all" if str(tag_match_mode).lower() == "all" else "any"
+    safe_tags = [tag for tag in (tags or []) if isinstance(tag, str) and tag]
+    return _SEARCH_OPTIONS.set(
+        {
+            "tags": safe_tags,
+            "tag_match_mode": safe_mode,
+            "include_untagged_fallback": bool(include_untagged_fallback),
+            "rerank": bool(rerank),
+            "rerank_top_k": max(1, min(int(rerank_top_k or 10), 50)),
+        }
+    )
+
+
+def reset_search_options(token: Token) -> None:
+    _SEARCH_OPTIONS.reset(token)
+
+
+def _tokenize_for_rerank(text: str) -> set[str]:
+    return {
+        token
+        for token in re.findall(r"[a-z0-9]+", (text or "").lower())
+        if len(token) > 1
+    }
+
+
+def _rerank_results(query: str, docs: List[Dict[str, Any]], top_k: int) -> List[Dict[str, Any]]:
+    query_terms = _tokenize_for_rerank(query)
+    if not query_terms:
+        return docs[:top_k]
+
+    scored: List[tuple[float, Dict[str, Any]]] = []
+    for doc in docs:
+        content_terms = _tokenize_for_rerank(doc.get("content", ""))
+        overlap = len(query_terms & content_terms)
+        recall = overlap / max(1, len(query_terms))
+        base_similarity = float(doc.get("similarity", 0.0) or 0.0)
+        combined = (0.75 * base_similarity) + (0.25 * recall)
+        scored.append((combined, doc))
+    scored.sort(key=lambda item: item[0], reverse=True)
+    return [doc for _, doc in scored[:top_k]]
 
 
 def _normalize_document(doc: Dict[str, Any]) -> Dict[str, Any]:
@@ -152,22 +219,38 @@ def db_search_tool(query: str) -> str:
         ...     print(f"Source: {doc['source_url']}")
         ...     print(f"Content: {doc['content']}")
     """
-    # NOTE: This is a placeholder function - do NOT call it directly.
-    # Instead, use create_db_search_tool() with proper initialization:
-    #
-    # Example:
-    #   from supabase import create_client
-    #   from langchain_huggingface import HuggingFaceEmbeddings
-    #   
-    #   db = create_client(url, key)
-    #   embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-    #   db_search = create_db_search_tool(db, embeddings, match_threshold=0.3)
-    #   result = db_search.invoke({"query": "What is climate change?"})
-    raise RuntimeError(
-        "db_search_tool() is a placeholder. "
-        "Use create_db_search_tool(supabase_client, embedding_model) to create a configured instance. "
-        "See create_db_search_tool() docstring for details."
-    )
+    global _DEFAULT_DB_SEARCH
+
+    if _DEFAULT_DB_SEARCH is None:
+        supabase_url = os.getenv("SUPABASE_URL")
+        supabase_key = os.getenv("SUPABASE_KEY")
+        embedding_model_name = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+
+        if not supabase_url or not supabase_key:
+            logger.warning("db_search_tool not configured: missing SUPABASE_URL or SUPABASE_KEY")
+            return "[]"
+
+        try:
+            from langchain_huggingface import HuggingFaceEmbeddings
+
+            supabase_client = create_client(supabase_url, supabase_key)
+            embedding_model = HuggingFaceEmbeddings(model_name=embedding_model_name)
+            _DEFAULT_DB_SEARCH = create_db_search_tool(
+                supabase_client,
+                embedding_model,
+                match_threshold=float(os.getenv("DB_MATCH_THRESHOLD", "0.3")),
+                match_count=int(os.getenv("DB_MATCH_COUNT", "5")),
+                session_id=None,
+            )
+        except Exception as exc:
+            logger.error("Failed to initialize db_search_tool: %s", exc)
+            return "[]"
+
+    try:
+        return _DEFAULT_DB_SEARCH.invoke({"query": query})
+    except Exception as exc:
+        logger.error("db_search_tool runtime error: %s", exc)
+        return "[]"
 
 
 def create_db_search_tool(supabase_client, embedding_model, match_threshold: float = 0.3, match_count: int = 5, session_id: str = None):
@@ -212,11 +295,19 @@ def create_db_search_tool(supabase_client, embedding_model, match_threshold: flo
                 f"DB Search: Searching Supabase with threshold={match_threshold}, match_count={match_count}, session_id={session_id}...")
             
             # Prepare RPC parameters
+            search_opts = _SEARCH_OPTIONS.get()
             rpc_params = {
                 "query_embedding": question_embedding,
                 "match_threshold": match_threshold,
                 "match_count": match_count
             }
+
+            if search_opts.get("tags"):
+                rpc_params.update({
+                    "tag_filter": search_opts.get("tags", []),
+                    "tag_match_mode": search_opts.get("tag_match_mode", "any"),
+                    "include_untagged_fallback": search_opts.get("include_untagged_fallback", True),
+                })
             
             # Add session_filter if session_id is provided
             if session_id:
@@ -225,10 +316,30 @@ def create_db_search_tool(supabase_client, embedding_model, match_threshold: flo
             else:
                 logger.info("DB Search: No session filter - searching public data only")
             
-            relevant_docs = supabase_client.rpc(
-                "search_similar_documents",
-                rpc_params
-            ).execute()
+            try:
+                relevant_docs = supabase_client.rpc(
+                    "search_similar_documents",
+                    rpc_params
+                ).execute()
+            except Exception as rpc_error:
+                if "tag_filter" in rpc_params and any(
+                    marker in str(rpc_error).lower()
+                    for marker in ["does not exist", "could not find", "unexpected", "signature"]
+                ):
+                    logger.warning("DB Search: Falling back to legacy RPC signature without tag filters")
+                    fallback_params = {
+                        "query_embedding": question_embedding,
+                        "match_threshold": match_threshold,
+                        "match_count": match_count,
+                    }
+                    if session_id:
+                        fallback_params["session_filter"] = session_id
+                    relevant_docs = supabase_client.rpc(
+                        "search_similar_documents",
+                        fallback_params,
+                    ).execute()
+                else:
+                    raise
 
             logger.info(
                 f"DB Search: RPC call completed. Result type: {type(relevant_docs)}")
@@ -251,6 +362,13 @@ def create_db_search_tool(supabase_client, embedding_model, match_threshold: flo
 
             # Normalize document format using helper function
             results = [_normalize_document(doc) for doc in relevant_docs.data]
+
+            if search_opts.get("rerank"):
+                results = _rerank_results(
+                    query,
+                    results,
+                    int(search_opts.get("rerank_top_k", match_count)),
+                )
 
             # Return JSON string for proper LLM serialization
             logger.info(f"DB Search: Returning {len(results)} results as JSON")

@@ -27,9 +27,16 @@ def _get_faq_dir() -> Path:
     import os
     if FAQ_DIR_ENV in os.environ:
         return Path(os.environ[FAQ_DIR_ENV])
-    
-    # Default: relative to agent module
-    return Path(__file__).parent.parent.parent / "services" / "agent" / "data" / "faqs"
+
+    # Canonical path first (backend/src/services/agent/data/faqs)
+    project_root = Path(__file__).parent.parent.parent
+    canonical = project_root / "src" / "services" / "agent" / "data" / "faqs"
+    if canonical.exists():
+        return canonical
+
+    # Legacy fallback (backend/services/agent/data/faqs)
+    legacy = project_root / "services" / "agent" / "data" / "faqs"
+    return legacy
 
 
 def load_faqs_from_markdown(lang: str = "en") -> Dict[str, str]:

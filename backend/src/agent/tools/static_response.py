@@ -28,7 +28,7 @@ FAQ_DATABASE = {
 
 
 @tool
-def static_response_tool(query: str, language: str = "en") -> str:
+def static_response_tool(query: str, language: str = "en") -> str | None:
     """Check if the query matches a frequently asked question (FAQ).
 
     Returns the answer if found, or a 'not found' message.
@@ -65,12 +65,37 @@ def static_response_tool(query: str, language: str = "en") -> str:
                 if faq_key_clean in normalized_query_clean or normalized_query_clean in faq_key_clean:
                     return faq_answer
 
-        # 4. No match found - Return a STRING, never None
-        return "No FAQ found."
+        # 4. No match found - Return None so other tools can be attempted
+        return None
 
     except Exception as e:
         logger.error(f"Static Response Error: {e}")
-        return "Error checking FAQs."
+        return None
+
+
+def add_faq(question: str, answer: str, language: str = "en") -> None:
+    """Add or update an FAQ entry in-memory.
+
+    This helper is primarily used by tests and local development.
+    """
+    normalized_language = (language or "en").lower()
+    normalized_question = (question or "").strip().lower()
+    if not normalized_question:
+        return
+
+    if normalized_language not in FAQ_DATABASE:
+        FAQ_DATABASE[normalized_language] = {}
+
+    FAQ_DATABASE[normalized_language][normalized_question] = answer
+
+
+def list_faqs(language: str = "en") -> dict:
+    """Return FAQs for a language.
+
+    Returns an empty dict for unknown languages.
+    """
+    normalized_language = (language or "en").lower()
+    return FAQ_DATABASE.get(normalized_language, {})
 
 
 def create_static_response_tool():

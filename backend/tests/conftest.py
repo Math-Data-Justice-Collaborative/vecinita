@@ -2,6 +2,7 @@
 Shared pytest fixtures and configuration for the Vecinita test suite.
 """
 import os
+import json
 import pytest
 from dotenv import load_dotenv
 from unittest.mock import Mock, patch
@@ -17,9 +18,47 @@ def env_vars():
     return {
         "SUPABASE_URL": os.getenv("SUPABASE_URL", "https://test.supabase.co"),
         "SUPABASE_KEY": os.getenv("SUPABASE_KEY", "test-key"),
-        "GROQ_API_KEY": os.getenv("GROQ_API_KEY", "test-groq-key"),
+        "OLLAMA_BASE_URL": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+        "OLLAMA_MODEL": os.getenv("OLLAMA_MODEL", "llama3.1:8b"),
+        "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY", "test-openai-key"),
         "DATABASE_URL": os.getenv("DATABASE_URL", "postgresql://test"),
     }
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _agent_module_path_compatibility():
+    """Provide compatibility aliases for canonical agent test imports."""
+    import sys
+    import types
+    import importlib.machinery
+    from unittest.mock import Mock
+
+    # Avoid importing broken/binary torch during test module import.
+    if "torch" not in sys.modules:
+        fake_torch = types.ModuleType("torch")
+        fake_torch.__version__ = "0.0-test"
+        fake_torch.__spec__ = importlib.machinery.ModuleSpec("torch", loader=None)
+        sys.modules["torch"] = fake_torch
+
+    # Stub embedding service client before importing src.agent.main.
+    fake_embedding_module = types.ModuleType("src.embedding_service.client")
+
+    def _fake_create_embedding_client(*_args, **_kwargs):
+        mock_embedding = Mock()
+        mock_embedding.embed_query = Mock(return_value=[0.1] * 384)
+        mock_embedding.embed_documents = Mock(return_value=[[0.1] * 384])
+        return mock_embedding
+
+    fake_embedding_module.create_embedding_client = _fake_create_embedding_client
+    sys.modules["src.embedding_service.client"] = fake_embedding_module
+
+    import src.agent.main as agent_main
+
+    # Legacy tests patch ChatGroq; current code uses ChatOllama/OpenAI chain.
+    if not hasattr(agent_main, "ChatGroq"):
+        agent_main.ChatGroq = agent_main.ChatOllama
+
+    yield
 
 
 @pytest.fixture
@@ -64,7 +103,7 @@ def fastapi_client(env_vars, monkeypatch):
     # Patch dependencies before importing app
     from unittest.mock import MagicMock, patch
     with patch("src.agent.main.create_client") as mock_supabase, \
-            patch("src.agent.main.ChatGroq") as mock_groq, \
+            patch("src.agent.main.ChatOllama") as mock_ollama, \
             patch("src.agent.main.HuggingFaceEmbeddings") as mock_embeddings:
 
         # Setup mocks
@@ -76,15 +115,58 @@ def fastapi_client(env_vars, monkeypatch):
         mock_response = MagicMock()
         mock_response.content = "Test response"
         mock_llm.invoke.return_value = mock_response
-        mock_groq.return_value = mock_llm
+        mock_ollama.return_value = mock_llm
 
         mock_embedding_model = MagicMock()
         mock_embedding_model.embed_query.return_value = [0.1] * 384
         mock_embeddings.return_value = mock_embedding_model
 
         # Import after mocks are set
-        from main import app
+        from src.agent.main import app
         return TestClient(app)
+
+
+@pytest.fixture
+def auth_proxy_client(env_vars, monkeypatch):
+    """Create a TestClient for the auth proxy service."""
+    for key, value in env_vars.items():
+        monkeypatch.setenv(key, value)
+
+    import sys
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[2]
+    if str(repo_root) not in sys.path:
+        sys.path.insert(0, str(repo_root))
+
+    from auth.src.main import app as auth_app
+    return TestClient(auth_app)
+
+
+@pytest.fixture
+def mock_auth_header():
+    """Provide a standard auth header for gateway auth tests."""
+    return {"Authorization": "Bearer sk_vp_test_key_1234567890"}
+
+
+@pytest.fixture
+def parse_sse_events():
+    """Parse raw SSE response text into JSON event objects."""
+    def _parse(text: str):
+        events = []
+        for line in text.split("\n"):
+            if not line.startswith("data: "):
+                continue
+            payload = line[6:].strip()
+            if not payload:
+                continue
+            try:
+                events.append(json.loads(payload))
+            except json.JSONDecodeError:
+                continue
+        return events
+
+    return _parse
 
 
 @pytest.fixture

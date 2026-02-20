@@ -1,39 +1,36 @@
-"""Quick test script to verify sources are returned from the API."""
+"""Optional integration test to verify sources are returned from live /ask endpoint.
+
+This test is skipped by default and only runs when:
+- RUN_LIVE_SOURCE_TESTS=1
+and a live backend is available at LIVE_BACKEND_URL (default http://localhost:8000).
+"""
+
+import os
+
+import pytest
 import requests
-import json
 
-# Test the /ask endpoint
-url = "http://localhost:8000/ask"
-params = {
-    "query": "How can I find a doctor who speaks my language?",
-    "provider": "llama",
-    "thread_id": "test-123"
-}
+pytestmark = pytest.mark.integration
 
-print("Testing /ask endpoint...")
-print(f"Query: {params['query']}\n")
 
-response = requests.get(url, params=params)
+@pytest.mark.skipif(
+    os.getenv("RUN_LIVE_SOURCE_TESTS", "0") != "1",
+    reason="Live source test is opt-in. Set RUN_LIVE_SOURCE_TESTS=1 to run.",
+)
+def test_live_ask_returns_sources():
+    base_url = os.getenv("LIVE_BACKEND_URL", "http://localhost:8000").rstrip("/")
+    url = f"{base_url}/ask"
 
-if response.status_code == 200:
-    data = response.json()
-    print("✅ Response received successfully\n")
-    print(f"Answer: {data.get('answer', '')[:200]}...\n")
+    params = {
+        "question": "How can I find a doctor who speaks my language?",
+        "provider": "ollama",
+        "thread_id": "test-123",
+    }
 
-    sources = data.get('sources', [])
-    print(f"Sources count: {len(sources)}")
+    response = requests.get(url, params=params, timeout=20)
+    assert response.status_code == 200
 
-    if sources:
-        print("\n📚 Sources returned:")
-        for i, source in enumerate(sources, 1):
-            print(f"\n{i}. {source.get('title', 'Untitled')}")
-            print(f"   URL: {source.get('url', 'No URL')}")
-            print(f"   Type: {source.get('type', 'unknown')}")
-            if source.get('chunkIndex') is not None:
-                print(f"   Chunk: {source.get('chunkIndex')}")
-    else:
-        print("\n⚠️  No sources returned - this is the issue!")
-        print("The agent may not be calling tools, or source extraction failed.")
-else:
-    print(f"❌ Error: {response.status_code}")
-    print(response.text)
+    payload = response.json()
+    assert "answer" in payload
+    assert "sources" in payload
+    assert isinstance(payload["sources"], list)

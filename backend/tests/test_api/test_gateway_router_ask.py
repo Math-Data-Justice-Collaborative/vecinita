@@ -113,6 +113,27 @@ class TestAskEndpoint:
         assert response.status_code == 200
 
     @patch('httpx.AsyncClient.get')
+    def test_ask_with_tags_and_rerank_params(self, mock_get, ask_client, mock_agent_response):
+        """Test ask forwards metadata tag filter and reranking parameters."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = mock_agent_response
+        mock_response.raise_for_status = MagicMock()
+        mock_get.return_value = mock_response
+
+        response = ask_client.get(
+            "/api/v1/ask?question=Test&tags=housing,food&tag_match_mode=all&include_untagged_fallback=false&rerank=true&rerank_top_k=7"
+        )
+        assert response.status_code == 200
+
+        params = mock_get.call_args.kwargs.get("params", {})
+        assert params.get("tags") == "housing,food"
+        assert params.get("tag_match_mode") == "all"
+        assert params.get("include_untagged_fallback") == "false"
+        assert params.get("rerank") == "true"
+        assert params.get("rerank_top_k") == 7
+
+    @patch('httpx.AsyncClient.get')
     def test_ask_timeout_error(self, mock_get, ask_client):
         """Test timeout handling."""
         mock_get.side_effect = httpx.TimeoutException("Request timeout")
@@ -177,14 +198,14 @@ class TestAskStreamEndpoint:
     def test_ask_stream_success(self, mock_stream, ask_client):
         """Test streaming ask endpoint."""
         # Mock SSE stream
-        async def mock_lines():
-            yield 'data: {"type": "thinking", "message": "Searching..."}'
-            yield 'data: {"type": "complete", "answer": "Test", "sources": []}'
+        async def mock_bytes():
+            yield b'data: {"type": "thinking", "message": "Searching..."}\n\n'
+            yield b'data: {"type": "complete", "answer": "Test", "sources": []}\n\n'
         
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.raise_for_status = MagicMock()
-        mock_response.aiter_lines = mock_lines
+        mock_response.aiter_bytes = mock_bytes
         
         mock_context = MagicMock()
         mock_context.__aenter__ = AsyncMock(return_value=mock_response)
@@ -194,17 +215,18 @@ class TestAskStreamEndpoint:
         response = ask_client.get("/api/v1/ask/stream?question=Test")
         assert response.status_code == 200
         assert response.headers["content-type"] == "text/event-stream; charset=utf-8"
+        assert "\n\n" in response.text
 
     def test_ask_stream_with_all_params(self, ask_client):
         """Test streaming with all parameters."""
         with patch('httpx.AsyncClient.stream') as mock_stream:
-            async def mock_lines():
-                yield 'data: {"type": "complete", "answer": "Test"}'
+            async def mock_bytes():
+                yield b'data: {"type": "complete", "answer": "Test"}\n\n'
             
             mock_response = MagicMock()
             mock_response.status_code = 200
             mock_response.raise_for_status = MagicMock()
-            mock_response.aiter_lines = mock_lines
+            mock_response.aiter_bytes = mock_bytes
             
             mock_context = MagicMock()
             mock_context.__aenter__ = AsyncMock(return_value=mock_response)
@@ -215,6 +237,30 @@ class TestAskStreamEndpoint:
                 "/api/v1/ask/stream?question=Test&thread_id=123&lang=en&provider=groq&model=llama"
             )
             assert response.status_code == 200
+
+    @patch('httpx.AsyncClient.stream')
+    def test_ask_stream_preserves_sse_event_boundaries(self, mock_stream, ask_client):
+        """Test SSE proxy keeps blank-line delimiters between events."""
+        async def mock_bytes():
+            yield b'data: {"type":"thinking","message":"step 1"}\n\n'
+            yield b'data: {"type":"tool_event","phase":"result","tool":"db_search","message":"found 3"}\n\n'
+            yield b'data: {"type":"complete","answer":"done","sources":[]}\n\n'
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.raise_for_status = MagicMock()
+        mock_response.aiter_bytes = mock_bytes
+
+        mock_context = MagicMock()
+        mock_context.__aenter__ = AsyncMock(return_value=mock_response)
+        mock_context.__aexit__ = AsyncMock()
+        mock_stream.return_value = mock_context
+
+        response = ask_client.get("/api/v1/ask/stream?question=Test")
+        assert response.status_code == 200
+        body = response.text
+        assert body.count("\n\n") >= 3
+        assert '"type":"tool_event"' in body
 
 
 class TestAskConfigEndpoint:
@@ -246,7 +292,8 @@ class TestAskConfigEndpoint:
         mock_get.side_effect = httpx.RequestError("Connection failed")
         
         response = ask_client.get("/api/v1/ask/config")
-        assert response.status_code == 503
+        assert response.status_code == 200
+        assert response.json().get("service_status") == "degraded"
 
 
 class TestAskQueryValidation:

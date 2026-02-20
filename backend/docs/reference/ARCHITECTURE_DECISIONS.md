@@ -150,7 +150,8 @@ Could extract:
 ```python
 # ✓ Correct
 from src.api.main import app
-from src.services.agent.models import ModelSelection
+from src.agent.main import app as agent_app
+from src.embedding_service.main import app as embedding_app
 from src.utils.supabase_embeddings import SupabaseEmbeddings
 
 # ✗ Avoid
@@ -263,15 +264,15 @@ All same .env variables work. No new requirements.
 
 ### Onboarding to New Structure
 1. **API Development:** Work in `src/api/`
-2. **Agent Development:** Work in `src/services/agent/`
-3. **Embedding Development:** Work in `src/services/embedding/`
-4. **Scraper Development:** Work in `src/services/scraper/`
+2. **Agent Development:** Work in `src/agent/`
+3. **Embedding Development:** Work in `src/embedding_service/`
+4. **Scraper Development:** Work in `src/scraper/`
 5. **Shared Code:** Put in `src/utils/`, document why it's shared
 
 ### Adding New Service
 ```
 1. Create src/services/newservice/
-2. Add __init__.py, server.py, models.py
+2. Add __init__.py, main.py, models.py
 3. Create corresponding test directory
 4. Update pyproject.toml if needed
 5. Update Docker setup
@@ -281,11 +282,11 @@ All same .env variables work. No new requirements.
 ```python
 # When in source:
 from src.api.models import AskRequest
-from src.services.agent.models import ModelSelection
+from src.agent.main import app as agent_app
 
 # When in tests:
 from src.api import app
-from src.services.agent.server import app as agent_app
+from src.agent.main import app as agent_app
 ```
 
 ---

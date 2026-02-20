@@ -167,7 +167,7 @@ class TestLLMInitialization:
     """Test LLM provider initialization."""
 
     def test_llm_initialization_with_groq(self, env_vars, monkeypatch):
-        """Test LLM initialization with Groq API key."""
+        """Test LLM helper is available after initialization."""
         env_vars["GROQ_API_KEY"] = "test-groq-key"
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
@@ -186,7 +186,7 @@ class TestLLMInitialization:
             mock_embeddings.return_value = mock_embedding_model
 
             from src.services.agent import server
-            assert server.llm is not None
+            assert callable(server._get_llm_with_tools)
 
 
 class TestToolsInitialization:
@@ -251,23 +251,27 @@ class TestLLMWithTools:
 
         with patch("src.services.agent.server.create_client") as mock_supabase, \
              patch("src.services.agent.server.ChatGroq") as mock_groq, \
-             patch("src.services.agent.server.ChatOllama") as mock_ollama, \
              patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings:
-
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
 
             mock_llm = MagicMock()
             mock_groq.return_value = mock_llm
-            mock_ollama.return_value = mock_llm
 
             mock_embedding_model = MagicMock()
             mock_embeddings.return_value = mock_embedding_model
 
             from src.services.agent import server
-            # Set CURRENT_SELECTION for llama
-            server.CURRENT_SELECTION["provider"] = "llama"
-            llm_with_tools = server._get_llm_with_tools("llama", None)
+            server.ollama_base_url = "http://localhost:11434"
+            server.CURRENT_SELECTION["provider"] = "ollama"
+
+            mock_chatollama_cls = MagicMock()
+            mock_chatollama_instance = MagicMock()
+            mock_chatollama_instance.bind_tools.return_value = MagicMock()
+            mock_chatollama_cls.return_value = mock_chatollama_instance
+
+            with patch("src.services.agent.server._get_chatollama_class", return_value=mock_chatollama_cls):
+                llm_with_tools = server._get_llm_with_tools("ollama", None)
             assert llm_with_tools is not None
 
     def test_get_llm_with_tools_openai(self, env_vars, monkeypatch):
@@ -297,9 +301,7 @@ class TestLLMWithTools:
             assert llm_with_tools is not None
 
     def test_get_llm_with_tools_unsupported_provider(self, env_vars, monkeypatch):
-        """Test that unsupported provider gracefully falls back to available provider."""
-        # Set up environment with Groq API key
-        env_vars["GROQ_API_KEY"] = "test-groq-key"
+        """Test that unsupported provider raises a clear runtime error."""
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
@@ -319,10 +321,8 @@ class TestLLMWithTools:
             mock_embeddings.return_value = mock_embedding_model
 
             from src.services.agent import server
-            # Unsupported provider should fall back to available provider (Groq in this case)
-            llm_with_tools = server._get_llm_with_tools("unsupported", None)
-            # Should not raise error, but return valid LLM
-            assert llm_with_tools is not None
+            with pytest.raises(RuntimeError, match="Unsupported provider"):
+                server._get_llm_with_tools("unsupported", None)
 
 
 class TestMessageSanitization:

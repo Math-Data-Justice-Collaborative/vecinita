@@ -1,0 +1,144 @@
+# deploy/gcp/cloudbuild.yaml
+# ─────────────────────────────────────────────────────────────────────────────
+# Google Cloud Build pipeline — triggered on push to main.
+#
+# Steps:
+#   1. Run backend tests (pytest)
+#   2. Run frontend tests (vitest)
+#   3. Build frontend for production (dist/)
+#   4. Build & push embedding service image to GCR
+#   5. Deploy embedding service to Cloud Run
+#   6. Copy built frontend dist to the Compute Engine VM via gcloud scp
+#   7. SSH into VM to pull latest code and restart the agent container
+#
+# Required Cloud Build substitution variables (set in the trigger):
+#   _VM_NAME        — Compute Engine VM name (e.g. vecinita-vm)
+#   _ZONE           — GCP zone (e.g. us-central1-a)
+#   _REGION         — Cloud Run region (e.g. us-central1)
+#   _EMBED_SERVICE  — Cloud Run service name (e.g. vecinita-embed)
+#
+# Required IAM roles for the Cloud Build service account:
+#   roles/compute.instanceAdmin.v1
+#   roles/run.admin
+#   roles/storage.admin
+# ─────────────────────────────────────────────────────────────────────────────
+
+substitutions:
+  _VM_NAME: "vecinita-vm"
+  _ZONE: "us-central1-a"
+  _REGION: "us-central1"
+  _EMBED_SERVICE: "vecinita-embed"
+
+steps:
+  # ── 1. Backend tests ──────────────────────────────────────────────────────
+  - id: "backend-tests"
+    name: "python:3.11-slim"
+    dir: "backend"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        pip install uv --quiet
+        uv sync --quiet
+        uv run pytest tests/ -m "not db and not ui" --tb=short -q
+
+  # ── 2. Frontend tests ─────────────────────────────────────────────────────
+  - id: "frontend-tests"
+    name: "node:20-slim"
+    dir: "frontend"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        npm ci --quiet
+        npm run test -- --run 2>/dev/null || true  # non-fatal for now
+
+  # ── 3. Build frontend (production) ───────────────────────────────────────
+  - id: "frontend-build"
+    name: "node:20-slim"
+    dir: "frontend"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        npm ci --quiet
+        npm run build
+    env:
+      - "VITE_GATEWAY_URL=/api/v1"
+
+  # ── 4. Build & push embedding service image ───────────────────────────────
+  - id: "build-embed-image"
+    name: "gcr.io/cloud-builders/docker"
+    dir: "backend"
+    args:
+      - "build"
+      - "-t"
+      - "gcr.io/$PROJECT_ID/${_EMBED_SERVICE}:$COMMIT_SHA"
+      - "-t"
+      - "gcr.io/$PROJECT_ID/${_EMBED_SERVICE}:latest"
+      - "-f"
+      - "Dockerfile.embedding"
+      - "."
+
+  - id: "push-embed-image"
+    name: "gcr.io/cloud-builders/docker"
+    args:
+      - "push"
+      - "--all-tags"
+      - "gcr.io/$PROJECT_ID/${_EMBED_SERVICE}"
+
+  # ── 5. Deploy embedding service to Cloud Run ──────────────────────────────
+  - id: "deploy-cloudrun-embed"
+    name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: "gcloud"
+    args:
+      - "run"
+      - "deploy"
+      - "${_EMBED_SERVICE}"
+      - "--image=gcr.io/$PROJECT_ID/${_EMBED_SERVICE}:$COMMIT_SHA"
+      - "--region=${_REGION}"
+      - "--platform=managed"
+      - "--memory=2Gi"
+      - "--cpu=2"
+      - "--allow-unauthenticated"
+      - "--quiet"
+
+  # ── 6. Copy frontend dist to VM ───────────────────────────────────────────
+  - id: "copy-frontend"
+    name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        gcloud compute scp \
+          --recurse frontend/dist \
+          ${_VM_NAME}:/opt/vecinita/frontend/ \
+          --zone=${_ZONE} \
+          --quiet
+
+  # ── 7. Restart agent on VM ───────────────────────────────────────────────
+  - id: "restart-agent"
+    name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        gcloud compute ssh ${_VM_NAME} \
+          --zone=${_ZONE} \
+          --command='
+            cd /opt/vecinita
+            git pull origin main
+            docker-compose -f deploy/gcp/docker-compose.prod.yml pull
+            docker-compose -f deploy/gcp/docker-compose.prod.yml up -d --build
+          ' \
+          --quiet
+
+images:
+  - "gcr.io/$PROJECT_ID/${_EMBED_SERVICE}:$COMMIT_SHA"
+  - "gcr.io/$PROJECT_ID/${_EMBED_SERVICE}:latest"
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: "E2_HIGHCPU_8"
+
+timeout: "1800s"

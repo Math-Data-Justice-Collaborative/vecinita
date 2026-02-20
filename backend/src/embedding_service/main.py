@@ -10,6 +10,7 @@ import os
 from typing import List
 from pathlib import Path
 from pydantic import BaseModel
+from dotenv import load_dotenv
 
 import numpy as np
 from fastapi import FastAPI, HTTPException
@@ -29,6 +30,13 @@ app = FastAPI(
     version="0.1.0",
 )
 
+# Load environment variables with deterministic precedence:
+# backend/.env defaults, root .env overrides.
+_PROJECT_ROOT = Path(__file__).resolve().parents[3]
+_BACKEND_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(_BACKEND_ROOT / ".env", override=False)
+load_dotenv(_PROJECT_ROOT / ".env", override=True)
+
 # Global embedding model (lazy-loaded on first request)
 _embedding_model = None
 _model_name = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
@@ -37,16 +45,80 @@ _lock_selection = (os.getenv("EMBEDDING_LOCK", "false").lower() in ["1", "true",
 _selection_file = os.getenv("EMBEDDING_SELECTION_PATH", str(Path(__file__).parent / "selection.json"))
 
 
+def _resolve_fastembed_model_name() -> str:
+    """Pick a valid fastembed model name from env/config defaults."""
+    explicit_fastembed = os.getenv("FASTEMBED_MODEL")
+    if explicit_fastembed:
+        return explicit_fastembed
+
+    if _model_name and not _model_name.startswith("text-embedding-"):
+        return _model_name
+
+    return "BAAI/bge-small-en-v1.5"
+
+
+class _FastEmbedAdapter:
+    """Adapter to expose a sentence-transformers-like encode API via fastembed."""
+
+    def __init__(self, model_name: str):
+        from fastembed import TextEmbedding
+
+        self.model_name = model_name
+        self._embedder = TextEmbedding(model_name=model_name)
+
+    def encode(self, inputs, convert_to_numpy: bool = True):
+        if isinstance(inputs, str):
+            texts = [inputs]
+            single = True
+        else:
+            texts = list(inputs)
+            single = False
+
+        embeddings = list(self._embedder.embed(texts))
+        if not embeddings:
+            raise RuntimeError("FastEmbed returned no embeddings")
+
+        array = np.array(embeddings)
+        if single:
+            return array[0]
+        return array
+
+
 def get_embedding_model():
     """Lazy-load embedding model on first request."""
     global _embedding_model
     if _embedding_model is None:
         logger.info(f"Loading embedding model: {_model_name}")
+        if _provider_name == "fastembed":
+            try:
+                fallback_model = _resolve_fastembed_model_name()
+                _embedding_model = _FastEmbedAdapter(fallback_model)
+                logger.info("Embedding provider: fastembed")
+                logger.info("✅ FastEmbed model loaded successfully: %s", fallback_model)
+                return _embedding_model
+            except Exception as exc:
+                logger.error("❌ Failed to load fastembed model: %s", exc)
+                raise RuntimeError(f"Failed to load fastembed model: {exc}")
+
         try:
             from sentence_transformers import SentenceTransformer
 
             _embedding_model = SentenceTransformer(_model_name)
+            logger.info("Embedding provider: sentence-transformers")
             logger.info("✅ Embedding model loaded successfully")
+        except ModuleNotFoundError as e:
+            logger.warning("sentence_transformers is unavailable (%s). Falling back to FastEmbed.", e)
+            try:
+                fallback_model = _resolve_fastembed_model_name()
+                _embedding_model = _FastEmbedAdapter(fallback_model)
+                logger.info("Embedding provider: fastembed")
+                logger.info("✅ FastEmbed model loaded successfully: %s", fallback_model)
+            except Exception as fallback_exc:
+                logger.error("❌ FastEmbed fallback failed: %s", fallback_exc)
+                raise RuntimeError(
+                    "Failed to load embedding model: sentence_transformers unavailable and fastembed fallback failed: "
+                    f"{fallback_exc}"
+                )
         except Exception as e:
             logger.error(f"❌ Failed to load embedding model: {e}")
             raise RuntimeError(f"Failed to load embedding model: {e}")
@@ -243,8 +315,21 @@ async def get_config():
     return {
         "current": {"provider": _provider_name, "model": _model_name, "locked": _lock_selection},
         "available": {
-            "providers": [{"key": "huggingface", "label": "HuggingFace (local)"}],
-            "models": {"huggingface": ["sentence-transformers/all-MiniLM-L6-v2", "BAAI/bge-small-en-v1.5", "sentence-transformers/all-mpnet-base-v2"]},
+            "providers": [
+                {"key": "huggingface", "label": "HuggingFace (local)"},
+                {"key": "fastembed", "label": "FastEmbed (fallback)"},
+            ],
+            "models": {
+                "huggingface": [
+                    "sentence-transformers/all-MiniLM-L6-v2",
+                    "BAAI/bge-small-en-v1.5",
+                    "sentence-transformers/all-mpnet-base-v2",
+                ],
+                "fastembed": [
+                    "BAAI/bge-small-en-v1.5",
+                    "sentence-transformers/all-MiniLM-L6-v2",
+                ],
+            },
         },
     }
 
@@ -253,9 +338,14 @@ async def get_config():
 async def set_config(sel: EmbeddingSelection):
     if _lock_selection:
         raise HTTPException(status_code=403, detail="Embedding selection is locked")
-    if sel.provider != "huggingface":
-        raise HTTPException(status_code=400, detail="Only 'huggingface' provider is supported in this service")
-    _save_selection_file(sel.provider, sel.model, sel.lock)
+    if sel.provider not in {"huggingface", "fastembed"}:
+        raise HTTPException(status_code=400, detail="Only 'huggingface' and 'fastembed' providers are supported")
+
+    selected_model = sel.model
+    if sel.provider == "fastembed" and not selected_model:
+        selected_model = os.getenv("FASTEMBED_MODEL", "BAAI/bge-small-en-v1.5")
+
+    _save_selection_file(sel.provider, selected_model, sel.lock)
     return {"status": "ok", "current": {"provider": _provider_name, "model": _model_name, "locked": _lock_selection}}
 
 

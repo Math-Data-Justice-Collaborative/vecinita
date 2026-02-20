@@ -50,7 +50,7 @@ def test_gateway_with_valid_api_key(fastapi_client, mock_auth_header):
         mock_client_instance.post = AsyncMock(return_value=mock_response)
         mock_http.return_value = mock_client_instance
         
-        with patch("src.services.agent.server.supabase") as mock_supabase:
+        with patch("src.agent.main.supabase") as mock_supabase:
             mock_supabase.rpc.return_value.data = []
             
             response = fastapi_client.get(
@@ -170,7 +170,7 @@ def test_auth_proxy_unreachable_fails_open(fastapi_client):
         )
         mock_http.return_value = mock_client
         
-        with patch("src.services.agent.server.supabase") as mock_supabase:
+        with patch("src.agent.main.supabase") as mock_supabase:
             mock_supabase.rpc.return_value.data = []
             
             response = fastapi_client.get(

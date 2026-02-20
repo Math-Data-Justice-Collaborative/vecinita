@@ -14,7 +14,7 @@ AS $$
 DECLARE
     source_count INTEGER;
 BEGIN
-    SELECT COUNT(DISTINCT source) INTO source_count
+    SELECT COUNT(DISTINCT source_url) INTO source_count
     FROM document_chunks;
     
     RETURN COALESCE(source_count, 0);
@@ -70,20 +70,28 @@ RETURNS TABLE (
     url TEXT,
     chunk_count BIGINT,
     created_at TIMESTAMP WITH TIME ZONE,
-    last_updated TIMESTAMP WITH TIME ZONE
+    last_updated TIMESTAMP WITH TIME ZONE,
+    metadata JSONB
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
     RETURN QUERY
     SELECT 
-        source AS url,
+        source_url AS url,
         COUNT(*) AS chunk_count,
         MIN(document_chunks.created_at) AS created_at,
-        MAX(document_chunks.updated_at) AS last_updated
+        MAX(document_chunks.updated_at) AS last_updated,
+        jsonb_build_object(
+            'tags', ARRAY_REMOVE(ARRAY_AGG(DISTINCT tag_value), NULL)
+        ) AS metadata
     FROM document_chunks
-    WHERE source IS NOT NULL
-    GROUP BY source
+    LEFT JOIN LATERAL (
+        SELECT value AS tag_value
+        FROM jsonb_array_elements_text(COALESCE(document_chunks.metadata->'tags', '[]'::jsonb)) AS value
+    ) tag_entries ON TRUE
+    WHERE source_url IS NOT NULL
+    GROUP BY source_url
     ORDER BY chunk_count DESC;
 END;
 $$;

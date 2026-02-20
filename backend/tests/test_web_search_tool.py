@@ -14,8 +14,8 @@ from src.agent.tools.web_search import create_web_search_tool
 class TestWebSearchToolWithTavily:
     """Test suite for web search tool when Tavily is available."""
 
-    @patch.dict(os.environ, {"TAVILY_API_KEY": "test-key-123"})
-    @patch("langchain_community.tools.tavily_search.TavilySearchResults")
+    @patch.dict(os.environ, {"TAVILY_API_KEY": "test-key-123"}, clear=True)
+    @patch("langchain_tavily.TavilySearch")
     def test_tavily_initialization(self, mock_tavily_class):
         """Test that Tavily is initialized when API key is present."""
         mock_tavily = Mock()
@@ -28,8 +28,8 @@ class TestWebSearchToolWithTavily:
         assert call_kwargs["api_key"] == "test-key-123"
         assert call_kwargs["max_results"] == 5
 
-    @patch.dict(os.environ, {"TAVILY_API_KEY": "test-key"})
-    @patch("langchain_community.tools.tavily_search.TavilySearchResults")
+    @patch.dict(os.environ, {"TAVILY_API_KEY": "test-key"}, clear=True)
+    @patch("langchain_tavily.TavilySearch")
     def test_tavily_search_normalizes_results(self, mock_tavily_class):
         """Test that Tavily results are normalized correctly."""
         mock_tavily = Mock()
@@ -56,8 +56,8 @@ class TestWebSearchToolWithTavily:
         assert results[0]["content"] == "Information about local health services"
         assert results[0]["url"] == "https://example.com/health"
 
-    @patch.dict(os.environ, {"TAVILY_API_AI_KEY": "alt-key"})
-    @patch("langchain_community.tools.tavily_search.TavilySearchResults")
+    @patch.dict(os.environ, {"TAVILY_API_AI_KEY": "alt-key"}, clear=True)
+    @patch("langchain_tavily.TavilySearch")
     def test_alternate_tavily_env_var(self, mock_tavily_class):
         """Test that alternate TAVILY_API_AI_KEY env var is recognized."""
         mock_tavily = Mock()
@@ -68,8 +68,8 @@ class TestWebSearchToolWithTavily:
         call_kwargs = mock_tavily_class.call_args[1]
         assert call_kwargs["api_key"] == "alt-key"
 
-    @patch.dict(os.environ, {"TVLY_API_KEY": "tvly-key"})
-    @patch("langchain_community.tools.tavily_search.TavilySearchResults")
+    @patch.dict(os.environ, {"TVLY_API_KEY": "tvly-key"}, clear=True)
+    @patch("langchain_tavily.TavilySearch")
     def test_tvly_shorthand_env_var(self, mock_tavily_class):
         """Test that TVLY_API_KEY shorthand is recognized."""
         mock_tavily = Mock()
@@ -84,8 +84,8 @@ class TestWebSearchToolWithTavily:
         "TAVILY_API_KEY": "primary-key",
         "TAVILY_API_AI_KEY": "secondary-key",
         "TVLY_API_KEY": "tertiary-key",
-    })
-    @patch("langchain_community.tools.tavily_search.TavilySearchResults")
+    }, clear=True)
+    @patch("langchain_tavily.TavilySearch")
     def test_tavily_env_var_precedence(self, mock_tavily_class):
         """When multiple Tavily env vars are set, primary has precedence."""
         mock_tavily = Mock()
@@ -182,8 +182,8 @@ class TestWebSearchToolWithDuckDuckGo:
 class TestWebSearchToolErrorHandling:
     """Test suite for web search tool error handling."""
 
-    @patch.dict(os.environ, {"TAVILY_API_KEY": "test-key"})
-    @patch("langchain_community.tools.tavily_search.TavilySearchResults")
+    @patch.dict(os.environ, {"TAVILY_API_KEY": "test-key"}, clear=True)
+    @patch("langchain_tavily.TavilySearch")
     def test_tavily_initialization_failure_falls_back_to_duckduckgo(self, mock_tavily_class):
         """Test that DuckDuckGo fallback is used if Tavily init fails."""
         mock_tavily_class.side_effect = Exception("API key invalid")
@@ -215,8 +215,8 @@ class TestWebSearchToolErrorHandling:
 
             assert results == "[]"
 
-    @patch.dict(os.environ, {"TAVILY_API_KEY": "test-key"})
-    @patch("langchain_community.tools.tavily_search.TavilySearchResults")
+    @patch.dict(os.environ, {"TAVILY_API_KEY": "test-key"}, clear=True)
+    @patch("langchain_tavily.TavilySearch")
     def test_tavily_invocation_error_returns_empty_list(self, mock_tavily_class):
         """Test that tool returns empty list if search execution fails."""
         mock_tavily = Mock()
@@ -232,8 +232,8 @@ class TestWebSearchToolErrorHandling:
 class TestWebSearchToolProperties:
     """Test suite for web search tool properties."""
 
-    @patch.dict(os.environ, {"TAVILY_API_KEY": "test-key"})
-    @patch("langchain_community.tools.tavily_search.TavilySearchResults")
+    @patch.dict(os.environ, {"TAVILY_API_KEY": "test-key"}, clear=True)
+    @patch("langchain_tavily.TavilySearch")
     def test_tool_name_and_description(self, mock_tavily_class):
         """Test that tool has proper name and description."""
         mock_tavily = Mock()

@@ -75,8 +75,15 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Handle request authentication and tracking."""
+        path = request.url.path
+
         # Skip auth for health checks and public endpoints
-        if request.url.path in ["/health", "/", "/docs", "/openapi.json", "/redoc"]:
+        if path in ["/health", "/", "/docs", "/openapi.json", "/redoc"]:
+            return await call_next(request)
+
+        # Supabase-admin and public document routes manage auth separately
+        bypass_prefixes = ("/api/v1/admin", "/api/v1/documents")
+        if any(path.startswith(prefix) for prefix in bypass_prefixes):
             return await call_next(request)
 
         # Extract API key from Authorization header
@@ -237,6 +244,9 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
         # Skip rate limiting for public endpoints
         public_endpoints = ["/health", "/", "/docs", "/openapi.json", "/redoc", "/api/v1/openapi.json"]
         if any(request.url.path.startswith(ep) for ep in public_endpoints):
+            return await call_next(request)
+
+        if request.url.path.startswith("/api/v1/documents"):
             return await call_next(request)
 
         # Get API key from header

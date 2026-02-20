@@ -1,209 +1,199 @@
-"""Database search tool for Vecinita agent.
+"""Database search tool for Vecinita agent backed by ChromaDB."""
 
-This tool performs vector similarity search against the Supabase database
-to retrieve relevant document chunks for answering user questions.
-"""
-
-import logging
-from typing import List, Dict, Any
 import json
+import logging
+import re
+from contextvars import ContextVar, Token
+from typing import Any, Dict, List, Optional
+
 from langchain_core.tools import tool
 
+from src.services.chroma_store import ChromaStore, get_chroma_store
+
 logger = logging.getLogger(__name__)
+_LAST_SEARCH_STATUS = "not_run"
+
+_SEARCH_OPTIONS: ContextVar[Dict[str, Any]] = ContextVar(
+    "db_search_options",
+    default={
+        "tags": [],
+        "tag_match_mode": "any",
+        "include_untagged_fallback": True,
+        "rerank": False,
+        "rerank_top_k": 10,
+    },
+)
+
+
+def _update_search_status(status: str) -> None:
+    global _LAST_SEARCH_STATUS
+    _LAST_SEARCH_STATUS = str(status)
+    current = dict(_SEARCH_OPTIONS.get())
+    current["last_search_status"] = status
+    _SEARCH_OPTIONS.set(current)
+
+
+def get_last_search_status() -> str:
+    scoped = _SEARCH_OPTIONS.get().get("last_search_status")
+    if scoped:
+        return str(scoped)
+    return str(_LAST_SEARCH_STATUS)
+
+
+def set_search_options(
+    *,
+    tags: Optional[List[str]] = None,
+    tag_match_mode: str = "any",
+    include_untagged_fallback: bool = True,
+    rerank: bool = False,
+    rerank_top_k: int = 10,
+) -> Token:
+    safe_mode = "all" if str(tag_match_mode).lower() == "all" else "any"
+    safe_tags = [tag for tag in (tags or []) if isinstance(tag, str) and tag]
+    return _SEARCH_OPTIONS.set(
+        {
+            "tags": safe_tags,
+            "tag_match_mode": safe_mode,
+            "include_untagged_fallback": bool(include_untagged_fallback),
+            "rerank": bool(rerank),
+            "rerank_top_k": max(1, min(int(rerank_top_k or 10), 50)),
+            "last_search_status": "not_run",
+        }
+    )
+
+
+def reset_search_options(token: Token) -> None:
+    _SEARCH_OPTIONS.reset(token)
+
+
+def _tokenize_for_rerank(text: str) -> set[str]:
+    return {
+        token
+        for token in re.findall(r"[a-z0-9]+", (text or "").lower())
+        if len(token) > 1
+    }
+
+
+def _rerank_results(query: str, docs: List[Dict[str, Any]], top_k: int) -> List[Dict[str, Any]]:
+    query_terms = _tokenize_for_rerank(query)
+    if not query_terms:
+        return docs[:top_k]
+
+    scored: List[tuple[float, Dict[str, Any]]] = []
+    for doc in docs:
+        content_terms = _tokenize_for_rerank(doc.get("content", ""))
+        overlap = len(query_terms & content_terms)
+        recall = overlap / max(1, len(query_terms))
+        base_similarity = float(doc.get("similarity", 0.0) or 0.0)
+        combined = (0.75 * base_similarity) + (0.25 * recall)
+        scored.append((combined, doc))
+
+    scored.sort(key=lambda item: item[0], reverse=True)
+    return [doc for _, doc in scored[:top_k]]
+
+
+def _build_tags_where(tags: List[str], mode: str) -> Optional[Dict[str, Any]]:
+    if not tags:
+        return None
+
+    conditions = [{"tags": {"$contains": tag}} for tag in tags]
+    if mode == "all":
+        return {"$and": conditions}
+    if len(conditions) == 1:
+        return conditions[0]
+    return {"$or": conditions}
 
 
 def _normalize_document(doc: Dict[str, Any]) -> Dict[str, Any]:
-    """Normalize document field names from Supabase response.
+    metadata = doc.get("metadata") if isinstance(doc.get("metadata"), dict) else {}
+    source = doc.get("source_url") or metadata.get("source_url") or "Unknown source"
+    source_domain = doc.get("source_domain") or metadata.get("source_domain") or ""
 
-    Different Supabase schemas may use different field names.
-    This function provides fallback logic to handle variations.
-
-    Args:
-        doc: Raw document dictionary from Supabase
-
-    Returns:
-        Normalized document with 'content', 'source_url', 'similarity', and position fields
-    """
-    source = (
-        doc.get('source_url')
-        or doc.get('source')
-        or doc.get('url')
-        or 'Unknown source'
-    )
-    content = (
-        doc.get('content')
-        or doc.get('text')
-        or doc.get('chunk_text')
-        or ''
-    )
-    similarity = doc.get('similarity', 0.0)
-    chunk_index = doc.get('chunk_index')
-    total_chunks = doc.get('total_chunks')
-    metadata = doc.get('metadata', {})
-
-    # Extract position info from metadata if available
-    # Always include these fields for consistent return type
     result = {
-        'content': content,
-        'source_url': source,
-        'similarity': similarity,
-        'chunk_index': chunk_index,
-        'total_chunks': total_chunks,
-        'char_start': None,
-        'char_end': None,
-        'doc_index': None,
-        'metadata': metadata,  # Include full metadata for frontend use
+        "content": doc.get("content") or "",
+        "source_url": source,
+        "source_domain": source_domain,
+        "similarity": doc.get("similarity", 0.0),
+        "chunk_index": doc.get("chunk_index") if doc.get("chunk_index") is not None else metadata.get("chunk_index"),
+        "total_chunks": doc.get("total_chunks") if doc.get("total_chunks") is not None else metadata.get("total_chunks"),
+        "chunk_size": doc.get("chunk_size") if doc.get("chunk_size") is not None else metadata.get("chunk_size"),
+        "document_id": doc.get("document_id"),
+        "document_title": doc.get("document_title") or metadata.get("document_title"),
+        "created_at": doc.get("created_at") or metadata.get("created_at"),
+        "updated_at": doc.get("updated_at") or metadata.get("updated_at"),
+        "scraped_at": doc.get("scraped_at") or metadata.get("scraped_at"),
+        "is_processed": doc.get("is_processed", metadata.get("is_processed", True)),
+        "processing_status": doc.get("processing_status") or metadata.get("processing_status"),
+        "error_message": doc.get("error_message"),
+        "char_start": metadata.get("char_start"),
+        "char_end": metadata.get("char_end"),
+        "doc_index": metadata.get("doc_index"),
+        "metadata": metadata,
     }
-
-    # Populate position fields from metadata if available
-    if isinstance(metadata, dict):
-        result['char_start'] = metadata.get('char_start')
-        result['char_end'] = metadata.get('char_end')
-        result['doc_index'] = metadata.get('doc_index')
-
     return result
 
 
-def _format_db_error(e: Exception) -> str:
-    """Return a human-friendly message describing common DB search failures.
+def create_db_search_tool(
+    chroma_store: Optional[ChromaStore],
+    embedding_model,
+    match_threshold: float = 0.3,
+    match_count: int = 5,
+):
+    """Create a configured db_search tool with access to Chroma and embeddings."""
+    store = chroma_store or get_chroma_store()
 
-    Tries to distinguish typical issues to aid debugging: missing RPC,
-    connectivity problems, auth failures, and embedding dimension mismatches.
-    """
-    msg = str(e).lower()
-
-    # Function overloading conflict (PGRST203)
-    if (
-        "pgrst203" in msg or
-        "could not choose the best candidate function" in msg or
-        "function overloading" in msg
-    ):
-        return (
-            "RPC function overload conflict: Multiple versions of 'search_similar_documents' exist. "
-            "Run scripts/fix_rpc_overload.sql in Supabase SQL Editor to resolve."
-        )
-
-    # RPC function missing
-    if (
-        "search_similar_documents" in msg and
-        ("not found" in msg or "does not exist" in msg)
-    ):
-        return (
-            "RPC function not found: 'search_similar_documents'. "
-            "Ensure schema is installed (see scripts/schema_install.sql)."
-        )
-
-    # Connectivity / timeout
-    if (
-        "connection" in msg or
-        "timeout" in msg or
-        "failed to establish" in msg or
-        "network" in msg
-    ):
-        return (
-            "Database connection error. Check network access and SUPABASE_URL."
-        )
-
-    # Authentication
-    if (
-        "unauthorized" in msg or
-        "invalid api key" in msg or
-        "401" in msg
-    ):
-        return (
-            "Supabase authentication failed. Verify SUPABASE_KEY and permissions."
-        )
-
-    # Embedding / pgvector dimension mismatch
-    if (
-        "dimension" in msg or
-        "array length" in msg or
-        "pgvector" in msg
-    ):
-        return (
-            "Embedding dimension mismatch. Ensure model and pgvector column match (e.g., 384)."
-        )
-
-    return "Unexpected database error"
-
-
-def create_db_search_tool(supabase_client, embedding_model, match_threshold: float = 0.3, match_count: int = 5):
-    """Create a configured db_search tool with access to Supabase and embeddings.
-
-    Args:
-        supabase_client: Initialized Supabase client
-        embedding_model: Initialized embedding model (HuggingFaceEmbeddings)
-        match_threshold: Minimum similarity threshold (default: 0.3)
-        match_count: Maximum number of results to return (default: 5)
-
-    Returns:
-        A configured tool function that can be used with LangGraph
-    """
     @tool
     def db_search(query: str) -> str:
-        """Search the internal knowledge base for relevant information.
-
-        Use this tool to find information from the Vecinita document database.
-        It performs vector similarity search to retrieve the most relevant content
-        for answering the user's question.
-
-        Args:
-            query: The user's question or search query
-
-        Returns:
-            A JSON string containing a list of relevant documents. Parse the result
-            with json.loads() to get Python objects. Returns "[]" (empty JSON array)
-            if no relevant documents are found or on error.
-        """
+        """Search the internal knowledge base for relevant information."""
         try:
-            logger.info(
-                f"DB Search: Generating embedding for query: '{query}'")
-            question_embedding = embedding_model.embed_query(query)
-            logger.info(
-                f"DB Search: Embedding generated. Dimension: {len(question_embedding)}")
-            logger.info(
-                f"DB Search: Embedding first 5 values: {question_embedding[:5]}")
+            _update_search_status("running")
+            search_opts = _SEARCH_OPTIONS.get()
+            query_embedding = embedding_model.embed_query(query)
 
-            logger.info(
-                f"DB Search: Searching Supabase with threshold={match_threshold}, match_count={match_count}...")
-            relevant_docs = supabase_client.rpc(
-                "search_similar_documents",
-                {
-                    "query_embedding": question_embedding,
-                    "match_threshold": match_threshold,
-                    "match_count": match_count
-                },
-            ).execute()
+            tags = [t for t in search_opts.get("tags", []) if isinstance(t, str) and t]
+            tag_mode = search_opts.get("tag_match_mode", "any")
+            include_untagged_fallback = bool(search_opts.get("include_untagged_fallback", True))
 
-            logger.info(
-                f"DB Search: RPC call completed. Result type: {type(relevant_docs)}")
-            logger.info(
-                f"DB Search: Found {len(relevant_docs.data) if relevant_docs.data else 0} relevant documents")
+            where = _build_tags_where(tags, tag_mode)
+            rows = store.query_chunks(
+                query_embedding=query_embedding,
+                n_results=max(int(match_count), 1),
+                where=where,
+            )
 
-            if relevant_docs.data:
-                # Log similarity scores for debugging
-                similarities = [doc.get('similarity', 0)
-                                for doc in relevant_docs.data]
-                logger.info(f"DB Search: Similarity scores: {similarities}")
-                logger.info(
-                    f"DB Search: Min={min(similarities):.3f}, Max={max(similarities):.3f}, Avg={sum(similarities)/len(similarities):.3f}")
+            if not rows and tags and include_untagged_fallback:
+                rows = store.query_chunks(
+                    query_embedding=query_embedding,
+                    n_results=max(int(match_count), 1),
+                )
 
-            if not relevant_docs.data:
-                # Return empty JSON array string when no relevant documents are found
-                logger.warning(
-                    f"DB Search: No documents found with threshold {match_threshold}. Consider lowering threshold.")
+            if not rows:
+                _update_search_status("empty")
                 return "[]"
 
-            # Normalize document format using helper function
-            results = [_normalize_document(doc) for doc in relevant_docs.data]
+            filtered: List[Dict[str, Any]] = []
+            for row in rows:
+                similarity = float(row.get("similarity", 0.0) or 0.0)
+                if similarity >= float(match_threshold):
+                    filtered.append(_normalize_document(row))
 
-            # Return JSON string for proper LLM serialization
-            logger.info(f"DB Search: Returning {len(results)} results as JSON")
-            return json.dumps(results, ensure_ascii=False)
+            if not filtered:
+                _update_search_status("empty")
+                return "[]"
 
-        except Exception as e:
-            logger.error(f"DB Search: {_format_db_error(e)}: {e}")
-            # Return empty JSON array string on error to keep agent robust and satisfy tests
+            if search_opts.get("rerank"):
+                filtered = _rerank_results(
+                    query,
+                    filtered,
+                    int(search_opts.get("rerank_top_k", match_count)),
+                )
+
+            _update_search_status("ok")
+            return json.dumps(filtered, ensure_ascii=False)
+
+        except Exception as exc:
+            logger.error("DB Search error: %s", exc)
+            _update_search_status("error")
             return "[]"
 
     return db_search

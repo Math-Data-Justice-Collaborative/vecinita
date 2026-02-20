@@ -128,14 +128,14 @@ class TestGatewayRouterInclusion:
     def test_embed_router_included(self, gateway_client):
         """Test embed router is included."""
         response = gateway_client.post("/api/v1/embed", json={"text": "hello"})
-        # Should get 501 (not implemented)
-        assert response.status_code == 501
+        # Embed router proxies to embedding service; unavailable backend returns 503
+        assert response.status_code in [200, 503]
 
     def test_admin_router_included(self, gateway_client):
         """Test admin router is included."""
         response = gateway_client.get("/api/v1/admin/health")
-        # Should get 501 (not implemented)
-        assert response.status_code == 501
+        # Admin endpoints require authentication and should reject anonymous requests
+        assert response.status_code in [401, 403]
 
 
 class TestCORSConfiguration:

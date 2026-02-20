@@ -26,8 +26,8 @@ def mock_embedding_model():
 @pytest.fixture
 def embedding_app(mock_embedding_model):
     """Create embedding service app for testing."""
-    with patch("src.services.embedding.server.get_embedding_model", return_value=mock_embedding_model):
-        from src.services.embedding import server
+    with patch("src.embedding_service.main.get_embedding_model", return_value=mock_embedding_model):
+        from src.embedding_service import main as server
         # Reset global state
         server._embedding_model = None
         yield server.app
@@ -36,7 +36,7 @@ def embedding_app(mock_embedding_model):
 @pytest.fixture
 def embedding_client(embedding_app, mock_embedding_model):
     """Create test client for embedding service."""
-    with patch("src.services.embedding.server.get_embedding_model", return_value=mock_embedding_model):
+    with patch("src.embedding_service.main.get_embedding_model", return_value=mock_embedding_model):
         return TestClient(embedding_app)
 
 
@@ -165,7 +165,7 @@ class TestConfigEndpoints:
 
     def test_set_config_locked_config(self, embedding_client):
         """Test that locked config cannot be changed."""
-        with patch("src.services.embedding.server._lock_selection", True):
+        with patch("src.embedding_service.main._lock_selection", True):
             request_data = {
                 "provider": "huggingface",
                 "model": "sentence-transformers/all-MiniLM-L6-v2"
@@ -195,7 +195,7 @@ class TestSimilarityEndpoint:
     def test_similarity_search(self, embedding_client):
         """Test similarity search endpoint."""
         import numpy as np
-        with patch("src.services.embedding.server.get_embedding_model") as mock_model, \
+        with patch("src.embedding_service.main.get_embedding_model") as mock_model, \
              patch("sklearn.metrics.pairwise.cosine_similarity", return_value=np.array([[0.9, 0.7, 0.5]])) as mock_cosine:
             # Mock embedding model to return deterministic vectors
             mock_embedding = MagicMock()
@@ -223,7 +223,7 @@ class TestSimilarityEndpoint:
 
     def test_similarity_results_sorted(self, embedding_client):
         """Test that similarity results are sorted by score."""
-        with patch("src.services.embedding.server.get_embedding_model"):
+        with patch("src.embedding_service.main.get_embedding_model"):
             request_data = {
                 "query_request": {"text": "test"},
                 "texts_request": {"texts": ["a", "b", "c"]}
@@ -241,19 +241,19 @@ class TestEmbedRequestModel:
 
     def test_embed_request_valid(self, embedding_client):
         """Test valid EmbedRequest."""
-        from src.services.embedding.server import EmbedRequest
+        from src.embedding_service.main import EmbedRequest
         req = EmbedRequest(text="test text")
         assert req.text == "test text"
 
     def test_embed_request_min_length(self, embedding_client):
         """Test EmbedRequest respects min_length."""
-        from src.services.embedding.server import EmbedRequest
+        from src.embedding_service.main import EmbedRequest
         with pytest.raises(ValueError):
             EmbedRequest(text="")
 
     def test_embed_request_max_length(self, embedding_client):
         """Test EmbedRequest respects max_length."""
-        from src.services.embedding.server import EmbedRequest
+        from src.embedding_service.main import EmbedRequest
         with pytest.raises(ValueError):
             EmbedRequest(text="x" * 10001)
 
@@ -263,19 +263,19 @@ class TestBatchEmbedRequestModel:
 
     def test_batch_embed_request_valid(self, embedding_client):
         """Test valid BatchEmbedRequest."""
-        from src.services.embedding.server import BatchEmbedRequest
+        from src.embedding_service.main import BatchEmbedRequest
         req = BatchEmbedRequest(texts=["text1", "text2"])
         assert len(req.texts) == 2
 
     def test_batch_embed_request_min_items(self, embedding_client):
         """Test BatchEmbedRequest respects min_items."""
-        from src.services.embedding.server import BatchEmbedRequest
+        from src.embedding_service.main import BatchEmbedRequest
         with pytest.raises(ValueError):
             BatchEmbedRequest(texts=[])
 
     def test_batch_embed_request_max_items(self, embedding_client):
         """Test BatchEmbedRequest respects max_items."""
-        from src.services.embedding.server import BatchEmbedRequest
+        from src.embedding_service.main import BatchEmbedRequest
         with pytest.raises(ValueError):
             BatchEmbedRequest(texts=["text"] * 101)
 
@@ -285,7 +285,7 @@ class TestEmbeddingResponseModel:
 
     def test_embedding_response_valid(self, embedding_client):
         """Test valid EmbeddingResponse."""
-        from src.services.embedding.server import EmbeddingResponse
+        from src.embedding_service.main import EmbeddingResponse
         resp = EmbeddingResponse(
             embedding=[0.1] * 384,
             dimension=384,
@@ -300,7 +300,7 @@ class TestBatchEmbeddingResponseModel:
 
     def test_batch_embedding_response_valid(self, embedding_client):
         """Test valid BatchEmbeddingResponse."""
-        from src.services.embedding.server import BatchEmbeddingResponse
+        from src.embedding_service.main import BatchEmbeddingResponse
         resp = BatchEmbeddingResponse(
             embeddings=[[0.1] * 384, [0.2] * 384],
             dimension=384,

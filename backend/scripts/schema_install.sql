@@ -125,6 +125,8 @@ CREATE INDEX IF NOT EXISTS idx_document_chunks_source_domain ON document_chunks(
 CREATE INDEX IF NOT EXISTS idx_document_chunks_document_id ON document_chunks(document_id);
 CREATE INDEX IF NOT EXISTS idx_document_chunks_created_at ON document_chunks(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_document_chunks_is_processed ON document_chunks(is_processed);
+CREATE INDEX IF NOT EXISTS idx_document_chunks_metadata_gin ON document_chunks USING gin(metadata);
+CREATE INDEX IF NOT EXISTS idx_sources_metadata_gin ON sources USING gin(metadata);
 
 -- Full text search
 CREATE INDEX IF NOT EXISTS idx_document_chunks_content_gin 
@@ -172,7 +174,10 @@ CREATE TRIGGER update_sources_updated_at
 CREATE OR REPLACE FUNCTION search_similar_documents(
     query_embedding vector,
     match_threshold REAL DEFAULT 0.3,
-    match_count INTEGER DEFAULT 5
+    match_count INTEGER DEFAULT 5,
+    tag_filter TEXT[] DEFAULT NULL,
+    tag_match_mode TEXT DEFAULT 'any',
+    include_untagged_fallback BOOLEAN DEFAULT TRUE
 )
 RETURNS TABLE (
     id UUID,
@@ -197,6 +202,24 @@ BEGIN
     WHERE dc.embedding IS NOT NULL
         AND dc.is_processed = TRUE
         AND 1 - (dc.embedding <=> query_embedding) > match_threshold
+        AND (
+            tag_filter IS NULL
+            OR cardinality(tag_filter) = 0
+            OR (
+                (
+                    LOWER(COALESCE(tag_match_mode, 'any')) = 'all'
+                    AND COALESCE(dc.metadata->'tags', '[]'::jsonb) ?& tag_filter
+                )
+                OR (
+                    LOWER(COALESCE(tag_match_mode, 'any')) <> 'all'
+                    AND COALESCE(dc.metadata->'tags', '[]'::jsonb) ?| tag_filter
+                )
+                OR (
+                    include_untagged_fallback = TRUE
+                    AND jsonb_array_length(COALESCE(dc.metadata->'tags', '[]'::jsonb)) = 0
+                )
+            )
+        )
     ORDER BY dc.embedding <=> query_embedding
     LIMIT match_count;
 END;

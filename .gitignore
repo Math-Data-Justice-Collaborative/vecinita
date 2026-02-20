@@ -54,6 +54,7 @@ instance/
 # IDE specific files
 .idea/
 .vscode/
+.vscode/mcp.json
 *.swp
 *.swo
 *~

@@ -9,22 +9,23 @@ import time
 import logging
 import traceback
 from pathlib import Path
+from datetime import datetime
+
+# Avoid hard torch dependency during transformers import on CPU-only/broken torch envs.
+os.environ.setdefault("USE_TORCH", "0")
+os.environ.setdefault("TRANSFORMERS_NO_TORCH", "1")
+
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from typing import Annotated, List, TypedDict
+from typing import Annotated, List, TypedDict, Literal
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from typing import TypedDict, Optional
 from supabase import create_client, Client
-from langchain_groq import ChatGroq
-from langchain_openai import ChatOpenAI
-from langchain_ollama import ChatOllama
-from langchain_community.chat_models import ChatOpenAI as ChatDeepSeek
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, ToolMessage
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage, ToolMessage
 from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
 from langdetect import detect, LangDetectException
 from langgraph.graph import StateGraph, START, END
@@ -34,12 +35,23 @@ from langgraph.checkpoint.memory import MemorySaver
 
 # Import tools
 from .tools.db_search import create_db_search_tool
+from .tools.db_search import set_search_options as set_db_search_options
+from .tools.db_search import reset_search_options as reset_db_search_options
+from .tools.db_search import get_last_search_status
 from .tools.static_response import create_static_response_tool, FAQ_DATABASE
 from .tools.web_search import create_web_search_tool
 from .tools.clarify_question import create_clarify_question_tool
+from .tools.rank_retrieval import create_rank_retrieval_tool
+from .tools.rewrite_question import create_rewrite_question_tool
+from src.utils.tags import parse_tags_input
+from src.services.chroma_store import get_chroma_store
 
-# Load environment variables from .env file
-load_dotenv()
+# Load environment variables with deterministic precedence:
+# backend/.env as defaults, then root .env overrides.
+_PROJECT_ROOT = Path(__file__).resolve().parents[3]
+_BACKEND_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(_BACKEND_ROOT / ".env", override=False)
+load_dotenv(_PROJECT_ROOT / ".env", override=True)
 
 # --- Configure Logging ---
 logging.basicConfig(
@@ -47,6 +59,79 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# Providers that failed with transport/connect errors in current process.
+_RUNTIME_PROVIDER_BLOCKLIST: set[str] = set()
+
+# Lazy-loaded optional classes (avoid importing heavy/fragile deps at startup)
+ChatOllama = None
+_CHATOLLAMA_IMPORT_ERROR = None
+ChatOpenAI = None
+_CHATOPENAI_IMPORT_ERROR = None
+HuggingFaceEmbeddings = None
+_HF_EMBEDDINGS_IMPORT_ERROR = None
+
+
+def _get_chatollama_class():
+    """Load ChatOllama lazily so startup doesn't fail on optional deps."""
+    global ChatOllama, _CHATOLLAMA_IMPORT_ERROR
+    if ChatOllama is not None:
+        return ChatOllama
+    if _CHATOLLAMA_IMPORT_ERROR is not None:
+        return None
+    try:
+        from langchain_ollama import ChatOllama as _ChatOllama
+        ChatOllama = _ChatOllama
+        return ChatOllama
+    except Exception as exc:
+        _CHATOLLAMA_IMPORT_ERROR = exc
+        logger.warning(
+            "langchain_ollama unavailable at startup (%s). Ollama provider will be disabled.",
+            exc,
+        )
+        return None
+
+
+def _get_chatopenai_class():
+    """Load ChatOpenAI lazily to avoid startup failures when optional deps are broken."""
+    global ChatOpenAI, _CHATOPENAI_IMPORT_ERROR
+    if ChatOpenAI is not None:
+        return ChatOpenAI
+    if _CHATOPENAI_IMPORT_ERROR is not None:
+        return None
+    try:
+        from langchain_openai import ChatOpenAI as _ChatOpenAI
+        ChatOpenAI = _ChatOpenAI
+        return ChatOpenAI
+    except Exception as exc:
+        _CHATOPENAI_IMPORT_ERROR = exc
+        logger.warning(
+            "langchain_openai unavailable at startup (%s). "
+            "OpenAI/DeepSeek providers will be disabled unless dependency is fixed.",
+            exc,
+        )
+        return None
+
+
+def _get_hf_embeddings_class():
+    """Load HuggingFaceEmbeddings lazily for last-resort embedding fallback only."""
+    global HuggingFaceEmbeddings, _HF_EMBEDDINGS_IMPORT_ERROR
+    if HuggingFaceEmbeddings is not None:
+        return HuggingFaceEmbeddings
+    if _HF_EMBEDDINGS_IMPORT_ERROR is not None:
+        return None
+    try:
+        from langchain_huggingface import HuggingFaceEmbeddings as _HuggingFaceEmbeddings
+        HuggingFaceEmbeddings = _HuggingFaceEmbeddings
+        return HuggingFaceEmbeddings
+    except Exception as exc:
+        _HF_EMBEDDINGS_IMPORT_ERROR = exc
+        logger.warning(
+            "langchain_huggingface unavailable (%s). "
+            "HuggingFace embedding fallback will be disabled.",
+            exc,
+        )
+        return None
 
 # --- Initialize FastAPI App ---
 app = FastAPI()
@@ -62,25 +147,39 @@ app.add_middleware(
 
 # --- Load Environment Variables & Validate ---
 supabase_url = os.environ.get("SUPABASE_URL")
-supabase_key = os.environ.get("SUPABASE_KEY")
-groq_api_key = os.environ.get("GROQ_API_KEY")
+supabase_key = (
+    os.environ.get("SUPABASE_SECRET_KEY")
+    or os.environ.get("SUPABASE_KEY")
+    or os.environ.get("SUPABASE_PUBLISHABLE_KEY")
+)
+# Groq / X.AI / Twitter AI intentionally removed.
 openai_api_key = os.environ.get(
     "OPENAI_API_KEY") or os.environ.get("OPEN_API_KEY")
 deepseek_api_key = os.environ.get("DEEPSEEK_API_KEY")
 ollama_base_url = os.environ.get("OLLAMA_BASE_URL")
-ollama_model = os.environ.get("OLLAMA_MODEL") or "llama3.2"
-default_provider = (os.environ.get("DEFAULT_PROVIDER") or "llama").lower()
+ollama_model = os.environ.get("OLLAMA_MODEL") or "llama3.1:8b"
+default_provider = (os.environ.get("DEFAULT_PROVIDER") or "ollama").lower()
 default_model = os.environ.get("DEFAULT_MODEL") or None
 lock_model_selection_env = (os.environ.get("LOCK_MODEL_SELECTION") or "false").lower() in ["1", "true", "yes"]
 selection_file_path = os.environ.get("MODEL_SELECTION_PATH") or str(Path(__file__).parent / "data" / "model_selection.json")
-if not supabase_url or not supabase_key:
-    raise ValueError("Supabase URL and key must be set.")
-
+agent_fast_mode = (os.environ.get("AGENT_FAST_MODE") or "true").lower() in ["1", "true", "yes"]
+agent_max_response_sentences = max(1, int(os.environ.get("AGENT_MAX_RESPONSE_SENTENCES") or "4"))
+agent_max_response_chars = max(120, int(os.environ.get("AGENT_MAX_RESPONSE_CHARS") or "700"))
 # --- Initialize Clients ---
 try:
-    logger.info("Initializing Supabase client...")
-    supabase: Client = create_client(supabase_url, supabase_key)
-    logger.info("Supabase client initialized successfully")
+    supabase: Client | None = None
+    if supabase_url and supabase_key:
+        logger.info("Initializing optional Supabase client (auth/diagnostics only)...")
+        supabase = create_client(supabase_url, supabase_key)
+        logger.info("Supabase client initialized successfully")
+    else:
+        logger.info("Supabase client not configured for agent runtime; continuing with Chroma-backed retrieval")
+
+    chroma_store = get_chroma_store()
+    if chroma_store.heartbeat():
+        logger.info("Chroma store connectivity check passed")
+    else:
+        logger.warning("Chroma store heartbeat failed at startup; retrieval will retry during requests")
 
     # Persisted model selection (optional JSON file)
     class Selection(TypedDict):
@@ -124,65 +223,146 @@ try:
 
     _load_model_selection_from_file()
 
-    # Initialize default LLM: prefer DeepSeek, then Groq, then OpenAI, finally Ollama Llama
-    if deepseek_api_key:
-        logger.info("Initializing ChatOpenAI with DeepSeek (default)...")
-        deepseek_base_url = os.environ.get(
-            "DEEPSEEK_BASE_URL") or "https://api.deepseek.com/v1"
-        llm = ChatOpenAI(
-            temperature=0,
-            api_key=deepseek_api_key,
-            model="deepseek-chat",
-            base_url=deepseek_base_url
-        )
-        logger.info("DeepSeek LLM initialized successfully")
-    elif groq_api_key:
-        logger.info("Initializing ChatGroq LLM (Llama fallback)...")
-        llm = ChatGroq(temperature=0, groq_api_key=groq_api_key,
-                       model_name="llama-3.1-8b-instant")
-        logger.info("ChatGroq LLM initialized successfully")
-    elif openai_api_key:
-        logger.info("Initializing ChatOpenAI LLM (GPT fallback)...")
-        llm = ChatOpenAI(temperature=0, api_key=openai_api_key,
-                         model="gpt-4o-mini")
-        logger.info("ChatOpenAI LLM initialized successfully")
-    elif ollama_base_url:
-        logger.info("Initializing ChatOllama (Llama fallback)...")
-        llm = ChatOllama(temperature=0, model=ollama_model,
-                         base_url=ollama_base_url)
-        logger.info(
-            f"ChatOllama initialized successfully (model={ollama_model})")
-    else:
-        raise RuntimeError(
-            "No LLM provider configured. Set DEEPSEEK_API_KEY or GROQ_API_KEY or OPENAI_API_KEY/OPEN_API_KEY or OLLAMA_BASE_URL.")
+    def _available_providers() -> list[str]:
+        providers: list[str] = []
+        if ollama_base_url:
+            providers.append("ollama")
+        if deepseek_api_key:
+            providers.append("deepseek")
+        if openai_api_key:
+            providers.append("openai")
+        return providers
 
-    # Use dedicated Embedding Service for embeddings (lightweight agent!)
-    # Embedding service runs as a separate Render free-tier service
-    # Fallback to local FastEmbed if service unavailable
-    logger.info("Initializing embedding model (Embedding Service)...")
+    def _normalize_provider_name(provider_name: str | None) -> str:
+        normalized = str(provider_name or "").lower().strip()
+        if normalized == "llama":
+            return "ollama"
+        return normalized
+
+    def _validate_or_resolve_selection() -> None:
+        available = _available_providers()
+        if not available:
+            raise RuntimeError(
+                "No LLM provider configured. Set OLLAMA_BASE_URL, DEEPSEEK_API_KEY, or OPENAI_API_KEY."
+            )
+
+        selected = _normalize_provider_name(CURRENT_SELECTION.get("provider"))
+        if selected in available:
+            CURRENT_SELECTION["provider"] = selected
+            return
+
+        if CURRENT_SELECTION.get("locked"):
+            raise RuntimeError(
+                f"Model selection is locked to '{selected}', but that provider is not configured. "
+                f"Available providers: {available}"
+            )
+
+        resolved = available[0]
+        logger.warning(
+            "Configured provider '%s' is unavailable. Switching to '%s'. Available providers: %s",
+            selected or "<empty>",
+            resolved,
+            available,
+        )
+        CURRENT_SELECTION["provider"] = resolved
+        _save_model_selection_to_file(
+            provider=resolved,
+            model=CURRENT_SELECTION.get("model"),
+            locked=False,
+        )
+
+    _validate_or_resolve_selection()
+
+    # Validate selected provider dependencies at startup (fail-fast)
+    selected_provider_startup = _normalize_provider_name(CURRENT_SELECTION.get("provider"))
+    if selected_provider_startup == "ollama":
+        if not ollama_base_url:
+            raise RuntimeError("Selected provider is 'ollama' but OLLAMA_BASE_URL is not configured.")
+        if _get_chatollama_class() is None:
+            raise RuntimeError(
+                "Selected provider is 'ollama' but langchain_ollama import failed. "
+                f"Original error: {_CHATOLLAMA_IMPORT_ERROR}"
+            )
+    elif selected_provider_startup in ("deepseek", "openai"):
+        if _get_chatopenai_class() is None:
+            raise RuntimeError(
+                f"Selected provider is '{selected_provider_startup}' but langchain_openai import failed. "
+                f"Original error: {_CHATOPENAI_IMPORT_ERROR}"
+            )
+
+    # Use dedicated embedding service and optionally fail fast if unavailable
+    logger.info("Initializing embedding model (Embedding Service, fail-fast)...")
     embedding_service_url = os.environ.get(
         "EMBEDDING_SERVICE_URL", "http://embedding-service:8001")
+    embedding_strict_startup = (
+        os.environ.get("EMBEDDING_STRICT_STARTUP", "true").lower() in ["1", "true", "yes"]
+    )
 
     try:
         from src.embedding_service.client import create_embedding_client
-        embedding_model = create_embedding_client(embedding_service_url)
+        embedding_model = create_embedding_client(
+            embedding_service_url,
+            validate_on_init=True,
+        )
         logger.info(
             f"✅ Embedding model initialized via Embedding Service ({embedding_service_url})")
     except Exception as service_exc:
+        if embedding_strict_startup:
+            raise RuntimeError(
+                "Embedding service validation failed. "
+                "Set EMBEDDING_SERVICE_URL to a reachable service and ensure /health is up. "
+                "For local dev: `uv run uvicorn src.embedding_service.main:app --host 0.0.0.0 --port 8001`. "
+                "For Cloud Run deploy via gcloud CLI: `backend/scripts/deploy_embedding_gcloud.sh` "
+                "with PROJECT_ID and REGION configured. "
+                f"Original error: {service_exc}"
+            )
+
         logger.warning(
-            f"Embedding service failed ({service_exc}); falling back to FastEmbed")
+            "Embedding service unavailable at startup; falling back to local FastEmbedEmbeddings. "
+            "Set EMBEDDING_STRICT_STARTUP=true to fail fast. Original error: %s",
+            service_exc,
+        )
         try:
-            embedding_model = FastEmbedEmbeddings(
-                model_name="fast-bge-small-en-v1.5")
-            logger.info(
-                "Embedding model initialized successfully (FastEmbed fallback)")
-        except Exception as emb_exc:
+            embedding_model = FastEmbedEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+        except Exception as fastembed_exc:
             logger.warning(
-                f"FastEmbedEmbeddings failed ({emb_exc}); falling back to HuggingFace.")
-            model_name = "sentence-transformers/all-MiniLM-L6-v2"
-            embedding_model = HuggingFaceEmbeddings(model_name=model_name)
-            logger.info(
-                "Embedding model initialized successfully (HuggingFace fallback)")
+                "FastEmbedEmbeddings fallback unavailable: %s. Trying HuggingFaceEmbeddings fallback.",
+                fastembed_exc,
+            )
+            HuggingFaceEmbeddingsClass = _get_hf_embeddings_class()
+            if HuggingFaceEmbeddingsClass is not None:
+                try:
+                    embedding_model = HuggingFaceEmbeddingsClass(
+                        model_name="sentence-transformers/all-MiniLM-L6-v2"
+                    )
+                except Exception as hf_exc:
+                    logger.warning(
+                        "HuggingFaceEmbeddings initialization failed: %s. Using zero-vector fallback embeddings.",
+                        hf_exc,
+                    )
+
+                    class _ZeroVectorEmbeddings:
+                        def embed_query(self, _text: str):
+                            return [0.0] * 384
+
+                        def embed_documents(self, texts: list[str]):
+                            return [[0.0] * 384 for _ in texts]
+
+                    embedding_model = _ZeroVectorEmbeddings()
+            else:
+                logger.warning(
+                    "HuggingFaceEmbeddings fallback unavailable: %s. Using zero-vector fallback embeddings.",
+                    _HF_EMBEDDINGS_IMPORT_ERROR,
+                )
+
+                class _ZeroVectorEmbeddings:
+                    def embed_query(self, _text: str):
+                        return [0.0] * 384
+
+                    def embed_documents(self, texts: list[str]):
+                        return [[0.0] * 384 for _ in texts]
+
+                embedding_model = _ZeroVectorEmbeddings()
 except Exception as e:
     logger.error(f"Failed to initialize clients: {e}")
     logger.error(traceback.format_exc())
@@ -214,7 +394,9 @@ class AgentState(TypedDict):
     language: str
     provider: str | None
     model: str | None
+    fast_mode: bool | None
     plan: str | None  # Stores planning results
+    grade_result: str | None
 
 
 # --- Human-readable agent thinking messages ---
@@ -246,18 +428,104 @@ def get_agent_thinking_message(tool_name: str, language: str) -> str:
     return msgs.get(tool_name, 'Thinking...')
 
 
+def _summarize_tool_result(tool_name: str, content: str, language: str) -> str:
+    """Return compact user-visible summary for tool results."""
+    safe_content = content if isinstance(content, str) else str(content)
+    lang = 'es' if language == 'es' else 'en'
+
+    if tool_name == "db_search":
+        try:
+            docs = json.loads(safe_content)
+            if isinstance(docs, list):
+                if lang == 'es':
+                    return f"db_search devolvió {len(docs)} fragmentos relevantes."
+                return f"db_search returned {len(docs)} relevant chunks."
+        except Exception:
+            pass
+    if tool_name == "web_search":
+        try:
+            links = json.loads(safe_content)
+            if isinstance(links, list):
+                if lang == 'es':
+                    return f"web_search devolvió {len(links)} resultados web."
+                return f"web_search returned {len(links)} web results."
+        except Exception:
+            pass
+    if tool_name == "clarify_question":
+        return "Se requieren aclaraciones del usuario." if lang == 'es' else "User clarification is required."
+
+    return "Herramienta completada." if lang == 'es' else "Tool call completed."
+
+
+def _db_unavailable_message(language: str) -> str:
+    if language == 'es':
+        return (
+            "No puedo acceder temporalmente a la base de datos de documentos de Vecinita. "
+            "Inténtalo nuevamente en unos minutos mientras restablecemos la conexión."
+        )
+    return (
+        "I can’t access the Vecinita document database right now. "
+        "Please try again in a few minutes while the connection is restored."
+    )
+
+
+def _build_clarification_payload(content: str, language: str) -> dict:
+    """Parse clarify_question tool content into a structured clarification event payload."""
+    safe_content = content if isinstance(content, str) else str(content)
+    lines = [line.strip() for line in safe_content.splitlines() if line.strip()]
+
+    questions: list[str] = []
+    for line in lines:
+        normalized = line
+        for prefix in ("1.", "2.", "3.", "4.", "5.", "-", "•"):
+            if normalized.startswith(prefix):
+                normalized = normalized[len(prefix):].strip()
+        if normalized.endswith("?") and len(normalized) > 8:
+            questions.append(normalized)
+
+    if not questions:
+        if language == 'es':
+            questions = ["¿Podrías compartir más detalles para que pueda ayudarte mejor?"]
+        else:
+            questions = ["Could you share more details so I can help you better?"]
+
+    if language == 'es':
+        message = "Necesito más información para continuar."
+        context = "Se requiere intervención del usuario."
+    else:
+        message = "I need more details to continue."
+        context = "User intervention is required."
+
+    return {
+        "type": "clarification",
+        "message": message,
+        "questions": questions[:3],
+        "context": context,
+        "waiting": True,
+        "stage": "clarification",
+        "progress": 85,
+        "status": "waiting",
+    }
+
+
 # --- Initialize Tools ---
 logger.info("Initializing agent tools...")
 # Use lower threshold (0.1) for better recall - can be tuned based on results
 db_search_tool = create_db_search_tool(
-    supabase, embedding_model, match_threshold=0.1, match_count=5)
+    chroma_store, embedding_model, match_threshold=0.1, match_count=5)
 web_search_tool = create_web_search_tool()
 clarify_question_tool = create_clarify_question_tool()
 static_response_tool = create_static_response_tool()
+rank_retrieval_results_tool = create_rank_retrieval_tool()
+rewrite_question_tool = create_rewrite_question_tool(
+    lambda provider, model: _get_llm_without_tools(provider, model)
+)
 tools = [db_search_tool,
          static_response_tool,
          clarify_question_tool,
-         web_search_tool]
+         web_search_tool,
+         rank_retrieval_results_tool,
+         rewrite_question_tool]
 # Filter out None values if any tool failed to initialize
 tools = [t for t in tools if t is not None]
 logger.info(f"Initialized {len(tools)} tools: {[tool.name for tool in tools]}")
@@ -275,29 +543,34 @@ def _get_llm_with_tools(provider: str | None, model: str | None):
         provider = CURRENT_SELECTION["provider"]
         model = CURRENT_SELECTION["model"]
 
-    selected_provider = (provider or CURRENT_SELECTION["provider"] or "llama").lower()
-    if selected_provider == "llama":
-        # Prefer local Ollama
+    # Provider selection is normalized at startup; do not cascade at request-time.
+    selected_provider = (provider or CURRENT_SELECTION["provider"] or "ollama").lower()
+    if selected_provider in ("ollama", "llama"):
         if ollama_base_url:
-            use_model = model or ollama_model or "llama3.2"
-            local_llm = ChatOllama(
+            use_model = model or ollama_model or "llama3.1:8b"
+            ChatOllamaClass = _get_chatollama_class()
+            if ChatOllamaClass is None:
+                raise RuntimeError(
+                    "Ollama provider unavailable because langchain_ollama could not be imported. "
+                    f"Original error: {_CHATOLLAMA_IMPORT_ERROR}"
+                )
+            local_llm = ChatOllamaClass(
                 temperature=0, model=use_model, base_url=ollama_base_url)
             return local_llm.bind_tools(tools)
-        # Fallback to Groq-hosted Llama if available
-        if groq_api_key:
-            use_model = model or "llama-3.1-8b-instant"
-            groq_llm = ChatGroq(
-                temperature=0, groq_api_key=groq_api_key, model_name=use_model)
-            return groq_llm.bind_tools(tools)
-        # Last resort: if nothing available, raise
         raise RuntimeError(
-            "Llama provider requested but neither Ollama nor Groq are configured.")
+            "Ollama provider requested but OLLAMA_BASE_URL is not configured.")
     elif selected_provider == "openai":
         if not openai_api_key:
             raise RuntimeError(
                 "OpenAI provider requested but OPENAI_API_KEY/OPEN_API_KEY is not set.")
         use_model = model or CURRENT_SELECTION.get("model") or "gpt-4o-mini"
-        openai_llm = ChatOpenAI(
+        ChatOpenAIClass = _get_chatopenai_class()
+        if ChatOpenAIClass is None:
+            raise RuntimeError(
+                "OpenAI provider unavailable because langchain_openai could not be imported. "
+                f"Original error: {_CHATOPENAI_IMPORT_ERROR}"
+            )
+        openai_llm = ChatOpenAIClass(
             temperature=0, api_key=openai_api_key, model=use_model)
         return openai_llm.bind_tools(tools)
     elif selected_provider == "deepseek":
@@ -306,7 +579,13 @@ def _get_llm_with_tools(provider: str | None, model: str | None):
                 "DeepSeek provider requested but DEEPSEEK_API_KEY is not set.")
         # DeepSeek offers OpenAI-compatible API; use ChatOpenAI with base_url
         use_model = model or CURRENT_SELECTION.get("model") or "deepseek-chat"
-        deepseek_llm = ChatOpenAI(
+        ChatOpenAIClass = _get_chatopenai_class()
+        if ChatOpenAIClass is None:
+            raise RuntimeError(
+                "DeepSeek provider unavailable because langchain_openai could not be imported. "
+                f"Original error: {_CHATOPENAI_IMPORT_ERROR}"
+            )
+        deepseek_llm = ChatOpenAIClass(
             temperature=0,
             api_key=deepseek_api_key,
             model=use_model,
@@ -316,7 +595,121 @@ def _get_llm_with_tools(provider: str | None, model: str | None):
         return deepseek_llm.bind_tools(tools)
     else:
         raise RuntimeError(
-            f"Unsupported provider: {selected_provider}. Use 'llama' or 'openai'.")
+            f"Unsupported provider: {selected_provider}. Use 'ollama', 'deepseek', or 'openai'.")
+
+
+def _get_llm_without_tools(provider: str | None, model: str | None):
+    """Create an LLM instance without binding tools (for grading/rewriting control nodes)."""
+    if CURRENT_SELECTION.get("locked"):
+        provider = CURRENT_SELECTION["provider"]
+        model = CURRENT_SELECTION["model"]
+
+    selected_provider = (provider or CURRENT_SELECTION["provider"] or "ollama").lower()
+    if selected_provider in ("ollama", "llama"):
+        if not ollama_base_url:
+            raise RuntimeError("Ollama provider requested but OLLAMA_BASE_URL is not configured.")
+        use_model = model or ollama_model or "llama3.1:8b"
+        ChatOllamaClass = _get_chatollama_class()
+        if ChatOllamaClass is None:
+            raise RuntimeError(
+                "Ollama provider unavailable because langchain_ollama could not be imported. "
+                f"Original error: {_CHATOLLAMA_IMPORT_ERROR}"
+            )
+        return ChatOllamaClass(temperature=0, model=use_model, base_url=ollama_base_url)
+
+    if selected_provider == "openai":
+        if not openai_api_key:
+            raise RuntimeError(
+                "OpenAI provider requested but OPENAI_API_KEY/OPEN_API_KEY is not set."
+            )
+        use_model = model or CURRENT_SELECTION.get("model") or "gpt-4o-mini"
+        ChatOpenAIClass = _get_chatopenai_class()
+        if ChatOpenAIClass is None:
+            raise RuntimeError(
+                "OpenAI provider unavailable because langchain_openai could not be imported. "
+                f"Original error: {_CHATOPENAI_IMPORT_ERROR}"
+            )
+        return ChatOpenAIClass(temperature=0, api_key=openai_api_key, model=use_model)
+
+    if selected_provider == "deepseek":
+        if not deepseek_api_key:
+            raise RuntimeError(
+                "DeepSeek provider requested but DEEPSEEK_API_KEY is not set."
+            )
+        use_model = model or CURRENT_SELECTION.get("model") or "deepseek-chat"
+        ChatOpenAIClass = _get_chatopenai_class()
+        if ChatOpenAIClass is None:
+            raise RuntimeError(
+                "DeepSeek provider unavailable because langchain_openai could not be imported. "
+                f"Original error: {_CHATOPENAI_IMPORT_ERROR}"
+            )
+        return ChatOpenAIClass(
+            temperature=0,
+            api_key=deepseek_api_key,
+            model=use_model,
+            base_url=os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
+        )
+
+    raise RuntimeError(f"Unsupported provider: {selected_provider}. Use 'ollama', 'deepseek', or 'openai'.")
+
+
+def _normalize_provider_name_runtime(provider_name: str | None) -> str:
+    normalized = str(provider_name or "").lower().strip()
+    if normalized == "llama":
+        return "ollama"
+    return normalized
+
+
+def _is_transport_connection_error(exc: Exception) -> bool:
+    err_name = exc.__class__.__name__.lower()
+    text = str(exc).lower()
+    return (
+        "connecterror" in err_name
+        or "connectionerror" in err_name
+        or "apiconnectionerror" in err_name
+        or "connection refused" in text
+        or "failed to establish" in text
+        or "temporary failure in name resolution" in text
+        or "network is unreachable" in text
+    )
+
+
+def _provider_candidates_for_request(provider: str | None, model: str | None) -> list[tuple[str | None, str | None]]:
+    """Return ordered provider/model candidates for resilient execution.
+
+    If model selection is locked, use single configured provider.
+    Otherwise prefer request/current provider first, then other configured providers.
+    """
+    if CURRENT_SELECTION.get("locked"):
+        return [(CURRENT_SELECTION.get("provider"), CURRENT_SELECTION.get("model"))]
+
+    requested = _normalize_provider_name_runtime(provider or CURRENT_SELECTION.get("provider"))
+    available = _available_providers()
+    fallback_order = ["deepseek", "openai", "ollama"]
+
+    candidates: list[tuple[str | None, str | None]] = []
+    if requested and requested not in _RUNTIME_PROVIDER_BLOCKLIST:
+        candidates.append((requested, model))
+
+    for candidate in fallback_order:
+        if candidate not in available:
+            continue
+        if candidate in _RUNTIME_PROVIDER_BLOCKLIST:
+            continue
+        if any(_normalize_provider_name_runtime(existing_provider) == candidate for existing_provider, _ in candidates):
+            continue
+        default_model_for_candidate: str | None = None
+        if candidate == "deepseek":
+            default_model_for_candidate = "deepseek-chat"
+        elif candidate == "openai":
+            default_model_for_candidate = "gpt-4o-mini"
+        elif candidate == "ollama":
+            default_model_for_candidate = ollama_model or "llama3.1:8b"
+        candidates.append((candidate, default_model_for_candidate))
+
+    if not candidates:
+        candidates.append((provider, model))
+    return candidates
 
 
 def _sanitize_messages(messages: List[BaseMessage]) -> List[BaseMessage]:
@@ -327,9 +720,29 @@ def _sanitize_messages(messages: List[BaseMessage]) -> List[BaseMessage]:
     This function converts any non-string content to a string.
     """
     sanitized = []
+    valid_tool_call_ids: set[str] = set()
     for msg in messages:
         # Make a copy of the message to avoid modifying the original
+        if isinstance(msg, AIMessage):
+            tool_calls = getattr(msg, "tool_calls", None) or []
+            for call in tool_calls:
+                if isinstance(call, dict):
+                    call_id = call.get("id")
+                else:
+                    call_id = getattr(call, "id", None)
+                if call_id:
+                    valid_tool_call_ids.add(str(call_id))
+
         if isinstance(msg, ToolMessage):
+            tool_call_id = str(msg.tool_call_id) if msg.tool_call_id is not None else ""
+            if not tool_call_id or tool_call_id not in valid_tool_call_ids:
+                logger.debug(
+                    "Dropping orphan ToolMessage with tool_call_id=%s name=%s",
+                    tool_call_id,
+                    getattr(msg, "name", None),
+                )
+                continue
+
             # ToolMessage content can be a list; convert to string
             content = msg.content
             if isinstance(content, list):
@@ -368,53 +781,67 @@ def agent_node(state: AgentState) -> AgentState:
         logger.debug(
             f"Last message content: {last_message.content[:200] if isinstance(last_message.content, str) else last_message.content}")
 
-    # Select LLM per request
-    llm_with_tools = _get_llm_with_tools(
-        state.get("provider"), state.get("model"))
-
     # Sanitize messages to ensure all content is strings (required by some APIs like DeepSeek)
     sanitized_messages = _sanitize_messages(state["messages"])
 
-    # Rate-limit handling: retry on Groq 429 errors with suggested wait
-    # Import groq lazily to avoid hard dependency in environments where it's unavailable
-    try:
-        import re
-        import groq  # type: ignore
-    except Exception:
-        re = None
-        groq = None
-
-    attempts = 0
-    max_attempts = 3
+    # Retry on transient rate-limit / 429 errors and fail over provider on transport errors.
+    import re as _re
     last_exc = None
-    while attempts < max_attempts:
-        try:
-            response = llm_with_tools.invoke(sanitized_messages)
-            return {"messages": [response]}
-        except Exception as e:
-            last_exc = e
-            is_rate_limit = e.__class__.__name__ == "RateLimitError" or (
-                groq is not None and isinstance(
-                    e, getattr(groq, "RateLimitError", Exception))
-            )
-            if not is_rate_limit:
+    provider_candidates = _provider_candidates_for_request(
+        state.get("provider"), state.get("model")
+    )
+
+    for provider_candidate, model_candidate in provider_candidates:
+        logger.info(
+            "Agent node: Attempting provider='%s' model='%s'",
+            provider_candidate,
+            model_candidate,
+        )
+
+        llm_with_tools = _get_llm_with_tools(provider_candidate, model_candidate)
+
+        attempts = 0
+        max_attempts = 3
+        while attempts < max_attempts:
+            try:
+                response = llm_with_tools.invoke(sanitized_messages)
+                return {"messages": [response]}
+            except Exception as e:
+                last_exc = e
+                err_name = e.__class__.__name__
+                is_rate_limit = err_name in ("RateLimitError", "TooManyRequests", "RateLimitException")
+                if is_rate_limit:
+                    wait_seconds = 5.0
+                    m = _re.search(r"try again in ([0-9]+(?:\.[0-9]+)?)s", str(e))
+                    if m:
+                        try:
+                            wait_seconds = float(m.group(1))
+                        except Exception:
+                            pass
+                    logger.warning(
+                        "Rate limit hit (%s). Waiting %.2fs before retry (%s/%s).",
+                        err_name,
+                        wait_seconds,
+                        attempts + 1,
+                        max_attempts,
+                    )
+                    time.sleep(wait_seconds)
+                    attempts += 1
+                    continue
+
+                if _is_transport_connection_error(e):
+                    normalized_provider = _normalize_provider_name_runtime(provider_candidate)
+                    if normalized_provider:
+                        _RUNTIME_PROVIDER_BLOCKLIST.add(normalized_provider)
+                    logger.warning(
+                        "Provider '%s' failed with transport error: %s. Trying next provider if available.",
+                        provider_candidate,
+                        e,
+                    )
+                    break
+
                 raise
-            # Parse suggested wait time from message, fallback to 5s
-            wait_seconds = 5.0
-            msg = str(e)
-            if re is not None:
-                m = re.search(r"try again in ([0-9]+(?:\.[0-9]+)?)s", msg)
-                if m:
-                    try:
-                        wait_seconds = float(m.group(1))
-                    except Exception:
-                        pass
-            logger.warning(
-                f"Groq rate limit hit. Waiting {wait_seconds:.2f}s before retry ({attempts+1}/{max_attempts})."
-            )
-            time.sleep(wait_seconds)
-            attempts += 1
-    # If all retries failed, re-raise the last exception
+
     raise last_exc
 
 
@@ -429,6 +856,10 @@ def classify_query_complexity(state: AgentState) -> str:
     """
     question = state["question"]
     language = state["language"]
+
+    if state.get("fast_mode", agent_fast_mode):
+        logger.info("Fast mode enabled: skipping complexity classification and routing as SIMPLE")
+        return "simple"
 
     # Create classification prompt
     if language == 'es':
@@ -457,8 +888,8 @@ Question: "{question}"
 Respond with ONLY: SIMPLE or COMPLEX"""
 
     try:
-        # Use lightweight LLM for classification
-        llm = _get_llm_with_tools(state.get("provider"), state.get("model"))
+        # Use LLM without tools for classification
+        llm = _get_llm_without_tools(state.get("provider"), state.get("model"))
 
         # Get classification from LLM (without tools)
         response = llm.invoke([HumanMessage(content=classification_prompt)])
@@ -502,7 +933,11 @@ def planning_node(state: AgentState) -> AgentState:
     logger.info(
         "Planning node: Analyzing question and creating search strategy...")
 
-    llm_with_tools = _get_llm_with_tools(
+    if state.get("fast_mode", agent_fast_mode):
+        logger.info("Fast mode enabled: skipping planning node")
+        return {"plan": ""}
+
+    llm_without_tools = _get_llm_without_tools(
         state.get("provider"), state.get("model"))
 
     question = state["question"]
@@ -556,7 +991,7 @@ LOCATION CONTEXT: [if applicable, notes about the specific location required]
 
     # Get planning from LLM
     try:
-        planning_response = llm_with_tools.invoke([
+        planning_response = llm_without_tools.invoke([
             SystemMessage(content="You are a search strategy analyst. Analyze questions and create search plans." if language ==
                           'en' else "Eres un analista de estrategia de búsqueda. Analiza preguntas y crea planes de búsqueda."),
             HumanMessage(content=planning_prompt)
@@ -610,9 +1045,170 @@ def check_for_empty_db_search(state: AgentState) -> bool:
             # Check if the content indicates 0 documents
             content = msg.content if isinstance(
                 msg.content, str) else str(msg.content)
-            if 'found 0' in content.lower() or 'no documents' in content.lower():
+            normalized = content.lower().strip()
+            if normalized == "[]" or 'found 0' in normalized or 'no documents' in normalized:
                 return True
     return False
+
+
+class GradeDocuments(BaseModel):
+    """Binary relevance decision for retrieved context."""
+    binary_score: Literal["yes", "no"]
+
+
+def _latest_user_question(messages: List[BaseMessage]) -> str:
+    for message in reversed(messages):
+        if isinstance(message, HumanMessage) and isinstance(message.content, str):
+            return message.content
+    return ""
+
+
+def _extract_latest_db_search_docs(messages: List[BaseMessage]) -> list[dict]:
+    for message in reversed(messages):
+        if hasattr(message, "name") and getattr(message, "name", None) == "db_search":
+            content = message.content if isinstance(message.content, str) else str(message.content)
+            try:
+                docs = json.loads(content)
+                if isinstance(docs, list):
+                    return [doc for doc in docs if isinstance(doc, dict)]
+            except Exception:
+                return []
+    return []
+
+
+def _extract_latest_ranked_docs(messages: List[BaseMessage]) -> list[dict]:
+    for message in reversed(messages):
+        if hasattr(message, "name") and getattr(message, "name", None) == "rank_retrieval_results":
+            content = message.content if isinstance(message.content, str) else str(message.content)
+            try:
+                docs = json.loads(content)
+                if isinstance(docs, list):
+                    return [doc for doc in docs if isinstance(doc, dict)]
+            except Exception:
+                return []
+    return []
+
+
+def route_after_tools(state: AgentState) -> Literal["rank_retrieval", "grade_documents", "db_unavailable", "agent"]:
+    """Route after ToolNode execution.
+
+    - If db_search returned docs, grade relevance.
+    - Otherwise continue regular agent loop.
+    """
+    docs = _extract_latest_db_search_docs(state["messages"])
+    if docs:
+        return "rank_retrieval"
+
+    status = get_last_search_status()
+    if status in ("infra_error", "schema_error", "error"):
+        logger.warning(
+            "DB retrieval backend unavailable (status=%s); returning db_unavailable response.",
+            status,
+        )
+        return "db_unavailable"
+    return "agent"
+
+
+def db_unavailable_node(state: AgentState) -> AgentState:
+    """Return clear fallback when retrieval backend is unavailable."""
+    language = state.get("language") or "en"
+    if language == "es":
+        message = (
+            "No puedo acceder temporalmente a la base de datos de documentos de Vecinita. "
+            "Inténtalo nuevamente en unos minutos mientras restablecemos la conexión."
+        )
+    else:
+        message = (
+            "I can’t access the Vecinita document database right now. "
+            "Please try again in a few minutes while the connection is restored."
+        )
+    return {"messages": [AIMessage(content=message)]}
+
+
+def rank_retrieval_node(state: AgentState) -> AgentState:
+    """Rerank latest db_search results before grading/answering."""
+    docs = _extract_latest_db_search_docs(state["messages"])
+    question = _latest_user_question(state["messages"]) or state.get("question", "")
+
+    if not docs:
+        return {}
+
+    try:
+        ranked_json = rank_retrieval_results_tool.invoke(
+            {
+                "query": question,
+                "results_json": json.dumps(docs, ensure_ascii=False),
+                "top_k": min(10, len(docs)),
+            }
+        )
+        ranked_text = ranked_json if isinstance(ranked_json, str) else str(ranked_json)
+        return {
+            "messages": [
+                ToolMessage(
+                    content=ranked_text,
+                    tool_call_id="rank-retrieval-node",
+                    name="rank_retrieval_results",
+                )
+            ]
+        }
+    except Exception as exc:
+        logger.warning("Ranking node failed (%s); proceeding with unranked results.", exc)
+        return {}
+
+
+def grade_documents_node(state: AgentState) -> AgentState:
+    """Grade whether latest retrieved docs are relevant to the user question."""
+    docs = _extract_latest_ranked_docs(state["messages"]) or _extract_latest_db_search_docs(state["messages"])
+    question = _latest_user_question(state["messages"]) or state.get("question", "")
+
+    if not docs:
+        return {"grade_result": "no"}
+
+    context = "\n\n".join((doc.get("content") or "") for doc in docs[:5])
+    grading_prompt = (
+        "You are grading retrieval relevance for a RAG agent.\n"
+        "Return yes if the retrieved context is relevant to the user question, otherwise no.\n"
+        f"Question: {question}\n"
+        f"Retrieved Context:\n{context}"
+    )
+
+    try:
+        grader = _get_llm_without_tools(state.get("provider"), state.get("model"))
+        graded = grader.with_structured_output(GradeDocuments).invoke(
+            [HumanMessage(content=grading_prompt)]
+        )
+        score = "yes" if str(graded.binary_score).lower() == "yes" else "no"
+        logger.info("Retrieved document relevance grade: %s", score)
+        return {"grade_result": score}
+    except Exception as exc:
+        logger.warning("Document grading failed (%s). Defaulting to relevant to avoid dead-end.", exc)
+        return {"grade_result": "yes"}
+
+
+def route_after_grading(state: AgentState) -> Literal["agent", "rewrite_question"]:
+    """Route based on grade decision."""
+    if state.get("fast_mode", agent_fast_mode):
+        return "agent"
+    return "agent" if state.get("grade_result") == "yes" else "rewrite_question"
+
+
+def rewrite_question_node(state: AgentState) -> AgentState:
+    """Rewrite the latest user question when retrieved docs are not relevant."""
+    question = _latest_user_question(state["messages"]) or state.get("question", "")
+    try:
+        rewritten_text = rewrite_question_tool.invoke(
+            {
+                "question": question,
+                "provider": state.get("provider"),
+                "model": state.get("model"),
+            }
+        )
+        logger.info("Question rewritten for retrieval retry.")
+        final_text = rewritten_text if isinstance(rewritten_text, str) else str(rewritten_text)
+        return {"messages": [HumanMessage(content=final_text)]}
+    except Exception as exc:
+        logger.warning("Question rewrite failed (%s); continuing with original question.", exc)
+        return {"messages": [HumanMessage(content=question)]}
 
 
 # --- Build LangGraph ---
@@ -623,6 +1219,10 @@ workflow = StateGraph(AgentState)
 workflow.add_node("planning", planning_node)
 workflow.add_node("agent", agent_node)
 workflow.add_node("tools", ToolNode(tools))
+workflow.add_node("rank_retrieval", rank_retrieval_node)
+workflow.add_node("grade_documents", grade_documents_node)
+workflow.add_node("rewrite_question", rewrite_question_node)
+workflow.add_node("db_unavailable", db_unavailable_node)
 
 # Add conditional routing from START based on query complexity
 # Simple queries skip planning and go straight to agent
@@ -641,8 +1241,32 @@ workflow.add_edge("planning", "agent")
 # Agent decides: continue with tools or end
 workflow.add_conditional_edges("agent", should_continue, ["tools", END])
 
-# Tools loop back to agent
-workflow.add_edge("tools", "agent")
+# Route after tools execution: grade retrieved docs when available
+workflow.add_conditional_edges(
+    "tools",
+    route_after_tools,
+    {
+        "rank_retrieval": "rank_retrieval",
+        "grade_documents": "grade_documents",
+        "db_unavailable": "db_unavailable",
+        "agent": "agent",
+    },
+)
+
+workflow.add_edge("rank_retrieval", "grade_documents")
+
+# Route after grading: answer path or rewrite/retry retrieval
+workflow.add_conditional_edges(
+    "grade_documents",
+    route_after_grading,
+    {
+        "agent": "agent",
+        "rewrite_question": "rewrite_question",
+    },
+)
+
+workflow.add_edge("rewrite_question", "agent")
+workflow.add_edge("db_unavailable", END)
 
 # Compile with memory
 memory = MemorySaver()
@@ -1017,6 +1641,11 @@ async def ask_question(
     lang: str | None = Query(default=None),
     provider: str | None = Query(default=None),
     model: str | None = Query(default=None),
+    tags: str | None = Query(default=None, description="Comma-separated metadata tags"),
+    tag_match_mode: str = Query(default="any", description="Tag match mode: any|all"),
+    include_untagged_fallback: bool = Query(default=True),
+    rerank: bool = Query(default=False),
+    rerank_top_k: int = Query(default=10, ge=1, le=50),
 ):
     """Handles Q&A requests from the UI or API using LangGraph agent"""
     # Accept both 'question' and legacy 'query' parameter names
@@ -1046,14 +1675,22 @@ async def ask_question(
             f"\n--- New request received: '{question}' (Detected Language: {lang}, Thread: {thread_id}) ---")
 
         # Try static response first for deterministic FAQ handling in both languages
-        local_static = _find_static_faq_answer(question, lang)
+        # --- GuardrailsAI: validate input before invoking agent ---
+        from src.agent.guardrails_config import validate_input
+        guard_result = validate_input(question)
+        if not guard_result.passed:
+            return {"answer": guard_result.reason, "thread_id": thread_id, "sources": []}
+        # If PII was detected and redacted, use redacted version
+        effective_question = guard_result.redacted if guard_result.redacted else question
+
+        local_static = _find_static_faq_answer(effective_question, lang)
         if local_static:
             logger.info("Returning static FAQ answer (local matcher).")
             return {"answer": local_static, "thread_id": thread_id}
         # Fallback to tool-based static matcher (optional)
         try:
             static_answer = static_response_tool.invoke({
-                "query": question,
+                "query": effective_question,
                 "language": lang
             })
             if static_answer:
@@ -1145,8 +1782,20 @@ async def ask_question(
         # Configure graph execution with thread_id for conversation history
         config = {"configurable": {"thread_id": thread_id}}
 
+        request_tags = parse_tags_input(tags)
+        search_token = set_db_search_options(
+            tags=request_tags,
+            tag_match_mode=tag_match_mode,
+            include_untagged_fallback=include_untagged_fallback,
+            rerank=rerank,
+            rerank_top_k=rerank_top_k,
+        )
+
         logger.info("Invoking LangGraph agent...")
-        result = graph.invoke(initial_state, config)
+        try:
+            result = graph.invoke(initial_state, config)
+        finally:
+            reset_db_search_options(search_token)
         logger.info("Agent execution completed")
 
         # Extract the final answer from messages
@@ -1275,69 +1924,48 @@ async def ask_question(
 
         logger.info(f"Extracted {len(sources)} sources from tool calls")
 
+        db_status = get_last_search_status()
+        if not sources and db_status in {"schema_error", "infra_error", "error"}:
+            logger.warning(
+                "Overriding final answer due to retrieval backend failure (status=%s).",
+                db_status,
+            )
+            answer = _db_unavailable_message(lang)
+
+        # --- GuardrailsAI: validate output before returning ---
+        from src.agent.guardrails_config import validate_output
+        out_guard = validate_output(answer)
+        if not out_guard.passed:
+            answer = out_guard.reason
+        elif out_guard.redacted:
+            answer = out_guard.redacted
+
         return {"answer": answer, "sources": sources, "thread_id": thread_id}
 
     except Exception as e:
         logger.error("Error processing question '%s': %s", question, str(e))
         logger.error("Full traceback:\n%s", traceback.format_exc())
-        # Graceful handling of Groq rate limits: return a friendly message instead of 500
-        try:
-            import re
-            import groq  # type: ignore
-        except Exception:
-            re = None
-            groq = None
-        is_rate_limit = e.__class__.__name__ == "RateLimitError" or (
-            groq is not None and isinstance(
-                e, getattr(groq, "RateLimitError", Exception))
-        )
+        import re as _re
+        is_rate_limit = e.__class__.__name__ in ("RateLimitError", "TooManyRequests", "RateLimitException")
         if is_rate_limit:
             wait_seconds = 10.0
-            msg = str(e)
-            if re is not None:
-                m = re.search(r"try again in ([0-9]+(?:\.[0-9]+)?)s", msg)
-                if m:
-                    try:
-                        wait_seconds = float(m.group(1))
-                    except Exception:
-                        pass
-            # Language-aware fallback
+            m = _re.search(r"try again in ([0-9]+(?:\.[0-9]+)?)s", str(e))
+            if m:
+                try:
+                    wait_seconds = float(m.group(1))
+                except Exception:
+                    pass
             if 'lang' in locals() and lang == 'es':
                 fallback = (
-                    f"El asistente está limitado por tasa temporalmente. Intenta nuevamente en {wait_seconds:.0f} segundos. "
-                    "Si necesitas una descripción rápida: Vecinita es un asistente comunitario de preguntas y respuestas (Q&A)."
+                    f"El asistente está limitado por tasa temporalmente. Intenta nuevamente en {wait_seconds:.0f} segundos."
                 )
             else:
                 fallback = (
-                    f"The assistant is temporarily rate limited. Please try again in {wait_seconds:.0f} seconds. "
-                    "Quick summary: Vecinita is a community Q&A assistant."
+                    f"The assistant is temporarily unavailable. Please try again in {wait_seconds:.0f} seconds."
                 )
             return {"answer": fallback, "thread_id": thread_id}
         # Non-rate-limit errors: propagate as HTTP 500
         raise HTTPException(status_code=500, detail=str(e))
-
-
-# --- Helper function for tracking tool execution in streaming ---
-def _execute_agent_with_tool_progress(initial_state, config):
-    """Execute agent and yield tool execution updates.
-
-    Yields tuples of (tool_name, message) as tools are executed.
-    """
-    executed_tools = set()
-
-    # Use stream mode to track execution
-    for event in graph.stream(initial_state, config, stream_mode="updates"):
-        if event:
-            for node_name, node_update in event.items():
-                if node_name == "tools" and node_update:
-                    # Extract tool calls from ToolMessage results
-                    messages_list = node_update.get("messages", [])
-                    for msg in messages_list:
-                        if hasattr(msg, 'name') and msg.name:
-                            tool_name = msg.name
-                            if tool_name not in executed_tools:
-                                executed_tools.add(tool_name)
-                                yield tool_name
 
 
 @app.get("/ask-stream")
@@ -1349,6 +1977,11 @@ async def ask_question_stream(
     provider: str | None = Query(default=None),
     model: str | None = Query(default=None),
     clarification_response: str | None = Query(default=None),
+    tags: str | None = Query(default=None, description="Comma-separated metadata tags"),
+    tag_match_mode: str = Query(default="any", description="Tag match mode: any|all"),
+    include_untagged_fallback: bool = Query(default=True),
+    rerank: bool = Query(default=False),
+    rerank_top_k: int = Query(default=10, ge=1, le=50),
 ):
     """Enhanced streaming endpoint with conversational agent activity updates.
 
@@ -1369,6 +2002,10 @@ async def ask_question_stream(
 
     async def generate_stream():
         try:
+            def _sse(payload: dict) -> str:
+                payload.setdefault("timestamp", datetime.utcnow().isoformat() + "Z")
+                return f"data: {json.dumps(payload)}\\n\\n"
+
             # Detect language unless explicitly provided
             if not lang:
                 try:
@@ -1389,20 +2026,58 @@ async def ask_question_stream(
 
             # Yield thinking message for FAQ check
             msg = get_agent_thinking_message('static_response', lang_local)
-            yield f'data: {json.dumps({"type": "thinking", "message": msg})}\n\n'
+            yield _sse({
+                "type": "thinking",
+                "message": msg,
+                "stage": "precheck",
+                "progress": 10,
+                "status": "working",
+                "waiting": False,
+            })
 
             # Try static response first
             local_static = _find_static_faq_answer(question, lang_local)
             if local_static:
                 logger.info("Returning static FAQ answer (streaming).")
-                yield f'data: {json.dumps({"type": "complete", "answer": local_static, "sources": [], "thread_id": thread_id, "plan": ""})}\n\n'
+                yield _sse({
+                    "type": "complete",
+                    "answer": local_static,
+                    "sources": [],
+                    "thread_id": thread_id,
+                    "plan": "",
+                    "metadata": {
+                        "progress": 100,
+                        "stage": "complete",
+                    },
+                })
                 return
 
             # Yield thinking message for analysis
             msg = get_agent_thinking_message('analyzing', lang_local)
-            yield f'data: {json.dumps({"type": "thinking", "message": msg})}\n\n'
+            yield _sse({
+                "type": "thinking",
+                "message": msg,
+                "stage": "analysis",
+                "progress": 25,
+                "status": "working",
+                "waiting": False,
+            })
 
             # Build system prompt based on language
+            fast_mode_local = bool(agent_fast_mode)
+            concise_rules_es = (
+                f"\nREGLAS DE VELOCIDAD/CONCISIÓN:\n"
+                f"- Responde en máximo {agent_max_response_sentences} oraciones cortas.\n"
+                f"- Máximo aproximado {agent_max_response_chars} caracteres.\n"
+                f"- Prioriza una respuesta directa y luego fuentes.\n"
+            )
+            concise_rules_en = (
+                f"\nSPEED/CONCISENESS RULES:\n"
+                f"- Reply in at most {agent_max_response_sentences} short sentences.\n"
+                f"- Keep output near {agent_max_response_chars} characters max.\n"
+                f"- Prioritize direct answer first, then sources.\n"
+            )
+
             if lang_local == 'es':
                 system_prompt = """
 Eres un asistente comunitario, servicial y profesional para el proyecto Vecinita.
@@ -1425,6 +2100,8 @@ REGLAS OBLIGATORIAS (DEBES SEGUIRLAS EXACTAMENTE):
 
 IMPORTANTE: No describas lo que vas a hacer. HAZLO. Llama las herramientas directamente.
 """
+                if fast_mode_local:
+                    system_prompt += concise_rules_es
             else:  # Default to English
                 system_prompt = """
 You are a helpful and professional community assistant for the Vecinita project.
@@ -1447,6 +2124,8 @@ MANDATORY RULES (FOLLOW EXACTLY):
 
 IMPORTANT: Do not describe what you will do. DO IT. Call the tools directly.
 """
+                if fast_mode_local:
+                    system_prompt += concise_rules_en
 
             # Create messages for the agent
             messages = [
@@ -1466,6 +2145,7 @@ IMPORTANT: Do not describe what you will do. DO IT. Call the tools directly.
                 "language": lang_local,
                 "provider": provider,
                 "model": model,
+                "fast_mode": fast_mode_local,
                 "plan": None,
             }
 
@@ -1478,27 +2158,110 @@ IMPORTANT: Do not describe what you will do. DO IT. Call the tools directly.
             # Track which tools have been executed
             executed_tools = set()
 
-            # Execute graph with streaming and track tool execution
-            try:
-                # Use streaming to track tool execution with friendly messages
-                for tool_name in _execute_agent_with_tool_progress(initial_state, config):
-                    if tool_name not in executed_tools:
-                        executed_tools.add(tool_name)
-                        tool_msg = get_agent_thinking_message(
-                            tool_name, lang_local)
-                        logger.info(f"Agent activity: {tool_name}")
-                        yield f'data: {json.dumps({"type": "thinking", "message": tool_msg})}\n\n'
+            request_tags = parse_tags_input(tags)
+            search_token = set_db_search_options(
+                tags=request_tags,
+                tag_match_mode=tag_match_mode,
+                include_untagged_fallback=include_untagged_fallback,
+                rerank=rerank,
+                rerank_top_k=rerank_top_k,
+            )
 
-                # Get final result
-                result = graph.invoke(initial_state, config)
+            # Execute graph once with streaming and track tool execution.
+            # IMPORTANT: avoid calling graph.invoke after graph.stream,
+            # otherwise the same request is executed twice.
+            final_state = None
+            seen_tool_messages = set()
+            tool_progress_base = 35
+            tool_progress_step = 12
+            try:
+                for state_update in graph.stream(initial_state, config, stream_mode="values"):
+                    if not state_update:
+                        continue
+
+                    final_state = state_update
+                    messages_list = state_update.get("messages", [])
+
+                    for msg in messages_list:
+                        tool_name = getattr(msg, "name", None)
+                        if not tool_name:
+                            continue
+                        msg_type = msg.__class__.__name__
+                        if msg_type != "ToolMessage":
+                            continue
+
+                        msg_fingerprint = (
+                            tool_name,
+                            getattr(msg, "tool_call_id", None),
+                            str(getattr(msg, "content", ""))[:120],
+                        )
+                        if msg_fingerprint in seen_tool_messages:
+                            continue
+
+                        seen_tool_messages.add(msg_fingerprint)
+                        if tool_name not in executed_tools:
+                            executed_tools.add(tool_name)
+                            tool_msg = get_agent_thinking_message(tool_name, lang_local)
+                            logger.info(f"Agent activity: {tool_name}")
+                            progress_value = min(80, tool_progress_base + ((len(executed_tools) - 1) * tool_progress_step))
+                            yield _sse({
+                                "type": "thinking",
+                                "message": tool_msg,
+                                "stage": "tooling",
+                                "progress": progress_value,
+                                "status": "working",
+                                "waiting": False,
+                                "tool": tool_name,
+                            })
+                            yield _sse({
+                                "type": "tool_event",
+                                "phase": "start",
+                                "tool": tool_name,
+                                "message": tool_msg,
+                                "stage": "tooling",
+                                "progress": progress_value,
+                                "status": "working",
+                                "transient": True,
+                                "waiting": True,
+                            })
+
+                        compact_result = _summarize_tool_result(
+                            tool_name,
+                            str(getattr(msg, "content", "")),
+                            lang_local,
+                        )
+                        progress_value = min(90, tool_progress_base + (len(executed_tools) * tool_progress_step))
+                        yield _sse({
+                            "type": "tool_event",
+                            "phase": "result",
+                            "tool": tool_name,
+                            "message": compact_result,
+                            "stage": "tooling",
+                            "progress": progress_value,
+                            "status": "working",
+                            "transient": True,
+                            "waiting": False,
+                        })
+
+                        if tool_name == "clarify_question":
+                            yield _sse(_build_clarification_payload(
+                                str(getattr(msg, "content", "")),
+                                lang_local,
+                            ))
             except Exception as e:
                 logger.error(f"Graph invocation error: {e}")
                 raise
+            finally:
+                reset_db_search_options(search_token)
+
+            if final_state is None:
+                logger.warning("Streaming produced no state updates, falling back to single invoke")
+                final_state = graph.invoke(initial_state, config)
 
             logger.info("Agent execution completed (streaming)")
 
             # Extract the final answer from messages
-            final_message = result["messages"][-1]
+            final_message = final_state["messages"][-1]
             answer = final_message.content if hasattr(
                 final_message, "content") else str(final_message)
 
@@ -1509,9 +2272,9 @@ IMPORTANT: Do not describe what you will do. DO IT. Call the tools directly.
             seen_urls = set()
 
             logger.info(
-                f"Extracting sources from {len(result['messages'])} messages in conversation history (streaming)")
+                f"Extracting sources from {len(final_state['messages'])} messages in conversation history (streaming)")
 
-            for msg in result["messages"]:
+            for msg in final_state["messages"]:
                 # Check if this is a ToolMessage with db_search results
                 if hasattr(msg, 'name') and msg.name == 'db_search':
                     try:
@@ -1556,11 +2319,38 @@ IMPORTANT: Do not describe what you will do. DO IT. Call the tools directly.
             logger.info(
                 f"Extracted {len(sources)} sources from tool calls (streaming)")
 
+            db_status = get_last_search_status()
+            if not sources and db_status in {"schema_error", "infra_error", "error"}:
+                logger.warning(
+                    "Overriding streaming answer due to retrieval backend failure (status=%s).",
+                    db_status,
+                )
+                answer = _db_unavailable_message(lang_local)
+
             # Extract plan if available
-            plan = result.get("plan", "")
+            plan = final_state.get("plan", "")
+
+            yield _sse({
+                "type": "thinking",
+                "message": "Finalizing answer..." if lang_local != "es" else "Finalizando respuesta...",
+                "stage": "finalizing",
+                "progress": 95,
+                "status": "working",
+                "waiting": False,
+            })
 
             # Yield complete response
-            yield f'data: {json.dumps({"type": "complete", "answer": answer, "sources": sources, "thread_id": thread_id, "plan": plan})}\n\n'
+            yield _sse({
+                "type": "complete",
+                "answer": answer,
+                "sources": sources,
+                "thread_id": thread_id,
+                "plan": plan,
+                "metadata": {
+                    "progress": 100,
+                    "stage": "complete",
+                },
+            })
 
         except Exception as e:
             logger.error("Error in streaming endpoint '%s': %s",
@@ -1568,24 +2358,20 @@ IMPORTANT: Do not describe what you will do. DO IT. Call the tools directly.
             logger.error("Full traceback:\n%s", traceback.format_exc())
 
             # Handle rate limits gracefully
-            try:
-                import re
-                import groq  # type: ignore
-            except Exception:
-                re = None
-                groq = None
-
-            is_rate_limit = e.__class__.__name__ == "RateLimitError" or (
-                groq is not None and isinstance(
-                    e, getattr(groq, "RateLimitError", Exception))
-            )
-
+            import re as _re
+            is_rate_limit = e.__class__.__name__ in ("RateLimitError", "TooManyRequests", "RateLimitException")
             if is_rate_limit:
-                fallback = "Service temporarily rate limited. Please try again in a moment."
+                fallback = "Service temporarily unavailable. Please try again in a moment."
             else:
                 fallback = f"Error processing question: {str(e)}"
 
-            yield f'data: {json.dumps({"type": "error", "message": fallback})}\n\n'
+            yield _sse({
+                "type": "error",
+                "message": fallback,
+                "stage": "error",
+                "progress": 100,
+                "status": "error",
+            })
 
     return StreamingResponse(generate_stream(), media_type="text/event-stream")
 
@@ -1641,25 +2427,27 @@ def set_model_selection(selection: ModelSelection):
 @app.get("/config")
 def config():
     """Expose available providers/models based on environment for frontend discovery."""
+    # Provider chain: Ollama → DeepSeek → OpenAI. Groq/X.AI excluded.
     providers = []
     models = {}
-    # DeepSeek (default/primary)
+    if ollama_base_url:
+        providers.append({"key": "ollama", "label": "Ollama (Local)"})
+        models["ollama"] = [ollama_model or "llama3.1:8b"]
     if deepseek_api_key:
         providers.append({"key": "deepseek", "label": "DeepSeek"})
         models["deepseek"] = ["deepseek-chat", "deepseek-reasoner"]
-    # Groq (Llama)
-    if groq_api_key:
-        providers.append({"key": "groq", "label": "Groq (Llama)"})
-        models["groq"] = ["llama-3.1-8b-instant"]
-    # OpenAI if key present
     if openai_api_key:
         providers.append({"key": "openai", "label": "OpenAI"})
         models["openai"] = ["gpt-4o-mini"]
-    # Llama via Ollama
-    if ollama_base_url:
-        providers.append({"key": "llama", "label": "Llama (Local)"})
-        models["llama"] = [ollama_model or "llama3.2"]
-    return {"providers": providers, "models": models}
+    return {
+        "providers": providers,
+        "models": models,
+        "runtime": {
+            "fast_mode": agent_fast_mode,
+            "max_response_sentences": agent_max_response_sentences,
+            "max_response_chars": agent_max_response_chars,
+        },
+    }
 
 
 @app.get("/privacy")

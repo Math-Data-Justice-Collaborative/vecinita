@@ -21,6 +21,10 @@ def scrape_client(env_vars, monkeypatch):
     for key, value in env_vars.items():
         monkeypatch.setenv(key, value)
 
+    # Reset shared in-memory job state between tests
+    from src.api.job_manager import job_manager
+    job_manager.jobs.clear()
+
     # Mock background task to prevent immediate job completion
     # This allows us to test the 'queued' state
     with patch("src.api.router_scrape.background_scrape_task") as mock_bg_task:

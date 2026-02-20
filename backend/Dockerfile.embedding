@@ -14,7 +14,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY pyproject.toml .
 
 # Install dependencies to /install prefix
+# Important: preinstall CPU-only torch to avoid CUDA wheel explosion on Linux builds.
 RUN pip install --upgrade pip uv && \
+    pip install --no-cache-dir --target /install --index-url https://download.pytorch.org/whl/cpu torch && \
     uv pip install --python 3.11 --target /install \
     "fastapi" \
     "uvicorn[standard]" \

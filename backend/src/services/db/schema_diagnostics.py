@@ -53,6 +53,9 @@ class SchemaValidator:
         
         # Check RPC function
         results['rpc_search_similar_documents'] = await self._check_rpc_search_similar_documents()
+
+        # Check PostgREST schema profile exposure mismatch (PGRST106)
+        results['postgrest_schema_profile'] = await self._check_postgrest_schema_profile()
         
         # Check document_chunks table and columns
         results['table_document_chunks'] = await self._check_table_document_chunks()
@@ -81,6 +84,28 @@ class SchemaValidator:
             'warnings': self.validation_warnings,
             'checks': results,
         }
+
+    async def _check_postgrest_schema_profile(self) -> Dict[str, Any]:
+        """Detect common PostgREST schema mismatch errors (PGRST106)."""
+        try:
+            self.db.table('document_chunks').select('id').limit(1).execute()
+            return {'ok': True, 'code': None, 'message': 'PostgREST profile appears compatible.'}
+        except Exception as exc:
+            msg = str(exc)
+            lower = msg.lower()
+            if 'pgrst106' in lower or 'schema must be one of the following' in lower:
+                self.validation_errors.append(
+                    "❌ PostgREST schema profile mismatch (PGRST106).\n"
+                    "   The API is rejecting schema 'public'. Ensure Supabase API exposed schemas include 'public',\n"
+                    "   or update runtime profile/config to use an allowed schema (for example 'graphql_public')."
+                )
+                return {'ok': False, 'code': 'PGRST106', 'message': msg}
+
+            self.validation_warnings.append(
+                "⚠️  Could not confirm PostgREST schema profile compatibility.\n"
+                f"   Detail: {msg}"
+            )
+            return {'ok': False, 'code': None, 'message': msg}
     
     async def _check_rpc_search_similar_documents(self) -> bool:
         """

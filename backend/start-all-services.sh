@@ -50,13 +50,13 @@ sleep 1
 echo -e "${GREEN}Starting Agent Service on port 8000...${NC}"
 tmux send-keys -t vecinita:services.0 "cd /root/GitHub/VECINA/vecinita/backend" C-m
 tmux send-keys -t vecinita:services.0 "echo -e '${GREEN}[Agent Service - Port 8000]${NC}'" C-m
-tmux send-keys -t vecinita:services.0 "uv run uvicorn src.services.agent.server:app --host 0.0.0.0 --port 8000" C-m
+tmux send-keys -t vecinita:services.0 "uv run uvicorn src.agent.main:app --host 0.0.0.0 --port 8000" C-m
 
 # Start Embedding Service (Pane 1)
 echo -e "${GREEN}Starting Embedding Service on port 8001...${NC}"
 tmux send-keys -t vecinita:services.1 "cd /root/GitHub/VECINA/vecinita/backend" C-m
 tmux send-keys -t vecinita:services.1 "echo -e '${GREEN}[Embedding Service - Port 8001]${NC}'" C-m
-tmux send-keys -t vecinita:services.1 "uv run uvicorn src.services.embedding.server:app --host 0.0.0.0 --port 8001" C-m
+tmux send-keys -t vecinita:services.1 "uv run uvicorn src.embedding_service.main:app --host 0.0.0.0 --port 8001" C-m
 
 # Wait for services to start
 echo -e "${YELLOW}Waiting for services to start (5 seconds)...${NC}"

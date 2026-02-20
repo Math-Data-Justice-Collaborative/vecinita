@@ -476,7 +476,7 @@ def test_similarity():
 ### Integration Tests
 ```bash
 # Start embedding service
-cd backend && uvicorn src.services.embedding.server:app --port 8001 &
+cd backend && uvicorn src.embedding_service.main:app --port 8001 &
 
 # Start API gateway
 cd backend && uvicorn src.api.main:app --port 8002 &
@@ -508,7 +508,7 @@ pkill -f "uvicorn"
 curl http://localhost:8001/health
 
 # Start embedding service
-cd backend && uvicorn src.services.embedding.server:app --port 8001
+cd backend && uvicorn src.embedding_service.main:app --port 8001
 
 # Verify environment variable
 echo $EMBEDDING_SERVICE_URL
@@ -538,7 +538,7 @@ telnet localhost 8001
 **Solution:**
 ```bash
 # Option 1: Restart embedding service without lock
-EMBEDDING_LOCK=false uvicorn src.services.embedding.server:app --port 8001
+EMBEDDING_LOCK=false uvicorn src.embedding_service.main:app --port 8001
 
 # Option 2: Edit selection.json file
 rm backend/src/services/embedding/selection.json

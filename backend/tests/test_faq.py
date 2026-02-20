@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO)
 # Ensure Python can find your 'src' module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 
-from src.services.agent.tools.static_response import static_response_tool
+from src.agent.tools.static_response import static_response_tool
 
 def run_test():
     print("--- Starting End-to-End FAQ Test ---\n")

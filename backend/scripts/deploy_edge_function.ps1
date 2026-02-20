@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
-# Deploy Supabase Edge Function for Embeddings
-# This script deploys the generate-embedding edge function to Supabase
+# Deploy Supabase Edge Function for Retrieval
+# This script deploys the search-similar-documents edge function to Supabase
 
 param(
     [switch]$Local = $false,
@@ -9,7 +9,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "🚀 Deploying Supabase Edge Function: generate-embedding" -ForegroundColor Cyan
+$functionName = "search-similar-documents"
+
+Write-Host "🚀 Deploying Supabase Edge Function: $functionName" -ForegroundColor Cyan
 
 # Check if Supabase CLI is installed
 if (-not (Get-Command supabase -ErrorAction SilentlyContinue)) {
@@ -31,24 +33,13 @@ Set-Location $repoRoot
 
 Write-Host "📁 Repository root: $repoRoot" -ForegroundColor Gray
 
-# Check if .env exists for HuggingFace token
+# Check if .env exists for Supabase settings
 $envFile = Join-Path $repoRoot ".env"
 if (Test-Path $envFile) {
     Write-Host "✅ Found .env file" -ForegroundColor Green
-    
-    # Check for HuggingFace token
-    $envContent = Get-Content $envFile -Raw
-    if ($envContent -match "HUGGING_FACE_TOKEN=(.+)") {
-        Write-Host "✅ HUGGING_FACE_TOKEN found in .env" -ForegroundColor Green
-    } else {
-        Write-Host "⚠️  HUGGING_FACE_TOKEN not found in .env" -ForegroundColor Yellow
-        Write-Host "   Get a free token from: https://huggingface.co/settings/tokens" -ForegroundColor Yellow
-        Write-Host "   Add to .env: HUGGING_FACE_TOKEN=hf_your_token_here" -ForegroundColor Yellow
-    }
 } else {
     Write-Host "⚠️  .env file not found" -ForegroundColor Yellow
-    Write-Host "   Create .env and add: HUGGING_FACE_TOKEN=hf_your_token_here" -ForegroundColor Yellow
-    Write-Host "   Get token from: https://huggingface.co/settings/tokens" -ForegroundColor Yellow
+    Write-Host "   Create .env and add SUPABASE_URL/SUPABASE_KEY values" -ForegroundColor Yellow
 }
 
 if ($Local) {
@@ -59,10 +50,10 @@ if ($Local) {
     
     Write-Host ""
     Write-Host "🔧 Serving edge function locally..." -ForegroundColor Cyan
-    Write-Host "   Access at: http://127.0.0.1:54321/functions/v1/generate-embedding" -ForegroundColor Gray
+    Write-Host "   Access at: http://127.0.0.1:54321/functions/v1/$functionName" -ForegroundColor Gray
     Write-Host ""
     Write-Host "Press Ctrl+C to stop" -ForegroundColor Yellow
-    supabase functions serve generate-embedding
+    supabase functions serve $functionName
     
 } elseif ($Test) {
     # Test the deployed function
@@ -70,7 +61,13 @@ if ($Local) {
     Write-Host "🧪 Testing edge function..." -ForegroundColor Cyan
     
     $testPayload = @{
-        text = "Hello, this is a test embedding!"
+        query = "housing support"
+        query_embedding = @(0.01, 0.02, 0.03)
+        match_threshold = 0.1
+        match_count = 1
+        tag_filter = @("housing")
+        tag_match_mode = "any"
+        include_untagged_fallback = $true
     } | ConvertTo-Json
     
     Write-Host "   Payload: $testPayload" -ForegroundColor Gray
@@ -83,7 +80,7 @@ if ($Local) {
             if ($envContent -match "SUPABASE_KEY=(.+)") {
                 $supabaseKey = $matches[1].Trim()
                 
-                $functionUrl = "$supabaseUrl/functions/v1/generate-embedding"
+                $functionUrl = "$supabaseUrl/functions/v1/$functionName"
                 Write-Host "   Calling: $functionUrl" -ForegroundColor Gray
                 
                 try {
@@ -97,9 +94,11 @@ if ($Local) {
                     
                     Write-Host ""
                     Write-Host "✅ Success! Response:" -ForegroundColor Green
-                    Write-Host "   Dimension: $($response.dimension)" -ForegroundColor Gray
-                    Write-Host "   Model: $($response.model)" -ForegroundColor Gray
-                    Write-Host "   First 5 values: $($response.embedding[0..4] -join ', ')" -ForegroundColor Gray
+                    if ($response.data) {
+                        Write-Host "   Rows returned: $($response.data.Count)" -ForegroundColor Gray
+                    } else {
+                        Write-Host "   Response body: $($response | ConvertTo-Json -Depth 4)" -ForegroundColor Gray
+                    }
                     
                 } catch {
                     Write-Host ""
@@ -137,18 +136,16 @@ if ($Local) {
     
     # Deploy
     Write-Host "📤 Deploying function..." -ForegroundColor Cyan
-    supabase functions deploy generate-embedding
+    supabase functions deploy $functionName
     
     if ($LASTEXITCODE -eq 0) {
         Write-Host ""
         Write-Host "✅ Deployment successful!" -ForegroundColor Green
         Write-Host ""
         Write-Host "Next steps:" -ForegroundColor Yellow
-        Write-Host "1. Set HUGGING_FACE_TOKEN in Supabase Dashboard:" -ForegroundColor White
-        Write-Host "   → Project Settings → Edge Functions → Secrets" -ForegroundColor Gray
-        Write-Host "   → Add: HUGGING_FACE_TOKEN=hf_your_token_here" -ForegroundColor Gray
+        Write-Host "1. Confirm search_similar_documents RPC is available in database" -ForegroundColor White
         Write-Host ""
-        Write-Host "2. Set USE_EDGE_FUNCTION_EMBEDDINGS=true in Render:" -ForegroundColor White
+        Write-Host "2. Set DB_SEARCH_EDGE_FUNCTION=$functionName in runtime env" -ForegroundColor White
         Write-Host "   → Dashboard → vecinita-agent → Environment" -ForegroundColor Gray
         Write-Host ""
         Write-Host "3. Test the function:" -ForegroundColor White

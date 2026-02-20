@@ -14,39 +14,31 @@ from langchain_core.tools import tool
 logger = logging.getLogger(__name__)
 
 
-# NOTE: This placeholder function should NOT be called directly.
-# Instead, use create_web_search_tool() to get a properly configured instance.
-# The factory function handles:
-# - Tavily API initialization (if TAVILY_API_KEY is set)
-# - DuckDuckGo fallback (if Tavily unavailable)
-# - Response normalization across providers
-#
-# Example:
-#   from langchain_core.tools import Tool
-#   web_search = create_web_search_tool(search_depth='advanced', max_results=5)
-#   result = web_search.invoke({"query": "climate change 2024"})
+_DEFAULT_WEB_SEARCH_TOOL = None
 
 @tool
 def web_search_tool(query: str) -> str:
-    """Placeholder tool - do not use directly.
-    
-    Use create_web_search_tool() instead to get a configured instance.
-    This function exists only for type hinting and documentation.
+    """Search the web using configured provider with automatic fallback.
     
     Args:
-        query: The search query (not used in placeholder)
-        
+        query: The search query
+
     Returns:
-        Never returns - call create_web_search_tool() instead
-        
-    Raises:
-        RuntimeError: Always - this is a placeholder
+        JSON string containing normalized web search results
     """
-    raise RuntimeError(
-        "web_search_tool() is a placeholder. "
-        "Use create_web_search_tool() to create a properly configured instance. "
-        "See create_web_search_tool() docstring for examples."
-    )
+    global _DEFAULT_WEB_SEARCH_TOOL
+    if _DEFAULT_WEB_SEARCH_TOOL is None:
+        _DEFAULT_WEB_SEARCH_TOOL = create_web_search_tool()
+
+    try:
+        return _DEFAULT_WEB_SEARCH_TOOL.invoke({"query": query})
+    except Exception as e:
+        logger.error(f"web_search_tool wrapper error: {e}")
+        return json.dumps([{
+            "title": "Error",
+            "content": f"Web search failed: {str(e)}",
+            "url": ""
+        }])
 
 
 def create_web_search_tool(search_depth: str = "advanced", max_results: int = 5) -> tool:

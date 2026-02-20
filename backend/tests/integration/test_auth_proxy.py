@@ -11,6 +11,10 @@ import json
 pytestmark = pytest.mark.integration
 
 
+def _auth_headers(api_key: str) -> dict:
+    return {"Authorization": f"Bearer {api_key}"}
+
+
 @pytest.mark.auth
 def test_auth_proxy_health_check(auth_proxy_client):
     """Test auth proxy /health endpoint"""
@@ -63,7 +67,7 @@ def test_auth_proxy_usage_endpoint(auth_proxy_client):
     
     response = auth_proxy_client.get(
         "/usage",
-        headers={"X-API-Key": "sk_test_key"}
+        headers=_auth_headers("sk_vp_test_key_1234567890")
     )
     
     assert response.status_code == 200
@@ -83,7 +87,7 @@ def test_auth_proxy_track_usage_endpoint(auth_proxy_client):
     response = auth_proxy_client.post(
         "/track-usage",
         params={"tokens": "50"},
-        headers={"X-API-Key": "sk_test_track"}
+        headers=_auth_headers("sk_vp_test_track_1234567890")
     )
     
     assert response.status_code in [200, 400]
@@ -99,20 +103,20 @@ def test_auth_proxy_track_usage_endpoint(auth_proxy_client):
 def test_auth_proxy_rate_limit_daily_reset(auth_proxy_client):
     """Test daily token limit is respected"""
     
-    api_key = "sk_test_daily_limit"
+    api_key = "sk_vp_test_daily_limit_1234567890"
     
     # Track usage up to limit
     response = auth_proxy_client.post(
         "/track-usage",
         params={"tokens": "1000"},
-        headers={"X-API-Key": api_key}
+        headers=_auth_headers(api_key)
     )
     
     # Second request should be rejected (assuming daily limit is 1000)
     response2 = auth_proxy_client.post(
         "/track-usage",
         params={"tokens": "1"},
-        headers={"X-API-Key": api_key}
+        headers=_auth_headers(api_key)
     )
     
     # One of these should succeed, one may fail depending on config
@@ -125,7 +129,7 @@ def test_auth_proxy_rate_limit_daily_reset(auth_proxy_client):
 def test_auth_proxy_request_rate_limit(auth_proxy_client):
     """Test request per hour limit"""
     
-    api_key = "sk_test_req_limit"
+    api_key = "sk_vp_test_req_limit_1234567890"
     
     # Make multiple requests
     statuses = []
@@ -133,7 +137,7 @@ def test_auth_proxy_request_rate_limit(auth_proxy_client):
         response = auth_proxy_client.post(
             "/track-usage",
             params={"tokens": "10"},
-            headers={"X-API-Key": api_key}
+            headers=_auth_headers(api_key)
         )
         statuses.append(response.status_code)
     
@@ -169,18 +173,15 @@ def test_rate_limit_state_daily_reset():
     try:
         from auth.src.main import RateLimitState
         
-        state = RateLimitState("sk_test")
-        state.tokens_today = 100
-        state.requests_today = 5
-        
-        # Check initial values
-        assert state.tokens_today == 100
-        
-        # Simulate day change (would need to mock datetime in real test)
-        # For now, just verify the state exists
-        assert hasattr(state, "tokens_today")
-        assert hasattr(state, "requests_today")
-        assert hasattr(state, "last_reset")
+        state = RateLimitState()
+        stats = state.increment("sk_vp_test_state_1234567890", tokens=100)
+
+        assert stats["tokens_today"] == 100
+        assert stats["requests_today"] == 1
+        assert "last_reset" in stats
+        assert hasattr(state, "usage")
+        assert hasattr(state, "failed_attempts")
+        assert hasattr(state, "blocked_keys")
     except ImportError:
         pytest.skip("Auth proxy module not available")
 
@@ -200,26 +201,26 @@ def test_auth_proxy_cors_headers(auth_proxy_client):
 def test_multiple_api_keys_tracked_separately(auth_proxy_client):
     """Test different API keys are tracked independently"""
     
-    key1 = "sk_test_key1"
-    key2 = "sk_test_key2"
+    key1 = "sk_vp_test_key1_1234567890"
+    key2 = "sk_vp_test_key2_1234567890"
     
     # Track usage for key1
     response1 = auth_proxy_client.post(
         "/track-usage",
         params={"tokens": "100"},
-        headers={"X-API-Key": key1}
+        headers=_auth_headers(key1)
     )
     
     # Track usage for key2
     response2 = auth_proxy_client.post(
         "/track-usage",
         params={"tokens": "50"},
-        headers={"X-API-Key": key2}
+        headers=_auth_headers(key2)
     )
     
     # Get usage for both keys
-    usage1 = auth_proxy_client.get("/usage", headers={"X-API-Key": key1})
-    usage2 = auth_proxy_client.get("/usage", headers={"X-API-Key": key2})
+    usage1 = auth_proxy_client.get("/usage", headers=_auth_headers(key1))
+    usage2 = auth_proxy_client.get("/usage", headers=_auth_headers(key2))
     
     assert usage1.status_code == 200
     assert usage2.status_code == 200

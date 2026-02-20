@@ -4,6 +4,23 @@
 # Production uses cloud Supabase and Render services (see .env.prod and docs/RENDER_DEPLOYMENT_THREE_SERVICES.md)
 
 services:
+  # ChromaDB - Vector/document storage service
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: vecinita-chroma
+    ports:
+      - "8002:8000"
+    volumes:
+      - chroma_data_local:/data
+    restart: unless-stopped
+    networks:
+      - vecinita-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v2/heartbeat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Local PostgreSQL Database
   postgres:
     image: postgres:16-alpine
@@ -103,6 +120,12 @@ services:
       PORT: "8000"
       PYTHONUNBUFFERED: "1"
       EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
+      CHROMA_HOST: "chroma"
+      CHROMA_PORT: "8000"
+      CHROMA_SSL: "false"
+      CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
+      CHROMA_COLLECTION_SOURCES: "vecinita_sources"
+      CHROMA_COLLECTION_QUEUE: "vecinita_queue"
       SUPABASE_URL: "http://postgrest:3000"
       SUPABASE_KEY: "dev-anon-key"
       GROQ_API_KEY: "${GROQ_API_KEY}"
@@ -113,6 +136,8 @@ services:
       postgrest:
         condition: service_healthy
       embedding-service:
+        condition: service_healthy
+      chroma:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -132,6 +157,7 @@ services:
     ports:
       - "5173:5173"
     environment:
+      VITE_GATEWAY_URL: "http://localhost:8004/api/v1"
       VITE_BACKEND_URL: "http://localhost:8000"
     depends_on:
       - vecinita-agent
@@ -146,6 +172,7 @@ services:
 
 volumes:
   postgres_data_local:
+  chroma_data_local:
 
 networks:
   vecinita-network:

@@ -4,24 +4,34 @@ Unified API Gateway - Main FastAPI Application
 Consolidates Q&A, scraping, embeddings, and admin endpoints into a single API.
 Serves as the primary entry point for all backend services.
 
-Port: 8002 (by default)
+Port: 8004 (by default)
 """
 
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Dict, Optional
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+_PROJECT_ROOT = Path(__file__).resolve().parents[3]
+_BACKEND_ROOT = Path(__file__).resolve().parents[2]
+
+# Load backend defaults first, then allow root workspace env to override.
+load_dotenv(_BACKEND_ROOT / ".env", override=False)
+load_dotenv(_PROJECT_ROOT / ".env", override=True)
 
 from fastapi import FastAPI, HTTPException, Depends, Query, APIRouter, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from pathlib import Path
 
 from .router_ask import router as ask_router
 from .router_scrape import router as scrape_router
 from .router_embed import router as embed_router
 from .router_admin import router as admin_router
+from .router_documents import router as documents_router
 from .middleware import AuthenticationMiddleware, RateLimitingMiddleware
 from .models import HealthCheck, GatewayConfig, ErrorResponse
 from .job_manager import job_manager
@@ -238,6 +248,7 @@ v1_router.include_router(ask_router)
 v1_router.include_router(scrape_router)
 v1_router.include_router(embed_router)
 v1_router.include_router(admin_router)
+v1_router.include_router(documents_router)  # public, no auth
 
 # Include the version router in the main app
 app.include_router(v1_router)
@@ -297,7 +308,7 @@ else:
 if __name__ == "__main__":
     import uvicorn
 
-    port = int(os.getenv("GATEWAY_PORT", "8002"))
+    port = int(os.getenv("GATEWAY_PORT", "8004"))
     reload = os.getenv("RELOAD", "False").lower() == "true"
 
     print(f"Starting gateway on port {port} ({'with' if reload else 'without'} reload)...")

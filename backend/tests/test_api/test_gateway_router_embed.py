@@ -28,8 +28,8 @@ class TestEmbedSingleEndpoint:
             "/api/v1/embed",
             json={"text": "Hello world"}
         )
-        # Currently not implemented
-        assert response.status_code == 501
+        # Endpoint proxies to embedding service; unavailable backend returns 503
+        assert response.status_code in [200, 503]
 
     def test_embed_text_with_model_override(self, embed_client):
         """Test embedding with model override."""
@@ -40,7 +40,7 @@ class TestEmbedSingleEndpoint:
                 "model": "custom-model"
             }
         )
-        assert response.status_code == 501
+        assert response.status_code in [200, 503]
 
     def test_embed_empty_text(self, embed_client):
         """Test embedding empty text."""
@@ -48,8 +48,8 @@ class TestEmbedSingleEndpoint:
             "/api/v1/embed",
             json={"text": ""}
         )
-        # Empty string is technically valid for Pydantic, but endpoint not implemented
-        assert response.status_code == 501
+        # Empty strings pass request validation and are proxied to embedding service
+        assert response.status_code in [200, 503]
 
     def test_embed_missing_text(self, embed_client):
         """Test that text field is required."""
@@ -66,8 +66,7 @@ class TestEmbedSingleEndpoint:
             "/api/v1/embed",
             json={"text": long_text}
         )
-        # Not implemented, but should accept the request structure
-        assert response.status_code == 501
+        assert response.status_code in [200, 503]
 
 
 class TestEmbedBatchEndpoint:
@@ -81,7 +80,7 @@ class TestEmbedBatchEndpoint:
                 "texts": ["Hello", "World", "Test"]
             }
         )
-        assert response.status_code == 501
+        assert response.status_code in [200, 503]
 
     def test_embed_batch_single_text(self, embed_client):
         """Test batch endpoint with single text."""
@@ -89,7 +88,7 @@ class TestEmbedBatchEndpoint:
             "/api/v1/embed/batch",
             json={"texts": ["Hello"]}
         )
-        assert response.status_code == 501
+        assert response.status_code in [200, 503]
 
     def test_embed_batch_with_model(self, embed_client):
         """Test batch embedding with model override."""
@@ -100,7 +99,7 @@ class TestEmbedBatchEndpoint:
                 "model": "custom-model"
             }
         )
-        assert response.status_code == 501
+        assert response.status_code in [200, 503]
 
     def test_embed_batch_empty_list(self, embed_client):
         """Test batch endpoint rejects empty text list."""
@@ -125,7 +124,7 @@ class TestEmbedBatchEndpoint:
             "/api/v1/embed/batch",
             json={"texts": texts}
         )
-        assert response.status_code == 501
+        assert response.status_code in [200, 503]
 
 
 class TestSimilarityEndpoint:
@@ -140,7 +139,7 @@ class TestSimilarityEndpoint:
                 "text2": "Hello there"
             }
         )
-        assert response.status_code == 501
+        assert response.status_code in [200, 503]
 
     def test_similarity_with_model(self, embed_client):
         """Test similarity with model override."""
@@ -152,7 +151,7 @@ class TestSimilarityEndpoint:
                 "model": "custom-model"
             }
         )
-        assert response.status_code == 501
+        assert response.status_code in [200, 503]
 
     def test_similarity_identical_texts(self, embed_client):
         """Test similarity of identical texts."""
@@ -163,8 +162,7 @@ class TestSimilarityEndpoint:
                 "text2": "The same text"
             }
         )
-        # When implemented, should return similarity close to 1.0
-        assert response.status_code == 501
+        assert response.status_code in [200, 503]
 
     def test_similarity_different_texts(self, embed_client):
         """Test similarity of completely different texts."""
@@ -175,8 +173,7 @@ class TestSimilarityEndpoint:
                 "text2": "xyz abc 123"
             }
         )
-        # When implemented, should return lower similarity
-        assert response.status_code == 501
+        assert response.status_code in [200, 503]
 
     def test_similarity_missing_text1(self, embed_client):
         """Test similarity endpoint requires both texts."""
@@ -203,8 +200,7 @@ class TestSimilarityEndpoint:
                 "text2": ""
             }
         )
-        # Should accept structure but not implemented
-        assert response.status_code == 501
+        assert response.status_code in [200, 503]
 
 
 class TestEmbedConfigEndpoint:
@@ -241,9 +237,9 @@ class TestEmbedConfigEndpoint:
     def test_update_embedding_config(self, embed_client):
         """Test updating embedding configuration."""
         response = embed_client.post(
-            "/api/v1/embed/config?new_model=test-model"
+            "/api/v1/embed/config?provider=huggingface&model=test-model"
         )
-        assert response.status_code == 501
+        assert response.status_code in [200, 503]
 
     def test_update_config_missing_model(self, embed_client):
         """Test config update requires model parameter."""
@@ -330,8 +326,7 @@ class TestEmbedEndpointRouting:
             "/api/v1/embed",
             json={"text": "test"}
         )
-        # May not be implemented, but endpoint should exist
-        assert response.status_code in [501, 422]
+        assert response.status_code in [200, 422, 503]
 
     def test_batch_endpoint_exists(self, embed_client):
         """Test that batch endpoint is accessible."""
@@ -339,7 +334,7 @@ class TestEmbedEndpointRouting:
             "/api/v1/embed/batch",
             json={"texts": ["test"]}
         )
-        assert response.status_code in [501, 422]
+        assert response.status_code in [200, 422, 503]
 
     def test_similarity_endpoint_exists(self, embed_client):
         """Test that similarity endpoint is accessible."""
@@ -347,7 +342,7 @@ class TestEmbedEndpointRouting:
             "/api/v1/embed/similarity",
             json={"text1": "a", "text2": "b"}
         )
-        assert response.status_code in [501, 422]
+        assert response.status_code in [200, 422, 503]
 
     def test_config_endpoint_exists(self, embed_client):
         """Test that config endpoint is accessible."""

@@ -1,5 +1,5 @@
 {
-  "provider": "llama",
-  "model": null,
+  "provider": "ollama",
+  "model": "llama3.2",
   "locked": false
 }

@@ -196,7 +196,7 @@ EMBEDDING_SERVICE_URL=http://localhost:8001  # Required
 ### Service Dependencies
 1. **Embedding Service** (port 8001)
    - Must be running for endpoints to work
-   - Start with: `uvicorn src.services.embedding.server:app --port 8001`
+   - Start with: `uvicorn src.embedding_service.main:app --port 8001`
    - Health check: `curl http://localhost:8001/health`
 
 2. **Numpy** (Python package)
@@ -225,7 +225,7 @@ EMBEDDING_SERVICE_URL=http://localhost:8001  # Required
 ### Development
 ```bash
 # Terminal 1: Embedding service
-cd backend && uvicorn src.services.embedding.server:app --port 8001
+cd backend && uvicorn src.embedding_service.main:app --port 8001
 
 # Terminal 2: API gateway
 cd backend && uvicorn src.api.main:app --port 8002

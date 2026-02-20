@@ -90,10 +90,10 @@ uv sync
 uv run -m uvicorn src.api.main:app --reload --port 8002
 
 # Terminal 2 - Agent Service
-uv run -m uvicorn src.services.agent.server:app --reload --port 8000
+uv run -m uvicorn src.agent.main:app --reload --port 8000
 
 # Terminal 3 - Embedding Service
-uv run -m uvicorn src.services.embedding.server:app --reload --port 8001
+uv run -m uvicorn src.embedding_service.main:app --reload --port 8001
 ```
 
 Access API at: http://localhost:8002
@@ -113,7 +113,7 @@ docker-compose up
 ```bash
 # Test just Agent Service
 cd backend
-uv run -m uvicorn src.services.agent.server:app --port 8000
+uv run -m uvicorn src.agent.main:app --port 8000
 
 # Test with curl
 curl http://localhost:8000/ask?question=test
@@ -194,12 +194,12 @@ def test_my_endpoint(client):
 ### Use Service Models in Code
 
 ```python
-from src.services.agent.models import ModelSelection
+from src.agent.main import CURRENT_SELECTION
 
-selection: ModelSelection = {
-    "provider": "groq",
-    "model": "llama-3.1-70b",
-    "locked": False
+selection = {
+    "provider": CURRENT_SELECTION["provider"],
+    "model": CURRENT_SELECTION["model"],
+    "locked": CURRENT_SELECTION["locked"],
 }
 ```
 
@@ -213,14 +213,14 @@ from src.api.models import AskRequest, AskResponse
 from src.api.main import app
 
 # From service
-from src.services.agent.models import ModelSelection
-from src.services.agent.server import app as agent_app
+from src.agent.main import app as agent_app
+from src.embedding_service.main import app as embedding_app
 
 # From utils
 from src.utils.supabase_embeddings import SupabaseEmbeddings
 
 # In tests
-from src.services.agent.models import ModelSelection
+from src.agent.main import app as agent_app
 ```
 
 ### ❌ Avoid These
@@ -234,7 +234,7 @@ from src.agent.models import X       # WRONG - agent moved
 from src.gateway.main import app     # WRONG - gateway renamed
 
 # Don't cross-import between services
-from src.services.agent import X     # ❌ For embedding service
+from src.agent import X     # ❌ For embedding service
 ```
 
 ## Port Reference
@@ -244,7 +244,7 @@ from src.services.agent import X     # ❌ For embedding service
 | **API Gateway** | 8002 | Main entry point | http://localhost:8002 |
 | **Agent** | 8000 | LangGraph Q&A | http://localhost:8000 |
 | **Embedding** | 8001 | Text embeddings | http://localhost:8001 |
-| **Scraper** | N/A | Batch/CLI only | `python -m src.services.scraper.cli` |
+| **Scraper** | N/A | Batch/CLI only | `python -m src.scraper.cli` |
 
 ## Environment Variables
 
@@ -280,7 +280,7 @@ uv run pytest
 ### "Connection refused on port 8000"
 Agent service not running. Start it in another terminal:
 ```bash
-uv run -m uvicorn src.services.agent.server:app --reload --port 8000
+uv run -m uvicorn src.agent.main:app --reload --port 8000
 ```
 
 ### "Import from src.gateway failed"
@@ -309,9 +309,9 @@ uv run pytest -m "not integration and not e2e"
 |------|---------|
 | `src/api/main.py` | Main FastAPI application - START HERE for routing |
 | `src/api/models.py` | API request/response schemas - CHECK HERE for endpoints |
-| `src/services/agent/server.py` | Agent Q&A service - MODIFY for agent behavior |
-| `src/services/embedding/server.py` | Embedding service - MODIFY for embedding behavior |
-| `src/services/scraper/cli.py` | Scraper CLI - MODIFY for scraping logic |
+| `src/agent/main.py` | Agent Q&A service - MODIFY for agent behavior |
+| `src/embedding_service/main.py` | Embedding service - MODIFY for embedding behavior |
+| `src/scraper/cli.py` | Scraper CLI - MODIFY for scraping logic |
 | `pyproject.toml` | Dependencies and entry points |
 | `tests/conftest.py` | Pytest fixtures and configuration |
 
@@ -336,7 +336,7 @@ uv run ruff check src/ tests/
 uv run pyright src/
 
 # Run scraper
-uv run python -m src.services.scraper.cli --help
+uv run python -m src.scraper.cli --help
 
 # Run API
 uv run -m uvicorn src.api.main:app --reload
@@ -347,9 +347,9 @@ uv run -m uvicorn src.api.main:app --reload
 ## Quick Navigation
 
 - **Need to fix an API issue?** → `src/api/`
-- **Need to fix Agent?** → `src/services/agent/`
-- **Need to fix Embedding?** → `src/services/embedding/`
-- **Need to fix Scraper?** → `src/services/scraper/`
+- **Need to fix Agent?** → `src/agent/`
+- **Need to fix Embedding?** → `src/embedding_service/`
+- **Need to fix Scraper?** → `src/scraper/`
 - **Need to add shared utility?** → `src/utils/`
 - **Need to write tests?** → `tests/test_*/` (mirror of src/)
 - **Need to change how API works?** → `src/api/main.py`

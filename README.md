@@ -78,6 +78,22 @@ docker-compose up
 
 ### Option 2: Local Development
 
+#### Full stack in one terminal view (tmux)
+
+From repo root:
+
+```bash
+chmod +x dev-session.sh
+./dev-session.sh start
+```
+
+This starts Chroma, embedding service, agent service, API gateway, and frontend in one `tmux` session with live logs in split panes.
+
+```bash
+./dev-session.sh attach   # Re-attach to running session
+./dev-session.sh stop     # Stop session and chroma container
+```
+
 #### Backend (Python)
 
 ```bash
@@ -108,7 +124,7 @@ cd frontend
 npm install
 
 # (Optional) Create a local env file for the frontend
-# echo "VITE_BACKEND_URL=http://localhost:8000" > .env.local
+# echo "VITE_GATEWAY_URL=http://localhost:8004/api/v1" > .env.local
 
 # Run dev server
 npm run dev
@@ -123,7 +139,7 @@ npm run test:e2e      # E2E tests (Playwright)
 - Manage secrets locally using the `.env` file at the repo root.
 - A sanitized example is provided: `.env.example`.
 - Do not commit `.env` or any real secrets; `.gitignore` already excludes common env files.
-- Frontend can use `.env.local` for values like `VITE_BACKEND_URL`.
+- Frontend can use `.env.local` for values like `VITE_GATEWAY_URL` (preferred) or `VITE_BACKEND_URL` (legacy fallback).
 
 
 ## Core Features
@@ -223,14 +239,15 @@ The scraper pipeline processes web content into vector embeddings:
 ```bash
 cd backend
 
-# Run full pipeline
+# Run full pipeline (canonical script, local mode)
+bash scripts/run_scraper.sh --local --verbose
+
+# Run full pipeline in Docker mode
+bash scripts/run_scraper.sh --docker --verbose
+
+# Legacy commands still work and delegate to the canonical script:
 bash scripts/data_scrape_load.sh
-
-# Or run components separately
-uv run python -m src.scraper.main --input data/urls.txt --output-file data/chunks.txt --failed-log data/failed.txt
-
-# Streaming mode (immediate upload)
-uv run python -m src.scraper.main --input data/urls.txt --output-file data/chunks.txt --failed-log data/failed.txt --stream
+python scripts/data_scrape_load.py
 ```
 
 Configuration files:

@@ -57,7 +57,7 @@ fi
 # Start Agent Service
 echo -e "${GREEN}Starting Agent Service on port 8000...${NC}"
 cd "$BACKEND_DIR"
-nohup uv run uvicorn src.services.agent.server:app --host 0.0.0.0 --port 8000 \
+nohup uv run uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 \
     > "$LOG_DIR/agent.log" 2>&1 &
 echo $! > "$PID_DIR/agent.pid"
 sleep 2
@@ -73,7 +73,7 @@ fi
 
 # Start Embedding Service
 echo -e "${GREEN}Starting Embedding Service on port 8001...${NC}"
-nohup uv run uvicorn src.services.embedding.server:app --host 0.0.0.0 --port 8001 \
+nohup uv run uvicorn src.embedding_service.main:app --host 0.0.0.0 --port 8001 \
     > "$LOG_DIR/embedding.log" 2>&1 &
 echo $! > "$PID_DIR/embedding.pid"
 sleep 2

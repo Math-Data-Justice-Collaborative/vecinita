@@ -1,0 +1,99 @@
+# deploy/gcp/docker-compose.prod.yml
+# ─────────────────────────────────────────────────────────────────────────────
+# Production Docker Compose for GCP Compute Engine VM.
+#
+# Services:
+#   vecinita-agent  — FastAPI + LangGraph RAG agent (port 8000, internal)
+#   vecinita-embed  — Optional: run embedding service locally instead of Cloud Run
+#
+# Ollama runs as a separate systemd service (installed by instance-setup.sh),
+# not as a container, so the agent accesses it via host.docker.internal.
+#
+# Usage:
+#   docker-compose -f deploy/gcp/docker-compose.prod.yml up -d --build
+# ─────────────────────────────────────────────────────────────────────────────
+
+version: "3.9"
+
+services:
+  # ── ChromaDB (vector/document store) ─────────────────────────────────────
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: vecinita-chroma
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8002:8000"
+    volumes:
+      - chroma_data_prod:/data
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/api/v2/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ── RAG Agent ──────────────────────────────────────────────────────────────
+  vecinita-agent:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    container_name: vecinita-agent
+    restart: unless-stopped
+    env_file:
+      - ../../backend/.env
+    environment:
+      # Point Ollama to the host's systemd service
+      OLLAMA_BASE_URL: "http://host.docker.internal:11434"
+      # ChromaDB (container-to-container)
+      CHROMA_HOST: "chroma"
+      CHROMA_PORT: "8000"
+      CHROMA_SSL: "false"
+      CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
+      CHROMA_COLLECTION_SOURCES: "vecinita_sources"
+      CHROMA_COLLECTION_QUEUE: "vecinita_queue"
+      # Use Cloud Run embedding service (set EMBEDDING_SERVICE_URL in .env)
+      # or set to http://vecinita-embed:8001 to use the local embed service
+    ports:
+      - "127.0.0.1:8000:8000"   # Only bind to localhost — nginx proxies externally
+    depends_on:
+      chroma:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # ── Embedding Service (optional local fallback) ────────────────────────────
+  # Uncomment this block if you prefer to run embedding locally instead of
+  # Cloud Run. Set EMBEDDING_SERVICE_URL=http://vecinita-embed:8001 in .env.
+  #
+  # vecinita-embed:
+  #   build:
+  #     context: ../../backend
+  #     dockerfile: Dockerfile.embedding
+  #   container_name: vecinita-embed
+  #   restart: unless-stopped
+  #   env_file:
+  #     - ../../backend/.env
+  #   ports:
+  #     - "127.0.0.1:8001:8001"
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-sf", "http://localhost:8001/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+
+networks:
+  default:
+    name: vecinita-prod
+
+volumes:
+  chroma_data_prod:

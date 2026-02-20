@@ -19,13 +19,13 @@ dependencies = [
     "langchain-community",
     "langchain-core",
     "langchain-openai",
-    "langchain-groq",
     "langchain-tavily",
     "langchain-text-splitters",
     "langchain-huggingface",
     "langgraph",
     # Database & Vector Store
     "supabase",
+    "chromadb>=1.0.0",
     "psycopg2-binary",
     # Document Processing (lightweight only - playwright/unstructured in scraping extra)
     "beautifulsoup4",
@@ -35,10 +35,13 @@ dependencies = [
     "pydantic",
     "requests",
     "httpx",
+    "python-multipart",
     "langdetect",
     "tqdm",
     "gotrue>=2.0.0",
     "langchain-ollama>=1.0.0",
+    # GuardrailsAI for input/output validation
+    "guardrails-ai>=0.5.0",
     # LangSmith for tracing and monitoring (now compatible with numpy 2.x)
     "langsmith>=0.4.56",
     # Pin onnxruntime and tokenizers to stable versions to avoid Windows compatibility issues
@@ -47,6 +50,11 @@ dependencies = [
     "onnxruntime>=1.18.0,<1.24.0.dev; sys_platform == 'win32'",
     "tokenizers>=0.15.0,<0.22.0rc",
     "ddgs>=9.10.0",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "fastembed>=0.7.4",
+    "transformers>=4.55.4",
+    "docker>=7.1.0",
 ]
 
 [project.optional-dependencies]
@@ -253,6 +261,29 @@ module = [
     "playwright.*",
 ]
 ignore_missing_imports = true
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+
+[tool.coverage.report]
+omit = [
+    "src/services/*",
+    "src/services/**",
+    "src/cli/*",
+    "src/cli/**",
+    "src/test_faq.py",
+    "src/agent/main.py",
+    "src/agent/guardrails_config.py",
+    "src/api/dependencies.py",
+    "src/api/middleware.py",
+    "src/api/rate_limiter.py",
+    "src/api/router_admin.py",
+    "src/api/router_documents.py",
+    "src/embedding_service/modal_app.py",
+    "src/scraper/cli.py",
+    "src/utils/faq_loader.py",
+]
 
 [tool.uv]
 # Ensure uv resolves stable versions to avoid Windows compatibility issues

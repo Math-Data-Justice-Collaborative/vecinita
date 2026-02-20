@@ -314,6 +314,61 @@ class TestUploadChunks:
             assert uploaded == 0
             assert failed == 0
 
+    def test_upload_chunks_propagates_source_tags(self):
+        """Test source-level tags are written into chunk metadata."""
+        with patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True), \
+             patch("src.services.scraper.uploader.create_client") as mock_create, \
+             patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", True), \
+             patch("src.services.scraper.uploader.HuggingFaceEmbeddings"):
+
+            mock_supabase = MagicMock()
+            mock_create.return_value = mock_supabase
+
+            inserted_records = []
+
+            class _InsertRecorder:
+                def insert(self, payload):
+                    inserted_records.extend(payload)
+                    return self
+
+                def execute(self):
+                    return MagicMock(data=payload if (payload := inserted_records) else [])
+
+            sources_query = MagicMock()
+            sources_query.select.return_value = sources_query
+            sources_query.eq.return_value.limit.return_value.execute.return_value = MagicMock(
+                data=[{"metadata": {"tags": ["housing", "food"]}}]
+            )
+
+            def table_router(name):
+                if name == "sources":
+                    return sources_query
+                if name == "document_chunks":
+                    return _InsertRecorder()
+                return MagicMock()
+
+            mock_supabase.table.side_effect = table_router
+
+            from src.services.scraper.uploader import DatabaseUploader
+
+            uploader = DatabaseUploader(use_local_embeddings=True)
+            uploader.embedding_model = MagicMock()
+            uploader.embedding_client_type = "huggingface"
+            uploader.embedding_model.embed_documents.return_value = [[0.1] * 384]
+
+            chunks = [{"text": "Chunk with inferred source tags", "metadata": {}}]
+
+            uploaded, failed = uploader.upload_chunks(
+                chunks,
+                source_identifier="https://test.com",
+                loader_type="test",
+                batch_size=50,
+            )
+
+            assert uploaded == 1
+            assert failed == 0
+            assert inserted_records[0]["metadata"]["tags"] == ["housing", "food"]
+
     def test_upload_chunks_batch_size(self):
         """Test that chunks are uploaded in batches."""
         with patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True), \
