@@ -158,6 +158,11 @@ pytest integration/ -v
   - Response format validation
   - Error handling
 
+Modal reindex trigger coverage is validated in backend test suites:
+- `backend/tests/test_api/test_gateway_router_scrape.py` (unit)
+- `backend/tests/integration/test_modal_reindex_trigger.py` (integration)
+- `backend/tests/e2e/test_reindex_flow.py` (e2e)
+
 ### Response Format (API v1)
 ```json
 {

@@ -26,6 +26,7 @@ router = APIRouter(prefix="/embed", tags=["Embeddings"])
 
 # Configuration - embedding service URL from environment
 EMBEDDING_SERVICE_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:8001")
+EMBEDDING_SERVICE_AUTH_TOKEN = os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN") or os.getenv("MODAL_API_PROXY_SECRET")
 
 # Configuration - will be fetched from embedding service
 EMBEDDING_CONFIG = {
@@ -34,6 +35,13 @@ EMBEDDING_CONFIG = {
     "dimension": 384,
     "description": "Fast, lightweight embeddings via sentence-transformers",
 }
+
+
+def _embedding_service_headers() -> dict:
+    headers = {}
+    if EMBEDDING_SERVICE_AUTH_TOKEN:
+        headers["x-embedding-service-token"] = EMBEDDING_SERVICE_AUTH_TOKEN
+    return headers
 
 
 async def get_embedding_client() -> httpx.AsyncClient:
@@ -59,7 +67,8 @@ async def embed_text(request: EmbedRequest) -> EmbedResponse:
             # Call embedding service
             response = await client.post(
                 f"{EMBEDDING_SERVICE_URL}/embed",
-                json={"text": request.text}
+                json={"text": request.text},
+                headers=_embedding_service_headers(),
             )
             response.raise_for_status()
             
@@ -104,7 +113,8 @@ async def embed_batch(request: EmbedBatchRequest) -> EmbedBatchResponse:
             # Call embedding service batch endpoint
             response = await client.post(
                 f"{EMBEDDING_SERVICE_URL}/embed-batch",
-                json={"texts": request.texts}
+                json={"texts": request.texts},
+                headers=_embedding_service_headers(),
             )
             response.raise_for_status()
             
@@ -163,7 +173,8 @@ async def compute_similarity(request: SimilarityRequest) -> SimilarityResponse:
             # Generate embeddings for both texts using batch endpoint
             response = await client.post(
                 f"{EMBEDDING_SERVICE_URL}/embed-batch",
-                json={"texts": [request.text1, request.text2]}
+                json={"texts": [request.text1, request.text2]},
+                headers=_embedding_service_headers(),
             )
             response.raise_for_status()
             
@@ -248,12 +259,16 @@ async def update_embedding_config(
             
             response = await client.post(
                 f"{EMBEDDING_SERVICE_URL}/config",
-                json=payload
+                json=payload,
+                headers=_embedding_service_headers(),
             )
             response.raise_for_status()
             
             # Fetch updated config
-            config_response = await client.get(f"{EMBEDDING_SERVICE_URL}/config")
+            config_response = await client.get(
+                f"{EMBEDDING_SERVICE_URL}/config",
+                headers=_embedding_service_headers(),
+            )
             config_response.raise_for_status()
             config_data = config_response.json()
             

@@ -171,9 +171,14 @@ addopts = [
 markers = [
     "unit: Unit tests (fast, no external dependencies)",
     "integration: Integration tests (may require external services)",
+    "e2e: End-to-end tests",
     "ui: UI/API tests using FastAPI TestClient",
+    "streaming: Streaming response and SSE behavior tests",
     "slow: Tests that take a long time to run",
     "api: API endpoint tests",
+    "auth: Authentication and authorization tests",
+    "fallback: Fallback behavior and degraded-mode tests",
+    "rate_limit: Rate limiting behavior tests",
     "db: Database related tests",
 ]
 

@@ -63,7 +63,10 @@ jobs:
         echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY || 'test-groq-key' }}" >> .env
         echo "DATABASE_URL=${{ secrets.DATABASE_URL || 'postgresql://test' }}" >> .env
         echo "USE_LOCAL_EMBEDDINGS=true" >> .env
-        echo "EMBEDDING_MODEL=text-embedding-3-small" >> .env
+        echo "EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2" >> .env
+        echo "EMBEDDING_SERVICE_AUTH_TOKEN=test-embed-token" >> .env
+        echo "REINDEX_TRIGGER_TOKEN=test-reindex-token" >> .env
+        echo "REINDEX_SERVICE_URL=https://example.modal.run" >> .env
         # Support either OPENAI_API_KEY or legacy OPEN_API_KEY via secrets
         if [ -n "${{ secrets.OPENAI_API_KEY }}" ]; then echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env; fi
         if [ -n "${{ secrets.OPEN_API_KEY }}" ]; then echo "OPEN_API_KEY=${{ secrets.OPEN_API_KEY }}" >> .env; fi
@@ -130,7 +133,10 @@ jobs:
         echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY || 'test-groq-key' }}" >> .env
         echo "DATABASE_URL=${{ secrets.DATABASE_URL || 'postgresql://test' }}" >> .env
         echo "USE_LOCAL_EMBEDDINGS=true" >> .env
-        echo "EMBEDDING_MODEL=text-embedding-3-small" >> .env
+        echo "EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2" >> .env
+        echo "EMBEDDING_SERVICE_AUTH_TOKEN=test-embed-token" >> .env
+        echo "REINDEX_TRIGGER_TOKEN=test-reindex-token" >> .env
+        echo "REINDEX_SERVICE_URL=https://example.modal.run" >> .env
         if [ -n "${{ secrets.OPENAI_API_KEY }}" ]; then echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env; fi
         if [ -n "${{ secrets.OPEN_API_KEY }}" ]; then echo "OPEN_API_KEY=${{ secrets.OPEN_API_KEY }}" >> .env; fi
 

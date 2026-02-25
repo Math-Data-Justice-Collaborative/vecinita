@@ -52,6 +52,10 @@ QUICK START - DEPLOY TO MODAL
    Add these lines:
    EMBEDDING_SERVICE_URL=https://your-modal-url.modal.run
    SCRAPER_SERVICE_URL=https://your-modal-url.modal.run
+  REINDEX_SERVICE_URL=https://your-modal-url.modal.run
+  EMBEDDING_SERVICE_AUTH_TOKEN=<shared-service-token>
+  REINDEX_TRIGGER_TOKEN=<shared-reindex-token>
+  REINDEX_CRON_SCHEDULE=0 2 * * 0
 
 6. Deploy agent to Render with updated .env.prod
 
@@ -121,7 +125,7 @@ Embedding Service → Modal ✅
   • Auto-scales during high demand
 
 Scraper Service → Modal ✅
-  • Runs on schedule (e.g., daily at 2 AM)
+  • Runs on schedule (weekly Sunday 02:00 UTC by default)
   • Idle 95% of the time
   • Resource-intensive during runs
   • Perfect for batch processing
@@ -142,12 +146,19 @@ DEPLOYMENT SEQUENCE
 2. Deploy Modal services:
    $ ./backend/scripts/deploy_modal.sh --all
 
+  This deploys both:
+  • embedding web endpoint
+  • scraper reindex app (weekly cron + /reindex trigger)
+
 3. Update .env.prod with Modal URLs
 
-4. Deploy agent to Render:
+4. Optional: trigger a manual reindex via gateway
+  POST /api/v1/scrape/reindex
+
+5. Deploy agent to Render:
    (Push to GitHub or deploy manually)
 
-5. Deploy frontend to Vercel:
+6. Deploy frontend to Vercel:
    $ cd frontend && vercel deploy --prod
 
 
@@ -165,6 +176,11 @@ TROUBLESHOOTING
 "High latency on first request"
   → Expected: Modal cold start (3-5 seconds)
   → Solution: Keep-alive ping every 4 minutes
+
+"Weekly reindex did not run"
+  → Check schedule: REINDEX_CRON_SCHEDULE
+  → Check logs: modal app logs vecinita-scraper
+  → Trigger manually: POST /api/v1/scrape/reindex
 
 
 COMPLETE DOCUMENTATION

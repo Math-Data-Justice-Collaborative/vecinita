@@ -9,6 +9,7 @@ import tempfile
 from pathlib import Path
 from typing import Optional, List
 
+import httpx
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
 from fastapi.responses import JSONResponse
 
@@ -33,6 +34,8 @@ router = APIRouter(prefix="/scrape", tags=["Scraping"])
 # Configuration
 MAX_URLS_PER_REQUEST = 100
 MAX_CONCURRENT_JOBS = 5
+REINDEX_SERVICE_URL = os.getenv("REINDEX_SERVICE_URL", "").rstrip("/")
+REINDEX_TRIGGER_TOKEN = os.getenv("REINDEX_TRIGGER_TOKEN", "")
 
 
 async def background_scrape_task(
@@ -298,6 +301,43 @@ async def cleanup_old_jobs():
         "deleted_jobs": deleted_count,
         "message": f"Deleted {deleted_count} old jobs",
     }
+
+
+@router.post("/reindex")
+async def trigger_reindex(
+    clean: bool = Query(False, description="Run full clean reindex before scraping"),
+    verbose: bool = Query(False, description="Enable verbose pipeline output"),
+):
+    """Trigger scraper+embedding reindex flow on Modal reindex service."""
+    if not REINDEX_SERVICE_URL:
+        raise HTTPException(
+            status_code=503,
+            detail="REINDEX_SERVICE_URL is not configured",
+        )
+
+    headers = {}
+    if REINDEX_TRIGGER_TOKEN:
+        headers["x-reindex-token"] = REINDEX_TRIGGER_TOKEN
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                f"{REINDEX_SERVICE_URL}/reindex",
+                params={"clean": clean, "stream": True, "verbose": verbose},
+                headers=headers,
+            )
+            response.raise_for_status()
+            payload = response.json()
+            payload["service_url"] = REINDEX_SERVICE_URL
+            return payload
+    except httpx.HTTPStatusError as exc:
+        detail = exc.response.text if exc.response is not None else str(exc)
+        raise HTTPException(
+            status_code=exc.response.status_code if exc.response else 502,
+            detail=f"Reindex trigger failed: {detail}",
+        )
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=502, detail=f"Reindex service request failed: {exc}")
 
 
 @router.get("/{job_id}")

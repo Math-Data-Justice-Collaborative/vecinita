@@ -13,7 +13,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 
 import numpy as np
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
@@ -43,6 +43,24 @@ _model_name = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-
 _provider_name = os.getenv("EMBEDDING_PROVIDER", "huggingface")
 _lock_selection = (os.getenv("EMBEDDING_LOCK", "false").lower() in ["1", "true", "yes"]) 
 _selection_file = os.getenv("EMBEDDING_SELECTION_PATH", str(Path(__file__).parent / "selection.json"))
+_auth_token = os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN") or os.getenv("MODAL_API_PROXY_SECRET")
+
+
+def _ensure_authorized(request: Request) -> None:
+    """Require token auth when EMBEDDING_SERVICE_AUTH_TOKEN is configured."""
+    if not _auth_token:
+        return
+
+    header_token = request.headers.get("x-embedding-service-token")
+    auth_header = request.headers.get("authorization", "")
+    bearer_token = ""
+    if auth_header.lower().startswith("bearer "):
+        bearer_token = auth_header.split(" ", 1)[1].strip()
+
+    if header_token == _auth_token or bearer_token == _auth_token:
+        return
+
+    raise HTTPException(status_code=401, detail="Unauthorized embedding service request")
 
 
 def _resolve_fastembed_model_name() -> str:
@@ -201,7 +219,7 @@ def _save_selection_file(provider: str, model: str, lock: bool | None):
 
 # Single Embedding
 @app.post("/embed", response_model=EmbeddingResponse)
-async def embed(request: EmbedRequest):
+async def embed(request: EmbedRequest, http_request: Request):
     """
     Generate embedding for a single text.
 
@@ -212,6 +230,7 @@ async def embed(request: EmbedRequest):
         EmbeddingResponse with embedding vector and metadata
     """
     try:
+        _ensure_authorized(http_request)
         model = get_embedding_model()
         embedding = model.encode(request.text, convert_to_numpy=True)
         return EmbeddingResponse(
@@ -219,6 +238,8 @@ async def embed(request: EmbedRequest):
             dimension=len(embedding),
             model=_model_name,
         )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error generating embedding: {e}")
         raise HTTPException(
@@ -227,7 +248,7 @@ async def embed(request: EmbedRequest):
 
 # Batch Embeddings
 @app.post("/embed-batch", response_model=BatchEmbeddingResponse)
-async def embed_batch(request: BatchEmbedRequest):
+async def embed_batch(request: BatchEmbedRequest, http_request: Request):
     """
     Generate embeddings for multiple texts (batch).
 
@@ -238,6 +259,7 @@ async def embed_batch(request: BatchEmbedRequest):
         BatchEmbeddingResponse with list of embedding vectors
     """
     try:
+        _ensure_authorized(http_request)
         model = get_embedding_model()
         embeddings = model.encode(request.texts, convert_to_numpy=True)
         return BatchEmbeddingResponse(
@@ -246,6 +268,8 @@ async def embed_batch(request: BatchEmbedRequest):
             count=len(embeddings),
             model=_model_name,
         )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error generating batch embeddings: {e}")
         raise HTTPException(
@@ -254,7 +278,7 @@ async def embed_batch(request: BatchEmbedRequest):
 
 # Similarity Search (optional utility)
 @app.post("/similarity")
-async def similarity(query_request: EmbedRequest, texts_request: BatchEmbedRequest):
+async def similarity(query_request: EmbedRequest, texts_request: BatchEmbedRequest, http_request: Request):
     """
     Find most similar texts to a query.
 
@@ -266,16 +290,18 @@ async def similarity(query_request: EmbedRequest, texts_request: BatchEmbedReque
         List of (text, similarity_score) tuples sorted by similarity
     """
     try:
-        from sklearn.metrics.pairwise import cosine_similarity
-
+        _ensure_authorized(http_request)
         model = get_embedding_model()
 
         # Encode query and texts
         query_embedding = model.encode(query_request.text)
         text_embeddings = model.encode(texts_request.texts)
 
-        # Compute similarity
-        similarities = cosine_similarity([query_embedding], text_embeddings)[0]
+        # Compute cosine similarity using numpy only.
+        query_norm = np.linalg.norm(query_embedding)
+        text_norms = np.linalg.norm(text_embeddings, axis=1)
+        denominator = np.where((query_norm * text_norms) == 0, 1e-12, query_norm * text_norms)
+        similarities = np.dot(text_embeddings, query_embedding) / denominator
 
         # Return sorted results
         results = [
@@ -285,6 +311,8 @@ async def similarity(query_request: EmbedRequest, texts_request: BatchEmbedReque
         results.sort(key=lambda x: x["similarity"], reverse=True)
 
         return {"query": query_request.text, "results": results}
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error computing similarity: {e}")
         raise HTTPException(
@@ -311,7 +339,8 @@ async def root():
 
 
 @app.get("/config")
-async def get_config():
+async def get_config(http_request: Request):
+    _ensure_authorized(http_request)
     return {
         "current": {"provider": _provider_name, "model": _model_name, "locked": _lock_selection},
         "available": {
@@ -335,7 +364,8 @@ async def get_config():
 
 
 @app.post("/config")
-async def set_config(sel: EmbeddingSelection):
+async def set_config(sel: EmbeddingSelection, http_request: Request):
+    _ensure_authorized(http_request)
     if _lock_selection:
         raise HTTPException(status_code=403, detail="Embedding selection is locked")
     if sel.provider not in {"huggingface", "fastembed"}:

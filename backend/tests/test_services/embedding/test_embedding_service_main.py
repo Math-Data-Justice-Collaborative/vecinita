@@ -5,6 +5,7 @@ Tests embedding service endpoints and model loading.
 """
 import pytest
 import json
+import importlib
 from unittest.mock import Mock, patch, MagicMock
 from fastapi.testclient import TestClient
 
@@ -18,7 +19,7 @@ def mock_embedding_model():
     mock_embedding = MagicMock()
     # Return numpy arrays like real SentenceTransformer
     mock_embedding.encode = MagicMock(
-        side_effect=lambda text, **kwargs: np.array([[0.1] * 384]) if isinstance(text, str) else np.array([[0.1] * 384 for _ in range(len(text))])
+        side_effect=lambda text, **kwargs: np.array([0.1] * 384) if isinstance(text, str) else np.array([[0.1] * 384 for _ in range(len(text))])
     )
     return mock_embedding
 
@@ -26,10 +27,13 @@ def mock_embedding_model():
 @pytest.fixture
 def embedding_app(mock_embedding_model):
     """Create embedding service app for testing."""
+    from src.embedding_service import main as server_module
+
+    server = importlib.reload(server_module)
+    server._embedding_model = None
+    server._auth_token = None
+
     with patch("src.embedding_service.main.get_embedding_model", return_value=mock_embedding_model):
-        from src.embedding_service import main as server
-        # Reset global state
-        server._embedding_model = None
         yield server.app
 
 
@@ -49,6 +53,26 @@ class TestEmbeddingHealth:
         assert response.status_code == 200
         assert response.json()["status"] == "ok"
         assert response.json()["service"] == "embedding"
+
+
+class TestEmbeddingAuth:
+    def test_embed_rejects_unauthorized_when_token_enabled(self, embedding_client):
+        from src.embedding_service import main as server
+
+        server._auth_token = "test-token"
+        response = embedding_client.post("/embed", json={"text": "hello"})
+        assert response.status_code == 401
+
+    def test_embed_accepts_token_header(self, embedding_client):
+        from src.embedding_service import main as server
+
+        server._auth_token = "test-token"
+        response = embedding_client.post(
+            "/embed",
+            json={"text": "hello"},
+            headers={"x-embedding-service-token": "test-token"},
+        )
+        assert response.status_code == 200
 
 
 class TestRootEndpoint:

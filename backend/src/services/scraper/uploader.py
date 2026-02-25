@@ -23,7 +23,7 @@ except ImportError:
 
 # Import embedding service client (preferred)
 try:
-    from src.services.embedding.client import create_embedding_client
+    from src.embedding_service.client import create_embedding_client
     EMBEDDING_SERVICE_AVAILABLE = True
 except ImportError:
     EMBEDDING_SERVICE_AVAILABLE = False
@@ -283,6 +283,10 @@ class DatabaseUploader:
 
     def _init_embeddings(self) -> None:
         """Initialize embedding model with fallback chain: Service → FastEmbed → HuggingFace."""
+        strict_startup = (
+            os.getenv("EMBEDDING_STRICT_STARTUP", "true").lower() in {"1", "true", "yes"}
+        )
+
         # Try embedding service first (lightweight, scalable)
         embedding_service_url = os.getenv(
             "EMBEDDING_SERVICE_URL", "http://embedding-service:8001")
@@ -292,13 +296,21 @@ class DatabaseUploader:
                 log.info(
                     f"Initializing Embedding Service client ({embedding_service_url})...")
                 self.embedding_model = create_embedding_client(
-                    embedding_service_url)
+                    embedding_service_url,
+                    validate_on_init=True,
+                )
                 self.embedding_client_type = "embedding_service"
                 log.info(
                     f"✓ Embedding Service client initialized (384 dimensions)")
                 return
             except Exception as e:
                 log.warning(f"Embedding Service initialization failed: {e}")
+                if strict_startup:
+                    raise RuntimeError(
+                        "Embedding service validation failed during scraper uploader startup. "
+                        "Set EMBEDDING_SERVICE_URL to a reachable Modal endpoint, or set "
+                        "EMBEDDING_STRICT_STARTUP=false only for local development fallbacks."
+                    ) from e
 
         # Fallback to FastEmbed
         if FALLBACK_EMBEDDINGS_AVAILABLE:

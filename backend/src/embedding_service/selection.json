@@ -1,5 +1,5 @@
 {
-  "provider": "fastembed",
-  "model": "BAAI/bge-small-en-v1.5",
+  "provider": "huggingface",
+  "model": "sentence-transformers/all-MiniLM-L6-v2",
   "lock": false
 }

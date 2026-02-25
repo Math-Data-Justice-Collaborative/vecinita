@@ -160,6 +160,8 @@ TOTAL:              $40/month  (68% savings!)
 
 ## Environment Configuration
 
+> Modal is the current post-hoc embedding/reindex platform. The backend keeps URL/token abstraction so Cloud Run can replace Modal later by changing env values.
+
 ### Local Development (.env.local)
 ```env
 # All services run locally in Docker
@@ -173,6 +175,10 @@ SUPABASE_URL=http://localhost:3001
 # Embedding and scraper on Modal serverless
 EMBEDDING_SERVICE_URL=https://your-workspace--vecinita-embedding-web.modal.run
 SCRAPER_SERVICE_URL=https://your-workspace--vecinita-scraper-web.modal.run
+REINDEX_SERVICE_URL=https://your-workspace--vecinita-scraper-web.modal.run
+EMBEDDING_SERVICE_AUTH_TOKEN=<shared-service-token>
+REINDEX_TRIGGER_TOKEN=<shared-reindex-token>
+REINDEX_CRON_SCHEDULE=0 2 * * 0
 SUPABASE_URL=https://your-project.supabase.co
 ```
 
@@ -215,6 +221,7 @@ nano .env.prod
 # Update these lines with your Modal URLs:
 EMBEDDING_SERVICE_URL=https://your-actual-modal-url.modal.run
 SCRAPER_SERVICE_URL=https://your-actual-modal-url.modal.run
+REINDEX_SERVICE_URL=https://your-actual-modal-url.modal.run
 ```
 
 ### Step 4: Deploy Agent Service to Render
@@ -280,10 +287,15 @@ modal app list
 - **Idle:** Scales to zero after 5 minutes
 
 ### Scraper Service (Modal)
-- **Trigger:** Cron schedule (e.g., daily at 2 AM)
+- **Trigger:** Weekly cron schedule (default: `0 2 * * 0`, Sunday 02:00 UTC)
 - **Duration:** 30-120 minutes per run
 - **Resources:** Scales up to needed RAM/CPU
 - **Cost:** Only during active scraping
+
+### Manual Reindex Trigger
+- **Gateway endpoint:** `POST /api/v1/scrape/reindex`
+- **Forwarding target:** `${REINDEX_SERVICE_URL}/reindex`
+- **Auth:** `REINDEX_TRIGGER_TOKEN` propagated as `x-reindex-token`
 
 ### Agent Service (Render)
 - **Always-On:** Zero cold start

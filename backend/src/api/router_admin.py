@@ -58,9 +58,17 @@ ADMIN_CONFIG = {
 # Service URLs from environment
 AGENT_SERVICE_URL = os.getenv("AGENT_SERVICE_URL", "http://localhost:8000")
 EMBEDDING_SERVICE_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:8001")
+EMBEDDING_SERVICE_AUTH_TOKEN = os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN") or os.getenv("MODAL_API_PROXY_SECRET")
 
 # Token storage (in-memory for now, use Redis for production)
 _cleanup_tokens: Dict[str, datetime] = {}
+
+
+def _embedding_service_headers() -> Dict[str, str]:
+    headers: Dict[str, str] = {}
+    if EMBEDDING_SERVICE_AUTH_TOKEN:
+        headers["x-embedding-service-token"] = EMBEDDING_SERVICE_AUTH_TOKEN
+    return headers
 
 
 def _parse_queue_file_path(file_path: str) -> Dict[str, Any]:
@@ -957,7 +965,10 @@ async def get_models_config(_admin=Depends(_verify_admin)):
             agent_resp.raise_for_status()
             payload["generation"] = agent_resp.json()
 
-            embed_resp = await client.get(f"{EMBEDDING_SERVICE_URL}/config")
+            embed_resp = await client.get(
+                f"{EMBEDDING_SERVICE_URL}/config",
+                headers=_embedding_service_headers(),
+            )
             embed_resp.raise_for_status()
             payload["embeddings"] = embed_resp.json()
     except httpx.HTTPError as exc:
@@ -992,6 +1003,7 @@ async def update_models_config(
                 embedding_resp = await client.post(
                     f"{EMBEDDING_SERVICE_URL}/config",
                     json=embedding_payload,
+                    headers=_embedding_service_headers(),
                 )
                 embedding_resp.raise_for_status()
                 result["embeddings"] = embedding_resp.json()
@@ -1349,6 +1361,7 @@ async def upload_document(
             embed_resp = await client.post(
                 f"{EMBEDDING_SERVICE_URL}/embed-batch",
                 json={"texts": chunks},
+                headers=_embedding_service_headers(),
             )
         if embed_resp.status_code != 200:
             raise RuntimeError(f"Embedding service returned {embed_resp.status_code}")

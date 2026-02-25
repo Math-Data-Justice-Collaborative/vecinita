@@ -320,6 +320,68 @@ class TestScrapeStatsEndpoint:
         assert data["total_jobs"] == 5
 
 
+class _FakeReindexResponse:
+    def __init__(self, payload, status_code=200):
+        self._payload = payload
+        self.status_code = status_code
+        self.text = str(payload)
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise Exception("http error")
+
+    def json(self):
+        return self._payload
+
+
+class _FakeReindexClient:
+    def __init__(self, *args, **kwargs):
+        self.captured = kwargs
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        return False
+
+    async def post(self, url, params=None, headers=None):
+        return _FakeReindexResponse(
+            {
+                "status": "queued",
+                "call_id": "fc-test-123",
+                "url": url,
+                "params": params,
+                "headers": headers or {},
+            }
+        )
+
+
+class TestReindexEndpoint:
+    def test_reindex_requires_service_url(self, scrape_client, monkeypatch):
+        from src.api import router_scrape
+
+        monkeypatch.setattr(router_scrape, "REINDEX_SERVICE_URL", "")
+        response = scrape_client.post("/api/v1/scrape/reindex")
+        assert response.status_code == 503
+
+    def test_reindex_calls_modal_service(self, scrape_client, monkeypatch):
+        from src.api import router_scrape
+
+        monkeypatch.setattr(router_scrape, "REINDEX_SERVICE_URL", "https://reindex.modal.run")
+        monkeypatch.setattr(router_scrape, "REINDEX_TRIGGER_TOKEN", "token-123")
+        monkeypatch.setattr(router_scrape.httpx, "AsyncClient", _FakeReindexClient)
+
+        response = scrape_client.post("/api/v1/scrape/reindex?clean=true&verbose=true")
+        assert response.status_code == 200
+        payload = response.json()
+
+        assert payload["status"] == "queued"
+        assert payload["call_id"] == "fc-test-123"
+        assert payload["service_url"] == "https://reindex.modal.run"
+        assert payload["params"]["clean"] is True
+        assert payload["headers"]["x-reindex-token"] == "token-123"
+
+
 class TestScrapeCleanupEndpoint:
     """Test POST /scrape/cleanup endpoint."""
 

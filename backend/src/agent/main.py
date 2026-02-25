@@ -9,7 +9,7 @@ import time
 import logging
 import traceback
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Avoid hard torch dependency during transformers import on CPU-only/broken torch envs.
 os.environ.setdefault("USE_TORCH", "0")
@@ -2003,7 +2003,7 @@ async def ask_question_stream(
     async def generate_stream():
         try:
             def _sse(payload: dict) -> str:
-                payload.setdefault("timestamp", datetime.utcnow().isoformat() + "Z")
+                payload.setdefault("timestamp", datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"))
                 return f"data: {json.dumps(payload)}\\n\\n"
 
             # Detect language unless explicitly provided

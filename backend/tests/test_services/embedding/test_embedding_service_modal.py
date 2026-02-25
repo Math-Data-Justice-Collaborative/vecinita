@@ -1,47 +1,62 @@
-"""
-Unit tests for src/embedding_service/modal_app.py
+"""Unit tests for src.embedding_service.modal_app."""
 
-Tests Modal deployment wrapper for embedding service.
-"""
-import pytest
+import importlib
 import sys
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
+
+import pytest
 
 pytestmark = pytest.mark.unit
 
-# Mock modal module before importing modal_app
-mock_modal = MagicMock()
-# Configure the mock to support the chained calls in modal_app.py
-mock_app_instance = MagicMock()
-mock_function_wrapper = MagicMock()
-mock_wrapped = MagicMock()
-mock_wrapped.mounts = []
-mock_function_wrapper.__wrapped__ = mock_wrapped
-mock_app_instance.function.return_value = lambda x: mock_function_wrapper
-mock_modal.App.return_value = mock_app_instance
-mock_modal.Image.debian_slim.return_value.pip_install.return_value = MagicMock()
-mock_modal.Mount.from_local_dir.return_value = MagicMock()
-mock_modal.Secret.from_name.return_value = MagicMock()
-sys.modules['modal'] = mock_modal
+
+@pytest.fixture
+def modal_mock(monkeypatch):
+    mock_modal = MagicMock()
+
+    app_instance = MagicMock()
+    mock_modal.App.return_value = app_instance
+
+    image_instance = MagicMock()
+    mock_modal.Image.debian_slim.return_value = image_instance
+    image_instance.pip_install.return_value = image_instance
+
+    mock_modal.Secret.from_name.return_value = MagicMock()
+
+    def _identity_decorator(*_args, **_kwargs):
+        def _wrap(fn):
+            return fn
+
+        return _wrap
+
+    app_instance.function.side_effect = _identity_decorator
+    mock_modal.asgi_app.side_effect = _identity_decorator
+
+    monkeypatch.setitem(sys.modules, "modal", mock_modal)
+    return mock_modal
 
 
-class TestModalApp:
-    """Test Modal app configuration."""
+class TestEmbeddingModalApp:
+    def test_module_loads(self, modal_mock):
+        import src.embedding_service.modal_app as modal_app
 
-    def test_modal_app_creation(self):
-        """Test that Modal app is created."""
-        from src.services.embedding import modal_app
-        # Verify app attribute exists
+        modal_app = importlib.reload(modal_app)
+
         assert hasattr(modal_app, "app")
-
-    def test_modal_image_configuration(self):
-        """Test that Modal image is properly configured."""
-        from src.services.embedding import modal_app
-        # Verify image was configured
         assert hasattr(modal_app, "image")
 
-    def test_modal_function_decoration(self):
-        """Test that modal function is decorated properly."""
-        from src.services.embedding import modal_app
-        # Just verify the module loads without error
-        assert modal_app is not None
+    def test_mount_and_secret_configuration(self, modal_mock):
+        import src.embedding_service.modal_app as modal_app
+
+        modal_app = importlib.reload(modal_app)
+
+        assert modal_app.APP_NAME == "vecinita-embedding"
+        modal_mock.App.assert_called_with("vecinita-embedding")
+        modal_mock.Secret.from_name.assert_called()
+
+    def test_web_app_callable(self, modal_mock):
+        import src.embedding_service.modal_app as modal_app
+
+        modal_app = importlib.reload(modal_app)
+
+        app = modal_app.web_app()
+        assert app is not None

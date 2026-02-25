@@ -1,77 +1,40 @@
-"""
-Modal deployment wrapper for Vecinita Embedding Service
-Wraps the embedding service for Modal serverless deployment
-"""
-import os
-import modal
+"""Modal deployment entrypoint for the embedding service."""
+
 from pathlib import Path
+import os
 
-# Create Modal app
-app = modal.App("vecinita-embedding")
+import modal
 
-# Define image with dependencies
+APP_NAME = os.getenv("MODAL_EMBEDDING_APP_NAME", "vecinita-embedding")
+SECRET_NAME = os.getenv("MODAL_SECRET_NAME", "vecinita-secrets")
+SRC_DIR = Path(__file__).resolve().parents[1]
+
+app = modal.App(APP_NAME)
+
 image = modal.Image.debian_slim().pip_install(
-    "fastapi>=0.104.0",
-    "uvicorn>=0.24.0",
-    "sentence-transformers>=5.1.2",
-    "numpy>=1.24.0",
-    "pydantic>=2.0.0",
+	"fastapi>=0.104.0",
+	"uvicorn>=0.24.0",
+	"python-dotenv>=1.0.0",
+	"numpy>=1.24.0",
+	"pydantic>=2.0.0",
+	"fastembed>=0.6.0",
 )
+
 
 @app.function(
-    image=image,
-    secrets=[modal.Secret.from_name("vecinita-secrets", must_create=False)],
-    cpu=1.0,
-    memory=512,
-    timeout=3600,
+	image=image,
+	secrets=[modal.Secret.from_name(SECRET_NAME)],
+	cpu=1.0,
+	memory=2048,
+	timeout=3600,
 )
-async def embedding_service():
-    """Run embedding service on Modal"""
-    import subprocess
-    import sys
-    
-    # Run FastAPI with uvicorn
-    subprocess.run(
-        [
-            sys.executable, "-m", "uvicorn",
-            "src.embedding_service.main:app",
-            "--host", "0.0.0.0",
-            "--port", "8001",
-        ],
-        cwd="/app",
-    )
+@modal.asgi_app()
+def web_app():
+	from src.embedding_service.main import app as fastapi_app
 
-# Mount source code
-app_path = Path(__file__).parent.parent
-app.function(image=image)(
-    embedding_service,
-).__wrapped__.mounts = [
-    modal.Mount.from_local_dir(
-        app_path / "src" / "embedding_service",
-        remote_path="/app/src/embedding_service",
-    ),
-    modal.Mount.from_local_dir(
-        app_path / "src" / "agent",
-        remote_path="/app/src/agent",
-    ),
-]
+	return fastapi_app
 
-# Health check
+
 @app.function(image=image)
-def health():
-    """Health check for monitoring"""
-    return {"status": "healthy", "service": "embedding"}
-
-# Web endpoint
-@app.web_endpoint()
-def web():
-    """Web endpoint for modal.web"""
-    from fastapi import FastAPI
-    
-    _app = FastAPI()
-    
-    @_app.get("/health")
-    async def health_check():
-        return {"status": "healthy"}
-    
-    return _app
+def health() -> dict:
+	return {"status": "ok", "service": "embedding"}

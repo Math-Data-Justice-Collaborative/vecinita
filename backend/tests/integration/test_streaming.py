@@ -237,3 +237,26 @@ def test_streaming_response_time(fastapi_client):
         # Should complete in reasonable time in CI (tool-based flow can be slower)
         assert elapsed < 30, f"Streaming took too long: {elapsed}s"
         assert response.status_code == 200
+
+
+@pytest.mark.streaming
+def test_streaming_regression_no_stream_connection_failed_event(fastapi_client, parse_sse_events):
+    """Regression: normal prompt should complete without stream-connection-failed events."""
+
+    with patch("src.agent.main.supabase") as mock_supabase:
+        mock_supabase.rpc.return_value.data = [
+            {
+                "content": "Vecinita serves answers from retrieved context.",
+                "source_url": "https://example.com/context",
+                "similarity": 0.91,
+            }
+        ]
+
+        response = fastapi_client.get(
+            "/ask-stream",
+            params={"question": "Testing 1 2 3"}
+        )
+
+    assert response.status_code == 200
+    assert response.text is not None
+    assert "stream connection failed" not in response.text.lower()

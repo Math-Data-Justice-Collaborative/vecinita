@@ -25,7 +25,12 @@ class EmbeddingServiceClient(Embeddings):
     embedding generation to a separate Render service.
     """
 
-    def __init__(self, base_url: str = "http://localhost:8001", timeout: int = 30):
+    def __init__(
+        self,
+        base_url: str = "http://localhost:8001",
+        timeout: int = 30,
+        auth_token: str | None = None,
+    ):
         """
         Initialize embedding service client.
 
@@ -35,7 +40,11 @@ class EmbeddingServiceClient(Embeddings):
         """
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
-        self.client = httpx.Client(timeout=timeout)
+        self.auth_token = auth_token or os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN") or os.getenv("MODAL_API_PROXY_SECRET")
+        headers = {}
+        if self.auth_token:
+            headers["x-embedding-service-token"] = self.auth_token
+        self.client = httpx.Client(timeout=timeout, headers=headers)
         logger.info(f"✅ Embedding Service Client initialized: {self.base_url}")
 
     def _candidate_base_urls(self) -> List[str]:
@@ -211,6 +220,7 @@ class EmbeddingServiceClient(Embeddings):
 def create_embedding_client(
     embedding_service_url: str = "http://embedding-service:8001",
     validate_on_init: bool = False,
+    auth_token: str | None = None,
 ) -> EmbeddingServiceClient:
     """
     Factory function to create embedding service client.
@@ -222,7 +232,7 @@ def create_embedding_client(
     Returns:
         EmbeddingServiceClient instance
     """
-    client = EmbeddingServiceClient(base_url=embedding_service_url)
+    client = EmbeddingServiceClient(base_url=embedding_service_url, auth_token=auth_token)
     if validate_on_init:
         client.validate_connection()
     return client

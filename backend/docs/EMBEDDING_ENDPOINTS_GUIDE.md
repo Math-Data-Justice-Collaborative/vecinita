@@ -13,11 +13,22 @@ The API gateway acts as a proxy, providing:
 - Error handling and service availability checks
 - Consistent response formatting
 - Optional authentication/rate limiting (via middleware)
+- Service-to-service token forwarding via `x-embedding-service-token`
 
 The embedding service:
 - Runs sentence-transformers models locally
 - Provides fast, efficient embedding generation
 - Supports model switching and configuration
+
+### Service Auth Contract
+
+When `EMBEDDING_SERVICE_AUTH_TOKEN` is configured, embedding-service endpoints
+`/embed`, `/embed-batch`, `/similarity`, and `/config` require either:
+
+- `x-embedding-service-token: <token>` header, or
+- `Authorization: Bearer <token>` header.
+
+The gateway forwards this token automatically from its environment.
 
 ## Endpoints
 

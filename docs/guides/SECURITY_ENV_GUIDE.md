@@ -32,6 +32,14 @@
 
 ## Environment Setup
 
+### Modal Embedding/Reindex Secrets (Production)
+Set these in your secret manager (do not commit to git):
+
+- `EMBEDDING_SERVICE_AUTH_TOKEN` (backend ↔ embedding service token)
+- `REINDEX_TRIGGER_TOKEN` (gateway ↔ scraper reindex endpoint token)
+- `MODAL_API_TOKEN_ID`, `MODAL_API_TOKEN_SECRET` (CLI/deploy credentials)
+- `REINDEX_CRON_SCHEDULE` (non-secret, but operationally critical)
+
 ### For Production Deployment
 ```bash
 # Use root .env file (already configured)

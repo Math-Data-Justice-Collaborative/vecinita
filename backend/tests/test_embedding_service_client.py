@@ -87,3 +87,10 @@ def test_embed_documents_falls_back_to_alt_batch_endpoint(monkeypatch):
     result = client.embed_documents(["hello"])
     assert result == [[0.1, 0.2]]
     assert calls == ["/embed-batch", "/embed/batch"]
+
+
+def test_client_sets_auth_header_from_env(monkeypatch):
+    monkeypatch.setenv("EMBEDDING_SERVICE_AUTH_TOKEN", "abc123")
+    client = EmbeddingServiceClient(base_url="http://localhost:8001")
+
+    assert client.client.headers.get("x-embedding-service-token") == "abc123"
