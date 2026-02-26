@@ -1,0 +1,16 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Allow documented token/header examples in documentation and generated reference artifacts"
+paths = [
+  '''^docs/''',
+  '''^\.github/llm-txt/render-llm\.txt$''',
+  '''^\.github/render-llm\.txt$''',
+]
+
+[[allowlists]]
+description = "Allow synthetic API-key fixtures in integration auth tests"
+paths = [
+  '''^backend/tests/integration/test_auth_proxy\.py$''',
+]
