@@ -1,0 +1,228 @@
+# Development override compose for running alongside existing local containers
+# Uses alternate host ports and supports public gcloud access.
+#
+# Usage examples:
+#   docker compose -f docker-compose.dev.yml up -d --build
+#   PUBLIC_HOST=<GCE_EXTERNAL_IP> docker compose -f docker-compose.dev.yml build frontend
+#
+# Public endpoints (when firewall allows):
+#   Frontend: http://<PUBLIC_HOST_OR_IP>:15173
+#   API:      http://<PUBLIC_HOST_OR_IP>:18004/api/v1
+
+services:
+  # ChromaDB - Vector/document storage service
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: vecinita-chroma-dev
+    ports:
+      - "18002:8000"
+    volumes:
+      - chroma_data_local_dev:/data
+    restart: unless-stopped
+    networks:
+      - vecinita-network-dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v2/heartbeat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Local PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: vecinita-postgres-local-dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_INITDB_ARGS: "--locale=en_US.UTF-8 --encoding=UTF8"
+    ports:
+      - "15432:5432"
+    volumes:
+      - postgres_data_local_dev:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - vecinita-network-dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgREST - REST API layer on top of PostgreSQL
+  postgrest:
+    image: postgrest/postgrest:v12.0.1
+    container_name: vecinita-postgrest-local-dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgresql://postgres:postgres@vecinita-postgres-local-dev:5432/postgres
+      PGRST_DB_SCHEMA: public
+      PGRST_DB_ANON_ROLE: postgres
+      PGRST_JWT_SECRET: dev-jwt-secret-for-local-testing-only-32chars-min
+      PGRST_JWT_AUD: ""  # Allow any audience for development
+      PGRST_JWT_ROLE_CLAIM_KEY: ".role"
+    ports:
+      - "13001:3000"  # PostgREST REST API on localhost:13001
+    restart: unless-stopped
+    networks:
+      - vecinita-network-dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # pgAdmin - PostgreSQL Management UI (Optional but useful)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: vecinita-pgadmin-local-dev
+    depends_on:
+      - postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "15050:80"
+    restart: unless-stopped
+    networks:
+      - vecinita-network-dev
+
+  # Embedding Service - Lightweight microservice for text embeddings
+  embedding-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.embedding
+    container_name: vecinita-embedding-dev
+    ports:
+      - "18001:8001"
+    environment:
+      PORT: "8001"
+      PYTHONUNBUFFERED: "1"
+      HF_HOME: "/tmp/huggingface_cache"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - vecinita-network-dev
+
+  # Agent Service - FastAPI Q&A backend
+  vecinita-agent:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vecinita-agent-dev
+    ports:
+      - "18000:8000"
+    environment:
+      PORT: "8000"
+      PYTHONUNBUFFERED: "1"
+      EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
+      CHROMA_HOST: "chroma"
+      CHROMA_PORT: "8000"
+      CHROMA_SSL: "false"
+      CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
+      CHROMA_COLLECTION_SOURCES: "vecinita_sources"
+      CHROMA_COLLECTION_QUEUE: "vecinita_queue"
+      SUPABASE_URL: "http://postgrest:3000"
+      SUPABASE_KEY: "dev-anon-key"
+      GROQ_API_KEY: "${GROQ_API_KEY}"
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/postgres"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      postgrest:
+        condition: service_healthy
+      embedding-service:
+        condition: service_healthy
+      chroma:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - vecinita-network-dev
+
+  # API Gateway - Unified /api/v1 surface used by frontend
+  vecinita-gateway:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vecinita-gateway-dev
+    ports:
+      - "18004:8004"
+    environment:
+      PORT: "8004"
+      PYTHONUNBUFFERED: "1"
+      AGENT_SERVICE_URL: "http://vecinita-agent:8000"
+      EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
+      CHROMA_HOST: "chroma"
+      CHROMA_PORT: "8000"
+      CHROMA_SSL: "false"
+      CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
+      CHROMA_COLLECTION_SOURCES: "vecinita_sources"
+      CHROMA_COLLECTION_QUEUE: "vecinita_queue"
+      SUPABASE_URL: "http://postgrest:3000"
+      SUPABASE_KEY: "dev-anon-key"
+      DEV_ADMIN_ENABLED: "true"
+      DEV_ADMIN_BEARER_TOKEN: "vecinita-dev-admin-token-2026"
+      SUPABASE_UPLOADS_BUCKET: "documents"
+    command: ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port 8004"]
+    depends_on:
+      vecinita-agent:
+        condition: service_healthy
+      embedding-service:
+        condition: service_healthy
+      chroma:
+        condition: service_healthy
+      postgrest:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - vecinita-network-dev
+
+  # Frontend - Vite React application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_GATEWAY_URL: "${VITE_GATEWAY_URL:-http://localhost:18004/api/v1}"
+        VITE_BACKEND_URL: "${VITE_BACKEND_URL:-http://localhost:18000}"
+        VITE_DEV_ADMIN_ENABLED: "true"
+        VITE_DEV_ADMIN_EMAIL: "admin@vecinita.local"
+        VITE_DEV_ADMIN_PASSWORD: "VecinitaAdmin!2026"
+        VITE_DEV_ADMIN_TOKEN: "vecinita-dev-admin-token-2026"
+    container_name: vecinita-frontend-dev
+    ports:
+      - "15173:5173"
+    depends_on:
+      - vecinita-gateway
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - vecinita-network-dev
+
+volumes:
+  postgres_data_local_dev:
+  chroma_data_local_dev:
+
+networks:
+  vecinita-network-dev:
+    driver: bridge
