@@ -154,6 +154,7 @@ class RedisRateLimiter(RateLimiterBackend):
             token_count_key = f"rl:tokens_count:{api_key}"
             
             now_ts = datetime.now().timestamp()
+            tokens_for_request = int(endpoint_limits.get('tokens_per_request', 100))
             
             # Check daily token limit
             reset_ts = self.redis_client.get(token_key)
@@ -163,9 +164,14 @@ class RedisRateLimiter(RateLimiterBackend):
             
             if not reset_ts:
                 tomorrow_ts = int((datetime.now() + timedelta(days=1)).timestamp())
+                ttl_seconds = max(1, tomorrow_ts - int(now_ts))
                 self.redis_client.set(token_key, tomorrow_ts, ex=86400)
+                self.redis_client.delete(token_count_key)
+            else:
+                ttl_seconds = max(1, int(float(reset_ts) - now_ts))
             
-            tokens_used = int(self.redis_client.incr(token_count_key) or 0)
+            tokens_used = int(self.redis_client.incrby(token_count_key, tokens_for_request) or 0)
+            self.redis_client.expire(token_count_key, ttl_seconds)
             if tokens_used > endpoint_limits.get('tokens_per_day', 10000):
                 return False, f"Daily token limit exceeded ({tokens_used} used)"
             

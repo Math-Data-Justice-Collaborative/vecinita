@@ -89,8 +89,9 @@ def create_web_search_tool(search_depth: str = "advanced", max_results: int = 5)
                     })
                 if normalized:
                     return json.dumps(normalized)
-            # DuckDuckGo fallback
-            elif ddg is not None:
+
+            # DuckDuckGo fallback (also runs when Tavily returns no results)
+            if not normalized and ddg is not None:
                 logger.info(f"Web search (DuckDuckGo): {query}")
                 results = ddg.invoke(query)
                 if isinstance(results, list):

@@ -26,7 +26,7 @@ AUTH_FAIL_CLOSED = os.getenv("AUTH_FAIL_CLOSED", "true").lower() in ["true", "1"
 # Dependency Functions (for FastAPI Depends)
 # ============================================================================
 
-async def get_api_key(authorization: Optional[str] = Header(None)) -> str:
+async def get_api_key(authorization: Optional[str] = Header(None)) -> Optional[str]:
     """
     Extract and validate API key from Authorization header.
     
@@ -41,14 +41,22 @@ async def get_api_key(authorization: Optional[str] = Header(None)) -> str:
     Raises:
         HTTPException: 401 if missing/invalid, 403 if not admin-only endpoint
     """
+    # If auth is disabled, accept missing header and avoid strict Bearer validation.
+    # This keeps local/dev ergonomics while still allowing callers to pass a token.
+    if not ENABLE_AUTH:
+        if not authorization:
+            return None
+        parts = authorization.split(maxsplit=1)
+        if len(parts) == 2 and parts[0].lower() == "bearer":
+            return parts[1]
+        return authorization
+
     if not authorization:
-        if ENABLE_AUTH:
-            raise HTTPException(
-                status_code=401,
-                detail="Missing API key. Provide 'Authorization: Bearer <api_key>' header",
-            )
-        return None
-    
+        raise HTTPException(
+            status_code=401,
+            detail="Missing API key. Provide 'Authorization: Bearer <api_key>' header",
+        )
+
     # Extract token from "Bearer <token>" format
     parts = authorization.split()
     if len(parts) != 2 or parts[0].lower() != "bearer":
@@ -56,12 +64,8 @@ async def get_api_key(authorization: Optional[str] = Header(None)) -> str:
             status_code=401,
             detail="Invalid authorization format. Use 'Authorization: Bearer <api_key>'",
         )
-    
+
     api_key = parts[1]
-    
-    # If auth is disabled, accept any format
-    if not ENABLE_AUTH:
-        return api_key
     
     # If auth is enabled, validate against admin keys for admin endpoints
     # (this is checked by require_admin_auth below)
@@ -69,7 +73,7 @@ async def get_api_key(authorization: Optional[str] = Header(None)) -> str:
     return api_key
 
 
-async def require_admin_auth(api_key: str = Depends(get_api_key)) -> str:
+async def require_admin_auth(api_key: Optional[str] = Depends(get_api_key)) -> Optional[str]:
     """
     Verify that API key belongs to an admin.
     
@@ -104,7 +108,7 @@ async def require_admin_auth(api_key: str = Depends(get_api_key)) -> str:
     return api_key
 
 
-async def require_auth(api_key: str = Depends(get_api_key)) -> str:
+async def require_auth(api_key: Optional[str] = Depends(get_api_key)) -> Optional[str]:
     """
     Require valid API key for endpoint.
     

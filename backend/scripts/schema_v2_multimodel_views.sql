@@ -1,12 +1,37 @@
 -- View to query chunks from all embedding models
+CREATE OR REPLACE FUNCTION fn_document_chunks_latest()
+RETURNS SETOF document_chunks_huggingface_miniLMv2 AS $$
+DECLARE
+    sql_query TEXT := '';
+BEGIN
+    IF to_regclass('public.document_chunks_huggingface_miniLMv2') IS NOT NULL THEN
+        sql_query := sql_query || 'SELECT * FROM document_chunks_huggingface_miniLMv2';
+    END IF;
+
+    IF to_regclass('public.document_chunks_huggingface_bge_small') IS NOT NULL THEN
+        IF sql_query <> '' THEN
+            sql_query := sql_query || ' UNION ALL ';
+        END IF;
+        sql_query := sql_query || 'SELECT * FROM document_chunks_huggingface_bge_small';
+    END IF;
+
+    IF to_regclass('public.document_chunks_openai_text_embedding_3_small') IS NOT NULL THEN
+        IF sql_query <> '' THEN
+            sql_query := sql_query || ' UNION ALL ';
+        END IF;
+        sql_query := sql_query || 'SELECT * FROM document_chunks_openai_text_embedding_3_small';
+    END IF;
+
+    IF sql_query = '' THEN
+        RETURN;
+    END IF;
+
+    RETURN QUERY EXECUTE sql_query;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
 CREATE OR REPLACE VIEW v_document_chunks_latest AS
-SELECT * FROM document_chunks_huggingface_miniLMv2
-UNION ALL
-SELECT * FROM document_chunks_huggingface_bge_small
-WHERE EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'document_chunks_huggingface_bge_small')
-UNION ALL
-SELECT * FROM document_chunks_openai_text_embedding_3_small
-WHERE EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'document_chunks_openai_text_embedding_3_small');
+SELECT * FROM fn_document_chunks_latest();
 
 -- RPC function for searching across active embedding model
 CREATE OR REPLACE FUNCTION search_similar_documents_by_model(
