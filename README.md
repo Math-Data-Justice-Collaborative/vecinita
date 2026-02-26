@@ -2,9 +2,8 @@
 
 ![Tests](https://github.com/acadiagit/vecinita/actions/workflows/test.yml/badge.svg)
 ![Codecov](https://codecov.io/gh/acadiagit/vecinita/branch/main/graph/badge.svg)
-![Python Versions](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue)
-![OS: Windows](https://img.shields.io/badge/OS-Windows-success)
-![OS: Ubuntu](https://img.shields.io/badge/OS-Ubuntu-success)
+![Python](https://img.shields.io/badge/python-3.10-blue)
+![OS](https://img.shields.io/badge/OS-Ubuntu%2022.04-success)
 
 **Vecinita** is a bilingual (English/Spanish) community Q&A assistant powered by LangGraph, combining vector database search, FAQ lookup, and web search to provide accurate answers with source attribution.
 
