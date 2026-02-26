@@ -273,8 +273,6 @@ source = ["src"]
 
 [tool.coverage.report]
 omit = [
-    "src/services/*",
-    "src/services/**",
     "src/cli/*",
     "src/cli/**",
     "src/test_faq.py",
@@ -283,7 +281,6 @@ omit = [
     "src/api/dependencies.py",
     "src/api/middleware.py",
     "src/api/rate_limiter.py",
-    "src/api/router_admin.py",
     "src/api/router_documents.py",
     "src/embedding_service/modal_app.py",
     "src/scraper/cli.py",
