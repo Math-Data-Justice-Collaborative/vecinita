@@ -64,6 +64,29 @@ vecinita/
 
 ## Quick Start
 
+### Prerequisites (Local)
+
+Use these versions (or newer compatible versions):
+
+- Python 3.10+
+- `uv` (Python package manager used by this repo)
+- Node.js 20+ and `npm` (frontend)
+
+Install `uv`:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Install Node.js via `nvm` (recommended):
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+export NVM_DIR="$HOME/.nvm"
+. "$NVM_DIR/nvm.sh"
+nvm install --lts
+```
+
 ### Option 1: Docker Compose (Recommended)
 
 ```bash
@@ -113,6 +136,16 @@ uv run -m uvicorn src.agent.main:app --reload
 
 # Run tests (108 tests)
 uv run pytest
+```
+
+If your local `.env` contains empty values, tests may still fail provider checks. Ensure at least one LLM provider is configured for runtime paths:
+
+```env
+OLLAMA_BASE_URL=http://localhost:11434
+# or
+DEEPSEEK_API_KEY=...
+# or
+OPENAI_API_KEY=...
 ```
 
 #### Frontend (React)
@@ -186,6 +219,27 @@ cd backend
 uv run pytest                    # Run all tests
 uv run pytest -v                 # Verbose output
 uv run pytest --cov              # With coverage
+```
+
+### Verified Local Test Commands
+
+These commands are the canonical local verification flow used during development:
+
+```bash
+# backend
+cd backend
+uv sync
+uv run pytest -q
+
+# frontend
+cd ../frontend
+npm install
+npm run test -- --run
+
+# independent test harness (service-light mode)
+cd ../tests
+uv sync
+SKIP_INTEGRATION=true SKIP_E2E=true uv run pytest -q
 ```
 
 Test coverage:

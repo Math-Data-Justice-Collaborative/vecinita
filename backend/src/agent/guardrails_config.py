@@ -59,6 +59,8 @@ def _safe_install_validator(grd: Any, uri_candidates: list[str], attr_candidates
                 if validator_cls is not None:
                     logger.info(f"[GUARDRAILS] Loaded validator {attr} from {uri}")
                     return validator_cls
+        except SystemExit as exc:
+            logger.warning(f"[GUARDRAILS] Validator install exited for {uri}: {exc}")
         except Exception as exc:
             logger.warning(f"[GUARDRAILS] Failed to install {uri}: {exc}")
     return None
@@ -107,6 +109,9 @@ def _build_hub_guards() -> tuple[Any, Any]:
                     input_guard = input_guard.use(detect_pii_cls())
 
         return input_guard, output_guard
+    except SystemExit as exc:
+        logger.warning(f"[GUARDRAILS] Hub guard initialization exited: {exc}")
+        return None, None
     except Exception as exc:
         logger.warning(f"[GUARDRAILS] Hub guard initialization failed: {exc}")
         return None, None
@@ -273,6 +278,8 @@ def validate_input(text: str) -> GuardResult:
 
             if isinstance(validated_output, str) and validated_output != text:
                 return GuardResult(passed=True, redacted=validated_output)
+        except SystemExit as exc:
+            logger.warning(f"[GUARDRAILS] Hub input validation exited, using local fallback: {exc}")
         except Exception as exc:
             logger.warning(f"[GUARDRAILS] Hub input validation failed, using local fallback: {exc}")
 

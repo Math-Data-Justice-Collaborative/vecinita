@@ -15,13 +15,20 @@ load_dotenv()
 @pytest.fixture(scope="session")
 def env_vars():
     """Provide environment variables for tests."""
+    def _env_or_default(key: str, default: str) -> str:
+        value = os.getenv(key)
+        if value is None or str(value).strip() == "":
+            return default
+        return value
+
     return {
-        "SUPABASE_URL": os.getenv("SUPABASE_URL", "https://test.supabase.co"),
-        "SUPABASE_KEY": os.getenv("SUPABASE_KEY", "test-key"),
-        "OLLAMA_BASE_URL": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
-        "OLLAMA_MODEL": os.getenv("OLLAMA_MODEL", "llama3.1:8b"),
-        "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY", "test-openai-key"),
-        "DATABASE_URL": os.getenv("DATABASE_URL", "postgresql://test"),
+        "SUPABASE_URL": _env_or_default("SUPABASE_URL", "https://test.supabase.co"),
+        "SUPABASE_KEY": _env_or_default("SUPABASE_KEY", "test-key"),
+        "OLLAMA_BASE_URL": _env_or_default("OLLAMA_BASE_URL", "http://localhost:11434"),
+        "OLLAMA_MODEL": _env_or_default("OLLAMA_MODEL", "llama3.1:8b"),
+        "DEEPSEEK_API_KEY": _env_or_default("DEEPSEEK_API_KEY", "test-deepseek-key"),
+        "OPENAI_API_KEY": _env_or_default("OPENAI_API_KEY", "test-openai-key"),
+        "DATABASE_URL": _env_or_default("DATABASE_URL", "postgresql://test"),
     }
 
 
