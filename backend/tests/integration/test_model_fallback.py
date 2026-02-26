@@ -134,6 +134,28 @@ def test_config_default_provider_matches_current_selection(fastapi_client, monke
 
 
 @pytest.mark.fallback
+def test_provider_auto_switch_updates_model_to_provider_default(monkeypatch):
+    """When provider changes (e.g., ollama unavailable), model should switch to a valid default too."""
+    import src.agent.main as agent_main
+
+    monkeypatch.setattr(
+        agent_main,
+        "CURRENT_SELECTION",
+        {"provider": "ollama", "model": "llama3.2", "locked": False},
+    )
+    monkeypatch.setattr(agent_main, "ollama_base_url", "")
+    monkeypatch.setattr(agent_main, "deepseek_api_key", "sk_test_deepseek")
+    monkeypatch.setattr(agent_main, "openai_api_key", None)
+
+    with patch.object(agent_main, "_save_model_selection_to_file") as mock_save:
+        agent_main._validate_or_resolve_selection()
+
+    assert agent_main.CURRENT_SELECTION["provider"] == "deepseek"
+    assert agent_main.CURRENT_SELECTION["model"] == "deepseek-chat"
+    mock_save.assert_called_once_with(provider="deepseek", model="deepseek-chat", locked=False)
+
+
+@pytest.mark.fallback
 def test_model_names_available_for_providers(fastapi_client):
     """Test /config endpoint includes model names for each provider"""
     

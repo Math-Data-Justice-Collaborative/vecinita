@@ -27,6 +27,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 	supabase chromadb psycopg2-binary \
 	beautifulsoup4 pypdf \
 	python-dotenv pydantic requests httpx langdetect tqdm \
+	python-multipart \
 	gotrue langchain-ollama langsmith ddgs
 
 # Runtime stage - minimal image

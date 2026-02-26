@@ -169,6 +169,28 @@ class TestAskEndpoint:
         response = ask_client.get("/api/v1/ask?question=Test")
         assert response.status_code == 500
 
+    @patch('httpx.AsyncClient.get')
+    def test_ask_propagates_invalid_api_key_error_details(self, mock_get, ask_client):
+        """Gateway should preserve upstream invalid key details for easier diagnosis."""
+        upstream_body = (
+            "{\"detail\":\"Error code: 401 - {'error': {'code': 'invalid_api_key', "
+            "'message': 'Incorrect API key provided'}}\"}"
+        )
+        mock_response = MagicMock()
+        mock_response.status_code = 401
+        mock_response.text = upstream_body
+        mock_response.raise_for_status.side_effect = httpx.HTTPStatusError(
+            "Error", request=MagicMock(), response=mock_response
+        )
+        mock_get.return_value = mock_response
+
+        response = ask_client.get("/api/v1/ask?question=Test")
+
+        assert response.status_code == 401
+        payload = response.json()
+        error_text = str(payload.get("error", ""))
+        assert "invalid_api_key" in error_text
+
     def test_ask_spanish_query(self, ask_client):
         """Test asking a question in Spanish."""
         with patch('httpx.AsyncClient.get') as mock_get:

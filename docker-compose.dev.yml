@@ -21,11 +21,6 @@ services:
     restart: unless-stopped
     networks:
       - vecinita-network-dev
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v2/heartbeat"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   # Local PostgreSQL Database
   postgres:
@@ -68,11 +63,6 @@ services:
     restart: unless-stopped
     networks:
       - vecinita-network-dev
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   # pgAdmin - PostgreSQL Management UI (Optional but useful)
   pgadmin:
@@ -101,6 +91,10 @@ services:
       PORT: "8001"
       PYTHONUNBUFFERED: "1"
       HF_HOME: "/tmp/huggingface_cache"
+      EMBEDDING_PROVIDER: "huggingface"
+      EMBEDDING_MODEL: "sentence-transformers/all-MiniLM-L6-v2"
+      EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:-${MODAL_API_PROXY_SECRET:-}}"
+      MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET:-}"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
@@ -121,7 +115,16 @@ services:
     environment:
       PORT: "8000"
       PYTHONUNBUFFERED: "1"
+      OLLAMA_BASE_URL: ""
+      OPEN_API_KEY: "${OPEN_API_KEY:-}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      DEEPSEEK_API_KEY: "${DEEPSEEK_API_KEY:-}"
+      DEEPSEEK_BASE_URL: "${DEEPSEEK_BASE_URL:-https://api.deepseek.com}"
+      DEFAULT_PROVIDER: "${DEFAULT_PROVIDER:-deepseek}"
+      DEFAULT_MODEL: "${DEFAULT_MODEL:-deepseek-chat}"
       EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
+      EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:-${MODAL_API_PROXY_SECRET:-}}"
+      MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET:-}"
       CHROMA_HOST: "chroma"
       CHROMA_PORT: "8000"
       CHROMA_SSL: "false"
@@ -136,11 +139,11 @@ services:
       postgres:
         condition: service_healthy
       postgrest:
-        condition: service_healthy
+        condition: service_started
       embedding-service:
         condition: service_healthy
       chroma:
-        condition: service_healthy
+        condition: service_started
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -161,8 +164,12 @@ services:
     environment:
       PORT: "8004"
       PYTHONUNBUFFERED: "1"
+      ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-http://localhost:15173,http://127.0.0.1:15173,http://localhost:5173,http://localhost:5174,http://localhost:4173}"
+      ALLOWED_ORIGIN_REGEX: "${ALLOWED_ORIGIN_REGEX:-^https?://.*$}"
       AGENT_SERVICE_URL: "http://vecinita-agent:8000"
       EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
+      EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:-${MODAL_API_PROXY_SECRET:-}}"
+      MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET:-}"
       CHROMA_HOST: "chroma"
       CHROMA_PORT: "8000"
       CHROMA_SSL: "false"
@@ -181,9 +188,9 @@ services:
       embedding-service:
         condition: service_healthy
       chroma:
-        condition: service_healthy
+        condition: service_started
       postgrest:
-        condition: service_healthy
+        condition: service_started
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8004/health"]

@@ -240,6 +240,16 @@ try:
             return "ollama"
         return normalized
 
+    def _default_model_for_provider(provider_name: str) -> str | None:
+        normalized = _normalize_provider_name(provider_name)
+        if normalized == "ollama":
+            return ollama_model or "llama3.1:8b"
+        if normalized == "deepseek":
+            return "deepseek-chat"
+        if normalized == "openai":
+            return "gpt-4o-mini"
+        return None
+
     def _validate_or_resolve_selection() -> None:
         available = _available_providers()
         if not available:
@@ -266,9 +276,11 @@ try:
             available,
         )
         CURRENT_SELECTION["provider"] = resolved
+        resolved_default_model = _default_model_for_provider(resolved)
+        CURRENT_SELECTION["model"] = resolved_default_model
         _save_model_selection_to_file(
             provider=resolved,
-            model=CURRENT_SELECTION.get("model"),
+            model=resolved_default_model,
             locked=False,
         )
 
