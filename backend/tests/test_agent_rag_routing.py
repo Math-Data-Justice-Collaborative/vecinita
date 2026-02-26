@@ -255,3 +255,59 @@ def test_agent_node_invokes_llm_without_orphan_tool_messages(monkeypatch):
     seen_tools = [m for m in fake_llm.seen_messages if isinstance(m, ToolMessage)]
     assert len(seen_tools) == 1
     assert seen_tools[0].tool_call_id == "call-db-1"
+
+
+def test_is_answer_seeking_query_handles_greetings_and_questions():
+    agent_main = _agent_main_module()
+
+    assert agent_main._is_answer_seeking_query("hello", "en") is False
+    assert agent_main._is_answer_seeking_query("hola", "es") is False
+    assert agent_main._is_answer_seeking_query("What housing programs are available?", "en") is True
+    assert agent_main._is_answer_seeking_query("¿Qué programas de vivienda hay en Providence?", "es") is True
+
+
+def test_parse_db_search_docs_accepts_valid_json_list_only():
+    agent_main = _agent_main_module()
+
+    parsed = agent_main._parse_db_search_docs('[{"content":"abc","source_url":"https://example.com"}]')
+    assert isinstance(parsed, list)
+    assert len(parsed) == 1
+    assert parsed[0]["source_url"] == "https://example.com"
+
+    assert agent_main._parse_db_search_docs("not-json") == []
+    assert agent_main._parse_db_search_docs('{"content":"abc"}') == []
+
+
+def test_is_weak_retrieval_uses_similarity_threshold():
+    agent_main = _agent_main_module()
+
+    assert agent_main._is_weak_retrieval([]) is True
+    assert agent_main._is_weak_retrieval([{"similarity": 0.19}]) is True
+    assert agent_main._is_weak_retrieval([{"similarity": 0.25}]) is False
+
+
+def test_deterministic_rag_answer_falls_back_when_llm_unavailable(monkeypatch):
+    agent_main = _agent_main_module()
+
+    def _raise_llm(*_args, **_kwargs):
+        raise RuntimeError("LLM unavailable")
+
+    monkeypatch.setattr(agent_main, "_get_llm_without_tools", _raise_llm)
+
+    answer = agent_main._build_deterministic_rag_answer(
+        question="What support is available?",
+        language="en",
+        provider="ollama",
+        model=None,
+        retrieved_docs=[
+            {
+                "content": "Sample retrieved context about support resources.",
+                "source_url": "https://example.org/support",
+                "similarity": 0.9,
+            }
+        ],
+        weak_retrieval=False,
+    )
+
+    assert "best-effort summary" in answer.lower()
+    assert "https://example.org/support" in answer

@@ -3,8 +3,9 @@
 # Production Docker Compose for GCP Compute Engine VM.
 #
 # Services:
-#   vecinita-agent  — FastAPI + LangGraph RAG agent (port 8000, internal)
-#   vecinita-embed  — Optional: run embedding service locally instead of Cloud Run
+#   vecinita-agent    — FastAPI + LangGraph RAG agent (port 8000, internal)
+#   vecinita-gateway  — Unified API gateway (port 8004, internal; proxied by nginx)
+#   vecinita-embed    — Optional: run embedding service locally instead of Cloud Run
 #
 # Ollama runs as a separate systemd service (installed by instance-setup.sh),
 # not as a container, so the agent accesses it via host.docker.internal.
@@ -61,6 +62,50 @@ services:
       - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # ── API Gateway (public API surface via nginx) ───────────────────────────
+  vecinita-gateway:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    container_name: vecinita-gateway
+    restart: unless-stopped
+    env_file:
+      - ../../backend/.env
+    environment:
+      AGENT_SERVICE_URL: "http://vecinita-agent:8000"
+      EMBEDDING_SERVICE_URL: "${EMBEDDING_SERVICE_URL}"
+      CHROMA_HOST: "chroma"
+      CHROMA_PORT: "8000"
+      CHROMA_SSL: "false"
+      CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
+      CHROMA_COLLECTION_SOURCES: "vecinita_sources"
+      CHROMA_COLLECTION_QUEUE: "vecinita_queue"
+      DEV_ADMIN_ENABLED: "${DEV_ADMIN_ENABLED:-false}"
+      DEV_ADMIN_BEARER_TOKEN: "${DEV_ADMIN_BEARER_TOKEN:-}"
+      SUPABASE_UPLOADS_BUCKET: "${SUPABASE_UPLOADS_BUCKET:-documents}"
+      GATEWAY_PORT: "8004"
+    command: ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port 8004"]
+    ports:
+      - "127.0.0.1:8004:8004"
+    depends_on:
+      chroma:
+        condition: service_healthy
+      vecinita-agent:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8004/health"]
       interval: 30s
       timeout: 10s
       retries: 3

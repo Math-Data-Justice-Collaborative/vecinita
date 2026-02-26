@@ -8,6 +8,9 @@ Demo mode available via DEMO_MODE=true environment variable for testing without 
 """
 
 import os
+import time
+import logging
+from uuid import uuid4
 from typing import Optional, AsyncGenerator, Dict, Any, List
 from datetime import datetime
 
@@ -18,6 +21,7 @@ from fastapi.responses import StreamingResponse
 from .models import AskResponse, SourceCitation
 
 router = APIRouter(prefix="/ask", tags=["Q&A"])
+logger = logging.getLogger(__name__)
 
 # Agent service configuration
 AGENT_SERVICE_URL = os.getenv("AGENT_SERVICE_URL", "http://localhost:8000")
@@ -237,6 +241,7 @@ async def ask_question(
 
 async def sse_proxy_generator(
     question: str,
+    request_id: str,
     thread_id: Optional[str] = None,
     lang: Optional[str] = None,
     provider: Optional[str] = None,
@@ -253,6 +258,10 @@ async def sse_proxy_generator(
     Yields SSE-formatted events from the agent's streaming endpoint.
     """
     try:
+        started_at = time.perf_counter()
+        first_chunk_latency_ms: Optional[int] = None
+        chunk_count = 0
+
         # Build query parameters
         params = {"question": question}
         if thread_id:
@@ -271,6 +280,13 @@ async def sse_proxy_generator(
         params["rerank"] = str(rerank).lower()
         params["rerank_top_k"] = rerank_top_k
 
+        logger.info(
+            "SSE stream start request_id=%s thread_id=%s question_length=%s",
+            request_id,
+            thread_id,
+            len(question or ""),
+        )
+
         # Stream from agent service
         async with httpx.AsyncClient(timeout=AGENT_STREAM_TIMEOUT) as client:
             async with client.stream(
@@ -283,18 +299,37 @@ async def sse_proxy_generator(
                 # Forward raw SSE bytes from agent to preserve event boundaries.
                 async for chunk in response.aiter_bytes():
                     if chunk:
+                        chunk_count += 1
+                        if first_chunk_latency_ms is None:
+                            first_chunk_latency_ms = int((time.perf_counter() - started_at) * 1000)
+                            logger.info(
+                                "SSE first chunk request_id=%s latency_ms=%s",
+                                request_id,
+                                first_chunk_latency_ms,
+                            )
                         yield chunk
 
+        logger.info(
+            "SSE stream completed request_id=%s chunks=%s first_chunk_latency_ms=%s",
+            request_id,
+            chunk_count,
+            first_chunk_latency_ms,
+        )
+
     except httpx.TimeoutException:
+        logger.warning("SSE stream timeout request_id=%s", request_id)
         error_event = 'data: {"type": "error", "message": "Request timeout"}\n\n'
         yield error_event.encode("utf-8")
     except httpx.HTTPStatusError as e:
+        logger.warning("SSE stream http error request_id=%s status=%s", request_id, e.response.status_code)
         error_event = f'data: {{"type": "error", "message": "Agent error: {e.response.status_code}"}}\n\n'
         yield error_event.encode("utf-8")
     except httpx.RequestError as e:
+        logger.warning("SSE stream request error request_id=%s error=%s", request_id, str(e))
         error_event = f'data: {{"type": "error", "message": "Connection failed: {str(e)}"}}\n\n'
         yield error_event.encode("utf-8")
     except Exception as e:
+        logger.exception("SSE stream internal error request_id=%s", request_id)
         error_event = f'data: {{"type": "error", "message": "Internal error: {str(e)}"}}\n\n'
         yield error_event.encode("utf-8")
 
@@ -334,9 +369,18 @@ async def ask_question_stream(
     Returns:
         StreamingResponse with SSE events
     """
+    request_id = str(uuid4())
+    logger.info(
+        "Incoming /ask/stream request_id=%s thread_id=%s question_length=%s",
+        request_id,
+        thread_id,
+        len(question or ""),
+    )
+
     return StreamingResponse(
         sse_proxy_generator(
             question,
+            request_id,
             thread_id,
             lang,
             provider,

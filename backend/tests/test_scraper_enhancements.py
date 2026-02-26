@@ -47,30 +47,30 @@ class TestLinkExtraction:
 
 @pytest.mark.unit
 class TestUploaderPayload:
-    @patch('src.scraper.uploader.create_client')
-    def test_loader_type_stored_in_metadata_not_top_level(self, mock_create_client, monkeypatch):
+    def test_loader_type_stored_in_metadata_not_top_level(self, monkeypatch):
         from src.scraper.uploader import DatabaseUploader, DocumentChunk
+        from src.services.scraper import uploader as uploader_module
 
-        # Mock Supabase client chain: table().insert().execute()
-        captured = {}
+        captured = {"rows": []}
 
-        class InsertExec:
-            def __init__(self, table_name):
-                self.table_name = table_name
+        class MockChromaStore:
+            def heartbeat(self):
+                return True
 
-            def insert(self, records):
-                captured['table'] = self.table_name
-                captured['records'] = records
-                return self
+            def upsert_source(self, **kwargs):
+                return None
 
-            def execute(self):
-                return {'status': 201}
+            def query_source_metadata(self, *args, **kwargs):
+                return {}
 
-        class MockClient:
-            def table(self, t):
-                return InsertExec(t)
+            def list_tags(self):
+                return []
 
-        mock_create_client.return_value = MockClient()
+            def upsert_chunks(self, rows):
+                captured["rows"].extend(rows)
+                return len(rows)
+
+        monkeypatch.setattr(uploader_module, "get_chroma_store", lambda: MockChromaStore())
 
         # Avoid loading sentence-transformers by bypassing embeddings
         monkeypatch.setenv('SUPABASE_URL', 'https://test.supabase.co')
@@ -100,15 +100,12 @@ class TestUploaderPayload:
             loader_type='Unstructured',
         )
 
-        # The upload_chunks API expects chunk dicts and builds DocumentChunk internally,
-        # so verify the payload captured by supabase mock
-        assert captured['table'] == 'document_chunks'
         assert uploaded == 1
         assert failed == 0
-        assert 'loader_type' not in captured['records'][0]
-        assert 'metadata' in captured['records'][0]
-        assert captured['records'][0]['metadata'].get(
-            'loader_type') == 'Unstructured'
+        assert captured["rows"], "Expected at least one upserted row"
+        assert 'loader_type' not in captured["rows"][0]
+        assert 'metadata' in captured["rows"][0]
+        assert captured["rows"][0]['metadata'].get('loader_type') == 'Unstructured'
 
 
 @pytest.mark.unit

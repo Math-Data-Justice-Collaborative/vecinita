@@ -8,6 +8,39 @@ from fastapi.testclient import TestClient
 pytestmark = pytest.mark.unit
 
 
+class _FakeResponse:
+    def __init__(self, text: str = "", status_code: int = 200, headers: dict | None = None, json_data=None):
+        self.text = text
+        self.status_code = status_code
+        self.headers = headers or {}
+        self._json_data = json_data or {}
+
+    def json(self):
+        return self._json_data
+
+
+class _FakeAsyncClient:
+    def __init__(self, *args, **kwargs):
+        pass
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        return False
+
+    async def get(self, url: str, **kwargs):
+        return _FakeResponse(
+            text="<html><body>Housing assistance and food support information.</body></html>",
+            status_code=200,
+            headers={"content-type": "text/html"},
+        )
+
+    async def post(self, url: str, json=None, headers=None, **kwargs):
+        texts = (json or {}).get("texts", [])
+        return _FakeResponse(json_data={"embeddings": [[0.1] * 384 for _ in texts]})
+
+
 @pytest.fixture
 def admin_client(env_vars, monkeypatch):
     for key, value in env_vars.items():
@@ -71,18 +104,29 @@ class TestAdminTagsEndpoints:
 
     def test_add_source_accepts_tags(self, admin_client):
         client, _mock_db, mock_store = admin_client
+        from src.api import router_admin
 
-        response = client.post(
-            "/api/v1/admin/sources",
-            data={"url": "https://example.com", "depth": 1, "tags": "Housing, Community"},
-        )
+        mock_store.upsert_chunks.return_value = 1
+
+        original_client = router_admin.httpx.AsyncClient
+        router_admin.httpx.AsyncClient = _FakeAsyncClient
+
+        try:
+            response = client.post(
+                "/api/v1/admin/sources",
+                data={"url": "https://example.com", "depth": 1, "tags": "Housing, Community"},
+            )
+        finally:
+            router_admin.httpx.AsyncClient = original_client
 
         assert response.status_code == 200
         body = response.json()
-        assert body["status"] == "queued"
+        assert body["status"] == "completed"
         assert body["tags"] == ["housing", "community"]
-        mock_store.upsert_source.assert_called_once()
-        mock_store.add_queue_job.assert_called_once()
+        assert body["chunks_inserted"] == 1
+        assert mock_store.upsert_source.call_count >= 2
+        assert mock_store.add_queue_job.call_count >= 2
+        mock_store.upsert_chunks.assert_called_once()
 
 
 class TestAdminSourcesList:

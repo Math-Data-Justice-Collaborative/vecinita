@@ -192,8 +192,13 @@ async def compute_similarity(request: SimilarityRequest) -> SimilarityResponse:
             dot_product = np.dot(embed1, embed2)
             norm1 = np.linalg.norm(embed1)
             norm2 = np.linalg.norm(embed2)
-            
-            similarity = float(dot_product / (norm1 * norm2))
+
+            denom = norm1 * norm2
+            if denom == 0:
+                similarity = 0.0
+            else:
+                similarity = float(dot_product / denom)
+                similarity = max(-1.0, min(1.0, similarity))
             
             return SimilarityResponse(
                 text1=request.text1,

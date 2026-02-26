@@ -3,7 +3,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Bootstrap a GCP Compute Engine VM to run:
 #   • Ollama  (LLM host, CPU or GPU)
-#   • Vecinita agent  (FastAPI, port 8000)
+#   • Vecinita agent + API gateway (FastAPI, ports 8000 and 8004 internal)
 #   • Nginx reverse proxy (HTTPS on port 443, HTTP redirect on 80)
 #
 # Usage:
@@ -81,8 +81,12 @@ fi
 
 # ── Environment file ──────────────────────────────────────────────────────────
 if [[ ! -f "$APP_DIR/backend/.env" ]]; then
-  echo "==> Creating placeholder .env — FILL IN YOUR SECRETS!"
-  cat > "$APP_DIR/backend/.env" <<'EOF'
+  if [[ -f "$APP_DIR/deploy/gcp/.env.example" ]]; then
+    echo "==> Creating backend/.env from deploy/gcp/.env.example"
+    cp "$APP_DIR/deploy/gcp/.env.example" "$APP_DIR/backend/.env"
+  else
+    echo "==> Creating placeholder .env — FILL IN YOUR SECRETS!"
+    cat > "$APP_DIR/backend/.env" <<'EOF'
 # Supabase
 SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 SUPABASE_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY
@@ -97,6 +101,11 @@ OPENAI_API_KEY=
 # Embedding service (Cloud Run URL — set after cloudrun-embed.sh)
 EMBEDDING_SERVICE_URL=https://YOUR_EMBED_SERVICE.run.app
 
+# Gateway/admin + uploads
+DEV_ADMIN_ENABLED=false
+DEV_ADMIN_BEARER_TOKEN=
+SUPABASE_UPLOADS_BUCKET=documents
+
 # Guardrails
 GUARDRAILS_ENABLED=true
 
@@ -104,6 +113,7 @@ GUARDRAILS_ENABLED=true
 LANGCHAIN_TRACING_V2=false
 LANGCHAIN_API_KEY=
 EOF
+  fi
   echo "   !!! Edit $APP_DIR/backend/.env with real credentials before starting. !!!"
 fi
 
@@ -149,7 +159,8 @@ sudo systemctl enable vecinita
 
 echo ""
 echo "==> Setup complete!"
-echo "    Agent:  http://localhost:8000 (internal)"
+echo "    Agent:    http://localhost:8000 (internal)"
+echo "    Gateway:  http://localhost:8004 (internal)"
 echo "    Nginx:  http://$(curl -sf http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip -H 'Metadata-Flavor: Google' 2>/dev/null || echo '<EXTERNAL-IP>')"
 echo ""
 echo "    Next step: edit $APP_DIR/backend/.env with real credentials, then:"

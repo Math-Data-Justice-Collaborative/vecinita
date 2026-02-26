@@ -155,6 +155,67 @@ def test_documents_download_url_returns_non_error_for_url_only_sources(documents
     assert payload["download_url"] is None
 
 
+def test_documents_download_url_resolves_upload_source_without_explicit_download_url(documents_client):
+    client, mock_store = documents_client
+
+    mock_store.get_source.return_value = {
+        "id": "upload://uploads/2026/02/26/file.txt",
+        "title": "file.txt",
+        "metadata": {
+            "source_url": "upload://uploads/2026/02/26/file.txt",
+            "download_url": "https://example.supabase.co/storage/v1/object/public/documents/uploads/2026/02/26/file.txt",
+        },
+    }
+
+    response = client.get(
+        "/api/v1/documents/download-url",
+        params={"source_url": "upload://uploads/2026/02/26/file.txt"},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["downloadable"] is True
+    assert payload["download_url"] is not None
+
+
+def test_documents_overview_excludes_test_artifacts_by_default(documents_client):
+    client, mock_store = documents_client
+
+    mock_store.iter_all_chunks.return_value = [
+        {
+            "id": "1",
+            "content": "public content",
+            "metadata": {
+                "source_url": "https://community.example.org/resource",
+                "source_domain": "community.example.org",
+                "chunk_size": 80,
+                "document_title": "Community Resource",
+                "tags": ["housing"],
+            },
+        },
+        {
+            "id": "2",
+            "content": "test content",
+            "metadata": {
+                "source_url": "upload://uploads/2026/02/26/community-resource-click.txt",
+                "source_domain": "upload",
+                "chunk_size": 40,
+                "document_title": "community-resource-click.txt",
+                "tags": ["e2e"],
+            },
+        },
+    ]
+
+    response = client.get("/api/v1/documents/overview")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["unique_sources"] == 1
+
+    response_with_test = client.get("/api/v1/documents/overview", params={"include_test_data": "true"})
+    assert response_with_test.status_code == 200
+    payload_with_test = response_with_test.json()
+    assert payload_with_test["unique_sources"] == 2
+
+
 def test_documents_tags_returns_counts(documents_client):
     client, mock_store = documents_client
 

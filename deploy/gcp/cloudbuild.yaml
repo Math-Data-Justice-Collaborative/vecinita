@@ -9,7 +9,7 @@
 #   4. Build & push embedding service image to GCR
 #   5. Deploy embedding service to Cloud Run
 #   6. Copy built frontend dist to the Compute Engine VM via gcloud scp
-#   7. SSH into VM to pull latest code and restart the agent container
+#   7. SSH into VM to pull latest code and restart the production stack
 #
 # Required Cloud Build substitution variables (set in the trigger):
 #   _VM_NAME        — Compute Engine VM name (e.g. vecinita-vm)

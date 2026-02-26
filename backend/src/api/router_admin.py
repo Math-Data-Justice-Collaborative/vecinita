@@ -59,6 +59,7 @@ ADMIN_CONFIG = {
 AGENT_SERVICE_URL = os.getenv("AGENT_SERVICE_URL", "http://localhost:8000")
 EMBEDDING_SERVICE_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:8001")
 EMBEDDING_SERVICE_AUTH_TOKEN = os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN") or os.getenv("MODAL_API_PROXY_SECRET")
+UPLOAD_STORAGE_BUCKET = os.getenv("SUPABASE_UPLOADS_BUCKET", "documents")
 
 # Token storage (in-memory for now, use Redis for production)
 _cleanup_tokens: Dict[str, datetime] = {}
@@ -1020,6 +1021,60 @@ async def update_models_config(
 # Source management — add URL to corpus, delete, list queue
 # ============================================================================
 
+def _source_job_file_path(url: str, depth: int) -> str:
+    return f"url::{depth}::{url}"
+
+
+async def _extract_text_from_url(url: str) -> str:
+    try:
+        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
+            response = await client.get(url)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Failed to fetch URL: {exc}")
+
+    if response.status_code >= 400:
+        raise HTTPException(status_code=502, detail=f"Source returned HTTP {response.status_code}")
+
+    content_type = (response.headers.get("content-type") or "").lower()
+    if "html" in content_type or "xml" in content_type:
+        from bs4 import BeautifulSoup
+
+        return BeautifulSoup(response.text, "html.parser").get_text(separator="\n")
+
+    return response.text
+
+
+def _chunk_text_content(text: str) -> List[str]:
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=CHUNK_SIZE,
+        chunk_overlap=CHUNK_OVERLAP,
+        separators=["\n\n", "\n", ". ", " ", ""],
+    )
+    return splitter.split_text(text)
+
+
+async def _embed_text_chunks(chunks: List[str]) -> List[List[float]]:
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            embed_resp = await client.post(
+                f"{EMBEDDING_SERVICE_URL}/embed-batch",
+                json={"texts": chunks},
+                headers=_embedding_service_headers(),
+            )
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Embedding service error: {exc}")
+
+    if embed_resp.status_code != 200:
+        raise HTTPException(status_code=502, detail=f"Embedding service returned {embed_resp.status_code}")
+
+    embeddings: List[List[float]] = embed_resp.json().get("embeddings", [])
+    if len(embeddings) != len(chunks):
+        raise HTTPException(status_code=502, detail="Embedding count mismatch.")
+
+    return embeddings
+
 @router.post("/sources")
 async def add_source(
     url: str = Form(..., description="URL to scrape and embed"),
@@ -1028,36 +1083,189 @@ async def add_source(
     db: Client = Depends(get_database_client),
     _admin=Depends(_verify_admin),
 ):
-    """Enqueue a URL for scraping and embedding. Requires admin auth."""
+    """Add a URL source and run ingestion (fetch, chunk, embed, upsert). Requires admin auth."""
     # Validate URL format
     import re as _re
     if not _re.match(r"^https?://", url):
         raise HTTPException(status_code=400, detail="URL must start with http:// or https://")
 
     normalized_tags = parse_tags_input(tags)
+    source_domain = _domain_from_url(url)
+    source_title = source_domain or url
+    job_id = hashlib.sha256(f"{url}:{depth}:{time.time()}".encode("utf-8")).hexdigest()
+    created_at = datetime.now(timezone.utc).isoformat()
+    started_at = datetime.now(timezone.utc).isoformat()
 
     try:
         store = get_chroma_store()
         store.upsert_source(
             url=url,
-            metadata={"tags": normalized_tags, "source_type": "web", "depth": depth},
-            title=url,
+            metadata={
+                "tags": normalized_tags,
+                "source_type": "web",
+                "depth": depth,
+                "source_domain": source_domain,
+                "created_at": created_at,
+                "updated_at": created_at,
+            },
+            title=source_title,
             is_active=True,
         )
-        job_id = hashlib.sha256(f"{url}:{depth}:{time.time()}".encode("utf-8")).hexdigest()
         store.add_queue_job(
             job_id=job_id,
             payload={
                 "url": url,
                 "depth": depth,
                 "status": "pending",
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": created_at,
+                "file_path": _source_job_file_path(url, depth),
             },
         )
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Failed to enqueue URL: {exc}")
 
-    return {"status": "queued", "url": url, "depth": depth, "tags": normalized_tags}
+        store.add_queue_job(
+            job_id=job_id,
+            payload={
+                "url": url,
+                "depth": depth,
+                "status": "processing",
+                "created_at": created_at,
+                "started_at": started_at,
+                "chunks_processed": 0,
+                "total_chunks": 0,
+                "file_path": _source_job_file_path(url, depth),
+            },
+        )
+
+        text = (await _extract_text_from_url(url)).strip()
+        if not text:
+            raise HTTPException(status_code=422, detail="No text could be extracted from the URL.")
+
+        chunks = _chunk_text_content(text)
+        if not chunks:
+            raise HTTPException(status_code=422, detail="URL content produced no chunks after splitting.")
+
+        embeddings = await _embed_text_chunks(chunks)
+
+        total_chunks = len(chunks)
+        rows: List[Dict[str, Any]] = []
+        for index, chunk_text in enumerate(chunks):
+            chunk_id = hashlib.sha256(f"{url}:{index}:{chunk_text}".encode("utf-8")).hexdigest()
+            rows.append(
+                {
+                    "id": chunk_id,
+                    "content": chunk_text,
+                    "embedding": embeddings[index],
+                    "metadata": {
+                        "source_url": url,
+                        "source_domain": source_domain,
+                        "document_title": source_title,
+                        "chunk_index": index,
+                        "total_chunks": total_chunks,
+                        "chunk_size": len(chunk_text),
+                        "tags": normalized_tags,
+                        "source_type": "web",
+                        "depth": depth,
+                        "created_at": created_at,
+                        "updated_at": datetime.now(timezone.utc).isoformat(),
+                    },
+                    "source_url": url,
+                    "source_domain": source_domain,
+                    "chunk_index": index,
+                    "total_chunks": total_chunks,
+                    "chunk_size": len(chunk_text),
+                    "document_title": source_title,
+                    "created_at": created_at,
+                    "updated_at": datetime.now(timezone.utc).isoformat(),
+                    "is_processed": True,
+                    "processing_status": "completed",
+                }
+            )
+
+        inserted = store.upsert_chunks(rows)
+        completed_at = datetime.now(timezone.utc).isoformat()
+
+        store.upsert_source(
+            url=url,
+            metadata={
+                "tags": normalized_tags,
+                "source_type": "web",
+                "depth": depth,
+                "source_domain": source_domain,
+                "scrape_count": 1,
+                "total_characters": len(text),
+                "last_scraped_at": completed_at,
+                "updated_at": completed_at,
+            },
+            title=source_title,
+            is_active=True,
+        )
+
+        store.add_queue_job(
+            job_id=job_id,
+            payload={
+                "url": url,
+                "depth": depth,
+                "status": "completed",
+                "created_at": created_at,
+                "started_at": started_at,
+                "completed_at": completed_at,
+                "chunks_processed": inserted,
+                "total_chunks": total_chunks,
+                "file_path": _source_job_file_path(url, depth),
+            },
+        )
+
+        return {
+            "status": "completed",
+            "url": url,
+            "depth": depth,
+            "tags": normalized_tags,
+            "chunks_total": total_chunks,
+            "chunks_inserted": inserted,
+            "job_id": job_id,
+        }
+    except HTTPException as http_exc:
+        try:
+            store = get_chroma_store()
+            store.add_queue_job(
+                job_id=job_id,
+                payload={
+                    "url": url,
+                    "depth": depth,
+                    "status": "failed",
+                    "created_at": created_at,
+                    "started_at": started_at,
+                    "completed_at": datetime.now(timezone.utc).isoformat(),
+                    "chunks_processed": 0,
+                    "total_chunks": 0,
+                    "error_message": str(http_exc.detail),
+                    "file_path": _source_job_file_path(url, depth),
+                },
+            )
+        except Exception:
+            logger.exception("Failed to update queue state after add_source HTTPException")
+        raise
+    except Exception as exc:
+        try:
+            store = get_chroma_store()
+            store.add_queue_job(
+                job_id=job_id,
+                payload={
+                    "url": url,
+                    "depth": depth,
+                    "status": "failed",
+                    "created_at": created_at,
+                    "started_at": started_at,
+                    "completed_at": datetime.now(timezone.utc).isoformat(),
+                    "chunks_processed": 0,
+                    "total_chunks": 0,
+                    "error_message": str(exc),
+                    "file_path": _source_job_file_path(url, depth),
+                },
+            )
+        except Exception:
+            logger.exception("Failed to update queue state after add_source exception")
+        raise HTTPException(status_code=500, detail=f"Failed to process URL source: {exc}")
 
 
 @router.patch("/sources/tags")
@@ -1378,6 +1586,33 @@ async def upload_document(
     source_url = f"upload://{storage_path}"
     normalized_tags = parse_tags_input(tags)
     public_download_url: Optional[str] = None
+    storage_bucket = UPLOAD_STORAGE_BUCKET
+    storage_uploaded = False
+
+    try:
+        content_type = file.content_type or "application/octet-stream"
+        db.storage.from_(storage_bucket).upload(
+            storage_path,
+            raw,
+            {"content-type": content_type, "upsert": "true"},
+        )
+        public_url_payload = db.storage.from_(storage_bucket).get_public_url(storage_path)
+        if isinstance(public_url_payload, str):
+            public_download_url = public_url_payload
+        elif isinstance(public_url_payload, dict):
+            public_download_url = (
+                public_url_payload.get("publicUrl")
+                or public_url_payload.get("publicURL")
+                or public_url_payload.get("public_url")
+            )
+        storage_uploaded = bool(public_download_url)
+    except Exception as exc:
+        logger.warning(
+            "Failed to upload %s to storage bucket '%s': %s",
+            file.filename,
+            storage_bucket,
+            exc,
+        )
 
     store = get_chroma_store()
     try:
@@ -1387,7 +1622,9 @@ async def upload_document(
             metadata={
                 "tags": normalized_tags,
                 "source_type": "upload",
-                "storage_path": storage_path,
+                "storage_uploaded": storage_uploaded,
+                "storage_bucket": storage_bucket if storage_uploaded else None,
+                "storage_path": storage_path if storage_uploaded else None,
                 "download_url": public_download_url,
                 "mime_type": file.content_type,
             },
@@ -1420,7 +1657,9 @@ async def upload_document(
                 "metadata": {
                     "tags": normalized_tags,
                     "source_type": "upload",
-                    "storage_path": storage_path,
+                    "storage_uploaded": storage_uploaded,
+                    "storage_bucket": storage_bucket if storage_uploaded else None,
+                    "storage_path": storage_path if storage_uploaded else None,
                     "download_url": public_download_url,
                     "mime_type": file.content_type,
                     "document_title": file.filename,
@@ -1439,8 +1678,9 @@ async def upload_document(
         "chunks_total": total_chunks,
         "chunks_inserted": inserted,
         "tags": normalized_tags,
+        "storage_bucket": storage_bucket if storage_uploaded else None,
         "download_url": public_download_url,
-        "storage_path": storage_path,
+        "storage_path": storage_path if storage_uploaded else None,
         "errors": errors[:10],  # cap error list
     }
 

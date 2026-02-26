@@ -8,6 +8,7 @@ import json
 import time
 import logging
 import traceback
+import urllib.request
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -467,6 +468,226 @@ def _db_unavailable_message(language: str) -> str:
         "I can’t access the Vecinita document database right now. "
         "Please try again in a few minutes while the connection is restored."
     )
+
+
+def _weak_retrieval_warning(language: str) -> str:
+    if language == 'es':
+        return (
+            "⚠️ No encontré suficientes coincidencias sólidas en la base local. "
+            "La siguiente respuesta es de mejor esfuerzo y puede ser incompleta."
+        )
+    return (
+        "⚠️ I did not find strong matches in the local knowledge base. "
+        "The following answer is best-effort and may be incomplete."
+    )
+
+
+def _is_answer_seeking_query(question: str, language: str) -> bool:
+    text = (question or "").strip().lower()
+    if not text:
+        return False
+
+    non_answer_intents_en = {
+        "hi", "hello", "hey", "good morning", "good afternoon", "good evening",
+        "thanks", "thank you", "ok", "okay", "cool", "bye", "goodbye",
+    }
+    non_answer_intents_es = {
+        "hola", "buenos dias", "buenas tardes", "buenas noches", "gracias",
+        "ok", "vale", "adios", "chao", "chau",
+    }
+
+    compact = " ".join(text.split())
+    if language == 'es':
+        if compact in non_answer_intents_es:
+            return False
+    else:
+        if compact in non_answer_intents_en:
+            return False
+
+    question_markers = ("?", "¿", "what", "how", "when", "where", "why", "which", "who", "can you", "help")
+    if any(marker in compact for marker in question_markers):
+        return True
+
+    return len(compact.split()) > 4
+
+
+def _parse_db_search_docs(raw_content: str) -> list[dict]:
+    content = raw_content if isinstance(raw_content, str) else str(raw_content)
+    content = content.strip()
+    if not content or not content.startswith("["):
+        return []
+    try:
+        parsed = json.loads(content)
+    except Exception:
+        return []
+    if not isinstance(parsed, list):
+        return []
+    return [item for item in parsed if isinstance(item, dict)]
+
+
+def _is_weak_retrieval(docs: list[dict]) -> bool:
+    if not docs:
+        return True
+    similarities = [float(doc.get("similarity", 0.0) or 0.0) for doc in docs]
+    if not similarities:
+        return True
+    return max(similarities) < 0.2
+
+
+def _build_sources_from_docs(docs: list[dict]) -> list[dict]:
+    sources: list[dict] = []
+    seen_urls = set()
+
+    for d in docs[:5]:
+        url = d.get("source_url") or ""
+        if not url or url in seen_urls:
+            continue
+        seen_urls.add(url)
+
+        content_text = d.get("content", "")
+        clean_title = None
+
+        if content_text.startswith("DOCUMENTS_LOADED:"):
+            lines = content_text.split('\n', 2)
+            if len(lines) >= 2:
+                for line in lines[1:]:
+                    stripped = line.strip()
+                    if stripped and len(stripped) > 3:
+                        clean_title = stripped[:100] + ("..." if len(stripped) > 100 else "")
+                        break
+
+        if not clean_title and content_text:
+            first_line = content_text.split('\n')[0].strip()
+            if first_line and len(first_line) > 3:
+                clean_title = first_line[:100] + ("..." if len(first_line) > 100 else "")
+
+        if not clean_title:
+            try:
+                from urllib.parse import urlparse
+                parsed = urlparse(url)
+                path_parts = parsed.path.rstrip('/').split('/')
+                if path_parts and path_parts[-1]:
+                    clean_title = path_parts[-1]
+                else:
+                    clean_title = parsed.netloc or url.split('/')[-1] or "Internal Document"
+            except Exception:
+                clean_title = url.split('/')[-1] or "Internal Document"
+
+        entry = {
+            "title": clean_title,
+            "url": url,
+            "type": "document",
+        }
+        lower = url.lower()
+        entry["isDownload"] = any(lower.endswith(ext) for ext in [
+            ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv"
+        ])
+        if 'chunk_index' in d:
+            entry['chunkIndex'] = d['chunk_index']
+        if 'char_start' in d:
+            entry['charStart'] = d['char_start']
+        if 'char_end' in d:
+            entry['charEnd'] = d['char_end']
+        if 'doc_index' in d:
+            entry['docIndex'] = d['doc_index']
+        if 'total_chunks' in d:
+            entry['totalChunks'] = d['total_chunks']
+        if 'metadata' in d and d['metadata']:
+            entry['metadata'] = d['metadata']
+        sources.append(entry)
+
+    return sources
+
+
+def _build_deterministic_rag_answer(
+    *,
+    question: str,
+    language: str,
+    provider: str | None,
+    model: str | None,
+    retrieved_docs: list[dict],
+    weak_retrieval: bool,
+) -> str:
+    context_blocks = []
+    for index, doc in enumerate(retrieved_docs[:5], start=1):
+        source = doc.get("source_url") or "Internal Document"
+        content = (doc.get("content") or "").strip()
+        if not content:
+            continue
+        context_blocks.append(f"[{index}] Source: {source}\n{content}")
+    context_text = "\n\n".join(context_blocks) if context_blocks else ""
+
+    if language == 'es':
+        if context_text:
+            prompt = (
+                "Responde usando principalmente el contexto recuperado de la base vectorial local. "
+                "Si el contexto no alcanza para una parte, dilo claramente. "
+                "Incluye citas en formato (Fuente: URL) cuando uses el contexto.\n\n"
+                f"Pregunta: {question}\n\n"
+                f"Contexto recuperado:\n{context_text}"
+            )
+        else:
+            prompt = (
+                "No se recuperó contexto útil de la base local. "
+                "Da una respuesta cautelosa y explícitamente limitada. "
+                "No afirmes certeza cuando no la tengas.\n\n"
+                f"Pregunta: {question}"
+            )
+    else:
+        if context_text:
+            prompt = (
+                "Answer primarily using the retrieved local vector database context. "
+                "If context is insufficient for any part, state that explicitly. "
+                "Include citations in the format (Source: URL) when using context.\n\n"
+                f"Question: {question}\n\n"
+                f"Retrieved context:\n{context_text}"
+            )
+        else:
+            prompt = (
+                "No useful context was retrieved from the local knowledge base. "
+                "Provide a cautious, explicitly limited best-effort response. "
+                "Do not imply certainty where none exists.\n\n"
+                f"Question: {question}"
+            )
+
+    try:
+        llm = _get_llm_without_tools(provider, model)
+        response = llm.invoke([HumanMessage(content=prompt)])
+        answer = response.content if hasattr(response, "content") else str(response)
+    except Exception as exc:
+        logger.warning("Deterministic generation fallback activated due to model error: %s", exc)
+        if language == 'es':
+            if retrieved_docs:
+                source = retrieved_docs[0].get("source_url") or "Documento interno"
+                snippet = (retrieved_docs[0].get("content") or "").strip()[:260]
+                answer = (
+                    "No pude consultar el modelo de lenguaje en este momento. "
+                    "Comparto un resumen de mejor esfuerzo basado en el contenido recuperado:\n\n"
+                    f"{snippet}\n\n(Fuente: {source})"
+                )
+            else:
+                answer = (
+                    "No pude consultar el modelo de lenguaje y no se recuperó contexto suficiente. "
+                    "Intenta reformular la pregunta o vuelve a intentar en unos minutos."
+                )
+        else:
+            if retrieved_docs:
+                source = retrieved_docs[0].get("source_url") or "Internal Document"
+                snippet = (retrieved_docs[0].get("content") or "").strip()[:260]
+                answer = (
+                    "I could not reach the language model right now. "
+                    "Here is a best-effort summary from retrieved context:\n\n"
+                    f"{snippet}\n\n(Source: {source})"
+                )
+            else:
+                answer = (
+                    "I could not reach the language model and insufficient context was retrieved. "
+                    "Please rephrase your question or try again in a few minutes."
+                )
+
+    if weak_retrieval:
+        return f"{_weak_retrieval_warning(language)}\n\n{answer}"
+    return answer
 
 
 def _build_clarification_payload(content: str, language: str) -> dict:
@@ -1683,104 +1904,25 @@ async def ask_question(
         # If PII was detected and redacted, use redacted version
         effective_question = guard_result.redacted if guard_result.redacted else question
 
-        local_static = _find_static_faq_answer(effective_question, lang)
-        if local_static:
-            logger.info("Returning static FAQ answer (local matcher).")
-            return {"answer": local_static, "thread_id": thread_id}
-        # Fallback to tool-based static matcher (optional)
-        try:
-            static_answer = static_response_tool.invoke({
-                "query": effective_question,
-                "language": lang
-            })
-            if static_answer:
-                logger.info(
-                    "Returning static FAQ answer without invoking agent (tool).")
-                return {"answer": static_answer, "thread_id": thread_id}
-        except Exception as static_exc:
-            logger.warning(f"Static response check failed: {static_exc}")
+        answer_seeking = _is_answer_seeking_query(effective_question, lang)
+        if not answer_seeking:
+            local_static = _find_static_faq_answer(effective_question, lang)
+            if local_static:
+                logger.info("Returning static FAQ answer (local matcher, non-answer intent).")
+                return {"answer": local_static, "thread_id": thread_id}
+            try:
+                static_answer = static_response_tool.invoke({
+                    "query": effective_question,
+                    "language": lang
+                })
+                if static_answer:
+                    logger.info(
+                        "Returning static FAQ answer without retrieval (non-answer intent).")
+                    return {"answer": static_answer, "thread_id": thread_id}
+            except Exception as static_exc:
+                logger.warning(f"Static response check failed: {static_exc}")
 
-        # Build system prompt based on language
-        if lang == 'es':
-            system_prompt = f"""
-            Eres un asistente comunitario de {LOCATION_CONTEXT['organization']}, servicial y profesional.
-            Ubicado en {LOCATION_CONTEXT['location']} ({LOCATION_CONTEXT['address']}).
-            
-            Tu objetivo es dar respuestas claras, concisas y precisas basadas en la información disponible
-            sobre recursos de la comunidad de Rhode Island, especialmente relacionados con:
-            {', '.join(LOCATION_CONTEXT['focus_areas'])}
-
-            CONTEXTO IMPORTANTE:
-            - Sirves a la comunidad de la cuenca {LOCATION_CONTEXT['service_area']}
-            - Enfócate en recursos y programas locales de Rhode Island
-            - Si una pregunta no es sobre {LOCATION_CONTEXT['location']}, ayuda a aclarar la ubicación correcta
-
-            HERRAMIENTAS DISPONIBLES:
-            1. static_response_tool: Preguntas frecuentes sobre Vecinita
-            2. db_search: Busca en la base de datos interna de documentos comunitarios
-            3. clarify_question: Hacer preguntas de seguimiento cuando la búsqueda en BD no da resultados
-            4. web_search: Usa como ÚLTIMO RECURSO para buscar información externa
-
-            REGLAS OBLIGATORIAS (DEBES SEGUIRLAS EXACTAMENTE):
-            1. PRIMERO: SIEMPRE llama static_response_tool para CADA pregunta
-            2. SEGUNDO: Si static_response_tool no da respuesta, DEBES llamar db_search (OBLIGATORIO)
-            3. Si db_search retorna 0 documentos, DEBES llamar clarify_question para pedir más detalles
-            4. SOLO usa web_search si db_search falla y clarify_question no obtiene respuesta
-            5. NUNCA inventar respuestas sin usar las herramientas disponibles
-            6. SIEMPRE citar fuentes con formato: "(Fuente: URL)" o "(Fuente: Documento interno)"
-            7. Responde SIEMPRE en español
-
-            IMPORTANTE: No describas lo que vas a hacer. HAZLO. Llama las herramientas directamente.
-            """
-        else:  # Default to English
-            system_prompt = f"""
-            You are a community assistant for {LOCATION_CONTEXT['organization']}, helpful and professional.
-            Located in {LOCATION_CONTEXT['location']} ({LOCATION_CONTEXT['address']}).
-            
-            Your goal is to provide clear, concise, and accurate answers based on available information
-            about community resources in Rhode Island, especially related to:
-            {', '.join(LOCATION_CONTEXT['focus_areas'])}
-
-            IMPORTANT CONTEXT:
-            - You serve the {LOCATION_CONTEXT['service_area']} community
-            - Focus on local Rhode Island resources and programs
-            - If a question is not about {LOCATION_CONTEXT['location']}, help clarify the correct location
-
-            AVAILABLE TOOLS:
-            1. static_response_tool: Frequently asked questions about Vecinita
-            2. db_search: Search the internal database of community documents
-            3. clarify_question: Ask follow-up questions when database search returns no results
-            4. web_search: Use as LAST RESORT for external information
-
-            MANDATORY RULES (FOLLOW EXACTLY):
-            1. FIRST: ALWAYS call static_response_tool for EVERY question
-            2. SECOND: If static_response_tool has no answer, you MUST call db_search (MANDATORY)
-            3. If db_search returns 0 documents, you MUST call clarify_question to ask for details
-            4. ONLY use web_search if db_search fails and clarify_question gets no response
-            5. NEVER make up answers without using available tools
-            6. ALWAYS cite sources with format: "(Source: URL)" or "(Source: Internal Document)"
-            7. Always respond in the user's language
-
-            IMPORTANT: Do not describe what you will do. DO IT. Call the tools directly.
-            """
-
-        # Create messages for the agent
-        messages = [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=question)
-        ]
-
-        # Prepare state
-        initial_state = {
-            "messages": messages,
-            "question": question,
-            "language": lang,
-            "provider": provider,
-            "model": model,
-        }
-
-        # Configure graph execution with thread_id for conversation history
-        config = {"configurable": {"thread_id": thread_id}}
+        # Deterministic, intent-gated RAG is handled below.
 
         request_tags = parse_tags_input(tags)
         search_token = set_db_search_options(
@@ -1790,147 +1932,46 @@ async def ask_question(
             rerank=rerank,
             rerank_top_k=rerank_top_k,
         )
-
-        logger.info("Invoking LangGraph agent...")
         try:
-            result = graph.invoke(initial_state, config)
+            logger.info("Intent gate: answer_seeking=%s", answer_seeking)
+
+            if not answer_seeking:
+                local_non_answer = _find_static_faq_answer(effective_question, lang)
+                if local_non_answer:
+                    answer = local_non_answer
+                else:
+                    fallback_llm = _get_llm_without_tools(provider, model)
+                    quick_prompt = (
+                        f"Respond briefly and naturally in {'Spanish' if lang == 'es' else 'English'}: {effective_question}"
+                    )
+                    raw = fallback_llm.invoke([HumanMessage(content=quick_prompt)])
+                    answer = raw.content if hasattr(raw, "content") else str(raw)
+                sources: list[dict] = []
+            else:
+                logger.info("Running mandatory one-shot db_search for answer-seeking query")
+                raw_search = db_search_tool.invoke({"query": effective_question})
+                retrieved_docs = _parse_db_search_docs(raw_search if isinstance(raw_search, str) else str(raw_search))
+                weak_retrieval = _is_weak_retrieval(retrieved_docs)
+
+                answer = _build_deterministic_rag_answer(
+                    question=effective_question,
+                    language=lang,
+                    provider=provider,
+                    model=model,
+                    retrieved_docs=retrieved_docs,
+                    weak_retrieval=weak_retrieval,
+                )
+                sources = _build_sources_from_docs(retrieved_docs)
+                logger.info("Deterministic RAG complete: docs=%s, weak=%s, sources=%s", len(retrieved_docs), weak_retrieval, len(sources))
         finally:
             reset_db_search_options(search_token)
-        logger.info("Agent execution completed")
-
-        # Extract the final answer from messages
-        final_message = result["messages"][-1]
-        answer = final_message.content if hasattr(
-            final_message, "content") else str(final_message)
-
-        logger.info(f"Agent response: {answer[:200]}...")
-
-        # Extract sources from ToolMessage objects in the conversation history
-        sources: list[dict] = []
-        seen_urls = set()  # Deduplicate sources by URL
-
-        logger.info(
-            f"Extracting sources from {len(result['messages'])} messages in conversation history")
-
-        for msg in result["messages"]:
-            if not isinstance(msg, ToolMessage):
-                continue
-
-            tool_name = getattr(msg, 'name', None)
-            content = msg.content
-
-            logger.debug(
-                f"Processing ToolMessage from tool: {tool_name}, content type: {type(content)}")
-
-            # Parse JSON content if it's a string
-            if isinstance(content, str):
-                try:
-                    content = json.loads(content)
-                    logger.debug(
-                        f"Parsed JSON content, result type: {type(content)}, length: {len(content) if isinstance(content, list) else 'N/A'}")
-                except (json.JSONDecodeError, ValueError):
-                    logger.debug(
-                        f"Failed to parse JSON content: {content[:100]}")
-                    continue
-
-            # Extract DB search results
-            if tool_name == 'db_search' and isinstance(content, list):
-                for d in content[:5]:
-                    url = d.get("source_url") or ""
-                    if url and url not in seen_urls:
-                        seen_urls.add(url)
-
-                        # Extract clean title from content by removing scraper metadata header
-                        content_text = d.get("content", "")
-                        clean_title = None
-
-                        # Check if content starts with scraper metadata header
-                        if content_text.startswith("DOCUMENTS_LOADED:"):
-                            # Find the end of the metadata line (first newline)
-                            lines = content_text.split('\n', 2)
-                            if len(lines) >= 2:
-                                # Use the first non-empty line after metadata as title
-                                for line in lines[1:]:
-                                    stripped = line.strip()
-                                    if stripped and len(stripped) > 3:
-                                        # Take first 100 chars as title
-                                        clean_title = stripped[:100] + \
-                                            ("..." if len(stripped) > 100 else "")
-                                        break
-
-                        # If no clean title extracted, try first line of content
-                        if not clean_title and content_text:
-                            first_line = content_text.split('\n')[0].strip()
-                            if first_line and len(first_line) > 3:
-                                clean_title = first_line[:100] + \
-                                    ("..." if len(first_line) > 100 else "")
-
-                        # Fallback to domain name or filename from URL
-                        if not clean_title:
-                            try:
-                                from urllib.parse import urlparse
-                                parsed = urlparse(url)
-                                # Try filename first
-                                path_parts = parsed.path.rstrip('/').split('/')
-                                if path_parts and path_parts[-1]:
-                                    clean_title = path_parts[-1]
-                                else:
-                                    # Use domain
-                                    clean_title = parsed.netloc or url.split(
-                                        '/')[-1] or "Internal Document"
-                            except:
-                                clean_title = url.split(
-                                    '/')[-1] or "Internal Document"
-
-                        entry = {
-                            "title": clean_title,
-                            "url": url,
-                            "type": "document",
-                        }
-                        lower = url.lower()
-                        entry["isDownload"] = any(lower.endswith(ext) for ext in [
-                            ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv"
-                        ])
-                        # Add position information if available
-                        if 'chunk_index' in d:
-                            entry['chunkIndex'] = d['chunk_index']
-                        if 'char_start' in d:
-                            entry['charStart'] = d['char_start']
-                        if 'char_end' in d:
-                            entry['charEnd'] = d['char_end']
-                        if 'doc_index' in d:
-                            entry['docIndex'] = d['doc_index']
-                        # Add total_chunks for multi-chunk sources
-                        if 'total_chunks' in d:
-                            entry['totalChunks'] = d['total_chunks']
-                        # Add metadata (includes link type, link source, loader type, etc.)
-                        if 'metadata' in d and d['metadata']:
-                            entry['metadata'] = d['metadata']
-                        sources.append(entry)
-
-            # Extract web search results
-            elif tool_name == 'web_search' and isinstance(content, list):
-                for r in content[:5]:
-                    url = r.get("url") or ""
-                    if url and url not in seen_urls:
-                        seen_urls.add(url)
-                        entry = {
-                            "title": r.get("title") or url.split('/')[-1] or "Web Result",
-                            "url": url,
-                            "type": "link",
-                            "isDownload": url.lower().endswith(".pdf"),
-                        }
-                        sources.append(entry)
-
-        logger.info(f"Extracted {len(sources)} sources from tool calls")
 
         db_status = get_last_search_status()
-        if not sources and db_status in {"schema_error", "infra_error", "error"}:
+        if answer_seeking and not sources and db_status in {"schema_error", "infra_error", "error"}:
             logger.warning(
-                "Overriding final answer due to retrieval backend failure (status=%s).",
+                "Retrieval backend failure detected during deterministic path (status=%s).",
                 db_status,
             )
-            answer = _db_unavailable_message(lang)
 
         # --- GuardrailsAI: validate output before returning ---
         from src.agent.guardrails_config import validate_output
@@ -2035,23 +2076,6 @@ async def ask_question_stream(
                 "waiting": False,
             })
 
-            # Try static response first
-            local_static = _find_static_faq_answer(question, lang_local)
-            if local_static:
-                logger.info("Returning static FAQ answer (streaming).")
-                yield _sse({
-                    "type": "complete",
-                    "answer": local_static,
-                    "sources": [],
-                    "thread_id": thread_id,
-                    "plan": "",
-                    "metadata": {
-                        "progress": 100,
-                        "stage": "complete",
-                    },
-                })
-                return
-
             # Yield thinking message for analysis
             msg = get_agent_thinking_message('analyzing', lang_local)
             yield _sse({
@@ -2062,273 +2086,102 @@ async def ask_question_stream(
                 "status": "working",
                 "waiting": False,
             })
+            answer_seeking = _is_answer_seeking_query(question, lang_local)
+            logger.info("Streaming intent gate: answer_seeking=%s", answer_seeking)
 
-            # Build system prompt based on language
-            fast_mode_local = bool(agent_fast_mode)
-            concise_rules_es = (
-                f"\nREGLAS DE VELOCIDAD/CONCISIÓN:\n"
-                f"- Responde en máximo {agent_max_response_sentences} oraciones cortas.\n"
-                f"- Máximo aproximado {agent_max_response_chars} caracteres.\n"
-                f"- Prioriza una respuesta directa y luego fuentes.\n"
-            )
-            concise_rules_en = (
-                f"\nSPEED/CONCISENESS RULES:\n"
-                f"- Reply in at most {agent_max_response_sentences} short sentences.\n"
-                f"- Keep output near {agent_max_response_chars} characters max.\n"
-                f"- Prioritize direct answer first, then sources.\n"
-            )
+            if not answer_seeking:
+                local_static = _find_static_faq_answer(question, lang_local)
+                if local_static:
+                    logger.info("Returning static FAQ answer (streaming, non-answer intent).")
+                    yield _sse({
+                        "type": "complete",
+                        "answer": local_static,
+                        "sources": [],
+                        "thread_id": thread_id,
+                        "plan": "",
+                        "metadata": {
+                            "progress": 100,
+                            "stage": "complete",
+                        },
+                    })
+                    return
 
-            if lang_local == 'es':
-                system_prompt = """
-Eres un asistente comunitario, servicial y profesional para el proyecto Vecinita.
-Tu objetivo es dar respuestas claras, concisas y precisas basadas en la información disponible.
-
-HERRAMIENTAS DISPONIBLES:
-1. static_response_tool: Preguntas frecuentes sobre Vecinita
-2. db_search: Busca en la base de datos interna de documentos comunitarios
-3. clarify_question: Hacer preguntas de seguimiento cuando la búsqueda en BD no da resultados
-4. web_search: Usa como ÚLTIMO RECURSO para buscar información externa
-
-REGLAS OBLIGATORIAS (DEBES SEGUIRLAS EXACTAMENTE):
-1. PRIMERO: SIEMPRE llama static_response_tool para CADA pregunta
-2. SEGUNDO: Si static_response_tool no da respuesta, DEBES llamar db_search (OBLIGATORIO)
-3. Si db_search retorna 0 documentos, DEBES llamar clarify_question para pedir más detalles
-4. SOLO usa web_search si db_search falla y clarify_question no obtiene respuesta
-5. NUNCA inventar respuestas sin usar las herramientas disponibles
-6. SIEMPRE citar fuentes con formato: "(Fuente: URL)" o "(Fuente: Documento interno)"
-7. Responde SIEMPRE en español
-
-IMPORTANTE: No describas lo que vas a hacer. HAZLO. Llama las herramientas directamente.
-"""
-                if fast_mode_local:
-                    system_prompt += concise_rules_es
-            else:  # Default to English
-                system_prompt = """
-You are a helpful and professional community assistant for the Vecinita project.
-Your goal is to provide clear, concise, and accurate answers based on available information.
-
-AVAILABLE TOOLS:
-1. static_response_tool: Frequently asked questions about Vecinita
-2. db_search: Search the internal database of community documents
-3. clarify_question: Ask follow-up questions when database search returns no results
-4. web_search: Use as LAST RESORT for external information
-
-MANDATORY RULES (FOLLOW EXACTLY):
-1. FIRST: ALWAYS call static_response_tool for EVERY question
-2. SECOND: If static_response_tool has no answer, you MUST call db_search (MANDATORY)
-3. If db_search returns 0 documents, you MUST call clarify_question to ask for details
-4. ONLY use web_search if db_search fails and clarify_question gets no response
-5. NEVER make up answers without using available tools
-6. ALWAYS cite sources with format: "(Source: URL)" or "(Source: Internal Document)"
-7. Always respond in the user's language
-
-IMPORTANT: Do not describe what you will do. DO IT. Call the tools directly.
-"""
-                if fast_mode_local:
-                    system_prompt += concise_rules_en
-
-            # Create messages for the agent
-            messages = [
-                SystemMessage(content=system_prompt),
-                HumanMessage(content=question)
-            ]
-
-            # If this is a clarification response, add it to the conversation
-            if clarification_response:
-                messages.append(HumanMessage(
-                    content=f"Based on your questions, here is my clarification: {clarification_response}"))
-
-            # Prepare state
-            initial_state = {
-                "messages": messages,
-                "question": question,
-                "language": lang_local,
-                "provider": provider,
-                "model": model,
-                "fast_mode": fast_mode_local,
-                "plan": None,
-            }
-
-            # Configure graph execution with thread_id for conversation history
-            config = {"configurable": {"thread_id": thread_id}}
-
-            logger.info(
-                "Invoking LangGraph agent with tool progress tracking (streaming)...")
-
-            # Track which tools have been executed
-            executed_tools = set()
-
-            request_tags = parse_tags_input(tags)
-            search_token = set_db_search_options(
-                tags=request_tags,
-                tag_match_mode=tag_match_mode,
-                include_untagged_fallback=include_untagged_fallback,
-                rerank=rerank,
-                rerank_top_k=rerank_top_k,
-            )
-
-            # Execute graph once with streaming and track tool execution.
-            # IMPORTANT: avoid calling graph.invoke after graph.stream,
-            # otherwise the same request is executed twice.
-            final_state = None
-            seen_tool_messages = set()
-            tool_progress_base = 35
-            tool_progress_step = 12
-            try:
-                for state_update in graph.stream(initial_state, config, stream_mode="values"):
-                    if not state_update:
-                        continue
-
-                    final_state = state_update
-                    messages_list = state_update.get("messages", [])
-
-                    for msg in messages_list:
-                        tool_name = getattr(msg, "name", None)
-                        if not tool_name:
-                            continue
-                        msg_type = msg.__class__.__name__
-                        if msg_type != "ToolMessage":
-                            continue
-
-                        msg_fingerprint = (
-                            tool_name,
-                            getattr(msg, "tool_call_id", None),
-                            str(getattr(msg, "content", ""))[:120],
-                        )
-                        if msg_fingerprint in seen_tool_messages:
-                            continue
-
-                        seen_tool_messages.add(msg_fingerprint)
-                        if tool_name not in executed_tools:
-                            executed_tools.add(tool_name)
-                            tool_msg = get_agent_thinking_message(tool_name, lang_local)
-                            logger.info(f"Agent activity: {tool_name}")
-                            progress_value = min(80, tool_progress_base + ((len(executed_tools) - 1) * tool_progress_step))
-                            yield _sse({
-                                "type": "thinking",
-                                "message": tool_msg,
-                                "stage": "tooling",
-                                "progress": progress_value,
-                                "status": "working",
-                                "waiting": False,
-                                "tool": tool_name,
-                            })
-                            yield _sse({
-                                "type": "tool_event",
-                                "phase": "start",
-                                "tool": tool_name,
-                                "message": tool_msg,
-                                "stage": "tooling",
-                                "progress": progress_value,
-                                "status": "working",
-                                "transient": True,
-                                "waiting": True,
-                            })
-
-                        compact_result = _summarize_tool_result(
-                            tool_name,
-                            str(getattr(msg, "content", "")),
-                            lang_local,
-                        )
-                        progress_value = min(90, tool_progress_base + (len(executed_tools) * tool_progress_step))
-                        yield _sse({
-                            "type": "tool_event",
-                            "phase": "result",
-                            "tool": tool_name,
-                            "message": compact_result,
-                            "stage": "tooling",
-                            "progress": progress_value,
-                            "status": "working",
-                            "transient": True,
-                            "waiting": False,
-                        })
-
-                        if tool_name == "clarify_question":
-                            yield _sse(_build_clarification_payload(
-                                str(getattr(msg, "content", "")),
-                                lang_local,
-                            ))
-            except Exception as e:
-                logger.error(f"Graph invocation error: {e}")
-                raise
-            finally:
-                reset_db_search_options(search_token)
-
-            if final_state is None:
-                logger.warning("Streaming produced no state updates, falling back to single invoke")
-                final_state = graph.invoke(initial_state, config)
-
-            logger.info("Agent execution completed (streaming)")
-
-            # Extract the final answer from messages
-            final_message = final_state["messages"][-1]
-            answer = final_message.content if hasattr(
-                final_message, "content") else str(final_message)
-
-            logger.info(f"Agent response (streaming): {answer[:200]}...")
-
-            # Extract sources from ToolMessage objects
             sources: list[dict] = []
-            seen_urls = set()
+            plan = ""
 
-            logger.info(
-                f"Extracting sources from {len(final_state['messages'])} messages in conversation history (streaming)")
+            if not answer_seeking:
+                local_non_answer = _find_static_faq_answer(question, lang_local)
+                if local_non_answer:
+                    answer = local_non_answer
+                else:
+                    llm_plain = _get_llm_without_tools(provider, model)
+                    quick_prompt = (
+                        f"Respond briefly and naturally in {'Spanish' if lang_local == 'es' else 'English'}: {question}"
+                    )
+                    plain = llm_plain.invoke([HumanMessage(content=quick_prompt)])
+                    answer = plain.content if hasattr(plain, "content") else str(plain)
+            else:
+                tool_msg = get_agent_thinking_message('db_search', lang_local)
+                yield _sse({
+                    "type": "thinking",
+                    "message": tool_msg,
+                    "stage": "tooling",
+                    "progress": 40,
+                    "status": "working",
+                    "waiting": False,
+                    "tool": "db_search",
+                })
+                yield _sse({
+                    "type": "tool_event",
+                    "phase": "start",
+                    "tool": "db_search",
+                    "message": tool_msg,
+                    "stage": "tooling",
+                    "progress": 42,
+                    "status": "working",
+                    "transient": True,
+                    "waiting": True,
+                })
 
-            for msg in final_state["messages"]:
-                # Check if this is a ToolMessage with db_search results
-                if hasattr(msg, 'name') and msg.name == 'db_search':
-                    try:
-                        content = msg.content if isinstance(
-                            msg.content, str) else str(msg.content)
-                        docs = json.loads(
-                            content) if content.strip().startswith('[') else []
-                        for doc in docs:
-                            url = doc.get('source_url', '')
-                            if url and url not in seen_urls:
-                                sources.append({
-                                    "title": doc.get('content', '')[:60] + '...',
-                                    "url": url,
-                                    "type": "document",
-                                    "similarity": doc.get('similarity', 0)
-                                })
-                                seen_urls.add(url)
-                    except Exception:
-                        pass
-
-                # Check if this is a ToolMessage with web_search results
-                elif hasattr(msg, 'name') and msg.name == 'web_search':
-                    try:
-                        content = msg.content if isinstance(
-                            msg.content, str) else str(msg.content)
-                        results = json.loads(
-                            content) if content.strip().startswith('[') else []
-                        for r in results:
-                            url = r.get('url')
-                            if url and url not in seen_urls:
-                                seen_urls.add(url)
-                                entry = {
-                                    "title": r.get("title") or url.split('/')[-1] or "Web Result",
-                                    "url": url,
-                                    "type": "link",
-                                    "isDownload": url.lower().endswith(".pdf"),
-                                }
-                                sources.append(entry)
-                    except Exception:
-                        pass
-
-            logger.info(
-                f"Extracted {len(sources)} sources from tool calls (streaming)")
-
-            db_status = get_last_search_status()
-            if not sources and db_status in {"schema_error", "infra_error", "error"}:
-                logger.warning(
-                    "Overriding streaming answer due to retrieval backend failure (status=%s).",
-                    db_status,
+                request_tags = parse_tags_input(tags)
+                search_token = set_db_search_options(
+                    tags=request_tags,
+                    tag_match_mode=tag_match_mode,
+                    include_untagged_fallback=include_untagged_fallback,
+                    rerank=rerank,
+                    rerank_top_k=rerank_top_k,
                 )
-                answer = _db_unavailable_message(lang_local)
+                try:
+                    raw_search = db_search_tool.invoke({"query": question})
+                finally:
+                    reset_db_search_options(search_token)
 
-            # Extract plan if available
-            plan = final_state.get("plan", "")
+                raw_search_text = raw_search if isinstance(raw_search, str) else str(raw_search)
+                retrieved_docs = _parse_db_search_docs(raw_search_text)
+                weak_retrieval = _is_weak_retrieval(retrieved_docs)
+
+                yield _sse({
+                    "type": "tool_event",
+                    "phase": "result",
+                    "tool": "db_search",
+                    "message": _summarize_tool_result("db_search", raw_search_text, lang_local),
+                    "stage": "tooling",
+                    "progress": 62,
+                    "status": "working",
+                    "transient": True,
+                    "waiting": False,
+                })
+
+                answer = _build_deterministic_rag_answer(
+                    question=question,
+                    language=lang_local,
+                    provider=provider,
+                    model=model,
+                    retrieved_docs=retrieved_docs,
+                    weak_retrieval=weak_retrieval,
+                )
+                sources = _build_sources_from_docs(retrieved_docs)
+                logger.info("Streaming deterministic RAG complete: docs=%s, weak=%s, sources=%s", len(retrieved_docs), weak_retrieval, len(sources))
 
             yield _sse({
                 "type": "thinking",
@@ -2374,12 +2227,6 @@ IMPORTANT: Do not describe what you will do. DO IT. Call the tools directly.
             })
 
     return StreamingResponse(generate_stream(), media_type="text/event-stream")
-
-
-@app.get("/health")
-def health():
-    return JSONResponse({"status": "ok"})
-
 
 class ModelSelection(BaseModel):
     provider: str
@@ -2427,21 +2274,52 @@ def set_model_selection(selection: ModelSelection):
 @app.get("/config")
 def config():
     """Expose available providers/models based on environment for frontend discovery."""
+    def _ollama_is_reachable(base_url: str | None) -> bool:
+        candidate = str(base_url or "").strip().rstrip("/")
+        if not candidate:
+            return False
+        try:
+            with urllib.request.urlopen(f"{candidate}/api/tags", timeout=1.5) as response:
+                status = getattr(response, "status", 200)
+                return int(status) < 500
+        except Exception:
+            return False
+
     # Provider chain: Ollama → DeepSeek → OpenAI. Groq/X.AI excluded.
-    providers = []
+    provider_entries: list[tuple[str, str]] = []
     models = {}
-    if ollama_base_url:
-        providers.append({"key": "ollama", "label": "Ollama (Local)"})
+    if ollama_base_url and _ollama_is_reachable(ollama_base_url):
+        provider_entries.append(("ollama", "Ollama (Local)"))
         models["ollama"] = [ollama_model or "llama3.1:8b"]
+    elif ollama_base_url:
+        logger.warning("Ollama configured at %s but unreachable; excluding provider from /config", ollama_base_url)
     if deepseek_api_key:
-        providers.append({"key": "deepseek", "label": "DeepSeek"})
+        provider_entries.append(("deepseek", "DeepSeek"))
         models["deepseek"] = ["deepseek-chat", "deepseek-reasoner"]
     if openai_api_key:
-        providers.append({"key": "openai", "label": "OpenAI"})
+        provider_entries.append(("openai", "OpenAI"))
         models["openai"] = ["gpt-4o-mini"]
+
+    selected_provider = _normalize_provider_name_runtime(CURRENT_SELECTION.get("provider"))
+    available_provider_keys = [key for key, _ in provider_entries]
+    default_provider = selected_provider if selected_provider in available_provider_keys else (
+        available_provider_keys[0] if available_provider_keys else None
+    )
+
+    providers = [
+        {
+            "key": key,
+            "label": label,
+            "default": key == default_provider,
+        }
+        for key, label in provider_entries
+    ]
+
     return {
         "providers": providers,
         "models": models,
+        "defaultProvider": default_provider,
+        "defaultModel": (models.get(default_provider) or [None])[0] if default_provider else None,
         "runtime": {
             "fast_mode": agent_fast_mode,
             "max_response_sentences": agent_max_response_sentences,

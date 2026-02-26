@@ -3,7 +3,9 @@
 from pathlib import Path
 
 
-SCRIPT_PATH = Path("scripts/deploy_embedding_gcloud.sh")
+SCRIPT_PATH = Path("backend/scripts/deploy_embedding_gcloud.sh")
+if not SCRIPT_PATH.exists():
+    SCRIPT_PATH = Path("scripts/deploy_embedding_gcloud.sh")
 
 
 def test_deploy_script_exists_and_is_shell_script():

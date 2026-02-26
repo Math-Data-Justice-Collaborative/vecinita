@@ -373,12 +373,26 @@ class TestMessageSanitization:
             mock_embeddings.return_value = mock_embedding_model
 
             from src.services.agent.server import _sanitize_messages
-            from langchain_core.messages import ToolMessage
+            from langchain_core.messages import ToolMessage, AIMessage
 
-            messages = [ToolMessage(content=["item1", "item2"], tool_call_id="123")]
+            messages = [
+                AIMessage(
+                    content="",
+                    tool_calls=[
+                        {
+                            "id": "123",
+                            "name": "db_search",
+                            "args": {"query": "test"},
+                            "type": "tool_call",
+                        }
+                    ],
+                ),
+                ToolMessage(content=["item1", "item2"], tool_call_id="123", name="db_search"),
+            ]
             sanitized = _sanitize_messages(messages)
-            assert len(sanitized) == 1
-            assert isinstance(sanitized[0].content, str)
+            tool_messages = [m for m in sanitized if isinstance(m, ToolMessage)]
+            assert len(tool_messages) == 1
+            assert isinstance(tool_messages[0].content, str)
 
 
 class TestEnvironmentVariableValidation:

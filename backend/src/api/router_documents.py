@@ -24,6 +24,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/documents", tags=["Documents (Public)"])
 
 EMBEDDING_SERVICE_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:8001")
+UPLOAD_STORAGE_BUCKET = os.getenv("SUPABASE_UPLOADS_BUCKET", "documents")
+EXCLUDED_TEST_TAGS = {"__e2e__", "__test__", "e2e", "test-data"}
 
 
 def _get_db() -> Client | None:
@@ -50,6 +52,15 @@ def _build_public_storage_url(storage_bucket: str, storage_path: str) -> Optiona
     return f"{supabase_url}/storage/v1/object/public/{storage_bucket}/{storage_path}"
 
 
+def _storage_path_from_source_url(source_url: str) -> Optional[str]:
+    if not source_url.startswith("upload://"):
+        return None
+    raw_path = source_url[len("upload://"):].strip()
+    if not raw_path:
+        return None
+    return raw_path
+
+
 def _extract_download_url(metadata: Any) -> Optional[str]:
     if isinstance(metadata, str):
         metadata_text = metadata.strip()
@@ -60,11 +71,28 @@ def _extract_download_url(metadata: Any) -> Optional[str]:
                 metadata = {}
     if not isinstance(metadata, dict):
         return None
-    if metadata.get("download_url"):
-        return metadata.get("download_url")
-    storage_bucket = metadata.get("storage_bucket")
-    storage_path = metadata.get("storage_path")
-    return _build_public_storage_url(storage_bucket, storage_path)
+    download_url = metadata.get("download_url")
+    if isinstance(download_url, str) and download_url.strip():
+        return download_url.strip()
+    return None
+
+
+def _resolve_download_url(metadata: Any, source_url: str) -> Optional[str]:
+    return _extract_download_url(metadata)
+
+
+def _is_test_artifact(source_url: str, tags: list[str]) -> bool:
+    normalized_tags = {str(tag).strip().lower() for tag in tags if str(tag).strip()}
+    if normalized_tags.intersection(EXCLUDED_TEST_TAGS):
+        return True
+    if any(("e2e" in tag) or (tag in {"test", "testing"}) for tag in normalized_tags):
+        return True
+
+    source_lower = source_url.lower()
+    if "e2e-" in source_lower or "?e2e=" in source_lower:
+        return True
+
+    return False
 
 
 def _metadata_dict(value: Any) -> dict[str, Any]:
@@ -106,7 +134,7 @@ def _normalize_public_source(raw: dict[str, Any]) -> dict[str, Any]:
     total_chunks = _to_int(raw.get("total_chunks") or raw.get("chunk_count"), 0)
 
     tags = normalize_tags(raw.get("tags") or metadata.get("tags") or [])
-    download_url = _extract_download_url(metadata)
+    download_url = _resolve_download_url(metadata, url)
 
     return {
         "id": raw.get("id"),
@@ -280,6 +308,7 @@ def _load_chunk_statistics_via_sql(limit: int) -> list[dict[str, Any]]:
 async def documents_overview(
     tags: Optional[str] = Query(None, description="Comma-separated tags used to filter source list"),
     tag_match_mode: str = Query("any", pattern="^(any|all)$", description="Tag match mode for source filtering"),
+    include_test_data: bool = Query(False, description="Include test/e2e-tagged artifacts in results"),
     db: Client | None = Depends(_get_db),
 ) -> dict[str, Any]:
     """
@@ -333,6 +362,11 @@ async def documents_overview(
                 current["download_url"] = chunk_download_url
 
         source_rows = [_normalize_public_source(item) for item in source_index.values()]
+        if not include_test_data:
+            source_rows = [
+                item for item in source_rows
+                if not _is_test_artifact(item.get("url") or "", item.get("tags") or [])
+            ]
         requested_tags = _parse_query_tags(tags)
         if requested_tags:
             source_rows = [
@@ -413,7 +447,7 @@ async def documents_download_url(
 
         if source_row:
             metadata = source_row.get("metadata") or {}
-            download_url = _extract_download_url(metadata)
+            download_url = _resolve_download_url(metadata, source_url)
             if download_url:
                 return {
                     "source_url": source_url,
@@ -436,7 +470,7 @@ async def documents_download_url(
             raise HTTPException(status_code=404, detail="Source not found")
 
         metadata = _metadata_dict(metas[0] if metas else {})
-        download_url = _extract_download_url(metadata)
+        download_url = _resolve_download_url(metadata, source_url)
         if not download_url:
             return {
                 "source_url": source_url,
@@ -516,6 +550,7 @@ async def documents_chunk_statistics(
 async def documents_tags(
     limit: int = Query(100, ge=1, le=500, description="Maximum number of tags to return"),
     query: str = Query("", description="Optional case-insensitive tag search"),
+    include_test_data: bool = Query(False, description="Include tags from test/e2e artifacts"),
     db: Client | None = Depends(_get_db),
 ) -> dict[str, Any]:
     """Return tag inventory and counts for Documents filtering UI."""
@@ -529,6 +564,8 @@ async def documents_tags(
             metadata = _metadata_dict(row.get("metadata"))
             source_url = str(metadata.get("source_url") or "")
             tags = normalize_tags(metadata.get("tags") or [])
+            if not include_test_data and _is_test_artifact(source_url, tags):
+                continue
             for tag in tags:
                 chunk_counts[tag] = chunk_counts.get(tag, 0) + 1
                 if source_url:

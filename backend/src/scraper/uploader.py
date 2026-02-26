@@ -11,6 +11,8 @@ from src.services.scraper.uploader import (  # noqa: F401
     DocumentChunk,
     EMBEDDING_SERVICE_AVAILABLE,
     FALLBACK_EMBEDDINGS_AVAILABLE,
+    SUPABASE_AVAILABLE,
+    create_client,
 )
 
 __all__ = [
@@ -18,4 +20,6 @@ __all__ = [
     "DocumentChunk",
     "EMBEDDING_SERVICE_AVAILABLE",
     "FALLBACK_EMBEDDINGS_AVAILABLE",
+    "SUPABASE_AVAILABLE",
+    "create_client",
 ]

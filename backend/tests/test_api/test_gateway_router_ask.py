@@ -295,6 +295,38 @@ class TestAskConfigEndpoint:
         assert response.status_code == 200
         assert response.json().get("service_status") == "degraded"
 
+    @patch('httpx.AsyncClient.get')
+    def test_get_ask_config_preserves_explicit_default_provider(self, mock_get, ask_client):
+        """Gateway should honor upstream default flags instead of forcing first provider."""
+        upstream_config = {
+            "providers": [
+                {"key": "ollama", "label": "Ollama", "default": False},
+                {"key": "deepseek", "label": "DeepSeek", "default": True},
+            ],
+            "models": {
+                "ollama": ["llama3.2"],
+                "deepseek": ["deepseek-chat", "deepseek-reasoner"],
+            },
+            "defaultProvider": "deepseek",
+            "defaultModel": "deepseek-chat",
+        }
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = upstream_config
+        mock_response.raise_for_status = MagicMock()
+        mock_get.return_value = mock_response
+
+        response = ask_client.get("/api/v1/ask/config")
+        assert response.status_code == 200
+        data = response.json()
+
+        assert data.get("defaultProvider") == "deepseek"
+        assert data.get("defaultModel") == "deepseek-chat"
+        deepseek = next((p for p in data.get("providers", []) if p.get("name") == "deepseek"), None)
+        ollama = next((p for p in data.get("providers", []) if p.get("name") == "ollama"), None)
+        assert deepseek is not None and deepseek.get("default") is True
+        assert ollama is not None and ollama.get("default") is False
+
 
 class TestAskQueryValidation:
     """Test query parameter validation."""
@@ -386,6 +418,11 @@ class TestAskErrorHandling:
 
 class TestAskEndpointRouting:
     """Test that ask endpoints are properly routed."""
+
+    def test_legacy_question_route_not_supported(self, ask_client):
+        """Legacy /ask/question route should not exist (canonical is /ask?question=...)."""
+        response = ask_client.get("/api/v1/ask/question?question=test")
+        assert response.status_code == 404
 
     @patch('httpx.AsyncClient.get')
     def test_ask_endpoint_exists(self, mock_get, ask_client):

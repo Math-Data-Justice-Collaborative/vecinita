@@ -15,6 +15,13 @@ from src.utils.tags import normalize_tags
 from src.services.chroma_store import get_chroma_store, ChromaStore
 
 try:
+    from supabase import create_client  # type: ignore
+    SUPABASE_AVAILABLE = True
+except Exception:
+    create_client = None  # type: ignore[assignment]
+    SUPABASE_AVAILABLE = False
+
+try:
     from pydantic import BaseModel, Field
     from langchain_openai import ChatOpenAI
     DEEPSEEK_TAGGING_AVAILABLE = True

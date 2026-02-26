@@ -141,6 +141,18 @@ npm run test:e2e      # E2E tests (Playwright)
 - Do not commit `.env` or any real secrets; `.gitignore` already excludes common env files.
 - Frontend can use `.env.local` for values like `VITE_GATEWAY_URL` (preferred) or `VITE_BACKEND_URL` (legacy fallback).
 
+### Pre-commit secret scanning
+
+This repository includes a pre-commit hook config using `gitleaks`.
+
+```bash
+pip install pre-commit
+pre-commit install
+pre-commit run --all-files
+```
+
+The hook scans staged changes and blocks commits that include potential secrets.
+
 
 ## Core Features
 

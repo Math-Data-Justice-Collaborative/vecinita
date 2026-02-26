@@ -7,6 +7,7 @@ Tests the automatic provider selection and fallback logic.
 import pytest
 from unittest.mock import patch, MagicMock
 import json
+import urllib.request
 
 pytestmark = pytest.mark.integration
 
@@ -102,6 +103,37 @@ def test_provider_order_respected(fastapi_client):
 
 
 @pytest.mark.fallback
+def test_config_default_provider_matches_current_selection(fastapi_client, monkeypatch):
+    """Test /config marks current provider as default when available."""
+    import src.agent.main as agent_main
+
+    monkeypatch.setattr(agent_main, "ollama_base_url", "http://localhost:11434")
+    monkeypatch.setattr(agent_main, "deepseek_api_key", "sk_test_deepseek")
+    monkeypatch.setattr(agent_main, "openai_api_key", "sk_test_openai")
+    monkeypatch.setattr(
+        agent_main,
+        "CURRENT_SELECTION",
+        {"provider": "deepseek", "model": "deepseek-chat", "locked": False},
+    )
+
+    response = fastapi_client.get("/config")
+    assert response.status_code == 200
+    data = response.json()
+
+    assert data.get("defaultProvider") == "deepseek"
+    assert data.get("defaultModel") == "deepseek-chat"
+
+    providers = data.get("providers", [])
+    deepseek_entry = next((entry for entry in providers if entry.get("key") == "deepseek"), None)
+    ollama_entry = next((entry for entry in providers if entry.get("key") == "ollama"), None)
+
+    assert deepseek_entry is not None
+    assert deepseek_entry.get("default") is True
+    if ollama_entry is not None:
+        assert ollama_entry.get("default") is False
+
+
+@pytest.mark.fallback
 def test_model_names_available_for_providers(fastapi_client):
     """Test /config endpoint includes model names for each provider"""
     
@@ -127,7 +159,7 @@ def test_model_names_available_for_providers(fastapi_client):
 @pytest.mark.fallback
 @pytest.mark.parametrize("provider_key,should_find", [
     ("deepseek", True),
-    ("ollama", False),
+    ("ollama", None),
     ("openai", True),
     ("invalid_provider", False),
 ])
@@ -140,7 +172,9 @@ def test_get_provider_from_config(fastapi_client, provider_key, should_find):
     
     found = any(p["key"] == provider_key for p in providers)
     
-    if should_find and provider_key in ["deepseek", "ollama", "openai"]:
+    if should_find is None:
+        assert isinstance(found, bool)
+    elif should_find and provider_key in ["deepseek", "openai"]:
         assert found, f"Provider {provider_key} not found in config"
     elif not should_find:
         assert not found, f"Invalid provider {provider_key} found in config"
@@ -231,3 +265,44 @@ def test_different_providers_same_input(fastapi_client):
         
         assert "metadata" in data1 or response1.text  # Either in data or response
         assert "metadata" in data2 or response2.text  # Either in data or response
+
+
+@pytest.mark.fallback
+def test_config_excludes_unreachable_ollama(fastapi_client, monkeypatch):
+    """Ollama should not be advertised if its base URL is unreachable."""
+    import src.agent.main as agent_main
+
+    monkeypatch.setattr(agent_main, "ollama_base_url", "http://127.0.0.1:65534")
+
+    response = fastapi_client.get("/config")
+    assert response.status_code == 200
+    data = response.json()
+
+    provider_keys = [p.get("key") for p in data.get("providers", [])]
+    assert "ollama" not in provider_keys
+
+
+@pytest.mark.fallback
+def test_config_includes_reachable_ollama(fastapi_client, monkeypatch):
+    """Ollama should be advertised when reachable and configured."""
+    import src.agent.main as agent_main
+
+    monkeypatch.setattr(agent_main, "ollama_base_url", "http://localhost:11434")
+    monkeypatch.setattr(urllib.request, "urlopen", lambda *args, **kwargs: _DummyOkResponse())
+
+    response = fastapi_client.get("/config")
+    assert response.status_code == 200
+    data = response.json()
+
+    provider_keys = [p.get("key") for p in data.get("providers", [])]
+    assert "ollama" in provider_keys
+
+
+class _DummyOkResponse:
+    status = 200
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return False

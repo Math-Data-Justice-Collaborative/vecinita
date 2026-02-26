@@ -12,4 +12,19 @@ from src.agent import main as _canonical
 if not hasattr(_canonical, "ChatGroq") and hasattr(_canonical, "ChatOllama"):
     ChatGroq = _canonical.ChatOllama  # type: ignore[misc]
 
-__all__ = [name for name in dir(_canonical) if not name.startswith("_")]
+
+def _export_private_symbol(name: str) -> None:
+    if hasattr(_canonical, name):
+        globals()[name] = getattr(_canonical, name)
+
+
+for _private_name in (
+    "_get_llm_with_tools",
+    "_get_llm_without_tools",
+    "_get_chatollama_class",
+    "_get_chatopenai_class",
+    "_sanitize_messages",
+):
+    _export_private_symbol(_private_name)
+
+__all__ = [name for name in dir(_canonical) if not name.startswith("__")]

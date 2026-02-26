@@ -14,6 +14,9 @@ Internet
 [Nginx: port 80/443]  ──── serves ──── /opt/vecinita/frontend/dist  (React SPA)
     │
     ▼ /api/  and  /ask  /health  etc.
+[vecinita-gateway container :8004]  (Unified API Gateway)
+    │
+    ▼
 [vecinita-agent container :8000]  (FastAPI + LangGraph)
     │                 │
     ▼                 ▼
@@ -60,6 +63,7 @@ curl -sSL https://raw.githubusercontent.com/YOUR_ORG/vecinita/main/deploy/gcp/in
 ### 3. Fill in secrets
 
 ```bash
+cp /opt/vecinita/deploy/gcp/.env.example /opt/vecinita/backend/.env
 nano /opt/vecinita/backend/.env
 ```
 
@@ -72,6 +76,11 @@ CHROMA_SSL=false
 CHROMA_COLLECTION_CHUNKS=vecinita_chunks
 CHROMA_COLLECTION_SOURCES=vecinita_sources
 CHROMA_COLLECTION_QUEUE=vecinita_queue
+
+# Gateway/admin + uploads
+DEV_ADMIN_ENABLED=false
+DEV_ADMIN_BEARER_TOKEN=
+SUPABASE_UPLOADS_BUCKET=documents
 ```
 
 ### 4. Deploy embedding service (from local machine)

@@ -148,19 +148,66 @@ services:
     networks:
       - vecinita-network
 
+  # API Gateway - Unified /api/v1 surface used by frontend
+  vecinita-gateway:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vecinita-gateway
+    ports:
+      - "8004:8004"
+    environment:
+      PORT: "8004"
+      PYTHONUNBUFFERED: "1"
+      AGENT_SERVICE_URL: "http://vecinita-agent:8000"
+      EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
+      CHROMA_HOST: "chroma"
+      CHROMA_PORT: "8000"
+      CHROMA_SSL: "false"
+      CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
+      CHROMA_COLLECTION_SOURCES: "vecinita_sources"
+      CHROMA_COLLECTION_QUEUE: "vecinita_queue"
+      SUPABASE_URL: "http://postgrest:3000"
+      SUPABASE_KEY: "dev-anon-key"
+      DEV_ADMIN_ENABLED: "true"
+      DEV_ADMIN_BEARER_TOKEN: "vecinita-dev-admin-token-2026"
+      SUPABASE_UPLOADS_BUCKET: "documents"
+    command: ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port 8004"]
+    depends_on:
+      vecinita-agent:
+        condition: service_healthy
+      embedding-service:
+        condition: service_healthy
+      chroma:
+        condition: service_healthy
+      postgrest:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - vecinita-network
+
   # Frontend - Vite React application
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_GATEWAY_URL: "http://localhost:8004/api/v1"
+        VITE_BACKEND_URL: "http://localhost:8000"
+        VITE_DEV_ADMIN_ENABLED: "true"
+        VITE_DEV_ADMIN_EMAIL: "admin@vecinita.local"
+        VITE_DEV_ADMIN_PASSWORD: "VecinitaAdmin!2026"
+        VITE_DEV_ADMIN_TOKEN: "vecinita-dev-admin-token-2026"
     container_name: vecinita-frontend
     ports:
       - "5173:5173"
-    environment:
-      VITE_GATEWAY_URL: "http://localhost:8004/api/v1"
-      VITE_BACKEND_URL: "http://localhost:8000"
     depends_on:
-      - vecinita-agent
+      - vecinita-gateway
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5173"]

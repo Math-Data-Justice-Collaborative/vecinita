@@ -20,6 +20,7 @@ dependencies = [
     # HTTP Client for integration tests
     "httpx>=0.25.0",
     "requests>=2.31.0",
+    "fastapi>=0.116.0",
     
     # Playwright for E2E tests
     "playwright>=1.40.0",
