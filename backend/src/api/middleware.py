@@ -51,6 +51,25 @@ ENDPOINT_RATE_LIMITS: Dict[str, Dict[str, int]] = {
     "/api/v1/embed": {"requests_per_hour": 100, "tokens_per_day": 10000},
 }
 
+PUBLIC_ENDPOINTS = {
+    "/",
+    "/health",
+    "/docs",
+    "/openapi.json",
+    "/redoc",
+    "/api/v1/docs",
+    "/api/v1/openapi.json",
+    "/api/v1/redoc",
+}
+
+PUBLIC_PREFIXES = (
+    "/api/v1/documents",
+)
+
+AUTH_BYPASS_PREFIXES = (
+    "/api/v1/admin",
+)
+
 
 class AuthenticationMiddleware(BaseHTTPMiddleware):
     """
@@ -78,12 +97,15 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
         path = request.url.path
 
         # Skip auth for health checks and public endpoints
-        if path in ["/health", "/", "/docs", "/openapi.json", "/redoc"]:
+        if path in PUBLIC_ENDPOINTS:
             return await call_next(request)
 
-        # Supabase-admin and public document routes manage auth separately
-        bypass_prefixes = ("/api/v1/admin", "/api/v1/documents")
-        if any(path.startswith(prefix) for prefix in bypass_prefixes):
+        # Public document routes intentionally allow unauthenticated read access.
+        if any(path.startswith(prefix) for prefix in PUBLIC_PREFIXES):
+            return await call_next(request)
+
+        # Admin routes enforce auth at router-level via Supabase JWT admin checks.
+        if any(path.startswith(prefix) for prefix in AUTH_BYPASS_PREFIXES):
             return await call_next(request)
 
         # Extract API key from Authorization header
@@ -242,11 +264,10 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
         Returns 429 Too Many Requests if limits exceeded.
         """
         # Skip rate limiting for public endpoints
-        public_endpoints = ["/health", "/", "/docs", "/openapi.json", "/redoc", "/api/v1/openapi.json"]
-        if any(request.url.path.startswith(ep) for ep in public_endpoints):
+        if request.url.path in PUBLIC_ENDPOINTS:
             return await call_next(request)
 
-        if request.url.path.startswith("/api/v1/documents"):
+        if any(request.url.path.startswith(prefix) for prefix in PUBLIC_PREFIXES):
             return await call_next(request)
 
         # Get API key from header
