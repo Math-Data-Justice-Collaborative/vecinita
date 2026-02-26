@@ -85,3 +85,17 @@ http://localhost:8081/MentalandBehavioralResourceGuide-english_11162022.pdf
 http://localhost:8081/RIOSpdf.pdf
 http://localhost:8081/MentalandBehavioralResourceGuide-english_11162022.pdf
 http://localhost:8081/RIOSpdf.pdf
+https://dhs.ri.gov/
+https://dmv.ri.gov/
+https://dioceseofprovidence.org/
+https://www.diiri.org/
+https://www.immigrantcoalitionri.org/
+https://ricadv.org/
+https://www.rihispanicchamber.org/
+https://rihca.org/
+https://wrwc.org/
+https://vecina.wrwc.org/
+https://qubeshub.org/community/groups/rios
+https://www.nuestrasalud.com/
+https://math-data-justice-collaborative.github.io/medico-pvd/
+https://healthsourceri.com/

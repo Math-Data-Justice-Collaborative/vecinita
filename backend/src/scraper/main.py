@@ -25,6 +25,7 @@ from importlib import import_module
 #     main.VecinaScraper = FakeScraper
 #     main.main()
 from .scraper import VecinaScraper
+from .utils import prepare_scrape_urls
 
 
 # Configure logging
@@ -125,13 +126,16 @@ def main():
         for encoding in encodings:
             try:
                 with open(args.input, 'r', encoding=encoding) as f:
-                    urls = [
-                        line.strip().lstrip('\ufeff')
-                        for line in f
-                        if line.strip() and not line.startswith('#')
-                    ]
+                    urls, url_stats = prepare_scrape_urls(f)
                 log.info(
                     f"Successfully read input file with {encoding} encoding")
+                log.info(
+                    "URL hygiene: "
+                    f"kept={url_stats['final_urls']}, "
+                    f"duplicates_removed={url_stats['duplicates_removed']}, "
+                    f"ignored_invalid={url_stats['ignored_invalid_url']}, "
+                    f"ignored_localhost={url_stats['ignored_localhost']}"
+                )
                 decode_successful = True
                 break
             except UnicodeDecodeError:

@@ -6,12 +6,101 @@ Includes text cleaning, file handling, and URL processing.
 import os
 import re
 import logging
-from typing import Optional, List
+from typing import Optional, List, Iterable, Tuple, Dict
 import requests
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin, urlparse, urlunparse
 from bs4 import BeautifulSoup
 
 log = logging.getLogger(__name__)
+
+
+def normalize_scrape_url(raw_line: str) -> Optional[str]:
+    """Normalize a raw URL line for scraping or return None if invalid/ignored."""
+    if raw_line is None:
+        return None
+
+    value = raw_line.strip().lstrip('\ufeff')
+    if not value or value.startswith('#'):
+        return None
+
+    parsed = urlparse(value)
+    if parsed.scheme.lower() not in {'http', 'https'}:
+        return None
+
+    scheme = parsed.scheme.lower()
+    netloc = parsed.netloc.lower()
+
+    path = parsed.path or ''
+    if path and path != '/':
+        path = path.rstrip('/')
+
+    normalized = urlunparse((
+        scheme,
+        netloc,
+        path,
+        parsed.params,
+        parsed.query,
+        '',
+    ))
+    return normalized
+
+
+def prepare_scrape_urls(
+    raw_lines: Iterable[str],
+    *,
+    skip_localhost: bool = True,
+) -> Tuple[List[str], Dict[str, int]]:
+    """Normalize, filter, and deduplicate URL lines for scraping.
+
+    Returns:
+        Tuple[list[str], dict[str, int]] where stats contains counters for:
+        - total_lines
+        - ignored_blank_or_comment
+        - ignored_invalid_url
+        - ignored_localhost
+        - duplicates_removed
+        - final_urls
+    """
+    stats = {
+        'total_lines': 0,
+        'ignored_blank_or_comment': 0,
+        'ignored_invalid_url': 0,
+        'ignored_localhost': 0,
+        'duplicates_removed': 0,
+        'final_urls': 0,
+    }
+
+    unique_urls: List[str] = []
+    seen: set[str] = set()
+
+    for raw in raw_lines:
+        stats['total_lines'] += 1
+        stripped = raw.strip().lstrip('\ufeff') if raw is not None else ''
+
+        if not stripped or stripped.startswith('#'):
+            stats['ignored_blank_or_comment'] += 1
+            continue
+
+        normalized = normalize_scrape_url(stripped)
+        if not normalized:
+            stats['ignored_invalid_url'] += 1
+            continue
+
+        if skip_localhost:
+            hostname = (urlparse(normalized).hostname or '').lower()
+            if hostname in {'localhost', '127.0.0.1'}:
+                stats['ignored_localhost'] += 1
+                continue
+
+        if normalized in seen:
+            stats['duplicates_removed'] += 1
+            continue
+
+        seen.add(normalized)
+        unique_urls.append(normalized)
+
+    stats['final_urls'] = len(unique_urls)
+    return unique_urls, stats
 
 
 def convert_github_to_raw(url: str) -> str:

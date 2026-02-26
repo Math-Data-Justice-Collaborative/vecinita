@@ -31,6 +31,7 @@ import shutil
 import docker
 from docker.errors import DockerException, NotFound, APIError
 from dotenv import load_dotenv
+from src.scraper.utils import prepare_scrape_urls
 
 # --- Color codes for terminal output ---
 
@@ -319,9 +320,15 @@ def run_initial_scrape(logger: logging.Logger, use_stream: bool = False, debug: 
         # Read URLs
         try:
             with open(Config.MAIN_URL_FILE, 'r', encoding='utf-8') as f:
-                urls = [line.strip() for line in f if line.strip()
-                        and not line.startswith('#')]
+                urls, url_stats = prepare_scrape_urls(f)
             logger.debug(f"Read {len(urls)} URLs from file")
+            logger.info(
+                "URL hygiene (initial scrape): "
+                f"kept={url_stats['final_urls']}, "
+                f"duplicates_removed={url_stats['duplicates_removed']}, "
+                f"ignored_invalid={url_stats['ignored_invalid_url']}, "
+                f"ignored_localhost={url_stats['ignored_localhost']}"
+            )
         except Exception as e:
             logger.error(f"Failed to read URL file: {e}")
             return False
@@ -378,7 +385,7 @@ def rerun_failed_urls(logger: logging.Logger, use_stream: bool = False, debug: b
     # Check if file has content
     try:
         with open(Config.FAILED_URL_LOG, 'r', encoding='utf-8') as f:
-            failed_urls = [line.strip() for line in f if line.strip()]
+            failed_urls, rerun_stats = prepare_scrape_urls(f)
 
         if not failed_urls:
             logger.info("No failed URLs found. Skipping re-run.")
@@ -386,6 +393,13 @@ def rerun_failed_urls(logger: logging.Logger, use_stream: bool = False, debug: b
 
         logger.info(
             f"Found {len(failed_urls)} failed URLs. Re-running with Playwright...")
+        logger.info(
+            "URL hygiene (failed rerun): "
+            f"kept={rerun_stats['final_urls']}, "
+            f"duplicates_removed={rerun_stats['duplicates_removed']}, "
+            f"ignored_invalid={rerun_stats['ignored_invalid_url']}, "
+            f"ignored_localhost={rerun_stats['ignored_localhost']}"
+        )
         logger.debug(
             f"Failed URLs: {failed_urls[:5]}{'...' if len(failed_urls) > 5 else ''}")
 

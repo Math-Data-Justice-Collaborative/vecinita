@@ -226,6 +226,40 @@ class TestScraperUtils:
         finally:
             os.remove(log_file)
 
+    def test_prepare_scrape_urls_dedupes_and_skips_localhost(self):
+        """Test URL preparation removes duplicates, localhost, and invalid entries."""
+        from src.scraper.utils import prepare_scrape_urls
+
+        raw_lines = [
+            "\ufeffhttps://Example.com/path/\n",
+            "https://example.com/path\n",
+            "# comment\n",
+            "\n",
+            "http://localhost:8081/file.pdf\n",
+            "ftp://example.com/file.txt\n",
+        ]
+
+        urls, stats = prepare_scrape_urls(raw_lines)
+
+        assert urls == ["https://example.com/path"]
+        assert stats["duplicates_removed"] == 1
+        assert stats["ignored_localhost"] == 1
+        assert stats["ignored_invalid_url"] == 1
+
+    def test_prepare_scrape_urls_allows_localhost_when_requested(self):
+        """Test URL preparation can keep localhost URLs when skip_localhost is disabled."""
+        from src.scraper.utils import prepare_scrape_urls
+
+        raw_lines = [
+            "http://localhost:8081/RIOSpdf.pdf\n",
+            "http://127.0.0.1:9000/doc.txt\n",
+        ]
+
+        urls, stats = prepare_scrape_urls(raw_lines, skip_localhost=False)
+
+        assert len(urls) == 2
+        assert stats["ignored_localhost"] == 0
+
 
 # ============================================================================
 # LOADERS TESTS
