@@ -8,6 +8,9 @@ services:
   chroma:
     image: chromadb/chroma:latest
     container_name: vecinita-chroma
+    environment:
+      IS_PERSISTENT: "TRUE"
+      PERSIST_DIRECTORY: "/data"
     ports:
       - "8002:8000"
     volumes:
@@ -126,6 +129,9 @@ services:
       CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
       CHROMA_COLLECTION_SOURCES: "vecinita_sources"
       CHROMA_COLLECTION_QUEUE: "vecinita_queue"
+      VECTOR_SYNC_ENABLED: "true"
+      VECTOR_SYNC_DEGRADED_MODE: "true"
+      VECTOR_SYNC_SUPABASE_FALLBACK_READS: "true"
       SUPABASE_URL: "http://postgrest:3000"
       SUPABASE_KEY: "dev-anon-key"
       GROQ_API_KEY: "${GROQ_API_KEY}"
@@ -167,6 +173,9 @@ services:
       CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
       CHROMA_COLLECTION_SOURCES: "vecinita_sources"
       CHROMA_COLLECTION_QUEUE: "vecinita_queue"
+      VECTOR_SYNC_ENABLED: "true"
+      VECTOR_SYNC_DEGRADED_MODE: "true"
+      VECTOR_SYNC_SUPABASE_FALLBACK_READS: "true"
       SUPABASE_URL: "http://postgrest:3000"
       SUPABASE_KEY: "dev-anon-key"
       DEV_ADMIN_ENABLED: "true"

@@ -22,6 +22,9 @@ services:
     image: chromadb/chroma:latest
     container_name: vecinita-chroma
     restart: unless-stopped
+    environment:
+      IS_PERSISTENT: "TRUE"
+      PERSIST_DIRECTORY: "/data"
     ports:
       - "127.0.0.1:8002:8000"
     volumes:
@@ -51,6 +54,9 @@ services:
       CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
       CHROMA_COLLECTION_SOURCES: "vecinita_sources"
       CHROMA_COLLECTION_QUEUE: "vecinita_queue"
+      VECTOR_SYNC_ENABLED: "true"
+      VECTOR_SYNC_DEGRADED_MODE: "true"
+      VECTOR_SYNC_SUPABASE_FALLBACK_READS: "true"
       # Use Cloud Run embedding service (set EMBEDDING_SERVICE_URL in .env)
       # or set to http://vecinita-embed:8001 to use the local embed service
     ports:
@@ -90,6 +96,9 @@ services:
       CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
       CHROMA_COLLECTION_SOURCES: "vecinita_sources"
       CHROMA_COLLECTION_QUEUE: "vecinita_queue"
+      VECTOR_SYNC_ENABLED: "true"
+      VECTOR_SYNC_DEGRADED_MODE: "true"
+      VECTOR_SYNC_SUPABASE_FALLBACK_READS: "true"
       DEV_ADMIN_ENABLED: "${DEV_ADMIN_ENABLED:-false}"
       DEV_ADMIN_BEARER_TOKEN: "${DEV_ADMIN_BEARER_TOKEN:-}"
       SUPABASE_UPLOADS_BUCKET: "${SUPABASE_UPLOADS_BUCKET:-documents}"

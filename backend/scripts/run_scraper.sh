@@ -72,6 +72,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 CLI_ARGS=()
 if [[ "$CLEAN" -eq 1 ]]; then
+  echo "⚠️  --clean truncates vector records used for Chroma/Supabase sync and should be used only for intentional resets."
   CLI_ARGS+=("--clean")
 fi
 if [[ "$NO_CONFIRM" -eq 1 ]]; then

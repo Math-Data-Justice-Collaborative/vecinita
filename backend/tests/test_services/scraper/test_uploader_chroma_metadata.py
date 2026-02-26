@@ -1,5 +1,18 @@
+import sys
+import types
+
 import pytest
 from unittest.mock import Mock, patch
+
+# Avoid importing heavy optional crypto dependencies through src.utils.__init__
+if "src.utils.supabase_embeddings" not in sys.modules:
+    fake_supabase_embeddings = types.ModuleType("src.utils.supabase_embeddings")
+
+    class _FakeSupabaseEmbeddings:
+        pass
+
+    fake_supabase_embeddings.SupabaseEmbeddings = _FakeSupabaseEmbeddings
+    sys.modules["src.utils.supabase_embeddings"] = fake_supabase_embeddings
 
 from src.services.scraper.uploader import DatabaseUploader
 
@@ -183,3 +196,127 @@ def test_upload_chunks_reuses_existing_source_tags_with_deepseek_tags():
     assert failed == 0
     row = uploader.chroma_store.upsert_chunks.call_args[0][0][0]
     assert row["metadata"]["tags"] == ["housing", "families", "benefits", "legal aid"]
+
+
+def test_upload_chunks_syncs_to_supabase_with_retry_in_degraded_mode():
+    uploader = _make_uploader()
+    uploader._generate_embeddings = Mock(return_value=[[0.1, 0.2, 0.3]])
+    uploader.chroma_store.upsert_chunks = Mock(return_value=1)
+    uploader.vector_sync_enabled = True
+    uploader.vector_sync_degraded_mode = True
+    uploader.vector_sync_retry_max = 2
+    uploader.vector_sync_retry_delay_seconds = 1
+
+    sync_table = Mock()
+    sync_table.upsert.return_value = sync_table
+    sync_table.execute.side_effect = [Exception("temporary sync error"), {"data": []}]
+    uploader.supabase_client = Mock()
+    uploader.supabase_client.table.return_value = sync_table
+
+    with patch("src.services.scraper.uploader.time.sleep", return_value=None):
+        uploaded, failed = uploader.upload_chunks(
+            chunks=[{"text": "community services", "metadata": {}}],
+            source_identifier="https://example.org/help",
+            loader_type="playwright",
+        )
+
+    assert uploaded == 1
+    assert failed == 0
+    assert sync_table.execute.call_count == 2
+    assert uploader.vector_sync_pending_rows == []
+
+
+def test_upload_chunks_queues_supabase_sync_rows_when_all_retries_fail():
+    uploader = _make_uploader()
+    uploader._generate_embeddings = Mock(return_value=[[0.1, 0.2, 0.3]])
+    uploader.chroma_store.upsert_chunks = Mock(return_value=1)
+    uploader.vector_sync_enabled = True
+    uploader.vector_sync_degraded_mode = True
+    uploader.vector_sync_retry_max = 2
+    uploader.vector_sync_retry_delay_seconds = 1
+
+    sync_table = Mock()
+    sync_table.upsert.return_value = sync_table
+    sync_table.execute.side_effect = Exception("persistent sync error")
+    uploader.supabase_client = Mock()
+    uploader.supabase_client.table.return_value = sync_table
+
+    with patch("src.services.scraper.uploader.time.sleep", return_value=None):
+        uploaded, failed = uploader.upload_chunks(
+            chunks=[{"text": "food assistance", "metadata": {}}],
+            source_identifier="https://example.org/food",
+            loader_type="playwright",
+        )
+
+    assert uploaded == 1
+    assert failed == 0
+    assert len(uploader.vector_sync_pending_rows) == 1
+
+
+def test_upload_chunks_strict_sync_mode_fails_when_supabase_unavailable():
+    uploader = _make_uploader()
+    uploader._generate_embeddings = Mock(return_value=[[0.1, 0.2, 0.3]])
+    uploader.chroma_store.upsert_chunks = Mock(return_value=1)
+    uploader.vector_sync_enabled = True
+    uploader.vector_sync_degraded_mode = False
+    uploader.vector_sync_retry_max = 1
+
+    sync_table = Mock()
+    sync_table.upsert.return_value = sync_table
+    sync_table.execute.side_effect = Exception("sync hard failure")
+    uploader.supabase_client = Mock()
+    uploader.supabase_client.table.return_value = sync_table
+
+    uploaded, failed = uploader.upload_chunks(
+        chunks=[{"text": "strict sync chunk", "metadata": {}}],
+        source_identifier="https://example.org/strict",
+        loader_type="playwright",
+    )
+
+    assert uploaded == 0
+    assert failed == 1
+
+
+def test_upload_chunks_flushes_pending_sync_queue_before_new_batch():
+    uploader = _make_uploader()
+    uploader._generate_embeddings = Mock(return_value=[[0.1, 0.2, 0.3]])
+    uploader.chroma_store.upsert_chunks = Mock(return_value=1)
+    uploader.vector_sync_enabled = True
+    uploader.vector_sync_degraded_mode = True
+    uploader.vector_sync_retry_max = 1
+    uploader.vector_sync_pending_rows = [
+        {
+            "id": "queued-1",
+            "content": "queued content",
+            "source_url": "https://example.org/queued",
+            "source_domain": "example.org",
+            "chunk_index": 0,
+            "total_chunks": 1,
+            "chunk_size": 12,
+            "document_title": "",
+            "metadata": {},
+            "embedding": [0.1, 0.2],
+            "processing_status": "completed",
+            "is_processed": True,
+            "created_at": "2026-01-01T00:00:00+00:00",
+            "updated_at": "2026-01-01T00:00:00+00:00",
+            "scraped_at": "2026-01-01T00:00:00+00:00",
+        }
+    ]
+
+    sync_table = Mock()
+    sync_table.upsert.return_value = sync_table
+    sync_table.execute.side_effect = [{"data": []}, {"data": []}]
+    uploader.supabase_client = Mock()
+    uploader.supabase_client.table.return_value = sync_table
+
+    uploaded, failed = uploader.upload_chunks(
+        chunks=[{"text": "new chunk", "metadata": {}}],
+        source_identifier="https://example.org/new",
+        loader_type="playwright",
+    )
+
+    assert uploaded == 1
+    assert failed == 0
+    assert uploader.vector_sync_pending_rows == []
+    assert sync_table.execute.call_count == 2

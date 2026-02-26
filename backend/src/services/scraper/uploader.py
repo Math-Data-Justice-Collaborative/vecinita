@@ -7,6 +7,7 @@ import hashlib
 import json
 import logging
 import os
+import time
 from typing import List, Dict, Optional, Tuple, Any
 from datetime import datetime, timezone
 from dataclasses import dataclass
@@ -88,6 +89,13 @@ class DatabaseUploader:
         self.deepseek_raw_model = None
         self._source_tag_cache: Dict[str, Dict[str, Any]] = {}
         self._known_tag_cache: Optional[List[str]] = None
+        self.supabase_client = None
+        self.vector_sync_enabled = (os.getenv("VECTOR_SYNC_ENABLED", "true").lower() in {"1", "true", "yes"})
+        self.vector_sync_degraded_mode = (os.getenv("VECTOR_SYNC_DEGRADED_MODE", "true").lower() in {"1", "true", "yes"})
+        self.vector_sync_retry_max = max(1, int(os.getenv("VECTOR_SYNC_RETRY_MAX", "3")))
+        self.vector_sync_retry_delay_seconds = max(1, int(os.getenv("VECTOR_SYNC_RETRY_DELAY_SECONDS", "2")))
+        self.vector_sync_table = os.getenv("VECTOR_SYNC_SUPABASE_TABLE", "document_chunks")
+        self.vector_sync_pending_rows: List[Dict[str, Any]] = []
 
         # Initialize embeddings with fallback chain
         if use_local_embeddings:
@@ -360,6 +368,107 @@ class DatabaseUploader:
         else:
             log.info("✓ Chroma connection established")
 
+        if not self.vector_sync_enabled:
+            log.info("Supabase sync disabled (VECTOR_SYNC_ENABLED=false)")
+            return
+
+        if not SUPABASE_AVAILABLE or create_client is None:
+            log.warning("Supabase sync unavailable: supabase client dependency is not installed")
+            return
+
+        supabase_url = os.getenv("SUPABASE_URL")
+        supabase_key = (
+            os.getenv("SUPABASE_SECRET_KEY")
+            or os.getenv("SUPABASE_KEY")
+            or os.getenv("SUPABASE_PUBLISHABLE_KEY")
+        )
+
+        if not supabase_url or not supabase_key:
+            log.warning("Supabase sync unavailable: missing SUPABASE_URL or SUPABASE_KEY")
+            return
+
+        try:
+            self.supabase_client = create_client(supabase_url, supabase_key)
+            log.info("✓ Supabase sync client initialized")
+        except Exception as exc:
+            self.supabase_client = None
+            log.warning(f"Supabase sync client initialization failed: {exc}")
+
+    def _build_supabase_row(self, row: Dict[str, Any]) -> Dict[str, Any]:
+        metadata = dict(row.get("metadata") or {})
+        return {
+            "id": row.get("id"),
+            "content": row.get("content") or "",
+            "source_url": row.get("source_url") or metadata.get("source_url") or "",
+            "source_domain": row.get("source_domain") or metadata.get("source_domain") or "",
+            "chunk_index": int(row.get("chunk_index") or metadata.get("chunk_index") or 0),
+            "total_chunks": int(row.get("total_chunks") or metadata.get("total_chunks") or 0),
+            "chunk_size": int(row.get("chunk_size") or metadata.get("chunk_size") or len(str(row.get("content") or ""))),
+            "document_title": row.get("document_title") or metadata.get("document_title") or "",
+            "metadata": metadata,
+            "embedding": row.get("embedding") or [],
+            "processing_status": row.get("processing_status") or "completed",
+            "is_processed": bool(row.get("is_processed", True)),
+            "created_at": row.get("created_at"),
+            "updated_at": row.get("updated_at"),
+            "scraped_at": row.get("scraped_at"),
+        }
+
+    def _queue_sync_rows(self, rows: List[Dict[str, Any]], error: Exception) -> None:
+        if not rows:
+            return
+        self.vector_sync_pending_rows.extend([self._build_supabase_row(row) for row in rows])
+        log.warning(
+            "Queued %s row(s) for Supabase sync replay after failure: %s",
+            len(rows),
+            error,
+        )
+
+    def _flush_sync_queue(self) -> None:
+        if not self.supabase_client or not self.vector_sync_pending_rows:
+            return
+
+        queued = list(self.vector_sync_pending_rows)
+        try:
+            self.supabase_client.table(self.vector_sync_table).upsert(queued, on_conflict="id").execute()
+            self.vector_sync_pending_rows.clear()
+            log.info("Flushed %s queued Supabase sync row(s)", len(queued))
+        except Exception as exc:
+            log.warning("Supabase sync replay failed (%s queued rows retained): %s", len(queued), exc)
+
+    def _sync_rows_to_supabase(self, rows: List[Dict[str, Any]]) -> bool:
+        if not rows or not self.vector_sync_enabled:
+            return True
+        if not self.supabase_client:
+            return True
+
+        self._flush_sync_queue()
+        payload = [self._build_supabase_row(row) for row in rows]
+        last_error: Optional[Exception] = None
+        for attempt in range(1, self.vector_sync_retry_max + 1):
+            try:
+                self.supabase_client.table(self.vector_sync_table).upsert(payload, on_conflict="id").execute()
+                return True
+            except Exception as exc:
+                last_error = exc
+                if attempt < self.vector_sync_retry_max:
+                    sleep_seconds = self.vector_sync_retry_delay_seconds * attempt
+                    log.warning(
+                        "Supabase sync attempt %s/%s failed, retrying in %ss: %s",
+                        attempt,
+                        self.vector_sync_retry_max,
+                        sleep_seconds,
+                        exc,
+                    )
+                    time.sleep(sleep_seconds)
+
+        if last_error is not None:
+            self._queue_sync_rows(rows, last_error)
+            if not self.vector_sync_degraded_mode:
+                raise RuntimeError(f"Supabase sync failed after retries: {last_error}")
+            log.warning("Supabase sync failed in degraded mode; write kept in Chroma only")
+        return False
+
     def upload_chunks(
         self,
         chunks: List[Dict],
@@ -550,6 +659,7 @@ class DatabaseUploader:
 
         try:
             successful = self.chroma_store.upsert_chunks(rows)
+            self._sync_rows_to_supabase(rows)
             failed = 0
             log.debug(f"Batch upload successful: {successful} chunks to Chroma")
             return successful, failed
@@ -606,6 +716,7 @@ class DatabaseUploader:
 
             try:
                 self.chroma_store.upsert_chunks([row])
+                self._sync_rows_to_supabase([row])
                 successful += 1
             except Exception as e:
                 log.warning(
@@ -689,6 +800,7 @@ class DatabaseUploader:
 
             try:
                 successful += self.chroma_store.upsert_chunks(batch)
+                self._sync_rows_to_supabase(batch)
                 log.debug(f"Batch of {len(batch)} links uploaded successfully")
             except Exception as e:
                 log.warning(f"Batch upload of links failed: {e}")
@@ -696,6 +808,7 @@ class DatabaseUploader:
                 for row in batch:
                     try:
                         self.chroma_store.upsert_chunks([row])
+                        self._sync_rows_to_supabase([row])
                         successful += 1
                     except Exception as e2:
                         log.warning(

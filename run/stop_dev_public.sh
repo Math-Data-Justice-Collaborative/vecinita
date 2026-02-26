@@ -52,6 +52,7 @@ fi
 echo "🛑 Stopping dev stack from: $COMPOSE_FILE"
 
 if [[ "$REMOVE_VOLUMES" == true ]]; then
+  echo "⚠️  --volumes will permanently delete local Chroma/Postgres persisted data for this dev stack."
   docker compose -f "$COMPOSE_FILE" down --remove-orphans --volumes
 else
   docker compose -f "$COMPOSE_FILE" down --remove-orphans

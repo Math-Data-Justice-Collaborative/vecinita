@@ -35,6 +35,10 @@ def env_vars():
 @pytest.fixture(scope="session", autouse=True)
 def _agent_module_path_compatibility():
     """Provide compatibility aliases for canonical agent test imports."""
+    if os.getenv("SKIP_AGENT_MAIN_IMPORT", "false").lower() in {"1", "true", "yes"}:
+        yield
+        return
+
     import sys
     import types
     import importlib.machinery

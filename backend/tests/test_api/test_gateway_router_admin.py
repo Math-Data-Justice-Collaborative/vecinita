@@ -1,11 +1,27 @@
 """Unit tests for admin router tag management functionality."""
 
+import sys
+import types
 from unittest.mock import MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
 
 pytestmark = pytest.mark.unit
+
+
+if "supabase" not in sys.modules:
+    fake_supabase = types.ModuleType("supabase")
+
+    class _FakeClient:
+        pass
+
+    def _fake_create_client(*_args, **_kwargs):
+        return MagicMock()
+
+    fake_supabase.Client = _FakeClient
+    fake_supabase.create_client = _fake_create_client
+    sys.modules["supabase"] = fake_supabase
 
 
 class _FakeResponse:
@@ -63,6 +79,32 @@ def admin_client(env_vars, monkeypatch):
 
 
 class TestAdminTagsEndpoints:
+    def test_admin_health_includes_vector_store_diagnostics(self, admin_client, monkeypatch):
+        client, mock_db, mock_store = admin_client
+        from src.api import router_admin
+
+        mock_db.table.return_value.select.return_value.limit.return_value.execute.return_value = MagicMock(data=[{"id": "chunk-1"}])
+        mock_store.heartbeat.return_value = True
+        monkeypatch.setenv("VECTOR_SYNC_ENABLED", "true")
+        monkeypatch.setenv("VECTOR_SYNC_SUPABASE_FALLBACK_READS", "true")
+
+        original_client = router_admin.httpx.AsyncClient
+        router_admin.httpx.AsyncClient = _FakeAsyncClient
+
+        try:
+            response = client.get("/api/v1/admin/health")
+        finally:
+            router_admin.httpx.AsyncClient = original_client
+
+        assert response.status_code == 200
+        body = response.json()
+        vector_store = body["database"]["vector_store"]
+        assert vector_store["primary"] == "chroma"
+        assert vector_store["sync_mode"] == "dual_write_degraded"
+        assert vector_store["supabase_dual_write_enabled"] is True
+        assert vector_store["supabase_fallback_reads_enabled"] is True
+        assert vector_store["chroma"]["status"] == "ok"
+
     def test_get_metadata_tags(self, admin_client):
         client, _mock_db, mock_store = admin_client
         mock_store.iter_all_chunks.return_value = [

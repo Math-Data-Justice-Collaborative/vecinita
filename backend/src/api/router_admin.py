@@ -373,18 +373,47 @@ async def admin_health_check(
     
     # Check database
     db_health = {"status": "error"}
+    chroma_status = {"status": "error"}
+    try:
+        store = get_chroma_store()
+        chroma_ok = store.heartbeat()
+        chroma_status = {
+            "status": "ok" if chroma_ok else "error",
+            "last_check": datetime.now(timezone.utc).isoformat(),
+        }
+    except Exception as e:
+        chroma_status = {
+            "status": "error",
+            "message": str(e),
+            "last_check": datetime.now(timezone.utc).isoformat(),
+        }
+
     try:
         # Simple query to test connection
-        result = db.table("document_chunks").select("id", count="exact").limit(1).execute()
+        db.table("document_chunks").select("id", count="exact").limit(1).execute()
         db_health = {
             "status": "ok",
-            "last_check": datetime.now(timezone.utc).isoformat()
+            "last_check": datetime.now(timezone.utc).isoformat(),
+            "vector_store": {
+                "primary": "chroma",
+                "sync_mode": "dual_write_degraded",
+                "chroma": chroma_status,
+                "supabase_fallback_reads_enabled": os.getenv("VECTOR_SYNC_SUPABASE_FALLBACK_READS", "true").lower() in ["1", "true", "yes"],
+                "supabase_dual_write_enabled": os.getenv("VECTOR_SYNC_ENABLED", "true").lower() in ["1", "true", "yes"],
+            },
         }
     except Exception as e:
         db_health = {
             "status": "error",
             "message": str(e),
-            "last_check": datetime.now(timezone.utc).isoformat()
+            "last_check": datetime.now(timezone.utc).isoformat(),
+            "vector_store": {
+                "primary": "chroma",
+                "sync_mode": "dual_write_degraded",
+                "chroma": chroma_status,
+                "supabase_fallback_reads_enabled": os.getenv("VECTOR_SYNC_SUPABASE_FALLBACK_READS", "true").lower() in ["1", "true", "yes"],
+                "supabase_dual_write_enabled": os.getenv("VECTOR_SYNC_ENABLED", "true").lower() in ["1", "true", "yes"],
+            },
         }
     
     # Determine overall status
