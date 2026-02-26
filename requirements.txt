@@ -1,0 +1,28 @@
+# Web & API
+fastapi
+uvicorn
+pydantic
+python-dotenv
+
+# LangChain & AI (Modernized for 2026)
+langchain-core
+langchain-community
+langchain-google-genai
+langchain-huggingface
+google-genai
+
+# The "99% Availability" Engine
+# Using the stable 2026 version of sentence-transformers
+sentence-transformers>=3.0.0
+
+# Database & Storage
+# Keeping Supabase stable but allowing minor patches
+supabase>=2.20.0
+psycopg2-binary
+
+# Tools & Scrapers
+playwright
+unstructured
+beautifulsoup4
+pypdf
+langdetect
