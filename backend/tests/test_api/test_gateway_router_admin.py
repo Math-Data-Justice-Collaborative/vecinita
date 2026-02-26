@@ -77,6 +77,15 @@ class TestAdminTagsEndpoints:
         assert body["tags"] == ["housing"]
         assert body["total"] == 1
 
+    def test_get_metadata_tags_supports_spanish_errors(self, admin_client):
+        client, _mock_db, mock_store = admin_client
+        mock_store.iter_all_chunks.side_effect = RuntimeError("boom")
+
+        response = client.get("/api/v1/admin/tags?lang=es")
+
+        assert response.status_code == 500
+        assert "No se pudieron obtener las etiquetas de metadatos" in str(response.json())
+
     def test_patch_source_tags_updates_chunks(self, admin_client):
         client, _mock_db, mock_store = admin_client
         mock_store.get_source.return_value = {"title": "Example", "metadata": {"tags": ["old"]}}
@@ -99,8 +108,30 @@ class TestAdminTagsEndpoints:
         assert body["status"] == "updated"
         assert body["tags"] == ["housing", "food"]
         assert body["chunks_updated"] == 2
+        assert body["message"] == "Source tags updated successfully."
         mock_store.upsert_source.assert_called_once()
         mock_store.upsert_chunks.assert_called_once()
+
+    def test_patch_source_tags_returns_spanish_message(self, admin_client):
+        client, _mock_db, mock_store = admin_client
+        mock_store.get_source.return_value = {"title": "Example", "metadata": {"tags": ["old"]}}
+        mock_store.get_chunks.return_value = {
+            "ids": ["chunk-1"],
+            "documents": ["Doc A"],
+            "metadatas": [{"title": "A", "source_url": "https://example.com/resource"}],
+        }
+        mock_store.chunks.return_value.get.return_value = {
+            "embeddings": [[0.1, 0.2]]
+        }
+
+        response = client.patch(
+            "/api/v1/admin/sources/tags?lang=es",
+            json={"url": "https://example.com/resource", "tags": ["Housing"]},
+        )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["message"] == "Las etiquetas de la fuente se actualizaron correctamente."
 
     def test_add_source_accepts_tags(self, admin_client):
         client, _mock_db, mock_store = admin_client

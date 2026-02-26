@@ -139,6 +139,30 @@ def _safe_metadata_dict(metadata: Any) -> Dict[str, Any]:
     return {}
 
 
+def _normalize_lang(lang: Optional[str]) -> str:
+    value = (lang or "").strip().lower()
+    return "es" if value.startswith("es") else "en"
+
+
+def _tagging_message(message_key: str, lang: str) -> str:
+    messages = {
+        "tags_updated": {
+            "en": "Source tags updated successfully.",
+            "es": "Las etiquetas de la fuente se actualizaron correctamente.",
+        },
+        "tags_update_failed": {
+            "en": "Failed to propagate tags to chunks",
+            "es": "No se pudieron propagar las etiquetas a los fragmentos",
+        },
+        "tags_fetch_failed": {
+            "en": "Failed to fetch metadata tags",
+            "es": "No se pudieron obtener las etiquetas de metadatos",
+        },
+    }
+    normalized_lang = _normalize_lang(lang)
+    return messages.get(message_key, {}).get(normalized_lang, message_key)
+
+
 def _domain_from_url(url: str) -> str:
     try:
         parsed = urlparse(url)
@@ -1271,6 +1295,7 @@ async def add_source(
 @router.patch("/sources/tags")
 async def update_source_tags(
     request: SourceTagsUpdateRequest,
+    lang: Optional[str] = Query(None, description="Response language (en/es)"),
     db: Client = Depends(get_database_client),
     _admin=Depends(_verify_admin),
 ):
@@ -1325,10 +1350,14 @@ async def update_source_tags(
                 row["embedding"] = existing_vectors[idx] if idx < len(existing_vectors) and existing_vectors[idx] else [0.0]
             store.upsert_chunks(rows)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Failed to propagate tags to chunks: {exc}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"{_tagging_message('tags_update_failed', lang)}: {exc}",
+        )
 
     return {
         "status": "updated",
+        "message": _tagging_message("tags_updated", lang),
         "url": request.url,
         "tags": normalized_tags,
         "chunks_updated": updated,
@@ -1339,6 +1368,7 @@ async def update_source_tags(
 async def get_metadata_tags(
     query: Optional[str] = Query(None, description="Optional tag prefix filter"),
     limit: int = Query(100, ge=1, le=500),
+    lang: Optional[str] = Query(None, description="Response language (en/es)"),
     db: Client = Depends(get_database_client),
     _admin=Depends(_verify_admin),
 ):
@@ -1356,7 +1386,10 @@ async def get_metadata_tags(
         tags = sorted(seen)[:limit]
         return {"tags": tags, "total": len(tags)}
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch metadata tags: {exc}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"{_tagging_message('tags_fetch_failed', lang)}: {exc}",
+        )
 
 
 @router.delete("/sources")
