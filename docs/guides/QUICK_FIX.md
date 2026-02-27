@@ -4,7 +4,7 @@
 
 ```bash
 # Quick fix for local development:
-./setup_local_dev.sh
+./run/setup_local_dev.sh
 ```
 
 This script will:
@@ -38,7 +38,7 @@ proxy-status: PostgREST; error=PGRST205
 
 ```bash
 # Automated setup (recommended):
-./setup_local_dev.sh
+./run/setup_local_dev.sh
 
 # Manual setup:
 # 1. Update backend/.env:
@@ -119,7 +119,7 @@ docker-compose restart
 
 ## Next Steps
 
-After running `./setup_local_dev.sh`:
+After running `./run/setup_local_dev.sh`:
 
 1. **Test the fix:**
    ```bash
@@ -148,9 +148,11 @@ After running `./setup_local_dev.sh`:
 ## Files Created
 
 - ✅ `SUPABASE_406_DIAGNOSIS.md` - Full diagnosis report
-- ✅ `setup_local_dev.sh` - Automated setup script
+- ✅ `run/setup_local_dev.sh` - Automated setup script
 - ✅ `QUICK_FIX.md` - This guide
 
 ---
 
-**Ready to proceed?** Run: `./setup_local_dev.sh`
+Compatibility note: `./setup_local_dev.sh` remains available as a root wrapper shim.
+
+**Ready to proceed?** Run: `./run/setup_local_dev.sh`

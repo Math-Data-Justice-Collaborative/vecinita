@@ -7,6 +7,7 @@ Welcome to the organized documentation hub.
 - [Quick Start Guide](guides/QUICKSTART.md) - Get up and running quickly
 - [Getting Started](guides/GETTING_STARTED.md) - Detailed setup instructions
 - [Documentation Hub](README.md) - Role-based navigation
+- [Testing Execution Plan](guides/TESTING_EXECUTION_PLAN.md) - Integration and E2E success criteria
 
 ## Architecture
 
@@ -33,6 +34,11 @@ Welcome to the organized documentation hub.
 - [Reference Directory](reference/) - Specs, config, and policy docs
 - [API Integration Spec](reference/API_INTEGRATION_SPEC.md)
 - [Privacy Policy](reference/PRIVACY_POLICY.md)
+- [Root File Organization Policy](reference/ROOT_FILE_ORGANIZATION_POLICY.md)
+- [Stage 3 Deprecation Checklist](reference/STAGE3_DEPRECATION_CHECKLIST.md) - Low-risk checklist for root manifest deprecation
+- [Stage 3 Dry-Run Audit](reference/STAGE3_DRY_RUN_AUDIT.md) - Go/no-go decisions with explicit evidence
+
+Migration note: legacy root schema files were moved to `supabase/migrations/archive/` as part of Stage 1 organization. See `supabase/migrations/archive/README.md` for archive conventions.
 
 ## Reports
 
@@ -43,7 +49,8 @@ Welcome to the organized documentation hub.
 
 - [Features](features/) - Feature-specific documentation
 - [Tools](tools/) - Utilities and CLI docs
-- [Backend Docs](../backend/docs/) - Backend-specific documentation
+- [SQL Archive Conventions](../supabase/migrations/archive/README.md) - Legacy schema file archive rules
+- [Backend Docs](../backend/docs/INDEX.md) - Backend-specific documentation
 - [Frontend Docs](../frontend/docs/) - Frontend-specific documentation
 
 ---

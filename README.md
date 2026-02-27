@@ -1,7 +1,8 @@
 # Vecinita
 
 ![Tests](https://github.com/acadiagit/vecinita/actions/workflows/test.yml/badge.svg)
-![Codecov](https://codecov.io/gh/acadiagit/vecinita/branch/main/graph/badge.svg)
+![Backend Coverage](https://github.com/acadiagit/vecinita/actions/workflows/backend-coverage.yml/badge.svg)
+![Frontend Coverage](https://github.com/acadiagit/vecinita/actions/workflows/frontend-coverage.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.10-blue)
 ![OS](https://img.shields.io/badge/OS-Ubuntu%2022.04-success)
 
@@ -105,16 +106,18 @@ docker-compose up
 From repo root:
 
 ```bash
-chmod +x dev-session.sh
-./dev-session.sh start
+chmod +x run/dev-session.sh
+./run/dev-session.sh start
 ```
 
 This starts Chroma, embedding service, agent service, API gateway, and frontend in one `tmux` session with live logs in split panes.
 
 ```bash
-./dev-session.sh attach   # Re-attach to running session
-./dev-session.sh stop     # Stop session and chroma container
+./run/dev-session.sh attach   # Re-attach to running session
+./run/dev-session.sh stop     # Stop session and chroma container
 ```
+
+Compatibility note: `./dev-session.sh` remains available as a root wrapper shim.
 
 #### Backend (Python)
 
@@ -301,6 +304,8 @@ curl "http://localhost:8000/ask?question=Hola&language=es"
 
 The scraper pipeline processes web content into vector embeddings:
 
+Schema archive note: legacy SQL schema files now live in `supabase/migrations/archive/`.
+
 ```bash
 cd backend
 
@@ -321,6 +326,12 @@ Configuration files:
 - `data/config/recursive_sites.txt` - Sites for recursive crawling
 - `data/config/playwright_sites.txt` - JS-heavy sites requiring Playwright
 - `data/config/skip_sites.txt` - Domains to skip
+
+## Schema Files
+
+- Active Supabase setup files: `supabase/init-local-db.sql`, `supabase/init-local-db.sh`, and migration scripts under `backend/scripts/`.
+- Archived legacy SQL snapshots/upgrades: `supabase/migrations/archive/`.
+- Archive conventions and handling guidance: `supabase/migrations/archive/README.md`.
 
 ## Environment Variables
 

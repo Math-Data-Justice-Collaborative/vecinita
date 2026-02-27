@@ -219,7 +219,33 @@ class GuardResult:
         return self.passed
 
 
-def validate_input(text: str) -> GuardResult:
+def _looks_spanish(text: str) -> bool:
+    sample = (text or "").lower()
+    if any(ch in sample for ch in ("¿", "¡", "á", "é", "í", "ó", "ú", "ñ", "ü")):
+        return True
+    spanish_markers = (
+        " por ", " para ", " necesito ", " ayudame", " ayúdame", " quiero ",
+        " escuela", " niño", " nina", " niña", " futbol", " fútbol", " recursos ",
+        " donde ", " dónde ", " como ", " cómo ", " que ", " qué ",
+    )
+    padded = f" {sample} "
+    return any(marker in padded for marker in spanish_markers)
+
+
+def _pick_language(text: str, lang: str | None = None) -> str:
+    normalized = (lang or "").strip().lower()
+    if normalized.startswith("es"):
+        return "es"
+    if normalized.startswith("en"):
+        return "en"
+    return "es" if _looks_spanish(text) else "en"
+
+
+def _localized(language: str, *, en: str, es: str) -> str:
+    return es if language == "es" else en
+
+
+def validate_input(text: str, lang: str | None = None) -> GuardResult:
     """
     Run all enabled input guards against user text.
 
@@ -237,14 +263,23 @@ def validate_input(text: str) -> GuardResult:
     if not GUARDRAILS_ENABLED:
         return GuardResult(passed=True)
 
+    language = _pick_language(text, lang)
+
     # 1. Prompt injection / jailbreak detection
     if GUARDRAILS_PROMPT_INJECTION and _INJECTION_RE.search(text):
         logger.warning(f"[GUARDRAILS] Prompt injection detected: {text[:120]!r}")
         return GuardResult(
             passed=False,
-            reason=(
-                "I'm not able to process that request. "
-                "Please ask me about the Woonasquatucket River Watershed or related topics."
+            reason=_localized(
+                language,
+                en=(
+                    "I'm not able to process that request. "
+                    "Please ask me about the Woonasquatucket River Watershed or related topics."
+                ),
+                es=(
+                    "No puedo procesar esa solicitud. "
+                    "Por favor pregúntame sobre la cuenca del río Woonasquatucket o temas relacionados."
+                ),
             ),
         )
 
@@ -253,9 +288,16 @@ def validate_input(text: str) -> GuardResult:
         logger.warning(f"[GUARDRAILS] SQL/DB attack-like input detected: {text[:120]!r}")
         return GuardResult(
             passed=False,
-            reason=(
-                "I can't help with database access, schema manipulation, or injection-style requests. "
-                "Please ask a normal information question instead."
+            reason=_localized(
+                language,
+                en=(
+                    "I can't help with database access, schema manipulation, or injection-style requests. "
+                    "Please ask a normal information question instead."
+                ),
+                es=(
+                    "No puedo ayudar con acceso a bases de datos, manipulación de esquemas "
+                    "o solicitudes de tipo inyección. Por favor haz una pregunta normal de información."
+                ),
             ),
         )
 
@@ -270,9 +312,16 @@ def validate_input(text: str) -> GuardResult:
             if not validation_passed:
                 return GuardResult(
                     passed=False,
-                    reason=(
-                        "Your request did not pass safety validation. "
-                        "Please rephrase without unsafe or sensitive content."
+                    reason=_localized(
+                        language,
+                        en=(
+                            "Your request did not pass safety validation. "
+                            "Please rephrase without unsafe or sensitive content."
+                        ),
+                        es=(
+                            "Tu solicitud no pasó la validación de seguridad. "
+                            "Por favor reformúlala sin contenido inseguro o sensible."
+                        ),
                     ),
                 )
 
@@ -302,10 +351,18 @@ def validate_input(text: str) -> GuardResult:
             logger.info(f"[GUARDRAILS] Off-topic query: {text[:120]!r}")
             return GuardResult(
                 passed=False,
-                reason=(
-                    "I can only answer questions related to the Woonasquatucket River Watershed, "
-                    "environmental topics in Rhode Island, and related community resources. "
-                    "Please ask me something related to those areas."
+                reason=_localized(
+                    language,
+                    en=(
+                        "I can only answer questions related to the Woonasquatucket River Watershed, "
+                        "environmental topics in Rhode Island, and related community resources. "
+                        "Please ask me something related to those areas."
+                    ),
+                    es=(
+                        "Solo puedo responder preguntas relacionadas con la cuenca del río Woonasquatucket, "
+                        "temas ambientales en Rhode Island y recursos comunitarios relacionados. "
+                        "Por favor pregúntame algo relacionado con esas áreas."
+                    ),
                 ),
             )
 

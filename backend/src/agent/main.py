@@ -6,6 +6,7 @@
 import os
 import json
 import time
+import re
 import logging
 import traceback
 import urllib.request
@@ -611,6 +612,30 @@ def _build_sources_from_docs(docs: list[dict]) -> list[dict]:
     return sources
 
 
+def _allowed_source_urls_from_docs(docs: list[dict]) -> set[str]:
+    allowed: set[str] = set()
+    for doc in docs:
+        source_url = str(doc.get("source_url") or "").strip()
+        if source_url.startswith("http://") or source_url.startswith("https://"):
+            allowed.add(source_url)
+    return allowed
+
+
+def _sanitize_answer_links(answer: str, allowed_urls: set[str], language: str) -> str:
+    if not answer:
+        return answer
+
+    url_pattern = re.compile(r"https?://[^\s)\]\[\"'<>]+")
+    replacement = "[enlace no verificado eliminado]" if language == "es" else "[unverified link removed]"
+
+    def _replace(match: re.Match[str]) -> str:
+        raw_url = match.group(0)
+        normalized = raw_url.rstrip(".,;:!?)\"]")
+        return raw_url if normalized in allowed_urls else replacement
+
+    return url_pattern.sub(_replace, answer)
+
+
 def _build_deterministic_rag_answer(
     *,
     question: str,
@@ -634,6 +659,7 @@ def _build_deterministic_rag_answer(
             prompt = (
                 "Responde usando principalmente el contexto recuperado de la base vectorial local. "
                 "Si el contexto no alcanza para una parte, dilo claramente. "
+                "Nunca inventes enlaces. Solo usa URLs que aparecen textualmente en el contexto recuperado. "
                 "Incluye citas en formato (Fuente: URL) cuando uses el contexto.\n\n"
                 f"Pregunta: {question}\n\n"
                 f"Contexto recuperado:\n{context_text}"
@@ -650,6 +676,7 @@ def _build_deterministic_rag_answer(
             prompt = (
                 "Answer primarily using the retrieved local vector database context. "
                 "If context is insufficient for any part, state that explicitly. "
+                "Never invent links. Only use URLs that appear verbatim in the retrieved context. "
                 "Include citations in the format (Source: URL) when using context.\n\n"
                 f"Question: {question}\n\n"
                 f"Retrieved context:\n{context_text}"
@@ -1910,7 +1937,7 @@ async def ask_question(
         # Try static response first for deterministic FAQ handling in both languages
         # --- GuardrailsAI: validate input before invoking agent ---
         from src.agent.guardrails_config import validate_input
-        guard_result = validate_input(question)
+        guard_result = validate_input(question, lang=lang)
         if not guard_result.passed:
             return {"answer": guard_result.reason, "thread_id": thread_id, "sources": []}
         # If PII was detected and redacted, use redacted version
@@ -1974,6 +2001,11 @@ async def ask_question(
                     weak_retrieval=weak_retrieval,
                 )
                 sources = _build_sources_from_docs(retrieved_docs)
+                answer = _sanitize_answer_links(
+                    answer,
+                    _allowed_source_urls_from_docs(retrieved_docs),
+                    lang,
+                )
                 logger.info("Deterministic RAG complete: docs=%s, weak=%s, sources=%s", len(retrieved_docs), weak_retrieval, len(sources))
         finally:
             reset_db_search_options(search_token)
@@ -2193,6 +2225,11 @@ async def ask_question_stream(
                     weak_retrieval=weak_retrieval,
                 )
                 sources = _build_sources_from_docs(retrieved_docs)
+                answer = _sanitize_answer_links(
+                    answer,
+                    _allowed_source_urls_from_docs(retrieved_docs),
+                    lang_local,
+                )
                 logger.info("Streaming deterministic RAG complete: docs=%s, weak=%s, sources=%s", len(retrieved_docs), weak_retrieval, len(sources))
 
             yield _sse({
