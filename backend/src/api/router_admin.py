@@ -16,7 +16,7 @@ import secrets
 import tempfile
 import time
 from datetime import datetime, timezone, timedelta
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Literal
 from urllib.parse import urlparse
 
 import httpx
@@ -24,9 +24,10 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from fastapi import APIRouter, HTTPException, Query, Depends, UploadFile, File, Form, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from supabase import create_client, Client
 from src.services.chroma_store import get_chroma_store
+from ..services.scraper.scraper import VecinaScraper
 
 from ..services.db.schema_diagnostics import validate_schema, get_validation_summary
 from .models import (
@@ -107,6 +108,16 @@ class SourceTagsUpdateRequest(BaseModel):
     tags: List[str]
 
 
+class BatchSourceIngestRequest(BaseModel):
+    """Request body for bulk source ingestion from pasted urls.txt content."""
+
+    urls_text: Optional[str] = None
+    urls: List[str] = Field(default_factory=list)
+    depth: int = 1
+    tags: List[str] = Field(default_factory=list)
+    tag_mode: Literal["none", "baseline_only", "auto_infer"] = "auto_infer"
+
+
 def _extract_tags(metadata: Any) -> List[str]:
     if isinstance(metadata, str):
         metadata_text = metadata.strip()
@@ -169,6 +180,31 @@ def _domain_from_url(url: str) -> str:
         return parsed.netloc or ""
     except Exception:
         return ""
+
+
+def _parse_urls_text(urls_text: Optional[str], urls: Optional[List[str]]) -> List[str]:
+    seen: set[str] = set()
+    ordered: List[str] = []
+
+    for value in urls or []:
+        normalized = (value or "").strip()
+        if not normalized or normalized.startswith("#"):
+            continue
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        ordered.append(normalized)
+
+    for raw_line in (urls_text or "").splitlines():
+        normalized = raw_line.strip()
+        if not normalized or normalized.startswith("#"):
+            continue
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        ordered.append(normalized)
+
+    return ordered
 
 
 def _to_int(value: Any, default: int = 0) -> int:
@@ -1128,21 +1164,63 @@ async def _embed_text_chunks(chunks: List[str]) -> List[List[float]]:
 
     return embeddings
 
-@router.post("/sources")
-async def add_source(
-    url: str = Form(..., description="URL to scrape and embed"),
-    depth: int = Form(1, ge=1, le=5, description="Crawl depth"),
-    tags: Optional[str] = Form(None, description="Comma-separated metadata tags"),
-    db: Client = Depends(get_database_client),
-    _admin=Depends(_verify_admin),
-):
-    """Add a URL source and run ingestion (fetch, chunk, embed, upsert). Requires admin auth."""
-    # Validate URL format
-    import re as _re
-    if not _re.match(r"^https?://", url):
-        raise HTTPException(status_code=400, detail="URL must start with http:// or https://")
 
-    normalized_tags = parse_tags_input(tags)
+def _validate_source_url(url: str) -> str:
+    import re as _re
+
+    normalized = (url or "").strip()
+    if not _re.match(r"^https?://", normalized):
+        raise HTTPException(status_code=400, detail="URL must start with http:// or https://")
+    return normalized
+
+
+def _should_retry_with_scraper_loader(exc: HTTPException) -> bool:
+    detail = str(exc.detail or "").lower()
+    anti_bot_markers = [
+        "http 403",
+        "forbidden",
+        "access denied",
+        "cloudflare",
+        "captcha",
+        "bot",
+    ]
+    return any(marker in detail for marker in anti_bot_markers)
+
+
+async def _ingest_source_via_scraper_loader(url: str, depth: int) -> Dict[str, Any]:
+    temp_dir = os.path.join(tempfile.gettempdir(), "vecinita_admin_ingest_fallback")
+    os.makedirs(temp_dir, exist_ok=True)
+
+    file_suffix = hashlib.sha256(f"{url}:{time.time()}".encode("utf-8")).hexdigest()[:12]
+    output_file = os.path.join(temp_dir, f"source_{file_suffix}_chunks.jsonl")
+    failed_log = os.path.join(temp_dir, f"source_{file_suffix}_failed.log")
+
+    scraper = VecinaScraper(
+        output_file=output_file,
+        failed_log=failed_log,
+        links_file=None,
+        stream_mode=True,
+    )
+
+    await asyncio.to_thread(scraper.scrape_urls, [url], "playwright")
+    await asyncio.to_thread(scraper.finalize)
+
+    if url not in scraper.successful_sources:
+        failure_reason = scraper.failed_sources.get(url) or "Scraper loader fallback failed"
+        raise HTTPException(status_code=502, detail=f"Scraper fallback failed: {failure_reason}")
+
+    total_chunks = int(scraper.stats.get("total_chunks", 0))
+    total_uploads = int(scraper.stats.get("total_uploads", 0))
+
+    return {
+        "chunks_total": total_chunks,
+        "chunks_inserted": total_uploads if total_uploads > 0 else total_chunks,
+        "ingestion_path": "scraper_loader_fallback",
+        "depth": depth,
+    }
+
+
+async def _ingest_source_url(url: str, depth: int, normalized_tags: List[str]) -> Dict[str, Any]:
     source_domain = _domain_from_url(url)
     source_title = source_domain or url
     job_id = hashlib.sha256(f"{url}:{depth}:{time.time()}".encode("utf-8")).hexdigest()
@@ -1189,52 +1267,73 @@ async def add_source(
             },
         )
 
-        text = (await _extract_text_from_url(url)).strip()
-        if not text:
-            raise HTTPException(status_code=422, detail="No text could be extracted from the URL.")
+        total_chunks = 0
+        inserted = 0
+        total_characters = 0
+        ingestion_path = "direct_fetch"
 
-        chunks = _chunk_text_content(text)
-        if not chunks:
-            raise HTTPException(status_code=422, detail="URL content produced no chunks after splitting.")
+        try:
+            text = (await _extract_text_from_url(url)).strip()
+            if not text:
+                raise HTTPException(status_code=422, detail="No text could be extracted from the URL.")
 
-        embeddings = await _embed_text_chunks(chunks)
+            chunks = _chunk_text_content(text)
+            if not chunks:
+                raise HTTPException(status_code=422, detail="URL content produced no chunks after splitting.")
 
-        total_chunks = len(chunks)
-        rows: List[Dict[str, Any]] = []
-        for index, chunk_text in enumerate(chunks):
-            chunk_id = hashlib.sha256(f"{url}:{index}:{chunk_text}".encode("utf-8")).hexdigest()
-            rows.append(
-                {
-                    "id": chunk_id,
-                    "content": chunk_text,
-                    "embedding": embeddings[index],
-                    "metadata": {
+            embeddings = await _embed_text_chunks(chunks)
+
+            total_chunks = len(chunks)
+            total_characters = len(text)
+            rows: List[Dict[str, Any]] = []
+            for index, chunk_text in enumerate(chunks):
+                chunk_id = hashlib.sha256(f"{url}:{index}:{chunk_text}".encode("utf-8")).hexdigest()
+                rows.append(
+                    {
+                        "id": chunk_id,
+                        "content": chunk_text,
+                        "embedding": embeddings[index],
+                        "metadata": {
+                            "source_url": url,
+                            "source_domain": source_domain,
+                            "document_title": source_title,
+                            "chunk_index": index,
+                            "total_chunks": total_chunks,
+                            "chunk_size": len(chunk_text),
+                            "tags": normalized_tags,
+                            "source_type": "web",
+                            "depth": depth,
+                            "created_at": created_at,
+                            "updated_at": datetime.now(timezone.utc).isoformat(),
+                        },
                         "source_url": url,
                         "source_domain": source_domain,
-                        "document_title": source_title,
                         "chunk_index": index,
                         "total_chunks": total_chunks,
                         "chunk_size": len(chunk_text),
-                        "tags": normalized_tags,
-                        "source_type": "web",
-                        "depth": depth,
+                        "document_title": source_title,
                         "created_at": created_at,
                         "updated_at": datetime.now(timezone.utc).isoformat(),
-                    },
-                    "source_url": url,
-                    "source_domain": source_domain,
-                    "chunk_index": index,
-                    "total_chunks": total_chunks,
-                    "chunk_size": len(chunk_text),
-                    "document_title": source_title,
-                    "created_at": created_at,
-                    "updated_at": datetime.now(timezone.utc).isoformat(),
-                    "is_processed": True,
-                    "processing_status": "completed",
-                }
-            )
+                        "is_processed": True,
+                        "processing_status": "completed",
+                    }
+                )
 
-        inserted = store.upsert_chunks(rows)
+            inserted = store.upsert_chunks(rows)
+        except HTTPException as direct_exc:
+            if not _should_retry_with_scraper_loader(direct_exc):
+                raise
+
+            logger.info(
+                "Direct source fetch blocked for %s (%s). Retrying via scraper loader fallback.",
+                url,
+                direct_exc.detail,
+            )
+            fallback_result = await _ingest_source_via_scraper_loader(url, depth)
+            total_chunks = int(fallback_result.get("chunks_total", 0))
+            inserted = int(fallback_result.get("chunks_inserted", total_chunks))
+            ingestion_path = str(fallback_result.get("ingestion_path") or "scraper_loader_fallback")
+
         completed_at = datetime.now(timezone.utc).isoformat()
 
         store.upsert_source(
@@ -1245,8 +1344,9 @@ async def add_source(
                 "depth": depth,
                 "source_domain": source_domain,
                 "scrape_count": 1,
-                "total_characters": len(text),
+                "total_characters": total_characters,
                 "last_scraped_at": completed_at,
+                "ingestion_path": ingestion_path,
                 "updated_at": completed_at,
             },
             title=source_title,
@@ -1296,7 +1396,7 @@ async def add_source(
                 },
             )
         except Exception:
-            logger.exception("Failed to update queue state after add_source HTTPException")
+            logger.exception("Failed to update queue state after source ingestion HTTPException")
         raise
     except Exception as exc:
         try:
@@ -1317,8 +1417,68 @@ async def add_source(
                 },
             )
         except Exception:
-            logger.exception("Failed to update queue state after add_source exception")
+            logger.exception("Failed to update queue state after source ingestion exception")
         raise HTTPException(status_code=500, detail=f"Failed to process URL source: {exc}")
+
+@router.post("/sources")
+async def add_source(
+    url: str = Form(..., description="URL to scrape and embed"),
+    depth: int = Form(1, ge=1, le=5, description="Crawl depth"),
+    tags: Optional[str] = Form(None, description="Comma-separated metadata tags"),
+    db: Client = Depends(get_database_client),
+    _admin=Depends(_verify_admin),
+):
+    """Add a URL source and run ingestion (fetch, chunk, embed, upsert). Requires admin auth."""
+    validated_url = _validate_source_url(url)
+    normalized_tags = parse_tags_input(tags)
+    return await _ingest_source_url(validated_url, depth, normalized_tags)
+
+
+@router.post("/sources/batch")
+async def add_sources_batch(
+    request: BatchSourceIngestRequest,
+    _admin=Depends(_verify_admin),
+):
+    """Bulk ingest URL sources from pasted urls.txt content and/or explicit URL list."""
+    if request.depth < 1 or request.depth > 5:
+        raise HTTPException(status_code=400, detail="Depth must be between 1 and 5")
+
+    parsed_urls = _parse_urls_text(request.urls_text, request.urls)
+    if not parsed_urls:
+        raise HTTPException(status_code=400, detail="Provide at least one URL in urls_text or urls")
+
+    baseline_tags = normalize_tags(request.tags)
+    tag_mode = request.tag_mode or "auto_infer"
+
+    results: List[Dict[str, Any]] = []
+    for raw_url in parsed_urls:
+        validated_url = _validate_source_url(raw_url)
+        tags_for_url = baseline_tags if tag_mode in ["baseline_only", "auto_infer"] else []
+        try:
+            result = await _ingest_source_url(validated_url, request.depth, tags_for_url)
+            results.append({"url": validated_url, "status": "completed", "result": result})
+        except HTTPException as exc:
+            results.append(
+                {
+                    "url": validated_url,
+                    "status": "failed",
+                    "error": str(exc.detail),
+                }
+            )
+
+    completed = len([item for item in results if item["status"] == "completed"])
+    failed = len(results) - completed
+
+    return {
+        "status": "completed" if failed == 0 else "partial",
+        "submitted": len(parsed_urls),
+        "completed": completed,
+        "failed": failed,
+        "depth": request.depth,
+        "tag_mode": tag_mode,
+        "baseline_tags": baseline_tags,
+        "results": results,
+    }
 
 
 @router.patch("/sources/tags")
@@ -1374,9 +1534,21 @@ async def update_source_tags(
         updated = len(rows)
         if rows:
             # Preserve existing vectors by fetching them directly from collection.
-            existing_vectors = store.chunks().get(ids=ids, include=["embeddings"]).get("embeddings") or []
+            existing_vectors_payload = store.chunks().get(ids=ids, include=["embeddings"]).get("embeddings")
+            if existing_vectors_payload is None:
+                existing_vectors: list[Any] = []
+            else:
+                existing_vectors = list(existing_vectors_payload)
             for idx, row in enumerate(rows):
-                row["embedding"] = existing_vectors[idx] if idx < len(existing_vectors) and existing_vectors[idx] else [0.0]
+                vector: Any = existing_vectors[idx] if idx < len(existing_vectors) else None
+                if hasattr(vector, "tolist"):
+                    vector = vector.tolist()
+                if vector is None:
+                    row["embedding"] = [0.0]
+                elif isinstance(vector, list) and len(vector) == 0:
+                    row["embedding"] = [0.0]
+                else:
+                    row["embedding"] = vector
             store.upsert_chunks(rows)
     except Exception as exc:
         raise HTTPException(

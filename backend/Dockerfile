@@ -28,7 +28,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 	beautifulsoup4 pypdf \
 	python-dotenv pydantic requests httpx langdetect tqdm \
 	python-multipart \
-	gotrue langchain-ollama langsmith ddgs
+	gotrue langchain-ollama langsmith ddgs playwright unstructured
 
 # Runtime stage - minimal image
 FROM python:3.11-slim-bookworm AS runtime
@@ -46,6 +46,9 @@ COPY --from=builder /install /usr/local
 # Copy application code
 COPY src/ ./src/
 COPY scripts/ ./scripts/
+
+# Install Playwright browser for JS-heavy scraping fallback
+RUN python -m playwright install --with-deps chromium
 
 # Python env flags
 ENV PYTHONUNBUFFERED=1

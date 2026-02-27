@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import re
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from contextvars import ContextVar, Token
 from typing import Any, Dict, List, Optional
 
@@ -15,6 +16,7 @@ except Exception:  # pragma: no cover - optional dependency in some test/runtime
     create_client = None  # type: ignore[assignment]
 
 from src.services.chroma_store import ChromaStore, get_chroma_store
+from src.utils.tags import infer_tags_from_text, normalize_tags
 
 logger = logging.getLogger(__name__)
 _LAST_SEARCH_STATUS = "not_run"
@@ -244,6 +246,31 @@ def _query_supabase_fallback(
     return [_normalize_supabase_document(row) for row in rows if isinstance(row, dict)]
 
 
+def _query_chroma_with_timeout(
+    *,
+    store: ChromaStore,
+    query_embedding: List[float],
+    n_results: int,
+    where: Optional[Dict[str, Any]] = None,
+) -> List[Dict[str, Any]]:
+    timeout_seconds = max(1.0, float(os.getenv("DB_SEARCH_CHROMA_TIMEOUT_SECONDS", "15")))
+
+    def _run_query() -> List[Dict[str, Any]]:
+        return store.query_chunks(
+            query_embedding=query_embedding,
+            n_results=n_results,
+            where=where,
+        )
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(_run_query)
+        try:
+            return future.result(timeout=timeout_seconds)
+        except FuturesTimeoutError as exc:
+            future.cancel()
+            raise TimeoutError(f"Chroma query timed out after {timeout_seconds}s") from exc
+
+
 def create_db_search_tool(
     chroma_store: Optional[ChromaStore],
     embedding_model,
@@ -262,14 +289,25 @@ def create_db_search_tool(
             query_embedding = embedding_model.embed_query(query)
 
             tags = [t for t in search_opts.get("tags", []) if isinstance(t, str) and t]
+            auto_infer_enabled = os.getenv("TAG_FILTER_AUTO_INFER", "true").lower() in {"1", "true", "yes"}
+            auto_inferred_tags = False
+            if not tags and auto_infer_enabled:
+                inferred_tags = infer_tags_from_text(query, max_tags=6)
+                tags = normalize_tags(inferred_tags)
+                if tags:
+                    auto_inferred_tags = True
+                    logger.info("Auto-inferred tag filters from query: %s", tags)
             tag_mode = search_opts.get("tag_match_mode", "any")
             include_untagged_fallback = bool(search_opts.get("include_untagged_fallback", True))
+            if auto_inferred_tags:
+                include_untagged_fallback = False
 
             where = _build_tags_where(tags, tag_mode)
             rows: List[Dict[str, Any]] = []
             chroma_failed = False
             try:
-                rows = store.query_chunks(
+                rows = _query_chroma_with_timeout(
+                    store=store,
                     query_embedding=query_embedding,
                     n_results=max(int(match_count), 1),
                     where=where,
@@ -280,7 +318,8 @@ def create_db_search_tool(
 
             if not rows and tags and include_untagged_fallback:
                 try:
-                    rows = store.query_chunks(
+                    rows = _query_chroma_with_timeout(
+                        store=store,
                         query_embedding=query_embedding,
                         n_results=max(int(match_count), 1),
                     )

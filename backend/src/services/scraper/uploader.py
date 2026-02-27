@@ -7,12 +7,13 @@ import hashlib
 import json
 import logging
 import os
+import re
 import time
 from typing import List, Dict, Optional, Tuple, Any
 from datetime import datetime, timezone
 from dataclasses import dataclass
 from urllib.parse import urlparse
-from src.utils.tags import normalize_tags
+from src.utils.tags import normalize_tags, infer_tags_from_text, build_bilingual_tag_fields
 from src.services.chroma_store import get_chroma_store, ChromaStore
 
 try:
@@ -28,6 +29,13 @@ try:
     DEEPSEEK_TAGGING_AVAILABLE = True
 except ImportError:
     DEEPSEEK_TAGGING_AVAILABLE = False
+
+try:
+    from langchain_groq import ChatGroq
+    GROQ_TAGGING_AVAILABLE = True
+except ImportError:
+    ChatGroq = None  # type: ignore[assignment]
+    GROQ_TAGGING_AVAILABLE = False
 
 # Import embedding service client (preferred)
 try:
@@ -87,6 +95,8 @@ class DatabaseUploader:
         self.chroma_store: Optional[ChromaStore] = None
         self.deepseek_tagger = None
         self.deepseek_raw_model = None
+        self._llm_structured_output_supported = True
+        self._llm_structured_output_warned = False
         self._source_tag_cache: Dict[str, Dict[str, Any]] = {}
         self._known_tag_cache: Optional[List[str]] = None
         self.supabase_client = None
@@ -95,6 +105,7 @@ class DatabaseUploader:
         self.vector_sync_retry_max = max(1, int(os.getenv("VECTOR_SYNC_RETRY_MAX", "3")))
         self.vector_sync_retry_delay_seconds = max(1, int(os.getenv("VECTOR_SYNC_RETRY_DELAY_SECONDS", "2")))
         self.vector_sync_table = os.getenv("VECTOR_SYNC_SUPABASE_TABLE", "document_chunks")
+        self.vector_sync_schema = os.getenv("VECTOR_SYNC_SUPABASE_SCHEMA", "public").strip() or "public"
         self.vector_sync_pending_rows: List[Dict[str, Any]] = []
 
         # Initialize embeddings with fallback chain
@@ -107,31 +118,63 @@ class DatabaseUploader:
         self._init_supabase()
 
     def _init_deepseek_tagger(self) -> None:
-        """Initialize optional DeepSeek structured-output tag enhancer."""
-        enabled = (os.getenv("ENABLE_DEEPSEEK_TAG_ENHANCEMENT", "true").lower() in {"1", "true", "yes"})
+        """Initialize optional LLM structured-output tag enhancer.
+
+        Provider selection:
+        - auto (default): DeepSeek first, then Groq fallback
+        - deepseek: DeepSeek only
+        - groq: Groq only
+        """
+        enabled = (
+            os.getenv("ENABLE_LLM_TAG_ENHANCEMENT", os.getenv("ENABLE_DEEPSEEK_TAG_ENHANCEMENT", "true")).lower()
+            in {"1", "true", "yes"}
+        )
         if not enabled:
             return
-        if not DEEPSEEK_TAGGING_AVAILABLE:
-            return
 
-        deepseek_api_key = os.getenv("DEEPSEEK_API_KEY")
-        if not deepseek_api_key:
-            return
+        provider = os.getenv("LLM_TAG_PROVIDER", "auto").strip().lower()
 
-        try:
-            deepseek_model = os.getenv("DEEPSEEK_TAG_MODEL", "deepseek-chat")
-            deepseek_base_url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
-            llm = ChatOpenAI(
-                model=deepseek_model,
-                api_key=deepseek_api_key,
-                base_url=deepseek_base_url,
-                temperature=0,
-            )
-            self.deepseek_raw_model = llm
-            self.deepseek_tagger = llm.with_structured_output(TagEnhancement)
-            log.info(f"✓ DeepSeek tag enhancement enabled ({deepseek_model})")
-        except Exception as exc:
-            log.warning(f"DeepSeek tag enhancement unavailable: {exc}")
+        if provider in {"auto", "deepseek"} and DEEPSEEK_TAGGING_AVAILABLE:
+            deepseek_api_key = os.getenv("DEEPSEEK_API_KEY")
+            if deepseek_api_key:
+                try:
+                    deepseek_model = os.getenv("DEEPSEEK_TAG_MODEL", "deepseek-chat")
+                    deepseek_base_url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+                    llm = ChatOpenAI(
+                        model=deepseek_model,
+                        api_key=deepseek_api_key,
+                        base_url=deepseek_base_url,
+                        temperature=0,
+                    )
+                    self.deepseek_raw_model = llm
+                    self.deepseek_tagger = llm.with_structured_output(TagEnhancement)
+                    log.info(f"✓ LLM tag enhancement enabled via DeepSeek ({deepseek_model})")
+                    return
+                except Exception as exc:
+                    log.warning(f"DeepSeek tag enhancement unavailable: {exc}")
+            elif provider == "deepseek":
+                log.warning("DeepSeek tag enhancement requested but DEEPSEEK_API_KEY is not configured")
+
+        if provider in {"auto", "groq"} and GROQ_TAGGING_AVAILABLE:
+            groq_api_key = os.getenv("GROQ_API_KEY")
+            if groq_api_key:
+                try:
+                    groq_model = os.getenv("GROQ_TAG_MODEL", "llama-3.1-8b-instant")
+                    llm = ChatGroq(
+                        model=groq_model,
+                        api_key=groq_api_key,
+                        temperature=0,
+                    )
+                    self.deepseek_raw_model = llm
+                    self.deepseek_tagger = llm.with_structured_output(TagEnhancement)
+                    log.info(f"✓ LLM tag enhancement enabled via Groq ({groq_model})")
+                    return
+                except Exception as exc:
+                    log.warning(f"Groq tag enhancement unavailable: {exc}")
+            elif provider == "groq":
+                log.warning("Groq tag enhancement requested but GROQ_API_KEY is not configured")
+
+        log.info("LLM tag enhancement disabled: no configured provider credentials available")
 
     def _build_chunk_id(self, source_url: str, chunk_index: int) -> str:
         """Build deterministic chunk IDs so upsert updates existing records in place."""
@@ -173,6 +216,71 @@ class DatabaseUploader:
             combined.extend(values or [])
         return normalize_tags(combined)
 
+    def _parse_llm_json_payload(self, content: Any) -> Optional[Dict[str, Any]]:
+        text = content
+        if isinstance(text, list):
+            text = "\n".join(str(part) for part in text)
+        text = str(text or "").strip()
+        if not text:
+            return None
+
+        try:
+            payload = json.loads(text)
+            return payload if isinstance(payload, dict) else None
+        except Exception:
+            pass
+
+        fenced = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, flags=re.DOTALL | re.IGNORECASE)
+        if fenced:
+            candidate = fenced.group(1).strip()
+            try:
+                payload = json.loads(candidate)
+                return payload if isinstance(payload, dict) else None
+            except Exception:
+                return None
+
+        start = text.find("{")
+        end = text.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            candidate = text[start:end + 1].strip()
+            try:
+                payload = json.loads(candidate)
+                return payload if isinstance(payload, dict) else None
+            except Exception:
+                return None
+
+        return None
+
+    def _invoke_raw_json_tagger(
+        self,
+        *,
+        source_identifier: str,
+        sample_texts: List[str],
+        known_tags: Optional[List[str]] = None,
+    ) -> Optional[Tuple[TagEnhancement, Dict[str, List[str]]]]:
+        if not self.deepseek_raw_model:
+            return None
+
+        prompt = (
+            "Return strict JSON object only with keys: tags, location_tags, subject_tags, service_tags, content_type_tags, organization_tags, audience_tags, document_title, source_summary. "
+            "All tag arrays should contain lowercase strings suitable for search. "
+            "Do not include markdown.\n\n"
+            f"Source URL: {source_identifier}\n\n"
+            + (f"Existing preferred tags (reuse when relevant): {', '.join((known_tags or [])[:120])}\n\n" if known_tags else "")
+            + "Sample content:\n"
+            + "\n\n".join(sample_texts[:3])
+        )
+
+        response = self.deepseek_raw_model.invoke(prompt)
+        content = getattr(response, "content", "") if response else ""
+        payload = self._parse_llm_json_payload(content)
+        if not payload:
+            return None
+
+        structured = TagEnhancement.model_validate(payload)
+        facets = self._normalize_tag_facets(payload)
+        return structured, facets
+
     def _enhance_source_tags(
         self,
         source_identifier: str,
@@ -208,8 +316,20 @@ class DatabaseUploader:
                 + "\n\n".join(sample_texts[:3])
             )
             structured = None
-            if self.deepseek_tagger:
+            facets: Dict[str, List[str]]
+            if self.deepseek_tagger and self._llm_structured_output_supported:
                 structured = self.deepseek_tagger.invoke(prompt)
+            elif self.deepseek_raw_model:
+                raw_result = self._invoke_raw_json_tagger(
+                    source_identifier=source_identifier,
+                    sample_texts=sample_texts,
+                    known_tags=known_tags,
+                )
+                if raw_result is not None:
+                    structured, facets = raw_result
+                else:
+                    return fallback_tags, None, None, {}
+
             if isinstance(structured, dict):
                 raw_tags = structured.get("tags", [])
                 facets = self._normalize_tag_facets(structured)
@@ -242,22 +362,20 @@ class DatabaseUploader:
             return final_tags, title, summary, facets
         except Exception as exc:
             if self.deepseek_raw_model and "response_format" in str(exc).lower():
+                self._llm_structured_output_supported = False
+                if not self._llm_structured_output_warned:
+                    log.info("LLM structured output unavailable; switching to raw JSON tagging mode for remaining sources")
+                    self._llm_structured_output_warned = True
                 try:
-                    fallback_prompt = (
-                        "Return strict JSON object only with keys: tags, location_tags, subject_tags, service_tags, content_type_tags, organization_tags, audience_tags, document_title, source_summary. "
-                        "All tag arrays should contain lowercase strings suitable for search. "
-                        "Do not include markdown.\n\n"
-                        f"Source URL: {source_identifier}\n\n"
-                        "Sample content:\n"
-                        + "\n\n".join(sample_texts[:3])
+                    raw_result = self._invoke_raw_json_tagger(
+                        source_identifier=source_identifier,
+                        sample_texts=sample_texts,
+                        known_tags=known_tags,
                     )
-                    response = self.deepseek_raw_model.invoke(fallback_prompt)
-                    content = getattr(response, "content", "") if response else ""
-                    if isinstance(content, list):
-                        content = "\n".join(str(part) for part in content)
-                    payload = json.loads(str(content).strip())
-                    structured = TagEnhancement.model_validate(payload)
-                    facets = self._normalize_tag_facets(payload)
+                    if raw_result is None:
+                        log.debug("Raw JSON fallback produced no parseable payload for %s", source_identifier)
+                        return fallback_tags, None, None, {}
+                    structured, facets = raw_result
                     final_tags = normalize_tags(
                         (known_tags or [])
                         + self._merge_all_tags(normalize_tags(structured.tags), facets)
@@ -271,7 +389,7 @@ class DatabaseUploader:
                     }
                     return final_tags, structured.document_title, structured.source_summary, facets
                 except Exception as fallback_exc:
-                    log.warning(f"DeepSeek JSON fallback failed for {source_identifier}: {fallback_exc}")
+                    log.debug(f"DeepSeek JSON fallback failed for {source_identifier}: {fallback_exc}")
             log.warning(f"DeepSeek tag enhancement failed for {source_identifier}: {exc}")
             return fallback_tags, None, None, {}
 
@@ -415,6 +533,8 @@ class DatabaseUploader:
         }
 
     def _queue_sync_rows(self, rows: List[Dict[str, Any]], error: Exception) -> None:
+        if not self.vector_sync_enabled:
+            return
         if not rows:
             return
         self.vector_sync_pending_rows.extend([self._build_supabase_row(row) for row in rows])
@@ -424,16 +544,71 @@ class DatabaseUploader:
             error,
         )
 
+    def _supabase_table_client(self):
+        if not self.supabase_client:
+            return None
+        try:
+            if self.vector_sync_schema:
+                return self.supabase_client.schema(self.vector_sync_schema).table(self.vector_sync_table)
+            return self.supabase_client.table(self.vector_sync_table)
+        except Exception:
+            return self.supabase_client.table(self.vector_sync_table)
+
+    def _apply_supabase_schema_fallback(self, error: Exception) -> bool:
+        err = str(error)
+        if "PGRST106" not in err:
+            return False
+        if "graphql_public" in err and self.vector_sync_schema != "graphql_public":
+            self.vector_sync_schema = "graphql_public"
+            log.warning(
+                "Supabase sync switched schema to 'graphql_public' after PGRST106; set VECTOR_SYNC_SUPABASE_SCHEMA=graphql_public to persist"
+            )
+            return True
+        return False
+
+    def _handle_unrecoverable_sync_error(self, error: Exception) -> bool:
+        err = str(error)
+        if "PGRST205" in err and "Could not find the table" in err:
+            self.vector_sync_enabled = False
+            self.vector_sync_pending_rows.clear()
+            log.warning(
+                "Supabase sync disabled for this run: table '%s.%s' is unavailable (%s)",
+                self.vector_sync_schema,
+                self.vector_sync_table,
+                error,
+            )
+            return True
+        return False
+
     def _flush_sync_queue(self) -> None:
         if not self.supabase_client or not self.vector_sync_pending_rows:
             return
 
         queued = list(self.vector_sync_pending_rows)
         try:
-            self.supabase_client.table(self.vector_sync_table).upsert(queued, on_conflict="id").execute()
+            table_client = self._supabase_table_client()
+            if table_client is None:
+                return
+            table_client.upsert(queued, on_conflict="id").execute()
             self.vector_sync_pending_rows.clear()
             log.info("Flushed %s queued Supabase sync row(s)", len(queued))
         except Exception as exc:
+            if self._apply_supabase_schema_fallback(exc):
+                try:
+                    table_client = self._supabase_table_client()
+                    if table_client is None:
+                        return
+                    table_client.upsert(queued, on_conflict="id").execute()
+                    self.vector_sync_pending_rows.clear()
+                    log.info("Flushed %s queued Supabase sync row(s)", len(queued))
+                    return
+                except Exception as retry_exc:
+                    if self._handle_unrecoverable_sync_error(retry_exc):
+                        return
+                    log.warning("Supabase sync replay failed (%s queued rows retained): %s", len(queued), retry_exc)
+                    return
+            if self._handle_unrecoverable_sync_error(exc):
+                return
             log.warning("Supabase sync replay failed (%s queued rows retained): %s", len(queued), exc)
 
     def _sync_rows_to_supabase(self, rows: List[Dict[str, Any]]) -> bool:
@@ -447,9 +622,25 @@ class DatabaseUploader:
         last_error: Optional[Exception] = None
         for attempt in range(1, self.vector_sync_retry_max + 1):
             try:
-                self.supabase_client.table(self.vector_sync_table).upsert(payload, on_conflict="id").execute()
+                table_client = self._supabase_table_client()
+                if table_client is None:
+                    return True
+                table_client.upsert(payload, on_conflict="id").execute()
                 return True
             except Exception as exc:
+                if self._apply_supabase_schema_fallback(exc):
+                    try:
+                        table_client = self._supabase_table_client()
+                        if table_client is None:
+                            return True
+                        table_client.upsert(payload, on_conflict="id").execute()
+                        return True
+                    except Exception as retry_exc:
+                        if self._handle_unrecoverable_sync_error(retry_exc):
+                            return False
+                        exc = retry_exc
+                if self._handle_unrecoverable_sync_error(exc):
+                    return False
                 last_error = exc
                 if attempt < self.vector_sync_retry_max:
                     sleep_seconds = self.vector_sync_retry_delay_seconds * attempt
@@ -509,12 +700,15 @@ class DatabaseUploader:
             for chunk in chunks[:3]
             if str(chunk.get("text") or "").strip()
         ]
+        inferred_source_tags = infer_tags_from_text("\n\n".join(sample_texts), max_tags=12)
+        resolved_source_tags = normalize_tags((resolved_source_tags or []) + inferred_source_tags)
         resolved_source_tags, source_title, source_summary, source_tag_facets = self._enhance_source_tags(
             source_identifier,
             sample_texts,
             resolved_source_tags,
             known_tags=known_tags,
         )
+        source_bilingual_tags = build_bilingual_tag_fields(resolved_source_tags)
 
         # Convert chunks to DocumentChunk objects with embeddings
         doc_chunks = []
@@ -523,12 +717,19 @@ class DatabaseUploader:
             chunk_meta = chunk_data.get('metadata', {})
             chunk_tags = normalize_tags((chunk_meta or {}).get("tags", []))
             chunk_facet_tags = self._normalize_tag_facets(chunk_meta)
-            final_tags = self._merge_all_tags(chunk_tags, chunk_facet_tags) or resolved_source_tags
+            final_tags = normalize_tags(
+                (resolved_source_tags or [])
+                + self._merge_all_tags(chunk_tags, chunk_facet_tags)
+            )
             chunk_meta = self._build_chunk_metadata(chunk_meta, final_tags)
             if source_title and not chunk_meta.get("document_title"):
                 chunk_meta["document_title"] = source_title
             if source_summary and not chunk_meta.get("source_summary"):
                 chunk_meta["source_summary"] = source_summary
+            if source_bilingual_tags.get("tags_en"):
+                chunk_meta["tags_en"] = source_bilingual_tags["tags_en"]
+            if source_bilingual_tags.get("tags_es"):
+                chunk_meta["tags_es"] = source_bilingual_tags["tags_es"]
             for facet_name, facet_values in source_tag_facets.items():
                 if facet_values and not normalize_tags(chunk_meta.get(facet_name, [])):
                     chunk_meta[facet_name] = facet_values

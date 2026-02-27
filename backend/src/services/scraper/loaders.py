@@ -132,7 +132,17 @@ class SmartLoader:
             log.info("--> Playwright failed. Falling back to standard loader...")
 
         # 5. Standard URL (default) - also serves as fallback from Playwright
-        return self._load_standard(url)
+        docs, loader_type, success = self._load_standard(url)
+        if success:
+            return docs, loader_type, True
+
+        # 6. Robust fallback: if standard loader fails, retry once with Playwright
+        log.info("--> Standard loader failed. Retrying with Playwright fallback...")
+        pw_docs, pw_loader, pw_success = self._load_playwright(url)
+        if pw_success:
+            return pw_docs, pw_loader, True
+
+        return [], pw_loader, False
 
     def _load_with_forced_loader(self, url: str, loader_name: str) -> Tuple[List, str, bool]:
         """Load with a forced loader type."""

@@ -3,6 +3,7 @@ Unit tests for src/gateway/router_scrape.py
 
 Tests async scraping endpoints and job management.
 """
+import asyncio
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 from fastapi.testclient import TestClient
@@ -135,6 +136,29 @@ class TestScrapeSubmitEndpoint:
         # Job ID should be a non-empty string (UUID format)
         assert isinstance(data["job_id"], str)
         assert len(data["job_id"]) > 0
+
+    def test_submit_scrape_normalizes_and_deduplicates_urls(self, scrape_client):
+        """Test URL normalization, deduplication, and GitHub blob->raw conversion."""
+        response = scrape_client.post(
+            "/api/v1/scrape",
+            json={
+                "urls": [
+                    "https://EXAMPLE.com/path/",
+                    "https://example.com/path",
+                    "https://github.com/user/repo/blob/main/file.csv",
+                ]
+            }
+        )
+        assert response.status_code == 200
+        job_id = response.json()["job_id"]
+
+        status_response = scrape_client.get(f"/api/v1/scrape/{job_id}")
+        assert status_response.status_code == 200
+        urls = status_response.json()["job"]["metadata"]["urls"]
+        assert urls == [
+            "https://example.com/path",
+            "https://raw.githubusercontent.com/user/repo/main/file.csv",
+        ]
 
 
 class TestScrapeStatusEndpoint:
@@ -417,3 +441,67 @@ class TestScrapeErrorHandling:
             headers={"Content-Type": "application/json"}
         )
         assert response.status_code == 422
+
+
+class _FakeScraperForBackgroundTask:
+    last_instance = None
+
+    def __init__(self, output_file, failed_log, links_file=None, stream_mode=False):
+        self.output_file = output_file
+        self.failed_log = failed_log
+        self.links_file = links_file
+        self.stream_mode = stream_mode
+        self.successful_sources = ["https://example.com"]
+        self.failed_sources = {}
+        self.stats = {
+            "total_chunks": 2,
+            "total_uploads": 0,
+            "failed_uploads": 0,
+        }
+        self.finalize_called = False
+        _FakeScraperForBackgroundTask.last_instance = self
+
+    def scrape_urls(self, urls, force_loader=None):
+        return len(urls), 1, 0
+
+    def finalize(self):
+        self.finalize_called = True
+        if not self.stream_mode:
+            self.stats["total_uploads"] = 2
+            self.stats["failed_uploads"] = 0
+
+
+class TestBackgroundScrapeTask:
+    def test_background_task_non_stream_finalizes_uploads(self, monkeypatch):
+        """Test non-stream tasks finalize and report upload counts before completion."""
+        from src.api import router_scrape
+        from src.api.job_manager import job_manager
+        from src.api.models import LoaderType
+
+        async def _run_test():
+            job_manager.jobs.clear()
+            job_id = await job_manager.create_job(
+                urls=["https://example.com"],
+                force_loader=LoaderType.AUTO,
+                stream=False,
+            )
+
+            monkeypatch.setattr(router_scrape, "VecinaScraper", _FakeScraperForBackgroundTask)
+
+            await router_scrape.background_scrape_task(
+                job_id=job_id,
+                urls=["https://example.com"],
+                force_loader=LoaderType.AUTO,
+                stream=False,
+            )
+
+            job = await job_manager.get_job(job_id)
+            assert job is not None
+            assert job.status.value == "completed"
+            assert "2 uploaded" in job.message
+            assert job.result is not None
+            assert job.result.total_chunks == 2
+            assert _FakeScraperForBackgroundTask.last_instance is not None
+            assert _FakeScraperForBackgroundTask.last_instance.finalize_called is True
+
+        asyncio.run(_run_test())

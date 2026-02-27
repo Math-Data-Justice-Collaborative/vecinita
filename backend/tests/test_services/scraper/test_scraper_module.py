@@ -96,6 +96,14 @@ class TestScraperConfig:
 class TestScraperUtils:
     """Test utility functions."""
 
+    def test_normalize_scrape_url(self):
+        """Test URL normalization strips casing/trailing slash/fragments."""
+        from src.services.scraper.utils import normalize_scrape_url
+
+        assert normalize_scrape_url("https://EXAMPLE.com/path/#fragment") == "https://example.com/path"
+        assert normalize_scrape_url("https://example.com/") == "https://example.com/"
+        assert normalize_scrape_url("not-a-url") is None
+
     def test_convert_github_to_raw(self):
         """Test GitHub URL conversion."""
         from src.services.scraper.utils import convert_github_to_raw
@@ -112,6 +120,25 @@ class TestScraperUtils:
         url = "https://example.com/page"
         result = convert_github_to_raw(url)
         assert result == url
+
+    def test_prepare_scrape_urls_dedupes_and_converts_github(self):
+        """Test canonical URL preparation for API/CLI scraping inputs."""
+        from src.services.scraper.utils import prepare_scrape_urls
+
+        urls, stats = prepare_scrape_urls([
+            "https://EXAMPLE.com/path/",
+            "https://example.com/path",
+            "https://github.com/user/repo/blob/main/file.csv",
+            "# comment",
+            "",
+        ])
+
+        assert urls == [
+            "https://example.com/path",
+            "https://raw.githubusercontent.com/user/repo/main/file.csv",
+        ]
+        assert stats["duplicates_removed"] == 1
+        assert stats["ignored_blank_or_comment"] == 2
 
     def test_should_skip_url_matching(self):
         """Test URL skip pattern matching."""

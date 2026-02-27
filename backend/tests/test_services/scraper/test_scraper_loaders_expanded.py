@@ -219,6 +219,30 @@ class TestLoaderTypeSelection:
                 assert isinstance(loader_type, str)
                 assert isinstance(success, bool)
 
+    def test_select_and_load_retries_playwright_after_standard_failure(self):
+        """Test auto mode retries Playwright when standard loader fails."""
+        with patch("src.services.scraper.loaders.ScraperConfig"):
+            from src.services.scraper.loaders import SmartLoader
+
+            mock_config = MagicMock()
+            mock_config.sites_to_crawl = {}
+            mock_config.sites_needing_playwright = []
+            loader = SmartLoader(mock_config)
+
+            with patch("src.services.scraper.loaders.is_csv_file", return_value=False), \
+                 patch("src.services.scraper.loaders.get_crawl_config", return_value=None), \
+                 patch("src.services.scraper.loaders.needs_playwright", return_value=False), \
+                 patch.object(loader, "_load_standard", return_value=([], "Unstructured URL Loader", False)) as mock_standard, \
+                 patch.object(loader, "_load_playwright", return_value=([MagicMock()], "Playwright (JavaScript rendering)", True)) as mock_playwright:
+
+                docs, loader_type, success = loader._select_and_load("https://example.com", force_loader=None)
+
+                assert success is True
+                assert loader_type == "Playwright (JavaScript rendering)"
+                assert len(docs) == 1
+                mock_standard.assert_called_once()
+                mock_playwright.assert_called_once()
+
 
 class TestURLHandling:
     """Test URL handling in loaders."""

@@ -5,6 +5,7 @@ Endpoints for async web scraping with job tracking.
 """
 
 import os
+import asyncio
 import tempfile
 from pathlib import Path
 from typing import Optional, List
@@ -28,6 +29,7 @@ from .models import (
 # Import scraper components
 from ..services.scraper.scraper import VecinaScraper
 from ..services.scraper.uploader import DatabaseUploader
+from ..services.scraper.utils import prepare_scrape_urls
 
 router = APIRouter(prefix="/scrape", tags=["Scraping"])
 
@@ -110,9 +112,10 @@ async def background_scrape_task(
         # - Process documents into chunks
         # - Upload to database (if stream_mode=True)
         # - Track successful/failed URLs
-        total_urls, successful, failed = scraper.scrape_urls(
-            urls=urls,
-            force_loader=scraper_force_loader
+        total_urls, successful, failed = await asyncio.to_thread(
+            scraper.scrape_urls,
+            urls,
+            scraper_force_loader,
         )
         
         # Calculate progress based on completion
@@ -124,20 +127,15 @@ async def background_scrape_task(
             progress_percent=progress,
             message=f"Scraping complete. Processing results...",
         )
-        
-        # If not streaming, we need to manually upload chunks from file
-        if not stream and scraper.uploader and successful > 0:
-            await job_manager.update_job_status(
-                job_id,
-                JobStatus.RUNNING,
-                progress_percent=80,
-                message="Uploading chunks to database...",
-            )
-            
-            # The scraper already saved chunks to output_file
-            # In non-streaming mode, chunks are in the file but not uploaded yet
-            # For now, streaming mode is recommended for API usage
-            # TODO: Add batch upload from file if needed
+
+        await job_manager.update_job_status(
+            job_id,
+            JobStatus.RUNNING,
+            progress_percent=85,
+            message="Finalizing scrape outputs...",
+        )
+
+        await asyncio.to_thread(scraper.finalize)
         
         # Build failed URLs log
         failed_urls_log = {}
@@ -163,7 +161,7 @@ async def background_scrape_task(
         if stream:
             message = f"Completed: {chunks_count} chunks from {len(scraper.successful_sources)} URLs ({uploads_count} uploaded, {failed_uploads} failed uploads)"
         else:
-            message = f"Completed: {chunks_count} chunks from {len(scraper.successful_sources)} URLs (saved to file)"
+            message = f"Completed: {chunks_count} chunks from {len(scraper.successful_sources)} URLs ({uploads_count} uploaded, {failed_uploads} failed uploads)"
         
         await job_manager.update_job_status(
             job_id,
@@ -221,17 +219,24 @@ async def submit_scrape_request(
     if len(request.urls) == 0:
         raise HTTPException(status_code=400, detail="At least one URL required")
 
-    # Validate URLs format (basic check)
-    for url in request.urls:
-        if not (url.startswith("http://") or url.startswith("https://")):
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid URL format: {url}",
-            )
+    normalized_urls, normalization_stats = prepare_scrape_urls(
+        request.urls,
+        skip_localhost=False,
+        convert_github_blob_urls=True,
+    )
+
+    if normalization_stats["ignored_invalid_url"] > 0:
+        raise HTTPException(
+            status_code=400,
+            detail="One or more URLs have invalid format",
+        )
+
+    if not normalized_urls:
+        raise HTTPException(status_code=400, detail="At least one valid URL required")
 
     # Create job
     job_id = await job_manager.create_job(
-        urls=request.urls,
+        urls=normalized_urls,
         force_loader=request.force_loader,
         stream=request.stream,
     )
@@ -240,7 +245,7 @@ async def submit_scrape_request(
     background_tasks.add_task(
         background_scrape_task,
         job_id,
-        request.urls,
+        normalized_urls,
         request.force_loader,
         request.stream,
     )

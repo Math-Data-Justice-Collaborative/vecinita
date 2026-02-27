@@ -82,6 +82,86 @@ def test_db_search_passes_tag_filter(db_search_tool, mock_store):
     assert "$and" in where
 
 
+def test_db_search_auto_infers_spanish_tags_for_filtering(monkeypatch, db_search_tool, mock_store):
+    mock_store.query_chunks.return_value = [
+        {
+            "content": "Immigration legal aid resources",
+            "source_url": "https://example.org/immigration",
+            "source_domain": "example.org",
+            "similarity": 0.9,
+            "metadata": {"tags": ["immigration"]},
+        }
+    ]
+
+    monkeypatch.setenv("TAG_FILTER_AUTO_INFER", "true")
+    token = set_search_options(tags=[], tag_match_mode="any", include_untagged_fallback=True)
+    try:
+        _ = db_search_tool.invoke("Necesito ayuda de inmigración")
+    finally:
+        reset_search_options(token)
+
+    _, kwargs = mock_store.query_chunks.call_args
+    where = kwargs.get("where")
+    assert where is not None
+    assert "immigration" in str(where)
+
+
+def test_db_search_auto_infers_doctor_intent_from_spanish_typo(monkeypatch, db_search_tool, mock_store):
+    mock_store.query_chunks.return_value = []
+    monkeypatch.setenv("TAG_FILTER_AUTO_INFER", "true")
+
+    token = set_search_options(tags=[], tag_match_mode="any", include_untagged_fallback=True)
+    try:
+        _ = db_search_tool.invoke("Dame unos doctos en Providence")
+    finally:
+        reset_search_options(token)
+
+    _, kwargs = mock_store.query_chunks.call_args
+    where = kwargs.get("where")
+    assert where is not None
+    assert "healthcare providers" in str(where)
+
+
+def test_db_search_uses_supabase_fallback_when_chroma_query_times_out(monkeypatch, mock_embedding_model):
+    mock_store = Mock()
+
+    def _slow_query(**_kwargs):
+        import time
+        time.sleep(1.2)
+        return []
+
+    mock_store.query_chunks.side_effect = _slow_query
+
+    mock_rpc = Mock()
+    mock_rpc.execute.return_value = Mock(
+        data=[
+            {
+                "id": "doc-timeout-1",
+                "content": "Healthcare directory",
+                "source_url": "https://example.org/health",
+                "source_domain": "example.org",
+                "similarity": 0.9,
+                "metadata": {},
+            }
+        ]
+    )
+    mock_supabase = Mock()
+    mock_supabase.rpc.return_value = mock_rpc
+
+    monkeypatch.setenv("DB_SEARCH_CHROMA_TIMEOUT_SECONDS", "1")
+    monkeypatch.setenv("VECTOR_SYNC_SUPABASE_FALLBACK_READS", "true")
+    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
+    monkeypatch.setenv("SUPABASE_KEY", "test-key")
+    monkeypatch.setattr(db_search_module, "_SUPABASE_CLIENT", None)
+    monkeypatch.setattr(db_search_module, "create_client", lambda _url, _key: mock_supabase)
+
+    tool = create_db_search_tool(mock_store, mock_embedding_model, match_threshold=0.3, match_count=5)
+    results = json.loads(tool.invoke("doctor in providence"))
+
+    assert len(results) == 1
+    assert results[0]["source_url"] == "https://example.org/health"
+
+
 def test_db_search_reranks_when_enabled(db_search_tool, mock_store):
     mock_store.query_chunks.return_value = [
         {

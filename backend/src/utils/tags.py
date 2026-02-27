@@ -70,6 +70,24 @@ _CANONICAL_TAG_ALIASES: Dict[str, str] = {
     "educacion bilingue": "bilingual education",
     "spanish": "spanish",
     "espanol": "spanish",
+    "doctor": "healthcare providers",
+    "doctors": "healthcare providers",
+    "doctor services": "healthcare providers",
+    "doctos": "healthcare providers",
+    "doctores": "healthcare providers",
+    "medico": "healthcare providers",
+    "medicos": "healthcare providers",
+    "medical": "healthcare",
+    "medical care": "healthcare",
+    "health": "healthcare",
+    "healthcare": "healthcare",
+    "salud": "healthcare",
+    "salud publica": "healthcare",
+    "clinica": "clinic",
+    "clinics": "clinic",
+    "clinic": "clinic",
+    "hospital": "hospital",
+    "hospitals": "hospital",
 }
 
 _TAG_METADATA_FIELDS: Tuple[str, ...] = (
@@ -81,6 +99,38 @@ _TAG_METADATA_FIELDS: Tuple[str, ...] = (
     "organization_tags",
     "audience_tags",
 )
+
+_CANONICAL_TAG_TRANSLATIONS_ES: Dict[str, str] = {
+    "topic": "tema",
+    "tag": "etiqueta",
+    "rhode island": "rhode island",
+    "providence": "providence",
+    "united states": "estados unidos",
+    "immigration": "inmigracion",
+    "immigration services": "servicios de inmigracion",
+    "refugees": "refugiados",
+    "housing": "vivienda",
+    "housing assistance": "asistencia de vivienda",
+    "education": "educacion",
+    "employment": "empleo",
+    "social services": "servicios sociales",
+    "legal services": "servicios legales",
+    "legal aid": "ayuda legal",
+    "translation": "traduccion",
+    "interpretation": "interpretacion",
+    "community": "comunidad",
+    "community services": "servicios comunitarios",
+    "nonprofit": "sin fines de lucro",
+    "homelessness": "personas sin hogar",
+    "affordable": "asequible",
+    "bilingual": "bilingue",
+    "bilingual education": "educacion bilingue",
+    "spanish": "espanol",
+    "healthcare": "salud",
+    "healthcare providers": "doctores",
+    "clinic": "clinica",
+    "hospital": "hospital",
+}
 
 
 def _normalize_text(value: Any) -> str:
@@ -106,6 +156,19 @@ def canonicalize_tag(raw_tag: Any) -> str:
     normalized = normalized.replace("_", " ")
     normalized = re.sub(r"\s+", " ", normalized).strip()
     return _CANONICAL_TAG_ALIASES.get(normalized, normalized)
+
+
+def _normalize_noncanonical_tag(raw_tag: Any) -> str:
+    value = _normalize_text(raw_tag)
+    if not value:
+        return ""
+    value = value.replace("_", " ")
+    value = re.sub(r"\s+", " ", value).strip()
+    if len(value) > MAX_TAG_LENGTH:
+        value = value[:MAX_TAG_LENGTH]
+    if not _TAG_PATTERN.match(value):
+        return ""
+    return value
 
 
 def normalize_tags(raw_tags: Iterable[str] | None) -> List[str]:
@@ -142,6 +205,72 @@ def normalize_tags(raw_tags: Iterable[str] | None) -> List[str]:
             break
 
     return normalized
+
+
+def infer_tags_from_text(text: str | None, *, max_tags: int = 8) -> List[str]:
+    """Infer canonical tags from free text (Spanish or English).
+
+    Uses alias phrase matching over the normalized text and returns canonical tags.
+    """
+    normalized_text = _normalize_text(text)
+    if not normalized_text:
+        return []
+
+    inferred: List[str] = []
+    seen: set[str] = set()
+
+    words = normalized_text.split()
+    ngram_candidates: List[str] = []
+    for n in (4, 3, 2, 1):
+        if len(words) < n:
+            continue
+        for idx in range(len(words) - n + 1):
+            ngram_candidates.append(" ".join(words[idx: idx + n]))
+
+    for candidate in ngram_candidates:
+        canonical = _CANONICAL_TAG_ALIASES.get(candidate)
+        if not canonical:
+            continue
+        if canonical in seen:
+            continue
+        seen.add(canonical)
+        inferred.append(canonical)
+        if len(inferred) >= max_tags:
+            break
+
+    if not inferred:
+        for alias, canonical in _CANONICAL_TAG_ALIASES.items():
+            if alias in normalized_text and canonical not in seen:
+                seen.add(canonical)
+                inferred.append(canonical)
+                if len(inferred) >= max_tags:
+                    break
+
+    return normalize_tags(inferred)
+
+
+def build_bilingual_tag_fields(raw_tags: Iterable[str] | None) -> Dict[str, List[str]]:
+    """Build bilingual tag arrays for metadata fields.
+
+    Returns language-specific arrays while preserving canonical English tags.
+    """
+    tags_en = normalize_tags(raw_tags)
+
+    tags_es: List[str] = []
+    seen_es: set[str] = set()
+    for tag in tags_en:
+        translated = _CANONICAL_TAG_TRANSLATIONS_ES.get(tag, tag)
+        normalized_es = _normalize_noncanonical_tag(translated)
+        if normalized_es and normalized_es not in seen_es:
+            seen_es.add(normalized_es)
+            tags_es.append(normalized_es)
+        if len(tags_es) >= MAX_TAG_COUNT:
+            break
+
+    return {
+        "tags_en": tags_en,
+        "tags_es": tags_es,
+    }
 
 
 def parse_tags_input(raw: str | None) -> List[str]:

@@ -57,6 +57,28 @@ class _FakeAsyncClient:
         return _FakeResponse(json_data={"embeddings": [[0.1] * 384 for _ in texts]})
 
 
+class _FakeEmbeddingVector:
+    def __init__(self, values):
+        self._values = values
+
+    def __bool__(self):
+        raise ValueError("The truth value of an array with more than one element is ambiguous")
+
+    def tolist(self):
+        return list(self._values)
+
+
+class _FakeEmbeddingsPayload:
+    def __init__(self, vectors):
+        self._vectors = vectors
+
+    def __bool__(self):
+        raise ValueError("The truth value of an array with more than one element is ambiguous")
+
+    def __iter__(self):
+        return iter(self._vectors)
+
+
 @pytest.fixture
 def admin_client(env_vars, monkeypatch):
     for key, value in env_vars.items():
@@ -175,6 +197,50 @@ class TestAdminTagsEndpoints:
         body = response.json()
         assert body["message"] == "Las etiquetas de la fuente se actualizaron correctamente."
 
+    def test_patch_source_tags_handles_array_like_embeddings(self, admin_client):
+        client, _mock_db, mock_store = admin_client
+        mock_store.get_source.return_value = {"title": "Example", "metadata": {"tags": ["old"]}}
+        mock_store.get_chunks.return_value = {
+            "ids": ["chunk-1"],
+            "documents": ["Doc A"],
+            "metadatas": [{"title": "A", "source_url": "https://example.com/resource"}],
+        }
+        mock_store.chunks.return_value.get.return_value = {
+            "embeddings": [_FakeEmbeddingVector([0.1, 0.2])]
+        }
+
+        response = client.patch(
+            "/api/v1/admin/sources/tags",
+            json={"url": "https://example.com/resource", "tags": ["Housing"]},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["status"] == "updated"
+        upsert_rows = mock_store.upsert_chunks.call_args.args[0]
+        assert upsert_rows[0]["embedding"] == [0.1, 0.2]
+
+    def test_patch_source_tags_handles_array_like_embeddings_payload(self, admin_client):
+        client, _mock_db, mock_store = admin_client
+        mock_store.get_source.return_value = {"title": "Example", "metadata": {"tags": ["old"]}}
+        mock_store.get_chunks.return_value = {
+            "ids": ["chunk-1"],
+            "documents": ["Doc A"],
+            "metadatas": [{"title": "A", "source_url": "https://example.com/resource"}],
+        }
+        mock_store.chunks.return_value.get.return_value = {
+            "embeddings": _FakeEmbeddingsPayload([_FakeEmbeddingVector([0.1, 0.2])])
+        }
+
+        response = client.patch(
+            "/api/v1/admin/sources/tags",
+            json={"url": "https://example.com/resource", "tags": ["Housing"]},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["status"] == "updated"
+        upsert_rows = mock_store.upsert_chunks.call_args.args[0]
+        assert upsert_rows[0]["embedding"] == [0.1, 0.2]
+
     def test_add_source_accepts_tags(self, admin_client):
         client, _mock_db, mock_store = admin_client
         from src.api import router_admin
@@ -200,6 +266,128 @@ class TestAdminTagsEndpoints:
         assert mock_store.upsert_source.call_count >= 2
         assert mock_store.add_queue_job.call_count >= 2
         mock_store.upsert_chunks.assert_called_once()
+
+    def test_add_source_retries_via_scraper_loader_on_blocked_fetch(self, admin_client, monkeypatch):
+        client, _mock_db, mock_store = admin_client
+        from src.api import router_admin
+
+        async def _blocked_fetch(_url: str):
+            raise router_admin.HTTPException(status_code=502, detail="Source returned HTTP 403")
+
+        async def _fallback_ingest(_url: str, _depth: int):
+            return {
+                "chunks_total": 3,
+                "chunks_inserted": 3,
+                "ingestion_path": "scraper_loader_fallback",
+            }
+
+        monkeypatch.setattr(router_admin, "_extract_text_from_url", _blocked_fetch)
+        monkeypatch.setattr(router_admin, "_ingest_source_via_scraper_loader", _fallback_ingest)
+
+        response = client.post(
+            "/api/v1/admin/sources",
+            data={"url": "https://blocked.example.com", "depth": 1, "tags": "Housing"},
+        )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["status"] == "completed"
+        assert body["chunks_total"] == 3
+        assert body["chunks_inserted"] == 3
+        assert mock_store.add_queue_job.call_count >= 2
+
+    def test_add_sources_batch_retries_via_scraper_loader_on_blocked_fetch(self, admin_client, monkeypatch):
+        client, _mock_db, _mock_store = admin_client
+        from src.api import router_admin
+
+        async def _fake_ingest(url: str, depth: int, normalized_tags: list[str]):
+            if "blocked" in url:
+                return {
+                    "status": "completed",
+                    "url": url,
+                    "depth": depth,
+                    "tags": normalized_tags,
+                    "chunks_inserted": 2,
+                    "chunks_total": 2,
+                    "job_id": "job-blocked",
+                }
+            return {
+                "status": "completed",
+                "url": url,
+                "depth": depth,
+                "tags": normalized_tags,
+                "chunks_inserted": 1,
+                "chunks_total": 1,
+                "job_id": "job-1",
+            }
+
+        monkeypatch.setattr(router_admin, "_ingest_source_url", _fake_ingest)
+
+        response = client.post(
+            "/api/v1/admin/sources/batch",
+            json={
+                "urls": ["https://ok.example.com", "https://blocked.example.com"],
+                "depth": 1,
+                "tags": ["housing"],
+                "tag_mode": "auto_infer",
+            },
+        )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["status"] == "completed"
+        assert body["submitted"] == 2
+        assert body["completed"] == 2
+        assert body["failed"] == 0
+
+    def test_add_sources_batch_parses_urls_and_returns_partial(self, admin_client, monkeypatch):
+        client, _mock_db, _mock_store = admin_client
+        from src.api import router_admin
+
+        async def _fake_ingest(url: str, depth: int, normalized_tags: list[str]):
+            if url.endswith("/bad"):
+                raise router_admin.HTTPException(status_code=422, detail="unprocessable")
+            return {
+                "status": "completed",
+                "url": url,
+                "depth": depth,
+                "tags": normalized_tags,
+                "chunks_inserted": 1,
+                "chunks_total": 1,
+                "job_id": "job-1",
+            }
+
+        monkeypatch.setattr(router_admin, "_ingest_source_url", _fake_ingest)
+
+        response = client.post(
+            "/api/v1/admin/sources/batch",
+            json={
+                "urls_text": "# comment\nhttps://example.com/good\nhttps://example.com/bad",
+                "depth": 2,
+                "tags": ["Housing", "food"],
+                "tag_mode": "auto_infer",
+            },
+        )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["status"] == "partial"
+        assert body["submitted"] == 2
+        assert body["completed"] == 1
+        assert body["failed"] == 1
+        assert body["baseline_tags"] == ["housing", "food"]
+        assert body["tag_mode"] == "auto_infer"
+
+    def test_add_sources_batch_rejects_empty_payload(self, admin_client):
+        client, _mock_db, _mock_store = admin_client
+
+        response = client.post(
+            "/api/v1/admin/sources/batch",
+            json={"urls_text": "\n\n", "depth": 1, "tags": [], "tag_mode": "auto_infer"},
+        )
+
+        assert response.status_code == 400
+        assert "Provide at least one URL" in str(response.json())
 
 
 class TestAdminSourcesList:

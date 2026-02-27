@@ -48,7 +48,9 @@ def test_upload_chunks_omits_empty_tags_and_sets_source_locator():
     row = rows[0]
     assert row["source_url"] == "https://sub.example.com/chat/help"
     assert row["source_domain"] == "sub.example.com/chat/help"
-    assert "tags" not in row["metadata"]
+    assert "tags" in row["metadata"]
+    assert row["metadata"].get("tags_en")
+    assert row["metadata"].get("tags_es")
 
 
 def test_chunk_id_is_stable_for_upsert_updates():
@@ -123,7 +125,7 @@ def test_upload_chunks_merges_deepseek_facets_into_search_tags_and_metadata():
     tags = row["metadata"]["tags"]
     assert "community support" in tags
     assert "providence" in tags
-    assert "health" in tags
+    assert "healthcare" in tags
     assert "insurance" in tags
     assert "legal assistance" in tags
     assert "how-to" in tags
@@ -131,11 +133,40 @@ def test_upload_chunks_merges_deepseek_facets_into_search_tags_and_metadata():
     assert "families" in tags
 
     assert row["metadata"]["location_tags"] == ["providence", "rhode island"]
-    assert row["metadata"]["subject_tags"] == ["health", "insurance"]
+    assert row["metadata"]["subject_tags"] == ["healthcare", "insurance"]
     assert row["metadata"]["service_tags"] == ["legal assistance"]
     assert row["metadata"]["content_type_tags"] == ["how-to", "guide"]
     assert row["metadata"]["organization_tags"] == ["nonprofit", "coalition"]
     assert row["metadata"]["audience_tags"] == ["families", "immigrants"]
+
+
+def test_upload_chunks_infers_source_tags_and_bilingual_fields_without_llm():
+    uploader = _make_uploader()
+    uploader._generate_embeddings = Mock(return_value=[[0.1, 0.2, 0.3]])
+    uploader.chroma_store.upsert_chunks = Mock(return_value=1)
+    uploader.deepseek_tagger = None
+
+    uploaded, failed = uploader.upload_chunks(
+        chunks=[
+            {
+                "text": "Ofrecemos ayuda de inmigración y asistencia de vivienda para familias.",
+                "metadata": {},
+            }
+        ],
+        source_identifier="https://example.org/servicios",
+        loader_type="playwright",
+    )
+
+    assert uploaded == 1
+    assert failed == 0
+    row = uploader.chroma_store.upsert_chunks.call_args[0][0][0]
+
+    tags = row["metadata"].get("tags", [])
+    assert "immigration" in tags
+    assert "housing assistance" in tags or "housing" in tags
+    assert "tags_en" in row["metadata"]
+    assert "tags_es" in row["metadata"]
+    assert "inmigracion" in row["metadata"]["tags_es"]
 
 
 def test_upload_chunks_uses_deepseek_json_fallback_when_response_format_unavailable():
@@ -196,6 +227,27 @@ def test_upload_chunks_reuses_existing_source_tags_with_deepseek_tags():
     assert failed == 0
     row = uploader.chroma_store.upsert_chunks.call_args[0][0][0]
     assert row["metadata"]["tags"] == ["housing", "families", "benefits", "legal aid"]
+
+
+def test_init_tagger_uses_groq_when_deepseek_unavailable(monkeypatch):
+    monkeypatch.setenv("ENABLE_LLM_TAG_ENHANCEMENT", "true")
+    monkeypatch.setenv("LLM_TAG_PROVIDER", "auto")
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    monkeypatch.setenv("GROQ_API_KEY", "test-groq-key")
+    monkeypatch.setenv("GROQ_TAG_MODEL", "llama-3.1-8b-instant")
+
+    with patch.object(DatabaseUploader, "_init_embeddings"), patch.object(DatabaseUploader, "_init_supabase"):
+        with patch("src.services.scraper.uploader.GROQ_TAGGING_AVAILABLE", True), patch("src.services.scraper.uploader.ChatGroq") as mock_chat_groq:
+            llm = Mock()
+            structured_tagger = Mock()
+            llm.with_structured_output.return_value = structured_tagger
+            mock_chat_groq.return_value = llm
+
+            uploader = DatabaseUploader(use_local_embeddings=False)
+
+    assert uploader.deepseek_tagger is structured_tagger
+    assert uploader.deepseek_raw_model is llm
+    mock_chat_groq.assert_called_once()
 
 
 def test_upload_chunks_syncs_to_supabase_with_retry_in_degraded_mode():

@@ -1,97 +1,54 @@
-﻿https://ride.ri.gov/
-https://math-data-justice-collaborative.github.io/
-https://dhs.ri.gov/
-https://dmv.ri.gov/
-https://dioceseofprovidence.org/
-https://www.diiri.org/
-https://www.immigrantcoalitionri.org/
-https://ricadv.org/
-https://www.rihispanicchamber.org/
-https://rihca.org/
-https://wrwc.org/
-https://vecina.wrwc.org/
-https://qubeshub.org/community/groups/rios
-https://www.nuestrasalud.com/
-https://math-data-justice-collaborative.github.io/medico-pvd/
-https://healthsourceri.com/
-https://rihca.org/resources
-https://www.pressreader.com/usa/the-providence-journal/20230903/281681144452011
+# VECINA Public Training Material - Curated URL List
+# Resources organized by category for web scraping
+# Last updated: 2026-01-03
+# PDF,md, and other text formats
+#http://localhost:8081/RIOSpdf.pdf
+#http://localhost:8081/MentalandBehavioralResourceGuide-english_11162022.pdf
+#
+# ===== CORE VECINA INFRASTRUCTURE =====
+https://wrwc.org
+https://vecina.wrwc.org
+
+# ===== EDUCATION RESOURCES =====
 https://math-data-justice-collaborative.github.io/edu-pvd/
+https://ride.ri.gov/
 https://www.providenceschools.org/
 https://enrollri.org/
+
+# ===== MEDICAL/HEALTH INFORMATION =====
+https://www.nuestrasalud.com/
+https://math-data-justice-collaborative.github.io/medico-pvd/
+https://rihca.org/resources
+
+# ===== COMMUNITY & ENVIRONMENTAL JUSTICE RESOURCES =====
+https://qubeshub.org/community/groups/rios
 https://math-data-justice-collaborative.github.io/apoyo-pvd
 https://dhs.ri.gov/about-us/dhs-offices
-https://open.spotify.com/episode/1zOWz6NJrXiXkeBT8Lt8B3?si=7OHjMHHnTMC_Uhxp5YNLPg
+https://www.rihispanicchamber.org/
+
+# ===== IMMIGRATION & REFUGEE SERVICES =====
 https://dioceseofprovidence.org/immigration-refugee-services
+https://www.immigrationadvocates.org/nonprofit/legaldirectory/organization.393282-Catholic_Charities_of_Providence_Office_of_Immigration_and_Refugee_Service
 https://www.immigrantcoalitionri.org/en/home
+https://www.immigrationadvocates.org/nonprofit/legaldirectory/organization.393284-Dorcas_International_Institute_of_Rhode_Island_Citizenship_and_Immigration
+https://www.diiri.org/
 https://www.immigrantcoalitionri.org/public-benefits
 https://www.uscis.gov/about-us/RI/Providence
 https://www.diiri.org/what-we-do/citizenship-immigration/
 https://ricadv.org/immigration-help-for-victims/
-https://www.ri.gov/
-https://dhs.ri.gov/programs-and-services/refugee-assistance-program/refugee-resources
-https://dlt.ri.gov/
-https://ride.ri.gov/
-https://uwri.org/get-help-2-1-1/
-https://www.ripta.com/
-http://www.diiri.org/
-https://www.immigrantcoalitionri.org/en/home
-https://www.refugeedreamcenter.org/
-https://www.progresolatino.org/
-https://www.immigrationlawhelp.org/search?state=RI
-http://www.dioceseofprovidence.org/immigration-refugee-services
-https://www.immigrantcoalitionri.org/health-care
-https://www.providenceschools.org/
-https://enrollri.org/
-https://www.211ri.org/
-https://www.crossroadsri.org/
-https://www.anchorrecovery.org/
-https://justiceassistance.org/
-http://www.riaclu.org/
-http://www.sojournerri.org/
-https://capitolgoodfund.org/
-http://www.southsideclt.org/
-http://www.wcri.org/
-https://thelatinopolicy.org/
-https://www.providencecommunityhealth.org/
-https://www.lifespan.org/
-https://www.cbhri.org/
-https://bhlink.org/
-https://www.ccfcenter.org/
-https://www.rilegalaid.org/
-https://www.ptacri.org/
-https://www.drri.org/
-https://www.goprovidence.com/
-https://www.economicprogressri.org/
-https://www.skillsforri.com/
-https://www.rihousing.com/
-https://www.heatri.com/
-https://www.rifoundation.org/
-https://www.unitedwayri.org/
-https://www.providencechildrensmuseum.org/
-https://www.clcfri.org/
-https://www.centerforjustice.org/
-https://www.rihomeless.org/
-https://www.farmfreshri.org/
 
-https://www.ridoh.org/
-https://covid.ri.gov/
-https://www.providenceri.gov/
-https://www.courts.ri.gov/
-https://www.ripuc.ri.gov/
-https://www.oha.ri.gov/
-https://www.riema.ri.gov/
-https://www.riag.ri.gov/
-https://www.providencejournal.com/
-https://www.eastbaycommunityaction.org/
-https://www.comcap.org/
-https://www.tricountyri.org/
-https://www.ccapri.org/
-https://www.ymcaprov.org/
-https://www.bgcprov.org/
-https://www.mealsonwheelsri.org/
-https://www.rihomelesscoalition.org/
-https://www.housingnetworkri.org/
-https://www.lisc.org/rhode-island/
-https://suicidepreventionlifeline.org/
-https://988lifeline.org/
+# ===== GOVERNMENT & ADMINISTRATIVE =====
+https://dmv.ri.gov/licenses-permits-ids
+
+# ===== GITHUB DATA & RESEARCH FILES =====
+# CSV files for demographic and health data - auto-converted to raw URLs
+https://github.com/Math-Data-Justice-Collaborative/VECINA-Nuestra_Salud_data_scraping_and_cleaning/blob/f877a81de34044f97b930d75f3dc5ddc0d691cd8/CT_MA_RI_2020_Hispanic_census_data.csv
+https://github.com/Math-Data-Justice-Collaborative/VECINA-Nuestra_Salud_data_scraping_and_cleaning/blob/f877a81de34044f97b930d75f3dc5ddc0d691cd8/Nuestra_Salud_directoria.csv
+https://github.com/Math-Data-Justice-Collaborative/VECINA-Nuestra_Salud_data_scraping_and_cleaning/blob/f877a81de34044f97b930d75f3dc5ddc0d691cd8/tipo_data.csv
+
+# ===== RESOURCES NOT INCLUDED (Known Limitations) =====
+# https://healthsourceri.com/ - SKIP: Crawl rate limit
+# https://www.providencejournal.com/ - SKIP: Subscription paywall
+# https://www.pressreader.com/ - SKIP: Subscription required
+# https://open.spotify.com/episode/1zOWz6NJrXiXkeBT8Lt8B3 - SKIP: Streaming platform
+# https://www.facebook.com/RIDeptEd/ - SKIP: Social media, no public API
