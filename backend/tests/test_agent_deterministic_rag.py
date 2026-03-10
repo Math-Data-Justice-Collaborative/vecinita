@@ -145,3 +145,72 @@ def test_stream_non_answer_intent_skips_db_search(fastapi_client, parse_sse_even
         complete = next((event for event in events if event.get("type") == "complete"), None)
         assert complete is not None
         assert complete.get("sources", []) == []
+
+
+def test_stream_spanish_thinking_messages_are_localized(fastapi_client, parse_sse_events, monkeypatch):
+    agent_main = _module()
+
+    monkeypatch.setattr(agent_main, "_find_static_faq_answer", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        agent_main,
+        "db_search_tool",
+        Mock(
+            invoke=Mock(
+                return_value=json.dumps([
+                    {
+                        "content": "Hay recursos de alimentos en Providence.",
+                        "source_url": "https://example.org/es-food",
+                        "similarity": 0.9,
+                    }
+                ])
+            )
+        ),
+    )
+
+    fake_llm = Mock()
+    fake_llm.invoke.return_value = Mock(content="Puedes usar recursos locales. (Fuente: https://example.org/es-food)")
+    monkeypatch.setattr(agent_main, "_get_llm_without_tools", lambda *_args, **_kwargs: fake_llm)
+
+    response = fastapi_client.get(
+        "/ask-stream",
+        params={"question": "¿Dónde puedo encontrar ayuda con alimentos?", "lang": "es"},
+    )
+    assert response.status_code == 200
+
+    events = parse_sse_events(response.text)
+    if events:
+        thinking_messages = [
+            event.get("message", "")
+            for event in events
+            if event.get("type") == "thinking"
+        ]
+        assert any("Verificando si ya conozco esto..." in message for message in thinking_messages)
+        assert any("Entendiendo tu pregunta..." in message for message in thinking_messages)
+        assert any("Revisando nuestros recursos locales..." in message for message in thinking_messages)
+        assert any("Finalizando respuesta..." in message for message in thinking_messages)
+        assert all("Finalizing answer..." not in message for message in thinking_messages)
+
+
+def test_stream_spanish_rate_limit_error_is_localized(fastapi_client, parse_sse_events, monkeypatch):
+    agent_main = _module()
+
+    monkeypatch.setattr(agent_main, "_find_static_faq_answer", lambda *_args, **_kwargs: None)
+
+    SpanishRateLimitError = type("RateLimitError", (Exception,), {})
+    monkeypatch.setattr(
+        agent_main,
+        "db_search_tool",
+        Mock(invoke=Mock(side_effect=SpanishRateLimitError("rate limited"))),
+    )
+
+    response = fastapi_client.get(
+        "/ask-stream",
+        params={"question": "¿Qué apoyo hay para vivienda?", "lang": "es"},
+    )
+    assert response.status_code == 200
+
+    events = parse_sse_events(response.text)
+    if events:
+        error_event = next((event for event in events if event.get("type") == "error"), None)
+        assert error_event is not None
+        assert "Servicio temporalmente no disponible" in error_event.get("message", "")

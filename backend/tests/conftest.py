@@ -63,6 +63,22 @@ def _agent_module_path_compatibility():
     fake_embedding_module.create_embedding_client = _fake_create_embedding_client
     sys.modules["src.embedding_service.client"] = fake_embedding_module
 
+    # Set minimal env vars so module-level LLM provider validation passes.
+    _test_env_defaults = {
+        "SUPABASE_URL": "https://test.supabase.co",
+        "SUPABASE_KEY": "test-key",
+        "DEEPSEEK_API_KEY": "test-deepseek-key",
+        "OPENAI_API_KEY": "test-openai-key",
+        "OLLAMA_BASE_URL": "http://localhost:11434",
+        "OLLAMA_MODEL": "llama3.1:8b",
+        "DATABASE_URL": "postgresql://test",
+    }
+    _patched_keys = []
+    for _k, _v in _test_env_defaults.items():
+        if not os.environ.get(_k):
+            os.environ[_k] = _v
+            _patched_keys.append(_k)
+
     import src.agent.main as agent_main
 
     # Legacy tests patch ChatGroq; current code uses ChatOllama/OpenAI chain.
@@ -70,6 +86,10 @@ def _agent_module_path_compatibility():
         agent_main.ChatGroq = agent_main.ChatOllama
 
     yield
+
+    # Restore any env vars we set for this session.
+    for _k in _patched_keys:
+        os.environ.pop(_k, None)
 
 
 @pytest.fixture

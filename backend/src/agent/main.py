@@ -439,7 +439,7 @@ AGENT_THINKING_MESSAGES = {
 def get_agent_thinking_message(tool_name: str, language: str) -> str:
     """Get human-readable conversational message for agent activity."""
     msgs = AGENT_THINKING_MESSAGES.get(language, AGENT_THINKING_MESSAGES['en'])
-    return msgs.get(tool_name, 'Thinking...')
+    return msgs.get(tool_name, 'Pensando...' if language == 'es' else 'Thinking...')
 
 
 def _summarize_tool_result(tool_name: str, content: str, language: str) -> str:
@@ -2263,9 +2263,17 @@ async def ask_question_stream(
             import re as _re
             is_rate_limit = e.__class__.__name__ in ("RateLimitError", "TooManyRequests", "RateLimitException")
             if is_rate_limit:
-                fallback = "Service temporarily unavailable. Please try again in a moment."
+                fallback = (
+                    "Servicio temporalmente no disponible. Inténtalo de nuevo en un momento."
+                    if lang_local == "es"
+                    else "Service temporarily unavailable. Please try again in a moment."
+                )
             else:
-                fallback = f"Error processing question: {str(e)}"
+                fallback = (
+                    f"Error procesando la pregunta: {str(e)}"
+                    if lang_local == "es"
+                    else f"Error processing question: {str(e)}"
+                )
 
             yield _sse({
                 "type": "error",
