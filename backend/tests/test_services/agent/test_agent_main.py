@@ -112,13 +112,9 @@ class TestAgentThinkingMessages:
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
-        with patch("src.services.agent.server.create_client"), \
-             patch("src.services.agent.server.ChatGroq"), \
-             patch("src.services.agent.server.HuggingFaceEmbeddings"):
-
-            from src.services.agent import server
-            msg = server.get_agent_thinking_message("unknown_tool", "es")
-            assert msg == "Pensando..."
+        from src.services.agent import server
+        msg = server.get_agent_thinking_message("unknown_tool", "es")
+        assert msg == "Pensando..."
 
 
 class TestAgentState:

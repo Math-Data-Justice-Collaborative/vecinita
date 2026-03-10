@@ -73,11 +73,11 @@ def _agent_module_path_compatibility():
         "OLLAMA_MODEL": "llama3.1:8b",
         "DATABASE_URL": "postgresql://test",
     }
-    _patched_keys = []
+    _original_env: dict[str, str | None] = {}
     for _k, _v in _test_env_defaults.items():
-        if not os.environ.get(_k):
+        _original_env[_k] = os.environ.get(_k)
+        if _k not in os.environ:
             os.environ[_k] = _v
-            _patched_keys.append(_k)
 
     import src.agent.main as agent_main
 
@@ -87,9 +87,12 @@ def _agent_module_path_compatibility():
 
     yield
 
-    # Restore any env vars we set for this session.
-    for _k in _patched_keys:
-        os.environ.pop(_k, None)
+    # Restore original environment values exactly, including empty strings.
+    for _k, _original_value in _original_env.items():
+        if _original_value is None:
+            os.environ.pop(_k, None)
+        else:
+            os.environ[_k] = _original_value
 
 
 @pytest.fixture

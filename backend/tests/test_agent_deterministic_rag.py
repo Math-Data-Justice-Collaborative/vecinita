@@ -1,5 +1,6 @@
 """Tests for intent-gated deterministic RAG behavior in src.agent.main endpoints."""
 
+import asyncio
 import json
 from unittest.mock import Mock
 
@@ -7,6 +8,23 @@ from unittest.mock import Mock
 def _module():
     import src.agent.main as agent_main
     return agent_main
+
+
+async def _collect_streaming_body(streaming_response) -> str:
+    parts: list[str] = []
+    async for chunk in streaming_response.generator:
+        if isinstance(chunk, bytes):
+            parts.append(chunk.decode("utf-8", errors="ignore"))
+        else:
+            parts.append(str(chunk))
+    return "".join(parts)
+
+
+class _CapturedStreamingResponse:
+    def __init__(self, generator, media_type=None):
+        self.generator = generator
+        self.media_type = media_type
+        self.status_code = 200
 
 
 def test_ask_answer_seeking_runs_db_search_once_and_returns_sources(fastapi_client, monkeypatch):
@@ -147,8 +165,9 @@ def test_stream_non_answer_intent_skips_db_search(fastapi_client, parse_sse_even
         assert complete.get("sources", []) == []
 
 
-def test_stream_spanish_thinking_messages_are_localized(fastapi_client, parse_sse_events, monkeypatch):
+def test_stream_spanish_thinking_messages_are_localized(parse_sse_events, monkeypatch):
     agent_main = _module()
+    monkeypatch.setattr(agent_main, "StreamingResponse", _CapturedStreamingResponse)
 
     monkeypatch.setattr(agent_main, "_find_static_faq_answer", lambda *_args, **_kwargs: None)
     monkeypatch.setattr(
@@ -171,28 +190,46 @@ def test_stream_spanish_thinking_messages_are_localized(fastapi_client, parse_ss
     fake_llm.invoke.return_value = Mock(content="Puedes usar recursos locales. (Fuente: https://example.org/es-food)")
     monkeypatch.setattr(agent_main, "_get_llm_without_tools", lambda *_args, **_kwargs: fake_llm)
 
-    response = fastapi_client.get(
-        "/ask-stream",
-        params={"question": "¿Dónde puedo encontrar ayuda con alimentos?", "lang": "es"},
+    streaming_response = asyncio.run(
+        agent_main.ask_question_stream(
+            question="¿Dónde puedo encontrar ayuda con alimentos?",
+            query=None,
+            thread_id="default",
+            lang="es",
+            provider=None,
+            model=None,
+            clarification_response=None,
+            tags=None,
+            tag_match_mode="any",
+            include_untagged_fallback=True,
+            rerank=False,
+            rerank_top_k=10,
+        )
     )
-    assert response.status_code == 200
+    body_text = asyncio.run(_collect_streaming_body(streaming_response))
+    body_text = body_text.replace("\\n\\n", "\n\n")
 
-    events = parse_sse_events(response.text)
-    if events:
-        thinking_messages = [
-            event.get("message", "")
-            for event in events
-            if event.get("type") == "thinking"
-        ]
-        assert any("Verificando si ya conozco esto..." in message for message in thinking_messages)
-        assert any("Entendiendo tu pregunta..." in message for message in thinking_messages)
-        assert any("Revisando nuestros recursos locales..." in message for message in thinking_messages)
-        assert any("Finalizando respuesta..." in message for message in thinking_messages)
-        assert all("Finalizing answer..." not in message for message in thinking_messages)
+    events = parse_sse_events(body_text)
+    assert "data:" in body_text, "Expected SSE payload lines in response body"
+    assert events, "Expected non-empty SSE event stream"
+
+    thinking_messages = [
+        event.get("message", "")
+        for event in events
+        if event.get("type") == "thinking"
+    ]
+    assert thinking_messages, "Expected at least one 'thinking' SSE event"
+
+    assert any("Verificando si ya conozco esto..." in message for message in thinking_messages)
+    assert any("Entendiendo tu pregunta..." in message for message in thinking_messages)
+    assert any("Revisando nuestros recursos locales..." in message for message in thinking_messages)
+    assert any("Finalizando respuesta..." in message for message in thinking_messages)
+    assert all("Finalizing answer..." not in message for message in thinking_messages)
 
 
-def test_stream_spanish_rate_limit_error_is_localized(fastapi_client, parse_sse_events, monkeypatch):
+def test_stream_spanish_rate_limit_error_is_localized(parse_sse_events, monkeypatch):
     agent_main = _module()
+    monkeypatch.setattr(agent_main, "StreamingResponse", _CapturedStreamingResponse)
 
     monkeypatch.setattr(agent_main, "_find_static_faq_answer", lambda *_args, **_kwargs: None)
 
@@ -203,14 +240,28 @@ def test_stream_spanish_rate_limit_error_is_localized(fastapi_client, parse_sse_
         Mock(invoke=Mock(side_effect=SpanishRateLimitError("rate limited"))),
     )
 
-    response = fastapi_client.get(
-        "/ask-stream",
-        params={"question": "¿Qué apoyo hay para vivienda?", "lang": "es"},
+    streaming_response = asyncio.run(
+        agent_main.ask_question_stream(
+            question="¿Qué apoyo hay para vivienda?",
+            query=None,
+            thread_id="default",
+            lang="es",
+            provider=None,
+            model=None,
+            clarification_response=None,
+            tags=None,
+            tag_match_mode="any",
+            include_untagged_fallback=True,
+            rerank=False,
+            rerank_top_k=10,
+        )
     )
-    assert response.status_code == 200
+    body_text = asyncio.run(_collect_streaming_body(streaming_response))
+    body_text = body_text.replace("\\n\\n", "\n\n")
 
-    events = parse_sse_events(response.text)
-    if events:
-        error_event = next((event for event in events if event.get("type") == "error"), None)
-        assert error_event is not None
-        assert "Servicio temporalmente no disponible" in error_event.get("message", "")
+    events = parse_sse_events(body_text)
+    assert "data:" in body_text, "Expected SSE payload lines in response body"
+    assert events, "Expected non-empty SSE event stream"
+    error_event = next((event for event in events if event.get("type") == "error"), None)
+    assert error_event is not None, "Expected an 'error' SSE event"
+    assert "Servicio temporalmente no disponible" in error_event.get("message", "")
