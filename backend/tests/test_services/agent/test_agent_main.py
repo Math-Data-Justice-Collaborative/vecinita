@@ -107,6 +107,15 @@ class TestAgentThinkingMessages:
             msg = server.get_agent_thinking_message("unknown_tool", "unknown_lang")
             assert msg == "Thinking..."
 
+    def test_get_agent_thinking_message_spanish_unknown_tool(self, env_vars, monkeypatch):
+        """Test Spanish fallback for unknown tool names."""
+        for key, value in env_vars.items():
+            monkeypatch.setenv(key, value)
+
+        from src.services.agent import server
+        msg = server.get_agent_thinking_message("unknown_tool", "es")
+        assert msg == "Pensando..."
+
 
 class TestAgentState:
     """Test AgentState TypedDict."""
