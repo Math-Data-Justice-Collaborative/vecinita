@@ -264,6 +264,7 @@ def test_upload_chunks_syncs_to_supabase_with_retry_in_degraded_mode():
     sync_table.execute.side_effect = [Exception("temporary sync error"), {"data": []}]
     uploader.supabase_client = Mock()
     uploader.supabase_client.table.return_value = sync_table
+    uploader.supabase_client.schema.return_value.table.return_value = sync_table
 
     with patch("src.services.scraper.uploader.time.sleep", return_value=None):
         uploaded, failed = uploader.upload_chunks(
@@ -292,6 +293,7 @@ def test_upload_chunks_queues_supabase_sync_rows_when_all_retries_fail():
     sync_table.execute.side_effect = Exception("persistent sync error")
     uploader.supabase_client = Mock()
     uploader.supabase_client.table.return_value = sync_table
+    uploader.supabase_client.schema.return_value.table.return_value = sync_table
 
     with patch("src.services.scraper.uploader.time.sleep", return_value=None):
         uploaded, failed = uploader.upload_chunks(
@@ -318,6 +320,7 @@ def test_upload_chunks_strict_sync_mode_fails_when_supabase_unavailable():
     sync_table.execute.side_effect = Exception("sync hard failure")
     uploader.supabase_client = Mock()
     uploader.supabase_client.table.return_value = sync_table
+    uploader.supabase_client.schema.return_value.table.return_value = sync_table
 
     uploaded, failed = uploader.upload_chunks(
         chunks=[{"text": "strict sync chunk", "metadata": {}}],
@@ -361,6 +364,7 @@ def test_upload_chunks_flushes_pending_sync_queue_before_new_batch():
     sync_table.execute.side_effect = [{"data": []}, {"data": []}]
     uploader.supabase_client = Mock()
     uploader.supabase_client.table.return_value = sync_table
+    uploader.supabase_client.schema.return_value.table.return_value = sync_table
 
     uploaded, failed = uploader.upload_chunks(
         chunks=[{"text": "new chunk", "metadata": {}}],

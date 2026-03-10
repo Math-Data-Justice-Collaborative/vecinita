@@ -203,9 +203,25 @@ def integration_client(env_vars, monkeypatch):
 
     db = FakeDB()
     store = FakeChromaStore()
+
+    async def _fake_ingest_source_url(url: str, depth: int, normalized_tags: list[str]):
+        metadata = {
+            "source_url": url,
+            "source_domain": "example.com",
+            "tags": normalized_tags,
+        }
+        store.upsert_source(url=url, metadata=metadata, title=url, is_active=True)
+        return {
+            "status": "queued",
+            "url": url,
+            "depth": depth,
+            "tags": normalized_tags,
+        }
+
     app.dependency_overrides[router_admin.get_database_client] = lambda: db
     app.dependency_overrides[router_admin._verify_admin] = lambda: {"id": "admin-user"}
     monkeypatch.setattr(router_admin, "get_chroma_store", lambda: store)
+    monkeypatch.setattr(router_admin, "_ingest_source_url", _fake_ingest_source_url)
 
     client = TestClient(app)
     yield client
