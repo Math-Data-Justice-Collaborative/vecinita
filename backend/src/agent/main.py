@@ -1959,9 +1959,6 @@ async def ask_question(
                 if any(ch in question for ch in ['¿', '¡', 'á', 'é', 'í', 'ó', 'ú', 'ñ']):
                     lang = 'es'
 
-        logger.info(
-            f"\n--- New request received: '{question}' (Detected Language: {lang}, Thread: {thread_id}) ---")
-
         # Try static response first for deterministic FAQ handling in both languages
         # --- GuardrailsAI: validate input before invoking agent ---
         from src.agent.guardrails_config import validate_input
@@ -1970,6 +1967,9 @@ async def ask_question(
             return _response_payload(guard_result.reason, thread_id=thread_id, started_at=started_at, sources=[])
         # If PII was detected and redacted, use redacted version
         effective_question = guard_result.redacted if guard_result.redacted else question
+
+        logger.info(
+            f"\n--- New request received: '{effective_question}' (Detected Language: {lang}, Thread: {thread_id}) ---")
 
         answer_seeking = _is_answer_seeking_query(effective_question, lang)
         if not answer_seeking:
@@ -2005,9 +2005,9 @@ async def ask_question(
             llm_ms = 0
 
             if not answer_seeking:
-                local_non_answer = _find_static_faq_answer(effective_question, lang)
-                if local_non_answer:
-                    answer = local_non_answer
+                static_faq_answer = _find_static_faq_answer(effective_question, lang)
+                if static_faq_answer:
+                    answer = static_faq_answer
                 else:
                     fallback_llm = _get_llm_without_tools(provider, model)
                     quick_prompt = (

@@ -217,8 +217,7 @@ async def ask_question(
             params["model"] = model
         if tags:
             params["tags"] = tags
-        if tag_match_mode:
-            params["tag_match_mode"] = tag_match_mode
+        params["tag_match_mode"] = tag_match_mode
         params["include_untagged_fallback"] = str(include_untagged_fallback).lower()
         params["rerank"] = str(rerank).lower()
         params["rerank_top_k"] = rerank_top_k
@@ -304,8 +303,7 @@ async def sse_proxy_generator(
             params["model"] = model
         if tags:
             params["tags"] = tags
-        if tag_match_mode:
-            params["tag_match_mode"] = tag_match_mode
+        params["tag_match_mode"] = tag_match_mode
         params["include_untagged_fallback"] = str(include_untagged_fallback).lower()
         params["rerank"] = str(rerank).lower()
         params["rerank_top_k"] = rerank_top_k

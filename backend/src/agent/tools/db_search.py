@@ -310,6 +310,15 @@ def create_db_search_tool(
     embedding_cache: OrderedDict[str, List[float]] = OrderedDict()
     embedding_cache_lock = threading.Lock()
 
+    def _update_lru_cache(key: str, value: Optional[List[float]] = None) -> None:
+        """Update cache with LRU eviction policy. Sets value if provided, moves to end."""
+        if value is not None:
+            embedding_cache[key] = value
+        embedding_cache.move_to_end(key)
+        # Evict oldest items if cache exceeds size limit
+        while len(embedding_cache) > embedding_cache_size:
+            embedding_cache.popitem(last=False)
+
     @tool
     def db_search(query: str) -> str:
         """Search the internal knowledge base for relevant information."""
@@ -337,7 +346,7 @@ def create_db_search_tool(
                     if cached_embedding is not None:
                         query_embedding = cached_embedding
                         cache_hit = True
-                        embedding_cache.move_to_end(normalized_query)
+                        _update_lru_cache(normalized_query)
 
             if query_embedding is None:
                 embedding_started_at = time.perf_counter()
@@ -345,10 +354,7 @@ def create_db_search_tool(
                 embedding_ms = int((time.perf_counter() - embedding_started_at) * 1000)
                 if embedding_cache_size > 0 and normalized_query:
                     with embedding_cache_lock:
-                        embedding_cache[normalized_query] = query_embedding
-                        embedding_cache.move_to_end(normalized_query)
-                        while len(embedding_cache) > embedding_cache_size:
-                            embedding_cache.popitem(last=False)
+                        _update_lru_cache(normalized_query, query_embedding)
 
             tags = [t for t in search_opts.get("tags", []) if isinstance(t, str) and t]
             auto_infer_enabled = os.getenv("TAG_FILTER_AUTO_INFER", "true").lower() in {"1", "true", "yes"}
