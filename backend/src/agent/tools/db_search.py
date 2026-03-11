@@ -4,6 +4,9 @@ import json
 import logging
 import os
 import re
+import threading
+import time
+from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from contextvars import ContextVar, Token
 from typing import Any, Dict, List, Optional
@@ -20,6 +23,8 @@ from src.utils.tags import infer_tags_from_text, normalize_tags
 
 logger = logging.getLogger(__name__)
 _LAST_SEARCH_STATUS = "not_run"
+_LAST_SEARCH_METRICS: Dict[str, Any] = {}
+_LAST_SEARCH_METRICS_LOCK = threading.Lock()
 
 _SEARCH_OPTIONS: ContextVar[Dict[str, Any]] = ContextVar(
     "db_search_options",
@@ -30,6 +35,11 @@ _SEARCH_OPTIONS: ContextVar[Dict[str, Any]] = ContextVar(
         "rerank": False,
         "rerank_top_k": 10,
     },
+)
+
+_SEARCH_METRICS: ContextVar[Dict[str, Any]] = ContextVar(
+    "db_search_metrics",
+    default={},
 )
 
 _SUPABASE_CLIENT = None
@@ -48,6 +58,23 @@ def get_last_search_status() -> str:
     if scoped:
         return str(scoped)
     return str(_LAST_SEARCH_STATUS)
+
+
+def get_last_search_metrics() -> Dict[str, Any]:
+    """Return metrics from the most recent db_search invocation in this process."""
+    scoped = _SEARCH_METRICS.get()
+    if scoped:
+        return dict(scoped)
+    with _LAST_SEARCH_METRICS_LOCK:
+        return dict(_LAST_SEARCH_METRICS)
+
+
+def _update_search_metrics(metrics: Dict[str, Any]) -> None:
+    global _LAST_SEARCH_METRICS
+    metrics_copy = dict(metrics)
+    _SEARCH_METRICS.set(metrics_copy)
+    with _LAST_SEARCH_METRICS_LOCK:
+        _LAST_SEARCH_METRICS = metrics_copy
 
 
 def set_search_options(
@@ -279,14 +306,55 @@ def create_db_search_tool(
 ):
     """Create a configured db_search tool with access to Chroma and embeddings."""
     store = chroma_store or get_chroma_store()
+    embedding_cache_size = max(int(os.getenv("DB_SEARCH_EMBED_CACHE_SIZE", "256")), 0)
+    embedding_cache: OrderedDict[str, List[float]] = OrderedDict()
+    embedding_cache_lock = threading.Lock()
+
+    def _update_lru_cache(key: str, value: Optional[List[float]] = None) -> None:
+        """Update cache with LRU eviction policy. Sets value if provided, moves to end."""
+        if value is not None:
+            embedding_cache[key] = value
+        embedding_cache.move_to_end(key)
+        # Evict oldest items if cache exceeds size limit
+        while len(embedding_cache) > embedding_cache_size:
+            embedding_cache.popitem(last=False)
 
     @tool
     def db_search(query: str) -> str:
         """Search the internal knowledge base for relevant information."""
+        started_at = time.perf_counter()
+        embedding_started_at = started_at
+        retrieval_started_at = started_at
+        rerank_started_at: Optional[float] = None
+        embedding_ms = 0
+        retrieval_ms = 0
+        rerank_ms = 0
+        cache_hit = False
+        retrieval_backend = "none"
+        rows_before_threshold = 0
+        rows_after_threshold = 0
+        used_auto_inferred_tags = False
+
         try:
             _update_search_status("running")
             search_opts = _SEARCH_OPTIONS.get()
-            query_embedding = embedding_model.embed_query(query)
+            normalized_query = " ".join((query or "").lower().split())
+            query_embedding = None
+            if embedding_cache_size > 0 and normalized_query:
+                with embedding_cache_lock:
+                    cached_embedding = embedding_cache.get(normalized_query)
+                    if cached_embedding is not None:
+                        query_embedding = cached_embedding
+                        cache_hit = True
+                        _update_lru_cache(normalized_query)
+
+            if query_embedding is None:
+                embedding_started_at = time.perf_counter()
+                query_embedding = embedding_model.embed_query(query)
+                embedding_ms = int((time.perf_counter() - embedding_started_at) * 1000)
+                if embedding_cache_size > 0 and normalized_query:
+                    with embedding_cache_lock:
+                        _update_lru_cache(normalized_query, query_embedding)
 
             tags = [t for t in search_opts.get("tags", []) if isinstance(t, str) and t]
             auto_infer_enabled = os.getenv("TAG_FILTER_AUTO_INFER", "true").lower() in {"1", "true", "yes"}
@@ -296,6 +364,7 @@ def create_db_search_tool(
                 tags = normalize_tags(inferred_tags)
                 if tags:
                     auto_inferred_tags = True
+                    used_auto_inferred_tags = True
                     logger.info("Auto-inferred tag filters from query: %s", tags)
             tag_mode = search_opts.get("tag_match_mode", "any")
             include_untagged_fallback = bool(search_opts.get("include_untagged_fallback", True))
@@ -306,28 +375,37 @@ def create_db_search_tool(
             rows: List[Dict[str, Any]] = []
             chroma_failed = False
             try:
+                retrieval_started_at = time.perf_counter()
                 rows = _query_chroma_with_timeout(
                     store=store,
                     query_embedding=query_embedding,
                     n_results=max(int(match_count), 1),
                     where=where,
                 )
+                retrieval_ms = int((time.perf_counter() - retrieval_started_at) * 1000)
+                retrieval_backend = "chroma"
             except Exception as exc:
+                retrieval_ms = int((time.perf_counter() - retrieval_started_at) * 1000)
                 chroma_failed = True
                 logger.warning("Chroma query failed; attempting Supabase fallback: %s", exc)
 
             if not rows and tags and include_untagged_fallback:
                 try:
+                    retrieval_started_at = time.perf_counter()
                     rows = _query_chroma_with_timeout(
                         store=store,
                         query_embedding=query_embedding,
                         n_results=max(int(match_count), 1),
                     )
+                    retrieval_ms += int((time.perf_counter() - retrieval_started_at) * 1000)
+                    retrieval_backend = "chroma"
                 except Exception as exc:
+                    retrieval_ms += int((time.perf_counter() - retrieval_started_at) * 1000)
                     chroma_failed = True
                     logger.warning("Chroma untagged fallback query failed; attempting Supabase fallback: %s", exc)
 
             if chroma_failed:
+                retrieval_started_at = time.perf_counter()
                 rows = _query_supabase_fallback(
                     query_embedding=query_embedding,
                     match_threshold=float(match_threshold),
@@ -336,9 +414,27 @@ def create_db_search_tool(
                     tag_mode=tag_mode,
                     include_untagged_fallback=include_untagged_fallback,
                 )
+                retrieval_ms += int((time.perf_counter() - retrieval_started_at) * 1000)
+                retrieval_backend = "supabase"
+
+            rows_before_threshold = len(rows)
 
             if not rows:
                 _update_search_status("empty")
+                _update_search_metrics(
+                    {
+                        "embedding_ms": embedding_ms,
+                        "retrieval_ms": retrieval_ms,
+                        "rerank_ms": rerank_ms,
+                        "total_ms": int((time.perf_counter() - started_at) * 1000),
+                        "cache_hit": cache_hit,
+                        "retrieval_backend": retrieval_backend,
+                        "rows_before_threshold": rows_before_threshold,
+                        "rows_after_threshold": 0,
+                        "auto_inferred_tags": used_auto_inferred_tags,
+                        "status": "empty",
+                    }
+                )
                 return "[]"
 
             filtered: List[Dict[str, Any]] = []
@@ -352,21 +448,68 @@ def create_db_search_tool(
 
             if not filtered:
                 _update_search_status("empty")
+                _update_search_metrics(
+                    {
+                        "embedding_ms": embedding_ms,
+                        "retrieval_ms": retrieval_ms,
+                        "rerank_ms": rerank_ms,
+                        "total_ms": int((time.perf_counter() - started_at) * 1000),
+                        "cache_hit": cache_hit,
+                        "retrieval_backend": retrieval_backend,
+                        "rows_before_threshold": rows_before_threshold,
+                        "rows_after_threshold": 0,
+                        "auto_inferred_tags": used_auto_inferred_tags,
+                        "status": "empty",
+                    }
+                )
                 return "[]"
 
+            rows_after_threshold = len(filtered)
+
             if search_opts.get("rerank"):
+                rerank_started_at = time.perf_counter()
                 filtered = _rerank_results(
                     query,
                     filtered,
                     int(search_opts.get("rerank_top_k", match_count)),
                 )
+                rerank_ms = int((time.perf_counter() - rerank_started_at) * 1000)
 
             _update_search_status("ok")
+            _update_search_metrics(
+                {
+                    "embedding_ms": embedding_ms,
+                    "retrieval_ms": retrieval_ms,
+                    "rerank_ms": rerank_ms,
+                    "total_ms": int((time.perf_counter() - started_at) * 1000),
+                    "cache_hit": cache_hit,
+                    "retrieval_backend": retrieval_backend,
+                    "rows_before_threshold": rows_before_threshold,
+                    "rows_after_threshold": rows_after_threshold,
+                    "auto_inferred_tags": used_auto_inferred_tags,
+                    "status": "ok",
+                }
+            )
             return json.dumps(filtered, ensure_ascii=False)
 
         except Exception as exc:
             logger.error("DB Search error: %s", exc)
             _update_search_status("error")
+            _update_search_metrics(
+                {
+                    "embedding_ms": embedding_ms,
+                    "retrieval_ms": retrieval_ms,
+                    "rerank_ms": rerank_ms,
+                    "total_ms": int((time.perf_counter() - started_at) * 1000),
+                    "cache_hit": cache_hit,
+                    "retrieval_backend": retrieval_backend,
+                    "rows_before_threshold": rows_before_threshold,
+                    "rows_after_threshold": rows_after_threshold,
+                    "auto_inferred_tags": used_auto_inferred_tags,
+                    "status": "error",
+                    "error": str(exc),
+                }
+            )
             return "[]"
 
     return db_search

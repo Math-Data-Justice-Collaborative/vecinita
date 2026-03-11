@@ -10,6 +10,7 @@ Demo mode available via DEMO_MODE=true environment variable for testing without 
 import os
 import time
 import logging
+import threading
 from uuid import uuid4
 from typing import Optional, AsyncGenerator, Dict, Any, List
 from datetime import datetime
@@ -28,6 +29,28 @@ AGENT_SERVICE_URL = os.getenv("AGENT_SERVICE_URL", "http://localhost:8000")
 AGENT_TIMEOUT = float(os.getenv("AGENT_TIMEOUT", "30"))
 AGENT_STREAM_TIMEOUT = float(os.getenv("AGENT_STREAM_TIMEOUT", "120"))
 DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
+_AGENT_CLIENT: Optional[httpx.AsyncClient] = None
+_AGENT_CLIENT_LOCK = threading.Lock()
+
+
+def _get_agent_client() -> httpx.AsyncClient:
+    """Reuse one HTTP client to avoid per-request connection setup overhead."""
+    global _AGENT_CLIENT
+
+    def _client_is_closed(client: Optional[httpx.AsyncClient]) -> bool:
+        if client is None:
+            return True
+        if not isinstance(client, httpx.AsyncClient):
+            return True
+        return bool(getattr(client, "is_closed", False))
+
+    if _client_is_closed(_AGENT_CLIENT):
+        with _AGENT_CLIENT_LOCK:
+            if _client_is_closed(_AGENT_CLIENT):
+                _AGENT_CLIENT = httpx.AsyncClient(
+                    limits=httpx.Limits(max_connections=100, max_keepalive_connections=20),
+                )
+    return _AGENT_CLIENT
 
 
 def _fallback_ask_config() -> Dict[str, Any]:
@@ -181,6 +204,7 @@ async def ask_question(
         return get_demo_response(question, lang)
     
     try:
+        started_at = time.perf_counter()
         # Build query parameters for agent service
         params = {"question": question}
         if thread_id:
@@ -193,20 +217,20 @@ async def ask_question(
             params["model"] = model
         if tags:
             params["tags"] = tags
-        if tag_match_mode:
-            params["tag_match_mode"] = tag_match_mode
+        params["tag_match_mode"] = tag_match_mode
         params["include_untagged_fallback"] = str(include_untagged_fallback).lower()
         params["rerank"] = str(rerank).lower()
         params["rerank_top_k"] = rerank_top_k
 
         # Proxy request to agent service
-        async with httpx.AsyncClient(timeout=AGENT_TIMEOUT) as client:
-            response = await client.get(
-                f"{AGENT_SERVICE_URL}/ask",
-                params=params
-            )
-            response.raise_for_status()
-            data = response.json()
+        client = _get_agent_client()
+        response = await client.get(
+            f"{AGENT_SERVICE_URL}/ask",
+            params=params,
+            timeout=AGENT_TIMEOUT,
+        )
+        response.raise_for_status()
+        data = response.json()
 
         # Map agent response to gateway format
         return AskResponse(
@@ -214,7 +238,12 @@ async def ask_question(
             answer=data.get("answer", ""),
             sources=data.get("sources", []),
             language=data.get("language", lang or "en"),
-            model=data.get("model", "unknown")
+            model=data.get("model", "unknown"),
+            response_time_ms=data.get("response_time_ms")
+            if isinstance(data.get("response_time_ms"), int)
+            else int((time.perf_counter() - started_at) * 1000),
+            token_usage=data.get("token_usage") if isinstance(data.get("token_usage"), dict) else None,
+            latency_breakdown=data.get("latency_breakdown") if isinstance(data.get("latency_breakdown"), dict) else None,
         )
 
     except httpx.TimeoutException:
@@ -274,8 +303,7 @@ async def sse_proxy_generator(
             params["model"] = model
         if tags:
             params["tags"] = tags
-        if tag_match_mode:
-            params["tag_match_mode"] = tag_match_mode
+        params["tag_match_mode"] = tag_match_mode
         params["include_untagged_fallback"] = str(include_untagged_fallback).lower()
         params["rerank"] = str(rerank).lower()
         params["rerank_top_k"] = rerank_top_k
@@ -288,26 +316,27 @@ async def sse_proxy_generator(
         )
 
         # Stream from agent service
-        async with httpx.AsyncClient(timeout=AGENT_STREAM_TIMEOUT) as client:
-            async with client.stream(
-                "GET",
-                f"{AGENT_SERVICE_URL}/ask-stream",
-                params=params
-            ) as response:
-                response.raise_for_status()
-                
-                # Forward raw SSE bytes from agent to preserve event boundaries.
-                async for chunk in response.aiter_bytes():
-                    if chunk:
-                        chunk_count += 1
-                        if first_chunk_latency_ms is None:
-                            first_chunk_latency_ms = int((time.perf_counter() - started_at) * 1000)
-                            logger.info(
-                                "SSE first chunk request_id=%s latency_ms=%s",
-                                request_id,
-                                first_chunk_latency_ms,
-                            )
-                        yield chunk
+        client = _get_agent_client()
+        async with client.stream(
+            "GET",
+            f"{AGENT_SERVICE_URL}/ask-stream",
+            params=params,
+            timeout=AGENT_STREAM_TIMEOUT,
+        ) as response:
+            response.raise_for_status()
+
+            # Forward raw SSE bytes from agent to preserve event boundaries.
+            async for chunk in response.aiter_bytes():
+                if chunk:
+                    chunk_count += 1
+                    if first_chunk_latency_ms is None:
+                        first_chunk_latency_ms = int((time.perf_counter() - started_at) * 1000)
+                        logger.info(
+                            "SSE first chunk request_id=%s latency_ms=%s",
+                            request_id,
+                            first_chunk_latency_ms,
+                        )
+                    yield chunk
 
         logger.info(
             "SSE stream completed request_id=%s chunks=%s first_chunk_latency_ms=%s",
@@ -411,10 +440,10 @@ async def get_ask_config():
         Configuration with available providers and models
     """
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(f"{AGENT_SERVICE_URL}/config")
-            response.raise_for_status()
-            return _normalize_agent_config(response.json())
+        client = _get_agent_client()
+        response = await client.get(f"{AGENT_SERVICE_URL}/config", timeout=10.0)
+        response.raise_for_status()
+        return _normalize_agent_config(response.json())
 
     except httpx.RequestError as e:
         return _fallback_ask_config()

@@ -74,6 +74,17 @@ class TestEmbeddingAuth:
         )
         assert response.status_code == 200
 
+    def test_embed_accepts_bearer_token_when_auth_enabled(self, embedding_client):
+        from src.embedding_service import main as server
+
+        server._auth_token = "test-token"
+        response = embedding_client.post(
+            "/embed",
+            json={"text": "hello"},
+            headers={"Authorization": "Bearer test-token"},
+        )
+        assert response.status_code == 200
+
 
 class TestRootEndpoint:
     """Test root endpoint."""

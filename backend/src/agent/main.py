@@ -40,6 +40,7 @@ from .tools.db_search import create_db_search_tool
 from .tools.db_search import set_search_options as set_db_search_options
 from .tools.db_search import reset_search_options as reset_db_search_options
 from .tools.db_search import get_last_search_status
+from .tools.db_search import get_last_search_metrics
 from .tools.static_response import create_static_response_tool, FAQ_DATABASE
 from .tools.web_search import create_web_search_tool
 from .tools.clarify_question import create_clarify_question_tool
@@ -308,6 +309,10 @@ try:
     logger.info("Initializing embedding model (Embedding Service, fail-fast)...")
     embedding_service_url = os.environ.get(
         "EMBEDDING_SERVICE_URL", "http://embedding-service:8001")
+    embedding_service_auth_token = (
+        os.environ.get("EMBEDDING_SERVICE_AUTH_TOKEN")
+        or os.environ.get("MODAL_API_PROXY_SECRET")
+    )
     embedding_strict_startup = (
         os.environ.get("EMBEDDING_STRICT_STARTUP", "true").lower() in ["1", "true", "yes"]
     )
@@ -317,6 +322,7 @@ try:
         embedding_model = create_embedding_client(
             embedding_service_url,
             validate_on_init=True,
+            auth_token=embedding_service_auth_token,
         )
         logger.info(
             f"✅ Embedding model initialized via Embedding Service ({embedding_service_url})")
@@ -1803,6 +1809,26 @@ def _get_recommendations(diagnostics: dict) -> list:
     return recommendations
 
 
+def _response_payload(
+    answer_text: str,
+    *,
+    thread_id: str,
+    started_at: float,
+    sources: Optional[list[dict]] = None,
+    latency_breakdown: Optional[dict] = None,
+) -> dict:
+    payload = {
+        "answer": answer_text,
+        "thread_id": thread_id,
+        "response_time_ms": int((time.perf_counter() - started_at) * 1000),
+    }
+    if sources is not None:
+        payload["sources"] = sources
+    if latency_breakdown:
+        payload["latency_breakdown"] = latency_breakdown
+    return payload
+
+
 @app.get("/db-info")
 def get_db_info():
     """Get basic database information for debugging.
@@ -1908,6 +1934,8 @@ async def ask_question(
     rerank_top_k: int = Query(default=10, ge=1, le=50),
 ):
     """Handles Q&A requests from the UI or API using LangGraph agent"""
+    started_at = time.perf_counter()
+
     # Accept both 'question' and legacy 'query' parameter names
     if question is None and query is not None:
         question = query
@@ -1931,24 +1959,24 @@ async def ask_question(
                 if any(ch in question for ch in ['¿', '¡', 'á', 'é', 'í', 'ó', 'ú', 'ñ']):
                     lang = 'es'
 
-        logger.info(
-            f"\n--- New request received: '{question}' (Detected Language: {lang}, Thread: {thread_id}) ---")
-
         # Try static response first for deterministic FAQ handling in both languages
         # --- GuardrailsAI: validate input before invoking agent ---
         from src.agent.guardrails_config import validate_input
         guard_result = validate_input(question, lang=lang)
         if not guard_result.passed:
-            return {"answer": guard_result.reason, "thread_id": thread_id, "sources": []}
+            return _response_payload(guard_result.reason, thread_id=thread_id, started_at=started_at, sources=[])
         # If PII was detected and redacted, use redacted version
         effective_question = guard_result.redacted if guard_result.redacted else question
+
+        logger.info(
+            f"\n--- New request received: '{effective_question}' (Detected Language: {lang}, Thread: {thread_id}) ---")
 
         answer_seeking = _is_answer_seeking_query(effective_question, lang)
         if not answer_seeking:
             local_static = _find_static_faq_answer(effective_question, lang)
             if local_static:
                 logger.info("Returning static FAQ answer (local matcher, non-answer intent).")
-                return {"answer": local_static, "thread_id": thread_id}
+                return _response_payload(local_static, thread_id=thread_id, started_at=started_at)
             try:
                 static_answer = static_response_tool.invoke({
                     "query": effective_question,
@@ -1957,7 +1985,7 @@ async def ask_question(
                 if static_answer:
                     logger.info(
                         "Returning static FAQ answer without retrieval (non-answer intent).")
-                    return {"answer": static_answer, "thread_id": thread_id}
+                    return _response_payload(static_answer, thread_id=thread_id, started_at=started_at)
             except Exception as static_exc:
                 logger.warning(f"Static response check failed: {static_exc}")
 
@@ -1973,25 +2001,32 @@ async def ask_question(
         )
         try:
             logger.info("Intent gate: answer_seeking=%s", answer_seeking)
+            retrieval_ms = 0
+            llm_ms = 0
 
             if not answer_seeking:
-                local_non_answer = _find_static_faq_answer(effective_question, lang)
-                if local_non_answer:
-                    answer = local_non_answer
+                static_faq_answer = _find_static_faq_answer(effective_question, lang)
+                if static_faq_answer:
+                    answer = static_faq_answer
                 else:
                     fallback_llm = _get_llm_without_tools(provider, model)
                     quick_prompt = (
                         f"Respond briefly and naturally in {'Spanish' if lang == 'es' else 'English'}: {effective_question}"
                     )
+                    llm_started_at = time.perf_counter()
                     raw = fallback_llm.invoke([HumanMessage(content=quick_prompt)])
+                    llm_ms = int((time.perf_counter() - llm_started_at) * 1000)
                     answer = raw.content if hasattr(raw, "content") else str(raw)
                 sources: list[dict] = []
             else:
                 logger.info("Running mandatory one-shot db_search for answer-seeking query")
-                raw_search = db_search_tool.invoke({"query": effective_question})
+                retrieval_started_at = time.perf_counter()
+                raw_search = db_search_tool.invoke(effective_question)
+                retrieval_ms = int((time.perf_counter() - retrieval_started_at) * 1000)
                 retrieved_docs = _parse_db_search_docs(raw_search if isinstance(raw_search, str) else str(raw_search))
                 weak_retrieval = _is_weak_retrieval(retrieved_docs)
 
+                llm_started_at = time.perf_counter()
                 answer = _build_deterministic_rag_answer(
                     question=effective_question,
                     language=lang,
@@ -2000,6 +2035,7 @@ async def ask_question(
                     retrieved_docs=retrieved_docs,
                     weak_retrieval=weak_retrieval,
                 )
+                llm_ms = int((time.perf_counter() - llm_started_at) * 1000)
                 sources = _build_sources_from_docs(retrieved_docs)
                 answer = _sanitize_answer_links(
                     answer,
@@ -2007,6 +2043,13 @@ async def ask_question(
                     lang,
                 )
                 logger.info("Deterministic RAG complete: docs=%s, weak=%s, sources=%s", len(retrieved_docs), weak_retrieval, len(sources))
+
+            db_metrics = get_last_search_metrics() if answer_seeking else {}
+            latency_breakdown = {
+                "retrieval_invoke_ms": retrieval_ms,
+                "llm_ms": llm_ms,
+                "db_search": db_metrics,
+            }
         finally:
             reset_db_search_options(search_token)
 
@@ -2025,7 +2068,13 @@ async def ask_question(
         elif out_guard.redacted:
             answer = out_guard.redacted
 
-        return {"answer": answer, "sources": sources, "thread_id": thread_id}
+        return _response_payload(
+            answer,
+            thread_id=thread_id,
+            started_at=started_at,
+            sources=sources,
+            latency_breakdown=latency_breakdown,
+        )
 
     except Exception as e:
         logger.error("Error processing question '%s': %s", question, str(e))
@@ -2048,7 +2097,7 @@ async def ask_question(
                 fallback = (
                     f"The assistant is temporarily unavailable. Please try again in {wait_seconds:.0f} seconds."
                 )
-            return {"answer": fallback, "thread_id": thread_id}
+            return _response_payload(fallback, thread_id=thread_id, started_at=started_at)
         # Non-rate-limit errors: propagate as HTTP 500
         raise HTTPException(status_code=500, detail=str(e))
 
