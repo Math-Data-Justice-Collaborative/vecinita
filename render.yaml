@@ -1,0 +1,102 @@
+services:
+  - type: web
+    name: vecinita-embedding
+    runtime: docker
+    region: virginia
+    plan: free
+    dockerfilePath: ./backend/Dockerfile.embedding
+    dockerContext: ./backend
+    autoDeployTrigger: commit
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "8001"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: HF_HOME
+        value: "/tmp/huggingface_cache"
+
+  - type: web
+    name: vecinita-agent
+    runtime: docker
+    region: virginia
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    autoDeployTrigger: commit
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: TF_ENABLE_ONEDNN_OPTS
+        value: "0"
+      - key: EMBEDDING_SERVICE_URL
+        value: "http://vecinita-embedding:8001"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vecinita-postgres
+          property: connectionString
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: LANGSMITH_API_KEY
+        sync: false
+      - key: LANGSMITH_PROJECT
+        sync: false
+
+  - type: cron
+    name: vecinita-scraper
+    runtime: docker
+    region: virginia
+    plan: starter
+    dockerfilePath: ./backend/Dockerfile.scraper
+    dockerContext: ./backend
+    schedule: "0 2 * * *"
+    autoDeployTrigger: commit
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: EMBEDDING_SERVICE_URL
+        value: "http://vecinita-embedding:8001"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vecinita-postgres
+          property: connectionString
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+
+  - type: web
+    name: vecinita-frontend
+    runtime: docker
+    region: virginia
+    plan: free
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    autoDeployTrigger: commit
+    healthCheckPath: /health
+    envVars:
+      - key: VITE_GATEWAY_URL
+        value: "/api/v1"
+      - key: VITE_BACKEND_URL
+        value: "https://vecinita-agent.onrender.com"
+
+databases:
+  - name: vecinita-postgres
+    region: virginia
+    plan: basic-256mb
+    databaseName: vecinita
+    user: vecinita
+    postgresMajorVersion: "16"
+    diskSizeGB: 1
+    ipAllowList: []
