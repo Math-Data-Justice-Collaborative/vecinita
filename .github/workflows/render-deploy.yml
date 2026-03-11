@@ -1,0 +1,58 @@
+name: Render Deploy
+
+on:
+  workflow_run:
+    workflows: ["Tests"]
+    types: [completed]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    if: |
+      (github.event_name == 'workflow_dispatch') ||
+      (
+        github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main'
+      )
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+
+    env:
+      RENDER_DEPLOY_HOOK_AGENT: ${{ secrets.RENDER_DEPLOY_HOOK_AGENT }}
+      RENDER_DEPLOY_HOOK_EMBEDDING: ${{ secrets.RENDER_DEPLOY_HOOK_EMBEDDING }}
+      RENDER_DEPLOY_HOOK_FRONTEND: ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}
+      RENDER_DEPLOY_HOOK_SCRAPER: ${{ secrets.RENDER_DEPLOY_HOOK_SCRAPER }}
+
+    steps:
+      - name: Trigger agent deploy hook
+        if: ${{ env.RENDER_DEPLOY_HOOK_AGENT != '' }}
+        run: curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_AGENT"
+
+      - name: Trigger embedding deploy hook
+        if: ${{ env.RENDER_DEPLOY_HOOK_EMBEDDING != '' }}
+        run: curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_EMBEDDING"
+
+      - name: Trigger frontend deploy hook
+        if: ${{ env.RENDER_DEPLOY_HOOK_FRONTEND != '' }}
+        run: curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_FRONTEND"
+
+      - name: Trigger scraper deploy hook
+        if: ${{ env.RENDER_DEPLOY_HOOK_SCRAPER != '' }}
+        run: curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_SCRAPER"
+
+      - name: Verify at least one deploy hook is configured
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_AGENT" ] && \
+             [ -z "$RENDER_DEPLOY_HOOK_EMBEDDING" ] && \
+             [ -z "$RENDER_DEPLOY_HOOK_FRONTEND" ] && \
+             [ -z "$RENDER_DEPLOY_HOOK_SCRAPER" ]; then
+            echo "No Render deploy hook secrets are configured."
+            echo "Set at least one of:"
+            echo "  RENDER_DEPLOY_HOOK_AGENT"
+            echo "  RENDER_DEPLOY_HOOK_EMBEDDING"
+            echo "  RENDER_DEPLOY_HOOK_FRONTEND"
+            echo "  RENDER_DEPLOY_HOOK_SCRAPER"
+            exit 1
+          fi
