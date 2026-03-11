@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import re
+import threading
 import time
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
@@ -23,6 +24,7 @@ from src.utils.tags import infer_tags_from_text, normalize_tags
 logger = logging.getLogger(__name__)
 _LAST_SEARCH_STATUS = "not_run"
 _LAST_SEARCH_METRICS: Dict[str, Any] = {}
+_LAST_SEARCH_METRICS_LOCK = threading.Lock()
 
 _SEARCH_OPTIONS: ContextVar[Dict[str, Any]] = ContextVar(
     "db_search_options",
@@ -33,6 +35,11 @@ _SEARCH_OPTIONS: ContextVar[Dict[str, Any]] = ContextVar(
         "rerank": False,
         "rerank_top_k": 10,
     },
+)
+
+_SEARCH_METRICS: ContextVar[Dict[str, Any]] = ContextVar(
+    "db_search_metrics",
+    default={},
 )
 
 _SUPABASE_CLIENT = None
@@ -55,12 +62,19 @@ def get_last_search_status() -> str:
 
 def get_last_search_metrics() -> Dict[str, Any]:
     """Return metrics from the most recent db_search invocation in this process."""
-    return dict(_LAST_SEARCH_METRICS)
+    scoped = _SEARCH_METRICS.get()
+    if scoped:
+        return dict(scoped)
+    with _LAST_SEARCH_METRICS_LOCK:
+        return dict(_LAST_SEARCH_METRICS)
 
 
 def _update_search_metrics(metrics: Dict[str, Any]) -> None:
     global _LAST_SEARCH_METRICS
-    _LAST_SEARCH_METRICS = dict(metrics)
+    metrics_copy = dict(metrics)
+    _SEARCH_METRICS.set(metrics_copy)
+    with _LAST_SEARCH_METRICS_LOCK:
+        _LAST_SEARCH_METRICS = metrics_copy
 
 
 def set_search_options(
@@ -294,6 +308,7 @@ def create_db_search_tool(
     store = chroma_store or get_chroma_store()
     embedding_cache_size = max(int(os.getenv("DB_SEARCH_EMBED_CACHE_SIZE", "256")), 0)
     embedding_cache: OrderedDict[str, List[float]] = OrderedDict()
+    embedding_cache_lock = threading.Lock()
 
     @tool
     def db_search(query: str) -> str:
@@ -315,19 +330,25 @@ def create_db_search_tool(
             _update_search_status("running")
             search_opts = _SEARCH_OPTIONS.get()
             normalized_query = " ".join((query or "").lower().split())
-            query_embedding = embedding_cache.get(normalized_query) if embedding_cache_size > 0 else None
+            query_embedding = None
+            if embedding_cache_size > 0 and normalized_query:
+                with embedding_cache_lock:
+                    cached_embedding = embedding_cache.get(normalized_query)
+                    if cached_embedding is not None:
+                        query_embedding = cached_embedding
+                        cache_hit = True
+                        embedding_cache.move_to_end(normalized_query)
+
             if query_embedding is None:
                 embedding_started_at = time.perf_counter()
                 query_embedding = embedding_model.embed_query(query)
                 embedding_ms = int((time.perf_counter() - embedding_started_at) * 1000)
                 if embedding_cache_size > 0 and normalized_query:
-                    embedding_cache[normalized_query] = query_embedding
-                    embedding_cache.move_to_end(normalized_query)
-                    while len(embedding_cache) > embedding_cache_size:
-                        embedding_cache.popitem(last=False)
-            elif embedding_cache_size > 0 and normalized_query:
-                cache_hit = True
-                embedding_cache.move_to_end(normalized_query)
+                    with embedding_cache_lock:
+                        embedding_cache[normalized_query] = query_embedding
+                        embedding_cache.move_to_end(normalized_query)
+                        while len(embedding_cache) > embedding_cache_size:
+                            embedding_cache.popitem(last=False)
 
             tags = [t for t in search_opts.get("tags", []) if isinstance(t, str) and t]
             auto_infer_enabled = os.getenv("TAG_FILTER_AUTO_INFER", "true").lower() in {"1", "true", "yes"}

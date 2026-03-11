@@ -10,6 +10,7 @@ Demo mode available via DEMO_MODE=true environment variable for testing without 
 import os
 import time
 import logging
+import threading
 from uuid import uuid4
 from typing import Optional, AsyncGenerator, Dict, Any, List
 from datetime import datetime
@@ -29,15 +30,26 @@ AGENT_TIMEOUT = float(os.getenv("AGENT_TIMEOUT", "30"))
 AGENT_STREAM_TIMEOUT = float(os.getenv("AGENT_STREAM_TIMEOUT", "120"))
 DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
 _AGENT_CLIENT: Optional[httpx.AsyncClient] = None
+_AGENT_CLIENT_LOCK = threading.Lock()
 
 
 def _get_agent_client() -> httpx.AsyncClient:
     """Reuse one HTTP client to avoid per-request connection setup overhead."""
     global _AGENT_CLIENT
-    if _AGENT_CLIENT is None or _AGENT_CLIENT.is_closed:
-        _AGENT_CLIENT = httpx.AsyncClient(
-            limits=httpx.Limits(max_connections=100, max_keepalive_connections=20),
-        )
+
+    def _client_is_closed(client: Optional[httpx.AsyncClient]) -> bool:
+        if client is None:
+            return True
+        if not isinstance(client, httpx.AsyncClient):
+            return True
+        return bool(getattr(client, "is_closed", False))
+
+    if _client_is_closed(_AGENT_CLIENT):
+        with _AGENT_CLIENT_LOCK:
+            if _client_is_closed(_AGENT_CLIENT):
+                _AGENT_CLIENT = httpx.AsyncClient(
+                    limits=httpx.Limits(max_connections=100, max_keepalive_connections=20),
+                )
     return _AGENT_CLIENT
 
 

@@ -19,7 +19,7 @@ services:
     networks:
       - vecinita-network
     healthcheck:
-      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/8000' 2>/dev/null"]
+      test: ["CMD", "nc", "-z", "localhost", "8000"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -100,7 +100,7 @@ services:
       PYTHONUNBUFFERED: "1"
       HF_HOME: "/tmp/huggingface_cache"
       EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:?Set EMBEDDING_SERVICE_AUTH_TOKEN before starting docker compose}"
-      MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET:-${EMBEDDING_SERVICE_AUTH_TOKEN}}"
+      MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET}"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]

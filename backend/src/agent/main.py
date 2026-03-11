@@ -1809,6 +1809,26 @@ def _get_recommendations(diagnostics: dict) -> list:
     return recommendations
 
 
+def _response_payload(
+    answer_text: str,
+    *,
+    thread_id: str,
+    started_at: float,
+    sources: Optional[list[dict]] = None,
+    latency_breakdown: Optional[dict] = None,
+) -> dict:
+    payload = {
+        "answer": answer_text,
+        "thread_id": thread_id,
+        "response_time_ms": int((time.perf_counter() - started_at) * 1000),
+    }
+    if sources is not None:
+        payload["sources"] = sources
+    if latency_breakdown:
+        payload["latency_breakdown"] = latency_breakdown
+    return payload
+
+
 @app.get("/db-info")
 def get_db_info():
     """Get basic database information for debugging.
@@ -1916,18 +1936,6 @@ async def ask_question(
     """Handles Q&A requests from the UI or API using LangGraph agent"""
     started_at = time.perf_counter()
 
-    def _response_payload(answer_text: str, *, sources: Optional[list[dict]] = None, latency_breakdown: Optional[dict] = None) -> dict:
-        payload = {
-            "answer": answer_text,
-            "thread_id": thread_id,
-            "response_time_ms": int((time.perf_counter() - started_at) * 1000),
-        }
-        if sources is not None:
-            payload["sources"] = sources
-        if latency_breakdown:
-            payload["latency_breakdown"] = latency_breakdown
-        return payload
-
     # Accept both 'question' and legacy 'query' parameter names
     if question is None and query is not None:
         question = query
@@ -1959,7 +1967,7 @@ async def ask_question(
         from src.agent.guardrails_config import validate_input
         guard_result = validate_input(question, lang=lang)
         if not guard_result.passed:
-            return _response_payload(guard_result.reason, sources=[])
+            return _response_payload(guard_result.reason, thread_id=thread_id, started_at=started_at, sources=[])
         # If PII was detected and redacted, use redacted version
         effective_question = guard_result.redacted if guard_result.redacted else question
 
@@ -1968,7 +1976,7 @@ async def ask_question(
             local_static = _find_static_faq_answer(effective_question, lang)
             if local_static:
                 logger.info("Returning static FAQ answer (local matcher, non-answer intent).")
-                return _response_payload(local_static)
+                return _response_payload(local_static, thread_id=thread_id, started_at=started_at)
             try:
                 static_answer = static_response_tool.invoke({
                     "query": effective_question,
@@ -1977,7 +1985,7 @@ async def ask_question(
                 if static_answer:
                     logger.info(
                         "Returning static FAQ answer without retrieval (non-answer intent).")
-                    return _response_payload(static_answer)
+                    return _response_payload(static_answer, thread_id=thread_id, started_at=started_at)
             except Exception as static_exc:
                 logger.warning(f"Static response check failed: {static_exc}")
 
@@ -2060,7 +2068,13 @@ async def ask_question(
         elif out_guard.redacted:
             answer = out_guard.redacted
 
-        return _response_payload(answer, sources=sources, latency_breakdown=latency_breakdown)
+        return _response_payload(
+            answer,
+            thread_id=thread_id,
+            started_at=started_at,
+            sources=sources,
+            latency_breakdown=latency_breakdown,
+        )
 
     except Exception as e:
         logger.error("Error processing question '%s': %s", question, str(e))
@@ -2083,7 +2097,7 @@ async def ask_question(
                 fallback = (
                     f"The assistant is temporarily unavailable. Please try again in {wait_seconds:.0f} seconds."
                 )
-            return _response_payload(fallback)
+            return _response_payload(fallback, thread_id=thread_id, started_at=started_at)
         # Non-rate-limit errors: propagate as HTTP 500
         raise HTTPException(status_code=500, detail=str(e))
 

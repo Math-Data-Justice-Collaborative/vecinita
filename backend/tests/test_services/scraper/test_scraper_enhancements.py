@@ -74,6 +74,7 @@ class TestUploaderPayload:
         # Avoid loading sentence-transformers by bypassing embeddings
         monkeypatch.setenv('SUPABASE_URL', 'https://test.supabase.co')
         monkeypatch.setenv('SUPABASE_KEY', 'test-key')
+        monkeypatch.setenv('VECTOR_SYNC_ENABLED', 'false')
 
         uploader = DatabaseUploader(use_local_embeddings=False)
 
