@@ -113,6 +113,27 @@ class TestAskEndpoint:
         assert response.status_code == 200
 
     @patch('httpx.AsyncClient.get')
+    def test_ask_maps_latency_metadata(self, mock_get, ask_client, mock_agent_response):
+        """Gateway should surface upstream latency fields when provided by agent."""
+        mock_agent_response["response_time_ms"] = 1234
+        mock_agent_response["latency_breakdown"] = {
+            "retrieval_invoke_ms": 110,
+            "llm_ms": 820,
+            "db_search": {"total_ms": 90},
+        }
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = mock_agent_response
+        mock_response.raise_for_status = MagicMock()
+        mock_get.return_value = mock_response
+
+        response = ask_client.get("/api/v1/ask?question=What%20is%20housing%3F")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["response_time_ms"] == 1234
+        assert data["latency_breakdown"]["retrieval_invoke_ms"] == 110
+
+    @patch('httpx.AsyncClient.get')
     def test_ask_with_tags_and_rerank_params(self, mock_get, ask_client, mock_agent_response):
         """Test ask forwards metadata tag filter and reranking parameters."""
         mock_response = MagicMock()

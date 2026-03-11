@@ -19,7 +19,7 @@ services:
     networks:
       - vecinita-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v2/heartbeat"]
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/8000' 2>/dev/null"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -65,11 +65,8 @@ services:
     restart: unless-stopped
     networks:
       - vecinita-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    # PostgREST is a distroless binary image with no shell or tooling; health is
+    # inferred from the postgres dependency and a short start_period in dependents.
 
   # pgAdmin - PostgreSQL Management UI (Optional but useful)
   pgadmin:
@@ -102,6 +99,8 @@ services:
       PORT: "8001"
       PYTHONUNBUFFERED: "1"
       HF_HOME: "/tmp/huggingface_cache"
+      EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:?Set EMBEDDING_SERVICE_AUTH_TOKEN before starting docker compose}"
+      MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET:-${EMBEDDING_SERVICE_AUTH_TOKEN}}"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
@@ -123,6 +122,8 @@ services:
       PORT: "8000"
       PYTHONUNBUFFERED: "1"
       EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
+      EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:?Set EMBEDDING_SERVICE_AUTH_TOKEN before starting docker compose}"
+      MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET:-${EMBEDDING_SERVICE_AUTH_TOKEN}}"
       CHROMA_HOST: "chroma"
       CHROMA_PORT: "8000"
       CHROMA_SSL: "false"
@@ -134,13 +135,18 @@ services:
       VECTOR_SYNC_SUPABASE_FALLBACK_READS: "true"
       SUPABASE_URL: "http://postgrest:3000"
       SUPABASE_KEY: "dev-anon-key"
-      GROQ_API_KEY: "${GROQ_API_KEY}"
+      DEEPSEEK_API_KEY: "${DEEPSEEK_API_KEY:-}"
+      DEEPSEEK_BASE_URL: "${DEEPSEEK_BASE_URL:-https://api.deepseek.com}"
+      OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-}"
+      OLLAMA_MODEL: "${OLLAMA_MODEL:-llama3.1:8b}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      DEFAULT_PROVIDER: "${DEFAULT_PROVIDER:-}"
       DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/postgres"
     depends_on:
       postgres:
         condition: service_healthy
       postgrest:
-        condition: service_healthy
+        condition: service_started
       embedding-service:
         condition: service_healthy
       chroma:
@@ -167,6 +173,8 @@ services:
       PYTHONUNBUFFERED: "1"
       AGENT_SERVICE_URL: "http://vecinita-agent:8000"
       EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
+      EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:?Set EMBEDDING_SERVICE_AUTH_TOKEN before starting docker compose}"
+      MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET:-${EMBEDDING_SERVICE_AUTH_TOKEN}}"
       CHROMA_HOST: "chroma"
       CHROMA_PORT: "8000"
       CHROMA_SSL: "false"
@@ -197,7 +205,7 @@ services:
       chroma:
         condition: service_healthy
       postgrest:
-        condition: service_healthy
+        condition: service_started
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8004/health"]

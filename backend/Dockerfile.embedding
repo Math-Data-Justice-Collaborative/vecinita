@@ -39,7 +39,6 @@ COPY --from=builder /install /usr/local/lib/python3.11/site-packages
 
 # Copy only the embedding service code
 COPY src/embedding_service ./src/embedding_service
-COPY .env* ./
 
 # Create non-root user for security
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app

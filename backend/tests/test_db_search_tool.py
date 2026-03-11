@@ -16,6 +16,7 @@ sys.modules[_DB_SEARCH_SPEC.name] = db_search_module
 _DB_SEARCH_SPEC.loader.exec_module(db_search_module)
 
 create_db_search_tool = db_search_module.create_db_search_tool
+get_last_search_metrics = db_search_module.get_last_search_metrics
 reset_search_options = db_search_module.reset_search_options
 set_search_options = db_search_module.set_search_options
 
@@ -66,6 +67,56 @@ def test_db_search_normalizes_documents(db_search_tool, mock_store):
 def test_db_search_calls_embedding_model(db_search_tool, mock_embedding_model):
     db_search_tool.invoke("test query")
     mock_embedding_model.embed_query.assert_called_once_with("test query")
+
+
+def test_db_search_reuses_cached_embedding_for_normalized_query(monkeypatch, mock_store, mock_embedding_model):
+    monkeypatch.setenv("DB_SEARCH_EMBED_CACHE_SIZE", "8")
+    tool = create_db_search_tool(mock_store, mock_embedding_model, match_threshold=0.3, match_count=5)
+    tool.invoke("Need housing help")
+    tool.invoke("  need   housing   help  ")
+    assert mock_embedding_model.embed_query.call_count == 1
+
+
+def test_db_search_embedding_cache_can_be_disabled(monkeypatch, mock_store, mock_embedding_model):
+    monkeypatch.setenv("DB_SEARCH_EMBED_CACHE_SIZE", "0")
+    tool = create_db_search_tool(mock_store, mock_embedding_model, match_threshold=0.3, match_count=5)
+    tool.invoke("Need housing help")
+    tool.invoke("need housing help")
+    assert mock_embedding_model.embed_query.call_count == 2
+
+
+def test_db_search_exposes_latency_metrics(monkeypatch, mock_store, mock_embedding_model):
+    monkeypatch.setenv("DB_SEARCH_EMBED_CACHE_SIZE", "8")
+    mock_store.query_chunks.return_value = [
+        {
+            "content": "Housing support resources",
+            "source_url": "https://example.org/housing",
+            "source_domain": "example.org",
+            "similarity": 0.91,
+            "metadata": {},
+        }
+    ]
+    tool = create_db_search_tool(mock_store, mock_embedding_model, match_threshold=0.3, match_count=5)
+
+    _ = tool.invoke("Need housing support")
+    metrics = get_last_search_metrics()
+
+    assert metrics["status"] == "ok"
+    assert metrics["retrieval_backend"] == "chroma"
+    assert isinstance(metrics["total_ms"], int)
+    assert metrics["rows_before_threshold"] == 1
+    assert metrics["rows_after_threshold"] == 1
+
+
+def test_db_search_metrics_marks_cache_hit(monkeypatch, mock_store, mock_embedding_model):
+    monkeypatch.setenv("DB_SEARCH_EMBED_CACHE_SIZE", "8")
+    tool = create_db_search_tool(mock_store, mock_embedding_model, match_threshold=0.3, match_count=5)
+
+    _ = tool.invoke("Need housing help")
+    _ = tool.invoke("need   housing   help")
+    metrics = get_last_search_metrics()
+
+    assert metrics["cache_hit"] is True
 
 
 def test_db_search_passes_tag_filter(db_search_tool, mock_store):

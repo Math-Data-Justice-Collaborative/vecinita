@@ -94,3 +94,37 @@ def test_client_sets_auth_header_from_env(monkeypatch):
     client = EmbeddingServiceClient(base_url="http://localhost:8001")
 
     assert client.client.headers.get("x-embedding-service-token") == "abc123"
+
+
+def test_client_prefers_explicit_auth_token_over_env(monkeypatch):
+    monkeypatch.setenv("EMBEDDING_SERVICE_AUTH_TOKEN", "env-token")
+    client = EmbeddingServiceClient(
+        base_url="http://localhost:8001",
+        auth_token="explicit-token",
+    )
+
+    assert client.client.headers.get("x-embedding-service-token") == "explicit-token"
+
+
+def test_create_embedding_client_passes_explicit_auth_token(monkeypatch):
+    captured: dict[str, str | None] = {}
+
+    def fake_init(self, base_url="http://localhost:8001", timeout=30, auth_token=None):
+        captured["base_url"] = base_url
+        captured["auth_token"] = auth_token
+        self.base_url = base_url.rstrip("/")
+        self.timeout = timeout
+        self.auth_token = auth_token
+        self.client = Mock(headers={})
+
+    monkeypatch.setattr(EmbeddingServiceClient, "__init__", fake_init)
+
+    create_embedding_client(
+        "http://embedding-service:8001",
+        auth_token="factory-token",
+    )
+
+    assert captured == {
+        "base_url": "http://embedding-service:8001",
+        "auth_token": "factory-token",
+    }

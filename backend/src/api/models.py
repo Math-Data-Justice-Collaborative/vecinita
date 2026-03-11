@@ -676,6 +676,10 @@ class AskQuestionResponse(BaseModel):
             "total_tokens": 768
         }
     )
+    latency_breakdown: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Optional stage-level latency metrics emitted by backend services"
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -698,6 +702,16 @@ class AskQuestionResponse(BaseModel):
                     "prompt_tokens": 512,
                     "completion_tokens": 256,
                     "total_tokens": 768
+                },
+                "latency_breakdown": {
+                    "retrieval_invoke_ms": 180,
+                    "llm_ms": 1320,
+                    "db_search": {
+                        "embedding_ms": 54,
+                        "retrieval_ms": 102,
+                        "rerank_ms": 8,
+                        "total_ms": 168
+                    }
                 }
             }
         }
