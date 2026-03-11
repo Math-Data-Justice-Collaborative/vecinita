@@ -72,8 +72,4 @@ services:
     dockerContext: ./frontend
     autoDeployTrigger: commit
     
-    # Explicitly set the start command - DO NOT include --build-arg here!
-    # This runs INSIDE the container, not at build time
-    dockerCommand: nginx -g 'daemon off;'
-    
     healthCheckPath: /health

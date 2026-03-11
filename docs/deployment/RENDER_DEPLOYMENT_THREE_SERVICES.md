@@ -2,6 +2,8 @@
 
 ## Architecture Overview
 
+Canonical Blueprint: [render.yaml](../../render.yaml)
+
 This deployment uses **three separate free-tier Render services**:
 
 1. **vecinita-embedding** (Free tier, 512MB) - Embedding service
@@ -99,6 +101,12 @@ PORT=10000
 PYTHONUNBUFFERED=1
 TF_ENABLE_ONEDNN_OPTS=0
 EMBEDDING_SERVICE_URL=https://vecinita-embedding.onrender.com
+```
+
+For internal service-to-service traffic on Render private network, prefer:
+
+```
+EMBEDDING_SERVICE_URL=http://vecinita-embedding:8001
 ```
 
 **Add these as secrets** (click "Add Secret"):

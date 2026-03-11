@@ -180,6 +180,7 @@ markers = [
     "fallback: Fallback behavior and degraded-mode tests",
     "rate_limit: Rate limiting behavior tests",
     "db: Database related tests",
+    "retrieval_quality: Retrieval quality regression and citation fidelity tests",
 ]
 
 # Logging

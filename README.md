@@ -3,6 +3,7 @@
 ![Tests](https://github.com/acadiagit/vecinita/actions/workflows/test.yml/badge.svg)
 ![Backend Coverage](https://github.com/acadiagit/vecinita/actions/workflows/backend-coverage.yml/badge.svg)
 ![Frontend Coverage](https://github.com/acadiagit/vecinita/actions/workflows/frontend-coverage.yml/badge.svg)
+![Render](https://img.shields.io/badge/Render-Blueprint%20Ready-46E3B7?logo=render&logoColor=white)
 ![Python](https://img.shields.io/badge/python-3.10-blue)
 ![OS](https://img.shields.io/badge/OS-Ubuntu%2022.04-success)
 
@@ -257,6 +258,37 @@ npm run test                     # Unit tests (Vitest)
 npm run test:coverage            # Coverage report
 npm run test:e2e                 # E2E tests (Playwright)
 ```
+
+## Render Deployment (Start Here)
+
+Vecinita now includes a Render Blueprint at [render.yaml](render.yaml) for a multi-service deployment:
+
+- `vecinita-frontend` (web)
+- `vecinita-agent` (web)
+- `vecinita-embedding` (web)
+- `vecinita-scraper` (cron)
+- `vecinita-postgres` (Render Postgres)
+
+### Required Render Secrets
+
+Set these in the Render Dashboard for `vecinita-agent` and/or `vecinita-scraper`:
+
+- `SUPABASE_URL`
+- `SUPABASE_KEY`
+- `GROQ_API_KEY` (or `OPENAI_API_KEY` / `DEEPSEEK_API_KEY`)
+
+### CI/CD to Render
+
+Deployment is gated by test success on `main` via [render-deploy.yml](.github/workflows/render-deploy.yml).
+
+Configure repository secrets in GitHub Actions:
+
+- `RENDER_DEPLOY_HOOK_AGENT`
+- `RENDER_DEPLOY_HOOK_EMBEDDING`
+- `RENDER_DEPLOY_HOOK_FRONTEND`
+- `RENDER_DEPLOY_HOOK_SCRAPER`
+
+The deploy workflow triggers only after the `Tests` workflow completes successfully on `main`.
 
 ## Documentation
 

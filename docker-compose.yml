@@ -19,7 +19,7 @@ services:
     networks:
       - vecinita-network
     healthcheck:
-      test: ["CMD-SHELL", "python", "-c", "import socket; socket.create_connection((\"localhost\", 8000), 5).close()"]
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/8000'"]
       interval: 10s
       timeout: 5s
       retries: 5

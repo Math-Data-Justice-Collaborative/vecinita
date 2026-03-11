@@ -189,6 +189,10 @@ jobs:
 
   frontend-e2e-smoke:
     runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: ${{ github.event_name == 'workflow_dispatch' && fromJSON('["chromium","firefox"]') || fromJSON('["chromium"]') }}
 
     steps:
     - name: Checkout code
@@ -207,9 +211,9 @@ jobs:
       working-directory: frontend
       run: npm ci
 
-    - name: Install Playwright Chromium
+    - name: Install Playwright browser
       working-directory: frontend
-      run: npx playwright install --with-deps chromium
+      run: npx playwright install --with-deps ${{ matrix.browser }}
 
     - name: Start compose stack for e2e smoke
       run: docker compose -f docker-compose.dev.yml up -d frontend vecinita-gateway
@@ -230,13 +234,13 @@ jobs:
         CI: 'true'
         E2E_SKIP_WEBSERVER: 'true'
         E2E_BASE_URL: http://127.0.0.1:15173
-      run: npx playwright test e2e/agent-config-connectivity.spec.ts
+      run: npx playwright test --project=${{ matrix.browser }} e2e/agent-config-connectivity.spec.ts
 
     - name: Upload Playwright report
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: playwright-report
+        name: playwright-report-${{ matrix.browser }}
         path: frontend/playwright-report
 
     - name: Dump compose logs on failure
@@ -246,3 +250,92 @@ jobs:
     - name: Stop compose stack
       if: always()
       run: docker compose -f docker-compose.dev.yml down -v
+
+  # ---------------------------------------------------------------------------
+  # pgvector integration gate
+  # Spins up a real Postgres 16 + pgvector container, runs DB migrations, then
+  # executes every test marked `integration and db` (excluding LLM calls).
+  # This closes the gap between mocked unit tests and a live Render Postgres DB.
+  # ---------------------------------------------------------------------------
+  backend-integration-pgvector:
+    runs-on: ubuntu-22.04
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: vecinita
+          POSTGRES_PASSWORD: vecinita
+          POSTGRES_DB: vecinita_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://vecinita:vecinita@localhost:5432/vecinita_test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential graphviz graphviz-dev pkg-config postgresql-client
+
+      - name: Install Python dependencies (lean CI)
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir ".[ci]"
+
+      - name: Run DB migrations
+        run: |
+          bash backend/scripts/run_migrations.sh
+
+      - name: Verify pgvector and schema
+        run: |
+          psql "$DATABASE_URL" -c "SELECT '[1,2,3]'::vector;" -c "\dt"
+
+      - name: Create .env file for tests
+        working-directory: backend
+        run: |
+          echo "DATABASE_URL=${DATABASE_URL}" >> .env
+          echo "SUPABASE_URL=https://test.supabase.co" >> .env
+          echo "SUPABASE_KEY=test-key" >> .env
+          echo "GROQ_API_KEY=test-groq-key" >> .env
+          echo "DEEPSEEK_API_KEY=test-deepseek-key" >> .env
+          echo "OLLAMA_BASE_URL=http://localhost:11434" >> .env
+          echo "USE_LOCAL_EMBEDDINGS=true" >> .env
+          echo "EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2" >> .env
+          echo "EMBEDDING_SERVICE_AUTH_TOKEN=test-embed-token" >> .env
+          echo "REINDEX_TRIGGER_TOKEN=test-reindex-token" >> .env
+          echo "REINDEX_SERVICE_URL=https://example.modal.run" >> .env
+
+      - name: Run integration tests against pgvector DB
+        working-directory: backend
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend
+        run: |
+          pytest tests/ -m "integration and db and not llm" -v --tb=short \
+            --junit-xml=integration-pgvector-results.xml
+
+      - name: Upload pgvector integration test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-integration-pgvector-results
+          path: backend/integration-pgvector-results.xml
