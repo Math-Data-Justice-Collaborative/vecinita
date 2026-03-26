@@ -330,8 +330,16 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}/backend
         run: |
+          set +e
           pytest tests/ -m "integration and db and not llm" -v --tb=short \
             --junit-xml=integration-pgvector-results.xml
+          status=$?
+          set -e
+          if [ "$status" -eq 5 ]; then
+            echo "No backend integration tests are currently marked with both 'integration' and 'db'; treating this as a no-op after successful schema verification."
+            exit 0
+          fi
+          exit "$status"
 
       - name: Upload pgvector integration test results
         uses: actions/upload-artifact@v4
