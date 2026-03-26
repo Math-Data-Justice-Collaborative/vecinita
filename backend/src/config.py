@@ -8,6 +8,7 @@ names or provider strings in other modules.
 
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -20,9 +21,7 @@ EMBEDDING_MODEL: str = os.getenv(
     "sentence-transformers/all-MiniLM-L6-v2",
 )
 EMBEDDING_DIMENSION: int = int(os.getenv("EMBEDDING_DIMENSION", "384"))
-EMBEDDING_SERVICE_URL: str = os.getenv(
-    "EMBEDDING_SERVICE_URL", "http://embedding-service:8001"
-)
+EMBEDDING_SERVICE_URL: str = os.getenv("EMBEDDING_SERVICE_URL", "http://embedding-service:8001")
 
 # ---------------------------------------------------------------------------
 # LLM Provider chain  (Ollama → DeepSeek → OpenAI → error)
@@ -32,9 +31,7 @@ OLLAMA_BASE_URL: str | None = os.getenv("OLLAMA_BASE_URL")
 OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
 
 DEEPSEEK_API_KEY: str | None = os.getenv("DEEPSEEK_API_KEY")
-DEEPSEEK_BASE_URL: str = os.getenv(
-    "DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1"
-)
+DEEPSEEK_BASE_URL: str = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
 DEEPSEEK_MODEL: str = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
 
 OPENAI_API_KEY: str | None = os.getenv("OPENAI_API_KEY") or os.getenv("OPEN_API_KEY")
@@ -53,11 +50,23 @@ SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
 # Disable individual guards via env without redeploying.
 # ---------------------------------------------------------------------------
 GUARDRAILS_ENABLED: bool = os.getenv("GUARDRAILS_ENABLED", "true").lower() in ("1", "true", "yes")
-GUARDRAILS_PROMPT_INJECTION: bool = os.getenv("GUARDRAILS_PROMPT_INJECTION", "true").lower() in ("1", "true", "yes")
-GUARDRAILS_TOPIC_RELEVANCE: bool = os.getenv("GUARDRAILS_TOPIC_RELEVANCE", "true").lower() in ("1", "true", "yes")
+GUARDRAILS_PROMPT_INJECTION: bool = os.getenv("GUARDRAILS_PROMPT_INJECTION", "true").lower() in (
+    "1",
+    "true",
+    "yes",
+)
+GUARDRAILS_TOPIC_RELEVANCE: bool = os.getenv("GUARDRAILS_TOPIC_RELEVANCE", "true").lower() in (
+    "1",
+    "true",
+    "yes",
+)
 GUARDRAILS_PII: bool = os.getenv("GUARDRAILS_PII", "true").lower() in ("1", "true", "yes")
 GUARDRAILS_TOXICITY: bool = os.getenv("GUARDRAILS_TOXICITY", "true").lower() in ("1", "true", "yes")
-GUARDRAILS_HALLUCINATION: bool = os.getenv("GUARDRAILS_HALLUCINATION", "true").lower() in ("1", "true", "yes")
+GUARDRAILS_HALLUCINATION: bool = os.getenv("GUARDRAILS_HALLUCINATION", "true").lower() in (
+    "1",
+    "true",
+    "yes",
+)
 
 # Seed topic list for the topic-relevance guardrail.
 # Override via GUARDRAILS_TOPICS env var (comma-separated).
@@ -68,9 +77,7 @@ _default_topics = (
     "wildlife,green space,conservation,education,volunteer"
 )
 GUARDRAILS_TOPIC_LIST: list[str] = [
-    t.strip()
-    for t in os.getenv("GUARDRAILS_TOPICS", _default_topics).split(",")
-    if t.strip()
+    t.strip() for t in os.getenv("GUARDRAILS_TOPICS", _default_topics).split(",") if t.strip()
 ]
 
 # ---------------------------------------------------------------------------

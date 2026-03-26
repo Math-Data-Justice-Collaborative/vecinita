@@ -84,8 +84,9 @@ def gateway_client(env_vars, monkeypatch):
     for key, value in env_vars.items():
         monkeypatch.setenv(key, value)
 
-    from src.api.main import app
     from fastapi.testclient import TestClient
+
+    from src.api.main import app
 
     return TestClient(app)
 

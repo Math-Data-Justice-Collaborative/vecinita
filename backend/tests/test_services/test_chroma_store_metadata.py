@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import Mock
+
+import pytest
 
 from src.services.chroma_store import ChromaStore
 

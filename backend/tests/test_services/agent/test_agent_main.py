@@ -3,11 +3,10 @@ Unit tests for src/agent/server.py
 
 Tests FastAPI app initialization, route handlers, and agent logic.
 """
-import json
-import os
+
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
-from pathlib import Path
 
 pytestmark = pytest.mark.unit
 
@@ -20,9 +19,11 @@ class TestAgentMainInitialization:
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
-        with patch("src.services.agent.server.create_client") as mock_supabase, \
-             patch("src.services.agent.server.ChatGroq") as mock_groq, \
-             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings:
+        with (
+            patch("src.services.agent.server.create_client") as mock_supabase,
+            patch("src.services.agent.server.ChatGroq") as mock_groq,
+            patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
+        ):
 
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
@@ -35,6 +36,7 @@ class TestAgentMainInitialization:
 
             # Import app after mocks
             from src.services.agent import server
+
             assert server.app is not None
 
     def test_location_context_configured(self, env_vars, monkeypatch):
@@ -42,11 +44,14 @@ class TestAgentMainInitialization:
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
-        with patch("src.services.agent.server.create_client"), \
-             patch("src.services.agent.server.ChatGroq"), \
-             patch("src.services.agent.server.HuggingFaceEmbeddings"):
+        with (
+            patch("src.services.agent.server.create_client"),
+            patch("src.services.agent.server.ChatGroq"),
+            patch("src.services.agent.server.HuggingFaceEmbeddings"),
+        ):
 
             from src.services.agent import server
+
             assert server.LOCATION_CONTEXT is not None
             assert "organization" in server.LOCATION_CONTEXT
             assert "location" in server.LOCATION_CONTEXT
@@ -60,11 +65,14 @@ class TestAgentThinkingMessages:
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
-        with patch("src.services.agent.server.create_client"), \
-             patch("src.services.agent.server.ChatGroq"), \
-             patch("src.services.agent.server.HuggingFaceEmbeddings"):
+        with (
+            patch("src.services.agent.server.create_client"),
+            patch("src.services.agent.server.ChatGroq"),
+            patch("src.services.agent.server.HuggingFaceEmbeddings"),
+        ):
 
             from src.services.agent import server
+
             assert "en" in server.AGENT_THINKING_MESSAGES
             assert "es" in server.AGENT_THINKING_MESSAGES
 
@@ -73,11 +81,14 @@ class TestAgentThinkingMessages:
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
-        with patch("src.services.agent.server.create_client"), \
-             patch("src.services.agent.server.ChatGroq"), \
-             patch("src.services.agent.server.HuggingFaceEmbeddings"):
+        with (
+            patch("src.services.agent.server.create_client"),
+            patch("src.services.agent.server.ChatGroq"),
+            patch("src.services.agent.server.HuggingFaceEmbeddings"),
+        ):
 
             from src.services.agent import server
+
             msg = server.get_agent_thinking_message("plan", "en")
             assert msg == "Let me think about your question..."
 
@@ -86,11 +97,14 @@ class TestAgentThinkingMessages:
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
-        with patch("src.services.agent.server.create_client"), \
-             patch("src.services.agent.server.ChatGroq"), \
-             patch("src.services.agent.server.HuggingFaceEmbeddings"):
+        with (
+            patch("src.services.agent.server.create_client"),
+            patch("src.services.agent.server.ChatGroq"),
+            patch("src.services.agent.server.HuggingFaceEmbeddings"),
+        ):
 
             from src.services.agent import server
+
             msg = server.get_agent_thinking_message("db_search", "es")
             assert msg == "Revisando nuestros recursos locales..."
 
@@ -99,11 +113,14 @@ class TestAgentThinkingMessages:
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
-        with patch("src.services.agent.server.create_client"), \
-             patch("src.services.agent.server.ChatGroq"), \
-             patch("src.services.agent.server.HuggingFaceEmbeddings"):
+        with (
+            patch("src.services.agent.server.create_client"),
+            patch("src.services.agent.server.ChatGroq"),
+            patch("src.services.agent.server.HuggingFaceEmbeddings"),
+        ):
 
             from src.services.agent import server
+
             msg = server.get_agent_thinking_message("unknown_tool", "unknown_lang")
             assert msg == "Thinking..."
 
@@ -113,6 +130,7 @@ class TestAgentThinkingMessages:
             monkeypatch.setenv(key, value)
 
         from src.services.agent import server
+
         msg = server.get_agent_thinking_message("unknown_tool", "es")
         assert msg == "Pensando..."
 
@@ -125,12 +143,15 @@ class TestAgentState:
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
-        with patch("src.services.agent.server.create_client"), \
-             patch("src.services.agent.server.ChatGroq"), \
-             patch("src.services.agent.server.HuggingFaceEmbeddings"):
+        with (
+            patch("src.services.agent.server.create_client"),
+            patch("src.services.agent.server.ChatGroq"),
+            patch("src.services.agent.server.HuggingFaceEmbeddings"),
+        ):
+
+            from langchain_core.messages import HumanMessage
 
             from src.services.agent.server import AgentState
-            from langchain_core.messages import HumanMessage
 
             state = AgentState(
                 messages=[HumanMessage(content="test")],
@@ -138,7 +159,7 @@ class TestAgentState:
                 language="en",
                 provider="llama",
                 model=None,
-                plan=None
+                plan=None,
             )
             assert state["question"] == "test question"
             assert state["language"] == "en"
@@ -153,10 +174,15 @@ class TestEmbeddingInitialization:
             monkeypatch.setenv(key, value)
 
         # Simulate embedding service unavailable
-        with patch("src.services.agent.server.create_client") as mock_supabase, \
-             patch("src.services.agent.server.ChatGroq") as mock_groq, \
-             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings, \
-             patch("src.services.agent.server.create_embedding_client", side_effect=Exception("Service unavailable")):
+        with (
+            patch("src.services.agent.server.create_client") as mock_supabase,
+            patch("src.services.agent.server.ChatGroq") as mock_groq,
+            patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
+            patch(
+                "src.services.agent.server.create_embedding_client",
+                side_effect=Exception("Service unavailable"),
+            ),
+        ):
 
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
@@ -168,6 +194,7 @@ class TestEmbeddingInitialization:
             mock_embeddings.return_value = mock_embedding_model
 
             from src.services.agent import server
+
             # Should have initialized with fallback
             assert server.embedding_model is not None
 
@@ -181,9 +208,11 @@ class TestLLMInitialization:
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
-        with patch("src.services.agent.server.create_client") as mock_supabase, \
-             patch("src.services.agent.server.ChatGroq") as mock_groq, \
-             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings:
+        with (
+            patch("src.services.agent.server.create_client") as mock_supabase,
+            patch("src.services.agent.server.ChatGroq") as mock_groq,
+            patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
+        ):
 
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
@@ -195,6 +224,7 @@ class TestLLMInitialization:
             mock_embeddings.return_value = mock_embedding_model
 
             from src.services.agent import server
+
             assert callable(server._get_llm_with_tools)
 
 
@@ -206,9 +236,11 @@ class TestToolsInitialization:
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
-        with patch("src.services.agent.server.create_client") as mock_supabase, \
-             patch("src.services.agent.server.ChatGroq") as mock_groq, \
-             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings:
+        with (
+            patch("src.services.agent.server.create_client") as mock_supabase,
+            patch("src.services.agent.server.ChatGroq") as mock_groq,
+            patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
+        ):
 
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
@@ -220,6 +252,7 @@ class TestToolsInitialization:
             mock_embeddings.return_value = mock_embedding_model
 
             from src.services.agent import server
+
             assert isinstance(server.tools, list)
             assert len(server.tools) > 0
             tool_names = [tool.name for tool in server.tools]
@@ -230,9 +263,11 @@ class TestToolsInitialization:
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
-        with patch("src.services.agent.server.create_client") as mock_supabase, \
-             patch("src.services.agent.server.ChatGroq") as mock_groq, \
-             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings:
+        with (
+            patch("src.services.agent.server.create_client") as mock_supabase,
+            patch("src.services.agent.server.ChatGroq") as mock_groq,
+            patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
+        ):
 
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
@@ -244,6 +279,7 @@ class TestToolsInitialization:
             mock_embeddings.return_value = mock_embedding_model
 
             from src.services.agent import server
+
             # All tools should be non-None
             assert all(tool is not None for tool in server.tools)
 
@@ -258,9 +294,11 @@ class TestLLMWithTools:
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
-        with patch("src.services.agent.server.create_client") as mock_supabase, \
-             patch("src.services.agent.server.ChatGroq") as mock_groq, \
-             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings:
+        with (
+            patch("src.services.agent.server.create_client") as mock_supabase,
+            patch("src.services.agent.server.ChatGroq") as mock_groq,
+            patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
+        ):
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
 
@@ -271,6 +309,7 @@ class TestLLMWithTools:
             mock_embeddings.return_value = mock_embedding_model
 
             from src.services.agent import server
+
             server.ollama_base_url = "http://localhost:11434"
             server.CURRENT_SELECTION["provider"] = "ollama"
 
@@ -279,7 +318,9 @@ class TestLLMWithTools:
             mock_chatollama_instance.bind_tools.return_value = MagicMock()
             mock_chatollama_cls.return_value = mock_chatollama_instance
 
-            with patch("src.services.agent.server._get_chatollama_class", return_value=mock_chatollama_cls):
+            with patch(
+                "src.services.agent.server._get_chatollama_class", return_value=mock_chatollama_cls
+            ):
                 llm_with_tools = server._get_llm_with_tools("ollama", None)
             assert llm_with_tools is not None
 
@@ -289,10 +330,12 @@ class TestLLMWithTools:
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
-        with patch("src.services.agent.server.create_client") as mock_supabase, \
-             patch("src.services.agent.server.ChatGroq") as mock_groq, \
-             patch("src.services.agent.server.ChatOpenAI") as mock_openai, \
-             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings:
+        with (
+            patch("src.services.agent.server.create_client") as mock_supabase,
+            patch("src.services.agent.server.ChatGroq") as mock_groq,
+            patch("src.services.agent.server.ChatOpenAI") as mock_openai,
+            patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
+        ):
 
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
@@ -305,6 +348,7 @@ class TestLLMWithTools:
             mock_embeddings.return_value = mock_embedding_model
 
             from src.services.agent import server
+
             server.CURRENT_SELECTION["provider"] = "openai"
             llm_with_tools = server._get_llm_with_tools("openai", None)
             assert llm_with_tools is not None
@@ -314,9 +358,11 @@ class TestLLMWithTools:
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
-        with patch("src.services.agent.server.create_client") as mock_supabase, \
-             patch("src.services.agent.server.ChatGroq") as mock_groq, \
-             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings:
+        with (
+            patch("src.services.agent.server.create_client") as mock_supabase,
+            patch("src.services.agent.server.ChatGroq") as mock_groq,
+            patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
+        ):
 
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
@@ -330,6 +376,7 @@ class TestLLMWithTools:
             mock_embeddings.return_value = mock_embedding_model
 
             from src.services.agent import server
+
             with pytest.raises(RuntimeError, match="Unsupported provider"):
                 server._get_llm_with_tools("unsupported", None)
 
@@ -342,9 +389,11 @@ class TestMessageSanitization:
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
-        with patch("src.services.agent.server.create_client") as mock_supabase, \
-             patch("src.services.agent.server.ChatGroq") as mock_groq, \
-             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings:
+        with (
+            patch("src.services.agent.server.create_client") as mock_supabase,
+            patch("src.services.agent.server.ChatGroq") as mock_groq,
+            patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
+        ):
 
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
@@ -355,8 +404,9 @@ class TestMessageSanitization:
             mock_embedding_model = MagicMock()
             mock_embeddings.return_value = mock_embedding_model
 
-            from src.services.agent.server import _sanitize_messages
             from langchain_core.messages import HumanMessage
+
+            from src.services.agent.server import _sanitize_messages
 
             messages = [HumanMessage(content="test")]
             sanitized = _sanitize_messages(messages)
@@ -368,9 +418,11 @@ class TestMessageSanitization:
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
-        with patch("src.services.agent.server.create_client") as mock_supabase, \
-             patch("src.services.agent.server.ChatGroq") as mock_groq, \
-             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings:
+        with (
+            patch("src.services.agent.server.create_client") as mock_supabase,
+            patch("src.services.agent.server.ChatGroq") as mock_groq,
+            patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
+        ):
 
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
@@ -381,8 +433,9 @@ class TestMessageSanitization:
             mock_embedding_model = MagicMock()
             mock_embeddings.return_value = mock_embedding_model
 
+            from langchain_core.messages import AIMessage, ToolMessage
+
             from src.services.agent.server import _sanitize_messages
-            from langchain_core.messages import ToolMessage, AIMessage
 
             messages = [
                 AIMessage(
@@ -417,16 +470,20 @@ class TestEnvironmentVariableValidation:
         monkeypatch.delenv("SUPABASE_URL", raising=False)
 
         # Mock all the imports to prevent actual initialization
-        with patch("src.services.agent.server.create_client") as mock_client, \
-             patch("src.services.agent.server.ChatGroq"), \
-             patch("src.services.agent.server.create_embedding_client"):
-            
+        with (
+            patch("src.services.agent.server.create_client") as mock_client,
+            patch("src.services.agent.server.ChatGroq"),
+            patch("src.services.agent.server.create_embedding_client"),
+        ):
+
             # Make create_client not be called (validation should fail first)
             mock_client.side_effect = Exception("Should not reach here")
-            
+
             with pytest.raises(ValueError, match="Supabase URL and key must be set"):
                 import importlib
+
                 from src.services.agent import server as agent_main
+
                 importlib.reload(agent_main)
 
     @pytest.mark.skip(reason="Module-level initialization testing is unreliable with mocks/reloads")
@@ -443,12 +500,16 @@ class TestEnvironmentVariableValidation:
         monkeypatch.delenv("OLLAMA_BASE_URL", raising=False)
 
         # Mock dependencies to allow reload
-        with patch("src.services.agent.server.create_client") as mock_client, \
-             patch("src.services.agent.server.create_embedding_client"):
-            
+        with (
+            patch("src.services.agent.server.create_client") as mock_client,
+            patch("src.services.agent.server.create_embedding_client"),
+        ):
+
             mock_client.return_value = MagicMock()
-            
+
             with pytest.raises(RuntimeError, match="No LLM provider configured"):
                 import importlib
+
                 from src.services.agent import server as agent_main
+
                 importlib.reload(agent_main)

@@ -15,21 +15,23 @@ import os
 import secrets
 import tempfile
 import time
-from datetime import datetime, timezone, timedelta
-from typing import Optional, Dict, Any, List, Literal
+from datetime import datetime, timedelta, timezone
+from typing import Any, Literal, cast
 from urllib.parse import urlparse
 
 import httpx
-import psycopg2
-from psycopg2.extras import RealDictCursor
-from fastapi import APIRouter, HTTPException, Query, Depends, UploadFile, File, Form, Header
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import psycopg2  # type: ignore[import-untyped]
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from psycopg2.extras import RealDictCursor  # type: ignore[import-untyped]
 from pydantic import BaseModel, Field
-from supabase import create_client, Client
-from src.services.chroma_store import get_chroma_store
-from ..services.scraper.scraper import VecinaScraper
+from supabase import Client, create_client
 
-from ..services.db.schema_diagnostics import validate_schema, get_validation_summary
+from src.services.chroma_store import get_chroma_store
+from src.utils.tags import normalize_tags, parse_tags_input
+
+from ..services.db.schema_diagnostics import get_validation_summary, validate_schema
+from ..services.scraper.scraper import VecinaScraper
 from .models import (
     AdminHealthResponse,
     AdminStatsResponse,
@@ -44,7 +46,6 @@ from .models import (
     ValidateSourceRequest,
     ValidateSourceResponse,
 )
-from src.utils.tags import normalize_tags, parse_tags_input
 
 router = APIRouter(prefix="/admin", tags=["Administration"])
 security = HTTPBearer(auto_error=False)
@@ -59,21 +60,23 @@ ADMIN_CONFIG = {
 # Service URLs from environment
 AGENT_SERVICE_URL = os.getenv("AGENT_SERVICE_URL", "http://localhost:8000")
 EMBEDDING_SERVICE_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:8001")
-EMBEDDING_SERVICE_AUTH_TOKEN = os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN") or os.getenv("MODAL_API_PROXY_SECRET")
+EMBEDDING_SERVICE_AUTH_TOKEN = os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN") or os.getenv(
+    "MODAL_API_PROXY_SECRET"
+)
 UPLOAD_STORAGE_BUCKET = os.getenv("SUPABASE_UPLOADS_BUCKET", "documents")
 
 # Token storage (in-memory for now, use Redis for production)
-_cleanup_tokens: Dict[str, datetime] = {}
+_cleanup_tokens: dict[str, datetime] = {}
 
 
-def _embedding_service_headers() -> Dict[str, str]:
-    headers: Dict[str, str] = {}
+def _embedding_service_headers() -> dict[str, str]:
+    headers: dict[str, str] = {}
     if EMBEDDING_SERVICE_AUTH_TOKEN:
         headers["x-embedding-service-token"] = EMBEDDING_SERVICE_AUTH_TOKEN
     return headers
 
 
-def _parse_queue_file_path(file_path: str) -> Dict[str, Any]:
+def _parse_queue_file_path(file_path: str) -> dict[str, Any]:
     """Parse queue file_path for hybrid URL/file job support.
 
     URL jobs are encoded as: url::<depth>::<url>
@@ -82,7 +85,7 @@ def _parse_queue_file_path(file_path: str) -> Dict[str, Any]:
         return {"type": "file", "url": None, "depth": 1, "file_path": ""}
 
     if file_path.startswith("url::"):
-        remainder = file_path[len("url::"):]
+        remainder = file_path[len("url::") :]
         depth = 1
         url = remainder
         if "::" in remainder:
@@ -104,21 +107,22 @@ def _parse_queue_file_path(file_path: str) -> Dict[str, Any]:
 
 class SourceTagsUpdateRequest(BaseModel):
     """Request body for editing source-level metadata tags."""
+
     url: str
-    tags: List[str]
+    tags: list[str]
 
 
 class BatchSourceIngestRequest(BaseModel):
     """Request body for bulk source ingestion from pasted urls.txt content."""
 
-    urls_text: Optional[str] = None
-    urls: List[str] = Field(default_factory=list)
+    urls_text: str | None = None
+    urls: list[str] = Field(default_factory=list)
     depth: int = 1
-    tags: List[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
     tag_mode: Literal["none", "baseline_only", "auto_infer"] = "auto_infer"
 
 
-def _extract_tags(metadata: Any) -> List[str]:
+def _extract_tags(metadata: Any) -> list[str]:
     if isinstance(metadata, str):
         metadata_text = metadata.strip()
         if metadata_text:
@@ -134,7 +138,7 @@ def _extract_tags(metadata: Any) -> List[str]:
     return []
 
 
-def _safe_metadata_dict(metadata: Any) -> Dict[str, Any]:
+def _safe_metadata_dict(metadata: Any) -> dict[str, Any]:
     if isinstance(metadata, dict):
         return metadata
     if isinstance(metadata, str):
@@ -150,7 +154,7 @@ def _safe_metadata_dict(metadata: Any) -> Dict[str, Any]:
     return {}
 
 
-def _normalize_lang(lang: Optional[str]) -> str:
+def _normalize_lang(lang: str | None) -> str:
     value = (lang or "").strip().lower()
     return "es" if value.startswith("es") else "en"
 
@@ -182,9 +186,9 @@ def _domain_from_url(url: str) -> str:
         return ""
 
 
-def _parse_urls_text(urls_text: Optional[str], urls: Optional[List[str]]) -> List[str]:
+def _parse_urls_text(urls_text: str | None, urls: list[str] | None) -> list[str]:
     seen: set[str] = set()
-    ordered: List[str] = []
+    ordered: list[str] = []
 
     for value in urls or []:
         normalized = (value or "").strip()
@@ -216,7 +220,7 @@ def _to_int(value: Any, default: int = 0) -> int:
         return default
 
 
-def _normalize_source_row(raw: Dict[str, Any], *, fallback_total_chunks: int = 0) -> Dict[str, Any]:
+def _normalize_source_row(raw: dict[str, Any], *, fallback_total_chunks: int = 0) -> dict[str, Any]:
     url = str(raw.get("url") or raw.get("source_url") or "")
     metadata = _safe_metadata_dict(raw.get("metadata"))
     domain = str(
@@ -237,7 +241,9 @@ def _normalize_source_row(raw: Dict[str, Any], *, fallback_total_chunks: int = 0
         "author": raw.get("author"),
         "published_date": raw.get("published_date"),
         "first_scraped_at": raw.get("first_scraped_at") or raw.get("created_at"),
-        "last_scraped_at": raw.get("last_scraped_at") or raw.get("last_updated") or raw.get("updated_at"),
+        "last_scraped_at": raw.get("last_scraped_at")
+        or raw.get("last_updated")
+        or raw.get("updated_at"),
         "scrape_count": _to_int(raw.get("scrape_count"), 0),
         "is_active": bool(raw.get("is_active", True)),
         "reliability_score": raw.get("reliability_score"),
@@ -252,7 +258,7 @@ def _normalize_source_row(raw: Dict[str, Any], *, fallback_total_chunks: int = 0
     return normalized
 
 
-def _list_sources_via_sql(limit: int = 1000) -> List[Dict[str, Any]]:
+def _list_sources_via_sql(limit: int = 1000) -> list[dict[str, Any]]:
     """Fallback source aggregation via direct PostgreSQL connection."""
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
@@ -276,7 +282,7 @@ def _list_sources_via_sql(limit: int = 1000) -> List[Dict[str, Any]]:
             cur.execute(query, (limit,))
             rows = cur.fetchall() or []
 
-    normalized: List[Dict[str, Any]] = []
+    normalized: list[dict[str, Any]] = []
     for row in rows:
         item = _normalize_source_row(dict(row))
         normalized.append(item)
@@ -286,10 +292,10 @@ def _list_sources_via_sql(limit: int = 1000) -> List[Dict[str, Any]]:
 def get_database_client() -> Client:
     """
     Dependency to get Supabase database client.
-    
+
     Returns:
         Supabase client instance
-        
+
     Raises:
         HTTPException: If database credentials not configured
     """
@@ -299,13 +305,13 @@ def get_database_client() -> Client:
         or os.getenv("SUPABASE_KEY")
         or os.getenv("SUPABASE_PUBLISHABLE_KEY")
     )
-    
+
     if not supabase_url or not supabase_key:
         raise HTTPException(
             status_code=500,
-            detail="Database not configured. Set SUPABASE_URL and a Supabase key (SUPABASE_SECRET_KEY or SUPABASE_KEY)."
+            detail="Database not configured. Set SUPABASE_URL and a Supabase key (SUPABASE_SECRET_KEY or SUPABASE_KEY).",
         )
-    
+
     return create_client(supabase_url, supabase_key)
 
 
@@ -331,7 +337,7 @@ def _verify_admin(
     db = get_database_client()
     try:
         user_resp = db.auth.get_user(token)
-        user = user_resp.user if hasattr(user_resp, "user") else user_resp
+        user = user_resp.user if hasattr(user_resp, "user") else user_resp  # type: ignore[union-attr]
         app_meta = getattr(user, "app_metadata", {}) or {}
         if app_meta.get("role") != "admin":
             raise HTTPException(status_code=403, detail="Admin role required.")
@@ -349,14 +355,14 @@ async def admin_health_check(
 ) -> AdminHealthResponse:
     """
     Check health of all backend services.
-    
+
     Particularly useful for debugging deployment issues.
-    
+
     Returns:
         Health status of agent, embedding service, database
     """
     # Check agent service
-    agent_health = {"status": "error"}
+    agent_health: dict[str, Any] = {"status": "error"}
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             start = time.time()
@@ -366,23 +372,23 @@ async def admin_health_check(
                 agent_health = {
                     "status": "ok",
                     "response_time_ms": elapsed_ms,
-                    "last_check": datetime.now(timezone.utc).isoformat()
+                    "last_check": datetime.now(timezone.utc).isoformat(),
                 }
             else:
                 agent_health = {
                     "status": "error",
                     "message": f"HTTP {response.status_code}",
-                    "last_check": datetime.now(timezone.utc).isoformat()
+                    "last_check": datetime.now(timezone.utc).isoformat(),
                 }
     except Exception as e:
         agent_health = {
             "status": "error",
             "message": str(e),
-            "last_check": datetime.now(timezone.utc).isoformat()
+            "last_check": datetime.now(timezone.utc).isoformat(),
         }
-    
+
     # Check embedding service
-    embedding_health = {"status": "error"}
+    embedding_health: dict[str, Any] = {"status": "error"}
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             start = time.time()
@@ -392,24 +398,24 @@ async def admin_health_check(
                 embedding_health = {
                     "status": "ok",
                     "response_time_ms": elapsed_ms,
-                    "last_check": datetime.now(timezone.utc).isoformat()
+                    "last_check": datetime.now(timezone.utc).isoformat(),
                 }
             else:
                 embedding_health = {
                     "status": "error",
                     "message": f"HTTP {response.status_code}",
-                    "last_check": datetime.now(timezone.utc).isoformat()
+                    "last_check": datetime.now(timezone.utc).isoformat(),
                 }
     except Exception as e:
         embedding_health = {
             "status": "error",
             "message": str(e),
-            "last_check": datetime.now(timezone.utc).isoformat()
+            "last_check": datetime.now(timezone.utc).isoformat(),
         }
-    
+
     # Check database
-    db_health = {"status": "error"}
-    chroma_status = {"status": "error"}
+    db_health: dict[str, Any] = {"status": "error"}
+    chroma_status: dict[str, Any] = {"status": "error"}
     try:
         store = get_chroma_store()
         chroma_ok = store.heartbeat()
@@ -426,7 +432,10 @@ async def admin_health_check(
 
     try:
         # Simple query to test connection
-        db.table("document_chunks").select("id", count="exact").limit(1).execute()
+        db.table("document_chunks").select(
+            "id",
+            count="exact",  # type: ignore[arg-type]
+        ).limit(1).execute()
         db_health = {
             "status": "ok",
             "last_check": datetime.now(timezone.utc).isoformat(),
@@ -434,8 +443,12 @@ async def admin_health_check(
                 "primary": "chroma",
                 "sync_mode": "dual_write_degraded",
                 "chroma": chroma_status,
-                "supabase_fallback_reads_enabled": os.getenv("VECTOR_SYNC_SUPABASE_FALLBACK_READS", "true").lower() in ["1", "true", "yes"],
-                "supabase_dual_write_enabled": os.getenv("VECTOR_SYNC_ENABLED", "true").lower() in ["1", "true", "yes"],
+                "supabase_fallback_reads_enabled": os.getenv(
+                    "VECTOR_SYNC_SUPABASE_FALLBACK_READS", "true"
+                ).lower()
+                in ["1", "true", "yes"],
+                "supabase_dual_write_enabled": os.getenv("VECTOR_SYNC_ENABLED", "true").lower()
+                in ["1", "true", "yes"],
             },
         }
     except Exception as e:
@@ -447,25 +460,29 @@ async def admin_health_check(
                 "primary": "chroma",
                 "sync_mode": "dual_write_degraded",
                 "chroma": chroma_status,
-                "supabase_fallback_reads_enabled": os.getenv("VECTOR_SYNC_SUPABASE_FALLBACK_READS", "true").lower() in ["1", "true", "yes"],
-                "supabase_dual_write_enabled": os.getenv("VECTOR_SYNC_ENABLED", "true").lower() in ["1", "true", "yes"],
+                "supabase_fallback_reads_enabled": os.getenv(
+                    "VECTOR_SYNC_SUPABASE_FALLBACK_READS", "true"
+                ).lower()
+                in ["1", "true", "yes"],
+                "supabase_dual_write_enabled": os.getenv("VECTOR_SYNC_ENABLED", "true").lower()
+                in ["1", "true", "yes"],
             },
         }
-    
+
     # Determine overall status
     all_healthy = (
-        agent_health["status"] == "ok" and
-        embedding_health["status"] == "ok" and
-        db_health["status"] == "ok"
+        agent_health["status"] == "ok"
+        and embedding_health["status"] == "ok"
+        and db_health["status"] == "ok"
     )
     overall_status = "healthy" if all_healthy else "degraded"
-    
+
     return AdminHealthResponse(
         status=overall_status,
         agent_service=agent_health,
         embedding_service=embedding_health,
         database=db_health,
-        timestamp=datetime.now(timezone.utc)
+        timestamp=datetime.now(timezone.utc),
     )
 
 
@@ -476,16 +493,24 @@ async def get_database_stats(
 ) -> AdminStatsResponse:
     """
     Get comprehensive database and system statistics.
-    
+
     Returns:
         - Database: chunk count, unique sources, embeddings status
         - Services: availability, configuration
     """
     try:
         # Get total chunks
-        total_result = db.table("document_chunks").select("*", count="exact").limit(1).execute()
+        total_result = (
+            db.table("document_chunks")
+            .select(
+                "*",
+                count="exact",  # type: ignore[arg-type]
+            )
+            .limit(1)
+            .execute()
+        )
         total_chunks = total_result.count if total_result.count is not None else 0
-        
+
         # Get unique sources
         try:
             sources_result = db.rpc("get_unique_sources_count").execute()
@@ -496,87 +521,92 @@ async def get_database_stats(
             else:
                 unique_sources = 0
         except Exception:
-            sources_count = db.table("sources").select("id", count="exact").limit(1).execute()
+            sources_count = (
+                db.table("sources")
+                .select(
+                    "id",
+                    count=cast(Any, "exact"),
+                )
+                .limit(1)
+                .execute()
+            )
             unique_sources = sources_count.count if sources_count.count is not None else 0
-        
+
         # Get chunks with embeddings (non-null embedding column)
         # Note: If is_processed=true, assume embedding exists
-        embeddings_result = db.table("document_chunks").select("*", count="exact").eq("is_processed", True).limit(1).execute()
+        embeddings_result = (
+            db.table("document_chunks")
+            .select("*", count=cast(Any, "exact"))
+            .eq("is_processed", True)
+            .limit(1)
+            .execute()
+        )
         total_embeddings = embeddings_result.count if embeddings_result.count is not None else 0
-        
+
         # Get average chunk size
         try:
             avg_size_result = db.rpc("get_average_chunk_size").execute()
-            avg_chunk_size = float(avg_size_result.data) if avg_size_result.data else 0.0
+            avg_chunk_size = float(avg_size_result.data) if avg_size_result.data else 0.0  # type: ignore[arg-type]
         except Exception:
             sample = db.table("document_chunks").select("chunk_size").limit(500).execute()
-            sizes = [int(item.get("chunk_size") or 0) for item in (sample.data or []) if item.get("chunk_size")]
+            sample_rows: list[dict[str, Any]] = sample.data or []  # type: ignore[assignment]
+            sizes = [
+                int(item.get("chunk_size") or 0) for item in sample_rows if item.get("chunk_size")
+            ]
             avg_chunk_size = float(sum(sizes) / len(sizes)) if sizes else 0.0
-        
+
         # Get database size (if RPC function exists)
         try:
             db_size_result = db.rpc("get_database_size").execute()
-            db_size_bytes = db_size_result.data if db_size_result.data else None
-        except:
+            db_size_bytes: int | None = int(db_size_result.data) if db_size_result.data else None  # type: ignore[arg-type]
+        except Exception:
             db_size_bytes = None
-        
+
         db_stats = DatabaseStats(
             total_chunks=total_chunks,
             unique_sources=unique_sources,
             total_embeddings=total_embeddings,
             average_chunk_size=avg_chunk_size,
             db_size_bytes=db_size_bytes,
-            last_updated=datetime.now(timezone.utc)
+            last_updated=datetime.now(timezone.utc),
         )
-        
+
         # Service metrics (basic, can be enhanced)
         services = {
-            "agent_service": {
-                "url": AGENT_SERVICE_URL,
-                "status": "configured"
-            },
-            "embedding_service": {
-                "url": EMBEDDING_SERVICE_URL,
-                "status": "configured"
-            }
+            "agent_service": {"url": AGENT_SERVICE_URL, "status": "configured"},
+            "embedding_service": {"url": EMBEDDING_SERVICE_URL, "status": "configured"},
         }
-        
-        return AdminStatsResponse(
-            database=db_stats,
-            services=services
-        )
-        
+
+        return AdminStatsResponse(database=db_stats, services=services)
+
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to retrieve stats: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve stats: {str(e)}")
 
 
 @router.get("/documents")
 async def list_documents(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    source_filter: Optional[str] = Query(None, description="Filter by source URL"),
+    source_filter: str | None = Query(None, description="Filter by source URL"),
     db: Client = Depends(get_database_client),
     _admin=Depends(_verify_admin),
 ) -> DocumentsListResponse:
     """
     List indexed document chunks.
-    
+
     Paginated, sortable by creation date or source.
-    
+
     Args:
         limit: Results per page
         offset: Results to skip
         source_filter: Optional source URL filter
-        
+
     Returns:
         Paginated list of document chunks
     """
     try:
         store = get_chroma_store()
-        rows: List[Dict[str, Any]] = []
+        rows: list[dict[str, Any]] = []
         for row in store.iter_all_chunks(batch_size=500):
             metadata = _safe_metadata_dict(row.get("metadata"))
             source_url = str(metadata.get("source_url") or "")
@@ -594,14 +624,22 @@ async def list_documents(
 
         rows.sort(key=lambda item: str(item.get("created_at") or ""), reverse=True)
         total = len(rows)
-        paged = rows[offset: offset + limit]
+        paged = rows[offset : offset + limit]
 
         documents = []
         for row in paged:
             created_at_raw = row.get("created_at")
             updated_at_raw = row.get("updated_at")
-            created_at = datetime.fromisoformat(str(created_at_raw).replace("Z", "+00:00")) if created_at_raw else datetime.now(timezone.utc)
-            updated_at = datetime.fromisoformat(str(updated_at_raw).replace("Z", "+00:00")) if updated_at_raw else None
+            created_at = (
+                datetime.fromisoformat(str(created_at_raw).replace("Z", "+00:00"))
+                if created_at_raw
+                else datetime.now(timezone.utc)
+            )
+            updated_at = (
+                datetime.fromisoformat(str(updated_at_raw).replace("Z", "+00:00"))
+                if updated_at_raw
+                else None
+            )
             documents.append(
                 DocumentChunk(
                     chunk_id=str(row.get("id")),
@@ -614,19 +652,11 @@ async def list_documents(
             )
 
         page = (offset // limit) + 1
-        
-        return DocumentsListResponse(
-            documents=documents,
-            total=total,
-            page=page,
-            limit=limit
-        )
-        
+
+        return DocumentsListResponse(documents=documents, total=total, page=page, limit=limit)
+
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to list documents: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to list documents: {str(e)}")
 
 
 @router.delete("/documents/{chunk_id}")
@@ -637,12 +667,12 @@ async def delete_document(
 ) -> DeleteChunkResponse:
     """
     Delete a specific document chunk.
-    
+
     Removes from database and vector store.
-    
+
     Args:
         chunk_id: Chunk identifier to delete
-        
+
     Returns:
         Deletion confirmation
     """
@@ -657,16 +687,13 @@ async def delete_document(
         return DeleteChunkResponse(
             success=True,
             deleted_chunk_id=chunk_id,
-            message=f"Successfully deleted chunk {chunk_id}"
+            message=f"Successfully deleted chunk {chunk_id}",
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to delete chunk: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to delete chunk: {str(e)}")
 
 
 @router.post("/database/clean")
@@ -677,109 +704,111 @@ async def clean_database(
 ) -> CleanDatabaseResponse:
     """
     Truncate all document chunks and embeddings.
-    
+
     DESTRUCTIVE OPERATION. Requires confirmation token to prevent accidents.
-    
+
     Args:
         request: CleanDatabaseRequest with confirmation token
-        
+
     Returns:
         Confirmation of deletion with count
-        
+
     Raises:
         HTTPException: If confirmation token is invalid
     """
     # Validate token
     token = request.confirmation_token
-    
+
     if token not in _cleanup_tokens:
         raise HTTPException(
             status_code=403,
-            detail="Invalid or expired confirmation token. Request a new token from GET /api/admin/database/clean-request"
+            detail="Invalid or expired confirmation token. Request a new token from GET /api/admin/database/clean-request",
         )
-    
+
     # Check token expiry
     expires_at = _cleanup_tokens[token]
     if datetime.now(timezone.utc) > expires_at:
         del _cleanup_tokens[token]
         raise HTTPException(
-            status_code=403,
-            detail="Confirmation token has expired. Request a new token."
+            status_code=403, detail="Confirmation token has expired. Request a new token."
         )
-    
+
     # Consume token (one-time use)
     del _cleanup_tokens[token]
-    
+
     try:
         # Check if require_confirmation is enabled
         if ADMIN_CONFIG.get("require_confirmation", True):
             # Already validated token above
             pass
-        
+
         # Get count before deletion
-        count_result = db.table("document_chunks").select("*", count="exact").limit(1).execute()
-        deleted_count = count_result.count if count_result.count is not None else 0
-        
+        count_result = (
+            db.table("document_chunks")
+            .select(
+                "*",
+                count="exact",  # type: ignore[arg-type]
+            )
+            .limit(1)
+            .execute()
+        )
+        _deleted_count = count_result.count if count_result.count is not None else 0
+
         # Delete all chunks (in batches to avoid timeout)
         batch_size = ADMIN_CONFIG.get("delete_chunk_batch_size", 1000)
         deleted_total = 0
-        
+
         while True:
-            result = db.table("document_chunks").delete().limit(batch_size).execute()
+            result = db.table("document_chunks").delete().limit(batch_size).execute()  # type: ignore[attr-defined]
             if not result.data:
                 break
             deleted_total += len(result.data)
             if len(result.data) < batch_size:
                 break
-        
+
         # Also delete orphaned sources if they exist in a separate table
         # (Optional, depends on schema)
         try:
             db.table("search_queries").delete().execute()
-        except:
+        except Exception:
             pass  # Table might not exist or be empty
-        
+
         return CleanDatabaseResponse(
             success=True,
             deleted_chunks=deleted_total,
-            message=f"Database cleaned: {deleted_total} chunks deleted"
+            message=f"Database cleaned: {deleted_total} chunks deleted",
         )
-        
+
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to clean database: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to clean database: {str(e)}")
 
 
 @router.get("/database/clean-request")
 async def request_database_clean(_admin=Depends(_verify_admin)) -> CleanRequestTokenResponse:
     """
     Request confirmation token for database cleanup.
-    
+
     Returns token that must be used in /database/clean POST.
     This is the first step of the cleanup process.
-    
+
     Returns:
         Confirmation token (valid for 5 minutes)
     """
     # Generate secure token
     token = secrets.token_urlsafe(32)
-    
+
     # Store with 5-minute expiry
     expires_at = datetime.now(timezone.utc) + timedelta(minutes=5)
     _cleanup_tokens[token] = expires_at
-    
+
     # Clean expired tokens
     now = datetime.now(timezone.utc)
     expired = [t for t, exp in _cleanup_tokens.items() if exp < now]
     for t in expired:
         del _cleanup_tokens[t]
-    
+
     return CleanRequestTokenResponse(
-        token=token,
-        expires_at=expires_at,
-        endpoint="POST /api/admin/database/clean"
+        token=token, expires_at=expires_at, endpoint="POST /api/admin/database/clean"
     )
 
 
@@ -790,13 +819,13 @@ async def list_all_sources(
 ) -> SourcesListResponse:
     """
     List all unique source URLs in the database.
-    
+
     Returns:
         List of sources with chunk counts
     """
     try:
         store = get_chroma_store()
-        source_map: Dict[str, Dict[str, Any]] = {}
+        source_map: dict[str, dict[str, Any]] = {}
 
         for source in store.list_sources(limit=1000, offset=0):
             url = str(source.get("url") or "")
@@ -859,17 +888,11 @@ async def list_all_sources(
 
         sources = [_normalize_source_row(source or {}) for source in source_map.values()]
         sources.sort(key=lambda x: x.get("chunk_count", 0), reverse=True)
-        
-        return SourcesListResponse(
-            sources=sources,
-            total=len(sources)
-        )
-        
+
+        return SourcesListResponse(sources=sources, total=len(sources))
+
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to list sources: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to list sources: {str(e)}")
 
 
 @router.post("/sources/validate")
@@ -879,29 +902,29 @@ async def validate_sources(
 ) -> ValidateSourceResponse:
     """
     Validate a source URL.
-    
+
     Tests HTTP connectivity for the source.
     Admin endpoint for debugging scraping issues.
-    
+
     Returns:
         Validation results
     """
     url = request.url
-    
+
     try:
         # Test HTTP HEAD request first (lightweight)
         async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
             try:
                 response = await client.head(url)
                 http_status = response.status_code
-                
+
                 # If HEAD not allowed, try GET
                 if http_status == 405:
                     response = await client.get(url, timeout=10.0)
                     http_status = response.status_code
-                
+
                 is_accessible = 200 <= http_status < 400
-                
+
                 # Basic scrapability check
                 is_scrapeable = is_accessible
                 if is_accessible:
@@ -912,30 +935,32 @@ async def validate_sources(
                         ct in content_type.lower()
                         for ct in ["html", "xml", "text/plain", "application/pdf"]
                     )
-                
+
                 message = "URL is accessible"
                 if is_accessible and is_scrapeable:
                     message = "URL is accessible and scrapeable"
                 elif is_accessible and not is_scrapeable:
-                    message = f"URL is accessible but content type ({content_type}) may not be scrapeable"
+                    message = (
+                        f"URL is accessible but content type ({content_type}) may not be scrapeable"
+                    )
                 elif not is_accessible:
                     message = f"URL returned HTTP {http_status}"
-                
+
                 return ValidateSourceResponse(
                     url=url,
                     is_accessible=is_accessible,
                     is_scrapeable=is_scrapeable,
                     http_status=http_status,
-                    message=message
+                    message=message,
                 )
-                
+
             except httpx.TimeoutException:
                 return ValidateSourceResponse(
                     url=url,
                     is_accessible=False,
                     is_scrapeable=False,
                     http_status=None,
-                    message="Request timed out after 10 seconds"
+                    message="Request timed out after 10 seconds",
                 )
             except httpx.HTTPError as e:
                 return ValidateSourceResponse(
@@ -943,16 +968,16 @@ async def validate_sources(
                     is_accessible=False,
                     is_scrapeable=False,
                     http_status=None,
-                    message=f"HTTP error: {str(e)}"
+                    message=f"HTTP error: {str(e)}",
                 )
-                
+
     except Exception as e:
         return ValidateSourceResponse(
             url=url,
             is_accessible=False,
             is_scrapeable=False,
             http_status=None,
-            message=f"Validation failed: {str(e)}"
+            message=f"Validation failed: {str(e)}",
         )
 
 
@@ -960,7 +985,7 @@ async def validate_sources(
 async def get_admin_config():
     """
     Get gateway admin configuration.
-    
+
     Returns:
         Current admin settings
     """
@@ -968,13 +993,13 @@ async def get_admin_config():
 
 
 @router.post("/config")
-async def update_admin_config(require_confirmation: Optional[bool] = None):
+async def update_admin_config(require_confirmation: bool | None = None):
     """
     Update gateway admin configuration.
-    
+
     Args:
         require_confirmation: Whether to require confirmation tokens for destructive ops
-        
+
     Returns:
         Updated configuration
     """
@@ -985,17 +1010,17 @@ async def update_admin_config(require_confirmation: Optional[bool] = None):
 
 
 @router.get("/diagnostics/schema")
-async def schema_diagnostics(db: Client = Depends(get_database_client)) -> Dict[str, Any]:
+async def schema_diagnostics(db: Client = Depends(get_database_client)) -> dict[str, Any]:
     """
     Diagnose database schema prerequisites for Vecinita.
-    
+
     Validates:
     - RPC function: search_similar_documents exists
     - Table: document_chunks exists
     - Column: embedding column exists with pgvector(384) type
     - Indexes: Required indexes exist on document_chunks
     - Supporting tables: conversations, documents exist
-    
+
     Returns:
         {
             'status': 'ok' | 'warning' | 'error',
@@ -1004,22 +1029,22 @@ async def schema_diagnostics(db: Client = Depends(get_database_client)) -> Dict[
             'warnings': List of non-blocking warnings,
             'checks': Detailed results for each check
         }
-    
+
     Use this endpoint to verify your Supabase schema is correctly configured
     before deploying Vecinita to production.
     """
     try:
         result = await validate_schema(db)
-        result['summary'] = get_validation_summary(result)
+        result["summary"] = get_validation_summary(result)
         return result
     except Exception as e:
         logger.error(f"Schema diagnostics error: {e}")
         return {
-            'status': 'error',
-            'summary': f'Schema diagnostics failed: {str(e)}',
-            'errors': [str(e)],
-            'warnings': [],
-            'checks': {}
+            "status": "error",
+            "summary": f"Schema diagnostics failed: {str(e)}",
+            "errors": [str(e)],
+            "warnings": [],
+            "checks": {},
         }
 
 
@@ -1030,25 +1055,25 @@ async def schema_diagnostics(db: Client = Depends(get_database_client)) -> Dict[
 
 class AgentModelSelectionRequest(BaseModel):
     provider: str
-    model: Optional[str] = None
-    lock: Optional[bool] = None
+    model: str | None = None
+    lock: bool | None = None
 
 
 class EmbeddingSelectionRequest(BaseModel):
     provider: str
     model: str
-    lock: Optional[bool] = None
+    lock: bool | None = None
 
 
 class AdminModelConfigUpdateRequest(BaseModel):
-    generation: Optional[AgentModelSelectionRequest] = None
-    embeddings: Optional[EmbeddingSelectionRequest] = None
+    generation: AgentModelSelectionRequest | None = None
+    embeddings: EmbeddingSelectionRequest | None = None
 
 
 @router.get("/models/config")
 async def get_models_config(_admin=Depends(_verify_admin)):
     """Get current generation and embedding model selections."""
-    payload: Dict[str, Any] = {}
+    payload: dict[str, Any] = {}
     try:
         async with httpx.AsyncClient(timeout=20.0) as client:
             agent_resp = await client.get(f"{AGENT_SERVICE_URL}/model-selection")
@@ -1074,9 +1099,11 @@ async def update_models_config(
 ):
     """Update generation and/or embedding model selection."""
     if request.generation is None and request.embeddings is None:
-        raise HTTPException(status_code=400, detail="Provide at least one of generation or embeddings")
+        raise HTTPException(
+            status_code=400, detail="Provide at least one of generation or embeddings"
+        )
 
-    result: Dict[str, Any] = {}
+    result: dict[str, Any] = {}
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             if request.generation is not None:
@@ -1099,7 +1126,9 @@ async def update_models_config(
                 result["embeddings"] = embedding_resp.json()
     except httpx.HTTPStatusError as exc:
         detail = exc.response.text if exc.response is not None else str(exc)
-        raise HTTPException(status_code=exc.response.status_code if exc.response else 502, detail=detail)
+        raise HTTPException(
+            status_code=exc.response.status_code if exc.response else 502, detail=detail
+        )
     except httpx.HTTPError as exc:
         raise HTTPException(status_code=502, detail=f"Failed to update model config: {exc}")
 
@@ -1109,6 +1138,7 @@ async def update_models_config(
 # ============================================================================
 # Source management — add URL to corpus, delete, list queue
 # ============================================================================
+
 
 def _source_job_file_path(url: str, depth: int) -> str:
     return f"url::{depth}::{url}"
@@ -1133,18 +1163,20 @@ async def _extract_text_from_url(url: str) -> str:
     return response.text
 
 
-def _chunk_text_content(text: str) -> List[str]:
-    from langchain_text_splitters import RecursiveCharacterTextSplitter
+def _chunk_text_content(text: str) -> list[str]:
+    from langchain_text_splitters import (  # type: ignore[import-not-found]
+        RecursiveCharacterTextSplitter,
+    )
 
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=CHUNK_SIZE,
         chunk_overlap=CHUNK_OVERLAP,
         separators=["\n\n", "\n", ". ", " ", ""],
     )
-    return splitter.split_text(text)
+    return splitter.split_text(text)  # type: ignore[no-any-return]
 
 
-async def _embed_text_chunks(chunks: List[str]) -> List[List[float]]:
+async def _embed_text_chunks(chunks: list[str]) -> list[list[float]]:
     try:
         async with httpx.AsyncClient(timeout=60.0) as client:
             embed_resp = await client.post(
@@ -1156,9 +1188,11 @@ async def _embed_text_chunks(chunks: List[str]) -> List[List[float]]:
         raise HTTPException(status_code=502, detail=f"Embedding service error: {exc}")
 
     if embed_resp.status_code != 200:
-        raise HTTPException(status_code=502, detail=f"Embedding service returned {embed_resp.status_code}")
+        raise HTTPException(
+            status_code=502, detail=f"Embedding service returned {embed_resp.status_code}"
+        )
 
-    embeddings: List[List[float]] = embed_resp.json().get("embeddings", [])
+    embeddings: list[list[float]] = embed_resp.json().get("embeddings", [])
     if len(embeddings) != len(chunks):
         raise HTTPException(status_code=502, detail="Embedding count mismatch.")
 
@@ -1187,11 +1221,11 @@ def _should_retry_with_scraper_loader(exc: HTTPException) -> bool:
     return any(marker in detail for marker in anti_bot_markers)
 
 
-async def _ingest_source_via_scraper_loader(url: str, depth: int) -> Dict[str, Any]:
+async def _ingest_source_via_scraper_loader(url: str, depth: int) -> dict[str, Any]:
     temp_dir = os.path.join(tempfile.gettempdir(), "vecinita_admin_ingest_fallback")
     os.makedirs(temp_dir, exist_ok=True)
 
-    file_suffix = hashlib.sha256(f"{url}:{time.time()}".encode("utf-8")).hexdigest()[:12]
+    file_suffix = hashlib.sha256(f"{url}:{time.time()}".encode()).hexdigest()[:12]
     output_file = os.path.join(temp_dir, f"source_{file_suffix}_chunks.jsonl")
     failed_log = os.path.join(temp_dir, f"source_{file_suffix}_failed.log")
 
@@ -1220,10 +1254,10 @@ async def _ingest_source_via_scraper_loader(url: str, depth: int) -> Dict[str, A
     }
 
 
-async def _ingest_source_url(url: str, depth: int, normalized_tags: List[str]) -> Dict[str, Any]:
+async def _ingest_source_url(url: str, depth: int, normalized_tags: list[str]) -> dict[str, Any]:
     source_domain = _domain_from_url(url)
     source_title = source_domain or url
-    job_id = hashlib.sha256(f"{url}:{depth}:{time.time()}".encode("utf-8")).hexdigest()
+    job_id = hashlib.sha256(f"{url}:{depth}:{time.time()}".encode()).hexdigest()
     created_at = datetime.now(timezone.utc).isoformat()
     started_at = datetime.now(timezone.utc).isoformat()
 
@@ -1275,19 +1309,23 @@ async def _ingest_source_url(url: str, depth: int, normalized_tags: List[str]) -
         try:
             text = (await _extract_text_from_url(url)).strip()
             if not text:
-                raise HTTPException(status_code=422, detail="No text could be extracted from the URL.")
+                raise HTTPException(
+                    status_code=422, detail="No text could be extracted from the URL."
+                )
 
             chunks = _chunk_text_content(text)
             if not chunks:
-                raise HTTPException(status_code=422, detail="URL content produced no chunks after splitting.")
+                raise HTTPException(
+                    status_code=422, detail="URL content produced no chunks after splitting."
+                )
 
             embeddings = await _embed_text_chunks(chunks)
 
             total_chunks = len(chunks)
             total_characters = len(text)
-            rows: List[Dict[str, Any]] = []
+            rows: list[dict[str, Any]] = []
             for index, chunk_text in enumerate(chunks):
-                chunk_id = hashlib.sha256(f"{url}:{index}:{chunk_text}".encode("utf-8")).hexdigest()
+                chunk_id = hashlib.sha256(f"{url}:{index}:{chunk_text}".encode()).hexdigest()
                 rows.append(
                     {
                         "id": chunk_id,
@@ -1420,11 +1458,12 @@ async def _ingest_source_url(url: str, depth: int, normalized_tags: List[str]) -
             logger.exception("Failed to update queue state after source ingestion exception")
         raise HTTPException(status_code=500, detail=f"Failed to process URL source: {exc}")
 
+
 @router.post("/sources")
 async def add_source(
     url: str = Form(..., description="URL to scrape and embed"),
     depth: int = Form(1, ge=1, le=5, description="Crawl depth"),
-    tags: Optional[str] = Form(None, description="Comma-separated metadata tags"),
+    tags: str | None = Form(None, description="Comma-separated metadata tags"),
     db: Client = Depends(get_database_client),
     _admin=Depends(_verify_admin),
 ):
@@ -1450,7 +1489,7 @@ async def add_sources_batch(
     baseline_tags = normalize_tags(request.tags)
     tag_mode = request.tag_mode or "auto_infer"
 
-    results: List[Dict[str, Any]] = []
+    results: list[dict[str, Any]] = []
     for raw_url in parsed_urls:
         validated_url = _validate_source_url(raw_url)
         tags_for_url = baseline_tags if tag_mode in ["baseline_only", "auto_infer"] else []
@@ -1484,7 +1523,7 @@ async def add_sources_batch(
 @router.patch("/sources/tags")
 async def update_source_tags(
     request: SourceTagsUpdateRequest,
-    lang: Optional[str] = Query(None, description="Response language (en/es)"),
+    lang: str | None = Query(None, description="Response language (en/es)"),
     db: Client = Depends(get_database_client),
     _admin=Depends(_verify_admin),
 ):
@@ -1508,7 +1547,7 @@ async def update_source_tags(
         docs = chunk_result.get("documents") or []
         metas = chunk_result.get("metadatas") or []
 
-        rows: List[Dict[str, Any]] = []
+        rows: list[dict[str, Any]] = []
         for idx, chunk_id in enumerate(ids):
             metadata = _safe_metadata_dict(metas[idx] if idx < len(metas) else {})
             metadata["tags"] = normalized_tags
@@ -1534,7 +1573,9 @@ async def update_source_tags(
         updated = len(rows)
         if rows:
             # Preserve existing vectors by fetching them directly from collection.
-            existing_vectors_payload = store.chunks().get(ids=ids, include=["embeddings"]).get("embeddings")
+            existing_vectors_payload = (
+                store.chunks().get(ids=ids, include=["embeddings"]).get("embeddings")
+            )
             if existing_vectors_payload is None:
                 existing_vectors: list[Any] = []
             else:
@@ -1553,12 +1594,12 @@ async def update_source_tags(
     except Exception as exc:
         raise HTTPException(
             status_code=500,
-            detail=f"{_tagging_message('tags_update_failed', lang)}: {exc}",
+            detail=f"{_tagging_message('tags_update_failed', _normalize_lang(lang))}: {exc}",
         )
 
     return {
         "status": "updated",
-        "message": _tagging_message("tags_updated", lang),
+        "message": _tagging_message("tags_updated", _normalize_lang(lang)),
         "url": request.url,
         "tags": normalized_tags,
         "chunks_updated": updated,
@@ -1567,9 +1608,9 @@ async def update_source_tags(
 
 @router.get("/tags")
 async def get_metadata_tags(
-    query: Optional[str] = Query(None, description="Optional tag prefix filter"),
+    query: str | None = Query(None, description="Optional tag prefix filter"),
     limit: int = Query(100, ge=1, le=500),
-    lang: Optional[str] = Query(None, description="Response language (en/es)"),
+    lang: str | None = Query(None, description="Response language (en/es)"),
     db: Client = Depends(get_database_client),
     _admin=Depends(_verify_admin),
 ):
@@ -1589,7 +1630,7 @@ async def get_metadata_tags(
     except Exception as exc:
         raise HTTPException(
             status_code=500,
-            detail=f"{_tagging_message('tags_fetch_failed', lang)}: {exc}",
+            detail=f"{_tagging_message('tags_fetch_failed', _normalize_lang(lang))}: {exc}",
         )
 
 
@@ -1617,7 +1658,9 @@ async def delete_source(
 
 @router.get("/queue")
 async def get_queue(
-    status: Optional[str] = Query(None, description="Filter by status: pending|processing|completed|failed"),
+    status: str | None = Query(
+        None, description="Filter by status: pending|processing|completed|failed"
+    ),
     limit: int = Query(50, ge=1, le=200),
     db: Client = Depends(get_database_client),
     _admin=Depends(_verify_admin),
@@ -1627,7 +1670,7 @@ async def get_queue(
         store = get_chroma_store()
         normalized_status = "completed" if status == "done" else status
         rows = store.list_queue_jobs(status=normalized_status, limit=limit)
-        jobs: List[Dict[str, Any]] = []
+        jobs: list[dict[str, Any]] = []
         for row in rows:
             parsed = _parse_queue_file_path(str(row.get("file_path") or ""))
             jobs.append(
@@ -1658,10 +1701,13 @@ async def get_queue_status_summary(
 ):
     """Return aggregated processing queue status summary from v_processing_status view."""
     try:
-        result = db.table("v_processing_status").select(
-            "status,job_count,total_chunks_processed,avg_processing_time_seconds"
-        ).order("status").execute()
-        rows = result.data or []
+        result = (
+            db.table("v_processing_status")
+            .select("status,job_count,total_chunks_processed,avg_processing_time_seconds")
+            .order("status")
+            .execute()
+        )
+        rows: list[dict[str, Any]] = result.data or []  # type: ignore[assignment]
         total_jobs = sum(int(item.get("job_count") or 0) for item in rows)
         return {
             "statuses": rows,
@@ -1680,7 +1726,7 @@ async def get_chunk_domain_stats(
     """Return per-domain chunk statistics from v_chunk_statistics view."""
     try:
         store = get_chroma_store()
-        buckets: Dict[str, Dict[str, Any]] = {}
+        buckets: dict[str, dict[str, Any]] = {}
         for row in store.iter_all_chunks(batch_size=500):
             metadata = _safe_metadata_dict(row.get("metadata"))
             source_domain = str(metadata.get("source_domain") or "unknown")
@@ -1703,14 +1749,16 @@ async def get_chunk_domain_stats(
             if source_url:
                 current["_sources"].add(source_url)
 
-        rows: List[Dict[str, Any]] = []
+        rows: list[dict[str, Any]] = []
         for item in buckets.values():
             chunk_count = int(item.get("chunk_count") or 0)
             rows.append(
                 {
                     "source_domain": item.get("source_domain"),
                     "chunk_count": chunk_count,
-                    "avg_chunk_size": int(item.get("total_size", 0) / chunk_count) if chunk_count else 0,
+                    "avg_chunk_size": (
+                        int(item.get("total_size", 0) / chunk_count) if chunk_count else 0
+                    ),
                     "total_size": item.get("total_size", 0),
                     "document_count": len(item.get("_sources", set())),
                     "latest_chunk": item.get("latest_chunk"),
@@ -1720,7 +1768,9 @@ async def get_chunk_domain_stats(
         rows = rows[:limit]
         return {"rows": rows, "total": len(rows)}
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch chunk domain statistics: {exc}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fetch chunk domain statistics: {exc}"
+        )
 
 
 # ============================================================================
@@ -1737,7 +1787,7 @@ ALLOWED_EXTENSIONS = {".pdf", ".txt", ".html", ".htm", ".md"}
 @router.post("/upload")
 async def upload_document(
     file: UploadFile = File(...),
-    tags: Optional[str] = Form(None, description="Comma-separated metadata tags"),
+    tags: str | None = Form(None, description="Comma-separated metadata tags"),
     db: Client = Depends(get_database_client),
     _admin=Depends(_verify_admin),
 ):
@@ -1768,11 +1818,13 @@ async def upload_document(
     text = ""
     try:
         if ext == ".pdf":
-            import pypdf
+            import pypdf  # type: ignore[import-not-found]
+
             reader = pypdf.PdfReader(io.BytesIO(raw))
             text = "\n".join(page.extract_text() or "" for page in reader.pages)
         elif ext in (".html", ".htm"):
             from bs4 import BeautifulSoup
+
             text = BeautifulSoup(raw, "html.parser").get_text(separator="\n")
         else:
             text = raw.decode("utf-8", errors="replace")
@@ -1785,12 +1837,13 @@ async def upload_document(
     # ── Chunk ─────────────────────────────────────────────────────────────
     try:
         from langchain_text_splitters import RecursiveCharacterTextSplitter
+
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=CHUNK_SIZE,
             chunk_overlap=CHUNK_OVERLAP,
             separators=["\n\n", "\n", ". ", " ", ""],
         )
-        chunks: List[str] = splitter.split_text(text)
+        chunks: list[str] = splitter.split_text(text)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Chunking failed: {exc}")
 
@@ -1807,7 +1860,7 @@ async def upload_document(
             )
         if embed_resp.status_code != 200:
             raise RuntimeError(f"Embedding service returned {embed_resp.status_code}")
-        embeddings: List[List[float]] = embed_resp.json().get("embeddings", [])
+        embeddings: list[list[float]] = embed_resp.json().get("embeddings", [])
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Embedding service error: {exc}")
 
@@ -1816,10 +1869,12 @@ async def upload_document(
 
     # ── Persist chunks and source metadata into Chroma ─────────────────────
     safe_name = (file.filename or "upload.bin").replace("/", "_")
-    storage_path = f"uploads/{datetime.now(timezone.utc).strftime('%Y/%m/%d')}/{int(time.time())}_{safe_name}"
+    storage_path = (
+        f"uploads/{datetime.now(timezone.utc).strftime('%Y/%m/%d')}/{int(time.time())}_{safe_name}"
+    )
     source_url = f"upload://{storage_path}"
     normalized_tags = parse_tags_input(tags)
-    public_download_url: Optional[str] = None
+    public_download_url: str | None = None
     storage_bucket = UPLOAD_STORAGE_BUCKET
     storage_uploaded = False
 
@@ -1869,10 +1924,10 @@ async def upload_document(
 
     total_chunks = len(chunks)
     inserted = 0
-    errors: List[str] = []
+    errors: list[str] = []
 
-    rows: List[Dict[str, Any]] = []
-    for i, (chunk_text, embedding) in enumerate(zip(chunks, embeddings)):
+    rows: list[dict[str, Any]] = []
+    for i, (chunk_text, embedding) in enumerate(zip(chunks, embeddings, strict=False)):
         rows.append(
             {
                 "id": hashlib.sha256(f"{source_url}:{i}:{chunk_text}".encode()).hexdigest(),
@@ -1917,4 +1972,3 @@ async def upload_document(
         "storage_path": storage_path if storage_uploaded else None,
         "errors": errors[:10],  # cap error list
     }
-

@@ -154,6 +154,18 @@ Comprehensive technical documentation for the Vecinita bilingual Q&A assistant. 
 
 ## 📝 Documentation Standards
 
+## 🌐 Publishing on GitHub Pages
+
+This repository now supports publishing docs through Docusaurus.
+
+- Site source: `website/`
+- Content source: `docs/`
+- Local preview: `make docs-serve`
+- Build validation: `make docs-build`
+- CI deployment workflow: `.github/workflows/docs-gh-pages.yml`
+
+The deploy job runs on pushes to `main` when files in `website/` or `docs/` change.
+
 When contributing new docs:
 - Place in appropriate subfolder: `architecture/`, `features/`, `guides/`, or `tools/`
 - Include metadata: Last updated, Status, Audience, Related docs

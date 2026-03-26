@@ -4,8 +4,8 @@ Extracts and saves URLs and metadata from scraped content.
 """
 
 import logging
-from typing import Dict, List, Optional, TYPE_CHECKING
 from datetime import datetime
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from .uploader import DatabaseUploader
@@ -16,7 +16,9 @@ log = logging.getLogger(__name__)
 class LinkTracker:
     """Tracks and saves extracted links and metadata."""
 
-    def __init__(self, output_file: Optional[str] = None, uploader: Optional['DatabaseUploader'] = None):
+    def __init__(
+        self, output_file: str | None = None, uploader: Optional["DatabaseUploader"] = None
+    ):
         """Initialize with optional output file and database uploader.
 
         Args:
@@ -25,10 +27,10 @@ class LinkTracker:
         """
         self.output_file = output_file
         self.uploader = uploader
-        self.links: Dict[str, List[str]] = {}
-        self.loaders: Dict[str, str] = {}  # Track loader type per source
+        self.links: dict[str, list[str]] = {}
+        self.loaders: dict[str, str] = {}  # Track loader type per source
 
-    def add_links(self, source_url: str, links: List[str], loader_type: str = "Unknown") -> None:
+    def add_links(self, source_url: str, links: list[str], loader_type: str = "Unknown") -> None:
         """
         Add links from a source.
 
@@ -70,9 +72,7 @@ class LinkTracker:
             unique_links = list(set(links))
 
             successful, failed = self.uploader.upload_links(
-                links=unique_links,
-                source_url=source_url,
-                loader_type=loader_type
+                links=unique_links, source_url=source_url, loader_type=loader_type
             )
             total_successful += successful
             total_failed += failed
@@ -83,12 +83,14 @@ class LinkTracker:
 
     def _save_links_to_file(self) -> None:
         """Save links summary to file."""
+        if not self.output_file:
+            return
         try:
-            with open(self.output_file, 'a', encoding='utf-8') as f:
-                f.write(f"\n{'='*70}\n")
-                f.write(f"LINK EXTRACTION SUMMARY\n")
+            with open(self.output_file, "a", encoding="utf-8") as f:
+                f.write(f"\n{'=' * 70}\n")
+                f.write("LINK EXTRACTION SUMMARY\n")
                 f.write(f"Timestamp: {datetime.now().isoformat()}\n")
-                f.write(f"{'='*70}\n\n")
+                f.write(f"{'=' * 70}\n\n")
 
                 for source, links in self.links.items():
                     f.write(f"Source: {source}\n")
@@ -101,14 +103,15 @@ class LinkTracker:
                     f.write("\n")
 
             log.info(
-                f"--> ✅ Saved {sum(len(v) for v in self.links.values())} links to {self.output_file}")
+                f"--> ✅ Saved {sum(len(v) for v in self.links.values())} links to {self.output_file}"
+            )
         except Exception as e:
             log.error(f"--> ❌ Failed to save links: {e}")
 
-    def get_summary(self) -> Dict[str, int]:
+    def get_summary(self) -> dict[str, int]:
         """Get summary statistics."""
         return {
             "total_sources": len(self.links),
             "total_links": sum(len(v) for v in self.links.values()),
-            "unique_links": sum(len(set(v)) for v in self.links.values())
+            "unique_links": sum(len(set(v)) for v in self.links.values()),
         }

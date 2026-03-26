@@ -3,14 +3,16 @@ Unit tests for src/scraper/uploader.py - Expanded coverage
 
 Tests database uploader, chunk management, and embedding initialization.
 """
+
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-from dataclasses import dataclass
-from datetime import datetime
 
 pytestmark = [
     pytest.mark.unit,
-    pytest.mark.skip(reason="Legacy Supabase uploader contract tests; uploader now targets Chroma store."),
+    pytest.mark.skip(
+        reason="Legacy Supabase uploader contract tests; uploader now targets Chroma store."
+    ),
 ]
 
 
@@ -70,11 +72,13 @@ class TestDatabaseUploaderInitialization:
     def test_uploader_init_with_local_embeddings(self):
         """Test DatabaseUploader initialization with local embeddings."""
         from src.services.scraper.uploader import DatabaseUploader
-        
-        with patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True), \
-             patch("src.services.scraper.uploader.create_client") as mock_client, \
-             patch.object(DatabaseUploader, "_init_embeddings") as mock_init_embeddings, \
-             patch.object(DatabaseUploader, "_init_supabase") as mock_init_supabase:
+
+        with (
+            patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
+            patch("src.services.scraper.uploader.create_client") as mock_client,
+            patch.object(DatabaseUploader, "_init_embeddings") as mock_init_embeddings,
+            patch.object(DatabaseUploader, "_init_supabase"),
+        ):
 
             mock_supabase = MagicMock()
             mock_client.return_value = mock_supabase
@@ -94,11 +98,14 @@ class TestDatabaseUploaderInitialization:
     def test_uploader_missing_supabase_credentials(self):
         """Test that uploader raises error without Supabase credentials."""
         import os
+
         from src.services.scraper.uploader import DatabaseUploader
 
-        with patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True), \
-             patch.dict(os.environ, {"SUPABASE_URL": "", "SUPABASE_KEY": ""}, clear=False), \
-             patch.object(DatabaseUploader, "_init_embeddings") as mock_init_embeddings:
+        with (
+            patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
+            patch.dict(os.environ, {"SUPABASE_URL": "", "SUPABASE_KEY": ""}, clear=False),
+            patch.object(DatabaseUploader, "_init_embeddings"),
+        ):
 
             with pytest.raises(ValueError):
                 DatabaseUploader()
@@ -109,10 +116,12 @@ class TestEmbeddingInitialization:
 
     def test_init_embeddings_with_service(self):
         """Test embedding initialization with embedding service."""
-        with patch("src.services.scraper.uploader.EMBEDDING_SERVICE_AVAILABLE", True), \
-             patch("src.services.scraper.uploader.create_embedding_client") as mock_client, \
-             patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True), \
-             patch("src.services.scraper.uploader.create_client"):
+        with (
+            patch("src.services.scraper.uploader.EMBEDDING_SERVICE_AVAILABLE", True),
+            patch("src.services.scraper.uploader.create_embedding_client") as mock_client,
+            patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
+            patch("src.services.scraper.uploader.create_client"),
+        ):
 
             mock_embedding_client = MagicMock()
             mock_client.return_value = mock_embedding_client
@@ -124,15 +133,17 @@ class TestEmbeddingInitialization:
 
     def test_init_embeddings_fallback_to_fastembed(self):
         """Test fallback to FastEmbed when service unavailable."""
-        with patch("src.services.scraper.uploader.EMBEDDING_SERVICE_AVAILABLE", True), \
-             patch(
-                 "src.services.scraper.uploader.create_embedding_client",
-                 side_effect=Exception("Service unavailable"),
-             ), \
-             patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", True), \
-             patch("src.services.scraper.uploader.FastEmbedEmbeddings") as mock_fastembed, \
-             patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True), \
-             patch("src.services.scraper.uploader.create_client"):
+        with (
+            patch("src.services.scraper.uploader.EMBEDDING_SERVICE_AVAILABLE", True),
+            patch(
+                "src.services.scraper.uploader.create_embedding_client",
+                side_effect=Exception("Service unavailable"),
+            ),
+            patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", True),
+            patch("src.services.scraper.uploader.FastEmbedEmbeddings") as mock_fastembed,
+            patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
+            patch("src.services.scraper.uploader.create_client"),
+        ):
 
             mock_embedding = MagicMock()
             mock_fastembed.return_value = mock_embedding
@@ -144,14 +155,17 @@ class TestEmbeddingInitialization:
 
     def test_init_embeddings_fallback_to_huggingface(self):
         """Test fallback to HuggingFace when FastEmbed unavailable."""
-        with patch("src.services.scraper.uploader.EMBEDDING_SERVICE_AVAILABLE", False), \
-             patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", True), \
-             patch("src.services.scraper.uploader.FastEmbedEmbeddings", side_effect=Exception("Not installed")), \
-             patch(
-                 "src.services.scraper.uploader.HuggingFaceEmbeddings"
-             ) as mock_hf, \
-             patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True), \
-             patch("src.services.scraper.uploader.create_client"):
+        with (
+            patch("src.services.scraper.uploader.EMBEDDING_SERVICE_AVAILABLE", False),
+            patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", True),
+            patch(
+                "src.services.scraper.uploader.FastEmbedEmbeddings",
+                side_effect=Exception("Not installed"),
+            ),
+            patch("src.services.scraper.uploader.HuggingFaceEmbeddings") as mock_hf,
+            patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
+            patch("src.services.scraper.uploader.create_client"),
+        ):
 
             mock_embedding = MagicMock()
             mock_hf.return_value = mock_embedding
@@ -163,10 +177,12 @@ class TestEmbeddingInitialization:
 
     def test_init_embeddings_all_fail(self):
         """Test error when all embedding options fail."""
-        with patch("src.services.scraper.uploader.EMBEDDING_SERVICE_AVAILABLE", False), \
-             patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", False), \
-             patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True), \
-             patch("src.services.scraper.uploader.create_client"):
+        with (
+            patch("src.services.scraper.uploader.EMBEDDING_SERVICE_AVAILABLE", False),
+            patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", False),
+            patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
+            patch("src.services.scraper.uploader.create_client"),
+        ):
 
             from src.services.scraper.uploader import DatabaseUploader
 
@@ -184,16 +200,18 @@ class TestSupabaseInitialization:
         """Test successful Supabase initialization."""
         import os
 
-        with patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True), \
-             patch("src.services.scraper.uploader.create_client") as mock_create, \
-             patch.dict(
-                 os.environ,
-                 {
-                     "SUPABASE_URL": "https://test.supabase.co",
-                     "SUPABASE_KEY": "test-key",
-                 },
-             ), \
-             patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", False):
+        with (
+            patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
+            patch("src.services.scraper.uploader.create_client") as mock_create,
+            patch.dict(
+                os.environ,
+                {
+                    "SUPABASE_URL": "https://test.supabase.co",
+                    "SUPABASE_KEY": "test-key",
+                },
+            ),
+            patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", False),
+        ):
 
             mock_client = MagicMock()
             mock_create.return_value = mock_client
@@ -207,8 +225,10 @@ class TestSupabaseInitialization:
         """Test error when Supabase URL missing."""
         import os
 
-        with patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True), \
-             patch.dict(os.environ, {"SUPABASE_URL": "", "SUPABASE_KEY": "key"}, clear=False):
+        with (
+            patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
+            patch.dict(os.environ, {"SUPABASE_URL": "", "SUPABASE_KEY": "key"}, clear=False),
+        ):
 
             from src.services.scraper.uploader import DatabaseUploader
 
@@ -221,12 +241,14 @@ class TestSupabaseInitialization:
         """Test error when Supabase key missing."""
         import os
 
-        with patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True), \
-             patch.dict(
-                 os.environ,
-                 {"SUPABASE_URL": "https://test.supabase.co", "SUPABASE_KEY": ""},
-                 clear=False,
-             ):
+        with (
+            patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
+            patch.dict(
+                os.environ,
+                {"SUPABASE_URL": "https://test.supabase.co", "SUPABASE_KEY": ""},
+                clear=False,
+            ),
+        ):
 
             from src.services.scraper.uploader import DatabaseUploader
 
@@ -241,10 +263,12 @@ class TestUploadChunks:
 
     def test_upload_chunks_basic(self):
         """Test basic chunk upload."""
-        with patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True), \
-             patch("src.services.scraper.uploader.create_client") as mock_create, \
-             patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", True), \
-             patch("src.services.scraper.uploader.HuggingFaceEmbeddings"):
+        with (
+            patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
+            patch("src.services.scraper.uploader.create_client") as mock_create,
+            patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", True),
+            patch("src.services.scraper.uploader.HuggingFaceEmbeddings"),
+        ):
 
             mock_supabase = MagicMock()
             mock_create.return_value = mock_supabase
@@ -255,9 +279,7 @@ class TestUploadChunks:
 
             # Mock embedding model
             uploader.embedding_model = MagicMock()
-            uploader.embedding_model.embed_query = MagicMock(
-                return_value=[0.1] * 384
-            )
+            uploader.embedding_model.embed_query = MagicMock(return_value=[0.1] * 384)
 
             # Create test chunks
             chunks = [
@@ -275,9 +297,7 @@ class TestUploadChunks:
             uploader.supabase_client.table = MagicMock(
                 return_value=MagicMock(
                     insert=MagicMock(
-                        return_value=MagicMock(
-                            execute=MagicMock(return_value=MagicMock(data=[]))
-                        )
+                        return_value=MagicMock(execute=MagicMock(return_value=MagicMock(data=[])))
                     )
                 )
             )
@@ -295,10 +315,12 @@ class TestUploadChunks:
 
     def test_upload_chunks_empty_list(self):
         """Test uploading empty chunk list."""
-        with patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True), \
-             patch("src.services.scraper.uploader.create_client") as mock_create, \
-             patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", True), \
-             patch("src.services.scraper.uploader.HuggingFaceEmbeddings"):
+        with (
+            patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
+            patch("src.services.scraper.uploader.create_client") as mock_create,
+            patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", True),
+            patch("src.services.scraper.uploader.HuggingFaceEmbeddings"),
+        ):
 
             mock_supabase = MagicMock()
             mock_create.return_value = mock_supabase
@@ -319,10 +341,12 @@ class TestUploadChunks:
 
     def test_upload_chunks_propagates_source_tags(self):
         """Test source-level tags are written into chunk metadata."""
-        with patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True), \
-             patch("src.services.scraper.uploader.create_client") as mock_create, \
-             patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", True), \
-             patch("src.services.scraper.uploader.HuggingFaceEmbeddings"):
+        with (
+            patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
+            patch("src.services.scraper.uploader.create_client") as mock_create,
+            patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", True),
+            patch("src.services.scraper.uploader.HuggingFaceEmbeddings"),
+        ):
 
             mock_supabase = MagicMock()
             mock_create.return_value = mock_supabase
@@ -374,10 +398,12 @@ class TestUploadChunks:
 
     def test_upload_chunks_batch_size(self):
         """Test that chunks are uploaded in batches."""
-        with patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True), \
-             patch("src.services.scraper.uploader.create_client") as mock_create, \
-             patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", True), \
-             patch("src.services.scraper.uploader.HuggingFaceEmbeddings"):
+        with (
+            patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
+            patch("src.services.scraper.uploader.create_client") as mock_create,
+            patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", True),
+            patch("src.services.scraper.uploader.HuggingFaceEmbeddings"),
+        ):
 
             mock_supabase = MagicMock()
             mock_create.return_value = mock_supabase
@@ -386,9 +412,7 @@ class TestUploadChunks:
 
             uploader = DatabaseUploader(use_local_embeddings=True)
             uploader.embedding_model = MagicMock()
-            uploader.embedding_model.embed_query = MagicMock(
-                return_value=[0.1] * 384
-            )
+            uploader.embedding_model.embed_query = MagicMock(return_value=[0.1] * 384)
 
             # Mock batch insert
             mock_table = MagicMock()

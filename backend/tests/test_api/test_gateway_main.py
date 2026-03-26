@@ -3,9 +3,8 @@ Unit tests for src/gateway/main.py
 
 Tests FastAPI app initialization, routes, and error handling.
 """
-import os
+
 import pytest
-from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 
 pytestmark = pytest.mark.unit
@@ -23,6 +22,7 @@ def gateway_client(env_vars, monkeypatch):
 
     # Import after env vars are set
     from src.api.main import app
+
     return TestClient(app)
 
 
@@ -35,6 +35,7 @@ class TestGatewayInitialization:
             monkeypatch.setenv(key, value)
 
         from src.api.main import app
+
         assert app is not None
         assert app.title == "Vecinita Unified API Gateway"
 
@@ -44,6 +45,7 @@ class TestGatewayInitialization:
             monkeypatch.setenv(key, value)
 
         from src.api.main import app
+
         assert app.version == "1.0.0"
 
 
@@ -225,10 +227,7 @@ class TestRequestValidation:
 
     def test_scrape_request_validation_valid(self, gateway_client):
         """Test valid scrape request."""
-        response = gateway_client.post(
-            "/api/v1/scrape",
-            json={"urls": ["https://example.com"]}
-        )
+        response = gateway_client.post("/api/v1/scrape", json={"urls": ["https://example.com"]})
         # Should succeed (200) or return job ID
         assert response.status_code in [200, 202]
 
@@ -249,6 +248,7 @@ class TestEnvironmentConfiguration:
     def test_agent_service_url_from_env(self, env_vars, monkeypatch):
         """Test agent service URL is read from environment."""
         import importlib
+
         custom_url = "http://custom-agent:9000"
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
@@ -256,12 +256,14 @@ class TestEnvironmentConfiguration:
 
         # Reload module to pick up new environment variables
         import src.api.main
+
         importlib.reload(src.api.main)
         assert src.api.main.AGENT_SERVICE_URL == custom_url
 
     def test_embedding_service_url_from_env(self, env_vars, monkeypatch):
         """Test embedding service URL is read from environment."""
         import importlib
+
         custom_url = "http://custom-embed:9001"
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
@@ -269,6 +271,7 @@ class TestEnvironmentConfiguration:
 
         # Reload module to pick up new environment variables
         import src.api.main
+
         importlib.reload(src.api.main)
         assert src.api.main.EMBEDDING_SERVICE_URL == custom_url
 
@@ -279,12 +282,13 @@ class TestEnvironmentConfiguration:
         monkeypatch.setenv("MAX_URLS_PER_REQUEST", "50")
 
         # Force reimport
-        import importlib
         import sys
-        if 'src.api.main' in sys.modules:
-            del sys.modules['src.api.main']
+
+        if "src.api.main" in sys.modules:
+            del sys.modules["src.api.main"]
 
         from src.api.main import MAX_URLS_PER_REQUEST
+
         assert MAX_URLS_PER_REQUEST == 50
 
     def test_job_retention_hours_from_env(self, env_vars, monkeypatch):
@@ -294,10 +298,12 @@ class TestEnvironmentConfiguration:
         monkeypatch.setenv("JOB_RETENTION_HOURS", "48")
 
         import sys
-        if 'src.api.main' in sys.modules:
-            del sys.modules['src.api.main']
+
+        if "src.api.main" in sys.modules:
+            del sys.modules["src.api.main"]
 
         from src.api.main import JOB_RETENTION_HOURS
+
         assert JOB_RETENTION_HOURS == 48
 
 
@@ -311,12 +317,16 @@ class TestAPIStructure:
 
         for category, endpoints in data["endpoints"].items():
             if category in ["Q&A", "Scraping", "Embeddings", "Admin"]:
-                for name, path in endpoints.items():
+                for _name, path in endpoints.items():
                     if not path.startswith("/"):
                         continue
                     # All service endpoints should have /api prefix
                     if not path.startswith("/docs") and not path.startswith("/open"):
-                        assert path.startswith("/api") or path.startswith("GET /api") or path.startswith("POST /api")
+                        assert (
+                            path.startswith("/api")
+                            or path.startswith("GET /api")
+                            or path.startswith("POST /api")
+                        )
 
     def test_versioning_in_paths(self, gateway_client):
         """Test API includes /v1/ version in paths."""
@@ -325,7 +335,7 @@ class TestAPIStructure:
 
         # Endpoints should have /v1/ in API paths
         all_paths = []
-        for category, endpoints in data["endpoints"].items():
+        for _category, endpoints in data["endpoints"].items():
             if isinstance(endpoints, dict):
                 all_paths.extend(endpoints.values())
 

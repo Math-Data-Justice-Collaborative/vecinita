@@ -1,11 +1,13 @@
 """
 Shared pytest fixtures and configuration for the Vecinita test suite.
 """
-import os
+
 import json
+import os
+from unittest.mock import Mock, patch
+
 import pytest
 from dotenv import load_dotenv
-from unittest.mock import Mock, patch
 from fastapi.testclient import TestClient
 
 # Load environment variables for tests
@@ -15,6 +17,7 @@ load_dotenv()
 @pytest.fixture(scope="session")
 def env_vars():
     """Provide environment variables for tests."""
+
     def _env_or_default(key: str, default: str) -> str:
         value = os.getenv(key)
         if value is None or str(value).strip() == "":
@@ -39,9 +42,9 @@ def _agent_module_path_compatibility():
         yield
         return
 
+    import importlib.machinery
     import sys
     import types
-    import importlib.machinery
     from unittest.mock import Mock
 
     # Avoid importing broken/binary torch during test module import.
@@ -108,8 +111,7 @@ def mock_supabase_client():
 def mock_embedding_model():
     """Create a mock embedding model."""
     mock_model = Mock()
-    mock_model.embed_query = Mock(
-        return_value=[0.1] * 384)  # Mock embedding vector
+    mock_model.embed_query = Mock(return_value=[0.1] * 384)  # Mock embedding vector
     return mock_model
 
 
@@ -135,10 +137,13 @@ def fastapi_client(env_vars, monkeypatch):
         monkeypatch.setenv(key, value)
 
     # Patch dependencies before importing app
-    from unittest.mock import MagicMock, patch
-    with patch("src.agent.main.create_client") as mock_supabase, \
-            patch("src.agent.main.ChatOllama") as mock_ollama, \
-            patch("src.agent.main.HuggingFaceEmbeddings") as mock_embeddings:
+    from unittest.mock import MagicMock
+
+    with (
+        patch("src.agent.main.create_client") as mock_supabase,
+        patch("src.agent.main.ChatOllama") as mock_ollama,
+        patch("src.agent.main.HuggingFaceEmbeddings") as mock_embeddings,
+    ):
 
         # Setup mocks
         mock_supabase_client = MagicMock()
@@ -157,6 +162,7 @@ def fastapi_client(env_vars, monkeypatch):
 
         # Import after mocks are set
         from src.agent.main import app
+
         return TestClient(app)
 
 
@@ -174,6 +180,7 @@ def auth_proxy_client(env_vars, monkeypatch):
         sys.path.insert(0, str(repo_root))
 
     from auth.src.main import app as auth_app
+
     return TestClient(auth_app)
 
 
@@ -186,6 +193,7 @@ def mock_auth_header():
 @pytest.fixture
 def parse_sse_events():
     """Parse raw SSE response text into JSON event objects."""
+
     def _parse(text: str):
         events = []
         for line in text.split("\n"):

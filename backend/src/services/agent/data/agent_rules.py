@@ -1,9 +1,9 @@
-import os
 from pathlib import Path
 
 # Define the path to the text file relative to this script
 # .parent gives us 'src/agent/data', so we just join the filename
 RULES_FILE_PATH = Path(__file__).parent / "system_rules.md"
+
 
 def get_system_rules() -> str:
     """
@@ -12,9 +12,9 @@ def get_system_rules() -> str:
     """
     try:
         # Open the file and read the contents
-        with open(RULES_FILE_PATH, "r", encoding="utf-8") as f:
+        with open(RULES_FILE_PATH, encoding="utf-8") as f:
             return f.read()
-            
+
     except FileNotFoundError:
         # Fallback safety: If the file is accidentally deleted, return a default
         return "System Rule: Answer helpfuly and accurately."

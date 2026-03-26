@@ -2,14 +2,13 @@
 Unit tests for scraper chunk upload functionality with detailed logging.
 Tests the _upload_chunks_from_file() method and its logging traceability.
 """
-import pytest
+
+import logging
 import os
 import tempfile
-import json
-from unittest.mock import Mock, patch, MagicMock, call
-from pathlib import Path
-from io import StringIO
-import logging
+from unittest.mock import Mock, patch
+
+import pytest
 
 from src.scraper.scraper import VecinaScraper
 
@@ -22,8 +21,7 @@ class TestUploadChunksFromFile:
     def mock_uploader(self):
         """Create a mock uploader with tracked calls."""
         uploader = Mock()
-        uploader.upload_chunks = Mock(
-            return_value=(10, 0))  # 10 uploaded, 0 failed
+        uploader.upload_chunks = Mock(return_value=(10, 0))  # 10 uploaded, 0 failed
         return uploader
 
     @pytest.fixture
@@ -56,7 +54,9 @@ The Department of Environmental Management protects Rhode Island's natural resou
 --- CHUNK 2/2 ---
 We manage state parks, forests, and wildlife habitats for public enjoyment.
 """
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt', encoding='utf-8') as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", delete=False, suffix=".txt", encoding="utf-8"
+        ) as f:
             f.write(content)
             temp_path = f.name
 
@@ -70,10 +70,10 @@ We manage state parks, forests, and wildlife habitats for public enjoyment.
     def scraper_with_uploader(self, mock_uploader):
         """Create a VecinaScraper instance with mocked uploader."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            output_file = os.path.join(tmpdir, 'chunks.txt')
-            failed_log = os.path.join(tmpdir, 'failed.txt')
+            output_file = os.path.join(tmpdir, "chunks.txt")
+            failed_log = os.path.join(tmpdir, "failed.txt")
 
-            with patch('src.scraper.scraper.ScraperConfig') as mock_config_class:
+            with patch("src.scraper.scraper.ScraperConfig") as mock_config_class:
                 # Setup mock config with proper values
                 mock_config = Mock()
                 mock_config.RATE_LIMIT_DELAY = 0.1
@@ -81,13 +81,11 @@ We manage state parks, forests, and wildlife habitats for public enjoyment.
                 mock_config.CHUNK_OVERLAP = 200
                 mock_config_class.return_value = mock_config
 
-                with patch('src.scraper.scraper.SmartLoader'):
-                    with patch('src.scraper.scraper.DocumentProcessor'):
-                        with patch('src.scraper.scraper.LinkTracker'):
+                with patch("src.scraper.scraper.SmartLoader"):
+                    with patch("src.scraper.scraper.DocumentProcessor"):
+                        with patch("src.scraper.scraper.LinkTracker"):
                             scraper = VecinaScraper(
-                                output_file=output_file,
-                                failed_log=failed_log,
-                                stream_mode=False
+                                output_file=output_file, failed_log=failed_log, stream_mode=False
                             )
                             scraper.uploader = mock_uploader
                             scraper.stats = {
@@ -95,11 +93,13 @@ We manage state parks, forests, and wildlife habitats for public enjoyment.
                                 "failed_uploads": 0,
                                 "total_sources": 0,
                                 "successful_sources": 0,
-                                "total_chunks": 0
+                                "total_chunks": 0,
                             }
                             yield scraper
 
-    def test_upload_chunks_from_file_success(self, scraper_with_uploader, sample_chunks_file, caplog):
+    def test_upload_chunks_from_file_success(
+        self, scraper_with_uploader, sample_chunks_file, caplog
+    ):
         """Test successful upload of chunks with logging verification."""
         scraper = scraper_with_uploader
         scraper.output_file = sample_chunks_file
@@ -124,7 +124,9 @@ We manage state parks, forests, and wildlife habitats for public enjoyment.
         assert scraper.stats["total_uploads"] == 20
         assert scraper.stats["failed_uploads"] == 0
 
-    def test_upload_chunks_source_detection(self, scraper_with_uploader, sample_chunks_file, caplog):
+    def test_upload_chunks_source_detection(
+        self, scraper_with_uploader, sample_chunks_file, caplog
+    ):
         """Test that SOURCE: lines are correctly detected and logged."""
         scraper = scraper_with_uploader
         scraper.output_file = sample_chunks_file
@@ -137,7 +139,9 @@ We manage state parks, forests, and wildlife habitats for public enjoyment.
         assert "SOURCE: https://dem.ri.gov/" in caplog.text
         assert "Started new chunk from SOURCE:" in caplog.text
 
-    def test_upload_chunks_loader_detection(self, scraper_with_uploader, sample_chunks_file, caplog):
+    def test_upload_chunks_loader_detection(
+        self, scraper_with_uploader, sample_chunks_file, caplog
+    ):
         """Test that LOADER: lines are correctly detected and logged."""
         scraper = scraper_with_uploader
         scraper.output_file = sample_chunks_file
@@ -149,7 +153,9 @@ We manage state parks, forests, and wildlife habitats for public enjoyment.
         assert "Set LOADER: Playwright" in caplog.text
         assert "Set LOADER: Unstructured" in caplog.text
 
-    def test_upload_chunks_separator_skipping(self, scraper_with_uploader, sample_chunks_file, caplog):
+    def test_upload_chunks_separator_skipping(
+        self, scraper_with_uploader, sample_chunks_file, caplog
+    ):
         """Test that separator lines are properly skipped with logging."""
         scraper = scraper_with_uploader
         scraper.output_file = sample_chunks_file
@@ -163,8 +169,8 @@ We manage state parks, forests, and wildlife habitats for public enjoyment.
     def test_upload_chunks_with_metadata(self):
         """Test upload of chunks with METADATA: lines."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            output_file = os.path.join(tmpdir, 'chunks.txt')
-            failed_log = os.path.join(tmpdir, 'failed.txt')
+            output_file = os.path.join(tmpdir, "chunks.txt")
+            failed_log = os.path.join(tmpdir, "failed.txt")
 
             content = """======================================================================
 SOURCE: https://example.com/
@@ -176,26 +182,24 @@ METADATA: {"key": "value", "type": "test"}
 --- CHUNK 1/1 ---
 Test content with metadata.
 """
-            with open(output_file, 'w', encoding='utf-8') as f:
+            with open(output_file, "w", encoding="utf-8") as f:
                 f.write(content)
 
             mock_uploader = Mock()
             mock_uploader.upload_chunks = Mock(return_value=(1, 0))
 
-            with patch('src.scraper.scraper.ScraperConfig') as mock_config_class:
+            with patch("src.scraper.scraper.ScraperConfig") as mock_config_class:
                 mock_config = Mock()
                 mock_config.RATE_LIMIT_DELAY = 0.1
                 mock_config.CHUNK_SIZE = 1000
                 mock_config.CHUNK_OVERLAP = 200
                 mock_config_class.return_value = mock_config
 
-                with patch('src.scraper.scraper.SmartLoader'):
-                    with patch('src.scraper.scraper.DocumentProcessor'):
-                        with patch('src.scraper.scraper.LinkTracker'):
+                with patch("src.scraper.scraper.SmartLoader"):
+                    with patch("src.scraper.scraper.DocumentProcessor"):
+                        with patch("src.scraper.scraper.LinkTracker"):
                             scraper = VecinaScraper(
-                                output_file=output_file,
-                                failed_log=failed_log,
-                                stream_mode=False
+                                output_file=output_file, failed_log=failed_log, stream_mode=False
                             )
                             scraper.uploader = mock_uploader
                             scraper.stats = {
@@ -203,21 +207,25 @@ Test content with metadata.
                                 "failed_uploads": 0,
                                 "total_sources": 0,
                                 "successful_sources": 0,
-                                "total_chunks": 0
+                                "total_chunks": 0,
                             }
 
                             scraper._upload_chunks_from_file()
 
                             # Verify metadata was parsed
                             call_args = mock_uploader.upload_chunks.call_args
-                            chunks = call_args[1]['chunks'] if 'chunks' in call_args[1] else call_args[0][0]
+                            chunks = (
+                                call_args[1]["chunks"]
+                                if "chunks" in call_args[1]
+                                else call_args[0][0]
+                            )
                             assert len(chunks) > 0
-                            assert chunks[0]['metadata']['type'] == 'test'
+                            assert chunks[0]["metadata"]["type"] == "test"
 
     def test_upload_chunks_missing_file(self, scraper_with_uploader, caplog):
         """Test handling of missing output file with logging."""
         scraper = scraper_with_uploader
-        scraper.output_file = '/nonexistent/path/chunks.txt'
+        scraper.output_file = "/nonexistent/path/chunks.txt"
 
         with caplog.at_level(logging.ERROR):
             scraper._upload_chunks_from_file()
@@ -239,7 +247,7 @@ Test content with metadata.
 
     def test_upload_chunks_empty_file(self, scraper_with_uploader, caplog):
         """Test handling of empty chunks file."""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
             f.write("")
             empty_file = f.name
 
@@ -251,7 +259,9 @@ Test content with metadata.
                 scraper._upload_chunks_from_file()
 
             # Verify empty file handling
-            assert "No chunks found in output file" in caplog.text or "Parsed 0 lines" in caplog.text
+            assert (
+                "No chunks found in output file" in caplog.text or "Parsed 0 lines" in caplog.text
+            )
         finally:
             os.remove(empty_file)
 
@@ -281,19 +291,20 @@ Test content with metadata.
 
         # Verify call parameters for first source
         first_call = mock_uploader.upload_chunks.call_args_list[0]
-        assert 'chunks' in first_call[1]
-        assert 'source_identifier' in first_call[1]
-        assert 'loader_type' in first_call[1]
-        assert 'https://ride.ri.gov/' in first_call[1]['source_identifier']
+        assert "chunks" in first_call[1]
+        assert "source_identifier" in first_call[1]
+        assert "loader_type" in first_call[1]
+        assert "https://ride.ri.gov/" in first_call[1]["source_identifier"]
 
-    def test_upload_chunks_with_upload_failure(self, scraper_with_uploader, sample_chunks_file, caplog):
+    def test_upload_chunks_with_upload_failure(
+        self, scraper_with_uploader, sample_chunks_file, caplog
+    ):
         """Test handling of upload failures with detailed logging."""
         scraper = scraper_with_uploader
         scraper.output_file = sample_chunks_file
 
         # Mock uploader to return failures
-        scraper.uploader.upload_chunks = Mock(
-            return_value=(5, 5))  # 5 success, 5 failed
+        scraper.uploader.upload_chunks = Mock(return_value=(5, 5))  # 5 success, 5 failed
 
         with caplog.at_level(logging.INFO):
             scraper._upload_chunks_from_file()
@@ -306,14 +317,15 @@ Test content with metadata.
         assert scraper.stats["total_uploads"] == 10
         assert scraper.stats["failed_uploads"] == 10
 
-    def test_upload_chunks_uploader_exception(self, scraper_with_uploader, sample_chunks_file, caplog):
+    def test_upload_chunks_uploader_exception(
+        self, scraper_with_uploader, sample_chunks_file, caplog
+    ):
         """Test handling of uploader exceptions with stack trace logging."""
         scraper = scraper_with_uploader
         scraper.output_file = sample_chunks_file
 
         # Mock uploader to raise exception
-        scraper.uploader.upload_chunks = Mock(
-            side_effect=Exception("Database connection failed"))
+        scraper.uploader.upload_chunks = Mock(side_effect=Exception("Database connection failed"))
 
         with caplog.at_level(logging.ERROR):
             scraper._upload_chunks_from_file()
@@ -325,8 +337,8 @@ Test content with metadata.
     def test_upload_chunks_metadata_parse_error(self):
         """Test handling of malformed METADATA: lines with error logging."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            output_file = os.path.join(tmpdir, 'chunks.txt')
-            failed_log = os.path.join(tmpdir, 'failed.txt')
+            output_file = os.path.join(tmpdir, "chunks.txt")
+            failed_log = os.path.join(tmpdir, "failed.txt")
 
             content = """======================================================================
 SOURCE: https://example.com/
@@ -338,26 +350,24 @@ METADATA: {invalid json}
 --- CHUNK 1/1 ---
 Test content with bad metadata.
 """
-            with open(output_file, 'w', encoding='utf-8') as f:
+            with open(output_file, "w", encoding="utf-8") as f:
                 f.write(content)
 
             mock_uploader = Mock()
             mock_uploader.upload_chunks = Mock(return_value=(1, 0))
 
-            with patch('src.scraper.scraper.ScraperConfig') as mock_config_class:
+            with patch("src.scraper.scraper.ScraperConfig") as mock_config_class:
                 mock_config = Mock()
                 mock_config.RATE_LIMIT_DELAY = 0.1
                 mock_config.CHUNK_SIZE = 1000
                 mock_config.CHUNK_OVERLAP = 200
                 mock_config_class.return_value = mock_config
 
-                with patch('src.scraper.scraper.SmartLoader'):
-                    with patch('src.scraper.scraper.DocumentProcessor'):
-                        with patch('src.scraper.scraper.LinkTracker'):
+                with patch("src.scraper.scraper.SmartLoader"):
+                    with patch("src.scraper.scraper.DocumentProcessor"):
+                        with patch("src.scraper.scraper.LinkTracker"):
                             scraper = VecinaScraper(
-                                output_file=output_file,
-                                failed_log=failed_log,
-                                stream_mode=False
+                                output_file=output_file, failed_log=failed_log, stream_mode=False
                             )
                             scraper.uploader = mock_uploader
                             scraper.stats = {
@@ -365,7 +375,7 @@ Test content with bad metadata.
                                 "failed_uploads": 0,
                                 "total_sources": 0,
                                 "successful_sources": 0,
-                                "total_chunks": 0
+                                "total_chunks": 0,
                             }
 
                             # Should not raise exception, just log warning
@@ -391,20 +401,20 @@ Test content with bad metadata.
 
     def test_upload_chunks_large_file(self, scraper_with_uploader, caplog):
         """Test upload performance with a large chunks file."""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt', encoding='utf-8') as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", delete=False, suffix=".txt", encoding="utf-8"
+        ) as f:
             # Create a large file with 100 chunks from 5 sources
             for source_num in range(1, 6):
                 f.write(f"{'='*70}\n")
                 f.write(f"SOURCE: https://example{source_num}.com/\n")
                 f.write(f"LOADER: Test Loader {source_num}\n")
-                f.write(
-                    f"DOCUMENTS_LOADED: 1 | DOCUMENTS_PROCESSED: 1 | CHUNKS: 20\n")
+                f.write("DOCUMENTS_LOADED: 1 | DOCUMENTS_PROCESSED: 1 | CHUNKS: 20\n")
                 f.write(f"{'='*70}\n\n")
 
                 for chunk_num in range(1, 21):
                     f.write(f"--- CHUNK {chunk_num}/20 ---\n")
-                    f.write(
-                        f"Content for source {source_num} chunk {chunk_num}. " * 10)
+                    f.write(f"Content for source {source_num} chunk {chunk_num}. " * 10)
                     f.write("\n\n")
 
             large_file = f.name
@@ -433,8 +443,8 @@ class TestUploadChunksLoggingOutput:
     def test_logging_contains_all_required_fields(self):
         """Test that logs include all required traceability fields."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            output_file = os.path.join(tmpdir, 'chunks.txt')
-            failed_log = os.path.join(tmpdir, 'failed.txt')
+            output_file = os.path.join(tmpdir, "chunks.txt")
+            failed_log = os.path.join(tmpdir, "failed.txt")
 
             content = """======================================================================
 SOURCE: https://example.com/
@@ -445,26 +455,24 @@ DOCUMENTS_LOADED: 1 | DOCUMENTS_PROCESSED: 1 | CHUNKS: 1
 --- CHUNK 1/1 ---
 Test content.
 """
-            with open(output_file, 'w', encoding='utf-8') as f:
+            with open(output_file, "w", encoding="utf-8") as f:
                 f.write(content)
 
             mock_uploader = Mock()
             mock_uploader.upload_chunks = Mock(return_value=(1, 0))
 
-            with patch('src.scraper.scraper.ScraperConfig') as mock_config_class:
+            with patch("src.scraper.scraper.ScraperConfig") as mock_config_class:
                 mock_config = Mock()
                 mock_config.RATE_LIMIT_DELAY = 0.1
                 mock_config.CHUNK_SIZE = 1000
                 mock_config.CHUNK_OVERLAP = 200
                 mock_config_class.return_value = mock_config
 
-                with patch('src.scraper.scraper.SmartLoader'):
-                    with patch('src.scraper.scraper.DocumentProcessor'):
-                        with patch('src.scraper.scraper.LinkTracker'):
+                with patch("src.scraper.scraper.SmartLoader"):
+                    with patch("src.scraper.scraper.DocumentProcessor"):
+                        with patch("src.scraper.scraper.LinkTracker"):
                             scraper = VecinaScraper(
-                                output_file=output_file,
-                                failed_log=failed_log,
-                                stream_mode=False
+                                output_file=output_file, failed_log=failed_log, stream_mode=False
                             )
                             scraper.uploader = mock_uploader
                             scraper.stats = {
@@ -472,25 +480,19 @@ Test content.
                                 "failed_uploads": 0,
                                 "total_sources": 0,
                                 "successful_sources": 0,
-                                "total_chunks": 0
+                                "total_chunks": 0,
                             }
 
                             # Capture logs
                             import logging
-                            logger = logging.getLogger('src.scraper.scraper')
+
+                            logger = logging.getLogger("src.scraper.scraper")
                             handler = logging.StreamHandler()
                             logger.addHandler(handler)
 
                             scraper._upload_chunks_from_file()
 
                             # All these should be in the logs
-                            required_fields = [
-                                "Reading chunks from",
-                                "extracted",
-                                "Grouped chunks",
-                                "Uploading",
-                                "Batch upload complete"
-                            ]
 
                             # Note: Direct assertion would require captured log output
                             # This test structure allows for integration with log capturing

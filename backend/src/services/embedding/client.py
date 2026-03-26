@@ -6,7 +6,7 @@ embedding service instead of loading models locally.
 """
 
 import logging
-from typing import List
+from typing import cast
 
 import httpx
 from langchain_core.embeddings import Embeddings
@@ -35,7 +35,7 @@ class EmbeddingServiceClient(Embeddings):
         self.client = httpx.Client(timeout=timeout)
         logger.info(f"✅ Embedding Service Client initialized: {self.base_url}")
 
-    def embed_query(self, text: str) -> List[float]:
+    def embed_query(self, text: str) -> list[float]:
         """
         Generate embedding for a single query text.
 
@@ -46,16 +46,17 @@ class EmbeddingServiceClient(Embeddings):
             List of floats representing the embedding vector
         """
         try:
-            response = self.client.post(
-                f"{self.base_url}/embed", json={"text": text}
-            )
+            response = self.client.post(f"{self.base_url}/embed", json={"text": text})
             response.raise_for_status()
-            return response.json()["embedding"]
+            payload = response.json()
+            if isinstance(payload, dict):
+                return cast(list[float], payload.get("embedding", []))
+            return []
         except Exception as e:
             logger.error(f"❌ Error calling embedding service: {e}")
             raise
 
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
         """
         Generate embeddings for multiple documents (batch).
 
@@ -66,20 +67,21 @@ class EmbeddingServiceClient(Embeddings):
             List of embedding vectors
         """
         try:
-            response = self.client.post(
-                f"{self.base_url}/embed-batch", json={"texts": texts}
-            )
+            response = self.client.post(f"{self.base_url}/embed-batch", json={"texts": texts})
             response.raise_for_status()
-            return response.json()["embeddings"]
+            payload = response.json()
+            if isinstance(payload, dict):
+                return cast(list[list[float]], payload.get("embeddings", []))
+            return []
         except Exception as e:
             logger.error(f"❌ Error calling embedding service: {e}")
             raise
 
-    async def aembed_query(self, text: str) -> List[float]:
+    async def aembed_query(self, text: str) -> list[float]:
         """Async version of embed_query (delegates to sync for now)."""
         return self.embed_query(text)
 
-    async def aembed_documents(self, texts: List[str]) -> List[List[float]]:
+    async def aembed_documents(self, texts: list[str]) -> list[list[float]]:
         """Async version of embed_documents (delegates to sync for now)."""
         return self.embed_documents(texts)
 

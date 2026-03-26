@@ -3,45 +3,48 @@ Utility functions for the VECINA scraper.
 Includes text cleaning, file handling, and URL processing.
 """
 
-import os
-import re
 import logging
-from typing import Optional, List, Iterable, Tuple, Dict
-import requests
+import re
+from collections.abc import Iterable
+from typing import Any, cast
 from urllib.parse import urljoin, urlparse, urlunparse
+
+import requests  # type: ignore[import-untyped]
 from bs4 import BeautifulSoup
 
 log = logging.getLogger(__name__)
 
 
-def normalize_scrape_url(raw_line: str) -> Optional[str]:
+def normalize_scrape_url(raw_line: str) -> str | None:
     """Normalize a raw URL line for scraping or return None if invalid/ignored."""
     if raw_line is None:
         return None
 
-    value = raw_line.strip().lstrip('\ufeff')
-    if not value or value.startswith('#'):
+    value = raw_line.strip().lstrip("\ufeff")
+    if not value or value.startswith("#"):
         return None
 
     parsed = urlparse(value)
-    if parsed.scheme.lower() not in {'http', 'https'}:
+    if parsed.scheme.lower() not in {"http", "https"}:
         return None
 
     scheme = parsed.scheme.lower()
     netloc = parsed.netloc.lower()
 
-    path = parsed.path or ''
-    if path and path != '/':
-        path = path.rstrip('/')
+    path = parsed.path or ""
+    if path and path != "/":
+        path = path.rstrip("/")
 
-    normalized = urlunparse((
-        scheme,
-        netloc,
-        path,
-        parsed.params,
-        parsed.query,
-        '',
-    ))
+    normalized = urlunparse(
+        (
+            scheme,
+            netloc,
+            path,
+            parsed.params,
+            parsed.query,
+            "",
+        )
+    )
     return normalized
 
 
@@ -50,61 +53,60 @@ def prepare_scrape_urls(
     *,
     skip_localhost: bool = True,
     convert_github_blob_urls: bool = True,
-) -> Tuple[List[str], Dict[str, int]]:
+) -> tuple[list[str], dict[str, int]]:
     """Normalize, filter, and deduplicate URL lines for scraping."""
     stats = {
-        'total_lines': 0,
-        'ignored_blank_or_comment': 0,
-        'ignored_invalid_url': 0,
-        'ignored_localhost': 0,
-        'duplicates_removed': 0,
-        'final_urls': 0,
+        "total_lines": 0,
+        "ignored_blank_or_comment": 0,
+        "ignored_invalid_url": 0,
+        "ignored_localhost": 0,
+        "duplicates_removed": 0,
+        "final_urls": 0,
     }
 
-    unique_urls: List[str] = []
+    unique_urls: list[str] = []
     seen: set[str] = set()
 
     for raw in raw_lines:
-        stats['total_lines'] += 1
-        stripped = raw.strip().lstrip('\ufeff') if raw is not None else ''
+        stats["total_lines"] += 1
+        stripped = raw.strip().lstrip("\ufeff") if raw is not None else ""
 
-        if not stripped or stripped.startswith('#'):
-            stats['ignored_blank_or_comment'] += 1
+        if not stripped or stripped.startswith("#"):
+            stats["ignored_blank_or_comment"] += 1
             continue
 
         normalized = normalize_scrape_url(stripped)
         if not normalized:
-            stats['ignored_invalid_url'] += 1
+            stats["ignored_invalid_url"] += 1
             continue
 
         if convert_github_blob_urls:
             normalized = normalize_scrape_url(convert_github_to_raw(normalized))
             if not normalized:
-                stats['ignored_invalid_url'] += 1
+                stats["ignored_invalid_url"] += 1
                 continue
 
         if skip_localhost:
-            hostname = (urlparse(normalized).hostname or '').lower()
-            if hostname in {'localhost', '127.0.0.1'}:
-                stats['ignored_localhost'] += 1
+            hostname = (urlparse(normalized).hostname or "").lower()
+            if hostname in {"localhost", "127.0.0.1"}:
+                stats["ignored_localhost"] += 1
                 continue
 
         if normalized in seen:
-            stats['duplicates_removed'] += 1
+            stats["duplicates_removed"] += 1
             continue
 
         seen.add(normalized)
         unique_urls.append(normalized)
 
-    stats['final_urls'] = len(unique_urls)
+    stats["final_urls"] = len(unique_urls)
     return unique_urls, stats
 
 
 def convert_github_to_raw(url: str) -> str:
     """Convert GitHub 'blob' URLs to 'raw' URLs for direct content access."""
     if "github.com" in url and "/blob/" in url:
-        raw_url = url.replace(
-            "github.com", "raw.githubusercontent.com").replace("/blob/", "/")
+        raw_url = url.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/")
         log.info(f"--> Converted GitHub URL to raw: {raw_url}")
         return raw_url
     return url
@@ -114,8 +116,7 @@ def should_skip_url(url: str, skip_patterns: list) -> bool:
     """Check if a URL matches any pattern in the skip list."""
     for skip_pattern in skip_patterns:
         if skip_pattern in url:
-            log.warning(
-                f"--> ⚠️ Skipping {url} (matches skip pattern: '{skip_pattern}')")
+            log.warning(f"--> ⚠️ Skipping {url} (matches skip pattern: '{skip_pattern}')")
             return True
     return False
 
@@ -127,18 +128,18 @@ def needs_playwright(url: str, playwright_patterns: list) -> bool:
 
 def is_csv_file(url: str) -> bool:
     """Check if a URL likely points to a CSV file."""
-    if url.lower().endswith('.csv'):
+    if url.lower().endswith(".csv"):
         return True
-    if "github.com" in url and "/blob/" in url and '.csv' in url.lower():
+    if "github.com" in url and "/blob/" in url and ".csv" in url.lower():
         return True
     return False
 
 
-def get_crawl_config(url: str, crawl_configs: dict) -> Optional[dict]:
+def get_crawl_config(url: str, crawl_configs: dict) -> dict | None:
     """Get recursive crawl config if URL matches a configured base URL."""
     for site_prefix, config in crawl_configs.items():
         if url.startswith(site_prefix):
-            return config
+            return cast(dict[Any, Any], config)
     return None
 
 
@@ -151,7 +152,7 @@ def download_file(url: str, save_path: str) -> bool:
         }
         response = requests.get(url, headers=headers, timeout=30, stream=True)
         response.raise_for_status()
-        with open(save_path, 'wb') as f:
+        with open(save_path, "wb") as f:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
         log.info(f"--> ✅ File saved to {save_path}")
@@ -171,21 +172,21 @@ def clean_text(text: str) -> str:
         return ""
 
     orig_chars = len(text)
-    orig_lines = text.count('\n') + 1
+    orig_lines = text.count("\n") + 1
 
     # Remove extra whitespace
-    text = re.sub(r'[ \t]+', ' ', text)
-    text = re.sub(r'\n\s*\n+', '\n\n', text)
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n\s*\n+", "\n\n", text)
 
     # Remove common website boilerplate (less aggressive)
     # Patterns to drop when they appear as a whole line
     exact_noise_patterns = [
-        r'^\s*cookie\s+policy\s*$',
-        r'^\s*privacy\s+policy\s*$',
-        r'^\s*terms\s+of\s+service\s*$',
-        r'^\s*terms\s*&\s*conditions\s*$',
-        r'^\s*site\s+map\s*$',
-        r'^\s*contact\s+us\s*$',
+        r"^\s*cookie\s+policy\s*$",
+        r"^\s*privacy\s+policy\s*$",
+        r"^\s*terms\s+of\s+service\s*$",
+        r"^\s*terms\s*&\s*conditions\s*$",
+        r"^\s*site\s+map\s*$",
+        r"^\s*contact\s+us\s*$",
     ]
 
     # Substring heuristics: drop lines that contain these noise phrases anywhere
@@ -197,14 +198,14 @@ def clean_text(text: str) -> str:
         "terms & conditions",
     ]
 
-    lines = text.split('\n')
+    lines = text.split("\n")
     cleaned_lines = []
     skipped_count = 0
 
     for line in lines:
         # Keep single blank lines for readability but collapse later
         if not line.strip():
-            cleaned_lines.append('')
+            cleaned_lines.append("")
             continue
 
         # Skip lines that are only boilerplate (exact match)
@@ -219,8 +220,7 @@ def clean_text(text: str) -> str:
         ):
             modified = line
             for phrase in substring_noise:
-                modified = re.sub(re.escape(phrase), "",
-                                  modified, flags=re.IGNORECASE)
+                modified = re.sub(re.escape(phrase), "", modified, flags=re.IGNORECASE)
             # Normalize whitespace after removals
             modified = re.sub(r"\s+", " ", modified).strip()
             if not modified or len(modified.split()) < 3:
@@ -231,30 +231,31 @@ def clean_text(text: str) -> str:
         cleaned_lines.append(line)
 
     # Remove consecutive empty lines
-    text = '\n'.join(cleaned_lines)
-    text = re.sub(r'\n\s*\n\s*\n+', '\n\n', text)
+    text = "\n".join(cleaned_lines)
+    text = re.sub(r"\n\s*\n\s*\n+", "\n\n", text)
 
     final_text = text.strip()
     final_chars = len(final_text)
-    final_lines = final_text.count('\n') + (1 if final_text else 0)
+    final_lines = final_text.count("\n") + (1 if final_text else 0)
 
     log.debug(
-        f"clean_text: chars {orig_chars}->{final_chars} | lines {orig_lines}->{final_lines} | boilerplate_lines_skipped={skipped_count}")
+        f"clean_text: chars {orig_chars}->{final_chars} | lines {orig_lines}->{final_lines} | boilerplate_lines_skipped={skipped_count}"
+    )
 
     if not final_text:
-        preview = (lines[0] if lines else '')[:200].replace('\n', ' ')
+        preview = (lines[0] if lines else "")[:200].replace("\n", " ")
         log.debug(f"clean_text: result empty. First-line preview='{preview}'")
 
     return final_text
 
 
-def _is_valid_link(href: str) -> bool:
+def _is_valid_link(href: str | None) -> bool:
     if not href:
         return False
     href = href.strip()
-    if href.startswith('#'):
+    if href.startswith("#"):
         return False
-    bad_schemes = ('mailto:', 'tel:', 'javascript:', 'data:')
+    bad_schemes = ("mailto:", "tel:", "javascript:", "data:")
     if href.startswith(bad_schemes):
         return False
     return True
@@ -264,24 +265,30 @@ def _should_skip_domain(netloc: str) -> bool:
     if not netloc:
         return False
     blacklist = [
-        'facebook.com', 'twitter.com', 'x.com', 'instagram.com',
-        'linkedin.com', 'youtube.com', 'tiktok.com', 'snapchat.com',
-        'pinterest.com'
+        "facebook.com",
+        "twitter.com",
+        "x.com",
+        "instagram.com",
+        "linkedin.com",
+        "youtube.com",
+        "tiktok.com",
+        "snapchat.com",
+        "pinterest.com",
     ]
     lower = netloc.lower()
     return any(b in lower for b in blacklist)
 
 
-def extract_outbound_links(url: str, same_domain_only: bool = False, timeout: int = 20) -> List[str]:
+def extract_outbound_links(
+    url: str, same_domain_only: bool = False, timeout: int = 20
+) -> list[str]:
     """Fetch a URL and extract outbound links as absolute URLs.
 
     Filters out social media, mailto/tel/js/data, and fragment-only links.
     Optionally restricts to same-domain links.
     """
     try:
-        headers = {
-            "User-Agent": "Mozilla/5.0 (VECINA Project - Link Extractor)"
-        }
+        headers = {"User-Agent": "Mozilla/5.0 (VECINA Project - Link Extractor)"}
         resp = requests.get(url, headers=headers, timeout=timeout)
         resp.raise_for_status()
         html = resp.text
@@ -290,15 +297,16 @@ def extract_outbound_links(url: str, same_domain_only: bool = False, timeout: in
         return []
 
     try:
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
     except Exception as e:
         log.debug(f"extract_outbound_links: bs4 parse failed for {url}: {e}")
         return []
 
     base_netloc = urlparse(url).netloc
-    links: List[str] = []
-    for a in soup.find_all('a'):
-        href = a.get('href')
+    links: list[str] = []
+    for a in soup.find_all("a"):
+        href_obj = a.get("href")
+        href = href_obj if isinstance(href_obj, str) else None
         if not _is_valid_link(href):
             continue
         abs_url = urljoin(url, href)
@@ -311,22 +319,22 @@ def extract_outbound_links(url: str, same_domain_only: bool = False, timeout: in
 
     # Dedupe while preserving order
     seen = set()
-    deduped: List[str] = []
-    for l in links:
-        if l not in seen:
-            seen.add(l)
-            deduped.append(l)
+    deduped: list[str] = []
+    for link in links:
+        if link not in seen:
+            seen.add(link)
+            deduped.append(link)
     log.debug(f"extract_outbound_links: {len(deduped)} links from {url}")
     return deduped
 
 
-def write_to_failed_log(url: str, reason: str, log_file: Optional[str]) -> None:
+def write_to_failed_log(url: str, reason: str, log_file: str | None) -> None:
     """Append a failed URL and its reason to a log file."""
     if not log_file:
         return
 
     try:
-        with open(log_file, 'a', encoding='utf-8') as f:
+        with open(log_file, "a", encoding="utf-8") as f:
             f.write(f"{url}\n")
     except Exception as e:
         log.error(f"Failed to write to failed-log {log_file}: {e}")

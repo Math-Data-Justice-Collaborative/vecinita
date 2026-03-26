@@ -13,8 +13,8 @@ def documents_client(monkeypatch, env_vars):
     for key, value in env_vars.items():
         monkeypatch.setenv(key, value)
 
-    from src.api.main import app
     from src.api import router_documents
+    from src.api.main import app
 
     mock_store = MagicMock()
     monkeypatch.setattr(router_documents, "get_chroma_store", lambda: mock_store)
@@ -109,10 +109,14 @@ def test_documents_preview_reads_chunks_from_source(documents_client):
     mock_store.get_chunks.return_value = {
         "ids": ["1"],
         "documents": ["Some preview content"],
-        "metadatas": [{"chunk_index": 0, "chunk_size": 20, "document_title": "Doc", "source_url": "https://x"}],
+        "metadatas": [
+            {"chunk_index": 0, "chunk_size": 20, "document_title": "Doc", "source_url": "https://x"}
+        ],
     }
 
-    response = client.get("/api/v1/documents/preview", params={"source_url": "https://x", "limit": 3})
+    response = client.get(
+        "/api/v1/documents/preview", params={"source_url": "https://x", "limit": 3}
+    )
     assert response.status_code == 200
     payload = response.json()
     assert payload["source_url"] == "https://x"
@@ -124,8 +128,24 @@ def test_chunk_statistics_from_chroma_metadata(documents_client):
     client, mock_store = documents_client
 
     mock_store.iter_all_chunks.return_value = [
-        {"id": "1", "content": "abc", "metadata": {"source_domain": "foo.org", "source_url": "https://foo.org/a", "chunk_size": 10}},
-        {"id": "2", "content": "xyz", "metadata": {"source_domain": "foo.org", "source_url": "https://foo.org/b", "chunk_size": 20}},
+        {
+            "id": "1",
+            "content": "abc",
+            "metadata": {
+                "source_domain": "foo.org",
+                "source_url": "https://foo.org/a",
+                "chunk_size": 10,
+            },
+        },
+        {
+            "id": "2",
+            "content": "xyz",
+            "metadata": {
+                "source_domain": "foo.org",
+                "source_url": "https://foo.org/b",
+                "chunk_size": 20,
+            },
+        },
     ]
 
     response = client.get("/api/v1/documents/chunk-statistics", params={"limit": 8})
@@ -155,7 +175,9 @@ def test_documents_download_url_returns_non_error_for_url_only_sources(documents
     assert payload["download_url"] is None
 
 
-def test_documents_download_url_resolves_upload_source_without_explicit_download_url(documents_client):
+def test_documents_download_url_resolves_upload_source_without_explicit_download_url(
+    documents_client,
+):
     client, mock_store = documents_client
 
     mock_store.get_source.return_value = {
@@ -210,7 +232,9 @@ def test_documents_overview_excludes_test_artifacts_by_default(documents_client)
     payload = response.json()
     assert payload["unique_sources"] == 1
 
-    response_with_test = client.get("/api/v1/documents/overview", params={"include_test_data": "true"})
+    response_with_test = client.get(
+        "/api/v1/documents/overview", params={"include_test_data": "true"}
+    )
     assert response_with_test.status_code == 200
     payload_with_test = response_with_test.json()
     assert payload_with_test["unique_sources"] == 2

@@ -3,10 +3,11 @@ Unit tests for src/embedding_service/main.py
 
 Tests embedding service endpoints and model loading.
 """
-import pytest
-import json
+
 import importlib
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 from fastapi.testclient import TestClient
 
 pytestmark = pytest.mark.unit
@@ -16,10 +17,15 @@ pytestmark = pytest.mark.unit
 def mock_embedding_model():
     """Mock embedding model for tests."""
     import numpy as np
+
     mock_embedding = MagicMock()
     # Return numpy arrays like real SentenceTransformer
     mock_embedding.encode = MagicMock(
-        side_effect=lambda text, **kwargs: np.array([0.1] * 384) if isinstance(text, str) else np.array([[0.1] * 384 for _ in range(len(text))])
+        side_effect=lambda text, **kwargs: (
+            np.array([0.1] * 384)
+            if isinstance(text, str)
+            else np.array([[0.1] * 384 for _ in range(len(text))])
+        )
     )
     return mock_embedding
 
@@ -192,7 +198,7 @@ class TestConfigEndpoints:
         request_data = {
             "provider": "huggingface",
             "model": "sentence-transformers/all-MiniLM-L6-v2",
-            "lock": False
+            "lock": False,
         }
         response = embedding_client.post("/config", json=request_data)
         assert response.status_code == 200
@@ -203,17 +209,14 @@ class TestConfigEndpoints:
         with patch("src.embedding_service.main._lock_selection", True):
             request_data = {
                 "provider": "huggingface",
-                "model": "sentence-transformers/all-MiniLM-L6-v2"
+                "model": "sentence-transformers/all-MiniLM-L6-v2",
             }
             response = embedding_client.post("/config", json=request_data)
             assert response.status_code == 403
 
     def test_set_config_unsupported_provider(self, embedding_client):
         """Test that unsupported provider is rejected."""
-        request_data = {
-            "provider": "unsupported",
-            "model": "some-model"
-        }
+        request_data = {"provider": "unsupported", "model": "some-model"}
         response = embedding_client.post("/config", json=request_data)
         assert response.status_code == 400
 
@@ -230,26 +233,31 @@ class TestSimilarityEndpoint:
     def test_similarity_search(self, embedding_client):
         """Test similarity search endpoint."""
         import numpy as np
-        with patch("src.embedding_service.main.get_embedding_model") as mock_model, \
-             patch("sklearn.metrics.pairwise.cosine_similarity", return_value=np.array([[0.9, 0.7, 0.5]])) as mock_cosine:
+
+        with (
+            patch("src.embedding_service.main.get_embedding_model") as mock_model,
+            patch(
+                "sklearn.metrics.pairwise.cosine_similarity",
+                return_value=np.array([[0.9, 0.7, 0.5]]),
+            ),
+        ):
             # Mock embedding model to return deterministic vectors
             mock_embedding = MagicMock()
+
             def mock_encode(text, **kwargs):
                 if isinstance(text, str):
                     return np.array([0.1, 0.2, 0.3] + [0.0] * 381)
                 else:
                     return np.array([[0.1, 0.2, 0.3] + [0.0] * 381 for _ in range(len(text))])
+
             mock_embedding.encode = mock_encode
             mock_model.return_value = mock_embedding
-            
+
             request_data = {
                 "query_request": {"text": "Hello world"},
-                "texts_request": {"texts": ["Hello", "World", "Test"]}
+                "texts_request": {"texts": ["Hello", "World", "Test"]},
             }
-            response = embedding_client.post(
-                "/similarity",
-                json=request_data
-            )
+            response = embedding_client.post("/similarity", json=request_data)
             assert response.status_code == 200
             data = response.json()
             assert "query" in data
@@ -261,7 +269,7 @@ class TestSimilarityEndpoint:
         with patch("src.embedding_service.main.get_embedding_model"):
             request_data = {
                 "query_request": {"text": "test"},
-                "texts_request": {"texts": ["a", "b", "c"]}
+                "texts_request": {"texts": ["a", "b", "c"]},
             }
             response = embedding_client.post("/similarity", json=request_data)
             if response.status_code == 200:
@@ -277,18 +285,21 @@ class TestEmbedRequestModel:
     def test_embed_request_valid(self, embedding_client):
         """Test valid EmbedRequest."""
         from src.embedding_service.main import EmbedRequest
+
         req = EmbedRequest(text="test text")
         assert req.text == "test text"
 
     def test_embed_request_min_length(self, embedding_client):
         """Test EmbedRequest respects min_length."""
         from src.embedding_service.main import EmbedRequest
+
         with pytest.raises(ValueError):
             EmbedRequest(text="")
 
     def test_embed_request_max_length(self, embedding_client):
         """Test EmbedRequest respects max_length."""
         from src.embedding_service.main import EmbedRequest
+
         with pytest.raises(ValueError):
             EmbedRequest(text="x" * 10001)
 
@@ -299,18 +310,21 @@ class TestBatchEmbedRequestModel:
     def test_batch_embed_request_valid(self, embedding_client):
         """Test valid BatchEmbedRequest."""
         from src.embedding_service.main import BatchEmbedRequest
+
         req = BatchEmbedRequest(texts=["text1", "text2"])
         assert len(req.texts) == 2
 
     def test_batch_embed_request_min_items(self, embedding_client):
         """Test BatchEmbedRequest respects min_items."""
         from src.embedding_service.main import BatchEmbedRequest
+
         with pytest.raises(ValueError):
             BatchEmbedRequest(texts=[])
 
     def test_batch_embed_request_max_items(self, embedding_client):
         """Test BatchEmbedRequest respects max_items."""
         from src.embedding_service.main import BatchEmbedRequest
+
         with pytest.raises(ValueError):
             BatchEmbedRequest(texts=["text"] * 101)
 
@@ -321,11 +335,8 @@ class TestEmbeddingResponseModel:
     def test_embedding_response_valid(self, embedding_client):
         """Test valid EmbeddingResponse."""
         from src.embedding_service.main import EmbeddingResponse
-        resp = EmbeddingResponse(
-            embedding=[0.1] * 384,
-            dimension=384,
-            model="test-model"
-        )
+
+        resp = EmbeddingResponse(embedding=[0.1] * 384, dimension=384, model="test-model")
         assert resp.dimension == 384
         assert len(resp.embedding) == 384
 
@@ -336,11 +347,9 @@ class TestBatchEmbeddingResponseModel:
     def test_batch_embedding_response_valid(self, embedding_client):
         """Test valid BatchEmbeddingResponse."""
         from src.embedding_service.main import BatchEmbeddingResponse
+
         resp = BatchEmbeddingResponse(
-            embeddings=[[0.1] * 384, [0.2] * 384],
-            dimension=384,
-            count=2,
-            model="test-model"
+            embeddings=[[0.1] * 384, [0.2] * 384], dimension=384, count=2, model="test-model"
         )
         assert resp.count == 2
         assert len(resp.embeddings) == 2
@@ -358,13 +367,14 @@ class TestEmbeddingModelLoading:
             mock_transformer.return_value = mock_model
 
             from src.services.embedding import server
+
             # Reset the global embedding model
             server._embedding_model = None
 
             # First call should load the model
             model1 = server.get_embedding_model()
             # Second call should return cached model
-            model2 = main.get_embedding_model()
+            model2 = server.get_embedding_model()
 
             assert model1 is model2
             # Constructor should be called only once
@@ -378,6 +388,7 @@ class TestEmbeddingModelLoading:
             mock_transformer.side_effect = ImportError("sentence-transformers not found")
 
             from src.services.embedding import server
+
             server._embedding_model = None
 
             with pytest.raises(RuntimeError, match="Failed to load embedding model"):

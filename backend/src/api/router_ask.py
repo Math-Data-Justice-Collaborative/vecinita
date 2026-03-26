@@ -7,16 +7,16 @@ Proxies requests to the agent service running on port 8000.
 Demo mode available via DEMO_MODE=true environment variable for testing without agent service.
 """
 
-import os
-import time
 import logging
+import os
 import threading
+import time
+from collections.abc import AsyncGenerator
+from typing import Any
 from uuid import uuid4
-from typing import Optional, AsyncGenerator, Dict, Any, List
-from datetime import datetime
 
 import httpx
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
 
 from .models import AskResponse, SourceCitation
@@ -29,15 +29,15 @@ AGENT_SERVICE_URL = os.getenv("AGENT_SERVICE_URL", "http://localhost:8000")
 AGENT_TIMEOUT = float(os.getenv("AGENT_TIMEOUT", "30"))
 AGENT_STREAM_TIMEOUT = float(os.getenv("AGENT_STREAM_TIMEOUT", "120"))
 DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
-_AGENT_CLIENT: Optional[httpx.AsyncClient] = None
+_AGENT_CLIENT: httpx.AsyncClient | None = None
 _AGENT_CLIENT_LOCK = threading.Lock()
 
 
-def _get_agent_client() -> httpx.AsyncClient:
+def _get_agent_client() -> httpx.AsyncClient | None:
     """Reuse one HTTP client to avoid per-request connection setup overhead."""
     global _AGENT_CLIENT
 
-    def _client_is_closed(client: Optional[httpx.AsyncClient]) -> bool:
+    def _client_is_closed(client: httpx.AsyncClient | None) -> bool:
         if client is None:
             return True
         if not isinstance(client, httpx.AsyncClient):
@@ -53,7 +53,7 @@ def _get_agent_client() -> httpx.AsyncClient:
     return _AGENT_CLIENT
 
 
-def _fallback_ask_config() -> Dict[str, Any]:
+def _fallback_ask_config() -> dict[str, Any]:
     """Return a safe fallback config when agent service is unavailable."""
     # Default to Ollama (local). Groq / X.AI intentionally excluded.
     default_provider = "ollama"
@@ -73,12 +73,14 @@ def _fallback_ask_config() -> Dict[str, Any]:
     }
 
 
-def _normalize_agent_config(agent_data: Dict[str, Any]) -> Dict[str, Any]:
+def _normalize_agent_config(agent_data: dict[str, Any]) -> dict[str, Any]:
     """Normalize agent /config payload to frontend-expected shape."""
-    raw_models = agent_data.get("models") if isinstance(agent_data.get("models"), dict) else {}
-    raw_providers = agent_data.get("providers") if isinstance(agent_data.get("providers"), list) else []
+    models_value = agent_data.get("models")
+    providers_value = agent_data.get("providers")
+    raw_models: dict[str, Any] = models_value if isinstance(models_value, dict) else {}
+    raw_providers: list[Any] = providers_value if isinstance(providers_value, list) else []
 
-    normalized_providers: List[Dict[str, Any]] = []
+    normalized_providers: list[dict[str, Any]] = []
 
     for index, provider in enumerate(raw_providers):
         if not isinstance(provider, dict):
@@ -120,7 +122,7 @@ def _normalize_agent_config(agent_data: Dict[str, Any]) -> Dict[str, Any]:
         normalized_providers[0],
     )
     default_provider = default_provider_obj.get("name")
-    default_model = (default_provider_obj.get("models") or [None])[0]
+    default_model = next(iter(default_provider_obj.get("models") or []), None)
 
     return {
         "providers": normalized_providers,
@@ -131,7 +133,7 @@ def _normalize_agent_config(agent_data: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def get_demo_response(question: str, lang: Optional[str] = None) -> AskResponse:
+def get_demo_response(question: str, lang: str | None = None) -> AskResponse:
     """Generate a demo response when agent service is unavailable or DEMO_MODE=true."""
     return AskResponse(
         question=question,
@@ -153,60 +155,62 @@ def get_demo_response(question: str, lang: Optional[str] = None) -> AskResponse:
                 title="Vecinita GitHub Repository",
                 chunk_id="demo-001",
                 relevance=0.95,
-                excerpt="Vecinita is a RAG Q&A Assistant using LangChain, LangGraph, and Supabase."
+                excerpt="Vecinita is a RAG Q&A Assistant using LangChain, LangGraph, and Supabase.",
             ),
             SourceCitation(
                 url="http://localhost:8004/docs",
                 title="API Documentation (Swagger UI)",
                 chunk_id="demo-002",
                 relevance=0.88,
-                excerpt="Complete OpenAPI documentation with request/response examples for all endpoints."
-            )
+                excerpt="Complete OpenAPI documentation with request/response examples for all endpoints.",
+            ),
         ],
         language=lang or "en",
         model="demo-mode",
         response_time_ms=0,
-        token_usage={"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+        token_usage={"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
     )
 
 
 @router.get("")
 async def ask_question(
     question: str = Query(..., description="User question"),
-    thread_id: Optional[str] = Query(None, description="Conversation thread ID"),
-    lang: Optional[str] = Query(None, description="Override language detection (es/en)"),
-    provider: Optional[str] = Query(None, description="LLM provider (e.g., groq, openai)"),
-    model: Optional[str] = Query(None, description="LLM model name"),
-    tags: Optional[str] = Query(None, description="Comma-separated metadata tags"),
+    thread_id: str | None = Query(None, description="Conversation thread ID"),
+    lang: str | None = Query(None, description="Override language detection (es/en)"),
+    provider: str | None = Query(None, description="LLM provider (e.g., groq, openai)"),
+    model: str | None = Query(None, description="LLM model name"),
+    tags: str | None = Query(None, description="Comma-separated metadata tags"),
     tag_match_mode: str = Query("any", description="Tag match mode: any|all"),
-    include_untagged_fallback: bool = Query(True, description="Include untagged docs when tag filter is active"),
+    include_untagged_fallback: bool = Query(
+        True, description="Include untagged docs when tag filter is active"
+    ),
     rerank: bool = Query(False, description="Enable backend reranking for search results"),
     rerank_top_k: int = Query(10, ge=1, le=50, description="Number of items to keep after rerank"),
 ) -> AskResponse:
     """
     Ask a question and get an answer with source citations.
-    
+
     The system will detect the query language (Spanish/English) automatically
     and return answers with source attribution.
-    
+
     Args:
         question: User's question
         thread_id: Optional conversation thread ID for context
         lang: Optional language override (es, en, etc.)
         provider: Optional LLM provider override
         model: Optional LLM model override
-        
+
     Returns:
         Answer with sources and metadata
     """
     # Return demo response if demo mode enabled or agent service unavailable
     if DEMO_MODE:
         return get_demo_response(question, lang)
-    
+
     try:
         started_at = time.perf_counter()
         # Build query parameters for agent service
-        params = {"question": question}
+        params: dict[str, Any] = {"question": question}
         if thread_id:
             params["thread_id"] = thread_id
         if lang:
@@ -224,6 +228,8 @@ async def ask_question(
 
         # Proxy request to agent service
         client = _get_agent_client()
+        if client is None:
+            raise HTTPException(status_code=503, detail="Agent service client not available")
         response = await client.get(
             f"{AGENT_SERVICE_URL}/ask",
             params=params,
@@ -239,43 +245,43 @@ async def ask_question(
             sources=data.get("sources", []),
             language=data.get("language", lang or "en"),
             model=data.get("model", "unknown"),
-            response_time_ms=data.get("response_time_ms")
-            if isinstance(data.get("response_time_ms"), int)
-            else int((time.perf_counter() - started_at) * 1000),
-            token_usage=data.get("token_usage") if isinstance(data.get("token_usage"), dict) else None,
-            latency_breakdown=data.get("latency_breakdown") if isinstance(data.get("latency_breakdown"), dict) else None,
+            response_time_ms=(
+                data.get("response_time_ms")
+                if isinstance(data.get("response_time_ms"), int)
+                else int((time.perf_counter() - started_at) * 1000)
+            ),
+            token_usage=(
+                data.get("token_usage") if isinstance(data.get("token_usage"), dict) else None
+            ),
+            latency_breakdown=(
+                data.get("latency_breakdown")
+                if isinstance(data.get("latency_breakdown"), dict)
+                else None
+            ),
         )
 
     except httpx.TimeoutException:
         raise HTTPException(
-            status_code=504,
-            detail="Agent service timeout - question took too long to process"
+            status_code=504, detail="Agent service timeout - question took too long to process"
         )
     except httpx.HTTPStatusError as e:
         raise HTTPException(
-            status_code=e.response.status_code,
-            detail=f"Agent service error: {e.response.text}"
+            status_code=e.response.status_code, detail=f"Agent service error: {e.response.text}"
         )
     except httpx.RequestError as e:
-        raise HTTPException(
-            status_code=503,
-            detail=f"Unable to connect to agent service: {str(e)}"
-        )
+        raise HTTPException(status_code=503, detail=f"Unable to connect to agent service: {str(e)}")
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Internal error: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
 
 async def sse_proxy_generator(
     question: str,
     request_id: str,
-    thread_id: Optional[str] = None,
-    lang: Optional[str] = None,
-    provider: Optional[str] = None,
-    model: Optional[str] = None,
-    tags: Optional[str] = None,
+    thread_id: str | None = None,
+    lang: str | None = None,
+    provider: str | None = None,
+    model: str | None = None,
+    tags: str | None = None,
     tag_match_mode: str = "any",
     include_untagged_fallback: bool = True,
     rerank: bool = False,
@@ -283,16 +289,16 @@ async def sse_proxy_generator(
 ) -> AsyncGenerator[bytes, None]:
     """
     Generator that proxies SSE events from agent service.
-    
+
     Yields SSE-formatted events from the agent's streaming endpoint.
     """
     try:
         started_at = time.perf_counter()
-        first_chunk_latency_ms: Optional[int] = None
+        first_chunk_latency_ms: int | None = None
         chunk_count = 0
 
         # Build query parameters
-        params = {"question": question}
+        params: dict[str, Any] = {"question": question}
         if thread_id:
             params["thread_id"] = thread_id
         if lang:
@@ -317,6 +323,8 @@ async def sse_proxy_generator(
 
         # Stream from agent service
         client = _get_agent_client()
+        if client is None:
+            raise RuntimeError("Agent service client not available")
         async with client.stream(
             "GET",
             f"{AGENT_SERVICE_URL}/ask-stream",
@@ -350,8 +358,12 @@ async def sse_proxy_generator(
         error_event = 'data: {"type": "error", "message": "Request timeout"}\n\n'
         yield error_event.encode("utf-8")
     except httpx.HTTPStatusError as e:
-        logger.warning("SSE stream http error request_id=%s status=%s", request_id, e.response.status_code)
-        error_event = f'data: {{"type": "error", "message": "Agent error: {e.response.status_code}"}}\n\n'
+        logger.warning(
+            "SSE stream http error request_id=%s status=%s", request_id, e.response.status_code
+        )
+        error_event = (
+            f'data: {{"type": "error", "message": "Agent error: {e.response.status_code}"}}\n\n'
+        )
         yield error_event.encode("utf-8")
     except httpx.RequestError as e:
         logger.warning("SSE stream request error request_id=%s error=%s", request_id, str(e))
@@ -366,35 +378,37 @@ async def sse_proxy_generator(
 @router.get("/stream")
 async def ask_question_stream(
     question: str = Query(..., description="User question"),
-    thread_id: Optional[str] = Query(None, description="Conversation thread ID"),
-    lang: Optional[str] = Query(None, description="Override language detection (es/en)"),
-    provider: Optional[str] = Query(None, description="LLM provider (e.g., groq, openai)"),
-    model: Optional[str] = Query(None, description="LLM model name"),
-    tags: Optional[str] = Query(None, description="Comma-separated metadata tags"),
+    thread_id: str | None = Query(None, description="Conversation thread ID"),
+    lang: str | None = Query(None, description="Override language detection (es/en)"),
+    provider: str | None = Query(None, description="LLM provider (e.g., groq, openai)"),
+    model: str | None = Query(None, description="LLM model name"),
+    tags: str | None = Query(None, description="Comma-separated metadata tags"),
     tag_match_mode: str = Query("any", description="Tag match mode: any|all"),
-    include_untagged_fallback: bool = Query(True, description="Include untagged docs when tag filter is active"),
+    include_untagged_fallback: bool = Query(
+        True, description="Include untagged docs when tag filter is active"
+    ),
     rerank: bool = Query(False, description="Enable backend reranking for search results"),
     rerank_top_k: int = Query(10, ge=1, le=50, description="Number of items to keep after rerank"),
 ):
     """
     Ask a question and stream the response as Server-Sent Events (SSE).
-    
+
     Proxies streaming from the agent service for real-time updates.
-    
+
     Event types:
     - thinking: Agent is processing (with status message)
     - tool_event: Compact tool lifecycle updates (start/result/error)
     - complete: Final answer with sources
     - clarification: Agent needs more info
     - error: Something went wrong
-    
+
     Args:
         question: User's question
         thread_id: Optional conversation thread ID for context
         lang: Optional language override (es, en, etc.)
         provider: Optional LLM provider override
         model: Optional LLM model override
-        
+
     Returns:
         StreamingResponse with SSE events
     """
@@ -425,7 +439,7 @@ async def ask_question_stream(
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
             "X-Accel-Buffering": "no",  # Disable nginx buffering
-        }
+        },
     )
 
 
@@ -433,19 +447,21 @@ async def ask_question_stream(
 async def get_ask_config():
     """
     Get current Q&A configuration (available LLM providers and models).
-    
+
     Proxies to agent service /config endpoint.
-    
+
     Returns:
         Configuration with available providers and models
     """
     try:
         client = _get_agent_client()
+        if client is None:
+            return _fallback_ask_config()
         response = await client.get(f"{AGENT_SERVICE_URL}/config", timeout=10.0)
         response.raise_for_status()
         return _normalize_agent_config(response.json())
 
-    except httpx.RequestError as e:
+    except httpx.RequestError:
         return _fallback_ask_config()
-    except Exception as e:
+    except Exception:
         return _fallback_ask_config()

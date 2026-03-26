@@ -4,12 +4,12 @@ Embedding Service - Pydantic Models
 Defines data structures for the text embedding service.
 """
 
-from typing import List, Optional
 from pydantic import BaseModel, Field
 
 
 class EmbeddingModel(BaseModel):
     """Information about an embedding model."""
+
     name: str
     provider: str
     dimension: int
@@ -19,6 +19,7 @@ class EmbeddingModel(BaseModel):
 
 class EmbeddingServiceConfig(BaseModel):
     """Configuration for embedding service."""
+
     model_name: str
     provider: str = "huggingface"
     dimension: int = 384
@@ -28,33 +29,37 @@ class EmbeddingServiceConfig(BaseModel):
 
 class EmbeddingResult(BaseModel):
     """Result of embedding a single text."""
+
     text: str
-    embedding: List[float] = Field(..., description="Embedding vector")
+    embedding: list[float] = Field(..., description="Embedding vector")
     model: str
     dimension: int
-    processing_time_ms: Optional[float] = None
+    processing_time_ms: float | None = None
 
 
 class BatchEmbeddingResult(BaseModel):
     """Result of batch embedding."""
-    embeddings: List[EmbeddingResult]
+
+    embeddings: list[EmbeddingResult]
     model: str
     dimension: int
     batch_size: int
-    total_processing_time_ms: Optional[float] = None
+    total_processing_time_ms: float | None = None
 
 
 class SimilarityScore(BaseModel):
     """Similarity between two texts."""
+
     text1: str
     text2: str
     similarity: float = Field(..., ge=-1.0, le=1.0, description="Cosine similarity")
     model: str
-    processing_time_ms: Optional[float] = None
+    processing_time_ms: float | None = None
 
 
 class Dimensionality(BaseModel):
     """Embedding dimensionality info."""
+
     model: str
     dimension: int
     provider: str

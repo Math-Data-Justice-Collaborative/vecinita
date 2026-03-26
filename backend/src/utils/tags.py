@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import re
 import unicodedata
-from typing import Any, Dict, Iterable, List, Sequence, Tuple
+from collections.abc import Iterable, Sequence
+from typing import Any
 
 MAX_TAG_LENGTH = 50
 MAX_TAG_COUNT = 20
 _TAG_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_\-/ ]*$")
 
-_CANONICAL_TAG_ALIASES: Dict[str, str] = {
+_CANONICAL_TAG_ALIASES: dict[str, str] = {
     "tema": "topic",
     "temas": "topic",
     "topico": "topic",
@@ -90,7 +91,7 @@ _CANONICAL_TAG_ALIASES: Dict[str, str] = {
     "hospitals": "hospital",
 }
 
-_TAG_METADATA_FIELDS: Tuple[str, ...] = (
+_TAG_METADATA_FIELDS: tuple[str, ...] = (
     "tags",
     "location_tags",
     "subject_tags",
@@ -100,7 +101,7 @@ _TAG_METADATA_FIELDS: Tuple[str, ...] = (
     "audience_tags",
 )
 
-_CANONICAL_TAG_TRANSLATIONS_ES: Dict[str, str] = {
+_CANONICAL_TAG_TRANSLATIONS_ES: dict[str, str] = {
     "topic": "tema",
     "tag": "etiqueta",
     "rhode island": "rhode island",
@@ -171,7 +172,7 @@ def _normalize_noncanonical_tag(raw_tag: Any) -> str:
     return value
 
 
-def normalize_tags(raw_tags: Iterable[str] | None) -> List[str]:
+def normalize_tags(raw_tags: Iterable[str] | None) -> list[str]:
     """Normalize user-provided tags for consistent storage/search.
 
     - lowercases
@@ -207,7 +208,7 @@ def normalize_tags(raw_tags: Iterable[str] | None) -> List[str]:
     return normalized
 
 
-def infer_tags_from_text(text: str | None, *, max_tags: int = 8) -> List[str]:
+def infer_tags_from_text(text: str | None, *, max_tags: int = 8) -> list[str]:
     """Infer canonical tags from free text (Spanish or English).
 
     Uses alias phrase matching over the normalized text and returns canonical tags.
@@ -216,16 +217,16 @@ def infer_tags_from_text(text: str | None, *, max_tags: int = 8) -> List[str]:
     if not normalized_text:
         return []
 
-    inferred: List[str] = []
+    inferred: list[str] = []
     seen: set[str] = set()
 
     words = normalized_text.split()
-    ngram_candidates: List[str] = []
+    ngram_candidates: list[str] = []
     for n in (4, 3, 2, 1):
         if len(words) < n:
             continue
         for idx in range(len(words) - n + 1):
-            ngram_candidates.append(" ".join(words[idx: idx + n]))
+            ngram_candidates.append(" ".join(words[idx : idx + n]))
 
     for candidate in ngram_candidates:
         canonical = _CANONICAL_TAG_ALIASES.get(candidate)
@@ -249,14 +250,14 @@ def infer_tags_from_text(text: str | None, *, max_tags: int = 8) -> List[str]:
     return normalize_tags(inferred)
 
 
-def build_bilingual_tag_fields(raw_tags: Iterable[str] | None) -> Dict[str, List[str]]:
+def build_bilingual_tag_fields(raw_tags: Iterable[str] | None) -> dict[str, list[str]]:
     """Build bilingual tag arrays for metadata fields.
 
     Returns language-specific arrays while preserving canonical English tags.
     """
     tags_en = normalize_tags(raw_tags)
 
-    tags_es: List[str] = []
+    tags_es: list[str] = []
     seen_es: set[str] = set()
     for tag in tags_en:
         translated = _CANONICAL_TAG_TRANSLATIONS_ES.get(tag, tag)
@@ -273,7 +274,7 @@ def build_bilingual_tag_fields(raw_tags: Iterable[str] | None) -> Dict[str, List
     }
 
 
-def parse_tags_input(raw: str | None) -> List[str]:
+def parse_tags_input(raw: str | None) -> list[str]:
     """Parse a comma-separated tag string and normalize it."""
     if not raw:
         return []
@@ -281,14 +282,14 @@ def parse_tags_input(raw: str | None) -> List[str]:
 
 
 def normalize_tag_fields(
-    metadata: Dict[str, Any] | None,
+    metadata: dict[str, Any] | None,
     fields: Sequence[str] = _TAG_METADATA_FIELDS,
-) -> tuple[Dict[str, Any], bool]:
+) -> tuple[dict[str, Any], bool]:
     """Normalize tag arrays within a metadata object.
 
     Returns `(normalized_metadata, changed)`.
     """
-    result: Dict[str, Any] = dict(metadata or {})
+    result: dict[str, Any] = dict(metadata or {})
     changed = False
 
     for field in fields:

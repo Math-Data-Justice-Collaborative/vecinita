@@ -12,13 +12,14 @@ TODO: Currently uses Supabase client directly. In production:
 - Add Redis-backed pool state for distributed systems
 """
 
-import os
-import logging
 import asyncio
-from typing import Optional
-from datetime import datetime, timedelta
+import logging
+import os
 from contextlib import asynccontextmanager
-from supabase import create_client, Client
+from datetime import datetime
+from typing import Any
+
+from supabase import Client, create_client
 
 logger = logging.getLogger(__name__)
 
@@ -46,72 +47,73 @@ QUERY_RETRY_BACKOFF_SECONDS = int(os.getenv("QUERY_RETRY_BACKOFF_SECONDS", "1"))
 # Connection Pool Manager
 # ============================================================================
 
+
 class DatabaseConnectionPool:
     """
     Manages database connections with health checks and pooling.
-    
+
     Features:
     - Lazy initialization of connections
     - Connection timeout handling
     - Automatic reconnection with exponential backoff
     - Health check monitoring
     - Query timeout enforcement
-    
+
     Note: This is a simple wrapper around Supabase client.
     For production multi-instance deployment, use external connection pool like PgBouncer.
     """
-    
+
     def __init__(self):
         """Initialize connection pool manager."""
-        self._client: Optional[Client] = None
+        self._client: Client | None = None
         self._initialized = False
-        self._health_check_task: Optional[asyncio.Task] = None
-        self._last_health_check: Optional[datetime] = None
+        self._health_check_task: asyncio.Task | None = None
+        self._last_health_check: datetime | None = None
         self._health_status = {
             "connected": False,
             "connection_count": 0,
             "failed_queries": 0,
             "successful_queries": 0,
         }
-    
+
     async def initialize(self) -> None:
         """
         Initialize database connection pool.
-        
+
         Called on application startup.
-        
+
         Raises:
             RuntimeError: If credentials not configured
         """
         if self._initialized:
             return
-        
+
         if not SUPABASE_URL or not SUPABASE_KEY:
             raise RuntimeError(
                 "Database not configured. Set SUPABASE_URL and SUPABASE_KEY environment variables."
             )
-        
+
         try:
             self._client = create_client(SUPABASE_URL, SUPABASE_KEY)
             logger.info("Database connection pool initialized")
             logger.info(f"Pool size: {POOL_MIN_SIZE}-{POOL_MAX_SIZE}")
             logger.info(f"Connection timeout: {POOL_TIMEOUT_SECONDS}s")
             logger.info(f"Query timeout: {QUERY_TIMEOUT_SECONDS}s")
-            
+
             self._initialized = True
             self._health_status["connected"] = True
-            
+
             # Start health check task
             self._health_check_task = asyncio.create_task(self._run_health_checks())
-        
+
         except Exception as e:
             logger.error(f"Failed to initialize database connection pool: {e}")
             raise
-    
+
     async def shutdown(self) -> None:
         """
         Shutdown database connection pool.
-        
+
         Called on application shutdown.
         Closes all connections and stops health check task.
         """
@@ -121,29 +123,29 @@ class DatabaseConnectionPool:
                 await self._health_check_task
             except asyncio.CancelledError:
                 pass
-        
+
         self._initialized = False
         logger.info("Database connection pool shutdown")
-    
+
     def get_client(self) -> Client:
         """
         Get database client.
-        
+
         Returns:
             Supabase client instance
-            
+
         Raises:
             RuntimeError: If pool not initialized
         """
         if not self._initialized or not self._client:
             raise RuntimeError("Database connection pool not initialized. Call initialize() first.")
-        
+
         return self._client
-    
+
     async def health_check(self) -> bool:
         """
         Check database connection health.
-        
+
         Returns:
             True if healthy, False otherwise
         """
@@ -151,45 +153,46 @@ class DatabaseConnectionPool:
             # Simple health check: test database connectivity
             if self._client is None:
                 return False
-            
+
             # Try to perform a simple query to verify connection
             # This should be lightweight and fast
-            result = self._client.table("documents").select("count", count="exact").limit(0).execute()
+            # Note: select() uses string value for count parameter
+            _ = self._client.table("documents").select("*", count="exact").limit(0).execute()  # type: ignore[arg-type]
             self._last_health_check = datetime.utcnow()
             self._health_status["connected"] = True
             return True
-        
+
         except Exception as e:
             logger.warning(f"Health check failed: {e}")
             self._health_status["connected"] = False
             return False
-    
+
     async def _run_health_checks(self) -> None:
         """
         Periodically run health checks in background.
-        
+
         Monitors connection pool health and logs issues.
         """
         while True:
             try:
                 await asyncio.sleep(POOL_HEALTH_CHECK_INTERVAL_SECONDS)
                 is_healthy = await self.health_check()
-                
+
                 if is_healthy:
                     logger.debug("Database health check passed")
                 else:
                     logger.error("Database health check failed")
                     # TODO: Trigger reconnection logic
-            
+
             except asyncio.CancelledError:
                 break
             except Exception as e:
                 logger.error(f"Health check error: {e}")
-    
+
     def get_stats(self) -> dict:
         """
         Get connection pool statistics.
-        
+
         Returns:
             Statistics about pool usage, health, etc.
         """
@@ -200,8 +203,10 @@ class DatabaseConnectionPool:
             "connection_timeout": POOL_TIMEOUT_SECONDS,
             "query_timeout": QUERY_TIMEOUT_SECONDS,
             "health_check_interval": POOL_HEALTH_CHECK_INTERVAL_SECONDS,
-            "last_health_check": self._last_health_check.isoformat() if self._last_health_check else None,
-            "stats": self._health_status
+            "last_health_check": (
+                self._last_health_check.isoformat() if self._last_health_check else None
+            ),
+            "stats": self._health_status,
         }
 
 
@@ -217,18 +222,19 @@ connection_pool = DatabaseConnectionPool()
 # FastAPI Dependency
 # ============================================================================
 
+
 async def get_database_client() -> Client:
     """
     FastAPI dependency to get database client from pool.
-    
+
     Usage:
         @app.get("/endpoint")
         async def endpoint(db: Client = Depends(get_database_client)):
             ...
-    
+
     Returns:
         Database client from connection pool
-        
+
     Raises:
         RuntimeError: If pool not initialized
     """
@@ -239,31 +245,31 @@ async def get_database_client() -> Client:
 # Context Manager for Query Execution
 # ============================================================================
 
+
 @asynccontextmanager
 async def query_with_timeout(query_name: str = "query"):
     """
     Context manager that enforces query timeout.
-    
+
     Usage:
         async with query_with_timeout("get_documents") as timeout_handle:
             result = db.table("documents").select("*").execute()
-    
+
     Args:
         query_name: Name of query for logging
-        
+
     Yields:
         Timeout handle (can be used to extend timeout if needed)
-        
+
     Raises:
         asyncio.TimeoutError: If query exceeds timeout
     """
     try:
-        async with asyncio.timeout(QUERY_TIMEOUT_SECONDS):
-            logger.debug(f"Executing query: {query_name}")
-            yield None
-            logger.debug(f"Query completed: {query_name}")
-            connection_pool._health_status["successful_queries"] += 1
-    
+        logger.debug(f"Executing query: {query_name}")
+        yield None
+        logger.debug(f"Query completed: {query_name}")
+        connection_pool._health_status["successful_queries"] += 1
+
     except asyncio.TimeoutError:
         logger.error(f"Query timeout: {query_name} (>{QUERY_TIMEOUT_SECONDS}s)")
         connection_pool._health_status["failed_queries"] += 1
@@ -274,51 +280,55 @@ async def query_with_timeout(query_name: str = "query"):
 # Query Retry Helper
 # ============================================================================
 
+
 async def execute_with_retry(
     query_func,
     query_name: str = "query",
     max_attempts: int = QUERY_RETRY_MAX_ATTEMPTS,
-) -> any:
+) -> Any:
     """
     Execute query with automatic retry on failure.
-    
+
     Implements exponential backoff retry strategy.
-    
+
     Usage:
         result = await execute_with_retry(
             lambda: db.table("docs").select("*").execute(),
             query_name="get_all_docs"
         )
-    
+
     Args:
         query_func: Async function that performs database query
         query_name: Name for logging
         max_attempts: Maximum retry attempts (default 3)
-        
+
     Returns:
         Query result
-        
+
     Raises:
         Exception: Final exception if all retries fail
     """
-    last_error = None
-    
+    last_error: Exception | None = None
+
     for attempt in range(max_attempts):
         try:
             async with query_with_timeout(query_name):
-                result = await query_func() if asyncio.iscoroutinefunction(query_func) else query_func()
-                
+                if asyncio.iscoroutinefunction(query_func):
+                    result = await asyncio.wait_for(query_func(), timeout=QUERY_TIMEOUT_SECONDS)
+                else:
+                    result = query_func()
+
                 if attempt > 0:
                     logger.info(f"Query succeeded on attempt {attempt + 1}: {query_name}")
-                
+
                 return result
-        
+
         except Exception as e:
             last_error = e
-            
+
             if attempt < max_attempts - 1:
                 # Exponential backoff: 1s, 2s, 4s, etc.
-                wait_time = QUERY_RETRY_BACKOFF_SECONDS * (2 ** attempt)
+                wait_time = QUERY_RETRY_BACKOFF_SECONDS * (2**attempt)
                 logger.warning(
                     f"Query attempt {attempt + 1}/{max_attempts} failed for {query_name}: {e}. "
                     f"Retrying in {wait_time}s..."
@@ -326,5 +336,7 @@ async def execute_with_retry(
                 await asyncio.sleep(wait_time)
             else:
                 logger.error(f"Query failed after {max_attempts} attempts: {query_name}")
-    
-    raise last_error
+
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError(f"Query execution failed without a captured error: {query_name}")

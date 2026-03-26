@@ -9,37 +9,42 @@ import logging
 import os
 import re
 import time
-from typing import List, Dict, Optional, Tuple, Any
-from datetime import datetime, timezone
 from dataclasses import dataclass
+from datetime import datetime, timezone
+from typing import Any, cast
 from urllib.parse import urlparse
-from src.utils.tags import normalize_tags, infer_tags_from_text, build_bilingual_tag_fields
-from src.services.chroma_store import get_chroma_store, ChromaStore
+
+from src.services.chroma_store import ChromaStore, get_chroma_store
+from src.utils.tags import build_bilingual_tag_fields, infer_tags_from_text, normalize_tags
 
 try:
-    from supabase import create_client  # type: ignore
+    from supabase import create_client
+
     SUPABASE_AVAILABLE = True
 except Exception:
     create_client = None  # type: ignore[assignment]
     SUPABASE_AVAILABLE = False
 
 try:
-    from pydantic import BaseModel, Field
     from langchain_openai import ChatOpenAI
+    from pydantic import BaseModel, Field
+
     DEEPSEEK_TAGGING_AVAILABLE = True
 except ImportError:
     DEEPSEEK_TAGGING_AVAILABLE = False
 
 try:
     from langchain_groq import ChatGroq
+
     GROQ_TAGGING_AVAILABLE = True
 except ImportError:
-    ChatGroq = None  # type: ignore[assignment]
+    ChatGroq = None
     GROQ_TAGGING_AVAILABLE = False
 
 # Import embedding service client (preferred)
 try:
     from src.embedding_service.client import create_embedding_client
+
     EMBEDDING_SERVICE_AVAILABLE = True
 except ImportError:
     EMBEDDING_SERVICE_AVAILABLE = False
@@ -47,36 +52,38 @@ except ImportError:
 # Import fallback embedding options
 try:
     from langchain_community.embeddings import FastEmbedEmbeddings, HuggingFaceEmbeddings
+
     FALLBACK_EMBEDDINGS_AVAILABLE = True
 except ImportError:
     FALLBACK_EMBEDDINGS_AVAILABLE = False
 
-log = logging.getLogger('vecinita_pipeline.uploader')
+log = logging.getLogger("vecinita_pipeline.uploader")
 log.addHandler(logging.NullHandler())
 
 
 class TagEnhancement(BaseModel):
-    tags: List[str] = Field(default_factory=list)
-    location_tags: List[str] = Field(default_factory=list)
-    subject_tags: List[str] = Field(default_factory=list)
-    service_tags: List[str] = Field(default_factory=list)
-    content_type_tags: List[str] = Field(default_factory=list)
-    organization_tags: List[str] = Field(default_factory=list)
-    audience_tags: List[str] = Field(default_factory=list)
-    document_title: Optional[str] = None
-    source_summary: Optional[str] = None
+    tags: list[str] = Field(default_factory=list)
+    location_tags: list[str] = Field(default_factory=list)
+    subject_tags: list[str] = Field(default_factory=list)
+    service_tags: list[str] = Field(default_factory=list)
+    content_type_tags: list[str] = Field(default_factory=list)
+    organization_tags: list[str] = Field(default_factory=list)
+    audience_tags: list[str] = Field(default_factory=list)
+    document_title: str | None = None
+    source_summary: str | None = None
 
 
 @dataclass
 class DocumentChunk:
     """Represents a single document chunk with metadata."""
+
     content: str
     source_url: str
     chunk_index: int
-    total_chunks: Optional[int] = None
-    loader_type: Optional[str] = None
-    metadata: Optional[Dict] = None
-    scraped_at: Optional[datetime] = None
+    total_chunks: int | None = None
+    loader_type: str | None = None
+    metadata: dict | None = None
+    scraped_at: datetime | None = None
 
 
 class DatabaseUploader:
@@ -90,23 +97,35 @@ class DatabaseUploader:
             use_local_embeddings: If True, use embedding service (or fallback). If False, requires OpenAI API key.
         """
         self.use_local_embeddings = use_local_embeddings
-        self.embedding_model = None
-        self.embedding_client_type = None
-        self.chroma_store: Optional[ChromaStore] = None
+        self.embedding_model: Any | None = None
+        self.embedding_client_type: str | None = None
+        self.chroma_store: ChromaStore | None = None
         self.deepseek_tagger = None
         self.deepseek_raw_model = None
         self._llm_structured_output_supported = True
         self._llm_structured_output_warned = False
-        self._source_tag_cache: Dict[str, Dict[str, Any]] = {}
-        self._known_tag_cache: Optional[List[str]] = None
-        self.supabase_client = None
-        self.vector_sync_enabled = (os.getenv("VECTOR_SYNC_ENABLED", "true").lower() in {"1", "true", "yes"})
-        self.vector_sync_degraded_mode = (os.getenv("VECTOR_SYNC_DEGRADED_MODE", "true").lower() in {"1", "true", "yes"})
+        self._source_tag_cache: dict[str, dict[str, Any]] = {}
+        self._known_tag_cache: list[str] | None = None
+        self.supabase_client: Any | None = None
+        self.vector_sync_enabled = os.getenv("VECTOR_SYNC_ENABLED", "true").lower() in {
+            "1",
+            "true",
+            "yes",
+        }
+        self.vector_sync_degraded_mode = os.getenv("VECTOR_SYNC_DEGRADED_MODE", "true").lower() in {
+            "1",
+            "true",
+            "yes",
+        }
         self.vector_sync_retry_max = max(1, int(os.getenv("VECTOR_SYNC_RETRY_MAX", "3")))
-        self.vector_sync_retry_delay_seconds = max(1, int(os.getenv("VECTOR_SYNC_RETRY_DELAY_SECONDS", "2")))
+        self.vector_sync_retry_delay_seconds = max(
+            1, int(os.getenv("VECTOR_SYNC_RETRY_DELAY_SECONDS", "2"))
+        )
         self.vector_sync_table = os.getenv("VECTOR_SYNC_SUPABASE_TABLE", "document_chunks")
-        self.vector_sync_schema = os.getenv("VECTOR_SYNC_SUPABASE_SCHEMA", "public").strip() or "public"
-        self.vector_sync_pending_rows: List[Dict[str, Any]] = []
+        self.vector_sync_schema = (
+            os.getenv("VECTOR_SYNC_SUPABASE_SCHEMA", "public").strip() or "public"
+        )
+        self.vector_sync_pending_rows: list[dict[str, Any]] = []
 
         # Initialize embeddings with fallback chain
         if use_local_embeddings:
@@ -125,10 +144,9 @@ class DatabaseUploader:
         - deepseek: DeepSeek only
         - groq: Groq only
         """
-        enabled = (
-            os.getenv("ENABLE_LLM_TAG_ENHANCEMENT", os.getenv("ENABLE_DEEPSEEK_TAG_ENHANCEMENT", "true")).lower()
-            in {"1", "true", "yes"}
-        )
+        enabled = os.getenv(
+            "ENABLE_LLM_TAG_ENHANCEMENT", os.getenv("ENABLE_DEEPSEEK_TAG_ENHANCEMENT", "true")
+        ).lower() in {"1", "true", "yes"}
         if not enabled:
             return
 
@@ -153,7 +171,9 @@ class DatabaseUploader:
                 except Exception as exc:
                     log.warning(f"DeepSeek tag enhancement unavailable: {exc}")
             elif provider == "deepseek":
-                log.warning("DeepSeek tag enhancement requested but DEEPSEEK_API_KEY is not configured")
+                log.warning(
+                    "DeepSeek tag enhancement requested but DEEPSEEK_API_KEY is not configured"
+                )
 
         if provider in {"auto", "groq"} and GROQ_TAGGING_AVAILABLE:
             groq_api_key = os.getenv("GROQ_API_KEY")
@@ -178,7 +198,7 @@ class DatabaseUploader:
 
     def _build_chunk_id(self, source_url: str, chunk_index: int) -> str:
         """Build deterministic chunk IDs so upsert updates existing records in place."""
-        return hashlib.sha256(f"{source_url}:{chunk_index}".encode("utf-8")).hexdigest()
+        return hashlib.sha256(f"{source_url}:{chunk_index}".encode()).hexdigest()
 
     def _source_locator(self, source_url: str) -> str:
         """Return host+path (including subdomain/path) for attribution displays."""
@@ -190,7 +210,9 @@ class DatabaseUploader:
         except Exception:
             return source_url
 
-    def _build_chunk_metadata(self, metadata: Optional[Dict[str, Any]], tags: List[str]) -> Dict[str, Any]:
+    def _build_chunk_metadata(
+        self, metadata: dict[str, Any] | None, tags: list[str]
+    ) -> dict[str, Any]:
         result = dict(metadata) if isinstance(metadata, dict) else {}
         if tags:
             result["tags"] = tags
@@ -198,7 +220,7 @@ class DatabaseUploader:
             result.pop("tags", None)
         return result
 
-    def _normalize_tag_facets(self, payload: Optional[Dict[str, Any]]) -> Dict[str, List[str]]:
+    def _normalize_tag_facets(self, payload: dict[str, Any] | None) -> dict[str, list[str]]:
         data = payload if isinstance(payload, dict) else {}
         facets = {
             "location_tags": normalize_tags(data.get("location_tags", [])),
@@ -210,13 +232,13 @@ class DatabaseUploader:
         }
         return facets
 
-    def _merge_all_tags(self, base_tags: List[str], facets: Dict[str, List[str]]) -> List[str]:
-        combined: List[str] = list(base_tags or [])
+    def _merge_all_tags(self, base_tags: list[str], facets: dict[str, list[str]]) -> list[str]:
+        combined: list[str] = list(base_tags or [])
         for values in facets.values():
             combined.extend(values or [])
         return normalize_tags(combined)
 
-    def _parse_llm_json_payload(self, content: Any) -> Optional[Dict[str, Any]]:
+    def _parse_llm_json_payload(self, content: Any) -> dict[str, Any] | None:
         text = content
         if isinstance(text, list):
             text = "\n".join(str(part) for part in text)
@@ -242,7 +264,7 @@ class DatabaseUploader:
         start = text.find("{")
         end = text.rfind("}")
         if start != -1 and end != -1 and end > start:
-            candidate = text[start:end + 1].strip()
+            candidate = text[start : end + 1].strip()
             try:
                 payload = json.loads(candidate)
                 return payload if isinstance(payload, dict) else None
@@ -255,9 +277,9 @@ class DatabaseUploader:
         self,
         *,
         source_identifier: str,
-        sample_texts: List[str],
-        known_tags: Optional[List[str]] = None,
-    ) -> Optional[Tuple[TagEnhancement, Dict[str, List[str]]]]:
+        sample_texts: list[str],
+        known_tags: list[str] | None = None,
+    ) -> tuple[TagEnhancement, dict[str, list[str]]] | None:
         if not self.deepseek_raw_model:
             return None
 
@@ -266,7 +288,11 @@ class DatabaseUploader:
             "All tag arrays should contain lowercase strings suitable for search. "
             "Do not include markdown.\n\n"
             f"Source URL: {source_identifier}\n\n"
-            + (f"Existing preferred tags (reuse when relevant): {', '.join((known_tags or [])[:120])}\n\n" if known_tags else "")
+            + (
+                f"Existing preferred tags (reuse when relevant): {', '.join((known_tags or [])[:120])}\n\n"
+                if known_tags
+                else ""
+            )
             + "Sample content:\n"
             + "\n\n".join(sample_texts[:3])
         )
@@ -284,10 +310,10 @@ class DatabaseUploader:
     def _enhance_source_tags(
         self,
         source_identifier: str,
-        sample_texts: List[str],
-        fallback_tags: List[str],
-        known_tags: Optional[List[str]] = None,
-    ) -> Tuple[List[str], Optional[str], Optional[str], Dict[str, List[str]]]:
+        sample_texts: list[str],
+        fallback_tags: list[str],
+        known_tags: list[str] | None = None,
+    ) -> tuple[list[str], str | None, str | None, dict[str, list[str]]]:
         cached = self._source_tag_cache.get(source_identifier)
         if cached:
             return (
@@ -310,13 +336,16 @@ class DatabaseUploader:
                 "Do not invent facts; use only supported inferences from URL/content.\n\n"
                 "Output schema keys: tags, location_tags, subject_tags, service_tags, content_type_tags, organization_tags, audience_tags, document_title, source_summary.\n\n"
                 f"Source URL: {source_identifier}\n\n"
-                + (f"Existing preferred tags (reuse when relevant): {', '.join((known_tags or [])[:120])}\n\n" if known_tags else "")
-                +
-                "Sample content:\n"
+                + (
+                    f"Existing preferred tags (reuse when relevant): {', '.join((known_tags or [])[:120])}\n\n"
+                    if known_tags
+                    else ""
+                )
+                + "Sample content:\n"
                 + "\n\n".join(sample_texts[:3])
             )
             structured = None
-            facets: Dict[str, List[str]]
+            facets: dict[str, list[str]]
             if self.deepseek_tagger and self._llm_structured_output_supported:
                 structured = self.deepseek_tagger.invoke(prompt)
             elif self.deepseek_raw_model:
@@ -364,7 +393,9 @@ class DatabaseUploader:
             if self.deepseek_raw_model and "response_format" in str(exc).lower():
                 self._llm_structured_output_supported = False
                 if not self._llm_structured_output_warned:
-                    log.info("LLM structured output unavailable; switching to raw JSON tagging mode for remaining sources")
+                    log.info(
+                        "LLM structured output unavailable; switching to raw JSON tagging mode for remaining sources"
+                    )
                     self._llm_structured_output_warned = True
                 try:
                     raw_result = self._invoke_raw_json_tagger(
@@ -373,7 +404,10 @@ class DatabaseUploader:
                         known_tags=known_tags,
                     )
                     if raw_result is None:
-                        log.debug("Raw JSON fallback produced no parseable payload for %s", source_identifier)
+                        log.debug(
+                            "Raw JSON fallback produced no parseable payload for %s",
+                            source_identifier,
+                        )
                         return fallback_tags, None, None, {}
                     structured, facets = raw_result
                     final_tags = normalize_tags(
@@ -389,11 +423,13 @@ class DatabaseUploader:
                     }
                     return final_tags, structured.document_title, structured.source_summary, facets
                 except Exception as fallback_exc:
-                    log.debug(f"DeepSeek JSON fallback failed for {source_identifier}: {fallback_exc}")
+                    log.debug(
+                        f"DeepSeek JSON fallback failed for {source_identifier}: {fallback_exc}"
+                    )
             log.warning(f"DeepSeek tag enhancement failed for {source_identifier}: {exc}")
             return fallback_tags, None, None, {}
 
-    def _get_known_tags(self) -> List[str]:
+    def _get_known_tags(self) -> list[str]:
         """Load existing tags from source records for tag reuse/canonicalization."""
         if self._known_tag_cache is not None:
             return self._known_tag_cache
@@ -403,7 +439,7 @@ class DatabaseUploader:
             return self._known_tag_cache
 
         try:
-            known: List[str] = []
+            known: list[str] = []
             for source in self.chroma_store.list_sources(limit=5000, offset=0):
                 source_tags = normalize_tags((source or {}).get("tags", []))
                 if source_tags:
@@ -416,25 +452,24 @@ class DatabaseUploader:
 
     def _init_embeddings(self) -> None:
         """Initialize embedding model with fallback chain: Service → FastEmbed → HuggingFace."""
-        strict_startup = (
-            os.getenv("EMBEDDING_STRICT_STARTUP", "true").lower() in {"1", "true", "yes"}
-        )
+        strict_startup = os.getenv("EMBEDDING_STRICT_STARTUP", "true").lower() in {
+            "1",
+            "true",
+            "yes",
+        }
 
         # Try embedding service first (lightweight, scalable)
-        embedding_service_url = os.getenv(
-            "EMBEDDING_SERVICE_URL", "http://embedding-service:8001")
+        embedding_service_url = os.getenv("EMBEDDING_SERVICE_URL", "http://embedding-service:8001")
 
         if EMBEDDING_SERVICE_AVAILABLE:
             try:
-                log.info(
-                    f"Initializing Embedding Service client ({embedding_service_url})...")
+                log.info(f"Initializing Embedding Service client ({embedding_service_url})...")
                 self.embedding_model = create_embedding_client(
                     embedding_service_url,
                     validate_on_init=True,
                 )
                 self.embedding_client_type = "embedding_service"
-                log.info(
-                    f"✓ Embedding Service client initialized (384 dimensions)")
+                log.info("✓ Embedding Service client initialized (384 dimensions)")
                 return
             except Exception as e:
                 log.warning(f"Embedding Service initialization failed: {e}")
@@ -449,8 +484,7 @@ class DatabaseUploader:
         if FALLBACK_EMBEDDINGS_AVAILABLE:
             try:
                 log.info("Falling back to FastEmbed (local)...")
-                self.embedding_model = FastEmbedEmbeddings(
-                    model_name="fast-bge-small-en-v1.5")
+                self.embedding_model = FastEmbedEmbeddings(model_name="fast-bge-small-en-v1.5")
                 self.embedding_client_type = "fastembed"
                 log.info("✓ FastEmbed initialized (384 dimensions)")
                 return
@@ -512,7 +546,7 @@ class DatabaseUploader:
             self.supabase_client = None
             log.warning(f"Supabase sync client initialization failed: {exc}")
 
-    def _build_supabase_row(self, row: Dict[str, Any]) -> Dict[str, Any]:
+    def _build_supabase_row(self, row: dict[str, Any]) -> dict[str, Any]:
         metadata = dict(row.get("metadata") or {})
         return {
             "id": row.get("id"),
@@ -521,7 +555,11 @@ class DatabaseUploader:
             "source_domain": row.get("source_domain") or metadata.get("source_domain") or "",
             "chunk_index": int(row.get("chunk_index") or metadata.get("chunk_index") or 0),
             "total_chunks": int(row.get("total_chunks") or metadata.get("total_chunks") or 0),
-            "chunk_size": int(row.get("chunk_size") or metadata.get("chunk_size") or len(str(row.get("content") or ""))),
+            "chunk_size": int(
+                row.get("chunk_size")
+                or metadata.get("chunk_size")
+                or len(str(row.get("content") or ""))
+            ),
             "document_title": row.get("document_title") or metadata.get("document_title") or "",
             "metadata": metadata,
             "embedding": row.get("embedding") or [],
@@ -532,7 +570,7 @@ class DatabaseUploader:
             "scraped_at": row.get("scraped_at"),
         }
 
-    def _queue_sync_rows(self, rows: List[Dict[str, Any]], error: Exception) -> None:
+    def _queue_sync_rows(self, rows: list[dict[str, Any]], error: Exception) -> None:
         if not self.vector_sync_enabled:
             return
         if not rows:
@@ -549,7 +587,9 @@ class DatabaseUploader:
             return None
         try:
             if self.vector_sync_schema:
-                return self.supabase_client.schema(self.vector_sync_schema).table(self.vector_sync_table)
+                return self.supabase_client.schema(self.vector_sync_schema).table(
+                    self.vector_sync_table
+                )
             return self.supabase_client.table(self.vector_sync_table)
         except Exception:
             return self.supabase_client.table(self.vector_sync_table)
@@ -605,13 +645,19 @@ class DatabaseUploader:
                 except Exception as retry_exc:
                     if self._handle_unrecoverable_sync_error(retry_exc):
                         return
-                    log.warning("Supabase sync replay failed (%s queued rows retained): %s", len(queued), retry_exc)
+                    log.warning(
+                        "Supabase sync replay failed (%s queued rows retained): %s",
+                        len(queued),
+                        retry_exc,
+                    )
                     return
             if self._handle_unrecoverable_sync_error(exc):
                 return
-            log.warning("Supabase sync replay failed (%s queued rows retained): %s", len(queued), exc)
+            log.warning(
+                "Supabase sync replay failed (%s queued rows retained): %s", len(queued), exc
+            )
 
-    def _sync_rows_to_supabase(self, rows: List[Dict[str, Any]]) -> bool:
+    def _sync_rows_to_supabase(self, rows: list[dict[str, Any]]) -> bool:
         if not rows or not self.vector_sync_enabled:
             return True
         if not self.supabase_client:
@@ -619,7 +665,7 @@ class DatabaseUploader:
 
         self._flush_sync_queue()
         payload = [self._build_supabase_row(row) for row in rows]
-        last_error: Optional[Exception] = None
+        last_error: Exception | None = None
         for attempt in range(1, self.vector_sync_retry_max + 1):
             try:
                 table_client = self._supabase_table_client()
@@ -662,12 +708,12 @@ class DatabaseUploader:
 
     def upload_chunks(
         self,
-        chunks: List[Dict],
+        chunks: list[dict],
         source_identifier: str,
         loader_type: str,
-        source_tags: Optional[List[str]] = None,
-        batch_size: int = 50
-    ) -> Tuple[int, int]:
+        source_tags: list[str] | None = None,
+        batch_size: int = 50,
+    ) -> tuple[int, int]:
         """
         Upload processed chunks to database.
 
@@ -702,24 +748,25 @@ class DatabaseUploader:
         ]
         inferred_source_tags = infer_tags_from_text("\n\n".join(sample_texts), max_tags=12)
         resolved_source_tags = normalize_tags((resolved_source_tags or []) + inferred_source_tags)
-        resolved_source_tags, source_title, source_summary, source_tag_facets = self._enhance_source_tags(
-            source_identifier,
-            sample_texts,
-            resolved_source_tags,
-            known_tags=known_tags,
+        resolved_source_tags, source_title, source_summary, source_tag_facets = (
+            self._enhance_source_tags(
+                source_identifier,
+                sample_texts,
+                resolved_source_tags,
+                known_tags=known_tags,
+            )
         )
         source_bilingual_tags = build_bilingual_tag_fields(resolved_source_tags)
 
         # Convert chunks to DocumentChunk objects with embeddings
         doc_chunks = []
         for idx, chunk_data in enumerate(chunks, 1):
-            chunk_text = chunk_data.get('text', '')
-            chunk_meta = chunk_data.get('metadata', {})
+            chunk_text = chunk_data.get("text", "")
+            chunk_meta = chunk_data.get("metadata", {})
             chunk_tags = normalize_tags((chunk_meta or {}).get("tags", []))
             chunk_facet_tags = self._normalize_tag_facets(chunk_meta)
             final_tags = normalize_tags(
-                (resolved_source_tags or [])
-                + self._merge_all_tags(chunk_tags, chunk_facet_tags)
+                (resolved_source_tags or []) + self._merge_all_tags(chunk_tags, chunk_facet_tags)
             )
             chunk_meta = self._build_chunk_metadata(chunk_meta, final_tags)
             if source_title and not chunk_meta.get("document_title"):
@@ -741,16 +788,14 @@ class DatabaseUploader:
                 total_chunks=len(chunks),
                 loader_type=loader_type,
                 metadata=chunk_meta,
-                scraped_at=datetime.now(timezone.utc)
+                scraped_at=datetime.now(timezone.utc),
             )
             doc_chunks.append(doc_chunk)
 
         # Generate embeddings
         log.debug(f"--> Generating embeddings for {len(doc_chunks)} chunks...")
         try:
-            embeddings = self._generate_embeddings(
-                [chunk.content for chunk in doc_chunks]
-            )
+            embeddings = self._generate_embeddings([chunk.content for chunk in doc_chunks])
             if len(embeddings) != len(doc_chunks):
                 log.error(
                     f"Embedding count mismatch: {len(embeddings)} embeddings for {len(doc_chunks)} chunks"
@@ -765,29 +810,25 @@ class DatabaseUploader:
         failed = 0
 
         for i in range(0, len(doc_chunks), batch_size):
-            batch_chunks = doc_chunks[i:i + batch_size]
-            batch_embeddings = embeddings[i:i + batch_size]
+            batch_chunks = doc_chunks[i : i + batch_size]
+            batch_embeddings = embeddings[i : i + batch_size]
 
-            success, fail = self._upload_batch(
-                batch_chunks, batch_embeddings, source_identifier
-            )
+            success, fail = self._upload_batch(batch_chunks, batch_embeddings, source_identifier)
             successful += success
             failed += fail
 
-        log.info(
-            f"--> ✅ Upload complete: {successful} successful, {failed} failed"
-        )
+        log.info(f"--> ✅ Upload complete: {successful} successful, {failed} failed")
         return successful, failed
 
-    def _generate_embeddings(self, texts: List[str]) -> List[List[float]]:
+    def _generate_embeddings(self, texts: list[str]) -> list[list[float]]:
         """Generate embeddings for a list of texts.
-        
+
         Uses local HuggingFace embeddings or embedding service microservice.
         OpenAI embeddings can be added in future versions if needed.
-        
+
         Args:
             texts: List of text strings to generate embeddings for
-            
+
         Returns:
             List of embedding vectors (each is a list of floats)
         """
@@ -802,40 +843,38 @@ class DatabaseUploader:
             self.use_local_embeddings = True
             return self._generate_local_embeddings(texts)
 
-    def _generate_local_embeddings(self, texts: List[str]) -> List[List[float]]:
+    def _generate_local_embeddings(self, texts: list[str]) -> list[list[float]]:
         """Generate embeddings using embedding service or local fallback."""
         if not self.embedding_model:
             raise RuntimeError("Embedding model not initialized")
 
-        log.debug(
-            f"Generating {len(texts)} embeddings with {self.embedding_client_type}...")
+        log.debug(f"Generating {len(texts)} embeddings with {self.embedding_client_type}...")
 
         # Embedding service and LangChain models use embed_documents()
         if self.embedding_client_type in ["embedding_service", "fastembed", "huggingface"]:
             try:
                 embeddings = self.embedding_model.embed_documents(texts)
                 log.debug(f"✓ Generated {len(embeddings)} embeddings")
-                return embeddings
+                return cast(list[list[float]], embeddings)
             except Exception as e:
                 log.error(f"Embedding generation failed: {e}")
                 raise
         else:
             # Legacy path (should not be reached with new fallback chain)
-            raise RuntimeError(
-                f"Unsupported embedding client type: {self.embedding_client_type}")
+            raise RuntimeError(f"Unsupported embedding client type: {self.embedding_client_type}")
 
     def _upload_batch(
-        self,
-        chunks: List[DocumentChunk],
-        embeddings: List[List[float]],
-        source_identifier: str
-    ) -> Tuple[int, int]:
+        self, chunks: list[DocumentChunk], embeddings: list[list[float]], source_identifier: str
+    ) -> tuple[int, int]:
         """Upload a batch of chunks to Chroma."""
         if not chunks or not embeddings:
             return 0, 0
 
+        if self.chroma_store is None:
+            raise RuntimeError("Chroma store not initialized")
+
         rows = []
-        for chunk, embedding in zip(chunks, embeddings):
+        for chunk, embedding in zip(chunks, embeddings, strict=False):
             row_id = self._build_chunk_id(chunk.source_url, chunk.chunk_index)
             metadata = dict(chunk.metadata or {})
             metadata["source_locator"] = self._source_locator(chunk.source_url)
@@ -847,7 +886,10 @@ class DatabaseUploader:
                 "chunk_index": chunk.chunk_index,
                 "total_chunks": chunk.total_chunks,
                 "embedding": embedding,
-                "metadata": {**metadata, **({"loader_type": chunk.loader_type} if chunk.loader_type else {})},
+                "metadata": {
+                    **metadata,
+                    **({"loader_type": chunk.loader_type} if chunk.loader_type else {}),
+                },
                 "scraped_at": chunk.scraped_at.isoformat() if chunk.scraped_at else None,
                 "created_at": (chunk.scraped_at or datetime.now(timezone.utc)).isoformat(),
                 "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -870,7 +912,7 @@ class DatabaseUploader:
             # Try uploading individually for better error reporting
             return self._upload_individual(chunks, embeddings)
 
-    def _get_source_tags(self, source_identifier: str) -> List[str]:
+    def _get_source_tags(self, source_identifier: str) -> list[str]:
         """Fetch canonical source-level tags from Chroma source records."""
         if not self.chroma_store:
             return []
@@ -886,15 +928,16 @@ class DatabaseUploader:
         return []
 
     def _upload_individual(
-        self,
-        chunks: List[DocumentChunk],
-        embeddings: List[List[float]]
-    ) -> Tuple[int, int]:
+        self, chunks: list[DocumentChunk], embeddings: list[list[float]]
+    ) -> tuple[int, int]:
         """Upload chunks individually for better error handling."""
+        if self.chroma_store is None:
+            raise RuntimeError("Chroma store not initialized")
+
         successful = 0
         failed = 0
 
-        for chunk, embedding in zip(chunks, embeddings):
+        for chunk, embedding in zip(chunks, embeddings, strict=False):
             metadata = dict(chunk.metadata or {})
             metadata["source_locator"] = self._source_locator(chunk.source_url)
             row = {
@@ -905,7 +948,10 @@ class DatabaseUploader:
                 "chunk_index": chunk.chunk_index,
                 "total_chunks": chunk.total_chunks,
                 "embedding": embedding,
-                "metadata": {**metadata, **({"loader_type": chunk.loader_type} if chunk.loader_type else {})},
+                "metadata": {
+                    **metadata,
+                    **({"loader_type": chunk.loader_type} if chunk.loader_type else {}),
+                },
                 "scraped_at": chunk.scraped_at.isoformat() if chunk.scraped_at else None,
                 "created_at": (chunk.scraped_at or datetime.now(timezone.utc)).isoformat(),
                 "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -920,19 +966,14 @@ class DatabaseUploader:
                 self._sync_rows_to_supabase([row])
                 successful += 1
             except Exception as e:
-                log.warning(
-                    f"Failed to upload chunk from {chunk.source_url}: {e}"
-                )
+                log.warning(f"Failed to upload chunk from {chunk.source_url}: {e}")
                 failed += 1
 
         return successful, failed
 
     def upload_links(
-        self,
-        links: List[str],
-        source_url: str,
-        loader_type: str = "Unknown"
-    ) -> Tuple[int, int]:
+        self, links: list[str], source_url: str, loader_type: str = "Unknown"
+    ) -> tuple[int, int]:
         """
         Upload extracted links as searchable chunks.
 
@@ -955,8 +996,7 @@ class DatabaseUploader:
             log.error("Chroma store not initialized")
             return 0, len(links)
 
-        log.info(
-            f"--> Uploading {len(links)} extracted links from {source_url}...")
+        log.info(f"--> Uploading {len(links)} extracted links from {source_url}...")
 
         # Create link chunks - each link becomes a searchable chunk
         rows = []
@@ -967,7 +1007,7 @@ class DatabaseUploader:
             embedding = self._generate_local_embeddings([link])[0]
 
             row = {
-                "id": hashlib.sha256(f"{source_url}:{idx}:{content}".encode("utf-8")).hexdigest(),
+                "id": hashlib.sha256(f"{source_url}:{idx}:{content}".encode()).hexdigest(),
                 "content": content,
                 "source_url": source_url,  # Track where the link was found
                 "source_domain": self._source_locator(source_url),
@@ -979,7 +1019,7 @@ class DatabaseUploader:
                     "link_source": source_url,
                     "source_locator": self._source_locator(source_url),
                     "loader_type": loader_type,
-                    "type": "extracted_link"  # Mark this as an extracted link
+                    "type": "extracted_link",  # Mark this as an extracted link
                 },
                 "scraped_at": datetime.now(timezone.utc).isoformat(),
                 "created_at": datetime.now(timezone.utc).isoformat(),
@@ -997,7 +1037,7 @@ class DatabaseUploader:
         batch_size = 50
 
         for i in range(0, len(rows), batch_size):
-            batch = rows[i:i + batch_size]
+            batch = rows[i : i + batch_size]
 
             try:
                 successful += self.chroma_store.upsert_chunks(batch)
@@ -1012,13 +1052,14 @@ class DatabaseUploader:
                         self._sync_rows_to_supabase([row])
                         successful += 1
                     except Exception as e2:
-                        log.warning(
-                            f"Failed to upload link {row['metadata']['link_target']}: {e2}"
+                        metadata = row.get("metadata") if isinstance(row, dict) else None
+                        link_target = (
+                            metadata.get("link_target") if isinstance(metadata, dict) else "unknown"
                         )
+                        log.warning(f"Failed to upload link {link_target}: {e2}")
                         failed += 1
 
-        log.info(
-            f"--> ✅ Links upload complete: {successful} successful, {failed} failed")
+        log.info(f"--> ✅ Links upload complete: {successful} successful, {failed} failed")
         return successful, failed
 
     def close(self) -> None:

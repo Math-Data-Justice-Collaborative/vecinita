@@ -9,6 +9,21 @@ This test suite covers:
 - **Integration tests** for database and API interactions
 - **UI tests** using Playwright for end-to-end testing
 
+## Gateway API v1 Integration Matrix
+
+Gateway contract coverage is tracked in:
+
+- `tests/integration/MATRIX_GATEWAY_V1.md` (endpoint matrix)
+- `tests/integration/MATRIX_INTEGRATION_POINTS.md` (integration point mapping)
+
+Matrix contract enforcement:
+
+```bash
+uv run pytest tests/integration/test_gateway_v1_matrix_coverage.py -q
+```
+
+This check fails if any Gateway API v1 endpoint exists in router source but is missing from the matrix file.
+
 ## Test Structure
 
 ```

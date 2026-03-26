@@ -2,13 +2,13 @@
 Tests for the scraper CLI module - src/scraper/main.py
 Tests for command-line interface and entry point.
 """
-import pytest
+
 import os
-import tempfile
 import sys
-from pathlib import Path
-from unittest.mock import patch, Mock, MagicMock
-from io import StringIO
+import tempfile
+from unittest.mock import Mock, patch
+
+import pytest
 
 
 @pytest.mark.unit
@@ -19,7 +19,7 @@ class TestScraperCLI:
         """Test that CLI arguments are parsed correctly."""
         from src.scraper.main import main
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
             urls_file = f.name
             f.write("https://example.com\n")
 
@@ -30,13 +30,20 @@ class TestScraperCLI:
             failed_log = f_failed.name
 
         try:
-            with patch.object(sys, 'argv', [
-                'main.py',
-                '--input', urls_file,
-                '--output-file', output_file,
-                '--failed-log', failed_log
-            ]):
-                with patch('src.scraper.main.VecinaScraper') as mock_scraper:
+            with patch.object(
+                sys,
+                "argv",
+                [
+                    "main.py",
+                    "--input",
+                    urls_file,
+                    "--output-file",
+                    output_file,
+                    "--failed-log",
+                    failed_log,
+                ],
+            ):
+                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.return_value = (1, 0, 1)
                     mock_scraper.return_value = mock_instance
@@ -62,12 +69,19 @@ class TestScraperCLI:
             failed_log = f_failed.name
 
         try:
-            with patch.object(sys, 'argv', [
-                'main.py',
-                '--input', '/nonexistent/file.txt',
-                '--output-file', output_file,
-                '--failed-log', failed_log
-            ]):
+            with patch.object(
+                sys,
+                "argv",
+                [
+                    "main.py",
+                    "--input",
+                    "/nonexistent/file.txt",
+                    "--output-file",
+                    output_file,
+                    "--failed-log",
+                    failed_log,
+                ],
+            ):
                 with pytest.raises(SystemExit):
                     main()
         finally:
@@ -79,20 +93,27 @@ class TestScraperCLI:
         from src.scraper.main import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            urls_file = os.path.join(tmpdir, 'urls.txt')
-            output_file = os.path.join(tmpdir, 'subdir', 'output.txt')
-            failed_log = os.path.join(tmpdir, 'subdir', 'failed.txt')
+            urls_file = os.path.join(tmpdir, "urls.txt")
+            output_file = os.path.join(tmpdir, "subdir", "output.txt")
+            failed_log = os.path.join(tmpdir, "subdir", "failed.txt")
 
-            with open(urls_file, 'w') as f:
+            with open(urls_file, "w") as f:
                 f.write("https://example.com\n")
 
-            with patch.object(sys, 'argv', [
-                'main.py',
-                '--input', urls_file,
-                '--output-file', output_file,
-                '--failed-log', failed_log
-            ]):
-                with patch('src.scraper.main.VecinaScraper') as mock_scraper:
+            with patch.object(
+                sys,
+                "argv",
+                [
+                    "main.py",
+                    "--input",
+                    urls_file,
+                    "--output-file",
+                    output_file,
+                    "--failed-log",
+                    failed_log,
+                ],
+            ):
+                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.return_value = (1, 1, 0)
                     mock_instance.print_summary = Mock()
@@ -110,22 +131,30 @@ class TestScraperCLI:
         from src.scraper.main import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            urls_file = os.path.join(tmpdir, 'urls.txt')
-            output_file = os.path.join(tmpdir, 'output.txt')
-            failed_log = os.path.join(tmpdir, 'failed.txt')
-            links_file = os.path.join(tmpdir, 'links.txt')
+            urls_file = os.path.join(tmpdir, "urls.txt")
+            output_file = os.path.join(tmpdir, "output.txt")
+            failed_log = os.path.join(tmpdir, "failed.txt")
+            links_file = os.path.join(tmpdir, "links.txt")
 
-            with open(urls_file, 'w') as f:
+            with open(urls_file, "w") as f:
                 f.write("https://example.com\n")
 
-            with patch.object(sys, 'argv', [
-                'main.py',
-                '--input', urls_file,
-                '--output-file', output_file,
-                '--failed-log', failed_log,
-                '--links-file', links_file
-            ]):
-                with patch('src.scraper.main.VecinaScraper') as mock_scraper:
+            with patch.object(
+                sys,
+                "argv",
+                [
+                    "main.py",
+                    "--input",
+                    urls_file,
+                    "--output-file",
+                    output_file,
+                    "--failed-log",
+                    failed_log,
+                    "--links-file",
+                    links_file,
+                ],
+            ):
+                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.return_value = (1, 1, 0)
                     mock_instance.print_summary = Mock()
@@ -137,28 +166,36 @@ class TestScraperCLI:
                     # Verify VecinaScraper was called with links_file
                     assert mock_scraper.called
                     call_kwargs = mock_scraper.call_args[1]
-                    assert call_kwargs.get('links_file') == links_file
+                    assert call_kwargs.get("links_file") == links_file
 
     def test_cli_with_loader_argument(self):
         """Test CLI accepts optional --loader argument."""
         from src.scraper.main import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            urls_file = os.path.join(tmpdir, 'urls.txt')
-            output_file = os.path.join(tmpdir, 'output.txt')
-            failed_log = os.path.join(tmpdir, 'failed.txt')
+            urls_file = os.path.join(tmpdir, "urls.txt")
+            output_file = os.path.join(tmpdir, "output.txt")
+            failed_log = os.path.join(tmpdir, "failed.txt")
 
-            with open(urls_file, 'w') as f:
+            with open(urls_file, "w") as f:
                 f.write("https://example.com\n")
 
-            with patch.object(sys, 'argv', [
-                'main.py',
-                '--input', urls_file,
-                '--output-file', output_file,
-                '--failed-log', failed_log,
-                '--loader', 'playwright'
-            ]):
-                with patch('src.scraper.main.VecinaScraper') as mock_scraper:
+            with patch.object(
+                sys,
+                "argv",
+                [
+                    "main.py",
+                    "--input",
+                    urls_file,
+                    "--output-file",
+                    output_file,
+                    "--failed-log",
+                    failed_log,
+                    "--loader",
+                    "playwright",
+                ],
+            ):
+                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.return_value = (1, 1, 0)
                     mock_instance.print_summary = Mock()
@@ -170,7 +207,7 @@ class TestScraperCLI:
                     # Verify scrape_urls was called with force_loader
                     assert mock_instance.scrape_urls.called
                     call_kwargs = mock_instance.scrape_urls.call_args[1]
-                    assert call_kwargs.get('force_loader') == 'playwright'
+                    assert call_kwargs.get("force_loader") == "playwright"
 
 
 @pytest.mark.unit
@@ -182,20 +219,27 @@ class TestScraperCLIErrorHandling:
         from src.scraper.main import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            urls_file = os.path.join(tmpdir, 'urls.txt')
-            output_file = os.path.join(tmpdir, 'output.txt')
-            failed_log = os.path.join(tmpdir, 'failed.txt')
+            urls_file = os.path.join(tmpdir, "urls.txt")
+            output_file = os.path.join(tmpdir, "output.txt")
+            failed_log = os.path.join(tmpdir, "failed.txt")
 
-            with open(urls_file, 'w') as f:
+            with open(urls_file, "w") as f:
                 f.write("https://example.com\n")
 
-            with patch.object(sys, 'argv', [
-                'main.py',
-                '--input', urls_file,
-                '--output-file', output_file,
-                '--failed-log', failed_log
-            ]):
-                with patch('src.scraper.main.VecinaScraper') as mock_scraper:
+            with patch.object(
+                sys,
+                "argv",
+                [
+                    "main.py",
+                    "--input",
+                    urls_file,
+                    "--output-file",
+                    output_file,
+                    "--failed-log",
+                    failed_log,
+                ],
+            ):
+                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.side_effect = KeyboardInterrupt()
                     mock_instance.print_summary = Mock()
@@ -212,23 +256,29 @@ class TestScraperCLIErrorHandling:
         from src.scraper.main import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            urls_file = os.path.join(tmpdir, 'urls.txt')
-            output_file = os.path.join(tmpdir, 'output.txt')
-            failed_log = os.path.join(tmpdir, 'failed.txt')
+            urls_file = os.path.join(tmpdir, "urls.txt")
+            output_file = os.path.join(tmpdir, "output.txt")
+            failed_log = os.path.join(tmpdir, "failed.txt")
 
-            with open(urls_file, 'w') as f:
+            with open(urls_file, "w") as f:
                 f.write("https://example.com\n")
 
-            with patch.object(sys, 'argv', [
-                'main.py',
-                '--input', urls_file,
-                '--output-file', output_file,
-                '--failed-log', failed_log
-            ]):
-                with patch('src.scraper.main.VecinaScraper') as mock_scraper:
+            with patch.object(
+                sys,
+                "argv",
+                [
+                    "main.py",
+                    "--input",
+                    urls_file,
+                    "--output-file",
+                    output_file,
+                    "--failed-log",
+                    failed_log,
+                ],
+            ):
+                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
-                    mock_instance.scrape_urls.side_effect = Exception(
-                        "Fatal error")
+                    mock_instance.scrape_urls.side_effect = Exception("Fatal error")
                     mock_scraper.return_value = mock_instance
 
                     with pytest.raises(SystemExit) as exc_info:
@@ -246,23 +296,30 @@ class TestScraperCLIURLParsing:
         from src.scraper.main import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            urls_file = os.path.join(tmpdir, 'urls.txt')
-            output_file = os.path.join(tmpdir, 'output.txt')
-            failed_log = os.path.join(tmpdir, 'failed.txt')
+            urls_file = os.path.join(tmpdir, "urls.txt")
+            output_file = os.path.join(tmpdir, "output.txt")
+            failed_log = os.path.join(tmpdir, "failed.txt")
 
-            with open(urls_file, 'w') as f:
+            with open(urls_file, "w") as f:
                 f.write("# Comment line\n")
                 f.write("https://example.com\n")
                 f.write("\n")
                 f.write("https://test.org\n")
 
-            with patch.object(sys, 'argv', [
-                'main.py',
-                '--input', urls_file,
-                '--output-file', output_file,
-                '--failed-log', failed_log
-            ]):
-                with patch('src.scraper.main.VecinaScraper') as mock_scraper:
+            with patch.object(
+                sys,
+                "argv",
+                [
+                    "main.py",
+                    "--input",
+                    urls_file,
+                    "--output-file",
+                    output_file,
+                    "--failed-log",
+                    failed_log,
+                ],
+            ):
+                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.return_value = (2, 2, 0)
                     mock_instance.print_summary = Mock()
@@ -282,21 +339,28 @@ class TestScraperCLIURLParsing:
         from src.scraper.main import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            urls_file = os.path.join(tmpdir, 'urls.txt')
-            output_file = os.path.join(tmpdir, 'output.txt')
-            failed_log = os.path.join(tmpdir, 'failed.txt')
+            urls_file = os.path.join(tmpdir, "urls.txt")
+            output_file = os.path.join(tmpdir, "output.txt")
+            failed_log = os.path.join(tmpdir, "failed.txt")
 
             # Write file with explicit UTF-8 encoding containing only comments
-            with open(urls_file, 'w', encoding='utf-8') as f:
+            with open(urls_file, "w", encoding="utf-8") as f:
                 f.write("# Only comments\n")
                 f.write("# No actual URLs\n")
 
-            with patch.object(sys, 'argv', [
-                'main.py',
-                '--input', urls_file,
-                '--output-file', output_file,
-                '--failed-log', failed_log
-            ]):
+            with patch.object(
+                sys,
+                "argv",
+                [
+                    "main.py",
+                    "--input",
+                    urls_file,
+                    "--output-file",
+                    output_file,
+                    "--failed-log",
+                    failed_log,
+                ],
+            ):
                 with pytest.raises(SystemExit) as exc_info:
                     main()
 
@@ -308,22 +372,29 @@ class TestScraperCLIURLParsing:
         from src.scraper.main import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            urls_file = os.path.join(tmpdir, 'urls_with_bom.txt')
-            output_file = os.path.join(tmpdir, 'output.txt')
-            failed_log = os.path.join(tmpdir, 'failed.txt')
+            urls_file = os.path.join(tmpdir, "urls_with_bom.txt")
+            output_file = os.path.join(tmpdir, "output.txt")
+            failed_log = os.path.join(tmpdir, "failed.txt")
 
             # Write file with UTF-8 BOM encoding
-            with open(urls_file, 'w', encoding='utf-8-sig') as f:
+            with open(urls_file, "w", encoding="utf-8-sig") as f:
                 f.write("https://example.com\n")
                 f.write("https://test.org\n")
 
-            with patch.object(sys, 'argv', [
-                'main.py',
-                '--input', urls_file,
-                '--output-file', output_file,
-                '--failed-log', failed_log
-            ]):
-                with patch('src.scraper.main.VecinaScraper') as mock_scraper:
+            with patch.object(
+                sys,
+                "argv",
+                [
+                    "main.py",
+                    "--input",
+                    urls_file,
+                    "--output-file",
+                    output_file,
+                    "--failed-log",
+                    failed_log,
+                ],
+            ):
+                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.return_value = (2, 2, 0)
                     mock_instance.print_summary = Mock()
@@ -343,23 +414,30 @@ class TestScraperCLIURLParsing:
         from src.scraper.main import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            urls_file = os.path.join(tmpdir, 'urls_latin1.txt')
-            output_file = os.path.join(tmpdir, 'output.txt')
-            failed_log = os.path.join(tmpdir, 'failed.txt')
+            urls_file = os.path.join(tmpdir, "urls_latin1.txt")
+            output_file = os.path.join(tmpdir, "output.txt")
+            failed_log = os.path.join(tmpdir, "failed.txt")
 
             # Write file with latin-1 encoding (includes special characters)
             # Using latin-1 specific character: é (0xe9 in latin-1)
             content = "# Sitio con carácter especial\nhttps://example.com/página\n"
-            with open(urls_file, 'wb') as f:
-                f.write(content.encode('latin-1'))
+            with open(urls_file, "wb") as f:
+                f.write(content.encode("latin-1"))
 
-            with patch.object(sys, 'argv', [
-                'main.py',
-                '--input', urls_file,
-                '--output-file', output_file,
-                '--failed-log', failed_log
-            ]):
-                with patch('src.scraper.main.VecinaScraper') as mock_scraper:
+            with patch.object(
+                sys,
+                "argv",
+                [
+                    "main.py",
+                    "--input",
+                    urls_file,
+                    "--output-file",
+                    output_file,
+                    "--failed-log",
+                    failed_log,
+                ],
+            ):
+                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.return_value = (1, 1, 0)
                     mock_instance.print_summary = Mock()
@@ -378,21 +456,28 @@ class TestScraperCLIURLParsing:
         from src.scraper.main import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            urls_file = os.path.join(tmpdir, 'urls.txt')
-            output_file = os.path.join(tmpdir, 'output.txt')
-            failed_log = os.path.join(tmpdir, 'failed.txt')
+            urls_file = os.path.join(tmpdir, "urls.txt")
+            output_file = os.path.join(tmpdir, "output.txt")
+            failed_log = os.path.join(tmpdir, "failed.txt")
 
             # Create a file that's valid UTF-8
-            with open(urls_file, 'w', encoding='utf-8') as f:
+            with open(urls_file, "w", encoding="utf-8") as f:
                 f.write("https://example.com\n")
 
-            with patch.object(sys, 'argv', [
-                'main.py',
-                '--input', urls_file,
-                '--output-file', output_file,
-                '--failed-log', failed_log
-            ]):
-                with patch('src.scraper.main.VecinaScraper') as mock_scraper:
+            with patch.object(
+                sys,
+                "argv",
+                [
+                    "main.py",
+                    "--input",
+                    urls_file,
+                    "--output-file",
+                    output_file,
+                    "--failed-log",
+                    failed_log,
+                ],
+            ):
+                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.return_value = (1, 1, 0)
                     mock_instance.print_summary = Mock()
@@ -404,14 +489,14 @@ class TestScraperCLIURLParsing:
                     encoding_attempts = []
 
                     def tracking_open(*args, **kwargs):
-                        if 'encoding' in kwargs:
-                            encoding_attempts.append(kwargs['encoding'])
+                        if "encoding" in kwargs:
+                            encoding_attempts.append(kwargs["encoding"])
                         return original_open(*args, **kwargs)
 
-                    with patch('builtins.open', side_effect=tracking_open):
+                    with patch("builtins.open", side_effect=tracking_open):
                         main()
 
                     # Verify utf-8 was tried first (and succeeded)
-                    assert 'utf-8' in encoding_attempts
+                    assert "utf-8" in encoding_attempts
                     # Since UTF-8 succeeds, we shouldn't need to try other encodings
-                    assert encoding_attempts[0] == 'utf-8'
+                    assert encoding_attempts[0] == "utf-8"

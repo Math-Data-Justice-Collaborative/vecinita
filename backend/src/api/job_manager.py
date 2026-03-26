@@ -7,15 +7,14 @@ Manages background scraping jobs with in-memory storage and automatic cleanup.
 import asyncio
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Optional, List, Tuple
 
-from .models import JobStatus, ScrapeJob, ScrapeJobMetadata, ScrapeJobResult, LoaderType
+from .models import JobStatus, LoaderType, ScrapeJob, ScrapeJobMetadata, ScrapeJobResult
 
 
 class AsyncJobManager:
     """
     Manages async scraping jobs with in-memory storage.
-    
+
     Stores job metadata and results; garbage collects old jobs.
     For production, consider replacing with Redis or Celery.
     """
@@ -23,14 +22,14 @@ class AsyncJobManager:
     def __init__(self, retention_hours: int = 24):
         """
         Initialize job manager.
-        
+
         Args:
             retention_hours: Keep job history for N hours before cleanup
         """
-        self.jobs: Dict[str, ScrapeJob] = {}
+        self.jobs: dict[str, ScrapeJob] = {}
         self.retention_hours = retention_hours
-        self._lock: Optional[asyncio.Lock] = None
-    
+        self._lock: asyncio.Lock | None = None
+
     async def _get_lock(self) -> asyncio.Lock:
         """Get or create the lock (lazy initialization for asyncio compatibility)."""
         if self._lock is None:
@@ -39,24 +38,24 @@ class AsyncJobManager:
 
     async def create_job(
         self,
-        urls: List[str],
+        urls: list[str],
         force_loader: LoaderType,
         stream: bool = False,
     ) -> str:
         """
         Create a new scrape job.
-        
+
         Args:
             urls: List of URLs to scrape
             force_loader: Loader type to use
             stream: Whether to stream results
-            
+
         Returns:
             Job ID (UUID string)
         """
         async with await self._get_lock():
             job_id = str(uuid.uuid4())
-            
+
             metadata = ScrapeJobMetadata(
                 job_id=job_id,
                 urls=urls,
@@ -64,7 +63,7 @@ class AsyncJobManager:
                 stream=stream,
                 created_at=datetime.now(timezone.utc),
             )
-            
+
             job = ScrapeJob(
                 job_id=job_id,
                 status=JobStatus.QUEUED,
@@ -72,11 +71,11 @@ class AsyncJobManager:
                 message="Job queued, waiting to start",
                 metadata=metadata,
             )
-            
+
             self.jobs[job_id] = job
             return job_id
 
-    async def get_job(self, job_id: str) -> Optional[ScrapeJob]:
+    async def get_job(self, job_id: str) -> ScrapeJob | None:
         """Retrieve job by ID."""
         async with await self._get_lock():
             return self.jobs.get(job_id)
@@ -85,13 +84,13 @@ class AsyncJobManager:
         self,
         job_id: str,
         status: JobStatus,
-        progress_percent: int = None,
-        message: str = None,
-        error: str = None,
+        progress_percent: int | None = None,
+        message: str | None = None,
+        error: str | None = None,
     ) -> bool:
         """
         Update job status and progress.
-        
+
         Returns:
             True if job exists, False otherwise
         """
@@ -125,7 +124,7 @@ class AsyncJobManager:
     ) -> bool:
         """
         Set job result (total chunks, successful/failed URLs).
-        
+
         Returns:
             True if job exists, False otherwise
         """
@@ -137,10 +136,10 @@ class AsyncJobManager:
             job.result = result
             return True
 
-    async def list_jobs(self, limit: int = 50, offset: int = 0) -> Tuple[List[ScrapeJob], int]:
+    async def list_jobs(self, limit: int = 50, offset: int = 0) -> tuple[list[ScrapeJob], int]:
         """
         List all jobs, most recent first.
-        
+
         Returns:
             (job list, total count)
         """
@@ -156,7 +155,7 @@ class AsyncJobManager:
     async def cancel_job(self, job_id: str) -> bool:
         """
         Cancel a running job.
-        
+
         Returns:
             True if job was cancelled, False if not found or already completed
         """
@@ -176,16 +175,14 @@ class AsyncJobManager:
     async def cleanup_old_jobs(self) -> int:
         """
         Remove jobs older than retention period.
-        
+
         Returns:
             Number of jobs deleted
         """
         async with await self._get_lock():
             cutoff_time = datetime.now(timezone.utc) - timedelta(hours=self.retention_hours)
             jobs_to_delete = [
-                job_id
-                for job_id, job in self.jobs.items()
-                if job.metadata.created_at < cutoff_time
+                job_id for job_id, job in self.jobs.items() if job.metadata.created_at < cutoff_time
             ]
 
             for job_id in jobs_to_delete:
@@ -193,11 +190,11 @@ class AsyncJobManager:
 
             return len(jobs_to_delete)
 
-    async def get_stats(self) -> Dict:
+    async def get_stats(self) -> dict[str, int | dict[str, int]]:
         """Get job manager statistics."""
         async with await self._get_lock():
             total_jobs = len(self.jobs)
-            by_status = {}
+            by_status: dict[str, int] = {}
             for job in self.jobs.values():
                 status = job.status.value
                 by_status[status] = by_status.get(status, 0) + 1

@@ -6,16 +6,17 @@ Exposes corpus metadata: embedding model, chunk stats, source list, and chunk pr
 No auth required — all data is non-sensitive metadata about the public knowledge base.
 """
 
-import os
 import json
 import logging
-from typing import Any, Optional
+import os
+from typing import Any
 from urllib.parse import urlparse
 
-from fastapi import APIRouter, HTTPException, Query, Depends
-import psycopg2
-from psycopg2.extras import RealDictCursor
-from supabase import create_client, Client
+import psycopg2  # type: ignore[import-untyped]
+from fastapi import APIRouter, Depends, HTTPException, Query
+from psycopg2.extras import RealDictCursor  # type: ignore[import-untyped]
+from supabase import Client, create_client
+
 from src.services.chroma_store import get_chroma_store
 from src.utils.tags import normalize_tags
 
@@ -45,23 +46,23 @@ def _get_db() -> Client | None:
         return None
 
 
-def _build_public_storage_url(storage_bucket: str, storage_path: str) -> Optional[str]:
+def _build_public_storage_url(storage_bucket: str, storage_path: str) -> str | None:
     supabase_url = os.getenv("SUPABASE_URL", "").rstrip("/")
     if not supabase_url or not storage_bucket or not storage_path:
         return None
     return f"{supabase_url}/storage/v1/object/public/{storage_bucket}/{storage_path}"
 
 
-def _storage_path_from_source_url(source_url: str) -> Optional[str]:
+def _storage_path_from_source_url(source_url: str) -> str | None:
     if not source_url.startswith("upload://"):
         return None
-    raw_path = source_url[len("upload://"):].strip()
+    raw_path = source_url[len("upload://") :].strip()
     if not raw_path:
         return None
     return raw_path
 
 
-def _extract_download_url(metadata: Any) -> Optional[str]:
+def _extract_download_url(metadata: Any) -> str | None:
     if isinstance(metadata, str):
         metadata_text = metadata.strip()
         if metadata_text:
@@ -77,7 +78,7 @@ def _extract_download_url(metadata: Any) -> Optional[str]:
     return None
 
 
-def _resolve_download_url(metadata: Any, source_url: str) -> Optional[str]:
+def _resolve_download_url(metadata: Any, source_url: str) -> str | None:
     return _extract_download_url(metadata)
 
 
@@ -130,7 +131,12 @@ def _to_int(value: Any, default: int = 0) -> int:
 def _normalize_public_source(raw: dict[str, Any]) -> dict[str, Any]:
     url = str(raw.get("url") or raw.get("source_url") or "")
     metadata = _metadata_dict(raw.get("metadata"))
-    domain = str(raw.get("domain") or raw.get("source_domain") or metadata.get("source_domain") or _domain_from_url(url))
+    domain = str(
+        raw.get("domain")
+        or raw.get("source_domain")
+        or metadata.get("source_domain")
+        or _domain_from_url(url)
+    )
     total_chunks = _to_int(raw.get("total_chunks") or raw.get("chunk_count"), 0)
 
     tags = normalize_tags(raw.get("tags") or metadata.get("tags") or [])
@@ -159,7 +165,7 @@ def _normalize_public_source(raw: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _parse_query_tags(tags: Optional[str]) -> list[str]:
+def _parse_query_tags(tags: str | None) -> list[str]:
     if not tags:
         return []
     parts = [part.strip() for part in str(tags).split(",") if part.strip()]
@@ -203,18 +209,15 @@ def _load_overview_via_sql() -> tuple[dict[str, int], list[dict[str, Any]]]:
 
     with psycopg2.connect(database_url) as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(
-                """
+            cur.execute("""
                 SELECT
                     COUNT(*)::int AS total_chunks,
                     COALESCE(AVG(COALESCE(chunk_size, LENGTH(content)))::int, 0) AS avg_chunk_size
                 FROM public.document_chunks
-                """
-            )
-            stats_row = cur.fetchone() or {}
+                """)
+            stats_row: dict[str, Any] = cur.fetchone() or {}
 
-            cur.execute(
-                """
+            cur.execute("""
                 SELECT
                     id,
                     url,
@@ -236,12 +239,10 @@ def _load_overview_via_sql() -> tuple[dict[str, int], list[dict[str, Any]]]:
                 FROM public.sources
                 ORDER BY COALESCE(total_chunks, 0) DESC, COALESCE(last_scraped_at, created_at) DESC
                 LIMIT 2000
-                """
-            )
+                """)
             source_rows = [dict(row) for row in (cur.fetchall() or [])]
 
-            cur.execute(
-                """
+            cur.execute("""
                 SELECT
                     source_url AS url,
                     MAX(source_domain) AS source_domain,
@@ -254,8 +255,7 @@ def _load_overview_via_sql() -> tuple[dict[str, int], list[dict[str, Any]]]:
                 GROUP BY source_url
                 ORDER BY COUNT(*) DESC
                 LIMIT 5000
-                """
-            )
+                """)
             chunk_rows = [dict(row) for row in (cur.fetchall() or [])]
 
     normalized_sources = [_normalize_public_source(row) for row in source_rows]
@@ -304,11 +304,16 @@ def _load_chunk_statistics_via_sql(limit: int) -> list[dict[str, Any]]:
 # Overview endpoint
 # ---------------------------------------------------------------------------
 
+
 @router.get("/overview")
 async def documents_overview(
-    tags: Optional[str] = Query(None, description="Comma-separated tags used to filter source list"),
-    tag_match_mode: str = Query("any", pattern="^(any|all)$", description="Tag match mode for source filtering"),
-    include_test_data: bool = Query(False, description="Include test/e2e-tagged artifacts in results"),
+    tags: str | None = Query(None, description="Comma-separated tags used to filter source list"),
+    tag_match_mode: str = Query(
+        "any", pattern="^(any|all)$", description="Tag match mode for source filtering"
+    ),
+    include_test_data: bool = Query(
+        False, description="Include test/e2e-tagged artifacts in results"
+    ),
     db: Client | None = Depends(_get_db),
 ) -> dict[str, Any]:
     """
@@ -364,13 +369,15 @@ async def documents_overview(
         source_rows = [_normalize_public_source(item) for item in source_index.values()]
         if not include_test_data:
             source_rows = [
-                item for item in source_rows
+                item
+                for item in source_rows
                 if not _is_test_artifact(item.get("url") or "", item.get("tags") or [])
             ]
         requested_tags = _parse_query_tags(tags)
         if requested_tags:
             source_rows = [
-                item for item in source_rows
+                item
+                for item in source_rows
                 if _tag_filter_match(item.get("tags") or [], requested_tags, tag_match_mode)
             ]
         source_rows.sort(key=lambda item: _to_int(item.get("total_chunks"), 0), reverse=True)
@@ -382,7 +389,9 @@ async def documents_overview(
             "unique_sources": len(source_rows),
             "filtered": bool(requested_tags),
             "avg_chunk_size": avg_chunk_size,
-            "embedding_model": os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"),
+            "embedding_model": os.getenv(
+                "EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
+            ),
             "embedding_dimension": int(os.getenv("EMBEDDING_DIMENSION", "384")),
             "sources": source_rows,
         }
@@ -395,6 +404,7 @@ async def documents_overview(
 # ---------------------------------------------------------------------------
 # Preview endpoint
 # ---------------------------------------------------------------------------
+
 
 @router.get("/preview")
 async def documents_preview(
@@ -416,12 +426,14 @@ async def documents_preview(
         for idx in range(len(ids)):
             metadata = _metadata_dict(metas[idx] if idx < len(metas) else {})
             content = str(docs[idx] if idx < len(docs) and docs[idx] is not None else "")
-            chunks.append({
-                "chunk_index": _to_int(metadata.get("chunk_index"), idx),
-                "chunk_size": _to_int(metadata.get("chunk_size"), len(content)),
-                "content_preview": content[:400],
-                "document_title": metadata.get("document_title") or source_url,
-            })
+            chunks.append(
+                {
+                    "chunk_index": _to_int(metadata.get("chunk_index"), idx),
+                    "chunk_size": _to_int(metadata.get("chunk_size"), len(content)),
+                    "content_preview": content[:400],
+                    "document_title": metadata.get("document_title") or source_url,
+                }
+            )
         chunks.sort(key=lambda item: _to_int(item.get("chunk_index"), 0))
         chunks = chunks[:limit]
         return {"source_url": source_url, "chunks": chunks}
@@ -528,7 +540,9 @@ async def documents_chunk_statistics(
             current["total_size"] += chunk_size
             if source_url:
                 current["_sources"].add(source_url)
-            if latest_chunk and (not current.get("latest_chunk") or str(latest_chunk) > str(current["latest_chunk"])):
+            if latest_chunk and (
+                not current.get("latest_chunk") or str(latest_chunk) > str(current["latest_chunk"])
+            ):
                 current["latest_chunk"] = latest_chunk
 
         rows: list[dict[str, Any]] = []
@@ -583,7 +597,14 @@ async def documents_tags(
                 }
             )
 
-        rows.sort(key=lambda item: (int(item.get("source_count", 0)), int(item.get("chunk_count", 0)), item.get("tag", "")), reverse=True)
+        rows.sort(
+            key=lambda item: (
+                _to_int(item.get("source_count"), 0),
+                _to_int(item.get("chunk_count"), 0),
+                str(item.get("tag", "")),
+            ),
+            reverse=True,
+        )
         rows = rows[:limit]
 
         return {"tags": rows, "total": len(rows)}

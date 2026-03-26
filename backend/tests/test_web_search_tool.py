@@ -4,10 +4,10 @@ Tests the web_search tool's ability to search the web via Tavily or
 DuckDuckGo and return normalized results as JSON.
 """
 
-import pytest
 import json
 import os
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
+
 from src.agent.tools.web_search import create_web_search_tool
 
 
@@ -21,7 +21,7 @@ class TestWebSearchToolWithTavily:
         mock_tavily = Mock()
         mock_tavily_class.return_value = mock_tavily
 
-        tool = create_web_search_tool()
+        create_web_search_tool()
 
         mock_tavily_class.assert_called_once()
         call_kwargs = mock_tavily_class.call_args[1]
@@ -38,7 +38,7 @@ class TestWebSearchToolWithTavily:
                 "title": "Health Services",
                 "content": "Information about local health services",
                 "url": "https://example.com/health",
-                "answer": "Answer text"
+                "answer": "Answer text",
             }
         ]
         mock_tavily_class.return_value = mock_tavily
@@ -48,8 +48,7 @@ class TestWebSearchToolWithTavily:
         results = json.loads(results_json)
 
         # Verify Tavily was called with correct query
-        mock_tavily.invoke.assert_called_once_with(
-            {"query": "health services"})
+        mock_tavily.invoke.assert_called_once_with({"query": "health services"})
 
         assert len(results) == 1
         assert results[0]["title"] == "Health Services"
@@ -63,7 +62,7 @@ class TestWebSearchToolWithTavily:
         mock_tavily = Mock()
         mock_tavily_class.return_value = mock_tavily
 
-        tool = create_web_search_tool()
+        create_web_search_tool()
 
         call_kwargs = mock_tavily_class.call_args[1]
         assert call_kwargs["api_key"] == "alt-key"
@@ -75,23 +74,27 @@ class TestWebSearchToolWithTavily:
         mock_tavily = Mock()
         mock_tavily_class.return_value = mock_tavily
 
-        tool = create_web_search_tool()
+        create_web_search_tool()
 
         call_kwargs = mock_tavily_class.call_args[1]
         assert call_kwargs["api_key"] == "tvly-key"
 
-    @patch.dict(os.environ, {
-        "TAVILY_API_KEY": "primary-key",
-        "TAVILY_API_AI_KEY": "secondary-key",
-        "TVLY_API_KEY": "tertiary-key",
-    }, clear=True)
+    @patch.dict(
+        os.environ,
+        {
+            "TAVILY_API_KEY": "primary-key",
+            "TAVILY_API_AI_KEY": "secondary-key",
+            "TVLY_API_KEY": "tertiary-key",
+        },
+        clear=True,
+    )
     @patch("langchain_tavily.TavilySearch")
     def test_tavily_env_var_precedence(self, mock_tavily_class):
         """When multiple Tavily env vars are set, primary has precedence."""
         mock_tavily = Mock()
         mock_tavily_class.return_value = mock_tavily
 
-        tool = create_web_search_tool()
+        create_web_search_tool()
 
         # Ensure Tavily was constructed with the primary key first
         call_kwargs = mock_tavily_class.call_args[1]
@@ -108,7 +111,7 @@ class TestWebSearchToolWithDuckDuckGo:
         mock_ddg = Mock()
         mock_ddg_class.return_value = mock_ddg
 
-        tool = create_web_search_tool()
+        create_web_search_tool()
 
         mock_ddg_class.assert_called_once_with(num_results=5)
 
@@ -121,13 +124,13 @@ class TestWebSearchToolWithDuckDuckGo:
             {
                 "title": "Result 1",
                 "snippet": "First result snippet",
-                "link": "https://example.com/1"
+                "link": "https://example.com/1",
             },
             {
                 "title": "Result 2",
                 "snippet": "Second result snippet",
-                "link": "https://example.com/2"
-            }
+                "link": "https://example.com/2",
+            },
         ]
         mock_ddg_class.return_value = mock_ddg
 

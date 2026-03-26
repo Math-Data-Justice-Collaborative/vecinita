@@ -10,7 +10,6 @@ Port: 8004 (by default)
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from typing import Dict, Optional
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -22,19 +21,18 @@ _BACKEND_ROOT = Path(__file__).resolve().parents[2]
 load_dotenv(_BACKEND_ROOT / ".env", override=False)
 load_dotenv(_PROJECT_ROOT / ".env", override=True)
 
-from fastapi import FastAPI, HTTPException, Depends, Query, APIRouter, Request
+from fastapi import APIRouter, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from .router_ask import router as ask_router
-from .router_scrape import router as scrape_router
-from .router_embed import router as embed_router
-from .router_admin import router as admin_router
-from .router_documents import router as documents_router
 from .middleware import AuthenticationMiddleware, RateLimitingMiddleware
-from .models import HealthCheck, GatewayConfig, ErrorResponse
-from .job_manager import job_manager
+from .models import GatewayConfig, HealthCheck
+from .router_admin import router as admin_router
+from .router_ask import router as ask_router
+from .router_documents import router as documents_router
+from .router_embed import router as embed_router
+from .router_scrape import router as scrape_router
 
 # ============================================================================
 # Configuration
@@ -46,17 +44,13 @@ DATABASE_URL = os.getenv("DATABASE_URL", "")
 
 # CORS configuration - supports multiple origins separated by comma
 ALLOWED_ORIGINS = os.getenv(
-    "ALLOWED_ORIGINS",
-    "http://localhost:5173,http://localhost:5174,http://localhost:4173"
+    "ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:5174,http://localhost:4173"
 ).split(",")
 ALLOWED_ORIGIN_REGEX = os.getenv("ALLOWED_ORIGIN_REGEX", "").strip() or None
 
 MAX_URLS_PER_REQUEST = int(os.getenv("MAX_URLS_PER_REQUEST", "100"))
 JOB_RETENTION_HOURS = int(os.getenv("JOB_RETENTION_HOURS", "24"))
-EMBEDDING_MODEL = os.getenv(
-    "EMBEDDING_MODEL",
-    "sentence-transformers/all-MiniLM-L6-v2"
-)
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 
 # ============================================================================
 # FastAPI Application
@@ -67,7 +61,7 @@ EMBEDDING_MODEL = os.getenv(
 async def lifespan(app: FastAPI):
     """
     Manage application lifespan: startup and shutdown events.
-    
+
     Startup: Initialize resources when the application starts.
     Shutdown: Clean up resources when the application stops.
     """
@@ -130,7 +124,7 @@ app.add_middleware(AuthenticationMiddleware)
 async def root(request: Request):
     """
     Gateway root endpoint.
-    
+
     Returns service info and available endpoints.
     - For browsers (Accept: text/html): serves frontend index.html if available
     - For API clients (Accept: application/json): returns JSON service info
@@ -138,20 +132,20 @@ async def root(request: Request):
     # Check if frontend is built and available
     frontend_dist = Path(__file__).parent.parent.parent.parent / "frontend" / "dist"
     frontend_available = frontend_dist.exists() and (frontend_dist / "index.html").exists()
-    
+
     # Check Accept header to determine response type
     accept_header = request.headers.get("accept", "").lower()
-    
+
     # If it's a browser request (accepts text/html) and frontend is available, serve it
     if "text/html" in accept_header and frontend_available:
         return FileResponse(str(frontend_dist / "index.html"))
-    
+
     # Otherwise return JSON service info (for API clients or when frontend unavailable)
     if frontend_available:
         front_message = " | Frontend available at /"
     else:
         front_message = " | Frontend not built (use: npm run build in frontend/)"
-    
+
     return {
         "service": "Vecinita Unified API Gateway",
         "version": "1.0.0",
@@ -205,7 +199,7 @@ async def health_check():
     """
     Health check endpoint - kept at root for backward compatibility.
     Also available at /api/v1/admin/health
-    
+
     Returns:
         Service health status
     """
@@ -224,7 +218,7 @@ async def get_gateway_config():
     """
     Get gateway configuration - kept at root for backward compatibility.
     Also available at /api/v1/admin/config
-    
+
     Returns:
         Current configuration
     """
@@ -314,7 +308,7 @@ if __name__ == "__main__":
     reload = os.getenv("RELOAD", "False").lower() == "true"
 
     print(f"Starting gateway on port {port} ({'with' if reload else 'without'} reload)...")
-    
+
     uvicorn.run(
         app,
         host="0.0.0.0",

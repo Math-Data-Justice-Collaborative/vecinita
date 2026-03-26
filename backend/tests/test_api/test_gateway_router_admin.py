@@ -25,7 +25,9 @@ if "supabase" not in sys.modules:
 
 
 class _FakeResponse:
-    def __init__(self, text: str = "", status_code: int = 200, headers: dict | None = None, json_data=None):
+    def __init__(
+        self, text: str = "", status_code: int = 200, headers: dict | None = None, json_data=None
+    ):
         self.text = text
         self.status_code = status_code
         self.headers = headers or {}
@@ -84,8 +86,8 @@ def admin_client(env_vars, monkeypatch):
     for key, value in env_vars.items():
         monkeypatch.setenv(key, value)
 
-    from src.api.main import app
     from src.api import router_admin
+    from src.api.main import app
 
     mock_db = MagicMock()
     mock_store = MagicMock()
@@ -105,7 +107,9 @@ class TestAdminTagsEndpoints:
         client, mock_db, mock_store = admin_client
         from src.api import router_admin
 
-        mock_db.table.return_value.select.return_value.limit.return_value.execute.return_value = MagicMock(data=[{"id": "chunk-1"}])
+        mock_db.table.return_value.select.return_value.limit.return_value.execute.return_value = (
+            MagicMock(data=[{"id": "chunk-1"}])
+        )
         mock_store.heartbeat.return_value = True
         monkeypatch.setenv("VECTOR_SYNC_ENABLED", "true")
         monkeypatch.setenv("VECTOR_SYNC_SUPABASE_FALLBACK_READS", "true")
@@ -156,11 +160,12 @@ class TestAdminTagsEndpoints:
         mock_store.get_chunks.return_value = {
             "ids": ["chunk-1", "chunk-2"],
             "documents": ["Doc A", "Doc B"],
-            "metadatas": [{"title": "A", "source_url": "https://example.com/resource"}, {"title": "B", "source_url": "https://example.com/resource"}],
+            "metadatas": [
+                {"title": "A", "source_url": "https://example.com/resource"},
+                {"title": "B", "source_url": "https://example.com/resource"},
+            ],
         }
-        mock_store.chunks.return_value.get.return_value = {
-            "embeddings": [[0.1, 0.2], [0.3, 0.4]]
-        }
+        mock_store.chunks.return_value.get.return_value = {"embeddings": [[0.1, 0.2], [0.3, 0.4]]}
 
         response = client.patch(
             "/api/v1/admin/sources/tags",
@@ -184,9 +189,7 @@ class TestAdminTagsEndpoints:
             "documents": ["Doc A"],
             "metadatas": [{"title": "A", "source_url": "https://example.com/resource"}],
         }
-        mock_store.chunks.return_value.get.return_value = {
-            "embeddings": [[0.1, 0.2]]
-        }
+        mock_store.chunks.return_value.get.return_value = {"embeddings": [[0.1, 0.2]]}
 
         response = client.patch(
             "/api/v1/admin/sources/tags?lang=es",
@@ -267,7 +270,9 @@ class TestAdminTagsEndpoints:
         assert mock_store.add_queue_job.call_count >= 2
         mock_store.upsert_chunks.assert_called_once()
 
-    def test_add_source_retries_via_scraper_loader_on_blocked_fetch(self, admin_client, monkeypatch):
+    def test_add_source_retries_via_scraper_loader_on_blocked_fetch(
+        self, admin_client, monkeypatch
+    ):
         client, _mock_db, mock_store = admin_client
         from src.api import router_admin
 
@@ -296,7 +301,9 @@ class TestAdminTagsEndpoints:
         assert body["chunks_inserted"] == 3
         assert mock_store.add_queue_job.call_count >= 2
 
-    def test_add_sources_batch_retries_via_scraper_loader_on_blocked_fetch(self, admin_client, monkeypatch):
+    def test_add_sources_batch_retries_via_scraper_loader_on_blocked_fetch(
+        self, admin_client, monkeypatch
+    ):
         client, _mock_db, _mock_store = admin_client
         from src.api import router_admin
 

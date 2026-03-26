@@ -48,7 +48,9 @@ def test_create_embedding_client_validate_on_init(monkeypatch):
 
 def test_validate_connection_raises_when_all_candidates_fail(monkeypatch):
     client = EmbeddingServiceClient(base_url="http://embedding-service:8001")
-    monkeypatch.setattr(client.client, "get", lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("down")))
+    monkeypatch.setattr(
+        client.client, "get", lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("down"))
+    )
 
     with pytest.raises(RuntimeError, match="Embedding service is unavailable"):
         client.validate_connection()

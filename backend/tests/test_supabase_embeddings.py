@@ -1,7 +1,8 @@
 """Tests for Supabase Edge Function Embeddings client."""
 
-import pytest
 from unittest.mock import Mock
+
+import pytest
 
 from src.utils.supabase_embeddings import SupabaseEmbeddings, create_embedding_model
 

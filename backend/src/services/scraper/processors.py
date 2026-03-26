@@ -3,16 +3,20 @@ Document processing for the VECINA scraper.
 Handles cleaning, chunking, and metadata extraction.
 """
 
-import time
 import logging
-from typing import List, Tuple, Dict, Optional
+import time
+from typing import Any
+
 from langchain_community.document_transformers import BeautifulSoupTransformer
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from .utils import clean_text, extract_outbound_links
+from langchain_text_splitters import (  # type: ignore[import-not-found]
+    RecursiveCharacterTextSplitter,
+)
+
 from .config import ScraperConfig
+from .utils import clean_text, extract_outbound_links
 
 # Use parent logger hierarchy for better integration with CLI logging
-log = logging.getLogger('vecinita_pipeline.processors')
+log = logging.getLogger("vecinita_pipeline.processors")
 log.addHandler(logging.NullHandler())
 
 
@@ -26,7 +30,7 @@ class DocumentProcessor:
             chunk_size=config.CHUNK_SIZE,
             chunk_overlap=config.CHUNK_OVERLAP,
             separators=["\n\n", "\n", ". ", "? ", "! ", "; ", ", ", " ", ""],
-            keep_separator=False
+            keep_separator=False,
         )
 
     def _find_chunk_position(self, content: str, chunk_text: str, current_offset: int) -> int:
@@ -45,24 +49,20 @@ class DocumentProcessor:
 
         # Fallback: Search in a limited window around expected position
         # This handles cases where separators cause position shifts
-        search_window_start = max(
-            0, current_offset - self.config.CHUNK_OVERLAP)
+        search_window_start = max(0, current_offset - self.config.CHUNK_OVERLAP)
         search_window_end = min(
             len(content),
             current_offset + chunk_len + self.config.CHUNK_OVERLAP,
         )
 
-        found_at = content.find(
-            chunk_text, search_window_start, search_window_end)
+        found_at = content.find(chunk_text, search_window_start, search_window_end)
         if found_at == -1:
             # Edge case: search from current offset onward (limited scope)
             found_at = content.find(chunk_text, search_window_start)
 
         if found_at == -1:
             # Last resort: approximate using current offset
-            log.debug(
-                f"--> Approximated position for chunk at offset {current_offset}"
-            )
+            log.debug(f"--> Approximated position for chunk at offset {current_offset}")
             return current_offset
 
         return found_at
@@ -72,9 +72,9 @@ class DocumentProcessor:
         docs: list,
         source_identifier: str,
         loader_type: str,
-        output_file: Optional[str] = None,
-        links_file: Optional[str] = None
-    ) -> Tuple[int, List[str]]:
+        output_file: str | None = None,
+        links_file: str | None = None,
+    ) -> tuple[int, list[str]]:
         """
         Process documents: clean, chunk, extract links, and save.
 
@@ -84,7 +84,7 @@ class DocumentProcessor:
         start_time = time.time()
 
         # Reset last_chunks storage for callers needing the built chunks
-        self.last_chunks: List[dict] = []
+        self.last_chunks: list[dict] = []
 
         if not docs:
             log.warning("--> No documents found to process. Skipping.")
@@ -96,21 +96,20 @@ class DocumentProcessor:
         if not cleaned_docs_content:
             # Fallback: if cleaning removed everything but raw docs have content, use raw content
             raw_fallback = [
-                (getattr(doc, 'page_content', '') or '',
-                 getattr(doc, 'metadata', {}) or {})
+                (getattr(doc, "page_content", "") or "", getattr(doc, "metadata", {}) or {})
                 for doc in docs
-                if getattr(doc, 'page_content', '')
+                if getattr(doc, "page_content", "")
             ]
             if raw_fallback:
                 log.debug(
-                    "--> Cleaning produced no content; using raw content fallback for chunking.")
+                    "--> Cleaning produced no content; using raw content fallback for chunking."
+                )
                 cleaned_docs_content = raw_fallback
             else:
                 log.warning("--> No content found after cleaning. Skipping.")
                 return 0, []
 
-        preview_text = cleaned_docs_content[0][0][:200].replace(
-            '\n', ' ') + '...'
+        preview_text = cleaned_docs_content[0][0][:200].replace("\n", " ") + "..."
         log.info(f"--> PREVIEW (after cleaning): {preview_text}")
 
         # Split into chunks with position tracking
@@ -133,19 +132,19 @@ class DocumentProcessor:
 
             for chunk_idx, chunk_text in enumerate(split_chunks):
                 chunk_len = len(chunk_text)
-                char_start = self._find_chunk_position(
-                    content, chunk_text, current_offset)
+                char_start = self._find_chunk_position(content, chunk_text, current_offset)
                 char_end = char_start + chunk_len
                 chunk_metadata = metadata.copy()
                 # Add position tracking to metadata
-                chunk_metadata.update({
-                    'char_start': char_start,
-                    'char_end': char_end,
-                    'doc_index': doc_index,
-                    'chunk_in_doc': chunk_idx
-                })
-                chunks_for_file.append(
-                    {'text': chunk_text, 'metadata': chunk_metadata})
+                chunk_metadata.update(
+                    {
+                        "char_start": char_start,
+                        "char_end": char_end,
+                        "doc_index": doc_index,
+                        "chunk_in_doc": chunk_idx,
+                    }
+                )
+                chunks_for_file.append({"text": chunk_text, "metadata": chunk_metadata})
 
                 # Update offset for next chunk: advance by chunk size minus overlap
                 # This assumes typical splitter behavior of (chunk_size - overlap) progression
@@ -153,37 +152,38 @@ class DocumentProcessor:
                 if current_offset < 0:
                     current_offset = char_end
             # Extract links from metadata
-            if 'source' in metadata:
-                extracted_links.append(metadata['source'])
+            if "source" in metadata:
+                extracted_links.append(metadata["source"])
 
-        log.info(
-            f"--> Created {total_chunks} chunks from {len(cleaned_docs_content)} documents.")
+        log.info(f"--> Created {total_chunks} chunks from {len(cleaned_docs_content)} documents.")
 
         # Write chunks to file
         if output_file and chunks_for_file:
             self._write_chunks_to_file(
-                output_file, source_identifier, loader_type, docs, cleaned_docs_content, chunks_for_file)
+                output_file,
+                source_identifier,
+                loader_type,
+                docs,
+                cleaned_docs_content,
+                chunks_for_file,
+            )
         elif not chunks_for_file:
             log.warning("--> No chunks generated. Nothing written to file.")
 
         # Extract outbound links from the source page (once) and write to file
         # Only when we have at least one document with a source metadata
         try:
-            any_source_meta = any('source' in (md or {})
-                                  for _, md in cleaned_docs_content)
+            any_source_meta = any("source" in (md or {}) for _, md in cleaned_docs_content)
             if any_source_meta:
-                page_links = extract_outbound_links(
-                    source_identifier, same_domain_only=False)
+                page_links = extract_outbound_links(source_identifier, same_domain_only=False)
                 if page_links:
                     extracted_links = page_links
-                    log.info(
-                        f"--> Extracted {len(extracted_links)} outbound links from page")
+                    log.info(f"--> Extracted {len(extracted_links)} outbound links from page")
         except Exception as e:
             log.debug(f"Link extraction failed for {source_identifier}: {e}")
 
         if links_file and extracted_links:
-            self._write_links_to_file(
-                links_file, source_identifier, extracted_links)
+            self._write_links_to_file(links_file, source_identifier, extracted_links)
 
         elapsed = time.time() - start_time
         log.info(f"--> ✅ Processing complete in {elapsed:.2f}s.")
@@ -197,13 +197,14 @@ class DocumentProcessor:
 
         return total_chunks, extracted_links
 
-    def _clean_documents(self, docs: list, loader_type: str) -> List[Tuple[str, dict]]:
+    def _clean_documents(self, docs: list, loader_type: str) -> list[tuple[str, dict]]:
         """Clean documents and return (content, metadata) tuples."""
         cleaned_docs = []
 
         log.info("--> Cleaning document content...")
         log.debug(
-            f"--> Cleaning summary (pre): documents_in={len(docs)} | loader_type={loader_type}")
+            f"--> Cleaning summary (pre): documents_in={len(docs)} | loader_type={loader_type}"
+        )
 
         # Use BeautifulSoup for HTML-like content
         if "Loader" in loader_type or "Crawler" in loader_type:
@@ -211,52 +212,67 @@ class DocumentProcessor:
             try:
                 transformed = bs_transformer.transform_documents(
                     docs,
-                    tags_to_extract=["main", "article", "section", "div", "p",
-                                     "h1", "h2", "h3", "h4", "h5", "h6", "li", "td", "th", "pre", "span"]
+                    tags_to_extract=[
+                        "main",
+                        "article",
+                        "section",
+                        "div",
+                        "p",
+                        "h1",
+                        "h2",
+                        "h3",
+                        "h4",
+                        "h5",
+                        "h6",
+                        "li",
+                        "td",
+                        "th",
+                        "pre",
+                        "span",
+                    ],
                 )
                 # Only replace if transformation produced non-empty content; otherwise keep originals
-                if transformed and any(getattr(d, 'page_content', '') for d in transformed):
+                if transformed and any(getattr(d, "page_content", "") for d in transformed):
                     docs = transformed
-                log.debug(
-                    f"--> BeautifulSoup transformed documents: count={len(docs)}")
+                log.debug(f"--> BeautifulSoup transformed documents: count={len(docs)}")
             except Exception as e:
-                log.warning(
-                    f"--> ⚠️ BeautifulSoup cleaning failed: {e}. Using raw content.")
+                log.warning(f"--> ⚠️ BeautifulSoup cleaning failed: {e}. Using raw content.")
 
-        dropped_examples = []
+        dropped_examples: list[dict[str, Any]] = []
         for idx, doc in enumerate(docs):
-            raw_len = len(getattr(doc, 'page_content', '') or '')
-            cleaned_content = clean_text(
-                getattr(doc, 'page_content', '') or '')
+            raw_len = len(getattr(doc, "page_content", "") or "")
+            cleaned_content = clean_text(getattr(doc, "page_content", "") or "")
             cleaned_len = len(cleaned_content)
             if cleaned_content:
-                cleaned_docs.append(
-                    (cleaned_content, getattr(doc, 'metadata', {})))
-                log.debug(
-                    f"--> Doc kept idx={idx} raw_len={raw_len} cleaned_len={cleaned_len}")
+                cleaned_docs.append((cleaned_content, getattr(doc, "metadata", {})))
+                log.debug(f"--> Doc kept idx={idx} raw_len={raw_len} cleaned_len={cleaned_len}")
             else:
                 # Track up to 3 examples for visibility when nothing remains
                 if len(dropped_examples) < 3:
-                    preview = (getattr(doc, 'page_content', '') or '')[
-                        :200].replace('\n', ' ')
-                    dropped_examples.append({
-                        'idx': idx,
-                        'raw_len': raw_len,
-                        'source': (getattr(doc, 'metadata', {}) or {}).get('source') or (getattr(doc, 'metadata', {}) or {}).get('url'),
-                        'preview': preview
-                    })
-                log.debug(
-                    f"--> Doc dropped idx={idx} raw_len={raw_len} cleaned_len={cleaned_len}")
+                    preview = (getattr(doc, "page_content", "") or "")[:200].replace("\n", " ")
+                    dropped_examples.append(
+                        {
+                            "idx": idx,
+                            "raw_len": raw_len,
+                            "source": (getattr(doc, "metadata", {}) or {}).get("source")
+                            or (getattr(doc, "metadata", {}) or {}).get("url"),
+                            "preview": preview,
+                        }
+                    )
+                log.debug(f"--> Doc dropped idx={idx} raw_len={raw_len} cleaned_len={cleaned_len}")
 
         log.info(
-            f"--> Cleaning summary (post): kept={len(cleaned_docs)} | dropped={len(docs) - len(cleaned_docs)}")
+            f"--> Cleaning summary (post): kept={len(cleaned_docs)} | dropped={len(docs) - len(cleaned_docs)}"
+        )
 
         if not cleaned_docs and dropped_examples:
             log.info(
-                "--> No content remained after cleaning. Examples of dropped docs (showing up to 3):")
+                "--> No content remained after cleaning. Examples of dropped docs (showing up to 3):"
+            )
             for ex in dropped_examples:
                 log.info(
-                    f"    - idx={ex['idx']} raw_len={ex['raw_len']} source={ex['source']} preview='{ex['preview']}'")
+                    f"    - idx={ex['idx']} raw_len={ex['raw_len']} source={ex['source']} preview='{ex['preview']}'"
+                )
 
         return cleaned_docs
 
@@ -267,39 +283,41 @@ class DocumentProcessor:
         loader_type: str,
         docs: list,
         cleaned_docs: list,
-        chunks: list
+        chunks: list,
     ) -> None:
         """Write chunks to output file."""
         log.info(f"--> Appending {len(chunks)} chunks to {output_file}...")
 
         try:
-            with open(output_file, 'a', encoding='utf-8') as f:
-                f.write(f"{'='*70}\n")
+            with open(output_file, "a", encoding="utf-8") as f:
+                f.write(f"{'=' * 70}\n")
                 f.write(f"SOURCE: {source_identifier}\n")
                 f.write(f"LOADER: {loader_type}\n")
                 f.write(
-                    f"DOCUMENTS_LOADED: {len(docs)} | DOCUMENTS_PROCESSED: {len(cleaned_docs)} | CHUNKS: {len(chunks)}\n")
-                f.write(f"{'='*70}\n\n")
+                    f"DOCUMENTS_LOADED: {len(docs)} | DOCUMENTS_PROCESSED: {len(cleaned_docs)} | CHUNKS: {len(chunks)}\n"
+                )
+                f.write(f"{'=' * 70}\n\n")
 
                 for i, chunk_data in enumerate(chunks, 1):
                     f.write(f"--- CHUNK {i}/{len(chunks)} ---\n")
-                    f.write(chunk_data['text'])
-                    chunk_source = chunk_data['metadata'].get(
-                        'source', source_identifier)
+                    f.write(chunk_data["text"])
+                    chunk_source = chunk_data["metadata"].get("source", source_identifier)
                     if chunk_source != source_identifier:
                         f.write(f"\n(Chunk Source: {chunk_source})")
                     f.write("\n\n")
         except Exception as e:
             log.error(f"--> ❌ Error writing to {output_file}: {e}")
 
-    def _write_links_to_file(self, links_file: str, source_identifier: str, links: List[str]) -> None:
+    def _write_links_to_file(
+        self, links_file: str, source_identifier: str, links: list[str]
+    ) -> None:
         """Write extracted links to a separate file."""
         try:
-            with open(links_file, 'a', encoding='utf-8') as f:
-                f.write(f"\n{'='*70}\n")
+            with open(links_file, "a", encoding="utf-8") as f:
+                f.write(f"\n{'=' * 70}\n")
                 f.write(f"SOURCE: {source_identifier}\n")
                 f.write(f"LINKS EXTRACTED: {len(links)}\n")
-                f.write(f"{'='*70}\n")
+                f.write(f"{'=' * 70}\n")
 
                 for link in set(links):  # Use set to avoid duplicates
                     f.write(f"{link}\n")

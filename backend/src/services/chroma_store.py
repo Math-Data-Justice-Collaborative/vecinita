@@ -9,10 +9,11 @@ from __future__ import annotations
 import json
 import logging
 import os
+from collections.abc import Iterable
 from datetime import datetime, timezone
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, cast
 
-import chromadb
+import chromadb  # type: ignore[import-not-found]
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _safe_metadata(value: Any) -> Dict[str, Any]:
+def _safe_metadata(value: Any) -> dict[str, Any]:
     if isinstance(value, dict):
         return value
     if isinstance(value, str):
@@ -37,9 +38,9 @@ def _safe_metadata(value: Any) -> Dict[str, Any]:
     return {}
 
 
-def _safe_tags(value: Any) -> List[str]:
+def _safe_tags(value: Any) -> list[str]:
     if isinstance(value, list):
-        result: List[str] = []
+        result: list[str] = []
         for item in value:
             if isinstance(item, str):
                 tag = item.strip().lower()
@@ -49,7 +50,7 @@ def _safe_tags(value: Any) -> List[str]:
     return []
 
 
-def _distance_to_similarity(distance: Optional[float]) -> float:
+def _distance_to_similarity(distance: float | None) -> float:
     if distance is None:
         return 0.0
     try:
@@ -63,12 +64,12 @@ class ChromaStore:
     def __init__(self) -> None:
         self.host = os.getenv("CHROMA_HOST", "chroma")
         self.port = int(os.getenv("CHROMA_PORT", "8000"))
-        self.ssl = (os.getenv("CHROMA_SSL", "false").lower() in {"1", "true", "yes"})
+        self.ssl = os.getenv("CHROMA_SSL", "false").lower() in {"1", "true", "yes"}
         self.chunks_collection = os.getenv("CHROMA_COLLECTION_CHUNKS", "vecinita_chunks")
         self.sources_collection = os.getenv("CHROMA_COLLECTION_SOURCES", "vecinita_sources")
         self.queue_collection = os.getenv("CHROMA_COLLECTION_QUEUE", "vecinita_queue")
 
-        self._client: Optional[chromadb.HttpClient] = None
+        self._client: chromadb.HttpClient | None = None
         self._chunks = None
         self._sources = None
         self._queue = None
@@ -93,7 +94,9 @@ class ChromaStore:
 
     def sources(self):
         if self._sources is None:
-            self._sources = self._get_client().get_or_create_collection(name=self.sources_collection)
+            self._sources = self._get_client().get_or_create_collection(
+                name=self.sources_collection
+            )
         return self._sources
 
     def queue(self):
@@ -101,14 +104,14 @@ class ChromaStore:
             self._queue = self._get_client().get_or_create_collection(name=self.queue_collection)
         return self._queue
 
-    def upsert_chunks(self, rows: List[Dict[str, Any]]) -> int:
+    def upsert_chunks(self, rows: list[dict[str, Any]]) -> int:
         if not rows:
             return 0
 
-        ids: List[str] = []
-        documents: List[str] = []
-        embeddings: List[List[float]] = []
-        metadatas: List[Dict[str, Any]] = []
+        ids: list[str] = []
+        documents: list[str] = []
+        embeddings: list[list[float]] = []
+        metadatas: list[dict[str, Any]] = []
 
         for row in rows:
             row_id = str(row.get("id") or "")
@@ -147,18 +150,20 @@ class ChromaStore:
         if not ids:
             return 0
 
-        self.chunks().upsert(ids=ids, documents=documents, embeddings=embeddings, metadatas=metadatas)
+        self.chunks().upsert(
+            ids=ids, documents=documents, embeddings=embeddings, metadatas=metadatas
+        )
         return len(ids)
 
     def query_chunks(
         self,
         *,
-        query_embedding: List[float],
+        query_embedding: list[float],
         n_results: int,
-        where: Optional[Dict[str, Any]] = None,
-        where_document: Optional[Dict[str, Any]] = None,
-    ) -> List[Dict[str, Any]]:
-        params: Dict[str, Any] = {
+        where: dict[str, Any] | None = None,
+        where_document: dict[str, Any] | None = None,
+    ) -> list[dict[str, Any]]:
+        params: dict[str, Any] = {
             "query_embeddings": [query_embedding],
             "n_results": int(n_results),
             "include": ["documents", "metadatas", "distances"],
@@ -174,7 +179,7 @@ class ChromaStore:
         metas = (result.get("metadatas") or [[]])[0]
         dists = (result.get("distances") or [[]])[0]
 
-        rows: List[Dict[str, Any]] = []
+        rows: list[dict[str, Any]] = []
         for idx, row_id in enumerate(ids):
             metadata = _safe_metadata(metas[idx] if idx < len(metas) else {})
             distance = dists[idx] if idx < len(dists) else None
@@ -199,17 +204,19 @@ class ChromaStore:
             )
         return rows
 
-    def get_chunks(self, *, where: Optional[Dict[str, Any]] = None, limit: int = 100, offset: int = 0) -> Dict[str, Any]:
-        params: Dict[str, Any] = {
+    def get_chunks(
+        self, *, where: dict[str, Any] | None = None, limit: int = 100, offset: int = 0
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {
             "limit": int(limit),
             "offset": int(offset),
             "include": ["documents", "metadatas"],
         }
         if where:
             params["where"] = where
-        return self.chunks().get(**params)
+        return cast(dict[str, Any], self.chunks().get(**params))
 
-    def iter_all_chunks(self, batch_size: int = 500) -> Iterable[Dict[str, Any]]:
+    def iter_all_chunks(self, batch_size: int = 500) -> Iterable[dict[str, Any]]:
         offset = 0
         while True:
             result = self.get_chunks(limit=batch_size, offset=offset)
@@ -231,8 +238,10 @@ class ChromaStore:
             if len(ids) < batch_size:
                 break
 
-    def delete_chunks(self, *, ids: Optional[List[str]] = None, where: Optional[Dict[str, Any]] = None) -> None:
-        params: Dict[str, Any] = {}
+    def delete_chunks(
+        self, *, ids: list[str] | None = None, where: dict[str, Any] | None = None
+    ) -> None:
+        params: dict[str, Any] = {}
         if ids:
             params["ids"] = ids
         if where:
@@ -240,7 +249,14 @@ class ChromaStore:
         if params:
             self.chunks().delete(**params)
 
-    def upsert_source(self, *, url: str, metadata: Dict[str, Any], title: Optional[str] = None, is_active: bool = True) -> None:
+    def upsert_source(
+        self,
+        *,
+        url: str,
+        metadata: dict[str, Any],
+        title: str | None = None,
+        is_active: bool = True,
+    ) -> None:
         source_meta = _safe_metadata(metadata)
         source_tags = _safe_tags(source_meta.get("tags"))
         if source_tags:
@@ -259,7 +275,7 @@ class ChromaStore:
             metadatas=[source_meta],
         )
 
-    def get_source(self, url: str) -> Optional[Dict[str, Any]]:
+    def get_source(self, url: str) -> dict[str, Any] | None:
         result = self.sources().get(ids=[url], include=["documents", "metadatas"])
         ids = result.get("ids") or []
         if not ids:
@@ -272,13 +288,13 @@ class ChromaStore:
             "metadata": _safe_metadata(metas[0] if metas else {}),
         }
 
-    def list_sources(self, limit: int = 1000, offset: int = 0) -> List[Dict[str, Any]]:
+    def list_sources(self, limit: int = 1000, offset: int = 0) -> list[dict[str, Any]]:
         result = self.sources().get(limit=limit, offset=offset, include=["documents", "metadatas"])
         ids = result.get("ids") or []
         docs = result.get("documents") or []
         metas = result.get("metadatas") or []
 
-        rows: List[Dict[str, Any]] = []
+        rows: list[dict[str, Any]] = []
         for idx, source_id in enumerate(ids):
             metadata = _safe_metadata(metas[idx] if idx < len(metas) else {})
             rows.append(
@@ -297,28 +313,36 @@ class ChromaStore:
     def delete_source(self, url: str) -> None:
         self.sources().delete(ids=[url])
 
-    def add_queue_job(self, *, job_id: str, payload: Dict[str, Any]) -> None:
+    def add_queue_job(self, *, job_id: str, payload: dict[str, Any]) -> None:
         meta = _safe_metadata(payload)
         meta.setdefault("status", "pending")
         meta.setdefault("created_at", _now_iso())
-        self.queue().upsert(ids=[job_id], documents=[str(payload.get("url") or payload.get("file_path") or "")], metadatas=[meta])
+        self.queue().upsert(
+            ids=[job_id],
+            documents=[str(payload.get("url") or payload.get("file_path") or "")],
+            metadatas=[meta],
+        )
 
-    def list_queue_jobs(self, *, status: Optional[str] = None, limit: int = 100) -> List[Dict[str, Any]]:
+    def list_queue_jobs(
+        self, *, status: str | None = None, limit: int = 100
+    ) -> list[dict[str, Any]]:
         where = {"status": status} if status else None
         result = self.queue().get(where=where, limit=limit, include=["documents", "metadatas"])
         ids = result.get("ids") or []
         docs = result.get("documents") or []
         metas = result.get("metadatas") or []
 
-        rows: List[Dict[str, Any]] = []
+        rows: list[dict[str, Any]] = []
         for idx, row_id in enumerate(ids):
             metadata = _safe_metadata(metas[idx] if idx < len(metas) else {})
-            rows.append({"id": row_id, "document": docs[idx] if idx < len(docs) else "", **metadata})
+            rows.append(
+                {"id": row_id, "document": docs[idx] if idx < len(docs) else "", **metadata}
+            )
         rows.sort(key=lambda x: str(x.get("created_at") or ""), reverse=True)
         return rows
 
 
-_store_singleton: Optional[ChromaStore] = None
+_store_singleton: ChromaStore | None = None
 
 
 def get_chroma_store() -> ChromaStore:

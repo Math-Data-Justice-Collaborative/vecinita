@@ -8,10 +8,9 @@ for rich Swagger/OpenAPI documentation at /docs.
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from pydantic import BaseModel, Field, ConfigDict
-
+from pydantic import BaseModel, ConfigDict, Field
 
 # ============================================================================
 # Scrape/Job Management Models
@@ -20,6 +19,7 @@ from pydantic import BaseModel, Field, ConfigDict
 
 class LoaderType(str, Enum):
     """Document loader types for scraping."""
+
     PLAYWRIGHT = "playwright"
     RECURSIVE = "recursive"
     UNSTRUCTURED = "unstructured"
@@ -28,6 +28,7 @@ class LoaderType(str, Enum):
 
 class JobStatus(str, Enum):
     """Status of async scrape job."""
+
     QUEUED = "queued"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -37,21 +38,22 @@ class JobStatus(str, Enum):
 
 class ScrapeStartRequest(BaseModel):
     """Request to start a web scraping job (POST /api/scrape/)."""
-    urls: List[str] = Field(
+
+    urls: list[str] = Field(
         ...,
         min_length=1,
         description="URLs to scrape (minimum 1, maximum configured in gateway)",
-        examples=["https://example.com/docs", "https://example.com/blog"]
+        examples=["https://example.com/docs", "https://example.com/blog"],
     )
     force_loader: LoaderType = Field(
         default=LoaderType.AUTO,
         description="Document loader strategy (auto=try standard first then Playwright, playwright=JS-heavy sites only)",
-        example=LoaderType.AUTO
+        examples=[LoaderType.AUTO],
     )
     stream: bool = Field(
         default=False,
         description="Stream chunks to database as scraping proceeds (vs batch on completion)",
-        example=False
+        examples=[False],
     )
 
     model_config = ConfigDict(
@@ -59,9 +61,9 @@ class ScrapeStartRequest(BaseModel):
             "example": {
                 "urls": ["https://example.com/docs", "https://example.com/blog"],
                 "force_loader": "auto",
-                "stream": False
+                "stream": False,
             },
-            "description": "POST /api/scrape/ - Initiate async web scraping job"
+            "description": "POST /api/scrape/ - Initiate async web scraping job",
         }
     )
 
@@ -72,83 +74,75 @@ ScrapeRequest = ScrapeStartRequest
 
 class ScrapeJobMetadata(BaseModel):
     """Metadata about a scraping job."""
+
     job_id: str = Field(..., description="Unique job identifier")
-    urls: List[str] = Field(..., description="URLs being scraped")
+    urls: list[str] = Field(..., description="URLs being scraped")
     force_loader: LoaderType = Field(..., description="Loader strategy used")
     stream: bool = Field(..., description="Whether streaming to DB is enabled")
     created_at: datetime = Field(..., description="Job creation timestamp")
-    started_at: Optional[datetime] = Field(default=None, description="Job start timestamp")
-    completed_at: Optional[datetime] = Field(default=None, description="Job completion timestamp")
-    cancelled_at: Optional[datetime] = Field(default=None, description="Job cancellation timestamp")
+    started_at: datetime | None = Field(default=None, description="Job start timestamp")
+    completed_at: datetime | None = Field(default=None, description="Job completion timestamp")
+    cancelled_at: datetime | None = Field(default=None, description="Job cancellation timestamp")
 
 
 class ScrapeJobResult(BaseModel):
     """Result data for completed scrape job."""
+
     total_chunks: int = Field(
-        default=0,
-        description="Total chunks extracted from all URLs",
-        example=125
+        default=0, description="Total chunks extracted from all URLs", examples=[125]
     )
-    successful_urls: List[str] = Field(
+    successful_urls: list[str] = Field(
         default_factory=list,
         description="URLs that were successfully scraped",
-        example=["https://example.com/page1", "https://example.com/page2"]
+        examples=[["https://example.com/page1", "https://example.com/page2"]],
     )
-    failed_urls: List[str] = Field(
+    failed_urls: list[str] = Field(
         default_factory=list,
         description="URLs that failed to scrape",
-        example=["https://example.com/404"]
+        examples=[["https://example.com/404"]],
     )
-    failed_urls_log: Dict[str, str] = Field(
+    failed_urls_log: dict[str, str] = Field(
         default_factory=dict,
         description="URL to error message mapping for failed URLs",
-        example={"https://example.com/404": "HTTP 404: Page not found"}
+        examples=[{"https://example.com/404": "HTTP 404: Page not found"}],
     )
 
 
 class ScrapeJob(BaseModel):
     """Complete representation of a scraping job."""
-    job_id: str = Field(..., description="Job ID", example="scrape-job-abc123xyz")
+
+    job_id: str = Field(..., description="Job ID", examples=["scrape-job-abc123xyz"])
     status: JobStatus = Field(..., description="Current job status")
     progress_percent: int = Field(
-        default=0,
-        ge=0,
-        le=100,
-        description="Progress percentage 0-100%",
-        example=65
+        default=0, ge=0, le=100, description="Progress percentage 0-100%", examples=[65]
     )
     message: str = Field(
         ...,
         description="Human-readable status message",
-        example="Scraped 2/3 URLs, 45 chunks extracted"
+        examples=["Scraped 2/3 URLs, 45 chunks extracted"],
     )
     metadata: ScrapeJobMetadata = Field(..., description="Job metadata")
-    result: Optional[ScrapeJobResult] = Field(
-        default=None,
-        description="Results (populated when status=completed)"
+    result: ScrapeJobResult | None = Field(
+        default=None, description="Results (populated when status=completed)"
     )
-    error: Optional[str] = Field(
-        default=None,
-        description="Error message if status=failed"
-    )
+    error: str | None = Field(default=None, description="Error message if status=failed")
 
 
 class ScrapeInitResponse(BaseModel):
     """Response when submitting scrape request (POST /api/scrape/)."""
+
     job_id: str = Field(
-        ...,
-        description="Unique job identifier for tracking",
-        example="scrape-job-abc123xyz"
+        ..., description="Unique job identifier for tracking", examples=["scrape-job-abc123xyz"]
     )
     status: JobStatus = Field(
         default=JobStatus.QUEUED,
         description="Initial status (always queued)",
-        example=JobStatus.QUEUED
+        examples=[JobStatus.QUEUED],
     )
     message: str = Field(
         ...,
         description="Human-readable message with polling instructions",
-        example="Scrape job enqueued. Poll GET /api/scrape/scrape-job-abc123xyz for status."
+        examples=["Scrape job enqueued. Poll GET /api/scrape/scrape-job-abc123xyz for status."],
     )
 
     model_config = ConfigDict(
@@ -156,7 +150,7 @@ class ScrapeInitResponse(BaseModel):
             "example": {
                 "job_id": "scrape-job-abc123xyz",
                 "status": "queued",
-                "message": "Scrape job enqueued. Poll GET /api/scrape/scrape-job-abc123xyz for status."
+                "message": "Scrape job enqueued. Poll GET /api/scrape/scrape-job-abc123xyz for status.",
             }
         }
     )
@@ -164,6 +158,7 @@ class ScrapeInitResponse(BaseModel):
 
 class ScrapeStatusResponse(BaseModel):
     """Response for job status queries (GET /api/scrape/{job_id})."""
+
     job: ScrapeJob = Field(..., description="Complete job representation with status and results")
 
     model_config = ConfigDict(
@@ -182,15 +177,15 @@ class ScrapeStatusResponse(BaseModel):
                         "created_at": "2024-02-09T10:00:00Z",
                         "started_at": "2024-02-09T10:00:05Z",
                         "completed_at": "2024-02-09T10:02:30Z",
-                        "cancelled_at": None
+                        "cancelled_at": None,
                     },
                     "result": {
                         "total_chunks": 125,
                         "successful_urls": ["https://example.com/page1"],
                         "failed_urls": [],
-                        "failed_urls_log": {}
+                        "failed_urls_log": {},
                     },
-                    "error": None
+                    "error": None,
                 }
             }
         }
@@ -199,6 +194,7 @@ class ScrapeStatusResponse(BaseModel):
 
 class ScrapeCancelResponse(BaseModel):
     """Response for cancel job request (POST /api/scrape/{job_id}/cancel)."""
+
     job: ScrapeJob = Field(..., description="Updated job with cancelled status")
 
     model_config = ConfigDict(
@@ -211,7 +207,7 @@ class ScrapeCancelResponse(BaseModel):
                     "message": "Job cancelled by user",
                     "metadata": {},
                     "result": None,
-                    "error": None
+                    "error": None,
                 }
             }
         }
@@ -220,18 +216,20 @@ class ScrapeCancelResponse(BaseModel):
 
 class ScrapeHistoryRequest(BaseModel):
     """Query params for scrape history (GET /api/scrape/history)."""
-    page: int = Field(default=1, ge=1, description="Page number (1-indexed)", example=1)
-    limit: int = Field(default=10, ge=1, le=100, description="Results per page", example=10)
-    status: Optional[JobStatus] = Field(default=None, description="Filter by job status")
+
+    page: int = Field(default=1, ge=1, description="Page number (1-indexed)", examples=[1])
+    limit: int = Field(default=10, ge=1, le=100, description="Results per page", examples=[10])
+    status: JobStatus | None = Field(default=None, description="Filter by job status")
 
 
 class ScrapeHistoryResponse(BaseModel):
     """Response listing job history (GET /api/scrape/history)."""
-    jobs: List[ScrapeJob] = Field(..., description="List of jobs for current page")
-    total: int = Field(..., description="Total number of jobs", example=24)
-    page: int = Field(..., description="Current page number", example=1)
-    limit: int = Field(..., description="Results per page", example=10)
-    total_pages: Optional[int] = Field(default=None, description="Total page count", example=3)
+
+    jobs: list[ScrapeJob] = Field(..., description="List of jobs for current page")
+    total: int = Field(..., description="Total number of jobs", examples=[24])
+    page: int = Field(..., description="Current page number", examples=[1])
+    limit: int = Field(..., description="Results per page", examples=[10])
+    total_pages: int | None = Field(default=None, description="Total page count", examples=[3])
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -243,13 +241,13 @@ class ScrapeHistoryResponse(BaseModel):
                         "progress_percent": 100,
                         "message": "Scrape completed",
                         "metadata": {},
-                        "result": {"total_chunks": 50}
+                        "result": {"total_chunks": 50},
                     }
                 ],
                 "total": 24,
                 "page": 1,
                 "limit": 10,
-                "total_pages": 3
+                "total_pages": 3,
             }
         }
     )
@@ -257,39 +255,22 @@ class ScrapeHistoryResponse(BaseModel):
 
 class ScrapeStatsResponse(BaseModel):
     """Response with scraping statistics (GET /api/scrape/stats)."""
-    total_jobs: int = Field(..., description="Total jobs created", example=152)
-    by_status: Dict[str, int] = Field(
+
+    total_jobs: int = Field(..., description="Total jobs created", examples=[152])
+    by_status: dict[str, int] = Field(
         ...,
         description="Count of jobs by status",
-        example={
-            "completed": 130,
-            "running": 3,
-            "queued": 5,
-            "failed": 12,
-            "cancelled": 2
-        }
+        examples=[{"completed": 130, "running": 3, "queued": 5, "failed": 12, "cancelled": 2}],
     )
     total_chunks_processed: int = Field(
-        ...,
-        description="Total chunks extracted across all jobs",
-        example=45230
+        ..., description="Total chunks extracted across all jobs", examples=[45230]
     )
-    total_urls_processed: int = Field(
-        ...,
-        description="Total URLs processed",
-        example=892
-    )
+    total_urls_processed: int = Field(..., description="Total URLs processed", examples=[892])
     success_rate: float = Field(
-        ...,
-        ge=0,
-        le=1,
-        description="Proportion of successful URLs (0-1)",
-        example=0.92
+        ..., ge=0, le=1, description="Proportion of successful URLs (0-1)", examples=[0.92]
     )
     average_chunks_per_url: float = Field(
-        ...,
-        description="Mean chunks extracted per URL",
-        example=50.7
+        ..., description="Mean chunks extracted per URL", examples=[50.7]
     )
 
     model_config = ConfigDict(
@@ -301,12 +282,12 @@ class ScrapeStatsResponse(BaseModel):
                     "running": 3,
                     "queued": 5,
                     "failed": 12,
-                    "cancelled": 2
+                    "cancelled": 2,
                 },
                 "total_chunks_processed": 45230,
                 "total_urls_processed": 892,
                 "success_rate": 0.92,
-                "average_chunks_per_url": 50.7
+                "average_chunks_per_url": 50.7,
             }
         }
     )
@@ -314,37 +295,30 @@ class ScrapeStatsResponse(BaseModel):
 
 class ScrapeCleanupRequest(BaseModel):
     """Request for job cleanup (POST /api/scrape/cleanup)."""
+
     hours_old: int = Field(
-        default=24,
-        ge=1,
-        description="Delete jobs older than this many hours",
-        example=24
+        default=24, ge=1, description="Delete jobs older than this many hours", examples=[24]
     )
     dry_run: bool = Field(
-        default=False,
-        description="Simulate cleanup without deleting",
-        example=False
+        default=False, description="Simulate cleanup without deleting", examples=[False]
     )
 
 
 class ScrapeCleanupResponse(BaseModel):
     """Response from cleanup operation (POST /api/scrape/cleanup)."""
-    deleted_jobs: int = Field(..., description="Count of jobs deleted", example=15)
-    deleted_chunks: Optional[int] = Field(
-        default=None,
-        description="Count of chunks removed if available",
-        example=750
+
+    deleted_jobs: int = Field(..., description="Count of jobs deleted", examples=[15])
+    deleted_chunks: int | None = Field(
+        default=None, description="Count of chunks removed if available", examples=[750]
     )
-    deleted_bytes: Optional[int] = Field(
-        default=None,
-        description="Storage reclaimed in bytes",
-        example=2097152
+    deleted_bytes: int | None = Field(
+        default=None, description="Storage reclaimed in bytes", examples=[2097152]
     )
-    dry_run: bool = Field(..., description="Whether this was a dry run", example=False)
+    dry_run: bool = Field(..., description="Whether this was a dry run", examples=[False])
     message: str = Field(
         ...,
         description="Human-readable cleanup summary",
-        example="Cleanup completed: 15 jobs deleted"
+        examples=["Cleanup completed: 15 jobs deleted"],
     )
 
     model_config = ConfigDict(
@@ -354,7 +328,7 @@ class ScrapeCleanupResponse(BaseModel):
                 "deleted_chunks": 750,
                 "deleted_bytes": 2097152,
                 "dry_run": False,
-                "message": "Cleanup completed: 15 jobs deleted"
+                "message": "Cleanup completed: 15 jobs deleted",
             }
         }
     )
@@ -363,15 +337,13 @@ class ScrapeCleanupResponse(BaseModel):
 # Backward compatibility
 class ScrapeResponse(BaseModel):
     """Deprecated: Use ScrapeInitResponse instead."""
+
     job_id: str
     status: JobStatus
     message: str
 
 
-class ScrapeHistoryResponse(BaseModel):
-    """Response listing job history."""
-    jobs: List[ScrapeJob]
-    total: int
+# ScrapeHistoryResponse is already defined above with full fields
 
 
 # ============================================================================
@@ -381,22 +353,21 @@ class ScrapeHistoryResponse(BaseModel):
 
 class EmbedRequest(BaseModel):
     """Request to generate embedding for single text (POST /api/embed/) - NOT YET IMPLEMENTED."""
+
     text: str = Field(
-        ...,
-        description="Text to embed",
-        example="The quick brown fox jumps over the lazy dog"
+        ..., description="Text to embed", examples=["The quick brown fox jumps over the lazy dog"]
     )
-    model: Optional[str] = Field(
+    model: str | None = Field(
         default=None,
         description="Override embedding model (uses default if None)",
-        example="sentence-transformers/all-MiniLM-L6-v2"
+        examples=["sentence-transformers/all-MiniLM-L6-v2"],
     )
 
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
                 "text": "The quick brown fox jumps over the lazy dog",
-                "model": "sentence-transformers/all-MiniLM-L6-v2"
+                "model": "sentence-transformers/all-MiniLM-L6-v2",
             }
         }
     )
@@ -404,17 +375,17 @@ class EmbedRequest(BaseModel):
 
 class EmbedBatchRequest(BaseModel):
     """Request to generate embeddings for multiple texts (POST /api/embed/batch) - NOT YET IMPLEMENTED."""
-    texts: List[str] = Field(
+
+    texts: list[str] = Field(
         ...,
         min_length=1,
         description="List of texts to embed",
         examples=[
             ["First document to embed", "Second document to embed", "Third document to embed"]
-        ]
+        ],
     )
-    model: Optional[str] = Field(
-        default=None,
-        description="Override embedding model (uses default if None)"
+    model: str | None = Field(
+        default=None, description="Override embedding model (uses default if None)"
     )
 
     model_config = ConfigDict(
@@ -423,9 +394,9 @@ class EmbedBatchRequest(BaseModel):
                 "texts": [
                     "First document to embed",
                     "Second document to embed",
-                    "Third document to embed"
+                    "Third document to embed",
                 ],
-                "model": "sentence-transformers/all-MiniLM-L6-v2"
+                "model": "sentence-transformers/all-MiniLM-L6-v2",
             }
         }
     )
@@ -433,14 +404,19 @@ class EmbedBatchRequest(BaseModel):
 
 class EmbedResponse(BaseModel):
     """Response with embedding vector (POST /api/embed/)."""
+
     text: str = Field(..., description="Original text that was embedded")
-    embedding: List[float] = Field(
+    embedding: list[float] = Field(
         ...,
         description="384-dimensional embedding vector from HuggingFace sentence-transformers",
-        example=[0.123, -0.456, 0.789]  # truncated for display
+        examples=[[0.123, -0.456, 0.789]],
     )
-    model: str = Field(..., description="Model used for embedding", example="sentence-transformers/all-MiniLM-L6-v2")
-    dimension: int = Field(..., description="Embedding dimensionality", example=384)
+    model: str = Field(
+        ...,
+        description="Model used for embedding",
+        examples=["sentence-transformers/all-MiniLM-L6-v2"],
+    )
+    dimension: int = Field(..., description="Embedding dimensionality", examples=[384])
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -448,7 +424,7 @@ class EmbedResponse(BaseModel):
                 "text": "The quick brown fox",
                 "embedding": [0.123, -0.456, 0.789, "... 381 more values ..."],
                 "model": "sentence-transformers/all-MiniLM-L6-v2",
-                "dimension": 384
+                "dimension": 384,
             }
         }
     )
@@ -456,19 +432,32 @@ class EmbedResponse(BaseModel):
 
 class EmbedBatchResponse(BaseModel):
     """Response with batch embeddings (POST /api/embed/batch)."""
-    embeddings: List[EmbedResponse] = Field(..., description="List of embedding responses")
-    model: str = Field(..., description="Model used", example="sentence-transformers/all-MiniLM-L6-v2")
-    dimension: int = Field(..., description="Embedding dimensionality", example=384)
+
+    embeddings: list[EmbedResponse] = Field(..., description="List of embedding responses")
+    model: str = Field(
+        ..., description="Model used", examples=["sentence-transformers/all-MiniLM-L6-v2"]
+    )
+    dimension: int = Field(..., description="Embedding dimensionality", examples=[384])
 
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
                 "embeddings": [
-                    {"text": "First document", "embedding": ["... 384 dims ..."], "model": "...", "dimension": 384},
-                    {"text": "Second document", "embedding": ["... 384 dims ..."], "model": "...", "dimension": 384}
+                    {
+                        "text": "First document",
+                        "embedding": ["... 384 dims ..."],
+                        "model": "...",
+                        "dimension": 384,
+                    },
+                    {
+                        "text": "Second document",
+                        "embedding": ["... 384 dims ..."],
+                        "model": "...",
+                        "dimension": 384,
+                    },
                 ],
                 "model": "sentence-transformers/all-MiniLM-L6-v2",
-                "dimension": 384
+                "dimension": 384,
             }
         }
     )
@@ -476,27 +465,19 @@ class EmbedBatchResponse(BaseModel):
 
 class SimilarityRequest(BaseModel):
     """Request to compute similarity between texts (POST /api/embed/similarity) - NOT YET IMPLEMENTED."""
-    text1: str = Field(
-        ...,
-        description="First text",
-        example="Machine learning is AI"
-    )
+
+    text1: str = Field(..., description="First text", examples=["Machine learning is AI"])
     text2: str = Field(
-        ...,
-        description="Second text",
-        example="Deep learning is machine learning"
+        ..., description="Second text", examples=["Deep learning is machine learning"]
     )
-    model: Optional[str] = Field(
-        default=None,
-        description="Override embedding model"
-    )
+    model: str | None = Field(default=None, description="Override embedding model")
 
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
                 "text1": "Machine learning is AI",
                 "text2": "Deep learning is machine learning",
-                "model": "sentence-transformers/all-MiniLM-L6-v2"
+                "model": "sentence-transformers/all-MiniLM-L6-v2",
             }
         }
     )
@@ -504,6 +485,7 @@ class SimilarityRequest(BaseModel):
 
 class SimilarityResponse(BaseModel):
     """Response with similarity score (POST /api/embed/similarity)."""
+
     text1: str = Field(..., description="First text")
     text2: str = Field(..., description="Second text")
     similarity: float = Field(
@@ -511,9 +493,11 @@ class SimilarityResponse(BaseModel):
         ge=-1,
         le=1,
         description="Cosine similarity score (-1 to 1, higher=more similar)",
-        example=0.87
+        examples=[0.87],
     )
-    model: str = Field(..., description="Model used", example="sentence-transformers/all-MiniLM-L6-v2")
+    model: str = Field(
+        ..., description="Model used", examples=["sentence-transformers/all-MiniLM-L6-v2"]
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -521,7 +505,7 @@ class SimilarityResponse(BaseModel):
                 "text1": "Machine learning is AI",
                 "text2": "Deep learning is machine learning",
                 "similarity": 0.87,
-                "model": "sentence-transformers/all-MiniLM-L6-v2"
+                "model": "sentence-transformers/all-MiniLM-L6-v2",
             }
         }
     )
@@ -529,35 +513,30 @@ class SimilarityResponse(BaseModel):
 
 class EmbeddingConfigResponse(BaseModel):
     """Response with current embedding model configuration (GET /api/embed/config)."""
+
     model: str = Field(
         default="sentence-transformers/all-MiniLM-L6-v2",
         description="Current embedding model identifier",
-        example="sentence-transformers/all-MiniLM-L6-v2"
+        examples=["sentence-transformers/all-MiniLM-L6-v2"],
     )
     provider: str = Field(
         default="huggingface",
         description="Embedding provider (huggingface, openai, etc.)",
-        example="huggingface"
+        examples=["huggingface"],
     )
     dimension: int = Field(
-        default=384,
-        description="Embedding vector dimensionality",
-        example=384
+        default=384, description="Embedding vector dimensionality", examples=[384]
     )
     description: str = Field(
         default="Fast, efficient 384-dimensional embeddings",
         description="Model description",
-        example="Fast, efficient 384-dimensional embeddings"
+        examples=["Fast, efficient 384-dimensional embeddings"],
     )
-    batch_size: Optional[int] = Field(
-        default=128,
-        description="Maximum batch size for embedding requests",
-        example=128
+    batch_size: int | None = Field(
+        default=128, description="Maximum batch size for embedding requests", examples=[128]
     )
-    cache_enabled: Optional[bool] = Field(
-        default=True,
-        description="Whether embedding cache is enabled",
-        example=True
+    cache_enabled: bool | None = Field(
+        default=True, description="Whether embedding cache is enabled", examples=[True]
     )
 
     model_config = ConfigDict(
@@ -568,7 +547,7 @@ class EmbeddingConfigResponse(BaseModel):
                 "dimension": 384,
                 "description": "Fast, efficient 384-dimensional embeddings",
                 "batch_size": 128,
-                "cache_enabled": True
+                "cache_enabled": True,
             }
         }
     )
@@ -581,50 +560,52 @@ class EmbeddingConfigResponse(BaseModel):
 
 class SourceCitation(BaseModel):
     """Source document cited in Q&A response."""
-    url: str = Field(..., description="Source document URL", example="https://example.com/docs/ml-guide")
-    title: Optional[str] = Field(default=None, description="Document title", example="Machine Learning Guide")
-    chunk_id: Optional[str] = Field(default=None, description="Chunk ID from vector store", example="chunk-456")
-    relevance: Optional[float] = Field(
+
+    url: str = Field(
+        ..., description="Source document URL", examples=["https://example.com/docs/ml-guide"]
+    )
+    title: str | None = Field(
+        default=None, description="Document title", examples=["Machine Learning Guide"]
+    )
+    chunk_id: str | None = Field(
+        default=None, description="Chunk ID from vector store", examples=["chunk-456"]
+    )
+    relevance: float | None = Field(
         default=None,
         ge=0,
         le=1,
         description="Vector similarity score (0-1, higher=more relevant)",
-        example=0.95
+        examples=[0.95],
     )
-    excerpt: Optional[str] = Field(
+    excerpt: str | None = Field(
         default=None,
         description="Relevant text excerpt from source",
-        example="Machine learning is a branch of artificial intelligence..."
+        examples=["Machine learning is a branch of artificial intelligence..."],
     )
 
 
 class AskQuestionRequest(BaseModel):
     """Request for Q&A query (GET /api/ask/)."""
+
     question: str = Field(
-        ...,
-        description="User's question to answer",
-        example="What is machine learning?"
+        ..., description="User's question to answer", examples=["What is machine learning?"]
     )
-    thread_id: Optional[str] = Field(
+    thread_id: str | None = Field(
         default=None,
         description="Conversation thread ID for maintaining context across messages",
-        example="conv-session-abc123xyz"
+        examples=["conv-session-abc123xyz"],
     )
-    lang: Optional[str] = Field(
+    lang: str | None = Field(
         default=None,
         description="Language code (es=Spanish, en=English). Auto-detected from question if omitted.",
-        example="en",
-        pattern="^(es|en)?$"
+        examples=["en"],
+        pattern="^(es|en)?$",
     )
-    provider: Optional[str] = Field(
-        default=None,
-        description="Override LLM provider (groq, openai, etc.)",
-        example="groq"
+    provider: str | None = Field(
+        default=None, description="Override LLM provider (groq, openai, etc.)", examples=["groq"]
     )
-    model: Optional[str] = Field(
-        default=None,
-        description="Override LLM model name",
-        example="llama-3.1-8b-instant"
+    model: str | None = Field(
+        default=None, description="Override LLM model name", examples=["llama-3.1-8b-instant"]
     )
 
     model_config = ConfigDict(
@@ -634,7 +615,7 @@ class AskQuestionRequest(BaseModel):
                 "thread_id": "conv-session-user-123",
                 "lang": "en",
                 "provider": "groq",
-                "model": "llama-3.1-8b-instant"
+                "model": "llama-3.1-8b-instant",
             }
         }
     )
@@ -642,43 +623,34 @@ class AskQuestionRequest(BaseModel):
 
 class AskQuestionResponse(BaseModel):
     """Response to Q&A query (GET /api/ask/)."""
-    question: str = Field(..., description="Original user question", example="What is machine learning?")
+
+    question: str = Field(
+        ..., description="Original user question", examples=["What is machine learning?"]
+    )
     answer: str = Field(
         ...,
         description="Generated answer based on vector search results",
-        example="Machine learning is a branch of artificial intelligence that enables systems to learn and improve from experience..."
+        examples=[
+            "Machine learning is a branch of artificial intelligence that enables systems to learn and improve from experience..."
+        ],
     )
-    sources: List[SourceCitation] = Field(
-        default_factory=list,
-        description="List of source documents cited in the answer"
+    sources: list[SourceCitation] = Field(
+        default_factory=list, description="List of source documents cited in the answer"
     )
-    language: str = Field(
-        ...,
-        description="Detected/used language code",
-        example="en"
-    )
+    language: str = Field(..., description="Detected/used language code", examples=["en"])
     model: str = Field(
-        ...,
-        description="LLM model used to generate answer",
-        example="llama-3.1-8b-instant"
+        ..., description="LLM model used to generate answer", examples=["llama-3.1-8b-instant"]
     )
-    response_time_ms: Optional[int] = Field(
-        default=None,
-        description="Total response time in milliseconds",
-        example=2340
+    response_time_ms: int | None = Field(
+        default=None, description="Total response time in milliseconds", examples=[2340]
     )
-    token_usage: Optional[Dict[str, int]] = Field(
+    token_usage: dict[str, int] | None = Field(
         default=None,
         description="Token usage breakdown (prompt_tokens, completion_tokens, total_tokens)",
-        example={
-            "prompt_tokens": 512,
-            "completion_tokens": 256,
-            "total_tokens": 768
-        }
+        examples=[{"prompt_tokens": 512, "completion_tokens": 256, "total_tokens": 768}],
     )
-    latency_breakdown: Optional[Dict[str, Any]] = Field(
-        default=None,
-        description="Optional stage-level latency metrics emitted by backend services"
+    latency_breakdown: dict[str, Any] | None = Field(
+        default=None, description="Optional stage-level latency metrics emitted by backend services"
     )
 
     model_config = ConfigDict(
@@ -692,7 +664,7 @@ class AskQuestionResponse(BaseModel):
                         "title": "ML Basics",
                         "chunk_id": "chunk-001",
                         "relevance": 0.98,
-                        "excerpt": "Machine learning enables systems to learn..."
+                        "excerpt": "Machine learning enables systems to learn...",
                     }
                 ],
                 "language": "en",
@@ -701,7 +673,7 @@ class AskQuestionResponse(BaseModel):
                 "token_usage": {
                     "prompt_tokens": 512,
                     "completion_tokens": 256,
-                    "total_tokens": 768
+                    "total_tokens": 768,
                 },
                 "latency_breakdown": {
                     "retrieval_invoke_ms": 180,
@@ -710,9 +682,9 @@ class AskQuestionResponse(BaseModel):
                         "embedding_ms": 54,
                         "retrieval_ms": 102,
                         "rerank_ms": 8,
-                        "total_ms": 168
-                    }
-                }
+                        "total_ms": 168,
+                    },
+                },
             }
         }
     )
@@ -720,6 +692,7 @@ class AskQuestionResponse(BaseModel):
 
 class StreamEventType(str, Enum):
     """Server-Sent Event types for streaming Q&A."""
+
     THINKING = "thinking"
     TOOL_EVENT = "tool_event"
     COMPLETE = "complete"
@@ -729,35 +702,30 @@ class StreamEventType(str, Enum):
 
 class ThinkingEvent(BaseModel):
     """Streaming event: intermediate thinking step (GET /api/ask/stream)."""
-    type: str = Field(
-        default="thinking",
-        description="Event type identifier"
-    )
+
+    type: str = Field(default="thinking", description="Event type identifier")
     message: str = Field(
         ...,
         description="Thinking status message",
-        example="The question asks about vector embeddings. I need to search for relevant docs..."
+        examples=[
+            "The question asks about vector embeddings. I need to search for relevant docs..."
+        ],
     )
 
     model_config = ConfigDict(
         json_schema_extra={
-            "example": {
-                "type": "thinking",
-                "message": "Searching local resources..."
-            }
+            "example": {"type": "thinking", "message": "Searching local resources..."}
         }
     )
 
 
 class CompleteEvent(BaseModel):
     """Streaming event: complete answer with sources (GET /api/ask/stream)."""
+
     type: str = Field(default="complete", description="Event type identifier")
     answer: str = Field(..., description="Final complete answer")
-    sources: List[SourceCitation] = Field(
-        default_factory=list,
-        description="Source citations"
-    )
-    thread_id: Optional[str] = Field(default=None, description="Conversation thread identifier")
+    sources: list[SourceCitation] = Field(default_factory=list, description="Source citations")
+    thread_id: str | None = Field(default=None, description="Conversation thread identifier")
     plan: str = Field(default="", description="Optional compact plan generated by agent")
 
     model_config = ConfigDict(
@@ -765,14 +733,9 @@ class CompleteEvent(BaseModel):
             "example": {
                 "type": "complete",
                 "answer": "Vector embeddings are numerical representations of text...",
-                "sources": [
-                    {
-                        "url": "https://example.com/embeddings",
-                        "relevance": 0.95
-                    }
-                ],
+                "sources": [{"url": "https://example.com/embeddings", "relevance": 0.95}],
                 "thread_id": "thread-123",
-                "plan": ""
+                "plan": "",
             }
         }
     )
@@ -780,9 +743,10 @@ class CompleteEvent(BaseModel):
 
 class ToolEvent(BaseModel):
     """Streaming event: compact tool lifecycle update (GET /api/ask/stream)."""
+
     type: str = Field(default="tool_event", description="Event type identifier")
     phase: str = Field(default="result", description="Lifecycle phase: start|result|error")
-    tool: str = Field(..., description="Tool name", example="db_search")
+    tool: str = Field(..., description="Tool name", examples=["db_search"])
     message: str = Field(..., description="Compact human-readable summary")
 
     model_config = ConfigDict(
@@ -791,7 +755,7 @@ class ToolEvent(BaseModel):
                 "type": "tool_event",
                 "phase": "result",
                 "tool": "db_search",
-                "message": "db_search returned 5 relevant chunks."
+                "message": "db_search returned 5 relevant chunks.",
             }
         }
     )
@@ -799,23 +763,25 @@ class ToolEvent(BaseModel):
 
 class ClarificationEvent(BaseModel):
     """Streaming event: request for clarification (GET /api/ask/stream)."""
+
     type: str = Field(default="clarification", description="Event type identifier")
-    message: Optional[str] = Field(
+    message: str | None = Field(
         default=None,
         description="Primary clarification prompt",
-        example="Do you want information for renters or homeowners?"
+        examples=["Do you want information for renters or homeowners?"],
     )
-    questions: List[str] = Field(
+    questions: list[str] = Field(
         default_factory=list,
         description="Optional list of clarifying questions",
-        example=[
-            "Are you asking about embeddings in NLP or general vector embeddings?",
-            "Do you want implementation details or conceptual understanding?"
-        ]
+        examples=[
+            [
+                "Are you asking about embeddings in NLP or general vector embeddings?",
+                "Do you want implementation details or conceptual understanding?",
+            ]
+        ],
     )
-    context: Optional[str] = Field(
-        default=None,
-        description="Optional context explaining why clarification is needed"
+    context: str | None = Field(
+        default=None, description="Optional context explaining why clarification is needed"
     )
 
     model_config = ConfigDict(
@@ -825,9 +791,9 @@ class ClarificationEvent(BaseModel):
                 "message": "Can you share your neighborhood?",
                 "questions": [
                     "Are you asking about embeddings in NLP or general vector embeddings?",
-                    "Do you want implementation details or conceptual understanding?"
+                    "Do you want implementation details or conceptual understanding?",
                 ],
-                "context": "Initial search returned no localized results"
+                "context": "Initial search returned no localized results",
             }
         }
     )
@@ -835,12 +801,13 @@ class ClarificationEvent(BaseModel):
 
 class StreamErrorEvent(BaseModel):
     """Streaming event: error occurred (GET /api/ask/stream)."""
+
     type: str = Field(default="error", description="Event type identifier")
-    message: str = Field(..., description="Error message", example="No relevant documents found for this question")
-    code: Optional[str] = Field(
-        default=None,
-        description="Machine-readable error code",
-        example="NO_CONTEXT"
+    message: str = Field(
+        ..., description="Error message", examples=["No relevant documents found for this question"]
+    )
+    code: str | None = Field(
+        default=None, description="Machine-readable error code", examples=["NO_CONTEXT"]
     )
 
     model_config = ConfigDict(
@@ -848,7 +815,7 @@ class StreamErrorEvent(BaseModel):
             "example": {
                 "type": "error",
                 "message": "No relevant documents found for this question",
-                "code": "NO_CONTEXT"
+                "code": "NO_CONTEXT",
             }
         }
     )
@@ -856,41 +823,37 @@ class StreamErrorEvent(BaseModel):
 
 class AskConfigResponse(BaseModel):
     """Response with Q&A service configuration (GET /api/ask/config)."""
-    supported_languages: List[str] = Field(
+
+    supported_languages: list[str] = Field(
         default_factory=lambda: ["en", "es"],
         description="List of supported language codes",
-        example=["en", "es"]
+        examples=[["en", "es"]],
     )
     default_language: str = Field(
-        default="en",
-        description="Default language for questions",
-        example="en"
+        default="en", description="Default language for questions", examples=["en"]
     )
     default_provider: str = Field(
-        default="groq",
-        description="Default LLM provider",
-        example="groq"
+        default="groq", description="Default LLM provider", examples=["groq"]
     )
-    available_models: List[Dict[str, Any]] = Field(
-        default_factory=list,
-        description="List of available LLM models with specs"
+    available_models: list[dict[str, Any]] = Field(
+        default_factory=list, description="List of available LLM models with specs"
     )
-    features: Dict[str, bool] = Field(
+    features: dict[str, bool] = Field(
         default_factory=lambda: {
             "streaming_enabled": True,
             "thread_context": True,
             "model_override": True,
-            "web_search": False
+            "web_search": False,
         },
-        description="Feature availability flags"
+        description="Feature availability flags",
     )
-    limits: Dict[str, int] = Field(
+    limits: dict[str, int] = Field(
         default_factory=lambda: {
             "max_question_length": 4000,
             "max_response_tokens": 2048,
-            "request_timeout_seconds": 30
+            "request_timeout_seconds": 30,
         },
-        description="Request/response limits"
+        description="Request/response limits",
     )
 
     model_config = ConfigDict(
@@ -904,20 +867,20 @@ class AskConfigResponse(BaseModel):
                         "provider": "groq",
                         "name": "llama-3.1-8b-instant",
                         "context_window": 8192,
-                        "cost_per_1k_tokens": 0.05
+                        "cost_per_1k_tokens": 0.05,
                     }
                 ],
                 "features": {
                     "streaming_enabled": True,
                     "thread_context": True,
                     "model_override": True,
-                    "web_search": False
+                    "web_search": False,
                 },
                 "limits": {
                     "max_question_length": 4000,
                     "max_response_tokens": 2048,
-                    "request_timeout_seconds": 30
-                }
+                    "request_timeout_seconds": 30,
+                },
             }
         }
     )
@@ -935,35 +898,26 @@ AskResponse = AskQuestionResponse
 
 class AdminConfigResponse(BaseModel):
     """Response with admin configuration (GET /api/admin/config)."""
+
     require_confirmation: bool = Field(
         default=True,
         description="Require confirmation tokens for destructive operations",
-        example=True
+        examples=[True],
     )
     confirmation_token_ttl_seconds: int = Field(
-        default=300,
-        description="Confirmation token expiration time in seconds",
-        example=300
+        default=300, description="Confirmation token expiration time in seconds", examples=[300]
     )
     max_jobs_to_retain: int = Field(
-        default=1000,
-        description="Maximum scraping jobs to keep in memory",
-        example=1000
+        default=1000, description="Maximum scraping jobs to keep in memory", examples=[1000]
     )
     auto_cleanup_hours: int = Field(
-        default=24,
-        description="Auto-cleanup job retention period in hours",
-        example=24
+        default=24, description="Auto-cleanup job retention period in hours", examples=[24]
     )
     enable_document_deletion: bool = Field(
-        default=True,
-        description="Allow document deletion via admin endpoint",
-        example=True
+        default=True, description="Allow document deletion via admin endpoint", examples=[True]
     )
     enable_database_reset: bool = Field(
-        default=False,
-        description="Allow full database reset (dangerous!)",
-        example=False
+        default=False, description="Allow full database reset (dangerous!)", examples=[False]
     )
 
     model_config = ConfigDict(
@@ -974,7 +928,7 @@ class AdminConfigResponse(BaseModel):
                 "max_jobs_to_retain": 1000,
                 "auto_cleanup_hours": 24,
                 "enable_document_deletion": True,
-                "enable_database_reset": False
+                "enable_database_reset": False,
             }
         }
     )
@@ -982,38 +936,30 @@ class AdminConfigResponse(BaseModel):
 
 class AdminConfigUpdateRequest(BaseModel):
     """Request to update admin configuration (POST /api/admin/config) - PARTIAL IMPLEMENTATION."""
-    require_confirmation: Optional[bool] = Field(
-        default=None,
-        description="Update confirmation requirement setting",
-        example=False
+
+    require_confirmation: bool | None = Field(
+        default=None, description="Update confirmation requirement setting", examples=[False]
     )
-    auto_cleanup_hours: Optional[int] = Field(
+    auto_cleanup_hours: int | None = Field(
         default=None,
         description="Update job retention period (TODO: not yet implemented)",
-        example=24
+        examples=[24],
     )
-    enable_document_deletion: Optional[bool] = Field(
+    enable_document_deletion: bool | None = Field(
         default=None,
         description="Allow/disallow document deletion (TODO: not yet implemented)",
-        example=True
+        examples=[True],
     )
 
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "require_confirmation": False
-            }
-        }
-    )
+    model_config = ConfigDict(json_schema_extra={"example": {"require_confirmation": False}})
 
 
 class AdminConfigUpdateResponse(BaseModel):
     """Response from config update (POST /api/admin/config)."""
-    updated: bool = Field(..., description="Whether update succeeded", example=True)
-    updated_fields: List[str] = Field(
-        ...,
-        description="Fields that were updated",
-        example=["require_confirmation"]
+
+    updated: bool = Field(..., description="Whether update succeeded", examples=[True])
+    updated_fields: list[str] = Field(
+        ..., description="Fields that were updated", examples=[["require_confirmation"]]
     )
     config: AdminConfigResponse = Field(..., description="Updated configuration")
 
@@ -1028,8 +974,8 @@ class AdminConfigUpdateResponse(BaseModel):
                     "max_jobs_to_retain": 1000,
                     "auto_cleanup_hours": 24,
                     "enable_document_deletion": True,
-                    "enable_database_reset": False
-                }
+                    "enable_database_reset": False,
+                },
             }
         }
     )
@@ -1037,91 +983,82 @@ class AdminConfigUpdateResponse(BaseModel):
 
 # NOT YET IMPLEMENTED: Admin endpoints below
 
+
 class AdminHealthResponse(BaseModel):
     """Response from health check (GET /api/admin/health) - NOT YET IMPLEMENTED."""
-    status: str = Field(
-        ...,
-        description="Overall system health status",
-        example="healthy"
-    )
-    agent_service: Optional[Dict[str, Any]] = Field(
+
+    status: str = Field(..., description="Overall system health status", examples=["healthy"])
+    agent_service: dict[str, Any] | None = Field(
         default=None,
         description="Agent service health details",
-        example={
-            "status": "ok",
-            "response_time_ms": 45,
-            "last_check": "2024-02-09T10:30:00Z"
-        }
+        examples=[{"status": "ok", "response_time_ms": 45, "last_check": "2024-02-09T10:30:00Z"}],
     )
-    embedding_service: Optional[Dict[str, Any]] = Field(
-        default=None,
-        description="Embedding service health details"
+    embedding_service: dict[str, Any] | None = Field(
+        default=None, description="Embedding service health details"
     )
-    database: Optional[Dict[str, Any]] = Field(
-        default=None,
-        description="Database health details"
-    )
+    database: dict[str, Any] | None = Field(default=None, description="Database health details")
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 
 class DatabaseStats(BaseModel):
     """Database statistics."""
-    total_chunks: int = Field(..., description="Total document chunks", example=45230)
-    unique_sources: int = Field(..., description="Unique source URLs", example=892)
-    total_embeddings: int = Field(..., description="Total embeddings generated", example=45230)
-    average_chunk_size: float = Field(..., description="Mean chunk size bytes", example=2048.5)
-    db_size_bytes: Optional[int] = Field(
-        default=None,
-        description="Total database size in bytes",
-        example=92593156
+
+    total_chunks: int = Field(..., description="Total document chunks", examples=[45230])
+    unique_sources: int = Field(..., description="Unique source URLs", examples=[892])
+    total_embeddings: int = Field(..., description="Total embeddings generated", examples=[45230])
+    average_chunk_size: float = Field(..., description="Mean chunk size bytes", examples=[2048.5])
+    db_size_bytes: int | None = Field(
+        default=None, description="Total database size in bytes", examples=[92593156]
     )
-    last_updated: Optional[datetime] = Field(
-        default=None,
-        description="Last update timestamp"
-    )
+    last_updated: datetime | None = Field(default=None, description="Last update timestamp")
 
 
 class AdminStatsResponse(BaseModel):
     """Response with admin statistics (GET /api/admin/stats) - NOT YET IMPLEMENTED."""
+
     database: DatabaseStats = Field(..., description="Database statistics")
-    services: Dict[str, Dict[str, Any]] = Field(
+    services: dict[str, dict[str, Any]] = Field(
         ...,
         description="Service metrics",
-        example={
-            "agent_service": {
-                "uptime_seconds": 86400,
-                "requests_processed": 5432,
-                "average_latency_ms": 245
-            },
-            "embedding_service": {
-                "uptime_seconds": 86400,
-                "embeddings_generated": 125600,
-                "cache_hit_rate": 0.67
+        examples=[
+            {
+                "agent_service": {
+                    "uptime_seconds": 86400,
+                    "requests_processed": 5432,
+                    "average_latency_ms": 245,
+                },
+                "embedding_service": {
+                    "uptime_seconds": 86400,
+                    "embeddings_generated": 125600,
+                    "cache_hit_rate": 0.67,
+                },
             }
-        }
+        ],
     )
 
 
 class DocumentChunk(BaseModel):
     """Document chunk metadata."""
-    chunk_id: str = Field(..., description="Chunk identifier", example="chunk-abc123")
+
+    chunk_id: str = Field(..., description="Chunk identifier", examples=["chunk-abc123"])
     source_url: str = Field(..., description="Source document URL")
     content_preview: str = Field(
         ...,
         description="First 200 chars of content",
-        example="Machine learning is a branch of artificial intelligence that..."
+        examples=["Machine learning is a branch of artificial intelligence that..."],
     )
-    embedding_dimension: int = Field(..., description="Embedding dimensionality", example=384)
+    embedding_dimension: int = Field(..., description="Embedding dimensionality", examples=[384])
     created_at: datetime = Field(..., description="Creation timestamp")
-    updated_at: Optional[datetime] = Field(default=None, description="Last update timestamp")
+    updated_at: datetime | None = Field(default=None, description="Last update timestamp")
 
 
 class DocumentsListResponse(BaseModel):
     """Response listing indexed documents (GET /api/admin/documents) - NOT YET IMPLEMENTED."""
-    documents: List[DocumentChunk] = Field(..., description="List of document chunks")
-    total: int = Field(..., description="Total chunks in database", example=45230)
-    page: int = Field(..., description="Current page number", example=1)
-    limit: int = Field(..., description="Results per page", example=20)
+
+    documents: list[DocumentChunk] = Field(..., description="List of document chunks")
+    total: int = Field(..., description="Total chunks in database", examples=[45230])
+    page: int = Field(..., description="Current page number", examples=[1])
+    limit: int = Field(..., description="Results per page", examples=[20])
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -1132,12 +1069,12 @@ class DocumentsListResponse(BaseModel):
                         "source_url": "https://example.com/doc",
                         "content_preview": "Content here...",
                         "embedding_dimension": 384,
-                        "created_at": "2024-02-09T10:00:00Z"
+                        "created_at": "2024-02-09T10:00:00Z",
                     }
                 ],
                 "total": 45230,
                 "page": 1,
-                "limit": 20
+                "limit": 20,
             }
         }
     )
@@ -1145,95 +1082,88 @@ class DocumentsListResponse(BaseModel):
 
 class DeleteChunkResponse(BaseModel):
     """Response from delete chunk (DELETE /api/admin/documents/{chunk_id}) - NOT YET IMPLEMENTED."""
-    success: bool = Field(..., description="Whether deletion succeeded", example=True)
-    deleted_chunk_id: str = Field(..., description="ID of deleted chunk", example="chunk-abc123")
+
+    success: bool = Field(..., description="Whether deletion succeeded", examples=[True])
+    deleted_chunk_id: str = Field(..., description="ID of deleted chunk", examples=["chunk-abc123"])
     message: str = Field(..., description="Confirmation message")
 
 
 class CleanDatabaseRequest(BaseModel):
     """Request to clean database (POST /api/admin/database/clean) - NOT YET IMPLEMENTED."""
+
     confirmation_token: str = Field(
         ...,
         description="Token obtained from GET /api/admin/database/clean-request",
-        example="token-abc123xyz789"
+        examples=["token-abc123xyz789"],
     )
 
     model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "confirmation_token": "token-abc123xyz789"
-            }
-        }
+        json_schema_extra={"example": {"confirmation_token": "token-abc123xyz789"}}
     )
 
 
 class CleanDatabaseResponse(BaseModel):
     """Response from database cleanup (POST /api/admin/database/clean)."""
-    success: bool = Field(..., description="Whether cleanup succeeded", example=True)
-    deleted_chunks: int = Field(..., description="Count of chunks deleted", example=45230)
+
+    success: bool = Field(..., description="Whether cleanup succeeded", examples=[True])
+    deleted_chunks: int = Field(..., description="Count of chunks deleted", examples=[45230])
     message: str = Field(
-        ...,
-        description="Cleanup summary",
-        example="Database cleaned: 45230 chunks deleted"
+        ..., description="Cleanup summary", examples=["Database cleaned: 45230 chunks deleted"]
     )
 
 
 class CleanRequestTokenResponse(BaseModel):
     """Response with cleanup confirmation token (GET /api/admin/database/clean-request) - NOT YET IMPLEMENTED."""
+
     token: str = Field(
-        ...,
-        description="One-time use confirmation token",
-        example="token-abc123xyz789"
+        ..., description="One-time use confirmation token", examples=["token-abc123xyz789"]
     )
     expires_at: datetime = Field(..., description="Token expiration time")
     endpoint: str = Field(
         ...,
         description="Endpoint to use this token with",
-        example="POST /api/admin/database/clean"
+        examples=["POST /api/admin/database/clean"],
     )
 
 
 class SourcesListResponse(BaseModel):
     """Response listing all document sources (GET /api/admin/sources) - NOT YET IMPLEMENTED."""
-    sources: List[Dict[str, Any]] = Field(
+
+    sources: list[dict[str, Any]] = Field(
         ...,
         description="List of unique sources with metadata",
-        example=[
-            {
-                "url": "https://example.com/docs",
-                "chunk_count": 125,
-                "created_at": "2024-02-09T10:00:00Z",
-                "last_updated": "2024-02-09T12:00:00Z"
-            }
-        ]
+        examples=[
+            [
+                {
+                    "url": "https://example.com/docs",
+                    "chunk_count": 125,
+                    "created_at": "2024-02-09T10:00:00Z",
+                    "last_updated": "2024-02-09T12:00:00Z",
+                }
+            ]
+        ],
     )
-    total: int = Field(..., description="Total unique sources", example=892)
+    total: int = Field(..., description="Total unique sources", examples=[892])
 
 
 class ValidateSourceRequest(BaseModel):
     """Request to validate a source (POST /api/admin/sources/validate) - NOT YET IMPLEMENTED."""
-    url: str = Field(
-        ...,
-        description="URL to validate",
-        example="https://example.com"
-    )
+
+    url: str = Field(..., description="URL to validate", examples=["https://example.com"])
     loader_type: LoaderType = Field(
-        ...,
-        description="Loader to test with",
-        example=LoaderType.AUTO
+        ..., description="Loader to test with", examples=[LoaderType.AUTO]
     )
 
 
 class ValidateSourceResponse(BaseModel):
     """Response from source validation (POST /api/admin/sources/validate)."""
+
     url: str = Field(..., description="URL tested")
-    is_accessible: bool = Field(..., description="Whether URL is accessible", example=True)
-    is_scrapeable: bool = Field(..., description="Whether content is scrapeable", example=True)
-    http_status: Optional[int] = Field(default=None, description="HTTP status code", example=200)
+    is_accessible: bool = Field(..., description="Whether URL is accessible", examples=[True])
+    is_scrapeable: bool = Field(..., description="Whether content is scrapeable", examples=[True])
+    http_status: int | None = Field(default=None, description="HTTP status code", examples=[200])
     message: str = Field(
-        ...,
-        description="Validation result message",
-        example="URL is accessible and scrapeable"
+        ..., description="Validation result message", examples=["URL is accessible and scrapeable"]
     )
 
 
@@ -1244,30 +1174,18 @@ class ValidateSourceResponse(BaseModel):
 
 class HealthCheckResponse(BaseModel):
     """Response from health check endpoint (GET /health)."""
-    status: str = Field(
-        ...,
-        description="Overall health status",
-        example="ok"
+
+    status: str = Field(..., description="Overall health status", examples=["ok"])
+    agent_service: str | None = Field(
+        default=None, description="Agent service health status", examples=["ok"]
     )
-    agent_service: Optional[str] = Field(
-        default=None,
-        description="Agent service health status",
-        example="ok"
+    embedding_service: str | None = Field(
+        default=None, description="Embedding service health status", examples=["ok"]
     )
-    embedding_service: Optional[str] = Field(
-        default=None,
-        description="Embedding service health status",
-        example="ok"
+    database: str | None = Field(
+        default=None, description="Database health status", examples=["ok"]
     )
-    database: Optional[str] = Field(
-        default=None,
-        description="Database health status",
-        example="ok"
-    )
-    timestamp: datetime = Field(
-        default_factory=datetime.utcnow,
-        description="Check timestamp"
-    )
+    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Check timestamp")
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -1276,7 +1194,7 @@ class HealthCheckResponse(BaseModel):
                 "agent_service": "ok",
                 "embedding_service": "ok",
                 "database": "ok",
-                "timestamp": "2024-02-09T10:30:00Z"
+                "timestamp": "2024-02-09T10:30:00Z",
             }
         }
     )
@@ -1284,55 +1202,34 @@ class HealthCheckResponse(BaseModel):
 
 class EndpointInfo(BaseModel):
     """Information about a single endpoint."""
-    method: str = Field(
-        ...,
-        description="HTTP method",
-        example="GET"
-    )
-    path: str = Field(
-        ...,
-        description="Endpoint path",
-        example="/api/ask/"
-    )
+
+    method: str = Field(..., description="HTTP method", examples=["GET"])
+    path: str = Field(..., description="Endpoint path", examples=["/api/ask/"])
     description: str = Field(
         ...,
         description="Brief endpoint description",
-        example="Ask a question and get an answer with sources"
+        examples=["Ask a question and get an answer with sources"],
     )
     authentication: bool = Field(
-        default=False,
-        description="Whether endpoint requires authentication",
-        example=False
+        default=False, description="Whether endpoint requires authentication", examples=[False]
     )
 
 
 class GatewayInfoResponse(BaseModel):
     """Response with service information (GET /)."""
-    service: str = Field(
-        default="Vecinita Unified API Gateway",
-        description="Service name"
-    )
-    version: str = Field(
-        default="1.0.0",
-        description="API version",
-        example="1.0.0"
-    )
+
+    service: str = Field(default="Vecinita Unified API Gateway", description="Service name")
+    version: str = Field(default="1.0.0", description="API version", examples=["1.0.0"])
     status: str = Field(
-        default="operational",
-        description="Service status",
-        example="operational"
+        default="operational", description="Service status", examples=["operational"]
     )
-    endpoints: Dict[str, List[EndpointInfo]] = Field(
-        default_factory=dict,
-        description="Endpoints organized by category"
+    endpoints: dict[str, list[EndpointInfo]] = Field(
+        default_factory=dict, description="Endpoints organized by category"
     )
-    environment: Dict[str, str] = Field(
+    environment: dict[str, str] = Field(
         default_factory=dict,
         description="Environment info (deployed_at, region, etc.)",
-        example={
-            "deployed_at": "2024-02-09T10:00:00Z",
-            "region": "us-east-1"
-        }
+        examples=[{"deployed_at": "2024-02-09T10:00:00Z", "region": "us-east-1"}],
     )
 
     model_config = ConfigDict(
@@ -1347,14 +1244,11 @@ class GatewayInfoResponse(BaseModel):
                             "method": "GET",
                             "path": "/api/ask/",
                             "description": "Ask a question",
-                            "authentication": False
+                            "authentication": False,
                         }
                     ]
                 },
-                "environment": {
-                    "deployed_at": "2024-02-09T10:00:00Z",
-                    "region": "us-east-1"
-                }
+                "environment": {"deployed_at": "2024-02-09T10:00:00Z", "region": "us-east-1"},
             }
         }
     )
@@ -1362,47 +1256,30 @@ class GatewayInfoResponse(BaseModel):
 
 class GatewayConfigResponse(BaseModel):
     """Response with gateway configuration (GET /config)."""
-    agent_url: str = Field(
-        ...,
-        description="Agent service URL",
-        example="http://localhost:8000"
-    )
+
+    agent_url: str = Field(..., description="Agent service URL", examples=["http://localhost:8000"])
     embedding_service_url: str = Field(
-        ...,
-        description="Embedding service URL",
-        example="http://localhost:8001"
+        ..., description="Embedding service URL", examples=["http://localhost:8001"]
     )
-    database_url: Optional[str] = Field(
-        default=None,
-        description="Database URL (masked for security)"
-    )
+    database_url: str | None = Field(default=None, description="Database URL (masked for security)")
     max_urls_per_request: int = Field(
-        ...,
-        description="Max URLs per scrape request",
-        example=100
+        ..., description="Max URLs per scrape request", examples=[100]
     )
     job_retention_hours: int = Field(
-        ...,
-        description="Job history retention period in hours",
-        example=24
+        ..., description="Job history retention period in hours", examples=[24]
     )
     embedding_model: str = Field(
         ...,
         description="Default embedding model",
-        example="sentence-transformers/all-MiniLM-L6-v2"
+        examples=["sentence-transformers/all-MiniLM-L6-v2"],
     )
     auth_enabled: bool = Field(
-        default=False,
-        description="Whether authentication is required",
-        example=False
+        default=False, description="Whether authentication is required", examples=[False]
     )
-    rate_limiting: Optional[Dict[str, int]] = Field(
+    rate_limiting: dict[str, int] | None = Field(
         default=None,
         description="Rate limit configuration",
-        example={
-            "requests_per_hour": 100,
-            "tokens_per_day": 1000
-        }
+        examples=[{"requests_per_hour": 100, "tokens_per_day": 1000}],
     )
 
     model_config = ConfigDict(
@@ -1415,10 +1292,7 @@ class GatewayConfigResponse(BaseModel):
                 "job_retention_hours": 24,
                 "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
                 "auth_enabled": False,
-                "rate_limiting": {
-                    "requests_per_hour": 100,
-                    "tokens_per_day": 1000
-                }
+                "rate_limiting": {"requests_per_hour": 100, "tokens_per_day": 1000},
             }
         }
     )
@@ -1426,27 +1300,21 @@ class GatewayConfigResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     """Standard error response."""
-    error: str = Field(
-        ...,
-        description="Error type/message",
-        example="Not Found"
-    )
-    detail: Optional[str] = Field(
+
+    error: str = Field(..., description="Error type/message", examples=["Not Found"])
+    detail: str | None = Field(
         default=None,
         description="Detailed error explanation",
-        example="The requested resource was not found"
+        examples=["The requested resource was not found"],
     )
-    timestamp: datetime = Field(
-        default_factory=datetime.utcnow,
-        description="Error timestamp"
-    )
+    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Error timestamp")
 
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
                 "error": "Not Found",
                 "detail": "The requested resource was not found",
-                "timestamp": "2024-02-09T10:30:00Z"
+                "timestamp": "2024-02-09T10:30:00Z",
             }
         }
     )
@@ -1529,7 +1397,7 @@ All models above are automatically documented in Swagger UI:
   - Each model shows:
     * Field names and types
     * Description text (from Field description=)
-    * Example values (from Field example= and model_config json_schema_extra)
+    * Example values (from Field examples=[ and model_config json_schema_extra])
     * Validation constraints (min_length, max, pattern, etc.)
     * Default values
     * Required vs optional fields

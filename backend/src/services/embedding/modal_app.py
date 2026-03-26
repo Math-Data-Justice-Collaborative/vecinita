@@ -2,9 +2,10 @@
 Modal deployment wrapper for Vecinita Embedding Service
 Wraps the embedding service for Modal serverless deployment
 """
-import os
-import modal
+
 from pathlib import Path
+
+import modal
 
 # Create Modal app
 app = modal.App("vecinita-embedding")
@@ -18,9 +19,10 @@ image = modal.Image.debian_slim().pip_install(
     "pydantic>=2.0.0",
 )
 
+
 @app.function(
     image=image,
-    secrets=[modal.Secret.from_name("vecinita-secrets", must_create=False)],
+    secrets=[modal.Secret.from_name("vecinita-secrets")],
     cpu=1.0,
     memory=512,
     timeout=3600,
@@ -29,21 +31,26 @@ async def embedding_service():
     """Run embedding service on Modal"""
     import subprocess
     import sys
-    
+
     # Run FastAPI with uvicorn
     subprocess.run(
         [
-            sys.executable, "-m", "uvicorn",
+            sys.executable,
+            "-m",
+            "uvicorn",
             "src.services.embedding.server:app",
-            "--host", "0.0.0.0",
-            "--port", "8001",
+            "--host",
+            "0.0.0.0",
+            "--port",
+            "8001",
         ],
         cwd="/app",
     )
 
+
 # Mount source code
 app_path = Path(__file__).parent.parent
-app.function(image=image)(
+app.function(image=image)(  # type: ignore[call-overload]
     embedding_service,
 ).__wrapped__.mounts = [
     modal.Mount.from_local_dir(
@@ -56,22 +63,25 @@ app.function(image=image)(
     ),
 ]
 
+
 # Health check
 @app.function(image=image)
 def health():
     """Health check for monitoring"""
     return {"status": "healthy", "service": "embedding"}
 
+
 # Web endpoint
-@app.web_endpoint()
+@app.function(image=image)
+@modal.asgi_app()
 def web():
     """Web endpoint for modal.web"""
     from fastapi import FastAPI
-    
+
     _app = FastAPI()
-    
+
     @_app.get("/health")
     async def health_check():
         return {"status": "healthy"}
-    
+
     return _app

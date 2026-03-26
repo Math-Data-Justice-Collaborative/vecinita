@@ -3,10 +3,10 @@ Unit tests for src/scraper/loaders.py - Expanded coverage
 
 Tests smart loader selection and document loading.
 """
+
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock, call
-from typing import List
-from pathlib import Path
 
 pytestmark = pytest.mark.unit
 
@@ -39,9 +39,11 @@ class TestLoadUrlBasic:
 
     def test_load_url_skipped(self):
         """Test that URLs matching skip patterns are skipped."""
-        with patch("src.services.scraper.loaders.ScraperConfig"), \
-             patch("src.services.scraper.loaders.should_skip_url") as mock_should_skip, \
-             patch("src.services.scraper.loaders.write_to_failed_log"):
+        with (
+            patch("src.services.scraper.loaders.ScraperConfig"),
+            patch("src.services.scraper.loaders.should_skip_url") as mock_should_skip,
+            patch("src.services.scraper.loaders.write_to_failed_log"),
+        ):
 
             from src.services.scraper.loaders import SmartLoader
 
@@ -59,11 +61,11 @@ class TestLoadUrlBasic:
 
     def test_load_url_not_skipped(self):
         """Test that non-skipped URLs proceed to loading."""
-        with patch("src.services.scraper.loaders.ScraperConfig"), \
-             patch("src.services.scraper.loaders.should_skip_url") as mock_should_skip, \
-             patch(
-                 "src.services.scraper.loaders.SmartLoader._select_and_load"
-             ) as mock_select_load:
+        with (
+            patch("src.services.scraper.loaders.ScraperConfig"),
+            patch("src.services.scraper.loaders.should_skip_url") as mock_should_skip,
+            patch("src.services.scraper.loaders.SmartLoader._select_and_load") as mock_select_load,
+        ):
 
             from src.services.scraper.loaders import SmartLoader
 
@@ -85,13 +87,15 @@ class TestLoadUrlBasic:
 
     def test_load_url_error_handling(self):
         """Test error handling in load_url."""
-        with patch("src.services.scraper.loaders.ScraperConfig"), \
-             patch("src.services.scraper.loaders.should_skip_url") as mock_should_skip, \
-             patch(
-                 "src.services.scraper.loaders.SmartLoader._select_and_load",
-                 side_effect=Exception("Test error"),
-             ), \
-             patch("src.services.scraper.loaders.write_to_failed_log"):
+        with (
+            patch("src.services.scraper.loaders.ScraperConfig"),
+            patch("src.services.scraper.loaders.should_skip_url") as mock_should_skip,
+            patch(
+                "src.services.scraper.loaders.SmartLoader._select_and_load",
+                side_effect=Exception("Test error"),
+            ),
+            patch("src.services.scraper.loaders.write_to_failed_log"),
+        ):
 
             from src.services.scraper.loaders import SmartLoader
 
@@ -111,11 +115,11 @@ class TestForceLoader:
 
     def test_load_url_with_forced_loader(self):
         """Test that forced_loader parameter is respected."""
-        with patch("src.services.scraper.loaders.ScraperConfig"), \
-             patch("src.services.scraper.loaders.should_skip_url") as mock_should_skip, \
-             patch(
-                 "src.services.scraper.loaders.SmartLoader._select_and_load"
-             ) as mock_select_load:
+        with (
+            patch("src.services.scraper.loaders.ScraperConfig"),
+            patch("src.services.scraper.loaders.should_skip_url") as mock_should_skip,
+            patch("src.services.scraper.loaders.SmartLoader._select_and_load") as mock_select_load,
+        ):
 
             from src.services.scraper.loaders import SmartLoader
 
@@ -142,11 +146,11 @@ class TestDocumentMetadata:
 
     def test_load_url_document_summary(self):
         """Test that document summary is logged."""
-        with patch("src.services.scraper.loaders.ScraperConfig"), \
-             patch("src.services.scraper.loaders.should_skip_url") as mock_should_skip, \
-             patch(
-                 "src.services.scraper.loaders.SmartLoader._select_and_load"
-             ) as mock_select_load:
+        with (
+            patch("src.services.scraper.loaders.ScraperConfig"),
+            patch("src.services.scraper.loaders.should_skip_url") as mock_should_skip,
+            patch("src.services.scraper.loaders.SmartLoader._select_and_load") as mock_select_load,
+        ):
 
             from src.services.scraper.loaders import SmartLoader
 
@@ -172,11 +176,11 @@ class TestDocumentMetadata:
 
     def test_load_url_missing_metadata(self):
         """Test handling of documents without metadata."""
-        with patch("src.services.scraper.loaders.ScraperConfig"), \
-             patch("src.services.scraper.loaders.should_skip_url") as mock_should_skip, \
-             patch(
-                 "src.services.scraper.loaders.SmartLoader._select_and_load"
-             ) as mock_select_load:
+        with (
+            patch("src.services.scraper.loaders.ScraperConfig"),
+            patch("src.services.scraper.loaders.should_skip_url") as mock_should_skip,
+            patch("src.services.scraper.loaders.SmartLoader._select_and_load") as mock_select_load,
+        ):
 
             from src.services.scraper.loaders import SmartLoader
 
@@ -229,13 +233,23 @@ class TestLoaderTypeSelection:
             mock_config.sites_needing_playwright = []
             loader = SmartLoader(mock_config)
 
-            with patch("src.services.scraper.loaders.is_csv_file", return_value=False), \
-                 patch("src.services.scraper.loaders.get_crawl_config", return_value=None), \
-                 patch("src.services.scraper.loaders.needs_playwright", return_value=False), \
-                 patch.object(loader, "_load_standard", return_value=([], "Unstructured URL Loader", False)) as mock_standard, \
-                 patch.object(loader, "_load_playwright", return_value=([MagicMock()], "Playwright (JavaScript rendering)", True)) as mock_playwright:
+            with (
+                patch("src.services.scraper.loaders.is_csv_file", return_value=False),
+                patch("src.services.scraper.loaders.get_crawl_config", return_value=None),
+                patch("src.services.scraper.loaders.needs_playwright", return_value=False),
+                patch.object(
+                    loader, "_load_standard", return_value=([], "Unstructured URL Loader", False)
+                ) as mock_standard,
+                patch.object(
+                    loader,
+                    "_load_playwright",
+                    return_value=([MagicMock()], "Playwright (JavaScript rendering)", True),
+                ) as mock_playwright,
+            ):
 
-                docs, loader_type, success = loader._select_and_load("https://example.com", force_loader=None)
+                docs, loader_type, success = loader._select_and_load(
+                    "https://example.com", force_loader=None
+                )
 
                 assert success is True
                 assert loader_type == "Playwright (JavaScript rendering)"
@@ -249,13 +263,15 @@ class TestURLHandling:
 
     def test_load_url_with_failed_log(self):
         """Test that failed URLs are logged."""
-        with patch("src.services.scraper.loaders.ScraperConfig"), \
-             patch("src.services.scraper.loaders.should_skip_url") as mock_should_skip, \
-             patch(
-                 "src.services.scraper.loaders.SmartLoader._select_and_load",
-                 side_effect=Exception("Network error"),
-             ), \
-             patch("src.services.scraper.loaders.write_to_failed_log") as mock_write_log:
+        with (
+            patch("src.services.scraper.loaders.ScraperConfig"),
+            patch("src.services.scraper.loaders.should_skip_url") as mock_should_skip,
+            patch(
+                "src.services.scraper.loaders.SmartLoader._select_and_load",
+                side_effect=Exception("Network error"),
+            ),
+            patch("src.services.scraper.loaders.write_to_failed_log"),
+        ):
 
             from src.services.scraper.loaders import SmartLoader
 
@@ -274,16 +290,16 @@ class TestURLHandling:
 
     def test_load_url_github_conversion(self):
         """Test GitHub URL conversion if applicable."""
-        with patch("src.services.scraper.loaders.ScraperConfig"), \
-             patch("src.services.scraper.loaders.should_skip_url"), \
-             patch(
-                 "src.services.scraper.loaders.convert_github_to_raw"
-            ) as mock_convert:
+        with (
+            patch("src.services.scraper.loaders.ScraperConfig"),
+            patch("src.services.scraper.loaders.should_skip_url"),
+            patch("src.services.scraper.loaders.convert_github_to_raw") as mock_convert,
+        ):
 
             from src.services.scraper.loaders import SmartLoader
 
             mock_config = MagicMock()
-            loader = SmartLoader(mock_config)
+            SmartLoader(mock_config)
 
             # Setup mocks
             mock_convert.return_value = "https://raw.github.com/..."
@@ -299,7 +315,6 @@ class TestLoaderConfiguration:
     def test_get_crawl_config(self):
         """Test crawl configuration retrieval."""
         with patch("src.services.scraper.loaders.get_crawl_config") as mock_get_config:
-            from src.services.scraper import loaders
 
             mock_get_config.return_value = {"max_depth": 2, "timeout": 30}
 
@@ -311,7 +326,6 @@ class TestLoaderConfiguration:
     def test_needs_playwright_detection(self):
         """Test JavaScript-heavy site detection."""
         with patch("src.services.scraper.loaders.needs_playwright") as mock_needs:
-            from src.services.scraper import loaders
 
             # Test JavaScript-heavy site
             mock_needs.return_value = True
@@ -324,7 +338,6 @@ class TestLoaderConfiguration:
     def test_csv_file_detection(self):
         """Test CSV file detection."""
         with patch("src.services.scraper.loaders.is_csv_file") as mock_is_csv:
-            from src.services.scraper import loaders
 
             mock_is_csv.return_value = True
             assert mock_is_csv("https://example.com/data.csv") is True
@@ -338,11 +351,11 @@ class TestDocumentProcessing:
 
     def test_load_url_document_content_access(self):
         """Test that document content is properly accessible."""
-        with patch("src.services.scraper.loaders.ScraperConfig"), \
-             patch("src.services.scraper.loaders.should_skip_url") as mock_should_skip, \
-             patch(
-                 "src.services.scraper.loaders.SmartLoader._select_and_load"
-            ) as mock_select_load:
+        with (
+            patch("src.services.scraper.loaders.ScraperConfig"),
+            patch("src.services.scraper.loaders.should_skip_url") as mock_should_skip,
+            patch("src.services.scraper.loaders.SmartLoader._select_and_load") as mock_select_load,
+        ):
 
             from src.services.scraper.loaders import SmartLoader
 
@@ -370,13 +383,15 @@ class TestLoaderErrors:
 
     def test_load_url_network_timeout(self):
         """Test handling of network timeout."""
-        with patch("src.services.scraper.loaders.ScraperConfig"), \
-             patch("src.services.scraper.loaders.should_skip_url"), \
-             patch(
-                 "src.services.scraper.loaders.SmartLoader._select_and_load",
-                 side_effect=TimeoutError("Connection timeout"),
-             ), \
-             patch("src.services.scraper.loaders.write_to_failed_log"):
+        with (
+            patch("src.services.scraper.loaders.ScraperConfig"),
+            patch("src.services.scraper.loaders.should_skip_url"),
+            patch(
+                "src.services.scraper.loaders.SmartLoader._select_and_load",
+                side_effect=TimeoutError("Connection timeout"),
+            ),
+            patch("src.services.scraper.loaders.write_to_failed_log"),
+        ):
 
             from src.services.scraper.loaders import SmartLoader
 
@@ -393,22 +408,22 @@ class TestLoaderErrors:
 
     def test_load_url_invalid_content(self):
         """Test handling of invalid or corrupt content."""
-        with patch("src.services.scraper.loaders.ScraperConfig"), \
-             patch("src.services.scraper.loaders.should_skip_url"), \
-             patch(
-                 "src.services.scraper.loaders.SmartLoader._select_and_load",
-                 side_effect=Exception("Invalid content encoding"),
-            ), \
-             patch("src.services.scraper.loaders.write_to_failed_log"):
+        with (
+            patch("src.services.scraper.loaders.ScraperConfig"),
+            patch("src.services.scraper.loaders.should_skip_url"),
+            patch(
+                "src.services.scraper.loaders.SmartLoader._select_and_load",
+                side_effect=Exception("Invalid content encoding"),
+            ),
+            patch("src.services.scraper.loaders.write_to_failed_log"),
+        ):
 
             from src.services.scraper.loaders import SmartLoader
 
             mock_config = MagicMock()
             loader = SmartLoader(mock_config)
 
-            docs, loader_type, success = loader.load_url(
-                "https://bad-encoding.com"
-            )
+            docs, loader_type, success = loader.load_url("https://bad-encoding.com")
 
             assert success is False
 
@@ -420,11 +435,11 @@ class TestLoaderPerformance:
         """Test that URL loading timing is tracked."""
         import time
 
-        with patch("src.services.scraper.loaders.ScraperConfig"), \
-             patch("src.services.scraper.loaders.should_skip_url"), \
-             patch(
-                 "src.services.scraper.loaders.SmartLoader._select_and_load"
-            ) as mock_select_load:
+        with (
+            patch("src.services.scraper.loaders.ScraperConfig"),
+            patch("src.services.scraper.loaders.should_skip_url"),
+            patch("src.services.scraper.loaders.SmartLoader._select_and_load") as mock_select_load,
+        ):
 
             from src.services.scraper.loaders import SmartLoader
 
@@ -442,11 +457,11 @@ class TestLoaderPerformance:
 
     def test_load_url_document_statistics(self):
         """Test that document statistics are calculated."""
-        with patch("src.services.scraper.loaders.ScraperConfig"), \
-             patch("src.services.scraper.loaders.should_skip_url", return_value=False), \
-             patch(
-                 "src.services.scraper.loaders.SmartLoader._select_and_load"
-            ) as mock_select_load:
+        with (
+            patch("src.services.scraper.loaders.ScraperConfig"),
+            patch("src.services.scraper.loaders.should_skip_url", return_value=False),
+            patch("src.services.scraper.loaders.SmartLoader._select_and_load") as mock_select_load,
+        ):
 
             from src.services.scraper.loaders import SmartLoader
 
@@ -464,9 +479,7 @@ class TestLoaderPerformance:
 
             mock_select_load.return_value = (docs, "TestLoader", True)
 
-            loaded_docs, loader_type, success = loader.load_url(
-                "https://example.com"
-            )
+            loaded_docs, loader_type, success = loader.load_url("https://example.com")
 
             assert success is True
             assert len(loaded_docs) == 3

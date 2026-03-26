@@ -1,7 +1,7 @@
 """Unit tests for the Chroma-backed database search tool."""
 
-import json
 import importlib.util
+import json
 import sys
 from pathlib import Path
 from unittest.mock import Mock
@@ -9,7 +9,9 @@ from unittest.mock import Mock
 import pytest
 
 _DB_SEARCH_PATH = Path(__file__).resolve().parents[1] / "src" / "agent" / "tools" / "db_search.py"
-_DB_SEARCH_SPEC = importlib.util.spec_from_file_location("src.agent.tools.db_search", _DB_SEARCH_PATH)
+_DB_SEARCH_SPEC = importlib.util.spec_from_file_location(
+    "src.agent.tools.db_search", _DB_SEARCH_PATH
+)
 assert _DB_SEARCH_SPEC is not None and _DB_SEARCH_SPEC.loader is not None
 db_search_module = importlib.util.module_from_spec(_DB_SEARCH_SPEC)
 sys.modules[_DB_SEARCH_SPEC.name] = db_search_module
@@ -37,7 +39,9 @@ def mock_embedding_model():
 
 @pytest.fixture
 def db_search_tool(mock_store, mock_embedding_model):
-    return create_db_search_tool(mock_store, mock_embedding_model, match_threshold=0.3, match_count=5)
+    return create_db_search_tool(
+        mock_store, mock_embedding_model, match_threshold=0.3, match_count=5
+    )
 
 
 def test_db_search_returns_empty_when_no_results(db_search_tool, mock_store):
@@ -69,9 +73,13 @@ def test_db_search_calls_embedding_model(db_search_tool, mock_embedding_model):
     mock_embedding_model.embed_query.assert_called_once_with("test query")
 
 
-def test_db_search_reuses_cached_embedding_for_normalized_query(monkeypatch, mock_store, mock_embedding_model):
+def test_db_search_reuses_cached_embedding_for_normalized_query(
+    monkeypatch, mock_store, mock_embedding_model
+):
     monkeypatch.setenv("DB_SEARCH_EMBED_CACHE_SIZE", "8")
-    tool = create_db_search_tool(mock_store, mock_embedding_model, match_threshold=0.3, match_count=5)
+    tool = create_db_search_tool(
+        mock_store, mock_embedding_model, match_threshold=0.3, match_count=5
+    )
     tool.invoke("Need housing help")
     tool.invoke("  need   housing   help  ")
     assert mock_embedding_model.embed_query.call_count == 1
@@ -79,7 +87,9 @@ def test_db_search_reuses_cached_embedding_for_normalized_query(monkeypatch, moc
 
 def test_db_search_embedding_cache_can_be_disabled(monkeypatch, mock_store, mock_embedding_model):
     monkeypatch.setenv("DB_SEARCH_EMBED_CACHE_SIZE", "0")
-    tool = create_db_search_tool(mock_store, mock_embedding_model, match_threshold=0.3, match_count=5)
+    tool = create_db_search_tool(
+        mock_store, mock_embedding_model, match_threshold=0.3, match_count=5
+    )
     tool.invoke("Need housing help")
     tool.invoke("need housing help")
     assert mock_embedding_model.embed_query.call_count == 2
@@ -96,7 +106,9 @@ def test_db_search_exposes_latency_metrics(monkeypatch, mock_store, mock_embeddi
             "metadata": {},
         }
     ]
-    tool = create_db_search_tool(mock_store, mock_embedding_model, match_threshold=0.3, match_count=5)
+    tool = create_db_search_tool(
+        mock_store, mock_embedding_model, match_threshold=0.3, match_count=5
+    )
 
     _ = tool.invoke("Need housing support")
     metrics = get_last_search_metrics()
@@ -110,7 +122,9 @@ def test_db_search_exposes_latency_metrics(monkeypatch, mock_store, mock_embeddi
 
 def test_db_search_metrics_marks_cache_hit(monkeypatch, mock_store, mock_embedding_model):
     monkeypatch.setenv("DB_SEARCH_EMBED_CACHE_SIZE", "8")
-    tool = create_db_search_tool(mock_store, mock_embedding_model, match_threshold=0.3, match_count=5)
+    tool = create_db_search_tool(
+        mock_store, mock_embedding_model, match_threshold=0.3, match_count=5
+    )
 
     _ = tool.invoke("Need housing help")
     _ = tool.invoke("need   housing   help")
@@ -120,7 +134,9 @@ def test_db_search_metrics_marks_cache_hit(monkeypatch, mock_store, mock_embeddi
 
 
 def test_db_search_passes_tag_filter(db_search_tool, mock_store):
-    token = set_search_options(tags=["housing", "food"], tag_match_mode="all", include_untagged_fallback=False)
+    token = set_search_options(
+        tags=["housing", "food"], tag_match_mode="all", include_untagged_fallback=False
+    )
     try:
         db_search_tool.invoke("housing help")
     finally:
@@ -157,7 +173,9 @@ def test_db_search_auto_infers_spanish_tags_for_filtering(monkeypatch, db_search
     assert "immigration" in str(where)
 
 
-def test_db_search_auto_infers_doctor_intent_from_spanish_typo(monkeypatch, db_search_tool, mock_store):
+def test_db_search_auto_infers_doctor_intent_from_spanish_typo(
+    monkeypatch, db_search_tool, mock_store
+):
     mock_store.query_chunks.return_value = []
     monkeypatch.setenv("TAG_FILTER_AUTO_INFER", "true")
 
@@ -173,11 +191,14 @@ def test_db_search_auto_infers_doctor_intent_from_spanish_typo(monkeypatch, db_s
     assert "healthcare providers" in str(where)
 
 
-def test_db_search_uses_supabase_fallback_when_chroma_query_times_out(monkeypatch, mock_embedding_model):
+def test_db_search_uses_supabase_fallback_when_chroma_query_times_out(
+    monkeypatch, mock_embedding_model
+):
     mock_store = Mock()
 
     def _slow_query(**_kwargs):
         import time
+
         time.sleep(1.2)
         return []
 
@@ -206,7 +227,9 @@ def test_db_search_uses_supabase_fallback_when_chroma_query_times_out(monkeypatc
     monkeypatch.setattr(db_search_module, "_SUPABASE_CLIENT", None)
     monkeypatch.setattr(db_search_module, "create_client", lambda _url, _key: mock_supabase)
 
-    tool = create_db_search_tool(mock_store, mock_embedding_model, match_threshold=0.3, match_count=5)
+    tool = create_db_search_tool(
+        mock_store, mock_embedding_model, match_threshold=0.3, match_count=5
+    )
     results = json.loads(tool.invoke("doctor in providence"))
 
     assert len(results) == 1
@@ -269,7 +292,9 @@ def test_db_search_uses_supabase_fallback_when_chroma_fails(monkeypatch, mock_em
     monkeypatch.setattr(db_search_module, "_SUPABASE_CLIENT", None)
     monkeypatch.setattr(db_search_module, "create_client", lambda _url, _key: mock_supabase)
 
-    tool = create_db_search_tool(mock_store, mock_embedding_model, match_threshold=0.3, match_count=5)
+    tool = create_db_search_tool(
+        mock_store, mock_embedding_model, match_threshold=0.3, match_count=5
+    )
     results = json.loads(tool.invoke("housing"))
 
     assert len(results) == 1
@@ -277,18 +302,24 @@ def test_db_search_uses_supabase_fallback_when_chroma_fails(monkeypatch, mock_em
     assert results[0]["similarity"] == pytest.approx(0.91)
 
 
-def test_db_search_returns_empty_when_fallback_disabled_and_chroma_fails(monkeypatch, mock_embedding_model):
+def test_db_search_returns_empty_when_fallback_disabled_and_chroma_fails(
+    monkeypatch, mock_embedding_model
+):
     mock_store = Mock()
     mock_store.query_chunks.side_effect = RuntimeError("chroma unavailable")
 
     monkeypatch.setenv("VECTOR_SYNC_SUPABASE_FALLBACK_READS", "false")
     monkeypatch.setattr(db_search_module, "_SUPABASE_CLIENT", None)
 
-    tool = create_db_search_tool(mock_store, mock_embedding_model, match_threshold=0.3, match_count=5)
+    tool = create_db_search_tool(
+        mock_store, mock_embedding_model, match_threshold=0.3, match_count=5
+    )
     assert tool.invoke("housing") == "[]"
 
 
-def test_db_search_supabase_fallback_uses_legacy_rpc_signature_when_tag_signature_missing(monkeypatch, mock_embedding_model):
+def test_db_search_supabase_fallback_uses_legacy_rpc_signature_when_tag_signature_missing(
+    monkeypatch, mock_embedding_model
+):
     mock_store = Mock()
     mock_store.query_chunks.side_effect = RuntimeError("chroma unavailable")
 
@@ -319,7 +350,9 @@ def test_db_search_supabase_fallback_uses_legacy_rpc_signature_when_tag_signatur
 
     token = set_search_options(tags=["food"], tag_match_mode="all", include_untagged_fallback=False)
     try:
-        tool = create_db_search_tool(mock_store, mock_embedding_model, match_threshold=0.3, match_count=5)
+        tool = create_db_search_tool(
+            mock_store, mock_embedding_model, match_threshold=0.3, match_count=5
+        )
         results = json.loads(tool.invoke("food"))
     finally:
         reset_search_options(token)

@@ -7,14 +7,11 @@ Designed to run as a separate Render free-tier service (512MB limit).
 
 import logging
 import os
-from typing import List
 from pathlib import Path
-from pydantic import BaseModel
-from dotenv import load_dotenv
 
 import numpy as np
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 # Configure logging
@@ -41,8 +38,10 @@ load_dotenv(_PROJECT_ROOT / ".env", override=True)
 _embedding_model = None
 _model_name = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 _provider_name = os.getenv("EMBEDDING_PROVIDER", "huggingface")
-_lock_selection = (os.getenv("EMBEDDING_LOCK", "false").lower() in ["1", "true", "yes"]) 
-_selection_file = os.getenv("EMBEDDING_SELECTION_PATH", str(Path(__file__).parent / "selection.json"))
+_lock_selection = os.getenv("EMBEDDING_LOCK", "false").lower() in ["1", "true", "yes"]
+_selection_file = os.getenv(
+    "EMBEDDING_SELECTION_PATH", str(Path(__file__).parent / "selection.json")
+)
 _auth_token = os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN") or os.getenv("MODAL_API_PROXY_SECRET")
 
 
@@ -125,7 +124,9 @@ def get_embedding_model():
             logger.info("Embedding provider: sentence-transformers")
             logger.info("✅ Embedding model loaded successfully")
         except ModuleNotFoundError as e:
-            logger.warning("sentence_transformers is unavailable (%s). Falling back to FastEmbed.", e)
+            logger.warning(
+                "sentence_transformers is unavailable (%s). Falling back to FastEmbed.", e
+            )
             try:
                 fallback_model = _resolve_fastembed_model_name()
                 _embedding_model = _FastEmbedAdapter(fallback_model)
@@ -147,23 +148,21 @@ def get_embedding_model():
 class EmbedRequest(BaseModel):
     """Single text embedding request."""
 
-    text: str = Field(..., min_length=1, max_length=10000,
-                      description="Text to embed")
+    text: str = Field(..., min_length=1, max_length=10000, description="Text to embed")
 
 
 class BatchEmbedRequest(BaseModel):
     """Batch text embedding request."""
 
-    texts: List[str] = Field(
-        ..., min_items=1, max_items=100, description="List of texts to embed"
+    texts: list[str] = Field(
+        ..., min_length=1, max_length=100, description="List of texts to embed"
     )
 
 
 class EmbeddingResponse(BaseModel):
     """Embedding response with metadata."""
 
-    embedding: List[float] = Field(...,
-                                   description="384-dimensional embedding vector")
+    embedding: list[float] = Field(..., description="384-dimensional embedding vector")
     dimension: int = Field(default=384, description="Embedding dimension")
     model: str = Field(default=_model_name, description="Model used")
 
@@ -171,8 +170,7 @@ class EmbeddingResponse(BaseModel):
 class BatchEmbeddingResponse(BaseModel):
     """Batch embedding response."""
 
-    embeddings: List[List[float]
-                     ] = Field(..., description="List of embedding vectors")
+    embeddings: list[list[float]] = Field(..., description="List of embedding vectors")
     dimension: int = Field(default=384, description="Embedding dimension")
     count: int = Field(..., description="Number of embeddings")
     model: str = Field(default=_model_name, description="Model used")
@@ -202,14 +200,20 @@ def _load_selection_file():
             _model_name = js.get("model", _model_name)
             _lock_selection = bool(js.get("lock", _lock_selection))
             _embedding_model = None  # force reload with new model
-            logger.info(f"Embedding selection loaded: provider={_provider_name}, model={_model_name}, lock={_lock_selection}")
+            logger.info(
+                f"Embedding selection loaded: provider={_provider_name}, model={_model_name}, lock={_lock_selection}"
+            )
     except Exception as e:
         logger.warning(f"Failed to load embedding selection file: {e}")
 
 
 def _save_selection_file(provider: str, model: str, lock: bool | None):
     try:
-        payload = {"provider": provider, "model": model, "lock": _lock_selection if lock is None else bool(lock)}
+        payload = {
+            "provider": provider,
+            "model": model,
+            "lock": _lock_selection if lock is None else bool(lock),
+        }
         Path(_selection_file).parent.mkdir(parents=True, exist_ok=True)
         Path(_selection_file).write_text(__import__("json").dumps(payload, indent=2))
         _load_selection_file()
@@ -242,8 +246,7 @@ async def embed(request: EmbedRequest, http_request: Request):
         raise
     except Exception as e:
         logger.error(f"Error generating embedding: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Embedding error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Embedding error: {str(e)}")
 
 
 # Batch Embeddings
@@ -272,13 +275,14 @@ async def embed_batch(request: BatchEmbedRequest, http_request: Request):
         raise
     except Exception as e:
         logger.error(f"Error generating batch embeddings: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Batch embedding error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Batch embedding error: {str(e)}")
 
 
 # Similarity Search (optional utility)
 @app.post("/similarity")
-async def similarity(query_request: EmbedRequest, texts_request: BatchEmbedRequest, http_request: Request):
+async def similarity(
+    query_request: EmbedRequest, texts_request: BatchEmbedRequest, http_request: Request
+):
     """
     Find most similar texts to a query.
 
@@ -306,17 +310,21 @@ async def similarity(query_request: EmbedRequest, texts_request: BatchEmbedReque
         # Return sorted results
         results = [
             {"text": text, "similarity": float(sim)}
-            for text, sim in zip(texts_request.texts, similarities)
+            for text, sim in zip(texts_request.texts, similarities, strict=False)
         ]
-        results.sort(key=lambda x: x["similarity"], reverse=True)
+
+        def _similarity_key(item: dict[str, object]) -> float:
+            value = item.get("similarity", 0.0)
+            return float(value) if isinstance(value, (int, float)) else 0.0
+
+        results.sort(key=_similarity_key, reverse=True)
 
         return {"query": query_request.text, "results": results}
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error computing similarity: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Similarity error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Similarity error: {str(e)}")
 
 
 # Root endpoint
@@ -369,14 +377,19 @@ async def set_config(sel: EmbeddingSelection, http_request: Request):
     if _lock_selection:
         raise HTTPException(status_code=403, detail="Embedding selection is locked")
     if sel.provider not in {"huggingface", "fastembed"}:
-        raise HTTPException(status_code=400, detail="Only 'huggingface' and 'fastembed' providers are supported")
+        raise HTTPException(
+            status_code=400, detail="Only 'huggingface' and 'fastembed' providers are supported"
+        )
 
     selected_model = sel.model
     if sel.provider == "fastembed" and not selected_model:
         selected_model = os.getenv("FASTEMBED_MODEL", "BAAI/bge-small-en-v1.5")
 
     _save_selection_file(sel.provider, selected_model, sel.lock)
-    return {"status": "ok", "current": {"provider": _provider_name, "model": _model_name, "locked": _lock_selection}}
+    return {
+        "status": "ok",
+        "current": {"provider": _provider_name, "model": _model_name, "locked": _lock_selection},
+    }
 
 
 if __name__ == "__main__":

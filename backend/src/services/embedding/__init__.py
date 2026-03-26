@@ -13,7 +13,7 @@ Endpoints:
 
 Example usage:
   from src.services.embedding.client import create_embedding_client
-  
+
   client = create_embedding_client("http://localhost:8001")
   embedding = client.embed_query("hello world")
   print(embedding)  # [0.123, -0.456, ..., 384-dim vector]

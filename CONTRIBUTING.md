@@ -16,20 +16,17 @@ Thank you for your interest in contributing to Vecinita! This document provides 
 git clone https://github.com/acadiagit/vecinita
 cd vecinita
 
-# Backend
-cd backend
-uv sync
-uv run uvicorn src.agent.main:app --reload
+# Install dependencies
+cd backend && uv sync
+cd ../frontend && npm install
 
-# Frontend (in another terminal)
-cd frontend
-npm install
-npm run dev
+# Start the full stack in tmux
+make dev
 
-# Tests (in another terminal)
-cd tests
-uv sync
-uv run pytest -v
+# Or start services individually
+make dev-backend
+make dev-gateway
+make dev-frontend
 ```
 
 ## Project Structure
@@ -55,14 +52,13 @@ vecinita/
 
 - **Formatter**: Black
 - **Linter**: Ruff
-- **Type Checker**: Pyright
+- **Type Checker**: mypy
 - **Style**: PEP 8
 
 ```bash
-cd backend
-uv run black src tests
-uv run ruff check --fix src tests
-uv run pyright src
+make format-backend
+make lint-backend
+make typecheck-backend
 ```
 
 ### JavaScript/TypeScript (Frontend)
@@ -72,10 +68,32 @@ uv run pyright src
 - **Package Manager**: npm
 
 ```bash
+make format-frontend
+make lint-frontend
+make typecheck-frontend
+
+# Or run frontend scripts directly
 cd frontend
-npm run format      # Format code
-npm run lint        # Check linting
-npm run lint:fix    # Fix linting issues
+npm run format
+npm run format:write
+npm run lint
+npm run lint:fix
+npm run typecheck
+```
+
+### Root Makefile
+
+Use the root Makefile for the common workflows:
+
+```bash
+make help
+make dev
+make lint
+make typecheck
+make format
+make test-unit
+make test-integration
+make test-e2e
 ```
 
 ### Configuration
@@ -87,49 +105,35 @@ npm run lint:fix    # Fix linting issues
 ### Backend Tests
 
 ```bash
-cd backend
-
-# All tests
-uv run pytest
-
-# With coverage
-uv run pytest --cov
-
-# Specific test file
-uv run pytest tests/test_name.py
-
-# Unit tests only
-uv run pytest backend/tests/ -m "not integration"
+make test-backend-unit
+make test-all-integration
+make test-integration-gateway-fast
+make test-integration-gateway-full
 ```
 
 ### Frontend Tests
 
 ```bash
 cd frontend
-
-# All tests
-npm test
-
-# Watch mode
+npm run test:unit
 npm run test:watch
-
-# With coverage
 npm run test:coverage
+
+# Or use Make aliases
+make test-frontend-unit
+make test-frontend-e2e
 ```
 
 ### E2E and Integration Tests
 
 ```bash
-cd tests
+# Cross-stack suites (requires services running)
+make test-cross-integration
+make test-cross-e2e
 
-# All tests (requires backend + frontend running)
-uv run pytest -v
-
-# Integration only
-uv run pytest -v -m integration
-
-# E2E only
-uv run pytest -v -m e2e
+# Aggregate targets
+make test-integration
+make test-e2e
 ```
 
 ## Pull Request Process

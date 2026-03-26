@@ -4,8 +4,9 @@
 # and attempts to fetch one row from a specified table.
 
 import os
-from supabase import create_client, Client
+
 from dotenv import load_dotenv
+from supabase import Client, create_client
 
 # Load environment variables from a .env file in the same directory
 load_dotenv()
@@ -38,7 +39,7 @@ try:
     # 4. Perform a simple query to test the connection
     print(f"Attempting to query table: '{TABLE_TO_QUERY}'...")
     response = supabase.table(TABLE_TO_QUERY).select("*").limit(1).execute()
-    
+
     # 5. Check the response and print the result
     print("✅ Query executed successfully!")
     print("\n--- TEST SUCCEEDED ---")
@@ -49,4 +50,4 @@ except Exception as e:
     print("An error occurred:", e)
     exit(1)
 
-#--end-of-file
+# --end-of-file

@@ -104,7 +104,9 @@ def test_grade_documents_routes_to_rewrite_when_irrelevant(monkeypatch):
 def test_rewrite_question_node_emits_human_message(monkeypatch):
     agent_main = _agent_main_module()
     fake_llm = Mock()
-    fake_llm.invoke.return_value = Mock(content="What housing assistance programs are available in Providence?")
+    fake_llm.invoke.return_value = Mock(
+        content="What housing assistance programs are available in Providence?"
+    )
     monkeypatch.setattr(agent_main, "_get_llm_without_tools", lambda *_args, **_kwargs: fake_llm)
 
     state = {
@@ -263,13 +265,18 @@ def test_is_answer_seeking_query_handles_greetings_and_questions():
     assert agent_main._is_answer_seeking_query("hello", "en") is False
     assert agent_main._is_answer_seeking_query("hola", "es") is False
     assert agent_main._is_answer_seeking_query("What housing programs are available?", "en") is True
-    assert agent_main._is_answer_seeking_query("¿Qué programas de vivienda hay en Providence?", "es") is True
+    assert (
+        agent_main._is_answer_seeking_query("¿Qué programas de vivienda hay en Providence?", "es")
+        is True
+    )
 
 
 def test_parse_db_search_docs_accepts_valid_json_list_only():
     agent_main = _agent_main_module()
 
-    parsed = agent_main._parse_db_search_docs('[{"content":"abc","source_url":"https://example.com"}]')
+    parsed = agent_main._parse_db_search_docs(
+        '[{"content":"abc","source_url":"https://example.com"}]'
+    )
     assert isinstance(parsed, list)
     assert len(parsed) == 1
     assert parsed[0]["source_url"] == "https://example.com"

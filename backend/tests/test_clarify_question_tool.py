@@ -2,8 +2,8 @@
 Unit tests for the clarify_question tool.
 Tests question clarification and follow-up question generation.
 """
+
 import pytest
-from unittest.mock import Mock, patch
 
 from src.agent.tools.clarify_question import clarify_question, create_clarify_question_tool
 
@@ -17,7 +17,7 @@ class TestClarifyQuestion:
         result = clarify_question.invoke(
             {
                 "original_question": "Where's a doctor near me?",
-                "reason_for_clarification": "No matching documents found in database"
+                "reason_for_clarification": "No matching documents found in database",
             }
         )
 
@@ -31,7 +31,7 @@ class TestClarifyQuestion:
         result = clarify_question.invoke(
             {
                 "original_question": "What places are nearby?",
-                "reason_for_clarification": "Need more specific location"
+                "reason_for_clarification": "Need more specific location",
             }
         )
 
@@ -43,7 +43,7 @@ class TestClarifyQuestion:
         result = clarify_question.invoke(
             {
                 "original_question": "What services do you offer?",
-                "reason_for_clarification": "Question is too broad"
+                "reason_for_clarification": "Question is too broad",
             }
         )
 
@@ -55,21 +55,19 @@ class TestClarifyQuestion:
         result = clarify_question.invoke(
             {
                 "original_question": "Tell me about that thing",
-                "reason_for_clarification": "Unclear what you're asking about"
+                "reason_for_clarification": "Unclear what you're asking about",
             }
         )
 
-        assert "context" in result.lower(
-        ) or "detail" in result.lower() or "clarif" in result.lower()
+        assert (
+            "context" in result.lower() or "detail" in result.lower() or "clarif" in result.lower()
+        )
 
     def test_clarify_question_includes_reason(self):
         """Test that clarification includes the reason provided."""
         reason = "Search returned no results"
         result = clarify_question.invoke(
-            {
-                "original_question": "What is this?",
-                "reason_for_clarification": reason
-            }
+            {"original_question": "What is this?", "reason_for_clarification": reason}
         )
 
         assert reason in result
@@ -78,10 +76,7 @@ class TestClarifyQuestion:
         """Test that clarification includes the original question."""
         question = "How do I find a good restaurant?"
         result = clarify_question.invoke(
-            {
-                "original_question": question,
-                "reason_for_clarification": "Need more context"
-            }
+            {"original_question": question, "reason_for_clarification": "Need more context"}
         )
 
         assert question in result
@@ -89,10 +84,7 @@ class TestClarifyQuestion:
     def test_clarify_question_suggests_multiple_options(self):
         """Test that clarification suggests multiple follow-up options."""
         result = clarify_question.invoke(
-            {
-                "original_question": "Where can I get help?",
-                "reason_for_clarification": "Too vague"
-            }
+            {"original_question": "Where can I get help?", "reason_for_clarification": "Too vague"}
         )
 
         # Should have numbered options
@@ -104,7 +96,7 @@ class TestClarifyQuestion:
         result = clarify_question.invoke(
             {
                 "original_question": "Can you help me?",
-                "reason_for_clarification": "Unclear what you need"
+                "reason_for_clarification": "Unclear what you need",
             }
         )
 
@@ -118,7 +110,7 @@ class TestClarifyQuestion:
             {
                 "original_question": "What medical services exist?",
                 "search_context": "Searched: 'medical', 'health', 'services' - no results",
-                "reason_for_clarification": "Database search found 0 documents"
+                "reason_for_clarification": "Database search found 0 documents",
             }
         )
 
@@ -129,7 +121,7 @@ class TestClarifyQuestion:
         tool = create_clarify_question_tool()
 
         # Tool should be callable
-        assert hasattr(tool, 'invoke')
+        assert hasattr(tool, "invoke")
 
         # Tool should be the same as clarify_question
         assert tool is clarify_question
@@ -137,10 +129,7 @@ class TestClarifyQuestion:
     def test_clarify_question_with_empty_question(self):
         """Test clarification handles empty/minimal questions."""
         result = clarify_question.invoke(
-            {
-                "original_question": "",
-                "reason_for_clarification": "No question provided"
-            }
+            {"original_question": "", "reason_for_clarification": "No question provided"}
         )
 
         assert len(result) > 0
@@ -151,7 +140,7 @@ class TestClarifyQuestion:
         result = clarify_question.invoke(
             {
                 "original_question": "Where can I find a doctor for medical issues near me?",
-                "reason_for_clarification": "Need more specific information"
+                "reason_for_clarification": "Need more specific information",
             }
         )
 
@@ -164,7 +153,7 @@ class TestClarifyQuestion:
         result = clarify_question.invoke(
             {
                 "original_question": "What is Vecinita?",
-                "reason_for_clarification": "Need clarification"
+                "reason_for_clarification": "Need clarification",
             }
         )
 
@@ -176,26 +165,19 @@ class TestClarifyQuestion:
         result = clarify_question.invoke(
             {
                 "original_question": "hospital clinic medical center",
-                "reason_for_clarification": "Database search returned 0 results"
+                "reason_for_clarification": "Database search returned 0 results",
             }
         )
 
         # Should suggest healthcare-relevant questions
-        assert "doctor" in result.lower(
-        ) or "medical" in result.lower() or "type" in result.lower()
+        assert "doctor" in result.lower() or "medical" in result.lower() or "type" in result.lower()
 
     def test_clarify_question_consistent_format(self):
         """Test that clarification response has consistent structure."""
-        result1 = clarify_question.invoke(
-            {
-                "original_question": "Question 1?",
-                "reason_for_clarification": "Reason 1"
-            }
+        clarify_question.invoke(
+            {"original_question": "Question 1?", "reason_for_clarification": "Reason 1"}
         )
 
-        result2 = clarify_question.invoke(
-            {
-                "original_question": "Question 2?",
-                "reason_for_clarification": "Reason 2"
-            }
+        clarify_question.invoke(
+            {"original_question": "Question 2?", "reason_for_clarification": "Reason 2"}
         )

@@ -7,11 +7,11 @@ CLI and API ingestion write to the same vector database.
 """
 
 from src.services.scraper.uploader import (  # noqa: F401
-    DatabaseUploader,
-    DocumentChunk,
     EMBEDDING_SERVICE_AVAILABLE,
     FALLBACK_EMBEDDINGS_AVAILABLE,
     SUPABASE_AVAILABLE,
+    DatabaseUploader,
+    DocumentChunk,
     create_client,
 )
 

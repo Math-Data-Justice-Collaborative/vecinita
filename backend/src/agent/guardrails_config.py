@@ -26,9 +26,11 @@ _HUB_INITIALIZED = False
 # Lazy import helpers — graceful degradation if guardrails not installed
 # ---------------------------------------------------------------------------
 
+
 def _try_import_guardrails():
     try:
-        import guardrails as grd  # noqa: F401
+        import guardrails as grd  # type: ignore[import-not-found]  # noqa: F401
+
         return grd
     except Exception as exc:
         logger.warning(
@@ -207,6 +209,7 @@ def _is_topic_relevant(text: str, topic_list: list[str]) -> bool:
 # (Used by agent/graph.py — not wrapped in a Guard class to avoid hard dep)
 # ---------------------------------------------------------------------------
 
+
 class GuardResult:
     """Lightweight result object returned by validate_input / validate_output."""
 
@@ -224,9 +227,25 @@ def _looks_spanish(text: str) -> bool:
     if any(ch in sample for ch in ("¿", "¡", "á", "é", "í", "ó", "ú", "ñ", "ü")):
         return True
     spanish_markers = (
-        " por ", " para ", " necesito ", " ayudame", " ayúdame", " quiero ",
-        " escuela", " niño", " nina", " niña", " futbol", " fútbol", " recursos ",
-        " donde ", " dónde ", " como ", " cómo ", " que ", " qué ",
+        " por ",
+        " para ",
+        " necesito ",
+        " ayudame",
+        " ayúdame",
+        " quiero ",
+        " escuela",
+        " niño",
+        " nina",
+        " niña",
+        " futbol",
+        " fútbol",
+        " recursos ",
+        " donde ",
+        " dónde ",
+        " como ",
+        " cómo ",
+        " que ",
+        " qué ",
     )
     padded = f" {sample} "
     return any(marker in padded for marker in spanish_markers)
@@ -254,10 +273,10 @@ def validate_input(text: str, lang: str | None = None) -> GuardResult:
     """
     from src.config import (
         GUARDRAILS_ENABLED,
-        GUARDRAILS_PROMPT_INJECTION,
         GUARDRAILS_PII,
-        GUARDRAILS_TOPIC_RELEVANCE,
+        GUARDRAILS_PROMPT_INJECTION,
         GUARDRAILS_TOPIC_LIST,
+        GUARDRAILS_TOPIC_RELEVANCE,
     )
 
     if not GUARDRAILS_ENABLED:
@@ -378,8 +397,8 @@ def validate_output(text: str) -> GuardResult:
     """
     from src.config import (
         GUARDRAILS_ENABLED,
-        GUARDRAILS_TOXICITY,
         GUARDRAILS_HALLUCINATION,
+        GUARDRAILS_TOXICITY,
     )
 
     if not GUARDRAILS_ENABLED:
@@ -405,7 +424,9 @@ def validate_output(text: str) -> GuardResult:
             if isinstance(validated_output, str) and validated_output != text:
                 return GuardResult(passed=True, redacted=validated_output)
         except Exception as exc:
-            logger.warning(f"[GUARDRAILS] Hub output validation failed, using local fallback: {exc}")
+            logger.warning(
+                f"[GUARDRAILS] Hub output validation failed, using local fallback: {exc}"
+            )
 
     # 2. Local toxicity fallback
     if GUARDRAILS_TOXICITY and _TOXIC_WORDS.search(text):
@@ -433,7 +454,7 @@ def validate_output(text: str) -> GuardResult:
             logger.warning(
                 "[GUARDRAILS] Source claim without URL in LLM output — potential hallucination."
             )
-            # Soft warning: don't block, but log. 
+            # Soft warning: don't block, but log.
             # To block: return GuardResult(passed=False, reason="...")
 
     return GuardResult(passed=True)

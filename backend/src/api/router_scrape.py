@@ -4,32 +4,27 @@ Unified API Gateway - Scraping Router
 Endpoints for async web scraping with job tracking.
 """
 
-import os
 import asyncio
+import os
 import tempfile
 from pathlib import Path
-from typing import Optional, List
 
 import httpx
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
-from fastapi.responses import JSONResponse
 
+# Import scraper components
+from ..services.scraper.scraper import VecinaScraper
+from ..services.scraper.utils import prepare_scrape_urls
 from .job_manager import job_manager
 from .models import (
     JobStatus,
     LoaderType,
-    ScrapeJob,
+    ScrapeHistoryResponse,
     ScrapeJobResult,
     ScrapeRequest,
     ScrapeResponse,
     ScrapeStatusResponse,
-    ScrapeHistoryResponse,
 )
-
-# Import scraper components
-from ..services.scraper.scraper import VecinaScraper
-from ..services.scraper.uploader import DatabaseUploader
-from ..services.scraper.utils import prepare_scrape_urls
 
 router = APIRouter(prefix="/scrape", tags=["Scraping"])
 
@@ -42,20 +37,20 @@ REINDEX_TRIGGER_TOKEN = os.getenv("REINDEX_TRIGGER_TOKEN", "")
 
 async def background_scrape_task(
     job_id: str,
-    urls: List[str],
+    urls: list[str],
     force_loader: LoaderType,
     stream: bool = False,
 ):
     """
     Background task to perform actual scraping.
-    
+
     Updates job status and result as it progresses.
     Integrates with VecinaScraper for actual web scraping and database upload.
     """
     output_file = None
     failed_log = None
     links_file = None
-    
+
     try:
         # Update status to running
         await job_manager.update_job_status(
@@ -64,15 +59,15 @@ async def background_scrape_task(
             progress_percent=5,
             message="Initializing scraper...",
         )
-        
+
         # Create temporary files for scraper output
         temp_dir = Path(tempfile.gettempdir()) / "vecinita_scraper_jobs"
         temp_dir.mkdir(parents=True, exist_ok=True)
-        
+
         output_file = str(temp_dir / f"job_{job_id}_chunks.jsonl")
         failed_log = str(temp_dir / f"job_{job_id}_failed.log")
         links_file = str(temp_dir / f"job_{job_id}_links.jsonl") if stream else None
-        
+
         # Map LoaderType enum to scraper's force_loader format
         force_loader_map = {
             LoaderType.PLAYWRIGHT: "playwright",
@@ -81,14 +76,14 @@ async def background_scrape_task(
             LoaderType.AUTO: None,  # Let scraper decide
         }
         scraper_force_loader = force_loader_map.get(force_loader)
-        
+
         await job_manager.update_job_status(
             job_id,
             JobStatus.RUNNING,
             progress_percent=10,
             message="Creating scraper instance...",
         )
-        
+
         # Initialize VecinaScraper
         # stream_mode=True uploads chunks immediately to database
         # stream_mode=False saves to file and uploads in batch at end
@@ -98,14 +93,14 @@ async def background_scrape_task(
             links_file=links_file,
             stream_mode=stream,  # Use streaming if requested
         )
-        
+
         await job_manager.update_job_status(
             job_id,
             JobStatus.RUNNING,
             progress_percent=15,
             message=f"Starting to scrape {len(urls)} URLs...",
         )
-        
+
         # Perform actual scraping
         # This will:
         # - Load each URL with appropriate loader
@@ -117,15 +112,15 @@ async def background_scrape_task(
             urls,
             scraper_force_loader,
         )
-        
+
         # Calculate progress based on completion
         progress = 70 + int((successful + failed) / total_urls * 20) if total_urls > 0 else 90
-        
+
         await job_manager.update_job_status(
             job_id,
             JobStatus.RUNNING,
             progress_percent=progress,
-            message=f"Scraping complete. Processing results...",
+            message="Scraping complete. Processing results...",
         )
 
         await job_manager.update_job_status(
@@ -136,13 +131,13 @@ async def background_scrape_task(
         )
 
         await asyncio.to_thread(scraper.finalize)
-        
+
         # Build failed URLs log
         failed_urls_log = {}
         if scraper.failed_sources:
             for url, error in scraper.failed_sources.items():
                 failed_urls_log[url] = error
-        
+
         # Extract results
         result = ScrapeJobResult(
             total_chunks=scraper.stats.get("total_chunks", 0),
@@ -150,19 +145,19 @@ async def background_scrape_task(
             failed_urls=list(scraper.failed_sources.keys()),
             failed_urls_log=failed_urls_log,
         )
-        
+
         await job_manager.set_job_result(job_id, result)
-        
+
         # Determine final status message
         chunks_count = scraper.stats.get("total_chunks", 0)
         uploads_count = scraper.stats.get("total_uploads", 0)
         failed_uploads = scraper.stats.get("failed_uploads", 0)
-        
+
         if stream:
             message = f"Completed: {chunks_count} chunks from {len(scraper.successful_sources)} URLs ({uploads_count} uploaded, {failed_uploads} failed uploads)"
         else:
             message = f"Completed: {chunks_count} chunks from {len(scraper.successful_sources)} URLs ({uploads_count} uploaded, {failed_uploads} failed uploads)"
-        
+
         await job_manager.update_job_status(
             job_id,
             JobStatus.COMPLETED,
@@ -173,15 +168,16 @@ async def background_scrape_task(
     except Exception as e:
         # Mark job as failed with error details
         import traceback
+
         error_detail = f"{str(e)}\n{traceback.format_exc()}"
-        
+
         await job_manager.update_job_status(
             job_id,
             JobStatus.FAILED,
             error=error_detail,
             message=f"Scraping failed: {str(e)}",
         )
-    
+
     finally:
         # Cleanup: Remove temporary files after job completion
         # Keep them for a while in case of debugging needs
@@ -196,16 +192,16 @@ async def submit_scrape_request(
 ) -> ScrapeResponse:
     """
     Submit a web scraping job.
-    
+
     Validates URLs, creates job, starts background scraping, returns job ID.
-    
+
     Args:
         request: ScrapeRequest with URLs and options
         background_tasks: FastAPI background tasks
-        
+
     Returns:
         ScrapeResponse with job_id and status
-        
+
     Raises:
         HTTPException: If URL count exceeds limit or validation fails
     """
@@ -264,25 +260,26 @@ async def list_scrape_history(
 ) -> ScrapeHistoryResponse:
     """
     List scraping job history.
-    
+
     Returns most recent jobs first.
-    
+
     Args:
         limit: Number of results to return
         offset: Number of results to skip
-        
+
     Returns:
         List of jobs from history
     """
     jobs, total = await job_manager.list_jobs(limit=limit, offset=offset)
-    return ScrapeHistoryResponse(jobs=jobs, total=total)
+    page = (offset // limit) + 1
+    return ScrapeHistoryResponse(jobs=jobs, total=total, page=page, limit=limit)
 
 
 @router.get("/stats")
 async def get_scrape_stats():
     """
     Get scraping subsystem statistics.
-    
+
     Returns:
         Stats about jobs, resource usage, etc.
     """
@@ -294,10 +291,10 @@ async def get_scrape_stats():
 async def cleanup_old_jobs():
     """
     Cleanup old jobs from history.
-    
+
     Removes jobs older than retention period.
     Admin endpoint.
-    
+
     Returns:
         Number of jobs deleted
     """
@@ -349,13 +346,13 @@ async def trigger_reindex(
 async def get_scrape_status(job_id: str) -> ScrapeStatusResponse:
     """
     Get status of a scraping job.
-    
+
     Args:
         job_id: Job identifier
-        
+
     Returns:
         Complete job information with status and progress
-        
+
     Raises:
         HTTPException: If job not found
     """
@@ -370,13 +367,13 @@ async def get_scrape_status(job_id: str) -> ScrapeStatusResponse:
 async def cancel_scrape_job(job_id: str):
     """
     Cancel a running scraping job.
-    
+
     Args:
         job_id: Job identifier
-        
+
     Returns:
         Status update response
-        
+
     Raises:
         HTTPException: If job cannot be cancelled
     """
@@ -388,4 +385,6 @@ async def cancel_scrape_job(job_id: str):
         )
 
     job = await job_manager.get_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
     return ScrapeStatusResponse(job=job)

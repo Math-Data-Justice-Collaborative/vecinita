@@ -8,9 +8,9 @@ Exports:
 """
 
 from .faq_loader import (
+    get_faq_stats,
     load_faqs_from_markdown,
     reload_faqs,
-    get_faq_stats,
 )
 from .html_cleaner import HTMLCleaner
 from .supabase_embeddings import SupabaseEmbeddings

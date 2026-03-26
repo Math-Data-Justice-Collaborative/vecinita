@@ -3,9 +3,10 @@
 Test script demonstrating the HTML cleaner functionality.
 """
 
-from src.utils import HTMLCleaner
 import sys
 from pathlib import Path
+
+from src.utils import HTMLCleaner
 
 # Ensure src is on sys.path before importing
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -15,19 +16,19 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 USCIS_EXAMPLE = """
   </div></div>
       </div>
-    
+
     <br><p>This office profile was last updated at 2023-07-07 08:16:42</p>
           </div>
-      
+
                 </div>
-  
-  
-    
+
+
+
               <div class="reviewed-date">
     <div class="reviewed-date__label">Last Reviewed/Updated:</div>
                 <div class="field field--name-field-display-date field__item"><time datetime="2025-04-10T23:26:06Z" class="datetime">04/10/2025</time>
 </div>
-      
+
   </div>
 
       </article>
@@ -38,8 +39,8 @@ USCIS_EXAMPLE = """
 
                               </div>
 
-                              
-              
+
+
                 <div id="modal" class="modal page-modal"><div class="modal-content"><div class="modal-footer title-wrap"><div class="heading"><button id="modal-button" class="close" data-toggle="modal" data-dismiss="modal" aria-label="Close to proceed"><i class="fas fa-times" aria-labelledby="modal-button"></i></button><div class="modal-title" data-no-results="No results found." data-load-text="Loading..."></div></div></div><div class="modal-body"></div></div></div>
             </main>
           </div>
@@ -47,9 +48,9 @@ USCIS_EXAMPLE = """
 
               </div>
     </div>
-                                
+
   <div id="footer">
-        
+
 <div class="usa-footer-container">
   <footer class="usa-footer usa-footer--medium" role="contentinfo">
     <div class="grid-container usa-footer__return-to-top">
@@ -72,11 +73,11 @@ USCIS_EXAMPLE = """
                       </ul>
                  </nav>
                </div>
-             
+
                      </div>
                                </div>
        </div>
-                            
+
         <div class="usa-footer__intermediate-section">
           <div class="grid-container">
 
@@ -86,7 +87,7 @@ USCIS_EXAMPLE = """
                   <img class="usa-footer__logo-img" src="/sites/default/files/USCIS_Signature_Preferred_FC.png" alt="U.S. Department of Homeland Security Seal, U.S. Citizenship and Immigration Services">
               </div>
                               </div>
-                                              
+
                 <div class="usa-footer__contact-links mobile-lg:grid-col-6">
                   <div class="usa-footer__social-links grid-row grid-gap-1">
                                                                   <div class="grid-col-auto">
@@ -116,10 +117,10 @@ USCIS_EXAMPLE = """
                   </address>
                 </div>
                           </div>
-          
+
           </div>
         </div>
-      
+
     <div class="usa-footer__secondary-section">
       <div class="grid-container">
         <div class="grid-row grid-gap">
@@ -150,8 +151,8 @@ USCIS_EXAMPLE = """
 
     <div class="region region-footer_third">
       <div id="block-qualtrics">
-    
-        
+
+
                       <div class="clearfix text-formatted field field--name-body field__item"><!--BEGIN QUALTRICS WEBSITE FEEDBACK SNIPPET--><script type="text/javascript">
 (function(){var g=function(e,h,f,g){
 this.get=function(a){for(var a=a+"=",c=document.cookie.split(";"),b=0,e=c.length;b<e;b++){for(var d=c[b];" "==d.charAt(0);)d=d.substring(1,d.length);if(0==d.indexOf(a))return d.substring(a.length,d.length)}return null};
@@ -163,7 +164,7 @@ try{(new g(100,"r","QSI_S_ZN_3WrTsyl9WWQdlxb","https://zn3wrtsyl9wwqdlxb-uscisom
 </script>
 <div id="ZN_3WrTsyl9WWQdlxb"><!--DO NOT REMOVE-CONTENTS PLACED HERE--></div>
 <!--END WEBSITE FEEDBACK SNIPPET--></div>
-      
+
       </div>
 
   </div>
@@ -172,7 +173,7 @@ try{(new g(100,"r","QSI_S_ZN_3WrTsyl9WWQdlxb","https://zn3wrtsyl9wwqdlxb-uscisom
 
   </div>
 
-    
+
     <script src="/core/assets/vendor/jquery/jquery.min.js?v=4.0.0-rc.1"></script>
 """
 
@@ -197,7 +198,9 @@ def test_html_cleaner():
         print("[EMPTY - All content was boilerplate/noise]")
     print("-" * 70)
     print(f"\n📊 Reduction: {len(USCIS_EXAMPLE)} → {len(cleaned)} characters")
-    print(f"   Removed: {len(USCIS_EXAMPLE) - len(cleaned)} characters ({100 * (len(USCIS_EXAMPLE) - len(cleaned)) / len(USCIS_EXAMPLE):.1f}%)")
+    print(
+        f"   Removed: {len(USCIS_EXAMPLE) - len(cleaned)} characters ({100 * (len(USCIS_EXAMPLE) - len(cleaned)) / len(USCIS_EXAMPLE):.1f}%)"
+    )
 
 
 if __name__ == "__main__":

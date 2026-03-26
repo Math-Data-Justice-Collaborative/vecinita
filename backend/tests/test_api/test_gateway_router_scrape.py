@@ -3,9 +3,11 @@ Unit tests for src/gateway/router_scrape.py
 
 Tests async scraping endpoints and job management.
 """
+
 import asyncio
+from unittest.mock import AsyncMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
 from fastapi.testclient import TestClient
 
 pytestmark = pytest.mark.unit
@@ -14,7 +16,7 @@ pytestmark = pytest.mark.unit
 @pytest.fixture
 def scrape_client(env_vars, monkeypatch):
     """Create a test client with scrape router included.
-    
+
     Mocks background_scrape_task to prevent jobs from immediately completing.
     In TestClient, background tasks run synchronously, so we need to mock them
     to test the initial 'queued' state.
@@ -24,16 +26,18 @@ def scrape_client(env_vars, monkeypatch):
 
     # Reset shared in-memory job state between tests
     from src.api.job_manager import job_manager
+
     job_manager.jobs.clear()
 
     # Mock background task to prevent immediate job completion
     # This allows us to test the 'queued' state
     with patch("src.api.router_scrape.background_scrape_task") as mock_bg_task:
         mock_bg_task.return_value = AsyncMock()
-        
+
         from src.api.main import app
+
         client = TestClient(app)
-        
+
         yield client
 
 
@@ -42,10 +46,7 @@ class TestScrapeSubmitEndpoint:
 
     def test_submit_scrape_single_url(self, scrape_client):
         """Test submitting a scrape job with single URL."""
-        response = scrape_client.post(
-            "/api/v1/scrape",
-            json={"urls": ["https://example.com"]}
-        )
+        response = scrape_client.post("/api/v1/scrape", json={"urls": ["https://example.com"]})
         assert response.status_code == 200
         data = response.json()
         assert data["job_id"] is not None
@@ -59,10 +60,7 @@ class TestScrapeSubmitEndpoint:
             "https://example.com/page2",
             "https://example.com/page3",
         ]
-        response = scrape_client.post(
-            "/api/v1/scrape",
-            json={"urls": urls}
-        )
+        response = scrape_client.post("/api/v1/scrape", json={"urls": urls})
         assert response.status_code == 200
         data = response.json()
         assert data["job_id"] is not None
@@ -70,48 +68,31 @@ class TestScrapeSubmitEndpoint:
     def test_submit_scrape_with_loader(self, scrape_client):
         """Test submitting scrape with specific loader."""
         response = scrape_client.post(
-            "/api/v1/scrape",
-            json={
-                "urls": ["https://example.com"],
-                "force_loader": "playwright"
-            }
+            "/api/v1/scrape", json={"urls": ["https://example.com"], "force_loader": "playwright"}
         )
         assert response.status_code == 200
 
     def test_submit_scrape_with_stream(self, scrape_client):
         """Test submitting scrape with streaming enabled."""
         response = scrape_client.post(
-            "/api/v1/scrape",
-            json={
-                "urls": ["https://example.com"],
-                "stream": True
-            }
+            "/api/v1/scrape", json={"urls": ["https://example.com"], "stream": True}
         )
         assert response.status_code == 200
 
     def test_submit_scrape_missing_urls(self, scrape_client):
         """Test that submitting without URLs fails."""
-        response = scrape_client.post(
-            "/api/v1/scrape",
-            json={}
-        )
+        response = scrape_client.post("/api/v1/scrape", json={})
         assert response.status_code == 422
 
     def test_submit_scrape_empty_urls(self, scrape_client):
         """Test that submitting with empty URLs list fails."""
-        response = scrape_client.post(
-            "/api/v1/scrape",
-            json={"urls": []}
-        )
+        response = scrape_client.post("/api/v1/scrape", json={"urls": []})
         # Pydantic validation returns 422 (Unprocessable Entity), not 400
         assert response.status_code == 422
 
     def test_submit_scrape_invalid_url_format(self, scrape_client):
         """Test that invalid URL format is rejected."""
-        response = scrape_client.post(
-            "/api/v1/scrape",
-            json={"urls": ["not-a-url"]}
-        )
+        response = scrape_client.post("/api/v1/scrape", json={"urls": ["not-a-url"]})
         # Endpoint validation returns 400 (custom business logic validation)
         assert response.status_code == 400
 
@@ -119,19 +100,13 @@ class TestScrapeSubmitEndpoint:
         """Test that too many URLs are rejected."""
         # Create 101 URLs (max is 100)
         urls = [f"https://example.com/{i}" for i in range(101)]
-        response = scrape_client.post(
-            "/api/v1/scrape",
-            json={"urls": urls}
-        )
+        response = scrape_client.post("/api/v1/scrape", json={"urls": urls})
         # Endpoint validation returns 400 (custom business logic validation)
         assert response.status_code == 400
 
     def test_submit_scrape_returns_job_id(self, scrape_client):
         """Test that response includes job ID."""
-        response = scrape_client.post(
-            "/api/v1/scrape",
-            json={"urls": ["https://example.com"]}
-        )
+        response = scrape_client.post("/api/v1/scrape", json={"urls": ["https://example.com"]})
         data = response.json()
         # Job ID should be a non-empty string (UUID format)
         assert isinstance(data["job_id"], str)
@@ -147,7 +122,7 @@ class TestScrapeSubmitEndpoint:
                     "https://example.com/path",
                     "https://github.com/user/repo/blob/main/file.csv",
                 ]
-            }
+            },
         )
         assert response.status_code == 200
         job_id = response.json()["job_id"]
@@ -167,10 +142,7 @@ class TestScrapeStatusEndpoint:
     def test_get_scrape_status_queued(self, scrape_client):
         """Test getting status of queued job."""
         # First submit a job
-        response = scrape_client.post(
-            "/api/v1/scrape",
-            json={"urls": ["https://example.com"]}
-        )
+        response = scrape_client.post("/api/v1/scrape", json={"urls": ["https://example.com"]})
         job_id = response.json()["job_id"]
 
         # Get status
@@ -188,8 +160,7 @@ class TestScrapeStatusEndpoint:
     def test_get_scrape_status_includes_metadata(self, scrape_client):
         """Test that job status includes metadata."""
         response = scrape_client.post(
-            "/api/v1/scrape",
-            json={"urls": ["https://example.com", "https://example.org"]}
+            "/api/v1/scrape", json={"urls": ["https://example.com", "https://example.org"]}
         )
         job_id = response.json()["job_id"]
 
@@ -203,10 +174,7 @@ class TestScrapeStatusEndpoint:
 
     def test_get_scrape_status_includes_progress(self, scrape_client):
         """Test that status includes progress percentage."""
-        response = scrape_client.post(
-            "/api/v1/scrape",
-            json={"urls": ["https://example.com"]}
-        )
+        response = scrape_client.post("/api/v1/scrape", json={"urls": ["https://example.com"]})
         job_id = response.json()["job_id"]
 
         response = scrape_client.get(f"/api/v1/scrape/{job_id}")
@@ -232,10 +200,7 @@ class TestScrapeHistoryEndpoint:
         """Test getting history with multiple jobs."""
         # Submit 3 jobs
         for i in range(3):
-            scrape_client.post(
-                "/api/v1/scrape",
-                json={"urls": [f"https://example.com/{i}"]}
-            )
+            scrape_client.post("/api/v1/scrape", json={"urls": [f"https://example.com/{i}"]})
 
         response = scrape_client.get("/api/v1/scrape/history")
         assert response.status_code == 200
@@ -247,10 +212,7 @@ class TestScrapeHistoryEndpoint:
         """Test history pagination."""
         # Submit 25 jobs
         for i in range(25):
-            scrape_client.post(
-                "/api/v1/scrape",
-                json={"urls": [f"https://example.com/{i}"]}
-            )
+            scrape_client.post("/api/v1/scrape", json={"urls": [f"https://example.com/{i}"]})
 
         # Request first page
         response = scrape_client.get("/api/v1/scrape/history?limit=10&offset=0")
@@ -269,8 +231,7 @@ class TestScrapeHistoryEndpoint:
         job_ids = []
         for i in range(3):
             response = scrape_client.post(
-                "/api/v1/scrape",
-                json={"urls": [f"https://example.com/{i}"]}
+                "/api/v1/scrape", json={"urls": [f"https://example.com/{i}"]}
             )
             job_ids.append(response.json()["job_id"])
 
@@ -286,10 +247,7 @@ class TestScrapeCancelEndpoint:
 
     def test_cancel_scrape_job(self, scrape_client):
         """Test cancelling a scrape job."""
-        response = scrape_client.post(
-            "/api/v1/scrape",
-            json={"urls": ["https://example.com"]}
-        )
+        response = scrape_client.post("/api/v1/scrape", json={"urls": ["https://example.com"]})
         job_id = response.json()["job_id"]
 
         response = scrape_client.post(f"/api/v1/scrape/{job_id}/cancel")
@@ -304,10 +262,7 @@ class TestScrapeCancelEndpoint:
 
     def test_cancel_job_sets_cancelled_timestamp(self, scrape_client):
         """Test that cancelled timestamp is set."""
-        response = scrape_client.post(
-            "/api/v1/scrape",
-            json={"urls": ["https://example.com"]}
-        )
+        response = scrape_client.post("/api/v1/scrape", json={"urls": ["https://example.com"]})
         job_id = response.json()["job_id"]
 
         scrape_client.post(f"/api/v1/scrape/{job_id}/cancel")
@@ -334,10 +289,7 @@ class TestScrapeStatsEndpoint:
         """Test that stats reflect submitted jobs."""
         # Submit jobs
         for i in range(5):
-            scrape_client.post(
-                "/api/v1/scrape",
-                json={"urls": [f"https://example.com/{i}"]}
-            )
+            scrape_client.post("/api/v1/scrape", json={"urls": [f"https://example.com/{i}"]})
 
         response = scrape_client.get("/api/v1/scrape/stats")
         data = response.json()
@@ -424,11 +376,7 @@ class TestScrapeErrorHandling:
     def test_invalid_loader_type(self, scrape_client):
         """Test error with invalid loader type."""
         response = scrape_client.post(
-            "/api/v1/scrape",
-            json={
-                "urls": ["https://example.com"],
-                "force_loader": "invalid_type"
-            }
+            "/api/v1/scrape", json={"urls": ["https://example.com"], "force_loader": "invalid_type"}
         )
         # Validation error
         assert response.status_code == 422
@@ -436,9 +384,7 @@ class TestScrapeErrorHandling:
     def test_malformed_json(self, scrape_client):
         """Test error with malformed JSON."""
         response = scrape_client.post(
-            "/api/v1/scrape",
-            content="not json",
-            headers={"Content-Type": "application/json"}
+            "/api/v1/scrape", content="not json", headers={"Content-Type": "application/json"}
         )
         assert response.status_code == 422
 

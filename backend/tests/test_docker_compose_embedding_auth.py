@@ -1,6 +1,7 @@
 """Regression tests for mandatory embedding auth in production compose."""
 
 from pathlib import Path
+
 import yaml
 
 
@@ -27,4 +28,6 @@ def test_prod_compose_sets_embedding_auth_token_for_required_services():
                 for item in environment
             )
 
-        assert has_token, f"Service '{service_name}' is missing EMBEDDING_SERVICE_AUTH_TOKEN in environment"
+        assert (
+            has_token
+        ), f"Service '{service_name}' is missing EMBEDDING_SERVICE_AUTH_TOKEN in environment"

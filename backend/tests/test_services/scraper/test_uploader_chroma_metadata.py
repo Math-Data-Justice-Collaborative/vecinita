@@ -1,8 +1,8 @@
 import sys
 import types
+from unittest.mock import Mock, patch
 
 import pytest
-from unittest.mock import Mock, patch
 
 # Avoid importing heavy optional crypto dependencies through src.utils.__init__
 if "src.utils.supabase_embeddings" not in sys.modules:
@@ -20,7 +20,11 @@ pytestmark = pytest.mark.unit
 
 
 def _make_uploader():
-    with patch.object(DatabaseUploader, "_init_embeddings"), patch.object(DatabaseUploader, "_init_supabase"), patch.object(DatabaseUploader, "_init_deepseek_tagger"):
+    with (
+        patch.object(DatabaseUploader, "_init_embeddings"),
+        patch.object(DatabaseUploader, "_init_supabase"),
+        patch.object(DatabaseUploader, "_init_deepseek_tagger"),
+    ):
         uploader = DatabaseUploader(use_local_embeddings=False)
     uploader.chroma_store = Mock()
     uploader.chroma_store.list_sources.return_value = []
@@ -173,7 +177,9 @@ def test_upload_chunks_uses_deepseek_json_fallback_when_response_format_unavaila
     uploader = _make_uploader()
     uploader._generate_embeddings = Mock(return_value=[[0.1, 0.2, 0.3]])
     uploader.chroma_store.upsert_chunks = Mock(return_value=1)
-    uploader.deepseek_tagger = Mock(invoke=Mock(side_effect=Exception("response_format type unavailable")))
+    uploader.deepseek_tagger = Mock(
+        invoke=Mock(side_effect=Exception("response_format type unavailable"))
+    )
     uploader.deepseek_raw_model = Mock(
         invoke=Mock(
             return_value=Mock(
@@ -236,8 +242,14 @@ def test_init_tagger_uses_groq_when_deepseek_unavailable(monkeypatch):
     monkeypatch.setenv("GROQ_API_KEY", "test-groq-key")
     monkeypatch.setenv("GROQ_TAG_MODEL", "llama-3.1-8b-instant")
 
-    with patch.object(DatabaseUploader, "_init_embeddings"), patch.object(DatabaseUploader, "_init_supabase"):
-        with patch("src.services.scraper.uploader.GROQ_TAGGING_AVAILABLE", True), patch("src.services.scraper.uploader.ChatGroq") as mock_chat_groq:
+    with (
+        patch.object(DatabaseUploader, "_init_embeddings"),
+        patch.object(DatabaseUploader, "_init_supabase"),
+    ):
+        with (
+            patch("src.services.scraper.uploader.GROQ_TAGGING_AVAILABLE", True),
+            patch("src.services.scraper.uploader.ChatGroq") as mock_chat_groq,
+        ):
             llm = Mock()
             structured_tagger = Mock()
             llm.with_structured_output.return_value = structured_tagger

@@ -8,7 +8,7 @@ embedding service instead of loading models locally.
 import logging
 import os
 import subprocess
-from typing import List
+from typing import cast
 from urllib.parse import urlparse, urlunparse
 
 import httpx
@@ -40,14 +40,18 @@ class EmbeddingServiceClient(Embeddings):
         """
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
-        self.auth_token = auth_token or os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN") or os.getenv("MODAL_API_PROXY_SECRET")
+        self.auth_token = (
+            auth_token
+            or os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
+            or os.getenv("MODAL_API_PROXY_SECRET")
+        )
         headers = {}
         if self.auth_token:
             headers["x-embedding-service-token"] = self.auth_token
         self.client = httpx.Client(timeout=timeout, headers=headers)
         logger.info(f"✅ Embedding Service Client initialized: {self.base_url}")
 
-    def _candidate_base_urls(self) -> List[str]:
+    def _candidate_base_urls(self) -> list[str]:
         """Return ordered base URLs to try for embedding requests."""
         candidates = [self.base_url]
 
@@ -84,7 +88,9 @@ class EmbeddingServiceClient(Embeddings):
 
         Activated only when enough context is present via environment variables.
         """
-        service_name = os.getenv("EMBEDDING_CLOUD_RUN_SERVICE") or os.getenv("CLOUD_RUN_EMBED_SERVICE")
+        service_name = os.getenv("EMBEDDING_CLOUD_RUN_SERVICE") or os.getenv(
+            "CLOUD_RUN_EMBED_SERVICE"
+        )
         project = os.getenv("GCP_PROJECT_ID") or os.getenv("PROJECT_ID")
         region = os.getenv("GCP_REGION") or os.getenv("REGION")
 
@@ -164,7 +170,7 @@ class EmbeddingServiceClient(Embeddings):
             "Ensure EMBEDDING_SERVICE_URL is reachable and the embedding service is running."
         ) from last_error
 
-    def embed_query(self, text: str) -> List[float]:
+    def embed_query(self, text: str) -> list[float]:
         """
         Generate embedding for a single query text.
 
@@ -176,12 +182,15 @@ class EmbeddingServiceClient(Embeddings):
         """
         try:
             response = self._post_with_fallback("/embed", {"text": text})
-            return response.json()["embedding"]
+            payload = response.json()
+            if isinstance(payload, dict):
+                return cast(list[float], payload.get("embedding", []))
+            return []
         except Exception as e:
             logger.error(f"❌ Error calling embedding service: {e}")
             raise
 
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
         """
         Generate embeddings for multiple documents (batch).
 
@@ -196,16 +205,19 @@ class EmbeddingServiceClient(Embeddings):
                 response = self._post_with_fallback("/embed-batch", {"texts": texts})
             except Exception:
                 response = self._post_with_fallback("/embed/batch", {"texts": texts})
-            return response.json()["embeddings"]
+            payload = response.json()
+            if isinstance(payload, dict):
+                return cast(list[list[float]], payload.get("embeddings", []))
+            return []
         except Exception as e:
             logger.error(f"❌ Error calling embedding service: {e}")
             raise
 
-    async def aembed_query(self, text: str) -> List[float]:
+    async def aembed_query(self, text: str) -> list[float]:
         """Async version of embed_query (delegates to sync for now)."""
         return self.embed_query(text)
 
-    async def aembed_documents(self, texts: List[str]) -> List[List[float]]:
+    async def aembed_documents(self, texts: list[str]) -> list[list[float]]:
         """Async version of embed_documents (delegates to sync for now)."""
         return self.embed_documents(texts)
 

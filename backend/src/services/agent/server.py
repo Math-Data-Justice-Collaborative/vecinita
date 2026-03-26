@@ -5,12 +5,12 @@ This module re-exports canonical symbols so legacy paths continue to work
 while the codebase is migrated to the flatter structure.
 """
 
-from src.agent.main import *  # noqa: F401,F403
 from src.agent import main as _canonical
+from src.agent.main import *  # noqa: F401,F403
 
 # Legacy tests and patch points still reference ChatGroq on this module.
 if not hasattr(_canonical, "ChatGroq") and hasattr(_canonical, "ChatOllama"):
-    ChatGroq = _canonical.ChatOllama  # type: ignore[misc]
+    ChatGroq = _canonical.ChatOllama
 
 
 def _export_private_symbol(name: str) -> None:

@@ -55,6 +55,7 @@ dependencies = [
     "fastembed>=0.7.4",
     "transformers>=4.55.4",
     "docker>=7.1.0",
+    "types-requests>=2.32.4.20260324",
 ]
 
 [project.optional-dependencies]
@@ -201,7 +202,7 @@ filterwarnings = [
 
 [tool.black]
 line-length = 100
-target-version = ["py310", "py311", "py312"]
+target-version = ["py310"]
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -220,6 +221,8 @@ extend-exclude = '''
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+
+[tool.ruff.lint]
 select = [
     "E",   # pycodestyle errors
     "W",   # pycodestyle warnings
@@ -233,13 +236,18 @@ ignore = [
     "E501",  # line too long (handled by black)
     "B008",  # do not perform function calls in argument defaults
     "C901",  # too complex
+    "B904",  # legacy exception wrapping patterns; migrate incrementally
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
+"src/api/main.py" = ["E402"]
+"src/services/db/security.py" = ["E402"]
+"src/test_faq.py" = ["E402"]
 
 [tool.mypy]
 python_version = "3.10"
+explicit_package_bases = true
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
@@ -274,18 +282,6 @@ source = ["src"]
 
 [tool.coverage.report]
 omit = [
-    "src/cli/*",
-    "src/cli/**",
-    "src/test_faq.py",
-    "src/agent/main.py",
-    "src/agent/guardrails_config.py",
-    "src/api/dependencies.py",
-    "src/api/middleware.py",
-    "src/api/rate_limiter.py",
-    "src/api/router_documents.py",
-    "src/embedding_service/modal_app.py",
-    "src/scraper/cli.py",
-    "src/utils/faq_loader.py",
 ]
 
 [tool.uv]

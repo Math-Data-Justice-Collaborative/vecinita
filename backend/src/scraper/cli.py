@@ -12,7 +12,7 @@ Usage:
     python -m src.scraper.cli --clean
     python -m src.scraper.cli --verbose
     python -m src.scraper.cli --clean --verbose
-    
+
 Or after installation:
     vecinita-scrape
     vecinita-scrape --clean
@@ -20,17 +20,18 @@ Or after installation:
 """
 
 import argparse
+import logging
 import os
+import shutil
 import subprocess
 import sys
-import logging
-from pathlib import Path
 from datetime import datetime
-from typing import Optional
-import shutil
-import docker
-from docker.errors import DockerException, NotFound, APIError
+from pathlib import Path
+
+import docker  # type: ignore[import-untyped]
+from docker.errors import APIError, DockerException, NotFound  # type: ignore[import-untyped]
 from dotenv import load_dotenv
+
 from src.scraper.utils import prepare_scrape_urls
 
 # --- Color codes for terminal output ---
@@ -38,15 +39,16 @@ from src.scraper.utils import prepare_scrape_urls
 
 class Colors:
     """ANSI color codes for terminal output."""
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
 
 
 class ColoredFormatter(logging.Formatter):
@@ -70,6 +72,7 @@ class ColoredFormatter(logging.Formatter):
 # --- Configuration ---
 class Config:
     """Pipeline configuration."""
+
     CHUNK_FILE = Path("data/new_content_chunks.txt")
     LINKS_FILE = Path("data/extracted_links.txt")
     MAIN_URL_FILE = Path("data/urls.txt")
@@ -97,7 +100,7 @@ def setup_logging(verbose: bool = False) -> logging.Logger:
     Returns:
         Configured logger instance
     """
-    logger = logging.getLogger('vecinita_pipeline')
+    logger = logging.getLogger("vecinita_pipeline")
     logger.setLevel(logging.DEBUG)
 
     # Remove existing handlers
@@ -106,24 +109,18 @@ def setup_logging(verbose: bool = False) -> logging.Logger:
     # Console handler with colors
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.DEBUG if verbose else logging.INFO)
-    console_formatter = ColoredFormatter(
-        '%(levelname)s | %(message)s'
-    )
+    console_formatter = ColoredFormatter("%(levelname)s | %(message)s")
     console_handler.setFormatter(console_formatter)
     logger.addHandler(console_handler)
 
     # File handler (always verbose)
-    log_file = Path('logs')
+    log_file = Path("logs")
     log_file.mkdir(exist_ok=True)
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    file_handler = logging.FileHandler(
-        log_file / f'pipeline_{timestamp}.log',
-        encoding='utf-8'
-    )
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    file_handler = logging.FileHandler(log_file / f"pipeline_{timestamp}.log", encoding="utf-8")
     file_handler.setLevel(logging.DEBUG)
     file_formatter = logging.Formatter(
-        '%(asctime)s | %(levelname)-8s | %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
+        "%(asctime)s | %(levelname)-8s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
     )
     file_handler.setFormatter(file_formatter)
     logger.addHandler(file_handler)
@@ -155,12 +152,7 @@ def run_command(cmd: list, logger: logging.Logger, description: str) -> tuple[bo
     logger.debug(f"Running command: {' '.join(cmd)}")
 
     try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            check=True
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
         if result.stdout:
             logger.debug(f"Command output:\n{result.stdout}")
@@ -178,8 +170,7 @@ def run_command(cmd: list, logger: logging.Logger, description: str) -> tuple[bo
         return False, e.stderr
 
     except FileNotFoundError:
-        logger.error(
-            f"{Colors.FAIL}✗{Colors.ENDC} Command not found: {cmd[0]}")
+        logger.error(f"{Colors.FAIL}✗{Colors.ENDC} Command not found: {cmd[0]}")
         return False, "Command not found"
 
 
@@ -202,8 +193,9 @@ def clean_database(logger: logging.Logger, no_confirm: bool = False) -> bool:
     if not no_confirm:
         try:
             response = input(
-                f"{Colors.WARNING}Are you sure you want to continue? (y/n): {Colors.ENDC}")
-            if response.lower() not in ['y', 'yes']:
+                f"{Colors.WARNING}Are you sure you want to continue? (y/n): {Colors.ENDC}"
+            )
+            if response.lower() not in ["y", "yes"]:
                 logger.info("Operation cancelled by user.")
                 return False
         except KeyboardInterrupt:
@@ -214,9 +206,11 @@ def clean_database(logger: logging.Logger, no_confirm: bool = False) -> bool:
 
     # Use Python database CLI instead of psql
     cmd = [
-        sys.executable, '-m', 'src.agent.utils.db_cli',
-        'truncate',
-        '--no-confirm',  # We already confirmed above
+        sys.executable,
+        "-m",
+        "src.agent.utils.db_cli",
+        "truncate",
+        "--no-confirm",  # We already confirmed above
     ]
 
     success, _ = run_command(cmd, logger, "Database truncated")
@@ -258,17 +252,17 @@ def clean_old_files(logger: logging.Logger) -> bool:
     try:
         Config.CHUNK_FILE.parent.mkdir(parents=True, exist_ok=True)
         Config.CHUNK_FILE.touch()
-        logger.info(
-            f"{Colors.OKGREEN}✓{Colors.ENDC} Cleaned {cleaned_count} old files")
-        logger.info(
-            f"{Colors.OKGREEN}✓{Colors.ENDC} Created new empty chunk file")
+        logger.info(f"{Colors.OKGREEN}✓{Colors.ENDC} Cleaned {cleaned_count} old files")
+        logger.info(f"{Colors.OKGREEN}✓{Colors.ENDC} Created new empty chunk file")
         return True
     except Exception as e:
         logger.error(f"Failed to create chunk file: {e}")
         return False
 
 
-def run_initial_scrape(logger: logging.Logger, use_stream: bool = False, debug: bool = False) -> bool:
+def run_initial_scrape(
+    logger: logging.Logger, use_stream: bool = False, debug: bool = False
+) -> bool:
     """
     Run the initial scraping with standard loaders.
 
@@ -288,9 +282,8 @@ def run_initial_scrape(logger: logging.Logger, use_stream: bool = False, debug: 
 
     # Count URLs to process
     try:
-        with open(Config.MAIN_URL_FILE, 'r', encoding='utf-8') as f:
-            url_count = sum(1 for line in f if line.strip()
-                            and not line.startswith('#'))
+        with open(Config.MAIN_URL_FILE, encoding="utf-8") as f:
+            url_count: int | str = sum(1 for line in f if line.strip() and not line.startswith("#"))
         logger.info(f"Processing {url_count} URLs from {Config.MAIN_URL_FILE}")
     except Exception as e:
         logger.warning(f"Could not count URLs: {e}")
@@ -298,28 +291,28 @@ def run_initial_scrape(logger: logging.Logger, use_stream: bool = False, debug: 
 
     # Run scraper directly (imported) instead of subprocess for better logging
     try:
-        from src.scraper.scraper import VecinaScraper
         from pathlib import Path
+
+        from src.scraper.scraper import VecinaScraper
 
         logger.info(f"{Colors.OKCYAN}Initializing scraper...{Colors.ENDC}")
 
         # Prepare output file path (or None if not debugging)
-        output_file = str(Config.CHUNK_FILE) if debug else None
+        output_file = str(Config.CHUNK_FILE)
 
         # Initialize scraper
         scraper = VecinaScraper(
             output_file=output_file,
             failed_log=str(Config.FAILED_URL_LOG),
             links_file=str(Config.LINKS_FILE),
-            stream_mode=use_stream
+            stream_mode=use_stream,
         )
 
-        logger.info(
-            f"{Colors.OKGREEN}Scraper initialized successfully{Colors.ENDC}")
+        logger.info(f"{Colors.OKGREEN}Scraper initialized successfully{Colors.ENDC}")
 
         # Read URLs
         try:
-            with open(Config.MAIN_URL_FILE, 'r', encoding='utf-8') as f:
+            with open(Config.MAIN_URL_FILE, encoding="utf-8") as f:
                 urls, url_stats = prepare_scrape_urls(f)
             logger.debug(f"Read {len(urls)} URLs from file")
             logger.info(
@@ -338,8 +331,7 @@ def run_initial_scrape(logger: logging.Logger, use_stream: bool = False, debug: 
             return True
 
         # Run scraper
-        logger.info(
-            f"{Colors.OKCYAN}Starting scraping process...{Colors.ENDC}")
+        logger.info(f"{Colors.OKCYAN}Starting scraping process...{Colors.ENDC}")
         total, successful, failed = scraper.scrape_urls(urls)
 
         # Print summary and finalize
@@ -364,7 +356,9 @@ def run_initial_scrape(logger: logging.Logger, use_stream: bool = False, debug: 
         return False
 
 
-def rerun_failed_urls(logger: logging.Logger, use_stream: bool = False, debug: bool = False) -> bool:
+def rerun_failed_urls(
+    logger: logging.Logger, use_stream: bool = False, debug: bool = False
+) -> bool:
     """
     Re-run failed URLs with Playwright loader.
 
@@ -384,15 +378,14 @@ def rerun_failed_urls(logger: logging.Logger, use_stream: bool = False, debug: b
 
     # Check if file has content
     try:
-        with open(Config.FAILED_URL_LOG, 'r', encoding='utf-8') as f:
+        with open(Config.FAILED_URL_LOG, encoding="utf-8") as f:
             failed_urls, rerun_stats = prepare_scrape_urls(f)
 
         if not failed_urls:
             logger.info("No failed URLs found. Skipping re-run.")
             return True
 
-        logger.info(
-            f"Found {len(failed_urls)} failed URLs. Re-running with Playwright...")
+        logger.info(f"Found {len(failed_urls)} failed URLs. Re-running with Playwright...")
         logger.info(
             "URL hygiene (failed rerun): "
             f"kept={rerun_stats['final_urls']}, "
@@ -400,8 +393,7 @@ def rerun_failed_urls(logger: logging.Logger, use_stream: bool = False, debug: b
             f"ignored_invalid={rerun_stats['ignored_invalid_url']}, "
             f"ignored_localhost={rerun_stats['ignored_localhost']}"
         )
-        logger.debug(
-            f"Failed URLs: {failed_urls[:5]}{'...' if len(failed_urls) > 5 else ''}")
+        logger.debug(f"Failed URLs: {failed_urls[:5]}{'...' if len(failed_urls) > 5 else ''}")
 
     except Exception as e:
         logger.error(f"Could not read failed URLs log: {e}")
@@ -410,45 +402,39 @@ def rerun_failed_urls(logger: logging.Logger, use_stream: bool = False, debug: b
     # Run scraper directly instead of subprocess for better logging
     try:
         from src.scraper.scraper import VecinaScraper
-        from pathlib import Path
 
-        logger.info(
-            f"{Colors.OKCYAN}Initializing Playwright scraper...{Colors.ENDC}")
+        logger.info(f"{Colors.OKCYAN}Initializing Playwright scraper...{Colors.ENDC}")
 
         # Prepare output file path (or None if not debugging)
-        output_file = str(Config.CHUNK_FILE) if debug else None
+        output_file = str(Config.CHUNK_FILE)
 
         # Initialize scraper with Playwright forced
         scraper = VecinaScraper(
             output_file=output_file,
             failed_log=str(Config.FAILED_URL_LOG),
             links_file=str(Config.LINKS_FILE),
-            stream_mode=use_stream
+            stream_mode=use_stream,
         )
 
         logger.info(f"{Colors.OKGREEN}Scraper initialized{Colors.ENDC}")
 
         # Run with Playwright forced
-        logger.info(
-            f"{Colors.OKCYAN}Starting Playwright re-run...{Colors.ENDC}")
-        total, successful, failed = scraper.scrape_urls(
-            failed_urls, force_loader='playwright')
+        logger.info(f"{Colors.OKCYAN}Starting Playwright re-run...{Colors.ENDC}")
+        total, successful, failed = scraper.scrape_urls(failed_urls, force_loader="playwright")
 
         # Print summary and finalize
         scraper.print_summary()
         scraper.finalize()
 
-        logger.info(
-            f"{Colors.OKGREEN}Playwright re-run completed{Colors.ENDC}")
+        logger.info(f"{Colors.OKGREEN}Playwright re-run completed{Colors.ENDC}")
 
         # Report final failed count
         if Config.FAILED_URL_LOG.exists():
             try:
-                with open(Config.FAILED_URL_LOG, 'r', encoding='utf-8') as f:
+                with open(Config.FAILED_URL_LOG, encoding="utf-8") as f:
                     final_failed = sum(1 for line in f if line.strip())
                 if final_failed > 0:
-                    logger.warning(
-                        f"{final_failed} URLs still failed after Playwright re-run")
+                    logger.warning(f"{final_failed} URLs still failed after Playwright re-run")
                 else:
                     logger.info("All URLs processed successfully!")
             except Exception as e:
@@ -521,8 +507,7 @@ def restart_application(logger: logging.Logger) -> bool:
 
     except DockerException as e:
         logger.warning("Docker Engine is not running or not accessible.")
-        logger.info(
-            "Please start Docker Desktop and run 'docker-compose up -d' manually.")
+        logger.info("Please start Docker Desktop and run 'docker-compose up -d' manually.")
         logger.debug(f"Docker error: {e}")
         return True  # Non-critical, return True to continue pipeline
 
@@ -535,19 +520,20 @@ def restart_application(logger: logging.Logger) -> bool:
         container.reload()  # Refresh container state
         status = container.status
 
-        if status == 'running':
-            logger.info(f"Container is running. Restarting...")
+        if status == "running":
+            logger.info("Container is running. Restarting...")
             container.restart()
             logger.info(
-                f"{Colors.OKGREEN}✓{Colors.ENDC} Container '{Config.APP_CONTAINER_NAME}' restarted successfully")
-        elif status in ['exited', 'created', 'paused']:
+                f"{Colors.OKGREEN}✓{Colors.ENDC} Container '{Config.APP_CONTAINER_NAME}' restarted successfully"
+            )
+        elif status in ["exited", "created", "paused"]:
             logger.info(f"Container status: {status}. Starting...")
             container.start()
             logger.info(
-                f"{Colors.OKGREEN}✓{Colors.ENDC} Container '{Config.APP_CONTAINER_NAME}' started successfully")
+                f"{Colors.OKGREEN}✓{Colors.ENDC} Container '{Config.APP_CONTAINER_NAME}' started successfully"
+            )
         else:
-            logger.warning(
-                f"Container status: {status}. Manual intervention may be required.")
+            logger.warning(f"Container status: {status}. Manual intervention may be required.")
             return True
 
         return True
@@ -558,19 +544,14 @@ def restart_application(logger: logging.Logger) -> bool:
         logger.info("Attempting to start with docker-compose...")
 
         # Fall back to subprocess for docker-compose
-        compose_cmd = 'docker-compose' if shutil.which(
-            'docker-compose') else 'docker compose'
-        start_cmd = compose_cmd.split() + ['up', '-d', 'app']
+        compose_cmd = "docker-compose" if shutil.which("docker-compose") else "docker compose"
+        start_cmd = compose_cmd.split() + ["up", "-d", "app"]
 
         try:
-            result = subprocess.run(
-                start_cmd,
-                capture_output=True,
-                text=True,
-                check=True
-            )
+            subprocess.run(start_cmd, capture_output=True, text=True, check=True)
             logger.info(
-                f"{Colors.OKGREEN}✓{Colors.ENDC} Container started successfully with docker-compose")
+                f"{Colors.OKGREEN}✓{Colors.ENDC} Container started successfully with docker-compose"
+            )
             return True
         except subprocess.CalledProcessError as e:
             logger.warning("Failed to start container with docker-compose.")
@@ -580,8 +561,7 @@ def restart_application(logger: logging.Logger) -> bool:
 
     except APIError as e:
         logger.error(f"Docker API error: {e}")
-        logger.info(
-            "Please check Docker Desktop and try 'docker-compose up -d' manually.")
+        logger.info("Please check Docker Desktop and try 'docker-compose up -d' manually.")
         return True  # Non-critical
 
     except Exception as e:
@@ -592,7 +572,7 @@ def restart_application(logger: logging.Logger) -> bool:
     finally:
         try:
             client.close()
-        except:
+        except Exception:
             pass
 
 
@@ -618,28 +598,27 @@ def print_summary(logger: logging.Logger, start_time: datetime):
     if Config.CHUNK_FILE.exists():
         chunk_size = Config.CHUNK_FILE.stat().st_size
         logger.info(
-            f"{Colors.OKGREEN}✓{Colors.ENDC} Chunks saved to: {Config.CHUNK_FILE} ({chunk_size:,} bytes)")
+            f"{Colors.OKGREEN}✓{Colors.ENDC} Chunks saved to: {Config.CHUNK_FILE} ({chunk_size:,} bytes)"
+        )
 
     if Config.LINKS_FILE.exists():
         link_count = sum(1 for _ in open(Config.LINKS_FILE))
         logger.info(
-            f"{Colors.OKGREEN}✓{Colors.ENDC} Links saved to: {Config.LINKS_FILE} ({link_count} links)")
+            f"{Colors.OKGREEN}✓{Colors.ENDC} Links saved to: {Config.LINKS_FILE} ({link_count} links)"
+        )
 
     if Config.FAILED_URL_LOG.exists():
-        failed_count = sum(1 for line in open(
-            Config.FAILED_URL_LOG) if line.strip())
+        failed_count = sum(1 for line in open(Config.FAILED_URL_LOG) if line.strip())
         if failed_count > 0:
-            logger.warning(
-                f"Failed URLs logged to: {Config.FAILED_URL_LOG} ({failed_count} URLs)")
+            logger.warning(f"Failed URLs logged to: {Config.FAILED_URL_LOG} ({failed_count} URLs)")
         else:
             logger.info(f"{Colors.OKGREEN}✓{Colors.ENDC} No failed URLs!")
 
     # Log file location
-    log_files = list(Path('logs').glob('pipeline_*.log'))
+    log_files = list(Path("logs").glob("pipeline_*.log"))
     if log_files:
         latest_log = max(log_files, key=lambda p: p.stat().st_mtime)
-        logger.info(
-            f"{Colors.OKBLUE}ℹ{Colors.ENDC} Detailed log: {latest_log}")
+        logger.info(f"{Colors.OKBLUE}ℹ{Colors.ENDC} Detailed log: {latest_log}")
 
 
 def main():
@@ -648,7 +627,7 @@ def main():
     load_dotenv()
 
     parser = argparse.ArgumentParser(
-        description='VECINA data scraping and loading pipeline',
+        description="VECINA data scraping and loading pipeline",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -657,37 +636,33 @@ Examples:
   vecinita-scrape --stream          # Streaming mode (memory-efficient)
   vecinita-scrape --clean --stream  # Clean + streaming
   vecinita-scrape --verbose         # Verbose output
-        """
+        """,
     )
 
     parser.add_argument(
-        '--clean',
-        action='store_true',
-        help='Clean (truncate) database before loading new data'
+        "--clean", action="store_true", help="Clean (truncate) database before loading new data"
     )
 
     parser.add_argument(
-        '-v', '--verbose',
-        action='store_true',
-        help='Enable verbose (DEBUG) logging'
+        "-v", "--verbose", action="store_true", help="Enable verbose (DEBUG) logging"
     )
 
     parser.add_argument(
-        '--stream',
-        action='store_true',
-        help='Enable streaming mode: upload chunks immediately during scraping (reduces memory usage, skips file I/O)'
+        "--stream",
+        action="store_true",
+        help="Enable streaming mode: upload chunks immediately during scraping (reduces memory usage, skips file I/O)",
     )
 
     parser.add_argument(
-        '--debug',
-        action='store_true',
-        help='Enable debug mode: save chunks to local file and verbose logging'
+        "--debug",
+        action="store_true",
+        help="Enable debug mode: save chunks to local file and verbose logging",
     )
 
     parser.add_argument(
-        '--no-confirm',
-        action='store_true',
-        help='Skip confirmation prompts (use with caution with --clean)'
+        "--no-confirm",
+        action="store_true",
+        help="Skip confirmation prompts (use with caution with --clean)",
     )
 
     args = parser.parse_args()
@@ -698,32 +673,27 @@ Examples:
 
     # Print header
     logger.info("")
-    logger.info(f"{Colors.BOLD}{Colors.HEADER}{'='*70}{Colors.ENDC}")
-    logger.info(
-        f"{Colors.BOLD}{Colors.HEADER}VECINA Data Scraping & Loading Pipeline{Colors.ENDC}")
-    logger.info(f"{Colors.BOLD}{Colors.HEADER}{'='*70}{Colors.ENDC}")
+    logger.info(f"{Colors.BOLD}{Colors.HEADER}{'=' * 70}{Colors.ENDC}")
+    logger.info(f"{Colors.BOLD}{Colors.HEADER}VECINA Data Scraping & Loading Pipeline{Colors.ENDC}")
+    logger.info(f"{Colors.BOLD}{Colors.HEADER}{'=' * 70}{Colors.ENDC}")
     logger.info(f"Started: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
 
     if args.clean:
-        logger.info(
-            f"Mode: {Colors.WARNING}CLEAN (database will be truncated){Colors.ENDC}")
+        logger.info(f"Mode: {Colors.WARNING}CLEAN (database will be truncated){Colors.ENDC}")
     else:
-        logger.info(
-            f"Mode: {Colors.OKGREEN}ADDITIVE (new content will be added){Colors.ENDC}")
+        logger.info(f"Mode: {Colors.OKGREEN}ADDITIVE (new content will be added){Colors.ENDC}")
 
     if args.stream:
         logger.info(
-            f"Streaming: {Colors.OKCYAN}ENABLED (chunks uploaded immediately, reduced memory usage){Colors.ENDC}")
+            f"Streaming: {Colors.OKCYAN}ENABLED (chunks uploaded immediately, reduced memory usage){Colors.ENDC}"
+        )
     else:
-        logger.info(
-            f"Streaming: OFF (traditional file-based processing)")
+        logger.info("Streaming: OFF (traditional file-based processing)")
 
     if args.debug:
-        logger.info(
-            f"Debug: {Colors.OKCYAN}ENABLED (chunks saved to local file){Colors.ENDC}")
+        logger.info(f"Debug: {Colors.OKCYAN}ENABLED (chunks saved to local file){Colors.ENDC}")
     else:
-        logger.info(
-            f"Debug: OFF (no local chunk files saved)")
+        logger.info("Debug: OFF (no local chunk files saved)")
 
     logger.info("")
 
@@ -754,7 +724,8 @@ Examples:
         # Step 5: Load data into database (skip in streaming mode - already uploaded)
         if args.stream:
             logger.info(
-                f"{Colors.OKCYAN}Skipping data loading step (streaming mode - data already uploaded){Colors.ENDC}")
+                f"{Colors.OKCYAN}Skipping data loading step (streaming mode - data already uploaded){Colors.ENDC}"
+            )
         elif args.debug:
             if not load_data_to_database(logger):
                 logger.error("Data loading failed. Exiting.")
@@ -762,15 +733,13 @@ Examples:
 
         # Step 6: Restart application
         if not restart_application(logger):
-            logger.warning(
-                "Application restart failed, but pipeline completed.")
+            logger.warning("Application restart failed, but pipeline completed.")
 
         # Print summary
         print_summary(logger, start_time)
 
         logger.info("")
-        logger.info(
-            f"{Colors.OKGREEN}{Colors.BOLD}✓ Pipeline completed successfully!{Colors.ENDC}")
+        logger.info(f"{Colors.OKGREEN}{Colors.BOLD}✓ Pipeline completed successfully!{Colors.ENDC}")
         logger.info("")
 
     except KeyboardInterrupt:
@@ -780,12 +749,11 @@ Examples:
 
     except Exception as e:
         logger.error("")
-        logger.error(
-            f"{Colors.FAIL}Pipeline failed with unexpected error:{Colors.ENDC}")
+        logger.error(f"{Colors.FAIL}Pipeline failed with unexpected error:{Colors.ENDC}")
         logger.error(f"{Colors.FAIL}{e}{Colors.ENDC}")
         logger.exception("Traceback:")
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -7,12 +7,11 @@ Usage:
         --failed-log <failed_urls_file> [--links-file <links_file>] [--loader playwright|recursive|unstructured]
 """
 
-import os
-from pathlib import Path
-import sys
-import logging
 import argparse
-from importlib import import_module
+import logging
+import os
+import sys
+from pathlib import Path
 
 # NOTE ON TESTABILITY:
 # We intentionally use a direct import of VecinaScraper here instead of a dynamic
@@ -27,12 +26,8 @@ from importlib import import_module
 from .scraper import VecinaScraper
 from .utils import prepare_scrape_urls
 
-
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 log = logging.getLogger(__name__)
 
 
@@ -46,42 +41,42 @@ def main():
         "--input",
         type=str,
         required=True,
-        help="REQUIRED: Path to the input file of URLs to process (e.g., data/urls.txt)."
+        help="REQUIRED: Path to the input file of URLs to process (e.g., data/urls.txt).",
     )
 
     parser.add_argument(
         "--output-file",
         type=str,
         required=True,
-        help="REQUIRED: Path to the output file for chunks. Content will be APPENDED."
+        help="REQUIRED: Path to the output file for chunks. Content will be APPENDED.",
     )
 
     parser.add_argument(
         "--failed-log",
         type=str,
         required=True,
-        help="REQUIRED: Path to a file where failed URLs will be logged."
+        help="REQUIRED: Path to a file where failed URLs will be logged.",
     )
 
     parser.add_argument(
         "--links-file",
         type=str,
         default=None,
-        help="(Optional) Path to a file for saving extracted links and metadata."
+        help="(Optional) Path to a file for saving extracted links and metadata.",
     )
 
     parser.add_argument(
         "--loader",
         type=str,
-        choices=['playwright', 'recursive', 'unstructured'],
+        choices=["playwright", "recursive", "unstructured"],
         default=None,
-        help="(Optional) Force a specific loader for all URLs in the input file."
+        help="(Optional) Force a specific loader for all URLs in the input file.",
     )
 
     parser.add_argument(
         "--stream",
         action="store_true",
-        help="(Optional) Enable streaming mode: upload chunks immediately to database (reduces memory usage)."
+        help="(Optional) Enable streaming mode: upload chunks immediately to database (reduces memory usage).",
     )
 
     args = parser.parse_args()
@@ -102,8 +97,7 @@ def main():
 
     # Log streaming mode
     if args.stream:
-        log.info(
-            "Streaming mode enabled: chunks will be uploaded immediately to database")
+        log.info("Streaming mode enabled: chunks will be uploaded immediately to database")
 
     # Initialize scraper
     try:
@@ -111,7 +105,7 @@ def main():
             output_file=args.output_file,
             failed_log=args.failed_log,
             links_file=args.links_file,
-            stream_mode=args.stream
+            stream_mode=args.stream,
         )
     except Exception as e:
         log.error(f"Failed to initialize scraper: {e}")
@@ -120,15 +114,14 @@ def main():
     # Read URLs from input file
     try:
         # Try UTF-8 first, then fall back to UTF-8 with BOM, then latin-1
-        encodings = ['utf-8', 'utf-8-sig', 'latin-1']
-        urls = []
+        encodings = ["utf-8", "utf-8-sig", "latin-1"]
+        urls: list[str] = []
         decode_successful = False
         for encoding in encodings:
             try:
-                with open(args.input, 'r', encoding=encoding) as f:
+                with open(args.input, encoding=encoding) as f:
                     urls, url_stats = prepare_scrape_urls(f)
-                log.info(
-                    f"Successfully read input file with {encoding} encoding")
+                log.info(f"Successfully read input file with {encoding} encoding")
                 log.info(
                     "URL hygiene: "
                     f"kept={url_stats['final_urls']}, "
@@ -142,8 +135,7 @@ def main():
                 continue
 
         if not decode_successful:
-            raise Exception(
-                "Could not decode file with any supported encoding")
+            raise Exception("Could not decode file with any supported encoding")
 
     except Exception as e:
         log.error(f"Failed to read input file {args.input}: {e}")
@@ -157,14 +149,13 @@ def main():
 
     # Scrape URLs
     try:
-        total, successful, failed = scraper.scrape_urls(
-            urls, force_loader=args.loader)
+        total, successful, failed = scraper.scrape_urls(urls, force_loader=args.loader)
         scraper.print_summary()
         scraper.finalize()
 
-        log.info(f"\n{'='*70}")
+        log.info(f"\n{'=' * 70}")
         log.info("SCRAPING PIPELINE COMPLETE!")
-        log.info(f"{'='*70}")
+        log.info(f"{'=' * 70}")
 
     except KeyboardInterrupt:
         log.warning("\nScraping interrupted by user.")

@@ -5,6 +5,7 @@ This tool provides predefined answers to frequently asked questions (FAQs).
 
 import logging
 import string
+
 from langchain_core.tools import tool
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ FAQ_DATABASE = {
         "qué es vecinita": "Vecinita es un asistente comunitario de preguntas y respuestas diseñado para ayudar a las personas a encontrar información sobre servicios locales.",
         "cómo funciona esto": "Vecinita funciona buscando en una base de datos de documentos y recursos comunitarios.",
         "quién creó vecinita": "Vecinita es un proyecto de código abierto creado para apoyar el acceso a la información comunitaria.",
-    }
+    },
 }
 
 
@@ -38,12 +39,11 @@ def static_response_tool(query: str, language: str = "en") -> str | None:
         language: The language code ('en' or 'es').
     """
     try:
-        logger.info(
-            f"Static Response: Checking FAQ for: '{query}' ({language})")
+        logger.info(f"Static Response: Checking FAQ for: '{query}' ({language})")
 
         # Normalize query
         normalized_query = query.lower().strip()
-        punctuation_table = str.maketrans('', '', string.punctuation + "¿¡")
+        punctuation_table = str.maketrans("", "", string.punctuation + "¿¡")
         normalized_query_clean = normalized_query.translate(punctuation_table)
 
         # Get FAQs for language
@@ -62,7 +62,10 @@ def static_response_tool(query: str, language: str = "en") -> str | None:
         if len(normalized_query_clean) >= MIN_QUERY_LENGTH:
             for faq_key, faq_answer in faqs.items():
                 faq_key_clean = faq_key.translate(punctuation_table)
-                if faq_key_clean in normalized_query_clean or normalized_query_clean in faq_key_clean:
+                if (
+                    faq_key_clean in normalized_query_clean
+                    or normalized_query_clean in faq_key_clean
+                ):
                     return faq_answer
 
         # 4. No match found - Return None so other tools can be attempted
@@ -100,10 +103,10 @@ def list_faqs(language: str = "en") -> dict:
 
 def create_static_response_tool():
     """Create an instance of the static_response tool.
-    
+
     The static response tool checks if a query matches a frequently asked question (FAQ)
     and returns the predefined answer if found.
-    
+
     Returns:
         A configured tool function that can be used with LangGraph
     """

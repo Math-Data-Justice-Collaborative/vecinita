@@ -7,14 +7,15 @@ import re
 import threading
 import time
 from collections import OrderedDict
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeoutError
 from contextvars import ContextVar, Token
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from langchain_core.tools import tool
 
 try:
-    from supabase import create_client  # type: ignore
+    from supabase import create_client
 except Exception:  # pragma: no cover - optional dependency in some test/runtime profiles
     create_client = None  # type: ignore[assignment]
 
@@ -23,23 +24,17 @@ from src.utils.tags import infer_tags_from_text, normalize_tags
 
 logger = logging.getLogger(__name__)
 _LAST_SEARCH_STATUS = "not_run"
-_LAST_SEARCH_METRICS: Dict[str, Any] = {}
+_LAST_SEARCH_METRICS: dict[str, Any] = {}
 _LAST_SEARCH_METRICS_LOCK = threading.Lock()
 
-_SEARCH_OPTIONS: ContextVar[Dict[str, Any]] = ContextVar(
+_SEARCH_OPTIONS: ContextVar[dict[str, Any] | None] = ContextVar(
     "db_search_options",
-    default={
-        "tags": [],
-        "tag_match_mode": "any",
-        "include_untagged_fallback": True,
-        "rerank": False,
-        "rerank_top_k": 10,
-    },
+    default=None,
 )
 
-_SEARCH_METRICS: ContextVar[Dict[str, Any]] = ContextVar(
+_SEARCH_METRICS: ContextVar[dict[str, Any] | None] = ContextVar(
     "db_search_metrics",
-    default={},
+    default=None,
 )
 
 _SUPABASE_CLIENT = None
@@ -48,28 +43,29 @@ _SUPABASE_CLIENT = None
 def _update_search_status(status: str) -> None:
     global _LAST_SEARCH_STATUS
     _LAST_SEARCH_STATUS = str(status)
-    current = dict(_SEARCH_OPTIONS.get())
+    current = dict(_SEARCH_OPTIONS.get() or {})
     current["last_search_status"] = status
     _SEARCH_OPTIONS.set(current)
 
 
 def get_last_search_status() -> str:
-    scoped = _SEARCH_OPTIONS.get().get("last_search_status")
+    scoped_options = _SEARCH_OPTIONS.get() or {}
+    scoped = scoped_options.get("last_search_status")
     if scoped:
         return str(scoped)
     return str(_LAST_SEARCH_STATUS)
 
 
-def get_last_search_metrics() -> Dict[str, Any]:
+def get_last_search_metrics() -> dict[str, Any]:
     """Return metrics from the most recent db_search invocation in this process."""
-    scoped = _SEARCH_METRICS.get()
+    scoped = _SEARCH_METRICS.get() or {}
     if scoped:
         return dict(scoped)
     with _LAST_SEARCH_METRICS_LOCK:
         return dict(_LAST_SEARCH_METRICS)
 
 
-def _update_search_metrics(metrics: Dict[str, Any]) -> None:
+def _update_search_metrics(metrics: dict[str, Any]) -> None:
     global _LAST_SEARCH_METRICS
     metrics_copy = dict(metrics)
     _SEARCH_METRICS.set(metrics_copy)
@@ -79,7 +75,7 @@ def _update_search_metrics(metrics: Dict[str, Any]) -> None:
 
 def set_search_options(
     *,
-    tags: Optional[List[str]] = None,
+    tags: list[str] | None = None,
     tag_match_mode: str = "any",
     include_untagged_fallback: bool = True,
     rerank: bool = False,
@@ -104,19 +100,15 @@ def reset_search_options(token: Token) -> None:
 
 
 def _tokenize_for_rerank(text: str) -> set[str]:
-    return {
-        token
-        for token in re.findall(r"[a-z0-9]+", (text or "").lower())
-        if len(token) > 1
-    }
+    return {token for token in re.findall(r"[a-z0-9]+", (text or "").lower()) if len(token) > 1}
 
 
-def _rerank_results(query: str, docs: List[Dict[str, Any]], top_k: int) -> List[Dict[str, Any]]:
+def _rerank_results(query: str, docs: list[dict[str, Any]], top_k: int) -> list[dict[str, Any]]:
     query_terms = _tokenize_for_rerank(query)
     if not query_terms:
         return docs[:top_k]
 
-    scored: List[tuple[float, Dict[str, Any]]] = []
+    scored: list[tuple[float, dict[str, Any]]] = []
     for doc in docs:
         content_terms = _tokenize_for_rerank(doc.get("content", ""))
         overlap = len(query_terms & content_terms)
@@ -129,7 +121,7 @@ def _rerank_results(query: str, docs: List[Dict[str, Any]], top_k: int) -> List[
     return [doc for _, doc in scored[:top_k]]
 
 
-def _build_tags_where(tags: List[str], mode: str) -> Optional[Dict[str, Any]]:
+def _build_tags_where(tags: list[str], mode: str) -> dict[str, Any] | None:
     if not tags:
         return None
 
@@ -141,8 +133,8 @@ def _build_tags_where(tags: List[str], mode: str) -> Optional[Dict[str, Any]]:
     return {"$or": conditions}
 
 
-def _normalize_document(doc: Dict[str, Any]) -> Dict[str, Any]:
-    metadata = doc.get("metadata") if isinstance(doc.get("metadata"), dict) else {}
+def _normalize_document(doc: dict[str, Any]) -> dict[str, Any]:
+    metadata: dict[str, Any] = doc.get("metadata") if isinstance(doc.get("metadata"), dict) else {}  # type: ignore[assignment]
     source = doc.get("source_url") or metadata.get("source_url") or "Unknown source"
     source_domain = doc.get("source_domain") or metadata.get("source_domain") or ""
 
@@ -151,9 +143,21 @@ def _normalize_document(doc: Dict[str, Any]) -> Dict[str, Any]:
         "source_url": source,
         "source_domain": source_domain,
         "similarity": doc.get("similarity", 0.0),
-        "chunk_index": doc.get("chunk_index") if doc.get("chunk_index") is not None else metadata.get("chunk_index"),
-        "total_chunks": doc.get("total_chunks") if doc.get("total_chunks") is not None else metadata.get("total_chunks"),
-        "chunk_size": doc.get("chunk_size") if doc.get("chunk_size") is not None else metadata.get("chunk_size"),
+        "chunk_index": (
+            doc.get("chunk_index")
+            if doc.get("chunk_index") is not None
+            else metadata.get("chunk_index")
+        ),
+        "total_chunks": (
+            doc.get("total_chunks")
+            if doc.get("total_chunks") is not None
+            else metadata.get("total_chunks")
+        ),
+        "chunk_size": (
+            doc.get("chunk_size")
+            if doc.get("chunk_size") is not None
+            else metadata.get("chunk_size")
+        ),
         "document_id": doc.get("document_id"),
         "document_title": doc.get("document_title") or metadata.get("document_title"),
         "created_at": doc.get("created_at") or metadata.get("created_at"),
@@ -198,16 +202,28 @@ def _get_supabase_client():
     return _SUPABASE_CLIENT
 
 
-def _normalize_supabase_document(doc: Dict[str, Any]) -> Dict[str, Any]:
-    metadata = doc.get("metadata") if isinstance(doc.get("metadata"), dict) else {}
+def _normalize_supabase_document(doc: dict[str, Any]) -> dict[str, Any]:
+    metadata: dict[str, Any] = doc.get("metadata") if isinstance(doc.get("metadata"), dict) else {}  # type: ignore[assignment]
     return {
         "content": doc.get("content") or "",
         "source_url": doc.get("source_url") or metadata.get("source_url") or "Unknown source",
         "source_domain": doc.get("source_domain") or metadata.get("source_domain") or "",
         "similarity": float(doc.get("similarity", 0.0) or 0.0),
-        "chunk_index": doc.get("chunk_index") if doc.get("chunk_index") is not None else metadata.get("chunk_index"),
-        "total_chunks": doc.get("total_chunks") if doc.get("total_chunks") is not None else metadata.get("total_chunks"),
-        "chunk_size": doc.get("chunk_size") if doc.get("chunk_size") is not None else metadata.get("chunk_size"),
+        "chunk_index": (
+            doc.get("chunk_index")
+            if doc.get("chunk_index") is not None
+            else metadata.get("chunk_index")
+        ),
+        "total_chunks": (
+            doc.get("total_chunks")
+            if doc.get("total_chunks") is not None
+            else metadata.get("total_chunks")
+        ),
+        "chunk_size": (
+            doc.get("chunk_size")
+            if doc.get("chunk_size") is not None
+            else metadata.get("chunk_size")
+        ),
         "document_id": doc.get("id") or doc.get("document_id"),
         "document_title": doc.get("document_title") or metadata.get("document_title"),
         "created_at": doc.get("created_at") or metadata.get("created_at"),
@@ -225,13 +241,13 @@ def _normalize_supabase_document(doc: Dict[str, Any]) -> Dict[str, Any]:
 
 def _query_supabase_fallback(
     *,
-    query_embedding: List[float],
+    query_embedding: list[float],
     match_threshold: float,
     match_count: int,
-    tags: List[str],
+    tags: list[str],
     tag_mode: str,
     include_untagged_fallback: bool,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     if not _fallback_reads_enabled():
         return []
 
@@ -239,7 +255,7 @@ def _query_supabase_fallback(
     if client is None:
         return []
 
-    rpc_params: Dict[str, Any] = {
+    rpc_params: dict[str, Any] = {
         "query_embedding": query_embedding,
         "match_threshold": float(match_threshold),
         "match_count": max(int(match_count), 1),
@@ -276,13 +292,13 @@ def _query_supabase_fallback(
 def _query_chroma_with_timeout(
     *,
     store: ChromaStore,
-    query_embedding: List[float],
+    query_embedding: list[float],
     n_results: int,
-    where: Optional[Dict[str, Any]] = None,
-) -> List[Dict[str, Any]]:
+    where: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
     timeout_seconds = max(1.0, float(os.getenv("DB_SEARCH_CHROMA_TIMEOUT_SECONDS", "15")))
 
-    def _run_query() -> List[Dict[str, Any]]:
+    def _run_query() -> list[dict[str, Any]]:
         return store.query_chunks(
             query_embedding=query_embedding,
             n_results=n_results,
@@ -299,7 +315,7 @@ def _query_chroma_with_timeout(
 
 
 def create_db_search_tool(
-    chroma_store: Optional[ChromaStore],
+    chroma_store: ChromaStore | None,
     embedding_model,
     match_threshold: float = 0.3,
     match_count: int = 5,
@@ -307,10 +323,10 @@ def create_db_search_tool(
     """Create a configured db_search tool with access to Chroma and embeddings."""
     store = chroma_store or get_chroma_store()
     embedding_cache_size = max(int(os.getenv("DB_SEARCH_EMBED_CACHE_SIZE", "256")), 0)
-    embedding_cache: OrderedDict[str, List[float]] = OrderedDict()
+    embedding_cache: OrderedDict[str, list[float]] = OrderedDict()
     embedding_cache_lock = threading.Lock()
 
-    def _update_lru_cache(key: str, value: Optional[List[float]] = None) -> None:
+    def _update_lru_cache(key: str, value: list[float] | None = None) -> None:
         """Update cache with LRU eviction policy. Sets value if provided, moves to end."""
         if value is not None:
             embedding_cache[key] = value
@@ -325,7 +341,7 @@ def create_db_search_tool(
         started_at = time.perf_counter()
         embedding_started_at = started_at
         retrieval_started_at = started_at
-        rerank_started_at: Optional[float] = None
+        rerank_started_at: float | None = None
         embedding_ms = 0
         retrieval_ms = 0
         rerank_ms = 0
@@ -337,7 +353,7 @@ def create_db_search_tool(
 
         try:
             _update_search_status("running")
-            search_opts = _SEARCH_OPTIONS.get()
+            search_opts = _SEARCH_OPTIONS.get() or {}
             normalized_query = " ".join((query or "").lower().split())
             query_embedding = None
             if embedding_cache_size > 0 and normalized_query:
@@ -357,7 +373,11 @@ def create_db_search_tool(
                         _update_lru_cache(normalized_query, query_embedding)
 
             tags = [t for t in search_opts.get("tags", []) if isinstance(t, str) and t]
-            auto_infer_enabled = os.getenv("TAG_FILTER_AUTO_INFER", "true").lower() in {"1", "true", "yes"}
+            auto_infer_enabled = os.getenv("TAG_FILTER_AUTO_INFER", "true").lower() in {
+                "1",
+                "true",
+                "yes",
+            }
             auto_inferred_tags = False
             if not tags and auto_infer_enabled:
                 inferred_tags = infer_tags_from_text(query, max_tags=6)
@@ -372,7 +392,7 @@ def create_db_search_tool(
                 include_untagged_fallback = False
 
             where = _build_tags_where(tags, tag_mode)
-            rows: List[Dict[str, Any]] = []
+            rows: list[dict[str, Any]] = []
             chroma_failed = False
             try:
                 retrieval_started_at = time.perf_counter()
@@ -402,7 +422,10 @@ def create_db_search_tool(
                 except Exception as exc:
                     retrieval_ms += int((time.perf_counter() - retrieval_started_at) * 1000)
                     chroma_failed = True
-                    logger.warning("Chroma untagged fallback query failed; attempting Supabase fallback: %s", exc)
+                    logger.warning(
+                        "Chroma untagged fallback query failed; attempting Supabase fallback: %s",
+                        exc,
+                    )
 
             if chroma_failed:
                 retrieval_started_at = time.perf_counter()
@@ -437,7 +460,7 @@ def create_db_search_tool(
                 )
                 return "[]"
 
-            filtered: List[Dict[str, Any]] = []
+            filtered: list[dict[str, Any]] = []
             for row in rows:
                 similarity = float(row.get("similarity", 0.0) or 0.0)
                 if similarity >= float(match_threshold):

@@ -65,6 +65,27 @@ vecinita/
 
 ## Quick Start
 
+### Recommended Root Workflow
+
+From the repository root, use the Makefile as the default entry point for local development and verification:
+
+```bash
+make dev
+make lint
+make typecheck
+make test-unit
+```
+
+Additional common targets:
+
+```bash
+make dev-attach
+make dev-stop
+make test-integration
+make test-e2e
+make docs-serve
+```
+
 ### Prerequisites (Local)
 
 Use these versions (or newer compatible versions):
@@ -107,15 +128,14 @@ docker-compose up
 From repo root:
 
 ```bash
-chmod +x run/dev-session.sh
-./run/dev-session.sh start
+make dev
 ```
 
 This starts Chroma, embedding service, agent service, API gateway, and frontend in one `tmux` session with live logs in split panes.
 
 ```bash
-./run/dev-session.sh attach   # Re-attach to running session
-./run/dev-session.sh stop     # Stop session and chroma container
+make dev-attach   # Re-attach to running session
+make dev-stop     # Stop session and chroma container
 ```
 
 Compatibility note: `./dev-session.sh` remains available as a root wrapper shim.
@@ -166,8 +186,18 @@ npm install
 npm run dev
 
 # Run tests
-npm run test          # Unit tests (Vitest)
+npm run test:unit     # Unit tests (Vitest)
 npm run test:e2e      # E2E tests (Playwright)
+```
+
+From the repo root, the equivalent shortcuts are:
+
+```bash
+make dev-frontend
+make lint-frontend
+make typecheck-frontend
+make test-frontend-unit
+make test-frontend-e2e
 ```
 
 ## Environment Variables
@@ -215,6 +245,31 @@ The hook scans staged changes and blocks commits that include potential secrets.
 
 ## Testing
 
+### Root Makefile Shortcuts
+
+From repository root:
+
+```bash
+make help
+make dev
+make lint
+make typecheck
+make test-unit
+make test-integration
+make test-e2e
+make test-integration-gateway-fast
+make test-integration-gateway-full
+make test-all-integration
+```
+
+Documentation workflow:
+
+```bash
+make docs-install
+make docs-serve
+make docs-build
+```
+
 ### Backend Tests (108 passing)
 
 ```bash
@@ -227,6 +282,14 @@ uv run pytest --cov              # With coverage
 ### Verified Local Test Commands
 
 These commands are the canonical local verification flow used during development:
+
+```bash
+make lint
+make typecheck
+make test-unit
+```
+
+Direct commands remain available when you need to work inside a subproject:
 
 ```bash
 # backend
@@ -258,6 +321,14 @@ npm run test                     # Unit tests (Vitest)
 npm run test:coverage            # Coverage report
 npm run test:e2e                 # E2E tests (Playwright)
 ```
+
+## Documentation Site
+
+The project now includes a Docusaurus site in `website/` that publishes docs from `docs/`.
+
+- Local run: `make docs-serve`
+- Build check: `make docs-build`
+- Deploy: GitHub Pages workflow at `.github/workflows/docs-gh-pages.yml`
 
 ## Render Deployment (Start Here)
 

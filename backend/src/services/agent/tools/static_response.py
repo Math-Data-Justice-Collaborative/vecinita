@@ -6,8 +6,10 @@ FAQs are loaded from markdown files in backend/src/services/agent/data/faqs/.
 
 import logging
 import string
+
 from langchain_core.tools import tool
-from src.utils import load_faqs_from_markdown, get_faq_stats
+
+from src.utils import get_faq_stats, load_faqs_from_markdown
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +30,7 @@ DEFAULT_FAQ_DATABASE = {
 }
 
 
-def _bootstrap_faq_database() -> dict:
+def _bootstrap_faq_database() -> dict[str, dict[str, str]]:
     """Load markdown FAQs into an in-memory, mutable database."""
     en_faqs = load_faqs_from_markdown("en")
     es_faqs = load_faqs_from_markdown("es")
@@ -41,7 +43,7 @@ def _bootstrap_faq_database() -> dict:
 
 
 # In-memory FAQ store kept for backward compatibility with tests and legacy code.
-FAQ_DATABASE = _bootstrap_faq_database()
+FAQ_DATABASE: dict[str, dict[str, str]] = _bootstrap_faq_database()
 
 
 @tool
@@ -59,18 +61,17 @@ def static_response_tool(query: str, language: str = "en") -> str | None:
         The FAQ answer string if found, None if no match.
     """
     try:
-        logger.info(
-            f"Static Response: Checking FAQ for: '{query}' ({language})")
+        logger.info(f"Static Response: Checking FAQ for: '{query}' ({language})")
 
         # Normalize query
         normalized_query = query.lower().strip()
-        punctuation_table = str.maketrans('', '', string.punctuation + "¿¡")
+        punctuation_table = str.maketrans("", "", string.punctuation + "¿¡")
         normalized_query_clean = normalized_query.translate(punctuation_table)
 
         # Read from mutable in-memory store first (test compatibility), then fallback.
         normalized_language = (language or "en").lower()
 
-        faqs = FAQ_DATABASE.get(normalized_language)
+        faqs: dict[str, str] | None = FAQ_DATABASE.get(normalized_language)
         if faqs is None:
             faqs = FAQ_DATABASE.get("en", {})
 
@@ -87,7 +88,10 @@ def static_response_tool(query: str, language: str = "en") -> str | None:
         if len(normalized_query_clean) >= MIN_QUERY_LENGTH:
             for faq_key, faq_answer in faqs.items():
                 faq_key_clean = faq_key.translate(punctuation_table)
-                if faq_key_clean in normalized_query_clean or normalized_query_clean in faq_key_clean:
+                if (
+                    faq_key_clean in normalized_query_clean
+                    or normalized_query_clean in faq_key_clean
+                ):
                     return faq_answer
 
         # 4. No match found - Return None so agent can try other tools
@@ -117,7 +121,7 @@ def add_faq(question: str, answer: str, language: str = "en") -> None:
     FAQ_DATABASE[normalized_language][normalized_question] = answer
 
 
-def list_faqs(language: str = "en") -> dict:
+def list_faqs(language: str = "en") -> dict[str, str]:
     """List all available FAQs for a language.
 
     Args:
@@ -132,12 +136,12 @@ def list_faqs(language: str = "en") -> dict:
     return {}
 
 
-def get_faq_statistics() -> dict:
+def get_faq_statistics() -> dict[str, object]:
     """Get statistics about loaded FAQs.
 
     Returns:
         Dictionary with FAQ counts per language
     """
-    stats = get_faq_stats()
+    stats: dict[str, object] = dict(get_faq_stats())
     stats["in_memory"] = {lang: len(faqs) for lang, faqs in FAQ_DATABASE.items()}
     return stats

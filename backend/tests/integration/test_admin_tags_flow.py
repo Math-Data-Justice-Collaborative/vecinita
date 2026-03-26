@@ -60,7 +60,11 @@ class _Table:
                 return _Result([])
 
             if self._where.get("source_url"):
-                rows = [row for row in self.db.chunks if row.get("source_url") == self._where["source_url"]]
+                rows = [
+                    row
+                    for row in self.db.chunks
+                    if row.get("source_url") == self._where["source_url"]
+                ]
                 return _Result(rows)
 
             return _Result(self.db.chunks)
@@ -102,7 +106,11 @@ class FakeDB:
                         [
                             {
                                 "url": url,
-                                "chunk_count": sum(1 for chunk in self.outer.chunks if chunk.get("source_url") == url),
+                                "chunk_count": sum(
+                                    1
+                                    for chunk in self.outer.chunks
+                                    if chunk.get("source_url") == url
+                                ),
                                 "metadata": data.get("metadata", {}),
                             }
                             for url, data in self.outer.sources.items()
@@ -132,7 +140,9 @@ class FakeChromaStore:
         ]
         self.queue = []
 
-    def upsert_source(self, *, url: str, metadata: dict, title: str | None = None, is_active: bool = True):
+    def upsert_source(
+        self, *, url: str, metadata: dict, title: str | None = None, is_active: bool = True
+    ):
         self.sources[url] = {
             "url": url,
             "title": title or url,
@@ -152,8 +162,12 @@ class FakeChromaStore:
     def get_chunks(self, *, where=None, limit=100, offset=0):
         where = where or {}
         source_url = where.get("source_url")
-        rows = [c for c in self.chunk_rows if not source_url or c["metadata"].get("source_url") == source_url]
-        rows = rows[offset: offset + limit]
+        rows = [
+            c
+            for c in self.chunk_rows
+            if not source_url or c["metadata"].get("source_url") == source_url
+        ]
+        rows = rows[offset : offset + limit]
         return {
             "ids": [r["id"] for r in rows],
             "documents": [r["document"] for r in rows],
@@ -174,7 +188,7 @@ class FakeChromaStore:
         return len(rows)
 
     def list_sources(self, limit=1000, offset=0):
-        return list(self.sources.values())[offset: offset + limit]
+        return list(self.sources.values())[offset : offset + limit]
 
     def iter_all_chunks(self, batch_size=500):
         for chunk in self.chunk_rows:
@@ -198,8 +212,8 @@ def integration_client(env_vars, monkeypatch):
     for key, value in env_vars.items():
         monkeypatch.setenv(key, value)
 
-    from src.api.main import app
     from src.api import router_admin
+    from src.api.main import app
 
     db = FakeDB()
     store = FakeChromaStore()

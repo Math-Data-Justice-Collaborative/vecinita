@@ -1,7 +1,7 @@
 """Modal deployment entrypoint for weekly scraper reindex jobs."""
 
-from pathlib import Path
 import os
+from pathlib import Path
 
 import modal
 
@@ -67,14 +67,24 @@ def _run_scraper_pipeline(clean: bool, stream: bool, verbose: bool) -> dict:
     }
 
 
-@app.function(**_COMMON_FUNCTION_KWARGS)
+@app.function(
+    image=image,
+    secrets=[modal.Secret.from_name(SECRET_NAME)],
+    cpu=2.0,
+    memory=4096,
+    timeout=3 * 60 * 60,
+)
 def run_reindex(clean: bool = False, stream: bool = True, verbose: bool = False) -> dict:
     return _run_scraper_pipeline(clean=clean, stream=stream, verbose=verbose)
 
 
 @app.function(
+    image=image,
+    secrets=[modal.Secret.from_name(SECRET_NAME)],
+    cpu=2.0,
+    memory=4096,
+    timeout=3 * 60 * 60,
     schedule=modal.Cron(REINDEX_CRON_SCHEDULE),
-    **_COMMON_FUNCTION_KWARGS,
 )
 def weekly_reindex() -> dict:
     clean = os.getenv("SCRAPER_REINDEX_CLEAN", "false").lower() in {"1", "true", "yes"}
@@ -82,7 +92,13 @@ def weekly_reindex() -> dict:
     return _run_scraper_pipeline(clean=clean, stream=True, verbose=verbose)
 
 
-@app.function(**_COMMON_FUNCTION_KWARGS)
+@app.function(
+    image=image,
+    secrets=[modal.Secret.from_name(SECRET_NAME)],
+    cpu=2.0,
+    memory=4096,
+    timeout=3 * 60 * 60,
+)
 @modal.asgi_app()
 def web_app():
     from fastapi import FastAPI, Header, HTTPException

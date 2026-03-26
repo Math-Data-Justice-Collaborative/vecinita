@@ -3,8 +3,8 @@ Unit tests for src/gateway/models.py
 
 Tests Pydantic models for request/response validation.
 """
+
 from datetime import datetime, timezone
-from typing import List
 
 import pytest
 from pydantic import ValidationError
@@ -17,7 +17,7 @@ class TestScrapeModels:
 
     def test_scrape_request_valid(self):
         """Test valid ScrapeRequest."""
-        from src.api.models import ScrapeRequest, LoaderType
+        from src.api.models import LoaderType, ScrapeRequest
 
         request = ScrapeRequest(
             urls=["https://example.com"],
@@ -59,7 +59,7 @@ class TestScrapeModels:
 
     def test_scrape_response(self):
         """Test ScrapeResponse model."""
-        from src.api.models import ScrapeResponse, JobStatus
+        from src.api.models import JobStatus, ScrapeResponse
 
         response = ScrapeResponse(
             job_id="test-job-123",
@@ -96,7 +96,7 @@ class TestScrapeModels:
 
     def test_scrape_job_metadata(self):
         """Test ScrapeJobMetadata model."""
-        from src.api.models import ScrapeJobMetadata, LoaderType
+        from src.api.models import LoaderType, ScrapeJobMetadata
 
         metadata = ScrapeJobMetadata(
             job_id="job-123",
@@ -125,10 +125,7 @@ class TestEmbeddingModels:
         """Test EmbedRequest with model override."""
         from src.api.models import EmbedRequest
 
-        request = EmbedRequest(
-            text="Hello world",
-            model="custom-model"
-        )
+        request = EmbedRequest(text="Hello world", model="custom-model")
         assert request.model == "custom-model"
 
     def test_embed_response(self):
@@ -231,9 +228,7 @@ class TestAskModels:
         response = AskQuestionResponse(
             question="What is housing?",
             answer="Housing is a place where people live.",
-            sources=[
-                {"url": "https://example.com", "content": "Sample content", "relevance": 0.9}
-            ],
+            sources=[{"url": "https://example.com", "content": "Sample content", "relevance": 0.9}],
             language="en",
             model="gpt-4",
         )

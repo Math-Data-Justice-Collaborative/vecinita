@@ -2,17 +2,17 @@
 Tests for the new modular scraper module - src/scraper/
 Comprehensive test suite for all scraper components.
 """
-import pytest
+
 import os
 import tempfile
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime
+from unittest.mock import Mock, patch
 
+import pytest
 
 # ============================================================================
 # CONFIG TESTS
 # ============================================================================
+
 
 @pytest.mark.unit
 class TestScraperConfig:
@@ -37,7 +37,7 @@ class TestScraperConfig:
         assert "skip_sites" in config.SKIP_SITES_FILE
         assert config.DATA_DIR == "data/"
 
-    @patch('os.path.exists', return_value=False)
+    @patch("os.path.exists", return_value=False)
     def test_load_config_missing_file(self, mock_exists):
         """Test that missing config files are handled gracefully."""
         from src.scraper.config import ScraperConfig
@@ -46,8 +46,8 @@ class TestScraperConfig:
         result = config._load_config_list("nonexistent.txt")
         assert result == []
 
-    @patch('builtins.open', create=True)
-    @patch('os.path.exists', return_value=True)
+    @patch("builtins.open", create=True)
+    @patch("os.path.exists", return_value=True)
     def test_load_config_list(self, mock_exists, mock_file):
         """Test loading a configuration list from file."""
         from src.scraper.config import ScraperConfig
@@ -57,7 +57,7 @@ class TestScraperConfig:
             "domain1.com\n",
             "# comment\n",
             "domain2.com\n",
-            "\n"
+            "\n",
         ]
 
         config = ScraperConfig()
@@ -68,8 +68,8 @@ class TestScraperConfig:
         assert "# comment" not in result
         assert "" not in result
 
-    @patch('builtins.open', create=True)
-    @patch('os.path.exists', return_value=True)
+    @patch("builtins.open", create=True)
+    @patch("os.path.exists", return_value=True)
     def test_load_recursive_config(self, mock_exists, mock_file):
         """Test loading recursive crawl configuration."""
         from src.scraper.config import ScraperConfig
@@ -77,7 +77,7 @@ class TestScraperConfig:
         mock_file.return_value.__enter__.return_value = [
             "https://example.com 2\n",
             "https://test.org 1\n",
-            "# comment\n"
+            "# comment\n",
         ]
 
         config = ScraperConfig()
@@ -91,6 +91,7 @@ class TestScraperConfig:
 # ============================================================================
 # UTILS TESTS
 # ============================================================================
+
 
 @pytest.mark.unit
 class TestScraperUtils:
@@ -118,8 +119,7 @@ class TestScraperUtils:
         from src.scraper.utils import should_skip_url
 
         skip_patterns = ["facebook.com", "youtube.com"]
-        assert should_skip_url(
-            "https://facebook.com/page", skip_patterns) is True
+        assert should_skip_url("https://facebook.com/page", skip_patterns) is True
         assert should_skip_url("https://example.com", skip_patterns) is False
 
     def test_needs_playwright(self):
@@ -127,18 +127,15 @@ class TestScraperUtils:
         from src.scraper.utils import needs_playwright
 
         playwright_patterns = ["javascript-site.com", "enrollri.org"]
-        assert needs_playwright(
-            "https://enrollri.org/page", playwright_patterns) is True
-        assert needs_playwright("https://example.com",
-                                playwright_patterns) is False
+        assert needs_playwright("https://enrollri.org/page", playwright_patterns) is True
+        assert needs_playwright("https://example.com", playwright_patterns) is False
 
     def test_is_csv_file_detection(self):
         """Test CSV file detection."""
         from src.scraper.utils import is_csv_file
 
         assert is_csv_file("https://example.com/data.csv") is True
-        assert is_csv_file(
-            "https://github.com/user/repo/blob/main/file.csv") is True
+        assert is_csv_file("https://github.com/user/repo/blob/main/file.csv") is True
         assert is_csv_file("https://example.com/page.html") is False
 
     def test_get_crawl_config_matching(self):
@@ -147,7 +144,7 @@ class TestScraperUtils:
 
         crawl_configs = {
             "https://example.com/": {"max_depth": 2},
-            "https://test.org/": {"max_depth": 1}
+            "https://test.org/": {"max_depth": 1},
         }
 
         result = get_crawl_config("https://example.com/page", crawl_configs)
@@ -168,8 +165,8 @@ class TestScraperUtils:
 
         dirty_text = """
         Sample text. Cookie policy here.
-        
-        
+
+
         Real content.
         Terms of service link.
         More content.
@@ -181,13 +178,13 @@ class TestScraperUtils:
         assert "More content" in result
         assert "cookie" not in result.lower() or "policy" not in result.lower()
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_download_file_success(self, mock_get):
         """Test successful file download."""
         from src.scraper.utils import download_file
 
         mock_response = Mock()
-        mock_response.iter_content = Mock(return_value=[b'test data'])
+        mock_response.iter_content = Mock(return_value=[b"test data"])
         mock_get.return_value = mock_response
 
         with tempfile.NamedTemporaryFile(delete=False) as f:
@@ -201,7 +198,7 @@ class TestScraperUtils:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
 
-    @patch('requests.get', side_effect=Exception("Network error"))
+    @patch("requests.get", side_effect=Exception("Network error"))
     def test_download_file_failure(self, mock_get):
         """Test file download failure handling."""
         from src.scraper.utils import download_file
@@ -213,13 +210,13 @@ class TestScraperUtils:
         """Test writing to failed URL log."""
         from src.scraper.utils import write_to_failed_log
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
             log_file = f.name
 
         try:
             write_to_failed_log("https://example.com", "Test error", log_file)
 
-            with open(log_file, 'r') as f:
+            with open(log_file) as f:
                 content = f.read()
 
             assert "https://example.com" in content
@@ -265,6 +262,7 @@ class TestScraperUtils:
 # LOADERS TESTS
 # ============================================================================
 
+
 @pytest.mark.unit
 class TestSmartLoader:
     """Test SmartLoader class."""
@@ -286,19 +284,18 @@ class TestSmartLoader:
         loader = SmartLoader(mock_config)
         assert loader.config is not None
 
-    @patch('src.scraper.utils.should_skip_url', return_value=True)
+    @patch("src.scraper.utils.should_skip_url", return_value=True)
     def test_load_url_skips_matching(self, mock_skip, mock_config):
         """Test that matching URLs are skipped."""
         from src.scraper.loaders import SmartLoader
 
         loader = SmartLoader(mock_config)
-        docs, loader_type, success = loader.load_url(
-            "https://skip-site.com/page")
+        docs, loader_type, success = loader.load_url("https://skip-site.com/page")
 
         assert success is False
         assert loader_type == "Skipped"
 
-    @patch('src.scraper.loaders.SmartLoader._load_standard')
+    @patch("src.scraper.loaders.SmartLoader._load_standard")
     def test_load_url_with_forced_unstructured_loader(self, mock_load, mock_config):
         """Test forcing unstructured loader."""
         from src.scraper.loaders import SmartLoader
@@ -307,8 +304,7 @@ class TestSmartLoader:
 
         loader = SmartLoader(mock_config)
         docs, loader_type, success = loader.load_url(
-            "https://example.com",
-            force_loader='unstructured'
+            "https://example.com", force_loader="unstructured"
         )
 
         mock_load.assert_called_once()
@@ -317,6 +313,7 @@ class TestSmartLoader:
 # ============================================================================
 # PROCESSORS TESTS
 # ============================================================================
+
 
 @pytest.mark.unit
 class TestDocumentProcessor:
@@ -344,9 +341,7 @@ class TestDocumentProcessor:
 
         processor = DocumentProcessor(mock_config)
         chunks, links = processor.process_documents(
-            docs=[],
-            source_identifier="https://example.com",
-            loader_type="Test"
+            docs=[], source_identifier="https://example.com", loader_type="Test"
         )
 
         assert chunks == 0
@@ -363,6 +358,7 @@ class TestDocumentProcessor:
 # ============================================================================
 # LINK TRACKER TESTS
 # ============================================================================
+
 
 @pytest.mark.unit
 class TestLinkTracker:
@@ -381,8 +377,7 @@ class TestLinkTracker:
         from src.scraper.link_tracker import LinkTracker
 
         tracker = LinkTracker()
-        tracker.add_links("https://example.com",
-                          ["https://link1.com", "https://link2.com"])
+        tracker.add_links("https://example.com", ["https://link1.com", "https://link2.com"])
 
         assert "https://example.com" in tracker.links
         assert len(tracker.links["https://example.com"]) == 2
@@ -392,10 +387,8 @@ class TestLinkTracker:
         from src.scraper.link_tracker import LinkTracker
 
         tracker = LinkTracker()
-        tracker.add_links("https://example.com",
-                          ["https://link1.com", "https://link2.com"])
-        tracker.add_links("https://test.com",
-                          ["https://link1.com", "https://link3.com"])
+        tracker.add_links("https://example.com", ["https://link1.com", "https://link2.com"])
+        tracker.add_links("https://test.com", ["https://link1.com", "https://link3.com"])
 
         summary = tracker.get_summary()
         assert summary["total_sources"] == 2
@@ -405,16 +398,15 @@ class TestLinkTracker:
         """Test saving links to file."""
         from src.scraper.link_tracker import LinkTracker
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
             output_file = f.name
 
         try:
             tracker = LinkTracker(output_file=output_file)
-            tracker.add_links("https://example.com",
-                              ["https://link1.com", "https://link2.com"])
+            tracker.add_links("https://example.com", ["https://link1.com", "https://link2.com"])
             tracker.save_links()
 
-            with open(output_file, 'r') as f:
+            with open(output_file) as f:
                 content = f.read()
 
             assert "https://example.com" in content
@@ -426,6 +418,7 @@ class TestLinkTracker:
 # ============================================================================
 # SCRAPER TESTS
 # ============================================================================
+
 
 @pytest.mark.unit
 class TestVecinaScraper:
@@ -470,7 +463,7 @@ class TestVecinaScraper:
             os.remove(output)
             os.remove(failed_log)
 
-    @patch('src.scraper.scraper.SmartLoader.load_url')
+    @patch("src.scraper.scraper.SmartLoader.load_url")
     def test_scrape_urls_empty_list(self, mock_load_url):
         """Test scraping empty URL list."""
         from src.scraper.scraper import VecinaScraper
@@ -496,6 +489,7 @@ class TestVecinaScraper:
 # INTEGRATION TESTS
 # ============================================================================
 
+
 @pytest.mark.integration
 class TestScraperIntegration:
     """Integration tests for the complete scraper pipeline."""
@@ -503,7 +497,7 @@ class TestScraperIntegration:
     @pytest.fixture
     def temp_urls_file(self):
         """Create temporary URLs file."""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
             f.write("# Test URLs\n")
             f.write("https://example.com\n")
             f.write("https://test.org\n")

@@ -13,18 +13,18 @@ Security Patterns:
 - Thread isolation prevents cross-conversation access
 """
 
-import os
 import logging
+import os
 import time
-import json
-from typing import Optional, Callable, Dict, Tuple
-from collections import defaultdict
+from collections.abc import Awaitable, Callable
 from datetime import datetime, timedelta
+from typing import Any
+
+import httpx
+from starlette.datastructures import MutableHeaders
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from starlette.responses import Response, JSONResponse
-from starlette.datastructures import MutableHeaders
-import httpx
+from starlette.responses import JSONResponse, Response
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ RATE_LIMIT_TOKENS_PER_DAY = int(os.getenv("RATE_LIMIT_TOKENS_PER_DAY", "1000"))
 RATE_LIMIT_REQUESTS_PER_HOUR = int(os.getenv("RATE_LIMIT_REQUESTS_PER_HOUR", "100"))
 
 # Per-endpoint rate limits (can be overridden)
-ENDPOINT_RATE_LIMITS: Dict[str, Dict[str, int]] = {
+ENDPOINT_RATE_LIMITS: dict[str, dict[str, int]] = {
     "/api/v1/ask": {"requests_per_hour": 60, "tokens_per_day": 1000},
     "/api/v1/scrape": {"requests_per_hour": 10, "tokens_per_day": 5000},
     "/api/v1/admin": {"requests_per_hour": 5, "tokens_per_day": 100},
@@ -62,19 +62,15 @@ PUBLIC_ENDPOINTS = {
     "/api/v1/redoc",
 }
 
-PUBLIC_PREFIXES = (
-    "/api/v1/documents",
-)
+PUBLIC_PREFIXES = ("/api/v1/documents",)
 
-AUTH_BYPASS_PREFIXES = (
-    "/api/v1/admin",
-)
+AUTH_BYPASS_PREFIXES = ("/api/v1/admin",)
 
 
 class AuthenticationMiddleware(BaseHTTPMiddleware):
     """
     Middleware to intercept requests and validate API keys via the auth proxy.
-    
+
     - Extracts API key from Authorization header
     - Calls auth proxy to validate
     - Tracks token usage
@@ -92,7 +88,9 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
             self._http_client = httpx.Client(timeout=5.0)
         return self._http_client
 
-    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         """Handle request authentication and tracking."""
         path = request.url.path
 
@@ -119,7 +117,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
                 content={
                     "error": "Missing API key",
                     "detail": "Provide API key via 'Authorization: Bearer <api_key>' header",
-                }
+                },
             )
 
         # Validate against auth proxy if enabled
@@ -131,7 +129,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
                     content={
                         "error": "Invalid API key",
                         "detail": "API key validation failed",
-                    }
+                    },
                 )
 
         # Call the actual endpoint
@@ -166,7 +164,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
                 content={"error": "Internal server error"},
             )
 
-    def _extract_api_key(self, auth_header: str) -> Optional[str]:
+    def _extract_api_key(self, auth_header: str) -> str | None:
         """Extract API key from Authorization header."""
         if not auth_header:
             return None
@@ -177,20 +175,20 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
             return parts[1]
         elif len(parts) == 1:
             return parts[0]
-        
+
         return None
 
     async def _validate_api_key(self, api_key: str) -> bool:
         """
         Validate API key via auth proxy.
-        
+
         SECURITY: Implements FAIL-CLOSED pattern:
         - If auth proxy is unavailable and AUTH_FAIL_CLOSED=true (default): DENY access
         - If auth proxy is unavailable and AUTH_FAIL_CLOSED=false: ALLOW access (legacy)
-        
+
         Args:
             api_key: API key to validate
-            
+
         Returns:
             True if valid, False if invalid or auth proxy unavailable
         """
@@ -202,18 +200,18 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
             )
             if response.status_code == 200:
                 data = response.json()
-                return data.get("valid", False)
+                return bool(data.get("valid", False)) if isinstance(data, dict) else False
             logger.warning(f"Auth proxy returned {response.status_code}")
             return False
         except Exception as e:
             logger.error(f"Auth proxy unavailable: {e}")
             if AUTH_FAIL_CLOSED:
                 # FAIL CLOSED (secure default): Deny access when auth service is down
-                logger.error(f"Auth proxy error with FAIL_CLOSED=true: denying access")
+                logger.error("Auth proxy error with FAIL_CLOSED=true: denying access")
                 return False
             else:
                 # FAIL OPEN (legacy): Allow access when auth service is down
-                logger.warning(f"Auth proxy error: allowing access (FAIL_OPEN mode)")
+                logger.warning("Auth proxy error: allowing access (FAIL_OPEN mode)")
                 return True
 
     async def _track_usage(self, api_key: str, tokens: int) -> None:
@@ -232,11 +230,11 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
 class RateLimitingMiddleware(BaseHTTPMiddleware):
     """
     Rate limiting middleware with per-endpoint configuration.
-    
+
     Tracks:
     - Requests per hour (per endpoint)
     - Tokens per day (global)
-    
+
     Data structure:
     rate_limit_state[api_key] = {
         'token_count': int,
@@ -248,19 +246,21 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
             }
         }
     }
-    
+
     TODO: Move to Redis for production/multi-instance deployment
     """
 
     def __init__(self, app):
         super().__init__(app)
         # In-memory rate limit tracking: api_key -> {tokens, requests_by_endpoint}
-        self.rate_limit_state: Dict[str, Dict] = {}
+        self.rate_limit_state: dict[str, dict] = {}
 
-    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         """
         Check rate limits before processing request.
-        
+
         Returns 429 Too Many Requests if limits exceeded.
         """
         # Skip rate limiting for public endpoints
@@ -277,11 +277,9 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
         # Check rate limits if API key provided
         if api_key:
             rate_limit_info = self._check_and_update_rate_limits(
-                api_key=api_key,
-                endpoint=request.url.path,
-                method=request.method
+                api_key=api_key, endpoint=request.url.path, method=request.method
             )
-            
+
             if rate_limit_info["exceeded"]:
                 return JSONResponse(
                     status_code=429,
@@ -296,12 +294,12 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
                         "X-RateLimit-Limit": str(rate_limit_info["limit"]),
                         "X-RateLimit-Remaining": str(max(0, rate_limit_info["remaining"])),
                         "X-RateLimit-Reset": rate_limit_info["reset_at"],
-                    }
+                    },
                 )
 
         return await call_next(request)
 
-    def _extract_api_key(self, auth_header: str) -> Optional[str]:
+    def _extract_api_key(self, auth_header: str) -> str | None:
         """Extract API key from Authorization header."""
         if not auth_header:
             return None
@@ -312,34 +310,32 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
             return parts[0]
         return None
 
-    def _get_endpoint_limit(self, endpoint: str) -> Dict[str, int]:
+    def _get_endpoint_limit(self, endpoint: str) -> dict[str, int]:
         """
         Get rate limit for specific endpoint.
-        
+
         Returns:
             {'requests_per_hour': int, 'tokens_per_day': int}
         """
         # Check exact match first
         if endpoint in ENDPOINT_RATE_LIMITS:
             return ENDPOINT_RATE_LIMITS[endpoint]
-        
+
         # Check path prefix matches
         for path_prefix, limits in ENDPOINT_RATE_LIMITS.items():
             if endpoint.startswith(path_prefix):
                 return limits
-        
+
         # Default limits for unknown endpoints
         return {
             "requests_per_hour": RATE_LIMIT_REQUESTS_PER_HOUR,
             "tokens_per_day": RATE_LIMIT_TOKENS_PER_DAY,
         }
 
-    def _check_and_update_rate_limits(
-        self, api_key: str, endpoint: str, method: str
-    ) -> Dict:
+    def _check_and_update_rate_limits(self, api_key: str, endpoint: str, method: str) -> dict:
         """
         Check and update rate limits for API key.
-        
+
         Returns:
             {
                 'exceeded': bool,
@@ -352,26 +348,26 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
             }
         """
         now = datetime.utcnow()
-        
+
         # Initialize state for new API key
         if api_key not in self.rate_limit_state:
             self.rate_limit_state[api_key] = {
                 "token_used": 0,
                 "token_reset_time": now + timedelta(days=1),
-                "endpoints": {}
+                "endpoints": {},
             }
-        
+
         state = self.rate_limit_state[api_key]
-        
+
         # ===== Check tokens per day =====
         if now >= state["token_reset_time"]:
             # Reset daily tokens
             state["token_used"] = 0
             state["token_reset_time"] = now + timedelta(days=1)
-        
+
         endpoint_limits = self._get_endpoint_limit(endpoint)
         tokens_per_day_limit = endpoint_limits["tokens_per_day"]
-        
+
         if state["token_used"] >= tokens_per_day_limit:
             reset_at = state["token_reset_time"].isoformat()
             retry_after = int((state["token_reset_time"] - now).total_seconds())
@@ -384,22 +380,22 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
                 "reset_at": reset_at,
                 "retry_after_seconds": max(1, retry_after),
             }
-        
+
         # ===== Check requests per hour =====
         if endpoint not in state["endpoints"]:
             state["endpoints"][endpoint] = {
                 "request_count": 0,
-                "request_reset_time": now + timedelta(hours=1)
+                "request_reset_time": now + timedelta(hours=1),
             }
-        
+
         endpoint_state = state["endpoints"][endpoint]
         requests_per_hour_limit = endpoint_limits["requests_per_hour"]
-        
+
         if now >= endpoint_state["request_reset_time"]:
             # Reset hourly requests
             endpoint_state["request_count"] = 0
             endpoint_state["request_reset_time"] = now + timedelta(hours=1)
-        
+
         if endpoint_state["request_count"] >= requests_per_hour_limit:
             reset_at = endpoint_state["request_reset_time"].isoformat()
             retry_after = int((endpoint_state["request_reset_time"] - now).total_seconds())
@@ -412,11 +408,11 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
                 "reset_at": reset_at,
                 "retry_after_seconds": max(1, retry_after),
             }
-        
+
         # ===== Update counters =====
         state["token_used"] += 1
         endpoint_state["request_count"] += 1
-        
+
         # Return success with remaining limits
         return {
             "exceeded": False,
@@ -432,12 +428,12 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
 class ThreadIsolationMiddleware(BaseHTTPMiddleware):
     """
     Middleware for thread/conversation isolation in single-tenant mode.
-    
+
     Tracks thread ownership and prevents cross-thread data access:
     - Maps thread_id -> session_id (API key or anonymous session)
     - Validates thread access on each request
     - Injects session context for downstream services
-    
+
     In single-tenant mode, this provides conversation-level isolation
     without requiring full multi-tenancy infrastructure.
     """
@@ -451,36 +447,35 @@ class ThreadIsolationMiddleware(BaseHTTPMiddleware):
         # Thread timeout: remove threads after 24 hours of inactivity
         self._thread_ttl_seconds = 24 * 60 * 60
 
-    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         """Validate thread ownership and inject session context."""
-        from datetime import datetime, timezone
         import time
-        
+
         # Skip for public endpoints
         if request.url.path in ["/health", "/", "/docs", "/openapi.json", "/redoc"]:
             return await call_next(request)
-        
+
         # Extract thread_id from query params or headers
-        thread_id = (
-            request.query_params.get("thread_id")
-            or request.headers.get("X-Thread-ID")
-        )
-        
+        thread_id = request.query_params.get("thread_id") or request.headers.get("X-Thread-ID")
+
         # Extract session identifier (API key or anonymous session)
         api_key = self._extract_api_key(request.headers.get("Authorization", ""))
         session_id = api_key or request.headers.get("X-Session-ID") or "anonymous"
-        
+
         # If no thread_id provided, create a new one
         if not thread_id:
             import secrets
+
             thread_id = f"thread-{secrets.token_urlsafe(16)}"
             logger.info(f"Created new thread: {thread_id} for session: {session_id}")
-        
+
         # Check thread ownership
         current_time = time.time()
         if thread_id in self._thread_registry:
             thread_info = self._thread_registry[thread_id]
-            
+
             # Check if thread belongs to different session
             if thread_info["session_id"] != session_id:
                 logger.warning(
@@ -491,55 +486,57 @@ class ThreadIsolationMiddleware(BaseHTTPMiddleware):
                     status_code=403,
                     content={
                         "error": "Thread access denied",
-                        "detail": "This conversation thread belongs to another session"
-                    }
+                        "detail": "This conversation thread belongs to another session",
+                    },
                 )
-            
+
             # Update last accessed time
             thread_info["last_accessed"] = current_time
-            
+
             # Check if thread has expired
             age = current_time - thread_info["last_accessed"]
             if age > self._thread_ttl_seconds:
-                logger.info(f"Thread expired: {thread_id} (age: {age/3600:.1f} hours)")
+                logger.info(f"Thread expired: {thread_id} (age: {age / 3600:.1f} hours)")
                 self._remove_thread(thread_id, session_id)
                 return JSONResponse(
                     status_code=410,
                     content={
                         "error": "Thread expired",
-                        "detail": "This conversation thread has expired due to inactivity"
-                    }
+                        "detail": "This conversation thread has expired due to inactivity",
+                    },
                 )
         else:
             # Register new thread
             self._thread_registry[thread_id] = {
                 "session_id": session_id,
                 "created_at": current_time,
-                "last_accessed": current_time
+                "last_accessed": current_time,
             }
-            
+
             # Add to session's thread list
             if session_id not in self._session_threads:
                 self._session_threads[session_id] = []
             self._session_threads[session_id].append(thread_id)
-            
+
             logger.info(f"Registered thread: {thread_id} for session: {session_id}")
-        
+
         # Process request
         response = await call_next(request)
-        
+
         # Add thread info to response headers
         response.headers["X-Thread-ID"] = thread_id
         response.headers["X-Thread-Session"] = session_id
-        response.headers["X-Thread-Age"] = str(int(current_time - self._thread_registry[thread_id]["created_at"]))
-        
+        response.headers["X-Thread-Age"] = str(
+            int(current_time - self._thread_registry[thread_id]["created_at"])
+        )
+
         # Periodic cleanup of expired threads (every 100th request)
         if len(self._thread_registry) % 100 == 0:
             self._cleanup_expired_threads()
-        
+
         return response
-    
-    def _extract_api_key(self, auth_header: str) -> Optional[str]:
+
+    def _extract_api_key(self, auth_header: str) -> str | None:
         """Extract API key from Authorization header."""
         if not auth_header:
             return None
@@ -549,50 +546,52 @@ class ThreadIsolationMiddleware(BaseHTTPMiddleware):
         elif len(parts) == 1:
             return parts[0]
         return None
-    
+
     def _remove_thread(self, thread_id: str, session_id: str):
         """Remove thread from registry."""
         if thread_id in self._thread_registry:
             del self._thread_registry[thread_id]
-        
+
         if session_id in self._session_threads:
             if thread_id in self._session_threads[session_id]:
                 self._session_threads[session_id].remove(thread_id)
-            
+
             # Clean up empty session entries
             if not self._session_threads[session_id]:
                 del self._session_threads[session_id]
-    
+
     def _cleanup_expired_threads(self):
         """Remove expired threads from registry."""
         import time
+
         current_time = time.time()
         expired_threads = []
-        
+
         for thread_id, info in self._thread_registry.items():
             age = current_time - info["last_accessed"]
             if age > self._thread_ttl_seconds:
                 expired_threads.append((thread_id, info["session_id"]))
-        
+
         for thread_id, session_id in expired_threads:
             logger.info(f"Cleaning up expired thread: {thread_id}")
             self._remove_thread(thread_id, session_id)
-        
+
         if expired_threads:
             logger.info(f"Cleaned up {len(expired_threads)} expired threads")
-    
-    def get_session_threads(self, session_id: str) -> list:
+
+    def get_session_threads(self, session_id: str) -> list[Any]:
         """Get all threads for a session (admin/debugging)."""
-        return self._session_threads.get(session_id, [])
-    
-    def get_thread_info(self, thread_id: str) -> Optional[dict]:
+        threads = self._session_threads.get(session_id, [])
+        return list(threads)
+
+    def get_thread_info(self, thread_id: str) -> dict | None:
         """Get thread information (admin/debugging)."""
         return self._thread_registry.get(thread_id)
-    
+
     def count_active_threads(self) -> int:
         """Count total active threads (monitoring)."""
         return len(self._thread_registry)
-    
+
     def count_active_sessions(self) -> int:
         """Count total active sessions (monitoring)."""
         return len(self._session_threads)

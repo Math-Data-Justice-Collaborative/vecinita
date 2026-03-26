@@ -7,6 +7,7 @@ from unittest.mock import Mock
 
 def _module():
     import src.agent.main as agent_main
+
     return agent_main
 
 
@@ -33,21 +34,29 @@ def test_ask_answer_seeking_runs_db_search_once_and_returns_sources(fastapi_clie
     monkeypatch.setattr(agent_main, "_find_static_faq_answer", lambda *_args, **_kwargs: None)
     monkeypatch.setattr(agent_main, "static_response_tool", Mock(invoke=Mock(return_value=None)))
 
-    db_search_mock = Mock(return_value=json.dumps([
-        {
-            "content": "Housing help is available in Providence.",
-            "source_url": "https://example.org/housing",
-            "similarity": 0.91,
-            "chunk_index": 0,
-        }
-    ]))
+    db_search_mock = Mock(
+        return_value=json.dumps(
+            [
+                {
+                    "content": "Housing help is available in Providence.",
+                    "source_url": "https://example.org/housing",
+                    "similarity": 0.91,
+                    "chunk_index": 0,
+                }
+            ]
+        )
+    )
     monkeypatch.setattr(agent_main, "db_search_tool", Mock(invoke=db_search_mock))
 
     fake_llm = Mock()
-    fake_llm.invoke.return_value = Mock(content="Grounded response. (Source: https://example.org/housing)")
+    fake_llm.invoke.return_value = Mock(
+        content="Grounded response. (Source: https://example.org/housing)"
+    )
     monkeypatch.setattr(agent_main, "_get_llm_without_tools", lambda *_args, **_kwargs: fake_llm)
 
-    response = fastapi_client.get("/ask", params={"question": "What housing programs are available?"})
+    response = fastapi_client.get(
+        "/ask", params={"question": "What housing programs are available?"}
+    )
 
     assert response.status_code == 200
     payload = response.json()
@@ -89,13 +98,15 @@ def test_ask_weak_retrieval_adds_warning_banner(fastapi_client, monkeypatch):
         "db_search_tool",
         Mock(
             invoke=Mock(
-                return_value=json.dumps([
-                    {
-                        "content": "Partial and weakly matched content.",
-                        "source_url": "https://example.org/weak",
-                        "similarity": 0.12,
-                    }
-                ])
+                return_value=json.dumps(
+                    [
+                        {
+                            "content": "Partial and weakly matched content.",
+                            "source_url": "https://example.org/weak",
+                            "similarity": 0.12,
+                        }
+                    ]
+                )
             )
         ),
     )
@@ -104,7 +115,9 @@ def test_ask_weak_retrieval_adds_warning_banner(fastapi_client, monkeypatch):
     fake_llm.invoke.return_value = Mock(content="Best-effort answer.")
     monkeypatch.setattr(agent_main, "_get_llm_without_tools", lambda *_args, **_kwargs: fake_llm)
 
-    response = fastapi_client.get("/ask", params={"question": "How can I improve local water quality?"})
+    response = fastapi_client.get(
+        "/ask", params={"question": "How can I improve local water quality?"}
+    )
 
     assert response.status_code == 200
     payload = response.json()
@@ -116,20 +129,28 @@ def test_stream_answer_seeking_runs_db_search_once(fastapi_client, parse_sse_eve
 
     monkeypatch.setattr(agent_main, "_find_static_faq_answer", lambda *_args, **_kwargs: None)
 
-    db_search_mock = Mock(return_value=json.dumps([
-        {
-            "content": "Food pantry resources in Providence.",
-            "source_url": "https://example.org/food",
-            "similarity": 0.88,
-        }
-    ]))
+    db_search_mock = Mock(
+        return_value=json.dumps(
+            [
+                {
+                    "content": "Food pantry resources in Providence.",
+                    "source_url": "https://example.org/food",
+                    "similarity": 0.88,
+                }
+            ]
+        )
+    )
     monkeypatch.setattr(agent_main, "db_search_tool", Mock(invoke=db_search_mock))
 
     fake_llm = Mock()
-    fake_llm.invoke.return_value = Mock(content="Use local pantry resources. (Source: https://example.org/food)")
+    fake_llm.invoke.return_value = Mock(
+        content="Use local pantry resources. (Source: https://example.org/food)"
+    )
     monkeypatch.setattr(agent_main, "_get_llm_without_tools", lambda *_args, **_kwargs: fake_llm)
 
-    response = fastapi_client.get("/ask-stream", params={"question": "Where can I find food assistance?"})
+    response = fastapi_client.get(
+        "/ask-stream", params={"question": "Where can I find food assistance?"}
+    )
 
     assert response.status_code == 200
     assert db_search_mock.call_count == 1
@@ -175,19 +196,23 @@ def test_stream_spanish_thinking_messages_are_localized(parse_sse_events, monkey
         "db_search_tool",
         Mock(
             invoke=Mock(
-                return_value=json.dumps([
-                    {
-                        "content": "Hay recursos de alimentos en Providence.",
-                        "source_url": "https://example.org/es-food",
-                        "similarity": 0.9,
-                    }
-                ])
+                return_value=json.dumps(
+                    [
+                        {
+                            "content": "Hay recursos de alimentos en Providence.",
+                            "source_url": "https://example.org/es-food",
+                            "similarity": 0.9,
+                        }
+                    ]
+                )
             )
         ),
     )
 
     fake_llm = Mock()
-    fake_llm.invoke.return_value = Mock(content="Puedes usar recursos locales. (Fuente: https://example.org/es-food)")
+    fake_llm.invoke.return_value = Mock(
+        content="Puedes usar recursos locales. (Fuente: https://example.org/es-food)"
+    )
     monkeypatch.setattr(agent_main, "_get_llm_without_tools", lambda *_args, **_kwargs: fake_llm)
 
     streaming_response = asyncio.run(
@@ -214,9 +239,7 @@ def test_stream_spanish_thinking_messages_are_localized(parse_sse_events, monkey
     assert events, "Expected non-empty SSE event stream"
 
     thinking_messages = [
-        event.get("message", "")
-        for event in events
-        if event.get("type") == "thinking"
+        event.get("message", "") for event in events if event.get("type") == "thinking"
     ]
     assert thinking_messages, "Expected at least one 'thinking' SSE event"
 

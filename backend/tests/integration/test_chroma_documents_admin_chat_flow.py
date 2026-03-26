@@ -17,10 +17,11 @@ class _FakeChromaStore:
         self.queue: dict[str, dict[str, Any]] = {}
 
     def iter_all_chunks(self, batch_size: int = 500):
-        for row in self.rows:
-            yield row
+        yield from self.rows
 
-    def upsert_source(self, *, url: str, metadata: dict, title: str | None = None, is_active: bool = True):
+    def upsert_source(
+        self, *, url: str, metadata: dict, title: str | None = None, is_active: bool = True
+    ):
         self.sources[url] = {
             "url": url,
             "title": title or url,
@@ -44,7 +45,13 @@ class _FakeChromaStore:
 
 
 class _FakeResponse:
-    def __init__(self, payload: dict[str, Any], status_code: int = 200, text: str = "", headers: dict[str, str] | None = None):
+    def __init__(
+        self,
+        payload: dict[str, Any],
+        status_code: int = 200,
+        text: str = "",
+        headers: dict[str, str] | None = None,
+    ):
         self._payload = payload
         self.status_code = status_code
         self.text = text
@@ -163,7 +170,9 @@ def test_admin_upload_writes_chunks_to_chroma(gateway_client, monkeypatch):
     files = {
         "file": ("sample.txt", b"Housing assistance information for residents.", "text/plain"),
     }
-    response = gateway_client.post("/api/v1/admin/upload", files=files, data={"tags": "housing,benefits"})
+    response = gateway_client.post(
+        "/api/v1/admin/upload", files=files, data={"tags": "housing,benefits"}
+    )
 
     app.dependency_overrides.clear()
 
@@ -205,7 +214,9 @@ def test_ask_endpoint_preserves_source_attribution(gateway_client, monkeypatch):
 
     monkeypatch.setattr(router_ask.httpx, "AsyncClient", _FakeAsyncClient)
 
-    response = gateway_client.get("/api/v1/ask", params={"question": "Where can I find assistance?"})
+    response = gateway_client.get(
+        "/api/v1/ask", params={"question": "Where can I find assistance?"}
+    )
     assert response.status_code == 200
 
     data = response.json()

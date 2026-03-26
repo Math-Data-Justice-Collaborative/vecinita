@@ -3,51 +3,49 @@
 # This version includes an explicit rule for response language.
 # Serves the index.html UI at the root "/" endpoint.
 
-import os
 import json
-import time
-import re
 import logging
+import os
+import re
+import time
 import traceback
 import urllib.request
-from pathlib import Path
 from datetime import datetime, timezone
+from pathlib import Path
 
 # Avoid hard torch dependency during transformers import on CPU-only/broken torch envs.
 os.environ.setdefault("USE_TORCH", "0")
 os.environ.setdefault("TRANSFORMERS_NO_TORCH", "1")
 
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from typing import Annotated, Any, Literal, TypedDict
+
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from typing import Annotated, List, TypedDict, Literal
-from dotenv import load_dotenv
-from pydantic import BaseModel
-from typing import TypedDict, Optional
-from supabase import create_client, Client
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage, ToolMessage
+from fastapi.responses import JSONResponse, StreamingResponse
 from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
-from langdetect import detect, LangDetectException
-from langgraph.graph import StateGraph, START, END
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage, ToolMessage
+from langdetect import LangDetectException, detect  # type: ignore[import-not-found]
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
-from langgraph.checkpoint.memory import MemorySaver
+from pydantic import BaseModel
+from supabase import Client, create_client
+
+from src.services.chroma_store import get_chroma_store
+from src.utils.tags import parse_tags_input
+
+from .tools.clarify_question import create_clarify_question_tool
 
 # Import tools
-from .tools.db_search import create_db_search_tool
-from .tools.db_search import set_search_options as set_db_search_options
+from .tools.db_search import create_db_search_tool, get_last_search_metrics, get_last_search_status
 from .tools.db_search import reset_search_options as reset_db_search_options
-from .tools.db_search import get_last_search_status
-from .tools.db_search import get_last_search_metrics
-from .tools.static_response import create_static_response_tool, FAQ_DATABASE
-from .tools.web_search import create_web_search_tool
-from .tools.clarify_question import create_clarify_question_tool
+from .tools.db_search import set_search_options as set_db_search_options
 from .tools.rank_retrieval import create_rank_retrieval_tool
 from .tools.rewrite_question import create_rewrite_question_tool
-from src.utils.tags import parse_tags_input
-from src.services.chroma_store import get_chroma_store
+from .tools.static_response import FAQ_DATABASE, create_static_response_tool
+from .tools.web_search import create_web_search_tool
 
 # Load environment variables with deterministic precedence:
 # backend/.env as defaults, then root .env overrides.
@@ -58,8 +56,7 @@ load_dotenv(_PROJECT_ROOT / ".env", override=True)
 
 # --- Configure Logging ---
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -83,7 +80,8 @@ def _get_chatollama_class():
     if _CHATOLLAMA_IMPORT_ERROR is not None:
         return None
     try:
-        from langchain_ollama import ChatOllama as _ChatOllama
+        from langchain_ollama import ChatOllama as _ChatOllama  # type: ignore[import-not-found]
+
         ChatOllama = _ChatOllama
         return ChatOllama
     except Exception as exc:
@@ -104,6 +102,7 @@ def _get_chatopenai_class():
         return None
     try:
         from langchain_openai import ChatOpenAI as _ChatOpenAI
+
         ChatOpenAI = _ChatOpenAI
         return ChatOpenAI
     except Exception as exc:
@@ -125,6 +124,7 @@ def _get_hf_embeddings_class():
         return None
     try:
         from langchain_huggingface import HuggingFaceEmbeddings as _HuggingFaceEmbeddings
+
         HuggingFaceEmbeddings = _HuggingFaceEmbeddings
         return HuggingFaceEmbeddings
     except Exception as exc:
@@ -136,14 +136,17 @@ def _get_hf_embeddings_class():
         )
         return None
 
+
 # --- Initialize FastAPI App ---
 app = FastAPI()
 
 # --- Add CORS Middleware ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], allow_credentials=True,
-    allow_methods=["*"], allow_headers=["*"],
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # --- Static files mount removed - using separate React frontend ---
@@ -156,15 +159,20 @@ supabase_key = (
     or os.environ.get("SUPABASE_PUBLISHABLE_KEY")
 )
 # Groq / X.AI / Twitter AI intentionally removed.
-openai_api_key = os.environ.get(
-    "OPENAI_API_KEY") or os.environ.get("OPEN_API_KEY")
+openai_api_key = os.environ.get("OPENAI_API_KEY") or os.environ.get("OPEN_API_KEY")
 deepseek_api_key = os.environ.get("DEEPSEEK_API_KEY")
 ollama_base_url = os.environ.get("OLLAMA_BASE_URL")
 ollama_model = os.environ.get("OLLAMA_MODEL") or "llama3.1:8b"
 default_provider = (os.environ.get("DEFAULT_PROVIDER") or "ollama").lower()
 default_model = os.environ.get("DEFAULT_MODEL") or None
-lock_model_selection_env = (os.environ.get("LOCK_MODEL_SELECTION") or "false").lower() in ["1", "true", "yes"]
-selection_file_path = os.environ.get("MODEL_SELECTION_PATH") or str(Path(__file__).parent / "data" / "model_selection.json")
+lock_model_selection_env = (os.environ.get("LOCK_MODEL_SELECTION") or "false").lower() in [
+    "1",
+    "true",
+    "yes",
+]
+selection_file_path = os.environ.get("MODEL_SELECTION_PATH") or str(
+    Path(__file__).parent / "data" / "model_selection.json"
+)
 agent_fast_mode = (os.environ.get("AGENT_FAST_MODE") or "true").lower() in ["1", "true", "yes"]
 agent_max_response_sentences = max(1, int(os.environ.get("AGENT_MAX_RESPONSE_SENTENCES") or "4"))
 agent_max_response_chars = max(120, int(os.environ.get("AGENT_MAX_RESPONSE_CHARS") or "700"))
@@ -176,18 +184,22 @@ try:
         supabase = create_client(supabase_url, supabase_key)
         logger.info("Supabase client initialized successfully")
     else:
-        logger.info("Supabase client not configured for agent runtime; continuing with Chroma-backed retrieval")
+        logger.info(
+            "Supabase client not configured for agent runtime; continuing with Chroma-backed retrieval"
+        )
 
     chroma_store = get_chroma_store()
     if chroma_store.heartbeat():
         logger.info("Chroma store connectivity check passed")
     else:
-        logger.warning("Chroma store heartbeat failed at startup; retrieval will retry during requests")
+        logger.warning(
+            "Chroma store heartbeat failed at startup; retrieval will retry during requests"
+        )
 
     # Persisted model selection (optional JSON file)
     class Selection(TypedDict):
         provider: str
-        model: Optional[str]
+        model: str | None
         locked: bool
 
     CURRENT_SELECTION: Selection = {
@@ -205,7 +217,9 @@ try:
                 prov = (data.get("provider") or CURRENT_SELECTION["provider"]).lower()
                 mod = data.get("model") or CURRENT_SELECTION["model"]
                 locked = bool(data.get("locked", CURRENT_SELECTION["locked"]))
-                CURRENT_SELECTION.update({"provider": prov, "model": mod, "locked": locked})
+                CURRENT_SELECTION["provider"] = prov
+                CURRENT_SELECTION["model"] = mod
+                CURRENT_SELECTION["locked"] = locked
                 logger.info(f"Model selection loaded: {CURRENT_SELECTION}")
         except Exception as e:
             logger.warning(f"Failed to load model selection file: {e}")
@@ -219,7 +233,11 @@ try:
             }
             Path(selection_file_path).parent.mkdir(parents=True, exist_ok=True)
             Path(selection_file_path).write_text(json.dumps(payload, indent=2))
-            CURRENT_SELECTION.update(payload)
+            CURRENT_SELECTION["provider"] = provider
+            CURRENT_SELECTION["model"] = model
+            CURRENT_SELECTION["locked"] = (
+                bool(locked) if locked is not None else CURRENT_SELECTION["locked"]
+            )
             logger.info(f"Model selection saved: {payload}")
         except Exception as e:
             logger.error(f"Failed to save model selection file: {e}")
@@ -292,7 +310,9 @@ try:
     selected_provider_startup = _normalize_provider_name(CURRENT_SELECTION.get("provider"))
     if selected_provider_startup == "ollama":
         if not ollama_base_url:
-            raise RuntimeError("Selected provider is 'ollama' but OLLAMA_BASE_URL is not configured.")
+            raise RuntimeError(
+                "Selected provider is 'ollama' but OLLAMA_BASE_URL is not configured."
+            )
         if _get_chatollama_class() is None:
             raise RuntimeError(
                 "Selected provider is 'ollama' but langchain_ollama import failed. "
@@ -307,25 +327,27 @@ try:
 
     # Use dedicated embedding service and optionally fail fast if unavailable
     logger.info("Initializing embedding model (Embedding Service, fail-fast)...")
-    embedding_service_url = os.environ.get(
-        "EMBEDDING_SERVICE_URL", "http://embedding-service:8001")
-    embedding_service_auth_token = (
-        os.environ.get("EMBEDDING_SERVICE_AUTH_TOKEN")
-        or os.environ.get("MODAL_API_PROXY_SECRET")
+    embedding_service_url = os.environ.get("EMBEDDING_SERVICE_URL", "http://embedding-service:8001")
+    embedding_service_auth_token = os.environ.get("EMBEDDING_SERVICE_AUTH_TOKEN") or os.environ.get(
+        "MODAL_API_PROXY_SECRET"
     )
-    embedding_strict_startup = (
-        os.environ.get("EMBEDDING_STRICT_STARTUP", "true").lower() in ["1", "true", "yes"]
-    )
+    embedding_strict_startup = os.environ.get("EMBEDDING_STRICT_STARTUP", "true").lower() in [
+        "1",
+        "true",
+        "yes",
+    ]
 
     try:
         from src.embedding_service.client import create_embedding_client
+
         embedding_model = create_embedding_client(
             embedding_service_url,
             validate_on_init=True,
             auth_token=embedding_service_auth_token,
         )
         logger.info(
-            f"✅ Embedding model initialized via Embedding Service ({embedding_service_url})")
+            f"✅ Embedding model initialized via Embedding Service ({embedding_service_url})"
+        )
     except Exception as service_exc:
         if embedding_strict_startup:
             raise RuntimeError(
@@ -343,7 +365,9 @@ try:
             service_exc,
         )
         try:
-            embedding_model = FastEmbedEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+            embedding_model = FastEmbedEmbeddings(
+                model_name="sentence-transformers/all-MiniLM-L6-v2"
+            )
         except Exception as fastembed_exc:
             logger.warning(
                 "FastEmbedEmbeddings fallback unavailable: %s. Trying HuggingFaceEmbeddings fallback.",
@@ -362,27 +386,20 @@ try:
                     )
 
                     class _ZeroVectorEmbeddings:
-                        def embed_query(self, _text: str):
+                        def embed_query(self, _text: str) -> list[float]:
                             return [0.0] * 384
 
-                        def embed_documents(self, texts: list[str]):
+                        def embed_documents(self, texts: list[str]) -> list[list[float]]:
                             return [[0.0] * 384 for _ in texts]
 
-                    embedding_model = _ZeroVectorEmbeddings()
+                    embedding_model = _ZeroVectorEmbeddings()  # type: ignore[assignment]
             else:
                 logger.warning(
                     "HuggingFaceEmbeddings fallback unavailable: %s. Using zero-vector fallback embeddings.",
                     _HF_EMBEDDINGS_IMPORT_ERROR,
                 )
 
-                class _ZeroVectorEmbeddings:
-                    def embed_query(self, _text: str):
-                        return [0.0] * 384
-
-                    def embed_documents(self, texts: list[str]):
-                        return [[0.0] * 384 for _ in texts]
-
-                embedding_model = _ZeroVectorEmbeddings()
+                embedding_model = _ZeroVectorEmbeddings()  # type: ignore[assignment]
 except Exception as e:
     logger.error(f"Failed to initialize clients: {e}")
     logger.error(traceback.format_exc())
@@ -400,16 +417,17 @@ LOCATION_CONTEXT = {
         "Water quality and watershed protection",
         "Community environmental education",
         "Habitat restoration",
-        "Community health and wellbeing in Rhode Island"
-    ]
+        "Community health and wellbeing in Rhode Island",
+    ],
 }
 
 # --- Define LangGraph State ---
 
 
-class AgentState(TypedDict):
+class AgentState(TypedDict, total=False):
     """State for the Vecinita agent."""
-    messages: Annotated[List[BaseMessage], add_messages]
+
+    messages: Annotated[list[BaseMessage], add_messages]
     question: str
     language: str
     provider: str | None
@@ -421,43 +439,43 @@ class AgentState(TypedDict):
 
 # --- Human-readable agent thinking messages ---
 AGENT_THINKING_MESSAGES = {
-    'es': {
-        'static_response': 'Verificando si ya conozco esto...',
-        'db_search': 'Revisando nuestros recursos locales...',
-        'clarify_question': 'Necesito un poco más de información...',
-        'web_search': 'Buscando información adicional...',
-        'plan': 'Déjame pensar en tu pregunta...',
-        'analyzing': 'Entendiendo tu pregunta...',
-        'searching': 'Encontrando información relevante...',
+    "es": {
+        "static_response": "Verificando si ya conozco esto...",
+        "db_search": "Revisando nuestros recursos locales...",
+        "clarify_question": "Necesito un poco más de información...",
+        "web_search": "Buscando información adicional...",
+        "plan": "Déjame pensar en tu pregunta...",
+        "analyzing": "Entendiendo tu pregunta...",
+        "searching": "Encontrando información relevante...",
     },
-    'en': {
-        'static_response': 'Checking if I already know this...',
-        'db_search': 'Looking through our local resources...',
-        'clarify_question': 'I need a bit more information...',
-        'web_search': 'Searching for additional information...',
-        'plan': 'Let me think about your question...',
-        'analyzing': 'Understanding your question...',
-        'searching': 'Finding relevant information...',
-    }
+    "en": {
+        "static_response": "Checking if I already know this...",
+        "db_search": "Looking through our local resources...",
+        "clarify_question": "I need a bit more information...",
+        "web_search": "Searching for additional information...",
+        "plan": "Let me think about your question...",
+        "analyzing": "Understanding your question...",
+        "searching": "Finding relevant information...",
+    },
 }
 
 
 def get_agent_thinking_message(tool_name: str, language: str) -> str:
     """Get human-readable conversational message for agent activity."""
-    msgs = AGENT_THINKING_MESSAGES.get(language, AGENT_THINKING_MESSAGES['en'])
-    return msgs.get(tool_name, 'Pensando...' if language == 'es' else 'Thinking...')
+    msgs = AGENT_THINKING_MESSAGES.get(language, AGENT_THINKING_MESSAGES["en"])
+    return msgs.get(tool_name, "Pensando..." if language == "es" else "Thinking...")
 
 
 def _summarize_tool_result(tool_name: str, content: str, language: str) -> str:
     """Return compact user-visible summary for tool results."""
     safe_content = content if isinstance(content, str) else str(content)
-    lang = 'es' if language == 'es' else 'en'
+    lang = "es" if language == "es" else "en"
 
     if tool_name == "db_search":
         try:
             docs = json.loads(safe_content)
             if isinstance(docs, list):
-                if lang == 'es':
+                if lang == "es":
                     return f"db_search devolvió {len(docs)} fragmentos relevantes."
                 return f"db_search returned {len(docs)} relevant chunks."
         except Exception:
@@ -466,19 +484,23 @@ def _summarize_tool_result(tool_name: str, content: str, language: str) -> str:
         try:
             links = json.loads(safe_content)
             if isinstance(links, list):
-                if lang == 'es':
+                if lang == "es":
                     return f"web_search devolvió {len(links)} resultados web."
                 return f"web_search returned {len(links)} web results."
         except Exception:
             pass
     if tool_name == "clarify_question":
-        return "Se requieren aclaraciones del usuario." if lang == 'es' else "User clarification is required."
+        return (
+            "Se requieren aclaraciones del usuario."
+            if lang == "es"
+            else "User clarification is required."
+        )
 
-    return "Herramienta completada." if lang == 'es' else "Tool call completed."
+    return "Herramienta completada." if lang == "es" else "Tool call completed."
 
 
 def _db_unavailable_message(language: str) -> str:
-    if language == 'es':
+    if language == "es":
         return (
             "No puedo acceder temporalmente a la base de datos de documentos de Vecinita. "
             "Inténtalo nuevamente en unos minutos mientras restablecemos la conexión."
@@ -490,7 +512,7 @@ def _db_unavailable_message(language: str) -> str:
 
 
 def _weak_retrieval_warning(language: str) -> str:
-    if language == 'es':
+    if language == "es":
         return (
             "⚠️ No encontré suficientes coincidencias sólidas en la base local. "
             "La siguiente respuesta es de mejor esfuerzo y puede ser incompleta."
@@ -507,23 +529,54 @@ def _is_answer_seeking_query(question: str, language: str) -> bool:
         return False
 
     non_answer_intents_en = {
-        "hi", "hello", "hey", "good morning", "good afternoon", "good evening",
-        "thanks", "thank you", "ok", "okay", "cool", "bye", "goodbye",
+        "hi",
+        "hello",
+        "hey",
+        "good morning",
+        "good afternoon",
+        "good evening",
+        "thanks",
+        "thank you",
+        "ok",
+        "okay",
+        "cool",
+        "bye",
+        "goodbye",
     }
     non_answer_intents_es = {
-        "hola", "buenos dias", "buenas tardes", "buenas noches", "gracias",
-        "ok", "vale", "adios", "chao", "chau",
+        "hola",
+        "buenos dias",
+        "buenas tardes",
+        "buenas noches",
+        "gracias",
+        "ok",
+        "vale",
+        "adios",
+        "chao",
+        "chau",
     }
 
     compact = " ".join(text.split())
-    if language == 'es':
+    if language == "es":
         if compact in non_answer_intents_es:
             return False
     else:
         if compact in non_answer_intents_en:
             return False
 
-    question_markers = ("?", "¿", "what", "how", "when", "where", "why", "which", "who", "can you", "help")
+    question_markers = (
+        "?",
+        "¿",
+        "what",
+        "how",
+        "when",
+        "where",
+        "why",
+        "which",
+        "who",
+        "can you",
+        "help",
+    )
     if any(marker in compact for marker in question_markers):
         return True
 
@@ -567,7 +620,7 @@ def _build_sources_from_docs(docs: list[dict]) -> list[dict]:
         clean_title = None
 
         if content_text.startswith("DOCUMENTS_LOADED:"):
-            lines = content_text.split('\n', 2)
+            lines = content_text.split("\n", 2)
             if len(lines) >= 2:
                 for line in lines[1:]:
                     stripped = line.strip()
@@ -576,21 +629,22 @@ def _build_sources_from_docs(docs: list[dict]) -> list[dict]:
                         break
 
         if not clean_title and content_text:
-            first_line = content_text.split('\n')[0].strip()
+            first_line = content_text.split("\n")[0].strip()
             if first_line and len(first_line) > 3:
                 clean_title = first_line[:100] + ("..." if len(first_line) > 100 else "")
 
         if not clean_title:
             try:
                 from urllib.parse import urlparse
+
                 parsed = urlparse(url)
-                path_parts = parsed.path.rstrip('/').split('/')
+                path_parts = parsed.path.rstrip("/").split("/")
                 if path_parts and path_parts[-1]:
                     clean_title = path_parts[-1]
                 else:
-                    clean_title = parsed.netloc or url.split('/')[-1] or "Internal Document"
+                    clean_title = parsed.netloc or url.split("/")[-1] or "Internal Document"
             except Exception:
-                clean_title = url.split('/')[-1] or "Internal Document"
+                clean_title = url.split("/")[-1] or "Internal Document"
 
         entry = {
             "title": clean_title,
@@ -598,21 +652,21 @@ def _build_sources_from_docs(docs: list[dict]) -> list[dict]:
             "type": "document",
         }
         lower = url.lower()
-        entry["isDownload"] = any(lower.endswith(ext) for ext in [
-            ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv"
-        ])
-        if 'chunk_index' in d:
-            entry['chunkIndex'] = d['chunk_index']
-        if 'char_start' in d:
-            entry['charStart'] = d['char_start']
-        if 'char_end' in d:
-            entry['charEnd'] = d['char_end']
-        if 'doc_index' in d:
-            entry['docIndex'] = d['doc_index']
-        if 'total_chunks' in d:
-            entry['totalChunks'] = d['total_chunks']
-        if 'metadata' in d and d['metadata']:
-            entry['metadata'] = d['metadata']
+        entry["isDownload"] = any(
+            lower.endswith(ext) for ext in [".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv"]
+        )
+        if "chunk_index" in d:
+            entry["chunkIndex"] = d["chunk_index"]
+        if "char_start" in d:
+            entry["charStart"] = d["char_start"]
+        if "char_end" in d:
+            entry["charEnd"] = d["char_end"]
+        if "doc_index" in d:
+            entry["docIndex"] = d["doc_index"]
+        if "total_chunks" in d:
+            entry["totalChunks"] = d["total_chunks"]
+        if "metadata" in d and d["metadata"]:
+            entry["metadata"] = d["metadata"]
         sources.append(entry)
 
     return sources
@@ -632,11 +686,13 @@ def _sanitize_answer_links(answer: str, allowed_urls: set[str], language: str) -
         return answer
 
     url_pattern = re.compile(r"https?://[^\s)\]\[\"'<>]+")
-    replacement = "[enlace no verificado eliminado]" if language == "es" else "[unverified link removed]"
+    replacement = (
+        "[enlace no verificado eliminado]" if language == "es" else "[unverified link removed]"
+    )
 
     def _replace(match: re.Match[str]) -> str:
         raw_url = match.group(0)
-        normalized = raw_url.rstrip(".,;:!?)\"]")
+        normalized = raw_url.rstrip('.,;:!?)"]')
         return raw_url if normalized in allowed_urls else replacement
 
     return url_pattern.sub(_replace, answer)
@@ -660,7 +716,7 @@ def _build_deterministic_rag_answer(
         context_blocks.append(f"[{index}] Source: {source}\n{content}")
     context_text = "\n\n".join(context_blocks) if context_blocks else ""
 
-    if language == 'es':
+    if language == "es":
         if context_text:
             prompt = (
                 "Responde usando principalmente el contexto recuperado de la base vectorial local. "
@@ -701,7 +757,7 @@ def _build_deterministic_rag_answer(
         answer = response.content if hasattr(response, "content") else str(response)
     except Exception as exc:
         logger.warning("Deterministic generation fallback activated due to model error: %s", exc)
-        if language == 'es':
+        if language == "es":
             if retrieved_docs:
                 source = retrieved_docs[0].get("source_url") or "Documento interno"
                 snippet = (retrieved_docs[0].get("content") or "").strip()[:260]
@@ -745,17 +801,17 @@ def _build_clarification_payload(content: str, language: str) -> dict:
         normalized = line
         for prefix in ("1.", "2.", "3.", "4.", "5.", "-", "•"):
             if normalized.startswith(prefix):
-                normalized = normalized[len(prefix):].strip()
+                normalized = normalized[len(prefix) :].strip()
         if normalized.endswith("?") and len(normalized) > 8:
             questions.append(normalized)
 
     if not questions:
-        if language == 'es':
+        if language == "es":
             questions = ["¿Podrías compartir más detalles para que pueda ayudarte mejor?"]
         else:
             questions = ["Could you share more details so I can help you better?"]
 
-    if language == 'es':
+    if language == "es":
         message = "Necesito más información para continuar."
         context = "Se requiere intervención del usuario."
     else:
@@ -778,7 +834,8 @@ def _build_clarification_payload(content: str, language: str) -> dict:
 logger.info("Initializing agent tools...")
 # Use lower threshold (0.1) for better recall - can be tuned based on results
 db_search_tool = create_db_search_tool(
-    chroma_store, embedding_model, match_threshold=0.1, match_count=5)
+    chroma_store, embedding_model, match_threshold=0.1, match_count=5
+)
 web_search_tool = create_web_search_tool()
 clarify_question_tool = create_clarify_question_tool()
 static_response_tool = create_static_response_tool()
@@ -786,12 +843,14 @@ rank_retrieval_results_tool = create_rank_retrieval_tool()
 rewrite_question_tool = create_rewrite_question_tool(
     lambda provider, model: _get_llm_without_tools(provider, model)
 )
-tools = [db_search_tool,
-         static_response_tool,
-         clarify_question_tool,
-         web_search_tool,
-         rank_retrieval_results_tool,
-         rewrite_question_tool]
+tools = [
+    db_search_tool,
+    static_response_tool,
+    clarify_question_tool,
+    web_search_tool,
+    rank_retrieval_results_tool,
+    rewrite_question_tool,
+]
 # Filter out None values if any tool failed to initialize
 tools = [t for t in tools if t is not None]
 logger.info(f"Initialized {len(tools)} tools: {[tool.name for tool in tools]}")
@@ -820,15 +879,14 @@ def _get_llm_with_tools(provider: str | None, model: str | None):
                     "Ollama provider unavailable because langchain_ollama could not be imported. "
                     f"Original error: {_CHATOLLAMA_IMPORT_ERROR}"
                 )
-            local_llm = ChatOllamaClass(
-                temperature=0, model=use_model, base_url=ollama_base_url)
+            local_llm = ChatOllamaClass(temperature=0, model=use_model, base_url=ollama_base_url)
             return local_llm.bind_tools(tools)
-        raise RuntimeError(
-            "Ollama provider requested but OLLAMA_BASE_URL is not configured.")
+        raise RuntimeError("Ollama provider requested but OLLAMA_BASE_URL is not configured.")
     elif selected_provider == "openai":
         if not openai_api_key:
             raise RuntimeError(
-                "OpenAI provider requested but OPENAI_API_KEY/OPEN_API_KEY is not set.")
+                "OpenAI provider requested but OPENAI_API_KEY/OPEN_API_KEY is not set."
+            )
         use_model = model or CURRENT_SELECTION.get("model") or "gpt-4o-mini"
         ChatOpenAIClass = _get_chatopenai_class()
         if ChatOpenAIClass is None:
@@ -836,13 +894,11 @@ def _get_llm_with_tools(provider: str | None, model: str | None):
                 "OpenAI provider unavailable because langchain_openai could not be imported. "
                 f"Original error: {_CHATOPENAI_IMPORT_ERROR}"
             )
-        openai_llm = ChatOpenAIClass(
-            temperature=0, api_key=openai_api_key, model=use_model)
+        openai_llm = ChatOpenAIClass(temperature=0, api_key=openai_api_key, model=use_model)
         return openai_llm.bind_tools(tools)
     elif selected_provider == "deepseek":
         if not deepseek_api_key:
-            raise RuntimeError(
-                "DeepSeek provider requested but DEEPSEEK_API_KEY is not set.")
+            raise RuntimeError("DeepSeek provider requested but DEEPSEEK_API_KEY is not set.")
         # DeepSeek offers OpenAI-compatible API; use ChatOpenAI with base_url
         use_model = model or CURRENT_SELECTION.get("model") or "deepseek-chat"
         ChatOpenAIClass = _get_chatopenai_class()
@@ -855,13 +911,13 @@ def _get_llm_with_tools(provider: str | None, model: str | None):
             temperature=0,
             api_key=deepseek_api_key,
             model=use_model,
-            base_url=os.environ.get(
-                "DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+            base_url=os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
         )
         return deepseek_llm.bind_tools(tools)
     else:
         raise RuntimeError(
-            f"Unsupported provider: {selected_provider}. Use 'ollama', 'deepseek', or 'openai'.")
+            f"Unsupported provider: {selected_provider}. Use 'ollama', 'deepseek', or 'openai'."
+        )
 
 
 def _get_llm_without_tools(provider: str | None, model: str | None):
@@ -899,9 +955,7 @@ def _get_llm_without_tools(provider: str | None, model: str | None):
 
     if selected_provider == "deepseek":
         if not deepseek_api_key:
-            raise RuntimeError(
-                "DeepSeek provider requested but DEEPSEEK_API_KEY is not set."
-            )
+            raise RuntimeError("DeepSeek provider requested but DEEPSEEK_API_KEY is not set.")
         use_model = model or CURRENT_SELECTION.get("model") or "deepseek-chat"
         ChatOpenAIClass = _get_chatopenai_class()
         if ChatOpenAIClass is None:
@@ -916,7 +970,9 @@ def _get_llm_without_tools(provider: str | None, model: str | None):
             base_url=os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
         )
 
-    raise RuntimeError(f"Unsupported provider: {selected_provider}. Use 'ollama', 'deepseek', or 'openai'.")
+    raise RuntimeError(
+        f"Unsupported provider: {selected_provider}. Use 'ollama', 'deepseek', or 'openai'."
+    )
 
 
 def _normalize_provider_name_runtime(provider_name: str | None) -> str:
@@ -940,7 +996,9 @@ def _is_transport_connection_error(exc: Exception) -> bool:
     )
 
 
-def _provider_candidates_for_request(provider: str | None, model: str | None) -> list[tuple[str | None, str | None]]:
+def _provider_candidates_for_request(
+    provider: str | None, model: str | None
+) -> list[tuple[str | None, str | None]]:
     """Return ordered provider/model candidates for resilient execution.
 
     If model selection is locked, use single configured provider.
@@ -962,7 +1020,10 @@ def _provider_candidates_for_request(provider: str | None, model: str | None) ->
             continue
         if candidate in _RUNTIME_PROVIDER_BLOCKLIST:
             continue
-        if any(_normalize_provider_name_runtime(existing_provider) == candidate for existing_provider, _ in candidates):
+        if any(
+            _normalize_provider_name_runtime(existing_provider) == candidate
+            for existing_provider, _ in candidates
+        ):
             continue
         default_model_for_candidate: str | None = None
         if candidate == "deepseek":
@@ -978,14 +1039,14 @@ def _provider_candidates_for_request(provider: str | None, model: str | None) ->
     return candidates
 
 
-def _sanitize_messages(messages: List[BaseMessage]) -> List[BaseMessage]:
+def _sanitize_messages(messages: list[BaseMessage]) -> list[BaseMessage]:  # noqa: C901
     """Sanitize messages to ensure all content fields are strings.
 
     Some LLM APIs (like DeepSeek) require message content to be strings,
     but LangChain's ToolNode can produce messages with list content.
     This function converts any non-string content to a string.
     """
-    sanitized = []
+    sanitized: list[BaseMessage] = []
     valid_tool_call_ids: set[str] = set()
     for msg in messages:
         # Make a copy of the message to avoid modifying the original
@@ -1015,11 +1076,13 @@ def _sanitize_messages(messages: List[BaseMessage]) -> List[BaseMessage]:
                 # Convert list to JSON string
                 content = json.dumps(content, ensure_ascii=False)
             # Create new ToolMessage with string content
-            sanitized.append(ToolMessage(
-                content=content,
-                tool_call_id=msg.tool_call_id,
-                name=msg.name if hasattr(msg, 'name') else None
-            ))
+            sanitized.append(
+                ToolMessage(
+                    content=content,
+                    tool_call_id=msg.tool_call_id,
+                    name=msg.name if hasattr(msg, "name") else None,
+                )
+            )
         else:
             # For other message types, ensure content is string
             content = msg.content
@@ -1030,9 +1093,10 @@ def _sanitize_messages(messages: List[BaseMessage]) -> List[BaseMessage]:
                     content = str(content)
             # Create a new message with the same type but sanitized content
             msg_dict = msg.dict()
-            msg_dict['content'] = content
+            msg_dict["content"] = content
             sanitized.append(msg.__class__(**msg_dict))
     return sanitized
+
 
 # --- Define Agent Node ---
 
@@ -1043,16 +1107,18 @@ def agent_node(state: AgentState) -> AgentState:
 
     # Log the current conversation state for debugging
     last_message = state["messages"][-1]
-    if hasattr(last_message, 'content'):
+    if hasattr(last_message, "content"):
         logger.debug(
-            f"Last message content: {last_message.content[:200] if isinstance(last_message.content, str) else last_message.content}")
+            f"Last message content: {last_message.content[:200] if isinstance(last_message.content, str) else last_message.content}"
+        )
 
     # Sanitize messages to ensure all content is strings (required by some APIs like DeepSeek)
     sanitized_messages = _sanitize_messages(state["messages"])
 
     # Retry on transient rate-limit / 429 errors and fail over provider on transport errors.
     import re as _re
-    last_exc = None
+
+    last_exc: Exception | None = None
     provider_candidates = _provider_candidates_for_request(
         state.get("provider"), state.get("model")
     )
@@ -1075,7 +1141,11 @@ def agent_node(state: AgentState) -> AgentState:
             except Exception as e:
                 last_exc = e
                 err_name = e.__class__.__name__
-                is_rate_limit = err_name in ("RateLimitError", "TooManyRequests", "RateLimitException")
+                is_rate_limit = err_name in (
+                    "RateLimitError",
+                    "TooManyRequests",
+                    "RateLimitException",
+                )
                 if is_rate_limit:
                     wait_seconds = 5.0
                     m = _re.search(r"try again in ([0-9]+(?:\.[0-9]+)?)s", str(e))
@@ -1108,7 +1178,9 @@ def agent_node(state: AgentState) -> AgentState:
 
                 raise
 
-    raise last_exc
+    if last_exc is not None:
+        raise last_exc
+    raise RuntimeError("All LLM provider candidates exhausted without result")
 
 
 def classify_query_complexity(state: AgentState) -> str:
@@ -1128,7 +1200,7 @@ def classify_query_complexity(state: AgentState) -> str:
         return "simple"
 
     # Create classification prompt
-    if language == 'es':
+    if language == "es":
         classification_prompt = f"""Analiza esta pregunta y clasifícala como SIMPLE o COMPLEJA.
 
 SIMPLE: Preguntas directas, saludos, definiciones básicas, preguntas de una sola respuesta.
@@ -1173,17 +1245,16 @@ Respond with ONLY: SIMPLE or COMPLEX"""
             word_count = len(question.split())
             result = "simple" if word_count < 10 else "complex"
             logger.info(
-                f"Query classified as {result.upper()} by fallback heuristic ({word_count} words)")
+                f"Query classified as {result.upper()} by fallback heuristic ({word_count} words)"
+            )
             return result
 
     except Exception as e:
-        logger.warning(
-            f"LLM classification failed ({e}), using fallback heuristic")
+        logger.warning(f"LLM classification failed ({e}), using fallback heuristic")
         # Fallback: word count heuristic
         word_count = len(question.split())
         result = "simple" if word_count < 10 else "complex"
-        logger.info(
-            f"Query classified as {result.upper()} by fallback ({word_count} words)")
+        logger.info(f"Query classified as {result.upper()} by fallback ({word_count} words)")
         return result
 
 
@@ -1196,59 +1267,57 @@ def planning_node(state: AgentState) -> AgentState:
     3. Plan which tools to use and in what order
     4. Store the plan for reference
     """
-    logger.info(
-        "Planning node: Analyzing question and creating search strategy...")
+    logger.info("Planning node: Analyzing question and creating search strategy...")
 
     if state.get("fast_mode", agent_fast_mode):
         logger.info("Fast mode enabled: skipping planning node")
         return {"plan": ""}
 
-    llm_without_tools = _get_llm_without_tools(
-        state.get("provider"), state.get("model"))
+    llm_without_tools = _get_llm_without_tools(state.get("provider"), state.get("model"))
 
     question = state["question"]
     language = state["language"]
 
     # Create planning prompt with location context
-    if language == 'es':
-        planning_prompt = f"""Analiza esta pregunta del usuario y crea un plan de búsqueda específico para {LOCATION_CONTEXT['location']}.
+    if language == "es":
+        planning_prompt = f"""Analiza esta pregunta del usuario y crea un plan de búsqueda específico para {LOCATION_CONTEXT["location"]}.
 
-CONTEXTO: Eres un asistente para {LOCATION_CONTEXT['organization']} en {LOCATION_CONTEXT['location']}.
-Las áreas de enfoque incluyen: {', '.join(LOCATION_CONTEXT['focus_areas'])}
+CONTEXTO: Eres un asistente para {LOCATION_CONTEXT["organization"]} en {LOCATION_CONTEXT["location"]}.
+Las áreas de enfoque incluyen: {", ".join(LOCATION_CONTEXT["focus_areas"])}
 
 PREGUNTA: "{question}"
 
 Tu tarea es:
 1. Identificar los conceptos clave en la pregunta
-2. Determinar si la pregunta es relevante para {LOCATION_CONTEXT['location']} (Rhode Island)
+2. Determinar si la pregunta es relevante para {LOCATION_CONTEXT["location"]} (Rhode Island)
 3. Identificar qué tipo de información se necesita (servicios locales, ubicación específica, etc.)
 4. Sugerir qué herramientas usar en qué orden
 
 Responde en este formato:
 CONCEPTOS CLAVE: [lista los conceptos principales]
-RELEVANCIA LOCAL: [es aplicable a {LOCATION_CONTEXT['location']}? Sí/No/Parcialmente]
+RELEVANCIA LOCAL: [es aplicable a {LOCATION_CONTEXT["location"]}? Sí/No/Parcialmente]
 TIPO DE INFORMACIÓN: [qué tipo de información busca el usuario]
 PLAN DE BÚSQUEDA: [describe el orden de búsqueda recomendado]
 BÚSQUEDA NECESITA CLARIFICACIÓN: [sí/no - ¿necesitamos más detalles del usuario?]
 CONTEXTO UBICACIÓN: [si aplica, notas sobre la ubicación específica requerida]
 """
     else:
-        planning_prompt = f"""Analyze this user question and create a search plan specific to {LOCATION_CONTEXT['location']}.
+        planning_prompt = f"""Analyze this user question and create a search plan specific to {LOCATION_CONTEXT["location"]}.
 
-CONTEXT: You are an assistant for {LOCATION_CONTEXT['organization']} in {LOCATION_CONTEXT['location']}.
-Focus areas include: {', '.join(LOCATION_CONTEXT['focus_areas'])}
+CONTEXT: You are an assistant for {LOCATION_CONTEXT["organization"]} in {LOCATION_CONTEXT["location"]}.
+Focus areas include: {", ".join(LOCATION_CONTEXT["focus_areas"])}
 
 QUESTION: "{question}"
 
 Your task is:
 1. Identify key concepts in the question
-2. Determine if the question is relevant to {LOCATION_CONTEXT['location']} (Rhode Island)
+2. Determine if the question is relevant to {LOCATION_CONTEXT["location"]} (Rhode Island)
 3. Identify what type of information is needed (local services, specific location, etc.)
 4. Suggest which tools to use and in what order
 
 Respond in this format:
 KEY CONCEPTS: [list the main concepts]
-LOCAL RELEVANCE: [is it applicable to {LOCATION_CONTEXT['location']}? Yes/No/Partially]
+LOCAL RELEVANCE: [is it applicable to {LOCATION_CONTEXT["location"]}? Yes/No/Partially]
 INFORMATION TYPE: [what type of information the user is searching for]
 SEARCH PLAN: [describe the recommended search order]
 SEARCH NEEDS CLARIFICATION: [yes/no - do we need more details from the user?]
@@ -1257,21 +1326,28 @@ LOCATION CONTEXT: [if applicable, notes about the specific location required]
 
     # Get planning from LLM
     try:
-        planning_response = llm_without_tools.invoke([
-            SystemMessage(content="You are a search strategy analyst. Analyze questions and create search plans." if language ==
-                          'en' else "Eres un analista de estrategia de búsqueda. Analiza preguntas y crea planes de búsqueda."),
-            HumanMessage(content=planning_prompt)
-        ])
+        planning_response = llm_without_tools.invoke(
+            [
+                SystemMessage(
+                    content=(
+                        "You are a search strategy analyst. Analyze questions and create search plans."
+                        if language == "en"
+                        else "Eres un analista de estrategia de búsqueda. Analiza preguntas y crea planes de búsqueda."
+                    )
+                ),
+                HumanMessage(content=planning_prompt),
+            ]
+        )
 
-        plan = planning_response.content if hasattr(
-            planning_response, 'content') else str(planning_response)
+        plan = (
+            planning_response.content
+            if hasattr(planning_response, "content")
+            else str(planning_response)
+        )
         logger.info(f"Search plan created: {plan[:200]}...")
 
         # Add plan to state
-        return {
-            "messages": state["messages"],
-            "plan": plan
-        }
+        return {"messages": state["messages"], "plan": plan}
     except Exception as e:
         logger.warning(f"Planning failed, continuing without plan: {e}")
         return {"plan": ""}
@@ -1282,20 +1358,21 @@ def should_continue(state: AgentState) -> str:
     last_message = state["messages"][-1]
 
     # Log whether this message has tool calls
-    has_tool_calls = hasattr(
-        last_message, "tool_calls") and last_message.tool_calls
+    has_tool_calls = hasattr(last_message, "tool_calls") and last_message.tool_calls
 
     if not has_tool_calls:
         logger.info(
-            f"Agent ended: No tool calls found. Final response type: {type(last_message).__name__}")
-        if hasattr(last_message, 'content') and isinstance(last_message.content, str):
-            logger.debug(
-                f"Final response preview: {last_message.content[:150]}...")
+            f"Agent ended: No tool calls found. Final response type: {type(last_message).__name__}"
+        )
+        if hasattr(last_message, "content") and isinstance(last_message.content, str):
+            logger.debug(f"Final response preview: {last_message.content[:150]}...")
         return END
 
     # Log tool calls that will be executed
-    tool_names = [call.get('name') if isinstance(call, dict) else getattr(call, 'name', 'unknown')
-                  for call in last_message.tool_calls]
+    tool_names = [
+        call.get("name") if isinstance(call, dict) else getattr(call, "name", "unknown")
+        for call in getattr(last_message, "tool_calls", [])
+    ]
     logger.info(f"Agent continuing with tool calls: {tool_names}")
     return "tools"
 
@@ -1307,29 +1384,29 @@ def check_for_empty_db_search(state: AgentState) -> bool:
     immediately falling back to web search.
     """
     for msg in reversed(state["messages"]):
-        if hasattr(msg, 'name') and msg.name == 'db_search':
+        if hasattr(msg, "name") and msg.name == "db_search":
             # Check if the content indicates 0 documents
-            content = msg.content if isinstance(
-                msg.content, str) else str(msg.content)
+            content = msg.content if isinstance(msg.content, str) else str(msg.content)
             normalized = content.lower().strip()
-            if normalized == "[]" or 'found 0' in normalized or 'no documents' in normalized:
+            if normalized == "[]" or "found 0" in normalized or "no documents" in normalized:
                 return True
     return False
 
 
 class GradeDocuments(BaseModel):
     """Binary relevance decision for retrieved context."""
+
     binary_score: Literal["yes", "no"]
 
 
-def _latest_user_question(messages: List[BaseMessage]) -> str:
+def _latest_user_question(messages: list[BaseMessage]) -> str:
     for message in reversed(messages):
         if isinstance(message, HumanMessage) and isinstance(message.content, str):
             return message.content
     return ""
 
 
-def _extract_latest_db_search_docs(messages: List[BaseMessage]) -> list[dict]:
+def _extract_latest_db_search_docs(messages: list[BaseMessage]) -> list[dict]:
     for message in reversed(messages):
         if hasattr(message, "name") and getattr(message, "name", None) == "db_search":
             content = message.content if isinstance(message.content, str) else str(message.content)
@@ -1342,7 +1419,7 @@ def _extract_latest_db_search_docs(messages: List[BaseMessage]) -> list[dict]:
     return []
 
 
-def _extract_latest_ranked_docs(messages: List[BaseMessage]) -> list[dict]:
+def _extract_latest_ranked_docs(messages: list[BaseMessage]) -> list[dict]:
     for message in reversed(messages):
         if hasattr(message, "name") and getattr(message, "name", None) == "rank_retrieval_results":
             content = message.content if isinstance(message.content, str) else str(message.content)
@@ -1355,7 +1432,9 @@ def _extract_latest_ranked_docs(messages: List[BaseMessage]) -> list[dict]:
     return []
 
 
-def route_after_tools(state: AgentState) -> Literal["rank_retrieval", "grade_documents", "db_unavailable", "agent"]:
+def route_after_tools(
+    state: AgentState,
+) -> Literal["rank_retrieval", "grade_documents", "db_unavailable", "agent"]:
     """Route after ToolNode execution.
 
     - If db_search returned docs, grade relevance.
@@ -1424,7 +1503,9 @@ def rank_retrieval_node(state: AgentState) -> AgentState:
 
 def grade_documents_node(state: AgentState) -> AgentState:
     """Grade whether latest retrieved docs are relevant to the user question."""
-    docs = _extract_latest_ranked_docs(state["messages"]) or _extract_latest_db_search_docs(state["messages"])
+    docs = _extract_latest_ranked_docs(state["messages"]) or _extract_latest_db_search_docs(
+        state["messages"]
+    )
     question = _latest_user_question(state["messages"]) or state.get("question", "")
 
     if not docs:
@@ -1447,7 +1528,9 @@ def grade_documents_node(state: AgentState) -> AgentState:
         logger.info("Retrieved document relevance grade: %s", score)
         return {"grade_result": score}
     except Exception as exc:
-        logger.warning("Document grading failed (%s). Defaulting to relevant to avoid dead-end.", exc)
+        logger.warning(
+            "Document grading failed (%s). Defaulting to relevant to avoid dead-end.", exc
+        )
         return {"grade_result": "yes"}
 
 
@@ -1496,9 +1579,9 @@ workflow.add_conditional_edges(
     START,
     classify_query_complexity,
     {
-        "simple": "agent",    # Simple queries: direct to agent
-        "complex": "planning"  # Complex queries: plan first
-    }
+        "simple": "agent",  # Simple queries: direct to agent
+        "complex": "planning",  # Complex queries: plan first
+    },
 )
 
 # Planning always goes to agent
@@ -1548,13 +1631,17 @@ def _find_static_faq_answer(question: str, language: str) -> str | None:
     try:
         import string
         import unicodedata
+
         q = question.lower().strip()
-        table = str.maketrans('', '', string.punctuation + "¿¡")
+        table = str.maketrans("", "", string.punctuation + "¿¡")
         q_clean = q.translate(table)
         # Remove accents for robust matching
 
         def _unaccent(s: str) -> str:
-            return ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
+            return "".join(
+                c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn"
+            )
+
         q_unaccent = _unaccent(q_clean)
         faqs = FAQ_DATABASE.get(language, FAQ_DATABASE.get("en", {}))
         # Exact match against original
@@ -1570,13 +1657,16 @@ def _find_static_faq_answer(question: str, language: str) -> str | None:
                 k_clean = k.translate(table)
                 k_unaccent = _unaccent(k_clean)
                 if (
-                    k_clean in q_clean or q_clean in k_clean or
-                    k_unaccent in q_unaccent or q_unaccent in k_unaccent
+                    k_clean in q_clean
+                    or q_clean in k_clean
+                    or k_unaccent in q_unaccent
+                    or q_unaccent in k_unaccent
                 ):
                     return v
         return None
     except Exception:
         return None
+
 
 # --- THIS IS THE NEW ROOT ENDPOINT ---
 
@@ -1592,9 +1682,9 @@ async def get_root():
             "health": "/health",
             "ask": "/ask?question=<your_question>",
             "docs": "/docs",
-            "config": "/config"
+            "config": "/config",
         },
-        "message": "Use the React frontend at http://localhost:3000 or call /ask endpoint directly"
+        "message": "Use the React frontend at http://localhost:3000 or call /ask endpoint directly",
     }
 
 
@@ -1617,65 +1707,77 @@ def test_db_search(query: str = "community resources"):
     Returns:
         Diagnostic information about the search operation
     """
-    diagnostics = {}
+    diagnostics: dict[str, Any] = {}
 
     try:
         logger.info(f"Test DB Search: Query = '{query}'")
 
+        if supabase is None:
+            return {"error": "Supabase client not initialized"}
+
         # Step 1: Check if table exists and has data
         try:
-            table_result = supabase.table('document_chunks').select(
-                'id', count='exact').limit(1).execute()
-            total_rows = table_result.count if hasattr(table_result, 'count') else len(
-                table_result.data) if table_result.data else 0
-            diagnostics['table_exists'] = True
-            diagnostics['total_rows'] = total_rows
+            table_result = supabase.table("document_chunks").select("*").limit(1).execute()
+            total_rows = (
+                table_result.count
+                if hasattr(table_result, "count")
+                else len(table_result.data) if table_result.data else 0
+            )
+            diagnostics["table_exists"] = True
+            diagnostics["total_rows"] = total_rows
             logger.info(f"Test DB Search: Table has {total_rows} rows")
         except Exception as e:
-            diagnostics['table_exists'] = False
-            diagnostics['table_error'] = str(e)
+            diagnostics["table_exists"] = False
+            diagnostics["table_error"] = str(e)
             logger.error(f"Test DB Search: Table check failed: {e}")
 
         # Step 2: Check if embeddings exist and are non-null
         try:
-            embedding_check = supabase.table('document_chunks').select(
-                'id,embedding').limit(5).execute()
+            embedding_check = (
+                supabase.table("document_chunks").select("id,embedding").limit(5).execute()
+            )
             if embedding_check.data:
+                embedding_rows: list[dict[str, Any]] = embedding_check.data  # type: ignore[assignment]
                 non_null_embeddings = sum(
-                    1 for row in embedding_check.data if row.get('embedding') is not None)
-                diagnostics['embeddings_exist'] = non_null_embeddings > 0
-                diagnostics['sample_embedding_count'] = non_null_embeddings
-                diagnostics['sample_size'] = len(embedding_check.data)
+                    1 for row in embedding_rows if row.get("embedding") is not None
+                )
+                diagnostics["embeddings_exist"] = non_null_embeddings > 0
+                diagnostics["sample_embedding_count"] = non_null_embeddings
+                diagnostics["sample_size"] = len(embedding_rows)
 
                 # Check embedding dimension if we have one
                 if non_null_embeddings > 0:
                     sample_embedding = next(
-                        (row['embedding'] for row in embedding_check.data if row.get('embedding')), None)
+                        (row["embedding"] for row in embedding_rows if row.get("embedding")), None
+                    )
                     if sample_embedding:
                         if isinstance(sample_embedding, list):
-                            diagnostics['stored_embedding_dimension'] = len(
-                                sample_embedding)
+                            diagnostics["stored_embedding_dimension"] = len(sample_embedding)
                         elif isinstance(sample_embedding, str):
                             # Might be stored as string, try to parse
                             try:
                                 import json
+
                                 parsed = json.loads(sample_embedding)
-                                diagnostics['stored_embedding_dimension'] = len(
-                                    parsed)
-                            except:
-                                diagnostics['stored_embedding_dimension'] = 'unknown (string format)'
+                                diagnostics["stored_embedding_dimension"] = len(parsed)
+                            except Exception:
+                                diagnostics["stored_embedding_dimension"] = (
+                                    "unknown (string format)"
+                                )
                         else:
-                            diagnostics[
-                                'stored_embedding_dimension'] = f'unknown (type: {type(sample_embedding).__name__})'
+                            diagnostics["stored_embedding_dimension"] = (
+                                f"unknown (type: {type(sample_embedding).__name__})"
+                            )
 
                 logger.info(
-                    f"Test DB Search: {non_null_embeddings}/{len(embedding_check.data)} sample rows have embeddings")
+                    f"Test DB Search: {non_null_embeddings}/{len(embedding_rows)} sample rows have embeddings"
+                )
             else:
-                diagnostics['embeddings_exist'] = False
-                diagnostics['embedding_check_error'] = 'No data returned'
+                diagnostics["embeddings_exist"] = False
+                diagnostics["embedding_check_error"] = "No data returned"
         except Exception as e:
-            diagnostics['embeddings_exist'] = False
-            diagnostics['embedding_check_error'] = str(e)
+            diagnostics["embeddings_exist"] = False
+            diagnostics["embedding_check_error"] = str(e)
             logger.error(f"Test DB Search: Embedding check failed: {e}")
 
         # Step 3: Check if RPC function exists
@@ -1684,70 +1786,63 @@ def test_db_search(query: str = "community resources"):
             test_embedding = [0.0] * 384
             rpc_test = supabase.rpc(
                 "search_similar_documents",
-                {
-                    "query_embedding": test_embedding,
-                    "match_threshold": 0.0,
-                    "match_count": 1
-                }
+                {"query_embedding": test_embedding, "match_threshold": 0.0, "match_count": 1},
             ).execute()
-            diagnostics['rpc_function_exists'] = True
-            diagnostics['rpc_test_results'] = len(
-                rpc_test.data) if rpc_test.data else 0
+            diagnostics["rpc_function_exists"] = True
+            rpc_test_data: list[dict[str, Any]] = rpc_test.data or []  # type: ignore[assignment]
+            diagnostics["rpc_test_results"] = len(rpc_test_data)
             logger.info(
-                f"Test DB Search: RPC function exists and returned {diagnostics['rpc_test_results']} results with test embedding")
+                f"Test DB Search: RPC function exists and returned {diagnostics['rpc_test_results']} results with test embedding"
+            )
         except Exception as e:
-            diagnostics['rpc_function_exists'] = False
-            diagnostics['rpc_error'] = str(e)
+            diagnostics["rpc_function_exists"] = False
+            diagnostics["rpc_error"] = str(e)
             logger.error(f"Test DB Search: RPC function test failed: {e}")
 
         # Step 4: Generate embedding from query
         question_embedding = embedding_model.embed_query(query)
-        diagnostics['query_embedding_dimension'] = len(question_embedding)
-        logger.info(
-            f"Test DB Search: Generated embedding dimension = {len(question_embedding)}")
-        logger.info(
-            f"Test DB Search: First 5 values = {question_embedding[:5]}")
+        diagnostics["query_embedding_dimension"] = len(question_embedding)
+        logger.info(f"Test DB Search: Generated embedding dimension = {len(question_embedding)}")
+        logger.info(f"Test DB Search: First 5 values = {question_embedding[:5]}")
 
         # Step 5: Try actual search with threshold=0.0
         test_threshold = 0.0
-        logger.info(
-            f"Test DB Search: Searching with threshold = {test_threshold}")
+        logger.info(f"Test DB Search: Searching with threshold = {test_threshold}")
 
         result = supabase.rpc(
             "search_similar_documents",
             {
                 "query_embedding": question_embedding,
                 "match_threshold": test_threshold,
-                "match_count": 10
+                "match_count": 10,
             },
         ).execute()
+        result_data: list[dict[str, Any]] = result.data or []  # type: ignore[assignment]
 
-        logger.info(
-            f"Test DB Search: Found {len(result.data) if result.data else 0} results")
-        diagnostics['search_results_found'] = len(
-            result.data) if result.data else 0
+        logger.info(f"Test DB Search: Found {len(result_data)} results")
+        diagnostics["search_results_found"] = len(result_data)
 
-        if result.data:
+        if result_data:
             # Show similarity scores
-            similarities = [doc.get('similarity', 0) for doc in result.data]
+            similarities = [doc.get("similarity", 0) for doc in result_data]
             logger.info(f"Test DB Search: Similarity scores = {similarities}")
 
             return {
                 "status": "success",
                 "query": query,
                 "diagnostics": diagnostics,
-                "results_found": len(result.data),
+                "results_found": len(result_data),
                 "similarity_range": {
                     "min": min(similarities),
                     "max": max(similarities),
-                    "avg": sum(similarities) / len(similarities)
+                    "avg": sum(similarities) / len(similarities),
                 },
                 "sample_result": {
-                    "content_preview": result.data[0].get('content', '')[:200],
-                    "source_url": result.data[0].get('source_url', 'N/A'),
-                    "similarity": result.data[0].get('similarity', 0)
+                    "content_preview": result_data[0].get("content", "")[:200],
+                    "source_url": result_data[0].get("source_url", "N/A"),
+                    "similarity": result_data[0].get("similarity", 0),
                 },
-                "all_similarities": similarities
+                "all_similarities": similarities,
             }
         else:
             return {
@@ -1755,7 +1850,7 @@ def test_db_search(query: str = "community resources"):
                 "query": query,
                 "diagnostics": diagnostics,
                 "message": "No results found. See diagnostics for details.",
-                "recommendations": _get_recommendations(diagnostics)
+                "recommendations": _get_recommendations(diagnostics),
             }
 
     except Exception as e:
@@ -1765,7 +1860,7 @@ def test_db_search(query: str = "community resources"):
             "query": query,
             "diagnostics": diagnostics,
             "error": str(e),
-            "error_type": type(e).__name__
+            "error_type": type(e).__name__,
         }
 
 
@@ -1773,38 +1868,49 @@ def _get_recommendations(diagnostics: dict) -> list:
     """Generate recommendations based on diagnostic results."""
     recommendations = []
 
-    if not diagnostics.get('table_exists'):
+    if not diagnostics.get("table_exists"):
         recommendations.append(
-            "❌ Table 'document_chunks' not found or not accessible. Check database connection and permissions.")
+            "❌ Table 'document_chunks' not found or not accessible. Check database connection and permissions."
+        )
 
-    if diagnostics.get('total_rows', 0) == 0:
+    if diagnostics.get("total_rows", 0) == 0:
         recommendations.append(
-            "❌ Table is empty. Run the scraper to populate data: cd backend && uv run python src/utils/vector_loader.py")
+            "❌ Table is empty. Run the scraper to populate data: cd backend && uv run python src/utils/vector_loader.py"
+        )
 
-    if not diagnostics.get('embeddings_exist'):
+    if not diagnostics.get("embeddings_exist"):
         recommendations.append(
-            "❌ Embeddings are NULL in database. Re-run vector loader to generate embeddings.")
+            "❌ Embeddings are NULL in database. Re-run vector loader to generate embeddings."
+        )
 
-    if not diagnostics.get('rpc_function_exists'):
+    if not diagnostics.get("rpc_function_exists"):
         recommendations.append(
-            "❌ RPC function 'search_similar_documents' not found. Run: psql $DATABASE_URL -f backend/scripts/schema_install.sql")
-    elif diagnostics.get('rpc_test_results', 0) == 0 and diagnostics.get('total_rows', 0) > 0:
+            "❌ RPC function 'search_similar_documents' not found. Run: psql $DATABASE_URL -f backend/scripts/schema_install.sql"
+        )
+    elif diagnostics.get("rpc_test_results", 0) == 0 and diagnostics.get("total_rows", 0) > 0:
         recommendations.append(
-            "⚠️ RPC function exists but returns no results with test embedding. Check function implementation.")
+            "⚠️ RPC function exists but returns no results with test embedding. Check function implementation."
+        )
 
-    stored_dim = diagnostics.get('stored_embedding_dimension')
-    query_dim = diagnostics.get('query_embedding_dimension')
+    stored_dim = diagnostics.get("stored_embedding_dimension")
+    query_dim = diagnostics.get("query_embedding_dimension")
     if stored_dim and query_dim and stored_dim != query_dim:
         recommendations.append(
-            f"❌ DIMENSION MISMATCH: Stored embeddings are {stored_dim}D but query is {query_dim}D. Re-generate embeddings with correct model.")
+            f"❌ DIMENSION MISMATCH: Stored embeddings are {stored_dim}D but query is {query_dim}D. Re-generate embeddings with correct model."
+        )
 
-    if diagnostics.get('search_results_found', 0) == 0 and diagnostics.get('rpc_test_results', 0) > 0:
+    if (
+        diagnostics.get("search_results_found", 0) == 0
+        and diagnostics.get("rpc_test_results", 0) > 0
+    ):
         recommendations.append(
-            "⚠️ RPC works with test embedding but not with query embedding. Check if embeddings were generated with the same model.")
+            "⚠️ RPC works with test embedding but not with query embedding. Check if embeddings were generated with the same model."
+        )
 
     if not recommendations:
         recommendations.append(
-            "✅ All diagnostics passed. Issue may be with query content or similarity calculation.")
+            "✅ All diagnostics passed. Issue may be with query content or similarity calculation."
+        )
 
     return recommendations
 
@@ -1814,8 +1920,8 @@ def _response_payload(
     *,
     thread_id: str,
     started_at: float,
-    sources: Optional[list[dict]] = None,
-    latency_breakdown: Optional[dict] = None,
+    sources: list[dict] | None = None,
+    latency_breakdown: dict | None = None,
 ) -> dict:
     payload = {
         "answer": answer_text,
@@ -1836,87 +1942,92 @@ def get_db_info():
     Returns:
         Database statistics and sample data
     """
+    if supabase is None:
+        return {"status": "error", "error": "Supabase client not initialized"}
+    _supa = supabase
     try:
-        info = {}
+        info: dict[str, Any] = {}
 
         # Get row count
         try:
-            count_result = supabase.table('document_chunks').select(
-                'id', count='exact').limit(1).execute()
-            info['total_rows'] = count_result.count if hasattr(count_result, 'count') else len(
-                supabase.table('document_chunks').select('id').execute().data)
+            count_result = _supa.table("document_chunks").select("id").limit(1).execute()
+            info["total_rows"] = (
+                count_result.count
+                if hasattr(count_result, "count")
+                else len(_supa.table("document_chunks").select("id").execute().data or [])
+            )
         except Exception as e:
-            info['total_rows'] = f'error: {e}'
+            info["total_rows"] = f"error: {e}"
 
         # Get sample rows with embeddings
         try:
-            sample_result = supabase.table('document_chunks').select(
-                'id,source_url,chunk_index,embedding,content').limit(3).execute()
+            sample_result = (
+                _supa.table("document_chunks")
+                .select("id,source_url,chunk_index,embedding,content")
+                .limit(3)
+                .execute()
+            )
             if sample_result.data:
+                sample_rows: list[dict[str, Any]] = sample_result.data  # type: ignore[assignment]
                 samples = []
-                for row in sample_result.data:
-                    sample = {
-                        'id': row.get('id'),
-                        'source_url': row.get('source_url'),
-                        'chunk_index': row.get('chunk_index'),
-                        'content_preview': row.get('content', '')[:100] + '...' if row.get('content') else None,
-                        'has_embedding': row.get('embedding') is not None,
+                for row in sample_rows:
+                    sample: dict[str, Any] = {
+                        "id": row.get("id"),
+                        "source_url": row.get("source_url"),
+                        "chunk_index": row.get("chunk_index"),
+                        "content_preview": (
+                            row.get("content", "")[:100] + "..." if row.get("content") else None
+                        ),
+                        "has_embedding": row.get("embedding") is not None,
                     }
 
                     # Try to get embedding dimension
-                    if row.get('embedding'):
-                        emb = row['embedding']
+                    if row.get("embedding"):
+                        emb = row["embedding"]
                         if isinstance(emb, list):
-                            sample['embedding_dimension'] = len(emb)
-                            sample['embedding_type'] = 'list'
+                            sample["embedding_dimension"] = len(emb)
+                            sample["embedding_type"] = "list"
                         elif isinstance(emb, str):
-                            sample['embedding_type'] = 'string'
+                            sample["embedding_type"] = "string"
                             try:
                                 import json
+
                                 parsed = json.loads(emb)
-                                sample['embedding_dimension'] = len(parsed)
-                            except:
-                                sample['embedding_dimension'] = 'parse_failed'
+                                sample["embedding_dimension"] = len(parsed)
+                            except Exception:
+                                sample["embedding_dimension"] = "parse_failed"
                         else:
-                            sample['embedding_type'] = type(emb).__name__
+                            sample["embedding_type"] = type(emb).__name__
 
                     samples.append(sample)
 
-                info['sample_rows'] = samples
+                info["sample_rows"] = samples
         except Exception as e:
-            info['sample_error'] = str(e)
+            info["sample_error"] = str(e)
 
         # Check RPC function
         try:
             test_embedding = [0.0] * 384
-            rpc_result = supabase.rpc(
+            rpc_result = _supa.rpc(
                 "search_similar_documents",
-                {
-                    "query_embedding": test_embedding,
-                    "match_threshold": 0.0,
-                    "match_count": 1
-                }
+                {"query_embedding": test_embedding, "match_threshold": 0.0, "match_count": 1},
             ).execute()
-            info['rpc_function_works'] = True
-            info['rpc_test_returned'] = len(
-                rpc_result.data) if rpc_result.data else 0
+            info["rpc_function_works"] = True
+            rpc_data: list[dict[str, Any]] = rpc_result.data or []  # type: ignore[assignment]
+            info["rpc_test_returned"] = len(rpc_data)
         except Exception as e:
-            info['rpc_function_works'] = False
-            info['rpc_error'] = str(e)
+            info["rpc_function_works"] = False
+            info["rpc_error"] = str(e)
 
         return {
             "status": "success",
             "database_info": info,
             "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
-            "expected_dimension": 384
+            "expected_dimension": 384,
         }
 
     except Exception as e:
-        return {
-            "status": "error",
-            "error": str(e),
-            "error_type": type(e).__name__
-        }
+        return {"status": "error", "error": str(e), "error_type": type(e).__name__}
 
 
 @app.get("/ask")
@@ -1953,23 +2064,28 @@ async def ask_question(
             except LangDetectException:
                 lang = "en"
                 logger.warning(
-                    "Language detection failed for question: '%s'. Defaulting to English.", question)
+                    "Language detection failed for question: '%s'. Defaulting to English.", question
+                )
             # Heuristic override: treat as Spanish if question contains Spanish punctuation or accents
-            if lang != 'es':
-                if any(ch in question for ch in ['¿', '¡', 'á', 'é', 'í', 'ó', 'ú', 'ñ']):
-                    lang = 'es'
+            if lang != "es":
+                if any(ch in question for ch in ["¿", "¡", "á", "é", "í", "ó", "ú", "ñ"]):
+                    lang = "es"
 
         # Try static response first for deterministic FAQ handling in both languages
         # --- GuardrailsAI: validate input before invoking agent ---
         from src.agent.guardrails_config import validate_input
+
         guard_result = validate_input(question, lang=lang)
         if not guard_result.passed:
-            return _response_payload(guard_result.reason, thread_id=thread_id, started_at=started_at, sources=[])
+            return _response_payload(
+                guard_result.reason, thread_id=thread_id, started_at=started_at, sources=[]
+            )
         # If PII was detected and redacted, use redacted version
         effective_question = guard_result.redacted if guard_result.redacted else question
 
         logger.info(
-            f"\n--- New request received: '{effective_question}' (Detected Language: {lang}, Thread: {thread_id}) ---")
+            f"\n--- New request received: '{effective_question}' (Detected Language: {lang}, Thread: {thread_id}) ---"
+        )
 
         answer_seeking = _is_answer_seeking_query(effective_question, lang)
         if not answer_seeking:
@@ -1978,14 +2094,16 @@ async def ask_question(
                 logger.info("Returning static FAQ answer (local matcher, non-answer intent).")
                 return _response_payload(local_static, thread_id=thread_id, started_at=started_at)
             try:
-                static_answer = static_response_tool.invoke({
-                    "query": effective_question,
-                    "language": lang
-                })
+                static_answer = static_response_tool.invoke(
+                    {"query": effective_question, "language": lang}
+                )
                 if static_answer:
                     logger.info(
-                        "Returning static FAQ answer without retrieval (non-answer intent).")
-                    return _response_payload(static_answer, thread_id=thread_id, started_at=started_at)
+                        "Returning static FAQ answer without retrieval (non-answer intent)."
+                    )
+                    return _response_payload(
+                        static_answer, thread_id=thread_id, started_at=started_at
+                    )
             except Exception as static_exc:
                 logger.warning(f"Static response check failed: {static_exc}")
 
@@ -2010,9 +2128,7 @@ async def ask_question(
                     answer = static_faq_answer
                 else:
                     fallback_llm = _get_llm_without_tools(provider, model)
-                    quick_prompt = (
-                        f"Respond briefly and naturally in {'Spanish' if lang == 'es' else 'English'}: {effective_question}"
-                    )
+                    quick_prompt = f"Respond briefly and naturally in {'Spanish' if lang == 'es' else 'English'}: {effective_question}"
                     llm_started_at = time.perf_counter()
                     raw = fallback_llm.invoke([HumanMessage(content=quick_prompt)])
                     llm_ms = int((time.perf_counter() - llm_started_at) * 1000)
@@ -2023,7 +2139,9 @@ async def ask_question(
                 retrieval_started_at = time.perf_counter()
                 raw_search = db_search_tool.invoke(effective_question)
                 retrieval_ms = int((time.perf_counter() - retrieval_started_at) * 1000)
-                retrieved_docs = _parse_db_search_docs(raw_search if isinstance(raw_search, str) else str(raw_search))
+                retrieved_docs = _parse_db_search_docs(
+                    raw_search if isinstance(raw_search, str) else str(raw_search)
+                )
                 weak_retrieval = _is_weak_retrieval(retrieved_docs)
 
                 llm_started_at = time.perf_counter()
@@ -2042,7 +2160,12 @@ async def ask_question(
                     _allowed_source_urls_from_docs(retrieved_docs),
                     lang,
                 )
-                logger.info("Deterministic RAG complete: docs=%s, weak=%s, sources=%s", len(retrieved_docs), weak_retrieval, len(sources))
+                logger.info(
+                    "Deterministic RAG complete: docs=%s, weak=%s, sources=%s",
+                    len(retrieved_docs),
+                    weak_retrieval,
+                    len(sources),
+                )
 
             db_metrics = get_last_search_metrics() if answer_seeking else {}
             latency_breakdown = {
@@ -2062,6 +2185,7 @@ async def ask_question(
 
         # --- GuardrailsAI: validate output before returning ---
         from src.agent.guardrails_config import validate_output
+
         out_guard = validate_output(answer)
         if not out_guard.passed:
             answer = out_guard.reason
@@ -2080,7 +2204,12 @@ async def ask_question(
         logger.error("Error processing question '%s': %s", question, str(e))
         logger.error("Full traceback:\n%s", traceback.format_exc())
         import re as _re
-        is_rate_limit = e.__class__.__name__ in ("RateLimitError", "TooManyRequests", "RateLimitException")
+
+        is_rate_limit = e.__class__.__name__ in (
+            "RateLimitError",
+            "TooManyRequests",
+            "RateLimitException",
+        )
         if is_rate_limit:
             wait_seconds = 10.0
             m = _re.search(r"try again in ([0-9]+(?:\.[0-9]+)?)s", str(e))
@@ -2089,14 +2218,10 @@ async def ask_question(
                     wait_seconds = float(m.group(1))
                 except Exception:
                     pass
-            if 'lang' in locals() and lang == 'es':
-                fallback = (
-                    f"El asistente está limitado por tasa temporalmente. Intenta nuevamente en {wait_seconds:.0f} segundos."
-                )
+            if "lang" in locals() and lang == "es":
+                fallback = f"El asistente está limitado por tasa temporalmente. Intenta nuevamente en {wait_seconds:.0f} segundos."
             else:
-                fallback = (
-                    f"The assistant is temporarily unavailable. Please try again in {wait_seconds:.0f} seconds."
-                )
+                fallback = f"The assistant is temporarily unavailable. Please try again in {wait_seconds:.0f} seconds."
             return _response_payload(fallback, thread_id=thread_id, started_at=started_at)
         # Non-rate-limit errors: propagate as HTTP 500
         raise HTTPException(status_code=500, detail=str(e))
@@ -2122,7 +2247,7 @@ async def ask_question_stream(
     Sends JSON objects showing agent's thinking process:
     - {"type": "thinking", "message": "Let me think about your question..."}
     - {"type": "thinking", "message": "Looking through our local resources..."}
-    - {"type": "clarification", "questions": [...], "context": "..."} ← User must respond  
+    - {"type": "clarification", "questions": [...], "context": "..."} ← User must respond
     - {"type": "complete", "answer": "...", "sources": [...]}
     """
     # Accept both 'question' and legacy 'query' parameter names
@@ -2136,49 +2261,56 @@ async def ask_question_stream(
 
     async def generate_stream():
         try:
+
             def _sse(payload: dict) -> str:
-                payload.setdefault("timestamp", datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"))
+                payload.setdefault(
+                    "timestamp", datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+                )
                 return f"data: {json.dumps(payload)}\\n\\n"
 
             # Detect language unless explicitly provided
             if not lang:
                 try:
                     detected_lang = detect(question)
-                    lang_local = detected_lang if detected_lang in [
-                        'es', 'en'] else 'en'
+                    lang_local = detected_lang if detected_lang in ["es", "en"] else "en"
                 except LangDetectException:
-                    lang_local = 'en'
+                    lang_local = "en"
                 # Heuristic override: treat as Spanish if question contains Spanish punctuation or accents
-                if lang_local != 'es':
-                    if any(c in question for c in '¿¡áéíóúñü'):
-                        lang_local = 'es'
+                if lang_local != "es":
+                    if any(c in question for c in "¿¡áéíóúñü"):
+                        lang_local = "es"
             else:
                 lang_local = lang
 
             logger.info(
-                f"\n--- Streaming request received: '{question}' (Language: {lang_local}, Thread: {thread_id}) ---")
+                f"\n--- Streaming request received: '{question}' (Language: {lang_local}, Thread: {thread_id}) ---"
+            )
 
             # Yield thinking message for FAQ check
-            msg = get_agent_thinking_message('static_response', lang_local)
-            yield _sse({
-                "type": "thinking",
-                "message": msg,
-                "stage": "precheck",
-                "progress": 10,
-                "status": "working",
-                "waiting": False,
-            })
+            msg = get_agent_thinking_message("static_response", lang_local)
+            yield _sse(
+                {
+                    "type": "thinking",
+                    "message": msg,
+                    "stage": "precheck",
+                    "progress": 10,
+                    "status": "working",
+                    "waiting": False,
+                }
+            )
 
             # Yield thinking message for analysis
-            msg = get_agent_thinking_message('analyzing', lang_local)
-            yield _sse({
-                "type": "thinking",
-                "message": msg,
-                "stage": "analysis",
-                "progress": 25,
-                "status": "working",
-                "waiting": False,
-            })
+            msg = get_agent_thinking_message("analyzing", lang_local)
+            yield _sse(
+                {
+                    "type": "thinking",
+                    "message": msg,
+                    "stage": "analysis",
+                    "progress": 25,
+                    "status": "working",
+                    "waiting": False,
+                }
+            )
             answer_seeking = _is_answer_seeking_query(question, lang_local)
             logger.info("Streaming intent gate: answer_seeking=%s", answer_seeking)
 
@@ -2186,17 +2318,19 @@ async def ask_question_stream(
                 local_static = _find_static_faq_answer(question, lang_local)
                 if local_static:
                     logger.info("Returning static FAQ answer (streaming, non-answer intent).")
-                    yield _sse({
-                        "type": "complete",
-                        "answer": local_static,
-                        "sources": [],
-                        "thread_id": thread_id,
-                        "plan": "",
-                        "metadata": {
-                            "progress": 100,
-                            "stage": "complete",
-                        },
-                    })
+                    yield _sse(
+                        {
+                            "type": "complete",
+                            "answer": local_static,
+                            "sources": [],
+                            "thread_id": thread_id,
+                            "plan": "",
+                            "metadata": {
+                                "progress": 100,
+                                "stage": "complete",
+                            },
+                        }
+                    )
                     return
 
             sources: list[dict] = []
@@ -2208,33 +2342,35 @@ async def ask_question_stream(
                     answer = local_non_answer
                 else:
                     llm_plain = _get_llm_without_tools(provider, model)
-                    quick_prompt = (
-                        f"Respond briefly and naturally in {'Spanish' if lang_local == 'es' else 'English'}: {question}"
-                    )
+                    quick_prompt = f"Respond briefly and naturally in {'Spanish' if lang_local == 'es' else 'English'}: {question}"
                     plain = llm_plain.invoke([HumanMessage(content=quick_prompt)])
                     answer = plain.content if hasattr(plain, "content") else str(plain)
             else:
-                tool_msg = get_agent_thinking_message('db_search', lang_local)
-                yield _sse({
-                    "type": "thinking",
-                    "message": tool_msg,
-                    "stage": "tooling",
-                    "progress": 40,
-                    "status": "working",
-                    "waiting": False,
-                    "tool": "db_search",
-                })
-                yield _sse({
-                    "type": "tool_event",
-                    "phase": "start",
-                    "tool": "db_search",
-                    "message": tool_msg,
-                    "stage": "tooling",
-                    "progress": 42,
-                    "status": "working",
-                    "transient": True,
-                    "waiting": True,
-                })
+                tool_msg = get_agent_thinking_message("db_search", lang_local)
+                yield _sse(
+                    {
+                        "type": "thinking",
+                        "message": tool_msg,
+                        "stage": "tooling",
+                        "progress": 40,
+                        "status": "working",
+                        "waiting": False,
+                        "tool": "db_search",
+                    }
+                )
+                yield _sse(
+                    {
+                        "type": "tool_event",
+                        "phase": "start",
+                        "tool": "db_search",
+                        "message": tool_msg,
+                        "stage": "tooling",
+                        "progress": 42,
+                        "status": "working",
+                        "transient": True,
+                        "waiting": True,
+                    }
+                )
 
                 request_tags = parse_tags_input(tags)
                 search_token = set_db_search_options(
@@ -2253,17 +2389,19 @@ async def ask_question_stream(
                 retrieved_docs = _parse_db_search_docs(raw_search_text)
                 weak_retrieval = _is_weak_retrieval(retrieved_docs)
 
-                yield _sse({
-                    "type": "tool_event",
-                    "phase": "result",
-                    "tool": "db_search",
-                    "message": _summarize_tool_result("db_search", raw_search_text, lang_local),
-                    "stage": "tooling",
-                    "progress": 62,
-                    "status": "working",
-                    "transient": True,
-                    "waiting": False,
-                })
+                yield _sse(
+                    {
+                        "type": "tool_event",
+                        "phase": "result",
+                        "tool": "db_search",
+                        "message": _summarize_tool_result("db_search", raw_search_text, lang_local),
+                        "stage": "tooling",
+                        "progress": 62,
+                        "status": "working",
+                        "transient": True,
+                        "waiting": False,
+                    }
+                )
 
                 answer = _build_deterministic_rag_answer(
                     question=question,
@@ -2279,38 +2417,51 @@ async def ask_question_stream(
                     _allowed_source_urls_from_docs(retrieved_docs),
                     lang_local,
                 )
-                logger.info("Streaming deterministic RAG complete: docs=%s, weak=%s, sources=%s", len(retrieved_docs), weak_retrieval, len(sources))
+                logger.info(
+                    "Streaming deterministic RAG complete: docs=%s, weak=%s, sources=%s",
+                    len(retrieved_docs),
+                    weak_retrieval,
+                    len(sources),
+                )
 
-            yield _sse({
-                "type": "thinking",
-                "message": "Finalizing answer..." if lang_local != "es" else "Finalizando respuesta...",
-                "stage": "finalizing",
-                "progress": 95,
-                "status": "working",
-                "waiting": False,
-            })
+            yield _sse(
+                {
+                    "type": "thinking",
+                    "message": (
+                        "Finalizing answer..." if lang_local != "es" else "Finalizando respuesta..."
+                    ),
+                    "stage": "finalizing",
+                    "progress": 95,
+                    "status": "working",
+                    "waiting": False,
+                }
+            )
 
             # Yield complete response
-            yield _sse({
-                "type": "complete",
-                "answer": answer,
-                "sources": sources,
-                "thread_id": thread_id,
-                "plan": plan,
-                "metadata": {
-                    "progress": 100,
-                    "stage": "complete",
-                },
-            })
+            yield _sse(
+                {
+                    "type": "complete",
+                    "answer": answer,
+                    "sources": sources,
+                    "thread_id": thread_id,
+                    "plan": plan,
+                    "metadata": {
+                        "progress": 100,
+                        "stage": "complete",
+                    },
+                }
+            )
 
         except Exception as e:
-            logger.error("Error in streaming endpoint '%s': %s",
-                         question, str(e))
+            logger.error("Error in streaming endpoint '%s': %s", question, str(e))
             logger.error("Full traceback:\n%s", traceback.format_exc())
 
             # Handle rate limits gracefully
-            import re as _re
-            is_rate_limit = e.__class__.__name__ in ("RateLimitError", "TooManyRequests", "RateLimitException")
+            is_rate_limit = e.__class__.__name__ in (
+                "RateLimitError",
+                "TooManyRequests",
+                "RateLimitException",
+            )
             if is_rate_limit:
                 fallback = (
                     "Servicio temporalmente no disponible. Inténtalo de nuevo en un momento."
@@ -2324,15 +2475,18 @@ async def ask_question_stream(
                     else f"Error processing question: {str(e)}"
                 )
 
-            yield _sse({
-                "type": "error",
-                "message": fallback,
-                "stage": "error",
-                "progress": 100,
-                "status": "error",
-            })
+            yield _sse(
+                {
+                    "type": "error",
+                    "message": fallback,
+                    "stage": "error",
+                    "progress": 100,
+                    "status": "error",
+                }
+            )
 
     return StreamingResponse(generate_stream(), media_type="text/event-stream")
+
 
 class ModelSelection(BaseModel):
     provider: str
@@ -2370,7 +2524,10 @@ def set_model_selection(selection: ModelSelection):
     if selection.model:
         avail_models = available["models"].get(selection.provider, [])
         if selection.model not in avail_models:
-            raise HTTPException(status_code=400, detail=f"Unsupported model for {selection.provider}: {selection.model}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported model for {selection.provider}: {selection.model}",
+            )
 
     # Save selection (file + in-memory)
     _save_model_selection_to_file(selection.provider.lower(), selection.model, selection.lock)
@@ -2380,6 +2537,7 @@ def set_model_selection(selection: ModelSelection):
 @app.get("/config")
 def config():
     """Expose available providers/models based on environment for frontend discovery."""
+
     def _ollama_is_reachable(base_url: str | None) -> bool:
         candidate = str(base_url or "").strip().rstrip("/")
         if not candidate:
@@ -2398,7 +2556,10 @@ def config():
         provider_entries.append(("ollama", "Ollama (Local)"))
         models["ollama"] = [ollama_model or "llama3.1:8b"]
     elif ollama_base_url:
-        logger.warning("Ollama configured at %s but unreachable; excluding provider from /config", ollama_base_url)
+        logger.warning(
+            "Ollama configured at %s but unreachable; excluding provider from /config",
+            ollama_base_url,
+        )
     if deepseek_api_key:
         provider_entries.append(("deepseek", "DeepSeek"))
         models["deepseek"] = ["deepseek-chat", "deepseek-reasoner"]
@@ -2408,8 +2569,10 @@ def config():
 
     selected_provider = _normalize_provider_name_runtime(CURRENT_SELECTION.get("provider"))
     available_provider_keys = [key for key, _ in provider_entries]
-    default_provider = selected_provider if selected_provider in available_provider_keys else (
-        available_provider_keys[0] if available_provider_keys else None
+    default_provider = (
+        selected_provider
+        if selected_provider in available_provider_keys
+        else (available_provider_keys[0] if available_provider_keys else None)
     )
 
     providers = [
@@ -2425,7 +2588,9 @@ def config():
         "providers": providers,
         "models": models,
         "defaultProvider": default_provider,
-        "defaultModel": (models.get(default_provider) or [None])[0] if default_provider else None,
+        "defaultModel": (
+            next(iter(models.get(default_provider) or []), None) if default_provider else None
+        ),
         "runtime": {
             "fast_mode": agent_fast_mode,
             "max_response_sentences": agent_max_response_sentences,
@@ -2444,5 +2609,6 @@ def privacy():
     if not policy_path.exists():
         raise HTTPException(status_code=404, detail="Privacy policy not found")
     return JSONResponse({"markdown": policy_path.read_text(encoding="utf-8")})
+
 
 # --end-of-file--

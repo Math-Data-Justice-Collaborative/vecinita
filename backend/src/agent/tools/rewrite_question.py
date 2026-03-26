@@ -3,13 +3,14 @@
 Uses the configured LLM provider to rewrite a question for better retrieval.
 """
 
-from typing import Callable
+from collections.abc import Callable
+from typing import Any
 
 from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
 
 
-def create_rewrite_question_tool(get_llm_without_tools: Callable[[str | None, str | None], object]):
+def create_rewrite_question_tool(get_llm_without_tools: Callable[[str | None, str | None], Any]):
     """Create rewrite tool bound to the current LLM factory."""
 
     @tool

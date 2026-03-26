@@ -26,7 +26,9 @@ def _install_fastembed_stub(monkeypatch):
 
     monkeypatch.setitem(sys.modules, "langchain_community", fake_langchain_community)
     monkeypatch.setitem(sys.modules, "langchain_community.embeddings", fake_embeddings_module)
-    monkeypatch.setitem(sys.modules, "langchain_community.embeddings.fastembed", fake_fastembed_module)
+    monkeypatch.setitem(
+        sys.modules, "langchain_community.embeddings.fastembed", fake_fastembed_module
+    )
 
 
 def _install_langdetect_stub(monkeypatch):
@@ -59,13 +61,33 @@ def _reload_agent_main(monkeypatch, create_embedding_client):
     import src.agent.main as agent_main
 
     monkeypatch.setattr(agent_main, "create_client", Mock(return_value=Mock()))
-    monkeypatch.setattr(agent_main, "get_chroma_store", Mock(return_value=Mock(heartbeat=Mock(return_value=True))))
-    monkeypatch.setattr(agent_main, "create_db_search_tool", Mock(return_value=Mock(name="db_search")))
-    monkeypatch.setattr(agent_main, "create_static_response_tool", Mock(return_value=Mock(name="static_response_tool")))
-    monkeypatch.setattr(agent_main, "create_web_search_tool", Mock(return_value=Mock(name="web_search")))
-    monkeypatch.setattr(agent_main, "create_clarify_question_tool", Mock(return_value=Mock(name="clarify_question")))
-    monkeypatch.setattr(agent_main, "create_rank_retrieval_tool", Mock(return_value=Mock(name="rank_retrieval_results")))
-    monkeypatch.setattr(agent_main, "create_rewrite_question_tool", Mock(return_value=Mock(name="rewrite_question_tool")))
+    monkeypatch.setattr(
+        agent_main, "get_chroma_store", Mock(return_value=Mock(heartbeat=Mock(return_value=True)))
+    )
+    monkeypatch.setattr(
+        agent_main, "create_db_search_tool", Mock(return_value=Mock(name="db_search"))
+    )
+    monkeypatch.setattr(
+        agent_main,
+        "create_static_response_tool",
+        Mock(return_value=Mock(name="static_response_tool")),
+    )
+    monkeypatch.setattr(
+        agent_main, "create_web_search_tool", Mock(return_value=Mock(name="web_search"))
+    )
+    monkeypatch.setattr(
+        agent_main, "create_clarify_question_tool", Mock(return_value=Mock(name="clarify_question"))
+    )
+    monkeypatch.setattr(
+        agent_main,
+        "create_rank_retrieval_tool",
+        Mock(return_value=Mock(name="rank_retrieval_results")),
+    )
+    monkeypatch.setattr(
+        agent_main,
+        "create_rewrite_question_tool",
+        Mock(return_value=Mock(name="rewrite_question_tool")),
+    )
 
     return importlib.reload(agent_main)
 

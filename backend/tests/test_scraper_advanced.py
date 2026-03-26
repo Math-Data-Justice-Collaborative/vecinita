@@ -2,17 +2,19 @@
 Edge case and advanced integration tests for the scraper module.
 Tests for error handling, edge cases, and end-to-end scenarios.
 """
-import pytest
+
 import os
 import tempfile
-from unittest.mock import Mock, patch, MagicMock
-from pathlib import Path
-from src.scraper.processors import DocumentProcessor
-from src.scraper.link_tracker import LinkTracker
+from unittest.mock import Mock, patch
+
+import pytest
+
 from src.scraper.config import ScraperConfig
-from src.scraper.utils import clean_text, convert_github_to_raw, write_to_failed_log
+from src.scraper.link_tracker import LinkTracker
 from src.scraper.loaders import SmartLoader
+from src.scraper.processors import DocumentProcessor
 from src.scraper.scraper import VecinaScraper
+from src.scraper.utils import clean_text, convert_github_to_raw, write_to_failed_log
 
 
 @pytest.mark.unit
@@ -31,9 +33,7 @@ class TestScraperEdgeCases:
 
         processor = DocumentProcessor(config)
         chunks, links = processor.process_documents(
-            docs=[mock_doc],
-            source_identifier="https://example.com",
-            loader_type="Test"
+            docs=[mock_doc], source_identifier="https://example.com", loader_type="Test"
         )
 
         assert chunks > 0
@@ -44,8 +44,7 @@ class TestScraperEdgeCases:
         """Test link tracker deduplicates links."""
         tracker = LinkTracker()
         tracker.add_links(
-            "https://example.com",
-            ["https://link1.com", "https://link1.com", "https://link2.com"]
+            "https://example.com", ["https://link1.com", "https://link1.com", "https://link2.com"]
         )
 
         summary = tracker.get_summary()
@@ -54,14 +53,14 @@ class TestScraperEdgeCases:
 
     def test_config_with_invalid_depth(self):
         """Test config handles invalid depth values."""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
             config_file = f.name
             f.write("https://example.com invalid_depth\n")
             f.write("https://test.org 2\n")
 
         try:
-            with patch('builtins.open', create=True):
-                config = ScraperConfig()
+            with patch("builtins.open", create=True):
+                ScraperConfig()
                 # Should handle gracefully without crashing
         finally:
             os.remove(config_file)
@@ -101,9 +100,7 @@ class TestScraperEdgeCases:
 
         processor = DocumentProcessor(config)
         chunks, links = processor.process_documents(
-            docs=[mock_doc],
-            source_identifier="https://example.com",
-            loader_type="Test"
+            docs=[mock_doc], source_identifier="https://example.com", loader_type="Test"
         )
 
         # Should create multiple chunks for large document
@@ -114,7 +111,7 @@ class TestScraperEdgeCases:
 class TestScraperWithMockedRequests:
     """Test scraper with mocked HTTP requests."""
 
-    @patch('src.scraper.loaders.PlaywrightURLLoader')
+    @patch("src.scraper.loaders.PlaywrightURLLoader")
     def test_playwright_loader_error_handling(self, mock_playwright):
         """Test Playwright loader returns empty results on failure without fallback."""
         # Playwright fails
@@ -138,7 +135,7 @@ class TestScraperWithMockedRequests:
         assert docs == []
         assert success is False
 
-    @patch('src.scraper.loaders.RecursiveUrlLoader')
+    @patch("src.scraper.loaders.RecursiveUrlLoader")
     def test_recursive_loader_with_depth(self, mock_recursive):
         """Test recursive loader respects depth configuration."""
         mock_loader = Mock()
@@ -153,11 +150,9 @@ class TestScraperWithMockedRequests:
 
         loader = SmartLoader(config)
 
-        with patch('src.scraper.loaders.SmartLoader._select_and_load') as mock_select:
-            mock_select.return_value = (
-                [], "Recursive Crawler (Depth: 3)", False)
-            docs, loader_type, success = loader.load_url(
-                "https://example.com/page")
+        with patch("src.scraper.loaders.SmartLoader._select_and_load") as mock_select:
+            mock_select.return_value = ([], "Recursive Crawler (Depth: 3)", False)
+            docs, loader_type, success = loader.load_url("https://example.com/page")
 
             assert "Depth: 3" in loader_type
 
@@ -169,18 +164,16 @@ class TestScraperPipelineEnd2End:
     def test_complete_scraper_pipeline(self):
         """Test a complete scraping pipeline with mocked loaders."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            output_file = os.path.join(tmpdir, 'output.txt')
-            failed_log = os.path.join(tmpdir, 'failed.txt')
-            links_file = os.path.join(tmpdir, 'links.txt')
+            output_file = os.path.join(tmpdir, "output.txt")
+            failed_log = os.path.join(tmpdir, "failed.txt")
+            links_file = os.path.join(tmpdir, "links.txt")
 
             scraper = VecinaScraper(
-                output_file=output_file,
-                failed_log=failed_log,
-                links_file=links_file
+                output_file=output_file, failed_log=failed_log, links_file=links_file
             )
 
             # Mock the loader to return some documents
-            with patch.object(scraper.loader, 'load_url') as mock_load:
+            with patch.object(scraper.loader, "load_url") as mock_load:
                 mock_doc = Mock()
                 mock_doc.page_content = "Test content about housing policy and community resources."
                 mock_doc.metadata = {"source": "https://example.com"}
@@ -188,13 +181,11 @@ class TestScraperPipelineEnd2End:
                 mock_load.return_value = ([mock_doc], "Test Loader", True)
 
                 # Mock processor
-                with patch.object(scraper.processor, 'process_documents') as mock_process:
+                with patch.object(scraper.processor, "process_documents") as mock_process:
                     mock_process.return_value = (1, ["https://example.com"])
 
                     # Run scraper
-                    total, successful, failed = scraper.scrape_urls(
-                        urls=["https://example.com"]
-                    )
+                    total, successful, failed = scraper.scrape_urls(urls=["https://example.com"])
 
                     assert total == 1
                     assert successful == 1
@@ -203,21 +194,14 @@ class TestScraperPipelineEnd2End:
     def test_scraper_with_mixed_success_failure(self):
         """Test scraper handling mix of successful and failed URLs."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            output_file = os.path.join(tmpdir, 'output.txt')
-            failed_log = os.path.join(tmpdir, 'failed.txt')
+            output_file = os.path.join(tmpdir, "output.txt")
+            failed_log = os.path.join(tmpdir, "failed.txt")
 
-            scraper = VecinaScraper(
-                output_file=output_file,
-                failed_log=failed_log
-            )
+            scraper = VecinaScraper(output_file=output_file, failed_log=failed_log)
 
-            urls = [
-                "https://example.com",
-                "https://fail.com",
-                "https://test.org"
-            ]
+            urls = ["https://example.com", "https://fail.com", "https://test.org"]
 
-            with patch.object(scraper.loader, 'load_url') as mock_load:
+            with patch.object(scraper.loader, "load_url") as mock_load:
                 # First URL succeeds, second fails, third succeeds
                 mock_doc = Mock()
                 mock_doc.page_content = "Content with multiple words in it for processing."
@@ -230,7 +214,7 @@ class TestScraperPipelineEnd2End:
 
                 mock_load.side_effect = load_side_effect
 
-                with patch.object(scraper.processor, 'process_documents') as mock_process:
+                with patch.object(scraper.processor, "process_documents") as mock_process:
                     mock_process.return_value = (1, [])
 
                     total, successful, failed = scraper.scrape_urls(urls)
@@ -242,13 +226,10 @@ class TestScraperPipelineEnd2End:
     def test_scraper_summary_generation(self):
         """Test scraper generates proper summary output."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            output_file = os.path.join(tmpdir, 'output.txt')
-            failed_log = os.path.join(tmpdir, 'failed.txt')
+            output_file = os.path.join(tmpdir, "output.txt")
+            failed_log = os.path.join(tmpdir, "failed.txt")
 
-            scraper = VecinaScraper(
-                output_file=output_file,
-                failed_log=failed_log
-            )
+            scraper = VecinaScraper(output_file=output_file, failed_log=failed_log)
 
             # Manually set some stats
             scraper.stats["total_urls"] = 5
@@ -260,16 +241,16 @@ class TestScraperPipelineEnd2End:
             scraper.successful_sources = [
                 "https://example.com",
                 "https://test.org",
-                "https://community.gov"
+                "https://community.gov",
             ]
 
             scraper.failed_sources = {
                 "https://fail.com": "Failed to load",
-                "https://skip.com": "Skipped (blocked pattern)"
+                "https://skip.com": "Skipped (blocked pattern)",
             }
 
             # This shouldn't raise an error
-            with patch('logging.getLogger') as mock_logger:
+            with patch("logging.getLogger"):
                 scraper.print_summary()
 
 
@@ -284,7 +265,7 @@ class TestScraperFileOperations:
         config.CHUNK_OVERLAP = 200
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            output_file = os.path.join(tmpdir, 'output.txt')
+            output_file = os.path.join(tmpdir, "output.txt")
 
             mock_doc = Mock()
             mock_doc.page_content = "Sample content to be written to file."
@@ -295,14 +276,14 @@ class TestScraperFileOperations:
                 docs=[mock_doc],
                 source_identifier="https://example.com",
                 loader_type="Test",
-                output_file=output_file
+                output_file=output_file,
             )
 
             # File should be created
             assert os.path.exists(output_file)
 
             # File should contain content
-            with open(output_file, 'r') as f:
+            with open(output_file) as f:
                 content = f.read()
 
             assert "https://example.com" in content
@@ -315,10 +296,10 @@ class TestScraperFileOperations:
         config.CHUNK_OVERLAP = 200
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            output_file = os.path.join(tmpdir, 'output.txt')
+            output_file = os.path.join(tmpdir, "output.txt")
 
             # Write initial content
-            with open(output_file, 'w') as f:
+            with open(output_file, "w") as f:
                 f.write("Initial content\n")
 
             mock_doc = Mock()
@@ -330,14 +311,14 @@ class TestScraperFileOperations:
                 docs=[mock_doc],
                 source_identifier="https://new.com",
                 loader_type="Test",
-                output_file=output_file
+                output_file=output_file,
             )
 
             # File should still exist
             assert os.path.exists(output_file)
 
             # File should contain both initial and new content
-            with open(output_file, 'r') as f:
+            with open(output_file) as f:
                 content = f.read()
 
             assert "Initial content" in content
@@ -346,20 +327,20 @@ class TestScraperFileOperations:
     def test_failed_log_accumulation(self):
         """Test that failed URLs accumulate in log file."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            log_file = os.path.join(tmpdir, 'failed.txt')
+            log_file = os.path.join(tmpdir, "failed.txt")
 
             write_to_failed_log("https://fail1.com", "Error 1", log_file)
             write_to_failed_log("https://fail2.com", "Error 2", log_file)
             write_to_failed_log("https://fail3.com", "Error 3", log_file)
 
-            with open(log_file, 'r') as f:
+            with open(log_file) as f:
                 content = f.read()
 
             assert "https://fail1.com" in content
             assert "https://fail2.com" in content
             assert "https://fail3.com" in content
 
-            lines = content.strip().split('\n')
+            lines = content.strip().split("\n")
             assert len(lines) == 3
 
 
@@ -372,20 +353,17 @@ class TestScraperConcurrency:
         import time
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            output_file = os.path.join(tmpdir, 'output.txt')
-            failed_log = os.path.join(tmpdir, 'failed.txt')
+            output_file = os.path.join(tmpdir, "output.txt")
+            failed_log = os.path.join(tmpdir, "failed.txt")
 
-            scraper = VecinaScraper(
-                output_file=output_file,
-                failed_log=failed_log
-            )
+            scraper = VecinaScraper(output_file=output_file, failed_log=failed_log)
 
             # Set a high rate limit for testing
             scraper.config.RATE_LIMIT_DELAY = 0.1
 
             urls = ["https://example1.com", "https://example2.com"]
 
-            with patch.object(scraper.loader, 'load_url') as mock_load:
+            with patch.object(scraper.loader, "load_url") as mock_load:
                 mock_load.return_value = ([], "Test", False)
 
                 start_time = time.time()

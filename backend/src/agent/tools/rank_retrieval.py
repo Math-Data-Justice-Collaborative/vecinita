@@ -5,26 +5,22 @@ Provides deterministic lightweight reranking for db_search results.
 
 import json
 import re
-from typing import Any, Dict, List
+from typing import Any
 
 from langchain_core.tools import tool
 
 
 def _tokenize_for_rerank(text: str) -> set[str]:
-    return {
-        token
-        for token in re.findall(r"[a-z0-9]+", (text or "").lower())
-        if len(token) > 1
-    }
+    return {token for token in re.findall(r"[a-z0-9]+", (text or "").lower()) if len(token) > 1}
 
 
-def _rerank_results(query: str, docs: List[Dict[str, Any]], top_k: int) -> List[Dict[str, Any]]:
+def _rerank_results(query: str, docs: list[dict[str, Any]], top_k: int) -> list[dict[str, Any]]:
     """Lightweight lexical reranker to improve top-ordering relevance."""
     query_terms = _tokenize_for_rerank(query)
     if not query_terms:
         return docs[:top_k]
 
-    scored: List[tuple[float, Dict[str, Any]]] = []
+    scored: list[tuple[float, dict[str, Any]]] = []
     for doc in docs:
         content_terms = _tokenize_for_rerank(str(doc.get("content", "")))
         overlap = len(query_terms & content_terms)

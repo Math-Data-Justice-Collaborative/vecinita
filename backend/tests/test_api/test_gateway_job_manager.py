@@ -3,9 +3,11 @@ Unit tests for src/gateway/job_manager.py
 
 Tests async job management, job lifecycle, and cleanup.
 """
+
 import asyncio
-import pytest
 from datetime import datetime, timedelta, timezone
+
+import pytest
 
 pytestmark = pytest.mark.unit
 
@@ -38,7 +40,7 @@ class TestAsyncJobManagerBasics:
 
     def test_get_job(self, job_manager):
         """Test retrieving a job."""
-        from src.api.models import LoaderType, JobStatus
+        from src.api.models import JobStatus, LoaderType
 
         async def run_test():
             job_id = await job_manager.create_job(
@@ -55,6 +57,7 @@ class TestAsyncJobManagerBasics:
 
     def test_get_nonexistent_job(self, job_manager):
         """Test retrieving nonexistent job returns None."""
+
         async def run_test():
             job = await job_manager.get_job("nonexistent-id")
             assert job is None
@@ -87,7 +90,7 @@ class TestJobStatusTransitions:
 
     def test_transition_to_running(self, job_manager):
         """Test transitioning job from QUEUED to RUNNING."""
-        from src.api.models import LoaderType, JobStatus
+        from src.api.models import JobStatus, LoaderType
 
         async def run_test():
             job_id = await job_manager.create_job(
@@ -112,7 +115,7 @@ class TestJobStatusTransitions:
 
     def test_transition_to_completed(self, job_manager):
         """Test transitioning job to COMPLETED."""
-        from src.api.models import LoaderType, JobStatus, ScrapeJobResult
+        from src.api.models import JobStatus, LoaderType, ScrapeJobResult
 
         async def run_test():
             job_id = await job_manager.create_job(
@@ -143,7 +146,7 @@ class TestJobStatusTransitions:
 
     def test_transition_to_failed(self, job_manager):
         """Test transitioning job to FAILED."""
-        from src.api.models import LoaderType, JobStatus
+        from src.api.models import JobStatus, LoaderType
 
         async def run_test():
             job_id = await job_manager.create_job(
@@ -167,7 +170,7 @@ class TestJobStatusTransitions:
 
     def test_transition_to_cancelled(self, job_manager):
         """Test transitioning job to CANCELLED."""
-        from src.api.models import LoaderType, JobStatus
+        from src.api.models import JobStatus, LoaderType
 
         async def run_test():
             job_id = await job_manager.create_job(
@@ -186,7 +189,7 @@ class TestJobStatusTransitions:
 
     def test_cannot_cancel_completed_job(self, job_manager):
         """Test that completed jobs cannot be cancelled."""
-        from src.api.models import LoaderType, JobStatus
+        from src.api.models import JobStatus, LoaderType
 
         async def run_test():
             job_id = await job_manager.create_job(
@@ -206,6 +209,7 @@ class TestJobListing:
 
     def test_list_jobs_empty(self, job_manager):
         """Test listing jobs when none exist."""
+
         async def run_test():
             jobs, total = await job_manager.list_jobs()
             assert jobs == []
@@ -380,6 +384,7 @@ class TestJobManagerStats:
 
     def test_get_stats_empty(self, job_manager):
         """Test stats when no jobs exist."""
+
         async def run_test():
             stats = await job_manager.get_stats()
             assert stats["total_jobs"] == 0
@@ -389,15 +394,15 @@ class TestJobManagerStats:
 
     def test_get_stats_with_jobs(self, job_manager):
         """Test stats with various job statuses."""
-        from src.api.models import LoaderType, JobStatus
+        from src.api.models import JobStatus, LoaderType
 
         async def run_test():
             # Create jobs in different states
-            job_id1 = await job_manager.create_job(
+            await job_manager.create_job(
                 urls=["https://example.com/1"],
                 force_loader=LoaderType.AUTO,
             )
-            
+
             job_id2 = await job_manager.create_job(
                 urls=["https://example.com/2"],
                 force_loader=LoaderType.AUTO,
@@ -435,7 +440,7 @@ class TestConcurrency:
                 )
 
             job_ids = await asyncio.gather(*[create_job() for _ in range(10)])
-            
+
             assert len(job_ids) == 10
             assert len(set(job_ids)) == 10  # All unique
 
@@ -446,7 +451,7 @@ class TestConcurrency:
 
     def test_concurrent_status_updates(self, job_manager):
         """Test updating job status concurrently."""
-        from src.api.models import LoaderType, JobStatus
+        from src.api.models import JobStatus, LoaderType
 
         async def run_test():
             job_id = await job_manager.create_job(
@@ -461,9 +466,7 @@ class TestConcurrency:
                     progress_percent=progress,
                 )
 
-            results = await asyncio.gather(*[
-                update_progress(i * 10) for i in range(1, 11)
-            ])
+            results = await asyncio.gather(*[update_progress(i * 10) for i in range(1, 11)])
 
             # All updates should succeed
             assert all(results)

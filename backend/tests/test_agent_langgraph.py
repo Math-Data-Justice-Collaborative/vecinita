@@ -21,22 +21,20 @@ For unit tests with mocked dependencies, see:
 """
 
 import os
+
 import pytest
 from fastapi.testclient import TestClient
 
 # Skip all integration tests if required environment variables are not set
 pytestmark = pytest.mark.skipif(
-    not all([
-        os.getenv("SUPABASE_URL"),
-        os.getenv("SUPABASE_KEY"),
-        os.getenv("GROQ_API_KEY")
-    ]),
-    reason="Integration tests require SUPABASE_URL, SUPABASE_KEY, and GROQ_API_KEY environment variables"
+    not all([os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"), os.getenv("GROQ_API_KEY")]),
+    reason="Integration tests require SUPABASE_URL, SUPABASE_KEY, and GROQ_API_KEY environment variables",
 )
 
 # Import app at module level with error handling
 try:
     from src.agent.main import app
+
     APP_IMPORT_ERROR = None
 except Exception as e:
     app = None
@@ -46,8 +44,7 @@ except Exception as e:
 @pytest.mark.integration
 def test_agent_basic_question(test_client):
     """Test that the agent can handle a basic question."""
-    response = test_client.get(
-        "/ask", params={"question": "What is Vecinita?"})
+    response = test_client.get("/ask", params={"question": "What is Vecinita?"})
 
     assert response.status_code == 200
     data = response.json()
@@ -71,8 +68,7 @@ def test_agent_static_response(test_client):
 @pytest.mark.integration
 def test_agent_spanish_question(test_client):
     """Test that the agent responds in Spanish to Spanish questions."""
-    response = test_client.get(
-        "/ask", params={"question": "¿Qué es Vecinita?"})
+    response = test_client.get("/ask", params={"question": "¿Qué es Vecinita?"})
 
     assert response.status_code == 200
     data = response.json()
@@ -87,17 +83,15 @@ def test_agent_conversation_history(test_client):
     thread_id = "test-thread-123"
 
     # First question
-    response1 = test_client.get("/ask", params={
-        "question": "What is Vecinita?",
-        "thread_id": thread_id
-    })
+    response1 = test_client.get(
+        "/ask", params={"question": "What is Vecinita?", "thread_id": thread_id}
+    )
     assert response1.status_code == 200
 
     # Second question in same thread
-    response2 = test_client.get("/ask", params={
-        "question": "Tell me more about it.",
-        "thread_id": thread_id
-    })
+    response2 = test_client.get(
+        "/ask", params={"question": "Tell me more about it.", "thread_id": thread_id}
+    )
     assert response2.status_code == 200
     data2 = response2.json()
     assert data2["thread_id"] == thread_id
@@ -127,4 +121,5 @@ def test_health_endpoint(test_client):
 def test_client():
     """Create a test client for the FastAPI app."""
     from src.agent.main import app
+
     return TestClient(app)

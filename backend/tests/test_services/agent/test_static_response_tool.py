@@ -4,13 +4,15 @@ Tests the static_response_tool's ability to match questions to predefined
 FAQ answers in English and Spanish.
 """
 
-import pytest
 import copy
+
+import pytest
+
 from src.services.agent.tools.static_response import (
-    static_response_tool,
+    FAQ_DATABASE,
     add_faq,
     list_faqs,
-    FAQ_DATABASE
+    static_response_tool,
 )
 
 
@@ -30,57 +32,40 @@ class TestStaticResponseTool:
 
     def test_static_response_matches_english_faq(self):
         """Test that tool matches English FAQ questions."""
-        result = static_response_tool.invoke({
-            "query": "what is vecinita",
-            "language": "en"
-        })
+        result = static_response_tool.invoke({"query": "what is vecinita", "language": "en"})
 
         assert result is not None
         assert "community assistant" in result.lower() or "q&a" in result.lower()
 
     def test_static_response_matches_spanish_faq(self):
         """Test that tool matches Spanish FAQ questions."""
-        result = static_response_tool.invoke({
-            "query": "qué es vecinita",
-            "language": "es"
-        })
+        result = static_response_tool.invoke({"query": "qué es vecinita", "language": "es"})
 
         assert result is not None
         assert "comunitar" in result.lower() or "asistente" in result.lower()
 
     def test_static_response_case_insensitive(self):
         """Test that FAQ matching is case-insensitive."""
-        result1 = static_response_tool.invoke({
-            "query": "what is vecinita",
-            "language": "en"
-        })
-        result2 = static_response_tool.invoke({
-            "query": "WHAT IS VECINITA",
-            "language": "en"
-        })
-        result3 = static_response_tool.invoke({
-            "query": "What Is Vecinita",
-            "language": "en"
-        })
+        result1 = static_response_tool.invoke({"query": "what is vecinita", "language": "en"})
+        result2 = static_response_tool.invoke({"query": "WHAT IS VECINITA", "language": "en"})
+        result3 = static_response_tool.invoke({"query": "What Is Vecinita", "language": "en"})
 
         assert result1 == result2 == result3
 
     def test_static_response_returns_none_for_nonexistent_question(self):
         """Test that tool returns 'No FAQ found' for questions without FAQ."""
-        result = static_response_tool.invoke({
-            "query": "xyzabc nonexistent topic",
-            "language": "en"
-        })
+        result = static_response_tool.invoke(
+            {"query": "xyzabc nonexistent topic", "language": "en"}
+        )
 
         # Tool returns "No FAQ found." string instead of None for robustness
         assert result == "No FAQ found." or result is None
 
     def test_static_response_partial_match(self):
         """Test that tool matches partial question strings."""
-        result = static_response_tool.invoke({
-            "query": "tell me about how vecinita works",
-            "language": "en"
-        })
+        result = static_response_tool.invoke(
+            {"query": "tell me about how vecinita works", "language": "en"}
+        )
 
         # Should match the "how does this work" FAQ since query contains those keywords
         # If partial matching is supported, result should contain info about how Vecinita works
@@ -91,24 +76,17 @@ class TestStaticResponseTool:
 
     def test_static_response_spanish_defaults_to_english(self):
         """Test that tool falls back to English if language not available."""
-        result = static_response_tool.invoke({
-            "query": "what is vecinita",
-            "language": "fr"  # French not in FAQ_DATABASE
-        })
+        result = static_response_tool.invoke(
+            {"query": "what is vecinita", "language": "fr"}  # French not in FAQ_DATABASE
+        )
 
         # Should return English FAQ (default behavior)
         assert result is not None
 
     def test_static_response_whitespace_handling(self):
         """Test that tool handles extra whitespace correctly."""
-        result1 = static_response_tool.invoke({
-            "query": "what is vecinita",
-            "language": "en"
-        })
-        result2 = static_response_tool.invoke({
-            "query": "  what is vecinita  ",
-            "language": "en"
-        })
+        result1 = static_response_tool.invoke({"query": "what is vecinita", "language": "en"})
+        result2 = static_response_tool.invoke({"query": "  what is vecinita  ", "language": "en"})
 
         assert result1 == result2
 
@@ -123,10 +101,7 @@ class TestAddFaqFunction:
 
         add_faq(test_question, test_answer, language="en")
 
-        result = static_response_tool.invoke({
-            "query": test_question,
-            "language": "en"
-        })
+        result = static_response_tool.invoke({"query": test_question, "language": "en"})
 
         assert result == test_answer
 
@@ -137,10 +112,7 @@ class TestAddFaqFunction:
 
         add_faq(test_question, test_answer, language="es")
 
-        result = static_response_tool.invoke({
-            "query": test_question,
-            "language": "es"
-        })
+        result = static_response_tool.invoke({"query": test_question, "language": "es"})
 
         assert result == test_answer
 
@@ -224,14 +196,13 @@ class TestFaqDatabase:
 
     def test_all_faq_keys_are_lowercase(self):
         """Test that all FAQ keys are lowercase."""
-        for lang, faqs in FAQ_DATABASE.items():
+        for _lang, faqs in FAQ_DATABASE.items():
             for question in faqs.keys():
-                assert question == question.lower(
-                ), f"FAQ key not lowercase: {question}"
+                assert question == question.lower(), f"FAQ key not lowercase: {question}"
 
     def test_all_faq_values_are_strings(self):
         """Test that all FAQ answers are strings."""
-        for lang, faqs in FAQ_DATABASE.items():
+        for _lang, faqs in FAQ_DATABASE.items():
             for answer in faqs.values():
                 assert isinstance(answer, str)
                 assert len(answer) > 0
