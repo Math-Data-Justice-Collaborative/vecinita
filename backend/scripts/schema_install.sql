@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS document_chunks (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     content TEXT NOT NULL,
     content_hash VARCHAR(64) GENERATED ALWAYS AS (encode(sha256(content::bytea), 'hex')) STORED,
-    embedding vector,
+    embedding vector(384),
     source_url TEXT NOT NULL,
     source_domain TEXT GENERATED ALWAYS AS (
         CASE 
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS processing_queue (
 CREATE TABLE IF NOT EXISTS search_queries (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     query_text TEXT NOT NULL,
-    query_embedding vector,
+    query_embedding vector(384),
     results_count INTEGER,
     top_result_id UUID REFERENCES document_chunks(id),
     similarity_score REAL,
