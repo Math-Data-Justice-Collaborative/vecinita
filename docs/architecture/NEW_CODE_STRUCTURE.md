@@ -50,7 +50,12 @@ from src.scraper.loaders import SmartLoader
 **Structure**:
 ```
 src/agent/
-├── main.py              (174 lines) - FastAPI app, vector search, LLM prompts
+├── main.py              - FastAPI app composition, shared runtime state, helper logic
+├── routers/             - Endpoint modules grouped by concern
+│   ├── ask.py           - /ask and /ask-stream handlers
+│   ├── config.py        - /config and /model-selection handlers
+│   ├── diagnostics.py   - /db-info and /test-db-search handlers
+│   └── system.py        - /, /health, and /privacy handlers
 ├── static/              - Web UI assets
 │   ├── index.html       - Interactive Q&A interface
 │   ├── img/             - Images and icons
@@ -67,9 +72,10 @@ src/agent/
 
 **Key Characteristics**:
 - FastAPI server for Q&A endpoint (`GET /ask`)
+- Router-based HTTP surface while preserving `src.agent.main:app` as the stable entrypoint
 - Language detection (Spanish/English) for query processing
 - Vector search with Supabase PostgreSQL
-- Groq Llama 3.1 8B LLM integration
+- Local-only Ollama-backed LLM integration
 - HuggingFace embeddings (local)
 - Source attribution in responses
 - CORS-enabled for cross-origin requests

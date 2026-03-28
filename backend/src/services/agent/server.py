@@ -8,9 +8,9 @@ while the codebase is migrated to the flatter structure.
 from src.agent import main as _canonical
 from src.agent.main import *  # noqa: F401,F403
 
-# Legacy tests and patch points still reference ChatGroq on this module.
-if not hasattr(_canonical, "ChatGroq") and hasattr(_canonical, "ChatOllama"):
-    ChatGroq = _canonical.ChatOllama
+# Compatibility patch points used by legacy unit tests.
+ChatGroq = getattr(_canonical, "ChatOllama", None)
+ChatOpenAI = getattr(_canonical, "ChatOllama", None)
 
 
 def _export_private_symbol(name: str) -> None:
@@ -22,7 +22,6 @@ for _private_name in (
     "_get_llm_with_tools",
     "_get_llm_without_tools",
     "_get_chatollama_class",
-    "_get_chatopenai_class",
     "_sanitize_messages",
 ):
     _export_private_symbol(_private_name)

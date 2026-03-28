@@ -7,6 +7,8 @@ import pytest
 
 from src.embedding_service.client import EmbeddingServiceClient, create_embedding_client
 
+pytestmark = pytest.mark.unit
+
 
 class _Resp:
     def __init__(self, status_code=200, payload=None):

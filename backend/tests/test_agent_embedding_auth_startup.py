@@ -48,15 +48,27 @@ def _reload_agent_main(monkeypatch, create_embedding_client):
     monkeypatch.setattr("dotenv.load_dotenv", lambda *args, **kwargs: False)
 
     fake_embedding_module = types.ModuleType("src.embedding_service.client")
+    fake_chroma_store_module = types.ModuleType("src.services.chroma_store")
+
+    class _FakeChromaStore:
+        def heartbeat(self):
+            return True
+
     fake_embedding_module.create_embedding_client = create_embedding_client
+    fake_chroma_store_module.ChromaStore = _FakeChromaStore
+    fake_chroma_store_module.get_chroma_store = lambda *_args, **_kwargs: Mock(
+        heartbeat=Mock(return_value=True)
+    )
 
     monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
     monkeypatch.setenv("SUPABASE_KEY", "test-key")
-    monkeypatch.setenv("DEEPSEEK_API_KEY", "test-deepseek-key")
-    monkeypatch.setenv("DEFAULT_PROVIDER", "deepseek")
+    monkeypatch.setenv("DEFAULT_PROVIDER", "ollama")
+    monkeypatch.setenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    monkeypatch.setenv("OLLAMA_MODEL", "llama3.1:8b")
     monkeypatch.setenv("MODEL_SELECTION_PATH", "/tmp/vecinita-test-model-selection.json")
     monkeypatch.setenv("SKIP_AGENT_MAIN_IMPORT", "true")
     monkeypatch.setitem(sys.modules, "src.embedding_service.client", fake_embedding_module)
+    monkeypatch.setitem(sys.modules, "src.services.chroma_store", fake_chroma_store_module)
 
     import src.agent.main as agent_main
 

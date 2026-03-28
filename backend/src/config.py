@@ -24,18 +24,10 @@ EMBEDDING_DIMENSION: int = int(os.getenv("EMBEDDING_DIMENSION", "384"))
 EMBEDDING_SERVICE_URL: str = os.getenv("EMBEDDING_SERVICE_URL", "http://embedding-service:8001")
 
 # ---------------------------------------------------------------------------
-# LLM Provider chain  (Ollama → DeepSeek → OpenAI → error)
-# Groq / X.AI / Twitter AI intentionally excluded.
+# Local LLM runtime
 # ---------------------------------------------------------------------------
 OLLAMA_BASE_URL: str | None = os.getenv("OLLAMA_BASE_URL")
 OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
-
-DEEPSEEK_API_KEY: str | None = os.getenv("DEEPSEEK_API_KEY")
-DEEPSEEK_BASE_URL: str = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
-DEEPSEEK_MODEL: str = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
-
-OPENAI_API_KEY: str | None = os.getenv("OPENAI_API_KEY") or os.getenv("OPEN_API_KEY")
-OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 DEFAULT_PROVIDER: str = os.getenv("DEFAULT_PROVIDER", "ollama").lower()
 

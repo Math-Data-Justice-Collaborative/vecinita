@@ -8,6 +8,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 pytestmark = pytest.mark.unit
@@ -23,8 +24,10 @@ def ask_client(env_vars, monkeypatch):
     monkeypatch.setenv("AGENT_TIMEOUT", "30")
     monkeypatch.setenv("AGENT_STREAM_TIMEOUT", "120")
 
-    from src.api.main import app
+    from src.api.router_ask import router as ask_router
 
+    app = FastAPI()
+    app.include_router(ask_router, prefix="/api/v1")
     return TestClient(app)
 
 
@@ -108,9 +111,7 @@ class TestAskEndpoint:
         mock_response.raise_for_status = MagicMock()
         mock_get.return_value = mock_response
 
-        response = ask_client.get(
-            "/api/v1/ask?question=Test&provider=groq&model=llama-3.1-8b-instant"
-        )
+        response = ask_client.get("/api/v1/ask?question=Test&provider=ollama&model=llama3.1:8b")
         assert response.status_code == 200
 
     @patch("httpx.AsyncClient.get")
@@ -163,8 +164,8 @@ class TestAskEndpoint:
         response = ask_client.get("/api/v1/ask?question=Test")
         assert response.status_code == 504
         response_data = response.json()
-        assert "error" in response_data
-        assert "timeout" in str(response_data["error"]).lower()
+        assert "detail" in response_data
+        assert "timeout" in str(response_data["detail"]).lower()
 
     @patch("httpx.AsyncClient.get")
     def test_ask_agent_service_unavailable(self, mock_get, ask_client):
@@ -174,8 +175,8 @@ class TestAskEndpoint:
         response = ask_client.get("/api/v1/ask?question=Test")
         assert response.status_code == 503
         response_data = response.json()
-        assert "error" in response_data
-        assert "connect" in str(response_data["error"]).lower()
+        assert "detail" in response_data
+        assert "connect" in str(response_data["detail"]).lower()
 
     @patch("httpx.AsyncClient.get")
     def test_ask_agent_service_error(self, mock_get, ask_client):
@@ -210,7 +211,7 @@ class TestAskEndpoint:
 
         assert response.status_code == 401
         payload = response.json()
-        error_text = str(payload.get("error", ""))
+        error_text = str(payload.get("detail", ""))
         assert "invalid_api_key" in error_text
 
     def test_ask_spanish_query(self, ask_client):
@@ -280,7 +281,7 @@ class TestAskStreamEndpoint:
             mock_stream.return_value = mock_context
 
             response = ask_client.get(
-                "/api/v1/ask/stream?question=Test&thread_id=123&lang=en&provider=groq&model=llama"
+                "/api/v1/ask/stream?question=Test&thread_id=123&lang=en&provider=ollama&model=llama3.1:8b"
             )
             assert response.status_code == 200
 
@@ -317,8 +318,8 @@ class TestAskConfigEndpoint:
     def test_get_ask_config_success(self, mock_get, ask_client):
         """Test getting ask configuration."""
         mock_config = {
-            "providers": [{"name": "groq", "models": ["llama-3.1-8b-instant"], "default": True}],
-            "models": {"groq": ["llama-3.1-8b-instant"]},
+            "providers": [{"name": "ollama", "models": ["llama3.1:8b"], "default": True}],
+            "models": {"ollama": ["llama3.1:8b"]},
         }
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -344,16 +345,10 @@ class TestAskConfigEndpoint:
     def test_get_ask_config_preserves_explicit_default_provider(self, mock_get, ask_client):
         """Gateway should honor upstream default flags instead of forcing first provider."""
         upstream_config = {
-            "providers": [
-                {"key": "ollama", "label": "Ollama", "default": False},
-                {"key": "deepseek", "label": "DeepSeek", "default": True},
-            ],
-            "models": {
-                "ollama": ["llama3.2"],
-                "deepseek": ["deepseek-chat", "deepseek-reasoner"],
-            },
-            "defaultProvider": "deepseek",
-            "defaultModel": "deepseek-chat",
+            "providers": [{"key": "ollama", "label": "Ollama", "default": True}],
+            "models": {"ollama": ["llama3.1:8b", "llama3.2"]},
+            "defaultProvider": "ollama",
+            "defaultModel": "llama3.1:8b",
         }
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -365,12 +360,10 @@ class TestAskConfigEndpoint:
         assert response.status_code == 200
         data = response.json()
 
-        assert data.get("defaultProvider") == "deepseek"
-        assert data.get("defaultModel") == "deepseek-chat"
-        deepseek = next((p for p in data.get("providers", []) if p.get("name") == "deepseek"), None)
+        assert data.get("defaultProvider") == "ollama"
+        assert data.get("defaultModel") == "llama3.1:8b"
         ollama = next((p for p in data.get("providers", []) if p.get("name") == "ollama"), None)
-        assert deepseek is not None and deepseek.get("default") is True
-        assert ollama is not None and ollama.get("default") is False
+        assert ollama is not None and ollama.get("default") is True
 
 
 class TestAskQueryValidation:

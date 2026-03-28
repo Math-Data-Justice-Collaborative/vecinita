@@ -36,7 +36,7 @@ jobs:
 
     - name: Run frontend tests with coverage
       working-directory: frontend
-      run: npm run test:coverage -- --run
+      run: npm run test:coverage:unit
 
     - name: Summarize coverage
       working-directory: frontend

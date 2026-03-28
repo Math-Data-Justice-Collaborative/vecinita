@@ -14,7 +14,10 @@ from datetime import datetime, timezone
 from typing import Any, cast
 from urllib.parse import urlparse
 
+from pydantic import BaseModel, Field
+
 from src.services.chroma_store import ChromaStore, get_chroma_store
+from src.services.llm import LocalLLMClientManager
 from src.utils.tags import build_bilingual_tag_fields, infer_tags_from_text, normalize_tags
 
 try:
@@ -24,22 +27,6 @@ try:
 except Exception:
     create_client = None  # type: ignore[assignment]
     SUPABASE_AVAILABLE = False
-
-try:
-    from langchain_openai import ChatOpenAI
-    from pydantic import BaseModel, Field
-
-    DEEPSEEK_TAGGING_AVAILABLE = True
-except ImportError:
-    DEEPSEEK_TAGGING_AVAILABLE = False
-
-try:
-    from langchain_groq import ChatGroq
-
-    GROQ_TAGGING_AVAILABLE = True
-except ImportError:
-    ChatGroq = None
-    GROQ_TAGGING_AVAILABLE = False
 
 # Import embedding service client (preferred)
 try:
@@ -94,14 +81,14 @@ class DatabaseUploader:
         Initialize database uploader.
 
         Args:
-            use_local_embeddings: If True, use embedding service (or fallback). If False, requires OpenAI API key.
+            use_local_embeddings: If True, use the embedding service or local embedding fallback.
         """
         self.use_local_embeddings = use_local_embeddings
         self.embedding_model: Any | None = None
         self.embedding_client_type: str | None = None
         self.chroma_store: ChromaStore | None = None
-        self.deepseek_tagger = None
-        self.deepseek_raw_model = None
+        self.local_llm_tagger = None
+        self.local_llm_raw_model = None
         self._llm_structured_output_supported = True
         self._llm_structured_output_warned = False
         self._source_tag_cache: dict[str, dict[str, Any]] = {}
@@ -131,70 +118,52 @@ class DatabaseUploader:
         if use_local_embeddings:
             self._init_embeddings()
 
-        self._init_deepseek_tagger()
+        self._init_local_llm_tagger()
 
         # Initialize Chroma connection
         self._init_supabase()
 
-    def _init_deepseek_tagger(self) -> None:
-        """Initialize optional LLM structured-output tag enhancer.
-
-        Provider selection:
-        - auto (default): DeepSeek first, then Groq fallback
-        - deepseek: DeepSeek only
-        - groq: Groq only
-        """
+    def _init_local_llm_tagger(self) -> None:
+        """Initialize optional local-LLM tag enhancement."""
         enabled = os.getenv(
-            "ENABLE_LLM_TAG_ENHANCEMENT", os.getenv("ENABLE_DEEPSEEK_TAG_ENHANCEMENT", "true")
+            # Honor the legacy env name during the transition to local-only tagging.
+            "ENABLE_LLM_TAG_ENHANCEMENT",
+            os.getenv("ENABLE_DEEPSEEK_TAG_ENHANCEMENT", "true"),
         ).lower() in {"1", "true", "yes"}
         if not enabled:
             return
 
-        provider = os.getenv("LLM_TAG_PROVIDER", "auto").strip().lower()
-
-        if provider in {"auto", "deepseek"} and DEEPSEEK_TAGGING_AVAILABLE:
-            deepseek_api_key = os.getenv("DEEPSEEK_API_KEY")
-            if deepseek_api_key:
-                try:
-                    deepseek_model = os.getenv("DEEPSEEK_TAG_MODEL", "deepseek-chat")
-                    deepseek_base_url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
-                    llm = ChatOpenAI(
-                        model=deepseek_model,
-                        api_key=deepseek_api_key,
-                        base_url=deepseek_base_url,
-                        temperature=0,
-                    )
-                    self.deepseek_raw_model = llm
-                    self.deepseek_tagger = llm.with_structured_output(TagEnhancement)
-                    log.info(f"✓ LLM tag enhancement enabled via DeepSeek ({deepseek_model})")
-                    return
-                except Exception as exc:
-                    log.warning(f"DeepSeek tag enhancement unavailable: {exc}")
-            elif provider == "deepseek":
-                log.warning(
-                    "DeepSeek tag enhancement requested but DEEPSEEK_API_KEY is not configured"
+        manager = LocalLLMClientManager(
+            base_url=os.getenv("MODAL_OLLAMA_ENDPOINT") or os.getenv("OLLAMA_BASE_URL"),
+            default_model=os.getenv("OLLAMA_MODEL", "llama3.1:8b"),
+            api_key=(
+                os.getenv("OLLAMA_API_KEY")
+                or os.getenv("MODAL_API_PROXY_SECRET")
+                or os.getenv("MODAL_API_KEY")
+                or os.getenv("MODAL_API_TOKEN_SECRET")
+            ),
+            modal_proxy_key=os.getenv("MODAL_API_KEY") or os.getenv("MODAL_API_TOKEN_ID"),
+            modal_proxy_secret=os.getenv("MODAL_API_PROXY_SECRET"),
+            use_native_api=(os.getenv("FORCE_LOCAL_MODAL_LLM") or "true").lower()
+            in {"1", "true", "yes"},
+        )
+        try:
+            manager.validate_runtime()
+            self.local_llm_raw_model = manager.build_client(temperature=0)
+            try:
+                self.local_llm_tagger = manager.build_client(
+                    temperature=0,
+                    structured_output_schema=TagEnhancement,
                 )
-
-        if provider in {"auto", "groq"} and GROQ_TAGGING_AVAILABLE:
-            groq_api_key = os.getenv("GROQ_API_KEY")
-            if groq_api_key:
-                try:
-                    groq_model = os.getenv("GROQ_TAG_MODEL", "llama-3.1-8b-instant")
-                    llm = ChatGroq(
-                        model=groq_model,
-                        api_key=groq_api_key,
-                        temperature=0,
-                    )
-                    self.deepseek_raw_model = llm
-                    self.deepseek_tagger = llm.with_structured_output(TagEnhancement)
-                    log.info(f"✓ LLM tag enhancement enabled via Groq ({groq_model})")
-                    return
-                except Exception as exc:
-                    log.warning(f"Groq tag enhancement unavailable: {exc}")
-            elif provider == "groq":
-                log.warning("Groq tag enhancement requested but GROQ_API_KEY is not configured")
-
-        log.info("LLM tag enhancement disabled: no configured provider credentials available")
+                log.info("✓ LLM tag enhancement enabled via local Ollama structured output")
+            except Exception as structured_exc:
+                self.local_llm_tagger = None
+                log.info(
+                    "Local LLM structured output unavailable; using raw JSON prompting for tagging (%s)",
+                    structured_exc,
+                )
+        except Exception as exc:
+            log.info("LLM tag enhancement disabled: local LLM unavailable (%s)", exc)
 
     def _build_chunk_id(self, source_url: str, chunk_index: int) -> str:
         """Build deterministic chunk IDs so upsert updates existing records in place."""
@@ -280,7 +249,7 @@ class DatabaseUploader:
         sample_texts: list[str],
         known_tags: list[str] | None = None,
     ) -> tuple[TagEnhancement, dict[str, list[str]]] | None:
-        if not self.deepseek_raw_model:
+        if not self.local_llm_raw_model:
             return None
 
         prompt = (
@@ -297,7 +266,7 @@ class DatabaseUploader:
             + "\n\n".join(sample_texts[:3])
         )
 
-        response = self.deepseek_raw_model.invoke(prompt)
+        response = self.local_llm_raw_model.invoke(prompt)
         content = getattr(response, "content", "") if response else ""
         payload = self._parse_llm_json_payload(content)
         if not payload:
@@ -323,7 +292,7 @@ class DatabaseUploader:
                 self._normalize_tag_facets(cached.get("tag_facets", {})),
             )
 
-        if (not self.deepseek_tagger and not self.deepseek_raw_model) or not sample_texts:
+        if (not self.local_llm_tagger and not self.local_llm_raw_model) or not sample_texts:
             return fallback_tags, None, None, {}
 
         try:
@@ -346,9 +315,9 @@ class DatabaseUploader:
             )
             structured = None
             facets: dict[str, list[str]]
-            if self.deepseek_tagger and self._llm_structured_output_supported:
-                structured = self.deepseek_tagger.invoke(prompt)
-            elif self.deepseek_raw_model:
+            if self.local_llm_tagger and self._llm_structured_output_supported:
+                structured = self.local_llm_tagger.invoke(prompt)
+            elif self.local_llm_raw_model:
                 raw_result = self._invoke_raw_json_tagger(
                     source_identifier=source_identifier,
                     sample_texts=sample_texts,
@@ -390,7 +359,7 @@ class DatabaseUploader:
             }
             return final_tags, title, summary, facets
         except Exception as exc:
-            if self.deepseek_raw_model and "response_format" in str(exc).lower():
+            if self.local_llm_raw_model and "response_format" in str(exc).lower():
                 self._llm_structured_output_supported = False
                 if not self._llm_structured_output_warned:
                     log.info(
@@ -424,9 +393,9 @@ class DatabaseUploader:
                     return final_tags, structured.document_title, structured.source_summary, facets
                 except Exception as fallback_exc:
                     log.debug(
-                        f"DeepSeek JSON fallback failed for {source_identifier}: {fallback_exc}"
+                        f"Local LLM JSON fallback failed for {source_identifier}: {fallback_exc}"
                     )
-            log.warning(f"DeepSeek tag enhancement failed for {source_identifier}: {exc}")
+            log.warning(f"Local LLM tag enhancement failed for {source_identifier}: {exc}")
             return fallback_tags, None, None, {}
 
     def _get_known_tags(self) -> list[str]:
@@ -823,8 +792,7 @@ class DatabaseUploader:
     def _generate_embeddings(self, texts: list[str]) -> list[list[float]]:
         """Generate embeddings for a list of texts.
 
-        Uses local HuggingFace embeddings or embedding service microservice.
-        OpenAI embeddings can be added in future versions if needed.
+        Uses local HuggingFace embeddings or the embedding service microservice.
 
         Args:
             texts: List of text strings to generate embeddings for

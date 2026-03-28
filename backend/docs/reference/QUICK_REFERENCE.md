@@ -41,6 +41,17 @@ backend/
 │   │       ├── uploader.py          # DB uploader
 │   │       └── utils.py             # Utilities
 │   │
+│   ├── agent/                         # 🤖 Local-only RAG assistant service
+│   │   ├── main.py                   # FastAPI app composition and shared runtime state
+│   │   ├── routers/                  # Agent HTTP surface, grouped by concern
+│   │   │   ├── ask.py               # /ask and /ask-stream endpoints
+│   │   │   ├── config.py            # /config and /model-selection endpoints
+│   │   │   ├── diagnostics.py       # /db-info and /test-db-search endpoints
+│   │   │   └── system.py            # /, /health, and /privacy endpoints
+│   │   ├── tools/                   # LangGraph tools
+│   │   ├── data/                    # Agent config
+│   │   └── static/                  # Legacy static assets
+│   │
 │   └── utils/                         # 🔧 Shared Utilities
 │       ├── supabase_embeddings.py    # Supabase client
 │       └── ...
@@ -214,6 +225,7 @@ from src.api.main import app
 
 # From service
 from src.agent.main import app as agent_app
+from src.agent.main import ask_question_stream
 from src.embedding_service.main import app as embedding_app
 
 # From utils

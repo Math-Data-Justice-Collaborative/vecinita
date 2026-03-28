@@ -354,7 +354,7 @@ class TestLLMWithTools:
             assert llm_with_tools is not None
 
     def test_get_llm_with_tools_unsupported_provider(self, env_vars, monkeypatch):
-        """Test that unsupported provider raises a clear runtime error."""
+        """Unsupported providers are coerced to the local Ollama client."""
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
@@ -377,8 +377,8 @@ class TestLLMWithTools:
 
             from src.services.agent import server
 
-            with pytest.raises(RuntimeError, match="Unsupported provider"):
-                server._get_llm_with_tools("unsupported", None)
+            llm_with_tools = server._get_llm_with_tools("unsupported", None)
+            assert llm_with_tools is not None
 
 
 class TestMessageSanitization:

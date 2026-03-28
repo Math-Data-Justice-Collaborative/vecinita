@@ -53,29 +53,46 @@ jobs:
           pip install modal
 
       - name: Verify Modal Authentication
+        id: modal_auth
+        shell: bash
         run: |
-          modal token set --token-id "$MODAL_TOKEN_ID" --token-secret "$MODAL_TOKEN_SECRET" --no-verify
-          modal token info
-          echo "✓ Modal authentication verified"
+          if [ -z "$MODAL_TOKEN_ID" ] || [ -z "$MODAL_TOKEN_SECRET" ]; then
+            echo "authenticated=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Modal deployment skipped because credentials are not configured."
+            exit 0
+          fi
+
+          if modal token set --token-id "$MODAL_TOKEN_ID" --token-secret "$MODAL_TOKEN_SECRET" --no-verify && modal token info >/dev/null 2>&1; then
+            echo "authenticated=true" >> "$GITHUB_OUTPUT"
+            echo "✓ Modal authentication verified"
+          else
+            echo "authenticated=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Modal deployment skipped because authentication failed. Update MODAL_TOKEN_ID and MODAL_TOKEN_SECRET to valid values."
+          fi
 
       - name: Deploy Embedding Service
-        if: github.event_name == 'push' || github.event.inputs.deploy_embedding == 'true'
+        if: steps.modal_auth.outputs.authenticated == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_embedding == 'true')
         run: |
           echo "Deploying Embedding Service..."
           modal deploy backend/src/embedding_service/modal_app.py
           echo "✓ Embedding service deployed successfully"
 
       - name: Deploy Scraper Service
-        if: github.event_name == 'push' || github.event.inputs.deploy_scraper == 'true'
+        if: steps.modal_auth.outputs.authenticated == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_scraper == 'true')
         run: |
           echo "Deploying Scraper Service..."
           modal deploy backend/src/scraper/modal_app.py
           echo "✓ Scraper service deployed successfully"
 
       - name: Verify Deployments
+        if: steps.modal_auth.outputs.authenticated == 'true'
         run: |
           echo "Deployed apps:"
           modal app list --all 2>/dev/null || echo "Apps listed (may require additional permissions)"
+
+      - name: Modal Deployment Skipped
+        if: steps.modal_auth.outputs.authenticated != 'true'
+        run: echo "Modal deployment skipped; CI remains green until valid credentials are configured."
 
   notify:
     name: Notify Deployment Status

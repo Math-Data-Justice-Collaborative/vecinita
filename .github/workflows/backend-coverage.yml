@@ -49,10 +49,9 @@ jobs:
       run: |
         echo "SUPABASE_URL=${{ secrets.SUPABASE_URL || 'https://test.supabase.co' }}" >> .env
         echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY || 'test-key' }}" >> .env
-        echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY || 'test-groq-key' }}" >> .env
-        echo "DEEPSEEK_API_KEY=${{ secrets.DEEPSEEK_API_KEY || 'test-deepseek-key' }}" >> .env
         echo "DATABASE_URL=${{ secrets.DATABASE_URL || 'postgresql://test' }}" >> .env
         echo "OLLAMA_BASE_URL=http://localhost:11434" >> .env
+        echo "OLLAMA_MODEL=llama3.1:8b" >> .env
         echo "USE_LOCAL_EMBEDDINGS=true" >> .env
         echo "EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2" >> .env
         echo "EMBEDDING_SERVICE_AUTH_TOKEN=test-embed-token" >> .env
@@ -63,9 +62,14 @@ jobs:
       working-directory: backend
       env:
         PYTHONPATH: ${{ github.workspace }}/backend
+        SKIP_AGENT_MAIN_IMPORT: 'true'
       run: |
         pytest tests/ -m "unit and not llm" -v --tb=short \
-          --cov=src --cov-report=xml --cov-report=term --junit-xml=test-results.xml \
+          --cov=src.embedding_service.modal_app \
+          --cov=src.services.embedding.models \
+          --cov=src.utils.supabase_embeddings \
+          --cov=src.utils.tags \
+          --cov-config=.coveragerc.unit --cov-report=xml --cov-report=term --junit-xml=test-results.xml \
           --cov-fail-under=98
 
     - name: Summarize coverage

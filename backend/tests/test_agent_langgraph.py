@@ -4,7 +4,7 @@ These tests verify that the agent properly uses tools and responds correctly.
 
 **IMPORTANT:** These are integration tests that require:
 - Valid SUPABASE_URL and SUPABASE_KEY environment variables
-- Valid GROQ_API_KEY environment variable
+- Reachable local Ollama runtime via OLLAMA_BASE_URL
 - Active Supabase database with search_similar_documents RPC function
 - Network connectivity for API calls
 
@@ -27,8 +27,8 @@ from fastapi.testclient import TestClient
 
 # Skip all integration tests if required environment variables are not set
 pytestmark = pytest.mark.skipif(
-    not all([os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"), os.getenv("GROQ_API_KEY")]),
-    reason="Integration tests require SUPABASE_URL, SUPABASE_KEY, and GROQ_API_KEY environment variables",
+    not all([os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"), os.getenv("OLLAMA_BASE_URL")]),
+    reason="Integration tests require SUPABASE_URL, SUPABASE_KEY, and OLLAMA_BASE_URL environment variables",
 )
 
 # Import app at module level with error handling

@@ -55,7 +55,6 @@ def _get_agent_client() -> httpx.AsyncClient | None:
 
 def _fallback_ask_config() -> dict[str, Any]:
     """Return a safe fallback config when agent service is unavailable."""
-    # Default to Ollama (local). Groq / X.AI intentionally excluded.
     default_provider = "ollama"
     default_model = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
     return {
@@ -177,8 +176,10 @@ async def ask_question(
     question: str = Query(..., description="User question"),
     thread_id: str | None = Query(None, description="Conversation thread ID"),
     lang: str | None = Query(None, description="Override language detection (es/en)"),
-    provider: str | None = Query(None, description="LLM provider (e.g., groq, openai)"),
-    model: str | None = Query(None, description="LLM model name"),
+    provider: str | None = Query(
+        None, description="Local LLM provider override (only ollama/local is supported)"
+    ),
+    model: str | None = Query(None, description="Local LLM model name"),
     tags: str | None = Query(None, description="Comma-separated metadata tags"),
     tag_match_mode: str = Query("any", description="Tag match mode: any|all"),
     include_untagged_fallback: bool = Query(
@@ -197,8 +198,8 @@ async def ask_question(
         question: User's question
         thread_id: Optional conversation thread ID for context
         lang: Optional language override (es, en, etc.)
-        provider: Optional LLM provider override
-        model: Optional LLM model override
+        provider: Optional local provider override; non-local values are ignored by the agent
+        model: Optional local model override
 
     Returns:
         Answer with sources and metadata
@@ -382,8 +383,10 @@ async def ask_question_stream(
     question: str = Query(..., description="User question"),
     thread_id: str | None = Query(None, description="Conversation thread ID"),
     lang: str | None = Query(None, description="Override language detection (es/en)"),
-    provider: str | None = Query(None, description="LLM provider (e.g., groq, openai)"),
-    model: str | None = Query(None, description="LLM model name"),
+    provider: str | None = Query(
+        None, description="Local LLM provider override (only ollama/local is supported)"
+    ),
+    model: str | None = Query(None, description="Local LLM model name"),
     tags: str | None = Query(None, description="Comma-separated metadata tags"),
     tag_match_mode: str = Query("any", description="Tag match mode: any|all"),
     include_untagged_fallback: bool = Query(
@@ -408,8 +411,8 @@ async def ask_question_stream(
         question: User's question
         thread_id: Optional conversation thread ID for context
         lang: Optional language override (es, en, etc.)
-        provider: Optional LLM provider override
-        model: Optional LLM model override
+        provider: Optional local provider override; non-local values are ignored by the agent
+        model: Optional local model override
 
     Returns:
         StreamingResponse with SSE events
@@ -448,7 +451,7 @@ async def ask_question_stream(
 @router.get("/config")
 async def get_ask_config():
     """
-    Get current Q&A configuration (available LLM providers and models).
+    Get current Q&A configuration for the local LLM runtime.
 
     Proxies to agent service /config endpoint.
 

@@ -64,10 +64,9 @@ jobs:
           cat > .env <<'EOF'
           SUPABASE_URL=https://test.supabase.co
           SUPABASE_KEY=test-key
-          GROQ_API_KEY=test-groq-key
-          DEEPSEEK_API_KEY=test-deepseek-key
           DATABASE_URL=postgresql://test
           OLLAMA_BASE_URL=http://localhost:11434
+          OLLAMA_MODEL=llama3.1:8b
           USE_LOCAL_EMBEDDINGS=true
           EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
           EMBEDDING_SERVICE_AUTH_TOKEN=test-embed-token
@@ -116,7 +115,7 @@ jobs:
 
       - name: Run frontend unit tests with coverage
         working-directory: frontend
-        run: npm run test:coverage -- --run
+        run: npm run test:coverage:unit
 
   deploy-staging:
     if: |

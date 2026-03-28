@@ -220,7 +220,11 @@ def test_hash_password_matches_sha256(auth_module):
 
 
 def test_validate_api_key_handles_internal_exception(auth_module, monkeypatch):
-    monkeypatch.setattr(auth_module, "validate_api_key_format", lambda _api_key: (_ for _ in ()).throw(RuntimeError("boom")))
+    monkeypatch.setattr(
+        auth_module,
+        "validate_api_key_format",
+        lambda _api_key: (_ for _ in ()).throw(RuntimeError("boom")),
+    )
 
     assert auth_module.validate_api_key("sk_vp_" + "x" * 20) is False
 
@@ -265,7 +269,11 @@ def test_validate_key_success_branch_returns_metadata(client):
 
 def test_validate_key_handles_internal_exception_branch(client, auth_module, monkeypatch):
     key = "sk_vp_" + "v" * 20
-    monkeypatch.setattr(auth_module.rate_limit, "increment", lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("fail")))
+    monkeypatch.setattr(
+        auth_module.rate_limit,
+        "increment",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("fail")),
+    )
 
     response = client.post("/validate-key", json={"api_key": key})
 
@@ -285,7 +293,11 @@ def test_token_endpoint_rejects_invalid_api_key(client, auth_module, monkeypatch
 
 def test_token_endpoint_handles_unexpected_error(client, auth_module, monkeypatch):
     key = "sk_vp_" + "w" * 20
-    monkeypatch.setattr(auth_module.rate_limit, "reset_failed_attempts", lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("boom")))
+    monkeypatch.setattr(
+        auth_module.rate_limit,
+        "reset_failed_attempts",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("boom")),
+    )
 
     response = client.post("/token", headers={"Authorization": key})
 
@@ -305,7 +317,11 @@ def test_usage_endpoint_defaults_when_no_stats_exist(client):
 
 def test_track_usage_handles_unexpected_error(client, auth_module, monkeypatch):
     key = "sk_vp_" + "t" * 20
-    monkeypatch.setattr(auth_module.rate_limit, "increment", lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("broken")))
+    monkeypatch.setattr(
+        auth_module.rate_limit,
+        "increment",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("broken")),
+    )
 
     response = client.post("/track-usage?tokens=1", headers={"Authorization": key})
 
@@ -334,7 +350,14 @@ def test_change_password_handles_unexpected_error(client, auth_module, monkeypat
         raise RuntimeError("forced")
 
     # Patch underlying endpoint function by replacing logger with object that triggers exception on info call.
-    monkeypatch.setattr(auth_module, "logger", SimpleNamespace(info=lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("forced")), error=lambda *_args, **_kwargs: None))
+    monkeypatch.setattr(
+        auth_module,
+        "logger",
+        SimpleNamespace(
+            info=lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("forced")),
+            error=lambda *_args, **_kwargs: None,
+        ),
+    )
 
     response = client.post(
         "/change-password",

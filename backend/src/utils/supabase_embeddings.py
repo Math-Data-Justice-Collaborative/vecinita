@@ -6,9 +6,12 @@ Zero memory overhead, centralized model management.
 """
 
 import logging
-from typing import cast
+from typing import TYPE_CHECKING, Any, cast
 
-from supabase import Client
+if TYPE_CHECKING:
+    from supabase import Client
+else:
+    Client = Any
 
 logger = logging.getLogger(__name__)
 

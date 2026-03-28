@@ -43,10 +43,9 @@ jobs:
         run: |
           echo "SUPABASE_URL=https://test.supabase.co" >> .env
           echo "SUPABASE_KEY=test-key" >> .env
-          echo "GROQ_API_KEY=test-groq-key" >> .env
-          echo "DEEPSEEK_API_KEY=test-deepseek-key" >> .env
           echo "DATABASE_URL=postgresql://test" >> .env
           echo "OLLAMA_BASE_URL=http://localhost:11434" >> .env
+          echo "OLLAMA_MODEL=llama3.1:8b" >> .env
           echo "USE_LOCAL_EMBEDDINGS=true" >> .env
           echo "EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2" >> .env
           echo "EMBEDDING_SERVICE_AUTH_TOKEN=test-embed-token" >> .env

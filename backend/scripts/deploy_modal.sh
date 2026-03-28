@@ -124,7 +124,7 @@ echo -e "   ${BLUE}modal secret create vecinita-secrets${NC}"
 echo "   Add environment variables:"
 echo "     SUPABASE_URL=https://..."
 echo "     SUPABASE_KEY=eyJ..."
-echo "     GROQ_API_KEY=gsk_..."
+echo "     GROQ_API_KEY=<your-groq-api-key>"
 echo ""
 echo "2. Update agent environment:"
 if [ -n "$EMBEDDING_SERVICE_URL" ]; then

@@ -521,7 +521,7 @@ class EmbeddingConfigResponse(BaseModel):
     )
     provider: str = Field(
         default="huggingface",
-        description="Embedding provider (huggingface, openai, etc.)",
+        description="Embedding provider name",
         examples=["huggingface"],
     )
     dimension: int = Field(
@@ -602,10 +602,14 @@ class AskQuestionRequest(BaseModel):
         pattern="^(es|en)?$",
     )
     provider: str | None = Field(
-        default=None, description="Override LLM provider (groq, openai, etc.)", examples=["groq"]
+        default=None,
+        description="Override local LLM provider (only ollama/local is supported)",
+        examples=["ollama"],
     )
     model: str | None = Field(
-        default=None, description="Override LLM model name", examples=["llama-3.1-8b-instant"]
+        default=None,
+        description="Override local LLM model name",
+        examples=["llama3.1:8b"],
     )
 
     model_config = ConfigDict(
@@ -614,8 +618,8 @@ class AskQuestionRequest(BaseModel):
                 "question": "What is vector embeddings?",
                 "thread_id": "conv-session-user-123",
                 "lang": "en",
-                "provider": "groq",
-                "model": "llama-3.1-8b-instant",
+                "provider": "ollama",
+                "model": "llama3.1:8b",
             }
         }
     )
@@ -833,7 +837,7 @@ class AskConfigResponse(BaseModel):
         default="en", description="Default language for questions", examples=["en"]
     )
     default_provider: str = Field(
-        default="groq", description="Default LLM provider", examples=["groq"]
+        default="ollama", description="Default local LLM provider", examples=["ollama"]
     )
     available_models: list[dict[str, Any]] = Field(
         default_factory=list, description="List of available LLM models with specs"
@@ -861,13 +865,13 @@ class AskConfigResponse(BaseModel):
             "example": {
                 "supported_languages": ["en", "es"],
                 "default_language": "en",
-                "default_provider": "groq",
+                "default_provider": "ollama",
                 "available_models": [
                     {
-                        "provider": "groq",
-                        "name": "llama-3.1-8b-instant",
+                        "provider": "ollama",
+                        "name": "llama3.1:8b",
                         "context_window": 8192,
-                        "cost_per_1k_tokens": 0.05,
+                        "cost_per_1k_tokens": 0.0,
                     }
                 ],
                 "features": {

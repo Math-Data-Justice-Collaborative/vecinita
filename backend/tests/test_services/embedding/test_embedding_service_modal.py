@@ -60,3 +60,10 @@ class TestEmbeddingModalApp:
 
         app = modal_app.web_app()
         assert app is not None
+
+    def test_health_callable(self, modal_mock):
+        import src.embedding_service.modal_app as modal_app
+
+        modal_app = importlib.reload(modal_app)
+
+        assert modal_app.health() == {"status": "ok", "service": "embedding"}

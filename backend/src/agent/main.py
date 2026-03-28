@@ -9,7 +9,6 @@ import os
 import re
 import time
 import traceback
-import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -19,14 +18,11 @@ os.environ.setdefault("TRANSFORMERS_NO_TORCH", "1")
 
 from typing import Annotated, Any, Literal, TypedDict
 
-import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
-from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage, ToolMessage
-from langdetect import LangDetectException, detect  # type: ignore[import-not-found]
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
@@ -34,7 +30,24 @@ from langgraph.prebuilt import ToolNode
 from pydantic import BaseModel
 from supabase import Client, create_client
 
+try:
+    from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
+except Exception:
+    FastEmbedEmbeddings = None
+
+try:
+    from langdetect import LangDetectException, detect  # type: ignore[import-not-found]
+except Exception:
+
+    class LangDetectException(Exception):
+        pass
+
+    def detect(_text: str) -> str:
+        return "en"
+
+
 from src.services.chroma_store import get_chroma_store
+from src.services.llm import LocalLLMClientManager
 from src.utils.tags import parse_tags_input
 
 from .tools.clarify_question import create_clarify_question_tool
@@ -67,8 +80,6 @@ _RUNTIME_PROVIDER_BLOCKLIST: set[str] = set()
 # Lazy-loaded optional classes (avoid importing heavy/fragile deps at startup)
 ChatOllama = None
 _CHATOLLAMA_IMPORT_ERROR = None
-ChatOpenAI = None
-_CHATOPENAI_IMPORT_ERROR = None
 HuggingFaceEmbeddings = None
 _HF_EMBEDDINGS_IMPORT_ERROR = None
 
@@ -89,28 +100,6 @@ def _get_chatollama_class():
         _CHATOLLAMA_IMPORT_ERROR = exc
         logger.warning(
             "langchain_ollama unavailable at startup (%s). Ollama provider will be disabled.",
-            exc,
-        )
-        return None
-
-
-def _get_chatopenai_class():
-    """Load ChatOpenAI lazily to avoid startup failures when optional deps are broken."""
-    global ChatOpenAI, _CHATOPENAI_IMPORT_ERROR
-    if ChatOpenAI is not None:
-        return ChatOpenAI
-    if _CHATOPENAI_IMPORT_ERROR is not None:
-        return None
-    try:
-        from langchain_openai import ChatOpenAI as _ChatOpenAI
-
-        ChatOpenAI = _ChatOpenAI
-        return ChatOpenAI
-    except Exception as exc:
-        _CHATOPENAI_IMPORT_ERROR = exc
-        logger.warning(
-            "langchain_openai unavailable at startup (%s). "
-            "OpenAI/DeepSeek providers will be disabled unless dependency is fixed.",
             exc,
         )
         return None
@@ -159,9 +148,6 @@ supabase_key = (
     or os.environ.get("SUPABASE_KEY")
     or os.environ.get("SUPABASE_PUBLISHABLE_KEY")
 )
-# Groq / X.AI / Twitter AI intentionally removed.
-openai_api_key = os.environ.get("OPENAI_API_KEY") or os.environ.get("OPEN_API_KEY")
-deepseek_api_key = os.environ.get("DEEPSEEK_API_KEY")
 ollama_base_url = os.environ.get("MODAL_OLLAMA_ENDPOINT") or os.environ.get("OLLAMA_BASE_URL")
 ollama_api_key = (
     os.environ.get("OLLAMA_API_KEY")
@@ -172,7 +158,7 @@ ollama_api_key = (
 modal_proxy_key = os.environ.get("MODAL_API_KEY") or os.environ.get("MODAL_API_TOKEN_ID")
 modal_proxy_secret = os.environ.get("MODAL_API_PROXY_SECRET")
 ollama_model = os.environ.get("OLLAMA_MODEL") or "llama3.1:8b"
-default_provider = (os.environ.get("DEFAULT_PROVIDER") or "ollama").lower()
+default_provider = "ollama"
 default_model = os.environ.get("DEFAULT_MODEL") or None
 force_local_modal_llm = (os.environ.get("FORCE_LOCAL_MODAL_LLM") or "true").lower() in [
     "1",
@@ -190,6 +176,16 @@ selection_file_path = os.environ.get("MODEL_SELECTION_PATH") or str(
 agent_fast_mode = (os.environ.get("AGENT_FAST_MODE") or "true").lower() in ["1", "true", "yes"]
 agent_max_response_sentences = max(1, int(os.environ.get("AGENT_MAX_RESPONSE_SENTENCES") or "4"))
 agent_max_response_chars = max(120, int(os.environ.get("AGENT_MAX_RESPONSE_CHARS") or "700"))
+llm_client_manager = LocalLLMClientManager(
+    base_url=ollama_base_url,
+    default_model=ollama_model,
+    api_key=ollama_api_key,
+    modal_proxy_key=modal_proxy_key,
+    modal_proxy_secret=modal_proxy_secret,
+    selection_file_path=selection_file_path,
+    locked=lock_model_selection_env,
+    use_native_api=force_local_modal_llm,
+)
 # --- Initialize Clients ---
 try:
     supabase: Client | None = None
@@ -210,134 +206,34 @@ try:
             "Chroma store heartbeat failed at startup; retrieval will retry during requests"
         )
 
-    # Persisted model selection (optional JSON file)
     class Selection(TypedDict):
         provider: str
         model: str | None
         locked: bool
 
-    CURRENT_SELECTION: Selection = {
-        "provider": str(default_provider),
-        "model": default_model if default_model else None,
-        "locked": bool(lock_model_selection_env),
-    }
-
-    def _load_model_selection_from_file():
-        try:
-            p = Path(selection_file_path)
-            if p.exists():
-                data = json.loads(p.read_text())
-                # Minimal validation
-                prov = (data.get("provider") or CURRENT_SELECTION["provider"]).lower()
-                mod = data.get("model") or CURRENT_SELECTION["model"]
-                locked = bool(data.get("locked", CURRENT_SELECTION["locked"]))
-                CURRENT_SELECTION["provider"] = prov
-                CURRENT_SELECTION["model"] = mod
-                CURRENT_SELECTION["locked"] = locked
-                logger.info(f"Model selection loaded: {CURRENT_SELECTION}")
-        except Exception as e:
-            logger.warning(f"Failed to load model selection file: {e}")
+    CURRENT_SELECTION: Selection = llm_client_manager.get_selection()
 
     def _save_model_selection_to_file(provider: str, model: str | None, locked: bool | None = None):
-        try:
-            payload = {
-                "provider": provider,
-                "model": model,
-                "locked": CURRENT_SELECTION["locked"] if locked is None else bool(locked),
-            }
-            Path(selection_file_path).parent.mkdir(parents=True, exist_ok=True)
-            Path(selection_file_path).write_text(json.dumps(payload, indent=2))
-            CURRENT_SELECTION["provider"] = provider
-            CURRENT_SELECTION["model"] = model
-            CURRENT_SELECTION["locked"] = (
-                bool(locked) if locked is not None else CURRENT_SELECTION["locked"]
-            )
-            logger.info(f"Model selection saved: {payload}")
-        except Exception as e:
-            logger.error(f"Failed to save model selection file: {e}")
-
-    _load_model_selection_from_file()
+        llm_client_manager.save_selection(provider, model, locked)
 
     def _available_providers() -> list[str]:
-        providers: list[str] = []
-        if ollama_base_url:
-            providers.append("ollama")
-        if deepseek_api_key:
-            providers.append("deepseek")
-        if openai_api_key:
-            providers.append("openai")
-        return providers
+        return ["ollama"] if ollama_base_url else []
 
     def _normalize_provider_name(provider_name: str | None) -> str:
-        normalized = str(provider_name or "").lower().strip()
-        if normalized == "llama":
-            return "ollama"
-        return normalized
+        return llm_client_manager.normalize_provider(provider_name)
 
-    def _default_model_for_provider(provider_name: str) -> str | None:
-        normalized = _normalize_provider_name(provider_name)
-        if normalized == "ollama":
-            return ollama_model or "llama3.1:8b"
-        if normalized == "deepseek":
-            return "deepseek-chat"
-        if normalized == "openai":
-            return "gpt-4o-mini"
-        return None
+    def _default_model_for_provider(_provider_name: str) -> str | None:
+        return llm_client_manager.current_model()
+
+    def _use_modal_native_chat_api(base_url: str | None = None) -> bool:
+        candidate_url = (base_url or llm_client_manager.base_url or "").strip()
+        return bool(force_local_modal_llm and candidate_url and "modal.run" in candidate_url)
 
     def _validate_or_resolve_selection() -> None:
-        available = _available_providers()
-        if not available:
-            raise RuntimeError(
-                "No LLM provider configured. Set OLLAMA_BASE_URL, DEEPSEEK_API_KEY, or OPENAI_API_KEY."
-            )
-
-        selected = _normalize_provider_name(CURRENT_SELECTION.get("provider"))
-        if selected in available:
-            CURRENT_SELECTION["provider"] = selected
-            return
-
-        if CURRENT_SELECTION.get("locked"):
-            raise RuntimeError(
-                f"Model selection is locked to '{selected}', but that provider is not configured. "
-                f"Available providers: {available}"
-            )
-
-        resolved = available[0]
-        logger.warning(
-            "Configured provider '%s' is unavailable. Switching to '%s'. Available providers: %s",
-            selected or "<empty>",
-            resolved,
-            available,
-        )
-        CURRENT_SELECTION["provider"] = resolved
-        resolved_default_model = _default_model_for_provider(resolved)
-        CURRENT_SELECTION["model"] = resolved_default_model
-        _save_model_selection_to_file(
-            provider=resolved,
-            model=resolved_default_model,
-            locked=False,
-        )
+        llm_client_manager.validate_selection()
 
     _validate_or_resolve_selection()
-
-    # Validate selected provider dependencies at startup (fail-fast)
-    selected_provider_startup = _normalize_provider_name(CURRENT_SELECTION.get("provider"))
-    if selected_provider_startup == "ollama":
-        if not ollama_base_url:
-            raise RuntimeError(
-                "Selected provider is 'ollama' but OLLAMA_BASE_URL is not configured."
-            )
-        if _get_chatollama_class() is None:
-            raise RuntimeError(
-                "Selected provider is 'ollama' but langchain_ollama import failed. "
-                f"Original error: {_CHATOLLAMA_IMPORT_ERROR}"
-            )
-    elif selected_provider_startup in ("deepseek", "openai"):
-        if _get_chatopenai_class() is None:
-            raise RuntimeError(
-                f"Selected provider is '{selected_provider_startup}' but langchain_openai import failed. "
-                f"Original error: {_CHATOPENAI_IMPORT_ERROR}"
-            )
+    llm_client_manager.validate_runtime()
 
     # Use dedicated embedding service and optionally fail fast if unavailable
     logger.info("Initializing embedding model (Embedding Service, fail-fast)...")
@@ -386,6 +282,8 @@ try:
             service_exc,
         )
         try:
+            if FastEmbedEmbeddings is None:
+                raise ImportError("langchain_community is not installed")
             embedding_model = FastEmbedEmbeddings(
                 model_name="sentence-transformers/all-MiniLM-L6-v2"
             )
@@ -877,256 +775,34 @@ tools = [t for t in tools if t is not None]
 logger.info(f"Initialized {len(tools)} tools: {[tool.name for tool in tools]}")
 
 
-def _ollama_client_headers() -> dict[str, str]:
-    headers: dict[str, str] = {}
-    if ollama_api_key:
-        headers["Authorization"] = f"Bearer {ollama_api_key}"
-    if modal_proxy_key and modal_proxy_secret:
-        headers["Modal-Key"] = modal_proxy_key
-        headers["Modal-Secret"] = modal_proxy_secret
-    return headers
-
-
-def _use_modal_native_chat_api(base_url: str | None) -> bool:
-    """Return True when configured LLM endpoint is a Modal native chat API."""
-    if not base_url:
-        return False
-    if "modal.run" not in base_url:
-        return False
-    return (os.environ.get("MODAL_OLLAMA_USE_NATIVE_API") or "true").lower() in {
-        "1",
-        "true",
-        "yes",
-    }
-
-
-class _ModalNativeChatClient:
-    """Minimal chat client for Modal-native /chat endpoints.
-
-    The deployed Modal model service in this repo exposes `/chat` and `/stream`,
-    not Ollama's `/api/chat`. This adapter keeps invoke()-style calls compatible
-    with current deterministic answer paths.
-    """
-
-    def __init__(
-        self,
-        *,
-        base_url: str,
-        model: str,
-        headers: dict[str, str],
-        temperature: float = 0,
-        timeout: float = 60.0,
-    ):
-        self.base_url = base_url.rstrip("/")
-        self.model = model
-        self.headers = headers
-        self.temperature = temperature
-        self.timeout = timeout
-
-    def bind_tools(self, _tools: list[Any]):
-        # Deterministic routes do not require tool-calling support.
-        return self
-
-    def invoke(self, messages: list[BaseMessage]):
-        payload_messages: list[dict[str, str]] = []
-        for msg in messages:
-            role = "user"
-            if isinstance(msg, SystemMessage):
-                role = "system"
-            elif isinstance(msg, AIMessage):
-                role = "assistant"
-            content = msg.content if isinstance(msg.content, str) else str(msg.content)
-            payload_messages.append({"role": role, "content": content})
-
-        payload = {
-            "model": self.model,
-            "messages": payload_messages,
-            "temperature": self.temperature,
-        }
-
-        with httpx.Client(timeout=self.timeout) as client:
-            response = client.post(
-                f"{self.base_url}/chat",
-                json=payload,
-                headers={"Content-Type": "application/json", **self.headers},
-            )
-            response.raise_for_status()
-            data = response.json()
-
-        message = data.get("message") if isinstance(data, dict) else None
-        content = ""
-        if isinstance(message, dict):
-            content = str(message.get("content") or "")
-        if not content:
-            content = str(data)
-        return AIMessage(content=content)
-
-
 def _resolve_effective_provider_model(
     provider: str | None,
     model: str | None,
 ) -> tuple[str | None, str | None]:
-    """Resolve provider/model, enforcing local Modal Ollama when configured."""
-    if force_local_modal_llm and ollama_base_url:
-        requested_provider = (provider or "").strip().lower()
-        if requested_provider and requested_provider not in {"ollama", "llama"}:
-            logger.info(
-                "FORCE_LOCAL_MODAL_LLM is enabled; overriding requested provider '%s' with 'ollama'.",
-                requested_provider,
-            )
-        forced_model = os.environ.get("MODAL_OLLAMA_MODEL") or ollama_model or "llama3.1:8b"
-        return "ollama", forced_model
-    return provider, model
+    """Resolve provider/model against the local-only selection manager."""
+    resolved_provider, resolved_model = llm_client_manager.resolve_request(provider, model)
+    return resolved_provider, resolved_model
 
 
 def _get_llm_with_tools(provider: str | None, model: str | None):
-    """Create an LLM bound with tools based on requested provider/model.
-
-    Supported providers: 'llama' (Ollama preferred, Groq fallback), 'openai', 'deepseek'.
-    Defaults: provider='llama', model from OLLAMA_MODEL or 'llama3.2';
-    for OpenAI, default model='gpt-4o-mini'. For DeepSeek, default model='deepseek-chat'.
-    """
-    # Honor lock: if locked, override with persisted selection
-    if CURRENT_SELECTION.get("locked"):
-        provider = CURRENT_SELECTION["provider"]
-        model = CURRENT_SELECTION["model"]
-
-    # Provider selection is normalized at startup; do not cascade at request-time.
-    selected_provider = (provider or CURRENT_SELECTION["provider"] or "ollama").lower()
-    if selected_provider in ("ollama", "llama"):
-        if ollama_base_url:
-            use_model = model or ollama_model or "llama3.1:8b"
-            if _use_modal_native_chat_api(ollama_base_url):
-                return _ModalNativeChatClient(
-                    base_url=ollama_base_url,
-                    model=use_model,
-                    headers=_ollama_client_headers(),
-                    temperature=0,
-                ).bind_tools(tools)
-            ChatOllamaClass = _get_chatollama_class()
-            if ChatOllamaClass is None:
-                raise RuntimeError(
-                    "Ollama provider unavailable because langchain_ollama could not be imported. "
-                    f"Original error: {_CHATOLLAMA_IMPORT_ERROR}"
-                )
-            local_llm = ChatOllamaClass(
-                temperature=0,
-                model=use_model,
-                base_url=ollama_base_url,
-                client_kwargs={"headers": _ollama_client_headers()},
-            )
-            return local_llm.bind_tools(tools)
-        raise RuntimeError("Ollama provider requested but OLLAMA_BASE_URL is not configured.")
-    elif selected_provider == "openai":
-        if not openai_api_key:
-            raise RuntimeError(
-                "OpenAI provider requested but OPENAI_API_KEY/OPEN_API_KEY is not set."
-            )
-        use_model = model or CURRENT_SELECTION.get("model") or "gpt-4o-mini"
-        ChatOpenAIClass = _get_chatopenai_class()
-        if ChatOpenAIClass is None:
-            raise RuntimeError(
-                "OpenAI provider unavailable because langchain_openai could not be imported. "
-                f"Original error: {_CHATOPENAI_IMPORT_ERROR}"
-            )
-        openai_llm = ChatOpenAIClass(temperature=0, api_key=openai_api_key, model=use_model)
-        return openai_llm.bind_tools(tools)
-    elif selected_provider == "deepseek":
-        if not deepseek_api_key:
-            raise RuntimeError("DeepSeek provider requested but DEEPSEEK_API_KEY is not set.")
-        # DeepSeek offers OpenAI-compatible API; use ChatOpenAI with base_url
-        use_model = model or CURRENT_SELECTION.get("model") or "deepseek-chat"
-        ChatOpenAIClass = _get_chatopenai_class()
-        if ChatOpenAIClass is None:
-            raise RuntimeError(
-                "DeepSeek provider unavailable because langchain_openai could not be imported. "
-                f"Original error: {_CHATOPENAI_IMPORT_ERROR}"
-            )
-        deepseek_llm = ChatOpenAIClass(
-            temperature=0,
-            api_key=deepseek_api_key,
-            model=use_model,
-            base_url=os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
-        )
-        return deepseek_llm.bind_tools(tools)
-    else:
-        raise RuntimeError(
-            f"Unsupported provider: {selected_provider}. Use 'ollama', 'deepseek', or 'openai'."
-        )
+    return llm_client_manager.build_client(
+        provider=provider,
+        model=model,
+        temperature=0,
+        tools=tools,
+    )
 
 
 def _get_llm_without_tools(provider: str | None, model: str | None):
-    """Create an LLM instance without binding tools (for grading/rewriting control nodes)."""
-    if CURRENT_SELECTION.get("locked"):
-        provider = CURRENT_SELECTION["provider"]
-        model = CURRENT_SELECTION["model"]
-
-    selected_provider = (provider or CURRENT_SELECTION["provider"] or "ollama").lower()
-    if selected_provider in ("ollama", "llama"):
-        if not ollama_base_url:
-            raise RuntimeError("Ollama provider requested but OLLAMA_BASE_URL is not configured.")
-        use_model = model or ollama_model or "llama3.1:8b"
-        if _use_modal_native_chat_api(ollama_base_url):
-            return _ModalNativeChatClient(
-                base_url=ollama_base_url,
-                model=use_model,
-                headers=_ollama_client_headers(),
-                temperature=0,
-            )
-        ChatOllamaClass = _get_chatollama_class()
-        if ChatOllamaClass is None:
-            raise RuntimeError(
-                "Ollama provider unavailable because langchain_ollama could not be imported. "
-                f"Original error: {_CHATOLLAMA_IMPORT_ERROR}"
-            )
-        return ChatOllamaClass(
-            temperature=0,
-            model=use_model,
-            base_url=ollama_base_url,
-            client_kwargs={"headers": _ollama_client_headers()},
-        )
-
-    if selected_provider == "openai":
-        if not openai_api_key:
-            raise RuntimeError(
-                "OpenAI provider requested but OPENAI_API_KEY/OPEN_API_KEY is not set."
-            )
-        use_model = model or CURRENT_SELECTION.get("model") or "gpt-4o-mini"
-        ChatOpenAIClass = _get_chatopenai_class()
-        if ChatOpenAIClass is None:
-            raise RuntimeError(
-                "OpenAI provider unavailable because langchain_openai could not be imported. "
-                f"Original error: {_CHATOPENAI_IMPORT_ERROR}"
-            )
-        return ChatOpenAIClass(temperature=0, api_key=openai_api_key, model=use_model)
-
-    if selected_provider == "deepseek":
-        if not deepseek_api_key:
-            raise RuntimeError("DeepSeek provider requested but DEEPSEEK_API_KEY is not set.")
-        use_model = model or CURRENT_SELECTION.get("model") or "deepseek-chat"
-        ChatOpenAIClass = _get_chatopenai_class()
-        if ChatOpenAIClass is None:
-            raise RuntimeError(
-                "DeepSeek provider unavailable because langchain_openai could not be imported. "
-                f"Original error: {_CHATOPENAI_IMPORT_ERROR}"
-            )
-        return ChatOpenAIClass(
-            temperature=0,
-            api_key=deepseek_api_key,
-            model=use_model,
-            base_url=os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
-        )
-
-    raise RuntimeError(
-        f"Unsupported provider: {selected_provider}. Use 'ollama', 'deepseek', or 'openai'."
+    return llm_client_manager.build_client(
+        provider=provider,
+        model=model,
+        temperature=0,
     )
 
 
 def _normalize_provider_name_runtime(provider_name: str | None) -> str:
-    normalized = str(provider_name or "").lower().strip()
-    if normalized == "llama":
-        return "ollama"
-    return normalized
+    return llm_client_manager.normalize_provider(provider_name)
 
 
 def _is_transport_connection_error(exc: Exception) -> bool:
@@ -1146,53 +822,14 @@ def _is_transport_connection_error(exc: Exception) -> bool:
 def _provider_candidates_for_request(
     provider: str | None, model: str | None
 ) -> list[tuple[str | None, str | None]]:
-    """Return ordered provider/model candidates for resilient execution.
-
-    If model selection is locked, use single configured provider.
-    Otherwise prefer request/current provider first, then other configured providers.
-    """
-    if force_local_modal_llm and ollama_base_url:
-        return [("ollama", os.environ.get("MODAL_OLLAMA_MODEL") or ollama_model or "llama3.1:8b")]
-
-    if CURRENT_SELECTION.get("locked"):
-        return [(CURRENT_SELECTION.get("provider"), CURRENT_SELECTION.get("model"))]
-
-    requested = _normalize_provider_name_runtime(provider or CURRENT_SELECTION.get("provider"))
-    available = _available_providers()
-    fallback_order = ["deepseek", "openai", "ollama"]
-
-    candidates: list[tuple[str | None, str | None]] = []
-    if requested and requested not in _RUNTIME_PROVIDER_BLOCKLIST:
-        candidates.append((requested, model))
-
-    for candidate in fallback_order:
-        if candidate not in available:
-            continue
-        if candidate in _RUNTIME_PROVIDER_BLOCKLIST:
-            continue
-        if any(
-            _normalize_provider_name_runtime(existing_provider) == candidate
-            for existing_provider, _ in candidates
-        ):
-            continue
-        default_model_for_candidate: str | None = None
-        if candidate == "deepseek":
-            default_model_for_candidate = "deepseek-chat"
-        elif candidate == "openai":
-            default_model_for_candidate = "gpt-4o-mini"
-        elif candidate == "ollama":
-            default_model_for_candidate = ollama_model or "llama3.1:8b"
-        candidates.append((candidate, default_model_for_candidate))
-
-    if not candidates:
-        candidates.append((provider, model))
-    return candidates
+    resolved_provider, resolved_model = llm_client_manager.resolve_request(provider, model)
+    return [(resolved_provider, resolved_model)]
 
 
 def _sanitize_messages(messages: list[BaseMessage]) -> list[BaseMessage]:  # noqa: C901
     """Sanitize messages to ensure all content fields are strings.
 
-    Some LLM APIs (like DeepSeek) require message content to be strings,
+    Some chat APIs require message content to be strings,
     but LangChain's ToolNode can produce messages with list content.
     This function converts any non-string content to a string.
     """
@@ -1262,7 +899,7 @@ def agent_node(state: AgentState) -> AgentState:
             f"Last message content: {last_message.content[:200] if isinstance(last_message.content, str) else last_message.content}"
         )
 
-    # Sanitize messages to ensure all content is strings (required by some APIs like DeepSeek)
+    # Sanitize messages to ensure all content is strings for chat-client compatibility
     sanitized_messages = _sanitize_messages(state["messages"])
 
     # Retry on transient rate-limit / 429 errors and fail over provider on transport errors.
@@ -2664,92 +2301,43 @@ def get_model_selection():
 
 @app.post("/model-selection")
 def set_model_selection(selection: ModelSelection):
-    """Set provider/model if not locked. Developers can freeze via env or file."""
+    """Set the local model selection if not locked."""
     if CURRENT_SELECTION.get("locked"):
         raise HTTPException(status_code=403, detail="Model selection is locked")
 
-    available = config()
-    providers = [p["key"] for p in available["providers"]]
-    if selection.provider not in providers:
-        raise HTTPException(status_code=400, detail=f"Unsupported provider: {selection.provider}")
+    normalized_provider = llm_client_manager.normalize_provider(selection.provider)
+    if normalized_provider != "ollama":
+        raise HTTPException(
+            status_code=400,
+            detail="Only the local Ollama provider is supported",
+        )
 
     # Validate model if provided
     if selection.model:
-        avail_models = available["models"].get(selection.provider, [])
+        available = config()
+        avail_models = available["models"].get("ollama", [])
         if selection.model not in avail_models:
             raise HTTPException(
                 status_code=400,
-                detail=f"Unsupported model for {selection.provider}: {selection.model}",
+                detail=f"Unsupported local model: {selection.model}",
             )
 
     # Save selection (file + in-memory)
-    _save_model_selection_to_file(selection.provider.lower(), selection.model, selection.lock)
+    _save_model_selection_to_file("ollama", selection.model, selection.lock)
     return {"status": "ok", "current": CURRENT_SELECTION}
 
 
 @app.get("/config")
 def config():
-    """Expose available providers/models based on environment for frontend discovery."""
-
-    def _ollama_is_reachable(base_url: str | None) -> bool:
-        candidate = str(base_url or "").strip().rstrip("/")
-        if not candidate:
-            return False
-        try:
-            with urllib.request.urlopen(f"{candidate}/api/tags", timeout=1.5) as response:
-                status = getattr(response, "status", 200)
-                return int(status) < 500
-        except Exception:
-            return False
-
-    # Provider chain: Ollama → DeepSeek → OpenAI. Groq/X.AI excluded.
-    provider_entries: list[tuple[str, str]] = []
-    models = {}
-    if ollama_base_url and _ollama_is_reachable(ollama_base_url):
-        provider_entries.append(("ollama", "Ollama (Local)"))
-        models["ollama"] = [ollama_model or "llama3.1:8b"]
-    elif ollama_base_url:
-        logger.warning(
-            "Ollama configured at %s but unreachable; excluding provider from /config",
-            ollama_base_url,
-        )
-    if deepseek_api_key:
-        provider_entries.append(("deepseek", "DeepSeek"))
-        models["deepseek"] = ["deepseek-chat", "deepseek-reasoner"]
-    if openai_api_key:
-        provider_entries.append(("openai", "OpenAI"))
-        models["openai"] = ["gpt-4o-mini"]
-
-    selected_provider = _normalize_provider_name_runtime(CURRENT_SELECTION.get("provider"))
-    available_provider_keys = [key for key, _ in provider_entries]
-    default_provider = (
-        selected_provider
-        if selected_provider in available_provider_keys
-        else (available_provider_keys[0] if available_provider_keys else None)
-    )
-
-    providers = [
-        {
-            "key": key,
-            "label": label,
-            "default": key == default_provider,
-        }
-        for key, label in provider_entries
-    ]
-
-    return {
-        "providers": providers,
-        "models": models,
-        "defaultProvider": default_provider,
-        "defaultModel": (
-            next(iter(models.get(default_provider) or []), None) if default_provider else None
-        ),
-        "runtime": {
-            "fast_mode": agent_fast_mode,
-            "max_response_sentences": agent_max_response_sentences,
-            "max_response_chars": agent_max_response_chars,
-        },
+    """Expose the local-only LLM configuration for frontend discovery."""
+    payload = llm_client_manager.config_payload()
+    payload["runtime"] = {
+        "fast_mode": agent_fast_mode,
+        "max_response_sentences": agent_max_response_sentences,
+        "max_response_chars": agent_max_response_chars,
+        "reachable": llm_client_manager.is_reachable(),
     }
+    return payload
 
 
 @app.get("/privacy")

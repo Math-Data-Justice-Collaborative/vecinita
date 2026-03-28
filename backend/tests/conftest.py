@@ -29,8 +29,6 @@ def env_vars():
         "SUPABASE_KEY": _env_or_default("SUPABASE_KEY", "test-key"),
         "OLLAMA_BASE_URL": _env_or_default("OLLAMA_BASE_URL", "http://localhost:11434"),
         "OLLAMA_MODEL": _env_or_default("OLLAMA_MODEL", "llama3.1:8b"),
-        "DEEPSEEK_API_KEY": _env_or_default("DEEPSEEK_API_KEY", "test-deepseek-key"),
-        "OPENAI_API_KEY": _env_or_default("OPENAI_API_KEY", "test-openai-key"),
         "DATABASE_URL": _env_or_default("DATABASE_URL", "postgresql://test"),
     }
 
@@ -56,6 +54,13 @@ def _agent_module_path_compatibility():
 
     # Stub embedding service client before importing src.agent.main.
     fake_embedding_module = types.ModuleType("src.embedding_service.client")
+    fake_chroma_store_module = types.ModuleType("src.services.chroma_store")
+    fake_psycopg2_module = types.ModuleType("psycopg2")
+    fake_psycopg2_extras_module = types.ModuleType("psycopg2.extras")
+
+    class _FakeChromaStore:
+        def heartbeat(self):
+            return True
 
     def _fake_create_embedding_client(*_args, **_kwargs):
         mock_embedding = Mock()
@@ -63,15 +68,23 @@ def _agent_module_path_compatibility():
         mock_embedding.embed_documents = Mock(return_value=[[0.1] * 384])
         return mock_embedding
 
+    def _fake_get_chroma_store(*_args, **_kwargs):
+        return Mock(heartbeat=Mock(return_value=True))
+
     fake_embedding_module.create_embedding_client = _fake_create_embedding_client
+    fake_chroma_store_module.ChromaStore = _FakeChromaStore
+    fake_chroma_store_module.get_chroma_store = _fake_get_chroma_store
+    fake_psycopg2_extras_module.RealDictCursor = object
+    fake_psycopg2_module.extras = fake_psycopg2_extras_module
     sys.modules["src.embedding_service.client"] = fake_embedding_module
+    sys.modules["src.services.chroma_store"] = fake_chroma_store_module
+    sys.modules["psycopg2"] = fake_psycopg2_module
+    sys.modules["psycopg2.extras"] = fake_psycopg2_extras_module
 
     # Set minimal env vars so module-level LLM provider validation passes.
     _test_env_defaults = {
         "SUPABASE_URL": "https://test.supabase.co",
         "SUPABASE_KEY": "test-key",
-        "DEEPSEEK_API_KEY": "test-deepseek-key",
-        "OPENAI_API_KEY": "test-openai-key",
         "OLLAMA_BASE_URL": "http://localhost:11434",
         "OLLAMA_MODEL": "llama3.1:8b",
         "DATABASE_URL": "postgresql://test",
@@ -82,11 +95,7 @@ def _agent_module_path_compatibility():
         if _k not in os.environ:
             os.environ[_k] = _v
 
-    import src.agent.main as agent_main
-
-    # Legacy tests patch ChatGroq; current code uses ChatOllama/OpenAI chain.
-    if not hasattr(agent_main, "ChatGroq"):
-        agent_main.ChatGroq = agent_main.ChatOllama
+    __import__("src.agent.main")
 
     yield
 

@@ -1,18 +1,6 @@
-import sys
-import types
 from unittest.mock import Mock, patch
 
 import pytest
-
-# Avoid importing heavy optional crypto dependencies through src.utils.__init__
-if "src.utils.supabase_embeddings" not in sys.modules:
-    fake_supabase_embeddings = types.ModuleType("src.utils.supabase_embeddings")
-
-    class _FakeSupabaseEmbeddings:
-        pass
-
-    fake_supabase_embeddings.SupabaseEmbeddings = _FakeSupabaseEmbeddings
-    sys.modules["src.utils.supabase_embeddings"] = fake_supabase_embeddings
 
 from src.services.scraper.uploader import DatabaseUploader
 
@@ -23,13 +11,14 @@ def _make_uploader():
     with (
         patch.object(DatabaseUploader, "_init_embeddings"),
         patch.object(DatabaseUploader, "_init_supabase"),
-        patch.object(DatabaseUploader, "_init_deepseek_tagger"),
+        patch.object(DatabaseUploader, "_init_local_llm_tagger"),
     ):
         uploader = DatabaseUploader(use_local_embeddings=False)
     uploader.chroma_store = Mock()
     uploader.chroma_store.list_sources.return_value = []
     uploader.chroma_store.get_source.return_value = None
-    uploader.deepseek_tagger = None
+    uploader.local_llm_tagger = None
+    uploader.local_llm_raw_model = None
     return uploader
 
 
@@ -68,11 +57,11 @@ def test_chunk_id_is_stable_for_upsert_updates():
     assert id_a != id_c
 
 
-def test_upload_chunks_uses_deepseek_structured_tags_when_available():
+def test_upload_chunks_uses_local_llm_structured_tags_when_available():
     uploader = _make_uploader()
     uploader._generate_embeddings = Mock(return_value=[[0.1, 0.2, 0.3]])
     uploader.chroma_store.upsert_chunks = Mock(return_value=1)
-    uploader.deepseek_tagger = Mock(
+    uploader.local_llm_tagger = Mock(
         invoke=Mock(
             return_value={
                 "tags": ["Housing", "Benefits", "Community Resources"],
@@ -96,11 +85,11 @@ def test_upload_chunks_uses_deepseek_structured_tags_when_available():
     assert row["metadata"]["document_title"] == "WRWC Programs"
 
 
-def test_upload_chunks_merges_deepseek_facets_into_search_tags_and_metadata():
+def test_upload_chunks_merges_local_llm_facets_into_search_tags_and_metadata():
     uploader = _make_uploader()
     uploader._generate_embeddings = Mock(return_value=[[0.1, 0.2, 0.3]])
     uploader.chroma_store.upsert_chunks = Mock(return_value=1)
-    uploader.deepseek_tagger = Mock(
+    uploader.local_llm_tagger = Mock(
         invoke=Mock(
             return_value={
                 "tags": ["community support"],
@@ -148,7 +137,7 @@ def test_upload_chunks_infers_source_tags_and_bilingual_fields_without_llm():
     uploader = _make_uploader()
     uploader._generate_embeddings = Mock(return_value=[[0.1, 0.2, 0.3]])
     uploader.chroma_store.upsert_chunks = Mock(return_value=1)
-    uploader.deepseek_tagger = None
+    uploader.local_llm_tagger = None
 
     uploaded, failed = uploader.upload_chunks(
         chunks=[
@@ -173,14 +162,14 @@ def test_upload_chunks_infers_source_tags_and_bilingual_fields_without_llm():
     assert "inmigracion" in row["metadata"]["tags_es"]
 
 
-def test_upload_chunks_uses_deepseek_json_fallback_when_response_format_unavailable():
+def test_upload_chunks_uses_local_llm_json_fallback_when_response_format_unavailable():
     uploader = _make_uploader()
     uploader._generate_embeddings = Mock(return_value=[[0.1, 0.2, 0.3]])
     uploader.chroma_store.upsert_chunks = Mock(return_value=1)
-    uploader.deepseek_tagger = Mock(
+    uploader.local_llm_tagger = Mock(
         invoke=Mock(side_effect=Exception("response_format type unavailable"))
     )
-    uploader.deepseek_raw_model = Mock(
+    uploader.local_llm_raw_model = Mock(
         invoke=Mock(
             return_value=Mock(
                 content='{"tags": ["Housing", "Legal Aid"], "document_title": "WRWC Help", "source_summary": "Local support resources."}'
@@ -201,7 +190,7 @@ def test_upload_chunks_uses_deepseek_json_fallback_when_response_format_unavaila
     assert row["metadata"]["document_title"] == "WRWC Help"
 
 
-def test_upload_chunks_reuses_existing_source_tags_with_deepseek_tags():
+def test_upload_chunks_reuses_existing_source_tags_with_local_llm_tags():
     uploader = _make_uploader()
     uploader._generate_embeddings = Mock(return_value=[[0.1, 0.2, 0.3]])
     uploader.chroma_store.upsert_chunks = Mock(return_value=1)
@@ -213,7 +202,7 @@ def test_upload_chunks_reuses_existing_source_tags_with_deepseek_tags():
     uploader.chroma_store.list_sources.return_value = [
         {"url": "https://wrwc.org/help", "tags": ["housing", "families", "benefits"]}
     ]
-    uploader.deepseek_tagger = Mock(
+    uploader.local_llm_tagger = Mock(
         invoke=Mock(
             return_value={
                 "tags": ["legal aid"],
@@ -235,31 +224,27 @@ def test_upload_chunks_reuses_existing_source_tags_with_deepseek_tags():
     assert row["metadata"]["tags"] == ["housing", "families", "benefits", "legal aid"]
 
 
-def test_init_tagger_uses_groq_when_deepseek_unavailable(monkeypatch):
+def test_init_tagger_uses_local_llm_manager(monkeypatch):
     monkeypatch.setenv("ENABLE_LLM_TAG_ENHANCEMENT", "true")
-    monkeypatch.setenv("LLM_TAG_PROVIDER", "auto")
-    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
-    monkeypatch.setenv("GROQ_API_KEY", "test-groq-key")
-    monkeypatch.setenv("GROQ_TAG_MODEL", "llama-3.1-8b-instant")
+    monkeypatch.setenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    monkeypatch.setenv("OLLAMA_MODEL", "llama3.1:8b")
 
     with (
         patch.object(DatabaseUploader, "_init_embeddings"),
         patch.object(DatabaseUploader, "_init_supabase"),
+        patch("src.services.scraper.uploader.LocalLLMClientManager") as mock_manager_class,
     ):
-        with (
-            patch("src.services.scraper.uploader.GROQ_TAGGING_AVAILABLE", True),
-            patch("src.services.scraper.uploader.ChatGroq") as mock_chat_groq,
-        ):
-            llm = Mock()
-            structured_tagger = Mock()
-            llm.with_structured_output.return_value = structured_tagger
-            mock_chat_groq.return_value = llm
+        manager = Mock()
+        raw_model = Mock()
+        structured_tagger = Mock()
+        manager.build_client.side_effect = [raw_model, structured_tagger]
+        mock_manager_class.return_value = manager
 
-            uploader = DatabaseUploader(use_local_embeddings=False)
+        uploader = DatabaseUploader(use_local_embeddings=False)
 
-    assert uploader.deepseek_tagger is structured_tagger
-    assert uploader.deepseek_raw_model is llm
-    mock_chat_groq.assert_called_once()
+    manager.validate_runtime.assert_called_once()
+    assert uploader.local_llm_raw_model is raw_model
+    assert uploader.local_llm_tagger is structured_tagger
 
 
 def test_upload_chunks_syncs_to_supabase_with_retry_in_degraded_mode():

@@ -6,6 +6,8 @@ import pytest
 
 from src.utils.supabase_embeddings import SupabaseEmbeddings, create_embedding_model
 
+pytestmark = pytest.mark.unit
+
 
 class TestSupabaseEmbeddings:
     """Test suite for SupabaseEmbeddings client."""
@@ -63,6 +65,25 @@ class TestSupabaseEmbeddings:
         with pytest.raises(RuntimeError, match="Failed to generate embedding"):
             embeddings.embed_query("test query")
 
+    def test_embed_query_supports_data_attribute_only_responses(self, embeddings, mock_supabase):
+        mock_response = Mock()
+        del mock_response.json
+        mock_response.status_code = 200
+        mock_response.data = {"embedding": [0.5, 0.6]}
+        mock_supabase.functions.invoke.return_value = mock_response
+
+        assert embeddings.embed_query("test query") == [0.5, 0.6]
+
+    def test_embed_query_rejects_unknown_response_shapes(self, embeddings, mock_supabase):
+        mock_response = Mock()
+        del mock_response.json
+        del mock_response.data
+        mock_response.status_code = 200
+        mock_supabase.functions.invoke.return_value = mock_response
+
+        with pytest.raises(RuntimeError, match="Failed to generate embedding"):
+            embeddings.embed_query("test query")
+
     def test_embed_documents_success(self, embeddings, mock_supabase):
         mock_response = Mock()
         mock_response.status_code = 200
@@ -114,6 +135,40 @@ class TestSupabaseEmbeddings:
         assert result[0] == [0.1, 0.2, 0.3]
         assert result[1] == [0.1, 0.2, 0.3]
         assert mock_supabase.functions.invoke.call_count == 3
+
+    def test_embed_documents_supports_data_attribute_only_responses(
+        self, embeddings, mock_supabase
+    ):
+        mock_response = Mock()
+        del mock_response.json
+        mock_response.status_code = 200
+        mock_response.data = {"embeddings": [[0.3], [0.4]]}
+        mock_supabase.functions.invoke.return_value = mock_response
+
+        assert embeddings.embed_documents(["doc 1", "doc 2"]) == [[0.3], [0.4]]
+
+    def test_embed_documents_falls_back_on_unknown_response_shape(self, embeddings, mock_supabase):
+        mock_response = Mock()
+        del mock_response.json
+        del mock_response.data
+        mock_response.status_code = 200
+        mock_supabase.functions.invoke.return_value = mock_response
+        embeddings.embed_query = Mock(side_effect=[[0.1], [0.2]])
+
+        assert embeddings.embed_documents(["doc 1", "doc 2"]) == [[0.1], [0.2]]
+        assert embeddings.embed_query.call_count == 2
+
+    def test_embed_documents_invalid_payload_falls_back_to_individual_calls(
+        self, embeddings, mock_supabase
+    ):
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"embeddings": "not-a-list"}
+        mock_supabase.functions.invoke.return_value = mock_response
+        embeddings.embed_query = Mock(side_effect=[[0.7], [0.8]])
+
+        assert embeddings.embed_documents(["doc 1", "doc 2"]) == [[0.7], [0.8]]
+        assert embeddings.embed_query.call_count == 2
 
     def test_create_embedding_model(self, mock_supabase):
         model = create_embedding_model(mock_supabase)

@@ -1,2 +1,11 @@
 [extend]
 useDefault = true
+
+[[allowlists]]
+description = "Generated docs and lockfiles with example tokens and hashes"
+paths = [
+	'''^\.github/llm-txt/.*$''',
+	'''^\.github/render-llm\.txt$''',
+	'''^backend/uv\.lock$''',
+]
+useDefault = true

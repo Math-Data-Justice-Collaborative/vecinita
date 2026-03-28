@@ -21,15 +21,6 @@ from dotenv import load_dotenv
 from supabase import Client, create_client
 from tqdm import tqdm  # type: ignore[import-untyped]
 
-# Optional: For OpenAI embeddings (install: pip install openai)
-try:
-    from openai import OpenAI
-
-    OPENAI_AVAILABLE = True
-except ImportError:
-    OPENAI_AVAILABLE = False
-    print("Warning: OpenAI not installed. Install with: pip install openai")
-
 # Optional: For local embeddings (install: pip install sentence-transformers)
 try:
     from sentence_transformers import SentenceTransformer
@@ -54,14 +45,9 @@ logger = logging.getLogger(__name__)
 
 # Configuration
 BATCH_SIZE = 100  # Number of chunks to process in one batch
-EMBEDDING_MODEL = os.getenv(
-    "EMBEDDING_MODEL", "text-embedding-3-large"
-)  # OpenAI model - higher quality
-# Local embedding model name to use when USE_LOCAL_EMBEDDINGS=true
-# Tests expect 'all-mpnet-base-v2'
-LOCAL_EMBEDDING_MODEL = "all-mpnet-base-v2"
-EMBEDDING_DIMENSION = 3072  # OpenAI text-embedding-3-large dimension
-USE_LOCAL_EMBEDDINGS = os.getenv("USE_LOCAL_EMBEDDINGS", "false").lower() == "true"
+LOCAL_EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "all-mpnet-base-v2")
+EMBEDDING_DIMENSION = int(os.getenv("EMBEDDING_DIMENSION", "384"))
+USE_LOCAL_EMBEDDINGS = os.getenv("USE_LOCAL_EMBEDDINGS", "true").lower() == "true"
 MAX_RETRIES = 3
 RETRY_DELAY = 1  # seconds
 
@@ -108,24 +94,9 @@ class VecinitaLoader:
                 self.embedding_model = None
                 self.embedding_dimension = EMBEDDING_DIMENSION
         else:
-            # Try OpenAI if available and configured; otherwise proceed without embeddings
-            if OPENAI_AVAILABLE:
-                # Support both OPENAI_API_KEY and legacy OPEN_API_KEY names
-                openai_api_key = os.environ.get("OPENAI_API_KEY") or os.environ.get("OPEN_API_KEY")
-                if openai_api_key:
-                    self.openai_client = OpenAI(api_key=openai_api_key)
-                    self.embedding_dimension = EMBEDDING_DIMENSION
-                    logger.info(f"Using OpenAI embedding model: {EMBEDDING_MODEL}")
-                else:
-                    logger.warning(
-                        "OpenAI available but API key not set. Proceeding without embeddings."
-                    )
-                    self.embedding_model = None
-                    self.embedding_dimension = EMBEDDING_DIMENSION
-            else:
-                logger.warning("No embedding model available. Proceeding without embeddings.")
-                self.embedding_model = None
-                self.embedding_dimension = EMBEDDING_DIMENSION
+            logger.warning("Local embeddings are disabled. Proceeding without embeddings.")
+            self.embedding_model = None
+            self.embedding_dimension = EMBEDDING_DIMENSION
 
     # --- THIS FUNCTION HAS BEEN REPLACED ---
     def parse_chunk_file(self, file_path: str) -> Generator[DocumentChunk, None, None]:
@@ -228,13 +199,6 @@ class VecinitaLoader:
                 # Use local sentence transformer
                 embedding = self.embedding_model.encode(text, convert_to_numpy=True)
                 return cast(list[float], embedding.tolist())
-            elif OPENAI_AVAILABLE and hasattr(self, "openai_client"):
-                # Use OpenAI API
-                response = self.openai_client.embeddings.create(
-                    model=EMBEDDING_MODEL,
-                    input=text[:8000],  # Limit text length for API
-                )
-                return response.data[0].embedding
             else:
                 return None
         except Exception as e:
