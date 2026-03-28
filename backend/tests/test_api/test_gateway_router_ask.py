@@ -329,6 +329,7 @@ class TestAskConfigEndpoint:
 
         response = ask_client.get("/api/v1/ask/config")
         assert response.status_code == 200
+        assert "application/json" in response.headers.get("content-type", "")
         data = response.json()
         assert "providers" in data
 

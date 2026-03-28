@@ -110,6 +110,14 @@ jobs:
         SKIP_AGENT_MAIN_IMPORT: 'true'
         EMBEDDING_STRICT_STARTUP: 'false'
 
+    - name: API regression - ask config returns JSON
+      working-directory: backend
+      run: |
+        pytest tests/test_api/test_gateway_router_ask.py -k "get_ask_config_success" -v --tb=short
+      env:
+        PYTHONPATH: ${{ github.workspace }}/backend
+        EMBEDDING_STRICT_STARTUP: 'false'
+
   backend-integration:
     runs-on: ubuntu-22.04
 

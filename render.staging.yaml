@@ -57,9 +57,13 @@ services:
     healthCheckPath: /health
     envVars:
       - key: VITE_GATEWAY_URL
-        value: "/api/v1"
+        value: "https://vecinita-agent-staging.onrender.com/api/v1"
       - key: VITE_BACKEND_URL
         value: "https://vecinita-agent-staging.onrender.com"
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
 
 databases:
   - name: vecinita-postgres-staging
