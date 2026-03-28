@@ -54,6 +54,7 @@ jobs:
 
       - name: Verify Modal Authentication
         run: |
+          modal token set --token-id "$MODAL_TOKEN_ID" --token-secret "$MODAL_TOKEN_SECRET" --no-verify
           modal token info
           echo "✓ Modal authentication verified"
 
