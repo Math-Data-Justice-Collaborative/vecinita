@@ -102,8 +102,9 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
       interval: 15s
-      timeout: 5s
-      retries: 3
+      timeout: 10s
+      retries: 5
+      start_period: 120s
     networks:
       - vecinita-network-dev
 
@@ -130,6 +131,7 @@ services:
       MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET:-}"
       CHROMA_HOST: "chroma"
       CHROMA_PORT: "8000"
+      EMBEDDING_STRICT_STARTUP: "false"
       CHROMA_SSL: "false"
       CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
       CHROMA_COLLECTION_SOURCES: "vecinita_sources"
@@ -178,6 +180,7 @@ services:
       MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET:-}"
       CHROMA_HOST: "chroma"
       CHROMA_PORT: "8000"
+      EMBEDDING_STRICT_STARTUP: "false"
       CHROMA_SSL: "false"
       CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
       CHROMA_COLLECTION_SOURCES: "vecinita_sources"

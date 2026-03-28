@@ -22,12 +22,12 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         submodules: 'recursive'
 
     - name: Set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
         node-version: '20'
         cache: 'npm'
@@ -47,7 +47,7 @@ jobs:
         node -e "const fs=require('fs');const summary=JSON.parse(fs.readFileSync('coverage/coverage-summary.json','utf8'));const pct=summary?.total?.lines?.pct ?? 0;const out='Frontend line coverage: '+Number(pct).toFixed(2)+'%\\n';process.stdout.write(out);fs.writeFileSync('coverage-summary.txt', out);"
 
     - name: Upload frontend coverage artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: always()
       with:
         name: frontend-coverage
