@@ -125,18 +125,8 @@ jobs:
     environment: staging
     env:
       RENDER_STAGING_DEPLOY_HOOK_AGENT: ${{ secrets.RENDER_STAGING_DEPLOY_HOOK_AGENT }}
-      RENDER_STAGING_DEPLOY_HOOK_EMBEDDING: ${{ secrets.RENDER_STAGING_DEPLOY_HOOK_EMBEDDING }}
       RENDER_STAGING_DEPLOY_HOOK_FRONTEND: ${{ secrets.RENDER_STAGING_DEPLOY_HOOK_FRONTEND }}
-      RENDER_STAGING_DEPLOY_HOOK_SCRAPER: ${{ secrets.RENDER_STAGING_DEPLOY_HOOK_SCRAPER }}
     steps:
-      - name: Trigger staging embedding deploy hook
-        if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_EMBEDDING != '' }}
-        run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_EMBEDDING" || echo "::notice::Staging embedding deploy hook request failed."
-
-      - name: Wait for staging embedding rollout
-        if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_EMBEDDING != '' }}
-        run: sleep 20
-
       - name: Trigger staging agent deploy hook
         if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_AGENT != '' }}
         run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_AGENT" || echo "::notice::Staging agent deploy hook request failed."
@@ -145,22 +135,14 @@ jobs:
         if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_FRONTEND != '' }}
         run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_FRONTEND" || echo "::notice::Staging frontend deploy hook request failed."
 
-      - name: Trigger staging scraper deploy hook
-        if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_SCRAPER != '' }}
-        run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_SCRAPER" || echo "::notice::Staging scraper deploy hook request failed."
-
       - name: Verify at least one staging deploy hook is configured
         run: |
           if [ -z "$RENDER_STAGING_DEPLOY_HOOK_AGENT" ] && \
-             [ -z "$RENDER_STAGING_DEPLOY_HOOK_EMBEDDING" ] && \
-             [ -z "$RENDER_STAGING_DEPLOY_HOOK_FRONTEND" ] && \
-             [ -z "$RENDER_STAGING_DEPLOY_HOOK_SCRAPER" ]; then
+             [ -z "$RENDER_STAGING_DEPLOY_HOOK_FRONTEND" ]; then
             echo "No staging Render deploy hook secrets are configured."
             echo "Set at least one of:"
             echo "  RENDER_STAGING_DEPLOY_HOOK_AGENT"
-            echo "  RENDER_STAGING_DEPLOY_HOOK_EMBEDDING"
             echo "  RENDER_STAGING_DEPLOY_HOOK_FRONTEND"
-            echo "  RENDER_STAGING_DEPLOY_HOOK_SCRAPER"
             echo "::warning::Skipping staging deploy because no deploy hook secrets are configured."
             exit 0
           fi
@@ -173,14 +155,13 @@ jobs:
     env:
       FRONTEND_URL: ${{ secrets.RENDER_STAGING_FRONTEND_URL }}
       AGENT_URL: ${{ secrets.RENDER_STAGING_AGENT_URL }}
-      EMBED_URL: ${{ secrets.RENDER_STAGING_EMBEDDING_URL }}
     steps:
       - name: Wait for staging services to stabilise
         run: sleep 45
 
       - name: Smoke staging services
         run: |
-          if [ -z "$FRONTEND_URL" ] && [ -z "$AGENT_URL" ] && [ -z "$EMBED_URL" ]; then
+          if [ -z "$FRONTEND_URL" ] && [ -z "$AGENT_URL" ]; then
             echo "No staging service URLs configured; skipping smoke probes."
             exit 0
           fi
@@ -204,7 +185,6 @@ jobs:
           check_url "Frontend health" "$FRONTEND_URL/health"
           check_url "Agent health" "$AGENT_URL/health"
           check_url "Agent config" "$AGENT_URL/api/v1/ask/config"
-          check_url "Embedding health" "$EMBED_URL/health"
 
   deploy-production:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -213,18 +193,8 @@ jobs:
     environment: production
     env:
       RENDER_PROD_DEPLOY_HOOK_AGENT: ${{ secrets.RENDER_PROD_DEPLOY_HOOK_AGENT || secrets.RENDER_DEPLOY_HOOK_AGENT || secrets.RENDER_VECINITA_AGENT_DEPLOY_HOOK }}
-      RENDER_PROD_DEPLOY_HOOK_EMBEDDING: ${{ secrets.RENDER_PROD_DEPLOY_HOOK_EMBEDDING || secrets.RENDER_DEPLOY_HOOK_EMBEDDING || secrets.RENDER_VECINITA_EMBEDDING_DEPLOY_HOOK }}
       RENDER_PROD_DEPLOY_HOOK_FRONTEND: ${{ secrets.RENDER_PROD_DEPLOY_HOOK_FRONTEND || secrets.RENDER_DEPLOY_HOOK_FRONTEND || secrets.RENDER_VECINITA_FRONTEND_DEPLOY_HOOK }}
-      RENDER_PROD_DEPLOY_HOOK_SCRAPER: ${{ secrets.RENDER_PROD_DEPLOY_HOOK_SCRAPER || secrets.RENDER_DEPLOY_HOOK_SCRAPER }}
     steps:
-      - name: Trigger production embedding deploy hook
-        if: ${{ env.RENDER_PROD_DEPLOY_HOOK_EMBEDDING != '' }}
-        run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_EMBEDDING" || echo "::notice::Production embedding deploy hook request failed."
-
-      - name: Wait for production embedding rollout
-        if: ${{ env.RENDER_PROD_DEPLOY_HOOK_EMBEDDING != '' }}
-        run: sleep 20
-
       - name: Trigger production agent deploy hook
         if: ${{ env.RENDER_PROD_DEPLOY_HOOK_AGENT != '' }}
         run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_AGENT" || echo "::notice::Production agent deploy hook request failed."
@@ -233,22 +203,14 @@ jobs:
         if: ${{ env.RENDER_PROD_DEPLOY_HOOK_FRONTEND != '' }}
         run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_FRONTEND" || echo "::notice::Production frontend deploy hook request failed."
 
-      - name: Trigger production scraper deploy hook
-        if: ${{ env.RENDER_PROD_DEPLOY_HOOK_SCRAPER != '' }}
-        run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_SCRAPER" || echo "::notice::Production scraper deploy hook request failed."
-
       - name: Verify at least one production deploy hook is configured
         run: |
           if [ -z "$RENDER_PROD_DEPLOY_HOOK_AGENT" ] && \
-             [ -z "$RENDER_PROD_DEPLOY_HOOK_EMBEDDING" ] && \
-             [ -z "$RENDER_PROD_DEPLOY_HOOK_FRONTEND" ] && \
-             [ -z "$RENDER_PROD_DEPLOY_HOOK_SCRAPER" ]; then
+             [ -z "$RENDER_PROD_DEPLOY_HOOK_FRONTEND" ]; then
             echo "No production Render deploy hook secrets are configured."
             echo "Set at least one of:"
             echo "  RENDER_PROD_DEPLOY_HOOK_AGENT"
-            echo "  RENDER_PROD_DEPLOY_HOOK_EMBEDDING"
             echo "  RENDER_PROD_DEPLOY_HOOK_FRONTEND"
-            echo "  RENDER_PROD_DEPLOY_HOOK_SCRAPER"
             echo "::warning::Skipping production deploy because no deploy hook secrets are configured."
             exit 0
           fi
@@ -261,14 +223,13 @@ jobs:
     env:
       FRONTEND_URL: ${{ secrets.RENDER_PROD_FRONTEND_URL || secrets.RENDER_FRONTEND_URL }}
       AGENT_URL: ${{ secrets.RENDER_PROD_AGENT_URL || secrets.RENDER_AGENT_URL }}
-      EMBED_URL: ${{ secrets.RENDER_PROD_EMBEDDING_URL || secrets.RENDER_EMBEDDING_URL }}
     steps:
       - name: Wait for production services to stabilise
         run: sleep 45
 
       - name: Smoke production services
         run: |
-          if [ -z "$FRONTEND_URL" ] && [ -z "$AGENT_URL" ] && [ -z "$EMBED_URL" ]; then
+          if [ -z "$FRONTEND_URL" ] && [ -z "$AGENT_URL" ]; then
             echo "No production service URLs configured; skipping smoke probes."
             exit 0
           fi
@@ -292,4 +253,3 @@ jobs:
           check_url "Frontend health" "$FRONTEND_URL/health"
           check_url "Agent health" "$AGENT_URL/health"
           check_url "Agent config" "$AGENT_URL/api/v1/ask/config"
-          check_url "Embedding health" "$EMBED_URL/health"

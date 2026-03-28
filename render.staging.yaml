@@ -1,22 +1,5 @@
 services:
   - type: web
-    name: vecinita-embedding-staging
-    runtime: docker
-    region: virginia
-    plan: free
-    dockerfilePath: ./backend/Dockerfile.embedding
-    dockerContext: ./backend
-    autoDeployTrigger: off
-    healthCheckPath: /health
-    envVars:
-      - key: PORT
-        value: "8001"
-      - key: PYTHONUNBUFFERED
-        value: "1"
-      - key: HF_HOME
-        value: "/tmp/huggingface_cache"
-
-  - type: web
     name: vecinita-agent-staging
     runtime: docker
     region: virginia
@@ -32,8 +15,16 @@ services:
         value: "1"
       - key: TF_ENABLE_ONEDNN_OPTS
         value: "0"
-      - key: EMBEDDING_SERVICE_URL
-        value: "https://vecinita-embedding-staging.onrender.com"
+      - key: MODAL_EMBEDDING_ENDPOINT
+        sync: false
+      - key: MODAL_OLLAMA_ENDPOINT
+        sync: false
+      - key: EMBEDDING_SERVICE_AUTH_TOKEN
+        sync: false
+      - key: REINDEX_SERVICE_URL
+        sync: false
+      - key: REINDEX_TRIGGER_TOKEN
+        sync: false
       - key: EMBEDDING_STRICT_STARTUP
         value: "false"
       - key: DATABASE_URL
@@ -53,31 +44,6 @@ services:
       - key: LANGSMITH_API_KEY
         sync: false
       - key: LANGSMITH_PROJECT
-        sync: false
-
-  - type: cron
-    name: vecinita-scraper-staging
-    runtime: docker
-    region: virginia
-    plan: starter
-    dockerfilePath: ./backend/Dockerfile.scraper
-    dockerContext: ./backend
-    schedule: "0 2 * * *"
-    autoDeployTrigger: off
-    envVars:
-      - key: PYTHONUNBUFFERED
-        value: "1"
-      - key: EMBEDDING_SERVICE_URL
-        value: "https://vecinita-embedding-staging.onrender.com"
-      - key: EMBEDDING_STRICT_STARTUP
-        value: "false"
-      - key: DATABASE_URL
-        fromDatabase:
-          name: vecinita-postgres-staging
-          property: connectionString
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_KEY
         sync: false
 
   - type: web
