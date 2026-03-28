@@ -82,7 +82,7 @@ class RateLimitState:
     def increment(self, api_key: str, tokens: int = 1) -> Dict[str, Any]:
         """Increment usage for an API key."""
         if api_key in self.blocked_keys:
-            raise ValueError(f"API key is blocked due to too many failed attempts")
+            raise ValueError("API key is blocked due to too many failed attempts")
         
         now = datetime.now(timezone.utc)
         key_stats = self.usage.get(api_key, {
@@ -243,8 +243,8 @@ async def lifespan(app: FastAPI):
     # Startup
     try:
         # Test Supabase connection
-        result = supabase.table("api_keys_meta").select("count", count="exact").limit(1).execute()
-        logger.info(f"✓ Supabase connection OK")
+        supabase.table("api_keys_meta").select("count", count="exact").limit(1).execute()
+        logger.info("✓ Supabase connection OK")
     except Exception as e:
         logger.warning(f"Note: api_keys_meta table may not exist yet: {e}")
     
