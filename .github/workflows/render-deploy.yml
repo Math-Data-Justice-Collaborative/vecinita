@@ -31,12 +31,12 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
 
       - name: Set up Python 3.10
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
           cache: pip
@@ -79,7 +79,7 @@ jobs:
           pytest tests/ -m "unit and not llm" -v --tb=short --junit-xml=test-results.xml
 
       - name: Upload backend unit test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: backend-unit-results
@@ -89,12 +89,12 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "20"
           cache: npm
@@ -136,19 +136,19 @@ jobs:
     steps:
       - name: Trigger staging agent deploy hook
         if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_AGENT != '' }}
-        run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_AGENT"
+        run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_AGENT" || echo "::warning::Staging agent deploy hook request failed."
 
       - name: Trigger staging embedding deploy hook
         if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_EMBEDDING != '' }}
-        run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_EMBEDDING"
+        run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_EMBEDDING" || echo "::warning::Staging embedding deploy hook request failed."
 
       - name: Trigger staging frontend deploy hook
         if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_FRONTEND != '' }}
-        run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_FRONTEND"
+        run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_FRONTEND" || echo "::warning::Staging frontend deploy hook request failed."
 
       - name: Trigger staging scraper deploy hook
         if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_SCRAPER != '' }}
-        run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_SCRAPER"
+        run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_SCRAPER" || echo "::warning::Staging scraper deploy hook request failed."
 
       - name: Verify at least one staging deploy hook is configured
         run: |
@@ -220,19 +220,19 @@ jobs:
     steps:
       - name: Trigger production agent deploy hook
         if: ${{ env.RENDER_PROD_DEPLOY_HOOK_AGENT != '' }}
-        run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_AGENT"
+        run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_AGENT" || echo "::warning::Production agent deploy hook request failed."
 
       - name: Trigger production embedding deploy hook
         if: ${{ env.RENDER_PROD_DEPLOY_HOOK_EMBEDDING != '' }}
-        run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_EMBEDDING"
+        run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_EMBEDDING" || echo "::warning::Production embedding deploy hook request failed."
 
       - name: Trigger production frontend deploy hook
         if: ${{ env.RENDER_PROD_DEPLOY_HOOK_FRONTEND != '' }}
-        run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_FRONTEND"
+        run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_FRONTEND" || echo "::warning::Production frontend deploy hook request failed."
 
       - name: Trigger production scraper deploy hook
         if: ${{ env.RENDER_PROD_DEPLOY_HOOK_SCRAPER != '' }}
-        run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_SCRAPER"
+        run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_SCRAPER" || echo "::warning::Production scraper deploy hook request failed."
 
       - name: Verify at least one production deploy hook is configured
         run: |
