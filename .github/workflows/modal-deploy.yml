@@ -63,7 +63,7 @@ jobs:
 
           if [ -z "$token_id" ] || [ -z "$token_secret" ]; then
             echo "authenticated=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Modal deployment skipped because credentials are not configured."
+            echo "::notice::Modal deployment skipped because credentials are not configured."
             exit 0
           fi
 
@@ -72,7 +72,7 @@ jobs:
             echo "✓ Modal authentication verified"
           else
             echo "authenticated=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Modal deployment skipped because authentication failed. Update MODAL_TOKEN_ID and MODAL_TOKEN_SECRET to valid values."
+            echo "::notice::Modal deployment skipped because authentication failed. Update MODAL_TOKEN_ID and MODAL_TOKEN_SECRET to valid values."
           fi
 
       - name: Deploy Embedding Service
