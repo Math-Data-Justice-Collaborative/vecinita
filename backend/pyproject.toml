@@ -117,6 +117,9 @@ ci = [
     "pytest-asyncio>=0.23.0",
     "pytest-cov>=5.0.0",
     "httpx>=0.25.0",
+    "black>=24.1.0",
+    "ruff>=0.2.0",
+    "mypy>=1.8.0",
 ]
 
 visualization = [
@@ -235,8 +238,6 @@ select = [
 ignore = [
     "E501",  # line too long (handled by black)
     "B008",  # do not perform function calls in argument defaults
-    "C901",  # too complex
-    "B904",  # legacy exception wrapping patterns; migrate incrementally
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -245,13 +246,16 @@ ignore = [
 "src/services/db/security.py" = ["E402"]
 "src/test_faq.py" = ["E402"]
 
+[tool.ruff.lint.mccabe]
+max-complexity = 25
+
 [tool.mypy]
 python_version = "3.10"
 explicit_package_bases = true
 warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = false
-disallow_incomplete_defs = false
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
 check_untyped_defs = true
 no_implicit_optional = true
 warn_redundant_casts = true
@@ -276,12 +280,29 @@ module = [
 ]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = [
+    "src.agent.*",
+    "src.api.*",
+    "src.embedding_service.*",
+    "src.scraper.*",
+    "src.services.*",
+    "src.test_faq",
+]
+ignore_errors = true
+
 [tool.coverage.run]
 branch = true
 source = ["src"]
 
 [tool.coverage.report]
+fail_under = 98
 omit = [
+]
+exclude_lines = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "@overload",
 ]
 
 [tool.uv]

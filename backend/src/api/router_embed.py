@@ -85,9 +85,9 @@ async def embed_text(request: EmbedRequest) -> EmbedResponse:
             )
 
     except httpx.HTTPError as e:
-        raise HTTPException(status_code=503, detail=f"Embedding service error: {str(e)}")
+        raise HTTPException(status_code=503, detail=f"Embedding service error: {str(e)}") from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to generate embedding: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate embedding: {str(e)}") from e
 
 
 @router.post("/batch")
@@ -130,11 +130,11 @@ async def embed_batch(request: EmbedBatchRequest) -> EmbedBatchResponse:
             return EmbedBatchResponse(embeddings=embed_responses, model=model, dimension=dimension)
 
     except httpx.HTTPError as e:
-        raise HTTPException(status_code=503, detail=f"Embedding service error: {str(e)}")
+        raise HTTPException(status_code=503, detail=f"Embedding service error: {str(e)}") from e
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to generate batch embeddings: {str(e)}"
-        )
+        ) from e
 
 
 @router.post("/similarity")
@@ -188,9 +188,9 @@ async def compute_similarity(request: SimilarityRequest) -> SimilarityResponse:
             )
 
     except httpx.HTTPError as e:
-        raise HTTPException(status_code=503, detail=f"Embedding service error: {str(e)}")
+        raise HTTPException(status_code=503, detail=f"Embedding service error: {str(e)}") from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to compute similarity: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to compute similarity: {str(e)}") from e
 
 
 @router.get("/config")
@@ -272,11 +272,11 @@ async def update_embedding_config(
         if e.response.status_code == 403:
             raise HTTPException(
                 status_code=403, detail="Embedding configuration is locked. Cannot update."
-            )
+            ) from e
         raise HTTPException(
             status_code=e.response.status_code, detail=f"Embedding service error: {e.response.text}"
-        )
+        ) from e
     except httpx.HTTPError as e:
-        raise HTTPException(status_code=503, detail=f"Embedding service error: {str(e)}")
+        raise HTTPException(status_code=503, detail=f"Embedding service error: {str(e)}") from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to update config: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to update config: {str(e)}") from e

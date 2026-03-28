@@ -398,7 +398,7 @@ async def documents_overview(
 
     except Exception as exc:
         logger.exception("documents_overview error")
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 # ---------------------------------------------------------------------------
@@ -439,7 +439,7 @@ async def documents_preview(
         return {"source_url": source_url, "chunks": chunks}
     except Exception as exc:
         logger.exception("documents_preview error")
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @router.get("/download-url")
@@ -502,7 +502,7 @@ async def documents_download_url(
         raise
     except Exception as exc:
         logger.exception("documents_download_url error")
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @router.get("/chunk-statistics")
@@ -557,7 +557,7 @@ async def documents_chunk_statistics(
         return {"rows": rows, "total": len(rows)}
     except Exception as exc:
         logger.exception("documents_chunk_statistics error")
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @router.get("/tags")
@@ -610,4 +610,4 @@ async def documents_tags(
         return {"tags": rows, "total": len(rows)}
     except Exception as exc:
         logger.exception("documents_tags error")
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=500, detail=str(exc)) from exc

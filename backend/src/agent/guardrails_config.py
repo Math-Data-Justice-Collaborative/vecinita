@@ -27,9 +27,9 @@ _HUB_INITIALIZED = False
 # ---------------------------------------------------------------------------
 
 
-def _try_import_guardrails():
+def _try_import_guardrails() -> Any | None:
     try:
-        import guardrails as grd  # type: ignore[import-not-found]  # noqa: F401
+        import guardrails as grd  # type: ignore[import-untyped]  # noqa: F401
 
         return grd
     except Exception as exc:
@@ -48,7 +48,9 @@ def _configure_hub_api_key() -> None:
         os.environ["GUARDRAILS_API_KEY"] = hub_key
 
 
-def _safe_install_validator(grd: Any, uri_candidates: list[str], attr_candidates: list[str]):
+def _safe_install_validator(
+    grd: Any, uri_candidates: list[str], attr_candidates: list[str]
+) -> Any | None:
     """Try installing a hub validator and returning its class.
 
     Returns the validator class or None.
@@ -218,7 +220,7 @@ class GuardResult:
         self.reason = reason
         self.redacted = redacted  # sanitised version of the text, if applicable
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self.passed
 
 

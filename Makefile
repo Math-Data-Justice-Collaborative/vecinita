@@ -1,5 +1,5 @@
 .PHONY: help \
-	dev dev-attach dev-stop dev-backend dev-gateway dev-frontend \
+	dev dev-attach dev-stop dev-clear-ports dev-backend dev-gateway dev-frontend \
 	lint lint-backend lint-frontend \
 	typecheck typecheck-backend typecheck-frontend \
 	format format-backend format-frontend \
@@ -16,6 +16,7 @@ help:
 	@echo "  make dev                            Start the full local tmux dev session"
 	@echo "  make dev-attach                     Attach to the existing dev session"
 	@echo "  make dev-stop                       Stop the dev session and local containers"
+	@echo "  make dev-clear-ports                Kill processes bound to local dev ports"
 	@echo "  make dev-backend                    Start the backend agent in reload mode"
 	@echo "  make dev-gateway                    Start the API gateway in reload mode"
 	@echo "  make dev-frontend                   Start the frontend dev server"
@@ -59,6 +60,17 @@ dev-attach:
 
 dev-stop:
 	./run/dev-session.sh stop
+
+dev-clear-ports:
+	@for port in 5173 8000 8001 8002 8004; do \
+		pids="$$( (command -v lsof >/dev/null 2>&1 && lsof -ti tcp:$$port 2>/dev/null) || (command -v fuser >/dev/null 2>&1 && fuser -n tcp $$port 2>/dev/null) || true )"; \
+		if [ -n "$$pids" ]; then \
+			echo "Clearing port $$port (PID(s): $$pids)"; \
+			kill -9 $$pids 2>/dev/null || true; \
+		else \
+			echo "Port $$port already free"; \
+		fi; \
+	done
 
 dev-backend:
 	cd backend && CHROMA_HOST='localhost' CHROMA_PORT='8002' CHROMA_SSL='false' \

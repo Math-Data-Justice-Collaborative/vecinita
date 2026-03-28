@@ -8629,10 +8629,13 @@ all = [
     { name = "unstructured", extra = ["doc", "docx", "pdf", "ppt"] },
 ]
 ci = [
+    { name = "black" },
     { name = "httpx" },
+    { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
+    { name = "ruff" },
 ]
 dev = [
     { name = "black" },
@@ -8676,6 +8679,7 @@ visualization = [
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4" },
+    { name = "black", marker = "extra == 'ci'", specifier = ">=24.1.0" },
     { name = "black", marker = "extra == 'dev'", specifier = ">=24.1.0" },
     { name = "chromadb", specifier = ">=1.0.0" },
     { name = "ddgs", specifier = ">=9.10.0" },
@@ -8704,6 +8708,7 @@ requires-dist = [
     { name = "langdetect" },
     { name = "langgraph" },
     { name = "langsmith", specifier = ">=0.4.56" },
+    { name = "mypy", marker = "extra == 'ci'", specifier = ">=1.8.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.8.0" },
     { name = "numpy", marker = "extra == 'embedding'" },
     { name = "onnxruntime", marker = "sys_platform == 'win32'", specifier = ">=1.18.0,<1.24.0.dev0" },
@@ -8724,6 +8729,7 @@ requires-dist = [
     { name = "python-dotenv" },
     { name = "python-multipart" },
     { name = "requests" },
+    { name = "ruff", marker = "extra == 'ci'", specifier = ">=0.2.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.2.0" },
     { name = "scikit-learn", marker = "extra == 'embedding'" },
     { name = "sentence-transformers", marker = "extra == 'embedding'", specifier = ">=5.1.2" },

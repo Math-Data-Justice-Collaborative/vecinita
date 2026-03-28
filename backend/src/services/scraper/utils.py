@@ -9,7 +9,7 @@ from collections.abc import Iterable
 from typing import Any, cast
 from urllib.parse import urljoin, urlparse, urlunparse
 
-import requests  # type: ignore[import-untyped]
+import requests
 from bs4 import BeautifulSoup
 
 log = logging.getLogger(__name__)

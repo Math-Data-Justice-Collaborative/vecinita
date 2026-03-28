@@ -12,6 +12,7 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
+from typing import cast
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +131,7 @@ class RedisRateLimiter(RateLimiterBackend):
     def __init__(self, redis_url: str):
         """Initialize Redis rate limiter."""
         try:
-            import redis  # type: ignore[import-not-found]
+            import redis
 
             self.redis_client = redis.from_url(redis_url)
             # Test connection
@@ -156,7 +157,8 @@ class RedisRateLimiter(RateLimiterBackend):
             tokens_for_request = int(endpoint_limits.get("tokens_per_request", 100))
 
             # Check daily token limit
-            reset_ts = self.redis_client.get(token_key)
+            reset_raw = self.redis_client.get(token_key)
+            reset_ts = cast(float | int | str | bytes | None, reset_raw)
             if reset_ts and float(reset_ts) <= now_ts:
                 self.redis_client.delete(token_count_key)
                 reset_ts = None
@@ -169,14 +171,16 @@ class RedisRateLimiter(RateLimiterBackend):
             else:
                 ttl_seconds = max(1, int(float(reset_ts) - now_ts))
 
-            tokens_used = int(self.redis_client.incrby(token_count_key, tokens_for_request) or 0)
+            tokens_used_raw = self.redis_client.incrby(token_count_key, tokens_for_request)
+            tokens_used = int(cast(int | str | bytes | None, tokens_used_raw) or 0)
             self.redis_client.expire(token_count_key, ttl_seconds)
             if tokens_used > endpoint_limits.get("tokens_per_day", 10000):
                 return False, f"Daily token limit exceeded ({tokens_used} used)"
 
             # Check hourly request limit
             ep_key = f"rl:requests:{api_key}:{endpoint}"
-            ep_count = int(self.redis_client.incr(ep_key) or 0)
+            ep_count_raw = self.redis_client.incr(ep_key)
+            ep_count = int(cast(int | str | bytes | None, ep_count_raw) or 0)
 
             if ep_count == 1:
                 # First request this hour
@@ -201,14 +205,17 @@ class RedisRateLimiter(RateLimiterBackend):
         """Get rate limit status from Redis."""
         try:
             token_count_key = f"rl:tokens_count:{api_key}"
-            tokens_used = int(self.redis_client.get(token_count_key) or 0)
+            tokens_used_raw = self.redis_client.get(token_count_key)
+            tokens_used = int(cast(int | str | bytes | None, tokens_used_raw) or 0)
 
             # Scan for endpoint requests
             ep_pattern = f"rl:requests:{api_key}:*"
             ep_requests = {}
             for key in self.redis_client.scan_iter(match=ep_pattern):
-                ep = key.decode().split(":")[-1]
-                count = int(self.redis_client.get(key) or 0)
+                key_str = key.decode() if isinstance(key, bytes) else str(key)
+                ep = key_str.split(":")[-1]
+                count_raw = self.redis_client.get(key)
+                count = int(cast(int | str | bytes | None, count_raw) or 0)
                 ep_requests[ep] = count
 
             return {

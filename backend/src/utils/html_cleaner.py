@@ -9,6 +9,7 @@ modals, and other non-content HTML structures.
 
 import logging
 import re
+from typing import Any
 
 from bs4 import BeautifulSoup
 
@@ -126,7 +127,7 @@ class HTMLCleaner:
     ]
 
     @staticmethod
-    def is_boilerplate_element(element) -> bool:
+    def is_boilerplate_element(element: Any) -> bool:
         """Check if an element is likely boilerplate content."""
         # Skip non-tag elements
         if not hasattr(element, "name") or element.name is None:
@@ -156,7 +157,7 @@ class HTMLCleaner:
         return False
 
     @staticmethod
-    def is_likely_main_content_container(element) -> bool:
+    def is_likely_main_content_container(element: Any) -> bool:
         """Check if an element is likely to contain main content."""
         if not hasattr(element, "get") or not hasattr(element, "name"):
             return False
@@ -180,7 +181,7 @@ class HTMLCleaner:
         return element_name == "main" or element_name == "article"
 
     @staticmethod
-    def should_remove_element(element) -> bool:
+    def should_remove_element(element: Any) -> bool:
         """Determine if an element should be completely removed."""
         # Skip non-tag elements
         if not hasattr(element, "name") or element.name is None:

@@ -73,7 +73,7 @@ def setup_logging(verbose: bool = False) -> logging.Logger:
     return logger
 
 
-def get_connection():
+def get_connection() -> Any:
     """
     Create and return a database connection.
 
@@ -314,7 +314,7 @@ def list_tables(logger: logging.Logger) -> bool:
         return False
 
 
-def main():
+def main() -> None:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Database CLI utility for Vecinita",

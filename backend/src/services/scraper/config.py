@@ -89,7 +89,7 @@ class ScraperConfig:
     CHUNK_SIZE = 1000
     CHUNK_OVERLAP = 200
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize configuration by loading all site lists."""
         self.sites_to_crawl: dict[str, dict[str, int]] = {}
         self.sites_needing_playwright: list[str] = []

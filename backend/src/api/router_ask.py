@@ -260,18 +260,18 @@ async def ask_question(
             ),
         )
 
-    except httpx.TimeoutException:
+    except httpx.TimeoutException as exc:
         raise HTTPException(
             status_code=504, detail="Agent service timeout - question took too long to process"
-        )
+        ) from exc
     except httpx.HTTPStatusError as e:
         raise HTTPException(
             status_code=e.response.status_code, detail=f"Agent service error: {e.response.text}"
-        )
+        ) from e
     except httpx.RequestError as e:
-        raise HTTPException(status_code=503, detail=f"Unable to connect to agent service: {str(e)}")
+        raise HTTPException(status_code=503, detail=f"Unable to connect to agent service: {str(e)}") from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e
 
 
 async def sse_proxy_generator(

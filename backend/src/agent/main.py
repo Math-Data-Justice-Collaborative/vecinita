@@ -357,7 +357,7 @@ try:
                 "For Cloud Run deploy via gcloud CLI: `backend/scripts/deploy_embedding_gcloud.sh` "
                 "with PROJECT_ID and REGION configured. "
                 f"Original error: {service_exc}"
-            )
+            ) from service_exc
 
         logger.warning(
             "Embedding service unavailable at startup; falling back to local FastEmbedEmbeddings. "
@@ -403,7 +403,7 @@ try:
 except Exception as e:
     logger.error(f"Failed to initialize clients: {e}")
     logger.error(traceback.format_exc())
-    raise RuntimeError(f"Failed to initialize clients: {e}")
+    raise RuntimeError(f"Failed to initialize clients: {e}") from e
 
 # --- Location Context Configuration ---
 # This can be customized per deployment or organization
@@ -2224,7 +2224,7 @@ async def ask_question(
                 fallback = f"The assistant is temporarily unavailable. Please try again in {wait_seconds:.0f} seconds."
             return _response_payload(fallback, thread_id=thread_id, started_at=started_at)
         # Non-rate-limit errors: propagate as HTTP 500
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/ask-stream")

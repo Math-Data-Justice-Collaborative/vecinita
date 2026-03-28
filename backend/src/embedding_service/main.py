@@ -115,7 +115,7 @@ def get_embedding_model():
                 return _embedding_model
             except Exception as exc:
                 logger.error("❌ Failed to load fastembed model: %s", exc)
-                raise RuntimeError(f"Failed to load fastembed model: {exc}")
+                raise RuntimeError(f"Failed to load fastembed model: {exc}") from exc
 
         try:
             from sentence_transformers import SentenceTransformer
@@ -137,10 +137,10 @@ def get_embedding_model():
                 raise RuntimeError(
                     "Failed to load embedding model: sentence_transformers unavailable and fastembed fallback failed: "
                     f"{fallback_exc}"
-                )
+                ) from fallback_exc
         except Exception as e:
             logger.error(f"❌ Failed to load embedding model: {e}")
-            raise RuntimeError(f"Failed to load embedding model: {e}")
+            raise RuntimeError(f"Failed to load embedding model: {e}") from e
     return _embedding_model
 
 
@@ -246,7 +246,7 @@ async def embed(request: EmbedRequest, http_request: Request):
         raise
     except Exception as e:
         logger.error(f"Error generating embedding: {e}")
-        raise HTTPException(status_code=500, detail=f"Embedding error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Embedding error: {str(e)}") from e
 
 
 # Batch Embeddings
@@ -275,7 +275,7 @@ async def embed_batch(request: BatchEmbedRequest, http_request: Request):
         raise
     except Exception as e:
         logger.error(f"Error generating batch embeddings: {e}")
-        raise HTTPException(status_code=500, detail=f"Batch embedding error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Batch embedding error: {str(e)}") from e
 
 
 # Similarity Search (optional utility)
@@ -324,7 +324,7 @@ async def similarity(
         raise
     except Exception as e:
         logger.error(f"Error computing similarity: {e}")
-        raise HTTPException(status_code=500, detail=f"Similarity error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Similarity error: {str(e)}") from e
 
 
 # Root endpoint

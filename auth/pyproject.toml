@@ -28,6 +28,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
     "pytest-asyncio>=0.24.0",
     "httpx[http2]>=0.26.0",
     "black>=24.4.0",
@@ -43,7 +44,7 @@ packages = ["src"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "-ra -q"
+addopts = "-ra -q --cov=src --cov-fail-under=98"
 testpaths = ["tests"]
 asyncio_mode = "auto"
 
@@ -54,3 +55,8 @@ target-version = ['py310', 'py311', 'py312']
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+
+[tool.coverage.report]
+exclude_lines = [
+    "if __name__ == \"__main__\":",
+]

@@ -28,7 +28,6 @@ from fastapi.staticfiles import StaticFiles
 
 from .middleware import AuthenticationMiddleware, RateLimitingMiddleware
 from .models import GatewayConfig, HealthCheck
-from .router_admin import router as admin_router
 from .router_ask import router as ask_router
 from .router_documents import router as documents_router
 from .router_embed import router as embed_router
@@ -149,7 +148,7 @@ async def root(request: Request):
     return {
         "service": "Vecinita Unified API Gateway",
         "version": "1.0.0",
-        "description": "Consolidated API for Q&A, scraping, embeddings, and admin" + front_message,
+        "description": "Consolidated API for Q&A, document viewing, scraping, and embeddings" + front_message,
         "api_base": "/api/v1",
         "endpoints": {
             "Q&A": {
@@ -171,15 +170,10 @@ async def root(request: Request):
                 "config": "GET /api/v1/embed/config",
                 "update_config": "POST /api/v1/embed/config",
             },
-            "Admin": {
-                "health": "GET /api/v1/admin/health",
-                "stats": "GET /api/v1/admin/stats",
-                "documents": "GET /api/v1/admin/documents",
-                "delete_document": "DELETE /api/v1/admin/documents/{chunk_id}",
-                "clean_database": "POST /api/v1/admin/database/clean",
-                "request_clean_token": "GET /api/v1/admin/database/clean-request",
-                "sources": "GET /api/v1/admin/sources",
-                "validate_sources": "POST /api/v1/admin/sources/validate",
+            "Documents": {
+                "overview": "GET /api/v1/documents/overview",
+                "preview": "GET /api/v1/documents/preview",
+                "tags": "GET /api/v1/documents/tags",
             },
             "Documentation": {
                 "docs": "GET /api/v1/docs (OpenAPI/Swagger)",
@@ -198,7 +192,6 @@ async def root(request: Request):
 async def health_check():
     """
     Health check endpoint - kept at root for backward compatibility.
-    Also available at /api/v1/admin/health
 
     Returns:
         Service health status
@@ -218,7 +211,6 @@ async def get_gateway_config():
     """
     Get gateway configuration - kept at root for backward compatibility.
     Also available at /api/v1/admin/config
-
     Returns:
         Current configuration
     """
@@ -239,11 +231,10 @@ async def get_gateway_config():
 # Create a version router that will hold all v1 endpoints
 v1_router = APIRouter(prefix="/api/v1")
 
-# Include sub-routers (they already have their own prefixes: /ask, /scrape, /embed, /admin)
+# Include sub-routers (they already have their own prefixes: /ask, /scrape, /embed)
 v1_router.include_router(ask_router)
 v1_router.include_router(scrape_router)
 v1_router.include_router(embed_router)
-v1_router.include_router(admin_router)
 v1_router.include_router(documents_router)  # public, no auth
 
 # Include the version router in the main app
