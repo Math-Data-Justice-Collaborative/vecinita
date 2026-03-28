@@ -1,7 +1,7 @@
 name: Docs GitHub Pages
 
 env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
   push:
@@ -19,16 +19,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: "docs-gh-pages"
+  cancel-in-progress: true
 
 jobs:
-  build:
+  docs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
@@ -41,9 +39,6 @@ jobs:
           cache: "npm"
           cache-dependency-path: website/package-lock.json
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v6
-
       - name: Install docs dependencies
         working-directory: website
         run: npm ci
@@ -52,19 +47,33 @@ jobs:
         working-directory: website
         run: npm run build
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: website/build
+      - name: Deploy to gh-pages branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-  deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-22.04
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
+          build_dir="${GITHUB_WORKSPACE}/website/build"
+          tmp_dir="$(mktemp -d)"
+          cp -R "${build_dir}/." "${tmp_dir}/"
+
+          git fetch origin gh-pages || true
+          if git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
+            git checkout -B gh-pages origin/gh-pages
+          else
+            git checkout --orphan gh-pages
+          fi
+
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -R "${tmp_dir}/." .
+          touch .nojekyll
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No documentation changes to deploy."
+            exit 0
+          fi
+
+          git commit -m "Deploy docs for ${GITHUB_SHA}"
+          git push origin gh-pages
