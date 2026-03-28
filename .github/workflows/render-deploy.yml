@@ -1,5 +1,8 @@
 name: Render Deploy
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   pull_request:
     branches: [main]
@@ -159,7 +162,8 @@ jobs:
             echo "  RENDER_STAGING_DEPLOY_HOOK_EMBEDDING"
             echo "  RENDER_STAGING_DEPLOY_HOOK_FRONTEND"
             echo "  RENDER_STAGING_DEPLOY_HOOK_SCRAPER"
-            exit 1
+            echo "::warning::Skipping staging deploy because no deploy hook secrets are configured."
+            exit 0
           fi
 
   smoke-staging:
@@ -242,7 +246,8 @@ jobs:
             echo "  RENDER_PROD_DEPLOY_HOOK_EMBEDDING"
             echo "  RENDER_PROD_DEPLOY_HOOK_FRONTEND"
             echo "  RENDER_PROD_DEPLOY_HOOK_SCRAPER"
-            exit 1
+            echo "::warning::Skipping production deploy because no deploy hook secrets are configured."
+            exit 0
           fi
 
   smoke-production:

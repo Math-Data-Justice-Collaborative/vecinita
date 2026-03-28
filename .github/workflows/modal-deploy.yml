@@ -1,5 +1,8 @@
 name: Modal Deployment
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     branches:
@@ -34,8 +37,8 @@ jobs:
       contents: read
     
     env:
-      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
-      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID || secrets.MODAL_API_TOKEN_ID }}
+      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET || secrets.MODAL_API_TOKEN_SECRET }}
 
     steps:
       - name: Checkout Repository
@@ -56,13 +59,16 @@ jobs:
         id: modal_auth
         shell: bash
         run: |
-          if [ -z "$MODAL_TOKEN_ID" ] || [ -z "$MODAL_TOKEN_SECRET" ]; then
+          token_id="$(printf '%s' "$MODAL_TOKEN_ID" | tr -d '\r\n')"
+          token_secret="$(printf '%s' "$MODAL_TOKEN_SECRET" | tr -d '\r\n')"
+
+          if [ -z "$token_id" ] || [ -z "$token_secret" ]; then
             echo "authenticated=false" >> "$GITHUB_OUTPUT"
             echo "::warning::Modal deployment skipped because credentials are not configured."
             exit 0
           fi
 
-          if modal token set --token-id "$MODAL_TOKEN_ID" --token-secret "$MODAL_TOKEN_SECRET" --no-verify && modal token info >/dev/null 2>&1; then
+          if modal token set --token-id "$token_id" --token-secret "$token_secret" --no-verify && modal token info >/dev/null 2>&1; then
             echo "authenticated=true" >> "$GITHUB_OUTPUT"
             echo "✓ Modal authentication verified"
           else
