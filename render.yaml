@@ -33,7 +33,9 @@ services:
       - key: TF_ENABLE_ONEDNN_OPTS
         value: "0"
       - key: EMBEDDING_SERVICE_URL
-        value: "http://vecinita-embedding:8001"
+        value: "https://vecinita-embedding.onrender.com"
+      - key: EMBEDDING_STRICT_STARTUP
+        value: "false"
       - key: DATABASE_URL
         fromDatabase:
           name: vecinita-postgres
@@ -66,7 +68,9 @@ services:
       - key: PYTHONUNBUFFERED
         value: "1"
       - key: EMBEDDING_SERVICE_URL
-        value: "http://vecinita-embedding:8001"
+        value: "https://vecinita-embedding.onrender.com"
+      - key: EMBEDDING_STRICT_STARTUP
+        value: "false"
       - key: DATABASE_URL
         fromDatabase:
           name: vecinita-postgres

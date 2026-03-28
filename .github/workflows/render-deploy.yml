@@ -129,13 +129,17 @@ jobs:
       RENDER_STAGING_DEPLOY_HOOK_FRONTEND: ${{ secrets.RENDER_STAGING_DEPLOY_HOOK_FRONTEND }}
       RENDER_STAGING_DEPLOY_HOOK_SCRAPER: ${{ secrets.RENDER_STAGING_DEPLOY_HOOK_SCRAPER }}
     steps:
-      - name: Trigger staging agent deploy hook
-        if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_AGENT != '' }}
-        run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_AGENT" || echo "::notice::Staging agent deploy hook request failed."
-
       - name: Trigger staging embedding deploy hook
         if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_EMBEDDING != '' }}
         run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_EMBEDDING" || echo "::notice::Staging embedding deploy hook request failed."
+
+      - name: Wait for staging embedding rollout
+        if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_EMBEDDING != '' }}
+        run: sleep 20
+
+      - name: Trigger staging agent deploy hook
+        if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_AGENT != '' }}
+        run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_AGENT" || echo "::notice::Staging agent deploy hook request failed."
 
       - name: Trigger staging frontend deploy hook
         if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_FRONTEND != '' }}
@@ -213,13 +217,17 @@ jobs:
       RENDER_PROD_DEPLOY_HOOK_FRONTEND: ${{ secrets.RENDER_PROD_DEPLOY_HOOK_FRONTEND || secrets.RENDER_DEPLOY_HOOK_FRONTEND || secrets.RENDER_VECINITA_FRONTEND_DEPLOY_HOOK }}
       RENDER_PROD_DEPLOY_HOOK_SCRAPER: ${{ secrets.RENDER_PROD_DEPLOY_HOOK_SCRAPER || secrets.RENDER_DEPLOY_HOOK_SCRAPER }}
     steps:
-      - name: Trigger production agent deploy hook
-        if: ${{ env.RENDER_PROD_DEPLOY_HOOK_AGENT != '' }}
-        run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_AGENT" || echo "::notice::Production agent deploy hook request failed."
-
       - name: Trigger production embedding deploy hook
         if: ${{ env.RENDER_PROD_DEPLOY_HOOK_EMBEDDING != '' }}
         run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_EMBEDDING" || echo "::notice::Production embedding deploy hook request failed."
+
+      - name: Wait for production embedding rollout
+        if: ${{ env.RENDER_PROD_DEPLOY_HOOK_EMBEDDING != '' }}
+        run: sleep 20
+
+      - name: Trigger production agent deploy hook
+        if: ${{ env.RENDER_PROD_DEPLOY_HOOK_AGENT != '' }}
+        run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_AGENT" || echo "::notice::Production agent deploy hook request failed."
 
       - name: Trigger production frontend deploy hook
         if: ${{ env.RENDER_PROD_DEPLOY_HOOK_FRONTEND != '' }}
