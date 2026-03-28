@@ -78,13 +78,6 @@ jobs:
           EOF
           pytest tests/ -m "unit and not llm" -v --tb=short --junit-xml=test-results.xml
 
-      - name: Upload backend unit test results
-        uses: actions/upload-artifact@v5
-        if: always()
-        with:
-          name: backend-unit-results
-          path: backend/test-results.xml
-
   frontend-quality:
     runs-on: ubuntu-22.04
     steps:
@@ -106,7 +99,7 @@ jobs:
 
       - name: Lint frontend
         working-directory: frontend
-        run: npm run lint
+        run: npm run lint -- --quiet
 
       - name: Check frontend formatting (Prettier)
         working-directory: frontend
