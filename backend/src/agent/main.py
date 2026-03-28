@@ -19,6 +19,7 @@ os.environ.setdefault("TRANSFORMERS_NO_TORCH", "1")
 
 from typing import Annotated, Any, Literal, TypedDict
 
+import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -48,11 +49,11 @@ from .tools.static_response import FAQ_DATABASE, create_static_response_tool
 from .tools.web_search import create_web_search_tool
 
 # Load environment variables with deterministic precedence:
-# backend/.env as defaults, then root .env overrides.
+# runtime shell env > root .env > backend/.env defaults.
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]
 _BACKEND_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(_PROJECT_ROOT / ".env", override=False)
 load_dotenv(_BACKEND_ROOT / ".env", override=False)
-load_dotenv(_PROJECT_ROOT / ".env", override=True)
 
 # --- Configure Logging ---
 logging.basicConfig(
@@ -161,10 +162,23 @@ supabase_key = (
 # Groq / X.AI / Twitter AI intentionally removed.
 openai_api_key = os.environ.get("OPENAI_API_KEY") or os.environ.get("OPEN_API_KEY")
 deepseek_api_key = os.environ.get("DEEPSEEK_API_KEY")
-ollama_base_url = os.environ.get("OLLAMA_BASE_URL")
+ollama_base_url = os.environ.get("MODAL_OLLAMA_ENDPOINT") or os.environ.get("OLLAMA_BASE_URL")
+ollama_api_key = (
+    os.environ.get("OLLAMA_API_KEY")
+    or os.environ.get("MODAL_API_PROXY_SECRET")
+    or os.environ.get("MODAL_API_KEY")
+    or os.environ.get("MODAL_API_TOKEN_SECRET")
+)
+modal_proxy_key = os.environ.get("MODAL_API_KEY") or os.environ.get("MODAL_API_TOKEN_ID")
+modal_proxy_secret = os.environ.get("MODAL_API_PROXY_SECRET")
 ollama_model = os.environ.get("OLLAMA_MODEL") or "llama3.1:8b"
 default_provider = (os.environ.get("DEFAULT_PROVIDER") or "ollama").lower()
 default_model = os.environ.get("DEFAULT_MODEL") or None
+force_local_modal_llm = (os.environ.get("FORCE_LOCAL_MODAL_LLM") or "true").lower() in [
+    "1",
+    "true",
+    "yes",
+]
 lock_model_selection_env = (os.environ.get("LOCK_MODEL_SELECTION") or "false").lower() in [
     "1",
     "true",
@@ -327,9 +341,16 @@ try:
 
     # Use dedicated embedding service and optionally fail fast if unavailable
     logger.info("Initializing embedding model (Embedding Service, fail-fast)...")
-    embedding_service_url = os.environ.get("EMBEDDING_SERVICE_URL", "http://embedding-service:8001")
-    embedding_service_auth_token = os.environ.get("EMBEDDING_SERVICE_AUTH_TOKEN") or os.environ.get(
-        "MODAL_API_PROXY_SECRET"
+    embedding_service_url = (
+        os.environ.get("MODAL_EMBEDDING_ENDPOINT")
+        or os.environ.get("EMBEDDING_SERVICE_URL")
+        or "http://embedding-service:8001"
+    )
+    embedding_service_auth_token = (
+        os.environ.get("EMBEDDING_SERVICE_AUTH_TOKEN")
+        or os.environ.get("MODAL_API_PROXY_SECRET")
+        or os.environ.get("MODAL_API_KEY")
+        or os.environ.get("MODAL_API_TOKEN_SECRET")
     )
     embedding_strict_startup = os.environ.get("EMBEDDING_STRICT_STARTUP", "true").lower() in [
         "1",
@@ -856,6 +877,108 @@ tools = [t for t in tools if t is not None]
 logger.info(f"Initialized {len(tools)} tools: {[tool.name for tool in tools]}")
 
 
+def _ollama_client_headers() -> dict[str, str]:
+    headers: dict[str, str] = {}
+    if ollama_api_key:
+        headers["Authorization"] = f"Bearer {ollama_api_key}"
+    if modal_proxy_key and modal_proxy_secret:
+        headers["Modal-Key"] = modal_proxy_key
+        headers["Modal-Secret"] = modal_proxy_secret
+    return headers
+
+
+def _use_modal_native_chat_api(base_url: str | None) -> bool:
+    """Return True when configured LLM endpoint is a Modal native chat API."""
+    if not base_url:
+        return False
+    if "modal.run" not in base_url:
+        return False
+    return (os.environ.get("MODAL_OLLAMA_USE_NATIVE_API") or "true").lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+
+
+class _ModalNativeChatClient:
+    """Minimal chat client for Modal-native /chat endpoints.
+
+    The deployed Modal model service in this repo exposes `/chat` and `/stream`,
+    not Ollama's `/api/chat`. This adapter keeps invoke()-style calls compatible
+    with current deterministic answer paths.
+    """
+
+    def __init__(
+        self,
+        *,
+        base_url: str,
+        model: str,
+        headers: dict[str, str],
+        temperature: float = 0,
+        timeout: float = 60.0,
+    ):
+        self.base_url = base_url.rstrip("/")
+        self.model = model
+        self.headers = headers
+        self.temperature = temperature
+        self.timeout = timeout
+
+    def bind_tools(self, _tools: list[Any]):
+        # Deterministic routes do not require tool-calling support.
+        return self
+
+    def invoke(self, messages: list[BaseMessage]):
+        payload_messages: list[dict[str, str]] = []
+        for msg in messages:
+            role = "user"
+            if isinstance(msg, SystemMessage):
+                role = "system"
+            elif isinstance(msg, AIMessage):
+                role = "assistant"
+            content = msg.content if isinstance(msg.content, str) else str(msg.content)
+            payload_messages.append({"role": role, "content": content})
+
+        payload = {
+            "model": self.model,
+            "messages": payload_messages,
+            "temperature": self.temperature,
+        }
+
+        with httpx.Client(timeout=self.timeout) as client:
+            response = client.post(
+                f"{self.base_url}/chat",
+                json=payload,
+                headers={"Content-Type": "application/json", **self.headers},
+            )
+            response.raise_for_status()
+            data = response.json()
+
+        message = data.get("message") if isinstance(data, dict) else None
+        content = ""
+        if isinstance(message, dict):
+            content = str(message.get("content") or "")
+        if not content:
+            content = str(data)
+        return AIMessage(content=content)
+
+
+def _resolve_effective_provider_model(
+    provider: str | None,
+    model: str | None,
+) -> tuple[str | None, str | None]:
+    """Resolve provider/model, enforcing local Modal Ollama when configured."""
+    if force_local_modal_llm and ollama_base_url:
+        requested_provider = (provider or "").strip().lower()
+        if requested_provider and requested_provider not in {"ollama", "llama"}:
+            logger.info(
+                "FORCE_LOCAL_MODAL_LLM is enabled; overriding requested provider '%s' with 'ollama'.",
+                requested_provider,
+            )
+        forced_model = os.environ.get("MODAL_OLLAMA_MODEL") or ollama_model or "llama3.1:8b"
+        return "ollama", forced_model
+    return provider, model
+
+
 def _get_llm_with_tools(provider: str | None, model: str | None):
     """Create an LLM bound with tools based on requested provider/model.
 
@@ -873,13 +996,25 @@ def _get_llm_with_tools(provider: str | None, model: str | None):
     if selected_provider in ("ollama", "llama"):
         if ollama_base_url:
             use_model = model or ollama_model or "llama3.1:8b"
+            if _use_modal_native_chat_api(ollama_base_url):
+                return _ModalNativeChatClient(
+                    base_url=ollama_base_url,
+                    model=use_model,
+                    headers=_ollama_client_headers(),
+                    temperature=0,
+                ).bind_tools(tools)
             ChatOllamaClass = _get_chatollama_class()
             if ChatOllamaClass is None:
                 raise RuntimeError(
                     "Ollama provider unavailable because langchain_ollama could not be imported. "
                     f"Original error: {_CHATOLLAMA_IMPORT_ERROR}"
                 )
-            local_llm = ChatOllamaClass(temperature=0, model=use_model, base_url=ollama_base_url)
+            local_llm = ChatOllamaClass(
+                temperature=0,
+                model=use_model,
+                base_url=ollama_base_url,
+                client_kwargs={"headers": _ollama_client_headers()},
+            )
             return local_llm.bind_tools(tools)
         raise RuntimeError("Ollama provider requested but OLLAMA_BASE_URL is not configured.")
     elif selected_provider == "openai":
@@ -931,13 +1066,25 @@ def _get_llm_without_tools(provider: str | None, model: str | None):
         if not ollama_base_url:
             raise RuntimeError("Ollama provider requested but OLLAMA_BASE_URL is not configured.")
         use_model = model or ollama_model or "llama3.1:8b"
+        if _use_modal_native_chat_api(ollama_base_url):
+            return _ModalNativeChatClient(
+                base_url=ollama_base_url,
+                model=use_model,
+                headers=_ollama_client_headers(),
+                temperature=0,
+            )
         ChatOllamaClass = _get_chatollama_class()
         if ChatOllamaClass is None:
             raise RuntimeError(
                 "Ollama provider unavailable because langchain_ollama could not be imported. "
                 f"Original error: {_CHATOLLAMA_IMPORT_ERROR}"
             )
-        return ChatOllamaClass(temperature=0, model=use_model, base_url=ollama_base_url)
+        return ChatOllamaClass(
+            temperature=0,
+            model=use_model,
+            base_url=ollama_base_url,
+            client_kwargs={"headers": _ollama_client_headers()},
+        )
 
     if selected_provider == "openai":
         if not openai_api_key:
@@ -1004,6 +1151,9 @@ def _provider_candidates_for_request(
     If model selection is locked, use single configured provider.
     Otherwise prefer request/current provider first, then other configured providers.
     """
+    if force_local_modal_llm and ollama_base_url:
+        return [("ollama", os.environ.get("MODAL_OLLAMA_MODEL") or ollama_model or "llama3.1:8b")]
+
     if CURRENT_SELECTION.get("locked"):
         return [(CURRENT_SELECTION.get("provider"), CURRENT_SELECTION.get("model"))]
 
@@ -2057,6 +2207,8 @@ async def ask_question(
         )
 
     try:
+        provider, model = _resolve_effective_provider_model(provider, model)
+
         # Detect language unless explicitly provided
         if not lang:
             try:
@@ -2261,6 +2413,7 @@ async def ask_question_stream(
 
     async def generate_stream():
         try:
+            effective_provider, effective_model = _resolve_effective_provider_model(provider, model)
 
             def _sse(payload: dict) -> str:
                 payload.setdefault(
@@ -2341,7 +2494,7 @@ async def ask_question_stream(
                 if local_non_answer:
                     answer = local_non_answer
                 else:
-                    llm_plain = _get_llm_without_tools(provider, model)
+                    llm_plain = _get_llm_without_tools(effective_provider, effective_model)
                     quick_prompt = f"Respond briefly and naturally in {'Spanish' if lang_local == 'es' else 'English'}: {question}"
                     plain = llm_plain.invoke([HumanMessage(content=quick_prompt)])
                     answer = plain.content if hasattr(plain, "content") else str(plain)
@@ -2406,8 +2559,8 @@ async def ask_question_stream(
                 answer = _build_deterministic_rag_answer(
                     question=question,
                     language=lang_local,
-                    provider=provider,
-                    model=model,
+                    provider=effective_provider,
+                    model=effective_model,
                     retrieved_docs=retrieved_docs,
                     weak_retrieval=weak_retrieval,
                 )

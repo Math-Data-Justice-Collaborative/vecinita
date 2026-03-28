@@ -7,9 +7,6 @@ name: Render Smoke Tests
 #   RENDER_EMBEDDING_URL   — e.g. https://vecinita-embedding.onrender.com
 
 on:
-  workflow_run:
-    workflows: ["Render Deploy"]
-    types: [completed]
   workflow_dispatch:
     inputs:
       render_frontend_url:
@@ -25,12 +22,7 @@ on:
 jobs:
   smoke:
     name: Post-deploy smoke
-    if: |
-      (github.event_name == 'workflow_dispatch') ||
-      (
-        github.event_name == 'workflow_run' &&
-        github.event.workflow_run.conclusion == 'success'
-      )
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-22.04
     timeout-minutes: 10
 

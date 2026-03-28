@@ -123,7 +123,7 @@ docker-compose up
 
 ### Option 2: Local Development
 
-#### Full stack in one terminal view (tmux)
+#### Full stack with cascading logs (single terminal)
 
 From repo root:
 
@@ -131,11 +131,14 @@ From repo root:
 make dev
 ```
 
-This starts Chroma, embedding service, agent service, API gateway, and frontend in one `tmux` session with live logs in split panes.
+This starts Chroma, embedding service, agent service, API gateway, and frontend in one terminal with merged cascading logs prefixed by service name.
+
+Press `Ctrl+C` to stop all services cleanly.
 
 ```bash
-make dev-attach   # Re-attach to running session
-make dev-stop     # Stop session and chroma container
+make dev-stop     # Stop managed processes and chroma container
+make dev-tmux     # Optional legacy tmux split-pane session
+make dev-attach   # Attach to tmux session started by make dev-tmux
 ```
 
 Compatibility note: `./dev-session.sh` remains available as a root wrapper shim.

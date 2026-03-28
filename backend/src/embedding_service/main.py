@@ -28,11 +28,11 @@ app = FastAPI(
 )
 
 # Load environment variables with deterministic precedence:
-# backend/.env defaults, root .env overrides.
+# runtime shell env > root .env > backend/.env defaults.
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]
 _BACKEND_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(_PROJECT_ROOT / ".env", override=False)
 load_dotenv(_BACKEND_ROOT / ".env", override=False)
-load_dotenv(_PROJECT_ROOT / ".env", override=True)
 
 # Global embedding model (lazy-loaded on first request)
 _embedding_model = None

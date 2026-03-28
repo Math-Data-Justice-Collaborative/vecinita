@@ -113,3 +113,62 @@ def test_agent_startup_uses_modal_secret_as_embedding_auth_fallback(monkeypatch)
     create_embedding_client.assert_called()
     _, kwargs = create_embedding_client.call_args
     assert kwargs["auth_token"] == "modal-secret-token"
+
+
+def test_agent_forces_local_modal_llm_provider_candidates(monkeypatch):
+    create_embedding_client = Mock(return_value=Mock(embed_query=Mock(return_value=[0.1] * 384)))
+    monkeypatch.setenv("MODAL_OLLAMA_ENDPOINT", "https://vecinita--vecinita-model-api.modal.run")
+    monkeypatch.setenv("FORCE_LOCAL_MODAL_LLM", "true")
+
+    agent_main = _reload_agent_main(monkeypatch, create_embedding_client)
+
+    candidates = agent_main._provider_candidates_for_request("deepseek", "deepseek-chat")
+    assert candidates[0][0] == "ollama"
+
+
+def test_modal_native_chat_api_detection(monkeypatch):
+    create_embedding_client = Mock(return_value=Mock(embed_query=Mock(return_value=[0.1] * 384)))
+    monkeypatch.setenv("MODAL_OLLAMA_ENDPOINT", "https://vecinita--vecinita-model-api.modal.run")
+    monkeypatch.setenv("MODAL_OLLAMA_USE_NATIVE_API", "true")
+
+    agent_main = _reload_agent_main(monkeypatch, create_embedding_client)
+
+    assert agent_main._use_modal_native_chat_api("https://vecinita--vecinita-model-api.modal.run")
+    assert not agent_main._use_modal_native_chat_api("http://localhost:11434")
+
+
+def test_modal_native_chat_client_invoke(monkeypatch):
+    create_embedding_client = Mock(return_value=Mock(embed_query=Mock(return_value=[0.1] * 384)))
+    monkeypatch.setenv("MODAL_OLLAMA_ENDPOINT", "https://vecinita--vecinita-model-api.modal.run")
+    monkeypatch.setenv("MODAL_OLLAMA_USE_NATIVE_API", "true")
+
+    agent_main = _reload_agent_main(monkeypatch, create_embedding_client)
+
+    class _Resp:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"model": "llama3.2:latest", "message": {"role": "assistant", "content": "ok"}}
+
+    class _Client:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def post(self, url, json=None, headers=None):
+            assert url.endswith("/chat")
+            assert isinstance(json, dict)
+            assert "messages" in json
+            return _Resp()
+
+    monkeypatch.setattr(agent_main.httpx, "Client", _Client)
+
+    llm = agent_main._get_llm_without_tools("ollama", "llama3.2")
+    response = llm.invoke([agent_main.HumanMessage(content="hello")])
+    assert response.content == "ok"

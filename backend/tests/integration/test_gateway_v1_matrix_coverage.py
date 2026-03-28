@@ -11,7 +11,6 @@ ROUTERS = {
     "router_ask.py": "/ask",
     "router_scrape.py": "/scrape",
     "router_embed.py": "/embed",
-    "router_admin.py": "/admin",
     "router_documents.py": "/documents",
 }
 

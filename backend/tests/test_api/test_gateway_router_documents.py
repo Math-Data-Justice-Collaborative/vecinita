@@ -277,3 +277,16 @@ def test_documents_tags_returns_counts(documents_client):
     assert payload["tags"][0]["tag"] == "housing"
     assert payload["tags"][0]["chunk_count"] == 3
     assert payload["tags"][0]["source_count"] == 2
+
+
+def test_documents_tags_returns_503_when_chroma_unavailable(documents_client):
+    client, mock_store = documents_client
+
+    mock_store.iter_all_chunks.side_effect = ValueError(
+        "Could not connect to a Chroma server. Are you sure it is running?"
+    )
+
+    response = client.get("/api/v1/documents/tags", params={"limit": 10})
+    assert response.status_code == 503
+    payload = response.json()
+    assert "Document index is temporarily unavailable" in payload["error"]

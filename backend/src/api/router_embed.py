@@ -25,10 +25,19 @@ from .models import (
 router = APIRouter(prefix="/embed", tags=["Embeddings"])
 
 # Configuration - embedding service URL from environment
-EMBEDDING_SERVICE_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:8001")
-EMBEDDING_SERVICE_AUTH_TOKEN = os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN") or os.getenv(
-    "MODAL_API_PROXY_SECRET"
+EMBEDDING_SERVICE_URL = (
+    os.getenv("MODAL_EMBEDDING_ENDPOINT")
+    or os.getenv("EMBEDDING_SERVICE_URL")
+    or "http://localhost:8001"
 )
+EMBEDDING_SERVICE_AUTH_TOKEN = (
+    os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
+    or os.getenv("MODAL_API_PROXY_SECRET")
+    or os.getenv("MODAL_API_KEY")
+    or os.getenv("MODAL_API_TOKEN_SECRET")
+)
+MODAL_PROXY_KEY = os.getenv("MODAL_API_KEY") or os.getenv("MODAL_API_TOKEN_ID")
+MODAL_PROXY_SECRET = os.getenv("MODAL_API_PROXY_SECRET")
 
 # Configuration - will be fetched from embedding service
 EMBEDDING_CONFIG: dict[str, Any] = {
@@ -43,6 +52,10 @@ def _embedding_service_headers() -> dict[str, str]:
     headers = {}
     if EMBEDDING_SERVICE_AUTH_TOKEN:
         headers["x-embedding-service-token"] = EMBEDDING_SERVICE_AUTH_TOKEN
+        headers["authorization"] = f"Bearer {EMBEDDING_SERVICE_AUTH_TOKEN}"
+    if MODAL_PROXY_KEY and MODAL_PROXY_SECRET:
+        headers["Modal-Key"] = MODAL_PROXY_KEY
+        headers["Modal-Secret"] = MODAL_PROXY_SECRET
     return headers
 
 
@@ -87,7 +100,9 @@ async def embed_text(request: EmbedRequest) -> EmbedResponse:
     except httpx.HTTPError as e:
         raise HTTPException(status_code=503, detail=f"Embedding service error: {str(e)}") from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to generate embedding: {str(e)}") from e
+        raise HTTPException(
+            status_code=500, detail=f"Failed to generate embedding: {str(e)}"
+        ) from e
 
 
 @router.post("/batch")
@@ -190,7 +205,9 @@ async def compute_similarity(request: SimilarityRequest) -> SimilarityResponse:
     except httpx.HTTPError as e:
         raise HTTPException(status_code=503, detail=f"Embedding service error: {str(e)}") from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to compute similarity: {str(e)}") from e
+        raise HTTPException(
+            status_code=500, detail=f"Failed to compute similarity: {str(e)}"
+        ) from e
 
 
 @router.get("/config")

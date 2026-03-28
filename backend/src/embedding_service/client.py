@@ -44,11 +44,20 @@ class EmbeddingServiceClient(Embeddings):
             auth_token
             or os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
             or os.getenv("MODAL_API_PROXY_SECRET")
+            or os.getenv("MODAL_API_KEY")
+            or os.getenv("MODAL_API_TOKEN_SECRET")
         )
+        self.modal_proxy_key = os.getenv("MODAL_API_KEY") or os.getenv("MODAL_API_TOKEN_ID")
+        self.modal_proxy_secret = os.getenv("MODAL_API_PROXY_SECRET")
         headers = {}
         if self.auth_token:
             headers["x-embedding-service-token"] = self.auth_token
+            headers["Authorization"] = f"Bearer {self.auth_token}"
+        if self.modal_proxy_key and self.modal_proxy_secret:
+            headers["Modal-Key"] = self.modal_proxy_key
+            headers["Modal-Secret"] = self.modal_proxy_secret
         self.client = httpx.Client(timeout=timeout, headers=headers)
+        self._single_embed_field = "text"
         logger.info(f"✅ Embedding Service Client initialized: {self.base_url}")
 
     def _candidate_base_urls(self) -> list[str]:
@@ -128,7 +137,12 @@ class EmbeddingServiceClient(Embeddings):
 
         return None
 
-    def _post_with_fallback(self, endpoint: str, payload: dict):
+    def _post_with_fallback(
+        self,
+        endpoint: str,
+        payload: dict,
+        suppress_status_log: set[int] | None = None,
+    ):
         """POST to embedding service, trying fallback URLs when needed."""
         last_error: Exception | None = None
         for base in self._candidate_base_urls():
@@ -138,7 +152,20 @@ class EmbeddingServiceClient(Embeddings):
                 return response
             except Exception as exc:
                 last_error = exc
-                logger.warning(f"Embedding service call failed at {base}{endpoint}: {exc}")
+                status_code = (
+                    exc.response.status_code
+                    if isinstance(exc, httpx.HTTPStatusError) and exc.response is not None
+                    else None
+                )
+                if suppress_status_log and status_code in suppress_status_log:
+                    logger.debug(
+                        "Embedding service call returned expected status %s at %s%s",
+                        status_code,
+                        base,
+                        endpoint,
+                    )
+                else:
+                    logger.warning(f"Embedding service call failed at {base}{endpoint}: {exc}")
 
         if last_error is not None:
             raise last_error
@@ -181,7 +208,20 @@ class EmbeddingServiceClient(Embeddings):
             List of floats representing the embedding vector
         """
         try:
-            response = self._post_with_fallback("/embed", {"text": text})
+            try:
+                response = self._post_with_fallback(
+                    "/embed",
+                    {self._single_embed_field: text},
+                    suppress_status_log={422},
+                )
+            except httpx.HTTPStatusError as exc:
+                # Some deployed Modal embedding endpoints still expect `query` instead of `text`.
+                status_code = exc.response.status_code if exc.response is not None else None
+                if status_code == 422:
+                    self._single_embed_field = "query"
+                    response = self._post_with_fallback("/embed", {"query": text})
+                else:
+                    raise
             payload = response.json()
             if isinstance(payload, dict):
                 return cast(list[float], payload.get("embedding", []))

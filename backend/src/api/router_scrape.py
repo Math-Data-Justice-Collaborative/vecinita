@@ -339,7 +339,9 @@ async def trigger_reindex(
             detail=f"Reindex trigger failed: {detail}",
         ) from exc
     except httpx.HTTPError as exc:
-        raise HTTPException(status_code=502, detail=f"Reindex service request failed: {exc}") from exc
+        raise HTTPException(
+            status_code=502, detail=f"Reindex service request failed: {exc}"
+        ) from exc
 
 
 @router.get("/{job_id}")

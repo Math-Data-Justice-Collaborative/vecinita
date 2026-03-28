@@ -202,6 +202,29 @@ def _is_schema_profile_error(exc: Exception) -> bool:
     return "PGRST106" in str(exc)
 
 
+def _is_chroma_unavailable_error(exc: Exception) -> bool:
+    message = str(exc).lower()
+    return (
+        "could not connect to a chroma server" in message
+        or "connection refused" in message
+        or "connecterror" in message
+    )
+
+
+def _raise_documents_error(endpoint_name: str, exc: Exception) -> None:
+    if _is_chroma_unavailable_error(exc):
+        logger.warning("%s degraded: Chroma unavailable (%s)", endpoint_name, exc)
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Document index is temporarily unavailable because Chroma is not reachable. "
+                "Please retry shortly."
+            ),
+        ) from exc
+    logger.exception("%s error", endpoint_name)
+    raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
 def _load_overview_via_sql() -> tuple[dict[str, int], list[dict[str, Any]]]:
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
@@ -397,8 +420,7 @@ async def documents_overview(
         }
 
     except Exception as exc:
-        logger.exception("documents_overview error")
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        _raise_documents_error("documents_overview", exc)
 
 
 # ---------------------------------------------------------------------------
@@ -438,8 +460,7 @@ async def documents_preview(
         chunks = chunks[:limit]
         return {"source_url": source_url, "chunks": chunks}
     except Exception as exc:
-        logger.exception("documents_preview error")
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        _raise_documents_error("documents_preview", exc)
 
 
 @router.get("/download-url")
@@ -501,8 +522,7 @@ async def documents_download_url(
     except HTTPException:
         raise
     except Exception as exc:
-        logger.exception("documents_download_url error")
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        _raise_documents_error("documents_download_url", exc)
 
 
 @router.get("/chunk-statistics")
@@ -556,8 +576,7 @@ async def documents_chunk_statistics(
         rows = rows[:limit]
         return {"rows": rows, "total": len(rows)}
     except Exception as exc:
-        logger.exception("documents_chunk_statistics error")
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        _raise_documents_error("documents_chunk_statistics", exc)
 
 
 @router.get("/tags")
@@ -609,5 +628,4 @@ async def documents_tags(
 
         return {"tags": rows, "total": len(rows)}
     except Exception as exc:
-        logger.exception("documents_tags error")
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        _raise_documents_error("documents_tags", exc)

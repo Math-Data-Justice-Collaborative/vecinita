@@ -1,5 +1,5 @@
 .PHONY: help \
-	dev dev-attach dev-stop dev-clear-ports dev-backend dev-gateway dev-frontend \
+	dev dev-tmux dev-attach dev-stop dev-clear-ports dev-backend dev-gateway dev-frontend \
 	lint lint-backend lint-frontend \
 	typecheck typecheck-backend typecheck-frontend \
 	format format-backend format-frontend \
@@ -13,8 +13,9 @@ help:
 	@echo "Vecinita root Makefile"
 	@echo ""
 	@echo "Development targets"
-	@echo "  make dev                            Start the full local tmux dev session"
-	@echo "  make dev-attach                     Attach to the existing dev session"
+	@echo "  make dev                            Start full local dev stack with cascading logs"
+	@echo "  make dev-tmux                       Start the legacy tmux split-pane dev session"
+	@echo "  make dev-attach                     Attach to the existing tmux dev session"
 	@echo "  make dev-stop                       Stop the dev session and local containers"
 	@echo "  make dev-clear-ports                Kill processes bound to local dev ports"
 	@echo "  make dev-backend                    Start the backend agent in reload mode"
@@ -54,6 +55,9 @@ help:
 
 dev:
 	./run/dev-session.sh start
+
+dev-tmux:
+	./run/dev-session.sh start-tmux
 
 dev-attach:
 	./run/dev-session.sh attach

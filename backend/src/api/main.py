@@ -17,9 +17,10 @@ from dotenv import load_dotenv
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]
 _BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
-# Load backend defaults first, then allow root workspace env to override.
+# Load environment with explicit precedence:
+# runtime shell env > root .env > backend/.env defaults.
+load_dotenv(_PROJECT_ROOT / ".env", override=False)
 load_dotenv(_BACKEND_ROOT / ".env", override=False)
-load_dotenv(_PROJECT_ROOT / ".env", override=True)
 
 from fastapi import APIRouter, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -38,7 +39,11 @@ from .router_scrape import router as scrape_router
 # ============================================================================
 
 AGENT_SERVICE_URL = os.getenv("AGENT_SERVICE_URL", "http://localhost:8000")
-EMBEDDING_SERVICE_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:8001")
+EMBEDDING_SERVICE_URL = (
+    os.getenv("MODAL_EMBEDDING_ENDPOINT")
+    or os.getenv("EMBEDDING_SERVICE_URL")
+    or "http://localhost:8001"
+)
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 
 # CORS configuration - supports multiple origins separated by comma
@@ -148,7 +153,8 @@ async def root(request: Request):
     return {
         "service": "Vecinita Unified API Gateway",
         "version": "1.0.0",
-        "description": "Consolidated API for Q&A, document viewing, scraping, and embeddings" + front_message,
+        "description": "Consolidated API for Q&A, document viewing, scraping, and embeddings"
+        + front_message,
         "api_base": "/api/v1",
         "endpoints": {
             "Q&A": {

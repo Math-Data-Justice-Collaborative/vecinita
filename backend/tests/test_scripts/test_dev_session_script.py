@@ -1,4 +1,4 @@
-"""Regression checks for local dev tmux launcher script."""
+"""Regression checks for local dev launcher script modes."""
 
 from pathlib import Path
 
@@ -15,12 +15,32 @@ def test_dev_session_script_exists() -> None:
     assert SCRIPT_PATH.exists(), "Expected run/dev-session.sh to exist"
 
 
+def test_dev_session_defaults_to_single_terminal_mode() -> None:
+    content = _script_text()
+    assert "start_single_terminal_session" in content
+    assert 'echo "Starting local dev stack in single-terminal cascading log mode"' in content
+    assert 'echo "Press Ctrl+C to stop all services"' in content
+    assert 'run_with_prefix "frontend"' in content
+
+
+def test_dev_session_supports_legacy_tmux_mode() -> None:
+    content = _script_text()
+    assert "start-tmux)" in content
+    assert "start_session" in content
+    assert 'tmux new-session -d -s "$SESSION_NAME" -n dev' in content
+
+
 def test_dev_session_waits_for_frontend_before_attach() -> None:
     content = _script_text()
     assert "wait_for_http_ready()" in content
-    assert 'wait_for_http_ready "Frontend" "http://localhost:5173/" "${DEV_FRONTEND_READY_TIMEOUT:-180}"' in content
+    assert (
+        'wait_for_http_ready "Frontend" "http://localhost:5173/" "${DEV_FRONTEND_READY_TIMEOUT:-180}"'
+        in content
+    )
 
-    wait_idx = content.find('wait_for_http_ready "Frontend" "http://localhost:5173/" "${DEV_FRONTEND_READY_TIMEOUT:-180}"')
+    wait_idx = content.find(
+        'wait_for_http_ready "Frontend" "http://localhost:5173/" "${DEV_FRONTEND_READY_TIMEOUT:-180}"'
+    )
     attach_idx = content.rfind('tmux attach -t "$SESSION_NAME"')
     assert wait_idx != -1
     assert attach_idx != -1
@@ -30,11 +50,11 @@ def test_dev_session_waits_for_frontend_before_attach() -> None:
 def test_dev_session_resets_existing_state_before_start() -> None:
     content = _script_text()
     assert "reset_existing_state_if_needed" in content
-    assert 'reset_existing_state_if_needed' in content
-    assert 'clear_managed_ports' in content
-    assert "tmux kill-session -t \"$SESSION_NAME\"" in content
-    assert 'Managed dev ports already in use:' in content
-    start_idx = content.find('reset_existing_state_if_needed')
+    assert "reset_existing_state_if_needed" in content
+    assert "clear_managed_ports" in content
+    assert 'tmux kill-session -t "$SESSION_NAME"' in content
+    assert "Managed dev ports already in use:" in content
+    start_idx = content.find("reset_existing_state_if_needed")
     new_session_idx = content.find('tmux new-session -d -s "$SESSION_NAME" -n dev')
     assert start_idx != -1
     assert new_session_idx != -1
@@ -43,9 +63,9 @@ def test_dev_session_resets_existing_state_before_start() -> None:
 
 def test_dev_session_manages_expected_ports() -> None:
     content = _script_text()
-    assert 'managed_ports()' in content
+    assert "managed_ports()" in content
     assert 'echo "5173 8000 8001 8002 8004"' in content
-    assert 'kill -9 $pids' in content
+    assert "kill -9 $pids" in content
 
 
 def test_dev_session_warns_instead_of_exiting_on_readiness_timeout() -> None:

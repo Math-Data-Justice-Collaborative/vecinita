@@ -269,7 +269,9 @@ async def ask_question(
             status_code=e.response.status_code, detail=f"Agent service error: {e.response.text}"
         ) from e
     except httpx.RequestError as e:
-        raise HTTPException(status_code=503, detail=f"Unable to connect to agent service: {str(e)}") from e
+        raise HTTPException(
+            status_code=503, detail=f"Unable to connect to agent service: {str(e)}"
+        ) from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e
 
