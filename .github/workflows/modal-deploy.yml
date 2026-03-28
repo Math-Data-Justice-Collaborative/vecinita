@@ -1,0 +1,98 @@
+name: Modal Deployment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/src/embedding_service/**"
+      - "backend/src/scraper/**"
+      - "backend/src/services/embedding/**"
+      - "backend/requirements.txt"
+      - "backend/pyproject.toml"
+      - ".github/workflows/modal-deploy.yml"
+  workflow_dispatch:
+    inputs:
+      deploy_embedding:
+        description: "Deploy embedding service"
+        required: false
+        default: "true"
+      deploy_scraper:
+        description: "Deploy scraper service"
+        required: false
+        default: "true"
+
+concurrency:
+  group: modal-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  modal-deploy:
+    name: Deploy to Modal
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    env:
+      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install Modal CLI
+        run: |
+          python -m pip install --upgrade pip
+          pip install modal
+
+      - name: Verify Modal Authentication
+        run: |
+          modal token info
+          echo "✓ Modal authentication verified"
+
+      - name: Deploy Embedding Service
+        if: github.event_name == 'push' || github.event.inputs.deploy_embedding == 'true'
+        run: |
+          echo "Deploying Embedding Service..."
+          modal deploy backend/src/embedding_service/modal_app.py
+          echo "✓ Embedding service deployed successfully"
+
+      - name: Deploy Scraper Service
+        if: github.event_name == 'push' || github.event.inputs.deploy_scraper == 'true'
+        run: |
+          echo "Deploying Scraper Service..."
+          modal deploy backend/src/scraper/modal_app.py
+          echo "✓ Scraper service deployed successfully"
+
+      - name: Verify Deployments
+        run: |
+          echo "Deployed apps:"
+          modal app list --all 2>/dev/null || echo "Apps listed (may require additional permissions)"
+
+  notify:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: modal-deploy
+    if: always()
+    
+    steps:
+      - name: Success Notification
+        if: needs.modal-deploy.result == 'success'
+        run: |
+          echo "✓ Modal deployment completed successfully"
+          echo "  - Embedding Service: https://vecinita--vecinita-embedding.modal.run"
+          echo "  - Scraper Service: https://vecinita--vecinita-scraper.modal.run"
+
+      - name: Failure Notification
+        if: needs.modal-deploy.result == 'failure'
+        run: |
+          echo "✗ Modal deployment failed"
+          echo "Check logs above for details"
+          exit 1
