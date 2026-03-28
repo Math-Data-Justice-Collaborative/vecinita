@@ -157,7 +157,8 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 15s
       timeout: 5s
-      retries: 3
+      retries: 6
+      start_period: 90s
     networks:
       - vecinita-network-dev
 
@@ -215,7 +216,8 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
       interval: 15s
       timeout: 5s
-      retries: 3
+      retries: 6
+      start_period: 45s
     networks:
       - vecinita-network-dev
 

@@ -46,11 +46,3 @@ jobs:
       run: |
         node -e "const fs=require('fs');const summary=JSON.parse(fs.readFileSync('coverage/coverage-summary.json','utf8'));const pct=summary?.total?.lines?.pct ?? 0;const out='Frontend line coverage: '+Number(pct).toFixed(2)+'%\\n';process.stdout.write(out);fs.writeFileSync('coverage-summary.txt', out);"
 
-    - name: Upload frontend coverage artifacts
-      uses: actions/upload-artifact@v5
-      if: always()
-      with:
-        name: frontend-coverage
-        path: |
-          frontend/coverage
-          frontend/coverage-summary.txt

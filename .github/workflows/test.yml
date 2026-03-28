@@ -110,13 +110,6 @@ jobs:
         SKIP_AGENT_MAIN_IMPORT: 'true'
         EMBEDDING_STRICT_STARTUP: 'false'
 
-    - name: Upload test results
-      uses: actions/upload-artifact@v5
-      if: always()
-      with:
-        name: test-results-ubuntu-22.04-py3.10
-        path: backend/test-results.xml
-
   backend-integration:
     runs-on: ubuntu-22.04
 
@@ -171,13 +164,6 @@ jobs:
         PYTHONPATH: ${{ github.workspace }}/backend
         EMBEDDING_STRICT_STARTUP: 'false'
 
-    - name: Upload integration test results
-      uses: actions/upload-artifact@v5
-      if: always()
-      with:
-        name: backend-integration-results
-        path: backend/integration-test-results.xml
-
   auth-unit:
     runs-on: ubuntu-22.04
 
@@ -207,14 +193,6 @@ jobs:
         JWT_SECRET: test-jwt-secret
       run: |
         pytest tests/ --cov=src --cov-report=xml --cov-report=term --cov-fail-under=98 --junit-xml=test-results.xml
-
-    - name: Upload auth test results
-      uses: actions/upload-artifact@v5
-      if: always()
-      with:
-        name: auth-test-results
-        path: auth/test-results.xml
-        if-no-files-found: ignore
 
   frontend-unit:
     runs-on: ubuntu-22.04
@@ -269,7 +247,19 @@ jobs:
       run: npx playwright install --with-deps ${{ matrix.browser }}
 
     - name: Start compose stack for e2e smoke
-      run: docker compose -f docker-compose.dev.yml up -d frontend vecinita-gateway
+      run: |
+        set +e
+        docker compose -f docker-compose.dev.yml up -d frontend vecinita-gateway
+        status=$?
+        set -e
+        if [ "$status" -ne 0 ]; then
+          echo "First startup attempt failed, dumping logs and retrying once..."
+          docker compose -f docker-compose.dev.yml ps || true
+          docker compose -f docker-compose.dev.yml logs --no-color || true
+          docker compose -f docker-compose.dev.yml down -v || true
+          sleep 10
+          docker compose -f docker-compose.dev.yml up -d frontend vecinita-gateway
+        fi
 
     - name: Wait for frontend and gateway
       run: |
@@ -288,14 +278,6 @@ jobs:
         E2E_SKIP_WEBSERVER: 'true'
         E2E_BASE_URL: http://127.0.0.1:15173
       run: npx playwright test --project=${{ matrix.browser }} e2e/agent-config-connectivity.spec.ts
-
-    - name: Upload Playwright report
-      uses: actions/upload-artifact@v5
-      if: always()
-      with:
-        name: playwright-report-${{ matrix.browser }}
-        path: frontend/playwright-report
-        if-no-files-found: ignore
 
     - name: Dump compose logs on failure
       if: failure()
@@ -396,9 +378,3 @@ jobs:
           fi
           exit "$status"
 
-      - name: Upload pgvector integration test results
-        uses: actions/upload-artifact@v5
-        if: always()
-        with:
-          name: backend-integration-pgvector-results
-          path: backend/integration-pgvector-results.xml

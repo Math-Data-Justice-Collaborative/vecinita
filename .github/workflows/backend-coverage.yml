@@ -91,12 +91,3 @@ jobs:
             f.write(f"Backend line coverage: {line_rate:.2f}%\n")
         PY
 
-    - name: Upload backend coverage artifacts
-      uses: actions/upload-artifact@v5
-      if: always()
-      with:
-        name: backend-coverage
-        path: |
-          backend/coverage.xml
-          backend/coverage-summary.txt
-          backend/test-results.xml
