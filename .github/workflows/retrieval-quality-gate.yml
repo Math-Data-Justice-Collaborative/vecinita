@@ -52,6 +52,7 @@ jobs:
           echo "USE_LOCAL_EMBEDDINGS=true" >> .env
           echo "EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2" >> .env
           echo "EMBEDDING_SERVICE_AUTH_TOKEN=test-embed-token" >> .env
+          echo "EMBEDDING_STRICT_STARTUP=false" >> .env
           echo "REINDEX_TRIGGER_TOKEN=test-reindex-token" >> .env
           echo "REINDEX_SERVICE_URL=https://example.modal.run" >> .env
 
@@ -59,6 +60,7 @@ jobs:
         working-directory: backend
         env:
           PYTHONPATH: ${{ github.workspace }}/backend
+          EMBEDDING_STRICT_STARTUP: 'false'
         run: |
           pytest tests/e2e/test_retrieval_quality_gate.py \
             -m "e2e and retrieval_quality" \

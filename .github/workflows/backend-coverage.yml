@@ -58,6 +58,7 @@ jobs:
         echo "USE_LOCAL_EMBEDDINGS=true" >> .env
         echo "EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2" >> .env
         echo "EMBEDDING_SERVICE_AUTH_TOKEN=test-embed-token" >> .env
+        echo "EMBEDDING_STRICT_STARTUP=false" >> .env
         echo "REINDEX_TRIGGER_TOKEN=test-reindex-token" >> .env
         echo "REINDEX_SERVICE_URL=https://example.modal.run" >> .env
 
@@ -66,6 +67,7 @@ jobs:
       env:
         PYTHONPATH: ${{ github.workspace }}/backend
         SKIP_AGENT_MAIN_IMPORT: 'true'
+        EMBEDDING_STRICT_STARTUP: 'false'
       run: |
         pytest tests/ -m "unit and not llm" -v --tb=short \
           --cov=src.embedding_service.modal_app \

@@ -63,6 +63,7 @@ jobs:
         working-directory: backend
         env:
           PYTHONPATH: ${{ github.workspace }}/backend
+          EMBEDDING_STRICT_STARTUP: 'false'
         run: |
           cat > .env <<'EOF'
           SUPABASE_URL=https://test.supabase.co
@@ -73,6 +74,7 @@ jobs:
           USE_LOCAL_EMBEDDINGS=true
           EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
           EMBEDDING_SERVICE_AUTH_TOKEN=test-embed-token
+          EMBEDDING_STRICT_STARTUP=false
           REINDEX_TRIGGER_TOKEN=test-reindex-token
           REINDEX_SERVICE_URL=https://example.modal.run
           EOF

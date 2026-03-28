@@ -248,7 +248,7 @@ try:
         or os.environ.get("MODAL_API_KEY")
         or os.environ.get("MODAL_API_TOKEN_SECRET")
     )
-    embedding_strict_startup = os.environ.get("EMBEDDING_STRICT_STARTUP", "true").lower() in [
+    embedding_strict_startup = os.environ.get("EMBEDDING_STRICT_STARTUP", "false").lower() in [
         "1",
         "true",
         "yes",
