@@ -1,0 +1,5 @@
+{
+  "provider": "ollama",
+  "model": "llama3.2",
+  "locked": false
+}

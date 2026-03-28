@@ -1,57 +1,252 @@
-################################################################################
-# PROJECT: Vecinita - Community Q&A Assistant
-# FILE: docker-compose.yml
-# VERSION: 2.4.0 (Rios VM Production Standard)
-# DATE: 2026-02-09
-# DESCRIPTION: Finalized orchestration for the Vecinita RAG engine.
-# This configuration strictly follows the "Single Source of Truth" principle,
-# pulling all secrets exclusively from the .env file.
-################################################################################
+# Local Development Full Stack
+# Includes: PostgreSQL, PostgREST, pgAdmin, Embedding Service, Agent Service, Frontend, Scraper
+# Usage: docker-compose up
+# Production uses cloud Supabase and Render services (see .env.prod and docs/RENDER_DEPLOYMENT_THREE_SERVICES.md)
 
 services:
-  vecinita-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: vecinita-app:latest
-    container_name: vecinita-app
-    
-    # --- SINGLE SOURCE OF TRUTH ---
-    # Injects all variables from .env (Supabase, Groq, OpenAI, etc.)
-    # This bypasses VM shell memory to prevent "Invalid API Key" errors.
-    env_file:
-      - .env
-
-    # --- PORT MIGRATION ---
-    # Standardizing on port 8080 for the RIOS VM environment
-    ports:
-      - "8080:8080"
-    
-    # --- RUNTIME OVERRIDES ---
-    # Only non-sensitive operational flags are kept here.
+  # ChromaDB - Vector/document storage service
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: vecinita-chroma
     environment:
-      - PORT=8080
-      - PYTHONUNBUFFERED=1
-
-    # --- PERSISTENCE & SYNC ---
-    # Mounts local source code for real-time updates without image rebuilds.
+      IS_PERSISTENT: "TRUE"
+      PERSIST_DIRECTORY: "/data"
+    ports:
+      - "8002:8000"
     volumes:
-      - ./src:/app/src
-
-    # --- RELIABILITY ---
+      - chroma_data_local:/data
     restart: unless-stopped
-
-    # --- HEALTHCHECK ---
-    # Monitors the FastAPI /health endpoint on the migrated port 8080.
+    networks:
+      - vecinita-network
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/8000'"]
+      interval: 10s
+      timeout: 5s
       retries: 5
-      start_period: 60s # Ample time for LLM/Embedding models to load into RAM
+
+  # Local PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: vecinita-postgres-local
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_INITDB_ARGS: "--locale=en_US.UTF-8 --encoding=UTF8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_local:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - vecinita-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgREST - REST API layer on top of PostgreSQL
+  postgrest:
+    image: postgrest/postgrest:v12.0.1
+    container_name: vecinita-postgrest-local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgresql://postgres:postgres@vecinita-postgres-local:5432/postgres
+      PGRST_DB_SCHEMA: public
+      PGRST_DB_ANON_ROLE: postgres
+      PGRST_JWT_SECRET: dev-jwt-secret-for-local-testing-only-32chars-min
+      PGRST_JWT_AUD: ""  # Allow any audience for development
+      PGRST_JWT_ROLE_CLAIM_KEY: ".role"
+    ports:
+      - "3001:3000"  # PostgREST REST API on localhost:3001
+    restart: unless-stopped
+    networks:
+      - vecinita-network
+    # PostgREST is a distroless binary image with no shell or tooling; health is
+    # inferred from the postgres dependency and a short start_period in dependents.
+
+  # pgAdmin - PostgreSQL Management UI (Optional but useful)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: vecinita-pgadmin-local
+    depends_on:
+      - postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    restart: unless-stopped
+    networks:
+      - vecinita-network
+
+  # ============================================================================
+  # MICROSERVICES (Agent, Embedding, Scraper)
+  # ============================================================================
+
+  # Embedding Service - Lightweight microservice for text embeddings
+  embedding-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.embedding
+    container_name: vecinita-embedding
+    ports:
+      - "8001:8001"
+    environment:
+      PORT: "8001"
+      PYTHONUNBUFFERED: "1"
+      HF_HOME: "/tmp/huggingface_cache"
+      EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:?EMBEDDING_SERVICE_AUTH_TOKEN is required for service authentication. Set this environment variable before starting docker compose.}"
+      MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET}"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - vecinita-network
+
+  # Agent Service - FastAPI Q&A backend
+  vecinita-agent:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vecinita-agent
+    ports:
+      - "8000:8000"
+    environment:
+      PORT: "8000"
+      PYTHONUNBUFFERED: "1"
+      EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
+      EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:?Set EMBEDDING_SERVICE_AUTH_TOKEN before starting docker compose}"
+      # MODAL_API_PROXY_SECRET can be used as an alternative to EMBEDDING_SERVICE_AUTH_TOKEN;
+      # when not set, it falls back to EMBEDDING_SERVICE_AUTH_TOKEN (see .env.example).
+      MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET:-${EMBEDDING_SERVICE_AUTH_TOKEN}}"
+      CHROMA_HOST: "chroma"
+      CHROMA_PORT: "8000"
+      CHROMA_SSL: "false"
+      CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
+      CHROMA_COLLECTION_SOURCES: "vecinita_sources"
+      CHROMA_COLLECTION_QUEUE: "vecinita_queue"
+      VECTOR_SYNC_ENABLED: "true"
+      VECTOR_SYNC_DEGRADED_MODE: "true"
+      VECTOR_SYNC_SUPABASE_FALLBACK_READS: "true"
+      SUPABASE_URL: "http://postgrest:3000"
+      SUPABASE_KEY: "dev-anon-key"
+      DEEPSEEK_API_KEY: "${DEEPSEEK_API_KEY:-}"
+      DEEPSEEK_BASE_URL: "${DEEPSEEK_BASE_URL:-https://api.deepseek.com}"
+      OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-}"
+      OLLAMA_MODEL: "${OLLAMA_MODEL:-llama3.1:8b}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      DEFAULT_PROVIDER: "${DEFAULT_PROVIDER:-}"
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/postgres"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      postgrest:
+        condition: service_started
+      embedding-service:
+        condition: service_healthy
+      chroma:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - vecinita-network
+
+  # API Gateway - Unified /api/v1 surface used by frontend
+  vecinita-gateway:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vecinita-gateway
+    ports:
+      - "8004:8004"
+    environment:
+      PORT: "8004"
+      PYTHONUNBUFFERED: "1"
+      AGENT_SERVICE_URL: "http://vecinita-agent:8000"
+      EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
+      EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:?Set EMBEDDING_SERVICE_AUTH_TOKEN before starting docker compose}"
+      MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET:-${EMBEDDING_SERVICE_AUTH_TOKEN}}"
+      CHROMA_HOST: "chroma"
+      CHROMA_PORT: "8000"
+      CHROMA_SSL: "false"
+      CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
+      CHROMA_COLLECTION_SOURCES: "vecinita_sources"
+      CHROMA_COLLECTION_QUEUE: "vecinita_queue"
+      VECTOR_SYNC_ENABLED: "true"
+      VECTOR_SYNC_DEGRADED_MODE: "true"
+      VECTOR_SYNC_SUPABASE_FALLBACK_READS: "true"
+      SUPABASE_URL: "http://postgrest:3000"
+      SUPABASE_KEY: "dev-anon-key"
+      DEEPSEEK_API_KEY: "${DEEPSEEK_API_KEY:-}"
+      DEEPSEEK_BASE_URL: "${DEEPSEEK_BASE_URL:-https://api.deepseek.com}"
+      GROQ_API_KEY: "${GROQ_API_KEY:-}"
+      ENABLE_LLM_TAG_ENHANCEMENT: "${ENABLE_LLM_TAG_ENHANCEMENT:-true}"
+      LLM_TAG_PROVIDER: "${LLM_TAG_PROVIDER:-auto}"
+      DEEPSEEK_TAG_MODEL: "${DEEPSEEK_TAG_MODEL:-deepseek-chat}"
+      GROQ_TAG_MODEL: "${GROQ_TAG_MODEL:-llama-3.1-8b-instant}"
+      DEV_ADMIN_ENABLED: "true"
+      DEV_ADMIN_BEARER_TOKEN: "vecinita-dev-admin-token-2026"
+      SUPABASE_UPLOADS_BUCKET: "documents"
+    command: ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port 8004"]
+    depends_on:
+      vecinita-agent:
+        condition: service_healthy
+      embedding-service:
+        condition: service_healthy
+      chroma:
+        condition: service_healthy
+      postgrest:
+        condition: service_started
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - vecinita-network
+
+  # Frontend - Vite React application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_GATEWAY_URL: "http://localhost:8004/api/v1"
+        VITE_BACKEND_URL: "http://localhost:8000"
+        VITE_DEV_ADMIN_ENABLED: "true"
+        VITE_DEV_ADMIN_EMAIL: "admin@vecinita.local"
+        VITE_DEV_ADMIN_PASSWORD: "VecinitaAdmin!2026"
+        VITE_DEV_ADMIN_TOKEN: "vecinita-dev-admin-token-2026"
+    container_name: vecinita-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - vecinita-gateway
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - vecinita-network
+
+volumes:
+  postgres_data_local:
+  chroma_data_local:
 
 networks:
-  default:
-    name: vecinita-net
-
-# EOF - RIOS VM DEPLOYMENT STANDARD
+  vecinita-network:
+    driver: bridge

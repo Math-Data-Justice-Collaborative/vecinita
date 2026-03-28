@@ -1,0 +1,314 @@
+[project]
+name = "vecinita"
+version = "0.1.0"
+description = "Vecinita RAG Q&A Assistant with LangGraph"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Vecinita Team"}
+]
+keywords = ["rag", "langgraph", "langchain", "supabase", "fastapi", "ai", "assistant"]
+
+dependencies = [
+    # Web Framework
+    "fastapi",
+    "uvicorn",
+    # LangChain & LangGraph
+    "langchain",
+    "langchain-community",
+    "langchain-core",
+    "langchain-openai",
+    "langchain-tavily",
+    "langchain-text-splitters",
+    "langchain-huggingface",
+    "langgraph",
+    # Database & Vector Store
+    "supabase",
+    "chromadb>=1.0.0",
+    "psycopg2-binary",
+    # Document Processing (lightweight only - playwright/unstructured in scraping extra)
+    "beautifulsoup4",
+    "pypdf",
+    # Utilities
+    "python-dotenv",
+    "pydantic",
+    "requests",
+    "httpx",
+    "python-multipart",
+    "langdetect",
+    "tqdm",
+    "gotrue>=2.0.0",
+    "langchain-ollama>=1.0.0",
+    # GuardrailsAI for input/output validation
+    "guardrails-ai>=0.5.0",
+    # LangSmith for tracing and monitoring (now compatible with numpy 2.x)
+    "langsmith>=0.4.56",
+    # Pin onnxruntime and tokenizers to stable versions to avoid Windows compatibility issues
+    # onnxruntime dev releases don't have Windows wheels
+    # tokenizers pre-releases require Rust compilation
+    "onnxruntime>=1.18.0,<1.24.0.dev; sys_platform == 'win32'",
+    "tokenizers>=0.15.0,<0.22.0rc",
+    "ddgs>=9.10.0",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "fastembed>=0.7.4",
+    "transformers>=4.55.4",
+    "docker>=7.1.0",
+    "types-requests>=2.32.4.20260324",
+]
+
+[project.optional-dependencies]
+# Agent service dependencies (minimal - no embedding models, calls embedding service via HTTP)
+agent = [
+    # Agent calls embedding service for embeddings - no local models needed
+    # All required dependencies already in base
+]
+
+# Embedding service dependencies (lightweight - runs as separate Render service)
+embedding = [
+    "sentence-transformers>=5.1.2",  # Core embedding model
+    "scikit-learn",  # For similarity computations
+    "numpy",  # For numerical operations
+]
+
+# Scraper service dependencies (heavy - includes embedding models and parsers)
+scraper = [
+    "unstructured[doc,docx,ppt,pdf]>=0.14.0",
+    "playwright>=1.40.0",
+    "sentence-transformers>=5.1.2",  # For generating embeddings during scraping
+    "fastembed",  # Alternative lightweight embedding model
+]
+
+# Docker utilities (only needed for local orchestration scripts)
+docker = [
+    "docker>=7.0.0",
+]
+
+ml = [
+    # Optional TensorFlow/Keras stack (pulls large CUDA libs on Linux runners)
+    "tf-keras>=2.20.1",
+]
+
+# Development: testing, code quality, and experimentation
+dev = [
+    # Testing Framework
+    "pytest>=9.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=5.0.0",
+    # FastAPI Testing
+    "httpx>=0.25.0",
+    # Code Quality Tools
+    "black>=24.1.0",
+    "ruff>=0.2.0",
+    "mypy>=1.8.0",
+    # Jupyter for experimentation
+    "jupyter>=1.0.0",
+    "ipython>=8.20.0",
+    # Optional scraping & docker utilities for local development
+    "unstructured[doc,docx,ppt,pdf]>=0.14.0",
+    "playwright>=1.40.0",
+    "docker>=7.0.0",
+]
+
+# Minimal CI dependencies - no playwright or docker for faster CI builds
+ci = [
+    "pytest>=9.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=5.0.0",
+    "httpx>=0.25.0",
+    "black>=24.1.0",
+    "ruff>=0.2.0",
+    "mypy>=1.8.0",
+]
+
+visualization = [
+    # For graph visualization
+    "graphviz>=0.20.0",
+    "pygraphviz>=1.14.0",
+]
+
+# All extras for local development
+all = [
+    "vecinita[dev,scraping,docker,visualization,embedding]",
+]
+
+[project.scripts]
+vecinita-main = "src.main:main"
+vecinita-agent = "src.rag_agent:main"
+vecinita-setup = "src.setup_check:main"
+vecinita-example = "scripts.example_rag_usage:main"
+vecinita-fastapi = "scripts.fastapi_integration_example:main"
+vecinita-scrape = "src.scraper.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/acadiagit/vecinita"
+Repository = "https://github.com/acadiagit/vecinita"
+Issues = "https://github.com/acadiagit/vecinita/issues"
+
+[build-system]
+requires = ["setuptools>=68.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+
+[tool.pytest.ini_options]
+# PyTest configuration for Vecinita tests
+minversion = "6.0"
+testpaths = ["tests"]
+pythonpath = ["."]
+
+# Test discovery patterns
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+# Test output options
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+    "--disable-warnings",
+]
+
+# Markers for test categorization
+markers = [
+    "unit: Unit tests (fast, no external dependencies)",
+    "integration: Integration tests (may require external services)",
+    "e2e: End-to-end tests",
+    "ui: UI/API tests using FastAPI TestClient",
+    "streaming: Streaming response and SSE behavior tests",
+    "slow: Tests that take a long time to run",
+    "api: API endpoint tests",
+    "auth: Authentication and authorization tests",
+    "fallback: Fallback behavior and degraded-mode tests",
+    "rate_limit: Rate limiting behavior tests",
+    "db: Database related tests",
+    "retrieval_quality: Retrieval quality regression and citation fidelity tests",
+]
+
+# Logging
+log_cli = false
+log_cli_level = "INFO"
+log_file = "tests/pytest.log"
+log_file_level = "DEBUG"
+
+# Test output
+console_output_style = "progress"
+
+# Filter warnings
+filterwarnings = [
+    "ignore::pydantic.warnings.PydanticDeprecatedSince20",
+    "ignore::DeprecationWarning:supabase._sync.client",
+    "ignore::DeprecationWarning:importlib._bootstrap",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "C",   # flake8-comprehensions
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+    "B008",  # do not perform function calls in argument defaults
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"src/api/main.py" = ["E402"]
+"src/services/db/security.py" = ["E402"]
+"src/test_faq.py" = ["E402"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 25
+
+[tool.mypy]
+python_version = "3.10"
+explicit_package_bases = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "supabase.*",
+    "langchain.*",
+    "langchain_community.*",
+    "langchain_core.*",
+    "langchain_openai.*",
+    "langchain_groq.*",
+    "langchain_huggingface.*",
+    "langgraph.*",
+    "sentence_transformers.*",
+    "fastembed.*",
+    "unstructured.*",
+    "playwright.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "src.agent.*",
+    "src.api.*",
+    "src.embedding_service.*",
+    "src.scraper.*",
+    "src.services.*",
+    "src.test_faq",
+]
+ignore_errors = true
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+
+[tool.coverage.report]
+fail_under = 98
+omit = [
+]
+exclude_lines = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "@overload",
+]
+
+[tool.uv]
+# Ensure uv resolves stable versions to avoid Windows compatibility issues
+# - onnxruntime dev releases don't have Windows wheels
+# - tokenizers pre-releases require Rust compilation
+# See: uv.toml for detailed configuration
+
+[dependency-groups]

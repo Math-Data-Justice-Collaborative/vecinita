@@ -1,0 +1,36 @@
+# Pytest
+__pycache__/
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+pytest.log
+.pytest_tmp/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Test artifacts
+test-results.xml
+screenshots/
+videos/

@@ -1,0 +1,101 @@
+[build-system]
+requires = ["setuptools>=68.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vecinita-e2e-tests"
+version = "0.1.0"
+description = "E2E and Integration tests for Vecinita (backend ↔ frontend)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Vecinita Team"}]
+
+dependencies = [
+    # Testing Framework
+    "pytest>=9.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=5.0.0",
+    
+    # HTTP Client for integration tests
+    "httpx>=0.25.0",
+    "requests>=2.31.0",
+    "fastapi>=0.116.0",
+    
+    # Playwright for E2E tests
+    "playwright>=1.40.0",
+    
+    # Utilities
+    "python-dotenv",
+    "pydantic>=2.0.0",
+]
+
+[project.optional-dependencies]
+# Full development with E2E
+dev = [
+    "vecinita-e2e-tests[all]",
+    "black>=24.1.0",
+    "ruff>=0.2.0",
+]
+
+all = []
+
+[tool.pytest.ini_options]
+# E2E and Integration test configuration
+minversion = "6.0"
+testpaths = ["."]
+pythonpath = ["."]
+asyncio_mode = "auto"
+
+# Test discovery patterns
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+# Test output options
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+]
+
+# Markers for test categorization
+markers = [
+    "e2e: end-to-end tests (requires Playwright and running backend/frontend services)",
+    "integration: integration tests (requires running services)",
+    "api: API endpoint tests (requires running backend service)",
+    "slow: slow running tests",
+    "frontend_required: tests that require frontend service",
+    "backend_required: tests that require backend service",
+    "requires_services: tests that require both services",
+]
+
+# Logging
+log_cli = false
+log_cli_level = "INFO"
+log_file = "pytest.log"
+log_file_level = "DEBUG"
+
+# Test output
+console_output_style = "progress"
+
+# Filter warnings
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+check_untyped_defs = true

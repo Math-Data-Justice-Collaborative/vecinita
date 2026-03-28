@@ -1,0 +1,262 @@
+"""
+Unit tests for src/gateway/router_embed.py
+
+Tests embedding generation and similarity computation endpoints.
+"""
+
+import pytest
+from fastapi.testclient import TestClient
+
+pytestmark = pytest.mark.unit
+
+
+@pytest.fixture
+def embed_client(env_vars, monkeypatch):
+    """Create a test client with embed router included."""
+    for key, value in env_vars.items():
+        monkeypatch.setenv(key, value)
+
+    from src.api.main import app
+
+    return TestClient(app)
+
+
+class TestEmbedSingleEndpoint:
+    """Test POST /embed endpoint."""
+
+    def test_embed_single_text(self, embed_client):
+        """Test embedding a single text."""
+        response = embed_client.post("/api/v1/embed", json={"text": "Hello world"})
+        # Endpoint proxies to embedding service; unavailable backend returns 503
+        assert response.status_code in [200, 503]
+
+    def test_embed_text_with_model_override(self, embed_client):
+        """Test embedding with model override."""
+        response = embed_client.post(
+            "/api/v1/embed", json={"text": "Hello world", "model": "custom-model"}
+        )
+        assert response.status_code in [200, 503]
+
+    def test_embed_empty_text(self, embed_client):
+        """Test embedding empty text."""
+        response = embed_client.post("/api/v1/embed", json={"text": ""})
+        # Empty strings pass request validation and are proxied to embedding service
+        assert response.status_code in [200, 503]
+
+    def test_embed_missing_text(self, embed_client):
+        """Test that text field is required."""
+        response = embed_client.post("/api/v1/embed", json={})
+        assert response.status_code == 422
+
+    def test_embed_long_text(self, embed_client):
+        """Test embedding long text."""
+        long_text = "hello " * 10000  # Very long text
+        response = embed_client.post("/api/v1/embed", json={"text": long_text})
+        assert response.status_code in [200, 503]
+
+
+class TestEmbedBatchEndpoint:
+    """Test POST /embed/batch endpoint."""
+
+    def test_embed_batch_texts(self, embed_client):
+        """Test embedding multiple texts."""
+        response = embed_client.post(
+            "/api/v1/embed/batch", json={"texts": ["Hello", "World", "Test"]}
+        )
+        assert response.status_code in [200, 503]
+
+    def test_embed_batch_single_text(self, embed_client):
+        """Test batch endpoint with single text."""
+        response = embed_client.post("/api/v1/embed/batch", json={"texts": ["Hello"]})
+        assert response.status_code in [200, 503]
+
+    def test_embed_batch_with_model(self, embed_client):
+        """Test batch embedding with model override."""
+        response = embed_client.post(
+            "/api/v1/embed/batch", json={"texts": ["Hello", "World"], "model": "custom-model"}
+        )
+        assert response.status_code in [200, 503]
+
+    def test_embed_batch_empty_list(self, embed_client):
+        """Test batch endpoint rejects empty text list."""
+        response = embed_client.post("/api/v1/embed/batch", json={"texts": []})
+        assert response.status_code == 422
+
+    def test_embed_batch_missing_texts(self, embed_client):
+        """Test batch endpoint requires texts field."""
+        response = embed_client.post("/api/v1/embed/batch", json={})
+        assert response.status_code == 422
+
+    def test_embed_batch_many_texts(self, embed_client):
+        """Test batch endpoint with many texts."""
+        texts = [f"Text {i}" for i in range(1000)]
+        response = embed_client.post("/api/v1/embed/batch", json={"texts": texts})
+        assert response.status_code in [200, 503]
+
+
+class TestSimilarityEndpoint:
+    """Test POST /embed/similarity endpoint."""
+
+    def test_compute_similarity(self, embed_client):
+        """Test computing similarity between two texts."""
+        response = embed_client.post(
+            "/api/v1/embed/similarity", json={"text1": "Hello world", "text2": "Hello there"}
+        )
+        assert response.status_code in [200, 503]
+
+    def test_similarity_with_model(self, embed_client):
+        """Test similarity with model override."""
+        response = embed_client.post(
+            "/api/v1/embed/similarity",
+            json={"text1": "Hello", "text2": "Hello", "model": "custom-model"},
+        )
+        assert response.status_code in [200, 503]
+
+    def test_similarity_identical_texts(self, embed_client):
+        """Test similarity of identical texts."""
+        response = embed_client.post(
+            "/api/v1/embed/similarity", json={"text1": "The same text", "text2": "The same text"}
+        )
+        assert response.status_code in [200, 503]
+
+    def test_similarity_different_texts(self, embed_client):
+        """Test similarity of completely different texts."""
+        response = embed_client.post(
+            "/api/v1/embed/similarity", json={"text1": "Hello world", "text2": "xyz abc 123"}
+        )
+        assert response.status_code in [200, 503]
+
+    def test_similarity_missing_text1(self, embed_client):
+        """Test similarity endpoint requires both texts."""
+        response = embed_client.post("/api/v1/embed/similarity", json={"text2": "Hello"})
+        assert response.status_code == 422
+
+    def test_similarity_missing_text2(self, embed_client):
+        """Test similarity endpoint requires both texts."""
+        response = embed_client.post("/api/v1/embed/similarity", json={"text1": "Hello"})
+        assert response.status_code == 422
+
+    def test_similarity_empty_texts(self, embed_client):
+        """Test similarity with empty texts."""
+        response = embed_client.post("/api/v1/embed/similarity", json={"text1": "", "text2": ""})
+        assert response.status_code in [200, 503]
+
+
+class TestEmbedConfigEndpoint:
+    """Test embedding configuration endpoints."""
+
+    def test_get_embedding_config(self, embed_client):
+        """Test getting embedding configuration."""
+        response = embed_client.get("/api/v1/embed/config")
+        assert response.status_code == 200
+        data = response.json()
+
+        assert data["model"] == "sentence-transformers/all-MiniLM-L6-v2"
+        assert data["provider"] == "huggingface"
+        assert data["dimension"] == 384
+        assert "description" in data
+
+    def test_embedding_config_has_required_fields(self, embed_client):
+        """Test config response has all required fields."""
+        response = embed_client.get("/api/v1/embed/config")
+        data = response.json()
+
+        required_fields = ["model", "provider", "dimension", "description"]
+        for field in required_fields:
+            assert field in data
+
+    def test_embedding_config_dimension_is_valid(self, embed_client):
+        """Test dimension is a positive integer."""
+        response = embed_client.get("/api/v1/embed/config")
+        data = response.json()
+
+        assert isinstance(data["dimension"], int)
+        assert data["dimension"] > 0
+
+    def test_update_embedding_config(self, embed_client):
+        """Test updating embedding configuration."""
+        response = embed_client.post("/api/v1/embed/config?provider=huggingface&model=test-model")
+        assert response.status_code in [200, 404, 503]
+
+    def test_update_config_missing_model(self, embed_client):
+        """Test config update requires model parameter."""
+        response = embed_client.post("/api/v1/embed/config")
+        assert response.status_code == 422
+
+
+class TestEmbedRequestValidation:
+    """Test request validation for embed endpoints."""
+
+    def test_embed_text_must_be_string(self, embed_client):
+        """Test text field must be a string."""
+        response = embed_client.post("/api/v1/embed", json={"text": 123})
+        assert response.status_code == 422
+
+    def test_batch_texts_must_be_list(self, embed_client):
+        """Test texts field must be a list."""
+        response = embed_client.post("/api/v1/embed/batch", json={"texts": "not a list"})
+        assert response.status_code == 422
+
+    def test_batch_texts_must_be_strings(self, embed_client):
+        """Test batch texts must all be strings."""
+        response = embed_client.post("/api/v1/embed/batch", json={"texts": ["Hello", 123, "World"]})
+        assert response.status_code == 422
+
+    def test_similarity_texts_must_be_strings(self, embed_client):
+        """Test similarity text fields must be strings."""
+        response = embed_client.post(
+            "/api/v1/embed/similarity", json={"text1": 123, "text2": "Hello"}
+        )
+        assert response.status_code == 422
+
+
+class TestEmbedErrorHandling:
+    """Test error handling in embed endpoints."""
+
+    def test_malformed_json_embed(self, embed_client):
+        """Test malformed JSON in embed request."""
+        response = embed_client.post(
+            "/api/v1/embed", content="not json", headers={"Content-Type": "application/json"}
+        )
+        assert response.status_code == 422
+
+    def test_malformed_json_batch(self, embed_client):
+        """Test malformed JSON in batch request."""
+        response = embed_client.post(
+            "/api/v1/embed/batch", content="not json", headers={"Content-Type": "application/json"}
+        )
+        assert response.status_code == 422
+
+    def test_malformed_json_similarity(self, embed_client):
+        """Test malformed JSON in similarity request."""
+        response = embed_client.post(
+            "/api/v1/embed/similarity",
+            content="not json",
+            headers={"Content-Type": "application/json"},
+        )
+        assert response.status_code == 422
+
+
+class TestEmbedEndpointRouting:
+    """Test that embed endpoints are properly routed."""
+
+    def test_embed_endpoint_exists(self, embed_client):
+        """Test that embed endpoint is accessible."""
+        response = embed_client.post("/api/v1/embed", json={"text": "test"})
+        assert response.status_code in [200, 422, 503]
+
+    def test_batch_endpoint_exists(self, embed_client):
+        """Test that batch endpoint is accessible."""
+        response = embed_client.post("/api/v1/embed/batch", json={"texts": ["test"]})
+        assert response.status_code in [200, 422, 503]
+
+    def test_similarity_endpoint_exists(self, embed_client):
+        """Test that similarity endpoint is accessible."""
+        response = embed_client.post("/api/v1/embed/similarity", json={"text1": "a", "text2": "b"})
+        assert response.status_code in [200, 422, 503]
+
+    def test_config_endpoint_exists(self, embed_client):
+        """Test that config endpoint is accessible."""
+        response = embed_client.get("/api/v1/embed/config")
+        # Config is implemented
+        assert response.status_code == 200

@@ -6,7 +6,8 @@
 .env.production.local
 *.env
 env.txt
-
+.env.production
+.env.prod
 # Python
 __pycache__/
 *.py[cod]
@@ -19,8 +20,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+backend/lib/
+backend/lib64/
 parts/
 sdist/
 var/
@@ -29,6 +30,9 @@ wheels/
 .installed.cfg
 *.egg
 *.bck
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
 # Virtual Environments
 venv/
 ENV/
@@ -50,6 +54,7 @@ instance/
 # IDE specific files
 .idea/
 .vscode/
+.vscode/mcp.json
 *.swp
 *.swo
 *~
@@ -102,4 +107,26 @@ utils/old_vector_loader
 
 # Ignore other project-specific files
 .venv*
+
+# Frontend (Vite/Node)
+# Ignore Node.js dependencies and build outputs
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+frontend/.eslintcache
+frontend/test-results/
+frontend/playwright-report/
+
+# Testing artifacts
+test-results/
+
+# Archived and temporary files
+data/archive/
+data/*.txt
+!data/urls.txt
+!data/README.md
+docs/archive/
+backend/data/output/
+.last-run.json
 *.pdf

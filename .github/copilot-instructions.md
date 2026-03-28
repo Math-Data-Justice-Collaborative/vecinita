@@ -46,7 +46,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ```bash
 # Recommended: Sync dependencies and run with uv
 uv sync
-uv run -m uvicorn src.main:app --reload
+uv run -m uvicorn src.agent.main:app --reload
 
 # Alternative: Direct uvicorn (ensure dependencies installed)
 cd src && uvicorn main:app --reload

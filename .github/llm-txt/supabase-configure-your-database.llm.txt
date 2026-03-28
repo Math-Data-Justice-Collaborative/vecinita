@@ -1,0 +1,67 @@
+Database
+Configuration, optimization, and testing
+Database configuration
+Database configuration
+
+Updating the default configuration for your Postgres database.
+
+Postgres provides a set of sensible defaults for you database size. In some cases, these defaults can be updated. We do not recommend changing these defaults unless you know what you're doing.
+
+Timeouts#
+See the Timeouts section.
+
+Statement optimization#
+All Supabase projects come with the pg_stat_statements extension installed, which tracks planning and execution statistics for all statements executed against it. These statistics can be used in order to diagnose the performance of your project.
+
+This data can further be used in conjunction with the explain functionality of Postgres to optimize your usage.
+
+Managing timezones#
+Every Supabase database is set to UTC timezone by default. We strongly recommend keeping it this way, even if your users are in a different location. This is because it makes it much easier to calculate differences between timezones if you adopt the mental model that everything in your database is in UTC time.
+
+Change timezone#
+
+SQL
+alter database postgres
+set timezone to 'America/New_York';
+Full list of timezones#
+Get a full list of timezones supported by your database. This will return the following columns:
+
+name: Time zone name
+abbrev: Time zone abbreviation
+utc_offset: Offset from UTC (positive means east of Greenwich)
+is_dst: True if currently observing daylight savings
+
+SQL
+select name, abbrev, utc_offset, is_dst
+from pg_timezone_names()
+order by name;
+Search for a specific timezone#
+Use ilike (case insensitive search) to find specific timezones.
+
+
+SQL
+select *
+from pg_timezone_names()
+where name ilike '%york%';
+Edit this page on GitHub
+Is this helpful?
+
+No
+
+Yes
+On this page
+Timeouts
+Statement optimization
+Managing timezones
+Change timezone
+Full list of timezones
+Search for a specific timezone
+Need some help?
+
+Contact support
+Latest product updates?
+
+See Changelog
+Something's not right?
+
+Check system status

@@ -1,0 +1,75 @@
+services:
+  # Embedding Service - Lightweight, sentence-transformers only (Free tier)
+  - type: web
+    name: vecinita-embedding
+    runtime: docker
+    region: virginia
+    plan: free
+    dockerfilePath: ./backend/Dockerfile.embedding
+    dockerContext: ./backend
+    autoDeployTrigger: commit
+    
+    envVars:
+      - key: PORT
+        value: "8001"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: HF_HOME
+        value: "/tmp/huggingface_cache"
+    
+    healthCheckPath: /health
+
+  # Backend FastAPI Agent Service (Free tier) - Lightweight, calls embedding service
+  - type: web
+    name: vecinita-agent
+    runtime: docker
+    region: virginia
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    autoDeployTrigger: commit
+    
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: TF_ENABLE_ONEDNN_OPTS
+        value: "0"
+      - key: EMBEDDING_SERVICE_URL
+        value: "http://vecinita-embedding:8001"  # Private network address (internal communication)
+      # Add these to Render Dashboard > Environment Variables:
+      # REQUIRED: SUPABASE_URL, SUPABASE_KEY
+      # REQUIRED (at least one): GROQ_API_KEY, OPENAI_API_KEY, DEEPSEEK_API_KEY
+      # OPTIONAL: TAVILY_API_KEY (web search), LANGSMITH_API_KEY, LANGSMITH_PROJECT (tracing)
+    
+    healthCheckPath: /health
+
+  # Background Scraper Service - Requires paid plan (Starter or higher)
+  - type: cron
+    name: vecinita-scraper
+    runtime: docker
+    region: virginia
+    dockerfilePath: ./backend/Dockerfile.scraper
+    dockerContext: ./backend
+    schedule: "0 2 * * *"  # Daily at 2 AM UTC
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: EMBEDDING_SERVICE_URL
+        value: "http://vecinita-embedding:8001"  # Scraper uses local embeddings, but available if needed
+      # CRITICAL: Add to Render Dashboard > Environment Variables:
+      # REQUIRED: SUPABASE_URL, SUPABASE_KEY, DATABASE_URL
+      # NOTE: Scraper uses local embeddings by default (FastEmbed/HuggingFace), not embedding service
+
+  # Frontend Vite Service (Free tier)
+  - type: web
+    name: vecinita-frontend
+    runtime: docker
+    region: virginia
+    plan: free
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    autoDeployTrigger: commit
+    
+    healthCheckPath: /health

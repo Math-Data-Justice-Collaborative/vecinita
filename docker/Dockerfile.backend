@@ -1,0 +1,52 @@
+# Unified Backend Dockerfile (Vecinita FastAPI Agent + Embedding Service)
+# Single image containing both backend services. Each service sets its own command in compose.
+
+FROM python:3.11-slim-bookworm AS builder
+
+WORKDIR /app
+
+# Install build tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy project manifest (top-level) for dependency resolution if needed
+COPY backend/pyproject.toml ./pyproject.toml
+
+# Upgrade pip and install combined runtime dependencies into /install
+# Includes agent deps + embedding deps
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --prefix=/install --no-cache-dir --retries 5 --default-timeout=1000 \
+      fastapi "uvicorn[standard]" pydantic typing-extensions \
+      langchain langchain-community langchain-core \
+      langchain-openai langchain-groq langchain-text-splitters \
+      langchain-huggingface langgraph \
+    supabase chromadb psycopg2-binary \
+      beautifulsoup4 pypdf \
+      python-dotenv pydantic requests httpx langdetect tqdm \
+      gotrue langchain-ollama langsmith ddgs \
+      "sentence-transformers>=5.1.2" scikit-learn numpy
+
+FROM python:3.11-slim-bookworm AS runtime
+
+WORKDIR /app
+
+# Minimal runtime tools (curl for healthchecks)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy installed packages from builder
+COPY --from=builder /install /usr/local
+
+# Copy application code (agent + embedding service)
+COPY backend/src ./src
+COPY backend/scripts ./scripts
+
+# Environment
+ENV PYTHONUNBUFFERED=1 \
+    TF_ENABLE_ONEDNN_OPTS=0 \
+    HF_HOME=/tmp/huggingface_cache
+
+# No default CMD; Compose will set service-specific commands

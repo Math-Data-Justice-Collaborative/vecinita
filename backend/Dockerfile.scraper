@@ -1,0 +1,50 @@
+# Backend Dockerfile (Vecinita Scraper with Playwright)
+# Use this for scraping operations that require JavaScript rendering
+# For the Q&A agent, use the standard Dockerfile instead
+
+# Use official Playwright Python image (includes browsers)
+FROM mcr.microsoft.com/playwright/python:v1.49.0-jammy
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy backend Python project manifest
+COPY pyproject.toml ./
+
+# Copy source code and supporting folders from backend context
+COPY src/ ./src/
+COPY scripts/ ./scripts/
+COPY tests/ ./tests/
+
+# Install system dependencies required for building packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+	build-essential \
+	curl \
+	graphviz \
+	graphviz-dev \
+	pkg-config && \
+	rm -rf /var/lib/apt/lists/*
+
+# Python env flags
+ENV PYTHONUNBUFFERED=1
+ENV TF_ENABLE_ONEDNN_OPTS=0
+ENV PORT=8000
+
+# Upgrade pip and install package with embedding and scraping extras
+RUN pip install --no-cache-dir --upgrade pip && \
+	pip install --no-cache-dir --retries 5 --default-timeout=1000 ".[embedding,scraping]"
+
+# Pre-cache embedding model to speed up first run
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')" || true
+
+# Note: Playwright browsers are already included in the base image (mcr.microsoft.com/playwright/python:v1.49.0-jammy)
+# No need to install them again - this would fail due to PATH issues during pip install
+
+# Note: No port exposure - this is a batch scraper, not a web service
+# Note: No health check for cron jobs - they run once and exit
+
+# Make sure the cron wrapper script is executable
+RUN chmod +x scripts/cron_scraper.sh
+
+# Run the scraper via the cron wrapper (validates env vars, runs in streaming mode)
+CMD ["/bin/sh", "scripts/cron_scraper.sh"]

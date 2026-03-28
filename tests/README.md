@@ -1,333 +1,218 @@
-# Vecinita Test Suite
+# E2E and Integration Tests
 
-Comprehensive testing suite for the Vecinita RAG Q&A system using pytest and Playwright.
+Independent test environment for testing backend ↔ frontend interactions, completely separate from backend unit tests.
 
-## Overview
+## Quick Start
 
-This test suite covers:
-- **Unit tests** for all utility modules and the FastAPI application
-- **Integration tests** for database and API interactions
-- **UI tests** using Playwright for end-to-end testing
+```bash
+# Terminal 1: Backend
+cd backend
+uv sync
+uv run uvicorn src.agent.main:app --reload
 
-## Test Structure
+# Terminal 2: Frontend  
+cd frontend
+npm install
+npm run dev
+
+# Terminal 3: Tests (from root)
+cd tests
+uv sync
+uv run pytest -v
+```
+
+## Structure
 
 ```
 tests/
-├── __init__.py
-├── conftest.py              # Shared fixtures and configuration
-├── test_main.py             # FastAPI application tests
-├── test_faq_loader.py       # FAQ loading tests
-├── test_load_faq.py         # Alternative FAQ loader tests
-├── test_scraper_to_text.py  # Web scraper tests
-├── test_supabase_db_test.py # Database connection tests
-├── test_vector_loader.py    # Vector database loader tests
-└── test_ui.py               # UI tests with Playwright
+├── conftest.py                  ← Root pytest config and fixtures
+├── pyproject.toml               ← Independent project dependencies
+├── .env.example                 ← Configuration template
+├── README.md                    ← This file
+│
+├── src/
+│   └── utils.py                 ← APIClient for HTTP testing
+│
+├── integration/
+│   ├── conftest.py
+│   ├── test_api.py              ← Backend API endpoint tests
+│   └── test_agent.py            ← LangGraph agent tests
+│
+├── e2e/
+│   ├── conftest.py
+│   └── test_sources.py          ← End-to-end source attribution tests
+│
+└── docs/
+    ├── README.md                ← Full documentation
+    └── README_QUICK_START.txt   ← Quick reference
 ```
 
-## Installation
+## Test Types
 
-### Install Test Dependencies
-
-```bash
-# Install pytest and required plugins
-pip install pytest pytest-asyncio
-
-# For async tests and UI testing
-pip install playwright
-
-# Install Playwright browsers (required for UI tests)
-playwright install
-```
-
-Or using UV:
-
-```bash
-uv pip install pytest pytest-asyncio playwright
-uv run playwright install
-```
+| Type | Location | Marker | Requirements | Speed |
+|------|----------|--------|-------------|-------|
+| **Integration** | `integration/` | `@pytest.mark.integration` | Backend running | 1-5s |
+| **E2E** | `e2e/` | `@pytest.mark.e2e` | Backend + Frontend | 5-30s |
+| **Unit** | `../backend/tests/` | None | Nothing | <1s |
 
 ## Running Tests
 
-### Run All Tests
+```bash
+# All tests (backend-enabled)
+uv run pytest -v
+
+# Discover tests without running
+uv run pytest --collect-only -q
+
+# Integration tests only
+uv run pytest -v -m integration
+
+# E2E tests only  
+uv run pytest -v -m e2e
+
+# Skip backend-dependent tests
+SKIP_INTEGRATION=true SKIP_E2E=true uv run pytest -v
+
+# With coverage
+uv run pytest -v --cov=.
+```
+
+## Expected Behavior Without Backend
+
+When the backend service is **not running**:
+- ✅ 8 tests are **skipped** gracefully
+- ✅ 3 tests **pass** (no backend dependency)
+- ❌ 3 tests **fail** (require backend)
+
+This is normal! Integration tests only pass when their services are running.
+
+## Configuration
+
+### Environment Variables
+
+Create `.env` from `.env.example`:
 
 ```bash
-pytest
+cp .env.example .env
 ```
 
-### Run Specific Test Categories
+Variables:
+- `BACKEND_URL` - Backend API URL (default: http://localhost:8004 for Gateway, 8000 for Agent)
+- `FRONTEND_URL` - Frontend dev server URL (default: http://localhost:5173)
+- `SKIP_E2E` - Skip E2E tests (default: false)
+- `SKIP_INTEGRATION` - Skip integration tests (default: false)
+- `API_TIMEOUT` - Request timeout in seconds (default: 10)
 
+## API v1 Testing (Updated for Gateway)
+
+The tests now target the **API Gateway** service with v1 versioning:
+
+### Default Backend URL Changed
+- **NEW:** `http://localhost:8004` (API Gateway with `/api/v1/*` endpoints)
+- **OLD:** `http://localhost:8000` (Agent service - still used by backend/tests/)
+
+### Tested Endpoints
+```
+Root & Documentation:
+  GET /                        → Service info (JSON) or Frontend (HTML)
+  GET /health                  → Health check (backward compatible)
+  GET /api/v1/docs             → Swagger UI
+  GET /api/v1/openapi.json     → OpenAPI schema
+
+Q&A Endpoints:
+  GET /api/v1/ask?question=... → Ask question
+  GET /api/v1/ask/stream       → Streaming response
+  GET /api/v1/ask/config       → Configuration
+
+Admin Endpoints:
+  GET /api/v1/admin/health     → Health status
+  GET /api/v1/admin/config     → Admin configuration
+  GET /api/v1/admin/stats      → Statistics
+
+Scraping Endpoints:
+  POST /api/v1/scrape          → Start scraping job
+  GET /api/v1/scrape/{job_id}  → Job status
+  GET /api/v1/scrape/history   → Job history
+  GET /api/v1/scrape/stats     → Statistics
+
+Embedding Endpoints:
+  GET /api/v1/embed/config     → Embedding configuration
+```
+
+### Running Gateway for Tests
 ```bash
-# Unit tests only (fast)
-pytest -m unit
+# Start API Gateway with demo mode
+cd backend
+DEMO_MODE=true python -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004
 
-# Integration tests
-pytest -m integration
-
-# UI tests (requires server running)
-pytest -m ui
-
-# Database tests
-pytest -m db
-
-# API tests
-pytest -m api
+# Run tests against gateway
+cd tests
+pytest integration/ -v
 ```
 
-### Run Specific Test Files
+### Test Files
+- **test_api.py** - Core API endpoint tests (updated for v1)
+- **test_api_v1_features.py** - New tests for API v1 features:
+  - Versioning structure
+  - Documentation endpoints
+  - Response format validation
+  - Error handling
 
-```bash
-# Test main.py
-pytest tests/test_main.py
+Modal reindex trigger coverage is validated in backend test suites:
+- `backend/tests/test_api/test_gateway_router_scrape.py` (unit)
+- `backend/tests/integration/test_modal_reindex_trigger.py` (integration)
+- `backend/tests/e2e/test_reindex_flow.py` (e2e)
 
-# Test FAQ loader
-pytest tests/test_faq_loader.py
-
-# Test scraper
-pytest tests/test_scraper_to_text.py
-
-# Test vector loader
-pytest tests/test_vector_loader.py
+### Response Format (API v1)
+```json
+{
+  "question": "What is Vecinita?",
+  "answer": "...",
+  "sources": [
+    {
+      "url": "https://...",
+      "title": "...",
+      "chunk_id": "...",
+      "relevance": 0.95
+    }
+  ],
+  "language": "en",
+  "model": "demo-mode",
+  "response_time_ms": 123,
+  "token_usage": {
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0
+  }
+}
 ```
+- `FRONTEND_URL` - Frontend URL (default: http://localhost:5173)
+- `SKIP_INTEGRATION` - Skip integration tests (default: false)
+- `SKIP_E2E` - Skip E2E tests (default: false)
+- `API_TIMEOUT` - HTTP request timeout in seconds (default: 10)
 
-### Run Tests with Verbose Output
+### Supabase/Backend Testing
 
-```bash
-pytest -v
-```
+Some tests require a running backend with:
+- Supabase instance configured
+- Groq API key (`GROQ_API_KEY`)
+- Valid URLs in data configuration
 
-### Run Tests with Coverage
+## Import Pattern
 
-```bash
-pytest --cov=. --cov-report=html
-```
-
-## UI Tests with Playwright
-
-### Prerequisites
-
-1. **Install Playwright browsers:**
-   ```bash
-   playwright install
-   ```
-
-2. **Start the development server:**
-   ```bash
-   uv run uvicorn main:app --host localhost --port 8000
-   ```
-
-3. **Run UI tests:**
-   ```bash
-   # The UI tests are skipped by default
-   # To run them, remove the @pytest.mark.skip decorators or use:
-   pytest tests/test_ui.py --run-skipped -m ui -v
-   ```
-
-### UI Test Coverage
-
-- Page load and initialization
-- Input element validation
-- Submit button functionality
-- Spanish language question handling
-- API endpoint integration
-- Response display
-- Responsive design (mobile/desktop)
-- Performance metrics
-- Error handling
-- Console error detection
-
-## Test Configuration
-
-### pytest.ini
-
-Configuration file for pytest with:
-- Test discovery patterns
-- Test markers for categorization
-- Logging configuration
-- Output formatting
-
-### conftest.py
-
-Shared pytest fixtures:
-- `env_vars` - Environment variables
-- `mock_supabase_client` - Mocked Supabase client
-- `mock_embedding_model` - Mocked embedding model
-- `mock_llm` - Mocked language model
-- `fastapi_client` - FastAPI test client
-- `temp_file` - Temporary file for testing
-- `sample_documents` - Sample document data
-- `sample_chunks` - Sample document chunks
-
-## Test Markers
-
-Tests are organized with markers for easy filtering:
-
-- `@pytest.mark.unit` - Unit tests (no external dependencies)
-- `@pytest.mark.integration` - Integration tests (may require services)
-- `@pytest.mark.ui` - UI tests using Playwright
-- `@pytest.mark.db` - Database-related tests
-- `@pytest.mark.api` - API endpoint tests
-- `@pytest.mark.slow` - Long-running tests
-
-## Mocking Strategy
-
-The test suite uses mocking extensively to:
-- Avoid external dependencies during testing
-- Isolate units of code for testing
-- Control test data and responses
-- Speed up test execution
-
-Key mocked components:
-- Supabase client and database operations
-- Embedding models (HuggingFace, OpenAI)
-- Language models (ChatGroq, ChatOpenAI)
-- File I/O operations
-- HTTP requests
-
-## Environment Variables for Testing
-
-Tests use a `.env` file for configuration. Create a `.env.test` file or set environment variables:
-
-```
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your-api-key
-GROQ_API_KEY=your-groq-key
-DATABASE_URL=postgresql://user:password@localhost/db
-```
-
-## Continuous Integration
-
-These tests are designed to run in CI/CD pipelines:
-
-```bash
-# Run with minimal output for CI
-pytest --tb=short -q
-
-# Generate coverage report
-pytest --cov=. --cov-report=xml
-
-# Run specific tests matching pattern
-pytest -k "test_ask" -v
-```
-
-## Troubleshooting
-
-### Playwright Tests Not Running
-
-1. Ensure browsers are installed:
-   ```bash
-   playwright install
-   ```
-
-2. Ensure the server is running:
-   ```bash
-   uv run uvicorn main:app --host localhost --port 8000
-   ```
-
-3. Remove `@pytest.mark.skip` decorators from UI tests
-
-### Import Errors
-
-1. Ensure you're in the correct directory:
-   ```bash
-   cd /path/to/vecinita
-   ```
-
-2. Ensure dependencies are installed:
-   ```bash
-   pip install -e .
-   ```
-
-### Mocking Issues
-
-If mocks aren't working correctly:
-1. Check the import path matches the patch path
-2. Ensure patch is applied before the code under test runs
-3. Verify mock return values are set correctly
-
-## Writing New Tests
-
-### Test File Template
+Tests use **HTTP client** (`APIClient`) instead of direct imports for true independence:
 
 ```python
-import pytest
-from unittest.mock import patch, MagicMock
+from utils import APIClient
 
-@pytest.mark.unit
-class TestMyFeature:
-    """Test my feature."""
-    
-    def test_something(self, fastapi_client, mock_supabase_client):
-        """Test description."""
-        # Arrange
-        expected = "result"
-        
-        # Act
-        result = my_function()
-        
-        # Assert
-        assert result == expected
+def test_ask_endpoint(backend_url):
+    api = APIClient(backend_url)
+    response = api.ask(query="What is Vecinita?")
+    assert "answer" in response
 ```
 
-### Using Fixtures
+This ensures the tests are **completely separate** from the backend code.
 
-```python
-def test_with_fixtures(
-    fastapi_client,
-    mock_supabase_client,
-    mock_embedding_model,
-    sample_documents
-):
-    """Test using built-in fixtures."""
-    # Use fixtures...
-    pass
-```
+## Documentation
 
-## Best Practices
-
-1. **Name tests descriptively**: `test_ask_english_question` is better than `test_ask`
-2. **Use arrange-act-assert pattern**: Setup, execute, verify
-3. **Keep tests isolated**: No dependencies between tests
-4. **Mock external services**: Don't make real API calls
-5. **Test edge cases**: Empty inputs, errors, timeouts
-6. **Document complex setups**: Add comments explaining mocks
-
-## Performance
-
-- Unit tests run in < 1 second
-- Integration tests run in < 5 seconds
-- UI tests run in < 10 seconds per test (requires running server)
-
-Run only unit tests for fast feedback during development:
-
-```bash
-pytest -m unit
-```
-
-## Contributing
-
-When adding new features:
-1. Write tests first (TDD approach)
-2. Ensure all existing tests pass
-3. Add tests for edge cases and error conditions
-4. Update this README if adding new test categories
-5. Maintain > 80% code coverage
-
-## Coverage Goals
-
-- Core functionality: 90%+
-- Utilities: 85%+
-- Integration points: 80%+
-- Overall target: 85%
-
-Check coverage:
-
-```bash
-pytest --cov=. --cov-report=term-missing
-```
-
-## Resources
-
-- [pytest documentation](https://docs.pytest.org/)
-- [Playwright Python docs](https://playwright.dev/python/)
-- [unittest.mock documentation](https://docs.python.org/3/library/unittest.mock.html)
-- [FastAPI testing](https://fastapi.tiangolo.com/advanced/testing-dependencies/)
+For more details, see [docs/README.md](docs/README.md)
