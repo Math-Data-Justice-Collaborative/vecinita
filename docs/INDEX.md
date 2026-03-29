@@ -15,6 +15,7 @@ Welcome to the organized documentation hub.
 - [Microservice Architecture](architecture/ARCHITECTURE_MICROSERVICE.md)
 - [Embedding Service Architecture](architecture/EMBEDDING_SERVICE_ARCHITECTURE.md)
 - [Modal Hybrid Architecture](architecture/MODAL_HYBRID_ARCHITECTURE.md)
+- [Monorepo Refactor Blueprint](architecture/MONOREPO_REFACTOR_BLUEPRINT.md) - Target structure and migration phases for chat + data-management + modal services
 
 ## Deployment
 

@@ -1,5 +1,6 @@
 .PHONY: help \
 	dev dev-tmux dev-attach dev-stop dev-clear-ports dev-backend dev-gateway dev-frontend \
+	branch-status branch-save branch-restore branch-switch branch-pull branch-sync-main \
 	lint lint-backend lint-frontend \
 	typecheck typecheck-backend typecheck-frontend \
 	format format-backend format-frontend \
@@ -21,6 +22,14 @@ help:
 	@echo "  make dev-backend                    Start the backend agent in reload mode"
 	@echo "  make dev-gateway                    Start the API gateway in reload mode"
 	@echo "  make dev-frontend                   Start the frontend dev server"
+	@echo ""
+	@echo "Branch workflow targets"
+	@echo "  make branch-status                  Show component branch and dirty state"
+	@echo "  make branch-save                    Save current branch snapshot"
+	@echo "  make branch-switch BRANCH=<name>    Switch components to branch, fallback to main"
+	@echo "  make branch-pull [BRANCH=<name>]    Pull latest from origin for component branches"
+	@echo "  make branch-restore                 Restore last saved branch snapshot"
+	@echo "  make branch-sync-main               Switch all components to main"
 	@echo ""
 	@echo "Quality targets"
 	@echo "  make lint                           Lint backend and frontend"
@@ -90,6 +99,29 @@ dev-gateway:
 
 dev-frontend:
 	cd frontend && npm run dev -- --host 0.0.0.0 --port 5173
+
+branch-status:
+	./run/branch-orchestrator.sh status
+
+branch-save:
+	./run/branch-orchestrator.sh save
+
+branch-restore:
+	./run/branch-orchestrator.sh restore
+
+branch-switch:
+	@test -n "$(BRANCH)" || (echo "Usage: make branch-switch BRANCH=<name>" && exit 1)
+	./run/branch-orchestrator.sh switch "$(BRANCH)"
+
+branch-pull:
+	@if [ -n "$(BRANCH)" ]; then \
+		./run/branch-orchestrator.sh pull "$(BRANCH)"; \
+	else \
+		./run/branch-orchestrator.sh pull; \
+	fi
+
+branch-sync-main:
+	./run/branch-orchestrator.sh sync-main
 
 lint: lint-backend lint-frontend
 
