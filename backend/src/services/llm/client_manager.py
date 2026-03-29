@@ -111,6 +111,7 @@ class LocalLLMClientManager:
         api_key: str | None = None,
         modal_proxy_key: str | None = None,
         modal_proxy_secret: str | None = None,
+        proxy_auth_token: str | None = None,
         selection_file_path: str | None = None,
         locked: bool = False,
         use_native_api: bool = True,
@@ -120,6 +121,7 @@ class LocalLLMClientManager:
         self.api_key = api_key
         self.modal_proxy_key = modal_proxy_key
         self.modal_proxy_secret = modal_proxy_secret
+        self.proxy_auth_token = proxy_auth_token
         self.selection_file_path = selection_file_path
         self.use_native_api = use_native_api
         self.current_selection: Selection = {
@@ -143,7 +145,10 @@ class LocalLLMClientManager:
         # client (Authorization: Bearer, Modal-Key, Modal-Secret) causes Modal to
         # return HTTP 401 because the Bearer token is not a valid Modal credential.
         if self._via_proxy():
-            return {}
+            headers: dict[str, str] = {}
+            if self.proxy_auth_token:
+                headers["X-Proxy-Token"] = self.proxy_auth_token
+            return headers
         headers: dict[str, str] = {}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"

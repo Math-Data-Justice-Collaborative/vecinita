@@ -268,6 +268,7 @@ def _make_manager(**kwargs):
         api_key=kwargs.get("api_key"),
         modal_proxy_key=kwargs.get("modal_proxy_key"),
         modal_proxy_secret=kwargs.get("modal_proxy_secret"),
+        proxy_auth_token=kwargs.get("proxy_auth_token"),
     )
 
 
@@ -335,6 +336,17 @@ class TestHeadersViaProxy:
             modal_proxy_secret="ms-222",
         )
         assert "Modal-Key" not in mgr.headers()
+
+    def test_x_proxy_token_only_when_via_proxy_and_configured(self):
+        mgr = _make_manager(
+            base_url="http://vecinita-modal-proxy-v1:10000/model",
+            api_key="should-not-appear",
+            modal_proxy_key="mk-111",
+            modal_proxy_secret="ms-222",
+            proxy_auth_token="proxy-shared-token",
+        )
+        headers = mgr.headers()
+        assert headers == {"X-Proxy-Token": "proxy-shared-token"}
 
 
 class TestHeadersDirectModal:

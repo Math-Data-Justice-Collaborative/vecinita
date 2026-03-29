@@ -41,6 +41,11 @@ MODAL_PROXY_KEY = (
     os.getenv("MODAL_API_KEY") or os.getenv("MODAL_API_TOKEN_ID") or os.getenv("MODAL_TOKEN_ID")
 )
 MODAL_PROXY_SECRET = os.getenv("MODAL_API_PROXY_SECRET") or os.getenv("MODAL_TOKEN_SECRET")
+PROXY_AUTH_TOKEN = (
+    os.getenv("PROXY_AUTH_TOKEN")
+    or os.getenv("MODAL_PROXY_AUTH_TOKEN")
+    or os.getenv("X_PROXY_TOKEN")
+)
 
 # Configuration - will be fetched from embedding service
 EMBEDDING_CONFIG: dict[str, Any] = {
@@ -56,6 +61,8 @@ def _embedding_service_headers() -> dict[str, str]:
     if EMBEDDING_SERVICE_AUTH_TOKEN:
         headers["x-embedding-service-token"] = EMBEDDING_SERVICE_AUTH_TOKEN
         headers["authorization"] = f"Bearer {EMBEDDING_SERVICE_AUTH_TOKEN}"
+    if PROXY_AUTH_TOKEN:
+        headers["X-Proxy-Token"] = PROXY_AUTH_TOKEN
     if MODAL_PROXY_KEY and MODAL_PROXY_SECRET:
         headers["Modal-Key"] = MODAL_PROXY_KEY
         headers["Modal-Secret"] = MODAL_PROXY_SECRET

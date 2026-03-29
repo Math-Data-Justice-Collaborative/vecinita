@@ -265,6 +265,11 @@ modal_proxy_key = (
 modal_proxy_secret = os.environ.get("MODAL_API_PROXY_SECRET") or os.environ.get(
     "MODAL_TOKEN_SECRET"
 )
+proxy_auth_token = (
+    os.environ.get("PROXY_AUTH_TOKEN")
+    or os.environ.get("MODAL_PROXY_AUTH_TOKEN")
+    or os.environ.get("X_PROXY_TOKEN")
+)
 ollama_model = os.environ.get("OLLAMA_MODEL") or "llama3.1:8b"
 default_provider = "ollama"
 default_model = os.environ.get("DEFAULT_MODEL") or None
@@ -290,6 +295,7 @@ llm_client_manager = LocalLLMClientManager(
     api_key=ollama_api_key,
     modal_proxy_key=modal_proxy_key,
     modal_proxy_secret=modal_proxy_secret,
+    proxy_auth_token=proxy_auth_token,
     selection_file_path=selection_file_path,
     locked=lock_model_selection_env,
     use_native_api=force_local_modal_llm,

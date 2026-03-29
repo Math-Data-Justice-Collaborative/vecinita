@@ -159,6 +159,14 @@ def test_client_sets_modal_proxy_key_from_token_id(monkeypatch):
     assert client.client.headers.get("Modal-Secret") == "ws-test-proxy-secret"
 
 
+def test_client_sets_proxy_auth_token_header_when_available(monkeypatch):
+    monkeypatch.setenv("PROXY_AUTH_TOKEN", "proxy-shared-token")
+
+    client = EmbeddingServiceClient(base_url="http://vecinita-modal-proxy-v1:10000/embedding")
+
+    assert client.client.headers.get("X-Proxy-Token") == "proxy-shared-token"
+
+
 def test_create_embedding_client_passes_explicit_auth_token(monkeypatch):
     captured: dict[str, str | None] = {}
 

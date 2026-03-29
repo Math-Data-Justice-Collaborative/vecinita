@@ -67,10 +67,17 @@ class EmbeddingServiceClient(Embeddings):
         self.modal_proxy_secret = os.getenv("MODAL_API_PROXY_SECRET") or os.getenv(
             "MODAL_TOKEN_SECRET"
         )
+        self.proxy_auth_token = (
+            os.getenv("PROXY_AUTH_TOKEN")
+            or os.getenv("MODAL_PROXY_AUTH_TOKEN")
+            or os.getenv("X_PROXY_TOKEN")
+        )
         headers = {}
         if self.auth_token:
             headers["x-embedding-service-token"] = self.auth_token
             headers["Authorization"] = f"Bearer {self.auth_token}"
+        if self.proxy_auth_token:
+            headers["X-Proxy-Token"] = self.proxy_auth_token
         if self.modal_proxy_key and self.modal_proxy_secret:
             headers["Modal-Key"] = self.modal_proxy_key
             headers["Modal-Secret"] = self.modal_proxy_secret
