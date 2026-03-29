@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkvecinita_docs_site=self.webpackChunkvecinita_docs_site||[]).push([[176],{5648(e){e.exports=JSON.parse('{"tags":[{"label":"Releases","permalink":"/vecinita/docs/tags/releases","count":1},{"label":"Docusaurus","permalink":"/vecinita/docs/tags/docusaurus","description":"Docs related to the Docusaurus framework","count":1}]}')}}]);
