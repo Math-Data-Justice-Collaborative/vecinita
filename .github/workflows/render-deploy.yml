@@ -187,7 +187,9 @@ jobs:
           check_url "Agent config" "$AGENT_URL/api/v1/ask/config"
 
   deploy-production:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-22.04
     needs: [backend-quality, frontend-quality]
     environment: production
@@ -216,7 +218,9 @@ jobs:
           fi
 
   smoke-production:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-22.04
     needs: [deploy-production]
     timeout-minutes: 10
