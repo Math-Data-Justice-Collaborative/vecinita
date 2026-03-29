@@ -348,6 +348,18 @@ async def root():
 
 @app.get("/config")
 async def get_config(http_request: Request):
+    """Return the current and available embedding provider/model configuration.
+
+    Requires ``X-Embedding-Service-Token`` or ``Authorization: Bearer`` header
+    when ``EMBEDDING_SERVICE_AUTH_TOKEN`` is configured (see
+    ``_ensure_authorized``).
+
+    Returns:
+        dict: A JSON object with two keys:
+            - ``current``: active ``{provider, model, locked}`` settings.
+            - ``available``: lists of supported ``providers`` and ``models``
+              keyed by provider name.
+    """
     _ensure_authorized(http_request)
     return {
         "current": {"provider": _provider_name, "model": _model_name, "locked": _lock_selection},

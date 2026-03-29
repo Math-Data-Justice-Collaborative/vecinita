@@ -1,16 +1,40 @@
-"""
-Vecinita Auth Proxy - Lightweight Supabase Authentication Proxy
+"""Vecinita Auth Proxy — Lightweight Supabase Authentication Proxy.
 
-This service acts as a single point of authentication and API key management
-between the frontend and backend, reducing direct Supabase dependencies.
+This service acts as a single point of authentication and API-key management
+between the Vecinita frontend and backend, eliminating the need for each
+service to hold direct Supabase credentials.
 
-Features:
-- API key validation and rate limiting
-- Usage tracking (tokens per day)
-- Password complexity validation
-- JWT token management with expiration
-- Transparent proxy to backend services
-- Security: Protection against brute force, rate limiting, secure token storage
+Endpoints
+---------
+- ``GET  /health``          — readiness probe
+- ``POST /validate-key``    — validate an API key and return its metadata
+- ``POST /token``           — exchange credentials for a short-lived JWT
+- ``GET  /usage``           — query per-key token/request counters
+- ``POST /track-usage``     — increment usage counters (called by gateway)
+- ``POST /change-password`` — validated password change with complexity rules
+- ``GET  /config``          — service configuration and rate-limit settings
+
+Rate-limiting defaults
+----------------------
+- **1 000 tokens / day**   per API key
+- **100 requests / hour**  per API key
+
+Limits are enforced in ``RateLimitState`` and return ``429 Too Many Requests``
+when exceeded.
+
+Environment variables
+---------------------
+- ``SUPABASE_URL``  — Supabase project URL (required)
+- ``SUPABASE_KEY``  — Supabase anon or service-role key (required)
+- ``ENVIRONMENT``   — ``\"development\"`` / ``\"production\"`` (default: ``\"development\"``)
+- ``PORT``          — server port (default: 8003)
+
+Security
+--------
+- API keys follow the ``sk_vp_<random>`` format; any other format is rejected.
+- Brute-force protection via per-IP failed-attempt counters.
+- Password complexity: min 8 chars, upper + lower + digit + special.
+- Credential headers are never logged.
 """
 
 import os
