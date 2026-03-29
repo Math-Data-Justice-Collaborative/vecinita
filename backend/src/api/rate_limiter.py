@@ -12,9 +12,16 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
+from hashlib import sha256
 from typing import cast
 
 logger = logging.getLogger(__name__)
+
+
+def _key_fingerprint(api_key: str | None) -> str:
+    if not api_key:
+        return "none"
+    return sha256(api_key.encode("utf-8")).hexdigest()[:8]
 
 
 class RateLimiterBackend(ABC):
@@ -103,7 +110,7 @@ class InMemoryRateLimiter(RateLimiterBackend):
         ep_state["requests"] += 1
 
         logger.debug(
-            f"Rate limit OK: {api_key[:10]}... | "
+            f"Rate limit OK: {_key_fingerprint(api_key)} | "
             f"{ep_state['requests']}/{endpoint_limits.get('requests_per_hour', 100)} req/hr | "
             f"{state['tokens']}/{endpoint_limits.get('tokens_per_day', 10000)} tokens/day"
         )
@@ -190,7 +197,7 @@ class RedisRateLimiter(RateLimiterBackend):
                 return False, f"Hourly request limit exceeded for {endpoint}"
 
             logger.debug(
-                f"Rate limit OK (Redis): {api_key[:10]}... | "
+                f"Rate limit OK (Redis): {_key_fingerprint(api_key)} | "
                 f"{ep_count}/{endpoint_limits.get('requests_per_hour', 100)} req/hr"
             )
 

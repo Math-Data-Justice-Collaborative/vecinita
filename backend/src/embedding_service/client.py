@@ -55,12 +55,14 @@ class EmbeddingServiceClient(Embeddings):
             auth_token
             or os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
             or os.getenv("MODAL_API_PROXY_SECRET")
+            or os.getenv("MODAL_API_PROXY_KEY")
             or os.getenv("MODAL_API_KEY")
             or os.getenv("MODAL_TOKEN_SECRET")
             or os.getenv("MODAL_API_TOKEN_SECRET")
         )
         self.modal_proxy_key = (
-            os.getenv("MODAL_API_KEY")
+            os.getenv("MODAL_API_PROXY_KEY")
+            or os.getenv("MODAL_API_KEY")
             or os.getenv("MODAL_API_TOKEN_ID")
             or os.getenv("MODAL_TOKEN_ID")
         )

@@ -33,12 +33,16 @@ EMBEDDING_SERVICE_URL = (
 EMBEDDING_SERVICE_AUTH_TOKEN = (
     os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
     or os.getenv("MODAL_API_PROXY_SECRET")
+    or os.getenv("MODAL_API_PROXY_KEY")
     or os.getenv("MODAL_API_KEY")
     or os.getenv("MODAL_TOKEN_SECRET")
     or os.getenv("MODAL_API_TOKEN_SECRET")
 )
 MODAL_PROXY_KEY = (
-    os.getenv("MODAL_API_KEY") or os.getenv("MODAL_API_TOKEN_ID") or os.getenv("MODAL_TOKEN_ID")
+    os.getenv("MODAL_API_PROXY_KEY")
+    or os.getenv("MODAL_API_KEY")
+    or os.getenv("MODAL_API_TOKEN_ID")
+    or os.getenv("MODAL_TOKEN_ID")
 )
 MODAL_PROXY_SECRET = os.getenv("MODAL_API_PROXY_SECRET") or os.getenv("MODAL_TOKEN_SECRET")
 PROXY_AUTH_TOKEN = (

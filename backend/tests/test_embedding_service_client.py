@@ -139,6 +139,7 @@ def test_client_prefers_explicit_auth_token_over_env(monkeypatch):
 
 
 def test_client_sets_modal_proxy_headers_when_available(monkeypatch):
+    monkeypatch.delenv("MODAL_API_PROXY_KEY", raising=False)
     monkeypatch.setenv("MODAL_API_KEY", "wk-test-proxy-key")
     monkeypatch.setenv("MODAL_API_PROXY_SECRET", "ws-test-proxy-secret")
 
@@ -149,6 +150,7 @@ def test_client_sets_modal_proxy_headers_when_available(monkeypatch):
 
 
 def test_client_sets_modal_proxy_key_from_token_id(monkeypatch):
+    monkeypatch.delenv("MODAL_API_PROXY_KEY", raising=False)
     monkeypatch.delenv("MODAL_API_KEY", raising=False)
     monkeypatch.setenv("MODAL_API_TOKEN_ID", "wk-token-id-fallback")
     monkeypatch.setenv("MODAL_API_PROXY_SECRET", "ws-test-proxy-secret")

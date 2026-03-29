@@ -11,6 +11,7 @@ Provides decorators and dependency functions for:
 import logging
 import os
 from functools import wraps
+from hashlib import sha256
 
 from fastapi import Depends, Header, HTTPException
 
@@ -20,6 +21,13 @@ logger = logging.getLogger(__name__)
 ENABLE_AUTH = os.getenv("ENABLE_AUTH", "false").lower() in ["true", "1", "yes"]
 ADMIN_API_KEYS = os.getenv("ADMIN_API_KEYS", "").split(",") if os.getenv("ADMIN_API_KEYS") else []
 AUTH_FAIL_CLOSED = os.getenv("AUTH_FAIL_CLOSED", "true").lower() in ["true", "1", "yes"]
+
+
+def _key_fingerprint(api_key: str | None) -> str:
+    """Return a short non-reversible identifier for logging/tracing."""
+    if not api_key:
+        return "none"
+    return sha256(api_key.encode("utf-8")).hexdigest()[:8]
 
 
 # ============================================================================
@@ -100,7 +108,10 @@ async def require_admin_auth(api_key: str | None = Depends(get_api_key)) -> str 
         )
 
     if api_key not in ADMIN_API_KEYS:
-        logger.warning(f"Admin access attempt with non-admin API key: {api_key[:10]}***")
+        logger.warning(
+            "Admin access attempt with non-admin API key fingerprint=%s",
+            _key_fingerprint(api_key),
+        )
         raise HTTPException(
             status_code=403,
             detail="Admin access required for this endpoint",
@@ -186,7 +197,10 @@ def require_admin_api_key(func):
 
         # Verify admin status
         if api_key not in ADMIN_API_KEYS:
-            logger.warning(f"Unauthorized admin access attempt: {api_key[:10]}***")
+            logger.warning(
+                "Unauthorized admin access attempt fingerprint=%s",
+                _key_fingerprint(api_key),
+            )
             raise HTTPException(
                 status_code=403,
                 detail="Admin credentials required",
@@ -265,4 +279,4 @@ class RequestContext:
         return self.admin
 
     def __repr__(self):
-        return f"RequestContext(api_key={self.api_key[:10] if self.api_key else None}***, admin={self.admin})"
+        return f"RequestContext(api_key_fingerprint={_key_fingerprint(self.api_key)}, admin={self.admin})"

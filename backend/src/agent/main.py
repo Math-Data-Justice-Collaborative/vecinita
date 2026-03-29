@@ -48,6 +48,7 @@ os.environ.setdefault("TRANSFORMERS_NO_TORCH", "1")
 
 from typing import Annotated, Any, Literal, TypedDict
 
+import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -253,12 +254,14 @@ ollama_base_url = _normalize_internal_service_url(
 ollama_api_key = (
     os.environ.get("OLLAMA_API_KEY")
     or os.environ.get("MODAL_API_PROXY_SECRET")
+    or os.environ.get("MODAL_API_PROXY_KEY")
     or os.environ.get("MODAL_API_KEY")
     or os.environ.get("MODAL_TOKEN_SECRET")
     or os.environ.get("MODAL_API_TOKEN_SECRET")
 )
 modal_proxy_key = (
-    os.environ.get("MODAL_API_KEY")
+    os.environ.get("MODAL_API_PROXY_KEY")
+    or os.environ.get("MODAL_API_KEY")
     or os.environ.get("MODAL_API_TOKEN_ID")
     or os.environ.get("MODAL_TOKEN_ID")
 )

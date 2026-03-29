@@ -152,8 +152,6 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
             # Add metadata headers to response
             headers = MutableHeaders(response.headers)
             headers["X-Request-Time"] = f"{elapsed_time:.3f}s"
-            if api_key:
-                headers["X-API-Key-Masked"] = api_key[:10] + "***"
 
             return response
 
