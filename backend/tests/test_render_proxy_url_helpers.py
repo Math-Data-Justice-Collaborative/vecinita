@@ -117,9 +117,11 @@ class TestNormalizeUrlOffRender:
 
 
 class TestNormalizeUrlOnRender:
-    """On Render, _normalize must ALWAYS return the fallback_url, regardless
-    of what env var is configured.  This ensures all model/embedding traffic
-    routes through the internal modal-proxy.
+    """On Render, local/docker URLs must be forced to fallback URL.
+
+    Non-local explicit URLs (for example direct Modal endpoints) are preserved
+    to avoid hard failures when a hardcoded private-host fallback is not
+    reachable from the current Render region.
     """
 
     def _normalize_on_render(self, raw_url, fallback):
@@ -130,52 +132,59 @@ class TestNormalizeUrlOnRender:
     def test_returns_fallback_for_localhost_ollama(self):
         result = self._normalize_on_render(
             "http://localhost:11434",
-            "http://vecinita-modal-proxy-48hk:10000/model",
+            "http://vecinita-modal-proxy-v1:10000/model",
         )
-        assert result == "http://vecinita-modal-proxy-48hk:10000/model"
+        assert result == "http://vecinita-modal-proxy-v1:10000/model"
 
     def test_returns_fallback_for_127_0_0_1_ollama(self):
         result = self._normalize_on_render(
             "http://127.0.0.1:11434",
-            "http://vecinita-modal-proxy-48hk:10000/model",
+            "http://vecinita-modal-proxy-v1:10000/model",
         )
-        assert result == "http://vecinita-modal-proxy-48hk:10000/model"
+        assert result == "http://vecinita-modal-proxy-v1:10000/model"
 
     def test_returns_fallback_for_docker_embedding_service(self):
         result = self._normalize_on_render(
             "http://embedding-service:8001",
-            "http://vecinita-modal-proxy-48hk:10000/embedding",
+            "http://vecinita-modal-proxy-v1:10000/embedding",
         )
-        assert result == "http://vecinita-modal-proxy-48hk:10000/embedding"
+        assert result == "http://vecinita-modal-proxy-v1:10000/embedding"
 
     def test_returns_fallback_for_docker_vecinita_embedding(self):
         result = self._normalize_on_render(
             "http://vecinita-embedding:8001",
-            "http://vecinita-modal-proxy-48hk:10000/embedding",
+            "http://vecinita-modal-proxy-v1:10000/embedding",
         )
-        assert result == "http://vecinita-modal-proxy-48hk:10000/embedding"
+        assert result == "http://vecinita-modal-proxy-v1:10000/embedding"
 
     def test_returns_fallback_for_direct_modal_url(self):
-        """Even a live Modal endpoint must be routed through the proxy on Render."""
+        """A non-local explicit endpoint should be preserved on Render."""
         result = self._normalize_on_render(
             "https://vecinita--vecinita-model-api.modal.run",
-            "http://vecinita-modal-proxy-48hk:10000/model",
+            "http://vecinita-modal-proxy-v1:10000/model",
         )
-        assert result == "http://vecinita-modal-proxy-48hk:10000/model"
+        assert result == "https://vecinita--vecinita-model-api.modal.run"
+
+    def test_returns_fallback_for_local_embedding_service_name(self):
+        result = self._normalize_on_render(
+            "http://embedding-service:8001",
+            "http://vecinita-modal-proxy-v1:10000/embedding",
+        )
+        assert result == "http://vecinita-modal-proxy-v1:10000/embedding"
 
     def test_returns_fallback_when_raw_url_is_none(self):
-        result = self._normalize_on_render(None, "http://vecinita-modal-proxy-48hk:10000/model")
-        assert result == "http://vecinita-modal-proxy-48hk:10000/model"
+        result = self._normalize_on_render(None, "http://vecinita-modal-proxy-v1:10000/model")
+        assert result == "http://vecinita-modal-proxy-v1:10000/model"
 
     def test_returns_fallback_when_raw_url_is_empty(self):
-        result = self._normalize_on_render("", "http://vecinita-modal-proxy-48hk:10000/embedding")
-        assert result == "http://vecinita-modal-proxy-48hk:10000/embedding"
+        result = self._normalize_on_render("", "http://vecinita-modal-proxy-v1:10000/embedding")
+        assert result == "http://vecinita-modal-proxy-v1:10000/embedding"
 
     def test_model_fallback_includes_model_prefix(self):
         """Proxy path prefix /model is required so requests route to the Ollama backend."""
         result = self._normalize_on_render(
             "http://localhost:11434",
-            "http://vecinita-modal-proxy-48hk:10000/model",
+            "http://vecinita-modal-proxy-v1:10000/model",
         )
         assert result.endswith("/model")
 
@@ -183,16 +192,16 @@ class TestNormalizeUrlOnRender:
         """Proxy path prefix /embedding required so requests route to the embedding backend."""
         result = self._normalize_on_render(
             "http://localhost:8001",
-            "http://vecinita-modal-proxy-48hk:10000/embedding",
+            "http://vecinita-modal-proxy-v1:10000/embedding",
         )
         assert result.endswith("/embedding")
 
     def test_internal_proxy_host_preserved(self):
         result = self._normalize_on_render(
             "http://localhost:11434",
-            "http://vecinita-modal-proxy-48hk:10000/model",
+            "http://vecinita-modal-proxy-v1:10000/model",
         )
-        assert "vecinita-modal-proxy-48hk:10000" in result
+        assert "vecinita-modal-proxy-v1:10000" in result
 
 
 # ---------------------------------------------------------------------------
@@ -222,9 +231,9 @@ class TestModuleGlobalsOnRender:
             # Render env active to assert the expected output without reloading.
             result = m._normalize_internal_service_url(
                 "http://localhost:11434",
-                fallback_url="http://vecinita-modal-proxy-48hk:10000/model",
+                fallback_url="http://vecinita-modal-proxy-v1:10000/model",
             )
-        assert result == "http://vecinita-modal-proxy-48hk:10000/model"
+        assert result == "http://vecinita-modal-proxy-v1:10000/model"
 
     def test_embedding_url_resolves_to_embedding_proxy_on_render(self):
         env_overrides = {
@@ -239,9 +248,9 @@ class TestModuleGlobalsOnRender:
 
             result = m._normalize_internal_service_url(
                 "http://embedding-service:8001",
-                fallback_url="http://vecinita-modal-proxy-48hk:10000/embedding",
+                fallback_url="http://vecinita-modal-proxy-v1:10000/embedding",
             )
-        assert result == "http://vecinita-modal-proxy-48hk:10000/embedding"
+        assert result == "http://vecinita-modal-proxy-v1:10000/embedding"
 
 
 # ---------------------------------------------------------------------------
@@ -264,11 +273,11 @@ def _make_manager(**kwargs):
 
 class TestViaProxy:
     def test_returns_true_for_render_private_hostname(self):
-        mgr = _make_manager(base_url="http://vecinita-modal-proxy-48hk:10000/model")
+        mgr = _make_manager(base_url="http://vecinita-modal-proxy-v1:10000/model")
         assert mgr._via_proxy() is True
 
     def test_returns_true_for_embedding_proxy_prefix(self):
-        mgr = _make_manager(base_url="http://vecinita-modal-proxy-48hk:10000/embedding")
+        mgr = _make_manager(base_url="http://vecinita-modal-proxy-v1:10000/embedding")
         assert mgr._via_proxy() is True
 
     def test_returns_true_case_insensitive(self):
@@ -298,14 +307,14 @@ class TestHeadersViaProxy:
 
     def test_headers_empty_when_via_proxy_with_api_key(self):
         mgr = _make_manager(
-            base_url="http://vecinita-modal-proxy-48hk:10000/model",
+            base_url="http://vecinita-modal-proxy-v1:10000/model",
             api_key="secret-token",
         )
         assert mgr.headers() == {}
 
     def test_headers_empty_when_via_proxy_with_modal_credentials(self):
         mgr = _make_manager(
-            base_url="http://vecinita-modal-proxy-48hk:10000/model",
+            base_url="http://vecinita-modal-proxy-v1:10000/model",
             api_key="ak-xxx",
             modal_proxy_key="mk-111",
             modal_proxy_secret="ms-222",
@@ -314,14 +323,14 @@ class TestHeadersViaProxy:
 
     def test_no_authorization_header_via_proxy(self):
         mgr = _make_manager(
-            base_url="http://vecinita-modal-proxy-48hk:10000/model",
+            base_url="http://vecinita-modal-proxy-v1:10000/model",
             api_key="should-not-appear",
         )
         assert "Authorization" not in mgr.headers()
 
     def test_no_modal_key_header_via_proxy(self):
         mgr = _make_manager(
-            base_url="http://vecinita-modal-proxy-48hk:10000/model",
+            base_url="http://vecinita-modal-proxy-v1:10000/model",
             modal_proxy_key="mk-111",
             modal_proxy_secret="ms-222",
         )

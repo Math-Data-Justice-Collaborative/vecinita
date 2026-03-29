@@ -37,7 +37,7 @@ class EmbeddingServiceClient(Embeddings):
         Args:
             base_url:   Base URL of the embedding service.  On Render this
                         should be the modal-proxy embedding prefix, e.g.
-                        ``http://vecinita-modal-proxy-48hk:10000/embedding``
+                        ``http://vecinita-modal-proxy-v1:10000/embedding``
                         (default: ``http://localhost:8001``).
             timeout:    HTTP request timeout in seconds (default: 30).
             auth_token: Shared-secret token sent as both

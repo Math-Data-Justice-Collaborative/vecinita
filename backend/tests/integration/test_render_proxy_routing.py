@@ -151,7 +151,7 @@ def test_ollama_base_url_uses_model_proxy_prefix_on_render(render_env):
 
     result = m._normalize_internal_service_url(
         "http://localhost:11434",
-        fallback_url="http://vecinita-modal-proxy-48hk:10000/model",
+        fallback_url="http://vecinita-modal-proxy-v1:10000/model",
     )
     assert (
         "/model" in result
@@ -165,7 +165,7 @@ def test_embedding_url_uses_embedding_proxy_prefix_on_render(render_env):
 
     result = m._normalize_internal_service_url(
         "http://embedding-service:8001",
-        fallback_url="http://vecinita-modal-proxy-48hk:10000/embedding",
+        fallback_url="http://vecinita-modal-proxy-v1:10000/embedding",
     )
     assert (
         "/embedding" in result
@@ -179,12 +179,24 @@ def test_proxy_fallback_host_is_internal_render_hostname(render_env):
 
     result = m._normalize_internal_service_url(
         "http://localhost:11434",
-        fallback_url="http://vecinita-modal-proxy-48hk:10000/model",
+        fallback_url="http://vecinita-modal-proxy-v1:10000/model",
     )
     assert "vecinita-modal-proxy" in result
     assert (
         "onrender.com" not in result
     ), "Should use Render private hostname not public URL to avoid egress"
+
+
+@pytest.mark.api
+def test_nonlocal_explicit_url_preserved_on_render(render_env):
+    """On Render, explicitly configured non-local endpoints must be preserved."""
+    import src.agent.main as m
+
+    result = m._normalize_internal_service_url(
+        "https://vecinita--vecinita-model-api.modal.run",
+        fallback_url="http://vecinita-modal-proxy-v1:10000/model",
+    )
+    assert result == "https://vecinita--vecinita-model-api.modal.run"
 
 
 @pytest.mark.api
@@ -197,6 +209,6 @@ def test_off_render_url_uses_env_var_value(monkeypatch):
 
     result = m._normalize_internal_service_url(
         "http://localhost:11434",
-        fallback_url="http://vecinita-modal-proxy-48hk:10000/model",
+        fallback_url="http://vecinita-modal-proxy-v1:10000/model",
     )
     assert result == "http://localhost:11434"

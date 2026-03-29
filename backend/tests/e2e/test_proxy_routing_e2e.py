@@ -22,11 +22,11 @@ pytestmark = pytest.mark.e2e
 
 
 def _proxy_model_base_url() -> str:
-    return "http://vecinita-modal-proxy-48hk:10000/model"
+    return "http://vecinita-modal-proxy-v1:10000/model"
 
 
 def _proxy_embedding_base_url() -> str:
-    return "http://vecinita-modal-proxy-48hk:10000/embedding"
+    return "http://vecinita-modal-proxy-v1:10000/embedding"
 
 
 # ---------------------------------------------------------------------------
@@ -96,7 +96,7 @@ def test_proxy_model_path_stripped_by_proxy_convention(render_env_vars, monkeypa
 
     # Simulate what langchain_ollama would call:
     effective_chat_endpoint = ollama_url.rstrip("/") + "/api/chat"
-    assert effective_chat_endpoint == "http://vecinita-modal-proxy-48hk:10000/model/api/chat"
+    assert effective_chat_endpoint == "http://vecinita-modal-proxy-v1:10000/model/api/chat"
 
 
 @pytest.mark.e2e
@@ -114,10 +114,10 @@ def test_proxy_embedding_path_stripped_by_proxy_convention(render_env_vars, monk
 
     # Simulate what EmbeddingServiceClient would call:
     effective_embed_endpoint = embedding_url.rstrip("/") + "/embed"
-    assert effective_embed_endpoint == "http://vecinita-modal-proxy-48hk:10000/embedding/embed"
+    assert effective_embed_endpoint == "http://vecinita-modal-proxy-v1:10000/embedding/embed"
 
     effective_health_endpoint = embedding_url.rstrip("/") + "/health"
-    assert effective_health_endpoint == "http://vecinita-modal-proxy-48hk:10000/embedding/health"
+    assert effective_health_endpoint == "http://vecinita-modal-proxy-v1:10000/embedding/health"
 
 
 @pytest.mark.e2e

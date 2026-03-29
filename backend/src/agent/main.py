@@ -11,7 +11,7 @@ RAG (Retrieval-Augmented Generation) agent.  It exposes three main endpoints:
 Deployment routing (Render)
 ---------------------------
 On Render, all model and embedding traffic is routed through the internal
-modal-proxy private service (``vecinita-modal-proxy-48hk:10000``) using path
+modal-proxy private service (``vecinita-modal-proxy-v1:10000``) using path
 prefixes recognised by the proxy:
 
 - ``/model/...``     → Ollama-compatible model backend  (strips ``/model``)
@@ -40,6 +40,7 @@ import time
 import traceback
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlparse
 
 # Avoid hard torch dependency during transformers import on CPU-only/broken torch envs.
 os.environ.setdefault("USE_TORCH", "0")
@@ -197,8 +198,8 @@ def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -
     The ``fallback_url`` must include the correct proxy path prefix so that
     the modal-proxy router can forward to the right backend:
 
-    - Model (Ollama) traffic:    ``http://vecinita-modal-proxy-48hk:10000/model``
-    - Embedding traffic:         ``http://vecinita-modal-proxy-48hk:10000/embedding``
+    - Model (Ollama) traffic:    ``http://vecinita-modal-proxy-v1:10000/model``
+    - Embedding traffic:         ``http://vecinita-modal-proxy-v1:10000/embedding``
 
     The proxy strips the prefix before forwarding, so Ollama receives
     ``/api/chat`` rather than ``/model/api/chat``.
@@ -209,13 +210,33 @@ def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -
         fallback_url: URL to use when on Render or when *raw_url* is absent.
 
     Returns:
-        ``fallback_url`` unconditionally when running on Render, otherwise
-        ``raw_url`` if non-empty or ``fallback_url`` if blank.
+        On Render: a non-local configured URL when present, otherwise
+        ``fallback_url``.
+        Off Render: ``raw_url`` if non-empty or ``fallback_url`` if blank.
     """
-    # On Render, always route through the internal modal proxy regardless of env var overrides.
-    if _running_on_render():
-        return fallback_url
     candidate = (raw_url or "").strip()
+
+    if _running_on_render():
+        if candidate:
+            try:
+                host = (urlparse(candidate).hostname or "").lower()
+            except Exception:
+                host = ""
+
+            # Ignore local/docker-style endpoints on Render and force fallback.
+            if host not in {
+                "",
+                "localhost",
+                "127.0.0.1",
+                "0.0.0.0",
+                "::1",
+                "embedding-service",
+                "vecinita-embedding",
+                "vecinita-agent",
+            }:
+                return candidate
+        return fallback_url
+
     return candidate if candidate else fallback_url
 
 
@@ -227,7 +248,7 @@ supabase_key = (
 )
 ollama_base_url = _normalize_internal_service_url(
     os.environ.get("MODAL_OLLAMA_ENDPOINT") or os.environ.get("OLLAMA_BASE_URL"),
-    fallback_url="http://vecinita-modal-proxy-48hk:10000/model",
+    fallback_url="http://vecinita-modal-proxy-v1:10000/model",
 )
 ollama_api_key = (
     os.environ.get("OLLAMA_API_KEY")
@@ -321,7 +342,7 @@ try:
         os.environ.get("MODAL_EMBEDDING_ENDPOINT")
         or os.environ.get("EMBEDDING_SERVICE_URL")
         or "http://embedding-service:8001",
-        fallback_url="http://vecinita-modal-proxy-48hk:10000/embedding",
+        fallback_url="http://vecinita-modal-proxy-v1:10000/embedding",
     )
     embedding_service_auth_token = (
         os.environ.get("EMBEDDING_SERVICE_AUTH_TOKEN")
