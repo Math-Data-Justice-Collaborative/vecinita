@@ -138,6 +138,12 @@ class LocalLLMClientManager:
         return normalized
 
     def headers(self) -> dict[str, str]:
+        # When routing through the Render-internal modal proxy, the proxy injects
+        # Modal-Key/Modal-Secret server-side.  Forwarding any auth header from the
+        # client (Authorization: Bearer, Modal-Key, Modal-Secret) causes Modal to
+        # return HTTP 401 because the Bearer token is not a valid Modal credential.
+        if self._via_proxy():
+            return {}
         headers: dict[str, str] = {}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
@@ -145,6 +151,16 @@ class LocalLLMClientManager:
             headers["Modal-Key"] = self.modal_proxy_key
             headers["Modal-Secret"] = self.modal_proxy_secret
         return headers
+
+    def _via_proxy(self) -> bool:
+        """Return True when *base_url* routes through the Render-internal modal proxy.
+
+        The proxy hostname is ``vecinita-modal-proxy`` (Render private network) and
+        always appears in the URL when running on Render.  Local dev environments
+        connect directly to ``*.modal.run`` or ``localhost:11434`` so this returns
+        False there.
+        """
+        return bool(self.base_url and "modal-proxy" in self.base_url.lower())
 
     def current_model(self) -> str:
         return self.current_selection.get("model") or self.default_model

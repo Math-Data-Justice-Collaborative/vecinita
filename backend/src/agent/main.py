@@ -1,7 +1,36 @@
-# main.py
-# FastAPI application for the Vecinita RAG Q&A system.
-# This version includes an explicit rule for response language.
-# Serves the index.html UI at the root "/" endpoint.
+"""Vecinita Agent — FastAPI RAG Q&A Service.
+
+This module is the primary entry point for the Vecinita LangGraph-powered
+RAG (Retrieval-Augmented Generation) agent.  It exposes three main endpoints:
+
+- ``GET /ask``        — synchronous question answering with source attribution
+- ``GET /ask-stream`` — streaming (SSE) question answering with live agent
+                        activity updates (thinking / clarification / complete)
+- ``GET /config``     — LLM provider/model discovery for the frontend
+
+Deployment routing (Render)
+---------------------------
+On Render, all model and embedding traffic is routed through the internal
+modal-proxy private service (``vecinita-modal-proxy-48hk:10000``) using path
+prefixes recognised by the proxy:
+
+- ``/model/...``     → Ollama-compatible model backend  (strips ``/model``)
+- ``/embedding/...`` → Embedding backend                (strips ``/embedding``)
+
+This is enforced at startup by ``_normalize_internal_service_url``.  Any
+env vars pointing at ``localhost``, Docker-internal hostnames, or direct
+Modal endpoints are silently replaced with the proxy URL on Render.
+
+Environment variables (minimum required)
+-----------------------------------------
+- ``SUPABASE_URL`` / ``SUPABASE_KEY`` — vector-store access
+- ``OLLAMA_BASE_URL``                 — Ollama server (local/Docker dev only;
+                                        overridden by proxy on Render)
+- ``GROQ_API_KEY``                    — optional Groq provider
+- ``OPENAI_API_KEY``                  — optional OpenAI provider
+- ``EMBEDDING_SERVICE_URL``           — embedding microservice (local/Docker;
+                                        overridden by proxy on Render)
+"""
 
 import json
 import logging
@@ -141,12 +170,48 @@ app.add_middleware(
 
 # --- Static files mount removed - using separate React frontend ---
 
+
 # --- Load Environment Variables & Validate ---
 def _running_on_render() -> bool:
+    """Return True when the process is executing inside a Render deployment.
+
+    Detection uses two Render-injected environment variables:
+
+    - ``RENDER`` — set to ``"true"`` by the Render build system.
+    - ``RENDER_SERVICE_ID`` — unique service identifier (e.g. ``srv-abc123``).
+
+    Both variables are checked so that the function works regardless of which
+    variables Render happens to inject in a given environment tier.
+    """
     return bool(os.environ.get("RENDER") or os.environ.get("RENDER_SERVICE_ID"))
 
 
 def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -> str:
+    """Resolve the effective URL for an internal upstream service.
+
+    On Render, **all** upstream service traffic (Ollama model API, embedding
+    service) must route through the ``vecinita-modal-proxy`` private-network
+    service.  This prevents ``[Errno 111] Connection refused`` errors that
+    occur when env vars still point at Docker-internal hostnames or localhost.
+
+    The ``fallback_url`` must include the correct proxy path prefix so that
+    the modal-proxy router can forward to the right backend:
+
+    - Model (Ollama) traffic:    ``http://vecinita-modal-proxy-48hk:10000/model``
+    - Embedding traffic:         ``http://vecinita-modal-proxy-48hk:10000/embedding``
+
+    The proxy strips the prefix before forwarding, so Ollama receives
+    ``/api/chat`` rather than ``/model/api/chat``.
+
+    Args:
+        raw_url:      Raw URL from an environment variable (may be ``None`` or
+                      empty when the variable is unset).
+        fallback_url: URL to use when on Render or when *raw_url* is absent.
+
+    Returns:
+        ``fallback_url`` unconditionally when running on Render, otherwise
+        ``raw_url`` if non-empty or ``fallback_url`` if blank.
+    """
     # On Render, always route through the internal modal proxy regardless of env var overrides.
     if _running_on_render():
         return fallback_url
@@ -162,7 +227,7 @@ supabase_key = (
 )
 ollama_base_url = _normalize_internal_service_url(
     os.environ.get("MODAL_OLLAMA_ENDPOINT") or os.environ.get("OLLAMA_BASE_URL"),
-    fallback_url="http://vecinita-modal-proxy:10000/model",
+    fallback_url="http://vecinita-modal-proxy-48hk:10000/model",
 )
 ollama_api_key = (
     os.environ.get("OLLAMA_API_KEY")
@@ -256,7 +321,7 @@ try:
         os.environ.get("MODAL_EMBEDDING_ENDPOINT")
         or os.environ.get("EMBEDDING_SERVICE_URL")
         or "http://embedding-service:8001",
-        fallback_url="http://vecinita-modal-proxy:10000/embedding",
+        fallback_url="http://vecinita-modal-proxy-48hk:10000/embedding",
     )
     embedding_service_auth_token = (
         os.environ.get("EMBEDDING_SERVICE_AUTH_TOKEN")

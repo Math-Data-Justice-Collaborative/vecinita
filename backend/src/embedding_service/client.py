@@ -35,8 +35,18 @@ class EmbeddingServiceClient(Embeddings):
         Initialize embedding service client.
 
         Args:
-            base_url: URL of embedding service (default: http://localhost:8001)
-            timeout: Request timeout in seconds (default: 30)
+            base_url:   Base URL of the embedding service.  On Render this
+                        should be the modal-proxy embedding prefix, e.g.
+                        ``http://vecinita-modal-proxy-48hk:10000/embedding``
+                        (default: ``http://localhost:8001``).
+            timeout:    HTTP request timeout in seconds (default: 30).
+            auth_token: Shared-secret token sent as both
+                        ``x-embedding-service-token`` and
+                        ``Authorization: Bearer <token>`` headers.  If
+                        omitted the following env vars are checked in order:
+                        ``EMBEDDING_SERVICE_AUTH_TOKEN``,
+                        ``MODAL_API_PROXY_SECRET``, ``MODAL_API_KEY``,
+                        ``MODAL_API_TOKEN_SECRET``.
         """
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
