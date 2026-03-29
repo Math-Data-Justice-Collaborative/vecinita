@@ -1,4 +1,4 @@
-name: Modal Deployment
+pynvname: Modal Deployment
 
 on:
   push:
