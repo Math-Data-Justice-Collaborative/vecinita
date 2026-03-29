@@ -79,7 +79,6 @@ class TestDatabaseUploaderInitialization:
             patch.object(DatabaseUploader, "_init_embeddings") as mock_init_embeddings,
             patch.object(DatabaseUploader, "_init_supabase"),
         ):
-
             mock_supabase = MagicMock()
             mock_client.return_value = mock_supabase
 
@@ -106,7 +105,6 @@ class TestDatabaseUploaderInitialization:
             patch.dict(os.environ, {"SUPABASE_URL": "", "SUPABASE_KEY": ""}, clear=False),
             patch.object(DatabaseUploader, "_init_embeddings"),
         ):
-
             with pytest.raises(ValueError):
                 DatabaseUploader()
 
@@ -122,7 +120,6 @@ class TestEmbeddingInitialization:
             patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
             patch("src.services.scraper.uploader.create_client"),
         ):
-
             mock_embedding_client = MagicMock()
             mock_client.return_value = mock_embedding_client
 
@@ -144,7 +141,6 @@ class TestEmbeddingInitialization:
             patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
             patch("src.services.scraper.uploader.create_client"),
         ):
-
             mock_embedding = MagicMock()
             mock_fastembed.return_value = mock_embedding
 
@@ -166,7 +162,6 @@ class TestEmbeddingInitialization:
             patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
             patch("src.services.scraper.uploader.create_client"),
         ):
-
             mock_embedding = MagicMock()
             mock_hf.return_value = mock_embedding
 
@@ -183,7 +178,6 @@ class TestEmbeddingInitialization:
             patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
             patch("src.services.scraper.uploader.create_client"),
         ):
-
             from src.services.scraper.uploader import DatabaseUploader
 
             with pytest.raises(
@@ -212,7 +206,6 @@ class TestSupabaseInitialization:
             ),
             patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", False),
         ):
-
             mock_client = MagicMock()
             mock_create.return_value = mock_client
 
@@ -229,7 +222,6 @@ class TestSupabaseInitialization:
             patch("src.services.scraper.uploader.SUPABASE_AVAILABLE", True),
             patch.dict(os.environ, {"SUPABASE_URL": "", "SUPABASE_KEY": "key"}, clear=False),
         ):
-
             from src.services.scraper.uploader import DatabaseUploader
 
             with pytest.raises(ValueError, match="SUPABASE_URL and SUPABASE_KEY"):
@@ -249,7 +241,6 @@ class TestSupabaseInitialization:
                 clear=False,
             ),
         ):
-
             from src.services.scraper.uploader import DatabaseUploader
 
             with pytest.raises(ValueError, match="SUPABASE_URL and SUPABASE_KEY"):
@@ -269,7 +260,6 @@ class TestUploadChunks:
             patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", True),
             patch("src.services.scraper.uploader.HuggingFaceEmbeddings"),
         ):
-
             mock_supabase = MagicMock()
             mock_create.return_value = mock_supabase
 
@@ -321,7 +311,6 @@ class TestUploadChunks:
             patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", True),
             patch("src.services.scraper.uploader.HuggingFaceEmbeddings"),
         ):
-
             mock_supabase = MagicMock()
             mock_create.return_value = mock_supabase
 
@@ -347,7 +336,6 @@ class TestUploadChunks:
             patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", True),
             patch("src.services.scraper.uploader.HuggingFaceEmbeddings"),
         ):
-
             mock_supabase = MagicMock()
             mock_create.return_value = mock_supabase
 
@@ -404,7 +392,6 @@ class TestUploadChunks:
             patch("src.services.scraper.uploader.FALLBACK_EMBEDDINGS_AVAILABLE", True),
             patch("src.services.scraper.uploader.HuggingFaceEmbeddings"),
         ):
-
             mock_supabase = MagicMock()
             mock_create.return_value = mock_supabase
 

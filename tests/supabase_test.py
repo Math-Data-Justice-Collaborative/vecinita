@@ -7,7 +7,6 @@ Tests database connectivity, schema installation, and basic operations
 
 import os
 import sys
-import json
 from datetime import datetime
 from supabase import create_client, Client
 from dotenv import load_dotenv
@@ -48,7 +47,7 @@ def test_schema(supabase: Client):
     all_good = True
     for table in tables_to_check:
         try:
-            response = supabase.table(table).select('id').limit(1).execute()
+            supabase.table(table).select('id').limit(1).execute()
             print(f"✅ Table '{table}' exists")
         except Exception as e:
             print(f"❌ Table '{table}' not found: {e}")
@@ -115,16 +114,13 @@ def test_vector_extension(supabase: Client):
     
     try:
         # Try to create a test vector
-        test_query = """
-        SELECT '[1,2,3]'::vector AS test_vector;
-        """
-        response = supabase.rpc('test_vector_extension', {}).execute()
+        supabase.rpc('test_vector_extension', {}).execute()
         print("✅ Vector extension is installed")
         return True
-    except:
+    except Exception:
         # Alternative test - try to query with vector type
         try:
-            response = supabase.table('document_chunks').select('id').limit(1).execute()
+            supabase.table('document_chunks').select('id').limit(1).execute()
             print("✅ Vector extension appears to be working")
             return True
         except Exception as e:
@@ -138,8 +134,8 @@ def test_cleanup(supabase: Client, chunk_id):
     
     if chunk_id:
         try:
-            response = supabase.table('document_chunks').delete().eq('id', chunk_id).execute()
-            print(f"✅ Cleaned up test chunk")
+            supabase.table('document_chunks').delete().eq('id', chunk_id).execute()
+            print("✅ Cleaned up test chunk")
         except Exception as e:
             print(f"⚠️  Could not clean up test chunk: {e}")
 

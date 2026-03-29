@@ -153,7 +153,6 @@ def fastapi_client(env_vars, monkeypatch):
         patch("src.agent.main.ChatOllama") as mock_ollama,
         patch("src.agent.main.HuggingFaceEmbeddings") as mock_embeddings,
     ):
-
         # Setup mocks
         mock_supabase_client = MagicMock()
         mock_supabase_client.rpc.return_value.execute.return_value.data = []

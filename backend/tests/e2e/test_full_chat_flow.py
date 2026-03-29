@@ -179,7 +179,7 @@ def test_multiple_sequential_questions(fastapi_client):
 
         # All should succeed
         for i, response in enumerate(responses):
-            assert response.status_code == 200, f"Question {i+1} failed: {questions[i]}"
+            assert response.status_code == 200, f"Question {i + 1} failed: {questions[i]}"
 
 
 @pytest.mark.e2e

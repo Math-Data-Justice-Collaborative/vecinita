@@ -24,7 +24,6 @@ class TestAgentMainInitialization:
             patch("src.services.agent.server.ChatGroq") as mock_groq,
             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
         ):
-
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
 
@@ -49,7 +48,6 @@ class TestAgentMainInitialization:
             patch("src.services.agent.server.ChatGroq"),
             patch("src.services.agent.server.HuggingFaceEmbeddings"),
         ):
-
             from src.services.agent import server
 
             assert server.LOCATION_CONTEXT is not None
@@ -70,7 +68,6 @@ class TestAgentThinkingMessages:
             patch("src.services.agent.server.ChatGroq"),
             patch("src.services.agent.server.HuggingFaceEmbeddings"),
         ):
-
             from src.services.agent import server
 
             assert "en" in server.AGENT_THINKING_MESSAGES
@@ -86,7 +83,6 @@ class TestAgentThinkingMessages:
             patch("src.services.agent.server.ChatGroq"),
             patch("src.services.agent.server.HuggingFaceEmbeddings"),
         ):
-
             from src.services.agent import server
 
             msg = server.get_agent_thinking_message("plan", "en")
@@ -102,7 +98,6 @@ class TestAgentThinkingMessages:
             patch("src.services.agent.server.ChatGroq"),
             patch("src.services.agent.server.HuggingFaceEmbeddings"),
         ):
-
             from src.services.agent import server
 
             msg = server.get_agent_thinking_message("db_search", "es")
@@ -118,7 +113,6 @@ class TestAgentThinkingMessages:
             patch("src.services.agent.server.ChatGroq"),
             patch("src.services.agent.server.HuggingFaceEmbeddings"),
         ):
-
             from src.services.agent import server
 
             msg = server.get_agent_thinking_message("unknown_tool", "unknown_lang")
@@ -148,7 +142,6 @@ class TestAgentState:
             patch("src.services.agent.server.ChatGroq"),
             patch("src.services.agent.server.HuggingFaceEmbeddings"),
         ):
-
             from langchain_core.messages import HumanMessage
 
             from src.services.agent.server import AgentState
@@ -183,7 +176,6 @@ class TestEmbeddingInitialization:
                 side_effect=Exception("Service unavailable"),
             ),
         ):
-
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
 
@@ -213,7 +205,6 @@ class TestLLMInitialization:
             patch("src.services.agent.server.ChatGroq") as mock_groq,
             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
         ):
-
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
 
@@ -241,7 +232,6 @@ class TestToolsInitialization:
             patch("src.services.agent.server.ChatGroq") as mock_groq,
             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
         ):
-
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
 
@@ -268,7 +258,6 @@ class TestToolsInitialization:
             patch("src.services.agent.server.ChatGroq") as mock_groq,
             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
         ):
-
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
 
@@ -336,7 +325,6 @@ class TestLLMWithTools:
             patch("src.services.agent.server.ChatOpenAI") as mock_openai,
             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
         ):
-
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
 
@@ -363,7 +351,6 @@ class TestLLMWithTools:
             patch("src.services.agent.server.ChatGroq") as mock_groq,
             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
         ):
-
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
 
@@ -394,7 +381,6 @@ class TestMessageSanitization:
             patch("src.services.agent.server.ChatGroq") as mock_groq,
             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
         ):
-
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
 
@@ -423,7 +409,6 @@ class TestMessageSanitization:
             patch("src.services.agent.server.ChatGroq") as mock_groq,
             patch("src.services.agent.server.HuggingFaceEmbeddings") as mock_embeddings,
         ):
-
             mock_supabase_client = MagicMock()
             mock_supabase.return_value = mock_supabase_client
 
@@ -475,7 +460,6 @@ class TestEnvironmentVariableValidation:
             patch("src.services.agent.server.ChatGroq"),
             patch("src.services.agent.server.create_embedding_client"),
         ):
-
             # Make create_client not be called (validation should fail first)
             mock_client.side_effect = Exception("Should not reach here")
 
@@ -504,7 +488,6 @@ class TestEnvironmentVariableValidation:
             patch("src.services.agent.server.create_client") as mock_client,
             patch("src.services.agent.server.create_embedding_client"),
         ):
-
             mock_client.return_value = MagicMock()
 
             with pytest.raises(RuntimeError, match="No LLM provider configured"):

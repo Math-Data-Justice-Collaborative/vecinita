@@ -160,7 +160,6 @@ def test_streaming_metadata_tracking(fastapi_client, parse_sse_events):
         patch("src.agent.main.supabase") as mock_supabase,
         patch("src.agent.main._get_llm_with_tools") as mock_get_llm,
     ):
-
         # Setup mocks
         mock_supabase.rpc.return_value.data = []
 

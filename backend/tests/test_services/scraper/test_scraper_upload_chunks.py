@@ -406,11 +406,11 @@ Test content with bad metadata.
         ) as f:
             # Create a large file with 100 chunks from 5 sources
             for source_num in range(1, 6):
-                f.write(f"{'='*70}\n")
+                f.write(f"{'=' * 70}\n")
                 f.write(f"SOURCE: https://example{source_num}.com/\n")
                 f.write(f"LOADER: Test Loader {source_num}\n")
                 f.write("DOCUMENTS_LOADED: 1 | DOCUMENTS_PROCESSED: 1 | CHUNKS: 20\n")
-                f.write(f"{'='*70}\n\n")
+                f.write(f"{'=' * 70}\n\n")
 
                 for chunk_num in range(1, 21):
                     f.write(f"--- CHUNK {chunk_num}/20 ---\n")

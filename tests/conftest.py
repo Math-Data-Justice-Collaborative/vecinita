@@ -13,12 +13,11 @@ import os
 import sys
 from pathlib import Path
 
+import pytest
+
 # Add src to path for imports
 src_path = Path(__file__).parent / "src"
 sys.path.insert(0, str(src_path))
-
-import pytest
-from typing import Generator
 
 
 def pytest_configure(config):
@@ -117,7 +116,7 @@ def _services_available(config: ServiceConfig) -> bool:
             try:
                 response = client.get(f"{config.backend_url}/health", follow_redirects=True)
                 backend_ok = response.status_code in (200, 404)  # 404 is fine if /health doesn't exist
-            except:
+            except Exception:
                 backend_ok = False
             
             return backend_ok

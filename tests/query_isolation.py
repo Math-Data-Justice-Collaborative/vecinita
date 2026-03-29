@@ -29,7 +29,7 @@ def run_isolation_test(verbose=False):
     print("="*60)
 
     # --- PHASE 1: ENVIRONMENT ---
-    print(f"\n[PHASE 1] Environment & Secrets")
+    print("\n[PHASE 1] Environment & Secrets")
     conn_str = os.getenv("SUPABASE_CONN_STR")
     api_key = os.getenv("OPENAI_API_KEY")
     
@@ -41,30 +41,30 @@ def run_isolation_test(verbose=False):
         return False
 
     # --- PHASE 2: EMBEDDINGS ---
-    print(f"\n[PHASE 2] OpenAI Embedding Object Initialization")
+    print("\n[PHASE 2] OpenAI Embedding Object Initialization")
     try:
         # Targeting the 3072 dimension model
         embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
         test_vector = embeddings.embed_query("Providence health resources")
-        print(f"✅ LangChain Object created successfully.")
+        print("✅ LangChain Object created successfully.")
         print(f"✅ Vector generation successful. Dimensions: {len(test_vector)}")
     except Exception as e:
         print(f"❌ ERROR in Phase 2: {e}")
         return False
 
     # --- PHASE 3: DATABASE HANDSHAKE ---
-    print(f"\n[PHASE 3] SQLAlchemy Connection")
+    print("\n[PHASE 3] SQLAlchemy Connection")
     try:
         engine = create_engine(conn_str)
         with engine.connect() as conn:
-            res = conn.execute(text("SELECT 1"))
-            print(f"✅ Connection to Supabase established.")
+            conn.execute(text("SELECT 1"))
+            print("✅ Connection to Supabase established.")
     except Exception as e:
         print(f"❌ ERROR in Phase 3: {e}")
         return False
 
     # --- PHASE 4: VECTOR FUNCTION EXECUTION ---
-    print(f"\n[PHASE 4] RPC Function: search_similar_documents")
+    print("\n[PHASE 4] RPC Function: search_similar_documents")
     try:
         with engine.connect() as conn:
             query_sql = text("""
