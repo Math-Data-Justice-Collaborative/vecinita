@@ -142,13 +142,40 @@ app.add_middleware(
 # --- Static files mount removed - using separate React frontend ---
 
 # --- Load Environment Variables & Validate ---
+def _running_on_render() -> bool:
+    return bool(os.environ.get("RENDER") or os.environ.get("RENDER_SERVICE_ID"))
+
+
+def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -> str:
+    candidate = (raw_url or "").strip()
+    if not candidate:
+        return fallback_url
+
+    if not _running_on_render():
+        return candidate
+
+    lowered = candidate.lower()
+    if lowered in {
+        "http://localhost:11434",
+        "http://127.0.0.1:11434",
+        "http://embedding-service:8001",
+        "http://vecinita-embedding:8001",
+    }:
+        return fallback_url
+
+    return candidate
+
+
 supabase_url = os.environ.get("SUPABASE_URL")
 supabase_key = (
     os.environ.get("SUPABASE_SECRET_KEY")
     or os.environ.get("SUPABASE_KEY")
     or os.environ.get("SUPABASE_PUBLISHABLE_KEY")
 )
-ollama_base_url = os.environ.get("MODAL_OLLAMA_ENDPOINT") or os.environ.get("OLLAMA_BASE_URL")
+ollama_base_url = _normalize_internal_service_url(
+    os.environ.get("MODAL_OLLAMA_ENDPOINT") or os.environ.get("OLLAMA_BASE_URL"),
+    fallback_url="http://vecinita-modal-proxy:10000",
+)
 ollama_api_key = (
     os.environ.get("OLLAMA_API_KEY")
     or os.environ.get("MODAL_API_PROXY_SECRET")
@@ -237,10 +264,11 @@ try:
 
     # Use dedicated embedding service and optionally fail fast if unavailable
     logger.info("Initializing embedding model (Embedding Service, fail-fast)...")
-    embedding_service_url = (
+    embedding_service_url = _normalize_internal_service_url(
         os.environ.get("MODAL_EMBEDDING_ENDPOINT")
         or os.environ.get("EMBEDDING_SERVICE_URL")
-        or "http://embedding-service:8001"
+        or "http://embedding-service:8001",
+        fallback_url="http://vecinita-modal-proxy:10000",
     )
     embedding_service_auth_token = (
         os.environ.get("EMBEDDING_SERVICE_AUTH_TOKEN")
