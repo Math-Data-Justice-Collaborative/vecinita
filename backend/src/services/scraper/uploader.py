@@ -140,10 +140,16 @@ class DatabaseUploader:
                 os.getenv("OLLAMA_API_KEY")
                 or os.getenv("MODAL_API_PROXY_SECRET")
                 or os.getenv("MODAL_API_KEY")
+                or os.getenv("MODAL_TOKEN_SECRET")
                 or os.getenv("MODAL_API_TOKEN_SECRET")
             ),
-            modal_proxy_key=os.getenv("MODAL_API_KEY") or os.getenv("MODAL_API_TOKEN_ID"),
-            modal_proxy_secret=os.getenv("MODAL_API_PROXY_SECRET"),
+            modal_proxy_key=(
+                os.getenv("MODAL_API_KEY")
+                or os.getenv("MODAL_API_TOKEN_ID")
+                or os.getenv("MODAL_TOKEN_ID")
+            ),
+            modal_proxy_secret=os.getenv("MODAL_API_PROXY_SECRET")
+            or os.getenv("MODAL_TOKEN_SECRET"),
             use_native_api=(os.getenv("FORCE_LOCAL_MODAL_LLM") or "true").lower()
             in {"1", "true", "yes"},
         )

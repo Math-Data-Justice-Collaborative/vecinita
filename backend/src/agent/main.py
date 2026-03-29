@@ -254,10 +254,17 @@ ollama_api_key = (
     os.environ.get("OLLAMA_API_KEY")
     or os.environ.get("MODAL_API_PROXY_SECRET")
     or os.environ.get("MODAL_API_KEY")
+    or os.environ.get("MODAL_TOKEN_SECRET")
     or os.environ.get("MODAL_API_TOKEN_SECRET")
 )
-modal_proxy_key = os.environ.get("MODAL_API_KEY") or os.environ.get("MODAL_API_TOKEN_ID")
-modal_proxy_secret = os.environ.get("MODAL_API_PROXY_SECRET")
+modal_proxy_key = (
+    os.environ.get("MODAL_API_KEY")
+    or os.environ.get("MODAL_API_TOKEN_ID")
+    or os.environ.get("MODAL_TOKEN_ID")
+)
+modal_proxy_secret = os.environ.get("MODAL_API_PROXY_SECRET") or os.environ.get(
+    "MODAL_TOKEN_SECRET"
+)
 ollama_model = os.environ.get("OLLAMA_MODEL") or "llama3.1:8b"
 default_provider = "ollama"
 default_model = os.environ.get("DEFAULT_MODEL") or None
@@ -348,6 +355,7 @@ try:
         os.environ.get("EMBEDDING_SERVICE_AUTH_TOKEN")
         or os.environ.get("MODAL_API_PROXY_SECRET")
         or os.environ.get("MODAL_API_KEY")
+        or os.environ.get("MODAL_TOKEN_SECRET")
         or os.environ.get("MODAL_API_TOKEN_SECRET")
     )
     embedding_strict_startup = os.environ.get("EMBEDDING_STRICT_STARTUP", "false").lower() in [

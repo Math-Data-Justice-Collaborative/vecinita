@@ -46,6 +46,7 @@ class EmbeddingServiceClient(Embeddings):
                         omitted the following env vars are checked in order:
                         ``EMBEDDING_SERVICE_AUTH_TOKEN``,
                         ``MODAL_API_PROXY_SECRET``, ``MODAL_API_KEY``,
+                        ``MODAL_TOKEN_SECRET``,
                         ``MODAL_API_TOKEN_SECRET``.
         """
         self.base_url = base_url.rstrip("/")
@@ -55,10 +56,17 @@ class EmbeddingServiceClient(Embeddings):
             or os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
             or os.getenv("MODAL_API_PROXY_SECRET")
             or os.getenv("MODAL_API_KEY")
+            or os.getenv("MODAL_TOKEN_SECRET")
             or os.getenv("MODAL_API_TOKEN_SECRET")
         )
-        self.modal_proxy_key = os.getenv("MODAL_API_KEY") or os.getenv("MODAL_API_TOKEN_ID")
-        self.modal_proxy_secret = os.getenv("MODAL_API_PROXY_SECRET")
+        self.modal_proxy_key = (
+            os.getenv("MODAL_API_KEY")
+            or os.getenv("MODAL_API_TOKEN_ID")
+            or os.getenv("MODAL_TOKEN_ID")
+        )
+        self.modal_proxy_secret = os.getenv("MODAL_API_PROXY_SECRET") or os.getenv(
+            "MODAL_TOKEN_SECRET"
+        )
         headers = {}
         if self.auth_token:
             headers["x-embedding-service-token"] = self.auth_token
