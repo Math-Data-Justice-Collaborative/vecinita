@@ -147,23 +147,11 @@ def _running_on_render() -> bool:
 
 
 def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -> str:
+    # On Render, always route through the internal modal proxy regardless of env var overrides.
+    if _running_on_render():
+        return fallback_url
     candidate = (raw_url or "").strip()
-    if not candidate:
-        return fallback_url
-
-    if not _running_on_render():
-        return candidate
-
-    lowered = candidate.lower()
-    if lowered in {
-        "http://localhost:11434",
-        "http://127.0.0.1:11434",
-        "http://embedding-service:8001",
-        "http://vecinita-embedding:8001",
-    }:
-        return fallback_url
-
-    return candidate
+    return candidate if candidate else fallback_url
 
 
 supabase_url = os.environ.get("SUPABASE_URL")
@@ -174,7 +162,7 @@ supabase_key = (
 )
 ollama_base_url = _normalize_internal_service_url(
     os.environ.get("MODAL_OLLAMA_ENDPOINT") or os.environ.get("OLLAMA_BASE_URL"),
-    fallback_url="http://vecinita-modal-proxy:10000",
+    fallback_url="http://vecinita-modal-proxy:10000/model",
 )
 ollama_api_key = (
     os.environ.get("OLLAMA_API_KEY")
@@ -268,7 +256,7 @@ try:
         os.environ.get("MODAL_EMBEDDING_ENDPOINT")
         or os.environ.get("EMBEDDING_SERVICE_URL")
         or "http://embedding-service:8001",
-        fallback_url="http://vecinita-modal-proxy:10000",
+        fallback_url="http://vecinita-modal-proxy:10000/embedding",
     )
     embedding_service_auth_token = (
         os.environ.get("EMBEDDING_SERVICE_AUTH_TOKEN")
