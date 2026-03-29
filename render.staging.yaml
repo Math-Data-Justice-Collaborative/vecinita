@@ -57,13 +57,54 @@ services:
     healthCheckPath: /health
     envVars:
       - key: VITE_GATEWAY_URL
-        value: "https://vecinita-agent-staging.onrender.com/api/v1"
+        value: "https://vecinita-gateway-staging.onrender.com/api/v1"
       - key: VITE_BACKEND_URL
         value: "https://vecinita-agent-staging.onrender.com"
       - key: VITE_SUPABASE_URL
         sync: false
       - key: VITE_SUPABASE_ANON_KEY
         sync: false
+
+  - type: web
+    name: vecinita-gateway-staging
+    runtime: docker
+    region: virginia
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    dockerCommand: sh -c 'uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT:-10000}'
+    autoDeployTrigger: off
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: AGENT_SERVICE_URL
+        fromService:
+          name: vecinita-agent-staging
+          type: web
+          property: hostport
+      - key: MODAL_EMBEDDING_ENDPOINT
+        sync: false
+      - key: EMBEDDING_SERVICE_AUTH_TOKEN
+        sync: false
+      - key: MODAL_API_PROXY_SECRET
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: connectionString
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: DEV_ADMIN_ENABLED
+        value: "true"
+      - key: DEV_ADMIN_BEARER_TOKEN
+        sync: false
+      - key: SUPABASE_UPLOADS_BUCKET
+        value: "documents"
 
 databases:
   - name: vecinita-postgres-staging
