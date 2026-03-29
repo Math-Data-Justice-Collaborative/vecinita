@@ -31,7 +31,9 @@ router = APIRouter(prefix="/scrape", tags=["Scraping"])
 # Configuration
 MAX_URLS_PER_REQUEST = 100
 MAX_CONCURRENT_JOBS = 5
-REINDEX_SERVICE_URL = os.getenv("REINDEX_SERVICE_URL", "").rstrip("/")
+REINDEX_SERVICE_URL = os.getenv(
+    "REINDEX_SERVICE_URL", "http://vecinita-modal-proxy-v1:10000/jobs"
+).rstrip("/")
 REINDEX_TRIGGER_TOKEN = os.getenv("REINDEX_TRIGGER_TOKEN", "")
 
 

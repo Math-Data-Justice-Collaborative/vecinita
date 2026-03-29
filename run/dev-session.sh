@@ -35,6 +35,105 @@ detect_compose_cmd() {
   return 1
 }
 
+trim_spaces() {
+  local value="$1"
+  value="${value#${value%%[![:space:]]*}}"
+  value="${value%${value##*[![:space:]]}}"
+  printf '%s' "$value"
+}
+
+read_env_var_from_file() {
+  local file_path="$1"
+  local var_name="$2"
+
+  if [[ ! -f "$file_path" ]]; then
+    return 1
+  fi
+
+  local line
+  line="$(grep -E "^${var_name}[[:space:]]*=" "$file_path" | tail -n1 || true)"
+  if [[ -z "$line" ]]; then
+    return 1
+  fi
+
+  local value="${line#*=}"
+  value="$(trim_spaces "$value")"
+  if [[ ${#value} -ge 2 ]]; then
+    if [[ ("${value:0:1}" == '"' && "${value: -1}" == '"') || ("${value:0:1}" == "'" && "${value: -1}" == "'") ]]; then
+      value="${value:1:${#value}-2}"
+    fi
+  fi
+
+  if [[ -n "$value" ]]; then
+    printf '%s' "$value"
+    return 0
+  fi
+
+  return 1
+}
+
+resolve_local_embed_token() {
+  local env_keys=(
+    "EMBEDDING_SERVICE_AUTH_TOKEN"
+    "MODAL_API_PROXY_SECRET"
+    "MODAL_TOKEN_SECRET"
+    "MODAL_API_KEY"
+    "MODAL_API_TOKEN_SECRET"
+  )
+
+  local key
+  for key in "${env_keys[@]}"; do
+    local value="${!key:-}"
+    if [[ -n "$value" ]]; then
+      printf '%s' "$value"
+      return 0
+    fi
+  done
+
+  local env_files=("$ROOT_DIR/backend/.env" "$ROOT_DIR/.env")
+  local env_file
+  for env_file in "${env_files[@]}"; do
+    for key in "${env_keys[@]}"; do
+      if value="$(read_env_var_from_file "$env_file" "$key")"; then
+        printf '%s' "$value"
+        return 0
+      fi
+    done
+  done
+
+  printf '%s' "dev-embed-token"
+}
+
+resolve_proxy_auth_token() {
+  local env_keys=(
+    "PROXY_AUTH_TOKEN"
+    "MODAL_PROXY_AUTH_TOKEN"
+    "X_PROXY_TOKEN"
+  )
+
+  local key
+  for key in "${env_keys[@]}"; do
+    local value="${!key:-}"
+    if [[ -n "$value" ]]; then
+      printf '%s' "$value"
+      return 0
+    fi
+  done
+
+  local env_files=("$ROOT_DIR/backend/.env" "$ROOT_DIR/.env")
+  local env_file
+  for env_file in "${env_files[@]}"; do
+    for key in "${env_keys[@]}"; do
+      if value="$(read_env_var_from_file "$env_file" "$key")"; then
+        printf '%s' "$value"
+        return 0
+      fi
+    done
+  done
+
+  printf '%s' "vecinita-local-proxy-token"
+}
+
 print_usage() {
   cat <<EOF
 Usage: ./run/dev-session.sh [start|attach|stop|restart]
@@ -230,7 +329,7 @@ cleanup_single_terminal() {
   if [[ ${#COMPOSE_CMD[@]} -gt 0 ]]; then
     (
       cd "$ROOT_DIR"
-      EMBEDDING_SERVICE_AUTH_TOKEN='dev-embed-token' "${COMPOSE_CMD[@]}" stop chroma >/dev/null 2>&1 || true
+      EMBEDDING_SERVICE_AUTH_TOKEN="$(resolve_local_embed_token)" "${COMPOSE_CMD[@]}" stop chroma >/dev/null 2>&1 || true
     )
   fi
 
@@ -248,9 +347,14 @@ start_single_terminal_session() {
     exit 1
   fi
 
+  local embed_token
+  embed_token="$(resolve_local_embed_token)"
+  local proxy_auth_token
+  proxy_auth_token="$(resolve_proxy_auth_token)"
+
   (
     cd "$ROOT_DIR"
-    EMBEDDING_SERVICE_AUTH_TOKEN='dev-embed-token' "${COMPOSE_CMD[@]}" up -d chroma
+    EMBEDDING_SERVICE_AUTH_TOKEN="$embed_token" "${COMPOSE_CMD[@]}" up -d chroma
   )
 
   echo ""
@@ -261,10 +365,10 @@ start_single_terminal_session() {
   DEV_RUNNING=1
   trap cleanup_single_terminal INT TERM EXIT
 
-  run_with_prefix "chroma" bash -lc "cd '$ROOT_DIR' && EMBEDDING_SERVICE_AUTH_TOKEN='dev-embed-token' ${COMPOSE_CMD[*]} logs -f --tail=30 chroma"
-  run_with_prefix "embedding" bash -lc "cd '$ROOT_DIR/backend' && uv run -m uvicorn src.embedding_service.main:app --host 0.0.0.0 --port 8001 --reload"
-  run_with_prefix "agent" bash -lc "cd '$ROOT_DIR/backend' && CHROMA_HOST='localhost' CHROMA_PORT='8002' CHROMA_SSL='false' OLLAMA_BASE_URL='\${MODAL_OLLAMA_ENDPOINT:-\${OLLAMA_BASE_URL:-http://localhost:11434}}' OLLAMA_API_KEY='\${OLLAMA_API_KEY:-\${MODAL_API_PROXY_SECRET:-\${MODAL_API_KEY:-\${MODAL_API_TOKEN_SECRET:-}}}}' EMBEDDING_SERVICE_URL='\${MODAL_EMBEDDING_ENDPOINT:-\${EMBEDDING_SERVICE_URL:-http://localhost:8001}}' EMBEDDING_SERVICE_AUTH_TOKEN='\${EMBEDDING_SERVICE_AUTH_TOKEN:-\${MODAL_API_PROXY_SECRET:-\${MODAL_API_KEY:-\${MODAL_API_TOKEN_SECRET:-}}}}' DEFAULT_PROVIDER='ollama' DEFAULT_MODEL='' uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 --reload"
-  run_with_prefix "gateway" bash -lc "cd '$ROOT_DIR/backend' && AGENT_SERVICE_URL='http://localhost:8000' EMBEDDING_SERVICE_URL='\${MODAL_EMBEDDING_ENDPOINT:-\${EMBEDDING_SERVICE_URL:-http://localhost:8001}}' EMBEDDING_SERVICE_AUTH_TOKEN='\${EMBEDDING_SERVICE_AUTH_TOKEN:-\${MODAL_API_PROXY_SECRET:-\${MODAL_API_KEY:-\${MODAL_API_TOKEN_SECRET:-}}}}' CHROMA_HOST='localhost' CHROMA_PORT='8002' CHROMA_SSL='false' SUPABASE_URL='http://localhost:3001' SUPABASE_KEY='test-anon-key-local-development-only' DEV_ADMIN_ENABLED='true' DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' SUPABASE_UPLOADS_BUCKET='documents' DEMO_MODE='false' uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 --reload"
+  run_with_prefix "chroma" bash -lc "cd '$ROOT_DIR' && EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' ${COMPOSE_CMD[*]} logs -f --tail=30 chroma"
+  run_with_prefix "embedding" bash -lc "cd '$ROOT_DIR/backend' && EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' uv run -m uvicorn src.embedding_service.main:app --host 0.0.0.0 --port 8001 --reload"
+  run_with_prefix "agent" bash -lc "cd '$ROOT_DIR/backend' && CHROMA_HOST='localhost' CHROMA_PORT='8002' CHROMA_SSL='false' ANONYMIZED_TELEMETRY='false' OLLAMA_BASE_URL=\"\${MODAL_OLLAMA_ENDPOINT:-\${OLLAMA_BASE_URL:-http://localhost:11434}}\" OLLAMA_API_KEY=\"\${OLLAMA_API_KEY:-\${MODAL_API_PROXY_SECRET:-\${MODAL_API_KEY:-\${MODAL_API_TOKEN_SECRET:-}}}}\" PROXY_AUTH_TOKEN='$proxy_auth_token' EMBEDDING_SERVICE_URL=\"\${MODAL_EMBEDDING_ENDPOINT:-\${EMBEDDING_SERVICE_URL:-http://localhost:8001}}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' DEFAULT_PROVIDER='ollama' DEFAULT_MODEL='' uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 --reload"
+  run_with_prefix "gateway" bash -lc "cd '$ROOT_DIR/backend' && AGENT_SERVICE_URL='http://localhost:8000' EMBEDDING_SERVICE_URL=\"\${MODAL_EMBEDDING_ENDPOINT:-\${EMBEDDING_SERVICE_URL:-http://localhost:8001}}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' CHROMA_HOST='localhost' CHROMA_PORT='8002' CHROMA_SSL='false' ANONYMIZED_TELEMETRY='false' SUPABASE_URL='http://localhost:3001' SUPABASE_KEY='test-anon-key-local-development-only' DEV_ADMIN_ENABLED='true' DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' SUPABASE_UPLOADS_BUCKET='documents' DEMO_MODE='false' uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 --reload"
   run_with_prefix "frontend" bash -lc "cd '$ROOT_DIR/frontend' && npm run dev -- --host 0.0.0.0 --port 5173"
 
   if ! wait_for_http_ready "Frontend" "http://localhost:5173/" "${DEV_FRONTEND_READY_TIMEOUT:-180}"; then
@@ -300,6 +404,11 @@ start_session() {
     exit 1
   fi
 
+  local embed_token
+  embed_token="$(resolve_local_embed_token)"
+  local proxy_auth_token
+  proxy_auth_token="$(resolve_proxy_auth_token)"
+
   tmux new-session -d -s "$SESSION_NAME" -n dev
   tmux set-option -t "$SESSION_NAME" -g mouse on
   tmux set-option -t "$SESSION_NAME" -g history-limit 100000
@@ -311,10 +420,10 @@ start_session() {
   tmux split-window -v -t "$SESSION_NAME":dev.2
   tmux select-layout -t "$SESSION_NAME":dev tiled
 
-  tmux send-keys -t "$SESSION_NAME":dev.0 "cd '$ROOT_DIR' && echo '[chroma] EMBEDDING_SERVICE_AUTH_TOKEN=dev-embed-token $compose_cmd up chroma' && EMBEDDING_SERVICE_AUTH_TOKEN='dev-embed-token' $compose_cmd up chroma" C-m
-  tmux send-keys -t "$SESSION_NAME":dev.1 "cd '$ROOT_DIR/backend' && echo '[embedding] uv run -m uvicorn src.embedding_service.main:app --reload --port 8001' && uv run -m uvicorn src.embedding_service.main:app --host 0.0.0.0 --port 8001 --reload" C-m
-  tmux send-keys -t "$SESSION_NAME":dev.2 "cd '$ROOT_DIR/backend' && echo '[agent] uv run -m uvicorn src.agent.main:app --reload --port 8000' && CHROMA_HOST='localhost' CHROMA_PORT='8002' CHROMA_SSL='false' OLLAMA_BASE_URL='\${MODAL_OLLAMA_ENDPOINT:-\${OLLAMA_BASE_URL:-http://localhost:11434}}' OLLAMA_API_KEY='\${OLLAMA_API_KEY:-\${MODAL_API_PROXY_SECRET:-\${MODAL_API_KEY:-\${MODAL_API_TOKEN_SECRET:-}}}}' EMBEDDING_SERVICE_URL='\${MODAL_EMBEDDING_ENDPOINT:-\${EMBEDDING_SERVICE_URL:-http://localhost:8001}}' EMBEDDING_SERVICE_AUTH_TOKEN='\${EMBEDDING_SERVICE_AUTH_TOKEN:-\${MODAL_API_PROXY_SECRET:-\${MODAL_API_KEY:-\${MODAL_API_TOKEN_SECRET:-}}}}' DEFAULT_PROVIDER='ollama' DEFAULT_MODEL='' uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 --reload" C-m
-  tmux send-keys -t "$SESSION_NAME":dev.3 "cd '$ROOT_DIR/backend' && echo '[gateway] uv run -m uvicorn src.api.main:app --reload --port 8004' && AGENT_SERVICE_URL='http://localhost:8000' EMBEDDING_SERVICE_URL='\${MODAL_EMBEDDING_ENDPOINT:-\${EMBEDDING_SERVICE_URL:-http://localhost:8001}}' EMBEDDING_SERVICE_AUTH_TOKEN='\${EMBEDDING_SERVICE_AUTH_TOKEN:-\${MODAL_API_PROXY_SECRET:-\${MODAL_API_KEY:-\${MODAL_API_TOKEN_SECRET:-}}}}' CHROMA_HOST='localhost' CHROMA_PORT='8002' CHROMA_SSL='false' SUPABASE_URL='http://localhost:3001' SUPABASE_KEY='test-anon-key-local-development-only' DEV_ADMIN_ENABLED='true' DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' SUPABASE_UPLOADS_BUCKET='documents' DEMO_MODE='false' uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 --reload" C-m
+  tmux send-keys -t "$SESSION_NAME":dev.0 "cd '$ROOT_DIR' && echo '[chroma] EMBEDDING_SERVICE_AUTH_TOKEN=$embed_token $compose_cmd up chroma' && EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' $compose_cmd up chroma" C-m
+  tmux send-keys -t "$SESSION_NAME":dev.1 "cd '$ROOT_DIR/backend' && echo '[embedding] EMBEDDING_SERVICE_AUTH_TOKEN=$embed_token uv run -m uvicorn src.embedding_service.main:app --reload --port 8001' && EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' uv run -m uvicorn src.embedding_service.main:app --host 0.0.0.0 --port 8001 --reload" C-m
+  tmux send-keys -t "$SESSION_NAME":dev.2 "cd '$ROOT_DIR/backend' && echo '[agent] uv run -m uvicorn src.agent.main:app --reload --port 8000' && CHROMA_HOST='localhost' CHROMA_PORT='8002' CHROMA_SSL='false' ANONYMIZED_TELEMETRY='false' OLLAMA_BASE_URL=\"\${MODAL_OLLAMA_ENDPOINT:-\${OLLAMA_BASE_URL:-http://localhost:11434}}\" OLLAMA_API_KEY=\"\${OLLAMA_API_KEY:-\${MODAL_API_PROXY_SECRET:-\${MODAL_API_KEY:-\${MODAL_API_TOKEN_SECRET:-}}}}\" PROXY_AUTH_TOKEN='$proxy_auth_token' EMBEDDING_SERVICE_URL=\"\${MODAL_EMBEDDING_ENDPOINT:-\${EMBEDDING_SERVICE_URL:-http://localhost:8001}}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' DEFAULT_PROVIDER='ollama' DEFAULT_MODEL='' uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 --reload" C-m
+  tmux send-keys -t "$SESSION_NAME":dev.3 "cd '$ROOT_DIR/backend' && echo '[gateway] uv run -m uvicorn src.api.main:app --reload --port 8004' && AGENT_SERVICE_URL='http://localhost:8000' EMBEDDING_SERVICE_URL=\"\${MODAL_EMBEDDING_ENDPOINT:-\${EMBEDDING_SERVICE_URL:-http://localhost:8001}}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' CHROMA_HOST='localhost' CHROMA_PORT='8002' CHROMA_SSL='false' ANONYMIZED_TELEMETRY='false' SUPABASE_URL='http://localhost:3001' SUPABASE_KEY='test-anon-key-local-development-only' DEV_ADMIN_ENABLED='true' DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' SUPABASE_UPLOADS_BUCKET='documents' DEMO_MODE='false' uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 --reload" C-m
   tmux send-keys -t "$SESSION_NAME":dev.4 "cd '$ROOT_DIR/frontend' && echo '[frontend] npm run dev -- --host 0.0.0.0 --port 5173' && npm run dev -- --host 0.0.0.0 --port 5173" C-m
 
   if ! wait_for_http_ready "Frontend" "http://localhost:5173/" "${DEV_FRONTEND_READY_TIMEOUT:-180}"; then
@@ -347,7 +456,7 @@ stop_session() {
   (
     cd "$ROOT_DIR"
     if [[ ${#COMPOSE_CMD[@]} -gt 0 ]]; then
-      EMBEDDING_SERVICE_AUTH_TOKEN='dev-embed-token' "${COMPOSE_CMD[@]}" stop chroma >/dev/null 2>&1 || true
+      EMBEDDING_SERVICE_AUTH_TOKEN="$(resolve_local_embed_token)" "${COMPOSE_CMD[@]}" stop chroma >/dev/null 2>&1 || true
     fi
   )
 

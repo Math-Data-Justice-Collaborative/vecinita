@@ -7,6 +7,7 @@ Proxies requests to the dedicated embedding microservice.
 
 import os
 from typing import Any, cast
+from urllib.parse import urlparse
 
 import httpx
 import numpy as np
@@ -24,11 +25,34 @@ from .models import (
 
 router = APIRouter(prefix="/embed", tags=["Embeddings"])
 
+
+def _running_on_render() -> bool:
+    return bool(os.getenv("RENDER") or os.getenv("RENDER_SERVICE_ID"))
+
+
+def _normalize_embedding_service_url(raw_url: str | None) -> str:
+    candidate = (raw_url or "").strip()
+    if not candidate:
+        return "http://vecinita-modal-proxy-v1:10000/embedding"
+
+    if _running_on_render():
+        return candidate
+
+    host = ""
+    try:
+        host = (urlparse(candidate).hostname or "").lower()
+    except Exception:
+        host = ""
+
+    if host in {"", "localhost", "127.0.0.1", "0.0.0.0", "::1", "embedding-service"}:
+        return candidate
+
+    return os.getenv("LOCAL_EMBEDDING_SERVICE_URL", "http://localhost:8001")
+
+
 # Configuration - embedding service URL from environment
-EMBEDDING_SERVICE_URL = (
-    os.getenv("MODAL_EMBEDDING_ENDPOINT")
-    or os.getenv("EMBEDDING_SERVICE_URL")
-    or "http://localhost:8001"
+EMBEDDING_SERVICE_URL = _normalize_embedding_service_url(
+    os.getenv("MODAL_EMBEDDING_ENDPOINT") or os.getenv("EMBEDDING_SERVICE_URL")
 )
 EMBEDDING_SERVICE_AUTH_TOKEN = (
     os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
@@ -78,6 +102,38 @@ async def get_embedding_client() -> httpx.AsyncClient:
     return httpx.AsyncClient(timeout=30.0)
 
 
+async def _post_single_embedding(client: httpx.AsyncClient, text: str) -> httpx.Response:
+    """Call single embedding endpoint with compatibility fallback payloads."""
+    response = await client.post(
+        f"{EMBEDDING_SERVICE_URL}/embed",
+        json={"query": text},
+        headers=_embedding_service_headers(),
+    )
+    if response.status_code == 422:
+        response = await client.post(
+            f"{EMBEDDING_SERVICE_URL}/embed",
+            json={"text": text},
+            headers=_embedding_service_headers(),
+        )
+    return response
+
+
+async def _post_batch_embedding(client: httpx.AsyncClient, texts: list[str]) -> httpx.Response:
+    """Call batch embedding endpoint with compatibility fallback paths/payloads."""
+    response = await client.post(
+        f"{EMBEDDING_SERVICE_URL}/embed/batch",
+        json={"queries": texts},
+        headers=_embedding_service_headers(),
+    )
+    if response.status_code in {404, 405, 422}:
+        response = await client.post(
+            f"{EMBEDDING_SERVICE_URL}/embed-batch",
+            json={"texts": texts},
+            headers=_embedding_service_headers(),
+        )
+    return response
+
+
 @router.post("")
 async def embed_text(request: EmbedRequest) -> EmbedResponse:
     """
@@ -93,12 +149,7 @@ async def embed_text(request: EmbedRequest) -> EmbedResponse:
     """
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
-            # Call embedding service
-            response = await client.post(
-                f"{EMBEDDING_SERVICE_URL}/embed",
-                json={"text": request.text},
-                headers=_embedding_service_headers(),
-            )
+            response = await _post_single_embedding(client, request.text)
             response.raise_for_status()
 
             # Parse response
@@ -108,7 +159,7 @@ async def embed_text(request: EmbedRequest) -> EmbedResponse:
                 text=request.text,
                 embedding=data["embedding"],
                 model=data.get("model", EMBEDDING_CONFIG["model"]),
-                dimension=data.get("dimension", EMBEDDING_CONFIG["dimension"]),
+                dimension=data.get("dimension", data.get("dimensions", EMBEDDING_CONFIG["dimension"])),
             )
 
     except httpx.HTTPError as e:
@@ -135,19 +186,14 @@ async def embed_batch(request: EmbedBatchRequest) -> EmbedBatchResponse:
     """
     try:
         async with httpx.AsyncClient(timeout=60.0) as client:  # Longer timeout for batches
-            # Call embedding service batch endpoint
-            response = await client.post(
-                f"{EMBEDDING_SERVICE_URL}/embed-batch",
-                json={"texts": request.texts},
-                headers=_embedding_service_headers(),
-            )
+            response = await _post_batch_embedding(client, request.texts)
             response.raise_for_status()
 
             # Parse response
             data = response.json()
             embeddings_list = data["embeddings"]
             model = data.get("model", request.model or EMBEDDING_CONFIG["model"])
-            dimension = data.get("dimension", EMBEDDING_CONFIG["dimension"])
+            dimension = data.get("dimension", data.get("dimensions", EMBEDDING_CONFIG["dimension"]))
 
             # Build EmbedResponse objects for each text
             embed_responses = []
@@ -182,12 +228,7 @@ async def compute_similarity(request: SimilarityRequest) -> SimilarityResponse:
     """
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
-            # Generate embeddings for both texts using batch endpoint
-            response = await client.post(
-                f"{EMBEDDING_SERVICE_URL}/embed-batch",
-                json={"texts": [request.text1, request.text2]},
-                headers=_embedding_service_headers(),
-            )
+            response = await _post_batch_embedding(client, [request.text1, request.text2])
             response.raise_for_status()
 
             # Parse response
@@ -274,6 +315,17 @@ async def update_embedding_config(
                 json=payload,
                 headers=_embedding_service_headers(),
             )
+            if response.status_code in {404, 405}:
+                # External embedding service does not expose /config; keep gateway-level config only.
+                EMBEDDING_CONFIG["model"] = model
+                EMBEDDING_CONFIG["provider"] = provider
+                return EmbeddingConfigResponse(
+                    model=model,
+                    provider=provider,
+                    dimension=cast(int, EMBEDDING_CONFIG["dimension"]),
+                    description=f"Embedding model: {model}",
+                )
+
             response.raise_for_status()
 
             # Fetch updated config
@@ -281,6 +333,16 @@ async def update_embedding_config(
                 f"{EMBEDDING_SERVICE_URL}/config",
                 headers=_embedding_service_headers(),
             )
+            if config_response.status_code in {404, 405}:
+                EMBEDDING_CONFIG["model"] = model
+                EMBEDDING_CONFIG["provider"] = provider
+                return EmbeddingConfigResponse(
+                    model=model,
+                    provider=provider,
+                    dimension=cast(int, EMBEDDING_CONFIG["dimension"]),
+                    description=f"Embedding model: {model}",
+                )
+
             config_response.raise_for_status()
             config_data = config_response.json()
 
@@ -293,9 +355,7 @@ async def update_embedding_config(
             return EmbeddingConfigResponse(
                 model=current.get("model", model),
                 provider=current.get("provider", provider),
-                dimension=cast(
-                    int, EMBEDDING_CONFIG["dimension"]
-                ),  # Still hardcoded, could fetch dynamically
+                dimension=cast(int, EMBEDDING_CONFIG["dimension"]),
                 description=f"Embedding model: {current.get('model', model)}",
             )
 

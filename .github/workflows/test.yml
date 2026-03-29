@@ -126,6 +126,250 @@ jobs:
       working-directory: auth
       run: black --check src tests
 
+  data-management-api-structure:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        submodules: 'recursive'
+
+    - name: Validate imported data-management repo structure
+      run: |
+        test -f services/data-management-api/.gitmodules
+        test -d services/data-management-api/apps/backend
+        test -d services/data-management-api/apps/frontend
+
+  data-management-frontend-quality:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        submodules: 'recursive'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v5
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: apps/data-management-frontend/package-lock.json
+
+    - name: Install data-management frontend dependencies
+      working-directory: apps/data-management-frontend
+      run: npm ci
+
+    - name: Lint data-management frontend
+      working-directory: apps/data-management-frontend
+      run: npm run lint
+
+    - name: Build data-management frontend
+      working-directory: apps/data-management-frontend
+      run: npm run build
+
+  data-management-frontend-ci:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        submodules: 'recursive'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v5
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: apps/data-management-frontend/package-lock.json
+
+    - name: Install data-management frontend dependencies
+      working-directory: apps/data-management-frontend
+      run: npm ci
+
+    - name: Run data-management frontend tests
+      working-directory: apps/data-management-frontend
+      run: npm run test
+
+  modal-proxy-ci:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        submodules: 'recursive'
+
+    - name: Setup Python 3.12
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v4
+
+    - name: Install modal-proxy dependencies
+      working-directory: services/modal-proxy
+      run: uv sync --all-groups
+
+    - name: Run modal-proxy tests with coverage
+      working-directory: services/modal-proxy
+      run: uv run pytest --cov=app --cov-report=term-missing --cov-fail-under=95
+
+  embedding-modal-quality:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        submodules: 'recursive'
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install embedding-modal dependencies
+      working-directory: services/embedding-modal
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install --upgrade setuptools wheel
+        pip install ".[dev]"
+
+    - name: Lint embedding-modal
+      working-directory: services/embedding-modal
+      run: make lint
+
+  embedding-modal-ci:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        submodules: 'recursive'
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install embedding-modal dependencies
+      working-directory: services/embedding-modal
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install --upgrade setuptools wheel
+        pip install ".[dev]"
+
+    - name: Run embedding-modal tests
+      working-directory: services/embedding-modal
+      run: make test
+
+  model-modal-quality:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        submodules: 'recursive'
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install model-modal dependencies
+      working-directory: services/model-modal
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install --upgrade setuptools wheel
+        pip install ".[dev]"
+
+    - name: Lint model-modal
+      working-directory: services/model-modal
+      run: make lint
+
+  model-modal-ci:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        submodules: 'recursive'
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install model-modal dependencies
+      working-directory: services/model-modal
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install --upgrade setuptools wheel
+        pip install ".[dev]"
+
+    - name: Run model-modal tests
+      working-directory: services/model-modal
+      run: make test
+
+  scraper-quality:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        submodules: 'recursive'
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install scraper dependencies
+      working-directory: services/scraper
+      run: |
+        python -m pip install --upgrade pip
+        pip install --no-cache-dir -e ".[dev]"
+
+    - name: Lint scraper
+      working-directory: services/scraper
+      run: make lint
+
+    - name: Check scraper formatting
+      working-directory: services/scraper
+      run: black --check src/ tests/
+
+    - name: Type check scraper
+      working-directory: services/scraper
+      run: make type-check
+
+  scraper-ci:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        submodules: 'recursive'
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install scraper dependencies
+      working-directory: services/scraper
+      run: |
+        python -m pip install --upgrade pip
+        pip install --no-cache-dir -e ".[dev]"
+
+    - name: Run scraper tests
+      working-directory: services/scraper
+      run: make test
+
   backend-ci:
     runs-on: ubuntu-22.04
 

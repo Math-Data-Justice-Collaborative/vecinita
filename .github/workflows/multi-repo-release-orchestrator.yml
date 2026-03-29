@@ -1,0 +1,222 @@
+name: Multi-Repo Release Orchestrator
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_chat_frontend:
+        description: Dispatch chat frontend deployment workflow
+        required: false
+        default: true
+        type: boolean
+      deploy_data_management_frontend:
+        description: Dispatch data-management frontend deployment workflow
+        required: false
+        default: true
+        type: boolean
+      deploy_data_management_api:
+        description: Dispatch data-management API deployment workflow
+        required: false
+        default: true
+        type: boolean
+      deploy_modal_proxy:
+        description: Dispatch modal-proxy deployment workflow
+        required: false
+        default: true
+        type: boolean
+      deploy_scraper:
+        description: Dispatch scraper deployment workflow
+        required: false
+        default: true
+        type: boolean
+      deploy_embedding_modal:
+        description: Dispatch embedding-modal deployment workflow
+        required: false
+        default: true
+        type: boolean
+      deploy_model_modal:
+        description: Dispatch model-modal deployment workflow
+        required: false
+        default: true
+        type: boolean
+      target_ref:
+        description: Ref to deploy in all target repos
+        required: false
+        default: main
+        type: string
+      wait_for_completion:
+        description: Wait for each remote workflow completion
+        required: false
+        default: true
+        type: boolean
+      chat_frontend_workflow:
+        description: Workflow file in chat frontend repo
+        required: false
+        default: deploy.yml
+        type: string
+      data_management_frontend_workflow:
+        description: Workflow file in data-management frontend repo
+        required: false
+        default: deploy.yml
+        type: string
+      data_management_api_workflow:
+        description: Workflow file in data-management API repo
+        required: false
+        default: ci-cd.yml
+        type: string
+      modal_proxy_workflow:
+        description: Workflow file in modal-proxy repo
+        required: false
+        default: ci-cd.yml
+        type: string
+      scraper_workflow:
+        description: Workflow file in scraper repo
+        required: false
+        default: ci-cd.yml
+        type: string
+      embedding_modal_workflow:
+        description: Workflow file in embedding-modal repo
+        required: false
+        default: deploy.yml
+        type: string
+      model_modal_workflow:
+        description: Workflow file in model-modal repo
+        required: false
+        default: deploy.yml
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/multi-repo-release-orchestrator.yml"
+      - ".github/workflows/reusable-dispatch-repo-workflow.yml"
+      - "docs/deployment/MULTI_REPO_CICD_ORCHESTRATION.md"
+      - ".github/copilot-instructions.md"
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  chat-frontend:
+    if: github.event_name == 'push' || inputs.deploy_chat_frontend
+    uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
+    with:
+      service_name: chat-frontend
+      target_repo: joseph-c-mcguire/Vecinitafrontend
+      workflow_file: ${{ inputs.chat_frontend_workflow || 'deploy.yml' }}
+      target_ref: ${{ inputs.target_ref || 'main' }}
+      wait_for_completion: ${{ inputs.wait_for_completion != false }}
+      expected_platform: Render Frontend
+      expected_region: virginia
+    secrets:
+      github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+
+  data-management-frontend:
+    if: github.event_name == 'push' || inputs.deploy_data_management_frontend
+    uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
+    with:
+      service_name: data-management-frontend
+      target_repo: Math-Data-Justice-Collaborative/vecinita-data-management-frontend
+      workflow_file: ${{ inputs.data_management_frontend_workflow || 'deploy.yml' }}
+      target_ref: ${{ inputs.target_ref || 'main' }}
+      wait_for_completion: ${{ inputs.wait_for_completion != false }}
+      expected_platform: Render Frontend
+      expected_region: virginia
+    secrets:
+      github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+
+  data-management-api:
+    if: github.event_name == 'push' || inputs.deploy_data_management_api
+    uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
+    with:
+      service_name: data-management-api
+      target_repo: Math-Data-Justice-Collaborative/vecinita-data-management
+      workflow_file: ${{ inputs.data_management_api_workflow || 'ci-cd.yml' }}
+      target_ref: ${{ inputs.target_ref || 'main' }}
+      wait_for_completion: ${{ inputs.wait_for_completion != false }}
+      expected_platform: Render Private Service
+      expected_region: virginia
+    secrets:
+      github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+
+  modal-proxy:
+    if: github.event_name == 'push' || inputs.deploy_modal_proxy
+    uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
+    with:
+      service_name: modal-proxy
+      target_repo: Math-Data-Justice-Collaborative/vecinita-modal-proxy
+      workflow_file: ${{ inputs.modal_proxy_workflow || 'ci-cd.yml' }}
+      target_ref: ${{ inputs.target_ref || 'main' }}
+      wait_for_completion: ${{ inputs.wait_for_completion != false }}
+      expected_platform: Render Private Service
+      expected_region: virginia
+    secrets:
+      github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+
+  scraper:
+    if: github.event_name == 'push' || inputs.deploy_scraper
+    uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
+    with:
+      service_name: scraper
+      target_repo: Math-Data-Justice-Collaborative/vecinita-scraper
+      workflow_file: ${{ inputs.scraper_workflow || 'ci-cd.yml' }}
+      target_ref: ${{ inputs.target_ref || 'main' }}
+      wait_for_completion: ${{ inputs.wait_for_completion != false }}
+      expected_platform: Modal Deploy
+    secrets:
+      github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+
+  embedding-modal:
+    if: github.event_name == 'push' || inputs.deploy_embedding_modal
+    uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
+    with:
+      service_name: embedding-modal
+      target_repo: Math-Data-Justice-Collaborative/vecinita-embedding
+      workflow_file: ${{ inputs.embedding_modal_workflow || 'deploy.yml' }}
+      target_ref: ${{ inputs.target_ref || 'main' }}
+      wait_for_completion: ${{ inputs.wait_for_completion != false }}
+      expected_platform: Modal Deploy
+    secrets:
+      github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+
+  model-modal:
+    if: github.event_name == 'push' || inputs.deploy_model_modal
+    uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
+    with:
+      service_name: model-modal
+      target_repo: Math-Data-Justice-Collaborative/vecinita-model
+      workflow_file: ${{ inputs.model_modal_workflow || 'deploy.yml' }}
+      target_ref: ${{ inputs.target_ref || 'main' }}
+      wait_for_completion: ${{ inputs.wait_for_completion != false }}
+      expected_platform: Modal Deploy
+    secrets:
+      github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+
+  orchestrator-summary:
+    if: always()
+    needs:
+      - chat-frontend
+      - data-management-frontend
+      - data-management-api
+      - modal-proxy
+      - scraper
+      - embedding-modal
+      - model-modal
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Print dispatch summary
+        run: |
+          echo "chat-frontend: ${{ needs.chat-frontend.result }}"
+          echo "data-management-frontend: ${{ needs.data-management-frontend.result }}"
+          echo "data-management-api: ${{ needs.data-management-api.result }}"
+          echo "modal-proxy: ${{ needs.modal-proxy.result }}"
+          echo "scraper: ${{ needs.scraper.result }}"
+          echo "embedding-modal: ${{ needs.embedding-modal.result }}"
+          echo "model-modal: ${{ needs.model-modal.result }}"
+
+      - name: Fail orchestrator on child workflow failure
+        run: |
+          RESULTS="${{ needs.chat-frontend.result }} ${{ needs.data-management-frontend.result }} ${{ needs.data-management-api.result }} ${{ needs.modal-proxy.result }} ${{ needs.scraper.result }} ${{ needs.embedding-modal.result }} ${{ needs.model-modal.result }}"
+          if echo "$RESULTS" | grep -Eq "failure|cancelled|timed_out"; then
+            echo "At least one downstream service workflow failed."
+            exit 1
+          fi

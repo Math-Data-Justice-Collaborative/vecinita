@@ -48,6 +48,11 @@ class TestEmbedSingleEndpoint:
         response = embed_client.post("/api/v1/embed", json={})
         assert response.status_code == 422
 
+    def test_embed_accepts_query_field_from_service_contract(self, embed_client):
+        """Canonical embedding service contract uses `query` for single requests."""
+        response = embed_client.post("/api/v1/embed", json={"query": "Hello world"})
+        assert response.status_code in [200, 503]
+
     def test_embed_long_text(self, embed_client):
         """Test embedding long text."""
         long_text = "hello " * 10000  # Very long text
@@ -86,6 +91,11 @@ class TestEmbedBatchEndpoint:
         """Test batch endpoint requires texts field."""
         response = embed_client.post("/api/v1/embed/batch", json={})
         assert response.status_code == 422
+
+    def test_embed_batch_accepts_queries_field_from_service_contract(self, embed_client):
+        """Canonical embedding service contract uses `queries` for batch requests."""
+        response = embed_client.post("/api/v1/embed/batch", json={"queries": ["Hello", "World"]})
+        assert response.status_code in [200, 503]
 
     def test_embed_batch_many_texts(self, embed_client):
         """Test batch endpoint with many texts."""

@@ -20,6 +20,8 @@ Welcome to the organized documentation hub.
 ## Deployment
 
 - [Deployment Directory](deployment/) - Deployment docs and manifests
+- [Multi-Repo CI/CD Orchestration](deployment/MULTI_REPO_CICD_ORCHESTRATION.md) - Parent workflow dispatch model for chat, data-management, proxy, and modal services
+- [Microservices Compose Stack](deployment/MICROSERVICES_COMPOSE_STACK.md) - Local proxy-centric stack for chat + data-management + modal services
 - [Render Deployment](deployment/RENDER_DEPLOYMENT_THREE_SERVICES.md)
 - [Modal Setup](deployment/MODAL_SETUP.md)
 - [Codespaces Secrets Setup](deployment/GITHUB_CODESPACES_SECRETS_SETUP.md)

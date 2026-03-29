@@ -1,0 +1,92 @@
+name: Microservices Contracts
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  microservices-contracts:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Build selected microservices images
+        run: |
+          docker compose -f docker-compose.microservices.yml build \
+            model-service embedding-service scraper-service modal-proxy chat-agent chat-gateway
+
+      - name: Start microservices contract stack
+        run: |
+          docker compose -f docker-compose.microservices.yml up -d \
+            chroma postgres postgrest ollama \
+            model-service embedding-service scraper-service modal-proxy \
+            chat-agent chat-gateway
+
+      - name: Wait for core health endpoints
+        run: |
+          set -euo pipefail
+          for endpoint in \
+            http://localhost:8008/health \
+            http://localhost:8011/health \
+            http://localhost:8020/health \
+            http://localhost:10000/health \
+            http://localhost:8004/health
+          do
+            echo "Waiting for ${endpoint}"
+            for i in $(seq 1 90); do
+              if curl -fsS "${endpoint}" >/dev/null; then
+                echo "Ready: ${endpoint}"
+                break
+              fi
+              if [ "$i" -eq 90 ]; then
+                echo "Endpoint did not become healthy: ${endpoint}"
+                docker compose -f docker-compose.microservices.yml ps
+                docker compose -f docker-compose.microservices.yml logs --tail=200
+                exit 1
+              fi
+              sleep 2
+            done
+          done
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install integration test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e tests
+
+      - name: Run microservices contract tests
+        env:
+          REQUIRE_MICROSERVICES: "1"
+          GATEWAY_URL: http://localhost:8004
+          PROXY_URL: http://localhost:10000
+          MODEL_URL: http://localhost:8008
+          EMBEDDING_URL: http://localhost:8011
+          SCRAPER_URL: http://localhost:8020
+        run: |
+          cd tests
+          pytest integration/test_microservices_contracts.py -v
+
+      - name: Dump compose status on failure
+        if: failure()
+        run: |
+          docker compose -f docker-compose.microservices.yml ps
+          docker compose -f docker-compose.microservices.yml logs --tail=300
+
+      - name: Tear down stack
+        if: always()
+        run: docker compose -f docker-compose.microservices.yml down -v --remove-orphans

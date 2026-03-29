@@ -8,10 +8,70 @@ names or provider strings in other modules.
 
 import os
 from pathlib import Path
+from urllib.parse import urlparse
 
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
+# ---------------------------------------------------------------------------
+# Runtime Environment Detection
+# ---------------------------------------------------------------------------
+
+def _running_on_render() -> bool:
+    """Detect if running on Render platform."""
+    return bool(os.getenv("RENDER") or os.getenv("RENDER_SERVICE_ID"))
+
+
+def _normalize_internal_service_url(
+    raw_url: str | None, *, fallback_url: str
+) -> str:
+    """Resolve the effective URL for an internal upstream service (embedding, Ollama).
+
+    On Render, all upstream service traffic must route through the
+    ``vecinita-modal-proxy`` private-network service to avoid connection
+    errors when env vars still point at Docker-internal hostnames or localhost.
+
+    The ``fallback_url`` must include the correct proxy path prefix:
+    - Model (Ollama):  ``http://vecinita-modal-proxy-v1:10000/model``
+    - Embedding:       ``http://vecinita-modal-proxy-v1:10000/embedding``
+
+    Args:
+        raw_url:      Raw URL from an environment variable (may be None or empty).
+        fallback_url: URL to use on Render or when raw_url is absent.
+
+    Returns:
+        On Render: non-local URLs when present; otherwise fallback_url.
+        Off Render: raw_url if non-empty; otherwise fallback_url.
+    """
+    candidate = (raw_url or "").strip()
+
+    if _running_on_render():
+        if candidate:
+            try:
+                host = (urlparse(candidate).hostname or "").lower()
+            except Exception:
+                host = ""
+
+            # Ignore local/docker-style endpoints on Render and force fallback (proxy).
+            if host not in {
+                "",
+                "localhost",
+                "127.0.0.1",
+                "0.0.0.0",
+                "::1",
+                "embedding-service",
+                "vecinita-embedding",
+                "vecinita-agent",
+                "vecinita-modal-proxy",
+                "vecinita-modal-proxy-v1",
+            }:
+                return candidate
+        return fallback_url
+
+    return candidate if candidate else fallback_url
+
 
 # ---------------------------------------------------------------------------
 # Embedding (must be consistent across indexing AND query-time)
@@ -21,12 +81,18 @@ EMBEDDING_MODEL: str = os.getenv(
     "sentence-transformers/all-MiniLM-L6-v2",
 )
 EMBEDDING_DIMENSION: int = int(os.getenv("EMBEDDING_DIMENSION", "384"))
-EMBEDDING_SERVICE_URL: str = os.getenv("EMBEDDING_SERVICE_URL", "http://embedding-service:8001")
+EMBEDDING_SERVICE_URL: str = _normalize_internal_service_url(
+    os.getenv("MODAL_EMBEDDING_ENDPOINT") or os.getenv("EMBEDDING_SERVICE_URL"),
+    fallback_url="http://vecinita-modal-proxy-v1:10000/embedding",
+)
 
 # ---------------------------------------------------------------------------
 # Local LLM runtime
 # ---------------------------------------------------------------------------
-OLLAMA_BASE_URL: str | None = os.getenv("OLLAMA_BASE_URL")
+OLLAMA_BASE_URL: str | None = _normalize_internal_service_url(
+    os.getenv("MODAL_OLLAMA_ENDPOINT") or os.getenv("OLLAMA_BASE_URL"),
+    fallback_url="http://vecinita-modal-proxy-v1:10000/model",
+)
 OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
 
 DEFAULT_PROVIDER: str = os.getenv("DEFAULT_PROVIDER", "ollama").lower()

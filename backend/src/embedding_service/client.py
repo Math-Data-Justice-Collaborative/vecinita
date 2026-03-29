@@ -17,6 +17,21 @@ from langchain_core.embeddings import Embeddings
 logger = logging.getLogger(__name__)
 
 
+def _running_on_render() -> bool:
+    """Return True when running in a Render environment."""
+    return bool(os.environ.get("RENDER") or os.environ.get("RENDER_SERVICE_ID"))
+
+
+def _hostname_and_port(url: str) -> tuple[str, int | None]:
+    parsed = urlparse(url)
+    return (parsed.hostname or "", parsed.port)
+
+
+def _drop_headers(headers: dict[str, str], names: set[str]) -> dict[str, str]:
+    """Return a copy of *headers* with case-insensitive names removed."""
+    return {k: v for k, v in headers.items() if k.lower() not in names}
+
+
 class EmbeddingServiceClient(Embeddings):
     """
     LangChain-compatible embeddings using HTTP calls to embedding microservice.
@@ -27,7 +42,7 @@ class EmbeddingServiceClient(Embeddings):
 
     def __init__(
         self,
-        base_url: str = "http://localhost:8001",
+        base_url: str = "http://vecinita-modal-proxy-v1:10000/embedding",
         timeout: int = 30,
         auth_token: str | None = None,
     ):
@@ -38,7 +53,7 @@ class EmbeddingServiceClient(Embeddings):
             base_url:   Base URL of the embedding service.  On Render this
                         should be the modal-proxy embedding prefix, e.g.
                         ``http://vecinita-modal-proxy-v1:10000/embedding``
-                        (default: ``http://localhost:8001``).
+                        (default: ``http://vecinita-modal-proxy-v1:10000/embedding``).
             timeout:    HTTP request timeout in seconds (default: 30).
             auth_token: Shared-secret token sent as both
                         ``x-embedding-service-token`` and
@@ -87,18 +102,74 @@ class EmbeddingServiceClient(Embeddings):
         self._single_embed_field = "text"
         logger.info(f"✅ Embedding Service Client initialized: {self.base_url}")
 
+    def _is_modal_proxy_url(self, base_url: str) -> bool:
+        host, port = _hostname_and_port(base_url)
+        return host.endswith(".modal.run") or "modal-proxy" in host or port == 10000
+
+    def _is_local_embedding_url(self, base_url: str) -> bool:
+        host, port = _hostname_and_port(base_url)
+        return host in {"localhost", "127.0.0.1", "embedding-service"} and port == 8001
+
+    def _headers_for_base_url(self, base_url: str) -> dict[str, str]:
+        """Build per-target concrete headers so httpx never receives None values."""
+        headers = dict(self.client.headers)
+
+        if self._is_modal_proxy_url(base_url):
+            headers = _drop_headers(headers, {"x-embedding-service-token", "authorization"})
+            if self.proxy_auth_token:
+                headers["X-Proxy-Token"] = self.proxy_auth_token
+            if self.modal_proxy_key and self.modal_proxy_secret:
+                headers["Modal-Key"] = self.modal_proxy_key
+                headers["Modal-Secret"] = self.modal_proxy_secret
+            return headers
+
+        if self._is_local_embedding_url(base_url):
+            headers = _drop_headers(headers, {"x-proxy-token", "modal-key", "modal-secret"})
+            if self.auth_token:
+                headers["x-embedding-service-token"] = self.auth_token
+                headers["Authorization"] = f"Bearer {self.auth_token}"
+            return headers
+
+        # Fallback to client default headers for unknown endpoints.
+        return headers
+
     def _candidate_base_urls(self) -> list[str]:
         """Return ordered base URLs to try for embedding requests."""
-        candidates = [self.base_url]
-
-        discovered_cloud_run = self._discover_cloud_run_url()
-        if discovered_cloud_run:
-            candidates.append(discovered_cloud_run)
-
         parsed = urlparse(self.base_url)
         host = parsed.hostname or ""
         port = parsed.port or (443 if parsed.scheme == "https" else 80)
         scheme = parsed.scheme or "http"
+
+        local_candidates = [
+            "http://localhost:8001",
+            "http://127.0.0.1:8001",
+            "http://vecinita-modal-proxy-v1:10000/embedding",
+            "http://localhost:10000/embedding",
+        ]
+
+        # In local dev, prioritize known-local service URLs before any stale
+        # remote URL that may have been left in EMBEDDING_SERVICE_URL.
+        local_first = (not _running_on_render()) and host not in {
+            "",
+            "localhost",
+            "127.0.0.1",
+            "0.0.0.0",
+            "::1",
+            "embedding-service",
+            "vecinita-modal-proxy-v1",
+        }
+
+        candidates: list[str] = []
+        if local_first:
+            candidates.extend(local_candidates)
+            candidates.append(self.base_url)
+        else:
+            candidates.append(self.base_url)
+            candidates.extend(local_candidates)
+
+        discovered_cloud_run = self._discover_cloud_run_url()
+        if discovered_cloud_run:
+            candidates.append(discovered_cloud_run)
 
         # Local development safety net: if docker hostname isn't resolvable,
         # try localhost/127.0.0.1 on same port.
@@ -174,7 +245,11 @@ class EmbeddingServiceClient(Embeddings):
         last_error: Exception | None = None
         for base in self._candidate_base_urls():
             try:
-                response = self.client.post(f"{base}{endpoint}", json=payload)
+                response = self.client.post(
+                    f"{base}{endpoint}",
+                    json=payload,
+                    headers=self._headers_for_base_url(base),
+                )
                 response.raise_for_status()
                 return response
             except Exception as exc:
@@ -210,7 +285,10 @@ class EmbeddingServiceClient(Embeddings):
         last_error: Exception | None = None
         for base in self._candidate_base_urls():
             try:
-                response = self.client.get(f"{base}/health")
+                response = self.client.get(
+                    f"{base}/health",
+                    headers=self._headers_for_base_url(base),
+                )
                 response.raise_for_status()
                 self.base_url = base
                 logger.info(f"✅ Embedding service health check passed at {base}")
@@ -297,7 +375,7 @@ class EmbeddingServiceClient(Embeddings):
 
 
 def create_embedding_client(
-    embedding_service_url: str = "http://embedding-service:8001",
+    embedding_service_url: str = "http://vecinita-modal-proxy-v1:10000/embedding",
     validate_on_init: bool = False,
     auth_token: str | None = None,
 ) -> EmbeddingServiceClient:
@@ -306,7 +384,7 @@ def create_embedding_client(
 
     Args:
         embedding_service_url: URL of embedding service
-                              (default: http://embedding-service:8001 for Docker)
+                              (default: modal-proxy embedding route)
 
     Returns:
         EmbeddingServiceClient instance

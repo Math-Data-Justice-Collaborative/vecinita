@@ -134,7 +134,11 @@ class DatabaseUploader:
             return
 
         manager = LocalLLMClientManager(
-            base_url=os.getenv("MODAL_OLLAMA_ENDPOINT") or os.getenv("OLLAMA_BASE_URL"),
+            base_url=(
+                os.getenv("MODAL_OLLAMA_ENDPOINT")
+                or os.getenv("OLLAMA_BASE_URL")
+                or "http://vecinita-modal-proxy-v1:10000/model"
+            ),
             default_model=os.getenv("OLLAMA_MODEL", "llama3.1:8b"),
             api_key=(
                 os.getenv("OLLAMA_API_KEY")
@@ -436,7 +440,11 @@ class DatabaseUploader:
         }
 
         # Try embedding service first (lightweight, scalable)
-        embedding_service_url = os.getenv("EMBEDDING_SERVICE_URL", "http://embedding-service:8001")
+        embedding_service_url = (
+            os.getenv("MODAL_EMBEDDING_ENDPOINT")
+            or os.getenv("EMBEDDING_SERVICE_URL")
+            or "http://vecinita-modal-proxy-v1:10000/embedding"
+        )
 
         if EMBEDDING_SERVICE_AVAILABLE:
             try:

@@ -2,8 +2,8 @@
 
 ## Version 2025.02 - Full-Stack Integration Release
 
-**Release Date:** February 8, 2026  
-**Status:** 🟡 Pre-Release (Phases 1-6 complete, Phases 7-8 in progress)
+**Release Date:** March 29, 2026  
+**Status:** Maintenance Update (microservices consolidation and CI hardening)
 
 ---
 

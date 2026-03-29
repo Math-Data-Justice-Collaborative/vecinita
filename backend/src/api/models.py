@@ -10,7 +10,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 # ============================================================================
 # Scrape/Job Management Models
@@ -355,7 +355,10 @@ class EmbedRequest(BaseModel):
     """Request to generate embedding for single text (POST /api/embed/) - NOT YET IMPLEMENTED."""
 
     text: str = Field(
-        ..., description="Text to embed", examples=["The quick brown fox jumps over the lazy dog"]
+        ...,
+        description="Text/query to embed",
+        examples=["The quick brown fox jumps over the lazy dog"],
+        validation_alias=AliasChoices("text", "query"),
     )
     model: str | None = Field(
         default=None,
@@ -379,10 +382,11 @@ class EmbedBatchRequest(BaseModel):
     texts: list[str] = Field(
         ...,
         min_length=1,
-        description="List of texts to embed",
+        description="List of texts/queries to embed",
         examples=[
             ["First document to embed", "Second document to embed", "Third document to embed"]
         ],
+        validation_alias=AliasChoices("texts", "queries"),
     )
     model: str | None = Field(
         default=None, description="Override embedding model (uses default if None)"
@@ -1263,7 +1267,9 @@ class GatewayConfigResponse(BaseModel):
 
     agent_url: str = Field(..., description="Agent service URL", examples=["http://localhost:8000"])
     embedding_service_url: str = Field(
-        ..., description="Embedding service URL", examples=["http://localhost:8001"]
+        ...,
+        description="Embedding service URL",
+        examples=["http://vecinita-modal-proxy-v1:10000/embedding"],
     )
     database_url: str | None = Field(default=None, description="Database URL (masked for security)")
     max_urls_per_request: int = Field(
@@ -1290,7 +1296,7 @@ class GatewayConfigResponse(BaseModel):
         json_schema_extra={
             "example": {
                 "agent_url": "http://localhost:8000",
-                "embedding_service_url": "http://localhost:8001",
+                "embedding_service_url": "http://vecinita-modal-proxy-v1:10000/embedding",
                 "database_url": None,
                 "max_urls_per_request": 100,
                 "job_retention_hours": 24,

@@ -1,0 +1,111 @@
+name: Reusable - Dispatch Repo Workflow
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        description: Logical service name for logs
+        required: true
+        type: string
+      target_repo:
+        description: Target repository in owner/name format
+        required: true
+        type: string
+      workflow_file:
+        description: Workflow filename or workflow ID in target repository
+        required: true
+        type: string
+      target_ref:
+        description: Branch/tag to dispatch in target repository
+        required: false
+        default: main
+        type: string
+      wait_for_completion:
+        description: Wait for dispatched workflow completion
+        required: false
+        default: true
+        type: boolean
+      timeout_minutes:
+        description: Max minutes to wait for completion
+        required: false
+        default: 45
+        type: number
+      expected_platform:
+        description: Deployment platform label (Render or Modal)
+        required: false
+        default: ""
+        type: string
+      expected_region:
+        description: Expected region label for policy checks (for docs/logging)
+        required: false
+        default: ""
+        type: string
+    secrets:
+      github_token:
+        required: false
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  dispatch:
+    name: Dispatch ${{ inputs.service_name }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    env:
+      GH_TOKEN: ${{ secrets.github_token != '' && secrets.github_token || github.token }}
+      SERVICE_NAME: ${{ inputs.service_name }}
+      TARGET_REPO: ${{ inputs.target_repo }}
+      WORKFLOW_FILE: ${{ inputs.workflow_file }}
+      TARGET_REF: ${{ inputs.target_ref }}
+      WAIT_FOR_COMPLETION: ${{ inputs.wait_for_completion }}
+      EXPECTED_PLATFORM: ${{ inputs.expected_platform }}
+      EXPECTED_REGION: ${{ inputs.expected_region }}
+    steps:
+      - name: Validate gh auth context
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "Missing GitHub token context."
+            exit 1
+          fi
+          gh auth status
+
+      - name: Emit deployment policy context
+        run: |
+          echo "Service: $SERVICE_NAME"
+          if [ -n "$EXPECTED_PLATFORM" ]; then
+            echo "Platform policy: $EXPECTED_PLATFORM"
+          fi
+          if [ -n "$EXPECTED_REGION" ]; then
+            echo "Region policy: $EXPECTED_REGION"
+          fi
+
+      - name: Dispatch target repository workflow
+        run: |
+          gh api \
+            --method POST \
+            "repos/$TARGET_REPO/actions/workflows/$WORKFLOW_FILE/dispatches" \
+            -f ref="$TARGET_REF"
+          echo "Triggered $WORKFLOW_FILE in $TARGET_REPO on ref $TARGET_REF"
+
+      - name: Wait for target workflow run
+        if: ${{ inputs.wait_for_completion }}
+        run: |
+          sleep 8
+          RUN_ID=$(gh run list \
+            -R "$TARGET_REPO" \
+            --workflow "$WORKFLOW_FILE" \
+            --branch "$TARGET_REF" \
+            --event workflow_dispatch \
+            --limit 20 \
+            --json databaseId,createdAt \
+            --jq 'sort_by(.createdAt) | .[-1].databaseId')
+
+          if [ -z "$RUN_ID" ] || [ "$RUN_ID" = "null" ]; then
+            echo "Unable to locate dispatched run for $WORKFLOW_FILE in $TARGET_REPO"
+            exit 1
+          fi
+
+          echo "Watching run $RUN_ID"
+          gh run watch "$RUN_ID" -R "$TARGET_REPO" --exit-status --interval 20

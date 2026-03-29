@@ -77,6 +77,21 @@ def test_candidate_urls_include_discovered_cloud_run(monkeypatch):
     assert "https://vecinita-embed-abc123-uc.a.run.app" in candidates
 
 
+def test_candidate_urls_include_local_fallbacks_for_remote_base_url(monkeypatch):
+    monkeypatch.delenv("RENDER", raising=False)
+    monkeypatch.delenv("RENDER_SERVICE_ID", raising=False)
+
+    client = EmbeddingServiceClient(
+        base_url="https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run"
+    )
+
+    candidates = client._candidate_base_urls()
+
+    assert "http://localhost:8001" in candidates
+    assert "http://127.0.0.1:8001" in candidates
+    assert "http://localhost:10000/embedding" in candidates
+
+
 def test_embed_documents_falls_back_to_alt_batch_endpoint(monkeypatch):
     client = EmbeddingServiceClient(base_url="http://localhost:8001")
     calls = []

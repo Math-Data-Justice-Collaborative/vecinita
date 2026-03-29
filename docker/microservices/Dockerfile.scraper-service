@@ -1,0 +1,18 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app/services/scraper/src
+
+WORKDIR /app
+
+COPY services/scraper/pyproject.toml /app/services/scraper/pyproject.toml
+COPY services/scraper/README.md /app/services/scraper/README.md
+COPY services/scraper/src /app/services/scraper/src
+
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
+    && pip install --no-cache-dir -e /app/services/scraper
+
+EXPOSE 8020
+
+CMD ["uvicorn", "vecinita_scraper.api.server:app", "--host", "0.0.0.0", "--port", "8020"]

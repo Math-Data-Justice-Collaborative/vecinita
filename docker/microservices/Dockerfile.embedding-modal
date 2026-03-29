@@ -1,0 +1,20 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    HF_HOME=/tmp/huggingface_cache \
+    PYTHONPATH=/app/services/embedding-modal/src
+
+WORKDIR /app
+
+COPY services/embedding-modal/pyproject.toml /app/services/embedding-modal/pyproject.toml
+COPY services/embedding-modal/README.md /app/services/embedding-modal/README.md
+COPY services/embedding-modal/src /app/services/embedding-modal/src
+COPY docker/microservices/embedding_asgi.py /app/embedding_asgi.py
+
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
+    && pip install --no-cache-dir -e /app/services/embedding-modal
+
+EXPOSE 8011
+
+CMD ["uvicorn", "embedding_asgi:app", "--host", "0.0.0.0", "--port", "8011"]

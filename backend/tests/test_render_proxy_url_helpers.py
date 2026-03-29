@@ -285,6 +285,14 @@ class TestViaProxy:
         mgr = _make_manager(base_url="http://Vecinita-Modal-Proxy:10000/model")
         assert mgr._via_proxy() is True
 
+    def test_returns_true_for_localhost_proxy_model_path(self):
+        mgr = _make_manager(base_url="http://localhost:10000/model")
+        assert mgr._via_proxy() is True
+
+    def test_returns_true_for_localhost_proxy_embedding_path(self):
+        mgr = _make_manager(base_url="http://127.0.0.1:10000/embedding")
+        assert mgr._via_proxy() is True
+
     def test_returns_false_for_direct_modal_url(self):
         mgr = _make_manager(base_url="https://vecinita--vecinita-model-api.modal.run")
         assert mgr._via_proxy() is False
@@ -348,6 +356,37 @@ class TestHeadersViaProxy:
         headers = mgr.headers()
         assert headers == {"X-Proxy-Token": "proxy-shared-token"}
 
+    def test_localhost_proxy_sends_x_proxy_token_only(self):
+        mgr = _make_manager(
+            base_url="http://localhost:10000/model",
+            api_key="should-not-appear",
+            modal_proxy_key="mk-111",
+            modal_proxy_secret="ms-222",
+            proxy_auth_token="proxy-shared-token",
+        )
+        headers = mgr.headers()
+        assert headers == {"X-Proxy-Token": "proxy-shared-token"}
+
+    def test_localhost_proxy_uses_local_default_when_proxy_token_missing(self):
+        mgr = _make_manager(
+            base_url="http://localhost:10000/model",
+            modal_proxy_key="mk-111",
+            modal_proxy_secret="ms-222",
+            proxy_auth_token=None,
+        )
+        headers = mgr.headers()
+        assert headers == {"X-Proxy-Token": "vecinita-local-proxy-token"}
+
+    def test_explicit_proxy_token_wins_over_modal_proxy_secret(self):
+        mgr = _make_manager(
+            base_url="http://localhost:10000/model",
+            modal_proxy_key="mk-111",
+            modal_proxy_secret="ms-222",
+            proxy_auth_token="proxy-shared-token",
+        )
+        headers = mgr.headers()
+        assert headers == {"X-Proxy-Token": "proxy-shared-token"}
+
 
 class TestHeadersDirectModal:
     """When calling Modal directly (no proxy), auth headers must be injected."""
@@ -399,3 +438,33 @@ class TestHeadersLocalOllama:
     def test_empty_headers_for_local_ollama_no_key(self):
         mgr = _make_manager(base_url="http://localhost:11434")
         assert mgr.headers() == {}
+
+
+class TestNativeChatDetection:
+    def test_native_chat_enabled_for_modal_run(self):
+        mgr = _make_manager(base_url="https://workspace--vecinita-model-api.modal.run")
+        assert mgr.uses_modal_native_chat_api() is True
+
+    def test_native_chat_enabled_for_model_proxy_prefix(self):
+        mgr = _make_manager(base_url="http://vecinita-modal-proxy-v1:10000/model")
+        assert mgr.uses_modal_native_chat_api() is True
+
+    def test_native_chat_disabled_for_embedding_proxy_prefix(self):
+        mgr = _make_manager(base_url="http://vecinita-modal-proxy-v1:10000/embedding")
+        assert mgr.uses_modal_native_chat_api() is False
+
+    def test_native_chat_enabled_for_localhost_proxy_model(self):
+        mgr = _make_manager(base_url="http://localhost:10000/model")
+        assert mgr.uses_modal_native_chat_api() is True
+
+    def test_native_chat_enabled_for_127_0_0_1_proxy_model(self):
+        mgr = _make_manager(base_url="http://127.0.0.1:10000/model")
+        assert mgr.uses_modal_native_chat_api() is True
+
+    def test_native_chat_disabled_for_localhost_proxy_embedding(self):
+        mgr = _make_manager(base_url="http://localhost:10000/embedding")
+        assert mgr.uses_modal_native_chat_api() is False
+
+    def test_native_chat_disabled_for_localhost_different_port(self):
+        mgr = _make_manager(base_url="http://localhost:11434/model")
+        assert mgr.uses_modal_native_chat_api() is False

@@ -26,11 +26,27 @@ logger = logging.getLogger(__name__)
 
 # Agent service configuration
 AGENT_SERVICE_URL = os.getenv("AGENT_SERVICE_URL", "http://localhost:8000")
-AGENT_TIMEOUT = float(os.getenv("AGENT_TIMEOUT", "30"))
-AGENT_STREAM_TIMEOUT = float(os.getenv("AGENT_STREAM_TIMEOUT", "120"))
 DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
 _AGENT_CLIENT: httpx.AsyncClient | None = None
 _AGENT_CLIENT_LOCK = threading.Lock()
+
+
+def _read_positive_timeout(name: str, default: float) -> float:
+    raw_value = os.getenv(name, str(default))
+    try:
+        parsed_value = float(raw_value)
+    except (TypeError, ValueError):
+        return default
+
+    return parsed_value if parsed_value > 0 else default
+
+
+def _get_agent_timeout() -> float:
+    return _read_positive_timeout("AGENT_TIMEOUT", 75.0)
+
+
+def _get_agent_stream_timeout() -> float:
+    return _read_positive_timeout("AGENT_STREAM_TIMEOUT", 120.0)
 
 
 def _get_agent_client() -> httpx.AsyncClient | None:
@@ -234,7 +250,7 @@ async def ask_question(
         response = await client.get(
             f"{AGENT_SERVICE_URL}/ask",
             params=params,
-            timeout=AGENT_TIMEOUT,
+            timeout=_get_agent_timeout(),
         )
         response.raise_for_status()
         data = response.json()
@@ -332,7 +348,7 @@ async def sse_proxy_generator(
             "GET",
             f"{AGENT_SERVICE_URL}/ask-stream",
             params=params,
-            timeout=AGENT_STREAM_TIMEOUT,
+            timeout=_get_agent_stream_timeout(),
         ) as response:
             response.raise_for_status()
 

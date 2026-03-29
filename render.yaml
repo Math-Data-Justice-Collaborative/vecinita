@@ -15,6 +15,10 @@ services:
         value: "1"
       - key: TF_ENABLE_ONEDNN_OPTS
         value: "0"
+      - key: EMBEDDING_SERVICE_URL
+        sync: false
+      - key: OLLAMA_BASE_URL
+        sync: false
       - key: MODAL_EMBEDDING_ENDPOINT
         sync: false
       - key: MODAL_OLLAMA_ENDPOINT
@@ -22,6 +26,10 @@ services:
       - key: MODAL_TOKEN_ID
         sync: false
       - key: MODAL_TOKEN_SECRET
+        sync: false
+      - key: MODAL_API_PROXY_KEY
+        sync: false
+      - key: MODAL_API_PROXY_SECRET
         sync: false
       - key: PROXY_AUTH_TOKEN
         sync: false
@@ -68,6 +76,12 @@ services:
         value: "https://vecinita-gateway.onrender.com/api/v1"
       - key: VITE_BACKEND_URL
         value: "https://vecinita-agent.onrender.com"
+      - key: VITE_AGENT_REQUEST_TIMEOUT_MS
+        value: "90000"
+      - key: VITE_AGENT_STREAM_TIMEOUT_MS
+        value: "120000"
+      - key: VITE_AGENT_STREAM_FIRST_EVENT_TIMEOUT_MS
+        value: "15000"
       - key: VITE_SUPABASE_URL
         sync: false
       - key: VITE_SUPABASE_ANON_KEY
@@ -88,24 +102,40 @@ services:
         value: "10000"
       - key: PYTHONUNBUFFERED
         value: "1"
+      # Allow Render-hosted frontend and all onrender.com subdomains.
+      # Override ALLOWED_ORIGINS with a comma-separated list for custom domains.
+      - key: ALLOWED_ORIGINS
+        value: "https://vecinita-frontend.onrender.com"
+      - key: ALLOWED_ORIGIN_REGEX
+        value: "^https://[a-z0-9-]+\\.onrender\\.com$"
+      - key: AGENT_TIMEOUT
+        value: "75"
+      - key: AGENT_STREAM_TIMEOUT
+        value: "120"
       - key: AGENT_SERVICE_URL
         fromService:
           name: vecinita-agent
           type: web
           property: hostport
+      - key: EMBEDDING_SERVICE_URL
+        sync: false
+      - key: OLLAMA_BASE_URL
+        sync: false
       - key: MODAL_EMBEDDING_ENDPOINT
         sync: false
       - key: MODAL_TOKEN_ID
         sync: false
       - key: MODAL_TOKEN_SECRET
         sync: false
+      - key: MODAL_API_PROXY_KEY
+        sync: false
+      - key: MODAL_API_PROXY_SECRET
+        sync: false
       - key: PROXY_AUTH_TOKEN
         sync: false
       - key: MODAL_PROXY_AUTH_TOKEN
         sync: false
       - key: EMBEDDING_SERVICE_AUTH_TOKEN
-        sync: false
-      - key: MODAL_API_PROXY_SECRET
         sync: false
       - key: DATABASE_URL
         fromDatabase:

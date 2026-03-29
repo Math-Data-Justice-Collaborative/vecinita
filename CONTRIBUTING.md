@@ -6,14 +6,14 @@ Thank you for your interest in contributing to Vecinita! This document provides 
 
 ### Prerequisites
 - **Backend**: Python 3.10+, uv package manager
-- **Frontend**: Node.js 18+, npm
+- **Frontend**: Node.js 20+, npm
 - **Services**: Docker & Docker Compose (for local development)
 
 ### Setting Up Development
 
 ```bash
 # Clone the repository
-git clone https://github.com/acadiagit/vecinita
+git clone https://github.com/Math-Data-Justice-Collaborative/vecinita
 cd vecinita
 
 # Install dependencies
@@ -94,6 +94,7 @@ make format
 make test-unit
 make test-integration
 make test-e2e
+make test-microservices-contracts
 ```
 
 ### Configuration
@@ -219,4 +220,4 @@ By contributing, you agree your work will be licensed under the MIT License.
 
 ---
 
-Thank you for contributing to Vecinita! 🎉
+Thank you for contributing to Vecinita!

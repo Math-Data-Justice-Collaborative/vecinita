@@ -2,7 +2,7 @@
 description: Create a doc page with rich content.
 slug: /greeting
 tags:
-  - Releases
+  - releases
   - docusaurus
 ---
 

@@ -21,7 +21,7 @@ def ask_client(env_vars, monkeypatch):
         monkeypatch.setenv(key, value)
 
     monkeypatch.setenv("AGENT_SERVICE_URL", "http://localhost:8000")
-    monkeypatch.setenv("AGENT_TIMEOUT", "30")
+    monkeypatch.setenv("AGENT_TIMEOUT", "75")
     monkeypatch.setenv("AGENT_STREAM_TIMEOUT", "120")
 
     from src.api.router_ask import router as ask_router
@@ -166,6 +166,20 @@ class TestAskEndpoint:
         response_data = response.json()
         assert "detail" in response_data
         assert "timeout" in str(response_data["detail"]).lower()
+
+    @patch("httpx.AsyncClient.get")
+    def test_ask_uses_configured_agent_timeout(self, mock_get, ask_client, mock_agent_response):
+        """Gateway should use the configured non-stream timeout for fallback requests."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = mock_agent_response
+        mock_response.raise_for_status = MagicMock()
+        mock_get.return_value = mock_response
+
+        response = ask_client.get("/api/v1/ask?question=Timeout%20check")
+
+        assert response.status_code == 200
+        assert mock_get.call_args.kwargs["timeout"] == 75
 
     @patch("httpx.AsyncClient.get")
     def test_ask_agent_service_unavailable(self, mock_get, ask_client):

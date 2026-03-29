@@ -6,11 +6,13 @@ Ollama-compatible endpoint. External hosted providers are not supported.
 
 from __future__ import annotations
 
+import os
 import json
 import logging
 import urllib.request
 from pathlib import Path
 from typing import Any, TypedDict
+from urllib.parse import urlparse
 
 import httpx
 from langchain_core.messages import AIMessage, BaseMessage, SystemMessage
@@ -146,8 +148,16 @@ class LocalLLMClientManager:
         # return HTTP 401 because the Bearer token is not a valid Modal credential.
         if self._via_proxy():
             headers: dict[str, str] = {}
-            if self.proxy_auth_token:
-                headers["X-Proxy-Token"] = self.proxy_auth_token
+            proxy_token = (
+                self.proxy_auth_token
+                or os.environ.get("PROXY_AUTH_TOKEN")
+                or os.environ.get("MODAL_PROXY_AUTH_TOKEN")
+                or os.environ.get("X_PROXY_TOKEN")
+            )
+            if not proxy_token and self._is_local_proxy():
+                proxy_token = "vecinita-local-proxy-token"
+            if proxy_token:
+                headers["X-Proxy-Token"] = proxy_token
             return headers
         headers: dict[str, str] = {}
         if self.api_key:
@@ -161,11 +171,30 @@ class LocalLLMClientManager:
         """Return True when *base_url* routes through the Render-internal modal proxy.
 
         The proxy hostname is ``vecinita-modal-proxy`` (Render private network) and
-        always appears in the URL when running on Render.  Local dev environments
-        connect directly to ``*.modal.run`` or ``localhost:11434`` so this returns
-        False there.
+        always appears in the URL when running on Render. Local development may
+        route through the same proxy via ``localhost:10000/model`` or
+        ``localhost:10000/embedding``.
         """
-        return bool(self.base_url and "modal-proxy" in self.base_url.lower())
+        if not self.base_url:
+            return False
+
+        lowered = self.base_url.lower()
+        if "modal-proxy" in lowered:
+            return True
+
+        return self._is_local_proxy()
+
+    def _is_local_proxy(self) -> bool:
+        if not self.base_url:
+            return False
+
+        parsed = urlparse(self.base_url)
+        host = (parsed.hostname or "").lower()
+        port = parsed.port
+        path = (parsed.path or "").lower()
+        is_local_proxy = host in {"localhost", "127.0.0.1"} and port == 10000
+        has_proxy_prefix = path.startswith("/model") or path.startswith("/embedding")
+        return bool(is_local_proxy and has_proxy_prefix)
 
     def current_model(self) -> str:
         return self.current_selection.get("model") or self.default_model
@@ -259,12 +288,32 @@ class LocalLLMClientManager:
         return "ollama", model or self.current_model()
 
     def uses_modal_native_chat_api(self) -> bool:
-        return bool(self.use_native_api and self.base_url and "modal.run" in self.base_url)
+        if not (self.use_native_api and self.base_url):
+            return False
+        lowered = self.base_url.lower()
+        # Native Modal endpoints are hosted under *.modal.run.
+        if "modal.run" in lowered:
+            return True
+        # Proxy-routed model traffic also exposes native /chat and /health semantics
+        # at /model/* once the proxy strips the prefix for the upstream.
+        if "modal-proxy" in lowered and "/model" in lowered:
+            return True
+        # Local dev also routes through localhost:10000/model (same proxy container).
+        # ChatOllama would call /api/chat which the model service doesn't expose;
+        # use _ModalNativeChatClient which calls /chat instead.
+        parsed = urlparse(self.base_url)
+        host = (parsed.hostname or "").lower()
+        port = parsed.port
+        path = (parsed.path or "").lower()
+        is_local_proxy = host in {"localhost", "127.0.0.1"} and port == 10000
+        return bool(is_local_proxy and path.startswith("/model"))
 
     def is_reachable(self, timeout: float = 1.5) -> bool:
         if not self.base_url:
             return False
-        endpoints = ["/api/tags", "/health"]
+        endpoints = ["/health"]
+        if not self.uses_modal_native_chat_api():
+            endpoints.insert(0, "/api/tags")
         for endpoint in endpoints:
             try:
                 with urllib.request.urlopen(

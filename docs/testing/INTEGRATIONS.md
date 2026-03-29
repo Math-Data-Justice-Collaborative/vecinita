@@ -18,6 +18,7 @@ This catalogue tracks every external integration point, where it is tested, and 
 | ChromaDB | HTTP | `backend/tests/integration/test_chroma_documents_admin_chat_flow.py` | `backend-integration` | No |
 | Auth Proxy | HTTP | `backend/tests/integration/test_auth_proxy.py`, `backend/tests/integration/test_auth_matrix.py` | `backend-integration` | No (mocked) |
 | Modal Reindex Trigger | HTTPS REST | `backend/tests/integration/test_modal_reindex_trigger.py` | `backend-integration` | Partial |
+| Modal Proxy -> Model/Embedding/Scraper chain | HTTP | `tests/integration/test_microservices_contracts.py` | `microservices-contracts` | No (local compose defaults) |
 | Postgres + pgvector | TCP | `backend/tests/integration/*` with `db` marker | `backend-integration-pgvector` | No |
 | Redis (if enabled in runtime) | TCP | `backend/tests/integration/test_redis_integration.py` | `backend-integration` | No |
 

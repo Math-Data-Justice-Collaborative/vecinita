@@ -26,6 +26,11 @@ Complete testing and documentation pass completed on March 28, 2026. All quality
 - **Frontend**: PASS - 375 passed, 1 skipped
 - Command: `make test-unit`
 
+### ✅ Microservices Contract Tests
+- **Proxy chain contracts**: PASS in CI workflow (`microservices-contracts`)
+- **Coverage**: Gateway -> Proxy -> Model/Embedding/Scraper health and basic API contracts
+- Command: `make test-microservices-contracts`
+
 ## Test Fixes Applied
 
 ### Backend Tests - Admin Router Migration

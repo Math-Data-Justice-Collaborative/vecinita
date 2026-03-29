@@ -1,8 +1,8 @@
 # Vecinita
 
-![Tests](https://github.com/acadiagit/vecinita/actions/workflows/test.yml/badge.svg)
-![Backend Coverage](https://github.com/acadiagit/vecinita/actions/workflows/backend-coverage.yml/badge.svg)
-![Frontend Coverage](https://github.com/acadiagit/vecinita/actions/workflows/frontend-coverage.yml/badge.svg)
+![Tests](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/workflows/test.yml/badge.svg)
+![Backend Coverage](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/workflows/backend-coverage.yml/badge.svg)
+![Frontend Coverage](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/workflows/frontend-coverage.yml/badge.svg)
 ![Render](https://img.shields.io/badge/Render-Blueprint%20Ready-46E3B7?logo=render&logoColor=white)
 ![Python](https://img.shields.io/badge/python-3.10-blue)
 ![OS](https://img.shields.io/badge/OS-Ubuntu%2022.04-success)
@@ -11,12 +11,15 @@
 
 ## Architecture
 
-Vecinita uses a **microservice architecture** with 3 independent services:
+Vecinita uses a **microservice architecture** with agent, gateway, model, embedding, scraper, and frontend services:
 
-- **Embedding Service** (FastAPI): Generates text embeddings using sentence-transformers
-- **Agent Service** (FastAPI + LangGraph): Intelligent Q&A with tool routing
-- **Scraper Service** (Background cron): Web content ingestion pipeline
-- **Frontend** (React + Vite): Modern responsive UI
+- **Gateway Service** (FastAPI): Stable `/api/v1` surface for web clients
+- **Agent Service** (FastAPI + LangGraph): Q&A orchestration and retrieval flow
+- **Modal Proxy Service** (FastAPI): Auth and routing hub for model/embedding/scraper traffic
+- **Model Service** (FastAPI + Ollama/Modal): Chat generation endpoints
+- **Embedding Service** (FastAPI): Text embedding generation endpoints
+- **Scraper Service** (FastAPI + jobs): Ingestion and reindex triggers
+- **Frontends** (React + Vite): Chat app and data-management app
 
 All services communicate via HTTP and can be deployed on Render's free tier ($0/month).
 
@@ -112,13 +115,21 @@ nvm install --lts
 ### Option 1: Docker Compose (Recommended)
 
 ```bash
-# Start both backend and frontend
-docker-compose up
+# Start the standard local stack
+docker compose up -d
 
 # Access the application
-# Frontend: http://localhost:3000
-# Backend API: http://localhost:8000
+# Frontend: http://localhost:5173
+# Gateway API: http://localhost:8004/api/v1
+# Agent API: http://localhost:8000
 # API Docs: http://localhost:8000/docs
+```
+
+For the proxy-centric microservices stack, use:
+
+```bash
+make microservices-up
+make test-microservices-contracts
 ```
 
 ### Option 2: Local Development

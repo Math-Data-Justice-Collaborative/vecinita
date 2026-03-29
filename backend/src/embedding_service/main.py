@@ -45,7 +45,10 @@ _selection_file = os.getenv(
 _auth_token = (
     os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
     or os.getenv("MODAL_API_PROXY_SECRET")
+    or os.getenv("MODAL_API_PROXY_KEY")
+    or os.getenv("MODAL_API_KEY")
     or os.getenv("MODAL_TOKEN_SECRET")
+    or os.getenv("MODAL_API_TOKEN_SECRET")
 )
 
 

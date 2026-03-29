@@ -2,24 +2,55 @@
 
 Vecinita is a **RAG (Retrieval-Augmented Generation) Q&A Assistant** using LangChain, LangGraph, and Supabase. It scrapes web content, stores embeddings in a vector database, and answers user questions with source attribution.
 
+## Multi-Repo Deployment Topology (Canonical)
+
+Use this mapping as source-of-truth when implementing infra changes:
+
+- **Chat Frontend** (`joseph-c-mcguire/Vecinitafrontend`) -> Render frontend
+- **Data Management Frontend** (`Math-Data-Justice-Collaborative/vecinita-data-management-frontend`) -> Render frontend
+- **Data Management API** (`Math-Data-Justice-Collaborative/vecinita-data-management`) -> Render private service in Virginia
+- **Modal Proxy** (`Math-Data-Justice-Collaborative/vecinita-modal-proxy`) -> Render private service in Virginia
+- **Scraper** (`Math-Data-Justice-Collaborative/vecinita-scraper`) -> Modal deploy
+- **Embedding Modal** (`Math-Data-Justice-Collaborative/vecinita-embedding`) -> Modal deploy
+- **Model Modal** (`Math-Data-Justice-Collaborative/vecinita-model`) -> Modal deploy
+
+### Network/Data Isolation Rules
+
+- Data Management Frontend should call Data Management API directly.
+- Data Management API must remain private (no public ingress) and restricted CORS allow-list.
+- Agent/backend and Data Management API should call model/embedding/scraper via Modal Proxy.
+
+### CI/CD Rule
+
+- Service repositories own their own test/deploy workflows.
+- Root repo orchestrates cross-repo release via `.github/workflows/multi-repo-release-orchestrator.yml`.
+- Reusable dispatcher workflow is `.github/workflows/reusable-dispatch-repo-workflow.yml`.
+
+### Copilot Guidance Artifacts
+
+- Skill: `.github/skills/multi-repo-cicd-orchestration/SKILL.md`
+- Skill: `.github/skills/modal-llm-agent-development/SKILL.md`
+- Agent: `.github/agents/release-orchestrator.agent.md`
+- Quality hook checklist: `.github/hooks/copilot-cicd-quality-hook.md`
+
 ## Architecture Overview
 
 ### Data Flow
-1. **Web Scraping** ([src/utils/scraper_to_text.py](src/utils/scraper_to_text.py)): Downloads content from configured URLs using multiple loaders (PyPDF, Unstructured, Playwright for JS-heavy sites)
-2. **Vector Storage** ([src/utils/vector_loader.py](src/utils/vector_loader.py)): Chunks content, generates embeddings (HuggingFace local), stores in Supabase with source attribution
-3. **Q&A Engine** ([src/main.py](src/main.py)): FastAPI app detects query language, retrieves similar docs via vector search, prompts LLM with source context, returns answers with citations
+1. **Web Scraping** ([../backend/src/scraper/main.py](../backend/src/scraper/main.py)): Scraper entrypoint and orchestration for ingestion jobs
+2. **Vector Storage** ([../backend/src/agent/utils/vector_loader.py](../backend/src/agent/utils/vector_loader.py)): Chunk/embedding load path used by the agent stack
+3. **Q&A Engine** ([../backend/src/agent/main.py](../backend/src/agent/main.py)): FastAPI app detects query language, retrieves similar docs, and returns sourced answers
 
 ### Key Components
 - **FastAPI Server** (src/main.py): Two main endpoints—`GET /` (UI), `GET /ask` (Q&A logic)
 - **Supabase PostgreSQL**: Stores document chunks with embeddings; RPC function `search_similar_documents` performs vector similarity search
 - **LLM**: Groq's Llama 3.1 8B (configured via `GROQ_API_KEY`)
 - **Embeddings**: HuggingFace `sentence-transformers/all-MiniLM-L6-v2` (local, fast)
-- **Web UI**: [src/static/index.html](src/static/index.html)—simple form-based interface
+- **Web UI**: [../frontend/index.html](../frontend/index.html)—chat frontend entrypoint
 
 ## Data Pipeline & Configuration
 
 ### Orchestration Script
-[scripts/data_scrape_load.sh](scripts/data_scrape_load.sh) automates the full pipeline:
+[../backend/scripts/data_scrape_load.sh](../backend/scripts/data_scrape_load.sh) automates the full pipeline:
 - Accepts `--clean` flag to truncate database (additive mode is default)
 - Runs scraper in two passes: standard loaders first, then Playwright for failures
 - Loads chunks into Supabase with deduplication via `unique_content_source` constraint
@@ -31,7 +62,7 @@ Vecinita is a **RAG (Retrieval-Augmented Generation) Q&A Assistant** using LangC
 - **skip_sites.txt**: Domains to skip entirely
 
 ### URL Input
-[data/urls.txt](data/urls.txt): List of URLs to scrape (one per line, ignoring comments starting with `#`)
+[../data/urls.txt](../data/urls.txt): List of URLs to scrape (one per line, ignoring comments starting with `#`)
 
 ## Development Workflows
 
@@ -77,7 +108,7 @@ uv run pytest -m unit
 uv run playwright install
 ```
 
-Fixtures in [tests/conftest.py](tests/conftest.py) provide mocked Supabase, embedding models, and LLM clients. See [tests/README.md](tests/README.md) for full test strategy.
+Fixtures in [../tests/conftest.py](../tests/conftest.py) provide mocked Supabase, embedding models, and LLM clients. See [../tests/README.md](../tests/README.md) for full test strategy.
 
 ## Language-Aware Prompting
 
@@ -90,7 +121,7 @@ Both enforce:
 2. Cite sources with `(Fuente: URL)` or `(Source: URL)`
 3. Return fallback message if no relevant docs found
 
-See [src/main.py](src/main.py) lines 102–138 for prompt templates.
+See [../backend/src/agent/main.py](../backend/src/agent/main.py) for prompt templates and request handling.
 
 ## Key Patterns & Conventions
 

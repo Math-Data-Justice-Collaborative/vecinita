@@ -8,11 +8,22 @@ Port: 8004 (by default)
 """
 
 import os
+import warnings
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlparse
 
 from dotenv import load_dotenv
+
+# Suppress non-blocking transformers advisory on CPU-only environments.
+# This warning appears when PyTorch/TensorFlow/Flax are not installed but
+# doesn't prevent embedding service (HTTP-based) from functioning.
+warnings.filterwarnings(
+    "ignore",
+    message=".*None of PyTorch.*TensorFlow.*Flax have been found.*",
+    category=UserWarning,
+)
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]
 _BACKEND_ROOT = Path(__file__).resolve().parents[2]
@@ -38,12 +49,16 @@ from .router_scrape import router as scrape_router
 # Configuration
 # ============================================================================
 
+
+def _running_on_render() -> bool:
+    return bool(os.getenv("RENDER") or os.getenv("RENDER_SERVICE_ID"))
+
+
 AGENT_SERVICE_URL = os.getenv("AGENT_SERVICE_URL", "http://localhost:8000")
-EMBEDDING_SERVICE_URL = (
-    os.getenv("MODAL_EMBEDDING_ENDPOINT")
-    or os.getenv("EMBEDDING_SERVICE_URL")
-    or "http://localhost:8001"
-)
+
+# Import normalized endpoints from central config (ensures consistency across services).
+# config._normalize_internal_service_url() handles Render vs local-dev logic.
+from src.config import EMBEDDING_SERVICE_URL, OLLAMA_BASE_URL  # noqa: E402
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 
 # CORS configuration - supports multiple origins separated by comma

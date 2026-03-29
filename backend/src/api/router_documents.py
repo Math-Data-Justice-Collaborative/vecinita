@@ -24,7 +24,11 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/documents", tags=["Documents (Public)"])
 
-EMBEDDING_SERVICE_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:8001")
+EMBEDDING_SERVICE_URL = (
+    os.getenv("MODAL_EMBEDDING_ENDPOINT")
+    or os.getenv("EMBEDDING_SERVICE_URL")
+    or "http://vecinita-modal-proxy-v1:10000/embedding"
+)
 UPLOAD_STORAGE_BUCKET = os.getenv("SUPABASE_UPLOADS_BUCKET", "documents")
 EXCLUDED_TEST_TAGS = {"__e2e__", "__test__", "e2e", "test-data"}
 

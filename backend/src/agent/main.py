@@ -38,6 +38,7 @@ import os
 import re
 import time
 import traceback
+import warnings
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
@@ -45,10 +46,20 @@ from urllib.parse import urlparse
 # Avoid hard torch dependency during transformers import on CPU-only/broken torch envs.
 os.environ.setdefault("USE_TORCH", "0")
 os.environ.setdefault("TRANSFORMERS_NO_TORCH", "1")
+# Suppress advisory warning about missing torch/tensorflow/flax in local CPU paths.
+os.environ.setdefault("TRANSFORMERS_NO_ADVISORY_WARNINGS", "1")
+
+# Suppress non-blocking transformers advisory on CPU-only environments.
+# This warning appears when PyTorch/TensorFlow/Flax are not installed but
+# doesn't prevent embedding service (HTTP-based) from functioning.
+warnings.filterwarnings(
+    "ignore",
+    message=".*None of PyTorch.*TensorFlow.*Flax have been found.*",
+    category=UserWarning,
+)
 
 from typing import Annotated, Any, Literal, TypedDict
 
-import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -61,10 +72,8 @@ from langgraph.prebuilt import ToolNode
 from pydantic import BaseModel
 from supabase import Client, create_client
 
-try:
-    from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
-except Exception:
-    FastEmbedEmbeddings = None
+# Optional fallback embedding class; imported lazily only when needed.
+FastEmbedEmbeddings = None
 
 try:
     from langdetect import LangDetectException, detect  # type: ignore[import-not-found]
@@ -162,9 +171,23 @@ def _get_hf_embeddings_class():
 app = FastAPI()
 
 # --- Add CORS Middleware ---
+# Allow callers to restrict origins via env var.  Defaults to wildcard so
+# existing local-dev and gateway-proxied deployments are unaffected.
+# On Render the gateway enforces CORS; the agent ALLOWED_ORIGINS env var
+# provides an extra defense-in-depth layer (set to gateway hostname).
+_AGENT_ALLOWED_ORIGINS_RAW = os.environ.get("ALLOWED_ORIGINS", "*")
+_AGENT_ALLOWED_ORIGINS: list[str] = (
+    ["*"]
+    if _AGENT_ALLOWED_ORIGINS_RAW.strip() == "*"
+    else [o.strip() for o in _AGENT_ALLOWED_ORIGINS_RAW.split(",") if o.strip()]
+)
+_AGENT_ALLOWED_ORIGIN_REGEX: str | None = (
+    os.environ.get("ALLOWED_ORIGIN_REGEX", "").strip() or None
+)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_AGENT_ALLOWED_ORIGINS,
+    allow_origin_regex=_AGENT_ALLOWED_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -174,71 +197,13 @@ app.add_middleware(
 
 
 # --- Load Environment Variables & Validate ---
-def _running_on_render() -> bool:
-    """Return True when the process is executing inside a Render deployment.
-
-    Detection uses two Render-injected environment variables:
-
-    - ``RENDER`` — set to ``"true"`` by the Render build system.
-    - ``RENDER_SERVICE_ID`` — unique service identifier (e.g. ``srv-abc123``).
-
-    Both variables are checked so that the function works regardless of which
-    variables Render happens to inject in a given environment tier.
-    """
-    return bool(os.environ.get("RENDER") or os.environ.get("RENDER_SERVICE_ID"))
-
-
-def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -> str:
-    """Resolve the effective URL for an internal upstream service.
-
-    On Render, **all** upstream service traffic (Ollama model API, embedding
-    service) must route through the ``vecinita-modal-proxy`` private-network
-    service.  This prevents ``[Errno 111] Connection refused`` errors that
-    occur when env vars still point at Docker-internal hostnames or localhost.
-
-    The ``fallback_url`` must include the correct proxy path prefix so that
-    the modal-proxy router can forward to the right backend:
-
-    - Model (Ollama) traffic:    ``http://vecinita-modal-proxy-v1:10000/model``
-    - Embedding traffic:         ``http://vecinita-modal-proxy-v1:10000/embedding``
-
-    The proxy strips the prefix before forwarding, so Ollama receives
-    ``/api/chat`` rather than ``/model/api/chat``.
-
-    Args:
-        raw_url:      Raw URL from an environment variable (may be ``None`` or
-                      empty when the variable is unset).
-        fallback_url: URL to use when on Render or when *raw_url* is absent.
-
-    Returns:
-        On Render: a non-local configured URL when present, otherwise
-        ``fallback_url``.
-        Off Render: ``raw_url`` if non-empty or ``fallback_url`` if blank.
-    """
-    candidate = (raw_url or "").strip()
-
-    if _running_on_render():
-        if candidate:
-            try:
-                host = (urlparse(candidate).hostname or "").lower()
-            except Exception:
-                host = ""
-
-            # Ignore local/docker-style endpoints on Render and force fallback.
-            if host not in {
-                "",
-                "localhost",
-                "127.0.0.1",
-                "0.0.0.0",
-                "::1",
-                "embedding-service",
-                "vecinita-embedding",
-                "vecinita-agent",
-            }:
-                return candidate
-        return fallback_url
-
-    return candidate if candidate else fallback_url
+# Import normalized endpoints from central config (ensures consistency across services).
+from src.config import (
+    EMBEDDING_SERVICE_URL,
+    OLLAMA_BASE_URL,
+    _normalize_internal_service_url,
+    _running_on_render,
+)
 
 
 supabase_url = os.environ.get("SUPABASE_URL")
@@ -247,10 +212,8 @@ supabase_key = (
     or os.environ.get("SUPABASE_KEY")
     or os.environ.get("SUPABASE_PUBLISHABLE_KEY")
 )
-ollama_base_url = _normalize_internal_service_url(
-    os.environ.get("MODAL_OLLAMA_ENDPOINT") or os.environ.get("OLLAMA_BASE_URL"),
-    fallback_url="http://vecinita-modal-proxy-v1:10000/model",
-)
+# Use normalized OLLAMA_BASE_URL from config (handles Render vs local-dev)
+ollama_base_url = OLLAMA_BASE_URL
 ollama_api_key = (
     os.environ.get("OLLAMA_API_KEY")
     or os.environ.get("MODAL_API_PROXY_SECRET")
@@ -354,12 +317,8 @@ try:
 
     # Use dedicated embedding service and optionally fail fast if unavailable
     logger.info("Initializing embedding model (Embedding Service, fail-fast)...")
-    embedding_service_url = _normalize_internal_service_url(
-        os.environ.get("MODAL_EMBEDDING_ENDPOINT")
-        or os.environ.get("EMBEDDING_SERVICE_URL")
-        or "http://embedding-service:8001",
-        fallback_url="http://vecinita-modal-proxy-v1:10000/embedding",
-    )
+    # Use normalized EMBEDDING_SERVICE_URL from config (handles Render vs local-dev)
+    embedding_service_url = EMBEDDING_SERVICE_URL
     embedding_service_auth_token = (
         os.environ.get("EMBEDDING_SERVICE_AUTH_TOKEN")
         or os.environ.get("MODAL_API_PROXY_SECRET")
@@ -381,8 +340,10 @@ try:
             validate_on_init=True,
             auth_token=embedding_service_auth_token,
         )
+        active_embedding_url = getattr(embedding_model, "base_url", embedding_service_url)
         logger.info(
-            f"✅ Embedding model initialized via Embedding Service ({embedding_service_url})"
+            "✅ Embedding model initialized via Embedding Service (%s)",
+            active_embedding_url,
         )
     except Exception as service_exc:
         if embedding_strict_startup:
@@ -401,6 +362,14 @@ try:
             service_exc,
         )
         try:
+            if FastEmbedEmbeddings is None:
+                try:
+                    from langchain_community.embeddings.fastembed import FastEmbedEmbeddings as _FBE
+
+                    FastEmbedEmbeddings = _FBE
+                except Exception:
+                    FastEmbedEmbeddings = None
+
             if FastEmbedEmbeddings is None:
                 raise ImportError("langchain_community is not installed")
             embedding_model = FastEmbedEmbeddings(

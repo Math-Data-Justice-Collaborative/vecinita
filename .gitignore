@@ -1,13 +1,9 @@
 # Environment variables
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
 *.env
 env.txt
-.env.production
-.env.prod
+
 # Python
 __pycache__/
 *.py[cod]
@@ -15,13 +11,10 @@ __pycache__/
 *.so
 .Python
 build/
-develop-eggs/
 dist/
 downloads/
 eggs/
 .eggs/
-backend/lib/
-backend/lib64/
 parts/
 sdist/
 var/
@@ -29,29 +22,25 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-*.bck
 .mypy_cache/
 .pytest_cache/
 .ruff_cache/
-# Virtual Environments
+.tox/
+.hypothesis/
+
+# Virtual environments
 venv/
 ENV/
 env/
 .venv/
-.env/
 env.bak/
 venv.bak/
 
-# Flask
-instance/
-.webassets-cache
+# Local backend build outputs
+backend/lib/
+backend/lib64/
 
-# Database files
-# *.db
-# *.sqlite
-# *.sqlite3
-
-# IDE specific files
+# IDE/editor
 .idea/
 .vscode/
 .vscode/mcp.json
@@ -59,7 +48,7 @@ instance/
 *.swo
 *~
 
-# OS specific files
+# OS files
 .DS_Store
 .DS_Store?
 ._*
@@ -72,44 +61,27 @@ Thumbs.db
 .docker/
 docker-compose.override.yml
 
-# Logs
+# Logs and reports
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# Coverage reports
 htmlcov/
-.tox/
 .coverage
 .coverage.*
 .cache
 nosetests.xml
 coverage.xml
 *.cover
-.hypothesis/
 
-# Jupyter Notebook
+# Jupyter / python version
 .ipynb_checkpoints
-
-# pyenv
 .python-version
 
-# Testing
-.pytest_cache/
-
-# --- VECINA Project Specific ---
-
-# Ignore backup files
+# Project-specific
 *.bck
 utils/old_vector_loader
-
-# Ignore other project-specific files
-.venv*
-
-# Frontend (Vite/Node)
-# Ignore Node.js dependencies and build outputs
 node_modules/
 frontend/node_modules/
 frontend/dist/
@@ -117,11 +89,7 @@ frontend/coverage/
 frontend/.eslintcache
 frontend/test-results/
 frontend/playwright-report/
-
-# Testing artifacts
 test-results/
-
-# Archived and temporary files
 data/archive/
 data/*.txt
 !data/urls.txt
