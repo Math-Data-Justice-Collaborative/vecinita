@@ -9,17 +9,22 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  HAS_CROSS_REPO_WORKFLOW_TOKEN: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN != '' }}
 
 jobs:
   microservices-contracts:
+    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true'
     runs-on: ubuntu-22.04
     timeout-minutes: 40
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
         with:
-          submodules: recursive
-          token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+          submodules: false
+          token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+
+      - name: Checkout required service submodules
+        run: git submodule update --init --depth 1 services/model-modal services/modal-proxy
 
       - name: Build selected microservices images
         run: |
@@ -91,3 +96,10 @@ jobs:
       - name: Tear down stack
         if: always()
         run: docker compose -f docker-compose.microservices.yml down -v --remove-orphans
+
+  microservices-contracts-skipped:
+    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN != 'true'
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Explain skip
+        run: echo "::notice::Skipping microservices contract tests because CROSS_REPO_WORKFLOW_TOKEN is not configured."

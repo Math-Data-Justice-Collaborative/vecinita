@@ -95,9 +95,12 @@ permissions:
   contents: read
   actions: write
 
+env:
+  HAS_CROSS_REPO_WORKFLOW_TOKEN: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN != '' }}
+
 jobs:
   chat-frontend:
-    if: github.event_name == 'push' || github.event.inputs.deploy_chat_frontend == 'true'
+    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_chat_frontend == 'true')
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: chat-frontend
@@ -111,7 +114,7 @@ jobs:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   data-management-frontend:
-    if: github.event_name == 'push' || github.event.inputs.deploy_data_management_frontend == 'true'
+    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_data_management_frontend == 'true')
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: data-management-frontend
@@ -125,7 +128,7 @@ jobs:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   data-management-api:
-    if: github.event_name == 'push' || github.event.inputs.deploy_data_management_api == 'true'
+    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_data_management_api == 'true')
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: data-management-api
@@ -139,7 +142,7 @@ jobs:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   modal-proxy:
-    if: github.event_name == 'push' || github.event.inputs.deploy_modal_proxy == 'true'
+    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_modal_proxy == 'true')
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: modal-proxy
@@ -153,7 +156,7 @@ jobs:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   scraper:
-    if: github.event_name == 'push' || github.event.inputs.deploy_scraper == 'true'
+    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_scraper == 'true')
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: scraper
@@ -166,7 +169,7 @@ jobs:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   embedding-modal:
-    if: github.event_name == 'push' || github.event.inputs.deploy_embedding_modal == 'true'
+    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_embedding_modal == 'true')
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: embedding-modal
@@ -179,7 +182,7 @@ jobs:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   model-modal:
-    if: github.event_name == 'push' || github.event.inputs.deploy_model_modal == 'true'
+    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_model_modal == 'true')
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: model-modal

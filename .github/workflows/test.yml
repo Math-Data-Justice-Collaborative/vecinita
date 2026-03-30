@@ -2,6 +2,7 @@ name: Tests
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  HAS_CROSS_REPO_WORKFLOW_TOKEN: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN != '' }}
 
 on:
   push:
@@ -20,8 +21,7 @@ jobs:
       uses: actions/checkout@v5
       with:
         fetch-depth: 0
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
 
     - name: Install gitleaks
       run: |
@@ -42,8 +42,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v6
@@ -75,8 +74,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
+
+    - name: Checkout frontend submodule
+      run: git submodule update --init --depth 1 frontend
 
     - name: Set up Node.js
       uses: actions/setup-node@v5
@@ -107,8 +108,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v6
@@ -131,13 +131,17 @@ jobs:
       run: black --check src tests
 
   data-management-api-structure:
+    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true'
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
+        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+
+    - name: Checkout data-management API submodule
+      run: git submodule update --init --depth 1 services/data-management-api
 
     - name: Validate imported data-management repo structure
       run: |
@@ -146,13 +150,17 @@ jobs:
         test -d services/data-management-api/apps/frontend
 
   data-management-frontend-quality:
+    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true'
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
+        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+
+    - name: Checkout data-management frontend submodule
+      run: git submodule update --init --depth 1 apps/data-management-frontend
 
     - name: Set up Node.js
       uses: actions/setup-node@v5
@@ -174,13 +182,17 @@ jobs:
       run: npm run build
 
   data-management-frontend-ci:
+    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true'
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
+        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+
+    - name: Checkout data-management frontend submodule
+      run: git submodule update --init --depth 1 apps/data-management-frontend
 
     - name: Set up Node.js
       uses: actions/setup-node@v5
@@ -198,13 +210,17 @@ jobs:
       run: npm run test
 
   modal-proxy-ci:
+    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true'
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
+        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+
+    - name: Checkout modal-proxy submodule
+      run: git submodule update --init --depth 1 services/modal-proxy
 
     - name: Setup Python 3.12
       uses: actions/setup-python@v6
@@ -228,8 +244,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
+
+    - name: Checkout embedding-modal submodule
+      run: git submodule update --init --depth 1 services/embedding-modal
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v6
@@ -254,8 +272,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
+
+    - name: Checkout embedding-modal submodule
+      run: git submodule update --init --depth 1 services/embedding-modal
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v6
@@ -280,8 +300,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
+
+    - name: Checkout model-modal submodule
+      run: git submodule update --init --depth 1 services/model-modal
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v6
@@ -306,8 +328,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
+
+    - name: Checkout model-modal submodule
+      run: git submodule update --init --depth 1 services/model-modal
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v6
@@ -327,13 +351,17 @@ jobs:
       run: make test
 
   scraper-quality:
+    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true'
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
+        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+
+    - name: Checkout scraper submodule
+      run: git submodule update --init --depth 1 services/scraper
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v6
@@ -360,13 +388,17 @@ jobs:
       run: make type-check
 
   scraper-ci:
+    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true'
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
+        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+
+    - name: Checkout scraper submodule
+      run: git submodule update --init --depth 1 services/scraper
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v6
@@ -391,8 +423,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
 
     - name: Free disk space
       run: |
@@ -475,8 +506,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v6
@@ -530,8 +560,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v6
@@ -561,8 +590,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
+
+    - name: Checkout frontend submodule
+      run: git submodule update --init --depth 1 frontend
 
     - name: Set up Node.js
       uses: actions/setup-node@v5
@@ -590,8 +621,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+        submodules: 'false'
+
+    - name: Checkout frontend submodule
+      run: git submodule update --init --depth 1 frontend
 
     - name: Set up Node.js
       uses: actions/setup-node@v5
@@ -683,8 +716,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
         with:
-          submodules: 'recursive'
-          token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN || github.token }}
+          submodules: 'false'
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v6

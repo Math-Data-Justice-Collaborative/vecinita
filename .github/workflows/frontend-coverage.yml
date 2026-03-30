@@ -24,7 +24,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       with:
-        submodules: 'recursive'
+        submodules: 'false'
+
+    - name: Checkout frontend submodule
+      run: git submodule update --init --depth 1 frontend
 
     - name: Set up Node.js
       uses: actions/setup-node@v5
