@@ -9,11 +9,22 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  HAS_CROSS_REPO_WORKFLOW_TOKEN: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN != '' }}
 
 jobs:
+  workflow-context:
+    runs-on: ubuntu-22.04
+    outputs:
+      has_cross_repo_token: ${{ steps.detect.outputs.has_cross_repo_token }}
+    steps:
+      - name: Detect cross-repo token availability
+        id: detect
+        env:
+          HAS_CROSS_REPO_TOKEN: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN != '' }}
+        run: echo "has_cross_repo_token=${HAS_CROSS_REPO_TOKEN}" >> "$GITHUB_OUTPUT"
+
   microservices-contracts:
-    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true'
+    needs: [workflow-context]
+    if: needs.workflow-context.outputs.has_cross_repo_token == 'true'
     runs-on: ubuntu-22.04
     timeout-minutes: 40
     steps:
@@ -98,7 +109,8 @@ jobs:
         run: docker compose -f docker-compose.microservices.yml down -v --remove-orphans
 
   microservices-contracts-skipped:
-    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN != 'true'
+    needs: [workflow-context]
+    if: needs.workflow-context.outputs.has_cross_repo_token != 'true'
     runs-on: ubuntu-22.04
     steps:
       - name: Explain skip

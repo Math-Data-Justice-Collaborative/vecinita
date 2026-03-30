@@ -95,12 +95,21 @@ permissions:
   contents: read
   actions: write
 
-env:
-  HAS_CROSS_REPO_WORKFLOW_TOKEN: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN != '' }}
-
 jobs:
+  workflow-context:
+    runs-on: ubuntu-22.04
+    outputs:
+      has_cross_repo_token: ${{ steps.detect.outputs.has_cross_repo_token }}
+    steps:
+      - name: Detect cross-repo token availability
+        id: detect
+        env:
+          HAS_CROSS_REPO_TOKEN: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN != '' }}
+        run: echo "has_cross_repo_token=${HAS_CROSS_REPO_TOKEN}" >> "$GITHUB_OUTPUT"
+
   chat-frontend:
-    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_chat_frontend == 'true')
+    needs: [workflow-context]
+    if: needs.workflow-context.outputs.has_cross_repo_token == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_chat_frontend == 'true')
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: chat-frontend
@@ -114,7 +123,8 @@ jobs:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   data-management-frontend:
-    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_data_management_frontend == 'true')
+    needs: [workflow-context]
+    if: needs.workflow-context.outputs.has_cross_repo_token == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_data_management_frontend == 'true')
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: data-management-frontend
@@ -128,7 +138,8 @@ jobs:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   data-management-api:
-    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_data_management_api == 'true')
+    needs: [workflow-context]
+    if: needs.workflow-context.outputs.has_cross_repo_token == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_data_management_api == 'true')
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: data-management-api
@@ -142,7 +153,8 @@ jobs:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   modal-proxy:
-    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_modal_proxy == 'true')
+    needs: [workflow-context]
+    if: needs.workflow-context.outputs.has_cross_repo_token == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_modal_proxy == 'true')
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: modal-proxy
@@ -156,7 +168,8 @@ jobs:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   scraper:
-    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_scraper == 'true')
+    needs: [workflow-context]
+    if: needs.workflow-context.outputs.has_cross_repo_token == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_scraper == 'true')
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: scraper
@@ -169,7 +182,8 @@ jobs:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   embedding-modal:
-    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_embedding_modal == 'true')
+    needs: [workflow-context]
+    if: needs.workflow-context.outputs.has_cross_repo_token == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_embedding_modal == 'true')
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: embedding-modal
@@ -182,7 +196,8 @@ jobs:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   model-modal:
-    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_model_modal == 'true')
+    needs: [workflow-context]
+    if: needs.workflow-context.outputs.has_cross_repo_token == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_model_modal == 'true')
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: model-modal
@@ -197,6 +212,7 @@ jobs:
   orchestrator-summary:
     if: always()
     needs:
+      - workflow-context
       - chat-frontend
       - data-management-frontend
       - data-management-api
@@ -208,6 +224,7 @@ jobs:
     steps:
       - name: Print dispatch summary
         run: |
+          echo "cross-repo-token: ${{ needs.workflow-context.outputs.has_cross_repo_token }}"
           echo "chat-frontend: ${{ needs.chat-frontend.result }}"
           echo "data-management-frontend: ${{ needs.data-management-frontend.result }}"
           echo "data-management-api: ${{ needs.data-management-api.result }}"

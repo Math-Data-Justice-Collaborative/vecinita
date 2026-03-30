@@ -2,7 +2,6 @@ name: Tests
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  HAS_CROSS_REPO_WORKFLOW_TOKEN: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN != '' }}
 
 on:
   push:
@@ -12,6 +11,17 @@ on:
   workflow_dispatch:
 
 jobs:
+  workflow-context:
+    runs-on: ubuntu-22.04
+    outputs:
+      has_cross_repo_token: ${{ steps.detect.outputs.has_cross_repo_token }}
+    steps:
+    - name: Detect cross-repo token availability
+      id: detect
+      env:
+        HAS_CROSS_REPO_TOKEN: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN != '' }}
+      run: echo "has_cross_repo_token=${HAS_CROSS_REPO_TOKEN}" >> "$GITHUB_OUTPUT"
+
   secret-scan:
     runs-on: ubuntu-22.04
     permissions:
@@ -131,7 +141,8 @@ jobs:
       run: black --check src tests
 
   data-management-api-structure:
-    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true'
+    needs: [workflow-context]
+    if: needs.workflow-context.outputs.has_cross_repo_token == 'true'
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
@@ -150,7 +161,8 @@ jobs:
         test -d services/data-management-api/apps/frontend
 
   data-management-frontend-quality:
-    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true'
+    needs: [workflow-context]
+    if: needs.workflow-context.outputs.has_cross_repo_token == 'true'
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
@@ -182,7 +194,8 @@ jobs:
       run: npm run build
 
   data-management-frontend-ci:
-    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true'
+    needs: [workflow-context]
+    if: needs.workflow-context.outputs.has_cross_repo_token == 'true'
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
@@ -210,7 +223,8 @@ jobs:
       run: npm run test
 
   modal-proxy-ci:
-    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true'
+    needs: [workflow-context]
+    if: needs.workflow-context.outputs.has_cross_repo_token == 'true'
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
@@ -351,7 +365,8 @@ jobs:
       run: make test
 
   scraper-quality:
-    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true'
+    needs: [workflow-context]
+    if: needs.workflow-context.outputs.has_cross_repo_token == 'true'
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
@@ -388,7 +403,8 @@ jobs:
       run: make type-check
 
   scraper-ci:
-    if: env.HAS_CROSS_REPO_WORKFLOW_TOKEN == 'true'
+    needs: [workflow-context]
+    if: needs.workflow-context.outputs.has_cross_repo_token == 'true'
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
