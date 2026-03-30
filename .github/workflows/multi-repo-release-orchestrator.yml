@@ -78,7 +78,7 @@ jobs:
       expected_platform: Render Frontend
       expected_region: virginia
     secrets:
-      github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+      dispatch_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   data-management-frontend:
     needs: [workflow-context]
@@ -93,7 +93,7 @@ jobs:
       expected_platform: Render Frontend
       expected_region: virginia
     secrets:
-      github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+      dispatch_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   data-management-api:
     needs: [workflow-context]
@@ -108,7 +108,7 @@ jobs:
       expected_platform: Render Private Service
       expected_region: virginia
     secrets:
-      github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+      dispatch_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   modal-proxy:
     needs: [workflow-context]
@@ -123,7 +123,7 @@ jobs:
       expected_platform: Render Private Service
       expected_region: virginia
     secrets:
-      github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+      dispatch_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   scraper:
     needs: [workflow-context]
@@ -137,7 +137,7 @@ jobs:
       wait_for_completion: ${{ inputs.wait_for_completion }}
       expected_platform: Modal Deploy
     secrets:
-      github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+      dispatch_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   embedding-modal:
     needs: [workflow-context]
@@ -151,7 +151,7 @@ jobs:
       wait_for_completion: ${{ inputs.wait_for_completion }}
       expected_platform: Modal Deploy
     secrets:
-      github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+      dispatch_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   model-modal:
     needs: [workflow-context]
@@ -165,7 +165,7 @@ jobs:
       wait_for_completion: ${{ inputs.wait_for_completion }}
       expected_platform: Modal Deploy
     secrets:
-      github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+      dispatch_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   orchestrator-summary:
     if: always()

@@ -41,7 +41,7 @@ on:
         default: ""
         type: string
     secrets:
-      github_token:
+      dispatch_token:
         required: false
 
 permissions:
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: ${{ inputs.timeout_minutes }}
     env:
-      GH_TOKEN: ${{ secrets.github_token || github.token }}
+      GH_TOKEN: ${{ secrets.dispatch_token || github.token }}
       SERVICE_NAME: ${{ inputs.service_name }}
       TARGET_REPO: ${{ inputs.target_repo }}
       WORKFLOW_FILE: ${{ inputs.workflow_file }}
