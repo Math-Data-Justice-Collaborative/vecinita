@@ -62,7 +62,7 @@ jobs:
         working-directory: backend
         run: python -m mypy src
 
-      - name: Run backend unit tests (non-LLM)
+      - name: Run backend fast tests (non-LLM)
         working-directory: backend
         env:
           PYTHONPATH: ${{ github.workspace }}/backend
@@ -81,7 +81,7 @@ jobs:
           REINDEX_TRIGGER_TOKEN=test-reindex-token
           REINDEX_SERVICE_URL=https://example.modal.run
           EOF
-          pytest tests/ -m "unit and not llm" -v --tb=short --junit-xml=test-results.xml
+          pytest tests/ -m "not integration and not e2e and not llm" -v --tb=short --junit-xml=test-results.xml
 
   frontend-quality:
     runs-on: ubuntu-22.04

@@ -72,8 +72,8 @@ pytest
 ### Run Specific Test Categories
 
 ```bash
-# Unit tests only (fast)
-pytest -m unit
+# Fast backend tests (default local + unit-marked tests)
+pytest -m "not integration and not e2e"
 
 # Integration tests
 pytest -m integration
@@ -176,12 +176,13 @@ Shared pytest fixtures:
 
 Tests are organized with markers for easy filtering:
 
-- `@pytest.mark.unit` - Unit tests (no external dependencies)
 - `@pytest.mark.integration` - Integration tests (may require services)
 - `@pytest.mark.ui` - UI tests using Playwright
 - `@pytest.mark.db` - Database-related tests
 - `@pytest.mark.api` - API endpoint tests
 - `@pytest.mark.slow` - Long-running tests
+
+Fast backend CI uses `-m "not integration and not e2e and not llm"` so unmarked fast tests are included by default. `@pytest.mark.unit` is still supported for explicit categorization, but it is not the only way a fast test is selected.
 
 ## Mocking Strategy
 
@@ -312,10 +313,10 @@ def test_with_fixtures(
 - Integration tests run in < 5 seconds
 - UI tests run in < 10 seconds per test (requires running server)
 
-Run only unit tests for fast feedback during development:
+Run the fast backend suite for quick feedback during development:
 
 ```bash
-pytest -m unit
+pytest -m "not integration and not e2e"
 ```
 
 ## Contributing

@@ -65,14 +65,14 @@ jobs:
         echo "REINDEX_TRIGGER_TOKEN=test-reindex-token" >> .env
         echo "REINDEX_SERVICE_URL=https://example.modal.run" >> .env
 
-    - name: Run backend unit tests with coverage
+    - name: Run backend fast tests with coverage
       working-directory: backend
       env:
         PYTHONPATH: ${{ github.workspace }}/backend
         SKIP_AGENT_MAIN_IMPORT: 'true'
         EMBEDDING_STRICT_STARTUP: 'false'
       run: |
-        pytest tests/ -m "unit and not llm" -v --tb=short \
+        pytest tests/ -m "not integration and not e2e and not llm" -v --tb=short \
           --cov=src.embedding_service.modal_app \
           --cov=src.services.embedding.models \
           --cov=src.utils.supabase_embeddings \

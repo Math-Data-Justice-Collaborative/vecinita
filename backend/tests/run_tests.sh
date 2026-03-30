@@ -20,8 +20,8 @@ VERBOSE="${2:--v}"
 
 case $TEST_TYPE in
     "unit")
-        echo "🧪 Running unit tests..."
-        pytest tests/ -m unit $VERBOSE
+        echo "🧪 Running fast backend tests..."
+        pytest tests/ -m "not integration and not e2e" $VERBOSE
         ;;
     "integration")
         echo "🔗 Running integration tests..."

@@ -190,7 +190,7 @@ uv run pytest
 
 ### Run by Category
 ```bash
-uv run pytest -m unit        # Unit tests (fast)
+uv run pytest -m "not integration and not e2e" # Fast backend tests
 uv run pytest -m integration # Integration tests
 uv run pytest -m api         # API tests
 uv run pytest tests/test_api/  # Specific test file

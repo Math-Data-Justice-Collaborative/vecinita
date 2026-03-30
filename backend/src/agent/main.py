@@ -44,6 +44,8 @@ import warnings
 from datetime import datetime, timezone
 from pathlib import Path
 
+import httpx
+
 # Avoid hard torch dependency during transformers import on CPU-only/broken torch envs.
 os.environ.setdefault("USE_TORCH", "0")
 os.environ.setdefault("TRANSFORMERS_NO_TORCH", "1")

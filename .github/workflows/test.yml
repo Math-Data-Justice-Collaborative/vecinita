@@ -498,10 +498,10 @@ jobs:
         echo "REINDEX_SERVICE_URL=https://example.modal.run" >> .env
       shell: bash
 
-    - name: Run backend tests (unit only)
+    - name: Run backend fast tests
       working-directory: backend
       run: |
-        pytest tests/ -m "unit and not llm" -v --tb=short --junit-xml=test-results.xml \
+        pytest tests/ -m "not integration and not e2e and not llm" -v --tb=short --junit-xml=test-results.xml \
           --cov=src.embedding_service.modal_app \
           --cov=src.services.embedding.models \
           --cov=src.utils.supabase_embeddings \
