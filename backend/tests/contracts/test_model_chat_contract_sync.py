@@ -59,7 +59,9 @@ def test_modal_native_client_payload_matches_model_service_chat_schema(monkeypat
         temperature=0.2,
     )
 
-    response = client.invoke([SystemMessage(content="You are helpful."), HumanMessage(content="Hola")])
+    response = client.invoke(
+        [SystemMessage(content="You are helpful."), HumanMessage(content="Hola")]
+    )
 
     assert response.content == "ok"
     assert str(captured["url"]).endswith("/chat")

@@ -77,6 +77,6 @@ def test_dev_session_warns_instead_of_exiting_on_readiness_timeout() -> None:
 def test_dev_session_does_not_quote_proxy_token_parameter_expansion() -> None:
     content = _script_text()
     assert "PROXY_AUTH_TOKEN='\\${PROXY_AUTH_TOKEN:-vecinita-local-proxy-token}'" not in content
-    assert 'resolve_proxy_auth_token()' in content
+    assert "resolve_proxy_auth_token()" in content
     assert 'proxy_auth_token="$(resolve_proxy_auth_token)"' in content
     assert "PROXY_AUTH_TOKEN='$proxy_auth_token'" in content

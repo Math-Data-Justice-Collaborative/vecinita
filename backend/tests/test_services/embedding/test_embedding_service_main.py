@@ -77,7 +77,9 @@ class TestEmbeddingAuth:
         server = importlib.reload(server_module)
         server._embedding_model = None
 
-        with patch("src.embedding_service.main.get_embedding_model", return_value=mock_embedding_model):
+        with patch(
+            "src.embedding_service.main.get_embedding_model", return_value=mock_embedding_model
+        ):
             client = TestClient(server.app)
             response = client.post("/embed", json={"text": "hello"})
 

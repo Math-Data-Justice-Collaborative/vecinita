@@ -19,14 +19,13 @@ load_dotenv()
 # Runtime Environment Detection
 # ---------------------------------------------------------------------------
 
+
 def _running_on_render() -> bool:
     """Detect if running on Render platform."""
     return bool(os.getenv("RENDER") or os.getenv("RENDER_SERVICE_ID"))
 
 
-def _normalize_internal_service_url(
-    raw_url: str | None, *, fallback_url: str
-) -> str:
+def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -> str:
     """Resolve the effective URL for an internal upstream service (embedding, Ollama).
 
     On Render, all upstream service traffic must route through the

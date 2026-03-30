@@ -32,6 +32,8 @@ Environment variables (minimum required)
                                         overridden by proxy on Render)
 """
 
+# ruff: noqa: E402, I001
+
 import json
 import logging
 import os
@@ -41,7 +43,6 @@ import traceback
 import warnings
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
 
 # Avoid hard torch dependency during transformers import on CPU-only/broken torch envs.
 os.environ.setdefault("USE_TORCH", "0")
@@ -181,9 +182,7 @@ _AGENT_ALLOWED_ORIGINS: list[str] = (
     if _AGENT_ALLOWED_ORIGINS_RAW.strip() == "*"
     else [o.strip() for o in _AGENT_ALLOWED_ORIGINS_RAW.split(",") if o.strip()]
 )
-_AGENT_ALLOWED_ORIGIN_REGEX: str | None = (
-    os.environ.get("ALLOWED_ORIGIN_REGEX", "").strip() or None
-)
+_AGENT_ALLOWED_ORIGIN_REGEX: str | None = os.environ.get("ALLOWED_ORIGIN_REGEX", "").strip() or None
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_AGENT_ALLOWED_ORIGINS,
@@ -204,6 +203,9 @@ from src.config import (
     _normalize_internal_service_url,
     _running_on_render,
 )
+
+# Keep these helpers bound on this module for legacy imports and tests.
+_RENDER_URL_HELPERS = (_normalize_internal_service_url, _running_on_render)
 
 
 supabase_url = os.environ.get("SUPABASE_URL")

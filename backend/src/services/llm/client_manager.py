@@ -6,9 +6,9 @@ Ollama-compatible endpoint. External hosted providers are not supported.
 
 from __future__ import annotations
 
-import os
 import json
 import logging
+import os
 import urllib.request
 from pathlib import Path
 from typing import Any, TypedDict

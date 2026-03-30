@@ -159,7 +159,9 @@ async def embed_text(request: EmbedRequest) -> EmbedResponse:
                 text=request.text,
                 embedding=data["embedding"],
                 model=data.get("model", EMBEDDING_CONFIG["model"]),
-                dimension=data.get("dimension", data.get("dimensions", EMBEDDING_CONFIG["dimension"])),
+                dimension=data.get(
+                    "dimension", data.get("dimensions", EMBEDDING_CONFIG["dimension"])
+                ),
             )
 
     except httpx.HTTPError as e:

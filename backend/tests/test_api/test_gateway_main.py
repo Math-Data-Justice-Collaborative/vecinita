@@ -276,7 +276,9 @@ class TestEnvironmentConfiguration:
 
         # Reload module to pick up new environment variables
         import src.api.main
+        import src.config
 
+        importlib.reload(src.config)
         importlib.reload(src.api.main)
         assert src.api.main.EMBEDDING_SERVICE_URL == modal_url
 

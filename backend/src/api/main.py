@@ -7,12 +7,13 @@ Serves as the primary entry point for all backend services.
 Port: 8004 (by default)
 """
 
+# ruff: noqa: E402, I001
+
 import os
 import warnings
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
 
 from dotenv import load_dotenv
 
@@ -58,7 +59,8 @@ AGENT_SERVICE_URL = os.getenv("AGENT_SERVICE_URL", "http://localhost:8000")
 
 # Import normalized endpoints from central config (ensures consistency across services).
 # config._normalize_internal_service_url() handles Render vs local-dev logic.
-from src.config import EMBEDDING_SERVICE_URL, OLLAMA_BASE_URL  # noqa: E402
+from src.config import EMBEDDING_SERVICE_URL
+
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 
 # CORS configuration - supports multiple origins separated by comma
