@@ -69,6 +69,20 @@ class TestEmbeddingAuth:
         response = embedding_client.post("/embed", json={"text": "hello"})
         assert response.status_code == 401
 
+    def test_embed_skips_app_auth_when_disabled_for_modal(self, monkeypatch, mock_embedding_model):
+        monkeypatch.setenv("EMBEDDING_DISABLE_APP_AUTH", "true")
+
+        from src.embedding_service import main as server_module
+
+        server = importlib.reload(server_module)
+        server._embedding_model = None
+
+        with patch("src.embedding_service.main.get_embedding_model", return_value=mock_embedding_model):
+            client = TestClient(server.app)
+            response = client.post("/embed", json={"text": "hello"})
+
+        assert response.status_code == 200
+
     def test_embed_accepts_token_header(self, embedding_client):
         from src.embedding_service import main as server
 

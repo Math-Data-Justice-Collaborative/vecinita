@@ -110,12 +110,12 @@ services:
     container_name: vecinita-modal-proxy-ms
     environment:
       PORT: 10000
-      MODAL_TOKEN_ID: local-modal-token-id
-      MODAL_TOKEN_SECRET: local-modal-token-secret
-      PROXY_AUTH_TOKEN: vecinita-local-proxy-token
-      VECINITA_SCRAPER_API_URL: http://vecinita-scraper-ms:8020
-      VECINITA_MODEL_API_URL: http://vecinita-model-ms:8000
-      VECINITA_EMBEDDING_API_URL: http://vecinita-embedding-ms:8011
+      MODAL_TOKEN_ID: "${MODAL_TOKEN_ID:-${MODAL_API_PROXY_KEY:-${MODAL_API_TOKEN_ID:-${MODAL_AUTH_KEY:-local-modal-token-id}}}}"
+      MODAL_TOKEN_SECRET: "${MODAL_TOKEN_SECRET:-${MODAL_API_PROXY_SECRET:-${MODAL_API_TOKEN_SECRET:-${MODAL_AUTH_SECRET:-local-modal-token-secret}}}}"
+      PROXY_AUTH_TOKEN: "${PROXY_AUTH_TOKEN:-vecinita-local-proxy-token}"
+      VECINITA_SCRAPER_API_URL: "${VECINITA_SCRAPER_API_URL:-http://vecinita-scraper-ms:8020}"
+      VECINITA_MODEL_API_URL: "${VECINITA_MODEL_API_URL:-http://vecinita-model-ms:8000}"
+      VECINITA_EMBEDDING_API_URL: "${VECINITA_EMBEDDING_API_URL:-http://vecinita-embedding-ms:8011}"
       CORS_ORIGINS: "*"
       ENVIRONMENT: development
     ports:

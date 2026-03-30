@@ -134,18 +134,14 @@ dev-shared-status:
 
 dev: dev-shared-up
 	MODAL_OLLAMA_ENDPOINT='http://localhost:10000/model' \
-	MODAL_EMBEDDING_ENDPOINT='http://localhost:8001' \
-	MODAL_API_PROXY_KEY='local-modal-token-id' \
-	MODAL_API_PROXY_SECRET='local-modal-token-secret' \
-	PROXY_AUTH_TOKEN='vecinita-local-proxy-token' \
+	MODAL_EMBEDDING_ENDPOINT='http://localhost:10000/embedding' \
+	PROXY_AUTH_TOKEN="$${PROXY_AUTH_TOKEN:-vecinita-local-proxy-token}" \
 	./run/dev-session.sh start
 
 dev-tmux: dev-shared-up
 	MODAL_OLLAMA_ENDPOINT='http://localhost:10000/model' \
-	MODAL_EMBEDDING_ENDPOINT='http://localhost:8001' \
-	MODAL_API_PROXY_KEY='local-modal-token-id' \
-	MODAL_API_PROXY_SECRET='local-modal-token-secret' \
-	PROXY_AUTH_TOKEN='vecinita-local-proxy-token' \
+	MODAL_EMBEDDING_ENDPOINT='http://localhost:10000/embedding' \
+	PROXY_AUTH_TOKEN="$${PROXY_AUTH_TOKEN:-vecinita-local-proxy-token}" \
 	./run/dev-session.sh start-tmux
 
 dev-attach:

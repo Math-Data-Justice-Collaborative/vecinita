@@ -97,96 +97,96 @@ permissions:
 
 jobs:
   chat-frontend:
-    if: github.event_name == 'push' || inputs.deploy_chat_frontend
+    if: github.event_name == 'push' || github.event.inputs.deploy_chat_frontend == 'true'
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: chat-frontend
       target_repo: joseph-c-mcguire/Vecinitafrontend
-      workflow_file: ${{ inputs.chat_frontend_workflow || 'deploy.yml' }}
-      target_ref: ${{ inputs.target_ref || 'main' }}
-      wait_for_completion: ${{ inputs.wait_for_completion != false }}
+      workflow_file: ${{ github.event.inputs.chat_frontend_workflow || 'deploy.yml' }}
+      target_ref: ${{ github.event.inputs.target_ref || 'main' }}
+      wait_for_completion: ${{ github.event_name == 'push' || github.event.inputs.wait_for_completion != 'false' }}
       expected_platform: Render Frontend
       expected_region: virginia
     secrets:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   data-management-frontend:
-    if: github.event_name == 'push' || inputs.deploy_data_management_frontend
+    if: github.event_name == 'push' || github.event.inputs.deploy_data_management_frontend == 'true'
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: data-management-frontend
       target_repo: Math-Data-Justice-Collaborative/vecinita-data-management-frontend
-      workflow_file: ${{ inputs.data_management_frontend_workflow || 'deploy.yml' }}
-      target_ref: ${{ inputs.target_ref || 'main' }}
-      wait_for_completion: ${{ inputs.wait_for_completion != false }}
+      workflow_file: ${{ github.event.inputs.data_management_frontend_workflow || 'deploy.yml' }}
+      target_ref: ${{ github.event.inputs.target_ref || 'main' }}
+      wait_for_completion: ${{ github.event_name == 'push' || github.event.inputs.wait_for_completion != 'false' }}
       expected_platform: Render Frontend
       expected_region: virginia
     secrets:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   data-management-api:
-    if: github.event_name == 'push' || inputs.deploy_data_management_api
+    if: github.event_name == 'push' || github.event.inputs.deploy_data_management_api == 'true'
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: data-management-api
       target_repo: Math-Data-Justice-Collaborative/vecinita-data-management
-      workflow_file: ${{ inputs.data_management_api_workflow || 'ci-cd.yml' }}
-      target_ref: ${{ inputs.target_ref || 'main' }}
-      wait_for_completion: ${{ inputs.wait_for_completion != false }}
+      workflow_file: ${{ github.event.inputs.data_management_api_workflow || 'ci-cd.yml' }}
+      target_ref: ${{ github.event.inputs.target_ref || 'main' }}
+      wait_for_completion: ${{ github.event_name == 'push' || github.event.inputs.wait_for_completion != 'false' }}
       expected_platform: Render Private Service
       expected_region: virginia
     secrets:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   modal-proxy:
-    if: github.event_name == 'push' || inputs.deploy_modal_proxy
+    if: github.event_name == 'push' || github.event.inputs.deploy_modal_proxy == 'true'
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: modal-proxy
       target_repo: Math-Data-Justice-Collaborative/vecinita-modal-proxy
-      workflow_file: ${{ inputs.modal_proxy_workflow || 'ci-cd.yml' }}
-      target_ref: ${{ inputs.target_ref || 'main' }}
-      wait_for_completion: ${{ inputs.wait_for_completion != false }}
+      workflow_file: ${{ github.event.inputs.modal_proxy_workflow || 'ci-cd.yml' }}
+      target_ref: ${{ github.event.inputs.target_ref || 'main' }}
+      wait_for_completion: ${{ github.event_name == 'push' || github.event.inputs.wait_for_completion != 'false' }}
       expected_platform: Render Private Service
       expected_region: virginia
     secrets:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   scraper:
-    if: github.event_name == 'push' || inputs.deploy_scraper
+    if: github.event_name == 'push' || github.event.inputs.deploy_scraper == 'true'
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: scraper
       target_repo: Math-Data-Justice-Collaborative/vecinita-scraper
-      workflow_file: ${{ inputs.scraper_workflow || 'ci-cd.yml' }}
-      target_ref: ${{ inputs.target_ref || 'main' }}
-      wait_for_completion: ${{ inputs.wait_for_completion != false }}
+      workflow_file: ${{ github.event.inputs.scraper_workflow || 'ci-cd.yml' }}
+      target_ref: ${{ github.event.inputs.target_ref || 'main' }}
+      wait_for_completion: ${{ github.event_name == 'push' || github.event.inputs.wait_for_completion != 'false' }}
       expected_platform: Modal Deploy
     secrets:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   embedding-modal:
-    if: github.event_name == 'push' || inputs.deploy_embedding_modal
+    if: github.event_name == 'push' || github.event.inputs.deploy_embedding_modal == 'true'
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: embedding-modal
       target_repo: Math-Data-Justice-Collaborative/vecinita-embedding
-      workflow_file: ${{ inputs.embedding_modal_workflow || 'deploy.yml' }}
-      target_ref: ${{ inputs.target_ref || 'main' }}
-      wait_for_completion: ${{ inputs.wait_for_completion != false }}
+      workflow_file: ${{ github.event.inputs.embedding_modal_workflow || 'deploy.yml' }}
+      target_ref: ${{ github.event.inputs.target_ref || 'main' }}
+      wait_for_completion: ${{ github.event_name == 'push' || github.event.inputs.wait_for_completion != 'false' }}
       expected_platform: Modal Deploy
     secrets:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
   model-modal:
-    if: github.event_name == 'push' || inputs.deploy_model_modal
+    if: github.event_name == 'push' || github.event.inputs.deploy_model_modal == 'true'
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
       service_name: model-modal
       target_repo: Math-Data-Justice-Collaborative/vecinita-model
-      workflow_file: ${{ inputs.model_modal_workflow || 'deploy.yml' }}
-      target_ref: ${{ inputs.target_ref || 'main' }}
-      wait_for_completion: ${{ inputs.wait_for_completion != false }}
+      workflow_file: ${{ github.event.inputs.model_modal_workflow || 'deploy.yml' }}
+      target_ref: ${{ github.event.inputs.target_ref || 'main' }}
+      wait_for_completion: ${{ github.event_name == 'push' || github.event.inputs.wait_for_completion != 'false' }}
       expected_platform: Modal Deploy
     secrets:
       github_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}

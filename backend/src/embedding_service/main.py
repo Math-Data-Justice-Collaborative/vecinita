@@ -42,14 +42,21 @@ _lock_selection = os.getenv("EMBEDDING_LOCK", "false").lower() in ["1", "true", 
 _selection_file = os.getenv(
     "EMBEDDING_SELECTION_PATH", str(Path(__file__).parent / "selection.json")
 )
-_auth_token = (
-    os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
-    or os.getenv("MODAL_API_PROXY_SECRET")
-    or os.getenv("MODAL_API_PROXY_KEY")
-    or os.getenv("MODAL_API_KEY")
-    or os.getenv("MODAL_TOKEN_SECRET")
-    or os.getenv("MODAL_API_TOKEN_SECRET")
-)
+_disable_app_auth = os.getenv("EMBEDDING_DISABLE_APP_AUTH", "false").lower() in [
+    "1",
+    "true",
+    "yes",
+]
+_auth_token = None
+if not _disable_app_auth:
+    _auth_token = (
+        os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
+        or os.getenv("MODAL_API_PROXY_SECRET")
+        or os.getenv("MODAL_API_PROXY_KEY")
+        or os.getenv("MODAL_API_KEY")
+        or os.getenv("MODAL_TOKEN_SECRET")
+        or os.getenv("MODAL_API_TOKEN_SECRET")
+    )
 
 
 def _ensure_authorized(request: Request) -> None:

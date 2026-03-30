@@ -19,6 +19,8 @@ def modal_mock(monkeypatch):
     image_instance = MagicMock()
     mock_modal.Image.debian_slim.return_value = image_instance
     image_instance.pip_install.return_value = image_instance
+    image_instance.add_local_dir.return_value = image_instance
+    image_instance.env.return_value = image_instance
 
     mock_modal.Secret.from_name.return_value = MagicMock()
 
@@ -52,6 +54,25 @@ class TestEmbeddingModalApp:
         assert modal_app.APP_NAME == "vecinita-embedding"
         modal_mock.App.assert_called_with("vecinita-embedding")
         modal_mock.Secret.from_name.assert_called()
+
+    def test_image_includes_backend_src(self, modal_mock):
+        import src.embedding_service.modal_app as modal_app
+
+        modal_app = importlib.reload(modal_app)
+
+        image_instance = modal_mock.Image.debian_slim.return_value
+        image_instance.add_local_dir.assert_called_once()
+        assert image_instance.add_local_dir.call_args.kwargs["remote_path"] == "/root/src"
+        image_instance.env.assert_called_once_with(
+            {"PYTHONPATH": "/root", "EMBEDDING_DISABLE_APP_AUTH": "true"}
+        )
+
+    def test_web_app_requires_modal_proxy_auth(self, modal_mock):
+        import src.embedding_service.modal_app as modal_app
+
+        modal_app = importlib.reload(modal_app)
+
+        assert modal_mock.asgi_app.call_args.kwargs == {"requires_proxy_auth": True}
 
     def test_web_app_callable(self, modal_mock):
         import src.embedding_service.modal_app as modal_app

@@ -110,7 +110,7 @@ jobs:
         if: needs.modal-deploy.result == 'success'
         run: |
           echo "✓ Modal deployment completed successfully"
-          echo "  - Embedding Service: https://vecinita--vecinita-embedding.modal.run"
+          echo "  - Embedding Service: https://vecinita--vecinita-embedding-web-app.modal.run"
           echo "  - Scraper Service: https://vecinita--vecinita-scraper.modal.run"
 
       - name: Failure Notification
