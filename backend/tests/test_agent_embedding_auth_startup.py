@@ -70,6 +70,10 @@ def _reload_agent_main(monkeypatch, create_embedding_client):
     monkeypatch.setitem(sys.modules, "src.embedding_service.client", fake_embedding_module)
     monkeypatch.setitem(sys.modules, "src.services.chroma_store", fake_chroma_store_module)
 
+    import src.config as config
+
+    importlib.reload(config)
+
     import src.agent.main as agent_main
 
     monkeypatch.setattr(agent_main, "create_client", Mock(return_value=Mock()))
@@ -179,7 +183,10 @@ def test_modal_native_chat_client_invoke(monkeypatch):
             assert "messages" in json
             return _Resp()
 
-    monkeypatch.setattr(agent_main.httpx, "Client", _Client)
+    from src.services.llm import client_manager as llm_client_manager
+
+    assert agent_main.llm_client_manager.uses_modal_native_chat_api()
+    monkeypatch.setattr(llm_client_manager.httpx, "Client", _Client)
 
     llm = agent_main._get_llm_without_tools("ollama", "llama3.2")
     response = llm.invoke([agent_main.HumanMessage(content="hello")])
