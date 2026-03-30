@@ -48,41 +48,6 @@ on:
         required: false
         default: true
         type: boolean
-      chat_frontend_workflow:
-        description: Workflow file in chat frontend repo
-        required: false
-        default: deploy.yml
-        type: string
-      data_management_frontend_workflow:
-        description: Workflow file in data-management frontend repo
-        required: false
-        default: deploy.yml
-        type: string
-      data_management_api_workflow:
-        description: Workflow file in data-management API repo
-        required: false
-        default: ci-cd.yml
-        type: string
-      modal_proxy_workflow:
-        description: Workflow file in modal-proxy repo
-        required: false
-        default: ci-cd.yml
-        type: string
-      scraper_workflow:
-        description: Workflow file in scraper repo
-        required: false
-        default: ci-cd.yml
-        type: string
-      embedding_modal_workflow:
-        description: Workflow file in embedding-modal repo
-        required: false
-        default: deploy.yml
-        type: string
-      model_modal_workflow:
-        description: Workflow file in model-modal repo
-        required: false
-        default: deploy.yml
-        type: string
 
 permissions:
   contents: read
@@ -107,7 +72,7 @@ jobs:
     with:
       service_name: chat-frontend
       target_repo: joseph-c-mcguire/Vecinitafrontend
-      workflow_file: ${{ inputs.chat_frontend_workflow }}
+      workflow_file: deploy.yml
       target_ref: ${{ inputs.target_ref }}
       wait_for_completion: ${{ inputs.wait_for_completion }}
       expected_platform: Render Frontend
@@ -122,7 +87,7 @@ jobs:
     with:
       service_name: data-management-frontend
       target_repo: Math-Data-Justice-Collaborative/vecinita-data-management-frontend
-      workflow_file: ${{ inputs.data_management_frontend_workflow }}
+      workflow_file: deploy.yml
       target_ref: ${{ inputs.target_ref }}
       wait_for_completion: ${{ inputs.wait_for_completion }}
       expected_platform: Render Frontend
@@ -137,7 +102,7 @@ jobs:
     with:
       service_name: data-management-api
       target_repo: Math-Data-Justice-Collaborative/vecinita-data-management
-      workflow_file: ${{ inputs.data_management_api_workflow }}
+      workflow_file: ci-cd.yml
       target_ref: ${{ inputs.target_ref }}
       wait_for_completion: ${{ inputs.wait_for_completion }}
       expected_platform: Render Private Service
@@ -152,7 +117,7 @@ jobs:
     with:
       service_name: modal-proxy
       target_repo: Math-Data-Justice-Collaborative/vecinita-modal-proxy
-      workflow_file: ${{ inputs.modal_proxy_workflow }}
+      workflow_file: ci-cd.yml
       target_ref: ${{ inputs.target_ref }}
       wait_for_completion: ${{ inputs.wait_for_completion }}
       expected_platform: Render Private Service
@@ -167,7 +132,7 @@ jobs:
     with:
       service_name: scraper
       target_repo: Math-Data-Justice-Collaborative/vecinita-scraper
-      workflow_file: ${{ inputs.scraper_workflow }}
+      workflow_file: ci-cd.yml
       target_ref: ${{ inputs.target_ref }}
       wait_for_completion: ${{ inputs.wait_for_completion }}
       expected_platform: Modal Deploy
@@ -181,7 +146,7 @@ jobs:
     with:
       service_name: embedding-modal
       target_repo: Math-Data-Justice-Collaborative/vecinita-embedding
-      workflow_file: ${{ inputs.embedding_modal_workflow }}
+      workflow_file: deploy.yml
       target_ref: ${{ inputs.target_ref }}
       wait_for_completion: ${{ inputs.wait_for_completion }}
       expected_platform: Modal Deploy
@@ -195,7 +160,7 @@ jobs:
     with:
       service_name: model-modal
       target_repo: Math-Data-Justice-Collaborative/vecinita-model
-      workflow_file: ${{ inputs.model_modal_workflow }}
+      workflow_file: deploy.yml
       target_ref: ${{ inputs.target_ref }}
       wait_for_completion: ${{ inputs.wait_for_completion }}
       expected_platform: Modal Deploy
