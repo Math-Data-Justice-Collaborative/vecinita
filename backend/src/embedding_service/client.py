@@ -372,6 +372,24 @@ class EmbeddingServiceClient(Embeddings):
                                 (upstream_health.text or "")[:300],
                                 f"{proxy_root}/health/upstream/embedding",
                             )
+                            # If proxy confirms upstream reachable (200 + reachable:true),
+                            # trust it as authoritative for startup validation.
+                            # A /health 404 may be a stale deployment artifact;
+                            # actual embed requests will surface any real failures.
+                            if upstream_health.status_code == 200:
+                                try:
+                                    body = upstream_health.json()
+                                    if body.get("reachable") is True:
+                                        self.base_url = base
+                                        logger.warning(
+                                            "⚠️  Embedding /health returned 404 but proxy "
+                                            "upstream confirms reachable at %s. Accepting "
+                                            "proxy-validated connectivity.",
+                                            base,
+                                        )
+                                        return base
+                                except Exception:
+                                    pass
                         except Exception as upstream_exc:
                             logger.warning(
                                 "Proxy upstream health probe failed: %s",
