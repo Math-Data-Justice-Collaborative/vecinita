@@ -2,6 +2,11 @@ services:
   # This root blueprint defines only services owned by this repository.
   # Multi-repo-owned services (modal-proxy, data-management API/frontend,
   # scraper/embedding/model deploy targets) are managed in their own repos.
+  #
+  # All env vars are controlled by the shared env group in the Render dashboard
+  # (.env.prod.render). Only infrastructure bindings (fromDatabase, fromService)
+  # and PORT are declared here. Everything else uses sync: false so the env
+  # group value is never overwritten by this blueprint.
   - type: web
     name: vecinita-agent
     runtime: docker
@@ -14,30 +19,40 @@ services:
     envVars:
       - key: PORT
         value: "10000"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vecinita-postgres
+          property: connectionString
+      # All remaining vars come from the shared env group — sync: false
+      # ensures this blueprint never overwrites dashboard/env-group values.
       - key: PYTHONUNBUFFERED
-        value: "1"
+        sync: false
       - key: TF_ENABLE_ONEDNN_OPTS
-        value: "0"
-      - key: EMBEDDING_SERVICE_URL
+        sync: false
+      - key: OLLAMA_MODEL
         sync: false
       - key: OLLAMA_BASE_URL
         sync: false
-      - key: MODAL_EMBEDDING_ENDPOINT
-        sync: false
       - key: MODAL_OLLAMA_ENDPOINT
         sync: false
-      - key: OLLAMA_MODEL
-        value: "llama3.1:8b"
+      - key: MODAL_EMBEDDING_ENDPOINT
+        sync: false
+      - key: EMBEDDING_SERVICE_URL
+        sync: false
+      - key: EMBEDDING_SERVICE_AUTH_TOKEN
+        sync: false
+      - key: EMBEDDING_STRICT_STARTUP
+        sync: false
       - key: DEFAULT_PROVIDER
-        value: "ollama"
+        sync: false
       - key: DEFAULT_MODEL
-        value: "llama3.1:8b"
+        sync: false
       - key: FORCE_LOCAL_MODAL_LLM
-        value: "true"
+        sync: false
       - key: AGENT_ENFORCE_PROXY
-        value: "true"
+        sync: false
       - key: LOCK_MODEL_SELECTION
-        value: "true"
+        sync: false
       - key: MODAL_TOKEN_ID
         sync: false
       - key: MODAL_TOKEN_SECRET
@@ -50,36 +65,28 @@ services:
         sync: false
       - key: MODAL_PROXY_AUTH_TOKEN
         sync: false
-      - key: EMBEDDING_SERVICE_AUTH_TOKEN
-        sync: false
       - key: REINDEX_SERVICE_URL
         sync: false
       - key: REINDEX_TRIGGER_TOKEN
         sync: false
-      - key: EMBEDDING_STRICT_STARTUP
-        value: "false"
       - key: BACKEND_PREFLIGHT_ENABLED
-        value: "true"
+        sync: false
       - key: BACKEND_PREFLIGHT_STRICT
-        value: "true"
+        sync: false
       - key: GUARDRAILS_REQUIRE_HUB_VALIDATOR
-        value: "false"
+        sync: false
       - key: GUARDRAILS_HUB_AUTO_INSTALL
-        value: "false"
+        sync: false
       - key: GUARDRAILS_PERSISTENCE_DIR
         sync: false
       - key: CHROMA_REQUIRED
-        value: "false"
-      - key: DATABASE_URL
-        fromDatabase:
-          name: vecinita-postgres
-          property: connectionString
+        sync: false
       - key: DB_DATA_MODE
-        value: "postgres"
+        sync: false
       - key: VECTOR_SYNC_TARGET
-        value: "postgres"
+        sync: false
       - key: VECTOR_SYNC_SUPABASE_FALLBACK_READS
-        value: "false"
+        sync: false
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_KEY
@@ -89,6 +96,10 @@ services:
       - key: OPENAI_API_KEY
         sync: false
       - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: DEEPSEEK_BASE_URL
+        sync: false
+      - key: TAVILY_API_KEY
         sync: false
       - key: LANGSMITH_API_KEY
         sync: false
@@ -105,18 +116,21 @@ services:
     autoDeployTrigger: off
     healthCheckPath: /health
     envVars:
+      - key: PORT
+        value: "10000"
+      # All remaining vars come from the shared env group.
       - key: VITE_GATEWAY_URL
-        value: "https://vecinita-gateway.onrender.com/api/v1"
+        sync: false
       - key: VITE_BACKEND_URL
-        value: "https://vecinita-agent.onrender.com"
+        sync: false
       - key: VITE_AGENT_REQUEST_TIMEOUT_MS
-        value: "130000"
+        sync: false
       - key: VITE_AGENT_STREAM_TIMEOUT_MS
-        value: "120000"
+        sync: false
       - key: VITE_AGENT_STREAM_FIRST_EVENT_TIMEOUT_MS
-        value: "15000"
+        sync: false
       - key: VITE_DEV_ADMIN_ENABLED
-        value: "true"
+        sync: false
       - key: VITE_DEV_ADMIN_EMAIL
         sync: false
       - key: VITE_DEV_ADMIN_PASSWORD
@@ -141,23 +155,26 @@ services:
     envVars:
       - key: PORT
         value: "10000"
-      - key: PYTHONUNBUFFERED
-        value: "1"
-      # Allow Render-hosted frontend and all onrender.com subdomains.
-      # Override ALLOWED_ORIGINS with a comma-separated list for custom domains.
-      - key: ALLOWED_ORIGINS
-        value: "https://vecinita-frontend.onrender.com"
-      - key: ALLOWED_ORIGIN_REGEX
-        value: "^https://[a-z0-9-]+\\.onrender\\.com$"
-      - key: AGENT_TIMEOUT
-        value: "120"
-      - key: AGENT_STREAM_TIMEOUT
-        value: "120"
       - key: AGENT_SERVICE_URL
         fromService:
           name: vecinita-agent
           type: web
           property: hostport
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vecinita-postgres
+          property: connectionString
+      # All remaining vars come from the shared env group.
+      - key: PYTHONUNBUFFERED
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: ALLOWED_ORIGIN_REGEX
+        sync: false
+      - key: AGENT_TIMEOUT
+        sync: false
+      - key: AGENT_STREAM_TIMEOUT
+        sync: false
       - key: EMBEDDING_SERVICE_URL
         sync: false
       - key: OLLAMA_BASE_URL
@@ -178,20 +195,38 @@ services:
         sync: false
       - key: EMBEDDING_SERVICE_AUTH_TOKEN
         sync: false
-      - key: DATABASE_URL
-        fromDatabase:
-          name: vecinita-postgres
-          property: connectionString
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_KEY
         sync: false
+      - key: SUPABASE_UPLOADS_BUCKET
+        sync: false
       - key: DEV_ADMIN_ENABLED
-        value: "true"
+        sync: false
       - key: DEV_ADMIN_BEARER_TOKEN
         sync: false
-      - key: SUPABASE_UPLOADS_BUCKET
-        value: "documents"
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: DEEPSEEK_BASE_URL
+        sync: false
+      - key: ENABLE_LLM_TAG_ENHANCEMENT
+        sync: false
+      - key: LLM_TAG_PROVIDER
+        sync: false
+      - key: DEEPSEEK_TAG_MODEL
+        sync: false
+      - key: GROQ_TAG_MODEL
+        sync: false
+      - key: DB_DATA_MODE
+        sync: false
+      - key: VECTOR_SYNC_TARGET
+        sync: false
+      - key: VECTOR_SYNC_SUPABASE_FALLBACK_READS
+        sync: false
 
 databases:
   - name: vecinita-postgres

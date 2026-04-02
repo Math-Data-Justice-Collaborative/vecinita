@@ -1,4 +1,8 @@
 services:
+  # Staging blueprint — all env vars come from the shared env group in the
+  # Render dashboard. Only infrastructure bindings (fromDatabase, fromService)
+  # and PORT are declared here. sync: false on everything else ensures the
+  # env group is never overwritten by this blueprint.
   - type: web
     name: vecinita-agent-staging
     runtime: docker
@@ -11,17 +15,37 @@ services:
     envVars:
       - key: PORT
         value: "10000"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: connectionString
       - key: PYTHONUNBUFFERED
-        value: "1"
+        sync: false
       - key: TF_ENABLE_ONEDNN_OPTS
-        value: "0"
-      - key: EMBEDDING_SERVICE_URL
+        sync: false
+      - key: OLLAMA_MODEL
         sync: false
       - key: OLLAMA_BASE_URL
         sync: false
+      - key: MODAL_OLLAMA_ENDPOINT
+        sync: false
       - key: MODAL_EMBEDDING_ENDPOINT
         sync: false
-      - key: MODAL_OLLAMA_ENDPOINT
+      - key: EMBEDDING_SERVICE_URL
+        sync: false
+      - key: EMBEDDING_SERVICE_AUTH_TOKEN
+        sync: false
+      - key: EMBEDDING_STRICT_STARTUP
+        sync: false
+      - key: DEFAULT_PROVIDER
+        sync: false
+      - key: DEFAULT_MODEL
+        sync: false
+      - key: FORCE_LOCAL_MODAL_LLM
+        sync: false
+      - key: AGENT_ENFORCE_PROXY
+        sync: false
+      - key: LOCK_MODEL_SELECTION
         sync: false
       - key: MODAL_TOKEN_ID
         sync: false
@@ -35,36 +59,28 @@ services:
         sync: false
       - key: MODAL_PROXY_AUTH_TOKEN
         sync: false
-      - key: EMBEDDING_SERVICE_AUTH_TOKEN
-        sync: false
       - key: REINDEX_SERVICE_URL
         sync: false
       - key: REINDEX_TRIGGER_TOKEN
         sync: false
-      - key: EMBEDDING_STRICT_STARTUP
-        value: "false"
       - key: BACKEND_PREFLIGHT_ENABLED
-        value: "true"
+        sync: false
       - key: BACKEND_PREFLIGHT_STRICT
-        value: "true"
+        sync: false
       - key: GUARDRAILS_REQUIRE_HUB_VALIDATOR
-        value: "false"
+        sync: false
       - key: GUARDRAILS_HUB_AUTO_INSTALL
-        value: "false"
+        sync: false
       - key: GUARDRAILS_PERSISTENCE_DIR
         sync: false
       - key: CHROMA_REQUIRED
-        value: "false"
-      - key: DATABASE_URL
-        fromDatabase:
-          name: vecinita-postgres-staging
-          property: connectionString
+        sync: false
       - key: DB_DATA_MODE
-        value: "postgres"
+        sync: false
       - key: VECTOR_SYNC_TARGET
-        value: "postgres"
+        sync: false
       - key: VECTOR_SYNC_SUPABASE_FALLBACK_READS
-        value: "false"
+        sync: false
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_KEY
@@ -74,6 +90,10 @@ services:
       - key: OPENAI_API_KEY
         sync: false
       - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: DEEPSEEK_BASE_URL
+        sync: false
+      - key: TAVILY_API_KEY
         sync: false
       - key: LANGSMITH_API_KEY
         sync: false
@@ -90,16 +110,26 @@ services:
     autoDeployTrigger: off
     healthCheckPath: /health
     envVars:
+      - key: PORT
+        value: "10000"
       - key: VITE_GATEWAY_URL
-        value: "https://vecinita-gateway-staging.onrender.com/api/v1"
+        sync: false
       - key: VITE_BACKEND_URL
-        value: "https://vecinita-agent-staging.onrender.com"
+        sync: false
       - key: VITE_AGENT_REQUEST_TIMEOUT_MS
-        value: "130000"
+        sync: false
       - key: VITE_AGENT_STREAM_TIMEOUT_MS
-        value: "120000"
+        sync: false
       - key: VITE_AGENT_STREAM_FIRST_EVENT_TIMEOUT_MS
-        value: "15000"
+        sync: false
+      - key: VITE_DEV_ADMIN_ENABLED
+        sync: false
+      - key: VITE_DEV_ADMIN_EMAIL
+        sync: false
+      - key: VITE_DEV_ADMIN_PASSWORD
+        sync: false
+      - key: VITE_DEV_ADMIN_TOKEN
+        sync: false
       - key: VITE_SUPABASE_URL
         sync: false
       - key: VITE_SUPABASE_ANON_KEY
@@ -118,23 +148,25 @@ services:
     envVars:
       - key: PORT
         value: "10000"
-      - key: PYTHONUNBUFFERED
-        value: "1"
-      # Allow Render-hosted staging frontend and all onrender.com subdomains.
-      # Override ALLOWED_ORIGINS with a comma-separated list for custom domains.
-      - key: ALLOWED_ORIGINS
-        value: "https://vecinita-frontend-staging.onrender.com"
-      - key: ALLOWED_ORIGIN_REGEX
-        value: "^https://[a-z0-9-]+\\.onrender\\.com$"
-      - key: AGENT_TIMEOUT
-        value: "120"
-      - key: AGENT_STREAM_TIMEOUT
-        value: "120"
       - key: AGENT_SERVICE_URL
         fromService:
           name: vecinita-agent-staging
           type: web
           property: hostport
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: connectionString
+      - key: PYTHONUNBUFFERED
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: ALLOWED_ORIGIN_REGEX
+        sync: false
+      - key: AGENT_TIMEOUT
+        sync: false
+      - key: AGENT_STREAM_TIMEOUT
+        sync: false
       - key: EMBEDDING_SERVICE_URL
         sync: false
       - key: OLLAMA_BASE_URL
@@ -155,20 +187,30 @@ services:
         sync: false
       - key: EMBEDDING_SERVICE_AUTH_TOKEN
         sync: false
-      - key: DATABASE_URL
-        fromDatabase:
-          name: vecinita-postgres-staging
-          property: connectionString
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_KEY
         sync: false
+      - key: SUPABASE_UPLOADS_BUCKET
+        sync: false
       - key: DEV_ADMIN_ENABLED
-        value: "true"
+        sync: false
       - key: DEV_ADMIN_BEARER_TOKEN
         sync: false
-      - key: SUPABASE_UPLOADS_BUCKET
-        value: "documents"
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: DEEPSEEK_BASE_URL
+        sync: false
+      - key: DB_DATA_MODE
+        sync: false
+      - key: VECTOR_SYNC_TARGET
+        sync: false
+      - key: VECTOR_SYNC_SUPABASE_FALLBACK_READS
+        sync: false
 
 databases:
   - name: vecinita-postgres-staging
