@@ -3,6 +3,12 @@ services:
   # Render dashboard. Only infrastructure bindings (fromDatabase, fromService)
   # and PORT are declared here. sync: false on everything else ensures the
   # env group is never overwritten by this blueprint.
+  #
+  # Key ownership legend (mirrors render.yaml):
+  #   STRICT — must be true in staging to test strict-mode behavior pre-prod
+  #   MODAL  — upstream Modal endpoint refs
+  #   PROXY  — modal-proxy auth and routing
+  # See docs/deployment/RENDER_SHARED_ENV_CONTRACT.md for full contract.
   - type: web
     name: vecinita-agent-staging
     runtime: docker
@@ -25,17 +31,19 @@ services:
         sync: false
       - key: OLLAMA_MODEL
         sync: false
-      - key: OLLAMA_BASE_URL
-        sync: false
-      - key: MODAL_OLLAMA_ENDPOINT
-        sync: false
-      - key: MODAL_EMBEDDING_ENDPOINT
-        sync: false
-      - key: EMBEDDING_SERVICE_URL
-        sync: false
+      - key: VECINITA_MODEL_API_URL
+        sync: false   # MODAL required:true routes-to:vecinita-modal-proxy-v1:10000/model
+      - key: VECINITA_EMBEDDING_API_URL
+        sync: false   # MODAL required:true routes-to:vecinita-modal-proxy-v1:10000/embedding
+      - key: VECINITA_SCRAPER_API_URL
+        sync: false   # MODAL required:true routes-to:vecinita-modal-proxy-v1:10000/jobs
       - key: EMBEDDING_SERVICE_AUTH_TOKEN
         sync: false
       - key: EMBEDDING_STRICT_STARTUP
+        sync: false
+      - key: RENDER_REMOTE_INFERENCE_ONLY
+        sync: false   # STRICT must=true in staging
+      - key: RENDER_DISABLE_LOCAL_GUARDRAILS
         sync: false
       - key: DEFAULT_PROVIDER
         sync: false
@@ -56,8 +64,6 @@ services:
       - key: MODAL_API_PROXY_SECRET
         sync: false
       - key: PROXY_AUTH_TOKEN
-        sync: false
-      - key: MODAL_PROXY_AUTH_TOKEN
         sync: false
       - key: REINDEX_SERVICE_URL
         sync: false
@@ -167,12 +173,12 @@ services:
         sync: false
       - key: AGENT_STREAM_TIMEOUT
         sync: false
-      - key: EMBEDDING_SERVICE_URL
-        sync: false
-      - key: OLLAMA_BASE_URL
-        sync: false
-      - key: MODAL_EMBEDDING_ENDPOINT
-        sync: false
+      - key: VECINITA_EMBEDDING_API_URL
+        sync: false   # MODAL required:true
+      - key: VECINITA_MODEL_API_URL
+        sync: false   # MODAL required:true
+      - key: VECINITA_SCRAPER_API_URL
+        sync: false   # MODAL required:true
       - key: MODAL_TOKEN_ID
         sync: false
       - key: MODAL_TOKEN_SECRET
@@ -182,8 +188,6 @@ services:
       - key: MODAL_API_PROXY_SECRET
         sync: false
       - key: PROXY_AUTH_TOKEN
-        sync: false
-      - key: MODAL_PROXY_AUTH_TOKEN
         sync: false
       - key: EMBEDDING_SERVICE_AUTH_TOKEN
         sync: false
@@ -204,6 +208,14 @@ services:
       - key: DEEPSEEK_API_KEY
         sync: false
       - key: DEEPSEEK_BASE_URL
+        sync: false
+      - key: ENABLE_LLM_TAG_ENHANCEMENT
+        sync: false
+      - key: LLM_TAG_PROVIDER
+        sync: false
+      - key: DEEPSEEK_TAG_MODEL
+        sync: false
+      - key: GROQ_TAG_MODEL
         sync: false
       - key: DB_DATA_MODE
         sync: false

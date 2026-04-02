@@ -7,6 +7,16 @@ services:
   # (.env.prod.render). Only infrastructure bindings (fromDatabase, fromService)
   # and PORT are declared here. Everything else uses sync: false so the env
   # group value is never overwritten by this blueprint.
+  #
+  # Key ownership legend (for .env.prod.render governance):
+  #   CORE   — shared infrastructure: DATABASE_URL, SUPABASE_URL/KEY, ALLOWED_ORIGINS
+  #   AGENT  — consumed by vecinita-agent service
+  #   PROXY  — injected/consumed by vecinita-modal-proxy
+  #   MODAL  — Modal SDK / upstream endpoint refs (consumed by agent + proxy)
+  #   GW     — consumed by vecinita-gateway service
+  #   FE     — consumed by vecinita-frontend (VITE_* vars)
+  #   STRICT — strict-mode / enforcement flags: must be true=true for all Render prod services
+  # See docs/deployment/RENDER_SHARED_ENV_CONTRACT.md for the full contract.
   - type: web
     name: vecinita-agent
     runtime: docker
@@ -31,17 +41,19 @@ services:
         sync: false
       - key: OLLAMA_MODEL
         sync: false
-      - key: OLLAMA_BASE_URL
-        sync: false
-      - key: MODAL_OLLAMA_ENDPOINT
-        sync: false
-      - key: MODAL_EMBEDDING_ENDPOINT
-        sync: false
-      - key: EMBEDDING_SERVICE_URL
-        sync: false
+      - key: VECINITA_MODEL_API_URL
+        sync: false   # MODAL owner:proxy consumers:agent required:true routes-to:vecinita-modal-proxy-v1:10000/model
+      - key: VECINITA_EMBEDDING_API_URL
+        sync: false   # MODAL owner:proxy consumers:agent,gateway required:true routes-to:vecinita-modal-proxy-v1:10000/embedding
+      - key: VECINITA_SCRAPER_API_URL
+        sync: false   # MODAL owner:proxy consumers:agent required:true routes-to:vecinita-modal-proxy-v1:10000/jobs
       - key: EMBEDDING_SERVICE_AUTH_TOKEN
-        sync: false
+        sync: false   # AGENT owner:agent consumers:agent
       - key: EMBEDDING_STRICT_STARTUP
+        sync: false
+      - key: RENDER_REMOTE_INFERENCE_ONLY
+        sync: false   # STRICT owner:infra consumers:agent,scraper must=true in prod
+      - key: RENDER_DISABLE_LOCAL_GUARDRAILS
         sync: false
       - key: DEFAULT_PROVIDER
         sync: false
@@ -50,7 +62,7 @@ services:
       - key: FORCE_LOCAL_MODAL_LLM
         sync: false
       - key: AGENT_ENFORCE_PROXY
-        sync: false
+        sync: false   # STRICT owner:infra consumers:agent must=true in prod
       - key: LOCK_MODEL_SELECTION
         sync: false
       - key: MODAL_TOKEN_ID
@@ -62,9 +74,7 @@ services:
       - key: MODAL_API_PROXY_SECRET
         sync: false
       - key: PROXY_AUTH_TOKEN
-        sync: false
-      - key: MODAL_PROXY_AUTH_TOKEN
-        sync: false
+        sync: false   # PROXY owner:proxy consumers:agent,gateway required:true
       - key: REINDEX_SERVICE_URL
         sync: false
       - key: REINDEX_TRIGGER_TOKEN
@@ -175,12 +185,12 @@ services:
         sync: false
       - key: AGENT_STREAM_TIMEOUT
         sync: false
-      - key: EMBEDDING_SERVICE_URL
-        sync: false
-      - key: OLLAMA_BASE_URL
-        sync: false
-      - key: MODAL_EMBEDDING_ENDPOINT
-        sync: false
+      - key: VECINITA_EMBEDDING_API_URL
+        sync: false   # MODAL owner:proxy consumers:gateway required:true
+      - key: VECINITA_MODEL_API_URL
+        sync: false   # MODAL owner:proxy consumers:gateway required:true
+      - key: VECINITA_SCRAPER_API_URL
+        sync: false   # MODAL owner:proxy consumers:gateway
       - key: MODAL_TOKEN_ID
         sync: false
       - key: MODAL_TOKEN_SECRET
@@ -190,8 +200,6 @@ services:
       - key: MODAL_API_PROXY_SECRET
         sync: false
       - key: PROXY_AUTH_TOKEN
-        sync: false
-      - key: MODAL_PROXY_AUTH_TOKEN
         sync: false
       - key: EMBEDDING_SERVICE_AUTH_TOKEN
         sync: false

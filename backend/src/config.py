@@ -81,7 +81,9 @@ EMBEDDING_MODEL: str = os.getenv(
 )
 EMBEDDING_DIMENSION: int = int(os.getenv("EMBEDDING_DIMENSION", "384"))
 EMBEDDING_SERVICE_URL: str = _normalize_internal_service_url(
-    os.getenv("MODAL_EMBEDDING_ENDPOINT") or os.getenv("EMBEDDING_SERVICE_URL"),
+    os.getenv("VECINITA_EMBEDDING_API_URL")
+    or os.getenv("MODAL_EMBEDDING_ENDPOINT")
+    or os.getenv("EMBEDDING_SERVICE_URL"),
     fallback_url="http://vecinita-modal-proxy-v1:10000/embedding",
 )
 
@@ -89,7 +91,9 @@ EMBEDDING_SERVICE_URL: str = _normalize_internal_service_url(
 # Local LLM runtime
 # ---------------------------------------------------------------------------
 OLLAMA_BASE_URL: str | None = _normalize_internal_service_url(
-    os.getenv("MODAL_OLLAMA_ENDPOINT") or os.getenv("OLLAMA_BASE_URL"),
+    os.getenv("VECINITA_MODEL_API_URL")
+    or os.getenv("MODAL_OLLAMA_ENDPOINT")
+    or os.getenv("OLLAMA_BASE_URL"),
     fallback_url="http://vecinita-modal-proxy-v1:10000/model",
 )
 OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.1:8b")

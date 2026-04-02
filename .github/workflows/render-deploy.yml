@@ -38,6 +38,9 @@ jobs:
       - name: Checkout contract test submodules
         run: git submodule update --init --depth 1 services/embedding-modal services/model-modal
 
+      - name: Validate shared Render env contract
+        run: python3 scripts/github/validate_render_env.py .env.prod.render
+
       - name: Set up Python 3.10
         uses: actions/setup-python@v6
         with:
@@ -263,3 +266,76 @@ jobs:
           check_url "Frontend health" "$FRONTEND_URL/health"
           check_url "Agent health" "$AGENT_URL/health"
           check_url "Agent config" "$AGENT_URL/api/v1/ask/config"
+
+  deploy-wait:
+    name: Wait for deploys to reach live
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-22.04
+    needs: [deploy-production]
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        include:
+          - name: agent
+            secret_var: RENDER_AGENT_SERVICE_ID
+          - name: gateway
+            secret_var: RENDER_GATEWAY_SERVICE_ID
+          - name: frontend
+            secret_var: RENDER_FRONTEND_SERVICE_ID
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for ${{ matrix.name }} deploy
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          SERVICE_ID: ${{ secrets[matrix.secret_var] }}
+        run: |
+          if [ -z "$RENDER_API_KEY" ] || [ -z "$SERVICE_ID" ]; then
+            echo "::notice::RENDER_API_KEY or ${{ matrix.secret_var }} not set — skipping deploy wait"
+            exit 0
+          fi
+          python3 scripts/github/wait_for_render_deploy.py "$SERVICE_ID" --timeout 900 --interval 30
+
+  post-deploy-smoke:
+    name: Post-deploy live smoke tests
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-22.04
+    needs: [deploy-wait]
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      RENDER_GATEWAY_URL: ${{ secrets.RENDER_GATEWAY_URL }}
+      RENDER_AGENT_URL: ${{ secrets.RENDER_PROD_AGENT_URL || secrets.RENDER_AGENT_URL }}
+      RENDER_FRONTEND_URL: ${{ secrets.RENDER_PROD_FRONTEND_URL || secrets.RENDER_FRONTEND_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Sync dependencies
+        run: uv sync --frozen
+
+      - name: Wait 5 minutes post-deploy stabilisation
+        run: sleep 300
+
+      - name: Run live health smoke tests
+        run: uv run pytest tests/live/ -m live --timeout=120 -v --tb=short --junit-xml=live-smoke-results.xml || true
+        # `|| true` so we always upload the artifact even on failure
+
+      - name: Upload live smoke results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-smoke-results
+          path: backend/live-smoke-results.xml
+          if-no-files-found: ignore

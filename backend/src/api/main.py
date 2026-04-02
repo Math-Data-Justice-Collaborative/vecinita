@@ -10,6 +10,7 @@ Port: 8004 (by default)
 # ruff: noqa: E402, I001
 
 import os
+import logging
 import warnings
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -60,6 +61,7 @@ AGENT_SERVICE_URL = os.getenv("AGENT_SERVICE_URL", "http://localhost:8000")
 # Import normalized endpoints from central config (ensures consistency across services).
 # config._normalize_internal_service_url() handles Render vs local-dev logic.
 from src.config import EMBEDDING_SERVICE_URL
+from src.service_endpoints import log_endpoint_summary as _log_ep_summary
 
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 
@@ -87,6 +89,7 @@ async def lifespan(app: FastAPI):
     Shutdown: Clean up resources when the application stops.
     """
     # ========== STARTUP ==========
+    _log_ep_summary(logging.getLogger(__name__))
     print("[Gateway] Starting Vecinita Unified API Gateway")
     print(f"[Gateway] Agent Service: {AGENT_SERVICE_URL}")
     print(f"[Gateway] Embedding Service: {EMBEDDING_SERVICE_URL}")

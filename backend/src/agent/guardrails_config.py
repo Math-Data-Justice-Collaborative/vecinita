@@ -25,6 +25,7 @@ _HUB_INPUT_GUARD = None
 _HUB_OUTPUT_GUARD = None
 _HUB_INITIALIZED = False
 _HUB_INIT_LOCK = threading.Lock()
+_RENDER_GUARDRAILS_DISABLE_LOGGED = False
 
 
 def _configure_guardrails_runtime_noise() -> None:
@@ -131,11 +132,33 @@ def _is_truthy_env(name: str, default: bool) -> bool:
     return raw.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _running_on_render() -> bool:
+    return bool(os.getenv("RENDER") or os.getenv("RENDER_SERVICE_ID"))
+
+
+def _local_guardrails_disabled_on_render() -> bool:
+    return _running_on_render() and _is_truthy_env("RENDER_DISABLE_LOCAL_GUARDRAILS", True)
+
+
+def _log_render_guardrails_disabled_once() -> None:
+    global _RENDER_GUARDRAILS_DISABLE_LOGGED
+    if _RENDER_GUARDRAILS_DISABLE_LOGGED:
+        return
+    logger.info(
+        "[GUARDRAILS] Local guardrails are disabled on Render; expecting upstream guardrails enforcement."
+    )
+    _RENDER_GUARDRAILS_DISABLE_LOGGED = True
+
+
 def _build_hub_guards() -> tuple[Any, Any]:
     """Build Guardrails input/output guards from Hub validators.
 
     If validators cannot be installed, returns (None, None).
     """
+    if _local_guardrails_disabled_on_render():
+        _log_render_guardrails_disabled_once()
+        return None, None
+
     grd = _try_import_guardrails()
     if grd is None:
         return None, None
@@ -370,6 +393,10 @@ def validate_input(
     if not GUARDRAILS_ENABLED:
         return GuardResult(passed=True)
 
+    if _local_guardrails_disabled_on_render():
+        _log_render_guardrails_disabled_once()
+        return GuardResult(passed=True)
+
     language = _pick_language(text, lang)
 
     # 1. Prompt injection / jailbreak detection
@@ -490,6 +517,10 @@ def validate_output(text: str) -> GuardResult:
     )
 
     if not GUARDRAILS_ENABLED:
+        return GuardResult(passed=True)
+
+    if _local_guardrails_disabled_on_render():
+        _log_render_guardrails_disabled_once()
         return GuardResult(passed=True)
 
     # 1. Guardrails Hub SDK output validation (toxicity, etc.)

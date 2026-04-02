@@ -19,13 +19,14 @@ import httpx
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
 
+from src.service_endpoints import AGENT_SERVICE_URL
+
 from .models import AskResponse, SourceCitation
 
 router = APIRouter(prefix="/ask", tags=["Q&A"])
 logger = logging.getLogger(__name__)
 
-# Agent service configuration
-AGENT_SERVICE_URL = os.getenv("AGENT_SERVICE_URL", "http://localhost:8000")
+# Agent service URL is resolved via the centralized service_endpoints module.
 DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
 _AGENT_CLIENT: httpx.AsyncClient | None = None
 _AGENT_CLIENT_LOCK = threading.Lock()

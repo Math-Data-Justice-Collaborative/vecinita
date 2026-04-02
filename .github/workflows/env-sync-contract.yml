@@ -1,0 +1,46 @@
+name: Env Sync Contract
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "render.yaml"
+      - "render.staging.yaml"
+      - ".github/workflows/**"
+      - "services/**/config.py"
+      - "services/**/shared_config/**"
+      - "backend/src/utils/render_env_contract.py"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "render.yaml"
+      - "render.staging.yaml"
+      - ".github/workflows/**"
+      - "services/**/config.py"
+      - "services/**/shared_config/**"
+      - "backend/src/utils/render_env_contract.py"
+  workflow_dispatch:
+
+jobs:
+  env-sync-contract:
+    name: Env Key Sync Contract
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Sync dependencies
+        run: uv sync --frozen
+
+      - name: Run env sync contract tests
+        run: uv run pytest tests/contracts/test_env_sync_contract.py -v --tb=short -m contract

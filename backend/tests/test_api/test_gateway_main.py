@@ -263,16 +263,16 @@ class TestEnvironmentConfiguration:
         assert src.api.main.AGENT_SERVICE_URL == custom_url
 
     def test_embedding_service_url_from_env(self, env_vars, monkeypatch):
-        """Test embedding service URL is read from environment, respecting MODAL_EMBEDDING_ENDPOINT precedence."""
-        # This test validates that the environment variable precedence is:
-        # MODAL_EMBEDDING_ENDPOINT > EMBEDDING_SERVICE_URL > default
-        # Since MODAL_EMBEDDING_ENDPOINT may be set in .env, we verify the precedence works.
+        """Test embedding service URL uses canonical env key precedence."""
+        # Canonical precedence is:
+        # VECINITA_EMBEDDING_API_URL > MODAL_EMBEDDING_ENDPOINT > EMBEDDING_SERVICE_URL > default
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
-        # Test that MODAL_EMBEDDING_ENDPOINT takes precedence if set
-        modal_url = "https://test-modal.run"
-        monkeypatch.setenv("MODAL_EMBEDDING_ENDPOINT", modal_url)
+        canonical_url = "https://test-embedding-via-canonical.run"
+        monkeypatch.setenv("VECINITA_EMBEDDING_API_URL", canonical_url)
+        monkeypatch.setenv("MODAL_EMBEDDING_ENDPOINT", "https://legacy-modal.run")
+        monkeypatch.setenv("EMBEDDING_SERVICE_URL", "http://legacy-embedding-service:8001")
 
         # Reload module to pick up new environment variables
         import src.api.main
@@ -280,7 +280,7 @@ class TestEnvironmentConfiguration:
 
         importlib.reload(src.config)
         importlib.reload(src.api.main)
-        assert src.api.main.EMBEDDING_SERVICE_URL == modal_url
+        assert src.api.main.EMBEDDING_SERVICE_URL == canonical_url
 
     def test_max_urls_per_request_from_env(self, env_vars, monkeypatch):
         """Test max URLs limit from environment."""

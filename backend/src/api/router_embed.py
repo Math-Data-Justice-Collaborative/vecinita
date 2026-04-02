@@ -7,11 +7,12 @@ Proxies requests to the dedicated embedding microservice.
 
 import os
 from typing import Any, cast
-from urllib.parse import urlparse
 
 import httpx
 import numpy as np
 from fastapi import APIRouter, HTTPException, Query
+
+from src.service_endpoints import EMBEDDING_ENDPOINT, PROXY_AUTH_TOKEN
 
 from .models import (
     EmbedBatchRequest,
@@ -25,35 +26,8 @@ from .models import (
 
 router = APIRouter(prefix="/embed", tags=["Embeddings"])
 
-
-def _running_on_render() -> bool:
-    return bool(os.getenv("RENDER") or os.getenv("RENDER_SERVICE_ID"))
-
-
-def _normalize_embedding_service_url(raw_url: str | None) -> str:
-    candidate = (raw_url or "").strip()
-    if not candidate:
-        return "http://vecinita-modal-proxy-v1:10000/embedding"
-
-    if _running_on_render():
-        return candidate
-
-    host = ""
-    try:
-        host = (urlparse(candidate).hostname or "").lower()
-    except Exception:
-        host = ""
-
-    if host in {"", "localhost", "127.0.0.1", "0.0.0.0", "::1", "embedding-service"}:
-        return candidate
-
-    return os.getenv("LOCAL_EMBEDDING_SERVICE_URL", "http://localhost:8001")
-
-
-# Configuration - embedding service URL from environment
-EMBEDDING_SERVICE_URL = _normalize_embedding_service_url(
-    os.getenv("MODAL_EMBEDDING_ENDPOINT") or os.getenv("EMBEDDING_SERVICE_URL")
-)
+# Configuration - embedding service URL resolved via centralized service_endpoints module.
+EMBEDDING_SERVICE_URL = EMBEDDING_ENDPOINT
 EMBEDDING_SERVICE_AUTH_TOKEN = (
     os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
     or os.getenv("MODAL_API_PROXY_SECRET")
@@ -69,11 +43,6 @@ MODAL_PROXY_KEY = (
     or os.getenv("MODAL_TOKEN_ID")
 )
 MODAL_PROXY_SECRET = os.getenv("MODAL_API_PROXY_SECRET") or os.getenv("MODAL_TOKEN_SECRET")
-PROXY_AUTH_TOKEN = (
-    os.getenv("PROXY_AUTH_TOKEN")
-    or os.getenv("MODAL_PROXY_AUTH_TOKEN")
-    or os.getenv("X_PROXY_TOKEN")
-)
 
 # Configuration - will be fetched from embedding service
 EMBEDDING_CONFIG: dict[str, Any] = {

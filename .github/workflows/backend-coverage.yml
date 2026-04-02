@@ -29,6 +29,9 @@ jobs:
     - name: Checkout contract test submodules
       run: git submodule update --init --depth 1 services/embedding-modal services/model-modal
 
+    - name: Validate shared Render env contract
+      run: python3 scripts/github/validate_render_env.py .env.prod.render
+
     - name: Set up Python 3.10
       uses: actions/setup-python@v6
       with:

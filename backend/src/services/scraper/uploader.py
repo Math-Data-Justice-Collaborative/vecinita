@@ -145,6 +145,17 @@ class DatabaseUploader:
         if not enabled:
             return
 
+        enforce_proxy = (os.getenv("AGENT_ENFORCE_PROXY") or "true").lower() in {
+            "1",
+            "true",
+            "yes",
+        }
+        render_remote_inference_only = bool(
+            os.getenv("RENDER") or os.getenv("RENDER_SERVICE_ID")
+        ) and (os.getenv("RENDER_REMOTE_INFERENCE_ONLY", "true").lower() in {"1", "true", "yes"})
+        if render_remote_inference_only:
+            enforce_proxy = True
+
         manager = LocalLLMClientManager(
             base_url=(
                 os.getenv("MODAL_OLLAMA_ENDPOINT")
@@ -170,6 +181,7 @@ class DatabaseUploader:
             or os.getenv("MODAL_TOKEN_SECRET"),
             use_native_api=(os.getenv("FORCE_LOCAL_MODAL_LLM") or "true").lower()
             in {"1", "true", "yes"},
+            enforce_proxy=enforce_proxy,
         )
         try:
             manager.validate_runtime()

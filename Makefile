@@ -16,6 +16,10 @@
 	test-integration-gateway-fast test-integration-gateway-full test-integration-gateway \
 	test-all-integration test-cross-integration test-cross-e2e \
 	microservices-up microservices-down microservices-logs test-microservices-contracts test-microservices \
+	render-env-validate render-tests-proxy render-tests-strict render-tests-render-suite render-workflow-ci \
+	render-local-up render-local-down render-local-logs render-local-check render-local-check-live render-local-validate \
+	env-sync-contract render-connectivity-tests render-all-offline-contract-tests \
+	render-live-smoke render-live-integration render-deploy-trigger render-deploy-wait \
 	docs-install docs-serve docs-build docs-deploy-check
 
 help:
@@ -78,6 +82,30 @@ help:
 	@echo "  make test-cross-e2e                      Run tests/ e2e suite"
 	@echo "  make test-frontend-e2e                   Run frontend Playwright tests"
 	@echo ""
+	@echo "Render workflow shortcuts"
+	@echo "  make render-env-validate [ENV_FILE=...]  Validate shared Render env contract"
+	@echo "  make render-tests-proxy                  Run Agent->Proxy model+embedding contract tests"
+	@echo "  make render-tests-strict                 Run strict-mode fail-fast e2e tests"
+	@echo "  make render-tests-render-suite           Run full Render-focused backend test suite"
+	@echo "  make render-workflow-ci                  Validate env + run render-focused tests"
+	@echo "  make render-local-up                     Start local Render-like compose overlay"
+	@echo "  make render-local-down                   Stop local Render-like compose overlay"
+	@echo "  make render-local-logs                   Tail local Render-like compose logs"
+	@echo "  make render-local-validate [ENV_FILE=...] Validate env contract + compose syntax"
+	@echo "  make render-local-check [ENV_FILE=...]   Smart check: preflight always, live checks if stack is up"
+	@echo "  make render-local-check-live [ENV_FILE=...] Force live local Render smoke/runbook checks"
+	@echo ""
+		@echo "Env key standardization + contract tests"
+		@echo "  make env-sync-contract                   Cross-platform env key sync contract tests (no secrets)"
+		@echo "  make render-connectivity-tests           Render connectivity config tests (offline)"
+		@echo "  make render-all-offline-contract-tests   Run all offline contract tests"
+		@echo "Live tests (requires RENDER_GATEWAY_URL)"
+		@echo "  make render-live-smoke                   Live health + Q&A smoke tests vs Render"
+		@echo "  make render-live-integration             Full live integration test suite vs Render"
+		@echo "Deploy management (requires RENDER_*_DEPLOY_HOOK_URL / RENDER_API_KEY)"
+		@echo "  make render-deploy-trigger               Fire Render deploy hooks for all services"
+		@echo "  make render-deploy-wait SERVICE_ID=...   Wait for a Render deploy to reach live status"
+		@echo ""
 	@echo "Microservices stack targets"
 	@echo "  make microservices-up                    Start microservices compose stack"
 	@echo "  make microservices-down                  Stop microservices compose stack"
@@ -303,6 +331,101 @@ test-all-integration:
 
 test-cross-integration:
 	cd tests && uv run pytest -v -m integration
+
+render-env-validate:
+	python3 scripts/github/validate_render_env.py $(or $(ENV_FILE),.env.prod.render)
+
+render-tests-proxy:
+	cd backend && uv run pytest tests/integration/test_agent_proxy_model_contract.py tests/integration/test_agent_proxy_embedding_contract.py -v
+
+render-tests-strict:
+	cd backend && uv run pytest tests/e2e/test_strict_mode_failure.py -v
+
+render-tests-render-suite:
+	cd backend && uv run pytest tests/test_utils/test_render_env_contract.py tests/test_utils/test_service_endpoints.py tests/integration/test_agent_proxy_model_contract.py tests/integration/test_agent_proxy_embedding_contract.py tests/integration/test_render_proxy_routing.py tests/e2e/test_strict_mode_failure.py tests/test_render_proxy_url_helpers.py -q
+
+render-workflow-ci: render-env-validate render-tests-render-suite
+
+render-local-up:
+	docker compose -f docker-compose.render-local.yml up -d --build
+
+render-local-down:
+	docker compose -f docker-compose.render-local.yml down -v --remove-orphans
+
+render-local-logs:
+	docker compose -f docker-compose.render-local.yml logs -f
+
+render-local-check:
+	@set -e; \
+		env_file="$(or $(ENV_FILE),.env.prod.render)"; \
+		temp_env_created=0; \
+		if [ ! -f .env.render-local ]; then \
+			cp "$$env_file" .env.render-local; \
+			temp_env_created=1; \
+			echo "[render-local-check] Bootstrapped temporary .env.render-local from $$env_file"; \
+		fi; \
+		echo "[render-local-check] Preflight validation (env + compose config)"; \
+		python3 scripts/github/validate_render_env.py "$$env_file"; \
+		docker compose -f docker-compose.render-local.yml config >/dev/null; \
+		if curl -fsS --max-time 2 http://localhost:10000/health >/dev/null 2>&1; then \
+			echo "[render-local-check] Local Render stack detected; running live checks"; \
+			ENV_FILE="$$env_file" ./scripts/local-render-check.sh --skip-simulation; \
+		else \
+			echo "[render-local-check] Local Render stack is not running."; \
+			echo "[render-local-check] Run 'make render-local-up' then 'make render-local-check-live' for live probes."; \
+			if [ "$$temp_env_created" = "1" ]; then rm -f .env.render-local; fi; \
+			exit 0; \
+		fi; \
+		if [ "$$temp_env_created" = "1" ]; then rm -f .env.render-local; fi
+
+render-local-check-live:
+	ENV_FILE=$(or $(ENV_FILE),.env.prod.render) ./scripts/local-render-check.sh --skip-simulation
+
+render-local-validate:
+	@set -e; \
+		env_file="$(or $(ENV_FILE),.env.prod.render)"; \
+		temp_env_created=0; \
+		if [ ! -f .env.render-local ]; then \
+			cp "$$env_file" .env.render-local; \
+			temp_env_created=1; \
+		fi; \
+		python3 scripts/github/validate_render_env.py "$$env_file"; \
+		docker compose -f docker-compose.render-local.yml config >/dev/null; \
+		if [ "$$temp_env_created" = "1" ]; then rm -f .env.render-local; fi; \
+		echo "Render local preflight OK (env contract + compose config)"
+
+	env-sync-contract:
+		@echo "Running cross-platform env var sync contract tests (no secrets needed)..."
+		cd backend && uv run pytest tests/contracts/test_env_sync_contract.py -v --tb=short -m contract
+
+	render-connectivity-tests:
+		@echo "Running Render connectivity configuration tests (offline)..."
+		cd backend && uv run pytest tests/render/ -v --tb=short -m render_connectivity
+
+	render-all-offline-contract-tests: env-sync-contract render-connectivity-tests
+		@echo "All offline contract tests passed."
+
+	render-live-smoke:
+		@echo "Running live smoke tests against Render (requires RENDER_GATEWAY_URL)..."
+		cd backend && uv run pytest tests/live/ -m live --timeout=120 -v --tb=short
+
+	render-live-integration:
+		@echo "Running full live integration tests against Render (requires RENDER_GATEWAY_URL)..."
+		cd backend && uv run pytest tests/live/ -m live --timeout=120 -v --tb=long
+
+	render-deploy-trigger:
+		@echo "Triggering Render production deploy hooks (requires RENDER_*_DEPLOY_HOOK_URL env vars)..."
+		@if [ -z "$(RENDER_AGENT_DEPLOY_HOOK_URL)" ] && [ -z "$(RENDER_GATEWAY_DEPLOY_HOOK_URL)" ]; then \
+			echo "No deploy hook URLs set. Export RENDER_AGENT_DEPLOY_HOOK_URL, RENDER_GATEWAY_DEPLOY_HOOK_URL, RENDER_FRONTEND_DEPLOY_HOOK_URL."; \
+			exit 1; \
+		fi
+		@[ -n "$(RENDER_AGENT_DEPLOY_HOOK_URL)" ] && curl -fsSL -X POST "$(RENDER_AGENT_DEPLOY_HOOK_URL)" && echo "Agent deploy triggered" || true
+		@[ -n "$(RENDER_GATEWAY_DEPLOY_HOOK_URL)" ] && curl -fsSL -X POST "$(RENDER_GATEWAY_DEPLOY_HOOK_URL)" && echo "Gateway deploy triggered" || true
+		@[ -n "$(RENDER_FRONTEND_DEPLOY_HOOK_URL)" ] && curl -fsSL -X POST "$(RENDER_FRONTEND_DEPLOY_HOOK_URL)" && echo "Frontend deploy triggered" || true
+
+	render-deploy-wait:
+		@echo "Waiting for Render service to reach live status (requires RENDER_API_KEY and SERVICE_ID)..."
+		python3 scripts/github/wait_for_render_deploy.py "$(SERVICE_ID)" --timeout $(or $(TIMEOUT),900)
 
 microservices-up:
 	docker compose -f docker-compose.microservices.yml up -d

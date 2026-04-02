@@ -1,8 +1,34 @@
 # Service Integration Points
 
-Last updated: March 31, 2026
+Last updated: April 2, 2026
 
 This document summarizes runtime integration points across Vecinita services, including transport, routing, auth, and configuration controls.
+
+## 0. Centralized Endpoint Module
+
+**`backend/src/service_endpoints.py`** is the single source of truth for all resolved inter-service URLs and policy flags. Import from here rather than calling `os.getenv()` directly in routers or handlers.
+
+| Symbol | What it provides |
+|--------|-----------------|
+| `MODEL_ENDPOINT` | Resolved model URL (proxy path on Render) |
+| `EMBEDDING_ENDPOINT` | Resolved embedding URL (proxy path on Render) |
+| `SCRAPER_ENDPOINT` | Resolved scraper/jobs URL via proxy |
+| `AGENT_SERVICE_URL` | Agent service URL used by the gateway router |
+| `PROXY_AUTH_TOKEN` | Shared proxy auth token |
+| `is_render_strict_mode()` | True when both `AGENT_ENFORCE_PROXY` and `RENDER_REMOTE_INFERENCE_ONLY` are enabled |
+| `is_render()` | True on Render platform |
+| `get_allowed_origins()` | Parsed CORS origin list |
+| `log_endpoint_summary(logger)` | Emits structured startup log of all resolved endpoints |
+
+Startup log example (search for `service_endpoints_summary` in service logs):
+```
+service_endpoints_summary model=http://vecinita-modal-proxy-v1:10000/model
+  embedding=http://vecinita-modal-proxy-v1:10000/embedding
+  proxy_token_set=True strict_mode=True on_render=True
+  allowed_origins=['https://vecinita-frontend.onrender.com']
+```
+
+See [docs/deployment/RENDER_TROUBLESHOOTING_RUNBOOK.md](../deployment/RENDER_TROUBLESHOOTING_RUNBOOK.md) for ordered triage steps.
 
 ## 1. Canonical Service Topology
 

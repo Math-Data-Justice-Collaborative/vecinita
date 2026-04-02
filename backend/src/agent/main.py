@@ -279,6 +279,15 @@ enforce_proxy_llm = (os.environ.get("AGENT_ENFORCE_PROXY") or "true").lower() in
     "true",
     "yes",
 ]
+render_remote_inference_only = _running_on_render() and (
+    os.environ.get("RENDER_REMOTE_INFERENCE_ONLY", "true").strip().lower()
+    in {"1", "true", "yes", "on"}
+)
+if render_remote_inference_only and not enforce_proxy_llm:
+    logger.warning(
+        "Overriding AGENT_ENFORCE_PROXY=false because RENDER_REMOTE_INFERENCE_ONLY is enabled"
+    )
+    enforce_proxy_llm = True
 selection_file_path = os.environ.get("MODEL_SELECTION_PATH") or str(
     Path(__file__).parent / "data" / "model_selection.json"
 )
@@ -306,6 +315,11 @@ llm_client_manager = LocalLLMClientManager(**llm_manager_kwargs)
 # --- Initialize Clients ---
 try:
     supabase: Client | None = None
+    # Emit a single structured summary of all resolved service endpoints and
+    # policy flags so operators can confirm routing without reading env var dumps.
+    from src.service_endpoints import log_endpoint_summary as _log_ep_summary
+
+    _log_ep_summary(logger)
     logger.info(
         "Startup connection config: render=%s embedding_url=%s ollama_url=%s chroma=%s:%s "
         "chroma_required=%s embedding_strict_startup=%s preflight_strict=%s data_db_mode_env=%s",
@@ -381,6 +395,11 @@ try:
         "true",
         "yes",
     ]
+    if render_remote_inference_only and not embedding_strict_startup:
+        logger.warning(
+            "Overriding EMBEDDING_STRICT_STARTUP=false because RENDER_REMOTE_INFERENCE_ONLY is enabled"
+        )
+        embedding_strict_startup = True
     logger.info(
         "Embedding startup config: requested_url=%s strict_startup=%s has_auth_token=%s",
         embedding_service_url,
@@ -402,6 +421,14 @@ try:
             active_embedding_url,
         )
     except Exception as service_exc:
+        if render_remote_inference_only:
+            raise RuntimeError(
+                "Embedding service validation failed in Render remote-only mode. "
+                "Local embedding fallback is disabled to avoid hosting embeddings on Render. "
+                "Verify vecinita-modal-proxy /embedding routing and upstream embedding service health. "
+                f"Original error: {service_exc}"
+            ) from service_exc
+
         if embedding_strict_startup:
             raise RuntimeError(
                 "Embedding service validation failed. "
@@ -485,6 +512,9 @@ def _is_truthy_env(name: str, default: bool = False) -> bool:
 
 def _probe_guardrails_loaded() -> tuple[bool, str]:
     """Eager-load guardrails so first user request does not pay setup latency."""
+    if _running_on_render() and _is_truthy_env("RENDER_DISABLE_LOCAL_GUARDRAILS", True):
+        return True, "render_local_guardrails_disabled"
+
     try:
         from src.agent.guardrails_config import _get_hub_guards  # type: ignore[attr-defined]
 

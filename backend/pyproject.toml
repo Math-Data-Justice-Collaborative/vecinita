@@ -192,6 +192,9 @@ markers = [
     "rate_limit: Rate limiting behavior tests",
     "db: Database related tests",
     "retrieval_quality: Retrieval quality regression and citation fidelity tests",
+    "contract: Cross-platform env var and service contract tests (static, no external deps)",
+    "render_connectivity: Render-specific service connectivity configuration tests (offline)",
+    "live: Live smoke/integration tests against the deployed Render environment (requires RENDER_*_URL secrets)",
 ]
 
 # Logging
