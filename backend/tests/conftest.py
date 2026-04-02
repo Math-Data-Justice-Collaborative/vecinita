@@ -48,7 +48,7 @@ def _agent_module_path_compatibility():
     import importlib.machinery
     import sys
     import types
-    from unittest.mock import Mock
+    from unittest.mock import Mock, MagicMock
 
     # Avoid importing broken/binary torch during test module import.
     if "torch" not in sys.modules:
@@ -56,6 +56,27 @@ def _agent_module_path_compatibility():
         fake_torch.__version__ = "0.0-test"
         fake_torch.__spec__ = importlib.machinery.ModuleSpec("torch", loader=None)
         sys.modules["torch"] = fake_torch
+
+    # Mock Supabase client factory before importing src.agent.main.
+    def _fake_create_supabase_client(*_args, **_kwargs):
+        mock_client = MagicMock()
+        # Mock the query chain: table().select().limit().execute()
+        # Create a chainable query builder that returns itself for all methods
+        mock_query = MagicMock()
+        mock_result = MagicMock()
+        mock_result.data = []  # Preflight check expects .data attribute
+        
+        # Make methods return the query chain (or self) for chaining
+        mock_query.select.return_value = mock_query  # select() returns self for chaining
+        mock_query.limit.return_value = mock_query   # limit() returns self for chaining
+        mock_query.execute.return_value = mock_result  # execute() returns result object
+        
+        # table() returns the query chain
+        mock_client.table.return_value = mock_query
+        # rpc() also returns the query chain for other operations
+        mock_client.rpc.return_value = mock_query
+        
+        return mock_client
 
     # Stub embedding service client before importing src.agent.main.
     fake_embedding_module = types.ModuleType("src.embedding_service.client")
@@ -101,7 +122,9 @@ def _agent_module_path_compatibility():
         _original_env[_k] = os.environ.get(_k)
         os.environ[_k] = _v
 
-    __import__("src.agent.main")
+    # Patch create_client before importing src.agent.main
+    with patch("supabase.client.create_client", side_effect=_fake_create_supabase_client):
+        __import__("src.agent.main")
 
     yield
 
