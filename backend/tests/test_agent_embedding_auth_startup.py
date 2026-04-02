@@ -63,6 +63,7 @@ def _reload_agent_main(monkeypatch, create_embedding_client):
     monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
     monkeypatch.setenv("SUPABASE_KEY", "test-key")
     monkeypatch.setenv("DEFAULT_PROVIDER", "ollama")
+    monkeypatch.setenv("AGENT_ENFORCE_PROXY", "false")
     monkeypatch.setenv("OLLAMA_BASE_URL", "http://localhost:11434")
     monkeypatch.setenv("OLLAMA_MODEL", "llama3.1:8b")
     monkeypatch.setenv("MODEL_SELECTION_PATH", "/tmp/vecinita-test-model-selection.json")

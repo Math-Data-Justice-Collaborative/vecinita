@@ -32,7 +32,8 @@ def env_vars():
             "MODAL_OLLAMA_ENDPOINT", "http://localhost:10000/model"
         ),
         "OLLAMA_MODEL": _env_or_default("OLLAMA_MODEL", "llama3.1:8b"),
-        "AGENT_ENFORCE_PROXY": _env_or_default("AGENT_ENFORCE_PROXY", "false"),
+        # Keep tests deterministic regardless of runner-level env overrides.
+        "AGENT_ENFORCE_PROXY": "false",
         "DATABASE_URL": _env_or_default("DATABASE_URL", "postgresql://test"),
     }
 

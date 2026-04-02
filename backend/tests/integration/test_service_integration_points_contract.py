@@ -26,6 +26,13 @@ pytestmark = pytest.mark.integration
 WORKSPACE_ROOT = Path(__file__).resolve().parents[3]
 
 
+def _read_workspace_file(*parts: str) -> str:
+    target = WORKSPACE_ROOT.joinpath(*parts)
+    if not target.exists():
+        pytest.skip(f"Workspace file unavailable in this CI checkout: {target}")
+    return target.read_text(encoding="utf-8")
+
+
 class _JsonResponse:
     def __init__(self, payload: dict, status_code: int = 200):
         self._payload = payload
@@ -42,9 +49,7 @@ class _JsonResponse:
 
 def test_ip01_frontend_to_gateway_contract_file_wiring() -> None:
     """IP-01: Frontend -> Gateway URL and ask/stream path contract."""
-    content = (
-        WORKSPACE_ROOT / "frontend" / "src" / "app" / "services" / "agentService.ts"
-    ).read_text(encoding="utf-8")
+    content = _read_workspace_file("frontend", "src", "app", "services", "agentService.ts")
 
     assert "VITE_GATEWAY_URL" in content
     assert "VITE_BACKEND_URL" in content
@@ -54,9 +59,7 @@ def test_ip01_frontend_to_gateway_contract_file_wiring() -> None:
 
 def test_ip02_frontend_to_supabase_auth_contract_file_wiring() -> None:
     """IP-02: Frontend -> Supabase auth env vars and SDK client contract."""
-    content = (WORKSPACE_ROOT / "frontend" / "src" / "lib" / "supabase.ts").read_text(
-        encoding="utf-8"
-    )
+    content = _read_workspace_file("frontend", "src", "lib", "supabase.ts")
 
     assert "VITE_SUPABASE_URL" in content
     assert "VITE_SUPABASE_ANON_KEY" in content
@@ -380,12 +383,10 @@ def test_ip12_documents_router_mixed_datasource_contract(monkeypatch) -> None:
 
 def test_ip13_modal_proxy_route_and_header_contract_files() -> None:
     """IP-13: Modal proxy keeps path-strip and credential-strip contracts."""
-    defaults_content = (
-        WORKSPACE_ROOT / "services" / "modal-proxy" / "app" / "backends" / "defaults.py"
-    ).read_text(encoding="utf-8")
-    proxy_content = (WORKSPACE_ROOT / "services" / "modal-proxy" / "app" / "proxy.py").read_text(
-        encoding="utf-8"
+    defaults_content = _read_workspace_file(
+        "services", "modal-proxy", "app", "backends", "defaults.py"
     )
+    proxy_content = _read_workspace_file("services", "modal-proxy", "app", "proxy.py")
 
     assert 'path_prefix="/model"' in defaults_content
     assert 'path_strip_prefix="/model"' in defaults_content
