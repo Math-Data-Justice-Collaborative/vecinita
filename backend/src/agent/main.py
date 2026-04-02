@@ -505,11 +505,22 @@ def _run_startup_preflight() -> dict[str, Any]:
 
     checks: dict[str, dict[str, Any]] = {}
 
+    require_guardrails_hub = _is_truthy_env("GUARDRAILS_REQUIRE_HUB_VALIDATOR", False)
+    require_chroma = _is_truthy_env("CHROMA_REQUIRED", False)
+
     guardrails_ok, guardrails_detail = _probe_guardrails_loaded()
-    checks["guardrails"] = {"ok": guardrails_ok, "detail": guardrails_detail}
+    checks["guardrails"] = {
+        "ok": guardrails_ok,
+        "detail": guardrails_detail,
+        "required": require_guardrails_hub,
+    }
 
     chroma_ok, chroma_detail = _probe_chroma_connectivity()
-    checks["chroma"] = {"ok": chroma_ok, "detail": chroma_detail}
+    checks["chroma"] = {
+        "ok": chroma_ok,
+        "detail": chroma_detail,
+        "required": require_chroma,
+    }
 
     if data_mode == "postgres":
         data_ok, data_detail = _probe_postgres_connectivity()
@@ -517,6 +528,7 @@ def _run_startup_preflight() -> dict[str, Any]:
             "ok": data_ok,
             "backend": "postgres",
             "detail": data_detail,
+            "required": True,
         }
     else:
         data_ok, data_detail = _probe_supabase_connectivity()
@@ -524,9 +536,12 @@ def _run_startup_preflight() -> dict[str, Any]:
             "ok": data_ok,
             "backend": "supabase",
             "detail": data_detail,
+            "required": True,
         }
 
-    overall_ok = all(bool(item.get("ok")) for item in checks.values())
+    overall_ok = all(
+        bool(item.get("ok")) for item in checks.values() if bool(item.get("required", False))
+    )
     return {
         "status": "ok" if overall_ok else "degraded",
         "data_mode": data_mode,

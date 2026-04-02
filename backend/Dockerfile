@@ -28,7 +28,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
 	beautifulsoup4 pypdf \
 	python-dotenv pydantic requests httpx langdetect tqdm \
 	python-multipart \
-	gotrue langchain-ollama langsmith ddgs playwright unstructured
+	gotrue langchain-ollama langsmith ddgs playwright unstructured \
+	guardrails-ai fastembed sentence-transformers
 
 # Runtime stage - minimal image
 FROM python:3.11-slim-bookworm AS runtime

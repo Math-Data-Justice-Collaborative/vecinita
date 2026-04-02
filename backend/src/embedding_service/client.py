@@ -295,6 +295,29 @@ class EmbeddingServiceClient(Embeddings):
                 return base
             except Exception as exc:
                 last_error = exc
+
+                status_code = (
+                    exc.response.status_code
+                    if isinstance(exc, httpx.HTTPStatusError) and exc.response is not None
+                    else None
+                )
+
+                if status_code == 404:
+                    try:
+                        fallback = self.client.get(
+                            base,
+                            headers=self._headers_for_base_url(base),
+                        )
+                        fallback.raise_for_status()
+                        self.base_url = base
+                        logger.info(
+                            "✅ Embedding service root check passed at %s (no /health route)",
+                            base,
+                        )
+                        return base
+                    except Exception as root_exc:
+                        last_error = root_exc
+
                 logger.warning(f"Embedding service health check failed at {base}: {exc}")
 
         raise RuntimeError(
