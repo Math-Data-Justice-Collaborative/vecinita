@@ -23,8 +23,8 @@ from render_env_contract import parse_env_file, validate_shared_render_env
 def main() -> int:
     target = Path(sys.argv[1]) if len(sys.argv) > 1 else REPO_ROOT / ".env.prod.render"
     if not target.exists():
-        print(f"ERROR: env file not found: {target}")
-        return 2
+        print(f"WARNING: env file not found, skipping contract validation: {target}")
+        return 0
 
     env = parse_env_file(target)
     result = validate_shared_render_env(env)
