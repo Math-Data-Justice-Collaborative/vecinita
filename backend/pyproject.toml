@@ -96,6 +96,8 @@ dev = [
     "pytest>=9.0.0",
     "pytest-asyncio>=0.23.0",
     "pytest-cov>=5.0.0",
+    "schemathesis>=4.14.3",
+    "tracecov>=0.3.0",
     # FastAPI Testing
     "httpx>=0.25.0",
     # Code Quality Tools
@@ -116,6 +118,8 @@ ci = [
     "pytest>=9.0.0",
     "pytest-asyncio>=0.23.0",
     "pytest-cov>=5.0.0",
+    "schemathesis>=4.14.3",
+    "tracecov>=0.3.0",
     "httpx>=0.25.0",
     "black>=24.1.0",
     "ruff>=0.2.0",
@@ -176,6 +180,7 @@ markers = [
     "unit: Unit tests (fast, no external dependencies)",
     "integration: Integration tests (may require external services)",
     "e2e: End-to-end tests",
+    "schema: OpenAPI / schema conformance tests",
     "ui: UI/API tests using FastAPI TestClient",
     "streaming: Streaming response and SSE behavior tests",
     "slow: Tests that take a long time to run",

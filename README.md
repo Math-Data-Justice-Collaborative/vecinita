@@ -358,9 +358,19 @@ Vecinita now includes a Render Blueprint at [render.yaml](render.yaml) for a mul
 
 Set these in the Render Dashboard for `vecinita-agent` and/or `vecinita-scraper`:
 
+- `DATABASE_URL` (Render Postgres internal connection string)
+- `DB_DATA_MODE=postgres`
+- `VECTOR_SYNC_TARGET=postgres`
+- `VECTOR_SYNC_SUPABASE_FALLBACK_READS=false`
 - `SUPABASE_URL`
 - `SUPABASE_KEY`
 - `GROQ_API_KEY` (or `OPENAI_API_KEY` / `DEEPSEEK_API_KEY`)
+
+Architecture split for production:
+
+- Supabase remains auth/session provider for frontend and backend auth flows.
+- Render Postgres is the vector/document data backend for retrieval and ingestion paths.
+- Use the Render internal Postgres URL whenever services run in the same Render region.
 
 ### CI/CD to Render
 
@@ -384,6 +394,7 @@ The deploy workflow triggers only after the `Tests` workflow completes successfu
 
 ### Deployment
 - **[docs/RENDER_DEPLOYMENT_THREE_SERVICES.md](docs/RENDER_DEPLOYMENT_THREE_SERVICES.md)** - Step-by-step Render deployment (free tier)
+- **[docs/deployment/RENDER_POSTGRES_VECTOR_CUTOVER.md](docs/deployment/RENDER_POSTGRES_VECTOR_CUTOVER.md)** - Supabase-auth and Render-Postgres vector migration runbook
 - **[docs/QUICK_REFERENCE_MICROSERVICE.md](docs/QUICK_REFERENCE_MICROSERVICE.md)** - Quick reference for microservice setup
 - **[docs/ARCHITECTURE_MICROSERVICE.md](docs/ARCHITECTURE_MICROSERVICE.md)** - Detailed architecture documentation
 

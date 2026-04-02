@@ -1,14 +1,8 @@
 .PHONY: help \
 	dev dev-tmux dev-attach dev-stop dev-clear-ports \
-	dev-shared-up dev-shared-down dev-shared-logs dev-shared-status \
 	dev-chat dev-chat-backend dev-chat-gateway dev-chat-frontend \
 	dev-data-management dev-data-management-frontend dev-data-management-api \
 	dev-backend dev-gateway dev-frontend \
-	prod prod-chat prod-chat-backend prod-chat-agent prod-chat-gateway prod-chat-frontend \
-	prod-data-management prod-data-management-api prod-data-management-frontend \
-	prod-env-check \
-	modal-dev modal-dev-model modal-dev-embedding modal-prod modal-prod-model modal-prod-embedding \
-	modal-model-download modal-model-download-default modal-model-smoke \
 	branch-status branch-save branch-restore branch-switch branch-pull branch-sync-main \
 	lint lint-backend lint-frontend lint-imported \
 	typecheck typecheck-backend typecheck-frontend typecheck-imported \
@@ -39,21 +33,9 @@ help:
 	@echo "  make dev-attach                          Attach to the existing tmux dev session"
 	@echo "  make dev-stop                            Stop the dev session and local containers"
 	@echo "  make dev-clear-ports                     Kill processes bound to local dev ports"
-	@echo "  make dev-shared-up                       Start shared local model dependencies (proxy/model/embed/chroma/db)"
-	@echo "  make dev-shared-down                     Stop shared local model dependencies"
-	@echo "  make dev-shared-status                   Show shared dependency container status"
 	@echo "  make dev-backend                         Start the backend agent in reload mode"
 	@echo "  make dev-gateway                         Start the API gateway in reload mode"
 	@echo "  make dev-frontend                        Start the frontend dev server"
-	@echo "  make prod                                Start chat app locally against live services (requires .env.prod-local)"
-	@echo "  make prod-data-management                Start data-management app against live services (requires .env.prod-local)"
-	@echo "  make modal-dev-model                     Modal dev server for model service (modal serve)"
-	@echo "  make modal-dev-embedding                 Modal dev server for embedding service (modal serve)"
-	@echo "  make modal-prod-model                    Deploy model service to Modal (modal deploy)"
-	@echo "  make modal-prod-embedding                Deploy embedding service to Modal (modal deploy)"
-	@echo "  make modal-model-download MODEL=<id>     One-shot model weight preload via modal run"
-	@echo "  make modal-model-download-default         One-shot preload for llama3.2 via modal run"
-	@echo "  make modal-model-smoke                    One-shot modal run smoke call (no preload)"
 	@echo ""
 	@echo "Branch workflow targets"
 	@echo "  make branch-status                       Show component branch and dirty state"
@@ -107,41 +89,10 @@ help:
 	@echo "  make docs-build                          Build docs site"
 	@echo "  make docs-deploy-check                   Validate docs build for Pages"
 
-dev-shared-up:
-	@echo "Starting shared local model dependencies..."
-	@docker compose -f docker-compose.microservices.yml up -d --remove-orphans chroma postgres postgrest ollama model-service embedding-service modal-proxy
-	@if command -v curl >/dev/null 2>&1; then \
-		echo "Waiting for local modal-proxy health endpoint..."; \
-		for i in $$(seq 1 60); do \
-			if curl -fsS -m 2 http://localhost:10000/health >/dev/null 2>&1; then \
-				echo "Shared model dependencies are ready."; \
-				exit 0; \
-			fi; \
-			sleep 1; \
-		done; \
-		echo "Warning: modal-proxy health check did not pass within 60s."; \
-	fi
-
-dev-shared-down:
-	@echo "Stopping shared local model dependencies..."
-	@docker compose -f docker-compose.microservices.yml stop modal-proxy embedding-service model-service ollama postgrest postgres chroma || true
-
-dev-shared-logs:
-	docker compose -f docker-compose.microservices.yml logs -f modal-proxy model-service embedding-service ollama
-
-dev-shared-status:
-	docker compose -f docker-compose.microservices.yml ps chroma postgres postgrest ollama model-service embedding-service modal-proxy
-
-dev: dev-shared-up
-	MODAL_OLLAMA_ENDPOINT='http://localhost:10000/model' \
-	MODAL_EMBEDDING_ENDPOINT='http://localhost:10000/embedding' \
-	PROXY_AUTH_TOKEN="$${PROXY_AUTH_TOKEN:-vecinita-local-proxy-token}" \
+dev:
 	./run/dev-session.sh start
 
-dev-tmux: dev-shared-up
-	MODAL_OLLAMA_ENDPOINT='http://localhost:10000/model' \
-	MODAL_EMBEDDING_ENDPOINT='http://localhost:10000/embedding' \
-	PROXY_AUTH_TOKEN="$${PROXY_AUTH_TOKEN:-vecinita-local-proxy-token}" \
+dev-tmux:
 	./run/dev-session.sh start-tmux
 
 dev-attach:
@@ -149,7 +100,6 @@ dev-attach:
 
 dev-stop:
 	./run/dev-session.sh stop
-	@$(MAKE) dev-shared-down
 
 dev-clear-ports:
 	@for port in 5173 5174 8000 8001 8002 8004 8005; do \
@@ -164,7 +114,7 @@ dev-clear-ports:
 
 dev-backend:
 	cd backend && CHROMA_HOST='localhost' CHROMA_PORT='8002' CHROMA_SSL='false' \
-		uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 --reload
+		uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir src --reload-exclude '.mypy_cache/*' --reload-exclude '.pytest_cache/*' --reload-exclude '.ruff_cache/*' --reload-exclude '.venv/*' --reload-exclude 'logs/*' --reload-exclude 'build/*' --reload-exclude 'coverage*' --reload-exclude '*.pyc'
 
 dev-gateway:
 	cd backend && AGENT_SERVICE_URL='http://localhost:8000' EMBEDDING_SERVICE_URL='http://localhost:8001' \
@@ -172,7 +122,7 @@ dev-gateway:
 		SUPABASE_URL='http://localhost:3001' SUPABASE_KEY='test-anon-key-local-development-only' \
 		DEV_ADMIN_ENABLED='true' DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' \
 		SUPABASE_UPLOADS_BUCKET='documents' DEMO_MODE='false' \
-		uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 --reload
+		uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 --reload --reload-dir src --reload-exclude '.mypy_cache/*' --reload-exclude '.pytest_cache/*' --reload-exclude '.ruff_cache/*' --reload-exclude '.venv/*' --reload-exclude 'logs/*' --reload-exclude 'build/*' --reload-exclude 'coverage*' --reload-exclude '*.pyc'
 
 dev-frontend:
 	cd frontend && npm run dev -- --host 0.0.0.0 --port 5173
@@ -184,32 +134,24 @@ dev-frontend:
 dev-chat: dev-chat-backend dev-chat-frontend
 	@echo "Chat application started: Frontend on port 5173, Gateway on port 8004, Agent on port 8000"
 
-dev-chat-backend: dev-shared-up dev-chat-agent dev-chat-gateway
+dev-chat-backend: dev-chat-agent dev-chat-gateway
 
 dev-chat-agent:
 	@echo "Starting Chat Agent (port 8000)..."
 	@cd backend && CHROMA_HOST='localhost' CHROMA_PORT='8002' CHROMA_SSL='false' \
-		OLLAMA_BASE_URL='http://localhost:10000/model' \
-		EMBEDDING_SERVICE_URL='http://localhost:10000/embedding' \
-		MODAL_API_PROXY_KEY='local-modal-token-id' \
-		MODAL_API_PROXY_SECRET='local-modal-token-secret' \
-		PROXY_AUTH_TOKEN='vecinita-local-proxy-token' \
-		uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 --reload &
+		uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir src --reload-exclude '.mypy_cache/*' --reload-exclude '.pytest_cache/*' --reload-exclude '.ruff_cache/*' --reload-exclude '.venv/*' --reload-exclude 'logs/*' --reload-exclude 'build/*' --reload-exclude 'coverage*' --reload-exclude '*.pyc' &
 
 dev-chat-gateway:
 	@echo "Starting Chat Gateway (port 8004, Supabase-enabled)..."
 	@cd backend && source ../.env && \
 		AGENT_SERVICE_URL='http://localhost:8000' \
-		EMBEDDING_SERVICE_URL='http://localhost:10000/embedding' \
-		MODAL_API_PROXY_KEY='local-modal-token-id' \
-		MODAL_API_PROXY_SECRET='local-modal-token-secret' \
-		PROXY_AUTH_TOKEN='vecinita-local-proxy-token' \
+		EMBEDDING_SERVICE_URL='http://localhost:8001' \
 		CHROMA_HOST='localhost' \
 		CHROMA_PORT='8002' \
 		CHROMA_SSL='false' \
 		DEV_ADMIN_ENABLED='true' \
 		DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' \
-		uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 --reload &
+		uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 --reload --reload-dir src --reload-exclude '.mypy_cache/*' --reload-exclude '.pytest_cache/*' --reload-exclude '.ruff_cache/*' --reload-exclude '.venv/*' --reload-exclude 'logs/*' --reload-exclude 'build/*' --reload-exclude 'coverage*' --reload-exclude '*.pyc' &
 
 dev-chat-frontend:
 	@echo "Starting Chat Frontend (port 5173, Supabase-enabled)..."
@@ -219,7 +161,7 @@ dev-chat-frontend:
 # Data Management System (Frontend + API)
 # ============================================================================
 
-dev-data-management: dev-shared-up dev-data-management-api dev-data-management-frontend
+dev-data-management: dev-data-management-api dev-data-management-frontend
 	@echo "Data Management system started: Frontend on port 5174, API on port 8005"
 
 dev-data-management-frontend:
@@ -233,87 +175,7 @@ dev-data-management-api:
 		 echo "   Run: git submodule update --init services/data-management-api" && exit 1)
 	@cd services/data-management-api/apps/backend/proxy && \
 		source ../../../../../.env && \
-		VECINITA_MODEL_API_URL='http://localhost:10000/model' \
-		VECINITA_EMBEDDING_API_URL='http://localhost:10000/embedding' \
-		MODAL_PROXY_AUTH_TOKEN='vecinita-local-proxy-token' \
 		PORT=8005 uv run uvicorn app.main:app --host 0.0.0.0 --port 8005 --reload &
-
-# ============================================================================
-# Production-Like Local Runs (live endpoints)
-# ============================================================================
-
-prod-env-check:
-	@test -f .env.prod-local || (echo "❌ Missing .env.prod-local. Create it with live service endpoint vars before running prod targets." && exit 1)
-
-prod: prod-chat
-
-prod-chat: prod-chat-backend prod-chat-frontend
-	@echo "Prod-mode chat app started: Frontend on port 5173, Gateway on port 8004, Agent on port 8000"
-
-prod-chat-backend: prod-env-check prod-chat-agent prod-chat-gateway
-
-prod-chat-agent:
-	@echo "Starting Chat Agent in prod mode (port 8000, live services)..."
-	@cd backend && set -a && source ../.env.prod-local && set +a && \
-		CHROMA_HOST='localhost' CHROMA_PORT='8002' CHROMA_SSL='false' \
-		uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 --reload &
-
-prod-chat-gateway:
-	@echo "Starting Chat Gateway in prod mode (port 8004, live services)..."
-	@cd backend && set -a && source ../.env.prod-local && set +a && \
-		AGENT_SERVICE_URL='http://localhost:8000' \
-		CHROMA_HOST='localhost' \
-		CHROMA_PORT='8002' \
-		CHROMA_SSL='false' \
-		DEV_ADMIN_ENABLED='true' \
-		DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' \
-		uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 --reload &
-
-prod-chat-frontend:
-	@echo "Starting Chat Frontend in prod mode (port 5173)..."
-	@cd frontend && VITE_GATEWAY_URL='http://localhost:8004/api/v1' VITE_BACKEND_URL='http://localhost:8000' npm run dev -- --host 0.0.0.0 --port 5173
-
-prod-data-management: prod-env-check prod-data-management-api prod-data-management-frontend
-	@echo "Prod-mode data management started: Frontend on port 5174, API on port 8005"
-
-prod-data-management-frontend:
-	@echo "Starting Data Management Frontend in prod mode (port 5174)..."
-	@cd apps/data-management-frontend && npm run dev -- --host 0.0.0.0 --port 5174
-
-prod-data-management-api:
-	@echo "Starting Data Management API in prod mode (port 8005, live services)..."
-	@test -d services/data-management-api/apps/backend/proxy/app || \
-		(echo "❌ data-management-api submodule not initialized." && \
-		 echo "   Run: git submodule update --init services/data-management-api" && exit 1)
-	@cd services/data-management-api/apps/backend/proxy && \
-		set -a && source ../../../../../.env.prod-local && set +a && \
-		PORT=8005 uv run uvicorn app.main:app --host 0.0.0.0 --port 8005 --reload &
-
-modal-dev: modal-dev-model
-
-modal-dev-model:
-	@cd services/model-modal && PYTHONPATH=src python3 -m modal serve src/vecinita/app.py
-
-modal-dev-embedding:
-	@cd services/embedding-modal && python3.11 -m modal serve main.py
-
-modal-prod: modal-prod-model
-
-modal-prod-model:
-	@cd services/model-modal && PYTHONPATH=src python3 -m modal deploy src/vecinita/app.py
-
-modal-prod-embedding:
-	@cd services/embedding-modal && python3.11 -m modal deploy main.py
-
-modal-model-download:
-	@test -n "$(MODEL)" || (echo "Usage: make modal-model-download MODEL=<supported-model-id>" && exit 1)
-	@cd services/model-modal && PYTHONPATH=src python3 -m modal run src/vecinita/app.py::download_model --model-name "$(MODEL)"
-
-modal-model-download-default:
-	@$(MAKE) modal-model-download MODEL=llama3.2
-
-modal-model-smoke:
-	@cd services/model-modal && PYTHONPATH=src python3 -m modal run src/vecinita/app.py::download_model --help
 # Individual service targets (legacy)
 # ============================================================================
 

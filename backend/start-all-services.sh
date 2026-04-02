@@ -66,7 +66,7 @@ sleep 5
 echo -e "${GREEN}Starting API Gateway on port 8004...${NC}"
 tmux send-keys -t vecinita:services.2 "cd /root/GitHub/VECINA/vecinita/backend" C-m
 tmux send-keys -t vecinita:services.2 "echo -e '${GREEN}[API Gateway - Port 8004]${NC}'" C-m
-tmux send-keys -t vecinita:services.2 "export AGENT_SERVICE_URL=http://localhost:8000 && export DEMO_MODE=false && uv run uvicorn src.api.main:app --host 0.0.0.0 --port 8004 --reload" C-m
+tmux send-keys -t vecinita:services.2 "export AGENT_SERVICE_URL=http://localhost:8000 && export DEMO_MODE=false && uv run uvicorn src.api.main:app --host 0.0.0.0 --port 8004 --reload --reload-dir src --reload-exclude '.mypy_cache/*' --reload-exclude '.pytest_cache/*' --reload-exclude '.ruff_cache/*' --reload-exclude '.venv/*' --reload-exclude 'logs/*' --reload-exclude 'build/*' --reload-exclude 'coverage*' --reload-exclude '*.pyc'" C-m
 
 echo ""
 echo -e "${BLUE}════════════════════════════════════════════════════════════════${NC}"

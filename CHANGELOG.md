@@ -17,6 +17,13 @@ Comprehensive integration of frontend components with backend services featuring
 - Real-time token and source events in frontend
 - Metadata tracking for debugging and analytics
 
+### Added: Localized chat suggestions (March 30, 2026)
+- Added backend follow-up suggestion generation for `/ask-stream` complete events.
+- Extended SSE complete-event contract with additive field `suggested_questions`.
+- Added localized suggestion chips to chat splash state and after assistant responses.
+- Added frontend fallback suggestion banks for English and Spanish when backend suggestions are missing.
+- Added tests for suggestion parsing, rendering, and click-to-send interaction.
+
 ---
 
 ## Major Changes

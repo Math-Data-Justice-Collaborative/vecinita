@@ -178,7 +178,7 @@ Accept: text/event-stream
 ```
 data: {"type":"thinking","message":"Analyzing water quality concerns..."}
 data: {"type":"thinking","message":"Searching for relevant resources..."}
-data: {"type":"complete","answer":"Water quality...","sources":[...],"plan":"..."}
+data: {"type":"complete","answer":"Water quality...","sources":[...],"suggested_questions":["What should I do first?"],"plan":"..."}
 ```
 
 ### Message Types
@@ -204,6 +204,11 @@ Final answer with sources and planning
       "url": "https://www.epa.gov/wqs-tech",
       "snippet": "Information about water quality standards and regulations."
     }
+  ],
+  "suggested_questions": [
+    "Can you summarize this in 3 key points?",
+    "What should I do first?",
+    "Which local resources are most relevant to this answer?"
   ],
   "plan": "Optional: Agent's planning/reasoning summary"
 }
@@ -257,6 +262,7 @@ interface CompleteMessage {
   type: 'complete';
   answer: string;
   sources: Source[];
+  suggested_questions?: string[];
   plan?: string;
 }
 
@@ -567,7 +573,7 @@ curl "http://localhost:8000/ask-stream?query=Hello&provider=llama&model=llama3.2
 Expected output (SSE format):
 ```
 data: {"type":"thinking","message":"..."}
-data: {"type":"complete","answer":"...","sources":[...],"plan":""}
+data: {"type":"complete","answer":"...","sources":[...],"suggested_questions":["What should I do first?"],"plan":""}
 ```
 
 ### 3. Test with Language Parameter

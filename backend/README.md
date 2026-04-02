@@ -21,6 +21,28 @@ DEEPSEEK_API_KEY=test-deepseek-key
 
 At least one LLM provider must be configured (`OLLAMA_BASE_URL`, `DEEPSEEK_API_KEY`, or `OPENAI_API_KEY`).
 
+### Startup Preflight And Warmup
+
+The backend now runs a startup preflight before serving requests to reduce first-request latency and catch readiness issues early.
+
+Checks include:
+- Guardrails preload (Hub validator if installed, or local fallback)
+- Chroma connectivity heartbeat
+- Active data backend connectivity probe (`supabase` or `postgres` mode)
+
+Configuration:
+
+```env
+BACKEND_PREFLIGHT_ENABLED=true
+BACKEND_PREFLIGHT_STRICT=false
+GUARDRAILS_HUB_AUTO_INSTALL=false
+GUARDRAILS_PERSISTENCE_DIR=/data/cache
+```
+
+- Set `BACKEND_PREFLIGHT_STRICT=true` to fail startup when preflight is degraded.
+- Set `GUARDRAILS_PERSISTENCE_DIR` to a mounted volume path (Render disk, Docker volume, Modal volume) to persist Guardrails/HuggingFace caches across restarts.
+- `/health` now includes `readiness` and `preflight` details while keeping `status: ok` for compatibility with existing probes.
+
 Run backend tests:
 
 ```bash

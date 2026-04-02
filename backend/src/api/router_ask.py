@@ -42,7 +42,7 @@ def _read_positive_timeout(name: str, default: float) -> float:
 
 
 def _get_agent_timeout() -> float:
-    return _read_positive_timeout("AGENT_TIMEOUT", 75.0)
+    return _read_positive_timeout("AGENT_TIMEOUT", 120.0)
 
 
 def _get_agent_stream_timeout() -> float:
@@ -191,6 +191,7 @@ def get_demo_response(question: str, lang: str | None = None) -> AskResponse:
 async def ask_question(
     question: str = Query(..., description="User question"),
     thread_id: str | None = Query(None, description="Conversation thread ID"),
+    context_answer: str | None = Query(None, description="Prior assistant answer context"),
     lang: str | None = Query(None, description="Override language detection (es/en)"),
     provider: str | None = Query(
         None, description="Local LLM provider override (only ollama/local is supported)"
@@ -230,6 +231,8 @@ async def ask_question(
         params: dict[str, Any] = {"question": question}
         if thread_id:
             params["thread_id"] = thread_id
+        if context_answer:
+            params["context_answer"] = context_answer
         if lang:
             params["lang"] = lang
         if provider:
@@ -297,6 +300,7 @@ async def sse_proxy_generator(
     question: str,
     request_id: str,
     thread_id: str | None = None,
+    context_answer: str | None = None,
     lang: str | None = None,
     provider: str | None = None,
     model: str | None = None,
@@ -320,6 +324,8 @@ async def sse_proxy_generator(
         params: dict[str, Any] = {"question": question}
         if thread_id:
             params["thread_id"] = thread_id
+        if context_answer:
+            params["context_answer"] = context_answer
         if lang:
             params["lang"] = lang
         if provider:
@@ -398,6 +404,7 @@ async def sse_proxy_generator(
 async def ask_question_stream(
     question: str = Query(..., description="User question"),
     thread_id: str | None = Query(None, description="Conversation thread ID"),
+    context_answer: str | None = Query(None, description="Prior assistant answer context"),
     lang: str | None = Query(None, description="Override language detection (es/en)"),
     provider: str | None = Query(
         None, description="Local LLM provider override (only ollama/local is supported)"
@@ -446,6 +453,7 @@ async def ask_question_stream(
             question,
             request_id,
             thread_id,
+            context_answer,
             lang,
             provider,
             model,

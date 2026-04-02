@@ -1,4 +1,4 @@
-.PHONY: format format-check lint typecheck test quality test-streaming-ci
+.PHONY: format format-check lint typecheck test quality test-streaming-ci test-contracts test-acceptance-gateway-ask test-schema test-schema-cli
 
 format:
 	uv run black src tests
@@ -14,6 +14,18 @@ typecheck:
 
 test:
 	uv run pytest -q
+
+test-contracts:
+	uv run pytest tests/integration/test_service_integration_points_contract.py tests/integration/test_service_integration_points_contract_expanded.py -q
+
+test-acceptance-gateway-ask:
+	uv run pytest tests/integration/test_gateway_ask_acceptance.py -q
+
+test-schema:
+	SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_api_schema_schemathesis.py -q
+
+test-schema-cli:
+	bash scripts/run_schemathesis_live.sh
 
 quality: format-check lint typecheck test
 

@@ -13,6 +13,7 @@ Welcome to the organized documentation hub.
 
 - [Architecture Directory](architecture/) - All architecture and system design docs
 - [Microservice Architecture](architecture/ARCHITECTURE_MICROSERVICE.md)
+- [Service Integration Points](architecture/SERVICE_INTEGRATION_POINTS.md) - Cross-service integration matrix, routing, auth boundaries, and environment wiring
 - [Embedding Service Architecture](architecture/EMBEDDING_SERVICE_ARCHITECTURE.md)
 - [Modal Hybrid Architecture](architecture/MODAL_HYBRID_ARCHITECTURE.md)
 - [Monorepo Refactor Blueprint](architecture/MONOREPO_REFACTOR_BLUEPRINT.md) - Target structure and migration phases for chat + data-management + modal services

@@ -317,6 +317,75 @@ def test_db_search_returns_empty_when_fallback_disabled_and_chroma_fails(
     assert tool.invoke("housing") == "[]"
 
 
+def test_db_search_uses_postgres_fallback_when_data_mode_is_postgres(
+    monkeypatch, mock_embedding_model
+):
+    mock_store = Mock()
+    mock_store.query_chunks.side_effect = RuntimeError("chroma unavailable")
+
+    monkeypatch.setenv("DB_DATA_MODE", "postgres")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:pass@localhost:5432/db")
+    monkeypatch.setenv("SUPABASE_DATA_READS_ENABLED", "false")
+    monkeypatch.setenv("POSTGRES_DATA_READS_ENABLED", "true")
+
+    mock_postgres = Mock(
+        return_value=[
+            {
+                "id": "doc-pg-1",
+                "content": "Postgres fallback result",
+                "source_url": "https://example.org/postgres",
+                "source_domain": "example.org",
+                "similarity": 0.87,
+                "metadata": {},
+            }
+        ]
+    )
+    monkeypatch.setattr(db_search_module, "_query_postgres_fallback", mock_postgres)
+    monkeypatch.setattr(db_search_module, "_query_supabase_fallback", Mock(return_value=[]))
+
+    import src.config as app_config
+
+    importlib.reload(app_config)
+
+    tool = create_db_search_tool(
+        mock_store, mock_embedding_model, match_threshold=0.3, match_count=5
+    )
+    results = json.loads(tool.invoke("housing"))
+
+    assert len(results) == 1
+    assert results[0]["source_url"] == "https://example.org/postgres"
+    metrics = get_last_search_metrics()
+    assert metrics["retrieval_backend"] == "postgres"
+
+
+def test_db_search_auto_mode_prefers_postgres_when_supabase_missing(
+    monkeypatch, mock_embedding_model
+):
+    mock_store = Mock()
+    mock_store.query_chunks.side_effect = RuntimeError("chroma unavailable")
+
+    monkeypatch.setenv("DB_DATA_MODE", "auto")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:pass@localhost:5432/db")
+    monkeypatch.delenv("SUPABASE_URL", raising=False)
+    monkeypatch.delenv("SUPABASE_KEY", raising=False)
+
+    postgres_mock = Mock(return_value=[])
+    supabase_mock = Mock(return_value=[])
+    monkeypatch.setattr(db_search_module, "_query_postgres_fallback", postgres_mock)
+    monkeypatch.setattr(db_search_module, "_query_supabase_fallback", supabase_mock)
+
+    import src.config as app_config
+
+    importlib.reload(app_config)
+
+    tool = create_db_search_tool(
+        mock_store, mock_embedding_model, match_threshold=0.3, match_count=5
+    )
+    _ = tool.invoke("housing")
+
+    assert postgres_mock.called
+
+
 def test_db_search_supabase_fallback_uses_legacy_rpc_signature_when_tag_signature_missing(
     monkeypatch, mock_embedding_model
 ):

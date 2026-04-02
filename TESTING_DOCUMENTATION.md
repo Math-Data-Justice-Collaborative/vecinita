@@ -4,6 +4,29 @@
 
 Complete testing and documentation pass completed on March 28, 2026. All quality gates are **PASSING**.
 
+## New Feature Test Requirements: Localized Chat Suggestions
+
+The chat suggestion rollout adds required checks across backend and frontend.
+
+### Required Backend Coverage
+- Stream contract tests must validate `type: "complete"` events may include `suggested_questions`.
+- Suggestion helper tests must validate max count, deduplication, normalization, and language-aware content.
+- Existing streaming behavior must remain compatible when `suggested_questions` is empty or omitted.
+
+### Required Frontend Coverage
+- Hook tests must validate complete-event suggestion parsing from `suggested_questions` and fallback behavior when absent.
+- Component tests must validate splash suggestions render for empty chats and follow-up suggestions render per assistant message.
+- Interaction tests must validate suggestion chip click auto-sends a new user message.
+- Bilingual tests must validate English/Spanish suggestion copy and fallback banks.
+
+### Required End-to-End Coverage
+- Main chat page and chat widget must both be covered.
+- For each language (`en`, `es`):
+  - Empty-state suggestions are visible.
+  - Post-response suggestions are visible after complete event.
+  - Clicking a suggestion auto-sends and appends a new user turn.
+  - Fallback suggestions appear when backend omits suggestion payload.
+
 ## Quality Checks Status
 
 ### ✅ Linting
@@ -125,6 +148,32 @@ This explains why tests needed adjustment when `.env` contains `MODAL_EMBEDDING_
 | Tests Skipped | 24 | 1 | 25 |
 | Tests Failed | 0 | 0 | 0 |
 | Success Rate | 100% | 100% | 100% |
+
+## OpenAPI Schema Validation
+
+Schemathesis is configured for backend API schema validation via pytest and CLI.
+
+Files:
+- `backend/schemathesis.toml`
+- `backend/tests/schemathesis_hooks.py`
+- `backend/tests/integration/test_api_schema_schemathesis.py`
+
+Recommended local commands:
+
+```bash
+cd backend
+uv sync --extra ci
+SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_api_schema_schemathesis.py -q
+```
+
+Optional CLI run against a live server:
+
+```bash
+cd backend
+SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run schemathesis run http://127.0.0.1:8004/api/v1/openapi.json
+```
+
+The pytest suite uses mocked upstreams for stable schema conformance checks, while the CLI command can be used against a running gateway for broader live validation.
 
 ## Deployment Ready Status
 

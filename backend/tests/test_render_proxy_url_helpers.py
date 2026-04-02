@@ -269,6 +269,7 @@ def _make_manager(**kwargs):
         modal_proxy_key=kwargs.get("modal_proxy_key"),
         modal_proxy_secret=kwargs.get("modal_proxy_secret"),
         proxy_auth_token=kwargs.get("proxy_auth_token"),
+        enforce_proxy=kwargs.get("enforce_proxy", False),
     )
 
 
@@ -468,3 +469,22 @@ class TestNativeChatDetection:
     def test_native_chat_disabled_for_localhost_different_port(self):
         mgr = _make_manager(base_url="http://localhost:11434/model")
         assert mgr.uses_modal_native_chat_api() is False
+
+
+class TestProxyOnlyEnforcement:
+    def test_validate_runtime_rejects_direct_local_ollama_when_enforced(self):
+        mgr = _make_manager(base_url="http://localhost:11434", enforce_proxy=True)
+        with pytest.raises(RuntimeError, match="Proxy-only LLM mode is enabled"):
+            mgr.validate_runtime()
+
+    def test_validate_runtime_allows_proxy_model_when_enforced(self):
+        mgr = _make_manager(base_url="http://localhost:10000/model", enforce_proxy=True)
+        mgr.validate_runtime()
+
+    def test_build_client_rejects_direct_modal_when_enforced(self):
+        mgr = _make_manager(
+            base_url="https://vecinita--vecinita-model-api.modal.run",
+            enforce_proxy=True,
+        )
+        with pytest.raises(RuntimeError, match="Proxy-only LLM mode rejected"):
+            mgr.build_client()

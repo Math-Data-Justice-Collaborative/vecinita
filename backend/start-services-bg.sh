@@ -92,6 +92,9 @@ export EMBEDDING_SERVICE_URL=http://localhost:8001
 export DEMO_MODE=false
 
 nohup uv run uvicorn src.api.main:app --host 0.0.0.0 --port 8004 --reload \
+    --reload-dir src --reload-exclude '.mypy_cache/*' --reload-exclude '.pytest_cache/*' \
+    --reload-exclude '.ruff_cache/*' --reload-exclude '.venv/*' --reload-exclude 'logs/*' \
+    --reload-exclude 'build/*' --reload-exclude 'coverage*' --reload-exclude '*.pyc' \
     > "$LOG_DIR/gateway.log" 2>&1 &
 echo $! > "$PID_DIR/gateway.pid"
 sleep 3

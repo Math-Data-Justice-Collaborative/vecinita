@@ -27,8 +27,12 @@ def env_vars():
     return {
         "SUPABASE_URL": _env_or_default("SUPABASE_URL", "https://test.supabase.co"),
         "SUPABASE_KEY": _env_or_default("SUPABASE_KEY", "test-key"),
-        "OLLAMA_BASE_URL": _env_or_default("OLLAMA_BASE_URL", "http://localhost:11434"),
+        "OLLAMA_BASE_URL": _env_or_default("OLLAMA_BASE_URL", "http://localhost:10000/model"),
+        "MODAL_OLLAMA_ENDPOINT": _env_or_default(
+            "MODAL_OLLAMA_ENDPOINT", "http://localhost:10000/model"
+        ),
         "OLLAMA_MODEL": _env_or_default("OLLAMA_MODEL", "llama3.1:8b"),
+        "AGENT_ENFORCE_PROXY": _env_or_default("AGENT_ENFORCE_PROXY", "false"),
         "DATABASE_URL": _env_or_default("DATABASE_URL", "postgresql://test"),
     }
 
@@ -85,15 +89,16 @@ def _agent_module_path_compatibility():
     _test_env_defaults = {
         "SUPABASE_URL": "https://test.supabase.co",
         "SUPABASE_KEY": "test-key",
-        "OLLAMA_BASE_URL": "http://localhost:11434",
+        "OLLAMA_BASE_URL": "http://localhost:10000/model",
+        "MODAL_OLLAMA_ENDPOINT": "http://localhost:10000/model",
         "OLLAMA_MODEL": "llama3.1:8b",
+        "AGENT_ENFORCE_PROXY": "false",
         "DATABASE_URL": "postgresql://test",
     }
     _original_env: dict[str, str | None] = {}
     for _k, _v in _test_env_defaults.items():
         _original_env[_k] = os.environ.get(_k)
-        if _k not in os.environ:
-            os.environ[_k] = _v
+        os.environ[_k] = _v
 
     __import__("src.agent.main")
 

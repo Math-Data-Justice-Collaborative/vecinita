@@ -1,12 +1,19 @@
 # Supabase Configuration for Vecinita Chat & Data Management
 
+> Status (March 2026): Supabase is now scoped primarily to authentication and related role/session metadata. Vector/document retrieval and ingestion are being migrated to Render Postgres.
+
+For the full cross-service integration map (frontend, gateway, agent, modal-proxy, scraper, databases, auth boundaries), see [docs/architecture/SERVICE_INTEGRATION_POINTS.md](docs/architecture/SERVICE_INTEGRATION_POINTS.md).
+
 ## Overview
 
 Both the **Chat Application** and **Data Management System** use the same Supabase instance for:
 - Authentication (JWT tokens)
-- Database (PostgreSQL with pgvector)
-- Vector search (via edge functions)
+- Role/session metadata used by auth and admin flows
 - File storage (documents bucket)
+
+Vector data backend target:
+- Render Postgres (`DATABASE_URL`) is the canonical backend for vector retrieval/write paths.
+- Agent services should set `DB_DATA_MODE=postgres` and `VECTOR_SYNC_SUPABASE_FALLBACK_READS=false` for production cutover.
 
 ## Supabase Instance Details
 

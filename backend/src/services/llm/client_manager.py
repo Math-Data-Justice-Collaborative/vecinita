@@ -84,14 +84,35 @@ class _ModalNativeChatClient:
             "temperature": self.temperature,
         }
 
+        target_url = f"{self.base_url}/chat"
+        logger.info(
+            "llm_modal_invoke_start target=%s model=%s timeout_s=%.1f message_count=%s has_proxy_token=%s has_modal_key=%s has_modal_secret=%s",
+            target_url,
+            self.model,
+            float(self.timeout),
+            len(payload_messages),
+            "X-Proxy-Token" in self.headers,
+            "Modal-Key" in self.headers,
+            "Modal-Secret" in self.headers,
+        )
+
         with httpx.Client(timeout=self.timeout) as client:
-            response = client.post(
-                f"{self.base_url}/chat",
-                json=payload,
-                headers={"Content-Type": "application/json", **self.headers},
-            )
-            response.raise_for_status()
-            data = response.json()
+            try:
+                response = client.post(
+                    target_url,
+                    json=payload,
+                    headers={"Content-Type": "application/json", **self.headers},
+                )
+                response.raise_for_status()
+                data = response.json()
+            except Exception as exc:
+                logger.exception(
+                    "llm_modal_invoke_error target=%s model=%s error=%s",
+                    target_url,
+                    self.model,
+                    exc,
+                )
+                raise
 
         message = data.get("message") if isinstance(data, dict) else None
         content = ""
@@ -117,6 +138,7 @@ class LocalLLMClientManager:
         selection_file_path: str | None = None,
         locked: bool = False,
         use_native_api: bool = True,
+        enforce_proxy: bool = False,
     ):
         self.base_url = str(base_url or "").strip().rstrip("/")
         self.default_model = default_model
@@ -126,6 +148,7 @@ class LocalLLMClientManager:
         self.proxy_auth_token = proxy_auth_token
         self.selection_file_path = selection_file_path
         self.use_native_api = use_native_api
+        self.enforce_proxy = bool(enforce_proxy)
         self.current_selection: Selection = {
             "provider": "ollama",
             "model": default_model,
@@ -265,6 +288,11 @@ class LocalLLMClientManager:
             raise RuntimeError(
                 "No local LLM endpoint configured. Set OLLAMA_BASE_URL or MODAL_OLLAMA_ENDPOINT."
             )
+        if self.enforce_proxy and not self._via_proxy():
+            raise RuntimeError(
+                "Proxy-only LLM mode is enabled but base_url is not routed through modal-proxy. "
+                f"Current base_url='{self.base_url}'. Expected '*modal-proxy*/model' or 'localhost:10000/model'."
+            )
         if self.uses_modal_native_chat_api():
             return
         if _get_chatollama_class() is None:
@@ -351,6 +379,19 @@ class LocalLLMClientManager:
         structured_output_schema: Any | None = None,
     ):
         _provider, resolved_model = self.resolve_request(provider, model)
+        logger.info(
+            "llm_client_build provider=%s model=%s base_url=%s uses_native_api=%s via_proxy=%s",
+            _provider,
+            resolved_model,
+            self.base_url,
+            self.uses_modal_native_chat_api(),
+            self._via_proxy(),
+        )
+        if self.enforce_proxy and not self._via_proxy():
+            raise RuntimeError(
+                "Proxy-only LLM mode rejected a direct model endpoint. "
+                f"Current base_url='{self.base_url}'."
+            )
         if self.uses_modal_native_chat_api():
             if structured_output_schema is not None:
                 raise RuntimeError(

@@ -1,0 +1,10 @@
+continue-on-failure = true
+
+[generation]
+max-examples = 25
+
+[output.sanitization]
+enabled = false
+
+[reports.junit]
+enabled = true

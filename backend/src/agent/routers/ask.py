@@ -15,6 +15,7 @@ async def ask_question(
     lang: str | None = agent_main.Query(default=None),
     provider: str | None = agent_main.Query(default=None),
     model: str | None = agent_main.Query(default=None),
+    context_answer: str | None = agent_main.Query(default=None),
     tags: str | None = agent_main.Query(default=None, description="Comma-separated metadata tags"),
     tag_match_mode: str = agent_main.Query(default="any", description="Tag match mode: any|all"),
     include_untagged_fallback: bool = agent_main.Query(default=True),
@@ -51,7 +52,14 @@ async def ask_question(
 
         from src.agent.guardrails_config import validate_input, validate_output
 
-        guard_result = validate_input(question, lang=lang)
+        contextual_follow_up = bool(context_answer) and agent_main._is_contextual_follow_up(
+            question, lang
+        )
+        guard_result = validate_input(
+            question,
+            lang=lang,
+            allow_contextual_follow_up=contextual_follow_up,
+        )
         if not guard_result.passed:
             return agent_main._response_payload(
                 guard_result.reason,
@@ -60,6 +68,31 @@ async def ask_question(
                 sources=[],
             )
         effective_question = guard_result.redacted if guard_result.redacted else question
+
+        if contextual_follow_up:
+            llm_started_at = agent_main.time.perf_counter()
+            answer = agent_main._build_contextual_follow_up_answer(
+                question=effective_question,
+                prior_answer=context_answer or "",
+                language=lang,
+                provider=provider,
+                model=model,
+            )
+            llm_ms = int((agent_main.time.perf_counter() - llm_started_at) * 1000)
+
+            out_guard = validate_output(answer)
+            if not out_guard.passed:
+                answer = out_guard.reason
+            elif out_guard.redacted:
+                answer = out_guard.redacted
+
+            return agent_main._response_payload(
+                answer,
+                thread_id=thread_id,
+                started_at=started_at,
+                sources=[],
+                latency_breakdown={"retrieval_invoke_ms": 0, "llm_ms": llm_ms, "db_search": {}},
+            )
 
         agent_main.logger.info(
             "\n--- New request received: '%s' (Detected Language: %s, Thread: %s) ---",
@@ -224,6 +257,7 @@ async def ask_question_stream(
     provider: str | None = agent_main.Query(default=None),
     model: str | None = agent_main.Query(default=None),
     clarification_response: str | None = agent_main.Query(default=None),
+    context_answer: str | None = agent_main.Query(default=None),
     tags: str | None = agent_main.Query(default=None, description="Comma-separated metadata tags"),
     tag_match_mode: str = agent_main.Query(default="any", description="Tag match mode: any|all"),
     include_untagged_fallback: bool = agent_main.Query(default=True),
@@ -297,7 +331,37 @@ async def ask_question_stream(
                 }
             )
             answer_seeking = agent_main._is_answer_seeking_query(question, lang_local)
+            contextual_follow_up = bool(context_answer) and agent_main._is_contextual_follow_up(
+                question, lang_local
+            )
             agent_main.logger.info("Streaming intent gate: answer_seeking=%s", answer_seeking)
+
+            if contextual_follow_up:
+                answer = agent_main._build_contextual_follow_up_answer(
+                    question=question,
+                    prior_answer=context_answer or "",
+                    language=lang_local,
+                    provider=effective_provider,
+                    model=effective_model,
+                )
+
+                yield _sse(
+                    {
+                        "type": "complete",
+                        "answer": answer,
+                        "sources": [],
+                        "suggested_questions": agent_main._build_follow_up_suggestions(
+                            question=question,
+                            answer=answer,
+                            language=lang_local,
+                            sources=[],
+                        ),
+                        "thread_id": thread_id,
+                        "plan": "",
+                        "metadata": {"progress": 100, "stage": "complete"},
+                    }
+                )
+                return
 
             if not answer_seeking:
                 local_static = agent_main._find_static_faq_answer(question, lang_local)
@@ -310,6 +374,12 @@ async def ask_question_stream(
                             "type": "complete",
                             "answer": local_static,
                             "sources": [],
+                            "suggested_questions": agent_main._build_follow_up_suggestions(
+                                question=question,
+                                answer=local_static,
+                                language=lang_local,
+                                sources=[],
+                            ),
                             "thread_id": thread_id,
                             "plan": "",
                             "metadata": {"progress": 100, "stage": "complete"},
@@ -430,6 +500,12 @@ async def ask_question_stream(
                     "type": "complete",
                     "answer": answer,
                     "sources": sources,
+                    "suggested_questions": agent_main._build_follow_up_suggestions(
+                        question=question,
+                        answer=answer,
+                        language=lang_local,
+                        sources=sources,
+                    ),
                     "thread_id": thread_id,
                     "plan": plan,
                     "metadata": {"progress": 100, "stage": "complete"},
