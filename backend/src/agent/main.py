@@ -35,6 +35,7 @@ Environment variables (minimum required)
 # ruff: noqa: E402, I001
 
 import json
+import inspect
 import logging
 import os
 import re
@@ -268,18 +269,24 @@ selection_file_path = os.environ.get("MODEL_SELECTION_PATH") or str(
 agent_fast_mode = (os.environ.get("AGENT_FAST_MODE") or "true").lower() in ["1", "true", "yes"]
 agent_max_response_sentences = max(1, int(os.environ.get("AGENT_MAX_RESPONSE_SENTENCES") or "4"))
 agent_max_response_chars = max(120, int(os.environ.get("AGENT_MAX_RESPONSE_CHARS") or "700"))
-llm_client_manager = LocalLLMClientManager(
-    base_url=ollama_base_url,
-    default_model=ollama_model,
-    api_key=ollama_api_key,
-    modal_proxy_key=modal_proxy_key,
-    modal_proxy_secret=modal_proxy_secret,
-    proxy_auth_token=proxy_auth_token,
-    selection_file_path=selection_file_path,
-    locked=lock_model_selection_env,
-    use_native_api=force_local_modal_llm,
-    enforce_proxy=enforce_proxy_llm,
-)
+llm_manager_kwargs: dict[str, Any] = {
+    "base_url": ollama_base_url,
+    "default_model": ollama_model,
+    "api_key": ollama_api_key,
+    "modal_proxy_key": modal_proxy_key,
+    "modal_proxy_secret": modal_proxy_secret,
+    "proxy_auth_token": proxy_auth_token,
+    "selection_file_path": selection_file_path,
+    "locked": lock_model_selection_env,
+    "use_native_api": force_local_modal_llm,
+    "enforce_proxy": enforce_proxy_llm,
+}
+if "enforce_proxy" not in inspect.signature(LocalLLMClientManager.__init__).parameters:
+    logger.warning(
+        "LocalLLMClientManager does not accept enforce_proxy; falling back to legacy constructor"
+    )
+    llm_manager_kwargs.pop("enforce_proxy", None)
+llm_client_manager = LocalLLMClientManager(**llm_manager_kwargs)
 # --- Initialize Clients ---
 try:
     supabase: Client | None = None
