@@ -12,6 +12,7 @@ import httpx
 import numpy as np
 from fastapi import APIRouter, HTTPException, Query
 
+from src.config import _normalize_internal_service_url, _running_on_render
 from src.service_endpoints import EMBEDDING_ENDPOINT, PROXY_AUTH_TOKEN
 
 from .models import (
@@ -53,6 +54,28 @@ EMBEDDING_CONFIG: dict[str, Any] = {
 }
 
 
+def _normalize_embedding_service_url(url: str | None) -> str:
+    """Normalize embedding URL with local override for non-Render test/dev flows."""
+    local_override = os.getenv("LOCAL_EMBEDDING_SERVICE_URL", "").strip()
+    if local_override and not _running_on_render():
+        return local_override.rstrip("/")
+
+    return _normalize_internal_service_url(
+        url,
+        fallback_url="http://vecinita-modal-proxy-v1:10000/embedding",
+    ).rstrip("/")
+
+
+def _embedding_service_url() -> str:
+    configured = (
+        os.getenv("VECINITA_EMBEDDING_API_URL")
+        or os.getenv("MODAL_EMBEDDING_ENDPOINT")
+        or os.getenv("EMBEDDING_SERVICE_URL")
+        or EMBEDDING_SERVICE_URL
+    )
+    return _normalize_embedding_service_url(configured)
+
+
 def _embedding_service_headers() -> dict[str, str]:
     headers = {}
     if EMBEDDING_SERVICE_AUTH_TOKEN:
@@ -73,14 +96,15 @@ async def get_embedding_client() -> httpx.AsyncClient:
 
 async def _post_single_embedding(client: httpx.AsyncClient, text: str) -> httpx.Response:
     """Call single embedding endpoint with compatibility fallback payloads."""
+    base_url = _embedding_service_url()
     response = await client.post(
-        f"{EMBEDDING_SERVICE_URL}/embed",
+        f"{base_url}/embed",
         json={"query": text},
         headers=_embedding_service_headers(),
     )
     if response.status_code == 422:
         response = await client.post(
-            f"{EMBEDDING_SERVICE_URL}/embed",
+            f"{base_url}/embed",
             json={"text": text},
             headers=_embedding_service_headers(),
         )
@@ -89,14 +113,15 @@ async def _post_single_embedding(client: httpx.AsyncClient, text: str) -> httpx.
 
 async def _post_batch_embedding(client: httpx.AsyncClient, texts: list[str]) -> httpx.Response:
     """Call batch embedding endpoint with compatibility fallback paths/payloads."""
+    base_url = _embedding_service_url()
     response = await client.post(
-        f"{EMBEDDING_SERVICE_URL}/embed/batch",
+        f"{base_url}/embed/batch",
         json={"queries": texts},
         headers=_embedding_service_headers(),
     )
     if response.status_code in {404, 405, 422}:
         response = await client.post(
-            f"{EMBEDDING_SERVICE_URL}/embed-batch",
+            f"{base_url}/embed-batch",
             json={"texts": texts},
             headers=_embedding_service_headers(),
         )

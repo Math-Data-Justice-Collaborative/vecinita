@@ -360,7 +360,7 @@ class LocalLLMClientManager:
             "providers": [
                 {
                     "key": "ollama",
-                    "label": "Modal (Ollama-compatible)",
+                    "label": "Ollama (Local)",
                     "default": True,
                 }
             ],

@@ -32,6 +32,11 @@ _AGENT_CLIENT: httpx.AsyncClient | None = None
 _AGENT_CLIENT_LOCK = threading.Lock()
 
 
+def _agent_service_url() -> str:
+    """Resolve agent URL dynamically so monkeypatched env vars apply in tests/runtime."""
+    return os.getenv("AGENT_SERVICE_URL") or AGENT_SERVICE_URL
+
+
 def _read_positive_timeout(name: str, default: float) -> float:
     raw_value = os.getenv(name, str(default))
     try:
@@ -156,7 +161,7 @@ def get_demo_response(question: str, lang: str | None = None) -> AskResponse:
         answer=(
             "This is a demo response from the Vecinita Unified API Gateway. "
             "The agent service is not currently connected (expected to be running at "
-            f"{AGENT_SERVICE_URL}). "
+            f"{_agent_service_url()}). "
             "To start the agent service:\n\n"
             "```bash\n"
             "cd backend\n"
@@ -252,7 +257,7 @@ async def ask_question(
         if client is None:
             raise HTTPException(status_code=503, detail="Agent service client not available")
         response = await client.get(
-            f"{AGENT_SERVICE_URL}/ask",
+            f"{_agent_service_url()}/ask",
             params=params,
             timeout=_get_agent_timeout(),
         )
@@ -353,7 +358,7 @@ async def sse_proxy_generator(
             raise RuntimeError("Agent service client not available")
         async with client.stream(
             "GET",
-            f"{AGENT_SERVICE_URL}/ask-stream",
+            f"{_agent_service_url()}/ask-stream",
             params=params,
             timeout=_get_agent_stream_timeout(),
         ) as response:
@@ -487,7 +492,7 @@ async def get_ask_config():
         client = _get_agent_client()
         if client is None:
             return _fallback_ask_config()
-        response = await client.get(f"{AGENT_SERVICE_URL}/config", timeout=10.0)
+        response = await client.get(f"{_agent_service_url()}/config", timeout=10.0)
         response.raise_for_status()
         return _normalize_agent_config(response.json())
 

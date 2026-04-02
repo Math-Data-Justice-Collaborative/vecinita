@@ -177,6 +177,8 @@ class TestEmbeddingStrictModeFlags:
                 "MODAL_EMBEDDING_ENDPOINT": "http://vecinita-modal-proxy-v1:10000/embedding",
                 "OLLAMA_BASE_URL": "http://vecinita-modal-proxy-v1:10000/model",
                 "EMBEDDING_SERVICE_URL": "http://vecinita-modal-proxy-v1:10000/embedding",
+                "VECINITA_MODEL_API_URL": "http://vecinita-modal-proxy-v1:10000/model",
+                "VECINITA_EMBEDDING_API_URL": "http://vecinita-modal-proxy-v1:10000/embedding",
                 "PROXY_AUTH_TOKEN": "tok",
                 "VITE_BACKEND_URL": "https://vecinita-gateway.onrender.com",
                 "VITE_GATEWAY_URL": "https://vecinita-gateway.onrender.com",
