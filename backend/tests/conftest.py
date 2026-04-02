@@ -48,7 +48,7 @@ def _agent_module_path_compatibility():
     import importlib.machinery
     import sys
     import types
-    from unittest.mock import Mock, MagicMock
+    from unittest.mock import MagicMock, Mock
 
     # Avoid importing broken/binary torch during test module import.
     if "torch" not in sys.modules:
@@ -65,17 +65,17 @@ def _agent_module_path_compatibility():
         mock_query = MagicMock()
         mock_result = MagicMock()
         mock_result.data = []  # Preflight check expects .data attribute
-        
+
         # Make methods return the query chain (or self) for chaining
         mock_query.select.return_value = mock_query  # select() returns self for chaining
         mock_query.limit.return_value = mock_query   # limit() returns self for chaining
         mock_query.execute.return_value = mock_result  # execute() returns result object
-        
+
         # table() returns the query chain
         mock_client.table.return_value = mock_query
         # rpc() also returns the query chain for other operations
         mock_client.rpc.return_value = mock_query
-        
+
         return mock_client
 
     # Stub embedding service client before importing src.agent.main.
