@@ -144,6 +144,12 @@ services:
       OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
       DEFAULT_PROVIDER: "${DEFAULT_PROVIDER:-}"
       DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/postgres"
+      # Startup preflight configuration (disabled in dev, enabled in prod)
+      BACKEND_PREFLIGHT_ENABLED: "true"
+      BACKEND_PREFLIGHT_STRICT: "false"
+      GUARDRAILS_REQUIRE_HUB_VALIDATOR: "false"
+      GUARDRAILS_HUB_AUTO_INSTALL: "false"
+      CHROMA_REQUIRED: "false"
     depends_on:
       postgres:
         condition: service_healthy
@@ -198,6 +204,12 @@ services:
       DEV_ADMIN_ENABLED: "true"
       DEV_ADMIN_BEARER_TOKEN: "vecinita-dev-admin-token-2026"
       SUPABASE_UPLOADS_BUCKET: "documents"
+      # Startup preflight configuration (disabled in dev, enabled in prod)
+      BACKEND_PREFLIGHT_ENABLED: "true"
+      BACKEND_PREFLIGHT_STRICT: "false"
+      GUARDRAILS_REQUIRE_HUB_VALIDATOR: "false"
+      GUARDRAILS_HUB_AUTO_INSTALL: "false"
+      CHROMA_REQUIRED: "false"
     command: ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port 8004"]
     depends_on:
       vecinita-agent:

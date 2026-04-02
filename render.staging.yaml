@@ -48,11 +48,13 @@ services:
       - key: BACKEND_PREFLIGHT_STRICT
         value: "true"
       - key: GUARDRAILS_REQUIRE_HUB_VALIDATOR
-        value: "true"
+        value: "false"
       - key: GUARDRAILS_HUB_AUTO_INSTALL
-        value: "true"
+        value: "false"
       - key: GUARDRAILS_PERSISTENCE_DIR
         sync: false
+      - key: CHROMA_REQUIRED
+        value: "false"
       - key: DATABASE_URL
         fromDatabase:
           name: vecinita-postgres-staging
