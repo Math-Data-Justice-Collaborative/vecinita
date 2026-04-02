@@ -44,6 +44,7 @@ import traceback
 import warnings
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlparse
 
 # Avoid hard torch dependency during transformers import on CPU-only/broken torch envs.
 os.environ.setdefault("USE_TORCH", "0")
@@ -130,6 +131,21 @@ ChatOllama = None
 _CHATOLLAMA_IMPORT_ERROR = None
 HuggingFaceEmbeddings = None
 _HF_EMBEDDINGS_IMPORT_ERROR = None
+
+
+def _safe_host_port(url: str | None) -> str:
+    raw = (url or "").strip()
+    if not raw:
+        return "unset"
+    try:
+        parsed = urlparse(raw)
+        host = parsed.hostname or ""
+        port = parsed.port
+        scheme = parsed.scheme or "unknown"
+        path = parsed.path or "/"
+        return f"{scheme}://{host}:{port or 'default'}{path}"
+    except Exception:
+        return "unparseable"
 
 
 def _get_chatollama_class():
@@ -290,6 +306,19 @@ llm_client_manager = LocalLLMClientManager(**llm_manager_kwargs)
 # --- Initialize Clients ---
 try:
     supabase: Client | None = None
+    logger.info(
+        "Startup connection config: render=%s embedding_url=%s ollama_url=%s chroma=%s:%s "
+        "chroma_required=%s embedding_strict_startup=%s preflight_strict=%s data_db_mode_env=%s",
+        _running_on_render(),
+        _safe_host_port(EMBEDDING_SERVICE_URL),
+        _safe_host_port(OLLAMA_BASE_URL),
+        os.environ.get("CHROMA_HOST", "chroma"),
+        os.environ.get("CHROMA_PORT", "8000"),
+        os.environ.get("CHROMA_REQUIRED", "false"),
+        os.environ.get("EMBEDDING_STRICT_STARTUP", "false"),
+        os.environ.get("BACKEND_PREFLIGHT_STRICT", "false"),
+        os.environ.get("DB_DATA_MODE", "auto"),
+    )
     if supabase_url and supabase_key:
         logger.info("Initializing optional Supabase client (auth/diagnostics only)...")
         supabase = create_client(supabase_url, supabase_key)
@@ -352,6 +381,12 @@ try:
         "true",
         "yes",
     ]
+    logger.info(
+        "Embedding startup config: requested_url=%s strict_startup=%s has_auth_token=%s",
+        embedding_service_url,
+        embedding_strict_startup,
+        bool(embedding_service_auth_token),
+    )
 
     try:
         from src.embedding_service.client import create_embedding_client
@@ -429,7 +464,14 @@ try:
 
                 embedding_model = _ZeroVectorEmbeddings()  # type: ignore[assignment]
 except Exception as e:
-    logger.error(f"Failed to initialize clients: {e}")
+    logger.error(
+        "Failed to initialize clients: %s (render=%s embedding_url=%s chroma=%s:%s)",
+        e,
+        _running_on_render(),
+        _safe_host_port(EMBEDDING_SERVICE_URL),
+        os.environ.get("CHROMA_HOST", "chroma"),
+        os.environ.get("CHROMA_PORT", "8000"),
+    )
     logger.error(traceback.format_exc())
     raise RuntimeError(f"Failed to initialize clients: {e}") from e
 
@@ -461,7 +503,14 @@ def _probe_guardrails_loaded() -> tuple[bool, str]:
 def _probe_chroma_connectivity() -> tuple[bool, str]:
     try:
         healthy = bool(chroma_store.heartbeat())
-        return (healthy, "ok" if healthy else "heartbeat_failed")
+        if healthy:
+            return True, "ok"
+        return (
+            False,
+            "heartbeat_failed "
+            f"(host={os.environ.get('CHROMA_HOST', 'chroma')} "
+            f"port={os.environ.get('CHROMA_PORT', '8000')})",
+        )
     except Exception as exc:
         return False, f"error: {exc}"
 
@@ -496,6 +545,23 @@ def _probe_postgres_connectivity() -> tuple[bool, str]:
         return True, "ok"
     except Exception as exc:
         return False, f"error: {exc}"
+
+
+def _startup_config_summary() -> dict[str, Any]:
+    return {
+        "render": _running_on_render(),
+        "embedding_url": EMBEDDING_SERVICE_URL,
+        "ollama_url": OLLAMA_BASE_URL,
+        "chroma_host": os.environ.get("CHROMA_HOST", "chroma"),
+        "chroma_port": os.environ.get("CHROMA_PORT", "8000"),
+        "chroma_required": _is_truthy_env("CHROMA_REQUIRED", False),
+        "embedding_strict_startup": _is_truthy_env("EMBEDDING_STRICT_STARTUP", False),
+        "preflight_strict": _is_truthy_env("BACKEND_PREFLIGHT_STRICT", False),
+        "db_data_mode": os.environ.get("DB_DATA_MODE", "auto"),
+        "database_url_set": bool(os.environ.get("DATABASE_URL", "").strip()),
+        "supabase_url_set": bool(os.environ.get("SUPABASE_URL", "").strip()),
+        "supabase_key_set": bool((os.environ.get("SUPABASE_KEY") or "").strip()),
+    }
 
 
 def _run_startup_preflight() -> dict[str, Any]:
@@ -546,6 +612,7 @@ def _run_startup_preflight() -> dict[str, Any]:
         "status": "ok" if overall_ok else "degraded",
         "data_mode": data_mode,
         "checks": checks,
+        "config": _startup_config_summary(),
         "ran_at": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -565,13 +632,19 @@ async def startup_preflight() -> None:
     app.state.preflight = preflight
 
     logger.info(
-        "Startup preflight completed status=%s data_mode=%s checks=%s",
+        "Startup preflight completed status=%s data_mode=%s checks=%s config=%s",
         preflight.get("status"),
         preflight.get("data_mode"),
         preflight.get("checks"),
+        preflight.get("config"),
     )
 
     if preflight.get("status") != "ok" and _is_truthy_env("BACKEND_PREFLIGHT_STRICT", False):
+        logger.error(
+            "Startup preflight strict-mode failure: checks=%s config=%s",
+            preflight.get("checks"),
+            preflight.get("config"),
+        )
         raise RuntimeError("Startup preflight failed in strict mode")
 
 

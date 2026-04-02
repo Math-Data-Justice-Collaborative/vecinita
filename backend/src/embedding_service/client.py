@@ -27,6 +27,21 @@ def _hostname_and_port(url: str) -> tuple[str, int | None]:
     return (parsed.hostname or "", parsed.port)
 
 
+def _safe_error_detail(exc: Exception) -> str:
+    """Return concise error diagnostics for connection failures."""
+    if isinstance(exc, httpx.HTTPStatusError):
+        req = exc.request
+        res = exc.response
+        return (
+            f"HTTPStatusError(method={req.method}, url={req.url}, "
+            f"status={res.status_code}, reason={res.reason_phrase})"
+        )
+    if isinstance(exc, httpx.RequestError):
+        req = exc.request
+        return f"RequestError(method={req.method}, url={req.url}, detail={exc})"
+    return f"{type(exc).__name__}: {exc}"
+
+
 def _drop_headers(headers: dict[str, str], names: set[str]) -> dict[str, str]:
     """Return a copy of *headers* with case-insensitive names removed."""
     return {k: v for k, v in headers.items() if k.lower() not in names}
@@ -100,7 +115,15 @@ class EmbeddingServiceClient(Embeddings):
             headers["Modal-Secret"] = self.modal_proxy_secret
         self.client = httpx.Client(timeout=timeout, headers=headers)
         self._single_embed_field = "text"
-        logger.info(f"✅ Embedding Service Client initialized: {self.base_url}")
+        logger.info("✅ Embedding Service Client initialized: %s", self.base_url)
+        logger.info(
+            "Embedding client auth/header profile: has_auth_token=%s has_proxy_auth_token=%s "
+            "has_modal_proxy_creds=%s running_on_render=%s",
+            bool(self.auth_token),
+            bool(self.proxy_auth_token),
+            bool(self.modal_proxy_key and self.modal_proxy_secret),
+            _running_on_render(),
+        )
 
     def _is_modal_proxy_url(self, base_url: str) -> bool:
         host, port = _hostname_and_port(base_url)
@@ -140,12 +163,17 @@ class EmbeddingServiceClient(Embeddings):
         port = parsed.port or (443 if parsed.scheme == "https" else 80)
         scheme = parsed.scheme or "http"
 
-        local_candidates = [
-            "http://localhost:8001",
-            "http://127.0.0.1:8001",
-            "http://vecinita-modal-proxy-v1:10000/embedding",
-            "http://localhost:10000/embedding",
-        ]
+        # On Render, avoid localhost candidates because each service runs in its
+        # own isolated container and localhost won't reach sibling services.
+        if _running_on_render():
+            local_candidates = ["http://vecinita-modal-proxy-v1:10000/embedding"]
+        else:
+            local_candidates = [
+                "http://localhost:8001",
+                "http://127.0.0.1:8001",
+                "http://vecinita-modal-proxy-v1:10000/embedding",
+                "http://localhost:10000/embedding",
+            ]
 
         # In local dev, prioritize known-local service URLs before any stale
         # remote URL that may have been left in EMBEDDING_SERVICE_URL.
@@ -282,8 +310,11 @@ class EmbeddingServiceClient(Embeddings):
         Raises:
             RuntimeError if no candidate URL is reachable.
         """
+        candidates = self._candidate_base_urls()
+        logger.info("Embedding health validation candidates=%s", candidates)
+
         last_error: Exception | None = None
-        for base in self._candidate_base_urls():
+        for base in candidates:
             try:
                 response = self.client.get(
                     f"{base}/health",
@@ -304,6 +335,11 @@ class EmbeddingServiceClient(Embeddings):
 
                 if status_code == 404:
                     try:
+                        logger.warning(
+                            "Embedding /health returned 404 at %s; retrying root path to detect "
+                            "proxy prefix mismatch.",
+                            base,
+                        )
                         fallback = self.client.get(
                             base,
                             headers=self._headers_for_base_url(base),
@@ -318,7 +354,43 @@ class EmbeddingServiceClient(Embeddings):
                     except Exception as root_exc:
                         last_error = root_exc
 
-                logger.warning(f"Embedding service health check failed at {base}: {exc}")
+                    # For modal-proxy routes, check proxy's upstream embedding health
+                    # endpoint to distinguish route mismatch from upstream outage.
+                    if self._is_modal_proxy_url(base):
+                        try:
+                            parsed = urlparse(base)
+                            proxy_root = urlunparse(
+                                (parsed.scheme, parsed.netloc, "", "", "", "")
+                            ).rstrip("/")
+                            upstream_health = self.client.get(
+                                f"{proxy_root}/health/upstream/embedding",
+                                headers=self._headers_for_base_url(base),
+                            )
+                            logger.warning(
+                                "Proxy upstream embedding health probe status=%s body=%s url=%s",
+                                upstream_health.status_code,
+                                (upstream_health.text or "")[:300],
+                                f"{proxy_root}/health/upstream/embedding",
+                            )
+                        except Exception as upstream_exc:
+                            logger.warning(
+                                "Proxy upstream health probe failed: %s",
+                                _safe_error_detail(upstream_exc),
+                            )
+
+                logger.warning(
+                    "Embedding service health check failed at %s: %s",
+                    base,
+                    _safe_error_detail(exc),
+                )
+
+        logger.error(
+            "Embedding validation exhausted all candidates. configured_base_url=%s "
+            "candidates=%s last_error=%s",
+            self.base_url,
+            candidates,
+            _safe_error_detail(last_error) if last_error else "none",
+        )
 
         raise RuntimeError(
             "Embedding service is unavailable at all configured endpoints. "

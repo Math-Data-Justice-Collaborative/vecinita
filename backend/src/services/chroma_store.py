@@ -82,9 +82,21 @@ class ChromaStore:
     def heartbeat(self) -> bool:
         try:
             self._get_client().heartbeat()
+            logger.info(
+                "Chroma heartbeat OK host=%s port=%s ssl=%s",
+                self.host,
+                self.port,
+                self.ssl,
+            )
             return True
         except Exception as exc:
-            logger.warning("Chroma heartbeat failed: %s", exc)
+            logger.warning(
+                "Chroma heartbeat failed host=%s port=%s ssl=%s error=%s",
+                self.host,
+                self.port,
+                self.ssl,
+                exc,
+            )
             return False
 
     def chunks(self):
