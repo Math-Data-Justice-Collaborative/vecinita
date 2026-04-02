@@ -103,6 +103,51 @@ SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
 SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
 
 # ---------------------------------------------------------------------------
+# Data Database Routing (retrieval/storage path only)
+# Supabase remains the auth provider.
+# ---------------------------------------------------------------------------
+DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+DB_DATA_MODE: str = os.getenv("DB_DATA_MODE", "auto").strip().lower()
+
+
+def resolve_data_db_mode() -> str:
+    """Resolve backend data-path database mode.
+
+    Modes:
+    - "supabase": force Supabase for data reads/writes.
+    - "postgres": force direct Postgres via DATABASE_URL.
+    - "auto": prefer Postgres when DATABASE_URL is set and Supabase data
+      credentials are missing; otherwise use Supabase.
+
+    This mode applies only to data retrieval/storage paths. Authentication
+    remains Supabase-backed.
+    """
+
+    mode = DB_DATA_MODE if DB_DATA_MODE in {"auto", "postgres", "supabase"} else "auto"
+    if mode != "auto":
+        return mode
+
+    has_postgres = bool(DATABASE_URL)
+    has_supabase = bool(SUPABASE_URL and SUPABASE_KEY)
+
+    if has_postgres and not has_supabase:
+        return "postgres"
+    return "supabase"
+
+
+def supabase_data_reads_enabled() -> bool:
+    """Feature-flagged Supabase data-path reads for rollback windows."""
+
+    return os.getenv("SUPABASE_DATA_READS_ENABLED", "true").lower() in {"1", "true", "yes"}
+
+
+def postgres_data_reads_enabled() -> bool:
+    """Feature-flagged Postgres data-path reads."""
+
+    return os.getenv("POSTGRES_DATA_READS_ENABLED", "true").lower() in {"1", "true", "yes"}
+
+
+# ---------------------------------------------------------------------------
 # Guardrails AI feature flags
 # Disable individual guards via env without redeploying.
 # ---------------------------------------------------------------------------

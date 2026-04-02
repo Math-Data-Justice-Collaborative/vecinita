@@ -3,7 +3,7 @@ services:
     name: vecinita-agent-staging
     runtime: docker
     region: virginia
-    plan: free
+    plan: starter
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     autoDeployTrigger: off
@@ -43,10 +43,26 @@ services:
         sync: false
       - key: EMBEDDING_STRICT_STARTUP
         value: "false"
+      - key: BACKEND_PREFLIGHT_ENABLED
+        value: "true"
+      - key: BACKEND_PREFLIGHT_STRICT
+        value: "true"
+      - key: GUARDRAILS_REQUIRE_HUB_VALIDATOR
+        value: "true"
+      - key: GUARDRAILS_HUB_AUTO_INSTALL
+        value: "true"
+      - key: GUARDRAILS_PERSISTENCE_DIR
+        sync: false
       - key: DATABASE_URL
         fromDatabase:
           name: vecinita-postgres-staging
           property: connectionString
+      - key: DB_DATA_MODE
+        value: "postgres"
+      - key: VECTOR_SYNC_TARGET
+        value: "postgres"
+      - key: VECTOR_SYNC_SUPABASE_FALLBACK_READS
+        value: "false"
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_KEY
@@ -66,7 +82,7 @@ services:
     name: vecinita-frontend-staging
     runtime: docker
     region: virginia
-    plan: free
+    plan: starter
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: ./frontend
     autoDeployTrigger: off
@@ -77,7 +93,7 @@ services:
       - key: VITE_BACKEND_URL
         value: "https://vecinita-agent-staging.onrender.com"
       - key: VITE_AGENT_REQUEST_TIMEOUT_MS
-        value: "90000"
+        value: "130000"
       - key: VITE_AGENT_STREAM_TIMEOUT_MS
         value: "120000"
       - key: VITE_AGENT_STREAM_FIRST_EVENT_TIMEOUT_MS
@@ -91,7 +107,7 @@ services:
     name: vecinita-gateway-staging
     runtime: docker
     region: virginia
-    plan: free
+    plan: starter
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     dockerCommand: sh -c 'uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT:-10000}'
@@ -109,7 +125,7 @@ services:
       - key: ALLOWED_ORIGIN_REGEX
         value: "^https://[a-z0-9-]+\\.onrender\\.com$"
       - key: AGENT_TIMEOUT
-        value: "75"
+        value: "120"
       - key: AGENT_STREAM_TIMEOUT
         value: "120"
       - key: AGENT_SERVICE_URL

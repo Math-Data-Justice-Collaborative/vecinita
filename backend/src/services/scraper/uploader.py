@@ -28,6 +28,14 @@ except Exception:
     create_client = None  # type: ignore[assignment]
     SUPABASE_AVAILABLE = False
 
+try:
+    import psycopg2
+
+    POSTGRES_AVAILABLE = True
+except Exception:
+    psycopg2 = None  # type: ignore[assignment]
+    POSTGRES_AVAILABLE = False
+
 # Import embedding service client (preferred)
 try:
     from src.embedding_service.client import create_embedding_client
@@ -94,6 +102,10 @@ class DatabaseUploader:
         self._source_tag_cache: dict[str, dict[str, Any]] = {}
         self._known_tag_cache: list[str] | None = None
         self.supabase_client: Any | None = None
+        self.postgres_database_url = (os.getenv("DATABASE_URL") or "").strip()
+        self.vector_sync_target = (os.getenv("VECTOR_SYNC_TARGET") or "supabase").strip().lower()
+        if self.vector_sync_target not in {"supabase", "postgres"}:
+            self.vector_sync_target = "supabase"
         self.vector_sync_enabled = os.getenv("VECTOR_SYNC_ENABLED", "true").lower() in {
             "1",
             "true",
@@ -506,7 +518,17 @@ class DatabaseUploader:
             log.info("✓ Chroma connection established")
 
         if not self.vector_sync_enabled:
-            log.info("Supabase sync disabled (VECTOR_SYNC_ENABLED=false)")
+            log.info("Vector sync disabled (VECTOR_SYNC_ENABLED=false)")
+            return
+
+        if self.vector_sync_target == "postgres":
+            if not self.postgres_database_url:
+                log.warning("Postgres sync unavailable: missing DATABASE_URL")
+                return
+            if not POSTGRES_AVAILABLE:
+                log.warning("Postgres sync unavailable: psycopg2 dependency is not installed")
+                return
+            log.info("✓ Postgres sync configured")
             return
 
         if not SUPABASE_AVAILABLE or create_client is None:
@@ -645,6 +667,8 @@ class DatabaseUploader:
     def _sync_rows_to_supabase(self, rows: list[dict[str, Any]]) -> bool:
         if not rows or not self.vector_sync_enabled:
             return True
+        if self.vector_sync_target == "postgres":
+            return self._sync_rows_to_postgres(rows)
         if not self.supabase_client:
             return True
 
@@ -689,6 +713,86 @@ class DatabaseUploader:
             if not self.vector_sync_degraded_mode:
                 raise RuntimeError(f"Supabase sync failed after retries: {last_error}")
             log.warning("Supabase sync failed in degraded mode; write kept in Chroma only")
+        return False
+
+    def _vector_literal(self, embedding: Any) -> str | None:
+        if not isinstance(embedding, list) or not embedding:
+            return None
+        try:
+            return "[" + ",".join(f"{float(v):.10f}" for v in embedding) + "]"
+        except Exception:
+            return None
+
+    def _sync_rows_to_postgres(self, rows: list[dict[str, Any]]) -> bool:
+        if not rows or not self.vector_sync_enabled:
+            return True
+        if not self.postgres_database_url or not POSTGRES_AVAILABLE or psycopg2 is None:
+            return True
+
+        sql = (
+            "INSERT INTO document_chunks ("
+            "content, embedding, source_url, chunk_index, total_chunks, document_title, "
+            "scraped_at, metadata, is_processed, processing_status, updated_at"
+            ") VALUES ("
+            "%s, %s::vector, %s, %s, %s, %s, %s, %s::jsonb, %s, %s, TIMEZONE('utc', NOW())"
+            ") "
+            "ON CONFLICT ON CONSTRAINT unique_content_source DO UPDATE SET "
+            "embedding = EXCLUDED.embedding, "
+            "total_chunks = EXCLUDED.total_chunks, "
+            "document_title = COALESCE(EXCLUDED.document_title, document_chunks.document_title), "
+            "scraped_at = COALESCE(EXCLUDED.scraped_at, document_chunks.scraped_at), "
+            "metadata = COALESCE(document_chunks.metadata, '{}'::jsonb) || COALESCE(EXCLUDED.metadata, '{}'::jsonb), "
+            "is_processed = EXCLUDED.is_processed, "
+            "processing_status = EXCLUDED.processing_status, "
+            "updated_at = TIMEZONE('utc', NOW())"
+        )
+
+        last_error: Exception | None = None
+        for attempt in range(1, self.vector_sync_retry_max + 1):
+            try:
+                with psycopg2.connect(self.postgres_database_url, connect_timeout=5) as conn:
+                    with conn.cursor() as cur:
+                        for row in rows:
+                            metadata = (
+                                row.get("metadata") if isinstance(row.get("metadata"), dict) else {}
+                            )
+                            cur.execute(
+                                sql,
+                                (
+                                    row.get("content") or "",
+                                    self._vector_literal(row.get("embedding")),
+                                    row.get("source_url") or metadata.get("source_url") or "",
+                                    int(row.get("chunk_index") or metadata.get("chunk_index") or 0),
+                                    int(
+                                        row.get("total_chunks") or metadata.get("total_chunks") or 0
+                                    ),
+                                    row.get("document_title")
+                                    or metadata.get("document_title")
+                                    or None,
+                                    row.get("scraped_at"),
+                                    json.dumps(metadata),
+                                    bool(row.get("is_processed", True)),
+                                    row.get("processing_status") or "completed",
+                                ),
+                            )
+                return True
+            except Exception as exc:
+                last_error = exc
+                if attempt < self.vector_sync_retry_max:
+                    sleep_seconds = self.vector_sync_retry_delay_seconds * attempt
+                    log.warning(
+                        "Postgres sync attempt %s/%s failed, retrying in %ss: %s",
+                        attempt,
+                        self.vector_sync_retry_max,
+                        sleep_seconds,
+                        exc,
+                    )
+                    time.sleep(sleep_seconds)
+
+        if last_error is not None:
+            if not self.vector_sync_degraded_mode:
+                raise RuntimeError(f"Postgres sync failed after retries: {last_error}")
+            log.warning("Postgres sync failed in degraded mode; write kept in Chroma only")
         return False
 
     def upload_chunks(

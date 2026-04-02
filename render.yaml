@@ -1,9 +1,12 @@
 services:
+  # This root blueprint defines only services owned by this repository.
+  # Multi-repo-owned services (modal-proxy, data-management API/frontend,
+  # scraper/embedding/model deploy targets) are managed in their own repos.
   - type: web
     name: vecinita-agent
     runtime: docker
     region: virginia
-    plan: free
+    plan: starter
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     autoDeployTrigger: off
@@ -23,6 +26,18 @@ services:
         sync: false
       - key: MODAL_OLLAMA_ENDPOINT
         sync: false
+      - key: OLLAMA_MODEL
+        value: "llama3.1:8b"
+      - key: DEFAULT_PROVIDER
+        value: "ollama"
+      - key: DEFAULT_MODEL
+        value: "llama3.1:8b"
+      - key: FORCE_LOCAL_MODAL_LLM
+        value: "true"
+      - key: AGENT_ENFORCE_PROXY
+        value: "true"
+      - key: LOCK_MODEL_SELECTION
+        value: "true"
       - key: MODAL_TOKEN_ID
         sync: false
       - key: MODAL_TOKEN_SECRET
@@ -43,10 +58,26 @@ services:
         sync: false
       - key: EMBEDDING_STRICT_STARTUP
         value: "false"
+      - key: BACKEND_PREFLIGHT_ENABLED
+        value: "true"
+      - key: BACKEND_PREFLIGHT_STRICT
+        value: "true"
+      - key: GUARDRAILS_REQUIRE_HUB_VALIDATOR
+        value: "true"
+      - key: GUARDRAILS_HUB_AUTO_INSTALL
+        value: "true"
+      - key: GUARDRAILS_PERSISTENCE_DIR
+        sync: false
       - key: DATABASE_URL
         fromDatabase:
           name: vecinita-postgres
           property: connectionString
+      - key: DB_DATA_MODE
+        value: "postgres"
+      - key: VECTOR_SYNC_TARGET
+        value: "postgres"
+      - key: VECTOR_SYNC_SUPABASE_FALLBACK_READS
+        value: "false"
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_KEY
@@ -66,7 +97,7 @@ services:
     name: vecinita-frontend
     runtime: docker
     region: virginia
-    plan: free
+    plan: starter
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: ./frontend
     autoDeployTrigger: off
@@ -77,11 +108,19 @@ services:
       - key: VITE_BACKEND_URL
         value: "https://vecinita-agent.onrender.com"
       - key: VITE_AGENT_REQUEST_TIMEOUT_MS
-        value: "90000"
+        value: "130000"
       - key: VITE_AGENT_STREAM_TIMEOUT_MS
         value: "120000"
       - key: VITE_AGENT_STREAM_FIRST_EVENT_TIMEOUT_MS
         value: "15000"
+      - key: VITE_DEV_ADMIN_ENABLED
+        value: "true"
+      - key: VITE_DEV_ADMIN_EMAIL
+        sync: false
+      - key: VITE_DEV_ADMIN_PASSWORD
+        sync: false
+      - key: VITE_DEV_ADMIN_TOKEN
+        sync: false
       - key: VITE_SUPABASE_URL
         sync: false
       - key: VITE_SUPABASE_ANON_KEY
@@ -91,7 +130,7 @@ services:
     name: vecinita-gateway
     runtime: docker
     region: virginia
-    plan: free
+    plan: starter
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     dockerCommand: sh -c 'uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT:-10000}'
@@ -109,7 +148,7 @@ services:
       - key: ALLOWED_ORIGIN_REGEX
         value: "^https://[a-z0-9-]+\\.onrender\\.com$"
       - key: AGENT_TIMEOUT
-        value: "75"
+        value: "120"
       - key: AGENT_STREAM_TIMEOUT
         value: "120"
       - key: AGENT_SERVICE_URL

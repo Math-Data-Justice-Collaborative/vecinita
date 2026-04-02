@@ -64,8 +64,14 @@ def test_dev_session_resets_existing_state_before_start() -> None:
 def test_dev_session_manages_expected_ports() -> None:
     content = _script_text()
     assert "managed_ports()" in content
-    assert 'echo "5173 8000 8001 8002 8004"' in content
+    assert 'echo "5173 8000 8001 8002 8004 10000"' in content
     assert "kill -9 $pids" in content
+
+
+def test_dev_session_enforces_proxy_for_agent_llm() -> None:
+    content = _script_text()
+    assert "AGENT_ENFORCE_PROXY='true'" in content
+    assert "MODAL_OLLAMA_ENDPOINT:-http://localhost:10000/model" in content
 
 
 def test_dev_session_warns_instead_of_exiting_on_readiness_timeout() -> None:

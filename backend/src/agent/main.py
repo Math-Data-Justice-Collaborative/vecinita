@@ -87,6 +87,12 @@ except Exception:
         return "en"
 
 
+try:
+    import psycopg2
+except Exception:  # pragma: no cover - optional dependency in some test/runtime profiles
+    psycopg2 = None  # type: ignore[assignment]
+
+
 from src.services.chroma_store import get_chroma_store
 from src.services.llm import LocalLLMClientManager
 from src.utils.tags import parse_tags_input
@@ -251,6 +257,11 @@ lock_model_selection_env = (os.environ.get("LOCK_MODEL_SELECTION") or "false").l
     "true",
     "yes",
 ]
+enforce_proxy_llm = (os.environ.get("AGENT_ENFORCE_PROXY") or "true").lower() in [
+    "1",
+    "true",
+    "yes",
+]
 selection_file_path = os.environ.get("MODEL_SELECTION_PATH") or str(
     Path(__file__).parent / "data" / "model_selection.json"
 )
@@ -267,6 +278,7 @@ llm_client_manager = LocalLLMClientManager(
     selection_file_path=selection_file_path,
     locked=lock_model_selection_env,
     use_native_api=force_local_modal_llm,
+    enforce_proxy=enforce_proxy_llm,
 )
 # --- Initialize Clients ---
 try:
@@ -414,6 +426,133 @@ except Exception as e:
     logger.error(traceback.format_exc())
     raise RuntimeError(f"Failed to initialize clients: {e}") from e
 
+
+def _is_truthy_env(name: str, default: bool = False) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _probe_guardrails_loaded() -> tuple[bool, str]:
+    """Eager-load guardrails so first user request does not pay setup latency."""
+    try:
+        from src.agent.guardrails_config import _get_hub_guards  # type: ignore[attr-defined]
+
+        require_hub_validator = _is_truthy_env("GUARDRAILS_REQUIRE_HUB_VALIDATOR", False)
+        input_guard, _ = _get_hub_guards()
+        if input_guard is None:
+            if require_hub_validator:
+                return False, "hub_validator_required_but_unavailable"
+            return True, "local_fallback"
+        return True, "hub_validator_ready"
+    except Exception as exc:
+        logger.warning("Guardrails preload failed: %s", exc)
+        return False, f"error: {exc}"
+
+
+def _probe_chroma_connectivity() -> tuple[bool, str]:
+    try:
+        healthy = bool(chroma_store.heartbeat())
+        return (healthy, "ok" if healthy else "heartbeat_failed")
+    except Exception as exc:
+        return False, f"error: {exc}"
+
+
+def _probe_supabase_connectivity() -> tuple[bool, str]:
+    if supabase is None:
+        return False, "supabase_not_configured"
+    try:
+        # Lightweight connectivity probe for configured data backend.
+        supabase.table("document_chunks").select("id").limit(1).execute()
+        return True, "ok"
+    except Exception as exc:
+        return False, f"error: {exc}"
+
+
+def _probe_postgres_connectivity() -> tuple[bool, str]:
+    if psycopg2 is None:
+        return False, "psycopg2_not_available"
+
+    database_url = os.environ.get("DATABASE_URL", "").strip()
+    if not database_url:
+        return False, "database_url_not_configured"
+
+    try:
+        conn = psycopg2.connect(database_url, connect_timeout=3)
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1")
+                cur.fetchone()
+        finally:
+            conn.close()
+        return True, "ok"
+    except Exception as exc:
+        return False, f"error: {exc}"
+
+
+def _run_startup_preflight() -> dict[str, Any]:
+    from src.config import resolve_data_db_mode
+
+    data_mode = resolve_data_db_mode()
+
+    checks: dict[str, dict[str, Any]] = {}
+
+    guardrails_ok, guardrails_detail = _probe_guardrails_loaded()
+    checks["guardrails"] = {"ok": guardrails_ok, "detail": guardrails_detail}
+
+    chroma_ok, chroma_detail = _probe_chroma_connectivity()
+    checks["chroma"] = {"ok": chroma_ok, "detail": chroma_detail}
+
+    if data_mode == "postgres":
+        data_ok, data_detail = _probe_postgres_connectivity()
+        checks["data_backend"] = {
+            "ok": data_ok,
+            "backend": "postgres",
+            "detail": data_detail,
+        }
+    else:
+        data_ok, data_detail = _probe_supabase_connectivity()
+        checks["data_backend"] = {
+            "ok": data_ok,
+            "backend": "supabase",
+            "detail": data_detail,
+        }
+
+    overall_ok = all(bool(item.get("ok")) for item in checks.values())
+    return {
+        "status": "ok" if overall_ok else "degraded",
+        "data_mode": data_mode,
+        "checks": checks,
+        "ran_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+@app.on_event("startup")
+async def startup_preflight() -> None:
+    if not _is_truthy_env("BACKEND_PREFLIGHT_ENABLED", True):
+        app.state.preflight = {
+            "status": "skipped",
+            "reason": "disabled_by_env",
+            "ran_at": datetime.now(timezone.utc).isoformat(),
+        }
+        logger.info("Startup preflight skipped (BACKEND_PREFLIGHT_ENABLED=false)")
+        return
+
+    preflight = _run_startup_preflight()
+    app.state.preflight = preflight
+
+    logger.info(
+        "Startup preflight completed status=%s data_mode=%s checks=%s",
+        preflight.get("status"),
+        preflight.get("data_mode"),
+        preflight.get("checks"),
+    )
+
+    if preflight.get("status") != "ok" and _is_truthy_env("BACKEND_PREFLIGHT_STRICT", False):
+        raise RuntimeError("Startup preflight failed in strict mode")
+
+
 # --- Location Context Configuration ---
 # This can be customized per deployment or organization
 LOCATION_CONTEXT = {
@@ -530,6 +669,162 @@ def _weak_retrieval_warning(language: str) -> str:
         "⚠️ I did not find strong matches in the local knowledge base. "
         "The following answer is best-effort and may be incomplete."
     )
+
+
+def _normalize_suggested_questions(
+    candidates: list[str] | tuple[str, ...] | None,
+    *,
+    max_items: int = 3,
+) -> list[str]:
+    if not candidates:
+        return []
+
+    normalized: list[str] = []
+    seen: set[str] = set()
+
+    for candidate in candidates:
+        if not isinstance(candidate, str):
+            continue
+
+        cleaned = " ".join(candidate.strip().split())
+        if not cleaned:
+            continue
+
+        if len(cleaned) > 140:
+            cleaned = cleaned[:139].rstrip()
+
+        if not cleaned.endswith("?"):
+            cleaned = f"{cleaned}?"
+
+        key = cleaned.casefold()
+        if key in seen:
+            continue
+
+        seen.add(key)
+        normalized.append(cleaned)
+        if len(normalized) >= max_items:
+            break
+
+    return normalized
+
+
+def _build_follow_up_suggestions(
+    *,
+    question: str,
+    answer: str,
+    language: str,
+    sources: list[dict] | None = None,
+) -> list[str]:
+    del answer
+
+    first_source_title = ""
+    if sources:
+        for source in sources:
+            if isinstance(source, dict):
+                title = str(source.get("title") or "").strip()
+                if title:
+                    first_source_title = title
+                    break
+
+    if language == "es":
+        candidates = [
+            "¿Puedes resumir esto en 3 puntos clave",
+            "¿Qué debería hacer primero",
+            "¿Qué recursos locales están más relacionados con esta respuesta",
+        ]
+        if first_source_title:
+            candidates.insert(0, f"¿Qué dice la fuente '{first_source_title}'")
+        if question.strip():
+            candidates.append("¿Cómo cambia esto según mi situación")
+    else:
+        candidates = [
+            "Can you summarize this in 3 key points",
+            "What should I do first",
+            "Which local resources are most relevant to this answer",
+        ]
+        if first_source_title:
+            candidates.insert(0, f"What does the source '{first_source_title}' say")
+        if question.strip():
+            candidates.append("How does this change for my specific situation")
+
+    return _normalize_suggested_questions(candidates)
+
+
+def _is_contextual_follow_up(question: str, language: str) -> bool:
+    text = " ".join((question or "").strip().lower().split())
+    if not text:
+        return False
+
+    if language == "es":
+        patterns = (
+            "resume esto",
+            "resumir esto",
+            "3 puntos clave",
+            "que deberia hacer primero",
+            "que debería hacer primero",
+            "esta respuesta",
+        )
+    else:
+        patterns = (
+            "summarize this",
+            "summarise this",
+            "3 key points",
+            "what should i do first",
+            "this answer",
+            "this in 3",
+        )
+
+    return any(pattern in text for pattern in patterns)
+
+
+def _build_contextual_follow_up_answer(
+    *,
+    question: str,
+    prior_answer: str,
+    language: str,
+    provider: str | None,
+    model: str | None,
+) -> str:
+    context_text = (prior_answer or "").strip()
+    if not context_text:
+        if language == "es":
+            return "No tengo suficiente contexto previo para resumir."
+        return "I do not have enough prior context to summarize yet."
+
+    if language == "es":
+        prompt = (
+            "Responde SOLO usando el contexto provisto de la respuesta previa. "
+            "No agregues hechos nuevos ni enlaces nuevos. "
+            "Si piden resumen, devuelve 3 puntos clave breves en viñetas. "
+            "Si piden primeros pasos, da pasos concretos basados en ese contexto.\n\n"
+            f"Solicitud del usuario: {question}\n\n"
+            f"Contexto previo:\n{context_text}"
+        )
+    else:
+        prompt = (
+            "Answer ONLY from the provided prior-answer context. "
+            "Do not add new facts or links. "
+            "If asked to summarize, return 3 concise key bullet points. "
+            "If asked what to do first, provide practical first steps based on that context.\n\n"
+            f"User request: {question}\n\n"
+            f"Prior context:\n{context_text}"
+        )
+
+    try:
+        llm = _get_llm_without_tools(provider, model)
+        response = llm.invoke([HumanMessage(content=prompt)])
+        answer = response.content if hasattr(response, "content") else str(response)
+        cleaned = str(answer or "").strip()
+        if cleaned:
+            return cleaned
+    except Exception as exc:
+        logger.warning("Contextual follow-up generation failed: %s", exc)
+
+    sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", context_text) if s.strip()]
+    top = sentences[:3] if sentences else [context_text]
+    if language == "es":
+        return "\n".join(f"- {item}" for item in top)
+    return "\n".join(f"- {item}" for item in top)
 
 
 def _is_answer_seeking_query(question: str, language: str) -> bool:
@@ -765,7 +1060,15 @@ def _build_deterministic_rag_answer(
         response = llm.invoke([HumanMessage(content=prompt)])
         answer = response.content if hasattr(response, "content") else str(response)
     except Exception as exc:
-        logger.warning("Deterministic generation fallback activated due to model error: %s", exc)
+        logger.warning(
+            "Deterministic generation fallback activated due to model error: %s | provider=%s model=%s base_url=%s via_proxy=%s uses_native_api=%s",
+            exc,
+            provider,
+            model,
+            llm_client_manager.base_url,
+            llm_client_manager._via_proxy(),
+            llm_client_manager.uses_modal_native_chat_api(),
+        )
         if language == "es":
             if retrieved_docs:
                 source = retrieved_docs[0].get("source_url") or "Documento interno"
@@ -1571,7 +1874,17 @@ async def get_root():
 @app.get("/health")
 async def health():
     """Simple healthcheck endpoint used by Docker Compose."""
-    return {"status": "ok"}
+    preflight = getattr(app.state, "preflight", None)
+    readiness = (
+        preflight.get("status")
+        if isinstance(preflight, dict) and preflight.get("status")
+        else "unknown"
+    )
+    return {
+        "status": "ok",
+        "readiness": readiness,
+        "preflight": preflight,
+    }
 
 
 @app.get("/test-db-search")
@@ -1915,6 +2228,7 @@ async def ask_question(
     lang: str | None = Query(default=None),
     provider: str | None = Query(default=None),
     model: str | None = Query(default=None),
+    context_answer: str | None = Query(default=None),
     tags: str | None = Query(default=None, description="Comma-separated metadata tags"),
     tag_match_mode: str = Query(default="any", description="Tag match mode: any|all"),
     include_untagged_fallback: bool = Query(default=True),
@@ -1954,13 +2268,45 @@ async def ask_question(
         # --- GuardrailsAI: validate input before invoking agent ---
         from src.agent.guardrails_config import validate_input
 
-        guard_result = validate_input(question, lang=lang)
+        contextual_follow_up = bool(context_answer) and _is_contextual_follow_up(question, lang)
+        guard_result = validate_input(
+            question,
+            lang=lang,
+            allow_contextual_follow_up=contextual_follow_up,
+        )
         if not guard_result.passed:
             return _response_payload(
                 guard_result.reason, thread_id=thread_id, started_at=started_at, sources=[]
             )
         # If PII was detected and redacted, use redacted version
         effective_question = guard_result.redacted if guard_result.redacted else question
+
+        if contextual_follow_up:
+            llm_started_at = time.perf_counter()
+            answer = _build_contextual_follow_up_answer(
+                question=effective_question,
+                prior_answer=context_answer or "",
+                language=lang,
+                provider=provider,
+                model=model,
+            )
+            llm_ms = int((time.perf_counter() - llm_started_at) * 1000)
+
+            from src.agent.guardrails_config import validate_output
+
+            out_guard = validate_output(answer)
+            if not out_guard.passed:
+                answer = out_guard.reason
+            elif out_guard.redacted:
+                answer = out_guard.redacted
+
+            return _response_payload(
+                answer,
+                thread_id=thread_id,
+                started_at=started_at,
+                sources=[],
+                latency_breakdown={"retrieval_invoke_ms": 0, "llm_ms": llm_ms, "db_search": {}},
+            )
 
         logger.info(
             f"\n--- New request received: '{effective_question}' (Detected Language: {lang}, Thread: {thread_id}) ---"
@@ -2115,6 +2461,7 @@ async def ask_question_stream(
     provider: str | None = Query(default=None),
     model: str | None = Query(default=None),
     clarification_response: str | None = Query(default=None),
+    context_answer: str | None = Query(default=None),
     tags: str | None = Query(default=None, description="Comma-separated metadata tags"),
     tag_match_mode: str = Query(default="any", description="Tag match mode: any|all"),
     include_untagged_fallback: bool = Query(default=True),
@@ -2192,7 +2539,39 @@ async def ask_question_stream(
                 }
             )
             answer_seeking = _is_answer_seeking_query(question, lang_local)
+            contextual_follow_up = bool(context_answer) and _is_contextual_follow_up(
+                question, lang_local
+            )
             logger.info("Streaming intent gate: answer_seeking=%s", answer_seeking)
+
+            if contextual_follow_up:
+                answer = _build_contextual_follow_up_answer(
+                    question=question,
+                    prior_answer=context_answer or "",
+                    language=lang_local,
+                    provider=effective_provider,
+                    model=effective_model,
+                )
+                yield _sse(
+                    {
+                        "type": "complete",
+                        "answer": answer,
+                        "sources": [],
+                        "suggested_questions": _build_follow_up_suggestions(
+                            question=question,
+                            answer=answer,
+                            language=lang_local,
+                            sources=[],
+                        ),
+                        "thread_id": thread_id,
+                        "plan": "",
+                        "metadata": {
+                            "progress": 100,
+                            "stage": "complete",
+                        },
+                    }
+                )
+                return
 
             if not answer_seeking:
                 local_static = _find_static_faq_answer(question, lang_local)
@@ -2203,6 +2582,12 @@ async def ask_question_stream(
                             "type": "complete",
                             "answer": local_static,
                             "sources": [],
+                            "suggested_questions": _build_follow_up_suggestions(
+                                question=question,
+                                answer=local_static,
+                                language=lang_local,
+                                sources=[],
+                            ),
                             "thread_id": thread_id,
                             "plan": "",
                             "metadata": {
@@ -2323,6 +2708,12 @@ async def ask_question_stream(
                     "type": "complete",
                     "answer": answer,
                     "sources": sources,
+                    "suggested_questions": _build_follow_up_suggestions(
+                        question=question,
+                        answer=answer,
+                        language=lang_local,
+                        sources=sources,
+                    ),
                     "thread_id": thread_id,
                     "plan": plan,
                     "metadata": {

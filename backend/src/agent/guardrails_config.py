@@ -14,6 +14,9 @@ from __future__ import annotations
 import logging
 import os
 import re
+import threading
+import warnings
+from importlib import import_module
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -21,6 +24,19 @@ logger = logging.getLogger(__name__)
 _HUB_INPUT_GUARD = None
 _HUB_OUTPUT_GUARD = None
 _HUB_INITIALIZED = False
+_HUB_INIT_LOCK = threading.Lock()
+
+
+def _configure_guardrails_runtime_noise() -> None:
+    """Reduce noisy third-party logs/warnings while preserving actual errors."""
+    logging.getLogger("presidio-analyzer").setLevel(logging.ERROR)
+    logging.getLogger("guardrails-cli").setLevel(logging.WARNING)
+    warnings.filterwarnings(
+        "ignore",
+        message="Could not obtain an event loop.*",
+        category=UserWarning,
+    )
+
 
 # ---------------------------------------------------------------------------
 # Lazy import helpers — graceful degradation if guardrails not installed
@@ -48,6 +64,27 @@ def _configure_hub_api_key() -> None:
         os.environ["GUARDRAILS_API_KEY"] = hub_key
 
 
+def _configure_cache_dirs() -> None:
+    """Optionally pin cache locations to a persistent mounted volume."""
+    persistence_root = (os.getenv("GUARDRAILS_PERSISTENCE_DIR") or "").strip()
+    if not persistence_root:
+        return
+
+    os.makedirs(persistence_root, exist_ok=True)
+    guardrails_home = os.path.join(persistence_root, "guardrails")
+    hf_home = os.path.join(persistence_root, "huggingface")
+    transformers_cache = os.path.join(hf_home, "transformers")
+
+    os.makedirs(guardrails_home, exist_ok=True)
+    os.makedirs(hf_home, exist_ok=True)
+    os.makedirs(transformers_cache, exist_ok=True)
+
+    os.environ.setdefault("GUARDRAILS_HOME", guardrails_home)
+    os.environ.setdefault("HF_HOME", hf_home)
+    os.environ.setdefault("TRANSFORMERS_CACHE", transformers_cache)
+    os.environ.setdefault("XDG_CACHE_HOME", persistence_root)
+
+
 def _safe_install_validator(
     grd: Any, uri_candidates: list[str], attr_candidates: list[str]
 ) -> Any | None:
@@ -70,6 +107,30 @@ def _safe_install_validator(
     return None
 
 
+def _load_installed_validator(module_names: list[str], attr_candidates: list[str]) -> Any | None:
+    """Load an already-installed validator class without triggering hub installs."""
+    for module_name in module_names:
+        try:
+            module = import_module(module_name)
+        except Exception:
+            continue
+
+        for attr in attr_candidates:
+            validator_cls = getattr(module, attr, None)
+            if validator_cls is not None:
+                logger.info(f"[GUARDRAILS] Loaded installed validator {attr} from {module_name}")
+                return validator_cls
+
+    return None
+
+
+def _is_truthy_env(name: str, default: bool) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
 def _build_hub_guards() -> tuple[Any, Any]:
     """Build Guardrails input/output guards from Hub validators.
 
@@ -79,7 +140,9 @@ def _build_hub_guards() -> tuple[Any, Any]:
     if grd is None:
         return None, None
 
+    _configure_cache_dirs()
     _configure_hub_api_key()
+    _configure_guardrails_runtime_noise()
 
     try:
         input_guard = grd.Guard()
@@ -88,14 +151,26 @@ def _build_hub_guards() -> tuple[Any, Any]:
         from src.config import GUARDRAILS_PII
 
         if GUARDRAILS_PII:
-            detect_pii_cls = _safe_install_validator(
-                grd,
-                uri_candidates=[
-                    "hub://guardrails/detect_pii",
-                    "hub://guardrails/pii",
+            attr_candidates = ["DetectPII", "PIIFilter", "PiiFilter"]
+            detect_pii_cls = _load_installed_validator(
+                module_names=[
+                    "guardrails_grhub_detect_pii",
+                    "guardrails_grhub_pii",
                 ],
-                attr_candidates=["DetectPII", "PIIFilter", "PiiFilter"],
+                attr_candidates=attr_candidates,
             )
+
+            # Prevent runtime install noise/latency by default; can be explicitly enabled.
+            hub_auto_install = _is_truthy_env("GUARDRAILS_HUB_AUTO_INSTALL", False)
+            if detect_pii_cls is None and hub_auto_install:
+                detect_pii_cls = _safe_install_validator(
+                    grd,
+                    uri_candidates=[
+                        "hub://guardrails/detect_pii",
+                        "hub://guardrails/pii",
+                    ],
+                    attr_candidates=attr_candidates,
+                )
             if detect_pii_cls is not None:
                 try:
                     input_guard = input_guard.use(
@@ -103,7 +178,7 @@ def _build_hub_guards() -> tuple[Any, Any]:
                             pii_entities=[
                                 "EMAIL_ADDRESS",
                                 "PHONE_NUMBER",
-                                "US_SOCIAL_SECURITY_NUMBER",
+                                "US_SSN",
                                 "CREDIT_CARD",
                             ],
                             on_fail="fix",
@@ -111,6 +186,10 @@ def _build_hub_guards() -> tuple[Any, Any]:
                     )
                 except TypeError:
                     input_guard = input_guard.use(detect_pii_cls())
+            elif not hub_auto_install:
+                logger.info(
+                    "[GUARDRAILS] Hub validator auto-install disabled; using local PII fallback checks."
+                )
 
         return input_guard, output_guard
     except SystemExit as exc:
@@ -126,8 +205,10 @@ def _get_hub_guards() -> tuple[Any, Any]:
     global _HUB_INITIALIZED, _HUB_INPUT_GUARD, _HUB_OUTPUT_GUARD
 
     if not _HUB_INITIALIZED:
-        _HUB_INPUT_GUARD, _HUB_OUTPUT_GUARD = _build_hub_guards()
-        _HUB_INITIALIZED = True
+        with _HUB_INIT_LOCK:
+            if not _HUB_INITIALIZED:
+                _HUB_INPUT_GUARD, _HUB_OUTPUT_GUARD = _build_hub_guards()
+                _HUB_INITIALIZED = True
 
     return _HUB_INPUT_GUARD, _HUB_OUTPUT_GUARD
 
@@ -266,7 +347,12 @@ def _localized(language: str, *, en: str, es: str) -> str:
     return es if language == "es" else en
 
 
-def validate_input(text: str, lang: str | None = None) -> GuardResult:
+def validate_input(
+    text: str,
+    lang: str | None = None,
+    *,
+    allow_contextual_follow_up: bool = False,
+) -> GuardResult:
     """
     Run all enabled input guards against user text.
 
@@ -367,7 +453,7 @@ def validate_input(text: str, lang: str | None = None) -> GuardResult:
 
     # 4. Topic relevance — only block if question is clearly off-topic
     #    (short/greeting messages are always allowed)
-    if GUARDRAILS_TOPIC_RELEVANCE and len(text.split()) > 5:
+    if GUARDRAILS_TOPIC_RELEVANCE and len(text.split()) > 5 and not allow_contextual_follow_up:
         if not _is_topic_relevant(text, GUARDRAILS_TOPIC_LIST):
             logger.info(f"[GUARDRAILS] Off-topic query: {text[:120]!r}")
             return GuardResult(

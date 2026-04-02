@@ -15,10 +15,16 @@ from typing import Any
 from langchain_core.tools import tool
 
 try:
+    import psycopg2
+except Exception:  # pragma: no cover - optional dependency in some test/runtime profiles
+    psycopg2 = None  # type: ignore[assignment]
+
+try:
     from supabase import create_client
 except Exception:  # pragma: no cover - optional dependency in some test/runtime profiles
     create_client = None  # type: ignore[assignment]
 
+from src import config as app_config
 from src.services.chroma_store import ChromaStore, get_chroma_store
 from src.utils.tags import infer_tags_from_text, normalize_tags
 
@@ -178,6 +184,10 @@ def _fallback_reads_enabled() -> bool:
     return os.getenv("VECTOR_SYNC_SUPABASE_FALLBACK_READS", "true").lower() in {"1", "true", "yes"}
 
 
+def _postgres_reads_enabled() -> bool:
+    return app_config.postgres_data_reads_enabled()
+
+
 def _get_supabase_client():
     global _SUPABASE_CLIENT
     if _SUPABASE_CLIENT is not None:
@@ -289,6 +299,102 @@ def _query_supabase_fallback(
     return [_normalize_supabase_document(row) for row in rows if isinstance(row, dict)]
 
 
+def _query_postgres_fallback(
+    *,
+    query_embedding: list[float],
+    match_threshold: float,
+    match_count: int,
+    tags: list[str],
+    tag_mode: str,
+    include_untagged_fallback: bool,
+) -> list[dict[str, Any]]:
+    if not _postgres_reads_enabled():
+        return []
+
+    if psycopg2 is None:
+        return []
+
+    database_url = (app_config.DATABASE_URL or os.getenv("DATABASE_URL") or "").strip()
+    if not database_url:
+        return []
+
+    vector_literal = "[" + ",".join(f"{float(v):.10f}" for v in query_embedding) + "]"
+    params: list[Any] = [
+        vector_literal,
+        vector_literal,
+        float(match_threshold),
+    ]
+
+    tag_condition_sql = ""
+    if tags:
+        if str(tag_mode).lower() == "all":
+            tag_condition_sql = (
+                " AND ("
+                "(SELECT COUNT(DISTINCT tag) "
+                " FROM unnest(%s::text[]) AS tag "
+                " WHERE COALESCE(dc.metadata->'tags', '[]'::jsonb) ? tag) = cardinality(%s::text[])"
+            )
+            params.extend([tags, tags])
+            if include_untagged_fallback:
+                tag_condition_sql += (
+                    " OR dc.metadata->'tags' IS NULL"
+                    " OR jsonb_array_length(COALESCE(dc.metadata->'tags', '[]'::jsonb)) = 0"
+                )
+            tag_condition_sql += ")"
+        else:
+            tag_condition_sql = " AND (COALESCE(dc.metadata->'tags', '[]'::jsonb) ?| %s::text[]"
+            params.append(tags)
+            if include_untagged_fallback:
+                tag_condition_sql += (
+                    " OR dc.metadata->'tags' IS NULL"
+                    " OR jsonb_array_length(COALESCE(dc.metadata->'tags', '[]'::jsonb)) = 0"
+                )
+            tag_condition_sql += ")"
+
+    sql = (
+        "SELECT dc.id, dc.content, dc.source_url, dc.chunk_index, dc.metadata, "
+        "1 - (dc.embedding <=> %s::vector) AS similarity "
+        "FROM document_chunks dc "
+        "WHERE dc.embedding IS NOT NULL "
+        "AND COALESCE(dc.is_processed, true) = true "
+        "AND 1 - (dc.embedding <=> %s::vector) > %s"
+        f"{tag_condition_sql} "
+        "ORDER BY dc.embedding <=> %s::vector "
+        "LIMIT %s"
+    )
+    params.extend([vector_literal, max(int(match_count), 1)])
+
+    try:
+        connect_timeout = max(int(os.getenv("DB_SEARCH_POSTGRES_CONNECT_TIMEOUT_SECONDS", "5")), 1)
+        with psycopg2.connect(database_url, connect_timeout=connect_timeout) as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql, tuple(params))
+                rows = cur.fetchall()
+                columns = [desc[0] for desc in cur.description or []]
+    except Exception as exc:
+        logger.warning("Postgres fallback query failed: %s", exc)
+        return []
+
+    docs: list[dict[str, Any]] = []
+    for row in rows:
+        record = dict(zip(columns, row, strict=False))
+        docs.append(_normalize_supabase_document(record))
+    return docs
+
+
+def _resolve_data_backend_order() -> list[str]:
+    mode = app_config.resolve_data_db_mode()
+    if mode == "postgres":
+        return ["postgres", "supabase"]
+    if mode == "supabase":
+        return ["supabase", "postgres"]
+    # auto mode preference is resolved in config; keep explicit fallback chain here.
+    resolved = app_config.resolve_data_db_mode()
+    if resolved == "postgres":
+        return ["postgres", "supabase"]
+    return ["supabase", "postgres"]
+
+
 def _query_chroma_with_timeout(
     *,
     store: ChromaStore,
@@ -314,7 +420,7 @@ def _query_chroma_with_timeout(
             raise TimeoutError(f"Chroma query timed out after {timeout_seconds}s") from exc
 
 
-def create_db_search_tool(
+def create_db_search_tool(  # noqa: C901
     chroma_store: ChromaStore | None,
     embedding_model,
     match_threshold: float = 0.3,
@@ -428,17 +534,32 @@ def create_db_search_tool(
                     )
 
             if chroma_failed:
-                retrieval_started_at = time.perf_counter()
-                rows = _query_supabase_fallback(
-                    query_embedding=query_embedding,
-                    match_threshold=float(match_threshold),
-                    match_count=int(match_count),
-                    tags=tags,
-                    tag_mode=tag_mode,
-                    include_untagged_fallback=include_untagged_fallback,
-                )
-                retrieval_ms += int((time.perf_counter() - retrieval_started_at) * 1000)
-                retrieval_backend = "supabase"
+                backend_order = _resolve_data_backend_order()
+                for backend_name in backend_order:
+                    retrieval_started_at = time.perf_counter()
+                    if backend_name == "postgres":
+                        rows = _query_postgres_fallback(
+                            query_embedding=query_embedding,
+                            match_threshold=float(match_threshold),
+                            match_count=int(match_count),
+                            tags=tags,
+                            tag_mode=tag_mode,
+                            include_untagged_fallback=include_untagged_fallback,
+                        )
+                    else:
+                        rows = _query_supabase_fallback(
+                            query_embedding=query_embedding,
+                            match_threshold=float(match_threshold),
+                            match_count=int(match_count),
+                            tags=tags,
+                            tag_mode=tag_mode,
+                            include_untagged_fallback=include_untagged_fallback,
+                        )
+
+                    retrieval_ms += int((time.perf_counter() - retrieval_started_at) * 1000)
+                    if rows:
+                        retrieval_backend = backend_name
+                        break
 
             rows_before_threshold = len(rows)
 
