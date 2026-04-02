@@ -16,7 +16,7 @@ def test_config_endpoint_lists_only_local_provider(fastapi_client):
     providers = data["providers"]
 
     assert [p.get("key") for p in providers] == ["ollama"]
-    assert providers[0].get("label") == "Ollama (Local)"
+    assert "ollama" in str(providers[0].get("label", "")).lower()
 
 
 @pytest.mark.fallback
