@@ -25,6 +25,10 @@ def _running_on_render() -> bool:
     return bool(os.getenv("RENDER") or os.getenv("RENDER_SERVICE_ID"))
 
 
+def _truthy_env(name: str) -> bool:
+    return os.getenv(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -> str:
     """Resolve the effective URL for an internal upstream service (embedding, Ollama).
 
@@ -47,6 +51,14 @@ def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -
     candidate = (raw_url or "").strip()
 
     if _running_on_render():
+        # In strict proxy mode, force all internal upstream calls through modal-proxy
+        # even when explicit modal.run URLs are provided.
+        strict_proxy_mode = _truthy_env("AGENT_ENFORCE_PROXY") or _truthy_env(
+            "RENDER_REMOTE_INFERENCE_ONLY"
+        )
+        if strict_proxy_mode:
+            return fallback_url
+
         if candidate:
             try:
                 host = (urlparse(candidate).hostname or "").lower()
