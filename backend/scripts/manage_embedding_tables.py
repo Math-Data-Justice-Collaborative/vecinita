@@ -2,6 +2,7 @@
 Script to create/drop/migrate embedding chunk tables for each provider/model combo.
 """
 import sys
+
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 

@@ -10,12 +10,22 @@ import time
 from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
-from langchain_community.document_loaders import (
-    CSVLoader,
-    PlaywrightURLLoader,
-    UnstructuredURLLoader,
-)
-from langchain_community.document_loaders.recursive_url_loader import RecursiveUrlLoader
+
+try:
+    from langchain_community.document_loaders import (
+        CSVLoader,
+        PlaywrightURLLoader,
+        UnstructuredURLLoader,
+    )
+    from langchain_community.document_loaders.recursive_url_loader import RecursiveUrlLoader
+except Exception as exc:
+    CSVLoader = None
+    PlaywrightURLLoader = None
+    UnstructuredURLLoader = None
+    RecursiveUrlLoader = None
+    _LOADER_IMPORT_ERROR = exc
+else:
+    _LOADER_IMPORT_ERROR = None
 
 from .config import ScraperConfig
 from .utils import (
@@ -31,6 +41,26 @@ from .utils import (
 # Use parent logger hierarchy for better integration with CLI logging
 log = logging.getLogger("vecinita_pipeline.loaders")
 log.addHandler(logging.NullHandler())
+
+
+class _UnavailableLoader:
+    def __init__(self, *args, **kwargs):
+        raise RuntimeError(
+            "Optional LangChain loader dependencies are unavailable"
+        ) from _LOADER_IMPORT_ERROR
+
+
+if CSVLoader is None:
+    CSVLoader = _UnavailableLoader
+
+if PlaywrightURLLoader is None:
+    PlaywrightURLLoader = _UnavailableLoader
+
+if UnstructuredURLLoader is None:
+    UnstructuredURLLoader = _UnavailableLoader
+
+if RecursiveUrlLoader is None:
+    RecursiveUrlLoader = _UnavailableLoader
 
 
 class SmartLoader:

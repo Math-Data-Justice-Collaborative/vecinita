@@ -35,10 +35,12 @@ try:
     from sentence_transformers import SentenceTransformer
 
     LOCAL_EMBEDDINGS_AVAILABLE = True
-except ImportError:
+except Exception as exc:
+    SentenceTransformer = None  # type: ignore[assignment]
     LOCAL_EMBEDDINGS_AVAILABLE = False
     print(
-        "Warning: sentence-transformers not installed. Install with: pip install sentence-transformers"
+        "Warning: sentence-transformers unavailable or incompatible. "
+        f"Proceeding without local embeddings ({exc})."
     )
 
 # Load environment variables

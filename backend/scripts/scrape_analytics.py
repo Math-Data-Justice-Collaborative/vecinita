@@ -2,16 +2,16 @@
 Analytics queries for scraping and embedding tracking.
 """
 import os
-from typing import List, Dict, Any, Optional
+from typing import Any
+
 import psycopg2
-from datetime import datetime
 
 
 class ScrapeAnalytics:
     def __init__(self, database_url: str):
         self.conn = psycopg2.connect(database_url)
 
-    def get_last_scrape_by_model(self) -> List[Dict[str, Any]]:
+    def get_last_scrape_by_model(self) -> list[dict[str, Any]]:
         """Get last scrape time for each embedding model."""
         with self.conn.cursor() as cur:
             cur.execute("""
@@ -27,7 +27,7 @@ class ScrapeAnalytics:
             cols = [desc[0] for desc in cur.description]
             return [dict(zip(cols, row)) for row in cur.fetchall()]
 
-    def get_scrape_timeline(self, source_url: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_scrape_timeline(self, source_url: str | None = None) -> list[dict[str, Any]]:
         """Get timeline of when sources were last scraped per model."""
         with self.conn.cursor() as cur:
             query = """
@@ -47,7 +47,7 @@ class ScrapeAnalytics:
             cols = [desc[0] for desc in cur.description]
             return [dict(zip(cols, row)) for row in cur.fetchall()]
 
-    def get_chunks_by_model(self, model: str = None) -> Dict[str, int]:
+    def get_chunks_by_model(self, model: str = None) -> dict[str, int]:
         """Count chunks per embedding model."""
         with self.conn.cursor() as cur:
             cur.execute("""
@@ -59,7 +59,7 @@ class ScrapeAnalytics:
             """)
             return {f"{row[0]}_{row[1]}": row[2] for row in cur.fetchall()}
 
-    def get_scrape_stats(self) -> Dict[str, Any]:
+    def get_scrape_stats(self) -> dict[str, Any]:
         """Get overall scraping statistics."""
         with self.conn.cursor() as cur:
             cur.execute("""

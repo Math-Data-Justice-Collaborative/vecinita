@@ -314,11 +314,11 @@ def test_ip09_agent_supabase_disabled_fallback_contract(monkeypatch) -> None:
 
 
 def test_ip09_agent_supabase_legacy_rpc_signature_contract(monkeypatch) -> None:
+    fresh_db_search_module = importlib.import_module("src.agent.tools.db_search")
+
     mock_store = Mock()
     mock_store.query_chunks.side_effect = RuntimeError("chroma unavailable")
     mock_embedding_model = Mock(embed_query=Mock(return_value=[0.1] * 384))
-
-    from src.agent.tools.db_search import reset_search_options, set_search_options
 
     rpc_chain = Mock()
     rpc_chain.execute.side_effect = [
@@ -343,17 +343,26 @@ def test_ip09_agent_supabase_legacy_rpc_signature_contract(monkeypatch) -> None:
     monkeypatch.setenv("DB_DATA_MODE", "supabase")
     monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
     monkeypatch.setenv("SUPABASE_KEY", "test-key")
-    monkeypatch.setattr(db_search_module, "_SUPABASE_CLIENT", None)
-    monkeypatch.setattr(db_search_module, "create_client", lambda _url, _key: mock_supabase)
+    monkeypatch.setattr(fresh_db_search_module.app_config, "DB_DATA_MODE", "supabase")
+    monkeypatch.setattr(fresh_db_search_module, "_SUPABASE_CLIENT", None)
+    monkeypatch.setattr(
+        fresh_db_search_module,
+        "create_client",
+        lambda _url, _key: mock_supabase,
+    )
 
-    token = set_search_options(tags=["food"], tag_match_mode="all", include_untagged_fallback=False)
+    token = fresh_db_search_module.set_search_options(
+        tags=["food"],
+        tag_match_mode="all",
+        include_untagged_fallback=False,
+    )
     try:
-        tool = create_db_search_tool(
+        tool = fresh_db_search_module.create_db_search_tool(
             mock_store, mock_embedding_model, match_threshold=0.3, match_count=5
         )
         result = json.loads(tool.invoke("food"))
     finally:
-        reset_search_options(token)
+        fresh_db_search_module.reset_search_options(token)
 
     assert result[0]["source_url"] == "https://example.org/food"
     assert mock_supabase.rpc.call_count == 2

@@ -4,13 +4,14 @@ Quick database cleaner + scraper loader for VECINA
 No PowerShell or psql required!
 """
 
-from src.scraper.uploader import DatabaseUploader
-from src.scraper.main import main as scraper_main
-from dotenv import load_dotenv
 import logging
-import os
 import sys
 from pathlib import Path
+
+from dotenv import load_dotenv
+
+from src.scraper.main import main as scraper_main
+from src.scraper.uploader import DatabaseUploader
 
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent))

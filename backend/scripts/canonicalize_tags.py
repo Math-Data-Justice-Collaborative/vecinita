@@ -12,7 +12,7 @@ import argparse
 import json
 import pathlib
 import sys
-from typing import Any, Dict, List
+from typing import Any
 
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,7 +20,6 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.services.chroma_store import get_chroma_store
 from src.utils.tags import normalize_tag_fields
-
 
 TAG_FIELDS = (
     "tags",
@@ -33,15 +32,15 @@ TAG_FIELDS = (
 )
 
 
-def _normalize_source_metadata(metadata: Dict[str, Any]) -> tuple[Dict[str, Any], bool]:
+def _normalize_source_metadata(metadata: dict[str, Any]) -> tuple[dict[str, Any], bool]:
     return normalize_tag_fields(metadata, TAG_FIELDS)
 
 
-def _normalize_chunk_metadata(metadata: Dict[str, Any]) -> tuple[Dict[str, Any], bool]:
+def _normalize_chunk_metadata(metadata: dict[str, Any]) -> tuple[dict[str, Any], bool]:
     return normalize_tag_fields(metadata, TAG_FIELDS)
 
 
-def run(*, apply: bool, batch_size: int) -> Dict[str, Any]:
+def run(*, apply: bool, batch_size: int) -> dict[str, Any]:
     store = get_chroma_store()
 
     sources_scanned = 0
@@ -86,8 +85,8 @@ def run(*, apply: bool, batch_size: int) -> Dict[str, Any]:
         if not ids:
             break
 
-        update_ids: List[str] = []
-        update_metas: List[Dict[str, Any]] = []
+        update_ids: list[str] = []
+        update_metas: list[dict[str, Any]] = []
 
         for index, chunk_id in enumerate(ids):
             chunks_scanned += 1

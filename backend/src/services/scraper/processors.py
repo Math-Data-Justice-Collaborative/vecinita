@@ -8,9 +8,45 @@ import time
 from typing import Any
 
 from langchain_community.document_transformers import BeautifulSoupTransformer
-from langchain_text_splitters import (  # type: ignore[import-not-found]
-    RecursiveCharacterTextSplitter,
-)
+
+try:
+    from langchain_text_splitters import (  # type: ignore[import-not-found]
+        RecursiveCharacterTextSplitter,
+    )
+except Exception:
+
+    class RecursiveCharacterTextSplitter:  # type: ignore[no-redef]
+        def __init__(
+            self,
+            *,
+            chunk_size: int,
+            chunk_overlap: int,
+            separators: list[str] | None = None,
+            keep_separator: bool = False,
+        ):
+            self.chunk_size = chunk_size
+            self.chunk_overlap = chunk_overlap
+            self.separators = separators or ["\n\n", "\n", " ", ""]
+            self.keep_separator = keep_separator
+
+        def split_text(self, text: str) -> list[str]:
+            if not text:
+                return []
+
+            chunks = []
+            step = max(1, self.chunk_size - self.chunk_overlap)
+            start = 0
+            text_length = len(text)
+
+            while start < text_length:
+                end = min(text_length, start + self.chunk_size)
+                chunks.append(text[start:end])
+                if end >= text_length:
+                    break
+                start += step
+
+            return chunks
+
 
 from .config import ScraperConfig
 from .utils import clean_text, extract_outbound_links

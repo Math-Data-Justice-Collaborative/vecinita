@@ -7,9 +7,11 @@ import json
 from pathlib import Path
 
 import pytest
-from hypothesis import HealthCheck, settings
 
 schemathesis = pytest.importorskip("schemathesis")
+hypothesis = pytest.importorskip("hypothesis")
+HealthCheck = hypothesis.HealthCheck
+settings = hypothesis.settings
 
 
 class _FakeResponse:

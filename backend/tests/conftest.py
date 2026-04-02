@@ -185,16 +185,23 @@ def auth_proxy_client(env_vars, monkeypatch):
     for key, value in env_vars.items():
         monkeypatch.setenv(key, value)
 
+    import importlib.util
     import sys
     from pathlib import Path
 
     repo_root = Path(__file__).resolve().parents[2]
-    if str(repo_root) not in sys.path:
-        sys.path.insert(0, str(repo_root))
+    auth_main_path = repo_root / "auth" / "src" / "main.py"
+    module_name = "vecinita_auth_proxy_main"
 
-    from auth.src.main import app as auth_app
+    spec = importlib.util.spec_from_file_location(module_name, auth_main_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Unable to load auth proxy module from {auth_main_path}")
 
-    return TestClient(auth_app)
+    auth_module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = auth_module
+    spec.loader.exec_module(auth_module)
+
+    return TestClient(auth_module.app)
 
 
 @pytest.fixture

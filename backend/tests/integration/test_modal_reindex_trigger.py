@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 from typing import Any
 
 import pytest
@@ -51,9 +52,18 @@ def client(env_vars, monkeypatch):
     for key, value in env_vars.items():
         monkeypatch.setenv(key, value)
 
-    from src.api.main import app
+    monkeypatch.setenv("ENABLE_AUTH", "false")
+    monkeypatch.setenv("AUTH_FAIL_CLOSED", "false")
 
-    return TestClient(app)
+    import src.api.main as main_module
+    import src.api.middleware as middleware_module
+    import src.api.router_scrape as router_scrape_module
+
+    importlib.reload(middleware_module)
+    importlib.reload(router_scrape_module)
+    importlib.reload(main_module)
+
+    return TestClient(main_module.app)
 
 
 def test_modal_reindex_endpoint_returns_queued(client, monkeypatch):

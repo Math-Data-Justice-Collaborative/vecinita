@@ -3,10 +3,9 @@ Script to migrate document chunks from one embedding model to another.
 """
 import os
 import sys
-from typing import Optional
+
 import psycopg2
 from psycopg2.extras import execute_batch
-from datetime import datetime
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'services', 'shared', 'src'))
 from providers import get_provider
@@ -18,7 +17,7 @@ def migrate_chunks_to_new_model(
     target_provider: str,
     target_model: str,
     batch_size: int = 100,
-    limit: Optional[int] = None
+    limit: int | None = None
 ):
     """
     Migrate chunks from source table to new embedding model.

@@ -3,6 +3,7 @@
 
 import os
 import sys
+
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -64,7 +65,7 @@ def main():
         print(RPC_SQL)
         sys.exit(1)
 
-    print(f"Connecting to PostgreSQL database...")
+    print("Connecting to PostgreSQL database...")
     try:
         conn = psycopg2.connect(database_url)
         cur = conn.cursor()

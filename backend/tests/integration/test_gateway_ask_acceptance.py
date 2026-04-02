@@ -89,6 +89,7 @@ def _build_gateway_client(env_vars, monkeypatch, *, enable_auth: bool = True):
         monkeypatch.setenv(key, value)
 
     monkeypatch.setenv("AGENT_SERVICE_URL", "http://agent.test")
+    monkeypatch.setenv("DEMO_MODE", "false")
     monkeypatch.setenv("ENABLE_AUTH", "true" if enable_auth else "false")
     monkeypatch.setenv("AUTH_FAIL_CLOSED", "true")
     monkeypatch.delenv("MODAL_EMBEDDING_ENDPOINT", raising=False)

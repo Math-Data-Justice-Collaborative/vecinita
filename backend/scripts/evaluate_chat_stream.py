@@ -13,7 +13,7 @@ import argparse
 import json
 import time
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -22,20 +22,20 @@ import requests
 class StreamEvalResult:
     ok: bool
     event_count: int
-    first_event_ms: Optional[int]
+    first_event_ms: int | None
     complete_received: bool
     assistant_answer_len: int
-    error_message: Optional[str]
+    error_message: str | None
 
 
 def evaluate_stream(base_url: str, question: str, timeout: int) -> StreamEvalResult:
     stream_url = f"{base_url.rstrip('/')}/ask/stream"
     started = time.perf_counter()
-    first_event_ms: Optional[int] = None
+    first_event_ms: int | None = None
     event_count = 0
     complete_received = False
     assistant_answer_len = 0
-    error_message: Optional[str] = None
+    error_message: str | None = None
 
     with requests.get(
         stream_url,
@@ -86,7 +86,7 @@ def evaluate_stream(base_url: str, question: str, timeout: int) -> StreamEvalRes
     )
 
 
-def evaluate_non_stream(base_url: str, question: str, timeout: int) -> tuple[bool, int, Optional[str]]:
+def evaluate_non_stream(base_url: str, question: str, timeout: int) -> tuple[bool, int, str | None]:
     ask_url = f"{base_url.rstrip('/')}/ask"
     response = requests.get(
         ask_url,
@@ -125,7 +125,7 @@ def main() -> int:
 
     non_stream_ok = False
     non_stream_len = 0
-    non_stream_error: Optional[str] = None
+    non_stream_error: str | None = None
     try:
         non_stream_ok, non_stream_len, non_stream_error = evaluate_non_stream(
             args.base_url, args.question, args.timeout

@@ -10,12 +10,36 @@ import time
 from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
-from langchain_community.document_loaders import (
-    CSVLoader,
-    PlaywrightURLLoader,
-    UnstructuredURLLoader,
-)
-from langchain_community.document_loaders.recursive_url_loader import RecursiveUrlLoader
+
+try:
+    from langchain_community.document_loaders import (
+        CSVLoader,
+        PlaywrightURLLoader,
+        UnstructuredURLLoader,
+    )
+    from langchain_community.document_loaders.recursive_url_loader import RecursiveUrlLoader
+
+    LANGCHAIN_LOADERS_AVAILABLE = True
+    _LANGCHAIN_LOADERS_IMPORT_ERROR: Exception | None = None
+except Exception as exc:
+    LANGCHAIN_LOADERS_AVAILABLE = False
+    _LANGCHAIN_LOADERS_IMPORT_ERROR = exc
+
+    class _UnavailableLoader:
+        def __init__(self, *args, **kwargs):
+            self.args = args
+            self.kwargs = kwargs
+
+        def load(self):
+            raise RuntimeError(
+                "LangChain document loaders are unavailable in this environment: "
+                f"{_LANGCHAIN_LOADERS_IMPORT_ERROR}"
+            )
+
+    CSVLoader = _UnavailableLoader  # type: ignore[assignment]
+    PlaywrightURLLoader = _UnavailableLoader  # type: ignore[assignment]
+    UnstructuredURLLoader = _UnavailableLoader  # type: ignore[assignment]
+    RecursiveUrlLoader = _UnavailableLoader  # type: ignore[assignment]
 
 from .config import ScraperConfig
 from .utils import (
