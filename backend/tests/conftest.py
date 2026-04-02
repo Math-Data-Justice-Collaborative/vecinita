@@ -68,7 +68,7 @@ def _agent_module_path_compatibility():
 
         # Make methods return the query chain (or self) for chaining
         mock_query.select.return_value = mock_query  # select() returns self for chaining
-        mock_query.limit.return_value = mock_query   # limit() returns self for chaining
+        mock_query.limit.return_value = mock_query  # limit() returns self for chaining
         mock_query.execute.return_value = mock_result  # execute() returns result object
 
         # table() returns the query chain
