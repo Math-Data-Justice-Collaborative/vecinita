@@ -417,7 +417,12 @@ class DatabaseUploader:
         try:
             known: list[str] = []
 
-            if self.vector_sync_target == "postgres" and self.postgres_database_url and POSTGRES_AVAILABLE and psycopg2 is not None:
+            if (
+                self.vector_sync_target == "postgres"
+                and self.postgres_database_url
+                and POSTGRES_AVAILABLE
+                and psycopg2 is not None
+            ):
                 sql = (
                     "SELECT metadata->'tags' AS tags "
                     "FROM document_chunks "
@@ -438,7 +443,9 @@ class DatabaseUploader:
                     response = table_client.select("metadata").limit(5000).execute()
                     for row in response.data or []:
                         if isinstance(row, dict):
-                            metadata = row.get("metadata") if isinstance(row.get("metadata"), dict) else {}
+                            metadata = (
+                                row.get("metadata") if isinstance(row.get("metadata"), dict) else {}
+                            )
                             known.extend(normalize_tags(metadata.get("tags", [])))
 
             self._known_tag_cache = normalize_tags(known)
@@ -731,7 +738,9 @@ class DatabaseUploader:
             if self.vector_sync_degraded_mode:
                 log.warning("Postgres sync unavailable; skipping write in degraded mode")
                 return False
-            raise RuntimeError("Postgres sync is configured but DATABASE_URL/psycopg2 is unavailable")
+            raise RuntimeError(
+                "Postgres sync is configured but DATABASE_URL/psycopg2 is unavailable"
+            )
 
         sql = (
             "INSERT INTO document_chunks ("
@@ -1004,7 +1013,12 @@ class DatabaseUploader:
     def _get_source_tags(self, source_identifier: str) -> list[str]:
         """Fetch canonical source-level tags from existing stored chunks."""
         try:
-            if self.vector_sync_target == "postgres" and self.postgres_database_url and POSTGRES_AVAILABLE and psycopg2 is not None:
+            if (
+                self.vector_sync_target == "postgres"
+                and self.postgres_database_url
+                and POSTGRES_AVAILABLE
+                and psycopg2 is not None
+            ):
                 sql = (
                     "SELECT metadata->'tags' AS tags "
                     "FROM document_chunks "
@@ -1031,7 +1045,11 @@ class DatabaseUploader:
                     )
                     rows = response.data or []
                     if rows and isinstance(rows[0], dict):
-                        metadata = rows[0].get("metadata") if isinstance(rows[0].get("metadata"), dict) else {}
+                        metadata = (
+                            rows[0].get("metadata")
+                            if isinstance(rows[0].get("metadata"), dict)
+                            else {}
+                        )
                         return normalize_tags(metadata.get("tags", []))
         except Exception as exc:
             log.debug(f"Unable to load source tags for {source_identifier}: {exc}")

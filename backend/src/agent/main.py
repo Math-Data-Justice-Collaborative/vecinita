@@ -728,6 +728,7 @@ def _location_anchor_system_prompt(language: str) -> str:
         "Prioritize practical guidance, useful links, and clear next steps to access resources."
     )
 
+
 # --- Define LangGraph State ---
 
 
@@ -1313,9 +1314,7 @@ def _build_clarification_payload(content: str, language: str) -> dict:
 # --- Initialize Tools ---
 logger.info("Initializing agent tools...")
 # Use lower threshold (0.1) for better recall - can be tuned based on results
-db_search_tool = create_db_search_tool(
-    None, embedding_model, match_threshold=0.1, match_count=5
-)
+db_search_tool = create_db_search_tool(None, embedding_model, match_threshold=0.1, match_count=5)
 web_search_tool = create_web_search_tool()
 clarify_question_tool = create_clarify_question_tool()
 static_response_tool = create_static_response_tool()
