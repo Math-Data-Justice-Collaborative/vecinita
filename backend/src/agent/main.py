@@ -509,6 +509,68 @@ def _probe_supabase_connectivity() -> tuple[bool, str]:
         return False, f"error: {exc}"
 
 
+def _probe_postgres_schema(cur: Any) -> tuple[bool, str]:
+    cur.execute("SELECT 1 FROM pg_extension WHERE extname = 'vector'")
+    if cur.fetchone() is None:
+        return False, "missing_pgvector_extension"
+
+    cur.execute("SELECT to_regclass('public.document_chunks')")
+    doc_chunks_regclass = cur.fetchone()
+    if not doc_chunks_regclass or doc_chunks_regclass[0] is None:
+        return False, "missing_table_document_chunks"
+
+    cur.execute("SELECT to_regclass('public.sources')")
+    sources_regclass = cur.fetchone()
+    if not sources_regclass or sources_regclass[0] is None:
+        return False, "missing_table_sources"
+
+    cur.execute("""
+        SELECT udt_name
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'document_chunks'
+          AND column_name = 'embedding'
+        """)
+    embedding_column = cur.fetchone()
+    if not embedding_column:
+        return False, "missing_column_document_chunks.embedding"
+    if str(embedding_column[0]).lower() != "vector":
+        return False, f"invalid_column_type_document_chunks.embedding:{embedding_column[0]}"
+
+    cur.execute("""
+        SELECT 1
+        FROM pg_proc
+        WHERE proname = 'search_similar_documents'
+        LIMIT 1
+        """)
+    if cur.fetchone() is None:
+        return False, "missing_function_search_similar_documents"
+
+    return True, "ok"
+
+
+def _apply_postgres_bootstrap(conn: Any) -> tuple[bool, str]:
+    migrations_root = Path(__file__).resolve().parents[2] / "scripts" / "migrations"
+    migration_files = [
+        migrations_root / "001_pgvector_bootstrap.sql",
+        migrations_root / "002_rpc_functions.sql",
+    ]
+
+    missing = [str(path) for path in migration_files if not path.exists()]
+    if missing:
+        return False, f"missing_migration_files:{','.join(missing)}"
+
+    try:
+        with conn.cursor() as cur:
+            for path in migration_files:
+                cur.execute(path.read_text(encoding="utf-8"))
+        conn.commit()
+        return True, "ok"
+    except Exception as exc:
+        conn.rollback()
+        return False, f"migration_apply_failed:{exc}"
+
+
 def _probe_postgres_connectivity() -> tuple[bool, str]:
     if psycopg2 is None:
         return False, "psycopg2_not_available"
@@ -543,40 +605,22 @@ def _probe_postgres_connectivity() -> tuple[bool, str]:
                     else:
                         return False, "missing_pgvector_extension"
 
-                cur.execute("SELECT to_regclass('public.document_chunks')")
-                doc_chunks_regclass = cur.fetchone()
-                if not doc_chunks_regclass or doc_chunks_regclass[0] is None:
-                    return False, "missing_table_document_chunks"
-
-                cur.execute("SELECT to_regclass('public.sources')")
-                sources_regclass = cur.fetchone()
-                if not sources_regclass or sources_regclass[0] is None:
-                    return False, "missing_table_sources"
-
-                cur.execute("""
-                    SELECT udt_name
-                    FROM information_schema.columns
-                    WHERE table_schema = 'public'
-                      AND table_name = 'document_chunks'
-                      AND column_name = 'embedding'
-                    """)
-                embedding_column = cur.fetchone()
-                if not embedding_column:
-                    return False, "missing_column_document_chunks.embedding"
-                if str(embedding_column[0]).lower() != "vector":
-                    return (
-                        False,
-                        f"invalid_column_type_document_chunks.embedding:{embedding_column[0]}",
+                schema_ok, schema_detail = _probe_postgres_schema(cur)
+                if not schema_ok:
+                    auto_bootstrap = _is_truthy_env(
+                        "POSTGRES_AUTO_BOOTSTRAP_SCHEMA",
+                        _running_on_render(),
                     )
+                    if not auto_bootstrap:
+                        return False, schema_detail
 
-                cur.execute("""
-                    SELECT 1
-                    FROM pg_proc
-                    WHERE proname = 'search_similar_documents'
-                    LIMIT 1
-                    """)
-                if cur.fetchone() is None:
-                    return False, "missing_function_search_similar_documents"
+                    applied, apply_detail = _apply_postgres_bootstrap(conn)
+                    if not applied:
+                        return False, f"{schema_detail}:{apply_detail}"
+
+                    schema_ok, schema_detail = _probe_postgres_schema(cur)
+                    if not schema_ok:
+                        return False, schema_detail
         finally:
             conn.close()
         return True, "ok"
@@ -610,6 +654,7 @@ def _run_startup_preflight() -> dict[str, Any]:
 
     require_guardrails_hub = _is_truthy_env("GUARDRAILS_REQUIRE_HUB_VALIDATOR", False)
     require_chroma = _is_truthy_env("CHROMA_REQUIRED", False)
+    use_chroma_runtime = data_mode != "postgres"
 
     guardrails_ok, guardrails_detail = _probe_guardrails_loaded()
     checks["guardrails"] = {
@@ -618,12 +663,19 @@ def _run_startup_preflight() -> dict[str, Any]:
         "required": require_guardrails_hub,
     }
 
-    chroma_ok, chroma_detail = _probe_chroma_connectivity()
-    checks["chroma"] = {
-        "ok": chroma_ok,
-        "detail": chroma_detail,
-        "required": require_chroma,
-    }
+    if use_chroma_runtime:
+        chroma_ok, chroma_detail = _probe_chroma_connectivity()
+        checks["chroma"] = {
+            "ok": chroma_ok,
+            "detail": chroma_detail,
+            "required": require_chroma,
+        }
+    else:
+        checks["chroma"] = {
+            "ok": True,
+            "detail": "skipped_in_postgres_mode",
+            "required": False,
+        }
 
     if data_mode == "postgres":
         data_ok, data_detail = _probe_postgres_connectivity()
