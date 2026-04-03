@@ -180,6 +180,17 @@ These pull environment variables from Render dashboard (do NOT commit to `.env`)
 2. Verify Supabase credentials in root `.env`
 3. Check `DATABASE_URL` is correct
 
+### Documents Tab Returns 500/503 With dpg Hostname Error
+If backend logs show:
+
+`could not translate host name "dpg-..." to address: Temporary failure in name resolution`
+
+your local `.env` is using a Render-internal Postgres host. That hostname only resolves inside Render private networking.
+
+Use one of these instead:
+1. Local Postgres: `postgresql://postgres:postgres@localhost:5432/postgres`
+2. Render external Postgres hostname from the Render dashboard (`sslmode=require`)
+
 ### Both Systems Using Different Supabase Instances
 **Problem:** Chat and Data Management pointing to different Supabase projects
 

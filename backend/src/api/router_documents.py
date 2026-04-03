@@ -188,16 +188,49 @@ def _is_schema_profile_error(exc: Exception) -> bool:
 
 
 def _is_data_backend_unavailable_error(exc: Exception) -> bool:
-    message = str(exc).lower()
-    return (
-        "could not connect to server" in message
-        or "connection refused" in message
-        or "connecterror" in message
-        or "timeout" in message
+    if isinstance(exc, HTTPException):
+        return exc.status_code == 503
+
+    db_error_types = tuple(
+        err_type
+        for err_type in (
+            getattr(psycopg2, "OperationalError", None),
+            getattr(psycopg2, "InterfaceError", None),
+            TimeoutError,
+            ConnectionError,
+        )
+        if isinstance(err_type, type)
     )
+    if db_error_types and isinstance(exc, db_error_types):
+        return True
+
+    message = str(exc).lower()
+    patterns = (
+        "could not connect to server",
+        "connection refused",
+        "connecterror",
+        "timeout",
+        "could not translate host name",
+        "name or service not known",
+        "temporary failure in name resolution",
+        "could not resolve host",
+        "server closed the connection unexpectedly",
+        "connection not open",
+        "database_url_not_configured",
+        "database_url is not configured",
+    )
+    return any(pattern in message for pattern in patterns)
+
+
+def _set_statement_timeout(cur: Any, timeout_ms: int = 30000) -> None:
+    safe_timeout_ms = max(int(timeout_ms), 1000)
+    cur.execute(f"SET statement_timeout = {safe_timeout_ms}")
 
 
 def _raise_documents_error(endpoint_name: str, exc: Exception) -> None:
+    if isinstance(exc, HTTPException):
+        raise exc
+
     if _is_data_backend_unavailable_error(exc):
         logger.warning("%s degraded: Postgres unavailable (%s)", endpoint_name, exc)
         raise HTTPException(
@@ -214,10 +247,11 @@ def _raise_documents_error(endpoint_name: str, exc: Exception) -> None:
 def _load_overview_via_sql() -> tuple[dict[str, int], list[dict[str, Any]]]:
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
-        return {"total_chunks": 0, "avg_chunk_size": 0}, []
+        raise RuntimeError("database_url_not_configured")
 
-    with psycopg2.connect(database_url) as conn:
+    with psycopg2.connect(database_url, connect_timeout=5) as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            _set_statement_timeout(cur)
             cur.execute("""
                 SELECT
                     COUNT(*)::int AS total_chunks,
@@ -282,10 +316,11 @@ def _load_overview_via_sql() -> tuple[dict[str, int], list[dict[str, Any]]]:
 def _load_chunk_statistics_via_sql(limit: int) -> list[dict[str, Any]]:
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
-        return []
+        raise RuntimeError("database_url_not_configured")
 
-    with psycopg2.connect(database_url) as conn:
+    with psycopg2.connect(database_url, connect_timeout=5) as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            _set_statement_timeout(cur)
             cur.execute(
                 """
                 SELECT
@@ -385,11 +420,12 @@ async def documents_preview(
     try:
         database_url = os.getenv("DATABASE_URL")
         if not database_url:
-            raise HTTPException(status_code=500, detail="DATABASE_URL is not configured")
+            raise RuntimeError("database_url_not_configured")
 
         chunks = []
-        with psycopg2.connect(database_url) as conn:
+        with psycopg2.connect(database_url, connect_timeout=5) as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                _set_statement_timeout(cur)
                 cur.execute(
                     """
                     SELECT chunk_index, chunk_size, content, metadata
@@ -436,13 +472,14 @@ async def documents_download_url(
     try:
         database_url = os.getenv("DATABASE_URL")
         if not database_url:
-            raise HTTPException(status_code=500, detail="DATABASE_URL is not configured")
+            raise RuntimeError("database_url_not_configured")
 
         source_row: dict[str, Any] | None = None
         chunk_row: dict[str, Any] | None = None
 
-        with psycopg2.connect(database_url) as conn:
+        with psycopg2.connect(database_url, connect_timeout=5) as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                _set_statement_timeout(cur)
                 cur.execute(
                     """
                     SELECT url, title, metadata
@@ -533,14 +570,15 @@ async def documents_tags(
     try:
         database_url = os.getenv("DATABASE_URL")
         if not database_url:
-            raise HTTPException(status_code=500, detail="DATABASE_URL is not configured")
+            raise RuntimeError("database_url_not_configured")
 
         normalized_query = (query or "").strip().lower()
 
         chunk_counts: dict[str, int] = {}
         source_map: dict[str, set[str]] = {}
-        with psycopg2.connect(database_url) as conn:
+        with psycopg2.connect(database_url, connect_timeout=5) as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                _set_statement_timeout(cur)
                 cur.execute("SELECT source_url, metadata FROM public.document_chunks")
                 rows = cur.fetchall() or []
 

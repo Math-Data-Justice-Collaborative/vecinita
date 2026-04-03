@@ -25,7 +25,15 @@ Optional rollback toggles:
 
 ## Local `.env` procedure (untracked)
 
-Use the internal Render coordinates in your local `.env` (file is ignored by git):
+Do not use Render-internal `dpg-*` hostnames from local machines.
+Those hosts resolve only inside Render private networking.
+
+Use one of these local choices instead:
+
+- Local Docker Postgres: `postgresql://postgres:postgres@localhost:5432/postgres`
+- Render external Postgres hostname from Render dashboard (keep `sslmode=require`)
+
+Example of a Render-internal URL (valid only inside Render):
 
 ```env
 DATABASE_URL=postgresql://vecinita_postgres_user:<password>@dpg-d6or4g2a214c73f6hl20-a:5432/vecinita_postgres?sslmode=require
@@ -40,7 +48,13 @@ VECTOR_SYNC_SUPABASE_FALLBACK_READS=false
 
 If your password includes reserved URL characters (`@`, `:`, `/`, `?`, `#`, `%`), URL-encode it in `DATABASE_URL`.
 
-If you are running outside Render, use your external Render hostname and keep `sslmode=require`.
+If you are running outside Render, replace the `dpg-*` host with the external hostname.
+
+If you see this error locally:
+
+`could not translate host name "dpg-..." to address: Temporary failure in name resolution`
+
+switch to local Postgres or the Render external hostname.
 
 Example:
 

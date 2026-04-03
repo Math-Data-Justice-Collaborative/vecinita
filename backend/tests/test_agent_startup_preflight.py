@@ -67,7 +67,7 @@ def test_run_startup_preflight_degraded_postgres(preflight_module, monkeypatch):
 def test_probe_postgres_sentinel_url_is_rejected(preflight_module, monkeypatch):
     """Test that the test placeholder URL is rejected early with clear message."""
     monkeypatch.setenv("DATABASE_URL", "postgresql://test")
-    
+
     ok, detail = preflight_module._probe_postgres_connectivity()
 
     assert ok is False
@@ -76,7 +76,7 @@ def test_probe_postgres_sentinel_url_is_rejected(preflight_module, monkeypatch):
 
 def test_run_startup_preflight_degraded_when_db_url_is_placeholder(preflight_module, monkeypatch):
     """Regression test: Ensure placeholder DATABASE_URL causes degraded status.
-    
+
     This reproduces the original `make dev` failure where backend/.env had
     DATABASE_URL=postgresql://test, causing startup to fail with a confusing
     DNS error.
@@ -99,7 +99,10 @@ def test_run_startup_preflight_degraded_dns_error(preflight_module, monkeypatch)
     monkeypatch.setattr(
         preflight_module,
         "_probe_postgres_connectivity",
-        lambda: (False, 'error: could not translate host name "unknown" to address: Temporary failure in name resolution'),
+        lambda: (
+            False,
+            'error: could not translate host name "unknown" to address: Temporary failure in name resolution',
+        ),
     )
 
     with patch("src.config.resolve_data_db_mode", return_value="postgres"):
@@ -141,4 +144,3 @@ def test_probe_guardrails_allows_local_fallback_when_not_strict(preflight_module
 
     assert ok is True
     assert detail == "local_fallback"
-

@@ -10,6 +10,10 @@ on:
     branches: [ main, develop ]
   workflow_dispatch:
 
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   workflow-context:
     runs-on: ubuntu-22.04
@@ -657,12 +661,15 @@ jobs:
       working-directory: frontend
       run: npm run test:coverage:unit
 
-  frontend-e2e-smoke:
+  frontend-e2e:
     runs-on: ubuntu-22.04
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
         browser: [chromium, firefox]
+        shardIndex: [1, 2, 3, 4, 5, 6]
+        shardTotal: [6]
 
     steps:
     - name: Checkout code
@@ -688,7 +695,7 @@ jobs:
       working-directory: frontend
       run: npx playwright install --with-deps ${{ matrix.browser }}
 
-    - name: Start compose stack for e2e smoke
+    - name: Start compose stack for e2e
       run: |
         set +e
         docker compose -f docker-compose.dev.yml up -d frontend vecinita-gateway
@@ -713,16 +720,27 @@ jobs:
         docker compose -f docker-compose.dev.yml ps
         exit 1
 
-    - name: Run frontend e2e smoke test
+    - name: Run frontend e2e shard
       working-directory: frontend
       env:
         CI: 'true'
         E2E_SKIP_WEBSERVER: 'true'
         E2E_BASE_URL: http://127.0.0.1:15173
       run: |
-        npx playwright test --project=${{ matrix.browser }} \
-          e2e/agent-config-connectivity.spec.ts \
-          e2e/agent-config-non-json-regression.spec.ts
+        npx playwright test \
+          --project=${{ matrix.browser }} \
+          --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+
+    - name: Upload Playwright artifacts on failure
+      if: failure() && !cancelled()
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-failure-${{ matrix.browser }}-shard-${{ matrix.shardIndex }}
+        path: |
+          frontend/playwright-report/
+          frontend/test-results/
+        retention-days: 7
+        if-no-files-found: ignore
 
     - name: Dump compose logs on failure
       if: failure()

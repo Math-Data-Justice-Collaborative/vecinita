@@ -137,6 +137,22 @@ def _safe_host_port(url: str | None) -> str:
         return "unparseable"
 
 
+def _database_url_parts(database_url: str | None) -> tuple[str, str]:
+    raw = (database_url or "").strip()
+    if not raw:
+        return "", ""
+    try:
+        parsed = urlparse(raw)
+        return (parsed.scheme or "", parsed.hostname or "")
+    except Exception:
+        return "", ""
+
+
+def _is_render_internal_postgres_host(hostname: str) -> bool:
+    host = (hostname or "").strip().lower()
+    return host.startswith("dpg-")
+
+
 def _get_chatollama_class():
     """Load ChatOllama lazily so startup doesn't fail on optional deps."""
     global ChatOllama, _CHATOLLAMA_IMPORT_ERROR
@@ -275,13 +291,15 @@ try:
     _log_ep_summary(logger)
     logger.info(
         "Startup connection config: render=%s embedding_url=%s ollama_url=%s "
-        "embedding_strict_startup=%s preflight_strict=%s data_db_mode_env=%s",
+        "embedding_strict_startup=%s preflight_strict=%s data_db_mode_env=%s db_scheme=%s db_host=%s",
         _running_on_render(),
         _safe_host_port(EMBEDDING_SERVICE_URL),
         _safe_host_port(OLLAMA_BASE_URL),
         os.environ.get("EMBEDDING_STRICT_STARTUP", "false"),
         os.environ.get("BACKEND_PREFLIGHT_STRICT", "false"),
         os.environ.get("DB_DATA_MODE", "auto"),
+        _database_url_parts(os.environ.get("DATABASE_URL", ""))[0] or "unset",
+        _database_url_parts(os.environ.get("DATABASE_URL", ""))[1] or "unset",
     )
     if supabase_url and supabase_key:
         logger.info("Initializing optional Supabase client (auth/diagnostics only)...")
@@ -554,6 +572,8 @@ def _probe_postgres_connectivity() -> tuple[bool, str]:
     if database_url == "postgresql://test":
         return False, "database_url_is_test_placeholder"
 
+    _, database_host = _database_url_parts(database_url)
+
     try:
         conn = psycopg2.connect(database_url, connect_timeout=3)
         try:
@@ -600,10 +620,30 @@ def _probe_postgres_connectivity() -> tuple[bool, str]:
             conn.close()
         return True, "ok"
     except Exception as exc:
+        error_text = str(exc).lower()
+        has_name_resolution_error = (
+            "could not translate host name" in error_text
+            or "temporary failure in name resolution" in error_text
+            or "name or service not known" in error_text
+            or "could not resolve host" in error_text
+        )
+
+        if database_host and _is_render_internal_postgres_host(
+            database_host
+        ) and has_name_resolution_error:
+            return (
+                False,
+                "error: render_internal_host_unresolvable_outside_render"
+                f": host={database_host}"
+                ": hint=use_render_external_hostname_or_local_postgres",
+            )
+
         return False, f"error: {exc}"
 
 
 def _startup_config_summary() -> dict[str, Any]:
+    db_scheme, db_host = _database_url_parts(os.environ.get("DATABASE_URL", ""))
+
     return {
         "render": _running_on_render(),
         "embedding_url": EMBEDDING_SERVICE_URL,
@@ -612,6 +652,8 @@ def _startup_config_summary() -> dict[str, Any]:
         "preflight_strict": _is_truthy_env("BACKEND_PREFLIGHT_STRICT", False),
         "db_data_mode": os.environ.get("DB_DATA_MODE", "auto"),
         "database_url_set": bool(os.environ.get("DATABASE_URL", "").strip()),
+        "database_url_scheme": db_scheme or "unset",
+        "database_url_host": db_host or "unset",
         "supabase_url_set": bool(os.environ.get("SUPABASE_URL", "").strip()),
         "supabase_key_set": bool((os.environ.get("SUPABASE_KEY") or "").strip()),
     }

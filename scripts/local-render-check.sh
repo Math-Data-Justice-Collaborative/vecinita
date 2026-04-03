@@ -21,6 +21,7 @@ PROXY_URL="${PROXY_URL:-http://localhost:10000}"
 AGENT_URL="${AGENT_URL:-http://localhost:8000}"
 GATEWAY_URL="${GATEWAY_URL:-http://localhost:8004}"
 ENV_FILE="${ENV_FILE:-.env.render-local}"
+DOCUMENTS_EXPECTED_STATUS="${DOCUMENTS_EXPECTED_STATUS:-200}"
 FAIL_FAST=false
 SKIP_SIMULATION=false
 
@@ -85,6 +86,17 @@ env_check() {
   fi
 }
 
+env_value() {
+  local key="$1"
+  grep -E "^${key}=" "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"' || true
+}
+
+db_host_from_url() {
+  local url="$1"
+  # Extract host from postgresql://user:pass@host:port/db
+  echo "$url" | sed -E 's#^[A-Za-z0-9+.-]+://##' | sed -E 's#^[^@]*@##' | cut -d/ -f1 | cut -d: -f1
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Phase 0: Env contract validation
 # ─────────────────────────────────────────────────────────────────────────────
@@ -131,6 +143,39 @@ info "Phase 3 — Gateway service"
 echo "──────────────────────────────"
 
 http_check "Gateway /health" "${GATEWAY_URL}/api/v1/health" "200"
+
+echo ""
+info "Phase 3b — Documents endpoint smoke"
+echo "──────────────────────────────"
+
+http_check \
+  "Gateway /documents/overview" \
+  "${GATEWAY_URL}/api/v1/documents/overview" \
+  "${DOCUMENTS_EXPECTED_STATUS}"
+http_check \
+  "Gateway /documents/tags" \
+  "${GATEWAY_URL}/api/v1/documents/tags?limit=20" \
+  "${DOCUMENTS_EXPECTED_STATUS}"
+
+echo ""
+info "Phase 3c — DATABASE_URL host scope guard"
+echo "──────────────────────────────"
+
+if [[ -f "$ENV_FILE" ]]; then
+  db_url=$(env_value "DATABASE_URL")
+  db_host=$(db_host_from_url "$db_url")
+  if [[ -n "$db_host" ]]; then
+    if [[ "$db_host" == dpg-* && "$GATEWAY_URL" == http://localhost* ]]; then
+      fail "DATABASE_URL host '$db_host' is Render-internal and will not resolve from local runs. Use Render external hostname or local Postgres."
+    else
+      pass "DATABASE_URL host scope check ($db_host)"
+    fi
+  else
+    warn "DATABASE_URL not found in $ENV_FILE; host scope check skipped"
+  fi
+else
+  warn "Skipping DATABASE_URL host scope guard — $ENV_FILE not found"
+fi
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Phase 4: Proxy routing contract (URL path verification)

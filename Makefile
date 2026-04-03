@@ -4,10 +4,11 @@
 	dev-data-management dev-data-management-frontend dev-data-management-api \
 	dev-backend dev-gateway dev-frontend \
 	branch-status branch-save branch-restore branch-switch branch-pull branch-sync-main \
-	lint lint-backend lint-frontend lint-imported \
+	lint lint-backend lint-frontend lint-imported lint-fix lint-fix-backend lint-fix-frontend lint-fix-data-management-frontend \
 	typecheck typecheck-backend typecheck-frontend typecheck-imported \
 	format format-backend format-frontend format-check format-check-backend format-check-frontend \
-	quality quality-imported \
+	audit audit-backend audit-frontend audit-imported audit-data-management-frontend audit-fix audit-fix-frontend audit-fix-data-management-frontend \
+	quality quality-fix quality-full quality-imported \
 	test-unit test-integration test-e2e \
 	test-backend-unit test-frontend-unit test-frontend-e2e \
 	test-imported test-data-management-frontend test-embedding-modal test-model-modal test-scraper check-data-management-api-layout \
@@ -15,6 +16,7 @@
 	typecheck-scraper \
 	test-integration-gateway-fast test-integration-gateway-full test-integration-gateway \
 	test-all-integration test-cross-integration test-cross-e2e \
+	scraper-run scraper-run-verbose scraper-run-clean scraper-validate-postgres \
 	microservices-up microservices-down microservices-logs test-microservices-contracts test-microservices \
 	render-env-validate render-tests-proxy render-tests-strict render-tests-render-suite render-workflow-ci \
 	render-local-up render-local-down render-local-logs render-local-check render-local-check-live render-local-validate \
@@ -54,6 +56,7 @@ help:
 	@echo "  make lint-imported                       Lint imported service/frontend sub-repos"
 	@echo "  make lint-backend                        Run Ruff checks"
 	@echo "  make lint-frontend                       Run ESLint checks"
+	@echo "  make lint-fix                            Auto-fix supported lint issues"
 	@echo "  make typecheck                           Type-check core and imported codebases"
 	@echo "  make typecheck-imported                  Run imported sub-repo type checks"
 	@echo "  make typecheck-backend                   Run mypy on backend source"
@@ -62,8 +65,12 @@ help:
 	@echo "  make format-backend                      Format backend with Black"
 	@echo "  make format-frontend                     Format frontend with Prettier"
 	@echo "  make format-check                        Check formatting without writing"
-	@echo "  make quality-imported                    Run imported sub-repo checks"
-	@echo "  make quality                             Run core + imported quality checks + fast integration"
+	@echo "  make audit                               Run dependency audits for backend and frontend"
+	@echo "  make audit-imported                      Run dependency audits for imported frontend repos"
+	@echo "  make quality-imported                    Run imported sub-repo quality checks"
+	@echo "  make quality                             Run repo-wide lint, format, typecheck, and audit checks"
+	@echo "  make quality-fix                         Apply safe auto-fixes, then rerun quality checks"
+	@echo "  make quality-full                        Run quality checks plus unit/imported tests and fast integration"
 	@echo ""
 	@echo "Testing targets"
 	@echo "  make test-unit                           Run backend and frontend unit tests"
@@ -81,6 +88,12 @@ help:
 	@echo "  make test-e2e                            Run frontend and cross-stack e2e tests"
 	@echo "  make test-cross-e2e                      Run tests/ e2e suite"
 	@echo "  make test-frontend-e2e                   Run frontend Playwright tests"
+	@echo ""
+	@echo "Scraper and ingestion targets"
+	@echo "  make scraper-run                         Run scraper in additive streaming mode"
+	@echo "  make scraper-run-verbose                 Run scraper with verbose logs and DB validation"
+	@echo "  make scraper-run-clean                   Run destructive clean + scraper + DB validation"
+	@echo "  make scraper-validate-postgres           Run Postgres validation queries only (no scraping)"
 	@echo ""
 	@echo "Render workflow shortcuts"
 	@echo "  make render-env-validate [ENV_FILE=...]  Validate shared Render env contract"
@@ -231,14 +244,25 @@ lint: lint-backend lint-frontend
 
 lint-imported: lint-data-management-frontend lint-scraper lint-embedding-modal lint-model-modal
 
+lint-fix: lint-fix-backend lint-fix-frontend lint-fix-data-management-frontend
+
 lint-backend:
 	cd backend && uv run ruff check src tests
+
+lint-fix-backend:
+	cd backend && uv run ruff check --fix src tests
 
 lint-frontend:
 	cd frontend && npm run lint
 
+lint-fix-frontend:
+	cd frontend && npm run lint:fix
+
 lint-data-management-frontend:
 	cd apps/data-management-frontend && npm run lint
+
+lint-fix-data-management-frontend:
+	cd apps/data-management-frontend && npm run lint:fix
 
 lint-scraper:
 	cd services/scraper && make lint
@@ -278,6 +302,27 @@ format-check-backend:
 format-check-frontend:
 	cd frontend && npm run format
 
+audit: audit-backend audit-frontend
+
+audit-backend:
+	cd backend && uv run --with pip-audit pip-audit --progress-spinner off --desc
+
+audit-frontend:
+	cd frontend && npm audit --audit-level=high
+
+audit-imported: audit-data-management-frontend
+
+audit-data-management-frontend:
+	cd apps/data-management-frontend && npm audit --audit-level=high
+
+audit-fix: audit-fix-frontend audit-fix-data-management-frontend
+
+audit-fix-frontend:
+	cd frontend && npm audit fix
+
+audit-fix-data-management-frontend:
+	cd apps/data-management-frontend && npm audit fix
+
 check-data-management-api-layout:
 	test -d services/data-management-api/apps/backend
 	test -d services/data-management-api/packages/shared-config
@@ -296,9 +341,13 @@ test-model-modal:
 test-scraper:
 	cd services/scraper && make test
 
-quality-imported: lint-imported typecheck-imported test-imported
+quality-imported: lint-imported typecheck-imported audit-imported
 
-quality: lint typecheck format-check test-unit quality-imported test-integration-gateway-fast
+quality: format-check lint typecheck audit quality-imported
+
+quality-fix: format lint-fix audit-fix quality
+
+quality-full: quality test-unit test-imported test-integration-gateway-fast
 
 test-unit: test-backend-unit test-frontend-unit
 
@@ -324,6 +373,18 @@ test-all-integration:
 
 test-cross-integration:
 	cd tests && uv run pytest -v -m integration
+
+scraper-run:
+	./scripts/run_scraper_postgres_batch.sh --local
+
+scraper-run-verbose:
+	./scripts/run_scraper_postgres_batch.sh --local --verbose
+
+scraper-run-clean:
+	./scripts/run_scraper_postgres_batch.sh --local --clean
+
+scraper-validate-postgres:
+	./scripts/run_scraper_postgres_batch.sh --skip-scraper
 
 render-env-validate:
 	python3 scripts/github/validate_render_env.py $(or $(ENV_FILE),.env.prod.render)

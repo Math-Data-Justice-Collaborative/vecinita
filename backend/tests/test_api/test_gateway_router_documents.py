@@ -30,6 +30,10 @@ class _FakeCursor:
         return False
 
     def execute(self, _query, _params=None):
+        normalized_query = str(_query).strip().lower()
+        if normalized_query.startswith("set statement_timeout"):
+            self._current = []
+            return
         self._current = self._scripted_results.pop(0) if self._scripted_results else []
 
     def fetchone(self):
@@ -126,7 +130,7 @@ def test_documents_preview_reads_chunks_from_source(documents_client):
             "metadata": {"document_title": "Doc", "source_url": "https://x"},
         }
     ]
-    router_documents.psycopg2.connect = lambda _url: _FakeConnection([rows])
+    router_documents.psycopg2.connect = lambda _url, **_kwargs: _FakeConnection([rows])
 
     response = client.get(
         "/api/v1/documents/preview", params={"source_url": "https://x", "limit": 3}
@@ -169,7 +173,7 @@ def test_documents_download_url_returns_non_error_for_url_only_sources(documents
         "title": "Example Article",
         "metadata": {"source_url": "https://example.org/article"},
     }
-    router_documents.psycopg2.connect = lambda _url: _FakeConnection([[source_row]])
+    router_documents.psycopg2.connect = lambda _url, **_kwargs: _FakeConnection([[source_row]])
 
     response = client.get(
         "/api/v1/documents/download-url",
@@ -196,7 +200,7 @@ def test_documents_download_url_resolves_upload_source_without_explicit_download
             "download_url": "https://example.supabase.co/storage/v1/object/public/documents/uploads/2026/02/26/file.txt",
         },
     }
-    router_documents.psycopg2.connect = lambda _url: _FakeConnection([[source_row]])
+    router_documents.psycopg2.connect = lambda _url, **_kwargs: _FakeConnection([[source_row]])
 
     response = client.get(
         "/api/v1/documents/download-url",
@@ -262,7 +266,7 @@ def test_documents_tags_returns_counts(documents_client):
             "metadata": {"source_url": "https://b.example.org", "tags": ["housing"]},
         },
     ]
-    router_documents.psycopg2.connect = lambda _url: _FakeConnection([rows])
+    router_documents.psycopg2.connect = lambda _url, **_kwargs: _FakeConnection([rows])
 
     response = client.get("/api/v1/documents/tags", params={"limit": 10})
     assert response.status_code == 200
@@ -278,7 +282,7 @@ def test_documents_tags_returns_503_when_database_unavailable(documents_client):
 
     from src.api import router_documents
 
-    def _raise_connect_error(_url):
+    def _raise_connect_error(_url, **_kwargs):
         raise RuntimeError("could not connect to server")
 
     router_documents.psycopg2.connect = _raise_connect_error
@@ -327,7 +331,7 @@ def test_documents_tags_ignores_malformed_metadata_and_normalizes_tags(documents
             },
         },
     ]
-    router_documents.psycopg2.connect = lambda _url: _FakeConnection([rows])
+    router_documents.psycopg2.connect = lambda _url, **_kwargs: _FakeConnection([rows])
 
     response = client.get("/api/v1/documents/tags", params={"limit": 10})
     assert response.status_code == 200
@@ -338,3 +342,124 @@ def test_documents_tags_ignores_malformed_metadata_and_normalizes_tags(documents
     assert by_tag["housing"]["source_count"] == 2
     assert by_tag["benefits"]["chunk_count"] == 1
     assert by_tag["benefits"]["source_count"] == 1
+
+
+def test_documents_overview_returns_503_for_dns_resolution_error(documents_client):
+    client = documents_client
+
+    from src.api import router_documents
+
+    def _raise_dns_error():
+        raise RuntimeError(
+            'could not translate host name "dpg-d6or4g2a214c73f6hl20-a" to address: '
+            "Temporary failure in name resolution"
+        )
+
+    router_documents._load_overview_via_sql = _raise_dns_error
+
+    response = client.get("/api/v1/documents/overview")
+    assert response.status_code == 503
+    payload = response.json()
+    assert "Document index is temporarily unavailable" in payload["error"]
+
+
+def test_documents_preview_returns_503_when_database_unavailable(documents_client):
+    client = documents_client
+
+    from src.api import router_documents
+
+    def _raise_connect_error(_url, **_kwargs):
+        raise RuntimeError("connection refused")
+
+    router_documents.psycopg2.connect = _raise_connect_error
+
+    response = client.get("/api/v1/documents/preview", params={"source_url": "https://x"})
+    assert response.status_code == 503
+    payload = response.json()
+    assert "Document index is temporarily unavailable" in payload["error"]
+
+
+def test_documents_download_url_returns_503_when_database_unavailable(documents_client):
+    client = documents_client
+
+    from src.api import router_documents
+
+    def _raise_connect_error(_url, **_kwargs):
+        raise RuntimeError("name or service not known")
+
+    router_documents.psycopg2.connect = _raise_connect_error
+
+    response = client.get(
+        "/api/v1/documents/download-url",
+        params={"source_url": "https://example.org/article"},
+    )
+    assert response.status_code == 503
+    payload = response.json()
+    assert "Document index is temporarily unavailable" in payload["error"]
+
+
+def test_documents_chunk_statistics_returns_503_when_database_unavailable(documents_client):
+    client = documents_client
+
+    from src.api import router_documents
+
+    def _raise_backend_unavailable(_limit):
+        raise RuntimeError("timeout")
+
+    router_documents._load_chunk_statistics_via_sql = _raise_backend_unavailable
+
+    response = client.get("/api/v1/documents/chunk-statistics")
+    assert response.status_code == 503
+    payload = response.json()
+    assert "Document index is temporarily unavailable" in payload["error"]
+
+
+def test_documents_tags_returns_503_for_dns_resolution_error(documents_client):
+    client = documents_client
+
+    from src.api import router_documents
+
+    def _raise_dns_error(_url, **_kwargs):
+        raise RuntimeError("temporary failure in name resolution")
+
+    router_documents.psycopg2.connect = _raise_dns_error
+
+    response = client.get("/api/v1/documents/tags", params={"limit": 10})
+    assert response.status_code == 503
+    payload = response.json()
+    assert "Document index is temporarily unavailable" in payload["error"]
+
+
+def test_documents_endpoints_consistent_503_for_render_internal_dns_error(documents_client):
+    client = documents_client
+
+    from src.api import router_documents
+
+    dns_error = (
+        'could not translate host name "dpg-d6or4g2a214c73f6hl20-a" '
+        "to address: Temporary failure in name resolution"
+    )
+
+    def _raise_dns_error(*_args, **_kwargs):
+        raise RuntimeError(dns_error)
+
+    router_documents._load_overview_via_sql = lambda: _raise_dns_error()
+    router_documents._load_chunk_statistics_via_sql = lambda _limit: _raise_dns_error()
+    router_documents.psycopg2.connect = _raise_dns_error
+
+    cases = [
+        ("/api/v1/documents/overview", {}),
+        ("/api/v1/documents/tags", {"limit": 20}),
+        ("/api/v1/documents/preview", {"source_url": "https://example.org/a"}),
+        (
+            "/api/v1/documents/download-url",
+            {"source_url": "https://example.org/a"},
+        ),
+        ("/api/v1/documents/chunk-statistics", {"limit": 20}),
+    ]
+
+    for path, params in cases:
+        response = client.get(path, params=params)
+        assert response.status_code == 503, f"expected 503 for {path}, got {response.status_code}"
+        payload = response.json()
+        assert "Document index is temporarily unavailable" in payload["error"]

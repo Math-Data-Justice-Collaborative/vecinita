@@ -135,7 +135,10 @@ def resolve_data_db_mode() -> str:
     remains Supabase-backed.
     """
 
-    mode = DB_DATA_MODE if DB_DATA_MODE in {"auto", "postgres", "supabase"} else "auto"
+    # Resolve from live environment every call to avoid stale import-time values
+    # during dev/test startup sequencing.
+    mode_env = os.getenv("DB_DATA_MODE", "auto").strip().lower()
+    mode = mode_env if mode_env in {"auto", "postgres", "supabase"} else "auto"
 
     # Render runtime is Postgres-only during cutover and after migration.
     # Keep this strict so misconfigured env does not silently route reads/writes.
@@ -145,7 +148,7 @@ def resolve_data_db_mode() -> str:
     if mode != "auto":
         return mode
 
-    has_postgres = bool(DATABASE_URL)
+    has_postgres = bool(os.getenv("DATABASE_URL", "").strip())
 
     # Postgres-first cutover: when DATABASE_URL is available, use it for
     # retrieval/storage regardless of Supabase auth configuration.
