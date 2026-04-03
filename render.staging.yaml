@@ -24,6 +24,47 @@ services:
         fromDatabase:
           name: vecinita-postgres-staging
           property: connectionString
+      # Split connection bindings for tools/services that consume component DB vars.
+      - key: DB_HOST
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: password
+      - key: PGHOST
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: host
+      - key: PGPORT
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: port
+      - key: PGDATABASE
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: database
+      - key: PGUSER
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: user
+      - key: PGPASSWORD
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: password
       - key: PYTHONUNBUFFERED
         sync: false
       - key: TF_ENABLE_ONEDNN_OPTS
@@ -148,6 +189,47 @@ services:
         fromDatabase:
           name: vecinita-postgres-staging
           property: connectionString
+      # Split connection bindings for tools/services that consume component DB vars.
+      - key: DB_HOST
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: password
+      - key: PGHOST
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: host
+      - key: PGPORT
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: port
+      - key: PGDATABASE
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: database
+      - key: PGUSER
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: user
+      - key: PGPASSWORD
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: password
       - key: PYTHONUNBUFFERED
         sync: false
       - key: ALLOWED_ORIGINS

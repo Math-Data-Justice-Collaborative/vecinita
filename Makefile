@@ -210,9 +210,7 @@ dev-data-management-api:
 	@test -d services/data-management-api/apps/backend/proxy/app || \
 		(echo "❌ data-management-api submodule not initialized." && \
 		 echo "   Run: git submodule update --init services/data-management-api" && exit 1)
-	@cd services/data-management-api/apps/backend/proxy && \
-		source ../../../../../.env && \
-		PORT=8005 uv run uvicorn app.main:app --host 0.0.0.0 --port 8005 --reload &
+	@bash -c 'cd services/data-management-api/apps/backend/proxy && . /root/GitHub/VECINA/vecinita/.env && PORT=8005 uv run uvicorn app.main:app --host 0.0.0.0 --port 8005 --reload' &
 # Individual service targets (legacy)
 # ============================================================================
 

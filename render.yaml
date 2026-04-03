@@ -32,6 +32,47 @@ services:
         fromDatabase:
           name: vecinita-postgres
           property: connectionString
+      # Split connection bindings for tools/services that consume component DB vars.
+      - key: DB_HOST
+        fromDatabase:
+          name: vecinita-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: vecinita-postgres
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: vecinita-postgres
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: vecinita-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: vecinita-postgres
+          property: password
+      - key: PGHOST
+        fromDatabase:
+          name: vecinita-postgres
+          property: host
+      - key: PGPORT
+        fromDatabase:
+          name: vecinita-postgres
+          property: port
+      - key: PGDATABASE
+        fromDatabase:
+          name: vecinita-postgres
+          property: database
+      - key: PGUSER
+        fromDatabase:
+          name: vecinita-postgres
+          property: user
+      - key: PGPASSWORD
+        fromDatabase:
+          name: vecinita-postgres
+          property: password
       # All remaining vars come from the shared env group — sync: false
       # ensures this blueprint never overwrites dashboard/env-group values.
       - key: PYTHONUNBUFFERED
@@ -159,6 +200,47 @@ services:
         fromDatabase:
           name: vecinita-postgres
           property: connectionString
+      # Split connection bindings for tools/services that consume component DB vars.
+      - key: DB_HOST
+        fromDatabase:
+          name: vecinita-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: vecinita-postgres
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: vecinita-postgres
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: vecinita-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: vecinita-postgres
+          property: password
+      - key: PGHOST
+        fromDatabase:
+          name: vecinita-postgres
+          property: host
+      - key: PGPORT
+        fromDatabase:
+          name: vecinita-postgres
+          property: port
+      - key: PGDATABASE
+        fromDatabase:
+          name: vecinita-postgres
+          property: database
+      - key: PGUSER
+        fromDatabase:
+          name: vecinita-postgres
+          property: user
+      - key: PGPASSWORD
+        fromDatabase:
+          name: vecinita-postgres
+          property: password
       # All remaining vars come from the shared env group.
       - key: PYTHONUNBUFFERED
         sync: false
