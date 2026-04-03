@@ -74,6 +74,10 @@ services:
         sync: false
       - key: BACKEND_PREFLIGHT_STRICT
         sync: false
+      - key: POSTGRES_AUTO_CREATE_VECTOR_EXTENSION
+        value: "true"
+      - key: POSTGRES_AUTO_BOOTSTRAP_SCHEMA
+        value: "true"
       - key: GUARDRAILS_REQUIRE_HUB_VALIDATOR
         sync: false
       - key: GUARDRAILS_HUB_AUTO_INSTALL
@@ -98,6 +102,8 @@ services:
         sync: false
       - key: LANGSMITH_PROJECT
         sync: false
+      - key: MODAL_PROXY_INTERNAL_URL
+        sync: false
 
   - type: web
     name: vecinita-frontend
@@ -115,7 +121,7 @@ services:
       - key: VITE_GATEWAY_URL
         sync: false
       - key: VITE_BACKEND_URL
-        sync: false
+        value: https://vecinita-agent.onrender.com
       - key: VITE_AGENT_REQUEST_TIMEOUT_MS
         sync: false
       - key: VITE_AGENT_STREAM_TIMEOUT_MS
@@ -169,6 +175,8 @@ services:
       - key: VECINITA_MODEL_API_URL
         sync: false
       - key: VECINITA_SCRAPER_API_URL
+        sync: false
+      - key: MODAL_PROXY_INTERNAL_URL
         sync: false
       - key: MODAL_TOKEN_ID
         sync: false

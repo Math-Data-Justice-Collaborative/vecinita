@@ -1,6 +1,6 @@
 """
 Database uploader for the VECINA scraper.
-Handles uploading processed document chunks to ChromaDB.
+Handles uploading processed document chunks to Postgres/Supabase vector storage.
 """
 
 import hashlib
@@ -16,7 +16,6 @@ from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field
 
-from src.services.chroma_store import ChromaStore, get_chroma_store
 from src.services.llm import LocalLLMClientManager
 from src.utils.tags import build_bilingual_tag_fields, infer_tags_from_text, normalize_tags
 
@@ -82,7 +81,7 @@ class DocumentChunk:
 
 
 class DatabaseUploader:
-    """Uploads processed chunks to Chroma vector database."""
+    """Uploads processed chunks to Postgres/Supabase vector storage."""
 
     def __init__(self, use_local_embeddings: bool = True):
         """
@@ -94,7 +93,6 @@ class DatabaseUploader:
         self.use_local_embeddings = use_local_embeddings
         self.embedding_model: Any | None = None
         self.embedding_client_type: str | None = None
-        self.chroma_store: ChromaStore | None = None
         self.local_llm_tagger = None
         self.local_llm_raw_model = None
         self._llm_structured_output_supported = True
@@ -103,9 +101,9 @@ class DatabaseUploader:
         self._known_tag_cache: list[str] | None = None
         self.supabase_client: Any | None = None
         self.postgres_database_url = (os.getenv("DATABASE_URL") or "").strip()
-        self.vector_sync_target = (os.getenv("VECTOR_SYNC_TARGET") or "supabase").strip().lower()
+        self.vector_sync_target = (os.getenv("VECTOR_SYNC_TARGET") or "postgres").strip().lower()
         if self.vector_sync_target not in {"supabase", "postgres"}:
-            self.vector_sync_target = "supabase"
+            self.vector_sync_target = "postgres"
         self.vector_sync_enabled = os.getenv("VECTOR_SYNC_ENABLED", "true").lower() in {
             "1",
             "true",
@@ -132,7 +130,7 @@ class DatabaseUploader:
 
         self._init_local_llm_tagger()
 
-        # Initialize Chroma connection
+        # Initialize vector DB clients
         self._init_supabase()
 
     def _init_local_llm_tagger(self) -> None:
@@ -412,20 +410,37 @@ class DatabaseUploader:
             return fallback_tags, None, None, {}
 
     def _get_known_tags(self) -> list[str]:
-        """Load existing tags from source records for tag reuse/canonicalization."""
+        """Load existing tags from stored chunk metadata for tag reuse/canonicalization."""
         if self._known_tag_cache is not None:
-            return self._known_tag_cache
-
-        if not self.chroma_store:
-            self._known_tag_cache = []
             return self._known_tag_cache
 
         try:
             known: list[str] = []
-            for source in self.chroma_store.list_sources(limit=5000, offset=0):
-                source_tags = normalize_tags((source or {}).get("tags", []))
-                if source_tags:
-                    known.extend(source_tags)
+
+            if self.vector_sync_target == "postgres" and self.postgres_database_url and POSTGRES_AVAILABLE and psycopg2 is not None:
+                sql = (
+                    "SELECT metadata->'tags' AS tags "
+                    "FROM document_chunks "
+                    "WHERE metadata ? 'tags' "
+                    "ORDER BY updated_at DESC "
+                    "LIMIT 5000"
+                )
+                with psycopg2.connect(self.postgres_database_url, connect_timeout=5) as conn:
+                    with conn.cursor() as cur:
+                        cur.execute(sql)
+                        for (tags_value,) in cur.fetchall():
+                            if isinstance(tags_value, list):
+                                known.extend(normalize_tags(tags_value))
+
+            elif self.supabase_client:
+                table_client = self._supabase_table_client()
+                if table_client is not None:
+                    response = table_client.select("metadata").limit(5000).execute()
+                    for row in response.data or []:
+                        if isinstance(row, dict):
+                            metadata = row.get("metadata") if isinstance(row.get("metadata"), dict) else {}
+                            known.extend(normalize_tags(metadata.get("tags", [])))
+
             self._known_tag_cache = normalize_tags(known)
         except Exception as exc:
             log.debug(f"Unable to load known tag catalog: {exc}")
@@ -496,16 +511,10 @@ class DatabaseUploader:
         )
 
     def _init_supabase(self) -> None:
-        """Initialize Chroma client store.
+        """Initialize vector DB clients.
 
         Kept method name for backward compatibility in tests/import paths.
         """
-        self.chroma_store = get_chroma_store()
-        if not self.chroma_store.heartbeat():
-            log.warning("Chroma heartbeat failed during uploader init; uploads will retry on use")
-        else:
-            log.info("✓ Chroma connection established")
-
         if not self.vector_sync_enabled:
             log.info("Vector sync disabled (VECTOR_SYNC_ENABLED=false)")
             return
@@ -573,7 +582,7 @@ class DatabaseUploader:
             return
         self.vector_sync_pending_rows.extend([self._build_supabase_row(row) for row in rows])
         log.warning(
-            "Queued %s row(s) for Supabase sync replay after failure: %s",
+            "Queued %s row(s) for vector sync replay after failure: %s",
             len(rows),
             error,
         )
@@ -659,7 +668,10 @@ class DatabaseUploader:
         if self.vector_sync_target == "postgres":
             return self._sync_rows_to_postgres(rows)
         if not self.supabase_client:
-            return True
+            if self.vector_sync_degraded_mode:
+                log.warning("Supabase sync unavailable; skipping write in degraded mode")
+                return False
+            raise RuntimeError("Supabase sync is configured but no Supabase client is available")
 
         self._flush_sync_queue()
         payload = [self._build_supabase_row(row) for row in rows]
@@ -701,7 +713,7 @@ class DatabaseUploader:
             self._queue_sync_rows(rows, last_error)
             if not self.vector_sync_degraded_mode:
                 raise RuntimeError(f"Supabase sync failed after retries: {last_error}")
-            log.warning("Supabase sync failed in degraded mode; write kept in Chroma only")
+            log.warning("Supabase sync failed in degraded mode; write was not persisted")
         return False
 
     def _vector_literal(self, embedding: Any) -> str | None:
@@ -716,7 +728,10 @@ class DatabaseUploader:
         if not rows or not self.vector_sync_enabled:
             return True
         if not self.postgres_database_url or not POSTGRES_AVAILABLE or psycopg2 is None:
-            return True
+            if self.vector_sync_degraded_mode:
+                log.warning("Postgres sync unavailable; skipping write in degraded mode")
+                return False
+            raise RuntimeError("Postgres sync is configured but DATABASE_URL/psycopg2 is unavailable")
 
         sql = (
             "INSERT INTO document_chunks ("
@@ -781,7 +796,7 @@ class DatabaseUploader:
         if last_error is not None:
             if not self.vector_sync_degraded_mode:
                 raise RuntimeError(f"Postgres sync failed after retries: {last_error}")
-            log.warning("Postgres sync failed in degraded mode; write kept in Chroma only")
+            log.warning("Postgres sync failed in degraded mode; write was not persisted")
         return False
 
     def upload_chunks(
@@ -807,10 +822,6 @@ class DatabaseUploader:
         if not chunks:
             log.warning("No chunks to upload")
             return 0, 0
-
-        if not self.chroma_store:
-            log.error("Chroma store not initialized")
-            return 0, len(chunks)
 
         log.info(f"--> Uploading {len(chunks)} chunks to database...")
 
@@ -943,12 +954,9 @@ class DatabaseUploader:
     def _upload_batch(
         self, chunks: list[DocumentChunk], embeddings: list[list[float]], source_identifier: str
     ) -> tuple[int, int]:
-        """Upload a batch of chunks to Chroma."""
+        """Upload a batch of chunks to configured vector backend."""
         if not chunks or not embeddings:
             return 0, 0
-
-        if self.chroma_store is None:
-            raise RuntimeError("Chroma store not initialized")
 
         rows = []
         for chunk, embedding in zip(chunks, embeddings, strict=False):
@@ -978,11 +986,15 @@ class DatabaseUploader:
             rows.append(row)
 
         try:
-            successful = self.chroma_store.upsert_chunks(rows)
-            self._sync_rows_to_supabase(rows)
-            failed = 0
-            log.debug(f"Batch upload successful: {successful} chunks to Chroma")
-            return successful, failed
+            persisted = self._sync_rows_to_supabase(rows)
+            if persisted:
+                successful = len(rows)
+                failed = 0
+                log.debug(f"Batch upload successful: {successful} chunks")
+                return successful, failed
+
+            log.warning("Batch upload returned degraded mode without persistence")
+            return 0, len(rows)
 
         except Exception as e:
             log.error(f"--> Batch upload failed: {e}")
@@ -990,16 +1002,37 @@ class DatabaseUploader:
             return self._upload_individual(chunks, embeddings)
 
     def _get_source_tags(self, source_identifier: str) -> list[str]:
-        """Fetch canonical source-level tags from Chroma source records."""
-        if not self.chroma_store:
-            return []
+        """Fetch canonical source-level tags from existing stored chunks."""
         try:
-            source = self.chroma_store.get_source(source_identifier)
-            if not source:
-                return []
-            metadata = source.get("metadata") if isinstance(source, dict) else {}
-            if isinstance(metadata, dict):
-                return normalize_tags(metadata.get("tags", []))
+            if self.vector_sync_target == "postgres" and self.postgres_database_url and POSTGRES_AVAILABLE and psycopg2 is not None:
+                sql = (
+                    "SELECT metadata->'tags' AS tags "
+                    "FROM document_chunks "
+                    "WHERE source_url = %s "
+                    "ORDER BY updated_at DESC "
+                    "LIMIT 1"
+                )
+                with psycopg2.connect(self.postgres_database_url, connect_timeout=5) as conn:
+                    with conn.cursor() as cur:
+                        cur.execute(sql, (source_identifier,))
+                        row = cur.fetchone()
+                        if row and isinstance(row[0], list):
+                            return normalize_tags(row[0])
+
+            if self.supabase_client:
+                table_client = self._supabase_table_client()
+                if table_client is not None:
+                    response = (
+                        table_client.select("metadata")
+                        .eq("source_url", source_identifier)
+                        .order("updated_at", desc=True)
+                        .limit(1)
+                        .execute()
+                    )
+                    rows = response.data or []
+                    if rows and isinstance(rows[0], dict):
+                        metadata = rows[0].get("metadata") if isinstance(rows[0].get("metadata"), dict) else {}
+                        return normalize_tags(metadata.get("tags", []))
         except Exception as exc:
             log.debug(f"Unable to load source tags for {source_identifier}: {exc}")
         return []
@@ -1008,9 +1041,6 @@ class DatabaseUploader:
         self, chunks: list[DocumentChunk], embeddings: list[list[float]]
     ) -> tuple[int, int]:
         """Upload chunks individually for better error handling."""
-        if self.chroma_store is None:
-            raise RuntimeError("Chroma store not initialized")
-
         successful = 0
         failed = 0
 
@@ -1039,9 +1069,10 @@ class DatabaseUploader:
             }
 
             try:
-                self.chroma_store.upsert_chunks([row])
-                self._sync_rows_to_supabase([row])
-                successful += 1
+                if self._sync_rows_to_supabase([row]):
+                    successful += 1
+                else:
+                    failed += 1
             except Exception as e:
                 log.warning(f"Failed to upload chunk from {chunk.source_url}: {e}")
                 failed += 1
@@ -1068,10 +1099,6 @@ class DatabaseUploader:
         if not links:
             log.debug(f"No links to upload from {source_url}")
             return 0, 0
-
-        if not self.chroma_store:
-            log.error("Chroma store not initialized")
-            return 0, len(links)
 
         log.info(f"--> Uploading {len(links)} extracted links from {source_url}...")
 
@@ -1117,17 +1144,20 @@ class DatabaseUploader:
             batch = rows[i : i + batch_size]
 
             try:
-                successful += self.chroma_store.upsert_chunks(batch)
-                self._sync_rows_to_supabase(batch)
-                log.debug(f"Batch of {len(batch)} links uploaded successfully")
+                if self._sync_rows_to_supabase(batch):
+                    successful += len(batch)
+                    log.debug(f"Batch of {len(batch)} links uploaded successfully")
+                else:
+                    failed += len(batch)
             except Exception as e:
                 log.warning(f"Batch upload of links failed: {e}")
                 # Try individual uploads
                 for row in batch:
                     try:
-                        self.chroma_store.upsert_chunks([row])
-                        self._sync_rows_to_supabase([row])
-                        successful += 1
+                        if self._sync_rows_to_supabase([row]):
+                            successful += 1
+                        else:
+                            failed += 1
                     except Exception as e2:
                         metadata = row.get("metadata") if isinstance(row, dict) else None
                         link_target = (

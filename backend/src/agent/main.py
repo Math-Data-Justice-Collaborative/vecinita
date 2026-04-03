@@ -85,7 +85,6 @@ except Exception:  # pragma: no cover - optional dependency in some test/runtime
     psycopg2 = None  # type: ignore[assignment]
 
 
-from src.services.chroma_store import get_chroma_store
 from src.services.llm import LocalLLMClientManager
 from src.utils.tags import parse_tags_input
 
@@ -275,14 +274,11 @@ try:
 
     _log_ep_summary(logger)
     logger.info(
-        "Startup connection config: render=%s embedding_url=%s ollama_url=%s chroma=%s:%s "
-        "chroma_required=%s embedding_strict_startup=%s preflight_strict=%s data_db_mode_env=%s",
+        "Startup connection config: render=%s embedding_url=%s ollama_url=%s "
+        "embedding_strict_startup=%s preflight_strict=%s data_db_mode_env=%s",
         _running_on_render(),
         _safe_host_port(EMBEDDING_SERVICE_URL),
         _safe_host_port(OLLAMA_BASE_URL),
-        os.environ.get("CHROMA_HOST", "chroma"),
-        os.environ.get("CHROMA_PORT", "8000"),
-        os.environ.get("CHROMA_REQUIRED", "false"),
         os.environ.get("EMBEDDING_STRICT_STARTUP", "false"),
         os.environ.get("BACKEND_PREFLIGHT_STRICT", "false"),
         os.environ.get("DB_DATA_MODE", "auto"),
@@ -293,15 +289,7 @@ try:
         logger.info("Supabase client initialized successfully")
     else:
         logger.info(
-            "Supabase client not configured for agent runtime; continuing with Chroma-backed retrieval"
-        )
-
-    chroma_store = get_chroma_store()
-    if chroma_store.heartbeat():
-        logger.info("Chroma store connectivity check passed")
-    else:
-        logger.warning(
-            "Chroma store heartbeat failed at startup; retrieval will retry during requests"
+            "Supabase client not configured for agent runtime; continuing with Postgres-only retrieval"
         )
 
     class Selection(TypedDict):
@@ -445,12 +433,10 @@ try:
                 embedding_model = _ZeroVectorEmbeddings()  # type: ignore[assignment]
 except Exception as e:
     logger.error(
-        "Failed to initialize clients: %s (render=%s embedding_url=%s chroma=%s:%s)",
+        "Failed to initialize clients: %s (render=%s embedding_url=%s)",
         e,
         _running_on_render(),
         _safe_host_port(EMBEDDING_SERVICE_URL),
-        os.environ.get("CHROMA_HOST", "chroma"),
-        os.environ.get("CHROMA_PORT", "8000"),
     )
     logger.error(traceback.format_exc())
     raise RuntimeError(f"Failed to initialize clients: {e}") from e
@@ -480,21 +466,6 @@ def _probe_guardrails_loaded() -> tuple[bool, str]:
         return True, "hub_validator_ready"
     except Exception as exc:
         logger.warning("Guardrails preload failed: %s", exc)
-        return False, f"error: {exc}"
-
-
-def _probe_chroma_connectivity() -> tuple[bool, str]:
-    try:
-        healthy = bool(chroma_store.heartbeat())
-        if healthy:
-            return True, "ok"
-        return (
-            False,
-            "heartbeat_failed "
-            f"(host={os.environ.get('CHROMA_HOST', 'chroma')} "
-            f"port={os.environ.get('CHROMA_PORT', '8000')})",
-        )
-    except Exception as exc:
         return False, f"error: {exc}"
 
 
@@ -633,9 +604,6 @@ def _startup_config_summary() -> dict[str, Any]:
         "render": _running_on_render(),
         "embedding_url": EMBEDDING_SERVICE_URL,
         "ollama_url": OLLAMA_BASE_URL,
-        "chroma_host": os.environ.get("CHROMA_HOST", "chroma"),
-        "chroma_port": os.environ.get("CHROMA_PORT", "8000"),
-        "chroma_required": _is_truthy_env("CHROMA_REQUIRED", False),
         "embedding_strict_startup": _is_truthy_env("EMBEDDING_STRICT_STARTUP", False),
         "preflight_strict": _is_truthy_env("BACKEND_PREFLIGHT_STRICT", False),
         "db_data_mode": os.environ.get("DB_DATA_MODE", "auto"),
@@ -653,8 +621,6 @@ def _run_startup_preflight() -> dict[str, Any]:
     checks: dict[str, dict[str, Any]] = {}
 
     require_guardrails_hub = _is_truthy_env("GUARDRAILS_REQUIRE_HUB_VALIDATOR", False)
-    require_chroma = _is_truthy_env("CHROMA_REQUIRED", False)
-    use_chroma_runtime = data_mode != "postgres"
 
     guardrails_ok, guardrails_detail = _probe_guardrails_loaded()
     checks["guardrails"] = {
@@ -662,20 +628,6 @@ def _run_startup_preflight() -> dict[str, Any]:
         "detail": guardrails_detail,
         "required": require_guardrails_hub,
     }
-
-    if use_chroma_runtime:
-        chroma_ok, chroma_detail = _probe_chroma_connectivity()
-        checks["chroma"] = {
-            "ok": chroma_ok,
-            "detail": chroma_detail,
-            "required": require_chroma,
-        }
-    else:
-        checks["chroma"] = {
-            "ok": True,
-            "detail": "skipped_in_postgres_mode",
-            "required": False,
-        }
 
     if data_mode == "postgres":
         data_ok, data_detail = _probe_postgres_connectivity()
@@ -745,6 +697,7 @@ LOCATION_CONTEXT = {
     "address": "45 Eagle Street, Suite 202, Providence, RI 02909",
     "region": "Rhode Island",
     "service_area": "Woonasquatucket River Watershed",
+    "primary_purpose": "Help people find local resources and community services",
     "focus_areas": [
         "Water quality and watershed protection",
         "Community environmental education",
@@ -752,6 +705,28 @@ LOCATION_CONTEXT = {
         "Community health and wellbeing in Rhode Island",
     ],
 }
+
+
+def _location_anchor_system_prompt(language: str) -> str:
+    """Shared location/mission anchor that must be present across agent prompts."""
+    if language == "es":
+        return (
+            "[LOCATION_ANCHOR]\n"
+            f"Ubicación principal: Providence, RI ({LOCATION_CONTEXT['location']}).\n"
+            f"Área de servicio: {LOCATION_CONTEXT['service_area']}.\n"
+            f"Organización: {LOCATION_CONTEXT['organization']}.\n"
+            "Propósito principal: ayudar a las personas a encontrar recursos locales y servicios comunitarios.\n"
+            "Prioriza orientación práctica, enlaces útiles y pasos claros para acceder a recursos."
+        )
+
+    return (
+        "[LOCATION_ANCHOR]\n"
+        f"Primary location: Providence, RI ({LOCATION_CONTEXT['location']}).\n"
+        f"Service area: {LOCATION_CONTEXT['service_area']}.\n"
+        f"Organization: {LOCATION_CONTEXT['organization']}.\n"
+        "Primary purpose: help people find local resources and community services.\n"
+        "Prioritize practical guidance, useful links, and clear next steps to access resources."
+    )
 
 # --- Define LangGraph State ---
 
@@ -996,7 +971,12 @@ def _build_contextual_follow_up_answer(
 
     try:
         llm = _get_llm_without_tools(provider, model)
-        response = llm.invoke([HumanMessage(content=prompt)])
+        response = llm.invoke(
+            [
+                SystemMessage(content=_location_anchor_system_prompt(language)),
+                HumanMessage(content=prompt),
+            ]
+        )
         answer = response.content if hasattr(response, "content") else str(response)
         cleaned = str(answer or "").strip()
         if cleaned:
@@ -1241,7 +1221,12 @@ def _build_deterministic_rag_answer(
 
     try:
         llm = _get_llm_without_tools(provider, model)
-        response = llm.invoke([HumanMessage(content=prompt)])
+        response = llm.invoke(
+            [
+                SystemMessage(content=_location_anchor_system_prompt(language)),
+                HumanMessage(content=prompt),
+            ]
+        )
         answer = response.content if hasattr(response, "content") else str(response)
     except Exception as exc:
         logger.warning(
@@ -1329,7 +1314,7 @@ def _build_clarification_payload(content: str, language: str) -> dict:
 logger.info("Initializing agent tools...")
 # Use lower threshold (0.1) for better recall - can be tuned based on results
 db_search_tool = create_db_search_tool(
-    chroma_store, embedding_model, match_threshold=0.1, match_count=5
+    None, embedding_model, match_threshold=0.1, match_count=5
 )
 web_search_tool = create_web_search_tool()
 clarify_question_tool = create_clarify_question_tool()
@@ -1477,6 +1462,18 @@ def agent_node(state: AgentState) -> AgentState:
 
     # Sanitize messages to ensure all content is strings for chat-client compatibility
     sanitized_messages = _sanitize_messages(state["messages"])
+    language = state.get("language", "en")
+
+    # Ensure every core agent invocation carries the required location/mission anchor.
+    has_location_anchor = any(
+        isinstance(msg, SystemMessage) and "[LOCATION_ANCHOR]" in str(msg.content)
+        for msg in sanitized_messages[:3]
+    )
+    if not has_location_anchor:
+        sanitized_messages = [
+            SystemMessage(content=_location_anchor_system_prompt(language)),
+            *sanitized_messages,
+        ]
 
     # Retry on transient rate-limit / 429 errors and fail over provider on transport errors.
     import re as _re
@@ -1593,7 +1590,12 @@ Respond with ONLY: SIMPLE or COMPLEX"""
         llm = _get_llm_without_tools(state.get("provider"), state.get("model"))
 
         # Get classification from LLM (without tools)
-        response = llm.invoke([HumanMessage(content=classification_prompt)])
+        response = llm.invoke(
+            [
+                SystemMessage(content=_location_anchor_system_prompt(language)),
+                HumanMessage(content=classification_prompt),
+            ]
+        )
         classification = response.content.strip().upper()
 
         # Parse response
@@ -1693,9 +1695,11 @@ LOCATION CONTEXT: [if applicable, notes about the specific location required]
             [
                 SystemMessage(
                     content=(
-                        "You are a search strategy analyst. Analyze questions and create search plans."
+                        "You are a search strategy analyst. Analyze questions and create search plans. "
+                        + _location_anchor_system_prompt("en")
                         if language == "en"
-                        else "Eres un analista de estrategia de búsqueda. Analiza preguntas y crea planes de búsqueda."
+                        else "Eres un analista de estrategia de búsqueda. Analiza preguntas y crea planes de búsqueda. "
+                        + _location_anchor_system_prompt("es")
                     )
                 ),
                 HumanMessage(content=planning_prompt),
@@ -1885,7 +1889,10 @@ def grade_documents_node(state: AgentState) -> AgentState:
     try:
         grader = _get_llm_without_tools(state.get("provider"), state.get("model"))
         graded = grader.with_structured_output(GradeDocuments).invoke(
-            [HumanMessage(content=grading_prompt)]
+            [
+                SystemMessage(content=_location_anchor_system_prompt(state.get("language", "en"))),
+                HumanMessage(content=grading_prompt),
+            ]
         )
         score = "yes" if str(graded.binary_score).lower() == "yes" else "no"
         logger.info("Retrieved document relevance grade: %s", score)
@@ -2538,7 +2545,12 @@ async def ask_question(
                     fallback_llm = _get_llm_without_tools(provider, model)
                     quick_prompt = f"Respond briefly and naturally in {'Spanish' if lang == 'es' else 'English'}: {effective_question}"
                     llm_started_at = time.perf_counter()
-                    raw = fallback_llm.invoke([HumanMessage(content=quick_prompt)])
+                    raw = fallback_llm.invoke(
+                        [
+                            SystemMessage(content=_location_anchor_system_prompt(lang)),
+                            HumanMessage(content=quick_prompt),
+                        ]
+                    )
                     llm_ms = int((time.perf_counter() - llm_started_at) * 1000)
                     answer = raw.content if hasattr(raw, "content") else str(raw)
                 sources: list[dict] = []
@@ -2791,7 +2803,12 @@ async def ask_question_stream(
                 else:
                     llm_plain = _get_llm_without_tools(effective_provider, effective_model)
                     quick_prompt = f"Respond briefly and naturally in {'Spanish' if lang_local == 'es' else 'English'}: {question}"
-                    plain = llm_plain.invoke([HumanMessage(content=quick_prompt)])
+                    plain = llm_plain.invoke(
+                        [
+                            SystemMessage(content=_location_anchor_system_prompt(lang_local)),
+                            HumanMessage(content=quick_prompt),
+                        ]
+                    )
                     answer = plain.content if hasattr(plain, "content") else str(plain)
             else:
                 tool_msg = get_agent_thinking_message("db_search", lang_local)
