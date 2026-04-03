@@ -134,26 +134,37 @@ jobs:
     environment: staging
     env:
       RENDER_STAGING_DEPLOY_HOOK_AGENT: ${{ secrets.RENDER_STAGING_DEPLOY_HOOK_AGENT }}
+      RENDER_STAGING_DEPLOY_HOOK_GATEWAY: ${{ secrets.RENDER_STAGING_DEPLOY_HOOK_GATEWAY }}
       RENDER_STAGING_DEPLOY_HOOK_FRONTEND: ${{ secrets.RENDER_STAGING_DEPLOY_HOOK_FRONTEND }}
     steps:
       - name: Trigger staging agent deploy hook
         if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_AGENT != '' }}
         run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_AGENT" || echo "::notice::Staging agent deploy hook request failed."
 
+      - name: Trigger staging gateway deploy hook
+        if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_GATEWAY != '' }}
+        run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_GATEWAY" || echo "::notice::Staging gateway deploy hook request failed."
+
       - name: Trigger staging frontend deploy hook
         if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_FRONTEND != '' }}
         run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_FRONTEND" || echo "::notice::Staging frontend deploy hook request failed."
 
-      - name: Verify at least one staging deploy hook is configured
+      - name: Verify required staging deploy hooks are configured
         run: |
-          if [ -z "$RENDER_STAGING_DEPLOY_HOOK_AGENT" ] && \
-             [ -z "$RENDER_STAGING_DEPLOY_HOOK_FRONTEND" ]; then
-            echo "No staging Render deploy hook secrets are configured."
-            echo "Set at least one of:"
-            echo "  RENDER_STAGING_DEPLOY_HOOK_AGENT"
-            echo "  RENDER_STAGING_DEPLOY_HOOK_FRONTEND"
-            echo "::warning::Skipping staging deploy because no deploy hook secrets are configured."
-            exit 0
+          missing=0
+          for key in \
+            RENDER_STAGING_DEPLOY_HOOK_AGENT \
+            RENDER_STAGING_DEPLOY_HOOK_GATEWAY \
+            RENDER_STAGING_DEPLOY_HOOK_FRONTEND; do
+            if [ -z "${!key}" ]; then
+              echo "::error::Missing required staging deploy hook: $key"
+              missing=1
+            fi
+          done
+
+          if [ "$missing" -ne 0 ]; then
+            echo "Staging deploy hook validation failed. Configure all required hooks."
+            exit 1
           fi
 
   smoke-staging:
@@ -164,15 +175,22 @@ jobs:
     env:
       FRONTEND_URL: ${{ secrets.RENDER_STAGING_FRONTEND_URL }}
       AGENT_URL: ${{ secrets.RENDER_STAGING_AGENT_URL }}
+      GATEWAY_URL: ${{ secrets.RENDER_STAGING_GATEWAY_URL }}
     steps:
       - name: Wait for staging services to stabilise
         run: sleep 45
 
       - name: Smoke staging services
         run: |
-          if [ -z "$FRONTEND_URL" ] && [ -z "$AGENT_URL" ]; then
-            echo "No staging service URLs configured; skipping smoke probes."
-            exit 0
+          missing=0
+          for key in FRONTEND_URL AGENT_URL GATEWAY_URL; do
+            if [ -z "${!key}" ]; then
+              echo "::error::Missing required staging smoke URL: $key"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
           fi
 
           check_url() {
@@ -194,6 +212,8 @@ jobs:
           check_url "Frontend health" "$FRONTEND_URL/health"
           check_url "Agent health" "$AGENT_URL/health"
           check_url "Agent config" "$AGENT_URL/api/v1/ask/config"
+          check_url "Gateway health" "$GATEWAY_URL/health"
+          check_url "Gateway documents tags" "$GATEWAY_URL/api/v1/documents/tags?limit=5"
 
   deploy-production:
     if: |
@@ -204,26 +224,37 @@ jobs:
     environment: production
     env:
       RENDER_PROD_DEPLOY_HOOK_AGENT: ${{ secrets.RENDER_PROD_DEPLOY_HOOK_AGENT || secrets.RENDER_DEPLOY_HOOK_AGENT || secrets.RENDER_VECINITA_AGENT_DEPLOY_HOOK }}
+      RENDER_PROD_DEPLOY_HOOK_GATEWAY: ${{ secrets.RENDER_PROD_DEPLOY_HOOK_GATEWAY || secrets.RENDER_DEPLOY_HOOK_GATEWAY || secrets.RENDER_VECINITA_GATEWAY_DEPLOY_HOOK }}
       RENDER_PROD_DEPLOY_HOOK_FRONTEND: ${{ secrets.RENDER_PROD_DEPLOY_HOOK_FRONTEND || secrets.RENDER_DEPLOY_HOOK_FRONTEND || secrets.RENDER_VECINITA_FRONTEND_DEPLOY_HOOK }}
     steps:
       - name: Trigger production agent deploy hook
         if: ${{ env.RENDER_PROD_DEPLOY_HOOK_AGENT != '' }}
         run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_AGENT" || echo "::notice::Production agent deploy hook request failed."
 
+      - name: Trigger production gateway deploy hook
+        if: ${{ env.RENDER_PROD_DEPLOY_HOOK_GATEWAY != '' }}
+        run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_GATEWAY" || echo "::notice::Production gateway deploy hook request failed."
+
       - name: Trigger production frontend deploy hook
         if: ${{ env.RENDER_PROD_DEPLOY_HOOK_FRONTEND != '' }}
         run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_FRONTEND" || echo "::notice::Production frontend deploy hook request failed."
 
-      - name: Verify at least one production deploy hook is configured
+      - name: Verify required production deploy hooks are configured
         run: |
-          if [ -z "$RENDER_PROD_DEPLOY_HOOK_AGENT" ] && \
-             [ -z "$RENDER_PROD_DEPLOY_HOOK_FRONTEND" ]; then
-            echo "No production Render deploy hook secrets are configured."
-            echo "Set at least one of:"
-            echo "  RENDER_PROD_DEPLOY_HOOK_AGENT"
-            echo "  RENDER_PROD_DEPLOY_HOOK_FRONTEND"
-            echo "::warning::Skipping production deploy because no deploy hook secrets are configured."
-            exit 0
+          missing=0
+          for key in \
+            RENDER_PROD_DEPLOY_HOOK_AGENT \
+            RENDER_PROD_DEPLOY_HOOK_GATEWAY \
+            RENDER_PROD_DEPLOY_HOOK_FRONTEND; do
+            if [ -z "${!key}" ]; then
+              echo "::error::Missing required production deploy hook: $key"
+              missing=1
+            fi
+          done
+
+          if [ "$missing" -ne 0 ]; then
+            echo "Production deploy hook validation failed. Configure all required hooks."
+            exit 1
           fi
 
   smoke-production:
@@ -236,15 +267,22 @@ jobs:
     env:
       FRONTEND_URL: ${{ secrets.RENDER_PROD_FRONTEND_URL || secrets.RENDER_FRONTEND_URL }}
       AGENT_URL: ${{ secrets.RENDER_PROD_AGENT_URL || secrets.RENDER_AGENT_URL }}
+      GATEWAY_URL: ${{ secrets.RENDER_PROD_GATEWAY_URL || secrets.RENDER_GATEWAY_URL }}
     steps:
       - name: Wait for production services to stabilise
         run: sleep 45
 
       - name: Smoke production services
         run: |
-          if [ -z "$FRONTEND_URL" ] && [ -z "$AGENT_URL" ]; then
-            echo "No production service URLs configured; skipping smoke probes."
-            exit 0
+          missing=0
+          for key in FRONTEND_URL AGENT_URL GATEWAY_URL; do
+            if [ -z "${!key}" ]; then
+              echo "::error::Missing required production smoke URL: $key"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
           fi
 
           check_url() {
@@ -266,6 +304,8 @@ jobs:
           check_url "Frontend health" "$FRONTEND_URL/health"
           check_url "Agent health" "$AGENT_URL/health"
           check_url "Agent config" "$AGENT_URL/api/v1/ask/config"
+          check_url "Gateway health" "$GATEWAY_URL/health"
+          check_url "Gateway documents tags" "$GATEWAY_URL/api/v1/documents/tags?limit=5"
 
   deploy-wait:
     name: Wait for deploys to reach live

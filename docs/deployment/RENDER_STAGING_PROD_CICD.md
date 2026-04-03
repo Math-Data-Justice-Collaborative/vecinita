@@ -36,14 +36,13 @@ Optional but recommended:
 ### Staging deploy hooks
 
 - `RENDER_STAGING_DEPLOY_HOOK_AGENT`
-- `RENDER_STAGING_DEPLOY_HOOK_EMBEDDING`
+- `RENDER_STAGING_DEPLOY_HOOK_GATEWAY`
 - `RENDER_STAGING_DEPLOY_HOOK_FRONTEND`
-- `RENDER_STAGING_DEPLOY_HOOK_SCRAPER` (optional)
 
 ### Staging smoke URLs
 
 - `RENDER_STAGING_AGENT_URL`
-- `RENDER_STAGING_EMBEDDING_URL`
+- `RENDER_STAGING_GATEWAY_URL`
 - `RENDER_STAGING_FRONTEND_URL`
 
 ### Production deploy hooks
@@ -51,18 +50,16 @@ Optional but recommended:
 Preferred names:
 
 - `RENDER_PROD_DEPLOY_HOOK_AGENT`
-- `RENDER_PROD_DEPLOY_HOOK_EMBEDDING`
+- `RENDER_PROD_DEPLOY_HOOK_GATEWAY`
 - `RENDER_PROD_DEPLOY_HOOK_FRONTEND`
-- `RENDER_PROD_DEPLOY_HOOK_SCRAPER` (optional)
 
 Backward-compatible names also supported by workflow:
 
 - `RENDER_DEPLOY_HOOK_AGENT`
-- `RENDER_DEPLOY_HOOK_EMBEDDING`
+- `RENDER_DEPLOY_HOOK_GATEWAY`
 - `RENDER_DEPLOY_HOOK_FRONTEND`
-- `RENDER_DEPLOY_HOOK_SCRAPER`
+- `RENDER_VECINITA_GATEWAY_DEPLOY_HOOK`
 - `RENDER_VECINITA_AGENT_DEPLOY_HOOK`
-- `RENDER_VECINITA_EMBEDDING_DEPLOY_HOOK`
 - `RENDER_VECINITA_FRONTEND_DEPLOY_HOOK`
 
 ### Production smoke URLs
@@ -70,13 +67,13 @@ Backward-compatible names also supported by workflow:
 Preferred names:
 
 - `RENDER_PROD_AGENT_URL`
-- `RENDER_PROD_EMBEDDING_URL`
+- `RENDER_PROD_GATEWAY_URL`
 - `RENDER_PROD_FRONTEND_URL`
 
 Backward-compatible names:
 
 - `RENDER_AGENT_URL`
-- `RENDER_EMBEDDING_URL`
+- `RENDER_GATEWAY_URL`
 - `RENDER_FRONTEND_URL`
 
 ## Workflow Behavior
@@ -102,3 +99,52 @@ Frontend deploy is part of both staging and production hook triggers in the same
 2. Add all required secrets and environment protections in GitHub.
 3. Open a PR to `main` and verify staging deployment and smoke pass.
 4. Merge PR to `main` and verify production deployment and smoke pass.
+
+## Render MCP Env Sync Checklist
+
+Use Render MCP for Render service environment variable updates only.
+Do not use Render MCP for GitHub Actions secrets.
+
+### Boundary: What goes where
+
+- Render MCP updates: service env vars used at runtime by Render services.
+- GitHub secrets updates: deploy hooks and smoke URLs consumed by `.github/workflows/render-deploy.yml`.
+
+### Staging first, production second
+
+1. Update staging service env vars via Render MCP (`gateway`, `agent`, `frontend`).
+2. Verify staging health + documents smoke endpoints.
+3. Promote the same key set to production via Render MCP.
+4. Verify production health + documents smoke endpoints.
+
+### Minimum runtime vars to verify for Documents tab path
+
+- Frontend service:
+	- `VITE_GATEWAY_URL`
+	- `VITE_BACKEND_URL`
+- Gateway service:
+	- `ALLOWED_ORIGINS`
+	- `ALLOWED_ORIGIN_REGEX`
+	- `AGENT_SERVICE_URL` (service binding)
+	- `DATABASE_URL` (database binding)
+- Agent service:
+	- `DATABASE_URL` (database binding)
+
+### GitHub secrets required for the gateway deployment path
+
+- Staging deploy hooks:
+	- `RENDER_STAGING_DEPLOY_HOOK_AGENT`
+	- `RENDER_STAGING_DEPLOY_HOOK_GATEWAY`
+	- `RENDER_STAGING_DEPLOY_HOOK_FRONTEND`
+- Staging smoke URLs:
+	- `RENDER_STAGING_AGENT_URL`
+	- `RENDER_STAGING_GATEWAY_URL`
+	- `RENDER_STAGING_FRONTEND_URL`
+- Production deploy hooks:
+	- `RENDER_PROD_DEPLOY_HOOK_AGENT`
+	- `RENDER_PROD_DEPLOY_HOOK_GATEWAY`
+	- `RENDER_PROD_DEPLOY_HOOK_FRONTEND`
+- Production smoke URLs:
+	- `RENDER_PROD_AGENT_URL` (or fallback `RENDER_AGENT_URL`)
+	- `RENDER_PROD_GATEWAY_URL` (or fallback `RENDER_GATEWAY_URL`)
+	- `RENDER_PROD_FRONTEND_URL` (or fallback `RENDER_FRONTEND_URL`)
