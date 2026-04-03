@@ -49,7 +49,6 @@ dependencies = [
     "tokenizers>=0.15.0,<0.22.0rc",
     "ddgs>=9.10.0",
     # Keep optional local embedding fallback available without scraping extras.
-    "fastembed>=0.7.4",
     "transformers>=4.55.4",
 ]
 
