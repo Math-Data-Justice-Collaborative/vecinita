@@ -1,6 +1,4 @@
-"""Unit tests for public documents router endpoints (Chroma-backed)."""
-
-from unittest.mock import MagicMock
+"""Unit tests for public documents router endpoints (Postgres-backed)."""
 
 import pytest
 from fastapi.testclient import TestClient
@@ -12,42 +10,60 @@ pytestmark = pytest.mark.unit
 def documents_client(monkeypatch, env_vars):
     for key, value in env_vars.items():
         monkeypatch.setenv(key, value)
+    monkeypatch.setenv("DATABASE_URL", "postgresql://test:test@localhost:5432/test")
 
-    from src.api import router_documents
     from src.api.main import app
 
-    mock_store = MagicMock()
-    monkeypatch.setattr(router_documents, "get_chroma_store", lambda: mock_store)
-
     client = TestClient(app)
-    return client, mock_store
+    return client
+
+
+class _FakeCursor:
+    def __init__(self, scripted_results):
+        self._scripted_results = list(scripted_results)
+        self._current = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+    def execute(self, _query, _params=None):
+        self._current = self._scripted_results.pop(0) if self._scripted_results else []
+
+    def fetchone(self):
+        return self._current[0] if self._current else None
+
+    def fetchall(self):
+        return self._current
+
+
+class _FakeConnection:
+    def __init__(self, scripted_results):
+        self._scripted_results = list(scripted_results)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+    def cursor(self, cursor_factory=None):  # noqa: ARG002
+        return _FakeCursor(self._scripted_results)
 
 
 def test_documents_overview_aggregates_sources(documents_client):
-    client, mock_store = documents_client
+    client = documents_client
 
-    mock_store.iter_all_chunks.return_value = [
-        {
-            "id": "1",
-            "content": "alpha",
-            "metadata": {
-                "source_url": "https://a.example.org",
-                "source_domain": "a.example.org",
-                "chunk_size": 100,
-                "document_title": "A",
-            },
-        },
-        {
-            "id": "2",
-            "content": "beta",
-            "metadata": {
-                "source_url": "https://b.example.org",
-                "source_domain": "b.example.org",
-                "chunk_size": 200,
-                "document_title": "B",
-            },
-        },
+    from src.api import router_documents
+
+    stats = {"total_chunks": 2, "avg_chunk_size": 150}
+    sources = [
+        {"url": "https://a.example.org", "domain": "a.example.org", "total_chunks": 1},
+        {"url": "https://b.example.org", "domain": "b.example.org", "total_chunks": 1},
     ]
+    router_documents._load_overview_via_sql = lambda: (stats, sources)
 
     response = client.get("/api/v1/documents/overview")
     assert response.status_code == 200
@@ -58,32 +74,26 @@ def test_documents_overview_aggregates_sources(documents_client):
 
 
 def test_documents_overview_filters_by_tags(documents_client):
-    client, mock_store = documents_client
+    client = documents_client
 
-    mock_store.iter_all_chunks.return_value = [
+    from src.api import router_documents
+
+    stats = {"total_chunks": 2, "avg_chunk_size": 150}
+    sources = [
         {
-            "id": "1",
-            "content": "alpha",
-            "metadata": {
-                "source_url": "https://a.example.org",
-                "source_domain": "a.example.org",
-                "chunk_size": 100,
-                "document_title": "A",
-                "tags": ["housing", "benefits"],
-            },
+            "url": "https://a.example.org",
+            "domain": "a.example.org",
+            "total_chunks": 1,
+            "tags": ["housing", "benefits"],
         },
         {
-            "id": "2",
-            "content": "beta",
-            "metadata": {
-                "source_url": "https://b.example.org",
-                "source_domain": "b.example.org",
-                "chunk_size": 200,
-                "document_title": "B",
-                "tags": ["education"],
-            },
+            "url": "https://b.example.org",
+            "domain": "b.example.org",
+            "total_chunks": 1,
+            "tags": ["education"],
         },
     ]
+    router_documents._load_overview_via_sql = lambda: (stats, sources)
 
     response = client.get(
         "/api/v1/documents/overview",
@@ -104,15 +114,19 @@ def test_documents_overview_filters_by_tags(documents_client):
 
 
 def test_documents_preview_reads_chunks_from_source(documents_client):
-    client, mock_store = documents_client
+    client = documents_client
 
-    mock_store.get_chunks.return_value = {
-        "ids": ["1"],
-        "documents": ["Some preview content"],
-        "metadatas": [
-            {"chunk_index": 0, "chunk_size": 20, "document_title": "Doc", "source_url": "https://x"}
-        ],
-    }
+    from src.api import router_documents
+
+    rows = [
+        {
+            "chunk_index": 0,
+            "chunk_size": 20,
+            "content": "Some preview content",
+            "metadata": {"document_title": "Doc", "source_url": "https://x"},
+        }
+    ]
+    router_documents.psycopg2.connect = lambda _url: _FakeConnection([rows])
 
     response = client.get(
         "/api/v1/documents/preview", params={"source_url": "https://x", "limit": 3}
@@ -124,28 +138,17 @@ def test_documents_preview_reads_chunks_from_source(documents_client):
     assert payload["chunks"][0]["document_title"] == "Doc"
 
 
-def test_chunk_statistics_from_chroma_metadata(documents_client):
-    client, mock_store = documents_client
+def test_chunk_statistics_from_database(documents_client):
+    client = documents_client
 
-    mock_store.iter_all_chunks.return_value = [
+    from src.api import router_documents
+
+    router_documents._load_chunk_statistics_via_sql = lambda _limit: [
         {
-            "id": "1",
-            "content": "abc",
-            "metadata": {
-                "source_domain": "foo.org",
-                "source_url": "https://foo.org/a",
-                "chunk_size": 10,
-            },
-        },
-        {
-            "id": "2",
-            "content": "xyz",
-            "metadata": {
-                "source_domain": "foo.org",
-                "source_url": "https://foo.org/b",
-                "chunk_size": 20,
-            },
-        },
+            "source_domain": "foo.org",
+            "chunk_count": 2,
+            "avg_chunk_size": 15,
+        }
     ]
 
     response = client.get("/api/v1/documents/chunk-statistics", params={"limit": 8})
@@ -157,13 +160,16 @@ def test_chunk_statistics_from_chroma_metadata(documents_client):
 
 
 def test_documents_download_url_returns_non_error_for_url_only_sources(documents_client):
-    client, mock_store = documents_client
+    client = documents_client
 
-    mock_store.get_source.return_value = {
-        "id": "https://example.org/article",
+    from src.api import router_documents
+
+    source_row = {
+        "url": "https://example.org/article",
         "title": "Example Article",
         "metadata": {"source_url": "https://example.org/article"},
     }
+    router_documents.psycopg2.connect = lambda _url: _FakeConnection([[source_row]])
 
     response = client.get(
         "/api/v1/documents/download-url",
@@ -178,16 +184,19 @@ def test_documents_download_url_returns_non_error_for_url_only_sources(documents
 def test_documents_download_url_resolves_upload_source_without_explicit_download_url(
     documents_client,
 ):
-    client, mock_store = documents_client
+    client = documents_client
 
-    mock_store.get_source.return_value = {
-        "id": "upload://uploads/2026/02/26/file.txt",
+    from src.api import router_documents
+
+    source_row = {
+        "url": "upload://uploads/2026/02/26/file.txt",
         "title": "file.txt",
         "metadata": {
             "source_url": "upload://uploads/2026/02/26/file.txt",
             "download_url": "https://example.supabase.co/storage/v1/object/public/documents/uploads/2026/02/26/file.txt",
         },
     }
+    router_documents.psycopg2.connect = lambda _url: _FakeConnection([[source_row]])
 
     response = client.get(
         "/api/v1/documents/download-url",
@@ -200,32 +209,26 @@ def test_documents_download_url_resolves_upload_source_without_explicit_download
 
 
 def test_documents_overview_excludes_test_artifacts_by_default(documents_client):
-    client, mock_store = documents_client
+    client = documents_client
 
-    mock_store.iter_all_chunks.return_value = [
+    from src.api import router_documents
+
+    stats = {"total_chunks": 2, "avg_chunk_size": 60}
+    sources = [
         {
-            "id": "1",
-            "content": "public content",
-            "metadata": {
-                "source_url": "https://community.example.org/resource",
-                "source_domain": "community.example.org",
-                "chunk_size": 80,
-                "document_title": "Community Resource",
-                "tags": ["housing"],
-            },
+            "url": "https://community.example.org/resource",
+            "domain": "community.example.org",
+            "total_chunks": 1,
+            "tags": ["housing"],
         },
         {
-            "id": "2",
-            "content": "test content",
-            "metadata": {
-                "source_url": "upload://uploads/2026/02/26/community-resource-click.txt",
-                "source_domain": "upload",
-                "chunk_size": 40,
-                "document_title": "community-resource-click.txt",
-                "tags": ["e2e"],
-            },
+            "url": "upload://uploads/2026/02/26/community-resource-click.txt",
+            "domain": "upload",
+            "total_chunks": 1,
+            "tags": ["e2e"],
         },
     ]
+    router_documents._load_overview_via_sql = lambda: (stats, sources)
 
     response = client.get("/api/v1/documents/overview")
     assert response.status_code == 200
@@ -241,34 +244,25 @@ def test_documents_overview_excludes_test_artifacts_by_default(documents_client)
 
 
 def test_documents_tags_returns_counts(documents_client):
-    client, mock_store = documents_client
+    client = documents_client
 
-    mock_store.iter_all_chunks.return_value = [
+    from src.api import router_documents
+
+    rows = [
         {
-            "id": "1",
-            "content": "alpha",
-            "metadata": {
-                "source_url": "https://a.example.org",
-                "tags": ["housing", "benefits"],
-            },
+            "source_url": "https://a.example.org",
+            "metadata": {"source_url": "https://a.example.org", "tags": ["housing", "benefits"]},
         },
         {
-            "id": "2",
-            "content": "beta",
-            "metadata": {
-                "source_url": "https://a.example.org",
-                "tags": ["housing"],
-            },
+            "source_url": "https://a.example.org",
+            "metadata": {"source_url": "https://a.example.org", "tags": ["housing"]},
         },
         {
-            "id": "3",
-            "content": "gamma",
-            "metadata": {
-                "source_url": "https://b.example.org",
-                "tags": ["housing"],
-            },
+            "source_url": "https://b.example.org",
+            "metadata": {"source_url": "https://b.example.org", "tags": ["housing"]},
         },
     ]
+    router_documents.psycopg2.connect = lambda _url: _FakeConnection([rows])
 
     response = client.get("/api/v1/documents/tags", params={"limit": 10})
     assert response.status_code == 200
@@ -279,12 +273,15 @@ def test_documents_tags_returns_counts(documents_client):
     assert payload["tags"][0]["source_count"] == 2
 
 
-def test_documents_tags_returns_503_when_chroma_unavailable(documents_client):
-    client, mock_store = documents_client
+def test_documents_tags_returns_503_when_database_unavailable(documents_client):
+    client = documents_client
 
-    mock_store.iter_all_chunks.side_effect = ValueError(
-        "Could not connect to a Chroma server. Are you sure it is running?"
-    )
+    from src.api import router_documents
+
+    def _raise_connect_error(_url):
+        raise RuntimeError("could not connect to server")
+
+    router_documents.psycopg2.connect = _raise_connect_error
 
     response = client.get("/api/v1/documents/tags", params={"limit": 10})
     assert response.status_code == 503

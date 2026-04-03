@@ -57,7 +57,7 @@ class EmbeddingServiceClient(Embeddings):
 
     def __init__(
         self,
-        base_url: str = "http://vecinita-modal-proxy-v1:10000/embedding",
+        base_url: str = "http://localhost:8001",
         timeout: int = 30,
         auth_token: str | None = None,
     ):
@@ -66,16 +66,14 @@ class EmbeddingServiceClient(Embeddings):
 
         Args:
             base_url:   Base URL of the embedding service.  On Render this
-                        should be the modal-proxy embedding prefix, e.g.
-                        ``http://vecinita-modal-proxy-v1:10000/embedding``
-                        (default: ``http://vecinita-modal-proxy-v1:10000/embedding``).
+                        should point to the direct embedding endpoint, e.g.
+                        ``https://<service>.modal.run``.
             timeout:    HTTP request timeout in seconds (default: 30).
             auth_token: Shared-secret token sent as both
                         ``x-embedding-service-token`` and
                         ``Authorization: Bearer <token>`` headers.  If
                         omitted the following env vars are checked in order:
                         ``EMBEDDING_SERVICE_AUTH_TOKEN``,
-                        ``MODAL_API_PROXY_SECRET``, ``MODAL_API_KEY``,
                         ``MODAL_TOKEN_SECRET``,
                         ``MODAL_API_TOKEN_SECRET``.
         """
@@ -84,50 +82,21 @@ class EmbeddingServiceClient(Embeddings):
         self.auth_token = (
             auth_token
             or os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
-            or os.getenv("MODAL_API_PROXY_SECRET")
-            or os.getenv("MODAL_API_PROXY_KEY")
-            or os.getenv("MODAL_API_KEY")
             or os.getenv("MODAL_TOKEN_SECRET")
             or os.getenv("MODAL_API_TOKEN_SECRET")
-        )
-        self.modal_proxy_key = (
-            os.getenv("MODAL_API_PROXY_KEY")
-            or os.getenv("MODAL_API_KEY")
-            or os.getenv("MODAL_API_TOKEN_ID")
-            or os.getenv("MODAL_TOKEN_ID")
-        )
-        self.modal_proxy_secret = os.getenv("MODAL_API_PROXY_SECRET") or os.getenv(
-            "MODAL_TOKEN_SECRET"
-        )
-        self.proxy_auth_token = (
-            os.getenv("PROXY_AUTH_TOKEN")
-            or os.getenv("MODAL_PROXY_AUTH_TOKEN")
-            or os.getenv("X_PROXY_TOKEN")
         )
         headers = {}
         if self.auth_token:
             headers["x-embedding-service-token"] = self.auth_token
             headers["Authorization"] = f"Bearer {self.auth_token}"
-        if self.proxy_auth_token:
-            headers["X-Proxy-Token"] = self.proxy_auth_token
-        if self.modal_proxy_key and self.modal_proxy_secret:
-            headers["Modal-Key"] = self.modal_proxy_key
-            headers["Modal-Secret"] = self.modal_proxy_secret
         self.client = httpx.Client(timeout=timeout, headers=headers)
         self._single_embed_field = "text"
         logger.info("✅ Embedding Service Client initialized: %s", self.base_url)
         logger.info(
-            "Embedding client auth/header profile: has_auth_token=%s has_proxy_auth_token=%s "
-            "has_modal_proxy_creds=%s running_on_render=%s",
+            "Embedding client auth/header profile: has_auth_token=%s running_on_render=%s",
             bool(self.auth_token),
-            bool(self.proxy_auth_token),
-            bool(self.modal_proxy_key and self.modal_proxy_secret),
             _running_on_render(),
         )
-
-    def _is_modal_proxy_url(self, base_url: str) -> bool:
-        host, port = _hostname_and_port(base_url)
-        return host.endswith(".modal.run") or "modal-proxy" in host or port == 10000
 
     def _is_local_embedding_url(self, base_url: str) -> bool:
         host, port = _hostname_and_port(base_url)
@@ -137,17 +106,7 @@ class EmbeddingServiceClient(Embeddings):
         """Build per-target concrete headers so httpx never receives None values."""
         headers = dict(self.client.headers)
 
-        if self._is_modal_proxy_url(base_url):
-            headers = _drop_headers(headers, {"x-embedding-service-token", "authorization"})
-            if self.proxy_auth_token:
-                headers["X-Proxy-Token"] = self.proxy_auth_token
-            if self.modal_proxy_key and self.modal_proxy_secret:
-                headers["Modal-Key"] = self.modal_proxy_key
-                headers["Modal-Secret"] = self.modal_proxy_secret
-            return headers
-
         if self._is_local_embedding_url(base_url):
-            headers = _drop_headers(headers, {"x-proxy-token", "modal-key", "modal-secret"})
             if self.auth_token:
                 headers["x-embedding-service-token"] = self.auth_token
                 headers["Authorization"] = f"Bearer {self.auth_token}"
@@ -166,13 +125,11 @@ class EmbeddingServiceClient(Embeddings):
         # On Render, avoid localhost candidates because each service runs in its
         # own isolated container and localhost won't reach sibling services.
         if _running_on_render():
-            local_candidates = ["http://vecinita-modal-proxy-v1:10000/embedding"]
+            local_candidates: list[str] = []
         else:
             local_candidates = [
                 "http://localhost:8001",
                 "http://127.0.0.1:8001",
-                "http://vecinita-modal-proxy-v1:10000/embedding",
-                "http://localhost:10000/embedding",
             ]
 
         # In local dev, prioritize known-local service URLs before any stale
@@ -184,7 +141,6 @@ class EmbeddingServiceClient(Embeddings):
             "0.0.0.0",
             "::1",
             "embedding-service",
-            "vecinita-modal-proxy-v1",
         }
 
         candidates: list[str] = []
@@ -354,48 +310,6 @@ class EmbeddingServiceClient(Embeddings):
                     except Exception as root_exc:
                         last_error = root_exc
 
-                    # For modal-proxy routes, check proxy's upstream embedding health
-                    # endpoint to distinguish route mismatch from upstream outage.
-                    if self._is_modal_proxy_url(base):
-                        try:
-                            parsed = urlparse(base)
-                            proxy_root = urlunparse(
-                                (parsed.scheme, parsed.netloc, "", "", "", "")
-                            ).rstrip("/")
-                            upstream_health = self.client.get(
-                                f"{proxy_root}/health/upstream/embedding",
-                                headers=self._headers_for_base_url(base),
-                            )
-                            logger.warning(
-                                "Proxy upstream embedding health probe status=%s body=%s url=%s",
-                                upstream_health.status_code,
-                                (upstream_health.text or "")[:300],
-                                f"{proxy_root}/health/upstream/embedding",
-                            )
-                            # If proxy confirms upstream reachable (200 + reachable:true),
-                            # trust it as authoritative for startup validation.
-                            # A /health 404 may be a stale deployment artifact;
-                            # actual embed requests will surface any real failures.
-                            if upstream_health.status_code == 200:
-                                try:
-                                    body = upstream_health.json()
-                                    if body.get("reachable") is True:
-                                        self.base_url = base
-                                        logger.warning(
-                                            "⚠️  Embedding /health returned 404 but proxy "
-                                            "upstream confirms reachable at %s. Accepting "
-                                            "proxy-validated connectivity.",
-                                            base,
-                                        )
-                                        return base
-                                except Exception:
-                                    pass
-                        except Exception as upstream_exc:
-                            logger.warning(
-                                "Proxy upstream health probe failed: %s",
-                                _safe_error_detail(upstream_exc),
-                            )
-
                 logger.warning(
                     "Embedding service health check failed at %s: %s",
                     base,
@@ -488,7 +402,7 @@ class EmbeddingServiceClient(Embeddings):
 
 
 def create_embedding_client(
-    embedding_service_url: str = "http://vecinita-modal-proxy-v1:10000/embedding",
+    embedding_service_url: str = "http://localhost:8001",
     validate_on_init: bool = False,
     auth_token: str | None = None,
 ) -> EmbeddingServiceClient:
@@ -497,7 +411,7 @@ def create_embedding_client(
 
     Args:
         embedding_service_url: URL of embedding service
-                              (default: modal-proxy embedding route)
+                              (default: local embedding service)
 
     Returns:
         EmbeddingServiceClient instance

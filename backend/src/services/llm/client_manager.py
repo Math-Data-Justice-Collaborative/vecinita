@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import urllib.request
 from pathlib import Path
 from typing import Any, TypedDict
@@ -86,14 +85,12 @@ class _ModalNativeChatClient:
 
         target_url = f"{self.base_url}/chat"
         logger.info(
-            "llm_modal_invoke_start target=%s model=%s timeout_s=%.1f message_count=%s has_proxy_token=%s has_modal_key=%s has_modal_secret=%s",
+            "llm_modal_invoke_start target=%s model=%s timeout_s=%.1f message_count=%s has_auth_header=%s",
             target_url,
             self.model,
             float(self.timeout),
             len(payload_messages),
-            "X-Proxy-Token" in self.headers,
-            "Modal-Key" in self.headers,
-            "Modal-Secret" in self.headers,
+            "Authorization" in self.headers,
         )
 
         with httpx.Client(timeout=self.timeout) as client:
@@ -132,23 +129,20 @@ class LocalLLMClientManager:
         base_url: str | None,
         default_model: str,
         api_key: str | None = None,
-        modal_proxy_key: str | None = None,
-        modal_proxy_secret: str | None = None,
-        proxy_auth_token: str | None = None,
         selection_file_path: str | None = None,
         locked: bool = False,
         use_native_api: bool = True,
         enforce_proxy: bool = False,
+        **legacy_kwargs: Any,
     ):
+        # Ignore retired compatibility kwargs passed by older call sites.
+        _ = legacy_kwargs
         self.base_url = str(base_url or "").strip().rstrip("/")
         self.default_model = default_model
         self.api_key = api_key
-        self.modal_proxy_key = modal_proxy_key
-        self.modal_proxy_secret = modal_proxy_secret
-        self.proxy_auth_token = proxy_auth_token
         self.selection_file_path = selection_file_path
         self.use_native_api = use_native_api
-        self.enforce_proxy = bool(enforce_proxy)
+        self.enforce_proxy = False
         self.current_selection: Selection = {
             "provider": "ollama",
             "model": default_model,
@@ -165,59 +159,17 @@ class LocalLLMClientManager:
         return normalized
 
     def headers(self) -> dict[str, str]:
-        # When routing through the Render-internal modal proxy, the proxy injects
-        # Modal-Key/Modal-Secret server-side.  Forwarding any auth header from the
-        # client (Authorization: Bearer, Modal-Key, Modal-Secret) causes Modal to
-        # return HTTP 401 because the Bearer token is not a valid Modal credential.
-        if self._via_proxy():
-            headers: dict[str, str] = {}
-            proxy_token = (
-                self.proxy_auth_token
-                or os.environ.get("PROXY_AUTH_TOKEN")
-                or os.environ.get("MODAL_PROXY_AUTH_TOKEN")
-                or os.environ.get("X_PROXY_TOKEN")
-            )
-            if not proxy_token and self._is_local_proxy():
-                proxy_token = "vecinita-local-proxy-token"
-            if proxy_token:
-                headers["X-Proxy-Token"] = proxy_token
-            return headers
         headers: dict[str, str] = {}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
-        if self.modal_proxy_key and self.modal_proxy_secret:
-            headers["Modal-Key"] = self.modal_proxy_key
-            headers["Modal-Secret"] = self.modal_proxy_secret
         return headers
 
     def _via_proxy(self) -> bool:
-        """Return True when *base_url* routes through the Render-internal modal proxy.
-
-        The proxy hostname is ``vecinita-modal-proxy`` (Render private network) and
-        always appears in the URL when running on Render. Local development may
-        route through the same proxy via ``localhost:10000/model`` or
-        ``localhost:10000/embedding``.
-        """
-        if not self.base_url:
-            return False
-
-        lowered = self.base_url.lower()
-        if "modal-proxy" in lowered:
-            return True
-
-        return self._is_local_proxy()
+        """Legacy compatibility helper: proxy mode has been retired."""
+        return False
 
     def _is_local_proxy(self) -> bool:
-        if not self.base_url:
-            return False
-
-        parsed = urlparse(self.base_url)
-        host = (parsed.hostname or "").lower()
-        port = parsed.port
-        path = (parsed.path or "").lower()
-        is_local_proxy = host in {"localhost", "127.0.0.1"} and port == 10000
-        has_proxy_prefix = path.startswith("/model") or path.startswith("/embedding")
-        return bool(is_local_proxy and has_proxy_prefix)
+        return False
 
     def current_model(self) -> str:
         return self.current_selection.get("model") or self.default_model
@@ -288,11 +240,6 @@ class LocalLLMClientManager:
             raise RuntimeError(
                 "No local LLM endpoint configured. Set OLLAMA_BASE_URL or MODAL_OLLAMA_ENDPOINT."
             )
-        if self.enforce_proxy and not self._via_proxy():
-            raise RuntimeError(
-                "Proxy-only LLM mode is enabled but base_url is not routed through modal-proxy. "
-                f"Current base_url='{self.base_url}'. Expected '*modal-proxy*/model' or 'localhost:10000/model'."
-            )
         if self.uses_modal_native_chat_api():
             return
         if _get_chatollama_class() is None:
@@ -322,19 +269,14 @@ class LocalLLMClientManager:
         # Native Modal endpoints are hosted under *.modal.run.
         if "modal.run" in lowered:
             return True
-        # Proxy-routed model traffic also exposes native /chat and /health semantics
-        # at /model/* once the proxy strips the prefix for the upstream.
-        if "modal-proxy" in lowered and "/model" in lowered:
-            return True
-        # Local dev also routes through localhost:10000/model (same proxy container).
-        # ChatOllama would call /api/chat which the model service doesn't expose;
-        # use _ModalNativeChatClient which calls /chat instead.
+        # Local dev may still route model traffic through localhost:10000/model.
         parsed = urlparse(self.base_url)
         host = (parsed.hostname or "").lower()
         port = parsed.port
         path = (parsed.path or "").lower()
-        is_local_proxy = host in {"localhost", "127.0.0.1"} and port == 10000
-        return bool(is_local_proxy and path.startswith("/model"))
+        return bool(
+            host in {"localhost", "127.0.0.1"} and port == 10000 and path.startswith("/model")
+        )
 
     def is_reachable(self, timeout: float = 1.5) -> bool:
         if not self.base_url:
@@ -380,18 +322,12 @@ class LocalLLMClientManager:
     ):
         _provider, resolved_model = self.resolve_request(provider, model)
         logger.info(
-            "llm_client_build provider=%s model=%s base_url=%s uses_native_api=%s via_proxy=%s",
+            "llm_client_build provider=%s model=%s base_url=%s uses_native_api=%s",
             _provider,
             resolved_model,
             self.base_url,
             self.uses_modal_native_chat_api(),
-            self._via_proxy(),
         )
-        if self.enforce_proxy and not self._via_proxy():
-            raise RuntimeError(
-                "Proxy-only LLM mode rejected a direct model endpoint. "
-                f"Current base_url='{self.base_url}'."
-            )
         if self.uses_modal_native_chat_api():
             if structured_output_schema is not None:
                 raise RuntimeError(

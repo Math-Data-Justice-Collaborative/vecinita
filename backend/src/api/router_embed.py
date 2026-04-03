@@ -13,7 +13,7 @@ import numpy as np
 from fastapi import APIRouter, HTTPException, Query
 
 from src.config import _normalize_internal_service_url, _running_on_render
-from src.service_endpoints import EMBEDDING_ENDPOINT, PROXY_AUTH_TOKEN
+from src.service_endpoints import EMBEDDING_ENDPOINT
 
 from .models import (
     EmbedBatchRequest,
@@ -31,19 +31,9 @@ router = APIRouter(prefix="/embed", tags=["Embeddings"])
 EMBEDDING_SERVICE_URL = EMBEDDING_ENDPOINT
 EMBEDDING_SERVICE_AUTH_TOKEN = (
     os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
-    or os.getenv("MODAL_API_PROXY_SECRET")
-    or os.getenv("MODAL_API_PROXY_KEY")
-    or os.getenv("MODAL_API_KEY")
     or os.getenv("MODAL_TOKEN_SECRET")
     or os.getenv("MODAL_API_TOKEN_SECRET")
 )
-MODAL_PROXY_KEY = (
-    os.getenv("MODAL_API_PROXY_KEY")
-    or os.getenv("MODAL_API_KEY")
-    or os.getenv("MODAL_API_TOKEN_ID")
-    or os.getenv("MODAL_TOKEN_ID")
-)
-MODAL_PROXY_SECRET = os.getenv("MODAL_API_PROXY_SECRET") or os.getenv("MODAL_TOKEN_SECRET")
 
 # Configuration - will be fetched from embedding service
 EMBEDDING_CONFIG: dict[str, Any] = {
@@ -62,7 +52,7 @@ def _normalize_embedding_service_url(url: str | None) -> str:
 
     return _normalize_internal_service_url(
         url,
-        fallback_url="http://vecinita-modal-proxy-v1:10000/embedding",
+        fallback_url="http://localhost:8001",
     ).rstrip("/")
 
 
@@ -81,11 +71,6 @@ def _embedding_service_headers() -> dict[str, str]:
     if EMBEDDING_SERVICE_AUTH_TOKEN:
         headers["x-embedding-service-token"] = EMBEDDING_SERVICE_AUTH_TOKEN
         headers["authorization"] = f"Bearer {EMBEDDING_SERVICE_AUTH_TOKEN}"
-    if PROXY_AUTH_TOKEN:
-        headers["X-Proxy-Token"] = PROXY_AUTH_TOKEN
-    if MODAL_PROXY_KEY and MODAL_PROXY_SECRET:
-        headers["Modal-Key"] = MODAL_PROXY_KEY
-        headers["Modal-Secret"] = MODAL_PROXY_SECRET
     return headers
 
 

@@ -13,12 +13,9 @@ from pathlib import Path
 
 REQUIRED_KEYS: set[str] = {
     "DATABASE_URL",
-    "SUPABASE_URL",
-    "SUPABASE_KEY",
     "OLLAMA_MODEL",
-    "AGENT_ENFORCE_PROXY",
     "RENDER_REMOTE_INFERENCE_ONLY",
-    "PROXY_AUTH_TOKEN",
+    "MODAL_TOKEN_SECRET",
     "VECINITA_MODEL_API_URL",
     "VECINITA_EMBEDDING_API_URL",
     "VECINITA_SCRAPER_API_URL",
@@ -61,29 +58,22 @@ def _validate_required_keys(env: dict[str, str], result: ValidationResult) -> No
             result.errors.append(f"Missing required key: {key}")
 
 
-def _validate_proxy_endpoints(env: dict[str, str], result: ValidationResult) -> None:
-    proxy_host = "vecinita-modal-proxy-v1:10000"
-
+def _validate_modal_endpoints(env: dict[str, str], result: ValidationResult) -> None:
     model_endpoint = env.get("VECINITA_MODEL_API_URL", "")
     embed_endpoint = env.get("VECINITA_EMBEDDING_API_URL", "")
+    scraper_endpoint = env.get("VECINITA_SCRAPER_API_URL", "")
 
-    if model_endpoint and (
-        proxy_host not in model_endpoint or not model_endpoint.endswith("/model")
-    ):
-        result.errors.append(
-            "VECINITA_MODEL_API_URL must route through vecinita-modal-proxy-v1:10000/model"
-        )
-    if embed_endpoint and (
-        proxy_host not in embed_endpoint or not embed_endpoint.endswith("/embedding")
-    ):
-        result.errors.append(
-            "VECINITA_EMBEDDING_API_URL must route through vecinita-modal-proxy-v1:10000/embedding"
-        )
+    if model_endpoint and ".modal.run" not in model_endpoint:
+        result.errors.append("VECINITA_MODEL_API_URL must point to a direct Modal endpoint")
+
+    if embed_endpoint and ".modal.run" not in embed_endpoint:
+        result.errors.append("VECINITA_EMBEDDING_API_URL must point to a direct Modal endpoint")
+
+    if scraper_endpoint and ".modal.run" not in scraper_endpoint:
+        result.errors.append("VECINITA_SCRAPER_API_URL must point to a direct Modal endpoint")
 
 
 def _validate_strict_flags(env: dict[str, str], result: ValidationResult) -> None:
-    if not _is_truthy(env.get("AGENT_ENFORCE_PROXY")):
-        result.errors.append("AGENT_ENFORCE_PROXY must be enabled for Render runtime")
     if not _is_truthy(env.get("RENDER_REMOTE_INFERENCE_ONLY")):
         result.errors.append("RENDER_REMOTE_INFERENCE_ONLY must be enabled for Render runtime")
 
@@ -102,7 +92,7 @@ def validate_shared_render_env(env: dict[str, str]) -> ValidationResult:
     """Validate shared Render env contract used by multiple services."""
     result = ValidationResult()
     _validate_required_keys(env, result)
-    _validate_proxy_endpoints(env, result)
+    _validate_modal_endpoints(env, result)
     _validate_strict_flags(env, result)
     _validate_frontend_contract(env, result)
     return result

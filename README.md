@@ -142,12 +142,12 @@ From repo root:
 make dev
 ```
 
-This starts Chroma, embedding service, agent service, API gateway, and frontend in one terminal with merged cascading logs prefixed by service name.
+This starts embedding service, agent service, API gateway, and frontend in one terminal with merged cascading logs prefixed by service name.
 
 Press `Ctrl+C` to stop all services cleanly.
 
 ```bash
-make dev-stop     # Stop managed processes and chroma container
+make dev-stop     # Stop managed processes
 make dev-tmux     # Optional legacy tmux split-pane session
 make dev-attach   # Attach to tmux session started by make dev-tmux
 ```

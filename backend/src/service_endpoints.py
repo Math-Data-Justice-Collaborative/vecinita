@@ -22,19 +22,19 @@ from src.config import (
 )
 
 # ---------------------------------------------------------------------------
-# Modal proxy (model, embedding, scraper)
+# Modal upstream endpoints (direct)
 # ---------------------------------------------------------------------------
 
-#: Model endpoint.  On Render this is always the modal-proxy /model path.
-MODEL_ENDPOINT: str = OLLAMA_BASE_URL or "http://vecinita-modal-proxy-v1:10000/model"
+#: Model endpoint.
+MODEL_ENDPOINT: str = OLLAMA_BASE_URL or "http://localhost:11434"
 
-#: Embedding endpoint.  On Render this is always the modal-proxy /embedding path.
+#: Embedding endpoint.
 EMBEDDING_ENDPOINT: str = EMBEDDING_SERVICE_URL
 
-#: Scraper/job endpoint through the proxy.
+#: Scraper/job endpoint.
 SCRAPER_ENDPOINT: str = _normalize_internal_service_url(
     os.getenv("VECINITA_SCRAPER_API_URL") or os.getenv("SCRAPER_SERVICE_URL"),
-    fallback_url="http://vecinita-modal-proxy-v1:10000/jobs",
+    fallback_url="http://localhost:8010/jobs",
 )
 
 # ---------------------------------------------------------------------------
@@ -45,19 +45,12 @@ SCRAPER_ENDPOINT: str = _normalize_internal_service_url(
 AGENT_SERVICE_URL: str = os.getenv("AGENT_SERVICE_URL", "http://localhost:8000")
 
 # ---------------------------------------------------------------------------
-# Proxy auth
-# ---------------------------------------------------------------------------
-
-#: Shared proxy auth token for agent→modal-proxy requests.
-PROXY_AUTH_TOKEN: str | None = os.getenv("PROXY_AUTH_TOKEN")
-
-# ---------------------------------------------------------------------------
 # Strict-mode flags
 # ---------------------------------------------------------------------------
 
 
 def is_render_strict_mode() -> bool:
-    """Return True when both AGENT_ENFORCE_PROXY and RENDER_REMOTE_INFERENCE_ONLY are enabled.
+    """Return True when RENDER_REMOTE_INFERENCE_ONLY is enabled.
 
     In strict mode no silent fallback to local model/embedding is permitted.
     Startup should abort rather than fall back.
@@ -66,7 +59,7 @@ def is_render_strict_mode() -> bool:
     def _truthy(k: str) -> bool:
         return os.getenv(k, "").lower() in {"1", "true", "yes", "on"}
 
-    return _truthy("AGENT_ENFORCE_PROXY") and _truthy("RENDER_REMOTE_INFERENCE_ONLY")
+    return _truthy("RENDER_REMOTE_INFERENCE_ONLY")
 
 
 def is_render() -> bool:
@@ -106,13 +99,12 @@ def log_endpoint_summary(logger: logging.Logger) -> None:
     logger.info(
         "service_endpoints_summary "
         "model=%s embedding=%s scraper=%s agent=%s "
-        "proxy_token_set=%s strict_mode=%s on_render=%s "
+        "strict_mode=%s on_render=%s "
         "allowed_origins=%s",
         MODEL_ENDPOINT,
         EMBEDDING_ENDPOINT,
         SCRAPER_ENDPOINT,
         AGENT_SERVICE_URL,
-        bool(PROXY_AUTH_TOKEN),
         is_render_strict_mode(),
         is_render(),
         origins,

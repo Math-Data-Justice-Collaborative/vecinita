@@ -10,7 +10,7 @@
 	quality quality-imported \
 	test-unit test-integration test-e2e \
 	test-backend-unit test-frontend-unit test-frontend-e2e \
-	test-imported test-data-management-frontend test-modal-proxy test-embedding-modal test-model-modal test-scraper check-data-management-api-layout \
+	test-imported test-data-management-frontend test-embedding-modal test-model-modal test-scraper check-data-management-api-layout \
 	lint-data-management-frontend lint-scraper lint-embedding-modal lint-model-modal \
 	typecheck-scraper \
 	test-integration-gateway-fast test-integration-gateway-full test-integration-gateway \
@@ -130,7 +130,7 @@ dev-stop:
 	./run/dev-session.sh stop
 
 dev-clear-ports:
-	@for port in 5173 5174 8000 8001 8002 8004 8005; do \
+	@for port in 5173 5174 8000 8001 8004 8005; do \
 		pids="$$( (command -v lsof >/dev/null 2>&1 && lsof -ti tcp:$$port 2>/dev/null) || (command -v fuser >/dev/null 2>&1 && fuser -n tcp $$port 2>/dev/null) || true )"; \
 		if [ -n "$$pids" ]; then \
 			echo "Clearing port $$port (PID(s): $$pids)"; \
@@ -141,12 +141,11 @@ dev-clear-ports:
 	done
 
 dev-backend:
-	cd backend && CHROMA_HOST='localhost' CHROMA_PORT='8002' CHROMA_SSL='false' \
+	cd backend && \
 		uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir src --reload-exclude '.mypy_cache/*' --reload-exclude '.pytest_cache/*' --reload-exclude '.ruff_cache/*' --reload-exclude '.venv/*' --reload-exclude 'logs/*' --reload-exclude 'build/*' --reload-exclude 'coverage*' --reload-exclude '*.pyc'
 
 dev-gateway:
 	cd backend && AGENT_SERVICE_URL='http://localhost:8000' EMBEDDING_SERVICE_URL='http://localhost:8001' \
-		CHROMA_HOST='localhost' CHROMA_PORT='8002' CHROMA_SSL='false' \
 		SUPABASE_URL='http://localhost:3001' SUPABASE_KEY='test-anon-key-local-development-only' \
 		DEV_ADMIN_ENABLED='true' DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' \
 		SUPABASE_UPLOADS_BUCKET='documents' DEMO_MODE='false' \
@@ -166,7 +165,7 @@ dev-chat-backend: dev-chat-agent dev-chat-gateway
 
 dev-chat-agent:
 	@echo "Starting Chat Agent (port 8000)..."
-	@cd backend && CHROMA_HOST='localhost' CHROMA_PORT='8002' CHROMA_SSL='false' \
+	@cd backend && \
 		uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir src --reload-exclude '.mypy_cache/*' --reload-exclude '.pytest_cache/*' --reload-exclude '.ruff_cache/*' --reload-exclude '.venv/*' --reload-exclude 'logs/*' --reload-exclude 'build/*' --reload-exclude 'coverage*' --reload-exclude '*.pyc' &
 
 dev-chat-gateway:
@@ -174,9 +173,6 @@ dev-chat-gateway:
 	@cd backend && source ../.env && \
 		AGENT_SERVICE_URL='http://localhost:8000' \
 		EMBEDDING_SERVICE_URL='http://localhost:8001' \
-		CHROMA_HOST='localhost' \
-		CHROMA_PORT='8002' \
-		CHROMA_SSL='false' \
 		DEV_ADMIN_ENABLED='true' \
 		DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' \
 		uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 --reload --reload-dir src --reload-exclude '.mypy_cache/*' --reload-exclude '.pytest_cache/*' --reload-exclude '.ruff_cache/*' --reload-exclude '.venv/*' --reload-exclude 'logs/*' --reload-exclude 'build/*' --reload-exclude 'coverage*' --reload-exclude '*.pyc' &
@@ -286,13 +282,10 @@ check-data-management-api-layout:
 	test -d services/data-management-api/apps/backend
 	test -d services/data-management-api/packages/shared-config
 
-test-imported: check-data-management-api-layout test-data-management-frontend test-modal-proxy test-embedding-modal test-model-modal test-scraper
+test-imported: check-data-management-api-layout test-data-management-frontend test-embedding-modal test-model-modal test-scraper
 
 test-data-management-frontend:
 	cd apps/data-management-frontend && npm run test
-
-test-modal-proxy:
-	cd services/modal-proxy && uv run pytest --cov=app --cov-report=term-missing --cov-fail-under=95
 
 test-embedding-modal:
 	cd services/embedding-modal && make test

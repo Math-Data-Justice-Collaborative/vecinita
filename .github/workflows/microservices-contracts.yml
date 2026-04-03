@@ -35,18 +35,18 @@ jobs:
           token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
       - name: Checkout required service submodules
-        run: git submodule update --init --depth 1 services/model-modal services/modal-proxy
+        run: git submodule update --init --depth 1 services/model-modal
 
       - name: Build selected microservices images
         run: |
           docker compose -f docker-compose.microservices.yml build \
-            model-service embedding-service scraper-service modal-proxy chat-agent chat-gateway
+            model-service embedding-service scraper-service chat-agent chat-gateway
 
       - name: Start microservices contract stack
         run: |
           docker compose -f docker-compose.microservices.yml up -d \
-            chroma postgres postgrest ollama \
-            model-service embedding-service scraper-service modal-proxy \
+            postgres postgrest ollama \
+            model-service embedding-service scraper-service \
             chat-agent chat-gateway
 
       - name: Wait for core health endpoints
@@ -56,7 +56,6 @@ jobs:
             http://localhost:8008/health \
             http://localhost:8011/health \
             http://localhost:8020/health \
-            http://localhost:10000/health \
             http://localhost:8004/health
           do
             echo "Waiting for ${endpoint}"
@@ -90,7 +89,6 @@ jobs:
         env:
           REQUIRE_MICROSERVICES: "1"
           GATEWAY_URL: http://localhost:8004
-          PROXY_URL: http://localhost:10000
           MODEL_URL: http://localhost:8008
           EMBEDDING_URL: http://localhost:8011
           SCRAPER_URL: http://localhost:8020

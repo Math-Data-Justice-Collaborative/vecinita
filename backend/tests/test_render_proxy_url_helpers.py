@@ -266,33 +266,30 @@ def _make_manager(**kwargs):
         base_url=kwargs.get("base_url", "http://localhost:11434"),
         default_model=kwargs.get("default_model", "llama3.1:8b"),
         api_key=kwargs.get("api_key"),
-        modal_proxy_key=kwargs.get("modal_proxy_key"),
-        modal_proxy_secret=kwargs.get("modal_proxy_secret"),
-        proxy_auth_token=kwargs.get("proxy_auth_token"),
         enforce_proxy=kwargs.get("enforce_proxy", False),
     )
 
 
 class TestViaProxy:
-    def test_returns_true_for_render_private_hostname(self):
+    def test_always_false_for_render_private_hostname(self):
         mgr = _make_manager(base_url="http://vecinita-modal-proxy-v1:10000/model")
-        assert mgr._via_proxy() is True
+        assert mgr._via_proxy() is False
 
-    def test_returns_true_for_embedding_proxy_prefix(self):
+    def test_always_false_for_embedding_proxy_prefix(self):
         mgr = _make_manager(base_url="http://vecinita-modal-proxy-v1:10000/embedding")
-        assert mgr._via_proxy() is True
+        assert mgr._via_proxy() is False
 
-    def test_returns_true_case_insensitive(self):
+    def test_always_false_case_insensitive(self):
         mgr = _make_manager(base_url="http://Vecinita-Modal-Proxy:10000/model")
-        assert mgr._via_proxy() is True
+        assert mgr._via_proxy() is False
 
-    def test_returns_true_for_localhost_proxy_model_path(self):
+    def test_always_false_for_localhost_proxy_model_path(self):
         mgr = _make_manager(base_url="http://localhost:10000/model")
-        assert mgr._via_proxy() is True
+        assert mgr._via_proxy() is False
 
-    def test_returns_true_for_localhost_proxy_embedding_path(self):
+    def test_always_false_for_localhost_proxy_embedding_path(self):
         mgr = _make_manager(base_url="http://127.0.0.1:10000/embedding")
-        assert mgr._via_proxy() is True
+        assert mgr._via_proxy() is False
 
     def test_returns_false_for_direct_modal_url(self):
         mgr = _make_manager(base_url="https://vecinita--vecinita-model-api.modal.run")
@@ -312,31 +309,30 @@ class TestViaProxy:
 
 
 class TestHeadersViaProxy:
-    """When routing through the modal proxy, headers() must return {} to prevent
-    Authorization: Bearer from reaching Modal and triggering HTTP 401."""
+    """Proxy paths are treated like direct endpoints after proxy retirement."""
 
-    def test_headers_empty_when_via_proxy_with_api_key(self):
+    def test_headers_include_authorization_when_api_key_present(self):
         mgr = _make_manager(
             base_url="http://vecinita-modal-proxy-v1:10000/model",
             api_key="secret-token",
         )
-        assert mgr.headers() == {}
+        assert mgr.headers() == {"Authorization": "Bearer secret-token"}
 
-    def test_headers_empty_when_via_proxy_with_modal_credentials(self):
+    def test_headers_ignore_legacy_modal_credentials(self):
         mgr = _make_manager(
             base_url="http://vecinita-modal-proxy-v1:10000/model",
             api_key="ak-xxx",
             modal_proxy_key="mk-111",
             modal_proxy_secret="ms-222",
         )
-        assert mgr.headers() == {}
+        assert mgr.headers() == {"Authorization": "Bearer ak-xxx"}
 
-    def test_no_authorization_header_via_proxy(self):
+    def test_authorization_header_present_when_api_key_set(self):
         mgr = _make_manager(
             base_url="http://vecinita-modal-proxy-v1:10000/model",
             api_key="should-not-appear",
         )
-        assert "Authorization" not in mgr.headers()
+        assert mgr.headers().get("Authorization") == "Bearer should-not-appear"
 
     def test_no_modal_key_header_via_proxy(self):
         mgr = _make_manager(
@@ -346,7 +342,7 @@ class TestHeadersViaProxy:
         )
         assert "Modal-Key" not in mgr.headers()
 
-    def test_x_proxy_token_only_when_via_proxy_and_configured(self):
+    def test_no_x_proxy_token_header_emitted(self):
         mgr = _make_manager(
             base_url="http://vecinita-modal-proxy-v1:10000/model",
             api_key="should-not-appear",
@@ -355,9 +351,9 @@ class TestHeadersViaProxy:
             proxy_auth_token="proxy-shared-token",
         )
         headers = mgr.headers()
-        assert headers == {"X-Proxy-Token": "proxy-shared-token"}
+        assert headers == {"Authorization": "Bearer should-not-appear"}
 
-    def test_localhost_proxy_sends_x_proxy_token_only(self):
+    def test_localhost_proxy_path_behaves_like_direct_endpoint(self):
         mgr = _make_manager(
             base_url="http://localhost:10000/model",
             api_key="should-not-appear",
@@ -366,9 +362,9 @@ class TestHeadersViaProxy:
             proxy_auth_token="proxy-shared-token",
         )
         headers = mgr.headers()
-        assert headers == {"X-Proxy-Token": "proxy-shared-token"}
+        assert headers == {"Authorization": "Bearer should-not-appear"}
 
-    def test_localhost_proxy_uses_local_default_when_proxy_token_missing(self):
+    def test_localhost_proxy_path_without_api_key_yields_empty_headers(self):
         mgr = _make_manager(
             base_url="http://localhost:10000/model",
             modal_proxy_key="mk-111",
@@ -376,9 +372,9 @@ class TestHeadersViaProxy:
             proxy_auth_token=None,
         )
         headers = mgr.headers()
-        assert headers == {"X-Proxy-Token": "vecinita-local-proxy-token"}
+        assert headers == {}
 
-    def test_explicit_proxy_token_wins_over_modal_proxy_secret(self):
+    def test_explicit_proxy_token_does_not_affect_headers(self):
         mgr = _make_manager(
             base_url="http://localhost:10000/model",
             modal_proxy_key="mk-111",
@@ -386,7 +382,7 @@ class TestHeadersViaProxy:
             proxy_auth_token="proxy-shared-token",
         )
         headers = mgr.headers()
-        assert headers == {"X-Proxy-Token": "proxy-shared-token"}
+        assert headers == {}
 
 
 class TestHeadersDirectModal:
@@ -400,15 +396,15 @@ class TestHeadersDirectModal:
         h = mgr.headers()
         assert h.get("Authorization") == "Bearer token-123"
 
-    def test_modal_key_secret_sent_for_direct_modal(self):
+    def test_modal_key_secret_not_sent_for_direct_modal(self):
         mgr = _make_manager(
             base_url="https://vecinita--vecinita-model-api.modal.run",
             modal_proxy_key="mk-abc",
             modal_proxy_secret="ms-def",
         )
         h = mgr.headers()
-        assert h.get("Modal-Key") == "mk-abc"
-        assert h.get("Modal-Secret") == "ms-def"
+        assert h.get("Modal-Key") is None
+        assert h.get("Modal-Secret") is None
 
     def test_no_authorization_when_api_key_none_direct(self):
         mgr = _make_manager(
@@ -448,7 +444,7 @@ class TestNativeChatDetection:
 
     def test_native_chat_enabled_for_model_proxy_prefix(self):
         mgr = _make_manager(base_url="http://vecinita-modal-proxy-v1:10000/model")
-        assert mgr.uses_modal_native_chat_api() is True
+        assert mgr.uses_modal_native_chat_api() is False
 
     def test_native_chat_disabled_for_embedding_proxy_prefix(self):
         mgr = _make_manager(base_url="http://vecinita-modal-proxy-v1:10000/embedding")
@@ -472,19 +468,17 @@ class TestNativeChatDetection:
 
 
 class TestProxyOnlyEnforcement:
-    def test_validate_runtime_rejects_direct_local_ollama_when_enforced(self):
+    def test_validate_runtime_ignores_proxy_only_flag(self):
         mgr = _make_manager(base_url="http://localhost:11434", enforce_proxy=True)
-        with pytest.raises(RuntimeError, match="Proxy-only LLM mode is enabled"):
-            mgr.validate_runtime()
-
-    def test_validate_runtime_allows_proxy_model_when_enforced(self):
-        mgr = _make_manager(base_url="http://localhost:10000/model", enforce_proxy=True)
         mgr.validate_runtime()
 
-    def test_build_client_rejects_direct_modal_when_enforced(self):
+    def test_build_client_allows_direct_modal_when_enforced_flag_set(self):
         mgr = _make_manager(
-            base_url="https://vecinita--vecinita-model-api.modal.run",
-            enforce_proxy=True,
+            base_url="https://vecinita--vecinita-model-api.modal.run", enforce_proxy=True
         )
-        with pytest.raises(RuntimeError, match="Proxy-only LLM mode rejected"):
-            mgr.build_client()
+        # Should not fail solely because enforce_proxy is set.
+        mgr.build_client()
+
+    def test_build_client_local_ollama_still_depends_on_langchain_ollama(self):
+        mgr = _make_manager(base_url="http://localhost:11434", enforce_proxy=True)
+        assert mgr.build_client() is not None

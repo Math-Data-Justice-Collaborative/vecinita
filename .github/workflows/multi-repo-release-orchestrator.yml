@@ -18,11 +18,6 @@ on:
         required: false
         default: true
         type: boolean
-      deploy_modal_proxy:
-        description: Dispatch modal-proxy deployment workflow
-        required: false
-        default: true
-        type: boolean
       deploy_scraper:
         description: Dispatch scraper deployment workflow
         required: false
@@ -110,21 +105,6 @@ jobs:
     secrets:
       dispatch_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
-  modal-proxy:
-    needs: [workflow-context]
-    if: needs.workflow-context.outputs.has_cross_repo_token == 'true' && inputs.deploy_modal_proxy
-    uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
-    with:
-      service_name: modal-proxy
-      target_repo: Math-Data-Justice-Collaborative/vecinita-modal-proxy
-      workflow_file: ci-cd.yml
-      target_ref: ${{ inputs.target_ref }}
-      wait_for_completion: ${{ inputs.wait_for_completion }}
-      expected_platform: Render Private Service
-      expected_region: virginia
-    secrets:
-      dispatch_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
-
   scraper:
     needs: [workflow-context]
     if: needs.workflow-context.outputs.has_cross_repo_token == 'true' && inputs.deploy_scraper
@@ -174,7 +154,6 @@ jobs:
       - chat-frontend
       - data-management-frontend
       - data-management-api
-      - modal-proxy
       - scraper
       - embedding-modal
       - model-modal
@@ -186,14 +165,13 @@ jobs:
           echo "chat-frontend: ${{ needs.chat-frontend.result }}"
           echo "data-management-frontend: ${{ needs.data-management-frontend.result }}"
           echo "data-management-api: ${{ needs.data-management-api.result }}"
-          echo "modal-proxy: ${{ needs.modal-proxy.result }}"
           echo "scraper: ${{ needs.scraper.result }}"
           echo "embedding-modal: ${{ needs.embedding-modal.result }}"
           echo "model-modal: ${{ needs.model-modal.result }}"
 
       - name: Fail orchestrator on child workflow failure
         run: |
-          RESULTS="${{ needs.chat-frontend.result }} ${{ needs.data-management-frontend.result }} ${{ needs.data-management-api.result }} ${{ needs.modal-proxy.result }} ${{ needs.scraper.result }} ${{ needs.embedding-modal.result }} ${{ needs.model-modal.result }}"
+          RESULTS="${{ needs.chat-frontend.result }} ${{ needs.data-management-frontend.result }} ${{ needs.data-management-api.result }} ${{ needs.scraper.result }} ${{ needs.embedding-modal.result }} ${{ needs.model-modal.result }}"
           if echo "$RESULTS" | grep -Eq "failure|cancelled|timed_out"; then
             echo "At least one downstream service workflow failed."
             exit 1

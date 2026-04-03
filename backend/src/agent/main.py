@@ -10,32 +10,22 @@ RAG (Retrieval-Augmented Generation) agent.  It exposes three main endpoints:
 
 Deployment routing (Render)
 ---------------------------
-On Render, all model and embedding traffic is routed through the internal
-modal-proxy private service (``vecinita-modal-proxy-v1:10000``) using path
-prefixes recognised by the proxy:
-
-- ``/model/...``     → Ollama-compatible model backend  (strips ``/model``)
-- ``/embedding/...`` → Embedding backend                (strips ``/embedding``)
-
-This is enforced at startup by ``_normalize_internal_service_url``.  Any
-env vars pointing at ``localhost``, Docker-internal hostnames, or direct
-Modal endpoints are silently replaced with the proxy URL on Render.
+On Render, model and embedding traffic is sent directly to configured
+upstream endpoints (typically ``*.modal.run``). Localhost and docker-only
+addresses are treated as local-dev defaults.
 
 Environment variables (minimum required)
 -----------------------------------------
-- ``SUPABASE_URL`` / ``SUPABASE_KEY`` — vector-store access
-- ``OLLAMA_BASE_URL``                 — Ollama server (local/Docker dev only;
-                                        overridden by proxy on Render)
+- ``DATABASE_URL``                     — Postgres datastore access
+- ``OLLAMA_BASE_URL``                 — model endpoint (local or direct Modal)
 - ``GROQ_API_KEY``                    — optional Groq provider
 - ``OPENAI_API_KEY``                  — optional OpenAI provider
-- ``EMBEDDING_SERVICE_URL``           — embedding microservice (local/Docker;
-                                        overridden by proxy on Render)
+- ``EMBEDDING_SERVICE_URL``           — embedding microservice endpoint
 """
 
 # ruff: noqa: E402, I001
 
 import json
-import inspect
 import logging
 import os
 import re
@@ -241,25 +231,8 @@ supabase_key = (
 ollama_base_url = OLLAMA_BASE_URL
 ollama_api_key = (
     os.environ.get("OLLAMA_API_KEY")
-    or os.environ.get("MODAL_API_PROXY_SECRET")
-    or os.environ.get("MODAL_API_PROXY_KEY")
-    or os.environ.get("MODAL_API_KEY")
     or os.environ.get("MODAL_TOKEN_SECRET")
     or os.environ.get("MODAL_API_TOKEN_SECRET")
-)
-modal_proxy_key = (
-    os.environ.get("MODAL_API_PROXY_KEY")
-    or os.environ.get("MODAL_API_KEY")
-    or os.environ.get("MODAL_API_TOKEN_ID")
-    or os.environ.get("MODAL_TOKEN_ID")
-)
-modal_proxy_secret = os.environ.get("MODAL_API_PROXY_SECRET") or os.environ.get(
-    "MODAL_TOKEN_SECRET"
-)
-proxy_auth_token = (
-    os.environ.get("PROXY_AUTH_TOKEN")
-    or os.environ.get("MODAL_PROXY_AUTH_TOKEN")
-    or os.environ.get("X_PROXY_TOKEN")
 )
 ollama_model = os.environ.get("OLLAMA_MODEL") or "llama3.1:8b"
 default_provider = "ollama"
@@ -274,20 +247,10 @@ lock_model_selection_env = (os.environ.get("LOCK_MODEL_SELECTION") or "false").l
     "true",
     "yes",
 ]
-enforce_proxy_llm = (os.environ.get("AGENT_ENFORCE_PROXY") or "true").lower() in [
-    "1",
-    "true",
-    "yes",
-]
 render_remote_inference_only = _running_on_render() and (
     os.environ.get("RENDER_REMOTE_INFERENCE_ONLY", "true").strip().lower()
     in {"1", "true", "yes", "on"}
 )
-if render_remote_inference_only and not enforce_proxy_llm:
-    logger.warning(
-        "Overriding AGENT_ENFORCE_PROXY=false because RENDER_REMOTE_INFERENCE_ONLY is enabled"
-    )
-    enforce_proxy_llm = True
 selection_file_path = os.environ.get("MODEL_SELECTION_PATH") or str(
     Path(__file__).parent / "data" / "model_selection.json"
 )
@@ -298,19 +261,10 @@ llm_manager_kwargs: dict[str, Any] = {
     "base_url": ollama_base_url,
     "default_model": ollama_model,
     "api_key": ollama_api_key,
-    "modal_proxy_key": modal_proxy_key,
-    "modal_proxy_secret": modal_proxy_secret,
-    "proxy_auth_token": proxy_auth_token,
     "selection_file_path": selection_file_path,
     "locked": lock_model_selection_env,
     "use_native_api": force_local_modal_llm,
-    "enforce_proxy": enforce_proxy_llm,
 }
-if "enforce_proxy" not in inspect.signature(LocalLLMClientManager.__init__).parameters:
-    logger.warning(
-        "LocalLLMClientManager does not accept enforce_proxy; falling back to legacy constructor"
-    )
-    llm_manager_kwargs.pop("enforce_proxy", None)
 llm_client_manager = LocalLLMClientManager(**llm_manager_kwargs)
 # --- Initialize Clients ---
 try:
@@ -385,8 +339,6 @@ try:
     embedding_service_url = EMBEDDING_SERVICE_URL
     embedding_service_auth_token = (
         os.environ.get("EMBEDDING_SERVICE_AUTH_TOKEN")
-        or os.environ.get("MODAL_API_PROXY_SECRET")
-        or os.environ.get("MODAL_API_KEY")
         or os.environ.get("MODAL_TOKEN_SECRET")
         or os.environ.get("MODAL_API_TOKEN_SECRET")
     )
@@ -425,7 +377,7 @@ try:
             raise RuntimeError(
                 "Embedding service validation failed in Render remote-only mode. "
                 "Local embedding fallback is disabled to avoid hosting embeddings on Render. "
-                "Verify vecinita-modal-proxy /embedding routing and upstream embedding service health. "
+                "Verify direct embedding endpoint routing and upstream embedding service health. "
                 f"Original error: {service_exc}"
             ) from service_exc
 
@@ -1186,12 +1138,11 @@ def _build_deterministic_rag_answer(
         answer = response.content if hasattr(response, "content") else str(response)
     except Exception as exc:
         logger.warning(
-            "Deterministic generation fallback activated due to model error: %s | provider=%s model=%s base_url=%s via_proxy=%s uses_native_api=%s",
+            "Deterministic generation fallback activated due to model error: %s | provider=%s model=%s base_url=%s uses_native_api=%s",
             exc,
             provider,
             model,
             llm_client_manager.base_url,
-            llm_client_manager._via_proxy(),
             llm_client_manager.uses_modal_native_chat_api(),
         )
         if language == "es":

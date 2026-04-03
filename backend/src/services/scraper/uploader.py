@@ -145,43 +145,20 @@ class DatabaseUploader:
         if not enabled:
             return
 
-        enforce_proxy = (os.getenv("AGENT_ENFORCE_PROXY") or "true").lower() in {
-            "1",
-            "true",
-            "yes",
-        }
-        render_remote_inference_only = bool(
-            os.getenv("RENDER") or os.getenv("RENDER_SERVICE_ID")
-        ) and (os.getenv("RENDER_REMOTE_INFERENCE_ONLY", "true").lower() in {"1", "true", "yes"})
-        if render_remote_inference_only:
-            enforce_proxy = True
-
         manager = LocalLLMClientManager(
             base_url=(
                 os.getenv("MODAL_OLLAMA_ENDPOINT")
                 or os.getenv("OLLAMA_BASE_URL")
-                or "http://vecinita-modal-proxy-v1:10000/model"
+                or "http://localhost:11434"
             ),
             default_model=os.getenv("OLLAMA_MODEL", "llama3.1:8b"),
             api_key=(
                 os.getenv("OLLAMA_API_KEY")
-                or os.getenv("MODAL_API_PROXY_SECRET")
-                or os.getenv("MODAL_API_PROXY_KEY")
-                or os.getenv("MODAL_API_KEY")
                 or os.getenv("MODAL_TOKEN_SECRET")
                 or os.getenv("MODAL_API_TOKEN_SECRET")
             ),
-            modal_proxy_key=(
-                os.getenv("MODAL_API_PROXY_KEY")
-                or os.getenv("MODAL_API_KEY")
-                or os.getenv("MODAL_API_TOKEN_ID")
-                or os.getenv("MODAL_TOKEN_ID")
-            ),
-            modal_proxy_secret=os.getenv("MODAL_API_PROXY_SECRET")
-            or os.getenv("MODAL_TOKEN_SECRET"),
             use_native_api=(os.getenv("FORCE_LOCAL_MODAL_LLM") or "true").lower()
             in {"1", "true", "yes"},
-            enforce_proxy=enforce_proxy,
         )
         try:
             manager.validate_runtime()
@@ -467,7 +444,7 @@ class DatabaseUploader:
         embedding_service_url = (
             os.getenv("MODAL_EMBEDDING_ENDPOINT")
             or os.getenv("EMBEDDING_SERVICE_URL")
-            or "http://vecinita-modal-proxy-v1:10000/embedding"
+            or "http://localhost:8001"
         )
 
         if EMBEDDING_SERVICE_AVAILABLE:

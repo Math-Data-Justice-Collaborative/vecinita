@@ -99,8 +99,8 @@ def test_model_and_embedding_endpoints_no_localhost_on_render():
     """On Render, resolved MODEL_ENDPOINT and EMBEDDING_ENDPOINT must not be localhost."""
     render_env = {
         "RENDER": "true",
-        "VECINITA_MODEL_API_URL": "http://vecinita-modal-proxy-v1:10000/model",
-        "VECINITA_EMBEDDING_API_URL": "http://vecinita-modal-proxy-v1:10000/embedding",
+        "VECINITA_MODEL_API_URL": "https://vecinita--vecinita-model-api.modal.run",
+        "VECINITA_EMBEDDING_API_URL": "https://vecinita--vecinita-embedding-api.modal.run",
     }
     # Reload the module with Render env vars set so _running_on_render() returns True
     import sys
@@ -121,16 +121,16 @@ def test_model_and_embedding_endpoints_no_localhost_on_render():
 
 
 # ---------------------------------------------------------------------------
-# 4. Proxy hostname is the expected Render internal DNS format
+# 4. Endpoints must point to direct Modal hosts
 # ---------------------------------------------------------------------------
 
 
-def test_proxy_endpoints_use_render_internal_hostname():
-    """Canonical endpoint URLs must use the vecinita-modal-proxy-v1 private hostname."""
+def test_modal_endpoints_use_direct_modal_hosts():
+    """Canonical endpoint URLs must point to direct Modal hosts."""
     render_env = {
         "RENDER": "true",
-        "VECINITA_MODEL_API_URL": "http://vecinita-modal-proxy-v1:10000/model",
-        "VECINITA_EMBEDDING_API_URL": "http://vecinita-modal-proxy-v1:10000/embedding",
+        "VECINITA_MODEL_API_URL": "https://vecinita--vecinita-model-api.modal.run",
+        "VECINITA_EMBEDDING_API_URL": "https://vecinita--vecinita-embedding-api.modal.run",
     }
     import sys
 
@@ -141,65 +141,15 @@ def test_proxy_endpoints_use_render_internal_hostname():
         from src.service_endpoints import EMBEDDING_ENDPOINT, MODEL_ENDPOINT  # noqa: PLC0415
 
         assert (
-            "vecinita-modal-proxy-v1" in MODEL_ENDPOINT
-        ), f"MODEL_ENDPOINT must route through vecinita-modal-proxy-v1; got: {MODEL_ENDPOINT}"
+            "modal.run" in MODEL_ENDPOINT
+        ), f"MODEL_ENDPOINT must be direct Modal URL; got: {MODEL_ENDPOINT}"
         assert (
-            "vecinita-modal-proxy-v1" in EMBEDDING_ENDPOINT
-        ), f"EMBEDDING_ENDPOINT must route via vecinita-modal-proxy-v1; got: {EMBEDDING_ENDPOINT}"
+            "modal.run" in EMBEDDING_ENDPOINT
+        ), f"EMBEDDING_ENDPOINT must be direct Modal URL; got: {EMBEDDING_ENDPOINT}"
 
 
 # ---------------------------------------------------------------------------
-# 5. PROXY_AUTH_TOKEN reads only the canonical key (no aliases)
-# ---------------------------------------------------------------------------
-
-
-def test_proxy_auth_token_reads_canonical_key_only():
-    """service_endpoints.PROXY_AUTH_TOKEN must read PROXY_AUTH_TOKEN, not deprecated aliases."""
-    import sys
-
-    # Ensure PROXY_AUTH_TOKEN is set, aliases are absent
-    env_override = {
-        "PROXY_AUTH_TOKEN": "canonical-value",
-    }
-    remove_keys = ["MODAL_PROXY_AUTH_TOKEN", "X_PROXY_TOKEN"]
-
-    cleaned = {k: v for k, v in os.environ.items() if k not in remove_keys}
-    cleaned.update(env_override)
-
-    with patch.dict(os.environ, cleaned, clear=True):
-        for mod_name in list(sys.modules.keys()):
-            if "src.config" in mod_name or "src.service_endpoints" in mod_name:
-                del sys.modules[mod_name]
-        from src.service_endpoints import PROXY_AUTH_TOKEN  # noqa: PLC0415
-
-        assert PROXY_AUTH_TOKEN == "canonical-value"
-
-
-def test_deprecated_proxy_auth_alias_not_picked_up():
-    """MODAL_PROXY_AUTH_TOKEN must NOT be read by service_endpoints after Phase 0."""
-    import sys
-
-    env_override = {
-        "MODAL_PROXY_AUTH_TOKEN": "alias-value",
-    }
-    cleaned = {
-        k: v for k, v in os.environ.items() if k not in ("PROXY_AUTH_TOKEN", "X_PROXY_TOKEN")
-    }
-    cleaned.update(env_override)
-
-    with patch.dict(os.environ, cleaned, clear=True):
-        for mod_name in list(sys.modules.keys()):
-            if "src.config" in mod_name or "src.service_endpoints" in mod_name:
-                del sys.modules[mod_name]
-        from src.service_endpoints import PROXY_AUTH_TOKEN  # noqa: PLC0415
-
-        assert (
-            PROXY_AUTH_TOKEN != "alias-value"
-        ), "MODAL_PROXY_AUTH_TOKEN alias must no longer be read by service_endpoints"
-
-
-# ---------------------------------------------------------------------------
-# 6. ALLOWED_ORIGINS env var (not CORS_ORIGINS) is used for CORS
+# 5. ALLOWED_ORIGINS env var (not CORS_ORIGINS) is used for CORS
 # ---------------------------------------------------------------------------
 
 

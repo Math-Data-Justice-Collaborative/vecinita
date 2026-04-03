@@ -225,36 +225,6 @@ jobs:
       working-directory: apps/data-management-frontend
       run: npm run test
 
-  modal-proxy-ci:
-    needs: [workflow-context]
-    if: needs.workflow-context.outputs.has_cross_repo_token == 'true'
-    runs-on: ubuntu-22.04
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
-      with:
-        submodules: 'false'
-        token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
-
-    - name: Checkout modal-proxy submodule
-      run: git submodule update --init --depth 1 services/modal-proxy
-
-    - name: Setup Python 3.12
-      uses: actions/setup-python@v6
-      with:
-        python-version: '3.12'
-
-    - name: Setup uv
-      uses: astral-sh/setup-uv@v4
-
-    - name: Install modal-proxy dependencies
-      working-directory: services/modal-proxy
-      run: uv sync --all-groups
-
-    - name: Run modal-proxy tests with coverage
-      working-directory: services/modal-proxy
-      run: uv run pytest --cov=app --cov-report=term-missing --cov-fail-under=95
-
   embedding-modal-quality:
     runs-on: ubuntu-22.04
     steps:

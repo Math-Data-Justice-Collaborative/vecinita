@@ -32,13 +32,9 @@ def _truthy_env(name: str) -> bool:
 def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -> str:
     """Resolve the effective URL for an internal upstream service (embedding, Ollama).
 
-    On Render, all upstream service traffic must route through the
-    ``vecinita-modal-proxy`` private-network service to avoid connection
-    errors when env vars still point at Docker-internal hostnames or localhost.
-
-    The ``fallback_url`` must include the correct proxy path prefix:
-    - Model (Ollama):  ``http://vecinita-modal-proxy-v1:10000/model``
-    - Embedding:       ``http://vecinita-modal-proxy-v1:10000/embedding``
+    On Render, explicit non-local URLs are preferred. If an endpoint env var is
+    missing or points to a local/docker-only hostname, the provided fallback is
+    used.
 
     Args:
         raw_url:      Raw URL from an environment variable (may be None or empty).
@@ -51,21 +47,13 @@ def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -
     candidate = (raw_url or "").strip()
 
     if _running_on_render():
-        # In strict proxy mode, force all internal upstream calls through modal-proxy
-        # even when explicit modal.run URLs are provided.
-        strict_proxy_mode = _truthy_env("AGENT_ENFORCE_PROXY") or _truthy_env(
-            "RENDER_REMOTE_INFERENCE_ONLY"
-        )
-        if strict_proxy_mode:
-            return fallback_url
-
         if candidate:
             try:
                 host = (urlparse(candidate).hostname or "").lower()
             except Exception:
                 host = ""
 
-            # Ignore local/docker-style endpoints on Render and force fallback (proxy).
+            # Ignore local/docker-style endpoints on Render and force safe fallback.
             if host not in {
                 "",
                 "localhost",
@@ -75,8 +63,6 @@ def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -
                 "embedding-service",
                 "vecinita-embedding",
                 "vecinita-agent",
-                "vecinita-modal-proxy",
-                "vecinita-modal-proxy-v1",
             }:
                 return candidate
         return fallback_url
@@ -96,7 +82,7 @@ EMBEDDING_SERVICE_URL: str = _normalize_internal_service_url(
     os.getenv("VECINITA_EMBEDDING_API_URL")
     or os.getenv("MODAL_EMBEDDING_ENDPOINT")
     or os.getenv("EMBEDDING_SERVICE_URL"),
-    fallback_url="http://vecinita-modal-proxy-v1:10000/embedding",
+    fallback_url="http://localhost:8001",
 )
 
 # ---------------------------------------------------------------------------
@@ -106,14 +92,14 @@ OLLAMA_BASE_URL: str | None = _normalize_internal_service_url(
     os.getenv("VECINITA_MODEL_API_URL")
     or os.getenv("MODAL_OLLAMA_ENDPOINT")
     or os.getenv("OLLAMA_BASE_URL"),
-    fallback_url="http://vecinita-modal-proxy-v1:10000/model",
+    fallback_url="http://localhost:11434",
 )
 OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
 
 DEFAULT_PROVIDER: str = os.getenv("DEFAULT_PROVIDER", "ollama").lower()
 
 # ---------------------------------------------------------------------------
-# Supabase
+# Supabase (legacy)
 # ---------------------------------------------------------------------------
 SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
 SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
@@ -144,9 +130,10 @@ def resolve_data_db_mode() -> str:
         return mode
 
     has_postgres = bool(DATABASE_URL)
-    has_supabase = bool(SUPABASE_URL and SUPABASE_KEY)
 
-    if has_postgres and not has_supabase:
+    # Postgres-first cutover: when DATABASE_URL is available, use it for
+    # retrieval/storage regardless of Supabase auth configuration.
+    if has_postgres:
         return "postgres"
     return "supabase"
 

@@ -45,7 +45,17 @@ from .models import GatewayConfig, HealthCheck
 from .router_ask import router as ask_router
 from .router_documents import router as documents_router
 from .router_embed import router as embed_router
-from .router_scrape import router as scrape_router
+
+try:
+    from .router_scrape import router as scrape_router
+except ModuleNotFoundError as exc:
+    # Scraper stack has optional dependencies (e.g. langchain_community).
+    # Keep gateway importable for routes that do not depend on scraper features.
+    logging.getLogger(__name__).warning(
+        "Scrape router disabled because optional dependency is missing: %s",
+        exc,
+    )
+    scrape_router = None
 
 # ============================================================================
 # Configuration
@@ -259,7 +269,8 @@ v1_router = APIRouter(prefix="/api/v1")
 
 # Include sub-routers (they already have their own prefixes: /ask, /scrape, /embed)
 v1_router.include_router(ask_router)
-v1_router.include_router(scrape_router)
+if scrape_router is not None:
+    v1_router.include_router(scrape_router)
 v1_router.include_router(embed_router)
 v1_router.include_router(documents_router)  # public, no auth
 

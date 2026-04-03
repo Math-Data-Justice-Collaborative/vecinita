@@ -89,7 +89,7 @@ def test_candidate_urls_include_local_fallbacks_for_remote_base_url(monkeypatch)
 
     assert "http://localhost:8001" in candidates
     assert "http://127.0.0.1:8001" in candidates
-    assert "http://localhost:10000/embedding" in candidates
+    assert "http://localhost:10000/embedding" not in candidates
 
 
 def test_embed_documents_falls_back_to_alt_batch_endpoint(monkeypatch):
@@ -153,35 +153,33 @@ def test_client_prefers_explicit_auth_token_over_env(monkeypatch):
     assert client.client.headers.get("x-embedding-service-token") == "explicit-token"
 
 
-def test_client_sets_modal_proxy_headers_when_available(monkeypatch):
-    monkeypatch.delenv("MODAL_API_PROXY_KEY", raising=False)
-    monkeypatch.setenv("MODAL_API_KEY", "wk-test-proxy-key")
-    monkeypatch.setenv("MODAL_API_PROXY_SECRET", "ws-test-proxy-secret")
+def test_client_does_not_set_modal_headers_when_available(monkeypatch):
+    monkeypatch.setenv("MODAL_TOKEN_ID", "wk-test-modal-key")
+    monkeypatch.setenv("MODAL_TOKEN_SECRET", "ws-test-modal-secret")
 
     client = EmbeddingServiceClient(base_url="https://example.modal.run")
 
-    assert client.client.headers.get("Modal-Key") == "wk-test-proxy-key"
-    assert client.client.headers.get("Modal-Secret") == "ws-test-proxy-secret"
+    assert client.client.headers.get("Modal-Key") is None
+    assert client.client.headers.get("Modal-Secret") is None
 
 
-def test_client_sets_modal_proxy_key_from_token_id(monkeypatch):
-    monkeypatch.delenv("MODAL_API_PROXY_KEY", raising=False)
-    monkeypatch.delenv("MODAL_API_KEY", raising=False)
+def test_client_does_not_set_modal_key_from_token_id(monkeypatch):
+    monkeypatch.delenv("MODAL_TOKEN_ID", raising=False)
     monkeypatch.setenv("MODAL_API_TOKEN_ID", "wk-token-id-fallback")
-    monkeypatch.setenv("MODAL_API_PROXY_SECRET", "ws-test-proxy-secret")
+    monkeypatch.setenv("MODAL_TOKEN_SECRET", "ws-test-modal-secret")
 
     client = EmbeddingServiceClient(base_url="https://example.modal.run")
 
-    assert client.client.headers.get("Modal-Key") == "wk-token-id-fallback"
-    assert client.client.headers.get("Modal-Secret") == "ws-test-proxy-secret"
+    assert client.client.headers.get("Modal-Key") is None
+    assert client.client.headers.get("Modal-Secret") is None
 
 
-def test_client_sets_proxy_auth_token_header_when_available(monkeypatch):
+def test_client_does_not_set_proxy_auth_token_header(monkeypatch):
     monkeypatch.setenv("PROXY_AUTH_TOKEN", "proxy-shared-token")
 
-    client = EmbeddingServiceClient(base_url="http://vecinita-modal-proxy-v1:10000/embedding")
+    client = EmbeddingServiceClient(base_url="https://example.modal.run")
 
-    assert client.client.headers.get("X-Proxy-Token") == "proxy-shared-token"
+    assert client.client.headers.get("X-Proxy-Token") is None
 
 
 def test_create_embedding_client_passes_explicit_auth_token(monkeypatch):

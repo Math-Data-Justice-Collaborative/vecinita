@@ -38,34 +38,32 @@ def _reload(monkeypatch_env: dict[str, str] | None = None):
 
 
 class TestEndpointResolution:
-    def test_model_endpoint_returns_proxy_on_render(self, monkeypatch):
+    def test_model_endpoint_uses_local_default_without_env(self, monkeypatch):
         monkeypatch.setenv("RENDER", "true")
         monkeypatch.delenv("VECINITA_MODEL_API_URL", raising=False)
         monkeypatch.delenv("MODAL_OLLAMA_ENDPOINT", raising=False)
         monkeypatch.delenv("OLLAMA_BASE_URL", raising=False)
 
         ep = _reload()
-        assert "modal-proxy" in ep.MODEL_ENDPOINT
-        assert "/model" in ep.MODEL_ENDPOINT
+        assert ep.MODEL_ENDPOINT == "http://localhost:11434"
 
-    def test_embedding_endpoint_returns_proxy_on_render(self, monkeypatch):
+    def test_embedding_endpoint_uses_local_default_without_env(self, monkeypatch):
         monkeypatch.setenv("RENDER", "true")
         monkeypatch.delenv("VECINITA_EMBEDDING_API_URL", raising=False)
         monkeypatch.delenv("MODAL_EMBEDDING_ENDPOINT", raising=False)
         monkeypatch.delenv("EMBEDDING_SERVICE_URL", raising=False)
 
         ep = _reload()
-        assert "modal-proxy" in ep.EMBEDDING_ENDPOINT
-        assert "/embedding" in ep.EMBEDDING_ENDPOINT
+        assert ep.EMBEDDING_ENDPOINT == "http://localhost:8001"
 
-    def test_scraper_endpoint_falls_back_to_proxy_jobs(self, monkeypatch):
+    def test_scraper_endpoint_falls_back_to_local_jobs(self, monkeypatch):
         monkeypatch.delenv("VECINITA_SCRAPER_API_URL", raising=False)
         monkeypatch.delenv("SCRAPER_SERVICE_URL", raising=False)
         monkeypatch.delenv("RENDER", raising=False)
         monkeypatch.delenv("RENDER_SERVICE_ID", raising=False)
 
         ep = _reload()
-        assert "/jobs" in ep.SCRAPER_ENDPOINT
+        assert ep.SCRAPER_ENDPOINT == "http://localhost:8010/jobs"
 
     def test_agent_service_url_default_localhost(self, monkeypatch):
         monkeypatch.delenv("AGENT_SERVICE_URL", raising=False)
@@ -86,8 +84,7 @@ class TestEndpointResolution:
 
 
 class TestIsRenderStrictMode:
-    def test_returns_true_when_both_flags_enabled(self, monkeypatch):
-        monkeypatch.setenv("AGENT_ENFORCE_PROXY", "true")
+    def test_returns_true_when_render_remote_only_enabled(self, monkeypatch):
         monkeypatch.setenv("RENDER_REMOTE_INFERENCE_ONLY", "true")
 
         import src.service_endpoints as ep
@@ -96,7 +93,6 @@ class TestIsRenderStrictMode:
         assert ep.is_render_strict_mode() is True
 
     def test_returns_false_when_one_flag_missing(self, monkeypatch):
-        monkeypatch.setenv("AGENT_ENFORCE_PROXY", "true")
         monkeypatch.delenv("RENDER_REMOTE_INFERENCE_ONLY", raising=False)
 
         import src.service_endpoints as ep
@@ -105,7 +101,6 @@ class TestIsRenderStrictMode:
         assert ep.is_render_strict_mode() is False
 
     def test_returns_false_when_both_flags_absent(self, monkeypatch):
-        monkeypatch.delenv("AGENT_ENFORCE_PROXY", raising=False)
         monkeypatch.delenv("RENDER_REMOTE_INFERENCE_ONLY", raising=False)
 
         import src.service_endpoints as ep
@@ -114,7 +109,6 @@ class TestIsRenderStrictMode:
         assert ep.is_render_strict_mode() is False
 
     def test_accepts_numeric_truthy_values(self, monkeypatch):
-        monkeypatch.setenv("AGENT_ENFORCE_PROXY", "1")
         monkeypatch.setenv("RENDER_REMOTE_INFERENCE_ONLY", "1")
 
         import src.service_endpoints as ep
@@ -123,7 +117,6 @@ class TestIsRenderStrictMode:
         assert ep.is_render_strict_mode() is True
 
     def test_rejects_false_strings(self, monkeypatch):
-        monkeypatch.setenv("AGENT_ENFORCE_PROXY", "false")
         monkeypatch.setenv("RENDER_REMOTE_INFERENCE_ONLY", "0")
 
         import src.service_endpoints as ep

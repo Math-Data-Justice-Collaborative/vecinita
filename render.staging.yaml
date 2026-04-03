@@ -5,9 +5,8 @@ services:
   # env group is never overwritten by this blueprint.
   #
   # Key ownership legend (mirrors render.yaml):
-  #   STRICT — must be true in staging to test strict-mode behavior pre-prod
+  #   STRICT — strict-mode policy for staging validation
   #   MODAL  — upstream Modal endpoint refs
-  #   PROXY  — modal-proxy auth and routing
   # See docs/deployment/RENDER_SHARED_ENV_CONTRACT.md for full contract.
   - type: web
     name: vecinita-agent-staging
@@ -32,11 +31,11 @@ services:
       - key: OLLAMA_MODEL
         sync: false
       - key: VECINITA_MODEL_API_URL
-        sync: false   # MODAL required:true routes-to:vecinita-modal-proxy-v1:10000/model
+        sync: false
       - key: VECINITA_EMBEDDING_API_URL
-        sync: false   # MODAL required:true routes-to:vecinita-modal-proxy-v1:10000/embedding
+        sync: false
       - key: VECINITA_SCRAPER_API_URL
-        sync: false   # MODAL required:true routes-to:vecinita-modal-proxy-v1:10000/jobs
+        sync: false
       - key: EMBEDDING_SERVICE_AUTH_TOKEN
         sync: false
       - key: EMBEDDING_STRICT_STARTUP
@@ -51,19 +50,11 @@ services:
         sync: false
       - key: FORCE_LOCAL_MODAL_LLM
         sync: false
-      - key: AGENT_ENFORCE_PROXY
-        sync: false
       - key: LOCK_MODEL_SELECTION
         sync: false
       - key: MODAL_TOKEN_ID
         sync: false
       - key: MODAL_TOKEN_SECRET
-        sync: false
-      - key: MODAL_API_PROXY_KEY
-        sync: false
-      - key: MODAL_API_PROXY_SECRET
-        sync: false
-      - key: PROXY_AUTH_TOKEN
         sync: false
       - key: REINDEX_SERVICE_URL
         sync: false
@@ -79,17 +70,9 @@ services:
         sync: false
       - key: GUARDRAILS_PERSISTENCE_DIR
         sync: false
-      - key: CHROMA_REQUIRED
-        sync: false
       - key: DB_DATA_MODE
         sync: false
       - key: VECTOR_SYNC_TARGET
-        sync: false
-      - key: VECTOR_SYNC_SUPABASE_FALLBACK_READS
-        sync: false
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_KEY
         sync: false
       - key: GROQ_API_KEY
         sync: false
@@ -136,10 +119,6 @@ services:
         sync: false
       - key: VITE_DEV_ADMIN_TOKEN
         sync: false
-      - key: VITE_SUPABASE_URL
-        sync: false
-      - key: VITE_SUPABASE_ANON_KEY
-        sync: false
 
   - type: web
     name: vecinita-gateway-staging
@@ -178,24 +157,12 @@ services:
       - key: VECINITA_MODEL_API_URL
         sync: false   # MODAL required:true
       - key: VECINITA_SCRAPER_API_URL
-        sync: false   # MODAL required:true
+        sync: false
       - key: MODAL_TOKEN_ID
         sync: false
       - key: MODAL_TOKEN_SECRET
         sync: false
-      - key: MODAL_API_PROXY_KEY
-        sync: false
-      - key: MODAL_API_PROXY_SECRET
-        sync: false
-      - key: PROXY_AUTH_TOKEN
-        sync: false
       - key: EMBEDDING_SERVICE_AUTH_TOKEN
-        sync: false
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_KEY
-        sync: false
-      - key: SUPABASE_UPLOADS_BUCKET
         sync: false
       - key: DEV_ADMIN_ENABLED
         sync: false
@@ -220,8 +187,6 @@ services:
       - key: DB_DATA_MODE
         sync: false
       - key: VECTOR_SYNC_TARGET
-        sync: false
-      - key: VECTOR_SYNC_SUPABASE_FALLBACK_READS
         sync: false
 
 databases:

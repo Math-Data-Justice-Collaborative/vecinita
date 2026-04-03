@@ -9,15 +9,13 @@ No auth required — all data is non-sensitive metadata about the public knowled
 import json
 import logging
 import os
-from typing import Any
+from typing import Any, cast
 from urllib.parse import urlparse
 
 import psycopg2  # type: ignore[import-untyped]
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query
 from psycopg2.extras import RealDictCursor  # type: ignore[import-untyped]
-from supabase import Client, create_client
 
-from src.services.chroma_store import get_chroma_store
 from src.utils.tags import normalize_tags
 
 logger = logging.getLogger(__name__)
@@ -27,27 +25,10 @@ router = APIRouter(prefix="/documents", tags=["Documents (Public)"])
 EMBEDDING_SERVICE_URL = (
     os.getenv("MODAL_EMBEDDING_ENDPOINT")
     or os.getenv("EMBEDDING_SERVICE_URL")
-    or "http://vecinita-modal-proxy-v1:10000/embedding"
+    or "http://localhost:8001"
 )
 UPLOAD_STORAGE_BUCKET = os.getenv("SUPABASE_UPLOADS_BUCKET", "documents")
 EXCLUDED_TEST_TAGS = {"__e2e__", "__test__", "e2e", "test-data"}
-
-
-def _get_db() -> Client | None:
-    url = os.getenv("SUPABASE_URL")
-    key = (
-        os.getenv("SUPABASE_SECRET_KEY")
-        or os.getenv("SUPABASE_KEY")
-        or os.getenv("SUPABASE_PUBLISHABLE_KEY")
-    )
-    if not url or not key:
-        logger.warning("Documents API running without database configuration.")
-        return None
-    try:
-        return create_client(url, key)
-    except Exception as exc:
-        logger.warning("Failed to initialize database client for documents API: %s", exc)
-        return None
 
 
 def _build_public_storage_url(storage_bucket: str, storage_path: str) -> str | None:
@@ -206,22 +187,23 @@ def _is_schema_profile_error(exc: Exception) -> bool:
     return "PGRST106" in str(exc)
 
 
-def _is_chroma_unavailable_error(exc: Exception) -> bool:
+def _is_data_backend_unavailable_error(exc: Exception) -> bool:
     message = str(exc).lower()
     return (
-        "could not connect to a chroma server" in message
+        "could not connect to server" in message
         or "connection refused" in message
         or "connecterror" in message
+        or "timeout" in message
     )
 
 
 def _raise_documents_error(endpoint_name: str, exc: Exception) -> None:
-    if _is_chroma_unavailable_error(exc):
-        logger.warning("%s degraded: Chroma unavailable (%s)", endpoint_name, exc)
+    if _is_data_backend_unavailable_error(exc):
+        logger.warning("%s degraded: Postgres unavailable (%s)", endpoint_name, exc)
         raise HTTPException(
             status_code=503,
             detail=(
-                "Document index is temporarily unavailable because Chroma is not reachable. "
+                "Document index is temporarily unavailable because the database is not reachable. "
                 "Please retry shortly."
             ),
         ) from exc
@@ -341,7 +323,6 @@ async def documents_overview(
     include_test_data: bool = Query(
         False, description="Include test/e2e-tagged artifacts in results"
     ),
-    db: Client | None = Depends(_get_db),
 ) -> dict[str, Any]:
     """
     Return corpus-level statistics for the public Documents Dashboard.
@@ -355,45 +336,7 @@ async def documents_overview(
     - sources: list of {url, title, domain, total_chunks, is_active}
     """
     try:
-        store = get_chroma_store()
-        all_chunks = list(store.iter_all_chunks())
-
-        total_chunks = len(all_chunks)
-        total_size = 0
-        source_index: dict[str, dict[str, Any]] = {}
-
-        for row in all_chunks:
-            metadata = _metadata_dict(row.get("metadata"))
-            content = str(row.get("content") or "")
-            chunk_size = _to_int(metadata.get("chunk_size"), len(content))
-            total_size += chunk_size
-            chunk_tags = normalize_tags(metadata.get("tags") or [])
-            chunk_download_url = _extract_download_url(metadata)
-
-            source_url = str(metadata.get("source_url") or "")
-            if not source_url:
-                continue
-
-            current = source_index.get(source_url)
-            if current is None:
-                current = {
-                    "url": source_url,
-                    "source_domain": metadata.get("source_domain") or _domain_from_url(source_url),
-                    "title": metadata.get("document_title") or source_url,
-                    "total_chunks": 0,
-                    "metadata": metadata,
-                    "is_active": True,
-                    "tags": [],
-                    "download_url": chunk_download_url,
-                }
-                source_index[source_url] = current
-            current["total_chunks"] = _to_int(current.get("total_chunks"), 0) + 1
-            merged_tags = normalize_tags((current.get("tags") or []) + chunk_tags)
-            current["tags"] = merged_tags
-            if not current.get("download_url") and chunk_download_url:
-                current["download_url"] = chunk_download_url
-
-        source_rows = [_normalize_public_source(item) for item in source_index.values()]
+        stats, source_rows = _load_overview_via_sql()
         if not include_test_data:
             source_rows = [
                 item
@@ -409,13 +352,11 @@ async def documents_overview(
             ]
         source_rows.sort(key=lambda item: _to_int(item.get("total_chunks"), 0), reverse=True)
 
-        avg_chunk_size = int(total_size / total_chunks) if total_chunks else 0
-
         return {
-            "total_chunks": total_chunks,
+            "total_chunks": _to_int(stats.get("total_chunks"), 0),
             "unique_sources": len(source_rows),
             "filtered": bool(requested_tags),
-            "avg_chunk_size": avg_chunk_size,
+            "avg_chunk_size": _to_int(stats.get("avg_chunk_size"), 0),
             "embedding_model": os.getenv(
                 "EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
             ),
@@ -436,30 +377,46 @@ async def documents_overview(
 async def documents_preview(
     source_url: str = Query(..., description="Source URL to preview"),
     limit: int = Query(3, ge=1, le=10, description="Number of chunks to return"),
-    db: Client | None = Depends(_get_db),
 ) -> dict[str, Any]:
     """
     Return the first N chunk excerpts for a given source URL.
     Used by the Documents Dashboard source-preview drawer.
     """
     try:
-        store = get_chroma_store()
-        res = store.get_chunks(where={"source_url": source_url}, limit=max(limit, 1), offset=0)
+        database_url = os.getenv("DATABASE_URL")
+        if not database_url:
+            raise HTTPException(status_code=500, detail="DATABASE_URL is not configured")
+
         chunks = []
-        ids = res.get("ids") or []
-        docs = res.get("documents") or []
-        metas = res.get("metadatas") or []
-        for idx in range(len(ids)):
-            metadata = _metadata_dict(metas[idx] if idx < len(metas) else {})
-            content = str(docs[idx] if idx < len(docs) and docs[idx] is not None else "")
+        with psycopg2.connect(database_url) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute(
+                    """
+                    SELECT chunk_index, chunk_size, content, metadata
+                    FROM public.document_chunks
+                    WHERE source_url = %s
+                    ORDER BY chunk_index ASC NULLS LAST, created_at ASC
+                    LIMIT %s
+                    """,
+                    (source_url, max(limit, 1)),
+                )
+                rows = cur.fetchall() or []
+
+        for idx, row in enumerate(rows):
+            metadata = _metadata_dict(row.get("metadata"))
+            content = str(row.get("content") or "")
             chunks.append(
                 {
-                    "chunk_index": _to_int(metadata.get("chunk_index"), idx),
-                    "chunk_size": _to_int(metadata.get("chunk_size"), len(content)),
+                    "chunk_index": _to_int(row.get("chunk_index"), idx),
+                    "chunk_size": _to_int(row.get("chunk_size"), len(content)),
                     "content_preview": content[:400],
                     "document_title": metadata.get("document_title") or source_url,
                 }
             )
+
+        if not chunks:
+            raise HTTPException(status_code=404, detail="Source not found")
+
         chunks.sort(key=lambda item: _to_int(item.get("chunk_index"), 0))
         chunks = chunks[:limit]
         return {"source_url": source_url, "chunks": chunks}
@@ -470,7 +427,6 @@ async def documents_preview(
 @router.get("/download-url")
 async def documents_download_url(
     source_url: str = Query(..., description="Source URL to resolve download link"),
-    db: Client | None = Depends(_get_db),
 ) -> dict[str, Any]:
     """Resolve a download URL for a source when available.
 
@@ -478,9 +434,37 @@ async def documents_download_url(
     downloadable=false so clients can avoid raising user-visible errors.
     """
     try:
-        store = get_chroma_store()
-        source_entry = store.get_source(source_url)
-        source_row = source_entry if source_entry else None
+        database_url = os.getenv("DATABASE_URL")
+        if not database_url:
+            raise HTTPException(status_code=500, detail="DATABASE_URL is not configured")
+
+        source_row: dict[str, Any] | None = None
+        chunk_row: dict[str, Any] | None = None
+
+        with psycopg2.connect(database_url) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute(
+                    """
+                    SELECT url, title, metadata
+                    FROM public.sources
+                    WHERE url = %s
+                    LIMIT 1
+                    """,
+                    (source_url,),
+                )
+                source_row = cast(dict[str, Any] | None, cur.fetchone())
+
+                if source_row is None:
+                    cur.execute(
+                        """
+                        SELECT metadata
+                        FROM public.document_chunks
+                        WHERE source_url = %s
+                        LIMIT 1
+                        """,
+                        (source_url,),
+                    )
+                    chunk_row = cast(dict[str, Any] | None, cur.fetchone())
 
         if source_row:
             metadata = source_row.get("metadata") or {}
@@ -500,13 +484,10 @@ async def documents_download_url(
                 "message": "Source is URL-based and has no downloadable file",
             }
 
-        chunk_result = store.get_chunks(where={"source_url": source_url}, limit=1, offset=0)
-        ids = chunk_result.get("ids") or []
-        metas = chunk_result.get("metadatas") or []
-        if not ids:
+        if not chunk_row:
             raise HTTPException(status_code=404, detail="Source not found")
 
-        metadata = _metadata_dict(metas[0] if metas else {})
+        metadata = _metadata_dict(chunk_row.get("metadata"))
         download_url = _resolve_download_url(metadata, source_url)
         if not download_url:
             return {
@@ -532,51 +513,10 @@ async def documents_download_url(
 @router.get("/chunk-statistics")
 async def documents_chunk_statistics(
     limit: int = Query(20, ge=1, le=200, description="Maximum domains to return"),
-    db: Client | None = Depends(_get_db),
 ) -> dict[str, Any]:
-    """Return per-domain chunk statistics from Chroma metadata."""
+    """Return per-domain chunk statistics from Postgres metadata."""
     try:
-        store = get_chroma_store()
-        buckets: dict[str, dict[str, Any]] = {}
-
-        for row in store.iter_all_chunks():
-            metadata = _metadata_dict(row.get("metadata"))
-            source_domain = str(metadata.get("source_domain") or "unknown")
-            source_url = str(metadata.get("source_url") or "")
-            content = str(row.get("content") or "")
-            chunk_size = _to_int(metadata.get("chunk_size"), len(content))
-            latest_chunk = metadata.get("updated_at") or metadata.get("created_at")
-
-            current = buckets.get(source_domain)
-            if current is None:
-                current = {
-                    "source_domain": source_domain,
-                    "chunk_count": 0,
-                    "avg_chunk_size": 0,
-                    "total_size": 0,
-                    "document_count": 0,
-                    "latest_chunk": latest_chunk,
-                    "_sources": set(),
-                }
-                buckets[source_domain] = current
-
-            current["chunk_count"] += 1
-            current["total_size"] += chunk_size
-            if source_url:
-                current["_sources"].add(source_url)
-            if latest_chunk and (
-                not current.get("latest_chunk") or str(latest_chunk) > str(current["latest_chunk"])
-            ):
-                current["latest_chunk"] = latest_chunk
-
-        rows: list[dict[str, Any]] = []
-        for item in buckets.values():
-            chunk_count = _to_int(item.get("chunk_count"), 0)
-            item["avg_chunk_size"] = int(item["total_size"] / chunk_count) if chunk_count else 0
-            item["document_count"] = len(item.pop("_sources", set()))
-            rows.append(item)
-
-        rows.sort(key=lambda r: _to_int(r.get("chunk_count"), 0), reverse=True)
+        rows = _load_chunk_statistics_via_sql(limit)
         rows = rows[:limit]
         return {"rows": rows, "total": len(rows)}
     except Exception as exc:
@@ -588,16 +528,23 @@ async def documents_tags(
     limit: int = Query(100, ge=1, le=500, description="Maximum number of tags to return"),
     query: str = Query("", description="Optional case-insensitive tag search"),
     include_test_data: bool = Query(False, description="Include tags from test/e2e artifacts"),
-    db: Client | None = Depends(_get_db),
 ) -> dict[str, Any]:
     """Return tag inventory and counts for Documents filtering UI."""
     try:
-        store = get_chroma_store()
+        database_url = os.getenv("DATABASE_URL")
+        if not database_url:
+            raise HTTPException(status_code=500, detail="DATABASE_URL is not configured")
+
         normalized_query = (query or "").strip().lower()
 
         chunk_counts: dict[str, int] = {}
         source_map: dict[str, set[str]] = {}
-        for row in store.iter_all_chunks():
+        with psycopg2.connect(database_url) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("SELECT source_url, metadata FROM public.document_chunks")
+                rows = cur.fetchall() or []
+
+        for row in rows:
             metadata = _metadata_dict(row.get("metadata"))
             source_url = str(metadata.get("source_url") or "")
             tags = normalize_tags(metadata.get("tags") or [])
