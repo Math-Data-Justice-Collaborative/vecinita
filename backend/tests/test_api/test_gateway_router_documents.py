@@ -287,3 +287,54 @@ def test_documents_tags_returns_503_when_database_unavailable(documents_client):
     assert response.status_code == 503
     payload = response.json()
     assert "Document index is temporarily unavailable" in payload["error"]
+
+
+def test_documents_overview_returns_503_when_database_times_out(documents_client):
+    client = documents_client
+
+    from src.api import router_documents
+
+    def _raise_timeout():
+        raise RuntimeError("connection timeout")
+
+    router_documents._load_overview_via_sql = _raise_timeout
+
+    response = client.get("/api/v1/documents/overview")
+    assert response.status_code == 503
+    payload = response.json()
+    assert "Document index is temporarily unavailable" in payload["error"]
+
+
+def test_documents_tags_ignores_malformed_metadata_and_normalizes_tags(documents_client):
+    client = documents_client
+
+    from src.api import router_documents
+
+    rows = [
+        {"source_url": "https://broken.example.org", "metadata": "{not-json"},
+        {
+            "source_url": "https://a.example.org",
+            "metadata": {
+                "source_url": "https://a.example.org",
+                "tags": [" Housing ", "housing", "BENEFITS"],
+            },
+        },
+        {
+            "source_url": "https://b.example.org",
+            "metadata": {
+                "source_url": "https://b.example.org",
+                "tags": ["housing"],
+            },
+        },
+    ]
+    router_documents.psycopg2.connect = lambda _url: _FakeConnection([rows])
+
+    response = client.get("/api/v1/documents/tags", params={"limit": 10})
+    assert response.status_code == 200
+    payload = response.json()
+    by_tag = {item["tag"]: item for item in payload["tags"]}
+
+    assert by_tag["housing"]["chunk_count"] == 2
+    assert by_tag["housing"]["source_count"] == 2
+    assert by_tag["benefits"]["chunk_count"] == 1
+    assert by_tag["benefits"]["source_count"] == 1
