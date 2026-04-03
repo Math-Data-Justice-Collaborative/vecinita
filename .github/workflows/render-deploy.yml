@@ -171,8 +171,7 @@ jobs:
 
           if [ -z "$RENDER_STAGING_DEPLOY_HOOK_GATEWAY" ] && \
              { [ -z "$RENDER_API_KEY" ] || [ -z "$RENDER_STAGING_GATEWAY_SERVICE_ID" ]; }; then
-            echo "::error::Missing gateway deploy trigger for staging: set RENDER_STAGING_DEPLOY_HOOK_GATEWAY or provide RENDER_API_KEY + RENDER_STAGING_GATEWAY_SERVICE_ID"
-            missing=1
+            echo "::warning::No explicit staging gateway deploy trigger configured. Gateway service is expected to auto-deploy on commit."
           fi
 
           if [ "$missing" -ne 0 ]; then
@@ -274,8 +273,7 @@ jobs:
 
           if [ -z "$RENDER_PROD_DEPLOY_HOOK_GATEWAY" ] && \
              { [ -z "$RENDER_API_KEY" ] || [ -z "$RENDER_GATEWAY_SERVICE_ID" ]; }; then
-            echo "::error::Missing gateway deploy trigger for production: set RENDER_PROD_DEPLOY_HOOK_GATEWAY (or RENDER_DEPLOY_HOOK_GATEWAY) or provide RENDER_API_KEY + RENDER_GATEWAY_SERVICE_ID"
-            missing=1
+            echo "::warning::No explicit production gateway deploy trigger configured. Gateway service is expected to auto-deploy on commit."
           fi
 
           if [ "$missing" -ne 0 ]; then
