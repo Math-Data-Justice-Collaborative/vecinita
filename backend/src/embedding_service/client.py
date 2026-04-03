@@ -82,6 +82,7 @@ class EmbeddingServiceClient(Embeddings):
         self.auth_token = (
             auth_token
             or os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
+            or os.getenv("MODAL_API_PROXY_SECRET")
             or os.getenv("MODAL_TOKEN_SECRET")
             or os.getenv("MODAL_API_TOKEN_SECRET")
         )

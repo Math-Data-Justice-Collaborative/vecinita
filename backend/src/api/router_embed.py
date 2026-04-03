@@ -31,6 +31,7 @@ router = APIRouter(prefix="/embed", tags=["Embeddings"])
 EMBEDDING_SERVICE_URL = EMBEDDING_ENDPOINT
 EMBEDDING_SERVICE_AUTH_TOKEN = (
     os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
+    or os.getenv("MODAL_API_PROXY_SECRET")
     or os.getenv("MODAL_TOKEN_SECRET")
     or os.getenv("MODAL_API_TOKEN_SECRET")
 )

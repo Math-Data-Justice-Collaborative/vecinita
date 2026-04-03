@@ -64,14 +64,22 @@ def test_dev_session_resets_existing_state_before_start() -> None:
 def test_dev_session_manages_expected_ports() -> None:
     content = _script_text()
     assert "managed_ports()" in content
-    assert 'echo "5173 8000 8001 8002 8004 10000"' in content
+    assert 'echo "5173 8000 8001 8004"' in content
+    assert 'echo "5173 8000 8001 8002 8004 10000"' not in content
     assert "kill -9 $pids" in content
 
 
-def test_dev_session_enforces_proxy_for_agent_llm() -> None:
+def test_dev_session_prefers_direct_or_local_model_endpoints() -> None:
     content = _script_text()
-    assert "AGENT_ENFORCE_PROXY='true'" in content
-    assert "MODAL_OLLAMA_ENDPOINT:-http://localhost:10000/model" in content
+    assert "AGENT_ENFORCE_PROXY='true'" not in content
+    assert (
+        'VECINITA_MODEL_API_URL:-\\${MODAL_OLLAMA_ENDPOINT:-\\${OLLAMA_BASE_URL:-http://localhost:11434}}'
+        in content
+    )
+    assert (
+        'VECINITA_EMBEDDING_API_URL:-\\${MODAL_EMBEDDING_ENDPOINT:-\\${EMBEDDING_SERVICE_URL:-http://localhost:8001}}'
+        in content
+    )
 
 
 def test_dev_session_warns_instead_of_exiting_on_readiness_timeout() -> None:
@@ -80,9 +88,10 @@ def test_dev_session_warns_instead_of_exiting_on_readiness_timeout() -> None:
     assert "gateway readiness check timed out; attaching" in content
 
 
-def test_dev_session_does_not_quote_proxy_token_parameter_expansion() -> None:
+def test_dev_session_uses_embedding_token_resolution_without_proxy_helper() -> None:
     content = _script_text()
     assert "PROXY_AUTH_TOKEN='\\${PROXY_AUTH_TOKEN:-vecinita-local-proxy-token}'" not in content
-    assert "resolve_proxy_auth_token()" in content
-    assert 'proxy_auth_token="$(resolve_proxy_auth_token)"' in content
-    assert "PROXY_AUTH_TOKEN='$proxy_auth_token'" in content
+    assert "resolve_proxy_auth_token()" not in content
+    assert "resolve_local_embed_token()" in content
+    assert 'embed_token="$(resolve_local_embed_token)"' in content
+    assert "EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token'" in content
