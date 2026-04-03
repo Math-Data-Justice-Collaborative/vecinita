@@ -1,13 +1,11 @@
-"""Integration tests: Agent → modal-proxy model endpoint contract.
+"""Integration tests for LocalLLMClientManager endpoint/runtime behavior.
 
-Verifies the full proxy routing chain from LocalLLMClientManager:
-- base_url detection correctly identifies proxy vs direct endpoints
-- headers() omits auth when routing via proxy (proxy injects Modal credentials)
-- headers() includes X-Proxy-Token when proxy_auth_token is provided
-- validate_runtime() raises when enforce_proxy=True and non-proxy URL is set
-- validate_runtime() passes when enforce_proxy=True and proxy URL is set
-- uses_modal_native_chat_api() returns True for proxy model path
-- Proxy hostname forms (Render private network and localhost:10000) are both detected
+The legacy modal-proxy enforcement path was retired. These tests validate the
+current contract:
+- _via_proxy() is a compatibility helper that always returns False
+- headers() only reflects direct credentials (Authorization)
+- validate_runtime() enforces endpoint presence and adapter availability
+- uses_modal_native_chat_api() is based on endpoint shape, not proxy hostnames
 """
 
 from __future__ import annotations
@@ -17,10 +15,6 @@ import pytest
 from src.services.llm.client_manager import LocalLLMClientManager
 
 pytestmark = pytest.mark.integration
-
-# ---------------------------------------------------------------------------
-# Canonical proxy endpoints
-# ---------------------------------------------------------------------------
 
 _RENDER_PROXY_MODEL_URL = "http://vecinita-modal-proxy-v1:10000/model"
 _LOCAL_PROXY_MODEL_URL = "http://localhost:10000/model"
@@ -37,19 +31,14 @@ def _manager(base_url: str, **kwargs) -> LocalLLMClientManager:
     )
 
 
-# ---------------------------------------------------------------------------
-# _via_proxy detection
-# ---------------------------------------------------------------------------
-
-
 class TestViaProxyDetection:
     def test_render_private_network_url_is_detected_as_proxy(self):
         mgr = _manager(_RENDER_PROXY_MODEL_URL)
-        assert mgr._via_proxy() is True
+        assert mgr._via_proxy() is False
 
     def test_localhost_10000_model_path_is_detected_as_proxy(self):
         mgr = _manager(_LOCAL_PROXY_MODEL_URL)
-        assert mgr._via_proxy() is True
+        assert mgr._via_proxy() is False
 
     def test_direct_ollama_url_is_not_proxy(self):
         mgr = _manager(_DIRECT_OLLAMA_URL)
@@ -60,19 +49,13 @@ class TestViaProxyDetection:
         assert mgr._via_proxy() is False
 
     def test_modal_proxy_with_different_port_variant_detected(self):
-        """Any hostname containing 'modal-proxy' must resolve as proxy."""
+        """Compatibility helper remains disabled for all host/port variants."""
         mgr = _manager("http://vecinita-modal-proxy:8080/model")
-        assert mgr._via_proxy() is True
-
-
-# ---------------------------------------------------------------------------
-# headers() — proxy path must not forward Authorization or Modal credentials
-# ---------------------------------------------------------------------------
+        assert mgr._via_proxy() is False
 
 
 class TestProxyHeaders:
-    def test_headers_are_empty_dict_when_via_proxy_and_no_token(self):
-        """Proxy injects Modal-Key/Secret server-side; client must send nothing."""
+    def test_headers_include_authorization_when_api_key_present(self):
         mgr = _manager(
             _RENDER_PROXY_MODEL_URL,
             api_key="should-not-appear",
@@ -80,23 +63,9 @@ class TestProxyHeaders:
             modal_proxy_secret="secret",
         )
         h = mgr.headers()
-        assert "Authorization" not in h, "Must not forward Bearer token via proxy"
-        assert "Modal-Key" not in h, "Must not forward Modal-Key via proxy"
-        assert "Modal-Secret" not in h, "Must not forward Modal-Secret via proxy"
-
-    def test_headers_include_x_proxy_token_when_provided(self):
-        mgr = _manager(
-            _RENDER_PROXY_MODEL_URL,
-            proxy_auth_token="my-proxy-token-abc",
-        )
-        h = mgr.headers()
-        assert h.get("X-Proxy-Token") == "my-proxy-token-abc"
-
-    def test_local_proxy_gets_fallback_token_when_no_token_configured(self):
-        """localhost:10000 is treated as local dev proxy and gets a fallback token."""
-        mgr = _manager(_LOCAL_PROXY_MODEL_URL)
-        h = mgr.headers()
-        assert h.get("X-Proxy-Token") == "vecinita-local-proxy-token"
+        assert h.get("Authorization") == "Bearer should-not-appear"
+        assert "Modal-Key" not in h
+        assert "Modal-Secret" not in h
 
     def test_headers_include_bearer_for_non_proxy_direct_url(self):
         mgr = _manager(_DIRECT_OLLAMA_URL, api_key="my-api-key")
@@ -107,11 +76,6 @@ class TestProxyHeaders:
         mgr = _manager(_DIRECT_OLLAMA_URL)
         h = mgr.headers()
         assert h == {}
-
-
-# ---------------------------------------------------------------------------
-# validate_runtime() — enforce_proxy=True blocks non-proxy URLs
-# ---------------------------------------------------------------------------
 
 
 class TestEnforceProxyRuntime:
@@ -126,8 +90,8 @@ class TestEnforceProxyRuntime:
 
     def test_validate_runtime_raises_with_direct_url_and_enforce_proxy(self):
         mgr = _manager(_DIRECT_OLLAMA_URL, enforce_proxy=True)
-        with pytest.raises(RuntimeError, match="modal-proxy"):
-            mgr.validate_runtime()
+        # enforce_proxy is intentionally ignored after proxy retirement.
+        mgr.validate_runtime()
 
     def test_validate_runtime_raises_with_no_base_url_and_enforce_proxy(self):
         """Empty base_url raises: endpoint not configured and also not via proxy."""
@@ -141,15 +105,10 @@ class TestEnforceProxyRuntime:
         mgr.validate_runtime()
 
 
-# ---------------------------------------------------------------------------
-# uses_modal_native_chat_api() — proxy model path uses native /chat API
-# ---------------------------------------------------------------------------
-
-
 class TestModalNativeApiDetection:
     def test_render_proxy_model_url_uses_native_api(self):
         mgr = _manager(_RENDER_PROXY_MODEL_URL)
-        assert mgr.uses_modal_native_chat_api() is True
+        assert mgr.uses_modal_native_chat_api() is False
 
     def test_local_proxy_model_url_uses_native_api(self):
         mgr = _manager(_LOCAL_PROXY_MODEL_URL)

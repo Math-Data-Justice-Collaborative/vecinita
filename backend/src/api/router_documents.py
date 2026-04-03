@@ -218,18 +218,15 @@ def _load_overview_via_sql() -> tuple[dict[str, int], list[dict[str, Any]]]:
 
     with psycopg2.connect(database_url) as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(
-                """
+            cur.execute("""
                 SELECT
                     COUNT(*)::int AS total_chunks,
                     COALESCE(AVG(COALESCE(chunk_size, LENGTH(content)))::int, 0) AS avg_chunk_size
                 FROM public.document_chunks
-                """
-            )
+                """)
             stats_row: dict[str, Any] = cur.fetchone() or {}
 
-            cur.execute(
-                """
+            cur.execute("""
                 SELECT
                     id,
                     url,
@@ -251,12 +248,10 @@ def _load_overview_via_sql() -> tuple[dict[str, int], list[dict[str, Any]]]:
                 FROM public.sources
                 ORDER BY COALESCE(total_chunks, 0) DESC, COALESCE(last_scraped_at, created_at) DESC
                 LIMIT 2000
-                """
-            )
+                """)
             source_rows = [dict(row) for row in (cur.fetchall() or [])]
 
-            cur.execute(
-                """
+            cur.execute("""
                 SELECT
                     source_url AS url,
                     MAX(source_domain) AS source_domain,
@@ -269,8 +264,7 @@ def _load_overview_via_sql() -> tuple[dict[str, int], list[dict[str, Any]]]:
                 GROUP BY source_url
                 ORDER BY COUNT(*) DESC
                 LIMIT 5000
-                """
-            )
+                """)
             chunk_rows = [dict(row) for row in (cur.fetchall() or [])]
 
     normalized_sources = [_normalize_public_source(row) for row in source_rows]

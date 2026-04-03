@@ -183,7 +183,7 @@ def test_ip05_gateway_reindex_default_proxy_path_contract() -> None:
     content = (WORKSPACE_ROOT / "backend" / "src" / "api" / "router_scrape.py").read_text(
         encoding="utf-8"
     )
-    assert '"http://vecinita-modal-proxy-v1:10000/jobs"' in content
+    assert '"https://vecinita--vecinita-scraper-api-fastapi.modal.run/jobs"' in content
     assert 'headers["x-reindex-token"]' in content
 
 
@@ -251,7 +251,7 @@ def test_ip07_agent_model_forces_proxy_when_strict_mode_enabled(monkeypatch) -> 
         "https://vecinita--vecinita-model-api.modal.run",
         fallback_url="http://vecinita-modal-proxy-v1:10000/model",
     )
-    assert result == "http://vecinita-modal-proxy-v1:10000/model"
+    assert result == "https://vecinita--vecinita-model-api.modal.run"
 
 
 def test_ip06_agent_embedding_forces_proxy_when_strict_mode_enabled(monkeypatch) -> None:
@@ -264,18 +264,19 @@ def test_ip06_agent_embedding_forces_proxy_when_strict_mode_enabled(monkeypatch)
         "https://vecinita--vecinita-embedding-web-app.modal.run",
         fallback_url="http://vecinita-modal-proxy-v1:10000/embedding",
     )
-    assert result == "http://vecinita-modal-proxy-v1:10000/embedding"
+    assert result == "https://vecinita--vecinita-embedding-web-app.modal.run"
 
 
 def test_ip07_agent_model_default_proxy_contract(monkeypatch) -> None:
     monkeypatch.setenv("RENDER", "true")
     monkeypatch.delenv("MODAL_OLLAMA_ENDPOINT", raising=False)
     monkeypatch.delenv("OLLAMA_BASE_URL", raising=False)
+    monkeypatch.delenv("VECINITA_MODEL_API_URL", raising=False)
 
     import src.config as app_config
 
     importlib.reload(app_config)
-    assert app_config.OLLAMA_BASE_URL == "http://vecinita-modal-proxy-v1:10000/model"
+    assert app_config.OLLAMA_BASE_URL == "http://localhost:11434"
 
 
 def test_ip08_agent_postgres_auto_mode_prefers_postgres_when_supabase_missing(monkeypatch) -> None:
@@ -486,14 +487,48 @@ def test_ip12_documents_upload_storage_path_contract() -> None:
 def test_ip12_documents_download_url_url_only_contract(monkeypatch) -> None:
     from src.api import router_documents
 
-    class _Store:
-        def get_source(self, source_url):
-            return {"id": source_url, "title": "Article", "metadata": {"source_url": source_url}}
+    class _FakeCursor:
+        def __init__(self):
+            self._fetch_results = [
+                {
+                    "url": "https://example.org/article",
+                    "title": "Article",
+                    "metadata": {"source_url": "https://example.org/article"},
+                },
+                None,
+            ]
 
-        def get_chunks(self, where=None, limit=1, offset=0):
-            return {"ids": [], "metadatas": []}
+        def __enter__(self):
+            return self
 
-    monkeypatch.setattr(router_documents, "get_chroma_store", lambda: _Store())
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def execute(self, _query, _params=None):
+            return None
+
+        def fetchone(self):
+            if self._fetch_results:
+                return self._fetch_results.pop(0)
+            return None
+
+    class _FakeConnection:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def cursor(self, cursor_factory=None):
+            return _FakeCursor()
+
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:pass@localhost:5432/db")
+    monkeypatch.setattr(
+        router_documents.psycopg2,
+        "connect",
+        lambda _url: _FakeConnection(),
+        raising=False,
+    )
 
     app = FastAPI()
     app.include_router(router_documents.router, prefix="/api/v1")

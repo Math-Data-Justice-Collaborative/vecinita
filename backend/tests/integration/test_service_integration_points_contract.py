@@ -125,16 +125,13 @@ def test_ip04_gateway_to_embedding_service_headers_and_endpoint(monkeypatch) -> 
     import src.api.router_embed as router_embed
 
     monkeypatch.setattr(router_embed, "EMBEDDING_SERVICE_AUTH_TOKEN", "embed-token")
-    monkeypatch.setattr(router_embed, "PROXY_AUTH_TOKEN", "proxy-token")
-    monkeypatch.setattr(router_embed, "MODAL_PROXY_KEY", "wk-test")
-    monkeypatch.setattr(router_embed, "MODAL_PROXY_SECRET", "ws-test")
 
     headers = router_embed._embedding_service_headers()
     assert headers["x-embedding-service-token"] == "embed-token"
     assert headers["authorization"] == "Bearer embed-token"
-    assert headers["X-Proxy-Token"] == "proxy-token"
-    assert headers["Modal-Key"] == "wk-test"
-    assert headers["Modal-Secret"] == "ws-test"
+    assert "X-Proxy-Token" not in headers
+    assert "Modal-Key" not in headers
+    assert "Modal-Secret" not in headers
 
 
 def test_ip05_gateway_to_reindex_route_forwards_token_and_params(monkeypatch) -> None:
@@ -190,6 +187,7 @@ def test_ip06_agent_to_embedding_modal_proxy_headers(monkeypatch) -> None:
         fake_client_module, "create_embedding_client", _fake_create_embedding_client
     )
     monkeypatch.setenv("RENDER", "true")
+    monkeypatch.delenv("VECINITA_EMBEDDING_API_URL", raising=False)
     monkeypatch.setenv("MODAL_EMBEDDING_ENDPOINT", "http://vecinita-modal-proxy-v1:10000/embedding")
     monkeypatch.delenv("EMBEDDING_SERVICE_URL", raising=False)
     monkeypatch.setenv("EMBEDDING_SERVICE_AUTH_TOKEN", "embed-token")

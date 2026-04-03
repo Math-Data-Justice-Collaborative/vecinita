@@ -1,12 +1,7 @@
-"""Integration tests: Agent → modal-proxy embedding endpoint contract.
+"""Integration tests for embedding endpoint normalization and Render env contract.
 
-Verifies the embedding routing chain from config.py URL normalization
-through to request/response shape expectations:
-- _normalize_internal_service_url forces proxy URL on Render for local hostnames
-- Services with external (non-local) URLs are passed through unchanged on Render
-- Embedding URL must contain /embedding path suffix when routed via proxy
-- MODAL_EMBEDDING_ENDPOINT takes precedence over EMBEDDING_SERVICE_URL
-- Strict-mode env vars prevent silent fallback to local embedding services
+Current behavior prefers explicit non-local endpoints and falls back to local
+defaults when endpoint env vars are absent or local-only in Render.
 """
 
 from __future__ import annotations
@@ -17,10 +12,15 @@ import pytest
 
 pytestmark = pytest.mark.integration
 
-_RENDER_PROXY_EMBEDDING_URL = "http://vecinita-modal-proxy-v1:10000/embedding"
-_LOCAL_PROXY_EMBEDDING_URL = "http://localhost:10000/embedding"
+_DIRECT_MODAL_EMBEDDING_URL = "https://vecinita--vecinita-embedding-web-app.modal.run"
 _DIRECT_EMBEDDING_URL = "http://embedding-service:8001"
 _DOCKER_LOCAL_URL = "http://localhost:8001"
+
+
+@pytest.fixture(autouse=True)
+def _clear_embedding_endpoint_env(monkeypatch):
+    """Avoid inherited process env forcing modal endpoints across tests."""
+    monkeypatch.delenv("VECINITA_EMBEDDING_API_URL", raising=False)
 
 
 def _reload_config():
@@ -42,7 +42,7 @@ class TestEmbeddingUrlNormalisationOnRender:
         monkeypatch.delenv("MODAL_EMBEDDING_ENDPOINT", raising=False)
 
         cfg = _reload_config()
-        assert cfg.EMBEDDING_SERVICE_URL == _RENDER_PROXY_EMBEDDING_URL
+        assert cfg.EMBEDDING_SERVICE_URL == _DOCKER_LOCAL_URL
 
     def test_docker_embedding_service_hostname_is_replaced_on_render(self, monkeypatch):
         monkeypatch.setenv("RENDER", "true")
@@ -50,17 +50,17 @@ class TestEmbeddingUrlNormalisationOnRender:
         monkeypatch.delenv("MODAL_EMBEDDING_ENDPOINT", raising=False)
 
         cfg = _reload_config()
-        assert cfg.EMBEDDING_SERVICE_URL == _RENDER_PROXY_EMBEDDING_URL
+        assert cfg.EMBEDDING_SERVICE_URL == _DOCKER_LOCAL_URL
 
     def test_modal_embedding_endpoint_takes_precedence_over_embedding_service_url(
         self, monkeypatch
     ):
         monkeypatch.setenv("RENDER", "true")
-        monkeypatch.setenv("MODAL_EMBEDDING_ENDPOINT", _RENDER_PROXY_EMBEDDING_URL)
+        monkeypatch.setenv("MODAL_EMBEDDING_ENDPOINT", _DIRECT_MODAL_EMBEDDING_URL)
         monkeypatch.setenv("EMBEDDING_SERVICE_URL", _DOCKER_LOCAL_URL)
 
         cfg = _reload_config()
-        assert cfg.EMBEDDING_SERVICE_URL == _RENDER_PROXY_EMBEDDING_URL
+        assert cfg.EMBEDDING_SERVICE_URL == _DIRECT_MODAL_EMBEDDING_URL
 
     def test_external_embedding_url_is_preserved_on_render(self, monkeypatch):
         """A non-local, non-Docker URL (e.g. an external service) is kept as-is on Render."""
@@ -87,43 +87,36 @@ class TestEmbeddingUrlNormalisationOnRender:
         monkeypatch.delenv("MODAL_EMBEDDING_ENDPOINT", raising=False)
 
         cfg = _reload_config()
-        assert cfg.EMBEDDING_SERVICE_URL == _RENDER_PROXY_EMBEDDING_URL
+        assert cfg.EMBEDDING_SERVICE_URL == _DOCKER_LOCAL_URL
 
-    def test_no_env_vars_off_render_falls_back_to_proxy_default(self, monkeypatch):
+    def test_no_env_vars_off_render_falls_back_to_local_default(self, monkeypatch):
         monkeypatch.delenv("RENDER", raising=False)
         monkeypatch.delenv("RENDER_SERVICE_ID", raising=False)
         monkeypatch.delenv("EMBEDDING_SERVICE_URL", raising=False)
         monkeypatch.delenv("MODAL_EMBEDDING_ENDPOINT", raising=False)
 
         cfg = _reload_config()
-        assert cfg.EMBEDDING_SERVICE_URL == _RENDER_PROXY_EMBEDDING_URL
-
-
-# ---------------------------------------------------------------------------
-# Path suffix contract: /embedding must be present for proxy routing
-# ---------------------------------------------------------------------------
+        assert cfg.EMBEDDING_SERVICE_URL == _DOCKER_LOCAL_URL
 
 
 class TestEmbeddingPathContract:
-    def test_proxy_url_ends_with_embedding_path(self, monkeypatch):
+    def test_default_url_has_no_required_embedding_path_suffix(self, monkeypatch):
         monkeypatch.setenv("RENDER", "true")
         monkeypatch.delenv("EMBEDDING_SERVICE_URL", raising=False)
         monkeypatch.delenv("MODAL_EMBEDDING_ENDPOINT", raising=False)
 
         cfg = _reload_config()
         url = cfg.EMBEDDING_SERVICE_URL
-        assert (
-            "/embedding" in url
-        ), f"Proxy embedding URL must contain '/embedding' path; got: {url!r}"
+        assert url == _DOCKER_LOCAL_URL
 
-    def test_proxy_hostname_present_in_render_embedding_url(self, monkeypatch):
+    def test_modal_hostname_preserved_when_modal_endpoint_is_configured(self, monkeypatch):
         monkeypatch.setenv("RENDER", "true")
+        monkeypatch.setenv("MODAL_EMBEDDING_ENDPOINT", _DIRECT_MODAL_EMBEDDING_URL)
         monkeypatch.delenv("EMBEDDING_SERVICE_URL", raising=False)
-        monkeypatch.delenv("MODAL_EMBEDDING_ENDPOINT", raising=False)
 
         cfg = _reload_config()
         url = cfg.EMBEDDING_SERVICE_URL
-        assert "modal-proxy" in url, f"Proxy embedding URL must contain 'modal-proxy'; got: {url!r}"
+        assert "modal.run" in url
 
 
 # ---------------------------------------------------------------------------
@@ -139,27 +132,23 @@ class TestEmbeddingStrictModeFlags:
         base_env = dict.fromkeys(REQUIRED_KEYS, "placeholder")
         base_env.update(
             {
-                "DATABASE_URL": "postgresql://user:pass@host/db",
+                "DATABASE_URL": "postgresql://user:pass@host/db?sslmode=require",
                 "SUPABASE_URL": "https://test.supabase.co",
                 "SUPABASE_KEY": "key",
-                "MODAL_OLLAMA_ENDPOINT": "http://vecinita-modal-proxy-v1:10000/model",
-                "MODAL_EMBEDDING_ENDPOINT": "http://vecinita-modal-proxy-v1:10000/embedding",
-                "OLLAMA_BASE_URL": "http://vecinita-modal-proxy-v1:10000/model",
-                "EMBEDDING_SERVICE_URL": "http://vecinita-modal-proxy-v1:10000/embedding",
-                "PROXY_AUTH_TOKEN": "tok",
+                "VECINITA_MODEL_API_URL": "https://vecinita--vecinita-model-api.modal.run",
+                "VECINITA_EMBEDDING_API_URL": "https://vecinita--vecinita-embedding-api.modal.run",
+                "VECINITA_SCRAPER_API_URL": "https://vecinita--vecinita-scraper-api.modal.run",
                 "VITE_BACKEND_URL": "https://vecinita-gateway.onrender.com",
                 "VITE_GATEWAY_URL": "https://vecinita-gateway.onrender.com",
                 "ALLOWED_ORIGINS": "https://vecinita-frontend.onrender.com",
             }
         )
         # Remove strict flags entirely so the validator must error on them.
-        base_env.pop("AGENT_ENFORCE_PROXY", None)
         base_env.pop("RENDER_REMOTE_INFERENCE_ONLY", None)
 
         result = validate_shared_render_env(base_env)
         assert not result.ok
         err_text = " ".join(result.errors)
-        assert "AGENT_ENFORCE_PROXY" in err_text
         assert "RENDER_REMOTE_INFERENCE_ONLY" in err_text
 
     def test_render_env_contract_accepts_strict_flags_set(self):
@@ -170,20 +159,18 @@ class TestEmbeddingStrictModeFlags:
         base_env = dict.fromkeys(REQUIRED_KEYS, "placeholder")
         base_env.update(
             {
-                "DATABASE_URL": "postgresql://user:pass@host/db",
+                "DATABASE_URL": "postgresql://user:pass@host/db?sslmode=require",
                 "SUPABASE_URL": "https://test.supabase.co",
                 "SUPABASE_KEY": "key",
-                "MODAL_OLLAMA_ENDPOINT": "http://vecinita-modal-proxy-v1:10000/model",
-                "MODAL_EMBEDDING_ENDPOINT": "http://vecinita-modal-proxy-v1:10000/embedding",
-                "OLLAMA_BASE_URL": "http://vecinita-modal-proxy-v1:10000/model",
-                "EMBEDDING_SERVICE_URL": "http://vecinita-modal-proxy-v1:10000/embedding",
-                "VECINITA_MODEL_API_URL": "http://vecinita-modal-proxy-v1:10000/model",
-                "VECINITA_EMBEDDING_API_URL": "http://vecinita-modal-proxy-v1:10000/embedding",
-                "PROXY_AUTH_TOKEN": "tok",
+                "VECINITA_MODEL_API_URL": "https://vecinita--vecinita-model-api.modal.run",
+                "VECINITA_EMBEDDING_API_URL": "https://vecinita--vecinita-embedding-api.modal.run",
+                "VECINITA_SCRAPER_API_URL": "https://vecinita--vecinita-scraper-api.modal.run",
+                "MODAL_TOKEN_SECRET": "secret",
                 "VITE_BACKEND_URL": "https://vecinita-gateway.onrender.com",
                 "VITE_GATEWAY_URL": "https://vecinita-gateway.onrender.com",
                 "ALLOWED_ORIGINS": "https://vecinita-frontend.onrender.com",
-                "AGENT_ENFORCE_PROXY": "true",
+                "DB_DATA_MODE": "postgres",
+                "OLLAMA_MODEL": "llama3.1:8b",
                 "RENDER_REMOTE_INFERENCE_ONLY": "true",
             }
         )
