@@ -522,6 +522,45 @@ def _probe_postgres_connectivity() -> tuple[bool, str]:
             with conn.cursor() as cur:
                 cur.execute("SELECT 1")
                 cur.fetchone()
+
+                cur.execute("SELECT 1 FROM pg_extension WHERE extname = 'vector'")
+                if cur.fetchone() is None:
+                    return False, "missing_pgvector_extension"
+
+                cur.execute("SELECT to_regclass('public.document_chunks')")
+                doc_chunks_regclass = cur.fetchone()
+                if not doc_chunks_regclass or doc_chunks_regclass[0] is None:
+                    return False, "missing_table_document_chunks"
+
+                cur.execute("SELECT to_regclass('public.sources')")
+                sources_regclass = cur.fetchone()
+                if not sources_regclass or sources_regclass[0] is None:
+                    return False, "missing_table_sources"
+
+                cur.execute("""
+                    SELECT udt_name
+                    FROM information_schema.columns
+                    WHERE table_schema = 'public'
+                      AND table_name = 'document_chunks'
+                      AND column_name = 'embedding'
+                    """)
+                embedding_column = cur.fetchone()
+                if not embedding_column:
+                    return False, "missing_column_document_chunks.embedding"
+                if str(embedding_column[0]).lower() != "vector":
+                    return (
+                        False,
+                        f"invalid_column_type_document_chunks.embedding:{embedding_column[0]}",
+                    )
+
+                cur.execute("""
+                    SELECT 1
+                    FROM pg_proc
+                    WHERE proname = 'search_similar_documents'
+                    LIMIT 1
+                    """)
+                if cur.fetchone() is None:
+                    return False, "missing_function_search_similar_documents"
         finally:
             conn.close()
         return True, "ok"

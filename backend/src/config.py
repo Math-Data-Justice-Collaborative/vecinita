@@ -126,6 +126,12 @@ def resolve_data_db_mode() -> str:
     """
 
     mode = DB_DATA_MODE if DB_DATA_MODE in {"auto", "postgres", "supabase"} else "auto"
+
+    # Render runtime is Postgres-only during cutover and after migration.
+    # Keep this strict so misconfigured env does not silently route reads/writes.
+    if _running_on_render():
+        return "postgres"
+
     if mode != "auto":
         return mode
 

@@ -213,21 +213,21 @@ def test_no_deprecated_alias_keys_in_render_staging_yaml():
 
 
 # ---------------------------------------------------------------------------
-# 7. Scraper uses canonical SUPABASE_URL / SUPABASE_KEY
+# 7. Scraper supports Postgres-first Render data mode
 # ---------------------------------------------------------------------------
 
 
-def test_scraper_config_uses_canonical_supabase_keys():
-    """Scraper config.py must read SUPABASE_URL (not SUPABASE_PROJECT_URL) primarily."""
+def test_scraper_config_supports_render_postgres_mode():
+    """Scraper config.py must support DATABASE_URL + DB_DATA_MODE for Render cutover."""
     if not SCRAPER_CONFIG.exists():
         pytest.skip("scraper submodule not checked out")
     src = SCRAPER_CONFIG.read_text()
     assert (
-        'os.getenv("SUPABASE_URL")' in src
-    ), "scraper config must read SUPABASE_URL as the primary Supabase URL key"
+        '_env("DATABASE_URL"' in src or 'os.getenv("DATABASE_URL"' in src
+    ), "scraper config must read DATABASE_URL for Postgres runtime"
     assert (
-        'os.getenv("SUPABASE_KEY")' in src
-    ), "scraper config must read SUPABASE_KEY as the primary Supabase key"
+        'os.getenv("DB_DATA_MODE"' in src
+    ), "scraper config must read DB_DATA_MODE for Postgres/supabase mode resolution"
 
 
 # ---------------------------------------------------------------------------

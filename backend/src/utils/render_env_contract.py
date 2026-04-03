@@ -10,9 +10,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 REQUIRED_KEYS: set[str] = {
     "DATABASE_URL",
+    "DB_DATA_MODE",
     "OLLAMA_MODEL",
     "RENDER_REMOTE_INFERENCE_ONLY",
     "MODAL_TOKEN_SECRET",
@@ -58,6 +60,25 @@ def _validate_required_keys(env: dict[str, str], result: ValidationResult) -> No
             result.errors.append(f"Missing required key: {key}")
 
 
+def _validate_database_url(env: dict[str, str], result: ValidationResult) -> None:
+    database_url = (env.get("DATABASE_URL") or "").strip()
+    if not database_url:
+        return
+
+    parsed = urlparse(database_url)
+    if parsed.scheme not in {"postgresql", "postgres"}:
+        result.errors.append("DATABASE_URL must use postgres:// or postgresql:// scheme")
+        return
+
+    if not parsed.hostname:
+        result.errors.append("DATABASE_URL must include a hostname")
+
+    query = parse_qs(parsed.query or "")
+    sslmode_values = [value.strip().lower() for value in query.get("sslmode", []) if value]
+    if "require" not in sslmode_values:
+        result.errors.append("DATABASE_URL must include sslmode=require for Render runtime")
+
+
 def _validate_modal_endpoints(env: dict[str, str], result: ValidationResult) -> None:
     model_endpoint = env.get("VECINITA_MODEL_API_URL", "")
     embed_endpoint = env.get("VECINITA_EMBEDDING_API_URL", "")
@@ -77,6 +98,9 @@ def _validate_strict_flags(env: dict[str, str], result: ValidationResult) -> Non
     if not _is_truthy(env.get("RENDER_REMOTE_INFERENCE_ONLY")):
         result.errors.append("RENDER_REMOTE_INFERENCE_ONLY must be enabled for Render runtime")
 
+    if (env.get("DB_DATA_MODE") or "").strip().lower() != "postgres":
+        result.errors.append("DB_DATA_MODE must be set to postgres for Render runtime")
+
 
 def _validate_frontend_contract(env: dict[str, str], result: ValidationResult) -> None:
     allowed = env.get("ALLOWED_ORIGINS", "")
@@ -92,6 +116,7 @@ def validate_shared_render_env(env: dict[str, str]) -> ValidationResult:
     """Validate shared Render env contract used by multiple services."""
     result = ValidationResult()
     _validate_required_keys(env, result)
+    _validate_database_url(env, result)
     _validate_modal_endpoints(env, result)
     _validate_strict_flags(env, result)
     _validate_frontend_contract(env, result)
