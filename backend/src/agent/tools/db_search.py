@@ -328,15 +328,17 @@ def _query_postgres_fallback(
 
 def _resolve_data_backend_order() -> list[str]:
     mode = app_config.resolve_data_db_mode()
+    if app_config._running_on_render():
+        return ["postgres"]
     if mode == "postgres":
-        return ["postgres", "supabase"]
+        return ["postgres"]
     if mode == "supabase":
-        return ["supabase", "postgres"]
+        return ["supabase"]
     # auto mode preference is resolved in config; keep explicit fallback chain here.
     resolved = app_config.resolve_data_db_mode()
     if resolved == "postgres":
-        return ["postgres", "supabase"]
-    return ["supabase", "postgres"]
+        return ["postgres"]
+    return ["supabase"]
 
 
 def create_db_search_tool(  # noqa: C901

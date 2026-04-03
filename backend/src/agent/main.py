@@ -2648,6 +2648,7 @@ async def ask_question(
 
 
 @app.get("/ask-stream")
+@app.get("/ask/stream")
 async def ask_question_stream(
     question: str | None = Query(default=None),
     query: str | None = Query(default=None),

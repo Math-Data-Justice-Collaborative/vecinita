@@ -36,7 +36,7 @@ SCRAPER_ENDPOINT: str = _normalize_internal_service_url(
     os.getenv("VECINITA_SCRAPER_API_URL") or os.getenv("SCRAPER_SERVICE_URL"),
     fallback_url=(
         "http://vecinita-modal-proxy-v1:10000/jobs"
-        if is_render()
+        if _running_on_render()
         else "http://localhost:8010/jobs"
     ),
 )
