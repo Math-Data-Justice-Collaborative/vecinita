@@ -84,12 +84,12 @@ modal token info
 ### Step 3: Configure Environment
 
 After deployment, Modal returns URLs like:
-- `https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run`
+- `https://vecinita--vecinita-embedding-web-app.modal.run`
 - `https://vecinita--vecinita-scraper-web-app-api.modal.run`
 
 Update `.env`:
 ```env
-MODAL_EMBEDDING_ENDPOINT=https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run
+MODAL_EMBEDDING_ENDPOINT=https://vecinita--vecinita-embedding-web-app.modal.run
 REINDEX_SERVICE_URL=https://vecinita--vecinita-scraper-web-app-api.modal.run
 REINDEX_TRIGGER_TOKEN=<your-secure-token>  # Set in Modal secret
 ```

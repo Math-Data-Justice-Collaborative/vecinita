@@ -47,6 +47,36 @@ def _drop_headers(headers: dict[str, str], names: set[str]) -> dict[str, str]:
     return {k: v for k, v in headers.items() if k.lower() not in names}
 
 
+def _rewrite_deprecated_embedding_host(url: str) -> str | None:
+    """Return a compatibility rewrite for known deprecated embedding hostnames.
+
+    Some environments still carry the legacy
+    `*-embeddingservicecontainer-api.modal.run` host while the active embedding
+    endpoint is now exposed as `*-embedding-web-app.modal.run`.
+    """
+    try:
+        parsed = urlparse(url)
+    except Exception:
+        return None
+
+    host = (parsed.hostname or "").strip().lower()
+    if not host.endswith(".modal.run"):
+        return None
+    if "-embeddingservicecontainer-api.modal.run" not in host:
+        return None
+
+    rewritten_host = host.replace(
+        "-embeddingservicecontainer-api.modal.run",
+        "-embedding-web-app.modal.run",
+    )
+    if rewritten_host == host:
+        return None
+
+    port_part = f":{parsed.port}" if parsed.port else ""
+    netloc = f"{rewritten_host}{port_part}"
+    return urlunparse((parsed.scheme or "https", netloc, "", "", "", "")).rstrip("/")
+
+
 class EmbeddingServiceClient(Embeddings):
     """
     LangChain-compatible embeddings using HTTP calls to embedding microservice.
@@ -151,6 +181,25 @@ class EmbeddingServiceClient(Embeddings):
         else:
             candidates.append(self.base_url)
             candidates.extend(local_candidates)
+
+        # Also include explicit endpoint env vars so one stale variable does not
+        # block startup when another valid endpoint is configured.
+        env_candidates = [
+            os.getenv("VECINITA_EMBEDDING_API_URL", "").strip(),
+            os.getenv("MODAL_EMBEDDING_ENDPOINT", "").strip(),
+            os.getenv("EMBEDDING_SERVICE_URL", "").strip(),
+        ]
+        for candidate in env_candidates:
+            if candidate:
+                candidates.append(candidate.rstrip("/"))
+
+        # Compatibility fallback for legacy embeddingservicecontainer host naming.
+        rewritten_candidates: list[str] = []
+        for candidate in candidates:
+            rewritten = _rewrite_deprecated_embedding_host(candidate)
+            if rewritten:
+                rewritten_candidates.append(rewritten)
+        candidates.extend(rewritten_candidates)
 
         discovered_cloud_run = self._discover_cloud_run_url()
         if discovered_cloud_run:

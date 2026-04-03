@@ -1277,7 +1277,7 @@ class GatewayConfigResponse(BaseModel):
     embedding_service_url: str = Field(
         ...,
         description="Embedding service URL",
-        examples=["https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run"],
+        examples=["https://vecinita--vecinita-embedding-web-app.modal.run"],
     )
     database_url: str | None = Field(default=None, description="Database URL (masked for security)")
     max_urls_per_request: int = Field(
@@ -1304,7 +1304,7 @@ class GatewayConfigResponse(BaseModel):
         json_schema_extra={
             "example": {
                 "agent_url": "http://localhost:8000",
-                "embedding_service_url": "https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run",
+                "embedding_service_url": "https://vecinita--vecinita-embedding-web-app.modal.run",
                 "database_url": None,
                 "max_urls_per_request": 100,
                 "job_retention_hours": 24,
