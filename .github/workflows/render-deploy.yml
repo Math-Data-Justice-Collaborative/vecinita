@@ -136,6 +136,8 @@ jobs:
       RENDER_STAGING_DEPLOY_HOOK_AGENT: ${{ secrets.RENDER_STAGING_DEPLOY_HOOK_AGENT }}
       RENDER_STAGING_DEPLOY_HOOK_GATEWAY: ${{ secrets.RENDER_STAGING_DEPLOY_HOOK_GATEWAY }}
       RENDER_STAGING_DEPLOY_HOOK_FRONTEND: ${{ secrets.RENDER_STAGING_DEPLOY_HOOK_FRONTEND }}
+      RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      RENDER_STAGING_GATEWAY_SERVICE_ID: ${{ secrets.RENDER_STAGING_GATEWAY_SERVICE_ID }}
     steps:
       - name: Trigger staging agent deploy hook
         if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_AGENT != '' }}
@@ -145,6 +147,14 @@ jobs:
         if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_GATEWAY != '' }}
         run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_GATEWAY" || echo "::notice::Staging gateway deploy hook request failed."
 
+      - name: Trigger staging gateway deploy via Render API fallback
+        if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_GATEWAY == '' && env.RENDER_API_KEY != '' && env.RENDER_STAGING_GATEWAY_SERVICE_ID != '' }}
+        run: |
+          curl -fsSL -X POST "https://api.render.com/v1/services/$RENDER_STAGING_GATEWAY_SERVICE_ID/deploys" \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{}' || echo "::notice::Staging gateway deploy API fallback request failed."
+
       - name: Trigger staging frontend deploy hook
         if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_FRONTEND != '' }}
         run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_FRONTEND" || echo "::notice::Staging frontend deploy hook request failed."
@@ -152,15 +162,18 @@ jobs:
       - name: Verify required staging deploy hooks are configured
         run: |
           missing=0
-          for key in \
-            RENDER_STAGING_DEPLOY_HOOK_AGENT \
-            RENDER_STAGING_DEPLOY_HOOK_GATEWAY \
-            RENDER_STAGING_DEPLOY_HOOK_FRONTEND; do
+          for key in RENDER_STAGING_DEPLOY_HOOK_AGENT RENDER_STAGING_DEPLOY_HOOK_FRONTEND; do
             if [ -z "${!key}" ]; then
               echo "::error::Missing required staging deploy hook: $key"
               missing=1
             fi
           done
+
+          if [ -z "$RENDER_STAGING_DEPLOY_HOOK_GATEWAY" ] && \
+             { [ -z "$RENDER_API_KEY" ] || [ -z "$RENDER_STAGING_GATEWAY_SERVICE_ID" ]; }; then
+            echo "::error::Missing gateway deploy trigger for staging: set RENDER_STAGING_DEPLOY_HOOK_GATEWAY or provide RENDER_API_KEY + RENDER_STAGING_GATEWAY_SERVICE_ID"
+            missing=1
+          fi
 
           if [ "$missing" -ne 0 ]; then
             echo "Staging deploy hook validation failed. Configure all required hooks."
@@ -226,6 +239,8 @@ jobs:
       RENDER_PROD_DEPLOY_HOOK_AGENT: ${{ secrets.RENDER_PROD_DEPLOY_HOOK_AGENT || secrets.RENDER_DEPLOY_HOOK_AGENT || secrets.RENDER_VECINITA_AGENT_DEPLOY_HOOK }}
       RENDER_PROD_DEPLOY_HOOK_GATEWAY: ${{ secrets.RENDER_PROD_DEPLOY_HOOK_GATEWAY || secrets.RENDER_DEPLOY_HOOK_GATEWAY || secrets.RENDER_VECINITA_GATEWAY_DEPLOY_HOOK }}
       RENDER_PROD_DEPLOY_HOOK_FRONTEND: ${{ secrets.RENDER_PROD_DEPLOY_HOOK_FRONTEND || secrets.RENDER_DEPLOY_HOOK_FRONTEND || secrets.RENDER_VECINITA_FRONTEND_DEPLOY_HOOK }}
+      RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      RENDER_GATEWAY_SERVICE_ID: ${{ secrets.RENDER_GATEWAY_SERVICE_ID }}
     steps:
       - name: Trigger production agent deploy hook
         if: ${{ env.RENDER_PROD_DEPLOY_HOOK_AGENT != '' }}
@@ -235,6 +250,14 @@ jobs:
         if: ${{ env.RENDER_PROD_DEPLOY_HOOK_GATEWAY != '' }}
         run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_GATEWAY" || echo "::notice::Production gateway deploy hook request failed."
 
+      - name: Trigger production gateway deploy via Render API fallback
+        if: ${{ env.RENDER_PROD_DEPLOY_HOOK_GATEWAY == '' && env.RENDER_API_KEY != '' && env.RENDER_GATEWAY_SERVICE_ID != '' }}
+        run: |
+          curl -fsSL -X POST "https://api.render.com/v1/services/$RENDER_GATEWAY_SERVICE_ID/deploys" \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{}' || echo "::notice::Production gateway deploy API fallback request failed."
+
       - name: Trigger production frontend deploy hook
         if: ${{ env.RENDER_PROD_DEPLOY_HOOK_FRONTEND != '' }}
         run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_FRONTEND" || echo "::notice::Production frontend deploy hook request failed."
@@ -242,15 +265,18 @@ jobs:
       - name: Verify required production deploy hooks are configured
         run: |
           missing=0
-          for key in \
-            RENDER_PROD_DEPLOY_HOOK_AGENT \
-            RENDER_PROD_DEPLOY_HOOK_GATEWAY \
-            RENDER_PROD_DEPLOY_HOOK_FRONTEND; do
+          for key in RENDER_PROD_DEPLOY_HOOK_AGENT RENDER_PROD_DEPLOY_HOOK_FRONTEND; do
             if [ -z "${!key}" ]; then
               echo "::error::Missing required production deploy hook: $key"
               missing=1
             fi
           done
+
+          if [ -z "$RENDER_PROD_DEPLOY_HOOK_GATEWAY" ] && \
+             { [ -z "$RENDER_API_KEY" ] || [ -z "$RENDER_GATEWAY_SERVICE_ID" ]; }; then
+            echo "::error::Missing gateway deploy trigger for production: set RENDER_PROD_DEPLOY_HOOK_GATEWAY (or RENDER_DEPLOY_HOOK_GATEWAY) or provide RENDER_API_KEY + RENDER_GATEWAY_SERVICE_ID"
+            missing=1
+          fi
 
           if [ "$missing" -ne 0 ]; then
             echo "Production deploy hook validation failed. Configure all required hooks."
