@@ -73,11 +73,11 @@ def test_dev_session_prefers_direct_or_local_model_endpoints() -> None:
     content = _script_text()
     assert "AGENT_ENFORCE_PROXY='true'" not in content
     assert (
-        'VECINITA_MODEL_API_URL:-\\${MODAL_OLLAMA_ENDPOINT:-\\${OLLAMA_BASE_URL:-http://localhost:11434}}'
+        "VECINITA_MODEL_API_URL:-\\${MODAL_OLLAMA_ENDPOINT:-\\${OLLAMA_BASE_URL:-http://localhost:11434}}"
         in content
     )
     assert (
-        'VECINITA_EMBEDDING_API_URL:-\\${MODAL_EMBEDDING_ENDPOINT:-\\${EMBEDDING_SERVICE_URL:-http://localhost:8001}}'
+        "VECINITA_EMBEDDING_API_URL:-\\${MODAL_EMBEDDING_ENDPOINT:-\\${EMBEDDING_SERVICE_URL:-http://localhost:8001}}"
         in content
     )
 

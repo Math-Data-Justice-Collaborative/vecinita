@@ -109,25 +109,29 @@ def gateway_schema(monkeypatch):
                 }
             )
 
-    class _FakeChromaStore:
-        def iter_all_chunks(self):
-            return [
-                {
-                    "id": "chunk-1",
-                    "content": "housing support details",
-                    "metadata": {
-                        "source_url": "https://example.org/housing",
-                        "source_domain": "example.org",
-                        "chunk_size": 24,
-                        "document_title": "Housing Guide",
-                        "tags": ["housing"],
-                    },
-                }
-            ]
-
     monkeypatch.setattr(router_ask, "_get_agent_client", lambda: _FakeAgentClient())
     monkeypatch.setattr(router_embed.httpx, "AsyncClient", lambda *args, **kwargs: _EmbedClient())
-    monkeypatch.setattr(router_documents, "get_chroma_store", lambda: _FakeChromaStore())
+    monkeypatch.setattr(
+        router_documents,
+        "_load_overview_via_sql",
+        lambda: (
+            {"total_chunks": 1, "avg_chunk_size": 24},
+            [
+                {
+                    "id": "src-1",
+                    "url": "https://example.org/housing",
+                    "domain": "example.org",
+                    "source_domain": "example.org",
+                    "title": "Housing Guide",
+                    "total_chunks": 1,
+                    "tags": ["housing"],
+                    "metadata": {"document_title": "Housing Guide"},
+                    "download_url": None,
+                    "downloadable": False,
+                }
+            ],
+        ),
+    )
 
     return schemathesis.openapi.from_asgi("/api/v1/openapi.json", main_module.app)
 
