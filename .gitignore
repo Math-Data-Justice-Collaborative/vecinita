@@ -98,3 +98,7 @@ docs/archive/
 backend/data/output/
 .last-run.json
 *.pdf
+
+# Runtime state files (embedding service, model selection)
+backend/src/embedding_service/selection.json
+backend/src/agent/data/model_selection.json

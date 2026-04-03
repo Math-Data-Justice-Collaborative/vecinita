@@ -550,6 +550,10 @@ def _probe_postgres_connectivity() -> tuple[bool, str]:
     if not database_url:
         return False, "database_url_not_configured"
 
+    # Reject known test placeholder to prevent confusing DNS errors
+    if database_url == "postgresql://test":
+        return False, "database_url_is_test_placeholder"
+
     try:
         conn = psycopg2.connect(database_url, connect_timeout=3)
         try:
