@@ -49,13 +49,9 @@ dependencies = [
     "onnxruntime>=1.18.0,<1.24.0.dev; sys_platform == 'win32'",
     "tokenizers>=0.15.0,<0.22.0rc",
     "ddgs>=9.10.0",
-    "pytest>=9.0.2",
-    "pytest-cov>=7.0.0",
+    # Keep optional local embedding fallback available without scraping extras.
     "fastembed>=0.7.4",
     "transformers>=4.55.4",
-    "docker>=7.1.0",
-    "types-requests>=2.32.4.20260324",
-    "torch>=2.9.1",
 ]
 
 [project.optional-dependencies]
@@ -88,6 +84,8 @@ docker = [
 ml = [
     # Optional TensorFlow/Keras stack (pulls large CUDA libs on Linux runners)
     "tf-keras>=2.20.1",
+    # Optional torch stack for local experimentation.
+    "torch>=2.9.1",
 ]
 
 # Development: testing, code quality, and experimentation
@@ -112,6 +110,7 @@ dev = [
     "unstructured[doc,docx,ppt,pdf]>=0.14.0",
     "playwright>=1.40.0",
     "docker>=7.0.0",
+    "types-requests>=2.32.4.20260324",
 ]
 
 # Minimal CI dependencies - no playwright or docker for faster CI builds
@@ -122,6 +121,7 @@ ci = [
     "hypothesis>=6.0.0",
     "schemathesis>=4.14.3",
     "tracecov>=0.3.0",
+    "types-requests>=2.32.4.20260324",
     "httpx>=0.25.0",
     "black>=24.1.0",
     "ruff>=0.2.0",

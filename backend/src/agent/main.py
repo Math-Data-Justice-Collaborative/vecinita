@@ -526,7 +526,22 @@ def _probe_postgres_connectivity() -> tuple[bool, str]:
 
                 cur.execute("SELECT 1 FROM pg_extension WHERE extname = 'vector'")
                 if cur.fetchone() is None:
-                    return False, "missing_pgvector_extension"
+                    auto_create_vector = _is_truthy_env(
+                        "POSTGRES_AUTO_CREATE_VECTOR_EXTENSION",
+                        _running_on_render(),
+                    )
+                    if auto_create_vector:
+                        try:
+                            cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
+                            conn.commit()
+                            cur.execute("SELECT 1 FROM pg_extension WHERE extname = 'vector'")
+                            if cur.fetchone() is None:
+                                return False, "missing_pgvector_extension"
+                        except Exception as ext_exc:
+                            conn.rollback()
+                            return False, f"missing_pgvector_extension:create_failed:{ext_exc}"
+                    else:
+                        return False, "missing_pgvector_extension"
 
                 cur.execute("SELECT to_regclass('public.document_chunks')")
                 doc_chunks_regclass = cur.fetchone()

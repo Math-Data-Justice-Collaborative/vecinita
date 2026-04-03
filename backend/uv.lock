@@ -8757,7 +8757,6 @@ dependencies = [
     { name = "beautifulsoup4" },
     { name = "chromadb" },
     { name = "ddgs" },
-    { name = "docker" },
     { name = "fastapi" },
     { name = "fastembed" },
     { name = "gotrue" },
@@ -8777,17 +8776,13 @@ dependencies = [
     { name = "psycopg2-binary" },
     { name = "pydantic" },
     { name = "pypdf" },
-    { name = "pytest" },
-    { name = "pytest-cov" },
     { name = "python-dotenv" },
     { name = "python-multipart" },
     { name = "requests" },
     { name = "supabase" },
     { name = "tokenizers" },
-    { name = "torch" },
     { name = "tqdm" },
     { name = "transformers" },
-    { name = "types-requests" },
     { name = "uvicorn" },
 ]
 
@@ -8815,6 +8810,7 @@ all = [
     { name = "scikit-learn", version = "1.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "sentence-transformers" },
     { name = "tracecov" },
+    { name = "types-requests" },
     { name = "unstructured", extra = ["doc", "docx", "pdf", "ppt"] },
 ]
 ci = [
@@ -8828,6 +8824,7 @@ ci = [
     { name = "ruff" },
     { name = "schemathesis" },
     { name = "tracecov" },
+    { name = "types-requests" },
 ]
 dev = [
     { name = "black" },
@@ -8845,6 +8842,7 @@ dev = [
     { name = "ruff" },
     { name = "schemathesis" },
     { name = "tracecov" },
+    { name = "types-requests" },
     { name = "unstructured", extra = ["doc", "docx", "pdf", "ppt"] },
 ]
 docker = [
@@ -8859,6 +8857,7 @@ embedding = [
 ]
 ml = [
     { name = "tf-keras" },
+    { name = "torch" },
 ]
 scraper = [
     { name = "fastembed" },
@@ -8878,7 +8877,6 @@ requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=24.1.0" },
     { name = "chromadb", specifier = ">=1.0.0" },
     { name = "ddgs", specifier = ">=9.10.0" },
-    { name = "docker", specifier = ">=7.1.0" },
     { name = "docker", marker = "extra == 'dev'", specifier = ">=7.0.0" },
     { name = "docker", marker = "extra == 'docker'", specifier = ">=7.0.0" },
     { name = "fastapi" },
@@ -8914,12 +8912,10 @@ requires-dist = [
     { name = "pydantic" },
     { name = "pygraphviz", marker = "extra == 'visualization'", specifier = ">=1.14.0" },
     { name = "pypdf" },
-    { name = "pytest", specifier = ">=9.0.2" },
     { name = "pytest", marker = "extra == 'ci'", specifier = ">=9.0.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.0.0" },
     { name = "pytest-asyncio", marker = "extra == 'ci'", specifier = ">=0.23.0" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23.0" },
-    { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "pytest-cov", marker = "extra == 'ci'", specifier = ">=5.0.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0.0" },
     { name = "python-dotenv" },
@@ -8935,12 +8931,13 @@ requires-dist = [
     { name = "supabase" },
     { name = "tf-keras", marker = "extra == 'ml'", specifier = ">=2.20.1" },
     { name = "tokenizers", specifier = ">=0.15.0,<0.22.0rc0" },
-    { name = "torch", specifier = ">=2.9.1" },
+    { name = "torch", marker = "extra == 'ml'", specifier = ">=2.9.1" },
     { name = "tqdm" },
     { name = "tracecov", marker = "extra == 'ci'", specifier = ">=0.3.0" },
     { name = "tracecov", marker = "extra == 'dev'", specifier = ">=0.3.0" },
     { name = "transformers", specifier = ">=4.55.4" },
-    { name = "types-requests", specifier = ">=2.32.4.20260324" },
+    { name = "types-requests", marker = "extra == 'ci'", specifier = ">=2.32.4.20260324" },
+    { name = "types-requests", marker = "extra == 'dev'", specifier = ">=2.32.4.20260324" },
     { name = "unstructured", extras = ["doc", "docx", "ppt", "pdf"], marker = "extra == 'dev'", specifier = ">=0.14.0" },
     { name = "unstructured", extras = ["doc", "docx", "ppt", "pdf"], marker = "extra == 'scraper'", specifier = ">=0.14.0" },
     { name = "uvicorn" },
