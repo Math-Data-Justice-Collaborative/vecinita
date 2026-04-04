@@ -41,6 +41,9 @@ jobs:
       - name: Validate shared Render env contract
         run: python3 scripts/github/validate_render_env.py .env.prod.render
 
+      - name: Validate gateway dependency profile
+        run: python3 scripts/github/validate_gateway_dependency_profile.py
+
       - name: Set up Python 3.10
         uses: actions/setup-python@v6
         with:
@@ -139,6 +142,22 @@ jobs:
       RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
       RENDER_STAGING_GATEWAY_SERVICE_ID: ${{ secrets.RENDER_STAGING_GATEWAY_SERVICE_ID }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          submodules: false
+
+      - name: Validate staging gateway runtime is Docker
+        run: |
+          if [ -z "$RENDER_API_KEY" ] || [ -z "$RENDER_STAGING_GATEWAY_SERVICE_ID" ]; then
+            echo "::warning::RENDER_API_KEY or RENDER_STAGING_GATEWAY_SERVICE_ID missing; skipping staging runtime validation"
+            exit 0
+          fi
+          python3 scripts/github/validate_render_runtime.py \
+            --service-id "$RENDER_STAGING_GATEWAY_SERVICE_ID" \
+            --service-name "vecinita-gateway-staging" \
+            --expect docker
+
       - name: Trigger staging agent deploy hook
         if: ${{ env.RENDER_STAGING_DEPLOY_HOOK_AGENT != '' }}
         run: curl -fsSL -X POST "$RENDER_STAGING_DEPLOY_HOOK_AGENT" || echo "::notice::Staging agent deploy hook request failed."
@@ -241,6 +260,22 @@ jobs:
       RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
       RENDER_GATEWAY_SERVICE_ID: ${{ secrets.RENDER_GATEWAY_SERVICE_ID }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          submodules: false
+
+      - name: Validate production gateway runtime is Docker
+        run: |
+          if [ -z "$RENDER_API_KEY" ] || [ -z "$RENDER_GATEWAY_SERVICE_ID" ]; then
+            echo "::warning::RENDER_API_KEY or RENDER_GATEWAY_SERVICE_ID missing; skipping production runtime validation"
+            exit 0
+          fi
+          python3 scripts/github/validate_render_runtime.py \
+            --service-id "$RENDER_GATEWAY_SERVICE_ID" \
+            --service-name "vecinita-gateway" \
+            --expect docker
+
       - name: Trigger production agent deploy hook
         if: ${{ env.RENDER_PROD_DEPLOY_HOOK_AGENT != '' }}
         run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_AGENT" || echo "::notice::Production agent deploy hook request failed."

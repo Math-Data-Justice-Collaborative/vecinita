@@ -26,6 +26,16 @@ This runs in CI in:
 - `.github/workflows/render-deploy.yml`
 - `.github/workflows/backend-coverage.yml`
 
+Gateway runtime mode is also validated as part of the Render deploy workflow to
+guard against drift from Docker runtime on staging and production. See:
+
+- `scripts/github/validate_render_runtime.py`
+- `scripts/github/validate_gateway_dependency_profile.py`
+- `docs/deployment/RENDER_GATEWAY_DEPLOY_TROUBLESHOOTING.md`
+
+When native Python buildpack deploys are used outside Docker, `runtime.txt`
+pins Python to a supported version for binary wheel availability.
+
 ## Enforced Rules
 
 1. Required keys must be present (DB, Supabase, proxy endpoints, auth token,
