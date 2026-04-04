@@ -106,7 +106,7 @@ The service requires auth. Set token in `.env`:
 EMBEDDING_SERVICE_AUTH_TOKEN=<your-token>
 ```
 
-Or use Modal proxy credential:
+Or use Modal routing credential:
 ```bash
 modal secret get vecinita-secrets
 ```

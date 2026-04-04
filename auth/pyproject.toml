@@ -1,14 +1,14 @@
 [project]
-name = "vecinita-auth-proxy"
+name = "vecinita-auth-service"
 version = "0.1.0"
-description = "Supabase Authentication Proxy for Vecinita"
+description = "Supabase Authentication Routing for Vecinita"
 readme = "README.md"
 requires-python = ">=3.10,<3.13"
 license = {text = "MIT"}
 authors = [
     {name = "Vecinita Team"}
 ]
-keywords = ["auth", "supabase", "fastapi", "proxy"]
+keywords = ["auth", "supabase", "fastapi", "routing"]
 
 dependencies = [
     # Web Framework

@@ -2,7 +2,7 @@
 
 > Status (March 2026): Supabase is now scoped primarily to authentication and related role/session metadata. Vector/document retrieval and ingestion are being migrated to Render Postgres.
 
-For the full cross-service integration map (frontend, gateway, agent, modal-proxy, scraper, databases, auth boundaries), see [docs/architecture/SERVICE_INTEGRATION_POINTS.md](docs/architecture/SERVICE_INTEGRATION_POINTS.md).
+For the full cross-service integration map (frontend, gateway, agent, direct-routing, scraper, databases, auth boundaries), see [docs/architecture/SERVICE_INTEGRATION_POINTS.md](docs/architecture/SERVICE_INTEGRATION_POINTS.md).
 
 ## Overview
 

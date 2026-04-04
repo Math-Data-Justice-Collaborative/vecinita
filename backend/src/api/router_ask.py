@@ -252,7 +252,7 @@ async def ask_question(
         params["rerank"] = str(rerank).lower()
         params["rerank_top_k"] = rerank_top_k
 
-        # Proxy request to agent service
+        # Forward request to agent service
         client = _get_agent_client()
         if client is None:
             raise HTTPException(status_code=503, detail="Agent service client not available")
@@ -302,7 +302,7 @@ async def ask_question(
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e
 
 
-async def sse_proxy_generator(
+async def sse_stream_forward_generator(
     question: str,
     request_id: str,
     thread_id: str | None = None,
@@ -317,7 +317,7 @@ async def sse_proxy_generator(
     rerank_top_k: int = 10,
 ) -> AsyncGenerator[bytes, None]:
     """
-    Generator that proxies SSE events from agent service.
+    Generator that forwards SSE events from agent service.
 
     Yields SSE-formatted events from the agent's streaming endpoint.
     """
@@ -427,7 +427,7 @@ async def ask_question_stream(
     """
     Ask a question and stream the response as Server-Sent Events (SSE).
 
-    Proxies streaming from the agent service for real-time updates.
+    Forwards streaming from the agent service for real-time updates.
 
     Event types:
     - thinking: Agent is processing (with status message)
@@ -455,7 +455,7 @@ async def ask_question_stream(
     )
 
     return StreamingResponse(
-        sse_proxy_generator(
+        sse_stream_forward_generator(
             question,
             request_id,
             thread_id,
@@ -483,7 +483,7 @@ async def get_ask_config():
     """
     Get current Q&A configuration for the local LLM runtime.
 
-    Proxies to agent service /config endpoint.
+    Forwards to agent service /config endpoint.
 
     Returns:
         Configuration with available providers and models

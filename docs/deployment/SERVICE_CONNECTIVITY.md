@@ -16,7 +16,7 @@ def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -
 ```
 
 **Key behaviors:**
-- **On Render**: Forces all traffic through the `vecinita-modal-proxy` private service to avoid connection refused errors
+- **On Render**: Forces all traffic through the `vecinita-direct-routing` private service to avoid connection refused errors
 - **Off Render (local dev)**: Uses raw environment URLs if available, with fallback only when needed
 
 ### Configured Endpoints
@@ -25,12 +25,12 @@ Two endpoints are normalized globally:
 
 1. **EMBEDDING_SERVICE_URL**
    - Raw sources: `MODAL_EMBEDDING_ENDPOINT` or `EMBEDDING_SERVICE_URL` env var
-   - Fallback (Render): `http://vecinita-modal-proxy-v1:10000/embedding`
+   - Fallback (Render): `http://vecinita-embedding-ms-render:8011`
    - Fallback (local dev): defaults to raw URL, no localhost override
 
 2. **OLLAMA_BASE_URL**  
    - Raw sources: `MODAL_OLLAMA_ENDPOINT` or `OLLAMA_BASE_URL` env var
-   - Fallback (Render): `http://vecinita-modal-proxy-v1:10000/model`
+   - Fallback (Render): `http://vecinita-model-ms-render:8000`
    - Fallback (local dev): defaults to raw URL
 
 ### Services Using Unified Configuration
@@ -54,9 +54,9 @@ This ensures:
 
 ## Render Deployment Routing
 
-### Modal Proxy Architecture
+### Modal Routing Architecture
 
-On Render, the `vecinita-modal-proxy` private service acts as a **unified ingress** for all upstream Model/Embedding traffic:
+On Render, the `vecinita-direct-routing` private service acts as a **unified ingress** for all upstream Model/Embedding traffic:
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -75,7 +75,7 @@ On Render, the `vecinita-modal-proxy` private service acts as a **unified ingres
 │                        │                             │
 │                        ▼                             │
 │            ┌──────────────────────────┐             │
-│            │ vecinita-modal-proxy     │             │
+│            │ vecinita-direct-routing     │             │
 │            │ (private service)        │             │
 │            │ - /model     → Ollama    │             │
 │            │ - /embedding → Embedding │             │
@@ -120,8 +120,8 @@ services:
 **Setting URLs in Render Dashboard:**
 1. Goal: Agent and Gateway should have **identical** `EMBEDDING_SERVICE_URL` and `OLLAMA_BASE_URL` values
 2. Standard production values:
-   - `EMBEDDING_SERVICE_URL = http://vecinita-modal-proxy-v1:10000/embedding`
-   - `OLLAMA_BASE_URL = http://vecinita-modal-proxy-v1:10000/model`
+   - `EMBEDDING_SERVICE_URL = http://vecinita-embedding-ms-render:8011`
+   - `OLLAMA_BASE_URL = http://vecinita-model-ms-render:8000`
 
 ## Local Development Routing
 
@@ -134,16 +134,16 @@ services:
   agent:
     environment:
       - EMBEDDING_SERVICE_URL=http://embedding-service:8001
-      - OLLAMA_BASE_URL=http://vecinita-modal-proxy-v1:10000/model
+      - OLLAMA_BASE_URL=http://vecinita-model-ms-render:8000
   
   gateway:
     environment:
       - EMBEDDING_SERVICE_URL=http://embedding-service:8001
-      - OLLAMA_BASE_URL=http://vecinita-modal-proxy-v1:10000/model
+      - OLLAMA_BASE_URL=http://vecinita-model-ms-render:8000
 ```
 
 The `_normalize_internal_service_url()` function recognizes local hostnames and preserves them:
-- `localhost`, `127.0.0.1`, `embedding-service`, `vecinita-modal-proxy-v1` are all valid
+- `localhost`, `127.0.0.1`, `embedding-service`, `vecinita-direct-routing-v1` are all valid
 
 ## Troubleshooting Connectivity Issues
 
@@ -156,20 +156,20 @@ The `_normalize_internal_service_url()` function recognizes local hostnames and 
 **Fix:**
 1. Check `src/config.py` to verify the normalization logic is being used
 2. Verify both services have the same `EMBEDDING_SERVICE_URL` env var on Render
-3. If on Render, ensure both use the proxy: `http://vecinita-modal-proxy-v1:10000/embedding`
+3. If on Render, ensure both use the routing: `http://vecinita-embedding-ms-render:8011`
 
 ### Connection Refused Errors on Render
 
 **Symptom:** `[Errno 111] Connection refused` when connecting to embedding/Ollama.
 
-**Root Cause:** Env vars point to localhost or Docker-internal hostnames instead of the proxy.
+**Root Cause:** Env vars point to localhost or Docker-internal hostnames instead of the routing.
 
 **Fix:**
-1. On Render, `_running_on_render()` detects the env and forces proxy routing
+1. On Render, `_running_on_render()` detects the env and forces routing routing
 2. Ensure `MODAL_EMBEDDING_ENDPOINT` or `EMBEDDING_SERVICE_URL` is set to a non-local URL
-3. If  using fallback, ensure it includes the proxy path prefix (e.g., `/embedding`)
+3. If  using fallback, ensure it includes the routing path prefix (e.g., `/embedding`)
 
-### Local Dev Prefers Non-Proxy Endpoints
+### Local Dev Prefers Non-Routing Endpoints
 
 **Symptom:** Local agent/gateway reach remote Modal endpoints instead of local embeddings.
 

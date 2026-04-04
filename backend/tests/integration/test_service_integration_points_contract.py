@@ -66,8 +66,8 @@ def test_ip02_frontend_to_supabase_auth_contract_file_wiring() -> None:
     assert "createClient" in content
 
 
-def test_ip03_gateway_to_agent_proxy_forwards_query_params(monkeypatch) -> None:
-    """IP-03: Gateway ask endpoint proxies to Agent /ask with expected params."""
+def test_ip03_gateway_to_agent_forwards_query_params(monkeypatch) -> None:
+    """IP-03: Gateway ask endpoint forwards to Agent /ask with expected params."""
     from src.api import router_ask
 
     class _FakeAgentClient:
@@ -129,13 +129,13 @@ def test_ip04_gateway_to_embedding_service_headers_and_endpoint(monkeypatch) -> 
     headers = router_embed._embedding_service_headers()
     assert headers["x-embedding-service-token"] == "embed-token"
     assert headers["authorization"] == "Bearer embed-token"
-    assert "X-Proxy-Token" not in headers
+    assert "X-Service-Token" not in headers
     assert "Modal-Key" not in headers
     assert "Modal-Secret" not in headers
 
 
 def test_ip05_gateway_to_reindex_route_forwards_token_and_params(monkeypatch) -> None:
-    """IP-05: Gateway scrape/reindex forwards trigger token to proxy jobs endpoint."""
+    """IP-05: Gateway scrape/reindex forwards trigger token to direct jobs endpoint."""
     from src.api import router_scrape
 
     captured: dict[str, object] = {}
@@ -153,7 +153,11 @@ def test_ip05_gateway_to_reindex_route_forwards_token_and_params(monkeypatch) ->
             captured["headers"] = headers
             return _JsonResponse({"status": "queued", "call_id": "call-1"})
 
-    monkeypatch.setattr(router_scrape, "REINDEX_SERVICE_URL", "http://proxy:10000/jobs")
+    monkeypatch.setattr(
+        router_scrape,
+        "REINDEX_SERVICE_URL",
+        "https://vecinita--vecinita-scraper-api-fastapi.modal.run/jobs",
+    )
     monkeypatch.setattr(router_scrape, "REINDEX_TRIGGER_TOKEN", "reindex-secret")
     monkeypatch.setattr(router_scrape.httpx, "AsyncClient", lambda *args, **kwargs: _StubClient())
 
@@ -163,7 +167,7 @@ def test_ip05_gateway_to_reindex_route_forwards_token_and_params(monkeypatch) ->
 
     response = client.post("/api/v1/scrape/reindex?clean=true&verbose=true")
     assert response.status_code == 200
-    assert captured["url"] == "http://proxy:10000/jobs/reindex"
+    assert captured["url"] == "https://vecinita--vecinita-scraper-api-fastapi.modal.run/jobs/reindex"
     assert captured["params"] == {"clean": True, "stream": True, "verbose": True}
     assert captured["headers"] == {"x-reindex-token": "reindex-secret"}
 
@@ -382,9 +386,9 @@ def test_ip12_documents_router_mixed_datasource_contract(monkeypatch) -> None:
 
 
 def test_ip13_direct_modal_endpoint_contract_files() -> None:
-    """IP-13: Service endpoint contracts prefer direct Modal URLs and no proxy token headers."""
+    """IP-13: Service endpoint contracts prefer direct Modal URLs and no routing token headers."""
     service_endpoints_content = _read_workspace_file("backend", "src", "service_endpoints.py")
     embed_router_content = _read_workspace_file("backend", "src", "api", "router_embed.py")
 
     assert "vecinita--vecinita-scraper-api-fastapi.modal.run/jobs" in service_endpoints_content
-    assert '"X-Proxy-Token"' not in embed_router_content
+    assert '"X-Service-Token"' not in embed_router_content

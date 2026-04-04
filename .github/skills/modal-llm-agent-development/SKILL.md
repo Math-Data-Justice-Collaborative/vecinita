@@ -16,7 +16,7 @@ Use for tasks involving:
 - `services/model-modal`
 - `services/embedding-modal`
 - `services/scraper` Modal deployment flow
-- Modal proxy integration (`services/modal-proxy`) from backend callers
+- Modal routing integration (`services/direct-routing`) from backend callers
 - Local workflows that use `modal run`, `modal serve`, or `modal deploy`
 
 Do not use for generic FastAPI-only changes unrelated to Modal runtime behavior.
@@ -81,24 +81,24 @@ python3.11 -m modal deploy main.py
 1. Implement minimal code changes.
 2. Run one-shot validation with `modal run` when applicable.
 3. Run `modal serve` for endpoint behavior and logs.
-4. Validate local integration with proxy/backend callers.
+4. Validate local integration with routing/backend callers.
 5. Run relevant tests before finishing.
 
 ## Auth and endpoint guidance
 
-- Modal ASGI endpoints in this repo use proxy auth (`requires_proxy_auth=True`).
+- Modal ASGI endpoints in this repo use routing auth (`requires_service_auth=True`).
 - Backend clients should use URL-aware headers:
-  - Local non-proxy targets: embedding token headers.
-  - Modal proxy / modal.run targets: Modal key/secret and proxy token headers.
-- Do not forward incompatible auth headers to proxy-protected routes.
+  - Local non-routing targets: embedding token headers.
+  - Modal routing / modal.run targets: Modal key/secret and routing token headers.
+- Do not forward incompatible auth headers to routing-protected routes.
 
 ## Troubleshooting checklist
 
 - `401 Unauthorized`:
-  - Verify `MODAL_API_PROXY_KEY`, `MODAL_API_PROXY_SECRET`, and `PROXY_AUTH_TOKEN` values.
+  - Verify `MODAL_API_PROXY_KEY`, `MODAL_TOKEN_SECRET`, and `EMBEDDING_SERVICE_AUTH_TOKEN` values.
   - Confirm caller header strategy matches endpoint type.
 - `404` on expected path:
-  - Confirm `/model` and `/embedding` prefixes when routed through modal-proxy.
+  - Confirm `/model` and `/embedding` prefixes when routed through direct-routing.
 - Local connection refused:
   - Verify local dependency stack is running (`make dev-shared-status`).
 - Modal auth failures:

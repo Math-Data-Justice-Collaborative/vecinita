@@ -22,7 +22,7 @@ Modal Services (Serverless):
 ├── Embedding Service (ASGI)
 │   └── Port: 443 (https://...)
 │   └── Endpoints: /embed, /batch, /config, /health
-│   └── Auth: MODAL_API_PROXY_SECRET or EMBEDDING_SERVICE_AUTH_TOKEN
+│   └── Auth: MODAL_TOKEN_SECRET or EMBEDDING_SERVICE_AUTH_TOKEN
 │
 └── Scraper Service (ASGI + Cron)
     ├── Port: 443 (https://...)
@@ -105,7 +105,7 @@ The API Gateway (`backend/src/api/main.py`) routes to backend services:
 The gateway proxies requests to embedding service with:
 - Auth token injection (from environment):
   1. `EMBEDDING_SERVICE_AUTH_TOKEN` (explicit)
-  2. `MODAL_API_PROXY_SECRET` (Modal proxy)
+  2. `MODAL_TOKEN_SECRET` (Modal routing)
   3. `MODAL_API_KEY` (fallback)
   4. `MODAL_API_TOKEN_SECRET` (final fallback)
 
@@ -156,7 +156,7 @@ EMBEDDING_SERVICE_URL Resolution:
 EMBEDDING_SERVICE_AUTH_TOKEN Resolution:
   EMBEDDING_SERVICE_AUTH_TOKEN (1st priority)
     ↓
-  MODAL_API_PROXY_SECRET
+  MODAL_TOKEN_SECRET
     ↓
   MODAL_API_KEY
     ↓

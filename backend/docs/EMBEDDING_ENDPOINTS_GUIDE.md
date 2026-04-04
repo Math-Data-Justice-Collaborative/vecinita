@@ -2,13 +2,13 @@
 
 ## Overview
 
-The embedding router (`backend/src/api/router_embed.py`) provides 5 fully-implemented endpoints for text embedding generation, batch processing, and similarity computation. All endpoints proxy requests to the dedicated embedding microservice running on port 8001.
+The embedding router (`backend/src/api/router_embed.py`) provides 5 fully-implemented endpoints for text embedding generation, batch processing, and similarity computation. All endpoints routing requests to the dedicated embedding microservice running on port 8001.
 
 ## Architecture
 
 **API Gateway (port 8002)** → **Embedding Service (port 8001)**
 
-The API gateway acts as a proxy, providing:
+The API gateway acts as a routing, providing:
 - Request validation via Pydantic models
 - Error handling and service availability checks
 - Consistent response formatting

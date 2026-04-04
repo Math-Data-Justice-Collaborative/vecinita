@@ -12,7 +12,7 @@
 Comprehensive integration of frontend components with backend services featuring:
 - Token-by-token streaming responses via Server-Sent Events (SSE)
 - Multi-model LLM fallback chain (6 providers)
-- Unified authentication proxy with rate limiting
+- Unified authentication routing with rate limiting
 - Enhanced gateway with security middleware
 - Real-time token and source events in frontend
 - Metadata tracking for debugging and analytics
@@ -234,7 +234,7 @@ langchain-google-genai = ">= 1.0.0"
 
 ---
 
-### ✅ PHASE 3: Auth Proxy Service (NEW)
+### ✅ PHASE 3: Auth Routing Service (NEW)
 
 **New Files:**
 ```
@@ -414,11 +414,11 @@ import httpx
 import time
 
 class AuthenticationMiddleware(BaseHTTPMiddleware):
-    """Validates API keys via auth proxy"""
+    """Validates API keys via auth routing"""
     
-    def __init__(self, app: ASGIApp, auth_proxy_url: str):
+    def __init__(self, app: ASGIApp, auth_service_url: str):
         super().__init__(app)
-        self.auth_proxy_url = auth_proxy_url
+        self.auth_service_url = auth_service_url
         self.client = None
     
     async def dispatch(self, request: Request, call_next) -> Response:
@@ -436,20 +436,20 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
         
         api_key = auth_header.replace("Bearer ", "")
         
-        # Validate via auth proxy
+        # Validate via auth routing
         try:
             if self.client is None:
                 self.client = httpx.AsyncClient()
             
             response = await self.client.post(
-                f"{self.auth_proxy_url}/validate-key",
+                f"{self.auth_service_url}/validate-key",
                 json={"api_key": api_key}
             )
             
             if not response.json().get("valid"):
                 return JSONResponse(status_code=401, content={"error": "Invalid API key"})
         except Exception as e:
-            # Fail open: if auth proxy down, continue
+            # Fail open: if auth routing down, continue
             logger.warning(f"Auth check failed: {e}, continuing...")
         
         # Call actual endpoint
@@ -474,7 +474,7 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
         api_key = request.headers.get("x-api-key") or request.query_params.get("api_key")
         
         if api_key:
-            # Check rate limit (would call auth proxy or Redis)
+            # Check rate limit (would call auth routing or Redis)
             if is_rate_limited(api_key):
                 return JSONResponse(
                     status_code=429,
@@ -499,7 +499,7 @@ app.add_middleware(
 )
 app.add_middleware(
     AuthenticationMiddleware,
-    auth_proxy_url=os.getenv("AUTH_PROXY_URL", "http://localhost:8003")
+    auth_service_url=os.getenv("AUTH_SERVICE_URL", "http://localhost:8003")
 )
 ```
 - Purpose: Mount middleware on gateway
@@ -507,7 +507,7 @@ app.add_middleware(
 
 3. **Environment Variables Added**
 ```bash
-AUTH_PROXY_URL=http://localhost:8003
+AUTH_SERVICE_URL=http://localhost:8003
 ENABLE_AUTH=false  # Can disable in development
 RATE_LIMIT_TOKENS_PER_DAY=1000
 RATE_LIMIT_REQUESTS_PER_HOUR=100
@@ -515,7 +515,7 @@ RATE_LIMIT_REQUESTS_PER_HOUR=100
 
 **Testing Impact:**
 - Need middleware unit tests
-- Need integration tests with mock auth proxy
+- Need integration tests with mock auth routing
 - Need negative tests (missing key, invalid key, rate limited)
 
 **Breaking Changes:** None (feature flag: ENABLE_AUTH=false by default)
@@ -710,7 +710,7 @@ tests/
 │   └── test_streaming_flow.py       # Full request cycle
 ├── unit/
 │   ├── test_token_tracking.py       # Metadata extraction
-│   └── test_auth_proxy.py           # Service endpoints
+│   └── test_auth_service.py         # Service endpoints
 └── e2e/
     ├── test_full_chat.py            # Frontend → Agent
     └── test_streaming_ux.py         # Token accumulation
@@ -735,7 +735,7 @@ tests/
 - `.env.example` - Added new variables
 - `docker-compose.yml` - Documented services
 - `docs/API_INTEGRATION_SPEC.md` - New SSE format
-- `docs/ARCHITECTURE_MICROSERVICE.md` - Auth proxy role
+- `docs/ARCHITECTURE_MICROSERVICE.md` - Auth routing role
 
 ---
 
@@ -743,13 +743,13 @@ tests/
 
 **Modified: docker-compose.yml**
 
-**Addition: auth-proxy service**
+**Addition: auth-service service**
 ```yaml
-auth-proxy:
+auth-service:
   build:
     context: ./auth
     dockerfile: Dockerfile
-  container_name: vecinita-auth-proxy
+  container_name: vecinita-auth-service
   ports:
     - "8003:8003"
   environment:
@@ -776,14 +776,14 @@ auth-proxy:
 ```yaml
 environment:
   # ... existing ...
-  AUTH_PROXY_URL: "http://auth-proxy:8003"
+  AUTH_SERVICE_URL: "http://auth-service:8003"
   ENABLE_AUTH: "false"
   DEEPSEEK_API_KEY: ""
   GEMINI_API_KEY: ""
   GROK_API_KEY: ""
   RATE_LIMIT_TOKENS_PER_DAY: "10000"
 depends_on:
-  auth-proxy:
+  auth-service:
     condition: service_healthy
 ```
 
@@ -882,7 +882,7 @@ data: {"type": "complete", "answer": "Python is...", "sources": [...], "metadata
 ```
 
 ### POST /validate-key (NEW)
-**Auth Proxy Service**
+**Auth Routing Service**
 
 ```
 POST /validate-key
@@ -895,7 +895,7 @@ Response:
 ```
 
 ### GET /usage (NEW)
-**Auth Proxy Service**
+**Auth Routing Service**
 
 ```
 GET /usage
@@ -911,7 +911,7 @@ Response:
 ```
 
 ### POST /track-usage (NEW)
-**Auth Proxy Service**
+**Auth Routing Service**
 
 ```
 POST /track-usage?tokens=50
@@ -932,15 +932,15 @@ DEEPSEEK_API_KEY=sk_...           # Primary
 GEMINI_API_KEY=...                # Fallback 1
 GROK_API_KEY=...                  # Fallback 2
 
-# Auth proxy
-AUTH_PROXY_URL=http://localhost:8003
+# Auth routing
+AUTH_SERVICE_URL=http://localhost:8003
 ENABLE_AUTH=false
 
 # Rate limiting (gateway)
 RATE_LIMIT_TOKENS_PER_DAY=1000
 RATE_LIMIT_REQUESTS_PER_HOUR=100
 
-# Auth proxy service
+# Auth routing service
 PORT=8003
 ```
 
@@ -980,7 +980,7 @@ curl http://localhost:8002/ask-stream?question=test
 ```
 
 ### For Production
-1. Deploy auth-proxy service with Redis backend
+1. Deploy auth-service service with Redis backend
 2. Enable ENABLE_AUTH=true when ready
 3. Add API key management system
 4. Update monitoring for new service
@@ -991,7 +991,7 @@ curl http://localhost:8002/ask-stream?question=test
 ## File Changes Summary
 
 **Files Created:** 7
-- `auth/src/main.py` - Auth proxy server (200 lines)
+- `auth/src/main.py` - Auth routing server (200 lines)
 - `auth/pyproject.toml` - Dependencies
 - `auth/Dockerfile` - Container definition
 - `auth/README.md` - Documentation
@@ -1005,7 +1005,7 @@ curl http://localhost:8002/ask-stream?question=test
 - `backend/pyproject.toml` - New dependency (+1 line)
 - `frontend/src/app/types/agent.ts` - Event types (+30 lines)
 - `frontend/src/app/hooks/useAgentChat.ts` - Event handling (+50 lines)
-- `docker-compose.yml` - Auth proxy service (+50 lines)
+- `docker-compose.yml` - Auth routing service (+50 lines)
 
 **Total Changes:** 12 files, ~2500 lines added/modified
 
@@ -1019,7 +1019,7 @@ Before this PR is considered complete:
 - [ ] Docker compose builds: `docker-compose build`
 - [ ] All services start: `docker-compose up`
 - [ ] Streaming endpoint works: Manual curl test
-- [ ] Auth proxy responds: Health check
+- [ ] Auth routing responds: Health check
 - [ ] Model fallback logic: Test with API key missing
 - [ ] Frontend builds: `npm run build`
 - [ ] No TypeScript errors: `npx tsc --noEmit`

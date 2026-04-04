@@ -39,7 +39,7 @@ def test_gateway_with_valid_api_key(fastapi_client, mock_auth_header):
     """Test request succeeds with valid API key"""
 
     with patch("httpx.AsyncClient") as mock_http:
-        # Mock auth proxy response
+        # Mock auth routing response
         mock_response = MagicMock()
         mock_response.json = MagicMock(
             return_value={"valid": True, "metadata": {"rate_limit_tokens": 1000}}
@@ -134,10 +134,10 @@ def test_rate_limit_configuration(fastapi_client, env_vars, monkeypatch):
 
 
 @pytest.mark.auth
-def test_auth_proxy_url_configuration(env_vars, monkeypatch):
-    """Test Auth Proxy URL can be configured"""
+def test_auth_service_url_configuration(env_vars, monkeypatch):
+    """Test Auth Routing URL can be configured"""
 
-    monkeypatch.setenv("AUTH_PROXY_URL", "http://auth:8003")
+    monkeypatch.setenv("AUTH_SERVICE_URL", "http://auth:8003")
 
     # Would be used by middleware
     from src.api.main import app
@@ -147,13 +147,13 @@ def test_auth_proxy_url_configuration(env_vars, monkeypatch):
 
 
 @pytest.mark.auth
-def test_auth_proxy_unreachable_fails_open(fastapi_client):
-    """Test requests continue if auth proxy is unreachable"""
+def test_auth_service_unreachable_fails_open(fastapi_client):
+    """Test requests continue if auth routing is unreachable"""
 
     with patch("httpx.AsyncClient") as mock_http:
-        # Simulate auth proxy connection error
+        # Simulate auth routing connection error
         mock_client = MagicMock()
-        mock_client.post = AsyncMock(side_effect=ConnectionError("Auth proxy unreachable"))
+        mock_client.post = AsyncMock(side_effect=ConnectionError("Auth routing unreachable"))
         mock_http.return_value = mock_client
 
         with patch("src.agent.main.supabase") as mock_supabase:

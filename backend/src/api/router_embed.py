@@ -2,7 +2,7 @@
 Unified API Gateway - Embedding Router
 
 Endpoints for text embedding generation and similarity computation.
-Proxies requests to the dedicated embedding microservice.
+Forwards requests to the dedicated embedding microservice.
 """
 
 import os
@@ -31,7 +31,6 @@ router = APIRouter(prefix="/embed", tags=["Embeddings"])
 EMBEDDING_SERVICE_URL = EMBEDDING_ENDPOINT
 EMBEDDING_SERVICE_AUTH_TOKEN = (
     os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
-    or os.getenv("MODAL_API_PROXY_SECRET")
     or os.getenv("MODAL_TOKEN_SECRET")
     or os.getenv("MODAL_API_TOKEN_SECRET")
 )
@@ -119,7 +118,7 @@ async def embed_text(request: EmbedRequest) -> EmbedResponse:
     """
     Generate embedding for a single text.
 
-    Proxies request to the embedding microservice.
+    Forwards request to the embedding microservice.
 
     Args:
         request: EmbedRequest with text and optional model override

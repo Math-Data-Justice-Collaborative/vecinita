@@ -2,7 +2,7 @@
 # scripts/local-render-check.sh
 #
 # Pre-deploy health and smoke checks for the local Render-like environment.
-# Validates proxy routing, agent service, embedding, and DB connectivity
+# Validates direct model/embedding routing, agent service, and DB connectivity
 # to catch configuration issues before deploying to Render.
 #
 # Usage:
@@ -17,7 +17,8 @@ set -euo pipefail
 # ─────────────────────────────────────────────────────────────────────────────
 # Config
 # ─────────────────────────────────────────────────────────────────────────────
-PROXY_URL="${PROXY_URL:-http://localhost:10000}"
+MODEL_URL="${MODEL_URL:-http://localhost:8000}"
+EMBEDDING_URL="${EMBEDDING_URL:-http://localhost:8011}"
 AGENT_URL="${AGENT_URL:-http://localhost:8000}"
 GATEWAY_URL="${GATEWAY_URL:-http://localhost:8004}"
 ENV_FILE="${ENV_FILE:-.env.render-local}"
@@ -115,15 +116,14 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Phase 1: Modal proxy health
+# Phase 1: Direct model + embedding health
 # ─────────────────────────────────────────────────────────────────────────────
 echo ""
-info "Phase 1 — Modal proxy health"
+info "Phase 1 — Direct service health"
 echo "──────────────────────────────"
 
-http_check "Modal proxy /health" "${PROXY_URL}/health" "200"
-http_check "Modal proxy /model/health (model upstream)" "${PROXY_URL}/model/health" "200"
-http_check "Modal proxy /embedding/health (embedding upstream)" "${PROXY_URL}/embedding/health" "200"
+http_check "Model /health" "${MODEL_URL}/health" "200"
+http_check "Embedding /health" "${EMBEDDING_URL}/health" "200"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Phase 2: Agent service health
@@ -178,25 +178,24 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Phase 4: Proxy routing contract (URL path verification)
+# Phase 4: Direct routing contract (URL path verification)
 # ─────────────────────────────────────────────────────────────────────────────
 echo ""
-info "Phase 4 — Proxy routing contract"
+info "Phase 4 — Direct routing contract"
 echo "──────────────────────────────"
 
-# Verify that /model path correctly returns content (not nginx 404 or 502)
-model_resp=$(curl -s --max-time 5 "${PROXY_URL}/model/health" 2>/dev/null || echo "")
+model_resp=$(curl -s --max-time 5 "${MODEL_URL}/health" 2>/dev/null || echo "")
 if echo "$model_resp" | grep -qiE "ok|healthy|running"; then
-  pass "Model path correctly routes to model service"
+  pass "Model endpoint responds correctly"
 else
-  fail "Model path response not as expected: $model_resp"
+  fail "Model endpoint response not as expected: $model_resp"
 fi
 
-embedding_resp=$(curl -s --max-time 5 "${PROXY_URL}/embedding/health" 2>/dev/null || echo "")
+embedding_resp=$(curl -s --max-time 5 "${EMBEDDING_URL}/health" 2>/dev/null || echo "")
 if echo "$embedding_resp" | grep -qiE "ok|healthy|running"; then
-  pass "Embedding path correctly routes to embedding service"
+  pass "Embedding endpoint responds correctly"
 else
-  fail "Embedding path response not as expected: $embedding_resp"
+  fail "Embedding endpoint response not as expected: $embedding_resp"
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -207,9 +206,8 @@ info "Phase 5 — Strict-mode flag check"
 echo "──────────────────────────────"
 
 if [[ -f "$ENV_FILE" ]]; then
-  env_check "Agent enforce proxy" "AGENT_ENFORCE_PROXY"
   env_check "Render remote inference only" "RENDER_REMOTE_INFERENCE_ONLY"
-  env_check "Proxy auth token" "PROXY_AUTH_TOKEN"
+  env_check "Embedding service auth token" "EMBEDDING_SERVICE_AUTH_TOKEN"
 else
   warn "Skipping strict-mode flag check — $ENV_FILE not found"
 fi

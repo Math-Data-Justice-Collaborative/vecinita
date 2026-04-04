@@ -2,12 +2,7 @@
 #
 # Local Render-like development environment overlay.
 #
-# Mirrors the Render private-network hostname convention so local services
-# use the same hostnames the production environment expects:
-#   vecinita-modal-proxy-v1  →  port 10000  (model + embedding + jobs)
-#   vecinita-agent           →  port 8000
-#   vecinita-gateway         →  port 8004
-#   vecinita-frontend        →  port 5173
+# Mirrors a Render-like local network using direct service hostnames.
 #
 # Usage:
 #   docker compose -f docker-compose.render-local.yml up -d --build
@@ -24,31 +19,7 @@ x-render-network: &render-network
 
 services:
   # -------------------------------------------------------------------------
-  # Modal proxy stub — mirrors vecinita-modal-proxy-v1:10000
-  # Nginx reverse proxy that routes:
-  #   /model/*     → model-service:8000
-  #   /embedding/* → embedding-service:8011
-  #   /jobs/*      → scraper-service:8020
-  # -------------------------------------------------------------------------
-  modal-proxy:
-    image: nginx:alpine
-    container_name: vecinita-modal-proxy-v1
-    volumes:
-      - ./docker/render-local/nginx-modal-proxy.conf:/etc/nginx/conf.d/default.conf:ro
-    ports:
-      - "10000:10000"
-    depends_on:
-      - model-service
-      - embedding-service
-    <<: *render-network
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:10000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-  # -------------------------------------------------------------------------
-  # Model service — mirrors vecinita-modal-proxy-v1:10000/model
+  # Model service
   # Uses the microservices model-service container locally.
   # -------------------------------------------------------------------------
   model-service:
@@ -69,7 +40,7 @@ services:
       retries: 3
 
   # -------------------------------------------------------------------------
-  # Embedding service — mirrors vecinita-modal-proxy-v1:10000/embedding
+  # Embedding service
   # -------------------------------------------------------------------------
   embedding-service:
     build:
@@ -86,7 +57,7 @@ services:
       retries: 3
 
   # -------------------------------------------------------------------------
-  # Ollama — local LLM backend behind the modal proxy
+  # Ollama — local LLM backend
   # -------------------------------------------------------------------------
   ollama:
     image: ollama/ollama:latest
@@ -109,14 +80,15 @@ services:
       RENDER: "true"
       RENDER_SERVICE_ID: "local-render-sim"
       AGENT_SERVICE_URL: "http://vecinita-agent:8000"
-      MODAL_OLLAMA_ENDPOINT: "http://vecinita-modal-proxy-v1:10000/model"
-      MODAL_EMBEDDING_ENDPOINT: "http://vecinita-modal-proxy-v1:10000/embedding"
-      OLLAMA_BASE_URL: "http://vecinita-modal-proxy-v1:10000/model"
-      EMBEDDING_SERVICE_URL: "http://vecinita-modal-proxy-v1:10000/embedding"
-      AGENT_ENFORCE_PROXY: "true"
+      MODAL_OLLAMA_ENDPOINT: "http://vecinita-model-ms-render:8000"
+      MODAL_EMBEDDING_ENDPOINT: "http://vecinita-embedding-ms-render:8011"
+      OLLAMA_BASE_URL: "http://vecinita-model-ms-render:8000"
+      EMBEDDING_SERVICE_URL: "http://vecinita-embedding-ms-render:8011"
       RENDER_REMOTE_INFERENCE_ONLY: "true"
     depends_on:
-      modal-proxy:
+      model-service:
+        condition: service_healthy
+      embedding-service:
         condition: service_healthy
     ports:
       - "8000:8000"

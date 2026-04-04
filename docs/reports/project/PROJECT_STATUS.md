@@ -12,7 +12,7 @@
 |-------|-----------|--------|-------|
 | 1 | Agent streaming | ✅ Complete | Token-by-token SSE events implemented |
 | 2 | Multi-model fallback | ✅ Complete | 6 providers configured with fallback chain |
-| 3 | Auth proxy service | ✅ Complete | Full microservice with rate limiting |
+| 3 | Auth routing service | ✅ Complete | Full microservice with rate limiting |
 | 4 | Gateway middleware | ✅ Complete | Auth + rate-limiting middleware integrated |
 | 5 | Frontend updates | ✅ Complete | useAgentChat hook and types updated |
 | 6 | RAG tool standardization | ✅ Complete | Verified existing tools use standard schema |
@@ -61,7 +61,7 @@ GET /config  # Shows all available providers with ordering
 **Dependencies:** langchain-google-genai ≥ 1.0.0 added ✓  
 **Status:** Fully implemented and tested ✓
 
-### 3. Auth Proxy Service (New Microservice)
+### 3. Auth Routing Service (New Microservice)
 ```bash
 # Lightweight API key validation & rate limiting on port 8003
 POST /validate-key
@@ -82,7 +82,7 @@ GET /health
 ```python
 # Gateway middleware validates API keys
 # Rate limits enforced per API key
-# Fail-open (continues if auth proxy down)
+# Fail-open (continues if auth routing down)
 ```
 
 **Code Location:** [backend/src/gateway/middleware.py](../backend/src/gateway/middleware.py) (200+ lines)  
@@ -114,7 +114,7 @@ const { messages, sendMessage } = useAgentChat();
 - agent (port 8000)
 - embedding (port 8001)
 - gateway (port 8002)
-- auth-proxy (port 8003)  # NEW
+- auth-service (port 8003)  # NEW
 - postgres
 - postgrest
 ```
@@ -130,7 +130,7 @@ const { messages, sendMessage } = useAgentChat();
 **Test Coverage Delivered:**
 - ✅ Agent streaming endpoint `/ask-stream` SSE format validation (8 tests)
 - ✅ Model fallback chain provider selection logic (16 tests)
-- ✅ Auth proxy API key validation and usage tracking (13 tests)
+- ✅ Auth routing API key validation and usage tracking (13 tests)
 - ✅ Gateway middleware authentication and rate limiting (15 tests)
 - ✅ End-to-end chat flow through all services (8 tests)
 
@@ -142,7 +142,7 @@ backend/tests/
 │   ├── test_streaming.py                 # 8 SSE format tests
 │   ├── test_model_fallback.py            # 16 provider tests
 │   ├── test_gateway_auth.py              # 15 middleware tests
-│   └── test_auth_proxy.py                # 13 auth proxy tests
+│   └── test_auth_proxy.py                # 13 auth routing tests
 └── e2e/
     └── test_full_chat_flow.py            # 8 E2E tests
 ```
@@ -199,7 +199,7 @@ uv run pytest --cov=src
 
 5. **✅ `docs/ARCHITECTURE_MICROSERVICE.md`** (Updated)
    - Added gateway service (port 8002) with authentication middleware
-   - Added auth proxy service (port 8003) with rate limiting
+   - Added auth routing service (port 8003) with rate limiting
    - Updated architecture diagram with all services
    - Token streaming flow documented
 
@@ -239,7 +239,7 @@ curl -X GET "http://localhost:8002/ask-stream?question=What+is+Python%3F" \
 # Check which model is active
 curl http://localhost:8000/config | jq '.providers'
 
-# Check auth proxy health
+# Check auth routing health
 curl http://localhost:8003/health
 
 # View logs
@@ -296,7 +296,7 @@ kubectl apply -f k8s/
 | File | Purpose | Size | Status |
 |------|---------|------|--------|
 | [backend/src/agent/main.py](../backend/src/agent/main.py) | Agent with streaming | 600 lines | ✅ Complete |
-| [auth/src/main.py](../auth/src/main.py) | Auth proxy service | 200 lines | ✅ Complete |
+| [auth/src/main.py](../auth/src/main.py) | Auth routing service | 200 lines | ✅ Complete |
 | [backend/src/gateway/middleware.py](../backend/src/gateway/middleware.py) | Auth + rate-limit middleware | 200 lines | ✅ Complete |
 | [backend/src/gateway/main.py](../backend/src/gateway/main.py) | Gateway with middleware | 150 lines | ✅ Complete |
 | [frontend/src/app/hooks/useAgentChat.ts](../frontend/src/app/hooks/useAgentChat.ts) | React hook for streaming | 200 lines | ✅ Complete |
@@ -306,7 +306,7 @@ kubectl apply -f k8s/
 
 | File | Purpose | Status |
 |------|---------|--------|
-| [auth/pyproject.toml](../auth/pyproject.toml) | Auth proxy dependencies | ✅ Complete |
+| [auth/pyproject.toml](../auth/pyproject.toml) | Auth routing dependencies | ✅ Complete |
 | [backend/pyproject.toml](../backend/pyproject.toml) | Backend dependencies | ✅ Updated |
 | [.env.example](.env.example) | Environment template | 🔄 Needs update |
 
@@ -345,7 +345,7 @@ kubectl apply -f k8s/
      │                                             │
      ▼                                             ▼
 ┌──────────────────────┐            ┌──────────────────────┐
-│   Auth Proxy         │            │  Agent (FastAPI)     │
+│   Auth Routing         │            │  Agent (FastAPI)     │
 │    Port 8003         │            │   Port 8000          │
 │                      │            │                      │
 │ · Validate keys      │            │ · LangGraph workflow │
@@ -387,8 +387,8 @@ GROQ_API_KEY=...                  # Fallback 3
 OPENAI_API_KEY=sk-...             # Fallback 4
 OLLAMA_BASE_URL=http://localhost:11434  # Fallback 5
 
-# Auth proxy
-AUTH_PROXY_URL=http://localhost:8003
+# Auth routing
+AUTH_SERVICE_URL=http://localhost:8003
 ENABLE_AUTH=false  # Set to true to enforce auth in dev
 
 # Gateway
@@ -405,7 +405,7 @@ RATE_LIMIT_TOKENS_PER_DAY=10000
 - [x] Docker compose builds: `docker-compose build`
 - [x] Services start: `docker-compose up`
 - [x] Streaming works: `curl http://localhost:8002/ask-stream?question=test`
-- [x] Auth proxy health: `curl http://localhost:8003/health`
+- [x] Auth routing health: `curl http://localhost:8003/health`
 - [x] Model fallback works (tested with primary API key down)
 - [x] Frontend builds: `cd frontend && npm run build`
 - [x] Tests pass: `uv run pytest` (61 tests)
@@ -474,11 +474,11 @@ RATE_LIMIT_TOKENS_PER_DAY=10000
 
 | Problem | Solution |
 |---------|----------|
-| "Connection refused" port 8003 | Auth proxy not running; `docker-compose up auth_proxy` |
+| "Connection refused" port 8003 | Auth routing not running; `docker-compose up auth_proxy` |
 | "Connection refused" port 8002 | Gateway not running; `docker-compose up gateway` |
 | "No module named langchain_google_genai" | Missing dependency; `cd backend && uv sync` |
 | Streaming returns empty | Check `/ask-stream` endpoint; ensure `text/event-stream` header |
-| Rate limit always triggered | Check auth proxy; set `ENABLE_AUTH=false` for dev |
+| Rate limit always triggered | Check auth routing; set `ENABLE_AUTH=false` for dev |
 | Model not changing on fallback | Check API keys; verify provider keys are set in .env |
 | Tests failing with import errors | Use `uv run pytest` instead of system pytest |
 
@@ -488,7 +488,7 @@ RATE_LIMIT_TOKENS_PER_DAY=10000
 
 **Total Files Created/Modified:** 25+ files  
 **Total Lines Changed:** ~4,500+ lines  
-**New Services:** 2 (gateway on 8002, auth-proxy on 8003)  
+**New Services:** 2 (gateway on 8002, auth-service on 8003)  
 **New Tests:** 61 tests across 5 test files  
 **New Documentation:** 6 comprehensive guides  
 **Breaking Changes:** None (fully backward compatible with optional auth)

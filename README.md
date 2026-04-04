@@ -15,7 +15,7 @@ Vecinita uses a **microservice architecture** with agent, gateway, model, embedd
 
 - **Gateway Service** (FastAPI): Stable `/api/v1` surface for web clients
 - **Agent Service** (FastAPI + LangGraph): Q&A orchestration and retrieval flow
-- **Modal Proxy Service** (FastAPI): Auth and routing hub for model/embedding/scraper traffic
+- **Modal Routing Service** (FastAPI): Auth and routing hub for model/embedding/scraper traffic
 - **Model Service** (FastAPI + Ollama/Modal): Chat generation endpoints
 - **Embedding Service** (FastAPI): Text embedding generation endpoints
 - **Scraper Service** (FastAPI + jobs): Ingestion and reindex triggers
@@ -125,7 +125,7 @@ docker compose up -d
 # API Docs: http://localhost:8000/docs
 ```
 
-For the proxy-centric microservices stack, use:
+For the routing-centric microservices stack, use:
 
 ```bash
 make microservices-up

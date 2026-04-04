@@ -42,7 +42,7 @@ def test_ask_spanish_question_returns_answer(gateway_url: str):
 
 
 def test_ask_request_completes_within_sla(gateway_url: str):
-    """Wall-clock time for a simple ask must be < 30 s (production SLA proxy)."""
+    """Wall-clock time for a simple ask must be < 30 s (production SLA routing)."""
     start = time.monotonic()
     _ask(gateway_url, _ENGLISH_QUESTION, timeout=35)
     elapsed = time.monotonic() - start

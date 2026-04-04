@@ -63,7 +63,7 @@ def _reload_agent_main(monkeypatch, create_embedding_client):
     monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
     monkeypatch.setenv("SUPABASE_KEY", "test-key")
     monkeypatch.setenv("DEFAULT_PROVIDER", "ollama")
-    monkeypatch.setenv("AGENT_ENFORCE_PROXY", "false")
+    monkeypatch.setenv("AGENT_ENFORCE_ROUTE", "false")
     monkeypatch.setenv("OLLAMA_BASE_URL", "http://localhost:11434")
     monkeypatch.setenv("OLLAMA_MODEL", "llama3.1:8b")
     monkeypatch.setenv("MODEL_SELECTION_PATH", "/tmp/vecinita-test-model-selection.json")
@@ -123,7 +123,7 @@ def test_agent_startup_passes_explicit_embedding_auth_token(monkeypatch):
 def test_agent_startup_uses_modal_secret_as_embedding_auth_fallback(monkeypatch):
     create_embedding_client = Mock(return_value=Mock(embed_query=Mock(return_value=[0.1] * 384)))
     monkeypatch.delenv("EMBEDDING_SERVICE_AUTH_TOKEN", raising=False)
-    monkeypatch.setenv("MODAL_API_PROXY_SECRET", "modal-secret-token")
+    monkeypatch.setenv("MODAL_TOKEN_SECRET", "modal-secret-token")
 
     _reload_agent_main(monkeypatch, create_embedding_client)
 

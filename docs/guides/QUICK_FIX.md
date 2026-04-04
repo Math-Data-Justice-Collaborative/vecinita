@@ -23,7 +23,7 @@ This script will:
 ```
 HTTP/2 406 Not Acceptable
 HTTP/2 404 Not Found
-proxy-status: PostgREST; error=PGRST205
+routing-status: PostgREST; error=PGRST205
 ```
 
 **Translation:** Table doesn't exist in production database → connection fails.

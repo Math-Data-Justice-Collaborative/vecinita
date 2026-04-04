@@ -7,7 +7,7 @@ runs that do not have live Render credentials.
 
 Required environment variables:
     RENDER_GATEWAY_URL   -- public URL of vecinita-gateway  (e.g. https://gateway.onrender.com)
-    RENDER_AGENT_URL     -- public URL of vecinita-agent    (optional, gateway used as proxy)
+    RENDER_AGENT_URL     -- public URL of vecinita-agent    (optional, gateway used as routing)
     RENDER_FRONTEND_URL  -- public URL of vecinita-frontend (optional)
 """
 

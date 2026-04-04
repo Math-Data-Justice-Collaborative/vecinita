@@ -96,8 +96,7 @@ services:
       HF_HOME: "/tmp/huggingface_cache"
       EMBEDDING_PROVIDER: "huggingface"
       EMBEDDING_MODEL: "sentence-transformers/all-MiniLM-L6-v2"
-      EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:-${MODAL_API_PROXY_SECRET:-}}"
-      MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET:-}"
+      EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:-}"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
@@ -120,7 +119,6 @@ services:
       PORT: "8000"
       PYTHONUNBUFFERED: "1"
       OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-http://host.docker.internal:11434}"
-      AGENT_ENFORCE_PROXY: "false"
       FORCE_LOCAL_MODAL_LLM: "true"
       OPEN_API_KEY: "${OPEN_API_KEY:-}"
       OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
@@ -129,8 +127,7 @@ services:
       DEFAULT_PROVIDER: "${DEFAULT_PROVIDER:-ollama}"
       DEFAULT_MODEL: "${DEFAULT_MODEL:-llama3.1:8b}"
       EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
-      EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:-${MODAL_API_PROXY_SECRET:-}}"
-      MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET:-}"
+      EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:-}"
       CHROMA_HOST: "chroma"
       CHROMA_PORT: "8000"
       EMBEDDING_STRICT_STARTUP: "false"
@@ -181,8 +178,7 @@ services:
       ALLOWED_ORIGIN_REGEX: "${ALLOWED_ORIGIN_REGEX:-^https?://.*$}"
       AGENT_SERVICE_URL: "http://vecinita-agent:8000"
       EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
-      EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:-${MODAL_API_PROXY_SECRET:-}}"
-      MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET:-}"
+      EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:-}"
       CHROMA_HOST: "chroma"
       CHROMA_PORT: "8000"
       EMBEDDING_STRICT_STARTUP: "false"

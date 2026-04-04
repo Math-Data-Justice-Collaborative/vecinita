@@ -345,7 +345,6 @@ try:
     embedding_service_url = EMBEDDING_SERVICE_URL
     embedding_service_auth_token = (
         os.environ.get("EMBEDDING_SERVICE_AUTH_TOKEN")
-        or os.environ.get("MODAL_API_PROXY_SECRET")
         or os.environ.get("MODAL_TOKEN_SECRET")
         or os.environ.get("MODAL_API_TOKEN_SECRET")
     )

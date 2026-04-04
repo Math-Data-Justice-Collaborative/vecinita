@@ -49,7 +49,7 @@ Example:
 ```text
 data-management|services/data-management-api|main
 data-management-frontend|apps/data-management-frontend|main
-modal-proxy|services/modal-proxy|main
+direct-routing|services/direct-routing|main
 ```
 
 ## Typical Flow

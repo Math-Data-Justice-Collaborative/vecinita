@@ -21,7 +21,7 @@ Modal Services:
 ├── vecinita-embedding (ASGI app)
 │   └── Runs FastAPI embedding service
 │   └── Endpoint: /embed, /batch, /config, /health
-│   └── Auth: Modal proxy secret or custom token
+│   └── Auth: Modal routing secret or custom token
 │
 └── vecinita-scraper (ASGI app + Cron jobs)
     ├── HTTP endpoint: /health, /reindex
@@ -161,7 +161,7 @@ REINDEX_SERVICE_URL=https://vecinita--vecinita-scraper.modal.run
 REINDEX_TRIGGER_TOKEN=<your-secret-token>
 
 # Optional: Override defaults
-EMBEDDING_SERVICE_AUTH_TOKEN=${MODAL_API_PROXY_SECRET}  # For secured endpoints
+EMBEDDING_SERVICE_AUTH_TOKEN=${MODAL_TOKEN_SECRET}  # For secured endpoints
 ```
 
 ### Variable Resolution Order
@@ -175,7 +175,7 @@ For embedding service:
 
 For auth tokens:
 1. `EMBEDDING_SERVICE_AUTH_TOKEN` (explicit)
-2. `MODAL_API_PROXY_SECRET` (Modal proxy token)
+2. `MODAL_TOKEN_SECRET` (Modal routing token)
 3. `MODAL_API_KEY` (Modal API key)
 4. `MODAL_API_TOKEN_SECRET` (fallback)
 
@@ -204,12 +204,12 @@ modal app logs vecinita-scraper
 
 **Solution**: 
 ```bash
-# Get proxy secret from Modal app
+# Get routing secret from Modal app
 modal secret get vecinita-secrets
 
 # Or use explicit token
 export EMBEDDING_SERVICE_AUTH_TOKEN=<token>
-export MODAL_API_PROXY_SECRET=<token>
+export MODAL_TOKEN_SECRET=<token>
 ```
 
 ### Endpoint Returns 404

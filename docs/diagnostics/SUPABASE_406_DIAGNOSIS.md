@@ -28,7 +28,7 @@ curl "https://dosbzlhijkeircyainwz.supabase.co/rest/v1/document_chunks?select=id
 
 # Response:
 HTTP/2 404
-proxy-status: PostgREST; error=PGRST205
+routing-status: PostgREST; error=PGRST205
 # Translation: Table doesn't exist
 ```
 

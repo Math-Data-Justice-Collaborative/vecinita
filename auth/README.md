@@ -1,6 +1,6 @@
-# Vecinita Auth Proxy
+# Vecinita Auth Routing
 
-Lightweight Supabase authentication proxy service for Vecinita's frontend and backend.
+Lightweight Supabase authentication routing service for Vecinita's frontend and backend.
 
 ## Overview
 
@@ -29,8 +29,8 @@ python -m uvicorn src.main:app --reload --port 8003
 ### Docker
 
 ```bash
-docker build -t vecinita-auth-proxy .
-docker run -e SUPABASE_URL="..." -e SUPABASE_KEY="..." -p 8003:8003 vecinita-auth-proxy
+docker build -t vecinita-auth-service .
+docker run -e SUPABASE_URL="..." -e SUPABASE_KEY="..." -p 8003:8003 vecinita-auth-service
 ```
 
 ## API Endpoints
@@ -109,12 +109,12 @@ pytest --cov=src tests/
 
 ## Integration with Backend
 
-The gateway service calls this proxy to validate API keys before forwarding requests:
+The gateway service calls this routing to validate API keys before forwarding requests:
 
 ```python
 # In gateway authentication middleware
 response = requests.post(
-    "http://auth-proxy:8003/validate-key",
+    "http://auth-service:8003/validate-key",
     json={"api_key": api_key}
 )
 ```

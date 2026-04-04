@@ -55,7 +55,7 @@ data: {"type": "complete", ...}
 Frontend (5173)
     ↓ HTTP + SSE
 Gateway (8002)
-    ├→ Auth Proxy (8003) [NEW]
+    ├→ Auth Routing (8003) [NEW]
     └→ Agent (8000)
         ├→ LLM (DeepSeek → Gemini → Grok → Groq → OpenAI → Ollama) [UPDATED]
         └→ Tools
@@ -93,7 +93,7 @@ curl "http://localhost:8002/ask-stream?question=explain+Python"
 curl http://localhost:8000/config | jq '.providers'
 ```
 
-### 3. Auth Proxy & Rate Limiting ✅
+### 3. Auth Routing & Rate Limiting ✅
 - API key validation
 - Per-key rate limits (1000 tokens/day default)
 - Request limits (100 req/hour)
@@ -118,7 +118,7 @@ curl http://localhost:8003/usage \
 - Authentication: Validates API keys
 - Rate Limiting: Enforces per-key limits
 - Response Headers: X-API-Key-Masked, X-Request-Time
-- Fail-Open: Continues if auth proxy down
+- Fail-Open: Continues if auth routing down
 
 **Test It:**
 ```bash
@@ -157,14 +157,14 @@ Streaming complete. Metadata: {
 docker-compose ps
 
 # Specific service
-docker-compose logs auth-proxy
+docker-compose logs auth-service
 docker-compose logs gateway
 docker-compose logs agent
 
 # Health checks
 curl http://localhost:8000/health    # Agent
 curl http://localhost:8002/health    # Gateway
-curl http://localhost:8003/health    # Auth proxy
+curl http://localhost:8003/health    # Auth routing
 curl http://localhost:3001/swagger    # PostgREST
 ```
 
@@ -174,7 +174,7 @@ curl http://localhost:3001/swagger    # PostgREST
 docker-compose logs -f
 
 # Specific service
-docker-compose logs -f auth-proxy
+docker-compose logs -f auth-service
 
 # With grep
 docker-compose logs agent | grep "model_used"
@@ -260,8 +260,8 @@ SUPABASE_KEY=eyJhbGc...
 
 **Gateway**
 ```bash
-# Auth proxy integration
-AUTH_PROXY_URL=http://auth-proxy:8003
+# Auth routing integration
+AUTH_SERVICE_URL=http://auth-service:8003
 ENABLE_AUTH=false  # Set true to enforce auth
 
 # Rate limiting
@@ -269,7 +269,7 @@ RATE_LIMIT_TOKENS_PER_DAY=1000
 RATE_LIMIT_REQUESTS_PER_HOUR=100
 ```
 
-**Auth Proxy**
+**Auth Routing**
 ```bash
 # Service config
 PORT=8003
@@ -290,8 +290,8 @@ RATE_LIMIT_REQUESTS_PER_HOUR=100
 |---------|------|---------|--------------|
 | agent | 8000 | LLM + tools | postgres, supabase |
 | embedding | 8001 | Vector embeddings | postgres |
-| gateway | 8002 | API proxy | agent, auth-proxy |
-| auth-proxy | 8003 | Key validation | postgres |
+| gateway | 8002 | API routing | agent, auth-service |
+| auth-service | 8003 | Key validation | postgres |
 | postgrest | 3001 | DB API | postgres |
 | postgres | 5432 | Database | none |
 | pgadmin | 5050 | DB UI | postgres |
@@ -348,7 +348,7 @@ curl "http://localhost:8002/ask?question=What+is+Python%3F"
 }
 ```
 
-### Auth Proxy Endpoints
+### Auth Routing Endpoints
 
 **Validate Key:**
 ```bash
@@ -380,11 +380,11 @@ curl http://localhost:8003/usage \
 
 ### "Connection refused" at port 8003
 ```bash
-# Check if auth-proxy is running
-docker-compose logs auth-proxy
+# Check if auth-service is running
+docker-compose logs auth-service
 
 # Restart it
-docker-compose restart auth-proxy
+docker-compose restart auth-service
 
 # Or disable auth temporarily
 ENABLE_AUTH=false docker-compose up
@@ -417,11 +417,11 @@ curl https://api.deepseek.com/v1/models \
 
 ### Rate limit always triggered
 ```bash
-# Check auth proxy loading state
+# Check auth routing loading state
 curl http://localhost:8003/config
 
-# Reset usage (auth proxy needs restart)
-docker-compose restart auth-proxy
+# Reset usage (auth routing needs restart)
+docker-compose restart auth-service
 
 # Check rate limit config
 docker-compose config | grep RATE_LIMIT
@@ -473,7 +473,7 @@ docker-compose logs agent | grep "model_used" | \
 docker-compose logs agent | grep "request_time\|duration"
 ```
 
-### Scaling Auth Proxy
+### Scaling Auth Routing
 Current implementation uses in-memory rate limiting. For production:
 
 ```python
@@ -507,10 +507,10 @@ Current implementation uses in-memory rate limiting. For production:
 Before deploying to production:
 
 - [ ] All 6 LLM API keys configured
-- [ ] Auth proxy service running and healthy
+- [ ] Auth routing service running and healthy
 - [ ] Rate limits tested
 - [ ] SSL/TLS certificates configured
-- [ ] Auth proxy backed by Redis (not in-memory)
+- [ ] Auth routing backed by Redis (not in-memory)
 - [ ] Monitoring alerts set up for:
   - [ ] Provider failures
   - [ ] Rate limit exceeded
@@ -597,7 +597,7 @@ A: Set `ENABLE_AUTH=false` in `.env.local`
 A: No hard limit; depends on model. DeepSeek supports 8k context
 
 **Q: Can I monitor token usage per user?**
-A: Not built-in yet. Add user ID to auth header; upgrade auth proxy to track by user
+A: Not built-in yet. Add user ID to auth header; upgrade auth routing to track by user
 
 **Q: How do I debug why a model wasn't selected?**
 A: Check `docker-compose logs agent | grep "Trying provider"`

@@ -4,7 +4,7 @@
 # Bootstrap a GCP Compute Engine VM to run:
 #   • Ollama  (LLM host, CPU or GPU)
 #   • Vecinita agent + API gateway (FastAPI, ports 8000 and 8004 internal)
-#   • Nginx reverse proxy (HTTPS on port 443, HTTP redirect on 80)
+#   • Nginx reverse routing (HTTPS on port 443, HTTP redirect on 80)
 #
 # Usage:
 #   1. Create VM in GCP Console or with gcloud (see firewall-rules.sh)

@@ -72,7 +72,7 @@ class TestEmbeddingModalApp:
 
         modal_app = importlib.reload(modal_app)
 
-        assert modal_mock.asgi_app.call_args.kwargs == {"requires_proxy_auth": False}
+        assert modal_mock.asgi_app.call_args.kwargs == {"requires_service_auth": False}
 
     def test_web_app_callable(self, modal_mock):
         import src.embedding_service.modal_app as modal_app

@@ -14,7 +14,7 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 # Copy project files
 COPY pyproject.toml README.md ./
 
-# Install dependencies using uv (auth proxy has minimal deps)
+# Install dependencies using uv (auth routing has minimal deps)
 RUN /root/.local/bin/uv pip install --system --no-cache -e .
 
 # Copy source code

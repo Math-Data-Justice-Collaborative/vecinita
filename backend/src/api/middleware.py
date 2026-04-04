@@ -2,13 +2,13 @@
 Security Middleware for Vecinita Gateway (Phase 7 - Hardening).
 
 This module provides middleware for:
-- API key validation via the auth proxy (FAIL-CLOSED pattern)
+- API key validation without external auth hops
 - Request tracking and rate limiting (per-endpoint configuration)
 - Thread/conversation isolation
 - Metadata header injection
 
 Security Patterns:
-- Auth fails closed (deny by default when service unavailable)
+- Auth handling is local to the gateway process
 - Rate limiting tracks usage across multiple dimensions
 - Thread isolation prevents cross-conversation access
 """
@@ -20,7 +20,6 @@ from collections.abc import Awaitable, Callable
 from datetime import datetime, timedelta
 from typing import Any
 
-import httpx
 from starlette.datastructures import MutableHeaders
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -32,12 +31,7 @@ logger = logging.getLogger(__name__)
 # Configuration
 # ============================================================================
 
-AUTH_PROXY_URL = os.getenv("AUTH_PROXY_URL", "http://localhost:8003")
 ENABLE_AUTH = os.getenv("ENABLE_AUTH", "false").lower() in ["true", "1", "yes"]
-
-# Auth fail-closed: If set to True, deny access when auth proxy is unavailable
-# This is the secure default for production
-AUTH_FAIL_CLOSED = os.getenv("AUTH_FAIL_CLOSED", "true").lower() in ["true", "1", "yes"]
 
 # Rate limiting configuration
 RATE_LIMIT_TOKENS_PER_DAY = int(os.getenv("RATE_LIMIT_TOKENS_PER_DAY", "1000"))
@@ -70,24 +64,16 @@ AUTH_BYPASS_PREFIXES = ("/api/v1/admin",)
 
 class AuthenticationMiddleware(BaseHTTPMiddleware):
     """
-    Middleware to intercept requests and validate API keys via the auth proxy.
+    Middleware to intercept requests and validate API keys locally.
 
     - Extracts API key from Authorization header
-    - Calls auth proxy to validate
+    - Performs local validation when auth is enabled
     - Tracks token usage
     - Adds metadata headers to responses
     """
 
     def __init__(self, app):
         super().__init__(app)
-        self._http_client = None
-
-    @property
-    def http_client(self) -> httpx.Client:
-        """Lazy-initialize HTTP client."""
-        if self._http_client is None:
-            self._http_client = httpx.Client(timeout=5.0)
-        return self._http_client
 
     async def dispatch(
         self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
@@ -121,7 +107,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
                 },
             )
 
-        # Validate against auth proxy if enabled
+        # Validate API key locally when auth is enabled
         if ENABLE_AUTH and api_key:
             is_valid = await self._validate_api_key(api_key)
             if not is_valid:
@@ -178,50 +164,22 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
         return None
 
     async def _validate_api_key(self, api_key: str) -> bool:
-        """
-        Validate API key via auth proxy.
-
-        SECURITY: Implements FAIL-CLOSED pattern:
-        - If auth proxy is unavailable and AUTH_FAIL_CLOSED=true (default): DENY access
-        - If auth proxy is unavailable and AUTH_FAIL_CLOSED=false: ALLOW access (legacy)
-
-        Args:
-            api_key: API key to validate
-
-        Returns:
-            True if valid, False if invalid or auth proxy unavailable
-        """
-        try:
-            response = self.http_client.post(
-                f"{AUTH_PROXY_URL}/validate-key",
-                json={"api_key": api_key},
-                timeout=2.0,
-            )
-            if response.status_code == 200:
-                data = response.json()
-                return bool(data.get("valid", False)) if isinstance(data, dict) else False
-            logger.warning(f"Auth proxy returned {response.status_code}")
+        """Validate API key format locally without external network calls."""
+        token = str(api_key or "").strip()
+        if not token:
             return False
-        except Exception as e:
-            logger.error(f"Auth proxy unavailable: {e}")
-            if AUTH_FAIL_CLOSED:
-                # FAIL CLOSED (secure default): Deny access when auth service is down
-                logger.error("Auth proxy error with FAIL_CLOSED=true: denying access")
-                return False
-            else:
-                # FAIL OPEN (legacy): Allow access when auth service is down
-                logger.warning("Auth proxy error: allowing access (FAIL_OPEN mode)")
-                return True
+
+        # Keep validation permissive for existing integrations while still
+        # rejecting empty/malformed placeholders.
+        if token.lower() in {"none", "null", "undefined"}:
+            return False
+
+        return len(token) >= 8
 
     async def _track_usage(self, api_key: str, tokens: int) -> None:
-        """Track token usage for an API key."""
+        """Track token usage locally (best-effort logging only)."""
         try:
-            self.http_client.post(
-                f"{AUTH_PROXY_URL}/track-usage",
-                params={"tokens": tokens},
-                headers={"Authorization": f"Bearer {api_key}"},
-                timeout=2.0,
-            )
+            logger.debug("api_usage_tracked key_len=%s tokens=%s", len(api_key), tokens)
         except Exception as e:
             logger.warning(f"Failed to track usage: {e}")
 

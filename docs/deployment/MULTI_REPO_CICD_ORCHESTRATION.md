@@ -9,7 +9,7 @@ This document defines the independent pipeline ownership model and the top-level
 | Chat Frontend | joseph-c-mcguire/Vecinitafrontend | Render Frontend | Virginia |
 | Data Management Frontend | Math-Data-Justice-Collaborative/vecinita-data-management-frontend | Render Frontend | Virginia |
 | Data Management API | Math-Data-Justice-Collaborative/vecinita-data-management | Render Private Service | Virginia, private-only |
-| Modal Proxy | Math-Data-Justice-Collaborative/vecinita-modal-proxy | Render Private Service | Virginia, private-only |
+| Modal Routing | Math-Data-Justice-Collaborative/vecinita-direct-routing | Render Private Service | Virginia, private-only |
 | Scraper | Math-Data-Justice-Collaborative/vecinita-scraper | Modal Deploy | N/A |
 | Embedding Modal | Math-Data-Justice-Collaborative/vecinita-embedding | Modal Deploy | N/A |
 | Model Modal | Math-Data-Justice-Collaborative/vecinita-model | Modal Deploy | N/A |
@@ -56,7 +56,7 @@ Data Management architecture policy:
 
 - Data Management Frontend talks directly to Data Management API.
 - Data Management API is Render private service and should not be publicly exposed.
-- Modal Proxy is private and consumed by agent backend and data-management API.
+- Modal Routing is private and consumed by agent backend and data-management API.
 
 CORS policy guidance for Data Management API:
 
@@ -70,7 +70,7 @@ Render services in this mapping should use Virginia region:
 - chat frontend
 - data-management frontend
 - data-management API
-- modal proxy
+- modal routing
 
 Because Render deployment is controlled by each service repo, enforce region in those repos' render manifests or service settings.
 The parent orchestrator logs expected region and fails only on downstream workflow failures.

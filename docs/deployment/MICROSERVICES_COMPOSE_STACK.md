@@ -1,9 +1,9 @@
 # Microservices Compose Stack
 
-This stack runs Vecinita in a proxy-centric microservices topology:
+This stack runs Vecinita in a routing-centric microservices topology:
 
-- `chat-agent` routes model and embedding calls through `modal-proxy`.
-- `modal-proxy` fans out to `model-service`, `embedding-service`, and `scraper-service`.
+- `chat-agent` routes model and embedding calls through `direct-routing`.
+- `direct-routing` fans out to `model-service`, `embedding-service`, and `scraper-service`.
 - `chat-gateway` is the public API edge for the chat app.
 - Two separate UIs are exposed: `chat-frontend` and `data-manager-frontend`.
 
@@ -16,7 +16,7 @@ The runtime is defined in `docker-compose.microservices.yml`.
 - `ollama` + `model-service` for local model API behavior
 - `embedding-service` for local embedding API behavior
 - `scraper-service` for background ingestion/reindex jobs
-- `modal-proxy` as the service-to-service policy and routing layer
+- `direct-routing` as the service-to-service policy and routing layer
 - `chat-agent` + `chat-gateway` + `chat-frontend`
 - `data-manager-frontend`
 
@@ -30,7 +30,7 @@ make microservices-down
 
 ## Contract Tests
 
-Run API contract checks that validate health and routing behavior for the proxy chain:
+Run API contract checks that validate health and routing behavior for the routing chain:
 
 ```bash
 make test-microservices-contracts
@@ -46,7 +46,7 @@ make test-microservices
 
 - Gateway: `http://localhost:8004`
 - Agent: `http://localhost:8000`
-- Modal Proxy: `http://localhost:10000`
+- Modal Routing: `http://localhost:10000`
 - Model Service: `http://localhost:8008`
 - Embedding Service: `http://localhost:8011`
 - Scraper Service: `http://localhost:8020`

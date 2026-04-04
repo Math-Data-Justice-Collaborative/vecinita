@@ -1,4 +1,4 @@
-"""Vecinita Auth Proxy — Lightweight Supabase Authentication Proxy.
+"""Vecinita Auth Routing — Lightweight Supabase Authentication Routing.
 
 This service acts as a single point of authentication and API-key management
 between the Vecinita frontend and backend, eliminating the need for each
@@ -267,7 +267,7 @@ async def get_api_key_from_header(authorization: Optional[str] = Header(None)) -
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage app lifecycle."""
-    logger.info("Auth proxy starting up...")
+    logger.info("Auth routing starting up...")
     # Startup
     try:
         # Test Supabase connection
@@ -279,13 +279,13 @@ async def lifespan(app: FastAPI):
     yield
 
     # Shutdown
-    logger.info("Auth proxy shutting down...")
+    logger.info("Auth routing shutting down...")
 
 
 # --- FastAPI App ---
 app = FastAPI(
-    title="Vecinita Auth Proxy",
-    description="Authentication and API key management proxy for Vecinita",
+    title="Vecinita Auth Routing",
+    description="Authentication and API key management routing for Vecinita",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -306,7 +306,7 @@ async def health():
     """Health check endpoint."""
     return {
         "status": "ok",
-        "service": "auth-proxy",
+        "service": "auth-service",
         "environment": ENVIRONMENT,
         "jwt_enabled": True,
         "rate_limiting_enabled": True,
@@ -527,7 +527,7 @@ async def change_password(
 # --- Configuration Endpoint ---
 @app.get("/config")
 async def get_config():
-    """Get auth proxy configuration and security settings."""
+    """Get auth routing configuration and security settings."""
     return {
         "environment": ENVIRONMENT,
         "security": {

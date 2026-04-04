@@ -117,7 +117,7 @@ PUT  /embed/config - Update settings
 **Features:**
 - 🔄 Batch processing
 - 📝 Multiple models
-- 🔌 Microservice proxy
+- 🔌 Microservice routing
 - ⚙️ Runtime configuration
 
 **Documentation:**

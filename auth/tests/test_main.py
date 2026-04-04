@@ -87,7 +87,7 @@ def test_health_endpoint(client):
     assert response.status_code == 200
     payload = response.json()
     assert payload["status"] == "ok"
-    assert payload["service"] == "auth-proxy"
+    assert payload["service"] == "auth-service"
 
 
 def test_validate_key_marks_invalid_and_records_failure(client, auth_module):

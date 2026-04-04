@@ -10,21 +10,21 @@ This document summarizes runtime integration points across Vecinita services, in
 
 | Symbol | What it provides |
 |--------|-----------------|
-| `MODEL_ENDPOINT` | Resolved model URL (proxy path on Render) |
-| `EMBEDDING_ENDPOINT` | Resolved embedding URL (proxy path on Render) |
-| `SCRAPER_ENDPOINT` | Resolved scraper/jobs URL via proxy |
+| `MODEL_ENDPOINT` | Resolved model URL (routing path on Render) |
+| `EMBEDDING_ENDPOINT` | Resolved embedding URL (routing path on Render) |
+| `SCRAPER_ENDPOINT` | Resolved scraper/jobs URL via routing |
 | `AGENT_SERVICE_URL` | Agent service URL used by the gateway router |
-| `PROXY_AUTH_TOKEN` | Shared proxy auth token |
-| `is_render_strict_mode()` | True when both `AGENT_ENFORCE_PROXY` and `RENDER_REMOTE_INFERENCE_ONLY` are enabled |
+| `EMBEDDING_SERVICE_AUTH_TOKEN` | Shared routing auth token |
+| `is_render_strict_mode()` | True when strict route enforcement and `RENDER_REMOTE_INFERENCE_ONLY` are enabled |
 | `is_render()` | True on Render platform |
 | `get_allowed_origins()` | Parsed CORS origin list |
 | `log_endpoint_summary(logger)` | Emits structured startup log of all resolved endpoints |
 
 Startup log example (search for `service_endpoints_summary` in service logs):
 ```
-service_endpoints_summary model=http://vecinita-modal-proxy-v1:10000/model
-  embedding=http://vecinita-modal-proxy-v1:10000/embedding
-  proxy_token_set=True strict_mode=True on_render=True
+service_endpoints_summary model=http://vecinita-model-ms-render:8000
+  embedding=http://vecinita-embedding-ms-render:8011
+  service_token_set=True strict_mode=True on_render=True
   allowed_origins=['https://vecinita-frontend.onrender.com']
 ```
 
@@ -35,7 +35,7 @@ See [docs/deployment/RENDER_TROUBLESHOOTING_RUNBOOK.md](../deployment/RENDER_TRO
 ### Chat stack (this repo)
 - Frontend (`frontend`) calls Gateway (`backend/src/api/main.py`) over HTTP.
 - Gateway proxies Q&A requests to Agent (`backend/src/agent/main.py`) over HTTP.
-- Gateway and Agent call Embedding and Model routes through Modal Proxy when configured.
+- Gateway and Agent call Embedding and Model routes through Modal Routing when configured.
 - Agent/Gateway/Scraper read and write vector/document data via `DATABASE_URL` (Render Postgres target).
 - Supabase remains active for auth/session/role/storage flows where applicable.
 
@@ -43,7 +43,7 @@ See [docs/deployment/RENDER_TROUBLESHOOTING_RUNBOOK.md](../deployment/RENDER_TRO
 - Chat Frontend: `joseph-c-mcguire/Vecinitafrontend` (Render frontend)
 - Data Management Frontend: `Math-Data-Justice-Collaborative/vecinita-data-management-frontend` (Render frontend)
 - Data Management API: `Math-Data-Justice-Collaborative/vecinita-data-management` (Render private service)
-- Modal Proxy: `Math-Data-Justice-Collaborative/vecinita-modal-proxy` (Render private service)
+- Modal Routing: `Math-Data-Justice-Collaborative/vecinita-direct-routing` (Render private service)
 - Scraper: `Math-Data-Justice-Collaborative/vecinita-scraper` (Modal)
 - Embedding: `Math-Data-Justice-Collaborative/vecinita-embedding` (Modal)
 - Model: `Math-Data-Justice-Collaborative/vecinita-model` (Modal)
@@ -56,15 +56,15 @@ See [docs/deployment/RENDER_TROUBLESHOOTING_RUNBOOK.md](../deployment/RENDER_TRO
 | Frontend | Supabase Auth | Supabase JS SDK | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | JWT/session managed by Supabase |
 | Gateway | Agent | HTTP (`/ask`, `/ask-stream`, `/config`) | `AGENT_SERVICE_URL`, `AGENT_TIMEOUT`, `AGENT_STREAM_TIMEOUT` | Internal service-to-service |
 | Gateway | Embedding endpoint | HTTP (`/embed`, `/embed/batch`) | `EMBEDDING_SERVICE_URL`, `MODAL_EMBEDDING_ENDPOINT` | `x-embedding-service-token`/Bearer and optional Modal headers |
-| Gateway | Scraper/Reindex route | HTTP (`/jobs`) via proxy URL | `REINDEX_SERVICE_URL`, `REINDEX_TRIGGER_TOKEN` | Trigger token-based gate |
+| Gateway | Scraper/Reindex route | HTTP (`/jobs`) via routing URL | `REINDEX_SERVICE_URL`, `REINDEX_TRIGGER_TOKEN` | Trigger token-based gate |
 | Agent | Embedding endpoint | HTTP (query/document embeddings) | `EMBEDDING_SERVICE_URL`, `MODAL_EMBEDDING_ENDPOINT` | Same token/header pattern as gateway |
-| Agent | Model endpoint | HTTP via Ollama-compatible API | `OLLAMA_BASE_URL`, `MODAL_OLLAMA_ENDPOINT` | Proxy path: omit modal creds from client side; proxy injects |
+| Agent | Model endpoint | HTTP via Ollama-compatible API | `OLLAMA_BASE_URL`, `MODAL_OLLAMA_ENDPOINT` | Routing path: omit modal creds from client side; routing injects |
 | Agent tools | Postgres vector DB | SQL (`document_chunks`, similarity query) | `DATABASE_URL`, `DB_DATA_MODE`, `POSTGRES_DATA_READS_ENABLED` | DB network + credentials |
 | Agent tools (fallback) | Supabase RPC | PostgREST/RPC (`search_similar_documents`) | `SUPABASE_URL`, `SUPABASE_KEY`, `VECTOR_SYNC_SUPABASE_FALLBACK_READS` | Supabase service key |
 | Scraper uploader | Chroma | HTTP client (`upsert_chunks`) | `CHROMA_HOST`, `CHROMA_PORT`, collections | Internal network |
 | Scraper uploader | Postgres or Supabase sync target | SQL or Supabase upsert | `VECTOR_SYNC_TARGET`, `DATABASE_URL`, `VECTOR_SYNC_*` | DB credentials or Supabase key |
 | Documents router | Postgres + Supabase | SQL for corpus stats + Supabase storage URL | `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_*` | Mixed data-source read path |
-| Modal Proxy | Modal backends (model/embedding/scraper) | Pass-through HTTP with route stripping | `VECINITA_MODEL_API_URL`, `VECINITA_EMBEDDING_API_URL`, `VECINITA_SCRAPER_API_URL` | Injects `Modal-Key`/`Modal-Secret`; strips inbound credential headers |
+| Modal Routing | Modal backends (model/embedding/scraper) | Pass-through HTTP with route stripping | `VECINITA_MODEL_API_URL`, `VECINITA_EMBEDDING_API_URL`, `VECINITA_SCRAPER_API_URL` | Injects `Modal-Key`/`Modal-Secret`; strips inbound credential headers |
 
 ## 3. Primary Runtime Flows
 
@@ -72,12 +72,12 @@ See [docs/deployment/RENDER_TROUBLESHOOTING_RUNBOOK.md](../deployment/RENDER_TRO
 1. Frontend calls Gateway endpoint `/api/v1/ask` or `/api/v1/ask/stream`.
 2. Gateway forwards to Agent service URL.
 3. Agent performs retrieval (Chroma primary, DB fallback path per mode/flags).
-4. Agent calls model endpoint (typically through Modal Proxy).
+4. Agent calls model endpoint (typically through Modal Routing).
 5. Gateway returns normalized response to frontend.
 
 ### 3.2 Embedding flow
 1. Gateway/Agent use embedding client wrappers.
-2. If endpoint is modal-proxy route, proxy-level headers/tokens are used.
+2. If endpoint is direct-routing route, routing-level headers/tokens are used.
 3. Embedding service returns vectors (single or batch).
 
 ### 3.3 Scrape + ingest flow
@@ -103,15 +103,15 @@ See [docs/deployment/RENDER_TROUBLESHOOTING_RUNBOOK.md](../deployment/RENDER_TRO
 - Chroma, Postgres, Agent, Gateway, Frontend are connected by bridge network.
 
 ### Microservices Compose
-- `docker-compose.microservices.yml` runs modal-proxy-centric local simulation.
-- Model/embedding/scraper backends are individually wired to proxy route prefixes.
+- `docker-compose.microservices.yml` runs direct-routing-centric local simulation.
+- Model/embedding/scraper backends are individually wired to routing route prefixes.
 
 ## 5. Auth and Secret Boundaries
 
 - Frontend should only receive public Supabase anon credentials.
 - Gateway auth middleware enforces API key model for protected endpoints.
-- Modal Proxy strips any inbound Modal credential headers and injects server-side credentials.
-- Embedding/model requests can require proxy token and/or service token headers.
+- Modal Routing strips any inbound Modal credential headers and injects server-side credentials.
+- Embedding/model requests can require routing token and/or service token headers.
 - Production secrets are expected in Render dashboard (not committed files).
 
 ## 6. Current Split of Responsibility
@@ -155,24 +155,24 @@ See [docs/deployment/RENDER_TROUBLESHOOTING_RUNBOOK.md](../deployment/RENDER_TRO
 - `backend/src/services/scraper/uploader.py`
 - `backend/src/agent/utils/vector_loader.py`
 
-### Proxy integration
-- `services/modal-proxy/app/config.py`
-- `services/modal-proxy/app/backends/defaults.py`
-- `services/modal-proxy/app/proxy.py`
-- `services/modal-proxy/app/middleware.py`
-- `services/modal-proxy/BACKEND_API_SPECIFICATION.md`
+### Routing integration
+- `services/direct-routing/app/config.py`
+- `services/direct-routing/app/backends/defaults.py`
+- `services/direct-routing/app/routing.py`
+- `services/direct-routing/app/middleware.py`
+- `services/direct-routing/BACKEND_API_SPECIFICATION.md`
 
 ## 8. Integration Risks to Watch
 
 1. Config drift between local compose and Render blueprints (different defaults can hide regressions).
 2. Mixed Chroma + Postgres behavior during cutover can produce inconsistent retrieval behavior.
 3. Legacy Supabase vector assumptions in old docs can mislead operators.
-4. Proxy/header misconfiguration can yield 401s for Modal-backed model/embedding routes.
+4. Routing/header misconfiguration can yield 401s for Modal-backed model/embedding routes.
 5. Partial migration in dependent repos (data-management, modal services) can break cross-repo flows if env contracts diverge.
 
 ## 9. Recommended Operational Checks
 
 - Verify startup preflight logs include expected `data_mode` and backend health detail.
-- Verify gateway `/health` and proxy `/health` plus upstream probes before rollout.
+- Verify gateway `/health` and routing `/health` plus upstream probes before rollout.
 - Validate one end-to-end ask-stream call and one scrape/upload flow per environment.
 - Track retrieval backend metrics during transition windows.

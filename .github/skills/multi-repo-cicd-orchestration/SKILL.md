@@ -15,7 +15,7 @@ Use this skill when changing deployment wiring, repo mapping, or cross-repo rele
 - chat frontend -> Render frontend
 - data-management frontend -> Render frontend
 - data-management API -> Render private service in Virginia
-- modal-proxy -> Render private service in Virginia
+- direct-routing -> Render private service in Virginia
 - scraper -> Modal deploy
 - embedding-modal -> Modal deploy
 - model-modal -> Modal deploy
@@ -24,7 +24,7 @@ Use this skill when changing deployment wiring, repo mapping, or cross-repo rele
 
 1. Preserve private-network boundaries:
 - data-management frontend -> data-management API directly
-- agent backend and data-management API -> modal-proxy for model/embedding/scraper
+- agent backend and data-management API -> direct-routing for model/embedding/scraper
 
 2. Preserve CI/CD ownership model:
 - each service repo owns tests + deploy workflow
@@ -45,5 +45,5 @@ Use this skill when changing deployment wiring, repo mapping, or cross-repo rele
 ## Guardrails
 
 - Do not hardcode production credentials.
-- Do not remove private-service constraints for data-management API or modal-proxy.
+- Do not remove private-service constraints for data-management API or direct-routing.
 - Keep Virginia requirement explicit for Render private services in docs/policies.

@@ -71,7 +71,7 @@ def test_dev_session_manages_expected_ports() -> None:
 
 def test_dev_session_prefers_direct_or_local_model_endpoints() -> None:
     content = _script_text()
-    assert "AGENT_ENFORCE_PROXY='true'" not in content
+    assert "AGENT_ENFORCE_ROUTE='true'" not in content
     assert (
         "VECINITA_MODEL_API_URL:-\\${MODAL_OLLAMA_ENDPOINT:-\\${OLLAMA_BASE_URL:-http://localhost:11434}}"
         in content
@@ -88,10 +88,10 @@ def test_dev_session_warns_instead_of_exiting_on_readiness_timeout() -> None:
     assert "gateway readiness check timed out; attaching" in content
 
 
-def test_dev_session_uses_embedding_token_resolution_without_proxy_helper() -> None:
+def test_dev_session_uses_embedding_token_resolution_without_route_helper() -> None:
     content = _script_text()
-    assert "PROXY_AUTH_TOKEN='\\${PROXY_AUTH_TOKEN:-vecinita-local-proxy-token}'" not in content
-    assert "resolve_proxy_auth_token()" not in content
+    assert "SERVICE_AUTH_TOKEN='\\${SERVICE_AUTH_TOKEN:-vecinita-local-service-token}'" not in content
+    assert "resolve_route_auth_token()" not in content
     assert "resolve_local_embed_token()" in content
     assert 'embed_token="$(resolve_local_embed_token)"' in content
     assert "EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token'" in content

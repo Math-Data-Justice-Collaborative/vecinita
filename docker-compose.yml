@@ -100,7 +100,6 @@ services:
       PYTHONUNBUFFERED: "1"
       HF_HOME: "/tmp/huggingface_cache"
       EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:?EMBEDDING_SERVICE_AUTH_TOKEN is required for service authentication. Set this environment variable before starting docker compose.}"
-      MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET}"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
@@ -123,9 +122,6 @@ services:
       PYTHONUNBUFFERED: "1"
       EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
       EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:?Set EMBEDDING_SERVICE_AUTH_TOKEN before starting docker compose}"
-      # MODAL_API_PROXY_SECRET can be used as an alternative to EMBEDDING_SERVICE_AUTH_TOKEN;
-      # when not set, it falls back to EMBEDDING_SERVICE_AUTH_TOKEN (see .env.example).
-      MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET:-${EMBEDDING_SERVICE_AUTH_TOKEN}}"
       CHROMA_HOST: "chroma"
       CHROMA_PORT: "8000"
       CHROMA_SSL: "false"
@@ -182,7 +178,6 @@ services:
       AGENT_SERVICE_URL: "http://vecinita-agent:8000"
       EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
       EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:?Set EMBEDDING_SERVICE_AUTH_TOKEN before starting docker compose}"
-      MODAL_API_PROXY_SECRET: "${MODAL_API_PROXY_SECRET:-${EMBEDDING_SERVICE_AUTH_TOKEN}}"
       CHROMA_HOST: "chroma"
       CHROMA_PORT: "8000"
       CHROMA_SSL: "false"

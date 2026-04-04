@@ -9,7 +9,7 @@ This blueprint replaces the legacy in-repo scraper runtime path with the source-
 - vecinita-data-management
 - vecinita-data-management-frontend
 - vecinita-scraper
-- vecinita-modal-proxy
+- vecinita-direct-routing
 - vecinita-embedding
 - vecinita-model
 
@@ -19,7 +19,7 @@ This blueprint replaces the legacy in-repo scraper runtime path with the source-
 2. Two frontends remain separate deployables:
    - Chat frontend
    - Data management frontend
-3. Modal proxy remains the required gateway for embedding/model production traffic.
+3. Modal routing remains the required gateway for embedding/model production traffic.
 4. Embedding and model services remain Modal deployment units, but deployment code and CI live in this monorepo.
 5. Big-bang production cutover is used, with rollback toggles prepared in advance.
 6. Branch orchestration workflow is mandatory for cross-component development.
@@ -35,7 +35,7 @@ This blueprint replaces the legacy in-repo scraper runtime path with the source-
 │   ├── chat-api-gateway/               # existing backend API gateway and chat routes
 │   ├── data-management-api/            # from vecinita-data-management
 │   ├── scraper/                        # from vecinita-scraper (source of truth)
-│   ├── modal-proxy/                    # from vecinita-modal-proxy
+│   ├── direct-routing/                    # from vecinita-direct-routing
 │   ├── embedding-modal/                # from vecinita-embedding
 │   └── model-modal/                    # from vecinita-model
 ├── packages/
@@ -64,7 +64,7 @@ This blueprint replaces the legacy in-repo scraper runtime path with the source-
 | vecinita-data-management | services/data-management-api | Source-of-truth data management backend |
 | vecinita-data-management-frontend | apps/data-management-frontend | Source-of-truth data management UI |
 | vecinita-scraper | services/scraper | Source-of-truth scraper pipeline |
-| vecinita-modal-proxy | services/modal-proxy | Auth/proxy layer for embedding/model |
+| vecinita-direct-routing | services/direct-routing | Auth/routing layer for embedding/model |
 | vecinita-embedding | services/embedding-modal | Modal embedding service |
 | vecinita-model | services/model-modal | Modal model service |
 
@@ -133,7 +133,7 @@ Deliverables:
 
 Exit criteria:
 
-- Contract tests pass across gateway, data-management API, scraper, modal-proxy, embedding, and model.
+- Contract tests pass across gateway, data-management API, scraper, direct-routing, embedding, and model.
 
 ## Phase 4: Scraper Replacement
 
@@ -164,7 +164,7 @@ Deliverables:
 
 - Service-scoped env templates.
 - Local/staging/prod env matrix docs.
-- Proxy rule codified: embedding/model production calls route through modal-proxy.
+- Routing rule codified: embedding/model production calls route through direct-routing.
 
 Exit criteria:
 
@@ -241,8 +241,8 @@ Config file:
    - Mitigation: schema-level contract tests before cutover.
 2. Risk: private repo divergence or unknown build assumptions.
    - Mitigation: repo reality-check pass immediately after import.
-3. Risk: auth regression on proxy path.
-   - Mitigation: explicit end-to-end tests that validate proxy-auth-only behavior.
+3. Risk: auth regression on routing path.
+   - Mitigation: explicit end-to-end tests that validate routing-auth-only behavior.
 4. Risk: big-bang blast radius.
    - Mitigation: precomputed rollback toggles and clear rollback time budget.
 
@@ -251,5 +251,5 @@ Config file:
 1. All target repos are in one monorepo with runnable build/test workflows.
 2. Chat and data-management frontends deploy independently.
 3. Scraper runtime path is fully sourced from data-management/scraper repos.
-4. Embedding/model calls route through modal-proxy in production path.
+4. Embedding/model calls route through direct-routing in production path.
 5. Staging rehearsal and production cutover runbooks are complete and validated.

@@ -95,7 +95,7 @@
 
 **Solution:**
 - Implemented [backend/src/api/router_embed.py](backend/src/api/router_embed.py) with 5 endpoints
-- Proxy pattern to embedding microservice (port 8001)
+- Routing pattern to embedding microservice (port 8001)
 - Fallback chain for embedding generation
 
 **Endpoints Implemented:**
@@ -110,7 +110,7 @@
 **Features:**
 - 🔄 Batch processing for efficiency
 - 📝 Multiple embedding model support
-- 🔌 Microservice proxy pattern
+- 🔌 Microservice routing pattern
 - 🎯 Similarity computation
 - ⚙️ Runtime configuration
 

@@ -26,7 +26,7 @@ Phase 7 implements production-grade security hardening across four critical area
   # Old: return True (fail open - security vulnerability!)
   # New: return False if AUTH_FAIL_CLOSED else True (fail closed by default)
   ```
-- When auth proxy is unavailable:
+- When auth routing is unavailable:
   - If `AUTH_FAIL_CLOSED=true` (default): **DENY** access (401 Unauthorized)
   - If `AUTH_FAIL_CLOSED=false` (legacy): **ALLOW** access (backward compatible)
 
@@ -332,7 +332,7 @@ AUTH_FAIL_CLOSED=true
 
 ### Auth ✅
 - [x] Fail-closed pattern implemented
-- [x] Auth proxy unavailability handled securely
+- [x] Auth routing unavailability handled securely
 - [x] API key extraction from headers
 - [x] Admin role separation
 - [ ] Deploy with `ENABLE_AUTH=true` in production
@@ -415,7 +415,7 @@ done
 
 # Test auth fail-closed
 export AUTH_FAIL_CLOSED=true
-# Stop auth proxy: pkill -f "auth-proxy"
+# Stop auth routing: pkill -f "auth-service"
 curl -X GET http://localhost:8002/api/v1/ask \
   -H "Authorization: Bearer test-key"
 # Should get 401 instead of allowing access
@@ -437,7 +437,7 @@ curl -X GET http://localhost:8002/api/v1/admin/health/pool \
 
 ### Minimal Overhead
 - ~1ms for rate limit check (in-memory)
-- ~2ms for auth validation (local, not calling proxy each time)
+- ~2ms for auth validation (local, not calling routing each time)
 - ~0.1ms for query validation
 
 ### Recommended Monitoring
@@ -473,7 +473,7 @@ Before deploying Phase 7 to production:
 ```bash
 # Authentication (Auth Fail-Closed Pattern)
 ENABLE_AUTH=true                    # Enable API key validation
-AUTH_PROXY_URL=http://localhost:8003  # Auth service URL
+AUTH_SERVICE_URL=http://localhost:8003  # Auth service URL
 AUTH_FAIL_CLOSED=true               # Deny when auth service unavailable
 ADMIN_API_KEYS=key1,key2,key3       # Comma-separated admin keys
 

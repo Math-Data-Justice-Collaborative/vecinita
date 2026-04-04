@@ -301,7 +301,7 @@ class TestAskStreamEndpoint:
 
     @patch("httpx.AsyncClient.stream")
     def test_ask_stream_preserves_sse_event_boundaries(self, mock_stream, ask_client):
-        """Test SSE proxy keeps blank-line delimiters between events."""
+        """Test SSE routing keeps blank-line delimiters between events."""
 
         async def mock_bytes():
             yield b'data: {"type":"thinking","message":"step 1"}\n\n'

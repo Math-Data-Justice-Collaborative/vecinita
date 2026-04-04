@@ -33,7 +33,7 @@ def env_vars():
         ),
         "OLLAMA_MODEL": _env_or_default("OLLAMA_MODEL", "llama3.1:8b"),
         # Keep tests deterministic regardless of runner-level env overrides.
-        "AGENT_ENFORCE_PROXY": "false",
+        "AGENT_ENFORCE_ROUTE": "false",
         "DATABASE_URL": _env_or_default("DATABASE_URL", "postgresql://test"),
     }
 
@@ -114,7 +114,7 @@ def _agent_module_path_compatibility():
         "OLLAMA_BASE_URL": "http://localhost:10000/model",
         "MODAL_OLLAMA_ENDPOINT": "http://localhost:10000/model",
         "OLLAMA_MODEL": "llama3.1:8b",
-        "AGENT_ENFORCE_PROXY": "false",
+        "AGENT_ENFORCE_ROUTE": "false",
         "DATABASE_URL": "postgresql://test",
     }
     _original_env: dict[str, str | None] = {}
@@ -204,8 +204,8 @@ def fastapi_client(env_vars, monkeypatch):
 
 
 @pytest.fixture
-def auth_proxy_client(env_vars, monkeypatch):
-    """Create a TestClient for the auth proxy service."""
+def auth_service_client(env_vars, monkeypatch):
+    """Create a TestClient for the auth routing service."""
     for key, value in env_vars.items():
         monkeypatch.setenv(key, value)
 
@@ -215,11 +215,11 @@ def auth_proxy_client(env_vars, monkeypatch):
 
     repo_root = Path(__file__).resolve().parents[2]
     auth_main_path = repo_root / "auth" / "src" / "main.py"
-    module_name = "vecinita_auth_proxy_main"
+    module_name = "vecinita_auth_service_main"
 
     spec = importlib.util.spec_from_file_location(module_name, auth_main_path)
     if spec is None or spec.loader is None:
-        raise RuntimeError(f"Unable to load auth proxy module from {auth_main_path}")
+        raise RuntimeError(f"Unable to load auth routing module from {auth_main_path}")
 
     auth_module = importlib.util.module_from_spec(spec)
     sys.modules[module_name] = auth_module

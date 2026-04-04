@@ -1,4 +1,4 @@
-"""API contract checks for the proxy-centric microservices compose stack."""
+"""API contract checks for the routing-centric microservices compose stack."""
 
 from __future__ import annotations
 
@@ -48,7 +48,7 @@ class TestMicroservicesHealthContracts:
             ("model", f"{MODEL_URL}/health"),
             ("embedding", f"{EMBEDDING_URL}/health"),
             ("scraper", f"{SCRAPER_URL}/health"),
-            ("proxy", f"{PROXY_URL}/health"),
+            ("routing", f"{PROXY_URL}/health"),
             ("gateway", f"{GATEWAY_URL}/health"),
         ]
 

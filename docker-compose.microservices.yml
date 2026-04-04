@@ -88,7 +88,7 @@ services:
       dockerfile: docker/microservices/Dockerfile.scraper-service
     container_name: vecinita-scraper-ms
     environment:
-      MODAL_PROXY_AUTH_ENABLED: "false"
+      SERVICE_AUTH_ENABLED: "false"
       SUPABASE_PROJECT_URL: http://vecinita-postgrest-ms:3000
       SUPABASE_ANON_KEY: dev-anon-key
       SUPABASE_SERVICE_KEY: dev-service-key
@@ -103,30 +103,6 @@ services:
     networks:
       - vecinita-ms-net
 
-  modal-proxy:
-    build:
-      context: ./services/modal-proxy
-      dockerfile: Dockerfile
-    container_name: vecinita-modal-proxy-ms
-    environment:
-      PORT: 10000
-      MODAL_TOKEN_ID: "${MODAL_TOKEN_ID:-${MODAL_API_PROXY_KEY:-${MODAL_API_TOKEN_ID:-${MODAL_AUTH_KEY:-local-modal-token-id}}}}"
-      MODAL_TOKEN_SECRET: "${MODAL_TOKEN_SECRET:-${MODAL_API_PROXY_SECRET:-${MODAL_API_TOKEN_SECRET:-${MODAL_AUTH_SECRET:-local-modal-token-secret}}}}"
-      PROXY_AUTH_TOKEN: "${PROXY_AUTH_TOKEN:-vecinita-local-proxy-token}"
-      VECINITA_SCRAPER_API_URL: "${VECINITA_SCRAPER_API_URL:-http://vecinita-scraper-ms:8020}"
-      VECINITA_MODEL_API_URL: "${VECINITA_MODEL_API_URL:-http://vecinita-model-ms:8000}"
-      VECINITA_EMBEDDING_API_URL: "${VECINITA_EMBEDDING_API_URL:-http://vecinita-embedding-ms:8011}"
-      CORS_ORIGINS: "*"
-      ENVIRONMENT: development
-    ports:
-      - "10000:10000"
-    depends_on:
-      - scraper-service
-      - model-service
-      - embedding-service
-    networks:
-      - vecinita-ms-net
-
   chat-agent:
     build:
       context: ./backend
@@ -135,9 +111,8 @@ services:
     command: ["sh", "-c", "uvicorn src.agent.main:app --host 0.0.0.0 --port 8000"]
     environment:
       PORT: 8000
-      OLLAMA_BASE_URL: http://vecinita-modal-proxy-ms:10000/model
-      EMBEDDING_SERVICE_URL: http://vecinita-modal-proxy-ms:10000/embedding
-      MODAL_API_PROXY_SECRET: vecinita-local-proxy-token
+      OLLAMA_BASE_URL: http://vecinita-model-ms:8000
+      EMBEDDING_SERVICE_URL: http://vecinita-embedding-ms:8011
       SUPABASE_URL: http://vecinita-postgrest-ms:3000
       SUPABASE_KEY: dev-anon-key
       DATABASE_URL: postgresql://postgres:postgres@vecinita-postgres-ms:5432/postgres
@@ -150,7 +125,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - modal-proxy
+      - model-service
+      - embedding-service
       - chroma
       - postgrest
     networks:
@@ -165,8 +141,7 @@ services:
     environment:
       PORT: 8004
       AGENT_SERVICE_URL: http://vecinita-chat-agent-ms:8000
-      EMBEDDING_SERVICE_URL: http://vecinita-modal-proxy-ms:10000/embedding
-      MODAL_API_PROXY_SECRET: vecinita-local-proxy-token
+      EMBEDDING_SERVICE_URL: http://vecinita-embedding-ms:8011
       CHROMA_HOST: vecinita-chroma-ms
       CHROMA_PORT: 8000
       CHROMA_SSL: "false"
@@ -175,8 +150,8 @@ services:
       DEV_ADMIN_ENABLED: "true"
       DEV_ADMIN_BEARER_TOKEN: vecinita-dev-admin-token-2026
       SUPABASE_UPLOADS_BUCKET: documents
-      REINDEX_SERVICE_URL: http://vecinita-modal-proxy-ms:10000/jobs
-      REINDEX_TRIGGER_TOKEN: vecinita-local-proxy-token
+      REINDEX_SERVICE_URL: http://vecinita-scraper-ms:8020/jobs
+      REINDEX_TRIGGER_TOKEN: ""
     ports:
       - "8004:8004"
     depends_on:
@@ -207,7 +182,7 @@ services:
     ports:
       - "4173:4173"
     depends_on:
-      - modal-proxy
+      - chat-gateway
     networks:
       - vecinita-ms-net
 

@@ -2,7 +2,7 @@
 
 ## Summary
 
-Successfully implemented all 5 embedding endpoints in the API gateway with full integration to the dedicated embedding microservice. All endpoints proxy requests to the embedding service while providing validation, error handling, and consistent response formatting.
+Successfully implemented all 5 embedding endpoints in the API gateway with full integration to the dedicated embedding microservice. All endpoints routing requests to the embedding service while providing validation, error handling, and consistent response formatting.
 
 ## Completed Work
 

@@ -121,7 +121,7 @@ docker-compose -f docker-compose.prod.yml up
 - **API Gateway (8002)**: FastAPI, rate limiting, authentication
 - **Agent Service (8000)**: LangGraph, tool execution, response generation
 - **Embedding Service (8001)**: Model inference, batch processing
-- **Auth Proxy (8003)**: API key validation
+- **Auth Routing (8003)**: API key validation
 - **Database**: Supabase (PostgreSQL + pgvector)
 - **Cache**: Optional Redis (for distributed rate limiting)
 
@@ -250,7 +250,7 @@ curl -X GET 'http://localhost:8002/api/v1/admin/health' \
 ## 🔐 Security Features
 
 ### Authentication
-- **API Key validation** via auth proxy
+- **API Key validation** via auth routing
 - **Fail-closed pattern**: Deny access if auth service unavailable
 - **Admin-only endpoints**: Require admin API key
 
@@ -451,7 +451,7 @@ Vecinita is licensed under the MIT License. See LICENSE file for details.
 - **Search**: Vector similarity (pgvector)
 - **Embeddings**: HuggingFace Transformers
 - **Web Scraping**: Unstructured, Playwright, PyPDF
-- **Authentication**: API Keys, Auth Proxy
+- **Authentication**: API Keys, Auth Routing
 - **Deployment**: Docker, Docker Compose, Kubernetes-ready
 
 ---

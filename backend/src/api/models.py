@@ -1385,8 +1385,8 @@ NOT IMPLEMENTED ENDPOINTS (8 total) ❌
 =====================================
 
 EMBEDDINGS ROUTER (/api/embed/) - 5 ACTIVE (Phase 5 Complete)
-  ✅ POST /             → EmbedRequest → EmbedResponse (proxies to embedding service)
-  ✅ POST /batch        → EmbedBatchRequest → EmbedBatchResponse (proxies to embedding service)
+    ✅ POST /             → EmbedRequest → EmbedResponse (forwards to embedding service)
+    ✅ POST /batch        → EmbedBatchRequest → EmbedBatchResponse (forwards to embedding service)
   ✅ POST /similarity   → SimilarityRequest → SimilarityResponse (generates embeddings + computes cosine similarity)
   ✅ GET  /config       → (no params) → EmbeddingConfigResponse (returns current config)
   ✅ POST /config       → Query params (provider, model, lock) → EmbeddingConfigResponse (updates embedding service config)

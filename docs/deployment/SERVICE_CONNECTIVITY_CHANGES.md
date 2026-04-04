@@ -2,7 +2,7 @@
 
 ## Problem
 
-The **agent** (`src/agent/main.py`) and **gateway** (`src/api/main.py`) services had **different endpoint resolution logic** for internal services (embedding, Ollama), causing inconsistency when routing to Modal proxy on Render deployments.
+The **agent** (`src/agent/main.py`) and **gateway** (`src/api/main.py`) services had **different endpoint resolution logic** for internal services (embedding, Ollama), causing inconsistency when routing to Modal routing on Render deployments.
 
 ### Specific Issues
 
@@ -14,7 +14,7 @@ The **agent** (`src/agent/main.py`) and **gateway** (`src/api/main.py`) services
 ### Symptom
 
 Both services could end up with different endpoint URLs in the same Render deployment, causing one to fail while the other succeeds:
-- Agent successfully reaches embedding service via Modal proxy
+- Agent successfully reaches embedding service via Modal routing
 - Gateway fails to reach same service due to stale direct Modal URL
 
 ## Solution: Unified Configuration
@@ -29,7 +29,7 @@ Both services could end up with different endpoint URLs in the same Render deplo
 ```python
 def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -> str:
     """Resolve effective URL for internal upstream services."""
-    # On Render: force proxy routing for non-local URLs
+    # On Render: force routing routing for non-local URLs
     # Off Render: trust raw URLs with sensible fallback
 ```
 
@@ -39,7 +39,7 @@ def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -
 - `EMBEDDING_SERVICE_URL` — normalized via `_normalize_internal_service_url()`
 - `OLLAMA_BASE_URL` — normalized via `_normalize_internal_service_url()`
 
-Both use the same routing logic and fallback to Modal proxy on Render.
+Both use the same routing logic and fallback to Modal routing on Render.
 
 ### 3. Agent & Gateway Import from Central Config ✅
 
@@ -81,7 +81,7 @@ Removed duplicate functions and local calculations. Both now use identical endpo
 
 | File | Purpose |
 |---|---|
-| `docs/deployment/SERVICE_CONNECTIVITY.md` | Complete guide to unified endpoint routing, Render proxy architecture, local dev setup, troubleshooting |
+| `docs/deployment/SERVICE_CONNECTIVITY.md` | Complete guide to unified endpoint routing, Render routing architecture, local dev setup, troubleshooting |
 
 ## Behavior After Fix
 
@@ -93,10 +93,10 @@ Removed duplicate functions and local calculations. Both now use identical endpo
 ### Render Deployment
 - Both services must have identical `EMBEDDING_SERVICE_URL` and `OLLAMA_BASE_URL` set in Render dashboard
 - Recommended values:
-  - `EMBEDDING_SERVICE_URL = http://vecinita-modal-proxy-v1:10000/embedding`
-  - `OLLAMA_BASE_URL = http://vecinita-modal-proxy-v1:10000/model`
-- If raw URLs point anywhere (localhost, Docker hostname), normalization forces both to use proxy
-- Both services route through SAME proxy, preventing connection mismatches
+  - `EMBEDDING_SERVICE_URL = http://vecinita-embedding-ms-render:8011`
+  - `OLLAMA_BASE_URL = http://vecinita-model-ms-render:8000`
+- If raw URLs point anywhere (localhost, Docker hostname), normalization forces both to use routing
+- Both services route through SAME routing, preventing connection mismatches
 
 ## Testing
 
@@ -104,14 +104,14 @@ Removed duplicate functions and local calculations. Both now use identical endpo
 
 ```
 [Test 1] Configuration imports
-  ✅ EMBEDDING_SERVICE_URL: http://vecinita-modal-proxy-v1:10000/embedding
+  ✅ EMBEDDING_SERVICE_URL: http://vecinita-embedding-ms-render:8011
   ✅ OLLAMA_BASE_URL: http://localhost:11434
   ✅ Running on Render: False
 
 [Test 2] Normalization logic (all scenarios)
   ✅ Local dev (raw=localhost): preserves http://localhost:8001
   ✅ Local dev (raw=remote): preserves https://some-modal-app.modal.run/embedding
-  ✅ Render (raw=localhost): forces http://vecinita-modal-proxy-v1:10000/embedding
+  ✅ Render (raw=localhost): forces http://vecinita-embedding-ms-render:8011
   ✅ Render (raw=remote): allows https://some-modal-app.modal.run/embedding
 
 [Test 3] Both services compile
@@ -125,8 +125,8 @@ Removed duplicate functions and local calculations. Both now use identical endpo
 ### For Render Deployment
 1. Navigate to Render dashboard for `vecinita-agent` service
 2. Ensure env vars are configured:
-   - `EMBEDDING_SERVICE_URL = http://vecinita-modal-proxy-v1:10000/embedding`
-   - `OLLAMA_BASE_URL = http://vecinita-modal-proxy-v1:10000/model`
+   - `EMBEDDING_SERVICE_URL = http://vecinita-embedding-ms-render:8011`
+   - `OLLAMA_BASE_URL = http://vecinita-model-ms-render:8000`
 3. Repeat for `vecinita-gateway` service
 4. Repeat for staging services if present
 

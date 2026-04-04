@@ -384,7 +384,7 @@ All Phase 8 files: Syntax OK ✅
    # Should get 429 after 60 requests
    
    # Test auth fail-closed
-   # Stop auth proxy, requests should get 401
+   # Stop auth routing, requests should get 401
    
    # Test admin only
    curl http://localhost:8002/api/v1/admin/health

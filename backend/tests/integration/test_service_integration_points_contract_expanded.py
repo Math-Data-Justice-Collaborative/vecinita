@@ -76,7 +76,7 @@ def test_ip02_frontend_supabase_session_persistence_contract() -> None:
     assert "detectSessionInUrl: true" in content
 
 
-def test_ip03_gateway_agent_config_proxy_contract(monkeypatch) -> None:
+def test_ip03_gateway_agent_config_contract(monkeypatch) -> None:
     from src.api import router_ask
 
     class _FakeAgentClient:
@@ -97,7 +97,7 @@ def test_ip03_gateway_agent_config_proxy_contract(monkeypatch) -> None:
     assert "providers" in response.json()
 
 
-def test_ip03_gateway_agent_stream_proxy_contract(monkeypatch) -> None:
+def test_ip03_gateway_agent_stream_contract(monkeypatch) -> None:
     from src.api import router_ask
 
     class _StreamResponse:
@@ -179,7 +179,7 @@ def test_ip05_gateway_reindex_missing_service_contract(monkeypatch) -> None:
     assert response.status_code == 503
 
 
-def test_ip05_gateway_reindex_default_proxy_path_contract() -> None:
+def test_ip05_gateway_reindex_default_direct_path_contract() -> None:
     content = (WORKSPACE_ROOT / "backend" / "src" / "api" / "router_scrape.py").read_text(
         encoding="utf-8"
     )
@@ -207,8 +207,7 @@ def test_ip06_agent_embedding_auth_fallback_contract(monkeypatch) -> None:
     )
     monkeypatch.setenv("EMBEDDING_SERVICE_AUTH_TOKEN", "")
     monkeypatch.setenv("MODAL_API_KEY", "")
-    monkeypatch.setenv("MODAL_TOKEN_SECRET", "")
-    monkeypatch.setenv("MODAL_API_PROXY_SECRET", "modal-secret-token")
+    monkeypatch.setenv("MODAL_TOKEN_SECRET", "modal-secret-token")
 
     import src.agent.main as agent_main
     import src.config as app_config
@@ -258,7 +257,7 @@ def test_ip07_agent_model_preserves_direct_modal_when_strict_mode_enabled(monkey
 
 def test_ip06_agent_embedding_preserves_direct_modal_when_strict_mode_enabled(monkeypatch) -> None:
     monkeypatch.setenv("RENDER", "true")
-    monkeypatch.setenv("AGENT_ENFORCE_PROXY", "true")
+    monkeypatch.setenv("AGENT_ENFORCE_ROUTE", "true")
     import src.config as app_config
 
     importlib.reload(app_config)
@@ -550,8 +549,8 @@ def test_ip13_direct_modal_endpoint_contract() -> None:
     assert "vecinita--vecinita-embedding-web-app.modal.run" in content
 
 
-def test_ip13_gateway_embed_headers_do_not_use_proxy_token_contract() -> None:
+def test_ip13_gateway_embed_headers_do_not_use_service_token_contract() -> None:
     content = _read_workspace_file("backend", "src", "api", "router_embed.py")
 
     assert '"x-embedding-service-token"' in content
-    assert '"X-Proxy-Token"' not in content
+    assert '"X-Service-Token"' not in content

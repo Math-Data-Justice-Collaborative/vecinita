@@ -3,7 +3,7 @@
 **Date:** February 8, 2026  
 **Status:** ✅ COMPLETE (8 Phases)
 
-This document summarizes the comprehensive integration of frontend components with backend services, including token-streaming responses, multi-model LLM fallback chain, authentication proxy, and enhanced gateway.
+This document summarizes the comprehensive integration of frontend components with backend services, including token-streaming responses, multi-model LLM fallback chain, authentication routing, and enhanced gateway.
 
 ---
 
@@ -12,7 +12,7 @@ This document summarizes the comprehensive integration of frontend components wi
 A complete overhaul of the Vecinita RAG system to support:
 - **Token-by-token streaming** responses with real-time feedback
 - **Multi-model fallback chain** (DeepSeek → Gemini → Grok → Groq → OpenAI → Ollama)
-- **Unified authentication proxy** for API key management and rate limiting
+- **Unified authentication routing** for API key management and rate limiting
 - **Enhanced gateway** with authentication middleware
 - **Frontend streaming support** with token and source events
 - **Metadata tracking** for debugging and analytics (non-exposed to users)
@@ -69,7 +69,7 @@ A complete overhaul of the Vecinita RAG system to support:
 
 ---
 
-### Phase 3: Auth Proxy Service ✅
+### Phase 3: Auth Routing Service ✅
 **Files Created:** `auth/src/main.py`, `auth/Dockerfile`, `auth/pyproject.toml`, `auth/README.md`
 
 **New Service Architecture:**
@@ -100,10 +100,10 @@ FastAPI Server (Port 8003)
 **New Middleware:**
 1. **AuthenticationMiddleware**
    - Extracts API key from `Authorization: Bearer` header
-   - Calls auth proxy to validate
+   - Calls auth routing to validate
    - Tracks token usage
    - Adds `X-API-Key-Masked` and `X-Request-Time` headers to responses
-   - Fails open if auth proxy down (configurable via `ENABLE_AUTH`)
+   - Fails open if auth routing down (configurable via `ENABLE_AUTH`)
 
 2. **RateLimitingMiddleware**
    - Checks rate limits before request processing
@@ -111,7 +111,7 @@ FastAPI Server (Port 8003)
    - Per-API-key tracking
 
 **Configuration:**
-- `AUTH_PROXY_URL` - Auth proxy service URL (default: http://localhost:8003)
+- `AUTH_SERVICE_URL` - Auth routing service URL (default: http://localhost:8003)
 - `ENABLE_AUTH` - Toggle authentication middleware (default: false)
 - `RATE_LIMIT_TOKENS_PER_DAY` - Token limit (default: 1000)
 - `RATE_LIMIT_REQUESTS_PER_HOUR` - Request limit (default: 100)
@@ -189,20 +189,20 @@ tests/
 - Unit tests for individual components (fast, isolated)
 - Integration tests mock Supabase but test real service flow
 - E2E tests run full stack (local docker-compose)
-- Fixtures for: auth proxy, gateway, agent, embedding service
+- Fixtures for: auth routing, gateway, agent, embedding service
 
 ---
 
 ### Phase 8: Documentation & Docker ✅
 
 **Docker Updates:** `docker-compose.yml`
-- Added `auth-proxy` service (port 8003)
-- Updated dependencies: gateway now depends on auth-proxy
+- Added `auth-service` service (port 8003)
+- Updated dependencies: gateway now depends on auth-service
 - Added new environment variables:
   - `DEEPSEEK_API_KEY`
   - `GEMINI_API_KEY`
   - `GROK_API_KEY`
-  - `AUTH_PROXY_URL`
+  - `AUTH_SERVICE_URL`
   - `ENABLE_AUTH`
 
 **Service Stack:**
@@ -210,7 +210,7 @@ tests/
 Frontend (5173)
   ↓
 Gateway (8002) 
-  ├→ Auth Proxy (8003) ← API key validation & rate limiting
+  ├→ Auth Routing (8003) ← API key validation & rate limiting
   ├→ Agent (8000)      ← LLM + Tool orchestration
   ├→ Embedding (8001)  ← Vector embeddings
   └→ PostgREST (3001)  ← Database API
@@ -288,7 +288,7 @@ OLLAMA_BASE_URL=         # Local Ollama instance
 OLLAMA_MODEL=            # Default Ollama model
 ```
 
-### Auth Proxy
+### Auth Routing
 ```bash
 SUPABASE_URL=            # Supabase project URL
 SUPABASE_KEY=            # Supabase anon key
@@ -298,7 +298,7 @@ PORT=8003                # Server port
 
 ### Gateway
 ```bash
-AUTH_PROXY_URL=http://localhost:8003     # Auth proxy service
+AUTH_SERVICE_URL=http://localhost:8003     # Auth routing service
 ENABLE_AUTH=false                         # Enable authentication
 RATE_LIMIT_TOKENS_PER_DAY=1000           # Token limit
 RATE_LIMIT_REQUESTS_PER_HOUR=100         # Request limit
@@ -312,10 +312,10 @@ RATE_LIMIT_REQUESTS_PER_HOUR=100         # Request limit
 
 1. **Update Environment Variables**
    - Add new model provider keys (GEMINI_API_KEY, GROK_API_KEY)
-   - Add auth proxy settings (AUTH_PROXY_URL, ENABLE_AUTH)
+   - Add auth routing settings (AUTH_SERVICE_URL, ENABLE_AUTH)
 
 2. **Deploy New Services**
-   - Build and start auth-proxy container
+   - Build and start auth-service container
    - Restart gateway with updated environment
 
 3. **Update Frontend**
@@ -379,9 +379,9 @@ ENABLE_AUTH=true docker-compose up
 
 ### Common Issues
 
-**"Auth proxy connection refused"**
-- Ensure auth-proxy service is running on port 8003
-- Check `AUTH_PROXY_URL` environment variable
+**"Auth routing connection refused"**
+- Ensure auth-service service is running on port 8003
+- Check `AUTH_SERVICE_URL` environment variable
 - Try disabling auth: `ENABLE_AUTH=false`
 
 **"Model not available"**
@@ -397,7 +397,7 @@ ENABLE_AUTH=true docker-compose up
 **"Streaming stalls"**
 - Verify EventSource connection in browser dev tools
 - Check SSE endpoint is returning `text/event-stream` MIME type
-- Ensure no proxy/firewall blocking SSE
+- Ensure no routing/firewall blocking SSE
 
 ---
 
@@ -405,7 +405,7 @@ ENABLE_AUTH=true docker-compose up
 
 - [Token Streaming Implementation](./docs/STREAMING_IMPLEMENTATION.md) (To be created)
 - [Model Fallback Chain](./docs/MODEL_FALLBACK_CHAIN.md) (To be created)
-- [Auth Proxy Guide](docs/AUTH_PROXY_GUIDE.md)
+- [Auth Routing Guide](docs/AUTH_PROXY_GUIDE.md)
 - [Gateway API Reference](docs/API_INTEGRATION_SPEC.md) (Updated)
 - [Architecture Overview](docs/ARCHITECTURE_MICROSERVICE.md) (Updated)
 
@@ -424,7 +424,7 @@ This implementation delivers:
 ✅ Comprehensive debugging metadata  
 
 **Total Lines Changed:** ~2500 across 12+ files  
-**New Services:** 1 (auth-proxy)  
+**New Services:** 1 (auth-service)  
 **Breaking Changes:** None (backward compatible)  
 **Deployment Complexity:** Moderate (new env vars, new service)  
 

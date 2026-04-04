@@ -174,12 +174,12 @@ def test_client_does_not_set_modal_key_from_token_id(monkeypatch):
     assert client.client.headers.get("Modal-Secret") is None
 
 
-def test_client_does_not_set_proxy_auth_token_header(monkeypatch):
-    monkeypatch.setenv("PROXY_AUTH_TOKEN", "proxy-shared-token")
+def test_client_does_not_set_service_auth_token_header(monkeypatch):
+    monkeypatch.setenv("EMBEDDING_SERVICE_AUTH_TOKEN", "routing-shared-token")
 
     client = EmbeddingServiceClient(base_url="https://example.modal.run")
 
-    assert client.client.headers.get("X-Proxy-Token") is None
+    assert client.client.headers.get("X-Service-Token") is None
 
 
 def test_create_embedding_client_passes_explicit_auth_token(monkeypatch):

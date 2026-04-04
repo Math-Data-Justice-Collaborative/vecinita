@@ -5726,7 +5726,7 @@ Whenever a failover occurs ([automatic](#automatic-failover) or [manual](#manual
 ## Limitations of HA
 
 - HA increases your database's response latency by approximately 1 millisecond.
-  - This is because Render operates a proxy in front of the database to identify connectivity issues and trigger failovers.
+  - This is because Render operates a routing in front of the database to identify connectivity issues and trigger failovers.
 - Render runs your primary and standby instances on geographically separated nodes in the same region. In the unlikely event that _both_ nodes are affected by an incident, your database will experience downtime.
 - When an [automatic failover](#automatic-failover) occurs, a small number of the most recent writes to your degraded primary instance might not be represented in your standby instance. These changes are lost.
   - This is because data is replicated asynchronously, and the primary might not have pushed the most recent writes to the standby before the degradation occurred.
@@ -7479,13 +7479,13 @@ Most commonly when setting up a Cloudflare custom domain, you add a CNAME record
 
    - Set *Name* to `@` to specify your root domain (next you'll add a separate record for `www`).
    - Set *Target* to your Render service's subdomain (e.g., `example.onrender.com`).
-   - Set *Proxy status* to *DNS only*. This ensures that requests go to Render instead of Cloudflare, so that we can verify the domain and issue a certificate.
+   - Set *Routing status* to *DNS only*. This ensures that requests go to Render instead of Cloudflare, so that we can verify the domain and issue a certificate.
 
    Click *Save*.
 
 5. Repeat the previous step to create a _second_ CNAME record.
 
-   - This time, set *Name* to `www` and provide the same values as before for *Target* and *Proxy status*.
+   - This time, set *Name* to `www` and provide the same values as before for *Target* and *Routing status*.
 
    Click *Save*.
 
@@ -7497,7 +7497,7 @@ That's it! DNS changes might take a few minutes to propagate, after which your d
 
 [img]
 
-After the Render Dashboard indicates that your certificates are issued and valid, you can optionally set *Proxy status* to *Proxied* for your CNAME records.
+After the Render Dashboard indicates that your certificates are issued and valid, you can optionally set *Routing status* to *Proxied* for your CNAME records.
 
 ## Adding a wildcard custom domain without the base domain
 
@@ -7505,11 +7505,11 @@ Your Cloudflare domain requires some additional configuration if _all_ of the fo
 
 - You're adding a wildcard custom domain (e.g., `*.example.com`) to your Render service.
 - You are _not_ adding the corresponding _base_ domain (e.g., `example.com`) to your service.
-- You've [enabled proxying](https://community.cloudflare.com/t/what-is-the-proxied-feature-in-cloudflare/32887) for your base domain (i.e., *Proxy status* is set to *Proxied*).
+- You've [enabled proxying](https://community.cloudflare.com/t/what-is-the-proxied-feature-in-cloudflare/32887) for your base domain (i.e., *Routing status* is set to *Proxied*).
 
 ### Origin override with a Cloudflare Worker
 
-To direct wildcard traffic to Render while directing base domain traffic elsewhere, you can use a Cloudflare Worker to perform an [origin override](https://developers.cloudflare.com/workers/examples/bulk-origin-proxy).
+To direct wildcard traffic to Render while directing base domain traffic elsewhere, you can use a Cloudflare Worker to perform an [origin override](https://developers.cloudflare.com/workers/examples/bulk-origin-routing).
 
 *The instructions below assume the following:*
 
@@ -12335,13 +12335,13 @@ For log streams, you specify the endpoint corresponding to your Datadog site:
 
 ## Getting Started
 
-After [creating a QuotaGuard account](https://www.quotaguard.com/quotaguard-static-ip-pricing/#QGstatic), you will be redirected to a setup page with all the information needed to proxy your traffic through QuotaGuard's static IPs. Make note of the HTTP/S URLs and your static outbound IPs.
+After [creating a QuotaGuard account](https://www.quotaguard.com/quotaguard-static-ip-pricing/#QGstatic), you will be redirected to a setup page with all the information needed to routing your traffic through QuotaGuard's static IPs. Make note of the HTTP/S URLs and your static outbound IPs.
 
 [img]
 
 ## Configuring Your Application
 
-You can configure QuotaGuard the same way you would configure your app to use any HTTP proxy. [QuotaGuard provides examples](https://support.quotaguard.com/support/home) for common languages:
+You can configure QuotaGuard the same way you would configure your app to use any HTTP routing. [QuotaGuard provides examples](https://support.quotaguard.com/support/home) for common languages:
 
 - [QuotaGuard for Go](https://www.quotaguard.com/docs/language-platform/go/)
 - [QuotaGuard for Node.js](https://www.quotaguard.com/docs/language-platform/node-js/)
@@ -12349,13 +12349,13 @@ You can configure QuotaGuard the same way you would configure your app to use an
 - [QuotaGuard for Python](https://www.quotaguard.com/docs/language-platform/python/)
 - [QuotaGuard for Ruby](https://www.quotaguard.com/docs/language-platform/ruby/)
 
-Most of these examples involve adding the `QUOTAGUARDSTATIC_URL` environment variable to your service in the Render Dashboard. Set the value to the *_HTTP/HTTPS URL_* from your QuotaGuard Outbound Proxy Setup page. Any requests your application makes using QuotaGuard's proxy URL will be routed through one of the IPs displayed in your QuotaGuard configuration.
+Most of these examples involve adding the `QUOTAGUARDSTATIC_URL` environment variable to your service in the Render Dashboard. Set the value to the *_HTTP/HTTPS URL_* from your QuotaGuard Outbound Routing Setup page. Any requests your application makes using QuotaGuard's routing URL will be routed through one of the IPs displayed in your QuotaGuard configuration.
 
 > Using QuotaGuard Static IPs will add an additional hop to your network requests and can affect response times for your application. Make sure to test application response times before and after enabling QuotaGuard.
 
 ## Testing Your Implementation
 
-Requests to `ip.quotaguard.com` always return the request client's IP address. Requests made to this address with your QuotaGuard proxy configuration will return one of the static IPs listed in your configuration.
+Requests to `ip.quotaguard.com` always return the request client's IP address. Requests made to this address with your QuotaGuard routing configuration will return one of the static IPs listed in your configuration.
 
 ```shell{outputLines:2}
 curl -x QUOTAGUARDSTATIC_URL ip.quotaguard.com

@@ -14,12 +14,12 @@ Port Configuration:
   - API Gateway (main entry): 8002 (http://localhost:8002)
   - Agent Service: 8000 (http://localhost:8000)
   - Embedding Service: 8001 (http://localhost:8001)
-  - Auth Proxy: 8003 (http://localhost:8003)
+  - Auth Routing: 8003 (http://localhost:8003)
 
 Environment:
   AGENT_SERVICE_URL=http://localhost:8000
   EMBEDDING_SERVICE_URL=http://localhost:8001
-  AUTH_PROXY_URL=http://localhost:8003
+  AUTH_SERVICE_URL=http://localhost:8003
 """
 
 # ============================================================================
@@ -49,11 +49,11 @@ Authentication Configuration:
    
    ADMIN_API_KEYS=admin-key-1,admin-key-2,admin-key-3
 
-4. AUTH_PROXY_URL
+4. AUTH_SERVICE_URL
    - URL of authentication service
    - Default: http://localhost:8003
    
-   AUTH_PROXY_URL=http://localhost:8003
+   AUTH_SERVICE_URL=http://localhost:8003
 
 Usage:
   curl -X GET http://localhost:8002/api/v1/ask \\
@@ -356,7 +356,7 @@ API Gateway:
 Authentication & Security (Phase 7):
   ENABLE_AUTH=false                    # Set to true in production
   AUTH_FAIL_CLOSED=true                # Secure default
-  AUTH_PROXY_URL=http://localhost:8003
+  AUTH_SERVICE_URL=http://localhost:8003
   ADMIN_API_KEYS=key1,key2,key3
 
 Rate Limiting:
@@ -447,7 +447,7 @@ Safe defaults for development:
 API & Services:
   AGENT_SERVICE_URL=http://localhost:8000
   EMBEDDING_SERVICE_URL=http://localhost:8001
-  AUTH_PROXY_URL=http://localhost:8003
+  AUTH_SERVICE_URL=http://localhost:8003
   ALLOWED_ORIGINS=http://localhost:5173,http://localhost:5174,http://localhost:4173
 
 Authentication:
@@ -486,7 +486,7 @@ Authentication:
   [ ] ENABLE_AUTH=true
   [ ] AUTH_FAIL_CLOSED=true (verify it's default)
   [ ] ADMIN_API_KEYS set with multiple keys
-  [ ] Auth proxy service running and healthy
+  [ ] Auth routing service running and healthy
 
 Database:
   [ ] SUPABASE_URL configured
@@ -536,8 +536,8 @@ Problem: "Configuration directory does not exist"
   Default: backend/data/config/
   Fix: mkdir -p backend/data/config or SCRAPER_CONFIG_DIR=/path
 
-Problem: "Auth proxy unreachable"
-  Solution: Ensure AUTH_PROXY_URL is correct and service is running
+Problem: "Auth routing unreachable"
+  Solution: Ensure AUTH_SERVICE_URL is correct and service is running
   Check: curl http://localhost:8003/health
   Fix: docker-compose up auth
 

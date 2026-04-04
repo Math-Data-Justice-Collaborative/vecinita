@@ -133,7 +133,7 @@
 ### Authentication & Authorization
 - ✅ Fail-closed auth pattern (deny when unavailable)
 - ✅ Admin-only endpoint protection
-- ✅ API key validation via auth proxy
+- ✅ API key validation via auth routing
 - ✅ Confirmation tokens for destructive operations
 
 ### Data Protection

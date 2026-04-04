@@ -1,8 +1,8 @@
 """Centralized service endpoint resolution for Vecinita backend.
 
-Single source of truth for all cross-service URLs, proxy flags, and
-CORS origins.  Import from here — never call os.getenv() for
-cross-service endpoints directly in routers or handlers.
+Single source of truth for all cross-service URLs and CORS origins.
+Import from here — never call os.getenv() for cross-service endpoints
+directly in routers or handlers.
 
 Endpoints are resolved once at import time using the normalisation logic
 in ``src.config`` so all services observe the same Render-aware URL
@@ -45,7 +45,7 @@ SCRAPER_ENDPOINT: str = _normalize_internal_service_url(
 # Internal service routing
 # ---------------------------------------------------------------------------
 
-#: URL of the agent service (used by the gateway router to proxy /ask).
+#: URL of the agent service (used by the gateway router to forward /ask).
 AGENT_SERVICE_URL: str = os.getenv("AGENT_SERVICE_URL", "http://localhost:8000")
 
 # ---------------------------------------------------------------------------

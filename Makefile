@@ -18,7 +18,7 @@
 	test-all-integration test-cross-integration test-cross-e2e \
 	scraper-run scraper-run-verbose scraper-run-clean scraper-validate-postgres \
 	microservices-up microservices-down microservices-logs test-microservices-contracts test-microservices \
-	render-env-validate render-tests-proxy render-tests-strict render-tests-render-suite render-workflow-ci \
+	render-env-validate render-tests-strict render-tests-render-suite render-workflow-ci \
 	render-local-up render-local-down render-local-logs render-local-check render-local-check-live render-local-validate \
 	env-sync-contract render-connectivity-tests render-all-offline-contract-tests \
 	render-live-smoke render-live-integration render-deploy-trigger render-deploy-wait \
@@ -83,7 +83,7 @@ help:
 	@echo "  make test-integration-gateway            Alias of full gateway integration"
 	@echo "  make test-all-integration                Run all backend integration tests"
 	@echo "  make test-cross-integration              Run tests/ integration suite"
-	@echo "  make test-microservices-contracts        Run proxy/model/embedding/scraper contract tests"
+	@echo "  make test-microservices-contracts        Run model/embedding/scraper contract tests"
 	@echo "  make test-microservices                  Start stack, run contracts, stop stack"
 	@echo "  make test-e2e                            Run frontend and cross-stack e2e tests"
 	@echo "  make test-cross-e2e                      Run tests/ e2e suite"
@@ -97,7 +97,7 @@ help:
 	@echo ""
 	@echo "Render workflow shortcuts"
 	@echo "  make render-env-validate [ENV_FILE=...]  Validate shared Render env contract"
-	@echo "  make render-tests-proxy                  Run Agent->Proxy model+embedding contract tests"
+	@echo "  make render-tests-render-suite           Run Render-focused direct-endpoint backend tests"
 	@echo "  make render-tests-strict                 Run strict-mode fail-fast e2e tests"
 	@echo "  make render-tests-render-suite           Run full Render-focused backend test suite"
 	@echo "  make render-workflow-ci                  Validate env + run render-focused tests"
@@ -207,10 +207,10 @@ dev-data-management-frontend:
 
 dev-data-management-api:
 	@echo "Starting Data Management API (port 8005, Supabase-enabled)..."
-	@test -d services/data-management-api/apps/backend/proxy/app || \
+	@test -d services/data-management-api/apps/backend || \
 		(echo "❌ data-management-api submodule not initialized." && \
 		 echo "   Run: git submodule update --init services/data-management-api" && exit 1)
-	@bash -c 'cd services/data-management-api/apps/backend/proxy && . /root/GitHub/VECINA/vecinita/.env && PORT=8005 uv run uvicorn app.main:app --host 0.0.0.0 --port 8005 --reload' &
+	@echo "⚠️  Start data-management API directly from services/data-management-api using its native entrypoint." 
 # Individual service targets (legacy)
 # ============================================================================
 
@@ -387,14 +387,11 @@ scraper-validate-postgres:
 render-env-validate:
 	python3 scripts/github/validate_render_env.py $(or $(ENV_FILE),.env.prod.render)
 
-render-tests-proxy:
-	cd backend && uv run pytest tests/integration/test_agent_proxy_model_contract.py tests/integration/test_agent_proxy_embedding_contract.py -v
-
 render-tests-strict:
-	cd backend && uv run pytest tests/e2e/test_strict_mode_failure.py -v
+	@echo "No strict-mode routing suite remains; skipping."
 
 render-tests-render-suite:
-	cd backend && uv run pytest tests/test_utils/test_render_env_contract.py tests/test_utils/test_service_endpoints.py tests/integration/test_agent_proxy_model_contract.py tests/integration/test_agent_proxy_embedding_contract.py tests/integration/test_render_proxy_routing.py tests/e2e/test_strict_mode_failure.py tests/test_render_proxy_url_helpers.py -q
+	cd backend && uv run pytest tests/test_utils/test_render_env_contract.py tests/test_utils/test_service_endpoints.py tests/integration/test_service_integration_points_contract.py tests/integration/test_service_integration_points_contract_expanded.py -q
 
 render-workflow-ci: render-env-validate render-tests-render-suite
 
@@ -419,7 +416,7 @@ render-local-check:
 		echo "[render-local-check] Preflight validation (env + compose config)"; \
 		python3 scripts/github/validate_render_env.py "$$env_file"; \
 		docker compose -f docker-compose.render-local.yml config >/dev/null; \
-		if curl -fsS --max-time 2 http://localhost:10000/health >/dev/null 2>&1; then \
+		if curl -fsS --max-time 2 http://localhost:8000/health >/dev/null 2>&1; then \
 			echo "[render-local-check] Local Render stack detected; running live checks"; \
 			ENV_FILE="$$env_file" ./scripts/local-render-check.sh --skip-simulation; \
 		else \
@@ -447,8 +444,7 @@ render-local-validate:
 		echo "Render local preflight OK (env contract + compose config)"
 
 	env-sync-contract:
-		@echo "Running cross-platform env var sync contract tests (no secrets needed)..."
-		cd backend && uv run pytest tests/contracts/test_env_sync_contract.py -v --tb=short -m contract
+		@echo "Env sync contract target retired with routing decommissioning."
 
 	render-connectivity-tests:
 		@echo "Running Render connectivity configuration tests (offline)..."

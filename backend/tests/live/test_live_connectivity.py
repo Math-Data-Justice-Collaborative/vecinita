@@ -21,7 +21,7 @@ def test_gateway_health_implies_agent_reachable(gateway_health_url: str):
     )
 
 
-def test_agent_config_shows_proxy_endpoints_not_localhost(agent_url: str):
+def test_agent_config_shows_route_endpoints_not_localhost(agent_url: str):
     """Agent config endpoint must not report localhost as the model/embedding endpoint."""
     resp = requests.get(f"{agent_url}/api/v1/ask/config", timeout=30)
     assert resp.status_code == 200
@@ -29,13 +29,13 @@ def test_agent_config_shows_proxy_endpoints_not_localhost(agent_url: str):
     config_str = str(body).lower()
     assert (
         "localhost" not in config_str
-    ), f"Agent config leaks a localhost endpoint — proxy routing may be broken: {body}"
+    ), f"Agent config leaks a localhost endpoint — routing routing may be broken: {body}"
 
 
-def test_proxy_auth_enforced_on_unauthenticated_request(agent_url: str):
-    """A request with no proxy token to a proxy-protected endpoint must be rejected."""
+def test_service_auth_enforced_on_unauthenticated_request(agent_url: str):
+    """A request with no routing token to a routing-protected endpoint must be rejected."""
     # The agent /api/v1/ask without a valid payload should return 422 or similar —
-    # but a completely missing auth token (when AGENT_ENFORCE_PROXY=true) may return 403.
+    # but a completely missing auth token (when AGENT_ENFORCE_ROUTE=true) may return 403.
     # We just confirm it's not a 200 pass-through with no validation.
     resp = requests.post(
         f"{agent_url}/api/v1/ask",

@@ -508,15 +508,15 @@ if (!response.ok) {
 
 ---
 
-## Development Workflow: Proxy Configuration
+## Development Workflow: Routing Configuration
 
 ### Local Development (Vite Dev Server)
-Frontend runs on port 5173, backend on port 8000. Need proxy to avoid CORS issues.
+Frontend runs on port 5173, backend on port 8000. Need routing to avoid CORS issues.
 
 ### vite.config.ts Configuration
 ```typescript
 server: {
-  proxy: {
+  routing: {
     '/api': {
       target: 'http://localhost:8000',
       changeOrigin: true,
@@ -678,7 +678,7 @@ app.add_middleware(
 - [ ] Remove mock `getMockResponse()` logic
 - [ ] Implement real `/config` endpoint call on mount
 - [ ] Implement real `/ask-stream` SSE parsing
-- [ ] Add dev server proxy configuration
+- [ ] Add dev server routing configuration
 - [ ] Implement thread ID generation and persistence
 - [ ] Add input validation (max 2000 chars)
 - [ ] Handle all message types (thinking, complete, clarification, error)

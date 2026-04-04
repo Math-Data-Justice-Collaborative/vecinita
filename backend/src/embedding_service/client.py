@@ -112,7 +112,6 @@ class EmbeddingServiceClient(Embeddings):
         self.auth_token = (
             auth_token
             or os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
-            or os.getenv("MODAL_API_PROXY_SECRET")
             or os.getenv("MODAL_TOKEN_SECRET")
             or os.getenv("MODAL_API_TOKEN_SECRET")
         )
@@ -343,7 +342,7 @@ class EmbeddingServiceClient(Embeddings):
                     try:
                         logger.warning(
                             "Embedding /health returned 404 at %s; retrying root path to detect "
-                            "proxy prefix mismatch.",
+                            "endpoint prefix mismatch.",
                             base,
                         )
                         fallback = self.client.get(
