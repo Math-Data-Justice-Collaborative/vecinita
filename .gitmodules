@@ -18,11 +18,6 @@
 	url = https://github.com/Math-Data-Justice-Collaborative/vecinita-scraper.git
 	branch = main
 
-[submodule "services/modal-proxy"]
-	path = services/modal-proxy
-	url = https://github.com/Math-Data-Justice-Collaborative/vecinita-modal-proxy.git
-	branch = main
-
 [submodule "services/embedding-modal"]
 	path = services/embedding-modal
 	url = https://github.com/Math-Data-Justice-Collaborative/vecinita-embedding.git
