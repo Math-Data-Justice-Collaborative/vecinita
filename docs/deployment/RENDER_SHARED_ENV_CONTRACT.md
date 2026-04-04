@@ -1,8 +1,13 @@
 # Render Shared Env Contract
 
-This repository intentionally uses a single shared Render environment group
-backed by `.env.prod.render`. To reduce configuration drift, we enforce a
-contract for critical keys and key relationships.
+This repository intentionally uses shared Render environment groups backed by
+root contract files:
+
+- `.env.prod.render` for production
+- `.env.staging.render` for staging
+
+To reduce configuration drift, we enforce a contract for critical keys and key
+relationships.
 
 ## Why This Exists
 
@@ -19,6 +24,8 @@ Run manually:
 
 ```bash
 python3 scripts/github/validate_render_env.py .env.prod.render
+python3 scripts/github/validate_render_env.py .env.staging.render
+python3 scripts/github/validate_render_env_parity.py .env.prod.render .env.staging.render
 ```
 
 This runs in CI in:

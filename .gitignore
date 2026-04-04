@@ -102,3 +102,7 @@ backend/data/output/
 # Runtime state files (embedding service, model selection)
 backend/src/embedding_service/selection.json
 backend/src/agent/data/model_selection.json
+auth/test-results.local-ci.xml
+backend/integration-test-results.local-ci.xml
+backend/schema-test-results.local-ci.xml
+backend/test-results.local-ci.xml

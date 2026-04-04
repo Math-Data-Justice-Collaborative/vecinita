@@ -38,8 +38,14 @@ jobs:
       - name: Checkout contract test submodules
         run: git submodule update --init --depth 1 services/embedding-modal services/model-modal
 
-      - name: Validate shared Render env contract
+      - name: Validate production Render env contract
         run: python3 scripts/github/validate_render_env.py .env.prod.render
+
+      - name: Validate staging Render env contract
+        run: python3 scripts/github/validate_render_env.py .env.staging.render
+
+      - name: Validate Render env key parity (prod vs staging)
+        run: python3 scripts/github/validate_render_env_parity.py .env.prod.render .env.staging.render
 
       - name: Validate gateway dependency profile
         run: python3 scripts/github/validate_gateway_dependency_profile.py

@@ -151,7 +151,7 @@ services:
       - key: VITE_GATEWAY_URL
         sync: false
       - key: VITE_BACKEND_URL
-        value: https://vecinita-gateway-staging.onrender.com
+        sync: false
       - key: VITE_AGENT_REQUEST_TIMEOUT_MS
         sync: false
       - key: VITE_AGENT_STREAM_TIMEOUT_MS
