@@ -251,18 +251,18 @@ jobs:
             echo "[probe] Agent dependency health $url"
             payload=$(curl -fsS --retry 4 --retry-delay 10 --retry-all-errors --max-time 30 "$url")
             JSON_PAYLOAD="$payload" python3 - <<'PY'
-import json
-import os
+            import json
+            import os
 
-payload = json.loads(os.environ["JSON_PAYLOAD"])
-status = payload.get("status")
-readiness = payload.get("readiness")
-if status != "ok":
-    raise SystemExit(f"Agent status is not ok: {status}")
-if readiness == "degraded":
-    raise SystemExit(f"Agent readiness degraded: {payload}")
-print(f"[result] Agent health status={status} readiness={readiness}")
-PY
+            payload = json.loads(os.environ["JSON_PAYLOAD"])
+            status = payload.get("status")
+            readiness = payload.get("readiness")
+            if status != "ok":
+              raise SystemExit(f"Agent status is not ok: {status}")
+            if readiness == "degraded":
+              raise SystemExit(f"Agent readiness degraded: {payload}")
+            print(f"[result] Agent health status={status} readiness={readiness}")
+            PY
           }
 
           check_gateway_health_payload() {
@@ -287,19 +287,19 @@ PY
 
             payload=$(cat /tmp/gateway-health.json)
             JSON_PAYLOAD="$payload" python3 - <<'PY'
-import json
-import os
+            import json
+            import os
 
-payload = json.loads(os.environ["JSON_PAYLOAD"])
-status = payload.get("status")
-agent = payload.get("agent_service")
-embedding = payload.get("embedding_service")
-if status != "ok":
-    raise SystemExit(f"Gateway status is not ok: {status}")
-if agent != "ok" or embedding != "ok":
-    raise SystemExit(f"Gateway dependencies unhealthy: agent={agent}, embedding={embedding}, payload={payload}")
-print(f"[result] Gateway status={status} agent={agent} embedding={embedding}")
-PY
+            payload = json.loads(os.environ["JSON_PAYLOAD"])
+            status = payload.get("status")
+            agent = payload.get("agent_service")
+            embedding = payload.get("embedding_service")
+            if status != "ok":
+                raise SystemExit(f"Gateway status is not ok: {status}")
+            if agent != "ok" or embedding != "ok":
+                raise SystemExit(f"Gateway dependencies unhealthy: agent={agent}, embedding={embedding}, payload={payload}")
+            print(f"[result] Gateway status={status} agent={agent} embedding={embedding}")
+            PY
           }
 
           check_url "Frontend health" "$FRONTEND_URL/health"
@@ -317,7 +317,6 @@ PY
     environment: production
     env:
       RENDER_PROD_DEPLOY_HOOK_AGENT: ${{ secrets.RENDER_PROD_DEPLOY_HOOK_AGENT || secrets.RENDER_DEPLOY_HOOK_AGENT || secrets.RENDER_VECINITA_AGENT_DEPLOY_HOOK }}
-      RENDER_PROD_DEPLOY_HOOK_GATEWAY: ${{ secrets.RENDER_PROD_DEPLOY_HOOK_GATEWAY || secrets.RENDER_DEPLOY_HOOK_GATEWAY || secrets.RENDER_VECINITA_GATEWAY_DEPLOY_HOOK }}
       RENDER_PROD_DEPLOY_HOOK_FRONTEND: ${{ secrets.RENDER_PROD_DEPLOY_HOOK_FRONTEND || secrets.RENDER_DEPLOY_HOOK_FRONTEND || secrets.RENDER_VECINITA_FRONTEND_DEPLOY_HOOK }}
       RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
       RENDER_GATEWAY_SERVICE_ID: ${{ secrets.RENDER_GATEWAY_SERVICE_ID }}
@@ -335,24 +334,17 @@ PY
           fi
           python3 scripts/github/validate_render_runtime.py \
             --service-id "$RENDER_GATEWAY_SERVICE_ID" \
-            --service-name "vecinita-gateway" \
-            --expect docker
+            --service-name "vecinita-gateway-prod-v5" \
+            --expect python
 
       - name: Trigger production agent deploy hook
         if: ${{ env.RENDER_PROD_DEPLOY_HOOK_AGENT != '' }}
         run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_AGENT" || echo "::notice::Production agent deploy hook request failed."
 
-      - name: Trigger production gateway deploy hook
-        if: ${{ env.RENDER_PROD_DEPLOY_HOOK_GATEWAY != '' }}
-        run: curl -fsSL -X POST "$RENDER_PROD_DEPLOY_HOOK_GATEWAY" || echo "::notice::Production gateway deploy hook request failed."
-
-      - name: Trigger production gateway deploy via Render API fallback
-        if: ${{ env.RENDER_PROD_DEPLOY_HOOK_GATEWAY == '' && env.RENDER_API_KEY != '' && env.RENDER_GATEWAY_SERVICE_ID != '' }}
+      - name: Confirm production gateway is GitHub auto-deploy managed
         run: |
-          curl -fsSL -X POST "https://api.render.com/v1/services/$RENDER_GATEWAY_SERVICE_ID/deploys" \
-            -H "Authorization: Bearer $RENDER_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d '{}' || echo "::notice::Production gateway deploy API fallback request failed."
+          echo "Production gateway v5 is expected to auto-deploy directly from GitHub on main commits."
+          echo "Manual gateway deploy hooks are intentionally skipped in this workflow."
 
       - name: Trigger production frontend deploy hook
         if: ${{ env.RENDER_PROD_DEPLOY_HOOK_FRONTEND != '' }}
@@ -368,9 +360,8 @@ PY
             fi
           done
 
-          if [ -z "$RENDER_PROD_DEPLOY_HOOK_GATEWAY" ] && \
-             { [ -z "$RENDER_API_KEY" ] || [ -z "$RENDER_GATEWAY_SERVICE_ID" ]; }; then
-            echo "::warning::No explicit production gateway deploy trigger configured. Gateway service is expected to auto-deploy on commit."
+          if [ -z "$RENDER_GATEWAY_SERVICE_ID" ]; then
+            echo "::warning::RENDER_GATEWAY_SERVICE_ID is not configured; deploy wait/verification for gateway v5 may be skipped."
           fi
 
           if [ "$missing" -ne 0 ]; then
@@ -427,18 +418,18 @@ PY
             echo "[probe] Agent dependency health $url"
             payload=$(curl -fsS --retry 4 --retry-delay 10 --retry-all-errors --max-time 30 "$url")
             JSON_PAYLOAD="$payload" python3 - <<'PY'
-import json
-import os
+            import json
+            import os
 
-payload = json.loads(os.environ["JSON_PAYLOAD"])
-status = payload.get("status")
-readiness = payload.get("readiness")
-if status != "ok":
-    raise SystemExit(f"Agent status is not ok: {status}")
-if readiness == "degraded":
-    raise SystemExit(f"Agent readiness degraded: {payload}")
-print(f"[result] Agent health status={status} readiness={readiness}")
-PY
+            payload = json.loads(os.environ["JSON_PAYLOAD"])
+            status = payload.get("status")
+            readiness = payload.get("readiness")
+            if status != "ok":
+              raise SystemExit(f"Agent status is not ok: {status}")
+            if readiness == "degraded":
+              raise SystemExit(f"Agent readiness degraded: {payload}")
+            print(f"[result] Agent health status={status} readiness={readiness}")
+            PY
           }
 
           check_gateway_health_payload() {
@@ -463,19 +454,19 @@ PY
 
             payload=$(cat /tmp/gateway-health.json)
             JSON_PAYLOAD="$payload" python3 - <<'PY'
-import json
-import os
+            import json
+            import os
 
-payload = json.loads(os.environ["JSON_PAYLOAD"])
-status = payload.get("status")
-agent = payload.get("agent_service")
-embedding = payload.get("embedding_service")
-if status != "ok":
-    raise SystemExit(f"Gateway status is not ok: {status}")
-if agent != "ok" or embedding != "ok":
-    raise SystemExit(f"Gateway dependencies unhealthy: agent={agent}, embedding={embedding}, payload={payload}")
-print(f"[result] Gateway status={status} agent={agent} embedding={embedding}")
-PY
+            payload = json.loads(os.environ["JSON_PAYLOAD"])
+            status = payload.get("status")
+            agent = payload.get("agent_service")
+            embedding = payload.get("embedding_service")
+            if status != "ok":
+                raise SystemExit(f"Gateway status is not ok: {status}")
+            if agent != "ok" or embedding != "ok":
+                raise SystemExit(f"Gateway dependencies unhealthy: agent={agent}, embedding={embedding}, payload={payload}")
+            print(f"[result] Gateway status={status} agent={agent} embedding={embedding}")
+            PY
           }
 
           check_url "Frontend health" "$FRONTEND_URL/health"
