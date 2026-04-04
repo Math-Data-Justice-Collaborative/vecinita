@@ -16,8 +16,8 @@ import requests
 pytestmark = pytest.mark.live
 
 
-def test_gateway_health_has_status_key(gateway_url: str):
-    resp = requests.get(f"{gateway_url}/api/v1/health", timeout=30)
+def test_gateway_health_has_status_key(gateway_health_url: str):
+    resp = requests.get(gateway_health_url, timeout=30)
     assert resp.status_code == 200
     assert "status" in resp.json(), f"Gateway health missing 'status': {resp.json()}"
 

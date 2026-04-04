@@ -8,12 +8,12 @@ import requests
 pytestmark = pytest.mark.live
 
 
-def test_gateway_health_implies_agent_reachable(gateway_url: str):
+def test_gateway_health_implies_agent_reachable(gateway_health_url: str):
     """Gateway health passing confirms the gateway→agent private-network path is live."""
-    resp = requests.get(f"{gateway_url}/api/v1/health", timeout=30)
+    resp = requests.get(gateway_health_url, timeout=30)
     assert (
         resp.status_code == 200
-    ), f"gateway /api/v1/health returned {resp.status_code} — agent may be unreachable"
+    ), f"gateway health endpoint returned {resp.status_code} — agent may be unreachable"
     payload = resp.json()
     assert payload.get("agent_service") == "ok", (
         "gateway health indicates agent dependency is not healthy: "

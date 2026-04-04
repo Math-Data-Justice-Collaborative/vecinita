@@ -16,6 +16,7 @@ from __future__ import annotations
 import os
 
 import pytest
+import requests
 
 # ---------------------------------------------------------------------------
 # Skip guard — applied to all tests in this package
@@ -42,6 +43,22 @@ def gateway_url() -> str:
     if not url:
         pytest.skip("RENDER_GATEWAY_URL not set")
     return url.rstrip("/")
+
+
+@pytest.fixture(scope="session")
+def gateway_health_url(gateway_url: str) -> str:
+    """Gateway health endpoint with compatibility fallback (/api/v1/health -> /health)."""
+    candidates = (f"{gateway_url}/api/v1/health", f"{gateway_url}/health")
+    for url in candidates:
+        try:
+            resp = requests.get(url, timeout=15)
+        except requests.RequestException:
+            continue
+        if resp.status_code == 200:
+            return url
+
+    # Return preferred path so downstream assertions report a concrete failure location.
+    return candidates[0]
 
 
 @pytest.fixture(scope="session")

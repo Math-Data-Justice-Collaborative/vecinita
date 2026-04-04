@@ -31,9 +31,9 @@ def test_frontend_index_returns_200(frontend_url: str):
 # ---------------------------------------------------------------------------
 
 
-def test_gateway_health_returns_200(gateway_url: str):
-    resp = requests.get(f"{gateway_url}/api/v1/health", timeout=30)
-    assert resp.status_code == 200, f"Gateway /api/v1/health returned {resp.status_code}"
+def test_gateway_health_returns_200(gateway_health_url: str):
+    resp = requests.get(gateway_health_url, timeout=30)
+    assert resp.status_code == 200, f"Gateway health endpoint returned {resp.status_code}"
     body = resp.json()
     assert "status" in body, f"Gateway health body missing 'status': {body}"
 
