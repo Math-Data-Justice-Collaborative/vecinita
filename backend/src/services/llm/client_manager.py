@@ -165,7 +165,6 @@ class LocalLLMClientManager:
         return headers
 
     def _via_proxy(self) -> bool:
-        """Legacy compatibility helper: proxy mode has been retired."""
         return False
 
     def _is_local_proxy(self) -> bool:

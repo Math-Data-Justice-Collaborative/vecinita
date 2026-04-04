@@ -5,9 +5,9 @@ Use this checklist before submitting CI/CD topology changes.
 ## Topology and Isolation
 
 - [ ] Mapping still matches canonical service ownership and deployment platform.
-- [ ] Data Management API and Modal Proxy are private Render services in Virginia.
+- [ ] Data Management API is a private Render service in Virginia.
 - [ ] Data Management Frontend calls Data Management API directly.
-- [ ] Agent backend and Data Management API route model/embedding/scraper calls through Modal Proxy.
+- [ ] Agent backend and Data Management API route model/embedding/scraper calls directly to Modal endpoints.
 
 ## Workflow Quality
 

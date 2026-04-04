@@ -51,7 +51,7 @@ class _JsonResponse:
 def test_ip01_frontend_gateway_render_helper_contract() -> None:
     content = _read_workspace_file("frontend", "src", "app", "services", "agentService.ts")
     assert "isDirectRenderAgentHost" in content
-    assert "stripGatewayPrefixForDirectAgent" in content
+    assert "normalizeAgentApiBaseUrl" in content
     assert "resolveGatewayUrl" in content
 
 
@@ -202,7 +202,9 @@ def test_ip06_agent_embedding_auth_fallback_contract(monkeypatch) -> None:
         fake_client_module, "create_embedding_client", _fake_create_embedding_client
     )
     monkeypatch.setenv("RENDER", "true")
-    monkeypatch.setenv("MODAL_EMBEDDING_ENDPOINT", "http://vecinita-modal-proxy-v1:10000/embedding")
+    monkeypatch.setenv(
+        "MODAL_EMBEDDING_ENDPOINT", "https://vecinita--vecinita-embedding-web-app.modal.run"
+    )
     monkeypatch.setenv("EMBEDDING_SERVICE_AUTH_TOKEN", "")
     monkeypatch.setenv("MODAL_API_KEY", "")
     monkeypatch.setenv("MODAL_TOKEN_SECRET", "")
@@ -224,7 +226,7 @@ def test_ip06_agent_embedding_preserves_explicit_modal_url_on_render(monkeypatch
     importlib.reload(app_config)
     result = app_config._normalize_internal_service_url(
         "https://vecinita--vecinita-embedding-web-app.modal.run",
-        fallback_url="http://vecinita-modal-proxy-v1:10000/embedding",
+        fallback_url="https://vecinita--vecinita-embedding-web-app.modal.run",
     )
     assert result == "https://vecinita--vecinita-embedding-web-app.modal.run"
 
@@ -236,12 +238,12 @@ def test_ip07_agent_model_preserves_explicit_modal_url_on_render(monkeypatch) ->
     importlib.reload(app_config)
     result = app_config._normalize_internal_service_url(
         "https://vecinita--vecinita-model-api.modal.run",
-        fallback_url="http://vecinita-modal-proxy-v1:10000/model",
+        fallback_url="https://vecinita--vecinita-model-api.modal.run",
     )
     assert result == "https://vecinita--vecinita-model-api.modal.run"
 
 
-def test_ip07_agent_model_forces_proxy_when_strict_mode_enabled(monkeypatch) -> None:
+def test_ip07_agent_model_preserves_direct_modal_when_strict_mode_enabled(monkeypatch) -> None:
     monkeypatch.setenv("RENDER", "true")
     monkeypatch.setenv("RENDER_REMOTE_INFERENCE_ONLY", "true")
     import src.config as app_config
@@ -249,12 +251,12 @@ def test_ip07_agent_model_forces_proxy_when_strict_mode_enabled(monkeypatch) -> 
     importlib.reload(app_config)
     result = app_config._normalize_internal_service_url(
         "https://vecinita--vecinita-model-api.modal.run",
-        fallback_url="http://vecinita-modal-proxy-v1:10000/model",
+        fallback_url="https://vecinita--vecinita-model-api.modal.run",
     )
     assert result == "https://vecinita--vecinita-model-api.modal.run"
 
 
-def test_ip06_agent_embedding_forces_proxy_when_strict_mode_enabled(monkeypatch) -> None:
+def test_ip06_agent_embedding_preserves_direct_modal_when_strict_mode_enabled(monkeypatch) -> None:
     monkeypatch.setenv("RENDER", "true")
     monkeypatch.setenv("AGENT_ENFORCE_PROXY", "true")
     import src.config as app_config
@@ -262,12 +264,12 @@ def test_ip06_agent_embedding_forces_proxy_when_strict_mode_enabled(monkeypatch)
     importlib.reload(app_config)
     result = app_config._normalize_internal_service_url(
         "https://vecinita--vecinita-embedding-web-app.modal.run",
-        fallback_url="http://vecinita-modal-proxy-v1:10000/embedding",
+        fallback_url="https://vecinita--vecinita-embedding-web-app.modal.run",
     )
     assert result == "https://vecinita--vecinita-embedding-web-app.modal.run"
 
 
-def test_ip07_agent_model_default_proxy_contract(monkeypatch) -> None:
+def test_ip07_agent_model_default_direct_modal_contract(monkeypatch) -> None:
     monkeypatch.setenv("RENDER", "true")
     monkeypatch.delenv("MODAL_OLLAMA_ENDPOINT", raising=False)
     monkeypatch.delenv("OLLAMA_BASE_URL", raising=False)
@@ -276,7 +278,7 @@ def test_ip07_agent_model_default_proxy_contract(monkeypatch) -> None:
     import src.config as app_config
 
     importlib.reload(app_config)
-    assert app_config.OLLAMA_BASE_URL == "http://localhost:11434"
+    assert app_config.OLLAMA_BASE_URL == "https://vecinita--vecinita-model-api.modal.run"
 
 
 def test_ip08_agent_postgres_auto_mode_prefers_postgres_when_supabase_missing(monkeypatch) -> None:
@@ -541,20 +543,15 @@ def test_ip12_documents_download_url_url_only_contract(monkeypatch) -> None:
     assert response.json()["downloadable"] is False
 
 
-def test_ip13_modal_proxy_router_prefix_strip_contract() -> None:
-    content = _read_workspace_file("services", "modal-proxy", "app", "backends", "router.py")
-    defaults = _read_workspace_file("services", "modal-proxy", "app", "backends", "defaults.py")
+def test_ip13_direct_modal_endpoint_contract() -> None:
+    content = _read_workspace_file("backend", "src", "config.py")
 
-    assert "return rule.backend, upstream_path" in content
-    assert 'path_strip_prefix="/model"' in defaults
-    assert 'path_strip_prefix="/embedding"' in defaults
+    assert "vecinita--vecinita-model-api.modal.run" in content
+    assert "vecinita--vecinita-embedding-web-app.modal.run" in content
 
 
-def test_ip13_modal_proxy_auth_header_injection_contract() -> None:
-    content = _read_workspace_file("services", "modal-proxy", "app", "backends", "credentials.py")
-    middleware = _read_workspace_file("services", "modal-proxy", "app", "middleware.py")
+def test_ip13_gateway_embed_headers_do_not_use_proxy_token_contract() -> None:
+    content = _read_workspace_file("backend", "src", "api", "router_embed.py")
 
-    assert 'headers["Modal-Key"] = config.token_id' in content
-    assert 'headers["Modal-Secret"] = config.token_secret' in content
-    assert '"modal-key"' in middleware
-    assert '"modal-secret"' in middleware
+    assert '"x-embedding-service-token"' in content
+    assert '"X-Proxy-Token"' not in content

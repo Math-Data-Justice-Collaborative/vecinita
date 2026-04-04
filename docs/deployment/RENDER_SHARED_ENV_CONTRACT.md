@@ -14,7 +14,7 @@ relationships.
 A single shared env group is easy to operate but easy to drift. The contract
 validator catches high-impact mistakes before deploys, especially around:
 
-- proxy-only model and embedding routing
+- direct model and embedding routing
 - strict runtime flags
 - critical service URLs and auth tokens
 
@@ -45,14 +45,13 @@ pins Python to a supported version for binary wheel availability.
 
 ## Enforced Rules
 
-1. Required keys must be present (DB, Supabase, proxy endpoints, auth token,
-   frontend routing vars, and proxy upstream targets).
-2. `MODAL_OLLAMA_ENDPOINT` must use `vecinita-modal-proxy-v1:10000/model`.
-3. `MODAL_EMBEDDING_ENDPOINT` must use `vecinita-modal-proxy-v1:10000/embedding`.
+1. Required keys must be present (DB, Supabase, direct upstream endpoints,
+   frontend routing vars, and strict runtime flags).
+2. `VECINITA_MODEL_API_URL` must point to a direct `.modal.run` endpoint.
+3. `VECINITA_EMBEDDING_API_URL` must point to a direct `.modal.run` endpoint.
 4. `OLLAMA_BASE_URL` must equal `MODAL_OLLAMA_ENDPOINT`.
 5. `EMBEDDING_SERVICE_URL` must equal `MODAL_EMBEDDING_ENDPOINT`.
-6. `AGENT_ENFORCE_PROXY=true` is required.
-7. `RENDER_REMOTE_INFERENCE_ONLY=true` is required.
+6. `RENDER_REMOTE_INFERENCE_ONLY=true` is required.
 
 ## Warnings
 
@@ -65,7 +64,7 @@ not a hard production blocker.
 Even with one shared group, keys should have conceptual owners:
 
 - agent-owned runtime keys
-- modal-proxy-owned upstream keys
+- modal upstream endpoint keys
 - frontend-owned `VITE_*` keys
 - shared infrastructure keys (DB/Supabase)
 

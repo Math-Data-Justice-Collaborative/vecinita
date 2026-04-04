@@ -14,10 +14,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-_RENDER_MODAL_PROXY_BASE = (
-    (os.getenv("MODAL_PROXY_INTERNAL_URL") or "http://vecinita-modal-proxy-v1:10000").strip()
-).rstrip("/")
-
 
 # ---------------------------------------------------------------------------
 # Runtime Environment Detection
@@ -58,8 +54,6 @@ def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -
                 host = ""
 
             # Ignore local/docker-style endpoints on Render and force safe fallback.
-            if host.endswith("modal.run"):
-                return fallback_url
             if host not in {
                 "",
                 "localhost",
@@ -89,7 +83,9 @@ EMBEDDING_SERVICE_URL: str = _normalize_internal_service_url(
     or os.getenv("MODAL_EMBEDDING_ENDPOINT")
     or os.getenv("EMBEDDING_SERVICE_URL"),
     fallback_url=(
-        f"{_RENDER_MODAL_PROXY_BASE}/embedding" if _running_on_render() else "http://localhost:8001"
+        "https://vecinita--vecinita-embedding-web-app.modal.run"
+        if _running_on_render()
+        else "http://localhost:8001"
     ),
 )
 
@@ -101,7 +97,9 @@ OLLAMA_BASE_URL: str | None = _normalize_internal_service_url(
     or os.getenv("MODAL_OLLAMA_ENDPOINT")
     or os.getenv("OLLAMA_BASE_URL"),
     fallback_url=(
-        f"{_RENDER_MODAL_PROXY_BASE}/model" if _running_on_render() else "http://localhost:11434"
+        "https://vecinita--vecinita-model-api.modal.run"
+        if _running_on_render()
+        else "http://localhost:11434"
     ),
 )
 OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.1:8b")

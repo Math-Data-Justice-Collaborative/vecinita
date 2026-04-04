@@ -143,8 +143,6 @@ services:
         sync: false
       - key: LANGSMITH_PROJECT
         sync: false
-      - key: MODAL_PROXY_INTERNAL_URL
-        sync: false
 
   - type: web
     name: vecinita-frontend
@@ -257,8 +255,6 @@ services:
       - key: VECINITA_MODEL_API_URL
         sync: false
       - key: VECINITA_SCRAPER_API_URL
-        sync: false
-      - key: MODAL_PROXY_INTERNAL_URL
         sync: false
       - key: MODAL_TOKEN_ID
         sync: false

@@ -121,7 +121,7 @@ def test_ip03_gateway_to_agent_proxy_forwards_query_params(monkeypatch) -> None:
 
 
 def test_ip04_gateway_to_embedding_service_headers_and_endpoint(monkeypatch) -> None:
-    """IP-04: Gateway embedding route builds expected auth/proxy headers."""
+    """IP-04: Gateway embedding route builds direct embedding auth headers."""
     import src.api.router_embed as router_embed
 
     monkeypatch.setattr(router_embed, "EMBEDDING_SERVICE_AUTH_TOKEN", "embed-token")
@@ -168,8 +168,8 @@ def test_ip05_gateway_to_reindex_route_forwards_token_and_params(monkeypatch) ->
     assert captured["headers"] == {"x-reindex-token": "reindex-secret"}
 
 
-def test_ip06_agent_to_embedding_modal_proxy_headers(monkeypatch) -> None:
-    """IP-06: Agent startup wires modal-proxy embedding URL + auth token into client factory."""
+def test_ip06_agent_to_embedding_direct_endpoint_headers(monkeypatch) -> None:
+    """IP-06: Agent startup wires direct embedding URL + auth token into client factory."""
 
     captured: dict[str, object] = {}
 
@@ -188,7 +188,9 @@ def test_ip06_agent_to_embedding_modal_proxy_headers(monkeypatch) -> None:
     )
     monkeypatch.setenv("RENDER", "true")
     monkeypatch.delenv("VECINITA_EMBEDDING_API_URL", raising=False)
-    monkeypatch.setenv("MODAL_EMBEDDING_ENDPOINT", "http://vecinita-modal-proxy-v1:10000/embedding")
+    monkeypatch.setenv(
+        "MODAL_EMBEDDING_ENDPOINT", "https://vecinita--vecinita-embedding-web-app.modal.run"
+    )
     monkeypatch.delenv("EMBEDDING_SERVICE_URL", raising=False)
     monkeypatch.setenv("EMBEDDING_SERVICE_AUTH_TOKEN", "embed-token")
 
@@ -200,13 +202,13 @@ def test_ip06_agent_to_embedding_modal_proxy_headers(monkeypatch) -> None:
 
     importlib.reload(agent_main)
 
-    assert captured["url"] == "http://vecinita-modal-proxy-v1:10000/embedding"
+    assert captured["url"] == "https://vecinita--vecinita-embedding-web-app.modal.run"
     assert captured["validate_on_init"] is True
     assert captured["auth_token"] == "embed-token"
 
 
-def test_ip07_agent_to_model_uses_proxy_fallback_on_render(monkeypatch) -> None:
-    """IP-07: Agent model URL normalizes to /model proxy route on Render."""
+def test_ip07_agent_to_model_uses_direct_modal_fallback_on_render(monkeypatch) -> None:
+    """IP-07: Agent model URL normalizes to direct Modal endpoint on Render."""
     monkeypatch.setenv("RENDER", "true")
 
     import src.config as app_config
@@ -215,9 +217,9 @@ def test_ip07_agent_to_model_uses_proxy_fallback_on_render(monkeypatch) -> None:
 
     resolved = app_config._normalize_internal_service_url(
         "http://localhost:11434",
-        fallback_url="http://vecinita-modal-proxy-v1:10000/model",
+        fallback_url="https://vecinita--vecinita-model-api.modal.run",
     )
-    assert resolved == "http://vecinita-modal-proxy-v1:10000/model"
+    assert resolved == "https://vecinita--vecinita-model-api.modal.run"
 
 
 def test_ip08_agent_tools_postgres_fallback_when_mode_postgres(monkeypatch) -> None:
@@ -379,18 +381,10 @@ def test_ip12_documents_router_mixed_datasource_contract(monkeypatch) -> None:
     assert normalized["download_url"] == "https://cdn.example.org/file.pdf"
 
 
-def test_ip13_modal_proxy_route_and_header_contract_files() -> None:
-    """IP-13: Modal proxy keeps path-strip and credential-strip contracts."""
-    defaults_content = _read_workspace_file(
-        "services", "modal-proxy", "app", "backends", "defaults.py"
-    )
-    proxy_content = _read_workspace_file("services", "modal-proxy", "app", "proxy.py")
+def test_ip13_direct_modal_endpoint_contract_files() -> None:
+    """IP-13: Service endpoint contracts prefer direct Modal URLs and no proxy token headers."""
+    service_endpoints_content = _read_workspace_file("backend", "src", "service_endpoints.py")
+    embed_router_content = _read_workspace_file("backend", "src", "api", "router_embed.py")
 
-    assert 'path_prefix="/model"' in defaults_content
-    assert 'path_strip_prefix="/model"' in defaults_content
-    assert 'path_prefix="/embedding"' in defaults_content
-    assert 'path_strip_prefix="/embedding"' in defaults_content
-
-    assert '"modal-key"' in proxy_content
-    assert '"modal-secret"' in proxy_content
-    assert '"x-proxy-token"' in proxy_content
+    assert "vecinita--vecinita-scraper-api-fastapi.modal.run/jobs" in service_endpoints_content
+    assert '"X-Proxy-Token"' not in embed_router_content

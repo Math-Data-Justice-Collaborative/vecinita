@@ -77,8 +77,6 @@ services:
         sync: false
       - key: VECINITA_SCRAPER_API_URL
         sync: false
-      - key: MODAL_PROXY_INTERNAL_URL
-        sync: false
       - key: EMBEDDING_SERVICE_AUTH_TOKEN
         sync: false
       - key: EMBEDDING_STRICT_STARTUP
@@ -245,8 +243,6 @@ services:
       - key: VECINITA_MODEL_API_URL
         sync: false   # MODAL required:true
       - key: VECINITA_SCRAPER_API_URL
-        sync: false
-      - key: MODAL_PROXY_INTERNAL_URL
         sync: false
       - key: MODAL_TOKEN_ID
         sync: false

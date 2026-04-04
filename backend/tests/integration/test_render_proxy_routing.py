@@ -1,11 +1,9 @@
-"""Integration tests: agent API endpoints with Render proxy URL wiring.
+"""Integration tests: agent API endpoints with Render direct endpoint URL wiring.
 
 Verifies that:
 - /health and /config endpoints respond correctly.
-- When RENDER env is set, the agent's ollama_base_url and embedding_service_url
-  contain the correct proxy path prefixes (/model, /embedding).
-- The /ask endpoint succeeds when LLM/embedding are replaced with mocks
-  whose base_url reflects the proxy path.
+- When RENDER env is set, local/docker URLs resolve to direct Modal endpoints.
+- The /ask endpoint succeeds when LLM/embedding are replaced with mocks.
 """
 
 from __future__ import annotations
@@ -140,51 +138,45 @@ def test_ask_endpoint_rejects_missing_question(fastapi_client):
 
 
 # ---------------------------------------------------------------------------
-# Proxy URL wiring assertions (on Render environment)
+# Direct endpoint wiring assertions (on Render environment)
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.api
-def test_ollama_base_url_uses_model_proxy_prefix_on_render(render_env):
-    """On Render, ollama_base_url must end with /model (proxy routing prefix)."""
+def test_ollama_base_url_uses_direct_modal_endpoint_on_render(render_env):
+    """On Render, ollama base URL should resolve away from local URL to direct Modal endpoint."""
     import src.agent.main as m
 
     result = m._normalize_internal_service_url(
         "http://localhost:11434",
-        fallback_url="http://vecinita-modal-proxy-v1:10000/model",
+        fallback_url="https://vecinita--vecinita-model-api.modal.run",
     )
-    assert (
-        "/model" in result
-    ), f"ollama_base_url should contain /model prefix for proxy routing, got: {result}"
+    assert result == "https://vecinita--vecinita-model-api.modal.run"
 
 
 @pytest.mark.api
-def test_embedding_url_uses_embedding_proxy_prefix_on_render(render_env):
-    """On Render, embedding URL must end with /embedding (proxy routing prefix)."""
+def test_embedding_url_uses_direct_modal_endpoint_on_render(render_env):
+    """On Render, embedding URL should resolve away from local URL to direct Modal endpoint."""
     import src.agent.main as m
 
     result = m._normalize_internal_service_url(
         "http://embedding-service:8001",
-        fallback_url="http://vecinita-modal-proxy-v1:10000/embedding",
+        fallback_url="https://vecinita--vecinita-embedding-web-app.modal.run",
     )
-    assert (
-        "/embedding" in result
-    ), f"embedding_service_url should contain /embedding prefix, got: {result}"
+    assert result == "https://vecinita--vecinita-embedding-web-app.modal.run"
 
 
 @pytest.mark.api
-def test_proxy_fallback_host_is_internal_render_hostname(render_env):
-    """The proxy host must be the Render private-network hostname, not public HTTPS."""
+def test_direct_modal_fallback_host_is_public_modal_domain(render_env):
+    """Direct endpoint mode should use Modal domains instead of internal proxy hostnames."""
     import src.agent.main as m
 
     result = m._normalize_internal_service_url(
         "http://localhost:11434",
-        fallback_url="http://vecinita-modal-proxy-v1:10000/model",
+        fallback_url="https://vecinita--vecinita-model-api.modal.run",
     )
-    assert "vecinita-modal-proxy" in result
-    assert (
-        "onrender.com" not in result
-    ), "Should use Render private hostname not public URL to avoid egress"
+    assert "modal.run" in result
+    assert "vecinita-modal-proxy" not in result
 
 
 @pytest.mark.api
@@ -194,7 +186,7 @@ def test_nonlocal_explicit_url_preserved_on_render(render_env):
 
     result = m._normalize_internal_service_url(
         "https://vecinita--vecinita-model-api.modal.run",
-        fallback_url="http://vecinita-modal-proxy-v1:10000/model",
+        fallback_url="https://vecinita--vecinita-model-api.modal.run",
     )
     assert result == "https://vecinita--vecinita-model-api.modal.run"
 
@@ -209,6 +201,6 @@ def test_off_render_url_uses_env_var_value(monkeypatch):
 
     result = m._normalize_internal_service_url(
         "http://localhost:11434",
-        fallback_url="http://vecinita-modal-proxy-v1:10000/model",
+        fallback_url="https://vecinita--vecinita-model-api.modal.run",
     )
     assert result == "http://localhost:11434"

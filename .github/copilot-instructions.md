@@ -9,7 +9,6 @@ Use this mapping as source-of-truth when implementing infra changes:
 - **Chat Frontend** (`joseph-c-mcguire/Vecinitafrontend`) -> Render frontend
 - **Data Management Frontend** (`Math-Data-Justice-Collaborative/vecinita-data-management-frontend`) -> Render frontend
 - **Data Management API** (`Math-Data-Justice-Collaborative/vecinita-data-management`) -> Render private service in Virginia
-- **Modal Proxy** (`Math-Data-Justice-Collaborative/vecinita-modal-proxy`) -> Render private service in Virginia
 - **Scraper** (`Math-Data-Justice-Collaborative/vecinita-scraper`) -> Modal deploy
 - **Embedding Modal** (`Math-Data-Justice-Collaborative/vecinita-embedding`) -> Modal deploy
 - **Model Modal** (`Math-Data-Justice-Collaborative/vecinita-model`) -> Modal deploy
@@ -18,7 +17,7 @@ Use this mapping as source-of-truth when implementing infra changes:
 
 - Data Management Frontend should call Data Management API directly.
 - Data Management API must remain private (no public ingress) and restricted CORS allow-list.
-- Agent/backend and Data Management API should call model/embedding/scraper via Modal Proxy.
+- Agent/backend and Data Management API should call model/embedding/scraper via direct Modal endpoints.
 
 ### CI/CD Rule
 
