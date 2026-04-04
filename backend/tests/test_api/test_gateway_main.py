@@ -92,7 +92,7 @@ class TestGatewayRootEndpoints:
         response = gateway_client.get("/health")
         assert response.status_code == 200
         data = response.json()
-        assert data["status"] == "ok"
+        assert data["status"] in {"ok", "degraded"}
         assert "timestamp" in data
 
     def test_health_check_structure(self, gateway_client):
@@ -104,6 +104,53 @@ class TestGatewayRootEndpoints:
         assert "embedding_service" in data
         assert "database" in data
         assert "timestamp" in data
+
+    def test_health_check_v1_alias(self, gateway_client):
+        """Test GET /api/v1/health alias remains available for deploy probes."""
+        response = gateway_client.get("/api/v1/health")
+        assert response.status_code == 200
+        data = response.json()
+        assert "status" in data
+        assert "agent_service" in data
+
+    def test_health_check_reports_ok_when_probes_succeed(self, gateway_client, monkeypatch):
+        """Gateway reports OK when all downstream probes succeed."""
+        import src.api.main as gateway_main
+
+        async def _ok_probe(*_args, **_kwargs):
+            return "ok"
+
+        monkeypatch.setattr(gateway_main, "_probe_http_health", _ok_probe)
+        monkeypatch.setattr(gateway_main, "_probe_database_socket", _ok_probe)
+
+        response = gateway_client.get("/health")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "ok"
+        assert data["agent_service"] == "ok"
+        assert data["embedding_service"] == "ok"
+        assert data["database"] == "ok"
+
+    def test_health_check_reports_degraded_when_agent_probe_fails(self, gateway_client, monkeypatch):
+        """Gateway reports degraded when the agent dependency probe fails."""
+        import src.api.main as gateway_main
+
+        async def _probe_http(*args, **_kwargs):
+            if args and "localhost:8000" in str(args[0]):
+                return "error"
+            return "ok"
+
+        async def _probe_db(*_args, **_kwargs):
+            return "ok"
+
+        monkeypatch.setattr(gateway_main, "_probe_http_health", _probe_http)
+        monkeypatch.setattr(gateway_main, "_probe_database_socket", _probe_db)
+
+        response = gateway_client.get("/health")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "degraded"
+        assert data["agent_service"] == "error"
 
     def test_config_endpoint(self, gateway_client):
         """Test GET /config returns gateway configuration."""

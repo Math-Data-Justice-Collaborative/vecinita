@@ -14,6 +14,11 @@ def test_gateway_health_implies_agent_reachable(gateway_url: str):
     assert (
         resp.status_code == 200
     ), f"gateway /api/v1/health returned {resp.status_code} — agent may be unreachable"
+    payload = resp.json()
+    assert payload.get("agent_service") == "ok", (
+        "gateway health indicates agent dependency is not healthy: "
+        f"agent_service={payload.get('agent_service')} payload={payload}"
+    )
 
 
 def test_agent_config_shows_proxy_endpoints_not_localhost(agent_url: str):

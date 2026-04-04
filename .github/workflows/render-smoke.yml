@@ -64,14 +64,51 @@ jobs:
         if: ${{ env.AGENT_URL != '' }}
         run: |
           echo "[probe] GET $AGENT_URL/health"
-          STATUS=$(curl -o /dev/null -s -w "%{http_code}" \
+          PAYLOAD=$(curl -fsS \
             --retry 4 --retry-delay 10 --retry-all-errors \
             --max-time 30 "$AGENT_URL/health")
-          echo "[result] HTTP $STATUS"
+          JSON_PAYLOAD="$PAYLOAD" python3 - <<'PY'
+import json
+import os
+
+payload = json.loads(os.environ["JSON_PAYLOAD"])
+if payload.get("status") != "ok":
+    raise SystemExit(f"Agent status is not ok: {payload}")
+if payload.get("readiness") == "degraded":
+    raise SystemExit(f"Agent readiness degraded: {payload}")
+print(f"[result] Agent status={payload.get('status')} readiness={payload.get('readiness')}")
+PY
+
+      - name: Smoke — Gateway /api/v1/health
+        if: ${{ env.AGENT_URL != '' }}
+        run: |
+          echo "[probe] GET $AGENT_URL/api/v1/health"
+          STATUS=$(curl -o /tmp/gateway-health.json -s -w "%{http_code}" \
+            --retry 4 --retry-delay 10 --retry-all-errors \
+            --max-time 30 "$AGENT_URL/api/v1/health")
+          if [ "$STATUS" = "404" ]; then
+            echo "[skip] /api/v1/health not available on AGENT_URL target"
+            exit 0
+          fi
           if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 400 ]; then
-            echo "[fail] Agent /health returned $STATUS"
+            echo "[fail] Gateway /api/v1/health returned $STATUS"
             exit 1
           fi
+          PAYLOAD=$(cat /tmp/gateway-health.json)
+          JSON_PAYLOAD="$PAYLOAD" python3 - <<'PY'
+import json
+import os
+
+payload = json.loads(os.environ["JSON_PAYLOAD"])
+if payload.get("status") != "ok":
+    raise SystemExit(f"Gateway status is not ok: {payload}")
+if payload.get("agent_service") != "ok" or payload.get("embedding_service") != "ok":
+    raise SystemExit(f"Gateway dependencies unhealthy: {payload}")
+print(
+    "[result] Gateway status="
+    f"{payload.get('status')} agent={payload.get('agent_service')} embedding={payload.get('embedding_service')}"
+)
+PY
 
       - name: Smoke — Agent /api/v1/ask/config
         if: ${{ env.AGENT_URL != '' }}

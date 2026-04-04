@@ -11,10 +11,13 @@ Port: 8004 (by default)
 
 import os
 import logging
+import asyncio
+import socket
 import warnings
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlparse
 
 from dotenv import load_dotenv
 
@@ -36,6 +39,7 @@ load_dotenv(_PROJECT_ROOT / ".env", override=False)
 load_dotenv(_BACKEND_ROOT / ".env", override=False)
 
 from fastapi import APIRouter, FastAPI, HTTPException, Request
+import httpx
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -84,6 +88,46 @@ ALLOWED_ORIGIN_REGEX = os.getenv("ALLOWED_ORIGIN_REGEX", "").strip() or None
 MAX_URLS_PER_REQUEST = int(os.getenv("MAX_URLS_PER_REQUEST", "100"))
 JOB_RETENTION_HOURS = int(os.getenv("JOB_RETENTION_HOURS", "24"))
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+
+
+async def _probe_http_health(base_url: str, timeout_seconds: float = 2.0) -> str:
+    """Probe a dependency health endpoint and return a simple status string."""
+    if not base_url:
+        return "not_configured"
+
+    health_url = f"{base_url.rstrip('/')}/health"
+    try:
+        async with httpx.AsyncClient(timeout=timeout_seconds) as client:
+            response = await client.get(health_url)
+        return "ok" if response.status_code == 200 else "error"
+    except Exception:
+        return "error"
+
+
+async def _probe_database_socket(database_url: str, timeout_seconds: float = 2.0) -> str:
+    """Probe database reachability by opening a TCP socket to host/port from DATABASE_URL."""
+    if not database_url:
+        return "not_configured"
+
+    try:
+        parsed = urlparse(database_url)
+        host = parsed.hostname
+        port = int(parsed.port or 5432)
+        if not host:
+            return "error"
+
+        connection = await asyncio.wait_for(
+            asyncio.open_connection(host=host, port=port),
+            timeout=timeout_seconds,
+        )
+        _, writer = connection
+        writer.close()
+        await writer.wait_closed()
+        return "ok"
+    except (socket.gaierror, OSError, TimeoutError, ValueError):
+        return "error"
+    except Exception:
+        return "error"
 
 # ============================================================================
 # FastAPI Application
@@ -232,14 +276,28 @@ async def health_check():
     Returns:
         Service health status
     """
-    # TODO: Check actual service connectivity
+    agent_status, embedding_status, database_status = await asyncio.gather(
+        _probe_http_health(AGENT_SERVICE_URL),
+        _probe_http_health(EMBEDDING_SERVICE_URL),
+        _probe_database_socket(DATABASE_URL),
+    )
+
+    critical_statuses = [status for status in (agent_status, embedding_status) if status != "ok"]
+    overall_status = "degraded" if critical_statuses else "ok"
+
     return HealthCheck(
-        status="ok",
-        agent_service="ok",  # Should ping AGENT_SERVICE_URL
-        embedding_service="ok",  # Should ping EMBEDDING_SERVICE_URL
-        database="ok",  # Should test DATABASE_URL connection
+        status=overall_status,
+        agent_service=agent_status,
+        embedding_service=embedding_status,
+        database=database_status,
         timestamp=datetime.now(timezone.utc),
     )
+
+
+@app.get("/api/v1/health", response_model=HealthCheck, include_in_schema=False)
+async def health_check_v1_alias():
+    """Versioned alias used by smoke/live checks and legacy clients."""
+    return await health_check()
 
 
 @app.get("/config", response_model=GatewayConfig)

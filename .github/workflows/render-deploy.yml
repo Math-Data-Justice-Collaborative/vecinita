@@ -240,10 +240,49 @@ jobs:
             fi
           }
 
+          check_agent_health_payload() {
+            local url="$1"
+            echo "[probe] Agent dependency health $url"
+            payload=$(curl -fsS --retry 4 --retry-delay 10 --retry-all-errors --max-time 30 "$url")
+            JSON_PAYLOAD="$payload" python3 - <<'PY'
+import json
+import os
+
+payload = json.loads(os.environ["JSON_PAYLOAD"])
+status = payload.get("status")
+readiness = payload.get("readiness")
+if status != "ok":
+    raise SystemExit(f"Agent status is not ok: {status}")
+if readiness == "degraded":
+    raise SystemExit(f"Agent readiness degraded: {payload}")
+print(f"[result] Agent health status={status} readiness={readiness}")
+PY
+          }
+
+          check_gateway_health_payload() {
+            local url="$1"
+            echo "[probe] Gateway dependency health $url"
+            payload=$(curl -fsS --retry 4 --retry-delay 10 --retry-all-errors --max-time 30 "$url")
+            JSON_PAYLOAD="$payload" python3 - <<'PY'
+import json
+import os
+
+payload = json.loads(os.environ["JSON_PAYLOAD"])
+status = payload.get("status")
+agent = payload.get("agent_service")
+embedding = payload.get("embedding_service")
+if status != "ok":
+    raise SystemExit(f"Gateway status is not ok: {status}")
+if agent != "ok" or embedding != "ok":
+    raise SystemExit(f"Gateway dependencies unhealthy: agent={agent}, embedding={embedding}, payload={payload}")
+print(f"[result] Gateway status={status} agent={agent} embedding={embedding}")
+PY
+          }
+
           check_url "Frontend health" "$FRONTEND_URL/health"
-          check_url "Agent health" "$AGENT_URL/health"
+          check_agent_health_payload "$AGENT_URL/health"
           check_url "Agent config" "$AGENT_URL/api/v1/ask/config"
-          check_url "Gateway health" "$GATEWAY_URL/health"
+          check_gateway_health_payload "$GATEWAY_URL/api/v1/health"
           check_url "Gateway documents tags" "$GATEWAY_URL/api/v1/documents/tags?limit=5"
 
   deploy-production:
@@ -360,10 +399,49 @@ jobs:
             fi
           }
 
+          check_agent_health_payload() {
+            local url="$1"
+            echo "[probe] Agent dependency health $url"
+            payload=$(curl -fsS --retry 4 --retry-delay 10 --retry-all-errors --max-time 30 "$url")
+            JSON_PAYLOAD="$payload" python3 - <<'PY'
+import json
+import os
+
+payload = json.loads(os.environ["JSON_PAYLOAD"])
+status = payload.get("status")
+readiness = payload.get("readiness")
+if status != "ok":
+    raise SystemExit(f"Agent status is not ok: {status}")
+if readiness == "degraded":
+    raise SystemExit(f"Agent readiness degraded: {payload}")
+print(f"[result] Agent health status={status} readiness={readiness}")
+PY
+          }
+
+          check_gateway_health_payload() {
+            local url="$1"
+            echo "[probe] Gateway dependency health $url"
+            payload=$(curl -fsS --retry 4 --retry-delay 10 --retry-all-errors --max-time 30 "$url")
+            JSON_PAYLOAD="$payload" python3 - <<'PY'
+import json
+import os
+
+payload = json.loads(os.environ["JSON_PAYLOAD"])
+status = payload.get("status")
+agent = payload.get("agent_service")
+embedding = payload.get("embedding_service")
+if status != "ok":
+    raise SystemExit(f"Gateway status is not ok: {status}")
+if agent != "ok" or embedding != "ok":
+    raise SystemExit(f"Gateway dependencies unhealthy: agent={agent}, embedding={embedding}, payload={payload}")
+print(f"[result] Gateway status={status} agent={agent} embedding={embedding}")
+PY
+          }
+
           check_url "Frontend health" "$FRONTEND_URL/health"
-          check_url "Agent health" "$AGENT_URL/health"
+          check_agent_health_payload "$AGENT_URL/health"
           check_url "Agent config" "$AGENT_URL/api/v1/ask/config"
-          check_url "Gateway health" "$GATEWAY_URL/health"
+          check_gateway_health_payload "$GATEWAY_URL/api/v1/health"
           check_url "Gateway documents tags" "$GATEWAY_URL/api/v1/documents/tags?limit=5"
 
   deploy-wait:
