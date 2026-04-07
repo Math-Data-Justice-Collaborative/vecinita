@@ -7,7 +7,7 @@ This repo now supports a staged promotion flow:
 1. Pull request to `main` runs backend and frontend checks.
 2. If checks pass, GitHub Actions triggers **staging** Render deploy hooks.
 3. Staging smoke checks run against staging URLs.
-4. Merge to `main` triggers **production** deploy hooks for agent/frontend, while the production gateway v5 service auto-pulls from GitHub.
+4. Merge to `main` triggers **production** Render deploys for agent, gateway, and frontend.
 5. Production smoke checks run against production URLs.
 
 Pipeline file: `.github/workflows/render-deploy.yml`
@@ -18,7 +18,7 @@ Pipeline file: `.github/workflows/render-deploy.yml`
 - Staging blueprint: `render.staging.yaml`
 
 Staging services remain configured with `autoDeployTrigger: off` so deployments are controlled by CI/CD deploy hooks.
-Production gateway v5 is an existing Render service configured in the Render dashboard and should use GitHub commit auto-deploy on `main` instead of a manual deploy hook.
+Both staging and production gateway services should use the dedicated Docker image path defined by `backend/Dockerfile.gateway`.
 
 ## Required GitHub Environments
 
@@ -51,16 +51,17 @@ Optional but recommended:
 Preferred names:
 
 - `RENDER_PROD_DEPLOY_HOOK_AGENT`
+- `RENDER_PROD_DEPLOY_HOOK_GATEWAY`
 - `RENDER_PROD_DEPLOY_HOOK_FRONTEND`
 
 Backward-compatible names also supported by workflow:
 
 - `RENDER_DEPLOY_HOOK_AGENT`
+- `RENDER_DEPLOY_HOOK_GATEWAY`
 - `RENDER_DEPLOY_HOOK_FRONTEND`
 - `RENDER_VECINITA_AGENT_DEPLOY_HOOK`
+- `RENDER_VECINITA_GATEWAY_DEPLOY_HOOK`
 - `RENDER_VECINITA_FRONTEND_DEPLOY_HOOK`
-
-Gateway production deploy hook is intentionally not required when using `vecinita-gateway-prod-v5` with Render GitHub auto-deploy enabled.
 
 ### Production smoke URLs
 
@@ -98,7 +99,7 @@ Frontend deploy is part of both staging and production hook triggers in the same
 1. Create or update Render services from `render.staging.yaml` and `render.yaml`.
 2. Add all required secrets and environment protections in GitHub.
 3. Open a PR to `main` and verify staging deployment and smoke pass.
-4. Ensure `vecinita-gateway-prod-v5` in Render is configured with GitHub auto-deploy on `main`.
+4. Ensure the production gateway service is configured for Docker runtime and can be triggered either by `RENDER_PROD_DEPLOY_HOOK_GATEWAY` or by Render API using `RENDER_GATEWAY_SERVICE_ID`.
 5. Merge PR to `main` and verify production deployment and smoke pass.
 
 ## Render MCP Env Sync Checklist
@@ -143,17 +144,18 @@ Do not use Render MCP for GitHub Actions secrets.
 	- `RENDER_STAGING_FRONTEND_URL`
 - Production deploy hooks:
 	- `RENDER_PROD_DEPLOY_HOOK_AGENT`
+	- `RENDER_PROD_DEPLOY_HOOK_GATEWAY`
 	- `RENDER_PROD_DEPLOY_HOOK_FRONTEND`
 - Production smoke URLs:
 	- `RENDER_PROD_AGENT_URL` (or fallback `RENDER_AGENT_URL`)
 	- `RENDER_PROD_GATEWAY_URL` (or fallback `RENDER_GATEWAY_URL`)
 	- `RENDER_PROD_FRONTEND_URL` (or fallback `RENDER_FRONTEND_URL`)
 
-### Production gateway v5 manual Render setting
+### Production gateway Render settings
 
-For `vecinita-gateway-prod-v5`, enable Render auto-deploy from GitHub:
+For the production gateway service:
 
-1. Open the service settings in Render.
-2. Set Auto-Deploy to deploy on commits to `main`.
-3. Confirm the repo is `Math-Data-Justice-Collaborative/vecinita` and the service URL is `https://vecinita-gateway-prod-v5.onrender.com`.
-4. Keep `RENDER_GATEWAY_SERVICE_ID` in GitHub secrets so CI can still validate runtime and wait for the gateway deploy to become live.
+1. Keep the runtime set to Docker.
+2. Point the service at `backend/Dockerfile.gateway`.
+3. Prefer configuring `RENDER_PROD_DEPLOY_HOOK_GATEWAY` in GitHub secrets.
+4. If you do not use a deploy hook, keep `RENDER_API_KEY` and `RENDER_GATEWAY_SERVICE_ID` configured so CI can trigger the deploy via the Render API.

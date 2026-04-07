@@ -18,10 +18,11 @@ When runtime drifts to non-Docker/native, builds may fail with this pattern:
 ## Preflight
 
 1. Confirm gateway runtime in Render Dashboard is Docker for both environments.
-2. Confirm Render service IDs are set as GitHub secrets:
+2. Confirm the gateway service uses `backend/Dockerfile.gateway` instead of the generic backend Dockerfile.
+3. Confirm Render service IDs are set as GitHub secrets:
 - RENDER_STAGING_GATEWAY_SERVICE_ID
 - RENDER_GATEWAY_SERVICE_ID
-3. Confirm Render API key secret exists:
+4. Confirm Render API key secret exists:
 - RENDER_API_KEY
 
 ## Automated Guardrail
