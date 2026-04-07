@@ -1,7 +1,7 @@
 .PHONY: help \
 	dev dev-tmux dev-attach dev-stop dev-clear-ports \
 	dev-chat dev-chat-backend dev-chat-gateway dev-chat-frontend \
-	dev-data-management dev-data-management-frontend dev-data-management-api data-management-api-key \
+	dev-data-management dev-data-management-frontend dev-data-management-api data-management-api-key data-management \
 	dev-backend dev-gateway dev-frontend \
 	branch-status branch-save branch-restore branch-switch branch-pull branch-sync-main \
 	lint lint-backend lint-frontend lint-imported lint-fix lint-fix-backend lint-fix-frontend lint-fix-data-management-frontend \
@@ -35,6 +35,7 @@ help:
 	@echo "  make dev-data-management                 Start data management system (frontend + API)"
 	@echo "  make dev-data-management-frontend        Start data management frontend only"
 	@echo "  make dev-data-management-api             Start data management API only"
+	@echo "  make data-management                     Trigger data management frontend Render deploy"
 	@echo "  make data-management-api-key             Print configured dashboard API key or guidance"
 	@echo "  make dev-tmux                            Start the legacy tmux split-pane dev session"
 	@echo "  make dev-attach                          Attach to the existing tmux dev session"
@@ -233,6 +234,18 @@ data-management-api-key:
 		echo "Ask the data-management backend operator for a provisioned key, then export DATA_MANAGEMENT_API_KEY=<token> or add it to .env."; \
 		exit 1; \
 	fi
+
+data-management:
+	@echo "Triggering data-management frontend deploy..."
+	@set -e; \
+		hook_url="$${RENDER_DATA_MANAGEMENT_FRONTEND_DEPLOY_HOOK_URL:-$${DATA_MANAGEMENT_FRONTEND_DEPLOY_HOOK_URL:-$${RENDER_DEPLOY_HOOK_URL:-}}}"; \
+		if [ -z "$$hook_url" ]; then \
+			echo "No deploy hook configured for data-management frontend."; \
+			echo "Set one of: RENDER_DATA_MANAGEMENT_FRONTEND_DEPLOY_HOOK_URL, DATA_MANAGEMENT_FRONTEND_DEPLOY_HOOK_URL, or RENDER_DEPLOY_HOOK_URL"; \
+			exit 1; \
+		fi; \
+		curl -fsSL -X POST "$$hook_url"; \
+		echo "Data-management frontend deploy triggered."
 # Individual service targets (legacy)
 # ============================================================================
 
