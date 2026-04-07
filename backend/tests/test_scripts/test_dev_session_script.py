@@ -73,11 +73,19 @@ def test_dev_session_prefers_direct_or_local_model_endpoints() -> None:
     content = _script_text()
     assert "AGENT_ENFORCE_ROUTE='true'" not in content
     assert (
-        "VECINITA_MODEL_API_URL:-\\${MODAL_OLLAMA_ENDPOINT:-\\${OLLAMA_BASE_URL:-http://localhost:11434}}"
+        "DEFAULT_MODAL_MODEL_URL=\"https://vecinita--vecinita-model-api.modal.run\""
         in content
     )
     assert (
-        "VECINITA_EMBEDDING_API_URL:-\\${MODAL_EMBEDDING_ENDPOINT:-\\${EMBEDDING_SERVICE_URL:-http://localhost:8001}}"
+        "VECINITA_MODEL_API_URL:-\\${MODAL_OLLAMA_ENDPOINT:-\\${OLLAMA_BASE_URL:-$DEFAULT_MODAL_MODEL_URL}}"
+        in content
+    )
+    assert (
+        "DEFAULT_MODAL_EMBEDDING_URL=\"https://vecinita--vecinita-embedding-web-app.modal.run\""
+        in content
+    )
+    assert (
+        "VECINITA_EMBEDDING_API_URL:-\\${MODAL_EMBEDDING_ENDPOINT:-\\${EMBEDDING_SERVICE_URL:-$DEFAULT_MODAL_EMBEDDING_URL}}"
         in content
     )
 

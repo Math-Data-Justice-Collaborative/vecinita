@@ -10,21 +10,6 @@
 #   API:      http://<PUBLIC_HOST_OR_IP>:18004/api/v1
 
 services:
-  # ChromaDB - Vector/document storage service
-  chroma:
-    image: chromadb/chroma:latest
-    container_name: vecinita-chroma-dev
-    environment:
-      IS_PERSISTENT: "TRUE"
-      PERSIST_DIRECTORY: "/data"
-    ports:
-      - "18002:8000"
-    volumes:
-      - chroma_data_local_dev:/data
-    restart: unless-stopped
-    networks:
-      - vecinita-network-dev
-
   # Local PostgreSQL Database
   postgres:
     image: postgres:16-alpine
@@ -46,26 +31,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  # PostgREST - REST API layer on top of PostgreSQL
-  postgrest:
-    image: postgrest/postgrest:v12.0.1
-    container_name: vecinita-postgrest-local-dev
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      PGRST_DB_URI: postgresql://postgres:postgres@vecinita-postgres-local-dev:5432/postgres
-      PGRST_DB_SCHEMA: public
-      PGRST_DB_ANON_ROLE: postgres
-      PGRST_JWT_SECRET: dev-jwt-secret-for-local-testing-only-32chars-min
-      PGRST_JWT_AUD: ""  # Allow any audience for development
-      PGRST_JWT_ROLE_CLAIM_KEY: ".role"
-    ports:
-      - "13001:3000"  # PostgREST REST API on localhost:13001
-    restart: unless-stopped
-    networks:
-      - vecinita-network-dev
 
   # pgAdmin - PostgreSQL Management UI (Optional but useful)
   pgadmin:
@@ -128,29 +93,16 @@ services:
       DEFAULT_MODEL: "${DEFAULT_MODEL:-llama3.1:8b}"
       EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
       EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:-}"
-      CHROMA_HOST: "chroma"
-      CHROMA_PORT: "8000"
       EMBEDDING_STRICT_STARTUP: "false"
-      CHROMA_SSL: "false"
-      CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
-      CHROMA_COLLECTION_SOURCES: "vecinita_sources"
-      CHROMA_COLLECTION_QUEUE: "vecinita_queue"
       VECTOR_SYNC_ENABLED: "true"
       VECTOR_SYNC_DEGRADED_MODE: "true"
-      VECTOR_SYNC_SUPABASE_FALLBACK_READS: "true"
-      SUPABASE_URL: "http://postgrest:3000"
-      SUPABASE_KEY: "dev-anon-key"
       GROQ_API_KEY: "${GROQ_API_KEY}"
       DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/postgres"
     depends_on:
       postgres:
         condition: service_healthy
-      postgrest:
-        condition: service_started
       embedding-service:
         condition: service_healthy
-      chroma:
-        condition: service_started
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -179,18 +131,9 @@ services:
       AGENT_SERVICE_URL: "http://vecinita-agent:8000"
       EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
       EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:-}"
-      CHROMA_HOST: "chroma"
-      CHROMA_PORT: "8000"
       EMBEDDING_STRICT_STARTUP: "false"
-      CHROMA_SSL: "false"
-      CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
-      CHROMA_COLLECTION_SOURCES: "vecinita_sources"
-      CHROMA_COLLECTION_QUEUE: "vecinita_queue"
       VECTOR_SYNC_ENABLED: "true"
       VECTOR_SYNC_DEGRADED_MODE: "true"
-      VECTOR_SYNC_SUPABASE_FALLBACK_READS: "true"
-      SUPABASE_URL: "http://postgrest:3000"
-      SUPABASE_KEY: "dev-anon-key"
       DEEPSEEK_API_KEY: "${DEEPSEEK_API_KEY:-}"
       DEEPSEEK_BASE_URL: "${DEEPSEEK_BASE_URL:-https://api.deepseek.com}"
       GROQ_API_KEY: "${GROQ_API_KEY:-}"
@@ -200,17 +143,12 @@ services:
       GROQ_TAG_MODEL: "${GROQ_TAG_MODEL:-llama-3.1-8b-instant}"
       DEV_ADMIN_ENABLED: "true"
       DEV_ADMIN_BEARER_TOKEN: "vecinita-dev-admin-token-2026"
-      SUPABASE_UPLOADS_BUCKET: "documents"
     command: ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port 8004"]
     depends_on:
       vecinita-agent:
         condition: service_healthy
       embedding-service:
         condition: service_healthy
-      chroma:
-        condition: service_started
-      postgrest:
-        condition: service_started
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
@@ -249,7 +187,6 @@ services:
 
 volumes:
   postgres_data_local_dev:
-  chroma_data_local_dev:
 
 networks:
   vecinita-network-dev:

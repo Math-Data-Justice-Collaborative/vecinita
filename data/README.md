@@ -73,7 +73,7 @@ uv run python -m src.scraper.main \
 2. **Config** → `config/` (controls behavior)
 3. **Scrape** → Fetches content from URLs
 4. **Process** → Chunks content, generates embeddings
-5. **Output** → `output/` files + Supabase upload
+5. **Output** → `output/` files + PostgreSQL load
 6. **Archive** → Old runs moved to `archive/`
 
 ## Content Categories (31 URLs)

@@ -10,13 +10,13 @@ import json
 import logging
 import os
 from typing import Any, cast
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 import psycopg2  # type: ignore[import-untyped]
 from fastapi import APIRouter, HTTPException, Query
 from psycopg2.extras import RealDictCursor  # type: ignore[import-untyped]
 
-from src.utils.tags import normalize_tags
+from src.utils.tags import build_bilingual_tag_fields, normalize_tags
 
 logger = logging.getLogger(__name__)
 
@@ -27,15 +27,20 @@ EMBEDDING_SERVICE_URL = (
     or os.getenv("EMBEDDING_SERVICE_URL")
     or "http://localhost:8001"
 )
-UPLOAD_STORAGE_BUCKET = os.getenv("SUPABASE_UPLOADS_BUCKET", "documents")
+UPLOAD_STORAGE_BUCKET = os.getenv("UPLOADS_STORAGE_BUCKET") or os.getenv(
+    "DOCUMENTS_UPLOADS_BUCKET", "documents"
+)
+UPLOADS_PUBLIC_BASE_URL = (
+    os.getenv("UPLOADS_PUBLIC_BASE_URL") or os.getenv("DOCUMENTS_PUBLIC_BASE_URL") or ""
+).rstrip("/")
 EXCLUDED_TEST_TAGS = {"__e2e__", "__test__", "e2e", "test-data"}
 
 
 def _build_public_storage_url(storage_bucket: str, storage_path: str) -> str | None:
-    supabase_url = os.getenv("SUPABASE_URL", "").rstrip("/")
-    if not supabase_url or not storage_bucket or not storage_path:
+    if not UPLOADS_PUBLIC_BASE_URL or not storage_bucket or not storage_path:
         return None
-    return f"{supabase_url}/storage/v1/object/public/{storage_bucket}/{storage_path}"
+    encoded_path = quote(storage_path.lstrip("/"), safe="/")
+    return f"{UPLOADS_PUBLIC_BASE_URL}/{storage_bucket}/{encoded_path}"
 
 
 def _storage_path_from_source_url(source_url: str) -> str | None:
@@ -64,7 +69,14 @@ def _extract_download_url(metadata: Any) -> str | None:
 
 
 def _resolve_download_url(metadata: Any, source_url: str) -> str | None:
-    return _extract_download_url(metadata)
+    explicit_download_url = _extract_download_url(metadata)
+    if explicit_download_url:
+        return explicit_download_url
+
+    storage_path = _storage_path_from_source_url(source_url)
+    if not storage_path:
+        return None
+    return _build_public_storage_url(UPLOAD_STORAGE_BUCKET, storage_path)
 
 
 def _is_test_artifact(source_url: str, tags: list[str]) -> bool:
@@ -113,6 +125,15 @@ def _to_int(value: Any, default: int = 0) -> int:
         return default
 
 
+def _tag_label(tag: str, locale: str) -> str:
+    normalized_locale = str(locale or "en").strip().lower()
+    if normalized_locale.startswith("es"):
+        translated = build_bilingual_tag_fields([tag]).get("tags_es", [])
+        if translated:
+            return translated[0]
+    return tag
+
+
 def _normalize_public_source(raw: dict[str, Any]) -> dict[str, Any]:
     url = str(raw.get("url") or raw.get("source_url") or "")
     metadata = _metadata_dict(raw.get("metadata"))
@@ -126,6 +147,21 @@ def _normalize_public_source(raw: dict[str, Any]) -> dict[str, Any]:
 
     tags = normalize_tags(raw.get("tags") or metadata.get("tags") or [])
     download_url = _resolve_download_url(metadata, url)
+    language = str(
+        raw.get("language")
+        or metadata.get("language")
+        or metadata.get("primary_language")
+        or "Unknown"
+    )
+    primary_language_code = str(
+        raw.get("primary_language_code")
+        or metadata.get("primary_language_code")
+        or "unknown"
+    )
+    available_languages = raw.get("available_languages") or metadata.get("available_languages") or []
+    if not isinstance(available_languages, list):
+        available_languages = [language] if language else []
+    is_bilingual = bool(raw.get("is_bilingual") or metadata.get("is_bilingual"))
 
     return {
         "id": raw.get("id"),
@@ -145,6 +181,11 @@ def _normalize_public_source(raw: dict[str, Any]) -> dict[str, Any]:
         "total_characters": _to_int(raw.get("total_characters"), 0),
         "tags": tags,
         "metadata": metadata,
+        "language": language,
+        "primary_language": language,
+        "primary_language_code": primary_language_code,
+        "available_languages": available_languages,
+        "is_bilingual": is_bilingual,
         "download_url": download_url,
         "downloadable": bool(download_url),
     }
@@ -291,6 +332,13 @@ def _load_overview_via_sql() -> tuple[dict[str, int], list[dict[str, Any]]]:
                     MAX(source_domain) AS source_domain,
                     MAX(document_title) AS title,
                     COUNT(*)::int AS total_chunks,
+                    MAX(NULLIF(metadata->>'language', '')) AS language,
+                    MAX(NULLIF(metadata->>'primary_language_code', '')) AS primary_language_code,
+                    COALESCE(
+                        ARRAY_REMOVE(ARRAY_AGG(DISTINCT NULLIF(metadata->>'language', '')), NULL),
+                        ARRAY[]::text[]
+                    ) AS available_languages,
+                    BOOL_OR(COALESCE((metadata->>'is_bilingual')::boolean, FALSE)) AS is_bilingual,
                     MIN(created_at) AS created_at,
                     MAX(updated_at) AS updated_at
                 FROM public.document_chunks
@@ -564,6 +612,7 @@ async def documents_chunk_statistics(
 async def documents_tags(
     limit: int = Query(100, ge=1, le=500, description="Maximum number of tags to return"),
     query: str = Query("", description="Optional case-insensitive tag search"),
+    locale: str = Query("en", description="Locale for tag labels (en or es)"),
     include_test_data: bool = Query(False, description="Include tags from test/e2e artifacts"),
 ) -> dict[str, Any]:
     """Return tag inventory and counts for Documents filtering UI."""
@@ -585,7 +634,12 @@ async def documents_tags(
         for row in rows:
             metadata = _metadata_dict(row.get("metadata"))
             source_url = str(metadata.get("source_url") or "")
-            tags = normalize_tags(metadata.get("tags") or [])
+            tags = normalize_tags(
+                metadata.get("tags")
+                or metadata.get("tags_en")
+                or metadata.get("tags_es")
+                or []
+            )
             if not include_test_data and _is_test_artifact(source_url, tags):
                 continue
             for tag in tags:
@@ -593,28 +647,41 @@ async def documents_tags(
                 if source_url:
                     source_map.setdefault(tag, set()).add(source_url)
 
-        rows = []
+        response_rows = []
+        tag_counts: dict[str, int] = {}
         for tag, chunk_count in chunk_counts.items():
-            if normalized_query and normalized_query not in tag:
+            label = _tag_label(tag, locale)
+            if normalized_query and normalized_query not in tag and normalized_query not in label:
                 continue
-            rows.append(
+            resource_count = len(source_map.get(tag, set()))
+            tag_counts[tag] = resource_count
+            response_rows.append(
                 {
                     "tag": tag,
+                    "label": label,
+                    "locale": locale,
+                    "resource_count": resource_count,
                     "chunk_count": chunk_count,
-                    "source_count": len(source_map.get(tag, set())),
+                    "source_count": resource_count,
                 }
             )
 
-        rows.sort(
+        response_rows.sort(
             key=lambda item: (
+                _to_int(item.get("resource_count"), 0),
                 _to_int(item.get("source_count"), 0),
                 _to_int(item.get("chunk_count"), 0),
                 str(item.get("tag", "")),
             ),
             reverse=True,
         )
-        rows = rows[:limit]
+        response_rows = response_rows[:limit]
 
-        return {"tags": rows, "total": len(rows)}
+        return {
+            "tags": response_rows,
+            "tag_counts": tag_counts,
+            "locale": locale,
+            "total": len(response_rows),
+        }
     except Exception as exc:
         _raise_documents_error("documents_tags", exc)

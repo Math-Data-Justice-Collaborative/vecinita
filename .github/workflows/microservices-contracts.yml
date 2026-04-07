@@ -45,7 +45,7 @@ jobs:
       - name: Start microservices contract stack
         run: |
           docker compose -f docker-compose.microservices.yml up -d \
-            postgres postgrest ollama \
+            postgres ollama \
             model-service embedding-service scraper-service \
             chat-agent chat-gateway
 

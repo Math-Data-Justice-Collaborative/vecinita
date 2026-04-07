@@ -1,4 +1,4 @@
-"""Unit tests for the Chroma-backed database search tool."""
+"""Unit tests for the Postgres database search tool."""
 
 import importlib.util
 import json
@@ -38,7 +38,12 @@ def mock_embedding_model():
 
 
 @pytest.fixture
-def db_search_tool(mock_store, mock_embedding_model):
+def db_search_tool(mock_store, mock_embedding_model, monkeypatch):
+    monkeypatch.setattr(
+        db_search_module,
+        "_query_postgres_fallback",
+        lambda **kwargs: mock_store.query_chunks(**kwargs),
+    )
     return create_db_search_tool(
         mock_store, mock_embedding_model, match_threshold=0.3, match_count=5
     )
@@ -110,11 +115,17 @@ def test_db_search_exposes_latency_metrics(monkeypatch, mock_store, mock_embeddi
         mock_store, mock_embedding_model, match_threshold=0.3, match_count=5
     )
 
+    monkeypatch.setattr(
+        db_search_module,
+        "_query_postgres_fallback",
+        lambda **kwargs: mock_store.query_chunks(**kwargs),
+    )
+
     _ = tool.invoke("Need housing support")
     metrics = get_last_search_metrics()
 
     assert metrics["status"] == "ok"
-    assert metrics["retrieval_backend"] == "chroma"
+    assert metrics["retrieval_backend"] == "postgres"
     assert isinstance(metrics["total_ms"], int)
     assert metrics["rows_before_threshold"] == 1
     assert metrics["rows_after_threshold"] == 1
@@ -144,9 +155,9 @@ def test_db_search_passes_tag_filter(db_search_tool, mock_store):
 
     assert mock_store.query_chunks.call_count >= 1
     _, kwargs = mock_store.query_chunks.call_args
-    assert "where" in kwargs
-    where = kwargs["where"]
-    assert "$and" in where
+    assert kwargs.get("tags") == ["housing", "food"]
+    assert kwargs.get("tag_mode") == "all"
+    assert kwargs.get("include_untagged_fallback") is False
 
 
 def test_db_search_auto_infers_spanish_tags_for_filtering(monkeypatch, db_search_tool, mock_store):
@@ -168,9 +179,7 @@ def test_db_search_auto_infers_spanish_tags_for_filtering(monkeypatch, db_search
         reset_search_options(token)
 
     _, kwargs = mock_store.query_chunks.call_args
-    where = kwargs.get("where")
-    assert where is not None
-    assert "immigration" in str(where)
+    assert "immigration" in kwargs.get("tags", [])
 
 
 def test_db_search_auto_infers_doctor_intent_from_spanish_typo(
@@ -186,54 +195,19 @@ def test_db_search_auto_infers_doctor_intent_from_spanish_typo(
         reset_search_options(token)
 
     _, kwargs = mock_store.query_chunks.call_args
-    where = kwargs.get("where")
-    assert where is not None
-    assert "healthcare providers" in str(where)
+    assert "healthcare providers" in kwargs.get("tags", [])
 
 
-def test_db_search_uses_supabase_fallback_when_chroma_query_times_out(
-    monkeypatch, mock_embedding_model
-):
+def test_db_search_returns_empty_when_postgres_returns_no_rows(monkeypatch, mock_embedding_model):
     mock_store = Mock()
-
-    def _slow_query(**_kwargs):
-        import time
-
-        time.sleep(1.2)
-        return []
-
-    mock_store.query_chunks.side_effect = _slow_query
-
-    mock_rpc = Mock()
-    mock_rpc.execute.return_value = Mock(
-        data=[
-            {
-                "id": "doc-timeout-1",
-                "content": "Healthcare directory",
-                "source_url": "https://example.org/health",
-                "source_domain": "example.org",
-                "similarity": 0.9,
-                "metadata": {},
-            }
-        ]
-    )
-    mock_supabase = Mock()
-    mock_supabase.rpc.return_value = mock_rpc
-
-    monkeypatch.setenv("DB_SEARCH_CHROMA_TIMEOUT_SECONDS", "1")
-    monkeypatch.setenv("VECTOR_SYNC_SUPABASE_FALLBACK_READS", "true")
-    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
-    monkeypatch.setenv("SUPABASE_KEY", "test-key")
-    monkeypatch.setattr(db_search_module, "_SUPABASE_CLIENT", None)
-    monkeypatch.setattr(db_search_module, "create_client", lambda _url, _key: mock_supabase)
+    monkeypatch.setattr(db_search_module, "_query_postgres_fallback", lambda **_kwargs: [])
 
     tool = create_db_search_tool(
         mock_store, mock_embedding_model, match_threshold=0.3, match_count=5
     )
     results = json.loads(tool.invoke("doctor in providence"))
 
-    assert len(results) == 1
-    assert results[0]["source_url"] == "https://example.org/health"
+    assert results == []
 
 
 def test_db_search_reranks_when_enabled(db_search_tool, mock_store):
@@ -266,13 +240,12 @@ def test_db_search_tool_metadata(db_search_tool):
     assert "knowledge base" in db_search_tool.description.lower()
 
 
-def test_db_search_uses_supabase_fallback_when_chroma_fails(monkeypatch, mock_embedding_model):
+def test_db_search_returns_postgres_rows_when_available(monkeypatch, mock_embedding_model):
     mock_store = Mock()
-    mock_store.query_chunks.side_effect = RuntimeError("chroma unavailable")
-
-    mock_rpc = Mock()
-    mock_rpc.execute.return_value = Mock(
-        data=[
+    monkeypatch.setattr(
+        db_search_module,
+        "_query_postgres_fallback",
+        lambda **_kwargs: [
             {
                 "id": "doc-1",
                 "content": "Housing support resources",
@@ -281,16 +254,8 @@ def test_db_search_uses_supabase_fallback_when_chroma_fails(monkeypatch, mock_em
                 "similarity": 0.91,
                 "metadata": {"chunk_index": 0, "total_chunks": 1},
             }
-        ]
+        ],
     )
-    mock_supabase = Mock()
-    mock_supabase.rpc.return_value = mock_rpc
-
-    monkeypatch.setenv("VECTOR_SYNC_SUPABASE_FALLBACK_READS", "true")
-    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
-    monkeypatch.setenv("SUPABASE_KEY", "test-key")
-    monkeypatch.setattr(db_search_module, "_SUPABASE_CLIENT", None)
-    monkeypatch.setattr(db_search_module, "create_client", lambda _url, _key: mock_supabase)
 
     tool = create_db_search_tool(
         mock_store, mock_embedding_model, match_threshold=0.3, match_count=5
@@ -302,14 +267,11 @@ def test_db_search_uses_supabase_fallback_when_chroma_fails(monkeypatch, mock_em
     assert results[0]["similarity"] == pytest.approx(0.91)
 
 
-def test_db_search_returns_empty_when_fallback_disabled_and_chroma_fails(
+def test_db_search_returns_empty_when_fallback_disabled_and_primary_store_fails(
     monkeypatch, mock_embedding_model
 ):
     mock_store = Mock()
-    mock_store.query_chunks.side_effect = RuntimeError("chroma unavailable")
-
-    monkeypatch.setenv("VECTOR_SYNC_SUPABASE_FALLBACK_READS", "false")
-    monkeypatch.setattr(db_search_module, "_SUPABASE_CLIENT", None)
+    monkeypatch.setattr(db_search_module, "_query_postgres_fallback", lambda **_kwargs: [])
 
     tool = create_db_search_tool(
         mock_store, mock_embedding_model, match_threshold=0.3, match_count=5
@@ -321,11 +283,9 @@ def test_db_search_uses_postgres_fallback_when_data_mode_is_postgres(
     monkeypatch, mock_embedding_model
 ):
     mock_store = Mock()
-    mock_store.query_chunks.side_effect = RuntimeError("chroma unavailable")
+    mock_store.query_chunks.side_effect = RuntimeError("primary store unavailable")
 
-    monkeypatch.setenv("DB_DATA_MODE", "postgres")
     monkeypatch.setenv("DATABASE_URL", "postgresql://user:pass@localhost:5432/db")
-    monkeypatch.setenv("SUPABASE_DATA_READS_ENABLED", "false")
     monkeypatch.setenv("POSTGRES_DATA_READS_ENABLED", "true")
 
     mock_postgres = Mock(
@@ -341,7 +301,6 @@ def test_db_search_uses_postgres_fallback_when_data_mode_is_postgres(
         ]
     )
     monkeypatch.setattr(db_search_module, "_query_postgres_fallback", mock_postgres)
-    monkeypatch.setattr(db_search_module, "_query_supabase_fallback", Mock(return_value=[]))
 
     import src.config as app_config
 
@@ -358,21 +317,14 @@ def test_db_search_uses_postgres_fallback_when_data_mode_is_postgres(
     assert metrics["retrieval_backend"] == "postgres"
 
 
-def test_db_search_auto_mode_prefers_postgres_when_supabase_missing(
-    monkeypatch, mock_embedding_model
-):
+def test_db_search_prefers_postgres_when_database_url_present(monkeypatch, mock_embedding_model):
     mock_store = Mock()
-    mock_store.query_chunks.side_effect = RuntimeError("chroma unavailable")
+    mock_store.query_chunks.side_effect = RuntimeError("primary store unavailable")
 
-    monkeypatch.setenv("DB_DATA_MODE", "auto")
     monkeypatch.setenv("DATABASE_URL", "postgresql://user:pass@localhost:5432/db")
-    monkeypatch.delenv("SUPABASE_URL", raising=False)
-    monkeypatch.delenv("SUPABASE_KEY", raising=False)
 
     postgres_mock = Mock(return_value=[])
-    supabase_mock = Mock(return_value=[])
     monkeypatch.setattr(db_search_module, "_query_postgres_fallback", postgres_mock)
-    monkeypatch.setattr(db_search_module, "_query_supabase_fallback", supabase_mock)
 
     import src.config as app_config
 
@@ -386,36 +338,24 @@ def test_db_search_auto_mode_prefers_postgres_when_supabase_missing(
     assert postgres_mock.called
 
 
-def test_db_search_supabase_fallback_uses_legacy_rpc_signature_when_tag_signature_missing(
+def test_db_search_tag_filter_uses_postgres_only(
     monkeypatch, mock_embedding_model
 ):
     mock_store = Mock()
-    mock_store.query_chunks.side_effect = RuntimeError("chroma unavailable")
-
-    mock_rpc_chain = Mock()
-    mock_rpc_chain.execute.side_effect = [
-        Exception("search_similar_documents(tag_filter) does not exist"),
-        Mock(
-            data=[
-                {
-                    "id": "doc-legacy-1",
-                    "content": "Food pantry support",
-                    "source_url": "https://example.org/food",
-                    "source_domain": "example.org",
-                    "similarity": 0.88,
-                    "metadata": {},
-                }
-            ]
-        ),
-    ]
-    mock_supabase = Mock()
-    mock_supabase.rpc.return_value = mock_rpc_chain
-
-    monkeypatch.setenv("VECTOR_SYNC_SUPABASE_FALLBACK_READS", "true")
-    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
-    monkeypatch.setenv("SUPABASE_KEY", "test-key")
-    monkeypatch.setattr(db_search_module, "_SUPABASE_CLIENT", None)
-    monkeypatch.setattr(db_search_module, "create_client", lambda _url, _key: mock_supabase)
+    mock_store.query_chunks.side_effect = RuntimeError("primary store unavailable")
+    postgres_mock = Mock(
+        return_value=[
+            {
+                "id": "doc-legacy-1",
+                "content": "Food pantry support",
+                "source_url": "https://example.org/food",
+                "source_domain": "example.org",
+                "similarity": 0.88,
+                "metadata": {},
+            }
+        ]
+    )
+    monkeypatch.setattr(db_search_module, "_query_postgres_fallback", postgres_mock)
 
     token = set_search_options(tags=["food"], tag_match_mode="all", include_untagged_fallback=False)
     try:
@@ -428,4 +368,4 @@ def test_db_search_supabase_fallback_uses_legacy_rpc_signature_when_tag_signatur
 
     assert len(results) == 1
     assert results[0]["source_url"] == "https://example.org/food"
-    assert mock_supabase.rpc.call_count == 2
+    assert postgres_mock.called

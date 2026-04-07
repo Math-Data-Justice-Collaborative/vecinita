@@ -1,7 +1,7 @@
 .PHONY: help \
 	dev dev-tmux dev-attach dev-stop dev-clear-ports \
 	dev-chat dev-chat-backend dev-chat-gateway dev-chat-frontend \
-	dev-data-management dev-data-management-frontend dev-data-management-api \
+	dev-data-management dev-data-management-frontend dev-data-management-api data-management-api-key \
 	dev-backend dev-gateway dev-frontend \
 	branch-status branch-save branch-restore branch-switch branch-pull branch-sync-main \
 	lint lint-backend lint-frontend lint-imported lint-fix lint-fix-backend lint-fix-frontend lint-fix-data-management-frontend \
@@ -35,6 +35,7 @@ help:
 	@echo "  make dev-data-management                 Start data management system (frontend + API)"
 	@echo "  make dev-data-management-frontend        Start data management frontend only"
 	@echo "  make dev-data-management-api             Start data management API only"
+	@echo "  make data-management-api-key             Print configured dashboard API key or guidance"
 	@echo "  make dev-tmux                            Start the legacy tmux split-pane dev session"
 	@echo "  make dev-attach                          Attach to the existing tmux dev session"
 	@echo "  make dev-stop                            Stop the dev session and local containers"
@@ -159,9 +160,8 @@ dev-backend:
 
 dev-gateway:
 	cd backend && AGENT_SERVICE_URL='http://localhost:8000' EMBEDDING_SERVICE_URL='http://localhost:8001' \
-		SUPABASE_URL='http://localhost:3001' SUPABASE_KEY='test-anon-key-local-development-only' \
 		DEV_ADMIN_ENABLED='true' DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' \
-		SUPABASE_UPLOADS_BUCKET='documents' DEMO_MODE='false' \
+		DEMO_MODE='false' \
 		uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 --reload --reload-dir src --reload-exclude '.mypy_cache/*' --reload-exclude '.pytest_cache/*' --reload-exclude '.ruff_cache/*' --reload-exclude '.venv/*' --reload-exclude 'logs/*' --reload-exclude 'build/*' --reload-exclude 'coverage*' --reload-exclude '*.pyc'
 
 dev-frontend:
@@ -182,7 +182,7 @@ dev-chat-agent:
 		uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir src --reload-exclude '.mypy_cache/*' --reload-exclude '.pytest_cache/*' --reload-exclude '.ruff_cache/*' --reload-exclude '.venv/*' --reload-exclude 'logs/*' --reload-exclude 'build/*' --reload-exclude 'coverage*' --reload-exclude '*.pyc' &
 
 dev-chat-gateway:
-	@echo "Starting Chat Gateway (port 8004, Supabase-enabled)..."
+	@echo "Starting Chat Gateway (port 8004, PostgreSQL-backed)..."
 	@cd backend && source ../.env && \
 		AGENT_SERVICE_URL='http://localhost:8000' \
 		EMBEDDING_SERVICE_URL='http://localhost:8001' \
@@ -191,7 +191,7 @@ dev-chat-gateway:
 		uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 --reload --reload-dir src --reload-exclude '.mypy_cache/*' --reload-exclude '.pytest_cache/*' --reload-exclude '.ruff_cache/*' --reload-exclude '.venv/*' --reload-exclude 'logs/*' --reload-exclude 'build/*' --reload-exclude 'coverage*' --reload-exclude '*.pyc' &
 
 dev-chat-frontend:
-	@echo "Starting Chat Frontend (port 5173, Supabase-enabled)..."
+	@echo "Starting Chat Frontend (port 5173)..."
 	@cd frontend && npm run dev -- --host 0.0.0.0 --port 5173
 
 # ============================================================================
@@ -206,11 +206,33 @@ dev-data-management-frontend:
 	@cd apps/data-management-frontend && npm run dev -- --host 0.0.0.0 --port 5174
 
 dev-data-management-api:
-	@echo "Starting Data Management API (port 8005, Supabase-enabled)..."
+	@echo "Starting Data Management API (port 8005, PostgreSQL-backed)..."
 	@test -d services/data-management-api/apps/backend || \
 		(echo "❌ data-management-api submodule not initialized." && \
 		 echo "   Run: git submodule update --init services/data-management-api" && exit 1)
 	@echo "⚠️  Start data-management API directly from services/data-management-api using its native entrypoint." 
+
+data-management-api-key:
+	@set -e; \
+	if [ -n "$$DATA_MANAGEMENT_API_KEY" ]; then \
+		echo "$$DATA_MANAGEMENT_API_KEY"; \
+	elif [ -n "$$DEV_ADMIN_BEARER_TOKEN" ]; then \
+		echo "$$DEV_ADMIN_BEARER_TOKEN"; \
+	elif [ -f .env ] && grep -q '^DATA_MANAGEMENT_API_KEY=' .env; then \
+		grep '^DATA_MANAGEMENT_API_KEY=' .env | tail -n 1 | cut -d= -f2-; \
+	elif [ -f .env ] && grep -q '^DEV_ADMIN_BEARER_TOKEN=' .env; then \
+		grep '^DEV_ADMIN_BEARER_TOKEN=' .env | tail -n 1 | cut -d= -f2-; \
+	elif [ -f services/data-management-api/.env ] && grep -q '^DATA_MANAGEMENT_API_KEY=' services/data-management-api/.env; then \
+		grep '^DATA_MANAGEMENT_API_KEY=' services/data-management-api/.env | tail -n 1 | cut -d= -f2-; \
+	elif [ -f services/data-management-api/.env ] && grep -q '^DEV_ADMIN_BEARER_TOKEN=' services/data-management-api/.env; then \
+		grep '^DEV_ADMIN_BEARER_TOKEN=' services/data-management-api/.env | tail -n 1 | cut -d= -f2-; \
+	else \
+		echo "No DATA_MANAGEMENT_API_KEY is configured."; \
+		echo "No DATA_MANAGEMENT_API_KEY or DEV_ADMIN_BEARER_TOKEN is configured."; \
+		echo "This repo does not mint dashboard API keys automatically."; \
+		echo "Ask the data-management backend operator for a provisioned key, then export DATA_MANAGEMENT_API_KEY=<token> or add it to .env."; \
+		exit 1; \
+	fi
 # Individual service targets (legacy)
 # ============================================================================
 

@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 	langchain langchain-community langchain-core \
 	langchain-openai langchain-groq langchain-tavily langchain-text-splitters \
 	langchain-huggingface langgraph \
-	supabase chromadb psycopg2-binary \
+	psycopg2-binary \
 	beautifulsoup4 pypdf \
 	python-dotenv pydantic requests httpx langdetect tqdm \
 	python-multipart \

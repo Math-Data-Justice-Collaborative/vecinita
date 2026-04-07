@@ -107,58 +107,20 @@ OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
 DEFAULT_PROVIDER: str = os.getenv("DEFAULT_PROVIDER", "ollama").lower()
 
 # ---------------------------------------------------------------------------
-# Supabase (legacy)
-# ---------------------------------------------------------------------------
-SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
-SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
-
-# ---------------------------------------------------------------------------
 # Data Database Routing (retrieval/storage path only)
-# Supabase remains the auth provider.
+# Render Postgres is the only supported data backend.
 # ---------------------------------------------------------------------------
 DATABASE_URL: str = os.getenv("DATABASE_URL", "")
-DB_DATA_MODE: str = os.getenv("DB_DATA_MODE", "auto").strip().lower()
+DB_DATA_MODE: str = "postgres"
 
 
 def resolve_data_db_mode() -> str:
     """Resolve backend data-path database mode.
 
-    Modes:
-    - "supabase": force Supabase for data reads/writes.
-    - "postgres": force direct Postgres via DATABASE_URL.
-    - "auto": prefer Postgres when DATABASE_URL is set and Supabase data
-      credentials are missing; otherwise use Supabase.
-
-    This mode applies only to data retrieval/storage paths. Authentication
-    remains Supabase-backed.
+    The backend is postgres-only.
     """
 
-    # Resolve from live environment every call to avoid stale import-time values
-    # during dev/test startup sequencing.
-    mode_env = os.getenv("DB_DATA_MODE", "auto").strip().lower()
-    mode = mode_env if mode_env in {"auto", "postgres", "supabase"} else "auto"
-
-    # Render runtime is Postgres-only during cutover and after migration.
-    # Keep this strict so misconfigured env does not silently route reads/writes.
-    if _running_on_render():
-        return "postgres"
-
-    if mode != "auto":
-        return mode
-
-    has_postgres = bool(os.getenv("DATABASE_URL", "").strip())
-
-    # Postgres-first cutover: when DATABASE_URL is available, use it for
-    # retrieval/storage regardless of Supabase auth configuration.
-    if has_postgres:
-        return "postgres"
-    return "supabase"
-
-
-def supabase_data_reads_enabled() -> bool:
-    """Feature-flagged Supabase data-path reads for rollback windows."""
-
-    return os.getenv("SUPABASE_DATA_READS_ENABLED", "true").lower() in {"1", "true", "yes"}
+    return "postgres"
 
 
 def postgres_data_reads_enabled() -> bool:

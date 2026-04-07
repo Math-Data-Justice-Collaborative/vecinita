@@ -27,19 +27,9 @@ echo "Checking environment variables..."
 
 MISSING_VARS=0
 
-if [ -z "$SUPABASE_URL" ]; then
-    echo -e "${RED}❌ ERROR: SUPABASE_URL not set${NC}"
-    MISSING_VARS=$((MISSING_VARS + 1))
-fi
-
-if [ -z "$SUPABASE_KEY" ]; then
-    echo -e "${RED}❌ ERROR: SUPABASE_KEY not set${NC}"
-    MISSING_VARS=$((MISSING_VARS + 1))
-fi
-
 if [ -z "$DATABASE_URL" ]; then
-    echo -e "${YELLOW}⚠ WARNING: DATABASE_URL not set${NC}"
-    echo "  Attempting to use SUPABASE_URL for database connection..."
+    echo -e "${RED}❌ ERROR: DATABASE_URL not set${NC}"
+    MISSING_VARS=$((MISSING_VARS + 1))
 fi
 
 if [ $MISSING_VARS -gt 0 ]; then
@@ -70,7 +60,7 @@ mkdir -p data/output logs
 echo -e "${GREEN}✓ Output directories ready${NC}"
 
 # Run the scraper with streaming mode
-# --stream: Upload chunks immediately to Supabase (memory efficient for cron)
+# --stream: Upload chunks immediately to PostgreSQL (memory efficient for cron)
 # --no-confirm: Skip confirmation prompts
 # --verbose: Show detailed logs for debugging
 echo ""

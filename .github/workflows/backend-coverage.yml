@@ -62,8 +62,6 @@ jobs:
     - name: Create .env file for tests
       working-directory: backend
       run: |
-        echo "SUPABASE_URL=${{ secrets.SUPABASE_URL || 'https://test.supabase.co' }}" >> .env
-        echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY || 'test-key' }}" >> .env
         echo "DATABASE_URL=${{ secrets.DATABASE_URL || 'postgresql://test' }}" >> .env
         echo "OLLAMA_BASE_URL=http://localhost:11434" >> .env
         echo "OLLAMA_MODEL=llama3.1:8b" >> .env
@@ -84,7 +82,6 @@ jobs:
         pytest tests/ -m "not integration and not e2e and not llm" -v --tb=short \
           --cov=src.embedding_service.modal_app \
           --cov=src.services.embedding.models \
-          --cov=src.utils.supabase_embeddings \
           --cov=src.utils.tags \
           --cov-config=.coveragerc.unit --cov-report=xml --cov-report=term --junit-xml=test-results.xml \
           --cov-fail-under=98

@@ -31,19 +31,19 @@ def test_run_startup_preflight_ok(preflight_module, monkeypatch):
     assert result["checks"]["data_backend"]["backend"] == "postgres"
 
 
-def test_run_startup_preflight_ok_supabase(preflight_module, monkeypatch):
-    """Test startup preflight succeeds with Supabase backend."""
+def test_run_startup_preflight_reports_postgres_backend(preflight_module, monkeypatch):
+    """Startup preflight reports the postgres backend when checks pass."""
     monkeypatch.setattr(preflight_module, "_probe_guardrails_loaded", lambda: (True, "ok"))
-    monkeypatch.setattr(preflight_module, "_probe_supabase_connectivity", lambda: (True, "ok"))
+    monkeypatch.setattr(preflight_module, "_probe_postgres_connectivity", lambda: (True, "ok"))
 
-    with patch("src.config.resolve_data_db_mode", return_value="supabase"):
+    with patch("src.config.resolve_data_db_mode", return_value="postgres"):
         result = preflight_module._run_startup_preflight()
 
     assert result["status"] == "ok"
-    assert result["data_mode"] == "supabase"
+    assert result["data_mode"] == "postgres"
     assert result["checks"]["guardrails"]["ok"] is True
     assert result["checks"]["data_backend"]["ok"] is True
-    assert result["checks"]["data_backend"]["backend"] == "supabase"
+    assert result["checks"]["data_backend"]["backend"] == "postgres"
 
 
 def test_run_startup_preflight_degraded_postgres(preflight_module, monkeypatch):

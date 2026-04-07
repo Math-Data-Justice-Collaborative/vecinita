@@ -191,10 +191,10 @@ Modal reindex trigger coverage is validated in backend test suites:
 - `SKIP_E2E` - Skip E2E tests (default: false)
 - `API_TIMEOUT` - HTTP request timeout in seconds (default: 10)
 
-### Supabase/Backend Testing
+### Backend Integration Testing
 
 Some tests require a running backend with:
-- Supabase instance configured
+- PostgreSQL database configured
 - Groq API key (`GROQ_API_KEY`)
 - Valid URLs in data configuration
 

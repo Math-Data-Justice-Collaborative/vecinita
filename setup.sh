@@ -69,7 +69,6 @@ fi
 echo -e "\n${YELLOW}5. Starting services (this may take 2-3 minutes on first run)...${NC}"
 echo -e "   Services being started:"
 echo -e "   • PostgreSQL (5432)"
-echo -e "   • PostgREST API (3001)"
 echo -e "   • pgAdmin UI (5050)"
 echo -e "   • Embedding Service (8001)"
 echo -e "   • Agent Service (8000)"
@@ -81,7 +80,7 @@ docker-compose up -d --build
 # Wait for services
 echo -e "\n${YELLOW}6. Waiting for services to be healthy...${NC}"
 
-services=("postgres:5432" "postgrest:3001" "embedding-service:8001" "vecinita-agent:8000" "vecinita-frontend:5173")
+services=("postgres:5432" "embedding-service:8001" "vecinita-agent:8000" "vecinita-frontend:5173")
 max_attempts=30
 attempt=0
 
@@ -119,9 +118,6 @@ echo -e "  → API Docs: http://localhost:8000/docs"
 echo ""
 echo -e "  ${YELLOW}Embedding Service${NC}"
 echo -e "  → http://localhost:8001/health"
-echo ""
-echo -e "  ${YELLOW}PostgREST REST API${NC}"
-echo -e "  → http://localhost:3001"
 echo ""
 echo -e "  ${YELLOW}pgAdmin (Database UI)${NC}"
 echo -e "  → http://localhost:5050"

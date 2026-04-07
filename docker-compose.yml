@@ -1,29 +1,8 @@
 # Local Development Full Stack
-# Includes: PostgreSQL, PostgREST, pgAdmin, Embedding Service, Agent Service, Frontend, Scraper
+# Includes: PostgreSQL, pgAdmin, Embedding Service, Agent Service, Frontend, Scraper
 # Usage: docker-compose up
-# Production uses cloud Supabase and Render services (see .env.prod and docs/RENDER_DEPLOYMENT_THREE_SERVICES.md)
 
 services:
-  # ChromaDB - Vector/document storage service
-  chroma:
-    image: chromadb/chroma:latest
-    container_name: vecinita-chroma
-    environment:
-      IS_PERSISTENT: "TRUE"
-      PERSIST_DIRECTORY: "/data"
-    ports:
-      - "8002:8000"
-    volumes:
-      - chroma_data_local:/data
-    restart: unless-stopped
-    networks:
-      - vecinita-network
-    healthcheck:
-      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/8000'"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   # Local PostgreSQL Database
   postgres:
     image: postgres:16-alpine
@@ -45,28 +24,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  # PostgREST - REST API layer on top of PostgreSQL
-  postgrest:
-    image: postgrest/postgrest:v12.0.1
-    container_name: vecinita-postgrest-local
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      PGRST_DB_URI: postgresql://postgres:postgres@vecinita-postgres-local:5432/postgres
-      PGRST_DB_SCHEMA: public
-      PGRST_DB_ANON_ROLE: postgres
-      PGRST_JWT_SECRET: dev-jwt-secret-for-local-testing-only-32chars-min
-      PGRST_JWT_AUD: ""  # Allow any audience for development
-      PGRST_JWT_ROLE_CLAIM_KEY: ".role"
-    ports:
-      - "3001:3000"  # PostgREST REST API on localhost:3001
-    restart: unless-stopped
-    networks:
-      - vecinita-network
-    # PostgREST is a distroless binary image with no shell or tooling; health is
-    # inferred from the postgres dependency and a short start_period in dependents.
 
   # pgAdmin - PostgreSQL Management UI (Optional but useful)
   pgadmin:
@@ -122,17 +79,8 @@ services:
       PYTHONUNBUFFERED: "1"
       EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
       EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:?Set EMBEDDING_SERVICE_AUTH_TOKEN before starting docker compose}"
-      CHROMA_HOST: "chroma"
-      CHROMA_PORT: "8000"
-      CHROMA_SSL: "false"
-      CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
-      CHROMA_COLLECTION_SOURCES: "vecinita_sources"
-      CHROMA_COLLECTION_QUEUE: "vecinita_queue"
       VECTOR_SYNC_ENABLED: "true"
       VECTOR_SYNC_DEGRADED_MODE: "true"
-      VECTOR_SYNC_SUPABASE_FALLBACK_READS: "true"
-      SUPABASE_URL: "http://postgrest:3000"
-      SUPABASE_KEY: "dev-anon-key"
       DEEPSEEK_API_KEY: "${DEEPSEEK_API_KEY:-}"
       DEEPSEEK_BASE_URL: "${DEEPSEEK_BASE_URL:-https://api.deepseek.com}"
       OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-}"
@@ -145,15 +93,10 @@ services:
       BACKEND_PREFLIGHT_STRICT: "false"
       GUARDRAILS_REQUIRE_HUB_VALIDATOR: "false"
       GUARDRAILS_HUB_AUTO_INSTALL: "false"
-      CHROMA_REQUIRED: "false"
     depends_on:
       postgres:
         condition: service_healthy
-      postgrest:
-        condition: service_started
       embedding-service:
-        condition: service_healthy
-      chroma:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -178,17 +121,8 @@ services:
       AGENT_SERVICE_URL: "http://vecinita-agent:8000"
       EMBEDDING_SERVICE_URL: "http://embedding-service:8001"
       EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:?Set EMBEDDING_SERVICE_AUTH_TOKEN before starting docker compose}"
-      CHROMA_HOST: "chroma"
-      CHROMA_PORT: "8000"
-      CHROMA_SSL: "false"
-      CHROMA_COLLECTION_CHUNKS: "vecinita_chunks"
-      CHROMA_COLLECTION_SOURCES: "vecinita_sources"
-      CHROMA_COLLECTION_QUEUE: "vecinita_queue"
       VECTOR_SYNC_ENABLED: "true"
       VECTOR_SYNC_DEGRADED_MODE: "true"
-      VECTOR_SYNC_SUPABASE_FALLBACK_READS: "true"
-      SUPABASE_URL: "http://postgrest:3000"
-      SUPABASE_KEY: "dev-anon-key"
       DEEPSEEK_API_KEY: "${DEEPSEEK_API_KEY:-}"
       DEEPSEEK_BASE_URL: "${DEEPSEEK_BASE_URL:-https://api.deepseek.com}"
       GROQ_API_KEY: "${GROQ_API_KEY:-}"
@@ -198,23 +132,17 @@ services:
       GROQ_TAG_MODEL: "${GROQ_TAG_MODEL:-llama-3.1-8b-instant}"
       DEV_ADMIN_ENABLED: "true"
       DEV_ADMIN_BEARER_TOKEN: "vecinita-dev-admin-token-2026"
-      SUPABASE_UPLOADS_BUCKET: "documents"
       # Startup preflight configuration (disabled in dev, enabled in prod)
       BACKEND_PREFLIGHT_ENABLED: "true"
       BACKEND_PREFLIGHT_STRICT: "false"
       GUARDRAILS_REQUIRE_HUB_VALIDATOR: "false"
       GUARDRAILS_HUB_AUTO_INSTALL: "false"
-      CHROMA_REQUIRED: "false"
     command: ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port 8004"]
     depends_on:
       vecinita-agent:
         condition: service_healthy
       embedding-service:
         condition: service_healthy
-      chroma:
-        condition: service_healthy
-      postgrest:
-        condition: service_started
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
@@ -252,7 +180,6 @@ services:
 
 volumes:
   postgres_data_local:
-  chroma_data_local:
 
 networks:
   vecinita-network:

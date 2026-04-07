@@ -25,8 +25,6 @@ def env_vars():
         return value
 
     return {
-        "SUPABASE_URL": _env_or_default("SUPABASE_URL", "https://test.supabase.co"),
-        "SUPABASE_KEY": _env_or_default("SUPABASE_KEY", "test-key"),
         "OLLAMA_BASE_URL": _env_or_default("OLLAMA_BASE_URL", "http://localhost:10000/model"),
         "MODAL_OLLAMA_ENDPOINT": _env_or_default(
             "MODAL_OLLAMA_ENDPOINT", "http://localhost:10000/model"
@@ -57,36 +55,10 @@ def _agent_module_path_compatibility():
         fake_torch.__spec__ = importlib.machinery.ModuleSpec("torch", loader=None)
         sys.modules["torch"] = fake_torch
 
-    # Mock Supabase client factory before importing src.agent.main.
-    def _fake_create_supabase_client(*_args, **_kwargs):
-        mock_client = MagicMock()
-        # Mock the query chain: table().select().limit().execute()
-        # Create a chainable query builder that returns itself for all methods
-        mock_query = MagicMock()
-        mock_result = MagicMock()
-        mock_result.data = []  # Preflight check expects .data attribute
-
-        # Make methods return the query chain (or self) for chaining
-        mock_query.select.return_value = mock_query  # select() returns self for chaining
-        mock_query.limit.return_value = mock_query  # limit() returns self for chaining
-        mock_query.execute.return_value = mock_result  # execute() returns result object
-
-        # table() returns the query chain
-        mock_client.table.return_value = mock_query
-        # rpc() also returns the query chain for other operations
-        mock_client.rpc.return_value = mock_query
-
-        return mock_client
-
     # Stub embedding service client before importing src.agent.main.
     fake_embedding_module = types.ModuleType("src.embedding_service.client")
-    fake_chroma_store_module = types.ModuleType("src.services.chroma_store")
     fake_psycopg2_module = types.ModuleType("psycopg2")
     fake_psycopg2_extras_module = types.ModuleType("psycopg2.extras")
-
-    class _FakeChromaStore:
-        def heartbeat(self):
-            return True
 
     def _fake_create_embedding_client(*_args, **_kwargs):
         mock_embedding = Mock()
@@ -94,23 +66,15 @@ def _agent_module_path_compatibility():
         mock_embedding.embed_documents = Mock(return_value=[[0.1] * 384])
         return mock_embedding
 
-    def _fake_get_chroma_store(*_args, **_kwargs):
-        return Mock(heartbeat=Mock(return_value=True))
-
     fake_embedding_module.create_embedding_client = _fake_create_embedding_client
-    fake_chroma_store_module.ChromaStore = _FakeChromaStore
-    fake_chroma_store_module.get_chroma_store = _fake_get_chroma_store
     fake_psycopg2_extras_module.RealDictCursor = object
     fake_psycopg2_module.extras = fake_psycopg2_extras_module
     sys.modules["src.embedding_service.client"] = fake_embedding_module
-    sys.modules["src.services.chroma_store"] = fake_chroma_store_module
     sys.modules["psycopg2"] = fake_psycopg2_module
     sys.modules["psycopg2.extras"] = fake_psycopg2_extras_module
 
     # Set minimal env vars so module-level LLM provider validation passes.
     _test_env_defaults = {
-        "SUPABASE_URL": "https://test.supabase.co",
-        "SUPABASE_KEY": "test-key",
         "OLLAMA_BASE_URL": "http://localhost:10000/model",
         "MODAL_OLLAMA_ENDPOINT": "http://localhost:10000/model",
         "OLLAMA_MODEL": "llama3.1:8b",
@@ -122,9 +86,7 @@ def _agent_module_path_compatibility():
         _original_env[_k] = os.environ.get(_k)
         os.environ[_k] = _v
 
-    # Patch create_client before importing src.agent.main
-    with patch("supabase.client.create_client", side_effect=_fake_create_supabase_client):
-        __import__("src.agent.main")
+    __import__("src.agent.main")
 
     yield
 
@@ -134,15 +96,6 @@ def _agent_module_path_compatibility():
             os.environ.pop(_k, None)
         else:
             os.environ[_k] = _original_value
-
-
-@pytest.fixture
-def mock_supabase_client():
-    """Create a mock Supabase client for testing."""
-    mock_client = Mock()
-    mock_client.table = Mock(return_value=Mock())
-    mock_client.rpc = Mock(return_value=Mock())
-    return mock_client
 
 
 @pytest.fixture
@@ -178,15 +131,10 @@ def fastapi_client(env_vars, monkeypatch):
     from unittest.mock import MagicMock
 
     with (
-        patch("src.agent.main.create_client") as mock_supabase,
         patch("src.agent.main.ChatOllama") as mock_ollama,
         patch("src.agent.main.HuggingFaceEmbeddings") as mock_embeddings,
     ):
         # Setup mocks
-        mock_supabase_client = MagicMock()
-        mock_supabase_client.rpc.return_value.execute.return_value.data = []
-        mock_supabase.return_value = mock_supabase_client
-
         mock_llm = MagicMock()
         mock_response = MagicMock()
         mock_response.content = "Test response"
@@ -201,31 +149,6 @@ def fastapi_client(env_vars, monkeypatch):
         from src.agent.main import app
 
         return TestClient(app)
-
-
-@pytest.fixture
-def auth_service_client(env_vars, monkeypatch):
-    """Create a TestClient for the auth routing service."""
-    for key, value in env_vars.items():
-        monkeypatch.setenv(key, value)
-
-    import importlib.util
-    import sys
-    from pathlib import Path
-
-    repo_root = Path(__file__).resolve().parents[2]
-    auth_main_path = repo_root / "auth" / "src" / "main.py"
-    module_name = "vecinita_auth_service_main"
-
-    spec = importlib.util.spec_from_file_location(module_name, auth_main_path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"Unable to load auth routing module from {auth_main_path}")
-
-    auth_module = importlib.util.module_from_spec(spec)
-    sys.modules[module_name] = auth_module
-    spec.loader.exec_module(auth_module)
-
-    return TestClient(auth_module.app)
 
 
 @pytest.fixture

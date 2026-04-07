@@ -45,7 +45,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .middleware import AuthenticationMiddleware, RateLimitingMiddleware
-from .models import GatewayConfig, HealthCheck
+from .models import GatewayConfig, HealthCheck, IntegrationComponentStatus, IntegrationsStatus
 from .router_ask import router as ask_router
 from .router_documents import router as documents_router
 from .router_embed import router as embed_router
@@ -75,7 +75,11 @@ AGENT_SERVICE_URL = os.getenv("AGENT_SERVICE_URL", "http://localhost:8000")
 # Import normalized endpoints from central config (ensures consistency across services).
 # config._normalize_internal_service_url() handles Render vs local-dev logic.
 from src.config import EMBEDDING_SERVICE_URL
-from src.service_endpoints import log_endpoint_summary as _log_ep_summary
+from src.service_endpoints import (
+    MODEL_ENDPOINT,
+    SCRAPER_ENDPOINT,
+    log_endpoint_summary as _log_ep_summary,
+)
 
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 
@@ -128,6 +132,148 @@ async def _probe_database_socket(database_url: str, timeout_seconds: float = 2.0
         return "error"
     except Exception:
         return "error"
+
+
+async def _probe_http_dependency(
+    name: str,
+    base_url: str,
+    *,
+    timeout_seconds: float = 2.0,
+    critical: bool = False,
+) -> IntegrationComponentStatus:
+    """Probe an HTTP dependency and return operator-friendly health details."""
+    if not base_url:
+        return IntegrationComponentStatus(
+            status="not_configured",
+            configured=False,
+            critical=critical,
+            endpoint=None,
+            health_url=None,
+            detail=f"{name} is not configured",
+        )
+
+    health_url = f"{base_url.rstrip('/')}/health"
+    started_at = asyncio.get_running_loop().time()
+    try:
+        async with httpx.AsyncClient(timeout=timeout_seconds) as client:
+            response = await client.get(health_url)
+        elapsed_ms = int((asyncio.get_running_loop().time() - started_at) * 1000)
+        status = "ok" if response.status_code == 200 else "error"
+        return IntegrationComponentStatus(
+            status=status,
+            configured=True,
+            critical=critical,
+            endpoint=base_url,
+            health_url=health_url,
+            response_time_ms=elapsed_ms,
+            detail=f"health endpoint returned {response.status_code}",
+        )
+    except Exception as exc:
+        elapsed_ms = int((asyncio.get_running_loop().time() - started_at) * 1000)
+        return IntegrationComponentStatus(
+            status="error",
+            configured=True,
+            critical=critical,
+            endpoint=base_url,
+            health_url=health_url,
+            response_time_ms=elapsed_ms,
+            detail=f"{name} probe failed: {exc}",
+        )
+
+
+async def _probe_database_dependency(
+    database_url: str,
+    *,
+    timeout_seconds: float = 2.0,
+    critical: bool = True,
+) -> IntegrationComponentStatus:
+    """Probe Postgres reachability and return a structured status payload."""
+    if not database_url:
+        return IntegrationComponentStatus(
+            status="not_configured",
+            configured=False,
+            critical=critical,
+            endpoint=None,
+            health_url=None,
+            detail="database is not configured",
+        )
+
+    try:
+        parsed = urlparse(database_url)
+        host = parsed.hostname
+        port = int(parsed.port or 5432)
+        endpoint = f"{host}:{port}" if host else None
+    except Exception:
+        endpoint = None
+
+    started_at = asyncio.get_running_loop().time()
+    status = await _probe_database_socket(database_url, timeout_seconds=timeout_seconds)
+    elapsed_ms = int((asyncio.get_running_loop().time() - started_at) * 1000)
+
+    return IntegrationComponentStatus(
+        status=status,
+        configured=True,
+        critical=critical,
+        endpoint=endpoint,
+        health_url=None,
+        response_time_ms=elapsed_ms,
+        detail=(
+            "database socket probe succeeded"
+            if status == "ok"
+            else "database socket probe failed"
+        ),
+    )
+
+
+async def _build_integrations_status() -> IntegrationsStatus:
+    """Build an aggregated integrations status payload for operators and deploy checks."""
+    agent_status, embedding_status, database_status, scraper_status, model_status = await asyncio.gather(
+        _probe_http_dependency("agent", AGENT_SERVICE_URL, critical=True),
+        _probe_http_dependency("embedding service", EMBEDDING_SERVICE_URL, critical=True),
+        _probe_database_dependency(DATABASE_URL, critical=True),
+        _probe_http_dependency("scraper service", SCRAPER_ENDPOINT, critical=False),
+        _probe_http_dependency("model service", MODEL_ENDPOINT, critical=False),
+    )
+
+    components = {
+        "agent": agent_status,
+        "embedding_service": embedding_status,
+        "database": database_status,
+        "scraper": scraper_status,
+        "model": model_status,
+    }
+
+    degraded_integrations = [
+        name
+        for name, component in components.items()
+        if component.configured and component.status != "ok"
+    ]
+    active_integrations = [
+        name
+        for name, component in components.items()
+        if component.configured and component.status == "ok"
+    ]
+
+    overall_status = "ok"
+    if any(component.critical and component.status != "ok" for component in components.values()):
+        overall_status = "degraded"
+
+    return IntegrationsStatus(
+        status=overall_status,
+        gateway=IntegrationComponentStatus(
+            status="ok",
+            configured=True,
+            critical=True,
+            endpoint=os.getenv("RENDER_SERVICE_NAME") or "vecinita-gateway",
+            health_url=None,
+            response_time_ms=0,
+            detail="gateway process is running",
+        ),
+        components=components,
+        active_integrations=active_integrations,
+        degraded_integrations=degraded_integrations,
+        timestamp=datetime.now(timezone.utc),
+    )
 
 # ============================================================================
 # FastAPI Application
@@ -255,6 +401,10 @@ async def root(request: Request):
                 "preview": "GET /api/v1/documents/preview",
                 "tags": "GET /api/v1/documents/tags",
             },
+            "Operations": {
+                "health": "GET /health",
+                "integrations": "GET /api/v1/integrations/status",
+            },
             "Documentation": {
                 "docs": "GET /api/v1/docs (OpenAPI/Swagger)",
                 "openapi": "GET /api/v1/openapi.json",
@@ -276,17 +426,13 @@ async def health_check():
     Returns:
         Service health status
     """
-    agent_status, embedding_status, database_status = await asyncio.gather(
-        _probe_http_health(AGENT_SERVICE_URL),
-        _probe_http_health(EMBEDDING_SERVICE_URL),
-        _probe_database_socket(DATABASE_URL),
-    )
-
-    critical_statuses = [status for status in (agent_status, embedding_status) if status != "ok"]
-    overall_status = "degraded" if critical_statuses else "ok"
+    integrations = await _build_integrations_status()
+    agent_status = integrations.components["agent"].status
+    embedding_status = integrations.components["embedding_service"].status
+    database_status = integrations.components["database"].status
 
     return HealthCheck(
-        status=overall_status,
+        status=integrations.status,
         agent_service=agent_status,
         embedding_service=embedding_status,
         database=database_status,
@@ -298,6 +444,18 @@ async def health_check():
 async def health_check_v1_alias():
     """Versioned alias used by smoke/live checks and legacy clients."""
     return await health_check()
+
+
+@app.get("/integrations/status", response_model=IntegrationsStatus)
+async def integrations_status():
+    """Detailed integration health for deploy checks and operator diagnostics."""
+    return await _build_integrations_status()
+
+
+@app.get("/api/v1/integrations/status", response_model=IntegrationsStatus, include_in_schema=False)
+async def integrations_status_v1_alias():
+    """Versioned alias for integration health checks."""
+    return await integrations_status()
 
 
 @app.get("/config", response_model=GatewayConfig)

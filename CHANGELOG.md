@@ -299,7 +299,7 @@ async def validate_key(request: ValidateKeyRequest):
     if not api_key.startswith("sk_"):
         return {"valid": False, "reason": "Invalid format"}
     
-    # Could check Supabase database here
+    # Could check the database here
     return {"valid": True, "metadata": {...}}
 
 @app.post("/track-usage")
@@ -351,7 +351,7 @@ dependencies = [
     "fastapi >= 0.104.0",
     "httpx >= 0.25.0",
     "uvicorn[standard] >= 0.24.0",
-    "supabase >= 2.0.0",
+    "psycopg2-binary >= 2.9.0",
 ]
 ```
 - Purpose: Minimal dependencies (4 packages)
@@ -390,7 +390,7 @@ CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8003"]
 - Need unit tests for RateLimitState
 - Need tests for each endpoint
 - Need negative tests (expired keys, limits exceeded)
-- Need mock Supabase lookups
+- Need mock database lookups
 
 **Breaking Changes:** None (new service)
 
@@ -754,15 +754,12 @@ auth-service:
     - "8003:8003"
   environment:
     PORT: "8003"
-    SUPABASE_URL: "http://postgrest:3000"
-    SUPABASE_KEY: "dev-anon-key"
+        DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/postgres"
     ENVIRONMENT: "development"
     RATE_LIMIT_TOKENS_PER_DAY: "10000"
     RATE_LIMIT_REQUESTS_PER_HOUR: "100"
   depends_on:
     postgres:
-      condition: service_healthy
-    postgrest:
       condition: service_healthy
   healthcheck:
     test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
@@ -796,7 +793,7 @@ environment:
   GROK_API_KEY: ""
 ```
 
-**No changes to:** PostgreSQL, PostgREST, Embedding service, Redis
+**No changes to:** PostgreSQL, Embedding service, Redis
 
 ---
 

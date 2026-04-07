@@ -1,4 +1,4 @@
-"""Database search tool for Vecinita agent backed by Postgres/Supabase."""
+"""Database search tool for Vecinita agent backed by Postgres."""
 
 import json
 import logging
@@ -17,11 +17,6 @@ try:
 except Exception:  # pragma: no cover - optional dependency in some test/runtime profiles
     psycopg2 = None  # type: ignore[assignment]
 
-try:
-    from supabase import create_client
-except Exception:  # pragma: no cover - optional dependency in some test/runtime profiles
-    create_client = None  # type: ignore[assignment]
-
 from src import config as app_config
 from src.utils.tags import infer_tags_from_text, normalize_tags
 
@@ -39,9 +34,6 @@ _SEARCH_METRICS: ContextVar[dict[str, Any] | None] = ContextVar(
     "db_search_metrics",
     default=None,
 )
-
-_SUPABASE_CLIENT = None
-
 
 def _update_search_status(status: str) -> None:
     global _LAST_SEARCH_STATUS
@@ -124,39 +116,10 @@ def _rerank_results(query: str, docs: list[dict[str, Any]], top_k: int) -> list[
     return [doc for _, doc in scored[:top_k]]
 
 
-def _fallback_reads_enabled() -> bool:
-    return os.getenv("VECTOR_SYNC_SUPABASE_FALLBACK_READS", "true").lower() in {"1", "true", "yes"}
-
-
 def _postgres_reads_enabled() -> bool:
     return app_config.postgres_data_reads_enabled()
 
-
-def _get_supabase_client():
-    global _SUPABASE_CLIENT
-    if _SUPABASE_CLIENT is not None:
-        return _SUPABASE_CLIENT
-    if create_client is None:
-        return None
-
-    supabase_url = os.getenv("SUPABASE_URL")
-    supabase_key = (
-        os.getenv("SUPABASE_SECRET_KEY")
-        or os.getenv("SUPABASE_KEY")
-        or os.getenv("SUPABASE_PUBLISHABLE_KEY")
-    )
-    if not supabase_url or not supabase_key:
-        return None
-
-    try:
-        _SUPABASE_CLIENT = create_client(supabase_url, supabase_key)
-    except Exception as exc:
-        logger.warning("Supabase fallback client init failed: %s", exc)
-        _SUPABASE_CLIENT = None
-    return _SUPABASE_CLIENT
-
-
-def _normalize_supabase_document(doc: dict[str, Any]) -> dict[str, Any]:
+def _normalize_document(doc: dict[str, Any]) -> dict[str, Any]:
     metadata: dict[str, Any] = doc.get("metadata") if isinstance(doc.get("metadata"), dict) else {}  # type: ignore[assignment]
     return {
         "content": doc.get("content") or "",
@@ -191,56 +154,6 @@ def _normalize_supabase_document(doc: dict[str, Any]) -> dict[str, Any]:
         "doc_index": metadata.get("doc_index"),
         "metadata": metadata,
     }
-
-
-def _query_supabase_fallback(
-    *,
-    query_embedding: list[float],
-    match_threshold: float,
-    match_count: int,
-    tags: list[str],
-    tag_mode: str,
-    include_untagged_fallback: bool,
-) -> list[dict[str, Any]]:
-    if not _fallback_reads_enabled():
-        return []
-
-    client = _get_supabase_client()
-    if client is None:
-        return []
-
-    rpc_params: dict[str, Any] = {
-        "query_embedding": query_embedding,
-        "match_threshold": float(match_threshold),
-        "match_count": max(int(match_count), 1),
-    }
-    if tags:
-        rpc_params.update(
-            {
-                "tag_filter": tags,
-                "tag_match_mode": "all" if str(tag_mode).lower() == "all" else "any",
-                "include_untagged_fallback": bool(include_untagged_fallback),
-            }
-        )
-
-    try:
-        result = client.rpc("search_similar_documents", rpc_params).execute()
-    except Exception as rpc_error:
-        if "tag_filter" in rpc_params and any(
-            marker in str(rpc_error).lower()
-            for marker in ["does not exist", "could not find", "unexpected", "signature"]
-        ):
-            fallback_params = {
-                "query_embedding": query_embedding,
-                "match_threshold": float(match_threshold),
-                "match_count": max(int(match_count), 1),
-            }
-            result = client.rpc("search_similar_documents", fallback_params).execute()
-        else:
-            raise
-
-    rows = result.data or []
-    return [_normalize_supabase_document(row) for row in rows if isinstance(row, dict)]
 
 
 def _query_postgres_fallback(
@@ -322,33 +235,22 @@ def _query_postgres_fallback(
     docs: list[dict[str, Any]] = []
     for row in rows:
         record = dict(zip(columns, row, strict=False))
-        docs.append(_normalize_supabase_document(record))
+        docs.append(_normalize_document(record))
     return docs
 
 
 def _resolve_data_backend_order() -> list[str]:
-    mode = app_config.resolve_data_db_mode()
-    if app_config._running_on_render():
-        return ["postgres"]
-    if mode == "postgres":
-        return ["postgres"]
-    if mode == "supabase":
-        return ["supabase"]
-    # auto mode preference is resolved in config; keep explicit fallback chain here.
-    resolved = app_config.resolve_data_db_mode()
-    if resolved == "postgres":
-        return ["postgres"]
-    return ["supabase"]
+    return ["postgres"]
 
 
 def create_db_search_tool(  # noqa: C901
-    chroma_store,
+    store_client,
     embedding_model,
     match_threshold: float = 0.3,
     match_count: int = 5,
 ):
-    """Create a configured db_search tool backed by Postgres/Supabase and embeddings."""
-    _ = chroma_store  # Legacy arg retained for compatibility with existing callers/tests.
+    """Create a configured db_search tool backed by Postgres and embeddings."""
+    _ = store_client
     embedding_cache_size = max(int(os.getenv("DB_SEARCH_EMBED_CACHE_SIZE", "256")), 0)
     embedding_cache: OrderedDict[str, list[float]] = OrderedDict()
     embedding_cache_lock = threading.Lock()
@@ -422,24 +324,21 @@ def create_db_search_tool(  # noqa: C901
             backend_order = _resolve_data_backend_order()
             for backend_name in backend_order:
                 retrieval_started_at = time.perf_counter()
-                if backend_name == "postgres":
-                    rows = _query_postgres_fallback(
-                        query_embedding=query_embedding,
-                        match_threshold=float(match_threshold),
-                        match_count=int(match_count),
-                        tags=tags,
-                        tag_mode=tag_mode,
-                        include_untagged_fallback=include_untagged_fallback,
-                    )
-                else:
-                    rows = _query_supabase_fallback(
-                        query_embedding=query_embedding,
-                        match_threshold=float(match_threshold),
-                        match_count=int(match_count),
-                        tags=tags,
-                        tag_mode=tag_mode,
-                        include_untagged_fallback=include_untagged_fallback,
-                    )
+                try:
+                    if backend_name == "postgres":
+                        rows = _query_postgres_fallback(
+                            query_embedding=query_embedding,
+                            match_threshold=float(match_threshold),
+                            match_count=int(match_count),
+                            tags=tags,
+                            tag_mode=tag_mode,
+                            include_untagged_fallback=include_untagged_fallback,
+                        )
+                    else:
+                        rows = []
+                except Exception as backend_exc:
+                    logger.warning("%s retrieval failed: %s", backend_name, backend_exc)
+                    rows = []
 
                 retrieval_ms += int((time.perf_counter() - retrieval_started_at) * 1000)
                 if rows:
@@ -449,24 +348,21 @@ def create_db_search_tool(  # noqa: C901
             if not rows and tags and include_untagged_fallback:
                 for backend_name in backend_order:
                     retrieval_started_at = time.perf_counter()
-                    if backend_name == "postgres":
-                        rows = _query_postgres_fallback(
-                            query_embedding=query_embedding,
-                            match_threshold=float(match_threshold),
-                            match_count=int(match_count),
-                            tags=[],
-                            tag_mode=tag_mode,
-                            include_untagged_fallback=False,
-                        )
-                    else:
-                        rows = _query_supabase_fallback(
-                            query_embedding=query_embedding,
-                            match_threshold=float(match_threshold),
-                            match_count=int(match_count),
-                            tags=[],
-                            tag_mode=tag_mode,
-                            include_untagged_fallback=False,
-                        )
+                    try:
+                        if backend_name == "postgres":
+                            rows = _query_postgres_fallback(
+                                query_embedding=query_embedding,
+                                match_threshold=float(match_threshold),
+                                match_count=int(match_count),
+                                tags=[],
+                                tag_mode=tag_mode,
+                                include_untagged_fallback=False,
+                            )
+                        else:
+                            rows = []
+                    except Exception as backend_exc:
+                        logger.warning("%s retrieval failed: %s", backend_name, backend_exc)
+                        rows = []
 
                     retrieval_ms += int((time.perf_counter() - retrieval_started_at) * 1000)
                     if rows:
@@ -497,7 +393,7 @@ def create_db_search_tool(  # noqa: C901
             for row in rows:
                 similarity = float(row.get("similarity", 0.0) or 0.0)
                 if similarity >= float(match_threshold):
-                    filtered.append(_normalize_supabase_document(row))
+                    filtered.append(_normalize_document(row))
 
             if not filtered:
                 _update_search_status("empty")

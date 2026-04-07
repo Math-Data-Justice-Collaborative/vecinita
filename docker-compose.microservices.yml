@@ -1,17 +1,4 @@
 services:
-  chroma:
-    image: chromadb/chroma:latest
-    container_name: vecinita-chroma-ms
-    environment:
-      IS_PERSISTENT: "TRUE"
-      PERSIST_DIRECTORY: "/data"
-    ports:
-      - "8102:8000"
-    volumes:
-      - chroma_data_ms:/data
-    networks:
-      - vecinita-ms-net
-
   postgres:
     image: postgres:16-alpine
     container_name: vecinita-postgres-ms
@@ -28,22 +15,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - vecinita-ms-net
-
-  postgrest:
-    image: postgrest/postgrest:v12.0.1
-    container_name: vecinita-postgrest-ms
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      PGRST_DB_URI: postgresql://postgres:postgres@vecinita-postgres-ms:5432/postgres
-      PGRST_DB_SCHEMA: public
-      PGRST_DB_ANON_ROLE: postgres
-      PGRST_JWT_SECRET: dev-jwt-secret-for-local-testing-only-32chars-min
-    ports:
-      - "8301:3000"
     networks:
       - vecinita-ms-net
 
@@ -89,15 +60,13 @@ services:
     container_name: vecinita-scraper-ms
     environment:
       SERVICE_AUTH_ENABLED: "false"
-      SUPABASE_PROJECT_URL: http://vecinita-postgrest-ms:3000
-      SUPABASE_ANON_KEY: dev-anon-key
-      SUPABASE_SERVICE_KEY: dev-service-key
+      DATABASE_URL: postgresql://postgres:postgres@vecinita-postgres-ms:5432/postgres
       VECINITA_EMBEDDING_API_URL: http://vecinita-embedding-ms:8011
     ports:
       - "8020:8020"
     depends_on:
-      postgrest:
-        condition: service_started
+      postgres:
+        condition: service_healthy
       embedding-service:
         condition: service_started
     networks:
@@ -113,12 +82,7 @@ services:
       PORT: 8000
       OLLAMA_BASE_URL: http://vecinita-model-ms:8000
       EMBEDDING_SERVICE_URL: http://vecinita-embedding-ms:8011
-      SUPABASE_URL: http://vecinita-postgrest-ms:3000
-      SUPABASE_KEY: dev-anon-key
       DATABASE_URL: postgresql://postgres:postgres@vecinita-postgres-ms:5432/postgres
-      CHROMA_HOST: vecinita-chroma-ms
-      CHROMA_PORT: 8000
-      CHROMA_SSL: "false"
       DEFAULT_PROVIDER: ollama
       OLLAMA_MODEL: llama3.2
       EMBEDDING_STRICT_STARTUP: "false"
@@ -127,8 +91,7 @@ services:
     depends_on:
       - model-service
       - embedding-service
-      - chroma
-      - postgrest
+      - postgres
     networks:
       - vecinita-ms-net
 
@@ -142,14 +105,9 @@ services:
       PORT: 8004
       AGENT_SERVICE_URL: http://vecinita-chat-agent-ms:8000
       EMBEDDING_SERVICE_URL: http://vecinita-embedding-ms:8011
-      CHROMA_HOST: vecinita-chroma-ms
-      CHROMA_PORT: 8000
-      CHROMA_SSL: "false"
-      SUPABASE_URL: http://vecinita-postgrest-ms:3000
-      SUPABASE_KEY: dev-anon-key
+      DATABASE_URL: postgresql://postgres:postgres@vecinita-postgres-ms:5432/postgres
       DEV_ADMIN_ENABLED: "true"
       DEV_ADMIN_BEARER_TOKEN: vecinita-dev-admin-token-2026
-      SUPABASE_UPLOADS_BUCKET: documents
       REINDEX_SERVICE_URL: http://vecinita-scraper-ms:8020/jobs
       REINDEX_TRIGGER_TOKEN: ""
     ports:
@@ -188,7 +146,6 @@ services:
 
 volumes:
   postgres_data_ms:
-  chroma_data_ms:
   ollama_data_ms:
 
 networks:

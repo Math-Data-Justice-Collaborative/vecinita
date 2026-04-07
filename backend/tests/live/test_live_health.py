@@ -38,6 +38,15 @@ def test_gateway_health_returns_200(gateway_health_url: str):
     assert "status" in body, f"Gateway health body missing 'status': {body}"
 
 
+def test_gateway_integrations_status_returns_200(gateway_url: str):
+    resp = requests.get(f"{gateway_url}/api/v1/integrations/status", timeout=30)
+    assert resp.status_code == 200, f"Gateway integrations status returned {resp.status_code}"
+    body = resp.json()
+    assert "status" in body, f"Gateway integrations body missing 'status': {body}"
+    assert "components" in body, f"Gateway integrations body missing 'components': {body}"
+    assert "gateway" in body, f"Gateway integrations body missing 'gateway': {body}"
+
+
 def test_gateway_documents_overview_not_broken(gateway_url: str):
     resp = requests.get(f"{gateway_url}/api/v1/documents/overview", timeout=30)
     assert resp.status_code not in (

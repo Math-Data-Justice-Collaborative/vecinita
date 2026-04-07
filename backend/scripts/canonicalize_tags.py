@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Canonicalize metadata tags across sources and chunks.
 
+Reads the Render Postgres database (via DATABASE_URL) and normalises tag
+fields in the metadata JSONB columns of both the ``sources`` and
+``document_chunks`` tables.
+
 Usage:
   uv run python scripts/canonicalize_tags.py --dry-run
   uv run python scripts/canonicalize_tags.py --apply
@@ -10,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import pathlib
 import sys
 from typing import Any
@@ -18,7 +23,9 @@ PROJECT_ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.services.chroma_store import get_chroma_store
+import psycopg2  # type: ignore[import-not-found]
+import psycopg2.extras  # type: ignore[import-not-found]
+
 from src.utils.tags import normalize_tag_fields
 
 TAG_FIELDS = (
@@ -32,78 +39,102 @@ TAG_FIELDS = (
 )
 
 
-def _normalize_source_metadata(metadata: dict[str, Any]) -> tuple[dict[str, Any], bool]:
+def _normalize_metadata(metadata: dict[str, Any]) -> tuple[dict[str, Any], bool]:
     return normalize_tag_fields(metadata, TAG_FIELDS)
 
 
-def _normalize_chunk_metadata(metadata: dict[str, Any]) -> tuple[dict[str, Any], bool]:
-    return normalize_tag_fields(metadata, TAG_FIELDS)
+def _get_conn() -> "psycopg2.connection":
+    database_url = os.getenv("DATABASE_URL", "")
+    if not database_url:
+        raise RuntimeError(
+            "DATABASE_URL is not set. Export it before running this script:\n"
+            "  export DATABASE_URL=postgresql://<user>:<pass>@<host>:<port>/<db>"
+        )
+    return psycopg2.connect(database_url, connect_timeout=10)
 
 
 def run(*, apply: bool, batch_size: int) -> dict[str, Any]:
-    store = get_chroma_store()
-
     sources_scanned = 0
     sources_changed = 0
     chunks_scanned = 0
     chunks_changed = 0
 
-    # Sources
-    offset = 0
-    while True:
-        sources = store.list_sources(limit=batch_size, offset=offset)
-        if not sources:
-            break
+    conn = _get_conn()
+    try:
+        conn.autocommit = False
 
-        for source in sources:
-            sources_scanned += 1
-            url = str(source.get("url") or "")
-            title = source.get("title") or url
-            metadata = dict(source.get("metadata") or {})
-            normalized_metadata, changed = _normalize_source_metadata(metadata)
-            if not changed:
-                continue
-            sources_changed += 1
-            if apply and url:
-                store.upsert_source(
-                    url=url,
-                    metadata=normalized_metadata,
-                    title=title,
-                    is_active=bool(source.get("is_active", True)),
+        # ── Sources ──────────────────────────────────────────────────────────
+        offset = 0
+        while True:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                cur.execute(
+                    "SELECT id, url, title, is_active, metadata"
+                    " FROM sources"
+                    " ORDER BY created_at"
+                    " LIMIT %s OFFSET %s",
+                    (batch_size, offset),
                 )
+                rows = cur.fetchall()
 
-        offset += len(sources)
-        if len(sources) < batch_size:
-            break
+            if not rows:
+                break
 
-    # Chunks (metadata-only update; preserves embeddings/documents)
-    offset = 0
-    while True:
-        result = store.get_chunks(limit=batch_size, offset=offset)
-        ids = result.get("ids") or []
-        metadatas = result.get("metadatas") or []
-        if not ids:
-            break
+            for row in rows:
+                sources_scanned += 1
+                metadata = dict(row.get("metadata") or {})
+                normalized, changed = _normalize_metadata(metadata)
+                if not changed:
+                    continue
+                sources_changed += 1
+                if apply:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            "UPDATE sources SET metadata = %s, updated_at = NOW() WHERE id = %s",
+                            (json.dumps(normalized), row["id"]),
+                        )
 
-        update_ids: list[str] = []
-        update_metas: list[dict[str, Any]] = []
+            offset += len(rows)
+            if len(rows) < batch_size:
+                break
 
-        for index, chunk_id in enumerate(ids):
-            chunks_scanned += 1
-            metadata = dict(metadatas[index] or {}) if index < len(metadatas) else {}
-            normalized_metadata, changed = _normalize_chunk_metadata(metadata)
-            if not changed:
-                continue
-            chunks_changed += 1
-            update_ids.append(str(chunk_id))
-            update_metas.append(normalized_metadata)
+        # ── document_chunks ───────────────────────────────────────────────────
+        offset = 0
+        while True:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                cur.execute(
+                    "SELECT id, metadata"
+                    " FROM document_chunks"
+                    " ORDER BY created_at"
+                    " LIMIT %s OFFSET %s",
+                    (batch_size, offset),
+                )
+                rows = cur.fetchall()
 
-        if apply and update_ids:
-            store.chunks().update(ids=update_ids, metadatas=update_metas)
+            if not rows:
+                break
 
-        offset += len(ids)
-        if len(ids) < batch_size:
-            break
+            for row in rows:
+                chunks_scanned += 1
+                metadata = dict(row.get("metadata") or {})
+                normalized, changed = _normalize_metadata(metadata)
+                if not changed:
+                    continue
+                chunks_changed += 1
+                if apply:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            "UPDATE document_chunks SET metadata = %s, updated_at = NOW() WHERE id = %s",
+                            (json.dumps(normalized), row["id"]),
+                        )
+
+            offset += len(rows)
+            if len(rows) < batch_size:
+                break
+
+        if apply:
+            conn.commit()
+    finally:
+        conn.close()
 
     return {
         "apply": apply,
@@ -136,7 +167,7 @@ def main() -> None:
             json.dumps(
                 {
                     "error": str(exc),
-                    "hint": "Ensure Chroma is running and CHROMA_HOST/CHROMA_PORT are reachable before running this migration.",
+                    "hint": "Ensure DATABASE_URL is set and points to the Render Postgres instance.",
                 },
                 indent=2,
             )

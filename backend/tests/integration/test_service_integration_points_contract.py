@@ -57,13 +57,13 @@ def test_ip01_frontend_to_gateway_contract_file_wiring() -> None:
     assert "/api/v1" in content
 
 
-def test_ip02_frontend_to_supabase_auth_contract_file_wiring() -> None:
-    """IP-02: Frontend -> Supabase auth env vars and SDK client contract."""
-    content = _read_workspace_file("frontend", "src", "lib", "supabase.ts")
+def test_ip02_frontend_to_direct_admin_auth_contract_file_wiring() -> None:
+    """IP-02: Frontend -> direct admin auth env vars and session storage contract."""
+    content = _read_workspace_file("frontend", "src", "app", "context", "AuthContext.tsx")
 
-    assert "VITE_SUPABASE_URL" in content
-    assert "VITE_SUPABASE_ANON_KEY" in content
-    assert "createClient" in content
+    assert "VITE_ADMIN_AUTH_ENABLED" in content
+    assert "vecinita-admin-session" in content
+    assert "direct-admin" in content
 
 
 def test_ip03_gateway_to_agent_forwards_query_params(monkeypatch) -> None:
@@ -226,17 +226,15 @@ def test_ip07_agent_to_model_uses_direct_modal_fallback_on_render(monkeypatch) -
     assert resolved == "https://vecinita--vecinita-model-api.modal.run"
 
 
-def test_ip08_agent_tools_postgres_fallback_when_mode_postgres(monkeypatch) -> None:
-    """IP-08: Agent tools call Postgres fallback in Postgres data mode."""
+def test_ip08_agent_tools_postgres_fallback_with_database_url(monkeypatch) -> None:
+    """IP-08: Agent tools call Postgres fallback when a database URL is configured."""
     mock_store = Mock()
-    mock_store.query_chunks.side_effect = RuntimeError("chroma unavailable")
+    mock_store.query_chunks.side_effect = RuntimeError("primary store unavailable")
     mock_embedding_model = Mock()
     mock_embedding_model.embed_query.return_value = [0.1] * 384
 
-    monkeypatch.setenv("DB_DATA_MODE", "postgres")
     monkeypatch.setenv("DATABASE_URL", "postgresql://user:pass@localhost:5432/db")
     monkeypatch.setenv("POSTGRES_DATA_READS_ENABLED", "true")
-    monkeypatch.setenv("SUPABASE_DATA_READS_ENABLED", "false")
 
     postgres_mock = Mock(
         return_value=[
@@ -250,9 +248,7 @@ def test_ip08_agent_tools_postgres_fallback_when_mode_postgres(monkeypatch) -> N
             }
         ]
     )
-    supabase_mock = Mock(return_value=[])
     monkeypatch.setattr(db_search_module, "_query_postgres_fallback", postgres_mock)
-    monkeypatch.setattr(db_search_module, "_query_supabase_fallback", supabase_mock)
 
     import src.config as app_config
 
@@ -268,23 +264,20 @@ def test_ip08_agent_tools_postgres_fallback_when_mode_postgres(monkeypatch) -> N
     assert get_last_search_metrics()["retrieval_backend"] == "postgres"
 
 
-def test_ip09_agent_tools_supabase_fallback_when_enabled(monkeypatch) -> None:
-    """IP-09: Agent tools call Supabase RPC fallback when enabled."""
+def test_ip09_agent_tools_remain_postgres_only(monkeypatch) -> None:
+    """IP-09: Agent tools remain postgres-only when the primary store fails."""
     mock_store = Mock()
-    mock_store.query_chunks.side_effect = RuntimeError("chroma unavailable")
+    mock_store.query_chunks.side_effect = RuntimeError("primary store unavailable")
     mock_embedding_model = Mock()
     mock_embedding_model.embed_query.return_value = [0.1] * 384
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:pass@localhost:5432/db")
 
-    monkeypatch.setenv("DB_DATA_MODE", "supabase")
-    monkeypatch.setenv("VECTOR_SYNC_SUPABASE_FALLBACK_READS", "true")
-
-    postgres_mock = Mock(return_value=[])
-    supabase_mock = Mock(
+    postgres_mock = Mock(
         return_value=[
             {
-                "id": "doc-sb-1",
-                "content": "supabase result",
-                "source_url": "https://example.org/supabase",
+                "id": "doc-pg-2",
+                "content": "postgres result",
+                "source_url": "https://example.org/postgres",
                 "source_domain": "example.org",
                 "similarity": 0.89,
                 "metadata": {},
@@ -292,7 +285,6 @@ def test_ip09_agent_tools_supabase_fallback_when_enabled(monkeypatch) -> None:
         ]
     )
     monkeypatch.setattr(db_search_module, "_query_postgres_fallback", postgres_mock)
-    monkeypatch.setattr(db_search_module, "_query_supabase_fallback", supabase_mock)
 
     import src.config as app_config
 
@@ -303,44 +295,41 @@ def test_ip09_agent_tools_supabase_fallback_when_enabled(monkeypatch) -> None:
     )
     rows = json.loads(tool.invoke("benefits"))
 
-    assert rows[0]["source_url"] == "https://example.org/supabase"
-    assert supabase_mock.called
-    assert get_last_search_metrics()["retrieval_backend"] == "supabase"
+    assert rows[0]["source_url"] == "https://example.org/postgres"
+    assert postgres_mock.called
+    assert get_last_search_metrics()["retrieval_backend"] == "postgres"
 
 
-def test_ip10_scraper_uploader_writes_to_chroma() -> None:
-    """IP-10: Scraper uploader sends chunk rows to Chroma upsert interface."""
+def test_ip10_scraper_uploader_writes_to_sync_backend() -> None:
+    """IP-10: Scraper uploader sends chunk rows to configured sync backend."""
     with (
         patch.object(DatabaseUploader, "_init_embeddings"),
-        patch.object(DatabaseUploader, "_init_supabase"),
+        patch.object(DatabaseUploader, "_init_vector_sync"),
         patch.object(DatabaseUploader, "_init_local_llm_tagger"),
     ):
         uploader = DatabaseUploader(use_local_embeddings=False)
 
-    uploader.chroma_store = Mock()
-    uploader.chroma_store.upsert_chunks = Mock(return_value=1)
-    uploader.chroma_store.list_sources.return_value = []
-    uploader.chroma_store.get_source.return_value = None
     uploader.local_llm_tagger = None
     uploader.local_llm_raw_model = None
     uploader._generate_embeddings = Mock(return_value=[[0.2] * 384])
+    uploader._sync_rows = Mock(return_value=True)
 
     uploaded, failed = uploader.upload_chunks(
         chunks=[{"text": "community support", "metadata": {}}],
-        source_identifier="https://example.org/chroma",
+        source_identifier="https://example.org/vector-sync",
         loader_type="playwright",
     )
 
     assert uploaded == 1
     assert failed == 0
-    uploader.chroma_store.upsert_chunks.assert_called_once()
+    uploader._sync_rows.assert_called_once()
 
 
 def test_ip11_scraper_uploader_switches_to_postgres_sync_target() -> None:
     """IP-11: Scraper uploader routes vector sync to Postgres when configured."""
     with (
         patch.object(DatabaseUploader, "_init_embeddings"),
-        patch.object(DatabaseUploader, "_init_supabase"),
+        patch.object(DatabaseUploader, "_init_vector_sync"),
         patch.object(DatabaseUploader, "_init_local_llm_tagger"),
     ):
         uploader = DatabaseUploader(use_local_embeddings=False)
@@ -348,7 +337,7 @@ def test_ip11_scraper_uploader_switches_to_postgres_sync_target() -> None:
     uploader.vector_sync_target = "postgres"
     uploader._sync_rows_to_postgres = Mock(return_value=True)
 
-    ok = uploader._sync_rows_to_supabase(
+    ok = uploader._sync_rows(
         [
             {
                 "id": "row-1",
@@ -365,14 +354,15 @@ def test_ip11_scraper_uploader_switches_to_postgres_sync_target() -> None:
 
 
 def test_ip12_documents_router_mixed_datasource_contract(monkeypatch) -> None:
-    """IP-12: Documents router keeps SQL + Supabase URL builder contract."""
+    """IP-12: Documents router keeps SQL + public asset URL builder contract."""
+    import importlib
+
     from src.api import router_documents
 
-    monkeypatch.setenv("SUPABASE_URL", "https://demo.supabase.co")
+    monkeypatch.setenv("UPLOADS_PUBLIC_BASE_URL", "https://assets.example.org/public")
+    importlib.reload(router_documents)
     public_url = router_documents._build_public_storage_url("documents", "uploads/file.txt")
-    assert (
-        public_url == "https://demo.supabase.co/storage/v1/object/public/documents/uploads/file.txt"
-    )
+    assert public_url == "https://assets.example.org/public/documents/uploads/file.txt"
 
     normalized = router_documents._normalize_public_source(
         {

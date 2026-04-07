@@ -39,7 +39,7 @@ services:
       - key: EMBEDDING_SERVICE_URL
         value: "http://vecinita-embedding:8001"  # Private network address (internal communication)
       # Add these to Render Dashboard > Environment Variables:
-      # REQUIRED: SUPABASE_URL, SUPABASE_KEY
+      # REQUIRED: DATABASE_URL
       # REQUIRED (at least one): GROQ_API_KEY, OPENAI_API_KEY, DEEPSEEK_API_KEY
       # OPTIONAL: TAVILY_API_KEY (web search), LANGSMITH_API_KEY, LANGSMITH_PROJECT (tracing)
     
@@ -59,7 +59,7 @@ services:
       - key: EMBEDDING_SERVICE_URL
         value: "http://vecinita-embedding:8001"  # Scraper uses local embeddings, but available if needed
       # CRITICAL: Add to Render Dashboard > Environment Variables:
-      # REQUIRED: SUPABASE_URL, SUPABASE_KEY, DATABASE_URL
+      # REQUIRED: DATABASE_URL
       # NOTE: Scraper uses local embeddings by default (FastEmbed/HuggingFace), not embedding service
 
   # Frontend Vite Service (Free tier)

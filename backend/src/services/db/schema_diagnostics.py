@@ -1,31 +1,47 @@
-"""
-Database Schema Diagnostics (Phase 1).
-
-Verifies that required database schema elements exist:
-- RPC function: search_similar_documents
-- Column: document_chunks.embedding (pgvector type, 384 dimensions)
-- Indexes: document_chunks on source, session_id, created_at
-- Tables: document_chunks, conversations, documents (with expected columns)
-
-Provides meaningful error messages if prerequisites are missing.
-"""
+"""Database schema diagnostics for Postgres and pgvector prerequisites."""
 
 import logging
+import os
 from typing import Any
 
-from supabase import Client
+try:
+    import psycopg2
+except Exception:  # pragma: no cover - optional in some test profiles
+    psycopg2 = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 
 
 class SchemaValidator:
-    """Validates Supabase schema prerequisites for Vecinita."""
+    """Validates Postgres schema prerequisites for Vecinita."""
 
-    def __init__(self, db: Client):
-        """Initialize with Supabase client."""
+    def __init__(self, db: Any):
+        """Initialize with a DB adapter or database URL string."""
         self.db = db
         self.validation_errors: list[str] = []
         self.validation_warnings: list[str] = []
+
+    def _execute(self, sql: str, params: tuple[Any, ...] = ()) -> list[tuple[Any, ...]]:
+        if hasattr(self.db, "execute"):
+            return list(self.db.execute(sql, params))
+
+        if hasattr(self.db, "cursor"):
+            with self.db.cursor() as cur:
+                cur.execute(sql, params)
+                if cur.description:
+                    return list(cur.fetchall() or [])
+                return []
+
+        database_url = self.db if isinstance(self.db, str) else os.getenv("DATABASE_URL", "")
+        if not database_url or psycopg2 is None:
+            raise RuntimeError("DATABASE_URL and psycopg2 are required for schema diagnostics")
+
+        with psycopg2.connect(str(database_url), connect_timeout=5) as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql, params)
+                if cur.description:
+                    return list(cur.fetchall() or [])
+                return []
 
     async def validate_all(self) -> dict[str, Any]:
         """
@@ -55,9 +71,6 @@ class SchemaValidator:
         # Check RPC function
         results["rpc_search_similar_documents"] = await self._check_rpc_search_similar_documents()
 
-        # Check PostgREST schema profile exposure mismatch (PGRST106)
-        results["postgrest_schema_profile"] = await self._check_postgrest_schema_profile()
-
         # Check document_chunks table and columns
         results["table_document_chunks"] = await self._check_table_document_chunks()
         results["column_embedding"] = await self._check_column_embedding()
@@ -86,160 +99,107 @@ class SchemaValidator:
             "checks": results,
         }
 
-    async def _check_postgrest_schema_profile(self) -> dict[str, Any]:
-        """Detect common PostgREST schema mismatch errors (PGRST106)."""
-        try:
-            self.db.table("document_chunks").select("id").limit(1).execute()
-            return {"ok": True, "code": None, "message": "PostgREST profile appears compatible."}
-        except Exception as exc:
-            msg = str(exc)
-            lower = msg.lower()
-            if "pgrst106" in lower or "schema must be one of the following" in lower:
-                self.validation_errors.append(
-                    "❌ PostgREST schema profile mismatch (PGRST106).\n"
-                    "   The API is rejecting schema 'public'. Ensure Supabase API exposed schemas include 'public',\n"
-                    "   or update runtime profile/config to use an allowed schema (for example 'graphql_public')."
-                )
-                return {"ok": False, "code": "PGRST106", "message": msg}
-
-            self.validation_warnings.append(
-                f"⚠️  Could not confirm PostgREST schema profile compatibility.\n   Detail: {msg}"
-            )
-            return {"ok": False, "code": None, "message": msg}
-
     async def _check_rpc_search_similar_documents(self) -> bool:
-        """
-        Check if search_similar_documents RPC function exists.
-
-        Expected signature:
-            search_similar_documents(
-                query_embedding: vector,
-                match_threshold: float = 0.3,
-                match_count: int = 5
-            ) -> TABLE
-
-        Returns:
-            True if RPC exists, False otherwise
-        """
+        """Check if search_similar_documents function exists."""
         try:
-            # Try calling the RPC with null/zero values to check existence
-            # (This will fail with dimension error if RPC doesn't exist, but we catch that)
-            await self._execute_rpc_check()
-            return True
+            rows = self._execute(
+                "SELECT 1 FROM pg_proc WHERE proname = 'search_similar_documents' LIMIT 1"
+            )
+            if rows:
+                return True
+            raise RuntimeError("function not found")
         except Exception as e:
             error_msg = str(e)
 
-            # Check if error is about the RPC not existing vs. parameter mismatch
             if "not found" in error_msg.lower() or "no function" in error_msg.lower():
                 self.validation_errors.append(
-                    "❌ RPC function 'search_similar_documents' not found in database.\n"
-                    "   Solution: Create RPC function with signature:\n"
-                    "   - search_similar_documents(query_embedding vector, match_threshold float, match_count int)\n"
-                    "   See: docs/deployment/SUPABASE_SCHEMA_SETUP.md"
+                    "❌ Function 'search_similar_documents' not found in database.\n"
+                    "   Apply the pgvector bootstrap migrations before starting the service."
                 )
                 return False
-            else:
-                # If it's another error (like vector dimension), RPC exists but has config issue
-                logger.warning(f"RPC check status unclear: {error_msg}")
-                return True  # Assume it exists, dimension check will catch config issues
+            logger.warning(f"RPC check status unclear: {error_msg}")
+            return True
 
         return False
-
-    async def _execute_rpc_check(self) -> Any:
-        """Execute RPC call to verify it exists."""
-        # Try to call RPC - will fail gracefully if it doesn't exist
-        zero_vector = [0.0] * 384  # Correct dimensions
-        return self.db.rpc(
-            "search_similar_documents",
-            {"query_embedding": zero_vector, "match_threshold": 0.3, "match_count": 1},
-        ).execute()
 
     async def _check_table_document_chunks(self) -> bool:
         """Check if document_chunks table exists with expected columns."""
         try:
-            self.db.table("document_chunks").select("id").limit(1).execute()
-            return True
+            rows = self._execute("SELECT to_regclass('public.document_chunks')")
+            return bool(rows and rows[0][0])
         except Exception:
             self.validation_errors.append(
                 "❌ Table 'document_chunks' not found in database.\n"
-                "   Solution: Create required schema.\n"
-                "   See: docs/deployment/SUPABASE_SCHEMA_SETUP.md"
+                "   Apply the database migrations before starting the service."
             )
             return False
 
     async def _check_column_embedding(self) -> dict[str, Any]:
-        """
-        Check if document_chunks.embedding column exists and is pgvector(384).
-
-        Returns:
-            {'exists': bool, 'type': str, 'dimensions': int}
-        """
+        """Check if document_chunks.embedding column exists and is a vector column."""
         try:
-            # Query table structure (using PostgreSQL info schema via RPC is ideal,
-            # but we'll try a simple select to verify column accessibility)
-            self.db.table("document_chunks").select("embedding").limit(0).execute()
-
-            # If we get here, column exists
-            # Try to infer type from Supabase response metadata if available
-            # For now, we mark as "exists" and recommend manual verification
-
-            self.validation_warnings.append(
-                "⚠️  Assuming 'embedding' column exists with pgvector(384) type.\n"
-                "   Recommended: Verify in Supabase Dashboard → SQL Editor →\n"
-                "   SELECT column_name, udt_name FROM information_schema.columns\n"
-                "   WHERE table_name = 'document_chunks' AND column_name = 'embedding'"
+            rows = self._execute(
+                """
+                SELECT udt_name
+                FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name = 'document_chunks'
+                  AND column_name = 'embedding'
+                """
             )
-
-            return {"exists": True, "type": "vector (assumed)", "dimensions": 384}
+            if rows and rows[0][0]:
+                column_type = str(rows[0][0])
+                if column_type.lower() != "vector":
+                    self.validation_errors.append(
+                        f"❌ Column 'embedding' has invalid type '{column_type}'. Expected pgvector."
+                    )
+                    return {"exists": True, "type": column_type, "dimensions": None}
+                return {"exists": True, "type": column_type, "dimensions": 384}
+            raise RuntimeError("column embedding does not exist")
         except Exception as e:
             error_msg = str(e)
             if "embedding" in error_msg.lower() or "column" in error_msg.lower():
                 self.validation_errors.append(
                     "❌ Column 'embedding' not found in 'document_chunks' table.\n"
-                    "   Solution: Add column with: ALTER TABLE document_chunks ADD COLUMN embedding vector(384);\n"
-                    "   See: docs/deployment/SUPABASE_SCHEMA_SETUP.md"
+                    "   Add the pgvector embedding column before enabling semantic search."
                 )
                 return {"exists": False, "type": None, "dimensions": None}
-            else:
-                logger.warning(f"Embedding column check status unclear: {error_msg}")
-                return {"exists": True, "type": "vector (unverified)", "dimensions": 384}
+            logger.warning(f"Embedding column check status unclear: {error_msg}")
+            return {"exists": True, "type": "vector (unverified)", "dimensions": 384}
 
     async def _check_index(self, index_name: str) -> bool:
-        """
-        Check if index exists on document_chunks table.
-
-        Note: Supabase doesn't expose index metadata via PostgREST,
-        so we recommend manual verification via SQL Editor.
-
-        Returns:
-            True (assumes indexes exist; recommend manual verification)
-        """
+        """Check if a Postgres index exists."""
+        try:
+            rows = self._execute(
+                "SELECT 1 FROM pg_indexes WHERE schemaname = 'public' AND indexname = %s LIMIT 1",
+                (index_name,),
+            )
+            if rows:
+                return True
+        except Exception as exc:
+            logger.warning("Index check failed for %s: %s", index_name, exc)
         self.validation_warnings.append(
-            f"⚠️  Cannot verify index '{index_name}' via API.\n"
-            "   Recommended: Verify in Supabase Dashboard → SQL Editor →\n"
-            "   SELECT indexname FROM pg_indexes WHERE schemaname = 'public'"
+            f"⚠️  Index '{index_name}' was not found. Query performance may be degraded."
         )
-        return True  # Optimistically assume it exists
+        return False
 
     async def _check_table(self, table_name: str) -> bool:
         """Check if table exists."""
         try:
-            self.db.table(table_name).select("id").limit(0).execute()
-            return True
+            rows = self._execute("SELECT to_regclass(%s)", (f"public.{table_name}",))
+            return bool(rows and rows[0][0])
         except Exception:
             self.validation_warnings.append(
-                f"⚠️  Table '{table_name}' may not exist or may have no accessible columns.\n"
-                "   Recommended: Verify in Supabase Dashboard → Table Editor"
+                f"⚠️  Table '{table_name}' may not exist or may not be accessible."
             )
             return False
 
 
-async def validate_schema(db: Client) -> dict[str, Any]:
+async def validate_schema(db: Any) -> dict[str, Any]:
     """
     Convenience function: Run complete schema validation.
 
     Args:
-        db: Supabase client
+        db: Database adapter or connection string
 
     Returns:
         Validation result dictionary with status and detailed checks

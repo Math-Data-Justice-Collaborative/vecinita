@@ -40,7 +40,7 @@ vecinita/
 │   │   │   ├── scraper.py       # VecinaScraper class
 │   │   │   ├── loaders.py       # Content loaders
 │   │   │   ├── processors.py    # Document processing
-│   │   │   └── uploader.py      # Supabase upload
+│   │   │   └── uploader.py      # PostgreSQL load
 │   │   └── cli/                 # CLI tools
 │   ├── scripts/                 # Automation scripts
 │   │   └── data_scrape_load.sh  # Data pipeline orchestrator
@@ -239,7 +239,7 @@ The hook scans staged changes and blocks commits that include potential secrets.
 ### Backend
 
 - **LangGraph Agent**: Intelligent tool routing with 3 specialized tools
-  - `db_search`: Vector similarity search on Supabase documents
+  - `db_search`: Vector similarity search on PostgreSQL documents
   - `static_response`: Bilingual FAQ lookup (English/Spanish)
   - `web_search`: Tavily API + DuckDuckGo fallback
 - **Web Scraper**: Multi-loader pipeline (Unstructured, Playwright, Recursive)
@@ -359,17 +359,13 @@ Vecinita now includes a Render Blueprint at [render.yaml](render.yaml) for a mul
 Set these in the Render Dashboard for `vecinita-agent` and/or `vecinita-scraper`:
 
 - `DATABASE_URL` (Render Postgres internal connection string)
-- `DB_DATA_MODE=postgres`
 - `VECTOR_SYNC_TARGET=postgres`
-- `VECTOR_SYNC_SUPABASE_FALLBACK_READS=false`
-- `SUPABASE_URL`
-- `SUPABASE_KEY`
 - `GROQ_API_KEY` (or `OPENAI_API_KEY` / `DEEPSEEK_API_KEY`)
 
 Architecture split for production:
 
-- Supabase remains auth/session provider for frontend and backend auth flows.
 - Render Postgres is the vector/document data backend for retrieval and ingestion paths.
+- Frontends use local admin or API-key session models.
 - Use the Render internal Postgres URL whenever services run in the same Render region.
 
 ### CI/CD to Render
@@ -393,10 +389,7 @@ The deploy workflow triggers only after the `Tests` workflow completes successfu
 - **[frontend/README.md](frontend/README.md)** - Frontend components and testing
 
 ### Deployment
-- **[docs/RENDER_DEPLOYMENT_THREE_SERVICES.md](docs/RENDER_DEPLOYMENT_THREE_SERVICES.md)** - Step-by-step Render deployment (free tier)
-- **[docs/deployment/RENDER_POSTGRES_VECTOR_CUTOVER.md](docs/deployment/RENDER_POSTGRES_VECTOR_CUTOVER.md)** - Supabase-auth and Render-Postgres vector migration runbook
-- **[docs/QUICK_REFERENCE_MICROSERVICE.md](docs/QUICK_REFERENCE_MICROSERVICE.md)** - Quick reference for microservice setup
-- **[docs/ARCHITECTURE_MICROSERVICE.md](docs/ARCHITECTURE_MICROSERVICE.md)** - Detailed architecture documentation
+- Service repositories own their deploy documentation and workflow details.
 
 ### Technical Documentation
 - **[docs/](docs/)** - Comprehensive technical docs
@@ -432,8 +425,6 @@ curl "http://localhost:8000/ask?question=Hola&language=es"
 
 The scraper pipeline processes web content into vector embeddings:
 
-Schema archive note: legacy SQL schema files now live in `supabase/migrations/archive/`.
-
 ```bash
 cd backend
 
@@ -457,17 +448,14 @@ Configuration files:
 
 ## Schema Files
 
-- Active Supabase setup files: `supabase/init-local-db.sql`, `supabase/init-local-db.sh`, and migration scripts under `backend/scripts/`.
-- Archived legacy SQL snapshots/upgrades: `supabase/migrations/archive/`.
-- Archive conventions and handling guidance: `supabase/migrations/archive/README.md`.
+- Active schema and maintenance scripts live under `backend/scripts/`.
 
 ## Environment Variables
 
 ### Required
 
 ```bash
-SUPABASE_URL=https://<project>.supabase.co
-SUPABASE_KEY=<anon-or-service-key>
+DATABASE_URL=postgresql://<user>:<password>@<host>:5432/<db>
 GROQ_API_KEY=<your-groq-api-key>
 ```
 
@@ -488,7 +476,7 @@ EMBEDDING_SERVICE_URL=http://embedding-service:8001       # Embedding service UR
 - **Agent**: LangGraph (LangChain)
 - **LLM**: Groq (Llama 3.1 8B) / DeepSeek / OpenAI / Ollama
 - **Embeddings**: Microservice (sentence-transformers/all-MiniLM-L6-v2) with fallback chain
-- **Database**: Supabase (PostgreSQL + pgvector)
+- **Database**: PostgreSQL + pgvector
 - **Scraping**: Playwright, Unstructured, RecursiveUrlLoader
 - **Testing**: pytest (108 tests)
 - **Package Manager**: uv

@@ -176,7 +176,7 @@ def get_demo_response(question: str, lang: str | None = None) -> AskResponse:
                 title="Vecinita GitHub Repository",
                 chunk_id="demo-001",
                 relevance=0.95,
-                excerpt="Vecinita is a RAG Q&A Assistant using LangChain, LangGraph, and Supabase.",
+                excerpt="Vecinita is a RAG Q&A Assistant using LangChain, LangGraph, and Render Postgres.",
             ),
             SourceCitation(
                 url="http://localhost:8004/docs",

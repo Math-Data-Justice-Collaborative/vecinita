@@ -14,7 +14,6 @@ from urllib.parse import parse_qs, urlparse
 
 REQUIRED_KEYS: set[str] = {
     "DATABASE_URL",
-    "DB_DATA_MODE",
     "OLLAMA_MODEL",
     "RENDER_REMOTE_INFERENCE_ONLY",
     "MODAL_TOKEN_SECRET",
@@ -97,9 +96,6 @@ def _validate_modal_endpoints(env: dict[str, str], result: ValidationResult) -> 
 def _validate_strict_flags(env: dict[str, str], result: ValidationResult) -> None:
     if not _is_truthy(env.get("RENDER_REMOTE_INFERENCE_ONLY")):
         result.errors.append("RENDER_REMOTE_INFERENCE_ONLY must be enabled for Render runtime")
-
-    if (env.get("DB_DATA_MODE") or "").strip().lower() != "postgres":
-        result.errors.append("DB_DATA_MODE must be set to postgres for Render runtime")
 
 
 def _validate_frontend_contract(env: dict[str, str], result: ValidationResult) -> None:

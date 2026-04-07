@@ -1,12 +1,40 @@
 """Diagnostic endpoints for database and retrieval troubleshooting."""
 
+import os
 from typing import Any
 
 from fastapi import APIRouter
 
 from .. import main as agent_main
 
+try:
+    import psycopg2
+except Exception:  # pragma: no cover - optional in some environments
+    psycopg2 = None  # type: ignore[assignment]
+
 router = APIRouter()
+
+
+def _database_url() -> str:
+    return (os.getenv("DATABASE_URL") or "").strip()
+
+
+def _vector_literal(values: list[float]) -> str:
+    return "[" + ",".join(f"{float(value):.8f}" for value in values) + "]"
+
+
+def _fetch_rows(query: str, params: tuple[Any, ...] = ()) -> list[dict[str, Any]]:
+    database_url = _database_url()
+    if not database_url or psycopg2 is None:
+        raise RuntimeError("DATABASE_URL and psycopg2 are required for diagnostics")
+
+    with psycopg2.connect(database_url, connect_timeout=5) as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, params)
+            if not cur.description:
+                return []
+            columns = [column[0] for column in cur.description]
+            return [dict(zip(columns, row)) for row in cur.fetchall()]
 
 
 @router.get("/test-db-search")
@@ -17,18 +45,12 @@ def test_db_search(query: str = "community resources"):
     try:
         agent_main.logger.info("Test DB Search: Query = '%s'", query)
 
-        if agent_main.supabase is None:
-            return {"error": "Supabase client not initialized"}
+        if not _database_url() or psycopg2 is None:
+            return {"error": "DATABASE_URL and psycopg2 are required"}
 
         try:
-            table_result = (
-                agent_main.supabase.table("document_chunks").select("*").limit(1).execute()
-            )
-            total_rows = (
-                table_result.count
-                if hasattr(table_result, "count")
-                else len(table_result.data) if table_result.data else 0
-            )
+            table_rows = _fetch_rows("SELECT COUNT(*) AS total_rows FROM document_chunks")
+            total_rows = int(table_rows[0]["total_rows"]) if table_rows else 0
             diagnostics["table_exists"] = True
             diagnostics["total_rows"] = total_rows
             agent_main.logger.info("Test DB Search: Table has %s rows", total_rows)
@@ -38,14 +60,8 @@ def test_db_search(query: str = "community resources"):
             agent_main.logger.error("Test DB Search: Table check failed: %s", exc)
 
         try:
-            embedding_check = (
-                agent_main.supabase.table("document_chunks")
-                .select("id,embedding")
-                .limit(5)
-                .execute()
-            )
-            if embedding_check.data:
-                embedding_rows: list[dict[str, Any]] = embedding_check.data  # type: ignore[assignment]
+            embedding_rows = _fetch_rows("SELECT id, embedding FROM document_chunks LIMIT 5")
+            if embedding_rows:
                 non_null_embeddings = sum(
                     1 for row in embedding_rows if row.get("embedding") is not None
                 )
@@ -88,13 +104,12 @@ def test_db_search(query: str = "community resources"):
 
         try:
             test_embedding = [0.0] * 384
-            rpc_test = agent_main.supabase.rpc(
-                "search_similar_documents",
-                {"query_embedding": test_embedding, "match_threshold": 0.0, "match_count": 1},
-            ).execute()
+            rpc_test = _fetch_rows(
+                "SELECT * FROM search_similar_documents(%s::vector, %s, %s)",
+                (_vector_literal(test_embedding), 0.0, 1),
+            )
             diagnostics["rpc_function_exists"] = True
-            rpc_test_data: list[dict[str, Any]] = rpc_test.data or []  # type: ignore[assignment]
-            diagnostics["rpc_test_results"] = len(rpc_test_data)
+            diagnostics["rpc_test_results"] = len(rpc_test)
             agent_main.logger.info(
                 "Test DB Search: RPC function exists and returned %s results with test embedding",
                 diagnostics["rpc_test_results"],
@@ -115,15 +130,10 @@ def test_db_search(query: str = "community resources"):
         test_threshold = 0.0
         agent_main.logger.info("Test DB Search: Searching with threshold = %s", test_threshold)
 
-        result = agent_main.supabase.rpc(
-            "search_similar_documents",
-            {
-                "query_embedding": question_embedding,
-                "match_threshold": test_threshold,
-                "match_count": 10,
-            },
-        ).execute()
-        result_data: list[dict[str, Any]] = result.data or []  # type: ignore[assignment]
+        result_data = _fetch_rows(
+            "SELECT * FROM search_similar_documents(%s::vector, %s, %s)",
+            (_vector_literal(question_embedding), test_threshold, 10),
+        )
 
         agent_main.logger.info("Test DB Search: Found %s results", len(result_data))
         diagnostics["search_results_found"] = len(result_data)
@@ -172,31 +182,22 @@ def test_db_search(query: str = "community resources"):
 @router.get("/db-info")
 def get_db_info():
     """Return a compact snapshot of document-chunk and RPC state."""
-    if agent_main.supabase is None:
-        return {"status": "error", "error": "Supabase client not initialized"}
-    supabase_client = agent_main.supabase
+    if not _database_url() or psycopg2 is None:
+        return {"status": "error", "error": "DATABASE_URL and psycopg2 are required"}
     try:
         info: dict[str, Any] = {}
 
         try:
-            count_result = supabase_client.table("document_chunks").select("id").limit(1).execute()
-            info["total_rows"] = (
-                count_result.count
-                if hasattr(count_result, "count")
-                else len(supabase_client.table("document_chunks").select("id").execute().data or [])
-            )
+            count_rows = _fetch_rows("SELECT COUNT(*) AS total_rows FROM document_chunks")
+            info["total_rows"] = int(count_rows[0]["total_rows"]) if count_rows else 0
         except Exception as exc:
             info["total_rows"] = f"error: {exc}"
 
         try:
-            sample_result = (
-                supabase_client.table("document_chunks")
-                .select("id,source_url,chunk_index,embedding,content")
-                .limit(3)
-                .execute()
+            sample_rows = _fetch_rows(
+                "SELECT id, source_url, chunk_index, embedding, content FROM document_chunks LIMIT 3"
             )
-            if sample_result.data:
-                sample_rows: list[dict[str, Any]] = sample_result.data  # type: ignore[assignment]
+            if sample_rows:
                 samples = []
                 for row in sample_rows:
                     sample: dict[str, Any] = {
@@ -232,13 +233,12 @@ def get_db_info():
 
         try:
             test_embedding = [0.0] * 384
-            rpc_result = supabase_client.rpc(
-                "search_similar_documents",
-                {"query_embedding": test_embedding, "match_threshold": 0.0, "match_count": 1},
-            ).execute()
+            rpc_result = _fetch_rows(
+                "SELECT * FROM search_similar_documents(%s::vector, %s, %s)",
+                (_vector_literal(test_embedding), 0.0, 1),
+            )
             info["rpc_function_works"] = True
-            rpc_data: list[dict[str, Any]] = rpc_result.data or []  # type: ignore[assignment]
-            info["rpc_test_returned"] = len(rpc_data)
+            info["rpc_test_returned"] = len(rpc_result)
         except Exception as exc:
             info["rpc_function_works"] = False
             info["rpc_error"] = str(exc)

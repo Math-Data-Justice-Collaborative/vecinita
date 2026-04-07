@@ -45,7 +45,7 @@ class TestEndpointResolution:
         monkeypatch.delenv("OLLAMA_BASE_URL", raising=False)
 
         ep = _reload()
-        assert ep.MODEL_ENDPOINT == "http://localhost:11434"
+        assert ep.MODEL_ENDPOINT == "https://vecinita--vecinita-model-api.modal.run"
 
     def test_embedding_endpoint_uses_local_default_without_env(self, monkeypatch):
         monkeypatch.setenv("RENDER", "true")
@@ -54,7 +54,7 @@ class TestEndpointResolution:
         monkeypatch.delenv("EMBEDDING_SERVICE_URL", raising=False)
 
         ep = _reload()
-        assert ep.EMBEDDING_ENDPOINT == "http://localhost:8001"
+        assert ep.EMBEDDING_ENDPOINT == "https://vecinita--vecinita-embedding-web-app.modal.run"
 
     def test_scraper_endpoint_falls_back_to_local_jobs(self, monkeypatch):
         monkeypatch.delenv("VECINITA_SCRAPER_API_URL", raising=False)

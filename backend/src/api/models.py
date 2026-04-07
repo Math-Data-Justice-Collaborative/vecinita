@@ -1216,6 +1216,104 @@ class HealthCheckResponse(BaseModel):
     )
 
 
+class IntegrationComponentStatus(BaseModel):
+    """Health snapshot for a single dependency or integration."""
+
+    status: str = Field(..., description="Integration status", examples=["ok"])
+    configured: bool = Field(
+        ..., description="Whether the integration is configured for this runtime", examples=[True]
+    )
+    critical: bool = Field(
+        default=False,
+        description="Whether this integration affects the overall service status",
+        examples=[True],
+    )
+    endpoint: str | None = Field(
+        default=None,
+        description="Resolved upstream endpoint or host used for the check",
+        examples=["http://vecinita-agent:10000"],
+    )
+    health_url: str | None = Field(
+        default=None,
+        description="Health URL probed for the integration when applicable",
+        examples=["http://vecinita-agent:10000/health"],
+    )
+    response_time_ms: int | None = Field(
+        default=None,
+        description="Probe latency in milliseconds when available",
+        examples=[42],
+    )
+    detail: str | None = Field(
+        default=None,
+        description="Operator-friendly detail message for the current status",
+        examples=["health endpoint returned 200"],
+    )
+
+
+class IntegrationsStatusResponse(BaseModel):
+    """Aggregated gateway and dependency health for deploy checks and operators."""
+
+    status: str = Field(..., description="Overall gateway integration status", examples=["ok"])
+    gateway: IntegrationComponentStatus = Field(
+        ..., description="Gateway service status for the current process"
+    )
+    components: dict[str, IntegrationComponentStatus] = Field(
+        default_factory=dict,
+        description="Per-integration health snapshots keyed by component name",
+    )
+    active_integrations: list[str] = Field(
+        default_factory=list,
+        description="Configured integrations currently reporting healthy status",
+        examples=[["agent", "embedding_service", "database"]],
+    )
+    degraded_integrations: list[str] = Field(
+        default_factory=list,
+        description="Configured integrations currently degraded or unavailable",
+        examples=[["scraper"]],
+    )
+    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Check timestamp")
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "status": "degraded",
+                "gateway": {
+                    "status": "ok",
+                    "configured": True,
+                    "critical": True,
+                    "endpoint": "vecinita-gateway",
+                    "health_url": None,
+                    "response_time_ms": 0,
+                    "detail": "gateway process is running",
+                },
+                "components": {
+                    "agent": {
+                        "status": "ok",
+                        "configured": True,
+                        "critical": True,
+                        "endpoint": "http://vecinita-agent:10000",
+                        "health_url": "http://vecinita-agent:10000/health",
+                        "response_time_ms": 47,
+                        "detail": "health endpoint returned 200",
+                    },
+                    "database": {
+                        "status": "error",
+                        "configured": True,
+                        "critical": True,
+                        "endpoint": "vecinita-postgres:5432",
+                        "health_url": None,
+                        "response_time_ms": 2000,
+                        "detail": "database socket probe failed",
+                    },
+                },
+                "active_integrations": ["agent"],
+                "degraded_integrations": ["database"],
+                "timestamp": "2024-02-09T10:30:00Z",
+            }
+        }
+    )
+
+
 class EndpointInfo(BaseModel):
     """Information about a single endpoint."""
 
@@ -1341,6 +1439,7 @@ class ErrorResponse(BaseModel):
 # Backward compatibility aliases
 HealthCheck = HealthCheckResponse
 GatewayConfig = GatewayConfigResponse
+IntegrationsStatus = IntegrationsStatusResponse
 
 # ============================================================================
 # API ENDPOINT DOCUMENTATION & STATUS SUMMARY
@@ -1509,7 +1608,7 @@ IMPLEMENTATION NOTES & TODOS
 
 3. Admin Endpoints (8 endpoints)
    - Status: All return 501 Not Implemented except config GET/POST
-   - Required: Database queries to Supabase for documents, stats, sources
+    - Required: Database queries to Render Postgres for documents, stats, sources
    - Required: Implement cleanup token generation and validation
 
 4. Health Checks

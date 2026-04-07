@@ -250,12 +250,9 @@ class TestAskEndpointWithDegradedDataBackend:
 class TestStartupWithValidConfiguration:
     """Verify startup succeeds when DATABASE_URL is properly configured."""
 
-    def test_preflight_ok_with_supabase_when_database_url_unset(self, monkeypatch):
-        """When DATABASE_URL is unset and SUPABASE is configured, preflight is ok."""
-        # Remove DATABASE_URL to allow Supabase path
+    def test_preflight_degraded_when_database_url_unset(self, monkeypatch):
+        """When DATABASE_URL is unset, postgres-only preflight is degraded."""
         monkeypatch.delenv("DATABASE_URL", raising=False)
-        monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
-        monkeypatch.setenv("SUPABASE_KEY", "test-key")
         monkeypatch.setenv("GUARDRAILS_REQUIRE_HUB_VALIDATOR", "false")
 
         from importlib import reload
@@ -264,21 +261,18 @@ class TestStartupWithValidConfiguration:
 
         reload(agent_main)
 
-        # Mock both data_db_mode resolution and the Supabase probe
-        with patch("src.config.resolve_data_db_mode", return_value="supabase"):
+        with patch("src.config.resolve_data_db_mode", return_value="postgres"):
             with patch.object(
-                agent_main, "_probe_supabase_connectivity", return_value=(True, "ok")
+                agent_main, "_probe_postgres_connectivity", return_value=(False, "database_url_not_configured")
             ):
                 result = agent_main._run_startup_preflight()
 
-        assert result["status"] == "ok"
-        assert result["data_mode"] == "supabase"
+        assert result["status"] == "degraded"
+        assert result["checks"]["data_backend"]["backend"] == "postgres"
 
-    def test_health_ok_with_valid_supabase_config(self, monkeypatch):
-        """GET /health returns ok status when Supabase is configured."""
-        monkeypatch.delenv("DATABASE_URL", raising=False)
-        monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
-        monkeypatch.setenv("SUPABASE_KEY", "test-key")
+    def test_health_ok_with_valid_database_config(self, monkeypatch):
+        """GET /health returns ok status when Postgres is configured."""
+        monkeypatch.setenv("DATABASE_URL", "postgresql://user:pass@example-db:5432/db")
         monkeypatch.setenv("GUARDRAILS_REQUIRE_HUB_VALIDATOR", "false")
 
         from importlib import reload
@@ -287,9 +281,8 @@ class TestStartupWithValidConfiguration:
 
         reload(agent_main)
 
-        with patch.object(agent_main, "_probe_supabase_connectivity", return_value=(True, "ok")):
-            client = TestClient(agent_main.app)
-            response = client.get("/health")
+        client = TestClient(agent_main.app)
+        response = client.get("/health")
 
         assert response.status_code == 200
         payload = response.json()
@@ -302,13 +295,10 @@ class TestStartupWithValidConfiguration:
 
 
 class TestPreflightModeSelectionConsistency:
-    """Verify preflight backend selection matches DB_DATA_MODE intent."""
+    """Verify preflight backend selection stays on postgres."""
 
-    def test_preflight_uses_postgres_backend_when_mode_forced_postgres(self, monkeypatch):
-        monkeypatch.setenv("DB_DATA_MODE", "postgres")
+    def test_preflight_uses_postgres_backend_when_database_url_is_present(self, monkeypatch):
         monkeypatch.setenv("DATABASE_URL", "postgresql://user:pass@example-db:5432/db")
-        monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
-        monkeypatch.setenv("SUPABASE_KEY", "test-key")
         monkeypatch.setenv("GUARDRAILS_REQUIRE_HUB_VALIDATOR", "false")
         monkeypatch.delenv("RENDER", raising=False)
         monkeypatch.delenv("RENDER_SERVICE_ID", raising=False)
@@ -323,21 +313,14 @@ class TestPreflightModeSelectionConsistency:
             with patch.object(
                 agent_main, "_probe_postgres_connectivity", return_value=(True, "ok")
             ) as postgres_probe:
-                with patch.object(
-                    agent_main, "_probe_supabase_connectivity", return_value=(True, "ok")
-                ) as supabase_probe:
-                    result = agent_main._run_startup_preflight()
+                result = agent_main._run_startup_preflight()
 
         assert result["data_mode"] == "postgres"
         assert result["checks"]["data_backend"]["backend"] == "postgres"
         assert postgres_probe.called is True
-        assert supabase_probe.called is False
 
-    def test_preflight_uses_supabase_backend_when_mode_forced_supabase(self, monkeypatch):
-        monkeypatch.setenv("DB_DATA_MODE", "supabase")
+    def test_preflight_reloads_with_postgres_backend_defaults(self, monkeypatch):
         monkeypatch.setenv("DATABASE_URL", "postgresql://user:pass@example-db:5432/db")
-        monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
-        monkeypatch.setenv("SUPABASE_KEY", "test-key")
         monkeypatch.setenv("GUARDRAILS_REQUIRE_HUB_VALIDATOR", "false")
         monkeypatch.delenv("RENDER", raising=False)
         monkeypatch.delenv("RENDER_SERVICE_ID", raising=False)
@@ -352,44 +335,11 @@ class TestPreflightModeSelectionConsistency:
             with patch.object(
                 agent_main, "_probe_postgres_connectivity", return_value=(True, "ok")
             ) as postgres_probe:
-                with patch.object(
-                    agent_main, "_probe_supabase_connectivity", return_value=(True, "ok")
-                ) as supabase_probe:
-                    result = agent_main._run_startup_preflight()
-
-        assert result["data_mode"] == "supabase"
-        assert result["checks"]["data_backend"]["backend"] == "supabase"
-        assert supabase_probe.called is True
-        assert postgres_probe.called is False
-
-    def test_preflight_auto_mode_prefers_postgres_when_database_url_present(self, monkeypatch):
-        monkeypatch.setenv("DB_DATA_MODE", "auto")
-        monkeypatch.setenv("DATABASE_URL", "postgresql://user:pass@example-db:5432/db")
-        monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
-        monkeypatch.setenv("SUPABASE_KEY", "test-key")
-        monkeypatch.setenv("GUARDRAILS_REQUIRE_HUB_VALIDATOR", "false")
-        monkeypatch.delenv("RENDER", raising=False)
-        monkeypatch.delenv("RENDER_SERVICE_ID", raising=False)
-
-        import src.config as config_module
-        from src.agent import main as agent_main
-
-        importlib.reload(config_module)
-        importlib.reload(agent_main)
-
-        with patch.object(agent_main, "_probe_guardrails_loaded", return_value=(True, "ok")):
-            with patch.object(
-                agent_main, "_probe_postgres_connectivity", return_value=(True, "ok")
-            ) as postgres_probe:
-                with patch.object(
-                    agent_main, "_probe_supabase_connectivity", return_value=(True, "ok")
-                ) as supabase_probe:
-                    result = agent_main._run_startup_preflight()
+                result = agent_main._run_startup_preflight()
 
         assert result["data_mode"] == "postgres"
         assert result["checks"]["data_backend"]["backend"] == "postgres"
         assert postgres_probe.called is True
-        assert supabase_probe.called is False
 
 
 # ---------------------------------------------------------------------------

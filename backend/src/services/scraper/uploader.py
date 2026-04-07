@@ -1,6 +1,6 @@
 """
 Database uploader for the VECINA scraper.
-Handles uploading processed document chunks to Postgres/Supabase vector storage.
+Handles uploading processed document chunks to Postgres vector storage.
 """
 
 import hashlib
@@ -17,15 +17,8 @@ from urllib.parse import urlparse
 from pydantic import BaseModel, Field
 
 from src.services.llm import LocalLLMClientManager
+from src.utils.resource_metadata import infer_resource_language_metadata
 from src.utils.tags import build_bilingual_tag_fields, infer_tags_from_text, normalize_tags
-
-try:
-    from supabase import create_client
-
-    SUPABASE_AVAILABLE = True
-except Exception:
-    create_client = None  # type: ignore[assignment]
-    SUPABASE_AVAILABLE = False
 
 try:
     import psycopg2
@@ -81,7 +74,7 @@ class DocumentChunk:
 
 
 class DatabaseUploader:
-    """Uploads processed chunks to Postgres/Supabase vector storage."""
+    """Uploads processed chunks to Postgres vector storage."""
 
     def __init__(self, use_local_embeddings: bool = True):
         """
@@ -99,10 +92,9 @@ class DatabaseUploader:
         self._llm_structured_output_warned = False
         self._source_tag_cache: dict[str, dict[str, Any]] = {}
         self._known_tag_cache: list[str] | None = None
-        self.supabase_client: Any | None = None
         self.postgres_database_url = (os.getenv("DATABASE_URL") or "").strip()
         self.vector_sync_target = (os.getenv("VECTOR_SYNC_TARGET") or "postgres").strip().lower()
-        if self.vector_sync_target not in {"supabase", "postgres"}:
+        if self.vector_sync_target != "postgres":
             self.vector_sync_target = "postgres"
         self.vector_sync_enabled = os.getenv("VECTOR_SYNC_ENABLED", "true").lower() in {
             "1",
@@ -118,12 +110,7 @@ class DatabaseUploader:
         self.vector_sync_retry_delay_seconds = max(
             1, int(os.getenv("VECTOR_SYNC_RETRY_DELAY_SECONDS", "2"))
         )
-        self.vector_sync_table = os.getenv("VECTOR_SYNC_SUPABASE_TABLE", "document_chunks")
-        self.vector_sync_schema = (
-            os.getenv("VECTOR_SYNC_SUPABASE_SCHEMA", "public").strip() or "public"
-        )
         self.vector_sync_pending_rows: list[dict[str, Any]] = []
-
         # Initialize embeddings with fallback chain
         if use_local_embeddings:
             self._init_embeddings()
@@ -131,7 +118,7 @@ class DatabaseUploader:
         self._init_local_llm_tagger()
 
         # Initialize vector DB clients
-        self._init_supabase()
+        self._init_vector_sync()
 
     def _init_local_llm_tagger(self) -> None:
         """Initialize optional local-LLM tag enhancement."""
@@ -437,17 +424,6 @@ class DatabaseUploader:
                             if isinstance(tags_value, list):
                                 known.extend(normalize_tags(tags_value))
 
-            elif self.supabase_client:
-                table_client = self._supabase_table_client()
-                if table_client is not None:
-                    response = table_client.select("metadata").limit(5000).execute()
-                    for row in response.data or []:
-                        if isinstance(row, dict):
-                            metadata = (
-                                row.get("metadata") if isinstance(row.get("metadata"), dict) else {}
-                            )
-                            known.extend(normalize_tags(metadata.get("tags", [])))
-
             self._known_tag_cache = normalize_tags(known)
         except Exception as exc:
             log.debug(f"Unable to load known tag catalog: {exc}")
@@ -517,211 +493,51 @@ class DatabaseUploader:
             "Install dependencies: pip install langchain-community fastembed"
         )
 
-    def _init_supabase(self) -> None:
-        """Initialize vector DB clients.
-
-        Kept method name for backward compatibility in tests/import paths.
-        """
+    def _init_vector_sync(self) -> None:
+        """Initialize Postgres vector sync configuration."""
         if not self.vector_sync_enabled:
             log.info("Vector sync disabled (VECTOR_SYNC_ENABLED=false)")
             return
 
-        if self.vector_sync_target == "postgres":
-            if not self.postgres_database_url:
-                log.warning("Postgres sync unavailable: missing DATABASE_URL")
-                return
-            if not POSTGRES_AVAILABLE:
-                log.warning("Postgres sync unavailable: psycopg2 dependency is not installed")
-                return
-            log.info("✓ Postgres sync configured")
+        if not self.postgres_database_url:
+            log.warning("Postgres sync unavailable: missing DATABASE_URL")
             return
-
-        if not SUPABASE_AVAILABLE or create_client is None:
-            log.warning("Supabase sync unavailable: supabase client dependency is not installed")
+        if not POSTGRES_AVAILABLE:
+            log.warning("Postgres sync unavailable: psycopg2 dependency is not installed")
             return
-
-        supabase_url = os.getenv("SUPABASE_URL")
-        supabase_key = (
-            os.getenv("SUPABASE_SECRET_KEY")
-            or os.getenv("SUPABASE_KEY")
-            or os.getenv("SUPABASE_PUBLISHABLE_KEY")
-        )
-
-        if not supabase_url or not supabase_key:
-            log.warning("Supabase sync unavailable: missing SUPABASE_URL or SUPABASE_KEY")
-            return
-
-        try:
-            self.supabase_client = create_client(supabase_url, supabase_key)
-            log.info("✓ Supabase sync client initialized")
-        except Exception as exc:
-            self.supabase_client = None
-            log.warning(f"Supabase sync client initialization failed: {exc}")
-
-    def _build_supabase_row(self, row: dict[str, Any]) -> dict[str, Any]:
-        metadata = dict(row.get("metadata") or {})
-        return {
-            "id": row.get("id"),
-            "content": row.get("content") or "",
-            "source_url": row.get("source_url") or metadata.get("source_url") or "",
-            "source_domain": row.get("source_domain") or metadata.get("source_domain") or "",
-            "chunk_index": int(row.get("chunk_index") or metadata.get("chunk_index") or 0),
-            "total_chunks": int(row.get("total_chunks") or metadata.get("total_chunks") or 0),
-            "chunk_size": int(
-                row.get("chunk_size")
-                or metadata.get("chunk_size")
-                or len(str(row.get("content") or ""))
-            ),
-            "document_title": row.get("document_title") or metadata.get("document_title") or "",
-            "metadata": metadata,
-            "embedding": row.get("embedding") or [],
-            "processing_status": row.get("processing_status") or "completed",
-            "is_processed": bool(row.get("is_processed", True)),
-            "created_at": row.get("created_at"),
-            "updated_at": row.get("updated_at"),
-            "scraped_at": row.get("scraped_at"),
-        }
+        log.info("✓ Postgres sync configured")
 
     def _queue_sync_rows(self, rows: list[dict[str, Any]], error: Exception) -> None:
-        if not self.vector_sync_enabled:
-            return
         if not rows:
             return
-        self.vector_sync_pending_rows.extend([self._build_supabase_row(row) for row in rows])
+        self.vector_sync_pending_rows.extend(rows)
         log.warning(
             "Queued %s row(s) for vector sync replay after failure: %s",
             len(rows),
             error,
         )
 
-    def _supabase_table_client(self):
-        if not self.supabase_client:
-            return None
-        try:
-            if self.vector_sync_schema:
-                return self.supabase_client.schema(self.vector_sync_schema).table(
-                    self.vector_sync_table
-                )
-            return self.supabase_client.table(self.vector_sync_table)
-        except Exception:
-            return self.supabase_client.table(self.vector_sync_table)
-
-    def _apply_supabase_schema_fallback(self, error: Exception) -> bool:
-        err = str(error)
-        if "PGRST106" not in err:
-            return False
-        if "graphql_public" in err and self.vector_sync_schema != "graphql_public":
-            self.vector_sync_schema = "graphql_public"
-            log.warning(
-                "Supabase sync switched schema to 'graphql_public' after PGRST106; set VECTOR_SYNC_SUPABASE_SCHEMA=graphql_public to persist"
-            )
-            return True
-        return False
-
-    def _handle_unrecoverable_sync_error(self, error: Exception) -> bool:
-        err = str(error)
-        if "PGRST205" in err and "Could not find the table" in err:
-            self.vector_sync_enabled = False
-            self.vector_sync_pending_rows.clear()
-            log.warning(
-                "Supabase sync disabled for this run: table '%s.%s' is unavailable (%s)",
-                self.vector_sync_schema,
-                self.vector_sync_table,
-                error,
-            )
-            return True
-        return False
-
     def _flush_sync_queue(self) -> None:
-        if not self.supabase_client or not self.vector_sync_pending_rows:
+        if not self.vector_sync_pending_rows:
             return
-
         queued = list(self.vector_sync_pending_rows)
-        try:
-            table_client = self._supabase_table_client()
-            if table_client is None:
-                return
-            table_client.upsert(queued, on_conflict="id").execute()
+        if self._sync_rows_to_postgres(queued):
             self.vector_sync_pending_rows.clear()
-            log.info("Flushed %s queued Supabase sync row(s)", len(queued))
-        except Exception as exc:
-            if self._apply_supabase_schema_fallback(exc):
-                try:
-                    table_client = self._supabase_table_client()
-                    if table_client is None:
-                        return
-                    table_client.upsert(queued, on_conflict="id").execute()
-                    self.vector_sync_pending_rows.clear()
-                    log.info("Flushed %s queued Supabase sync row(s)", len(queued))
-                    return
-                except Exception as retry_exc:
-                    if self._handle_unrecoverable_sync_error(retry_exc):
-                        return
-                    log.warning(
-                        "Supabase sync replay failed (%s queued rows retained): %s",
-                        len(queued),
-                        retry_exc,
-                    )
-                    return
-            if self._handle_unrecoverable_sync_error(exc):
-                return
-            log.warning(
-                "Supabase sync replay failed (%s queued rows retained): %s", len(queued), exc
-            )
 
-    def _sync_rows_to_supabase(self, rows: list[dict[str, Any]]) -> bool:
+    def _sync_rows(self, rows: list[dict[str, Any]]) -> bool:
         if not rows or not self.vector_sync_enabled:
             return True
-        if self.vector_sync_target == "postgres":
-            return self._sync_rows_to_postgres(rows)
-        if not self.supabase_client:
-            if self.vector_sync_degraded_mode:
-                log.warning("Supabase sync unavailable; skipping write in degraded mode")
-                return False
-            raise RuntimeError("Supabase sync is configured but no Supabase client is available")
 
         self._flush_sync_queue()
-        payload = [self._build_supabase_row(row) for row in rows]
-        last_error: Exception | None = None
-        for attempt in range(1, self.vector_sync_retry_max + 1):
-            try:
-                table_client = self._supabase_table_client()
-                if table_client is None:
-                    return True
-                table_client.upsert(payload, on_conflict="id").execute()
-                return True
-            except Exception as exc:
-                if self._apply_supabase_schema_fallback(exc):
-                    try:
-                        table_client = self._supabase_table_client()
-                        if table_client is None:
-                            return True
-                        table_client.upsert(payload, on_conflict="id").execute()
-                        return True
-                    except Exception as retry_exc:
-                        if self._handle_unrecoverable_sync_error(retry_exc):
-                            return False
-                        exc = retry_exc
-                if self._handle_unrecoverable_sync_error(exc):
-                    return False
-                last_error = exc
-                if attempt < self.vector_sync_retry_max:
-                    sleep_seconds = self.vector_sync_retry_delay_seconds * attempt
-                    log.warning(
-                        "Supabase sync attempt %s/%s failed, retrying in %ss: %s",
-                        attempt,
-                        self.vector_sync_retry_max,
-                        sleep_seconds,
-                        exc,
-                    )
-                    time.sleep(sleep_seconds)
+        try:
+            persisted = self._sync_rows_to_postgres(rows)
+        except Exception as exc:
+            self._queue_sync_rows(rows, exc)
+            raise
 
-        if last_error is not None:
-            self._queue_sync_rows(rows, last_error)
-            if not self.vector_sync_degraded_mode:
-                raise RuntimeError(f"Supabase sync failed after retries: {last_error}")
-            log.warning("Supabase sync failed in degraded mode; write was not persisted")
-        return False
+        if not persisted:
+            self._queue_sync_rows(rows, RuntimeError("Postgres sync did not persist rows"))
+        return persisted
 
     def _vector_literal(self, embedding: Any) -> str | None:
         if not isinstance(embedding, list) or not embedding:
@@ -835,6 +651,7 @@ class DatabaseUploader:
         log.info(f"--> Uploading {len(chunks)} chunks to database...")
 
         resolved_source_tags = normalize_tags(source_tags)
+        existing_source_metadata = self._get_source_metadata(source_identifier)
         existing_source_tags = self._get_source_tags(source_identifier)
         resolved_source_tags = normalize_tags((resolved_source_tags or []) + existing_source_tags)
         known_tags = self._get_known_tags()
@@ -855,6 +672,10 @@ class DatabaseUploader:
             )
         )
         source_bilingual_tags = build_bilingual_tag_fields(resolved_source_tags)
+        source_language_metadata = infer_resource_language_metadata(
+            sample_texts,
+            existing_metadata=existing_source_metadata,
+        )
 
         # Convert chunks to DocumentChunk objects with embeddings
         doc_chunks = []
@@ -875,6 +696,14 @@ class DatabaseUploader:
                 chunk_meta["tags_en"] = source_bilingual_tags["tags_en"]
             if source_bilingual_tags.get("tags_es"):
                 chunk_meta["tags_es"] = source_bilingual_tags["tags_es"]
+            for field_name, field_value in source_language_metadata.items():
+                if field_name == "is_bilingual":
+                    chunk_meta[field_name] = bool(chunk_meta.get(field_name) or field_value)
+                elif field_name in {"available_languages", "available_language_codes"}:
+                    if not chunk_meta.get(field_name):
+                        chunk_meta[field_name] = field_value
+                elif not chunk_meta.get(field_name):
+                    chunk_meta[field_name] = field_value
             for facet_name, facet_values in source_tag_facets.items():
                 if facet_values and not normalize_tags(chunk_meta.get(facet_name, [])):
                     chunk_meta[facet_name] = facet_values
@@ -995,7 +824,7 @@ class DatabaseUploader:
             rows.append(row)
 
         try:
-            persisted = self._sync_rows_to_supabase(rows)
+            persisted = self._sync_rows(rows)
             if persisted:
                 successful = len(rows)
                 failed = 0
@@ -1012,6 +841,13 @@ class DatabaseUploader:
 
     def _get_source_tags(self, source_identifier: str) -> list[str]:
         """Fetch canonical source-level tags from existing stored chunks."""
+        metadata = self._get_source_metadata(source_identifier)
+        return normalize_tags(
+            metadata.get("tags") or metadata.get("tags_en") or metadata.get("tags_es") or []
+        )
+
+    def _get_source_metadata(self, source_identifier: str) -> dict[str, Any]:
+        """Fetch existing metadata for a source to preserve derived fields."""
         try:
             if (
                 self.vector_sync_target == "postgres"
@@ -1020,8 +856,7 @@ class DatabaseUploader:
                 and psycopg2 is not None
             ):
                 sql = (
-                    "SELECT metadata->'tags' AS tags "
-                    "FROM document_chunks "
+                    "SELECT metadata FROM document_chunks "
                     "WHERE source_url = %s "
                     "ORDER BY updated_at DESC "
                     "LIMIT 1"
@@ -1030,30 +865,11 @@ class DatabaseUploader:
                     with conn.cursor() as cur:
                         cur.execute(sql, (source_identifier,))
                         row = cur.fetchone()
-                        if row and isinstance(row[0], list):
-                            return normalize_tags(row[0])
-
-            if self.supabase_client:
-                table_client = self._supabase_table_client()
-                if table_client is not None:
-                    response = (
-                        table_client.select("metadata")
-                        .eq("source_url", source_identifier)
-                        .order("updated_at", desc=True)
-                        .limit(1)
-                        .execute()
-                    )
-                    rows = response.data or []
-                    if rows and isinstance(rows[0], dict):
-                        metadata = (
-                            rows[0].get("metadata")
-                            if isinstance(rows[0].get("metadata"), dict)
-                            else {}
-                        )
-                        return normalize_tags(metadata.get("tags", []))
+                        if row and isinstance(row[0], dict):
+                            return dict(row[0])
         except Exception as exc:
-            log.debug(f"Unable to load source tags for {source_identifier}: {exc}")
-        return []
+            log.debug(f"Unable to load source metadata for {source_identifier}: {exc}")
+        return {}
 
     def _upload_individual(
         self, chunks: list[DocumentChunk], embeddings: list[list[float]]
@@ -1087,7 +903,7 @@ class DatabaseUploader:
             }
 
             try:
-                if self._sync_rows_to_supabase([row]):
+                if self._sync_rows([row]):
                     successful += 1
                 else:
                     failed += 1
@@ -1162,7 +978,7 @@ class DatabaseUploader:
             batch = rows[i : i + batch_size]
 
             try:
-                if self._sync_rows_to_supabase(batch):
+                if self._sync_rows(batch):
                     successful += len(batch)
                     log.debug(f"Batch of {len(batch)} links uploaded successfully")
                 else:
@@ -1172,7 +988,7 @@ class DatabaseUploader:
                 # Try individual uploads
                 for row in batch:
                     try:
-                        if self._sync_rows_to_supabase([row]):
+                        if self._sync_rows([row]):
                             successful += 1
                         else:
                             failed += 1

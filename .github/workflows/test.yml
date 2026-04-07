@@ -119,34 +119,6 @@ jobs:
       working-directory: frontend
       run: npm run typecheck
 
-  auth-quality:
-    runs-on: ubuntu-22.04
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
-      with:
-        submodules: 'false'
-
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v6
-      with:
-        python-version: "3.10"
-        cache: 'pip'
-
-    - name: Install auth dependencies
-      working-directory: auth
-      run: |
-        python -m pip install --upgrade pip
-        pip install --no-cache-dir ".[dev]"
-
-    - name: Lint auth service (Ruff)
-      working-directory: auth
-      run: ruff check src tests
-
-    - name: Check auth formatting (Black)
-      working-directory: auth
-      run: black --check src tests
-
   data-management-api-structure:
     needs: [workflow-context]
     if: needs.workflow-context.outputs.has_cross_repo_token == 'true'
@@ -459,8 +431,6 @@ jobs:
     - name: Create .env file for tests
       working-directory: backend
       run: |
-        echo "SUPABASE_URL=${{ secrets.SUPABASE_URL || 'https://test.supabase.co' }}" >> .env
-        echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY || 'test-key' }}" >> .env
         echo "DATABASE_URL=${{ secrets.DATABASE_URL || 'postgresql://test' }}" >> .env
         echo "OLLAMA_BASE_URL=http://localhost:11434" >> .env
         echo "OLLAMA_MODEL=llama3.1:8b" >> .env
@@ -478,7 +448,6 @@ jobs:
         pytest tests/ -m "not integration and not e2e and not llm" -v --tb=short --junit-xml=test-results.xml \
           --cov=src.embedding_service.modal_app \
           --cov=src.services.embedding.models \
-          --cov=src.utils.supabase_embeddings \
           --cov=src.utils.tags \
           --cov-config=.coveragerc.unit --cov-report=xml --cov-report=html --cov-report=term \
           --cov-fail-under=98
@@ -528,8 +497,6 @@ jobs:
     - name: Create .env file for tests
       working-directory: backend
       run: |
-        echo "SUPABASE_URL=${{ secrets.SUPABASE_URL || 'https://test.supabase.co' }}" >> .env
-        echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY || 'test-key' }}" >> .env
         echo "DATABASE_URL=${{ secrets.DATABASE_URL || 'postgresql://test' }}" >> .env
         echo "OLLAMA_BASE_URL=http://localhost:11434" >> .env
         echo "OLLAMA_MODEL=llama3.1:8b" >> .env
@@ -573,8 +540,6 @@ jobs:
     - name: Create .env file for schema tests
       working-directory: backend
       run: |
-        echo "SUPABASE_URL=${{ secrets.SUPABASE_URL || 'https://test.supabase.co' }}" >> .env
-        echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY || 'test-key' }}" >> .env
         echo "DATABASE_URL=${{ secrets.DATABASE_URL || 'postgresql://test' }}" >> .env
         echo "OLLAMA_BASE_URL=http://localhost:11434" >> .env
         echo "OLLAMA_MODEL=llama3.1:8b" >> .env
@@ -603,36 +568,6 @@ jobs:
           backend/schema-test-results.xml
           backend/schema-coverage.html
         if-no-files-found: warn
-
-  auth-unit:
-    runs-on: ubuntu-22.04
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
-      with:
-        submodules: 'false'
-
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v6
-      with:
-        python-version: "3.10"
-        cache: 'pip'
-
-    - name: Install auth dependencies
-      working-directory: auth
-      run: |
-        python -m pip install --upgrade pip
-        pip install --no-cache-dir ".[dev]"
-
-    - name: Run auth unit tests with coverage
-      working-directory: auth
-      env:
-        SUPABASE_URL: https://test.supabase.co
-        SUPABASE_KEY: test-key
-        JWT_SECRET: test-jwt-secret
-      run: |
-        pytest tests/ --cov=src --cov-report=xml --cov-report=term --cov-fail-under=98 --junit-xml=test-results.xml
 
   frontend-unit:
     runs-on: ubuntu-22.04
@@ -813,8 +748,6 @@ jobs:
         working-directory: backend
         run: |
           echo "DATABASE_URL=${DATABASE_URL}" >> .env
-          echo "SUPABASE_URL=https://test.supabase.co" >> .env
-          echo "SUPABASE_KEY=test-key" >> .env
           echo "OLLAMA_BASE_URL=http://localhost:11434" >> .env
           echo "OLLAMA_MODEL=llama3.1:8b" >> .env
           echo "USE_LOCAL_EMBEDDINGS=true" >> .env

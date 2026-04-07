@@ -1,16 +1,4 @@
-"""
-Database Connection Pool Manager (Phase 7).
-
-Manages database connections with:
-- Configurable pool size (min/max)
-- Connection timeout and retry logic
-- Health checks and monitoring
-- Connection recycling
-
-TODO: Currently uses Supabase client directly. In production:
-- Multi-instance deployment should use external connection pool (PgBouncer)
-- Add Redis-backed pool state for distributed systems
-"""
+"""Postgres connection manager with health checks and retry helpers."""
 
 import asyncio
 import logging
@@ -19,7 +7,10 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Any
 
-from supabase import Client, create_client
+try:
+    import psycopg2
+except Exception:  # pragma: no cover - optional in some test profiles
+    psycopg2 = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +18,7 @@ logger = logging.getLogger(__name__)
 # Configuration
 # ============================================================================
 
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
+DATABASE_URL = os.getenv("DATABASE_URL", "")
 
 # Pool configuration
 POOL_MIN_SIZE = int(os.getenv("POOL_MIN_SIZE", "5"))
@@ -59,13 +49,13 @@ class DatabaseConnectionPool:
     - Health check monitoring
     - Query timeout enforcement
 
-    Note: This is a simple wrapper around Supabase client.
-    For production multi-instance deployment, use external connection pool like PgBouncer.
+    Note: This is a lightweight process-local manager, not a true shared pool.
+    For production multi-instance deployment, use an external pool such as PgBouncer.
     """
 
     def __init__(self):
         """Initialize connection pool manager."""
-        self._client: Client | None = None
+        self._client: str | None = None
         self._initialized = False
         self._health_check_task: asyncio.Task | None = None
         self._last_health_check: datetime | None = None
@@ -88,13 +78,13 @@ class DatabaseConnectionPool:
         if self._initialized:
             return
 
-        if not SUPABASE_URL or not SUPABASE_KEY:
-            raise RuntimeError(
-                "Database not configured. Set SUPABASE_URL and SUPABASE_KEY environment variables."
-            )
+        if not DATABASE_URL:
+            raise RuntimeError("Database not configured. Set DATABASE_URL.")
+        if psycopg2 is None:
+            raise RuntimeError("Database not configured. Install psycopg2 to enable Postgres access.")
 
         try:
-            self._client = create_client(SUPABASE_URL, SUPABASE_KEY)
+            self._client = DATABASE_URL
             logger.info("Database connection pool initialized")
             logger.info(f"Pool size: {POOL_MIN_SIZE}-{POOL_MAX_SIZE}")
             logger.info(f"Connection timeout: {POOL_TIMEOUT_SECONDS}s")
@@ -102,6 +92,7 @@ class DatabaseConnectionPool:
 
             self._initialized = True
             self._health_status["connected"] = True
+            self._health_status["connection_count"] = 1
 
             # Start health check task
             self._health_check_task = asyncio.create_task(self._run_health_checks())
@@ -124,15 +115,17 @@ class DatabaseConnectionPool:
             except asyncio.CancelledError:
                 pass
 
+        self._client = None
         self._initialized = False
+        self._health_status["connected"] = False
         logger.info("Database connection pool shutdown")
 
-    def get_client(self) -> Client:
+    def get_client(self) -> str:
         """
-        Get database client.
+        Get configured database handle.
 
         Returns:
-            Supabase client instance
+            Postgres connection string
 
         Raises:
             RuntimeError: If pool not initialized
@@ -150,14 +143,13 @@ class DatabaseConnectionPool:
             True if healthy, False otherwise
         """
         try:
-            # Simple health check: test database connectivity
-            if self._client is None:
+            if self._client is None or psycopg2 is None:
                 return False
 
-            # Try to perform a simple query to verify connection
-            # This should be lightweight and fast
-            # Note: select() uses string value for count parameter
-            _ = self._client.table("documents").select("*", count="exact").limit(0).execute()  # type: ignore[arg-type]
+            with psycopg2.connect(self._client, connect_timeout=POOL_TIMEOUT_SECONDS) as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT 1")
+                    cur.fetchone()
             self._last_health_check = datetime.utcnow()
             self._health_status["connected"] = True
             return True
@@ -223,17 +215,16 @@ connection_pool = DatabaseConnectionPool()
 # ============================================================================
 
 
-async def get_database_client() -> Client:
+async def get_database_client() -> str:
     """
-    FastAPI dependency to get database client from pool.
+    FastAPI dependency to get database handle from pool.
 
     Usage:
-        @app.get("/endpoint")
-        async def endpoint(db: Client = Depends(get_database_client)):
+        async def endpoint(database_url: str = Depends(get_database_client)):
             ...
 
     Returns:
-        Database client from connection pool
+        Database connection string from connection pool
 
     Raises:
         RuntimeError: If pool not initialized

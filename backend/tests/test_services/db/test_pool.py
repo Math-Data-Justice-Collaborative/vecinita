@@ -8,35 +8,42 @@ from src.services.db import pool
 pytestmark = pytest.mark.unit
 
 
-class _FakeQuery:
+class _FakeCursor:
     def __init__(self, should_fail: bool = False):
         self.should_fail = should_fail
 
-    def select(self, *_args, **_kwargs):
-        return self
-
-    def limit(self, *_args, **_kwargs):
-        return self
-
-    def execute(self):
+    def execute(self, _query):
         if self.should_fail:
             raise RuntimeError("query failed")
-        return SimpleNamespace(data=[])
+
+    def fetchone(self):
+        return (1,)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
 
 
-class _FakeClient:
+class _FakeConnection:
     def __init__(self, should_fail: bool = False):
         self.should_fail = should_fail
 
-    def table(self, _name):
-        return _FakeQuery(should_fail=self.should_fail)
+    def cursor(self):
+        return _FakeCursor(should_fail=self.should_fail)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
 
 
 @pytest.mark.anyio
 async def test_initialize_raises_when_config_missing(monkeypatch):
     db_pool = pool.DatabaseConnectionPool()
-    monkeypatch.setattr(pool, "SUPABASE_URL", "")
-    monkeypatch.setattr(pool, "SUPABASE_KEY", "")
+    monkeypatch.setattr(pool, "DATABASE_URL", "")
 
     with pytest.raises(RuntimeError):
         await db_pool.initialize()
@@ -45,9 +52,8 @@ async def test_initialize_raises_when_config_missing(monkeypatch):
 @pytest.mark.anyio
 async def test_initialize_sets_client_and_status(monkeypatch):
     db_pool = pool.DatabaseConnectionPool()
-    monkeypatch.setattr(pool, "SUPABASE_URL", "https://example.supabase.co")
-    monkeypatch.setattr(pool, "SUPABASE_KEY", "test-key")
-    monkeypatch.setattr(pool, "create_client", lambda *_args, **_kwargs: _FakeClient())
+    monkeypatch.setattr(pool, "DATABASE_URL", "postgresql://user:pass@localhost:5432/db")
+    monkeypatch.setattr(pool, "psycopg2", SimpleNamespace(connect=lambda *_args, **_kwargs: _FakeConnection()))
 
     async def _fake_health_loop():
         await asyncio.sleep(0)
@@ -79,19 +85,31 @@ async def test_health_check_returns_false_without_client():
 @pytest.mark.anyio
 async def test_health_check_success_updates_status():
     db_pool = pool.DatabaseConnectionPool()
-    db_pool._client = _FakeClient()
+    db_pool._client = "postgresql://user:pass@localhost:5432/db"
+    original_psycopg2 = pool.psycopg2
+    pool.psycopg2 = SimpleNamespace(connect=lambda *_args, **_kwargs: _FakeConnection())
 
-    assert await db_pool.health_check() is True
-    assert db_pool._health_status["connected"] is True
+    try:
+        assert await db_pool.health_check() is True
+        assert db_pool._health_status["connected"] is True
+    finally:
+        pool.psycopg2 = original_psycopg2
 
 
 @pytest.mark.anyio
 async def test_health_check_failure_updates_status():
     db_pool = pool.DatabaseConnectionPool()
-    db_pool._client = _FakeClient(should_fail=True)
+    db_pool._client = "postgresql://user:pass@localhost:5432/db"
+    original_psycopg2 = pool.psycopg2
+    pool.psycopg2 = SimpleNamespace(
+        connect=lambda *_args, **_kwargs: _FakeConnection(should_fail=True)
+    )
 
-    assert await db_pool.health_check() is False
-    assert db_pool._health_status["connected"] is False
+    try:
+        assert await db_pool.health_check() is False
+        assert db_pool._health_status["connected"] is False
+    finally:
+        pool.psycopg2 = original_psycopg2
 
 
 @pytest.mark.anyio

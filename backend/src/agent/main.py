@@ -63,7 +63,6 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 from pydantic import BaseModel
-from supabase import Client, create_client
 
 # Optional fallback embedding class; imported lazily only when needed.
 FastEmbedEmbeddings = None
@@ -230,18 +229,13 @@ from src.config import (
     OLLAMA_BASE_URL,
     _normalize_internal_service_url,
     _running_on_render,
+    resolve_data_db_mode,
 )
 
 # Keep these helpers bound on this module for legacy imports and tests.
 _RENDER_URL_HELPERS = (_normalize_internal_service_url, _running_on_render)
 
 
-supabase_url = os.environ.get("SUPABASE_URL")
-supabase_key = (
-    os.environ.get("SUPABASE_SECRET_KEY")
-    or os.environ.get("SUPABASE_KEY")
-    or os.environ.get("SUPABASE_PUBLISHABLE_KEY")
-)
 # Use normalized OLLAMA_BASE_URL from config (handles Render vs local-dev)
 ollama_base_url = OLLAMA_BASE_URL
 ollama_api_key = (
@@ -283,7 +277,6 @@ llm_manager_kwargs: dict[str, Any] = {
 llm_client_manager = LocalLLMClientManager(**llm_manager_kwargs)
 # --- Initialize Clients ---
 try:
-    supabase: Client | None = None
     # Emit a single structured summary of all resolved service endpoints and
     # policy flags so operators can confirm routing without reading env var dumps.
     from src.service_endpoints import log_endpoint_summary as _log_ep_summary
@@ -291,24 +284,16 @@ try:
     _log_ep_summary(logger)
     logger.info(
         "Startup connection config: render=%s embedding_url=%s ollama_url=%s "
-        "embedding_strict_startup=%s preflight_strict=%s data_db_mode_env=%s db_scheme=%s db_host=%s",
+        "embedding_strict_startup=%s preflight_strict=%s data_backend=%s db_scheme=%s db_host=%s",
         _running_on_render(),
         _safe_host_port(EMBEDDING_SERVICE_URL),
         _safe_host_port(OLLAMA_BASE_URL),
         os.environ.get("EMBEDDING_STRICT_STARTUP", "false"),
         os.environ.get("BACKEND_PREFLIGHT_STRICT", "false"),
-        os.environ.get("DB_DATA_MODE", "auto"),
+        resolve_data_db_mode(),
         _database_url_parts(os.environ.get("DATABASE_URL", ""))[0] or "unset",
         _database_url_parts(os.environ.get("DATABASE_URL", ""))[1] or "unset",
     )
-    if supabase_url and supabase_key:
-        logger.info("Initializing optional Supabase client (auth/diagnostics only)...")
-        supabase = create_client(supabase_url, supabase_key)
-        logger.info("Supabase client initialized successfully")
-    else:
-        logger.info(
-            "Supabase client not configured for agent runtime; continuing with Postgres-only retrieval"
-        )
 
     class Selection(TypedDict):
         provider: str
@@ -486,17 +471,6 @@ def _probe_guardrails_loaded() -> tuple[bool, str]:
         return False, f"error: {exc}"
 
 
-def _probe_supabase_connectivity() -> tuple[bool, str]:
-    if supabase is None:
-        return False, "supabase_not_configured"
-    try:
-        # Lightweight connectivity probe for configured data backend.
-        supabase.table("document_chunks").select("id").limit(1).execute()
-        return True, "ok"
-    except Exception as exc:
-        return False, f"error: {exc}"
-
-
 def _probe_postgres_schema(cur: Any) -> tuple[bool, str]:
     cur.execute("SELECT 1 FROM pg_extension WHERE extname = 'vector'")
     if cur.fetchone() is None:
@@ -649,12 +623,10 @@ def _startup_config_summary() -> dict[str, Any]:
         "ollama_url": OLLAMA_BASE_URL,
         "embedding_strict_startup": _is_truthy_env("EMBEDDING_STRICT_STARTUP", False),
         "preflight_strict": _is_truthy_env("BACKEND_PREFLIGHT_STRICT", False),
-        "db_data_mode": os.environ.get("DB_DATA_MODE", "auto"),
+        "data_backend": "postgres",
         "database_url_set": bool(os.environ.get("DATABASE_URL", "").strip()),
         "database_url_scheme": db_scheme or "unset",
         "database_url_host": db_host or "unset",
-        "supabase_url_set": bool(os.environ.get("SUPABASE_URL", "").strip()),
-        "supabase_key_set": bool((os.environ.get("SUPABASE_KEY") or "").strip()),
     }
 
 
@@ -674,22 +646,13 @@ def _run_startup_preflight() -> dict[str, Any]:
         "required": require_guardrails_hub,
     }
 
-    if data_mode == "postgres":
-        data_ok, data_detail = _probe_postgres_connectivity()
-        checks["data_backend"] = {
-            "ok": data_ok,
-            "backend": "postgres",
-            "detail": data_detail,
-            "required": True,
-        }
-    else:
-        data_ok, data_detail = _probe_supabase_connectivity()
-        checks["data_backend"] = {
-            "ok": data_ok,
-            "backend": "supabase",
-            "detail": data_detail,
-            "required": True,
-        }
+    data_ok, data_detail = _probe_postgres_connectivity()
+    checks["data_backend"] = {
+        "ok": data_ok,
+        "backend": "postgres",
+        "detail": data_detail,
+        "required": True,
+    }
 
     overall_ok = all(
         bool(item.get("ok")) for item in checks.values() if bool(item.get("required", False))
@@ -2134,116 +2097,92 @@ def test_db_search(query: str = "community resources"):
     diagnostics: dict[str, Any] = {}
 
     try:
-        logger.info(f"Test DB Search: Query = '{query}'")
+        logger.info("Test DB Search: Query = '%s'", query)
 
-        if supabase is None:
-            return {"error": "Supabase client not initialized"}
+        if psycopg2 is None:
+            return {"error": "psycopg2 not available"}
+
+        database_url = (os.environ.get("DATABASE_URL") or "").strip()
+        if not database_url:
+            return {"error": "DATABASE_URL not configured"}
 
         # Step 1: Check if table exists and has data
         try:
-            table_result = supabase.table("document_chunks").select("*").limit(1).execute()
-            total_rows = (
-                table_result.count
-                if hasattr(table_result, "count")
-                else len(table_result.data) if table_result.data else 0
-            )
+            with psycopg2.connect(database_url, connect_timeout=5) as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT COUNT(*) FROM document_chunks")
+                    total_rows = int(cur.fetchone()[0] or 0)
             diagnostics["table_exists"] = True
             diagnostics["total_rows"] = total_rows
-            logger.info(f"Test DB Search: Table has {total_rows} rows")
+            logger.info("Test DB Search: Table has %s rows", total_rows)
         except Exception as e:
             diagnostics["table_exists"] = False
             diagnostics["table_error"] = str(e)
-            logger.error(f"Test DB Search: Table check failed: {e}")
+            logger.error("Test DB Search: Table check failed: %s", e)
 
-        # Step 2: Check if embeddings exist and are non-null
+        # Step 2: Check embeddings and dimensions
         try:
-            embedding_check = (
-                supabase.table("document_chunks").select("id,embedding").limit(5).execute()
-            )
-            if embedding_check.data:
-                embedding_rows: list[dict[str, Any]] = embedding_check.data  # type: ignore[assignment]
-                non_null_embeddings = sum(
-                    1 for row in embedding_rows if row.get("embedding") is not None
-                )
-                diagnostics["embeddings_exist"] = non_null_embeddings > 0
-                diagnostics["sample_embedding_count"] = non_null_embeddings
-                diagnostics["sample_size"] = len(embedding_rows)
-
-                # Check embedding dimension if we have one
-                if non_null_embeddings > 0:
-                    sample_embedding = next(
-                        (row["embedding"] for row in embedding_rows if row.get("embedding")), None
+            with psycopg2.connect(database_url, connect_timeout=5) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "SELECT embedding::text FROM document_chunks WHERE embedding IS NOT NULL LIMIT 5"
                     )
-                    if sample_embedding:
-                        if isinstance(sample_embedding, list):
-                            diagnostics["stored_embedding_dimension"] = len(sample_embedding)
-                        elif isinstance(sample_embedding, str):
-                            # Might be stored as string, try to parse
-                            try:
-                                import json
+                    embedding_rows = [row[0] for row in cur.fetchall()]
 
-                                parsed = json.loads(sample_embedding)
-                                diagnostics["stored_embedding_dimension"] = len(parsed)
-                            except Exception:
-                                diagnostics["stored_embedding_dimension"] = (
-                                    "unknown (string format)"
-                                )
-                        else:
-                            diagnostics["stored_embedding_dimension"] = (
-                                f"unknown (type: {type(sample_embedding).__name__})"
-                            )
-
-                logger.info(
-                    f"Test DB Search: {non_null_embeddings}/{len(embedding_rows)} sample rows have embeddings"
-                )
-            else:
-                diagnostics["embeddings_exist"] = False
-                diagnostics["embedding_check_error"] = "No data returned"
+            diagnostics["embeddings_exist"] = bool(embedding_rows)
+            diagnostics["sample_embedding_count"] = len(embedding_rows)
+            diagnostics["sample_size"] = len(embedding_rows)
+            if embedding_rows:
+                sample_embedding_text = str(embedding_rows[0] or "").strip().strip("[]")
+                dims = len([v for v in sample_embedding_text.split(",") if v.strip()])
+                diagnostics["stored_embedding_dimension"] = dims
         except Exception as e:
             diagnostics["embeddings_exist"] = False
             diagnostics["embedding_check_error"] = str(e)
-            logger.error(f"Test DB Search: Embedding check failed: {e}")
+            logger.error("Test DB Search: Embedding check failed: %s", e)
 
-        # Step 3: Check if RPC function exists
+        # Step 3: Check if search function exists
         try:
-            # Try calling RPC with a simple test embedding (all zeros)
-            test_embedding = [0.0] * 384
-            rpc_test = supabase.rpc(
-                "search_similar_documents",
-                {"query_embedding": test_embedding, "match_threshold": 0.0, "match_count": 1},
-            ).execute()
-            diagnostics["rpc_function_exists"] = True
-            rpc_test_data: list[dict[str, Any]] = rpc_test.data or []  # type: ignore[assignment]
-            diagnostics["rpc_test_results"] = len(rpc_test_data)
-            logger.info(
-                f"Test DB Search: RPC function exists and returned {diagnostics['rpc_test_results']} results with test embedding"
-            )
+            with psycopg2.connect(database_url, connect_timeout=5) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "SELECT 1 FROM pg_proc WHERE proname = 'search_similar_documents' LIMIT 1"
+                    )
+                    diagnostics["rpc_function_exists"] = cur.fetchone() is not None
+            diagnostics["rpc_test_results"] = 0
         except Exception as e:
             diagnostics["rpc_function_exists"] = False
             diagnostics["rpc_error"] = str(e)
-            logger.error(f"Test DB Search: RPC function test failed: {e}")
+            logger.error("Test DB Search: Function check failed: %s", e)
 
         # Step 4: Generate embedding from query
         question_embedding = embedding_model.embed_query(query)
         diagnostics["query_embedding_dimension"] = len(question_embedding)
-        logger.info(f"Test DB Search: Generated embedding dimension = {len(question_embedding)}")
-        logger.info(f"Test DB Search: First 5 values = {question_embedding[:5]}")
 
         # Step 5: Try actual search with threshold=0.0
-        test_threshold = 0.0
-        logger.info(f"Test DB Search: Searching with threshold = {test_threshold}")
+        vector_literal = "[" + ",".join(f"{float(v):.10f}" for v in question_embedding) + "]"
+        with psycopg2.connect(database_url, connect_timeout=5) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT content, source_url, 1 - (embedding <=> %s::vector) AS similarity "
+                    "FROM document_chunks "
+                    "WHERE embedding IS NOT NULL "
+                    "ORDER BY embedding <=> %s::vector "
+                    "LIMIT 10",
+                    (vector_literal, vector_literal),
+                )
+                result_rows = cur.fetchall()
 
-        result = supabase.rpc(
-            "search_similar_documents",
+        result_data: list[dict[str, Any]] = [
             {
-                "query_embedding": question_embedding,
-                "match_threshold": test_threshold,
-                "match_count": 10,
-            },
-        ).execute()
-        result_data: list[dict[str, Any]] = result.data or []  # type: ignore[assignment]
+                "content": row[0],
+                "source_url": row[1],
+                "similarity": float(row[2] or 0.0),
+            }
+            for row in result_rows
+        ]
 
-        logger.info(f"Test DB Search: Found {len(result_data)} results")
+        logger.info("Test DB Search: Found %s results", len(result_data))
         diagnostics["search_results_found"] = len(result_data)
 
         if result_data:
@@ -2366,62 +2305,52 @@ def get_db_info():
     Returns:
         Database statistics and sample data
     """
-    if supabase is None:
-        return {"status": "error", "error": "Supabase client not initialized"}
-    _supa = supabase
+    if psycopg2 is None:
+        return {"status": "error", "error": "psycopg2 not available"}
+
+    database_url = (os.environ.get("DATABASE_URL") or "").strip()
+    if not database_url:
+        return {"status": "error", "error": "DATABASE_URL not configured"}
+
     try:
         info: dict[str, Any] = {}
 
         # Get row count
         try:
-            count_result = _supa.table("document_chunks").select("id").limit(1).execute()
-            info["total_rows"] = (
-                count_result.count
-                if hasattr(count_result, "count")
-                else len(_supa.table("document_chunks").select("id").execute().data or [])
-            )
+            with psycopg2.connect(database_url, connect_timeout=5) as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT COUNT(*) FROM document_chunks")
+                    info["total_rows"] = int(cur.fetchone()[0] or 0)
         except Exception as e:
             info["total_rows"] = f"error: {e}"
 
         # Get sample rows with embeddings
         try:
-            sample_result = (
-                _supa.table("document_chunks")
-                .select("id,source_url,chunk_index,embedding,content")
-                .limit(3)
-                .execute()
-            )
-            if sample_result.data:
-                sample_rows: list[dict[str, Any]] = sample_result.data  # type: ignore[assignment]
+            with psycopg2.connect(database_url, connect_timeout=5) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "SELECT id::text, source_url, chunk_index, embedding::text, content "
+                        "FROM document_chunks LIMIT 3"
+                    )
+                    sample_rows = cur.fetchall()
+            if sample_rows:
                 samples = []
                 for row in sample_rows:
                     sample: dict[str, Any] = {
-                        "id": row.get("id"),
-                        "source_url": row.get("source_url"),
-                        "chunk_index": row.get("chunk_index"),
-                        "content_preview": (
-                            row.get("content", "")[:100] + "..." if row.get("content") else None
-                        ),
-                        "has_embedding": row.get("embedding") is not None,
+                        "id": row[0],
+                        "source_url": row[1],
+                        "chunk_index": row[2],
+                        "content_preview": (row[4][:100] + "..." if row[4] else None),
+                        "has_embedding": row[3] is not None,
                     }
 
                     # Try to get embedding dimension
-                    if row.get("embedding"):
-                        emb = row["embedding"]
-                        if isinstance(emb, list):
-                            sample["embedding_dimension"] = len(emb)
-                            sample["embedding_type"] = "list"
-                        elif isinstance(emb, str):
-                            sample["embedding_type"] = "string"
-                            try:
-                                import json
-
-                                parsed = json.loads(emb)
-                                sample["embedding_dimension"] = len(parsed)
-                            except Exception:
-                                sample["embedding_dimension"] = "parse_failed"
-                        else:
-                            sample["embedding_type"] = type(emb).__name__
+                    if row[3]:
+                        emb_text = str(row[3]).strip().strip("[]")
+                        sample["embedding_type"] = "pgvector_text"
+                        sample["embedding_dimension"] = len(
+                            [v for v in emb_text.split(",") if v.strip()]
+                        )
 
                     samples.append(sample)
 
@@ -2431,14 +2360,13 @@ def get_db_info():
 
         # Check RPC function
         try:
-            test_embedding = [0.0] * 384
-            rpc_result = _supa.rpc(
-                "search_similar_documents",
-                {"query_embedding": test_embedding, "match_threshold": 0.0, "match_count": 1},
-            ).execute()
-            info["rpc_function_works"] = True
-            rpc_data: list[dict[str, Any]] = rpc_result.data or []  # type: ignore[assignment]
-            info["rpc_test_returned"] = len(rpc_data)
+            with psycopg2.connect(database_url, connect_timeout=5) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "SELECT 1 FROM pg_proc WHERE proname = 'search_similar_documents' LIMIT 1"
+                    )
+                    info["rpc_function_works"] = cur.fetchone() is not None
+            info["rpc_test_returned"] = 0
         except Exception as e:
             info["rpc_function_works"] = False
             info["rpc_error"] = str(e)

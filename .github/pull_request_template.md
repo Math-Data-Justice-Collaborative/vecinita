@@ -35,10 +35,10 @@ _Details:_
 - [ ] Changes to scraper behavior (URLs, loaders, rate limiting, Playwright usage, etc.)
 - [ ] Changes to config files (`data/config/*.txt`, `data/urls.txt`)
 
-**Vector storage / embeddings / Supabase:**
+**Vector storage / embeddings / Postgres:**
 - [ ] No changes
 - [ ] Changes to chunking or embedding generation
-- [ ] Changes to Supabase schema or RPCs (e.g., `search_similar_documents`)
+- [ ] Changes to Postgres schema or retrieval functions (e.g., `search_similar_documents`)
 - [ ] Potential impact on `unique_content_source` deduplication
 
 **Q&A engine / prompts / language handling:**
@@ -101,6 +101,6 @@ _Describe any breaking changes, required DB migrations, or one-time scripts:_
 Notes:
 - Prefer `uv` for running tests and dev commands (e.g., `uv run pytest`).
 - Use pytest markers (`unit`, `integration`, `db`, `api`, `ui`) to classify tests.
-- When touching the data pipeline (scraper, vector loader, Supabase), be explicit about
+- When touching the data pipeline (scraper, vector loader, Postgres), be explicit about
   potential impacts on existing data and search behavior.
 -->

@@ -16,8 +16,6 @@ google-genai
 sentence-transformers>=3.0.0
 
 # Database & Storage
-# Keeping Supabase stable but allowing minor patches
-supabase>=2.20.0
 psycopg2-binary
 
 # Tools & Scrapers

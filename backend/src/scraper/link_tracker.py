@@ -58,7 +58,7 @@ class LinkTracker:
             self._save_links_to_file()
 
     def _upload_links_to_database(self) -> None:
-        """Upload all tracked links to Supabase database."""
+        """Upload all tracked links to the configured Postgres database."""
         if not self.uploader or not self.links:
             return
 

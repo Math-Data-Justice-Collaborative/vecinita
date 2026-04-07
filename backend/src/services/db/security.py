@@ -102,7 +102,7 @@ class QueryValidator:
         Validate filter value.
 
         SECURITY: Ensures type safety, prevents injection through values.
-        Note: Supabase client handles parameterization automatically.
+        Note: parameterized SQL execution should handle value binding.
 
         Args:
             value: Filter value
@@ -268,13 +268,13 @@ async def get_document_by_id(
     Securely get document by ID with optional session filtering.
 
     SECURITY:
-    - Uses parameterized query (handled by Supabase client)
+    - Uses parameterized query execution
     - Validates column/table names
     - Enforces session isolation
     - Timeouts enforced at connection level
 
     Args:
-        db: Supabase database client
+        db: Database client or query adapter
         document_id: Document ID (parameterized)
         session_id: Session ID for isolation (parameterized)
 
@@ -320,7 +320,7 @@ async def delete_documents_by_filter(
     - Logs audit trail
 
     Args:
-        db: Supabase client
+        db: Database client or query adapter
         table_name: Table to delete from
         filter_field: Field to filter on (parameterized)
         filter_value: Value to match (parameterized)

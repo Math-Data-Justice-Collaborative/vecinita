@@ -48,11 +48,13 @@ ENDPOINT_RATE_LIMITS: dict[str, dict[str, int]] = {
 PUBLIC_ENDPOINTS = {
     "/",
     "/health",
+    "/integrations/status",
     "/docs",
     "/openapi.json",
     "/redoc",
     "/api/v1/ask/config",
     "/api/v1/docs",
+    "/api/v1/integrations/status",
     "/api/v1/openapi.json",
     "/api/v1/redoc",
 }
@@ -89,7 +91,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
         if any(path.startswith(prefix) for prefix in PUBLIC_PREFIXES):
             return await call_next(request)
 
-        # Admin routes enforce auth at router-level via Supabase JWT admin checks.
+        # Admin routes enforce auth at router level via admin credential checks.
         if any(path.startswith(prefix) for prefix in AUTH_BYPASS_PREFIXES):
             return await call_next(request)
 

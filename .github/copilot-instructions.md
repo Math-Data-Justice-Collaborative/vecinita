@@ -1,6 +1,6 @@
 # Vecinita Copilot Instructions
 
-Vecinita is a **RAG (Retrieval-Augmented Generation) Q&A Assistant** using LangChain, LangGraph, and Supabase. It scrapes web content, stores embeddings in a vector database, and answers user questions with source attribution.
+Vecinita is a **RAG (Retrieval-Augmented Generation) Q&A Assistant** using LangChain, LangGraph, and PostgreSQL with pgvector. It scrapes web content, stores embeddings in a vector database, and answers user questions with source attribution.
 
 ## Multi-Repo Deployment Topology (Canonical)
 
@@ -41,7 +41,7 @@ Use this mapping as source-of-truth when implementing infra changes:
 
 ### Key Components
 - **FastAPI Server** (src/main.py): Two main endpoints—`GET /` (UI), `GET /ask` (Q&A logic)
-- **Supabase PostgreSQL**: Stores document chunks with embeddings; RPC function `search_similar_documents` performs vector similarity search
+- **Render Postgres / pgvector**: Stores document chunks with embeddings and powers vector similarity search
 - **LLM**: Groq's Llama 3.1 8B (configured via `GROQ_API_KEY`)
 - **Embeddings**: HuggingFace `sentence-transformers/all-MiniLM-L6-v2` (local, fast)
 - **Web UI**: [../frontend/index.html](../frontend/index.html)—chat frontend entrypoint
@@ -52,7 +52,7 @@ Use this mapping as source-of-truth when implementing infra changes:
 [../backend/scripts/data_scrape_load.sh](../backend/scripts/data_scrape_load.sh) automates the full pipeline:
 - Accepts `--clean` flag to truncate database (additive mode is default)
 - Runs scraper in two passes: standard loaders first, then Playwright for failures
-- Loads chunks into Supabase with deduplication via `unique_content_source` constraint
+- Loads chunks into PostgreSQL with deduplication via `unique_content_source` constraint
 - Restarts Docker container on completion
 
 ### Configuration Files (data/config/)
@@ -107,7 +107,7 @@ uv run pytest -m unit
 uv run playwright install
 ```
 
-Fixtures in [../tests/conftest.py](../tests/conftest.py) provide mocked Supabase, embedding models, and LLM clients. See [../tests/README.md](../tests/README.md) for full test strategy.
+Fixtures in [../tests/conftest.py](../tests/conftest.py) provide mocked database, embedding models, and LLM clients. See [../tests/README.md](../tests/README.md) for full test strategy.
 
 ## Language-Aware Prompting
 
@@ -146,26 +146,23 @@ FastAPI mounts `src/static/` directory; ensure `index.html` and `favicon.ico` ex
 
 Required in `.env`:
 ```
-SUPABASE_URL=https://<project>.supabase.co
-SUPABASE_KEY=<anon-or-service-key>
+DATABASE_URL=postgresql://<user>:<password>@<host>:5432/<db>
 GROQ_API_KEY=<your-groq-api-key>
 ```
-
-Optional: `DATABASE_URL` (for direct PostgreSQL operations)
 
 ## Error Handling & Debugging
 
 - **Missing UI**: Check static path in error message; ensure `src/static/index.html` exists
 - **Embedding failures**: Verify HuggingFace model download; model auto-caches on first use
-- **Vector search failures**: Check Supabase RPC function exists and embedding dimensions match (384 for all-MiniLM-L6-v2)
+- **Vector search failures**: Check PostgreSQL search functions exist and embedding dimensions match (384 for all-MiniLM-L6-v2)
 - **Scraper timeouts**: Increase RATE_LIMIT_DELAY or configure Playwright in config
 - **Duplicate detection**: Database constraint `unique_content_source` silently rejects duplicates; check logs for details
 
 ## Testing Guidance
 
 - **Unit tests** (fast): Test utility functions without external services
-- **Integration tests**: Mock Supabase; test vector search logic
-- **DB tests** (skipped in CI): Require real Supabase credentials
+- **Integration tests**: Mock PostgreSQL-backed retrieval; test vector search logic
+- **DB tests** (skipped in CI): Require real database credentials
 - **UI tests** (Playwright): Require running FastAPI server; mark with `@pytest.mark.ui`
 
-Use `env_vars` fixture to inject test credentials; mock `supabase_client`, `embedding_model`, `llm` for isolated testing.
+Use `env_vars` fixture to inject test credentials; mock the database client, `embedding_model`, and `llm` for isolated testing.

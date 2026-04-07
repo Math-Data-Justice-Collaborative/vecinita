@@ -1,5 +1,5 @@
 -- Vecinita Vector Database Installation
--- Run these commands in order in your Supabase SQL Editor
+-- Run these commands in order against your PostgreSQL database
 
 -- ============================================
 -- STEP 1: Enable Required Extensions

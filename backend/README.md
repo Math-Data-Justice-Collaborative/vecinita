@@ -12,8 +12,7 @@ uv sync
 Recommended local `.env` minimum for stable startup and tests:
 
 ```env
-SUPABASE_URL=https://test.supabase.co
-SUPABASE_KEY=test-key
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
 OLLAMA_BASE_URL=http://localhost:11434
 OPENAI_API_KEY=test-openai-key
 DEEPSEEK_API_KEY=test-deepseek-key
@@ -27,8 +26,8 @@ The backend now runs a startup preflight before serving requests to reduce first
 
 Checks include:
 - Guardrails preload (Hub validator if installed, or local fallback)
-- Chroma connectivity heartbeat
-- Active data backend connectivity probe (`supabase` or `postgres` mode)
+- PostgreSQL connectivity heartbeat
+- Active data backend connectivity probe (`postgres`)
 
 Configuration:
 

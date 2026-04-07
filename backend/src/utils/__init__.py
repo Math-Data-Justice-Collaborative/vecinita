@@ -14,14 +14,8 @@ __all__ = [
     "get_faq_stats",
     # HTML processing
     "HTMLCleaner",
-    # Embeddings
-    "SupabaseEmbeddings",
 ]
 
 
 def __getattr__(name: str) -> object:
-    if name == "SupabaseEmbeddings":
-        from .supabase_embeddings import SupabaseEmbeddings
-
-        return SupabaseEmbeddings
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

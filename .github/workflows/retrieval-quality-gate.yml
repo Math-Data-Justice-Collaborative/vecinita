@@ -44,8 +44,6 @@ jobs:
       - name: Create .env file for retrieval tests
         working-directory: backend
         run: |
-          echo "SUPABASE_URL=https://test.supabase.co" >> .env
-          echo "SUPABASE_KEY=test-key" >> .env
           echo "DATABASE_URL=postgresql://test" >> .env
           echo "OLLAMA_BASE_URL=http://localhost:11434" >> .env
           echo "OLLAMA_MODEL=llama3.1:8b" >> .env

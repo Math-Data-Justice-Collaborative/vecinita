@@ -78,7 +78,7 @@ Use this test to lock behavior:
 - [backend/tests/test_api/test_gateway_router_documents.py](backend/tests/test_api/test_gateway_router_documents.py)
   - `test_documents_endpoints_consistent_503_for_render_internal_dns_error`
 - [backend/tests/integration/test_startup_database_url_failure.py](backend/tests/integration/test_startup_database_url_failure.py)
-   - `TestPreflightModeSelectionConsistency` suite (guards postgres/supabase mode drift)
+   - `TestPreflightModeSelectionConsistency` suite (guards postgres backend selection)
 
 What it protects:
 

@@ -64,8 +64,22 @@ def test_documents_overview_aggregates_sources(documents_client):
 
     stats = {"total_chunks": 2, "avg_chunk_size": 150}
     sources = [
-        {"url": "https://a.example.org", "domain": "a.example.org", "total_chunks": 1},
-        {"url": "https://b.example.org", "domain": "b.example.org", "total_chunks": 1},
+        {
+            "url": "https://a.example.org",
+            "domain": "a.example.org",
+            "total_chunks": 1,
+            "language": "English",
+            "available_languages": ["English"],
+            "is_bilingual": False,
+        },
+        {
+            "url": "https://b.example.org",
+            "domain": "b.example.org",
+            "total_chunks": 1,
+            "language": "Spanish",
+            "available_languages": ["English", "Spanish"],
+            "is_bilingual": True,
+        },
     ]
     router_documents._load_overview_via_sql = lambda: (stats, sources)
 
@@ -75,6 +89,29 @@ def test_documents_overview_aggregates_sources(documents_client):
     assert payload["total_chunks"] == 2
     assert payload["unique_sources"] == 2
     assert payload["avg_chunk_size"] == 150
+    assert payload["sources"][0]["language"] in {"English", "Spanish"}
+    assert "available_languages" in payload["sources"][0]
+
+
+def test_normalize_public_source_exposes_language_metadata():
+    from src.api import router_documents
+
+    normalized = router_documents._normalize_public_source(
+        {
+            "url": "https://example.org",
+            "metadata": {
+                "language": "Spanish",
+                "primary_language_code": "es",
+                "available_languages": ["English", "Spanish"],
+                "is_bilingual": True,
+            },
+        }
+    )
+
+    assert normalized["language"] == "Spanish"
+    assert normalized["primary_language_code"] == "es"
+    assert normalized["available_languages"] == ["English", "Spanish"]
+    assert normalized["is_bilingual"] is True
 
 
 def test_documents_overview_filters_by_tags(documents_client):
@@ -197,7 +234,7 @@ def test_documents_download_url_resolves_upload_source_without_explicit_download
         "title": "file.txt",
         "metadata": {
             "source_url": "upload://uploads/2026/02/26/file.txt",
-            "download_url": "https://example.supabase.co/storage/v1/object/public/documents/uploads/2026/02/26/file.txt",
+            "download_url": "https://downloads.example.org/documents/uploads/2026/02/26/file.txt",
         },
     }
     router_documents.psycopg2.connect = lambda _url, **_kwargs: _FakeConnection([[source_row]])
@@ -273,8 +310,11 @@ def test_documents_tags_returns_counts(documents_client):
     payload = response.json()
     assert payload["total"] >= 1
     assert payload["tags"][0]["tag"] == "housing"
+    assert payload["tags"][0]["label"] == "housing"
+    assert payload["tags"][0]["resource_count"] == 2
     assert payload["tags"][0]["chunk_count"] == 3
     assert payload["tags"][0]["source_count"] == 2
+    assert payload["tag_counts"]["housing"] == 2
 
 
 def test_documents_tags_returns_503_when_database_unavailable(documents_client):
@@ -338,10 +378,34 @@ def test_documents_tags_ignores_malformed_metadata_and_normalizes_tags(documents
     payload = response.json()
     by_tag = {item["tag"]: item for item in payload["tags"]}
 
+    assert by_tag["housing"]["resource_count"] == 2
     assert by_tag["housing"]["chunk_count"] == 2
     assert by_tag["housing"]["source_count"] == 2
+    assert by_tag["benefits"]["resource_count"] == 1
     assert by_tag["benefits"]["chunk_count"] == 1
     assert by_tag["benefits"]["source_count"] == 1
+
+
+def test_documents_tags_returns_spanish_labels(documents_client):
+    client = documents_client
+
+    from src.api import router_documents
+
+    rows = [
+        {
+            "source_url": "https://a.example.org",
+            "metadata": {"source_url": "https://a.example.org", "tags": ["housing", "legal aid"]},
+        }
+    ]
+    router_documents.psycopg2.connect = lambda _url, **_kwargs: _FakeConnection([rows])
+
+    response = client.get("/api/v1/documents/tags", params={"limit": 10, "locale": "es"})
+    assert response.status_code == 200
+    payload = response.json()
+    by_tag = {item["tag"]: item for item in payload["tags"]}
+
+    assert by_tag["housing"]["label"] == "vivienda"
+    assert by_tag["legal aid"]["label"] == "ayuda legal"
 
 
 def test_documents_overview_returns_503_for_dns_resolution_error(documents_client):

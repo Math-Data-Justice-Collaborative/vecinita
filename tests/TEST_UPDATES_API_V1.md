@@ -161,7 +161,7 @@ test_api_v1_features.py:
   ✅ test_method_not_allowed
 
 test_agent.py:
-  ⏭️  6 tests skipped (require SUPABASE_URL, GROQ_API_KEY env vars)
+   ⏭️  6 tests skipped (require DATABASE_URL, GROQ_API_KEY env vars)
 ```
 
 **Total: 22 passed, 6 skipped**
@@ -173,7 +173,7 @@ test_agent.py:
 The tests in `/backend/tests/` were **not modified** because they test the **agent service** directly on port 8000, not the API Gateway. These tests:
 - Use FastAPI TestClient with `src.services.agent.server`
 - Test internal agent endpoints: `/ask`, `/ask-stream`
-- Mock Supabase, LLM, and embedding dependencies
+- Mock database, LLM, and embedding dependencies
 - Are independent of the Gateway API changes
 
 **Files that remain unchanged:**

@@ -47,7 +47,7 @@ class DBConfig:
 
         # Fall back to individual parameters
         return {
-            "host": os.getenv("DB_HOST", "db.dosbzlhijkeircyainwz.supabase.co"),
+            "host": os.getenv("DB_HOST", "localhost"),
             "port": int(os.getenv("DB_PORT", "5432")),
             "database": os.getenv("DB_NAME", "postgres"),
             "user": os.getenv("DB_USER", "postgres"),

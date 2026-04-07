@@ -12,7 +12,6 @@ from src.embedding_service import client as _embedding_client
 # Compatibility patch points used by legacy unit tests.
 ChatGroq = getattr(_canonical, "ChatOllama", None)
 ChatOpenAI = getattr(_canonical, "ChatOllama", None)
-create_client = getattr(_canonical, "create_client", None)
 create_embedding_client = _embedding_client.create_embedding_client
 HuggingFaceEmbeddings = getattr(_canonical, "HuggingFaceEmbeddings", None)
 AGENT_THINKING_MESSAGES = getattr(_canonical, "AGENT_THINKING_MESSAGES", None)

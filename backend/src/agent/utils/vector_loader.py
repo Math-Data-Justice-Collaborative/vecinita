@@ -2,7 +2,7 @@
 # vector_loader.py
 """
 Vecinita Data Loader
-Loads scraped content chunks into Supabase vector database with embeddings
+Loads scraped content chunks into Postgres vector storage with embeddings
 Supports source attribution and batch processing for large files
 """
 
@@ -19,7 +19,6 @@ from datetime import datetime, timezone
 from typing import Any, cast
 
 from dotenv import load_dotenv
-from supabase import Client, create_client
 from tqdm import tqdm  # type: ignore[import-untyped]
 
 try:
@@ -77,32 +76,19 @@ class DocumentChunk:
 
 
 class VecinitaLoader:
-    """Main class for loading data into Vecinita vector database"""
+    """Main class for loading data into Vecinita Postgres vector storage."""
 
     def __init__(self):
-        """Initialize the loader with database connection and embedding model"""
-        self.db_data_mode = os.environ.get("DB_DATA_MODE", "auto").strip().lower()
+        """Initialize the loader with Postgres connection and embedding model."""
+        self.db_data_mode = "postgres"
         self.database_url = (os.environ.get("DATABASE_URL") or "").strip()
+        if not self.database_url:
+            raise ValueError("DATABASE_URL must be set for Postgres vector loading")
+        if not POSTGRES_AVAILABLE:
+            raise ValueError("DATABASE_URL requires psycopg2 to be installed")
 
-        use_postgres = self.db_data_mode == "postgres" and bool(self.database_url)
-        self.use_postgres = use_postgres and POSTGRES_AVAILABLE
-        if use_postgres and not POSTGRES_AVAILABLE:
-            raise ValueError("DB_DATA_MODE=postgres requires psycopg2 to be installed")
-
-        # Initialize Supabase client for legacy mode
-        self.supabase_url = os.environ.get("SUPABASE_URL")
-        self.supabase_key = os.environ.get("SUPABASE_KEY")
-        self.supabase: Client | None = None
-
-        if self.use_postgres:
-            logger.info("Using direct Postgres mode for vector writes")
-        else:
-            if not self.supabase_url or not self.supabase_key:
-                raise ValueError(
-                    "SUPABASE_URL and SUPABASE_KEY must be set unless DB_DATA_MODE=postgres"
-                )
-            self.supabase = create_client(self.supabase_url, self.supabase_key)
-            logger.info(f"Connected to Supabase at {self.supabase_url[:25]}...")
+        self.use_postgres = True
+        logger.info("Using direct Postgres mode for vector writes")
 
         # Initialize embedding model
         if USE_LOCAL_EMBEDDINGS:
@@ -272,14 +258,7 @@ class VecinitaLoader:
         if batch_data:
             for attempt in range(MAX_RETRIES):
                 try:
-                    if self.use_postgres:
-                        self._upsert_postgres_chunks(batch_data)
-                    else:
-                        if self.supabase is None:
-                            raise RuntimeError("Supabase client is not initialized")
-                        self.supabase.table("document_chunks").upsert(
-                            batch_data  # type: ignore[arg-type]
-                        ).execute()
+                    self._upsert_postgres_chunks(batch_data)
 
                     successful = len(batch_data)
                     logger.info(f"Inserted batch of {successful} chunks")
@@ -393,14 +372,7 @@ class VecinitaLoader:
         }
 
         queue_id: str | None = None
-        if self.use_postgres:
-            queue_id = self._insert_processing_queue_postgres(queue_entry)
-        else:
-            if self.supabase is None:
-                raise RuntimeError("Supabase client is not initialized")
-            queue_response = self.supabase.table("processing_queue").insert(queue_entry).execute()  # type: ignore[arg-type]
-            queue_data: list[dict[str, Any]] = queue_response.data or []  # type: ignore[assignment]
-            queue_id = queue_data[0].get("id") if queue_data else None
+        queue_id = self._insert_processing_queue_postgres(queue_entry)
 
         # Process chunks in batches
         batch = []
@@ -480,12 +452,7 @@ class VecinitaLoader:
     def verify_installation(self) -> bool:
         """Verify that the database schema is properly installed"""
         try:
-            if self.use_postgres:
-                self._verify_postgres_tables()
-            else:
-                if self.supabase is None:
-                    raise RuntimeError("Supabase client is not initialized")
-                self.supabase.table("document_chunks").select("id").limit(1).execute()
+            self._verify_postgres_tables()
             logger.info("✅ Database schema verified")
             return True
         except Exception as e:
@@ -564,24 +531,12 @@ class VecinitaLoader:
                 return str(row[0]) if row else None
 
     def _update_processing_queue_progress(self, queue_id: str, stats: dict[str, int]) -> None:
-        if self.use_postgres:
-            if not self.database_url or psycopg2 is None:
-                return
-            sql = (
-                "UPDATE processing_queue SET chunks_processed = %s, total_chunks = %s WHERE id = %s"
-            )
-            with psycopg2.connect(self.database_url, connect_timeout=5) as conn:
-                with conn.cursor() as cur:
-                    cur.execute(sql, (stats["successful"], stats["total_chunks"], queue_id))
+        if not self.database_url or psycopg2 is None:
             return
-
-        if self.supabase is not None:
-            self.supabase.table("processing_queue").update(
-                {
-                    "chunks_processed": stats["successful"],
-                    "total_chunks": stats["total_chunks"],
-                }
-            ).eq("id", queue_id).execute()
+        sql = "UPDATE processing_queue SET chunks_processed = %s, total_chunks = %s WHERE id = %s"
+        with psycopg2.connect(self.database_url, connect_timeout=5) as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql, (stats["successful"], stats["total_chunks"], queue_id))
 
     def _mark_processing_queue_complete(self, queue_id: str, stats: dict[str, int]) -> None:
         payload = {
@@ -590,26 +545,21 @@ class VecinitaLoader:
             "chunks_processed": stats["successful"],
             "total_chunks": stats["total_chunks"],
         }
-        if self.use_postgres:
-            if not self.database_url or psycopg2 is None:
-                return
-            sql = "UPDATE processing_queue SET status = %s, completed_at = %s, chunks_processed = %s, total_chunks = %s WHERE id = %s"
-            with psycopg2.connect(self.database_url, connect_timeout=5) as conn:
-                with conn.cursor() as cur:
-                    cur.execute(
-                        sql,
-                        (
-                            payload["status"],
-                            payload["completed_at"],
-                            payload["chunks_processed"],
-                            payload["total_chunks"],
-                            queue_id,
-                        ),
-                    )
+        if not self.database_url or psycopg2 is None:
             return
-
-        if self.supabase is not None:
-            self.supabase.table("processing_queue").update(payload).eq("id", queue_id).execute()
+        sql = "UPDATE processing_queue SET status = %s, completed_at = %s, chunks_processed = %s, total_chunks = %s WHERE id = %s"
+        with psycopg2.connect(self.database_url, connect_timeout=5) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    sql,
+                    (
+                        payload["status"],
+                        payload["completed_at"],
+                        payload["chunks_processed"],
+                        payload["total_chunks"],
+                        queue_id,
+                    ),
+                )
 
     def _mark_processing_queue_failed(self, queue_id: str, error_message: str) -> None:
         payload = {
@@ -617,25 +567,20 @@ class VecinitaLoader:
             "error_message": error_message,
             "completed_at": datetime.now(timezone.utc).isoformat(),
         }
-        if self.use_postgres:
-            if not self.database_url or psycopg2 is None:
-                return
-            sql = "UPDATE processing_queue SET status = %s, error_message = %s, completed_at = %s WHERE id = %s"
-            with psycopg2.connect(self.database_url, connect_timeout=5) as conn:
-                with conn.cursor() as cur:
-                    cur.execute(
-                        sql,
-                        (
-                            payload["status"],
-                            payload["error_message"],
-                            payload["completed_at"],
-                            queue_id,
-                        ),
-                    )
+        if not self.database_url or psycopg2 is None:
             return
-
-        if self.supabase is not None:
-            self.supabase.table("processing_queue").update(payload).eq("id", queue_id).execute()
+        sql = "UPDATE processing_queue SET status = %s, error_message = %s, completed_at = %s WHERE id = %s"
+        with psycopg2.connect(self.database_url, connect_timeout=5) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    sql,
+                    (
+                        payload["status"],
+                        payload["error_message"],
+                        payload["completed_at"],
+                        queue_id,
+                    ),
+                )
 
     def _verify_postgres_tables(self) -> None:
         if not self.database_url or psycopg2 is None:

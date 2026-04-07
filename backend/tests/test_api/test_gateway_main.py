@@ -113,15 +113,132 @@ class TestGatewayRootEndpoints:
         assert "status" in data
         assert "agent_service" in data
 
+    def test_integrations_status_endpoint(self, gateway_client, monkeypatch):
+        """Test GET /api/v1/integrations/status returns component details."""
+        import src.api.main as gateway_main
+
+        async def _probe_http_dependency(_name, base_url, **_kwargs):
+            return gateway_main.IntegrationComponentStatus(
+                status="ok",
+                configured=bool(base_url),
+                critical=True,
+                endpoint=base_url,
+                health_url=f"{base_url.rstrip('/')}/health" if base_url else None,
+                response_time_ms=12,
+                detail="health endpoint returned 200",
+            )
+
+        async def _probe_database_dependency(*_args, **_kwargs):
+            return gateway_main.IntegrationComponentStatus(
+                status="ok",
+                configured=True,
+                critical=True,
+                endpoint="localhost:5432",
+                health_url=None,
+                response_time_ms=5,
+                detail="database socket probe succeeded",
+            )
+
+        monkeypatch.setattr(gateway_main, "_probe_http_dependency", _probe_http_dependency)
+        monkeypatch.setattr(gateway_main, "_probe_database_dependency", _probe_database_dependency)
+
+        response = gateway_client.get("/api/v1/integrations/status")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "ok"
+        assert data["gateway"]["status"] == "ok"
+        assert "components" in data
+        assert "agent" in data["components"]
+        assert "active_integrations" in data
+
+    def test_integrations_status_reports_degraded_when_critical_dependency_fails(
+        self, gateway_client, monkeypatch
+    ):
+        """Critical dependency failures should surface in integrations status."""
+        import src.api.main as gateway_main
+
+        async def _probe_http_dependency(name, base_url, **_kwargs):
+            status = "error" if name == "agent" else "ok"
+            return gateway_main.IntegrationComponentStatus(
+                status=status,
+                configured=bool(base_url),
+                critical=name in {"agent", "embedding service"},
+                endpoint=base_url,
+                health_url=f"{base_url.rstrip('/')}/health" if base_url else None,
+                response_time_ms=20,
+                detail=f"{name} status {status}",
+            )
+
+        async def _probe_database_dependency(*_args, **_kwargs):
+            return gateway_main.IntegrationComponentStatus(
+                status="ok",
+                configured=True,
+                critical=True,
+                endpoint="localhost:5432",
+                health_url=None,
+                response_time_ms=5,
+                detail="database socket probe succeeded",
+            )
+
+        monkeypatch.setattr(gateway_main, "_probe_http_dependency", _probe_http_dependency)
+        monkeypatch.setattr(gateway_main, "_probe_database_dependency", _probe_database_dependency)
+
+        response = gateway_client.get("/integrations/status")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "degraded"
+        assert "agent" in data["degraded_integrations"]
+
     def test_health_check_reports_ok_when_probes_succeed(self, gateway_client, monkeypatch):
         """Gateway reports OK when all downstream probes succeed."""
         import src.api.main as gateway_main
 
-        async def _ok_probe(*_args, **_kwargs):
-            return "ok"
+        async def _ok_status():
+            return gateway_main.IntegrationsStatus(
+                status="ok",
+                gateway=gateway_main.IntegrationComponentStatus(
+                    status="ok",
+                    configured=True,
+                    critical=True,
+                    endpoint="vecinita-gateway",
+                    health_url=None,
+                    response_time_ms=0,
+                    detail="gateway process is running",
+                ),
+                components={
+                    "agent": gateway_main.IntegrationComponentStatus(
+                        status="ok",
+                        configured=True,
+                        critical=True,
+                        endpoint="http://localhost:8000",
+                        health_url="http://localhost:8000/health",
+                        response_time_ms=10,
+                        detail="health endpoint returned 200",
+                    ),
+                    "embedding_service": gateway_main.IntegrationComponentStatus(
+                        status="ok",
+                        configured=True,
+                        critical=True,
+                        endpoint="http://localhost:8001",
+                        health_url="http://localhost:8001/health",
+                        response_time_ms=10,
+                        detail="health endpoint returned 200",
+                    ),
+                    "database": gateway_main.IntegrationComponentStatus(
+                        status="ok",
+                        configured=True,
+                        critical=True,
+                        endpoint="localhost:5432",
+                        health_url=None,
+                        response_time_ms=3,
+                        detail="database socket probe succeeded",
+                    ),
+                },
+                active_integrations=["agent", "embedding_service", "database"],
+                degraded_integrations=[],
+            )
 
-        monkeypatch.setattr(gateway_main, "_probe_http_health", _ok_probe)
-        monkeypatch.setattr(gateway_main, "_probe_database_socket", _ok_probe)
+        monkeypatch.setattr(gateway_main, "_build_integrations_status", _ok_status)
 
         response = gateway_client.get("/health")
         assert response.status_code == 200
@@ -135,16 +252,52 @@ class TestGatewayRootEndpoints:
         """Gateway reports degraded when the agent dependency probe fails."""
         import src.api.main as gateway_main
 
-        async def _probe_http(*args, **_kwargs):
-            if args and "localhost:8000" in str(args[0]):
-                return "error"
-            return "ok"
+        async def _degraded_status():
+            return gateway_main.IntegrationsStatus(
+                status="degraded",
+                gateway=gateway_main.IntegrationComponentStatus(
+                    status="ok",
+                    configured=True,
+                    critical=True,
+                    endpoint="vecinita-gateway",
+                    health_url=None,
+                    response_time_ms=0,
+                    detail="gateway process is running",
+                ),
+                components={
+                    "agent": gateway_main.IntegrationComponentStatus(
+                        status="error",
+                        configured=True,
+                        critical=True,
+                        endpoint="http://localhost:8000",
+                        health_url="http://localhost:8000/health",
+                        response_time_ms=50,
+                        detail="agent probe failed",
+                    ),
+                    "embedding_service": gateway_main.IntegrationComponentStatus(
+                        status="ok",
+                        configured=True,
+                        critical=True,
+                        endpoint="http://localhost:8001",
+                        health_url="http://localhost:8001/health",
+                        response_time_ms=10,
+                        detail="health endpoint returned 200",
+                    ),
+                    "database": gateway_main.IntegrationComponentStatus(
+                        status="ok",
+                        configured=True,
+                        critical=True,
+                        endpoint="localhost:5432",
+                        health_url=None,
+                        response_time_ms=3,
+                        detail="database socket probe succeeded",
+                    ),
+                },
+                active_integrations=["embedding_service", "database"],
+                degraded_integrations=["agent"],
+            )
 
-        async def _probe_db(*_args, **_kwargs):
-            return "ok"
-
-        monkeypatch.setattr(gateway_main, "_probe_http_health", _probe_http)
-        monkeypatch.setattr(gateway_main, "_probe_database_socket", _probe_db)
+        monkeypatch.setattr(gateway_main, "_build_integrations_status", _degraded_status)
 
         response = gateway_client.get("/health")
         assert response.status_code == 200

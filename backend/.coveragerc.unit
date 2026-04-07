@@ -2,7 +2,6 @@
 include =
     src/embedding_service/modal_app.py
     src/services/embedding/models.py
-    src/utils/supabase_embeddings.py
     src/utils/tags.py
 
 [report]
