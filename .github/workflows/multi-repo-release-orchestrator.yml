@@ -97,10 +97,10 @@ jobs:
     with:
       service_name: data-management-api
       target_repo: Math-Data-Justice-Collaborative/vecinita-data-management
-      workflow_file: ci-cd.yml
+      workflow_file: deploy.yml
       target_ref: ${{ inputs.target_ref }}
       wait_for_completion: ${{ inputs.wait_for_completion }}
-      expected_platform: Render Private Service
+      expected_platform: Render Web Service (CORS-restricted)
       expected_region: virginia
     secrets:
       dispatch_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
