@@ -1,0 +1,260 @@
+# docker-compose.render-parity.yml
+#
+# Local Render-equivalent development environment.
+# ==================================================
+#
+# This is the CANONICAL local development topology that mirrors Render exactly:
+# - Service names match Render service names (no suffixes or aliases)
+# - Port mappings simulate Render internal networking (service:port)
+# - Environment variables use internal URLs for service-to-service communication
+# - All services are healthy before dependent services start
+#
+# Why use this instead of docker-compose.yml?
+# - docker-compose.yml is a full local stack with pgAdmin, multiple compose files
+# - This file is a minimal, Render-faithful setup for debugging "works locally, fails on Render"
+#
+# Usage:
+#   docker-compose -f docker-compose.render-parity.yml up -d --build
+#   curl http://localhost:8080/health
+#   docker-compose -f docker-compose.render-parity.yml down
+#
+# Notes:
+# - Frontend runs on 3000 (Vite dev server); access at http://localhost:3000
+# - Gateway (API) runs on 8080; access at http://localhost:8080
+# - Agent (Q&A engine) runs on 10000; internal-only from gateway
+# - PostgreSQL runs on 5432 with pgvector extension
+
+version: "3.9"
+
+services:
+  # ============================================================================
+  # DATABASE — Render PostgreSQL equivalent
+  # ============================================================================
+  vecinita-postgres:
+    image: postgres:16-alpine
+    container_name: vecinita-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_INITDB_ARGS: "--locale=en_US.UTF-8 --encoding=UTF8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_render_parity:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - vecinita-render-parity
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ============================================================================
+  # AGENT — Vecinita Q&A Engine (Private service equivalent)
+  # ============================================================================
+  vecinita-agent:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vecinita-agent
+    ports:
+      - "10000:10000"
+    environment:
+      # Core configuration
+      PORT: "10000"
+      PYTHONUNBUFFERED: "1"
+      
+      # Database (internal Render URL pattern)
+      DATABASE_URL: "postgresql://postgres:postgres@vecinita-postgres:5432/postgres"
+      DB_HOST: "vecinita-postgres"
+      DB_PORT: "5432"
+      DB_NAME: "postgres"
+      DB_USER: "postgres"
+      DB_PASSWORD: "postgres"
+      PGHOST: "vecinita-postgres"
+      PGPORT: "5432"
+      
+      # LLM provider configuration
+      DEFAULT_PROVIDER: "${DEFAULT_PROVIDER:-groq}"
+      GROQ_API_KEY: "${GROQ_API_KEY:-}"
+      OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-}"
+      OLLAMA_MODEL: "${OLLAMA_MODEL:-llama3.1:8b}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      OPENAI_MODEL_NAME: "${OPENAI_MODEL_NAME:-gpt-4o-mini}"
+      
+      # Embedding service (local or Modal)
+      EMBEDDING_SERVICE_URL: "${EMBEDDING_SERVICE_URL:-http://vecinita-embedding:8080}"
+      EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:-}"
+      VECINITA_EMBEDDING_API_URL: "${VECINITA_EMBEDDING_API_URL:-}"
+      
+      # Optional scraper/reindex service
+      REINDEX_SERVICE_URL: "${REINDEX_SERVICE_URL:-}"
+      REINDEX_TRIGGER_TOKEN: "${REINDEX_TRIGGER_TOKEN:-}"
+      
+      # Startup configuration
+      BACKEND_PREFLIGHT_ENABLED: "true"
+      BACKEND_PREFLIGHT_STRICT: "false"
+      GUARDRAILS_REQUIRE_HUB_VALIDATOR: "false"
+      GUARDRAILS_HUB_AUTO_INSTALL: "false"
+      
+      # Logging
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
+    depends_on:
+      vecinita-postgres:
+        condition: service_healthy
+    networks:
+      - vecinita-render-parity
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:10000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # ============================================================================
+  # GATEWAY — Vecinita API Router/Auth (Public service equivalent)
+  # ============================================================================
+  vecinita-gateway:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vecinita-gateway
+    command: ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port 8080"]
+    ports:
+      - "8080:8080"
+    environment:
+      # Core configuration
+      PORT: "8080"
+      PYTHONUNBUFFERED: "1"
+      
+      # Database (same as agent, shared in Render)
+      DATABASE_URL: "postgresql://postgres:postgres@vecinita-postgres:5432/postgres"
+      DB_HOST: "vecinita-postgres"
+      DB_PORT: "5432"
+      DB_NAME: "postgres"
+      DB_USER: "postgres"
+      DB_PASSWORD: "postgres"
+      PGHOST: "vecinita-postgres"
+      PGPORT: "5432"
+      
+      # Agent service routing (internal Render URL)
+      AGENT_SERVICE_URL: "http://vecinita-agent:10000"
+      
+      # LLM provider configuration (for fallback/discovery)
+      DEFAULT_PROVIDER: "${DEFAULT_PROVIDER:-groq}"
+      GROQ_API_KEY: "${GROQ_API_KEY:-}"
+      OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-}"
+      OLLAMA_MODEL: "${OLLAMA_MODEL:-llama3.1:8b}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      
+      # Embedding service for discovery
+      EMBEDDING_SERVICE_URL: "${EMBEDDING_SERVICE_URL:-http://vecinita-embedding:8080}"
+      EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:-}"
+      VECINITA_EMBEDDING_API_URL: "${VECINITA_EMBEDDING_API_URL:-}"
+      
+      # Reindex/scraper for admin endpoints
+      REINDEX_SERVICE_URL: "${REINDEX_SERVICE_URL:-}"
+      REINDEX_TRIGGER_TOKEN: "${REINDEX_TRIGGER_TOKEN:-}"
+      
+      # CORS configuration
+      ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}"
+      
+      # Dev admin (local only)
+      DEV_ADMIN_ENABLED: "true"
+      DEV_ADMIN_BEARER_TOKEN: "vecinita-dev-admin-token-2026"
+      
+      # Startup
+      BACKEND_PREFLIGHT_ENABLED: "true"
+      BACKEND_PREFLIGHT_STRICT: "false"
+      GUARDRAILS_REQUIRE_HUB_VALIDATOR: "false"
+      GUARDRAILS_HUB_AUTO_INSTALL: "false"
+      
+      # Logging
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
+    depends_on:
+      vecinita-postgres:
+        condition: service_healthy
+      vecinita-agent:
+        condition: service_healthy
+    networks:
+      - vecinita-render-parity
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # ============================================================================
+  # FRONTEND — React/Vite Chat UI (Public service equivalent)
+  # ============================================================================
+  vecinita-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_GATEWAY_URL: "http://localhost:8080/api/v1"
+        VITE_BACKEND_URL: "http://localhost:10000"
+    container_name: vecinita-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      # Build-time variables (for Vite)
+      VITE_GATEWAY_URL: "http://localhost:8080/api/v1"
+      VITE_BACKEND_URL: "http://localhost:10000"
+      
+      # Frontend dev server
+      HOST: "0.0.0.0"
+      PORT: "3000"
+    depends_on:
+      vecinita-gateway:
+        condition: service_healthy
+    networks:
+      - vecinita-render-parity
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # ============================================================================
+  # OPTIONAL: EMBEDDING SERVICE — Local embedding microservice
+  # ============================================================================
+  # Uncomment this section if you want to test local embedding service instead
+  # of using Modal. By default, EMBEDDING_SERVICE_URL points to this.
+  #
+  # vecinita-embedding:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile.embedding
+  #   container_name: vecinita-embedding
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     PORT: "8080"
+  #     PYTHONUNBUFFERED: "1"
+  #     HF_HOME: "/tmp/huggingface_cache"
+  #     EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:?Set EMBEDDING_SERVICE_AUTH_TOKEN}"
+  #   networks:
+  #     - vecinita-render-parity
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+  #     interval: 15s
+  #     timeout: 5s
+  #     retries: 3
+  #     start_period: 30s
+  #   restart: unless-stopped
+
+networks:
+  vecinita-render-parity:
+    driver: bridge
+
+volumes:
+  postgres_data_render_parity:

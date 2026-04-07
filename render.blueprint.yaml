@@ -1,0 +1,392 @@
+# render.blueprint.yaml
+#
+# Render Blueprint (Infrastructure as Code) for Vecinita multi-service deployment.
+#
+# This file serves as the single source of truth for:
+# 1. Infrastructure (database, services, networks)
+# 2. Environment groups (shared config across services)
+# 3. Service dependencies and deployment order
+#
+# **CRITICAL:** While this file defines the structure, SENSITIVE VALUES
+# (API keys, secrets, etc.) are managed in the Render dashboard via env groups.
+# Do NOT commit real secrets into this file.
+#
+# Usage:
+#   1. Review and validate: rendercli blueprint validate render.blueprint.yaml
+#   2. Deploy: rendercli blueprint deploy render.blueprint.yaml
+#
+# For multi-repo services (data-management, scraper, embedding, model),
+# see their respective repositories' render.yaml files.
+
+databases:
+  - name: vecinita-postgres
+    region: virginia
+    plan: basic-256mb  # or standard-2gb for higher load
+    databaseName: vecinita
+    user: vecinita
+    postgresMajorVersion: "16"
+    diskSizeGB: 1
+    ipAllowList: []
+
+envVarGroups:
+  # ========================================================================
+  # TIER 1: Shared Infrastructure Config
+  # ========================================================================
+  # These variables are used by multiple services.
+  # Sensitive values (API keys) are managed dashboard-side with sync: false.
+  - name: app-shared
+    envVars:
+      # --- Database (injected via fromDatabase bindings below) ---
+      # DATABASE_URL, DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
+      # PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD
+      
+      # --- LLM Provider Configuration ---
+      # Agent and Gateway both discover available providers from these keys
+      - key: DEFAULT_PROVIDER
+        sync: false  # dashboard-managed; values: groq, openai, ollama, modal, etc.
+      - key: DEFAULT_MODEL
+        sync: false  # e.g., "gpt-4o-mini", "llama3.1:8b"
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: DEEPSEEK_BASE_URL
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false  # for web search fallback
+      - key: OLLAMA_MODEL
+        sync: false
+      - key: LANGSMITH_API_KEY
+        sync: false  # for LangChain observability
+      - key: LANGSMITH_PROJECT
+        sync: false
+      
+      # --- Modal Service Endpoints (external API URLs) ---
+      # These point to Modal deployments for scraper, embedding, model
+      - key: VECINITA_MODEL_API_URL
+        sync: false  # e.g., https://api.modal.run/v1/your-org/vecinita-model
+      - key: VECINITA_EMBEDDING_API_URL
+        sync: false
+      - key: VECINITA_SCRAPER_API_URL
+        sync: false
+      - key: MODAL_TOKEN_ID
+        sync: false
+      - key: MODAL_TOKEN_SECRET
+        sync: false
+      
+      # --- Embedding Service Configuration ---
+      - key: EMBEDDING_SERVICE_AUTH_TOKEN
+        sync: false  # if using local embedding service or Modal auth
+      - key: EMBEDDING_STRICT_STARTUP
+        sync: false  # values: true/false; if true, fail startup if embedding service unavailable
+      
+      # --- Schema & Vectorization ---
+      - key: POSTGRES_AUTO_CREATE_VECTOR_EXTENSION
+        value: "true"  # auto-create pgvector on database init
+      - key: POSTGRES_AUTO_BOOTSTRAP_SCHEMA
+        value: "true"  # auto-bootstrap schema on startup
+      - key: DB_DATA_MODE
+        sync: false
+      - key: VECTOR_SYNC_TARGET
+        sync: false
+      
+      # --- Security & Guardrails ---
+      - key: GUARDRAILS_REQUIRE_HUB_VALIDATOR
+        sync: false
+      - key: GUARDRAILS_HUB_AUTO_INSTALL
+        sync: false
+      - key: GUARDRAILS_PERSISTENCE_DIR
+        sync: false
+      
+      # --- Runtime Configuration ---
+      - key: PYTHONUNBUFFERED
+        value: "1"  # improve production logging flush
+      - key: TF_ENABLE_ONEDNN_OPTS
+        sync: false
+      - key: BACKEND_PREFLIGHT_ENABLED
+        value: "true"  # all services validate startup state
+      - key: BACKEND_PREFLIGHT_STRICT
+        sync: false  # if true, fail startup on any preflight validation issue
+
+  # ========================================================================
+  # TIER 2: Agent-Only Configuration
+  # ========================================================================
+  # These variables are consumed ONLY by the vecinita-agent service.
+  - name: agent-config
+    envVars:
+      # --- Inference Server Selection ---
+      # Agent can use local Ollama-via-Docker, Modal endpoints, or external LLM APIs
+      - key: FORCE_LOCAL_MODAL_LLM
+        sync: false  # if true, prefer local Ollama/Modal; if false, prefer API
+      - key: LOCK_MODEL_SELECTION
+        sync: false  # if true, prevent model switching
+      - key: RENDER_REMOTE_INFERENCE_ONLY
+        sync: false  # Render-specific: restrict to Modal endpoints only
+      - key: RENDER_DISABLE_LOCAL_GUARDRAILS
+        sync: false
+      
+      # --- Reindexing & Administrative Tasks ---
+      - key: REINDEX_SERVICE_URL
+        sync: false  # URL of scraper/reindex service, if available
+      - key: REINDEX_TRIGGER_TOKEN
+        sync: false  # auth token for triggering reindex jobs
+
+  # ========================================================================
+  # TIER 3: Gateway-Only Configuration
+  # ========================================================================
+  # These variables are consumed ONLY by the vecinita-gateway service.
+  - name: gateway-config
+    envVars:
+      # --- CORS Configuration ---
+      # Restrict which frontend origins can call the gateway
+      - key: ALLOWED_ORIGINS
+        sync: false
+        # Example: "https://vecinita-frontend.onrender.com,https://custom-domain.com"
+      - key: ALLOWED_ORIGIN_REGEX
+        sync: false
+        # Example: "https://.*\.onrender\.com"
+      
+      # --- Agent Communication Timeouts ---
+      # Gateway waits this long for agent to respond
+      - key: AGENT_TIMEOUT
+        sync: false  # seconds; fallback 30
+      - key: AGENT_STREAM_TIMEOUT
+        sync: false  # seconds; for SSE streams; fallback 120
+      
+      # --- Admin / Dev Features ---
+      - key: DEV_ADMIN_ENABLED
+        sync: false  # if true, enable /admin/* endpoints
+      - key: DEV_ADMIN_BEARER_TOKEN
+        sync: false  # bearer token for admin endpoints
+      
+      # --- LLM Tag Enhancement (AI-driven tagging) ---
+      - key: ENABLE_LLM_TAG_ENHANCEMENT
+        sync: false
+      - key: LLM_TAG_PROVIDER
+        sync: false  # e.g., deep seek, groq
+      - key: DEEPSEEK_TAG_MODEL
+        sync: false
+      - key: GROQ_TAG_MODEL
+        sync: false
+
+  # ========================================================================
+  # TIER 4: Frontend-Only Configuration
+  # ========================================================================
+  # These variables are available at build time / runtime to the frontend.
+  - name: frontend-config
+    envVars:
+      # --- API Endpoints ---
+      - key: VITE_GATEWAY_URL
+        sync: false  # e.g., "https://api.onrender.com/api/v1" or "http://localhost:8080/api/v1"
+      - key: VITE_BACKEND_URL
+        sync: false  # fallback agent URL (usually same as gateway)
+      
+      # --- Request Timeouts (milliseconds) ---
+      - key: VITE_AGENT_REQUEST_TIMEOUT_MS
+        sync: false  # regular request timeout; fallback 30000
+      - key: VITE_AGENT_STREAM_TIMEOUT_MS
+        sync: false  # SSE stream timeout; fallback 120000
+      - key: VITE_AGENT_STREAM_FIRST_EVENT_TIMEOUT_MS
+        sync: false  # time to first event; fallback 10000
+      
+      # --- Admin UI (frontend) ---
+      - key: VITE_DEV_ADMIN_ENABLED
+        sync: false
+      - key: VITE_DEV_ADMIN_EMAIL
+        sync: false
+      - key: VITE_DEV_ADMIN_PASSWORD
+        sync: false
+      - key: VITE_DEV_ADMIN_TOKEN
+        sync: false
+
+services:
+  # ========================================================================
+  # AGENT SERVICE
+  # ========================================================================
+  # Role: Private service (internal HTTP routing only)
+  # Runs: FastAPI + LangGraph RAG engine
+  # Port: 10000
+  # Exposes:
+  #   - /health       (health check for Render)
+  #   - /ask          (sync question answering)
+  #   - /ask-stream   (streaming answer with agent thougths)
+  #   - /config       (LLM provider discovery for frontend)
+  - type: web
+    name: vecinita-agent
+    runtime: docker
+    region: virginia
+    plan: starter  # adjust for load; starter = 512MB RAM
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    autoDeployTrigger: off  # manual deploys; change to "push" for CI/CD-triggered
+    healthCheckPath: /health
+    preDeployCommand: ""  # migrations run here if needed; currently in startup
+    
+    envVars:
+      # --- Core Infrastructure ---
+      - key: PORT
+        value: "10000"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vecinita-postgres
+          property: connectionString
+      - key: DB_HOST
+        fromDatabase:
+          name: vecinita-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: vecinita-postgres
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: vecinita-postgres
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: vecinita-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: vecinita-postgres
+          property: password
+      - key: PGHOST
+        fromDatabase:
+          name: vecinita-postgres
+          property: host
+      - key: PGPORT
+        fromDatabase:
+          name: vecinita-postgres
+          property: port
+      - key: PGDATABASE
+        fromDatabase:
+          name: vecinita-postgres
+          property: database
+      - key: PGUSER
+        fromDatabase:
+          name: vecinita-postgres
+          property: user
+      - key: PGPASSWORD
+        fromDatabase:
+          name: vecinita-postgres
+          property: password
+      
+      # --- Shared Config Group (all services can access) ---
+      - fromGroup: app-shared
+      
+      # --- Agent-Specific Config Group ---
+      - fromGroup: agent-config
+
+  # ========================================================================
+  # GATEWAY SERVICE
+  # ========================================================================
+  # Role: Public web service (frontend-facing API)
+  # Runs: FastAPI router, auth middleware, request logging
+  # Port: 10000 (externally accessible at https://vecinita-gateway.onrender.com)
+  # Calls: Internal agent at http://vecinita-agent:10000
+  # Exposes:
+  #   - /health       (health check)
+  #   - /api/v1/ask   (proxies to agent)
+  #   - /api/v1/config (provider discovery)
+  #   - /admin/*      (admin endpoints, if DEV_ADMIN_ENABLED)
+  - type: web
+    name: vecinita-gateway
+    runtime: docker
+    region: virginia
+    plan: starter
+    dockerfilePath: ./backend/Dockerfile.gateway
+    dockerContext: ./backend
+    dockerCommand: sh -c 'uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT:-10000}'
+    autoDeployTrigger: off
+    healthCheckPath: /health
+    preDeployCommand: ""
+    
+    envVars:
+      # --- Core Infrastructure ---
+      - key: PORT
+        value: "10000"
+      # Use fromService to reference the agent service's internal hostname
+      - key: AGENT_SERVICE_URL
+        fromService:
+          name: vecinita-agent
+          type: web
+          property: host
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vecinita-postgres
+          property: connectionString
+      - key: DB_HOST
+        fromDatabase:
+          name: vecinita-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: vecinita-postgres
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: vecinita-postgres
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: vecinita-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: vecinita-postgres
+          property: password
+      - key: PGHOST
+        fromDatabase:
+          name: vecinita-postgres
+          property: host
+      - key: PGPORT
+        fromDatabase:
+          name: vecinita-postgres
+          property: port
+      - key: PGDATABASE
+        fromDatabase:
+          name: vecinita-postgres
+          property: database
+      - key: PGUSER
+        fromDatabase:
+          name: vecinita-postgres
+          property: user
+      - key: PGPASSWORD
+        fromDatabase:
+          name: vecinita-postgres
+          property: password
+      
+      # --- Shared Config Group ---
+      - fromGroup: app-shared
+      
+      # --- Gateway-Specific Config Group ---
+      - fromGroup: gateway-config
+
+  # ========================================================================
+  # FRONTEND SERVICE
+  # ========================================================================
+  # Role: Public web service (user-facing UI)
+  # Runs: React + Vite dev server or Node production server
+  # Port: 10000 (externally accessible at https://vecinita-frontend.onrender.com)
+  # Calls: External gateway at https://vecinita-gateway.onrender.com/api/v1
+  # Exposes: Chat UI frontend
+  - type: web
+    name: vecinita-frontend
+    runtime: docker
+    region: virginia
+    plan: starter
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    autoDeployTrigger: off
+    healthCheckPath: /
+    preDeployCommand: ""
+    
+    envVars:
+      # --- Core Infrastructure ---
+      - key: PORT
+        value: "10000"
+      
+      # --- Frontend-Specific Config Group ---
+      - fromGroup: frontend-config
