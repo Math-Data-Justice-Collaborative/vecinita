@@ -86,3 +86,32 @@ def frontend_url() -> str:
     if not url:
         pytest.skip("RENDER_FRONTEND_URL not set")
     return url.rstrip("/")
+
+
+@pytest.fixture(scope="session")
+def agent_config_url(agent_url: str) -> str:
+    """Resolve config endpoint for either gateway-routed or direct-agent URL."""
+    candidates = (f"{agent_url}/api/v1/ask/config", f"{agent_url}/config")
+    for url in candidates:
+        try:
+            resp = requests.get(url, timeout=15)
+        except requests.RequestException:
+            continue
+        if resp.status_code == 200:
+            return url
+    return candidates[0]
+
+
+@pytest.fixture(scope="session")
+def ask_base_url(agent_url: str) -> str:
+    """Resolve ask endpoint base path for gateway-routed or direct-agent URL."""
+    candidates = (f"{agent_url}/api/v1/ask", f"{agent_url}/ask")
+    for url in candidates:
+        try:
+            # Send minimal request to detect a live route.
+            resp = requests.get(url, params={"question": "ping"}, timeout=20)
+        except requests.RequestException:
+            continue
+        if resp.status_code != 404:
+            return url
+    return candidates[1]

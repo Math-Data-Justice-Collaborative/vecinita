@@ -67,9 +67,9 @@ def test_agent_health_returns_200(agent_url: str):
     assert resp.status_code == 200, f"Agent /health returned {resp.status_code}"
 
 
-def test_agent_config_endpoint_returns_providers(agent_url: str):
-    resp = requests.get(f"{agent_url}/api/v1/ask/config", timeout=30)
-    assert resp.status_code == 200, f"Agent /api/v1/ask/config returned {resp.status_code}"
+def test_agent_config_endpoint_returns_providers(agent_config_url: str):
+    resp = requests.get(agent_config_url, timeout=30)
+    assert resp.status_code == 200, f"Agent config endpoint returned {resp.status_code}"
     body = resp.json()
     assert (
         "providers" in body or "provider" in body

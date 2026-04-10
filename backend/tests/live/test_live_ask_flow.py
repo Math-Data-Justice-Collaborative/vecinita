@@ -7,6 +7,8 @@ import time
 import pytest
 import requests
 
+from .response_validators import validate_ask_payload
+
 pytestmark = pytest.mark.live
 
 _ENGLISH_QUESTION = "What environmental programs are available in Boyle Heights?"
@@ -27,18 +29,13 @@ def _ask(gateway_url: str, question: str, *, timeout: int = 60) -> dict:
 
 def test_ask_english_question_returns_answer_and_sources(gateway_url: str):
     body = _ask(gateway_url, _ENGLISH_QUESTION)
-    assert "answer" in body or "response" in body, f"Response missing answer: {body}"
-    # Sources/citations are optional but rated highly
-    # just confirm no server error and response is non-empty
-    answer_text = body.get("answer") or body.get("response") or ""
-    assert len(answer_text) > 10, f"Answer suspiciously short: {answer_text!r}"
+    validate_ask_payload(body)
 
 
 def test_ask_spanish_question_returns_answer(gateway_url: str):
     """Spanish input exercises the language-detection path in agent/main.py."""
     body = _ask(gateway_url, _SPANISH_QUESTION)
-    answer_text = body.get("answer") or body.get("response") or ""
-    assert len(answer_text) > 10, f"Spanish answer suspiciously short: {answer_text!r}"
+    validate_ask_payload(body)
 
 
 def test_ask_request_completes_within_sla(gateway_url: str):

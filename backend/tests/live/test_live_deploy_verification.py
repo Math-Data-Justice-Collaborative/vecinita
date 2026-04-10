@@ -32,9 +32,9 @@ def test_agent_health_has_status_key(agent_url: str):
     ), f"Agent health body has no recognised status key: {body}"
 
 
-def test_agent_config_shows_no_debug_or_test_providers(agent_url: str):
+def test_agent_config_shows_no_debug_or_test_providers(agent_config_url: str):
     """Production config must not expose debug, test, or local-only providers."""
-    resp = requests.get(f"{agent_url}/api/v1/ask/config", timeout=30)
+    resp = requests.get(agent_config_url, timeout=30)
     assert resp.status_code == 200
     body = resp.json()
     providers = body.get("providers", body.get("provider", ""))

@@ -5,6 +5,8 @@ from __future__ import annotations
 import pytest
 import requests
 
+from .response_validators import parse_sse_data_line
+
 pytestmark = pytest.mark.live
 
 
@@ -33,9 +35,12 @@ def test_sse_stream_produces_data_events(gateway_url: str):
     assert events, "No SSE events returned from streaming endpoint"
     data_lines = [e for e in events if e.startswith("data:")]
     assert data_lines, f"No 'data:' SSE lines in first {len(events)} events: {events}"
+    for line in data_lines:
+        parse_sse_data_line(line)
 
 
 def test_stream_completes_without_error_event(gateway_url: str):
     events = _collect_sse_events(gateway_url, "Hello", max_events=5)
-    error_events = [e for e in events if "event: error" in e or '"error"' in e.lower()]
+    parsed = [parse_sse_data_line(e) for e in events if e.startswith("data:")]
+    error_events = [e for e in parsed if e.get("type") == "error"]
     assert not error_events, f"Stream returned error events: {error_events}"

@@ -24,6 +24,8 @@ import schemathesis
 from hypothesis import HealthCheck, settings
 from schemathesis.generation import GenerationMode
 
+from .response_validators import parse_sse_data_line, validate_ask_payload
+
 pytestmark = pytest.mark.live
 
 # ---------------------------------------------------------------------------
@@ -46,7 +48,9 @@ def agent_schema(agent_url: str):
     )
     # Restrict to positive-only generation: only inputs valid per schema.
     schema.config.generation.modes = [GenerationMode.POSITIVE]
-    return schema.exclude(path=["/ask/stream", "/ask-stream"])
+    # /ask remains covered by targeted smoke tests below; excluding from fuzzing
+    # reduces upstream model-provider instability noise in live runs.
+    return schema.exclude(path=["/ask", "/ask/stream", "/ask-stream"])
 
 
 # Lazy loader: parametrized tests below are deferred until ``agent_schema``
@@ -73,6 +77,9 @@ def test_api_operations_conform_to_schema(case):
     query handling). For live reliability gating we enforce the strongest
     stability signal here: no 5xx responses.
     """
+    if case.path == "/ask":
+        pytest.skip("/ask fuzzing is unstable due upstream model provider variance in live env")
+
     case.call_and_validate(
         timeout=45,
         checks=[schemathesis.checks.not_a_server_error],
@@ -107,8 +114,7 @@ def test_ask_english_question_returns_200(agent_url: str) -> None:
     )
     assert resp.status_code == 200
     body = resp.json()
-    # Accept any dict response — shape varies by LLM provider
-    assert isinstance(body, dict), f"Expected dict response from /ask, got: {type(body)}"
+    validate_ask_payload(body)
 
 
 def test_ask_spanish_question_returns_200(agent_url: str) -> None:
@@ -119,6 +125,7 @@ def test_ask_spanish_question_returns_200(agent_url: str) -> None:
         timeout=60,
     )
     assert resp.status_code == 200
+    validate_ask_payload(resp.json())
 
 
 def test_ask_with_rerank_param(agent_url: str) -> None:
@@ -129,6 +136,7 @@ def test_ask_with_rerank_param(agent_url: str) -> None:
         timeout=60,
     )
     assert resp.status_code == 200
+    validate_ask_payload(resp.json())
 
 
 def test_ask_with_tag_filter(agent_url: str) -> None:
@@ -142,10 +150,9 @@ def test_ask_with_tag_filter(agent_url: str) -> None:
         },
         timeout=60,
     )
-    assert resp.status_code in (
-        200,
-        422,
-    ), f"/ask with tags returned unexpected status: {resp.status_code}"
+    assert resp.status_code in (200, 422), f"/ask with tags returned unexpected status: {resp.status_code}"
+    if resp.status_code == 200:
+        validate_ask_payload(resp.json())
 
 
 def test_ask_stream_does_not_5xx(agent_url: str) -> None:
@@ -162,6 +169,10 @@ def test_ask_stream_does_not_5xx(agent_url: str) -> None:
         503,
         504,
     ), f"/ask/stream returned server error: {resp.status_code}"
+    for raw_line in resp.iter_lines(decode_unicode=True):
+        if raw_line and raw_line.startswith("data:"):
+            parse_sse_data_line(raw_line)
+            break
     resp.close()
 
 

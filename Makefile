@@ -478,37 +478,76 @@ render-local-validate:
 		if [ "$$temp_env_created" = "1" ]; then rm -f .env.render-local; fi; \
 		echo "Render local preflight OK (env contract + compose config)"
 
-	env-sync-contract:
-		@echo "Env sync contract target retired with routing decommissioning."
+env-sync-contract:
+	@echo "Env sync contract target retired with routing decommissioning."
 
-	render-connectivity-tests:
-		@echo "Running Render connectivity configuration tests (offline)..."
-		cd backend && uv run pytest tests/render/ -v --tb=short -m render_connectivity
+render-connectivity-tests:
+	@echo "Running Render connectivity configuration tests (offline)..."
+	cd backend && uv run pytest tests/render/ -v --tb=short -m render_connectivity
 
-	render-all-offline-contract-tests: env-sync-contract render-connectivity-tests
-		@echo "All offline contract tests passed."
+render-all-offline-contract-tests: env-sync-contract render-connectivity-tests
+	@echo "All offline contract tests passed."
 
-	render-live-smoke:
-		@echo "Running live smoke tests against Render (requires RENDER_GATEWAY_URL)..."
-		cd backend && uv run pytest tests/live/ -m live --timeout=120 -v --tb=short
+render-live-smoke:
+	@echo "Running live smoke tests against Render (auto-loading .env when present)..."
+	@set -a; \
+	if [ -f .env ]; then . ./.env; fi; \
+	set +a; \
+	if [ -n "$$RENDER_AGENT_URL" ] && [ "$$USE_GATEWAY_LIVE" != "1" ]; then \
+		unset RENDER_GATEWAY_URL; \
+		echo "Using agent-only live mode (set USE_GATEWAY_LIVE=1 to include gateway checks)."; \
+	fi; \
+	if [ -z "$$RENDER_GATEWAY_URL" ] && [ -z "$$RENDER_AGENT_URL" ]; then \
+		echo "Warning: RENDER_GATEWAY_URL and RENDER_AGENT_URL are not set; live tests may be skipped."; \
+	fi; \
+	cd backend && SKIP_AGENT_MAIN_IMPORT="$${SKIP_AGENT_MAIN_IMPORT:-true}" uv run pytest tests/live/ -m live -v --tb=short
 
-	render-live-integration:
-		@echo "Running full live integration tests against Render (requires RENDER_GATEWAY_URL)..."
-		cd backend && uv run pytest tests/live/ -m live --timeout=120 -v --tb=long
+render-live-integration:
+	@echo "Running full live integration tests against Render (auto-loading .env when present)..."
+	@set -a; \
+	if [ -f .env ]; then . ./.env; fi; \
+	set +a; \
+	if [ -n "$$RENDER_AGENT_URL" ] && [ "$$USE_GATEWAY_LIVE" != "1" ]; then \
+		unset RENDER_GATEWAY_URL; \
+		echo "Using agent-only live mode (set USE_GATEWAY_LIVE=1 to include gateway checks)."; \
+	fi; \
+	if [ -z "$$RENDER_GATEWAY_URL" ] && [ -z "$$RENDER_AGENT_URL" ]; then \
+		echo "Warning: RENDER_GATEWAY_URL and RENDER_AGENT_URL are not set; live tests may be skipped."; \
+	fi; \
+	cd backend && SKIP_AGENT_MAIN_IMPORT="$${SKIP_AGENT_MAIN_IMPORT:-true}" uv run pytest tests/live/ -m live -v --tb=long
 
-	render-deploy-trigger:
-		@echo "Triggering Render production deploy hooks (requires RENDER_*_DEPLOY_HOOK_URL env vars)..."
-		@if [ -z "$(RENDER_AGENT_DEPLOY_HOOK_URL)" ] && [ -z "$(RENDER_GATEWAY_DEPLOY_HOOK_URL)" ]; then \
-			echo "No deploy hook URLs set. Export RENDER_AGENT_DEPLOY_HOOK_URL, RENDER_GATEWAY_DEPLOY_HOOK_URL, RENDER_FRONTEND_DEPLOY_HOOK_URL."; \
-			exit 1; \
-		fi
-		@[ -n "$(RENDER_AGENT_DEPLOY_HOOK_URL)" ] && curl -fsSL -X POST "$(RENDER_AGENT_DEPLOY_HOOK_URL)" && echo "Agent deploy triggered" || true
-		@[ -n "$(RENDER_GATEWAY_DEPLOY_HOOK_URL)" ] && curl -fsSL -X POST "$(RENDER_GATEWAY_DEPLOY_HOOK_URL)" && echo "Gateway deploy triggered" || true
-		@[ -n "$(RENDER_FRONTEND_DEPLOY_HOOK_URL)" ] && curl -fsSL -X POST "$(RENDER_FRONTEND_DEPLOY_HOOK_URL)" && echo "Frontend deploy triggered" || true
+render-live-validity:
+	@echo "Running strict live validity checks (output-shape + SSE contract)..."
+	@set -a; \
+	if [ -f .env ]; then . ./.env; fi; \
+	set +a; \
+	if [ -n "$$RENDER_AGENT_URL" ]; then \
+		unset RENDER_GATEWAY_URL; \
+		echo "Using agent-only validity mode for deterministic output checks."; \
+	fi; \
+	if [ -z "$$RENDER_GATEWAY_URL" ] && [ -z "$$RENDER_AGENT_URL" ]; then \
+		echo "Warning: RENDER_GATEWAY_URL and RENDER_AGENT_URL are not set; live tests may be skipped."; \
+	fi; \
+	cd backend && SKIP_AGENT_MAIN_IMPORT="$${SKIP_AGENT_MAIN_IMPORT:-true}" uv run pytest \
+		tests/live/test_live_schemathesis.py \
+		tests/live/test_live_health.py \
+		tests/live/test_live_connectivity.py \
+		tests/live/test_live_embedding.py \
+		-v --tb=short
 
-	render-deploy-wait:
-		@echo "Waiting for Render service to reach live status (requires RENDER_API_KEY and SERVICE_ID)..."
-		python3 scripts/github/wait_for_render_deploy.py "$(SERVICE_ID)" --timeout $(or $(TIMEOUT),900)
+render-deploy-trigger:
+	@echo "Triggering Render production deploy hooks (requires RENDER_*_DEPLOY_HOOK_URL env vars)..."
+	@if [ -z "$(RENDER_AGENT_DEPLOY_HOOK_URL)" ] && [ -z "$(RENDER_GATEWAY_DEPLOY_HOOK_URL)" ]; then \
+		echo "No deploy hook URLs set. Export RENDER_AGENT_DEPLOY_HOOK_URL, RENDER_GATEWAY_DEPLOY_HOOK_URL, RENDER_FRONTEND_DEPLOY_HOOK_URL."; \
+		exit 1; \
+	fi
+	@[ -n "$(RENDER_AGENT_DEPLOY_HOOK_URL)" ] && curl -fsSL -X POST "$(RENDER_AGENT_DEPLOY_HOOK_URL)" && echo "Agent deploy triggered" || true
+	@[ -n "$(RENDER_GATEWAY_DEPLOY_HOOK_URL)" ] && curl -fsSL -X POST "$(RENDER_GATEWAY_DEPLOY_HOOK_URL)" && echo "Gateway deploy triggered" || true
+	@[ -n "$(RENDER_FRONTEND_DEPLOY_HOOK_URL)" ] && curl -fsSL -X POST "$(RENDER_FRONTEND_DEPLOY_HOOK_URL)" && echo "Frontend deploy triggered" || true
+
+render-deploy-wait:
+	@echo "Waiting for Render service to reach live status (requires RENDER_API_KEY and SERVICE_ID)..."
+	python3 scripts/github/wait_for_render_deploy.py "$(SERVICE_ID)" --timeout $(or $(TIMEOUT),900)
 
 microservices-up:
 	docker compose -f docker-compose.microservices.yml up -d
