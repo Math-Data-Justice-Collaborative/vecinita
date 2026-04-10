@@ -66,6 +66,12 @@ def _validate_required_keys(env: dict[str, str], result: ValidationResult) -> No
             result.errors.append(f"Missing required key: {key}")
 
 
+def _validate_db_data_mode(env: dict[str, str], result: ValidationResult) -> None:
+    mode = (env.get("DB_DATA_MODE") or "").strip().lower()
+    if mode != "postgres":
+        result.errors.append("DB_DATA_MODE must be set to postgres for Render runtime")
+
+
 def _validate_database_url(env: dict[str, str], result: ValidationResult) -> None:
     database_url = (env.get("DATABASE_URL") or "").strip()
     if not database_url:
@@ -128,6 +134,7 @@ def validate_shared_render_env(env: dict[str, str]) -> ValidationResult:
     """Validate shared Render env contract used by multiple services."""
     result = ValidationResult()
     _validate_required_keys(env, result)
+    _validate_db_data_mode(env, result)
     _validate_database_url(env, result)
     _validate_modal_endpoints(env, result)
     _validate_strict_flags(env, result)

@@ -73,7 +73,7 @@ def health():
 
 # Web endpoint
 @app.function(image=image)
-@modal.asgi_app(requires_service_auth=False)
+@modal.asgi_app()
 def web():
     """Web endpoint for modal.web"""
     from fastapi import FastAPI

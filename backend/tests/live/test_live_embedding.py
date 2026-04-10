@@ -17,9 +17,9 @@ def test_agent_config_references_direct_embedding_endpoint(agent_config_url: str
     # Current config payload may not include concrete endpoint URLs, but must
     # not reference the old direct-routing service and should indicate a live
     # remote provider/runtime.
-    assert "vecinita-direct-routing" not in config_str, (
-        "Agent config still points at deprecated direct-routing service"
-    )
-    assert ("modal" in config_str or "ollama" in config_str), (
-        "Agent config does not expose expected remote provider metadata"
-    )
+    assert (
+        "vecinita-direct-routing" not in config_str
+    ), "Agent config still points at deprecated direct-routing service"
+    assert (
+        "modal" in config_str or "ollama" in config_str
+    ), "Agent config does not expose expected remote provider metadata"

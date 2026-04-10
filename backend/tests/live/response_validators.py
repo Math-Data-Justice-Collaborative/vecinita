@@ -22,19 +22,19 @@ def validate_source_item(source: Any, *, index: int = 0) -> None:
     src = _expect_dict(source, f"sources[{index}]")
     if "url" in src and src["url"] is not None:
         url = _expect_nonempty_string(src["url"], f"sources[{index}].url", min_len=8)
-        assert url.startswith(("http://", "https://")), (
-            f"sources[{index}].url must start with http(s)://, got {url!r}"
-        )
+        assert url.startswith(
+            ("http://", "https://")
+        ), f"sources[{index}].url must start with http(s)://, got {url!r}"
     if "source" in src and src["source"] is not None:
         _expect_nonempty_string(src["source"], f"sources[{index}].source", min_len=1)
     if "relevance" in src and src["relevance"] is not None:
         relevance = src["relevance"]
-        assert isinstance(relevance, (int, float)), (
-            f"sources[{index}].relevance must be numeric, got {type(relevance)}"
-        )
-        assert 0 <= float(relevance) <= 1, (
-            f"sources[{index}].relevance must be in [0,1], got {relevance}"
-        )
+        assert isinstance(
+            relevance, (int, float)
+        ), f"sources[{index}].relevance must be numeric, got {type(relevance)}"
+        assert (
+            0 <= float(relevance) <= 1
+        ), f"sources[{index}].relevance must be in [0,1], got {relevance}"
 
 
 def validate_ask_payload(payload: Any) -> dict[str, Any]:
@@ -52,12 +52,12 @@ def validate_ask_payload(payload: Any) -> dict[str, Any]:
 
     if "response_time_ms" in body and body["response_time_ms"] is not None:
         response_time_ms = body["response_time_ms"]
-        assert isinstance(response_time_ms, int), (
-            f"response_time_ms must be int, got {type(response_time_ms)}"
-        )
-        assert 0 <= response_time_ms <= 120_000, (
-            f"response_time_ms out of bounds: {response_time_ms}"
-        )
+        assert isinstance(
+            response_time_ms, int
+        ), f"response_time_ms must be int, got {type(response_time_ms)}"
+        assert (
+            0 <= response_time_ms <= 120_000
+        ), f"response_time_ms out of bounds: {response_time_ms}"
 
     if "language" in body and body["language"] is not None:
         lang = _expect_nonempty_string(body["language"], "language", min_len=2)
@@ -79,9 +79,13 @@ def parse_sse_data_line(line: str) -> dict[str, Any]:
     body = _expect_dict(payload, "SSE payload")
 
     event_type = _expect_nonempty_string(body.get("type"), "SSE type", min_len=3)
-    assert event_type in {"thinking", "tool_event", "complete", "clarification", "error"}, (
-        f"Unexpected SSE type: {event_type!r}"
-    )
+    assert event_type in {
+        "thinking",
+        "tool_event",
+        "complete",
+        "clarification",
+        "error",
+    }, f"Unexpected SSE type: {event_type!r}"
 
     if event_type == "complete":
         validate_ask_payload(body)

@@ -67,12 +67,12 @@ class TestEmbeddingModalApp:
             {"PYTHONPATH": "/root", "EMBEDDING_DISABLE_APP_AUTH": "true"}
         )
 
-    def test_web_app_disables_modal_proxy_auth(self, modal_mock):
+    def test_asgi_app_uses_modal_sdk_without_deprecated_kwargs(self, modal_mock):
         import src.embedding_service.modal_app as modal_app
 
         modal_app = importlib.reload(modal_app)
 
-        assert modal_mock.asgi_app.call_args.kwargs == {"requires_service_auth": False}
+        assert modal_mock.asgi_app.call_args.kwargs == {}
 
     def test_web_app_callable(self, modal_mock):
         import src.embedding_service.modal_app as modal_app

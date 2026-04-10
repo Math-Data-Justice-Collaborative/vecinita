@@ -34,7 +34,7 @@ image = (
     memory=2048,
     timeout=3600,
 )
-@modal.asgi_app(requires_service_auth=False)
+@modal.asgi_app()
 def web_app():
     if "/root" not in sys.path:
         sys.path.insert(0, "/root")

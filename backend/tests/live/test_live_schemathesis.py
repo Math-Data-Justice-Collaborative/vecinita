@@ -150,7 +150,10 @@ def test_ask_with_tag_filter(agent_url: str) -> None:
         },
         timeout=60,
     )
-    assert resp.status_code in (200, 422), f"/ask with tags returned unexpected status: {resp.status_code}"
+    assert resp.status_code in (
+        200,
+        422,
+    ), f"/ask with tags returned unexpected status: {resp.status_code}"
     if resp.status_code == 200:
         validate_ask_payload(resp.json())
 
