@@ -15,6 +15,11 @@ on:
         description: Workflow filename or workflow ID in target repository
         required: true
         type: string
+      workflow_inputs_json:
+        description: Optional JSON object passed as workflow_dispatch inputs
+        required: false
+        default: "{}"
+        type: string
       target_ref:
         description: Branch/tag to dispatch in target repository
         required: false
@@ -58,6 +63,7 @@ jobs:
       SERVICE_NAME: ${{ inputs.service_name }}
       TARGET_REPO: ${{ inputs.target_repo }}
       WORKFLOW_FILE: ${{ inputs.workflow_file }}
+      WORKFLOW_INPUTS_JSON: ${{ inputs.workflow_inputs_json }}
       TARGET_REF: ${{ inputs.target_ref }}
       WAIT_FOR_COMPLETION: ${{ inputs.wait_for_completion }}
       EXPECTED_PLATFORM: ${{ inputs.expected_platform }}
@@ -83,10 +89,17 @@ jobs:
 
       - name: Dispatch target repository workflow
         run: |
+          set -euo pipefail
+          if ! echo "$WORKFLOW_INPUTS_JSON" | jq -e 'type == "object"' >/dev/null; then
+            echo "workflow_inputs_json must be a JSON object"
+            exit 1
+          fi
+
+          DISPATCH_PAYLOAD=$(jq -c --arg ref "$TARGET_REF" --argjson inputs "$WORKFLOW_INPUTS_JSON" '{ref: $ref, inputs: $inputs}')
           gh api \
             --method POST \
             "repos/$TARGET_REPO/actions/workflows/$WORKFLOW_FILE/dispatches" \
-            -f ref="$TARGET_REF"
+            --input - <<<"$DISPATCH_PAYLOAD"
           echo "Triggered $WORKFLOW_FILE in $TARGET_REPO on ref $TARGET_REF"
 
       - name: Wait for target workflow run

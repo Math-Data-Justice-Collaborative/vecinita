@@ -3,6 +3,9 @@
 .env.*
 *.env
 env.txt
+!.env.local.example
+!.env.prod.render.example
+!.env.staging.render.example
 
 # Python
 __pycache__/

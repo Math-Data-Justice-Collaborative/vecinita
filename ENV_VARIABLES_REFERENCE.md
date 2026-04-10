@@ -1,5 +1,13 @@
 # Data Management API - Environment Variables Reference
 
+## Canonical Template Files
+
+- Local development shared template: `.env.local.example`
+- Render production shared template: `.env.prod.render.example`
+- Render staging shared template: `.env.staging.render.example`
+
+Copy templates into real environment files/secrets and never commit populated credentials.
+
 ## Exact Variables Required
 
 Set these 3 environment variables on Render for `vecinita-data-management-api-v1`:
@@ -17,6 +25,8 @@ Set these 3 environment variables on Render for `vecinita-data-management-api-v1
 | `VECINITA_EMBEDDING_API_URL` | `.env` line 149 | Custom embedding service URL |
 | `VECINITA_MODEL_API_URL` | `.env` line 148 | Custom model service URL |
 | `DATABASE_URL` | `.env` | Postgres for data persistence |
+| `SCRAPER_API_KEYS` | Render env group/secret | Comma-separated Bearer API keys accepted by scraper API |
+| `SCRAPER_DEBUG_BYPASS_AUTH` | local/dev only | `true` bypasses auth in local/dev/test only; must remain `false` in staging/prod |
 
 ## Copy-Paste Ready
 

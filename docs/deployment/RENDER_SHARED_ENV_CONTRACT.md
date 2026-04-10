@@ -4,6 +4,13 @@ This document is the single source of truth for environment variables required b
 Render-deployed service. Set these in the Render dashboard before triggering the first
 deploy. Variables marked **Required** will cause startup failures if missing.
 
+Shared contract templates:
+
+- `.env.prod.render.example`
+- `.env.staging.render.example`
+
+Use these template files as the authoritative key sets for CI contract/parity checks.
+
 ---
 
 ## vecinita-data-management-frontend (Render Static Site)

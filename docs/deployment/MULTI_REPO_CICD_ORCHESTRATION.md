@@ -2,6 +2,16 @@
 
 This document defines the independent pipeline ownership model and the top-level orchestrator used from this repository.
 
+## Canonical Control Plane
+
+This repository is the **single release control plane** for cross-repo deployments.
+
+- Canonical service mapping lives in `.github/release/release-manifest.json`.
+- `.github/workflows/multi-repo-release-orchestrator.yml` reads that manifest and dispatches child workflows.
+- Service repositories remain owners of their own test + deploy workflows.
+
+This provides one place to manage "everything" without violating the required multi-repo ownership model.
+
 ## Deployment Ownership Mapping
 
 | Service | Repository | Deployment Target | Region/Network Policy |
@@ -37,8 +47,15 @@ Files:
 
 - .github/workflows/reusable-dispatch-repo-workflow.yml
 - .github/workflows/multi-repo-release-orchestrator.yml
+- .github/release/release-manifest.json
 
 The parent orchestrator dispatches workflow_dispatch events into each service repo and optionally waits for completion.
+
+## Why Not One Literal Render File For All Repos
+
+Render blueprints are repository-scoped, and this architecture requires each service repository to own its own deployment workflow. A single literal Render blueprint that deploys every repository is therefore not feasible without collapsing all services into one repository.
+
+The manifest-driven orchestrator is the supported "single place" solution.
 
 ## Required Secrets
 

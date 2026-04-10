@@ -53,6 +53,8 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       has_cross_repo_token: ${{ steps.detect.outputs.has_cross_repo_token }}
+      services_json: ${{ steps.select-services.outputs.services_json }}
+      service_count: ${{ steps.select-services.outputs.service_count }}
     steps:
       - name: Detect cross-repo token availability
         id: detect
@@ -60,90 +62,66 @@ jobs:
           HAS_CROSS_REPO_TOKEN: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN != '' }}
         run: echo "has_cross_repo_token=${HAS_CROSS_REPO_TOKEN}" >> "$GITHUB_OUTPUT"
 
-  chat-frontend:
-    needs: [workflow-context]
-    if: needs.workflow-context.outputs.has_cross_repo_token == 'true' && inputs.deploy_chat_frontend
-    uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
-    with:
-      service_name: chat-frontend
-      target_repo: joseph-c-mcguire/Vecinitafrontend
-      workflow_file: deploy.yml
-      target_ref: ${{ inputs.target_ref }}
-      wait_for_completion: ${{ inputs.wait_for_completion }}
-      expected_platform: Render Frontend
-      expected_region: virginia
-    secrets:
-      dispatch_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  data-management-frontend:
-    needs: [workflow-context]
-    if: needs.workflow-context.outputs.has_cross_repo_token == 'true' && inputs.deploy_data_management_frontend
-    uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
-    with:
-      service_name: data-management-frontend
-      target_repo: Math-Data-Justice-Collaborative/vecinita-data-management-frontend
-      workflow_file: deploy.yml
-      target_ref: ${{ inputs.target_ref }}
-      wait_for_completion: ${{ inputs.wait_for_completion }}
-      expected_platform: Render Frontend
-      expected_region: virginia
-    secrets:
-      dispatch_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+      - name: Select services from canonical release manifest
+        id: select-services
+        env:
+          DEPLOY_CHAT_FRONTEND: ${{ inputs.deploy_chat_frontend }}
+          DEPLOY_DATA_MANAGEMENT_FRONTEND: ${{ inputs.deploy_data_management_frontend }}
+          DEPLOY_DATA_MANAGEMENT_API: ${{ inputs.deploy_data_management_api }}
+          DEPLOY_SCRAPER: ${{ inputs.deploy_scraper }}
+          DEPLOY_EMBEDDING_MODAL: ${{ inputs.deploy_embedding_modal }}
+          DEPLOY_MODEL_MODAL: ${{ inputs.deploy_model_modal }}
+        run: |
+          MANIFEST=".github/release/release-manifest.json"
+          if [ ! -f "$MANIFEST" ]; then
+            echo "Missing canonical release manifest: $MANIFEST"
+            exit 1
+          fi
 
-  data-management-api:
-    needs: [workflow-context]
-    if: needs.workflow-context.outputs.has_cross_repo_token == 'true' && inputs.deploy_data_management_api
-    uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
-    with:
-      service_name: data-management-api
-      target_repo: Math-Data-Justice-Collaborative/vecinita-data-management
-      workflow_file: deploy.yml
-      target_ref: ${{ inputs.target_ref }}
-      wait_for_completion: ${{ inputs.wait_for_completion }}
-      expected_platform: Render Web Service (CORS-restricted)
-      expected_region: virginia
-    secrets:
-      dispatch_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+          SERVICES_JSON=$(jq -c \
+            --argjson chat "$DEPLOY_CHAT_FRONTEND" \
+            --argjson dmf "$DEPLOY_DATA_MANAGEMENT_FRONTEND" \
+            --argjson dma "$DEPLOY_DATA_MANAGEMENT_API" \
+            --argjson scraper "$DEPLOY_SCRAPER" \
+            --argjson embedding "$DEPLOY_EMBEDDING_MODAL" \
+            --argjson model "$DEPLOY_MODEL_MODAL" \
+            '[
+              .services[]
+              | select(
+                  (.workflow_dispatch_input != "deploy_chat_frontend" or $chat)
+                  and (.workflow_dispatch_input != "deploy_data_management_frontend" or $dmf)
+                  and (.workflow_dispatch_input != "deploy_data_management_api" or $dma)
+                  and (.workflow_dispatch_input != "deploy_scraper" or $scraper)
+                  and (.workflow_dispatch_input != "deploy_embedding_modal" or $embedding)
+                  and (.workflow_dispatch_input != "deploy_model_modal" or $model)
+                )
+            ]' \
+            "$MANIFEST")
 
-  scraper:
-    needs: [workflow-context]
-    if: needs.workflow-context.outputs.has_cross_repo_token == 'true' && inputs.deploy_scraper
-    uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
-    with:
-      service_name: scraper
-      target_repo: Math-Data-Justice-Collaborative/vecinita-scraper
-      workflow_file: ci-cd.yml
-      target_ref: ${{ inputs.target_ref }}
-      wait_for_completion: ${{ inputs.wait_for_completion }}
-      expected_platform: Modal Deploy
-    secrets:
-      dispatch_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
+          SERVICE_COUNT=$(echo "$SERVICES_JSON" | jq 'length')
+          echo "services_json=$SERVICES_JSON" >> "$GITHUB_OUTPUT"
+          echo "service_count=$SERVICE_COUNT" >> "$GITHUB_OUTPUT"
+          echo "Selected $SERVICE_COUNT service(s) for dispatch"
 
-  embedding-modal:
+  dispatch-services:
     needs: [workflow-context]
-    if: needs.workflow-context.outputs.has_cross_repo_token == 'true' && inputs.deploy_embedding_modal
+    if: needs.workflow-context.outputs.has_cross_repo_token == 'true' && needs.workflow-context.outputs.service_count != '0'
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.workflow-context.outputs.services_json) }}
     uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
     with:
-      service_name: embedding-modal
-      target_repo: Math-Data-Justice-Collaborative/vecinita-embedding
-      workflow_file: deploy.yml
+      service_name: ${{ matrix.service.id }}
+      target_repo: ${{ matrix.service.target_repo }}
+      workflow_file: ${{ matrix.service.workflow_file }}
       target_ref: ${{ inputs.target_ref }}
       wait_for_completion: ${{ inputs.wait_for_completion }}
-      expected_platform: Modal Deploy
-    secrets:
-      dispatch_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
-
-  model-modal:
-    needs: [workflow-context]
-    if: needs.workflow-context.outputs.has_cross_repo_token == 'true' && inputs.deploy_model_modal
-    uses: ./.github/workflows/reusable-dispatch-repo-workflow.yml
-    with:
-      service_name: model-modal
-      target_repo: Math-Data-Justice-Collaborative/vecinita-model
-      workflow_file: deploy.yml
-      target_ref: ${{ inputs.target_ref }}
-      wait_for_completion: ${{ inputs.wait_for_completion }}
-      expected_platform: Modal Deploy
+      expected_platform: ${{ matrix.service.expected_platform }}
+      expected_region: ${{ matrix.service.expected_region }}
     secrets:
       dispatch_token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
@@ -151,27 +129,18 @@ jobs:
     if: always()
     needs:
       - workflow-context
-      - chat-frontend
-      - data-management-frontend
-      - data-management-api
-      - scraper
-      - embedding-modal
-      - model-modal
+      - dispatch-services
     runs-on: ubuntu-22.04
     steps:
       - name: Print dispatch summary
         run: |
           echo "cross-repo-token: ${{ needs.workflow-context.outputs.has_cross_repo_token }}"
-          echo "chat-frontend: ${{ needs.chat-frontend.result }}"
-          echo "data-management-frontend: ${{ needs.data-management-frontend.result }}"
-          echo "data-management-api: ${{ needs.data-management-api.result }}"
-          echo "scraper: ${{ needs.scraper.result }}"
-          echo "embedding-modal: ${{ needs.embedding-modal.result }}"
-          echo "model-modal: ${{ needs.model-modal.result }}"
+          echo "selected-services: ${{ needs.workflow-context.outputs.service_count }}"
+          echo "dispatch-services: ${{ needs.dispatch-services.result }}"
 
       - name: Fail orchestrator on child workflow failure
         run: |
-          RESULTS="${{ needs.chat-frontend.result }} ${{ needs.data-management-frontend.result }} ${{ needs.data-management-api.result }} ${{ needs.scraper.result }} ${{ needs.embedding-modal.result }} ${{ needs.model-modal.result }}"
+          RESULTS="${{ needs.dispatch-services.result }}"
           if echo "$RESULTS" | grep -Eq "failure|cancelled|timed_out"; then
             echo "At least one downstream service workflow failed."
             exit 1

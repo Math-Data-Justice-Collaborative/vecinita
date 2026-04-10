@@ -25,10 +25,24 @@ if str(CONTRACT_MODULE_DIR) not in sys.path:
 from render_env_contract import parse_env_file
 
 
+def _resolve_env_path(path: Path) -> tuple[Path | None, str | None]:
+    if path.exists():
+        return path, None
+
+    example_path = path.with_suffix(path.suffix + ".example")
+    if example_path.exists():
+        return example_path, f"{path} not found; using template {example_path}"
+
+    return None, None
+
+
 def _load_env(path: Path) -> dict[str, str]:
-    if not path.exists():
+    resolved_path, notice = _resolve_env_path(path)
+    if resolved_path is None:
         raise FileNotFoundError(path)
-    return parse_env_file(path)
+    if notice:
+        print(f"NOTICE: {notice}")
+    return parse_env_file(resolved_path)
 
 
 def main() -> int:

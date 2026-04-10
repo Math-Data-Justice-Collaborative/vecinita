@@ -24,6 +24,7 @@ Use this mapping as source-of-truth when implementing infra changes:
 - Service repositories own their own test/deploy workflows.
 - Root repo orchestrates cross-repo release via `.github/workflows/multi-repo-release-orchestrator.yml`.
 - Reusable dispatcher workflow is `.github/workflows/reusable-dispatch-repo-workflow.yml`.
+- Canonical cross-repo service mapping is `.github/release/release-manifest.json`.
 
 ### Copilot Guidance Artifacts
 

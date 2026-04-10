@@ -13,10 +13,13 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 REQUIRED_KEYS: set[str] = {
+    "ALLOWED_ORIGINS",
     "DATABASE_URL",
+    "EMBEDDING_SERVICE_AUTH_TOKEN",
+    "MODAL_TOKEN_ID",
+    "MODAL_TOKEN_SECRET",
     "OLLAMA_MODEL",
     "RENDER_REMOTE_INFERENCE_ONLY",
-    "MODAL_TOKEN_SECRET",
     "VECINITA_MODEL_API_URL",
     "VECINITA_EMBEDDING_API_URL",
     "VECINITA_SCRAPER_API_URL",
@@ -98,6 +101,15 @@ def _validate_strict_flags(env: dict[str, str], result: ValidationResult) -> Non
         result.errors.append("RENDER_REMOTE_INFERENCE_ONLY must be enabled for Render runtime")
 
 
+def _validate_provider_keys(env: dict[str, str], result: ValidationResult) -> None:
+    provider_keys = ["GROQ_API_KEY", "OPENAI_API_KEY", "DEEPSEEK_API_KEY"]
+    if not any((env.get(key) or "").strip() for key in provider_keys):
+        result.warnings.append(
+            "No LLM provider key set (GROQ_API_KEY/OPENAI_API_KEY/DEEPSEEK_API_KEY); "
+            "verify remote inference provider configuration"
+        )
+
+
 def _validate_frontend_contract(env: dict[str, str], result: ValidationResult) -> None:
     allowed = env.get("ALLOWED_ORIGINS", "")
     # Keep a warning-level contract for local/staging parity with internal frontend hostnames.
@@ -115,5 +127,6 @@ def validate_shared_render_env(env: dict[str, str]) -> ValidationResult:
     _validate_database_url(env, result)
     _validate_modal_endpoints(env, result)
     _validate_strict_flags(env, result)
+    _validate_provider_keys(env, result)
     _validate_frontend_contract(env, result)
     return result

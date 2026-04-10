@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "services": [
+    {
+      "id": "chat-frontend",
+      "workflow_dispatch_input": "deploy_chat_frontend",
+      "target_repo": "joseph-c-mcguire/Vecinitafrontend",
+      "workflow_file": "deploy.yml",
+      "expected_platform": "Render Frontend",
+      "expected_region": "virginia"
+    },
+    {
+      "id": "data-management-frontend",
+      "workflow_dispatch_input": "deploy_data_management_frontend",
+      "target_repo": "Math-Data-Justice-Collaborative/vecinita-data-management-frontend",
+      "workflow_file": "deploy.yml",
+      "expected_platform": "Render Frontend",
+      "expected_region": "virginia"
+    },
+    {
+      "id": "data-management-api",
+      "workflow_dispatch_input": "deploy_data_management_api",
+      "target_repo": "Math-Data-Justice-Collaborative/vecinita-data-management",
+      "workflow_file": "deploy.yml",
+      "expected_platform": "Render Web Service (private-network constrained)",
+      "expected_region": "virginia"
+    },
+    {
+      "id": "scraper",
+      "workflow_dispatch_input": "deploy_scraper",
+      "target_repo": "Math-Data-Justice-Collaborative/vecinita-scraper",
+      "workflow_file": "ci-cd.yml",
+      "expected_platform": "Modal Deploy",
+      "expected_region": ""
+    },
+    {
+      "id": "embedding-modal",
+      "workflow_dispatch_input": "deploy_embedding_modal",
+      "target_repo": "Math-Data-Justice-Collaborative/vecinita-embedding",
+      "workflow_file": "deploy.yml",
+      "expected_platform": "Modal Deploy",
+      "expected_region": ""
+    },
+    {
+      "id": "model-modal",
+      "workflow_dispatch_input": "deploy_model_modal",
+      "target_repo": "Math-Data-Justice-Collaborative/vecinita-model",
+      "workflow_file": "deploy.yml",
+      "expected_platform": "Modal Deploy",
+      "expected_region": ""
+    }
+  ]
+}

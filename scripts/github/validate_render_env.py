@@ -20,13 +20,28 @@ if str(CONTRACT_MODULE_DIR) not in sys.path:
 from render_env_contract import parse_env_file, validate_shared_render_env
 
 
+def _resolve_target(path: Path) -> tuple[Path | None, str | None]:
+    if path.exists():
+        return path, None
+
+    example_path = path.with_suffix(path.suffix + ".example")
+    if example_path.exists():
+        return example_path, f"{path} not found; using template {example_path}"
+
+    return None, None
+
+
 def main() -> int:
     target = Path(sys.argv[1]) if len(sys.argv) > 1 else REPO_ROOT / ".env.prod.render"
-    if not target.exists():
+    resolved_target, fallback_notice = _resolve_target(target)
+    if resolved_target is None:
         print(f"WARNING: env file not found, skipping contract validation: {target}")
         return 0
 
-    env = parse_env_file(target)
+    if fallback_notice:
+        print(f"NOTICE: {fallback_notice}")
+
+    env = parse_env_file(resolved_target)
     result = validate_shared_render_env(env)
 
     if result.warnings:
@@ -40,7 +55,7 @@ def main() -> int:
             print(f"- {error}")
         return 1
 
-    print(f"Render env contract OK: {target}")
+    print(f"Render env contract OK: {resolved_target}")
     return 0
 
 

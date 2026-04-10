@@ -6,7 +6,12 @@ on:
     paths:
       - "render.yaml"
       - "render.staging.yaml"
+      - ".env.prod.render.example"
+      - ".env.staging.render.example"
+      - ".env.local.example"
       - ".github/workflows/**"
+      - "scripts/github/validate_render_env.py"
+      - "scripts/github/validate_render_env_parity.py"
       - "services/**/config.py"
       - "services/**/shared_config/**"
       - "backend/src/utils/render_env_contract.py"
@@ -15,7 +20,12 @@ on:
     paths:
       - "render.yaml"
       - "render.staging.yaml"
+      - ".env.prod.render.example"
+      - ".env.staging.render.example"
+      - ".env.local.example"
       - ".github/workflows/**"
+      - "scripts/github/validate_render_env.py"
+      - "scripts/github/validate_render_env_parity.py"
       - "services/**/config.py"
       - "services/**/shared_config/**"
       - "backend/src/utils/render_env_contract.py"
@@ -43,4 +53,6 @@ jobs:
         run: uv sync --frozen
 
       - name: Run env sync contract tests
+        env:
+          SKIP_AGENT_MAIN_IMPORT: "true"
         run: uv run pytest tests/contracts/test_env_sync_contract.py -v --tb=short -m contract
