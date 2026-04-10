@@ -16,6 +16,9 @@ services:
   #   FE     — consumed by vecinita-frontend (VITE_* vars)
   #   STRICT — strict-mode / enforcement flags for prod services
   # See docs/deployment/RENDER_SHARED_ENV_CONTRACT.md for the full contract.
+  #
+  # autoDeployTrigger: checksPass — Render deploys only after linked-branch CI checks
+  # succeed (GitHub Actions / Checks API). See https://render.com/docs/deploys#configuring-auto-deploys
   - type: web
     name: vecinita-agent
     runtime: docker
@@ -23,7 +26,7 @@ services:
     plan: starter
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    autoDeployTrigger: off
+    autoDeployTrigger: checksPass
     healthCheckPath: /health
     envVars:
       - key: PORT
@@ -151,7 +154,7 @@ services:
     plan: starter
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: ./frontend
-    autoDeployTrigger: off
+    autoDeployTrigger: checksPass
     healthCheckPath: /health
     envVars:
       - key: PORT
@@ -184,7 +187,7 @@ services:
     dockerfilePath: ./backend/Dockerfile.gateway
     dockerContext: ./backend
     dockerCommand: /bin/sh ./scripts/start_gateway_render.sh
-    autoDeployTrigger: off
+    autoDeployTrigger: checksPass
     healthCheckPath: /health
     envVars:
       - key: PORT
@@ -298,7 +301,7 @@ services:
     plan: starter
     dockerfilePath: ./apps/data-management-frontend/Dockerfile
     dockerContext: ./apps/data-management-frontend
-    autoDeployTrigger: off
+    autoDeployTrigger: checksPass
     healthCheckPath: /
     envVars:
       - key: PORT
@@ -319,7 +322,7 @@ services:
     plan: starter
     dockerfilePath: ./services/data-management-api/apps/backend/scraper-service/Dockerfile
     dockerContext: ./services/data-management-api/apps/backend/scraper-service
-    autoDeployTrigger: off
+    autoDeployTrigger: checksPass
     healthCheckPath: /health
     envVars:
       - key: PORT

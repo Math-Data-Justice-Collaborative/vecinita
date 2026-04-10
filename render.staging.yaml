@@ -8,6 +8,7 @@ services:
   #   STRICT — strict-mode policy for staging validation
   #   MODAL  — upstream Modal endpoint refs
   # See docs/deployment/RENDER_SHARED_ENV_CONTRACT.md for full contract.
+  # autoDeployTrigger: checksPass — deploy only after CI checks pass (Render blueprint spec).
   - type: web
     name: vecinita-agent-staging
     runtime: docker
@@ -15,7 +16,7 @@ services:
     plan: starter
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    autoDeployTrigger: off
+    autoDeployTrigger: checksPass
     healthCheckPath: /health
     envVars:
       - key: PORT
@@ -141,7 +142,7 @@ services:
     plan: starter
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: ./frontend
-    autoDeployTrigger: off
+    autoDeployTrigger: checksPass
     healthCheckPath: /health
     envVars:
       - key: PORT
@@ -174,7 +175,7 @@ services:
     dockerContext: ./backend
 
     dockerCommand: /bin/sh ./scripts/start_gateway_render.sh
-    autoDeployTrigger: off
+    autoDeployTrigger: checksPass
     healthCheckPath: /health
     envVars:
       - key: PORT
@@ -287,7 +288,7 @@ services:
     plan: starter
     dockerfilePath: ./apps/data-management-frontend/Dockerfile
     dockerContext: ./apps/data-management-frontend
-    autoDeployTrigger: off
+    autoDeployTrigger: checksPass
     healthCheckPath: /
     envVars:
       - key: PORT
@@ -308,7 +309,7 @@ services:
     plan: starter
     dockerfilePath: ./services/data-management-api/apps/backend/scraper-service/Dockerfile
     dockerContext: ./services/data-management-api/apps/backend/scraper-service
-    autoDeployTrigger: off
+    autoDeployTrigger: checksPass
     healthCheckPath: /health
     envVars:
       - key: PORT

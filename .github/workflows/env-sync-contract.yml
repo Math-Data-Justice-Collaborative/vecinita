@@ -1,5 +1,8 @@
 name: Env Sync Contract
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     branches: [main, develop]
@@ -40,19 +43,20 @@ jobs:
         working-directory: backend
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: false
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v5
         with:
           version: "latest"
 
       - name: Sync dependencies
-        run: uv sync --frozen
+        # pytest lives in optional-dependencies.ci; base sync has no test runner
+        run: uv sync --frozen --extra ci
 
       - name: Run env sync contract tests
         env:
           SKIP_AGENT_MAIN_IMPORT: "true"
-        run: uv run pytest tests/contracts/test_env_sync_contract.py -v --tb=short -m contract
+        run: uv run python -m pytest tests/contracts/test_env_sync_contract.py -v --tb=short -m contract

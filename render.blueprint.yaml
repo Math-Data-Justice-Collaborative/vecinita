@@ -220,7 +220,7 @@ services:
     plan: starter  # adjust for load; starter = 512MB RAM
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    autoDeployTrigger: off  # manual deploys; change to "push" for CI/CD-triggered
+    autoDeployTrigger: checksPass  # deploy only after CI checks pass (Render blueprint spec)
     healthCheckPath: /health
     preDeployCommand: ""  # migrations run here if needed; currently in startup
     
@@ -299,7 +299,7 @@ services:
     dockerfilePath: ./backend/Dockerfile.gateway
     dockerContext: ./backend
     dockerCommand: /bin/sh ./scripts/start_gateway_render.sh
-    autoDeployTrigger: off
+    autoDeployTrigger: checksPass
     healthCheckPath: /health
     preDeployCommand: ""
     
@@ -379,7 +379,7 @@ services:
     plan: starter
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: ./frontend
-    autoDeployTrigger: off
+    autoDeployTrigger: checksPass
     healthCheckPath: /
     preDeployCommand: ""
     

@@ -7,7 +7,7 @@ services:
     plan: free
     dockerfilePath: ./backend/Dockerfile.embedding
     dockerContext: ./backend
-    autoDeployTrigger: commit
+    autoDeployTrigger: checksPass
     
     envVars:
       - key: PORT
@@ -27,7 +27,7 @@ services:
     plan: free
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    autoDeployTrigger: commit
+    autoDeployTrigger: checksPass
     
     envVars:
       - key: PORT
@@ -70,6 +70,6 @@ services:
     plan: free
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: ./frontend
-    autoDeployTrigger: commit
+    autoDeployTrigger: checksPass
     
     healthCheckPath: /health
