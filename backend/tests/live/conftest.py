@@ -1,13 +1,13 @@
 """Fixtures and skip guard for live Render environment tests.
 
 All tests in backend/tests/live/ use the ``live`` pytest marker and
-are automatically skipped when RENDER_GATEWAY_URL is not set in the
-environment.  This keeps the suite safe for local offline runs and CI
-runs that do not have live Render credentials.
+are automatically skipped when neither RENDER_GATEWAY_URL nor RENDER_AGENT_URL
+is set in the environment.  This keeps the suite safe for local offline runs
+and CI runs that do not have live Render credentials.
 
-Required environment variables:
+Required environment variables (at least one must be set):
     RENDER_GATEWAY_URL   -- public URL of vecinita-gateway  (e.g. https://gateway.onrender.com)
-    RENDER_AGENT_URL     -- public URL of vecinita-agent    (optional, gateway used as routing)
+    RENDER_AGENT_URL     -- public URL of vecinita-agent    (e.g. https://vecinita-agent-lx27.onrender.com)
     RENDER_FRONTEND_URL  -- public URL of vecinita-frontend (optional)
 """
 
@@ -24,11 +24,15 @@ import requests
 
 
 def pytest_collection_modifyitems(items):
-    skip_marker = pytest.mark.skip(reason="RENDER_GATEWAY_URL not set — skipping live tests")
+    _has_gateway = bool(os.getenv("RENDER_GATEWAY_URL"))
+    _has_agent = bool(os.getenv("RENDER_AGENT_URL"))
+    skip_marker = pytest.mark.skip(
+        reason="Neither RENDER_GATEWAY_URL nor RENDER_AGENT_URL is set — skipping live tests"
+    )
     for item in items:
         if "live" in str(item.fspath):
             item.add_marker(pytest.mark.live)
-            if not os.getenv("RENDER_GATEWAY_URL"):
+            if not _has_gateway and not _has_agent:
                 item.add_marker(skip_marker)
 
 
@@ -62,9 +66,18 @@ def gateway_health_url(gateway_url: str) -> str:
 
 
 @pytest.fixture(scope="session")
-def agent_url(gateway_url: str) -> str:
-    """Agent URL; falls back to gateway if RENDER_AGENT_URL is not set."""
-    return os.environ.get("RENDER_AGENT_URL", gateway_url).rstrip("/")
+def agent_url() -> str:
+    """Agent service URL.
+
+    Resolution order:
+    1. ``RENDER_AGENT_URL`` env var (direct agent endpoint)
+    2. ``RENDER_GATEWAY_URL`` env var (gateway used as agent proxy)
+    3. Skip — neither variable is set.
+    """
+    url = os.environ.get("RENDER_AGENT_URL") or os.environ.get("RENDER_GATEWAY_URL", "")
+    if not url:
+        pytest.skip("Neither RENDER_AGENT_URL nor RENDER_GATEWAY_URL is set")
+    return url.rstrip("/")
 
 
 @pytest.fixture(scope="session")

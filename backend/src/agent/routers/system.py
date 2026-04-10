@@ -36,6 +36,12 @@ def privacy():
     policy_path = agent_main.Path(__file__).parent.parent.parent / "docs" / "PRIVACY_POLICY.md"
     if not policy_path.exists():
         policy_path = agent_main.Path(__file__).parents[4] / "docs" / "PRIVACY_POLICY.md"
-    if not policy_path.exists():
-        raise agent_main.HTTPException(status_code=404, detail="Privacy policy not found")
-    return agent_main.JSONResponse({"markdown": policy_path.read_text(encoding="utf-8")})
+    if policy_path.exists():
+        return agent_main.JSONResponse({"markdown": policy_path.read_text(encoding="utf-8")})
+
+    fallback_markdown = (
+        "# Privacy Policy\n\n"
+        "Privacy policy content is temporarily unavailable in this deployment.\n\n"
+        "For the latest policy text, contact the Vecinita team."
+    )
+    return agent_main.JSONResponse({"markdown": fallback_markdown})

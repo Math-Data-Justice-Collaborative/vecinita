@@ -3003,9 +3003,16 @@ def privacy():
     # Fallback to repo docs if local not found
     if not policy_path.exists():
         policy_path = Path(__file__).parents[3] / "docs" / "PRIVACY_POLICY.md"
-    if not policy_path.exists():
-        raise HTTPException(status_code=404, detail="Privacy policy not found")
-    return JSONResponse({"markdown": policy_path.read_text(encoding="utf-8")})
+    if policy_path.exists():
+        return JSONResponse({"markdown": policy_path.read_text(encoding="utf-8")})
+
+    # Keep API contract stable in environments where docs are not bundled.
+    fallback_markdown = (
+        "# Privacy Policy\n\n"
+        "Privacy policy content is temporarily unavailable in this deployment.\n\n"
+        "For the latest policy text, contact the Vecinita team."
+    )
+    return JSONResponse({"markdown": fallback_markdown})
 
 
 # --end-of-file--
