@@ -6,13 +6,11 @@ older imports functional while using the Postgres-only search path.
 
 import logging
 import os
-from typing import Any, cast
+from typing import cast
 
 from langchain_core.tools import tool
 
 from src.agent.tools.db_search import create_db_search_tool as _create_db_search_tool
-from src.agent.tools.db_search import get_last_search_metrics, get_last_search_status
-from src.agent.tools.db_search import reset_search_options, set_search_options
 
 logger = logging.getLogger(__name__)
 _DEFAULT_DB_SEARCH = None
@@ -39,7 +37,9 @@ def db_search_tool(query: str) -> str:
     """Search the internal knowledge base for relevant information."""
     global _DEFAULT_DB_SEARCH
     if _DEFAULT_DB_SEARCH is None:
-        embedding_model_name = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+        embedding_model_name = os.getenv(
+            "EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
+        )
         try:
             from langchain_huggingface import HuggingFaceEmbeddings
 

@@ -51,7 +51,10 @@ def test_get_agent_thinking_message_english(env_vars, monkeypatch):
 
 def test_get_agent_thinking_message_spanish(env_vars, monkeypatch):
     server = _import_server(env_vars, monkeypatch)
-    assert server.get_agent_thinking_message("db_search", "es") == "Revisando nuestros recursos locales..."
+    assert (
+        server.get_agent_thinking_message("db_search", "es")
+        == "Revisando nuestros recursos locales..."
+    )
 
 
 def test_get_agent_thinking_message_fallback(env_vars, monkeypatch):
@@ -67,6 +70,7 @@ def test_get_agent_thinking_message_spanish_unknown_tool(env_vars, monkeypatch):
 def test_agent_state_creation(env_vars, monkeypatch):
     _import_server(env_vars, monkeypatch)
     from langchain_core.messages import HumanMessage
+
     from src.services.agent.server import AgentState
 
     state = AgentState(
@@ -163,6 +167,7 @@ def test_get_llm_with_tools_unsupported_provider(env_vars, monkeypatch):
 def test_sanitize_human_message(env_vars, monkeypatch):
     _import_server(env_vars, monkeypatch)
     from langchain_core.messages import HumanMessage
+
     from src.services.agent.server import _sanitize_messages
 
     messages = [HumanMessage(content="test")]
@@ -174,6 +179,7 @@ def test_sanitize_human_message(env_vars, monkeypatch):
 def test_sanitize_tool_message_with_list_content(env_vars, monkeypatch):
     _import_server(env_vars, monkeypatch)
     from langchain_core.messages import AIMessage, ToolMessage
+
     from src.services.agent.server import _sanitize_messages
 
     messages = [

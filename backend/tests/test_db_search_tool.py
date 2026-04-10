@@ -338,9 +338,7 @@ def test_db_search_prefers_postgres_when_database_url_present(monkeypatch, mock_
     assert postgres_mock.called
 
 
-def test_db_search_tag_filter_uses_postgres_only(
-    monkeypatch, mock_embedding_model
-):
+def test_db_search_tag_filter_uses_postgres_only(monkeypatch, mock_embedding_model):
     mock_store = Mock()
     mock_store.query_chunks.side_effect = RuntimeError("primary store unavailable")
     postgres_mock = Mock(

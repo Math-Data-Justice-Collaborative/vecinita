@@ -6,13 +6,9 @@ from collections import Counter
 from typing import Any
 
 try:
-    from langdetect import LangDetectException, detect  # type: ignore[import-not-found]
+    from langdetect import detect as _detect  # type: ignore[import-untyped]
 except Exception:  # pragma: no cover - fallback for minimal test envs
-    class LangDetectException(Exception):
-        pass
-
-    def detect(_text: str) -> str:
-        raise LangDetectException("langdetect unavailable")
+    _detect = None
 
 
 SUPPORTED_LANGUAGE_CODES = {"en", "es", "pt", "fr"}
@@ -93,10 +89,11 @@ def detect_language_code(text: str | None) -> str:
     if len(sample) < 24:
         return _heuristic_language_code(sample)
 
-    try:
-        return normalize_language_code(detect(sample))
-    except LangDetectException:
+    if _detect is None:
         return _heuristic_language_code(sample)
+
+    try:
+        return normalize_language_code(_detect(sample))
     except Exception:
         return _heuristic_language_code(sample)
 
@@ -108,10 +105,14 @@ def infer_resource_language_metadata(
     metadata = dict(existing_metadata or {})
 
     detected_codes = [
-        code for code in (detect_language_code(text) for text in (sample_texts or [])) if code != "unknown"
+        code
+        for code in (detect_language_code(text) for text in (sample_texts or []))
+        if code != "unknown"
     ]
     existing_primary_code = normalize_language_code(
-        metadata.get("primary_language_code") or metadata.get("primary_language") or metadata.get("language")
+        metadata.get("primary_language_code")
+        or metadata.get("primary_language")
+        or metadata.get("language")
     )
 
     counter = Counter(detected_codes)

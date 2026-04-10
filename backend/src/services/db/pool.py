@@ -81,7 +81,9 @@ class DatabaseConnectionPool:
         if not DATABASE_URL:
             raise RuntimeError("Database not configured. Set DATABASE_URL.")
         if psycopg2 is None:
-            raise RuntimeError("Database not configured. Install psycopg2 to enable Postgres access.")
+            raise RuntimeError(
+                "Database not configured. Install psycopg2 to enable Postgres access."
+            )
 
         try:
             self._client = DATABASE_URL

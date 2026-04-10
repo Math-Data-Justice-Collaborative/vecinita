@@ -34,7 +34,7 @@ def _fetch_rows(query: str, params: tuple[Any, ...] = ()) -> list[dict[str, Any]
             if not cur.description:
                 return []
             columns = [column[0] for column in cur.description]
-            return [dict(zip(columns, row)) for row in cur.fetchall()]
+            return [dict(zip(columns, row, strict=False)) for row in cur.fetchall()]
 
 
 @router.get("/test-db-search")

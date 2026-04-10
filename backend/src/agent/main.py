@@ -601,9 +601,11 @@ def _probe_postgres_connectivity() -> tuple[bool, str]:
             or "could not resolve host" in error_text
         )
 
-        if database_host and _is_render_internal_postgres_host(
+        if (
             database_host
-        ) and has_name_resolution_error:
+            and _is_render_internal_postgres_host(database_host)
+            and has_name_resolution_error
+        ):
             return (
                 False,
                 "error: render_internal_host_unresolvable_outside_render"

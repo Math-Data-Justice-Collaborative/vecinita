@@ -154,11 +154,11 @@ def _normalize_public_source(raw: dict[str, Any]) -> dict[str, Any]:
         or "Unknown"
     )
     primary_language_code = str(
-        raw.get("primary_language_code")
-        or metadata.get("primary_language_code")
-        or "unknown"
+        raw.get("primary_language_code") or metadata.get("primary_language_code") or "unknown"
     )
-    available_languages = raw.get("available_languages") or metadata.get("available_languages") or []
+    available_languages = (
+        raw.get("available_languages") or metadata.get("available_languages") or []
+    )
     if not isinstance(available_languages, list):
         available_languages = [language] if language else []
     is_bilingual = bool(raw.get("is_bilingual") or metadata.get("is_bilingual"))
@@ -635,10 +635,7 @@ async def documents_tags(
             metadata = _metadata_dict(row.get("metadata"))
             source_url = str(metadata.get("source_url") or "")
             tags = normalize_tags(
-                metadata.get("tags")
-                or metadata.get("tags_en")
-                or metadata.get("tags_es")
-                or []
+                metadata.get("tags") or metadata.get("tags_en") or metadata.get("tags_es") or []
             )
             if not include_test_data and _is_test_artifact(source_url, tags):
                 continue

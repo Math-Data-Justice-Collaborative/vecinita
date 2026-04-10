@@ -263,7 +263,9 @@ class TestStartupWithValidConfiguration:
 
         with patch("src.config.resolve_data_db_mode", return_value="postgres"):
             with patch.object(
-                agent_main, "_probe_postgres_connectivity", return_value=(False, "database_url_not_configured")
+                agent_main,
+                "_probe_postgres_connectivity",
+                return_value=(False, "database_url_not_configured"),
             ):
                 result = agent_main._run_startup_preflight()
 

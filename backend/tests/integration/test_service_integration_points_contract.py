@@ -167,7 +167,9 @@ def test_ip05_gateway_to_reindex_route_forwards_token_and_params(monkeypatch) ->
 
     response = client.post("/api/v1/scrape/reindex?clean=true&verbose=true")
     assert response.status_code == 200
-    assert captured["url"] == "https://vecinita--vecinita-scraper-api-fastapi.modal.run/jobs/reindex"
+    assert (
+        captured["url"] == "https://vecinita--vecinita-scraper-api-fastapi.modal.run/jobs/reindex"
+    )
     assert captured["params"] == {"clean": True, "stream": True, "verbose": True}
     assert captured["headers"] == {"x-reindex-token": "reindex-secret"}
 

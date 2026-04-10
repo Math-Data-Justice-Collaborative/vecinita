@@ -18,7 +18,9 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[3]
 RENDER_YAML = REPO_ROOT / "render.yaml"
 RENDER_STAGING_YAML = REPO_ROOT / "render.staging.yaml"
+RENDER_BLUEPRINT_YAML = REPO_ROOT / "render.blueprint.yaml"
 GATEWAY_DOCKERFILE = REPO_ROOT / "backend" / "Dockerfile.gateway"
+GATEWAY_START_SCRIPT = REPO_ROOT / "backend" / "scripts" / "start_gateway_render.sh"
 
 pytestmark = pytest.mark.render_connectivity
 
@@ -180,7 +182,7 @@ def test_allowed_origins_read_from_correct_env_key():
 
 
 # ---------------------------------------------------------------------------
-# 6. Gateway blueprint must rely on Dockerfile CMD and dedicated gateway image
+# 6. Gateway blueprint must use the dedicated gateway image and safe start script
 # ---------------------------------------------------------------------------
 
 
@@ -189,9 +191,10 @@ def test_allowed_origins_read_from_correct_env_key():
     [
         (RENDER_YAML, "vecinita-gateway"),
         (RENDER_STAGING_YAML, "vecinita-gateway-staging"),
+        (RENDER_BLUEPRINT_YAML, "vecinita-gateway"),
     ],
 )
-def test_gateway_services_use_gateway_dockerfile_without_command_override(
+def test_gateway_services_use_gateway_dockerfile_with_safe_start_script(
     render_yaml_path: Path, service_name: str
 ):
     data = _load_yaml(render_yaml_path)
@@ -201,11 +204,17 @@ def test_gateway_services_use_gateway_dockerfile_without_command_override(
     assert svc.get("dockerfilePath") == "./backend/Dockerfile.gateway"
     assert svc.get("dockerContext") == "./backend"
     assert (
-        "dockerCommand" not in svc
-    ), f"{service_name} should rely on Dockerfile CMD; Render already uses Dockerfile CMD by default"
+        svc.get("dockerCommand") == "/bin/sh ./scripts/start_gateway_render.sh"
+    ), f"{service_name} must use the dedicated gateway start script to avoid Render Docker command quoting issues"
 
 
 def test_gateway_dockerfile_cmd_starts_uvicorn_on_render_port():
     dockerfile_text = GATEWAY_DOCKERFILE.read_text()
-    assert "CMD [\"sh\", \"-c\"" in dockerfile_text
-    assert "uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT:-10000}" in dockerfile_text
+    assert 'CMD ["sh", "./scripts/start_gateway_render.sh"]' in dockerfile_text
+
+
+def test_gateway_start_script_execs_uvicorn_on_render_port():
+    script_text = GATEWAY_START_SCRIPT.read_text()
+    assert "exec uvicorn src.api.main:app" in script_text
+    assert "--host 0.0.0.0" in script_text
+    assert '--port "${PORT:-10000}"' in script_text

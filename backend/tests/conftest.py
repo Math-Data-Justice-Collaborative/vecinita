@@ -46,7 +46,7 @@ def _agent_module_path_compatibility():
     import importlib.machinery
     import sys
     import types
-    from unittest.mock import MagicMock, Mock
+    from unittest.mock import Mock
 
     # Avoid importing broken/binary torch during test module import.
     if "torch" not in sys.modules:

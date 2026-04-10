@@ -172,6 +172,8 @@ services:
     plan: starter
     dockerfilePath: ./backend/Dockerfile.gateway
     dockerContext: ./backend
+
+    dockerCommand: /bin/sh ./scripts/start_gateway_render.sh
     autoDeployTrigger: off
     healthCheckPath: /health
     envVars:

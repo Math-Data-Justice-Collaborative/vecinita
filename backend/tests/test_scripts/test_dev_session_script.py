@@ -72,16 +72,13 @@ def test_dev_session_manages_expected_ports() -> None:
 def test_dev_session_prefers_direct_or_local_model_endpoints() -> None:
     content = _script_text()
     assert "AGENT_ENFORCE_ROUTE='true'" not in content
-    assert (
-        "DEFAULT_MODAL_MODEL_URL=\"https://vecinita--vecinita-model-api.modal.run\""
-        in content
-    )
+    assert 'DEFAULT_MODAL_MODEL_URL="https://vecinita--vecinita-model-api.modal.run"' in content
     assert (
         "VECINITA_MODEL_API_URL:-\\${MODAL_OLLAMA_ENDPOINT:-\\${OLLAMA_BASE_URL:-$DEFAULT_MODAL_MODEL_URL}}"
         in content
     )
     assert (
-        "DEFAULT_MODAL_EMBEDDING_URL=\"https://vecinita--vecinita-embedding-web-app.modal.run\""
+        'DEFAULT_MODAL_EMBEDDING_URL="https://vecinita--vecinita-embedding-web-app.modal.run"'
         in content
     )
     assert (
@@ -98,7 +95,9 @@ def test_dev_session_warns_instead_of_exiting_on_readiness_timeout() -> None:
 
 def test_dev_session_uses_embedding_token_resolution_without_route_helper() -> None:
     content = _script_text()
-    assert "SERVICE_AUTH_TOKEN='\\${SERVICE_AUTH_TOKEN:-vecinita-local-service-token}'" not in content
+    assert (
+        "SERVICE_AUTH_TOKEN='\\${SERVICE_AUTH_TOKEN:-vecinita-local-service-token}'" not in content
+    )
     assert "resolve_route_auth_token()" not in content
     assert "resolve_local_embed_token()" in content
     assert 'embed_token="$(resolve_local_embed_token)"' in content

@@ -22,11 +22,16 @@ When Docker runtime is correct but startup is overridden incorrectly, deploys ma
 
 This specific failure is caused by an invalid `dockerCommand` override. For Docker services, Render uses the Dockerfile `CMD` by default. Only set `dockerCommand` when you intentionally need to replace `CMD`, and when you do, use a command format Render can execute directly.
 
+Current repository hardening:
+- gateway Dockerfile `CMD` runs `backend/scripts/start_gateway_render.sh`
+- all gateway blueprint variants set `dockerCommand: /bin/sh ./scripts/start_gateway_render.sh`
+- regression tests verify `render.yaml`, `render.staging.yaml`, and `render.blueprint.yaml` stay aligned
+
 ## Preflight
 
 1. Confirm gateway runtime in Render Dashboard is Docker for both environments.
 2. Confirm the gateway service uses `backend/Dockerfile.gateway` instead of the generic backend Dockerfile.
-3. Confirm the gateway service does not set a `dockerCommand` override unless there is a deliberate need to replace the Dockerfile `CMD`.
+3. Confirm the gateway service Docker Command is `/bin/sh ./scripts/start_gateway_render.sh`.
 4. Confirm Render service IDs are set as GitHub secrets:
 - RENDER_STAGING_GATEWAY_SERVICE_ID
 - RENDER_GATEWAY_SERVICE_ID

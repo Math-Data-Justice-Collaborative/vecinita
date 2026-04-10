@@ -53,7 +53,9 @@ async def test_initialize_raises_when_config_missing(monkeypatch):
 async def test_initialize_sets_client_and_status(monkeypatch):
     db_pool = pool.DatabaseConnectionPool()
     monkeypatch.setattr(pool, "DATABASE_URL", "postgresql://user:pass@localhost:5432/db")
-    monkeypatch.setattr(pool, "psycopg2", SimpleNamespace(connect=lambda *_args, **_kwargs: _FakeConnection()))
+    monkeypatch.setattr(
+        pool, "psycopg2", SimpleNamespace(connect=lambda *_args, **_kwargs: _FakeConnection())
+    )
 
     async def _fake_health_loop():
         await asyncio.sleep(0)

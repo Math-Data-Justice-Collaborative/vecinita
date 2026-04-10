@@ -248,7 +248,9 @@ class TestGatewayRootEndpoints:
         assert data["embedding_service"] == "ok"
         assert data["database"] == "ok"
 
-    def test_health_check_reports_degraded_when_agent_probe_fails(self, gateway_client, monkeypatch):
+    def test_health_check_reports_degraded_when_agent_probe_fails(
+        self, gateway_client, monkeypatch
+    ):
         """Gateway reports degraded when the agent dependency probe fails."""
         import src.api.main as gateway_main
 

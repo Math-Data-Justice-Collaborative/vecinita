@@ -35,6 +35,7 @@ _SEARCH_METRICS: ContextVar[dict[str, Any] | None] = ContextVar(
     default=None,
 )
 
+
 def _update_search_status(status: str) -> None:
     global _LAST_SEARCH_STATUS
     _LAST_SEARCH_STATUS = str(status)
@@ -118,6 +119,7 @@ def _rerank_results(query: str, docs: list[dict[str, Any]], top_k: int) -> list[
 
 def _postgres_reads_enabled() -> bool:
     return app_config.postgres_data_reads_enabled()
+
 
 def _normalize_document(doc: dict[str, Any]) -> dict[str, Any]:
     metadata: dict[str, Any] = doc.get("metadata") if isinstance(doc.get("metadata"), dict) else {}  # type: ignore[assignment]

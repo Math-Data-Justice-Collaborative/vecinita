@@ -14,41 +14,53 @@ dependencies = [
     # Web Framework
     "fastapi",
     "uvicorn",
+    "aiohttp>=3.13.4",
     # LangChain & LangGraph
     "langchain",
     "langchain-community",
-    "langchain-core",
+    "langchain-core>=1.2.28",
     "langchain-tavily",
     "langchain-text-splitters",
     "langchain-huggingface",
-    "langgraph",
+    "langgraph>=1.0.10",
+    "langgraph-checkpoint>=4.0.0",
     # Database & Vector Store
     "psycopg2-binary",
     # Document Processing (lightweight only - playwright/unstructured in scraping extra)
     "beautifulsoup4",
-    "pypdf",
+    "pillow>=12.1.1; python_version < '3.13'",
+    "pypdf>=6.9.2",
     # Utilities
+    "cryptography>=46.0.7",
+    "filelock>=3.20.3",
     "python-dotenv",
     "pydantic",
-    "requests",
+    "requests>=2.33.0",
+    "urllib3>=2.6.3",
     "httpx",
-    "python-multipart",
+    "python-multipart>=0.0.22",
     "langdetect",
     "tqdm",
+    "protobuf>=6.33.5",
+    "pygments>=2.20.0",
+    "pyjwt>=2.12.0",
+    "marshmallow>=3.26.2",
+    "orjson>=3.11.6",
     "gotrue>=2.0.0",
     "langchain-ollama>=1.0.0",
     # GuardrailsAI for input/output validation
     "guardrails-ai>=0.5.0",
+    "litellm>=1.83.0",
     # LangSmith for tracing and monitoring (now compatible with numpy 2.x)
-    "langsmith>=0.4.56",
+    "langsmith>=0.6.3",
     # Pin onnxruntime and tokenizers to stable versions to avoid Windows compatibility issues
     # onnxruntime dev releases don't have Windows wheels
     # tokenizers pre-releases require Rust compilation
     "onnxruntime>=1.18.0,<1.24.0.dev; sys_platform == 'win32'",
-    "tokenizers>=0.15.0,<0.22.0rc",
+    "tokenizers>=0.22.0,<0.23.0",
     "ddgs>=9.10.0",
     # Keep optional local embedding fallback available without scraping extras.
-    "transformers>=4.55.4",
+    "transformers>=5.0.0rc3",
 ]
 
 [project.optional-dependencies]

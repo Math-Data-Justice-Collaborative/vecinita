@@ -218,21 +218,21 @@ async def _probe_database_dependency(
         health_url=None,
         response_time_ms=elapsed_ms,
         detail=(
-            "database socket probe succeeded"
-            if status == "ok"
-            else "database socket probe failed"
+            "database socket probe succeeded" if status == "ok" else "database socket probe failed"
         ),
     )
 
 
 async def _build_integrations_status() -> IntegrationsStatus:
     """Build an aggregated integrations status payload for operators and deploy checks."""
-    agent_status, embedding_status, database_status, scraper_status, model_status = await asyncio.gather(
-        _probe_http_dependency("agent", AGENT_SERVICE_URL, critical=True),
-        _probe_http_dependency("embedding service", EMBEDDING_SERVICE_URL, critical=True),
-        _probe_database_dependency(DATABASE_URL, critical=True),
-        _probe_http_dependency("scraper service", SCRAPER_ENDPOINT, critical=False),
-        _probe_http_dependency("model service", MODEL_ENDPOINT, critical=False),
+    agent_status, embedding_status, database_status, scraper_status, model_status = (
+        await asyncio.gather(
+            _probe_http_dependency("agent", AGENT_SERVICE_URL, critical=True),
+            _probe_http_dependency("embedding service", EMBEDDING_SERVICE_URL, critical=True),
+            _probe_database_dependency(DATABASE_URL, critical=True),
+            _probe_http_dependency("scraper service", SCRAPER_ENDPOINT, critical=False),
+            _probe_http_dependency("model service", MODEL_ENDPOINT, critical=False),
+        )
     )
 
     components = {
@@ -274,6 +274,7 @@ async def _build_integrations_status() -> IntegrationsStatus:
         degraded_integrations=degraded_integrations,
         timestamp=datetime.now(timezone.utc),
     )
+
 
 # ============================================================================
 # FastAPI Application
