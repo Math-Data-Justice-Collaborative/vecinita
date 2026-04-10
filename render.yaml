@@ -183,7 +183,6 @@ services:
     plan: starter
     dockerfilePath: ./backend/Dockerfile.gateway
     dockerContext: ./backend
-    dockerCommand: sh -c 'uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT:-10000}'
     autoDeployTrigger: off
     healthCheckPath: /health
     envVars:

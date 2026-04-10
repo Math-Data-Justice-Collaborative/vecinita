@@ -15,14 +15,22 @@ When runtime drifts to non-Docker/native, builds may fail with this pattern:
 - maturin/cargo write into read-only filesystem
 - build ends with metadata-generation-failed for py-rust-stemmers
 
+When Docker runtime is correct but startup is overridden incorrectly, deploys may fail with this pattern:
+- image build completes successfully
+- Render begins deploy and never opens the HTTP port
+- logs show `sh: 1: uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT:-10000}: not found`
+
+This specific failure is caused by an invalid `dockerCommand` override. For Docker services, Render uses the Dockerfile `CMD` by default. Only set `dockerCommand` when you intentionally need to replace `CMD`, and when you do, use a command format Render can execute directly.
+
 ## Preflight
 
 1. Confirm gateway runtime in Render Dashboard is Docker for both environments.
 2. Confirm the gateway service uses `backend/Dockerfile.gateway` instead of the generic backend Dockerfile.
-3. Confirm Render service IDs are set as GitHub secrets:
+3. Confirm the gateway service does not set a `dockerCommand` override unless there is a deliberate need to replace the Dockerfile `CMD`.
+4. Confirm Render service IDs are set as GitHub secrets:
 - RENDER_STAGING_GATEWAY_SERVICE_ID
 - RENDER_GATEWAY_SERVICE_ID
-4. Confirm Render API key secret exists:
+5. Confirm Render API key secret exists:
 - RENDER_API_KEY
 
 ## Automated Guardrail

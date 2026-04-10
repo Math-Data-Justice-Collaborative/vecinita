@@ -17,6 +17,8 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 RENDER_YAML = REPO_ROOT / "render.yaml"
+RENDER_STAGING_YAML = REPO_ROOT / "render.staging.yaml"
+GATEWAY_DOCKERFILE = REPO_ROOT / "backend" / "Dockerfile.gateway"
 
 pytestmark = pytest.mark.render_connectivity
 
@@ -26,8 +28,12 @@ pytestmark = pytest.mark.render_connectivity
 # ---------------------------------------------------------------------------
 
 
+def _load_yaml(path: Path) -> dict:
+    return yaml.safe_load(path.read_text())
+
+
 def _load_render_yaml() -> dict:
-    return yaml.safe_load(RENDER_YAML.read_text())
+    return _load_yaml(RENDER_YAML)
 
 
 def _find_service(data: dict, name: str) -> dict | None:
@@ -171,3 +177,35 @@ def test_allowed_origins_read_from_correct_env_key():
         origins = get_allowed_origins()
         assert "https://app.example.com" in origins
         assert "https://wrong.example.com" not in origins
+
+
+# ---------------------------------------------------------------------------
+# 6. Gateway blueprint must rely on Dockerfile CMD and dedicated gateway image
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("render_yaml_path", "service_name"),
+    [
+        (RENDER_YAML, "vecinita-gateway"),
+        (RENDER_STAGING_YAML, "vecinita-gateway-staging"),
+    ],
+)
+def test_gateway_services_use_gateway_dockerfile_without_command_override(
+    render_yaml_path: Path, service_name: str
+):
+    data = _load_yaml(render_yaml_path)
+    svc = _find_service(data, service_name)
+    assert svc is not None, f"{service_name} not found in {render_yaml_path.name}"
+    assert svc.get("runtime") == "docker"
+    assert svc.get("dockerfilePath") == "./backend/Dockerfile.gateway"
+    assert svc.get("dockerContext") == "./backend"
+    assert (
+        "dockerCommand" not in svc
+    ), f"{service_name} should rely on Dockerfile CMD; Render already uses Dockerfile CMD by default"
+
+
+def test_gateway_dockerfile_cmd_starts_uvicorn_on_render_port():
+    dockerfile_text = GATEWAY_DOCKERFILE.read_text()
+    assert "CMD [\"sh\", \"-c\"" in dockerfile_text
+    assert "uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT:-10000}" in dockerfile_text
