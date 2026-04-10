@@ -280,6 +280,64 @@ services:
       - key: VECTOR_SYNC_TARGET
         sync: false
 
+  - type: web
+    name: vecinita-data-management-frontend-v1-staging
+    runtime: docker
+    region: virginia
+    plan: starter
+    dockerfilePath: ./apps/data-management-frontend/Dockerfile
+    dockerContext: ./apps/data-management-frontend
+    autoDeployTrigger: off
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: VITE_VECINITA_SCRAPER_API_URL
+        sync: false
+      - key: VITE_VECINITA_MODEL_API_URL
+        sync: false
+      - key: VITE_VECINITA_EMBEDDING_API_URL
+        sync: false
+      - key: VITE_DEFAULT_SCRAPER_USER_ID
+        sync: false
+
+  - type: web
+    name: vecinita-data-management-api-v1-staging
+    runtime: docker
+    region: virginia
+    plan: starter
+    dockerfilePath: ./services/data-management-api/apps/backend/scraper-service/Dockerfile
+    dockerContext: ./services/data-management-api/apps/backend/scraper-service
+    autoDeployTrigger: off
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: DATABASE_URL
+        sync: false
+      - key: MODAL_TOKEN_ID
+        sync: false
+      - key: MODAL_TOKEN_SECRET
+        sync: false
+      - key: MODAL_WORKSPACE
+        sync: false
+      - key: VECINITA_MODEL_API_URL
+        sync: false
+      - key: VECINITA_EMBEDDING_API_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SCRAPER_API_KEYS
+        sync: false
+      - key: SCRAPER_DEBUG_BYPASS_AUTH
+        value: "false"
+      - key: ENVIRONMENT
+        value: staging
+      - key: LOG_LEVEL
+        value: INFO
+      - key: UPSTREAM_TIMEOUT_SECONDS
+        value: "55"
+
 databases:
   - name: vecinita-postgres-staging
     region: virginia

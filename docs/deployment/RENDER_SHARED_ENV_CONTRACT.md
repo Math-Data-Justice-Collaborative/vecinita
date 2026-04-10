@@ -13,26 +13,27 @@ Use these template files as the authoritative key sets for CI contract/parity ch
 
 ---
 
-## vecinita-data-management-frontend (Render Static Site)
+## vecinita-data-management-frontend-v1 (Render Web Service)
 
-VITE_* variables are baked into the JavaScript bundle at **build time** by Vite. Changing
-them requires a new deploy; they cannot be injected at runtime.
+This frontend image writes runtime config to `dist/env.js` at container startup,
+so `VITE_*` values can be provided as runtime environment variables without
+rebuilding the image.
 
 | Variable | Required | Description |
 |---|---|---|
-| `VITE_VECINITA_SCRAPER_API_URL` | **Required** | Public URL of the `vecinita-modal-proxy` Render web service (e.g. `https://vecinita-modal-proxy.onrender.com`). No production fallback — if unset, the "Scraper API not configured" banner will appear for all users. |
+| `VITE_VECINITA_SCRAPER_API_URL` | **Required** | Public URL of the `vecinita-data-management-api-v1` Render web service (or staging equivalent). No production fallback — if unset, the "Scraper API not configured" banner will appear for all users. |
 | `VITE_DEFAULT_SCRAPER_USER_ID` | Optional | Default user ID submitted with scraping jobs. Defaults to `frontend-user` if absent. |
 
 > **Naming note:** `VITE_VECINITA_SCRAPER_API_URL` is the historical name for the
 > data-management API base URL. Despite the `SCRAPER` in the name, it points at the
-> proxy service, not directly at the Modal scraper endpoint.
+> data-management API web service, not directly at the Modal scraper endpoint.
 
 ---
 
-## vecinita-modal-proxy (Render Web Service — the Data Management API)
+## vecinita-data-management-api-v1 (Render Web Service — the Data Management API)
 
-The proxy is a FastAPI service that authenticates requests and routes them to Modal-deployed
-backends. All variables below are runtime environment variables.
+This service is a FastAPI API that authenticates requests and routes them to
+Modal-deployed backends. All variables below are runtime environment variables.
 
 | Variable | Required | Description |
 |---|---|---|
@@ -50,9 +51,9 @@ backends. All variables below are runtime environment variables.
 | `BACKEND_ROUTE_RULES_JSON` | Optional | JSON array of custom route rules overriding defaults. |
 
 > **Region and CORS setup order (critical):**
-> 1. Create the `vecinita-modal-proxy` web service first — you need its public URL before configuring the frontend.
-> 2. Create the `vecinita-data-management-frontend` static site and set `VITE_VECINITA_SCRAPER_API_URL` to the proxy URL from step 1.
-> 3. Return to `vecinita-modal-proxy` and set `CORS_ORIGINS` to the frontend URL from step 2.
+> 1. Deploy `vecinita-data-management-api-v1` (and staging equivalent) first.
+> 2. Deploy `vecinita-data-management-frontend-v1` and set `VITE_VECINITA_SCRAPER_API_URL` to the API URL.
+> 3. Set `CORS_ORIGINS` on the API service to the frontend URL for the same environment.
 
 ---
 
@@ -82,11 +83,11 @@ Each service repo that uses a Render deploy hook (`curl POST $RENDER_DEPLOY_HOOK
 
 | GitHub Repository | Where to set | Connects to |
 |---|---|---|
-| `Math-Data-Justice-Collaborative/vecinita-data-management` | Repo Settings → Secrets → Actions | `vecinita-modal-proxy` deploy hook |
-| `Math-Data-Justice-Collaborative/vecinita-data-management-frontend` | Repo Settings → Secrets → Actions | `vecinita-data-management-frontend` deploy hook |
+| `Math-Data-Justice-Collaborative/vecinita-data-management` | Repo Settings → Secrets → Actions | `vecinita-data-management-api-v1` deploy hook |
+| `Math-Data-Justice-Collaborative/vecinita-data-management-frontend` | Repo Settings → Secrets → Actions | `vecinita-data-management-frontend-v1` deploy hook |
 | `joseph-c-mcguire/Vecinitafrontend` | Repo Settings → Secrets → Actions | `vecinita-frontend` deploy hook |
 
-> The `vecinita-data-management` repo's `deploy.yml` triggers the proxy's Render deploy hook
-> (not a deploy of the monorepo itself, which has no Render service). Wire the proxy hook URL
-> into `vecinita-data-management`'s `RENDER_DEPLOY_HOOK_URL` secret so the orchestrator's
-> `deploy_data_management_api` input deploys the proxy as intended.
+> The `vecinita-data-management` repo's `deploy.yml` should trigger the data-management API
+> Render deploy hook. Wire the API hook URL into
+> `vecinita-data-management`'s `RENDER_DEPLOY_HOOK_URL` secret so the orchestrator's
+> `deploy_data_management_api` input deploys the API service as intended.
