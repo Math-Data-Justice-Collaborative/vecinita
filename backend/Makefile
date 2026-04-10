@@ -31,7 +31,10 @@ test-acceptance-gateway-ask:
 	uv run pytest tests/integration/test_gateway_ask_acceptance.py -q
 
 test-schema:
-	SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_api_schema_schemathesis.py -q
+	SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
+		tests/integration/test_api_schema_schemathesis.py \
+		tests/integration/test_agent_api_schema_schemathesis.py \
+		-q
 
 test-schema-cli:
 	bash scripts/run_schemathesis_live.sh

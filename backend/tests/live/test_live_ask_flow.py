@@ -16,14 +16,15 @@ _SPANISH_QUESTION = "¿Qué programas ambientales hay disponibles en Boyle Heigh
 
 
 def _ask(gateway_url: str, question: str, *, timeout: int = 60) -> dict:
-    resp = requests.post(
+    # Gateway exposes GET /api/v1/ask with question as a query param (see router_ask.py).
+    resp = requests.get(
         f"{gateway_url}/api/v1/ask",
-        json={"question": question},
+        params={"question": question},
         timeout=timeout,
     )
     assert (
         resp.status_code == 200
-    ), f"POST /api/v1/ask returned {resp.status_code}: {resp.text[:200]}"
+    ), f"GET /api/v1/ask returned {resp.status_code}: {resp.text[:200]}"
     return resp.json()
 
 

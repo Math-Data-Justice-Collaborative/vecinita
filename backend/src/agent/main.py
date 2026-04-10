@@ -1,12 +1,12 @@
 """Vecinita Agent — FastAPI RAG Q&A Service.
 
 This module is the primary entry point for the Vecinita LangGraph-powered
-RAG (Retrieval-Augmented Generation) agent.  It exposes three main endpoints:
+RAG (Retrieval-Augmented Generation) agent. Core HTTP surfaces include:
 
-- ``GET /ask``        — synchronous question answering with source attribution
-- ``GET /ask-stream`` — streaming (SSE) question answering with live agent
-                        activity updates (thinking / clarification / complete)
-- ``GET /config``     — LLM provider/model discovery for the frontend
+- ``GET /ask`` / ``GET /ask/stream`` — synchronous and streaming Q&A
+- ``GET /config`` — LLM provider/model discovery for the frontend
+- ``GET /health`` — process health and optional preflight diagnostics
+- ``GET /openapi.json`` — OpenAPI schema (``/docs`` for Swagger)
 
 Deployment routing (Render)
 ---------------------------
@@ -56,13 +56,13 @@ from typing import Annotated, Any, Literal, TypedDict
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage, ToolMessage
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 # Optional fallback embedding class; imported lazily only when needed.
 FastEmbedEmbeddings = None
@@ -195,8 +195,62 @@ def _get_hf_embeddings_class():
         return None
 
 
+# --- OpenAPI response shapes (stable JSON surfaces for docs / Schemathesis) ---
+
+
+class AgentRootInfo(BaseModel):
+    """`GET /` service discovery payload."""
+
+    service: str
+    status: str
+    version: str
+    endpoints: dict[str, str]
+    message: str
+
+
+class AgentHealthResponse(BaseModel):
+    """`GET /health` payload; `preflight` mirrors optional startup diagnostics."""
+
+    model_config = ConfigDict(extra="allow")
+
+    status: str
+    readiness: str
+
+
+class PrivacyMarkdownPayload(BaseModel):
+    """`GET /privacy` JSON body."""
+
+    markdown: str
+
+
+class ModelSelectionGetApiResponse(BaseModel):
+    """`GET /model-selection` — `current` plus the same keys as `GET /config` for `available`."""
+
+    model_config = ConfigDict(extra="allow")
+
+    current: dict[str, Any]
+
+
+class AgentLlmConfigApiResponse(BaseModel):
+    """`GET /config` — LLM catalog plus `runtime` tuning block."""
+
+    model_config = ConfigDict(extra="allow")
+
+    providers: list[Any] = Field(default_factory=list)
+
+
 # --- Initialize FastAPI App ---
-app = FastAPI()
+app = FastAPI(
+    title="Vecinita Agent API",
+    description=(
+        "LangGraph RAG Q&A service: synchronous and streaming answers, LLM config discovery, "
+        "and limited operator diagnostics."
+    ),
+    version="2.0",
+    openapi_url="/openapi.json",
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
 
 # --- Add CORS Middleware ---
 # Allow callers to restrict origins via env var.  Defaults to wildcard so
@@ -486,25 +540,29 @@ def _probe_postgres_schema(cur: Any) -> tuple[bool, str]:
     if not sources_regclass or sources_regclass[0] is None:
         return False, "missing_table_sources"
 
-    cur.execute("""
+    cur.execute(
+        """
         SELECT udt_name
         FROM information_schema.columns
         WHERE table_schema = 'public'
           AND table_name = 'document_chunks'
           AND column_name = 'embedding'
-        """)
+        """
+    )
     embedding_column = cur.fetchone()
     if not embedding_column:
         return False, "missing_column_document_chunks.embedding"
     if str(embedding_column[0]).lower() != "vector":
         return False, f"invalid_column_type_document_chunks.embedding:{embedding_column[0]}"
 
-    cur.execute("""
+    cur.execute(
+        """
         SELECT 1
         FROM pg_proc
         WHERE proname = 'search_similar_documents'
         LIMIT 1
-        """)
+        """
+    )
     if cur.fetchone() is None:
         return False, "missing_function_search_similar_documents"
 
@@ -2050,7 +2108,7 @@ def _find_static_faq_answer(question: str, language: str) -> str | None:
 # --- THIS IS THE NEW ROOT ENDPOINT ---
 
 
-@app.get("/")
+@app.get("/", response_model=AgentRootInfo, tags=["Meta"])
 async def get_root():
     """Returns API information and available endpoints."""
     return {
@@ -2070,7 +2128,7 @@ async def get_root():
 # --- Favicon endpoint removed - using separate React frontend ---
 
 
-@app.get("/health")
+@app.get("/health", response_model=AgentHealthResponse, tags=["Health"])
 async def health():
     """Simple healthcheck endpoint used by Docker Compose."""
     preflight = getattr(app.state, "preflight", None)
@@ -2086,7 +2144,7 @@ async def health():
     }
 
 
-@app.get("/test-db-search")
+@app.get("/test-db-search", tags=["Diagnostics"])
 def test_db_search(query: str = "community resources"):
     """Test database search functionality and return diagnostic info.
 
@@ -2300,7 +2358,7 @@ def _response_payload(
     return payload
 
 
-@app.get("/db-info")
+@app.get("/db-info", tags=["Diagnostics"])
 def get_db_info():
     """Get basic database information for debugging.
 
@@ -2384,7 +2442,7 @@ def get_db_info():
         return {"status": "error", "error": str(e), "error_type": type(e).__name__}
 
 
-@app.get("/ask")
+@app.get("/ask", tags=["Q&A"])
 async def ask_question(
     question: str | None = Query(default=None),
     query: str | None = Query(default=None),
@@ -2621,8 +2679,8 @@ async def ask_question(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@app.get("/ask-stream")
-@app.get("/ask/stream")
+@app.get("/ask-stream", tags=["Q&A"])
+@app.get("/ask/stream", tags=["Q&A"])
 async def ask_question_stream(
     question: str | None = Query(default=None),
     query: str | None = Query(default=None),
@@ -2940,7 +2998,7 @@ class ModelSelection(BaseModel):
     lock: bool | None = None
 
 
-@app.get("/model-selection")
+@app.get("/model-selection", response_model=ModelSelectionGetApiResponse, tags=["Configuration"])
 def get_model_selection():
     """Return current model selection and availability map for frontend."""
     # Reuse config() enumerations for available providers/models
@@ -2955,7 +3013,7 @@ def get_model_selection():
     }
 
 
-@app.post("/model-selection")
+@app.post("/model-selection", tags=["Configuration"])
 def set_model_selection(selection: ModelSelection):
     """Set the local model selection if not locked."""
     if CURRENT_SELECTION.get("locked"):
@@ -2983,7 +3041,7 @@ def set_model_selection(selection: ModelSelection):
     return {"status": "ok", "current": CURRENT_SELECTION}
 
 
-@app.get("/config")
+@app.get("/config", response_model=AgentLlmConfigApiResponse, tags=["Configuration"])
 def config():
     """Expose the local-only LLM configuration for frontend discovery."""
     payload = llm_client_manager.config_payload()
@@ -2996,7 +3054,7 @@ def config():
     return payload
 
 
-@app.get("/privacy")
+@app.get("/privacy", response_model=PrivacyMarkdownPayload, tags=["Meta"])
 def privacy():
     """Return Privacy Policy markdown content for display."""
     policy_path = Path(__file__).parent.parent.parent / "docs" / "PRIVACY_POLICY.md"
@@ -3004,7 +3062,7 @@ def privacy():
     if not policy_path.exists():
         policy_path = Path(__file__).parents[3] / "docs" / "PRIVACY_POLICY.md"
     if policy_path.exists():
-        return JSONResponse({"markdown": policy_path.read_text(encoding="utf-8")})
+        return {"markdown": policy_path.read_text(encoding="utf-8")}
 
     # Keep API contract stable in environments where docs are not bundled.
     fallback_markdown = (
@@ -3012,7 +3070,7 @@ def privacy():
         "Privacy policy content is temporarily unavailable in this deployment.\n\n"
         "For the latest policy text, contact the Vecinita team."
     )
-    return JSONResponse({"markdown": fallback_markdown})
+    return {"markdown": fallback_markdown}
 
 
 # --end-of-file--

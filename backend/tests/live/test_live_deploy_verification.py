@@ -46,11 +46,13 @@ def test_agent_config_shows_no_debug_or_test_providers(agent_config_url: str):
 
 def test_gateway_cors_preflight_returns_headers(gateway_url: str):
     """Gateway OPTIONS preflight must return Access-Control headers."""
+    # /api/v1/ask is GET with a query param; preflight must request GET, not POST.
     resp = requests.options(
         f"{gateway_url}/api/v1/ask",
         headers={
             "Origin": "https://vecinita.example.com",
-            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "accept",
         },
         timeout=30,
     )
@@ -61,13 +63,12 @@ def test_gateway_cors_preflight_returns_headers(gateway_url: str):
 
 
 def test_malformed_request_does_not_leak_traceback(gateway_url: str):
-    """A malformed body must not return a Python traceback in the response."""
-    resp = requests.post(
-        f"{gateway_url}/api/v1/ask",
-        data="not-valid-json{{{{",
-        headers={"Content-Type": "application/json"},
-        timeout=30,
-    )
+    """Validation errors must not return a Python traceback (GET ask without required question)."""
+    resp = requests.get(f"{gateway_url}/api/v1/ask", timeout=30)
+    assert resp.status_code in (
+        400,
+        422,
+    ), f"Expected validation error for missing question, got {resp.status_code}: {resp.text[:200]}"
     body_text = resp.text
     assert (
         "Traceback" not in body_text

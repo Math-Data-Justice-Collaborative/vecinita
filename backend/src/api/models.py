@@ -1442,188 +1442,63 @@ GatewayConfig = GatewayConfigResponse
 IntegrationsStatus = IntegrationsStatusResponse
 
 # ============================================================================
-# API ENDPOINT DOCUMENTATION & STATUS SUMMARY
+# API ENDPOINT DOCUMENTATION & STATUS SUMMARY (Gateway v1)
 # ============================================================================
 """
-COMPREHENSIVE ENDPOINT STATUS & DOCUMENTATION
-==============================================
+Unified API Gateway — OpenAPI and routing reference
+=====================================================
 
-This documentation is automatically exposed in FastAPI Swagger UI at /docs
-All models above are used to generate OpenAPI schemas with full descriptions and examples.
+All Pydantic models in this module feed FastAPI/OpenAPI for ``src.api.main``.
 
-ACTIVE ENDPOINTS (12 total) ✅
-=====================================
+**Interactive docs (local default: port 8004)**
 
-Q&A ROUTER (/api/ask/) - 3 ACTIVE
-  ✅ GET  /              → AskQuestionRequest query params → AskQuestionResponse
-    ✅ GET  /stream        → Query params (same as /) → SSE stream [ThinkingEvent, ToolEvent, CompleteEvent, ClarificationEvent, StreamErrorEvent]
-  ✅ GET  /config        → (no params) → AskConfigResponse
+- Swagger UI: ``http://localhost:8004/api/v1/docs``
+- OpenAPI JSON: ``http://localhost:8004/api/v1/openapi.json``
+- Redoc: ``http://localhost:8004/api/v1/redoc``
 
-SCRAPING ROUTER (/api/scrape/) - 6 ENDPOINTS (5 partial, 1 callback)
-  ⚠️  POST /             → ScrapeStartRequest → ScrapeInitResponse (job management ✅, scraper integration TODO)
-  ⚠️  GET  /{job_id}     → (no body) → ScrapeStatusResponse
-  ⚠️  POST /{job_id}/cancel → (no body) → ScrapeCancelResponse
-  ⚠️  GET  /history      → ScrapeHistoryRequest query params → ScrapeHistoryResponse
-  ⚠️  GET  /stats        → (no params) → ScrapeStatsResponse
-  ⚠️  POST /cleanup      → ScrapeCleanupRequest → ScrapeCleanupResponse
+**Versioned API base:** ``/api/v1/...`` (routers: ask, scrape, embed, documents).
 
-EMBEDDINGS ROUTER (/api/embed/) - 1 ACTIVE
-  ✅ GET  /config        → (no params) → EmbeddingConfigResponse (hardcoded HuggingFace config)
+**Compatibility routes (also listed in OpenAPI where applicable)**
 
-ADMIN ROUTER (/api/admin/) - 2 PARTIAL
-  ⚠️  GET  /config       → (no params) → AdminConfigResponse
-  ⚠️  POST /config       → AdminConfigUpdateRequest → AdminConfigUpdateResponse (only updates require_confirmation)
+- ``GET /health``, ``GET /config`` — same semantics as versioned health/config patterns.
+- ``GET /integrations/status`` — operator integration matrix (also exposed under ``/api/v1/`` for probes).
 
-GATEWAY ROOT ENDPOINTS - 3 ENDPOINTS
-  ✅ GET  /              → (no params) → GatewayInfoResponse
-  ✅ GET  /config        → (no params) → GatewayConfigResponse
-  ⚠️  GET  /health       → (no params) → HealthCheckResponse (hardcoded, should probe services)
+**Q&A** — ``/api/v1/ask``, ``/api/v1/ask/stream``, ``/api/v1/ask/config``
 
+**Scraping** — ``/api/v1/scrape`` and related job/history/stats/cleanup/reindex routes (see ``router_scrape.py``).
 
-NOT IMPLEMENTED ENDPOINTS (8 total) ❌
-=====================================
+**Embeddings** — ``/api/v1/embed``, ``/embed/batch``, ``/embed/similarity``, ``/embed/config``.
 
-EMBEDDINGS ROUTER (/api/embed/) - 5 ACTIVE (Phase 5 Complete)
-    ✅ POST /             → EmbedRequest → EmbedResponse (forwards to embedding service)
-    ✅ POST /batch        → EmbedBatchRequest → EmbedBatchResponse (forwards to embedding service)
-  ✅ POST /similarity   → SimilarityRequest → SimilarityResponse (generates embeddings + computes cosine similarity)
-  ✅ GET  /config       → (no params) → EmbeddingConfigResponse (returns current config)
-  ✅ POST /config       → Query params (provider, model, lock) → EmbeddingConfigResponse (updates embedding service config)
+**Public documents** — ``/api/v1/documents/*`` (overview, preview, tags, etc.).
 
-ADMIN ROUTER (/api/admin/) - 8 ACTIVE (Phase 4 Complete)
-  ✅ GET  /health       → (no params) → AdminHealthResponse (checks agent, embedding, database)
-  ✅ GET  /stats        → (no params) → AdminStatsResponse (database statistics)
-  ✅ GET  /documents    → Query params (limit, offset, source_filter) → DocumentsListResponse (paginated list)
-  ✅ DELETE /documents/{chunk_id} → (no body) → DeleteChunkResponse (deletes specific chunk)
-  ✅ POST /database/clean → CleanDatabaseRequest → CleanDatabaseResponse (requires confirmation token)
-  ✅ GET  /database/clean-request → (no params) → CleanRequestTokenResponse (generates token)
-  ✅ GET  /sources      → (no params) → SourcesListResponse (lists all sources with counts)
-  ✅ POST /sources/validate → ValidateSourceRequest → ValidateSourceResponse (tests URL accessibility)
+**Authentication (when ``ENABLE_AUTH=true``)**
 
-SCRAPING ROUTER - 1 CRITICAL GAP (Phase 6 Pending)
-  ⚠️  Background task: Job creation framework is complete, but background_scrape_task()
-      in router_scrape.py lacks actual scraper integration (TODO: import VecinaScraper)
+Protected routes expect ``Authorization: Bearer <api_key>`` (see ``AuthenticationMiddleware`` in ``middleware.py``).
+Public prefixes include ``/api/v1/documents`` and selected discovery endpoints; see ``PUBLIC_ENDPOINTS``.
 
+**Contract / Schemathesis**
 
+- Offline gateway schema tests: ``tests/integration/test_api_schema_schemathesis.py`` (mocked upstreams).
+- Offline agent schema tests: ``tests/integration/test_agent_api_schema_schemathesis.py``.
+- From repo root: ``make test-schemathesis-gateway``, ``make test-schemathesis-agent``, ``make test-schemathesis``.
 
-SWAGGER/OPENAPI DOCUMENTATION
-=============================
+**cURL examples (gateway on 8004)**
 
-All models above are automatically documented in Swagger UI:
-  - Navigate to: http://localhost:8002/docs
-  - Each model shows:
-    * Field names and types
-    * Description text (from Field description=)
-    * Example values (from Field examples=[ and model_config json_schema_extra])
-    * Validation constraints (min_length, max, pattern, etc.)
-    * Default values
-    * Required vs optional fields
-
-The OpenAPI schema is available at: http://localhost:8002/openapi.json
-
-
-CURL REFERENCE EXAMPLES
-========================
-
-Ask Question:
-  curl -X GET 'http://localhost:8002/api/ask/?question=What%20is%20AI&lang=en'
-
-Stream Question (SSE):
-  curl -X GET 'http://localhost:8002/api/ask/stream?question=What%20is%20AI'
-
-Get Q&A Config:
-  curl -X GET 'http://localhost:8002/api/ask/config'
-
-Start Web Scraping:
-  curl -X POST 'http://localhost:8002/api/scrape' \\
-    -H 'Content-Type: application/json' \\
-    -d '{"urls":["https://example.com"],"force_loader":"auto"}'
-
-Check Scrape Status:
-  curl -X GET 'http://localhost:8002/api/scrape/scrape-job-abc123xyz'
-
-Cancel Scrape Job:
-  curl -X POST 'http://localhost:8002/api/scrape/scrape-job-abc123xyz/cancel' \\
-    -H 'Content-Type: application/json'
-
-Get Scrape History:
-  curl -X GET 'http://localhost:8002/api/scrape/history?page=1&limit=10'
-
-Get Scrape Stats:
-  curl -X GET 'http://localhost:8002/api/scrape/stats'
-
-Clean Old Jobs:
-  curl -X POST 'http://localhost:8002/api/scrape/cleanup' \\
-    -H 'Content-Type: application/json' \\
-    -d '{"hours_old":24,"dry_run":false}'
-
-Get Embedding Config:
-  curl -X GET 'http://localhost:8002/api/embed/config'
-
-Get Admin Config:
-  curl -X GET 'http://localhost:8002/api/admin/config' \\
-    -H 'Authorization: Bearer <api-key>'
-
-Update Admin Config:
-  curl -X POST 'http://localhost:8002/api/admin/config' \\
-    -H 'Content-Type: application/json' \\
-    -H 'Authorization: Bearer <api-key>' \\
-    -d '{"require_confirmation":false}'
-
-Get Gateway Info:
-  curl -X GET 'http://localhost:8002/'
-
-Get Gateway Config:
-  curl -X GET 'http://localhost:8002/config'
-
-Health Check:
-  curl -X GET 'http://localhost:8002/health'
+  curl -sS 'http://localhost:8004/api/v1/ask/config'
+  curl -sS 'http://localhost:8004/health'
+  curl -sS 'http://localhost:8004/api/v1/openapi.json' | head -c 200
 
 
 BACKWARD COMPATIBILITY ALIASES
 ===============================
 
 For migration/compatibility with existing code:
-  - ScrapeRequest → Use ScrapeStartRequest instead
-  - AskRequest → Use AskQuestionRequest instead
-  - AskResponse → Use AskQuestionResponse instead
-  - HealthCheck → Use HealthCheckResponse instead
-  - GatewayConfig → Use GatewayConfigResponse instead
+
+- ScrapeRequest → Use ScrapeStartRequest instead
+- AskRequest → Use AskQuestionRequest instead
+- AskResponse → Use AskQuestionResponse instead
+- HealthCheck → Use HealthCheckResponse instead
+- GatewayConfig → Use GatewayConfigResponse instead
 
 Old names still resolve to new models but are deprecated in favor of the new explicit names.
-
-
-IMPLEMENTATION NOTES & TODOS
-============================
-
-1. CRITICAL: Embed Endpoints (5 endpoints)
-   - Status: All return 501 Not Implemented
-   - Required: Integrate with embedding service at EMBEDDING_SERVICE_URL
-   - Expected: Delegate model/inference to external service or Modal function
-
-2. SCRAPING Background Task
-   - Status: Job framework complete (create, track, poll), actual scraping TODO
-   - Required: Import VecinaScraper and invoke from background_scrape_task()
-   - File: backend/src/api/router_scrape.py line ~120 has placeholder
-
-3. Admin Endpoints (8 endpoints)
-   - Status: All return 501 Not Implemented except config GET/POST
-    - Required: Database queries to Render Postgres for documents, stats, sources
-   - Required: Implement cleanup token generation and validation
-
-4. Health Checks
-   - Status: /health returns hardcoded "ok"
-   - Required: Actually probe agent_service, embedding_service, database
-   - File: backend/src/api/main.py lifespan startup event
-
-5. Rate Limiting & Auth
-   - Status: Middleware exists, in-memory state
-   - Required: Use Redis for distributed deployments
-   - File: backend/src/api/middleware.py
-
-6. Job Persistence
-   - Status: In-memory AsyncJobManager
-   - Required: Persist to Redis or database for production
-   - File: backend/src/api/job_manager.py
-
 """

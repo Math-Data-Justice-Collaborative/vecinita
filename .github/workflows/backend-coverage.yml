@@ -93,7 +93,9 @@ jobs:
         EMBEDDING_STRICT_STARTUP: 'false'
         SCHEMATHESIS_HOOKS: tests.schemathesis_hooks
       run: |
-        pytest tests/integration/test_api_schema_schemathesis.py -q --junit-xml=schema-test-results.xml
+        pytest tests/integration/test_api_schema_schemathesis.py \
+          tests/integration/test_agent_api_schema_schemathesis.py \
+          -q --junit-xml=schema-test-results.xml
 
     - name: Summarize coverage
       working-directory: backend

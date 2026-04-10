@@ -9,7 +9,11 @@ pytestmark = pytest.mark.live
 
 
 def test_gateway_health_implies_agent_reachable(gateway_health_url: str):
-    """Gateway health passing confirms the gateway→agent private-network path is live."""
+    """Gateway health passing confirms the gateway→agent private-network path is live.
+
+    If ``agent_service`` is ``error``, check Render gateway env ``AGENT_SERVICE_URL``
+    (private service URL) and that the agent service returns 200 from ``GET /health``.
+    """
     resp = requests.get(gateway_health_url, timeout=30)
     assert (
         resp.status_code == 200
@@ -33,19 +37,9 @@ def test_agent_config_shows_route_endpoints_not_localhost(agent_config_url: str)
 
 
 def test_service_auth_enforced_on_unauthenticated_request(ask_base_url: str):
-    """A request with no routing token to a routing-protected endpoint must be rejected."""
-    # The agent /api/v1/ask without a valid payload should return 422 or similar —
-    # but a completely missing auth token (when AGENT_ENFORCE_ROUTE=true) may return 403.
-    # We just confirm it's not a 200 pass-through with no validation.
-    if ask_base_url.endswith("/api/v1/ask"):
-        resp = requests.post(
-            ask_base_url,
-            json={},  # intentionally empty
-            timeout=30,
-        )
-    else:
-        # Direct-agent ask is GET-based in this deployment.
-        resp = requests.get(ask_base_url, timeout=30)
+    """Ask without a required question must not return 200 (GET contract on gateway and agent)."""
+    # POST to /api/v1/ask returns 405; use GET without ``question`` → 422 validation error.
+    resp = requests.get(ask_base_url, timeout=30)
     # Acceptable: 400 validation error, 422 unprocessable, 403 forbidden, 401 unauthorized
     # Not acceptable: 200 (passed through with empty input), 5xx server crashes
     assert resp.status_code in (

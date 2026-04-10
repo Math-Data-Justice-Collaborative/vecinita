@@ -324,6 +324,36 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
+def custom_openapi():
+    """Attach Bearer security scheme documentation for Schemathesis and API clients."""
+    if app.openapi_schema:
+        return app.openapi_schema
+    from fastapi.openapi.utils import get_openapi
+
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    )
+    components = openapi_schema.setdefault("components", {})
+    schemes = components.setdefault("securitySchemes", {})
+    schemes["GatewayBearerAuth"] = {
+        "type": "http",
+        "scheme": "bearer",
+        "description": (
+            "When ENABLE_AUTH is true, send your API key as a Bearer token. "
+            "Public routes (health, parts of /api/v1/documents, ask/config, etc.) "
+            "are listed in middleware.PUBLIC_ENDPOINTS."
+        ),
+    }
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi  # type: ignore[method-assign]
+
 # Enable CORS for frontend
 app.add_middleware(
     CORSMiddleware,

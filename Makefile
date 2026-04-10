@@ -16,6 +16,7 @@
 	typecheck-scraper \
 	test-integration-gateway-fast test-integration-gateway-full test-integration-gateway \
 	test-all-integration test-cross-integration test-cross-e2e \
+	test-schemathesis test-schemathesis-gateway test-schemathesis-agent test-schemathesis-cli test-schemathesis-live \
 	scraper-run scraper-run-verbose scraper-run-clean scraper-validate-postgres \
 	microservices-up microservices-down microservices-logs test-microservices-contracts test-microservices \
 	render-env-validate render-tests-strict render-tests-render-suite render-workflow-ci \
@@ -90,6 +91,13 @@ help:
 	@echo "  make test-e2e                            Run frontend and cross-stack e2e tests"
 	@echo "  make test-cross-e2e                      Run tests/ e2e suite"
 	@echo "  make test-frontend-e2e                   Run frontend Playwright tests"
+	@echo ""
+	@echo "Schemathesis (OpenAPI contract)"
+	@echo "  make test-schemathesis                   Run gateway + agent offline Schemathesis pytest suites"
+	@echo "  make test-schemathesis-gateway           Gateway ASGI schema tests (mocked upstreams)"
+	@echo "  make test-schemathesis-agent             Agent ASGI schema tests (mocked LLM/embeddings)"
+	@echo "  make test-schemathesis-cli               CLI schemathesis run (needs SCHEMA_URL / local gateway)"
+	@echo "  make test-schemathesis-live              Live Schemathesis + smoke (needs RENDER_* URLs)"
 	@echo ""
 	@echo "Scraper and ingestion targets"
 	@echo "  make scraper-run                         Run scraper in additive streaming mode"
@@ -571,6 +579,32 @@ test-e2e: test-cross-e2e test-frontend-e2e
 
 test-cross-e2e:
 	cd tests && uv run pytest -v -m e2e
+
+test-schemathesis-gateway:
+	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_api_schema_schemathesis.py -q
+
+test-schemathesis-agent:
+	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_agent_api_schema_schemathesis.py -q
+
+test-schemathesis:
+	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
+		tests/integration/test_api_schema_schemathesis.py \
+		tests/integration/test_agent_api_schema_schemathesis.py \
+		-q
+
+test-schemathesis-cli:
+	cd backend && bash scripts/run_schemathesis_live.sh
+
+test-schemathesis-live:
+	@echo "Running live Schemathesis + related live checks (auto-loading .env when present)..."
+	@set -a; \
+	if [ -f .env ]; then . ./.env; fi; \
+	set +a; \
+	cd backend && SKIP_AGENT_MAIN_IMPORT="$${SKIP_AGENT_MAIN_IMPORT:-true}" uv run pytest \
+		tests/live/test_live_schemathesis.py \
+		tests/live/test_live_health.py \
+		tests/live/test_live_connectivity.py \
+		-q --tb=short
 
 test-frontend-e2e:
 	cd frontend && npm run test:e2e

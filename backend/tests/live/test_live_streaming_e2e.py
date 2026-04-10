@@ -11,17 +11,17 @@ pytestmark = pytest.mark.live
 
 
 def _collect_sse_events(gateway_url: str, question: str, max_events: int = 5) -> list[str]:
-    """Stream SSE from /ask/stream and collect up to *max_events* events."""
+    """Stream SSE from GET /api/v1/ask/stream (query param question; see router_ask.py)."""
     events: list[str] = []
-    with requests.post(
+    with requests.get(
         f"{gateway_url}/api/v1/ask/stream",
-        json={"question": question},
+        params={"question": question},
         stream=True,
         timeout=60,
     ) as resp:
         assert (
             resp.status_code == 200
-        ), f"POST /api/v1/ask/stream returned {resp.status_code}: {resp.text[:200]}"
+        ), f"GET /api/v1/ask/stream returned {resp.status_code}: {resp.text[:200]}"
         for raw_line in resp.iter_lines(decode_unicode=True):
             if raw_line:
                 events.append(raw_line)

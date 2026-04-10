@@ -149,31 +149,60 @@ This explains why tests needed adjustment when `.env` contains `MODAL_EMBEDDING_
 | Tests Failed | 0 | 0 | 0 |
 | Success Rate | 100% | 100% | 100% |
 
-## OpenAPI Schema Validation
+## OpenAPI Schema Validation (Schemathesis)
 
-Schemathesis is configured for backend API schema validation via pytest and CLI.
+Schemathesis exercises the **gateway** and **agent** OpenAPI descriptions in-process (pytest) and optionally against a running server (CLI).
 
-Files:
-- `backend/schemathesis.toml`
-- `backend/tests/schemathesis_hooks.py`
-- `backend/tests/integration/test_api_schema_schemathesis.py`
+**Schema URLs**
 
-Recommended local commands:
+- Gateway: `http://127.0.0.1:8004/api/v1/openapi.json` (Swagger UI: `/api/v1/docs`)
+- Agent: `http://127.0.0.1:8000/openapi.json` (docs: `/docs`)
+
+**Tiered checks (pytest)**
+
+- **Stability**: default Schemathesis checks on an allowlisted set of operations (mocked agent/embedding/documents SQL where needed).
+- **Response contract**: `response_schema_conformance` on a subset with accurate `response_model` coverage (`test_gateway_openapi_response_schema_contract`).
+- **Auth**: `ENABLE_AUTH=true` plus `Authorization: Bearer …` for `GET /api/v1/ask` (`test_gateway_ask_with_bearer_auth`).
+- **Agent offline**: positive-generation fuzz on cheap routes (`test_agent_api_schema_schemathesis.py`).
+
+**Files**
+
+- `backend/schemathesis.toml` — generation limits, JUnit reports, `continue-on-failure`
+- `backend/tests/schemathesis_hooks.py` — optional trace coverage hooks
+- `backend/tests/integration/test_api_schema_schemathesis.py` — gateway ASGI suite
+- `backend/tests/integration/test_agent_api_schema_schemathesis.py` — agent ASGI suite
+- `backend/scripts/run_schemathesis_live.sh` — CLI wrapper for live gateway runs
+
+**From repo root (preferred)**
 
 ```bash
-cd backend
-uv sync --extra ci
-SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_api_schema_schemathesis.py -q
+make test-schemathesis              # gateway + agent offline pytest suites
+make test-schemathesis-gateway
+make test-schemathesis-agent
+make test-schemathesis-cli          # requires SCHEMA_URL or local gateway on 8004
+make test-schemathesis-live         # requires RENDER_* URLs; live agent Schemathesis + smoke
 ```
 
-Optional CLI run against a live server:
+**From `backend/`**
+
+```bash
+uv sync --extra ci
+SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
+  tests/integration/test_api_schema_schemathesis.py \
+  tests/integration/test_agent_api_schema_schemathesis.py \
+  -q
+```
+
+**CLI against a live gateway**
 
 ```bash
 cd backend
+SCHEMA_URL=http://127.0.0.1:8004/api/v1/openapi.json make test-schema-cli
+# or:
 SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run schemathesis run http://127.0.0.1:8004/api/v1/openapi.json
 ```
 
-The pytest suite uses mocked upstreams for stable schema conformance checks, while the CLI command can be used against a running gateway for broader live validation.
+The pytest suites use mocked upstreams for deterministic CI. The CLI is suited to broader exploratory runs when the stack is already up.
 
 ## Deployment Ready Status
 

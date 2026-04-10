@@ -22,7 +22,7 @@ dependencies = [
     "langchain-tavily",
     "langchain-text-splitters",
     "langchain-huggingface",
-    "langgraph>=1.0.10",
+    "langgraph>=1.1.2",
     "langgraph-checkpoint>=4.0.0",
     # Database & Vector Store
     "psycopg2-binary",
