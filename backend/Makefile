@@ -1,15 +1,15 @@
 .PHONY: format format-check lint lint-fix typecheck audit test test-e2e quality quality-fix test-streaming-ci test-contracts test-acceptance-gateway-ask test-schema test-schema-cli
 
 format:
-	uv run black src tests
+	uv run black src tests scripts
 
 format-check:
-	uv run black --check src tests
+	uv run black --check src tests scripts
 
 lint:
-	uv run ruff check src
+	uv run ruff check src tests
 
-lint-fix:
+lint-fix: format
 	uv run ruff check --fix src tests
 
 typecheck:

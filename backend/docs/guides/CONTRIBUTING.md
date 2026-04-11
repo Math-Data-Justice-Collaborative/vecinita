@@ -29,7 +29,7 @@ uv run pytest -m "not integration"
 
 ### Black (Formatter)
 ```bash
-uv run black src tests
+uv run black src tests scripts
 ```
 
 ### Ruff (Linter)
@@ -92,7 +92,7 @@ uv add package_name
 
 ### Run linting
 ```bash
-uv run black src tests
+uv run black src tests scripts
 uv run ruff check --fix src tests
 ```
 

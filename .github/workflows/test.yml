@@ -79,7 +79,7 @@ jobs:
 
     - name: Check backend formatting (Black)
       working-directory: backend
-      run: python -m black --check src tests
+      run: python -m black --check src tests scripts
 
     - name: Type check backend (mypy)
       working-directory: backend

@@ -1,6 +1,7 @@
 """
 Script to create/drop/migrate embedding chunk tables for each provider/model combo.
 """
+
 import sys
 
 import psycopg2
@@ -36,6 +37,7 @@ CREATE TABLE IF NOT EXISTS {table_name} (
 );
 """
 
+
 def create_embedding_table(conn, provider, model, dimension):
     safe_model = model.replace("/", "_").replace("-", "_").replace(".", "_")
     table_name = f"document_chunks_{provider}_{safe_model}"
@@ -43,6 +45,7 @@ def create_embedding_table(conn, provider, model, dimension):
         cur.execute(TABLE_TEMPLATE.format(table_name=table_name))
         print(f"Created table: {table_name}")
     return table_name
+
 
 def main():
     if len(sys.argv) < 5:
@@ -53,6 +56,7 @@ def main():
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     create_embedding_table(conn, provider, model, int(dimension))
     conn.close()
+
 
 if __name__ == "__main__":
     main()

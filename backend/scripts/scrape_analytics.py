@@ -1,6 +1,7 @@
 """
 Analytics queries for scraping and embedding tracking.
 """
+
 import os
 from typing import Any
 
@@ -14,7 +15,8 @@ class ScrapeAnalytics:
     def get_last_scrape_by_model(self) -> list[dict[str, Any]]:
         """Get last scrape time for each embedding model."""
         with self.conn.cursor() as cur:
-            cur.execute("""
+            cur.execute(
+                """
                 SELECT 
                     provider,
                     model,
@@ -23,7 +25,8 @@ class ScrapeAnalytics:
                     chunks_count
                 FROM embedding_metadata
                 ORDER BY last_used_at DESC NULLS LAST;
-            """)
+            """
+            )
             cols = [desc[0] for desc in cur.description]
             return [dict(zip(cols, row)) for row in cur.fetchall()]
 
@@ -50,19 +53,22 @@ class ScrapeAnalytics:
     def get_chunks_by_model(self, model: str = None) -> dict[str, int]:
         """Count chunks per embedding model."""
         with self.conn.cursor() as cur:
-            cur.execute("""
+            cur.execute(
+                """
                 SELECT 
                     provider,
                     model,
                     chunks_count
                 FROM embedding_metadata;
-            """)
+            """
+            )
             return {f"{row[0]}_{row[1]}": row[2] for row in cur.fetchall()}
 
     def get_scrape_stats(self) -> dict[str, Any]:
         """Get overall scraping statistics."""
         with self.conn.cursor() as cur:
-            cur.execute("""
+            cur.execute(
+                """
                 SELECT 
                     COUNT(DISTINCT source_url) as total_sources,
                     COUNT(*) as total_chunks,
@@ -70,14 +76,15 @@ class ScrapeAnalytics:
                     MAX(last_scraped_at) as last_scrape_time,
                     AVG(scrape_count) as avg_scrapes_per_source
                 FROM document_sources;
-            """)
+            """
+            )
             row = cur.fetchone()
             return {
                 "total_sources": row[0],
                 "total_chunks": row[1],
                 "total_characters": row[2],
                 "last_scrape_time": row[3],
-                "avg_scrapes_per_source": row[4]
+                "avg_scrapes_per_source": row[4],
             }
 
     def close(self):

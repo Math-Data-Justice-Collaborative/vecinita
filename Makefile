@@ -79,7 +79,7 @@ help:
 	@echo "  make typecheck-backend                   Run mypy on backend source"
 	@echo "  make typecheck-frontend                  Run TypeScript checks"
 	@echo "  make format                              Format backend and frontend"
-	@echo "  make format-backend                      Format backend with Black"
+	@echo "  make format-backend                      Format backend with Black (src, tests, scripts)"
 	@echo "  make format-frontend                     Format frontend with Prettier"
 	@echo "  make format-check                        Check formatting without writing"
 	@echo "  make audit                               Run dependency audits for backend and frontend"
@@ -338,7 +338,8 @@ lint-fix: lint-fix-backend lint-fix-frontend lint-fix-data-management-frontend
 lint-backend:
 	cd backend && uv run ruff check src tests
 
-lint-fix-backend:
+# Runs Black first so CI parity with GitHub (black --check src tests scripts) is fixed even if only lint-fix is used.
+lint-fix-backend: format-backend
 	cd backend && uv run ruff check --fix src tests
 
 lint-frontend:
@@ -378,7 +379,7 @@ typecheck-scraper:
 format: format-backend format-frontend
 
 format-backend:
-	cd backend && uv run black src tests
+	cd backend && uv run black src tests scripts
 
 format-frontend:
 	cd frontend && npm run format:write
@@ -386,7 +387,7 @@ format-frontend:
 format-check: format-check-backend format-check-frontend
 
 format-check-backend:
-	cd backend && uv run black --check src tests
+	cd backend && uv run black --check src tests scripts
 
 format-check-frontend:
 	cd frontend && npm run format
