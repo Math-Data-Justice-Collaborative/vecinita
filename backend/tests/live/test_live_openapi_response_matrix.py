@@ -32,9 +32,9 @@ def test_agent_ask_rerank_top_k_out_of_range_422(live_direct_agent_url: str) -> 
         timeout=30,
     )
     assert resp.status_code == 422, resp.text
-    assert _detail_is_fastapi_validation(resp.json()), (
-        "expected FastAPI validation error body with str or list detail"
-    )
+    assert _detail_is_fastapi_validation(
+        resp.json()
+    ), "expected FastAPI validation error body with str or list detail"
 
 
 def test_agent_ask_missing_question_returns_400(live_direct_agent_url: str) -> None:
@@ -47,9 +47,9 @@ def test_agent_ask_missing_question_returns_400(live_direct_agent_url: str) -> N
 def test_gateway_ask_missing_required_question_422(gateway_url: str) -> None:
     resp = requests.get(f"{gateway_url}/api/v1/ask", timeout=20)
     assert resp.status_code == 422, resp.text
-    assert _detail_is_fastapi_validation(resp.json()), (
-        "expected FastAPI validation error body with str or list detail"
-    )
+    assert _detail_is_fastapi_validation(
+        resp.json()
+    ), "expected FastAPI validation error body with str or list detail"
 
 
 def test_gateway_ask_invalid_rerank_top_k_422(gateway_url: str) -> None:
@@ -59,6 +59,6 @@ def test_gateway_ask_invalid_rerank_top_k_422(gateway_url: str) -> None:
         timeout=30,
     )
     assert resp.status_code == 422, resp.text
-    assert _detail_is_fastapi_validation(resp.json()), (
-        "expected FastAPI validation error body with str or list detail"
-    )
+    assert _detail_is_fastapi_validation(
+        resp.json()
+    ), "expected FastAPI validation error body with str or list detail"
