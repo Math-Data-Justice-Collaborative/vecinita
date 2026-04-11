@@ -203,9 +203,11 @@ def get_table_stats(logger: logging.Logger) -> bool:
             count = cursor.fetchone()[0]
 
             # Get table size
-            cursor.execute(f"""
+            cursor.execute(
+                f"""
                 SELECT pg_size_pretty(pg_total_relation_size('public.{table}'));
-            """)
+            """
+            )
             size = cursor.fetchone()[0]
 
             logger.info(f"{table:25s} | {count:>10,} rows | {size:>10s}")
@@ -280,12 +282,14 @@ def list_tables(logger: logging.Logger) -> bool:
         conn = get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT table_name
             FROM information_schema.tables
             WHERE table_schema = 'public'
             ORDER BY table_name;
-        """)
+        """
+        )
 
         tables = cursor.fetchall()
 

@@ -137,13 +137,15 @@ class SchemaValidator:
     async def _check_column_embedding(self) -> dict[str, Any]:
         """Check if document_chunks.embedding column exists and is a vector column."""
         try:
-            rows = self._execute("""
+            rows = self._execute(
+                """
                 SELECT udt_name
                 FROM information_schema.columns
                 WHERE table_schema = 'public'
                   AND table_name = 'document_chunks'
                   AND column_name = 'embedding'
-                """)
+                """
+            )
             if rows and rows[0][0]:
                 column_type = str(rows[0][0])
                 if column_type.lower() != "vector":

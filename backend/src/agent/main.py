@@ -239,6 +239,69 @@ class AgentLlmConfigApiResponse(BaseModel):
     providers: list[Any] = Field(default_factory=list)
 
 
+class AgentHttp422Example(BaseModel):
+    """Documented FastAPI validation error envelope for query parameters."""
+
+    model_config = ConfigDict(extra="allow")
+
+    detail: list[dict[str, Any]] = Field(
+        ...,
+        description="Validation issues (``loc`` / ``msg`` / ``type`` per FastAPI).",
+        examples=[
+            [
+                {
+                    "loc": ["query", "rerank_top_k"],
+                    "msg": "ensure this value is greater than or equal to 1",
+                    "type": "greater_than_equal",
+                }
+            ]
+        ],
+    )
+
+
+class AgentAskJsonResponse(BaseModel):
+    """Typical successful JSON body for ``GET /ask`` (extra keys preserved)."""
+
+    model_config = ConfigDict(extra="allow")
+
+    answer: str = Field(
+        ...,
+        examples=["Nearby clinics include Eastside Community Health Center..."],
+    )
+    thread_id: str = Field(default="default", examples=["default"])
+    response_time_ms: int = Field(default=0, ge=0, examples=[842])
+    sources: list[dict[str, Any]] = Field(default_factory=list)
+    latency_breakdown: dict[str, Any] | None = Field(
+        default=None,
+        description="Optional retrieval / LLM timing breakdown.",
+    )
+
+
+_AGENT_ASK_OPENAPI_RESPONSES: dict[int | str, dict[str, Any]] = {
+    400: {
+        "description": "Missing ``question`` / ``query`` or empty value.",
+        "content": {
+            "application/json": {
+                "schema": {
+                    "type": "object",
+                    "properties": {"detail": {"type": "string"}},
+                }
+            }
+        },
+    },
+    422: {
+        "description": "Invalid query parameters (for example ``rerank_top_k`` out of range).",
+        "model": AgentHttp422Example,
+    },
+    500: {"description": "Unhandled server error."},
+}
+
+_AGENT_STREAM_OPENAPI_RESPONSES: dict[int | str, dict[str, Any]] = {
+    400: _AGENT_ASK_OPENAPI_RESPONSES[400],
+    422: {"description": "Invalid query parameters.", "model": AgentHttp422Example},
+}
+
+
 # --- Initialize FastAPI App ---
 app = FastAPI(
     title="Vecinita Agent API",
@@ -540,25 +603,29 @@ def _probe_postgres_schema(cur: Any) -> tuple[bool, str]:
     if not sources_regclass or sources_regclass[0] is None:
         return False, "missing_table_sources"
 
-    cur.execute("""
+    cur.execute(
+        """
         SELECT udt_name
         FROM information_schema.columns
         WHERE table_schema = 'public'
           AND table_name = 'document_chunks'
           AND column_name = 'embedding'
-        """)
+        """
+    )
     embedding_column = cur.fetchone()
     if not embedding_column:
         return False, "missing_column_document_chunks.embedding"
     if str(embedding_column[0]).lower() != "vector":
         return False, f"invalid_column_type_document_chunks.embedding:{embedding_column[0]}"
 
-    cur.execute("""
+    cur.execute(
+        """
         SELECT 1
         FROM pg_proc
         WHERE proname = 'search_similar_documents'
         LIMIT 1
-        """)
+        """
+    )
     if cur.fetchone() is None:
         return False, "missing_function_search_similar_documents"
 
@@ -2438,7 +2505,12 @@ def get_db_info():
         return {"status": "error", "error": str(e), "error_type": type(e).__name__}
 
 
-@app.get("/ask", tags=["Q&A"])
+@app.get(
+    "/ask",
+    tags=["Q&A"],
+    response_model=AgentAskJsonResponse,
+    responses=_AGENT_ASK_OPENAPI_RESPONSES,
+)
 async def ask_question(
     question: str | None = Query(default=None),
     query: str | None = Query(default=None),
@@ -2675,8 +2747,8 @@ async def ask_question(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@app.get("/ask-stream", tags=["Q&A"])
-@app.get("/ask/stream", tags=["Q&A"])
+@app.get("/ask-stream", tags=["Q&A"], responses=_AGENT_STREAM_OPENAPI_RESPONSES)
+@app.get("/ask/stream", tags=["Q&A"], responses=_AGENT_STREAM_OPENAPI_RESPONSES)
 async def ask_question_stream(
     question: str | None = Query(default=None),
     query: str | None = Query(default=None),

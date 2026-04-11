@@ -81,6 +81,15 @@ def agent_url() -> str:
 
 
 @pytest.fixture(scope="session")
+def live_direct_agent_url() -> str:
+    """Public agent URL only (never the gateway). Used for matrix tests that hit ``/ask``."""
+    url = os.environ.get("RENDER_AGENT_URL", "").strip()
+    if not url:
+        pytest.skip("RENDER_AGENT_URL not set")
+    return url.rstrip("/")
+
+
+@pytest.fixture(scope="session")
 def frontend_url() -> str:
     url = os.environ.get("RENDER_FRONTEND_URL", "")
     if not url:

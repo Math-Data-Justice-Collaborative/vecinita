@@ -16,13 +16,15 @@
 	typecheck-scraper \
 	test-integration-gateway-fast test-integration-gateway-full test-integration-gateway \
 	test-all-integration test-cross-integration test-cross-e2e \
-	test-schemathesis test-schemathesis-gateway test-schemathesis-agent test-schemathesis-cli test-schemathesis-live \
+	test-schemathesis test-schemathesis-gateway test-schemathesis-agent test-schemathesis-cli \
+	test-schemathesis-live test-schemathesis-live-agent test-schemathesis-live-gateway test-schemathesis-live-matrix test-schemathesis-live-all \
 	scraper-run scraper-run-verbose scraper-run-clean scraper-validate-postgres \
 	microservices-up microservices-down microservices-logs test-microservices-contracts test-microservices \
 	render-env-validate render-tests-strict render-tests-render-suite render-workflow-ci \
 	render-local-up render-local-down render-local-logs render-local-check render-local-check-live render-local-validate \
 	env-sync-contract render-connectivity-tests render-all-offline-contract-tests \
 	render-live-smoke render-live-integration render-deploy-trigger render-deploy-wait \
+	render-services render-deploy-status render-deploy-show render-service-env render-logs \
 	docs-install docs-serve docs-build docs-deploy-check
 
 help:
@@ -103,8 +105,13 @@ help:
 	@echo "  make test-schemathesis                   Run gateway + agent offline Schemathesis pytest suites"
 	@echo "  make test-schemathesis-gateway           Gateway ASGI schema tests (mocked upstreams)"
 	@echo "  make test-schemathesis-agent             Agent ASGI schema tests (mocked LLM/embeddings)"
-	@echo "  make test-schemathesis-cli               CLI schemathesis run (needs SCHEMA_URL / local gateway)"
-	@echo "  make test-schemathesis-live              Live Schemathesis + smoke (needs RENDER_* URLs)"
+	@echo "  make test-schemathesis-cli               CLI live run (AGENT_SCHEMA_URL and/or GATEWAY_SCHEMA_URL; optional GATEWAY_LIVE_BEARER)"
+	@echo "  make test-schemathesis-live              Live pytest: matrix + agent + gateway Schemathesis + health/connectivity"
+	@echo "  make test-schemathesis-live-matrix       Live OpenAPI error matrix only (fast)"
+	@echo "  make test-schemathesis-live-agent        Live agent Schemathesis (RENDER_AGENT_URL)"
+	@echo "  make test-schemathesis-live-gateway      Live gateway Schemathesis (RENDER_GATEWAY_URL)"
+	@echo "  make test-schemathesis-live-all          matrix, then agent, then gateway live suites"
+	@echo "    SCHEMATHESIS_TIER=b                    Optional stricter response_schema_conformance (gateway live)"
 	@echo ""
 	@echo "Scraper and ingestion targets"
 	@echo "  make scraper-run                         Run scraper in additive streaming mode"
@@ -135,6 +142,13 @@ help:
 		@echo "Deploy management (requires RENDER_*_DEPLOY_HOOK_URL / RENDER_API_KEY)"
 		@echo "  make render-deploy-trigger               Fire Render deploy hooks for all services"
 		@echo "  make render-deploy-wait SERVICE_ID=...   Wait for a Render deploy to reach live status"
+		@echo "Render API inspect (requires RENDER_API_KEY; see https://dashboard.render.com/api-keys)"
+		@echo "  make render-services [LIMIT=50]        List service ids + names for this API key"
+		@echo "  make render-deploy-status [SERVICE_ID=]  Recent deploys (SERVICE_ID or RENDER_*_SERVICE_ID env)"
+		@echo "  make render-deploy-show DEPLOY=dep-... [SERVICE_ID=]  Full JSON for one deploy"
+		@echo "  make render-service-env [SERVICE_ID=]    Env keys + binding kinds (secret values not returned by API)"
+		@echo "  make render-logs [LOG_TYPE=build] ...  Recent logs (omit LOG_TYPE for all types Render returns)"
+		@echo "    After render login: render logs -r srv-... -o text --type build"
 		@echo ""
 	@echo "Microservices stack targets"
 	@echo "  make microservices-up                    Start microservices compose stack"
@@ -366,7 +380,13 @@ format-check-frontend:
 audit: audit-backend audit-frontend
 
 audit-backend:
-	cd backend && uv run --with pip-audit pip-audit --progress-spinner off --desc
+	@set -e; \
+	req=$$(mktemp); \
+	trap 'rm -f "$$req"' EXIT; \
+	cd backend && \
+	uv export --frozen --format requirements.txt --no-hashes --no-annotate --no-header \
+		--extra ci --no-emit-project -o "$$req" && \
+	uv run --with pip-audit pip-audit -r "$$req" --progress-spinner off --desc
 
 audit-frontend:
 	cd frontend && npm audit --audit-level=high
@@ -577,6 +597,52 @@ render-deploy-wait:
 	@echo "Waiting for Render service to reach live status (requires RENDER_API_KEY and SERVICE_ID)..."
 	python3 scripts/github/wait_for_render_deploy.py "$(SERVICE_ID)" --timeout $(or $(TIMEOUT),900)
 
+# SERVICE_ID for targets below: Makefile SERVICE_ID=, or env RENDER_SERVICE_ID / RENDER_GATEWAY_SERVICE_ID.
+render-services:
+	@command -v python3 >/dev/null 2>&1 || (echo "python3 is required" && exit 1)
+	python3 scripts/github/render_inspect.py services --limit $(or $(LIMIT),50)
+
+render-deploy-status:
+	@command -v python3 >/dev/null 2>&1 || (echo "python3 is required" && exit 1)
+	@svc="$(or $(SERVICE_ID),$(RENDER_SERVICE_ID),$(RENDER_GATEWAY_SERVICE_ID))"; \
+	if [ -z "$$svc" ]; then \
+		echo "Usage: make render-deploy-status SERVICE_ID=srv-...  (or export RENDER_SERVICE_ID / RENDER_GATEWAY_SERVICE_ID)"; \
+		exit 1; \
+	fi; \
+	python3 scripts/github/render_inspect.py deploys --service-id "$$svc" --limit $(or $(LIMIT),15)
+
+render-deploy-show:
+	@command -v python3 >/dev/null 2>&1 || (echo "python3 is required" && exit 1)
+	@test -n "$(DEPLOY)" || (echo "Usage: make render-deploy-show DEPLOY=dep-... [SERVICE_ID=srv-...]" && exit 1)
+	@svc="$(or $(SERVICE_ID),$(RENDER_SERVICE_ID),$(RENDER_GATEWAY_SERVICE_ID))"; \
+	if [ -z "$$svc" ]; then \
+		echo "Set SERVICE_ID or RENDER_SERVICE_ID / RENDER_GATEWAY_SERVICE_ID"; \
+		exit 1; \
+	fi; \
+	python3 scripts/github/render_inspect.py deploy --service-id "$$svc" --deploy-id "$(DEPLOY)"
+
+render-service-env:
+	@command -v python3 >/dev/null 2>&1 || (echo "python3 is required" && exit 1)
+	@svc="$(or $(SERVICE_ID),$(RENDER_SERVICE_ID),$(RENDER_GATEWAY_SERVICE_ID))"; \
+	if [ -z "$$svc" ]; then \
+		echo "Usage: make render-service-env SERVICE_ID=srv-...  (or export RENDER_SERVICE_ID / RENDER_GATEWAY_SERVICE_ID)"; \
+		exit 1; \
+	fi; \
+	python3 scripts/github/render_inspect.py env --service-id "$$svc"
+
+render-logs:
+	@command -v python3 >/dev/null 2>&1 || (echo "python3 is required" && exit 1)
+	@svc="$(or $(SERVICE_ID),$(RENDER_SERVICE_ID),$(RENDER_GATEWAY_SERVICE_ID))"; \
+	if [ -z "$$svc" ]; then \
+		echo "Usage: make render-logs SERVICE_ID=srv-... [LOG_TYPE=build] [LIMIT=80]"; \
+		exit 1; \
+	fi; \
+	if [ -n "$(LOG_TYPE)" ]; then \
+		python3 scripts/github/render_inspect.py logs --service-id "$$svc" --limit $(or $(LIMIT),80) --type "$(LOG_TYPE)"; \
+	else \
+		python3 scripts/github/render_inspect.py logs --service-id "$$svc" --limit $(or $(LIMIT),80); \
+	fi
+
 microservices-up:
 	docker compose -f docker-compose.microservices.yml up -d
 
@@ -615,16 +681,48 @@ test-schemathesis:
 test-schemathesis-cli:
 	cd backend && bash scripts/run_schemathesis_live.sh
 
-test-schemathesis-live:
-	@echo "Running live Schemathesis + related live checks (auto-loading .env when present)..."
+test-schemathesis-live-agent:
+	@echo "Live Schemathesis: agent OpenAPI (loads repo .env when present)..."
 	@set -a; \
 	if [ -f .env ]; then . ./.env; fi; \
 	set +a; \
 	cd backend && SKIP_AGENT_MAIN_IMPORT="$${SKIP_AGENT_MAIN_IMPORT:-true}" uv run pytest \
 		tests/live/test_live_schemathesis.py \
+		-m live -v --tb=short
+
+test-schemathesis-live-gateway:
+	@echo "Live Schemathesis: gateway OpenAPI (loads repo .env when present)..."
+	@set -a; \
+	if [ -f .env ]; then . ./.env; fi; \
+	set +a; \
+	cd backend && SKIP_AGENT_MAIN_IMPORT="$${SKIP_AGENT_MAIN_IMPORT:-true}" uv run pytest \
+		tests/live/test_live_gateway_schemathesis.py \
+		-m live -v --tb=short
+
+test-schemathesis-live-matrix:
+	@echo "Live OpenAPI response matrix (loads repo .env when present)..."
+	@set -a; \
+	if [ -f .env ]; then . ./.env; fi; \
+	set +a; \
+	cd backend && SKIP_AGENT_MAIN_IMPORT="$${SKIP_AGENT_MAIN_IMPORT:-true}" uv run pytest \
+		tests/live/test_live_openapi_response_matrix.py \
+		-m live -v --tb=short
+
+test-schemathesis-live-all: test-schemathesis-live-matrix test-schemathesis-live-agent test-schemathesis-live-gateway
+	@echo "Live Schemathesis aggregate finished."
+
+test-schemathesis-live:
+	@echo "Running live Schemathesis matrix + agent + gateway + health/connectivity (auto-loading .env when present)..."
+	@set -a; \
+	if [ -f .env ]; then . ./.env; fi; \
+	set +a; \
+	cd backend && SKIP_AGENT_MAIN_IMPORT="$${SKIP_AGENT_MAIN_IMPORT:-true}" uv run pytest \
+		tests/live/test_live_openapi_response_matrix.py \
+		tests/live/test_live_schemathesis.py \
+		tests/live/test_live_gateway_schemathesis.py \
 		tests/live/test_live_health.py \
 		tests/live/test_live_connectivity.py \
-		-q --tb=short
+		-m live -q --tb=short
 
 test-frontend-e2e:
 	cd frontend && npm run test:e2e

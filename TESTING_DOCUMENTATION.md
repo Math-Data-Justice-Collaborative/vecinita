@@ -158,12 +158,20 @@ Schemathesis exercises the **gateway** and **agent** OpenAPI descriptions in-pro
 - Gateway: `http://127.0.0.1:8004/api/v1/openapi.json` (Swagger UI: `/api/v1/docs`)
 - Agent: `http://127.0.0.1:8000/openapi.json` (docs: `/docs`)
 
-**Tiered checks (pytest)**
+**Tiered checks (offline pytest)**
 
-- **Stability**: default Schemathesis checks on an allowlisted set of operations (mocked agent/embedding/documents SQL where needed).
-- **Response contract**: `response_schema_conformance` on a subset with accurate `response_model` coverage (`test_gateway_openapi_response_schema_contract`).
-- **Auth**: `ENABLE_AUTH=true` plus `Authorization: Bearer …` for `GET /api/v1/ask` (`test_gateway_ask_with_bearer_auth`).
+- **Tier A — stability**: default Schemathesis checks on an allowlisted set of operations (mocked agent/embedding/documents SQL where needed).
+- **Tier B — response contract**: `response_schema_conformance` on a subset with accurate `response_model` coverage (`test_gateway_openapi_response_schema_contract` in `test_api_schema_schemathesis.py`).
+- **Auth slice**: `ENABLE_AUTH=true` plus `Authorization: Bearer …` for `GET /api/v1/ask` (`test_gateway_ask_with_bearer_auth`).
 - **Agent offline**: positive-generation fuzz on cheap routes (`test_agent_api_schema_schemathesis.py`).
+
+**Live Render (lx27 or staging)**
+
+- **Tier A (default)**: live pytest and CLI runs use `not_a_server_error` only — strongest signal under POSITIVE generation without demanding perfect error-body documentation.
+- **Tier B (opt-in)**: set `SCHEMATHESIS_TIER=b` for gateway live tests to add `response_schema_conformance` on a small read-only allowlist (`test_live_gateway_schemathesis.py`). Use after OpenAPI/error models are aligned to avoid spec-noise failures.
+- **Hypothesis**: live suites use low `max_examples` and generous HTTP timeouts; the CLI honors `SCHEMATHESIS_MAX_EXAMPLES` (see `run_schemathesis_live.sh`).
+- **Auth**: export `GATEWAY_LIVE_BEARER` when the gateway has `ENABLE_AUTH=true`.
+- **Response matrix**: deterministic 4xx/422 checks in `tests/live/test_live_openapi_response_matrix.py` (requires `RENDER_AGENT_URL` for agent rows and `RENDER_GATEWAY_URL` for gateway rows).
 
 **Files**
 
@@ -171,7 +179,11 @@ Schemathesis exercises the **gateway** and **agent** OpenAPI descriptions in-pro
 - `backend/tests/schemathesis_hooks.py` — optional trace coverage hooks
 - `backend/tests/integration/test_api_schema_schemathesis.py` — gateway ASGI suite
 - `backend/tests/integration/test_agent_api_schema_schemathesis.py` — agent ASGI suite
-- `backend/scripts/run_schemathesis_live.sh` — CLI wrapper for live gateway runs
+- `backend/tests/live/test_live_schemathesis.py` — live agent Schemathesis (+ isolated `GET /ask` budget)
+- `backend/tests/live/test_live_gateway_schemathesis.py` — live gateway Schemathesis
+- `backend/tests/live/test_live_openapi_response_matrix.py` — live documented error shapes
+- `backend/scripts/run_schemathesis_live.sh` — CLI: `AGENT_SCHEMA_URL` / `GATEWAY_SCHEMA_URL` (or legacy `SCHEMA_URL`)
+- `.github/workflows/schemathesis-live-nightly.yml` — optional scheduled / manual aggregate (secrets required for real hits)
 
 **From repo root (preferred)**
 
@@ -179,8 +191,12 @@ Schemathesis exercises the **gateway** and **agent** OpenAPI descriptions in-pro
 make test-schemathesis              # gateway + agent offline pytest suites
 make test-schemathesis-gateway
 make test-schemathesis-agent
-make test-schemathesis-cli          # requires SCHEMA_URL or local gateway on 8004
-make test-schemathesis-live         # requires RENDER_* URLs; live agent Schemathesis + smoke
+make test-schemathesis-cli          # set AGENT_SCHEMA_URL and/or GATEWAY_SCHEMA_URL; optional GATEWAY_LIVE_BEARER
+make test-schemathesis-live         # matrix + agent + gateway live pytest + health/connectivity
+make test-schemathesis-live-matrix  # fast 422/400 matrix only
+make test-schemathesis-live-agent
+make test-schemathesis-live-gateway
+make test-schemathesis-live-all     # matrix → agent → gateway
 ```
 
 **From `backend/`**
@@ -193,16 +209,17 @@ SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
   -q
 ```
 
-**CLI against a live gateway**
+**CLI against live public OpenAPI**
 
 ```bash
 cd backend
-SCHEMA_URL=http://127.0.0.1:8004/api/v1/openapi.json make test-schema-cli
-# or:
-SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run schemathesis run http://127.0.0.1:8004/api/v1/openapi.json
+export AGENT_SCHEMA_URL=https://vecinita-agent-lx27.onrender.com/openapi.json
+export GATEWAY_SCHEMA_URL=https://vecinita-gateway-lx27.onrender.com/api/v1/openapi.json
+# export GATEWAY_LIVE_BEARER=...   # when gateway auth is enabled
+bash scripts/run_schemathesis_live.sh
 ```
 
-The pytest suites use mocked upstreams for deterministic CI. The CLI is suited to broader exploratory runs when the stack is already up.
+The pytest suites use mocked upstreams for deterministic CI. The CLI is suited to broader exploratory runs against URLs you provide; do not commit secrets.
 
 ## Deployment Ready Status
 

@@ -21,10 +21,24 @@ from fastapi.responses import StreamingResponse
 
 from src.service_endpoints import AGENT_SERVICE_URL
 
-from .models import AskResponse, SourceCitation
+from .models import AskResponse, ErrorResponse, SourceCitation, ValidationErrorResponse
 
 router = APIRouter(prefix="/ask", tags=["Q&A"])
 logger = logging.getLogger(__name__)
+
+_GATEWAY_ASK_OPENAPI_RESPONSES: dict[int | str, dict[str, Any]] = {
+    401: {
+        "model": ErrorResponse,
+        "description": "Authentication required when ENABLE_AUTH=true (missing/invalid Bearer).",
+    },
+    422: {
+        "model": ValidationErrorResponse,
+        "description": "Invalid query parameters.",
+    },
+    503: {"model": ErrorResponse, "description": "Cannot reach agent service."},
+    504: {"model": ErrorResponse, "description": "Agent request timed out."},
+    500: {"model": ErrorResponse, "description": "Unexpected gateway or upstream failure."},
+}
 
 # Agent service URL is resolved via the centralized service_endpoints module.
 DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
@@ -193,9 +207,22 @@ def get_demo_response(question: str, lang: str | None = None) -> AskResponse:
     )
 
 
-@router.get("")
+@router.get("", response_model=AskResponse, responses=_GATEWAY_ASK_OPENAPI_RESPONSES)
 async def ask_question(
-    question: str = Query(..., description="User question"),
+    question: str = Query(
+        ...,
+        description="User question",
+        openapi_examples={
+            "housing_en": {
+                "summary": "English — housing resources",
+                "value": "What affordable housing programs exist in this neighborhood?",
+            },
+            "health_es": {
+                "summary": "Spanish — community health",
+                "value": "¿Dónde puedo encontrar una clínica de salud comunitaria?",
+            },
+        },
+    ),
     thread_id: str | None = Query(None, description="Conversation thread ID"),
     context_answer: str | None = Query(None, description="Prior assistant answer context"),
     lang: str | None = Query(None, description="Override language detection (es/en)"),
@@ -406,7 +433,7 @@ async def sse_stream_forward_generator(
         yield error_event.encode("utf-8")
 
 
-@router.get("/stream")
+@router.get("/stream", responses=_GATEWAY_ASK_OPENAPI_RESPONSES)
 async def ask_question_stream(
     question: str = Query(..., description="User question"),
     thread_id: str | None = Query(None, description="Conversation thread ID"),

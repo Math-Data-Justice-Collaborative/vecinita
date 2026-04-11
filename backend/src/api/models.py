@@ -1436,6 +1436,24 @@ class ErrorResponse(BaseModel):
     )
 
 
+class ValidationErrorResponse(BaseModel):
+    """FastAPI ``HTTPException`` / request validation error shape (422)."""
+
+    detail: list[dict[str, Any]] | str = Field(
+        ...,
+        description="Validation issues or error message payload.",
+        examples=[
+            [
+                {
+                    "loc": ["query", "question"],
+                    "msg": "field required",
+                    "type": "value_error.missing",
+                }
+            ]
+        ],
+    )
+
+
 # Backward compatibility aliases
 HealthCheck = HealthCheckResponse
 GatewayConfig = GatewayConfigResponse

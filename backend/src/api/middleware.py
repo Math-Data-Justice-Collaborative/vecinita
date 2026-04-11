@@ -17,7 +17,7 @@ import logging
 import os
 import time
 from collections.abc import Awaitable, Callable
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from starlette.datastructures import MutableHeaders
@@ -106,6 +106,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
                 content={
                     "error": "Missing API key",
                     "detail": "Provide API key via 'Authorization: Bearer <api_key>' header",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 },
             )
 
@@ -118,6 +119,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
                     content={
                         "error": "Invalid API key",
                         "detail": "API key validation failed",
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     },
                 )
 

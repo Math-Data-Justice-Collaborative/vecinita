@@ -35,9 +35,12 @@ pytestmark = pytest.mark.live
 
 @pytest.fixture(scope="session")
 def agent_schema(agent_url: str):
-    """Load the live OpenAPI schema and exclude SSE streaming endpoints.
+    """Load the live OpenAPI schema and exclude SSE streaming + ``/ask``.
 
-    Streaming endpoints emit SSE / NDJSON and are exercised by smoke tests.
+    ``GET /ask`` is fuzzed separately with a low Hypothesis budget
+    (``agent_schema_ask``). Streaming endpoints are covered by targeted smoke
+    tests and stream-specific assertions.
+
     Generation mode is restricted to POSITIVE to avoid schemathesis sending
     undocumented HTTP methods (PUT, TRACE, DELETE, etc.) which trigger Render
     and Cloudflare infrastructure 502/405 errors unrelated to app behaviour.
@@ -46,16 +49,25 @@ def agent_schema(agent_url: str):
         f"{agent_url}/openapi.json",
         wait_for_schema=30.0,
     )
-    # Restrict to positive-only generation: only inputs valid per schema.
     schema.config.generation.modes = [GenerationMode.POSITIVE]
-    # /ask remains covered by targeted smoke tests below; excluding from fuzzing
-    # reduces upstream model-provider instability noise in live runs.
     return schema.exclude(path=["/ask", "/ask/stream", "/ask-stream"])
+
+
+@pytest.fixture(scope="session")
+def agent_schema_ask(agent_url: str):
+    """Narrow live schema to ``GET /ask`` only for a small Schemathesis budget."""
+    schema = schemathesis.openapi.from_url(
+        f"{agent_url}/openapi.json",
+        wait_for_schema=30.0,
+    )
+    schema.config.generation.modes = [GenerationMode.POSITIVE]
+    return schema.include(path="/ask", method="GET")
 
 
 # Lazy loader: parametrized tests below are deferred until ``agent_schema``
 # is resolved by pytest, so a fixture skip propagates cleanly.
 schema = schemathesis.pytest.from_fixture("agent_schema")
+schema_ask = schemathesis.pytest.from_fixture("agent_schema_ask")
 
 
 # ---------------------------------------------------------------------------
@@ -77,11 +89,22 @@ def test_api_operations_conform_to_schema(case):
     query handling). For live reliability gating we enforce the strongest
     stability signal here: no 5xx responses.
     """
-    if case.path == "/ask":
-        pytest.skip("/ask fuzzing is unstable due upstream model provider variance in live env")
-
     case.call_and_validate(
         timeout=45,
+        checks=[schemathesis.checks.not_a_server_error],
+    )
+
+
+@schema_ask.parametrize()
+@settings(
+    max_examples=4,
+    suppress_health_check=[HealthCheck.too_slow, HealthCheck.filter_too_much],
+    deadline=None,
+)
+def test_ask_get_not_a_server_error(case):
+    """Low-budget POSITIVE fuzz on ``GET /ask`` only (isolated from other routes)."""
+    case.call_and_validate(
+        timeout=90,
         checks=[schemathesis.checks.not_a_server_error],
     )
 
