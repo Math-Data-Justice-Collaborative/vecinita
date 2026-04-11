@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "stop": [
+      {
+        "command": ".cursor/hooks/run-ci-on-stop.sh",
+        "timeout": 900,
+        "loop_limit": 8
+      }
+    ]
+  }
+}

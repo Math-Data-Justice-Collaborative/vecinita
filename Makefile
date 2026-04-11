@@ -4,11 +4,12 @@
 	dev-data-management dev-data-management-frontend dev-data-management-api data-management-api-key data-management \
 	dev-backend dev-gateway dev-frontend \
 	branch-status branch-save branch-restore branch-switch branch-pull branch-sync-main actions-status actions-failures actions-logs \
+	actions-local actions-local-act actions-local-list \
 	lint lint-backend lint-frontend lint-imported lint-fix lint-fix-backend lint-fix-frontend lint-fix-data-management-frontend \
 	typecheck typecheck-backend typecheck-frontend typecheck-imported \
 	format format-backend format-frontend format-check format-check-backend format-check-frontend \
 	audit audit-backend audit-frontend audit-imported audit-data-management-frontend audit-fix audit-fix-frontend audit-fix-data-management-frontend \
-	quality quality-fix quality-full quality-imported \
+	quality quality-fix quality-full ci quality-imported \
 	test-unit test-integration test-e2e \
 	test-backend-unit test-frontend-unit test-frontend-e2e \
 	test-imported test-data-management-frontend test-embedding-modal test-model-modal test-scraper check-data-management-api-layout \
@@ -17,13 +18,12 @@
 	test-integration-gateway-fast test-integration-gateway-full test-integration-gateway \
 	test-all-integration test-cross-integration test-cross-e2e \
 	test-schemathesis test-schemathesis-gateway test-schemathesis-agent test-schemathesis-cli \
-	test-schemathesis-live test-schemathesis-live-agent test-schemathesis-live-gateway test-schemathesis-live-matrix test-schemathesis-live-all \
 	scraper-run scraper-run-verbose scraper-run-clean scraper-validate-postgres \
 	microservices-up microservices-down microservices-logs test-microservices-contracts test-microservices \
 	render-env-validate render-tests-strict render-tests-render-suite render-workflow-ci \
 	render-local-up render-local-down render-local-logs render-local-check render-local-check-live render-local-validate \
 	env-sync-contract render-connectivity-tests render-all-offline-contract-tests \
-	render-live-smoke render-live-integration render-deploy-trigger render-deploy-wait \
+	render-deploy-trigger render-deploy-wait \
 	render-services render-deploy-status render-deploy-show render-service-env render-logs \
 	docs-install docs-serve docs-build docs-deploy-check
 
@@ -62,6 +62,11 @@ help:
 	@echo "  make actions-failures                    List recent failed runs (same optional filters except STATUS)"
 	@echo "  make actions-logs RUN=<run-id>           Stream logs for a run (failed steps by default; LOG=full for all)"
 	@echo "    REPO=... JOB=<job-id>                  Optional repo override or single-job logs"
+	@echo "  make actions-local [WORKFLOW=test.yml]   Local parity vs .github/workflows (no act required; optional USE_ACT=1)"
+	@echo "    RUN_PLAYWRIGHT=1 RUN_MICROSERVICES=1      Optional heavy steps (see scripts/github/run_actions_local_make.sh)"
+	@echo "  make actions-local-act [WORKFLOW=...]    Same as actions-local but requires nektos/act + Docker"
+	@echo "    ARGS='-n' ACT_EVENT=push ACT_SKIP=...  Optional act flags when USE_ACT=1"
+	@echo "  make actions-local-list WORKFLOW=test.yml  List jobs/events for one workflow (requires act)"
 	@echo ""
 	@echo "Quality targets"
 	@echo "  make lint                                Lint core and imported codebases"
@@ -83,6 +88,7 @@ help:
 	@echo "  make quality                             Run repo-wide lint, format, typecheck, and audit checks"
 	@echo "  make quality-fix                         Apply safe auto-fixes, then rerun quality checks"
 	@echo "  make quality-full                        Run quality checks plus unit/imported tests and fast integration"
+	@echo "  make ci                                  Same as quality-full (local CI gate; .cursor stop hook runs this)"
 	@echo ""
 	@echo "Testing targets"
 	@echo "  make test-unit                           Run backend and frontend unit tests"
@@ -105,13 +111,7 @@ help:
 	@echo "  make test-schemathesis                   Run gateway + agent offline Schemathesis pytest suites"
 	@echo "  make test-schemathesis-gateway           Gateway ASGI schema tests (mocked upstreams)"
 	@echo "  make test-schemathesis-agent             Agent ASGI schema tests (mocked LLM/embeddings)"
-	@echo "  make test-schemathesis-cli               CLI live run (AGENT_SCHEMA_URL and/or GATEWAY_SCHEMA_URL; optional GATEWAY_LIVE_BEARER)"
-	@echo "  make test-schemathesis-live              Live pytest: matrix + agent + gateway Schemathesis + health/connectivity"
-	@echo "  make test-schemathesis-live-matrix       Live OpenAPI error matrix only (fast)"
-	@echo "  make test-schemathesis-live-agent        Live agent Schemathesis (RENDER_AGENT_URL)"
-	@echo "  make test-schemathesis-live-gateway      Live gateway Schemathesis (RENDER_GATEWAY_URL)"
-	@echo "  make test-schemathesis-live-all          matrix, then agent, then gateway live suites"
-	@echo "    SCHEMATHESIS_TIER=b                    Optional stricter response_schema_conformance (gateway live)"
+	@echo "  make test-schemathesis-cli               Schemathesis CLI (AGENT_SCHEMA_URL and/or GATEWAY_SCHEMA_URL; optional GATEWAY_LIVE_BEARER)"
 	@echo ""
 	@echo "Scraper and ingestion targets"
 	@echo "  make scraper-run                         Run scraper in additive streaming mode"
@@ -132,24 +132,21 @@ help:
 	@echo "  make render-local-check [ENV_FILE=...]   Smart check: preflight always, live checks if stack is up"
 	@echo "  make render-local-check-live [ENV_FILE=...] Force live local Render smoke/runbook checks"
 	@echo ""
-		@echo "Env key standardization + contract tests"
-		@echo "  make env-sync-contract                   Cross-platform env key sync contract tests (no secrets)"
-		@echo "  make render-connectivity-tests           Render connectivity config tests (offline)"
-		@echo "  make render-all-offline-contract-tests   Run all offline contract tests"
-		@echo "Live tests (requires RENDER_GATEWAY_URL)"
-		@echo "  make render-live-smoke                   Live health + Q&A smoke tests vs Render"
-		@echo "  make render-live-integration             Full live integration test suite vs Render"
-		@echo "Deploy management (requires RENDER_*_DEPLOY_HOOK_URL / RENDER_API_KEY)"
-		@echo "  make render-deploy-trigger               Fire Render deploy hooks for all services"
-		@echo "  make render-deploy-wait SERVICE_ID=...   Wait for a Render deploy to reach live status"
-		@echo "Render API inspect (requires RENDER_API_KEY; see https://dashboard.render.com/api-keys)"
-		@echo "  make render-services [LIMIT=50]        List service ids + names for this API key"
-		@echo "  make render-deploy-status [SERVICE_ID=]  Recent deploys (SERVICE_ID or RENDER_*_SERVICE_ID env)"
-		@echo "  make render-deploy-show DEPLOY=dep-... [SERVICE_ID=]  Full JSON for one deploy"
-		@echo "  make render-service-env [SERVICE_ID=]    Env keys + binding kinds (secret values not returned by API)"
-		@echo "  make render-logs [LOG_TYPE=build] ...  Recent logs (omit LOG_TYPE for all types Render returns)"
-		@echo "    After render login: render logs -r srv-... -o text --type build"
-		@echo ""
+	@echo "Env key standardization + contract tests"
+	@echo "  make env-sync-contract                   Cross-platform env key sync contract tests (no secrets)"
+	@echo "  make render-connectivity-tests           Render connectivity config tests (offline)"
+	@echo "  make render-all-offline-contract-tests   Run all offline contract tests"
+	@echo "Deploy management (requires RENDER_*_DEPLOY_HOOK_URL / RENDER_API_KEY)"
+	@echo "  make render-deploy-trigger               Fire Render deploy hooks for all services"
+	@echo "  make render-deploy-wait SERVICE_ID=...   Wait for a Render deploy to reach live status"
+	@echo "Render API inspect (requires RENDER_API_KEY; see https://dashboard.render.com/api-keys)"
+	@echo "  make render-services [LIMIT=50]        List service ids + names for this API key"
+	@echo "  make render-deploy-status [SERVICE_ID=]  Recent deploys (SERVICE_ID or RENDER_*_SERVICE_ID env)"
+	@echo "  make render-deploy-show DEPLOY=dep-... [SERVICE_ID=]  Full JSON for one deploy"
+	@echo "  make render-service-env [SERVICE_ID=]    Env keys + binding kinds (secret values not returned by API)"
+	@echo "  make render-logs [LOG_TYPE=build] ...  Recent logs (omit LOG_TYPE for all types Render returns)"
+	@echo "    After render login: render logs -r srv-... -o text --type build"
+	@echo ""
 	@echo "Microservices stack targets"
 	@echo "  make microservices-up                    Start microservices compose stack"
 	@echo "  make microservices-down                  Stop microservices compose stack"
@@ -315,6 +312,23 @@ actions-logs:
 	@test -n "$(RUN)" || (echo "Usage: make actions-logs RUN=<run-id>  (numeric id from make actions-failures or make actions-status)" && exit 1)
 	gh run view $(RUN) $(if $(REPO),-R $(REPO),) $(if $(JOB),--job $(JOB),) $(if $(filter full,$(LOG)),--log,--log-failed)
 
+# Local parity with GitHub workflows: default runs scripts/github/run_actions_local_make.sh (no act).
+# USE_ACT=1 uses nektos/act when installed. See scripts/github/run_actions_local_make.sh for env vars.
+actions-local:
+	@WORKFLOW="$(WORKFLOW)" ACT_EVENT="$(ACT_EVENT)" ACT_SKIP="$(ACT_SKIP)" ACT_RUNNER_IMAGE="$(ACT_RUNNER_IMAGE)" \
+		USE_ACT="$(USE_ACT)" ./scripts/github/actions_local.sh $(ARGS)
+
+# Requires Docker + act: https://github.com/nektos/act
+actions-local-act:
+	@command -v act >/dev/null 2>&1 || (echo "act is not installed. See https://github.com/nektos/act#installation" && exit 1)
+	@WORKFLOW="$(WORKFLOW)" ACT_EVENT="$(ACT_EVENT)" ACT_SKIP="$(ACT_SKIP)" ACT_RUNNER_IMAGE="$(ACT_RUNNER_IMAGE)" \
+		./scripts/github/run_act_workflows.sh $(ARGS)
+
+actions-local-list:
+	@command -v act >/dev/null 2>&1 || (echo "act is not installed. See https://github.com/nektos/act#installation" && exit 1)
+	@test -n "$(WORKFLOW)" || (echo "Usage: make actions-local-list WORKFLOW=test.yml" && exit 1)
+	act --list -W .github/workflows/$(WORKFLOW)
+
 lint: lint-backend lint-frontend
 
 lint-imported: lint-data-management-frontend lint-scraper lint-embedding-modal lint-model-modal
@@ -430,6 +444,8 @@ quality-fix: format lint-fix audit-fix quality
 
 quality-full: quality test-unit test-imported test-integration-gateway-fast
 
+ci: quality-full
+
 test-unit: test-backend-unit test-frontend-unit
 
 test-backend-unit:
@@ -536,53 +552,6 @@ render-connectivity-tests:
 render-all-offline-contract-tests: env-sync-contract render-connectivity-tests
 	@echo "All offline contract tests passed."
 
-render-live-smoke:
-	@echo "Running live smoke tests against Render (auto-loading .env when present)..."
-	@set -a; \
-	if [ -f .env ]; then . ./.env; fi; \
-	set +a; \
-	if [ -n "$$RENDER_AGENT_URL" ] && [ "$$USE_GATEWAY_LIVE" != "1" ]; then \
-		unset RENDER_GATEWAY_URL; \
-		echo "Using agent-only live mode (set USE_GATEWAY_LIVE=1 to include gateway checks)."; \
-	fi; \
-	if [ -z "$$RENDER_GATEWAY_URL" ] && [ -z "$$RENDER_AGENT_URL" ]; then \
-		echo "Warning: RENDER_GATEWAY_URL and RENDER_AGENT_URL are not set; live tests may be skipped."; \
-	fi; \
-	cd backend && SKIP_AGENT_MAIN_IMPORT="$${SKIP_AGENT_MAIN_IMPORT:-true}" uv run pytest tests/live/ -m live -v --tb=short
-
-render-live-integration:
-	@echo "Running full live integration tests against Render (auto-loading .env when present)..."
-	@set -a; \
-	if [ -f .env ]; then . ./.env; fi; \
-	set +a; \
-	if [ -n "$$RENDER_AGENT_URL" ] && [ "$$USE_GATEWAY_LIVE" != "1" ]; then \
-		unset RENDER_GATEWAY_URL; \
-		echo "Using agent-only live mode (set USE_GATEWAY_LIVE=1 to include gateway checks)."; \
-	fi; \
-	if [ -z "$$RENDER_GATEWAY_URL" ] && [ -z "$$RENDER_AGENT_URL" ]; then \
-		echo "Warning: RENDER_GATEWAY_URL and RENDER_AGENT_URL are not set; live tests may be skipped."; \
-	fi; \
-	cd backend && SKIP_AGENT_MAIN_IMPORT="$${SKIP_AGENT_MAIN_IMPORT:-true}" uv run pytest tests/live/ -m live -v --tb=long
-
-render-live-validity:
-	@echo "Running strict live validity checks (output-shape + SSE contract)..."
-	@set -a; \
-	if [ -f .env ]; then . ./.env; fi; \
-	set +a; \
-	if [ -n "$$RENDER_AGENT_URL" ]; then \
-		unset RENDER_GATEWAY_URL; \
-		echo "Using agent-only validity mode for deterministic output checks."; \
-	fi; \
-	if [ -z "$$RENDER_GATEWAY_URL" ] && [ -z "$$RENDER_AGENT_URL" ]; then \
-		echo "Warning: RENDER_GATEWAY_URL and RENDER_AGENT_URL are not set; live tests may be skipped."; \
-	fi; \
-	cd backend && SKIP_AGENT_MAIN_IMPORT="$${SKIP_AGENT_MAIN_IMPORT:-true}" uv run pytest \
-		tests/live/test_live_schemathesis.py \
-		tests/live/test_live_health.py \
-		tests/live/test_live_connectivity.py \
-		tests/live/test_live_embedding.py \
-		-v --tb=short
-
 render-deploy-trigger:
 	@echo "Triggering Render production deploy hooks (requires RENDER_*_DEPLOY_HOOK_URL env vars)..."
 	@if [ -z "$(RENDER_AGENT_DEPLOY_HOOK_URL)" ] && [ -z "$(RENDER_GATEWAY_DEPLOY_HOOK_URL)" ]; then \
@@ -680,49 +649,6 @@ test-schemathesis:
 
 test-schemathesis-cli:
 	cd backend && bash scripts/run_schemathesis_live.sh
-
-test-schemathesis-live-agent:
-	@echo "Live Schemathesis: agent OpenAPI (loads repo .env when present)..."
-	@set -a; \
-	if [ -f .env ]; then . ./.env; fi; \
-	set +a; \
-	cd backend && SKIP_AGENT_MAIN_IMPORT="$${SKIP_AGENT_MAIN_IMPORT:-true}" uv run pytest \
-		tests/live/test_live_schemathesis.py \
-		-m live -v --tb=short
-
-test-schemathesis-live-gateway:
-	@echo "Live Schemathesis: gateway OpenAPI (loads repo .env when present)..."
-	@set -a; \
-	if [ -f .env ]; then . ./.env; fi; \
-	set +a; \
-	cd backend && SKIP_AGENT_MAIN_IMPORT="$${SKIP_AGENT_MAIN_IMPORT:-true}" uv run pytest \
-		tests/live/test_live_gateway_schemathesis.py \
-		-m live -v --tb=short
-
-test-schemathesis-live-matrix:
-	@echo "Live OpenAPI response matrix (loads repo .env when present)..."
-	@set -a; \
-	if [ -f .env ]; then . ./.env; fi; \
-	set +a; \
-	cd backend && SKIP_AGENT_MAIN_IMPORT="$${SKIP_AGENT_MAIN_IMPORT:-true}" uv run pytest \
-		tests/live/test_live_openapi_response_matrix.py \
-		-m live -v --tb=short
-
-test-schemathesis-live-all: test-schemathesis-live-matrix test-schemathesis-live-agent test-schemathesis-live-gateway
-	@echo "Live Schemathesis aggregate finished."
-
-test-schemathesis-live:
-	@echo "Running live Schemathesis matrix + agent + gateway + health/connectivity (auto-loading .env when present)..."
-	@set -a; \
-	if [ -f .env ]; then . ./.env; fi; \
-	set +a; \
-	cd backend && SKIP_AGENT_MAIN_IMPORT="$${SKIP_AGENT_MAIN_IMPORT:-true}" uv run pytest \
-		tests/live/test_live_openapi_response_matrix.py \
-		tests/live/test_live_schemathesis.py \
-		tests/live/test_live_gateway_schemathesis.py \
-		tests/live/test_live_health.py \
-		tests/live/test_live_connectivity.py \
-		-m live -q --tb=short
 
 test-frontend-e2e:
 	cd frontend && npm run test:e2e

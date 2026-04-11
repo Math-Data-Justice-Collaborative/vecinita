@@ -1,0 +1,10 @@
+---
+description: Run local CI (make ci) before declaring a task complete
+alwaysApply: true
+---
+
+# CI gate before completion
+
+- Before you tell the user a task is **done** or that the change is **ready**, run **`make ci`** from the repository root and ensure it exits successfully.
+- The **stop** hook also runs `make ci` when the agent session completes; if it fails, you will get a follow-up with the log — fix issues and run `make ci` until it passes.
+- To bypass the hook in exceptional cases, the environment variable `SKIP_CI_HOOK=1` can be set (use sparingly).

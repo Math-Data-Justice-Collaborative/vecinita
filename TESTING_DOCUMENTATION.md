@@ -183,8 +183,6 @@ Schemathesis exercises the **gateway** and **agent** OpenAPI descriptions in-pro
 - `backend/tests/live/test_live_gateway_schemathesis.py` — live gateway Schemathesis
 - `backend/tests/live/test_live_openapi_response_matrix.py` — live documented error shapes
 - `backend/scripts/run_schemathesis_live.sh` — CLI: `AGENT_SCHEMA_URL` / `GATEWAY_SCHEMA_URL` (or legacy `SCHEMA_URL`)
-- `.github/workflows/schemathesis-live-nightly.yml` — optional scheduled / manual aggregate (secrets required for real hits)
-
 **From repo root (preferred)**
 
 ```bash
@@ -192,12 +190,9 @@ make test-schemathesis              # gateway + agent offline pytest suites
 make test-schemathesis-gateway
 make test-schemathesis-agent
 make test-schemathesis-cli          # set AGENT_SCHEMA_URL and/or GATEWAY_SCHEMA_URL; optional GATEWAY_LIVE_BEARER
-make test-schemathesis-live         # matrix + agent + gateway live pytest + health/connectivity
-make test-schemathesis-live-matrix  # fast 422/400 matrix only
-make test-schemathesis-live-agent
-make test-schemathesis-live-gateway
-make test-schemathesis-live-all     # matrix → agent → gateway
 ```
+
+Live-marked Schemathesis pytest (`tests/live/…`, `-m live`) is not wired to Makefile targets; run with `uv run pytest` from `backend/` when you have deployed URLs and env configured.
 
 **From `backend/`**
 
