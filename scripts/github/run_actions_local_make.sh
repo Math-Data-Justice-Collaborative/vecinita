@@ -3,7 +3,7 @@
 # Skips workflows that only run on GitHub (cross-repo, post-deploy, secrets/URLs).
 #
 # Optional env:
-#   RUN_PLAYWRIGHT=1     Include frontend Playwright e2e (test.yml frontend-e2e; slow).
+#   RUN_PLAYWRIGHT=1     Run frontend Playwright e2e locally (optional; not part of GitHub test.yml).
 #   RUN_PGVECTOR=1       Run DB integration tests against a local pgvector (advanced).
 #   RUN_MICROSERVICES=1  Force microservices stack test even if Docker check fails (not recommended).
 
@@ -78,26 +78,6 @@ make test-schemathesis
 section "render / offline contracts (render-workflow-ci, connectivity)"
 make render-workflow-ci render-connectivity-tests
 
-section "retrieval-quality-gate.yml"
-(
-	cd backend
-	: >.env
-	{
-		echo "DATABASE_URL=postgresql://test"
-		echo "OLLAMA_BASE_URL=http://localhost:11434"
-		echo "OLLAMA_MODEL=llama3.1:8b"
-		echo "USE_LOCAL_EMBEDDINGS=true"
-		echo "EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2"
-		echo "EMBEDDING_SERVICE_AUTH_TOKEN=test-embed-token"
-		echo "EMBEDDING_STRICT_STARTUP=false"
-		echo "REINDEX_TRIGGER_TOKEN=test-reindex-token"
-		echo "REINDEX_SERVICE_URL=https://example.modal.run"
-	} >>.env
-	export PYTHONPATH="${ROOT}/backend"
-	export EMBEDDING_STRICT_STARTUP=false
-	uv run pytest tests/e2e/test_retrieval_quality_gate.py -m "e2e and retrieval_quality" -v --tb=short
-)
-
 section "backend-coverage.yml"
 (
 	cd backend
@@ -141,11 +121,11 @@ else
 	skip "microservices-contracts (docker compose stack)" "Docker not available. Start Docker and re-run, or RUN_MICROSERVICES=1 make actions-local (will likely fail without Docker)."
 fi
 
-section "test.yml — Playwright e2e (optional)"
+section "Playwright e2e (optional; local only — not in CI)"
 if [[ "${RUN_PLAYWRIGHT:-}" == "1" ]]; then
 	make test-frontend-e2e
 else
-	skip "test.yml frontend-e2e" "set RUN_PLAYWRIGHT=1 to run Playwright (requires stack; slow)."
+	skip "Playwright e2e" "set RUN_PLAYWRIGHT=1 to run Playwright (requires stack; slow)."
 fi
 
 section "test.yml — pgvector integration (optional)"
