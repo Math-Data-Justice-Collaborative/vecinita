@@ -3,7 +3,7 @@
 	dev-chat dev-chat-backend dev-chat-gateway dev-chat-frontend \
 	dev-data-management dev-data-management-frontend dev-data-management-api data-management-api-key data-management \
 	dev-backend dev-gateway dev-frontend \
-	branch-status branch-save branch-restore branch-switch branch-pull branch-sync-main \
+	branch-status branch-save branch-restore branch-switch branch-pull branch-sync-main actions-status actions-failures actions-logs \
 	lint lint-backend lint-frontend lint-imported lint-fix lint-fix-backend lint-fix-frontend lint-fix-data-management-frontend \
 	typecheck typecheck-backend typecheck-frontend typecheck-imported \
 	format format-backend format-frontend format-check format-check-backend format-check-frontend \
@@ -53,6 +53,13 @@ help:
 	@echo "  make branch-pull [BRANCH=<name>]         Pull latest from origin for component branches"
 	@echo "  make branch-restore                      Restore last saved branch snapshot"
 	@echo "  make branch-sync-main                    Switch all components to main"
+	@echo ""
+	@echo "GitHub Actions (GitHub CLI)"
+	@echo "  make actions-status                      List recent workflow runs for this repo (requires gh)"
+	@echo "    REPO=owner/name WORKFLOW=ci.yml BRANCH=main STATUS=failure LIMIT=10  Optional filters"
+	@echo "  make actions-failures                    List recent failed runs (same optional filters except STATUS)"
+	@echo "  make actions-logs RUN=<run-id>           Stream logs for a run (failed steps by default; LOG=full for all)"
+	@echo "    REPO=... JOB=<job-id>                  Optional repo override or single-job logs"
 	@echo ""
 	@echo "Quality targets"
 	@echo "  make lint                                Lint core and imported codebases"
@@ -280,6 +287,19 @@ branch-pull:
 
 branch-sync-main:
 	./run/branch-orchestrator.sh sync-main
+
+actions-status:
+	@command -v gh >/dev/null 2>&1 || (echo "GitHub CLI (gh) is not installed. See https://cli.github.com/" && exit 1)
+	gh run list $(if $(REPO),-R $(REPO),) $(if $(WORKFLOW),-w $(WORKFLOW),) $(if $(BRANCH),-b $(BRANCH),) $(if $(STATUS),-s $(STATUS),) --limit $(or $(LIMIT),20)
+
+actions-failures:
+	@command -v gh >/dev/null 2>&1 || (echo "GitHub CLI (gh) is not installed. See https://cli.github.com/" && exit 1)
+	gh run list $(if $(REPO),-R $(REPO),) $(if $(WORKFLOW),-w $(WORKFLOW),) $(if $(BRANCH),-b $(BRANCH),) -s failure --limit $(or $(LIMIT),20)
+
+actions-logs:
+	@command -v gh >/dev/null 2>&1 || (echo "GitHub CLI (gh) is not installed. See https://cli.github.com/" && exit 1)
+	@test -n "$(RUN)" || (echo "Usage: make actions-logs RUN=<run-id>  (numeric id from make actions-failures or make actions-status)" && exit 1)
+	gh run view $(RUN) $(if $(REPO),-R $(REPO),) $(if $(JOB),--job $(JOB),) $(if $(filter full,$(LOG)),--log,--log-failed)
 
 lint: lint-backend lint-frontend
 
