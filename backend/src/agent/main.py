@@ -29,6 +29,7 @@ import json
 import logging
 import os
 import re
+from contextlib import asynccontextmanager
 import time
 import traceback
 import warnings
@@ -302,6 +303,13 @@ _AGENT_STREAM_OPENAPI_RESPONSES: dict[int | str, dict[str, Any]] = {
 }
 
 
+@asynccontextmanager
+async def _agent_lifespan(application: FastAPI):
+    """Lifespan context (replaces deprecated @app.on_event(\"startup\"))."""
+    _apply_startup_preflight_to_app(application)
+    yield
+
+
 # --- Initialize FastAPI App ---
 app = FastAPI(
     title="Vecinita Agent API",
@@ -313,6 +321,7 @@ app = FastAPI(
     openapi_url="/openapi.json",
     docs_url="/docs",
     redoc_url="/redoc",
+    lifespan=_agent_lifespan,
 )
 
 # --- Add CORS Middleware ---
@@ -789,10 +798,10 @@ def _run_startup_preflight() -> dict[str, Any]:
     }
 
 
-@app.on_event("startup")
-async def startup_preflight() -> None:
+def _apply_startup_preflight_to_app(application: FastAPI) -> None:
+    """Run startup preflight; invoked from ``_agent_lifespan``."""
     if not _is_truthy_env("BACKEND_PREFLIGHT_ENABLED", True):
-        app.state.preflight = {
+        application.state.preflight = {
             "status": "skipped",
             "reason": "disabled_by_env",
             "ran_at": datetime.now(timezone.utc).isoformat(),
@@ -801,7 +810,7 @@ async def startup_preflight() -> None:
         return
 
     preflight = _run_startup_preflight()
-    app.state.preflight = preflight
+    application.state.preflight = preflight
 
     logger.info(
         "Startup preflight completed status=%s data_mode=%s checks=%s config=%s",
@@ -1570,7 +1579,7 @@ def _sanitize_messages(messages: list[BaseMessage]) -> list[BaseMessage]:  # noq
                 else:
                     content = str(content)
             # Create a new message with the same type but sanitized content
-            msg_dict = msg.dict()
+            msg_dict = msg.model_dump()
             msg_dict["content"] = content
             sanitized.append(msg.__class__(**msg_dict))
     return sanitized

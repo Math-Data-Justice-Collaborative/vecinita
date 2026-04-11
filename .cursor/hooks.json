@@ -4,7 +4,7 @@
     "stop": [
       {
         "command": ".cursor/hooks/run-ci-on-stop.sh",
-        "timeout": 900,
+        "timeout": 1200,
         "loop_limit": 8
       }
     ]

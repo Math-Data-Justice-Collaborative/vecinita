@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Cursor `stop` hook (https://cursor.com/docs/agent/third-party-hooks):
 # When the agent loop ends with status "completed", run `make ci` (local CI gate).
-# If it fails, stdout returns JSON with `followup_message` so Cursor submits a
-# follow-up and the task is not treated as done until CI passes.
+# If `make ci` fails, run `make format` and `make lint-fix`, then `make ci` again.
+# If it still fails, stdout returns JSON with `followup_message` for a follow-up turn.
 #
 # Disable: SKIP_CI_HOOK=1
 
@@ -49,10 +49,28 @@ set +e
 make ci >"$LOG" 2>&1
 RC=$?
 set -e
-if [[ "$RC" -eq 0 ]]; then
-	echo "[cursor hook] make ci passed." >&2
+
+if [[ "$RC" -ne 0 ]]; then
+	echo "[cursor hook] make ci failed (exit ${RC}); running make format && make lint-fix && make ci (stop on first error)…" >&2
+	set +e
+	{
+		echo ""
+		echo "=== [cursor hook] make format (auto) ==="
+		make format && \
+		echo "" && echo "=== [cursor hook] make lint-fix (auto) ===" && \
+		make lint-fix && \
+		echo "" && echo "=== [cursor hook] make ci (retry after format/lint-fix) ===" && \
+		make ci
+	} >>"$LOG" 2>&1
+	RC=$?
+	set -e
+	if [[ "$RC" -eq 0 ]]; then
+		echo "[cursor hook] make ci passed after format/lint-fix." >&2
+	else
+		echo "[cursor hook] make ci still failing (exit ${RC}); injecting follow-up message." >&2
+	fi
 else
-	echo "[cursor hook] make ci failed (exit ${RC}); injecting follow-up message." >&2
+	echo "[cursor hook] make ci passed." >&2
 fi
 
 python3 - "$LOG" "$RC" <<'PY'
@@ -74,8 +92,9 @@ if rc == 0:
     print("{}")
 else:
     msg = (
-        "The local CI gate (`make ci`) failed — do not treat this task as complete until it passes.\n\n"
-        "Fix the errors below, run `make ci` again from the repo root until it exits 0, then summarize what changed.\n\n"
+        "The local CI gate (`make ci`) failed after automatically running `make format` and "
+        "`make lint-fix` and retrying `make ci`. Address any remaining issues below, run "
+        "`make ci` until it exits 0, then summarize what changed.\n\n"
         f"```\n{tail}\n```"
     )
     print(json.dumps({"followup_message": msg}))

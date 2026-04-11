@@ -87,7 +87,7 @@ help:
 	@echo "  make quality-imported                    Run imported sub-repo quality checks"
 	@echo "  make quality                             Run repo-wide lint, format, typecheck, and audit checks"
 	@echo "  make quality-fix                         Apply safe auto-fixes, then rerun quality checks"
-	@echo "  make quality-full                        Run quality checks plus unit/imported tests and fast integration"
+	@echo "  make quality-full                        Sequential: quality → unit tests → imported tests → gateway matrix (stops on first failure)"
 	@echo "  make ci                                  Same as quality-full (local CI gate; .cursor stop hook runs this)"
 	@echo ""
 	@echo "Testing targets"
@@ -111,7 +111,7 @@ help:
 	@echo "  make test-schemathesis                   Run gateway + agent offline Schemathesis pytest suites"
 	@echo "  make test-schemathesis-gateway           Gateway ASGI schema tests (mocked upstreams)"
 	@echo "  make test-schemathesis-agent             Agent ASGI schema tests (mocked LLM/embeddings)"
-	@echo "  make test-schemathesis-cli               Schemathesis CLI (AGENT_SCHEMA_URL and/or GATEWAY_SCHEMA_URL; optional GATEWAY_LIVE_BEARER)"
+	@echo "  make test-schemathesis-cli               Schemathesis CLI (loads repo .env; AGENT_SCHEMA_URL / GATEWAY_SCHEMA_URL; optional GATEWAY_LIVE_BEARER)"
 	@echo ""
 	@echo "Scraper and ingestion targets"
 	@echo "  make scraper-run                         Run scraper in additive streaming mode"
@@ -442,7 +442,9 @@ quality: format-check lint typecheck audit quality-imported
 
 quality-fix: format lint-fix audit-fix quality
 
-quality-full: quality test-unit test-imported test-integration-gateway-fast
+# Sequential chain: stop on first failure (avoids parallel -j running later stages early).
+quality-full:
+	@$(MAKE) quality && $(MAKE) test-unit && $(MAKE) test-imported && $(MAKE) test-integration-gateway-fast
 
 ci: quality-full
 
@@ -648,6 +650,9 @@ test-schemathesis:
 		-q
 
 test-schemathesis-cli:
+	@set -a; \
+	if [ -f .env ]; then . ./.env; fi; \
+	set +a; \
 	cd backend && bash scripts/run_schemathesis_live.sh
 
 test-frontend-e2e:
