@@ -61,29 +61,26 @@ jobs:
     - name: Checkout contract test submodules
       run: git submodule update --init --depth 1 services/embedding-modal services/model-modal
 
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v6
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
       with:
-        python-version: "3.10"
-        cache: 'pip'
+        version: "latest"
 
-    - name: Install backend quality dependencies
+    - name: Install backend CI dependencies (locked; matches local uv)
       working-directory: backend
-      run: |
-        python -m pip install --upgrade pip
-        pip install --no-cache-dir ".[ci]"
+      run: uv sync --frozen --extra ci
 
     - name: Lint backend (Ruff)
       working-directory: backend
-      run: python -m ruff check src tests
+      run: uv run ruff check src tests
 
     - name: Check backend formatting (Black)
       working-directory: backend
-      run: python -m black --check src tests scripts
+      run: uv run black --check src tests scripts
 
     - name: Type check backend (mypy)
       working-directory: backend
-      run: python -m mypy src
+      run: uv run mypy src
 
   frontend-quality:
     runs-on: ubuntu-22.04

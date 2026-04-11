@@ -108,8 +108,8 @@ dev = [
     "tracecov>=0.3.0",
     # FastAPI Testing
     "httpx>=0.25.0",
-    # Code Quality Tools
-    "black>=26.3.1",
+    # Code Quality Tools (pin Black — must match uv.lock; CI uses uv sync --frozen)
+    "black==26.3.1",
     "ruff>=0.2.0",
     "mypy>=1.8.0",
     # Jupyter for experimentation
@@ -132,7 +132,7 @@ ci = [
     "tracecov>=0.3.0",
     "types-requests>=2.32.4.20260324",
     "httpx>=0.25.0",
-    "black>=26.3.1",
+    "black==26.3.1",
     "ruff>=0.2.0",
     "mypy>=1.8.0",
 ]

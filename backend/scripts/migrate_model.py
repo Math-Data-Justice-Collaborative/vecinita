@@ -45,8 +45,7 @@ def migrate_chunks_to_new_model(
 
         # Create table if not exists
         print(f"Creating target table: {target_table}")
-        cur.execute(
-            f"""
+        cur.execute(f"""
             CREATE TABLE IF NOT EXISTS {target_table} (
                 id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
                 content TEXT NOT NULL,
@@ -74,8 +73,7 @@ def migrate_chunks_to_new_model(
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                 CONSTRAINT unique_content_source UNIQUE(content_hash, source_url, chunk_index)
             );
-        """
-        )
+        """)
         conn.commit()
 
         # Fetch chunks from source table
