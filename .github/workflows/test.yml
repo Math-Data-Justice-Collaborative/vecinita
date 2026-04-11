@@ -62,7 +62,7 @@ jobs:
       run: git submodule update --init --depth 1 services/embedding-modal services/model-modal
 
     - name: Install uv
-      uses: astral-sh/setup-uv@v5
+      uses: astral-sh/setup-uv@v8.0.0
       with:
         version: "latest"
 
