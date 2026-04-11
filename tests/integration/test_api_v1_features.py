@@ -70,8 +70,8 @@ class TestAPIv1Documentation:
         assert b"swagger" in response.content.lower()
     
     def test_openapi_schema_available(self, api_client):
-        """Test OpenAPI schema is available at /api/v1/openapi.json."""
-        response = api_client.get("/api/v1/openapi.json")
+        """Test OpenAPI schema is available at /api/v1/docs/openapi.json."""
+        response = api_client.get("/api/v1/docs/openapi.json")
         assert response.status_code == 200
         
         schema = response.json()
@@ -85,7 +85,7 @@ class TestAPIv1Documentation:
     
     def test_openapi_schema_contains_v1_endpoints(self, api_client):
         """Test OpenAPI schema documents /api/v1/* endpoints."""
-        response = api_client.get("/api/v1/openapi.json")
+        response = api_client.get("/api/v1/docs/openapi.json")
         schema = response.json()
         
         paths = schema["paths"]

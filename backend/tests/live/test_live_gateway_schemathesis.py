@@ -57,7 +57,7 @@ _LIVE_GATEWAY_STABLE_OPS: frozenset[tuple[str, str]] = frozenset(
 @pytest.fixture(scope="session")
 def gateway_live_schema(gateway_url: str):
     schema = schemathesis.openapi.from_url(
-        f"{gateway_url}/api/v1/openapi.json",
+        f"{gateway_url}/api/v1/docs/openapi.json",
         wait_for_schema=30.0,
     )
     schema.config.generation.modes = [GenerationMode.POSITIVE]
@@ -67,7 +67,7 @@ def gateway_live_schema(gateway_url: str):
 @pytest.fixture(scope="session")
 def gateway_live_schema_ask(gateway_url: str):
     schema = schemathesis.openapi.from_url(
-        f"{gateway_url}/api/v1/openapi.json",
+        f"{gateway_url}/api/v1/docs/openapi.json",
         wait_for_schema=30.0,
     )
     schema.config.generation.modes = [GenerationMode.POSITIVE]

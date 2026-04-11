@@ -117,7 +117,7 @@ Root & Documentation:
   GET /                        → Service info (JSON) or Frontend (HTML)
   GET /health                  → Health check (backward compatible)
   GET /api/v1/docs             → Swagger UI
-  GET /api/v1/openapi.json     → OpenAPI schema
+  GET /api/v1/docs/openapi.json → OpenAPI schema (GET /api/v1/openapi.json aliases)
 
 Q&A Endpoints:
   GET /api/v1/ask?question=... → Ask question

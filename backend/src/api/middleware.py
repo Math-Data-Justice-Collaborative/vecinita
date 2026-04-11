@@ -54,6 +54,7 @@ PUBLIC_ENDPOINTS = {
     "/redoc",
     "/api/v1/ask/config",
     "/api/v1/docs",
+    "/api/v1/docs/openapi.json",
     "/api/v1/integrations/status",
     "/api/v1/openapi.json",
     "/api/v1/redoc",

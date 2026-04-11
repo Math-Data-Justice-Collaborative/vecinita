@@ -151,7 +151,7 @@ def _reload_gateway_with_mocks(monkeypatch: pytest.MonkeyPatch, *, enable_auth: 
     )
     monkeypatch.setattr(router_documents, "_load_chunk_statistics_via_sql", _fake_chunk_statistics)
 
-    return schemathesis.openapi.from_asgi("/api/v1/openapi.json", main_module.app)
+    return schemathesis.openapi.from_asgi("/api/v1/docs/openapi.json", main_module.app)
 
 
 @pytest.fixture

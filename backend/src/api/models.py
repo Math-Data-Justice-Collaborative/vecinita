@@ -1471,7 +1471,7 @@ All Pydantic models in this module feed FastAPI/OpenAPI for ``src.api.main``.
 **Interactive docs (local default: port 8004)**
 
 - Swagger UI: ``http://localhost:8004/api/v1/docs``
-- OpenAPI JSON: ``http://localhost:8004/api/v1/openapi.json``
+- OpenAPI JSON: ``http://localhost:8004/api/v1/docs/openapi.json`` (``/api/v1/openapi.json`` aliases the same document)
 - Redoc: ``http://localhost:8004/api/v1/redoc``
 
 **Versioned API base:** ``/api/v1/...`` (routers: ask, scrape, embed, documents).
@@ -1504,7 +1504,7 @@ Public prefixes include ``/api/v1/documents`` and selected discovery endpoints; 
 
   curl -sS 'http://localhost:8004/api/v1/ask/config'
   curl -sS 'http://localhost:8004/health'
-  curl -sS 'http://localhost:8004/api/v1/openapi.json' | head -c 200
+  curl -sS 'http://localhost:8004/api/v1/docs/openapi.json' | head -c 200
 
 
 BACKWARD COMPATIBILITY ALIASES

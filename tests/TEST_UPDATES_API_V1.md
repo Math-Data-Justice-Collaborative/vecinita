@@ -93,7 +93,7 @@ assert "title" in source, "Source should have 'title' field"
 
 2. **TestAPIv1Documentation** - Tests documentation endpoints
    - Swagger UI at `/api/v1/docs`
-   - OpenAPI schema at `/api/v1/openapi.json`
+   - OpenAPI schema at `/api/v1/docs/openapi.json` (alias `/api/v1/openapi.json`)
    - Schema contains all v1 endpoints
 
 3. **TestAPIv1AskEndpoint** - Tests ask response structure

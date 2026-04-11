@@ -3,7 +3,7 @@
 #
 # Environment:
 #   AGENT_SCHEMA_URL     — e.g. https://vecinita-agent-lx27.onrender.com/openapi.json
-#   GATEWAY_SCHEMA_URL   — e.g. https://vecinita-gateway-lx27.onrender.com/api/v1/openapi.json
+#   GATEWAY_SCHEMA_URL   — e.g. https://vecinita-gateway-lx27.onrender.com/api/v1/docs/openapi.json
 #   SCHEMA_URL           — backward compatible default when only one URL is used
 #   GATEWAY_LIVE_BEARER  — optional Bearer token when ENABLE_AUTH=true on gateway
 #   SCHEMATHESIS_CHECKS  — default: not_a_server_error

@@ -364,14 +364,15 @@ class TestOpenAPIDocumentation:
     """Test OpenAPI documentation endpoints."""
 
     def test_openapi_json_endpoint(self, gateway_client):
-        """Test GET /api/v1/openapi.json returns OpenAPI schema."""
-        response = gateway_client.get("/api/v1/openapi.json")
-        assert response.status_code == 200
-        data = response.json()
+        """Test GET /api/v1/docs/openapi.json returns OpenAPI schema (legacy /api/v1/openapi.json aliases)."""
+        for path in ("/api/v1/docs/openapi.json", "/api/v1/openapi.json"):
+            response = gateway_client.get(path)
+            assert response.status_code == 200
+            data = response.json()
 
-        assert "openapi" in data
-        assert "info" in data
-        assert data["info"]["title"] == "Vecinita Unified API Gateway"
+            assert "openapi" in data
+            assert "info" in data
+            assert data["info"]["title"] == "Vecinita Unified API Gateway"
 
     def test_swagger_docs_endpoint(self, gateway_client):
         """Test GET /api/v1/docs returns Swagger UI."""

@@ -319,7 +319,7 @@ app = FastAPI(
     description="Consolidated API for Q&A, document scraping, embeddings, and administration",
     version="1.0.0",
     docs_url="/api/v1/docs",
-    openapi_url="/api/v1/openapi.json",
+    openapi_url="/api/v1/docs/openapi.json",
     redoc_url="/api/v1/redoc",
     lifespan=lifespan,
 )
@@ -353,6 +353,13 @@ def custom_openapi():
 
 
 app.openapi = custom_openapi  # type: ignore[method-assign]
+
+
+@app.get("/api/v1/openapi.json", include_in_schema=False)
+async def openapi_json_legacy_alias():
+    """Same schema as ``GET /api/v1/docs/openapi.json`` (older path kept for compatibility)."""
+    return JSONResponse(app.openapi())
+
 
 # Enable CORS for frontend
 app.add_middleware(
@@ -438,7 +445,7 @@ async def root(request: Request):
             },
             "Documentation": {
                 "docs": "GET /api/v1/docs (OpenAPI/Swagger)",
-                "openapi": "GET /api/v1/openapi.json",
+                "openapi": "GET /api/v1/docs/openapi.json",
             },
         },
         "environment": {

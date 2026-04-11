@@ -155,7 +155,7 @@ Schemathesis exercises the **gateway** and **agent** OpenAPI descriptions in-pro
 
 **Schema URLs**
 
-- Gateway: `http://127.0.0.1:8004/api/v1/openapi.json` (Swagger UI: `/api/v1/docs`)
+- Gateway: `http://127.0.0.1:8004/api/v1/docs/openapi.json` (Swagger UI: `/api/v1/docs`; legacy alias `GET /api/v1/openapi.json`)
 - Agent: `http://127.0.0.1:8000/openapi.json` (docs: `/docs`)
 
 **Tiered checks (offline pytest)**
@@ -209,7 +209,7 @@ SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
 ```bash
 cd backend
 export AGENT_SCHEMA_URL=https://vecinita-agent-lx27.onrender.com/openapi.json
-export GATEWAY_SCHEMA_URL=https://vecinita-gateway-lx27.onrender.com/api/v1/openapi.json
+export GATEWAY_SCHEMA_URL=https://vecinita-gateway-lx27.onrender.com/api/v1/docs/openapi.json
 # export GATEWAY_LIVE_BEARER=...   # when gateway auth is enabled
 bash scripts/run_schemathesis_live.sh
 ```
