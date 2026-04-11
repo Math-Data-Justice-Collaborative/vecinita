@@ -307,8 +307,8 @@ services:
     runtime: docker
     region: virginia
     plan: starter
-    dockerfilePath: ./services/data-management-api/apps/backend/scraper-service/Dockerfile
-    dockerContext: ./services/data-management-api/apps/backend/scraper-service
+    dockerfilePath: ./services/scraper/Dockerfile
+    dockerContext: ./services/scraper
     autoDeployTrigger: checksPass
     healthCheckPath: /health
     envVars:

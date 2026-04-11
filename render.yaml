@@ -315,13 +315,16 @@ services:
       - key: VITE_DEFAULT_SCRAPER_USER_ID
         sync: false
 
+  # API image is vecinita-scraper. Build from the monorepo's top-level
+  # services/scraper submodule so Render does not require nested submodule init
+  # under services/data-management-api (see Render / nested submodules).
   - type: web
     name: vecinita-data-management-api-v1
     runtime: docker
     region: virginia
     plan: starter
-    dockerfilePath: ./services/data-management-api/apps/backend/scraper-service/Dockerfile
-    dockerContext: ./services/data-management-api/apps/backend/scraper-service
+    dockerfilePath: ./services/scraper/Dockerfile
+    dockerContext: ./services/scraper
     autoDeployTrigger: checksPass
     healthCheckPath: /health
     envVars:
