@@ -46,30 +46,34 @@ rebuilding the image.
 
 ---
 
-## vecinita-data-management-api-v1 (Render Web Service — the Data Management API)
+## vecinita-data-management-api-v1 (Render Web Service — Scraper FastAPI image)
 
-This service is a FastAPI API that authenticates requests and routes them to
-Modal-deployed backends. All variables below are runtime environment variables.
+Blueprint builds [`services/scraper`](../../services/scraper) (`vecinita_scraper`). At startup the process validates config and **fails immediately** if production auth is incomplete (`ConfigError: Missing required auth configuration…`).
 
 | Variable | Required | Description |
 |---|---|---|
-| `MODAL_TOKEN_ID` | **Required** | Modal workspace token ID. Used to authenticate proxy-to-Modal calls. |
-| `MODAL_TOKEN_SECRET` | **Required** | Modal workspace token secret. |
-| `VECINITA_SCRAPER_API_URL` | **Required** | Public URL of the vecinita-scraper Modal endpoint. |
-| `CORS_ORIGINS` | **Required** | Comma-separated list of allowed frontend origins. **Must not be `*` in production.** Set to the data-management frontend's Render URL (e.g. `https://vecinita-data-management-frontend.onrender.com`). |
-| `VECINITA_MODEL_API_URL` | Recommended | Public URL of the vecinita-model Modal endpoint. Required if model routes are used. |
-| `VECINITA_EMBEDDING_API_URL` | Recommended | Public URL of the vecinita-embedding Modal endpoint. Required if embedding routes are used. |
-| `PROXY_AUTH_TOKEN` | Optional | Shared secret for `X-Proxy-Token` header authentication. If set, callers must include this header. |
-| `ENVIRONMENT` | Optional | Runtime environment label. Defaults to `production`. |
-| `LOG_LEVEL` | Optional | Logging verbosity. Defaults to `INFO`. |
-| `UPSTREAM_TIMEOUT_SECONDS` | Optional | Timeout for upstream Modal calls in seconds. Defaults to `55`. |
-| `RATE_LIMIT_DEFAULT` | Optional | Global rate limit per client IP. Defaults to `60/minute`. |
-| `BACKEND_ROUTE_RULES_JSON` | Optional | JSON array of custom route rules overriding defaults. |
+| `DATABASE_URL` | **Required** | Postgres DSN (root blueprint injects via `fromDatabase` on `vecinita-postgres`). |
+| `SCRAPER_API_KEYS` | **Required** | Comma-separated Bearer token values accepted on protected routes (`Authorization: Bearer …`). Set on the **Render** env group linked to this service. Without this, Uvicorn exits during import. |
+| `VECINITA_EMBEDDING_API_URL` | **Required** | Public URL of the embedding service (typically Modal). |
+| `CORS_ORIGINS` | **Required** | Comma-separated allowed browser origins. **Must not be `*` in production** when cookies or credentials matter. |
+| `ENVIRONMENT` | **Required for strict checks** | Use `production` on Render (see `render.yaml`). Enables Modal token validation. |
+| `MODAL_TOKEN_ID` | **Required** when `ENVIRONMENT=production` | Modal workspace token ID for server-side Modal usage. |
+| `MODAL_TOKEN_SECRET` | **Required** when `ENVIRONMENT=production` | Modal workspace token secret. |
+| `MODAL_WORKSPACE` | Recommended | Modal workspace slug (e.g. `vecinita`). |
+| `VECINITA_MODEL_API_URL` | Recommended | Model API base URL when model-assisted features run. |
+| `SCRAPER_DEBUG_BYPASS_AUTH` | Must be `false` | Only `true` in local/dev/test; production must keep `false`. |
+| `DEV_ADMIN_BEARER_TOKEN` | Optional | Legacy compatibility: if set, also treated as an accepted Bearer secret. |
+| `LOG_LEVEL` | Optional | Defaults to `INFO`. |
+| `UPSTREAM_TIMEOUT_SECONDS` | Optional | Upstream HTTP timeout (seconds). |
+
+**Modal (`vecinita-scraper-env`):** If you also deploy the same FastAPI behind Modal (`vecinita_scraper.api.app`), put the **same** `SCRAPER_API_KEYS` (and DB / upstream URLs) in the Modal secret group `vecinita-scraper-env`. GitHub Actions does not push those values to Render or Modal; operators define secrets in each platform.
+
+**Shared contract / CI:** The monorepo validates `.env.prod.render` / `.env.staging.render` against [`backend/src/utils/render_env_contract.py`](../../backend/src/utils/render_env_contract.py). `SCRAPER_API_KEYS` must not remain the old template literal `replace-with-comma-separated-api-keys`.
 
 > **Region and CORS setup order (critical):**
-> 1. Deploy `vecinita-data-management-api-v1` (and staging equivalent) first.
-> 2. Deploy `vecinita-data-management-frontend-v1` and set `VITE_VECINITA_SCRAPER_API_URL` to the API URL.
-> 3. Set `CORS_ORIGINS` on the API service to the frontend URL for the same environment.
+> 1. Deploy `vecinita-data-management-api-v1` (and staging equivalent) with `SCRAPER_API_KEYS`, `DATABASE_URL`, and upstream URLs set.
+> 2. Deploy `vecinita-data-management-frontend-v1` and set `VITE_VECINITA_SCRAPER_API_URL` to this API’s public URL.
+> 3. Set `CORS_ORIGINS` on the API to that frontend origin.
 
 ---
 

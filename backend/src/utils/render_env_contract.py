@@ -66,6 +66,19 @@ def _validate_required_keys(env: dict[str, str], result: ValidationResult) -> No
             result.errors.append(f"Missing required key: {key}")
 
 
+def _validate_scraper_api_keys_not_placeholder(
+    env: dict[str, str], result: ValidationResult
+) -> None:
+    """Reject template placeholder values that pass non-empty checks but break prod startup."""
+    raw = (env.get("SCRAPER_API_KEYS") or "").strip().lower()
+    if raw == "replace-with-comma-separated-api-keys":
+        result.errors.append(
+            "SCRAPER_API_KEYS is still the template placeholder; set one or more real "
+            "comma-separated Bearer secrets in Render (shared env group) and in Modal "
+            "secret vecinita-scraper-env if you serve the scraper API on Modal"
+        )
+
+
 def _validate_db_data_mode(env: dict[str, str], result: ValidationResult) -> None:
     mode = (env.get("DB_DATA_MODE") or "").strip().lower()
     if mode != "postgres":
@@ -134,6 +147,7 @@ def validate_shared_render_env(env: dict[str, str]) -> ValidationResult:
     """Validate shared Render env contract used by multiple services."""
     result = ValidationResult()
     _validate_required_keys(env, result)
+    _validate_scraper_api_keys_not_placeholder(env, result)
     _validate_db_data_mode(env, result)
     _validate_database_url(env, result)
     _validate_modal_endpoints(env, result)

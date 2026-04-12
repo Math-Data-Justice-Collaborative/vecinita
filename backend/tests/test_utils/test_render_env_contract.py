@@ -94,3 +94,16 @@ def test_validate_shared_render_env_requires_sslmode_require_for_database_url(
     result = validate_shared_render_env(env)
 
     assert "DATABASE_URL must include sslmode=require for Render runtime" in result.errors
+
+
+def test_validate_shared_render_env_rejects_scraper_api_keys_template_placeholder(
+    minimal_valid_render_env,
+):
+    env = {
+        **minimal_valid_render_env,
+        "SCRAPER_API_KEYS": "replace-with-comma-separated-api-keys",
+    }
+
+    result = validate_shared_render_env(env)
+
+    assert any("SCRAPER_API_KEYS is still the template placeholder" in e for e in result.errors)

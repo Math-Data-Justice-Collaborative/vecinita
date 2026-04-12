@@ -10,31 +10,36 @@ Copy templates into real environment files/secrets and never commit populated cr
 
 ## Exact Variables Required
 
-Set these 3 environment variables on Render for `vecinita-data-management-api-v1`:
+On Render, `vecinita-data-management-api-v1` runs the [`services/scraper`](services/scraper) image. Besides Modal tokens, **`SCRAPER_API_KEYS` is required** in production or the process raises `ConfigError` on startup.
 
-| Render Env Var | Value from `.env` | Value |
-|---|---|---|
-| `MODAL_TOKEN_ID` | `MODAL_API_TOKEN_ID` | `ak-1YjGmfYdtX7etaGwRqxkTa` |
-| `MODAL_TOKEN_SECRET` | `MODAL_API_TOKEN_SECRET` | `as-tELxaoFAqbkNeOKSNY1sVu` |
-| `MODAL_WORKSPACE` | (optional) | Leave blank or set to `vecinita` |
+| Render Env Var | Notes |
+|---|---|
+| `DATABASE_URL` | Usually injected by root `render.yaml` `fromDatabase` |
+| `SCRAPER_API_KEYS` | **Required** — comma-separated Bearer secrets; same values callers send as `Authorization: Bearer …` |
+| `VECINITA_EMBEDDING_API_URL` | **Required** by scraper config validation |
+| `CORS_ORIGINS` | **Required** for browser clients |
+| `ENVIRONMENT` | Set to `production` on Render (see `render.yaml`) |
+| `MODAL_TOKEN_ID` | Map from local `MODAL_API_TOKEN_ID` if you use that name locally |
+| `MODAL_TOKEN_SECRET` | Map from local `MODAL_API_TOKEN_SECRET` |
+| `MODAL_WORKSPACE` | Optional; e.g. `vecinita` |
 
-## Optional Variables (for advanced features)
+## Optional / compatibility
 
-| Render Env Var | Source | Purpose |
-|---|---|---|
-| `VECINITA_EMBEDDING_API_URL` | `.env` line 149 | Custom embedding service URL |
-| `VECINITA_MODEL_API_URL` | `.env` line 148 | Custom model service URL |
-| `DATABASE_URL` | `.env` or Render `fromDatabase` | **Canonical** Postgres DSN; root `render.yaml` binds it for `vecinita-data-management-api-v1` from `vecinita-postgres` |
-| `DB_URL` | alternate secret name only | Optional **same** DSN if `DATABASE_URL` is unset; honoured by scraper `PostgresConfig`, gateway (`get_resolved_database_url`), and agent uploader |
-| `SCRAPER_API_KEYS` | Render env group/secret | Comma-separated Bearer API keys accepted by scraper API |
-| `SCRAPER_DEBUG_BYPASS_AUTH` | local/dev only | `true` bypasses auth in local/dev/test only; must remain `false` in staging/prod |
+| Render Env Var | Purpose |
+|---|---|
+| `VECINITA_MODEL_API_URL` | Model service URL when used |
+| `DB_URL` | Optional fallback if `DATABASE_URL` is unset (same DSN) |
+| `DEV_ADMIN_BEARER_TOKEN` | Optional extra accepted Bearer (see scraper `AuthConfig`) |
+| `SCRAPER_DEBUG_BYPASS_AUTH` | Must stay `false` in prod |
 
-## Copy-Paste Ready
+## Copy-Paste Ready (placeholders only)
 
-**For Render Dashboard Environment Tab:**
+**For Render Dashboard Environment Tab** (replace with your real secrets):
+
 ```
-MODAL_TOKEN_ID=ak-1YjGmfYdtX7etaGwRqxkTa
-MODAL_TOKEN_SECRET=as-tELxaoFAqbkNeOKSNY1sVu
+MODAL_TOKEN_ID=ak-your-token-id
+MODAL_TOKEN_SECRET=as-your-token-secret
+SCRAPER_API_KEYS=your-first-key,your-second-key-optional
 ```
 
 ## What the Code Expects
@@ -42,7 +47,7 @@ MODAL_TOKEN_SECRET=as-tELxaoFAqbkNeOKSNY1sVu
 The data-management API reads these exact environment variable names from `config.py`:
 
 ```python
-# From vecinita_scraper.core.config.py (line 112-116)
+# From services/scraper/src/vecinita_scraper/core/config.py — ModalConfig / AuthConfig
 ModalConfig(
     token_id=os.getenv("MODAL_TOKEN_ID", ""),
     token_secret=os.getenv("MODAL_TOKEN_SECRET", ""),
@@ -80,4 +85,4 @@ Expected response:
 - **Service ID**: `srv-d7a6477kijhs7395eneg`
 - **Service Name**: `vecinita-data-management-api-v1`
 - **Dashboard**: https://dashboard.render.com/web/srv-d7a6477kijhs7395eneg
-- **Config File**: `/root/GitHub/VECINA/vecinita/services/data-management-api/apps/backend/scraper-service/src/vecinita_scraper/core/config.py`
+- **Config File**: `services/scraper/src/vecinita_scraper/core/config.py`

@@ -152,6 +152,18 @@ python3 scripts/env_sync.py render-api --file .env.prod.render --service-id srv-
 python3 scripts/env_sync.py render-api --file .env.prod.render --service-id srv-xxxxxxxx --yes
 ```
 
+**Scraper API keys (`SCRAPER_API_KEYS`):** use the Render CLI for service-id discovery plus the same REST sync, and Modal CLI for `vecinita-scraper-env`:
+
+```bash
+render login
+./scripts/sync_scraper_auth_render_modal.sh render --dotenv .env.prod.render --dry-run
+export RENDER_API_KEY=...
+./scripts/sync_scraper_auth_render_modal.sh render --dotenv .env.prod.render --yes
+
+modal secret create vecinita-scraper-env --from-dotenv ~/path/to/scraper-modal.env --force
+# or: ./scripts/sync_scraper_auth_render_modal.sh modal --from-dotenv ~/path/to/scraper-modal.env --force
+```
+
 Limit to a prefix or explicit keys:
 
 ```bash
