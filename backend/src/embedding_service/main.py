@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 # Configure logging
 logging.basicConfig(
@@ -163,7 +163,21 @@ class EmbedRequest(BaseModel):
     deployments that used a different field name.
     """
 
-    text: str | None = Field(default=None, max_length=10000, description="Primary text to embed")
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {"text": "Affordable housing intake locations near me"},
+                {"query": "Example using legacy query field name"},
+            ]
+        }
+    )
+
+    text: str | None = Field(
+        default=None,
+        max_length=10000,
+        description="Primary text to embed (non-empty after trim, or use ``query``).",
+        examples=["What food assistance programs exist in this ZIP code?"],
+    )
     query: str | None = Field(
         default=None,
         max_length=10000,
@@ -185,17 +199,41 @@ class EmbedRequest(BaseModel):
 class BatchEmbedRequest(BaseModel):
     """Batch text embedding request."""
 
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "texts": [
+                        "First passage about community clinics.",
+                        "Second passage about SNAP enrollment.",
+                    ]
+                }
+            ]
+        }
+    )
+
     texts: list[str] = Field(
-        ..., min_length=1, max_length=100, description="List of texts to embed"
+        ...,
+        min_length=1,
+        max_length=100,
+        description="Non-empty list of strings to embed (max 100 items).",
     )
 
 
 class EmbeddingResponse(BaseModel):
     """Embedding response with metadata."""
 
-    embedding: list[float] = Field(..., description="384-dimensional embedding vector")
-    dimension: int = Field(default=384, description="Embedding dimension")
-    model: str = Field(default=_model_name, description="Model used")
+    embedding: list[float] = Field(
+        ...,
+        description="Dense embedding vector (length matches ``dimension``).",
+        examples=[[0.01, -0.02, 0.03]],
+    )
+    dimension: int = Field(default=384, description="Embedding vector length", examples=[384])
+    model: str = Field(
+        default=_model_name,
+        description="Model identifier used for encoding",
+        examples=["sentence-transformers/all-MiniLM-L6-v2"],
+    )
 
 
 class BatchEmbeddingResponse(BaseModel):

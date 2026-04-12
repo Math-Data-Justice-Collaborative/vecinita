@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites disabled="0" errors="0" failures="2" tests="3" time="1.8199523510411382">
+	<testsuite disabled="0" errors="0" failures="2" name="schemathesis" skipped="0" tests="3" time="1.8199523510411382" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
+		<testcase name="GET /health" time="1.032716"/>
+		<testcase name="GET /jobs" time="0.084018">
+			<failure type="failure" message="1. Test Case ID: 0vMBki
+
+- Server error
+
+[500] Internal Server Error:
+
+    `{&quot;detail&quot;:&quot;Error listing jobs&quot;}`
+
+Reproduce with:
+
+    curl -X GET 'https://vecinita--vecinita-scraper-api-fastapi.modal.run/jobs?user_id=null&amp;x-schemathesis-unknown-property=42'"/>
+		</testcase>
+		<testcase name="GET /jobs/{job_id}" time="0.703218">
+			<failure type="failure" message="1. Test Case ID: IxYiur
+
+- Server error
+
+[500] Internal Server Error:
+
+    `{&quot;detail&quot;:&quot;Internal server error&quot;}`
+
+Reproduce with:
+
+    curl -X GET https://vecinita--vecinita-scraper-api-fastapi.modal.run/jobs/0"/>
+		</testcase>
+	</testsuite>
+</testsuites>

@@ -13,7 +13,10 @@ from schemathesis import HookContext, hook
 
 @hook
 def map_body(context: HookContext, body):  # noqa: ANN001
-    """Avoid impossible POST /model-selection bodies during fuzzing (runtime model allowlist)."""
+    """Avoid impossible POST /model-selection bodies during agent fuzzing (Vecinita agent path only).
+
+    Modal microservices (embedding, scraper, model) use different paths; this hook leaves their bodies unchanged.
+    """
     operation = context.operation
     if operation.path == "/model-selection" and operation.method.upper() == "POST":
         return {"provider": "ollama", "model": None, "lock": False}
