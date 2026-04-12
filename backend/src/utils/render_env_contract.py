@@ -119,6 +119,18 @@ def _validate_modal_endpoints(env: dict[str, str], result: ValidationResult) -> 
         result.errors.append("VECINITA_SCRAPER_API_URL must point to a direct Modal endpoint")
 
 
+def _validate_reindex_service_url(env: dict[str, str], result: ValidationResult) -> None:
+    """When set, REINDEX_SERVICE_URL must be an absolute URL (avoids httpx / DNS footguns)."""
+    url = (env.get("REINDEX_SERVICE_URL") or "").strip()
+    if not url:
+        return
+    parsed = urlparse(url)
+    if parsed.scheme not in {"http", "https"}:
+        result.errors.append("REINDEX_SERVICE_URL must include an http:// or https:// scheme")
+    if not parsed.hostname:
+        result.errors.append("REINDEX_SERVICE_URL must include a hostname")
+
+
 def _validate_strict_flags(env: dict[str, str], result: ValidationResult) -> None:
     if not _is_truthy(env.get("RENDER_REMOTE_INFERENCE_ONLY")):
         result.errors.append("RENDER_REMOTE_INFERENCE_ONLY must be enabled for Render runtime")
@@ -151,6 +163,7 @@ def validate_shared_render_env(env: dict[str, str]) -> ValidationResult:
     _validate_db_data_mode(env, result)
     _validate_database_url(env, result)
     _validate_modal_endpoints(env, result)
+    _validate_reindex_service_url(env, result)
     _validate_strict_flags(env, result)
     _validate_provider_keys(env, result)
     _validate_frontend_contract(env, result)

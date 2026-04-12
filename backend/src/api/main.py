@@ -70,12 +70,11 @@ def _running_on_render() -> bool:
     return bool(os.getenv("RENDER") or os.getenv("RENDER_SERVICE_ID"))
 
 
-AGENT_SERVICE_URL = os.getenv("AGENT_SERVICE_URL", "http://localhost:8000")
-
 # Import normalized endpoints from central config (ensures consistency across services).
 # config._normalize_internal_service_url() handles Render vs local-dev logic.
 from src.config import EMBEDDING_SERVICE_URL
 from src.service_endpoints import (
+    AGENT_SERVICE_URL,
     MODEL_ENDPOINT,
     SCRAPER_ENDPOINT,
     log_endpoint_summary as _log_ep_summary,

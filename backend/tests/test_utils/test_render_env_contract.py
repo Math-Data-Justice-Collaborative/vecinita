@@ -107,3 +107,32 @@ def test_validate_shared_render_env_rejects_scraper_api_keys_template_placeholde
     result = validate_shared_render_env(env)
 
     assert any("SCRAPER_API_KEYS is still the template placeholder" in e for e in result.errors)
+
+
+def test_validate_shared_render_env_rejects_reindex_url_without_scheme(minimal_valid_render_env):
+    env = {**minimal_valid_render_env, "REINDEX_SERVICE_URL": "vecinita-scraper-api/jobs"}
+
+    result = validate_shared_render_env(env)
+
+    assert any("REINDEX_SERVICE_URL must include" in e for e in result.errors)
+
+
+def test_validate_shared_render_env_accepts_valid_reindex_url(minimal_valid_render_env):
+    env = {
+        **minimal_valid_render_env,
+        "REINDEX_SERVICE_URL": "https://vecinita--vecinita-scraper-api-fastapi.modal.run/jobs",
+    }
+
+    result = validate_shared_render_env(env)
+
+    assert result.errors == []
+
+
+def test_validate_shared_render_env_rejects_reindex_url_https_without_hostname(
+    minimal_valid_render_env,
+):
+    env = {**minimal_valid_render_env, "REINDEX_SERVICE_URL": "https:///jobs"}
+
+    result = validate_shared_render_env(env)
+
+    assert any("REINDEX_SERVICE_URL must include a hostname" in e for e in result.errors)

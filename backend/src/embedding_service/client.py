@@ -14,6 +14,8 @@ from urllib.parse import urlparse, urlunparse
 import httpx
 from langchain_core.embeddings import Embeddings
 
+from src.config import rewrite_deprecated_modal_embedding_host
+
 logger = logging.getLogger(__name__)
 
 
@@ -48,33 +50,8 @@ def _drop_headers(headers: dict[str, str], names: set[str]) -> dict[str, str]:
 
 
 def _rewrite_deprecated_embedding_host(url: str) -> str | None:
-    """Return a compatibility rewrite for known deprecated embedding hostnames.
-
-    Some environments still carry the legacy
-    `*-embeddingservicecontainer-api.modal.run` host while the active embedding
-    endpoint is now exposed as `*-embedding-web-app.modal.run`.
-    """
-    try:
-        parsed = urlparse(url)
-    except Exception:
-        return None
-
-    host = (parsed.hostname or "").strip().lower()
-    if not host.endswith(".modal.run"):
-        return None
-    if "-embeddingservicecontainer-api.modal.run" not in host:
-        return None
-
-    rewritten_host = host.replace(
-        "-embeddingservicecontainer-api.modal.run",
-        "-embedding-web-app.modal.run",
-    )
-    if rewritten_host == host:
-        return None
-
-    port_part = f":{parsed.port}" if parsed.port else ""
-    netloc = f"{rewritten_host}{port_part}"
-    return urlunparse((parsed.scheme or "https", netloc, "", "", "", "")).rstrip("/")
+    """Compatibility alias for :func:`rewrite_deprecated_modal_embedding_host`."""
+    return rewrite_deprecated_modal_embedding_host(url)
 
 
 class EmbeddingServiceClient(Embeddings):

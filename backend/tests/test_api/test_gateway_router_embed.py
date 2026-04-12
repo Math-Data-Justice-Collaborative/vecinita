@@ -38,10 +38,9 @@ class TestEmbedSingleEndpoint:
         assert response.status_code in [200, 503]
 
     def test_embed_empty_text(self, embed_client):
-        """Test embedding empty text."""
+        """Empty text is rejected at the gateway (min_length=1)."""
         response = embed_client.post("/api/v1/embed", json={"text": ""})
-        # Empty strings pass request validation and are proxied to embedding service
-        assert response.status_code in [200, 503]
+        assert response.status_code == 422
 
     def test_embed_missing_text(self, embed_client):
         """Test that text field is required."""
@@ -147,9 +146,9 @@ class TestSimilarityEndpoint:
         assert response.status_code == 422
 
     def test_similarity_empty_texts(self, embed_client):
-        """Test similarity with empty texts."""
+        """Empty texts are rejected at the gateway (min_length=1)."""
         response = embed_client.post("/api/v1/embed/similarity", json={"text1": "", "text2": ""})
-        assert response.status_code in [200, 503]
+        assert response.status_code == 422
 
 
 class TestEmbedConfigEndpoint:
@@ -270,3 +269,39 @@ class TestEmbedEndpointRouting:
         response = embed_client.get("/api/v1/embed/config")
         # Config is implemented
         assert response.status_code == 200
+
+
+class TestEmbeddingUpstreamUrlResolution:
+    """``_embedding_service_url`` must rewrite legacy Modal container hosts (no HTTP)."""
+
+    def test_rewrites_legacy_vecinita_modal_host(self, monkeypatch):
+        monkeypatch.delenv("RENDER", raising=False)
+        monkeypatch.delenv("RENDER_SERVICE_ID", raising=False)
+        monkeypatch.delenv("LOCAL_EMBEDDING_SERVICE_URL", raising=False)
+        monkeypatch.setenv(
+            "VECINITA_EMBEDDING_API_URL",
+            "https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run",
+        )
+
+        from src.api import router_embed
+
+        resolved = router_embed._embedding_service_url()
+        assert "embedding-web-app.modal.run" in resolved
+        assert "embeddingservicecontainer-api" not in resolved
+
+
+class TestGatewayEmbedOpenapiResponses:
+    """Regression: upstream failures are documented for Schemathesis / contract tools."""
+
+    def test_post_embed_routes_document_503_with_error_response_schema(self, embed_client):
+        spec = embed_client.app.openapi()
+        for path in (
+            "/api/v1/embed",
+            "/api/v1/embed/batch",
+            "/api/v1/embed/similarity",
+        ):
+            post = spec["paths"][path]["post"]
+            assert "503" in post["responses"], f"missing 503 on {path}"
+            schema = post["responses"]["503"]["content"]["application/json"]["schema"]
+            ref = schema.get("$ref", "")
+            assert ref.endswith("ErrorResponse"), f"unexpected 503 schema on {path}: {schema}"

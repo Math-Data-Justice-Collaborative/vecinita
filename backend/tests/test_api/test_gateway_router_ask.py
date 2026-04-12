@@ -626,3 +626,13 @@ class TestAskMethods:
         response = ask_client.get("/api/v1/ask?query=test")
         # Should be not implemented, not method not allowed
         assert response.status_code != 405
+
+
+class TestAgentServiceUrlResolution:
+    """Render ``fromService`` supplies ``host:port``; httpx needs a scheme."""
+
+    def test_agent_service_url_prepends_http_for_hostport(self, monkeypatch):
+        from src.api import router_ask
+
+        monkeypatch.setenv("AGENT_SERVICE_URL", "vecinita-agent.internal:10000")
+        assert router_ask._agent_service_url() == "http://vecinita-agent.internal:10000"

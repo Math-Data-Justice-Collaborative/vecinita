@@ -19,6 +19,7 @@ from src.config import (
     OLLAMA_BASE_URL,
     _normalize_internal_service_url,
     _running_on_render,
+    normalize_agent_service_url,
 )
 
 # ---------------------------------------------------------------------------
@@ -46,7 +47,7 @@ SCRAPER_ENDPOINT: str = _normalize_internal_service_url(
 # ---------------------------------------------------------------------------
 
 #: URL of the agent service (used by the gateway router to forward /ask).
-AGENT_SERVICE_URL: str = os.getenv("AGENT_SERVICE_URL", "http://localhost:8000")
+AGENT_SERVICE_URL: str = normalize_agent_service_url(os.getenv("AGENT_SERVICE_URL"))
 
 # ---------------------------------------------------------------------------
 # Strict-mode flags

@@ -32,6 +32,7 @@ from src.agent.openapi_examples import (
     AGENT_ASK_TAGS,
     AGENT_ASK_THREAD_ID,
 )
+from src.config import normalize_agent_service_url
 from src.service_endpoints import AGENT_SERVICE_URL
 
 from .models import AskResponse, ErrorResponse, SourceCitation, ValidationErrorResponse
@@ -61,7 +62,10 @@ _AGENT_CLIENT_LOCK = threading.Lock()
 
 def _agent_service_url() -> str:
     """Resolve agent URL dynamically so monkeypatched env vars apply in tests/runtime."""
-    return os.getenv("AGENT_SERVICE_URL") or AGENT_SERVICE_URL
+    raw = os.getenv("AGENT_SERVICE_URL")
+    if raw is not None and raw.strip():
+        return normalize_agent_service_url(raw)
+    return AGENT_SERVICE_URL
 
 
 def _read_positive_timeout(name: str, default: float) -> float:

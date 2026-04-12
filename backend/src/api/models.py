@@ -352,48 +352,76 @@ class ScrapeResponse(BaseModel):
 
 
 class EmbedRequest(BaseModel):
-    """Request to generate embedding for single text (POST /api/embed/) - NOT YET IMPLEMENTED."""
+    """Request body for ``POST /api/v1/embed`` (gateway proxy to embedding service)."""
 
     text: str = Field(
         ...,
-        description="Text/query to embed",
-        examples=["The quick brown fox jumps over the lazy dog"],
+        min_length=1,
+        description="Text or query to embed (non-empty).",
+        examples=[
+            "The quick brown fox jumps over the lazy dog",
+            "Community clinic walk-in hours and eligibility.",
+        ],
         validation_alias=AliasChoices("text", "query"),
     )
     model: str | None = Field(
         default=None,
-        description="Override embedding model (uses default if None)",
-        examples=["sentence-transformers/all-MiniLM-L6-v2"],
+        max_length=200,
+        description="Optional embedding model id; server default is used when omitted.",
+        examples=["sentence-transformers/all-MiniLM-L6-v2", "BAAI/bge-small-en-v1.5"],
     )
 
     model_config = ConfigDict(
         json_schema_extra={
+            "examples": [
+                {"text": "The quick brown fox jumps over the lazy dog", "model": None},
+                {
+                    "text": "Summarize tenant rights for informal housing.",
+                    "model": "sentence-transformers/all-MiniLM-L6-v2",
+                },
+            ],
             "example": {
                 "text": "The quick brown fox jumps over the lazy dog",
                 "model": "sentence-transformers/all-MiniLM-L6-v2",
-            }
+            },
         }
     )
 
 
 class EmbedBatchRequest(BaseModel):
-    """Request to generate embeddings for multiple texts (POST /api/embed/batch) - NOT YET IMPLEMENTED."""
+    """Request body for ``POST /api/v1/embed/batch`` (gateway proxy to embedding service)."""
 
     texts: list[str] = Field(
         ...,
         min_length=1,
-        description="List of texts/queries to embed",
+        description="Non-empty list of texts to embed (upstream service may enforce a batch limit).",
         examples=[
             ["First document to embed", "Second document to embed", "Third document to embed"]
         ],
         validation_alias=AliasChoices("texts", "queries"),
     )
     model: str | None = Field(
-        default=None, description="Override embedding model (uses default if None)"
+        default=None,
+        max_length=200,
+        description="Optional embedding model id; server default is used when omitted.",
     )
 
     model_config = ConfigDict(
         json_schema_extra={
+            "examples": [
+                {
+                    "texts": ["Short note one", "Short note two"],
+                    "model": None,
+                },
+                {
+                    "texts": [
+                        "First document to embed",
+                        "Second document to embed",
+                        "Third document to embed",
+                    ],
+                    "model": "sentence-transformers/all-MiniLM-L6-v2",
+                },
+            ],
             "example": {
                 "texts": [
                     "First document to embed",
@@ -401,7 +429,7 @@ class EmbedBatchRequest(BaseModel):
                     "Third document to embed",
                 ],
                 "model": "sentence-transformers/all-MiniLM-L6-v2",
-            }
+            },
         }
     )
 
@@ -468,21 +496,45 @@ class EmbedBatchResponse(BaseModel):
 
 
 class SimilarityRequest(BaseModel):
-    """Request to compute similarity between texts (POST /api/embed/similarity) - NOT YET IMPLEMENTED."""
+    """Request body for ``POST /api/v1/embed/similarity`` (cosine similarity via embedding service)."""
 
-    text1: str = Field(..., description="First text", examples=["Machine learning is AI"])
-    text2: str = Field(
-        ..., description="Second text", examples=["Deep learning is machine learning"]
+    text1: str = Field(
+        ...,
+        min_length=1,
+        description="First text to embed and compare.",
+        examples=["Machine learning is AI", "Tenant organizing workshop next Tuesday."],
     )
-    model: str | None = Field(default=None, description="Override embedding model")
+    text2: str = Field(
+        ...,
+        min_length=1,
+        description="Second text to embed and compare.",
+        examples=["Deep learning is machine learning", "RSVP for the housing rights clinic."],
+    )
+    model: str | None = Field(
+        default=None,
+        max_length=200,
+        description="Optional embedding model id; server default is used when omitted.",
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
+            "examples": [
+                {
+                    "text1": "Machine learning is AI",
+                    "text2": "Deep learning is machine learning",
+                    "model": None,
+                },
+                {
+                    "text1": "Where can I get a flu shot?",
+                    "text2": "Community health center offers walk-in vaccines.",
+                    "model": "sentence-transformers/all-MiniLM-L6-v2",
+                },
+            ],
             "example": {
                 "text1": "Machine learning is AI",
                 "text2": "Deep learning is machine learning",
                 "model": "sentence-transformers/all-MiniLM-L6-v2",
-            }
+            },
         }
     )
 

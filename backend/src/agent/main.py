@@ -3289,7 +3289,38 @@ def get_model_selection():
     }
 
 
-@app.post("/model-selection", tags=["Configuration"])
+@app.post(
+    "/model-selection",
+    tags=["Configuration"],
+    responses={
+        403: {
+            "description": (
+                "Model selection is locked by policy (e.g. LOCK_MODEL_SELECTION). "
+                "This is not a missing-Bearer authentication error."
+            ),
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {"detail": {"type": "string"}},
+                        "example": {"detail": "Model selection is locked"},
+                    }
+                }
+            },
+        },
+        400: {
+            "description": "Unsupported provider or model not available for Ollama.",
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {"detail": {"type": "string"}},
+                    }
+                }
+            },
+        },
+    },
+)
 def set_model_selection(
     selection: ModelSelection = Body(openapi_examples=AGENT_MODEL_SELECTION_BODY),
 ):

@@ -67,3 +67,14 @@ def test_openapi_includes_parameter_examples_for_ask(fastapi_client):
     assert (
         "examples" in q_param or "example" in q_param
     ), f"expected examples on question param, got keys: {sorted(q_param.keys())}"
+
+
+def test_openapi_post_model_selection_documents_403_for_lock_policy(fastapi_client):
+    """Schemathesis should not treat 403 as generic missing-auth when selection is locked."""
+    r = fastapi_client.get("/openapi.json")
+    assert r.status_code == 200
+    spec = r.json()
+    post = spec["paths"]["/model-selection"]["post"]
+    assert "403" in post["responses"]
+    desc = (post["responses"]["403"].get("description") or "").lower()
+    assert "locked" in desc or "policy" in desc or "missing-bearer" in desc

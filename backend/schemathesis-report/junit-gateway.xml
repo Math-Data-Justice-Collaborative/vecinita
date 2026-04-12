@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites disabled="0" errors="0" failures="5" tests="24" time="70.535721266">
+	<testsuite disabled="0" errors="0" failures="5" name="schemathesis" skipped="18" tests="24" time="70.535721266" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
+		<testcase name="POST /api/v1/embed" time="2.669644">
+			<failure type="failure" message="1. Test Case ID: Osra0N
+
+- Server error
+
+[503] Service Unavailable:
+
+    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run/embed'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T13:32:26.484746+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text&quot;: &quot;The quick brown fox jumps over the lazy dog&quot;, &quot;model&quot;: &quot;sentence-transformers/all-MiniLM-L6-v2&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed"/>
+			<failure type="failure" message="1. Test Case ID: Osra0N
+
+- Server error
+
+[503] Service Unavailable:
+
+    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run/embed'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T13:32:26.484746+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text&quot;: &quot;The quick brown fox jumps over the lazy dog&quot;, &quot;model&quot;: &quot;sentence-transformers/all-MiniLM-L6-v2&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed"/>
+			<failure type="failure" message="1. Test Case ID: Osra0N
+
+- Server error
+
+[503] Service Unavailable:
+
+    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run/embed'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T13:32:26.484746+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text&quot;: &quot;The quick brown fox jumps over the lazy dog&quot;, &quot;model&quot;: &quot;sentence-transformers/all-MiniLM-L6-v2&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed"/>
+		</testcase>
+		<testcase name="POST /api/v1/embed/batch" time="3.026846">
+			<failure type="failure" message="1. Test Case ID: YFN8yJ
+
+- Server error
+
+[503] Service Unavailable:
+
+    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run/embed-batch'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T13:32:26.773637+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '{&quot;texts&quot;: [&quot;First document to embed&quot;, &quot;Second document to embed&quot;, &quot;Third document to embed&quot;], &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/batch"/>
+			<failure type="failure" message="1. Test Case ID: YFN8yJ
+
+- Server error
+
+[503] Service Unavailable:
+
+    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run/embed-batch'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T13:32:26.773637+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '{&quot;texts&quot;: [&quot;First document to embed&quot;, &quot;Second document to embed&quot;, &quot;Third document to embed&quot;], &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/batch"/>
+			<failure type="failure" message="1. Test Case ID: YFN8yJ
+
+- Server error
+
+[503] Service Unavailable:
+
+    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run/embed-batch'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T13:32:26.773637+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '{&quot;texts&quot;: [&quot;First document to embed&quot;, &quot;Second document to embed&quot;, &quot;Third document to embed&quot;], &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/batch"/>
+		</testcase>
+		<testcase name="POST /api/v1/embed/config" time="1.964396">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="POST /api/v1/embed/similarity" time="3.376208">
+			<failure type="failure" message="1. Test Case ID: dggDKF
+
+- Server error
+
+[503] Service Unavailable:
+
+    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run/embed-batch'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T13:32:27.073823+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text1&quot;: &quot;Machine learning is AI&quot;, &quot;text2&quot;: &quot;Deep learning is machine learning&quot;, &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/similarity"/>
+			<failure type="failure" message="1. Test Case ID: dggDKF
+
+- Server error
+
+[503] Service Unavailable:
+
+    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run/embed-batch'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T13:32:27.073823+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text1&quot;: &quot;Machine learning is AI&quot;, &quot;text2&quot;: &quot;Deep learning is machine learning&quot;, &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/similarity"/>
+			<failure type="failure" message="1. Test Case ID: dggDKF
+
+- Server error
+
+[503] Service Unavailable:
+
+    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run/embed-batch'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T13:32:27.073823+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text1&quot;: &quot;Machine learning is AI&quot;, &quot;text2&quot;: &quot;Deep learning is machine learning&quot;, &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/similarity"/>
+		</testcase>
+		<testcase name="POST /api/v1/scrape" time="2.452034"/>
+		<testcase name="POST /api/v1/scrape/cleanup" time="0.375398">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="POST /api/v1/scrape/reindex" time="2.375050">
+			<failure type="failure" message="1. Test Case ID: 5X3KV3
+
+- Server error
+
+[502] Bad Gateway:
+
+    `{&quot;error&quot;:&quot;Reindex service request failed: [Errno -2] Name or service not known&quot;,&quot;timestamp&quot;:&quot;2026-04-12T13:32:38.089676+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X POST 'https://vecinita-gateway-lx27.onrender.com/api/v1/scrape/reindex?verbose=false&amp;x-schemathesis-unknown-property=42'"/>
+			<failure type="failure" message="1. Test Case ID: 5X3KV3
+
+- Server error
+
+[502] Bad Gateway:
+
+    `{&quot;error&quot;:&quot;Reindex service request failed: [Errno -2] Name or service not known&quot;,&quot;timestamp&quot;:&quot;2026-04-12T13:32:38.089676+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X POST 'https://vecinita-gateway-lx27.onrender.com/api/v1/scrape/reindex?verbose=false&amp;x-schemathesis-unknown-property=42'"/>
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /" time="0.292331">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /api/v1/ask" time="4.566965">
+			<failure type="failure" message="1. Test Case ID: T68Fce
+
+- Server error
+
+[503] Service Unavailable:
+
+    `{&quot;error&quot;:&quot;Unable to connect to agent service: Request URL is missing an 'http://' or 'https://' protocol.&quot;,&quot;timestamp&quot;:&quot;2026-04-12T13:32:27.668606+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X GET 'https://vecinita-gateway-lx27.onrender.com/api/v1/ask?question=Can+you+summarize+this+in+3+key+points%3F&amp;thread_id=default&amp;context_answer=Nearby+clinics+include+Eastside+Community+Health+Center+%28walk-ins+welcome%29+and+Northside+Family+Medicine.&amp;lang=en&amp;provider=ollama&amp;model=llama3.1%3A8b&amp;tags=housing%2Cpermits&amp;tag_match_mode=any&amp;include_untagged_fallback=True&amp;rerank=False&amp;rerank_top_k=5'"/>
+			<failure type="failure" message="1. Test Case ID: T68Fce
+
+- Server error
+
+[503] Service Unavailable:
+
+    `{&quot;error&quot;:&quot;Unable to connect to agent service: Request URL is missing an 'http://' or 'https://' protocol.&quot;,&quot;timestamp&quot;:&quot;2026-04-12T13:32:27.668606+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X GET 'https://vecinita-gateway-lx27.onrender.com/api/v1/ask?question=Can+you+summarize+this+in+3+key+points%3F&amp;thread_id=default&amp;context_answer=Nearby+clinics+include+Eastside+Community+Health+Center+%28walk-ins+welcome%29+and+Northside+Family+Medicine.&amp;lang=en&amp;provider=ollama&amp;model=llama3.1%3A8b&amp;tags=housing%2Cpermits&amp;tag_match_mode=any&amp;include_untagged_fallback=True&amp;rerank=False&amp;rerank_top_k=5'"/>
+			<failure type="failure" message="1. Test Case ID: T68Fce
+
+- Server error
+
+[503] Service Unavailable:
+
+    `{&quot;error&quot;:&quot;Unable to connect to agent service: Request URL is missing an 'http://' or 'https://' protocol.&quot;,&quot;timestamp&quot;:&quot;2026-04-12T13:32:27.668606+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X GET 'https://vecinita-gateway-lx27.onrender.com/api/v1/ask?question=Can+you+summarize+this+in+3+key+points%3F&amp;thread_id=default&amp;context_answer=Nearby+clinics+include+Eastside+Community+Health+Center+%28walk-ins+welcome%29+and+Northside+Family+Medicine.&amp;lang=en&amp;provider=ollama&amp;model=llama3.1%3A8b&amp;tags=housing%2Cpermits&amp;tag_match_mode=any&amp;include_untagged_fallback=True&amp;rerank=False&amp;rerank_top_k=5'"/>
+		</testcase>
+		<testcase name="GET /api/v1/ask/config" time="0.306753">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /api/v1/documents/chunk-statistics" time="2.117154">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /api/v1/documents/download-url" time="1.883270">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /api/v1/documents/overview" time="5.031931">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /api/v1/documents/preview" time="1.698410">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /api/v1/documents/tags" time="4.393840">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /api/v1/embed/config" time="0.315193">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /api/v1/scrape/history" time="2.152456">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /api/v1/scrape/stats" time="0.430129">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /config" time="0.367291">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /health" time="1.445477">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /integrations/status" time="1.104284">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /api/v1/scrape/{job_id}" time="16.257568">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="POST /api/v1/scrape/{job_id}/cancel" time="0.736514">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="Stateful tests" time="11.196578"/>
+	</testsuite>
+</testsuites>

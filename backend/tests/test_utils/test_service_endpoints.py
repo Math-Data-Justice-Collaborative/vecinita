@@ -77,6 +77,13 @@ class TestEndpointResolution:
         ep = _reload()
         assert ep.AGENT_SERVICE_URL == "http://vecinita-agent:8000"
 
+    def test_agent_service_url_prepends_http_for_render_hostport(self, monkeypatch):
+        """Render fromService hostport is host:port without scheme."""
+        monkeypatch.setenv("AGENT_SERVICE_URL", "vecinita-agent:10000")
+
+        ep = _reload()
+        assert ep.AGENT_SERVICE_URL == "http://vecinita-agent:10000"
+
 
 # ---------------------------------------------------------------------------
 # is_render_strict_mode()

@@ -11,6 +11,9 @@
 #   WAIT_FOR_SCHEMA_SECONDS — default: 30
 #   SCHEMATHESIS_MAX_EXAMPLES — maps to --max-examples (default: 12)
 #   SCHEMATHESIS_REQUEST_TIMEOUT — per-request HTTP timeout in seconds (default: 180)
+#   SCHEMATHESIS_EXCLUDE_IGNORED_AUTH — set to 0 to keep Schemathesis "ignored_auth" checks
+#       on the agent OpenAPI run (default: 1 — POST /model-selection returns 403 when locked,
+#       which is policy, not missing Bearer credentials)
 #
 # Modal microservices (optional; avoids surprise network/cost when unset):
 #   SCHEMATHESIS_MODAL_MICROSERVICES — set to 1 to run Schemathesis against the three Modal OpenAPI URLs
@@ -31,6 +34,7 @@ MAX_EX="${SCHEMATHESIS_MAX_EXAMPLES:-12}"
 REQ_TIMEOUT="${SCHEMATHESIS_REQUEST_TIMEOUT:-180}"
 MODEL_REQ_TIMEOUT="${SCHEMATHESIS_MODAL_MODEL_REQUEST_TIMEOUT:-300}"
 MODEL_MAX_EX="${SCHEMATHESIS_MODAL_MODEL_MAX_EXAMPLES:-6}"
+EXCLUDE_IGNORED_AUTH="${SCHEMATHESIS_EXCLUDE_IGNORED_AUTH:-1}"
 
 AGENT_URL="${AGENT_SCHEMA_URL:-}"
 GATEWAY_URL="${GATEWAY_SCHEMA_URL:-}"
@@ -99,10 +103,13 @@ run_agent_or_gateway() {
   local location="$1"
   local junit_name="$2"
   local use_auth="${3:-0}"
+  shift 3 || true
+  local extra=("$@")
   run_st "${location}" "${junit_name}" "${use_auth}" "${REQ_TIMEOUT}" "${MAX_EX}" \
     --exclude-path-regex '/ask/stream$' \
     --exclude-path '/ask/stream' \
-    --exclude-path '/ask-stream'
+    --exclude-path '/ask-stream' \
+    "${extra[@]+"${extra[@]}"}"
 }
 
 any_core_schema_set() {
@@ -115,7 +122,11 @@ if ! any_core_schema_set && [[ "${MODAL_FLAG}" != "1" ]]; then
 fi
 
 if [[ -n "${AGENT_URL}" ]]; then
-  run_agent_or_gateway "${AGENT_URL}" "junit-agent.xml" 0
+  agent_extra=()
+  if [[ "${EXCLUDE_IGNORED_AUTH}" == "1" ]]; then
+    agent_extra+=( --exclude-checks ignored_auth )
+  fi
+  run_agent_or_gateway "${AGENT_URL}" "junit-agent.xml" 0 "${agent_extra[@]+"${agent_extra[@]}"}"
 fi
 
 if [[ -n "${GATEWAY_URL}" ]]; then

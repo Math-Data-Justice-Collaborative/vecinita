@@ -8,7 +8,7 @@ names or provider strings in other modules.
 
 import os
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 from dotenv import load_dotenv
 
@@ -68,6 +68,50 @@ def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -
         return fallback_url
 
     return candidate if candidate else fallback_url
+
+
+def rewrite_deprecated_modal_embedding_host(url: str) -> str | None:
+    """Map legacy Modal embedding hostnames to the current ``web_app`` endpoint host.
+
+    Some environments still use ``*-embeddingservicecontainer-api.modal.run`` while
+    the active deployment is ``*-embedding-web-app.modal.run``.
+    """
+    try:
+        parsed = urlparse(url)
+    except Exception:
+        return None
+
+    host = (parsed.hostname or "").strip().lower()
+    if not host.endswith(".modal.run"):
+        return None
+    if "-embeddingservicecontainer-api.modal.run" not in host:
+        return None
+
+    rewritten_host = host.replace(
+        "-embeddingservicecontainer-api.modal.run",
+        "-embedding-web-app.modal.run",
+    )
+    if rewritten_host == host:
+        return None
+
+    port_part = f":{parsed.port}" if parsed.port else ""
+    netloc = f"{rewritten_host}{port_part}"
+    return urlunparse((parsed.scheme or "https", netloc, "", "", "", "")).rstrip("/")
+
+
+def normalize_agent_service_url(raw: str | None, *, default: str = "http://localhost:8000") -> str:
+    """Ensure ``AGENT_SERVICE_URL`` has an HTTP scheme.
+
+    Render ``fromService`` bindings often supply ``host:port`` only; httpx requires
+    ``http://`` or ``https://``. Private service mesh on Render uses HTTP to the
+    internal hostname.
+    """
+    candidate = (raw or "").strip()
+    if not candidate:
+        return default
+    if "://" in candidate:
+        return candidate
+    return f"http://{candidate}"
 
 
 # ---------------------------------------------------------------------------

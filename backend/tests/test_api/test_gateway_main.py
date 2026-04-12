@@ -459,11 +459,28 @@ class TestEnvironmentConfiguration:
             monkeypatch.setenv(key, value)
         monkeypatch.setenv("AGENT_SERVICE_URL", custom_url)
 
-        # Reload module to pick up new environment variables
+        # Reload service_endpoints then main so module-level AGENT_SERVICE_URL rebinds.
         import src.api.main
+        import src.service_endpoints as ep
 
+        importlib.reload(ep)
         importlib.reload(src.api.main)
         assert src.api.main.AGENT_SERVICE_URL == custom_url
+
+    def test_agent_service_url_hostport_gets_http_scheme(self, env_vars, monkeypatch):
+        """Render fromService supplies host:port; gateway must normalize for httpx."""
+        import importlib
+
+        for key, value in env_vars.items():
+            monkeypatch.setenv(key, value)
+        monkeypatch.setenv("AGENT_SERVICE_URL", "vecinita-agent.internal:10000")
+
+        import src.api.main
+        import src.service_endpoints as ep
+
+        importlib.reload(ep)
+        importlib.reload(src.api.main)
+        assert src.api.main.AGENT_SERVICE_URL == "http://vecinita-agent.internal:10000"
 
     def test_embedding_service_url_from_env(self, env_vars, monkeypatch):
         """Test embedding service URL uses canonical env key precedence."""

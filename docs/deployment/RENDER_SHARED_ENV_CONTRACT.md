@@ -92,7 +92,16 @@ Render dashboard. Key vars:
 | Variable | Required | Description |
 |---|---|---|
 | `ALLOWED_ORIGINS` | **Required** | Comma-separated chat frontend origins for CORS. |
+| `VECINITA_EMBEDDING_API_URL` | **Required** for embed routes | HTTPS base URL of the Modal (or other) embedding service — no trailing path. Must serve `POST /embed` and batch routes used by [`backend/src/api/router_embed.py`](../../backend/src/api/router_embed.py). Canonical Modal `web_app` deploy uses a `*-embedding-web-app.modal.run` host (see `.env.prod.render.example`). |
+| `EMBEDDING_SERVICE_AUTH_TOKEN` | Recommended | Sent to the embedding service as `x-embedding-service-token` / `Authorization` from the gateway when set. |
+| `REINDEX_SERVICE_URL` | **Required** for `POST /api/v1/scrape/reindex` | Absolute `https://…` URL of the scraper jobs API base, ending in `/jobs` (same shape as [`backend/src/api/router_scrape.py`](../../backend/src/api/router_scrape.py) default). A typo or Docker-only hostname causes DNS failures (`Name or service not known`) at runtime. |
+| `REINDEX_TRIGGER_TOKEN` | Optional | When set, the gateway forwards it as `x-reindex-token` to the reindex endpoint. |
+| `AGENT_SERVICE_URL` | **Injected by blueprint** | `render.yaml` sets this via `fromService` (`property: hostport`), which is `host:port` without a scheme. The gateway normalizes it to `http://…` for httpx. Do **not** duplicate in the env group unless you intentionally override the binding. |
 | `DEV_ADMIN_BEARER_TOKEN` | Optional | Developer admin bearer token for the chat UI admin panel. |
+
+### OpenAPI / Schemathesis
+
+Contract tests and live Schemathesis runs use [`backend/schemathesis.toml`](../../backend/schemathesis.toml) and [`backend/tests/schemathesis_hooks.py`](../../backend/tests/schemathesis_hooks.py). If Schemathesis reports **schema validation mismatch** on scrape/embed/ask routes, tighten Pydantic constraints and add **`Field(examples=…)`** / **`openapi_examples`** on gateway routers so generated examples stay valid. Live CLI: [`backend/scripts/run_schemathesis_live.sh`](../../backend/scripts/run_schemathesis_live.sh) — agent runs skip the `ignored_auth` check by default (`SCHEMATHESIS_EXCLUDE_IGNORED_AUTH=1`) because `POST /model-selection` returns **403** when model selection is locked (policy), not missing credentials.
 
 ---
 

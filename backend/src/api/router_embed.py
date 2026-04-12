@@ -12,7 +12,11 @@ import httpx
 import numpy as np
 from fastapi import APIRouter, HTTPException, Query
 
-from src.config import _normalize_internal_service_url, _running_on_render
+from src.config import (
+    _normalize_internal_service_url,
+    _running_on_render,
+    rewrite_deprecated_modal_embedding_host,
+)
 from src.service_endpoints import EMBEDDING_ENDPOINT
 
 from .models import (
@@ -21,9 +25,28 @@ from .models import (
     EmbeddingConfigResponse,
     EmbedRequest,
     EmbedResponse,
+    ErrorResponse,
     SimilarityRequest,
     SimilarityResponse,
+    ValidationErrorResponse,
 )
+
+_EMBED_OPENAPI_RESPONSES: dict[int | str, dict[str, Any]] = {
+    422: {
+        "model": ValidationErrorResponse,
+        "description": "Request body or query validation failed.",
+    },
+    500: {
+        "model": ErrorResponse,
+        "description": "Unexpected error while handling the embedding request.",
+    },
+    503: {
+        "model": ErrorResponse,
+        "description": (
+            "Embedding upstream unreachable, connection error, or non-success HTTP response."
+        ),
+    },
+}
 
 router = APIRouter(prefix="/embed", tags=["Embeddings"])
 
@@ -63,7 +86,9 @@ def _embedding_service_url() -> str:
         or os.getenv("EMBEDDING_SERVICE_URL")
         or EMBEDDING_SERVICE_URL
     )
-    return _normalize_embedding_service_url(configured)
+    base = _normalize_embedding_service_url(configured)
+    rewritten = rewrite_deprecated_modal_embedding_host(base)
+    return (rewritten or base).rstrip("/")
 
 
 def _embedding_service_headers() -> dict[str, str]:
@@ -113,7 +138,7 @@ async def _post_batch_embedding(client: httpx.AsyncClient, texts: list[str]) -> 
     return response
 
 
-@router.post("")
+@router.post("", responses=_EMBED_OPENAPI_RESPONSES)
 async def embed_text(request: EmbedRequest) -> EmbedResponse:
     """
     Generate embedding for a single text.
@@ -151,7 +176,7 @@ async def embed_text(request: EmbedRequest) -> EmbedResponse:
         ) from e
 
 
-@router.post("/batch")
+@router.post("/batch", responses=_EMBED_OPENAPI_RESPONSES)
 async def embed_batch(request: EmbedBatchRequest) -> EmbedBatchResponse:
     """
     Generate embeddings for multiple texts in batch.
@@ -193,7 +218,7 @@ async def embed_batch(request: EmbedBatchRequest) -> EmbedBatchResponse:
         ) from e
 
 
-@router.post("/similarity")
+@router.post("/similarity", responses=_EMBED_OPENAPI_RESPONSES)
 async def compute_similarity(request: SimilarityRequest) -> SimilarityResponse:
     """
     Compute similarity score between two texts.

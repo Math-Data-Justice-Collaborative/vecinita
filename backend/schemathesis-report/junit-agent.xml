@@ -1,34 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<testsuites disabled="0" errors="1" failures="0" tests="9" time="182.56779958010884">
-	<testsuite disabled="0" errors="1" failures="0" name="schemathesis" skipped="6" tests="9" time="182.56779958010884" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
-		<testcase name="POST /model-selection" time="3.797962"/>
-		<testcase name="GET /" time="0.422050">
+<testsuites disabled="0" errors="0" failures="0" tests="9" time="151.748592052">
+	<testsuite disabled="0" errors="0" failures="0" name="schemathesis" skipped="6" tests="9" time="151.748592052" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
+		<testcase name="POST /model-selection" time="3.088710"/>
+		<testcase name="GET /" time="0.338222">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /ask" time="160.694704">
-			<error type="error">Network Error
-
-Read timed out after 10.0 seconds
-
-Reproduce with:
-
-    curl -X GET 'https://vecinita-agent-lx27.onrender.com/ask?question=%C2%BFD%C3%B3nde+puedo+encontrar+una+cl%C3%ADnica+de+salud+comunitaria%3F&amp;query=Where+is+the+nearest+food+bank%3F&amp;thread_id=chat-session-7f3a&amp;lang=es&amp;provider=ollama&amp;model=llama3.2%3Alatest&amp;context_answer=Nearby+clinics+include+Eastside+Community+Health+Center+%28walk-ins+welcome%29+and+Northside+Family+Medicine.&amp;tags=health&amp;tag_match_mode=all&amp;include_untagged_fallback=True&amp;rerank=False&amp;rerank_top_k=10'</error>
-		</testcase>
-		<testcase name="GET /config" time="0.809297">
+		<testcase name="GET /ask" time="128.140515"/>
+		<testcase name="GET /config" time="0.766516">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /db-info" time="0.873599">
+		<testcase name="GET /db-info" time="0.939875">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /health" time="0.363073">
+		<testcase name="GET /health" time="0.353082">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /model-selection" time="0.998861">
+		<testcase name="GET /model-selection" time="0.769776">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /privacy" time="0.380147">
+		<testcase name="GET /privacy" time="0.299211">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /test-db-search" time="14.228107"/>
+		<testcase name="GET /test-db-search" time="17.052686"/>
 	</testsuite>
 </testsuites>
