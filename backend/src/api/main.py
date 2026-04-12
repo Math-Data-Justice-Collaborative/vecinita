@@ -80,8 +80,9 @@ from src.service_endpoints import (
     SCRAPER_ENDPOINT,
     log_endpoint_summary as _log_ep_summary,
 )
+from src.utils.database_url import get_resolved_database_url
 
-DATABASE_URL = os.getenv("DATABASE_URL", "")
+DATABASE_URL = get_resolved_database_url()
 
 # CORS configuration - supports multiple origins separated by comma
 ALLOWED_ORIGINS = os.getenv(

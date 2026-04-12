@@ -11,6 +11,22 @@ Shared contract templates:
 
 Use these template files as the authoritative key sets for CI contract/parity checks.
 
+## Credentials parity with local `.env`
+
+Values you keep in gitignored **`.env`**, **`.env.local`**, **`.env.prod.render`**, or **`.env.staging.render`** (copied from the examples below) must appear on **Render** under the **same variable names** the services read at runtime. Render does not rename keys for you.
+
+| Where you work | Template to copy keys from |
+|----------------|----------------------------|
+| Production Render Environment Group / per-service env | [`.env.prod.render.example`](../../.env.prod.render.example) |
+| Staging Render Environment Group / per-service env | [`.env.staging.render.example`](../../.env.staging.render.example) |
+| Local full-stack development | [`.env.local.example`](../../.env.local.example) |
+
+**Modal:** On Render, set **`MODAL_TOKEN_ID`** and **`MODAL_TOKEN_SECRET`**. If your local `.env` only has **`MODAL_API_TOKEN_ID`** / **`MODAL_API_TOKEN_SECRET`** (see `.env.local.example`), paste the same token values into Render using the **`MODAL_TOKEN_*`** names — production/staging services do not read `MODAL_API_TOKEN_*`.
+
+**Postgres:** Prefer **`DATABASE_URL`** (Render blueprints can inject it with `fromDatabase`). Some components also accept **`DB_URL`** as an optional alias if an existing secret uses that name.
+
+After adding a new key to the app, update the matching example file and your Render env group so names stay aligned.
+
 ---
 
 ## vecinita-data-management-frontend-v1 (Render Web Service)

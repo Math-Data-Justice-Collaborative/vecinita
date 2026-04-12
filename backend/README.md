@@ -13,6 +13,8 @@ Recommended local `.env` minimum for stable startup and tests:
 
 ```env
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
+# Optional legacy/alternate name for the same value (gateway + uploader + scraper):
+# DB_URL=postgresql://postgres:postgres@localhost:5432/postgres
 OLLAMA_BASE_URL=http://localhost:11434
 OPENAI_API_KEY=test-openai-key
 DEEPSEEK_API_KEY=test-deepseek-key

@@ -1,8 +1,9 @@
 services:
-  # Staging blueprint — all env vars come from the shared env group in the
-  # Render dashboard. Only infrastructure bindings (fromDatabase, fromService)
-  # and PORT are declared here. sync: false on everything else ensures the
-  # env group is never overwritten by this blueprint.
+  # Staging blueprint — env vars come from the shared env group in the Render
+  # dashboard. Match keys to .env.staging.render.example (values in gitignored
+  # .env.staging.render). Only infrastructure bindings (fromDatabase, fromService)
+  # and PORT are declared here. sync: false on everything else ensures the env
+  # group is never overwritten by this blueprint.
   #
   # Key ownership legend (mirrors render.yaml):
   #   STRICT — strict-mode policy for staging validation
@@ -315,7 +316,9 @@ services:
       - key: PORT
         value: "10000"
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: vecinita-postgres-staging
+          property: connectionString
       - key: MODAL_TOKEN_ID
         sync: false
       - key: MODAL_TOKEN_SECRET

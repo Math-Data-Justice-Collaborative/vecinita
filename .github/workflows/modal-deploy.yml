@@ -34,8 +34,9 @@ jobs:
       contents: read
     
     env:
-      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID || secrets.MODAL_API_TOKEN_ID }}
-      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET || secrets.MODAL_API_TOKEN_SECRET }}
+      # Canonical: MODAL_TOKEN_* (Render / shared env). Aliases: MODAL_API_TOKEN_* (.env), MODAL_AUTH_* (legacy).
+      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID || secrets.MODAL_API_TOKEN_ID || secrets.MODAL_AUTH_KEY }}
+      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET || secrets.MODAL_API_TOKEN_SECRET || secrets.MODAL_AUTH_SECRET }}
       MODAL_PROFILE: ${{ secrets.MODAL_API_PROFILE || vars.MODAL_API_PROFILE || 'vecinita' }}
 
     steps:
@@ -63,7 +64,7 @@ jobs:
 
           if [ -z "$token_id" ] || [ -z "$token_secret" ]; then
             echo "authenticated=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Modal deployment skipped because credentials are not configured."
+            echo "::notice::Modal deployment skipped: set MODAL_TOKEN_ID and MODAL_TOKEN_SECRET (or MODAL_API_TOKEN_*, or MODAL_AUTH_*)."
             exit 0
           fi
 
@@ -72,7 +73,7 @@ jobs:
             echo "✓ Modal authentication verified"
           else
             echo "authenticated=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Modal deployment skipped because authentication failed. Update MODAL_TOKEN_ID and MODAL_TOKEN_SECRET to valid values."
+            echo "::notice::Modal deployment skipped because authentication failed. Configure repo secrets MODAL_TOKEN_ID and MODAL_TOKEN_SECRET (or MODAL_API_TOKEN_ID / MODAL_API_TOKEN_SECRET, or MODAL_AUTH_KEY / MODAL_AUTH_SECRET)."
           fi
 
       - name: Deploy Embedding Service

@@ -10,6 +10,11 @@
   # Staging / production environment secrets in GitHub
   python3 scripts/env_sync.py gh --file .env --prefix RENDER_ --environment staging --yes
 
+  # Push Modal + Postgres secrets for GitHub Actions (same names workflows read; resolves
+  # MODAL_API_TOKEN_* / MODAL_AUTH_* -> MODAL_TOKEN_* and DB_URL -> DATABASE_URL)
+  python3 scripts/env_sync.py gh --preset github-actions --file .env --file .env.local --dry-run
+  python3 scripts/env_sync.py gh --preset github-actions --file .env --yes
+
   # Patch a Render web service env vars from .env.prod.render (requires RENDER_API_KEY)
   python3 scripts/env_sync.py render-api --file .env.prod.render --service-id srv-xxxxx --dry-run
   python3 scripts/env_sync.py render-api --file .env.prod.render --service-id srv-xxxxx --yes
@@ -62,6 +67,34 @@ def merge_files(paths: list[Path]) -> dict[str, str]:
     return merged
 
 
+def build_github_actions_secrets_bundle(data: dict[str, str]) -> dict[str, str]:
+    """Map local .env keys to GitHub Actions secret names used by repo workflows.
+
+    Aligns with ``modal-deploy.yml`` and submodule deploy workflows:
+    ``MODAL_TOKEN_*`` (from ``MODAL_API_TOKEN_*`` or ``MODAL_AUTH_*``),
+    ``DATABASE_URL`` (from ``DB_URL`` if needed), ``MODAL_API_PROFILE``.
+    """
+    out: dict[str, str] = {}
+    token_id = (
+        (data.get("MODAL_TOKEN_ID") or data.get("MODAL_API_TOKEN_ID") or data.get("MODAL_AUTH_KEY") or "").strip()
+    )
+    token_secret = (
+        (data.get("MODAL_TOKEN_SECRET") or data.get("MODAL_API_TOKEN_SECRET") or data.get("MODAL_AUTH_SECRET") or "")
+        .strip()
+    )
+    if token_id:
+        out["MODAL_TOKEN_ID"] = token_id
+    if token_secret:
+        out["MODAL_TOKEN_SECRET"] = token_secret
+    database_url = (data.get("DATABASE_URL") or data.get("DB_URL") or "").strip()
+    if database_url:
+        out["DATABASE_URL"] = database_url
+    profile = (data.get("MODAL_API_PROFILE") or data.get("MODAL_PROFILE") or "").strip()
+    if profile:
+        out["MODAL_API_PROFILE"] = profile
+    return out
+
+
 def filter_keys(
     data: dict[str, str],
     prefix: str | None,
@@ -85,12 +118,18 @@ def filter_keys(
 def cmd_gh(args: argparse.Namespace) -> int:
     paths = [Path(p).resolve() for p in args.file]
     data = merge_files(paths)
-    subset = filter_keys(
-        data,
-        args.prefix,
-        set(args.key) if args.key else None,
-        all_keys=args.all_keys,
-    )
+    if args.preset == "github-actions":
+        subset = build_github_actions_secrets_bundle(data)
+        if args.key:
+            want = set(args.key)
+            subset = {k: v for k, v in subset.items() if k in want}
+    else:
+        subset = filter_keys(
+            data,
+            args.prefix,
+            set(args.key) if args.key else None,
+            all_keys=args.all_keys,
+        )
     if not subset:
         print("No non-empty keys matched filters.", file=sys.stderr)
         return 1
@@ -223,6 +262,13 @@ def main() -> int:
 
     gh = sub.add_parser("gh", help="Push secrets with gh secret set")
     gh.add_argument("--file", action="append", required=True, help="Dotenv file (repeat to merge, later wins)")
+    gh.add_argument(
+        "--preset",
+        choices=("github-actions",),
+        default=None,
+        help="github-actions: push MODAL_TOKEN_*, DATABASE_URL, MODAL_API_PROFILE for CI "
+        "resolved from local file keys (see build_github_actions_secrets_bundle). Ignores --prefix/--all-keys.",
+    )
     gh.add_argument("--prefix", default="RENDER_", help="Only keys starting with this prefix (default: RENDER_)")
     gh.add_argument("--key", action="append", help="Exact key name (repeat); overrides --prefix if set")
     gh.add_argument("--repo", help="owner/repo (default: current gh repo)")

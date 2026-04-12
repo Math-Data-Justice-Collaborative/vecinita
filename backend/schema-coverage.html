@@ -1,0 +1,2591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Coverage Report</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+:root{--font-family-default:Poppins;--color-background:#1a1a1a;--color-surface-1:#212121;--color-surface-2:#2a2a2a;--color-border:#616161;--color-border-subtle:#404040;--color-text-primary:#eaebef;--color-text-secondary:#b6b6b6;--color-brand-success:#51cd78;--color-brand-warning:#f5b74c;--color-brand-danger:#f76f61;--color-brand-info:#3b82f6;--color-success-bg:#51cd781a;--color-warning-bg:#f5b74c1a;--color-danger-bg:#f76f611a;--color-info-bg:#3b82f61a;--color-success-border:#51cd782e;--color-warning-border:#f5b74c2e;--color-danger-border:#f76f612e;--color-info-border:#3b82f62e;--font-size-xs:.75rem;--font-size-sm:.875rem;--font-size-base:1rem;--font-size-lg:1.125rem;--font-size-xl:1.25rem;--font-size-2xl:1.5rem;--font-size-3xl:2rem;--font-size-5xl:3rem;--space-2xs:.15rem;--space-xs:.25rem;--space-sm:.5rem;--space-md:1rem;--space-lg:1.5rem;--radius-sm:4px;--radius-md:8px;--radius-lg:12px;--shadow-sm:0 2px 4px #0000001a;--shadow-md:0 4px 8px #0000001f;--shadow-lg:0 8px 25px #00000026}body{background-color:var(--color-background);color:var(--color-text-primary);min-width:830px;font-family:var(--font-family-default),sans-serif;margin:0;font-style:normal;font-weight:400;transition:background-color .1s,color .1s}.container{max-width:1400px;margin:0 auto;padding-left:30px;padding-right:30px}header{padding-top:var(--space-md);padding-bottom:var(--space-md);flex-direction:row;justify-content:flex-start;align-items:center;display:flex}.logo{padding-right:48px;display:flex;& svg{& path{fill:var(--color-text-primary)}}}nav{font-size:var(--font-size-base);& ul{flex-direction:row;gap:8px;margin:0;padding:0;list-style:none;display:flex;& li{& a{color:var(--color-text-primary);padding:8px;font-weight:600;text-decoration:none;display:block}}}}.github-link{border:1px solid var(--color-border);border-radius:var(--radius-sm);background-color:var(--color-background);font-size:var(--font-size-base);color:inherit;justify-content:flex-start;align-items:center;margin-left:16px;padding:4px;text-decoration:none;transition:border-color .2s ease-in-out,box-shadow .2s ease-in-out;display:none}@media (width>=480px){.github-link{display:inline-flex}}.github-link:hover{border-color:#e5e7ebb3}.icon-container,.arrow-container{justify-content:center;align-items:center;width:24px;height:24px;display:flex}.icon-container{margin-right:4px}.divider{background-color:var(--color-border);width:1px;height:24px}.arrow-container{margin-left:4px}.title{margin-top:var(--space-lg);margin-bottom:var(--space-lg);padding-top:var(--space-lg);padding-bottom:var(--space-lg);text-align:center;& h1{font-weight:400;font-size:var(--font-size-5xl);margin:0;margin-bottom:var(--space-sm)}& .hero-subtitle{font-size:var(--font-size-lg);color:var(--color-text-secondary);margin:0 0 var(--space-md)0;font-weight:400}& span{margin-top:var(--space-sm);font-size:var(--font-size-sm);color:var(--color-text-secondary)}}.navigation{& .navigation-desc{text-align:center;margin-top:10px}}.filters{margin:var(--space-lg)0;padding:var(--space-md);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-md);box-shadow:var(--shadow-sm)}.filter-row{justify-content:space-between;align-items:center;display:flex}.filter-group{align-items:center;gap:var(--space-md);display:flex}.filter-label{color:var(--color-text-secondary);font-size:var(--font-size-sm);white-space:nowrap;font-weight:600}.select-vs{gap:var(--space-md);align-items:center;min-width:100px;display:flex;position:relative}.profile-options{gap:var(--space-md);display:flex}.profile-option{align-items:center;gap:var(--space-xs);cursor:pointer;padding:var(--space-xs);display:flex}.filter-info{border-top:1px solid var(--color-border-subtle);padding-top:var(--space-md)}.info-content{gap:var(--space-xs);flex-direction:column;display:flex}.info-text{color:var(--color-text-secondary);font-size:var(--font-size-sm)}#profile-command{background:var(--color-background);padding:var(--space-xs)var(--space-sm);border-radius:var(--radius-sm);font-family:Monaco,Menlo,Ubuntu Mono,monospace;font-size:var(--font-size-xs);color:var(--color-text-secondary);border:1px solid var(--color-border-subtle)}.badge{font-size:var(--font-size-3xl);padding:var(--space-sm)var(--space-sm);border-radius:var(--radius-md);border:1px solid var(--badge-border);background:var(--badge-bg,transparent);color:var(--badge-text,var(--text));font-weight:700;line-height:1}.badge.info{--badge-text:var(--color-brand-info);--badge-bg:var(--color-info-bg);--badge-border:var(--color-info-border)}.badge.success{--badge-text:var(--color-brand-success);--badge-bg:var(--color-success-bg);--badge-border:var(--color-success-border)}.badge.warning{--badge-text:var(--color-brand-warning);--badge-bg:var(--color-warning-bg);--badge-border:var(--color-warning-border)}.badge.danger{--badge-text:var(--color-brand-danger);--badge-bg:var(--color-danger-bg);--badge-border:var(--color-danger-border)}.main-info-metric{text-align:right;min-width:115px}.cards{gap:var(--space-lg);max-width:1400px;margin:0 auto;margin-top:var(--space-lg);margin-bottom:var(--space-lg);grid-template-columns:repeat(auto-fit,minmax(380px,1fr));display:grid}@media (width>=1200px){.cards{grid-template-columns:repeat(2,1fr)}}@media (width>=1600px){.cards{grid-template-columns:repeat(2,1fr)}}.card{border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-md);background:var(--color-surface-1);box-shadow:var(--shadow-sm)transition: all .3s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden}.card:hover{border-color:var(--color-brand-success);box-shadow:var(--shadow-lg)}.card-header{gap:var(--space-sm);padding-bottom:var(--space-md);flex-direction:column;align-items:stretch;display:flex}.card-metrics{gap:var(--space-sm);padding-bottom:var(--space-sm);border-bottom:1px solid var(--color-border);align-items:flex-start;display:flex}.card-header-top{gap:var(--space-md);align-items:flex-start;display:flex}.card-description{color:var(--color-text-secondary);font-size:var(--font-size-sm);padding-top:var(--space-sm);margin:0}.metric-item{text-align:right;flex-direction:column;align-items:flex-end;min-width:100px;display:flex}.metric-label{color:var(--color-text-secondary);font-size:var(--font-size-xs);white-space:nowrap;font-weight:500}.metric-value{font-size:var(--font-size-xl);color:var(--color-text-primary);letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-bottom:2px;font-weight:600}.metric-item:first-child{position:relative}.metric-label-with-comparison{align-items:center;gap:var(--space-xs);font-size:var(--font-size-xs);display:flex}.metric-item:first-child:after{content:"";right:calc(var(--space-lg)*-.5);opacity:.5;width:1px;height:24px;position:absolute;top:50%;transform:translateY(-50%)}.card-logo{color:#f3f4f6;border-radius:var(--radius-md);width:60px;height:60px;font-weight:700;font-size:var(--font-size-3xl);background:linear-gradient(135deg,#525252 0%,#3f3f46 100%);flex-shrink:0;justify-content:center;align-items:center;display:flex}.card-logo img{object-fit:cover;border-radius:var(--radius-md);width:100%;height:100%}.card-content{flex:1;min-width:0}.card-content h3{margin:0 0 var(--space-xs)0;font-size:var(--font-size-2xl);white-space:nowrap;text-overflow:ellipsis;font-weight:600;line-height:1.2;overflow:hidden}.card-content a{color:var(--color-text-primary);text-decoration:none}.card-content a:hover{text-decoration:underline}.card-tags{gap:var(--space-xs);flex-wrap:wrap;align-items:center;display:flex}.card-tag{background:var(--color-surface-1);border:1px solid var(--color-border-subtle);border-radius:var(--radius-sm);color:var(--color-text-secondary);padding:var(--space-xs)var(--space-sm);font-size:var(--font-size-xs);text-transform:uppercase;letter-spacing:.5px;font-weight:600;transition:all .2s}.card-tag:hover{background:var(--color-surface-2);color:var(--color-text-primary)}.card-tag--framework{background:var(--color-info-bg);border-color:var(--color-info-border);color:var(--color-brand-info)}.card-tag--spec{color:var(--color-text-secondary);background:#ffffff0f;border-color:#ffffff1a}.github-stars{align-items:center;gap:var(--space-xs);padding:var(--space-xs)var(--space-sm);border-radius:var(--radius-sm);color:var(--color-text-primary);font-size:var(--font-size-xs);background:#ffffff14;border:1px solid #ffffff1f;font-weight:500;text-decoration:none;transition:all .2s;display:inline-flex}.github-stars:hover{background:var(--color-surface-2);color:var(--color-text-primary)}.github-stars svg{color:#fbbf24;flex-shrink:0;width:12px;height:12px}.issues-breakdown{gap:var(--space-md);min-height:calc(var(--max-categories)*52px + var(--space-sm));flex-direction:column;display:flex}.issue-category{align-items:center;gap:var(--space-md);padding:var(--space-sm);padding-left:var(--space-xs);border-radius:var(--radius-md);border-left:4px solid #0000;display:flex;position:relative}.issue-category.critical{background:var(--color-danger-bg);border-left-color:var(--color-brand-danger);border-radius:var(--radius-sm)}.issue-category.high,.issue-category.medium{background:var(--color-warning-bg);border-left-color:var(--color-brand-warning);border-radius:var(--radius-sm)}.category-count{font-size:var(--font-size-2xl);text-align:right;min-width:115px;padding-right:var(--space-sm);font-weight:700}.category-name{font-weight:500;font-size:var(--font-size-sm);flex:1}.category-severity{color:var(--color-text-primary);padding:var(--space-xs)var(--space-sm);border-radius:var(--radius-md);font-size:var(--font-size-xs);text-transform:uppercase;letter-spacing:.5px;text-align:center;background:#fff3;min-width:4rem;font-weight:600}.severity-critical{background:var(--color-danger-bg);color:var(--color-brand-danger);border:1px solid var(--color-danger-border)}.severity-high,.severity-medium{background:var(--color-warning-bg);color:var(--color-brand-warning);border:1px solid var(--color-warning-border)}.info-block{border:1px solid var(--color-border-subtle);border-radius:var(--radius-md);padding:var(--space-lg);margin-top:var(--space-md);margin-bottom:var(--space-md);background:var(--color-surface-2);overflow:hidden}.info-block-header{gap:var(--space-md);padding-bottom:var(--space-md);margin-bottom:var(--space-md);border-bottom:1px solid var(--color-border);align-items:flex-start;display:flex}.info-block-content{flex:1}.info-block-content h4{margin:0 0 var(--space-xs)0;font-size:var(--font-size-base);color:var(--color-text-primary);align-items:center;gap:var(--space-sm);display:flex}.info-block-content p{font-size:var(--font-size-xs);color:var(--color-text-secondary);margin:0}.coverage-chart{border-radius:var(--radius-sm);padding:var(--space-sm);margin-top:var(--space-sm);background:#0003}.issues-breakdown{gap:var(--space-sm);flex-direction:column;display:flex}.coverage-segments{border-radius:var(--radius-sm);height:12px;margin-bottom:var(--space-sm);border:1px solid var(--color-border-subtle);background:#0006;display:flex;position:relative;overflow:hidden;box-shadow:inset 0 1px 2px #0003}.coverage-breakdown{margin-top:2em;margin-bottom:2em}.segment.covered.success{background:linear-gradient(90deg,var(--color-brand-success)0%,#45b865 100%);transition:width .3s}.segment.covered.warning{background:linear-gradient(90deg,var(--color-brand-warning)0%,#e09f2c 100%);transition:width .3s}.segment.covered.danger{background:linear-gradient(90deg,var(--color-brand-danger)0%,#e55a4d 100%);transition:width .3s}.segment.uncovered{background:0 0;transition:width .3s}.card-actions{gap:var(--space-md);margin-top:var(--space-lg);padding-top:var(--space-lg);border-top:1px solid var(--color-border);font-size:var(--font-size-sm);flex-direction:column;display:flex}.action-line{align-items:center;gap:var(--space-sm);display:flex}.action-category{color:var(--color-text-secondary);min-width:85px;font-weight:600;font-size:var(--font-size-xs);text-transform:uppercase;letter-spacing:.5px}.action-line a{padding:var(--space-xs)var(--space-sm);background:var(--color-surface-1);border:1px solid var(--color-border-subtle);border-radius:var(--radius-sm);color:var(--color-text-primary);font-weight:500;font-size:var(--font-size-xs);text-align:center;min-width:85px;text-decoration:none;transition:all .2s;display:inline-block}.action-line a:hover{background:var(--color-surface-2);border-color:var(--color-brand-info);color:var(--color-brand-info);text-decoration:none;transform:translateY(-1px)}.separator{color:var(--color-border);font-weight:300}.action-pill{padding:var(--space-xs)var(--space-xs);border:1px solid var(--color-border-subtle);border-radius:var(--radius-md);color:var(--color-text-secondary);font-size:var(--font-size-sm);white-space:nowrap;background:#ffffff14;font-weight:500;text-decoration:none;transition:all .2s}.action-pill:hover{border-color:var(--color-text-secondary);color:var(--color-text-primary);background:#ffffff26;transform:translateY(-1px)}.action-pill:focus{outline:2px solid var(--color-brand-info);outline-offset:2px}.action-pill:active{background:#ffffff0d;transform:translateY(0)}.select{min-width:100px;display:inline-block;position:relative}.select__input{appearance:none;background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-sm);color:var(--color-text-primary);cursor:pointer;font-family:inherit;font-size:var(--font-size-xs);padding:var(--space-xs)var(--space-lg)var(--space-xs)var(--space-sm);width:100%;font-weight:500;transition:all .2s;box-shadow:0 1px 3px #0000001a}.select__input:hover{border-color:var(--color-border);background:var(--color-surface-1);box-shadow:0 2px 6px #00000026}.select__input:focus{border-color:var(--color-brand-info);outline:none;box-shadow:0 0 0 2px #3b82f61a}.select__input option{background:var(--color-surface-1);color:var(--color-text-primary);padding:var(--space-sm);font-weight:500}.select__input option:hover{background:var(--color-surface-2)}.select-vs:after,.select:after{content:"";right:var(--space-sm);border-left:4px solid #0000;border-right:4px solid #0000;border-top:5px solid var(--color-text-secondary);pointer-events:none;width:0;height:0;transition:all .2s;position:absolute;top:50%;transform:translateY(-50%)}.select-vs:hover:after,.select:hover:after{border-top-color:var(--color-text-primary)}.select__input:focus+.select:after{border-top-color:var(--color-brand-info)}.coverage-bar-header{margin-bottom:var(--space-xs);justify-content:space-between;align-items:center;display:flex}.report-link{padding:var(--space-xs)var(--space-sm);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-sm);color:var(--color-text-primary);font-size:var(--font-size-xs);white-space:nowrap;text-align:center;flex-shrink:0;align-self:flex-start;min-width:87px;margin-left:auto;font-weight:500;text-decoration:none;transition:all .2s}.report-link:hover{background:var(--color-surface-1);border-color:var(--color-text-primary);color:var(--color-text-primary);text-decoration:none}.card-metrics .comparison-indicator{font-size:var(--font-size-xs);order:-1;font-weight:600}.card-metrics .comparison-value{font-variant-numeric:tabular-nums}.comparison-indicator{align-items:center;gap:var(--space-2xs);font-size:var(--font-size-xs);margin-left:var(--space-xs);opacity:.8;font-weight:600;transition:opacity .2s;display:inline-flex}.comparison-indicator.positive{color:var(--color-brand-success)}.comparison-indicator.negative{color:var(--color-brand-danger)}.comparison-indicator.neutral{color:var(--color-text-secondary)}.comparison-arrow{font-size:var(--font-size-xs);line-height:1}.comparison-value{font-size:var(--font-size-xs);font-variant-numeric:tabular-nums}.comparison-indicator.hidden{display:none}.metric-diff{margin-left:2px;font-size:10px;font-weight:500}.metric-diff.positive{color:var(--color-brand-success)}.metric-diff.negative{color:var(--color-brand-danger)}.response-breakdown{justify-content:center;gap:var(--space-md);flex-wrap:wrap;display:flex}.response-badge{align-items:center;gap:var(--space-xs);padding:var(--space-sm);border-radius:var(--radius-md);border:1px solid var(--badge-border);background:var(--badge-bg,transparent);flex-direction:column;min-width:80px;display:flex}.response-badge.info{--badge-bg:var(--color-info-bg);--badge-border:var(--color-info-border)}.response-badge.success{--badge-bg:var(--color-success-bg);--badge-border:var(--color-success-border)}.response-badge.warning{--badge-bg:var(--color-warning-bg);--badge-border:var(--color-warning-border)}.response-badge.danger{--badge-bg:var(--color-danger-bg);--badge-border:var(--color-danger-border)}.response-count{font-size:var(--font-size-2xl);color:var(--badge-text,var(--color-text-primary));font-weight:700}.response-badge.success .response-count{color:var(--color-brand-success)}.response-badge.warning .response-count{color:var(--color-brand-warning)}.response-badge.danger .response-count{color:var(--color-brand-danger)}.response-label{font-size:var(--font-size-sm);color:var(--color-text-secondary);text-transform:uppercase;font-weight:500}.section-header{text-align:center;margin-bottom:var(--space-md);padding-bottom:var(--space-sm);border-bottom:1px solid var(--color-border-subtle)}.section-header h4{font-size:var(--font-size-base);color:var(--color-text-primary);margin:0;font-weight:600}.summary-stats{gap:var(--space-md);padding:var(--space-lg);background:var(--color-surface-1);border:1px solid var(--color-border);border-radius:var(--radius-lg)var(--radius-lg)0 0;border-bottom:none;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));display:grid}.stat-card{text-align:center;padding:var(--space-sm)}.stat-value{font-size:var(--font-size-3xl);color:var(--color-text-primary);margin-bottom:var(--space-xs);font-weight:700}.stat-label{font-size:var(--font-size-sm);color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.5px;font-weight:500}.stats-note{text-align:center;font-size:var(--font-size-xs);color:var(--color-text-secondary);padding:var(--space-sm)var(--space-lg);background:var(--color-surface-1);border:1px solid var(--color-border);border-radius:0 0 var(--radius-lg)var(--radius-lg);border-top:1px solid var(--color-border-subtle);margin-bottom:var(--space-lg);opacity:.7}.info-hint{margin-top:var(--space-sm);font-size:var(--font-size-xs);color:var(--color-text-secondary);font-style:italic;display:block}.cta-section{text-align:center;padding:var(--space-lg);margin-top:calc(var(--space-lg)*2);margin-bottom:var(--space-lg);background:var(--color-surface-1);border:1px solid var(--color-border);border-radius:var(--radius-lg)}.cta-content{max-width:700px;margin:0 auto}.cta-section h2{margin:0 0 var(--space-xs)0;font-size:var(--font-size-2xl);color:var(--color-text-primary);font-weight:600}.cta-subtitle{margin:0 0 var(--space-lg)0;font-size:var(--font-size-sm);color:var(--color-text-secondary)}.install-command-wrapper{margin-bottom:var(--space-md)}.install-command{background:var(--color-background);padding:var(--space-sm)var(--space-md);border-radius:var(--radius-md);font-family:Monaco,Menlo,Ubuntu Mono,monospace;font-size:var(--font-size-sm);color:var(--color-brand-success);border:1px solid var(--color-border);transition:all .2s;display:inline-block}.install-command:hover{border-color:var(--color-success-border)}.cta-buttons{gap:var(--space-md);flex-wrap:wrap;justify-content:center;display:flex}.btn{padding:var(--space-sm)var(--space-lg);border-radius:var(--radius-md);font-size:var(--font-size-sm);box-shadow:var(--shadow-sm);font-weight:600;text-decoration:none;transition:all .2s}.btn-primary{background:var(--color-brand-success);color:var(--color-background);border:1px solid var(--color-brand-success)}.btn-primary:hover{background:var(--color-success-bg);color:var(--color-brand-success);border-color:var(--color-brand-success);box-shadow:var(--shadow-md);transform:translateY(-2px)}.btn-secondary{background:var(--color-surface-1);color:var(--color-text-primary);border:1px solid var(--color-border)}.btn-secondary:hover{background:var(--color-surface-2);border-color:var(--color-text-primary);box-shadow:var(--shadow-md);transform:translateY(-2px)}
+:root {
+    --color-http-get: var(--color-brand-info);
+    --color-http-post: var(--color-brand-success);
+    --color-http-put: var(--color-brand-warning);
+    --color-http-patch: var(--color-brand-success);
+    --color-http-delete: var(--color-brand-danger);
+    --color-http-head: var(--color-brand-info);
+    --color-http-options: var(--color-brand-info);
+    --color-coverage-positive: #349147;
+    --font-family-monospace: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+}
+
+header {
+    justify-content: flex-end;
+    border-bottom: 2px solid var(--color-border);
+    padding: var(--space-lg) var(--space-md);
+}
+
+.header-title {
+    margin-right: auto;
+}
+
+.logotype {
+    font-size: var(--font-size-3xl);
+    font-weight: 600;
+}
+
+.subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-top: var(--space-xs);
+}
+
+.time {
+    font-size: var(--font-size-base);
+    color: var(--color-text-secondary);
+}
+
+/* Coverage Charts */
+.charts {
+    display: flex;
+    gap: 1rem;
+    margin-top: 20px;
+}
+
+.chart-block {
+    flex: 1;
+    background-color: var(--color-surface-2);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: var(--radius-md);
+    position: relative;
+    border: 1px solid var(--color-border-subtle);
+}
+
+.chart-title {
+    margin-bottom: 10px;
+}
+
+.chart-values {
+    font-size: var(--font-size-3xl);
+    margin-bottom: 5px;
+    color: var(--color-text-primary);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.chart-values .positive {
+    color: var(--color-brand-success);
+}
+
+.chart-values .invalid {
+    color: var(--color-brand-danger);
+}
+
+.chart-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.card-tooltip {
+    display: none;
+    position: absolute;
+    width: 240px;
+    z-index: 10;
+    top: 24px;
+    right: 0;
+    text-align: center;
+    font-size: var(--font-size-sm);
+    font-family: var(--font-family-default), serif;
+    line-height: 1.4;
+}
+
+.chart-info {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.chart-info svg {
+    fill: var(--color-text-secondary);
+    opacity: 0.8;
+}
+
+.chart-info:hover svg {
+    fill: var(--color-text-primary);
+    opacity: 1;
+}
+
+.chart-info:hover .card-tooltip {
+    display: block;
+    background-color: var(--color-background);
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+}
+
+.note {
+    margin-top: 10px;
+}
+
+/* Coverage Tools */
+.sr-only {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.coverage-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 10px;
+    border: 1px solid var(--color-border-subtle);
+    background-color: var(--color-surface-1);
+    padding: 10px;
+    justify-content: start;
+    border-radius: var(--radius-md);
+    gap: 1rem;
+}
+
+.coverage-tools--right {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 30px;
+    width: 480px;
+    justify-content: end;
+    margin-left: auto;
+}
+
+.search-bar {
+    position: relative;
+    display: inline-block;
+}
+
+.search-input {
+    padding: 6px 30px 6px 10px;
+    border: 1px solid var(--color-border-subtle);
+    background-color: var(--color-surface-1);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    transition: border-color 0.3s, background-color 0.3s;
+    border-radius: var(--radius-md);
+}
+
+.search-input:focus {
+    border-color: var(--color-border);
+    background-color: var(--color-surface-2);
+}
+
+.search-input::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 0.6;
+}
+
+.clear-btn {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    width: 15px;
+    height: 15px;
+}
+
+.clear-btn svg {
+    fill: var(--color-text-secondary);
+}
+
+.clear-btn:hover svg {
+    fill: var(--color-text-primary);
+}
+
+.coverage-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-right: auto;
+}
+
+.coverage-buttons button {
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    padding: 6px 8px 6px 8px;
+    border: 1px solid var(--color-border-subtle);
+    background-color: var(--color-surface-2);
+    font-size: var(--font-size-sm);
+    transition: background-color 0.3s;
+    text-align: center;
+    align-items: center;
+    display: flex;
+    gap: 0.3rem;
+}
+
+.coverage-buttons button:hover {
+    background-color: var(--color-background);
+}
+
+.coverage-buttons button svg {
+    width: 15px;
+    height: 13px;
+    fill: var(--color-text-primary);
+}
+
+.coverage-buttons button svg g {
+    fill: var(--color-text-primary);
+}
+
+.coverage-buttons button span {
+    height: 16px;
+}
+
+.toggle-icon {
+    transition: transform 0.3s ease;
+    transform: rotate(180deg);
+}
+
+.rotated {
+    transform: rotate(0deg);
+}
+
+.tool-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.tool-button {
+    color: var(--color-text-primary);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.coverage-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.legend-item {
+    padding: 1px 8px;
+    border-radius: calc(var(--radius-md) / 2);
+    color: white;
+    font-size: var(--font-size-sm);
+    display: flex;
+    gap: 4px;
+}
+
+.legend-covered {
+    background-color: var(--color-coverage-positive);
+}
+
+.legend-uncovered {
+    background-color: var(--color-brand-danger);
+    border-right: 4px solid #843F39;
+}
+
+.legend-uncovered svg {
+    width: 20px;
+}
+
+.legend-partial {
+    background-color: var(--color-brand-warning);
+    border-right: 4px solid #836430;
+}
+
+.progress-bar {
+    width: 155px;
+    height: 20px;
+    border-radius: var(--radius-md);
+    position: relative;
+    background-color: var(--color-surface-2);
+    overflow: hidden;
+    border: 1px solid var(--color-border-subtle);
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0;
+    animation: none;
+}
+
+.progress-text {
+    right: 10px;
+    width: 60px;
+    text-align: center;
+    color: var(--color-text-primary);
+}
+
+.progress-bar.red .progress-fill {
+    background-color: var(--color-brand-danger);
+    width: var(--progress);
+}
+
+.progress-bar.yellow .progress-fill {
+    background-color: var(--color-brand-warning);
+    width: var(--progress);
+}
+
+.progress-bar.green .progress-fill {
+    background-color: var(--color-coverage-positive);
+    width: var(--progress);
+}
+
+.progress-bar.empty {
+    opacity: 0.5;
+}
+
+.accordion {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.accordion input[type="checkbox"] {
+    display: none;
+}
+
+.accordion-header {
+    display: flex;
+    gap: 1rem;
+    padding: 10px;
+    user-select: none;
+    align-items: center;
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-1);
+    justify-content: space-between;
+}
+
+.accordion-header.error {
+    border: 1px solid var(--color-brand-danger);
+}
+
+.accordion-header.error ~ .accordion-content ol {
+    margin: 0;
+}
+
+.accordion-header.error .coverage-text {
+    color: var(--color-brand-danger);
+}
+
+.accordion-header.error .method-endpoint {
+    color: var(--color-brand-danger);
+}
+
+.accordion-header.not-called .param-stats,
+.accordion-header.not-called .keyword-stats {
+    color: var(--color-text-primary);
+}
+
+.accordion-header.deprecated {
+    opacity: 0.5;
+}
+
+.accordion-header.deprecated .endpoint {
+    text-decoration: line-through;
+}
+
+.accordion-header.shadowed {
+    border: 1px solid var(--color-brand-warning);
+}
+
+.accordion-header.shadowed .coverage-text {
+    color: var(--color-brand-warning);
+}
+
+.accordion-header.shadowed .method-endpoint {
+    color: var(--color-brand-warning);
+}
+
+.shadowed-warning {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--font-size-xs);
+    color: var(--color-brand-warning);
+    padding: 2px 8px;
+    background: var(--color-warning-bg);
+    border: 1px solid var(--color-warning-border);
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+}
+
+.shadowed-warning svg {
+    width: 14px;
+    height: 14px;
+    fill: var(--color-brand-warning);
+}
+
+.accordion-header--right {
+    display: flex;
+    align-items: center;
+    width: 465px;
+    flex-wrap: nowrap;
+    gap: 1rem;
+    justify-content: end;
+    min-width: 465px;
+}
+
+.method-endpoint {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-weight: bold;
+    margin-right: auto;
+    width: 500px;
+    flex: 1;
+    min-width: 0;
+}
+
+.endpoint {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+    position: relative;
+}
+
+.param-stats,
+.keyword-stats {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: bold;
+    width: 98px;
+    text-align: center;
+}
+
+.coverage-cell {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 268px;
+    min-width: 268px;
+    justify-content: end;
+}
+
+.coverage-text {
+    text-transform: uppercase;
+    width: 60px;
+    text-align: center;
+}
+
+.accordion-arrow {
+    transition: transform 0.3s ease;
+    transform: rotate(180deg);
+    opacity: 0.7;
+}
+
+.accordion-header:hover .accordion-arrow {
+    opacity: 1;
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    margin: 0 10px;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 500px;
+}
+
+.accordion input[type="checkbox"]:checked ~ .accordion-header {
+    border-bottom: 1px solid var(--color-border);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.accordion input[type="checkbox"]:checked ~ .accordion-content {
+    max-height: max-content;
+    padding: 15px 0;
+}
+
+.accordion input[type="checkbox"]:checked ~ .accordion-header .accordion-arrow {
+    transform: rotate(0deg);
+}
+
+.method {
+    padding: 6px 15px;
+    color: white;
+    border-radius: var(--radius-md);
+    width: 70px;
+    min-width: 70px;
+    text-align: center;
+}
+
+.post {
+    background-color: var(--color-http-post);
+}
+
+.patch {
+    background-color: var(--color-http-patch);
+}
+
+.get {
+    background-color: var(--color-http-get);
+}
+
+.delete {
+    background-color: var(--color-http-delete);
+}
+
+.put {
+    background-color: var(--color-http-put);
+}
+
+.head {
+    background-color: var(--color-http-head);
+}
+
+.options {
+    background-color: var(--color-http-options);
+}
+
+.location {
+    font-weight: bold;
+    margin-top: 15px;
+    color: var(--color-text-primary);
+    display: flex;
+    flex-direction: row;
+}
+
+.location-metrics {
+    font-weight: 500;
+    margin-left: auto;
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+}
+
+.location-metrics span:first-of-type {
+    width: 40px;
+}
+
+.location-metrics span:last-of-type {
+    width: 70px;
+}
+
+.location-hint {
+    font-weight: 400;
+    font-size: 0.85em;
+    opacity: 0.6;
+}
+
+.param-name {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-sm);
+    font-weight: bold;
+    color: var(--color-text-primary);
+}
+
+.schema-viewer {
+    font-family: var(--font-family-monospace), serif;
+    overflow-x: auto;
+    position: relative;
+    border-radius: var(--radius-sm);
+}
+
+.schema-content {
+    width: max-content;
+    min-width: 100%;
+}
+
+.schema-header {
+    display: flex;
+    align-items: center;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    padding: 4px 0;
+    background: var(--color-surface-2);
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.header-spacer {
+    width: 32px;
+    padding-right: 8px;
+    margin-right: 8px;
+    border-right: 1px solid var(--color-border-subtle);
+}
+
+.header-labels {
+    display: flex;
+    gap: 6px;
+    width: 78px;
+    margin-right: 6px;
+    text-transform: uppercase;
+    font-size: 9px;
+    letter-spacing: 0.3px;
+}
+
+.header-labels span {
+    width: 36px;
+    text-align: center;
+}
+
+.schema-viewer--tooltip {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-family: var(--font-family-default), serif;
+    font-size: var(--font-size-sm);
+    z-index: 1;
+    padding: 1px 8px;
+    border-left: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    border-bottom-left-radius: var(--radius-sm);
+    background-color: var(--color-background);
+}
+
+.code-line {
+    position: relative;
+    border-left: 3px solid var(--color-border);
+    flex: 1;
+    white-space: pre;
+}
+
+.code-row {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    font-size: var(--font-size-sm);
+    background-color: var(--color-surface-1);
+}
+
+.code-row:first-child {
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.code-row:last-child {
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+.code-row:first-child:last-child {
+    border-radius: var(--radius-sm);
+}
+
+.code-row:hover .line-number {
+    color: var(--color-text-primary);
+}
+
+.line-number {
+    width: 32px;
+    text-align: right;
+    padding-right: 8px;
+    margin-right: 8px;
+    border-right: 1px solid var(--color-border-subtle);
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+    user-select: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: end;
+}
+
+/* Coverage count columns */
+.coverage-counts {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 78px;
+    flex-shrink: 0;
+    margin-right: 6px;
+    font-size: var(--font-size-xs);
+}
+
+.count {
+    width: 36px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+}
+
+.count-hit {
+    font-weight: 600;
+}
+
+.count-miss {
+    opacity: 0.6;
+}
+
+.count-na {
+    opacity: 0.3;
+    font-style: italic;
+    font-size: 0.9em;
+}
+
+.schema-viewer.example {
+    margin-bottom: 15px;
+}
+
+.schema-viewer.example .line-number {
+    content: "";
+    width: 20px;
+}
+
+.schema-viewer.example .code-line {
+    border-left: 0;
+}
+
+/* Inlined Component Header */
+.inlined-component {
+    margin-bottom: 0;
+}
+
+.inlined-component-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: linear-gradient(90deg, var(--color-surface-2) 0%, var(--color-surface-1) 100%);
+    border: 1px solid var(--color-border-subtle);
+    border-bottom: none;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    font-family: var(--font-family-monospace), monospace;
+    font-size: var(--font-size-xs);
+}
+
+.inlined-component-header .component-icon {
+    color: var(--color-text-secondary);
+    display: block;
+    flex-shrink: 0;
+}
+
+.inlined-component-header .component-name {
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+.inlined-component .schema-viewer {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.inlined-component .schema-viewer .code-row:first-child {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+/* Multi-Ref Schema Components */
+.multi-ref-schema {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ref-components-section {
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-1);
+}
+
+.ref-components-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-family: var(--font-family-monospace), monospace;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    user-select: none;
+}
+
+.ref-components-toggle:hover {
+    color: var(--color-text-primary);
+}
+
+.ref-components-summary {
+    margin-left: auto;
+}
+
+.ref-components-toggle .toggle-icon,
+.ref-component-header .toggle-icon {
+    color: var(--color-text-tertiary);
+    transition: transform 0.15s ease;
+    transform: rotate(180deg);
+}
+
+.ref-components-section[open] .toggle-icon,
+.ref-component[open] .toggle-icon {
+    transform: rotate(0deg);
+}
+
+.ref-components-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 12px 12px;
+}
+
+.ref-component {
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-2);
+}
+
+.ref-component-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-family: var(--font-family-monospace), monospace;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    user-select: none;
+}
+
+.ref-component-header:hover {
+    color: var(--color-text-primary);
+}
+
+.ref-component-name {
+    font-weight: 600;
+}
+
+.ref-component-stats,
+.ref-components-summary {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+    margin-left: auto;
+}
+
+.ref-component-stats {
+    margin-right: 8px;
+}
+
+.ref-component-content {
+    padding: 0 10px 10px;
+}
+
+.ref-component-content .schema-viewer {
+    border-radius: var(--radius-sm);
+}
+
+/* Code row coverage highlighting */
+.code-row.coverage-full {
+    background-color: color-mix(in srgb, var(--color-coverage-positive) 50%, black 20%);
+}
+
+.code-row.coverage-full:hover {
+    background-color: var(--color-coverage-positive);
+}
+
+.code-row.coverage-partial {
+    background-color: color-mix(in srgb, var(--color-brand-warning) 50%, black 20%);
+}
+
+.code-row.coverage-partial:hover {
+    background-color: var(--color-brand-warning);
+}
+
+.code-row.coverage-partial .code-line {
+    border-color: var(--color-brand-warning);
+}
+
+.code-row.coverage-none {
+    background-color: color-mix(in srgb, var(--color-brand-danger) 50%, black 20%);
+}
+
+.code-row.coverage-none:hover {
+    background-color: var(--color-brand-danger);
+}
+
+.code-row.coverage-none .code-line {
+    border-color: var(--color-brand-danger);
+}
+
+.coverage-constrained {
+    background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 4px,
+        rgba(255, 255, 255, 0.04) 4px,
+        rgba(255, 255, 255, 0.04) 8px
+    );
+}
+
+.coverage-unsupported {
+    background-color: color-mix(in srgb, var(--color-text-secondary) 30%, black 40%);
+}
+
+.coverage-unsupported:hover {
+    background-color: var(--color-text-secondary);
+}
+
+.coverage-unsupported .code-line {
+    border-color: var(--color-text-secondary);
+}
+
+.section-divider {
+    border: none;
+    border-top: 1px solid;
+    border-color: var(--color-border);
+    margin: 0.75rem 0;
+}
+
+.keywords-coverage {
+    margin: 5px 20px;
+    font-size: var(--font-size-sm);
+    font-weight: normal;
+    color: var(--color-text-secondary);
+}
+
+.keywords-coverage.uncovered {
+    font-style: italic;
+}
+
+.response-stats.uncovered .response-metrics {
+    color: var(--color-text-secondary);
+}
+
+/* Response Stats */
+.response-stats {
+    margin-bottom: 15px;
+}
+
+.response-subgroup {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    padding: 12px 0 4px 0;
+    margin-top: 4px;
+}
+
+.response-subgroup:first-child {
+    padding-top: 0;
+    margin-top: 0;
+}
+
+.response-row {
+    display: flex;
+    padding: 8px 0;
+    align-items: center;
+}
+
+.response-row:last-child {
+    border-bottom: none;
+}
+
+.response-code {
+    font-family: var(--font-family-monospace), serif;
+    font-weight: bold;
+    padding: 2px 8px;
+    margin-right: 15px;
+    border-radius: 3px;
+    min-width: 60px;
+    text-align: center;
+    font-size: var(--font-size-sm);
+}
+
+.response-row.success .response-code {
+    background-color: var(--color-brand-success);
+    color: white;
+}
+
+.response-row.error .response-code {
+    background-color: var(--color-brand-danger);
+    color: white;
+}
+
+.response-row.default .response-code {
+    background-color: var(--color-text-secondary);
+    color: white;
+}
+
+.response-desc {
+    flex-grow: 1;
+    color: var(--color-text-secondary);
+}
+
+.response-metrics {
+    text-align: right;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    font-weight: 500;
+}
+
+.hit-count {
+    display: inline-block;
+    width: 40px;
+    text-align: center;
+}
+
+.avg-time {
+    display: inline-block;
+    width: 70px;
+    text-align: center;
+}
+
+.alert-text {
+    border: 1px solid var(--color-brand-danger);
+    padding: 5px 5px 5px 26px;
+    border-radius: var(--radius-md);
+    position: relative;
+}
+
+.alert-text svg {
+    position: absolute;
+    fill: var(--color-brand-danger);
+    left: 4px;
+    top: 6px;
+}
+
+.example-group-header {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    padding: var(--space-sm) 0;
+    margin-top: var(--space-sm);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    body {
+        min-width: unset;
+    }
+
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    /* Header: stack title and timestamp */
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* Charts: 2x3 grid */
+    .charts {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .chart-block {
+        min-width: unset;
+    }
+
+    /* Hide info icons - overlap on small cards */
+    .chart-info {
+        display: none;
+    }
+
+    /* Coverage tools: stack vertically */
+    .coverage-tools {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-sm);
+    }
+
+    .coverage-tools--right {
+        width: 100%;
+        justify-content: space-between;
+        margin-left: 0;
+    }
+
+    /* Hide column headers since we hide the columns */
+    .tool-buttons {
+        display: none;
+    }
+
+    /* Accordion header: stack method+path above stats */
+    .accordion-header {
+        flex-wrap: wrap;
+        min-height: unset;
+        gap: var(--space-sm);
+    }
+
+    /* Method + endpoint: full width, path truncated */
+    .method-endpoint {
+        width: 100%;
+        flex: 1 1 100%;
+        gap: var(--space-sm);
+    }
+
+    .endpoint {
+        font-size: var(--font-size-sm);
+    }
+
+    /* Stats row: right-aligned below */
+    .accordion-header--right {
+        min-width: unset;
+        width: 100%;
+        gap: var(--space-sm);
+        justify-content: flex-end;
+    }
+
+    .param-stats,
+    .keyword-stats {
+        display: none;
+    }
+
+    .coverage-cell {
+        min-width: unset;
+    }
+
+    .progress-bar {
+        flex: 1;
+        width: auto;
+    }
+
+    .method {
+        min-width: 45px;
+        padding: 4px 8px;
+        font-size: var(--font-size-xs);
+    }
+
+    /* Hide shadowed warning on mobile - too much space */
+    .shadowed-warning span {
+        display: none;
+    }
+
+    .shadowed-warning {
+        padding: 2px 4px;
+    }
+
+    /* Larger tap targets for buttons */
+    .coverage-buttons button {
+        min-height: 44px;
+    }
+}
+
+/* Focus Ring Visibility */
+button:focus-visible,
+input:focus-visible {
+    outline: 2px solid var(--color-brand-info);
+    outline-offset: 2px;
+}
+
+/* Report Footer */
+.report-footer {
+    text-align: center;
+    padding: var(--space-lg) var(--space-md);
+    margin-top: var(--space-lg);
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.report-footer a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.report-footer a:hover {
+    color: var(--color-text-primary);
+    text-decoration: underline;
+}
+
+/* Suggestions Panel */
+.suggestions-section {
+    margin-top: var(--space-lg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-1);
+    overflow: hidden;
+}
+
+.suggestions-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--color-surface-2);
+    border-bottom: 1px solid var(--color-border);
+    font-weight: 600;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.suggestions-header-icon {
+    width: 14px;
+    height: 14px;
+    opacity: 0.6;
+}
+
+.suggestions-count {
+    margin-left: var(--space-xs);
+    color: var(--color-text-secondary);
+    font-weight: 400;
+}
+
+.suggestions-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+}
+
+.suggestion-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-2);
+    border-left: 4px solid transparent;
+}
+
+.suggestion-item:hover {
+    background: color-mix(in srgb, var(--color-surface-2) 90%, var(--color-surface-1) 10%);
+}
+
+.suggestion-item.suggestion-positive {
+    border-left-color: var(--color-brand-success);
+}
+
+.suggestion-item.suggestion-negative {
+    border-left-color: var(--color-brand-danger);
+}
+
+.suggestion-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-secondary);
+    border-bottom: 1px solid var(--color-border-subtle);
+    background: color-mix(in srgb, var(--color-surface-2) 50%, var(--color-surface-1) 50%);
+}
+
+.suggestion-index {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 20px;
+    padding: 0 var(--space-xs);
+    background: var(--color-surface-1);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+}
+
+.suggestion-polarity {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.suggestion-positive .suggestion-index {
+    background: color-mix(in srgb, var(--color-brand-success) 15%, var(--color-surface-1) 85%);
+    border-color: color-mix(in srgb, var(--color-brand-success) 30%, var(--color-border) 70%);
+    color: var(--color-brand-success);
+}
+
+.suggestion-negative .suggestion-index {
+    background: color-mix(in srgb, var(--color-brand-danger) 15%, var(--color-surface-1) 85%);
+    border-color: color-mix(in srgb, var(--color-brand-danger) 30%, var(--color-border) 70%);
+    color: var(--color-brand-danger);
+}
+
+.suggestion-positive .suggestion-polarity {
+    color: var(--color-brand-success);
+}
+
+.suggestion-negative .suggestion-polarity {
+    color: var(--color-brand-danger);
+}
+
+.suggestion-value-container {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+}
+
+.suggestion-value {
+    margin: 0;
+    padding: var(--space-sm) var(--space-md);
+    padding-right: calc(var(--space-md) + 28px); /* Space for copy button */
+    background: transparent;
+    border: none;
+    font-family: var(--font-family-monospace);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-primary);
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.5;
+}
+
+.suggestion-value.truncated {
+    max-height: none;
+}
+
+.suggestion-value-full {
+    margin: 0;
+    padding: var(--space-sm) var(--space-md);
+    padding-right: calc(var(--space-md) + 28px);
+    background: transparent;
+    border: none;
+    font-family: var(--font-family-monospace);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-primary);
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.5;
+}
+
+/* Truncated value fade + toggle */
+.suggestion-value-wrapper {
+    position: relative;
+}
+
+.suggestion-value-wrapper.truncated::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+    background: linear-gradient(to bottom, transparent 0%, var(--color-surface-2) 100%);
+    pointer-events: none;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+.suggestion-expand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-surface-2);
+    border: none;
+    border-top: 1px solid var(--color-border-subtle);
+    color: var(--color-text-secondary);
+    font-family: var(--font-family-default), sans-serif;
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.suggestion-expand:hover {
+    background: color-mix(in srgb, var(--color-surface-2) 80%, var(--color-surface-1) 20%);
+    color: var(--color-text-primary);
+}
+
+.suggestion-expand svg {
+    width: 12px;
+    height: 12px;
+    transform: rotate(180deg);
+    transition: transform 0.2s ease;
+}
+
+.suggestion-expand.expanded svg {
+    transform: rotate(0deg);
+}
+
+.suggestion-copy {
+    position: absolute;
+    top: var(--space-xs);
+    right: var(--space-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.suggestion-copy svg {
+    width: 16px;
+    height: 16px;
+}
+
+.suggestion-copy:hover {
+    background: var(--color-surface-1);
+    color: var(--color-text-primary);
+}
+
+.suggestion-copy.copied {
+    color: var(--color-brand-success);
+}
+
+.suggestion-copy.copied svg {
+    animation: copy-success 0.3s ease;
+}
+
+@keyframes copy-success {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Locked suggestions (community edition) */
+.suggestion-locked {
+    border-left-color: var(--color-brand-primary);
+    background: linear-gradient(135deg, var(--color-surface-1) 0%, color-mix(in srgb, var(--color-surface-1) 95%, var(--color-brand-primary) 5%) 100%);
+    border: 1px solid color-mix(in srgb, var(--color-brand-primary) 20%, var(--color-border) 80%);
+    border-left-width: 4px;
+}
+
+.suggestion-locked:hover {
+    background: linear-gradient(135deg, var(--color-surface-1) 0%, color-mix(in srgb, var(--color-surface-1) 92%, var(--color-brand-primary) 8%) 100%);
+}
+
+.suggestion-locked-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.suggestion-locked-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: var(--color-text-tertiary);
+}
+
+.suggestion-locked-text {
+    flex: 1;
+}
+
+.suggestion-locked-count {
+    font-weight: 600;
+    color: var(--color-brand-primary);
+}
+
+.suggestion-locked-label {
+    color: var(--color-text-tertiary);
+}
+
+</style></head>
+<body>
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg"><defs>
+<symbol id="icon-arrow" viewBox="0 0 12 12"><path d="M2 8 L6 3 L10 8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></symbol>
+<symbol id="icon-ref" viewBox="0 0 24 24"><path d="M5 12 L17 12 M13 7 L18 12 L13 17" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="icon-tooltip" viewBox="0 0 24 24"><path d="M 12 2 C 6.4889971 2 2 6.4889971 2 12 C 2 17.511003 6.4889971 22 12 22 C 17.511003 22 22 17.511003 22 12 C 22 6.4889971 17.511003 2 12 2 z M 12 4 C 16.430123 4 20 7.5698774 20 12 C 20 16.430123 16.430123 20 12 20 C 7.5698774 20 4 16.430123 4 12 C 4 7.5698774 7.5698774 4 12 4 z M 11 7 L 11 9 L 13 9 L 13 7 L 11 7 z M 11 11 L 11 17 L 13 17 L 13 11 L 11 11 z"/></symbol>
+<symbol id="icon-close" viewBox="0 0 24 24"><path d="M 4.9902344 3.9902344 A 1.0001 1.0001 0 0 0 4.2929688 5.7070312 L 10.585938 12 L 4.2929688 18.292969 A 1.0001 1.0001 0 1 0 5.7070312 19.707031 L 12 13.414062 L 18.292969 19.707031 A 1.0001 1.0001 0 1 0 19.707031 18.292969 L 13.414062 12 L 19.707031 5.7070312 A 1.0001 1.0001 0 0 0 18.980469 3.9902344 A 1.0001 1.0001 0 0 0 18.292969 4.2929688 L 12 10.585938 L 5.7070312 4.2929688 A 1.0001 1.0001 0 0 0 4.9902344 3.9902344 z"/></symbol>
+<symbol id="icon-checkbox-unchecked" viewBox="0 0 18 18"><path d="M16,2 L16,16 L2,16 L2,2 L16,2 L16,2 Z M16,0 L2,0 C0.9,0 0,0.9 0,2 L0,16 C0,17.1 0.9,18 2,18 L16,18 C17.1,18 18,17.1 18,16 L18,2 C18,0.9 17.1,0 16,0 L16,0 L16,0 Z"/></symbol>
+<symbol id="icon-checkbox-checked" viewBox="0 0 18 18"><path d="M4.9,7.1 L3.5,8.5 L8,13 L18,3 L16.6,1.6 L8,10.2 L4.9,7.1 L4.9,7.1 Z M16,16 L2,16 L2,2 L12,2 L12,0 L2,0 C0.9,0 0,0.9 0,2 L0,16 C0,17.1 0.9,18 2,18 L16,18 C17.1,18 18,17.1 18,16 L18,8 L16,8 L16,16 L16,16 Z"/></symbol>
+<symbol id="icon-check" viewBox="0 0 16 16"><path d="M13.5 4.5L6.5 11.5L2.5 7.5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="icon-x" viewBox="0 0 16 16"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="icon-copy" viewBox="0 0 16 16"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M3.5 10.5H3a1.5 1.5 0 01-1.5-1.5V3A1.5 1.5 0 013 1.5h6A1.5 1.5 0 0110.5 3v.5" stroke="currentColor" stroke-width="1.5" fill="none"/></symbol>
+</defs></svg>
+    <header class="container">
+        <div class="header-title">
+            <div class="logotype">Schemathesis 4.14.3
+            </div>
+            <div class="subtitle">API Coverage Report</div>
+        </div>
+        <div class="time">2026-04-11 21:42:05.046</div>
+    </header>
+
+    <div class="container">
+            <div class="charts">
+                <div class="chart-block">
+                    <div class="chart-title">Operations</div>
+                    <div class="chart-values">
+                        <span>9</span> / <span>11</span>
+                    </div>
+                    <div class="chart-info">
+                        <svg width="20" height="20"><use href="#icon-tooltip"/></svg>
+                        <div class="card-tooltip">API endpoints that were called during your test run</div>
+                    </div>
+                </div>
+
+                <div class="chart-block">
+                    <div class="chart-title">Parameters</div>
+                    <div class="chart-values">
+                        <span>35.00%</span>
+                    </div>
+                    <div class="chart-label">14 of 40 covered</div>
+                    <div class="chart-info">
+                        <svg width="20" height="20"><use href="#icon-tooltip"/></svg>
+                        <div class="card-tooltip">Parameters tested with both valid and invalid values</div>
+                    </div>
+                </div>
+
+                <div class="chart-block">
+                    <div class="chart-title">Keywords</div>
+                    <div class="chart-values">
+                        <span>39.22%</span>
+                    </div>
+                    <div class="chart-label">40 of 102 covered</div>
+                    <div class="chart-info">
+                        <svg width="20" height="20"><use href="#icon-tooltip"/></svg>
+                        <div class="card-tooltip">Schema validation rules tested with both valid and invalid values</div>
+                    </div>
+                </div>
+
+                <div class="chart-block">
+                    <div class="chart-title">Examples</div>
+                    <div class="chart-values">
+                        <span>37.50%</span>
+                    </div>
+                    <div class="chart-label">6 of 16 covered</div>
+                    <div class="chart-info">
+                        <svg width="20" height="20"><use href="#icon-tooltip"/></svg>
+                        <div class="card-tooltip">Schema examples and default values that were actually used in your tests</div>
+                    </div>
+                </div>
+
+                <div class="chart-block">
+                    <div class="chart-title">Responses</div>
+                    <div class="chart-values">
+                        <span>13</span> / <span>20</span>
+                    </div>
+                    <div class="chart-info">
+                        <svg width="20" height="20"><use href="#icon-tooltip"/></svg>
+                        <div class="card-tooltip">Response status codes that your tests actually received from the API</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="coverage-tools">
+                <div class="search-bar">
+                    <label for="search-input" class="sr-only">Search</label>
+                    <input
+                            type="text"
+                            id="search-input"
+                            class="search-input"
+                            placeholder="Search..."
+                    />
+                    <button type="button" class="clear-btn" aria-label="Clear search">
+                        <svg width="15" height="15"><use href="#icon-close"/></svg>
+                    </button>
+                </div>
+                <div class="coverage-buttons">
+                  <button id="hide-covered">
+                     <svg id="svgNotCheck" height="18" width="18"><use href="#icon-checkbox-unchecked"/></svg>
+                     <svg id="svgCheck" style="display: none" height="18" width="18"><use href="#icon-checkbox-checked"/></svg>
+                    <span>Hide covered</span>
+                  </button>
+                  <button id="toggle-all">
+                     <svg id="toggle-icon" class="toggle-icon" height="18" width="18"><use href="#icon-arrow"/></svg>
+                     <span id="toggle-text">Expand all</span>
+                  </button>
+               </div>
+               <div class="coverage-tools--right">
+                  <div class="tool-buttons">
+                     <div class="tool-button">Parameters</div>
+                     <div class="tool-button">Keywords</div>
+                  </div>
+                  <div class="coverage-legend">
+                     <div class="legend-item legend-uncovered">
+                        Uncovered
+                     </div>
+                     <div class="legend-item legend-partial">Partial</div>
+                     <div class="legend-item legend-covered">Covered</div>
+                  </div>
+               </div>
+            </div>
+
+<div class="accordion" data-covered='covered'>
+    <input type="checkbox" id="acc-toggle1">
+    <label for="acc-toggle1" class="accordion-header">
+        <div class="method-endpoint">
+            <span class="method get">GET</span>
+            <span class="endpoint" data-search="/" title="/">/</span>
+            
+        </div>
+        <div class="accordion-header--right">
+            <div class="param-stats">0</div>
+            <div class="keyword-stats">0</div>
+            <div class="coverage-cell">
+                <div class="progress-bar " style="--progress: 100%;"><div class="progress-fill"></div></div>
+                <div class="progress-text">-</div>
+                <svg class="accordion-arrow" width="12" height="12"><use href="#icon-arrow"/></svg>
+            </div>
+        </div>
+    </label>
+    <div class="accordion-content">
+    <div class="location">
+        <div class="location-title">Responses</div>
+        <div class="location-metrics">
+        <span>seen</span>
+        <span>average</span>
+        </div>
+    </div>
+    <hr class="section-divider">
+    <div class="response-stats">
+    <div class="response-row success">
+        <div class="response-code">200</div>
+        <div class="response-desc">Successful Response</div>
+        <div class="response-metrics">
+            <span class="hit-count">2</span>
+            <span class="avg-time">29.51ms</span>
+        </div>
+</div>
+</div>
+</div>
+</div>
+<div class="accordion" data-covered='covered'>
+    <input type="checkbox" id="acc-toggle2">
+    <label for="acc-toggle2" class="accordion-header">
+        <div class="method-endpoint">
+            <span class="method get">GET</span>
+            <span class="endpoint" data-search="/ask" title="/ask">/ask</span>
+            
+        </div>
+        <div class="accordion-header--right">
+            <div class="param-stats">12</div>
+            <div class="keyword-stats">28</div>
+            <div class="coverage-cell">
+                <div class="progress-bar green" style="--progress: 100%;"><div class="progress-fill"></div></div>
+                <div class="progress-text">100.00%</div>
+                <svg class="accordion-arrow" width="12" height="12"><use href="#icon-arrow"/></svg>
+            </div>
+        </div>
+    </label>
+    <div class="accordion-content">
+        <div class="location">Query Parameters</div>
+        <hr class="section-divider"><div class="param-name"><span class="param-text">question</span><span class="keywords-coverage">3 of 3 keywords covered</span></div>
+    <div class="schema-viewer"><div class="schema-content">
+      <div class="schema-header"><span class="header-spacer"></span><span class="header-labels"><span>valid</span><span>invalid</span></span></div><div class="code-row coverage-full coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-hit">66</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-hit">66</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-full"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-hit">59</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-hit">59</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-hit">59</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-full"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-hit">7</span><span class="count count-hit">59</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-hit">7</span><span class="count count-hit">59</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-hit">7</span><span class="count count-hit">59</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-hit">66</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-hit">66</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">query</span><span class="keywords-coverage">3 of 3 keywords covered</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-full coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-hit">63</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-hit">63</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-full"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-hit">56</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-hit">56</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-hit">56</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-full"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-hit">7</span><span class="count count-hit">56</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-hit">7</span><span class="count count-hit">56</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-hit">7</span><span class="count count-hit">56</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-hit">63</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-hit">63</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">thread_id</span><span class="keywords-coverage">1 of 1 keywords covered</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-full coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-hit">46</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-hit">46</span><span class="count count-na">n/a</span></span><span class="code-line">  "type": "string"</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-hit">46</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">lang</span><span class="keywords-coverage">3 of 3 keywords covered</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-full coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-hit">72</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-hit">72</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-full"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-hit">64</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-hit">64</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-hit">64</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-full"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-hit">8</span><span class="count count-hit">64</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-hit">8</span><span class="count count-hit">64</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-hit">8</span><span class="count count-hit">64</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-hit">72</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-hit">72</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">provider</span><span class="keywords-coverage">3 of 3 keywords covered</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-full coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-hit">64</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-hit">64</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-full"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-hit">58</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-hit">58</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-hit">58</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-full"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-hit">6</span><span class="count count-hit">58</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-hit">6</span><span class="count count-hit">58</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-hit">6</span><span class="count count-hit">58</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-hit">64</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-hit">64</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">model</span><span class="keywords-coverage">3 of 3 keywords covered</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-full coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-hit">65</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-hit">65</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-full"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-hit">58</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-hit">58</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-hit">58</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-full"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-hit">7</span><span class="count count-hit">58</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-hit">7</span><span class="count count-hit">58</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-hit">7</span><span class="count count-hit">58</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-hit">65</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-hit">65</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">context_answer</span><span class="keywords-coverage">3 of 3 keywords covered</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-full coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-hit">70</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-hit">70</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-full"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-hit">63</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-hit">63</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-hit">63</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-full"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-hit">7</span><span class="count count-hit">63</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-hit">7</span><span class="count count-hit">63</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-hit">7</span><span class="count count-hit">63</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-hit">70</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-hit">70</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">tags</span><span class="keywords-coverage">3 of 3 keywords covered</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-full coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-hit">57</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-hit">57</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-full"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-hit">52</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-hit">52</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-hit">52</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-full"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-hit">5</span><span class="count count-hit">52</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-hit">5</span><span class="count count-hit">52</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-hit">5</span><span class="count count-hit">52</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-hit">57</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-hit">57</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">tag_match_mode</span><span class="keywords-coverage">1 of 1 keywords covered</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-full coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-hit">50</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-hit">50</span><span class="count count-na">n/a</span></span><span class="code-line">  "type": "string"</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-hit">50</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">include_untagged_fallback</span><span class="keywords-coverage">1 of 1 keywords covered</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-full"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-hit">59</span><span class="count count-hit">7</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-full"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-hit">59</span><span class="count count-hit">7</span></span><span class="code-line">  "type": "boolean"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-hit">59</span><span class="count count-hit">7</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">rerank</span><span class="keywords-coverage">1 of 1 keywords covered</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-full"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-hit">50</span><span class="count count-hit">6</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-full"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-hit">50</span><span class="count count-hit">6</span></span><span class="code-line">  "type": "boolean"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-hit">50</span><span class="count count-hit">6</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">rerank_top_k</span><span class="keywords-coverage">3 of 3 keywords covered</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-full"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-hit">45</span><span class="count count-hit">14</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-full"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-hit">47</span><span class="count count-hit">2</span></span><span class="code-line">  "maximum": 50,</span>
+  </div><div class="code-row coverage-full"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-hit">47</span><span class="count count-hit">2</span></span><span class="code-line">  "minimum": 1,</span>
+  </div><div class="code-row coverage-full"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-hit">49</span><span class="count count-hit">10</span></span><span class="code-line">  "type": "integer"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-hit">45</span><span class="count count-hit">14</span></span><span class="code-line">}</span>
+  </div></div></div>
+    <div class="location">
+        <div class="location-title">Responses</div>
+        <div class="location-metrics">
+        <span>seen</span>
+        <span>average</span>
+        </div>
+    </div>
+    <hr class="section-divider">
+    <div class="response-stats">
+    <div class="response-row success">
+        <div class="response-code">200</div>
+        <div class="response-desc">Successful Response</div>
+        <div class="response-metrics">
+            <span class="hit-count">14</span>
+            <span class="avg-time">1248.08ms</span>
+        </div>
+</div>
+    <div class="response-row success">
+        <div class="response-code">400</div>
+        <div class="response-desc">Missing ``question`` / ``query`` or empty value.</div>
+        <div class="response-metrics">
+            <span class="hit-count">75</span>
+            <span class="avg-time">26.92ms</span>
+        </div>
+</div>
+    <div class="response-row success">
+        <div class="response-code">422</div>
+        <div class="response-desc">Invalid query parameters (for example ``rerank_top_k`` out of range).</div>
+        <div class="response-metrics">
+            <span class="hit-count">27</span>
+            <span class="avg-time">27.62ms</span>
+        </div>
+</div>
+    <div class="response-row success">
+        <div class="response-code">500</div>
+        <div class="response-desc">Unhandled server error.</div>
+        <div class="response-metrics">
+            <span class="hit-count">2</span>
+            <span class="avg-time">373.84ms</span>
+        </div>
+</div>
+</div>
+    <div class="location">
+        <div class="location-title">Examples</div>
+        <div class="location-metrics" style="white-space: nowrap;">
+            5 of 5 covered
+        </div>
+    </div>
+    <hr class="section-divider"><div class="example-group-header">Query</div><div class="schema-viewer example"><div class="schema-viewer--tooltip">thread_id</div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">&nbsp;</span></div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">"default"</span></div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">&nbsp;</span></div></div><div class="schema-viewer example"><div class="schema-viewer--tooltip">tag_match_mode</div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">&nbsp;</span></div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">"any"</span></div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">&nbsp;</span></div></div><div class="schema-viewer example"><div class="schema-viewer--tooltip">include_untagged_fallback</div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">&nbsp;</span></div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">true</span></div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">&nbsp;</span></div></div><div class="schema-viewer example"><div class="schema-viewer--tooltip">rerank</div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">&nbsp;</span></div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">false</span></div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">&nbsp;</span></div></div><div class="schema-viewer example"><div class="schema-viewer--tooltip">rerank_top_k</div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">&nbsp;</span></div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">10</span></div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">&nbsp;</span></div></div>
+</div>
+</div>
+<div class="accordion">
+    <input type="checkbox" id="acc-toggle3">
+    <label for="acc-toggle3" class="accordion-header not-called">
+        <div class="method-endpoint">
+            <span class="method get">GET</span>
+            <span class="endpoint" data-search="/ask-stream" title="/ask-stream">/ask-stream</span>
+            
+        </div>
+        <div class="accordion-header--right">
+            <div class="param-stats">13</div>
+            <div class="keyword-stats">31</div>
+            <div class="coverage-cell">
+                <div class="progress-bar empty" style="--progress: 0%;"><div class="progress-fill"></div></div>
+                <div class="coverage-text">0.00%</div>
+                <svg class="accordion-arrow" width="12" height="12"><use href="#icon-arrow"/></svg>
+            </div>
+        </div>
+    </label>
+    <div class="accordion-content">
+        <div class="location">Query Parameters</div>
+        <hr class="section-divider"><div class="param-name"><span class="param-text">question</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content">
+      <div class="schema-header"><span class="header-spacer"></span><span class="header-labels"><span>valid</span><span>invalid</span></span></div><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-none"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">query</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-none"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">thread_id</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">lang</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-none"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">provider</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-none"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">model</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-none"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">clarification_response</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-none"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">context_answer</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-none"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">tags</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-none"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">tag_match_mode</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">include_untagged_fallback</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">  "type": "boolean"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">rerank</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">  "type": "boolean"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">rerank_top_k</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">  "maximum": 50,</span>
+  </div><div class="code-row coverage-none"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">  "minimum": 1,</span>
+  </div><div class="code-row coverage-none"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">  "type": "integer"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">}</span>
+  </div></div></div>
+    <div class="location">Expected Responses</div>
+    <hr class="section-divider">
+    <div class="response-stats uncovered">
+    <div class="response-row">
+        <div class="response-code">200</div>
+        <div class="response-desc">Successful Response</div>
+        <div class="response-metrics">—</div>
+    </div>
+    <div class="response-row">
+        <div class="response-code">400</div>
+        <div class="response-desc">Missing ``question`` / ``query`` or empty value.</div>
+        <div class="response-metrics">—</div>
+    </div>
+    <div class="response-row">
+        <div class="response-code">422</div>
+        <div class="response-desc">Invalid query parameters.</div>
+        <div class="response-metrics">—</div>
+    </div>
+</div>
+</div>
+</div>
+<div class="accordion">
+    <input type="checkbox" id="acc-toggle4">
+    <label for="acc-toggle4" class="accordion-header not-called">
+        <div class="method-endpoint">
+            <span class="method get">GET</span>
+            <span class="endpoint" data-search="/ask/stream" title="/ask/stream">/ask/stream</span>
+            
+        </div>
+        <div class="accordion-header--right">
+            <div class="param-stats">13</div>
+            <div class="keyword-stats">31</div>
+            <div class="coverage-cell">
+                <div class="progress-bar empty" style="--progress: 0%;"><div class="progress-fill"></div></div>
+                <div class="coverage-text">0.00%</div>
+                <svg class="accordion-arrow" width="12" height="12"><use href="#icon-arrow"/></svg>
+            </div>
+        </div>
+    </label>
+    <div class="accordion-content">
+        <div class="location">Query Parameters</div>
+        <hr class="section-divider"><div class="param-name"><span class="param-text">question</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content">
+      <div class="schema-header"><span class="header-spacer"></span><span class="header-labels"><span>valid</span><span>invalid</span></span></div><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-none"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">query</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-none"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">thread_id</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">lang</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-none"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">provider</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-none"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">model</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-none"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">clarification_response</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-none"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">context_answer</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-none"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">tags</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "anyOf": [</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-none"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    {</span>
+  </div><div class="code-row coverage-none"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">      "type": "null"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">tag_match_mode</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">  "type": "string"</span>
+  </div><div class="code-row coverage-none coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">include_untagged_fallback</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">  "type": "boolean"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">rerank</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">  "type": "boolean"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">}</span>
+  </div></div></div><div class="param-name"><span class="param-text">rerank_top_k</span><span class="keywords-coverage uncovered">no coverage data</span></div>
+    <div class="schema-viewer"><div class="schema-content"><div class="code-row coverage-none"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-none"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">  "maximum": 50,</span>
+  </div><div class="code-row coverage-none"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">  "minimum": 1,</span>
+  </div><div class="code-row coverage-none"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">  "type": "integer"</span>
+  </div><div class="code-row coverage-none"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-miss">0</span><span class="count count-miss">0</span></span><span class="code-line">}</span>
+  </div></div></div>
+    <div class="location">Expected Responses</div>
+    <hr class="section-divider">
+    <div class="response-stats uncovered">
+    <div class="response-row">
+        <div class="response-code">200</div>
+        <div class="response-desc">Successful Response</div>
+        <div class="response-metrics">—</div>
+    </div>
+    <div class="response-row">
+        <div class="response-code">400</div>
+        <div class="response-desc">Missing ``question`` / ``query`` or empty value.</div>
+        <div class="response-metrics">—</div>
+    </div>
+    <div class="response-row">
+        <div class="response-code">422</div>
+        <div class="response-desc">Invalid query parameters.</div>
+        <div class="response-metrics">—</div>
+    </div>
+</div>
+</div>
+</div>
+<div class="accordion" data-covered='covered'>
+    <input type="checkbox" id="acc-toggle5">
+    <label for="acc-toggle5" class="accordion-header">
+        <div class="method-endpoint">
+            <span class="method get">GET</span>
+            <span class="endpoint" data-search="/config" title="/config">/config</span>
+            
+        </div>
+        <div class="accordion-header--right">
+            <div class="param-stats">0</div>
+            <div class="keyword-stats">0</div>
+            <div class="coverage-cell">
+                <div class="progress-bar " style="--progress: 100%;"><div class="progress-fill"></div></div>
+                <div class="progress-text">-</div>
+                <svg class="accordion-arrow" width="12" height="12"><use href="#icon-arrow"/></svg>
+            </div>
+        </div>
+    </label>
+    <div class="accordion-content">
+    <div class="location">
+        <div class="location-title">Responses</div>
+        <div class="location-metrics">
+        <span>seen</span>
+        <span>average</span>
+        </div>
+    </div>
+    <hr class="section-divider">
+    <div class="response-stats">
+    <div class="response-row success">
+        <div class="response-code">200</div>
+        <div class="response-desc">Successful Response</div>
+        <div class="response-metrics">
+            <span class="hit-count">2</span>
+            <span class="avg-time">244.13ms</span>
+        </div>
+</div>
+</div>
+</div>
+</div>
+<div class="accordion" data-covered='covered'>
+    <input type="checkbox" id="acc-toggle6">
+    <label for="acc-toggle6" class="accordion-header">
+        <div class="method-endpoint">
+            <span class="method get">GET</span>
+            <span class="endpoint" data-search="/db-info" title="/db-info">/db-info</span>
+            
+        </div>
+        <div class="accordion-header--right">
+            <div class="param-stats">0</div>
+            <div class="keyword-stats">0</div>
+            <div class="coverage-cell">
+                <div class="progress-bar " style="--progress: 100%;"><div class="progress-fill"></div></div>
+                <div class="progress-text">-</div>
+                <svg class="accordion-arrow" width="12" height="12"><use href="#icon-arrow"/></svg>
+            </div>
+        </div>
+    </label>
+    <div class="accordion-content">
+    <div class="location">
+        <div class="location-title">Responses</div>
+        <div class="location-metrics">
+        <span>seen</span>
+        <span>average</span>
+        </div>
+    </div>
+    <hr class="section-divider">
+    <div class="response-stats">
+    <div class="response-row success">
+        <div class="response-code">200</div>
+        <div class="response-desc">Successful Response</div>
+        <div class="response-metrics">
+            <span class="hit-count">2</span>
+            <span class="avg-time">348.60ms</span>
+        </div>
+</div>
+</div>
+</div>
+</div>
+<div class="accordion" data-covered='covered'>
+    <input type="checkbox" id="acc-toggle7">
+    <label for="acc-toggle7" class="accordion-header">
+        <div class="method-endpoint">
+            <span class="method get">GET</span>
+            <span class="endpoint" data-search="/health" title="/health">/health</span>
+            
+        </div>
+        <div class="accordion-header--right">
+            <div class="param-stats">0</div>
+            <div class="keyword-stats">0</div>
+            <div class="coverage-cell">
+                <div class="progress-bar " style="--progress: 100%;"><div class="progress-fill"></div></div>
+                <div class="progress-text">-</div>
+                <svg class="accordion-arrow" width="12" height="12"><use href="#icon-arrow"/></svg>
+            </div>
+        </div>
+    </label>
+    <div class="accordion-content">
+    <div class="location">
+        <div class="location-title">Responses</div>
+        <div class="location-metrics">
+        <span>seen</span>
+        <span>average</span>
+        </div>
+    </div>
+    <hr class="section-divider">
+    <div class="response-stats">
+    <div class="response-row success">
+        <div class="response-code">200</div>
+        <div class="response-desc">Successful Response</div>
+        <div class="response-metrics">
+            <span class="hit-count">2</span>
+            <span class="avg-time">41.31ms</span>
+        </div>
+</div>
+</div>
+</div>
+</div>
+<div class="accordion" data-covered='covered'>
+    <input type="checkbox" id="acc-toggle8">
+    <label for="acc-toggle8" class="accordion-header">
+        <div class="method-endpoint">
+            <span class="method get">GET</span>
+            <span class="endpoint" data-search="/model-selection" title="/model-selection">/model-selection</span>
+            
+        </div>
+        <div class="accordion-header--right">
+            <div class="param-stats">0</div>
+            <div class="keyword-stats">0</div>
+            <div class="coverage-cell">
+                <div class="progress-bar " style="--progress: 100%;"><div class="progress-fill"></div></div>
+                <div class="progress-text">-</div>
+                <svg class="accordion-arrow" width="12" height="12"><use href="#icon-arrow"/></svg>
+            </div>
+        </div>
+    </label>
+    <div class="accordion-content">
+    <div class="location">
+        <div class="location-title">Responses</div>
+        <div class="location-metrics">
+        <span>seen</span>
+        <span>average</span>
+        </div>
+    </div>
+    <hr class="section-divider">
+    <div class="response-stats">
+    <div class="response-row success">
+        <div class="response-code">200</div>
+        <div class="response-desc">Successful Response</div>
+        <div class="response-metrics">
+            <span class="hit-count">2</span>
+            <span class="avg-time">257.22ms</span>
+        </div>
+</div>
+</div>
+</div>
+</div>
+<div class="accordion" data-covered='covered'>
+    <input type="checkbox" id="acc-toggle9">
+    <label for="acc-toggle9" class="accordion-header">
+        <div class="method-endpoint">
+            <span class="method post">POST</span>
+            <span class="endpoint" data-search="/model-selection" title="/model-selection">/model-selection</span>
+            
+        </div>
+        <div class="accordion-header--right">
+            <div class="param-stats">1</div>
+            <div class="keyword-stats">11</div>
+            <div class="coverage-cell">
+                <div class="progress-bar green" style="--progress: 100%;"><div class="progress-fill"></div></div>
+                <div class="progress-text">100.00%</div>
+                <svg class="accordion-arrow" width="12" height="12"><use href="#icon-arrow"/></svg>
+            </div>
+        </div>
+    </label>
+    <div class="accordion-content">
+        <div class="location">Body</div>
+        <hr class="section-divider"><div class="param-name"><span class="param-text">application/json</span><span class="keywords-coverage">11 of 11 keywords covered</span></div><div class="inlined-component"><div class="inlined-component-header"><svg class="component-icon" width="14" height="14"><use href="#icon-ref"/></svg><span class="component-name">ModelSelection</span></div>
+    <div class="schema-viewer"><div class="schema-content">
+      <div class="schema-header"><span class="header-spacer"></span><span class="header-labels"><span>valid</span><span>invalid</span></span></div><div class="code-row coverage-full"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-hit">11</span><span class="count count-hit">24</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-full"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-hit">13</span><span class="count count-hit">13</span></span><span class="code-line">  "properties": {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-hit">17</span><span class="count count-hit">4</span></span><span class="code-line">    "lock": {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">4</span><span class="coverage-counts"><span class="count count-hit">17</span><span class="count count-hit">4</span></span><span class="code-line">      "anyOf": [</span>
+  </div><div class="code-row coverage-full"><span class="line-number">5</span><span class="coverage-counts"><span class="count count-hit">4</span><span class="count count-hit">17</span></span><span class="code-line">        {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">6</span><span class="coverage-counts"><span class="count count-hit">4</span><span class="count count-hit">17</span></span><span class="code-line">          "type": "boolean"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">7</span><span class="coverage-counts"><span class="count count-hit">4</span><span class="count count-hit">17</span></span><span class="code-line">        },</span>
+  </div><div class="code-row coverage-full"><span class="line-number">8</span><span class="coverage-counts"><span class="count count-hit">13</span><span class="count count-hit">8</span></span><span class="code-line">        {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">9</span><span class="coverage-counts"><span class="count count-hit">13</span><span class="count count-hit">8</span></span><span class="code-line">          "type": "null"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">10</span><span class="coverage-counts"><span class="count count-hit">13</span><span class="count count-hit">8</span></span><span class="code-line">        }</span>
+  </div><div class="code-row coverage-full"><span class="line-number">11</span><span class="coverage-counts"><span class="count count-hit">17</span><span class="count count-hit">4</span></span><span class="code-line">      ],</span>
+  </div><div class="code-row coverage-full"><span class="line-number">12</span><span class="coverage-counts"><span class="count count-hit">17</span><span class="count count-hit">4</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-full"><span class="line-number">13</span><span class="coverage-counts"><span class="count count-hit">17</span><span class="count count-hit">4</span></span><span class="code-line">    "model": {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">14</span><span class="coverage-counts"><span class="count count-hit">17</span><span class="count count-hit">4</span></span><span class="code-line">      "anyOf": [</span>
+  </div><div class="code-row coverage-full"><span class="line-number">15</span><span class="coverage-counts"><span class="count count-hit">2</span><span class="count count-hit">19</span></span><span class="code-line">        {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">16</span><span class="coverage-counts"><span class="count count-hit">2</span><span class="count count-hit">19</span></span><span class="code-line">          "type": "string"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">17</span><span class="coverage-counts"><span class="count count-hit">2</span><span class="count count-hit">19</span></span><span class="code-line">        },</span>
+  </div><div class="code-row coverage-full"><span class="line-number">18</span><span class="coverage-counts"><span class="count count-hit">15</span><span class="count count-hit">6</span></span><span class="code-line">        {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">19</span><span class="coverage-counts"><span class="count count-hit">15</span><span class="count count-hit">6</span></span><span class="code-line">          "type": "null"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">20</span><span class="coverage-counts"><span class="count count-hit">15</span><span class="count count-hit">6</span></span><span class="code-line">        }</span>
+  </div><div class="code-row coverage-full"><span class="line-number">21</span><span class="coverage-counts"><span class="count count-hit">17</span><span class="count count-hit">4</span></span><span class="code-line">      ],</span>
+  </div><div class="code-row coverage-full"><span class="line-number">22</span><span class="coverage-counts"><span class="count count-hit">17</span><span class="count count-hit">4</span></span><span class="code-line">    },</span>
+  </div><div class="code-row coverage-full"><span class="line-number">23</span><span class="coverage-counts"><span class="count count-hit">19</span><span class="count count-hit">5</span></span><span class="code-line">    "provider": {</span>
+  </div><div class="code-row coverage-full"><span class="line-number">24</span><span class="coverage-counts"><span class="count count-hit">19</span><span class="count count-hit">5</span></span><span class="code-line">      "type": "string"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">25</span><span class="coverage-counts"><span class="count count-hit">19</span><span class="count count-hit">5</span></span><span class="code-line">    }</span>
+  </div><div class="code-row coverage-full"><span class="line-number">26</span><span class="coverage-counts"><span class="count count-hit">13</span><span class="count count-hit">13</span></span><span class="code-line">  },</span>
+  </div><div class="code-row coverage-full"><span class="line-number">27</span><span class="coverage-counts"><span class="count count-hit">24</span><span class="count count-hit">2</span></span><span class="code-line">  "required": [</span>
+  </div><div class="code-row coverage-full"><span class="line-number">28</span><span class="coverage-counts"><span class="count count-hit">24</span><span class="count count-hit">2</span></span><span class="code-line">    "provider"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">29</span><span class="coverage-counts"><span class="count count-hit">24</span><span class="count count-hit">2</span></span><span class="code-line">  ],</span>
+  </div><div class="code-row coverage-full"><span class="line-number">30</span><span class="coverage-counts"><span class="count count-hit">26</span><span class="count count-hit">9</span></span><span class="code-line">  "type": "object"</span>
+  </div><div class="code-row coverage-full"><span class="line-number">31</span><span class="coverage-counts"><span class="count count-hit">11</span><span class="count count-hit">24</span></span><span class="code-line">}</span>
+  </div></div></div></div>
+    <div class="location">
+        <div class="location-title">Responses</div>
+        <div class="location-metrics">
+        <span>seen</span>
+        <span>average</span>
+        </div>
+    </div>
+    <hr class="section-divider">
+    <div class="response-stats">
+    <div class="response-row success">
+        <div class="response-code">200</div>
+        <div class="response-desc">Successful Response</div>
+        <div class="response-metrics">
+            <span class="hit-count">3</span>
+            <span class="avg-time">32.85ms</span>
+        </div>
+</div>
+    <div class="response-row success">
+        <div class="response-code">422</div>
+        <div class="response-desc">Validation Error</div>
+        <div class="response-metrics">
+            <span class="hit-count">23</span>
+            <span class="avg-time">28.96ms</span>
+        </div>
+</div><div class="response-subgroup">Undocumented <span class="location-hint">(not in spec)</span></div>
+    <div class="response-row error">
+        <div class="response-code">403</div>
+        <div class="response-desc">Forbidden</div>
+        <div class="response-metrics">
+            <span class="hit-count">9</span>
+            <span class="avg-time">40.86ms</span>
+        </div>
+    </div>
+    <div class="response-row error">
+        <div class="response-code">400</div>
+        <div class="response-desc">Bad Request</div>
+        <div class="response-metrics">
+            <span class="hit-count">3</span>
+            <span class="avg-time">27.00ms</span>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+<div class="accordion" data-covered='covered'>
+    <input type="checkbox" id="acc-toggle10">
+    <label for="acc-toggle10" class="accordion-header">
+        <div class="method-endpoint">
+            <span class="method get">GET</span>
+            <span class="endpoint" data-search="/privacy" title="/privacy">/privacy</span>
+            
+        </div>
+        <div class="accordion-header--right">
+            <div class="param-stats">0</div>
+            <div class="keyword-stats">0</div>
+            <div class="coverage-cell">
+                <div class="progress-bar " style="--progress: 100%;"><div class="progress-fill"></div></div>
+                <div class="progress-text">-</div>
+                <svg class="accordion-arrow" width="12" height="12"><use href="#icon-arrow"/></svg>
+            </div>
+        </div>
+    </label>
+    <div class="accordion-content">
+    <div class="location">
+        <div class="location-title">Responses</div>
+        <div class="location-metrics">
+        <span>seen</span>
+        <span>average</span>
+        </div>
+    </div>
+    <hr class="section-divider">
+    <div class="response-stats">
+    <div class="response-row success">
+        <div class="response-code">200</div>
+        <div class="response-desc">Successful Response</div>
+        <div class="response-metrics">
+            <span class="hit-count">2</span>
+            <span class="avg-time">25.63ms</span>
+        </div>
+</div>
+</div>
+</div>
+</div>
+<div class="accordion" data-covered='covered'>
+    <input type="checkbox" id="acc-toggle11">
+    <label for="acc-toggle11" class="accordion-header">
+        <div class="method-endpoint">
+            <span class="method get">GET</span>
+            <span class="endpoint" data-search="/test-db-search" title="/test-db-search">/test-db-search</span>
+            
+        </div>
+        <div class="accordion-header--right">
+            <div class="param-stats">1</div>
+            <div class="keyword-stats">1</div>
+            <div class="coverage-cell">
+                <div class="progress-bar green" style="--progress: 100%;"><div class="progress-fill"></div></div>
+                <div class="progress-text">100.00%</div>
+                <svg class="accordion-arrow" width="12" height="12"><use href="#icon-arrow"/></svg>
+            </div>
+        </div>
+    </label>
+    <div class="accordion-content">
+        <div class="location">Query Parameters</div>
+        <hr class="section-divider"><div class="param-name"><span class="param-text">query</span><span class="keywords-coverage">1 of 1 keywords covered</span></div>
+    <div class="schema-viewer"><div class="schema-content">
+      <div class="schema-header"><span class="header-spacer"></span><span class="header-labels"><span>valid</span><span>invalid</span></span></div><div class="code-row coverage-full coverage-constrained"><span class="line-number">1</span><span class="coverage-counts"><span class="count count-hit">10</span><span class="count count-na">n/a</span></span><span class="code-line">{</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">2</span><span class="coverage-counts"><span class="count count-hit">10</span><span class="count count-na">n/a</span></span><span class="code-line">  "type": "string"</span>
+  </div><div class="code-row coverage-full coverage-constrained"><span class="line-number">3</span><span class="coverage-counts"><span class="count count-hit">10</span><span class="count count-na">n/a</span></span><span class="code-line">}</span>
+  </div></div></div>
+    <div class="location">
+        <div class="location-title">Responses</div>
+        <div class="location-metrics">
+        <span>seen</span>
+        <span>average</span>
+        </div>
+    </div>
+    <hr class="section-divider">
+    <div class="response-stats">
+    <div class="response-row success">
+        <div class="response-code">200</div>
+        <div class="response-desc">Successful Response</div>
+        <div class="response-metrics">
+            <span class="hit-count">13</span>
+            <span class="avg-time">1059.95ms</span>
+        </div>
+</div>
+    <div class="response-row error">
+        <div class="response-code">422</div>
+        <div class="response-desc">Validation Error</div>
+        <div class="response-metrics">
+            <span class="hit-count">0</span>
+            <span class="avg-time">-</span>
+        </div>
+</div>
+</div>
+    <div class="location">
+        <div class="location-title">Examples</div>
+        <div class="location-metrics" style="white-space: nowrap;">
+            1 of 1 covered
+        </div>
+    </div>
+    <hr class="section-divider"><div class="example-group-header">Query</div><div class="schema-viewer example"><div class="schema-viewer--tooltip">query</div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">&nbsp;</span></div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">"community resources"</span></div><div class="code-row coverage-full"><span class="line-number"></span><span class="code-line">&nbsp;</span></div></div>
+</div>
+</div></div></div>
+<footer class="report-footer">
+    <a href="https://forms.gle/53Zcpt4NxbvmXbwFA" target="_blank" rel="noopener">Help improve TraceCov: Share feedback</a>
+</footer>
+<script>document.addEventListener("DOMContentLoaded", function() {
+  const searchInput = document.getElementById("search-input");
+  const clearBtn = document.querySelector(".clear-btn");
+  const hideBtn = document.getElementById("hide-covered");
+  const svgCheck = document.getElementById("svgCheck");
+  const svgNotCheck = document.getElementById("svgNotCheck");
+  const toggleAllBtn = document.getElementById("toggle-all");
+  const toggleText = document.getElementById("toggle-text");
+  const toggleIcon = document.getElementById("toggle-icon");
+
+  // Cache accordion data once at startup
+  const accordionData = [];
+  const checkboxes = [];
+  document.querySelectorAll(".accordion").forEach(accordion => {
+    const checkbox = accordion.querySelector("input[type='checkbox']");
+    const endpointEl = accordion.querySelector(".method-endpoint [data-search]");
+    const isCovered = accordion.dataset.covered === "covered";
+    const searchValue = endpointEl ? endpointEl.getAttribute("data-search").toLowerCase() : "";
+
+    accordionData.push({ accordion, checkbox, searchValue, isCovered });
+    if (checkbox) checkboxes.push(checkbox);
+  });
+
+  let expanded = false;
+  let coveredHidden = false;
+
+  toggleAllBtn.addEventListener("click", function() {
+    expanded = !expanded;
+    checkboxes.forEach(cb => cb.checked = expanded);
+    toggleText.textContent = expanded ? "Collapse all" : "Expand all";
+    toggleIcon.classList.toggle("rotated", expanded);
+  });
+
+  // Debounced search
+  let searchTimeout;
+  searchInput.addEventListener("input", function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      const query = searchInput.value.trim().toLowerCase();
+      accordionData.forEach(({ accordion, searchValue, isCovered }) => {
+        const matchesSearch = query === "" || searchValue.includes(query);
+        const matchesCovered = !coveredHidden || !isCovered;
+        accordion.style.display = matchesSearch && matchesCovered ? "" : "none";
+      });
+    }, 150);
+  });
+
+  clearBtn.addEventListener("click", function() {
+    searchInput.value = "";
+    searchInput.dispatchEvent(new Event("input"));
+  });
+
+  hideBtn.addEventListener("click", function() {
+    coveredHidden = !coveredHidden;
+    const query = searchInput.value.trim().toLowerCase();
+
+    accordionData.forEach(({ accordion, searchValue, isCovered }) => {
+      const matchesSearch = query === "" || searchValue.includes(query);
+      const matchesCovered = !coveredHidden || !isCovered;
+      accordion.style.display = matchesSearch && matchesCovered ? "" : "none";
+    });
+
+    svgCheck.style.display = coveredHidden ? "inline-block" : "none";
+    svgNotCheck.style.display = coveredHidden ? "none" : "inline-block";
+  });
+
+  // Suggestion copy buttons
+  document.querySelectorAll(".suggestion-copy").forEach(btn => {
+    btn.addEventListener("click", async function() {
+      const value = this.getAttribute("data-value");
+      try {
+        await navigator.clipboard.writeText(value);
+        this.classList.add("copied");
+        setTimeout(() => this.classList.remove("copied"), 1500);
+      } catch (err) {
+        console.error("Failed to copy:", err);
+      }
+    });
+  });
+
+  // Suggestion expand buttons
+  document.querySelectorAll(".suggestion-expand").forEach(btn => {
+    btn.addEventListener("click", function() {
+      const container = this.closest(".suggestion-value-container");
+      const wrapper = container.querySelector(".suggestion-value-wrapper");
+      const full = container.querySelector(".suggestion-value-full");
+      if (wrapper && full) {
+        const isExpanded = full.style.display !== "none";
+        wrapper.style.display = isExpanded ? "" : "none";
+        full.style.display = isExpanded ? "none" : "";
+        this.classList.toggle("expanded", !isExpanded);
+        // Update text while preserving SVG
+        const textNode = Array.from(this.childNodes).find(n => n.nodeType === Node.TEXT_NODE);
+        if (textNode) textNode.textContent = isExpanded ? "Show more" : "Show less";
+      }
+    });
+  });
+});
+</script></body></html>

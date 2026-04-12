@@ -1,6 +1,8 @@
 """Configuration and model-selection endpoints for the local agent runtime."""
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
+
+from src.agent.openapi_examples import AGENT_MODEL_SELECTION_BODY
 
 from .. import main as agent_main
 
@@ -22,7 +24,9 @@ def get_model_selection():
 
 
 @router.post("/model-selection")
-def set_model_selection(selection: agent_main.ModelSelection):
+def set_model_selection(
+    selection: agent_main.ModelSelection = Body(openapi_examples=AGENT_MODEL_SELECTION_BODY),
+):
     """Persist a validated local model selection when the runtime is unlocked."""
     if agent_main.CURRENT_SELECTION.get("locked"):
         raise agent_main.HTTPException(status_code=403, detail="Model selection is locked")

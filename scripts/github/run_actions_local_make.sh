@@ -47,7 +47,7 @@ echo "quality-gate.yml checks are included in \`make ci\` (via quality-full → 
 section "env-sync-contract.yml"
 (
 	cd backend
-	SKIP_AGENT_MAIN_IMPORT=true uv run python -m pytest tests/contracts/test_env_sync_contract.py -v --tb=short -m contract
+	SKIP_AGENT_MAIN_IMPORT=true uv run python -m pytest tests/contracts/test_env_sync_contract.py tests/contracts/test_env_sync_github_actions_bundle.py -v --tb=short -m contract
 )
 
 section "render-deploy.yml (validate env + gateway profile)"

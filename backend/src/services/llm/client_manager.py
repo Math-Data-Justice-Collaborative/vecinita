@@ -18,6 +18,32 @@ from langchain_core.messages import AIMessage, BaseMessage, SystemMessage
 
 logger = logging.getLogger(__name__)
 
+# Query strings like model=null (literal) must not be forwarded to upstream chat APIs.
+_QUERY_STRING_SENTINELS = frozenset({"", "null", "none", "undefined"})
+
+
+def coerce_optional_query_str(value: str | None) -> str | None:
+    """Treat common sentinel query values as absent (Schemathesis / clients send model=null, etc.)."""
+    if value is None:
+        return None
+    s = str(value).strip()
+    if not s or s.lower() in _QUERY_STRING_SENTINELS:
+        return None
+    return s
+
+
+def _coerce_optional_model_id(model: str | None) -> str | None:
+    """Return a model id safe to send upstream, or None to use the default selection."""
+    s = coerce_optional_query_str(model)
+    if s is None:
+        return None
+    if len(s) > 200:
+        return None
+    if any(ord(c) < 32 for c in s):
+        return None
+    return s
+
+
 ChatOllama = None
 _CHATOLLAMA_IMPORT_ERROR: Exception | None = None
 
@@ -259,7 +285,10 @@ class LocalLLMClientManager:
                 requested,
             )
             return "ollama", self.current_model()
-        return "ollama", model or self.current_model()
+        clean = _coerce_optional_model_id(model)
+        if clean is None:
+            return "ollama", self.current_model()
+        return "ollama", clean
 
     def uses_modal_native_chat_api(self) -> bool:
         if not (self.use_native_api and self.base_url):

@@ -13,8 +13,10 @@ on:
       - ".env.staging.render.example"
       - ".env.local.example"
       - ".github/workflows/**"
+      - "scripts/env_sync.py"
       - "scripts/github/validate_render_env.py"
       - "scripts/github/validate_render_env_parity.py"
+      - "backend/tests/contracts/test_env_sync_github_actions_bundle.py"
       - "services/**/config.py"
       - "services/**/shared_config/**"
       - "backend/src/utils/render_env_contract.py"
@@ -27,8 +29,10 @@ on:
       - ".env.staging.render.example"
       - ".env.local.example"
       - ".github/workflows/**"
+      - "scripts/env_sync.py"
       - "scripts/github/validate_render_env.py"
       - "scripts/github/validate_render_env_parity.py"
+      - "backend/tests/contracts/test_env_sync_github_actions_bundle.py"
       - "services/**/config.py"
       - "services/**/shared_config/**"
       - "backend/src/utils/render_env_contract.py"
@@ -59,4 +63,4 @@ jobs:
       - name: Run env sync contract tests
         env:
           SKIP_AGENT_MAIN_IMPORT: "true"
-        run: uv run python -m pytest tests/contracts/test_env_sync_contract.py -v --tb=short -m contract
+        run: uv run python -m pytest tests/contracts/test_env_sync_contract.py tests/contracts/test_env_sync_github_actions_bundle.py -v --tb=short -m contract

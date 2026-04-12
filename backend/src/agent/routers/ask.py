@@ -1,6 +1,24 @@
 """Question-answering endpoints for deterministic and streaming agent responses."""
 
+from typing import Literal
+
 from fastapi import APIRouter
+
+from src.agent.openapi_examples import (
+    AGENT_ASK_CLARIFICATION_RESPONSE,
+    AGENT_ASK_CONTEXT_ANSWER,
+    AGENT_ASK_FLAG_FALSE,
+    AGENT_ASK_FLAG_TRUE,
+    AGENT_ASK_LANG,
+    AGENT_ASK_MODEL,
+    AGENT_ASK_PROVIDER,
+    AGENT_ASK_QUERY_ALIAS,
+    AGENT_ASK_QUESTION,
+    AGENT_ASK_RERANK_TOP_K,
+    AGENT_ASK_TAG_MATCH_MODE,
+    AGENT_ASK_TAGS,
+    AGENT_ASK_THREAD_ID,
+)
 
 from .. import main as agent_main
 
@@ -9,21 +27,83 @@ router = APIRouter()
 
 @router.get("/ask")
 async def ask_question(
-    question: str | None = agent_main.Query(default=None),
-    query: str | None = agent_main.Query(default=None),
-    thread_id: str = "default",
-    lang: str | None = agent_main.Query(default=None),
-    provider: str | None = agent_main.Query(default=None),
-    model: str | None = agent_main.Query(default=None),
-    context_answer: str | None = agent_main.Query(default=None),
-    tags: str | None = agent_main.Query(default=None, description="Comma-separated metadata tags"),
-    tag_match_mode: str = agent_main.Query(default="any", description="Tag match mode: any|all"),
-    include_untagged_fallback: bool = agent_main.Query(default=True),
-    rerank: bool = agent_main.Query(default=False),
-    rerank_top_k: int = agent_main.Query(default=10, ge=1, le=50),
+    question: str | None = agent_main.Query(
+        default=None,
+        description="Primary question text (use ``query`` only as a legacy alias).",
+        openapi_examples=AGENT_ASK_QUESTION,
+    ),
+    query: str | None = agent_main.Query(
+        default=None,
+        description="Legacy alias for ``question`` when ``question`` is omitted.",
+        openapi_examples=AGENT_ASK_QUERY_ALIAS,
+    ),
+    thread_id: str = agent_main.Query(
+        default="default",
+        description="Conversation thread id for correlating follow-ups.",
+        openapi_examples=AGENT_ASK_THREAD_ID,
+    ),
+    lang: str | None = agent_main.Query(
+        default=None,
+        description="Force language (e.g. en, es) instead of auto-detection.",
+        openapi_examples=AGENT_ASK_LANG,
+    ),
+    provider: str | None = agent_main.Query(
+        default=None,
+        description="LLM provider override (ollama-compatible stack).",
+        openapi_examples=AGENT_ASK_PROVIDER,
+    ),
+    model: str | None = agent_main.Query(
+        default=None,
+        description="Model id override; must exist in ``GET /config`` when set.",
+        openapi_examples=AGENT_ASK_MODEL,
+    ),
+    context_answer: str | None = agent_main.Query(
+        default=None,
+        description="Prior assistant answer for short contextual follow-ups.",
+        openapi_examples=AGENT_ASK_CONTEXT_ANSWER,
+    ),
+    tags: str | None = agent_main.Query(
+        default=None,
+        description="Comma-separated metadata tags for retrieval filtering.",
+        openapi_examples=AGENT_ASK_TAGS,
+    ),
+    tag_match_mode: Literal["any", "all"] = agent_main.Query(
+        default="any",
+        description="Tag match mode: any|all",
+        openapi_examples=AGENT_ASK_TAG_MATCH_MODE,
+    ),
+    include_untagged_fallback: bool = agent_main.Query(
+        default=True,
+        description="When tag filter is active, include untagged documents as fallback.",
+        openapi_examples=AGENT_ASK_FLAG_TRUE,
+    ),
+    rerank: bool = agent_main.Query(
+        default=False,
+        description="Enable reranking of retrieved chunks.",
+        openapi_examples=AGENT_ASK_FLAG_FALSE,
+    ),
+    rerank_top_k: int = agent_main.Query(
+        default=10,
+        ge=1,
+        le=50,
+        description="Number of chunks to retain after reranking.",
+        openapi_examples=AGENT_ASK_RERANK_TOP_K,
+    ),
 ):
     """Handle non-streaming Q&A requests using intent-gated deterministic RAG."""
     started_at = agent_main.time.perf_counter()
+
+    question, query, lang, provider, model, tags, context_answer = (
+        agent_main._coerce_ask_query_parameters(
+            question=question,
+            query=query,
+            lang=lang,
+            provider=provider,
+            model=model,
+            tags=tags,
+            context_answer=context_answer,
+        )
+    )
 
     if question is None and query is not None:
         question = query
@@ -147,12 +227,12 @@ async def ask_question(
                 if static_faq_answer:
                     answer = static_faq_answer
                 else:
-                    fallback_llm = agent_main._get_llm_without_tools(provider, model)
-                    quick_prompt = f"Respond briefly and naturally in {'Spanish' if lang == 'es' else 'English'}: {effective_question}"
-                    llm_started_at = agent_main.time.perf_counter()
-                    raw = fallback_llm.invoke([agent_main.HumanMessage(content=quick_prompt)])
-                    llm_ms = int((agent_main.time.perf_counter() - llm_started_at) * 1000)
-                    answer = raw.content if hasattr(raw, "content") else str(raw)
+                    answer, llm_ms = agent_main._non_answer_brief_llm_reply(
+                        provider=provider,
+                        model=model,
+                        lang=lang,
+                        effective_question=effective_question,
+                    )
                 sources: list[dict] = []
             else:
                 agent_main.logger.info(
@@ -250,22 +330,88 @@ async def ask_question(
 
 @router.get("/ask-stream")
 async def ask_question_stream(
-    question: str | None = agent_main.Query(default=None),
-    query: str | None = agent_main.Query(default=None),
-    thread_id: str = "default",
-    lang: str | None = agent_main.Query(default=None),
-    provider: str | None = agent_main.Query(default=None),
-    model: str | None = agent_main.Query(default=None),
-    clarification_response: str | None = agent_main.Query(default=None),
-    context_answer: str | None = agent_main.Query(default=None),
-    tags: str | None = agent_main.Query(default=None, description="Comma-separated metadata tags"),
-    tag_match_mode: str = agent_main.Query(default="any", description="Tag match mode: any|all"),
-    include_untagged_fallback: bool = agent_main.Query(default=True),
-    rerank: bool = agent_main.Query(default=False),
-    rerank_top_k: int = agent_main.Query(default=10, ge=1, le=50),
+    question: str | None = agent_main.Query(
+        default=None,
+        description="Primary question text (use ``query`` only as a legacy alias).",
+        openapi_examples=AGENT_ASK_QUESTION,
+    ),
+    query: str | None = agent_main.Query(
+        default=None,
+        description="Legacy alias for ``question`` when ``question`` is omitted.",
+        openapi_examples=AGENT_ASK_QUERY_ALIAS,
+    ),
+    thread_id: str = agent_main.Query(
+        default="default",
+        description="Conversation thread id for correlating follow-ups.",
+        openapi_examples=AGENT_ASK_THREAD_ID,
+    ),
+    lang: str | None = agent_main.Query(
+        default=None,
+        description="Force language (e.g. en, es) instead of auto-detection.",
+        openapi_examples=AGENT_ASK_LANG,
+    ),
+    provider: str | None = agent_main.Query(
+        default=None,
+        description="LLM provider override (ollama-compatible stack).",
+        openapi_examples=AGENT_ASK_PROVIDER,
+    ),
+    model: str | None = agent_main.Query(
+        default=None,
+        description="Model id override; must exist in ``GET /config`` when set.",
+        openapi_examples=AGENT_ASK_MODEL,
+    ),
+    clarification_response: str | None = agent_main.Query(
+        default=None,
+        description="Reserved for future clarification flows.",
+        openapi_examples=AGENT_ASK_CLARIFICATION_RESPONSE,
+    ),
+    context_answer: str | None = agent_main.Query(
+        default=None,
+        description="Prior assistant answer for short contextual follow-ups.",
+        openapi_examples=AGENT_ASK_CONTEXT_ANSWER,
+    ),
+    tags: str | None = agent_main.Query(
+        default=None,
+        description="Comma-separated metadata tags for retrieval filtering.",
+        openapi_examples=AGENT_ASK_TAGS,
+    ),
+    tag_match_mode: Literal["any", "all"] = agent_main.Query(
+        default="any",
+        description="Tag match mode: any|all",
+        openapi_examples=AGENT_ASK_TAG_MATCH_MODE,
+    ),
+    include_untagged_fallback: bool = agent_main.Query(
+        default=True,
+        description="When tag filter is active, include untagged documents as fallback.",
+        openapi_examples=AGENT_ASK_FLAG_TRUE,
+    ),
+    rerank: bool = agent_main.Query(
+        default=False,
+        description="Enable reranking of retrieved chunks.",
+        openapi_examples=AGENT_ASK_FLAG_FALSE,
+    ),
+    rerank_top_k: int = agent_main.Query(
+        default=10,
+        ge=1,
+        le=50,
+        description="Number of chunks to retain after reranking.",
+        openapi_examples=AGENT_ASK_RERANK_TOP_K,
+    ),
 ):
     """Stream agent progress and the final answer as SSE events."""
     del clarification_response
+
+    question, query, lang, provider, model, tags, context_answer = (
+        agent_main._coerce_ask_query_parameters(
+            question=question,
+            query=query,
+            lang=lang,
+            provider=provider,
+            model=model,
+            tags=tags,
+            context_answer=context_answer,
+        )
+    )
 
     if question is None and query is not None:
         question = query

@@ -17,6 +17,7 @@ from urllib.parse import urlparse
 from pydantic import BaseModel, Field
 
 from src.services.llm import LocalLLMClientManager
+from src.utils.database_url import get_resolved_database_url
 from src.utils.resource_metadata import infer_resource_language_metadata
 from src.utils.tags import build_bilingual_tag_fields, infer_tags_from_text, normalize_tags
 
@@ -92,7 +93,7 @@ class DatabaseUploader:
         self._llm_structured_output_warned = False
         self._source_tag_cache: dict[str, dict[str, Any]] = {}
         self._known_tag_cache: list[str] | None = None
-        self.postgres_database_url = (os.getenv("DATABASE_URL") or "").strip()
+        self.postgres_database_url = get_resolved_database_url()
         self.vector_sync_target = (os.getenv("VECTOR_SYNC_TARGET") or "postgres").strip().lower()
         if self.vector_sync_target != "postgres":
             self.vector_sync_target = "postgres"
@@ -500,7 +501,7 @@ class DatabaseUploader:
             return
 
         if not self.postgres_database_url:
-            log.warning("Postgres sync unavailable: missing DATABASE_URL")
+            log.warning("Postgres sync unavailable: missing DATABASE_URL (or DB_URL)")
             return
         if not POSTGRES_AVAILABLE:
             log.warning("Postgres sync unavailable: psycopg2 dependency is not installed")
@@ -555,7 +556,7 @@ class DatabaseUploader:
                 log.warning("Postgres sync unavailable; skipping write in degraded mode")
                 return False
             raise RuntimeError(
-                "Postgres sync is configured but DATABASE_URL/psycopg2 is unavailable"
+                "Postgres sync is configured but DATABASE_URL|DB_URL/psycopg2 is unavailable"
             )
 
         sql = (

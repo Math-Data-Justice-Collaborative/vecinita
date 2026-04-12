@@ -86,10 +86,11 @@ Frontend and backend deploy together from Render’s perspective when each servi
 ## Manual Rollout
 
 1. Create or update Render services from `render.staging.yaml` and `render.yaml`; apply blueprints so **Auto-Deploy** is **After CI Checks Pass**.
-2. Configure GitHub environments and `RENDER_API_KEY` + service IDs if you use **deploy-wait** in **Render Post-Deploy**.
-3. Open a PR to `main` and verify checks; confirm staging services deploy on Render after checks pass.
-4. Ensure the production gateway service uses Docker runtime and `backend/Dockerfile.gateway`.
-5. Merge to `main` and verify Render deploys; optionally confirm **Render Post-Deploy** **deploy-wait** if secrets are set.
+2. **Credentials:** Populate the Render Environment Group (or each service) using the **same keys** as [`.env.prod.render.example`](../../.env.prod.render.example) / [`.env.staging.render.example`](../../.env.staging.render.example) — copy values from your gitignored `.env` / `.env.prod.render` / `.env.staging.render`, not ad-hoc names. See [RENDER_SHARED_ENV_CONTRACT.md](RENDER_SHARED_ENV_CONTRACT.md) (*Credentials parity with local `.env`*).
+3. Configure GitHub environments and `RENDER_API_KEY` + service IDs if you use **deploy-wait** in **Render Post-Deploy**.
+4. Open a PR to `main` and verify checks; confirm staging services deploy on Render after checks pass.
+5. Ensure the production gateway service uses Docker runtime and `backend/Dockerfile.gateway`.
+6. Merge to `main` and verify Render deploys; optionally confirm **Render Post-Deploy** **deploy-wait** if secrets are set.
 
 ## Local sync: `gh` CLI and Render API (`scripts/env_sync.py`)
 
@@ -103,7 +104,14 @@ Prerequisites:
 
 ### GitHub Actions secrets
 
-Default: only keys starting with `RENDER_` (typical CI secrets). Always dry-run first:
+**Modal / DB credentials for workflows** (from your local `.env` / `.env.local`, never committed): use `scripts/env_sync.py` with the `github-actions` preset so GitHub receives the same names the workflows read (`MODAL_TOKEN_ID`, `MODAL_TOKEN_SECRET`, `DATABASE_URL`, `MODAL_API_PROFILE`). Requires [`gh auth login`](https://cli.github.com/manual/gh_auth_login).
+
+```bash
+python3 scripts/env_sync.py gh --preset github-actions --file .env --file .env.local --dry-run
+python3 scripts/env_sync.py gh --preset github-actions --file .env --file .env.local --yes
+```
+
+**Render / CI helpers** — default: only keys starting with `RENDER_` (typical CI secrets). Always dry-run first:
 
 ```bash
 python3 scripts/env_sync.py gh --file .env --file .env.prod.render --prefix RENDER_ --dry-run

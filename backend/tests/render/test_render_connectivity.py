@@ -81,9 +81,16 @@ def test_gateway_agent_service_url_is_from_service_binding():
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("service_name", ["vecinita-agent", "vecinita-gateway"])
+@pytest.mark.parametrize(
+    "service_name",
+    [
+        "vecinita-agent",
+        "vecinita-gateway",
+        "vecinita-data-management-api-v1",
+    ],
+)
 def test_database_url_bound_from_postgres(service_name: str):
-    """Agent and gateway must bind DATABASE_URL via fromDatabase."""
+    """Core web services must bind DATABASE_URL via fromDatabase."""
     data = _load_render_yaml()
     svc = _find_service(data, service_name)
     assert svc is not None, f"{service_name} not found in render.yaml"
@@ -96,6 +103,19 @@ def test_database_url_bound_from_postgres(service_name: str):
     assert (
         db_entry["fromDatabase"]["name"] == "vecinita-postgres"
     ), f"DATABASE_URL in {service_name} must bind from 'vecinita-postgres'"
+
+
+def test_staging_data_management_api_database_url_bound_from_postgres_staging():
+    """Staging scraper API must bind DATABASE_URL to the staging Postgres instance."""
+    data = _load_yaml(RENDER_STAGING_YAML)
+    svc = _find_service(data, "vecinita-data-management-api-v1-staging")
+    assert (
+        svc is not None
+    ), "vecinita-data-management-api-v1-staging not found in render.staging.yaml"
+    db_entry = _find_env_entry(svc, "DATABASE_URL")
+    assert db_entry is not None
+    assert "fromDatabase" in db_entry
+    assert db_entry["fromDatabase"]["name"] == "vecinita-postgres-staging"
 
 
 # ---------------------------------------------------------------------------

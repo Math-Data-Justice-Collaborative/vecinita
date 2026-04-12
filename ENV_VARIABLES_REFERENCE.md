@@ -24,7 +24,8 @@ Set these 3 environment variables on Render for `vecinita-data-management-api-v1
 |---|---|---|
 | `VECINITA_EMBEDDING_API_URL` | `.env` line 149 | Custom embedding service URL |
 | `VECINITA_MODEL_API_URL` | `.env` line 148 | Custom model service URL |
-| `DATABASE_URL` | `.env` | Postgres for data persistence |
+| `DATABASE_URL` | `.env` or Render `fromDatabase` | **Canonical** Postgres DSN; root `render.yaml` binds it for `vecinita-data-management-api-v1` from `vecinita-postgres` |
+| `DB_URL` | alternate secret name only | Optional **same** DSN if `DATABASE_URL` is unset; honoured by scraper `PostgresConfig`, gateway (`get_resolved_database_url`), and agent uploader |
 | `SCRAPER_API_KEYS` | Render env group/secret | Comma-separated Bearer API keys accepted by scraper API |
 | `SCRAPER_DEBUG_BYPASS_AUTH` | local/dev only | `true` bypasses auth in local/dev/test only; must remain `false` in staging/prod |
 

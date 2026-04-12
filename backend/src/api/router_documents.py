@@ -16,6 +16,7 @@ import psycopg2  # type: ignore[import-untyped]
 from fastapi import APIRouter, HTTPException, Query
 from psycopg2.extras import RealDictCursor  # type: ignore[import-untyped]
 
+from src.utils.database_url import get_resolved_database_url
 from src.utils.tags import build_bilingual_tag_fields, normalize_tags
 
 logger = logging.getLogger(__name__)
@@ -286,7 +287,7 @@ def _raise_documents_error(endpoint_name: str, exc: Exception) -> None:
 
 
 def _load_overview_via_sql() -> tuple[dict[str, int], list[dict[str, Any]]]:
-    database_url = os.getenv("DATABASE_URL")
+    database_url = get_resolved_database_url()
     if not database_url:
         raise RuntimeError("database_url_not_configured")
 
@@ -362,7 +363,7 @@ def _load_overview_via_sql() -> tuple[dict[str, int], list[dict[str, Any]]]:
 
 
 def _load_chunk_statistics_via_sql(limit: int) -> list[dict[str, Any]]:
-    database_url = os.getenv("DATABASE_URL")
+    database_url = get_resolved_database_url()
     if not database_url:
         raise RuntimeError("database_url_not_configured")
 
@@ -466,7 +467,7 @@ async def documents_preview(
     Used by the Documents Dashboard source-preview drawer.
     """
     try:
-        database_url = os.getenv("DATABASE_URL")
+        database_url = get_resolved_database_url()
         if not database_url:
             raise RuntimeError("database_url_not_configured")
 
@@ -518,7 +519,7 @@ async def documents_download_url(
     downloadable=false so clients can avoid raising user-visible errors.
     """
     try:
-        database_url = os.getenv("DATABASE_URL")
+        database_url = get_resolved_database_url()
         if not database_url:
             raise RuntimeError("database_url_not_configured")
 
@@ -617,7 +618,7 @@ async def documents_tags(
 ) -> dict[str, Any]:
     """Return tag inventory and counts for Documents filtering UI."""
     try:
-        database_url = os.getenv("DATABASE_URL")
+        database_url = get_resolved_database_url()
         if not database_url:
             raise RuntimeError("database_url_not_configured")
 

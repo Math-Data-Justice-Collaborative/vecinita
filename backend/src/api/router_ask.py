@@ -19,6 +19,19 @@ import httpx
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
 
+from src.agent.openapi_examples import (
+    AGENT_ASK_CONTEXT_ANSWER,
+    AGENT_ASK_FLAG_FALSE,
+    AGENT_ASK_FLAG_TRUE,
+    AGENT_ASK_LANG,
+    AGENT_ASK_MODEL,
+    AGENT_ASK_PROVIDER,
+    AGENT_ASK_QUESTION,
+    AGENT_ASK_RERANK_TOP_K,
+    AGENT_ASK_TAG_MATCH_MODE,
+    AGENT_ASK_TAGS,
+    AGENT_ASK_THREAD_ID,
+)
 from src.service_endpoints import AGENT_SERVICE_URL
 
 from .models import AskResponse, ErrorResponse, SourceCitation, ValidationErrorResponse
@@ -212,31 +225,60 @@ async def ask_question(
     question: str = Query(
         ...,
         description="User question",
-        openapi_examples={
-            "housing_en": {
-                "summary": "English — housing resources",
-                "value": "What affordable housing programs exist in this neighborhood?",
-            },
-            "health_es": {
-                "summary": "Spanish — community health",
-                "value": "¿Dónde puedo encontrar una clínica de salud comunitaria?",
-            },
-        },
+        openapi_examples=AGENT_ASK_QUESTION,
     ),
-    thread_id: str | None = Query(None, description="Conversation thread ID"),
-    context_answer: str | None = Query(None, description="Prior assistant answer context"),
-    lang: str | None = Query(None, description="Override language detection (es/en)"),
+    thread_id: str | None = Query(
+        None,
+        description="Conversation thread ID",
+        openapi_examples=AGENT_ASK_THREAD_ID,
+    ),
+    context_answer: str | None = Query(
+        None,
+        description="Prior assistant answer context",
+        openapi_examples=AGENT_ASK_CONTEXT_ANSWER,
+    ),
+    lang: str | None = Query(
+        None,
+        description="Override language detection (es/en)",
+        openapi_examples=AGENT_ASK_LANG,
+    ),
     provider: str | None = Query(
-        None, description="Local LLM provider override (only ollama/local is supported)"
+        None,
+        description="Local LLM provider override (only ollama/local is supported)",
+        openapi_examples=AGENT_ASK_PROVIDER,
     ),
-    model: str | None = Query(None, description="Local LLM model name"),
-    tags: str | None = Query(None, description="Comma-separated metadata tags"),
-    tag_match_mode: str = Query("any", description="Tag match mode: any|all"),
+    model: str | None = Query(
+        None,
+        description="Local LLM model name",
+        openapi_examples=AGENT_ASK_MODEL,
+    ),
+    tags: str | None = Query(
+        None,
+        description="Comma-separated metadata tags",
+        openapi_examples=AGENT_ASK_TAGS,
+    ),
+    tag_match_mode: str = Query(
+        "any",
+        description="Tag match mode: any|all",
+        openapi_examples=AGENT_ASK_TAG_MATCH_MODE,
+    ),
     include_untagged_fallback: bool = Query(
-        True, description="Include untagged docs when tag filter is active"
+        True,
+        description="Include untagged docs when tag filter is active",
+        openapi_examples=AGENT_ASK_FLAG_TRUE,
     ),
-    rerank: bool = Query(False, description="Enable backend reranking for search results"),
-    rerank_top_k: int = Query(10, ge=1, le=50, description="Number of items to keep after rerank"),
+    rerank: bool = Query(
+        False,
+        description="Enable backend reranking for search results",
+        openapi_examples=AGENT_ASK_FLAG_FALSE,
+    ),
+    rerank_top_k: int = Query(
+        10,
+        ge=1,
+        le=50,
+        description="Number of items to keep after rerank",
+        openapi_examples=AGENT_ASK_RERANK_TOP_K,
+    ),
 ) -> AskResponse:
     """
     Ask a question and get an answer with source citations.
@@ -435,21 +477,63 @@ async def sse_stream_forward_generator(
 
 @router.get("/stream", responses=_GATEWAY_ASK_OPENAPI_RESPONSES)
 async def ask_question_stream(
-    question: str = Query(..., description="User question"),
-    thread_id: str | None = Query(None, description="Conversation thread ID"),
-    context_answer: str | None = Query(None, description="Prior assistant answer context"),
-    lang: str | None = Query(None, description="Override language detection (es/en)"),
+    question: str = Query(
+        ...,
+        description="User question",
+        openapi_examples=AGENT_ASK_QUESTION,
+    ),
+    thread_id: str | None = Query(
+        None,
+        description="Conversation thread ID",
+        openapi_examples=AGENT_ASK_THREAD_ID,
+    ),
+    context_answer: str | None = Query(
+        None,
+        description="Prior assistant answer context",
+        openapi_examples=AGENT_ASK_CONTEXT_ANSWER,
+    ),
+    lang: str | None = Query(
+        None,
+        description="Override language detection (es/en)",
+        openapi_examples=AGENT_ASK_LANG,
+    ),
     provider: str | None = Query(
-        None, description="Local LLM provider override (only ollama/local is supported)"
+        None,
+        description="Local LLM provider override (only ollama/local is supported)",
+        openapi_examples=AGENT_ASK_PROVIDER,
     ),
-    model: str | None = Query(None, description="Local LLM model name"),
-    tags: str | None = Query(None, description="Comma-separated metadata tags"),
-    tag_match_mode: str = Query("any", description="Tag match mode: any|all"),
+    model: str | None = Query(
+        None,
+        description="Local LLM model name",
+        openapi_examples=AGENT_ASK_MODEL,
+    ),
+    tags: str | None = Query(
+        None,
+        description="Comma-separated metadata tags",
+        openapi_examples=AGENT_ASK_TAGS,
+    ),
+    tag_match_mode: str = Query(
+        "any",
+        description="Tag match mode: any|all",
+        openapi_examples=AGENT_ASK_TAG_MATCH_MODE,
+    ),
     include_untagged_fallback: bool = Query(
-        True, description="Include untagged docs when tag filter is active"
+        True,
+        description="Include untagged docs when tag filter is active",
+        openapi_examples=AGENT_ASK_FLAG_TRUE,
     ),
-    rerank: bool = Query(False, description="Enable backend reranking for search results"),
-    rerank_top_k: int = Query(10, ge=1, le=50, description="Number of items to keep after rerank"),
+    rerank: bool = Query(
+        False,
+        description="Enable backend reranking for search results",
+        openapi_examples=AGENT_ASK_FLAG_FALSE,
+    ),
+    rerank_top_k: int = Query(
+        10,
+        ge=1,
+        le=50,
+        description="Number of items to keep after rerank",
+        openapi_examples=AGENT_ASK_RERANK_TOP_K,
+    ),
 ):
     """
     Ask a question and stream the response as Server-Sent Events (SSE).

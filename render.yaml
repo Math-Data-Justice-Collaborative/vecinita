@@ -3,10 +3,11 @@ services:
   # Includes chat stack services and data-management frontend/API services.
   # Modal deploy targets (scraper/embedding/model) remain managed by Modal.
   #
-  # All env vars are controlled by the shared env group in the Render dashboard
-  # (.env.prod.render). Only infrastructure bindings (fromDatabase, fromService)
-  # and PORT are declared here. Everything else uses sync: false so the env
-  # group value is never overwritten by this blueprint.
+  # All env vars are controlled by the shared env group in the Render dashboard.
+  # Use the SAME variable names as .env.prod.render.example (values live in
+  # gitignored .env.prod.render — never commit secrets). Only infrastructure
+  # bindings (fromDatabase, fromService) and PORT are declared here. Everything
+  # else uses sync: false so the env group value is never overwritten by this blueprint.
   #
   # Key ownership legend (for .env.prod.render governance):
   #   CORE   — shared infrastructure: DATABASE_URL, ALLOWED_ORIGINS
@@ -331,7 +332,9 @@ services:
       - key: PORT
         value: "10000"
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: vecinita-postgres
+          property: connectionString
       - key: MODAL_TOKEN_ID
         sync: false
       - key: MODAL_TOKEN_SECRET
