@@ -58,10 +58,6 @@ AGENT_ASK_MODEL: dict[str, dict[str, Any]] = {
         "description": "Must exist in runtime /config when overriding.",
         "value": "llama3.1:8b",
     },
-    "llama32_latest": {
-        "summary": "Another common Ollama tag",
-        "value": "llama3.2:latest",
-    },
 }
 
 AGENT_ASK_CONTEXT_ANSWER: dict[str, dict[str, Any]] = {

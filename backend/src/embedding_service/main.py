@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 # Configure logging
 logging.basicConfig(
@@ -157,9 +157,29 @@ def get_embedding_model():
 
 # Request/Response Models
 class EmbedRequest(BaseModel):
-    """Single text embedding request."""
+    """Single text embedding request.
 
-    text: str = Field(..., min_length=1, max_length=10000, description="Text to embed")
+    ``text`` is canonical. ``query`` is accepted as a legacy alias for older Modal
+    deployments that used a different field name.
+    """
+
+    text: str | None = Field(default=None, max_length=10000, description="Primary text to embed")
+    query: str | None = Field(
+        default=None,
+        max_length=10000,
+        description="Legacy alias for ``text`` when the primary field is omitted",
+    )
+
+    @model_validator(mode="after")
+    def _coalesce_text(self) -> "EmbedRequest":
+        primary = (self.text or "").strip()
+        legacy = (self.query or "").strip()
+        chosen = primary or legacy
+        if not chosen:
+            raise ValueError("Either non-empty text or query is required")
+        if len(chosen) > 10000:
+            raise ValueError("Text exceeds maximum length")
+        return self.model_copy(update={"text": chosen, "query": None})
 
 
 class BatchEmbedRequest(BaseModel):

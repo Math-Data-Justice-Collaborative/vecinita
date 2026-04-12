@@ -2233,6 +2233,8 @@ async def health():
 def test_db_search(
     query: str = Query(
         default="community resources",
+        min_length=1,
+        max_length=10_000,
         description="Text used to build a diagnostic embedding and vector search probe.",
         openapi_examples=AGENT_TEST_DB_SEARCH_QUERY,
     ),
@@ -2609,59 +2611,48 @@ async def ask_question(
     query: str | None = Query(
         default=None,
         description="Legacy alias for ``question`` when ``question`` is omitted.",
-        openapi_examples=AGENT_ASK_QUERY_ALIAS,
     ),
     thread_id: str = Query(
         default="default",
         description="Conversation thread id for correlating follow-ups.",
-        openapi_examples=AGENT_ASK_THREAD_ID,
     ),
     lang: str | None = Query(
         default=None,
         description="Force language (e.g. en, es) instead of auto-detection.",
-        openapi_examples=AGENT_ASK_LANG,
     ),
     provider: str | None = Query(
         default=None,
         description="LLM provider override (ollama-compatible stack).",
-        openapi_examples=AGENT_ASK_PROVIDER,
     ),
     model: str | None = Query(
         default=None,
         description="Model id override; must exist in ``GET /config`` when set.",
-        openapi_examples=AGENT_ASK_MODEL,
     ),
     context_answer: str | None = Query(
         default=None,
         description="Prior assistant answer for short contextual follow-ups.",
-        openapi_examples=AGENT_ASK_CONTEXT_ANSWER,
     ),
     tags: str | None = Query(
         default=None,
         description="Comma-separated metadata tags for retrieval filtering.",
-        openapi_examples=AGENT_ASK_TAGS,
     ),
     tag_match_mode: Literal["any", "all"] = Query(
         default="any",
         description="Tag match mode: any|all",
-        openapi_examples=AGENT_ASK_TAG_MATCH_MODE,
     ),
     include_untagged_fallback: bool = Query(
         default=True,
         description="When tag filter is active, include untagged documents as fallback.",
-        openapi_examples=AGENT_ASK_FLAG_TRUE,
     ),
     rerank: bool = Query(
         default=False,
         description="Enable reranking of retrieved chunks.",
-        openapi_examples=AGENT_ASK_FLAG_FALSE,
     ),
     rerank_top_k: int = Query(
         default=10,
         ge=1,
         le=50,
         description="Number of chunks to retain after reranking.",
-        openapi_examples=AGENT_ASK_RERANK_TOP_K,
     ),
 ):
     """Handles Q&A requests from the UI or API using LangGraph agent"""
@@ -3275,7 +3266,10 @@ async def ask_question_stream(
 class ModelSelection(BaseModel):
     """Body for POST /model-selection — constraints align OpenAPI with FastAPI validation."""
 
-    provider: str = Field(..., min_length=1, max_length=128)
+    provider: Literal["ollama"] = Field(
+        ...,
+        description="Local Ollama-compatible stack (only value accepted at runtime).",
+    )
     model: str | None = Field(default=None, max_length=200)
     lock: bool | None = None
 

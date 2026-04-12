@@ -154,6 +154,14 @@ class TestEmbedSingle:
         response = embedding_client.post("/embed", json=request_data)
         assert response.status_code == 422  # Validation error
 
+    def test_embed_single_legacy_query_field(self, embedding_client):
+        """POST /embed accepts legacy ``query`` JSON field (coerced to ``text``)."""
+        response = embedding_client.post("/embed", json={"query": "Hello from query"})
+        assert response.status_code == 200
+        data = response.json()
+        assert "embedding" in data
+        assert data.get("dimension") == 384
+
 
 class TestEmbedBatch:
     """Test batch text embedding endpoint."""
@@ -305,19 +313,30 @@ class TestEmbedRequestModel:
         req = EmbedRequest(text="test text")
         assert req.text == "test text"
 
-    def test_embed_request_min_length(self, embedding_client):
-        """Test EmbedRequest respects min_length."""
+    def test_embed_request_accepts_legacy_query_field(self, embedding_client):
         from src.embedding_service.main import EmbedRequest
 
-        with pytest.raises(ValueError):
-            EmbedRequest(text="")
+        req = EmbedRequest.model_validate({"query": "from query field"})
+        assert req.text == "from query field"
+        assert req.query is None
+
+    def test_embed_request_min_length(self, embedding_client):
+        """Test EmbedRequest rejects empty inputs."""
+        from pydantic import ValidationError
+
+        from src.embedding_service.main import EmbedRequest
+
+        with pytest.raises(ValidationError):
+            EmbedRequest.model_validate({"text": ""})
 
     def test_embed_request_max_length(self, embedding_client):
         """Test EmbedRequest respects max_length."""
+        from pydantic import ValidationError
+
         from src.embedding_service.main import EmbedRequest
 
-        with pytest.raises(ValueError):
-            EmbedRequest(text="x" * 10001)
+        with pytest.raises(ValidationError):
+            EmbedRequest.model_validate({"text": "x" * 10001})
 
 
 class TestBatchEmbedRequestModel:

@@ -1,43 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<testsuites disabled="0" errors="0" failures="1" tests="9" time="42.690483929007314">
-	<testsuite disabled="0" errors="0" failures="1" name="schemathesis" skipped="9" tests="9" time="42.690483929007314" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
-		<testcase name="POST /model-selection" time="2.348181">
+<testsuites disabled="0" errors="1" failures="0" tests="9" time="182.56779958010884">
+	<testsuite disabled="0" errors="1" failures="0" name="schemathesis" skipped="6" tests="9" time="182.56779958010884" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
+		<testcase name="POST /model-selection" time="3.797962"/>
+		<testcase name="GET /" time="0.422050">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /" time="0.491649">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /ask" time="22.034938">
-			<failure type="failure" message="1. Test Case ID: XWwn75
+		<testcase name="GET /ask" time="160.694704">
+			<error type="error">Network Error
 
-- Server error
-
-[500] Internal Server Error:
-
-    `{&quot;detail&quot;:&quot;Server error '500 Internal Server Error' for url 'https://vecinita--vecinita-model-api.modal.run/chat'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500&quot;}`
+Read timed out after 10.0 seconds
 
 Reproduce with:
 
-    curl -X GET 'https://vecinita-agent-lx27.onrender.com/ask?question=P%0B%F3%9B%AA%B3%C3%B1%C3%85&amp;model=null&amp;thread_id=%24%C3%90%04%1E%1A%C2%A2&amp;rerank_top_k=6&amp;include_untagged_fallback=false&amp;context_answer=%E6%A2%A2%06%C3%99%C2%86m%C2%B1%F3%AF%B4%B0%C2%8B%C2%B8%C2%81%C3%84%1A%F2%90%89%ACw%11%7C%F0%B1%96%A7%C3%8C%C2%9DW&amp;tags=null&amp;rerank=false&amp;query=null&amp;tag_match_mode=%15&amp;lang=null'"/>
+    curl -X GET 'https://vecinita-agent-lx27.onrender.com/ask?question=%C2%BFD%C3%B3nde+puedo+encontrar+una+cl%C3%ADnica+de+salud+comunitaria%3F&amp;query=Where+is+the+nearest+food+bank%3F&amp;thread_id=chat-session-7f3a&amp;lang=es&amp;provider=ollama&amp;model=llama3.2%3Alatest&amp;context_answer=Nearby+clinics+include+Eastside+Community+Health+Center+%28walk-ins+welcome%29+and+Northside+Family+Medicine.&amp;tags=health&amp;tag_match_mode=all&amp;include_untagged_fallback=True&amp;rerank=False&amp;rerank_top_k=10'</error>
+		</testcase>
+		<testcase name="GET /config" time="0.809297">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /config" time="0.808783">
+		<testcase name="GET /db-info" time="0.873599">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /db-info" time="1.000365">
+		<testcase name="GET /health" time="0.363073">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /health" time="0.368092">
+		<testcase name="GET /model-selection" time="0.998861">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /model-selection" time="0.813127">
+		<testcase name="GET /privacy" time="0.380147">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /privacy" time="0.397215">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /test-db-search" time="14.428135">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
+		<testcase name="GET /test-db-search" time="14.228107"/>
 	</testsuite>
 </testsuites>

@@ -3,7 +3,7 @@
 import os
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 
 from .. import main as agent_main
 
@@ -38,7 +38,14 @@ def _fetch_rows(query: str, params: tuple[Any, ...] = ()) -> list[dict[str, Any]
 
 
 @router.get("/test-db-search")
-def test_db_search(query: str = "community resources"):
+def test_db_search(
+    query: str = Query(
+        default="community resources",
+        min_length=1,
+        max_length=10_000,
+        description="Text used to build a diagnostic embedding and vector search probe.",
+    ),
+):
     """Run a diagnostic retrieval flow and return debug metadata."""
     diagnostics: dict[str, Any] = {}
 

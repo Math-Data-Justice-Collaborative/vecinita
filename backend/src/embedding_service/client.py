@@ -120,7 +120,6 @@ class EmbeddingServiceClient(Embeddings):
             headers["x-embedding-service-token"] = self.auth_token
             headers["Authorization"] = f"Bearer {self.auth_token}"
         self.client = httpx.Client(timeout=timeout, headers=headers)
-        self._single_embed_field = "text"
         logger.info("✅ Embedding Service Client initialized: %s", self.base_url)
         logger.info(
             "Embedding client auth/header profile: has_auth_token=%s running_on_render=%s",
@@ -389,26 +388,19 @@ class EmbeddingServiceClient(Embeddings):
             List of floats representing the embedding vector
         """
         try:
-            try:
-                response = self._post_with_fallback(
-                    "/embed",
-                    {self._single_embed_field: text},
-                    suppress_status_log={422},
-                )
-            except httpx.HTTPStatusError as exc:
-                # Some deployed Modal embedding endpoints still expect `query` instead of `text`.
-                status_code = exc.response.status_code if exc.response is not None else None
-                if status_code == 422:
-                    self._single_embed_field = "query"
-                    response = self._post_with_fallback("/embed", {"query": text})
-                else:
-                    raise
+            response = self._post_with_fallback("/embed", {"text": text})
             payload = response.json()
             if isinstance(payload, dict):
                 return cast(list[float], payload.get("embedding", []))
             return []
+        except httpx.HTTPStatusError as exc:
+            if exc.response is not None and exc.response.status_code == 422:
+                preview = (exc.response.text or "")[:800]
+                logger.warning("Embedding /embed returned 422; body (truncated): %s", preview)
+            logger.error("❌ Error calling embedding service: %s", exc)
+            raise
         except Exception as e:
-            logger.error(f"❌ Error calling embedding service: {e}")
+            logger.error("❌ Error calling embedding service: %s", e)
             raise
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:

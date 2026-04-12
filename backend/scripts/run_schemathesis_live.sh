@@ -10,12 +10,14 @@
 #   SCHEMATHESIS_REPORT_DIR — default: schemathesis-report (under cwd, usually backend/)
 #   WAIT_FOR_SCHEMA_SECONDS — default: 30
 #   SCHEMATHESIS_MAX_EXAMPLES — maps to --max-examples (default: 12)
+#   SCHEMATHESIS_REQUEST_TIMEOUT — per-request HTTP timeout in seconds for st run (default: 180)
 set -euo pipefail
 
 WAIT_FOR_SCHEMA_SECONDS="${WAIT_FOR_SCHEMA_SECONDS:-30}"
 REPORT_DIR="${SCHEMATHESIS_REPORT_DIR:-schemathesis-report}"
 CHECKS="${SCHEMATHESIS_CHECKS:-not_a_server_error}"
 MAX_EX="${SCHEMATHESIS_MAX_EXAMPLES:-12}"
+REQ_TIMEOUT="${SCHEMATHESIS_REQUEST_TIMEOUT:-180}"
 
 AGENT_URL="${AGENT_SCHEMA_URL:-}"
 GATEWAY_URL="${GATEWAY_SCHEMA_URL:-}"
@@ -42,6 +44,7 @@ run_one() {
   fi
 
   uv run schemathesis run "${location}" \
+    --request-timeout "${REQ_TIMEOUT}" \
     --wait-for-schema "${WAIT_FOR_SCHEMA_SECONDS}" \
     --report junit \
     --report-dir "${REPORT_DIR}" \

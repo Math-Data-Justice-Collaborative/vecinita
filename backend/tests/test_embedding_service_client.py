@@ -2,7 +2,6 @@
 
 from unittest.mock import Mock
 
-import httpx
 import pytest
 
 from src.embedding_service.client import EmbeddingServiceClient, create_embedding_client
@@ -109,20 +108,12 @@ def test_embed_documents_falls_back_to_alt_batch_endpoint(monkeypatch):
     assert calls == ["/embed-batch", "/embed/batch"]
 
 
-def test_embed_query_falls_back_to_query_payload_on_422(monkeypatch):
+def test_embed_query_posts_text_payload(monkeypatch):
     client = EmbeddingServiceClient(base_url="http://localhost:8001")
     calls: list[tuple[str, dict]] = []
 
     def fake_post_with_fallback(endpoint, payload, **_kwargs):
         calls.append((endpoint, payload))
-        if payload == {"text": "hello"}:
-            request = httpx.Request("POST", "http://localhost:8001/embed")
-            response = httpx.Response(
-                422,
-                request=request,
-                json={"detail": [{"loc": ["body", "query"], "msg": "Field required"}]},
-            )
-            raise httpx.HTTPStatusError("422", request=request, response=response)
         return _Resp(status_code=200, payload={"embedding": [0.11, 0.22]})
 
     monkeypatch.setattr(client, "_post_with_fallback", fake_post_with_fallback)
@@ -130,10 +121,7 @@ def test_embed_query_falls_back_to_query_payload_on_422(monkeypatch):
     result = client.embed_query("hello")
 
     assert result == [0.11, 0.22]
-    assert calls == [
-        ("/embed", {"text": "hello"}),
-        ("/embed", {"query": "hello"}),
-    ]
+    assert calls == [("/embed", {"text": "hello"})]
 
 
 def test_client_sets_auth_header_from_env(monkeypatch):
