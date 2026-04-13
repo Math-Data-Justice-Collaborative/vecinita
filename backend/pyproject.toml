@@ -100,7 +100,7 @@ ml = [
 # Development: testing, code quality, and experimentation
 dev = [
     # Testing Framework
-    "pytest>=9.0.0",
+    "pytest>=9.0.3",
     "pytest-asyncio>=0.23.0",
     "pytest-cov>=5.0.0",
     "hypothesis>=6.0.0",
@@ -124,7 +124,7 @@ dev = [
 
 # Minimal CI dependencies - no playwright or docker for faster CI builds
 ci = [
-    "pytest>=9.0.0",
+    "pytest>=9.0.3",
     "pytest-asyncio>=0.23.0",
     "pytest-cov>=5.0.0",
     "hypothesis>=6.0.0",

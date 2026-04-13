@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<testsuites disabled="0" errors="0" failures="0" tests="9" time="170.30057434599075">
-	<testsuite disabled="0" errors="0" failures="0" name="schemathesis" skipped="6" tests="9" time="170.30057434599075" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
-		<testcase name="POST /model-selection" time="3.569064"/>
-		<testcase name="GET /" time="0.417832">
+<testsuites disabled="0" errors="0" failures="0" tests="9" time="143.02830415598874">
+	<testsuite disabled="0" errors="0" failures="0" name="schemathesis" skipped="6" tests="9" time="143.02830415598874" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
+		<testcase name="POST /model-selection" time="3.958397"/>
+		<testcase name="GET /" time="0.430438">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /ask" time="138.335430"/>
-		<testcase name="GET /config" time="0.785467">
+		<testcase name="GET /ask" time="119.055225"/>
+		<testcase name="GET /config" time="0.917009">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /db-info" time="0.920178">
+		<testcase name="GET /db-info" time="0.747682">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /health" time="0.412883">
+		<testcase name="GET /health" time="0.430648">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /model-selection" time="0.744042">
+		<testcase name="GET /model-selection" time="0.821611">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /privacy" time="0.379633">
+		<testcase name="GET /privacy" time="0.421774">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /test-db-search" time="24.736046"/>
+		<testcase name="GET /test-db-search" time="16.245521"/>
 	</testsuite>
 </testsuites>

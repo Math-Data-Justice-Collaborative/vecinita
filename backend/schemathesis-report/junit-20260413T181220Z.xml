@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites disabled="0" errors="0" failures="2" tests="10" time="21.65610799397109">
+	<testsuite disabled="0" errors="0" failures="2" name="schemathesis" skipped="6" tests="10" time="21.65610799397109" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
+		<testcase name="GET /" time="0.002355">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /health" time="0.000353">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /test-db-search" time="1.726402"/>
+		<testcase name="GET /db-info" time="0.000492">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /ask" time="13.449311"/>
+		<testcase name="GET /ask/stream" time="5.440921">
+			<failure type="failure" message="1. Test Case ID: pB8REH
+
+- Undocumented Content-Type
+
+    Received: text/event-stream; charset=utf-8
+    Documented: application/json
+
+[200] OK:
+
+    `data: {&quot;type&quot;: &quot;thinking&quot;, &quot;message&quot;: &quot;Checking if I already know this...&quot;, &quot;stage&quot;: &quot;precheck&quot;, &quot;progress&quot;: 10, &quot;status&quot;: &quot;working&quot;, &quot;waiting&quot;: false, &quot;timestamp&quot;: &quot;2026-04-13T18:12:39.834787Z&quot;}\n\ndata: {&quot;type&quot;: &quot;thinking&quot;, &quot;message&quot;: &quot;Understanding your question...&quot;, &quot;stage&quot;: &quot;analysis&quot;, &quot;progress&quot;: 25, &quot;status&quot;: &quot;working&quot;, &quot;waiting&quot;: false, &quot;timestamp&quot;: &quot;2026-04-13T18:12:39.834911Z&quot;}\n\ndata: {&quot;type&quot;: &quot;complete&quot;, &quot;answer&quot;: &quot;Here are 3 concise key bullet points:\n\n\u2022 Nearby clinics offer walk-in ser // Output truncated...`
+
+Reproduce with:
+
+    curl -X GET 'https://vecinita-agent-lx27.onrender.com/ask/stream?question=Can+you+summarize+this+in+3+key+points%3F&amp;query=Where+is+the+nearest+food+bank%3F&amp;thread_id=default&amp;lang=en&amp;provider=ollama&amp;model=llama3.1%3A8b&amp;clarification_response=I+meant+housing+resources+in+ZIP+94110.&amp;context_answer=Nearby+clinics+include+Eastside+Community+Health+Center+%28walk-ins+welcome%29+and+Northside+Family+Medicine.&amp;tags=housing%2Cpermits&amp;tag_match_mode=any&amp;include_untagged_fallback=True&amp;rerank=False&amp;rerank_top_k=5'"/>
+		</testcase>
+		<testcase name="GET /ask-stream" time="1.034619">
+			<failure type="failure" message="1. Test Case ID: Qlbq7x
+
+- Undocumented Content-Type
+
+    Received: text/event-stream; charset=utf-8
+    Documented: application/json
+
+[200] OK:
+
+    `data: {&quot;type&quot;: &quot;thinking&quot;, &quot;message&quot;: &quot;Checking if I already know this...&quot;, &quot;stage&quot;: &quot;precheck&quot;, &quot;progress&quot;: 10, &quot;status&quot;: &quot;working&quot;, &quot;waiting&quot;: false, &quot;timestamp&quot;: &quot;2026-04-13T18:12:45.302636Z&quot;}\n\ndata: {&quot;type&quot;: &quot;thinking&quot;, &quot;message&quot;: &quot;Understanding your question...&quot;, &quot;stage&quot;: &quot;analysis&quot;, &quot;progress&quot;: 25, &quot;status&quot;: &quot;working&quot;, &quot;waiting&quot;: false, &quot;timestamp&quot;: &quot;2026-04-13T18:12:45.302756Z&quot;}\n\ndata: {&quot;type&quot;: &quot;complete&quot;, &quot;answer&quot;: &quot;Here are 3 concise key bullet points:\n\n\u2022 Nearby clinics offer walk-in ser // Output truncated...`
+
+Reproduce with:
+
+    curl -X GET 'https://vecinita-agent-lx27.onrender.com/ask-stream?question=Can+you+summarize+this+in+3+key+points%3F&amp;query=Where+is+the+nearest+food+bank%3F&amp;thread_id=default&amp;lang=en&amp;provider=ollama&amp;model=llama3.1%3A8b&amp;clarification_response=I+meant+housing+resources+in+ZIP+94110.&amp;context_answer=Nearby+clinics+include+Eastside+Community+Health+Center+%28walk-ins+welcome%29+and+Northside+Family+Medicine.&amp;tags=housing%2Cpermits&amp;tag_match_mode=any&amp;include_untagged_fallback=True&amp;rerank=False&amp;rerank_top_k=5'"/>
+		</testcase>
+		<testcase name="GET /model-selection" time="0.000510">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /config" time="0.000482">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /privacy" time="0.000664">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+	</testsuite>
+</testsuites>

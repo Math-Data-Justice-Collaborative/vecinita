@@ -1,189 +1,149 @@
 <?xml version="1.0" encoding="utf-8"?>
-<testsuites disabled="0" errors="0" failures="4" tests="24" time="247.0923207479791">
-	<testsuite disabled="0" errors="0" failures="4" name="schemathesis" skipped="18" tests="24" time="247.0923207479791" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
-		<testcase name="POST /api/v1/embed" time="5.137751">
-			<failure type="failure" message="1. Test Case ID: CfvyoA
+<testsuites disabled="0" errors="1" failures="2" tests="24" time="325.4170096431044">
+	<testsuite disabled="0" errors="1" failures="2" name="schemathesis" skipped="14" tests="24" time="325.4170096431044" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
+		<testcase name="POST /api/v1/embed" time="12.517837"/>
+		<testcase name="POST /api/v1/embed/batch" time="11.882808">
+			<failure type="failure" message="1. Test Case ID: E8gAap
 
 - Server error
 
 [503] Service Unavailable:
 
-    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embedding-web-app.modal.run/embed'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T19:38:07.155518+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Embedding service error: Client error '422 Unprocessable Entity' for url 'https://vecinita--vecinita-embedding-web-app.modal.run/embed-batch'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422&quot;,&quot;timestamp&quot;:&quot;2026-04-13T17:13:42.809190+00:00&quot;}`
 
 Reproduce with:
 
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text&quot;: &quot;Community clinic walk-in hours and eligibility.&quot;, &quot;model&quot;: &quot;BAAI/bge-small-en-v1.5&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed"/>
-			<failure type="failure" message="1. Test Case ID: CfvyoA
+    curl -X POST -H 'Content-Type: application/json' -d '{&quot;model&quot;: &quot;sentence-transformers/all-MiniLM-L6-v2&quot;, &quot;texts&quot;: [&quot;&quot;, &quot;&quot;]}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/batch"/>
+			<failure type="failure" message="1. Test Case ID: E8gAap
 
 - Server error
 
 [503] Service Unavailable:
 
-    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embedding-web-app.modal.run/embed'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T19:38:07.155518+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Embedding service error: Client error '422 Unprocessable Entity' for url 'https://vecinita--vecinita-embedding-web-app.modal.run/embed-batch'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422&quot;,&quot;timestamp&quot;:&quot;2026-04-13T17:13:42.809190+00:00&quot;}`
 
 Reproduce with:
 
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text&quot;: &quot;Community clinic walk-in hours and eligibility.&quot;, &quot;model&quot;: &quot;BAAI/bge-small-en-v1.5&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed"/>
-			<failure type="failure" message="1. Test Case ID: CfvyoA
-
-- Server error
-
-[503] Service Unavailable:
-
-    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embedding-web-app.modal.run/embed'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T19:38:07.155518+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text&quot;: &quot;Community clinic walk-in hours and eligibility.&quot;, &quot;model&quot;: &quot;BAAI/bge-small-en-v1.5&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed"/>
+    curl -X POST -H 'Content-Type: application/json' -d '{&quot;model&quot;: &quot;sentence-transformers/all-MiniLM-L6-v2&quot;, &quot;texts&quot;: [&quot;&quot;, &quot;&quot;]}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/batch"/>
 		</testcase>
-		<testcase name="POST /api/v1/embed/batch" time="4.333462">
-			<failure type="failure" message="1. Test Case ID: FO8Y2V
-
-- Server error
-
-[503] Service Unavailable:
-
-    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embedding-web-app.modal.run/embed-batch'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T19:38:07.665199+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;texts&quot;: [&quot;First document to embed&quot;, &quot;Second document to embed&quot;, &quot;Third document to embed&quot;], &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/batch"/>
-			<failure type="failure" message="1. Test Case ID: FO8Y2V
-
-- Server error
-
-[503] Service Unavailable:
-
-    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embedding-web-app.modal.run/embed-batch'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T19:38:07.665199+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;texts&quot;: [&quot;First document to embed&quot;, &quot;Second document to embed&quot;, &quot;Third document to embed&quot;], &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/batch"/>
-			<failure type="failure" message="1. Test Case ID: FO8Y2V
-
-- Server error
-
-[503] Service Unavailable:
-
-    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embedding-web-app.modal.run/embed-batch'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T19:38:07.665199+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;texts&quot;: [&quot;First document to embed&quot;, &quot;Second document to embed&quot;, &quot;Third document to embed&quot;], &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/batch"/>
-		</testcase>
-		<testcase name="POST /api/v1/embed/config" time="1.750649">
+		<testcase name="POST /api/v1/embed/config" time="3.685975">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="POST /api/v1/embed/similarity" time="5.242496">
-			<failure type="failure" message="1. Test Case ID: jJ5I2N
-
-- Server error
-
-[503] Service Unavailable:
-
-    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embedding-web-app.modal.run/embed-batch'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T19:38:08.229584+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text1&quot;: &quot;Tenant organizing workshop next Tuesday.&quot;, &quot;text2&quot;: &quot;RSVP for the housing rights clinic.&quot;, &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/similarity"/>
-			<failure type="failure" message="1. Test Case ID: jJ5I2N
-
-- Server error
-
-[503] Service Unavailable:
-
-    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embedding-web-app.modal.run/embed-batch'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T19:38:08.229584+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text1&quot;: &quot;Tenant organizing workshop next Tuesday.&quot;, &quot;text2&quot;: &quot;RSVP for the housing rights clinic.&quot;, &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/similarity"/>
-			<failure type="failure" message="1. Test Case ID: jJ5I2N
-
-- Server error
-
-[503] Service Unavailable:
-
-    `{&quot;error&quot;:&quot;Embedding service error: Client error '404 Not Found' for url 'https://vecinita--vecinita-embedding-embedding-web-app.modal.run/embed-batch'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404&quot;,&quot;timestamp&quot;:&quot;2026-04-12T19:38:08.229584+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text1&quot;: &quot;Tenant organizing workshop next Tuesday.&quot;, &quot;text2&quot;: &quot;RSVP for the housing rights clinic.&quot;, &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/similarity"/>
-		</testcase>
-		<testcase name="POST /api/v1/scrape" time="3.731348"/>
-		<testcase name="POST /api/v1/scrape/cleanup" time="0.347151">
+		<testcase name="POST /api/v1/embed/similarity" time="11.893632"/>
+		<testcase name="POST /api/v1/scrape" time="5.974036"/>
+		<testcase name="POST /api/v1/scrape/cleanup" time="0.582117">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="POST /api/v1/scrape/reindex" time="2.650743">
-			<failure type="failure" message="1. Test Case ID: RcfYxm
+		<testcase name="POST /api/v1/scrape/reindex" time="13.022500">
+			<failure type="failure" message="1. Test Case ID: KLDoP8
 
 - Server error
 
 [502] Bad Gateway:
 
-    `{&quot;error&quot;:&quot;Reindex service request failed: [Errno -2] Name or service not known&quot;,&quot;timestamp&quot;:&quot;2026-04-12T19:38:33.795777+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Reindex service request failed: [Errno -2] Name or service not known&quot;,&quot;timestamp&quot;:&quot;2026-04-13T17:14:00.302919+00:00&quot;}`
 
 Reproduce with:
 
     curl -X POST 'https://vecinita-gateway-lx27.onrender.com/api/v1/scrape/reindex?verbose=false&amp;x-schemathesis-unknown-property=42'"/>
-			<failure type="failure" message="1. Test Case ID: RcfYxm
+			<failure type="failure" message="1. Test Case ID: KLDoP8
 
 - Server error
 
 [502] Bad Gateway:
 
-    `{&quot;error&quot;:&quot;Reindex service request failed: [Errno -2] Name or service not known&quot;,&quot;timestamp&quot;:&quot;2026-04-12T19:38:33.795777+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Reindex service request failed: [Errno -2] Name or service not known&quot;,&quot;timestamp&quot;:&quot;2026-04-13T17:14:00.302919+00:00&quot;}`
 
 Reproduce with:
 
     curl -X POST 'https://vecinita-gateway-lx27.onrender.com/api/v1/scrape/reindex?verbose=false&amp;x-schemathesis-unknown-property=42'"/>
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /" time="0.349861">
+		<testcase name="GET /" time="0.381374">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/ask" time="165.183285"/>
-		<testcase name="GET /api/v1/ask/config" time="0.862033">
+		<testcase name="GET /api/v1/ask" time="160.889607"/>
+		<testcase name="GET /api/v1/ask/config" time="0.932051">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/documents/chunk-statistics" time="2.403315">
+		<testcase name="GET /api/v1/documents/chunk-statistics" time="1.979232">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/documents/download-url" time="2.093327">
+		<testcase name="GET /api/v1/documents/download-url" time="2.638817"/>
+		<testcase name="GET /api/v1/documents/overview" time="4.745372">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/documents/overview" time="5.008714">
+		<testcase name="GET /api/v1/documents/preview" time="3.059911"/>
+		<testcase name="GET /api/v1/documents/tags" time="3.635108">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/documents/preview" time="2.071101">
+		<testcase name="GET /api/v1/embed/config" time="0.416890">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/documents/tags" time="5.357876">
+		<testcase name="GET /api/v1/scrape/history" time="2.281750">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/embed/config" time="0.317481">
+		<testcase name="GET /api/v1/scrape/stats" time="0.400585">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/scrape/history" time="2.192046">
+		<testcase name="GET /config" time="0.512722">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/scrape/stats" time="0.347265">
+		<testcase name="GET /health" time="1.211096">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /config" time="0.388079">
+		<testcase name="GET /integrations/status" time="1.631934">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /health" time="1.203299">
-			<skipped type="skipped">No examples in schema</skipped>
+		<testcase name="GET /api/v1/scrape/{job_id}" time="1.029308"/>
+		<testcase name="POST /api/v1/scrape/{job_id}/cancel" time="0.877564"/>
+		<testcase name="Stateful tests" time="79.234784">
+			<error type="error">Runtime Error
+
+'NoneType' object is not iterable
+
+    Traceback (most recent call last):
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/schemathesis/engine/run/stateful/_executor.py&quot;, line 225, in execute_state_machine_loop
+        InstrumentedStateMachine.run(settings=hypothesis_settings)
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/schemathesis/generation/stateful/state_machine.py&quot;, line 280, in run
+        return run_state_machine_as_test(cls, settings=settings)
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/schemathesis/generation/stateful/__init__.py&quot;, line 42, in run_state_machine_as_test
+        return _run_state_machine_as_test(state_machine_factory, settings=settings, _min_steps=2)
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/stateful.py&quot;, line 269, in run_state_machine_as_test
+        state_machine_test()
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/stateful.py&quot;, line 119, in run_state_machine
+        @given(st.data())
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/core.py&quot;, line 2264, in wrapped_test
+        raise the_error_hypothesis_found
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/schemathesis/specs/openapi/stateful/__init__.py&quot;, line 339, in inner
+        case = draw(cases)
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/internal/conjecture/data.py&quot;, line 1205, in draw
+        return unwrapped.do_draw(self)
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/strategies/_internal/strategies.py&quot;, line 851, in do_draw
+        return data.draw(strategy)
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/internal/conjecture/data.py&quot;, line 1205, in draw
+        return unwrapped.do_draw(self)
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/strategies/_internal/core.py&quot;, line 1927, in do_draw
+        return self.definition(data.draw, *self.args, **self.kwargs)
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/schemathesis/specs/openapi/_hypothesis.py&quot;, line 108, in openapi_cases
+        path_parameters_ = generate_parameter(
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/schemathesis/specs/openapi/_hypothesis.py&quot;, line 700, in generate_parameter
+        value, metadata = get_parameters_value(
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/schemathesis/specs/openapi/_hypothesis.py&quot;, line 643, in get_parameters_value
+        new = draw(strategy)
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/internal/conjecture/data.py&quot;, line 1205, in draw
+        return unwrapped.do_draw(self)
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/strategies/_internal/strategies.py&quot;, line 710, in do_draw
+        result = self.do_filtered_draw(data)
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/strategies/_internal/misc.py&quot;, line 64, in do_filtered_draw
+        return self._transform(self.value)
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/strategies/_internal/strategies.py&quot;, line 699, in _transform
+        result = f(element)
+      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/schemathesis/hooks.py&quot;, line 308, in wrapper
+        return hook(value)
+      File &quot;/root/GitHub/VECINA/vecinita/backend/tests/schemathesis_hooks.py&quot;, line 78, in map_path_parameters
+        out = dict(path_parameters)
+    TypeError: 'NoneType' object is not iterable</error>
 		</testcase>
-		<testcase name="GET /integrations/status" time="1.416503">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /api/v1/scrape/{job_id}" time="24.736347">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="POST /api/v1/scrape/{job_id}/cancel" time="0.872862">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="Stateful tests" time="9.095329"/>
 	</testsuite>
 </testsuites>

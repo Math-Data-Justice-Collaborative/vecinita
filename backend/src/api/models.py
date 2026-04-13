@@ -10,7 +10,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import AliasChoices, BaseModel, ConfigDict, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
 
 # ============================================================================
 # Scrape/Job Management Models
@@ -405,6 +405,15 @@ class EmbedBatchRequest(BaseModel):
         max_length=200,
         description="Optional embedding model id; server default is used when omitted.",
     )
+
+    @field_validator("texts")
+    @classmethod
+    def texts_must_be_non_whitespace(cls, value: list[str]) -> list[str]:
+        """Reject empty or whitespace-only entries (aligns with embedding service validation)."""
+        for item in value:
+            if not item.strip():
+                raise ValueError("Each text must be non-empty and not whitespace-only.")
+        return value
 
     model_config = ConfigDict(
         json_schema_extra={

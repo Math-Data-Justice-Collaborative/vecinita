@@ -14,6 +14,9 @@
 #   SCHEMATHESIS_EXCLUDE_IGNORED_AUTH — set to 0 to keep Schemathesis "ignored_auth" checks
 #       on the agent OpenAPI run (default: 1 — POST /model-selection returns 403 when locked,
 #       which is policy, not missing Bearer credentials)
+#   SCHEMATHESIS_EXCLUDE_AGENT_MODEL_SELECTION — set to 1 to skip POST /model-selection on the
+#       agent run only (avoids auth-policy warnings when LOCK_MODEL_SELECTION locks the endpoint).
+#       Uses OpenAPI operationId set_model_selection_model_selection_post (FastAPI default).
 #   SCHEMATHESIS_SOURCE_URL — optional; known source_url for GET /api/v1/documents/preview and
 #       /download-url (hooks default: https://example.org/community-resource-guide). Set to a URL
 #       that exists in the target Postgres to avoid 404 warnings on live runs.
@@ -31,6 +34,12 @@
 #   SCRAPER_SCHEMATHESIS_ALLOW_MUTATIONS — set to 1 to allow POST on scraper (default: GET-only for production safety)
 #   SCHEMATHESIS_MODAL_MODEL_MAX_EXAMPLES — default: 6 (LLM cost)
 #   SCHEMATHESIS_MODAL_MODEL_REQUEST_TIMEOUT — default: 300 seconds
+#
+# Gateway deploy (Render) — reindex:
+#   For POST /api/v1/scrape/reindex to succeed against a live gateway, set REINDEX_SERVICE_URL
+#   to a publicly resolvable base URL (e.g. Modal scraper web URL) and REINDEX_TRIGGER_TOKEN
+#   to match the scraper service. A 502 with "Name or service not known" means DNS cannot
+#   resolve the configured host (fix in the Render dashboard / secrets, not in this script).
 set -euo pipefail
 
 WAIT_FOR_SCHEMA_SECONDS="${WAIT_FOR_SCHEMA_SECONDS:-30}"
@@ -41,6 +50,7 @@ REQ_TIMEOUT="${SCHEMATHESIS_REQUEST_TIMEOUT:-180}"
 MODEL_REQ_TIMEOUT="${SCHEMATHESIS_MODAL_MODEL_REQUEST_TIMEOUT:-300}"
 MODEL_MAX_EX="${SCHEMATHESIS_MODAL_MODEL_MAX_EXAMPLES:-6}"
 EXCLUDE_IGNORED_AUTH="${SCHEMATHESIS_EXCLUDE_IGNORED_AUTH:-1}"
+EXCLUDE_AGENT_MODEL_SELECTION="${SCHEMATHESIS_EXCLUDE_AGENT_MODEL_SELECTION:-0}"
 
 AGENT_URL="${AGENT_SCHEMA_URL:-}"
 GATEWAY_URL="${GATEWAY_SCHEMA_URL:-}"
@@ -131,6 +141,9 @@ if [[ -n "${AGENT_URL}" ]]; then
   agent_extra=()
   if [[ "${EXCLUDE_IGNORED_AUTH}" == "1" ]]; then
     agent_extra+=( --exclude-checks ignored_auth )
+  fi
+  if [[ "${EXCLUDE_AGENT_MODEL_SELECTION}" == "1" ]]; then
+    agent_extra+=( --exclude-operation-id set_model_selection_model_selection_post )
   fi
   run_agent_or_gateway "${AGENT_URL}" "junit-agent.xml" 0 "${agent_extra[@]+"${agent_extra[@]}"}"
 fi

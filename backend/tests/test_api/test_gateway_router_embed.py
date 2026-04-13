@@ -4,6 +4,9 @@ Unit tests for src/gateway/router_embed.py
 Tests embedding generation and similarity computation endpoints.
 """
 
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 
@@ -101,6 +104,48 @@ class TestEmbedBatchEndpoint:
         texts = [f"Text {i}" for i in range(1000)]
         response = embed_client.post("/api/v1/embed/batch", json={"texts": texts})
         assert response.status_code in [200, 503]
+
+    def test_embed_batch_rejects_empty_string_entries(self, embed_client):
+        """Whitespace and empty strings are rejected before calling upstream."""
+        response = embed_client.post(
+            "/api/v1/embed/batch",
+            json={"texts": ["", ""]},
+        )
+        assert response.status_code == 422
+
+    def test_embed_batch_rejects_whitespace_only_entries(self, embed_client):
+        response = embed_client.post(
+            "/api/v1/embed/batch",
+            json={"texts": ["  ", "\t"]},
+        )
+        assert response.status_code == 422
+
+    @patch("src.api.router_embed.httpx.AsyncClient")
+    def test_embed_batch_maps_upstream_422_to_422(self, mock_async_client, embed_client):
+        """Upstream embedding 422 must not be surfaced as gateway 503 (Schemathesis not_a_server_error)."""
+        mock_response = MagicMock()
+        mock_response.status_code = 422
+        mock_response.json.return_value = {"detail": "invalid payload"}
+        mock_response.raise_for_status.side_effect = httpx.HTTPStatusError(
+            "Unprocessable Entity",
+            request=MagicMock(),
+            response=mock_response,
+        )
+
+        mock_inner = MagicMock()
+        mock_inner.post = AsyncMock(return_value=mock_response)
+        mock_inner.__aenter__ = AsyncMock(return_value=mock_inner)
+        mock_inner.__aexit__ = AsyncMock(return_value=None)
+        mock_async_client.return_value = mock_inner
+
+        response = embed_client.post(
+            "/api/v1/embed/batch",
+            json={"texts": ["Hello", "World"]},
+        )
+        assert response.status_code == 422
+        payload = response.json()
+        assert "error" in payload
+        assert payload["error"] == {"detail": "invalid payload"}
 
 
 class TestSimilarityEndpoint:
@@ -302,6 +347,7 @@ class TestGatewayEmbedOpenapiResponses:
             "/api/v1/embed/similarity",
         ):
             post = spec["paths"][path]["post"]
+            assert "422" in post["responses"], f"missing 422 on {path}"
             assert "503" in post["responses"], f"missing 503 on {path}"
             schema = post["responses"]["503"]["content"]["application/json"]["schema"]
             ref = schema.get("$ref", "")

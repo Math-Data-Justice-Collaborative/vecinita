@@ -189,6 +189,30 @@ Schemathesis exercises the **gateway** and **agent** OpenAPI descriptions in-pro
 - **Auth**: export `GATEWAY_LIVE_BEARER` when the gateway has `ENABLE_AUTH=true`.
 - **Response matrix**: deterministic 4xx/422 checks in `tests/live/test_live_openapi_response_matrix.py` (requires `RENDER_AGENT_URL` for agent rows and `RENDER_GATEWAY_URL` for gateway rows).
 
+**Live CLI checklist (reduces failures and noisy warnings)**
+
+Before `make test-schemathesis-cli` (or `backend/scripts/run_schemathesis_live.sh`) against staging/lx27:
+
+| Goal | Environment variables / notes |
+|------|--------------------------------|
+| Realistic document preview/download | `SCHEMATHESIS_SOURCE_URL` — URL that exists in the target Postgres `documents` data. |
+| Scrape job status / cancel | `SCHEMATHESIS_SCRAPE_JOB_ID` — UUID from a real `POST /api/v1/scrape` job on that environment. |
+| Scrape POST body | `SCHEMATHESIS_SCRAPE_URL` — first URL in the scrape request (default is a placeholder). |
+| Gateway auth | `GATEWAY_LIVE_BEARER` when `ENABLE_AUTH=true`. |
+| Scraper Modal (optional block) | `SCRAPER_SCHEMATHESIS_BEARER` or a valid first key in `SCRAPER_API_KEYS`. |
+
+**Agent `POST /model-selection` (403 vs authentication)**
+
+When `LOCK_MODEL_SELECTION` locks the agent, `POST /model-selection` returns **403** with policy semantics. Schemathesis may still print an “authentication” warning; that is a classification quirk, not a missing Bearer token. To remove the operation from the **agent** CLI run only, set `SCHEMATHESIS_EXCLUDE_AGENT_MODEL_SELECTION=1` (see `backend/scripts/run_schemathesis_live.sh`).
+
+**Gateway `POST /api/v1/scrape/reindex` (502 / DNS)**
+
+The gateway proxies to `REINDEX_SERVICE_URL` (and `REINDEX_TRIGGER_TOKEN`). If the CLI reports `502` with `Name or service not known`, the hostname in `REINDEX_SERVICE_URL` does not resolve from the runner (fix the Render gateway env / secret to a **public** Modal or HTTPS URL—operations concern, not the Schemathesis script).
+
+**OpenAPI vs validation on document/scrape routes**
+
+`GET /api/v1/documents/*` and scrape job routes use strict query/path validation; hooks plus the env vars above are the supported way to satisfy live fuzzing. Job IDs are UUIDs in production, but the API still accepts arbitrary path strings and returns **404** when the job is missing (hooks default to a well-formed UUID example).
+
 **Files**
 
 - `backend/schemathesis.toml` — generation limits, JUnit reports, `continue-on-failure`

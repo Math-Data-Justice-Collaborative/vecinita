@@ -38,6 +38,8 @@ def map_body(context: HookContext, body):  # noqa: ANN001
     operation = context.operation
     if operation is None:
         return body
+    if body is None:
+        body = {}
     path = operation.path
     method = operation.method.upper()
     if path == "/model-selection" and method == "POST":
@@ -62,7 +64,7 @@ def map_query(context: HookContext, query):  # noqa: ANN001
         "/api/v1/documents/download-url",
     }:
         return query
-    out = dict(query)
+    out = {} if query is None else dict(query)
     out["source_url"] = _source_url()
     return out
 
@@ -75,6 +77,6 @@ def map_path_parameters(context: HookContext, path_parameters):  # noqa: ANN001
         return path_parameters
     if operation.path not in {"/api/v1/scrape/{job_id}", "/api/v1/scrape/{job_id}/cancel"}:
         return path_parameters
-    out = dict(path_parameters)
+    out = {} if path_parameters is None else dict(path_parameters)
     out["job_id"] = _scrape_job_id()
     return out

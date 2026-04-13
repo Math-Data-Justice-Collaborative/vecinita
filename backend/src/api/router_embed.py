@@ -104,6 +104,14 @@ async def get_embedding_client() -> httpx.AsyncClient:
     return httpx.AsyncClient(timeout=30.0)
 
 
+def _upstream_unprocessable_detail(response: httpx.Response) -> Any:
+    """Safe JSON or text from embedding service 422 responses."""
+    try:
+        return response.json()
+    except Exception:
+        return response.text or "Unprocessable entity"
+
+
 async def _post_single_embedding(client: httpx.AsyncClient, text: str) -> httpx.Response:
     """Call single embedding endpoint with compatibility fallback payloads."""
     base_url = _embedding_service_url()
@@ -168,6 +176,13 @@ async def embed_text(request: EmbedRequest) -> EmbedResponse:
                 ),
             )
 
+    except httpx.HTTPStatusError as e:
+        if e.response is not None and e.response.status_code == 422:
+            raise HTTPException(
+                status_code=422,
+                detail=_upstream_unprocessable_detail(e.response),
+            ) from e
+        raise HTTPException(status_code=503, detail=f"Embedding service error: {str(e)}") from e
     except httpx.HTTPError as e:
         raise HTTPException(status_code=503, detail=f"Embedding service error: {str(e)}") from e
     except Exception as e:
@@ -210,6 +225,13 @@ async def embed_batch(request: EmbedBatchRequest) -> EmbedBatchResponse:
 
             return EmbedBatchResponse(embeddings=embed_responses, model=model, dimension=dimension)
 
+    except httpx.HTTPStatusError as e:
+        if e.response is not None and e.response.status_code == 422:
+            raise HTTPException(
+                status_code=422,
+                detail=_upstream_unprocessable_detail(e.response),
+            ) from e
+        raise HTTPException(status_code=503, detail=f"Embedding service error: {str(e)}") from e
     except httpx.HTTPError as e:
         raise HTTPException(status_code=503, detail=f"Embedding service error: {str(e)}") from e
     except Exception as e:
@@ -263,6 +285,13 @@ async def compute_similarity(request: SimilarityRequest) -> SimilarityResponse:
                 text1=request.text1, text2=request.text2, similarity=similarity, model=model
             )
 
+    except httpx.HTTPStatusError as e:
+        if e.response is not None and e.response.status_code == 422:
+            raise HTTPException(
+                status_code=422,
+                detail=_upstream_unprocessable_detail(e.response),
+            ) from e
+        raise HTTPException(status_code=503, detail=f"Embedding service error: {str(e)}") from e
     except httpx.HTTPError as e:
         raise HTTPException(status_code=503, detail=f"Embedding service error: {str(e)}") from e
     except Exception as e:
