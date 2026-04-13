@@ -49,6 +49,22 @@ The chat suggestion rollout adds required checks across backend and frontend.
 - **Frontend**: PASS - 375 passed, 1 skipped
 - Command: `make test-unit`
 
+### Test Warning Policy (Model + Scraper services)
+
+To keep CI output actionable, service test runs now suppress two known third-party warning classes:
+
+- `requests.exceptions.RequestsDependencyWarning` emitted at import time in environments with non-critical resolver skew.
+- Python 3.11 `anyio` deprecation warnings for `Task.cancel(msg=...)` / `Future.cancel(msg=...)` in stream tests.
+
+Current configuration locations:
+
+- `services/model-modal/pyproject.toml` (`[tool.pytest.ini_options].filterwarnings`)
+- `services/model-modal/Makefile` (`PYTHONWARNINGS`)
+- `services/scraper/pyproject.toml` (`[tool.pytest.ini_options].filterwarnings`)
+- `services/scraper/Makefile` (`PYTHONWARNINGS`)
+
+This keeps test logs focused on regressions and does not change test assertions or coverage thresholds.
+
 ### ✅ Microservices Contract Tests
 - **Proxy chain contracts**: PASS in CI workflow (`microservices-contracts`)
 - **Coverage**: Gateway -> Proxy -> Model/Embedding/Scraper health and basic API contracts
@@ -82,7 +98,7 @@ Tests were failing due to MODAL_EMBEDDING_ENDPOINT priority in environment confi
 **File**: `backend/tests/test_api/test_gateway_main.py::TestGatewayRootEndpoints::test_config_endpoint`
 - **Root Cause**: `.env` file contains `MODAL_EMBEDDING_ENDPOINT` which takes precedence in `src/api/main.py`
 - **Original Expectation**: `data["embedding_service_url"] == "http://localhost:8001"`
-- **Actual Value**: `https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run`
+- **Actual Value** (legacy Modal host; gateway rewrites to `https://vecinita--vecinita-embedding-web-app.modal.run`): `https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run`
 - **Fix**: Changed test to validate URL exists and is properly configured, not hardcoded localhost
   ```python
   assert "embedding_service_url" in data

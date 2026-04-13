@@ -89,6 +89,8 @@ def test_candidate_urls_include_local_fallbacks_for_remote_base_url(monkeypatch)
     assert "http://localhost:8001" in candidates
     assert "http://127.0.0.1:8001" in candidates
     assert "http://localhost:10000/embedding" not in candidates
+    assert "https://vecinita--vecinita-embedding-web-app.modal.run" in candidates
+    assert not any("embedding-embedding-web-app" in c for c in candidates)
 
 
 def test_embed_documents_falls_back_to_alt_batch_endpoint(monkeypatch):

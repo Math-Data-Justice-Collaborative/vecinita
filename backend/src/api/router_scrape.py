@@ -11,6 +11,7 @@ from pathlib import Path
 
 import httpx
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
+from fastapi import Path as PathParam
 
 # Import scraper components
 from ..services.scraper.scraper import VecinaScraper
@@ -35,6 +36,9 @@ REINDEX_SERVICE_URL = os.getenv(
     "REINDEX_SERVICE_URL", "https://vecinita--vecinita-scraper-api-fastapi.modal.run/jobs"
 ).rstrip("/")
 REINDEX_TRIGGER_TOKEN = os.getenv("REINDEX_TRIGGER_TOKEN", "")
+
+# OpenAPI example only (tests/schemathesis_hooks.py may override live CLI parameters).
+_DEFAULT_OPENAPI_SCRAPE_JOB_ID = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 
 
 async def background_scrape_task(
@@ -347,7 +351,13 @@ async def trigger_reindex(
 
 
 @router.get("/{job_id}")
-async def get_scrape_status(job_id: str) -> ScrapeStatusResponse:
+async def get_scrape_status(
+    job_id: str = PathParam(
+        ...,
+        description="Job UUID returned by POST /api/v1/scrape",
+        examples=[_DEFAULT_OPENAPI_SCRAPE_JOB_ID],
+    ),
+) -> ScrapeStatusResponse:
     """
     Get status of a scraping job.
 
@@ -368,7 +378,13 @@ async def get_scrape_status(job_id: str) -> ScrapeStatusResponse:
 
 
 @router.post("/{job_id}/cancel")
-async def cancel_scrape_job(job_id: str):
+async def cancel_scrape_job(
+    job_id: str = PathParam(
+        ...,
+        description="Job UUID returned by POST /api/v1/scrape",
+        examples=[_DEFAULT_OPENAPI_SCRAPE_JOB_ID],
+    ),
+):
     """
     Cancel a running scraping job.
 

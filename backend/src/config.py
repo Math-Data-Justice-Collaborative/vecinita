@@ -73,8 +73,15 @@ def _normalize_internal_service_url(raw_url: str | None, *, fallback_url: str) -
 def rewrite_deprecated_modal_embedding_host(url: str) -> str | None:
     """Map legacy Modal embedding hostnames to the current ``web_app`` endpoint host.
 
-    Some environments still use ``*-embeddingservicecontainer-api.modal.run`` while
+    Some environments still use ``*-embedding-embeddingservicecontainer-api.modal.run`` while
     the active deployment is ``*-embedding-web-app.modal.run``.
+
+    Replacing only the suffix ``-embeddingservicecontainer-api`` would incorrectly produce
+    ``...-embedding-embedding-web-app...``; we replace the full segment
+    ``embedding-embeddingservicecontainer-api.modal.run`` → ``embedding-web-app.modal.run``.
+
+    A second pass fixes hosts that already contain the mistaken doubled ``embedding`` segment
+    (from older rewrite logic or manual env typos).
     """
     try:
         parsed = urlparse(url)
@@ -84,18 +91,26 @@ def rewrite_deprecated_modal_embedding_host(url: str) -> str | None:
     host = (parsed.hostname or "").strip().lower()
     if not host.endswith(".modal.run"):
         return None
-    if "-embeddingservicecontainer-api.modal.run" not in host:
+
+    new_host = host
+    if "embedding-embeddingservicecontainer-api.modal.run" in new_host:
+        new_host = new_host.replace(
+            "embedding-embeddingservicecontainer-api.modal.run",
+            "embedding-web-app.modal.run",
+        )
+    elif "-embedding-embedding-web-app.modal.run" in new_host:
+        new_host = new_host.replace(
+            "-embedding-embedding-web-app.modal.run",
+            "-embedding-web-app.modal.run",
+        )
+    else:
         return None
 
-    rewritten_host = host.replace(
-        "-embeddingservicecontainer-api.modal.run",
-        "-embedding-web-app.modal.run",
-    )
-    if rewritten_host == host:
+    if new_host == host:
         return None
 
     port_part = f":{parsed.port}" if parsed.port else ""
-    netloc = f"{rewritten_host}{port_part}"
+    netloc = f"{new_host}{port_part}"
     return urlunparse((parsed.scheme or "https", netloc, "", "", "", "")).rstrip("/")
 
 
@@ -122,7 +137,7 @@ EMBEDDING_MODEL: str = os.getenv(
     "sentence-transformers/all-MiniLM-L6-v2",
 )
 EMBEDDING_DIMENSION: int = int(os.getenv("EMBEDDING_DIMENSION", "384"))
-EMBEDDING_SERVICE_URL: str = _normalize_internal_service_url(
+_EMBEDDING_SERVICE_URL_RAW: str = _normalize_internal_service_url(
     os.getenv("VECINITA_EMBEDDING_API_URL")
     or os.getenv("MODAL_EMBEDDING_ENDPOINT")
     or os.getenv("EMBEDDING_SERVICE_URL"),
@@ -132,6 +147,11 @@ EMBEDDING_SERVICE_URL: str = _normalize_internal_service_url(
         else "http://localhost:8001"
     ),
 )
+# Normalize legacy / mistaken Modal hosts once at import (see rewrite_deprecated_modal_embedding_host).
+EMBEDDING_SERVICE_URL: str = (
+    rewrite_deprecated_modal_embedding_host(_EMBEDDING_SERVICE_URL_RAW)
+    or _EMBEDDING_SERVICE_URL_RAW
+).rstrip("/")
 
 # ---------------------------------------------------------------------------
 # Local LLM runtime

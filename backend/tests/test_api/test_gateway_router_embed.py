@@ -286,7 +286,8 @@ class TestEmbeddingUpstreamUrlResolution:
         from src.api import router_embed
 
         resolved = router_embed._embedding_service_url()
-        assert "embedding-web-app.modal.run" in resolved
+        assert resolved == "https://vecinita--vecinita-embedding-web-app.modal.run"
+        assert "embedding-embedding-web-app" not in resolved
         assert "embeddingservicecontainer-api" not in resolved
 
 

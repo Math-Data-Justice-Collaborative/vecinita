@@ -45,8 +45,12 @@ def test_service_request_field_names_remain_supported_by_backend_models() -> Non
     service_query_request = schemas.QueryRequest(query="hola")
     service_batch_request = schemas.BatchQueryRequest(queries=["hola", "adios"])
 
-    backend_single = EmbedRequest.model_validate(service_query_request.model_dump())
-    backend_batch = EmbedBatchRequest.model_validate(service_batch_request.model_dump())
+    backend_single = EmbedRequest.model_validate(
+        service_query_request.model_dump(exclude_none=True)
+    )
+    backend_batch = EmbedBatchRequest.model_validate(
+        service_batch_request.model_dump(exclude_none=True)
+    )
 
     assert backend_single.text == "hola"
     assert backend_batch.texts == ["hola", "adios"]

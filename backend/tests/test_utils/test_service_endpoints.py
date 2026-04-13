@@ -56,6 +56,18 @@ class TestEndpointResolution:
         ep = _reload()
         assert ep.EMBEDDING_ENDPOINT == "https://vecinita--vecinita-embedding-web-app.modal.run"
 
+    def test_embedding_endpoint_rewrites_double_embedding_modal_host(self, monkeypatch):
+        """Render env sometimes stores mistaken …embedding-embedding-web-app… host; normalize at import."""
+        monkeypatch.setenv("RENDER", "true")
+        monkeypatch.setenv(
+            "VECINITA_EMBEDDING_API_URL",
+            "https://vecinita--vecinita-embedding-embedding-web-app.modal.run",
+        )
+
+        ep = _reload()
+        assert ep.EMBEDDING_ENDPOINT == "https://vecinita--vecinita-embedding-web-app.modal.run"
+        assert "embedding-embedding-web-app" not in ep.EMBEDDING_ENDPOINT
+
     def test_scraper_endpoint_falls_back_to_local_jobs(self, monkeypatch):
         monkeypatch.delenv("VECINITA_SCRAPER_API_URL", raising=False)
         monkeypatch.delenv("SCRAPER_SERVICE_URL", raising=False)

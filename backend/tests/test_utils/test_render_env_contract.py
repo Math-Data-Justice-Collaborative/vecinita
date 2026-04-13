@@ -136,3 +136,12 @@ def test_validate_shared_render_env_rejects_reindex_url_https_without_hostname(
     result = validate_shared_render_env(env)
 
     assert any("REINDEX_SERVICE_URL must include a hostname" in e for e in result.errors)
+
+
+def test_validate_shared_render_env_warns_reindex_hostname_not_fqdn(minimal_valid_render_env):
+    env = {**minimal_valid_render_env, "REINDEX_SERVICE_URL": "https://reindex/jobs"}
+
+    result = validate_shared_render_env(env)
+
+    assert result.errors == []
+    assert any("not a FQDN" in w for w in result.warnings)

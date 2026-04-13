@@ -8,37 +8,48 @@ from src.config import normalize_agent_service_url, rewrite_deprecated_modal_emb
 
 pytestmark = pytest.mark.unit
 
+CANONICAL_VECINITA_EMBEDDING_MODAL = "https://vecinita--vecinita-embedding-web-app.modal.run"
+
 
 class TestRewriteDeprecatedModalEmbeddingHost:
     @pytest.mark.parametrize(
-        ("input_url", "expected_suffix"),
+        ("input_url", "expected"),
         [
             (
                 "https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run",
-                "https://vecinita--vecinita-embedding-embedding-web-app.modal.run",
+                CANONICAL_VECINITA_EMBEDDING_MODAL,
             ),
             (
                 "https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run/",
-                "https://vecinita--vecinita-embedding-embedding-web-app.modal.run",
+                CANONICAL_VECINITA_EMBEDDING_MODAL,
             ),
         ],
     )
-    def test_rewrites_legacy_container_host_to_web_app(self, input_url: str, expected_suffix: str):
+    def test_rewrites_legacy_container_host_to_web_app(self, input_url: str, expected: str):
         out = rewrite_deprecated_modal_embedding_host(input_url)
         assert out is not None
-        assert out.rstrip("/") == expected_suffix.rstrip("/")
+        assert out.rstrip("/") == expected
+        assert "embedding-embedding-web-app" not in out
+
+    def test_self_heals_buggy_double_embedding_segment(self):
+        """Older rewrite logic produced ``...embedding-embedding-web-app...``; repair in place."""
+        buggy = "https://vecinita--vecinita-embedding-embedding-web-app.modal.run"
+        out = rewrite_deprecated_modal_embedding_host(buggy)
+        assert out is not None
+        assert out.rstrip("/") == CANONICAL_VECINITA_EMBEDDING_MODAL
+        assert "embedding-embedding-web-app" not in out
 
     def test_preserves_non_default_port(self):
         url = "https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run:443"
         out = rewrite_deprecated_modal_embedding_host(url)
         assert out is not None
-        assert ":443" in out
-        assert "embedding-web-app" in out
+        assert out == f"{CANONICAL_VECINITA_EMBEDDING_MODAL}:443"
+        assert "embedding-embedding-web-app" not in out
 
     @pytest.mark.parametrize(
         "input_url",
         [
-            "https://vecinita--vecinita-embedding-embedding-web-app.modal.run",
+            "https://vecinita--vecinita-embedding-web-app.modal.run",
             "https://other--other-api.modal.run",
             "https://example.com/embed",
             "",

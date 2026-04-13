@@ -14,9 +14,15 @@
 #   SCHEMATHESIS_EXCLUDE_IGNORED_AUTH — set to 0 to keep Schemathesis "ignored_auth" checks
 #       on the agent OpenAPI run (default: 1 — POST /model-selection returns 403 when locked,
 #       which is policy, not missing Bearer credentials)
+#   SCHEMATHESIS_SOURCE_URL — optional; known source_url for GET /api/v1/documents/preview and
+#       /download-url (hooks default: https://example.org/community-resource-guide). Set to a URL
+#       that exists in the target Postgres to avoid 404 warnings on live runs.
+#   SCHEMATHESIS_SCRAPE_JOB_ID — optional; UUID for GET /api/v1/scrape/{job_id} and POST …/cancel
+#       (hooks default: example UUID). Set to a real job id from POST /api/v1/scrape when testing.
+#   SCHEMATHESIS_SCRAPE_URL — optional; first URL in POST /api/v1/scrape body (default: https://example.com/page).
 #
-# Modal microservices (optional; avoids surprise network/cost when unset):
-#   SCHEMATHESIS_MODAL_MICROSERVICES — set to 1 to run Schemathesis against the three Modal OpenAPI URLs
+# Modal microservices (on by default; set SCHEMATHESIS_MODAL_MICROSERVICES=0 to skip):
+#   SCHEMATHESIS_MODAL_MICROSERVICES — default 1: run Schemathesis against Modal embedding, scraper, and model OpenAPI
 #   MODAL_EMBEDDING_SCHEMA_URL — default: https://vecinita--vecinita-embedding-web-app.modal.run/openapi.json
 #   MODAL_SCRAPER_SCHEMA_URL   — default: https://vecinita--vecinita-scraper-api-fastapi.modal.run/openapi.json
 #   MODAL_MODEL_SCHEMA_URL     — default: https://vecinita--vecinita-model-api.modal.run/openapi.json
@@ -39,7 +45,7 @@ EXCLUDE_IGNORED_AUTH="${SCHEMATHESIS_EXCLUDE_IGNORED_AUTH:-1}"
 AGENT_URL="${AGENT_SCHEMA_URL:-}"
 GATEWAY_URL="${GATEWAY_SCHEMA_URL:-}"
 LEGACY="${SCHEMA_URL:-}"
-MODAL_FLAG="${SCHEMATHESIS_MODAL_MICROSERVICES:-0}"
+MODAL_FLAG="${SCHEMATHESIS_MODAL_MICROSERVICES:-1}"
 
 MODAL_EMBEDDING_SCHEMA_URL="${MODAL_EMBEDDING_SCHEMA_URL:-https://vecinita--vecinita-embedding-web-app.modal.run/openapi.json}"
 MODAL_SCRAPER_SCHEMA_URL="${MODAL_SCRAPER_SCHEMA_URL:-https://vecinita--vecinita-scraper-api-fastapi.modal.run/openapi.json}"
@@ -117,7 +123,7 @@ any_core_schema_set() {
 }
 
 if ! any_core_schema_set && [[ "${MODAL_FLAG}" != "1" ]]; then
-  echo "Set AGENT_SCHEMA_URL and/or GATEWAY_SCHEMA_URL (or SCHEMA_URL), or set SCHEMATHESIS_MODAL_MICROSERVICES=1 for Modal-only runs." >&2
+  echo "Set AGENT_SCHEMA_URL and/or GATEWAY_SCHEMA_URL (or SCHEMA_URL), or set SCHEMATHESIS_MODAL_MICROSERVICES=1 (default) for Modal-only OpenAPI runs." >&2
   exit 1
 fi
 
@@ -143,7 +149,7 @@ if [[ -z "${AGENT_URL}" && -z "${GATEWAY_URL}" && -n "${LEGACY}" ]]; then
 fi
 
 if [[ "${MODAL_FLAG}" == "1" ]]; then
-  echo "Modal microservices Schemathesis (SCHEMATHESIS_MODAL_MICROSERVICES=1)"
+  echo "Modal microservices Schemathesis (embedding, scraper, model OpenAPI)"
 
   # --- Embedding Modal ---
   emb_hdrs=()

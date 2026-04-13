@@ -23,6 +23,9 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/documents", tags=["Documents (Public)"])
 
+# Stable OpenAPI example aligned with tests/schemathesis_hooks.py defaults (live CLI + Schemathesis).
+_DEFAULT_SCHEMATHESIS_SOURCE_URL = "https://example.org/community-resource-guide"
+
 EMBEDDING_SERVICE_URL = (
     os.getenv("MODAL_EMBEDDING_ENDPOINT")
     or os.getenv("EMBEDDING_SERVICE_URL")
@@ -459,7 +462,12 @@ async def documents_overview(
 
 @router.get("/preview")
 async def documents_preview(
-    source_url: str = Query(..., description="Source URL to preview"),
+    source_url: str = Query(
+        ...,
+        min_length=1,
+        description="Source URL to preview",
+        examples=[_DEFAULT_SCHEMATHESIS_SOURCE_URL],
+    ),
     limit: int = Query(3, ge=1, le=10, description="Number of chunks to return"),
 ) -> dict[str, Any]:
     """
@@ -511,7 +519,12 @@ async def documents_preview(
 
 @router.get("/download-url")
 async def documents_download_url(
-    source_url: str = Query(..., description="Source URL to resolve download link"),
+    source_url: str = Query(
+        ...,
+        min_length=1,
+        description="Source URL to resolve download link",
+        examples=[_DEFAULT_SCHEMATHESIS_SOURCE_URL],
+    ),
 ) -> dict[str, Any]:
     """Resolve a download URL for a source when available.
 

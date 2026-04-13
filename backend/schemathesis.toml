@@ -1,3 +1,5 @@
+# Gateway live CLI: SCHEMATHESIS_HOOKS=tests.schemathesis_hooks supplies stable query/path/body
+# for document preview, scrape job polling, and POST /api/v1/scrape (see scripts/run_schemathesis_live.sh).
 continue-on-failure = true
 
 [generation]

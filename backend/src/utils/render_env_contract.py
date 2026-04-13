@@ -129,6 +129,14 @@ def _validate_reindex_service_url(env: dict[str, str], result: ValidationResult)
         result.errors.append("REINDEX_SERVICE_URL must include an http:// or https:// scheme")
     if not parsed.hostname:
         result.errors.append("REINDEX_SERVICE_URL must include a hostname")
+        return
+    host = parsed.hostname.strip()
+    if "." not in host:
+        result.warnings.append(
+            "REINDEX_SERVICE_URL hostname is not a FQDN (no dot); the gateway may fail DNS "
+            "with 'Name or service not known'. Prefer a public host such as "
+            "https://vecinita--vecinita-scraper-api-fastapi.modal.run/jobs (see .env.prod.render.example)."
+        )
 
 
 def _validate_strict_flags(env: dict[str, str], result: ValidationResult) -> None:
