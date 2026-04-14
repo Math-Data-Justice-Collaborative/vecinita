@@ -59,7 +59,8 @@ class TestEmbedSingleEndpoint:
         """Test embedding long text."""
         long_text = "hello " * 10000  # Very long text
         response = embed_client.post("/api/v1/embed", json={"text": long_text})
-        assert response.status_code in [200, 503]
+        # Upstream may reject oversized bodies with 422 depending on deployment limits.
+        assert response.status_code in [200, 422, 503]
 
 
 class TestEmbedBatchEndpoint:
@@ -103,7 +104,8 @@ class TestEmbedBatchEndpoint:
         """Test batch endpoint with many texts."""
         texts = [f"Text {i}" for i in range(1000)]
         response = embed_client.post("/api/v1/embed/batch", json={"texts": texts})
-        assert response.status_code in [200, 503]
+        # Upstream may reject oversized batches with 422 depending on deployment limits.
+        assert response.status_code in [200, 422, 503]
 
     def test_embed_batch_rejects_empty_string_entries(self, embed_client):
         """Whitespace and empty strings are rejected before calling upstream."""
