@@ -6,11 +6,11 @@ Forwards requests to the dedicated embedding microservice.
 """
 
 import os
-from typing import Any, cast
+from typing import Annotated, Any, cast
 
 import httpx
 import numpy as np
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 
 from src.config import (
     _normalize_internal_service_url,
@@ -26,6 +26,7 @@ from .models import (
     EmbedRequest,
     EmbedResponse,
     ErrorResponse,
+    GatewayEmbeddingConfigUpdateParams,
     SimilarityRequest,
     SimilarityResponse,
     ValidationErrorResponse,
@@ -318,11 +319,7 @@ async def get_embedding_config() -> EmbeddingConfigResponse:
 
 @router.post("/config")
 async def update_embedding_config(
-    provider: str = Query(..., description="Embedding provider (e.g., 'huggingface')"),
-    model: str = Query(
-        ..., description="Model identifier (e.g., 'sentence-transformers/all-MiniLM-L6-v2')"
-    ),
-    lock: bool | None = Query(None, description="Lock selection to prevent further changes"),
+    params: Annotated[GatewayEmbeddingConfigUpdateParams, Depends()],
 ) -> EmbeddingConfigResponse:
     """
     Update the embedding model configuration.
@@ -341,9 +338,9 @@ async def update_embedding_config(
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Call embedding service config endpoint
-            payload: dict[str, Any] = {"provider": provider, "model": model}
-            if lock is not None:
-                payload["lock"] = lock
+            payload: dict[str, Any] = {"provider": params.provider, "model": params.model}
+            if params.lock is not None:
+                payload["lock"] = params.lock
 
             response = await client.post(
                 f"{EMBEDDING_SERVICE_URL}/config",
@@ -352,13 +349,13 @@ async def update_embedding_config(
             )
             if response.status_code in {404, 405}:
                 # External embedding service does not expose /config; keep gateway-level config only.
-                EMBEDDING_CONFIG["model"] = model
-                EMBEDDING_CONFIG["provider"] = provider
+                EMBEDDING_CONFIG["model"] = params.model
+                EMBEDDING_CONFIG["provider"] = params.provider
                 return EmbeddingConfigResponse(
-                    model=model,
-                    provider=provider,
+                    model=params.model,
+                    provider=params.provider,
                     dimension=cast(int, EMBEDDING_CONFIG["dimension"]),
-                    description=f"Embedding model: {model}",
+                    description=f"Embedding model: {params.model}",
                 )
 
             response.raise_for_status()
@@ -369,13 +366,13 @@ async def update_embedding_config(
                 headers=_embedding_service_headers(),
             )
             if config_response.status_code in {404, 405}:
-                EMBEDDING_CONFIG["model"] = model
-                EMBEDDING_CONFIG["provider"] = provider
+                EMBEDDING_CONFIG["model"] = params.model
+                EMBEDDING_CONFIG["provider"] = params.provider
                 return EmbeddingConfigResponse(
-                    model=model,
-                    provider=provider,
+                    model=params.model,
+                    provider=params.provider,
                     dimension=cast(int, EMBEDDING_CONFIG["dimension"]),
-                    description=f"Embedding model: {model}",
+                    description=f"Embedding model: {params.model}",
                 )
 
             config_response.raise_for_status()
@@ -384,14 +381,14 @@ async def update_embedding_config(
             current = config_data.get("current", {})
 
             # Update local cache
-            EMBEDDING_CONFIG["model"] = current.get("model", model)
-            EMBEDDING_CONFIG["provider"] = current.get("provider", provider)
+            EMBEDDING_CONFIG["model"] = current.get("model", params.model)
+            EMBEDDING_CONFIG["provider"] = current.get("provider", params.provider)
 
             return EmbeddingConfigResponse(
-                model=current.get("model", model),
-                provider=current.get("provider", provider),
+                model=current.get("model", params.model),
+                provider=current.get("provider", params.provider),
                 dimension=cast(int, EMBEDDING_CONFIG["dimension"]),
-                description=f"Embedding model: {current.get('model', model)}",
+                description=f"Embedding model: {current.get('model', params.model)}",
             )
 
     except httpx.HTTPStatusError as e:

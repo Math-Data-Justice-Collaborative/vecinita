@@ -1,149 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<testsuites disabled="0" errors="1" failures="2" tests="24" time="325.4170096431044">
-	<testsuite disabled="0" errors="1" failures="2" name="schemathesis" skipped="14" tests="24" time="325.4170096431044" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
-		<testcase name="POST /api/v1/embed" time="12.517837"/>
-		<testcase name="POST /api/v1/embed/batch" time="11.882808">
-			<failure type="failure" message="1. Test Case ID: E8gAap
-
-- Server error
-
-[503] Service Unavailable:
-
-    `{&quot;error&quot;:&quot;Embedding service error: Client error '422 Unprocessable Entity' for url 'https://vecinita--vecinita-embedding-web-app.modal.run/embed-batch'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422&quot;,&quot;timestamp&quot;:&quot;2026-04-13T17:13:42.809190+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;model&quot;: &quot;sentence-transformers/all-MiniLM-L6-v2&quot;, &quot;texts&quot;: [&quot;&quot;, &quot;&quot;]}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/batch"/>
-			<failure type="failure" message="1. Test Case ID: E8gAap
-
-- Server error
-
-[503] Service Unavailable:
-
-    `{&quot;error&quot;:&quot;Embedding service error: Client error '422 Unprocessable Entity' for url 'https://vecinita--vecinita-embedding-web-app.modal.run/embed-batch'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422&quot;,&quot;timestamp&quot;:&quot;2026-04-13T17:13:42.809190+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;model&quot;: &quot;sentence-transformers/all-MiniLM-L6-v2&quot;, &quot;texts&quot;: [&quot;&quot;, &quot;&quot;]}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/batch"/>
-		</testcase>
-		<testcase name="POST /api/v1/embed/config" time="3.685975">
+<testsuites disabled="0" errors="0" failures="1" tests="24" time="266.7767599459621">
+	<testsuite disabled="0" errors="0" failures="1" name="schemathesis" skipped="14" tests="24" time="266.7767599459621" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
+		<testcase name="POST /api/v1/embed" time="12.819778"/>
+		<testcase name="POST /api/v1/embed/batch" time="8.119064"/>
+		<testcase name="POST /api/v1/embed/config" time="4.250143">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="POST /api/v1/embed/similarity" time="11.893632"/>
-		<testcase name="POST /api/v1/scrape" time="5.974036"/>
-		<testcase name="POST /api/v1/scrape/cleanup" time="0.582117">
+		<testcase name="POST /api/v1/embed/similarity" time="14.683294"/>
+		<testcase name="POST /api/v1/scrape" time="5.406738"/>
+		<testcase name="POST /api/v1/scrape/cleanup" time="0.365021">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="POST /api/v1/scrape/reindex" time="13.022500">
-			<failure type="failure" message="1. Test Case ID: KLDoP8
+		<testcase name="POST /api/v1/scrape/reindex" time="13.375879">
+			<failure type="failure" message="1. Test Case ID: 7b7vFd
 
 - Server error
 
 [502] Bad Gateway:
 
-    `{&quot;error&quot;:&quot;Reindex service request failed: [Errno -2] Name or service not known&quot;,&quot;timestamp&quot;:&quot;2026-04-13T17:14:00.302919+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Reindex service request failed: [Errno -2] Name or service not known&quot;,&quot;timestamp&quot;:&quot;2026-04-13T21:59:49.652168+00:00&quot;}`
 
 Reproduce with:
 
     curl -X POST 'https://vecinita-gateway-lx27.onrender.com/api/v1/scrape/reindex?verbose=false&amp;x-schemathesis-unknown-property=42'"/>
-			<failure type="failure" message="1. Test Case ID: KLDoP8
+			<failure type="failure" message="1. Test Case ID: 7b7vFd
 
 - Server error
 
 [502] Bad Gateway:
 
-    `{&quot;error&quot;:&quot;Reindex service request failed: [Errno -2] Name or service not known&quot;,&quot;timestamp&quot;:&quot;2026-04-13T17:14:00.302919+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Reindex service request failed: [Errno -2] Name or service not known&quot;,&quot;timestamp&quot;:&quot;2026-04-13T21:59:49.652168+00:00&quot;}`
 
 Reproduce with:
 
     curl -X POST 'https://vecinita-gateway-lx27.onrender.com/api/v1/scrape/reindex?verbose=false&amp;x-schemathesis-unknown-property=42'"/>
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /" time="0.381374">
+		<testcase name="GET /" time="0.371512">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/ask" time="160.889607"/>
-		<testcase name="GET /api/v1/ask/config" time="0.932051">
+		<testcase name="GET /api/v1/ask" time="160.023492"/>
+		<testcase name="GET /api/v1/ask/config" time="1.133984">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/documents/chunk-statistics" time="1.979232">
+		<testcase name="GET /api/v1/documents/chunk-statistics" time="2.712066">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/documents/download-url" time="2.638817"/>
-		<testcase name="GET /api/v1/documents/overview" time="4.745372">
+		<testcase name="GET /api/v1/documents/download-url" time="2.732838"/>
+		<testcase name="GET /api/v1/documents/overview" time="5.903538">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/documents/preview" time="3.059911"/>
-		<testcase name="GET /api/v1/documents/tags" time="3.635108">
+		<testcase name="GET /api/v1/documents/preview" time="3.457248"/>
+		<testcase name="GET /api/v1/documents/tags" time="5.361116">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/embed/config" time="0.416890">
+		<testcase name="GET /api/v1/embed/config" time="0.575882">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/scrape/history" time="2.281750">
+		<testcase name="GET /api/v1/scrape/history" time="2.705858">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/scrape/stats" time="0.400585">
+		<testcase name="GET /api/v1/scrape/stats" time="0.777301">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /config" time="0.512722">
+		<testcase name="GET /config" time="0.426587">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /health" time="1.211096">
+		<testcase name="GET /health" time="1.325199">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /integrations/status" time="1.631934">
+		<testcase name="GET /integrations/status" time="1.334214">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/scrape/{job_id}" time="1.029308"/>
-		<testcase name="POST /api/v1/scrape/{job_id}/cancel" time="0.877564"/>
-		<testcase name="Stateful tests" time="79.234784">
-			<error type="error">Runtime Error
-
-'NoneType' object is not iterable
-
-    Traceback (most recent call last):
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/schemathesis/engine/run/stateful/_executor.py&quot;, line 225, in execute_state_machine_loop
-        InstrumentedStateMachine.run(settings=hypothesis_settings)
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/schemathesis/generation/stateful/state_machine.py&quot;, line 280, in run
-        return run_state_machine_as_test(cls, settings=settings)
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/schemathesis/generation/stateful/__init__.py&quot;, line 42, in run_state_machine_as_test
-        return _run_state_machine_as_test(state_machine_factory, settings=settings, _min_steps=2)
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/stateful.py&quot;, line 269, in run_state_machine_as_test
-        state_machine_test()
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/stateful.py&quot;, line 119, in run_state_machine
-        @given(st.data())
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/core.py&quot;, line 2264, in wrapped_test
-        raise the_error_hypothesis_found
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/schemathesis/specs/openapi/stateful/__init__.py&quot;, line 339, in inner
-        case = draw(cases)
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/internal/conjecture/data.py&quot;, line 1205, in draw
-        return unwrapped.do_draw(self)
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/strategies/_internal/strategies.py&quot;, line 851, in do_draw
-        return data.draw(strategy)
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/internal/conjecture/data.py&quot;, line 1205, in draw
-        return unwrapped.do_draw(self)
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/strategies/_internal/core.py&quot;, line 1927, in do_draw
-        return self.definition(data.draw, *self.args, **self.kwargs)
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/schemathesis/specs/openapi/_hypothesis.py&quot;, line 108, in openapi_cases
-        path_parameters_ = generate_parameter(
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/schemathesis/specs/openapi/_hypothesis.py&quot;, line 700, in generate_parameter
-        value, metadata = get_parameters_value(
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/schemathesis/specs/openapi/_hypothesis.py&quot;, line 643, in get_parameters_value
-        new = draw(strategy)
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/internal/conjecture/data.py&quot;, line 1205, in draw
-        return unwrapped.do_draw(self)
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/strategies/_internal/strategies.py&quot;, line 710, in do_draw
-        result = self.do_filtered_draw(data)
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/strategies/_internal/misc.py&quot;, line 64, in do_filtered_draw
-        return self._transform(self.value)
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/hypothesis/strategies/_internal/strategies.py&quot;, line 699, in _transform
-        result = f(element)
-      File &quot;/root/GitHub/VECINA/vecinita/backend/.venv/lib/python3.10/site-packages/schemathesis/hooks.py&quot;, line 308, in wrapper
-        return hook(value)
-      File &quot;/root/GitHub/VECINA/vecinita/backend/tests/schemathesis_hooks.py&quot;, line 78, in map_path_parameters
-        out = dict(path_parameters)
-    TypeError: 'NoneType' object is not iterable</error>
-		</testcase>
+		<testcase name="GET /api/v1/scrape/{job_id}" time="1.300216"/>
+		<testcase name="POST /api/v1/scrape/{job_id}/cancel" time="1.285255"/>
+		<testcase name="Stateful tests" time="16.330539"/>
 	</testsuite>
 </testsuites>

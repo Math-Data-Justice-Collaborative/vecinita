@@ -45,7 +45,13 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .middleware import AuthenticationMiddleware, RateLimitingMiddleware
-from .models import GatewayConfig, HealthCheck, IntegrationComponentStatus, IntegrationsStatus
+from .models import (
+    GatewayConfig,
+    GatewayPublicRootResponse,
+    HealthCheck,
+    IntegrationComponentStatus,
+    IntegrationsStatus,
+)
 from .router_ask import router as ask_router
 from .router_documents import router as documents_router
 from .router_embed import router as embed_router
@@ -408,13 +414,13 @@ async def root(request: Request):
     else:
         front_message = " | Frontend not built (use: npm run build in frontend/)"
 
-    return {
-        "service": "Vecinita Unified API Gateway",
-        "version": "1.0.0",
-        "description": "Consolidated API for Q&A, document viewing, scraping, and embeddings"
+    return GatewayPublicRootResponse(
+        service="Vecinita Unified API Gateway",
+        version="1.0.0",
+        description="Consolidated API for Q&A, document viewing, scraping, and embeddings"
         + front_message,
-        "api_base": "/api/v1",
-        "endpoints": {
+        api_base="/api/v1",
+        endpoints={
             "Q&A": {
                 "ask": "GET /api/v1/ask?question=...",
                 "ask_stream": "GET /api/v1/ask/stream?question=...",
@@ -448,12 +454,12 @@ async def root(request: Request):
                 "openapi": "GET /api/v1/docs/openapi.json",
             },
         },
-        "environment": {
+        environment={
             "agent_service": AGENT_SERVICE_URL,
             "embedding_service": EMBEDDING_SERVICE_URL,
             "database_configured": bool(DATABASE_URL),
         },
-    }
+    )
 
 
 @app.get("/health", response_model=HealthCheck)

@@ -219,20 +219,70 @@ def _get_hf_embeddings_class():
 class AgentRootInfo(BaseModel):
     """`GET /` service discovery payload."""
 
-    service: str
-    status: str
-    version: str
-    endpoints: dict[str, str]
-    message: str
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "service": "Vecinita Backend API",
+                    "status": "running",
+                    "version": "2.0",
+                    "endpoints": {
+                        "health": "/health",
+                        "ask": "/ask?question=<your_question>",
+                        "docs": "/docs",
+                        "config": "/config",
+                    },
+                    "message": "Use the React frontend or call /ask directly.",
+                }
+            ]
+        }
+    )
+
+    service: str = Field(..., examples=["Vecinita Backend API"])
+    status: str = Field(..., examples=["running"])
+    version: str = Field(..., examples=["2.0"])
+    endpoints: dict[str, str] = Field(default_factory=dict)
+    message: str = Field(..., examples=["Service discovery payload."])
 
 
 class AgentHealthResponse(BaseModel):
     """`GET /health` payload; `preflight` mirrors optional startup diagnostics."""
 
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
+            "examples": [
+                {
+                    "status": "ok",
+                    "readiness": "unknown",
+                    "preflight": None,
+                },
+                {
+                    "status": "ok",
+                    "readiness": "ready",
+                    "preflight": {"postgres": "ok"},
+                },
+                {
+                    "status": "ok",
+                    "readiness": "degraded",
+                    "preflight": {"postgres": "slow"},
+                },
+                {
+                    "status": "error",
+                    "readiness": "not_ready",
+                    "preflight": {"postgres": "unreachable"},
+                },
+                {
+                    "status": "ok",
+                    "readiness": "unknown",
+                    "preflight": {"guardrails": "skipped"},
+                },
+            ]
+        },
+    )
 
-    status: str
-    readiness: str
+    status: str = Field(..., examples=["ok"])
+    readiness: str = Field(..., examples=["unknown"])
 
 
 class PrivacyMarkdownPayload(BaseModel):
@@ -244,7 +294,48 @@ class PrivacyMarkdownPayload(BaseModel):
 class ModelSelectionGetApiResponse(BaseModel):
     """`GET /model-selection` — `current` plus the same keys as `GET /config` for `available`."""
 
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
+            "examples": [
+                {
+                    "current": {
+                        "provider": "ollama",
+                        "model": "llama3.1:8b",
+                        "locked": False,
+                    }
+                },
+                {
+                    "current": {
+                        "provider": "ollama",
+                        "model": None,
+                        "locked": False,
+                    }
+                },
+                {
+                    "current": {
+                        "provider": "ollama",
+                        "model": "llama3.1:8b",
+                        "locked": True,
+                    }
+                },
+                {
+                    "current": {
+                        "provider": "ollama",
+                        "model": "mistral",
+                        "locked": False,
+                    }
+                },
+                {
+                    "current": {
+                        "provider": "ollama",
+                        "model": "phi3:mini",
+                        "locked": False,
+                    }
+                },
+            ]
+        },
+    )
 
     current: dict[str, Any]
 
@@ -252,7 +343,25 @@ class ModelSelectionGetApiResponse(BaseModel):
 class AgentLlmConfigApiResponse(BaseModel):
     """`GET /config` — LLM catalog plus `runtime` tuning block."""
 
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
+            "examples": [
+                {"providers": [], "models": {"ollama": ["llama3.1:8b"]}},
+                {"providers": [{"name": "ollama"}], "models": {"ollama": []}},
+                {
+                    "providers": [{"name": "ollama", "available": True}],
+                    "models": {"ollama": ["llama3.1:8b", "mistral"]},
+                },
+                {
+                    "providers": [],
+                    "models": {"ollama": ["phi3:mini"]},
+                    "runtime": {"temperature": 0.7},
+                },
+                {"providers": [], "models": {}, "defaultProvider": "ollama"},
+            ]
+        },
+    )
 
     providers: list[Any] = Field(default_factory=list)
 
@@ -260,7 +369,58 @@ class AgentLlmConfigApiResponse(BaseModel):
 class AgentHttp422Example(BaseModel):
     """Documented FastAPI validation error envelope for query parameters."""
 
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
+            "examples": [
+                {
+                    "detail": [
+                        {
+                            "loc": ["query", "rerank_top_k"],
+                            "msg": "ensure this value is greater than or equal to 1",
+                            "type": "greater_than_equal",
+                        }
+                    ]
+                },
+                {
+                    "detail": [
+                        {
+                            "loc": ["query", "question"],
+                            "msg": "field required",
+                            "type": "value_error.missing",
+                        }
+                    ]
+                },
+                {
+                    "detail": [
+                        {
+                            "loc": ["query", "tag_match_mode"],
+                            "msg": "string does not match pattern",
+                            "type": "value_error.str.regex",
+                        }
+                    ]
+                },
+                {
+                    "detail": [
+                        {
+                            "loc": ["body"],
+                            "msg": "JSON decode error",
+                            "type": "value_error.jsondecode",
+                        }
+                    ]
+                },
+                {
+                    "detail": [
+                        {
+                            "loc": ["query", "rerank_top_k"],
+                            "msg": "ensure this value is less than or equal to 50",
+                            "type": "less_than_equal",
+                        }
+                    ]
+                },
+            ]
+        },
+    )
 
     detail: list[dict[str, Any]] = Field(
         ...,
@@ -280,7 +440,48 @@ class AgentHttp422Example(BaseModel):
 class AgentAskJsonResponse(BaseModel):
     """Typical successful JSON body for ``GET /ask`` (extra keys preserved)."""
 
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
+            "examples": [
+                {
+                    "answer": "Nearby clinics include Eastside Community Health Center...",
+                    "thread_id": "default",
+                    "response_time_ms": 842,
+                    "sources": [],
+                    "latency_breakdown": None,
+                },
+                {
+                    "answer": "The pantry is open Tuesdays 10am–2pm.",
+                    "thread_id": "food-1",
+                    "response_time_ms": 500,
+                    "sources": [{"url": "https://food.example"}],
+                    "latency_breakdown": {"llm_ms": 400},
+                },
+                {
+                    "answer": "Bring photo ID and proof of income.",
+                    "thread_id": "wic-2",
+                    "response_time_ms": 1200,
+                    "sources": [],
+                    "latency_breakdown": {"retrieval_ms": 200, "llm_ms": 900},
+                },
+                {
+                    "answer": "Cooling centers include Main Library this weekend.",
+                    "thread_id": "heat-3",
+                    "response_time_ms": 2000,
+                    "sources": [{"url": "https://city.gov/heat", "title": "Heat"}],
+                    "latency_breakdown": None,
+                },
+                {
+                    "answer": "Short summary of tenant rights…",
+                    "thread_id": "default",
+                    "response_time_ms": 300,
+                    "sources": [],
+                    "latency_breakdown": {},
+                },
+            ]
+        },
+    )
 
     answer: str = Field(
         ...,
@@ -292,6 +493,101 @@ class AgentAskJsonResponse(BaseModel):
     latency_breakdown: dict[str, Any] | None = Field(
         default=None,
         description="Optional retrieval / LLM timing breakdown.",
+    )
+
+
+class AgentTestDbSearchResponse(BaseModel):
+    """``GET /test-db-search`` — diagnostic payload (shape varies by branch)."""
+
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
+            "examples": [
+                {"status": "success", "hits": 3},
+                {"status": "no_results", "hits": 0},
+                {"status": "error", "detail": "connection refused"},
+                {"status": "success", "hits": 1, "took_ms": 12},
+                {"status": "success", "hits": 50, "truncated": True},
+            ]
+        },
+    )
+
+    status: str | None = Field(
+        default=None,
+        description="success | no_results | error | omitted for early error dicts.",
+        examples=["success"],
+    )
+
+
+class AgentDbInfoResponse(BaseModel):
+    """``GET /db-info`` — database inspection payload."""
+
+    model_config = ConfigDict(
+        extra="allow",
+        json_schema_extra={
+            "examples": [
+                {"status": "success", "tables": ["chunks", "sources"]},
+                {"status": "error", "detail": "permission denied"},
+                {"status": "success", "version": "15"},
+                {"status": "success", "pool_size": 5},
+                {"status": "degraded", "lag_ms": 200},
+            ]
+        },
+    )
+
+    status: str | None = Field(default=None, examples=["success"])
+
+
+class ModelSelectionPostResponse(BaseModel):
+    """``POST /model-selection`` success body."""
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "status": "ok",
+                    "current": {
+                        "provider": "ollama",
+                        "model": "llama3.1:8b",
+                        "locked": False,
+                    },
+                },
+                {
+                    "status": "ok",
+                    "current": {"provider": "ollama", "model": None, "locked": False},
+                },
+                {
+                    "status": "ok",
+                    "current": {
+                        "provider": "ollama",
+                        "model": "mistral",
+                        "locked": False,
+                    },
+                },
+                {
+                    "status": "ok",
+                    "current": {
+                        "provider": "ollama",
+                        "model": "llama3.1:8b",
+                        "locked": True,
+                    },
+                },
+                {
+                    "status": "ok",
+                    "current": {
+                        "provider": "ollama",
+                        "model": "phi3:mini",
+                        "locked": False,
+                    },
+                },
+            ]
+        }
+    )
+
+    status: str = Field(default="ok", examples=["ok"])
+    current: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Persisted selection after update.",
     )
 
 
@@ -2229,7 +2525,11 @@ async def health():
     }
 
 
-@app.get("/test-db-search", tags=["Diagnostics"])
+@app.get(
+    "/test-db-search",
+    response_model=AgentTestDbSearchResponse,
+    tags=["Diagnostics"],
+)
 def test_db_search(
     query: str = Query(
         default="community resources",
@@ -2253,11 +2553,13 @@ def test_db_search(
         logger.info("Test DB Search: Query = '%s'", query)
 
         if psycopg2 is None:
-            return {"error": "psycopg2 not available"}
+            return AgentTestDbSearchResponse.model_validate({"error": "psycopg2 not available"})
 
         database_url = (os.environ.get("DATABASE_URL") or "").strip()
         if not database_url:
-            return {"error": "DATABASE_URL not configured"}
+            return AgentTestDbSearchResponse.model_validate(
+                {"error": "DATABASE_URL not configured"}
+            )
 
         # Step 1: Check if table exists and has data
         try:
@@ -2343,41 +2645,47 @@ def test_db_search(
             similarities = [doc.get("similarity", 0) for doc in result_data]
             logger.info(f"Test DB Search: Similarity scores = {similarities}")
 
-            return {
-                "status": "success",
-                "query": query,
-                "diagnostics": diagnostics,
-                "results_found": len(result_data),
-                "similarity_range": {
-                    "min": min(similarities),
-                    "max": max(similarities),
-                    "avg": sum(similarities) / len(similarities),
-                },
-                "sample_result": {
-                    "content_preview": result_data[0].get("content", "")[:200],
-                    "source_url": result_data[0].get("source_url", "N/A"),
-                    "similarity": result_data[0].get("similarity", 0),
-                },
-                "all_similarities": similarities,
-            }
+            return AgentTestDbSearchResponse.model_validate(
+                {
+                    "status": "success",
+                    "query": query,
+                    "diagnostics": diagnostics,
+                    "results_found": len(result_data),
+                    "similarity_range": {
+                        "min": min(similarities),
+                        "max": max(similarities),
+                        "avg": sum(similarities) / len(similarities),
+                    },
+                    "sample_result": {
+                        "content_preview": result_data[0].get("content", "")[:200],
+                        "source_url": result_data[0].get("source_url", "N/A"),
+                        "similarity": result_data[0].get("similarity", 0),
+                    },
+                    "all_similarities": similarities,
+                }
+            )
         else:
-            return {
-                "status": "no_results",
-                "query": query,
-                "diagnostics": diagnostics,
-                "message": "No results found. See diagnostics for details.",
-                "recommendations": _get_recommendations(diagnostics),
-            }
+            return AgentTestDbSearchResponse.model_validate(
+                {
+                    "status": "no_results",
+                    "query": query,
+                    "diagnostics": diagnostics,
+                    "message": "No results found. See diagnostics for details.",
+                    "recommendations": _get_recommendations(diagnostics),
+                }
+            )
 
     except Exception as e:
         logger.error(f"Test DB Search Error: {e}")
-        return {
-            "status": "error",
-            "query": query,
-            "diagnostics": diagnostics,
-            "error": str(e),
-            "error_type": type(e).__name__,
-        }
+        return AgentTestDbSearchResponse.model_validate(
+            {
+                "status": "error",
+                "query": query,
+                "diagnostics": diagnostics,
+                "error": str(e),
+                "error_type": type(e).__name__,
+            }
+        )
 
 
 def _get_recommendations(diagnostics: dict) -> list:
@@ -2451,7 +2759,7 @@ def _response_payload(
     return payload
 
 
-@app.get("/db-info", tags=["Diagnostics"])
+@app.get("/db-info", response_model=AgentDbInfoResponse, tags=["Diagnostics"])
 def get_db_info():
     """Get basic database information for debugging.
 
@@ -2459,11 +2767,15 @@ def get_db_info():
         Database statistics and sample data
     """
     if psycopg2 is None:
-        return {"status": "error", "error": "psycopg2 not available"}
+        return AgentDbInfoResponse.model_validate(
+            {"status": "error", "error": "psycopg2 not available"}
+        )
 
     database_url = (os.environ.get("DATABASE_URL") or "").strip()
     if not database_url:
-        return {"status": "error", "error": "DATABASE_URL not configured"}
+        return AgentDbInfoResponse.model_validate(
+            {"status": "error", "error": "DATABASE_URL not configured"}
+        )
 
     try:
         info: dict[str, Any] = {}
@@ -2524,15 +2836,19 @@ def get_db_info():
             info["rpc_function_works"] = False
             info["rpc_error"] = str(e)
 
-        return {
-            "status": "success",
-            "database_info": info,
-            "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
-            "expected_dimension": 384,
-        }
+        return AgentDbInfoResponse.model_validate(
+            {
+                "status": "success",
+                "database_info": info,
+                "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+                "expected_dimension": 384,
+            }
+        )
 
     except Exception as e:
-        return {"status": "error", "error": str(e), "error_type": type(e).__name__}
+        return AgentDbInfoResponse.model_validate(
+            {"status": "error", "error": str(e), "error_type": type(e).__name__}
+        )
 
 
 def _coerce_ask_query_parameters(
@@ -3323,7 +3639,7 @@ def get_model_selection():
 )
 def set_model_selection(
     selection: ModelSelection = Body(openapi_examples=AGENT_MODEL_SELECTION_BODY),
-):
+) -> ModelSelectionPostResponse:
     """Set the local model selection if not locked."""
     if CURRENT_SELECTION.get("locked"):
         raise HTTPException(status_code=403, detail="Model selection is locked")
@@ -3347,7 +3663,7 @@ def set_model_selection(
 
     # Save selection (file + in-memory)
     _save_model_selection_to_file("ollama", selection.model, selection.lock)
-    return {"status": "ok", "current": CURRENT_SELECTION}
+    return ModelSelectionPostResponse(status="ok", current=dict(CURRENT_SELECTION))
 
 
 @app.get("/config", response_model=AgentLlmConfigApiResponse, tags=["Configuration"])

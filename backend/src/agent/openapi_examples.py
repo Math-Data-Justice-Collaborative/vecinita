@@ -128,4 +128,12 @@ AGENT_MODEL_SELECTION_BODY: dict[str, dict[str, Any]] = {
         "summary": "Lock selection",
         "value": {"provider": "ollama", "model": "llama3.1:8b", "lock": True},
     },
+    "lock_without_model": {
+        "summary": "Lock policy without changing the active model tag",
+        "value": {"provider": "ollama", "model": None, "lock": True},
+    },
+    "alternate_tag": {
+        "summary": "Pin a different local tag when available",
+        "value": {"provider": "ollama", "model": "llama3.1:70b", "lock": False},
+    },
 }

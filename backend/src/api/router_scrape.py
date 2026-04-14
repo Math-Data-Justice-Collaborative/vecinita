@@ -8,9 +8,10 @@ import asyncio
 import os
 import tempfile
 from pathlib import Path
+from typing import Annotated
 
 import httpx
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi import Path as PathParam
 
 # Import scraper components
@@ -18,8 +19,13 @@ from ..services.scraper.scraper import VecinaScraper
 from ..services.scraper.utils import prepare_scrape_urls
 from .job_manager import job_manager
 from .models import (
+    GatewayReindexTriggerResponse,
     JobStatus,
     LoaderType,
+    ScrapeGatewayCleanupResponse,
+    ScrapeGatewayHistoryQueryParams,
+    ScrapeGatewayReindexQueryParams,
+    ScrapeGatewayStatsResponse,
     ScrapeHistoryResponse,
     ScrapeJobResult,
     ScrapeRequest,
@@ -261,8 +267,7 @@ async def submit_scrape_request(
 
 @router.get("/history")
 async def list_scrape_history(
-    limit: int = Query(50, ge=1, le=100),
-    offset: int = Query(0, ge=0),
+    params: Annotated[ScrapeGatewayHistoryQueryParams, Depends()],
 ) -> ScrapeHistoryResponse:
     """
     List scraping job history.
@@ -276,13 +281,13 @@ async def list_scrape_history(
     Returns:
         List of jobs from history
     """
-    jobs, total = await job_manager.list_jobs(limit=limit, offset=offset)
-    page = (offset // limit) + 1
-    return ScrapeHistoryResponse(jobs=jobs, total=total, page=page, limit=limit)
+    jobs, total = await job_manager.list_jobs(limit=params.limit, offset=params.offset)
+    page = (params.offset // params.limit) + 1
+    return ScrapeHistoryResponse(jobs=jobs, total=total, page=page, limit=params.limit)
 
 
-@router.get("/stats")
-async def get_scrape_stats():
+@router.get("/stats", response_model=ScrapeGatewayStatsResponse)
+async def get_scrape_stats() -> ScrapeGatewayStatsResponse:
     """
     Get scraping subsystem statistics.
 
@@ -290,11 +295,11 @@ async def get_scrape_stats():
         Stats about jobs, resource usage, etc.
     """
     stats = await job_manager.get_stats()
-    return stats
+    return ScrapeGatewayStatsResponse.model_validate(stats)
 
 
-@router.post("/cleanup")
-async def cleanup_old_jobs():
+@router.post("/cleanup", response_model=ScrapeGatewayCleanupResponse)
+async def cleanup_old_jobs() -> ScrapeGatewayCleanupResponse:
     """
     Cleanup old jobs from history.
 
@@ -305,17 +310,16 @@ async def cleanup_old_jobs():
         Number of jobs deleted
     """
     deleted_count = await job_manager.cleanup_old_jobs()
-    return {
-        "deleted_jobs": deleted_count,
-        "message": f"Deleted {deleted_count} old jobs",
-    }
+    return ScrapeGatewayCleanupResponse(
+        deleted_jobs=deleted_count,
+        message=f"Deleted {deleted_count} old jobs",
+    )
 
 
-@router.post("/reindex")
+@router.post("/reindex", response_model=GatewayReindexTriggerResponse)
 async def trigger_reindex(
-    clean: bool = Query(False, description="Run full clean reindex before scraping"),
-    verbose: bool = Query(False, description="Enable verbose pipeline output"),
-):
+    params: Annotated[ScrapeGatewayReindexQueryParams, Depends()],
+) -> GatewayReindexTriggerResponse:
     """Trigger scraper+embedding reindex flow on Modal reindex service."""
     if not REINDEX_SERVICE_URL:
         raise HTTPException(
@@ -331,13 +335,13 @@ async def trigger_reindex(
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(
                 f"{REINDEX_SERVICE_URL}/reindex",
-                params={"clean": clean, "stream": True, "verbose": verbose},
+                params={"clean": params.clean, "stream": True, "verbose": params.verbose},
                 headers=headers,
             )
             response.raise_for_status()
             payload = response.json()
-            payload["service_url"] = REINDEX_SERVICE_URL
-            return payload
+            merged = {**payload, "service_url": REINDEX_SERVICE_URL}
+            return GatewayReindexTriggerResponse.model_validate(merged)
     except httpx.HTTPStatusError as exc:
         detail = exc.response.text if exc.response is not None else str(exc)
         raise HTTPException(

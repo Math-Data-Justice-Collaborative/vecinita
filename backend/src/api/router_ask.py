@@ -12,30 +12,24 @@ import os
 import threading
 import time
 from collections.abc import AsyncGenerator
-from typing import Any
+from typing import Annotated, Any
 from uuid import uuid4
 
 import httpx
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 
-from src.agent.openapi_examples import (
-    AGENT_ASK_CONTEXT_ANSWER,
-    AGENT_ASK_FLAG_FALSE,
-    AGENT_ASK_FLAG_TRUE,
-    AGENT_ASK_LANG,
-    AGENT_ASK_MODEL,
-    AGENT_ASK_PROVIDER,
-    AGENT_ASK_QUESTION,
-    AGENT_ASK_RERANK_TOP_K,
-    AGENT_ASK_TAG_MATCH_MODE,
-    AGENT_ASK_TAGS,
-    AGENT_ASK_THREAD_ID,
-)
 from src.config import normalize_agent_service_url
 from src.service_endpoints import AGENT_SERVICE_URL
 
-from .models import AskResponse, ErrorResponse, SourceCitation, ValidationErrorResponse
+from .models import (
+    AskResponse,
+    ErrorResponse,
+    GatewayAskConfigPayload,
+    GatewayAskQueryParams,
+    SourceCitation,
+    ValidationErrorResponse,
+)
 
 router = APIRouter(prefix="/ask", tags=["Q&A"])
 logger = logging.getLogger(__name__)
@@ -226,63 +220,7 @@ def get_demo_response(question: str, lang: str | None = None) -> AskResponse:
 
 @router.get("", response_model=AskResponse, responses=_GATEWAY_ASK_OPENAPI_RESPONSES)
 async def ask_question(
-    question: str = Query(
-        ...,
-        description="User question",
-        openapi_examples=AGENT_ASK_QUESTION,
-    ),
-    thread_id: str | None = Query(
-        None,
-        description="Conversation thread ID",
-        openapi_examples=AGENT_ASK_THREAD_ID,
-    ),
-    context_answer: str | None = Query(
-        None,
-        description="Prior assistant answer context",
-        openapi_examples=AGENT_ASK_CONTEXT_ANSWER,
-    ),
-    lang: str | None = Query(
-        None,
-        description="Override language detection (es/en)",
-        openapi_examples=AGENT_ASK_LANG,
-    ),
-    provider: str | None = Query(
-        None,
-        description="Local LLM provider override (only ollama/local is supported)",
-        openapi_examples=AGENT_ASK_PROVIDER,
-    ),
-    model: str | None = Query(
-        None,
-        description="Local LLM model name",
-        openapi_examples=AGENT_ASK_MODEL,
-    ),
-    tags: str | None = Query(
-        None,
-        description="Comma-separated metadata tags",
-        openapi_examples=AGENT_ASK_TAGS,
-    ),
-    tag_match_mode: str = Query(
-        "any",
-        description="Tag match mode: any|all",
-        openapi_examples=AGENT_ASK_TAG_MATCH_MODE,
-    ),
-    include_untagged_fallback: bool = Query(
-        True,
-        description="Include untagged docs when tag filter is active",
-        openapi_examples=AGENT_ASK_FLAG_TRUE,
-    ),
-    rerank: bool = Query(
-        False,
-        description="Enable backend reranking for search results",
-        openapi_examples=AGENT_ASK_FLAG_FALSE,
-    ),
-    rerank_top_k: int = Query(
-        10,
-        ge=1,
-        le=50,
-        description="Number of items to keep after rerank",
-        openapi_examples=AGENT_ASK_RERANK_TOP_K,
-    ),
+    params: Annotated[GatewayAskQueryParams, Depends()],
 ) -> AskResponse:
     """
     Ask a question and get an answer with source citations.
@@ -302,28 +240,28 @@ async def ask_question(
     """
     # Return demo response if demo mode enabled or agent service unavailable
     if DEMO_MODE:
-        return get_demo_response(question, lang)
+        return get_demo_response(params.question, params.lang)
 
     try:
         started_at = time.perf_counter()
         # Build query parameters for agent service
-        params: dict[str, Any] = {"question": question}
-        if thread_id:
-            params["thread_id"] = thread_id
-        if context_answer:
-            params["context_answer"] = context_answer
-        if lang:
-            params["lang"] = lang
-        if provider:
-            params["provider"] = provider
-        if model:
-            params["model"] = model
-        if tags:
-            params["tags"] = tags
-        params["tag_match_mode"] = tag_match_mode
-        params["include_untagged_fallback"] = str(include_untagged_fallback).lower()
-        params["rerank"] = str(rerank).lower()
-        params["rerank_top_k"] = rerank_top_k
+        upstream: dict[str, Any] = {"question": params.question}
+        if params.thread_id:
+            upstream["thread_id"] = params.thread_id
+        if params.context_answer:
+            upstream["context_answer"] = params.context_answer
+        if params.lang:
+            upstream["lang"] = params.lang
+        if params.provider:
+            upstream["provider"] = params.provider
+        if params.model:
+            upstream["model"] = params.model
+        if params.tags:
+            upstream["tags"] = params.tags
+        upstream["tag_match_mode"] = params.tag_match_mode
+        upstream["include_untagged_fallback"] = str(params.include_untagged_fallback).lower()
+        upstream["rerank"] = str(params.rerank).lower()
+        upstream["rerank_top_k"] = params.rerank_top_k
 
         # Forward request to agent service
         client = _get_agent_client()
@@ -331,7 +269,7 @@ async def ask_question(
             raise HTTPException(status_code=503, detail="Agent service client not available")
         response = await client.get(
             f"{_agent_service_url()}/ask",
-            params=params,
+            params=upstream,
             timeout=_get_agent_timeout(),
         )
         response.raise_for_status()
@@ -339,10 +277,10 @@ async def ask_question(
 
         # Map agent response to gateway format
         return AskResponse(
-            question=question,
+            question=params.question,
             answer=data.get("answer", ""),
             sources=data.get("sources", []),
-            language=data.get("language", lang or "en"),
+            language=data.get("language", params.lang or "en"),
             model=data.get("model", "unknown"),
             response_time_ms=(
                 data.get("response_time_ms")
@@ -481,63 +419,7 @@ async def sse_stream_forward_generator(
 
 @router.get("/stream", responses=_GATEWAY_ASK_OPENAPI_RESPONSES)
 async def ask_question_stream(
-    question: str = Query(
-        ...,
-        description="User question",
-        openapi_examples=AGENT_ASK_QUESTION,
-    ),
-    thread_id: str | None = Query(
-        None,
-        description="Conversation thread ID",
-        openapi_examples=AGENT_ASK_THREAD_ID,
-    ),
-    context_answer: str | None = Query(
-        None,
-        description="Prior assistant answer context",
-        openapi_examples=AGENT_ASK_CONTEXT_ANSWER,
-    ),
-    lang: str | None = Query(
-        None,
-        description="Override language detection (es/en)",
-        openapi_examples=AGENT_ASK_LANG,
-    ),
-    provider: str | None = Query(
-        None,
-        description="Local LLM provider override (only ollama/local is supported)",
-        openapi_examples=AGENT_ASK_PROVIDER,
-    ),
-    model: str | None = Query(
-        None,
-        description="Local LLM model name",
-        openapi_examples=AGENT_ASK_MODEL,
-    ),
-    tags: str | None = Query(
-        None,
-        description="Comma-separated metadata tags",
-        openapi_examples=AGENT_ASK_TAGS,
-    ),
-    tag_match_mode: str = Query(
-        "any",
-        description="Tag match mode: any|all",
-        openapi_examples=AGENT_ASK_TAG_MATCH_MODE,
-    ),
-    include_untagged_fallback: bool = Query(
-        True,
-        description="Include untagged docs when tag filter is active",
-        openapi_examples=AGENT_ASK_FLAG_TRUE,
-    ),
-    rerank: bool = Query(
-        False,
-        description="Enable backend reranking for search results",
-        openapi_examples=AGENT_ASK_FLAG_FALSE,
-    ),
-    rerank_top_k: int = Query(
-        10,
-        ge=1,
-        le=50,
-        description="Number of items to keep after rerank",
-        openapi_examples=AGENT_ASK_RERANK_TOP_K,
-    ),
+    params: Annotated[GatewayAskQueryParams, Depends()],
 ):
     """
     Ask a question and stream the response as Server-Sent Events (SSE).
@@ -565,24 +447,24 @@ async def ask_question_stream(
     logger.info(
         "Incoming /ask/stream request_id=%s thread_id=%s question_length=%s",
         request_id,
-        thread_id,
-        len(question or ""),
+        params.thread_id,
+        len(params.question or ""),
     )
 
     return StreamingResponse(
         sse_stream_forward_generator(
-            question,
+            params.question,
             request_id,
-            thread_id,
-            context_answer,
-            lang,
-            provider,
-            model,
-            tags,
-            tag_match_mode,
-            include_untagged_fallback,
-            rerank,
-            rerank_top_k,
+            params.thread_id,
+            params.context_answer,
+            params.lang,
+            params.provider,
+            params.model,
+            params.tags,
+            params.tag_match_mode,
+            params.include_untagged_fallback,
+            params.rerank,
+            params.rerank_top_k,
         ),
         media_type="text/event-stream",
         headers={
@@ -593,8 +475,8 @@ async def ask_question_stream(
     )
 
 
-@router.get("/config")
-async def get_ask_config():
+@router.get("/config", response_model=GatewayAskConfigPayload)
+async def get_ask_config() -> GatewayAskConfigPayload:
     """
     Get current Q&A configuration for the local LLM runtime.
 
@@ -606,12 +488,12 @@ async def get_ask_config():
     try:
         client = _get_agent_client()
         if client is None:
-            return _fallback_ask_config()
+            return GatewayAskConfigPayload.model_validate(_fallback_ask_config())
         response = await client.get(f"{_agent_service_url()}/config", timeout=10.0)
         response.raise_for_status()
-        return _normalize_agent_config(response.json())
+        return GatewayAskConfigPayload.model_validate(_normalize_agent_config(response.json()))
 
     except httpx.RequestError:
-        return _fallback_ask_config()
+        return GatewayAskConfigPayload.model_validate(_fallback_ask_config())
     except Exception:
-        return _fallback_ask_config()
+        return GatewayAskConfigPayload.model_validate(_fallback_ask_config())

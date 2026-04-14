@@ -9,22 +9,36 @@ No auth required — all data is non-sensitive metadata about the public knowled
 import json
 import logging
 import os
-from typing import Any, cast
+from typing import Annotated, Any, cast
 from urllib.parse import quote, urlparse
 
 import psycopg2  # type: ignore[import-untyped]
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from psycopg2.extras import RealDictCursor  # type: ignore[import-untyped]
 
 from src.utils.database_url import get_resolved_database_url
 from src.utils.tags import build_bilingual_tag_fields, normalize_tags
 
+from .models import (
+    DocumentsChunkStatisticsQueryParams,
+    DocumentsChunkStatisticsResponse,
+    DocumentsChunkStatisticsRow,
+    DocumentsDownloadUrlQueryParams,
+    DocumentsDownloadUrlResponse,
+    DocumentsOverviewQueryParams,
+    DocumentsOverviewResponse,
+    DocumentsPreviewChunk,
+    DocumentsPreviewQueryParams,
+    DocumentsPreviewResponse,
+    DocumentsTagRow,
+    DocumentsTagsQueryParams,
+    DocumentsTagsResponse,
+    PublicDocumentsSourceItem,
+)
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/documents", tags=["Documents (Public)"])
-
-# Stable OpenAPI example aligned with tests/schemathesis_hooks.py defaults (live CLI + Schemathesis).
-_DEFAULT_SCHEMATHESIS_SOURCE_URL = "https://example.org/community-resource-guide"
 
 EMBEDDING_SERVICE_URL = (
     os.getenv("MODAL_EMBEDDING_ENDPOINT")
@@ -401,16 +415,10 @@ def _load_chunk_statistics_via_sql(limit: int) -> list[dict[str, Any]]:
 # ---------------------------------------------------------------------------
 
 
-@router.get("/overview")
+@router.get("/overview", response_model=DocumentsOverviewResponse)
 async def documents_overview(
-    tags: str | None = Query(None, description="Comma-separated tags used to filter source list"),
-    tag_match_mode: str = Query(
-        "any", pattern="^(any|all)$", description="Tag match mode for source filtering"
-    ),
-    include_test_data: bool = Query(
-        False, description="Include test/e2e-tagged artifacts in results"
-    ),
-) -> dict[str, Any]:
+    params: Annotated[DocumentsOverviewQueryParams, Depends()],
+) -> DocumentsOverviewResponse:
     """
     Return corpus-level statistics for the public Documents Dashboard.
 
@@ -424,32 +432,31 @@ async def documents_overview(
     """
     try:
         stats, source_rows = _load_overview_via_sql()
-        if not include_test_data:
+        if not params.include_test_data:
             source_rows = [
                 item
                 for item in source_rows
                 if not _is_test_artifact(item.get("url") or "", item.get("tags") or [])
             ]
-        requested_tags = _parse_query_tags(tags)
+        requested_tags = _parse_query_tags(params.tags)
         if requested_tags:
             source_rows = [
                 item
                 for item in source_rows
-                if _tag_filter_match(item.get("tags") or [], requested_tags, tag_match_mode)
+                if _tag_filter_match(item.get("tags") or [], requested_tags, params.tag_match_mode)
             ]
         source_rows.sort(key=lambda item: _to_int(item.get("total_chunks"), 0), reverse=True)
 
-        return {
-            "total_chunks": _to_int(stats.get("total_chunks"), 0),
-            "unique_sources": len(source_rows),
-            "filtered": bool(requested_tags),
-            "avg_chunk_size": _to_int(stats.get("avg_chunk_size"), 0),
-            "embedding_model": os.getenv(
-                "EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
-            ),
-            "embedding_dimension": int(os.getenv("EMBEDDING_DIMENSION", "384")),
-            "sources": source_rows,
-        }
+        sources = [PublicDocumentsSourceItem.model_validate(item) for item in source_rows]
+        return DocumentsOverviewResponse(
+            total_chunks=_to_int(stats.get("total_chunks"), 0),
+            unique_sources=len(source_rows),
+            filtered=bool(requested_tags),
+            avg_chunk_size=_to_int(stats.get("avg_chunk_size"), 0),
+            embedding_model=os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"),
+            embedding_dimension=int(os.getenv("EMBEDDING_DIMENSION", "384")),
+            sources=sources,
+        )
 
     except Exception as exc:
         _raise_documents_error("documents_overview", exc)
@@ -460,16 +467,10 @@ async def documents_overview(
 # ---------------------------------------------------------------------------
 
 
-@router.get("/preview")
+@router.get("/preview", response_model=DocumentsPreviewResponse)
 async def documents_preview(
-    source_url: str = Query(
-        ...,
-        min_length=1,
-        description="Source URL to preview",
-        examples=[_DEFAULT_SCHEMATHESIS_SOURCE_URL],
-    ),
-    limit: int = Query(3, ge=1, le=10, description="Number of chunks to return"),
-) -> dict[str, Any]:
+    params: Annotated[DocumentsPreviewQueryParams, Depends()],
+) -> DocumentsPreviewResponse:
     """
     Return the first N chunk excerpts for a given source URL.
     Used by the Documents Dashboard source-preview drawer.
@@ -491,7 +492,7 @@ async def documents_preview(
                     ORDER BY chunk_index ASC NULLS LAST, created_at ASC
                     LIMIT %s
                     """,
-                    (source_url, max(limit, 1)),
+                    (params.source_url, max(params.limit, 1)),
                 )
                 rows = cur.fetchall() or []
 
@@ -503,7 +504,7 @@ async def documents_preview(
                     "chunk_index": _to_int(row.get("chunk_index"), idx),
                     "chunk_size": _to_int(row.get("chunk_size"), len(content)),
                     "content_preview": content[:400],
-                    "document_title": metadata.get("document_title") or source_url,
+                    "document_title": metadata.get("document_title") or params.source_url,
                 }
             )
 
@@ -511,21 +512,17 @@ async def documents_preview(
             raise HTTPException(status_code=404, detail="Source not found")
 
         chunks.sort(key=lambda item: _to_int(item.get("chunk_index"), 0))
-        chunks = chunks[:limit]
-        return {"source_url": source_url, "chunks": chunks}
+        chunks = chunks[: params.limit]
+        preview_chunks = [DocumentsPreviewChunk.model_validate(c) for c in chunks]
+        return DocumentsPreviewResponse(source_url=params.source_url, chunks=preview_chunks)
     except Exception as exc:
         _raise_documents_error("documents_preview", exc)
 
 
-@router.get("/download-url")
+@router.get("/download-url", response_model=DocumentsDownloadUrlResponse)
 async def documents_download_url(
-    source_url: str = Query(
-        ...,
-        min_length=1,
-        description="Source URL to resolve download link",
-        examples=[_DEFAULT_SCHEMATHESIS_SOURCE_URL],
-    ),
-) -> dict[str, Any]:
+    params: Annotated[DocumentsDownloadUrlQueryParams, Depends()],
+) -> DocumentsDownloadUrlResponse:
     """Resolve a download URL for a source when available.
 
     For URL-only sources (no downloadable artifact), returns 200 with
@@ -549,7 +546,7 @@ async def documents_download_url(
                     WHERE url = %s
                     LIMIT 1
                     """,
-                    (source_url,),
+                    (params.source_url,),
                 )
                 source_row = cast(dict[str, Any] | None, cur.fetchone())
 
@@ -561,81 +558,79 @@ async def documents_download_url(
                         WHERE source_url = %s
                         LIMIT 1
                         """,
-                        (source_url,),
+                        (params.source_url,),
                     )
                     chunk_row = cast(dict[str, Any] | None, cur.fetchone())
 
         if source_row:
             metadata = source_row.get("metadata") or {}
-            download_url = _resolve_download_url(metadata, source_url)
+            download_url = _resolve_download_url(metadata, params.source_url)
             if download_url:
-                return {
-                    "source_url": source_url,
-                    "title": source_row.get("title") or source_url,
-                    "download_url": download_url,
-                    "downloadable": True,
-                }
-            return {
-                "source_url": source_url,
-                "title": source_row.get("title") or source_url,
-                "download_url": None,
-                "downloadable": False,
-                "message": "Source is URL-based and has no downloadable file",
-            }
+                return DocumentsDownloadUrlResponse(
+                    source_url=params.source_url,
+                    title=str(source_row.get("title") or params.source_url),
+                    download_url=download_url,
+                    downloadable=True,
+                )
+            return DocumentsDownloadUrlResponse(
+                source_url=params.source_url,
+                title=str(source_row.get("title") or params.source_url),
+                download_url=None,
+                downloadable=False,
+                message="Source is URL-based and has no downloadable file",
+            )
 
         if not chunk_row:
             raise HTTPException(status_code=404, detail="Source not found")
 
         metadata = _metadata_dict(chunk_row.get("metadata"))
-        download_url = _resolve_download_url(metadata, source_url)
+        download_url = _resolve_download_url(metadata, params.source_url)
         if not download_url:
-            return {
-                "source_url": source_url,
-                "title": metadata.get("document_title") or source_url,
-                "download_url": None,
-                "downloadable": False,
-                "message": "Source is URL-based and has no downloadable file",
-            }
+            return DocumentsDownloadUrlResponse(
+                source_url=params.source_url,
+                title=str(metadata.get("document_title") or params.source_url),
+                download_url=None,
+                downloadable=False,
+                message="Source is URL-based and has no downloadable file",
+            )
 
-        return {
-            "source_url": source_url,
-            "title": metadata.get("document_title") or source_url,
-            "download_url": download_url,
-            "downloadable": True,
-        }
+        return DocumentsDownloadUrlResponse(
+            source_url=params.source_url,
+            title=str(metadata.get("document_title") or params.source_url),
+            download_url=download_url,
+            downloadable=True,
+        )
     except HTTPException:
         raise
     except Exception as exc:
         _raise_documents_error("documents_download_url", exc)
 
 
-@router.get("/chunk-statistics")
+@router.get("/chunk-statistics", response_model=DocumentsChunkStatisticsResponse)
 async def documents_chunk_statistics(
-    limit: int = Query(20, ge=1, le=200, description="Maximum domains to return"),
-) -> dict[str, Any]:
+    params: Annotated[DocumentsChunkStatisticsQueryParams, Depends()],
+) -> DocumentsChunkStatisticsResponse:
     """Return per-domain chunk statistics from Postgres metadata."""
     try:
-        rows = _load_chunk_statistics_via_sql(limit)
-        rows = rows[:limit]
-        return {"rows": rows, "total": len(rows)}
+        rows = _load_chunk_statistics_via_sql(params.limit)
+        rows = rows[: params.limit]
+        typed = [DocumentsChunkStatisticsRow.model_validate(r) for r in rows]
+        return DocumentsChunkStatisticsResponse(rows=typed, total=len(typed))
     except Exception as exc:
         _raise_documents_error("documents_chunk_statistics", exc)
 
 
-@router.get("/tags")
+@router.get("/tags", response_model=DocumentsTagsResponse)
 async def documents_tags(
-    limit: int = Query(100, ge=1, le=500, description="Maximum number of tags to return"),
-    query: str = Query("", description="Optional case-insensitive tag search"),
-    locale: str = Query("en", description="Locale for tag labels (en or es)"),
-    include_test_data: bool = Query(False, description="Include tags from test/e2e artifacts"),
-) -> dict[str, Any]:
+    params: Annotated[DocumentsTagsQueryParams, Depends()],
+) -> DocumentsTagsResponse:
     """Return tag inventory and counts for Documents filtering UI."""
     try:
         database_url = get_resolved_database_url()
         if not database_url:
             raise RuntimeError("database_url_not_configured")
 
-        normalized_query = (query or "").strip().lower()
+        normalized_query = (params.query or "").strip().lower()
 
         chunk_counts: dict[str, int] = {}
         source_map: dict[str, set[str]] = {}
@@ -651,17 +646,17 @@ async def documents_tags(
             tags = normalize_tags(
                 metadata.get("tags") or metadata.get("tags_en") or metadata.get("tags_es") or []
             )
-            if not include_test_data and _is_test_artifact(source_url, tags):
+            if not params.include_test_data and _is_test_artifact(source_url, tags):
                 continue
             for tag in tags:
                 chunk_counts[tag] = chunk_counts.get(tag, 0) + 1
                 if source_url:
                     source_map.setdefault(tag, set()).add(source_url)
 
-        response_rows = []
+        response_rows: list[dict[str, Any]] = []
         tag_counts: dict[str, int] = {}
         for tag, chunk_count in chunk_counts.items():
-            label = _tag_label(tag, locale)
+            label = _tag_label(tag, params.locale)
             if normalized_query and normalized_query not in tag and normalized_query not in label:
                 continue
             resource_count = len(source_map.get(tag, set()))
@@ -670,7 +665,7 @@ async def documents_tags(
                 {
                     "tag": tag,
                     "label": label,
-                    "locale": locale,
+                    "locale": params.locale,
                     "resource_count": resource_count,
                     "chunk_count": chunk_count,
                     "source_count": resource_count,
@@ -686,13 +681,14 @@ async def documents_tags(
             ),
             reverse=True,
         )
-        response_rows = response_rows[:limit]
+        response_rows = response_rows[: params.limit]
 
-        return {
-            "tags": response_rows,
-            "tag_counts": tag_counts,
-            "locale": locale,
-            "total": len(response_rows),
-        }
+        tag_models = [DocumentsTagRow.model_validate(item) for item in response_rows]
+        return DocumentsTagsResponse(
+            tags=tag_models,
+            tag_counts=tag_counts,
+            locale=params.locale,
+            total=len(tag_models),
+        )
     except Exception as exc:
         _raise_documents_error("documents_tags", exc)

@@ -166,8 +166,14 @@ class EmbedRequest(BaseModel):
     model_config = ConfigDict(
         json_schema_extra={
             "examples": [
-                {"text": "Affordable housing intake locations near me"},
-                {"query": "Example using legacy query field name"},
+                {"text": "Affordable housing intake locations near me", "query": None},
+                {"text": None, "query": "Example using legacy query field name"},
+                {"text": "WIC clinic appointment checklist", "query": None},
+                {"text": None, "query": "Bus discount programs for seniors"},
+                {
+                    "text": "After-school program registration spring 2026",
+                    "query": None,
+                },
             ]
         }
     )
@@ -207,7 +213,22 @@ class BatchEmbedRequest(BaseModel):
                         "First passage about community clinics.",
                         "Second passage about SNAP enrollment.",
                     ]
-                }
+                },
+                {
+                    "texts": [
+                        "Eviction moratorium FAQ paragraph one.",
+                        "Eviction moratorium FAQ paragraph two.",
+                    ]
+                },
+                {"texts": ["Cooling center hours", "Library heat relief sites"]},
+                {
+                    "texts": [
+                        "Food bank Tuesday distribution",
+                        "ID requirements for first visit",
+                        "Parking instructions",
+                    ]
+                },
+                {"texts": ["Tenant union meeting agenda", "RSVP link deadline Friday"]},
             ]
         }
     )
@@ -222,6 +243,38 @@ class BatchEmbedRequest(BaseModel):
 
 class EmbeddingResponse(BaseModel):
     """Embedding response with metadata."""
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "embedding": [0.01, -0.02, 0.03],
+                    "dimension": 384,
+                    "model": "sentence-transformers/all-MiniLM-L6-v2",
+                },
+                {
+                    "embedding": [0.1, 0.0],
+                    "dimension": 384,
+                    "model": "sentence-transformers/all-MiniLM-L6-v2",
+                },
+                {
+                    "embedding": [-0.5, 0.2, 0.1],
+                    "dimension": 384,
+                    "model": "BAAI/bge-small-en-v1.5",
+                },
+                {
+                    "embedding": [0.0, 0.0, 0.01],
+                    "dimension": 384,
+                    "model": "sentence-transformers/all-MiniLM-L6-v2",
+                },
+                {
+                    "embedding": [0.2, -0.1],
+                    "dimension": 384,
+                    "model": "intfloat/e5-small-v2",
+                },
+            ]
+        }
+    )
 
     embedding: list[float] = Field(
         ...,
@@ -238,6 +291,43 @@ class EmbeddingResponse(BaseModel):
 
 class BatchEmbeddingResponse(BaseModel):
     """Batch embedding response."""
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "embeddings": [[0.01, -0.02], [0.0, 0.05]],
+                    "dimension": 384,
+                    "count": 2,
+                    "model": "sentence-transformers/all-MiniLM-L6-v2",
+                },
+                {
+                    "embeddings": [[0.1]],
+                    "dimension": 384,
+                    "count": 1,
+                    "model": "sentence-transformers/all-MiniLM-L6-v2",
+                },
+                {
+                    "embeddings": [[1.0, 0.0], [0.0, 1.0]],
+                    "dimension": 384,
+                    "count": 2,
+                    "model": "BAAI/bge-small-en-v1.5",
+                },
+                {
+                    "embeddings": [[0.0], [0.02], [-0.02]],
+                    "dimension": 384,
+                    "count": 3,
+                    "model": "sentence-transformers/all-MiniLM-L6-v2",
+                },
+                {
+                    "embeddings": [[0.2, -0.1, 0.0]],
+                    "dimension": 384,
+                    "count": 1,
+                    "model": "intfloat/e5-small-v2",
+                },
+            ]
+        }
+    )
 
     embeddings: list[list[float]] = Field(..., description="List of embedding vectors")
     dimension: int = Field(default=384, description="Embedding dimension")
