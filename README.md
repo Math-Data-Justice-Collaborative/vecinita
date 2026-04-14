@@ -179,11 +179,14 @@ If your local `.env` contains empty values, tests may still fail provider checks
 
 ```env
 OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=gemma3
 # or
 DEEPSEEK_API_KEY=...
 # or
 OPENAI_API_KEY=...
 ```
+
+When using Ollama, `OLLAMA_MODEL` defaults to **`gemma3`** in code and templates if unset (see root `.env.example`).
 
 #### Frontend (React)
 

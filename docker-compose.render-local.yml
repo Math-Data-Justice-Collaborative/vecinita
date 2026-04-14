@@ -29,7 +29,7 @@ services:
     container_name: vecinita-model-ms-render
     environment:
       OLLAMA_HOST: http://vecinita-ollama-local:11434
-      DEFAULT_MODEL: llama3.1:8b
+      DEFAULT_MODEL: gemma3
     depends_on:
       - ollama
     <<: *render-network

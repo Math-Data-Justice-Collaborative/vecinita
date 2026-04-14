@@ -16,6 +16,8 @@ from urllib.parse import urlparse
 import httpx
 from langchain_core.messages import AIMessage, BaseMessage, SystemMessage
 
+from src.services.modal.invoker import invoke_modal_model_chat, modal_function_invocation_enabled
+
 logger = logging.getLogger(__name__)
 
 # Query strings like model=null (literal) must not be forwarded to upstream chat APIs.
@@ -108,6 +110,20 @@ class _ModalNativeChatClient:
             "messages": payload_messages,
             "temperature": self.temperature,
         }
+
+        if modal_function_invocation_enabled():
+            data = invoke_modal_model_chat(
+                model=self.model,
+                messages=payload_messages,
+                temperature=self.temperature,
+            )
+            message = data.get("message") if isinstance(data, dict) else None
+            content = ""
+            if isinstance(message, dict):
+                content = str(message.get("content") or "")
+            if not content:
+                content = str(data)
+            return AIMessage(content=content)
 
         target_url = f"{self.base_url}/chat"
         logger.info(

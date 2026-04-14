@@ -6,6 +6,7 @@ Forwards requests to the dedicated embedding microservice.
 """
 
 import os
+from asyncio import to_thread
 from typing import Annotated, Any, cast
 
 import httpx
@@ -18,6 +19,11 @@ from src.config import (
     rewrite_deprecated_modal_embedding_host,
 )
 from src.service_endpoints import EMBEDDING_ENDPOINT
+from src.services.modal.invoker import (
+    invoke_modal_embedding_batch,
+    invoke_modal_embedding_single,
+    modal_function_invocation_enabled,
+)
 
 from .models import (
     EmbedBatchRequest,
@@ -161,6 +167,17 @@ async def embed_text(request: EmbedRequest) -> EmbedResponse:
         EmbedResponse with 384-dimensional embedding vector
     """
     try:
+        if modal_function_invocation_enabled():
+            data = await to_thread(invoke_modal_embedding_single, request.text)
+            return EmbedResponse(
+                text=request.text,
+                embedding=data["embedding"],
+                model=data.get("model", EMBEDDING_CONFIG["model"]),
+                dimension=data.get(
+                    "dimension", data.get("dimensions", EMBEDDING_CONFIG["dimension"])
+                ),
+            )
+
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await _post_single_embedding(client, request.text)
             response.raise_for_status()
@@ -207,6 +224,18 @@ async def embed_batch(request: EmbedBatchRequest) -> EmbedBatchResponse:
         EmbedBatchResponse with embeddings for each text
     """
     try:
+        if modal_function_invocation_enabled():
+            data = await to_thread(invoke_modal_embedding_batch, request.texts)
+            embeddings_list = data["embeddings"]
+            model = data.get("model", request.model or EMBEDDING_CONFIG["model"])
+            dimension = data.get("dimension", data.get("dimensions", EMBEDDING_CONFIG["dimension"]))
+            embed_responses = []
+            for text, embedding in zip(request.texts, embeddings_list, strict=False):
+                embed_responses.append(
+                    EmbedResponse(text=text, embedding=embedding, model=model, dimension=dimension)
+                )
+            return EmbedBatchResponse(embeddings=embed_responses, model=model, dimension=dimension)
+
         async with httpx.AsyncClient(timeout=60.0) as client:  # Longer timeout for batches
             response = await _post_batch_embedding(client, request.texts)
             response.raise_for_status()
@@ -256,6 +285,25 @@ async def compute_similarity(request: SimilarityRequest) -> SimilarityResponse:
         SimilarityResponse with score between -1 and 1
     """
     try:
+        if modal_function_invocation_enabled():
+            data = await to_thread(invoke_modal_embedding_batch, [request.text1, request.text2])
+            embeddings = data["embeddings"]
+            model = data.get("model", request.model or EMBEDDING_CONFIG["model"])
+            embed1 = np.array(embeddings[0])
+            embed2 = np.array(embeddings[1])
+            dot_product = np.dot(embed1, embed2)
+            norm1 = np.linalg.norm(embed1)
+            norm2 = np.linalg.norm(embed2)
+            denom = norm1 * norm2
+            if denom == 0:
+                similarity = 0.0
+            else:
+                similarity = float(dot_product / denom)
+                similarity = max(-1.0, min(1.0, similarity))
+            return SimilarityResponse(
+                text1=request.text1, text2=request.text2, similarity=similarity, model=model
+            )
+
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await _post_batch_embedding(client, [request.text1, request.text2])
             response.raise_for_status()

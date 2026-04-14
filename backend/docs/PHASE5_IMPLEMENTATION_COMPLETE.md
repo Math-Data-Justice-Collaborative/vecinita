@@ -237,7 +237,7 @@ cd backend && uvicorn src.api.main:app --port 8002
 3. **Monitoring**: Add Prometheus metrics for latency, errors, throughput
 4. **Caching**: Implement Redis cache for frequently embedded texts
 5. **Timeouts**: Adjust based on production load (currently 30s/60s)
-6. **Health Checks**: Monitor embedding service from gateway health endpoint
+6. **Health Checks**: Monitor the embedding microservice directly; gateway **`/api/v1/integrations/status`** does not continuously probe embedding (agent + DB are probed; Modal workers are on-demand).
 7. **Fallback**: Implement circuit breaker pattern for service failures
 
 ## Error Handling

@@ -140,7 +140,7 @@ def test_gateway_ask_acceptance_success(env_vars, monkeypatch):
                     }
                 ],
                 "language": "en",
-                "model": "llama3.1:8b",
+                "model": "gemma3",
                 "response_time_ms": 42,
             }
         )
@@ -162,7 +162,7 @@ def test_gateway_ask_acceptance_success(env_vars, monkeypatch):
     assert data["question"] == "Where can I find housing help?"
     assert data["answer"].startswith("Housing support")
     assert data["sources"][0]["url"] == "https://example.org/housing"
-    assert data["model"] == "llama3.1:8b"
+    assert data["model"] == "gemma3"
     assert fake_client.get_calls == [
         (
             "http://agent.test/ask",

@@ -19,7 +19,7 @@ def test_post_model_selection_empty_provider_returns_422(fastapi_client):
 
 
 def test_post_model_selection_missing_provider_returns_422(fastapi_client):
-    response = fastapi_client.post("/model-selection", json={"model": "llama3.1:8b"})
+    response = fastapi_client.post("/model-selection", json={"model": "gemma3"})
     assert response.status_code == 422
 
 

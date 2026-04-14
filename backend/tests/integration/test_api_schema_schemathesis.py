@@ -66,10 +66,8 @@ def _reload_gateway_with_mocks(monkeypatch: pytest.MonkeyPatch, *, enable_auth: 
             if url.endswith("/config"):
                 return _FakeResponse(
                     {
-                        "providers": [
-                            {"name": "ollama", "models": ["llama3.1:8b"], "default": True}
-                        ],
-                        "models": {"ollama": ["llama3.1:8b"]},
+                        "providers": [{"name": "ollama", "models": ["gemma3"], "default": True}],
+                        "models": {"ollama": ["gemma3"]},
                     }
                 )
             return _FakeResponse(

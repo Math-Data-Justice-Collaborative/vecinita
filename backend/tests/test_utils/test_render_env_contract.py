@@ -17,7 +17,7 @@ def minimal_valid_render_env():
         "MODAL_TOKEN_ID": "ak-example",
         "MODAL_TOKEN_SECRET": "as-example",
         "MODAL_WORKSPACE": "vecinita",
-        "OLLAMA_MODEL": "llama3.1:8b",
+        "OLLAMA_MODEL": "gemma3",
         "RENDER_REMOTE_INFERENCE_ONLY": "true",
         "SCRAPER_API_KEYS": "key1,key2",
         "VECINITA_MODEL_API_URL": "https://vecinita--vecinita-model-api.modal.run",

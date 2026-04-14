@@ -111,7 +111,7 @@ class TestAskEndpoint:
         mock_response.raise_for_status = MagicMock()
         mock_get.return_value = mock_response
 
-        response = ask_client.get("/api/v1/ask?question=Test&provider=ollama&model=llama3.1:8b")
+        response = ask_client.get("/api/v1/ask?question=Test&provider=ollama&model=gemma3")
         assert response.status_code == 200
 
     @patch("httpx.AsyncClient.get")
@@ -295,7 +295,7 @@ class TestAskStreamEndpoint:
             mock_stream.return_value = mock_context
 
             response = ask_client.get(
-                "/api/v1/ask/stream?question=Test&thread_id=123&lang=en&provider=ollama&model=llama3.1:8b"
+                "/api/v1/ask/stream?question=Test&thread_id=123&lang=en&provider=ollama&model=gemma3"
             )
             assert response.status_code == 200
 
@@ -332,8 +332,8 @@ class TestAskConfigEndpoint:
     def test_get_ask_config_success(self, mock_get, ask_client):
         """Test getting ask configuration."""
         mock_config = {
-            "providers": [{"name": "ollama", "models": ["llama3.1:8b"], "default": True}],
-            "models": {"ollama": ["llama3.1:8b"]},
+            "providers": [{"name": "ollama", "models": ["gemma3"], "default": True}],
+            "models": {"ollama": ["gemma3"]},
         }
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -361,9 +361,9 @@ class TestAskConfigEndpoint:
         """Gateway should honor upstream default flags instead of forcing first provider."""
         upstream_config = {
             "providers": [{"key": "ollama", "label": "Ollama", "default": True}],
-            "models": {"ollama": ["llama3.1:8b", "llama3.2"]},
+            "models": {"ollama": ["gemma3", "llama3.2"]},
             "defaultProvider": "ollama",
-            "defaultModel": "llama3.1:8b",
+            "defaultModel": "gemma3",
         }
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -376,7 +376,7 @@ class TestAskConfigEndpoint:
         data = response.json()
 
         assert data.get("defaultProvider") == "ollama"
-        assert data.get("defaultModel") == "llama3.1:8b"
+        assert data.get("defaultModel") == "gemma3"
         ollama = next((p for p in data.get("providers", []) if p.get("name") == "ollama"), None)
         assert ollama is not None and ollama.get("default") is True
 

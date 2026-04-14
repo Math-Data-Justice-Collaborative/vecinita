@@ -301,7 +301,7 @@ class ModelSelectionGetApiResponse(BaseModel):
                 {
                     "current": {
                         "provider": "ollama",
-                        "model": "llama3.1:8b",
+                        "model": "gemma3",
                         "locked": False,
                     }
                 },
@@ -315,7 +315,7 @@ class ModelSelectionGetApiResponse(BaseModel):
                 {
                     "current": {
                         "provider": "ollama",
-                        "model": "llama3.1:8b",
+                        "model": "gemma3",
                         "locked": True,
                     }
                 },
@@ -347,11 +347,11 @@ class AgentLlmConfigApiResponse(BaseModel):
         extra="allow",
         json_schema_extra={
             "examples": [
-                {"providers": [], "models": {"ollama": ["llama3.1:8b"]}},
+                {"providers": [], "models": {"ollama": ["gemma3"]}},
                 {"providers": [{"name": "ollama"}], "models": {"ollama": []}},
                 {
                     "providers": [{"name": "ollama", "available": True}],
-                    "models": {"ollama": ["llama3.1:8b", "mistral"]},
+                    "models": {"ollama": ["gemma3", "mistral"]},
                 },
                 {
                     "providers": [],
@@ -548,7 +548,7 @@ class ModelSelectionPostResponse(BaseModel):
                     "status": "ok",
                     "current": {
                         "provider": "ollama",
-                        "model": "llama3.1:8b",
+                        "model": "gemma3",
                         "locked": False,
                     },
                 },
@@ -568,7 +568,7 @@ class ModelSelectionPostResponse(BaseModel):
                     "status": "ok",
                     "current": {
                         "provider": "ollama",
-                        "model": "llama3.1:8b",
+                        "model": "gemma3",
                         "locked": True,
                     },
                 },
@@ -682,7 +682,7 @@ ollama_api_key = (
     or os.environ.get("MODAL_TOKEN_SECRET")
     or os.environ.get("MODAL_API_TOKEN_SECRET")
 )
-ollama_model = os.environ.get("OLLAMA_MODEL") or "llama3.1:8b"
+ollama_model = os.environ.get("OLLAMA_MODEL") or "gemma3"
 default_provider = "ollama"
 default_model = os.environ.get("DEFAULT_MODEL") or None
 force_local_modal_llm = (os.environ.get("FORCE_LOCAL_MODAL_LLM") or "true").lower() in [

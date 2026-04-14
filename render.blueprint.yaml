@@ -45,7 +45,7 @@ envVarGroups:
       - key: DEFAULT_PROVIDER
         sync: false  # dashboard-managed; values: groq, openai, ollama, modal, etc.
       - key: DEFAULT_MODEL
-        sync: false  # e.g., "gpt-4o-mini", "llama3.1:8b"
+        sync: false  # e.g., "gpt-4o-mini", "gemma3" (Ollama / local stack)
       - key: GROQ_API_KEY
         sync: false
       - key: OPENAI_API_KEY

@@ -32,14 +32,14 @@ def test_config_default_provider_matches_current_selection(fastapi_client, monke
     import src.agent.main as agent_main
 
     monkeypatch.setitem(agent_main.CURRENT_SELECTION, "provider", "ollama")
-    monkeypatch.setitem(agent_main.CURRENT_SELECTION, "model", "llama3.1:8b")
+    monkeypatch.setitem(agent_main.CURRENT_SELECTION, "model", "gemma3")
 
     response = fastapi_client.get("/config")
     assert response.status_code == 200
     data = response.json()
 
     assert data.get("defaultProvider") == "ollama"
-    assert data.get("defaultModel") == "llama3.1:8b"
+    assert data.get("defaultModel") == "gemma3"
 
 
 @pytest.mark.fallback

@@ -1,79 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<testsuites disabled="0" errors="0" failures="1" tests="24" time="266.7767599459621">
-	<testsuite disabled="0" errors="0" failures="1" name="schemathesis" skipped="14" tests="24" time="266.7767599459621" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
-		<testcase name="POST /api/v1/embed" time="12.819778"/>
-		<testcase name="POST /api/v1/embed/batch" time="8.119064"/>
-		<testcase name="POST /api/v1/embed/config" time="4.250143">
+<testsuites disabled="0" errors="0" failures="1" tests="24" time="111.39839549182216">
+	<testsuite disabled="0" errors="0" failures="1" name="schemathesis" skipped="17" tests="24" time="111.39839549182216" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
+		<testcase name="POST /api/v1/embed" time="10.050640"/>
+		<testcase name="POST /api/v1/embed/batch" time="8.268600"/>
+		<testcase name="POST /api/v1/embed/config" time="3.863422">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="POST /api/v1/embed/similarity" time="14.683294"/>
-		<testcase name="POST /api/v1/scrape" time="5.406738"/>
-		<testcase name="POST /api/v1/scrape/cleanup" time="0.365021">
+		<testcase name="POST /api/v1/embed/similarity" time="12.967013"/>
+		<testcase name="POST /api/v1/scrape" time="7.802454"/>
+		<testcase name="POST /api/v1/scrape/cleanup" time="0.378580">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="POST /api/v1/scrape/reindex" time="13.375879">
-			<failure type="failure" message="1. Test Case ID: 7b7vFd
+		<testcase name="POST /api/v1/scrape/reindex" time="16.803292">
+			<failure type="failure" message="1. Test Case ID: NgFsDF
 
 - Server error
 
 [502] Bad Gateway:
 
-    `{&quot;error&quot;:&quot;Reindex service request failed: [Errno -2] Name or service not known&quot;,&quot;timestamp&quot;:&quot;2026-04-13T21:59:49.652168+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Reindex service request failed: [Errno -2] Name or service not known&quot;,&quot;timestamp&quot;:&quot;2026-04-14T15:18:19.901591+00:00&quot;}`
 
 Reproduce with:
 
     curl -X POST 'https://vecinita-gateway-lx27.onrender.com/api/v1/scrape/reindex?verbose=false&amp;x-schemathesis-unknown-property=42'"/>
-			<failure type="failure" message="1. Test Case ID: 7b7vFd
+			<failure type="failure" message="1. Test Case ID: NgFsDF
 
 - Server error
 
 [502] Bad Gateway:
 
-    `{&quot;error&quot;:&quot;Reindex service request failed: [Errno -2] Name or service not known&quot;,&quot;timestamp&quot;:&quot;2026-04-13T21:59:49.652168+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Reindex service request failed: [Errno -2] Name or service not known&quot;,&quot;timestamp&quot;:&quot;2026-04-14T15:18:19.901591+00:00&quot;}`
 
 Reproduce with:
 
     curl -X POST 'https://vecinita-gateway-lx27.onrender.com/api/v1/scrape/reindex?verbose=false&amp;x-schemathesis-unknown-property=42'"/>
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /" time="0.371512">
+		<testcase name="GET /" time="0.392841">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/ask" time="160.023492"/>
-		<testcase name="GET /api/v1/ask/config" time="1.133984">
+		<testcase name="GET /api/v1/ask" time="9.240985">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/documents/chunk-statistics" time="2.712066">
+		<testcase name="GET /api/v1/ask/config" time="0.927355">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/documents/download-url" time="2.732838"/>
-		<testcase name="GET /api/v1/documents/overview" time="5.903538">
+		<testcase name="GET /api/v1/documents/chunk-statistics" time="2.676253">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/documents/preview" time="3.457248"/>
-		<testcase name="GET /api/v1/documents/tags" time="5.361116">
+		<testcase name="GET /api/v1/documents/download-url" time="2.467398">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/embed/config" time="0.575882">
+		<testcase name="GET /api/v1/documents/overview" time="4.473752">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/scrape/history" time="2.705858">
+		<testcase name="GET /api/v1/documents/preview" time="3.021033">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/scrape/stats" time="0.777301">
+		<testcase name="GET /api/v1/documents/tags" time="4.472328">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /config" time="0.426587">
+		<testcase name="GET /api/v1/embed/config" time="0.385177">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /health" time="1.325199">
+		<testcase name="GET /api/v1/scrape/history" time="2.053173">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /integrations/status" time="1.334214">
+		<testcase name="GET /api/v1/scrape/stats" time="0.411950">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/scrape/{job_id}" time="1.300216"/>
-		<testcase name="POST /api/v1/scrape/{job_id}/cancel" time="1.285255"/>
-		<testcase name="Stateful tests" time="16.330539"/>
+		<testcase name="GET /config" time="0.662367">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /health" time="1.435953">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /integrations/status" time="1.287937">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /api/v1/scrape/{job_id}" time="1.249123"/>
+		<testcase name="POST /api/v1/scrape/{job_id}/cancel" time="1.364278"/>
+		<testcase name="Stateful tests" time="14.742491"/>
 	</testsuite>
 </testsuites>

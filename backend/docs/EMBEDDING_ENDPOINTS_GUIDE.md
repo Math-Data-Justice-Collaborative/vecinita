@@ -580,7 +580,7 @@ UPDATE document_chunks SET embedding = NULL, is_processed = FALSE;
 3. **Caching**: Implement Redis cache for frequently embedded texts
 4. **Rate Limiting**: Prevent abuse with rate limiting middleware
 5. **Async Client**: Use httpx.AsyncClient in production for better concurrency
-6. **Health Checks**: Monitor embedding service health from gateway
+6. **Health Checks**: Probe the **embedding service URL** directly (or via your orchestrator). The gateway **`GET /api/v1/integrations/status`** does not perform continuous HTTP health checks on the embedding Modal worker (see gateway `_build_integrations_status`).
 7. **Fallback**: Implement fallback to alternative provider on service failure
 8. **Connection Pooling**: Use persistent connections to embedding service
 

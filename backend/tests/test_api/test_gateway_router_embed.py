@@ -354,3 +354,46 @@ class TestGatewayEmbedOpenapiResponses:
             schema = post["responses"]["503"]["content"]["application/json"]["schema"]
             ref = schema.get("$ref", "")
             assert ref.endswith("ErrorResponse"), f"unexpected 503 schema on {path}: {schema}"
+
+
+class TestModalFunctionInvocation:
+    def test_embed_uses_modal_function_invocation(self, embed_client, monkeypatch):
+        monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
+        from src.api import router_embed
+
+        monkeypatch.setattr(
+            router_embed,
+            "invoke_modal_embedding_single",
+            lambda _text: {
+                "embedding": [0.1, 0.2],
+                "model": "sentence-transformers/test",
+                "dimension": 2,
+            },
+        )
+
+        response = embed_client.post("/api/v1/embed", json={"text": "Hello world"})
+        assert response.status_code == 200
+        data = response.json()
+        assert data["dimension"] == 2
+        assert data["model"] == "sentence-transformers/test"
+
+    def test_embed_batch_uses_modal_function_invocation(self, embed_client, monkeypatch):
+        monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "true")
+        from src.api import router_embed
+
+        monkeypatch.setattr(
+            router_embed,
+            "invoke_modal_embedding_batch",
+            lambda _texts: {
+                "embeddings": [[0.1, 0.2], [0.3, 0.4]],
+                "model": "sentence-transformers/test",
+                "dimension": 2,
+            },
+        )
+
+        response = embed_client.post("/api/v1/embed/batch", json={"texts": ["Hello", "World"]})
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["dimension"] == 2
+        assert payload["model"] == "sentence-transformers/test"
+        assert len(payload["embeddings"]) == 2

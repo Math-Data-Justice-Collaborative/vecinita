@@ -64,7 +64,7 @@ jobs:
       run: |
         echo "DATABASE_URL=${{ secrets.DATABASE_URL || 'postgresql://test' }}" >> .env
         echo "OLLAMA_BASE_URL=http://localhost:11434" >> .env
-        echo "OLLAMA_MODEL=llama3.1:8b" >> .env
+        echo "OLLAMA_MODEL=gemma3" >> .env
         echo "USE_LOCAL_EMBEDDINGS=true" >> .env
         echo "EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2" >> .env
         echo "EMBEDDING_SERVICE_AUTH_TOKEN=test-embed-token" >> .env

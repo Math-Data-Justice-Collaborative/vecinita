@@ -72,7 +72,7 @@ DEEPSEEK_BASE_URL=https://api.deepseek.com
 
 # Ollama (local or remote)
 OLLAMA_BASE_URL=http://your-ollama:11434
-OLLAMA_MODEL=llama3.1:8b
+OLLAMA_MODEL=gemma3
 
 # Model selection controls
 FORCE_LOCAL_MODAL_LLM=false             # if true, prefer local/Modal endpoints
@@ -82,6 +82,8 @@ LOCK_MODEL_SELECTION=false              # if true, prevent switching providers
 **Why shared:** Both agent and gateway need to discover available providers and validate configs.  
 **Who owns:** DevOps / Infrastructure team (API key management).  
 **Production pattern:** Set actual keys in Render dashboard with `sync: false`; Blueprint has placeholders.
+
+When `OLLAMA_MODEL` is unset, the backend defaults to **`gemma3`** (aligned with the Modal model service and root `.env.example`).
 
 ---
 

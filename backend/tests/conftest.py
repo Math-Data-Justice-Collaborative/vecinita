@@ -29,7 +29,7 @@ def env_vars():
         "MODAL_OLLAMA_ENDPOINT": _env_or_default(
             "MODAL_OLLAMA_ENDPOINT", "http://localhost:10000/model"
         ),
-        "OLLAMA_MODEL": _env_or_default("OLLAMA_MODEL", "llama3.1:8b"),
+        "OLLAMA_MODEL": _env_or_default("OLLAMA_MODEL", "gemma3"),
         # Keep tests deterministic regardless of runner-level env overrides.
         "AGENT_ENFORCE_ROUTE": "false",
         "DATABASE_URL": _env_or_default("DATABASE_URL", "postgresql://test"),
@@ -77,7 +77,7 @@ def _agent_module_path_compatibility():
     _test_env_defaults = {
         "OLLAMA_BASE_URL": "http://localhost:10000/model",
         "MODAL_OLLAMA_ENDPOINT": "http://localhost:10000/model",
-        "OLLAMA_MODEL": "llama3.1:8b",
+        "OLLAMA_MODEL": "gemma3",
         "AGENT_ENFORCE_ROUTE": "false",
         "DATABASE_URL": "postgresql://test",
     }

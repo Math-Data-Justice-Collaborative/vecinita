@@ -39,12 +39,12 @@ class LLMProviderResponse(BaseModel):
                         "ollama": {
                             "name": "ollama",
                             "available": True,
-                            "default_model": "llama3.1:8b",
+                            "default_model": "gemma3",
                             "description": "Local",
                         }
                     },
                     "current": "ollama",
-                    "available_models": ["llama3.1:8b", "mistral"],
+                    "available_models": ["gemma3", "mistral"],
                 },
                 {
                     "providers": {},
@@ -80,12 +80,12 @@ class LLMProviderResponse(BaseModel):
                         "ollama": {
                             "name": "ollama",
                             "available": True,
-                            "default_model": "llama3.1:8b",
+                            "default_model": "gemma3",
                             "description": "Dev",
                         }
                     },
                     "current": "ollama",
-                    "available_models": ["llama3.1:8b", "llama3.1:70b"],
+                    "available_models": ["gemma3", "llama3.1:70b"],
                 },
             ]
         }
@@ -103,7 +103,7 @@ class ModelSelectionRequest(BaseModel):
         json_schema_extra={
             "examples": [
                 {"provider": "ollama", "model": None},
-                {"provider": "ollama", "model": "llama3.1:8b"},
+                {"provider": "ollama", "model": "gemma3"},
                 {"provider": "ollama", "model": "llama3.1:70b"},
                 {"provider": "ollama", "model": "mistral"},
                 {"provider": "ollama", "model": "phi3:mini"},
@@ -123,7 +123,7 @@ class ModelSelectionResponse(BaseModel):
             "examples": [
                 {
                     "provider": "ollama",
-                    "model": "llama3.1:8b",
+                    "model": "gemma3",
                     "success": True,
                     "message": "Selection updated",
                 },
@@ -181,7 +181,7 @@ class AgentQueryResponse(BaseModel):
                     "answer": "Eastside pantry Tuesdays 10–2.",
                     "sources": [],
                     "language": "en",
-                    "model": "llama3.1:8b",
+                    "model": "gemma3",
                     "provider": "ollama",
                     "confidence": 0.8,
                     "processing_time_ms": 900.0,
@@ -191,7 +191,7 @@ class AgentQueryResponse(BaseModel):
                     "answer": "ID, income, residency.",
                     "sources": [{"url": "https://health.example/wic"}],
                     "language": "en",
-                    "model": "llama3.1:8b",
+                    "model": "gemma3",
                     "provider": "ollama",
                     "confidence": 0.7,
                     "processing_time_ms": 1200.0,
@@ -218,7 +218,7 @@ class AgentQueryResponse(BaseModel):
                         }
                     ],
                     "language": "en",
-                    "model": "llama3.1:8b",
+                    "model": "gemma3",
                     "provider": "ollama",
                     "confidence": 0.85,
                     "processing_time_ms": 1500.0,
@@ -228,7 +228,7 @@ class AgentQueryResponse(BaseModel):
                     "answer": "Every 15 minutes peak.",
                     "sources": [],
                     "language": "en",
-                    "model": "llama3.1:8b",
+                    "model": "gemma3",
                     "provider": "ollama",
                     "confidence": 0.5,
                     "processing_time_ms": 400.0,

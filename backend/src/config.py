@@ -166,7 +166,7 @@ OLLAMA_BASE_URL: str | None = _normalize_internal_service_url(
         else "http://localhost:11434"
     ),
 )
-OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
+OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "gemma3")
 
 DEFAULT_PROVIDER: str = os.getenv("DEFAULT_PROVIDER", "ollama").lower()
 

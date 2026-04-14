@@ -139,3 +139,9 @@ Removed duplicate functions and local calculations. Both now use identical endpo
 ## Impact
 
 **Zero breaking changes:** Both services now consistently resolve endpoints, eliminating the class of errors where one service succeeds and the other fails with connection/404 errors.
+
+---
+
+## Gateway integrations status (2026)
+
+`GET /api/v1/integrations/status` on the gateway aggregates **HTTP probes** for **agent** and **database** only. **Embedding, model, and scraper** components are reported as not continuously probed (`detail` explains function-invoked / cost rationale). Operators should validate Modal or internal URLs with direct requests or platform logs rather than expecting those rows to flip to `ok` from passive gateway polling alone.

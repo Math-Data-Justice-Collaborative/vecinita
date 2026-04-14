@@ -111,7 +111,7 @@ help:
 	@echo "  make test-schemathesis                   Run gateway + agent offline Schemathesis pytest suites"
 	@echo "  make test-schemathesis-gateway           Gateway ASGI schema tests (mocked upstreams)"
 	@echo "  make test-schemathesis-agent             Agent ASGI schema tests (mocked LLM/embeddings)"
-	@echo "  make test-schemathesis-cli               Live Schemathesis CLI (loads .env): agent + gateway + Modal embedding/model/scraper OpenAPI"
+	@echo "  make test-schemathesis-cli               Live Schemathesis CLI (loads .env): gateway + data-management OpenAPI"
 	@echo "                                           Set SCHEMATHESIS_MODAL_MICROSERVICES=0 to skip Modal runs; override MODAL_*_SCHEMA_URL if needed"
 	@echo ""
 	@echo "Scraper and ingestion targets"

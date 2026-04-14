@@ -38,13 +38,14 @@ Use this for weight/model prep and one-off jobs:
 
 ```bash
 cd services/model-modal
-PYTHONPATH=src python3 -m modal run src/vecinita/app.py::download_model --model-name llama3.2
+# Default image pulls gemma3; override when testing another registry id:
+PYTHONPATH=src python3 -m modal run src/vecinita/app.py::download_model --model-name gemma3
 ```
 
 Supported shorthand in this repository:
 
 ```bash
-make modal-model-download MODEL=llama3.2
+make modal-model-download MODEL=gemma3
 make modal-model-download-default
 ```
 

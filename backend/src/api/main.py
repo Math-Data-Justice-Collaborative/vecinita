@@ -81,8 +81,6 @@ def _running_on_render() -> bool:
 from src.config import EMBEDDING_SERVICE_URL
 from src.service_endpoints import (
     AGENT_SERVICE_URL,
-    MODEL_ENDPOINT,
-    SCRAPER_ENDPOINT,
     log_endpoint_summary as _log_ep_summary,
 )
 from src.utils.database_url import get_resolved_database_url
@@ -231,14 +229,36 @@ async def _probe_database_dependency(
 
 async def _build_integrations_status() -> IntegrationsStatus:
     """Build an aggregated integrations status payload for operators and deploy checks."""
-    agent_status, embedding_status, database_status, scraper_status, model_status = (
-        await asyncio.gather(
-            _probe_http_dependency("agent", AGENT_SERVICE_URL, critical=True),
-            _probe_http_dependency("embedding service", EMBEDDING_SERVICE_URL, critical=True),
-            _probe_database_dependency(DATABASE_URL, critical=True),
-            _probe_http_dependency("scraper service", SCRAPER_ENDPOINT, critical=False),
-            _probe_http_dependency("model service", MODEL_ENDPOINT, critical=False),
-        )
+    agent_status, database_status = await asyncio.gather(
+        _probe_http_dependency("agent", AGENT_SERVICE_URL, critical=True),
+        _probe_database_dependency(DATABASE_URL, critical=True),
+    )
+
+    # Modal worker-backed services are invoked by application calls, not continuously
+    # probed over HTTP, to avoid keeping endpoint-style health checks as a cost driver.
+    embedding_status = IntegrationComponentStatus(
+        status="not_configured",
+        configured=False,
+        critical=False,
+        endpoint=None,
+        health_url=None,
+        detail="embedding service health probe disabled (function-invoked dependency)",
+    )
+    scraper_status = IntegrationComponentStatus(
+        status="not_configured",
+        configured=False,
+        critical=False,
+        endpoint=None,
+        health_url=None,
+        detail="scraper service health probe disabled (function-invoked dependency)",
+    )
+    model_status = IntegrationComponentStatus(
+        status="not_configured",
+        configured=False,
+        critical=False,
+        endpoint=None,
+        health_url=None,
+        detail="model service health probe disabled (function-invoked dependency)",
     )
 
     components = {

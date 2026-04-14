@@ -88,7 +88,7 @@ jobs:
           cat > .env <<'EOF'
           DATABASE_URL=postgresql://test
           OLLAMA_BASE_URL=http://localhost:11434
-          OLLAMA_MODEL=llama3.1:8b
+          OLLAMA_MODEL=gemma3
           USE_LOCAL_EMBEDDINGS=true
           EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
           EMBEDDING_SERVICE_AUTH_TOKEN=test-embed-token

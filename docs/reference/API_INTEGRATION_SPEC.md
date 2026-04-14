@@ -48,7 +48,7 @@ No special headers required. May benefit from `Accept: application/json`.
       "deepseek-reasoner"
     ],
     "llama": [
-      "llama3.2"
+      "gemma3"
     ],
     "openai": [
       "gpt-4o-mini"
@@ -157,7 +157,7 @@ https://vecinita-agent.onrender.com/ask-stream (production)
 
 **Minimal Request**:
 ```
-GET /ask-stream?query=Hello&provider=llama&model=llama3.2
+GET /ask-stream?query=Hello&provider=llama&model=gemma3
 ```
 
 **Full Request**:
@@ -567,7 +567,7 @@ Expected output:
 
 ### 2. Test /ask-stream Endpoint
 ```bash
-curl "http://localhost:8000/ask-stream?query=Hello&provider=llama&model=llama3.2"
+curl "http://localhost:8000/ask-stream?query=Hello&provider=llama&model=gemma3"
 ```
 
 Expected output (SSE format):
@@ -578,12 +578,12 @@ data: {"type":"complete","answer":"...","sources":[...],"suggested_questions":["
 
 ### 3. Test with Language Parameter
 ```bash
-curl "http://localhost:8000/ask-stream?query=Hola&provider=llama&model=llama3.2&lang=es"
+curl "http://localhost:8000/ask-stream?query=Hola&provider=llama&model=gemma3&lang=es"
 ```
 
 ### 4. Test with Thread ID
 ```bash
-curl "http://localhost:8000/ask-stream?query=What%20about%20water?&provider=llama&model=llama3.2&thread_id=550e8400-e29b-41d4-a716-446655440000"
+curl "http://localhost:8000/ask-stream?query=What%20about%20water?&provider=llama&model=gemma3&thread_id=550e8400-e29b-41d4-a716-446655440000"
 ```
 
 ---

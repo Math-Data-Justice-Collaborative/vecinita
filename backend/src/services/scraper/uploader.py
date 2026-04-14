@@ -137,7 +137,7 @@ class DatabaseUploader:
                 or os.getenv("OLLAMA_BASE_URL")
                 or "http://localhost:11434"
             ),
-            default_model=os.getenv("OLLAMA_MODEL", "llama3.1:8b"),
+            default_model=os.getenv("OLLAMA_MODEL", "gemma3"),
             api_key=(
                 os.getenv("OLLAMA_API_KEY")
                 or os.getenv("MODAL_TOKEN_SECRET")

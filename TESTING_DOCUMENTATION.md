@@ -167,12 +167,15 @@ This explains why tests needed adjustment when `.env` contains `MODAL_EMBEDDING_
 
 ## OpenAPI Schema Validation (Schemathesis)
 
-Schemathesis exercises the **gateway** and **agent** OpenAPI descriptions in-process (pytest) and optionally against a running server (CLI).
+**Offline (pytest / CI):** Schemathesis exercises the **gateway** and **agent** OpenAPI descriptions in-process with mocked upstreams (`make test-schemathesis`, `make test-schemathesis-gateway`, `make test-schemathesis-agent`).
+
+**Live CLI (`make test-schemathesis-cli`):** [`backend/scripts/run_schemathesis_live.sh`](backend/scripts/run_schemathesis_live.sh) runs Schemathesis only against deployed **gateway** and **data-management** OpenAPI. Configure `GATEWAY_SCHEMA_URL` and/or `DATA_MANAGEMENT_SCHEMA_URL` (defaults point at lx27-style hosts if unset). The script does **not** hit the agent or standalone Modal microservice OpenAPI URLs.
 
 **Schema URLs**
 
 - Gateway: `http://127.0.0.1:8004/api/v1/docs/openapi.json` (Swagger UI: `/api/v1/docs`; legacy alias `GET /api/v1/openapi.json`)
-- Agent: `http://127.0.0.1:8000/openapi.json` (docs: `/docs`)
+- Data-management API: `https://<data-management-host>/openapi.json` (public spec for the data-management service)
+- Agent (pytest only): `http://127.0.0.1:8000/openapi.json` (docs: `/docs`)
 
 **Tiered checks (offline pytest)**
 
@@ -199,11 +202,12 @@ Before `make test-schemathesis-cli` (or `backend/scripts/run_schemathesis_live.s
 | Scrape job status / cancel | `SCHEMATHESIS_SCRAPE_JOB_ID` — UUID from a real `POST /api/v1/scrape` job on that environment. |
 | Scrape POST body | `SCHEMATHESIS_SCRAPE_URL` — first URL in the scrape request (default is a placeholder). |
 | Gateway auth | `GATEWAY_LIVE_BEARER` when `ENABLE_AUTH=true`. |
-| Scraper Modal (optional block) | `SCRAPER_SCHEMATHESIS_BEARER` or a valid first key in `SCRAPER_API_KEYS`. |
+| Scraper-backed routes on gateway | Optional: `SCRAPER_SCHEMATHESIS_BEARER` or first key in `SCRAPER_API_KEYS` when live data exercises scrape paths. |
+| `POST /api/v1/scrape/reindex` | **Excluded by default** (avoids 502 when the gateway’s `REINDEX_SERVICE_URL` is missing or not DNS-resolvable from Render). Set `SCHEMATHESIS_INCLUDE_GATEWAY_REINDEX=1` only after fixing that URL on the target gateway. |
 
-**Agent `POST /model-selection` (403 vs authentication)**
+**Agent offline Schemathesis — `POST /model-selection` (403 vs authentication)**
 
-When `LOCK_MODEL_SELECTION` locks the agent, `POST /model-selection` returns **403** with policy semantics. Schemathesis may still print an “authentication” warning; that is a classification quirk, not a missing Bearer token. To remove the operation from the **agent** CLI run only, set `SCHEMATHESIS_EXCLUDE_AGENT_MODEL_SELECTION=1` (see `backend/scripts/run_schemathesis_live.sh`).
+When `LOCK_MODEL_SELECTION` locks the agent, `POST /model-selection` returns **403** with policy semantics. Schemathesis may still print an “authentication” warning; that is a classification quirk, not a missing Bearer token. Agent-focused live pytest may use `SCHEMATHESIS_EXCLUDE_IGNORED_AUTH` / `SCHEMATHESIS_EXCLUDE_AGENT_MODEL_SELECTION` (see `backend/scripts/run_schemathesis_live.sh` for env knobs used by historical agent CLI runs).
 
 **Gateway `POST /api/v1/scrape/reindex` (502 / DNS)**
 
@@ -222,14 +226,15 @@ The gateway proxies to `REINDEX_SERVICE_URL` (and `REINDEX_TRIGGER_TOKEN`). If t
 - `backend/tests/live/test_live_schemathesis.py` — live agent Schemathesis (+ isolated `GET /ask` budget)
 - `backend/tests/live/test_live_gateway_schemathesis.py` — live gateway Schemathesis
 - `backend/tests/live/test_live_openapi_response_matrix.py` — live documented error shapes
-- `backend/scripts/run_schemathesis_live.sh` — CLI: `AGENT_SCHEMA_URL` / `GATEWAY_SCHEMA_URL` (or legacy `SCHEMA_URL`)
+- `backend/scripts/run_schemathesis_live.sh` — live CLI: `GATEWAY_SCHEMA_URL`, `DATA_MANAGEMENT_SCHEMA_URL`; optional `GATEWAY_LIVE_BEARER`
+
 **From repo root (preferred)**
 
 ```bash
 make test-schemathesis              # gateway + agent offline pytest suites
 make test-schemathesis-gateway
 make test-schemathesis-agent
-make test-schemathesis-cli          # set AGENT_SCHEMA_URL and/or GATEWAY_SCHEMA_URL; optional GATEWAY_LIVE_BEARER
+make test-schemathesis-cli          # live: gateway + data-management OpenAPI; optional GATEWAY_LIVE_BEARER
 ```
 
 Live-marked Schemathesis pytest (`tests/live/…`, `-m live`) is not wired to Makefile targets; run with `uv run pytest` from `backend/` when you have deployed URLs and env configured.
@@ -248,8 +253,8 @@ SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
 
 ```bash
 cd backend
-export AGENT_SCHEMA_URL=https://vecinita-agent-lx27.onrender.com/openapi.json
 export GATEWAY_SCHEMA_URL=https://vecinita-gateway-lx27.onrender.com/api/v1/docs/openapi.json
+export DATA_MANAGEMENT_SCHEMA_URL=https://vecinita-data-management-api-v1-lx27.onrender.com/openapi.json
 # export GATEWAY_LIVE_BEARER=...   # when gateway auth is enabled
 bash scripts/run_schemathesis_live.sh
 ```

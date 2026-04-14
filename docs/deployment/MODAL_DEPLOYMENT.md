@@ -2,9 +2,10 @@
 
 ## Overview
 
-Vecinita has two key services deployed on Modal:
+Vecinita deploys several Modal-backed workloads:
 - **Embedding Service**: Generates text embeddings using sentence-transformers
-- **Scraper Service**: Periodically scrapes and re-indexes content via scheduled cron jobs
+- **Model Service**: Serves Ollama-compatible chat (default **`gemma3`**); CPU-class workers (no GPU requirement in the current app definition)
+- **Scraper Service**: Scrapes and re-indexes content (HTTP entrypoints plus scheduled jobs where configured)
 
 ## Architecture
 
@@ -17,17 +18,20 @@ API Gateway (FastAPI @ :8004)
     ├── Scrape Router → Backend + Modal Scraper Service
     └── Ask Router → Question answering
 
-Modal Services:
-├── vecinita-embedding (ASGI app)
-│   └── Runs FastAPI embedding service
-│   └── Endpoint: /embed, /batch, /config, /health
+Modal Services (representative layout; exact app names follow your Modal workspace):
+├── vecinita-embedding (ASGI `web_app`)
+│   └── FastAPI embedding service — `/embed`, batch routes, `/config`, `/health`
 │   └── Auth: Modal routing secret or custom token
 │
-└── vecinita-scraper (ASGI app + Cron jobs)
-    ├── HTTP endpoint: /health, /reindex
-    ├── Cron job: weekly_reindex() - scheduled scraping
-    └── Auth: REINDEX_TRIGGER_TOKEN header
+├── vecinita-model (ASGI `web_app`)
+│   └── Ollama-compatible HTTP API — default model **`gemma3`**
+│
+└── vecinita-scraper (ASGI + jobs)
+    ├── HTTP: `/health`, job/reindex endpoints as deployed
+    └── Auth: e.g. `REINDEX_TRIGGER_TOKEN` where applicable
 ```
+
+**Gateway `/api/v1/integrations/status`:** The API gateway still **HTTP-probes** the **agent** and **database** for operator visibility. **Embedding, model, and scraper** Modal workers are **not** continuously health-checked from the gateway (they are treated as on-demand dependencies; see `backend/src/api/main.py` `_build_integrations_status`). Validate those services with direct `curl` to their deployed URLs or Modal logs when troubleshooting.
 
 ## Prerequisites
 
@@ -96,14 +100,16 @@ REINDEX_TRIGGER_TOKEN=<your-secure-token>  # Set in Modal secret
 
 ### Step 4: Test Deployments
 
+Use the **actual** `*.modal.run` hostnames from your deploy output (often a `*-web-app` suffix for ASGI apps), for example:
+
 ```bash
-# Test embedding service
-curl https://vecinita--vecinita-embedding.modal.run/health
+# Embedding web app (replace with your deployment URL)
+curl -fsS "https://<your-embedding-web-app-host>/health" | head
 
-# Test scraper service
-curl https://vecinita--vecinita-scraper.modal.run/health
+# Scraper / model — same pattern for the hosts Modal prints after deploy
+# curl -fsS "https://<your-scraper-host>/health"
+# curl -fsS "https://<your-model-host>/health"
 
-# Verify from Modal CLI
 modal app list --all
 ```
 

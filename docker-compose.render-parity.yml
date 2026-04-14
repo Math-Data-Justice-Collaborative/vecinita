@@ -81,7 +81,7 @@ services:
       DEFAULT_PROVIDER: "${DEFAULT_PROVIDER:-groq}"
       GROQ_API_KEY: "${GROQ_API_KEY:-}"
       OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-}"
-      OLLAMA_MODEL: "${OLLAMA_MODEL:-llama3.1:8b}"
+      OLLAMA_MODEL: "${OLLAMA_MODEL:-gemma3}"
       OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
       OPENAI_MODEL_NAME: "${OPENAI_MODEL_NAME:-gpt-4o-mini}"
       
@@ -148,7 +148,7 @@ services:
       DEFAULT_PROVIDER: "${DEFAULT_PROVIDER:-groq}"
       GROQ_API_KEY: "${GROQ_API_KEY:-}"
       OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-}"
-      OLLAMA_MODEL: "${OLLAMA_MODEL:-llama3.1:8b}"
+      OLLAMA_MODEL: "${OLLAMA_MODEL:-gemma3}"
       OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
       
       # Embedding service for discovery

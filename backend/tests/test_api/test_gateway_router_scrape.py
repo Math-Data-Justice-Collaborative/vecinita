@@ -357,6 +357,30 @@ class TestReindexEndpoint:
         assert payload["params"]["clean"] is True
         assert payload["headers"]["x-reindex-token"] == "token-123"
 
+    def test_reindex_uses_modal_function_invocation(self, scrape_client, monkeypatch):
+        from src.api import router_scrape
+
+        monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
+        monkeypatch.setenv("MODAL_SCRAPER_APP_NAME", "vecinita-scraper")
+        monkeypatch.setenv("MODAL_SCRAPER_REINDEX_FUNCTION", "trigger_reindex")
+        monkeypatch.setattr(
+            router_scrape,
+            "invoke_modal_scraper_reindex",
+            lambda clean, stream, verbose: {
+                "status": "accepted",
+                "clean": clean,
+                "stream": stream,
+                "verbose": verbose,
+            },
+        )
+
+        response = scrape_client.post("/api/v1/scrape/reindex?clean=true&verbose=true")
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["status"] == "accepted"
+        assert payload["service_url"] == "modal://vecinita-scraper/trigger_reindex"
+        assert payload["clean"] is True
+
 
 class TestScrapeCleanupEndpoint:
     """Test POST /scrape/cleanup endpoint."""

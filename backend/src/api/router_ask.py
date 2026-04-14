@@ -103,7 +103,7 @@ def _get_agent_client() -> httpx.AsyncClient | None:
 def _fallback_ask_config() -> dict[str, Any]:
     """Return a safe fallback config when agent service is unavailable."""
     default_provider = "ollama"
-    default_model = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
+    default_model = os.getenv("OLLAMA_MODEL", "gemma3")
     return {
         "providers": [
             {

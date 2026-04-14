@@ -14,6 +14,11 @@ import httpx
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi import Path as PathParam
 
+from src.services.modal.invoker import (
+    invoke_modal_scraper_reindex,
+    modal_function_invocation_enabled,
+)
+
 # Import scraper components
 from ..services.scraper.scraper import VecinaScraper
 from ..services.scraper.utils import prepare_scrape_urls
@@ -321,6 +326,24 @@ async def trigger_reindex(
     params: Annotated[ScrapeGatewayReindexQueryParams, Depends()],
 ) -> GatewayReindexTriggerResponse:
     """Trigger scraper+embedding reindex flow on Modal reindex service."""
+    if modal_function_invocation_enabled():
+        try:
+            payload = await asyncio.to_thread(
+                invoke_modal_scraper_reindex, params.clean, True, params.verbose
+            )
+            merged = {
+                **payload,
+                "service_url": (
+                    f"modal://{os.getenv('MODAL_SCRAPER_APP_NAME', 'vecinita-scraper')}/"
+                    f"{os.getenv('MODAL_SCRAPER_REINDEX_FUNCTION', 'trigger_reindex')}"
+                ),
+            }
+            return GatewayReindexTriggerResponse.model_validate(merged)
+        except Exception as exc:
+            raise HTTPException(
+                status_code=502, detail=f"Modal reindex function invocation failed: {exc}"
+            ) from exc
+
     if not REINDEX_SERVICE_URL:
         raise HTTPException(
             status_code=503,

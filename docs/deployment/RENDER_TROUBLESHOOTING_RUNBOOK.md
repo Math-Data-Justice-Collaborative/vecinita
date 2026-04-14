@@ -82,7 +82,7 @@ Cross-region private networking is not supported.
 
 ### Step 5 — Upstream Modal health check
 
-If the routing is healthy but model/embedding calls fail:
+The gateway **`GET /api/v1/integrations/status`** does **not** substitute for Modal health checks: it probes **agent** and **database** over HTTP and treats embedding/model/scraper as non-probed dependencies. If routing is healthy but model/embedding calls fail:
 
 1. Open Modal dashboard → App `vecinita-model` / `vecinita-embedding`.
 2. Verify the app is deployed and the endpoint URL matches `VECINITA_MODEL_API_URL`

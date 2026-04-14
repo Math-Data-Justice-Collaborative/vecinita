@@ -93,7 +93,8 @@ OLLAMA_BASE_URL=http://localhost:11434   # Local fallback (free)
 - `gpt-3.5-turbo` (legacy, very fast)
 
 ### Ollama (Local)
-- `llama3.2` (default, fast)
+- `gemma3` (Vecinita default when `OLLAMA_MODEL` is unset; Gemma 3 via Ollama)
+- `llama3.2` (fast alternative)
 - `mistral` (high quality)
 - `neural-chat` (specialized for chat)
 

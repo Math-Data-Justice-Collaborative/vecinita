@@ -56,7 +56,7 @@ AGENT_ASK_MODEL: dict[str, dict[str, Any]] = {
     "llama31": {
         "summary": "Example model id",
         "description": "Must exist in runtime /config when overriding.",
-        "value": "llama3.1:8b",
+        "value": "gemma3",
     },
 }
 
@@ -122,11 +122,11 @@ AGENT_MODEL_SELECTION_BODY: dict[str, dict[str, Any]] = {
     },
     "set_model_unlocked": {
         "summary": "Select a model (must exist in /config)",
-        "value": {"provider": "ollama", "model": "llama3.1:8b", "lock": False},
+        "value": {"provider": "ollama", "model": "gemma3", "lock": False},
     },
     "lock_selection": {
         "summary": "Lock selection",
-        "value": {"provider": "ollama", "model": "llama3.1:8b", "lock": True},
+        "value": {"provider": "ollama", "model": "gemma3", "lock": True},
     },
     "lock_without_model": {
         "summary": "Lock policy without changing the active model tag",

@@ -1452,7 +1452,7 @@ class AskQuestionRequest(BaseModel):
     model: str | None = Field(
         default=None,
         description="Override local LLM model name",
-        examples=["llama3.1:8b"],
+        examples=["gemma3"],
     )
 
     model_config = ConfigDict(
@@ -1463,7 +1463,7 @@ class AskQuestionRequest(BaseModel):
                     "thread_id": "conv-session-user-123",
                     "lang": "en",
                     "provider": "ollama",
-                    "model": "llama3.1:8b",
+                    "model": "gemma3",
                 },
                 {
                     "question": "¿Dónde solicito vouchers de vivienda?",
@@ -1484,14 +1484,14 @@ class AskQuestionRequest(BaseModel):
                     "thread_id": None,
                     "lang": None,
                     "provider": None,
-                    "model": "llama3.1:8b",
+                    "model": "gemma3",
                 },
                 {
                     "question": "Explain good cause eviction in plain language.",
                     "thread_id": "legal-followup-7",
                     "lang": "en",
                     "provider": "ollama",
-                    "model": "llama3.1:8b",
+                    "model": "gemma3",
                 },
             ],
             "example": {
@@ -1499,7 +1499,7 @@ class AskQuestionRequest(BaseModel):
                 "thread_id": "conv-session-user-123",
                 "lang": "en",
                 "provider": "ollama",
-                "model": "llama3.1:8b",
+                "model": "gemma3",
             },
         }
     )
@@ -2014,7 +2014,7 @@ class AskConfigResponse(BaseModel):
                     "available_models": [
                         {
                             "provider": "ollama",
-                            "name": "llama3.1:8b",
+                            "name": "gemma3",
                             "context_window": 8192,
                             "cost_per_1k_tokens": 0.0,
                         }
@@ -2079,7 +2079,7 @@ class AskConfigResponse(BaseModel):
                     "available_models": [
                         {
                             "provider": "ollama",
-                            "name": "llama3.1:8b",
+                            "name": "gemma3",
                             "context_window": 8192,
                             "cost_per_1k_tokens": 0.0,
                         },
@@ -2134,7 +2134,7 @@ class AskConfigResponse(BaseModel):
                 "available_models": [
                     {
                         "provider": "ollama",
-                        "name": "llama3.1:8b",
+                        "name": "gemma3",
                         "context_window": 8192,
                         "cost_per_1k_tokens": 0.0,
                     }
@@ -4455,7 +4455,7 @@ class GatewayAskQueryParams(BaseModel):
     model: str | None = Field(
         default=None,
         description="Model id override; must exist in upstream ``/config`` when set.",
-        examples=["llama3.1:8b"],
+        examples=["gemma3"],
     )
     tags: str | None = Field(
         default=None,
@@ -4508,7 +4508,7 @@ class GatewayAskQueryParams(BaseModel):
                     "context_answer": None,
                     "lang": "en",
                     "provider": "ollama",
-                    "model": "llama3.1:8b",
+                    "model": "gemma3",
                     "tags": "housing,legal",
                     "tag_match_mode": "any",
                     "include_untagged_fallback": True,
@@ -4547,7 +4547,7 @@ class GatewayAskQueryParams(BaseModel):
                     "context_answer": None,
                     "lang": "en",
                     "provider": "ollama",
-                    "model": "llama3.1:8b",
+                    "model": "gemma3",
                     "tags": "food,benefits",
                     "tag_match_mode": "all",
                     "include_untagged_fallback": True,
@@ -4567,7 +4567,7 @@ class GatewayAskConfigPayload(BaseModel):
     providers: list[dict[str, Any]] = Field(default_factory=list)
     models: dict[str, Any] = Field(default_factory=dict)
     defaultProvider: str | None = Field(default=None, examples=["ollama"])
-    defaultModel: str | None = Field(default=None, examples=["llama3.1:8b"])
+    defaultModel: str | None = Field(default=None, examples=["gemma3"])
     service_status: str = Field(default="ok", examples=["ok", "degraded"])
 
 
