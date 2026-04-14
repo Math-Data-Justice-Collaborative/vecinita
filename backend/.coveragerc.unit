@@ -1,6 +1,6 @@
 [run]
 include =
-    src/embedding_service/modal_app.py
+    ../services/embedding-modal/src/vecinita/app.py
     src/services/embedding/models.py
     src/utils/tags.py
 

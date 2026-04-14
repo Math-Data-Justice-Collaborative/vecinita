@@ -443,13 +443,13 @@ jobs:
       working-directory: backend
       run: |
         pytest tests/ -m "not integration and not e2e and not llm" -v --tb=short --junit-xml=test-results.xml \
-          --cov=src.embedding_service.modal_app \
+          --cov=vecinita.app \
           --cov=src.services.embedding.models \
           --cov=src.utils.tags \
           --cov-config=.coveragerc.unit --cov-report=xml --cov-report=html --cov-report=term \
           --cov-fail-under=98
       env:
-        PYTHONPATH: ${{ github.workspace }}/backend
+        PYTHONPATH: ${{ github.workspace }}/backend:${{ github.workspace }}/services/embedding-modal/src
         SKIP_AGENT_MAIN_IMPORT: 'true'
         EMBEDDING_STRICT_STARTUP: 'false'
 

@@ -21,7 +21,6 @@ def modal_mock(monkeypatch):
     image.pip_install_from_requirements.return_value = image
     image.env.return_value = image
 
-    mock_modal.Mount.from_local_dir.return_value = MagicMock()
     mock_modal.Secret.from_name.return_value = MagicMock()
     mock_modal.Cron.return_value = MagicMock()
 
@@ -32,7 +31,6 @@ def modal_mock(monkeypatch):
         return _wrap
 
     app_instance.function.side_effect = _identity_decorator
-    mock_modal.asgi_app.side_effect = _identity_decorator
 
     monkeypatch.setitem(sys.modules, "modal", mock_modal)
     return mock_modal

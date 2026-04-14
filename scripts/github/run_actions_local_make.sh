@@ -93,11 +93,11 @@ section "backend-coverage.yml"
 		echo "REINDEX_TRIGGER_TOKEN=test-reindex-token"
 		echo "REINDEX_SERVICE_URL=https://example.modal.run"
 	} >>.env
-	export PYTHONPATH="${ROOT}/backend"
+	export PYTHONPATH="${ROOT}/backend:${ROOT}/services/embedding-modal/src"
 	export SKIP_AGENT_MAIN_IMPORT=true
 	export EMBEDDING_STRICT_STARTUP=false
 	uv run pytest tests/ -m "not integration and not e2e and not llm" -v --tb=short \
-		--cov=src.embedding_service.modal_app \
+		--cov=vecinita.app \
 		--cov=src.services.embedding.models \
 		--cov=src.utils.tags \
 		--cov-config=.coveragerc.unit --cov-report=term \

@@ -5,20 +5,23 @@ on:
     branches:
       - main
     paths:
-      - "backend/src/embedding_service/**"
-      - "backend/src/scraper/**"
-      - "backend/src/services/embedding/**"
-      - "backend/requirements.txt"
-      - "backend/pyproject.toml"
+      - "services/embedding-modal/**"
+      - "services/model-modal/**"
+      - "services/scraper/**"
+      - "backend/src/scraper/modal_app.py"
       - ".github/workflows/modal-deploy.yml"
   workflow_dispatch:
     inputs:
       deploy_embedding:
-        description: "Deploy embedding service"
+        description: "Deploy embedding service (services/embedding-modal)"
+        required: false
+        default: "true"
+      deploy_model:
+        description: "Deploy model service (services/model-modal)"
         required: false
         default: "true"
       deploy_scraper:
-        description: "Deploy scraper service"
+        description: "Deploy scraper workers + API (services/scraper)"
         required: false
         default: "true"
 
@@ -32,9 +35,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    
+
     env:
-      # Canonical: MODAL_TOKEN_* (Render / shared env). Aliases: MODAL_API_TOKEN_* (.env), MODAL_AUTH_* (legacy).
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID || secrets.MODAL_API_TOKEN_ID || secrets.MODAL_AUTH_KEY }}
       MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET || secrets.MODAL_API_TOKEN_SECRET || secrets.MODAL_AUTH_SECRET }}
       MODAL_PROFILE: ${{ secrets.MODAL_API_PROFILE || vars.MODAL_API_PROFILE || 'vecinita' }}
@@ -42,6 +44,13 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v5
+
+      - name: Init service submodules
+        run: |
+          git submodule update --init --depth 1 \
+            services/embedding-modal \
+            services/model-modal \
+            services/scraper
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -76,25 +85,33 @@ jobs:
             echo "::notice::Modal deployment skipped because authentication failed. Configure repo secrets MODAL_TOKEN_ID and MODAL_TOKEN_SECRET (or MODAL_API_TOKEN_ID / MODAL_API_TOKEN_SECRET, or MODAL_AUTH_KEY / MODAL_AUTH_SECRET)."
           fi
 
-      - name: Deploy Embedding Service
+      - name: Deploy embedding Modal app
         if: steps.modal_auth.outputs.authenticated == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_embedding == 'true')
         run: |
-          echo "Deploying Embedding Service..."
-          modal deploy backend/src/embedding_service/modal_app.py
-          echo "✓ Embedding service deployed successfully"
+          echo "Deploying services/embedding-modal..."
+          modal deploy services/embedding-modal/src/vecinita/app.py
+          echo "✓ Embedding Modal app deployed"
 
-      - name: Deploy Scraper Service
+      - name: Deploy model Modal app
+        if: steps.modal_auth.outputs.authenticated == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_model == 'true')
+        run: |
+          echo "Deploying services/model-modal..."
+          modal deploy services/model-modal/src/vecinita/app.py
+          echo "✓ Model Modal app deployed"
+
+      - name: Deploy scraper Modal apps
         if: steps.modal_auth.outputs.authenticated == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_scraper == 'true')
         run: |
-          echo "Deploying Scraper Service..."
-          modal deploy backend/src/scraper/modal_app.py
-          echo "✓ Scraper service deployed successfully"
+          echo "Deploying services/scraper (workers + API)..."
+          modal deploy services/scraper/src/vecinita_scraper/app.py
+          modal deploy services/scraper/src/vecinita_scraper/api/app.py
+          echo "✓ Scraper Modal apps deployed"
 
       - name: Verify Deployments
         if: steps.modal_auth.outputs.authenticated == 'true'
         run: |
-          echo "Deployed apps:"
-          modal app list --all 2>/dev/null || echo "Apps listed (may require additional permissions)"
+          echo "Deployed apps (subset):"
+          modal app list --all 2>/dev/null || echo "modal app list unavailable in this environment"
 
       - name: Modal Deployment Skipped
         if: steps.modal_auth.outputs.authenticated != 'true'
@@ -105,18 +122,16 @@ jobs:
     runs-on: ubuntu-latest
     needs: modal-deploy
     if: always()
-    
+
     steps:
       - name: Success Notification
         if: needs.modal-deploy.result == 'success'
         run: |
-          echo "✓ Modal deployment completed successfully"
-          echo "  - Embedding Service: https://vecinita--vecinita-embedding-web-app.modal.run"
-          echo "  - Scraper Service: https://vecinita--vecinita-scraper.modal.run"
+          echo "✓ Modal deployment job finished successfully"
+          echo "  Confirm hosts in the Modal dashboard (*.modal.run) match gateway env vars."
 
       - name: Failure Notification
         if: needs.modal-deploy.result == 'failure'
         run: |
           echo "✗ Modal deployment failed"
-          echo "Check logs above for details"
           exit 1

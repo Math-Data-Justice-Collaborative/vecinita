@@ -1,150 +1,105 @@
 #!/bin/bash
-# Deploy Vecinita services to Modal
-# Usage: ./backend/scripts/deploy_modal.sh [--embedding] [--scraper] [--all]
-# Requires: modal CLI installed (pip install modal) and authenticated (modal token new)
+# Deploy Vecinita Modal apps from canonical service packages (Modal 1.x).
+#
+# Usage: ./backend/scripts/deploy_modal.sh [--embedding] [--model] [--scraper] [--all]
+# Optional legacy cron-only app (monolith CLI, no HTTP):
+#   ./backend/scripts/deploy_modal.sh --legacy-scraper-cron
+#
+# Requires: modal CLI (pip install modal) and authentication (modal token new).
 
 set -e
 
-# Color codes
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 echo -e "${BLUE}======================================"
-echo "Vecinita Modal Deployment Script"
+echo "Vecinita Modal Deployment (service packages)"
 echo -e "======================================${NC}\n"
 
-# Check prerequisites
 if ! command -v modal &> /dev/null; then
-    echo -e "${RED}❌ Modal CLI not found. Install with: pip install modal${NC}"
+    echo -e "${RED}Modal CLI not found. Install with: pip install modal${NC}"
     exit 1
 fi
 
 if ! modal token info &> /dev/null 2>&1; then
-    echo -e "${RED}❌ Not authenticated with Modal. Run: modal token new${NC}"
+    echo -e "${RED}Not authenticated with Modal. Run: modal token new${NC}"
     exit 1
 fi
 
-# Parse arguments
 DEPLOY_EMBEDDING=false
+DEPLOY_MODEL=false
 DEPLOY_SCRAPER=false
+DEPLOY_LEGACY_SCRAPER_CRON=false
 
 if [ $# -eq 0 ]; then
     DEPLOY_EMBEDDING=true
+    DEPLOY_MODEL=true
     DEPLOY_SCRAPER=true
 else
     for arg in "$@"; do
         case $arg in
             --embedding) DEPLOY_EMBEDDING=true ;;
+            --model) DEPLOY_MODEL=true ;;
             --scraper) DEPLOY_SCRAPER=true ;;
-            --all) DEPLOY_EMBEDDING=true; DEPLOY_SCRAPER=true ;;
-            *) echo "Unknown option: $arg"; exit 1 ;;
+            --legacy-scraper-cron) DEPLOY_LEGACY_SCRAPER_CRON=true ;;
+            --all)
+                DEPLOY_EMBEDDING=true
+                DEPLOY_MODEL=true
+                DEPLOY_SCRAPER=true
+                ;;
+            *)
+                echo "Unknown option: $arg"
+                exit 1
+                ;;
         esac
     done
 fi
 
-# Navigate to repo root
 cd "$(dirname "$0")/../.."
 
-# ============================================================================
-# Deploy Embedding Service
-# ============================================================================
+init_submodules() {
+    echo -e "${BLUE}→ Ensuring service submodules are present...${NC}"
+    git submodule update --init --depth 1 \
+        services/embedding-modal \
+        services/model-modal \
+        services/scraper
+}
+
+if [ "$DEPLOY_EMBEDDING" = true ] || [ "$DEPLOY_MODEL" = true ] || [ "$DEPLOY_SCRAPER" = true ]; then
+    init_submodules
+fi
+
 if [ "$DEPLOY_EMBEDDING" = true ]; then
-    echo -e "${BLUE}→ Deploying Embedding Service to Modal...${NC}"
-    
-    if [ ! -f "backend/src/embedding_service/modal_app.py" ]; then
-        echo -e "${RED}❌ Embedding service not found${NC}"
-        echo "   Expected: backend/src/embedding_service/modal_app.py"
-        exit 1
-    fi
-    
-    echo "  Deploying backend/src/embedding_service/modal_app.py..."
-    set +e
-    modal deploy backend/src/embedding_service/modal_app.py 2>&1 | tee /tmp/modal_embedding.log
-    EMBED_EXIT=${PIPESTATUS[0]}
-    set -e
-    if [ "$EMBED_EXIT" -ne 0 ]; then
-        echo -e "${RED}❌ Embedding deployment failed${NC}"
-        exit "$EMBED_EXIT"
-    fi
-    
-    # Extract URL
-    EMBEDDING_URL=$(grep -oP '(?<=Available at ).*' /tmp/modal_embedding.log || echo "https://vecinita-embedding--latest.modal.run")
-    
-    echo -e "${GREEN}✓ Embedding Service Deployed${NC}"
-    echo -e "  URL: ${BLUE}$EMBEDDING_URL${NC}\n"
-    
-    # Save URL for next service
-    export EMBEDDING_SERVICE_URL="$EMBEDDING_URL"
+    echo -e "${BLUE}→ Deploying embedding Modal app...${NC}"
+    modal deploy services/embedding-modal/src/vecinita/app.py
+    echo -e "${GREEN}✓ Embedding Modal app deployed${NC}\n"
 fi
 
-# ============================================================================
-# Deploy Scraper Service (Cron Job)
-# ============================================================================
+if [ "$DEPLOY_MODEL" = true ]; then
+    echo -e "${BLUE}→ Deploying model Modal app...${NC}"
+    modal deploy services/model-modal/src/vecinita/app.py
+    echo -e "${GREEN}✓ Model Modal app deployed${NC}\n"
+fi
+
 if [ "$DEPLOY_SCRAPER" = true ]; then
-    echo -e "${BLUE}→ Deploying Scraper to Modal...${NC}"
-    
-    if [ ! -f "backend/src/scraper/modal_app.py" ]; then
-        echo -e "${RED}❌ Scraper Modal app not found at backend/src/scraper/modal_app.py${NC}"
-        exit 1
-    fi
-    
-    echo "  Deploying backend/src/scraper/modal_app.py..."
-    set +e
-    modal deploy backend/src/scraper/modal_app.py 2>&1 | tee /tmp/modal_scraper.log
-    SCRAPER_EXIT=${PIPESTATUS[0]}
-    set -e
-    if [ "$SCRAPER_EXIT" -ne 0 ]; then
-        echo -e "${RED}❌ Scraper deployment failed${NC}"
-        exit "$SCRAPER_EXIT"
-    fi
-
-    SCRAPER_URL=$(grep -oP '(?<=Available at ).*' /tmp/modal_scraper.log || echo "https://vecinita-scraper--latest.modal.run")
-    
-    echo -e "${GREEN}✓ Scraper Deployed${NC}"
-    echo -e "  URL: ${BLUE}$SCRAPER_URL${NC}"
-    echo -e "  Schedule: Weekly cron reindex (REINDEX_CRON_SCHEDULE)\n"
-
-    export REINDEX_SERVICE_URL="$SCRAPER_URL"
+    echo -e "${BLUE}→ Deploying scraper workers + HTTP API...${NC}"
+    modal deploy services/scraper/src/vecinita_scraper/app.py
+    modal deploy services/scraper/src/vecinita_scraper/api/app.py
+    echo -e "${GREEN}✓ Scraper Modal apps deployed${NC}\n"
 fi
 
-# ============================================================================
-# Summary
-# ============================================================================
+if [ "$DEPLOY_LEGACY_SCRAPER_CRON" = true ]; then
+    echo -e "${YELLOW}→ Deploying legacy scraper cron (backend/src/scraper/modal_app.py)...${NC}"
+    modal deploy backend/src/scraper/modal_app.py
+    echo -e "${YELLOW}⚠ This overwrites the Modal app named in MODAL_SCRAPER_APP_NAME if it matches${NC}"
+    echo -e "${YELLOW}  the workers app; prefer migrating cron to services/scraper.${NC}\n"
+fi
+
 echo -e "${GREEN}======================================"
-echo "✓ Modal Deployment Complete"
-echo -e "======================================${NC}\n"
-
-echo -e "${YELLOW}Next Steps:${NC}"
-echo ""
-echo "1. Create Modal secrets (one-time):"
-echo -e "   ${BLUE}modal secret create vecinita-secrets${NC}"
-echo "   Add environment variables:"
-echo "     DATABASE_URL=postgresql://..."
-echo "     GROQ_API_KEY=<your-groq-api-key>"
-echo ""
-echo "2. Update agent environment:"
-if [ -n "$EMBEDDING_SERVICE_URL" ]; then
-    echo -e "   ${BLUE}export EMBEDDING_SERVICE_URL=$EMBEDDING_SERVICE_URL${NC}"
-fi
-if [ -n "$REINDEX_SERVICE_URL" ]; then
-    echo -e "   ${BLUE}export REINDEX_SERVICE_URL=$REINDEX_SERVICE_URL${NC}"
-fi
-echo ""
-echo "3. Monitor deployments:"
-echo -e "   ${BLUE}modal app logs vecinita-embedding${NC}"
-echo -e "   ${BLUE}modal app logs vecinita-scraper${NC}"
-echo ""
-echo "4. Test services:"
-echo -e "   ${BLUE}curl $EMBEDDING_SERVICE_URL/health${NC}"
-if [ -n "$REINDEX_SERVICE_URL" ]; then
-    echo -e "   ${BLUE}curl $REINDEX_SERVICE_URL/health${NC}"
-fi
-echo ""
-echo "5. To undeploy:"
-echo -e "   ${BLUE}modal app delete vecinita-embedding${NC}"
-echo -e "   ${BLUE}modal app delete vecinita-scraper${NC}"
-echo ""
-echo "More info: modal app logs, modal app info <name>"
+echo "Done"
+echo -e "======================================${NC}"
+echo -e "${YELLOW}Teardown old HTTP apps:${NC} see backend/scripts/modal_teardown_legacy_web.sh"
+echo -e "${YELLOW}Operations:${NC} modal app list --all | modal app logs <name>"

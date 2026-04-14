@@ -23,12 +23,15 @@ Modal Services (representative layout; exact app names follow your Modal workspa
 │   └── FastAPI embedding service — `/embed`, batch routes, `/config`, `/health`
 │   └── Auth: Modal routing secret or custom token
 │
-├── vecinita-model (ASGI `web_app`)
+├── vecinita-model (ASGI ``api``)
 │   └── Ollama-compatible HTTP API — default model **`gemma3`**
 │
-└── vecinita-scraper (ASGI + jobs)
-    ├── HTTP: `/health`, job/reindex endpoints as deployed
-    └── Auth: e.g. `REINDEX_TRIGGER_TOKEN` where applicable
+├── vecinita-scraper (workers + queues)
+│   └── Modal ``@app.function`` workers; optional legacy cron in ``backend/src/scraper/modal_app.py``
+│
+└── vecinita-scraper-api (ASGI ``fastapi``)
+    └── HTTP: FastAPI under ``/jobs`` (see service OpenAPI)
+    └── Auth: e.g. ``REINDEX_TRIGGER_TOKEN`` where applicable
 ```
 
 **Gateway `/api/v1/integrations/status`:** The API gateway still **HTTP-probes** the **agent** and **database** for operator visibility. **Embedding, model, and scraper** Modal workers are **not** continuously health-checked from the gateway (they are treated as on-demand dependencies; see `backend/src/api/main.py` `_build_integrations_status`). Validate those services with direct `curl` to their deployed URLs or Modal logs when troubleshooting.
@@ -76,25 +79,31 @@ modal token info
 
 ### Step 2: Deploy Services
 
+Canonical entrypoints live under `services/*` (Modal 1.x: `@modal.asgi_app()` handlers are **nullary**; see the [Modal 1.0 migration guide](https://modal.com/docs/guide/modal-1-0-migration) and [managing deployments](https://modal.com/docs/guide/managing-deployments)).
+
 ```bash
-# Deploy both services
+# Embedding + model + scraper (workers + HTTP API)
 ./backend/scripts/deploy_modal.sh --all
 
 # Or deploy individually:
-./backend/scripts/deploy_modal.sh --embedding  # Just embedding service
-./backend/scripts/deploy_modal.sh --scraper    # Just scraper service
+./backend/scripts/deploy_modal.sh --embedding
+./backend/scripts/deploy_modal.sh --model
+./backend/scripts/deploy_modal.sh --scraper
+
+# Optional: legacy monolith cron only (see backend/src/scraper/modal_app.py)
+# ./backend/scripts/deploy_modal.sh --legacy-scraper-cron
 ```
+
+After you confirm traffic uses the new apps, use `backend/scripts/modal_teardown_legacy_web.sh` as a checklist for retiring old Modal web routes.
 
 ### Step 3: Configure Environment
 
-After deployment, Modal returns URLs like:
-- `https://vecinita--vecinita-embedding-web-app.modal.run`
-- `https://vecinita--vecinita-scraper-web-app-api.modal.run`
+After deployment, copy the **exact** `*.modal.run` hostnames from the Modal CLI or dashboard (suffixes vary by function name).
 
 Update `.env`:
 ```env
-MODAL_EMBEDDING_ENDPOINT=https://vecinita--vecinita-embedding-web-app.modal.run
-REINDEX_SERVICE_URL=https://vecinita--vecinita-scraper-web-app-api.modal.run
+MODAL_EMBEDDING_ENDPOINT=https://<your-embedding-asgi-host>
+REINDEX_SERVICE_URL=https://<your-scraper-api-host>/jobs
 REINDEX_TRIGGER_TOKEN=<your-secure-token>  # Set in Modal secret
 ```
 
@@ -128,19 +137,13 @@ The `.github/workflows/modal-deploy.yml` workflow automatically deploys to Modal
 
 ### Workflow Triggers
 
-The workflow deploys when:
-```yaml
-paths:
-  - backend/src/embedding_service/**
-  - backend/src/scraper/**
-  - backend/requirements.txt
-  - .github/workflows/modal-deploy.yml
-```
+The workflow deploys when `services/embedding-modal/**`, `services/model-modal/**`, `services/scraper/**`, or `backend/src/scraper/modal_app.py` change (see `.github/workflows/modal-deploy.yml`).
 
 Manual trigger:
 ```bash
 gh workflow run modal-deploy.yml \
   -f deploy_embedding=true \
+  -f deploy_model=true \
   -f deploy_scraper=true
 ```
 
@@ -262,20 +265,22 @@ The scraper runs on cron schedule (default: `0 2 * * 0` = Sunday 2 AM UTC):
 # View scheduled runs
 modal function logs vecinita-scraper.weekly_reindex --stream
 
-# Manually trigger reindex
-curl -X POST https://vecinita--vecinita-scraper.modal.run/reindex \
-  -H "x-reindex-token: <REINDEX_TRIGGER_TOKEN>"
+# Enqueue work on the scraper API (paths are under ``/jobs`` — see OpenAPI on that host)
+curl -fsS -X POST "https://<vecinita-scraper-api-host>/jobs" \
+  -H "Authorization: Bearer <REINDEX_TRIGGER_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"kind":"example"}'
 ```
 
 ## Security
 
 ### Secrets Management
 
-Modal secrets are configured per-app and referenced in `modal_app.py`:
+Modal secrets are configured per-app and referenced from each service’s Modal entrypoint (for example `services/scraper/src/vecinita_scraper/api/app.py`).
 
 ```python
 @modal.asgi_app()
-def web_app():
+def web_app():  # must be nullary on Modal ≥1.0
     # Access secrets via env vars inside Modal function
     token = os.getenv("REINDEX_TRIGGER_TOKEN")
     # ...
@@ -314,7 +319,7 @@ Current config:
 To scale:
 - Increase `cpu` for faster embeddings
 - Increase `memory` for larger models
-- Add `concurrency_limit` for request batching
+- Tune Modal autoscaler settings (`max_containers`, `scaledown_window`, etc.; see [Modal 1.0 migration](https://modal.com/docs/guide/modal-1-0-migration))
 
 ### Scraper Service
 
@@ -360,12 +365,7 @@ REINDEX_CRON_SCHEDULE=  # Empty to disable
 
 ### Multi-Region Deployment
 
-Modal supports regional deployment; configure in `modal_app.py`:
-```python
-@modal.asgi_app(region="us-west-2")
-def web_app():
-    # ...
-```
+Modal supports regional deployment; configure on `@app.function(...)` / image build in the relevant service `src/vecinita/app.py` (consult current Modal docs for supported `region` parameters).
 
 ## Related Documentation
 

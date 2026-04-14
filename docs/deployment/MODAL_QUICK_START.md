@@ -45,25 +45,22 @@ pip install modal
 modal token new
 
 # Deploy everything
-./backend/scripts/deploy_modal.sh --all
+./backend/scripts/deploy_modal.sh --all   # embedding + model + scraper (from services/*)
 
 # Or specific service
 ./backend/scripts/deploy_modal.sh --embedding
+./backend/scripts/deploy_modal.sh --model
 ./backend/scripts/deploy_modal.sh --scraper
 ```
 
 ## After Deployment
 
-Modal returns URLs like:
-```
-https://vecinita--vecinita-embedding.modal.run
-https://vecinita--vecinita-scraper.modal.run
-```
+Modal prints `*.modal.run` URLs after deploy (copy from the CLI output or dashboard). The scraper **HTTP** app is typically named ``vecinita-scraper-api`` (ASGI function ``fastapi``).
 
 Update `.env`:
 ```bash
-MODAL_EMBEDDING_ENDPOINT=https://vecinita--vecinita-embedding.modal.run
-REINDEX_SERVICE_URL=https://vecinita--vecinita-scraper.modal.run
+MODAL_EMBEDDING_ENDPOINT=https://<embedding-asgi-host>
+REINDEX_SERVICE_URL=https://<scraper-api-host>/jobs
 REINDEX_TRIGGER_TOKEN=<secure-random-token>  # Set in Modal secrets
 ```
 
@@ -72,14 +69,14 @@ REINDEX_TRIGGER_TOKEN=<secure-random-token>  # Set in Modal secrets
 ```bash
 # View logs
 modal app logs vecinita-embedding --stream
-modal app logs vecinita-scraper --stream
+modal app logs vecinita-scraper-api --stream
 
 # Check status
 modal app list --all
 
 # List functions
 modal function list vecinita-embedding
-modal function list vecinita-scraper
+modal function list vecinita-scraper-api
 ```
 
 ## Troubleshooting
@@ -97,7 +94,7 @@ modal app logs vecinita-embedding
 modal app logs vecinita-scraper
 
 # Redeploy
-./backend/scripts/deploy_modal.sh --all
+./backend/scripts/deploy_modal.sh --all   # embedding + model + scraper (from services/*)
 ```
 
 ### 401 Unauthorized from embedding service
