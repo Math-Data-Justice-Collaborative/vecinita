@@ -1,11 +1,19 @@
 #!/bin/bash
 # Deploy Vecinita Modal apps from canonical service packages (Modal 1.x).
 #
-# Usage: ./backend/scripts/deploy_modal.sh [--embedding] [--model] [--scraper] [--all]
-# Optional legacy cron-only app (monolith CLI, no HTTP):
+# Usage:
+#   ./backend/scripts/deploy_modal.sh [--embedding] [--model] [--scraper] [--all]
+#   ./backend/scripts/deploy_modal.sh --no-web [--embedding] [--model] [--scraper] [--all]
+#
+# ``--no-web`` sets ``VECINITA_MODAL_INCLUDE_WEB_ENDPOINTS=0`` so ``modal deploy`` only
+# registers function endpoints (embedding ``embed_*``, model ``chat_completion`` / downloads,
+# scraper workers). Scraper FastAPI (``vecinita_scraper/api/app.py``) is skipped.
+#
+# Optional legacy cron-only app:
 #   ./backend/scripts/deploy_modal.sh --legacy-scraper-cron
 #
-# Requires: modal CLI (pip install modal) and authentication (modal token new).
+# Requires: modal CLI and authentication (``modal token new``).
+# See: https://modal.com/docs/guide/managing-deployments
 
 set -e
 
@@ -27,6 +35,23 @@ fi
 if ! modal token info &> /dev/null 2>&1; then
     echo -e "${RED}Not authenticated with Modal. Run: modal token new${NC}"
     exit 1
+fi
+
+INCLUDE_WEB=1
+FILTERED_ARGS=()
+for arg in "$@"; do
+    case $arg in
+        --no-web) INCLUDE_WEB=0 ;;
+        *) FILTERED_ARGS+=("$arg") ;;
+    esac
+done
+set -- "${FILTERED_ARGS[@]}"
+
+if [ "$INCLUDE_WEB" = 0 ]; then
+    export VECINITA_MODAL_INCLUDE_WEB_ENDPOINTS=0
+    echo -e "${YELLOW}Web / ASGI endpoints omitted (function-only deploy).${NC}\n"
+else
+    export VECINITA_MODAL_INCLUDE_WEB_ENDPOINTS=1
 fi
 
 DEPLOY_EMBEDDING=false
@@ -60,6 +85,17 @@ fi
 
 cd "$(dirname "$0")/../.."
 
+# Run ``modal deploy`` from the service directory so ``uv run`` resolves import-time deps.
+_modal_deploy_in_service() {
+    local svc_dir="$1"
+    local entry_file="$2"
+    if command -v uv >/dev/null 2>&1 && [ -f "$svc_dir/uv.lock" ]; then
+        ( cd "$svc_dir" && uv run modal deploy "$entry_file" )
+    else
+        ( cd "$svc_dir" && modal deploy "$entry_file" )
+    fi
+}
+
 init_submodules() {
     echo -e "${BLUE}→ Ensuring service submodules are present...${NC}"
     git submodule update --init --depth 1 \
@@ -74,21 +110,26 @@ fi
 
 if [ "$DEPLOY_EMBEDDING" = true ]; then
     echo -e "${BLUE}→ Deploying embedding Modal app...${NC}"
-    modal deploy services/embedding-modal/src/vecinita/app.py
+    _modal_deploy_in_service services/embedding-modal main.py
     echo -e "${GREEN}✓ Embedding Modal app deployed${NC}\n"
 fi
 
 if [ "$DEPLOY_MODEL" = true ]; then
     echo -e "${BLUE}→ Deploying model Modal app...${NC}"
-    modal deploy services/model-modal/src/vecinita/app.py
+    _modal_deploy_in_service services/model-modal main.py
     echo -e "${GREEN}✓ Model Modal app deployed${NC}\n"
 fi
 
 if [ "$DEPLOY_SCRAPER" = true ]; then
-    echo -e "${BLUE}→ Deploying scraper workers + HTTP API...${NC}"
-    modal deploy services/scraper/src/vecinita_scraper/app.py
-    modal deploy services/scraper/src/vecinita_scraper/api/app.py
-    echo -e "${GREEN}✓ Scraper Modal apps deployed${NC}\n"
+    echo -e "${BLUE}→ Deploying scraper workers...${NC}"
+    _modal_deploy_in_service services/scraper modal_workers_entry.py
+    if [ "$INCLUDE_WEB" = 1 ]; then
+        echo -e "${BLUE}→ Deploying scraper HTTP API...${NC}"
+        _modal_deploy_in_service services/scraper modal_api_entry.py
+    else
+        echo -e "${YELLOW}  Skipped vecinita_scraper/api (HTTP) — use without --no-web to deploy.${NC}"
+    fi
+    echo -e "${GREEN}✓ Scraper Modal deploy step(s) complete${NC}\n"
 fi
 
 if [ "$DEPLOY_LEGACY_SCRAPER_CRON" = true ]; then
@@ -101,5 +142,4 @@ fi
 echo -e "${GREEN}======================================"
 echo "Done"
 echo -e "======================================${NC}"
-echo -e "${YELLOW}Teardown old HTTP apps:${NC} see backend/scripts/modal_teardown_legacy_web.sh"
 echo -e "${YELLOW}Operations:${NC} modal app list --all | modal app logs <name>"

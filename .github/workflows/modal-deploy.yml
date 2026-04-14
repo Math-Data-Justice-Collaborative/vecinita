@@ -1,15 +1,23 @@
+# Deploy Vecinita Modal apps after the main CI workflow succeeds.
+#
+# Pattern aligns with Modal continuous deployment guidance:
+# https://modal.com/docs/guide/continuous-deployment
+# https://modal.com/docs/guide/managing-deployments
+#
+# Requires GitHub Actions secrets: MODAL_TOKEN_ID and MODAL_TOKEN_SECRET
+# (aliases MODAL_API_TOKEN_* / MODAL_AUTH_* are also read in the deploy job).
+
 name: Modal Deployment
 
 on:
-  push:
+  # Run only after the full "Tests" suite completes successfully on main (same commit).
+  workflow_run:
+    workflows:
+      - Tests
+    types:
+      - completed
     branches:
       - main
-    paths:
-      - "services/embedding-modal/**"
-      - "services/model-modal/**"
-      - "services/scraper/**"
-      - "backend/src/scraper/modal_app.py"
-      - ".github/workflows/modal-deploy.yml"
   workflow_dispatch:
     inputs:
       deploy_embedding:
@@ -26,13 +34,22 @@ on:
         default: "true"
 
 concurrency:
-  group: modal-deploy-${{ github.ref }}
+  group: modal-deploy-${{ github.run_id }}
   cancel-in-progress: false
 
 jobs:
   modal-deploy:
     name: Deploy to Modal
     runs-on: ubuntu-latest
+    # workflow_dispatch: always; workflow_run: only successful upstream run on main from this repo.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main' &&
+        github.event.workflow_run.head_repository.full_name == github.repository
+      )
     permissions:
       contents: read
 
@@ -40,10 +57,14 @@ jobs:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID || secrets.MODAL_API_TOKEN_ID || secrets.MODAL_AUTH_KEY }}
       MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET || secrets.MODAL_API_TOKEN_SECRET || secrets.MODAL_AUTH_SECRET }}
       MODAL_PROFILE: ${{ secrets.MODAL_API_PROFILE || vars.MODAL_API_PROFILE || 'vecinita' }}
+      MODAL_ENVIRONMENT: ${{ vars.MODAL_ENVIRONMENT || secrets.MODAL_ENVIRONMENT || '' }}
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout tested commit
         uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 1
 
       - name: Init service submodules
         run: |
@@ -52,18 +73,28 @@ jobs:
             services/model-modal \
             services/scraper
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v8.0.0
+        with:
+          version: "latest"
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.10"
-          cache: pip
+          python-version: "3.11"
 
       - name: Install Modal CLI
         run: |
           python -m pip install --upgrade pip
-          pip install modal
+          pip install "modal>=1.3.0"
 
-      - name: Verify Modal Authentication
+      - name: Sync service environments (locked)
+        run: |
+          ( cd services/embedding-modal && uv sync --frozen )
+          ( cd services/model-modal && uv sync --frozen )
+          ( cd services/scraper && uv sync --frozen )
+
+      - name: Verify Modal authentication
         id: modal_auth
         shell: bash
         run: |
@@ -73,65 +104,95 @@ jobs:
 
           if [ -z "$token_id" ] || [ -z "$token_secret" ]; then
             echo "authenticated=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Modal deployment skipped: set MODAL_TOKEN_ID and MODAL_TOKEN_SECRET (or MODAL_API_TOKEN_*, or MODAL_AUTH_*)."
+            echo "::notice::Modal deploy skipped: add MODAL_TOKEN_ID and MODAL_TOKEN_SECRET (see Modal CD docs)."
             exit 0
           fi
 
-          if modal token set --profile "$modal_profile" --token-id "$token_id" --token-secret "$token_secret" --no-verify && MODAL_PROFILE="$modal_profile" modal token info >/dev/null 2>&1; then
+          if modal token set --profile "$modal_profile" --token-id "$token_id" --token-secret "$token_secret" --no-verify \
+            && MODAL_PROFILE="$modal_profile" modal token info >/dev/null 2>&1; then
             echo "authenticated=true" >> "$GITHUB_OUTPUT"
             echo "✓ Modal authentication verified"
           else
             echo "authenticated=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Modal deployment skipped because authentication failed. Configure repo secrets MODAL_TOKEN_ID and MODAL_TOKEN_SECRET (or MODAL_API_TOKEN_ID / MODAL_API_TOKEN_SECRET, or MODAL_AUTH_KEY / MODAL_AUTH_SECRET)."
+            echo "::notice::Modal deploy skipped: token set or verification failed."
           fi
 
       - name: Deploy embedding Modal app
-        if: steps.modal_auth.outputs.authenticated == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_embedding == 'true')
+        if: >-
+          steps.modal_auth.outputs.authenticated == 'true' &&
+          (
+            github.event_name == 'workflow_run' ||
+            github.event.inputs.deploy_embedding == 'true'
+          )
+        env:
+          VECINITA_MODAL_INCLUDE_WEB_ENDPOINTS: "1"
+          MODAL_PROFILE: ${{ secrets.MODAL_API_PROFILE || vars.MODAL_API_PROFILE || 'vecinita' }}
+          MODAL_ENVIRONMENT: ${{ vars.MODAL_ENVIRONMENT || secrets.MODAL_ENVIRONMENT || '' }}
         run: |
-          echo "Deploying services/embedding-modal..."
-          modal deploy services/embedding-modal/src/vecinita/app.py
+          echo "Deploying vecinita-embedding (commit ${{ github.event.workflow_run.head_sha || github.sha }})..."
+          ( cd services/embedding-modal && uv run modal deploy main.py )
           echo "✓ Embedding Modal app deployed"
 
       - name: Deploy model Modal app
-        if: steps.modal_auth.outputs.authenticated == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_model == 'true')
+        if: >-
+          steps.modal_auth.outputs.authenticated == 'true' &&
+          (
+            github.event_name == 'workflow_run' ||
+            github.event.inputs.deploy_model == 'true'
+          )
+        env:
+          VECINITA_MODAL_INCLUDE_WEB_ENDPOINTS: "1"
+          MODAL_PROFILE: ${{ secrets.MODAL_API_PROFILE || vars.MODAL_API_PROFILE || 'vecinita' }}
+          MODAL_ENVIRONMENT: ${{ vars.MODAL_ENVIRONMENT || secrets.MODAL_ENVIRONMENT || '' }}
         run: |
-          echo "Deploying services/model-modal..."
-          modal deploy services/model-modal/src/vecinita/app.py
+          echo "Deploying vecinita-model..."
+          ( cd services/model-modal && uv run modal deploy main.py )
           echo "✓ Model Modal app deployed"
 
       - name: Deploy scraper Modal apps
-        if: steps.modal_auth.outputs.authenticated == 'true' && (github.event_name == 'push' || github.event.inputs.deploy_scraper == 'true')
+        if: >-
+          steps.modal_auth.outputs.authenticated == 'true' &&
+          (
+            github.event_name == 'workflow_run' ||
+            github.event.inputs.deploy_scraper == 'true'
+          )
+        env:
+          MODAL_PROFILE: ${{ secrets.MODAL_API_PROFILE || vars.MODAL_API_PROFILE || 'vecinita' }}
+          MODAL_ENVIRONMENT: ${{ vars.MODAL_ENVIRONMENT || secrets.MODAL_ENVIRONMENT || '' }}
         run: |
-          echo "Deploying services/scraper (workers + API)..."
-          modal deploy services/scraper/src/vecinita_scraper/app.py
-          modal deploy services/scraper/src/vecinita_scraper/api/app.py
+          echo "Deploying vecinita-scraper workers + API..."
+          ( cd services/scraper && uv run modal deploy modal_workers_entry.py )
+          ( cd services/scraper && uv run modal deploy modal_api_entry.py )
           echo "✓ Scraper Modal apps deployed"
 
-      - name: Verify Deployments
+      - name: Verify deployments
         if: steps.modal_auth.outputs.authenticated == 'true'
+        env:
+          MODAL_PROFILE: ${{ secrets.MODAL_API_PROFILE || vars.MODAL_API_PROFILE || 'vecinita' }}
+          MODAL_ENVIRONMENT: ${{ vars.MODAL_ENVIRONMENT || secrets.MODAL_ENVIRONMENT || '' }}
         run: |
-          echo "Deployed apps (subset):"
-          modal app list --all 2>/dev/null || echo "modal app list unavailable in this environment"
+          echo "Recent Modal apps (if permitted):"
+          MODAL_PROFILE="${MODAL_PROFILE:-vecinita}" modal app list --all 2>/dev/null || true
 
-      - name: Modal Deployment Skipped
+      - name: Modal deploy skipped (no credentials)
         if: steps.modal_auth.outputs.authenticated != 'true'
-        run: echo "Modal deployment skipped; CI remains green until valid credentials are configured."
+        run: echo "Modal deploy skipped; workflow stays green until tokens are configured."
 
   notify:
-    name: Notify Deployment Status
+    name: Notify deployment status
     runs-on: ubuntu-latest
     needs: modal-deploy
     if: always()
 
     steps:
-      - name: Success Notification
+      - name: Success
         if: needs.modal-deploy.result == 'success'
         run: |
-          echo "✓ Modal deployment job finished successfully"
-          echo "  Confirm hosts in the Modal dashboard (*.modal.run) match gateway env vars."
+          echo "Modal deployment workflow finished successfully."
+          echo "Confirm *.modal.run hosts in the Modal dashboard match gateway env."
 
-      - name: Failure Notification
+      - name: Failure
         if: needs.modal-deploy.result == 'failure'
         run: |
-          echo "✗ Modal deployment failed"
+          echo "Modal deployment workflow failed."
           exit 1

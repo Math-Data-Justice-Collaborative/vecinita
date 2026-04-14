@@ -75,6 +75,16 @@ def modal_mock(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
 
 
 class TestEmbeddingModalApp:
+    def test_web_app_omitted_when_env_disabled(
+        self, modal_mock: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setenv("VECINITA_MODAL_INCLUDE_WEB_ENDPOINTS", "0")
+        import vecinita.app as modal_app
+
+        modal_app = importlib.reload(modal_app)
+        assert not hasattr(modal_app, "web_app")
+        assert hasattr(modal_app, "embed_query")
+
     def test_module_loads(self, modal_mock: MagicMock) -> None:
         import vecinita.app as modal_app
 

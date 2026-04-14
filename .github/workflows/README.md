@@ -11,7 +11,7 @@
 - `test.yml`: Core test execution.
 - `render-deploy.yml`: Quality gates + staging/production validation notices. Deploys are driven by blueprint **`autoDeployTrigger: checksPass`** (not deploy hooks).
 - `render-post-deploy.yml`: Runs after **Render Deploy** completes — waits for Render services to go live via the API (avoids `checksPass` deadlock). See `docs/deployment/RENDER_STAGING_PROD_CICD.md`.
-- `modal-deploy.yml`: Root Modal deployment flow for this repository surfaces.
+- `modal-deploy.yml`: Deploys embedding, model, and scraper Modal apps after the **`Tests`** workflow succeeds on **`main`** (plus manual dispatch). See [Modal continuous deployment](https://modal.com/docs/guide/continuous-deployment).
 
 ### Sync GitHub Actions secrets from local `.env` (GitHub CLI)
 

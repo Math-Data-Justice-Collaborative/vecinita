@@ -79,7 +79,7 @@ modal token info
 
 ### Step 2: Deploy Services
 
-Canonical entrypoints live under `services/*` (Modal 1.x: `@modal.asgi_app()` handlers are **nullary**; see the [Modal 1.0 migration guide](https://modal.com/docs/guide/modal-1-0-migration) and [managing deployments](https://modal.com/docs/guide/managing-deployments)).
+Canonical **deploy** entry files (add `src/` to `sys.path` so packages resolve) are `services/embedding-modal/main.py`, `services/model-modal/main.py`, `services/scraper/modal_workers_entry.py`, and `services/scraper/modal_api_entry.py`. Modal 1.x: `@modal.asgi_app()` handlers are **nullary**; see the [Modal 1.0 migration guide](https://modal.com/docs/guide/modal-1-0-migration) and [managing deployments](https://modal.com/docs/guide/managing-deployments).
 
 ```bash
 # Embedding + model + scraper (workers + HTTP API)
@@ -92,6 +92,12 @@ Canonical entrypoints live under `services/*` (Modal 1.x: `@modal.asgi_app()` ha
 
 # Optional: legacy monolith cron only (see backend/src/scraper/modal_app.py)
 # ./backend/scripts/deploy_modal.sh --legacy-scraper-cron
+```
+
+**Function-only (no ASGI / scraper HTTP):** pass **`--no-web`**. That sets `VECINITA_MODAL_INCLUDE_WEB_ENDPOINTS=0` for embedding and model deploys and skips `modal_api_entry.py` for scraper. Equivalent manual example:
+
+```bash
+cd services/embedding-modal && VECINITA_MODAL_INCLUDE_WEB_ENDPOINTS=0 uv run modal deploy main.py
 ```
 
 After you confirm traffic uses the new apps, use `backend/scripts/modal_teardown_legacy_web.sh` as a checklist for retiring old Modal web routes.
@@ -124,9 +130,13 @@ modal app list --all
 
 ## GitHub Actions CI/CD
 
-The `.github/workflows/modal-deploy.yml` workflow automatically deploys to Modal on:
-- **Push to main** with changes to Modal app files
-- **Manual workflow dispatch** (Actions → Modal Deployment → Run)
+Continuous deployment follows Modal’s GitHub Actions pattern ([Modal: Continuous deployment](https://modal.com/docs/guide/continuous-deployment)): after the **`Tests`** workflow completes **successfully** on **`main`**, `.github/workflows/modal-deploy.yml` checks out the **same commit** that CI validated and deploys, in order:
+
+1. **Embedding** — `services/embedding-modal/main.py`
+2. **Model** — `services/model-modal/main.py`
+3. **Scraper** — `services/scraper/modal_workers_entry.py` then `modal_api_entry.py`
+
+You can also run **Actions → Modal Deployment → Run workflow** (`workflow_dispatch`) to deploy the selected services from the branch you choose.
 
 ### Setup GitHub Secrets
 
@@ -135,9 +145,7 @@ The `.github/workflows/modal-deploy.yml` workflow automatically deploys to Modal
    - `MODAL_TOKEN_ID`: Your Modal token ID
    - `MODAL_TOKEN_SECRET`: Your Modal token secret
 
-### Workflow Triggers
-
-The workflow deploys when `services/embedding-modal/**`, `services/model-modal/**`, `services/scraper/**`, or `backend/src/scraper/modal_app.py` change (see `.github/workflows/modal-deploy.yml`).
+Optional repository **Variables** (or secrets): `MODAL_ENVIRONMENT` if you use [multiple Modal environments](https://modal.com/docs/guide/continuous-deployment); `MODAL_API_PROFILE` defaults to `vecinita`.
 
 Manual trigger:
 ```bash
