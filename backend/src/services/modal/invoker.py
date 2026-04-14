@@ -1,8 +1,12 @@
 """Modal Function invocation helpers for gateway / agent paths.
 
-These helpers provide a non-HTTP integration mode so callers can invoke Modal
-workloads via ``modal.Function.from_name(...).remote(...)`` (Modal SDK 1.x)
-instead of hitting ``*.modal.run`` web endpoints.
+These helpers provide a non-HTTP integration mode so callers invoke deployed
+Modal workloads via ``modal.Function.from_name`` + ``.remote()`` / ``.spawn()``
+(Modal SDK 1.x) instead of ``*.modal.run`` HTTP where this module is used.
+
+See https://modal.com/docs/reference/modal.Function — ``spawn`` returns a
+``FunctionCall``; we use ``.get(timeout=...)`` when the gateway still needs a
+result payload (e.g. reindex trigger acknowledgement).
 """
 
 from __future__ import annotations
@@ -16,9 +20,37 @@ def _truthy(value: str | None) -> bool:
     return str(value or "").strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _falsy_explicit_modal_mode(value: str) -> bool:
+    return value.strip().lower() in {"0", "false", "no", "off", "http", "rest"}
+
+
+def _modal_token_pair_configured() -> bool:
+    """True when Modal SDK can authenticate (canonical or legacy env names)."""
+    token_id = (os.getenv("MODAL_TOKEN_ID") or os.getenv("MODAL_API_TOKEN_ID") or "").strip()
+    token_secret = (
+        os.getenv("MODAL_TOKEN_SECRET") or os.getenv("MODAL_API_TOKEN_SECRET") or ""
+    ).strip()
+    return bool(token_id and token_secret)
+
+
 def modal_function_invocation_enabled() -> bool:
-    """Return whether backend should prefer Modal Function invocation."""
-    return _truthy(os.getenv("MODAL_FUNCTION_INVOCATION", "false"))
+    """Return whether backend should prefer Modal Function invocation over HTTP.
+
+    * Unset or empty — **disabled** (use HTTP / gateway defaults). Keeps local tests
+      and mixed env files predictable when Modal tokens are present for other tools.
+    * ``auto`` — enable only when a Modal token pair is configured (see
+      ``_modal_token_pair_configured``); otherwise HTTP.
+    * ``true``, ``1``, ``yes``, ``on`` — always enable (Modal SDK + auth required).
+    * ``false``, ``http``, ``rest``, … — force HTTP even if tokens exist.
+    """
+    raw = str(os.getenv("MODAL_FUNCTION_INVOCATION", "")).strip().lower()
+    if not raw:
+        return False
+    if raw == "auto":
+        return _modal_token_pair_configured()
+    if _falsy_explicit_modal_mode(raw):
+        return False
+    return _truthy(os.getenv("MODAL_FUNCTION_INVOCATION"))
 
 
 def _modal_environment_name() -> str | None:
@@ -73,7 +105,13 @@ def invoke_modal_scraper_reindex(clean: bool, stream: bool, verbose: bool) -> di
     app_name = os.getenv("MODAL_SCRAPER_APP_NAME", "vecinita-scraper")
     fn_name = os.getenv("MODAL_SCRAPER_REINDEX_FUNCTION", "trigger_reindex")
     fn = _lookup_function(app_name, fn_name, _invoke_env())
-    return fn.remote(clean=clean, stream=stream, verbose=verbose)
+    timeout_raw = os.getenv("MODAL_SCRAPER_REINDEX_FUNCTION_TIMEOUT", "120").strip()
+    try:
+        timeout_s = float(timeout_raw)
+    except ValueError:
+        timeout_s = 120.0
+    call = fn.spawn(clean=clean, stream=stream, verbose=verbose)
+    return call.get(timeout=timeout_s)
 
 
 def invoke_modal_model_chat(
