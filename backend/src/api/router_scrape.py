@@ -43,9 +43,7 @@ router = APIRouter(prefix="/scrape", tags=["Scraping"])
 # Configuration
 MAX_URLS_PER_REQUEST = 100
 MAX_CONCURRENT_JOBS = 5
-REINDEX_SERVICE_URL = os.getenv(
-    "REINDEX_SERVICE_URL", "https://vecinita--vecinita-scraper-api-fastapi.modal.run/jobs"
-).rstrip("/")
+REINDEX_SERVICE_URL = os.getenv("REINDEX_SERVICE_URL", "").rstrip("/")
 REINDEX_TRIGGER_TOKEN = os.getenv("REINDEX_TRIGGER_TOKEN", "")
 
 # OpenAPI example only (tests/schemathesis_hooks.py may override live CLI parameters).
@@ -348,6 +346,15 @@ async def trigger_reindex(
         raise HTTPException(
             status_code=503,
             detail="REINDEX_SERVICE_URL is not configured",
+        )
+
+    if "modal.run" in REINDEX_SERVICE_URL.lower() and not modal_function_invocation_enabled():
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "REINDEX_SERVICE_URL targets Modal; enable MODAL_FUNCTION_INVOCATION=auto or 1 "
+                "with Modal tokens, or point REINDEX_SERVICE_URL at a non-Modal HTTP reindex API."
+            ),
         )
 
     headers = {}

@@ -108,3 +108,51 @@ def test_invoke_modal_scraper_reindex_uses_spawn_and_get(monkeypatch):
     monkeypatch.setattr(invoker, "_lookup_function", lambda *a, **k: _Fn())
     out = invoker.invoke_modal_scraper_reindex(True, False, True)
     assert out == {"status": "accepted", "mode": "spawn"}
+
+
+def test_modal_function_invocation_mode_variants(monkeypatch):
+    from src.services.modal.invoker import modal_function_invocation_mode
+
+    monkeypatch.delenv("MODAL_FUNCTION_INVOCATION", raising=False)
+    assert modal_function_invocation_mode() == "off"
+
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "auto")
+    assert modal_function_invocation_mode() == "auto"
+
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "true")
+    assert modal_function_invocation_mode() == "on"
+
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "http")
+    assert modal_function_invocation_mode() == "off"
+
+
+def test_enforce_modal_function_policy_for_urls_requires_mode(monkeypatch):
+    from src.services.modal.invoker import enforce_modal_function_policy_for_urls
+
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "0")
+    with pytest.raises(RuntimeError, match="Configured Modal HTTP endpoints require Modal"):
+        enforce_modal_function_policy_for_urls(
+            {"OLLAMA_BASE_URL": "https://vecinita--vecinita-model-api.modal.run"}
+        )
+
+
+def test_enforce_modal_function_policy_for_urls_requires_tokens(monkeypatch):
+    from src.services.modal.invoker import enforce_modal_function_policy_for_urls
+
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
+    monkeypatch.delenv("MODAL_TOKEN_ID", raising=False)
+    monkeypatch.delenv("MODAL_TOKEN_SECRET", raising=False)
+    monkeypatch.delenv("MODAL_API_TOKEN_ID", raising=False)
+    monkeypatch.delenv("MODAL_API_TOKEN_SECRET", raising=False)
+
+    with pytest.raises(RuntimeError, match="Modal tokens are missing"):
+        enforce_modal_function_policy_for_urls(
+            {"EMBEDDING_SERVICE_URL": "https://vecinita--vecinita-embedding-web-app.modal.run"}
+        )
+
+
+def test_enforce_modal_function_policy_for_urls_allows_non_modal(monkeypatch):
+    from src.services.modal.invoker import enforce_modal_function_policy_for_urls
+
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "0")
+    enforce_modal_function_policy_for_urls({"OLLAMA_BASE_URL": "http://localhost:11434"})

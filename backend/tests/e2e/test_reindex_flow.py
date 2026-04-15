@@ -57,7 +57,8 @@ def gateway_client(env_vars, monkeypatch):
 def test_reindex_endpoint_e2e(gateway_client, monkeypatch):
     from src.api import router_scrape
 
-    monkeypatch.setattr(router_scrape, "REINDEX_SERVICE_URL", "https://vecinita-scraper.modal.run")
+    monkeypatch.setattr(router_scrape, "modal_function_invocation_enabled", lambda: False)
+    monkeypatch.setattr(router_scrape, "REINDEX_SERVICE_URL", "https://reindex.e2e.test/jobs")
     monkeypatch.setattr(router_scrape, "REINDEX_TRIGGER_TOKEN", "e2e-token")
     monkeypatch.setattr(router_scrape.httpx, "AsyncClient", _ReindexAsyncClient)
 
@@ -67,4 +68,4 @@ def test_reindex_endpoint_e2e(gateway_client, monkeypatch):
     payload = response.json()
     assert payload["status"] == "queued"
     assert payload["call_id"] == "fc-e2e-123"
-    assert payload["service_url"] == "https://vecinita-scraper.modal.run"
+    assert payload["service_url"] == "https://reindex.e2e.test/jobs"

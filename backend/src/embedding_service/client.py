@@ -15,6 +15,7 @@ import httpx
 from langchain_core.embeddings import Embeddings
 
 from src.config import rewrite_deprecated_modal_embedding_host
+from src.services.modal.invoker import modal_function_invocation_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -72,9 +73,10 @@ class EmbeddingServiceClient(Embeddings):
         Initialize embedding service client.
 
         Args:
-            base_url:   Base URL of the embedding service.  On Render this
-                        should point to the direct embedding endpoint, e.g.
-                        ``https://<service>.modal.run``.
+            base_url:   Base URL of a **non-Modal** HTTP embedding microservice
+                        (e.g. ``http://embedding:8001``). Do not use ``*.modal.run`` here;
+                        use :func:`create_embedding_client` with ``MODAL_FUNCTION_INVOCATION``
+                        enabled to call Modal ``embed_query`` / ``embed_batch`` functions.
             timeout:    HTTP request timeout in seconds (default: 30).
             auth_token: Shared-secret token sent as both
                         ``x-embedding-service-token`` and
@@ -85,6 +87,18 @@ class EmbeddingServiceClient(Embeddings):
                         ``MODAL_API_TOKEN_SECRET``.
         """
         self.base_url = base_url.rstrip("/")
+        if "modal.run" in self.base_url.lower():
+            if modal_function_invocation_enabled():
+                raise ValueError(
+                    "Do not point EmbeddingServiceClient at *.modal.run when "
+                    "MODAL_FUNCTION_INVOCATION is enabled; use create_embedding_client(...) "
+                    "which calls Modal functions instead of HTTP."
+                )
+            raise ValueError(
+                "EmbeddingServiceClient cannot use *.modal.run without Modal function "
+                "invocation; set MODAL_FUNCTION_INVOCATION=auto or 1 (with MODAL_TOKEN_*), "
+                "or use http://localhost:8001 (or another non-Modal HTTP embedding service)."
+            )
         self.timeout = timeout
         self.auth_token = (
             auth_token
@@ -423,17 +437,22 @@ def create_embedding_client(
     embedding_service_url: str = "http://localhost:8001",
     validate_on_init: bool = False,
     auth_token: str | None = None,
-) -> EmbeddingServiceClient:
+) -> Embeddings:
     """
-    Factory function to create embedding service client.
+    Factory: HTTP embedding microservice, or Modal SDK when ``MODAL_FUNCTION_INVOCATION`` is on.
 
-    Args:
-        embedding_service_url: URL of embedding service
-                              (default: local embedding service)
-
-    Returns:
-        EmbeddingServiceClient instance
+    When Modal function invocation is enabled, ``embedding_service_url`` is only used as a
+    logical label (``ModalSdkEmbeddings.base_url``); vectors come from ``embed_query`` /
+    ``embed_batch`` Modal functions, not ``*.modal.run`` HTTP.
     """
+    if modal_function_invocation_enabled():
+        from src.embedding_service.modal_embeddings import ModalSdkEmbeddings
+
+        emb = ModalSdkEmbeddings(logical_url=embedding_service_url)
+        if validate_on_init:
+            emb.validate_connection()
+        return emb
+
     client = EmbeddingServiceClient(base_url=embedding_service_url, auth_token=auth_token)
     if validate_on_init:
         client.validate_connection()

@@ -123,8 +123,16 @@ class TestEmbedBatchEndpoint:
         assert response.status_code == 422
 
     @patch("src.api.router_embed.httpx.AsyncClient")
-    def test_embed_batch_maps_upstream_422_to_422(self, mock_async_client, embed_client):
+    def test_embed_batch_maps_upstream_422_to_422(
+        self, mock_async_client, embed_client, monkeypatch
+    ):
         """Upstream embedding 422 must not be surfaced as gateway 503 (Schemathesis not_a_server_error)."""
+        from src.api import router_embed
+
+        monkeypatch.setattr(
+            router_embed, "_embedding_service_url", lambda: "http://127.0.0.1:18001"
+        )
+
         mock_response = MagicMock()
         mock_response.status_code = 422
         mock_response.json.return_value = {"detail": "invalid payload"}

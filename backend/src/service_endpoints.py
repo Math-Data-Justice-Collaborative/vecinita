@@ -21,6 +21,11 @@ from src.config import (
     _running_on_render,
     normalize_agent_service_url,
 )
+from src.services.modal.invoker import (
+    modal_function_invocation_enabled,
+    modal_function_invocation_mode,
+    modal_token_pair_configured,
+)
 
 # ---------------------------------------------------------------------------
 # Modal upstream endpoints (direct)
@@ -104,7 +109,7 @@ def log_endpoint_summary(logger: logging.Logger) -> None:
     logger.info(
         "service_endpoints_summary "
         "model=%s embedding=%s scraper=%s agent=%s "
-        "strict_mode=%s on_render=%s "
+        "strict_mode=%s on_render=%s modal_mode=%s modal_enabled=%s modal_tokens=%s "
         "allowed_origins=%s",
         MODEL_ENDPOINT,
         EMBEDDING_ENDPOINT,
@@ -112,5 +117,8 @@ def log_endpoint_summary(logger: logging.Logger) -> None:
         AGENT_SERVICE_URL,
         is_render_strict_mode(),
         is_render(),
+        modal_function_invocation_mode(),
+        modal_function_invocation_enabled(),
+        modal_token_pair_configured(),
         origins,
     )

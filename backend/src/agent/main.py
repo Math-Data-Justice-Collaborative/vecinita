@@ -670,6 +670,7 @@ from src.config import (
     _running_on_render,
     resolve_data_db_mode,
 )
+from src.services.modal.invoker import enforce_modal_function_policy_for_urls
 
 # Keep these helpers bound on this module for legacy imports and tests.
 _RENDER_URL_HELPERS = (_normalize_internal_service_url, _running_on_render)
@@ -721,6 +722,12 @@ try:
     from src.service_endpoints import log_endpoint_summary as _log_ep_summary
 
     _log_ep_summary(logger)
+    enforce_modal_function_policy_for_urls(
+        {
+            "OLLAMA_BASE_URL": OLLAMA_BASE_URL,
+            "EMBEDDING_SERVICE_URL": EMBEDDING_SERVICE_URL,
+        }
+    )
     logger.info(
         "Startup connection config: render=%s embedding_url=%s ollama_url=%s "
         "embedding_strict_startup=%s preflight_strict=%s data_backend=%s db_scheme=%s db_host=%s",

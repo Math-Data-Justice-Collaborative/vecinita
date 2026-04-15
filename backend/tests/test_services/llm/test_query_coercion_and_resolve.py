@@ -86,3 +86,26 @@ def test_modal_native_chat_client_can_use_modal_function_invocation(monkeypatch)
     )
     message = client.invoke([])
     assert message.content == "hello from function"
+
+
+def test_validate_runtime_rejects_modal_run_when_invocation_disabled(monkeypatch):
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "0")
+    mgr = LocalLLMClientManager(
+        base_url="https://example.modal.run",
+        default_model="gemma3",
+        selection_file_path=None,
+        locked=False,
+    )
+    with pytest.raises(RuntimeError, match="Model base URL targets Modal"):
+        mgr.validate_runtime()
+
+
+def test_validate_runtime_accepts_modal_run_when_invocation_enabled(monkeypatch):
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
+    mgr = LocalLLMClientManager(
+        base_url="https://example.modal.run",
+        default_model="gemma3",
+        selection_file_path=None,
+        locked=False,
+    )
+    mgr.validate_runtime()

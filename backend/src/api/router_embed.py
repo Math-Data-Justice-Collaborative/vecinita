@@ -106,6 +106,20 @@ def _embedding_service_headers() -> dict[str, str]:
     return headers
 
 
+def _http_embeddings_blocked_modal_host() -> None:
+    """Do not use httpx against ``*.modal.run`` unless Modal SDK invocation is enabled."""
+    if modal_function_invocation_enabled():
+        return
+    if "modal.run" in _embedding_service_url().lower():
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Embedding URL targets Modal; set MODAL_FUNCTION_INVOCATION=auto or 1 "
+                "(with MODAL_TOKEN_*) or set LOCAL_EMBEDDING_SERVICE_URL to a non-Modal HTTP service."
+            ),
+        )
+
+
 async def get_embedding_client() -> httpx.AsyncClient:
     """Dependency to get httpx AsyncClient for embedding service."""
     return httpx.AsyncClient(timeout=30.0)
@@ -178,6 +192,8 @@ async def embed_text(request: EmbedRequest) -> EmbedResponse:
                 ),
             )
 
+        _http_embeddings_blocked_modal_host()
+
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await _post_single_embedding(client, request.text)
             response.raise_for_status()
@@ -194,6 +210,8 @@ async def embed_text(request: EmbedRequest) -> EmbedResponse:
                 ),
             )
 
+    except HTTPException:
+        raise
     except httpx.HTTPStatusError as e:
         if e.response is not None and e.response.status_code == 422:
             raise HTTPException(
@@ -236,6 +254,8 @@ async def embed_batch(request: EmbedBatchRequest) -> EmbedBatchResponse:
                 )
             return EmbedBatchResponse(embeddings=embed_responses, model=model, dimension=dimension)
 
+        _http_embeddings_blocked_modal_host()
+
         async with httpx.AsyncClient(timeout=60.0) as client:  # Longer timeout for batches
             response = await _post_batch_embedding(client, request.texts)
             response.raise_for_status()
@@ -255,6 +275,8 @@ async def embed_batch(request: EmbedBatchRequest) -> EmbedBatchResponse:
 
             return EmbedBatchResponse(embeddings=embed_responses, model=model, dimension=dimension)
 
+    except HTTPException:
+        raise
     except httpx.HTTPStatusError as e:
         if e.response is not None and e.response.status_code == 422:
             raise HTTPException(
@@ -304,6 +326,8 @@ async def compute_similarity(request: SimilarityRequest) -> SimilarityResponse:
                 text1=request.text1, text2=request.text2, similarity=similarity, model=model
             )
 
+        _http_embeddings_blocked_modal_host()
+
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await _post_batch_embedding(client, [request.text1, request.text2])
             response.raise_for_status()
@@ -334,6 +358,8 @@ async def compute_similarity(request: SimilarityRequest) -> SimilarityResponse:
                 text1=request.text1, text2=request.text2, similarity=similarity, model=model
             )
 
+    except HTTPException:
+        raise
     except httpx.HTTPStatusError as e:
         if e.response is not None and e.response.status_code == 422:
             raise HTTPException(
@@ -384,6 +410,8 @@ async def update_embedding_config(
         Updated configuration
     """
     try:
+        _http_embeddings_blocked_modal_host()
+
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Call embedding service config endpoint
             payload: dict[str, Any] = {"provider": params.provider, "model": params.model}
@@ -439,6 +467,8 @@ async def update_embedding_config(
                 description=f"Embedding model: {current.get('model', params.model)}",
             )
 
+    except HTTPException:
+        raise
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 403:
             raise HTTPException(

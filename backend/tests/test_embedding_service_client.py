@@ -43,6 +43,9 @@ def test_create_embedding_client_validate_on_init(monkeypatch):
         return self.base_url
 
     monkeypatch.setattr(EmbeddingServiceClient, "validate_connection", fake_validate)
+    monkeypatch.setattr(
+        "src.embedding_service.client.modal_function_invocation_enabled", lambda: False
+    )
 
     create_embedding_client("http://embedding-service:8001", validate_on_init=True)
     assert called["validated"] is True
@@ -80,9 +83,8 @@ def test_candidate_urls_include_local_fallbacks_for_remote_base_url(monkeypatch)
     monkeypatch.delenv("RENDER", raising=False)
     monkeypatch.delenv("RENDER_SERVICE_ID", raising=False)
 
-    client = EmbeddingServiceClient(
-        base_url="https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run"
-    )
+    client = EmbeddingServiceClient(base_url="http://localhost:8001")
+    client.base_url = "https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run"
 
     candidates = client._candidate_base_urls()
 
@@ -147,7 +149,7 @@ def test_client_does_not_set_modal_headers_when_available(monkeypatch):
     monkeypatch.setenv("MODAL_TOKEN_ID", "wk-test-modal-key")
     monkeypatch.setenv("MODAL_TOKEN_SECRET", "ws-test-modal-secret")
 
-    client = EmbeddingServiceClient(base_url="https://example.modal.run")
+    client = EmbeddingServiceClient(base_url="http://localhost:8001")
 
     assert client.client.headers.get("Modal-Key") is None
     assert client.client.headers.get("Modal-Secret") is None
@@ -158,7 +160,7 @@ def test_client_does_not_set_modal_key_from_token_id(monkeypatch):
     monkeypatch.setenv("MODAL_API_TOKEN_ID", "wk-token-id-fallback")
     monkeypatch.setenv("MODAL_TOKEN_SECRET", "ws-test-modal-secret")
 
-    client = EmbeddingServiceClient(base_url="https://example.modal.run")
+    client = EmbeddingServiceClient(base_url="http://localhost:8001")
 
     assert client.client.headers.get("Modal-Key") is None
     assert client.client.headers.get("Modal-Secret") is None
@@ -167,7 +169,7 @@ def test_client_does_not_set_modal_key_from_token_id(monkeypatch):
 def test_client_does_not_set_service_auth_token_header(monkeypatch):
     monkeypatch.setenv("EMBEDDING_SERVICE_AUTH_TOKEN", "routing-shared-token")
 
-    client = EmbeddingServiceClient(base_url="https://example.modal.run")
+    client = EmbeddingServiceClient(base_url="http://localhost:8001")
 
     assert client.client.headers.get("X-Service-Token") is None
 
@@ -184,6 +186,9 @@ def test_create_embedding_client_passes_explicit_auth_token(monkeypatch):
         self.client = Mock(headers={})
 
     monkeypatch.setattr(EmbeddingServiceClient, "__init__", fake_init)
+    monkeypatch.setattr(
+        "src.embedding_service.client.modal_function_invocation_enabled", lambda: False
+    )
 
     create_embedding_client(
         "http://embedding-service:8001",
@@ -194,3 +199,62 @@ def test_create_embedding_client_passes_explicit_auth_token(monkeypatch):
         "base_url": "http://embedding-service:8001",
         "auth_token": "factory-token",
     }
+
+
+def test_embedding_service_client_rejects_modal_run_url(monkeypatch):
+    monkeypatch.setattr(
+        "src.embedding_service.client.modal_function_invocation_enabled", lambda: False
+    )
+    with pytest.raises(ValueError, match="EmbeddingServiceClient cannot use"):
+        EmbeddingServiceClient(base_url="https://example.modal.run")
+
+
+def test_embedding_service_client_rejects_modal_run_when_modal_sdk_enabled(monkeypatch):
+    monkeypatch.setattr(
+        "src.embedding_service.client.modal_function_invocation_enabled", lambda: True
+    )
+    with pytest.raises(ValueError, match="Do not point EmbeddingServiceClient"):
+        EmbeddingServiceClient(base_url="https://example.modal.run")
+
+
+def test_create_embedding_client_uses_modal_sdk_when_invocation_enabled(monkeypatch):
+    monkeypatch.setattr(
+        "src.embedding_service.client.modal_function_invocation_enabled", lambda: True
+    )
+    monkeypatch.setattr(
+        "src.embedding_service.modal_embeddings.invoke_modal_embedding_single",
+        lambda _text: {"embedding": [0.25, 0.5], "model": "m", "dimension": 2},
+    )
+    monkeypatch.setattr(
+        "src.embedding_service.modal_embeddings.invoke_modal_embedding_batch",
+        lambda _texts: {"embeddings": [[1.0, 2.0]], "model": "m", "dimension": 2},
+    )
+    from src.embedding_service.modal_embeddings import ModalSdkEmbeddings
+
+    emb = create_embedding_client(
+        "https://labels-only.modal.run", validate_on_init=False, auth_token="ignored"
+    )
+    assert isinstance(emb, ModalSdkEmbeddings)
+    assert emb.base_url == "https://labels-only.modal.run"
+    assert emb.embed_query("x") == [0.25, 0.5]
+    assert emb.embed_documents(["a"]) == [[1.0, 2.0]]
+
+
+def test_create_embedding_client_modal_sdk_validate_on_init(monkeypatch):
+    monkeypatch.setattr(
+        "src.embedding_service.client.modal_function_invocation_enabled", lambda: True
+    )
+
+    validated = {"called": False}
+
+    def _fake_validate(self):
+        validated["called"] = True
+        return self.base_url
+
+    monkeypatch.setattr(
+        "src.embedding_service.modal_embeddings.ModalSdkEmbeddings.validate_connection",
+        _fake_validate,
+    )
+
+    _ = create_embedding_client("modal://logical", validate_on_init=True)
+    assert validated["called"] is True

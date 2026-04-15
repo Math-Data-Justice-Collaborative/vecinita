@@ -16,6 +16,7 @@ def minimal_valid_render_env():
         "EMBEDDING_SERVICE_AUTH_TOKEN": "test-embed-token",
         "MODAL_TOKEN_ID": "ak-example",
         "MODAL_TOKEN_SECRET": "as-example",
+        "MODAL_FUNCTION_INVOCATION": "auto",
         "MODAL_WORKSPACE": "vecinita",
         "OLLAMA_MODEL": "gemma3",
         "RENDER_REMOTE_INFERENCE_ONLY": "true",
@@ -59,19 +60,32 @@ def test_validate_shared_render_env_flags_missing_and_inconsistent_values(minima
         "DATABASE_URL": "https://not-postgres.example.com/db",
         "DB_DATA_MODE": "auto",
         "RENDER_REMOTE_INFERENCE_ONLY": "false",
-        "VECINITA_MODEL_API_URL": "https://model.example.com",
+        "MODAL_FUNCTION_INVOCATION": "0",
+        "VECINITA_MODEL_API_URL": "not-a-url",
         "VECINITA_EMBEDDING_API_URL": "https://embedding.example.com",
-        "VECINITA_SCRAPER_API_URL": "https://scraper.example.com",
+        "VECINITA_SCRAPER_API_URL": "https://scraper.example.com/jobs",
     }
 
     result = validate_shared_render_env(env)
 
     assert "DATABASE_URL must use postgres:// or postgresql:// scheme" in result.errors
-    assert "VECINITA_MODEL_API_URL must point to a direct Modal endpoint" in result.errors
-    assert "VECINITA_EMBEDDING_API_URL must point to a direct Modal endpoint" in result.errors
-    assert "VECINITA_SCRAPER_API_URL must point to a direct Modal endpoint" in result.errors
+    assert "VECINITA_MODEL_API_URL must be an absolute http(s) URL in HTTP mode" in result.errors
     assert "RENDER_REMOTE_INFERENCE_ONLY must be enabled for Render runtime" in result.errors
     assert "DB_DATA_MODE must be set to postgres for Render runtime" in result.errors
+
+
+def test_validate_shared_render_env_function_mode_requires_modal_tokens(minimal_valid_render_env):
+    env = {
+        **minimal_valid_render_env,
+        "MODAL_FUNCTION_INVOCATION": "1",
+        "MODAL_TOKEN_ID": "",
+        "MODAL_TOKEN_SECRET": "",
+    }
+
+    result = validate_shared_render_env(env)
+    assert any(
+        "MODAL_FUNCTION_INVOCATION is enabled but MODAL_TOKEN_ID" in e for e in result.errors
+    )
 
 
 def test_validate_shared_render_env_warns_when_frontend_origin_missing(minimal_valid_render_env):

@@ -69,7 +69,10 @@ def client(env_vars, monkeypatch):
 def test_modal_reindex_endpoint_returns_queued(client, monkeypatch):
     from src.api import router_scrape
 
-    monkeypatch.setattr(router_scrape, "REINDEX_SERVICE_URL", "https://vecinita-scraper.modal.run")
+    monkeypatch.setattr(router_scrape, "modal_function_invocation_enabled", lambda: False)
+    monkeypatch.setattr(
+        router_scrape, "REINDEX_SERVICE_URL", "https://reindex.integration.test/jobs"
+    )
     monkeypatch.setattr(router_scrape, "REINDEX_TRIGGER_TOKEN", "integration-token")
     monkeypatch.setattr(router_scrape.httpx, "AsyncClient", _AsyncClientStub)
 
@@ -79,4 +82,4 @@ def test_modal_reindex_endpoint_returns_queued(client, monkeypatch):
     body = response.json()
     assert body["status"] == "queued"
     assert body["call_id"] == "fc-integration-001"
-    assert body["service_url"] == "https://vecinita-scraper.modal.run"
+    assert body["service_url"] == "https://reindex.integration.test/jobs"

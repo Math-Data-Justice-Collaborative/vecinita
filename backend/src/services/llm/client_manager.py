@@ -125,6 +125,12 @@ class _ModalNativeChatClient:
                 content = str(data)
             return AIMessage(content=content)
 
+        if "modal.run" in self.base_url.lower():
+            raise RuntimeError(
+                "Model base URL targets Modal; set MODAL_FUNCTION_INVOCATION=auto or 1 "
+                "with Modal tokens, or use a non-Modal Ollama HTTP endpoint."
+            )
+
         target_url = f"{self.base_url}/chat"
         logger.info(
             "llm_modal_invoke_start target=%s model=%s timeout_s=%.1f message_count=%s has_auth_header=%s",
@@ -280,6 +286,11 @@ class LocalLLMClientManager:
         if not self.base_url:
             raise RuntimeError(
                 "No local LLM endpoint configured. Set OLLAMA_BASE_URL or MODAL_OLLAMA_ENDPOINT."
+            )
+        if "modal.run" in self.base_url.lower() and not modal_function_invocation_enabled():
+            raise RuntimeError(
+                "Model base URL targets Modal; set MODAL_FUNCTION_INVOCATION=auto or 1 "
+                "with Modal tokens, or use a non-Modal Ollama HTTP endpoint."
             )
         if self.uses_modal_native_chat_api():
             return

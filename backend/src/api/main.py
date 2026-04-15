@@ -55,6 +55,7 @@ from .models import (
 from .router_ask import router as ask_router
 from .router_documents import router as documents_router
 from .router_embed import router as embed_router
+from .router_modal_jobs import router as modal_jobs_router
 
 try:
     from .router_scrape import router as scrape_router
@@ -79,8 +80,11 @@ def _running_on_render() -> bool:
 # Import normalized endpoints from central config (ensures consistency across services).
 # config._normalize_internal_service_url() handles Render vs local-dev logic.
 from src.config import EMBEDDING_SERVICE_URL
+from src.services.modal.invoker import enforce_modal_function_policy_for_urls
 from src.service_endpoints import (
     AGENT_SERVICE_URL,
+    MODEL_ENDPOINT,
+    SCRAPER_ENDPOINT,
     log_endpoint_summary as _log_ep_summary,
 )
 from src.utils.database_url import get_resolved_database_url
@@ -317,6 +321,14 @@ async def lifespan(app: FastAPI):
     """
     # ========== STARTUP ==========
     _log_ep_summary(logging.getLogger(__name__))
+    enforce_modal_function_policy_for_urls(
+        {
+            "MODEL_ENDPOINT": MODEL_ENDPOINT,
+            "EMBEDDING_SERVICE_URL": EMBEDDING_SERVICE_URL,
+            "SCRAPER_ENDPOINT": SCRAPER_ENDPOINT,
+            "REINDEX_SERVICE_URL": os.getenv("REINDEX_SERVICE_URL", "").strip() or None,
+        }
+    )
     print("[Gateway] Starting Vecinita Unified API Gateway")
     print(f"[Gateway] Agent Service: {AGENT_SERVICE_URL}")
     print(f"[Gateway] Embedding Service: {EMBEDDING_SERVICE_URL}")
@@ -552,6 +564,7 @@ v1_router.include_router(ask_router)
 if scrape_router is not None:
     v1_router.include_router(scrape_router)
 v1_router.include_router(embed_router)
+v1_router.include_router(modal_jobs_router)
 v1_router.include_router(documents_router)  # public, no auth
 
 # Include the version router in the main app

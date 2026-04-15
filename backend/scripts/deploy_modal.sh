@@ -5,9 +5,14 @@
 #   ./backend/scripts/deploy_modal.sh [--embedding] [--model] [--scraper] [--all]
 #   ./backend/scripts/deploy_modal.sh --no-web [--embedding] [--model] [--scraper] [--all]
 #
-# ``--no-web`` sets ``VECINITA_MODAL_INCLUDE_WEB_ENDPOINTS=0`` so ``modal deploy`` only
-# registers function endpoints (embedding ``embed_*``, model ``chat_completion`` / downloads,
-# scraper workers). Scraper FastAPI (``vecinita_scraper/api/app.py``) is skipped.
+# Embedding and model Modal apps register **functions only** (``embed_query``,
+# ``embed_batch``, ``chat_completion``, download helpers) — no Modal ASGI / ``*.modal.run``
+# web apps for those services. Call them via ``modal.Function.from_name`` from the
+# gateway (``MODAL_FUNCTION_INVOCATION``) or ``modal run ...::fn.remote()``.
+#
+# ``--no-web`` skips deploying the scraper FastAPI app (``modal_api_entry.py``); only
+# ``vecinita-scraper`` workers are deployed. Omit ``--no-web`` to also deploy the
+# scraper HTTP API (``vecinita-scraper-api``).
 #
 # Optional legacy cron-only app:
 #   ./backend/scripts/deploy_modal.sh --legacy-scraper-cron
@@ -37,21 +42,18 @@ if ! modal token info &> /dev/null 2>&1; then
     exit 1
 fi
 
-INCLUDE_WEB=1
+DEPLOY_SCRAPER_HTTP=1
 FILTERED_ARGS=()
 for arg in "$@"; do
     case $arg in
-        --no-web) INCLUDE_WEB=0 ;;
+        --no-web) DEPLOY_SCRAPER_HTTP=0 ;;
         *) FILTERED_ARGS+=("$arg") ;;
     esac
 done
 set -- "${FILTERED_ARGS[@]}"
 
-if [ "$INCLUDE_WEB" = 0 ]; then
-    export VECINITA_MODAL_INCLUDE_WEB_ENDPOINTS=0
-    echo -e "${YELLOW}Web / ASGI endpoints omitted (function-only deploy).${NC}\n"
-else
-    export VECINITA_MODAL_INCLUDE_WEB_ENDPOINTS=1
+if [ "$DEPLOY_SCRAPER_HTTP" = 0 ]; then
+    echo -e "${YELLOW}Scraper FastAPI (modal_api_entry) will be skipped.${NC}\n"
 fi
 
 DEPLOY_EMBEDDING=false
@@ -123,11 +125,11 @@ fi
 if [ "$DEPLOY_SCRAPER" = true ]; then
     echo -e "${BLUE}→ Deploying scraper workers...${NC}"
     _modal_deploy_in_service services/scraper modal_workers_entry.py
-    if [ "$INCLUDE_WEB" = 1 ]; then
+    if [ "$DEPLOY_SCRAPER_HTTP" = 1 ]; then
         echo -e "${BLUE}→ Deploying scraper HTTP API...${NC}"
         _modal_deploy_in_service services/scraper modal_api_entry.py
     else
-        echo -e "${YELLOW}  Skipped vecinita_scraper/api (HTTP) — use without --no-web to deploy.${NC}"
+        echo -e "${YELLOW}  Skipped vecinita_scraper/api (HTTP) — omit --no-web to deploy.${NC}"
     fi
     echo -e "${GREEN}✓ Scraper Modal deploy step(s) complete${NC}\n"
 fi

@@ -1,8 +1,14 @@
 """Modal Function invocation helpers for gateway / agent paths.
 
-These helpers provide a non-HTTP integration mode so callers invoke deployed
-Modal workloads via ``modal.Function.from_name`` + ``.remote()`` / ``.spawn()``
-(Modal SDK 1.x) instead of ``*.modal.run`` HTTP where this module is used.
+Deployed apps (after ``modal deploy``): use ``modal.Function.from_name(...)`` +
+``.remote()`` / ``.spawn()`` from any Python client with Modal auth — the pattern
+described in Modal's "Apps, Functions, and entrypoints" and "Trigger deployed functions"
+guides (https://modal.com/docs/guide/apps,
+https://modal.com/docs/guide/trigger-deployed-functions).
+
+Ephemeral apps (``modal run`` / ``with app.run():``): call ``.remote()`` on the
+function handle attached to your local ``modal.App`` (e.g. inside an
+``@app.local_entrypoint()``); that is for dev / one-off jobs, not this gateway module.
 
 See https://modal.com/docs/reference/modal.Function — ``spawn`` returns a
 ``FunctionCall``; we use ``.get(timeout=...)`` when the gateway still needs a
@@ -51,6 +57,48 @@ def modal_function_invocation_enabled() -> bool:
     if _falsy_explicit_modal_mode(raw):
         return False
     return _truthy(os.getenv("MODAL_FUNCTION_INVOCATION"))
+
+
+def modal_function_invocation_mode() -> str:
+    """Return normalized invocation mode: ``off`` | ``auto`` | ``on``."""
+    raw = str(os.getenv("MODAL_FUNCTION_INVOCATION", "")).strip().lower()
+    if not raw or _falsy_explicit_modal_mode(raw):
+        return "off"
+    if raw == "auto":
+        return "auto"
+    return "on"
+
+
+def modal_token_pair_configured() -> bool:
+    """Expose whether a Modal token pair is configured."""
+    return _modal_token_pair_configured()
+
+
+def enforce_modal_function_policy_for_urls(urls: dict[str, str | None]) -> None:
+    """Fail fast when ``*.modal.run`` URLs are configured without function invocation."""
+    modal_targets = [
+        (name, str(value).strip())
+        for name, value in urls.items()
+        if value and "modal.run" in str(value).strip().lower()
+    ]
+    if not modal_targets:
+        return
+
+    if not modal_function_invocation_enabled():
+        targets = ", ".join(f"{name}={value}" for name, value in modal_targets)
+        raise RuntimeError(
+            "Configured Modal HTTP endpoints require Modal function invocation. "
+            f"Set MODAL_FUNCTION_INVOCATION=auto or 1 and provide MODAL_TOKEN_ID/MODAL_TOKEN_SECRET. "
+            f"Targets: {targets}"
+        )
+
+    if not _modal_token_pair_configured():
+        targets = ", ".join(name for name, _ in modal_targets)
+        raise RuntimeError(
+            "Modal function invocation is enabled for Modal-hosted targets but Modal tokens are missing. "
+            "Set MODAL_TOKEN_ID and MODAL_TOKEN_SECRET (or MODAL_API_TOKEN_ID/MODAL_API_TOKEN_SECRET). "
+            f"Targets: {targets}"
+        )
 
 
 def _modal_environment_name() -> str | None:
@@ -121,3 +169,47 @@ def invoke_modal_model_chat(
     fn_name = os.getenv("MODAL_MODEL_CHAT_FUNCTION", "chat_completion")
     fn = _lookup_function(app_name, fn_name, _invoke_env())
     return fn.remote(model=model, messages=messages, temperature=temperature)
+
+
+def spawn_modal_scraper_reindex(clean: bool, stream: bool, verbose: bool) -> Any:
+    """Spawn ``trigger_reindex`` (or configured function) without blocking on the result."""
+    app_name = os.getenv("MODAL_SCRAPER_APP_NAME", "vecinita-scraper")
+    fn_name = os.getenv("MODAL_SCRAPER_REINDEX_FUNCTION", "trigger_reindex")
+    fn = _lookup_function(app_name, fn_name, _invoke_env())
+    return fn.spawn(clean=clean, stream=stream, verbose=verbose)
+
+
+def get_modal_function_call_result(function_call_id: str, timeout: float | None) -> Any:
+    """Resolve a ``FunctionCall`` by id and ``get`` its result (may raise ``TimeoutError``)."""
+    modal = _get_modal_module()
+    fc = modal.FunctionCall.from_id(function_call_id)
+    return fc.get(timeout=timeout)
+
+
+def invoke_modal_scrape_job_submit(payload: dict[str, Any]) -> dict[str, Any]:
+    """Call scraper ``modal_scrape_job_submit``; returns Modal RPC envelope dict."""
+    app_name = os.getenv("MODAL_SCRAPER_APP_NAME", "vecinita-scraper")
+    fn_name = os.getenv("MODAL_SCRAPER_JOB_SUBMIT_FUNCTION", "modal_scrape_job_submit")
+    fn = _lookup_function(app_name, fn_name, _invoke_env())
+    return fn.remote(payload)
+
+
+def invoke_modal_scrape_job_get(job_id: str) -> dict[str, Any]:
+    app_name = os.getenv("MODAL_SCRAPER_APP_NAME", "vecinita-scraper")
+    fn_name = os.getenv("MODAL_SCRAPER_JOB_GET_FUNCTION", "modal_scrape_job_get")
+    fn = _lookup_function(app_name, fn_name, _invoke_env())
+    return fn.remote(job_id)
+
+
+def invoke_modal_scrape_job_list(user_id: str | None, limit: int) -> dict[str, Any]:
+    app_name = os.getenv("MODAL_SCRAPER_APP_NAME", "vecinita-scraper")
+    fn_name = os.getenv("MODAL_SCRAPER_JOB_LIST_FUNCTION", "modal_scrape_job_list")
+    fn = _lookup_function(app_name, fn_name, _invoke_env())
+    return fn.remote(user_id=user_id, limit=limit)
+
+
+def invoke_modal_scrape_job_cancel(job_id: str) -> dict[str, Any]:
+    app_name = os.getenv("MODAL_SCRAPER_APP_NAME", "vecinita-scraper")
+    fn_name = os.getenv("MODAL_SCRAPER_JOB_CANCEL_FUNCTION", "modal_scrape_job_cancel")
+    fn = _lookup_function(app_name, fn_name, _invoke_env())
+    return fn.remote(job_id)

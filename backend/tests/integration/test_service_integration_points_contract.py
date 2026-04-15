@@ -138,6 +138,8 @@ def test_ip05_gateway_to_reindex_route_forwards_token_and_params(monkeypatch) ->
     """IP-05: Gateway scrape/reindex forwards trigger token to direct jobs endpoint."""
     from src.api import router_scrape
 
+    monkeypatch.setattr(router_scrape, "modal_function_invocation_enabled", lambda: False)
+
     captured: dict[str, object] = {}
 
     class _StubClient:
@@ -156,7 +158,7 @@ def test_ip05_gateway_to_reindex_route_forwards_token_and_params(monkeypatch) ->
     monkeypatch.setattr(
         router_scrape,
         "REINDEX_SERVICE_URL",
-        "https://vecinita--vecinita-scraper-api-fastapi.modal.run/jobs",
+        "https://reindex.example.com/jobs",
     )
     monkeypatch.setattr(router_scrape, "REINDEX_TRIGGER_TOKEN", "reindex-secret")
     monkeypatch.setattr(router_scrape.httpx, "AsyncClient", lambda *args, **kwargs: _StubClient())
@@ -167,9 +169,7 @@ def test_ip05_gateway_to_reindex_route_forwards_token_and_params(monkeypatch) ->
 
     response = client.post("/api/v1/scrape/reindex?clean=true&verbose=true")
     assert response.status_code == 200
-    assert (
-        captured["url"] == "https://vecinita--vecinita-scraper-api-fastapi.modal.run/jobs/reindex"
-    )
+    assert captured["url"] == "https://reindex.example.com/jobs/reindex"
     assert captured["params"] == {"clean": True, "stream": True, "verbose": True}
     assert captured["headers"] == {"x-reindex-token": "reindex-secret"}
 

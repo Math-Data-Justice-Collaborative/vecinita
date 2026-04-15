@@ -343,7 +343,9 @@ class TestReindexEndpoint:
     def test_reindex_calls_modal_service(self, scrape_client, monkeypatch):
         from src.api import router_scrape
 
-        monkeypatch.setattr(router_scrape, "REINDEX_SERVICE_URL", "https://reindex.modal.run")
+        monkeypatch.setattr(
+            router_scrape, "REINDEX_SERVICE_URL", "https://reindex.example.com/jobs"
+        )
         monkeypatch.setattr(router_scrape, "REINDEX_TRIGGER_TOKEN", "token-123")
         monkeypatch.setattr(router_scrape.httpx, "AsyncClient", _FakeReindexClient)
 
@@ -353,7 +355,7 @@ class TestReindexEndpoint:
 
         assert payload["status"] == "queued"
         assert payload["call_id"] == "fc-test-123"
-        assert payload["service_url"] == "https://reindex.modal.run"
+        assert payload["service_url"] == "https://reindex.example.com/jobs"
         assert payload["params"]["clean"] is True
         assert payload["headers"]["x-reindex-token"] == "token-123"
 

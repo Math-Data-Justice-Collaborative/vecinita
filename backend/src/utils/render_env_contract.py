@@ -19,6 +19,7 @@ REQUIRED_KEYS: set[str] = {
     "EMBEDDING_SERVICE_AUTH_TOKEN",
     "MODAL_TOKEN_ID",
     "MODAL_TOKEN_SECRET",
+    "MODAL_FUNCTION_INVOCATION",
     "MODAL_WORKSPACE",
     "OLLAMA_MODEL",
     "RENDER_REMOTE_INFERENCE_ONLY",
@@ -105,18 +106,35 @@ def _validate_database_url(env: dict[str, str], result: ValidationResult) -> Non
 
 
 def _validate_modal_endpoints(env: dict[str, str], result: ValidationResult) -> None:
+    mode = (env.get("MODAL_FUNCTION_INVOCATION") or "").strip().lower()
+    function_mode = mode in {"1", "true", "yes", "on", "auto"}
+
     model_endpoint = env.get("VECINITA_MODEL_API_URL", "")
     embed_endpoint = env.get("VECINITA_EMBEDDING_API_URL", "")
     scraper_endpoint = env.get("VECINITA_SCRAPER_API_URL", "")
 
-    if model_endpoint and ".modal.run" not in model_endpoint:
-        result.errors.append("VECINITA_MODEL_API_URL must point to a direct Modal endpoint")
+    if function_mode:
+        token_id = (env.get("MODAL_TOKEN_ID") or env.get("MODAL_API_TOKEN_ID") or "").strip()
+        token_secret = (
+            env.get("MODAL_TOKEN_SECRET") or env.get("MODAL_API_TOKEN_SECRET") or ""
+        ).strip()
+        if not (token_id and token_secret):
+            result.errors.append(
+                "MODAL_FUNCTION_INVOCATION is enabled but MODAL_TOKEN_ID/MODAL_TOKEN_SECRET are missing"
+            )
+        return
 
-    if embed_endpoint and ".modal.run" not in embed_endpoint:
-        result.errors.append("VECINITA_EMBEDDING_API_URL must point to a direct Modal endpoint")
-
-    if scraper_endpoint and ".modal.run" not in scraper_endpoint:
-        result.errors.append("VECINITA_SCRAPER_API_URL must point to a direct Modal endpoint")
+    for key, value in (
+        ("VECINITA_MODEL_API_URL", model_endpoint),
+        ("VECINITA_EMBEDDING_API_URL", embed_endpoint),
+        ("VECINITA_SCRAPER_API_URL", scraper_endpoint),
+    ):
+        raw = (value or "").strip()
+        if not raw:
+            continue
+        parsed = urlparse(raw)
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+            result.errors.append(f"{key} must be an absolute http(s) URL in HTTP mode")
 
 
 def _validate_reindex_service_url(env: dict[str, str], result: ValidationResult) -> None:

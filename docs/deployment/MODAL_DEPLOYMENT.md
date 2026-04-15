@@ -19,22 +19,27 @@ API Gateway (FastAPI @ :8004)
     └── Ask Router → Question answering
 
 Modal Services (representative layout; exact app names follow your Modal workspace):
-├── vecinita-embedding (ASGI `web_app`)
-│   └── FastAPI embedding service — `/embed`, batch routes, `/config`, `/health`
-│   └── Auth: Modal routing secret or custom token
+├── vecinita-embedding (Modal **Functions** only)
+│   └── ``embed_query``, ``embed_batch`` — invoke via ``modal.Function.from_name`` (gateway: ``MODAL_FUNCTION_INVOCATION``) or ``modal run ...::embed_query.remote(...)``
 │
-├── vecinita-model (ASGI ``api``)
-│   └── Ollama-compatible HTTP API — default model **`gemma3`**
+├── vecinita-model (Modal **Functions** only)
+│   └── ``chat_completion``, ``download_model``, ``download_default_model`` — no Modal-hosted Ollama HTTP app; local HTTP remains available via Docker ``vecinita.asgi`` if you need it
 │
 ├── vecinita-scraper (workers + queues)
-│   └── Modal ``@app.function`` workers; optional legacy cron in ``backend/src/scraper/modal_app.py``
+│   └── Modal ``@app.function`` workers (``drain_*_queue``, ``trigger_reindex``, …)
+│   └── **Job RPC:** ``modal_scrape_job_submit``, ``modal_scrape_job_get``, ``modal_scrape_job_list``, ``modal_scrape_job_cancel`` — same Postgres + ``scrape-jobs`` queue as HTTP ``/jobs``, for ``modal.Function.from_name`` callers
+│   └── Optional legacy cron in ``backend/src/scraper/modal_app.py``
 │
-└── vecinita-scraper-api (ASGI ``fastapi``)
+└── vecinita-scraper-api (ASGI ``fastapi``) — optional; skipped when ``deploy_modal.sh --no-web``
     └── HTTP: FastAPI under ``/jobs`` (see service OpenAPI)
     └── Auth: e.g. ``REINDEX_TRIGGER_TOKEN`` where applicable
 ```
 
-**Gateway `/api/v1/integrations/status`:** The API gateway still **HTTP-probes** the **agent** and **database** for operator visibility. **Embedding, model, and scraper** Modal workers are **not** continuously health-checked from the gateway (they are treated as on-demand dependencies; see `backend/src/api/main.py` `_build_integrations_status`). Validate those services with direct `curl` to their deployed URLs or Modal logs when troubleshooting.
+**Gateway `/api/v1/integrations/status`:** The API gateway still **HTTP-probes** the **agent** and **database** for operator visibility. **Embedding and model on Modal** are reached via the Modal Python client when configured (not via `*.modal.run` ASGI). **Scraper** may still use HTTP to ``vecinita-scraper-api`` when deployed. Validate with Modal logs or ``modal run`` smoke tests when troubleshooting.
+
+**Gateway Modal job API (`/api/v1/modal-jobs/...`):** When ``MODAL_FUNCTION_INVOCATION`` is enabled, the gateway exposes scrape job **CRUD** that calls the scraper Modal functions above (no direct ``*.modal.run`` to the scraper ASGI). **Tracked reindex spawns** use ``POST /api/v1/modal-jobs/reindex/spawn``; metadata is stored in a Modal **Dict** named by ``MODAL_JOB_REGISTRY_DICT`` (default ``vecinita-gateway-modal-jobs``), with in-memory fallback if the Dict is unavailable. Set ``MODAL_JOB_REGISTRY_DISABLE=1`` to force in-memory only.
+
+**Frontend (data management):** Set ``VITE_USE_GATEWAY_MODAL_JOBS=true`` and ``VITE_VECINITA_GATEWAY_URL`` so scrape job traffic uses the gateway Modal job routes instead of ``VITE_VECINITA_SCRAPER_API_URL`` ``/jobs`` (the scraper HTTP API can remain deployed for other clients).
 
 ## Prerequisites
 
@@ -94,39 +99,70 @@ Canonical **deploy** entry files (add `src/` to `sys.path` so packages resolve) 
 # ./backend/scripts/deploy_modal.sh --legacy-scraper-cron
 ```
 
-**Function-only (no ASGI / scraper HTTP):** pass **`--no-web`**. That sets `VECINITA_MODAL_INCLUDE_WEB_ENDPOINTS=0` for embedding and model deploys and skips `modal_api_entry.py` for scraper. Equivalent manual example:
+**Scraper HTTP API omitted:** pass **`--no-web`** to deploy only ``vecinita-scraper`` workers (skip ``modal_api_entry.py`` / ``vecinita-scraper-api``). Embedding and model Modal apps are always function-only in source; no env flag is required.
 
-```bash
-cd services/embedding-modal && VECINITA_MODAL_INCLUDE_WEB_ENDPOINTS=0 uv run modal deploy main.py
-```
+**If the Modal dashboard still lists ``web_app`` (embedding) or ``api`` (model) as web endpoints:** that is the **previous** deployment. The current repo does not register those handlers on ``vecinita-embedding`` / ``vecinita-model``. Run a fresh ``modal deploy`` for each app from this revision (or let ``modal-deploy.yml`` run on ``main``). Until then, traffic can keep hitting the old ASGI URLs; configure the gateway with ``MODAL_FUNCTION_INVOCATION`` so new traffic uses ``embed_query`` / ``chat_completion`` instead.
 
 After you confirm traffic uses the new apps, use `backend/scripts/modal_teardown_legacy_web.sh` as a checklist for retiring old Modal web routes.
 
 ### Step 3: Configure Environment
 
-After deployment, copy the **exact** `*.modal.run` hostnames from the Modal CLI or dashboard (suffixes vary by function name).
+For **embedding and model on Modal**, configure the gateway with Modal workspace tokens and function invocation (see ``backend/.env.example``: ``MODAL_TOKEN_ID``, ``MODAL_TOKEN_SECRET``, ``MODAL_FUNCTION_INVOCATION=auto`` or ``true``, and optional ``MODAL_EMBEDDING_APP_NAME`` / ``MODAL_MODEL_APP_NAME`` overrides). You can still point ``EMBEDDING_SERVICE_URL`` / ``OLLAMA_BASE_URL`` at a **non-Modal** HTTP service (e.g. local Docker) when not using Modal functions.
 
-Update `.env`:
+For the **recommended function-first mode** on Render, leave ``REINDEX_SERVICE_URL`` empty and enable:
+
 ```env
-MODAL_EMBEDDING_ENDPOINT=https://<your-embedding-asgi-host>
+MODAL_FUNCTION_INVOCATION=auto
+MODAL_TOKEN_ID=<your-token-id>
+MODAL_TOKEN_SECRET=<your-token-secret>
+```
+
+Use the **optional scraper HTTP API mode** only when you explicitly want gateway->HTTP forwarding:
+
+```env
 REINDEX_SERVICE_URL=https://<your-scraper-api-host>/jobs
 REINDEX_TRIGGER_TOKEN=<your-secure-token>  # Set in Modal secret
 ```
 
 ### Step 4: Test Deployments
 
-Use the **actual** `*.modal.run` hostnames from your deploy output (often a `*-web-app` suffix for ASGI apps), for example:
-
 ```bash
-# Embedding web app (replace with your deployment URL)
-curl -fsS "https://<your-embedding-web-app-host>/health" | head
+# List deployed functions (embedding: embed_query / embed_batch; model: chat_completion / download_*)
+modal function list vecinita-embedding
+modal function list vecinita-model
 
-# Scraper / model — same pattern for the hosts Modal prints after deploy
-# curl -fsS "https://<your-scraper-host>/health"
-# curl -fsS "https://<your-model-host>/health"
+# Scraper HTTP API (only if you deployed modal_api_entry.py)
+# curl -fsS "https://<vecinita-scraper-api-host>/health"
 
 modal app list --all
 ```
+
+### Invoking functions (Modal “Apps, Functions, and entrypoints”)
+
+Modal documents two common patterns ([Apps, Functions, and entrypoints](https://modal.com/docs/guide/apps)):
+
+1. **Deployed app** (`modal deploy`) — invoke from **any** Python process that has the Modal SDK and workspace tokens, without importing your service package on the caller:
+
+   ```python
+   import modal
+
+   embed = modal.Function.from_name("vecinita-embedding", "embed_query")
+   out = embed.remote("hello")  # dict with embedding, model, dimension
+
+   chat = modal.Function.from_name("vecinita-model", "chat_completion")
+   out = chat.remote(model="gemma3", messages=[{"role": "user", "content": "Hi"}], temperature=0.0)
+   ```
+
+   Optional: `environment_name=...` if you use [Modal environments](https://modal.com/docs/guide/continuous-deployment). The vecinita **gateway** wraps the same idea in `backend/src/services/modal/invoker.py` when `MODAL_FUNCTION_INVOCATION` is enabled. See also [Trigger deployed functions](https://modal.com/docs/guide/trigger-deployed-functions).
+
+2. **Ephemeral app** (`modal run` or `app.run()` in a script) — for local smoke tests or batch jobs: use `with app.run():` and call `.remote()` on the **function object** defined next to your `modal.App` (e.g. a `@app.local_entrypoint()` that calls `embed_query.remote(...)`), as in the Modal guide. Example direct remote entrypoint:
+
+   ```bash
+   cd services/embedding-modal
+   PYTHONPATH=src modal run main.py::app.embed_query -- "hello"
+   ```
+
+   (Adjust `MODAL_PROFILE` / auth if needed; `modal run` CLI syntax follows Modal’s [CLI run](https://modal.com/docs/reference/cli/run) docs.)
 
 ## GitHub Actions CI/CD
 
@@ -172,23 +208,27 @@ REINDEX_SERVICE_URL=  # Optional for local testing
 MODAL_API_TOKEN_ID=<your-token-id>
 MODAL_API_TOKEN_SECRET=<your-token-secret>
 
-# Runtime endpoints
-MODAL_EMBEDDING_ENDPOINT=https://vecinita--vecinita-embedding.modal.run
-REINDEX_SERVICE_URL=https://vecinita--vecinita-scraper.modal.run
+# Runtime: Modal embedding/model use Function.from_name (set MODAL_FUNCTION_INVOCATION + tokens)
+MODAL_FUNCTION_INVOCATION=auto
+MODAL_TOKEN_ID=<your-token-id>
+MODAL_TOKEN_SECRET=<your-token-secret>
+# Optional HTTP-mode scraper fallback only:
+# REINDEX_SERVICE_URL=https://<vecinita-scraper-api-host>/jobs
 REINDEX_TRIGGER_TOKEN=<your-secret-token>
 
-# Optional: Override defaults
-EMBEDDING_SERVICE_AUTH_TOKEN=${MODAL_TOKEN_SECRET}  # For secured endpoints
+# Optional: HTTP fallback embedding URL (e.g. local Docker), when not using Modal functions
+# EMBEDDING_SERVICE_URL=http://localhost:8001
+EMBEDDING_SERVICE_AUTH_TOKEN=${MODAL_TOKEN_SECRET}  # For secured HTTP endpoints when used
 ```
 
 ### Variable Resolution Order
 
-The API gateway resolves URLs with this precedence:
+The API gateway resolves embedding delivery with this precedence:
 
 For embedding service:
-1. `MODAL_EMBEDDING_ENDPOINT` (Modal-hosted)
-2. `EMBEDDING_SERVICE_URL` (fallback)
-3. `http://localhost:8001` (default)
+1. When ``MODAL_FUNCTION_INVOCATION`` is enabled — Modal ``embed_query`` / ``embed_batch`` via the Modal SDK
+2. ``EMBEDDING_SERVICE_URL`` (HTTP to another host)
+3. ``http://localhost:8001`` (default)
 
 For auth tokens:
 1. `EMBEDDING_SERVICE_AUTH_TOKEN` (explicit)
@@ -261,7 +301,8 @@ modal app logs vecinita-scraper --stream
 modal function list vecinita-embedding
 
 # Get function details
-modal function show vecinita-embedding.web_app
+modal function show vecinita-embedding.embed_query
+modal function show vecinita-model.chat_completion
 modal function show vecinita-scraper.run_reindex
 ```
 
@@ -288,7 +329,7 @@ Modal secrets are configured per-app and referenced from each service’s Modal 
 
 ```python
 @modal.asgi_app()
-def web_app():  # must be nullary on Modal ≥1.0
+def fastapi():  # scraper API entry; must be nullary on Modal ≥1.0
     # Access secrets via env vars inside Modal function
     token = os.getenv("REINDEX_TRIGGER_TOKEN")
     # ...

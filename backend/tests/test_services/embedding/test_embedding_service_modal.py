@@ -75,10 +75,7 @@ def modal_mock(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
 
 
 class TestEmbeddingModalApp:
-    def test_web_app_omitted_when_env_disabled(
-        self, modal_mock: MagicMock, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        monkeypatch.setenv("VECINITA_MODAL_INCLUDE_WEB_ENDPOINTS", "0")
+    def test_no_modal_asgi_export(self, modal_mock: MagicMock) -> None:
         import vecinita.app as modal_app
 
         modal_app = importlib.reload(modal_app)
@@ -101,7 +98,7 @@ class TestEmbeddingModalApp:
         assert modal_app.APP_NAME == "vecinita-embedding"
         modal_mock.App.assert_called_with("vecinita-embedding")
 
-    def test_image_declares_fastembed_and_fastapi(self, modal_mock: MagicMock) -> None:
+    def test_image_declares_fastembed_only(self, modal_mock: MagicMock) -> None:
         import vecinita.app as modal_app
 
         importlib.reload(modal_app)
@@ -111,28 +108,6 @@ class TestEmbeddingModalApp:
         first_args = image_instance.pip_install.call_args_list[0][0]
         joined = " ".join(str(x) for x in first_args[0])
         assert "fastembed" in joined
-        assert "fastapi" in joined
-
-    def test_asgi_app_uses_modal_sdk_without_deprecated_kwargs(self, modal_mock: MagicMock) -> None:
-        import vecinita.app as modal_app
-
-        importlib.reload(modal_app)
-
-        assert modal_mock.asgi_app.call_args.kwargs == {}
-
-    def test_web_app_callable(self, modal_mock: MagicMock, monkeypatch: pytest.MonkeyPatch) -> None:
-        import vecinita.app as modal_app
-
-        modal_app = importlib.reload(modal_app)
-        sentinel = object()
-        monkeypatch.setattr(modal_app, "load_runtime_model", lambda: sentinel)
-        monkeypatch.setattr(
-            modal_app,
-            "build_web_app",
-            lambda _model: MagicMock(name="FastAPIStub"),
-        )
-
-        assert modal_app.web_app() is not None
 
 
 def _reload_modal_app(modal_mock: MagicMock) -> Any:
@@ -194,9 +169,20 @@ class TestEmbeddingModalAppRuntimeCoverage:
 
         assert warmed == (model, "ok")
 
-    def test_build_web_app_creates_fastapi_app(self, modal_mock: MagicMock) -> None:
+    def test_create_app_with_service_exposes_health_metadata(self, modal_mock: MagicMock) -> None:
+        path = str(EMBEDDING_MODAL_SRC)
+        if path not in sys.path:
+            sys.path.insert(0, path)
+        from vecinita.api import create_app
+        from vecinita.service import EmbeddingService
+
         modal_app = _reload_modal_app(modal_mock)
-        app = modal_app.build_web_app(_FakeEmbedder(vectors=[[0.1, 0.2, 0.3]]))
+        app = create_app(
+            EmbeddingService(
+                _FakeEmbedder(vectors=[[0.1, 0.2, 0.3]]),
+                default_model=modal_app.DEFAULT_MODEL,
+            )
+        )
         client = TestClient(app)
 
         response = client.get("/")
@@ -262,13 +248,3 @@ class TestEmbeddingModalAppRuntimeCoverage:
         batch = modal_app.embed_batch(["x", "y"])
         assert batch["embeddings"] == [[1.0], [2.0, 3.0]]
         assert batch["dimension"] == 1  # len(first vector); rows can differ in length
-
-    def test_web_app_loads_model_and_returns_asgi(
-        self, modal_mock: MagicMock, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        modal_app = _reload_modal_app(modal_mock)
-        embedder = _FakeEmbedder(vectors=[[0.5, 0.5]])
-        monkeypatch.setattr(modal_app, "load_runtime_model", lambda: embedder)
-        asgi = modal_app.web_app()
-        client = TestClient(asgi)
-        assert client.get("/").status_code == 200

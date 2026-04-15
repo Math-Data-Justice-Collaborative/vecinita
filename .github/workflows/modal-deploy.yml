@@ -125,7 +125,6 @@ jobs:
             github.event.inputs.deploy_embedding == 'true'
           )
         env:
-          VECINITA_MODAL_INCLUDE_WEB_ENDPOINTS: "1"
           MODAL_PROFILE: ${{ secrets.MODAL_API_PROFILE || vars.MODAL_API_PROFILE || 'vecinita' }}
           MODAL_ENVIRONMENT: ${{ vars.MODAL_ENVIRONMENT || secrets.MODAL_ENVIRONMENT || '' }}
         run: |
@@ -141,7 +140,6 @@ jobs:
             github.event.inputs.deploy_model == 'true'
           )
         env:
-          VECINITA_MODAL_INCLUDE_WEB_ENDPOINTS: "1"
           MODAL_PROFILE: ${{ secrets.MODAL_API_PROFILE || vars.MODAL_API_PROFILE || 'vecinita' }}
           MODAL_ENVIRONMENT: ${{ vars.MODAL_ENVIRONMENT || secrets.MODAL_ENVIRONMENT || '' }}
         run: |
@@ -189,7 +187,7 @@ jobs:
         if: needs.modal-deploy.result == 'success'
         run: |
           echo "Modal deployment workflow finished successfully."
-          echo "Confirm *.modal.run hosts in the Modal dashboard match gateway env."
+          echo "Embedding/model on Modal are function-only; gateway should use MODAL_FUNCTION_INVOCATION + MODAL_TOKEN_*."
 
       - name: Failure
         if: needs.modal-deploy.result == 'failure'

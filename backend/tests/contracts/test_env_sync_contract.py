@@ -44,6 +44,7 @@ def test_local_template_contains_core_cross_service_keys() -> None:
         "VITE_VECINITA_SCRAPER_API_URL",
         "MODAL_TOKEN_ID",
         "MODAL_TOKEN_SECRET",
+        "MODAL_FUNCTION_INVOCATION",
     }
     missing = sorted(key for key in required_local_keys if key not in local_env)
     assert missing == []
