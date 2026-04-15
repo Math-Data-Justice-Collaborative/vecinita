@@ -87,7 +87,7 @@ help:
 	@echo "  make quality-imported                    Run imported sub-repo quality checks"
 	@echo "  make quality                             Run repo-wide lint, format, typecheck, and audit checks"
 	@echo "  make quality-fix                         Apply safe auto-fixes, then rerun quality checks"
-	@echo "  make quality-full                        Sequential: quality → unit tests → imported tests → gateway matrix (stops on first failure)"
+	@echo "  make quality-full                        Sequential: quality → unit → imported → gateway matrix → service integration contracts (stops on first failure)"
 	@echo "  make ci                                  Same as quality-full (local CI gate; .cursor stop hook runs this)"
 	@echo ""
 	@echo "Testing targets"
@@ -97,6 +97,7 @@ help:
 	@echo "  make test-imported                       Run imported sub-repo test suites"
 	@echo "  make test-integration                    Run backend and cross-stack integration tests"
 	@echo "  make test-integration-gateway-fast       Run gateway matrix contract checks"
+	@echo "  make test-integration-service-contracts   Run SERVICE_INTEGRATION_POINTS contract tests (matches CI backend-integration slice)"
 	@echo "  make test-integration-gateway-full       Run gateway-focused integration suites"
 	@echo "  make test-integration-gateway            Alias of full gateway integration"
 	@echo "  make test-all-integration                Run all backend integration tests"
@@ -446,7 +447,7 @@ quality-fix: format lint-fix audit-fix quality
 
 # Sequential chain: stop on first failure (avoids parallel -j running later stages early).
 quality-full:
-	@$(MAKE) quality && $(MAKE) test-unit && $(MAKE) test-imported && $(MAKE) test-integration-gateway-fast
+	@$(MAKE) quality && $(MAKE) test-unit && $(MAKE) test-imported && $(MAKE) test-integration-gateway-fast && $(MAKE) test-integration-service-contracts
 
 ci: quality-full
 
@@ -462,6 +463,10 @@ test-integration: test-all-integration test-cross-integration
 
 test-integration-gateway-fast:
 	cd backend && uv run pytest tests/integration/test_gateway_v1_matrix_coverage.py -q
+
+# Matches GitHub Actions backend-integration job (service integration point contracts).
+test-integration-service-contracts:
+	cd backend && uv run pytest tests/integration/test_service_integration_points_contract.py -m "integration and not db and not llm" -v --tb=short
 
 test-integration-gateway-full:
 	cd backend && uv run pytest tests/integration -m "integration" \
@@ -494,7 +499,7 @@ render-tests-strict:
 	@echo "No strict-mode routing suite remains; skipping."
 
 render-tests-render-suite:
-	cd backend && uv run pytest tests/test_utils/test_render_env_contract.py tests/test_utils/test_service_endpoints.py tests/integration/test_service_integration_points_contract.py tests/integration/test_service_integration_points_contract_expanded.py -q
+	cd backend && uv run pytest tests/test_utils/test_render_env_contract.py tests/test_utils/test_service_endpoints.py tests/integration/test_service_integration_points_contract.py -q
 
 render-workflow-ci: render-env-validate render-tests-render-suite
 

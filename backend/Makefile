@@ -25,7 +25,7 @@ test-e2e:
 	uv run pytest tests/e2e -v --tb=short
 
 test-contracts:
-	uv run pytest tests/integration/test_service_integration_points_contract.py tests/integration/test_service_integration_points_contract_expanded.py -q
+	uv run pytest tests/integration/test_service_integration_points_contract.py -q
 
 test-acceptance-gateway-ask:
 	uv run pytest tests/integration/test_gateway_ask_acceptance.py -q

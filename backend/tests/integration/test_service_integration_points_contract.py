@@ -193,6 +193,10 @@ def test_ip06_agent_to_embedding_direct_endpoint_headers(monkeypatch) -> None:
         fake_client_module, "create_embedding_client", _fake_create_embedding_client
     )
     monkeypatch.setenv("RENDER", "true")
+    # Modal URLs require function invocation + tokens (see enforce_modal_function_policy_for_urls).
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "auto")
+    monkeypatch.setenv("MODAL_TOKEN_ID", "ak-ip06-contract")
+    monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-ip06-contract")
     monkeypatch.delenv("VECINITA_EMBEDDING_API_URL", raising=False)
     monkeypatch.setenv(
         "MODAL_EMBEDDING_ENDPOINT", "https://vecinita--vecinita-embedding-web-app.modal.run"

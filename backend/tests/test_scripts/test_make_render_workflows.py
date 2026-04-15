@@ -34,7 +34,6 @@ def test_render_and_strict_targets_run_expected_test_files() -> None:
     content = _content()
     assert "render-tests-render-suite:" in content
     assert "tests/integration/test_service_integration_points_contract.py" in content
-    assert "tests/integration/test_service_integration_points_contract_expanded.py" in content
 
     assert "render-tests-strict:" in content
     assert "No strict-mode routing suite remains; skipping." in content
