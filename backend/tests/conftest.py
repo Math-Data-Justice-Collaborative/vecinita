@@ -29,9 +29,6 @@ def env_vars():
         "MODAL_OLLAMA_ENDPOINT": _env_or_default(
             "MODAL_OLLAMA_ENDPOINT", "http://localhost:10000/model"
         ),
-        "MODAL_FUNCTION_INVOCATION": _env_or_default("MODAL_FUNCTION_INVOCATION", "auto"),
-        "MODAL_TOKEN_ID": _env_or_default("MODAL_TOKEN_ID", "ak-test"),
-        "MODAL_TOKEN_SECRET": _env_or_default("MODAL_TOKEN_SECRET", "as-test"),
         "OLLAMA_MODEL": _env_or_default("OLLAMA_MODEL", "gemma3"),
         # Keep tests deterministic regardless of runner-level env overrides.
         "AGENT_ENFORCE_ROUTE": "false",
@@ -80,9 +77,6 @@ def _agent_module_path_compatibility():
     _test_env_defaults = {
         "OLLAMA_BASE_URL": "http://localhost:10000/model",
         "MODAL_OLLAMA_ENDPOINT": "http://localhost:10000/model",
-        "MODAL_FUNCTION_INVOCATION": "auto",
-        "MODAL_TOKEN_ID": "ak-test",
-        "MODAL_TOKEN_SECRET": "as-test",
         "OLLAMA_MODEL": "gemma3",
         "AGENT_ENFORCE_ROUTE": "false",
         "DATABASE_URL": "postgresql://test",
