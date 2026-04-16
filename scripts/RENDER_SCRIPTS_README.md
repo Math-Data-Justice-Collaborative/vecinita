@@ -1,111 +1,103 @@
-# Render Environment Scripts
+# Render environment scripts
 
-This directory contains helper scripts for managing Render service deployments.
+Helpers for syncing environment variables to Render using the **Render REST API** and, where needed, the **Render CLI** for service discovery.
 
-## Scripts
+## `scripts/env_sync.py` (recommended)
 
-### `setup-render-env.sh`
+Python entrypoint used by the shell wrappers. It parses dotenv files safely (handles `=` in values, quotes) and can read **`RENDER_API_KEY` from a merged `--file`** so you do not have to export it in the shell.
 
-**Purpose**: Interactive setup of environment variables using Render CLI
+### List services (requires `render login`)
 
-**Requirements**:
-- `render` CLI installed and authenticated (`render login`)
-- `.env` file with Modal credentials
-- Bash shell
-
-**Usage**:
 ```bash
-./scripts/setup-render-env.sh
+python3 scripts/env_sync.py render-list
 ```
 
-**What it does**:
-1. Verifies Render CLI is installed and authenticated
-2. Reads Modal credentials from `.env` file
-3. Shows what will be set and asks for confirmation
-4. Attempts to set variables via Render API (requires RENDER_API_KEY)
-5. Falls back to manual dashboard instructions if API key not available
-6. Provides verification command
+### Push Modal runtime tokens (gateway / agent)
 
-**Best for**: Local development and manual deployments
+Preset **`render-runtime-modal`** sends:
+
+- `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` (from `MODAL_TOKEN_*`, or `MODAL_API_TOKEN_*`, or `MODAL_AUTH_*`)
+- `MODAL_FUNCTION_INVOCATION` when set in the file
+- `EMBEDDING_SERVICE_AUTH_TOKEN` when set in the file
+
+Resolve the service id with the CLI (requires `render login`):
+
+```bash
+python3 scripts/env_sync.py render-api \
+  --preset render-runtime-modal \
+  --file .env \
+  --service-name vecinita-gateway \
+  --dry-run
+```
+
+Or pass a known id (no CLI lookup):
+
+```bash
+python3 scripts/env_sync.py render-api \
+  --preset render-runtime-modal \
+  --file .env \
+  --service-id srv-xxxxxxxx \
+  --yes
+```
+
+`RENDER_API_KEY` may live in `.env` (merged) or in the environment.
+
+### Other modes
+
+See the module docstring in `scripts/env_sync.py` for `gh` (GitHub Actions secrets) and ad-hoc `render-api` with `--prefix` / `--key` / `--all-keys`.
 
 ---
 
-### `apply-render-env-api.sh`
+## `setup-render-env.sh`
 
-**Purpose**: Automated environment variable setup via Render API
+Thin wrapper around `env_sync.py render-api --preset render-runtime-modal`.
 
-**Requirements**:
-- `RENDER_API_KEY` environment variable set
-- `.env` file with Modal credentials
-- `curl` command available
-- Bash shell
+- **Default**: `--file .env`, `--service-name vecinita-gateway` (override with `RENDER_SERVICE_NAME` or `RENDER_SERVICE_ID`).
+- **Dry-run** unless you pass **`--yes`**.
 
-**Usage**:
 ```bash
-RENDER_API_KEY="your-api-key" ./scripts/apply-render-env-api.sh
+./scripts/setup-render-env.sh --dry-run
+./scripts/setup-render-env.sh --yes
+RENDER_SERVICE_NAME=vecinita-agent ./scripts/setup-render-env.sh --yes
 ```
-
-**What it does**:
-1. Validates API key and .env file exist
-2. Extracts Modal credentials from `.env`
-3. Shows what will be set and prompts for confirmation
-4. Calls Render API to set environment variables
-5. Reports success/failure with HTTP status code
-6. Provides verification command
-
-**Best for**: CI/CD pipelines and automated deployments
 
 ---
 
-## Environment Variables Used
+## `apply-render-env-api.sh`
 
-Both scripts extract these variables from `.env`:
+Same as `setup-render-env.sh` but **requires `--yes`** (non-interactive automation).
 
-| Variable | Source | Purpose |
-|----------|--------|---------|
-| `MODAL_API_TOKEN_ID` | `.env` | Modal API authentication |
-| `MODAL_API_TOKEN_SECRET` | `.env` | Modal API secret key |
-| `VECINITA_SCRAPER_API_URL` | `.env` or inferred | Scraper backend URL |
+```bash
+./scripts/apply-render-env-api.sh --yes
+```
 
-## Render API Key
+---
 
-To get a RENDER_API_KEY:
-1. Go to https://dashboard.render.com/api-keys
-2. Create a new API key
-3. Copy and store securely
-4. Set as environment variable: `export RENDER_API_KEY="your-key"`
+## `sync_scraper_auth_render_modal.sh`
 
-## Service IDs
+Syncs scraper Bearer auth to Render and Modal. For Render, it calls `env_sync.py render-api` with `--key` filters. **`RENDER_API_KEY` may be only in the dotenv file** (merged by `env_sync`).
 
-- **vecinita-data-management-api-v1**: `srv-d7a6477kijhs7395eneg`
+```bash
+./scripts/sync_scraper_auth_render_modal.sh render --dotenv .env.prod.render --dry-run
+./scripts/sync_scraper_auth_render_modal.sh render --dotenv .env.prod.render --yes
+```
+
+---
 
 ## Troubleshooting
 
-### "Render CLI not authorized"
-```bash
-render login
-```
+### `render login`
 
-### "RENDER_API_KEY not set"
-```bash
-export RENDER_API_KEY="<your-key>"
-```
+Required for `--service-name` resolution and for `render-list`.
 
-### "Service not found (404)"
-Check that the SERVICE_ID is correct:
-```bash
-render services --output json
-```
+### `exec: "xdg-open": executable file not found in $PATH`
 
-### API returns 401
-Your RENDER_API_KEY may be expired or invalid. Generate a new one at https://dashboard.render.com/api-keys
+Headless Linux often lacks `xdg-open`. Install **`xdg-utils`** (`sudo apt-get install -y xdg-utils`) or copy the **device authorization URL** from the terminal into a browser on another machine. To avoid CLI login for env pushes, use **`--service-id`** plus **`RENDER_API_KEY`** (see `RENDER_LOGIN_INSTRUCTIONS.md` in the repo root).
 
-## Manual Dashboard Method
+### `error: set RENDER_API_KEY...`
 
-If neither script works, set variables manually:
-1. Go to https://dashboard.render.com/web/srv-d7a6477kijhs7395eneg
-2. Click **Environment** tab
-3. Add variables from `.env` file
-4. Click **Save**
+For `--yes` PATCH calls, provide `RENDER_API_KEY` in the environment **or** in a merged `--file` (e.g. `.env`).
 
-Service will auto-redeploy with new variables.
+### Service not found
+
+Run `python3 scripts/env_sync.py render-list` and confirm the **service name** matches your Render dashboard (e.g. `vecinita-gateway`, `vecinita-agent`).

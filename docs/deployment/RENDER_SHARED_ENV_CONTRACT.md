@@ -21,7 +21,7 @@ Values you keep in gitignored **`.env`**, **`.env.local`**, **`.env.prod.render`
 | Staging Render Environment Group / per-service env | [`.env.staging.render.example`](../../.env.staging.render.example) |
 | Local full-stack development | [`.env.local.example`](../../.env.local.example) |
 
-**Modal:** On Render, set **`MODAL_TOKEN_ID`** and **`MODAL_TOKEN_SECRET`**. If your local `.env` only has **`MODAL_API_TOKEN_ID`** / **`MODAL_API_TOKEN_SECRET`** (see `.env.local.example`), paste the same token values into Render using the **`MODAL_TOKEN_*`** names — production/staging services do not read `MODAL_API_TOKEN_*`.
+**Modal:** On Render, set **`MODAL_TOKEN_ID`** and **`MODAL_TOKEN_SECRET`**. When **`OLLAMA_BASE_URL`**, **`EMBEDDING_SERVICE_URL`**, or other resolved URLs point at **`*.modal.run`**, also set **`MODAL_FUNCTION_INVOCATION=auto`** (or **`1`**) so the agent and gateway use Modal **`Function.from_name`** instead of raw HTTP to deprecated ASGI endpoints (see `backend/src/services/modal/invoker.py`). With **`auto`**, invocation turns on only when both **`MODAL_TOKEN_*`** values are set. If your local `.env` only has **`MODAL_API_TOKEN_ID`** / **`MODAL_API_TOKEN_SECRET`** (see `.env.local.example`), paste the same token values into Render using the **`MODAL_TOKEN_*`** names — production/staging services do not read `MODAL_API_TOKEN_*`.
 
 **Postgres:** Prefer **`DATABASE_URL`** (Render blueprints can inject it with `fromDatabase`). Some components also accept **`DB_URL`** as an optional alias if an existing secret uses that name.
 
@@ -82,6 +82,11 @@ Blueprint builds [`services/scraper`](../../services/scraper) (`vecinita_scraper
 Root-repo owned. All env vars are controlled by the shared env group `.env.prod.render` in the
 Render dashboard. See `render.yaml` for the full list.
 
+| Variable | Required | Description |
+|---|---|---|
+| `MODAL_FUNCTION_INVOCATION` | **Required** when model/embedding URLs use `*.modal.run` | Use `auto` (recommended) or `1`. Without it, startup fails fast in `enforce_modal_function_policy_for_urls` even if `MODAL_TOKEN_*` are set. |
+| `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` | **Required** with Modal function invocation | Workspace token pair for `modal.Function.from_name` calls to embedding and chat functions. |
+
 ---
 
 ## vecinita-gateway (Render Web Service — Chat Gateway)
@@ -91,6 +96,7 @@ Render dashboard. Key vars:
 
 | Variable | Required | Description |
 |---|---|---|
+| `MODAL_FUNCTION_INVOCATION` | **Required** when upstream embedding/model hosts are `*.modal.run` | Same semantics as on the agent (`auto` recommended). Gateway embed routes and Modal job APIs depend on this when URLs target Modal. |
 | `ALLOWED_ORIGINS` | **Required** | Comma-separated chat frontend origins for CORS. |
 | `VECINITA_EMBEDDING_API_URL` | **Required** for embed routes | HTTPS base URL of the Modal (or other) embedding service — no trailing path. Must serve `POST /embed` and batch routes used by [`backend/src/api/router_embed.py`](../../backend/src/api/router_embed.py). Canonical Modal `web_app` deploy uses a `*-embedding-web-app.modal.run` host (see `.env.prod.render.example`). Legacy `*-embedding-embeddingservicecontainer-api.modal.run` values are rewritten at runtime to that host (and a mistaken `*-embedding-embedding-web-app*` segment is normalized). |
 | `EMBEDDING_SERVICE_AUTH_TOKEN` | Recommended | Sent to the embedding service as `x-embedding-service-token` / `Authorization` from the gateway when set. |

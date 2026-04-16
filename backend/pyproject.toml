@@ -29,7 +29,7 @@ dependencies = [
     # Document Processing (lightweight only - playwright/unstructured in scraping extra)
     "beautifulsoup4",
     "pillow>=12.1.1; python_version < '3.13'",
-    "pypdf>=6.9.2",
+    "pypdf>=6.10.1",
     # Utilities
     "cryptography>=46.0.7",
     "filelock>=3.20.3",

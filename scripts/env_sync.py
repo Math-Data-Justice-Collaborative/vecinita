@@ -19,6 +19,10 @@
   python3 scripts/env_sync.py render-api --file .env.prod.render --service-id srv-xxxxx --dry-run
   python3 scripts/env_sync.py render-api --file .env.prod.render --service-id srv-xxxxx --yes
 
+  # Same, but RENDER_API_KEY and tokens live only in .env (read after merge); resolve service id via CLI
+  python3 scripts/env_sync.py render-api --preset render-runtime-modal --file .env --service-name vecinita-gateway --dry-run
+  python3 scripts/env_sync.py render-api --preset render-runtime-modal --file .env --service-name vecinita-gateway --yes
+
   # List Render services (CLI JSON output)
   python3 scripts/env_sync.py render-list
 
@@ -65,6 +69,30 @@ def merge_files(paths: list[Path]) -> dict[str, str]:
             continue
         merged.update(parse_dotenv(p))
     return merged
+
+
+def build_render_runtime_modal_bundle(data: dict[str, str]) -> dict[str, str]:
+    """Map local .env keys to Render service env for Modal SDK + gateway/agent startup.
+
+    Resolves ``MODAL_TOKEN_*`` from ``MODAL_API_TOKEN_*`` / ``MODAL_AUTH_*`` (same as
+    GitHub Actions preset). Optionally includes ``MODAL_FUNCTION_INVOCATION`` and
+    ``EMBEDDING_SERVICE_AUTH_TOKEN`` when set in the merged dotenv files.
+    """
+    base = build_github_actions_secrets_bundle(data)
+    out: dict[str, str] = {}
+    tid = (base.get("MODAL_TOKEN_ID") or "").strip()
+    tsec = (base.get("MODAL_TOKEN_SECRET") or "").strip()
+    if tid:
+        out["MODAL_TOKEN_ID"] = tid
+    if tsec:
+        out["MODAL_TOKEN_SECRET"] = tsec
+    mfi = (data.get("MODAL_FUNCTION_INVOCATION") or "").strip()
+    if mfi:
+        out["MODAL_FUNCTION_INVOCATION"] = mfi
+    embed_tok = (data.get("EMBEDDING_SERVICE_AUTH_TOKEN") or "").strip()
+    if embed_tok:
+        out["EMBEDDING_SERVICE_AUTH_TOKEN"] = embed_tok
+    return out
 
 
 def build_github_actions_secrets_bundle(data: dict[str, str]) -> dict[str, str]:
@@ -171,29 +199,102 @@ def cmd_gh(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_render_api(args: argparse.Namespace) -> int:
-    api_key = os.environ.get("RENDER_API_KEY", "").strip()
-    if not api_key and not args.dry_run:
-        print("error: set RENDER_API_KEY in the environment", file=sys.stderr)
-        return 1
+def resolve_render_service_id(service_name: str) -> str:
+    """Resolve a Render web service id using the authenticated ``render`` CLI."""
+    r = subprocess.run(
+        ["render", "services", "-o", "json"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if r.returncode != 0:
+        raise RuntimeError((r.stderr or r.stdout or "render services failed").strip())
+    raw = (r.stdout or "").strip()
+    if not raw:
+        raise RuntimeError("empty JSON from render services — run: render login")
+    try:
+        parsed: object = json.loads(raw)
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"invalid JSON from render services: {e}") from e
 
+    if isinstance(parsed, dict):
+        if isinstance(parsed.get("items"), list):
+            parsed = parsed["items"]
+        elif isinstance(parsed.get("services"), list):
+            parsed = parsed["services"]
+        else:
+            parsed = [parsed]
+    if not isinstance(parsed, list):
+        raise RuntimeError("unexpected JSON shape from render services")
+
+    for item in parsed:
+        if not isinstance(item, dict):
+            continue
+        if item.get("serviceType") == "datastore":
+            continue
+        if item.get("name") == service_name:
+            sid = item.get("id") or item.get("serviceId")
+            if isinstance(sid, str) and sid.strip():
+                return sid.strip()
+    raise RuntimeError(
+        f"no Render service named {service_name!r} in workspace — "
+        "check RENDER_SERVICE_NAME or run: render services -o json"
+    )
+
+
+def cmd_render_api(args: argparse.Namespace) -> int:
     paths = [Path(p).resolve() for p in args.file]
     data = merge_files(paths)
-    subset = filter_keys(
-        data,
-        args.prefix,
-        set(args.key) if args.key else None,
-        all_keys=args.all_keys,
-    )
-    if not subset:
-        print("No non-empty keys matched filters.", file=sys.stderr)
+
+    api_key = (os.environ.get("RENDER_API_KEY", "").strip() or data.get("RENDER_API_KEY", "").strip())
+    if not api_key and not args.dry_run:
+        print(
+            "error: set RENDER_API_KEY in the environment or add it to a merged --file",
+            file=sys.stderr,
+        )
         return 1
+
+    if args.preset == "render-runtime-modal":
+        subset = build_render_runtime_modal_bundle(data)
+        if args.key:
+            want = set(args.key)
+            subset = {k: v for k, v in subset.items() if k in want}
+    else:
+        subset = filter_keys(
+            data,
+            args.prefix,
+            set(args.key) if args.key else None,
+            all_keys=args.all_keys,
+        )
+    if not subset:
+        if args.preset == "render-runtime-modal":
+            print(
+                "error: no MODAL_TOKEN_* values (or MODAL_API_TOKEN_* / MODAL_AUTH_* aliases) "
+                "found in merged --file; add tokens to .env",
+                file=sys.stderr,
+            )
+        else:
+            print("No non-empty keys matched filters.", file=sys.stderr)
+        return 1
+
+    service_id = (args.service_id or "").strip()
+    if not service_id:
+        name = (args.service_name or "").strip()
+        if not name:
+            print("error: provide --service-id or --service-name", file=sys.stderr)
+            return 1
+        try:
+            service_id = resolve_render_service_id(name)
+        except RuntimeError as e:
+            print(f"error: {e}", file=sys.stderr)
+            return 1
+        print(f"resolved Render service {name!r} -> {service_id}", file=sys.stderr)
 
     payload = {"envVars": [{"key": k, "value": v} for k, v in sorted(subset.items())]}
     body = json.dumps(payload).encode("utf-8")
 
     if args.dry_run:
-        print(f"Would PATCH https://api.render.com/v1/services/{args.service_id}")
+        print(f"Would PATCH https://api.render.com/v1/services/{service_id}")
         print(f"  with {len(subset)} env vars (keys only): {', '.join(sorted(subset))}")
         return 0
 
@@ -201,13 +302,13 @@ def cmd_render_api(args: argparse.Namespace) -> int:
         print("Refusing to call Render API without --yes", file=sys.stderr)
         return 1
 
-    url = f"https://api.render.com/v1/services/{args.service_id}"
+    url = f"https://api.render.com/v1/services/{service_id}"
     req = urllib.request.Request(
         url,
         data=body,
         method="PATCH",
         headers={
-            "Authorization": f"Bearer {api_key}",
+            "Authorization": f"Bearer {api_key.strip()}",
             "Content-Type": "application/json",
             "Accept": "application/json",
         },
@@ -284,7 +385,20 @@ def main() -> int:
 
     ra = sub.add_parser("render-api", help="PATCH Render service envVars via REST API")
     ra.add_argument("--file", action="append", required=True, help="Dotenv file (repeat to merge)")
-    ra.add_argument("--service-id", required=True, help="Render service id srv-...")
+    svc = ra.add_mutually_exclusive_group(required=True)
+    svc.add_argument("--service-id", help="Render service id srv-...")
+    svc.add_argument(
+        "--service-name",
+        metavar="NAME",
+        help="Resolve service id via `render services -o json` (requires render login)",
+    )
+    ra.add_argument(
+        "--preset",
+        choices=("render-runtime-modal",),
+        default=None,
+        help="render-runtime-modal: push MODAL_TOKEN_* (from MODAL_API_TOKEN_* aliases), "
+        "MODAL_FUNCTION_INVOCATION, EMBEDDING_SERVICE_AUTH_TOKEN when present",
+    )
     ra.add_argument("--prefix", default=None, help="Only keys with this prefix (optional)")
     ra.add_argument("--key", action="append", help="Exact key (repeat)")
     ra.add_argument("--dry-run", action="store_true")

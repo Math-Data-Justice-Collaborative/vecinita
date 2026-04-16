@@ -5,7 +5,7 @@
 # Prerequisites
 #   Render:
 #     - render login
-#     - export RENDER_API_KEY=...   (Dashboard → Account → API keys)
+#     - RENDER_API_KEY in the shell or in the merged dotenv (Dashboard → Account → API keys)
 #   Modal:
 #     - modal token set ...  (or modal setup)
 #
@@ -141,7 +141,7 @@ cmd_render() {
     return 0
   fi
 
-  [[ -n "${RENDER_API_KEY:-}" ]] || die "set RENDER_API_KEY for render --yes"
+  # RENDER_API_KEY may be set in the shell or only inside the dotenv file (env_sync merges --file first).
   python3 scripts/env_sync.py render-api \
     --file "$dotenv" \
     --service-id "$sid" \

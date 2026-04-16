@@ -135,13 +135,29 @@ See [Using secrets in workflows](https://docs.github.com/en/actions/how-tos/writ
 
 ### Render service environment variables
 
-The Render CLI in this repo does not expose bulk env upload; the script uses the [Render API](https://render.com/docs/api) `PATCH /v1/services/{serviceId}` with an `envVars` array (same pattern as `scripts/apply-render-env-api.sh`). Confirm merge behavior on a **staging** service before production.
+The official Render CLI does not expose bulk env upload; `scripts/env_sync.py` uses the [Render API](https://render.com/docs/api) `PATCH /v1/services/{serviceId}` with an `envVars` array. Use **`render login`** plus **`--service-name`** so the script can resolve a service id from `render services -o json`, or pass **`--service-id`** explicitly. **`RENDER_API_KEY`** may be set in the shell or inside a merged **`--file`** (for example a gitignored `.env`). Confirm merge behavior on a **staging** service before production.
 
 List service IDs:
 
 ```bash
 python3 scripts/env_sync.py render-list
 # or: render services -o json
+```
+
+Push Modal tokens + `MODAL_FUNCTION_INVOCATION` from `.env` to the gateway (dry-run first):
+
+```bash
+render login
+python3 scripts/env_sync.py render-api \
+  --preset render-runtime-modal \
+  --file .env \
+  --service-name vecinita-gateway \
+  --dry-run
+python3 scripts/env_sync.py render-api \
+  --preset render-runtime-modal \
+  --file .env \
+  --service-name vecinita-gateway \
+  --yes
 ```
 
 Push keys from a dotenv file (all non-empty keys in file by default):
@@ -157,7 +173,6 @@ python3 scripts/env_sync.py render-api --file .env.prod.render --service-id srv-
 ```bash
 render login
 ./scripts/sync_scraper_auth_render_modal.sh render --dotenv .env.prod.render --dry-run
-export RENDER_API_KEY=...
 ./scripts/sync_scraper_auth_render_modal.sh render --dotenv .env.prod.render --yes
 
 modal secret create vecinita-scraper-env --from-dotenv ~/path/to/scraper-modal.env --force
@@ -173,7 +188,7 @@ python3 scripts/env_sync.py render-api --file .env.staging.render --service-id s
 ## Render MCP Env Sync Checklist
 
 Use Render MCP **or** `scripts/env_sync.py render-api` for Render service environment variable updates.
-Do not store long-lived Render API keys in the repo; export `RENDER_API_KEY` only in your local shell or a secrets manager.
+Keep long-lived `RENDER_API_KEY` out of committed files; a **gitignored** `.env` is fine for local sync.
 
 ### Boundary: What goes where
 

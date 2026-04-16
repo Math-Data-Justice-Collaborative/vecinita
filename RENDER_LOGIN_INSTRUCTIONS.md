@@ -1,84 +1,69 @@
-# Render CLI Login Instructions
+# Render CLI login (and when `xdg-open` is missing)
 
-## Device Authorization Code: H31Z-FL12-1YOP-GI0U
+## `Error: exec: "xdg-open": executable file not found in $PATH`
 
-### Step 1: Complete Authorization in Browser
+The Render CLI tries to open your browser with **`xdg-open`** (standard on desktop Linux). Minimal images, SSH servers, and containers often omit it.
 
-1. Go to this URL in your web browser:
+**Option A — install the helper (Debian/Ubuntu):**
+
+```bash
+sudo apt-get update && sudo apt-get install -y xdg-utils
+```
+
+Then run `render login` again. If you still have no graphical browser, use option B.
+
+**Option B — device login without opening a browser:**
+
+1. Run:
+
+   ```bash
+   render login
    ```
-   https://dashboard.render.com/device-authorization/H31Z-FL12-1YOP-GI0U
+
+2. If the CLI prints a **device authorization URL** and a **code** but fails on `xdg-open`, copy the URL from the terminal and open it on any machine that has a browser (your laptop is enough).
+
+3. Approve the device in the Render dashboard, then verify:
+
+   ```bash
+   render whoami -o text
    ```
 
-2. You'll see a prompt asking to authorize the Render CLI device.
+**Option C — skip CLI login entirely (env sync only):**
 
-3. Click **Authorize** to approve CLI access to your account.
+For `scripts/env_sync.py render-api` you only need a **Render API key**, not an interactive CLI session, if you pass **`--service-id`** (from the dashboard URL or `render services -o json` on another machine).
 
-### Step 2: Verify Authentication
-
-Once authorized, verify the CLI is logged in:
+Put **`RENDER_API_KEY`** in a gitignored `.env` (or export it), then:
 
 ```bash
-render whoami
+python3 scripts/env_sync.py render-api \
+  --preset render-runtime-modal \
+  --file .env \
+  --service-id srv-xxxxxxxx \
+  --dry-run
 ```
 
-Expected output:
-```
-Email:     <your-email>
-Workspace: <your-workspace>
-```
-
-### Step 3: Set Environment Variables
-
-Once authenticated, run the setup script:
-
-```bash
-./scripts/setup-render-env.sh
-```
-
-The script will:
-- Read Modal credentials from `.env`
-- Apply them to the data-management-api service
-- Show verification instructions
+See [Render CLI auth with an API key](https://render.com/docs/cli#2-log-in) — an API key in the environment can satisfy automated use cases without `render login`.
 
 ---
 
-## If Authorization Fails or You Don't Have Browser Access
-
-**Use the API method instead** (no CLI authentication needed):
+## After you are authenticated
 
 ```bash
-# Set your Render API key
-export RENDER_API_KEY="<your-api-key>"
-
-# Run the direct API script
-./scripts/apply-render-env-api.sh
+render whoami -o text
+./scripts/setup-render-env.sh --dry-run
 ```
-
-This bypasses CLI authentication entirely.
 
 ---
 
-## Trouble Getting RENDER_API_KEY?
+## API key (dashboard)
 
-1. Go to: https://dashboard.render.com/api-keys
-2. Click **Create New** API Key
-3. Copy the key
-4. Set it: `export RENDER_API_KEY="<your-key>"`
+1. Open https://dashboard.render.com/api-keys  
+2. Create a key and add **`RENDER_API_KEY=...`** to your gitignored `.env` (or export it in the shell).
 
 ---
 
-## Verification Command (After Variables are Set)
-
-Once environment variables are applied (either method), test the API:
+## Verify a deployed service
 
 ```bash
-curl https://vecinita-data-management-api-v1.onrender.com/health
-```
-
-Expected response:
-```json
-{
-  "status": "ok",
-  "modal_reachable": true
-}
+curl -fsS "https://<your-service>.onrender.com/health"
 ```
