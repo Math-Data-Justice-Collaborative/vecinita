@@ -54,8 +54,8 @@ jobs:
       contents: read
 
     env:
-      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID || secrets.MODAL_API_TOKEN_ID || secrets.MODAL_AUTH_KEY }}
-      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET || secrets.MODAL_API_TOKEN_SECRET || secrets.MODAL_AUTH_SECRET }}
+      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID || secrets.MODAL_TOKEN_ID || secrets.MODAL_AUTH_KEY }}
+      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET || secrets.MODAL_TOKEN_SECRET || secrets.MODAL_AUTH_SECRET }}
       MODAL_PROFILE: ${{ secrets.MODAL_API_PROFILE || vars.MODAL_API_PROFILE || 'vecinita' }}
       MODAL_ENVIRONMENT: ${{ vars.MODAL_ENVIRONMENT || secrets.MODAL_ENVIRONMENT || '' }}
 

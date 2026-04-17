@@ -104,10 +104,10 @@ def build_github_actions_secrets_bundle(data: dict[str, str]) -> dict[str, str]:
     """
     out: dict[str, str] = {}
     token_id = (
-        (data.get("MODAL_TOKEN_ID") or data.get("MODAL_API_TOKEN_ID") or data.get("MODAL_AUTH_KEY") or "").strip()
+        (data.get("MODAL_TOKEN_ID") or data.get("MODAL_TOKEN_ID") or data.get("MODAL_AUTH_KEY") or "").strip()
     )
     token_secret = (
-        (data.get("MODAL_TOKEN_SECRET") or data.get("MODAL_API_TOKEN_SECRET") or data.get("MODAL_AUTH_SECRET") or "")
+        (data.get("MODAL_TOKEN_SECRET") or data.get("MODAL_TOKEN_SECRET") or data.get("MODAL_AUTH_SECRET") or "")
         .strip()
     )
     if token_id:

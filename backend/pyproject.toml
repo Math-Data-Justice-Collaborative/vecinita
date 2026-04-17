@@ -18,9 +18,9 @@ dependencies = [
     # LangChain & LangGraph
     "langchain",
     "langchain-community",
-    "langchain-core>=1.2.28",
+    "langchain-core>=1.2.31",
     "langchain-tavily",
-    "langchain-text-splitters",
+    "langchain-text-splitters>=1.1.2",
     "langchain-huggingface",
     "langgraph>=1.1.2",
     "langgraph-checkpoint>=4.0.0",

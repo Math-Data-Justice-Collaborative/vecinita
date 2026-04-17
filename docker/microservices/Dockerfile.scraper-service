@@ -15,4 +15,4 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
 
 EXPOSE 8020
 
-CMD ["uvicorn", "vecinita_scraper.api.server:app", "--host", "0.0.0.0", "--port", "8020"]
+CMD ["uvicorn", "vecinita_scraper.api.server:create_app", "--factory", "--host", "0.0.0.0", "--port", "8020"]

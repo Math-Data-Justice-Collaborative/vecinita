@@ -84,7 +84,7 @@ class EmbeddingServiceClient(Embeddings):
                         omitted the following env vars are checked in order:
                         ``EMBEDDING_SERVICE_AUTH_TOKEN``,
                         ``MODAL_TOKEN_SECRET``,
-                        ``MODAL_API_TOKEN_SECRET``.
+                        ``MODAL_TOKEN_SECRET``.
         """
         self.base_url = base_url.rstrip("/")
         if "modal.run" in self.base_url.lower():
@@ -104,7 +104,7 @@ class EmbeddingServiceClient(Embeddings):
             auth_token
             or os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
             or os.getenv("MODAL_TOKEN_SECRET")
-            or os.getenv("MODAL_API_TOKEN_SECRET")
+            or os.getenv("MODAL_TOKEN_SECRET")
         )
         headers = {}
         if self.auth_token:

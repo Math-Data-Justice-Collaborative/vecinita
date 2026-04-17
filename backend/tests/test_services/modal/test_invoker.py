@@ -30,8 +30,8 @@ def test_modal_function_invocation_auto_off_without_tokens(monkeypatch):
     for key in (
         "MODAL_TOKEN_ID",
         "MODAL_TOKEN_SECRET",
-        "MODAL_API_TOKEN_ID",
-        "MODAL_API_TOKEN_SECRET",
+        "MODAL_TOKEN_ID",
+        "MODAL_TOKEN_SECRET",
     ):
         monkeypatch.delenv(key, raising=False)
     assert modal_function_invocation_enabled() is False
@@ -43,8 +43,8 @@ def test_modal_function_invocation_auto_on_with_canonical_tokens(monkeypatch):
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "auto")
     monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")
     monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-test")
-    monkeypatch.delenv("MODAL_API_TOKEN_ID", raising=False)
-    monkeypatch.delenv("MODAL_API_TOKEN_SECRET", raising=False)
+    monkeypatch.delenv("MODAL_TOKEN_ID", raising=False)
+    monkeypatch.delenv("MODAL_TOKEN_SECRET", raising=False)
     assert modal_function_invocation_enabled() is True
 
 
@@ -54,8 +54,8 @@ def test_modal_function_invocation_auto_on_with_legacy_api_tokens(monkeypatch):
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "auto")
     monkeypatch.delenv("MODAL_TOKEN_ID", raising=False)
     monkeypatch.delenv("MODAL_TOKEN_SECRET", raising=False)
-    monkeypatch.setenv("MODAL_API_TOKEN_ID", "ak-legacy")
-    monkeypatch.setenv("MODAL_API_TOKEN_SECRET", "as-legacy")
+    monkeypatch.setenv("MODAL_TOKEN_ID", "ak-legacy")
+    monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-legacy")
     assert modal_function_invocation_enabled() is True
 
 
@@ -74,8 +74,8 @@ def test_modal_function_invocation_explicit_auto_uses_token_gate(monkeypatch):
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "auto")
     monkeypatch.delenv("MODAL_TOKEN_ID", raising=False)
     monkeypatch.delenv("MODAL_TOKEN_SECRET", raising=False)
-    monkeypatch.delenv("MODAL_API_TOKEN_ID", raising=False)
-    monkeypatch.delenv("MODAL_API_TOKEN_SECRET", raising=False)
+    monkeypatch.delenv("MODAL_TOKEN_ID", raising=False)
+    monkeypatch.delenv("MODAL_TOKEN_SECRET", raising=False)
     assert modal_function_invocation_enabled() is False
 
 
@@ -142,8 +142,8 @@ def test_enforce_modal_function_policy_for_urls_requires_tokens(monkeypatch):
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
     monkeypatch.delenv("MODAL_TOKEN_ID", raising=False)
     monkeypatch.delenv("MODAL_TOKEN_SECRET", raising=False)
-    monkeypatch.delenv("MODAL_API_TOKEN_ID", raising=False)
-    monkeypatch.delenv("MODAL_API_TOKEN_SECRET", raising=False)
+    monkeypatch.delenv("MODAL_TOKEN_ID", raising=False)
+    monkeypatch.delenv("MODAL_TOKEN_SECRET", raising=False)
 
     with pytest.raises(RuntimeError, match="Modal tokens are missing"):
         enforce_modal_function_policy_for_urls(

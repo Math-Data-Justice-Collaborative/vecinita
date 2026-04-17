@@ -114,9 +114,9 @@ def _validate_modal_endpoints(env: dict[str, str], result: ValidationResult) -> 
     scraper_endpoint = env.get("VECINITA_SCRAPER_API_URL", "")
 
     if function_mode:
-        token_id = (env.get("MODAL_TOKEN_ID") or env.get("MODAL_API_TOKEN_ID") or "").strip()
+        token_id = (env.get("MODAL_TOKEN_ID") or env.get("MODAL_TOKEN_ID") or "").strip()
         token_secret = (
-            env.get("MODAL_TOKEN_SECRET") or env.get("MODAL_API_TOKEN_SECRET") or ""
+            env.get("MODAL_TOKEN_SECRET") or env.get("MODAL_TOKEN_SECRET") or ""
         ).strip()
         if not (token_id and token_secret):
             result.errors.append(

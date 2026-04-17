@@ -62,7 +62,7 @@ EMBEDDING_SERVICE_URL = EMBEDDING_ENDPOINT
 EMBEDDING_SERVICE_AUTH_TOKEN = (
     os.getenv("EMBEDDING_SERVICE_AUTH_TOKEN")
     or os.getenv("MODAL_TOKEN_SECRET")
-    or os.getenv("MODAL_API_TOKEN_SECRET")
+    or os.getenv("MODAL_TOKEN_SECRET")
 )
 
 # Configuration - will be fetched from embedding service

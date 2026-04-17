@@ -28,7 +28,7 @@ def env_sync_module():
 def test_build_github_actions_secrets_bundle_prefers_canonical_modal(env_sync_module):
     data = {
         "MODAL_TOKEN_ID": "tid",
-        "MODAL_API_TOKEN_ID": "ignored",
+        "MODAL_AUTH_KEY": "ignored",
         "MODAL_TOKEN_SECRET": "tsec",
         "DATABASE_URL": "postgresql://a/b",
     }
@@ -41,8 +41,8 @@ def test_build_github_actions_secrets_bundle_prefers_canonical_modal(env_sync_mo
 @pytest.mark.contract
 def test_build_github_actions_secrets_bundle_modal_api_aliases(env_sync_module):
     data = {
-        "MODAL_API_TOKEN_ID": "aid",
-        "MODAL_API_TOKEN_SECRET": "asec",
+        "MODAL_TOKEN_ID": "aid",
+        "MODAL_TOKEN_SECRET": "asec",
         "DB_URL": "postgresql://x/y",
     }
     b = env_sync_module.build_github_actions_secrets_bundle(data)
@@ -63,8 +63,8 @@ def test_build_github_actions_secrets_bundle_auth_legacy(env_sync_module):
 @pytest.mark.contract
 def test_build_render_runtime_modal_bundle_aliases_and_extras(env_sync_module):
     data = {
-        "MODAL_API_TOKEN_ID": "aid",
-        "MODAL_API_TOKEN_SECRET": "asec",
+        "MODAL_TOKEN_ID": "aid",
+        "MODAL_TOKEN_SECRET": "asec",
         "MODAL_FUNCTION_INVOCATION": "auto",
         "EMBEDDING_SERVICE_AUTH_TOKEN": "embedtok",
     }
@@ -105,8 +105,8 @@ def test_env_sync_render_api_preset_dry_run_no_shell_api_key(tmp_path):
     env_file = tmp_path / "r.env"
     env_file.write_text(
         "RENDER_API_KEY=rk_test_only_in_file\n"
-        "MODAL_API_TOKEN_ID=id1\n"
-        "MODAL_API_TOKEN_SECRET=s1\n"
+        "MODAL_TOKEN_ID=id1\n"
+        "MODAL_TOKEN_SECRET=s1\n"
         "MODAL_FUNCTION_INVOCATION=auto\n",
         encoding="utf-8",
     )
@@ -139,7 +139,7 @@ def test_env_sync_render_api_preset_dry_run_no_shell_api_key(tmp_path):
 def test_env_sync_gh_github_actions_preset_dry_run(tmp_path):
     env_file = tmp_path / "ci.env"
     env_file.write_text(
-        "MODAL_API_TOKEN_ID=from_api_id\nMODAL_API_TOKEN_SECRET=from_api_secret\n"
+        "MODAL_TOKEN_ID=from_api_id\nMODAL_TOKEN_SECRET=from_api_secret\n"
         "DATABASE_URL=postgresql://u:p@h/db\nMODAL_PROFILE=myworkspace\n",
         encoding="utf-8",
     )

@@ -157,7 +157,7 @@ def test_client_does_not_set_modal_headers_when_available(monkeypatch):
 
 def test_client_does_not_set_modal_key_from_token_id(monkeypatch):
     monkeypatch.delenv("MODAL_TOKEN_ID", raising=False)
-    monkeypatch.setenv("MODAL_API_TOKEN_ID", "wk-token-id-fallback")
+    monkeypatch.setenv("MODAL_TOKEN_ID", "wk-token-id-fallback")
     monkeypatch.setenv("MODAL_TOKEN_SECRET", "ws-test-modal-secret")
 
     client = EmbeddingServiceClient(base_url="http://localhost:8001")

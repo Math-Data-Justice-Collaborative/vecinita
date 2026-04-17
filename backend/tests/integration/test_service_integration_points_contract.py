@@ -388,3 +388,41 @@ def test_ip13_direct_modal_endpoint_contract_files() -> None:
 
     assert "vecinita--vecinita-scraper-api-fastapi.modal.run/jobs" in service_endpoints_content
     assert '"X-Service-Token"' not in embed_router_content
+
+
+def test_ip14_env_auth_contract_local_render_and_modal(monkeypatch) -> None:
+    """IP-14: Env/auth contract across local HTTP and Render+Modal invocation modes."""
+    from src.services.modal import invoker
+
+    # Local development contract: no Modal invocation requirement for non-Modal endpoints.
+    monkeypatch.delenv("RENDER", raising=False)
+    monkeypatch.delenv("RENDER_SERVICE_ID", raising=False)
+    monkeypatch.delenv("MODAL_FUNCTION_INVOCATION", raising=False)
+    monkeypatch.delenv("MODAL_TOKEN_ID", raising=False)
+    monkeypatch.delenv("MODAL_TOKEN_SECRET", raising=False)
+    assert invoker.modal_function_invocation_enabled() is False
+    invoker.enforce_modal_function_policy_for_urls(
+        {
+            "EMBEDDING_SERVICE_URL": "http://localhost:8001",
+            "OLLAMA_BASE_URL": "http://localhost:11434",
+        }
+    )
+
+    # Render contract: Modal-hosted endpoints require invocation mode + token pair.
+    monkeypatch.setenv("RENDER", "true")
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "auto")
+    monkeypatch.setenv("MODAL_TOKEN_ID", "ak-ip14-contract")
+    monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-ip14-contract")
+    assert invoker.modal_function_invocation_enabled() is True
+    invoker.enforce_modal_function_policy_for_urls(
+        {"EMBEDDING_SERVICE_URL": "https://vecinita--vecinita-embedding-web-app.modal.run"}
+    )
+
+    # Misconfigured Render contract must fail fast so CI blocks bad deploy config.
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
+    monkeypatch.delenv("MODAL_TOKEN_ID", raising=False)
+    monkeypatch.delenv("MODAL_TOKEN_SECRET", raising=False)
+    with pytest.raises(RuntimeError, match="Modal tokens are missing"):
+        invoker.enforce_modal_function_policy_for_urls(
+            {"VECINITA_MODEL_API_URL": "https://vecinita--vecinita-model-api.modal.run"}
+        )

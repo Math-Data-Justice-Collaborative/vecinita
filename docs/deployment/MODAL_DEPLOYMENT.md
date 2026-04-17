@@ -205,8 +205,8 @@ REINDEX_SERVICE_URL=  # Optional for local testing
 
 ```env
 # Modal credentials (for deployment only, not runtime)
-MODAL_API_TOKEN_ID=<your-token-id>
-MODAL_API_TOKEN_SECRET=<your-token-secret>
+MODAL_TOKEN_ID=<your-token-id>
+MODAL_TOKEN_SECRET=<your-token-secret>
 
 # Runtime: Modal embedding/model use Function.from_name (set MODAL_FUNCTION_INVOCATION + tokens)
 MODAL_FUNCTION_INVOCATION=auto
@@ -234,7 +234,7 @@ For auth tokens:
 1. `EMBEDDING_SERVICE_AUTH_TOKEN` (explicit)
 2. `MODAL_TOKEN_SECRET` (Modal routing token)
 3. `MODAL_API_KEY` (Modal API key)
-4. `MODAL_API_TOKEN_SECRET` (fallback)
+4. `MODAL_TOKEN_SECRET` (fallback)
 
 ## Troubleshooting
 

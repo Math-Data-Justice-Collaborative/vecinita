@@ -36,7 +36,7 @@ Optional: `--repo OWNER/REPO`, `--environment staging|production` for [environme
 Workflows resolve credentials in this order (first non-empty wins):
 
 1. `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` — canonical (matches Render `MODAL_*` naming).
-2. `MODAL_API_TOKEN_ID` / `MODAL_API_TOKEN_SECRET` — same tokens under names used in local `.env` templates.
+2. `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` — same tokens under names used in local `.env` templates.
 3. `MODAL_AUTH_KEY` / `MODAL_AUTH_SECRET` — legacy names still supported in submodule deploy workflows.
 
 Optional: `MODAL_API_PROFILE` secret or `MODAL_API_PROFILE` variable for `MODAL_PROFILE` (default `vecinita`). Scraper Modal deploy jobs also accept `DATABASE_URL` or `DB_URL` for deploy-time env if your Modal apps read them from the runner environment.

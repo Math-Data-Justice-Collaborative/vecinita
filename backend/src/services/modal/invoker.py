@@ -32,9 +32,9 @@ def _falsy_explicit_modal_mode(value: str) -> bool:
 
 def _modal_token_pair_configured() -> bool:
     """True when Modal SDK can authenticate (canonical or legacy env names)."""
-    token_id = (os.getenv("MODAL_TOKEN_ID") or os.getenv("MODAL_API_TOKEN_ID") or "").strip()
+    token_id = (os.getenv("MODAL_TOKEN_ID") or os.getenv("MODAL_TOKEN_ID") or "").strip()
     token_secret = (
-        os.getenv("MODAL_TOKEN_SECRET") or os.getenv("MODAL_API_TOKEN_SECRET") or ""
+        os.getenv("MODAL_TOKEN_SECRET") or os.getenv("MODAL_TOKEN_SECRET") or ""
     ).strip()
     return bool(token_id and token_secret)
 
@@ -96,7 +96,7 @@ def enforce_modal_function_policy_for_urls(urls: dict[str, str | None]) -> None:
         targets = ", ".join(name for name, _ in modal_targets)
         raise RuntimeError(
             "Modal function invocation is enabled for Modal-hosted targets but Modal tokens are missing. "
-            "Set MODAL_TOKEN_ID and MODAL_TOKEN_SECRET (or MODAL_API_TOKEN_ID/MODAL_API_TOKEN_SECRET). "
+            "Set MODAL_TOKEN_ID and MODAL_TOKEN_SECRET (or MODAL_TOKEN_ID/MODAL_TOKEN_SECRET). "
             f"Targets: {targets}"
         )
 

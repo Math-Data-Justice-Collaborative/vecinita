@@ -19,8 +19,8 @@ On Render, `vecinita-data-management-api-v1` runs the [`services/scraper`](servi
 | `VECINITA_EMBEDDING_API_URL` | **Required** by scraper config validation |
 | `CORS_ORIGINS` | **Required** for browser clients |
 | `ENVIRONMENT` | Set to `production` on Render (see `render.yaml`) |
-| `MODAL_TOKEN_ID` | Map from local `MODAL_API_TOKEN_ID` if you use that name locally |
-| `MODAL_TOKEN_SECRET` | Map from local `MODAL_API_TOKEN_SECRET` |
+| `MODAL_TOKEN_ID` | Map from local `MODAL_TOKEN_ID` if you use that name locally |
+| `MODAL_TOKEN_SECRET` | Map from local `MODAL_TOKEN_SECRET` |
 | `MODAL_WORKSPACE` | Optional; e.g. `vecinita` |
 
 ## Optional / compatibility
@@ -55,13 +55,13 @@ ModalConfig(
 )
 ```
 
-**Note:** The API looks for `MODAL_TOKEN_ID` and `MODAL_TOKEN_SECRET`, not the longer `MODAL_API_TOKEN_ID` format from your `.env`.
+**Note:** The API looks for `MODAL_TOKEN_ID` and `MODAL_TOKEN_SECRET`, not the longer `MODAL_TOKEN_ID` format from your `.env`.
 
 ## How Scripts Transform Variables
 
 Both automated scripts (`setup-render-env.sh` and `apply-render-env-api.sh`) do this transformation:
 
-1. Read from `.env`: `MODAL_API_TOKEN_ID` and `MODAL_API_TOKEN_SECRET`
+1. Read from `.env`: `MODAL_TOKEN_ID` and `MODAL_TOKEN_SECRET`
 2. Transform to: `MODAL_TOKEN_ID` and `MODAL_TOKEN_SECRET`
 3. Apply to Render service
 

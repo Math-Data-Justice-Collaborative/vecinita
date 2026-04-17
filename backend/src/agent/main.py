@@ -681,7 +681,7 @@ ollama_base_url = OLLAMA_BASE_URL
 ollama_api_key = (
     os.environ.get("OLLAMA_API_KEY")
     or os.environ.get("MODAL_TOKEN_SECRET")
-    or os.environ.get("MODAL_API_TOKEN_SECRET")
+    or os.environ.get("MODAL_TOKEN_SECRET")
 )
 ollama_model = os.environ.get("OLLAMA_MODEL") or "gemma3"
 default_provider = "ollama"
@@ -777,7 +777,7 @@ try:
     embedding_service_auth_token = (
         os.environ.get("EMBEDDING_SERVICE_AUTH_TOKEN")
         or os.environ.get("MODAL_TOKEN_SECRET")
-        or os.environ.get("MODAL_API_TOKEN_SECRET")
+        or os.environ.get("MODAL_TOKEN_SECRET")
     )
     embedding_strict_startup = os.environ.get("EMBEDDING_STRICT_STARTUP", "false").lower() in [
         "1",
