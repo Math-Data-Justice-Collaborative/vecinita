@@ -18,7 +18,7 @@
 	test-integration-gateway-fast test-integration-gateway-full test-integration-gateway \
 	test-all-integration test-cross-integration test-cross-e2e \
 	test-schemathesis test-schemathesis-gateway test-schemathesis-agent test-schemathesis-cli \
-	scraper-run scraper-run-verbose scraper-run-clean scraper-validate-postgres \
+	scraper-run scraper-run-verbose scraper-run-clean scraper-validate-postgres scraper-pull \
 	microservices-up microservices-down microservices-logs test-microservices-contracts test-microservices \
 	render-env-validate render-tests-strict render-tests-render-suite render-workflow-ci \
 	render-local-up render-local-down render-local-logs render-local-check render-local-check-live render-local-validate \
@@ -119,6 +119,7 @@ help:
 	@echo "  make scraper-run                         Run scraper in additive streaming mode"
 	@echo "  make scraper-run-verbose                 Run scraper with verbose logs and DB validation"
 	@echo "  make scraper-run-clean                   Run destructive clean + scraper + DB validation"
+	@echo "  make scraper-pull                        Fetch/rebase services/scraper (fixes fast-forward pull failures)"
 	@echo "  make scraper-validate-postgres           Run Postgres validation queries only (no scraping)"
 	@echo ""
 	@echo "Render workflow shortcuts"
@@ -482,6 +483,9 @@ test-cross-integration:
 
 scraper-run:
 	./scripts/run_scraper_postgres_batch.sh --local
+
+scraper-pull:
+	./scripts/sync_scraper_submodule.sh
 
 scraper-run-verbose:
 	./scripts/run_scraper_postgres_batch.sh --local --verbose

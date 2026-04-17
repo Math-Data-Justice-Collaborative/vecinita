@@ -45,8 +45,9 @@ backend/lib64/
 
 # IDE/editor
 .idea/
-.vscode/
-.vscode/mcp.json
+# Track team VS Code defaults; keep other .vscode/ files local (e.g. mcp.json).
+.vscode/*
+!.vscode/settings.json
 *.swp
 *.swo
 *~

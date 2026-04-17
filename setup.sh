@@ -62,6 +62,14 @@ echo -e "\n${YELLOW}4. Checking git submodules...${NC}"
 
 if [ -d ".git" ]; then
     git submodule update --init --recursive --quiet 2>/dev/null || true
+    # vecinita-scraper: pull.ff=true aborts with "Not possible to fast-forward" when local/main
+    # and origin/main have diverged; rebase pulls need pull.ff=false.
+    if [ -f "services/scraper/.git" ]; then
+        git -C services/scraper config pull.rebase true
+        git -C services/scraper config pull.ff false
+        git -C services/scraper config merge.ff false
+        git -C services/scraper config branch.main.rebase true
+    fi
     echo -e "${GREEN}✓ Git submodules initialized${NC}"
 fi
 

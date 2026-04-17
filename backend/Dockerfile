@@ -29,7 +29,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
 	python-dotenv pydantic requests httpx langdetect tqdm \
 	python-multipart \
 	gotrue langchain-ollama langsmith ddgs \
-	guardrails-ai
+	guardrails-ai \
+	modal>=1.3.5
 
 # Runtime stage - minimal image
 FROM python:3.11-slim-bookworm AS runtime
