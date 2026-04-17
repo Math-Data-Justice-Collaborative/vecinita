@@ -9,8 +9,14 @@ set ``GATEWAY_LIVE_BEARER`` to a valid API key.
 - ``SCHEMATHESIS_TIER=b``: also ``response_schema_conformance`` on a small
   allowlist of read-only routes with stable ``response_model`` coverage.
 
-The main property suite avoids ``GET /api/v1/ask`` (LLM cost / latency); that
-route is covered separately with a low example budget.
+**Coverage**
+
+- Default: ``test_gateway_live_stable_operations`` exercises a **cheap allowlist**
+  (no ``GET /api/v1/ask``, no ``GET /api/v1/ask/stream`` in the main schema).
+- ``GET /api/v1/ask`` is covered separately with a low example budget.
+- Set ``SCHEMATHESIS_LIVE_GATEWAY_FULL=1`` to run **all** operations from the
+  fetched OpenAPI (including ``/ask`` and ``/ask/stream``) with the same checks;
+  use for staging smoke / release week (higher cost and latency).
 """
 
 from __future__ import annotations
@@ -26,6 +32,7 @@ from schemathesis.specs.openapi.checks import response_schema_conformance
 pytestmark = pytest.mark.live
 
 _TIER = os.environ.get("SCHEMATHESIS_TIER", "a").lower()
+_LIVE_GATEWAY_FULL = os.environ.get("SCHEMATHESIS_LIVE_GATEWAY_FULL", "").strip() == "1"
 
 _LIVE_GATEWAY_SCHEMA_CONTRACT_OPS: frozenset[tuple[str, str]] = frozenset(
     {
@@ -46,6 +53,8 @@ _LIVE_GATEWAY_STABLE_OPS: frozenset[tuple[str, str]] = frozenset(
         ("GET", "/api/v1/documents/overview"),
         ("GET", "/api/v1/documents/chunk-statistics"),
         ("GET", "/api/v1/documents/tags"),
+        ("GET", "/api/v1/documents/preview"),
+        ("GET", "/api/v1/documents/download-url"),
         ("GET", "/api/v1/embed/config"),
         ("POST", "/api/v1/embed"),
         ("POST", "/api/v1/embed/batch"),
@@ -61,6 +70,8 @@ def gateway_live_schema(gateway_url: str):
         wait_for_schema=30.0,
     )
     schema.config.generation.modes = [GenerationMode.POSITIVE]
+    if _LIVE_GATEWAY_FULL:
+        return schema
     return schema.exclude(path_regex=r"/ask/stream$").exclude(path="/api/v1/ask")
 
 
@@ -92,8 +103,10 @@ def _optional_bearer_kwargs() -> dict:
     deadline=None,
 )
 def test_gateway_live_stable_operations(case):
-    if (case.method, case.path) not in _LIVE_GATEWAY_STABLE_OPS:
-        pytest.skip("Outside stable live gateway allowlist")
+    if not _LIVE_GATEWAY_FULL and (case.method, case.path) not in _LIVE_GATEWAY_STABLE_OPS:
+        pytest.skip(
+            "Outside stable live gateway allowlist (set SCHEMATHESIS_LIVE_GATEWAY_FULL=1 for all ops)"
+        )
 
     checks = [schemathesis.checks.not_a_server_error]
     if _TIER == "b" and (case.method, case.path) in _LIVE_GATEWAY_SCHEMA_CONTRACT_OPS:
@@ -113,6 +126,9 @@ def test_gateway_live_stable_operations(case):
     deadline=None,
 )
 def test_gateway_live_ask_not_server_error(case):
+    if _LIVE_GATEWAY_FULL:
+        pytest.skip("GET /api/v1/ask is included in the full gateway schema run")
+
     case.call_and_validate(
         timeout=120,
         checks=[schemathesis.checks.not_a_server_error],

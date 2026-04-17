@@ -1,5 +1,10 @@
 # Gateway live CLI: SCHEMATHESIS_HOOKS=tests.schemathesis_hooks supplies stable query/path/body
-# for document preview, scrape job polling, and POST /api/v1/scrape (see scripts/run_schemathesis_live.sh).
+# for document preview, scrape job polling, POST /api/v1/scrape, and GET /api/v1/ask/stream
+# (see scripts/run_schemathesis_live.sh; SCHEMATHESIS_STREAM_QUESTION, SCHEMATHESIS_EXCLUDE_ASK_STREAM).
+#
+# Thorough / release runs: raise SCHEMATHESIS_MAX_EXAMPLES (or SCHEMATHESIS_GATEWAY_MAX_EXAMPLES for the
+# gateway CLI only), optionally SCHEMATHESIS_THOROUGH=1 for --generation-maximize response_time — see
+# https://schemathesis.readthedocs.io/en/stable/guides/config-optimization/
 continue-on-failure = true
 
 [generation]

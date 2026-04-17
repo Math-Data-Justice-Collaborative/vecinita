@@ -109,9 +109,9 @@ Render dashboard. Key vars:
 
 Contract tests and live Schemathesis runs use [`backend/schemathesis.toml`](../../backend/schemathesis.toml) and [`backend/tests/schemathesis_hooks.py`](../../backend/tests/schemathesis_hooks.py). If Schemathesis reports **schema validation mismatch** on scrape/embed/ask routes, tighten Pydantic constraints and add **`Field(examples=…)`** / **`openapi_examples`** on gateway routers so generated examples stay valid.
 
-**Offline pytest** (`make test-schemathesis`, gateway + agent) uses mocked upstreams in CI.
+**Offline pytest** (`make test-schemathesis`, gateway + agent) uses mocked upstreams in CI. The **scraper / data-management** HTTP API also has offline Schemathesis in [`services/scraper/tests/integration/test_openapi_schemathesis.py`](../../services/scraper/tests/integration/test_openapi_schemathesis.py) (mocked job control; runs in the scraper package test suite).
 
-**Live CLI** ([`backend/scripts/run_schemathesis_live.sh`](../../backend/scripts/run_schemathesis_live.sh), `make test-schemathesis-cli`) targets **gateway** and **data-management** OpenAPI URLs (`GATEWAY_SCHEMA_URL`, `DATA_MANAGEMENT_SCHEMA_URL`). It does not run Schemathesis against the agent or standalone Modal ASGI apps.
+**Live CLI** ([`backend/scripts/run_schemathesis_live.sh`](../../backend/scripts/run_schemathesis_live.sh), `make test-schemathesis-cli`) targets **gateway** and **data-management** OpenAPI URLs (`GATEWAY_SCHEMA_URL`, `DATA_MANAGEMENT_SCHEMA_URL`). Gateway runs include `GET /api/v1/ask/stream` by default unless `SCHEMATHESIS_EXCLUDE_ASK_STREAM=1`. It does not run Schemathesis against the agent or standalone Modal ASGI apps.
 
 For **agent** in-process Schemathesis, `POST /model-selection` can return **403** when `LOCK_MODEL_SELECTION` is enabled (policy, not missing credentials); related pytest/live-agent tuning may use `SCHEMATHESIS_EXCLUDE_IGNORED_AUTH` / `SCHEMATHESIS_EXCLUDE_AGENT_MODEL_SELECTION` (see script and `TESTING_DOCUMENTATION.md`).
 

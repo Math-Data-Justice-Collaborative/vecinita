@@ -36,6 +36,12 @@ from .models import (
     PublicDocumentsSourceItem,
 )
 
+
+def _pg_connect(*args: Any, **kwargs: Any):  # noqa: ANN401
+    """Thin wrapper so integration tests can monkeypatch DB access without replacing ``psycopg2``."""
+    return psycopg2.connect(*args, **kwargs)
+
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/documents", tags=["Documents (Public)"])
@@ -308,7 +314,7 @@ def _load_overview_via_sql() -> tuple[dict[str, int], list[dict[str, Any]]]:
     if not database_url:
         raise RuntimeError("database_url_not_configured")
 
-    with psycopg2.connect(database_url, connect_timeout=5) as conn:
+    with _pg_connect(database_url, connect_timeout=5) as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             _set_statement_timeout(cur)
             cur.execute("""
@@ -384,7 +390,7 @@ def _load_chunk_statistics_via_sql(limit: int) -> list[dict[str, Any]]:
     if not database_url:
         raise RuntimeError("database_url_not_configured")
 
-    with psycopg2.connect(database_url, connect_timeout=5) as conn:
+    with _pg_connect(database_url, connect_timeout=5) as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             _set_statement_timeout(cur)
             cur.execute(
@@ -481,7 +487,7 @@ async def documents_preview(
             raise RuntimeError("database_url_not_configured")
 
         chunks = []
-        with psycopg2.connect(database_url, connect_timeout=5) as conn:
+        with _pg_connect(database_url, connect_timeout=5) as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 _set_statement_timeout(cur)
                 cur.execute(
@@ -536,7 +542,7 @@ async def documents_download_url(
         source_row: dict[str, Any] | None = None
         chunk_row: dict[str, Any] | None = None
 
-        with psycopg2.connect(database_url, connect_timeout=5) as conn:
+        with _pg_connect(database_url, connect_timeout=5) as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 _set_statement_timeout(cur)
                 cur.execute(
@@ -634,7 +640,7 @@ async def documents_tags(
 
         chunk_counts: dict[str, int] = {}
         source_map: dict[str, set[str]] = {}
-        with psycopg2.connect(database_url, connect_timeout=5) as conn:
+        with _pg_connect(database_url, connect_timeout=5) as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 _set_statement_timeout(cur)
                 cur.execute("SELECT source_url, metadata FROM public.document_chunks")

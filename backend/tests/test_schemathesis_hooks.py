@@ -94,6 +94,20 @@ def test_map_path_parameters_accepts_none_stateful(monkeypatch):
     assert pp["job_id"] == "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
 
 
+def test_map_query_sets_stream_question(monkeypatch):
+    class Op:
+        path = "/api/v1/ask/stream"
+        method = "get"
+
+    class Ctx:
+        operation = Op()
+
+    monkeypatch.setenv("SCHEMATHESIS_STREAM_QUESTION", "Ping")
+    q = sh.map_query(Ctx(), {"lang": "en"})
+    assert q["question"] == "Ping"
+    assert q["lang"] == "en"
+
+
 def test_map_query_accepts_none_for_documents_paths(monkeypatch):
     class Op:
         path = "/api/v1/documents/preview"

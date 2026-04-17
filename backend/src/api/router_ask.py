@@ -34,6 +34,34 @@ from .models import (
 router = APIRouter(prefix="/ask", tags=["Q&A"])
 logger = logging.getLogger(__name__)
 
+# OpenAPI 3.x: per-event schema for SSE (Schemathesis validates each parsed event; see docs).
+_GATEWAY_ASK_STREAM_SSE_200: dict[str, Any] = {
+    "description": (
+        "Server-Sent Events stream. Each `data:` line carries a JSON object with a `type` field "
+        "(e.g. thinking, complete, error)."
+    ),
+    "content": {
+        "text/event-stream": {
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "examples": [
+                            "thinking",
+                            "complete",
+                            "error",
+                            "tool_event",
+                            "clarification",
+                        ],
+                    },
+                },
+                "required": ["type"],
+            }
+        }
+    },
+}
+
 _GATEWAY_ASK_OPENAPI_RESPONSES: dict[int | str, dict[str, Any]] = {
     401: {
         "model": ErrorResponse,
@@ -417,7 +445,10 @@ async def sse_stream_forward_generator(
         yield error_event.encode("utf-8")
 
 
-@router.get("/stream", responses=_GATEWAY_ASK_OPENAPI_RESPONSES)
+@router.get(
+    "/stream",
+    responses={200: _GATEWAY_ASK_STREAM_SSE_200, **_GATEWAY_ASK_OPENAPI_RESPONSES},
+)
 async def ask_question_stream(
     params: Annotated[GatewayAskQueryParams, Depends()],
 ):

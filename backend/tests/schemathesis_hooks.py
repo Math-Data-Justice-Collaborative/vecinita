@@ -20,6 +20,7 @@ _DEFAULT_SCRAPE_JOB_ID = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 _DEFAULT_SCRAPE_TARGET_URL = "https://example.com/page"
 # Tracked Modal registry ids (live runs: set to a real id to avoid repeated 404 warnings).
 _DEFAULT_MODAL_REGISTRY_JOB_ID = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+_DEFAULT_STREAM_QUESTION = "What is Vecinita?"
 
 
 def _source_url() -> str:
@@ -38,6 +39,10 @@ def _modal_registry_gateway_job_id() -> str:
     return os.environ.get(
         "SCHEMATHESIS_MODAL_GATEWAY_JOB_ID", _DEFAULT_MODAL_REGISTRY_JOB_ID
     ).strip()
+
+
+def _stream_question() -> str:
+    return os.environ.get("SCHEMATHESIS_STREAM_QUESTION", _DEFAULT_STREAM_QUESTION).strip()
 
 
 @hook
@@ -72,6 +77,10 @@ def map_query(context: HookContext, query):  # noqa: ANN001
         uid = out.get("user_id")
         if uid is None or str(uid).strip().lower() in ("", "null", "none"):
             out.pop("user_id", None)
+        return out
+    if operation.path == "/api/v1/ask/stream" and operation.method.upper() == "GET":
+        out = {} if query is None else dict(query)
+        out["question"] = _stream_question()
         return out
     if operation.path not in {
         "/api/v1/documents/preview",

@@ -167,9 +167,11 @@ This explains why tests needed adjustment when `.env` contains `MODAL_EMBEDDING_
 
 ## OpenAPI Schema Validation (Schemathesis)
 
-**Offline (pytest / CI):** Schemathesis exercises the **gateway** and **agent** OpenAPI descriptions in-process with mocked upstreams (`make test-schemathesis`, `make test-schemathesis-gateway`, `make test-schemathesis-agent`).
+**Offline (pytest / CI):** Schemathesis exercises the **gateway** and **agent** OpenAPI descriptions in-process with mocked upstreams (`make test-schemathesis`, `make test-schemathesis-gateway`, `make test-schemathesis-agent`). The **data-management (scraper) API** has an offline suite under [`services/scraper/tests/integration/test_openapi_schemathesis.py`](services/scraper/tests/integration/test_openapi_schemathesis.py) (runs with `make test` in `services/scraper/` / CI `scraper-ci`).
 
-**Live CLI (`make test-schemathesis-cli`):** [`backend/scripts/run_schemathesis_live.sh`](backend/scripts/run_schemathesis_live.sh) runs Schemathesis only against deployed **gateway** and **data-management** OpenAPI. Configure `GATEWAY_SCHEMA_URL` and/or `DATA_MANAGEMENT_SCHEMA_URL` (defaults point at lx27-style hosts if unset). The script does **not** hit the agent or standalone Modal microservice OpenAPI URLs.
+**Live CLI (`make test-schemathesis-cli`):** [`backend/scripts/run_schemathesis_live.sh`](backend/scripts/run_schemathesis_live.sh) runs Schemathesis against deployed **gateway** and **data-management** OpenAPI. Configure `GATEWAY_SCHEMA_URL` and/or `DATA_MANAGEMENT_SCHEMA_URL` (defaults point at lx27-style hosts if unset). The script does **not** hit the agent or standalone Modal microservice OpenAPI URLs.
+
+**References:** [Schemathesis SSE](https://schemathesis.readthedocs.io/en/stable/guides/server-sent-events/), [CI/CD](https://schemathesis.readthedocs.io/en/stable/guides/cicd/), [config optimization](https://schemathesis.readthedocs.io/en/stable/guides/config-optimization/) (thorough vs fast PR runs).
 
 **Schema URLs**
 
@@ -179,16 +181,16 @@ This explains why tests needed adjustment when `.env` contains `MODAL_EMBEDDING_
 
 **Tiered checks (offline pytest)**
 
-- **Tier A — stability**: default Schemathesis checks on an allowlisted set of operations (mocked agent/embedding/documents SQL where needed).
-- **Tier B — response contract**: `response_schema_conformance` on a subset with accurate `response_model` coverage (`test_gateway_openapi_response_schema_contract` in `test_api_schema_schemathesis.py`).
+- **Tier A — stability**: `not_a_server_error` on **all** gateway operations present in the loaded OpenAPI (mocked agent, embedding, documents SQL via `_pg_connect`, scrape job manager, Modal job stubs, finite SSE stream for `/api/v1/ask/stream`). Default checks exclude Schemathesis’s “unsupported method” / `Allow`-header rules; use explicit check lists if you need those.
+- **Tier B — response contract**: `response_schema_conformance` on a subset with accurate `response_model` coverage (`test_gateway_openapi_response_schema_contract` in `test_api_schema_schemathesis.py`). `GET /api/v1/ask/stream` documents `text/event-stream` per-event `schema` in OpenAPI for future SSE validation.
 - **Auth slice**: `ENABLE_AUTH=true` plus `Authorization: Bearer …` for `GET /api/v1/ask` (`test_gateway_ask_with_bearer_auth`).
 - **Agent offline**: positive-generation fuzz on cheap routes (`test_agent_api_schema_schemathesis.py`).
 
 **Live Render (lx27 or staging)**
 
-- **Tier A (default)**: live pytest and CLI runs use `not_a_server_error` only — strongest signal under POSITIVE generation without demanding perfect error-body documentation.
+- **Tier A (default)**: live pytest uses a **cheap allowlist** of read-mostly routes; `GET /api/v1/ask` is isolated with a tiny example budget. Set **`SCHEMATHESIS_LIVE_GATEWAY_FULL=1`** to fuzz **all** operations from the live OpenAPI (including `/ask` and `/ask/stream`) in `test_live_gateway_schemathesis.py` — use on staging when you accept higher cost/latency.
 - **Tier B (opt-in)**: set `SCHEMATHESIS_TIER=b` for gateway live tests to add `response_schema_conformance` on a small read-only allowlist (`test_live_gateway_schemathesis.py`). Use after OpenAPI/error models are aligned to avoid spec-noise failures.
-- **Hypothesis**: live suites use low `max_examples` and generous HTTP timeouts; the CLI honors `SCHEMATHESIS_MAX_EXAMPLES` (see `run_schemathesis_live.sh`).
+- **Hypothesis**: live suites use low `max_examples` and generous HTTP timeouts; the CLI honors `SCHEMATHESIS_MAX_EXAMPLES` and **`SCHEMATHESIS_GATEWAY_MAX_EXAMPLES`** (gateway run only). **`SCHEMATHESIS_THOROUGH=1`** appends `--generation-maximize response_time` on the gateway CLI (optional release/nightly).
 - **Auth**: export `GATEWAY_LIVE_BEARER` when the gateway has `ENABLE_AUTH=true`.
 - **Response matrix**: deterministic 4xx/422 checks in `tests/live/test_live_openapi_response_matrix.py` (requires `RENDER_AGENT_URL` for agent rows and `RENDER_GATEWAY_URL` for gateway rows).
 
@@ -204,6 +206,9 @@ Before `make test-schemathesis-cli` (or `backend/scripts/run_schemathesis_live.s
 | Gateway auth | `GATEWAY_LIVE_BEARER` when `ENABLE_AUTH=true`. |
 | Scraper-backed routes on gateway | Optional: `SCRAPER_SCHEMATHESIS_BEARER` or first key in `SCRAPER_API_KEYS` when live data exercises scrape paths. |
 | `POST /api/v1/scrape/reindex` | **Excluded by default** (avoids 502 when the gateway’s `REINDEX_SERVICE_URL` is missing or not DNS-resolvable from Render). Set `SCHEMATHESIS_INCLUDE_GATEWAY_REINDEX=1` only after fixing that URL on the target gateway. |
+| `GET /api/v1/ask/stream` | **Included by default** in the live gateway CLI. Set **`SCHEMATHESIS_EXCLUDE_ASK_STREAM=1`** to skip SSE (e.g. very slow agents). Hooks set a short **`SCHEMATHESIS_STREAM_QUESTION`**. |
+
+**Thorough CLI runs:** raise `SCHEMATHESIS_MAX_EXAMPLES` / `SCHEMATHESIS_GATEWAY_MAX_EXAMPLES`, keep `continue-on-failure` (see `backend/schemathesis.toml`), optionally `SCHEMATHESIS_THOROUGH=1` — see [config optimization](https://schemathesis.readthedocs.io/en/stable/guides/config-optimization/).
 
 **Agent offline Schemathesis — `POST /model-selection` (403 vs authentication)**
 
@@ -222,6 +227,7 @@ The gateway proxies to `REINDEX_SERVICE_URL` (and `REINDEX_TRIGGER_TOKEN`). If t
 - `backend/schemathesis.toml` — generation limits, JUnit reports, `continue-on-failure`
 - `backend/tests/schemathesis_hooks.py` — optional trace coverage hooks
 - `backend/tests/integration/test_api_schema_schemathesis.py` — gateway ASGI suite
+- `services/scraper/tests/integration/test_openapi_schemathesis.py` — data-management (scraper) ASGI suite
 - `backend/tests/integration/test_agent_api_schema_schemathesis.py` — agent ASGI suite
 - `backend/tests/live/test_live_schemathesis.py` — live agent Schemathesis (+ isolated `GET /ask` budget)
 - `backend/tests/live/test_live_gateway_schemathesis.py` — live gateway Schemathesis

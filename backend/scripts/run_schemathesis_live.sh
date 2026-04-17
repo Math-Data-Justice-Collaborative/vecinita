@@ -21,6 +21,12 @@
 #   SCHEMATHESIS_INCLUDE_GATEWAY_REINDEX — set to 1 to include POST /api/v1/scrape/reindex in the gateway
 #       run (default: excluded). Live fuzzing hits the gateway, which then calls REINDEX_SERVICE_URL on the
 #       server; a bad or internal-only host yields 502 and fails not_a_server_error checks.
+#   SCHEMATHESIS_EXCLUDE_ASK_STREAM — set to 1 to exclude GET /api/v1/ask/stream (and legacy paths) from the
+#       gateway run (default: 0, stream is included; uses hooks for a short `question` and may need higher
+#       SCHEMATHESIS_REQUEST_TIMEOUT for slow agents).
+#   SCHEMATHESIS_STREAM_QUESTION — passed via hooks as `question` for GET /api/v1/ask/stream (default in hooks).
+#   SCHEMATHESIS_GATEWAY_MAX_EXAMPLES — overrides --max-examples for the gateway run only (default: SCHEMATHESIS_MAX_EXAMPLES).
+#   SCHEMATHESIS_THOROUGH — set to 1 to append --generation-maximize response_time (optional; longer runs).
 #   SCHEMATHESIS_SUPPRESS_HEALTH_CHECK — comma list for --suppress-health-check (default: filter_too_much).
 #       Modal-jobs path params can trip Schemathesis generation health checks without affecting runtime API quality.
 #
@@ -36,6 +42,7 @@ REPORT_DIR="${SCHEMATHESIS_REPORT_DIR:-schemathesis-report}"
 CHECKS="${SCHEMATHESIS_CHECKS:-not_a_server_error}"
 SUPPRESS_HC="${SCHEMATHESIS_SUPPRESS_HEALTH_CHECK:-filter_too_much}"
 MAX_EX="${SCHEMATHESIS_MAX_EXAMPLES:-12}"
+GATEWAY_MAX_EX="${SCHEMATHESIS_GATEWAY_MAX_EXAMPLES:-$MAX_EX}"
 REQ_TIMEOUT="${SCHEMATHESIS_REQUEST_TIMEOUT:-180}"
 MODEL_REQ_TIMEOUT="${SCHEMATHESIS_MODAL_MODEL_REQUEST_TIMEOUT:-300}"
 MODEL_MAX_EX="${SCHEMATHESIS_MODAL_MODEL_MAX_EXAMPLES:-6}"
@@ -112,11 +119,22 @@ run_core_openapi() {
   if [[ "${SCHEMATHESIS_INCLUDE_GATEWAY_REINDEX:-0}" != "1" ]]; then
     reindex_exclude=( --exclude-path '/api/v1/scrape/reindex' )
   fi
-  run_st "${location}" "${junit_name}" "${use_auth}" "${REQ_TIMEOUT}" "${MAX_EX}" \
-    --exclude-path-regex '/ask/stream$' \
-    --exclude-path '/ask/stream' \
-    --exclude-path '/ask-stream' \
+  local stream_exclude=()
+  if [[ "${SCHEMATHESIS_EXCLUDE_ASK_STREAM:-0}" == "1" ]]; then
+    stream_exclude=(
+      --exclude-path-regex '/ask/stream$'
+      --exclude-path '/ask/stream'
+      --exclude-path '/ask-stream'
+    )
+  fi
+  local thorough_args=()
+  if [[ "${SCHEMATHESIS_THOROUGH:-0}" == "1" ]]; then
+    thorough_args=( --generation-maximize response_time )
+  fi
+  run_st "${location}" "${junit_name}" "${use_auth}" "${REQ_TIMEOUT}" "${GATEWAY_MAX_EX}" \
+    "${stream_exclude[@]+"${stream_exclude[@]}"}" \
     "${reindex_exclude[@]+"${reindex_exclude[@]}"}" \
+    "${thorough_args[@]+"${thorough_args[@]}"}" \
     "${extra[@]+"${extra[@]}"}"
 }
 
