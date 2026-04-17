@@ -43,8 +43,6 @@ def test_modal_function_invocation_auto_on_with_canonical_tokens(monkeypatch):
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "auto")
     monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")
     monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-test")
-    monkeypatch.delenv("MODAL_TOKEN_ID", raising=False)
-    monkeypatch.delenv("MODAL_TOKEN_SECRET", raising=False)
     assert modal_function_invocation_enabled() is True
 
 

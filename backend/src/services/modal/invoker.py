@@ -32,10 +32,8 @@ def _falsy_explicit_modal_mode(value: str) -> bool:
 
 def _modal_token_pair_configured() -> bool:
     """True when Modal SDK can authenticate (canonical or legacy env names)."""
-    token_id = (os.getenv("MODAL_TOKEN_ID") or os.getenv("MODAL_TOKEN_ID") or "").strip()
-    token_secret = (
-        os.getenv("MODAL_TOKEN_SECRET") or os.getenv("MODAL_TOKEN_SECRET") or ""
-    ).strip()
+    token_id = (os.getenv("MODAL_TOKEN_ID") or os.getenv("MODAL_AUTH_KEY") or "").strip()
+    token_secret = (os.getenv("MODAL_TOKEN_SECRET") or os.getenv("MODAL_AUTH_SECRET") or "").strip()
     return bool(token_id and token_secret)
 
 
