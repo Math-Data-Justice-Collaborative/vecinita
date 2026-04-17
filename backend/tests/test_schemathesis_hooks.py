@@ -53,6 +53,32 @@ def test_map_path_parameters_sets_job_id(monkeypatch):
     assert pp["job_id"] == "11111111-2222-3333-4444-555555555555"
 
 
+def test_map_path_parameters_modal_registry_gateway_job_id(monkeypatch):
+    class Op:
+        path = "/api/v1/modal-jobs/registry/{gateway_job_id}"
+        method = "delete"
+
+    class Ctx:
+        operation = Op()
+
+    monkeypatch.setenv("SCHEMATHESIS_MODAL_GATEWAY_JOB_ID", "aaaaaaaa-bbbb-cccc-dddd-000000000001")
+    pp = sh.map_path_parameters(Ctx(), {"gateway_job_id": "bad"})
+    assert pp["gateway_job_id"] == "aaaaaaaa-bbbb-cccc-dddd-000000000001"
+
+
+def test_map_query_modal_scraper_list_drops_null_user_id():
+    class Op:
+        path = "/api/v1/modal-jobs/scraper"
+        method = "get"
+
+    class Ctx:
+        operation = Op()
+
+    q = sh.map_query(Ctx(), {"user_id": "null", "limit": 10})
+    assert "user_id" not in q
+    assert q["limit"] == 10
+
+
 def test_map_path_parameters_accepts_none_stateful(monkeypatch):
     """Stateful generation may pass None; we still inject a stable job_id."""
 

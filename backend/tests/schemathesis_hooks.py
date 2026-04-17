@@ -18,6 +18,8 @@ from schemathesis import HookContext, hook
 _DEFAULT_SOURCE_URL = "https://example.org/community-resource-guide"
 _DEFAULT_SCRAPE_JOB_ID = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 _DEFAULT_SCRAPE_TARGET_URL = "https://example.com/page"
+# Tracked Modal registry ids (live runs: set to a real id to avoid repeated 404 warnings).
+_DEFAULT_MODAL_REGISTRY_JOB_ID = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 
 
 def _source_url() -> str:
@@ -30,6 +32,12 @@ def _scrape_job_id() -> str:
 
 def _scrape_post_url() -> str:
     return os.environ.get("SCHEMATHESIS_SCRAPE_URL", _DEFAULT_SCRAPE_TARGET_URL).strip()
+
+
+def _modal_registry_gateway_job_id() -> str:
+    return os.environ.get(
+        "SCHEMATHESIS_MODAL_GATEWAY_JOB_ID", _DEFAULT_MODAL_REGISTRY_JOB_ID
+    ).strip()
 
 
 @hook
@@ -59,6 +67,12 @@ def map_query(context: HookContext, query):  # noqa: ANN001
     operation = context.operation
     if operation is None:
         return query
+    if operation.path == "/api/v1/modal-jobs/scraper" and operation.method.upper() == "GET":
+        out = {} if query is None else dict(query)
+        uid = out.get("user_id")
+        if uid is None or str(uid).strip().lower() in ("", "null", "none"):
+            out.pop("user_id", None)
+        return out
     if operation.path not in {
         "/api/v1/documents/preview",
         "/api/v1/documents/download-url",
@@ -75,8 +89,17 @@ def map_path_parameters(context: HookContext, path_parameters):  # noqa: ANN001
     operation = context.operation
     if operation is None:
         return path_parameters
-    if operation.path not in {"/api/v1/scrape/{job_id}", "/api/v1/scrape/{job_id}/cancel"}:
+    if operation.path not in {
+        "/api/v1/scrape/{job_id}",
+        "/api/v1/scrape/{job_id}/cancel",
+        "/api/v1/modal-jobs/scraper/{job_id}",
+        "/api/v1/modal-jobs/scraper/{job_id}/cancel",
+        "/api/v1/modal-jobs/registry/{gateway_job_id}",
+    }:
         return path_parameters
     out = {} if path_parameters is None else dict(path_parameters)
-    out["job_id"] = _scrape_job_id()
+    if "gateway_job_id" in (operation.path or ""):
+        out["gateway_job_id"] = _modal_registry_gateway_job_id()
+    else:
+        out["job_id"] = _scrape_job_id()
     return out

@@ -15,10 +15,14 @@
 #       that exists in the target Postgres to avoid 404 warnings on live runs.
 #   SCHEMATHESIS_SCRAPE_JOB_ID — optional; UUID for GET /api/v1/scrape/{job_id} and POST …/cancel
 #       (hooks default: example UUID). Set to a real job id from POST /api/v1/scrape when testing.
+#   SCHEMATHESIS_MODAL_GATEWAY_JOB_ID — optional; path param for GET/DELETE …/modal-jobs/registry/{id}
+#       (hooks default: same example UUID). Set to a real gateway_job_id to reduce 404 warnings.
 #   SCHEMATHESIS_SCRAPE_URL — optional; first URL in POST /api/v1/scrape body (default: https://example.com/page).
 #   SCHEMATHESIS_INCLUDE_GATEWAY_REINDEX — set to 1 to include POST /api/v1/scrape/reindex in the gateway
 #       run (default: excluded). Live fuzzing hits the gateway, which then calls REINDEX_SERVICE_URL on the
 #       server; a bad or internal-only host yields 502 and fails not_a_server_error checks.
+#   SCHEMATHESIS_SUPPRESS_HEALTH_CHECK — comma list for --suppress-health-check (default: filter_too_much).
+#       Modal-jobs path params can trip Schemathesis generation health checks without affecting runtime API quality.
 #
 # Gateway deploy (Render) — reindex:
 #   For POST /api/v1/scrape/reindex to succeed when included, configure the gateway's REINDEX_SERVICE_URL
@@ -30,6 +34,7 @@ set -euo pipefail
 WAIT_FOR_SCHEMA_SECONDS="${WAIT_FOR_SCHEMA_SECONDS:-30}"
 REPORT_DIR="${SCHEMATHESIS_REPORT_DIR:-schemathesis-report}"
 CHECKS="${SCHEMATHESIS_CHECKS:-not_a_server_error}"
+SUPPRESS_HC="${SCHEMATHESIS_SUPPRESS_HEALTH_CHECK:-filter_too_much}"
 MAX_EX="${SCHEMATHESIS_MAX_EXAMPLES:-12}"
 REQ_TIMEOUT="${SCHEMATHESIS_REQUEST_TIMEOUT:-180}"
 MODEL_REQ_TIMEOUT="${SCHEMATHESIS_MODAL_MODEL_REQUEST_TIMEOUT:-300}"
@@ -78,10 +83,15 @@ run_st() {
   if [[ "${use_gateway_auth}" == "1" ]] && [[ "${#HEADER_ARGS[@]}" -gt 0 ]]; then
     auth_args=( "${HEADER_ARGS[@]}" )
   fi
+  local suppress_args=()
+  if [[ -n "${SUPPRESS_HC}" ]]; then
+    suppress_args=( --suppress-health-check "${SUPPRESS_HC}" )
+  fi
 
   uv run schemathesis run "${location}" \
     --request-timeout "${timeout_sec}" \
     --wait-for-schema "${WAIT_FOR_SCHEMA_SECONDS}" \
+    "${suppress_args[@]+"${suppress_args[@]}"}" \
     --report junit \
     --report-dir "${REPORT_DIR}" \
     --report-junit-path "${REPORT_DIR}/${junit_name}" \
