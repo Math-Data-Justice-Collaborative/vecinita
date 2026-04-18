@@ -1,4 +1,4 @@
-.PHONY: format format-check lint lint-fix typecheck audit test test-e2e quality quality-fix test-streaming-ci test-contracts test-acceptance-gateway-ask test-schema test-schema-cli
+.PHONY: format format-check lint lint-fix typecheck audit test test-e2e quality quality-fix test-streaming-ci test-contracts test-acceptance-gateway-ask test-schema test-schema-data-management test-schema-cli
 
 format:
 	uv run black src tests scripts
@@ -32,9 +32,24 @@ test-acceptance-gateway-ask:
 
 test-schema:
 	SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
-		tests/integration/test_api_schema_schemathesis.py \
-		tests/integration/test_agent_api_schema_schemathesis.py \
-		-q
+		tests/integration/test_api_schema_schemathesis.py -q \
+		--tracecov-format=html,text \
+		--tracecov-report-html-path=schema-coverage-gateway-pytest.html
+	SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
+		tests/integration/test_agent_api_schema_schemathesis.py -q \
+		--tracecov-format=html,text \
+		--tracecov-report-html-path=schema-coverage-agent-pytest.html
+	SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
+		tests/integration/test_data_management_api_schema_schemathesis.py -q \
+		--tracecov-format=html,text \
+		--tracecov-report-html-path=schema-coverage-data-management-pytest.html
+
+test-schema-data-management:
+	SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
+		tests/integration/test_data_management_api_schema_schemathesis.py -q \
+		--tracecov-format=html,text \
+		--tracecov-report-html-path=schema-coverage-data-management-pytest.html \
+		--tracecov-fail-under=100
 
 test-schema-cli:
 	bash scripts/run_schemathesis_live.sh

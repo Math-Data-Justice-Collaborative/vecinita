@@ -3686,6 +3686,7 @@ class DocumentsPreviewQueryParams(BaseModel):
     )
 
     model_config = ConfigDict(
+        extra="ignore",
         json_schema_extra={
             "examples": [
                 {"source_url": DOCUMENTS_DEFAULT_SOURCE_URL, "limit": 3},
@@ -3694,7 +3695,7 @@ class DocumentsPreviewQueryParams(BaseModel):
                 {"source_url": "https://schools.example/enrollment", "limit": 10},
                 {"source_url": "https://transit.example/schedules", "limit": 2},
             ]
-        }
+        },
     )
 
 
@@ -3709,6 +3710,7 @@ class DocumentsDownloadUrlQueryParams(BaseModel):
     )
 
     model_config = ConfigDict(
+        extra="ignore",
         json_schema_extra={
             "examples": [
                 {"source_url": DOCUMENTS_DEFAULT_SOURCE_URL},
@@ -3717,7 +3719,7 @@ class DocumentsDownloadUrlQueryParams(BaseModel):
                 {"source_url": "https://library.example/community-directory"},
                 {"source_url": "https://clinic.example/patient-info"},
             ]
-        }
+        },
     )
 
 
@@ -4487,6 +4489,7 @@ class GatewayAskQueryParams(BaseModel):
     )
 
     model_config = ConfigDict(
+        extra="ignore",
         json_schema_extra={
             "examples": [
                 {
@@ -4555,7 +4558,7 @@ class GatewayAskQueryParams(BaseModel):
                     "rerank_top_k": 50,
                 },
             ]
-        }
+        },
     )
 
 

@@ -154,7 +154,8 @@ class TestScrapeStatusEndpoint:
 
     def test_get_scrape_status_nonexistent(self, scrape_client):
         """Test getting status of nonexistent job."""
-        response = scrape_client.get("/api/v1/scrape/nonexistent-job-id")
+        missing = "00000000-0000-0000-0000-000000000001"
+        response = scrape_client.get(f"/api/v1/scrape/{missing}")
         assert response.status_code == 404
 
     def test_get_scrape_status_includes_metadata(self, scrape_client):
@@ -257,7 +258,8 @@ class TestScrapeCancelEndpoint:
 
     def test_cancel_nonexistent_job(self, scrape_client):
         """Test cancelling nonexistent job fails."""
-        response = scrape_client.post("/api/v1/scrape/nonexistent-job-id/cancel")
+        missing = "00000000-0000-0000-0000-000000000002"
+        response = scrape_client.post(f"/api/v1/scrape/{missing}/cancel")
         assert response.status_code == 400
 
     def test_cancel_job_sets_cancelled_timestamp(self, scrape_client):

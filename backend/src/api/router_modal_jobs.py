@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import asyncio
 from typing import Annotated, Any
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 from src.services.modal.invoker import (
     get_modal_function_call_result,
@@ -48,6 +49,27 @@ class GatewayModalScrapeSubmitRequest(BaseModel):
     chunking_config: dict[str, Any] | None = None
     metadata: dict[str, Any] | None = None
 
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "url": "https://example.com/community-page",
+                    "user_id": "live-test-user",
+                    "crawl_config": None,
+                    "chunking_config": None,
+                    "metadata": {},
+                },
+                {
+                    "url": "https://www.city.gov/housing/guide",
+                    "user_id": "schemathesis",
+                    "crawl_config": {},
+                    "chunking_config": {},
+                    "metadata": {"source": "openapi-example"},
+                },
+            ]
+        }
+    )
+
 
 class GatewayModalReindexSpawnResponse(BaseModel):
     gateway_job_id: str
@@ -69,10 +91,10 @@ async def modal_scraper_submit(
 
 @router.get("/scraper/{job_id}", summary="Get scrape job status via Modal function")
 async def modal_scraper_get(
-    job_id: str,
+    job_id: UUID,
     _: Annotated[None, Depends(_require_modal_invocation)],
 ) -> dict[str, Any]:
-    env = await asyncio.to_thread(invoke_modal_scrape_job_get, job_id)
+    env = await asyncio.to_thread(invoke_modal_scrape_job_get, str(job_id))
     return _unwrap_scraper_envelope(env)
 
 
@@ -97,10 +119,10 @@ async def modal_scraper_list(
 
 @router.post("/scraper/{job_id}/cancel", summary="Cancel scrape job via Modal function")
 async def modal_scraper_cancel(
-    job_id: str,
+    job_id: UUID,
     _: Annotated[None, Depends(_require_modal_invocation)],
 ) -> dict[str, Any]:
-    env = await asyncio.to_thread(invoke_modal_scrape_job_cancel, job_id)
+    env = await asyncio.to_thread(invoke_modal_scrape_job_cancel, str(job_id))
     return _unwrap_scraper_envelope(env)
 
 
@@ -151,14 +173,15 @@ async def modal_registry_list(
     "/registry/{gateway_job_id}", summary="Get tracked Modal job (optionally refresh result)"
 )
 async def modal_registry_get(
-    gateway_job_id: str,
+    gateway_job_id: UUID,
     _: Annotated[None, Depends(_require_modal_invocation)],
     refresh: bool = Query(
         default=False,
         description="If true, try a short Modal FunctionCall.get to move status to completed/failed.",
     ),
 ) -> dict[str, Any]:
-    rec = await modal_job_registry.get_record(gateway_job_id)
+    gid = str(gateway_job_id)
+    rec = await modal_job_registry.get_record(gid)
     if not rec:
         raise HTTPException(status_code=404, detail="Unknown gateway_job_id")
 
@@ -167,28 +190,29 @@ async def modal_registry_get(
         try:
             result = await asyncio.to_thread(get_modal_function_call_result, call_id, 0.05)
             await modal_job_registry.update_record(
-                gateway_job_id,
+                gid,
                 {"status": "completed", "result": result, "error": None},
             )
-            rec = await modal_job_registry.get_record(gateway_job_id) or rec
+            rec = await modal_job_registry.get_record(gid) or rec
         except TimeoutError:
             pass
         except Exception as exc:  # pragma: no cover - Modal runtime errors
             await modal_job_registry.update_record(
-                gateway_job_id,
+                gid,
                 {"status": "failed", "error": str(exc), "result": None},
             )
-            rec = await modal_job_registry.get_record(gateway_job_id) or rec
+            rec = await modal_job_registry.get_record(gid) or rec
 
     return rec
 
 
 @router.delete("/registry/{gateway_job_id}", summary="Remove gateway-tracked Modal job metadata")
 async def modal_registry_delete(
-    gateway_job_id: str,
+    gateway_job_id: UUID,
     _: Annotated[None, Depends(_require_modal_invocation)],
 ) -> dict[str, Any]:
-    ok = await modal_job_registry.delete_record(gateway_job_id)
+    gid = str(gateway_job_id)
+    ok = await modal_job_registry.delete_record(gid)
     if not ok:
         raise HTTPException(status_code=404, detail="Unknown gateway_job_id")
-    return {"gateway_job_id": gateway_job_id, "deleted": True}
+    return {"gateway_job_id": gid, "deleted": True}

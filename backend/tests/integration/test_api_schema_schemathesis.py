@@ -468,5 +468,6 @@ def test_schemathesis_config_file_is_present():
     assert config_path.is_file()
     text = config_path.read_text(encoding="utf-8")
     assert re.search(r"(?m)^continue-on-failure\s*=\s*true\s*$", text)
+    assert re.search(r'(?m)^hooks\s*=\s*"tests\.schemathesis_hooks"\s*$', text)
     gen = re.search(r"(?m)^max-examples\s*=\s*(\d+)\s*$", text)
     assert gen is not None and int(gen.group(1)) >= 1

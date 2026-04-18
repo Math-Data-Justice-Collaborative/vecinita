@@ -25,6 +25,8 @@ Values you keep in gitignored **`.env`**, **`.env.local`**, **`.env.prod.render`
 
 **Postgres:** Prefer **`DATABASE_URL`** (Render blueprints can inject it with `fromDatabase`). Some components also accept **`DB_URL`** as an optional alias if an existing secret uses that name.
 
+**Modal scraper `DATABASE_URL`:** Functions such as `modal_scrape_job_submit` run on Modal and open Postgres using `DATABASE_URL` from the Modal secret group **`vecinita-scraper-env`**. That DSN must point at an **available** Render Postgres instance (same database your lx27 blueprint uses, e.g. internal URL from the active `vecinita-postgres` resource). If it still references a **suspended** or retired instance, calls fail at runtime with errors like `SSL connection has been closed unexpectedly` — update the Modal secret to the current connection string from the Render dashboard and redeploy the Modal app.
+
 After adding a new key to the app, update the matching example file and your Render env group so names stay aligned.
 
 ---
@@ -111,7 +113,7 @@ Contract tests and live Schemathesis runs use [`backend/schemathesis.toml`](../.
 
 **Offline pytest** (`make test-schemathesis`, gateway + agent) uses mocked upstreams in CI. The **scraper / data-management** HTTP API also has offline Schemathesis in [`services/scraper/tests/integration/test_openapi_schemathesis.py`](../../services/scraper/tests/integration/test_openapi_schemathesis.py) (mocked job control; runs in the scraper package test suite).
 
-**Live CLI** ([`backend/scripts/run_schemathesis_live.sh`](../../backend/scripts/run_schemathesis_live.sh), `make test-schemathesis-cli`) targets **gateway** and **data-management** OpenAPI URLs (`GATEWAY_SCHEMA_URL`, `DATA_MANAGEMENT_SCHEMA_URL`). Gateway runs include `GET /api/v1/ask/stream` by default unless `SCHEMATHESIS_EXCLUDE_ASK_STREAM=1`. It does not run Schemathesis against the agent or standalone Modal ASGI apps.
+**Live CLI** ([`backend/scripts/run_schemathesis_live.sh`](../../backend/scripts/run_schemathesis_live.sh), `make test-schemathesis-cli`) targets **gateway** and **data-management** OpenAPI URLs (`GATEWAY_SCHEMA_URL`, `DATA_MANAGEMENT_SCHEMA_URL`). Set optional **`AGENT_SCHEMA_URL`** (e.g. `https://vecinita-agent-lx27.onrender.com/openapi.json`) for a third CLI pass, or run **`make test-schemathesis-cli-agent`** for live pytest Schemathesis on the agent. Gateway runs include `GET /api/v1/ask/stream` by default unless `SCHEMATHESIS_EXCLUDE_ASK_STREAM=1`.
 
 For **agent** in-process Schemathesis, `POST /model-selection` can return **403** when `LOCK_MODEL_SELECTION` is enabled (policy, not missing credentials); related pytest/live-agent tuning may use `SCHEMATHESIS_EXCLUDE_IGNORED_AUTH` / `SCHEMATHESIS_EXCLUDE_AGENT_MODEL_SELECTION` (see script and `TESTING_DOCUMENTATION.md`).
 

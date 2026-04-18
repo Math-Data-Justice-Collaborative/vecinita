@@ -1,301 +1,175 @@
 <?xml version="1.0" encoding="utf-8"?>
-<testsuites disabled="0" errors="3" failures="8" tests="31" time="238.3069962457521">
-	<testsuite disabled="0" errors="3" failures="8" name="schemathesis" skipped="24" tests="31" time="238.3069962457521" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
-		<testcase name="POST /api/v1/embed" time="6.578708">
-			<failure type="failure" message="1. Test Case ID: UICnSX
-
-- Server error
-
-[500] Internal Server Error:
-
-    `{&quot;error&quot;:&quot;Failed to generate embedding: Modal Function invocation requested, but modal SDK is unavailable&quot;,&quot;timestamp&quot;:&quot;2026-04-17T18:36:48.268767+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text&quot;: &quot;Community clinic walk-in hours and eligibility.&quot;, &quot;model&quot;: &quot;BAAI/bge-small-en-v1.5&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed"/>
-			<failure type="failure" message="1. Test Case ID: UICnSX
-
-- Server error
-
-[500] Internal Server Error:
-
-    `{&quot;error&quot;:&quot;Failed to generate embedding: Modal Function invocation requested, but modal SDK is unavailable&quot;,&quot;timestamp&quot;:&quot;2026-04-17T18:36:48.268767+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text&quot;: &quot;Community clinic walk-in hours and eligibility.&quot;, &quot;model&quot;: &quot;BAAI/bge-small-en-v1.5&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed"/>
-			<failure type="failure" message="1. Test Case ID: UICnSX
-
-- Server error
-
-[500] Internal Server Error:
-
-    `{&quot;error&quot;:&quot;Failed to generate embedding: Modal Function invocation requested, but modal SDK is unavailable&quot;,&quot;timestamp&quot;:&quot;2026-04-17T18:36:48.268767+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text&quot;: &quot;Community clinic walk-in hours and eligibility.&quot;, &quot;model&quot;: &quot;BAAI/bge-small-en-v1.5&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed"/>
-		</testcase>
-		<testcase name="POST /api/v1/embed/batch" time="4.022788">
-			<failure type="failure" message="1. Test Case ID: dt8eBx
-
-- Server error
-
-[500] Internal Server Error:
-
-    `{&quot;error&quot;:&quot;Failed to generate batch embeddings: Modal Function invocation requested, but modal SDK is unavailable&quot;,&quot;timestamp&quot;:&quot;2026-04-17T18:36:48.796880+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;texts&quot;: [&quot;First document to embed&quot;, &quot;Second document to embed&quot;, &quot;Third document to embed&quot;], &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/batch"/>
-			<failure type="failure" message="1. Test Case ID: dt8eBx
-
-- Server error
-
-[500] Internal Server Error:
-
-    `{&quot;error&quot;:&quot;Failed to generate batch embeddings: Modal Function invocation requested, but modal SDK is unavailable&quot;,&quot;timestamp&quot;:&quot;2026-04-17T18:36:48.796880+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;texts&quot;: [&quot;First document to embed&quot;, &quot;Second document to embed&quot;, &quot;Third document to embed&quot;], &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/batch"/>
-			<failure type="failure" message="1. Test Case ID: dt8eBx
-
-- Server error
-
-[500] Internal Server Error:
-
-    `{&quot;error&quot;:&quot;Failed to generate batch embeddings: Modal Function invocation requested, but modal SDK is unavailable&quot;,&quot;timestamp&quot;:&quot;2026-04-17T18:36:48.796880+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;texts&quot;: [&quot;First document to embed&quot;, &quot;Second document to embed&quot;, &quot;Third document to embed&quot;], &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/batch"/>
-		</testcase>
-		<testcase name="POST /api/v1/embed/config" time="3.704293">
+<testsuites disabled="0" errors="0" failures="4" tests="32" time="726.9742081462173">
+	<testsuite disabled="0" errors="0" failures="4" name="schemathesis" skipped="25" tests="32" time="726.9742081462173" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
+		<testcase name="POST /api/v1/embed" time="26.783269"/>
+		<testcase name="POST /api/v1/embed/batch" time="25.772382"/>
+		<testcase name="POST /api/v1/embed/config" time="2.185144">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="POST /api/v1/embed/similarity" time="4.610457">
-			<failure type="failure" message="1. Test Case ID: W35dn3
-
-- Server error
-
-[500] Internal Server Error:
-
-    `{&quot;error&quot;:&quot;Failed to compute similarity: Modal Function invocation requested, but modal SDK is unavailable&quot;,&quot;timestamp&quot;:&quot;2026-04-17T18:36:49.419960+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text1&quot;: &quot;Tenant organizing workshop next Tuesday.&quot;, &quot;text2&quot;: &quot;RSVP for the housing rights clinic.&quot;, &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/similarity"/>
-			<failure type="failure" message="1. Test Case ID: W35dn3
-
-- Server error
-
-[500] Internal Server Error:
-
-    `{&quot;error&quot;:&quot;Failed to compute similarity: Modal Function invocation requested, but modal SDK is unavailable&quot;,&quot;timestamp&quot;:&quot;2026-04-17T18:36:49.419960+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text1&quot;: &quot;Tenant organizing workshop next Tuesday.&quot;, &quot;text2&quot;: &quot;RSVP for the housing rights clinic.&quot;, &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/similarity"/>
-			<failure type="failure" message="1. Test Case ID: W35dn3
-
-- Server error
-
-[500] Internal Server Error:
-
-    `{&quot;error&quot;:&quot;Failed to compute similarity: Modal Function invocation requested, but modal SDK is unavailable&quot;,&quot;timestamp&quot;:&quot;2026-04-17T18:36:49.419960+00:00&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;text1&quot;: &quot;Tenant organizing workshop next Tuesday.&quot;, &quot;text2&quot;: &quot;RSVP for the housing rights clinic.&quot;, &quot;model&quot;: null}' https://vecinita-gateway-lx27.onrender.com/api/v1/embed/similarity"/>
-		</testcase>
-		<testcase name="POST /api/v1/modal-jobs/reindex/spawn" time="3.549075">
-			<failure type="failure" message="1. Test Case ID: nKiGTg
-
-- Server error
-
-[500] Internal Server Error:
-
-    `{&quot;error&quot;:&quot;Internal server error&quot;}`
-
-Reproduce with:
-
-    curl -X POST 'https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/reindex/spawn?clean=true&amp;stream=true'"/>
-			<failure type="failure" message="1. Test Case ID: nKiGTg
-
-- Server error
-
-[500] Internal Server Error:
-
-    `{&quot;error&quot;:&quot;Internal server error&quot;}`
-
-Reproduce with:
-
-    curl -X POST 'https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/reindex/spawn?clean=true&amp;stream=true'"/>
+		<testcase name="POST /api/v1/embed/similarity" time="22.283347"/>
+		<testcase name="POST /api/v1/modal-jobs/reindex/spawn" time="6.377885">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="POST /api/v1/modal-jobs/scraper" time="5.441889">
-			<failure type="failure" message="1. Test Case ID: PhlpNQ
+		<testcase name="POST /api/v1/modal-jobs/scraper" time="30.435125">
+			<failure type="failure" message="1. Test Case ID: RJrrRS
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Internal server error&quot;}`
+    `{&quot;error&quot;:&quot;Failed to create scraping job: connection to server at \&quot;dpg-d6or4g2a214c73f6hl20-a.virginia-postgres.render.com\&quot; (35.174.144.149), port 5432 failed: SSL connection has been closed unexpectedly\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T15:42:17.779831+00:00&quot;}`
 
 Reproduce with:
 
     curl -X POST -H 'Content-Type: application/json' -d '{&quot;chunking_config&quot;: null, &quot;crawl_config&quot;: null, &quot;metadata&quot;: {}, &quot;url&quot;: &quot;https://A.COM&quot;, &quot;user_id&quot;: &quot;0&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
-			<failure type="failure" message="1. Test Case ID: PhlpNQ
+			<failure type="failure" message="1. Test Case ID: RJrrRS
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Internal server error&quot;}`
+    `{&quot;error&quot;:&quot;Failed to create scraping job: connection to server at \&quot;dpg-d6or4g2a214c73f6hl20-a.virginia-postgres.render.com\&quot; (35.174.144.149), port 5432 failed: SSL connection has been closed unexpectedly\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T15:42:17.779831+00:00&quot;}`
 
 Reproduce with:
 
     curl -X POST -H 'Content-Type: application/json' -d '{&quot;chunking_config&quot;: null, &quot;crawl_config&quot;: null, &quot;metadata&quot;: {}, &quot;url&quot;: &quot;https://A.COM&quot;, &quot;user_id&quot;: &quot;0&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="POST /api/v1/scrape" time="4.417042"/>
-		<testcase name="POST /api/v1/scrape/cleanup" time="0.816344">
+		<testcase name="POST /api/v1/scrape" time="25.743495"/>
+		<testcase name="POST /api/v1/scrape/cleanup" time="0.606500">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /" time="0.804581">
+		<testcase name="GET /" time="0.810062">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/ask" time="93.622954">
+		<testcase name="GET /api/v1/ask" time="122.699341">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/ask/config" time="1.073595">
+		<testcase name="GET /api/v1/ask/config" time="0.622205">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/documents/chunk-statistics" time="3.912490">
+		<testcase name="GET /api/v1/ask/stream" time="104.622645">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/documents/download-url" time="2.978476">
+		<testcase name="GET /api/v1/documents/chunk-statistics" time="2.607725">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/documents/overview" time="4.756993">
+		<testcase name="GET /api/v1/documents/download-url" time="2.806384">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/documents/preview" time="3.236793">
+		<testcase name="GET /api/v1/documents/overview" time="4.467035">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/documents/tags" time="4.826029">
+		<testcase name="GET /api/v1/documents/preview" time="2.776033">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/embed/config" time="0.618827">
+		<testcase name="GET /api/v1/documents/tags" time="4.477318">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/modal-jobs/registry" time="1.777427">
+		<testcase name="GET /api/v1/embed/config" time="0.535010">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/modal-jobs/registry/{gateway_job_id}" time="1.813913">
+		<testcase name="GET /api/v1/modal-jobs/registry" time="18.866025">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/modal-jobs/scraper" time="3.244678">
-			<failure type="failure" message="1. Test Case ID: XvzGbx
+		<testcase name="GET /api/v1/modal-jobs/registry/{gateway_job_id}" time="1.944258">
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="GET /api/v1/modal-jobs/scraper" time="25.455367">
+			<failure type="failure" message="1. Test Case ID: MPAIYx
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Internal server error&quot;}`
+    `{&quot;error&quot;:&quot;Failed to list jobs: connection to server at \&quot;dpg-d6or4g2a214c73f6hl20-a.virginia-postgres.render.com\&quot; (35.174.144.149), port 5432 failed: SSL connection has been closed unexpectedly\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T15:44:26.709627+00:00&quot;}`
 
 Reproduce with:
 
     curl -X GET 'https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper?user_id=null&amp;x-schemathesis-unknown-property=42'"/>
-			<failure type="failure" message="1. Test Case ID: XvzGbx
+			<failure type="failure" message="1. Test Case ID: MPAIYx
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Internal server error&quot;}`
+    `{&quot;error&quot;:&quot;Failed to list jobs: connection to server at \&quot;dpg-d6or4g2a214c73f6hl20-a.virginia-postgres.render.com\&quot; (35.174.144.149), port 5432 failed: SSL connection has been closed unexpectedly\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T15:44:26.709627+00:00&quot;}`
 
 Reproduce with:
 
     curl -X GET 'https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper?user_id=null&amp;x-schemathesis-unknown-property=42'"/>
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/scrape/history" time="3.219534">
+		<testcase name="GET /api/v1/scrape/history" time="2.400101">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/scrape/stats" time="0.599805">
+		<testcase name="GET /api/v1/scrape/stats" time="0.540024">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /config" time="0.557209">
+		<testcase name="GET /config" time="0.471668">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /health" time="0.713731">
+		<testcase name="GET /health" time="0.594612">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /integrations/status" time="0.624063">
+		<testcase name="GET /integrations/status" time="0.621948">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="DELETE /api/v1/modal-jobs/registry/{gateway_job_id}" time="2.502408">
-			<error type="error">Failed Health Check
-
-Too many generated examples are filtered out for this operation
-
-Unable to identify the specific parameter. Common causes:
-  - Complex regex patterns that match few strings
-  - Multiple overlapping constraints (pattern + format + enum)
-
-Tip: Simplify constraints or widen acceptable value ranges or bypass this health check using `--suppress-health-check=filter_too_much`.</error>
+		<testcase name="DELETE /api/v1/modal-jobs/registry/{gateway_job_id}" time="18.147098">
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="GET /api/v1/scrape/{job_id}" time="1.703110"/>
-		<testcase name="POST /api/v1/modal-jobs/scraper/{job_id}/cancel" time="3.015212">
-			<failure type="failure" message="1. Test Case ID: elK2Va
+		<testcase name="GET /api/v1/scrape/{job_id}" time="1.103679"/>
+		<testcase name="POST /api/v1/modal-jobs/scraper/{job_id}/cancel" time="39.836298">
+			<failure type="failure" message="1. Test Case ID: AJRIgG
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Internal server error&quot;}`
+    `{&quot;error&quot;:&quot;Failed to get job status: connection to server at \&quot;dpg-d6or4g2a214c73f6hl20-a.virginia-postgres.render.com\&quot; (54.87.193.254), port 5432 failed: SSL connection has been closed unexpectedly\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T15:44:52.566498+00:00&quot;}`
 
 Reproduce with:
 
     curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/0/cancel"/>
-			<error type="error">Failed Health Check
-
-Too many generated examples are filtered out for this operation
-
-Unable to identify the specific parameter. Common causes:
-  - Complex regex patterns that match few strings
-  - Multiple overlapping constraints (pattern + format + enum)
-
-Tip: Simplify constraints or widen acceptable value ranges or bypass this health check using `--suppress-health-check=filter_too_much`.</error>
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="POST /api/v1/scrape/{job_id}/cancel" time="1.338268"/>
-		<testcase name="GET /api/v1/modal-jobs/scraper/{job_id}" time="3.111055">
-			<failure type="failure" message="1. Test Case ID: FtYh3S
+			<failure type="failure" message="1. Test Case ID: AJRIgG
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Internal server error&quot;}`
+    `{&quot;error&quot;:&quot;Failed to get job status: connection to server at \&quot;dpg-d6or4g2a214c73f6hl20-a.virginia-postgres.render.com\&quot; (54.87.193.254), port 5432 failed: SSL connection has been closed unexpectedly\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T15:44:52.566498+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/0/cancel"/>
+			<skipped type="skipped">No examples in schema</skipped>
+		</testcase>
+		<testcase name="POST /api/v1/scrape/{job_id}/cancel" time="1.117559"/>
+		<testcase name="GET /api/v1/modal-jobs/scraper/{job_id}" time="39.098390">
+			<failure type="failure" message="1. Test Case ID: LF6uqF
+
+- Server error
+
+[500] Internal Server Error:
+
+    `{&quot;error&quot;:&quot;Failed to get job status: connection to server at \&quot;dpg-d6or4g2a214c73f6hl20-a.virginia-postgres.render.com\&quot; (18.205.164.157), port 5432 failed: SSL connection has been closed unexpectedly\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T15:45:01.923345+00:00&quot;}`
 
 Reproduce with:
 
     curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/0"/>
-			<error type="error">Failed Health Check
+			<failure type="failure" message="1. Test Case ID: LF6uqF
 
-Too many generated examples are filtered out for this operation
+- Server error
 
-Unable to identify the specific parameter. Common causes:
-  - Complex regex patterns that match few strings
-  - Multiple overlapping constraints (pattern + format + enum)
+[500] Internal Server Error:
 
-Tip: Simplify constraints or widen acceptable value ranges or bypass this health check using `--suppress-health-check=filter_too_much`.</error>
+    `{&quot;error&quot;:&quot;Failed to get job status: connection to server at \&quot;dpg-d6or4g2a214c73f6hl20-a.virginia-postgres.render.com\&quot; (18.205.164.157), port 5432 failed: SSL connection has been closed unexpectedly\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T15:45:01.923345+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/0"/>
 			<skipped type="skipped">No examples in schema</skipped>
 		</testcase>
-		<testcase name="Stateful tests" time="65.115248"/>
+		<testcase name="Stateful tests" time="190.166274"/>
 	</testsuite>
 </testsuites>

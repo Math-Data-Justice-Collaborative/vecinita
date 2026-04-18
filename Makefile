@@ -17,7 +17,7 @@
 	typecheck-scraper \
 	test-integration-gateway-fast test-integration-gateway-full test-integration-gateway \
 	test-all-integration test-cross-integration test-cross-e2e \
-	test-schemathesis test-schemathesis-gateway test-schemathesis-agent test-schemathesis-cli \
+	test-schemathesis test-schemathesis-gateway test-schemathesis-agent test-schemathesis-data-management test-schemathesis-cli test-schemathesis-cli-agent \
 	scraper-run scraper-run-verbose scraper-run-clean scraper-validate-postgres scraper-pull \
 	microservices-up microservices-down microservices-logs test-microservices-contracts test-microservices \
 	render-env-validate render-tests-strict render-tests-render-suite render-workflow-ci \
@@ -109,11 +109,12 @@ help:
 	@echo "  make test-frontend-e2e                   Run frontend Playwright tests"
 	@echo ""
 	@echo "Schemathesis (OpenAPI contract)"
-	@echo "  make test-schemathesis                   Run gateway + agent offline Schemathesis pytest suites"
+	@echo "  make test-schemathesis                   Run gateway + agent + data-management Schemathesis pytest suites (TraceCov per suite)"
 	@echo "  make test-schemathesis-gateway           Gateway ASGI schema tests (mocked upstreams)"
 	@echo "  make test-schemathesis-agent             Agent ASGI schema tests (mocked LLM/embeddings)"
-	@echo "  make test-schemathesis-cli               Live Schemathesis CLI (loads .env): gateway + data-management OpenAPI"
-	@echo "                                           Set SCHEMATHESIS_MODAL_MICROSERVICES=0 to skip Modal runs; override MODAL_*_SCHEMA_URL if needed"
+	@echo "  make test-schemathesis-data-management   Live lx27 data-management API; TraceCov fail-under 100 (needs SCRAPER_API_KEYS)"
+	@echo "  make test-schemathesis-cli               Live Schemathesis CLI (loads .env): gateway + data-management; optional AGENT_SCHEMA_URL"
+	@echo "  make test-schemathesis-cli-agent         Live pytest Schemathesis against deployed agent (RENDER_AGENT_URL from .env)"
 	@echo ""
 	@echo "Scraper and ingestion targets"
 	@echo "  make scraper-run                         Run scraper in additive streaming mode"
@@ -649,22 +650,52 @@ test-cross-e2e:
 	cd tests && uv run pytest -v -m e2e
 
 test-schemathesis-gateway:
-	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_api_schema_schemathesis.py -q
+	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_api_schema_schemathesis.py -q \
+		--tracecov-format=html,text \
+		--tracecov-report-html-path=schema-coverage-gateway-pytest.html
 
 test-schemathesis-agent:
-	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_agent_api_schema_schemathesis.py -q
+	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_agent_api_schema_schemathesis.py -q \
+		--tracecov-format=html,text \
+		--tracecov-report-html-path=schema-coverage-agent-pytest.html
+
+test-schemathesis-data-management:
+	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
+		tests/integration/test_data_management_api_schema_schemathesis.py -q \
+		--tracecov-format=html,text \
+		--tracecov-report-html-path=schema-coverage-data-management-pytest.html \
+		--tracecov-fail-under=100 \
+		--junit-xml=schema-test-results-data-management.xml
 
 test-schemathesis:
+	@# One OpenAPI per TraceCov session (see tests/integration/conftest.py); run suites separately.
 	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
-		tests/integration/test_api_schema_schemathesis.py \
-		tests/integration/test_agent_api_schema_schemathesis.py \
-		-q
+		tests/integration/test_api_schema_schemathesis.py -q \
+		--tracecov-format=html,text \
+		--tracecov-report-html-path=schema-coverage-gateway-pytest.html \
+		--junit-xml=schema-test-results-gateway.xml
+	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
+		tests/integration/test_agent_api_schema_schemathesis.py -q \
+		--tracecov-format=html,text \
+		--tracecov-report-html-path=schema-coverage-agent-pytest.html \
+		--junit-xml=schema-test-results-agent.xml
+	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
+		tests/integration/test_data_management_api_schema_schemathesis.py -q \
+		--tracecov-format=html,text \
+		--tracecov-report-html-path=schema-coverage-data-management-pytest.html \
+		--junit-xml=schema-test-results-data-management.xml
 
 test-schemathesis-cli:
 	@set -a; \
 	if [ -f .env ]; then . ./.env; fi; \
 	set +a; \
 	cd backend && bash scripts/run_schemathesis_live.sh
+
+test-schemathesis-cli-agent:
+	@set -a; \
+	if [ -f .env ]; then . ./.env; fi; \
+	set +a; \
+	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/live/test_live_schemathesis.py -m live -q
 
 test-frontend-e2e:
 	cd frontend && npm run test:e2e

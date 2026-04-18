@@ -1,17 +1,60 @@
-# Gateway live CLI: SCHEMATHESIS_HOOKS=tests.schemathesis_hooks supplies stable query/path/body
-# for document preview, scrape job polling, POST /api/v1/scrape, and GET /api/v1/ask/stream
-# (see scripts/run_schemathesis_live.sh; SCHEMATHESIS_STREAM_QUESTION, SCHEMATHESIS_EXCLUDE_ASK_STREAM).
+# Schemathesis project config (CLI: `schemathesis run` auto-discovers this file from cwd or parents).
 #
-# Thorough / release runs: raise SCHEMATHESIS_MAX_EXAMPLES (or SCHEMATHESIS_GATEWAY_MAX_EXAMPLES for the
-# gateway CLI only), optionally SCHEMATHESIS_THOROUGH=1 for --generation-maximize response_time — see
-# https://schemathesis.readthedocs.io/en/stable/guides/config-optimization/
+# Configuration guide (auth, timeouts, phases, per-operation overrides):
+#   https://schemathesis.readthedocs.io/en/stable/configuration/
+# Full option reference:
+#   https://schemathesis.readthedocs.io/en/stable/reference/configuration/
+#
+# Hooks + TraceCov CLI: https://schemathesis.readthedocs.io/en/stable/guides/coverage/
+# Pytest TraceCov needs ``tracecov_schema`` in tests/integration/conftest.py.
+# Live wrapper: scripts/run_schemathesis_live.sh (passes CLI flags that override these defaults).
+#
+# Resolution order (highest wins): CLI → operation phases → global phases → [[operations]] → file defaults.
+
 continue-on-failure = true
 
+# Default hooks module so `cd backend && schemathesis run …` works without exporting SCHEMATHESIS_HOOKS.
+hooks = "tests.schemathesis_hooks"
+
+# Slow / cold APIs (guide: raise for flaky timeouts). CLI `--request-timeout` overrides when set.
+request-timeout = 180.0
+wait-for-schema = 90.0
+request-retries = 2
+
+# Hypothesis health checks (gateway path params often trip filter_too_much / too_slow without API bugs).
+suppress-health-check = ["filter_too_much", "too_slow"]
+
 [generation]
+# CLI `--max-examples` overrides. Offline pytest uses its own @settings(max_examples=…).
 max-examples = 25
+
+# Prefer response-linked values when the spec has no explicit examples (CLI phases).
+# https://schemathesis.readthedocs.io/en/stable/reference/configuration/#phases-examples-fill-missing
+[phases.examples]
+fill-missing = true
+
+# Faster, deterministic CLI runs unless you opt in to stateful exploration.
+[phases.stateful]
+enabled = false
+
+# POST/create before GET/delete ordering for fuzzing (CLI); default is "auto" — explicit for clarity.
+[phases.fuzzing]
+operation-ordering = "auto"
+
+[reports]
+directory = "schemathesis-report"
+
+[reports.junit]
+enabled = true
 
 [output.sanitization]
 enabled = false
 
-[reports.junit]
-enabled = true
+# Tier A-style defaults: avoid Allow-header / unsupported-method noise (see TESTING_DOCUMENTATION.md).
+[checks]
+unsupported_method.enabled = false
+
+# Reindex hits upstream DNS from many hosts; excluded from live shell script by default — mirror here for raw CLI.
+[[operations]]
+include-name = "POST /api/v1/scrape/reindex"
+enabled = false

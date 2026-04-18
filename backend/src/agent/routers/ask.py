@@ -1,5 +1,6 @@
 """Question-answering endpoints for deterministic and streaming agent responses."""
 
+import asyncio
 from typing import Literal
 
 from fastapi import APIRouter
@@ -239,7 +240,9 @@ async def ask_question(
                     "Running mandatory one-shot db_search for answer-seeking query"
                 )
                 retrieval_started_at = agent_main.time.perf_counter()
-                raw_search = agent_main.db_search_tool.invoke(effective_question)
+                raw_search = await asyncio.to_thread(
+                    agent_main.db_search_tool.invoke, effective_question
+                )
                 retrieval_ms = int((agent_main.time.perf_counter() - retrieval_started_at) * 1000)
                 retrieved_docs = agent_main._parse_db_search_docs(
                     raw_search if isinstance(raw_search, str) else str(raw_search)
@@ -247,7 +250,8 @@ async def ask_question(
                 weak_retrieval = agent_main._is_weak_retrieval(retrieved_docs)
 
                 llm_started_at = agent_main.time.perf_counter()
-                answer = agent_main._build_deterministic_rag_answer(
+                answer = await asyncio.to_thread(
+                    agent_main._build_deterministic_rag_answer,
                     question=effective_question,
                     language=lang,
                     provider=provider,
@@ -545,7 +549,10 @@ async def ask_question_stream(
                         effective_provider, effective_model
                     )
                     quick_prompt = f"Respond briefly and naturally in {'Spanish' if lang_local == 'es' else 'English'}: {question}"
-                    plain = llm_plain.invoke([agent_main.HumanMessage(content=quick_prompt)])
+                    plain = await asyncio.to_thread(
+                        llm_plain.invoke,
+                        [agent_main.HumanMessage(content=quick_prompt)],
+                    )
                     answer = plain.content if hasattr(plain, "content") else str(plain)
             else:
                 tool_msg = agent_main.get_agent_thinking_message("db_search", lang_local)
@@ -583,7 +590,9 @@ async def ask_question_stream(
                     rerank_top_k=rerank_top_k,
                 )
                 try:
-                    raw_search = agent_main.db_search_tool.invoke({"query": question})
+                    raw_search = await asyncio.to_thread(
+                        agent_main.db_search_tool.invoke, {"query": question}
+                    )
                 finally:
                     agent_main.reset_db_search_options(search_token)
 
@@ -607,7 +616,8 @@ async def ask_question_stream(
                     }
                 )
 
-                answer = agent_main._build_deterministic_rag_answer(
+                answer = await asyncio.to_thread(
+                    agent_main._build_deterministic_rag_answer,
                     question=question,
                     language=lang_local,
                     provider=effective_provider,

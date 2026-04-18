@@ -9,6 +9,7 @@ import os
 import tempfile
 from pathlib import Path
 from typing import Annotated
+from uuid import UUID
 
 import httpx
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
@@ -386,7 +387,7 @@ async def trigger_reindex(
 
 @router.get("/{job_id}")
 async def get_scrape_status(
-    job_id: str = PathParam(
+    job_id: UUID = PathParam(
         ...,
         description="Job UUID returned by POST /api/v1/scrape",
         examples=[_DEFAULT_OPENAPI_SCRAPE_JOB_ID],
@@ -404,7 +405,7 @@ async def get_scrape_status(
     Raises:
         HTTPException: If job not found
     """
-    job = await job_manager.get_job(job_id)
+    job = await job_manager.get_job(str(job_id))
     if not job:
         raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
 
@@ -413,7 +414,7 @@ async def get_scrape_status(
 
 @router.post("/{job_id}/cancel")
 async def cancel_scrape_job(
-    job_id: str = PathParam(
+    job_id: UUID = PathParam(
         ...,
         description="Job UUID returned by POST /api/v1/scrape",
         examples=[_DEFAULT_OPENAPI_SCRAPE_JOB_ID],
@@ -431,14 +432,14 @@ async def cancel_scrape_job(
     Raises:
         HTTPException: If job cannot be cancelled
     """
-    cancelled = await job_manager.cancel_job(job_id)
+    cancelled = await job_manager.cancel_job(str(job_id))
     if not cancelled:
         raise HTTPException(
             status_code=400,
             detail="Job cannot be cancelled (not found or already completed)",
         )
 
-    job = await job_manager.get_job(job_id)
+    job = await job_manager.get_job(str(job_id))
     if job is None:
         raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
     return ScrapeStatusResponse(job=job)

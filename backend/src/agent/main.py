@@ -25,6 +25,7 @@ Environment variables (minimum required)
 
 # ruff: noqa: E402, I001
 
+import asyncio
 import json
 import logging
 import os
@@ -3115,7 +3116,7 @@ async def ask_question(
             else:
                 logger.info("Running mandatory one-shot db_search for answer-seeking query")
                 retrieval_started_at = time.perf_counter()
-                raw_search = db_search_tool.invoke(effective_question)
+                raw_search = await asyncio.to_thread(db_search_tool.invoke, effective_question)
                 retrieval_ms = int((time.perf_counter() - retrieval_started_at) * 1000)
                 retrieved_docs = _parse_db_search_docs(
                     raw_search if isinstance(raw_search, str) else str(raw_search)
@@ -3123,7 +3124,8 @@ async def ask_question(
                 weak_retrieval = _is_weak_retrieval(retrieved_docs)
 
                 llm_started_at = time.perf_counter()
-                answer = _build_deterministic_rag_answer(
+                answer = await asyncio.to_thread(
+                    _build_deterministic_rag_answer,
                     question=effective_question,
                     language=lang,
                     provider=provider,
@@ -3430,11 +3432,12 @@ async def ask_question_stream(
                 else:
                     llm_plain = _get_llm_without_tools(effective_provider, effective_model)
                     quick_prompt = f"Respond briefly and naturally in {'Spanish' if lang_local == 'es' else 'English'}: {question}"
-                    plain = llm_plain.invoke(
+                    plain = await asyncio.to_thread(
+                        llm_plain.invoke,
                         [
                             SystemMessage(content=_location_anchor_system_prompt(lang_local)),
                             HumanMessage(content=quick_prompt),
-                        ]
+                        ],
                     )
                     answer = plain.content if hasattr(plain, "content") else str(plain)
             else:
@@ -3473,7 +3476,7 @@ async def ask_question_stream(
                     rerank_top_k=rerank_top_k,
                 )
                 try:
-                    raw_search = db_search_tool.invoke({"query": question})
+                    raw_search = await asyncio.to_thread(db_search_tool.invoke, {"query": question})
                 finally:
                     reset_db_search_options(search_token)
 
@@ -3495,7 +3498,8 @@ async def ask_question_stream(
                     }
                 )
 
-                answer = _build_deterministic_rag_answer(
+                answer = await asyncio.to_thread(
+                    _build_deterministic_rag_answer,
                     question=question,
                     language=lang_local,
                     provider=effective_provider,

@@ -223,6 +223,12 @@ filterwarnings = [
     "ignore::DeprecationWarning:importlib._bootstrap",
 ]
 
+# TraceCov (schema-level API coverage with Schemathesis): https://schemathesis.readthedocs.io/en/stable/guides/coverage/
+# ``tests/integration/conftest.py`` defines ``tracecov_schema`` when only gateway or only agent schema tests are collected.
+# Override output path per run via ``pytest --tracecov-report-html-path=...`` when running multiple suites.
+tracecov_format = "html,text"
+tracecov_report_html_path = "schema-coverage.html"
+
 [tool.black]
 line-length = 100
 target-version = ["py310"]

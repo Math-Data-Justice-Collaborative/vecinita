@@ -167,11 +167,13 @@ This explains why tests needed adjustment when `.env` contains `MODAL_EMBEDDING_
 
 ## OpenAPI Schema Validation (Schemathesis)
 
-**Offline (pytest / CI):** Schemathesis exercises the **gateway** and **agent** OpenAPI descriptions in-process with mocked upstreams (`make test-schemathesis`, `make test-schemathesis-gateway`, `make test-schemathesis-agent`). The **data-management (scraper) API** has an offline suite under [`services/scraper/tests/integration/test_openapi_schemathesis.py`](services/scraper/tests/integration/test_openapi_schemathesis.py) (runs with `make test` in `services/scraper/` / CI `scraper-ci`).
+**Offline (pytest / CI):** Schemathesis exercises the **gateway** and **agent** OpenAPI descriptions in-process with mocked upstreams (`make test-schemathesis-gateway`, `make test-schemathesis-agent`). The **data-management (scraper) API** also has an offline ASGI suite under [`services/scraper/tests/integration/test_openapi_schemathesis.py`](services/scraper/tests/integration/test_openapi_schemathesis.py) (runs with `make test` in `services/scraper/` / CI `scraper-ci`).
 
-**Live CLI (`make test-schemathesis-cli`):** [`backend/scripts/run_schemathesis_live.sh`](backend/scripts/run_schemathesis_live.sh) runs Schemathesis against deployed **gateway** and **data-management** OpenAPI. Configure `GATEWAY_SCHEMA_URL` and/or `DATA_MANAGEMENT_SCHEMA_URL` (defaults point at lx27-style hosts if unset). The script does **not** hit the agent or standalone Modal microservice OpenAPI URLs.
+**Live pytest — data-management public OpenAPI:** [`backend/tests/integration/test_data_management_api_schema_schemathesis.py`](backend/tests/integration/test_data_management_api_schema_schemathesis.py) loads the deployed spec (default lx27) and runs positive-generation Schemathesis with TraceCov. Tests are **skipped** when neither `SCRAPER_SCHEMATHESIS_BEARER` nor `SCRAPER_API_KEYS` is set (CI without secrets passes). For a strict **100%** TraceCov gate on that surface only, use **`make test-schemathesis-data-management`** (or `cd backend && make test-schema-data-management`). Aggregate **`make test-schemathesis`** runs gateway, then agent, then this file as a third pytest (the DM leg does not use `--tracecov-fail-under=100` so a PR can still pass if DM is skipped).
 
-**References:** [Schemathesis SSE](https://schemathesis.readthedocs.io/en/stable/guides/server-sent-events/), [CI/CD](https://schemathesis.readthedocs.io/en/stable/guides/cicd/), [config optimization](https://schemathesis.readthedocs.io/en/stable/guides/config-optimization/) (thorough vs fast PR runs).
+**Live CLI (`make test-schemathesis-cli`):** [`backend/scripts/run_schemathesis_live.sh`](backend/scripts/run_schemathesis_live.sh) runs Schemathesis against deployed **gateway** and **data-management** OpenAPI. Configure `GATEWAY_SCHEMA_URL` and/or `DATA_MANAGEMENT_SCHEMA_URL` (defaults apply when unset). Set optional **`AGENT_SCHEMA_URL`** (e.g. `https://vecinita-agent-lx27.onrender.com/openapi.json`) for a third pass (positive mode, `/ask` routes excluded). For pytest-based live agent fuzzing, use **`make test-schemathesis-cli-agent`** with `RENDER_AGENT_URL` in `.env`.
+
+**References:** [Schema coverage (TraceCov)](https://schemathesis.readthedocs.io/en/stable/guides/coverage/), [Schemathesis SSE](https://schemathesis.readthedocs.io/en/stable/guides/server-sent-events/), [CI/CD](https://schemathesis.readthedocs.io/en/stable/guides/cicd/), [config optimization](https://schemathesis.readthedocs.io/en/stable/guides/config-optimization/) (thorough vs fast PR runs).
 
 **Schema URLs**
 
@@ -200,11 +202,16 @@ Before `make test-schemathesis-cli` (or `backend/scripts/run_schemathesis_live.s
 
 | Goal | Environment variables / notes |
 |------|--------------------------------|
+| Cold start / slow OpenAPI HTTP | `WAIT_FOR_SCHEMA_SECONDS` (default **90**). `SCHEMATHESIS_REQUEST_RETRIES` (default **2**). |
 | Realistic document preview/download | `SCHEMATHESIS_SOURCE_URL` — URL that exists in the target Postgres `documents` data. |
 | Scrape job status / cancel | `SCHEMATHESIS_SCRAPE_JOB_ID` — UUID from a real `POST /api/v1/scrape` job on that environment. |
+| Modal registry GET/DELETE | `SCHEMATHESIS_MODAL_GATEWAY_JOB_ID` — real `gateway_job_id` when available. |
 | Scrape POST body | `SCHEMATHESIS_SCRAPE_URL` — first URL in the scrape request (default is a placeholder). |
 | Gateway auth | `GATEWAY_LIVE_BEARER` when `ENABLE_AUTH=true`. |
-| Scraper-backed routes on gateway | Optional: `SCRAPER_SCHEMATHESIS_BEARER` or first key in `SCRAPER_API_KEYS` when live data exercises scrape paths. |
+| Scraper-backed routes on gateway | Optional: `SCRAPER_SCHEMATHESIS_BEARER` or first key in `SCRAPER_API_KEYS` when live data exercises scrape paths (data-management CLI pass sends the first key automatically). |
+| Live pytest data-management (`test_data_management_api_schema_schemathesis.py`) | **`SCRAPER_SCHEMATHESIS_BEARER`** or **`SCRAPER_API_KEYS`** (Bearer from first comma-separated key). Optional: **`SCHEMATHESIS_DM_SUBMIT_URL`**, **`SCHEMATHESIS_DM_USER_ID`**, **`SCHEMATHESIS_DM_JOB_ID`** for `POST /jobs`, `GET /jobs`, and `/jobs/{id}` paths (see `backend/tests/schemathesis_hooks.py`). GitHub Actions: set repo secrets `SCRAPER_API_KEYS` / `SCRAPER_SCHEMATHESIS_BEARER` so the schema job runs the third pytest and uploads `schema-coverage-data-management-pytest.html`. |
+| Browser-friendly reports | `SCHEMATHESIS_REPORT_FORMATS=junit,allure` then `allure serve backend/schemathesis-report/allure-results`. TraceCov HTML: **`SCHEMATHESIS_REPORT_DIR/schema-coverage-<pass>.html`** (e.g. `gateway`, `data-management`, `agent`) plus optional **`SCHEMATHESIS_COVERAGE_FORMAT`** (`html,text` by default). Opt out of TraceCov in hooks: **`SCHEMATHESIS_COVERAGE=false`**. See [schema coverage](https://schemathesis.readthedocs.io/en/stable/guides/coverage/). |
+| Health check noise on `gateway_job_id` | Default `SCHEMATHESIS_SUPPRESS_HEALTH_CHECK=filter_too_much,too_slow`. |
 | `POST /api/v1/scrape/reindex` | **Excluded by default** (avoids 502 when the gateway’s `REINDEX_SERVICE_URL` is missing or not DNS-resolvable from Render). Set `SCHEMATHESIS_INCLUDE_GATEWAY_REINDEX=1` only after fixing that URL on the target gateway. |
 | `GET /api/v1/ask/stream` | **Included by default** in the live gateway CLI. Set **`SCHEMATHESIS_EXCLUDE_ASK_STREAM=1`** to skip SSE (e.g. very slow agents). Hooks set a short **`SCHEMATHESIS_STREAM_QUESTION`**. |
 
@@ -220,7 +227,7 @@ The gateway proxies to `REINDEX_SERVICE_URL` (and `REINDEX_TRIGGER_TOKEN`). If t
 
 **OpenAPI vs validation on document/scrape routes**
 
-`GET /api/v1/documents/*` and scrape job routes use strict query/path validation; hooks plus the env vars above are the supported way to satisfy live fuzzing. Job IDs are UUIDs in production, but the API still accepts arbitrary path strings and returns **404** when the job is missing (hooks default to a well-formed UUID example).
+`GET /api/v1/documents/*` and scrape job routes use strict query/path validation; hooks plus the env vars above are the supported way to satisfy live fuzzing. Scrape and related path parameters are **UUIDs**; unknown IDs yield **404** (hooks default to a well-formed example UUID).
 
 **Files**
 
@@ -229,30 +236,38 @@ The gateway proxies to `REINDEX_SERVICE_URL` (and `REINDEX_TRIGGER_TOKEN`). If t
 - `backend/tests/integration/test_api_schema_schemathesis.py` — gateway ASGI suite
 - `services/scraper/tests/integration/test_openapi_schemathesis.py` — data-management (scraper) ASGI suite
 - `backend/tests/integration/test_agent_api_schema_schemathesis.py` — agent ASGI suite
+- `backend/tests/integration/test_data_management_api_schema_schemathesis.py` — live public data-management OpenAPI (TraceCov; skipped without scraper auth)
 - `backend/tests/live/test_live_schemathesis.py` — live agent Schemathesis (+ isolated `GET /ask` budget)
 - `backend/tests/live/test_live_gateway_schemathesis.py` — live gateway Schemathesis
 - `backend/tests/live/test_live_openapi_response_matrix.py` — live documented error shapes
-- `backend/scripts/run_schemathesis_live.sh` — live CLI: `GATEWAY_SCHEMA_URL`, `DATA_MANAGEMENT_SCHEMA_URL`; optional `GATEWAY_LIVE_BEARER`
+- `backend/scripts/run_schemathesis_live.sh` — live CLI: `GATEWAY_SCHEMA_URL`, `DATA_MANAGEMENT_SCHEMA_URL`, optional `AGENT_SCHEMA_URL`; optional `GATEWAY_LIVE_BEARER`
 
 **From repo root (preferred)**
 
 ```bash
-make test-schemathesis              # gateway + agent offline pytest suites
+make test-schemathesis                    # gateway, then agent, then data-management (third pytest; DM skipped without keys)
 make test-schemathesis-gateway
 make test-schemathesis-agent
-make test-schemathesis-cli          # live: gateway + data-management OpenAPI; optional GATEWAY_LIVE_BEARER
+make test-schemathesis-data-management    # live DM only; TraceCov --tracecov-fail-under=100 (needs SCRAPER_* auth)
+make test-schemathesis-cli               # live: gateway + data-management; optional AGENT_SCHEMA_URL; optional GATEWAY_LIVE_BEARER
+make test-schemathesis-cli-agent         # live pytest: tests/live/test_live_schemathesis.py (set RENDER_AGENT_URL)
 ```
 
-Live-marked Schemathesis pytest (`tests/live/…`, `-m live`) is not wired to Makefile targets; run with `uv run pytest` from `backend/` when you have deployed URLs and env configured.
+**Modal job routes returning 500 (`SSL connection has been closed unexpectedly`):** the gateway calls Modal scraper functions that use Postgres via `DATABASE_URL` in Modal secrets. That DSN must reference an **active** Render database (not a suspended legacy instance). See [docs/deployment/RENDER_SHARED_ENV_CONTRACT.md](docs/deployment/RENDER_SHARED_ENV_CONTRACT.md).
 
 **From `backend/`**
 
 ```bash
 uv sync --extra ci
-SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
-  tests/integration/test_api_schema_schemathesis.py \
-  tests/integration/test_agent_api_schema_schemathesis.py \
-  -q
+# TraceCov needs one OpenAPI per session (tests/integration/conftest.py); do not pass gateway+agent+DM files in one pytest.
+SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_api_schema_schemathesis.py -q \
+  --tracecov-format=html,text --tracecov-report-html-path=schema-coverage-gateway-pytest.html
+SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_agent_api_schema_schemathesis.py -q \
+  --tracecov-format=html,text --tracecov-report-html-path=schema-coverage-agent-pytest.html
+# export SCRAPER_API_KEYS=...   # or SCRAPER_SCHEMATHESIS_BEARER — required for DM live suite (else skipped)
+SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_data_management_api_schema_schemathesis.py -q \
+  --tracecov-format=html,text --tracecov-report-html-path=schema-coverage-data-management-pytest.html \
+  --tracecov-fail-under=100
 ```
 
 **CLI against live public OpenAPI**

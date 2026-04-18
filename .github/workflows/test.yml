@@ -553,10 +553,21 @@ jobs:
         PYTHONPATH: ${{ github.workspace }}/backend
         EMBEDDING_STRICT_STARTUP: 'false'
         SCHEMATHESIS_HOOKS: tests.schemathesis_hooks
+        SCRAPER_API_KEYS: ${{ secrets.SCRAPER_API_KEYS }}
+        SCRAPER_SCHEMATHESIS_BEARER: ${{ secrets.SCRAPER_SCHEMATHESIS_BEARER }}
       run: |
-        pytest tests/integration/test_api_schema_schemathesis.py \
-          tests/integration/test_agent_api_schema_schemathesis.py \
-          -q --junit-xml=schema-test-results.xml
+        pytest tests/integration/test_api_schema_schemathesis.py -q \
+          --tracecov-format=html,text \
+          --tracecov-report-html-path=schema-coverage-gateway-pytest.html \
+          --junit-xml=schema-test-results-gateway.xml
+        pytest tests/integration/test_agent_api_schema_schemathesis.py -q \
+          --tracecov-format=html,text \
+          --tracecov-report-html-path=schema-coverage-agent-pytest.html \
+          --junit-xml=schema-test-results-agent.xml
+        pytest tests/integration/test_data_management_api_schema_schemathesis.py -q \
+          --tracecov-format=html,text \
+          --tracecov-report-html-path=schema-coverage-data-management-pytest.html \
+          --junit-xml=schema-test-results-data-management.xml
 
     - name: Upload backend schema artifacts
       if: always()
@@ -564,8 +575,14 @@ jobs:
       with:
         name: backend-schema-artifacts
         path: |
-          backend/schema-test-results.xml
+          backend/schema-test-results-gateway.xml
+          backend/schema-test-results-agent.xml
+          backend/schema-test-results-data-management.xml
           backend/schema-coverage.html
+          backend/schema-coverage-gateway-pytest.html
+          backend/schema-coverage-agent-pytest.html
+          backend/schema-coverage-data-management-pytest.html
+          backend/schemathesis-report/schema-coverage-*.html
         if-no-files-found: warn
 
   frontend-unit:
