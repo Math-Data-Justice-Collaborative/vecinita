@@ -11,8 +11,9 @@ For **pytest** schema coverage, TraceCov also needs a session ``tracecov_schema`
 (see ``tests/integration/conftest.py``); ``tracecov.schemathesis.install()`` here is mainly for **``schemathesis run``** CLI.
 
 TraceCov registers CLI report options (e.g. ``SCHEMATHESIS_COVERAGE_REPORT_HTML_PATH``,
-``SCHEMATHESIS_COVERAGE_FORMAT``). Set ``SCHEMATHESIS_COVERAGE`` to ``false`` to skip
-``tracecov.schemathesis.install()`` (matches the guide / Docker opt-out pattern).
+``SCHEMATHESIS_COVERAGE_FORMAT``). Set ``SCHEMATHESIS_COVERAGE_FAIL_UNDER`` (0–100) to fail
+``schemathesis run`` when schema coverage is below that percentage on any TraceCov dimension.
+Set ``SCHEMATHESIS_COVERAGE`` to ``false`` to skip ``tracecov.schemathesis.install()`` (matches the guide / Docker opt-out pattern).
 """
 
 from __future__ import annotations
@@ -22,6 +23,77 @@ import os
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+
+def _patch_tracecov_cli_coverage_threshold() -> None:
+    """Fail ``schemathesis run`` when TraceCov schema coverage is below a minimum.
+
+    TraceCov exposes ``--tracecov-fail-under`` for pytest only; the Schemathesis CLI handler
+    does not read ``schemathesis.toml`` for thresholds (the project file schema forbids extra keys).
+    Use env ``SCHEMATHESIS_COVERAGE_FAIL_UNDER`` (0–100) for the same gate on CLI runs.
+    """
+    raw = os.environ.get("SCHEMATHESIS_COVERAGE_FAIL_UNDER", "").strip()
+    if not raw:
+        return
+    try:
+        minimum = int(raw)
+    except ValueError:
+        logger.warning("Ignoring invalid SCHEMATHESIS_COVERAGE_FAIL_UNDER=%r", raw)
+        return
+    if not 0 <= minimum <= 100:
+        logger.warning("Ignoring SCHEMATHESIS_COVERAGE_FAIL_UNDER out of range [0, 100]: %s", raw)
+        return
+
+    try:
+        from schemathesis.cli.commands.run import executor as _st_executor
+    except Exception:  # pragma: no cover - optional during partial installs
+        return
+
+    handler_cls = next(
+        (
+            h
+            for h in _st_executor.CUSTOM_HANDLERS
+            if getattr(h, "__name__", "") == "TracecovHandler"
+            and getattr(h, "__module__", "") == "tracecov.schemathesis.handler"
+        ),
+        None,
+    )
+    if handler_cls is None:
+        logger.warning(
+            "TracecovHandler not found on Schemathesis CUSTOM_HANDLERS; "
+            "skipping SCHEMATHESIS_COVERAGE_FAIL_UNDER patch"
+        )
+        return
+
+    import click
+    from schemathesis.engine import events as _engine_events
+
+    _orig_handle_event = handler_cls.handle_event
+
+    def _handle_event_with_threshold(self: Any, ctx: Any, event: object) -> None:
+        _orig_handle_event(self, ctx, event)
+        if isinstance(event, _engine_events.EngineFinished) and self.coverage_map is not None:
+            vmin = float(minimum)
+            violations = self.coverage_map.check_thresholds(
+                operations=vmin,
+                parameters=vmin,
+                keywords=vmin,
+                examples=vmin,
+                responses=vmin,
+            )
+            if violations:
+                ctx.exit_code = 1
+                ctx.add_summary_line("")
+                ctx.add_summary_line(
+                    click.style("Schema coverage below required threshold", bold=True, fg="red")
+                )
+                for v in violations:
+                    ctx.add_summary_line(
+                        f"  {v['dimension']}: {v['actual']:.1f}% (required {v['minimum']:.0f}%)"
+                    )
+
+    handler_cls.handle_event = _handle_event_with_threshold  # type: ignore[method-assign]
+
 
 tracecov = None
 _cov = os.environ.get("SCHEMATHESIS_COVERAGE", "").strip().lower()
@@ -34,6 +106,7 @@ if _cov not in ("0", "false", "no"):
         tracecov = None
     if tracecov is not None:
         tracecov.schemathesis.install()
+        _patch_tracecov_cli_coverage_threshold()
 
 from schemathesis import HookContext, hook  # noqa: E402
 

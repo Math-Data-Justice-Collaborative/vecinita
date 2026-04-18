@@ -3,6 +3,10 @@
 All app surfaces should use :func:`get_resolved_database_url` so behavior matches
 across gateway, agent pool (when wired), and ``vecinita_scraper`` (which mirrors
 the same precedence in ``PostgresConfig``).
+
+Modal scraper workers additionally honor ``MODAL_DATABASE_URL`` (see
+``vecinita_scraper.core.config.PostgresConfig``): Render **internal** ``dpg-…-a``
+hostnames do not resolve from Modal; use Render's **external** Postgres URL there.
 """
 
 from __future__ import annotations

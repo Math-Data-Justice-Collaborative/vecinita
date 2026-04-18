@@ -471,3 +471,4 @@ def test_schemathesis_config_file_is_present():
     assert re.search(r'(?m)^hooks\s*=\s*"tests\.schemathesis_hooks"\s*$', text)
     gen = re.search(r"(?m)^max-examples\s*=\s*(\d+)\s*$", text)
     assert gen is not None and int(gen.group(1)) >= 1
+    assert "Schema-coverage gate (TraceCov)" in text

@@ -9,6 +9,13 @@
 # Pytest TraceCov needs ``tracecov_schema`` in tests/integration/conftest.py.
 # Live wrapper: scripts/run_schemathesis_live.sh (passes CLI flags that override these defaults).
 #
+# Schema-coverage gate (TraceCov): Schemathesis validates this file with ``additionalProperties: false``,
+# so TraceCov thresholds cannot live here. Use instead:
+#   - Pytest: ``--tracecov-fail-under=100`` on full schema runs (see backend ``Makefile`` ``test-schema``); avoid a global
+#     ``tracecov_fail_under`` ini so single-test invocations from the same file are not forced to hit 100% alone.
+#   - ``schemathesis run`` CLI: env ``SCHEMATHESIS_COVERAGE_FAIL_UNDER`` (0–100); ``tests/schemathesis_hooks.py`` enforces it
+#     after the TraceCov report. The live script defaults this to 100 when coverage is enabled (override as needed).
+#
 # Resolution order (highest wins): CLI → operation phases → global phases → [[operations]] → file defaults.
 
 continue-on-failure = true

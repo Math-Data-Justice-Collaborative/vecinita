@@ -1,175 +1,208 @@
 <?xml version="1.0" encoding="utf-8"?>
-<testsuites disabled="0" errors="0" failures="4" tests="32" time="726.9742081462173">
-	<testsuite disabled="0" errors="0" failures="4" name="schemathesis" skipped="25" tests="32" time="726.9742081462173" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
-		<testcase name="POST /api/v1/embed" time="26.783269"/>
-		<testcase name="POST /api/v1/embed/batch" time="25.772382"/>
-		<testcase name="POST /api/v1/embed/config" time="2.185144">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="POST /api/v1/embed/similarity" time="22.283347"/>
-		<testcase name="POST /api/v1/modal-jobs/reindex/spawn" time="6.377885">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="POST /api/v1/modal-jobs/scraper" time="30.435125">
-			<failure type="failure" message="1. Test Case ID: RJrrRS
+<testsuites disabled="0" errors="0" failures="4" tests="31" time="817.9193413676694">
+	<testsuite disabled="0" errors="0" failures="4" name="schemathesis" skipped="0" tests="31" time="817.9193413676694" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
+		<testcase name="POST /api/v1/embed" time="37.705226"/>
+		<testcase name="POST /api/v1/embed/batch" time="41.444211"/>
+		<testcase name="POST /api/v1/embed/config" time="2.061476"/>
+		<testcase name="POST /api/v1/embed/similarity" time="15.476576"/>
+		<testcase name="POST /api/v1/modal-jobs/reindex/spawn" time="6.845980"/>
+		<testcase name="POST /api/v1/modal-jobs/scraper" time="34.479791">
+			<failure type="failure" message="1. Test Case ID: HWLRg1
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to create scraping job: connection to server at \&quot;dpg-d6or4g2a214c73f6hl20-a.virginia-postgres.render.com\&quot; (35.174.144.149), port 5432 failed: SSL connection has been closed unexpectedly\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T15:42:17.779831+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to create scraping job: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T19:02:39.039838+00:00&quot;}`
 
 Reproduce with:
 
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;chunking_config&quot;: null, &quot;crawl_config&quot;: null, &quot;metadata&quot;: {}, &quot;url&quot;: &quot;https://A.COM&quot;, &quot;user_id&quot;: &quot;0&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
-			<failure type="failure" message="1. Test Case ID: RJrrRS
+    curl -X POST -H 'Content-Type: application/json' -d '{&quot;chunking_config&quot;: {}, &quot;crawl_config&quot;: {}, &quot;metadata&quot;: {&quot;source&quot;: &quot;openapi-example&quot;}, &quot;url&quot;: &quot;https://www.city.gov/housing/guide&quot;, &quot;user_id&quot;: &quot;schemathesis&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
+			<failure type="failure" message="1. Test Case ID: HWLRg1
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to create scraping job: connection to server at \&quot;dpg-d6or4g2a214c73f6hl20-a.virginia-postgres.render.com\&quot; (35.174.144.149), port 5432 failed: SSL connection has been closed unexpectedly\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T15:42:17.779831+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to create scraping job: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T19:02:39.039838+00:00&quot;}`
 
 Reproduce with:
 
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;chunking_config&quot;: null, &quot;crawl_config&quot;: null, &quot;metadata&quot;: {}, &quot;url&quot;: &quot;https://A.COM&quot;, &quot;user_id&quot;: &quot;0&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="POST /api/v1/scrape" time="25.743495"/>
-		<testcase name="POST /api/v1/scrape/cleanup" time="0.606500">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /" time="0.810062">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /api/v1/ask" time="122.699341">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /api/v1/ask/config" time="0.622205">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /api/v1/ask/stream" time="104.622645">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /api/v1/documents/chunk-statistics" time="2.607725">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /api/v1/documents/download-url" time="2.806384">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /api/v1/documents/overview" time="4.467035">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /api/v1/documents/preview" time="2.776033">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /api/v1/documents/tags" time="4.477318">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /api/v1/embed/config" time="0.535010">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /api/v1/modal-jobs/registry" time="18.866025">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /api/v1/modal-jobs/registry/{gateway_job_id}" time="1.944258">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /api/v1/modal-jobs/scraper" time="25.455367">
-			<failure type="failure" message="1. Test Case ID: MPAIYx
+    curl -X POST -H 'Content-Type: application/json' -d '{&quot;chunking_config&quot;: {}, &quot;crawl_config&quot;: {}, &quot;metadata&quot;: {&quot;source&quot;: &quot;openapi-example&quot;}, &quot;url&quot;: &quot;https://www.city.gov/housing/guide&quot;, &quot;user_id&quot;: &quot;schemathesis&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
+			<failure type="failure" message="1. Test Case ID: HWLRg1
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to list jobs: connection to server at \&quot;dpg-d6or4g2a214c73f6hl20-a.virginia-postgres.render.com\&quot; (35.174.144.149), port 5432 failed: SSL connection has been closed unexpectedly\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T15:44:26.709627+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to create scraping job: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T19:02:39.039838+00:00&quot;}`
 
 Reproduce with:
 
-    curl -X GET 'https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper?user_id=null&amp;x-schemathesis-unknown-property=42'"/>
-			<failure type="failure" message="1. Test Case ID: MPAIYx
+    curl -X POST -H 'Content-Type: application/json' -d '{&quot;chunking_config&quot;: {}, &quot;crawl_config&quot;: {}, &quot;metadata&quot;: {&quot;source&quot;: &quot;openapi-example&quot;}, &quot;url&quot;: &quot;https://www.city.gov/housing/guide&quot;, &quot;user_id&quot;: &quot;schemathesis&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
+		</testcase>
+		<testcase name="POST /api/v1/scrape" time="27.342826"/>
+		<testcase name="POST /api/v1/scrape/cleanup" time="0.477549"/>
+		<testcase name="GET /" time="0.398371"/>
+		<testcase name="GET /api/v1/ask" time="271.774098"/>
+		<testcase name="GET /api/v1/ask/config" time="0.651908"/>
+		<testcase name="GET /api/v1/ask/stream" time="157.581231"/>
+		<testcase name="GET /api/v1/documents/chunk-statistics" time="2.488699"/>
+		<testcase name="GET /api/v1/documents/download-url" time="2.017638"/>
+		<testcase name="GET /api/v1/documents/overview" time="5.276283"/>
+		<testcase name="GET /api/v1/documents/preview" time="2.835720"/>
+		<testcase name="GET /api/v1/documents/tags" time="4.488326"/>
+		<testcase name="GET /api/v1/embed/config" time="0.414290"/>
+		<testcase name="GET /api/v1/modal-jobs/registry" time="80.824168"/>
+		<testcase name="GET /api/v1/modal-jobs/registry/{gateway_job_id}" time="1.943483"/>
+		<testcase name="GET /api/v1/modal-jobs/scraper" time="33.844068">
+			<failure type="failure" message="1. Test Case ID: YWQGrq
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to list jobs: connection to server at \&quot;dpg-d6or4g2a214c73f6hl20-a.virginia-postgres.render.com\&quot; (35.174.144.149), port 5432 failed: SSL connection has been closed unexpectedly\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T15:44:26.709627+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to list jobs: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T19:03:41.644041+00:00&quot;}`
 
 Reproduce with:
 
-    curl -X GET 'https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper?user_id=null&amp;x-schemathesis-unknown-property=42'"/>
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /api/v1/scrape/history" time="2.400101">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /api/v1/scrape/stats" time="0.540024">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /config" time="0.471668">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /health" time="0.594612">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /integrations/status" time="0.621948">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="DELETE /api/v1/modal-jobs/registry/{gateway_job_id}" time="18.147098">
-			<skipped type="skipped">No examples in schema</skipped>
-		</testcase>
-		<testcase name="GET /api/v1/scrape/{job_id}" time="1.103679"/>
-		<testcase name="POST /api/v1/modal-jobs/scraper/{job_id}/cancel" time="39.836298">
-			<failure type="failure" message="1. Test Case ID: AJRIgG
+    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
+			<failure type="failure" message="1. Test Case ID: YWQGrq
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to get job status: connection to server at \&quot;dpg-d6or4g2a214c73f6hl20-a.virginia-postgres.render.com\&quot; (54.87.193.254), port 5432 failed: SSL connection has been closed unexpectedly\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T15:44:52.566498+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to list jobs: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T19:03:41.644041+00:00&quot;}`
 
 Reproduce with:
 
-    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/0/cancel"/>
-			<failure type="failure" message="1. Test Case ID: AJRIgG
+    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
+			<failure type="failure" message="1. Test Case ID: YWQGrq
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to get job status: connection to server at \&quot;dpg-d6or4g2a214c73f6hl20-a.virginia-postgres.render.com\&quot; (54.87.193.254), port 5432 failed: SSL connection has been closed unexpectedly\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T15:44:52.566498+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to list jobs: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T19:03:41.644041+00:00&quot;}`
 
 Reproduce with:
 
-    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/0/cancel"/>
-			<skipped type="skipped">No examples in schema</skipped>
+    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
 		</testcase>
-		<testcase name="POST /api/v1/scrape/{job_id}/cancel" time="1.117559"/>
-		<testcase name="GET /api/v1/modal-jobs/scraper/{job_id}" time="39.098390">
-			<failure type="failure" message="1. Test Case ID: LF6uqF
+		<testcase name="GET /api/v1/scrape/history" time="2.015629"/>
+		<testcase name="GET /api/v1/scrape/stats" time="0.463768"/>
+		<testcase name="GET /config" time="0.450207"/>
+		<testcase name="GET /health" time="0.517897"/>
+		<testcase name="GET /integrations/status" time="0.570607"/>
+		<testcase name="DELETE /api/v1/modal-jobs/registry/{gateway_job_id}" time="1.856164"/>
+		<testcase name="GET /api/v1/scrape/{job_id}" time="1.346549"/>
+		<testcase name="POST /api/v1/modal-jobs/scraper/{job_id}/cancel" time="55.151826">
+			<failure type="failure" message="1. Test Case ID: Cr2OFi
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to get job status: connection to server at \&quot;dpg-d6or4g2a214c73f6hl20-a.virginia-postgres.render.com\&quot; (18.205.164.157), port 5432 failed: SSL connection has been closed unexpectedly\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T15:45:01.923345+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T19:03:54.759076+00:00&quot;}`
 
 Reproduce with:
 
-    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/0"/>
-			<failure type="failure" message="1. Test Case ID: LF6uqF
+    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/3db0a9b9-86f1-461b-af43-ff35e4d2f57b/cancel"/>
+			<failure type="failure" message="1. Test Case ID: Cr2OFi
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to get job status: connection to server at \&quot;dpg-d6or4g2a214c73f6hl20-a.virginia-postgres.render.com\&quot; (18.205.164.157), port 5432 failed: SSL connection has been closed unexpectedly\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T15:45:01.923345+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T19:03:54.759076+00:00&quot;}`
 
 Reproduce with:
 
-    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/0"/>
-			<skipped type="skipped">No examples in schema</skipped>
+    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/3db0a9b9-86f1-461b-af43-ff35e4d2f57b/cancel"/>
+			<failure type="failure" message="1. Test Case ID: Cr2OFi
+
+- Server error
+
+[500] Internal Server Error:
+
+    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T19:03:54.759076+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/3db0a9b9-86f1-461b-af43-ff35e4d2f57b/cancel"/>
 		</testcase>
-		<testcase name="Stateful tests" time="190.166274"/>
+		<testcase name="POST /api/v1/scrape/{job_id}/cancel" time="1.138739"/>
+		<testcase name="GET /api/v1/modal-jobs/scraper/{job_id}" time="24.036038">
+			<failure type="failure" message="1. Test Case ID: pye48Z
+
+- Server error
+
+[500] Internal Server Error:
+
+    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T19:03:59.084507+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/3db0a9b9-86f1-461b-af43-ff35e4d2f57b"/>
+			<failure type="failure" message="1. Test Case ID: pye48Z
+
+- Server error
+
+[500] Internal Server Error:
+
+    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T19:03:59.084507+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/3db0a9b9-86f1-461b-af43-ff35e4d2f57b
+
+2. Test Case ID: 9ZMx3b
+
+- Server error
+
+[502] Bad Gateway:
+
+    `&lt;html&gt;
+    &lt;head&gt;&lt;title&gt;502 Bad Gateway&lt;/title&gt;&lt;/head&gt;
+    &lt;body&gt;
+    &lt;center&gt;&lt;h1&gt;502 Bad Gateway&lt;/h1&gt;&lt;/center&gt;
+    &lt;hr&gt;&lt;center&gt;cloudflare&lt;/center&gt;
+    &lt;/body&gt;
+    &lt;/html&gt;`
+
+Reproduce with:
+
+    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/e3e70682-c209-1cac-a29f-6fbed82c07cd"/>
+			<failure type="failure" message="1. Test Case ID: pye48Z
+
+- Server error
+
+[500] Internal Server Error:
+
+    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T19:03:59.084507+00:00&quot;}`
+
+Reproduce with:
+
+    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/3db0a9b9-86f1-461b-af43-ff35e4d2f57b
+
+2. Test Case ID: 9ZMx3b
+
+- Server error
+
+[502] Bad Gateway:
+
+    `&lt;html&gt;
+    &lt;head&gt;&lt;title&gt;502 Bad Gateway&lt;/title&gt;&lt;/head&gt;
+    &lt;body&gt;
+    &lt;center&gt;&lt;h1&gt;502 Bad Gateway&lt;/h1&gt;&lt;/center&gt;
+    &lt;hr&gt;&lt;center&gt;cloudflare&lt;/center&gt;
+    &lt;/body&gt;
+    &lt;/html&gt;`
+
+Reproduce with:
+
+    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/e3e70682-c209-1cac-a29f-6fbed82c07cd"/>
+		</testcase>
 	</testsuite>
 </testsuites>

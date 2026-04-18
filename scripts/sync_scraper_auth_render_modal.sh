@@ -20,7 +20,9 @@
 #   - render-api uses PATCH (see scripts/env_sync.py); only keys present in the dotenv file
 #     and selected by --key are sent.
 #   - Modal: --force replaces the entire secret. Use a dotenv that contains every key the
-#     scraper Modal image needs (DATABASE_URL, SCRAPER_API_KEYS, upstream URLs, CORS, …).
+#     scraper Modal image needs (MODAL_DATABASE_URL with Render *external* Postgres URL,
+#     SCRAPER_API_KEYS, upstream URLs, CORS, …). Internal dpg-*-a DATABASE_URL from Render
+#     blueprints will not resolve from Modal — see docs/deployment/RENDER_SHARED_ENV_CONTRACT.md.
 
 set -euo pipefail
 

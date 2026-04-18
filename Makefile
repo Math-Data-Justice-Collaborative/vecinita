@@ -652,12 +652,14 @@ test-cross-e2e:
 test-schemathesis-gateway:
 	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_api_schema_schemathesis.py -q \
 		--tracecov-format=html,text \
-		--tracecov-report-html-path=schema-coverage-gateway-pytest.html
+		--tracecov-report-html-path=schema-coverage-gateway-pytest.html \
+		--tracecov-fail-under=100
 
 test-schemathesis-agent:
 	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_agent_api_schema_schemathesis.py -q \
 		--tracecov-format=html,text \
-		--tracecov-report-html-path=schema-coverage-agent-pytest.html
+		--tracecov-report-html-path=schema-coverage-agent-pytest.html \
+		--tracecov-fail-under=100
 
 test-schemathesis-data-management:
 	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
@@ -673,16 +675,19 @@ test-schemathesis:
 		tests/integration/test_api_schema_schemathesis.py -q \
 		--tracecov-format=html,text \
 		--tracecov-report-html-path=schema-coverage-gateway-pytest.html \
+		--tracecov-fail-under=100 \
 		--junit-xml=schema-test-results-gateway.xml
 	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
 		tests/integration/test_agent_api_schema_schemathesis.py -q \
 		--tracecov-format=html,text \
 		--tracecov-report-html-path=schema-coverage-agent-pytest.html \
+		--tracecov-fail-under=100 \
 		--junit-xml=schema-test-results-agent.xml
 	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
 		tests/integration/test_data_management_api_schema_schemathesis.py -q \
 		--tracecov-format=html,text \
 		--tracecov-report-html-path=schema-coverage-data-management-pytest.html \
+		--tracecov-fail-under=100 \
 		--junit-xml=schema-test-results-data-management.xml
 
 test-schemathesis-cli:

@@ -54,6 +54,8 @@
 #   SCHEMATHESIS_COVERAGE_REPORT_MARKDOWN_PATH — optional Markdown report path (same per-slug default if FORMAT includes markdown).
 #   SCHEMATHESIS_COVERAGE_MARKDOWN_REPORT_URL — URL linked from the Markdown footer (defaults to file://… HTML when markdown is emitted).
 #   SCHEMATHESIS_COVERAGE_NO_REPORT — set to 1/true to collect coverage but skip writing report files (TraceCov option).
+#   SCHEMATHESIS_COVERAGE_FAIL_UNDER — TraceCov minimum % per dimension for ``schemathesis run`` (hooks enforce exit 1 if below).
+#       When coverage is enabled and this var is unset, this script defaults it to 100. Set to 0 to disable the gate only.
 #   SCHEMATHESIS_HOOKS_VERBOSE — set to 1/true to log schema load (before_load_schema / after_load_schema) and failed checks
 #       (after_validate); see https://schemathesis.readthedocs.io/en/stable/reference/hooks/
 #
@@ -189,8 +191,12 @@ run_st() {
   [[ -n "${SCHEMATHESIS_COVERAGE_FORMAT+x}" ]] && had_fmt=1
   [[ -n "${SCHEMATHESIS_COVERAGE_REPORT_MARKDOWN_PATH+x}" ]] && had_md=1
   [[ -n "${SCHEMATHESIS_COVERAGE_MARKDOWN_REPORT_URL+x}" ]] && had_md_url=1
-  local we_set_fmt=0 we_set_html=0 we_set_md=0 we_set_md_url=0
+  local we_set_fmt=0 we_set_html=0 we_set_md=0 we_set_md_url=0 we_set_cov_fail_under=0
   if [[ "${cov_on}" -eq 1 ]] && [[ "${no_rep}" -eq 0 ]]; then
+    if [[ -z "${SCHEMATHESIS_COVERAGE_FAIL_UNDER+x}" ]]; then
+      export SCHEMATHESIS_COVERAGE_FAIL_UNDER="100"
+      we_set_cov_fail_under=1
+    fi
     if [[ "${had_fmt}" -eq 0 ]]; then
       export SCHEMATHESIS_COVERAGE_FORMAT="${SCHEMATHESIS_COVERAGE_FORMAT_DEFAULT:-html,text}"
       we_set_fmt=1
@@ -260,6 +266,9 @@ run_st() {
   fi
   if [[ "${we_set_md_url}" -eq 1 ]]; then
     unset SCHEMATHESIS_COVERAGE_MARKDOWN_REPORT_URL || true
+  fi
+  if [[ "${we_set_cov_fail_under}" -eq 1 ]]; then
+    unset SCHEMATHESIS_COVERAGE_FAIL_UNDER || true
   fi
 }
 
