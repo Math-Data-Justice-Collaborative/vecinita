@@ -1,172 +1,172 @@
 <?xml version="1.0" encoding="utf-8"?>
-<testsuites disabled="0" errors="0" failures="4" tests="31" time="810.7762486384017">
-	<testsuite disabled="0" errors="0" failures="4" name="schemathesis" skipped="0" tests="31" time="810.7762486384017" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
-		<testcase name="POST /api/v1/embed" time="33.375563"/>
-		<testcase name="POST /api/v1/embed/batch" time="44.831637"/>
-		<testcase name="POST /api/v1/embed/config" time="2.339995"/>
-		<testcase name="POST /api/v1/embed/similarity" time="14.318032"/>
-		<testcase name="POST /api/v1/modal-jobs/reindex/spawn" time="7.225783"/>
-		<testcase name="POST /api/v1/modal-jobs/scraper" time="34.483626">
-			<failure type="failure" message="1. Test Case ID: C4tCfE
+<testsuites disabled="0" errors="0" failures="4" tests="31" time="767.8837203218136">
+	<testsuite disabled="0" errors="0" failures="4" name="schemathesis" skipped="0" tests="31" time="767.8837203218136" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
+		<testcase name="POST /api/v1/embed" time="23.999014"/>
+		<testcase name="POST /api/v1/embed/batch" time="31.347248"/>
+		<testcase name="POST /api/v1/embed/config" time="2.643241"/>
+		<testcase name="POST /api/v1/embed/similarity" time="15.676745"/>
+		<testcase name="POST /api/v1/modal-jobs/reindex/spawn" time="13.940161"/>
+		<testcase name="POST /api/v1/modal-jobs/scraper" time="27.221504">
+			<failure type="failure" message="1. Test Case ID: 7bEGn3
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to create scraping job: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T21:32:07.767489+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to create scraping job: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-19T02:44:30.120207+00:00&quot;}`
 
 Reproduce with:
 
     curl -X POST -H 'Content-Type: application/json' -d '{&quot;chunking_config&quot;: {}, &quot;crawl_config&quot;: {}, &quot;metadata&quot;: {&quot;source&quot;: &quot;openapi-example&quot;}, &quot;url&quot;: &quot;https://www.city.gov/housing/guide&quot;, &quot;user_id&quot;: &quot;schemathesis&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
-			<failure type="failure" message="1. Test Case ID: C4tCfE
+			<failure type="failure" message="1. Test Case ID: 7bEGn3
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to create scraping job: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T21:32:07.767489+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to create scraping job: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-19T02:44:30.120207+00:00&quot;}`
 
 Reproduce with:
 
     curl -X POST -H 'Content-Type: application/json' -d '{&quot;chunking_config&quot;: {}, &quot;crawl_config&quot;: {}, &quot;metadata&quot;: {&quot;source&quot;: &quot;openapi-example&quot;}, &quot;url&quot;: &quot;https://www.city.gov/housing/guide&quot;, &quot;user_id&quot;: &quot;schemathesis&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
-			<failure type="failure" message="1. Test Case ID: C4tCfE
+			<failure type="failure" message="1. Test Case ID: 7bEGn3
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to create scraping job: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T21:32:07.767489+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to create scraping job: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-19T02:44:30.120207+00:00&quot;}`
 
 Reproduce with:
 
     curl -X POST -H 'Content-Type: application/json' -d '{&quot;chunking_config&quot;: {}, &quot;crawl_config&quot;: {}, &quot;metadata&quot;: {&quot;source&quot;: &quot;openapi-example&quot;}, &quot;url&quot;: &quot;https://www.city.gov/housing/guide&quot;, &quot;user_id&quot;: &quot;schemathesis&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
 		</testcase>
-		<testcase name="POST /api/v1/scrape" time="21.854474"/>
-		<testcase name="POST /api/v1/scrape/cleanup" time="0.447044"/>
-		<testcase name="GET /" time="0.395375"/>
-		<testcase name="GET /api/v1/ask" time="263.748517"/>
-		<testcase name="GET /api/v1/ask/config" time="1.062647"/>
-		<testcase name="GET /api/v1/ask/stream" time="197.023639"/>
-		<testcase name="GET /api/v1/documents/chunk-statistics" time="2.676399"/>
-		<testcase name="GET /api/v1/documents/download-url" time="2.532837"/>
-		<testcase name="GET /api/v1/documents/overview" time="5.465603"/>
-		<testcase name="GET /api/v1/documents/preview" time="3.072747"/>
-		<testcase name="GET /api/v1/documents/tags" time="4.719948"/>
-		<testcase name="GET /api/v1/embed/config" time="0.369164"/>
-		<testcase name="GET /api/v1/modal-jobs/registry" time="30.645842"/>
-		<testcase name="GET /api/v1/modal-jobs/registry/{gateway_job_id}" time="1.898366"/>
-		<testcase name="GET /api/v1/modal-jobs/scraper" time="38.440865">
-			<failure type="failure" message="1. Test Case ID: pjIcN7
+		<testcase name="POST /api/v1/scrape" time="19.611940"/>
+		<testcase name="POST /api/v1/scrape/cleanup" time="0.705011"/>
+		<testcase name="GET /" time="0.645150"/>
+		<testcase name="GET /api/v1/ask" time="263.423999"/>
+		<testcase name="GET /api/v1/ask/config" time="0.780148"/>
+		<testcase name="GET /api/v1/ask/stream" time="196.389348"/>
+		<testcase name="GET /api/v1/documents/chunk-statistics" time="3.071243"/>
+		<testcase name="GET /api/v1/documents/download-url" time="2.505062"/>
+		<testcase name="GET /api/v1/documents/overview" time="4.713887"/>
+		<testcase name="GET /api/v1/documents/preview" time="3.094516"/>
+		<testcase name="GET /api/v1/documents/tags" time="4.669483"/>
+		<testcase name="GET /api/v1/embed/config" time="0.569250"/>
+		<testcase name="GET /api/v1/modal-jobs/registry" time="60.829081"/>
+		<testcase name="GET /api/v1/modal-jobs/registry/{gateway_job_id}" time="2.159720"/>
+		<testcase name="GET /api/v1/modal-jobs/scraper" time="31.776449">
+			<failure type="failure" message="1. Test Case ID: Ky0OmQ
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to list jobs: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T21:33:23.709237+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to list jobs: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-19T02:45:34.864218+00:00&quot;}`
 
 Reproduce with:
 
     curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
-			<failure type="failure" message="1. Test Case ID: pjIcN7
+			<failure type="failure" message="1. Test Case ID: Ky0OmQ
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to list jobs: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T21:33:23.709237+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to list jobs: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-19T02:45:34.864218+00:00&quot;}`
 
 Reproduce with:
 
     curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
-			<failure type="failure" message="1. Test Case ID: pjIcN7
+			<failure type="failure" message="1. Test Case ID: Ky0OmQ
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to list jobs: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T21:33:23.709237+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to list jobs: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-19T02:45:34.864218+00:00&quot;}`
 
 Reproduce with:
 
     curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
 		</testcase>
-		<testcase name="GET /api/v1/scrape/history" time="2.371436"/>
-		<testcase name="GET /api/v1/scrape/stats" time="0.458065"/>
-		<testcase name="GET /config" time="1.147072"/>
-		<testcase name="GET /health" time="0.542112"/>
-		<testcase name="GET /integrations/status" time="0.543114"/>
-		<testcase name="DELETE /api/v1/modal-jobs/registry/{gateway_job_id}" time="1.579175"/>
-		<testcase name="GET /api/v1/scrape/{job_id}" time="1.402018"/>
-		<testcase name="POST /api/v1/modal-jobs/scraper/{job_id}/cancel" time="32.574616">
-			<failure type="failure" message="1. Test Case ID: Daym7n
+		<testcase name="GET /api/v1/scrape/history" time="2.594328"/>
+		<testcase name="GET /api/v1/scrape/stats" time="0.625187"/>
+		<testcase name="GET /config" time="0.613436"/>
+		<testcase name="GET /health" time="0.690771"/>
+		<testcase name="GET /integrations/status" time="0.893063"/>
+		<testcase name="DELETE /api/v1/modal-jobs/registry/{gateway_job_id}" time="1.582092"/>
+		<testcase name="GET /api/v1/scrape/{job_id}" time="1.343050"/>
+		<testcase name="POST /api/v1/modal-jobs/scraper/{job_id}/cancel" time="27.097583">
+			<failure type="failure" message="1. Test Case ID: 8rUhDs
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T21:33:36.349676+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-19T02:45:42.914730+00:00&quot;}`
 
 Reproduce with:
 
-    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/7def2849-d0d2-436c-8d44-8009502d8ca2/cancel"/>
-			<failure type="failure" message="1. Test Case ID: Daym7n
+    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/364016ce-a292-410f-b453-70343cd71202/cancel"/>
+			<failure type="failure" message="1. Test Case ID: 8rUhDs
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T21:33:36.349676+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-19T02:45:42.914730+00:00&quot;}`
 
 Reproduce with:
 
-    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/7def2849-d0d2-436c-8d44-8009502d8ca2/cancel"/>
-			<failure type="failure" message="1. Test Case ID: Daym7n
+    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/364016ce-a292-410f-b453-70343cd71202/cancel"/>
+			<failure type="failure" message="1. Test Case ID: 8rUhDs
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T21:33:36.349676+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-19T02:45:42.914730+00:00&quot;}`
 
 Reproduce with:
 
-    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/7def2849-d0d2-436c-8d44-8009502d8ca2/cancel"/>
+    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/364016ce-a292-410f-b453-70343cd71202/cancel"/>
 		</testcase>
-		<testcase name="POST /api/v1/scrape/{job_id}/cancel" time="1.387366"/>
-		<testcase name="GET /api/v1/modal-jobs/scraper/{job_id}" time="57.843174">
-			<failure type="failure" message="1. Test Case ID: LZckOO
+		<testcase name="POST /api/v1/scrape/{job_id}/cancel" time="1.099997"/>
+		<testcase name="GET /api/v1/modal-jobs/scraper/{job_id}" time="21.572013">
+			<failure type="failure" message="1. Test Case ID: zcqjwJ
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T21:33:41.629415+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-19T02:45:48.519140+00:00&quot;}`
 
 Reproduce with:
 
-    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/7def2849-d0d2-436c-8d44-8009502d8ca2"/>
-			<failure type="failure" message="1. Test Case ID: LZckOO
+    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/364016ce-a292-410f-b453-70343cd71202"/>
+			<failure type="failure" message="1. Test Case ID: zcqjwJ
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T21:33:41.629415+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-19T02:45:48.519140+00:00&quot;}`
 
 Reproduce with:
 
-    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/7def2849-d0d2-436c-8d44-8009502d8ca2"/>
-			<failure type="failure" message="1. Test Case ID: LZckOO
+    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/364016ce-a292-410f-b453-70343cd71202"/>
+			<failure type="failure" message="1. Test Case ID: zcqjwJ
 
 - Server error
 
 [500] Internal Server Error:
 
-    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-18T21:33:41.629415+00:00&quot;}`
+    `{&quot;error&quot;:&quot;Failed to get job status: could not translate host name \&quot;dpg-d7chlqt7vvec73b700ng-a\&quot; to address: Name or service not known\n&quot;,&quot;timestamp&quot;:&quot;2026-04-19T02:45:48.519140+00:00&quot;}`
 
 Reproduce with:
 
-    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/7def2849-d0d2-436c-8d44-8009502d8ca2"/>
+    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/364016ce-a292-410f-b453-70343cd71202"/>
 		</testcase>
 	</testsuite>
 </testsuites>
