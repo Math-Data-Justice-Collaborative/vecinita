@@ -201,6 +201,28 @@ def test_map_query_accepts_none_for_documents_paths(monkeypatch):
     assert q["limit"] == 3
 
 
+def test_map_query_documents_per_path_source_url_overrides(monkeypatch):
+    class Prev:
+        path = "/api/v1/documents/preview"
+        method = "get"
+
+    class Dl:
+        path = "/api/v1/documents/download-url"
+        method = "get"
+
+    class Ctx:
+        def __init__(self, op):
+            self.operation = op
+
+    monkeypatch.setenv("SCHEMATHESIS_SOURCE_URL", "https://default.example/a")
+    monkeypatch.setenv("SCHEMATHESIS_DOCUMENTS_PREVIEW_SOURCE_URL", "https://preview.example/p")
+    monkeypatch.setenv("SCHEMATHESIS_DOCUMENTS_DOWNLOAD_SOURCE_URL", "https://download.example/d")
+    qp = sh.map_query(Ctx(Prev()), None)
+    assert qp["source_url"] == "https://preview.example/p"
+    qd = sh.map_query(Ctx(Dl()), None)
+    assert qd["source_url"] == "https://download.example/d"
+
+
 def test_before_after_load_schema_verbose_logs(monkeypatch, caplog):
     monkeypatch.setenv("SCHEMATHESIS_HOOKS_VERBOSE", "1")
     caplog.set_level(logging.INFO)

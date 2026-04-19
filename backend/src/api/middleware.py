@@ -16,6 +16,7 @@ Security Patterns:
 import logging
 import os
 import time
+import uuid
 from collections.abc import Awaitable, Callable
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -557,3 +558,20 @@ class ThreadIsolationMiddleware(BaseHTTPMiddleware):
     def count_active_sessions(self) -> int:
         """Count total active sessions (monitoring)."""
         return len(self._session_threads)
+
+
+CORRELATION_ID_HEADER = "X-Correlation-ID"
+
+
+class CorrelationIdMiddleware(BaseHTTPMiddleware):
+    """Assign or propagate ``X-Correlation-ID`` for gateway + Modal job tracing (**FR-006**)."""
+
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        incoming = request.headers.get(CORRELATION_ID_HEADER)
+        cid = incoming.strip() if incoming and incoming.strip() else str(uuid.uuid4())
+        request.state.correlation_id = cid
+        response = await call_next(request)
+        response.headers[CORRELATION_ID_HEADER] = cid
+        return response

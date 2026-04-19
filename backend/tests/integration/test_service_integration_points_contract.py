@@ -10,8 +10,10 @@ import importlib
 import json
 import sys
 from pathlib import Path
+from typing import Any
 from unittest.mock import Mock, patch
 
+import httpx
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -74,7 +76,7 @@ def test_ip03_gateway_to_agent_forwards_query_params(monkeypatch) -> None:
         def __init__(self) -> None:
             self.last_url: str | None = None
             self.last_params: dict | None = None
-            self.last_timeout: float | None = None
+            self.last_timeout: Any = None
 
         async def get(self, url: str, params=None, timeout=None):
             self.last_url = url
@@ -117,7 +119,10 @@ def test_ip03_gateway_to_agent_forwards_query_params(monkeypatch) -> None:
     assert fake_client.last_params["question"] == "Where can I find housing help?"
     assert fake_client.last_params["tags"] == "housing,benefits"
     assert fake_client.last_params["tag_match_mode"] == "all"
-    assert fake_client.last_timeout == pytest.approx(42.0)
+    t = fake_client.last_timeout
+    assert isinstance(t, httpx.Timeout)
+    assert t.read == pytest.approx(42.0)
+    assert t.write == pytest.approx(42.0)
 
 
 def test_ip04_gateway_to_embedding_service_headers_and_endpoint(monkeypatch) -> None:

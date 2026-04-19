@@ -108,6 +108,14 @@ def _get_agent_stream_timeout() -> float:
     return _read_positive_timeout("AGENT_STREAM_TIMEOUT", 120.0)
 
 
+def _agent_httpx_timeout(*, for_stream: bool) -> httpx.Timeout:
+    """Bounded connect/pool timeouts plus env-driven read timeout (agent can be slow)."""
+    read_s = _get_agent_stream_timeout() if for_stream else _get_agent_timeout()
+    connect_s = _read_positive_timeout("AGENT_HTTP_CONNECT_TIMEOUT", 10.0)
+    pool_s = _read_positive_timeout("AGENT_HTTP_POOL_TIMEOUT", 10.0)
+    return httpx.Timeout(connect=connect_s, read=read_s, write=read_s, pool=pool_s)
+
+
 def _get_agent_client() -> httpx.AsyncClient | None:
     """Reuse one HTTP client to avoid per-request connection setup overhead."""
     global _AGENT_CLIENT
@@ -298,7 +306,7 @@ async def ask_question(
         response = await client.get(
             f"{_agent_service_url()}/ask",
             params=upstream,
-            timeout=_get_agent_timeout(),
+            timeout=_agent_httpx_timeout(for_stream=False),
         )
         response.raise_for_status()
         data = response.json()
@@ -399,7 +407,7 @@ async def sse_stream_forward_generator(
             "GET",
             f"{_agent_service_url()}/ask-stream",
             params=params,
-            timeout=_get_agent_stream_timeout(),
+            timeout=_agent_httpx_timeout(for_stream=True),
         ) as response:
             response.raise_for_status()
 

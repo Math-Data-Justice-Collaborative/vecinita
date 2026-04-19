@@ -6,5 +6,5 @@ alwaysApply: true
 # CI gate before completion
 
 - Before you tell the user a task is **done** or that the change is **ready**, run **`make ci`** from the repository root and ensure it exits successfully.
-- The **stop** hook runs `make ci` when the agent session completes. If it fails, the hook runs **`make format`** and **`make lint-fix`**, then **`make ci`** again. Only if CI still fails will you get a follow-up with the combined log — fix what remains and run `make ci` until it passes.
+- The **stop** hook runs `make ci` when the agent session completes **unless** the only working-tree changes versus `HEAD` are prose-style paths (extensions such as `.md`, `.txt`, `.rst`, …). If it runs and fails, the hook runs **`make format`** and **`make lint-fix`**, then **`make ci`** again. Only if CI still fails will you get a follow-up with the combined log — fix what remains and run `make ci` until it passes.
 - To bypass the hook in exceptional cases, the environment variable `SKIP_CI_HOOK=1` can be set (use sparingly).

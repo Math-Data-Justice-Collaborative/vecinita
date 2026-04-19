@@ -323,8 +323,8 @@ services:
         sync: false
 
   # API image is vecinita-scraper. Build from the monorepo's top-level
-  # services/scraper submodule so Render does not require nested submodule init
-  # under services/data-management-api (see Render / nested submodules).
+  # services/scraper submodule — no nested checkouts under services/data-management-api
+  # (backend service submodules removed per 003-consolidate-scraper-dm).
   - type: web
     name: vecinita-data-management-api-v1
     runtime: docker

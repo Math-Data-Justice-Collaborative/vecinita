@@ -14,9 +14,13 @@
 #   SCHEMATHESIS_MAX_EXAMPLES — maps to --max-examples (default: 12)
 #   SCHEMATHESIS_AGENT_MAX_EXAMPLES — overrides --max-examples for AGENT_SCHEMA_URL only (default: 6)
 #   SCHEMATHESIS_REQUEST_TIMEOUT — per-request HTTP timeout in seconds (default: 180)
-#   SCHEMATHESIS_SOURCE_URL — optional; known source_url for GET /api/v1/documents/preview and
+#   SCHEMATHESIS_SOURCE_URL — optional; default source_url for GET /api/v1/documents/preview and
 #       /download-url (hooks default: https://example.org/community-resource-guide). Set to a URL
 #       that exists in the target Postgres to avoid 404 warnings on live runs.
+#   SCHEMATHESIS_DOCUMENTS_PREVIEW_SOURCE_URL — optional; overrides SCHEMATHESIS_SOURCE_URL for
+#       GET /api/v1/documents/preview only (use when preview and download need different seeds).
+#   SCHEMATHESIS_DOCUMENTS_DOWNLOAD_SOURCE_URL — optional; overrides SCHEMATHESIS_SOURCE_URL for
+#       GET /api/v1/documents/download-url only.
 #   SCHEMATHESIS_SCRAPE_JOB_ID — optional; UUID for GET /api/v1/scrape/{job_id} and POST …/cancel
 #       (hooks default: example UUID). Set to a real job id from POST /api/v1/scrape when testing.
 #   SCHEMATHESIS_MODAL_SCRAPER_JOB_ID — optional; UUID for GET/POST …/modal-jobs/scraper/{job_id} and …/cancel
@@ -39,6 +43,8 @@
 #       SCHEMATHESIS_SCRAPE_JOB_ID (POST /api/v1/scrape) when those env vars are unset, reducing 404 / mismatch noise.
 #       Set to 0 to skip (e.g. read-only environments).
 #   SCHEMATHESIS_GATEWAY_MAX_EXAMPLES — overrides --max-examples for the gateway run only (default: SCHEMATHESIS_MAX_EXAMPLES).
+#   SCHEMATHESIS_GATEWAY_INCLUDE_PATH_REGEX — optional; when set, passed as ``--include-path-regex`` on the gateway pass only
+#       (e.g. ``/api/v1/ask$`` for **T034** ask-only runs without editing the script).
 #   SCHEMATHESIS_GATEWAY_STATEFUL — set to 1 to append ``--phases examples,coverage,fuzzing,stateful`` on the
 #       gateway pass only (longer runs; hits real Modal/DB if mocks are absent). Default phases omit stateful
 #       (see ``backend/schemathesis.toml``). Pair with a tight ``--include-path-regex`` manually if you need
@@ -307,11 +313,16 @@ run_core_openapi() {
   if [[ "${SCHEMATHESIS_GATEWAY_STATEFUL:-0}" == "1" ]]; then
     stateful_args=( --phases examples,coverage,fuzzing,stateful )
   fi
+  local gateway_scope_args=()
+  if [[ -n "${SCHEMATHESIS_GATEWAY_INCLUDE_PATH_REGEX:-}" ]]; then
+    gateway_scope_args=( --include-path-regex "${SCHEMATHESIS_GATEWAY_INCLUDE_PATH_REGEX}" )
+  fi
   run_st "${location}" "${junit_name}" "${use_auth}" "${REQ_TIMEOUT}" "${GATEWAY_MAX_EX}" \
     "${stream_exclude[@]+"${stream_exclude[@]}"}" \
     "${reindex_exclude[@]+"${reindex_exclude[@]}"}" \
     "${stateful_args[@]+"${stateful_args[@]}"}" \
     "${thorough_args[@]+"${thorough_args[@]}"}" \
+    "${gateway_scope_args[@]+"${gateway_scope_args[@]}"}" \
     "${extra[@]+"${extra[@]}"}"
 }
 

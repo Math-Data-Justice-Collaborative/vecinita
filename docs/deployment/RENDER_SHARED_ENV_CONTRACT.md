@@ -31,6 +31,19 @@ Values you keep in gitignored **`.env`**, **`.env.local`**, **`.env.prod.render`
 
 After adding a new key to the app, update the matching example file and your Render env group so names stay aligned.
 
+### Go / no-go checklist (Modal scraper + Postgres DNS class failures)
+
+Use this before calling live contract tests or declaring the gateway “healthy” for hosted scraper
+jobs (`specs/003-consolidate-scraper-dm`):
+
+| # | Check | Pass criteria |
+|---|--------|----------------|
+| 1 | **Gateway** `MODAL_SCRAPER_PERSIST_VIA_GATEWAY` | Matches intended mode (`1`/`true` when gateway owns `scraping_jobs` inserts + Modal submit is enqueue-only). |
+| 2 | **Gateway** `DATABASE_URL` (or `DB_URL`) | Non-empty when gateway-owned persistence is enabled; uses **internal** Render hostname for the gateway process only. |
+| 3 | **Modal** `vecinita-scraper-env` `MODAL_DATABASE_URL` | Non-empty **external** DSN for any Modal worker stage that still opens Postgres (not the internal `dpg-*-a` hostname). |
+| 4 | **Modal** `MODAL_SCRAPER_PERSIST_VIA_GATEWAY` | Same value semantics as gateway so scraper honors the split. |
+| 5 | Symptom spot-check | `GET /api/v1/modal-jobs/scraper` returns **not** `500` with `could not translate host name "dpg-…"` when tiers 1–4 are satisfied. |
+
 ---
 
 ## vecinita-data-management-frontend-v1 (Render Web Service)

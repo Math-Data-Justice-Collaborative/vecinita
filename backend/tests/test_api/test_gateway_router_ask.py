@@ -179,7 +179,8 @@ class TestAskEndpoint:
         response = ask_client.get("/api/v1/ask?question=Timeout%20check")
 
         assert response.status_code == 200
-        assert mock_get.call_args.kwargs["timeout"] == 75
+        t = mock_get.call_args.kwargs["timeout"]
+        assert (t == 75) or (getattr(t, "read", None) == 75.0)
 
     @patch("httpx.AsyncClient.get")
     def test_ask_agent_service_unavailable(self, mock_get, ask_client):
