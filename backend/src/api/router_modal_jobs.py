@@ -41,6 +41,17 @@ _GATEWAY_HTTP_ERROR_OPENAPI = {
     }
 }
 
+# Malformed JSON reaches Starlette before Pydantic; response uses ``detail`` (not ``http_exception_handler`` shape).
+_MALFORMED_JSON_BODY_OPENAPI = {
+    "application/json": {
+        "schema": {
+            "type": "object",
+            "required": ["detail"],
+            "properties": {"detail": {"type": "string"}},
+        }
+    }
+}
+
 _MODAL_JOBS_VALIDATION = {
     422: {
         "model": ValidationErrorResponse,
@@ -165,6 +176,10 @@ class GatewayModalRegistryListResponse(BaseModel):
 
 _SCRAPER_SUBMIT_RESPONSES: dict[int | str, dict[str, Any]] = {
     200: {"model": GatewayModalScrapeJobBody, "description": "Job accepted and queued."},
+    400: {
+        "description": "Request body is not valid JSON (parse error before validation).",
+        "content": _MALFORMED_JSON_BODY_OPENAPI,
+    },
     **_MODAL_JOBS_VALIDATION,
     **_MODAL_JOBS_SERVICE_UNAVAILABLE,
     500: {
