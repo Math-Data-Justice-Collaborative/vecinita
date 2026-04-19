@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import uuid
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -22,6 +24,12 @@ def test_modal_scraper_submit_returns_503_when_modal_disabled(modal_jobs_client)
         "/api/v1/modal-jobs/scraper",
         json={"url": "https://example.com/page", "user_id": "test-user"},
     )
+    assert resp.status_code == 503
+
+
+def test_modal_scraper_get_returns_503_when_modal_disabled(modal_jobs_client):
+    job_id = str(uuid.uuid4())
+    resp = modal_jobs_client.get(f"/api/v1/modal-jobs/scraper/{job_id}")
     assert resp.status_code == 503
 
 
@@ -118,3 +126,165 @@ def test_modal_scraper_submit_gateway_persist_injects_job_id(modal_jobs_client, 
     )
     assert resp.status_code == 200
     assert resp.json()["job_id"] == fixed_id
+
+
+def test_modal_scraper_submit_injects_correlation_id_in_metadata_and_header(
+    modal_jobs_client, monkeypatch
+):
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
+    monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")
+    monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-test")
+    monkeypatch.setenv("MODAL_SCRAPER_PERSIST_VIA_GATEWAY", "1")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@localhost:5432/db")
+
+    from src.api import router_modal_jobs
+
+    captured: dict[str, object] = {}
+
+    monkeypatch.setattr(
+        router_modal_jobs.modal_scraper_persist,
+        "create_scraping_job",
+        lambda **kwargs: "job-corr-1",
+    )
+
+    def capture_submit(payload):
+        captured["payload"] = payload
+        return {
+            "ok": True,
+            "data": {
+                "job_id": payload.get("job_id"),
+                "status": "pending",
+                "created_at": "2024-01-01T00:00:00",
+                "url": str(payload["url"]),
+            },
+        }
+
+    monkeypatch.setattr(router_modal_jobs, "invoke_modal_scrape_job_submit", capture_submit)
+
+    resp = modal_jobs_client.post(
+        "/api/v1/modal-jobs/scraper",
+        json={
+            "url": "https://example.com/page",
+            "user_id": "test-user",
+            "metadata": {"source": "t"},
+        },
+        headers={"X-Correlation-ID": "fixed-corr-id"},
+    )
+    assert resp.status_code == 200
+    assert resp.headers.get("X-Correlation-ID") == "fixed-corr-id"
+    payload = captured.get("payload")
+    assert isinstance(payload, dict)
+    meta = payload.get("metadata")
+    assert isinstance(meta, dict)
+    assert meta.get("correlation_id") == "fixed-corr-id"
+    assert meta.get("source") == "t"
+
+
+def test_modal_scraper_get_returns_404_unknown_job_gateway_persist(modal_jobs_client, monkeypatch):
+    """Gateway-owned DB path: missing row → 404 (not 5xx)."""
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
+    monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")
+    monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-test")
+    monkeypatch.setenv("MODAL_SCRAPER_PERSIST_VIA_GATEWAY", "1")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@localhost:5432/db")
+
+    from src.api import router_modal_jobs
+
+    monkeypatch.setattr(
+        router_modal_jobs.modal_scraper_persist, "job_status_payload", lambda _jid: None
+    )
+
+    job_id = uuid.uuid4()
+    resp = modal_jobs_client.get(
+        f"/api/v1/modal-jobs/scraper/{job_id}",
+        headers={"X-Correlation-ID": "cid-get-404"},
+    )
+    assert resp.status_code == 404
+    assert resp.headers.get("X-Correlation-ID") == "cid-get-404"
+    body = resp.json()
+    assert body.get("correlation_id") == "cid-get-404"
+    assert "not found" in str(body.get("error", "")).lower()
+
+
+def test_modal_scraper_cancel_returns_404_unknown_job_gateway_persist(
+    modal_jobs_client, monkeypatch
+):
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
+    monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")
+    monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-test")
+    monkeypatch.setenv("MODAL_SCRAPER_PERSIST_VIA_GATEWAY", "1")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@localhost:5432/db")
+
+    from src.api import router_modal_jobs
+
+    monkeypatch.setattr(
+        router_modal_jobs.modal_scraper_persist,
+        "cancel_job",
+        lambda _jid: (None, "not_found"),
+    )
+
+    job_id = uuid.uuid4()
+    resp = modal_jobs_client.post(
+        f"/api/v1/modal-jobs/scraper/{job_id}/cancel",
+        headers={"X-Correlation-ID": "cid-cancel-404"},
+    )
+    assert resp.status_code == 404
+    assert resp.headers.get("X-Correlation-ID") == "cid-cancel-404"
+    body = resp.json()
+    assert body.get("correlation_id") == "cid-cancel-404"
+
+
+def test_modal_scraper_submit_sanitizes_modal_envelope_500_detail(modal_jobs_client, monkeypatch):
+    """Modal RPC envelope 5xx: client body must not echo raw internal Postgres hostnames (FR-002)."""
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
+    monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")
+    monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-test")
+
+    from src.api import router_modal_jobs
+
+    monkeypatch.setattr(
+        router_modal_jobs,
+        "invoke_modal_scrape_job_submit",
+        lambda _payload: {
+            "ok": False,
+            "http_status": 500,
+            "detail": 'could not translate host name "dpg-zzzzzzzz" to address: Name or service not known',
+        },
+    )
+
+    resp = modal_jobs_client.post(
+        "/api/v1/modal-jobs/scraper",
+        json={"url": "https://example.com/page", "user_id": "test-user"},
+    )
+    assert resp.status_code == 500
+    err = str(resp.json().get("error", "")).lower()
+    assert "dpg-" not in err
+
+
+def test_modal_scraper_submit_gateway_persist_db_runtime_redacted(modal_jobs_client, monkeypatch):
+    """If persist raises RuntimeError with internal hostname, HTTP 503 detail is redacted."""
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
+    monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")
+    monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-test")
+    monkeypatch.setenv("MODAL_SCRAPER_PERSIST_VIA_GATEWAY", "1")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@localhost:5432/db")
+
+    from src.api import router_modal_jobs
+
+    def bad_create(**_kwargs):
+        raise RuntimeError(
+            'could not translate host name "dpg-leak123" to address: Name or service not known'
+        )
+
+    monkeypatch.setattr(router_modal_jobs.modal_scraper_persist, "create_scraping_job", bad_create)
+
+    resp = modal_jobs_client.post(
+        "/api/v1/modal-jobs/scraper",
+        json={"url": "https://example.com/page", "user_id": "test-user"},
+        headers={"X-Correlation-ID": "cid-db-503"},
+    )
+    assert resp.status_code == 503
+    assert resp.headers.get("X-Correlation-ID") == "cid-db-503"
+    body = resp.json()
+    assert body.get("correlation_id") == "cid-db-503"
+    assert "dpg-" not in str(body.get("error", "")).lower()

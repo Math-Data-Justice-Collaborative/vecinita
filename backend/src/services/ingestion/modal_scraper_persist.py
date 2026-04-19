@@ -71,6 +71,15 @@ _STATUS_TO_PROGRESS: dict[str, int] = {
 _NON_CANCELLABLE = frozenset({"completed", "failed", "cancelled"})
 
 
+def _reraise_psycopg_sanitized(exc: BaseException) -> None:
+    """Map psycopg2 failures to sanitized ``RuntimeError`` messages for HTTP 503 responses."""
+    if psycopg2 is not None and isinstance(exc, psycopg2.Error):
+        from src.utils.gateway_dependency_errors import client_safe_message_for_dependency_failure
+
+        raise RuntimeError(client_safe_message_for_dependency_failure(exc)) from exc
+    raise exc
+
+
 def _database_url() -> str:
     url = get_resolved_database_url().strip()
     if not url:
@@ -122,37 +131,43 @@ def create_scraping_job(
     assert Json is not None
     job_id = str(uuid4())
     now = datetime.now(timezone.utc)
-    with _connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO scraping_jobs (
-                    id, url, user_id, status,
-                    crawl_config, chunking_config, metadata,
-                    created_at, updated_at
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """,
-                (
-                    job_id,
-                    url,
-                    user_id,
-                    "pending",
-                    Json(crawl_config),
-                    Json(chunking_config),
-                    Json(metadata or {}),
-                    now,
-                    now,
-                ),
-            )
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO scraping_jobs (
+                        id, url, user_id, status,
+                        crawl_config, chunking_config, metadata,
+                        created_at, updated_at
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (
+                        job_id,
+                        url,
+                        user_id,
+                        "pending",
+                        Json(crawl_config),
+                        Json(chunking_config),
+                        Json(metadata or {}),
+                        now,
+                        now,
+                    ),
+                )
+    except Exception as exc:
+        _reraise_psycopg_sanitized(exc)
     return job_id
 
 
 def fetch_job_detail(job_id: str) -> dict[str, Any] | None:
     """Return one serialized job row (``id`` + aggregates) or ``None``."""
-    with _connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(_JOB_DETAIL_SELECT + " WHERE j.id = %s", (job_id,))
-            row = cur.fetchone()
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(_JOB_DETAIL_SELECT + " WHERE j.id = %s", (job_id,))
+                row = cur.fetchone()
+    except Exception as exc:
+        _reraise_psycopg_sanitized(exc)
     return _serialize_record(row)
 
 
@@ -183,28 +198,31 @@ def job_status_payload(job_id: str) -> dict[str, Any] | None:
 def list_jobs_payload(*, user_id: str | None, limit: int) -> dict[str, Any]:
     """Return ``{"jobs": [...], "total": n}`` aligned with Modal list envelope."""
     lim = max(1, min(100, int(limit)))
-    with _connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT COUNT(*) AS total
-                FROM scraping_jobs
-                WHERE (%s IS NULL OR user_id = %s)
-                """,
-                (user_id, user_id),
-            )
-            total_row = cur.fetchone()
-            total = int(total_row["total"] if total_row is not None else 0)
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT COUNT(*) AS total
+                    FROM scraping_jobs
+                    WHERE (%s IS NULL OR user_id = %s)
+                    """,
+                    (user_id, user_id),
+                )
+                total_row = cur.fetchone()
+                total = int(total_row["total"] if total_row is not None else 0)
 
-            cur.execute(
-                _JOB_DETAIL_SELECT + """
-                WHERE (%s IS NULL OR j.user_id = %s)
-                ORDER BY j.created_at DESC
-                LIMIT %s
-                """,
-                (user_id, user_id, lim),
-            )
-            raw_jobs = cur.fetchall()
+                cur.execute(
+                    _JOB_DETAIL_SELECT + """
+                    WHERE (%s IS NULL OR j.user_id = %s)
+                    ORDER BY j.created_at DESC
+                    LIMIT %s
+                    """,
+                    (user_id, user_id, lim),
+                )
+                raw_jobs = cur.fetchall()
+    except Exception as exc:
+        _reraise_psycopg_sanitized(exc)
     jobs = _serialize_records(raw_jobs)
     return {"jobs": jobs, "total": total}
 
@@ -218,16 +236,19 @@ def cancel_job(job_id: str) -> tuple[dict[str, Any] | None, str | None]:
     if status in _NON_CANCELLABLE:
         return None, "conflict"
     now = datetime.now(timezone.utc)
-    with _connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                UPDATE scraping_jobs
-                SET status = %s, error_message = %s, updated_at = %s
-                WHERE id = %s
-                """,
-                ("cancelled", None, now, job_id),
-            )
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE scraping_jobs
+                    SET status = %s, error_message = %s, updated_at = %s
+                    WHERE id = %s
+                    """,
+                    ("cancelled", None, now, job_id),
+                )
+    except Exception as exc:
+        _reraise_psycopg_sanitized(exc)
     out = job_status_payload(job_id)
     if out is None:
         return None, "not_found"

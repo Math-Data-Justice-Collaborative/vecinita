@@ -38,13 +38,19 @@ _BACKEND_ROOT = Path(__file__).resolve().parents[2]
 load_dotenv(_PROJECT_ROOT / ".env", override=False)
 load_dotenv(_BACKEND_ROOT / ".env", override=False)
 
+from typing import Any
+
 from fastapi import APIRouter, FastAPI, HTTPException, Request
 import httpx
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from .middleware import AuthenticationMiddleware, RateLimitingMiddleware
+from .middleware import (
+    AuthenticationMiddleware,
+    CorrelationIdMiddleware,
+    RateLimitingMiddleware,
+)
 from .models import (
     GatewayConfig,
     GatewayPublicRootResponse,
@@ -406,7 +412,7 @@ app.add_middleware(
     allow_origin_regex=ALLOWED_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "Accept"],
+    allow_headers=["Content-Type", "Authorization", "Accept", "X-Correlation-ID"],
 )
 
 # Add rate limiting middleware (before auth to catch limits early)
@@ -414,6 +420,9 @@ app.add_middleware(RateLimitingMiddleware)
 
 # Add authentication middleware (validates API keys)
 app.add_middleware(AuthenticationMiddleware)
+
+# Outermost on request path: stable correlation id for operators + Modal submit payloads (**FR-006**)
+app.add_middleware(CorrelationIdMiddleware)
 
 # ============================================================================
 # Root Endpoints
@@ -576,28 +585,40 @@ app.include_router(v1_router)
 
 
 @app.exception_handler(HTTPException)
-async def http_exception_handler(request, exc):
+async def http_exception_handler(request: Request, exc: HTTPException):
     """Custom HTTP exception handler with standard response format."""
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={
-            "error": exc.detail or "An error occurred",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        },
-    )
+    cid = getattr(request.state, "correlation_id", None)
+    detail = exc.detail
+    if isinstance(detail, str):
+        error: Any = detail or "An error occurred"
+    elif isinstance(detail, (dict, list)):
+        # Preserve structured errors (e.g. upstream 422 JSON from embedding proxy).
+        error = detail
+    else:
+        error = str(detail) if detail is not None else "An error occurred"
+    content: dict[str, Any] = {
+        "error": error,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    if cid:
+        content["correlation_id"] = cid
+    headers = {"X-Correlation-ID": cid} if cid else {}
+    return JSONResponse(status_code=exc.status_code, content=content, headers=headers)
 
 
 @app.exception_handler(Exception)
-async def general_exception_handler(request, exc):
+async def general_exception_handler(request: Request, exc: Exception):
     """Catch-all exception handler."""
-    return JSONResponse(
-        status_code=500,
-        content={
-            "error": "Internal server error",
-            "detail": str(exc) if app.debug else None,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        },
-    )
+    cid = getattr(request.state, "correlation_id", None)
+    content: dict[str, Any] = {
+        "error": "Internal server error",
+        "detail": str(exc) if app.debug else None,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    if cid:
+        content["correlation_id"] = cid
+    headers = {"X-Correlation-ID": cid} if cid else {}
+    return JSONResponse(status_code=500, content=content, headers=headers)
 
 
 # ============================================================================

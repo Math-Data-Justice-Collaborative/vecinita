@@ -8,7 +8,7 @@ from functools import partial
 from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, HttpUrl
 
 from src.api.models import ErrorResponse, ValidationErrorResponse
@@ -24,6 +24,7 @@ from src.services.modal.invoker import (
 )
 from src.services.modal.job_registry import modal_job_registry
 from src.utils.database_url import get_resolved_database_url
+from src.utils.gateway_dependency_errors import client_safe_message_for_dependency_failure
 
 router = APIRouter(prefix="/modal-jobs", tags=["Modal jobs"])
 
@@ -90,7 +91,14 @@ def _unwrap_scraper_envelope(env: dict[str, Any]) -> dict[str, Any]:
         return data if isinstance(data, dict) else {}
     status_code = int(env.get("http_status") or 500)
     detail = str(env.get("detail") or env.get("code") or "Modal scraper RPC error")
+    if status_code >= 500:
+        detail = client_safe_message_for_dependency_failure(RuntimeError(detail))
     raise HTTPException(status_code=status_code, detail=detail)
+
+
+def _persist_runtime_http_detail(exc: RuntimeError) -> str:
+    """FR-002-safe text for gateway-owned Postgres paths (belt-and-suspenders over persist layer)."""
+    return client_safe_message_for_dependency_failure(exc)
 
 
 class GatewayModalScrapeSubmitRequest(BaseModel):
@@ -139,6 +147,7 @@ class GatewayModalScrapeJobBody(BaseModel):
 
     job_id: str = Field(
         ...,
+        min_length=1,
         validation_alias=AliasChoices("job_id", "id"),
         description="Scrape job id (Modal may return ``id`` or ``job_id``).",
     )
@@ -159,7 +168,7 @@ class GatewayModalRegistryRecord(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    gateway_job_id: str
+    gateway_job_id: str = Field(..., min_length=1)
     kind: str | None = None
     status: str | None = None
     modal_function_call_id: str | None = None
@@ -244,9 +253,15 @@ _REINDEX_SPAWN_RESPONSES: dict[int | str, dict[str, Any]] = {
     responses=_SCRAPER_SUBMIT_RESPONSES,
 )
 async def modal_scraper_submit(
+    request: Request,
     body: GatewayModalScrapeSubmitRequest,
     _: Annotated[None, Depends(_require_modal_invocation)],
 ) -> GatewayModalScrapeJobBody:
+    cid = getattr(request.state, "correlation_id", None)
+    merged_metadata: dict[str, Any] = dict(body.metadata or {})
+    if cid:
+        merged_metadata["correlation_id"] = cid
+
     if _gateway_owns_modal_scraper_control_plane():
         if not get_resolved_database_url().strip():
             raise HTTPException(
@@ -263,18 +278,20 @@ async def modal_scraper_submit(
                     user_id=body.user_id,
                     crawl_config=crawl,
                     chunking_config=chunk,
-                    metadata=body.metadata,
+                    metadata=merged_metadata,
                 ),
             )
         except RuntimeError as exc:
-            raise HTTPException(status_code=503, detail=str(exc)) from exc
+            raise HTTPException(status_code=503, detail=_persist_runtime_http_detail(exc)) from exc
         payload = body.model_dump(mode="json")
+        payload["metadata"] = merged_metadata
         payload["job_id"] = jid
         env = await asyncio.to_thread(invoke_modal_scrape_job_submit, payload)
         data = _unwrap_scraper_envelope(env)
         return GatewayModalScrapeJobBody.model_validate(data)
 
     payload = body.model_dump(mode="json")
+    payload["metadata"] = merged_metadata
     env = await asyncio.to_thread(invoke_modal_scrape_job_submit, payload)
     data = _unwrap_scraper_envelope(env)
     return GatewayModalScrapeJobBody.model_validate(data)
@@ -294,7 +311,7 @@ async def modal_scraper_get(
         try:
             data = await asyncio.to_thread(modal_scraper_persist.job_status_payload, str(job_id))
         except RuntimeError as exc:
-            raise HTTPException(status_code=503, detail=str(exc)) from exc
+            raise HTTPException(status_code=503, detail=_persist_runtime_http_detail(exc)) from exc
         if not data:
             raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
         return GatewayModalScrapeJobBody.model_validate(data)
@@ -312,7 +329,7 @@ async def modal_scraper_get(
 )
 async def modal_scraper_list(
     _: Annotated[None, Depends(_require_modal_invocation)],
-    user_id: str | None = None,
+    user_id: Annotated[str | None, Query(min_length=1)] = None,
     limit: int = Query(default=50, ge=1, le=100),
 ) -> GatewayModalScraperListResponse:
     if _gateway_owns_modal_scraper_control_plane():
@@ -326,7 +343,7 @@ async def modal_scraper_list(
                 partial(modal_scraper_persist.list_jobs_payload, user_id=user_id, limit=limit),
             )
         except RuntimeError as exc:
-            raise HTTPException(status_code=503, detail=str(exc)) from exc
+            raise HTTPException(status_code=503, detail=_persist_runtime_http_detail(exc)) from exc
     else:
         env = await asyncio.to_thread(invoke_modal_scrape_job_list, user_id, limit)
         data = _unwrap_scraper_envelope(env)
@@ -355,7 +372,7 @@ async def modal_scraper_cancel(
         try:
             payload, err = await asyncio.to_thread(modal_scraper_persist.cancel_job, str(job_id))
         except RuntimeError as exc:
-            raise HTTPException(status_code=503, detail=str(exc)) from exc
+            raise HTTPException(status_code=503, detail=_persist_runtime_http_detail(exc)) from exc
         if err == "not_found":
             raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
         if err == "conflict":

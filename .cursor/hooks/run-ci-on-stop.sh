@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Cursor `stop` hook (https://cursor.com/docs/agent/third-party-hooks):
-# When the agent loop ends with status "completed", run `make ci` (local CI gate).
+# When the agent loop ends with status "completed", run `make ci` (local CI gate)
+# only if the turn touched at least one non-prose file (e.g. .py, .tsx). Edits
+# limited to documentation-style extensions (.md, .txt, …) skip the gate.
 # If `make ci` fails, run `make format` and `make lint-fix`, then `make ci` again.
 # If it still fails, stdout returns JSON with `followup_message` for a follow-up turn.
 #
@@ -28,11 +30,94 @@ if ! command -v python3 >/dev/null 2>&1; then
 fi
 
 INPUT=$(cat || true)
-STATUS=$(python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('status',''))" <<<"$INPUT" 2>/dev/null || echo "")
+# run_make_ci: 1 = run gate, 0 = skip (docs-only / no paths), empty = not completed or parse error
+RUN_MAKE_CI=$(
+	python3 - "$INPUT" "$ROOT" <<'PY'
+import json
+import subprocess
+import sys
 
-if [[ "$STATUS" != "completed" ]]; then
+raw, root = sys.argv[1], sys.argv[2]
+
+try:
+    payload = json.loads(raw) if raw.strip() else {}
+except json.JSONDecodeError:
+    print("", end="")
+    raise SystemExit(0)
+
+if payload.get("status") != "completed":
+    print("", end="")
+    raise SystemExit(0)
+
+# Prose / plain-text doc extensions only — everything else is treated as code/config/assets.
+TEXT_DOC_EXT = frozenset({".md", ".markdown", ".txt", ".rst", ".adoc", ".asciidoc"})
+
+
+def file_ext(path: str) -> str:
+    p = path.lower().replace("\\", "/")
+    slash = p.rfind("/")
+    base = p[slash + 1 :]
+    dot = base.rfind(".")
+    return base[dot:] if dot != -1 else ""
+
+
+def git_changed_paths(repo: str) -> list[str] | None:
+    """Paths changed vs HEAD (tracked + untracked). None if git is unavailable."""
+    try:
+        r = subprocess.run(
+            ["git", "-C", repo, "rev-parse", "--is-inside-work-tree"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if r.returncode != 0 or r.stdout.strip() != "true":
+            return None
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+    paths: list[str] = []
+    for cmd in (
+        ["git", "-C", repo, "diff", "--name-only", "--diff-filter=ACMRT", "HEAD"],
+        ["git", "-C", repo, "ls-files", "--others", "--exclude-standard"],
+    ):
+        try:
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+            if r.returncode != 0:
+                return None
+            paths.extend(line.strip() for line in r.stdout.splitlines() if line.strip())
+        except (OSError, subprocess.TimeoutExpired):
+            return None
+    return paths
+
+
+def should_run_make_ci(repo: str, hook: dict) -> bool:
+    modified = hook.get("modified_files")
+    if isinstance(modified, list) and modified:
+        paths = [str(p).strip() for p in modified if str(p).strip()]
+    else:
+        paths = git_changed_paths(repo)
+        if paths is None:
+            return True
+
+    if not paths:
+        return False
+
+    return any(file_ext(p) not in TEXT_DOC_EXT for p in paths)
+
+
+print("1" if should_run_make_ci(root, payload) else "0", end="")
+PY
+) || RUN_MAKE_CI=""
+
+if [[ "$RUN_MAKE_CI" == "0" ]]; then
+	echo "[cursor hook] Skipping make ci (only prose/text doc extensions touched, or no changed paths vs HEAD)." >&2
 	emit '{}'
 	exit 0
+fi
+
+# Unknown / empty after completed: treat as run (e.g. JSON parse failure, or python crashed).
+if [[ "$RUN_MAKE_CI" != "1" ]]; then
+	echo "[cursor hook] Could not classify changed files — running make ci." >&2
 fi
 
 if ! command -v make >/dev/null 2>&1; then

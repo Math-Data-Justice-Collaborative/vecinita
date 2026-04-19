@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites disabled="0" errors="0" failures="0" tests="8" time="23.469176601152867">
+	<testsuite disabled="0" errors="0" failures="0" name="schemathesis" skipped="0" tests="8" time="23.469176601152867" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
+		<testcase name="POST /model-selection" time="1.745086"/>
+		<testcase name="GET /" time="0.102966"/>
+		<testcase name="GET /config" time="0.349157"/>
+		<testcase name="GET /db-info" time="0.840290"/>
+		<testcase name="GET /health" time="0.120974"/>
+		<testcase name="GET /model-selection" time="0.303318"/>
+		<testcase name="GET /privacy" time="0.114272"/>
+		<testcase name="GET /test-db-search" time="19.893113"/>
+	</testsuite>
+</testsuites>

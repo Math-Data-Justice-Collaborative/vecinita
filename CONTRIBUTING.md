@@ -46,6 +46,17 @@ vecinita/
 └── docker-compose.yml
 ```
 
+### Canonical scraper
+
+The **only** supported scraper implementation and orchestration code lives under
+[`services/scraper/`](./services/scraper/) (the `vecinita_scraper` package used by Modal, Docker, and CI).
+
+The **data-management-api** and other backends must **not** duplicate that logic: call a deployed
+scraper over HTTP using `SCRAPER_SERVICE_BASE_URL` and the typed client in
+[`services/data-management-api/packages/service-clients/`](./services/data-management-api/packages/service-clients/)
+(`ScraperClient`). See the normative remote contract in
+[`specs/003-consolidate-scraper-dm/contracts/dm-api-remote-service-integration.md`](./specs/003-consolidate-scraper-dm/contracts/dm-api-remote-service-integration.md).
+
 ## Code Standards
 
 ### Python (Backend)

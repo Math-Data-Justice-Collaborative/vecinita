@@ -457,7 +457,12 @@ ci: quality-full
 test-unit: test-backend-unit test-frontend-unit
 
 test-backend-unit:
-	cd backend && uv run pytest tests/ -m "unit and not llm" -v --tb=short
+	cd backend && uv run pytest tests/ -m "unit and not llm" -v --tb=short && \
+		PYTHONPATH=../services/data-management-api/packages/service-clients:../services/data-management-api/packages/shared-schemas:../services/data-management-api/packages/shared-config \
+		uv run pytest \
+			../services/data-management-api/packages/service-clients/tests/ \
+			../services/data-management-api/tests/parity/ \
+			-q --tb=short
 
 test-frontend-unit:
 	cd frontend && npm run test:unit

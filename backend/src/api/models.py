@@ -8,7 +8,7 @@ for rich Swagger/OpenAPI documentation at /docs.
 
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
 
@@ -3639,9 +3639,8 @@ class DocumentsOverviewQueryParams(BaseModel):
         description="Comma-separated tags used to filter the source list.",
         examples=["housing,permits"],
     )
-    tag_match_mode: str = Field(
+    tag_match_mode: Literal["any", "all"] = Field(
         default="any",
-        pattern="^(any|all)$",
         description="Tag match mode for source filtering.",
         examples=["any"],
     )
@@ -3762,7 +3761,7 @@ class DocumentsTagsQueryParams(BaseModel):
         description="Optional case-insensitive tag search substring.",
         examples=["health"],
     )
-    locale: str = Field(
+    locale: Literal["en", "es"] = Field(
         default="en",
         description="Locale for tag labels (en or es).",
         examples=["en"],
@@ -4095,7 +4094,7 @@ class DocumentsTagRow(BaseModel):
 
     tag: str = Field(..., examples=["housing"])
     label: str = Field(..., examples=["Housing"])
-    locale: str = Field(..., examples=["en"])
+    locale: Literal["en", "es"] = Field(..., examples=["en"])
     resource_count: int = Field(..., ge=0, examples=[3])
     chunk_count: int = Field(..., ge=0, examples=[40])
     source_count: int = Field(..., ge=0, examples=[3])
@@ -4109,7 +4108,7 @@ class DocumentsTagsResponse(BaseModel):
         default_factory=dict,
         examples=[{"housing": 3}],
     )
-    locale: str = Field(..., examples=["en"])
+    locale: Literal["en", "es"] = Field(..., examples=["en"])
     total: int = Field(..., ge=0, examples=[1])
 
     model_config = ConfigDict(
@@ -4431,6 +4430,7 @@ class GatewayAskQueryParams(BaseModel):
 
     question: str = Field(
         ...,
+        min_length=1,
         description="User question text.",
         examples=["What affordable housing programs exist in this neighborhood?"],
     )
@@ -4464,9 +4464,8 @@ class GatewayAskQueryParams(BaseModel):
         description="Comma-separated metadata tags for retrieval filtering.",
         examples=["housing,permits"],
     )
-    tag_match_mode: str = Field(
+    tag_match_mode: Literal["any", "all"] = Field(
         default="any",
-        pattern="^(any|all)$",
         description="Tag match mode: any|all.",
         examples=["any"],
     )

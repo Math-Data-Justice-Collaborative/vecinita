@@ -127,6 +127,20 @@ def _source_url() -> str:
     return os.environ.get("SCHEMATHESIS_SOURCE_URL", _DEFAULT_SOURCE_URL).strip()
 
 
+def _documents_path_source_url(path: str) -> str:
+    """``source_url`` for preview vs download when the DB has distinct rows per route."""
+    p = (path or "").strip()
+    if p == "/api/v1/documents/preview":
+        override = os.environ.get("SCHEMATHESIS_DOCUMENTS_PREVIEW_SOURCE_URL", "").strip()
+        if override:
+            return override
+    if p == "/api/v1/documents/download-url":
+        override = os.environ.get("SCHEMATHESIS_DOCUMENTS_DOWNLOAD_SOURCE_URL", "").strip()
+        if override:
+            return override
+    return _source_url()
+
+
 def _scrape_job_id() -> str:
     return os.environ.get("SCHEMATHESIS_SCRAPE_JOB_ID", _DEFAULT_SCRAPE_JOB_ID).strip()
 
@@ -325,7 +339,7 @@ def map_query(context: HookContext, query):  # noqa: ANN001
     }:
         return query
     out = {} if query is None else dict(query)
-    out["source_url"] = _source_url()
+    out["source_url"] = _documents_path_source_url(operation.path or "")
     if operation.path == "/api/v1/documents/preview":
         out["limit"] = 3
     return out
