@@ -25,6 +25,7 @@ from ..services.scraper.scraper import VecinaScraper
 from ..services.scraper.utils import prepare_scrape_urls
 from .job_manager import job_manager
 from .models import (
+    ErrorResponse,
     GatewayReindexTriggerResponse,
     JobStatus,
     LoaderType,
@@ -37,6 +38,7 @@ from .models import (
     ScrapeRequest,
     ScrapeResponse,
     ScrapeStatusResponse,
+    ValidationErrorResponse,
 )
 
 router = APIRouter(prefix="/scrape", tags=["Scraping"])
@@ -49,6 +51,31 @@ REINDEX_TRIGGER_TOKEN = os.getenv("REINDEX_TRIGGER_TOKEN", "")
 
 # OpenAPI example only (tests/schemathesis_hooks.py may override live CLI parameters).
 _DEFAULT_OPENAPI_SCRAPE_JOB_ID = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+
+# Matches ``http_exception_handler`` JSON in ``main.py`` (Schemathesis / clients rely on documented codes).
+_GATEWAY_HTTP_ERROR_OPENAPI = {
+    "application/json": {
+        "schema": {
+            "type": "object",
+            "required": ["error", "timestamp"],
+            "properties": {
+                "error": {"type": "string"},
+                "timestamp": {"type": "string"},
+            },
+        }
+    }
+}
+
+_SCRAPE_OPENAPI_COMMON = {
+    422: {
+        "model": ValidationErrorResponse,
+        "description": "Request validation failed.",
+    },
+    500: {
+        "model": ErrorResponse,
+        "description": "Unexpected gateway failure.",
+    },
+}
 
 
 async def background_scrape_task(
@@ -201,7 +228,16 @@ async def background_scrape_task(
         pass
 
 
-@router.post("")
+@router.post(
+    "",
+    responses={
+        **_SCRAPE_OPENAPI_COMMON,
+        400: {
+            "description": "Invalid URL list or limits exceeded.",
+            "content": _GATEWAY_HTTP_ERROR_OPENAPI,
+        },
+    },
+)
 async def submit_scrape_request(
     request: ScrapeRequest,
     background_tasks: BackgroundTasks,
@@ -269,7 +305,12 @@ async def submit_scrape_request(
     )
 
 
-@router.get("/history")
+@router.get(
+    "/history",
+    responses={
+        **_SCRAPE_OPENAPI_COMMON,
+    },
+)
 async def list_scrape_history(
     params: Annotated[ScrapeGatewayHistoryQueryParams, Depends()],
 ) -> ScrapeHistoryResponse:
@@ -290,7 +331,11 @@ async def list_scrape_history(
     return ScrapeHistoryResponse(jobs=jobs, total=total, page=page, limit=params.limit)
 
 
-@router.get("/stats", response_model=ScrapeGatewayStatsResponse)
+@router.get(
+    "/stats",
+    response_model=ScrapeGatewayStatsResponse,
+    responses={**_SCRAPE_OPENAPI_COMMON},
+)
 async def get_scrape_stats() -> ScrapeGatewayStatsResponse:
     """
     Get scraping subsystem statistics.
@@ -302,7 +347,11 @@ async def get_scrape_stats() -> ScrapeGatewayStatsResponse:
     return ScrapeGatewayStatsResponse.model_validate(stats)
 
 
-@router.post("/cleanup", response_model=ScrapeGatewayCleanupResponse)
+@router.post(
+    "/cleanup",
+    response_model=ScrapeGatewayCleanupResponse,
+    responses={**_SCRAPE_OPENAPI_COMMON},
+)
 async def cleanup_old_jobs() -> ScrapeGatewayCleanupResponse:
     """
     Cleanup old jobs from history.
@@ -320,7 +369,21 @@ async def cleanup_old_jobs() -> ScrapeGatewayCleanupResponse:
     )
 
 
-@router.post("/reindex", response_model=GatewayReindexTriggerResponse)
+@router.post(
+    "/reindex",
+    response_model=GatewayReindexTriggerResponse,
+    responses={
+        **_SCRAPE_OPENAPI_COMMON,
+        502: {
+            "model": ErrorResponse,
+            "description": "Upstream reindex or Modal invocation failed.",
+        },
+        503: {
+            "model": ErrorResponse,
+            "description": "Reindex not configured or Modal policy blocks the call.",
+        },
+    },
+)
 async def trigger_reindex(
     params: Annotated[ScrapeGatewayReindexQueryParams, Depends()],
 ) -> GatewayReindexTriggerResponse:
@@ -385,7 +448,16 @@ async def trigger_reindex(
         ) from exc
 
 
-@router.get("/{job_id}")
+@router.get(
+    "/{job_id}",
+    responses={
+        **_SCRAPE_OPENAPI_COMMON,
+        404: {
+            "description": "No job with the given id",
+            "content": _GATEWAY_HTTP_ERROR_OPENAPI,
+        },
+    },
+)
 async def get_scrape_status(
     job_id: UUID = PathParam(
         ...,
@@ -412,7 +484,20 @@ async def get_scrape_status(
     return ScrapeStatusResponse(job=job)
 
 
-@router.post("/{job_id}/cancel")
+@router.post(
+    "/{job_id}/cancel",
+    responses={
+        **_SCRAPE_OPENAPI_COMMON,
+        404: {
+            "description": "Job not found",
+            "content": _GATEWAY_HTTP_ERROR_OPENAPI,
+        },
+        409: {
+            "description": "Job cannot be cancelled (already completed, failed, or cancelled)",
+            "content": _GATEWAY_HTTP_ERROR_OPENAPI,
+        },
+    },
+)
 async def cancel_scrape_job(
     job_id: UUID = PathParam(
         ...,
@@ -430,13 +515,23 @@ async def cancel_scrape_job(
         Status update response
 
     Raises:
-        HTTPException: If job cannot be cancelled
+        HTTPException: 404 if the job does not exist; 409 if it is already terminal or cannot be cancelled.
     """
+    job = await job_manager.get_job(str(job_id))
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
+
+    if job.status in (JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED):
+        raise HTTPException(
+            status_code=409,
+            detail="Job cannot be cancelled (already completed, failed, or cancelled)",
+        )
+
     cancelled = await job_manager.cancel_job(str(job_id))
     if not cancelled:
         raise HTTPException(
-            status_code=400,
-            detail="Job cannot be cancelled (not found or already completed)",
+            status_code=409,
+            detail="Job cannot be cancelled (state changed or already terminal)",
         )
 
     job = await job_manager.get_job(str(job_id))

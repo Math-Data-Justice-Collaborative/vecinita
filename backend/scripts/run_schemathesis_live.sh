@@ -19,8 +19,12 @@
 #       that exists in the target Postgres to avoid 404 warnings on live runs.
 #   SCHEMATHESIS_SCRAPE_JOB_ID — optional; UUID for GET /api/v1/scrape/{job_id} and POST …/cancel
 #       (hooks default: example UUID). Set to a real job id from POST /api/v1/scrape when testing.
+#   SCHEMATHESIS_MODAL_SCRAPER_JOB_ID — optional; UUID for GET/POST …/modal-jobs/scraper/{job_id} and …/cancel
+#       (defaults to SCHEMATHESIS_SCRAPE_JOB_ID when unset). Use a real Modal-native scraping_jobs id on live DB.
 #   SCHEMATHESIS_MODAL_GATEWAY_JOB_ID — optional; path param for GET/DELETE …/modal-jobs/registry/{id}
 #       (hooks default: same example UUID). Set to a real gateway_job_id to reduce 404 warnings.
+#   MODAL_SCRAPER_PERSIST_VIA_GATEWAY — when set to 1 on the **gateway**, scraping job rows are written on Render
+#       and Modal ``modal_scrape_job_submit`` only enqueues (see docs/deployment/RENDER_SHARED_ENV_CONTRACT.md).
 #   SCHEMATHESIS_SCRAPE_URL — optional; first URL in POST /api/v1/scrape body (default: https://example.com/page).
 #   SCHEMATHESIS_INCLUDE_GATEWAY_REINDEX — set to 1 to include POST /api/v1/scrape/reindex in the gateway
 #       run (default: excluded). Live fuzzing hits the gateway, which then calls REINDEX_SERVICE_URL on the
@@ -35,6 +39,11 @@
 #       SCHEMATHESIS_SCRAPE_JOB_ID (POST /api/v1/scrape) when those env vars are unset, reducing 404 / mismatch noise.
 #       Set to 0 to skip (e.g. read-only environments).
 #   SCHEMATHESIS_GATEWAY_MAX_EXAMPLES — overrides --max-examples for the gateway run only (default: SCHEMATHESIS_MAX_EXAMPLES).
+#   SCHEMATHESIS_GATEWAY_STATEFUL — set to 1 to append ``--phases examples,coverage,fuzzing,stateful`` on the
+#       gateway pass only (longer runs; hits real Modal/DB if mocks are absent). Default phases omit stateful
+#       (see ``backend/schemathesis.toml``). Pair with a tight ``--include-path-regex`` manually if you need
+#       to cap scope; pytest stateful suites under ``tests/integration/test_gateway_*_stateful.py`` narrow by
+#       replacing the schema filter set (see TESTING_DOCUMENTATION.md).
 #   SCHEMATHESIS_THOROUGH — set to 1 to append --generation-maximize response_time (optional; longer runs).
 #   SCHEMATHESIS_SUPPRESS_HEALTH_CHECK — comma list for --suppress-health-check (default: filter_too_much,too_slow).
 #       Modal-jobs path params can trip Schemathesis generation health checks without affecting runtime API quality.
@@ -294,9 +303,14 @@ run_core_openapi() {
   if [[ "${SCHEMATHESIS_THOROUGH:-0}" == "1" ]]; then
     thorough_args=( --generation-maximize response_time )
   fi
+  local stateful_args=()
+  if [[ "${SCHEMATHESIS_GATEWAY_STATEFUL:-0}" == "1" ]]; then
+    stateful_args=( --phases examples,coverage,fuzzing,stateful )
+  fi
   run_st "${location}" "${junit_name}" "${use_auth}" "${REQ_TIMEOUT}" "${GATEWAY_MAX_EX}" \
     "${stream_exclude[@]+"${stream_exclude[@]}"}" \
     "${reindex_exclude[@]+"${reindex_exclude[@]}"}" \
+    "${stateful_args[@]+"${stateful_args[@]}"}" \
     "${thorough_args[@]+"${thorough_args[@]}"}" \
     "${extra[@]+"${extra[@]}"}"
 }
