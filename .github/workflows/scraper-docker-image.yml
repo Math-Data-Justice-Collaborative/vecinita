@@ -1,0 +1,51 @@
+# Wall-clock Docker image build for vecinita-data-management-api-v1 (Render-aligned context).
+# Profile ID for baselines: gha-ubuntu-latest-docker-build (see specs/002-dm-api-docker-build/baseline-notes.md).
+name: Scraper Docker image
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "services/scraper/**"
+      - ".github/workflows/scraper-docker-image.yml"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "services/scraper/**"
+      - ".github/workflows/scraper-docker-image.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: scraper-docker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout with scraper submodule
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          submodules: "false"
+
+      - name: Init scraper submodule
+        run: git submodule update --init --depth 1 services/scraper
+
+      - name: Docker build (timed)
+        run: |
+          set -euo pipefail
+          start=$(date +%s)
+          docker build \
+            -f services/scraper/Dockerfile \
+            -t vecinita-scraper:ci \
+            services/scraper
+          end=$(date +%s)
+          sec=$((end - start))
+          echo "docker_build_elapsed_sec=${sec}"
+          {
+            echo "## Scraper image build"
+            echo "Profile: \`gha-ubuntu-latest-docker-build\` (see \`specs/002-dm-api-docker-build/baseline-notes.md\`)."
+            echo "**docker_build_elapsed_sec**=${sec}"
+          } >> "${GITHUB_STEP_SUMMARY}"
