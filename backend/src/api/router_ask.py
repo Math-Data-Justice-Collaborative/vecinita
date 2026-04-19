@@ -306,7 +306,7 @@ async def ask_question(
         response = await client.get(
             f"{_agent_service_url()}/ask",
             params=upstream,
-            timeout=_get_agent_timeout(),
+            timeout=_agent_httpx_timeout(for_stream=False),
         )
         response.raise_for_status()
         data = response.json()

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib
 import json
+from typing import Any
 
 import httpx
 import pytest
@@ -70,8 +71,8 @@ class _FakeAgentClient:
         self.get_exception = get_exception
         self.stream_chunks = stream_chunks or []
         self.stream_exception = stream_exception
-        self.get_calls: list[tuple[str, dict | None, float | None]] = []
-        self.stream_calls: list[tuple[str, str, dict | None, float | None]] = []
+        self.get_calls: list[tuple[str, dict | None, Any]] = []
+        self.stream_calls: list[tuple[str, str, dict | None, Any]] = []
 
     async def get(self, url: str, params=None, timeout=None):
         self.get_calls.append((url, params, timeout))
@@ -175,7 +176,7 @@ def test_gateway_ask_acceptance_success(env_vars, monkeypatch):
                 "rerank": "false",
                 "rerank_top_k": 10,
             },
-            120.0,
+            router_ask_module._agent_httpx_timeout(for_stream=False),
         )
     ]
 
@@ -285,7 +286,7 @@ def test_gateway_ask_stream_acceptance_success(env_vars, monkeypatch):
                 "rerank": "false",
                 "rerank_top_k": 10,
             },
-            120.0,
+            router_ask_module._agent_httpx_timeout(for_stream=True),
         )
     ]
 
