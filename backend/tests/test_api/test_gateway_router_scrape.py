@@ -260,7 +260,15 @@ class TestScrapeCancelEndpoint:
         """Test cancelling nonexistent job fails."""
         missing = "00000000-0000-0000-0000-000000000002"
         response = scrape_client.post(f"/api/v1/scrape/{missing}/cancel")
-        assert response.status_code == 400
+        assert response.status_code == 404
+
+    def test_cancel_already_cancelled_job_returns_conflict(self, scrape_client):
+        """Second cancel on the same job is rejected with 409 (Schemathesis positive-data friendly)."""
+        response = scrape_client.post("/api/v1/scrape", json={"urls": ["https://example.com"]})
+        job_id = response.json()["job_id"]
+        assert scrape_client.post(f"/api/v1/scrape/{job_id}/cancel").status_code == 200
+        again = scrape_client.post(f"/api/v1/scrape/{job_id}/cancel")
+        assert again.status_code == 409
 
     def test_cancel_job_sets_cancelled_timestamp(self, scrape_client):
         """Test that cancelled timestamp is set."""

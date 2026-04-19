@@ -381,6 +381,24 @@ def _reload_gateway_with_mocks(monkeypatch: pytest.MonkeyPatch, *, enable_auth: 
     return schemathesis.openapi.from_asgi("/api/v1/docs/openapi.json", main_module.app)
 
 
+def clone_gateway_schema_path_prefix(schema: Any, path_prefix: str) -> Any:
+    """Return a schema clone that only selects operations under ``path_prefix``.
+
+    TraceCov / project defaults may register a catch-all ``priority_filter`` on the schema's
+    ``filter_set``. ``schema.include(path_regex=…)`` ORs with that matcher, so it does not
+    actually narrow operations. Stateful job tests replace ``filter_set`` with a single
+    prefix rule instead.
+    """
+    from schemathesis.filters import FilterSet
+
+    def matcher(ctx: Any) -> bool:
+        return ctx.operation.path.startswith(path_prefix)
+
+    fs = FilterSet()
+    fs.include(func=matcher)
+    return schema.clone(filter_set=fs)
+
+
 @pytest.fixture
 def gateway_schema(monkeypatch):
     return _reload_gateway_with_mocks(monkeypatch, enable_auth=False)

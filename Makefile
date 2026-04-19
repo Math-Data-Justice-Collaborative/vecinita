@@ -17,7 +17,7 @@
 	typecheck-scraper \
 	test-integration-gateway-fast test-integration-gateway-full test-integration-gateway \
 	test-all-integration test-cross-integration test-cross-e2e \
-	test-schemathesis test-schemathesis-gateway test-schemathesis-agent test-schemathesis-data-management test-schemathesis-cli test-schemathesis-cli-agent \
+	test-schemathesis test-schemathesis-gateway test-schemathesis-gateway-stateful test-schemathesis-agent test-schemathesis-data-management test-schemathesis-cli test-schemathesis-cli-agent \
 	scraper-run scraper-run-verbose scraper-run-clean scraper-validate-postgres scraper-pull \
 	microservices-up microservices-down microservices-logs test-microservices-contracts test-microservices \
 	render-env-validate render-tests-strict render-tests-render-suite render-workflow-ci \
@@ -111,6 +111,7 @@ help:
 	@echo "Schemathesis (OpenAPI contract)"
 	@echo "  make test-schemathesis                   Run gateway + agent + data-management Schemathesis pytest suites (TraceCov per suite)"
 	@echo "  make test-schemathesis-gateway           Gateway ASGI schema tests (mocked upstreams)"
+	@echo "  make test-schemathesis-gateway-stateful  Gateway job stateful Schemathesis (pytest; mocked)"
 	@echo "  make test-schemathesis-agent             Agent ASGI schema tests (mocked LLM/embeddings)"
 	@echo "  make test-schemathesis-data-management   Live lx27 data-management API; TraceCov fail-under 100 (needs SCRAPER_API_KEYS)"
 	@echo "  make test-schemathesis-cli               Live Schemathesis CLI (loads .env): gateway + data-management; optional AGENT_SCHEMA_URL"
@@ -654,6 +655,11 @@ test-schemathesis-gateway:
 		--tracecov-format=html,text \
 		--tracecov-report-html-path=schema-coverage-gateway-pytest.html \
 		--tracecov-fail-under=100
+
+test-schemathesis-gateway-stateful:
+	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
+		tests/integration/test_gateway_scrape_stateful.py \
+		tests/integration/test_gateway_modal_jobs_stateful.py -q
 
 test-schemathesis-agent:
 	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_agent_api_schema_schemathesis.py -q \

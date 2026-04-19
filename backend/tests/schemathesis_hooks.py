@@ -131,6 +131,11 @@ def _scrape_job_id() -> str:
     return os.environ.get("SCHEMATHESIS_SCRAPE_JOB_ID", _DEFAULT_SCRAPE_JOB_ID).strip()
 
 
+def _modal_scraper_job_id() -> str:
+    """Path param for ``/api/v1/modal-jobs/scraper/{job_id}`` (optional override)."""
+    return os.environ.get("SCHEMATHESIS_MODAL_SCRAPER_JOB_ID", _scrape_job_id()).strip()
+
+
 def _scrape_post_url() -> str:
     return os.environ.get("SCHEMATHESIS_SCRAPE_URL", _DEFAULT_SCRAPE_TARGET_URL).strip()
 
@@ -345,8 +350,11 @@ def map_path_parameters(context: HookContext, path_parameters):  # noqa: ANN001
     }:
         return path_parameters
     out = {} if path_parameters is None else dict(path_parameters)
-    if "gateway_job_id" in (operation.path or ""):
+    path = operation.path or ""
+    if "gateway_job_id" in path:
         out["gateway_job_id"] = _modal_registry_gateway_job_id()
+    elif "/modal-jobs/scraper/" in path:
+        out["job_id"] = _modal_scraper_job_id()
     else:
         out["job_id"] = _scrape_job_id()
     return out
