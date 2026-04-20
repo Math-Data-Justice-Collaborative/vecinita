@@ -109,4 +109,5 @@ backend/src/agent/data/model_selection.json
 backend/integration-test-results.local-ci.xml
 backend/schema-test-results.local-ci.xml
 backend/test-results.local-ci.xml
+backend/schemathesis-report/junit-gateway.xml
 .cursor/mcp.json
