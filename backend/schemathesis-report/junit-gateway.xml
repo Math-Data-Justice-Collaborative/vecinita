@@ -1,184 +1,185 @@
 <?xml version="1.0" encoding="utf-8"?>
-<testsuites disabled="0" errors="0" failures="5" tests="31" time="2449.3615529622184">
-	<testsuite disabled="0" errors="0" failures="5" name="schemathesis" skipped="0" tests="31" time="2449.3615529622184" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
-		<testcase name="POST /api/v1/embed" time="32.258758"/>
-		<testcase name="POST /api/v1/embed/batch" time="35.994464"/>
-		<testcase name="POST /api/v1/embed/config" time="2.072242"/>
-		<testcase name="POST /api/v1/embed/similarity" time="14.712551"/>
-		<testcase name="POST /api/v1/modal-jobs/reindex/spawn" time="21.982785"/>
-		<testcase name="POST /api/v1/modal-jobs/scraper" time="33.825608">
-			<failure type="failure" message="1. Test Case ID: AIJ4tk
-
-- Server error
-
-[500] Internal Server Error:
-
-    `{&quot;error&quot;:&quot;Database unreachable from this runtime; verify DATABASE_URL / network configuration with operators (internal hostname references are redacted).&quot;,&quot;timestamp&quot;:&quot;2026-04-20T01:37:45.871319+00:00&quot;,&quot;correlation_id&quot;:&quot;7009d81c-21b4-4d93-b32a-2bc749277b4c&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;chunking_config&quot;: {}, &quot;crawl_config&quot;: {}, &quot;metadata&quot;: {&quot;source&quot;: &quot;openapi-example&quot;}, &quot;url&quot;: &quot;https://www.city.gov/housing/guide&quot;, &quot;user_id&quot;: &quot;schemathesis&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
-			<failure type="failure" message="1. Test Case ID: AIJ4tk
-
-- Server error
-
-[500] Internal Server Error:
-
-    `{&quot;error&quot;:&quot;Database unreachable from this runtime; verify DATABASE_URL / network configuration with operators (internal hostname references are redacted).&quot;,&quot;timestamp&quot;:&quot;2026-04-20T01:37:45.871319+00:00&quot;,&quot;correlation_id&quot;:&quot;7009d81c-21b4-4d93-b32a-2bc749277b4c&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;chunking_config&quot;: {}, &quot;crawl_config&quot;: {}, &quot;metadata&quot;: {&quot;source&quot;: &quot;openapi-example&quot;}, &quot;url&quot;: &quot;https://www.city.gov/housing/guide&quot;, &quot;user_id&quot;: &quot;schemathesis&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
-			<failure type="failure" message="1. Test Case ID: AIJ4tk
-
-- Server error
-
-[500] Internal Server Error:
-
-    `{&quot;error&quot;:&quot;Database unreachable from this runtime; verify DATABASE_URL / network configuration with operators (internal hostname references are redacted).&quot;,&quot;timestamp&quot;:&quot;2026-04-20T01:37:45.871319+00:00&quot;,&quot;correlation_id&quot;:&quot;7009d81c-21b4-4d93-b32a-2bc749277b4c&quot;}`
-
-Reproduce with:
-
-    curl -X POST -H 'Content-Type: application/json' -d '{&quot;chunking_config&quot;: {}, &quot;crawl_config&quot;: {}, &quot;metadata&quot;: {&quot;source&quot;: &quot;openapi-example&quot;}, &quot;url&quot;: &quot;https://www.city.gov/housing/guide&quot;, &quot;user_id&quot;: &quot;schemathesis&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
-		</testcase>
-		<testcase name="POST /api/v1/scrape" time="19.838737"/>
-		<testcase name="POST /api/v1/scrape/cleanup" time="0.383730"/>
-		<testcase name="GET /" time="0.422218"/>
-		<testcase name="GET /api/v1/ask" time="435.836761">
-			<failure type="failure" message="1. Test Case ID: vW0gSM
+<testsuites disabled="0" errors="0" failures="5" tests="32" time="1895.5447552392725">
+	<testsuite disabled="0" errors="0" failures="5" name="schemathesis" skipped="0" tests="32" time="1895.5447552392725" hostname="coder1281aonubuntu2004-s-2vcpu-8gb-amd-nyc3-01">
+		<testcase name="POST /api/v1/embed" time="27.309372"/>
+		<testcase name="POST /api/v1/embed/batch" time="51.797709"/>
+		<testcase name="POST /api/v1/embed/config" time="2.644790"/>
+		<testcase name="POST /api/v1/embed/similarity" time="51.590325"/>
+		<testcase name="POST /api/v1/modal-jobs/reindex/spawn" time="7.778444"/>
+		<testcase name="POST /api/v1/modal-jobs/scraper" time="5.999346">
+			<failure type="failure" message="1. Test Case ID: Vwm8ZZ
 
 - Server error
 
 [503] Service Unavailable:
 
-    `{&quot;error&quot;:&quot;Unable to connect to agent service: Server disconnected without sending a response.&quot;,&quot;timestamp&quot;:&quot;2026-04-20T01:44:22.408689+00:00&quot;,&quot;correlation_id&quot;:&quot;c3995fa2-0b76-44a0-8370-7fbe55d4072d&quot;}`
+    `{&quot;error&quot;:&quot;relation \&quot;scraping_jobs\&quot; does not exist\nLINE 2:                     INSERT INTO scraping_jobs (\n                                        ^&quot;,&quot;timestamp&quot;:&quot;2026-04-20T19:09:17.275272+00:00&quot;,&quot;correlation_id&quot;:&quot;841fbcd0-4c44-4ee9-994c-8e8860a4e339&quot;}`
 
 Reproduce with:
 
-    curl -X GET 'https://vecinita-gateway-lx27.onrender.com/api/v1/ask?question=0&amp;thread_id=null'"/>
-		</testcase>
-		<testcase name="GET /api/v1/ask/config" time="0.586655"/>
-		<testcase name="GET /api/v1/ask/stream" time="1706.094684"/>
-		<testcase name="GET /api/v1/documents/chunk-statistics" time="2.194757"/>
-		<testcase name="GET /api/v1/documents/download-url" time="2.541704"/>
-		<testcase name="GET /api/v1/documents/overview" time="4.860647"/>
-		<testcase name="GET /api/v1/documents/preview" time="3.042498"/>
-		<testcase name="GET /api/v1/documents/tags" time="4.560260"/>
-		<testcase name="GET /api/v1/embed/config" time="0.344898"/>
-		<testcase name="GET /api/v1/modal-jobs/registry" time="18.071079"/>
-		<testcase name="GET /api/v1/modal-jobs/registry/{gateway_job_id}" time="1.580881"/>
-		<testcase name="GET /api/v1/modal-jobs/scraper" time="30.535723">
-			<failure type="failure" message="1. Test Case ID: lirRjZ
+    curl -X POST -H 'Content-Type: application/json' -d '{&quot;chunking_config&quot;: {}, &quot;crawl_config&quot;: {}, &quot;metadata&quot;: {&quot;source&quot;: &quot;openapi-example&quot;}, &quot;url&quot;: &quot;https://www.city.gov/housing/guide&quot;, &quot;user_id&quot;: &quot;schemathesis&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
+			<failure type="failure" message="1. Test Case ID: Vwm8ZZ
 
 - Server error
 
-[500] Internal Server Error:
+[503] Service Unavailable:
 
-    `{&quot;error&quot;:&quot;Database unreachable from this runtime; verify DATABASE_URL / network configuration with operators (internal hostname references are redacted).&quot;,&quot;timestamp&quot;:&quot;2026-04-20T01:38:45.124349+00:00&quot;,&quot;correlation_id&quot;:&quot;7c321b43-eb29-4250-8fd1-d1c9670e6f49&quot;}`
+    `{&quot;error&quot;:&quot;relation \&quot;scraping_jobs\&quot; does not exist\nLINE 2:                     INSERT INTO scraping_jobs (\n                                        ^&quot;,&quot;timestamp&quot;:&quot;2026-04-20T19:09:17.275272+00:00&quot;,&quot;correlation_id&quot;:&quot;841fbcd0-4c44-4ee9-994c-8e8860a4e339&quot;}`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '{&quot;chunking_config&quot;: {}, &quot;crawl_config&quot;: {}, &quot;metadata&quot;: {&quot;source&quot;: &quot;openapi-example&quot;}, &quot;url&quot;: &quot;https://www.city.gov/housing/guide&quot;, &quot;user_id&quot;: &quot;schemathesis&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
+			<failure type="failure" message="1. Test Case ID: Vwm8ZZ
+
+- Server error
+
+[503] Service Unavailable:
+
+    `{&quot;error&quot;:&quot;relation \&quot;scraping_jobs\&quot; does not exist\nLINE 2:                     INSERT INTO scraping_jobs (\n                                        ^&quot;,&quot;timestamp&quot;:&quot;2026-04-20T19:09:17.275272+00:00&quot;,&quot;correlation_id&quot;:&quot;841fbcd0-4c44-4ee9-994c-8e8860a4e339&quot;}`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '{&quot;chunking_config&quot;: {}, &quot;crawl_config&quot;: {}, &quot;metadata&quot;: {&quot;source&quot;: &quot;openapi-example&quot;}, &quot;url&quot;: &quot;https://www.city.gov/housing/guide&quot;, &quot;user_id&quot;: &quot;schemathesis&quot;}' https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
+		</testcase>
+		<testcase name="POST /api/v1/scrape" time="17.376611"/>
+		<testcase name="POST /api/v1/scrape/cleanup" time="0.517369"/>
+		<testcase name="GET /" time="0.436809"/>
+		<testcase name="GET /api/v1/ask" time="402.251907">
+			<failure type="failure" message="1. Test Case ID: j005hK
+
+- Server error
+
+[503] Service Unavailable:
+
+    `{&quot;error&quot;:&quot;Unable to connect to agent service: Server disconnected without sending a response.&quot;,&quot;timestamp&quot;:&quot;2026-04-20T19:15:55.038136+00:00&quot;,&quot;correlation_id&quot;:&quot;1335acd7-f802-473a-aa89-6062c92acc9f&quot;}`
+
+Reproduce with:
+
+    curl -X GET 'https://vecinita-gateway-lx27.onrender.com/api/v1/ask?question=0&amp;thread_id=null&amp;thread_id=null'"/>
+		</testcase>
+		<testcase name="GET /api/v1/ask/config" time="0.734213"/>
+		<testcase name="GET /api/v1/ask/stream" time="1187.904421"/>
+		<testcase name="GET /api/v1/documents/chunk-statistics" time="3.351116"/>
+		<testcase name="GET /api/v1/documents/download-url" time="2.753137"/>
+		<testcase name="GET /api/v1/documents/overview" time="5.629343"/>
+		<testcase name="GET /api/v1/documents/preview" time="3.604587"/>
+		<testcase name="GET /api/v1/documents/tags" time="6.337473"/>
+		<testcase name="GET /api/v1/embed/config" time="0.591588"/>
+		<testcase name="GET /api/v1/modal-jobs/registry" time="26.914674"/>
+		<testcase name="GET /api/v1/modal-jobs/registry/{gateway_job_id}" time="2.613550"/>
+		<testcase name="GET /api/v1/modal-jobs/scraper" time="5.839242">
+			<failure type="failure" message="1. Test Case ID: o3xupK
+
+- Server error
+
+[503] Service Unavailable:
+
+    `{&quot;error&quot;:&quot;relation \&quot;scraping_jobs\&quot; does not exist\nLINE 3:                     FROM scraping_jobs\n                                 ^&quot;,&quot;timestamp&quot;:&quot;2026-04-20T19:10:06.694368+00:00&quot;,&quot;correlation_id&quot;:&quot;a718694b-6f98-46b3-9f26-6535004097e4&quot;}`
 
 Reproduce with:
 
     curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
-			<failure type="failure" message="1. Test Case ID: lirRjZ
+			<failure type="failure" message="1. Test Case ID: o3xupK
 
 - Server error
 
-[500] Internal Server Error:
+[503] Service Unavailable:
 
-    `{&quot;error&quot;:&quot;Database unreachable from this runtime; verify DATABASE_URL / network configuration with operators (internal hostname references are redacted).&quot;,&quot;timestamp&quot;:&quot;2026-04-20T01:38:45.124349+00:00&quot;,&quot;correlation_id&quot;:&quot;7c321b43-eb29-4250-8fd1-d1c9670e6f49&quot;}`
+    `{&quot;error&quot;:&quot;relation \&quot;scraping_jobs\&quot; does not exist\nLINE 3:                     FROM scraping_jobs\n                                 ^&quot;,&quot;timestamp&quot;:&quot;2026-04-20T19:10:06.694368+00:00&quot;,&quot;correlation_id&quot;:&quot;a718694b-6f98-46b3-9f26-6535004097e4&quot;}`
 
 Reproduce with:
 
     curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
-			<failure type="failure" message="1. Test Case ID: lirRjZ
+			<failure type="failure" message="1. Test Case ID: o3xupK
 
 - Server error
 
-[500] Internal Server Error:
+[503] Service Unavailable:
 
-    `{&quot;error&quot;:&quot;Database unreachable from this runtime; verify DATABASE_URL / network configuration with operators (internal hostname references are redacted).&quot;,&quot;timestamp&quot;:&quot;2026-04-20T01:38:45.124349+00:00&quot;,&quot;correlation_id&quot;:&quot;7c321b43-eb29-4250-8fd1-d1c9670e6f49&quot;}`
+    `{&quot;error&quot;:&quot;relation \&quot;scraping_jobs\&quot; does not exist\nLINE 3:                     FROM scraping_jobs\n                                 ^&quot;,&quot;timestamp&quot;:&quot;2026-04-20T19:10:06.694368+00:00&quot;,&quot;correlation_id&quot;:&quot;a718694b-6f98-46b3-9f26-6535004097e4&quot;}`
 
 Reproduce with:
 
     curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper"/>
 		</testcase>
-		<testcase name="GET /api/v1/scrape/history" time="1.949120"/>
-		<testcase name="GET /api/v1/scrape/stats" time="0.401232"/>
-		<testcase name="GET /config" time="0.379167"/>
-		<testcase name="GET /health" time="0.559522"/>
-		<testcase name="GET /integrations/status" time="0.473901"/>
-		<testcase name="DELETE /api/v1/modal-jobs/registry/{gateway_job_id}" time="1.368394"/>
-		<testcase name="GET /api/v1/scrape/{job_id}" time="1.218058"/>
-		<testcase name="POST /api/v1/modal-jobs/scraper/{job_id}/cancel" time="36.862328">
-			<failure type="failure" message="1. Test Case ID: qbG1X7
+		<testcase name="GET /api/v1/scrape/history" time="3.387612"/>
+		<testcase name="GET /api/v1/scrape/stats" time="0.558927"/>
+		<testcase name="GET /config" time="0.635237"/>
+		<testcase name="GET /health" time="0.800338"/>
+		<testcase name="GET /integrations/status" time="0.686866"/>
+		<testcase name="DELETE /api/v1/modal-jobs/registry/{gateway_job_id}" time="2.078429"/>
+		<testcase name="GET /api/v1/scrape/{job_id}" time="2.090723"/>
+		<testcase name="POST /api/v1/modal-jobs/scraper/{job_id}/cancel" time="1.963540">
+			<failure type="failure" message="1. Test Case ID: 6u7kE2
 
 - Server error
 
-[500] Internal Server Error:
+[503] Service Unavailable:
 
-    `{&quot;error&quot;:&quot;Database unreachable from this runtime; verify DATABASE_URL / network configuration with operators (internal hostname references are redacted).&quot;,&quot;timestamp&quot;:&quot;2026-04-20T01:38:50.370223+00:00&quot;,&quot;correlation_id&quot;:&quot;ff97dcd9-ddb0-4e8b-8e4c-86aa48fd57fd&quot;}`
+    `{&quot;error&quot;:&quot;relation \&quot;scraping_jobs\&quot; does not exist\nLINE 31:     FROM scraping_jobs j\n                  ^&quot;,&quot;timestamp&quot;:&quot;2026-04-20T19:10:07.490883+00:00&quot;,&quot;correlation_id&quot;:&quot;0d6618d9-b644-401b-83d3-16d0a9789e6d&quot;}`
 
 Reproduce with:
 
-    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/1782f540-9b5f-41d6-ac28-49110128942f/cancel"/>
-			<failure type="failure" message="1. Test Case ID: qbG1X7
+    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/285b1ff0-ca50-44f5-9c9f-923d6d4120fc/cancel"/>
+			<failure type="failure" message="1. Test Case ID: 6u7kE2
 
 - Server error
 
-[500] Internal Server Error:
+[503] Service Unavailable:
 
-    `{&quot;error&quot;:&quot;Database unreachable from this runtime; verify DATABASE_URL / network configuration with operators (internal hostname references are redacted).&quot;,&quot;timestamp&quot;:&quot;2026-04-20T01:38:50.370223+00:00&quot;,&quot;correlation_id&quot;:&quot;ff97dcd9-ddb0-4e8b-8e4c-86aa48fd57fd&quot;}`
+    `{&quot;error&quot;:&quot;relation \&quot;scraping_jobs\&quot; does not exist\nLINE 31:     FROM scraping_jobs j\n                  ^&quot;,&quot;timestamp&quot;:&quot;2026-04-20T19:10:07.490883+00:00&quot;,&quot;correlation_id&quot;:&quot;0d6618d9-b644-401b-83d3-16d0a9789e6d&quot;}`
 
 Reproduce with:
 
-    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/1782f540-9b5f-41d6-ac28-49110128942f/cancel"/>
-			<failure type="failure" message="1. Test Case ID: qbG1X7
+    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/285b1ff0-ca50-44f5-9c9f-923d6d4120fc/cancel"/>
+			<failure type="failure" message="1. Test Case ID: 6u7kE2
 
 - Server error
 
-[500] Internal Server Error:
+[503] Service Unavailable:
 
-    `{&quot;error&quot;:&quot;Database unreachable from this runtime; verify DATABASE_URL / network configuration with operators (internal hostname references are redacted).&quot;,&quot;timestamp&quot;:&quot;2026-04-20T01:38:50.370223+00:00&quot;,&quot;correlation_id&quot;:&quot;ff97dcd9-ddb0-4e8b-8e4c-86aa48fd57fd&quot;}`
+    `{&quot;error&quot;:&quot;relation \&quot;scraping_jobs\&quot; does not exist\nLINE 31:     FROM scraping_jobs j\n                  ^&quot;,&quot;timestamp&quot;:&quot;2026-04-20T19:10:07.490883+00:00&quot;,&quot;correlation_id&quot;:&quot;0d6618d9-b644-401b-83d3-16d0a9789e6d&quot;}`
 
 Reproduce with:
 
-    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/1782f540-9b5f-41d6-ac28-49110128942f/cancel"/>
+    curl -X POST https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/285b1ff0-ca50-44f5-9c9f-923d6d4120fc/cancel"/>
 		</testcase>
-		<testcase name="POST /api/v1/scrape/{job_id}/cancel" time="1.070929"/>
-		<testcase name="GET /api/v1/modal-jobs/scraper/{job_id}" time="33.337262">
-			<failure type="failure" message="1. Test Case ID: CwcSXR
+		<testcase name="POST /api/v1/scrape/{job_id}/cancel" time="2.602614"/>
+		<testcase name="GET /api/v1/modal-jobs/scraper/{job_id}" time="2.325412">
+			<failure type="failure" message="1. Test Case ID: cKsDt7
 
 - Server error
 
-[500] Internal Server Error:
+[503] Service Unavailable:
 
-    `{&quot;error&quot;:&quot;Database unreachable from this runtime; verify DATABASE_URL / network configuration with operators (internal hostname references are redacted).&quot;,&quot;timestamp&quot;:&quot;2026-04-20T01:38:54.476587+00:00&quot;,&quot;correlation_id&quot;:&quot;f592c84a-6b3a-41cf-a517-f97452813402&quot;}`
+    `{&quot;error&quot;:&quot;relation \&quot;scraping_jobs\&quot; does not exist\nLINE 31:     FROM scraping_jobs j\n                  ^&quot;,&quot;timestamp&quot;:&quot;2026-04-20T19:10:07.640682+00:00&quot;,&quot;correlation_id&quot;:&quot;c3b02374-32b3-4477-8f24-ec075b1b2255&quot;}`
 
 Reproduce with:
 
-    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/1782f540-9b5f-41d6-ac28-49110128942f"/>
-			<failure type="failure" message="1. Test Case ID: CwcSXR
+    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/285b1ff0-ca50-44f5-9c9f-923d6d4120fc"/>
+			<failure type="failure" message="1. Test Case ID: cKsDt7
 
 - Server error
 
-[500] Internal Server Error:
+[503] Service Unavailable:
 
-    `{&quot;error&quot;:&quot;Database unreachable from this runtime; verify DATABASE_URL / network configuration with operators (internal hostname references are redacted).&quot;,&quot;timestamp&quot;:&quot;2026-04-20T01:38:54.476587+00:00&quot;,&quot;correlation_id&quot;:&quot;f592c84a-6b3a-41cf-a517-f97452813402&quot;}`
+    `{&quot;error&quot;:&quot;relation \&quot;scraping_jobs\&quot; does not exist\nLINE 31:     FROM scraping_jobs j\n                  ^&quot;,&quot;timestamp&quot;:&quot;2026-04-20T19:10:07.640682+00:00&quot;,&quot;correlation_id&quot;:&quot;c3b02374-32b3-4477-8f24-ec075b1b2255&quot;}`
 
 Reproduce with:
 
-    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/1782f540-9b5f-41d6-ac28-49110128942f"/>
-			<failure type="failure" message="1. Test Case ID: CwcSXR
+    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/285b1ff0-ca50-44f5-9c9f-923d6d4120fc"/>
+			<failure type="failure" message="1. Test Case ID: cKsDt7
 
 - Server error
 
-[500] Internal Server Error:
+[503] Service Unavailable:
 
-    `{&quot;error&quot;:&quot;Database unreachable from this runtime; verify DATABASE_URL / network configuration with operators (internal hostname references are redacted).&quot;,&quot;timestamp&quot;:&quot;2026-04-20T01:38:54.476587+00:00&quot;,&quot;correlation_id&quot;:&quot;f592c84a-6b3a-41cf-a517-f97452813402&quot;}`
+    `{&quot;error&quot;:&quot;relation \&quot;scraping_jobs\&quot; does not exist\nLINE 31:     FROM scraping_jobs j\n                  ^&quot;,&quot;timestamp&quot;:&quot;2026-04-20T19:10:07.640682+00:00&quot;,&quot;correlation_id&quot;:&quot;c3b02374-32b3-4477-8f24-ec075b1b2255&quot;}`
 
 Reproduce with:
 
-    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/1782f540-9b5f-41d6-ac28-49110128942f"/>
+    curl -X GET https://vecinita-gateway-lx27.onrender.com/api/v1/modal-jobs/scraper/285b1ff0-ca50-44f5-9c9f-923d6d4120fc"/>
 		</testcase>
+		<testcase name="Stateful tests" time="64.439032"/>
 	</testsuite>
 </testsuites>

@@ -63,6 +63,12 @@ def test_modal_scraper_submit_ok_when_modal_enabled(modal_jobs_client, monkeypat
             },
         },
     )
+    kicks: list[tuple[bool, bool, bool]] = []
+    monkeypatch.setattr(
+        router_modal_jobs,
+        "spawn_modal_scraper_reindex",
+        lambda c, s, v: kicks.append((c, s, v)) or "call-1",
+    )
 
     resp = modal_jobs_client.post(
         "/api/v1/modal-jobs/scraper",
@@ -72,6 +78,7 @@ def test_modal_scraper_submit_ok_when_modal_enabled(modal_jobs_client, monkeypat
     body = resp.json()
     assert body["job_id"] == "job-abc"
     assert body["status"] == "pending"
+    assert kicks == [(False, True, False)]
 
 
 def test_modal_scraper_submit_maps_modal_error_envelope(modal_jobs_client, monkeypatch):
@@ -129,6 +136,12 @@ def test_modal_scraper_submit_gateway_persist_injects_job_id(modal_jobs_client, 
             },
         },
     )
+    kicks: list[tuple[bool, bool, bool]] = []
+    monkeypatch.setattr(
+        router_modal_jobs,
+        "spawn_modal_scraper_reindex",
+        lambda c, s, v: kicks.append((c, s, v)) or "call-1",
+    )
 
     resp = modal_jobs_client.post(
         "/api/v1/modal-jobs/scraper",
@@ -136,6 +149,7 @@ def test_modal_scraper_submit_gateway_persist_injects_job_id(modal_jobs_client, 
     )
     assert resp.status_code == 200
     assert resp.json()["job_id"] == fixed_id
+    assert kicks == [(False, True, False)]
 
 
 def test_modal_scraper_submit_injects_correlation_id_in_metadata_and_header(
@@ -170,6 +184,7 @@ def test_modal_scraper_submit_injects_correlation_id_in_metadata_and_header(
         }
 
     monkeypatch.setattr(router_modal_jobs, "invoke_modal_scrape_job_submit", capture_submit)
+    monkeypatch.setattr(router_modal_jobs, "spawn_modal_scraper_reindex", lambda *_a, **_k: None)
 
     resp = modal_jobs_client.post(
         "/api/v1/modal-jobs/scraper",
@@ -298,3 +313,74 @@ def test_modal_scraper_submit_gateway_persist_db_runtime_redacted(modal_jobs_cli
     body = resp.json()
     assert body.get("correlation_id") == "cid-db-503"
     assert "dpg-" not in str(body.get("error", "")).lower()
+
+
+def test_modal_scraper_submit_succeeds_when_pipeline_kick_fails(modal_jobs_client, monkeypatch):
+    """Enqueue must still return 200 if trigger_reindex spawn fails (job is on Modal queue)."""
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
+    monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")
+    monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-test")
+
+    from src.api import router_modal_jobs
+
+    monkeypatch.setattr(
+        router_modal_jobs,
+        "invoke_modal_scrape_job_submit",
+        lambda payload: {
+            "ok": True,
+            "data": {
+                "job_id": "job-abc",
+                "status": "pending",
+                "created_at": "2024-01-01T00:00:00",
+                "url": str(payload["url"]),
+            },
+        },
+    )
+
+    def boom(_c, _s, _v):
+        raise RuntimeError("modal spawn failed")
+
+    monkeypatch.setattr(router_modal_jobs, "spawn_modal_scraper_reindex", boom)
+
+    resp = modal_jobs_client.post(
+        "/api/v1/modal-jobs/scraper",
+        json={"url": "https://example.com/page", "user_id": "test-user"},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["job_id"] == "job-abc"
+
+
+def test_modal_scraper_submit_skips_pipeline_kick_when_disabled(modal_jobs_client, monkeypatch):
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
+    monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")
+    monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-test")
+    monkeypatch.setenv("MODAL_SCRAPER_SUBMIT_AUTO_KICK", "0")
+
+    from src.api import router_modal_jobs
+
+    monkeypatch.setattr(
+        router_modal_jobs,
+        "invoke_modal_scrape_job_submit",
+        lambda payload: {
+            "ok": True,
+            "data": {
+                "job_id": "job-abc",
+                "status": "pending",
+                "created_at": "2024-01-01T00:00:00",
+                "url": str(payload["url"]),
+            },
+        },
+    )
+    called: list[bool] = []
+
+    def nope(*_a, **_k):
+        called.append(True)
+
+    monkeypatch.setattr(router_modal_jobs, "spawn_modal_scraper_reindex", nope)
+
+    resp = modal_jobs_client.post(
+        "/api/v1/modal-jobs/scraper",
+        json={"url": "https://example.com/page", "user_id": "test-user"},
+    )
+    assert resp.status_code == 200
+    assert called == []

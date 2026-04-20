@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
 from functools import partial
 from typing import Annotated, Any
@@ -25,6 +26,8 @@ from src.services.modal.invoker import (
 from src.services.modal.job_registry import modal_job_registry
 from src.utils.database_url import get_resolved_database_url
 from src.utils.gateway_dependency_errors import client_safe_message_for_dependency_failure
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/modal-jobs", tags=["Modal jobs"])
 
@@ -99,6 +102,28 @@ def _unwrap_scraper_envelope(env: dict[str, Any]) -> dict[str, Any]:
 def _persist_runtime_http_detail(exc: RuntimeError) -> str:
     """FR-002-safe text for gateway-owned Postgres paths (belt-and-suspenders over persist layer)."""
     return client_safe_message_for_dependency_failure(exc)
+
+
+def _submit_auto_kick_pipeline_enabled() -> bool:
+    """After a successful Modal scrape submit, spawn ``trigger_reindex`` so drain workers run.
+
+    Modal only enqueues to ``scrape-jobs``; ``trigger_reindex`` spawns the ``drain_*_queue``
+    functions. Disable with ``MODAL_SCRAPER_SUBMIT_AUTO_KICK=0`` if you batch-kick separately.
+    """
+    raw = str(os.getenv("MODAL_SCRAPER_SUBMIT_AUTO_KICK", "1")).strip().lower()
+    return raw not in {"0", "false", "no", "off"}
+
+
+async def _kick_scraper_pipeline_after_submit() -> None:
+    if not _submit_auto_kick_pipeline_enabled():
+        return
+    try:
+        await asyncio.to_thread(spawn_modal_scraper_reindex, False, True, False)
+    except Exception:
+        logger.exception(
+            "Modal trigger_reindex spawn failed after scrape submit; job may remain queued until "
+            "POST /api/v1/scrape/reindex or POST /api/v1/modal-jobs/reindex/spawn"
+        )
 
 
 class GatewayModalScrapeSubmitRequest(BaseModel):
@@ -288,12 +313,14 @@ async def modal_scraper_submit(
         payload["job_id"] = jid
         env = await asyncio.to_thread(invoke_modal_scrape_job_submit, payload)
         data = _unwrap_scraper_envelope(env)
+        await _kick_scraper_pipeline_after_submit()
         return GatewayModalScrapeJobBody.model_validate(data)
 
     payload = body.model_dump(mode="json")
     payload["metadata"] = merged_metadata
     env = await asyncio.to_thread(invoke_modal_scrape_job_submit, payload)
     data = _unwrap_scraper_envelope(env)
+    await _kick_scraper_pipeline_after_submit()
     return GatewayModalScrapeJobBody.model_validate(data)
 
 
