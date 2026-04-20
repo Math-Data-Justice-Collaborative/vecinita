@@ -88,6 +88,21 @@ def _require_modal_invocation() -> None:
         )
 
 
+def _require_gateway_scrape_db_or_modal_invocation() -> None:
+    """Status/list/cancel: gateway can serve from Postgres when persist-via-gateway is on.
+
+    Otherwise callers need Modal SDK (``modal_scrape_job_get`` / list / cancel RPC).
+    """
+    if _gateway_owns_modal_scraper_control_plane():
+        if not get_resolved_database_url().strip():
+            raise HTTPException(
+                status_code=503,
+                detail="MODAL_SCRAPER_PERSIST_VIA_GATEWAY requires DATABASE_URL (or DB_URL) on the gateway",
+            )
+        return
+    _require_modal_invocation()
+
+
 def _unwrap_scraper_envelope(env: dict[str, Any]) -> dict[str, Any]:
     if env.get("ok"):
         data = env.get("data")
@@ -332,7 +347,7 @@ async def modal_scraper_submit(
 )
 async def modal_scraper_get(
     job_id: UUID,
-    _: Annotated[None, Depends(_require_modal_invocation)],
+    _: Annotated[None, Depends(_require_gateway_scrape_db_or_modal_invocation)],
 ) -> GatewayModalScrapeJobBody:
     if _gateway_owns_modal_scraper_control_plane():
         try:
@@ -355,16 +370,11 @@ async def modal_scraper_get(
     responses=_SCRAPER_LIST_RESPONSES,
 )
 async def modal_scraper_list(
-    _: Annotated[None, Depends(_require_modal_invocation)],
+    _: Annotated[None, Depends(_require_gateway_scrape_db_or_modal_invocation)],
     user_id: Annotated[str | None, Query(min_length=1)] = None,
     limit: int = Query(default=50, ge=1, le=100),
 ) -> GatewayModalScraperListResponse:
     if _gateway_owns_modal_scraper_control_plane():
-        if not get_resolved_database_url().strip():
-            raise HTTPException(
-                status_code=503,
-                detail="MODAL_SCRAPER_PERSIST_VIA_GATEWAY requires DATABASE_URL (or DB_URL) on the gateway",
-            )
         try:
             data = await asyncio.to_thread(
                 partial(modal_scraper_persist.list_jobs_payload, user_id=user_id, limit=limit),
@@ -393,7 +403,7 @@ async def modal_scraper_list(
 )
 async def modal_scraper_cancel(
     job_id: UUID,
-    _: Annotated[None, Depends(_require_modal_invocation)],
+    _: Annotated[None, Depends(_require_gateway_scrape_db_or_modal_invocation)],
 ) -> GatewayModalScrapeJobBody:
     if _gateway_owns_modal_scraper_control_plane():
         try:

@@ -207,9 +207,7 @@ def test_modal_scraper_submit_injects_correlation_id_in_metadata_and_header(
 
 def test_modal_scraper_get_returns_404_unknown_job_gateway_persist(modal_jobs_client, monkeypatch):
     """Gateway-owned DB path: missing row → 404 (not 5xx)."""
-    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
-    monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")
-    monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-test")
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "0")
     monkeypatch.setenv("MODAL_SCRAPER_PERSIST_VIA_GATEWAY", "1")
     monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@localhost:5432/db")
 
@@ -234,9 +232,7 @@ def test_modal_scraper_get_returns_404_unknown_job_gateway_persist(modal_jobs_cl
 def test_modal_scraper_cancel_returns_404_unknown_job_gateway_persist(
     modal_jobs_client, monkeypatch
 ):
-    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
-    monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")
-    monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-test")
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "0")
     monkeypatch.setenv("MODAL_SCRAPER_PERSIST_VIA_GATEWAY", "1")
     monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@localhost:5432/db")
 
