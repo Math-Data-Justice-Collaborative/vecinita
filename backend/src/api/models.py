@@ -4487,6 +4487,19 @@ class GatewayAskQueryParams(BaseModel):
         examples=[10],
     )
 
+    @field_validator("lang", mode="before")
+    @classmethod
+    def normalize_ask_lang(cls, value: object) -> str | None:
+        """Treat literal ``null`` / ``none`` query tokens as unset (Schemathesis / clients)."""
+        if value is None:
+            return None
+        if isinstance(value, str):
+            s = value.strip()
+            if not s or s.lower() in {"null", "none", "undefined"}:
+                return None
+            return s
+        return None
+
     model_config = ConfigDict(
         extra="ignore",
         json_schema_extra={

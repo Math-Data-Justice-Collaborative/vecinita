@@ -259,6 +259,20 @@ def test_agent_node_invokes_llm_without_orphan_tool_messages(monkeypatch):
     assert seen_tools[0].tool_call_id == "call-db-1"
 
 
+def test_detect_ask_query_language_skips_langdetect_for_digit_only_questions():
+    agent_main = _agent_main_module()
+
+    assert agent_main.detect_ask_query_language("0") == "en"
+    assert agent_main.detect_ask_query_language("  42  ") == "en"
+
+
+def test_is_non_linguistic_question_identifies_digit_only_prompts():
+    agent_main = _agent_main_module()
+
+    assert agent_main._is_non_linguistic_question("0") is True
+    assert agent_main._is_non_linguistic_question("What about food?") is False
+
+
 def test_is_answer_seeking_query_handles_greetings_and_questions():
     agent_main = _agent_main_module()
 

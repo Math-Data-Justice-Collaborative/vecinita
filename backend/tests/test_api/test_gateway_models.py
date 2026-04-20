@@ -221,6 +221,16 @@ class TestAskModels:
         assert request.lang == "es"
         assert request.question == "¿Qué es la política de vivienda?"
 
+    def test_gateway_ask_query_params_coerces_string_null_lang(self):
+        from src.api.models import GatewayAskQueryParams
+
+        p = GatewayAskQueryParams(question="ok", lang="null")
+        assert p.lang is None
+        p2 = GatewayAskQueryParams(question="ok", lang="none")
+        assert p2.lang is None
+        p3 = GatewayAskQueryParams(question="ok", lang="  es  ")
+        assert p3.lang == "es"
+
     def test_ask_response(self):
         """Test AskQuestionResponse model."""
         from src.api.models import AskQuestionResponse

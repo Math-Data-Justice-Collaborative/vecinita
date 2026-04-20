@@ -62,6 +62,7 @@ from .router_ask import router as ask_router
 from .router_documents import router as documents_router
 from .router_embed import router as embed_router
 from .router_modal_jobs import router as modal_jobs_router
+from .router_scraper_pipeline_ingest import router as scraper_pipeline_ingest_router
 
 try:
     from .router_scrape import router as scrape_router
@@ -574,6 +575,7 @@ if scrape_router is not None:
     v1_router.include_router(scrape_router)
 v1_router.include_router(embed_router)
 v1_router.include_router(modal_jobs_router)
+v1_router.include_router(scraper_pipeline_ingest_router)
 v1_router.include_router(documents_router)  # public, no auth
 
 # Include the version router in the main app

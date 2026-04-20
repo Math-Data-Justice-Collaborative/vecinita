@@ -2883,6 +2883,49 @@ def _coerce_ask_query_parameters(
     return question, query, lang, provider, model, tags, context_answer
 
 
+def _question_has_letters(text: str) -> bool:
+    return any(ch.isalpha() for ch in text)
+
+
+def detect_ask_query_language(question: str) -> str:
+    """Return ``en`` or ``es`` for ask flows.
+
+    Skips ``langdetect`` when the prompt has no alphabetic characters (digits,
+    punctuation, emoji-only, etc.) to avoid spurious failures and log noise.
+    """
+    stripped = (question or "").strip()
+    if not stripped or not _question_has_letters(stripped):
+        return "en"
+    try:
+        candidate = detect(stripped)
+    except LangDetectException:
+        logger.warning(
+            "Language detection failed for question: '%s'. Defaulting to English.", stripped
+        )
+        candidate = "en"
+    lang = candidate if candidate in {"es", "en"} else "en"
+    if lang != "es" and any(ch in stripped for ch in ("¿", "¡", "á", "é", "í", "ó", "ú", "ñ", "ü")):
+        lang = "es"
+    return lang
+
+
+def _is_non_linguistic_question(text: str) -> bool:
+    stripped = (text or "").strip()
+    return bool(stripped) and not _question_has_letters(stripped)
+
+
+def _non_linguistic_query_reply(lang: str) -> str:
+    if lang == "es":
+        return (
+            "Necesito una pregunta escrita con palabras (por ejemplo, sobre recursos locales "
+            "en Providence). Escribe qué buscas y lo reviso."
+        )
+    return (
+        "I need a question written in words (for example, about local resources in "
+        "Providence). Please describe what you are looking for."
+    )
+
+
 def _non_answer_brief_llm_reply(
     *,
     provider: str | None,
@@ -3006,17 +3049,7 @@ async def ask_question(
 
         # Detect language unless explicitly provided
         if not lang:
-            try:
-                lang = detect(question)
-            except LangDetectException:
-                lang = "en"
-                logger.warning(
-                    "Language detection failed for question: '%s'. Defaulting to English.", question
-                )
-            # Heuristic override: treat as Spanish if question contains Spanish punctuation or accents
-            if lang != "es":
-                if any(ch in question for ch in ["¿", "¡", "á", "é", "í", "ó", "ú", "ñ"]):
-                    lang = "es"
+            lang = detect_ask_query_language(question)
 
         # Try static response first for deterministic FAQ handling in both languages
         # --- GuardrailsAI: validate input before invoking agent ---
@@ -3035,9 +3068,18 @@ async def ask_question(
         # If PII was detected and redacted, use redacted version
         effective_question = guard_result.redacted if guard_result.redacted else question
 
+        if _is_non_linguistic_question(effective_question):
+            return _response_payload(
+                _non_linguistic_query_reply(lang),
+                thread_id=thread_id,
+                started_at=started_at,
+                sources=[],
+            )
+
         if contextual_follow_up:
             llm_started_at = time.perf_counter()
-            answer = _build_contextual_follow_up_answer(
+            answer = await asyncio.to_thread(
+                _build_contextual_follow_up_answer,
                 question=effective_question,
                 prior_answer=context_answer or "",
                 language=lang,
@@ -3106,7 +3148,8 @@ async def ask_question(
                 if static_faq_answer:
                     answer = static_faq_answer
                 else:
-                    answer, llm_ms = _non_answer_brief_llm_reply(
+                    answer, llm_ms = await asyncio.to_thread(
+                        _non_answer_brief_llm_reply,
                         provider=provider,
                         model=model,
                         lang=lang,
@@ -3319,19 +3362,25 @@ async def ask_question_stream(
 
             # Detect language unless explicitly provided
             if not lang:
-                try:
-                    detected_lang = detect(question)
-                    lang_local = detected_lang if detected_lang in ["es", "en"] else "en"
-                except LangDetectException:
-                    lang_local = "en"
-                # Heuristic override: treat as Spanish if question contains Spanish punctuation or accents
-                if lang_local != "es":
-                    if any(c in question for c in "¿¡áéíóúñü"):
-                        lang_local = "es"
+                lang_local = detect_ask_query_language(question)
             else:
                 lang_local = lang
 
             lang = lang_local
+
+            if _is_non_linguistic_question(question):
+                yield _sse(
+                    {
+                        "type": "complete",
+                        "answer": _non_linguistic_query_reply(lang_local),
+                        "sources": [],
+                        "suggested_questions": [],
+                        "thread_id": thread_id,
+                        "plan": "",
+                        "metadata": {"progress": 100, "stage": "complete"},
+                    }
+                )
+                return
 
             logger.info(
                 f"\n--- Streaming request received: '{question}' (Language: {lang_local}, Thread: {thread_id}) ---"
@@ -3369,7 +3418,8 @@ async def ask_question_stream(
             logger.info("Streaming intent gate: answer_seeking=%s", answer_seeking)
 
             if contextual_follow_up:
-                answer = _build_contextual_follow_up_answer(
+                answer = await asyncio.to_thread(
+                    _build_contextual_follow_up_answer,
                     question=question,
                     prior_answer=context_answer or "",
                     language=lang_local,

@@ -185,7 +185,11 @@ def get_modal_function_call_result(function_call_id: str, timeout: float | None)
 
 
 def invoke_modal_scrape_job_submit(payload: dict[str, Any]) -> dict[str, Any]:
-    """Call scraper ``modal_scrape_job_submit``; returns Modal RPC envelope dict."""
+    """Call scraper ``modal_scrape_job_submit`` (``remote``); envelope may include ``modal_function_call_id``.
+
+    The scraper RPC enqueues work using Modal ``Function.spawn`` on ``scraper_worker`` when possible;
+    clients can poll ``GET /jobs/spawns/{modal_function_call_id}`` on the scraper HTTP API.
+    """
     app_name = os.getenv("MODAL_SCRAPER_APP_NAME", "vecinita-scraper")
     fn_name = os.getenv("MODAL_SCRAPER_JOB_SUBMIT_FUNCTION", "modal_scrape_job_submit")
     fn = _lookup_function(app_name, fn_name, _invoke_env())

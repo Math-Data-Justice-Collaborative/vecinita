@@ -12,6 +12,7 @@ from typing import Any
 from uuid import uuid4
 
 from src.utils.database_url import get_resolved_database_url
+from src.utils.postgres_json_sanitize import sanitize_postgres_json_payload, sanitize_postgres_text
 
 try:
     import psycopg2  # type: ignore[import-untyped]
@@ -131,6 +132,11 @@ def create_scraping_job(
     assert Json is not None
     job_id = str(uuid4())
     now = datetime.now(timezone.utc)
+    safe_url = sanitize_postgres_text(url)
+    safe_user_id = sanitize_postgres_text(user_id)
+    safe_crawl = sanitize_postgres_json_payload(crawl_config)
+    safe_chunk = sanitize_postgres_json_payload(chunking_config)
+    safe_meta = sanitize_postgres_json_payload(metadata or {})
     try:
         with _connect() as conn:
             with conn.cursor() as cur:
@@ -144,12 +150,12 @@ def create_scraping_job(
                     """,
                     (
                         job_id,
-                        url,
-                        user_id,
+                        safe_url,
+                        safe_user_id,
                         "pending",
-                        Json(crawl_config),
-                        Json(chunking_config),
-                        Json(metadata or {}),
+                        Json(safe_crawl),
+                        Json(safe_chunk),
+                        Json(safe_meta),
                         now,
                         now,
                     ),

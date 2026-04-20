@@ -172,6 +172,40 @@ def test_map_query_ask_stable_bundle(monkeypatch):
     }
 
 
+def test_map_query_documents_overview_stable():
+    class Op:
+        path = "/api/v1/documents/overview"
+        method = "get"
+
+    class Ctx:
+        operation = Op()
+
+    q = sh.map_query(Ctx(), {"tags": "x", "include_test_data": True})
+    assert q == {"tags": None, "tag_match_mode": "any", "include_test_data": False}
+
+
+def test_map_body_modal_scraper_strips_nul_in_json_fields():
+    class Op:
+        path = "/api/v1/modal-jobs/scraper"
+        method = "post"
+
+    class Ctx:
+        operation = Op()
+
+    body = sh.map_body(
+        Ctx(),
+        {
+            "url": "https://example.com/p",
+            "user_id": "u",
+            "crawl_config": {"a\u0000": "b\u0000"},
+            "chunking_config": None,
+            "metadata": {"k": "v\u0000"},
+        },
+    )
+    assert body["crawl_config"] == {"a": "b"}
+    assert body["metadata"] == {"k": "v"}
+
+
 def test_before_call_strips_schemathesis_probe_query_keys():
     class Op:
         path = "/api/v1/ask"

@@ -118,18 +118,7 @@ async def ask_question(
         provider, model = agent_main._resolve_effective_provider_model(provider, model)
 
         if not lang:
-            try:
-                lang = agent_main.detect(question)
-            except agent_main.LangDetectException:
-                lang = "en"
-                agent_main.logger.warning(
-                    "Language detection failed for question: '%s'. Defaulting to English.",
-                    question,
-                )
-            if lang != "es" and any(
-                ch in question for ch in ["¿", "¡", "á", "é", "í", "ó", "ú", "ñ"]
-            ):
-                lang = "es"
+            lang = agent_main.detect_ask_query_language(question)
 
         from src.agent.guardrails_config import validate_input, validate_output
 
@@ -150,9 +139,18 @@ async def ask_question(
             )
         effective_question = guard_result.redacted if guard_result.redacted else question
 
+        if agent_main._is_non_linguistic_question(effective_question):
+            return agent_main._response_payload(
+                agent_main._non_linguistic_query_reply(lang),
+                thread_id=thread_id,
+                started_at=started_at,
+                sources=[],
+            )
+
         if contextual_follow_up:
             llm_started_at = agent_main.time.perf_counter()
-            answer = agent_main._build_contextual_follow_up_answer(
+            answer = await asyncio.to_thread(
+                agent_main._build_contextual_follow_up_answer,
                 question=effective_question,
                 prior_answer=context_answer or "",
                 language=lang,
@@ -228,7 +226,8 @@ async def ask_question(
                 if static_faq_answer:
                     answer = static_faq_answer
                 else:
-                    answer, llm_ms = agent_main._non_answer_brief_llm_reply(
+                    answer, llm_ms = await asyncio.to_thread(
+                        agent_main._non_answer_brief_llm_reply,
                         provider=provider,
                         model=model,
                         lang=lang,
@@ -442,13 +441,21 @@ async def ask_question_stream(
                 return f"data: {agent_main.json.dumps(payload)}\\n\\n"
 
             if not lang:
-                try:
-                    detected_lang = agent_main.detect(question)
-                    lang_local = detected_lang if detected_lang in ["es", "en"] else "en"
-                except agent_main.LangDetectException:
-                    lang_local = "en"
-                if lang_local != "es" and any(char in question for char in "¿¡áéíóúñü"):
-                    lang_local = "es"
+                lang_local = agent_main.detect_ask_query_language(question)
+
+            if agent_main._is_non_linguistic_question(question):
+                yield _sse(
+                    {
+                        "type": "complete",
+                        "answer": agent_main._non_linguistic_query_reply(lang_local),
+                        "sources": [],
+                        "suggested_questions": [],
+                        "thread_id": thread_id,
+                        "plan": "",
+                        "metadata": {"progress": 100, "stage": "complete"},
+                    }
+                )
+                return
 
             agent_main.logger.info(
                 "\n--- Streaming request received: '%s' (Language: %s, Thread: %s) ---",
@@ -487,7 +494,8 @@ async def ask_question_stream(
             agent_main.logger.info("Streaming intent gate: answer_seeking=%s", answer_seeking)
 
             if contextual_follow_up:
-                answer = agent_main._build_contextual_follow_up_answer(
+                answer = await asyncio.to_thread(
+                    agent_main._build_contextual_follow_up_answer,
                     question=question,
                     prior_answer=context_answer or "",
                     language=lang_local,

@@ -303,6 +303,14 @@ def map_body(context: HookContext, body):  # noqa: ANN001
             "force_loader": "auto",
             "stream": False,
         }
+    if path == "/api/v1/modal-jobs/scraper" and method == "POST":
+        from src.utils.postgres_json_sanitize import sanitize_postgres_json_payload
+
+        out = dict(body) if isinstance(body, dict) else {}
+        for key in ("crawl_config", "chunking_config", "metadata"):
+            if key in out and out[key] is not None:
+                out[key] = sanitize_postgres_json_payload(out[key])
+        return out
     return body
 
 
@@ -333,6 +341,8 @@ def map_query(context: HookContext, query):  # noqa: ANN001
             "rerank": False,
             "rerank_top_k": 10,
         }
+    if operation.path == "/api/v1/documents/overview" and operation.method.upper() == "GET":
+        return {"tags": None, "tag_match_mode": "any", "include_test_data": False}
     if operation.path not in {
         "/api/v1/documents/preview",
         "/api/v1/documents/download-url",

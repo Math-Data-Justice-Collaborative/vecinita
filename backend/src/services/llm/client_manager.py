@@ -46,6 +46,23 @@ def _coerce_optional_model_id(model: str | None) -> str | None:
     return s
 
 
+# IDs accepted by Modal ``chat_completion`` (``vecinita-model``).
+# Keep in sync with ``services/model-modal/src/vecinita/config.py`` ``SUPPORTED_MODELS``.
+_MODAL_NATIVE_FUNCTION_CHAT_MODEL_IDS: frozenset[str] = frozenset(
+    {
+        "gemma3",
+        "llama3.2",
+        "llama3.2:1b",
+        "llama3.1",
+        "llama3.1:8b",
+        "mistral",
+        "phi3",
+        "gemma2",
+        "gemma2:2b",
+    }
+)
+
+
 ChatOllama = None
 _CHATOLLAMA_IMPORT_ERROR: Exception | None = None
 
@@ -314,6 +331,13 @@ class LocalLLMClientManager:
             return "ollama", self.current_model()
         clean = _coerce_optional_model_id(model)
         if clean is None:
+            return "ollama", self.current_model()
+        if self.uses_modal_native_chat_api() and clean not in _MODAL_NATIVE_FUNCTION_CHAT_MODEL_IDS:
+            logger.warning(
+                "Ignoring unsupported model override %r for Modal native chat; using %s",
+                clean,
+                self.current_model(),
+            )
             return "ollama", self.current_model()
         return "ollama", clean
 

@@ -64,9 +64,45 @@ def test_resolve_request_preserves_clean_explicit_model():
         selection_file_path=None,
         locked=False,
     )
+    provider, model = mgr.resolve_request(None, "mistral")
+    assert provider == "ollama"
+    assert model == "mistral"
+
+
+def test_resolve_request_unknown_model_falls_back_for_modal_native():
+    mgr = LocalLLMClientManager(
+        base_url="http://127.0.0.1:10000/model",
+        default_model="gemma3",
+        selection_file_path=None,
+        locked=False,
+    )
+    provider, model = mgr.resolve_request(None, "mistral:7b")
+    assert provider == "ollama"
+    assert model == "gemma3"
+
+
+def test_resolve_request_unknown_model_allowed_for_direct_ollama_http():
+    mgr = LocalLLMClientManager(
+        base_url="http://127.0.0.1:11434",
+        default_model="gemma3",
+        selection_file_path=None,
+        locked=False,
+    )
     provider, model = mgr.resolve_request(None, "mistral:7b")
     assert provider == "ollama"
     assert model == "mistral:7b"
+
+
+def test_resolve_request_unknown_model_falls_back_for_modal_run_url():
+    mgr = LocalLLMClientManager(
+        base_url="https://vecinita--vecinita-model-api.modal.run",
+        default_model="gemma3",
+        selection_file_path=None,
+        locked=False,
+    )
+    provider, model = mgr.resolve_request(None, "fuzzed-model-id")
+    assert provider == "ollama"
+    assert model == "gemma3"
 
 
 def test_modal_native_chat_client_can_use_modal_function_invocation(monkeypatch):

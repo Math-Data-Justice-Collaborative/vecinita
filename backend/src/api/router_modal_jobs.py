@@ -26,6 +26,7 @@ from src.services.modal.invoker import (
 from src.services.modal.job_registry import modal_job_registry
 from src.utils.database_url import get_resolved_database_url
 from src.utils.gateway_dependency_errors import client_safe_message_for_dependency_failure
+from src.utils.postgres_json_sanitize import sanitize_postgres_json_payload, sanitize_postgres_text
 
 logger = logging.getLogger(__name__)
 
@@ -192,6 +193,13 @@ class GatewayModalScrapeJobBody(BaseModel):
         description="Scrape job id (Modal may return ``id`` or ``job_id``).",
     )
     status: str | None = Field(default=None, description="Job status when present.")
+    modal_function_call_id: str | None = Field(
+        default=None,
+        description=(
+            "When Modal started ``scraper_worker`` via ``spawn``, the ``FunctionCall`` id "
+            "(poll ``GET /jobs/spawns/{id}`` on the scraper HTTP API per Modal job-queue docs)."
+        ),
+    )
 
 
 class GatewayModalScraperListResponse(BaseModel):
@@ -298,7 +306,11 @@ async def modal_scraper_submit(
     _: Annotated[None, Depends(_require_modal_invocation)],
 ) -> GatewayModalScrapeJobBody:
     cid = getattr(request.state, "correlation_id", None)
-    merged_metadata: dict[str, Any] = dict(body.metadata or {})
+    crawl_in = body.crawl_config
+    chunk_in = body.chunking_config
+    crawl = sanitize_postgres_json_payload(crawl_in) if crawl_in is not None else {}
+    chunk = sanitize_postgres_json_payload(chunk_in) if chunk_in is not None else {}
+    merged_metadata: dict[str, Any] = dict(sanitize_postgres_json_payload(body.metadata or {}))
     if cid:
         merged_metadata["correlation_id"] = cid
 
@@ -308,14 +320,12 @@ async def modal_scraper_submit(
                 status_code=503,
                 detail="MODAL_SCRAPER_PERSIST_VIA_GATEWAY requires DATABASE_URL (or DB_URL) on the gateway",
             )
-        crawl = body.crawl_config or {}
-        chunk = body.chunking_config or {}
         try:
             jid = await asyncio.to_thread(
                 partial(
                     modal_scraper_persist.create_scraping_job,
-                    url=str(body.url),
-                    user_id=body.user_id,
+                    url=sanitize_postgres_text(str(body.url)),
+                    user_id=sanitize_postgres_text(body.user_id),
                     crawl_config=crawl,
                     chunking_config=chunk,
                     metadata=merged_metadata,
@@ -324,6 +334,8 @@ async def modal_scraper_submit(
         except RuntimeError as exc:
             raise HTTPException(status_code=503, detail=_persist_runtime_http_detail(exc)) from exc
         payload = body.model_dump(mode="json")
+        payload["crawl_config"] = None if crawl_in is None else crawl
+        payload["chunking_config"] = None if chunk_in is None else chunk
         payload["metadata"] = merged_metadata
         payload["job_id"] = jid
         env = await asyncio.to_thread(invoke_modal_scrape_job_submit, payload)
@@ -332,6 +344,8 @@ async def modal_scraper_submit(
         return GatewayModalScrapeJobBody.model_validate(data)
 
     payload = body.model_dump(mode="json")
+    payload["crawl_config"] = None if crawl_in is None else crawl
+    payload["chunking_config"] = None if chunk_in is None else chunk
     payload["metadata"] = merged_metadata
     env = await asyncio.to_thread(invoke_modal_scrape_job_submit, payload)
     data = _unwrap_scraper_envelope(env)

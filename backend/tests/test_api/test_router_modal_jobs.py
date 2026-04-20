@@ -43,6 +43,48 @@ def test_modal_scraper_get_returns_503_when_modal_disabled(modal_jobs_client):
     assert resp.status_code == 503
 
 
+def test_modal_scraper_submit_sanitizes_json_payloads_before_modal_invoke(
+    modal_jobs_client, monkeypatch
+):
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
+    monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")
+    monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-test")
+
+    from src.api import router_modal_jobs
+
+    captured: dict[str, object] = {}
+
+    def capture_submit(payload):
+        captured["payload"] = payload
+        return {
+            "ok": True,
+            "data": {
+                "job_id": "job-abc",
+                "status": "pending",
+                "created_at": "2024-01-01T00:00:00",
+                "url": str(payload["url"]),
+            },
+        }
+
+    monkeypatch.setattr(router_modal_jobs, "invoke_modal_scrape_job_submit", capture_submit)
+    monkeypatch.setattr(router_modal_jobs, "spawn_modal_scraper_reindex", lambda *_a, **_k: None)
+
+    resp = modal_jobs_client.post(
+        "/api/v1/modal-jobs/scraper",
+        json={
+            "url": "https://example.com/page",
+            "user_id": "test-user",
+            "crawl_config": {"x\u0000": ["y\u0000"]},
+            "metadata": {"m\u0000": "v"},
+        },
+    )
+    assert resp.status_code == 200
+    payload = captured["payload"]
+    assert payload["crawl_config"] == {"x": ["y"]}
+    assert payload["metadata"].get("m") == "v"
+    assert "correlation_id" in payload["metadata"]
+
+
 def test_modal_scraper_submit_ok_when_modal_enabled(modal_jobs_client, monkeypatch):
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
     monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")
