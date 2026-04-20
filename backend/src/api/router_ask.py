@@ -34,6 +34,16 @@ from .models import (
 router = APIRouter(prefix="/ask", tags=["Q&A"])
 logger = logging.getLogger(__name__)
 
+
+def _raise_if_invalid_ask_model(model: str | None) -> None:
+    """Reject numeric-only ``model`` query values (e.g. fuzzed ``0``) that upstream Ollama treats as model names."""
+    if model is not None and model.strip().isdigit():
+        raise HTTPException(
+            status_code=422,
+            detail="model must be a named upstream model id, not a numeric placeholder",
+        )
+
+
 # OpenAPI 3.x: per-event schema for SSE (Schemathesis validates each parsed event; see docs).
 _GATEWAY_ASK_STREAM_SSE_200: dict[str, Any] = {
     "description": (
@@ -101,11 +111,12 @@ def _read_positive_timeout(name: str, default: float) -> float:
 
 
 def _get_agent_timeout() -> float:
-    return _read_positive_timeout("AGENT_TIMEOUT", 120.0)
+    # Default aligns with backend/schemathesis.toml request-timeout for live contract tests.
+    return _read_positive_timeout("AGENT_TIMEOUT", 180.0)
 
 
 def _get_agent_stream_timeout() -> float:
-    return _read_positive_timeout("AGENT_STREAM_TIMEOUT", 120.0)
+    return _read_positive_timeout("AGENT_STREAM_TIMEOUT", 180.0)
 
 
 def _agent_httpx_timeout(*, for_stream: bool) -> httpx.Timeout:
@@ -274,6 +285,7 @@ async def ask_question(
     Returns:
         Answer with sources and metadata
     """
+    _raise_if_invalid_ask_model(params.model)
     # Return demo response if demo mode enabled or agent service unavailable
     if DEMO_MODE:
         return get_demo_response(params.question, params.lang)
@@ -489,6 +501,7 @@ async def ask_question_stream(
         params.thread_id,
         len(params.question or ""),
     )
+    _raise_if_invalid_ask_model(params.model)
 
     return StreamingResponse(
         sse_stream_forward_generator(

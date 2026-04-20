@@ -40,9 +40,15 @@ max-examples = 25
 [phases.examples]
 fill-missing = true
 
-# Faster, deterministic CLI runs unless you opt in to stateful exploration.
+# Stateful testing (Hypothesis state machine): chains operations using OpenAPI links and
+# dependency analysis (e.g. POST /scrape → GET /scrape/{job_id} → POST …/cancel).
+# https://schemathesis.readthedocs.io/en/stable/stateful.html
+#
+# Enabled globally; ``[[operations]]`` blocks below turn stateful *off* for non-queue routes
+# (Schemathesis merges operation phase overrides with project defaults — see configuration docs).
 [phases.stateful]
-enabled = false
+enabled = true
+max-steps = 8
 
 # POST/create before GET/delete ordering for fuzzing (CLI); default is "auto" — explicit for clarity.
 [phases.fuzzing]
@@ -64,4 +70,19 @@ unsupported_method.enabled = false
 # Reindex hits upstream DNS from many hosts; excluded from live shell script by default — mirror here for raw CLI.
 [[operations]]
 include-name = "POST /api/v1/scrape/reindex"
+enabled = false
+
+# Gateway job queues (scrape + modal-jobs): stateful mixes invalid bodies; align with pytest
+# ``test_gateway_*_stateful`` (negative_data_rejection disabled for these paths only).
+[[operations]]
+include-path-regex = "^/api/v1/(scrape|modal-jobs)(/|$)"
+
+[operations.checks.negative_data_rejection]
+enabled = false
+
+# Keep stateful off outside job-queue surfaces (agent, documents, embeddings, meta).
+[[operations]]
+include-path-regex = "^/api/v1/(ask|documents|embed)(/|$)|^/(config|health)$|^/integrations/"
+
+[operations.phases.stateful]
 enabled = false

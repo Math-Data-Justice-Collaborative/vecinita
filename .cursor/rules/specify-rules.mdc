@@ -6,5 +6,5 @@ alwaysApply: true
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
 
-`specs/003-consolidate-scraper-dm/plan.md`
+`specs/004-modal-model-prepull/plan.md`
 <!-- SPECKIT END -->

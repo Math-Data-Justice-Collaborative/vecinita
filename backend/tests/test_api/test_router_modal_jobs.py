@@ -14,6 +14,16 @@ pytestmark = pytest.mark.unit
 def modal_jobs_client(env_vars, monkeypatch):
     for key, value in env_vars.items():
         monkeypatch.setenv(key, value)
+    # Root .env may set gateway-owned scraper mode for live deploys; force Modal-RPC path for these tests.
+    monkeypatch.setenv("MODAL_SCRAPER_PERSIST_VIA_GATEWAY", "0")
+    # Importing ``src.api.main`` loads ``src.agent.main``, which enforces Modal policy when ``*.modal.run``
+    # URLs are present without invocation tokens. ``src.config`` prefers VECINITA_* over OLLAMA_* / EMBEDDING_*.
+    monkeypatch.setenv("VECINITA_MODEL_API_URL", "http://localhost:10000/model")
+    monkeypatch.setenv("VECINITA_EMBEDDING_API_URL", "http://localhost:8001")
+    monkeypatch.setenv("OLLAMA_BASE_URL", "http://localhost:10000/model")
+    monkeypatch.setenv("MODAL_OLLAMA_ENDPOINT", "http://localhost:10000/model")
+    monkeypatch.setenv("EMBEDDING_SERVICE_URL", "http://localhost:8001")
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "0")
     from src.api.main import app
 
     return TestClient(app)

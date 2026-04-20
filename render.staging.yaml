@@ -192,7 +192,8 @@ services:
         fromDatabase:
           name: vecinita-postgres-staging
           property: connectionString
-      # Optional (env group): MODAL_SCRAPER_PERSIST_VIA_GATEWAY=1 — same as production gateway (see render.yaml).
+      - key: MODAL_SCRAPER_PERSIST_VIA_GATEWAY
+        value: "1"
       # Split connection bindings for tools/services that consume component DB vars.
       - key: DB_HOST
         fromDatabase:

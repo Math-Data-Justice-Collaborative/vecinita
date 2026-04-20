@@ -490,3 +490,5 @@ def test_schemathesis_config_file_is_present():
     gen = re.search(r"(?m)^max-examples\s*=\s*(\d+)\s*$", text)
     assert gen is not None and int(gen.group(1)) >= 1
     assert "Schema-coverage gate (TraceCov)" in text
+    assert re.search(r"(?ms)\[phases\.stateful\]\s*\nenabled\s*=\s*true", text)
+    assert re.search(r"scrape\|modal-jobs", text)
