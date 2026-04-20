@@ -46,10 +46,10 @@
 #   SCHEMATHESIS_GATEWAY_INCLUDE_PATH_REGEX — optional; when set, passed as ``--include-path-regex`` on the gateway pass only
 #       (e.g. ``/api/v1/ask$`` for **T034** ask-only runs without editing the script).
 #   SCHEMATHESIS_GATEWAY_STATEFUL — set to 1 to append ``--phases examples,coverage,fuzzing,stateful`` on the
-#       gateway pass only (longer runs; hits real Modal/DB if mocks are absent). Default phases omit stateful
-#       (see ``backend/schemathesis.toml``). Pair with a tight ``--include-path-regex`` manually if you need
-#       to cap scope; pytest stateful suites under ``tests/integration/test_gateway_*_stateful.py`` narrow by
-#       replacing the schema filter set (see TESTING_DOCUMENTATION.md).
+#       gateway pass (redundant when ``backend/schemathesis.toml`` already enables the stateful phase globally;
+#       use for forcing an explicit phase list). Stateful job-queue tuning (scrape + modal-jobs, negative_data
+#       relaxation) lives in ``schemathesis.toml`` [[operations]] blocks; pytest-only flows stay in
+#       ``tests/integration/test_gateway_*_stateful.py`` (see TESTING_DOCUMENTATION.md).
 #   SCHEMATHESIS_THOROUGH — set to 1 to append --generation-maximize response_time (optional; longer runs).
 #   SCHEMATHESIS_SUPPRESS_HEALTH_CHECK — comma list for --suppress-health-check (default: filter_too_much,too_slow).
 #       Modal-jobs path params can trip Schemathesis generation health checks without affecting runtime API quality.

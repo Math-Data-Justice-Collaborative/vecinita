@@ -73,6 +73,11 @@ class TestAskEndpoint:
         response = ask_client.get("/api/v1/ask")
         assert response.status_code == 422
 
+    def test_ask_rejects_numeric_only_model(self, ask_client):
+        """Numeric-only model ids break Ollama upstream; gateway validates before proxying."""
+        response = ask_client.get("/api/v1/ask?question=test&model=0")
+        assert response.status_code == 422
+
     @patch("httpx.AsyncClient.get")
     def test_ask_with_thread_id(self, mock_get, ask_client, mock_agent_response):
         """Test ask endpoint with thread_id."""

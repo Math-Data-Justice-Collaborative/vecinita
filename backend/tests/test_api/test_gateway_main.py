@@ -415,6 +415,73 @@ class TestErrorHandling:
         data = response.json()
         assert "detail" in data
 
+    def test_http_exception_path_includes_correlation_id(self, gateway_client):
+        """HTTPException responses should echo validated correlation identifiers."""
+        response = gateway_client.get(
+            "/api/v1/modal-jobs/scraper/11111111-1111-1111-1111-111111111111",
+            headers={"X-Correlation-ID": "cid-http-path-1"},
+        )
+        assert response.status_code == 503
+        assert response.headers.get("X-Correlation-ID") == "cid-http-path-1"
+        data = response.json()
+        assert data.get("correlation_id") == "cid-http-path-1"
+
+    def test_unhandled_exception_path_includes_correlation_id(self, gateway_client, monkeypatch):
+        """Generic exception handler should include correlation data for diagnostics."""
+        import src.api.main as gateway_main
+
+        async def _boom(*_args, **_kwargs):
+            raise RuntimeError("forced test failure")
+
+        monkeypatch.setattr(gateway_main, "_build_integrations_status", _boom)
+        client = TestClient(gateway_main.app, raise_server_exceptions=False)
+        response = client.get("/health", headers={"X-Correlation-ID": "cid-generic-err"})
+        assert response.status_code == 500
+        assert response.headers.get("X-Correlation-ID") == "cid-generic-err"
+        data = response.json()
+        assert data.get("error") == "Internal server error"
+        assert data.get("correlation_id") == "cid-generic-err"
+
+    def test_invalid_correlation_id_header_is_replaced(self, gateway_client):
+        """Unsafe incoming correlation headers should be replaced with generated ids."""
+        response = gateway_client.get(
+            "/api/v1/modal-jobs/scraper/11111111-1111-1111-1111-111111111111",
+            headers={"X-Correlation-ID": "bad value with spaces"},
+        )
+        assert response.status_code == 503
+        returned = response.headers.get("X-Correlation-ID")
+        assert isinstance(returned, str)
+        assert returned
+        assert returned != "bad value with spaces"
+        assert " " not in returned
+
+    def test_overlength_correlation_id_header_is_replaced(self, gateway_client):
+        too_long = "a" * 129
+        response = gateway_client.get(
+            "/api/v1/modal-jobs/scraper/11111111-1111-1111-1111-111111111111",
+            headers={"X-Correlation-ID": too_long},
+        )
+        assert response.status_code == 503
+        returned = response.headers.get("X-Correlation-ID")
+        assert isinstance(returned, str)
+        assert returned
+        assert returned != too_long
+        assert len(returned) <= 128
+
+    def test_disallowed_punctuation_correlation_id_header_is_replaced(self, gateway_client):
+        bad = "cid@bad!chars"
+        response = gateway_client.get(
+            "/api/v1/modal-jobs/scraper/11111111-1111-1111-1111-111111111111",
+            headers={"X-Correlation-ID": bad},
+        )
+        assert response.status_code == 503
+        returned = response.headers.get("X-Correlation-ID")
+        assert isinstance(returned, str)
+        assert returned
+        assert returned != bad
+        assert "@" not in returned
+        assert "!" not in returned
+
 
 class TestRequestValidation:
     """Test request validation."""

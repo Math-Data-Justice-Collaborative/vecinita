@@ -204,8 +204,9 @@ services:
         fromDatabase:
           name: vecinita-postgres
           property: connectionString
-      # Optional (env group): MODAL_SCRAPER_PERSIST_VIA_GATEWAY=1 — gateway owns scraping_jobs rows;
-      # Modal submit only enqueues. Uses this internal DATABASE_URL (see RENDER_SHARED_ENV_CONTRACT.md).
+      # Gateway-owned scraping_jobs + Modal enqueue-only (see RENDER_SHARED_ENV_CONTRACT.md).
+      - key: MODAL_SCRAPER_PERSIST_VIA_GATEWAY
+        value: "1"
       # Split connection bindings for tools/services that consume component DB vars.
       - key: DB_HOST
         fromDatabase:
