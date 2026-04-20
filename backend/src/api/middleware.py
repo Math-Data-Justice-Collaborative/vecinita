@@ -15,6 +15,7 @@ Security Patterns:
 
 import logging
 import os
+import re
 import time
 import uuid
 from collections.abc import Awaitable, Callable
@@ -22,6 +23,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from starlette.datastructures import MutableHeaders
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
@@ -34,17 +36,64 @@ logger = logging.getLogger(__name__)
 
 ENABLE_AUTH = os.getenv("ENABLE_AUTH", "false").lower() in ["true", "1", "yes"]
 
+
+def _env_int(name: str, default: int, *, minimum: int = 1) -> int:
+    """Parse integer env var with clamped minimum and safe fallback."""
+    raw = str(os.getenv(name, "")).strip()
+    if not raw:
+        return default
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        logger.warning("Invalid integer for %s=%r; using default %s", name, raw, default)
+        return default
+    if value < minimum:
+        logger.warning("Value for %s=%s below minimum %s; using minimum", name, value, minimum)
+        return minimum
+    return value
+
+
 # Rate limiting configuration
-RATE_LIMIT_TOKENS_PER_DAY = int(os.getenv("RATE_LIMIT_TOKENS_PER_DAY", "1000"))
-RATE_LIMIT_REQUESTS_PER_HOUR = int(os.getenv("RATE_LIMIT_REQUESTS_PER_HOUR", "100"))
+RATE_LIMIT_TOKENS_PER_DAY = _env_int("RATE_LIMIT_TOKENS_PER_DAY", 1000, minimum=1)
+RATE_LIMIT_REQUESTS_PER_HOUR = _env_int("RATE_LIMIT_REQUESTS_PER_HOUR", 100, minimum=1)
+
+_ENDPOINT_LIMIT_DEFAULTS: dict[str, dict[str, int]] = {
+    "/api/v1/ask": {"requests_per_hour": 600, "tokens_per_day": 10000},
+    "/api/v1/scrape": {"requests_per_hour": 100, "tokens_per_day": 50000},
+    "/api/v1/admin": {"requests_per_hour": 50, "tokens_per_day": 1000},
+    "/api/v1/embed": {"requests_per_hour": 1000, "tokens_per_day": 100000},
+}
+
+
+def _load_endpoint_rate_limits() -> dict[str, dict[str, int]]:
+    """Load endpoint limits from env vars, falling back to defaults."""
+    env_keys = {
+        "/api/v1/ask": ("RATE_LIMIT_ASK_REQUESTS_PER_HOUR", "RATE_LIMIT_ASK_TOKENS_PER_DAY"),
+        "/api/v1/scrape": (
+            "RATE_LIMIT_SCRAPE_REQUESTS_PER_HOUR",
+            "RATE_LIMIT_SCRAPE_TOKENS_PER_DAY",
+        ),
+        "/api/v1/admin": (
+            "RATE_LIMIT_ADMIN_REQUESTS_PER_HOUR",
+            "RATE_LIMIT_ADMIN_TOKENS_PER_DAY",
+        ),
+        "/api/v1/embed": (
+            "RATE_LIMIT_EMBED_REQUESTS_PER_HOUR",
+            "RATE_LIMIT_EMBED_TOKENS_PER_DAY",
+        ),
+    }
+    out: dict[str, dict[str, int]] = {}
+    for endpoint, defaults in _ENDPOINT_LIMIT_DEFAULTS.items():
+        req_env, tok_env = env_keys[endpoint]
+        out[endpoint] = {
+            "requests_per_hour": _env_int(req_env, defaults["requests_per_hour"], minimum=1),
+            "tokens_per_day": _env_int(tok_env, defaults["tokens_per_day"], minimum=1),
+        }
+    return out
+
 
 # Per-endpoint rate limits (can be overridden)
-ENDPOINT_RATE_LIMITS: dict[str, dict[str, int]] = {
-    "/api/v1/ask": {"requests_per_hour": 60, "tokens_per_day": 1000},
-    "/api/v1/scrape": {"requests_per_hour": 10, "tokens_per_day": 5000},
-    "/api/v1/admin": {"requests_per_hour": 5, "tokens_per_day": 100},
-    "/api/v1/embed": {"requests_per_hour": 100, "tokens_per_day": 10000},
-}
+ENDPOINT_RATE_LIMITS: dict[str, dict[str, int]] = _load_endpoint_rate_limits()
 
 PUBLIC_ENDPOINTS = {
     "/",
@@ -148,11 +197,16 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
 
             return response
 
+        except StarletteHTTPException:
+            raise
         except Exception as e:
             logger.error(f"Error in authentication middleware: {e}")
             return JSONResponse(
                 status_code=500,
-                content={"error": "Internal server error"},
+                content={
+                    "error": "Internal server error",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                },
             )
 
     def _extract_api_key(self, auth_header: str) -> str | None:
@@ -561,6 +615,20 @@ class ThreadIsolationMiddleware(BaseHTTPMiddleware):
 
 
 CORRELATION_ID_HEADER = "X-Correlation-ID"
+_CORRELATION_ID_MAX_LEN = 128
+_CORRELATION_ID_ALLOWED_RE = re.compile(r"^[A-Za-z0-9._:-]+$")
+
+
+def _normalized_or_generated_correlation_id(incoming: str | None) -> str:
+    """Use caller-provided correlation ID only when it is short and header-safe."""
+    raw = (incoming or "").strip()
+    if (
+        raw
+        and len(raw) <= _CORRELATION_ID_MAX_LEN
+        and _CORRELATION_ID_ALLOWED_RE.fullmatch(raw) is not None
+    ):
+        return raw
+    return str(uuid.uuid4())
 
 
 class CorrelationIdMiddleware(BaseHTTPMiddleware):
@@ -569,8 +637,7 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
-        incoming = request.headers.get(CORRELATION_ID_HEADER)
-        cid = incoming.strip() if incoming and incoming.strip() else str(uuid.uuid4())
+        cid = _normalized_or_generated_correlation_id(request.headers.get(CORRELATION_ID_HEADER))
         request.state.correlation_id = cid
         response = await call_next(request)
         response.headers[CORRELATION_ID_HEADER] = cid

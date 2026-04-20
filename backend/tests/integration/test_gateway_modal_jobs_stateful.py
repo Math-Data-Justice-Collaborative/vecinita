@@ -22,6 +22,8 @@ _STATEFUL_SETTINGS = settings(
 @pytest.mark.schema
 def test_gateway_modal_jobs_stateful_flow(monkeypatch: pytest.MonkeyPatch) -> None:
     """Covers scraper submit/get/cancel and registry paths with inferred links on typed models."""
+    # Avoid gateway-owned Postgres scrape path (developer .env may set persist=1); this suite mocks Modal RPC only.
+    monkeypatch.setenv("MODAL_SCRAPER_PERSIST_VIA_GATEWAY", "0")
     schema = _reload_gateway_with_mocks(monkeypatch, enable_auth=False)
     narrow = clone_gateway_schema_path_prefix(schema, "/api/v1/modal-jobs")
     narrow.config.phases.stateful.enabled = True

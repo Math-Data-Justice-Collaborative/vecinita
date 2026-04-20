@@ -147,6 +147,22 @@ jobs:
           ( cd services/model-modal && uv run modal deploy main.py )
           echo "✓ Model Modal app deployed"
 
+      - name: Warm model Modal volume (default Ollama weights)
+        if: >-
+          steps.modal_auth.outputs.authenticated == 'true' &&
+          (
+            github.event_name == 'workflow_run' ||
+            github.event.inputs.deploy_model == 'true'
+          )
+        timeout-minutes: 120
+        env:
+          MODAL_PROFILE: ${{ secrets.MODAL_API_PROFILE || vars.MODAL_API_PROFILE || 'vecinita' }}
+          MODAL_ENVIRONMENT: ${{ vars.MODAL_ENVIRONMENT || secrets.MODAL_ENVIRONMENT || '' }}
+        run: |
+          echo "Pre-pulling default model into Modal volume vecinita-models (same as services/model-modal deploy workflow)..."
+          ( cd services/model-modal && PYTHONPATH=src uv run modal run src/vecinita/app.py::download_default_model )
+          echo "✓ Model volume warm complete"
+
       - name: Deploy scraper Modal apps
         if: >-
           steps.modal_auth.outputs.authenticated == 'true' &&
