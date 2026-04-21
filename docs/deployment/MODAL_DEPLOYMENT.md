@@ -28,7 +28,7 @@ Modal Services (representative layout; exact app names follow your Modal workspa
 ├── vecinita-scraper (workers + queues)
 │   └── Modal ``@app.function`` workers (``drain_*_queue``, ``trigger_reindex``, …)
 │   └── **Job RPC:** ``modal_scrape_job_submit``, ``modal_scrape_job_get``, ``modal_scrape_job_list``, ``modal_scrape_job_cancel`` — same Postgres + ``scrape-jobs`` queue as HTTP ``/jobs``, for ``modal.Function.from_name`` callers
-│   └── Optional legacy cron in ``backend/src/scraper/modal_app.py``
+│   └── Optional legacy cron in ``backend/src/services/scraper/modal_app.py``
 │
 └── vecinita-scraper-api (ASGI ``fastapi``) — optional; skipped when ``deploy_modal.sh --no-web``
     └── HTTP: FastAPI under ``/jobs`` (see service OpenAPI)
@@ -97,7 +97,7 @@ Canonical **deploy** entry files (add `src/` to `sys.path` so packages resolve) 
 ./backend/scripts/deploy_modal.sh --model
 ./backend/scripts/deploy_modal.sh --scraper
 
-# Optional: legacy monolith cron only (see backend/src/scraper/modal_app.py)
+# Optional: legacy monolith cron only (see backend/src/services/scraper/modal_app.py)
 # ./backend/scripts/deploy_modal.sh --legacy-scraper-cron
 ```
 

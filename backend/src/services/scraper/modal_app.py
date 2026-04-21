@@ -13,7 +13,7 @@ from pathlib import Path
 
 import modal
 
-BACKEND_DIR = Path(__file__).resolve().parents[2]
+BACKEND_DIR = Path(__file__).resolve().parents[3]
 
 APP_NAME = os.getenv("MODAL_SCRAPER_APP_NAME", "vecinita-scraper")
 SECRET_NAME = os.getenv("MODAL_SECRET_NAME", "vecinita-secrets")
@@ -33,7 +33,7 @@ def _run_scraper_pipeline(clean: bool, stream: bool, verbose: bool) -> dict:
     import sys
     import time
 
-    cmd = [sys.executable, "-m", "src.scraper.cli", "--no-confirm"]
+    cmd = [sys.executable, "-m", "src.services.scraper.cli", "--no-confirm"]
     if clean:
         cmd.append("--clean")
     if stream:

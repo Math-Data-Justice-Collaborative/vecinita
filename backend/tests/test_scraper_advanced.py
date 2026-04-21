@@ -9,12 +9,12 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.scraper.config import ScraperConfig
-from src.scraper.link_tracker import LinkTracker
-from src.scraper.loaders import SmartLoader
-from src.scraper.processors import DocumentProcessor
-from src.scraper.scraper import VecinaScraper
-from src.scraper.utils import clean_text, convert_github_to_raw, write_to_failed_log
+from src.services.scraper.config import ScraperConfig
+from src.services.scraper.link_tracker import LinkTracker
+from src.services.scraper.loaders import SmartLoader
+from src.services.scraper.processors import DocumentProcessor
+from src.services.scraper.scraper import VecinaScraper
+from src.services.scraper.utils import clean_text, convert_github_to_raw, write_to_failed_log
 
 
 @pytest.mark.unit
@@ -111,7 +111,7 @@ class TestScraperEdgeCases:
 class TestScraperWithMockedRequests:
     """Test scraper with mocked HTTP requests."""
 
-    @patch("src.scraper.loaders.PlaywrightURLLoader")
+    @patch("src.services.scraper.loaders.PlaywrightURLLoader")
     def test_playwright_loader_error_handling(self, mock_playwright):
         """Test Playwright loader returns empty results on failure without fallback."""
         # Playwright fails
@@ -135,7 +135,7 @@ class TestScraperWithMockedRequests:
         assert docs == []
         assert success is False
 
-    @patch("src.scraper.loaders.RecursiveUrlLoader")
+    @patch("src.services.scraper.loaders.RecursiveUrlLoader")
     def test_recursive_loader_with_depth(self, mock_recursive):
         """Test recursive loader respects depth configuration."""
         mock_loader = Mock()
@@ -150,7 +150,7 @@ class TestScraperWithMockedRequests:
 
         loader = SmartLoader(config)
 
-        with patch("src.scraper.loaders.SmartLoader._select_and_load") as mock_select:
+        with patch("src.services.scraper.loaders.SmartLoader._select_and_load") as mock_select:
             mock_select.return_value = ([], "Recursive Crawler (Depth: 3)", False)
             docs, loader_type, success = loader.load_url("https://example.com/page")
 

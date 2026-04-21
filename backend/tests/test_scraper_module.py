@@ -20,7 +20,7 @@ class TestScraperConfig:
 
     def test_config_initialization(self):
         """Test ScraperConfig initializes with default values."""
-        from src.scraper.config import ScraperConfig
+        from src.services.scraper.config import ScraperConfig
 
         config = ScraperConfig()
         assert config.RATE_LIMIT_DELAY == 2
@@ -29,7 +29,7 @@ class TestScraperConfig:
 
     def test_config_directory_paths(self):
         """Test that config directory paths are properly set."""
-        from src.scraper.config import ScraperConfig
+        from src.services.scraper.config import ScraperConfig
 
         config = ScraperConfig()
         assert "recursive_sites" in config.RECURSIVE_SITES_FILE
@@ -40,7 +40,7 @@ class TestScraperConfig:
     @patch("os.path.exists", return_value=False)
     def test_load_config_missing_file(self, mock_exists):
         """Test that missing config files are handled gracefully."""
-        from src.scraper.config import ScraperConfig
+        from src.services.scraper.config import ScraperConfig
 
         config = ScraperConfig()
         result = config._load_config_list("nonexistent.txt")
@@ -50,7 +50,7 @@ class TestScraperConfig:
     @patch("os.path.exists", return_value=True)
     def test_load_config_list(self, mock_exists, mock_file):
         """Test loading a configuration list from file."""
-        from src.scraper.config import ScraperConfig
+        from src.services.scraper.config import ScraperConfig
 
         # Mock file content
         mock_file.return_value.__enter__.return_value = [
@@ -72,7 +72,7 @@ class TestScraperConfig:
     @patch("os.path.exists", return_value=True)
     def test_load_recursive_config(self, mock_exists, mock_file):
         """Test loading recursive crawl configuration."""
-        from src.scraper.config import ScraperConfig
+        from src.services.scraper.config import ScraperConfig
 
         mock_file.return_value.__enter__.return_value = [
             "https://example.com 2\n",
@@ -99,7 +99,7 @@ class TestScraperUtils:
 
     def test_convert_github_to_raw(self):
         """Test GitHub URL conversion."""
-        from src.scraper.utils import convert_github_to_raw
+        from src.services.scraper.utils import convert_github_to_raw
 
         github_url = "https://github.com/user/repo/blob/main/file.csv"
         expected = "https://raw.githubusercontent.com/user/repo/main/file.csv"
@@ -108,7 +108,7 @@ class TestScraperUtils:
 
     def test_convert_non_github_url_unchanged(self):
         """Test non-GitHub URLs are unchanged."""
-        from src.scraper.utils import convert_github_to_raw
+        from src.services.scraper.utils import convert_github_to_raw
 
         url = "https://example.com/page"
         result = convert_github_to_raw(url)
@@ -116,7 +116,7 @@ class TestScraperUtils:
 
     def test_should_skip_url_matching(self):
         """Test URL skip pattern matching."""
-        from src.scraper.utils import should_skip_url
+        from src.services.scraper.utils import should_skip_url
 
         skip_patterns = ["facebook.com", "youtube.com"]
         assert should_skip_url("https://facebook.com/page", skip_patterns) is True
@@ -124,7 +124,7 @@ class TestScraperUtils:
 
     def test_needs_playwright(self):
         """Test Playwright requirement detection."""
-        from src.scraper.utils import needs_playwright
+        from src.services.scraper.utils import needs_playwright
 
         playwright_patterns = ["javascript-site.com", "enrollri.org"]
         assert needs_playwright("https://enrollri.org/page", playwright_patterns) is True
@@ -132,7 +132,7 @@ class TestScraperUtils:
 
     def test_is_csv_file_detection(self):
         """Test CSV file detection."""
-        from src.scraper.utils import is_csv_file
+        from src.services.scraper.utils import is_csv_file
 
         assert is_csv_file("https://example.com/data.csv") is True
         assert is_csv_file("https://github.com/user/repo/blob/main/file.csv") is True
@@ -140,7 +140,7 @@ class TestScraperUtils:
 
     def test_get_crawl_config_matching(self):
         """Test getting crawl config for matching URL."""
-        from src.scraper.utils import get_crawl_config
+        from src.services.scraper.utils import get_crawl_config
 
         crawl_configs = {
             "https://example.com/": {"max_depth": 2},
@@ -153,7 +153,7 @@ class TestScraperUtils:
 
     def test_get_crawl_config_no_match(self):
         """Test no match for URL in crawl config."""
-        from src.scraper.utils import get_crawl_config
+        from src.services.scraper.utils import get_crawl_config
 
         crawl_configs = {"https://example.com/": {"max_depth": 2}}
         result = get_crawl_config("https://other.com/", crawl_configs)
@@ -161,7 +161,7 @@ class TestScraperUtils:
 
     def test_clean_text(self):
         """Test text cleaning removes noise."""
-        from src.scraper.utils import clean_text
+        from src.services.scraper.utils import clean_text
 
         dirty_text = """
         Sample text. Cookie policy here.
@@ -181,7 +181,7 @@ class TestScraperUtils:
     @patch("requests.get")
     def test_download_file_success(self, mock_get):
         """Test successful file download."""
-        from src.scraper.utils import download_file
+        from src.services.scraper.utils import download_file
 
         mock_response = Mock()
         mock_response.iter_content = Mock(return_value=[b"test data"])
@@ -201,14 +201,14 @@ class TestScraperUtils:
     @patch("requests.get", side_effect=Exception("Network error"))
     def test_download_file_failure(self, mock_get):
         """Test file download failure handling."""
-        from src.scraper.utils import download_file
+        from src.services.scraper.utils import download_file
 
         result = download_file("https://example.com/file.csv", "/tmp/test.csv")
         assert result is False
 
     def test_write_to_failed_log(self):
         """Test writing to failed URL log."""
-        from src.scraper.utils import write_to_failed_log
+        from src.services.scraper.utils import write_to_failed_log
 
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
             log_file = f.name
@@ -225,7 +225,7 @@ class TestScraperUtils:
 
     def test_prepare_scrape_urls_dedupes_and_skips_localhost(self):
         """Test URL preparation removes duplicates, localhost, and invalid entries."""
-        from src.scraper.utils import prepare_scrape_urls
+        from src.services.scraper.utils import prepare_scrape_urls
 
         raw_lines = [
             "\ufeffhttps://Example.com/path/\n",
@@ -245,7 +245,7 @@ class TestScraperUtils:
 
     def test_prepare_scrape_urls_allows_localhost_when_requested(self):
         """Test URL preparation can keep localhost URLs when skip_localhost is disabled."""
-        from src.scraper.utils import prepare_scrape_urls
+        from src.services.scraper.utils import prepare_scrape_urls
 
         raw_lines = [
             "http://localhost:8081/RIOSpdf.pdf\n",
@@ -279,15 +279,15 @@ class TestSmartLoader:
 
     def test_loader_initialization(self, mock_config):
         """Test SmartLoader initializes properly."""
-        from src.scraper.loaders import SmartLoader
+        from src.services.scraper.loaders import SmartLoader
 
         loader = SmartLoader(mock_config)
         assert loader.config is not None
 
-    @patch("src.scraper.utils.should_skip_url", return_value=True)
+    @patch("src.services.scraper.utils.should_skip_url", return_value=True)
     def test_load_url_skips_matching(self, mock_skip, mock_config):
         """Test that matching URLs are skipped."""
-        from src.scraper.loaders import SmartLoader
+        from src.services.scraper.loaders import SmartLoader
 
         loader = SmartLoader(mock_config)
         docs, loader_type, success = loader.load_url("https://skip-site.com/page")
@@ -295,10 +295,10 @@ class TestSmartLoader:
         assert success is False
         assert loader_type == "Skipped"
 
-    @patch("src.scraper.loaders.SmartLoader._load_standard")
+    @patch("src.services.scraper.loaders.SmartLoader._load_standard")
     def test_load_url_with_forced_unstructured_loader(self, mock_load, mock_config):
         """Test forcing unstructured loader."""
-        from src.scraper.loaders import SmartLoader
+        from src.services.scraper.loaders import SmartLoader
 
         mock_load.return_value = ([], "Unstructured", False)
 
@@ -329,7 +329,7 @@ class TestDocumentProcessor:
 
     def test_processor_initialization(self, mock_config):
         """Test DocumentProcessor initializes with config."""
-        from src.scraper.processors import DocumentProcessor
+        from src.services.scraper.processors import DocumentProcessor
 
         processor = DocumentProcessor(mock_config)
         assert processor.config is not None
@@ -337,7 +337,7 @@ class TestDocumentProcessor:
 
     def test_process_documents_empty_list(self, mock_config):
         """Test processing empty document list."""
-        from src.scraper.processors import DocumentProcessor
+        from src.services.scraper.processors import DocumentProcessor
 
         processor = DocumentProcessor(mock_config)
         chunks, links = processor.process_documents(
@@ -366,7 +366,7 @@ class TestLinkTracker:
 
     def test_link_tracker_initialization(self):
         """Test LinkTracker initialization."""
-        from src.scraper.link_tracker import LinkTracker
+        from src.services.scraper.link_tracker import LinkTracker
 
         tracker = LinkTracker()
         assert tracker.output_file is None
@@ -374,7 +374,7 @@ class TestLinkTracker:
 
     def test_add_links(self):
         """Test adding links to tracker."""
-        from src.scraper.link_tracker import LinkTracker
+        from src.services.scraper.link_tracker import LinkTracker
 
         tracker = LinkTracker()
         tracker.add_links("https://example.com", ["https://link1.com", "https://link2.com"])
@@ -384,7 +384,7 @@ class TestLinkTracker:
 
     def test_get_summary(self):
         """Test getting link tracking summary."""
-        from src.scraper.link_tracker import LinkTracker
+        from src.services.scraper.link_tracker import LinkTracker
 
         tracker = LinkTracker()
         tracker.add_links("https://example.com", ["https://link1.com", "https://link2.com"])
@@ -396,7 +396,7 @@ class TestLinkTracker:
 
     def test_save_links_to_file(self):
         """Test saving links to file."""
-        from src.scraper.link_tracker import LinkTracker
+        from src.services.scraper.link_tracker import LinkTracker
 
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
             output_file = f.name
@@ -426,7 +426,7 @@ class TestVecinaScraper:
 
     def test_scraper_initialization(self):
         """Test VecinaScraper initialization."""
-        from src.scraper.scraper import VecinaScraper
+        from src.services.scraper.scraper import VecinaScraper
 
         with tempfile.NamedTemporaryFile(delete=False) as f1:
             output = f1.name
@@ -444,7 +444,7 @@ class TestVecinaScraper:
 
     def test_scraper_stats_initialization(self):
         """Test scraper initializes with correct stats."""
-        from src.scraper.scraper import VecinaScraper
+        from src.services.scraper.scraper import VecinaScraper
 
         with tempfile.NamedTemporaryFile(delete=False) as f1:
             output = f1.name
@@ -463,10 +463,10 @@ class TestVecinaScraper:
             os.remove(output)
             os.remove(failed_log)
 
-    @patch("src.scraper.scraper.SmartLoader.load_url")
+    @patch("src.services.scraper.scraper.SmartLoader.load_url")
     def test_scrape_urls_empty_list(self, mock_load_url):
         """Test scraping empty URL list."""
-        from src.scraper.scraper import VecinaScraper
+        from src.services.scraper.scraper import VecinaScraper
 
         with tempfile.NamedTemporaryFile(delete=False) as f1:
             output = f1.name
@@ -510,7 +510,7 @@ class TestScraperIntegration:
 
     def test_config_loads_on_scraper_init(self):
         """Test that config loads when scraper initializes."""
-        from src.scraper.scraper import VecinaScraper
+        from src.services.scraper.scraper import VecinaScraper
 
         with tempfile.NamedTemporaryFile(delete=False) as f1:
             output = f1.name

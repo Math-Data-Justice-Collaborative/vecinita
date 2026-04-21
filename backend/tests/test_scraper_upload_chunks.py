@@ -10,7 +10,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.scraper.scraper import VecinaScraper
+from src.services.scraper.scraper import VecinaScraper
 
 
 @pytest.mark.unit
@@ -73,7 +73,7 @@ We manage state parks, forests, and wildlife habitats for public enjoyment.
             output_file = os.path.join(tmpdir, "chunks.txt")
             failed_log = os.path.join(tmpdir, "failed.txt")
 
-            with patch("src.scraper.scraper.ScraperConfig") as mock_config_class:
+            with patch("src.services.scraper.scraper.ScraperConfig") as mock_config_class:
                 # Setup mock config with proper values
                 mock_config = Mock()
                 mock_config.RATE_LIMIT_DELAY = 0.1
@@ -81,9 +81,9 @@ We manage state parks, forests, and wildlife habitats for public enjoyment.
                 mock_config.CHUNK_OVERLAP = 200
                 mock_config_class.return_value = mock_config
 
-                with patch("src.scraper.scraper.SmartLoader"):
-                    with patch("src.scraper.scraper.DocumentProcessor"):
-                        with patch("src.scraper.scraper.LinkTracker"):
+                with patch("src.services.scraper.scraper.SmartLoader"):
+                    with patch("src.services.scraper.scraper.DocumentProcessor"):
+                        with patch("src.services.scraper.scraper.LinkTracker"):
                             scraper = VecinaScraper(
                                 output_file=output_file, failed_log=failed_log, stream_mode=False
                             )
@@ -188,16 +188,16 @@ Test content with metadata.
             mock_uploader = Mock()
             mock_uploader.upload_chunks = Mock(return_value=(1, 0))
 
-            with patch("src.scraper.scraper.ScraperConfig") as mock_config_class:
+            with patch("src.services.scraper.scraper.ScraperConfig") as mock_config_class:
                 mock_config = Mock()
                 mock_config.RATE_LIMIT_DELAY = 0.1
                 mock_config.CHUNK_SIZE = 1000
                 mock_config.CHUNK_OVERLAP = 200
                 mock_config_class.return_value = mock_config
 
-                with patch("src.scraper.scraper.SmartLoader"):
-                    with patch("src.scraper.scraper.DocumentProcessor"):
-                        with patch("src.scraper.scraper.LinkTracker"):
+                with patch("src.services.scraper.scraper.SmartLoader"):
+                    with patch("src.services.scraper.scraper.DocumentProcessor"):
+                        with patch("src.services.scraper.scraper.LinkTracker"):
                             scraper = VecinaScraper(
                                 output_file=output_file, failed_log=failed_log, stream_mode=False
                             )
@@ -356,16 +356,16 @@ Test content with bad metadata.
             mock_uploader = Mock()
             mock_uploader.upload_chunks = Mock(return_value=(1, 0))
 
-            with patch("src.scraper.scraper.ScraperConfig") as mock_config_class:
+            with patch("src.services.scraper.scraper.ScraperConfig") as mock_config_class:
                 mock_config = Mock()
                 mock_config.RATE_LIMIT_DELAY = 0.1
                 mock_config.CHUNK_SIZE = 1000
                 mock_config.CHUNK_OVERLAP = 200
                 mock_config_class.return_value = mock_config
 
-                with patch("src.scraper.scraper.SmartLoader"):
-                    with patch("src.scraper.scraper.DocumentProcessor"):
-                        with patch("src.scraper.scraper.LinkTracker"):
+                with patch("src.services.scraper.scraper.SmartLoader"):
+                    with patch("src.services.scraper.scraper.DocumentProcessor"):
+                        with patch("src.services.scraper.scraper.LinkTracker"):
                             scraper = VecinaScraper(
                                 output_file=output_file, failed_log=failed_log, stream_mode=False
                             )
@@ -461,16 +461,16 @@ Test content.
             mock_uploader = Mock()
             mock_uploader.upload_chunks = Mock(return_value=(1, 0))
 
-            with patch("src.scraper.scraper.ScraperConfig") as mock_config_class:
+            with patch("src.services.scraper.scraper.ScraperConfig") as mock_config_class:
                 mock_config = Mock()
                 mock_config.RATE_LIMIT_DELAY = 0.1
                 mock_config.CHUNK_SIZE = 1000
                 mock_config.CHUNK_OVERLAP = 200
                 mock_config_class.return_value = mock_config
 
-                with patch("src.scraper.scraper.SmartLoader"):
-                    with patch("src.scraper.scraper.DocumentProcessor"):
-                        with patch("src.scraper.scraper.LinkTracker"):
+                with patch("src.services.scraper.scraper.SmartLoader"):
+                    with patch("src.services.scraper.scraper.DocumentProcessor"):
+                        with patch("src.services.scraper.scraper.LinkTracker"):
                             scraper = VecinaScraper(
                                 output_file=output_file, failed_log=failed_log, stream_mode=False
                             )
@@ -486,7 +486,7 @@ Test content.
                             # Capture logs
                             import logging
 
-                            logger = logging.getLogger("src.scraper.scraper")
+                            logger = logging.getLogger("src.services.scraper.scraper")
                             handler = logging.StreamHandler()
                             logger.addHandler(handler)
 

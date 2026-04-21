@@ -8,7 +8,7 @@ The data scraping pipeline now provides **detailed, real-time logging** througho
 ### 1. Direct Scraper Execution (No Subprocess)
 **Before:**
 ```
-DEBUG | Running command: C:\Users\bigme\...\python.exe -m src.scraper.main --input data\urls.txt ...
+DEBUG | Running command: C:\Users\bigme\...\python.exe -m src.services.scraper.server --input data\urls.txt ...
 ```
 
 **After:**

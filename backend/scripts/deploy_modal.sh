@@ -135,8 +135,8 @@ if [ "$DEPLOY_SCRAPER" = true ]; then
 fi
 
 if [ "$DEPLOY_LEGACY_SCRAPER_CRON" = true ]; then
-    echo -e "${YELLOW}→ Deploying legacy scraper cron (backend/src/scraper/modal_app.py)...${NC}"
-    modal deploy backend/src/scraper/modal_app.py
+    echo -e "${YELLOW}→ Deploying legacy scraper cron (backend/src/services/scraper/modal_app.py)...${NC}"
+    modal deploy backend/src/services/scraper/modal_app.py
     echo -e "${YELLOW}⚠ This overwrites the Modal app named in MODAL_SCRAPER_APP_NAME if it matches${NC}"
     echo -e "${YELLOW}  the workers app; prefer migrating cron to services/scraper.${NC}\n"
 fi

@@ -102,7 +102,7 @@ if [[ "$MODE" == "local" ]]; then
 
   export EMBEDDING_SERVICE_URL="${EMBEDDING_SERVICE_URL:-http://localhost:8001}"
   echo "Running scraper locally with args: ${CLI_ARGS[*]:-(default)}"
-  uv run -m src.scraper.cli "${CLI_ARGS[@]}"
+  uv run -m src.services.scraper.cli "${CLI_ARGS[@]}"
   exit 0
 fi
 
@@ -117,4 +117,4 @@ fi
 
 cd "$REPO_ROOT"
 echo "Running scraper in Docker (service: vecinita-agent) with args: ${CLI_ARGS[*]:-(default)}"
-"${COMPOSE[@]}" exec -T vecinita-agent uv run -m src.scraper.cli "${CLI_ARGS[@]}"
+"${COMPOSE[@]}" exec -T vecinita-agent uv run -m src.services.scraper.cli "${CLI_ARGS[@]}"

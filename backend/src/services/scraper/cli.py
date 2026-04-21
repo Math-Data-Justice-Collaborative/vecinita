@@ -8,10 +8,10 @@ Default mode: Additive. Adds new content without deleting old data.
 Use --clean flag to wipe the database and start fresh.
 
 Usage:
-    python -m src.scraper.cli
-    python -m src.scraper.cli --clean
-    python -m src.scraper.cli --verbose
-    python -m src.scraper.cli --clean --verbose
+    python -m src.services.scraper.cli
+    python -m src.services.scraper.cli --clean
+    python -m src.services.scraper.cli --verbose
+    python -m src.services.scraper.cli --clean --verbose
 
 Or after installation:
     vecinita-scrape

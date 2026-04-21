@@ -21,7 +21,7 @@ Deploy Vecinita services to Modal with one click or command.
 Just push changes to `main` in these directories:
 ```
 backend/src/embedding_service/**
-backend/src/scraper/**
+backend/src/services/scraper/**
 ```
 
 The workflow `.github/workflows/modal-deploy.yml` automatically deploys.

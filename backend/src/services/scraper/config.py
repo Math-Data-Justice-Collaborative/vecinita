@@ -21,8 +21,9 @@ def _find_repo_root() -> Path:
         <repo_root>/
             backend/
                 src/
-                    scraper/
-                        config.py
+                    services/
+                        scraper/
+                            config.py
             pyproject.toml
             docker-compose.yml
             .git/
@@ -51,8 +52,8 @@ def _find_repo_root() -> Path:
                 return current
         current = current.parent
 
-    # Fallback: use relative path (backend/src/scraper/config.py -> parent of backend)
-    fallback_root = Path(__file__).resolve().parents[3]
+    # Fallback: repo root is four levels above this file (…/backend/src/services/scraper/config.py).
+    fallback_root = Path(__file__).resolve().parents[4]
     log.debug(f"No repo root marker found; using fallback path: {fallback_root}")
     return fallback_root
 
@@ -67,8 +68,8 @@ class ScraperConfig:
     if _env_config_dir:
         _config_dir_path = Path(_env_config_dir).expanduser().resolve()
     else:
-        # From backend/src/scraper/config.py, go up 3 levels to project root, then data/config
-        _config_dir_path = Path(__file__).resolve().parents[3] / "data" / "config"
+        # From backend/src/services/scraper/config.py, go up 4 levels to project root, then data/config
+        _config_dir_path = Path(__file__).resolve().parents[4] / "data" / "config"
 
     if not _config_dir_path.exists():
         log.warning(

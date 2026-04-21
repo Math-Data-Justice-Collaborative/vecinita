@@ -4,7 +4,7 @@
 
 **Old way (subprocess):**
 ```
-Running command: C:\...\python.exe -m src.scraper.main --input ...
+Running command: C:\...\python.exe -m src.services.scraper.server --input ...
 (and that's all you see until it finishes)
 ```
 

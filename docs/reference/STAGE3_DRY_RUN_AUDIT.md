@@ -33,7 +33,7 @@ Scope audited:
 ### Backend requirements consumption is service-local
 
 - Backend scraper modal deployment installs from `backend/requirements.txt`:
-  - [backend/src/scraper/modal_app.py](../../backend/src/scraper/modal_app.py#L21)
+  - [backend/src/services/scraper/modal_app.py](../../backend/src/services/scraper/modal_app.py#L21)
 
 ### Root manifests are still ambiguous for ad-hoc/external usage
 

@@ -1,4 +1,4 @@
-"""Unit tests for src.scraper.modal_app."""
+"""Unit tests for src.services.scraper.modal_app."""
 
 import importlib
 import sys
@@ -37,7 +37,7 @@ def modal_mock(monkeypatch):
 
 
 def test_scraper_modal_app_loads(modal_mock):
-    import src.scraper.modal_app as modal_app
+    import src.services.scraper.modal_app as modal_app
 
     modal_app = importlib.reload(modal_app)
 
@@ -47,7 +47,7 @@ def test_scraper_modal_app_loads(modal_mock):
 
 
 def test_scraper_modal_schedule_default(modal_mock):
-    import src.scraper.modal_app as modal_app
+    import src.services.scraper.modal_app as modal_app
 
     modal_app = importlib.reload(modal_app)
 

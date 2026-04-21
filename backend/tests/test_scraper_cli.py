@@ -17,7 +17,7 @@ class TestScraperCLI:
 
     def test_cli_argument_parsing(self):
         """Test that CLI arguments are parsed correctly."""
-        from src.scraper.main import main
+        from src.services.scraper.server import main
 
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
             urls_file = f.name
@@ -43,7 +43,7 @@ class TestScraperCLI:
                     failed_log,
                 ],
             ):
-                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
+                with patch("src.services.scraper.server.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.return_value = (1, 0, 1)
                     mock_scraper.return_value = mock_instance
@@ -60,7 +60,7 @@ class TestScraperCLI:
 
     def test_cli_input_file_validation(self):
         """Test that CLI validates input file exists."""
-        from src.scraper.main import main
+        from src.services.scraper.server import main
 
         with tempfile.NamedTemporaryFile(delete=False) as f_out:
             output_file = f_out.name
@@ -90,7 +90,7 @@ class TestScraperCLI:
 
     def test_cli_output_directory_creation(self):
         """Test that CLI creates output directories if needed."""
-        from src.scraper.main import main
+        from src.services.scraper.server import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
             urls_file = os.path.join(tmpdir, "urls.txt")
@@ -113,7 +113,7 @@ class TestScraperCLI:
                     failed_log,
                 ],
             ):
-                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
+                with patch("src.services.scraper.server.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.return_value = (1, 1, 0)
                     mock_instance.print_summary = Mock()
@@ -128,7 +128,7 @@ class TestScraperCLI:
 
     def test_cli_with_links_file_argument(self):
         """Test CLI accepts optional --links-file argument."""
-        from src.scraper.main import main
+        from src.services.scraper.server import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
             urls_file = os.path.join(tmpdir, "urls.txt")
@@ -154,7 +154,7 @@ class TestScraperCLI:
                     links_file,
                 ],
             ):
-                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
+                with patch("src.services.scraper.server.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.return_value = (1, 1, 0)
                     mock_instance.print_summary = Mock()
@@ -170,7 +170,7 @@ class TestScraperCLI:
 
     def test_cli_with_loader_argument(self):
         """Test CLI accepts optional --loader argument."""
-        from src.scraper.main import main
+        from src.services.scraper.server import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
             urls_file = os.path.join(tmpdir, "urls.txt")
@@ -195,7 +195,7 @@ class TestScraperCLI:
                     "playwright",
                 ],
             ):
-                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
+                with patch("src.services.scraper.server.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.return_value = (1, 1, 0)
                     mock_instance.print_summary = Mock()
@@ -216,7 +216,7 @@ class TestScraperCLIErrorHandling:
 
     def test_cli_handles_keyboard_interrupt(self):
         """Test CLI gracefully handles keyboard interrupt."""
-        from src.scraper.main import main
+        from src.services.scraper.server import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
             urls_file = os.path.join(tmpdir, "urls.txt")
@@ -239,7 +239,7 @@ class TestScraperCLIErrorHandling:
                     failed_log,
                 ],
             ):
-                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
+                with patch("src.services.scraper.server.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.side_effect = KeyboardInterrupt()
                     mock_instance.print_summary = Mock()
@@ -253,7 +253,7 @@ class TestScraperCLIErrorHandling:
 
     def test_cli_handles_fatal_error(self):
         """Test CLI handles fatal errors during scraping."""
-        from src.scraper.main import main
+        from src.services.scraper.server import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
             urls_file = os.path.join(tmpdir, "urls.txt")
@@ -276,7 +276,7 @@ class TestScraperCLIErrorHandling:
                     failed_log,
                 ],
             ):
-                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
+                with patch("src.services.scraper.server.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.side_effect = Exception("Fatal error")
                     mock_scraper.return_value = mock_instance
@@ -293,7 +293,7 @@ class TestScraperCLIURLParsing:
 
     def test_cli_parses_urls_from_file(self):
         """Test that CLI correctly parses URLs from input file."""
-        from src.scraper.main import main
+        from src.services.scraper.server import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
             urls_file = os.path.join(tmpdir, "urls.txt")
@@ -319,7 +319,7 @@ class TestScraperCLIURLParsing:
                     failed_log,
                 ],
             ):
-                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
+                with patch("src.services.scraper.server.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.return_value = (2, 2, 0)
                     mock_instance.print_summary = Mock()
@@ -336,7 +336,7 @@ class TestScraperCLIURLParsing:
 
     def test_cli_handles_empty_url_file(self):
         """Test CLI exits gracefully with empty URL file."""
-        from src.scraper.main import main
+        from src.services.scraper.server import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
             urls_file = os.path.join(tmpdir, "urls.txt")
@@ -369,7 +369,7 @@ class TestScraperCLIURLParsing:
 
     def test_cli_handles_utf8_with_bom(self):
         """Test CLI correctly reads UTF-8 files with BOM."""
-        from src.scraper.main import main
+        from src.services.scraper.server import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
             urls_file = os.path.join(tmpdir, "urls_with_bom.txt")
@@ -394,7 +394,7 @@ class TestScraperCLIURLParsing:
                     failed_log,
                 ],
             ):
-                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
+                with patch("src.services.scraper.server.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.return_value = (2, 2, 0)
                     mock_instance.print_summary = Mock()
@@ -411,7 +411,7 @@ class TestScraperCLIURLParsing:
 
     def test_cli_handles_latin1_encoding(self):
         """Test CLI falls back to latin-1 encoding when UTF-8 fails."""
-        from src.scraper.main import main
+        from src.services.scraper.server import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
             urls_file = os.path.join(tmpdir, "urls_latin1.txt")
@@ -437,7 +437,7 @@ class TestScraperCLIURLParsing:
                     failed_log,
                 ],
             ):
-                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
+                with patch("src.services.scraper.server.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.return_value = (1, 1, 0)
                     mock_instance.print_summary = Mock()
@@ -453,7 +453,7 @@ class TestScraperCLIURLParsing:
 
     def test_cli_encoding_fallback_order(self):
         """Test CLI tries encodings in correct order: utf-8, utf-8-sig, latin-1."""
-        from src.scraper.main import main
+        from src.services.scraper.server import main
 
         with tempfile.TemporaryDirectory() as tmpdir:
             urls_file = os.path.join(tmpdir, "urls.txt")
@@ -477,7 +477,7 @@ class TestScraperCLIURLParsing:
                     failed_log,
                 ],
             ):
-                with patch("src.scraper.main.VecinaScraper") as mock_scraper:
+                with patch("src.services.scraper.server.VecinaScraper") as mock_scraper:
                     mock_instance = Mock()
                     mock_instance.scrape_urls.return_value = (1, 1, 0)
                     mock_instance.print_summary = Mock()

@@ -66,7 +66,7 @@ echo -e "${GREEN}✓ Output directories ready${NC}"
 echo ""
 echo "Starting scraper (streaming mode)..."
 echo "=========================================="
-python -m src.scraper.cli --stream --no-confirm --verbose
+python -m src.services.scraper.cli --stream --no-confirm --verbose
 
 SCRAPER_EXIT_CODE=$?
 

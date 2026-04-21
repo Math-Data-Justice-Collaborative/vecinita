@@ -48,20 +48,20 @@ data/
 
 ```bash
 # Standard scrape with all URLs
-uv run python -m src.scraper.main \
+uv run python -m src.services.scraper.server \
   --input data/input/urls.txt \
   --output-file data/output/chunks.txt \
   --failed-log data/output/failed.txt
 
 # With streaming mode (uploads immediately)
-uv run python -m src.scraper.main \
+uv run python -m src.services.scraper.server \
   --input data/input/urls.txt \
   --output-file data/output/chunks.txt \
   --failed-log data/output/failed.txt \
   --stream
 
 # Test with small dataset
-uv run python -m src.scraper.main \
+uv run python -m src.services.scraper.server \
   --input data/test_urls/test_urls_small.txt \
   --output-file data/output/chunks.txt \
   --failed-log data/output/failed.txt

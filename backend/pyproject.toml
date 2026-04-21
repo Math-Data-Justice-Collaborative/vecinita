@@ -33,7 +33,7 @@ dependencies = [
     # Utilities
     "cryptography>=46.0.7",
     "filelock>=3.20.3",
-    "python-dotenv",
+    "python-dotenv>=1.2.2",
     "pydantic",
     "requests>=2.33.0",
     "urllib3>=2.6.3",
@@ -156,7 +156,7 @@ vecinita-agent = "src.rag_agent:main"
 vecinita-setup = "src.setup_check:main"
 vecinita-example = "scripts.example_rag_usage:main"
 vecinita-fastapi = "scripts.fastapi_integration_example:main"
-vecinita-scrape = "src.scraper.cli:main"
+vecinita-scrape = "src.services.scraper.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/acadiagit/vecinita"
@@ -308,7 +308,6 @@ module = [
     "src.agent.*",
     "src.api.*",
     "src.embedding_service.*",
-    "src.scraper.*",
     "src.services.*",
     "src.test_faq",
 ]

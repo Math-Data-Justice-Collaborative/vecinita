@@ -20,10 +20,11 @@ from pathlib import Path
 #
 # If tests need to substitute or mock the scraper implementation, they should
 # patch this module-level name before calling `main()`, for example:
-#     from backend.src.scraper import main
-#     main.VecinaScraper = FakeScraper
-#     main.main()
+#     from src.services.scraper import server as scraper_server
+#     scraper_server.VecinaScraper = FakeScraper
+#     scraper_server.main()
 from .scraper import VecinaScraper
+from .utils import prepare_scrape_urls
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -114,17 +115,20 @@ def main():
     try:
         # Try UTF-8 first, then fall back to UTF-8 with BOM, then latin-1
         encodings = ["utf-8", "utf-8-sig", "latin-1"]
-        urls = []
+        urls: list[str] = []
         decode_successful = False
         for encoding in encodings:
             try:
                 with open(args.input, encoding=encoding) as f:
-                    urls = [
-                        line.strip().lstrip("\ufeff")
-                        for line in f
-                        if line.strip() and not line.startswith("#")
-                    ]
+                    urls, url_stats = prepare_scrape_urls(f)
                 log.info(f"Successfully read input file with {encoding} encoding")
+                log.info(
+                    "URL hygiene: "
+                    f"kept={url_stats['final_urls']}, "
+                    f"duplicates_removed={url_stats['duplicates_removed']}, "
+                    f"ignored_invalid={url_stats['ignored_invalid_url']}, "
+                    f"ignored_localhost={url_stats['ignored_localhost']}"
+                )
                 decode_successful = True
                 break
             except UnicodeDecodeError:

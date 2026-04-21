@@ -36,7 +36,7 @@ Use this mapping as source-of-truth when implementing infra changes:
 ## Architecture Overview
 
 ### Data Flow
-1. **Web Scraping** ([../backend/src/scraper/main.py](../backend/src/scraper/main.py)): Scraper entrypoint and orchestration for ingestion jobs
+1. **Web Scraping** ([../backend/src/services/scraper/server.py](../backend/src/services/scraper/server.py)): Scraper entrypoint and orchestration for ingestion jobs
 2. **Vector Storage** ([../backend/src/agent/utils/vector_loader.py](../backend/src/agent/utils/vector_loader.py)): Chunk/embedding load path used by the agent stack
 3. **Q&A Engine** ([../backend/src/agent/main.py](../backend/src/agent/main.py)): FastAPI app detects query language, retrieves similar docs, and returns sourced answers
 

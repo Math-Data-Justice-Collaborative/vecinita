@@ -67,9 +67,9 @@ VecinaScraper (scraper.py)
 - File I/O operations
 - Logging helpers
 
-### `main.py` - CLI Entry Point
+### `server.py` - CLI entry (URL file mode)
 - Argument parsing
-- Can be run directly: `python -m src.scraper.main`
+- Can be run directly: `python -m src.services.scraper.server`
 - Initializes scraper and processes URLs
 
 ### `__init__.py` - Package
@@ -79,8 +79,8 @@ VecinaScraper (scraper.py)
 ## How the CLI Uses It
 
 ```python
-# In src/cli/data_scrape_load.py
-from src.scraper.scraper import VecinaScraper
+# In src/cli/__main__.py (delegates to pipeline CLI)
+from src.services.scraper.scraper import VecinaScraper
 
 # Create scraper instance
 scraper = VecinaScraper(
@@ -130,16 +130,16 @@ These are separate, non-scraper modules (correctly placed in `src/utils/`):
 
 ```bash
 # Import all scraper components
-python -c "from src.scraper.scraper import VecinaScraper; print('✓ OK')"
+python -c "from src.services.scraper.scraper import VecinaScraper; print('✓ OK')"
 
 # Check module structure
 python -c "
-from src.scraper import config, loaders, processors, scraper, utils
+from src.services.scraper import config, loaders, processors, scraper, utils
 print('✓ All modules present')
 "
 
 # Run scraper directly
-python -m src.scraper.main --help
+python -m src.services.scraper.server --help
 
 # Use from CLI
 python -m src.cli --stream --verbose
@@ -147,12 +147,12 @@ python -m src.cli --stream --verbose
 
 ## Conclusion
 
-✅ **CONFIRMED**: All scraper backend code is organized in `src/utils/scraper/`
+✅ **CONFIRMED**: In-process scraper backend code lives under `src/services/scraper/`
 
 The modular structure provides:
 - Clear separation of concerns
 - Easy maintenance and testing
 - Simple extension mechanism
-- Clean import path for CLI: `from src.scraper.scraper import VecinaScraper`
+- Clean import path for CLI: `from src.services.scraper.scraper import VecinaScraper`
 
 No changes needed - the structure is optimal.

@@ -16,7 +16,8 @@
 #   SCHEMATHESIS_REQUEST_TIMEOUT — per-request HTTP timeout in seconds (default: 180)
 #   SCHEMATHESIS_SOURCE_URL — optional; default source_url for GET /api/v1/documents/preview and
 #       /download-url (hooks default: https://example.org/community-resource-guide). Set to a URL
-#       that exists in the target Postgres to avoid 404 warnings on live runs.
+#       that exists in the target Postgres to avoid 404 warnings on live runs. When unset and
+#       SCHEMATHESIS_BOOTSTRAP_IDS=1, bootstrap picks from GET /api/v1/documents/overview (prefers total_chunks>0).
 #   SCHEMATHESIS_DOCUMENTS_PREVIEW_SOURCE_URL — optional; overrides SCHEMATHESIS_SOURCE_URL for
 #       GET /api/v1/documents/preview only (use when preview and download need different seeds).
 #   SCHEMATHESIS_DOCUMENTS_DOWNLOAD_SOURCE_URL — optional; overrides SCHEMATHESIS_SOURCE_URL for
@@ -24,7 +25,8 @@
 #   SCHEMATHESIS_SCRAPE_JOB_ID — optional; UUID for GET /api/v1/scrape/{job_id} and POST …/cancel
 #       (hooks default: example UUID). Set to a real job id from POST /api/v1/scrape when testing.
 #   SCHEMATHESIS_MODAL_SCRAPER_JOB_ID — optional; UUID for GET/POST …/modal-jobs/scraper/{job_id} and …/cancel
-#       (defaults to SCHEMATHESIS_SCRAPE_JOB_ID when unset). Use a real Modal-native scraping_jobs id on live DB.
+#       (hooks default to SCHEMATHESIS_SCRAPE_JOB_ID when unset — not the same namespace as POST /api/v1/scrape).
+#       Bootstrap (SCHEMATHESIS_BOOTSTRAP_IDS=1) sets this from GET /api/v1/modal-jobs/scraper when unset.
 #   SCHEMATHESIS_MODAL_GATEWAY_JOB_ID — optional; path param for GET/DELETE …/modal-jobs/registry/{id}
 #       (hooks default: same example UUID). Set to a real gateway_job_id to reduce 404 warnings.
 #   MODAL_SCRAPER_PERSIST_VIA_GATEWAY — when set to 1 on the **gateway**, scraping job rows are written on Render
@@ -38,9 +40,11 @@
 #       SCHEMATHESIS_REQUEST_TIMEOUT for slow agents).
 #   SCHEMATHESIS_STREAM_QUESTION — passed via hooks as `question` for GET /api/v1/ask/stream (default in hooks).
 #   SCHEMATHESIS_ASK_QUESTION — passed via hooks as `question` for GET /api/v1/ask (default in hooks).
-#   SCHEMATHESIS_BOOTSTRAP_IDS — default 1: before the gateway run, probe the live gateway to set
-#       SCHEMATHESIS_MODAL_GATEWAY_JOB_ID (first entry from GET /modal-jobs/registry) and/or
-#       SCHEMATHESIS_SCRAPE_JOB_ID (POST /api/v1/scrape) when those env vars are unset, reducing 404 / mismatch noise.
+#   SCHEMATHESIS_BOOTSTRAP_IDS — default 1: before the gateway run, probe the live gateway when env vars are unset:
+#       SCHEMATHESIS_SOURCE_URL from GET /api/v1/documents/overview (prefers a source with total_chunks > 0),
+#       SCHEMATHESIS_MODAL_GATEWAY_JOB_ID from GET /modal-jobs/registry?limit=1,
+#       SCHEMATHESIS_MODAL_SCRAPER_JOB_ID from GET /modal-jobs/scraper?limit=1,
+#       SCHEMATHESIS_SCRAPE_JOB_ID from POST /api/v1/scrape — reduces 404 / TraceCov mismatch noise on live runs.
 #       Set to 0 to skip (e.g. read-only environments).
 #   SCHEMATHESIS_GATEWAY_MAX_EXAMPLES — overrides --max-examples for the gateway run only (default: SCHEMATHESIS_MAX_EXAMPLES).
 #   SCHEMATHESIS_GATEWAY_INCLUDE_PATH_REGEX — optional; when set, passed as ``--include-path-regex`` on the gateway pass only
@@ -127,6 +131,36 @@ _schemathesis_bootstrap_gateway_ids() {
   PYBIN="$(command -v python3 || command -v python || true)"
   [[ -n "${PYBIN}" ]] || return 0
 
+  if [[ -z "${SCHEMATHESIS_SOURCE_URL:-}" ]]; then
+    local doc_url=""
+    doc_url="$(curl -sS -m 45 "${base}/api/v1/documents/overview" \
+      ${HEADER_ARGS[@]+"${HEADER_ARGS[@]}"} \
+      -H "Accept: application/json" 2>/dev/null | "${PYBIN}" -c "import json,sys
+try:
+    d=json.load(sys.stdin)
+except Exception:
+    sys.exit(0)
+sources=d.get(\"sources\") or []
+best=\"\"
+for item in sources:
+    if not isinstance(item, dict):
+        continue
+    u=(item.get(\"url\") or \"\").strip()
+    if not u:
+        continue
+    chunks=int(item.get(\"total_chunks\") or 0)
+    if chunks>0:
+        print(u, end=\"\")
+        sys.exit(0)
+    if not best:
+        best=u
+print(best, end=\"\")" )" || true
+    if [[ -n "${doc_url}" ]]; then
+      export SCHEMATHESIS_SOURCE_URL="${doc_url}"
+      echo "Schemathesis bootstrap: SCHEMATHESIS_SOURCE_URL from GET /api/v1/documents/overview"
+    fi
+  fi
+
   if [[ -z "${SCHEMATHESIS_MODAL_GATEWAY_JOB_ID:-}" ]]; then
     local gid=""
     gid="$(curl -sS -m 45 "${base}/api/v1/modal-jobs/registry?limit=1" \
@@ -142,6 +176,28 @@ if jobs and isinstance(jobs[0], dict):
     if [[ -n "${gid}" ]]; then
       export SCHEMATHESIS_MODAL_GATEWAY_JOB_ID="${gid}"
       echo "Schemathesis bootstrap: SCHEMATHESIS_MODAL_GATEWAY_JOB_ID from GET /modal-jobs/registry"
+    fi
+  fi
+
+  if [[ -z "${SCHEMATHESIS_MODAL_SCRAPER_JOB_ID:-}" ]]; then
+    local msid=""
+    msid="$(curl -sS -m 45 "${base}/api/v1/modal-jobs/scraper?limit=1" \
+      ${HEADER_ARGS[@]+"${HEADER_ARGS[@]}"} \
+      -H "Accept: application/json" 2>/dev/null | "${PYBIN}" -c "import json,sys
+try:
+    d=json.load(sys.stdin)
+except Exception:
+    sys.exit(0)
+for row in d.get(\"jobs\") or []:
+    if not isinstance(row, dict):
+        continue
+    jid=(row.get(\"job_id\") or row.get(\"id\") or \"\").strip()
+    if jid:
+        print(jid, end=\"\")
+        sys.exit(0)" )" || true
+    if [[ -n "${msid}" ]]; then
+      export SCHEMATHESIS_MODAL_SCRAPER_JOB_ID="${msid}"
+      echo "Schemathesis bootstrap: SCHEMATHESIS_MODAL_SCRAPER_JOB_ID from GET /modal-jobs/scraper"
     fi
   fi
 
