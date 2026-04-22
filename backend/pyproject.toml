@@ -206,6 +206,7 @@ markers = [
     "contract: Cross-platform env var and service contract tests (static, no external deps)",
     "render_connectivity: Render-specific service connectivity configuration tests (offline)",
     "live: Live smoke/integration tests against the deployed Render environment (requires RENDER_*_URL secrets)",
+    "pact_provider: Pact provider replay tests (requires live services + generated pact JSON)",
 ]
 
 # Logging
@@ -333,6 +334,13 @@ exclude_lines = [
 # - tokenizers pre-releases require Rust compilation
 # See: uv.toml for detailed configuration
 # Force patched werkzeug (transitive via schemathesis, tensorboard, etc.)
-constraint-dependencies = ["werkzeug>=3.1.6"]
+constraint-dependencies = [
+    "werkzeug>=3.1.6",
+    # CVE-2026-41066: default entity resolution in lxml <6.1.0
+    "lxml>=6.1.0",
+]
 
 [dependency-groups]
+dev = [
+    "pact-python>=3.3.0",
+]

@@ -1,0 +1,79 @@
+# PR-scoped Pact consumers + unit checks for chat and DM frontends (FR-006 / SC-004–SC-005).
+# Provider replay and real-stack smoke: default branch (see Makefile pact-verify-providers, real-stack-wiring.yml).
+name: PR wiring — contract consumers
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "frontend/**"
+      - "apps/data-management-frontend/**"
+      - ".github/workflows/pr-wiring-contract-consumers.yml"
+
+concurrency:
+  group: pr-wiring-contracts-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chat-frontend-pact:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: "false"
+
+      - name: Init frontend submodule
+        run: git submodule update --init --depth 1 frontend
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Pact consumer (Vitest)
+        working-directory: frontend
+        run: npm run test:pact
+
+      - name: Unit tests (Vitest)
+        working-directory: frontend
+        run: npm run test:unit
+
+  dm-frontend-pact:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: "false"
+
+      - name: Init data-management frontend submodule
+        run: git submodule update --init --depth 1 apps/data-management-frontend
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: apps/data-management-frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/data-management-frontend
+        run: npm ci
+
+      - name: Pact consumer (Vitest)
+        working-directory: apps/data-management-frontend
+        run: npm run test:pact
+
+      - name: Unit tests (Vitest)
+        working-directory: apps/data-management-frontend
+        run: npm run test
