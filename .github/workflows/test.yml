@@ -76,7 +76,7 @@ jobs:
 
     - name: Check backend formatting (Black)
       working-directory: backend
-      run: uv run black --check src tests scripts
+      run: uv run black --check --config pyproject.toml src tests scripts ../scripts/dm_openapi_diff.py
 
     - name: Type check backend (mypy)
       working-directory: backend
@@ -197,6 +197,10 @@ jobs:
     - name: Run data-management frontend tests
       working-directory: apps/data-management-frontend
       run: npm run test
+
+    - name: Pact consumer (DM → scraper / modal-jobs)
+      working-directory: apps/data-management-frontend
+      run: npm run test:pact
 
   embedding-modal-quality:
     runs-on: ubuntu-22.04
@@ -569,6 +573,12 @@ jobs:
           --tracecov-report-html-path=schema-coverage-data-management-pytest.html \
           --junit-xml=schema-test-results-data-management.xml
 
+    - name: DM OpenAPI snapshot drift (SC-002)
+      working-directory: ${{ github.workspace }}
+      env:
+        DATA_MANAGEMENT_SCHEMA_URL: ${{ secrets.DATA_MANAGEMENT_SCHEMA_URL }}
+      run: python3 scripts/dm_openapi_diff.py
+
     - name: Upload backend schema artifacts
       if: always()
       uses: actions/upload-artifact@v4
@@ -611,6 +621,10 @@ jobs:
     - name: Run frontend unit tests
       working-directory: frontend
       run: npm run test:coverage:unit
+
+    - name: Pact consumer (chat → gateway)
+      working-directory: frontend
+      run: npm run test:pact
 
   # ---------------------------------------------------------------------------
   # pgvector integration gate

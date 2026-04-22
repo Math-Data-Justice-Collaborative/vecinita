@@ -1,5 +1,36 @@
 # Testing & Quality Assurance Report
 
+## Contract & schema testing matrix (FR-004–FR-008, SC-002–SC-006)
+
+This section is the **single** place for merge-blocking vs informational contract work (replaces earlier `005-wire-services-dm-front` draft fragments).
+
+### Pact — two JS consumers
+
+| Product line | `consumer` name | Scope |
+|--------------|-----------------|-------|
+| Chat (`frontend/`) | `vecinita-chat-frontend` | Gateway/agent HTTP used by the SPA (**FR-007**); non-streaming paths in Pact. |
+| DM (`apps/data-management-frontend/`) | `vecinita-dm-frontend` | Scraper `/health`, `/jobs`, cancel, optional gateway modal-jobs base (**FR-008**). |
+
+**Broker vs checked-in pactfiles:** this repo uses **checked-in** pact JSON under `frontend/pacts/` and `apps/data-management-frontend/pacts/` for offline PR runs. A broker remains optional for teams that adopt it; never commit broker credentials.
+
+| When | What runs | Merge-blocking? |
+|------|-----------|-----------------|
+| Push/PR **`test.yml`** (`main` / `develop`) | **`frontend-unit`:** `npm run test:pact` in `frontend/`. **`data-management-frontend-ci`:** `npm run test:pact` in `apps/data-management-frontend/` (same job as Vitest; requires `CROSS_REPO_WORKFLOW_TOKEN` so the DM submodule is checked out). | Yes, when the job runs. |
+| PR (`pr-wiring-contract-consumers.yml`) | `npm run test:pact` in `frontend/` and `apps/data-management-frontend/` | Yes (on matching path filters). |
+| Local / release prep | `make pact-verify-providers` (pytest under `backend/tests/pact/`); see `backend/tests/pact/README.md` | Policy: default-branch / pre-release (not every PR). |
+| Manual | `.github/workflows/real-stack-wiring.yml` `workflow_dispatch` | Informational anchor for compose/Render smoke (**FR-006** / SC-003). |
+
+### Schemathesis & OpenAPI
+
+- **Config:** `backend/schemathesis.toml` (hooks `tests.schemathesis_hooks`, `continue-on-failure`, gateway `/api/v1/(scrape|modal-jobs)` tuning including **modal-jobs** when present in the live gateway OpenAPI).
+- **Default-branch job `backend-schema` (`.github/workflows/test.yml`):** pytest `test_api_schema_schemathesis`, `test_agent_api_schema_schemathesis`, `test_data_management_api_schema_schemathesis` — **FR-005** baseline; DM leg skips without scraper secrets. **DM OpenAPI drift:** `python3 scripts/dm_openapi_diff.py` vs `specs/005-wire-services-dm-front/artifacts/dm-openapi.snapshot.json` (**SC-002**); optional `DATA_MANAGEMENT_SCHEMA_URL` secret.
+- **Makefile:** `make test-schemathesis`, `make test-schemathesis-data-management`, `make test-fr005-schemathesis-baseline`, `make dm-openapi-diff`, `make test-schemathesis-cli` (see `make help`).
+
+### Typed DM client (**FR-010**)
+
+- `npm run codegen:api` in `apps/data-management-frontend/` regenerates `src/app/api/types/dm-openapi.generated.ts` from the **same committed snapshot** used by `dm_openapi_diff.py`.
+- App types: `src/app/api/types/index.ts` re-exports generated scraper shapes via `modal-types.ts`; corpus DTOs stay in `dm-api-dtos.ts` until a corpus OpenAPI is pinned.
+
 ## Executive Summary
 
 Complete testing and documentation pass completed on March 28, 2026. All quality gates are **PASSING**.

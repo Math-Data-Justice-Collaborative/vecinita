@@ -18,6 +18,7 @@
 	test-integration-gateway-fast test-integration-gateway-full test-integration-gateway \
 	test-all-integration test-cross-integration test-cross-e2e \
 	test-schemathesis test-schemathesis-gateway test-schemathesis-gateway-stateful test-schemathesis-agent test-schemathesis-data-management test-schemathesis-cli test-schemathesis-cli-agent \
+	test-fr005-schemathesis-baseline dm-openapi-diff pact-verify-providers \
 	scraper-run scraper-run-verbose scraper-run-clean scraper-validate-postgres scraper-pull \
 	microservices-up microservices-down microservices-logs test-microservices-contracts test-microservices \
 	render-env-validate render-tests-strict render-tests-render-suite render-workflow-ci \
@@ -116,6 +117,9 @@ help:
 	@echo "  make test-schemathesis-data-management   Live lx27 data-management API; TraceCov fail-under 100 (needs SCRAPER_API_KEYS)"
 	@echo "  make test-schemathesis-cli               Live Schemathesis CLI (loads .env): gateway + data-management; optional AGENT_SCHEMA_URL"
 	@echo "  make test-schemathesis-cli-agent         Live pytest Schemathesis against deployed agent (RENDER_AGENT_URL from .env)"
+	@echo "  make test-fr005-schemathesis-baseline    Gateway + agent Schemathesis pytest (FR-005 / T032)"
+	@echo "  make dm-openapi-diff                     Diff DM OpenAPI vs committed snapshot (FR-004 / SC-002)"
+	@echo "  make pact-verify-providers               Replay Pact consumers against live providers (FR-007/008; needs env + pacts)"
 	@echo ""
 	@echo "Scraper and ingestion targets"
 	@echo "  make scraper-run                         Run scraper in additive streaming mode"
@@ -384,7 +388,7 @@ typecheck-scraper:
 format: format-backend format-frontend
 
 format-backend:
-	cd backend && uv run black src tests scripts
+	cd backend && uv run black --config pyproject.toml src tests scripts ../scripts/dm_openapi_diff.py
 
 format-frontend:
 	cd frontend && npm run format:write
@@ -392,7 +396,7 @@ format-frontend:
 format-check: format-check-backend format-check-frontend
 
 format-check-backend:
-	cd backend && uv run black --check src tests scripts
+	cd backend && uv run black --check --config pyproject.toml src tests scripts ../scripts/dm_openapi_diff.py
 
 format-check-frontend:
 	cd frontend && npm run format
@@ -712,6 +716,17 @@ test-schemathesis-cli-agent:
 	if [ -f .env ]; then . ./.env; fi; \
 	set +a; \
 	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/live/test_live_schemathesis.py -m live -q
+
+# FR-005 / C1 (T032): assertable gateway + agent Schemathesis pytest entrypoints (TraceCov 100).
+test-fr005-schemathesis-baseline: test-schemathesis-gateway test-schemathesis-agent
+
+# FR-004 / SC-002: drift gate for committed DM OpenAPI snapshot (network to DATA_MANAGEMENT_SCHEMA_URL or default).
+dm-openapi-diff:
+	python3 scripts/dm_openapi_diff.py
+
+# FR-007 / FR-008: Pact provider replay (skips unless env vars + generated pacts exist).
+pact-verify-providers:
+	cd backend && uv run pytest tests/pact/test_chat_gateway_provider_verify.py tests/pact/test_dm_api_provider_verify.py tests/pact/test_agent_provider_verify.py -q
 
 test-frontend-e2e:
 	cd frontend && npm run test:e2e

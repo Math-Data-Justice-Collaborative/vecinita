@@ -1,0 +1,31 @@
+# Manual real-stack / integration smoke hook (FR-006 / SC-003).
+# Full stack bring-up is environment-specific; use this as a dispatch anchor for
+# documented compose or Render workflows from TESTING_DOCUMENTATION.md.
+name: Real stack wiring (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      notes:
+        description: "Optional run notes (ignored by automation)"
+        required: false
+        default: ""
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  wiring-context:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: "false"
+
+      - name: Documented entrypoints
+        run: |
+          set -euo pipefail
+          echo "workflow_dispatch received: ${{ github.event.inputs.notes }}"
+          echo "Compose stacks live at repo root (e.g. docker-compose.microservices.yml, docker-compose.dev.yml)."
+          echo "See TESTING_DOCUMENTATION.md and specs/005-wire-services-dm-front/quickstart.md for Pact, Schemathesis, and Playwright."
