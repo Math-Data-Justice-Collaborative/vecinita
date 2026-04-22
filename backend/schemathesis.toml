@@ -74,6 +74,8 @@ enabled = false
 
 # Gateway job queues (scrape + modal-jobs): stateful mixes invalid bodies; align with pytest
 # ``test_gateway_*_stateful`` (negative_data_rejection disabled for these paths only).
+# Modal-jobs scraper proxy paths appear in the gateway OpenAPI when gateway env enables that surface;
+# exercise them via live schema jobs in ``test.yml`` ``backend-schema`` (same regex family as here).
 [[operations]]
 include-path-regex = "^/api/v1/(scrape|modal-jobs)(/|$)"
 
