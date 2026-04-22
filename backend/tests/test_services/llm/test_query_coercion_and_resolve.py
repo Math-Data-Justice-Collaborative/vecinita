@@ -4,12 +4,15 @@ Sentinel query strings like ``model=null`` must not be forwarded as literal mode
 to upstream chat APIs — see ``coerce_optional_query_str`` and ``resolve_request``.
 """
 
+from types import SimpleNamespace
+
 import pytest
 
 from src.services.llm.client_manager import (
     LocalLLMClientManager,
     _ModalNativeChatClient,
     coerce_optional_query_str,
+    extract_assistant_text_from_llm_http_payload,
 )
 
 pytestmark = pytest.mark.unit
@@ -105,6 +108,46 @@ def test_resolve_request_unknown_model_falls_back_for_modal_run_url():
     assert model == "gemma3"
 
 
+def test_extract_assistant_text_from_ollama_chat_shape():
+    data = {
+        "model": "llama3.2",
+        "done": True,
+        "message": {"role": "assistant", "content": "Hello from Ollama chat."},
+    }
+    assert extract_assistant_text_from_llm_http_payload(data) == "Hello from Ollama chat."
+
+
+def test_extract_assistant_text_from_openai_choices_shape():
+    data = {
+        "choices": [
+            {
+                "message": {"role": "assistant", "content": "Hello from choices[0]."},
+            }
+        ]
+    }
+    assert extract_assistant_text_from_llm_http_payload(data) == "Hello from choices[0]."
+
+
+def test_extract_assistant_text_from_ollama_generate_response_key():
+    data = {"model": "x", "response": "Hello from generate API."}
+    assert extract_assistant_text_from_llm_http_payload(data) == "Hello from generate API."
+
+
+def test_extract_assistant_text_supports_message_objects_with_content_attr():
+    data = {"message": SimpleNamespace(role="assistant", content="Hello from namespace message.")}
+    assert extract_assistant_text_from_llm_http_payload(data) == "Hello from namespace message."
+
+
+def test_extract_assistant_text_from_multimodal_content_list():
+    data = {
+        "message": {
+            "role": "assistant",
+            "content": [{"type": "text", "text": "Line one"}, {"type": "text", "text": "Line two"}],
+        }
+    }
+    assert extract_assistant_text_from_llm_http_payload(data) == "Line one\nLine two"
+
+
 def test_modal_native_chat_client_can_use_modal_function_invocation(monkeypatch):
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
     import src.services.llm.client_manager as client_manager
@@ -122,6 +165,27 @@ def test_modal_native_chat_client_can_use_modal_function_invocation(monkeypatch)
     )
     message = client.invoke([])
     assert message.content == "hello from function"
+
+
+def test_modal_native_chat_client_empty_extract_does_not_stringify_entire_payload(monkeypatch):
+    """Regression: never set AIMessage.content to str(full_upstream_json)."""
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
+    import src.services.llm.client_manager as client_manager
+
+    monkeypatch.setattr(
+        client_manager,
+        "invoke_modal_model_chat",
+        lambda **_kwargs: {"model": "llama3.2", "done": True},
+    )
+
+    client = _ModalNativeChatClient(
+        base_url="https://example.modal.run",
+        model="gemma3",
+        headers={},
+    )
+    message = client.invoke([])
+    assert message.content == ""
+    assert "llama3.2" not in message.content
 
 
 def test_validate_runtime_rejects_modal_run_when_invocation_disabled(monkeypatch):

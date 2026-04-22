@@ -24,6 +24,67 @@ logger = logging.getLogger(__name__)
 _QUERY_STRING_SENTINELS = frozenset({"", "null", "none", "undefined"})
 
 
+def _stringify_llm_content_value(raw: Any) -> str:
+    """Normalize LangChain / Ollama ``content`` fields (str, multimodal list, or dict) to plain text."""
+    if raw is None:
+        return ""
+    if isinstance(raw, str):
+        return raw.strip()
+    if isinstance(raw, list):
+        parts: list[str] = []
+        for item in raw:
+            if isinstance(item, str) and item.strip():
+                parts.append(item.strip())
+            elif isinstance(item, dict):
+                text = item.get("text")
+                if isinstance(text, str) and text.strip():
+                    parts.append(text.strip())
+                nested = item.get("content")
+                if isinstance(nested, str) and nested.strip():
+                    parts.append(nested.strip())
+        return "\n".join(parts).strip()
+    if isinstance(raw, dict):
+        text = raw.get("text")
+        if isinstance(text, str) and text.strip():
+            return text.strip()
+    return ""
+
+
+def extract_assistant_text_from_llm_http_payload(data: Any) -> str:
+    """Pull user-visible assistant text from Ollama / OpenAI-shaped chat JSON.
+
+    Never stringify the whole payload — that leaked raw model metadata to clients
+    when ``message`` was missing or used a non-dict shape.
+    """
+    if not isinstance(data, dict):
+        return ""
+
+    choices = data.get("choices")
+    if isinstance(choices, list) and choices:
+        first = choices[0]
+        if isinstance(first, dict):
+            msg = first.get("message")
+            raw_content = (
+                msg.get("content") if isinstance(msg, dict) else getattr(msg, "content", None)
+            )
+            text = _stringify_llm_content_value(raw_content)
+            if text:
+                return text
+
+    msg = data.get("message")
+    if msg is not None:
+        raw_content = msg.get("content") if isinstance(msg, dict) else getattr(msg, "content", None)
+        text = _stringify_llm_content_value(raw_content)
+        if text:
+            return text
+
+    response = data.get("response")
+    if isinstance(response, str) and response.strip():
+        return response.strip()
+
+    return ""
+
+
 def coerce_optional_query_str(value: str | None) -> str | None:
     """Treat common sentinel query values as absent (Schemathesis / clients send model=null, etc.)."""
     if value is None:
@@ -134,12 +195,13 @@ class _ModalNativeChatClient:
                 messages=payload_messages,
                 temperature=self.temperature,
             )
-            message = data.get("message") if isinstance(data, dict) else None
-            content = ""
-            if isinstance(message, dict):
-                content = str(message.get("content") or "")
+            content = extract_assistant_text_from_llm_http_payload(data)
             if not content:
-                content = str(data)
+                logger.warning(
+                    "modal chat_completion returned no assistant text (model=%s keys=%s)",
+                    self.model,
+                    list(data.keys()) if isinstance(data, dict) else type(data).__name__,
+                )
             return AIMessage(content=content)
 
         if "modal.run" in self.base_url.lower():
@@ -176,12 +238,13 @@ class _ModalNativeChatClient:
                 )
                 raise
 
-        message = data.get("message") if isinstance(data, dict) else None
-        content = ""
-        if isinstance(message, dict):
-            content = str(message.get("content") or "")
+        content = extract_assistant_text_from_llm_http_payload(data)
         if not content:
-            content = str(data)
+            logger.warning(
+                "llm HTTP /chat returned no assistant text (model=%s keys=%s)",
+                self.model,
+                list(data.keys()) if isinstance(data, dict) else type(data).__name__,
+            )
         return AIMessage(content=content)
 
 
