@@ -14,6 +14,8 @@ NO_CONFIRM=0
 NO_STREAM=0
 SOURCE_FILTER=""
 LIMIT=20
+WAIT_FOR_DB_SECONDS="${WAIT_FOR_DB_SECONDS:-90}"
+WAIT_FOR_DB_INTERVAL_SECONDS="${WAIT_FOR_DB_INTERVAL_SECONDS:-3}"
 
 usage() {
   cat <<'EOF'
@@ -31,6 +33,8 @@ Options:
   --debug                  Enable scraper debug mode
   --source-filter <text>   Filter validation queries by source_url/domain text
   --limit <n>              Validation row limit (default: 20)
+  --wait-for-db-seconds <n>        Max seconds to wait for DATABASE_URL (default: 90)
+  --wait-for-db-interval <n>       Seconds between DB probes (default: 3)
   -h, --help               Show this help
 
 Examples:
@@ -77,6 +81,14 @@ while [[ $# -gt 0 ]]; do
       LIMIT="${2:-20}"
       shift
       ;;
+    --wait-for-db-seconds)
+      WAIT_FOR_DB_SECONDS="${2:-90}"
+      shift
+      ;;
+    --wait-for-db-interval)
+      WAIT_FOR_DB_INTERVAL_SECONDS="${2:-3}"
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
@@ -103,7 +115,36 @@ if [[ -n "${DATABASE_URL:-}" ]]; then
   export DATABASE_URL
 fi
 
+wait_for_postgres() {
+  local timeout="$1"
+  local interval="$2"
+  local waited=0
+
+  if [[ -z "${DATABASE_URL:-}" ]]; then
+    return 0
+  fi
+
+  if ! command -v psql >/dev/null 2>&1; then
+    echo "[scraper-batch] psql not installed; skipping DATABASE_URL readiness wait."
+    return 0
+  fi
+
+  while (( waited < timeout )); do
+    if PGCONNECT_TIMEOUT=5 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT 1;" >/dev/null 2>&1; then
+      echo "[scraper-batch] DATABASE_URL is reachable."
+      return 0
+    fi
+    sleep "$interval"
+    waited=$((waited + interval))
+  done
+
+  echo "[scraper-batch] DATABASE_URL did not become reachable within ${timeout}s." >&2
+  return 1
+}
+
 if [[ "$RUN_SCRAPER" -eq 1 ]]; then
+  wait_for_postgres "$WAIT_FOR_DB_SECONDS" "$WAIT_FOR_DB_INTERVAL_SECONDS"
+
   SCRAPER_ARGS=("--${MODE}")
 
   if [[ "$CLEAN" -eq 1 ]]; then
@@ -140,6 +181,8 @@ if ! command -v psql >/dev/null 2>&1; then
   echo "[scraper-batch] psql is not installed. Skipping Postgres validation queries."
   exit 0
 fi
+
+wait_for_postgres "$WAIT_FOR_DB_SECONDS" "$WAIT_FOR_DB_INTERVAL_SECONDS"
 
 FILTER_SQL="TRUE"
 if [[ -n "$SOURCE_FILTER" ]]; then

@@ -19,7 +19,7 @@
 	test-all-integration test-cross-integration test-cross-e2e \
 	test-schemathesis test-schemathesis-gateway test-schemathesis-gateway-stateful test-schemathesis-agent test-schemathesis-data-management test-schemathesis-cli test-schemathesis-cli-agent \
 	test-fr005-schemathesis-baseline dm-openapi-diff pact-verify-providers \
-	scraper-run scraper-run-verbose scraper-run-clean scraper-validate-postgres scraper-pull \
+	scraper-run scraper-run-verbose scraper-run-verbos scraper-run-clean scraper-validate-postgres scraper-pull \
 	active-crawl active-crawl-live active-crawl-validate active-crawl-pipeline \
 	microservices-up microservices-down microservices-logs test-microservices-contracts test-microservices \
 	render-env-validate render-tests-strict render-tests-render-suite render-workflow-ci \
@@ -124,7 +124,8 @@ help:
 	@echo ""
 	@echo "Scraper and ingestion targets"
 	@echo "  make scraper-run                         Run scraper in additive streaming mode"
-	@echo "  make scraper-run-verbose                 Run scraper with verbose logs and DB validation"
+	@echo "  make scraper-run-verbose                 Submit configured seeds to DM API /jobs with verbose logs"
+	@echo "  make scraper-run-verbos                  Typo alias of scraper-run-verbose (kept for operator compatibility)"
 	@echo "  make scraper-run-clean                   Run destructive clean + scraper + DB validation"
 	@echo "  make scraper-pull                        Fetch/rebase services/scraper (fixes fast-forward pull failures)"
 	@echo "  make scraper-validate-postgres           Run Postgres validation queries only (no scraping)"
@@ -504,7 +505,9 @@ scraper-pull:
 	./scripts/sync_scraper_submodule.sh
 
 scraper-run-verbose:
-	./scripts/run_scraper_postgres_batch.sh --local --verbose
+	./scripts/run_scraper_remote_jobs.sh --verbose
+
+scraper-run-verbos: scraper-run-verbose
 
 scraper-run-clean:
 	./scripts/run_scraper_postgres_batch.sh --local --clean

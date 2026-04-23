@@ -8,6 +8,23 @@ a single key segment.
 
 from __future__ import annotations
 
+import os
+
+
+def scraper_api_key_segments(raw: str | None) -> list[str]:
+    """Non-empty trimmed segments from a comma-separated SCRAPER_API_KEYS value."""
+    stripped = (raw if raw is not None else "").strip()
+    if not stripped:
+        return []
+    return [part.strip() for part in stripped.split(",") if part.strip()]
+
+
+def first_scraper_api_key(raw: str | None = None) -> str | None:
+    """First comma-separated API key segment (same convention as Bearer on DM /jobs)."""
+    source = os.getenv("SCRAPER_API_KEYS", "") if raw is None else raw
+    parts = scraper_api_key_segments(source)
+    return parts[0] if parts else None
+
 
 def iter_scraper_api_key_segment_errors(raw: str) -> list[str]:
     """Return human-readable errors for invalid segments; empty list if all valid."""
