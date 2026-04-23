@@ -242,11 +242,11 @@ dev-data-management-frontend:
 	@cd apps/data-management-frontend && npm run dev -- --host 0.0.0.0 --port 5174
 
 dev-data-management-api:
-	@echo "Starting Data Management API (port 8005, PostgreSQL-backed)..."
-	@test -d services/data-management-api/apps/backend || \
+	@echo "Starting Data Management API (port 8005)..."
+	@test -d services/data-management-api/apps/backend/vecinita_dm_api || \
 		(echo "❌ data-management-api submodule not initialized." && \
 		 echo "   Run: git submodule update --init services/data-management-api" && exit 1)
-	@echo "⚠️  Start data-management API directly from services/data-management-api using its native entrypoint." 
+	cd backend && PYTHONPATH=../services/data-management-api/apps/backend:../services/data-management-api/packages/service-clients:../services/data-management-api/packages/shared-schemas:../services/data-management-api/packages/shared-config uv run python -m uvicorn vecinita_dm_api.app:create_app --factory --host 0.0.0.0 --port 8005
 
 data-management-api-key:
 	@set -e; \
@@ -462,10 +462,10 @@ test-unit: test-backend-unit test-frontend-unit
 
 test-backend-unit:
 	cd backend && uv run pytest tests/ -m "unit and not llm" -v --tb=short && \
-		PYTHONPATH=../services/data-management-api/packages/service-clients:../services/data-management-api/packages/shared-schemas:../services/data-management-api/packages/shared-config \
+		PYTHONPATH=../services/data-management-api/packages/service-clients:../services/data-management-api/packages/shared-schemas:../services/data-management-api/packages/shared-config:../services/data-management-api/apps/backend \
 		uv run pytest \
 			../services/data-management-api/packages/service-clients/tests/ \
-			../services/data-management-api/tests/parity/ \
+			../services/data-management-api/tests/ \
 			-q --tb=short
 
 test-frontend-unit:

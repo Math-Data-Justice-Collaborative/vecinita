@@ -154,3 +154,19 @@ def test_enforce_modal_function_policy_for_urls_allows_non_modal(monkeypatch):
 
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "0")
     enforce_modal_function_policy_for_urls({"OLLAMA_BASE_URL": "http://localhost:11434"})
+
+
+def test_enforce_modal_function_policy_allows_modal_hosts_when_auto_and_tokens_configured(
+    monkeypatch,
+):
+    from src.services.modal.invoker import enforce_modal_function_policy_for_urls
+
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "auto")
+    monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")
+    monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-test")
+    enforce_modal_function_policy_for_urls(
+        {
+            "OLLAMA_BASE_URL": "https://vecinita--vecinita-model-api.modal.run",
+            "EMBEDDING_SERVICE_URL": "https://vecinita--vecinita-embedding-web-app.modal.run",
+        }
+    )
