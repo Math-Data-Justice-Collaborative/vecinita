@@ -12,13 +12,13 @@ from urllib.parse import urlparse
 from uuid import UUID
 
 from src.services.scraper.active_crawl.config import ActiveCrawlConfig, retrieval_mode_for
-from src.services.scraper.active_crawl.live_scraper import LiveScrapeResult, submit_and_wait_for_job
 from src.services.scraper.active_crawl.discovery import (
     extract_same_site_links,
     fetch_html_for_discovery,
 )
 from src.services.scraper.active_crawl.escalation import should_force_playwright
 from src.services.scraper.active_crawl.frontier import CrawlFrontier, QueuedURL
+from src.services.scraper.active_crawl.live_scraper import LiveScrapeResult, submit_and_wait_for_job
 from src.services.scraper.active_crawl.persistence import CrawlRepository, FetchAttemptRow
 from src.services.scraper.active_crawl.robots import robots_cache_from_env
 from src.services.scraper.active_crawl.url_policy import (
@@ -76,7 +76,7 @@ def run_once_seeds(cfg: ActiveCrawlConfig, *, bfs: bool = True) -> UUID:
     return run_active_crawl(cfg, bfs=bfs)
 
 
-def run_active_crawl(cfg: ActiveCrawlConfig, *, bfs: bool = True) -> UUID:
+def run_active_crawl(cfg: ActiveCrawlConfig, *, bfs: bool = True) -> UUID:  # noqa: C901
     repo = CrawlRepository()
     allowlist = load_allowlist(cfg.allowlist_file)
     robots = robots_cache_from_env()
