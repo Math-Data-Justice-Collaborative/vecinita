@@ -17,5 +17,17 @@ if [[ -n "${DATABASE_URL:-}" ]]; then
   export DATABASE_URL
 fi
 
+# Match backend/scripts/run_scraper.sh defaults so the Python environment matches
+# the main scraper pipeline (embeddings HTTP client, etc.). LLM/tagging env vars
+# still come from repo .env via python-dotenv in the active_crawl CLI; this export
+# keeps EMBEDDING_SERVICE_URL consistent when chaining with make scraper-run.
+if [[ -z "${EMBEDDING_SERVICE_URL:-}" && -f "${REPO_ROOT}/.env" ]]; then
+  _emb="$(grep -E '^EMBEDDING_SERVICE_URL=' "${REPO_ROOT}/.env" | head -1 | cut -d= -f2- | tr -d '\r' || true)"
+  if [[ -n "${_emb:-}" ]]; then
+    export EMBEDDING_SERVICE_URL="${_emb}"
+  fi
+fi
+export EMBEDDING_SERVICE_URL="${EMBEDDING_SERVICE_URL:-http://localhost:8001}"
+
 cd "${REPO_ROOT}/backend"
 exec uv run python -m src.services.scraper.active_crawl "$@"

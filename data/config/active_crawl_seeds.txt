@@ -1,7 +1,8 @@
 # Default seed URLs (spec FR-003). One https URL per line; # comments and blank lines ignored.
 # Operators may fix obvious typos before production runs.
+# FR-003 lists errollri.org; that hostname does not resolve (DNS). enrollri.org resolves and is the intended RI enrollment site.
 https://chartercare.org/
-https://errollri.org/
+https://enrollri.org/
 https://rifreeclinic.org/
 https://github.com/
 https://health-careservices.com/
