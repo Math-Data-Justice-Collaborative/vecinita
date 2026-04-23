@@ -29,5 +29,25 @@ if [[ -z "${EMBEDDING_SERVICE_URL:-}" && -f "${REPO_ROOT}/.env" ]]; then
 fi
 export EMBEDDING_SERVICE_URL="${EMBEDDING_SERVICE_URL:-http://localhost:8001}"
 
+# Live scraper (VECINITA_SCRAPER_API_URL + SCRAPER_API_KEYS) for ACTIVE_CRAWL_USE_LIVE_SCRAPER / --live-scraper
+if [[ -z "${VECINITA_SCRAPER_API_URL:-}" && -f "${REPO_ROOT}/.env" ]]; then
+  _vsu="$(grep -E '^VECINITA_SCRAPER_API_URL=' "${REPO_ROOT}/.env" | head -1 | cut -d= -f2- | tr -d '\r' || true)"
+  if [[ -n "${_vsu:-}" ]]; then
+    export VECINITA_SCRAPER_API_URL="${_vsu}"
+  fi
+fi
+if [[ -z "${SCRAPER_API_KEYS:-}" && -f "${REPO_ROOT}/.env" ]]; then
+  _keys="$(grep -E '^SCRAPER_API_KEYS=' "${REPO_ROOT}/.env" | head -1 | cut -d= -f2- | tr -d '\r' || true)"
+  if [[ -n "${_keys:-}" ]]; then
+    export SCRAPER_API_KEYS="${_keys}"
+  fi
+fi
+if [[ -z "${ACTIVE_CRAWL_USE_LIVE_SCRAPER:-}" && -f "${REPO_ROOT}/.env" ]]; then
+  _ac_live="$(grep -E '^ACTIVE_CRAWL_USE_LIVE_SCRAPER=' "${REPO_ROOT}/.env" | head -1 | cut -d= -f2- | tr -d '\r' || true)"
+  if [[ -n "${_ac_live:-}" ]]; then
+    export ACTIVE_CRAWL_USE_LIVE_SCRAPER="${_ac_live}"
+  fi
+fi
+
 cd "${REPO_ROOT}/backend"
 exec uv run python -m src.services.scraper.active_crawl "$@"

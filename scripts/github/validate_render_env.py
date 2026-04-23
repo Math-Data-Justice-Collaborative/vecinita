@@ -13,11 +13,15 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CONTRACT_MODULE_DIR = REPO_ROOT / "backend" / "src" / "utils"
-if str(CONTRACT_MODULE_DIR) not in sys.path:
-    sys.path.insert(0, str(CONTRACT_MODULE_DIR))
+# Backend code uses ``from src.utils...``; that layout requires ``backend`` on sys.path.
+BACKEND_ROOT = REPO_ROOT / "backend"
+if str(BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(BACKEND_ROOT))
 
-from render_env_contract import parse_env_file, validate_shared_render_env
+from src.utils.render_env_contract import (  # noqa: E402
+    parse_env_file,
+    validate_shared_render_env,
+)
 
 
 def _resolve_target(path: Path) -> tuple[Path | None, str | None]:

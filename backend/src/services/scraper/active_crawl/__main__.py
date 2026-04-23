@@ -10,7 +10,7 @@ from typing import Any
 
 from dotenv import load_dotenv
 
-from src.services.scraper.active_crawl.config import ActiveCrawlConfig
+from src.services.scraper.active_crawl.config import ActiveCrawlConfig, validate_live_scraper_config
 from src.services.scraper.active_crawl.persistence import CrawlRepository
 from src.services.scraper.active_crawl.runner import run_active_crawl
 from src.utils.database_url import get_resolved_database_url
@@ -57,6 +57,14 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         action="store_true",
         help="Fetch seed URLs only (no same-site link expansion)",
     )
+    p.add_argument(
+        "--live-scraper",
+        action="store_true",
+        help=(
+            "Submit each URL as POST /jobs to VECINITA_SCRAPER_API_URL (Bearer = first SCRAPER_API_KEYS); "
+            "same as ACTIVE_CRAWL_USE_LIVE_SCRAPER=1"
+        ),
+    )
     p.add_argument("--verbose", "-v", action="store_true", help="DEBUG logging")
     return p.parse_args(argv)
 
@@ -88,7 +96,10 @@ def main(argv: list[str] | None = None) -> int:
             overrides["wall_seconds"] = args.wall_seconds
         if args.seeds_file is not None:
             overrides["seeds_file"] = args.seeds_file.expanduser().resolve()
+        if args.live_scraper:
+            overrides["use_live_scraper"] = True
         cfg = cfg0.with_cli(**overrides)
+        validate_live_scraper_config(cfg)
     except Exception as exc:
         print(f"Configuration error: {exc}", file=sys.stderr)
         return 1

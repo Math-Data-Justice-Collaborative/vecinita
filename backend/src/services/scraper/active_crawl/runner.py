@@ -8,9 +8,11 @@ import tempfile
 import time
 from io import BytesIO
 from pathlib import Path
+from urllib.parse import urlparse
 from uuid import UUID
 
 from src.services.scraper.active_crawl.config import ActiveCrawlConfig, retrieval_mode_for
+from src.services.scraper.active_crawl.live_scraper import LiveScrapeResult, submit_and_wait_for_job
 from src.services.scraper.active_crawl.discovery import (
     extract_same_site_links,
     fetch_html_for_discovery,
@@ -79,7 +81,7 @@ def run_active_crawl(cfg: ActiveCrawlConfig, *, bfs: bool = True) -> UUID:
     allowlist = load_allowlist(cfg.allowlist_file)
     robots = robots_cache_from_env()
     scraper_cfg = ScraperConfig()
-    loader = SmartLoader(scraper_cfg)
+    loader: SmartLoader | None = SmartLoader(scraper_cfg) if not cfg.use_live_scraper else None
     seeds = _read_seed_urls(cfg)
 
     snapshot = {
@@ -90,6 +92,8 @@ def run_active_crawl(cfg: ActiveCrawlConfig, *, bfs: bool = True) -> UUID:
         "no_raw": cfg.no_raw,
         "seeds_file": str(cfg.seeds_file),
         "bfs": bfs,
+        "use_live_scraper": cfg.use_live_scraper,
+        "live_scraper_jobs_host": urlparse(cfg.live_scraper_jobs_url or "").hostname,
     }
     run_id = repo.create_run(snapshot)
 
@@ -174,7 +178,57 @@ def run_active_crawl(cfg: ActiveCrawlConfig, *, bfs: bool = True) -> UUID:
                 repo.increment_counters(run_id, skipped=1)
                 continue
 
-            if item.url.lower().split("?", 1)[0].endswith(".pdf"):
+            is_pdf = item.url.lower().split("?", 1)[0].endswith(".pdf")
+
+            if cfg.use_live_scraper:
+                assert cfg.live_scraper_jobs_url and cfg.live_scraper_bearer
+                t0 = time.perf_counter()
+                lr = submit_and_wait_for_job(
+                    jobs_base_url=cfg.live_scraper_jobs_url,
+                    bearer=cfg.live_scraper_bearer,
+                    seed_url=item.url,
+                    crawl_run_id=str(run_id),
+                    depth=item.depth,
+                    poll_interval_s=cfg.remote_job_poll_interval_s,
+                    max_wait_s=cfg.remote_job_max_wait_s,
+                    deadline_monotonic=wall,
+                )
+                _persist_live_scrape_attempt(
+                    repo, run_id, item, lr, document_format="pdf" if is_pdf else "html"
+                )
+                per_host[host] = per_host.get(host, 0) + 1
+                if lr.completed:
+                    repo.increment_counters(run_id, fetched=1)
+                elif lr.terminal_status == "cancelled":
+                    repo.increment_counters(run_id, skipped=1)
+                else:
+                    repo.increment_counters(run_id, failed=1)
+                dt_ms = int((time.perf_counter() - t0) * 1000)
+                log.info(
+                    "active_crawl_rate crawl_run_id=%s host=%s delta_ms=%s retrieval_mode=live_scraper "
+                    "completed=%s terminal=%s",
+                    run_id,
+                    host,
+                    dt_ms,
+                    lr.completed,
+                    lr.terminal_status,
+                )
+                if lr.completed and bfs and item.depth < cfg.max_depth and not is_pdf:
+                    dr = fetch_html_for_discovery(item.url)
+                    if dr.html:
+                        links = extract_same_site_links(
+                            item.url,
+                            dr.html,
+                            seed_registrable=item.seed_root,
+                            allowlist=allowlist,
+                        )
+                        for link in links:
+                            frontier.enqueue(
+                                QueuedURL(url=link, depth=item.depth + 1, seed_root=item.seed_root)
+                            )
+                continue
+
+            if is_pdf:
                 t0 = time.perf_counter()
                 _handle_pdf_url(cfg, repo, run_id, item)
                 dt_ms = int((time.perf_counter() - t0) * 1000)
@@ -187,6 +241,7 @@ def run_active_crawl(cfg: ActiveCrawlConfig, *, bfs: bool = True) -> UUID:
                 per_host[host] = per_host.get(host, 0) + 1
                 continue
 
+            assert loader is not None
             mode = retrieval_mode_for(cfg, item.url)
             t0 = time.perf_counter()
             if mode == "always_playwright":
@@ -267,6 +322,50 @@ def run_active_crawl(cfg: ActiveCrawlConfig, *, bfs: bool = True) -> UUID:
 
     log.info("active_crawl_rate summary crawl_run_id=%s status=completed", run_id)
     return run_id
+
+
+def _persist_live_scrape_attempt(
+    repo: CrawlRepository,
+    run_id: UUID,
+    item: QueuedURL,
+    lr: LiveScrapeResult,
+    *,
+    document_format: str,
+) -> None:
+    if lr.completed:
+        outcome = "success"
+        skip_reason = None
+        http_status = lr.last_poll_http_status or lr.submit_http_status or 200
+    elif lr.terminal_status == "cancelled":
+        outcome = "skipped"
+        skip_reason = "remote_cancelled"
+        http_status = lr.last_poll_http_status
+    else:
+        outcome = "failed"
+        skip_reason = None
+        http_status = lr.last_poll_http_status
+    pdf_status = "remote_pipeline" if document_format == "pdf" else "na"
+    repo.insert_fetch_attempt(
+        FetchAttemptRow(
+            crawl_run_id=run_id,
+            canonical_url=item.url,
+            requested_url=item.url,
+            final_url=item.url,
+            seed_root=item.seed_root,
+            depth=item.depth,
+            http_status=http_status,
+            outcome=outcome,
+            skip_reason=skip_reason,
+            retrieval_path="live_scraper",
+            document_format=document_format,
+            extracted_text=None,
+            raw_artifact=None,
+            raw_omitted_reason="remote_scraper_pipeline",
+            content_sha256=None,
+            pdf_extraction_status=pdf_status,
+            error_detail=lr.error_detail,
+        )
+    )
 
 
 def _persist_html_attempt(

@@ -18,11 +18,11 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CONTRACT_MODULE_DIR = REPO_ROOT / "backend" / "src" / "utils"
-if str(CONTRACT_MODULE_DIR) not in sys.path:
-    sys.path.insert(0, str(CONTRACT_MODULE_DIR))
+BACKEND_ROOT = REPO_ROOT / "backend"
+if str(BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(BACKEND_ROOT))
 
-from render_env_contract import parse_env_file
+from src.utils.render_env_contract import parse_env_file  # noqa: E402
 
 
 def _resolve_env_path(path: Path) -> tuple[Path | None, str | None]:
