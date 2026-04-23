@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Path, status
 from pydantic import BaseModel, Field
 
 from src.services.ingestion import modal_scraper_pipeline_persist as pipeline_persist
+from src.utils.scraper_api_keys import scraper_api_key_segments
 
 router = APIRouter(
     prefix="/internal/scraper-pipeline",
@@ -19,21 +20,22 @@ router = APIRouter(
 _PIPELINE_TOKEN_HEADER = "X-Scraper-Pipeline-Ingest-Token"
 
 
-def _expected_ingest_token() -> str:
-    return str(os.getenv("SCRAPER_PIPELINE_INGEST_TOKEN", "")).strip()
+def _allowed_pipeline_ingest_tokens() -> frozenset[str]:
+    """Modal workers send one key; gateway accepts any segment from SCRAPER_API_KEYS."""
+    return frozenset(scraper_api_key_segments(os.getenv("SCRAPER_API_KEYS")))
 
 
 async def require_pipeline_ingest_token(
     x_scraper_pipeline_ingest_token: Annotated[str | None, Header()] = None,
 ) -> None:
-    expected = _expected_ingest_token()
-    if not expected:
+    allowed = _allowed_pipeline_ingest_tokens()
+    if not allowed:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="SCRAPER_PIPELINE_INGEST_TOKEN is not configured on the gateway",
+            detail="SCRAPER_API_KEYS is not configured on the gateway (required for pipeline ingest)",
         )
     got = (x_scraper_pipeline_ingest_token or "").strip()
-    if not got or got != expected:
+    if not got or got not in allowed:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or missing scraper pipeline ingest token",
