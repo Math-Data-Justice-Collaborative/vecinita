@@ -38,6 +38,7 @@ dependencies = [
     "requests>=2.33.0",
     "urllib3>=2.6.3",
     "httpx",
+    "pyyaml>=6.0.1",
     # Modal SDK: required on Render when MODAL_FUNCTION_INVOCATION is set (embed_query / embed_batch).
     "modal>=1.3.5",
     "python-multipart>=0.0.22",

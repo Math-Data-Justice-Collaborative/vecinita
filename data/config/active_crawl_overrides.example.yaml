@@ -1,0 +1,9 @@
+# Optional per-seed retrieval overrides (spec US3 / T022).
+# Copy to active_crawl_overrides.yaml in this directory to enable.
+# retrieval: static_only | static_first | always_playwright
+#
+# entries:
+#   - url: "https://health.ri.gov/"
+#     retrieval: always_playwright
+
+entries: []

@@ -123,6 +123,16 @@ def test_validate_shared_render_env_rejects_scraper_api_keys_template_placeholde
     assert any("SCRAPER_API_KEYS is still the template placeholder" in e for e in result.errors)
 
 
+def test_validate_shared_render_env_rejects_scraper_api_keys_with_whitespace_in_segment(
+    minimal_valid_render_env,
+):
+    env = {**minimal_valid_render_env, "SCRAPER_API_KEYS": "alpha,has space"}
+
+    result = validate_shared_render_env(env)
+
+    assert any("whitespace" in e.lower() for e in result.errors)
+
+
 def test_validate_shared_render_env_rejects_reindex_url_without_scheme(minimal_valid_render_env):
     env = {**minimal_valid_render_env, "REINDEX_SERVICE_URL": "vecinita-scraper-api/jobs"}
 

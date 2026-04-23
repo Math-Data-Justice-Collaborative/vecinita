@@ -12,6 +12,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+from src.utils.scraper_api_keys import iter_scraper_api_key_segment_errors
+
 REQUIRED_KEYS: set[str] = {
     "ALLOWED_ORIGINS",
     "CORS_ORIGINS",
@@ -71,13 +73,17 @@ def _validate_scraper_api_keys_not_placeholder(
     env: dict[str, str], result: ValidationResult
 ) -> None:
     """Reject template placeholder values that pass non-empty checks but break prod startup."""
-    raw = (env.get("SCRAPER_API_KEYS") or "").strip().lower()
+    raw_full = (env.get("SCRAPER_API_KEYS") or "").strip()
+    raw = raw_full.lower()
     if raw == "replace-with-comma-separated-api-keys":
         result.errors.append(
             "SCRAPER_API_KEYS is still the template placeholder; set one or more real "
             "comma-separated Bearer secrets in Render (shared env group) and in Modal "
             "secret vecinita-scraper-env if you serve the scraper API on Modal"
         )
+        return
+    for msg in iter_scraper_api_key_segment_errors(raw_full):
+        result.errors.append(msg)
 
 
 def _validate_db_data_mode(env: dict[str, str], result: ValidationResult) -> None:

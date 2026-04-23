@@ -1,0 +1,6 @@
+# Optional cross-registrable-domain allowlist (spec FR-004).
+# Copy to active_crawl_allowlist.txt in this directory to enable.
+# One hostname or registrable domain per line; # comments allowed.
+# Example: allow CDN or partner domains linked from in-scope pages.
+# cdn.example.org
+# partner.gov

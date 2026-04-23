@@ -102,12 +102,35 @@ class ScraperConfig:
         self.sites_to_crawl = self._load_recursive_config(self.RECURSIVE_SITES_FILE)
         self.sites_needing_playwright = self._load_config_list(self.PLAYWRIGHT_SITES_FILE)
         self.sites_to_skip = self._load_config_list(self.SKIP_SITES_FILE)
+        self._merge_active_crawl_seeds()
 
         log.info(
             f"Loaded {len(self.sites_to_crawl)} recursive sites, "
             f"{len(self.sites_needing_playwright)} playwright sites, "
             f"{len(self.sites_to_skip)} skip sites."
         )
+
+    def _merge_active_crawl_seeds(self) -> None:
+        """Merge URLs from data/config/active_crawl_seeds.txt into recursive crawl list (spec T017)."""
+        from src.services.scraper.utils import normalize_scrape_url
+
+        path = self.CONFIG_DIR / "active_crawl_seeds.txt"
+        if not path.is_file():
+            return
+        added = 0
+        try:
+            for line in path.read_text(encoding="utf-8").splitlines():
+                n = normalize_scrape_url(line)
+                if not n:
+                    continue
+                if n not in self.sites_to_crawl:
+                    self.sites_to_crawl[n] = {"max_depth": 1}
+                    added += 1
+        except Exception as e:
+            log.error("Failed to merge active_crawl_seeds.txt: %s", e)
+            return
+        if added:
+            log.info("Merged %s seed URLs from active_crawl_seeds.txt into sites_to_crawl", added)
 
     @staticmethod
     def _load_config_list(file_path: str) -> list[str]:
