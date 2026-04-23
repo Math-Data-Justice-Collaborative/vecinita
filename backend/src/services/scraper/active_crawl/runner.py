@@ -20,7 +20,7 @@ from src.services.scraper.active_crawl.escalation import should_force_playwright
 from src.services.scraper.active_crawl.frontier import CrawlFrontier, QueuedURL
 from src.services.scraper.active_crawl.live_scraper import LiveScrapeResult, submit_and_wait_for_job
 from src.services.scraper.active_crawl.persistence import CrawlRepository, FetchAttemptRow
-from src.services.scraper.active_crawl.robots import robots_cache_from_env
+from src.services.scraper.active_crawl.robots import RobotsCache, robots_cache_from_env
 from src.services.scraper.active_crawl.url_policy import (
     hostname_of,
     load_allowlist,
@@ -71,12 +71,219 @@ def _read_seed_urls(cfg: ActiveCrawlConfig) -> list[str]:
     return urls
 
 
+def _enqueue_same_site_children_if_needed(
+    *,
+    eligible: bool,
+    item: QueuedURL,
+    frontier: CrawlFrontier,
+    allowlist: frozenset[str],
+) -> None:
+    if not eligible:
+        return
+    dr = fetch_html_for_discovery(item.url)
+    if not dr.html:
+        return
+    links = extract_same_site_links(
+        item.url,
+        dr.html,
+        seed_registrable=item.seed_root,
+        allowlist=allowlist,
+    )
+    for link in links:
+        frontier.enqueue(QueuedURL(url=link, depth=item.depth + 1, seed_root=item.seed_root))
+
+
+def _process_dequeued_crawl_url(
+    cfg: ActiveCrawlConfig,
+    repo: CrawlRepository,
+    run_id: UUID,
+    item: QueuedURL,
+    *,
+    frontier: CrawlFrontier,
+    allowlist: frozenset[str],
+    robots: RobotsCache,
+    loader: SmartLoader | None,
+    failed_log_path: str,
+    wall: float,
+    bfs: bool,
+    per_host: dict[str, int],
+) -> None:
+    host = hostname_of(item.url)
+    if per_host.get(host, 0) >= cfg.max_pages_per_host:
+        repo.insert_fetch_attempt(
+            FetchAttemptRow(
+                crawl_run_id=run_id,
+                canonical_url=item.url,
+                requested_url=item.url,
+                final_url=None,
+                seed_root=item.seed_root,
+                depth=item.depth,
+                http_status=None,
+                outcome="skipped",
+                skip_reason="max_pages_per_host",
+                retrieval_path="static",
+                document_format=None,
+                extracted_text=None,
+                raw_artifact=None,
+                raw_omitted_reason=None,
+                content_sha256=None,
+                pdf_extraction_status=None,
+                error_detail=None,
+            )
+        )
+        repo.increment_counters(run_id, skipped=1)
+        return
+
+    if not robots.can_fetch(item.url):
+        repo.insert_fetch_attempt(
+            FetchAttemptRow(
+                crawl_run_id=run_id,
+                canonical_url=item.url,
+                requested_url=item.url,
+                final_url=None,
+                seed_root=item.seed_root,
+                depth=item.depth,
+                http_status=None,
+                outcome="skipped",
+                skip_reason="robots",
+                retrieval_path="static",
+                document_format=None,
+                extracted_text=None,
+                raw_artifact=None,
+                raw_omitted_reason=None,
+                content_sha256=None,
+                pdf_extraction_status=None,
+                error_detail=None,
+            )
+        )
+        repo.increment_counters(run_id, skipped=1)
+        return
+
+    is_pdf = item.url.lower().split("?", 1)[0].endswith(".pdf")
+
+    if cfg.use_live_scraper:
+        assert cfg.live_scraper_jobs_url and cfg.live_scraper_bearer
+        t0 = time.perf_counter()
+        lr = submit_and_wait_for_job(
+            jobs_base_url=cfg.live_scraper_jobs_url,
+            bearer=cfg.live_scraper_bearer,
+            seed_url=item.url,
+            crawl_run_id=str(run_id),
+            depth=item.depth,
+            poll_interval_s=cfg.remote_job_poll_interval_s,
+            max_wait_s=cfg.remote_job_max_wait_s,
+            deadline_monotonic=wall,
+        )
+        _persist_live_scrape_attempt(
+            repo, run_id, item, lr, document_format="pdf" if is_pdf else "html"
+        )
+        per_host[host] = per_host.get(host, 0) + 1
+        if lr.completed:
+            repo.increment_counters(run_id, fetched=1)
+        elif lr.terminal_status == "cancelled":
+            repo.increment_counters(run_id, skipped=1)
+        else:
+            repo.increment_counters(run_id, failed=1)
+        dt_ms = int((time.perf_counter() - t0) * 1000)
+        log.info(
+            "active_crawl_rate crawl_run_id=%s host=%s delta_ms=%s retrieval_mode=live_scraper "
+            "completed=%s terminal=%s",
+            run_id,
+            host,
+            dt_ms,
+            lr.completed,
+            lr.terminal_status,
+        )
+        _enqueue_same_site_children_if_needed(
+            eligible=bool(lr.completed and bfs and item.depth < cfg.max_depth and not is_pdf),
+            item=item,
+            frontier=frontier,
+            allowlist=allowlist,
+        )
+        return
+
+    if is_pdf:
+        t0 = time.perf_counter()
+        _handle_pdf_url(cfg, repo, run_id, item)
+        dt_ms = int((time.perf_counter() - t0) * 1000)
+        log.info(
+            "active_crawl_rate crawl_run_id=%s host=%s delta_ms=%s outcome=pdf",
+            run_id,
+            host,
+            dt_ms,
+        )
+        per_host[host] = per_host.get(host, 0) + 1
+        return
+
+    assert loader is not None
+    mode = retrieval_mode_for(cfg, item.url)
+    t0 = time.perf_counter()
+    if mode == "always_playwright":
+        docs, ltype, ok = loader.load_url(
+            item.url, failed_log=failed_log_path, force_loader="playwright"
+        )
+    elif mode == "static_only":
+        docs, ltype, ok = loader.load_url(
+            item.url, failed_log=failed_log_path, force_loader="unstructured"
+        )
+    else:
+        docs, ltype, ok = loader.load_url(item.url, failed_log=failed_log_path, force_loader=None)
+        if not ok:
+            docs2, ltype2, ok2 = loader.load_url(
+                item.url, failed_log=failed_log_path, force_loader="playwright"
+            )
+            if ok2:
+                docs, ltype, ok = docs2, ltype2, ok2
+        text_probe = _docs_text(docs) if ok else ""
+        if ok and should_force_playwright(
+            thin_body_chars=len(text_probe),
+            threshold=cfg.thin_body_threshold,
+            static_failed=False,
+        ):
+            docs2, ltype2, ok2 = loader.load_url(
+                item.url, failed_log=failed_log_path, force_loader="playwright"
+            )
+            if ok2 and _docs_text(docs2):
+                docs, ltype, ok = docs2, ltype2, ok2
+    text = _docs_text(docs) if ok else ""
+
+    _persist_html_attempt(
+        cfg,
+        repo,
+        run_id,
+        item,
+        ok,
+        ltype,
+        text,
+        docs if ok else [],
+    )
+    per_host[host] = per_host.get(host, 0) + 1
+    repo.increment_counters(run_id, fetched=1 if ok else 0, failed=0 if ok else 1)
+    dt_ms = int((time.perf_counter() - t0) * 1000)
+    log.info(
+        "active_crawl_rate crawl_run_id=%s host=%s delta_ms=%s retrieval_mode=%s ok=%s loader=%s",
+        run_id,
+        host,
+        dt_ms,
+        mode,
+        ok,
+        ltype,
+    )
+
+    _enqueue_same_site_children_if_needed(
+        eligible=bool(ok and bfs and item.depth < cfg.max_depth),
+        item=item,
+        frontier=frontier,
+        allowlist=allowlist,
+    )
+
+
 def run_once_seeds(cfg: ActiveCrawlConfig, *, bfs: bool = True) -> UUID:
     """MVP: seeds only. When bfs=False, only seeds are fetched (legacy name)."""
     return run_active_crawl(cfg, bfs=bfs)
 
 
-def run_active_crawl(cfg: ActiveCrawlConfig, *, bfs: bool = True) -> UUID:  # noqa: C901
+def run_active_crawl(cfg: ActiveCrawlConfig, *, bfs: bool = True) -> UUID:
     repo = CrawlRepository()
     allowlist = load_allowlist(cfg.allowlist_file)
     robots = robots_cache_from_env()
@@ -127,190 +334,20 @@ def run_active_crawl(cfg: ActiveCrawlConfig, *, bfs: bool = True) -> UUID:  # no
                 break
             pages_budget_used += 1
 
-            host = hostname_of(item.url)
-            if per_host.get(host, 0) >= cfg.max_pages_per_host:
-                repo.insert_fetch_attempt(
-                    FetchAttemptRow(
-                        crawl_run_id=run_id,
-                        canonical_url=item.url,
-                        requested_url=item.url,
-                        final_url=None,
-                        seed_root=item.seed_root,
-                        depth=item.depth,
-                        http_status=None,
-                        outcome="skipped",
-                        skip_reason="max_pages_per_host",
-                        retrieval_path="static",
-                        document_format=None,
-                        extracted_text=None,
-                        raw_artifact=None,
-                        raw_omitted_reason=None,
-                        content_sha256=None,
-                        pdf_extraction_status=None,
-                        error_detail=None,
-                    )
-                )
-                repo.increment_counters(run_id, skipped=1)
-                continue
-
-            if not robots.can_fetch(item.url):
-                repo.insert_fetch_attempt(
-                    FetchAttemptRow(
-                        crawl_run_id=run_id,
-                        canonical_url=item.url,
-                        requested_url=item.url,
-                        final_url=None,
-                        seed_root=item.seed_root,
-                        depth=item.depth,
-                        http_status=None,
-                        outcome="skipped",
-                        skip_reason="robots",
-                        retrieval_path="static",
-                        document_format=None,
-                        extracted_text=None,
-                        raw_artifact=None,
-                        raw_omitted_reason=None,
-                        content_sha256=None,
-                        pdf_extraction_status=None,
-                        error_detail=None,
-                    )
-                )
-                repo.increment_counters(run_id, skipped=1)
-                continue
-
-            is_pdf = item.url.lower().split("?", 1)[0].endswith(".pdf")
-
-            if cfg.use_live_scraper:
-                assert cfg.live_scraper_jobs_url and cfg.live_scraper_bearer
-                t0 = time.perf_counter()
-                lr = submit_and_wait_for_job(
-                    jobs_base_url=cfg.live_scraper_jobs_url,
-                    bearer=cfg.live_scraper_bearer,
-                    seed_url=item.url,
-                    crawl_run_id=str(run_id),
-                    depth=item.depth,
-                    poll_interval_s=cfg.remote_job_poll_interval_s,
-                    max_wait_s=cfg.remote_job_max_wait_s,
-                    deadline_monotonic=wall,
-                )
-                _persist_live_scrape_attempt(
-                    repo, run_id, item, lr, document_format="pdf" if is_pdf else "html"
-                )
-                per_host[host] = per_host.get(host, 0) + 1
-                if lr.completed:
-                    repo.increment_counters(run_id, fetched=1)
-                elif lr.terminal_status == "cancelled":
-                    repo.increment_counters(run_id, skipped=1)
-                else:
-                    repo.increment_counters(run_id, failed=1)
-                dt_ms = int((time.perf_counter() - t0) * 1000)
-                log.info(
-                    "active_crawl_rate crawl_run_id=%s host=%s delta_ms=%s retrieval_mode=live_scraper "
-                    "completed=%s terminal=%s",
-                    run_id,
-                    host,
-                    dt_ms,
-                    lr.completed,
-                    lr.terminal_status,
-                )
-                if lr.completed and bfs and item.depth < cfg.max_depth and not is_pdf:
-                    dr = fetch_html_for_discovery(item.url)
-                    if dr.html:
-                        links = extract_same_site_links(
-                            item.url,
-                            dr.html,
-                            seed_registrable=item.seed_root,
-                            allowlist=allowlist,
-                        )
-                        for link in links:
-                            frontier.enqueue(
-                                QueuedURL(url=link, depth=item.depth + 1, seed_root=item.seed_root)
-                            )
-                continue
-
-            if is_pdf:
-                t0 = time.perf_counter()
-                _handle_pdf_url(cfg, repo, run_id, item)
-                dt_ms = int((time.perf_counter() - t0) * 1000)
-                log.info(
-                    "active_crawl_rate crawl_run_id=%s host=%s delta_ms=%s outcome=pdf",
-                    run_id,
-                    host,
-                    dt_ms,
-                )
-                per_host[host] = per_host.get(host, 0) + 1
-                continue
-
-            assert loader is not None
-            mode = retrieval_mode_for(cfg, item.url)
-            t0 = time.perf_counter()
-            if mode == "always_playwright":
-                docs, ltype, ok = loader.load_url(
-                    item.url, failed_log=failed_log_path, force_loader="playwright"
-                )
-            elif mode == "static_only":
-                docs, ltype, ok = loader.load_url(
-                    item.url, failed_log=failed_log_path, force_loader="unstructured"
-                )
-            else:
-                docs, ltype, ok = loader.load_url(
-                    item.url, failed_log=failed_log_path, force_loader=None
-                )
-                if not ok:
-                    docs2, ltype2, ok2 = loader.load_url(
-                        item.url, failed_log=failed_log_path, force_loader="playwright"
-                    )
-                    if ok2:
-                        docs, ltype, ok = docs2, ltype2, ok2
-                text_probe = _docs_text(docs) if ok else ""
-                if ok and should_force_playwright(
-                    thin_body_chars=len(text_probe),
-                    threshold=cfg.thin_body_threshold,
-                    static_failed=False,
-                ):
-                    docs2, ltype2, ok2 = loader.load_url(
-                        item.url, failed_log=failed_log_path, force_loader="playwright"
-                    )
-                    if ok2 and _docs_text(docs2):
-                        docs, ltype, ok = docs2, ltype2, ok2
-            text = _docs_text(docs) if ok else ""
-
-            _persist_html_attempt(
+            _process_dequeued_crawl_url(
                 cfg,
                 repo,
                 run_id,
                 item,
-                ok,
-                ltype,
-                text,
-                docs if ok else [],
+                frontier=frontier,
+                allowlist=allowlist,
+                robots=robots,
+                loader=loader,
+                failed_log_path=failed_log_path,
+                wall=wall,
+                bfs=bfs,
+                per_host=per_host,
             )
-            per_host[host] = per_host.get(host, 0) + 1
-            repo.increment_counters(run_id, fetched=1 if ok else 0, failed=0 if ok else 1)
-            dt_ms = int((time.perf_counter() - t0) * 1000)
-            log.info(
-                "active_crawl_rate crawl_run_id=%s host=%s delta_ms=%s retrieval_mode=%s ok=%s loader=%s",
-                run_id,
-                host,
-                dt_ms,
-                mode,
-                ok,
-                ltype,
-            )
-
-            if ok and bfs and item.depth < cfg.max_depth:
-                dr = fetch_html_for_discovery(item.url)
-                if dr.html:
-                    links = extract_same_site_links(
-                        item.url,
-                        dr.html,
-                        seed_registrable=item.seed_root,
-                        allowlist=allowlist,
-                    )
-                    for link in links:
-                        frontier.enqueue(
-                            QueuedURL(url=link, depth=item.depth + 1, seed_root=item.seed_root)
-                        )
 
         repo.finish_run(run_id, "completed")
     except Exception as exc:
