@@ -20,6 +20,7 @@
 	test-schemathesis test-schemathesis-gateway test-schemathesis-gateway-stateful test-schemathesis-agent test-schemathesis-data-management test-schemathesis-cli test-schemathesis-cli-agent \
 	test-fr005-schemathesis-baseline dm-openapi-diff pact-verify-providers \
 	scraper-run scraper-run-verbose scraper-run-clean scraper-validate-postgres scraper-pull \
+	active-crawl active-crawl-validate \
 	microservices-up microservices-down microservices-logs test-microservices-contracts test-microservices \
 	render-env-validate render-tests-strict render-tests-render-suite render-workflow-ci \
 	render-local-up render-local-down render-local-logs render-local-check render-local-check-live render-local-validate \
@@ -127,6 +128,8 @@ help:
 	@echo "  make scraper-run-clean                   Run destructive clean + scraper + DB validation"
 	@echo "  make scraper-pull                        Fetch/rebase services/scraper (fixes fast-forward pull failures)"
 	@echo "  make scraper-validate-postgres           Run Postgres validation queries only (no scraping)"
+	@echo "  make active-crawl [ARGS='--help']        Bounded active crawl → crawl_runs / crawl_fetch_attempts (needs DATABASE_URL; Playwright: cd backend && uv sync --extra scraping && uv run playwright install)"
+	@echo "  make active-crawl-validate               Inspect recent crawl_runs / crawl_fetch_attempts via psql"
 	@echo ""
 	@echo "Render workflow shortcuts"
 	@echo "  make render-env-validate [ENV_FILE=...]  Validate shared Render env contract"
@@ -506,6 +509,12 @@ scraper-run-clean:
 
 scraper-validate-postgres:
 	./scripts/run_scraper_postgres_batch.sh --skip-scraper
+
+active-crawl:
+	./scripts/run_active_crawl.sh $(ARGS)
+
+active-crawl-validate:
+	./scripts/validate_active_crawl.sh
 
 render-env-validate:
 	python3 scripts/github/validate_render_env.py $(or $(ENV_FILE),.env.prod.render)

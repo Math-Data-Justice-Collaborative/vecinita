@@ -1,0 +1,28 @@
+# Default seed URLs (spec FR-003). One https URL per line; # comments and blank lines ignored.
+# Operators may fix obvious typos before production runs.
+https://chartercare.org/
+https://errollri.org/
+https://rifreeclinic.org/
+https://github.com/
+https://health-careservices.com/
+https://health.ri.gov/
+https://healthsourceri.com/
+https://lifespan.erg/
+https://lincolnugentcareri.com/
+https://medassociatesofri.com/
+https://nhchc.org/
+https://nuestrasalud.com/
+https://open.spotify.com/
+https://pressreader.com/
+https://rihca.org/
+https://math-data-justice-collaborative.github.io/
+https://rimedicine.com/
+https://dhs.ri.gov/
+https://providencechc.org/
+https://providencejournal.com/
+https://rihispanicchamber.org/
+https://riosinstitute.org/
+https://rmisticeurgentcare.com/
+https://va.gov/
+https://vecina.wrwc.org/
+https://womenandinfants.org/
