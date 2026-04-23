@@ -9,7 +9,7 @@ This section is the **single** place for merge-blocking vs informational contrac
 | Product line | `consumer` name | Scope |
 |--------------|-----------------|-------|
 | Chat (`frontend/`) | `vecinita-chat-frontend` | Gateway/agent HTTP used by the SPA (**FR-007**); non-streaming paths in Pact. |
-| DM (`apps/data-management-frontend/`) | `vecinita-dm-frontend` | Scraper `/health`, `/jobs`, cancel, optional gateway modal-jobs base (**FR-008**). |
+| DM (`apps/data-management-frontend/`) | `vecinita-dm-frontend` | Scraper `/health`, `/jobs`, cancel against **data-management API** only (`VITE_DM_API_BASE_URL`); see **primary-flow matrix** in [`specs/007-scraper-via-dm-api/quickstart.md`](specs/007-scraper-via-dm-api/quickstart.md). |
 
 **Broker vs checked-in pactfiles:** this repo uses **checked-in** pact JSON under `frontend/pacts/` and `apps/data-management-frontend/pacts/` for offline PR runs. A broker remains optional for teams that adopt it; never commit broker credentials.
 

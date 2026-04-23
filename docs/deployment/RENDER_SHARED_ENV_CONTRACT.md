@@ -57,12 +57,18 @@ rebuilding the image.
 
 | Variable | Required | Description |
 |---|---|---|
-| `VITE_VECINITA_SCRAPER_API_URL` | **Required** | Public URL of the `vecinita-data-management-api-v1` Render web service (or staging equivalent). No production fallback — if unset, the "Scraper API not configured" banner will appear for all users. |
+| `VITE_DM_API_BASE_URL` | **Required** (preferred) | Same value as the historical `VITE_VECINITA_SCRAPER_API_URL`: public origin of **`vecinita-data-management-api-v1`** (no `*.modal.run`). |
+| `VITE_VECINITA_SCRAPER_API_URL` | Legacy alias | Still accepted if `VITE_DM_API_BASE_URL` is unset. |
 | `VITE_DEFAULT_SCRAPER_USER_ID` | Optional | Default user ID submitted with scraping jobs. Defaults to `frontend-user` if absent. |
 
 > **Naming note:** `VITE_VECINITA_SCRAPER_API_URL` is the historical name for the
 > data-management API base URL. Despite the `SCRAPER` in the name, it points at the
 > data-management API web service, not directly at the Modal scraper endpoint.
+
+**Partial rollout (007):** When the scraper’s legacy `*.modal.run` ASGI remains deployed for
+non-operator clients, treat the **Render `vecinita-data-management-api` URL** (and matching
+`VITE_DM_API_BASE_URL`) as **authoritative** for operator scraping in the DM SPA. Do not point
+the DM frontend at the gateway **`/api/v1/modal-jobs/scraper`** path for supported workflows.
 
 ---
 
@@ -79,6 +85,7 @@ Blueprint builds [`services/scraper`](../../services/scraper) (`vecinita_scraper
 | `ENVIRONMENT` | **Required for strict checks** | Use `production` on Render (see `render.yaml`). Enables Modal token validation. |
 | `MODAL_TOKEN_ID` | **Required** when `ENVIRONMENT=production` | Modal workspace token ID for server-side Modal usage. |
 | `MODAL_TOKEN_SECRET` | **Required** when `ENVIRONMENT=production` | Modal workspace token secret. |
+| `MODAL_FUNCTION_INVOCATION` | Recommended | Use `auto` or `1` when upstream embedding/model/scraper calls use Modal **functions** from this service (align with gateway semantics; see `packages/service-clients/service_clients/modal_invoker.py`). |
 | `MODAL_WORKSPACE` | Recommended | Modal workspace slug (e.g. `vecinita`). |
 | `VECINITA_MODEL_API_URL` | Recommended | Model API base URL when model-assisted features run. |
 | `SCRAPER_DEBUG_BYPASS_AUTH` | Must be `false` | Only `true` in local/dev/test; production must keep `false`. |

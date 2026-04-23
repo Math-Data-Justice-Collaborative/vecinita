@@ -1,5 +1,10 @@
 """Modal Function invocation helpers for gateway / agent paths.
 
+**Functions-first (feature 007):** any ``*.modal.run`` URL configured for
+embedding/model/scraper responsibilities must be paired with
+``MODAL_FUNCTION_INVOCATION=auto|1`` and Modal tokens, or startup policy
+(``enforce_modal_function_policy_for_urls``) fails fast.
+
 Deployed apps (after ``modal deploy``): use ``modal.Function.from_name(...)`` +
 ``.remote()`` / ``.spawn()`` from any Python client with Modal auth — the pattern
 described in Modal's "Apps, Functions, and entrypoints" and "Trigger deployed functions"

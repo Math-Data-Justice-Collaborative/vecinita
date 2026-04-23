@@ -28,8 +28,11 @@ from src.services.modal.invoker import (
 )
 
 # ---------------------------------------------------------------------------
-# Modal upstream endpoints (direct)
+# Modal upstream endpoints (direct HTTP defaults / docs)
 # ---------------------------------------------------------------------------
+# When resolved URLs contain ``*.modal.run``, production/staging MUST enable
+# ``MODAL_FUNCTION_INVOCATION`` + tokens so callers use Modal **functions**, not
+# raw ASGI HTTP (``specs/007-scraper-via-dm-api``; ``enforce_modal_function_policy_for_urls``).
 
 #: Model endpoint.
 MODEL_ENDPOINT: str = OLLAMA_BASE_URL or "http://localhost:11434"

@@ -41,7 +41,7 @@ Modal Services (representative layout; exact app names follow your Modal workspa
 
 **Pipeline persistence without Modal Postgres:** Set ``SCRAPER_GATEWAY_BASE_URL`` (public gateway URL) and ``SCRAPER_PIPELINE_INGEST_TOKEN`` on Modal ``vecinita-scraper-env``; set the same token on the Render gateway as ``SCRAPER_PIPELINE_INGEST_TOKEN``. Scraper workers then POST pipeline state to ``/api/v1/internal/scraper-pipeline/*`` instead of opening ``psycopg2`` on Modal. See ``docs/deployment/RENDER_SHARED_ENV_CONTRACT.md``.
 
-**Frontend (data management):** Set ``VITE_USE_GATEWAY_MODAL_JOBS=true`` and ``VITE_VECINITA_GATEWAY_URL`` so scrape job traffic uses the gateway Modal job routes instead of ``VITE_VECINITA_SCRAPER_API_URL`` ``/jobs`` (the scraper HTTP API can remain deployed for other clients).
+**Frontend (data management) — feature 007:** Point ``VITE_DM_API_BASE_URL`` (or legacy ``VITE_VECINITA_SCRAPER_API_URL``) at the **data-management API** origin; scrape job CRUD uses ``{DM}/jobs``. The gateway ``/api/v1/modal-jobs/scraper`` path remains for **gateway-owned** operator tools, not as the default DM SPA configuration. When legacy scraper ``*.modal.run`` ASGI endpoints still exist for other clients, treat the **DM API deployment** as **authoritative** for DM dashboard scraping.
 
 ## Prerequisites
 
