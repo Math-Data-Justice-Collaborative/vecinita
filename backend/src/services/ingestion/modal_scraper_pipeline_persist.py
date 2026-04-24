@@ -109,9 +109,13 @@ def store_crawled_url(
     status: str = "success",
     error_message: str | None = None,
 ) -> str:
-    """Insert crawled_urls row; ``raw_content`` is accepted for API parity but not stored."""
+    """Upsert crawled_urls by (job_id, url); return stable ``id``.
+
+    Idempotent for Modal retries and duplicate ingest calls. ``raw_content`` is accepted for API
+    parity but not stored.
+    """
     _ = raw_content
-    crawled_url_id = str(uuid4())
+    new_id = str(uuid4())
     crawled_at = datetime.now(timezone.utc)
     try:
         with _connect() as conn:
@@ -127,9 +131,15 @@ def store_crawled_url(
                         error_message,
                         crawled_at
                     ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (job_id, url) DO UPDATE SET
+                        raw_content_hash = EXCLUDED.raw_content_hash,
+                        status = EXCLUDED.status,
+                        error_message = EXCLUDED.error_message,
+                        crawled_at = EXCLUDED.crawled_at
+                    RETURNING id
                     """,
                     (
-                        crawled_url_id,
+                        new_id,
                         job_id,
                         url,
                         content_hash,
@@ -138,9 +148,14 @@ def store_crawled_url(
                         crawled_at,
                     ),
                 )
+                row = cur.fetchone()
+                if row is None or row.get("id") is None:
+                    raise RuntimeError(
+                        f"crawled_urls upsert did not return id (job_id={job_id!r}, url={url!r})"
+                    )
+                return str(row["id"])
     except Exception as exc:
         _reraise_psycopg_sanitized(exc)
-    return crawled_url_id
 
 
 def store_extracted_content(

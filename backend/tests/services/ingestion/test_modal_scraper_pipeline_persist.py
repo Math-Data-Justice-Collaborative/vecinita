@@ -30,3 +30,93 @@ def test_update_job_status_raises_when_no_matching_row(monkeypatch: pytest.Monke
         persist.update_job_status("nonexistent-job-id", "failed", "boom")
 
     mock_cur.execute.assert_called_once()
+
+
+def test_store_crawled_url_upsert_returns_id_from_returning(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.services.ingestion import modal_scraper_pipeline_persist as persist
+
+    stable_id = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+    mock_cur = MagicMock()
+    mock_cur.fetchone.return_value = {"id": stable_id}
+
+    cursor_cm = MagicMock()
+    cursor_cm.__enter__.return_value = mock_cur
+    cursor_cm.__exit__.return_value = None
+
+    mock_conn = MagicMock()
+    mock_conn.__enter__.return_value = mock_conn
+    mock_conn.__exit__.return_value = None
+    mock_conn.cursor.return_value = cursor_cm
+
+    monkeypatch.setattr(persist, "_connect", lambda: mock_conn)
+
+    out = persist.store_crawled_url(
+        "job-1",
+        "https://example.com/",
+        raw_content="ignored",
+        content_hash="0" * 64,
+        status="failed",
+        error_message="blocked",
+    )
+    assert out == stable_id
+    mock_cur.execute.assert_called_once()
+    sql = mock_cur.execute.call_args[0][0]
+    assert "ON CONFLICT (job_id, url)" in sql
+    assert "RETURNING id" in sql
+
+
+def test_store_crawled_url_idempotent_replay_returns_same_id(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Simulate two ingest calls (e.g. Modal retry): both receive the same RETURNING id."""
+    from src.services.ingestion import modal_scraper_pipeline_persist as persist
+
+    stable_id = "bbbbbbbb-cccc-dddd-eeee-ffffffffffff"
+    mock_cur = MagicMock()
+    mock_cur.fetchone.return_value = {"id": stable_id}
+
+    cursor_cm = MagicMock()
+    cursor_cm.__enter__.return_value = mock_cur
+    cursor_cm.__exit__.return_value = None
+
+    mock_conn = MagicMock()
+    mock_conn.__enter__.return_value = mock_conn
+    mock_conn.__exit__.return_value = None
+    mock_conn.cursor.return_value = cursor_cm
+
+    monkeypatch.setattr(persist, "_connect", lambda: mock_conn)
+
+    args = (
+        "job-retry",
+        "https://health.ri.gov/",
+        "",
+        "c" * 64,
+        "failed",
+        "anti-bot",
+    )
+    assert persist.store_crawled_url(*args) == stable_id
+    assert persist.store_crawled_url(*args) == stable_id
+    assert mock_cur.execute.call_count == 2
+
+
+def test_store_crawled_url_raises_when_returning_empty(monkeypatch: pytest.MonkeyPatch) -> None:
+    from src.services.ingestion import modal_scraper_pipeline_persist as persist
+
+    mock_cur = MagicMock()
+    mock_cur.fetchone.return_value = None
+
+    cursor_cm = MagicMock()
+    cursor_cm.__enter__.return_value = mock_cur
+    cursor_cm.__exit__.return_value = None
+
+    mock_conn = MagicMock()
+    mock_conn.__enter__.return_value = mock_conn
+    mock_conn.__exit__.return_value = None
+    mock_conn.cursor.return_value = cursor_cm
+
+    monkeypatch.setattr(persist, "_connect", lambda: mock_conn)
+
+    with pytest.raises(RuntimeError, match="did not return id"):
+        persist.store_crawled_url("j", "https://x.test/", "", "d" * 64)

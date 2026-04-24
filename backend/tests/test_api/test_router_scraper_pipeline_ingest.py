@@ -113,3 +113,41 @@ def test_pipeline_ingest_not_configured_returns_503(
         headers={"X-Scraper-Pipeline-Ingest-Token": "any"},
     )
     assert resp.status_code == 503
+
+
+def test_pipeline_ingest_store_crawled_url_ok(
+    pipeline_ingest_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """POST /crawled-urls returns 200 with id (idempotent upsert is implemented in persist layer)."""
+    from src.services.ingestion import modal_scraper_pipeline_persist
+
+    fixed = str(uuid.uuid4())
+
+    def _fake_store(
+        job_id: str,
+        url: str,
+        raw_content: str,
+        content_hash: str,
+        status: str = "success",
+        error_message: str | None = None,
+    ) -> str:
+        _ = (job_id, url, raw_content, content_hash, status, error_message)
+        return fixed
+
+    monkeypatch.setattr(modal_scraper_pipeline_persist, "store_crawled_url", _fake_store)
+
+    jid = str(uuid.uuid4())
+    resp = pipeline_ingest_client.post(
+        "/api/v1/internal/scraper-pipeline/crawled-urls",
+        json={
+            "job_id": jid,
+            "url": "https://health.ri.gov/",
+            "raw_content": "",
+            "content_hash": "e" * 64,
+            "status": "failed",
+            "error_message": "Blocked by anti-bot protection",
+        },
+        headers={"X-Scraper-Pipeline-Ingest-Token": "test-ingest-secret"},
+    )
+    assert resp.status_code == 200
+    assert resp.json() == {"crawled_url_id": fixed}
