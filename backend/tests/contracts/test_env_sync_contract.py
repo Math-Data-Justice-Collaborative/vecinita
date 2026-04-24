@@ -34,7 +34,10 @@ def test_render_templates_key_parity() -> None:
 
 @pytest.mark.contract
 def test_local_template_contains_core_cross_service_keys() -> None:
+    """Cross-service keys live in the root canonical catalog; `.env.local.example` may be pointer-only."""
+    root_env = parse_env_file(REPO_ROOT / ".env.example")
     local_env = parse_env_file(REPO_ROOT / ".env.local.example")
+    catalog = {**root_env, **local_env}
     required_local_keys = {
         "DATABASE_URL",
         "VECINITA_MODEL_API_URL",
@@ -46,5 +49,5 @@ def test_local_template_contains_core_cross_service_keys() -> None:
         "MODAL_TOKEN_SECRET",
         "MODAL_FUNCTION_INVOCATION",
     }
-    missing = sorted(key for key in required_local_keys if key not in local_env)
+    missing = sorted(key for key in required_local_keys if key not in catalog)
     assert missing == []
