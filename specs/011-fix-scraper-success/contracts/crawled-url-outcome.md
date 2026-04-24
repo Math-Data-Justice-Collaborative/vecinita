@@ -51,3 +51,20 @@ When `processed_count == 0`, `error_message` SHOULD be a concise multi-line or J
 ## Appendix: Crawl4AI string mapping (informative)
 
 Implementation maintains a mapping from common **`Crawl4AI` `error_message` substrings** (e.g. anti-bot structural hints) to **`failure_category`** `likely_bot_or_client_limitation` vs `non_extractable_html` per product rules—mapping table is **test-owned** (golden files).
+
+## Operator runbook (failure_category → action)
+
+| failure_category | Suggested operator action |
+|------------------|---------------------------|
+| `transport_error` | Retry later; check DNS/TLS/firewall; confirm URL reachable from browser. |
+| `http_error` | Inspect HTTP status; widen crawl timeout only if 408/504; fix URL if 404. |
+| `policy_blocked` | Respect robots/terms; exclude URL or obtain permission path. |
+| `non_extractable_html` | Enable longer waits; try manual capture; consider alternate URL on same site. |
+| `likely_bot_or_client_limitation` | Retry off-peak; reduce automation footprint; manual capture if policy allows. |
+| `content_not_ready` | Increase `timeout_seconds` / wait-for-content tuning; retry once. |
+| `pdf_corrupt_or_unreadable` | Re-fetch source; validate URL; try manual download. |
+| `pdf_password_protected` | Manual capture or obtain password under policy. |
+| `pdf_empty_non_extractive` | Expect image-only PDF; use OCR/manual path outside this worker. |
+| `text_encoding_failure` | Report encoding issue; try alternate mirror URL. |
+| `format_mismatch` | Verify URL is correct; report misconfigured server response. |
+| `text_empty` | Confirm resource has body content; pick alternate URL. |

@@ -22,9 +22,9 @@ Primary implementation root: `services/scraper/` (see [plan.md](./plan.md)).
 
 **Purpose**: Dependencies and smoke asset scaffolding.
 
-- [ ] T001 Add `pypdf` and `charset-normalizer` dependencies to `services/scraper/pyproject.toml` per `specs/011-fix-scraper-success/research.md`
-- [ ] T002 [P] Create `services/scraper/smoke/crawl_smoke_urls.yaml` with commented schema and placeholder entries documenting SC-001 composition (≥2 HTML, 1 PDF, 1 text, 1 extra)
-- [ ] T003 [P] Add optional `max_direct_fetch_bytes` (or equivalent) field to `CrawlConfig` in `services/scraper/src/vecinita_scraper/core/models.py` with safe default aligned to Modal memory
+- [x] T001 Add `pypdf` and `charset-normalizer` dependencies to `services/scraper/pyproject.toml` per `specs/011-fix-scraper-success/research.md`
+- [x] T002 [P] Create `services/scraper/smoke/crawl_smoke_urls.yaml` with commented schema and placeholder entries documenting SC-001 composition (≥2 HTML, 1 PDF, 1 text, 1 extra)
+- [x] T003 [P] Add optional `max_direct_fetch_bytes` (or equivalent) field to `CrawlConfig` in `services/scraper/src/vecinita_scraper/core/models.py` with safe default aligned to Modal memory
 
 ---
 
@@ -34,11 +34,11 @@ Primary implementation root: `services/scraper/` (see [plan.md](./plan.md)).
 
 **⚠️ CRITICAL**: No user story phase work should merge until this phase is complete.
 
-- [ ] T004 Add `ResponseKind` and `FailureCategory` `StrEnum` definitions in `services/scraper/src/vecinita_scraper/core/outcome_kinds.py` aligned to `specs/011-fix-scraper-success/data-model.md`
-- [ ] T005 Extend `CrawledPage` in `services/scraper/src/vecinita_scraper/crawlers/crawl4ai_adapter.py` with optional `response_kind`, `failure_category`, and `operator_summary` fields (defaults preserve current callers)
-- [ ] T006 [P] Implement substantive-content metrics and HTML outcome classification helpers in `services/scraper/src/vecinita_scraper/crawlers/classification.py` (including Crawl4AI `error_message` substring → `FailureCategory` mapping table)
-- [ ] T007 [P] Implement structured `error_message` JSON encode/decode helpers per `specs/011-fix-scraper-success/contracts/crawled-url-outcome.md` in `services/scraper/src/vecinita_scraper/crawlers/outcome_codec.py`
-- [ ] T008 Extend `store_crawled_url` in `services/scraper/src/vecinita_scraper/persistence/gateway_http.py` and mirror kwargs in `services/scraper/src/vecinita_scraper/core/db.py`, encoding optional fields into JSON in `error_message` when gateway/DM columns are not yet available
+- [x] T004 Add `ResponseKind` and `FailureCategory` `StrEnum` definitions in `services/scraper/src/vecinita_scraper/core/outcome_kinds.py` aligned to `specs/011-fix-scraper-success/data-model.md`
+- [x] T005 Extend `CrawledPage` in `services/scraper/src/vecinita_scraper/crawlers/crawl4ai_adapter.py` with optional `response_kind`, `failure_category`, and `operator_summary` fields (defaults preserve current callers)
+- [x] T006 [P] Implement substantive-content metrics and HTML outcome classification helpers in `services/scraper/src/vecinita_scraper/crawlers/classification.py` (including Crawl4AI `error_message` substring → `FailureCategory` mapping table)
+- [x] T007 [P] Implement structured `error_message` JSON encode/decode helpers per `specs/011-fix-scraper-success/contracts/crawled-url-outcome.md` in `services/scraper/src/vecinita_scraper/crawlers/outcome_codec.py`
+- [x] T008 Extend `store_crawled_url` in `services/scraper/src/vecinita_scraper/persistence/gateway_http.py` and mirror kwargs in `services/scraper/src/vecinita_scraper/core/db.py`, encoding optional fields into JSON in `error_message` when gateway/DM columns are not yet available
 
 **Checkpoint**: Foundation types and persistence path ready for user stories.
 
@@ -52,9 +52,9 @@ Primary implementation root: `services/scraper/` (see [plan.md](./plan.md)).
 
 ### Implementation for User Story 1
 
-- [ ] T009 [US1] Apply post-crawl substantive-content check and set `success`, `failure_category`, `response_kind`, and `operator_summary` in `services/scraper/src/vecinita_scraper/crawlers/crawl4ai_adapter.py` method `_crawl_single` using `classification.py`
-- [ ] T010 [US1] Update `run_scrape_job` in `services/scraper/src/vecinita_scraper/workers/scraper.py` to pass outcome fields into `store_crawled_url` and derive processor `content_type` from `response_kind` when set (else keep `determine_content_type(url)` fallback)
-- [ ] T011 [P] [US1] Add unit tests in `services/scraper/tests/unit/test_classification.py` and `services/scraper/tests/unit/test_outcome_codec.py` covering empty HTML, bot/shell-like Crawl4AI messages, and JSON round-trip
+- [x] T009 [US1] Apply post-crawl substantive-content check and set `success`, `failure_category`, `response_kind`, and `operator_summary` in `services/scraper/src/vecinita_scraper/crawlers/crawl4ai_adapter.py` method `_crawl_single` using `classification.py`
+- [x] T010 [US1] Update `run_scrape_job` in `services/scraper/src/vecinita_scraper/workers/scraper.py` to pass outcome fields into `store_crawled_url` and derive processor `content_type` from `response_kind` when set (else keep `determine_content_type(url)` fallback)
+- [x] T011 [P] [US1] Add unit tests in `services/scraper/tests/unit/test_classification.py` and `services/scraper/tests/unit/test_outcome_codec.py` covering empty HTML, bot/shell-like Crawl4AI messages, and JSON round-trip
 
 **Checkpoint**: US1 delivers operator-visible classification for HTML path failures independently of PDF/text routing.
 
@@ -68,13 +68,13 @@ Primary implementation root: `services/scraper/` (see [plan.md](./plan.md)).
 
 ### Implementation for User Story 2
 
-- [ ] T012 [US2] Implement `services/scraper/src/vecinita_scraper/crawlers/document_fetcher.py` with bounded HEAD/GET sniff, `Content-Type` + magic-byte detection, and async fetch returning bytes + metadata per `specs/011-fix-scraper-success/research.md`
-- [ ] T013 [P] [US2] Implement PDF text extraction and PDF-specific exceptions mapped to `FailureCategory` in `services/scraper/src/vecinita_scraper/crawlers/text_extractors.py`
-- [ ] T014 [P] [US2] Implement plain-text decoding with charset fallbacks (`charset-normalizer`) and `text_encoding_failure` / `text_empty` categories in `services/scraper/src/vecinita_scraper/crawlers/text_extractors.py`
-- [ ] T015 [US2] Integrate fetch routing in `services/scraper/src/vecinita_scraper/workers/scraper.py` so single-URL jobs invoke `document_fetcher` for PDF/plain_text and `Crawl4AIAdapter` for HTML, synthesizing `CrawledPage` consistently for all branches
-- [ ] T016 [US2] Adjust `services/scraper/src/vecinita_scraper/crawlers/crawl4ai_adapter.py` `_build_run_config` wait/timeout behavior to satisfy FR-006 and reduce false “content not ready” vs immediate block confusion (document chosen defaults in `plan.md` or code comments only where necessary)
-- [ ] T017 [P] [US2] Add `services/scraper/tests/unit/test_document_fetcher.py` using `httpx.MockTransport` for type sniffing and size-cap behavior
-- [ ] T018 [US2] Replace smoke placeholders with operator-approved public URLs (≥5 entries per SC-001) in `services/scraper/smoke/crawl_smoke_urls.yaml` and add `services/scraper/tests/integration/test_smoke_list_composition.py` (no network) plus optional `services/scraper/tests/integration/test_smoke_crawl_live.py` marked `live` for manual/scheduled runs
+- [x] T012 [US2] Implement `services/scraper/src/vecinita_scraper/crawlers/document_fetcher.py` with bounded HEAD/GET sniff, `Content-Type` + magic-byte detection, and async fetch returning bytes + metadata per `specs/011-fix-scraper-success/research.md`
+- [x] T013 [P] [US2] Implement PDF text extraction and PDF-specific exceptions mapped to `FailureCategory` in `services/scraper/src/vecinita_scraper/crawlers/text_extractors.py`
+- [x] T014 [P] [US2] Implement plain-text decoding with charset fallbacks (`charset-normalizer`) and `text_encoding_failure` / `text_empty` categories in `services/scraper/src/vecinita_scraper/crawlers/text_extractors.py`
+- [x] T015 [US2] Integrate fetch routing in `services/scraper/src/vecinita_scraper/workers/scraper.py` so single-URL jobs invoke `document_fetcher` for PDF/plain_text and `Crawl4AIAdapter` for HTML, synthesizing `CrawledPage` consistently for all branches
+- [x] T016 [US2] Adjust `services/scraper/src/vecinita_scraper/crawlers/crawl4ai_adapter.py` `_build_run_config` wait/timeout behavior to satisfy FR-006 and reduce false “content not ready” vs immediate block confusion (document chosen defaults in `plan.md` or code comments only where necessary)
+- [x] T017 [P] [US2] Add `services/scraper/tests/unit/test_document_fetcher.py` using `httpx.MockTransport` for type sniffing and size-cap behavior
+- [x] T018 [US2] Replace smoke placeholders with operator-approved public URLs (≥5 entries per SC-001) in `services/scraper/smoke/crawl_smoke_urls.yaml` and add `services/scraper/tests/integration/test_smoke_list_composition.py` (no network) plus optional `services/scraper/tests/integration/test_smoke_crawl_live.py` marked `live` for manual/scheduled runs
 
 **Checkpoint**: US2 enables successful or correctly classified outcomes for HTML + direct PDF + direct text targets.
 
@@ -88,9 +88,9 @@ Primary implementation root: `services/scraper/` (see [plan.md](./plan.md)).
 
 ### Implementation for User Story 3
 
-- [ ] T019 [US3] Build capped multi-URL aggregate `error_message` in `services/scraper/src/vecinita_scraper/workers/scraper.py` when `processed_count == 0`, per `specs/011-fix-scraper-success/contracts/crawled-url-outcome.md`
-- [ ] T020 [P] [US3] Append operator runbook table (`failure_category` → recommended action) to `specs/011-fix-scraper-success/contracts/crawled-url-outcome.md`
-- [ ] T021 [P] [US3] Add `services/scraper/tests/integration/test_scrape_job_zero_success_summary.py` asserting aggregate JSON/text shape from `run_scrape_job` with mocked `store_crawled_url` / DB
+- [x] T019 [US3] Build capped multi-URL aggregate `error_message` in `services/scraper/src/vecinita_scraper/workers/scraper.py` when `processed_count == 0`, per `specs/011-fix-scraper-success/contracts/crawled-url-outcome.md`
+- [x] T020 [P] [US3] Append operator runbook table (`failure_category` → recommended action) to `specs/011-fix-scraper-success/contracts/crawled-url-outcome.md`
+- [x] T021 [P] [US3] Add `services/scraper/tests/integration/test_scrape_job_zero_success_summary.py` asserting aggregate JSON/text shape from `run_scrape_job` with mocked `store_crawled_url` / DB
 
 **Checkpoint**: US3 complete—downstream-visible failure semantics documented and tested at worker boundary.
 
@@ -100,8 +100,8 @@ Primary implementation root: `services/scraper/` (see [plan.md](./plan.md)).
 
 **Purpose**: Docs, repo hygiene, CI validation.
 
-- [ ] T022 [P] Update `services/scraper/README.md` with smoke list location, `live` pytest marker usage, and classification overview for operators
-- [ ] T023 Run `services/scraper` test suite and repo `make ci` (or documented equivalent) from repository root; fix any regressions introduced by this feature per project CI rules
+- [x] T022 [P] Update `services/scraper/README.md` with smoke list location, `live` pytest marker usage, and classification overview for operators
+- [x] T023 Run `services/scraper` test suite and repo `make ci` (or documented equivalent) from repository root; fix any regressions introduced by this feature per project CI rules
 
 ---
 
