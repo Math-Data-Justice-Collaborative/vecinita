@@ -92,6 +92,11 @@ def update_job_status(
                     """,
                     (status, error_message, now, job_id),
                 )
+                if cur.rowcount == 0:
+                    raise RuntimeError(
+                        "scraping_jobs status update affected 0 rows "
+                        f"(job_id={job_id!r} is missing from this database)"
+                    )
     except Exception as exc:
         _reraise_psycopg_sanitized(exc)
 
