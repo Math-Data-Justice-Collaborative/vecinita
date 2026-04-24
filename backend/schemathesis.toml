@@ -76,6 +76,9 @@ enabled = false
 # ``test_gateway_*_stateful`` (negative_data_rejection disabled for these paths only).
 # Modal-jobs scraper proxy paths appear in the gateway OpenAPI when gateway env enables that surface;
 # exercise them via live schema jobs in ``test.yml`` ``backend-schema`` (same regex family as here).
+# Feature 012 (queued page ingestion): ``GET /modal-jobs/scraper/{job_id}`` may echo ``pipeline_stage``,
+# ``error_category``, ``correlation_id``, and ``metadata`` on gateway-persisted bodies — keep stateful
+# examples aligned with ``GatewayModalScrapeJobBody`` when extending OpenAPI (**SC-006**).
 [[operations]]
 include-path-regex = "^/api/v1/(scrape|modal-jobs)(/|$)"
 

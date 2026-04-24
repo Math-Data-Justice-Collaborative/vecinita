@@ -131,6 +131,7 @@ def _submit_auto_kick_pipeline_enabled() -> bool:
 
 
 async def _kick_scraper_pipeline_after_submit() -> None:
+    """Spawn Modal drain workers after submit so queued jobs actually run (**FR-001**)."""
     if not _submit_auto_kick_pipeline_enabled():
         return
     try:
@@ -193,6 +194,34 @@ class GatewayModalScrapeJobBody(BaseModel):
         description="Scrape job id (Modal may return ``id`` or ``job_id``).",
     )
     status: str | None = Field(default=None, description="Job status when present.")
+    pipeline_stage: str | None = Field(
+        default=None,
+        description="Fine-grained ingestion stage from gateway-persisted ``metadata`` (feature 012).",
+    )
+    error_category: str | None = Field(
+        default=None,
+        description="Machine-readable failure category when present on the job row metadata.",
+    )
+    correlation_id: str | None = Field(
+        default=None,
+        description="Gateway correlation id propagated via submit ``metadata`` (**FR-015**).",
+    )
+    created_at: str | None = Field(
+        default=None,
+        description="Job row ``created_at`` (ISO) when served from gateway Postgres (**FR-008**).",
+    )
+    updated_at: str | None = Field(
+        default=None,
+        description="Job row ``updated_at`` (ISO) when served from gateway Postgres (**FR-008**).",
+    )
+    pipeline_stage_updated_at: str | None = Field(
+        default=None,
+        description="Last pipeline stage transition time from ``metadata.pipeline_stage_updated_at`` when present.",
+    )
+    metadata: dict[str, Any] | None = Field(
+        default=None,
+        description="Raw job metadata JSON when served from gateway Postgres.",
+    )
     modal_function_call_id: str | None = Field(
         default=None,
         description=(
@@ -321,6 +350,42 @@ async def modal_scraper_submit(
                 detail="MODAL_SCRAPER_PERSIST_VIA_GATEWAY requires DATABASE_URL (or DB_URL) on the gateway",
             )
         try:
+            norm_key = modal_scraper_persist.normalize_modal_scrape_url_for_dedup(str(body.url))
+            prior = await asyncio.to_thread(
+                partial(
+                    modal_scraper_persist.find_completed_scrape_job_duplicate,
+                    sanitize_postgres_text(body.user_id),
+                    norm_key,
+                ),
+            )
+            if prior:
+                jid = await asyncio.to_thread(
+                    partial(
+                        modal_scraper_persist.create_scraping_job_duplicate_skipped,
+                        url=sanitize_postgres_text(str(body.url)),
+                        user_id=sanitize_postgres_text(body.user_id),
+                        crawl_config=crawl,
+                        chunking_config=chunk,
+                        metadata=merged_metadata,
+                        prior_completed_job_id=prior,
+                    ),
+                )
+                pdata = await asyncio.to_thread(
+                    partial(modal_scraper_persist.job_status_payload, jid),
+                )
+                if not pdata:
+                    raise HTTPException(
+                        status_code=500,
+                        detail="Gateway persistence returned no row for duplicate_skipped job",
+                    )
+                logger.info(
+                    "modal_scraper_submit_duplicate_skipped job_id=%s correlation_id=%s prior_job_id=%s",
+                    jid,
+                    cid,
+                    prior,
+                )
+                return GatewayModalScrapeJobBody.model_validate(pdata)
+
             jid = await asyncio.to_thread(
                 partial(
                     modal_scraper_persist.create_scraping_job,
@@ -341,6 +406,11 @@ async def modal_scraper_submit(
         env = await asyncio.to_thread(invoke_modal_scrape_job_submit, payload)
         data = _unwrap_scraper_envelope(env)
         await _kick_scraper_pipeline_after_submit()
+        logger.info(
+            "modal_scraper_submit_gateway_modal_rpc job_id=%s correlation_id=%s",
+            data.get("job_id") or jid,
+            cid,
+        )
         return GatewayModalScrapeJobBody.model_validate(data)
 
     payload = body.model_dump(mode="json")
@@ -350,6 +420,11 @@ async def modal_scraper_submit(
     env = await asyncio.to_thread(invoke_modal_scrape_job_submit, payload)
     data = _unwrap_scraper_envelope(env)
     await _kick_scraper_pipeline_after_submit()
+    logger.info(
+        "modal_scraper_submit_modal_rpc job_id=%s correlation_id=%s",
+        data.get("job_id"),
+        cid,
+    )
     return GatewayModalScrapeJobBody.model_validate(data)
 
 
@@ -361,8 +436,10 @@ async def modal_scraper_submit(
 )
 async def modal_scraper_get(
     job_id: UUID,
+    request: Request,
     _: Annotated[None, Depends(_require_gateway_scrape_db_or_modal_invocation)],
 ) -> GatewayModalScrapeJobBody:
+    cid = getattr(request.state, "correlation_id", None)
     if _gateway_owns_modal_scraper_control_plane():
         try:
             data = await asyncio.to_thread(modal_scraper_persist.job_status_payload, str(job_id))
@@ -370,6 +447,12 @@ async def modal_scraper_get(
             raise HTTPException(status_code=503, detail=_persist_runtime_http_detail(exc)) from exc
         if not data:
             raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
+        logger.info(
+            "modal_scraper_get job_id=%s correlation_id=%s pipeline_stage=%s",
+            job_id,
+            cid,
+            data.get("pipeline_stage"),
+        )
         return GatewayModalScrapeJobBody.model_validate(data)
 
     env = await asyncio.to_thread(invoke_modal_scrape_job_get, str(job_id))

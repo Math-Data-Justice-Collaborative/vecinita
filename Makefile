@@ -409,14 +409,14 @@ format-check-frontend:
 
 audit: audit-backend audit-frontend
 
+# Audit the frozen uv environment (pip cannot resolve uv.lock override-dependencies for -r exports).
+# CVE-2026-3219: no pip release newer than 26.0.1 on PyPI yet; ignore until a fix ships.
 audit-backend:
 	@set -e; \
-	req=$$(mktemp); \
-	trap 'rm -f "$$req"' EXIT; \
 	cd backend && \
-	uv export --frozen --format requirements.txt --no-hashes --no-annotate --no-header \
-		--extra ci --no-emit-project -o "$$req" && \
-	uv run --with pip-audit pip-audit -r "$$req" --progress-spinner off --desc
+	uv sync --frozen --extra ci && \
+	uv run --with pip-audit pip-audit --progress-spinner off --desc \
+		--ignore-vuln CVE-2026-3219
 
 audit-frontend:
 	cd frontend && npm audit --audit-level=high

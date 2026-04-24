@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Path, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Path, Request, status
 from pydantic import BaseModel, Field
 
 from src.services.ingestion import modal_scraper_pipeline_persist as pipeline_persist
@@ -16,6 +17,8 @@ router = APIRouter(
     tags=["Internal scraper pipeline"],
     include_in_schema=False,
 )
+
+logger = logging.getLogger(__name__)
 
 _PIPELINE_TOKEN_HEADER = "X-Scraper-Pipeline-Ingest-Token"
 
@@ -45,6 +48,14 @@ async def require_pipeline_ingest_token(
 class UpdateJobStatusBody(BaseModel):
     status: str = Field(..., min_length=1)
     error_message: str | None = None
+    pipeline_stage: str | None = Field(
+        default=None,
+        description="Normative pipeline stage; merged into ``scraping_jobs.metadata`` when set.",
+    )
+    error_category: str | None = Field(
+        default=None,
+        description="Short machine code merged into ``metadata``; may prefix ``error_message``.",
+    )
 
 
 @router.post(
@@ -55,18 +66,34 @@ class UpdateJobStatusBody(BaseModel):
 async def ingest_update_job_status(
     job_id: Annotated[str, Path(min_length=1)],
     body: UpdateJobStatusBody,
+    request: Request,
 ) -> None:
     try:
         pipeline_persist.update_job_status(
             job_id,
             body.status,
             body.error_message,
+            pipeline_stage=body.pipeline_stage,
+            error_category=body.error_category,
         )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
     except RuntimeError as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=str(exc),
         ) from exc
+    cid = getattr(request.state, "correlation_id", None)
+    xrid = (request.headers.get("X-Request-Id") or "").strip() or None
+    logger.info(
+        "scraper_pipeline_job_status_ingest job_id=%s correlation_id=%s x_request_id=%s "
+        "pipeline_stage=%s error_category=%s",
+        job_id,
+        cid,
+        xrid,
+        body.pipeline_stage,
+        body.error_category,
+    )
 
 
 class StoreCrawledUrlBody(BaseModel):

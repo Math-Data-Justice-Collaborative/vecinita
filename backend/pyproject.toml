@@ -53,7 +53,7 @@ dependencies = [
     "langchain-ollama>=1.0.0",
     # GuardrailsAI for input/output validation
     "guardrails-ai>=0.5.0",
-    "litellm>=1.83.0",
+    "litellm>=1.83.7",
     # LangSmith for tracing and monitoring (now compatible with numpy 2.x)
     "langsmith>=0.6.3",
     # Pin onnxruntime and tokenizers to stable versions to avoid Windows compatibility issues
@@ -341,6 +341,10 @@ constraint-dependencies = [
     "werkzeug>=3.1.6",
     # CVE-2026-41066: default entity resolution in lxml <6.1.0
     "lxml>=6.1.0",
+]
+# litellm declares python-dotenv==1.0.1; vecinita requires >=1.2.2.
+override-dependencies = [
+    "python-dotenv>=1.2.2",
 ]
 
 [dependency-groups]
