@@ -103,6 +103,8 @@ Canonical **deploy** entry files (add `src/` to `sys.path` so packages resolve) 
 
 **Scraper HTTP API omitted:** pass **`--no-web`** to deploy only ``vecinita-scraper`` workers (skip ``modal_api_entry.py`` / ``vecinita-scraper-api``). Embedding and model Modal apps are always function-only in source; no env flag is required.
 
+**Scraper worker image (Playwright):** The ``vecinita-scraper`` worker image runs ``python -m playwright install --with-deps chromium`` at image build time so Crawl4AI can launch Chromium (pip alone does not ship browser binaries). Expect a longer first build or after Playwright-related dependency bumps; Modal caches image layers afterward.
+
 **If the Modal dashboard still lists ``web_app`` (embedding) or ``api`` (model) as web endpoints:** that is the **previous** deployment. The current repo does not register those handlers on ``vecinita-embedding`` / ``vecinita-model``. Run a fresh ``modal deploy`` for each app from this revision (or let ``modal-deploy.yml`` run on ``main``). Until then, traffic can keep hitting the old ASGI URLs; configure the gateway with ``MODAL_FUNCTION_INVOCATION`` so new traffic uses ``embed_query`` / ``chat_completion`` instead.
 
 After you confirm traffic uses the new apps, use `backend/scripts/modal_teardown_legacy_web.sh` as a checklist for retiring old Modal web routes.
