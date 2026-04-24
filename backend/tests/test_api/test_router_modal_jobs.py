@@ -164,6 +164,11 @@ def test_modal_scraper_submit_gateway_persist_injects_job_id(modal_jobs_client, 
         "create_scraping_job",
         lambda **kwargs: fixed_id,
     )
+    monkeypatch.setattr(
+        router_modal_jobs.modal_scraper_persist,
+        "find_completed_scrape_job_duplicate",
+        lambda *_a, **_k: None,
+    )
 
     monkeypatch.setattr(
         router_modal_jobs,
@@ -211,6 +216,11 @@ def test_modal_scraper_submit_injects_correlation_id_in_metadata_and_header(
         router_modal_jobs.modal_scraper_persist,
         "create_scraping_job",
         lambda **kwargs: "job-corr-1",
+    )
+    monkeypatch.setattr(
+        router_modal_jobs.modal_scraper_persist,
+        "find_completed_scrape_job_duplicate",
+        lambda *_a, **_k: None,
     )
 
     def capture_submit(payload):
@@ -422,3 +432,56 @@ def test_modal_scraper_submit_skips_pipeline_kick_when_disabled(modal_jobs_clien
     )
     assert resp.status_code == 200
     assert called == []
+
+
+def test_modal_scraper_get_gateway_includes_operator_metadata(env_vars, monkeypatch):
+    """US3: persisted stage, categories, and timestamps surface on GET (gateway Postgres path)."""
+    for key, value in env_vars.items():
+        monkeypatch.setenv(key, value)
+    monkeypatch.setenv("MODAL_SCRAPER_PERSIST_VIA_GATEWAY", "1")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@localhost:5432/db")
+    monkeypatch.setenv("VECINITA_MODEL_API_URL", "http://localhost:10000/model")
+    monkeypatch.setenv("VECINITA_EMBEDDING_API_URL", "http://localhost:8001")
+    monkeypatch.setenv("OLLAMA_BASE_URL", "http://localhost:10000/model")
+    monkeypatch.setenv("MODAL_OLLAMA_ENDPOINT", "http://localhost:10000/model")
+    monkeypatch.setenv("EMBEDDING_SERVICE_URL", "http://localhost:8001")
+    monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "0")
+
+    fixed_uuid = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+
+    from src.api import router_modal_jobs
+
+    monkeypatch.setattr(
+        router_modal_jobs.modal_scraper_persist,
+        "job_status_payload",
+        lambda _jid: {
+            "job_id": fixed_uuid,
+            "id": fixed_uuid,
+            "status": "failed",
+            "progress_pct": 0,
+            "current_step": "failed",
+            "error_message": "x",
+            "updated_at": "2026-01-02T00:00:00+00:00",
+            "created_at": "2026-01-01T00:00:00+00:00",
+            "crawl_url_count": 1,
+            "chunk_count": 2,
+            "embedding_count": 0,
+            "pipeline_stage": "embedding",
+            "error_category": "embedding_failed_partial",
+            "pipeline_stage_updated_at": "2026-01-02T00:00:01+00:00",
+            "correlation_id": "corr-1",
+            "metadata": {"pipeline_stage": "embedding"},
+        },
+    )
+
+    from src.api.main import app
+
+    client = TestClient(app)
+    resp = client.get(f"/api/v1/modal-jobs/scraper/{fixed_uuid}")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["pipeline_stage"] == "embedding"
+    assert body["error_category"] == "embedding_failed_partial"
+    assert body["created_at"] == "2026-01-01T00:00:00+00:00"
+    assert body["updated_at"] == "2026-01-02T00:00:00+00:00"
+    assert body["pipeline_stage_updated_at"] == "2026-01-02T00:00:01+00:00"

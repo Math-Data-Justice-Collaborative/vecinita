@@ -6,5 +6,5 @@ alwaysApply: true
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
 
-`specs/010-minimal-env-config/plan.md`
+`specs/012-queued-page-ingestion-pipeline/plan.md`
 <!-- SPECKIT END -->

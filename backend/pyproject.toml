@@ -14,7 +14,8 @@ dependencies = [
     # Web Framework
     "fastapi",
     "uvicorn",
-    "aiohttp>=3.13.4",
+    # Align with litellm (pins httpx/aiohttp); avoids pip ResolutionImpossible when installing .[ci]
+    "aiohttp==3.13.5",
     # LangChain & LangGraph
     "langchain",
     "langchain-community",
@@ -33,11 +34,12 @@ dependencies = [
     # Utilities
     "cryptography>=46.0.7",
     "filelock>=3.20.3",
-    "python-dotenv>=1.2.2",
+    # python-dotenv: do not declare >=1.2.2 here — litellm pins ==1.0.1 and pip cannot merge both.
+    # uv lock/sync applies override-dependencies below to use patched python-dotenv.
     "pydantic",
     "requests>=2.33.0",
     "urllib3>=2.6.3",
-    "httpx",
+    "httpx==0.28.1",
     "pyyaml>=6.0.1",
     # Modal SDK: required on Render when MODAL_FUNCTION_INVOCATION is set (embed_query / embed_batch).
     "modal>=1.3.5",
@@ -53,7 +55,7 @@ dependencies = [
     "langchain-ollama>=1.0.0",
     # GuardrailsAI for input/output validation
     "guardrails-ai>=0.5.0",
-    "litellm>=1.83.0",
+    "litellm>=1.83.7",
     # LangSmith for tracing and monitoring (now compatible with numpy 2.x)
     "langsmith>=0.6.3",
     # Pin onnxruntime and tokenizers to stable versions to avoid Windows compatibility issues
@@ -109,8 +111,7 @@ dev = [
     "hypothesis>=6.0.0",
     "schemathesis>=4.14.3",
     "tracecov>=0.3.0",
-    # FastAPI Testing
-    "httpx>=0.25.0",
+    # httpx pinned in base (litellm); no duplicate here
     # Code Quality Tools (pin Black — must match uv.lock; CI uses uv sync --frozen)
     "black==26.3.1",
     "ruff>=0.2.0",
@@ -136,7 +137,6 @@ ci = [
     "tracecov>=0.3.0",
     "types-requests>=2.32.4.20260324",
     "types-PyYAML>=6.0.12",
-    "httpx>=0.25.0",
     "black==26.3.1",
     "ruff>=0.2.0",
     "mypy>=1.8.0",
@@ -341,6 +341,12 @@ constraint-dependencies = [
     "werkzeug>=3.1.6",
     # CVE-2026-41066: default entity resolution in lxml <6.1.0
     "lxml>=6.1.0",
+]
+# litellm declares python-dotenv==1.0.1; vecinita requires >=1.2.2.
+override-dependencies = [
+    "python-dotenv>=1.2.2",
+    "httpx==0.28.1",
+    "aiohttp==3.13.5",
 ]
 
 [dependency-groups]

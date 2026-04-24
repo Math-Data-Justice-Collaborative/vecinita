@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
+from src.services.ingestion import pipeline_stage as pipeline_stage_rules
 from src.utils.database_url import get_resolved_database_url
 from src.utils.postgres_json_sanitize import sanitize_postgres_json_payload, sanitize_postgres_text
 
@@ -73,30 +74,111 @@ def _vector_literal(values: Sequence[float]) -> str:
     return "[" + ",".join(str(float(v)) for v in values) + "]"
 
 
+def _decorate_error_message(error_message: str | None, error_category: str | None) -> str | None:
+    """Prefix operator-safe messages with ``[category]`` when ``error_category`` is set."""
+    if not error_message or not error_category:
+        return error_message
+    cat = sanitize_postgres_text(error_category)
+    msg = sanitize_postgres_text(error_message)
+    bracket = f"[{cat}]"
+    if msg.startswith(bracket):
+        return msg
+    return f"{bracket} {msg}"
+
+
 def update_job_status(
     job_id: str,
     status: str,
     error_message: str | None = None,
+    *,
+    pipeline_stage: str | None = None,
+    error_category: str | None = None,
 ) -> None:
+    """Update ``scraping_jobs.status``; optionally merge ``pipeline_stage`` / ``error_category`` into ``metadata`` jsonb.
+
+    When ``pipeline_stage`` is provided, transitions are validated against the prior
+    ``metadata.pipeline_stage`` (defaulting from **queued** when unset). Legacy workers
+    that only send ``status`` remain supported (no metadata read).
+    """
     now = datetime.now(timezone.utc)
+    eff_message = _decorate_error_message(error_message, error_category)
+    if pipeline_stage is None and error_category is None:
+        try:
+            with _connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        UPDATE scraping_jobs
+                        SET status = %s,
+                            error_message = %s,
+                            updated_at = %s
+                        WHERE id = %s
+                        """,
+                        (status, eff_message, now, job_id),
+                    )
+                    if cur.rowcount == 0:
+                        raise RuntimeError(
+                            "scraping_jobs status update affected 0 rows "
+                            f"(job_id={job_id!r} is missing from this database)"
+                        )
+        except Exception as exc:
+            _reraise_psycopg_sanitized(exc)
+        return
+
+    if Json is None:
+        raise RuntimeError("psycopg2.extras.Json is required for pipeline metadata updates")
+
     try:
         with _connect() as conn:
             with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT metadata FROM scraping_jobs WHERE id = %s FOR UPDATE",
+                    (job_id,),
+                )
+                row = cur.fetchone()
+                if row is None:
+                    raise RuntimeError(
+                        "scraping_jobs status update affected 0 rows "
+                        f"(job_id={job_id!r} is missing from this database)"
+                    )
+                raw_meta = row.get("metadata")
+                meta: dict[str, Any] = (
+                    dict(raw_meta)
+                    if isinstance(raw_meta, dict)
+                    else _parse_json_text(raw_meta) or {}
+                )
+                meta = sanitize_postgres_json_payload(meta)
+                if pipeline_stage is not None:
+                    prev = meta.get("pipeline_stage")
+                    before = (
+                        str(prev).strip()
+                        if isinstance(prev, str) and prev.strip()
+                        else pipeline_stage_rules.PIPELINE_STAGE_QUEUED
+                    )
+                    pipeline_stage_rules.validate_pipeline_stage_transition(before, pipeline_stage)
+                    meta["pipeline_stage"] = sanitize_postgres_text(pipeline_stage)
+                    meta["pipeline_stage_updated_at"] = now.isoformat()
+                if error_category is not None:
+                    meta["error_category"] = sanitize_postgres_text(error_category)
+
                 cur.execute(
                     """
                     UPDATE scraping_jobs
                     SET status = %s,
                         error_message = %s,
+                        metadata = %s,
                         updated_at = %s
                     WHERE id = %s
                     """,
-                    (status, error_message, now, job_id),
+                    (status, eff_message, Json(meta), now, job_id),
                 )
                 if cur.rowcount == 0:
                     raise RuntimeError(
                         "scraping_jobs status update affected 0 rows "
                         f"(job_id={job_id!r} is missing from this database)"
                     )
+    except ValueError:
+        raise
     except Exception as exc:
         _reraise_psycopg_sanitized(exc)
 
@@ -234,6 +316,9 @@ def store_chunks(processed_doc_id: str, chunks: list[dict[str, Any]]) -> list[st
         with _connect() as conn:
             with conn.cursor() as cur:
                 for index, chunk in enumerate(chunks):
+                    text_main = chunk["text"]
+                    raw_t = chunk.get("raw_text") or text_main
+                    enriched = chunk.get("enriched_text")
                     cur.execute(
                         """
                         INSERT INTO chunks (
@@ -242,16 +327,20 @@ def store_chunks(processed_doc_id: str, chunks: list[dict[str, Any]]) -> list[st
                             chunk_text,
                             position,
                             token_count,
-                            semantic_boundary
-                        ) VALUES (%s, %s, %s, %s, %s, %s)
+                            semantic_boundary,
+                            raw_text,
+                            enriched_text
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                         """,
                         (
                             chunk_ids[index],
                             processed_doc_id,
-                            chunk["text"],
+                            text_main,
                             chunk.get("position", index),
                             chunk.get("token_count", 0),
                             chunk.get("semantic_boundary", False),
+                            raw_t,
+                            enriched,
                         ),
                     )
     except Exception as exc:
@@ -277,6 +366,7 @@ def store_embeddings(job_id: str, chunk_embeddings: list[dict[str, Any]]) -> Non
                             dimensions,
                             created_at
                         ) VALUES (%s, %s, %s, %s::vector, %s, %s, %s)
+                        ON CONFLICT (chunk_id, model_name) DO NOTHING
                         """,
                         (
                             str(uuid4()),

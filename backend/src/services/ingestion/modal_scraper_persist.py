@@ -165,6 +165,99 @@ def create_scraping_job(
     return job_id
 
 
+def normalize_modal_scrape_url_for_dedup(url: str) -> str:
+    """Return a lowercase trimmed key used to match prior **completed** jobs for the same user."""
+    from src.services.scraper.utils import prepare_scrape_urls
+
+    urls, _ = prepare_scrape_urls(
+        [str(url).strip()],
+        skip_localhost=False,
+        convert_github_blob_urls=True,
+    )
+    if urls:
+        return str(urls[0]).strip().lower()
+    return sanitize_postgres_text(url).strip().lower()
+
+
+def find_completed_scrape_job_duplicate(user_id: str, url_match_key: str) -> str | None:
+    """Return the newest **completed** job id for *user_id* + URL key, or ``None``."""
+    uid = sanitize_postgres_text(user_id)
+    key = url_match_key.strip().lower()
+    if not uid or not key:
+        return None
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT id::text AS id
+                    FROM scraping_jobs
+                    WHERE user_id = %s
+                      AND lower(trim(url)) = %s
+                      AND lower(status) = 'completed'
+                    ORDER BY updated_at DESC
+                    LIMIT 1
+                    """,
+                    (uid, key),
+                )
+                row = cur.fetchone()
+    except Exception as exc:
+        _reraise_psycopg_sanitized(exc)
+    if not row:
+        return None
+    out = str(row.get("id") or "").strip()
+    return out or None
+
+
+def create_scraping_job_duplicate_skipped(
+    *,
+    url: str,
+    user_id: str,
+    crawl_config: dict[str, Any],
+    chunking_config: dict[str, Any],
+    metadata: dict[str, Any] | None,
+    prior_completed_job_id: str,
+) -> str:
+    """Insert a **completed** job row for duplicate URL (**duplicate_skipped**); no Modal work."""
+    assert Json is not None
+    job_id = str(uuid4())
+    now = datetime.now(timezone.utc)
+    safe_url = sanitize_postgres_text(url)
+    safe_user_id = sanitize_postgres_text(user_id)
+    safe_crawl = sanitize_postgres_json_payload(crawl_config)
+    safe_chunk = sanitize_postgres_json_payload(chunking_config)
+    safe_meta = dict(sanitize_postgres_json_payload(metadata or {}))
+    safe_meta["pipeline_stage"] = "duplicate_skipped"
+    safe_meta["dedup_of_job_id"] = sanitize_postgres_text(prior_completed_job_id)
+    safe_meta["duplicate_reason"] = "terminal_completed_same_url"
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO scraping_jobs (
+                        id, url, user_id, status,
+                        crawl_config, chunking_config, metadata,
+                        created_at, updated_at
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (
+                        job_id,
+                        safe_url,
+                        safe_user_id,
+                        "completed",
+                        Json(safe_crawl),
+                        Json(safe_chunk),
+                        Json(safe_meta),
+                        now,
+                        now,
+                    ),
+                )
+    except Exception as exc:
+        _reraise_psycopg_sanitized(exc)
+    return job_id
+
+
 def fetch_job_detail(job_id: str) -> dict[str, Any] | None:
     """Return one serialized job row (``id`` + aggregates) or ``None``."""
     try:
@@ -186,7 +279,7 @@ def job_status_payload(job_id: str) -> dict[str, Any] | None:
     progress = _STATUS_TO_PROGRESS.get(status, 0)
     created = row.get("created_at")
     updated = row.get("updated_at")
-    return {
+    out: dict[str, Any] = {
         "job_id": job_id,
         "id": job_id,
         "status": status,
@@ -199,6 +292,18 @@ def job_status_payload(job_id: str) -> dict[str, Any] | None:
         "chunk_count": int(row.get("chunk_count") or 0),
         "embedding_count": int(row.get("embedding_count") or 0),
     }
+    meta = row.get("metadata")
+    if isinstance(meta, dict):
+        out["metadata"] = meta
+        if isinstance(meta.get("pipeline_stage"), str):
+            out["pipeline_stage"] = meta["pipeline_stage"]
+        if isinstance(meta.get("error_category"), str):
+            out["error_category"] = meta["error_category"]
+        if isinstance(meta.get("correlation_id"), str):
+            out["correlation_id"] = meta["correlation_id"]
+        if isinstance(meta.get("pipeline_stage_updated_at"), str):
+            out["pipeline_stage_updated_at"] = meta["pipeline_stage_updated_at"]
+    return out
 
 
 def list_jobs_payload(*, user_id: str | None, limit: int) -> dict[str, Any]:

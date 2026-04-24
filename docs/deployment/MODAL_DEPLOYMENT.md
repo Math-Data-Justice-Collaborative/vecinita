@@ -41,6 +41,16 @@ Modal Services (representative layout; exact app names follow your Modal workspa
 
 **Pipeline persistence without Modal Postgres:** Set ``SCRAPER_GATEWAY_BASE_URL`` (public gateway URL) and the same comma-separated ``SCRAPER_API_KEYS`` on Modal ``vecinita-scraper-env`` as on the Render gateway. Workers send the first key in ``X-Scraper-Pipeline-Ingest-Token``; the gateway accepts any listed segment. Scraper workers then POST pipeline state to ``/api/v1/internal/scraper-pipeline/*`` instead of opening ``psycopg2`` on Modal. See ``docs/deployment/RENDER_SHARED_ENV_CONTRACT.md``.
 
+**See also (feature 012 — queued page ingestion pipeline):** [`specs/012-queued-page-ingestion-pipeline/contracts/render-modal-pipeline-wiring.md`](../../specs/012-queued-page-ingestion-pipeline/contracts/render-modal-pipeline-wiring.md) — Render ↔ Modal topology, env matrix, and **v1 pipeline stage persistence** (structured rows first; DDL only when explicitly migrated).
+
+### Queued page pipeline — timeouts and scale (feature 012)
+
+Summarized from [`specs/012-queued-page-ingestion-pipeline/research.md`](../../specs/012-queued-page-ingestion-pipeline/research.md) **Decision 1–2**:
+
+- **Timeouts:** Modal `@app.function` stubs for scraper/processor/chunk/embed workers use explicit **`timeout=`** (seconds) so a hung crawl or embed step cannot wedge a container indefinitely; tune per environment in `services/scraper/src/vecinita_scraper/workers/*.py` after measuring p95 page time.
+- **Invocation:** Prefer **`spawn`** / **`spawn_map`** for drain-driven work where completion is tracked via Postgres/queues rather than blocking the gateway HTTP worker on `.remote()` for long jobs.
+- **Observability:** Pass the gateway **correlation id** into Modal job metadata and worker HTTP headers (`X-Request-Id` on pipeline ingest) so **SC-007** join-up works across Render logs and Modal logs (**Decision 2**).
+
 **Frontend (data management) — feature 007:** Point ``VITE_DM_API_BASE_URL`` (or legacy ``VITE_VECINITA_SCRAPER_API_URL``) at the **data-management API** origin; scrape job CRUD uses ``{DM}/jobs``. The gateway ``/api/v1/modal-jobs/scraper`` path remains for **gateway-owned** operator tools, not as the default DM SPA configuration. When legacy scraper ``*.modal.run`` ASGI endpoints still exist for other clients, treat the **DM API deployment** as **authoritative** for DM dashboard scraping.
 
 ## Prerequisites

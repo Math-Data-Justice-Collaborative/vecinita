@@ -22,9 +22,12 @@ result payload (e.g. reindex trigger acknowledgement).
 
 from __future__ import annotations
 
+import logging
 import os
 from functools import lru_cache
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 
 def _truthy(value: str | None) -> bool:
@@ -194,7 +197,19 @@ def invoke_modal_scrape_job_submit(payload: dict[str, Any]) -> dict[str, Any]:
 
     The scraper RPC enqueues work using Modal ``Function.spawn`` on ``scraper_worker`` when possible;
     clients can poll ``GET /jobs/spawns/{modal_function_call_id}`` on the scraper HTTP API.
+
+    Correlation identifiers are taken from ``payload["metadata"]`` when present so gateway logs
+    and Modal-side logs can be joined (**FR-015**).
     """
+    meta = payload.get("metadata")
+    correlation_id = meta.get("correlation_id") if isinstance(meta, dict) else None
+    job_id = payload.get("job_id")
+    if correlation_id:
+        logger.info(
+            "Modal scraper job submit invoked job_id=%s correlation_id=%s",
+            job_id,
+            correlation_id,
+        )
     app_name = os.getenv("MODAL_SCRAPER_APP_NAME", "vecinita-scraper")
     fn_name = os.getenv("MODAL_SCRAPER_JOB_SUBMIT_FUNCTION", "modal_scrape_job_submit")
     fn = _lookup_function(app_name, fn_name, _invoke_env())
