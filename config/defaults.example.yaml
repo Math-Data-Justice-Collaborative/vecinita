@@ -11,8 +11,9 @@ db_search_edge_timeout: 12
 modal_scraper_reindex_function_timeout: 120
 
 # Feature flags (non-secret)
-modal_scraper_submit_auto_kick: 1
-modal_scraper_persist_via_gateway: 1
+# Do NOT set MODAL_SCRAPER_* gateway toggles here: they require psycopg2 + DB and break
+# backend contract tests that stub psycopg2. Configure those in `.env` / root `.env.example`
+# optional profiles instead.
 db_search_force_sql_fallback: false
 db_search_try_text_wrapper: false
 postgres_data_reads_enabled: true
