@@ -2,6 +2,8 @@
 .env
 .env.*
 *.env
+# Local non-secret defaults override (see config/defaults.example.yaml)
+config/defaults.yaml
 env.txt
 !.env.local.example
 !.env.prod.render.example

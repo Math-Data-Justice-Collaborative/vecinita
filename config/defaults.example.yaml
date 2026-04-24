@@ -1,0 +1,24 @@
+# Non-secret defaults for local Vecinita stacks (example).
+# Copy to config/defaults.yaml to override without committing (see .gitignore).
+# Environment variables always win over these values when set.
+
+# Public example URLs (no credentials)
+langsmith_endpoint: "https://api.smith.langchain.com"
+deepseek_base_url: "https://api.deepseek.com"
+
+# Timeouts and budgets (seconds unless noted)
+db_search_edge_timeout: 12
+modal_scraper_reindex_function_timeout: 120
+
+# Feature flags (non-secret)
+# Do NOT set MODAL_SCRAPER_* gateway toggles here: they require psycopg2 + DB and break
+# backend contract tests that stub psycopg2. Configure those in `.env` / root `.env.example`
+# optional profiles instead.
+db_search_force_sql_fallback: false
+db_search_try_text_wrapper: false
+postgres_data_reads_enabled: true
+supabase_data_reads_enabled: true
+
+# Default local routing (adjust per profile)
+vite_gateway_url: "http://localhost:8004/api/v1"
+vite_backend_url: "http://localhost:8004/api/v1"

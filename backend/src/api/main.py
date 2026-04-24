@@ -34,7 +34,9 @@ _PROJECT_ROOT = Path(__file__).resolve().parents[3]
 _BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
 # Load environment with explicit precedence:
-# runtime shell env > root .env > backend/.env defaults.
+# runtime shell env > root `.env` > `backend/.env`.
+# Canonical catalog of names/sections: repository root `.env.example`
+# (see docs/environment-migration.md).
 load_dotenv(_PROJECT_ROOT / ".env", override=False)
 load_dotenv(_BACKEND_ROOT / ".env", override=False)
 

@@ -208,6 +208,8 @@ def _reload_gateway_with_mocks(monkeypatch: pytest.MonkeyPatch, *, enable_auth: 
     monkeypatch.setenv("REINDEX_SERVICE_URL", "")
     monkeypatch.setenv("SCRAPER_ENDPOINT", "http://127.0.0.1:1")
     monkeypatch.setenv("MODEL_ENDPOINT", "http://127.0.0.1:1")
+    # Gateway-owned scraper persistence needs real psycopg2.Json; conftest stubs psycopg2 for agent.
+    monkeypatch.setenv("MODAL_SCRAPER_PERSIST_VIA_GATEWAY", "0")
 
     import src.api.main as main_module
     import src.api.middleware as middleware_module

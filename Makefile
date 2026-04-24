@@ -383,7 +383,7 @@ typecheck: typecheck-backend typecheck-frontend
 typecheck-imported: typecheck-scraper
 
 typecheck-backend:
-	cd backend && uv run mypy src
+	cd backend && uv run --extra ci mypy src
 
 typecheck-frontend:
 	cd frontend && npm run typecheck
