@@ -1,0 +1,17 @@
+# Vecinita — legacy environment variable aliases (example)
+# Copy to env_aliases.yaml locally if you need overrides; prefer editing this
+# committed example and keeping docs/migration tables in sync.
+#
+# Schema: each entry maps a legacy OS env name to the canonical name implementers
+# should migrate to. Values are NEVER secrets — names only.
+#
+# Consumed by: shared_config/env_deprecation.py, backend/src/env_deprecation.py,
+# and documented in docs/environment-migration.md.
+
+aliases:
+  - legacy_env_name: OPENAI_API_KEY
+    canonical_env_name: OPEN_API_KEY
+  - legacy_env_name: MODAL_AUTH_KEY
+    canonical_env_name: MODAL_TOKEN_ID
+  - legacy_env_name: MODAL_AUTH_SECRET
+    canonical_env_name: MODAL_TOKEN_SECRET

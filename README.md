@@ -163,8 +163,9 @@ cd backend
 uv sync
 
 # Set environment variables (recommended: use a .env file)
-# 1) Copy .env.example to .env at the repo root
-# 2) Fill in your local secrets
+# 1) Copy the repository root `.env.example` to `.env` (or `.env.local`)
+# 2) Set variables under `### REQUIRED — default local` first, then optional profiles as needed
+# 3) See docs/environment-migration.md for aliases, profiles, and merge order
 # .env is already ignored by .gitignore and should not be committed
 cp ../.env.example ../.env  # or create manually
 
@@ -183,7 +184,7 @@ OLLAMA_MODEL=gemma3
 # or
 DEEPSEEK_API_KEY=...
 # or
-OPENAI_API_KEY=...
+OPEN_API_KEY=...
 ```
 
 When using Ollama, `OLLAMA_MODEL` defaults to **`gemma3`** in code and templates if unset (see root `.env.example`).
@@ -220,9 +221,10 @@ make test-frontend-e2e
 ## Environment Variables
 
 - Manage secrets locally using the `.env` file at the repo root.
-- A sanitized example is provided: `.env.example`.
+- The canonical catalog is **`.env.example`** at the repository root (grouped into required vs optional profiles).
 - Do not commit `.env` or any real secrets; `.gitignore` already excludes common env files.
-- Frontend can use `.env.local` for values like `VITE_GATEWAY_URL` (preferred) or `VITE_BACKEND_URL` (legacy fallback).
+- **Migration guide**: [docs/environment-migration.md](docs/environment-migration.md) (legacy names, baseline counts, YAML merge order).
+- Frontend can use `.env.local` for values like `VITE_GATEWAY_URL` (preferred) or `VITE_BACKEND_URL` (legacy fallback); subsidiary `*/.env.example` files point at the root catalog.
 
 ### Pre-commit secret scanning
 

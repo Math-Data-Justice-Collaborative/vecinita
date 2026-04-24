@@ -16,10 +16,13 @@ addresses are treated as local-dev defaults.
 
 Environment variables (minimum required)
 -----------------------------------------
+See repository root ``.env.example`` (``### REQUIRED — default local``) and
+``docs/environment-migration.md``. Typical keys include:
+
 - ``DATABASE_URL``                     — Postgres datastore access
 - ``OLLAMA_BASE_URL``                 — model endpoint (local or direct Modal)
 - ``GROQ_API_KEY``                    — optional Groq provider
-- ``OPENAI_API_KEY``                  — optional OpenAI provider
+- ``OPEN_API_KEY``                    — optional OpenAI-compatible provider (legacy ``OPENAI_API_KEY`` accepted)
 - ``EMBEDDING_SERVICE_URL``           — embedding microservice endpoint
 """
 
@@ -118,7 +121,8 @@ from .tools.static_response import FAQ_DATABASE, create_static_response_tool
 from .tools.web_search import create_web_search_tool
 
 # Load environment variables with deterministic precedence:
-# runtime shell env > root .env > backend/.env defaults.
+# runtime shell env > root `.env` > `backend/.env`.
+# Canonical catalog: repository root `.env.example` (docs/environment-migration.md).
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]
 _BACKEND_ROOT = Path(__file__).resolve().parents[2]
 load_dotenv(_PROJECT_ROOT / ".env", override=False)

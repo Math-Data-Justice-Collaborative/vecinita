@@ -123,6 +123,7 @@ dev = [
     "playwright>=1.40.0",
     "docker>=7.0.0",
     "types-requests>=2.32.4.20260324",
+    "types-PyYAML>=6.0.12",
 ]
 
 # Minimal CI dependencies - no playwright or docker for faster CI builds
@@ -134,6 +135,7 @@ ci = [
     "schemathesis>=4.14.3",
     "tracecov>=0.3.0",
     "types-requests>=2.32.4.20260324",
+    "types-PyYAML>=6.0.12",
     "httpx>=0.25.0",
     "black==26.3.1",
     "ruff>=0.2.0",

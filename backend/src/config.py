@@ -10,9 +10,68 @@ import os
 from pathlib import Path
 from urllib.parse import urlparse, urlunparse
 
+import yaml
 from dotenv import load_dotenv
 
+from . import env_deprecation as _env_deprecation
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_BACKEND_ROOT = Path(__file__).resolve().parents[1]
+
 load_dotenv()
+load_dotenv(_REPO_ROOT / ".env", override=False)
+load_dotenv(_BACKEND_ROOT / ".env", override=False)
+
+_env_deprecation.apply_legacy_aliases_and_warn(_REPO_ROOT)
+
+
+def _snake_yaml_key_to_env_name(key: str) -> str:
+    return key.strip().upper()
+
+
+def _apply_defaults_from_yaml() -> None:
+    """Merge non-secret defaults: example layer then optional local overrides; env wins."""
+    merged: dict[str, str] = {}
+    for rel in ("config/defaults.example.yaml", "config/defaults.yaml"):
+        path = _REPO_ROOT / rel
+        if not path.is_file():
+            continue
+        layer = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        for raw_key, val in layer.items():
+            if not isinstance(raw_key, str) or val is None or isinstance(val, dict):
+                continue
+            merged[_snake_yaml_key_to_env_name(raw_key)] = str(val)
+    for env_name, value in merged.items():
+        if os.getenv(env_name) is None:
+            os.environ[env_name] = value
+
+
+def _apply_db_components_from_database_url() -> None:
+    """When discrete DB_* vars are unset, derive them from DATABASE_URL (non-destructive)."""
+    if os.getenv("DB_HOST"):
+        return
+    raw = (os.getenv("DATABASE_URL") or "").strip()
+    if not raw:
+        return
+    try:
+        parsed = urlparse(raw)
+    except Exception:
+        return
+    if parsed.hostname:
+        os.environ.setdefault("DB_HOST", parsed.hostname)
+    if parsed.port:
+        os.environ.setdefault("DB_PORT", str(parsed.port))
+    db_path = (parsed.path or "").lstrip("/")
+    if db_path:
+        os.environ.setdefault("DB_NAME", db_path.split("?", 1)[0])
+    if parsed.username:
+        os.environ.setdefault("DB_USER", parsed.username)
+    if parsed.password is not None:
+        os.environ.setdefault("DB_PASSWORD", parsed.password)
+
+
+_apply_defaults_from_yaml()
+_apply_db_components_from_database_url()
 
 
 # ---------------------------------------------------------------------------
