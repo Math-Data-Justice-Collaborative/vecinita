@@ -127,8 +127,8 @@ def test_model_and_embedding_endpoints_no_localhost_on_render():
     """On Render, resolved MODEL_ENDPOINT and EMBEDDING_ENDPOINT must not be localhost."""
     render_env = {
         "RENDER": "true",
-        "VECINITA_MODEL_API_URL": "https://vecinita--vecinita-model-api.modal.run",
-        "VECINITA_EMBEDDING_API_URL": "https://vecinita--vecinita-embedding-api.modal.run",
+        "OLLAMA_BASE_URL": "https://vecinita--vecinita-model-api.modal.run",
+        "EMBEDDING_UPSTREAM_URL": "https://vecinita--vecinita-embedding-api.modal.run",
     }
     # Reload the module with Render env vars set so _running_on_render() returns True
     import sys
@@ -157,8 +157,8 @@ def test_modal_endpoints_use_direct_modal_hosts():
     """Canonical endpoint URLs must point to direct Modal hosts."""
     render_env = {
         "RENDER": "true",
-        "VECINITA_MODEL_API_URL": "https://vecinita--vecinita-model-api.modal.run",
-        "VECINITA_EMBEDDING_API_URL": "https://vecinita--vecinita-embedding-api.modal.run",
+        "OLLAMA_BASE_URL": "https://vecinita--vecinita-model-api.modal.run",
+        "EMBEDDING_UPSTREAM_URL": "https://vecinita--vecinita-embedding-api.modal.run",
     }
     import sys
 

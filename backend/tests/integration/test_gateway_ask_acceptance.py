@@ -93,8 +93,6 @@ def _build_gateway_client(env_vars, monkeypatch, *, enable_auth: bool = True):
     monkeypatch.setenv("DEMO_MODE", "false")
     monkeypatch.setenv("ENABLE_AUTH", "true" if enable_auth else "false")
     monkeypatch.setenv("AUTH_FAIL_CLOSED", "true")
-    monkeypatch.delenv("MODAL_EMBEDDING_ENDPOINT", raising=False)
-
     import src.api.main as main_module
     import src.api.middleware as middleware_module
     import src.api.router_ask as router_ask_module

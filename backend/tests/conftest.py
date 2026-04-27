@@ -19,7 +19,7 @@ def _truthy_env_str(val: str | None) -> bool:
 def _apply_unit_test_llm_env_before_dotenv() -> None:
     """Pin LLM/embedding URLs before ``load_dotenv`` and any ``src.config`` import.
 
-    ``src.config`` resolves ``OLLAMA_BASE_URL`` / ``EMBEDDING_SERVICE_URL`` at import time.
+    ``src.config`` resolves ``OLLAMA_BASE_URL`` / ``EMBEDDING_UPSTREAM_URL`` at import time.
     A repo-root ``.env`` that points at ``*.modal.run`` with ``MODAL_FUNCTION_INVOCATION`` off
     would otherwise poison the whole suite during collection. Opt out with
     ``VECINITA_TEST_USE_DOTENV_LLM=1`` when intentionally testing against dotenv values.
@@ -28,11 +28,8 @@ def _apply_unit_test_llm_env_before_dotenv() -> None:
         return
     os.environ.update(
         {
-            "VECINITA_MODEL_API_URL": "http://localhost:10000/model",
-            "VECINITA_EMBEDDING_API_URL": "http://localhost:8001",
             "OLLAMA_BASE_URL": "http://localhost:10000/model",
-            "MODAL_OLLAMA_ENDPOINT": "http://localhost:10000/model",
-            "EMBEDDING_SERVICE_URL": "http://localhost:8001",
+            "EMBEDDING_UPSTREAM_URL": "http://localhost:8001",
             "MODAL_FUNCTION_INVOCATION": "0",
         }
     )
@@ -57,8 +54,8 @@ def env_vars():
 
     return {
         "OLLAMA_BASE_URL": _env_or_default("OLLAMA_BASE_URL", "http://localhost:10000/model"),
-        "MODAL_OLLAMA_ENDPOINT": _env_or_default(
-            "MODAL_OLLAMA_ENDPOINT", "http://localhost:10000/model"
+        "EMBEDDING_UPSTREAM_URL": _env_or_default(
+            "EMBEDDING_UPSTREAM_URL", "http://localhost:8001"
         ),
         "OLLAMA_MODEL": _env_or_default("OLLAMA_MODEL", "gemma3"),
         # Keep tests deterministic regardless of runner-level env overrides.
@@ -106,12 +103,8 @@ def _agent_module_path_compatibility():
 
     # Set minimal env vars so module-level LLM provider validation passes.
     _test_env_defaults = {
-        # ``src.config`` prefers VECINITA_* over OLLAMA_BASE_URL / EMBEDDING_SERVICE_URL.
-        "VECINITA_MODEL_API_URL": "http://localhost:10000/model",
-        "VECINITA_EMBEDDING_API_URL": "http://localhost:8001",
         "OLLAMA_BASE_URL": "http://localhost:10000/model",
-        "MODAL_OLLAMA_ENDPOINT": "http://localhost:10000/model",
-        "EMBEDDING_SERVICE_URL": "http://localhost:8001",
+        "EMBEDDING_UPSTREAM_URL": "http://localhost:8001",
         "OLLAMA_MODEL": "gemma3",
         "AGENT_ENFORCE_ROUTE": "false",
         "DATABASE_URL": "postgresql://test",

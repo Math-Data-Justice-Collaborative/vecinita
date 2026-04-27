@@ -19,15 +19,15 @@ REQUIRED_KEYS: set[str] = {
     "CORS_ORIGINS",
     "DATABASE_URL",
     "EMBEDDING_SERVICE_AUTH_TOKEN",
+    "EMBEDDING_UPSTREAM_URL",
     "MODAL_TOKEN_ID",
     "MODAL_TOKEN_SECRET",
     "MODAL_FUNCTION_INVOCATION",
     "MODAL_WORKSPACE",
+    "OLLAMA_BASE_URL",
     "OLLAMA_MODEL",
     "RENDER_REMOTE_INFERENCE_ONLY",
     "SCRAPER_API_KEYS",
-    "VECINITA_MODEL_API_URL",
-    "VECINITA_EMBEDDING_API_URL",
     "VECINITA_SCRAPER_API_URL",
     "VITE_GATEWAY_URL",
     "VITE_BACKEND_URL",
@@ -115,8 +115,8 @@ def _validate_modal_endpoints(env: dict[str, str], result: ValidationResult) -> 
     mode = (env.get("MODAL_FUNCTION_INVOCATION") or "").strip().lower()
     function_mode = mode in {"1", "true", "yes", "on", "auto"}
 
-    model_endpoint = env.get("VECINITA_MODEL_API_URL", "")
-    embed_endpoint = env.get("VECINITA_EMBEDDING_API_URL", "")
+    model_endpoint = env.get("OLLAMA_BASE_URL", "")
+    embed_endpoint = env.get("EMBEDDING_UPSTREAM_URL", "")
     scraper_endpoint = env.get("VECINITA_SCRAPER_API_URL", "")
 
     if function_mode:
@@ -131,8 +131,8 @@ def _validate_modal_endpoints(env: dict[str, str], result: ValidationResult) -> 
         return
 
     for key, value in (
-        ("VECINITA_MODEL_API_URL", model_endpoint),
-        ("VECINITA_EMBEDDING_API_URL", embed_endpoint),
+        ("OLLAMA_BASE_URL", model_endpoint),
+        ("EMBEDDING_UPSTREAM_URL", embed_endpoint),
         ("VECINITA_SCRAPER_API_URL", scraper_endpoint),
     ):
         raw = (value or "").strip()

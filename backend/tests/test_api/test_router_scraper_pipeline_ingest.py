@@ -15,11 +15,8 @@ def pipeline_ingest_client(env_vars, monkeypatch):
     for key, value in env_vars.items():
         monkeypatch.setenv(key, value)
     monkeypatch.setenv("MODAL_SCRAPER_PERSIST_VIA_GATEWAY", "0")
-    monkeypatch.setenv("VECINITA_MODEL_API_URL", "http://localhost:10000/model")
-    monkeypatch.setenv("VECINITA_EMBEDDING_API_URL", "http://localhost:8001")
     monkeypatch.setenv("OLLAMA_BASE_URL", "http://localhost:10000/model")
-    monkeypatch.setenv("MODAL_OLLAMA_ENDPOINT", "http://localhost:10000/model")
-    monkeypatch.setenv("EMBEDDING_SERVICE_URL", "http://localhost:8001")
+    monkeypatch.setenv("EMBEDDING_UPSTREAM_URL", "http://localhost:8001")
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "0")
     monkeypatch.setenv("SCRAPER_API_KEYS", "test-ingest-secret,other-key")
     from src.api.main import app
@@ -185,11 +182,8 @@ def test_pipeline_ingest_routes_503_when_api_keys_unset(
     for key, value in env_vars.items():
         monkeypatch.setenv(key, value)
     monkeypatch.delenv("SCRAPER_API_KEYS", raising=False)
-    monkeypatch.setenv("VECINITA_MODEL_API_URL", "http://localhost:10000/model")
-    monkeypatch.setenv("VECINITA_EMBEDDING_API_URL", "http://localhost:8001")
     monkeypatch.setenv("OLLAMA_BASE_URL", "http://localhost:10000/model")
-    monkeypatch.setenv("MODAL_OLLAMA_ENDPOINT", "http://localhost:10000/model")
-    monkeypatch.setenv("EMBEDDING_SERVICE_URL", "http://localhost:8001")
+    monkeypatch.setenv("EMBEDDING_UPSTREAM_URL", "http://localhost:8001")
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "0")
     from src.api.main import app
 
@@ -207,11 +201,8 @@ def test_pipeline_ingest_not_configured_returns_503(
     for key, value in env_vars.items():
         monkeypatch.setenv(key, value)
     monkeypatch.delenv("SCRAPER_API_KEYS", raising=False)
-    monkeypatch.setenv("VECINITA_MODEL_API_URL", "http://localhost:10000/model")
-    monkeypatch.setenv("VECINITA_EMBEDDING_API_URL", "http://localhost:8001")
     monkeypatch.setenv("OLLAMA_BASE_URL", "http://localhost:10000/model")
-    monkeypatch.setenv("MODAL_OLLAMA_ENDPOINT", "http://localhost:10000/model")
-    monkeypatch.setenv("EMBEDDING_SERVICE_URL", "http://localhost:8001")
+    monkeypatch.setenv("EMBEDDING_UPSTREAM_URL", "http://localhost:8001")
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "0")
     from src.api.main import app
 

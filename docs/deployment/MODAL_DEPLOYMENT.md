@@ -78,7 +78,7 @@ python -m src.agent.main  # Starts on :8000
 
 Set in `.env`:
 ```env
-EMBEDDING_SERVICE_URL=http://localhost:8001
+EMBEDDING_UPSTREAM_URL=http://localhost:8001
 REINDEX_SERVICE_URL=  # Optional for local testing
 ```
 
@@ -121,7 +121,7 @@ After you confirm traffic uses the new apps, use `backend/scripts/modal_teardown
 
 ### Step 3: Configure Environment
 
-For **embedding and model on Modal**, configure the gateway with Modal workspace tokens and function invocation (see ``backend/.env.example``: ``MODAL_TOKEN_ID``, ``MODAL_TOKEN_SECRET``, ``MODAL_FUNCTION_INVOCATION=auto`` or ``true``, and optional ``MODAL_EMBEDDING_APP_NAME`` / ``MODAL_MODEL_APP_NAME`` overrides). You can still point ``EMBEDDING_SERVICE_URL`` / ``OLLAMA_BASE_URL`` at a **non-Modal** HTTP service (e.g. local Docker) when not using Modal functions.
+For **embedding and model on Modal**, configure the gateway/agent with Modal workspace tokens and function invocation (``MODAL_TOKEN_ID``, ``MODAL_TOKEN_SECRET``, ``MODAL_FUNCTION_INVOCATION=auto`` or ``true``). Keep Modal **token vars** separate from HTTP base URLs. Connectivity URLs should use FR-004 canonical names (``RENDER_GATEWAY_URL``, ``RENDER_AGENT_URL``, ``DATA_MANAGEMENT_API_URL`` + schema URL vars); only set ``OLLAMA_BASE_URL`` / ``EMBEDDING_UPSTREAM_URL`` as upstream bases when you intentionally run HTTP mode.
 
 For the **recommended function-first mode** on Render, leave ``REINDEX_SERVICE_URL`` empty and enable:
 
@@ -207,32 +207,40 @@ gh workflow run modal-deploy.yml \
 
 ## Environment Variables
 
-### Development (Local Services)
+### Connectivity base URLs (FR-004 approved names)
+
+Use only canonical service URLs for cross-service routing:
 
 ```env
-EMBEDDING_SERVICE_URL=http://localhost:8001
-EMBEDDING_SERVICE_AUTH_TOKEN=  # Optional, empty for local
-REINDEX_SERVICE_URL=  # Optional for local testing
+RENDER_GATEWAY_URL=https://<gateway-host>
+RENDER_AGENT_URL=https://<agent-host>
+DATA_MANAGEMENT_API_URL=https://<data-management-api-host>
+GATEWAY_SCHEMA_URL=https://<gateway-host>/openapi.json
+DATA_MANAGEMENT_SCHEMA_URL=https://<data-management-api-host>/openapi.json
+AGENT_SCHEMA_URL=https://<agent-host>/openapi.json
+
+# Upstream model/embedding HTTP bases (when not using Modal SDK path)
+OLLAMA_BASE_URL=http://localhost:11434
+EMBEDDING_UPSTREAM_URL=http://localhost:8001
 ```
 
-### Production (Modal Services)
+### Modal token variables (SDK auth; separate from HTTP bases)
 
 ```env
-# Modal credentials (for deployment only, not runtime)
-MODAL_TOKEN_ID=<your-token-id>
-MODAL_TOKEN_SECRET=<your-token-secret>
-
-# Runtime: Modal embedding/model use Function.from_name (set MODAL_FUNCTION_INVOCATION + tokens)
 MODAL_FUNCTION_INVOCATION=auto
 MODAL_TOKEN_ID=<your-token-id>
 MODAL_TOKEN_SECRET=<your-token-secret>
-# Optional HTTP-mode scraper fallback only:
-# REINDEX_SERVICE_URL=https://<vecinita-scraper-api-host>/jobs
-REINDEX_TRIGGER_TOKEN=<your-secret-token>
+# Optional app/function selectors
+# MODAL_EMBEDDING_APP_NAME=vecinita-embedding
+# MODAL_MODEL_APP_NAME=vecinita-model
+```
 
-# Optional: HTTP fallback embedding URL (e.g. local Docker), when not using Modal functions
-# EMBEDDING_SERVICE_URL=http://localhost:8001
-EMBEDDING_SERVICE_AUTH_TOKEN=${MODAL_TOKEN_SECRET}  # For secured HTTP endpoints when used
+### Optional HTTP-mode scraper variables
+
+```env
+REINDEX_SERVICE_URL=https://<vecinita-scraper-api-host>/jobs
+REINDEX_TRIGGER_TOKEN=<your-secret-token>
+EMBEDDING_SERVICE_AUTH_TOKEN=${MODAL_TOKEN_SECRET}
 ```
 
 ### Variable Resolution Order
@@ -241,7 +249,7 @@ The API gateway resolves embedding delivery with this precedence:
 
 For embedding service:
 1. When ``MODAL_FUNCTION_INVOCATION`` is enabled — Modal ``embed_query`` / ``embed_batch`` via the Modal SDK
-2. ``EMBEDDING_SERVICE_URL`` (HTTP to another host)
+2. ``EMBEDDING_UPSTREAM_URL`` (HTTP to another host)
 3. ``http://localhost:8001`` (default)
 
 For auth tokens:

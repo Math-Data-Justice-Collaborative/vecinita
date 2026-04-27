@@ -364,9 +364,7 @@ class LocalLLMClientManager:
     def validate_runtime(self) -> None:
         self.validate_selection()
         if not self.base_url:
-            raise RuntimeError(
-                "No local LLM endpoint configured. Set OLLAMA_BASE_URL or MODAL_OLLAMA_ENDPOINT."
-            )
+            raise RuntimeError("No local LLM endpoint configured. Set OLLAMA_BASE_URL.")
         if "modal.run" in self.base_url.lower() and not modal_function_invocation_enabled():
             raise RuntimeError(
                 "Model base URL targets Modal; set MODAL_FUNCTION_INVOCATION=auto or 1 "

@@ -1,0 +1,6 @@
+# Repo-relative paths: suppress **URL-only** hits (https?://…modal.run) while migration removes literals.
+# Same-line httpx/requests/urllib/axios/fetch + Modal host is still flagged in these files.
+backend/src/api/models/gateway.py
+backend/src/config.py
+backend/src/utils/render_env_contract.py
+backend/src/service_endpoints.py

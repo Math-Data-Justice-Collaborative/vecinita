@@ -65,9 +65,9 @@ envVarGroups:
       
       # --- Modal Service Endpoints (external API URLs) ---
       # These point to Modal deployments for scraper, embedding, model
-      - key: VECINITA_MODEL_API_URL
-        sync: false  # e.g., https://api.modal.run/v1/your-org/vecinita-model
-      - key: VECINITA_EMBEDDING_API_URL
+      - key: OLLAMA_BASE_URL
+        sync: false  # e.g., https://…--vecinita-model-api.modal.run
+      - key: EMBEDDING_UPSTREAM_URL
         sync: false
       - key: VECINITA_SCRAPER_API_URL
         sync: false

@@ -15,3 +15,14 @@ aliases:
     canonical_env_name: MODAL_TOKEN_ID
   - legacy_env_name: MODAL_AUTH_SECRET
     canonical_env_name: MODAL_TOKEN_SECRET
+  # Feature 015 (FR-005): deprecated connectivity keys → canonical (see specs/015-openapi-sdk-clients/spec.md)
+  - legacy_env_name: MODAL_OLLAMA_ENDPOINT
+    canonical_env_name: OLLAMA_BASE_URL
+  - legacy_env_name: VECINITA_MODEL_API_URL
+    canonical_env_name: OLLAMA_BASE_URL
+  - legacy_env_name: MODAL_EMBEDDING_ENDPOINT
+    canonical_env_name: EMBEDDING_UPSTREAM_URL
+  - legacy_env_name: VECINITA_EMBEDDING_API_URL
+    canonical_env_name: EMBEDDING_UPSTREAM_URL
+  - legacy_env_name: EMBEDDING_SERVICE_URL
+    canonical_env_name: EMBEDDING_UPSTREAM_URL

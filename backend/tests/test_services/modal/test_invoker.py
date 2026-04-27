@@ -145,7 +145,7 @@ def test_enforce_modal_function_policy_for_urls_requires_tokens(monkeypatch):
 
     with pytest.raises(RuntimeError, match="Modal tokens are missing"):
         enforce_modal_function_policy_for_urls(
-            {"EMBEDDING_SERVICE_URL": "https://vecinita--vecinita-embedding-web-app.modal.run"}
+            {"EMBEDDING_UPSTREAM_URL": "https://vecinita--vecinita-embedding-web-app.modal.run"}
         )
 
 
@@ -167,6 +167,6 @@ def test_enforce_modal_function_policy_allows_modal_hosts_when_auto_and_tokens_c
     enforce_modal_function_policy_for_urls(
         {
             "OLLAMA_BASE_URL": "https://vecinita--vecinita-model-api.modal.run",
-            "EMBEDDING_SERVICE_URL": "https://vecinita--vecinita-embedding-web-app.modal.run",
+            "EMBEDDING_UPSTREAM_URL": "https://vecinita--vecinita-embedding-web-app.modal.run",
         }
     )

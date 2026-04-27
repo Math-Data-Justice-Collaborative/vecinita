@@ -89,6 +89,18 @@ make test-e2e
 make docs-serve
 ```
 
+### OpenAPI clients and Modal HTTP ban (feature 015)
+
+From the repository root (see [`specs/015-openapi-sdk-clients/quickstart.md`](./specs/015-openapi-sdk-clients/quickstart.md) for env wiring):
+
+| Command | Purpose |
+|---------|---------|
+| `make check-modal-http` | Static gate for **FR-001** / **SC-005** — blocks disallowed Modal HTTP URL patterns in application code (see `scripts/check_modal_http_ban.py`). Requires **ripgrep** (`rg`) on `PATH`. |
+| `make openapi-codegen` | Regenerate `packages/openapi-clients/` from `GATEWAY_SCHEMA_URL`, `DATA_MANAGEMENT_SCHEMA_URL`, and `AGENT_SCHEMA_URL` using the pinned OpenAPI Generator version in `scripts/openapi-generator-version.txt` (via `npx`). |
+| `make openapi-codegen-verify` | Runs codegen then **`git diff --exit-code packages/openapi-clients/`** so committed generated trees cannot drift. |
+
+CI: **Quality Gate** runs `make check-modal-http` with **`continue-on-error: true`** until US3 is fully green (**T036** flips it to required). `make openapi-codegen-verify` runs only when all three schema URL **repository variables** are set on the GitHub repo (otherwise the step logs a skip notice).
+
 ### Prerequisites (Local)
 
 Use these versions (or newer compatible versions):
@@ -469,7 +481,7 @@ GROQ_API_KEY=<your-groq-api-key>
 ```bash
 TAVILY_API_KEY=<your-tavily-key>                          # For enhanced web search
 VITE_BACKEND_URL=http://localhost:8000                    # Frontend backend URL (local)
-EMBEDDING_SERVICE_URL=http://embedding-service:8001       # Embedding service URL (Docker)
+EMBEDDING_UPSTREAM_URL=http://embedding-service:8001      # Embedding upstream URL (Docker)
 # For Render deployment: https://vecinita-embedding.onrender.com
 ```
 

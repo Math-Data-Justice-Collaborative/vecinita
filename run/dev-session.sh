@@ -330,9 +330,9 @@ wait_for_remote_endpoint_ready() {
 
 run_remote_endpoint_preflight_checks() {
   local model_api_url
-  model_api_url="$(resolve_env_value "$DEFAULT_MODAL_MODEL_URL" VECINITA_MODEL_API_URL MODAL_OLLAMA_ENDPOINT OLLAMA_BASE_URL)"
+  model_api_url="$(resolve_env_value "$DEFAULT_MODAL_MODEL_URL" OLLAMA_BASE_URL)"
   local embedding_api_url
-  embedding_api_url="$(resolve_env_value "$DEFAULT_MODAL_EMBEDDING_URL" VECINITA_EMBEDDING_API_URL MODAL_EMBEDDING_ENDPOINT EMBEDDING_SERVICE_URL)"
+  embedding_api_url="$(resolve_env_value "$DEFAULT_MODAL_EMBEDDING_URL" EMBEDDING_UPSTREAM_URL)"
   local endpoint_timeout
   endpoint_timeout="${DEV_REMOTE_ENDPOINT_READY_TIMEOUT:-120}"
 
@@ -420,8 +420,8 @@ start_single_terminal_session() {
   trap cleanup_single_terminal INT TERM EXIT
 
   run_with_prefix "embedding" bash -lc "cd '$ROOT_DIR/backend' && EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' uv run -m uvicorn src.embedding_service.main:app --host 0.0.0.0 --port 8001 ${uvicorn_reload_args}"
-  run_with_prefix "agent" bash -lc "cd '$ROOT_DIR/backend' && ANONYMIZED_TELEMETRY='false' OLLAMA_BASE_URL=\"\${VECINITA_MODEL_API_URL:-\${MODAL_OLLAMA_ENDPOINT:-\${OLLAMA_BASE_URL:-$DEFAULT_MODAL_MODEL_URL}}}\" OLLAMA_API_KEY=\"\${OLLAMA_API_KEY:-\${MODAL_API_KEY:-\${MODAL_TOKEN_SECRET:-\${MODAL_TOKEN_SECRET:-}}}}\" EMBEDDING_SERVICE_URL=\"\${VECINITA_EMBEDDING_API_URL:-\${MODAL_EMBEDDING_ENDPOINT:-\${EMBEDDING_SERVICE_URL:-$DEFAULT_MODAL_EMBEDDING_URL}}}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' DEFAULT_PROVIDER='ollama' DEFAULT_MODEL='' uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 ${uvicorn_reload_args}"
-  run_with_prefix "gateway" bash -lc "cd '$ROOT_DIR/backend' && AGENT_SERVICE_URL='http://localhost:8000' EMBEDDING_SERVICE_URL=\"\${VECINITA_EMBEDDING_API_URL:-\${MODAL_EMBEDDING_ENDPOINT:-\${EMBEDDING_SERVICE_URL:-$DEFAULT_MODAL_EMBEDDING_URL}}}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' ANONYMIZED_TELEMETRY='false' DEV_ADMIN_ENABLED='true' DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' DEMO_MODE='false' uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 ${uvicorn_reload_args}"
+  run_with_prefix "agent" bash -lc "cd '$ROOT_DIR/backend' && ANONYMIZED_TELEMETRY='false' OLLAMA_BASE_URL=\"\${OLLAMA_BASE_URL:-$DEFAULT_MODAL_MODEL_URL}\" OLLAMA_API_KEY=\"\${OLLAMA_API_KEY:-\${MODAL_API_KEY:-\${MODAL_TOKEN_SECRET:-\${MODAL_TOKEN_SECRET:-}}}}\" EMBEDDING_UPSTREAM_URL=\"\${EMBEDDING_UPSTREAM_URL:-$DEFAULT_MODAL_EMBEDDING_URL}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' DEFAULT_PROVIDER='ollama' DEFAULT_MODEL='' uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 ${uvicorn_reload_args}"
+  run_with_prefix "gateway" bash -lc "cd '$ROOT_DIR/backend' && AGENT_SERVICE_URL='http://localhost:8000' EMBEDDING_UPSTREAM_URL=\"\${EMBEDDING_UPSTREAM_URL:-$DEFAULT_MODAL_EMBEDDING_URL}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' ANONYMIZED_TELEMETRY='false' DEV_ADMIN_ENABLED='true' DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' DEMO_MODE='false' uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 ${uvicorn_reload_args}"
   run_with_prefix "frontend" bash -lc "cd '$ROOT_DIR/frontend' && npm run dev -- --host 0.0.0.0 --port 5173"
 
   if ! wait_for_http_ready "Frontend" "http://localhost:5173/" "${DEV_FRONTEND_READY_TIMEOUT:-180}"; then
@@ -470,8 +470,8 @@ start_session() {
   tmux select-layout -t "$SESSION_NAME":dev tiled
 
   tmux send-keys -t "$SESSION_NAME":dev.0 "cd '$ROOT_DIR/backend' && echo '[embedding] EMBEDDING_SERVICE_AUTH_TOKEN=$embed_token uv run -m uvicorn src.embedding_service.main:app --port 8001 ${uvicorn_reload_args}' && EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' uv run -m uvicorn src.embedding_service.main:app --host 0.0.0.0 --port 8001 ${uvicorn_reload_args}" C-m
-  tmux send-keys -t "$SESSION_NAME":dev.1 "cd '$ROOT_DIR/backend' && echo '[agent] uv run -m uvicorn src.agent.main:app --port 8000 ${uvicorn_reload_args}' && ANONYMIZED_TELEMETRY='false' OLLAMA_BASE_URL=\"\${VECINITA_MODEL_API_URL:-\${MODAL_OLLAMA_ENDPOINT:-\${OLLAMA_BASE_URL:-$DEFAULT_MODAL_MODEL_URL}}}\" OLLAMA_API_KEY=\"\${OLLAMA_API_KEY:-\${MODAL_API_KEY:-\${MODAL_TOKEN_SECRET:-\${MODAL_TOKEN_SECRET:-}}}}\" EMBEDDING_SERVICE_URL=\"\${VECINITA_EMBEDDING_API_URL:-\${MODAL_EMBEDDING_ENDPOINT:-\${EMBEDDING_SERVICE_URL:-$DEFAULT_MODAL_EMBEDDING_URL}}}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' DEFAULT_PROVIDER='ollama' DEFAULT_MODEL='' uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 ${uvicorn_reload_args}" C-m
-  tmux send-keys -t "$SESSION_NAME":dev.2 "cd '$ROOT_DIR/backend' && echo '[gateway] uv run -m uvicorn src.api.main:app --port 8004 ${uvicorn_reload_args}' && AGENT_SERVICE_URL='http://localhost:8000' EMBEDDING_SERVICE_URL=\"\${VECINITA_EMBEDDING_API_URL:-\${MODAL_EMBEDDING_ENDPOINT:-\${EMBEDDING_SERVICE_URL:-$DEFAULT_MODAL_EMBEDDING_URL}}}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' ANONYMIZED_TELEMETRY='false' DEV_ADMIN_ENABLED='true' DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' DEMO_MODE='false' uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 ${uvicorn_reload_args}" C-m
+  tmux send-keys -t "$SESSION_NAME":dev.1 "cd '$ROOT_DIR/backend' && echo '[agent] uv run -m uvicorn src.agent.main:app --port 8000 ${uvicorn_reload_args}' && ANONYMIZED_TELEMETRY='false' OLLAMA_BASE_URL=\"\${OLLAMA_BASE_URL:-$DEFAULT_MODAL_MODEL_URL}\" OLLAMA_API_KEY=\"\${OLLAMA_API_KEY:-\${MODAL_API_KEY:-\${MODAL_TOKEN_SECRET:-\${MODAL_TOKEN_SECRET:-}}}}\" EMBEDDING_UPSTREAM_URL=\"\${EMBEDDING_UPSTREAM_URL:-$DEFAULT_MODAL_EMBEDDING_URL}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' DEFAULT_PROVIDER='ollama' DEFAULT_MODEL='' uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 ${uvicorn_reload_args}" C-m
+  tmux send-keys -t "$SESSION_NAME":dev.2 "cd '$ROOT_DIR/backend' && echo '[gateway] uv run -m uvicorn src.api.main:app --port 8004 ${uvicorn_reload_args}' && AGENT_SERVICE_URL='http://localhost:8000' EMBEDDING_UPSTREAM_URL=\"\${EMBEDDING_UPSTREAM_URL:-$DEFAULT_MODAL_EMBEDDING_URL}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' ANONYMIZED_TELEMETRY='false' DEV_ADMIN_ENABLED='true' DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' DEMO_MODE='false' uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 ${uvicorn_reload_args}" C-m
   tmux send-keys -t "$SESSION_NAME":dev.3 "cd '$ROOT_DIR/frontend' && echo '[frontend] npm run dev -- --host 0.0.0.0 --port 5173' && npm run dev -- --host 0.0.0.0 --port 5173" C-m
   tmux send-keys -t "$SESSION_NAME":dev.4 "cd '$ROOT_DIR' && echo '[idle] reserved pane for ad-hoc commands' && bash" C-m
   tmux send-keys -t "$SESSION_NAME":dev.5 "cd '$ROOT_DIR' && echo '[idle] reserved pane for ad-hoc commands' && bash" C-m

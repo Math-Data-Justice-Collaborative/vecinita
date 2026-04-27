@@ -85,9 +85,21 @@ services:
         sync: false
       - key: OLLAMA_MODEL
         sync: false
-      - key: VECINITA_MODEL_API_URL
+      - key: OLLAMA_BASE_URL
         sync: false
-      - key: VECINITA_EMBEDDING_API_URL
+      - key: EMBEDDING_UPSTREAM_URL
+        sync: false
+      - key: RENDER_GATEWAY_URL
+        sync: false
+      - key: RENDER_AGENT_URL
+        sync: false
+      - key: DATA_MANAGEMENT_API_URL
+        sync: false
+      - key: GATEWAY_SCHEMA_URL
+        sync: false
+      - key: AGENT_SCHEMA_URL
+        sync: false
+      - key: EMBEDDING_SERVICE_SCHEMA_URL
         sync: false
       - key: VECINITA_SCRAPER_API_URL
         sync: false
@@ -259,9 +271,21 @@ services:
         sync: false
       - key: AGENT_STREAM_TIMEOUT
         sync: false
-      - key: VECINITA_EMBEDDING_API_URL
+      - key: EMBEDDING_UPSTREAM_URL
         sync: false
-      - key: VECINITA_MODEL_API_URL
+      - key: OLLAMA_BASE_URL
+        sync: false
+      - key: RENDER_GATEWAY_URL
+        sync: false
+      - key: RENDER_AGENT_URL
+        sync: false
+      - key: DATA_MANAGEMENT_API_URL
+        sync: false
+      - key: GATEWAY_SCHEMA_URL
+        sync: false
+      - key: AGENT_SCHEMA_URL
+        sync: false
+      - key: EMBEDDING_SERVICE_SCHEMA_URL
         sync: false
       - key: VECINITA_SCRAPER_API_URL
         sync: false
@@ -316,9 +340,9 @@ services:
         value: "10000"
       - key: VITE_VECINITA_SCRAPER_API_URL
         sync: false
-      - key: VITE_VECINITA_MODEL_API_URL
+      - key: VITE_OLLAMA_BASE_URL
         sync: false
-      - key: VITE_VECINITA_EMBEDDING_API_URL
+      - key: VITE_EMBEDDING_UPSTREAM_URL
         sync: false
       - key: VITE_DEFAULT_SCRAPER_USER_ID
         sync: false
@@ -348,9 +372,9 @@ services:
         sync: false
       - key: MODAL_WORKSPACE
         sync: false
-      - key: VECINITA_MODEL_API_URL
+      - key: OLLAMA_BASE_URL
         sync: false
-      - key: VECINITA_EMBEDDING_API_URL
+      - key: EMBEDDING_UPSTREAM_URL
         sync: false
       - key: CORS_ORIGINS
         sync: false

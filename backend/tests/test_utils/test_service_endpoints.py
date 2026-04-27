@@ -40,8 +40,6 @@ def _reload(monkeypatch_env: dict[str, str] | None = None):
 class TestEndpointResolution:
     def test_model_endpoint_uses_local_default_without_env(self, monkeypatch):
         monkeypatch.setenv("RENDER", "true")
-        monkeypatch.delenv("VECINITA_MODEL_API_URL", raising=False)
-        monkeypatch.delenv("MODAL_OLLAMA_ENDPOINT", raising=False)
         monkeypatch.delenv("OLLAMA_BASE_URL", raising=False)
 
         ep = _reload()
@@ -49,9 +47,7 @@ class TestEndpointResolution:
 
     def test_embedding_endpoint_uses_local_default_without_env(self, monkeypatch):
         monkeypatch.setenv("RENDER", "true")
-        monkeypatch.delenv("VECINITA_EMBEDDING_API_URL", raising=False)
-        monkeypatch.delenv("MODAL_EMBEDDING_ENDPOINT", raising=False)
-        monkeypatch.delenv("EMBEDDING_SERVICE_URL", raising=False)
+        monkeypatch.delenv("EMBEDDING_UPSTREAM_URL", raising=False)
 
         ep = _reload()
         assert ep.EMBEDDING_ENDPOINT == "https://vecinita--vecinita-embedding-web-app.modal.run"
@@ -60,7 +56,7 @@ class TestEndpointResolution:
         """Render env sometimes stores mistaken …embedding-embedding-web-app… host; normalize at import."""
         monkeypatch.setenv("RENDER", "true")
         monkeypatch.setenv(
-            "VECINITA_EMBEDDING_API_URL",
+            "EMBEDDING_UPSTREAM_URL",
             "https://vecinita--vecinita-embedding-embedding-web-app.modal.run",
         )
 

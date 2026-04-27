@@ -40,8 +40,8 @@ def test_local_template_contains_core_cross_service_keys() -> None:
     catalog = {**root_env, **local_env}
     required_local_keys = {
         "DATABASE_URL",
-        "VECINITA_MODEL_API_URL",
-        "VECINITA_EMBEDDING_API_URL",
+        "OLLAMA_BASE_URL",
+        "EMBEDDING_UPSTREAM_URL",
         "VECINITA_SCRAPER_API_URL",
         "VITE_GATEWAY_URL",
         "VITE_VECINITA_SCRAPER_API_URL",

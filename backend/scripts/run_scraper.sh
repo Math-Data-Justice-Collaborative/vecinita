@@ -106,22 +106,16 @@ if [[ "$MODE" == "local" ]]; then
   fi
 
   if [[ -f "$ENV_FILE" ]]; then
-    if [[ -z "${EMBEDDING_SERVICE_URL:-}" ]]; then
-      _emb="$(grep -E '^EMBEDDING_SERVICE_URL=' "$ENV_FILE" | sed -n '1p' | cut -d= -f2- | tr -d '\r' || true)"
+    if [[ -z "${EMBEDDING_UPSTREAM_URL:-}" ]]; then
+      _emb="$(grep -E '^EMBEDDING_UPSTREAM_URL=' "$ENV_FILE" | sed -n '1p' | cut -d= -f2- | tr -d '\r' || true)"
       if [[ -n "${_emb:-}" ]]; then
-        export EMBEDDING_SERVICE_URL="${_emb}"
+        export EMBEDDING_UPSTREAM_URL="${_emb}"
       fi
     fi
-    if [[ -z "${EMBEDDING_SERVICE_URL:-}" ]]; then
-      _modal_emb="$(grep -E '^MODAL_EMBEDDING_ENDPOINT=' "$ENV_FILE" | sed -n '1p' | cut -d= -f2- | tr -d '\r' || true)"
-      if [[ -n "${_modal_emb:-}" ]]; then
-        export EMBEDDING_SERVICE_URL="${_modal_emb}"
-      fi
-    fi
-    if [[ -z "${EMBEDDING_SERVICE_URL:-}" ]]; then
-      _vec_emb="$(grep -E '^VECINITA_EMBEDDING_API_URL=' "$ENV_FILE" | sed -n '1p' | cut -d= -f2- | tr -d '\r' || true)"
-      if [[ -n "${_vec_emb:-}" ]]; then
-        export EMBEDDING_SERVICE_URL="${_vec_emb}"
+    if [[ -z "${EMBEDDING_UPSTREAM_URL:-}" ]]; then
+      _legacy="$(grep -E '^EMBEDDING_SERVICE_URL=' "$ENV_FILE" | sed -n '1p' | cut -d= -f2- | tr -d '\r' || true)"
+      if [[ -n "${_legacy:-}" ]]; then
+        export EMBEDDING_UPSTREAM_URL="${_legacy}"
       fi
     fi
     if [[ -z "${DATA_MANAGEMENT_API_URL:-}" ]]; then
@@ -132,7 +126,7 @@ if [[ "$MODE" == "local" ]]; then
     fi
   fi
 
-  export EMBEDDING_SERVICE_URL="${EMBEDDING_SERVICE_URL:-http://localhost:8001}"
+  export EMBEDDING_UPSTREAM_URL="${EMBEDDING_UPSTREAM_URL:-http://localhost:8001}"
   export DATA_MANAGEMENT_API_URL="${DATA_MANAGEMENT_API_URL:-http://localhost:8005}"
 
   wait_for_http() {
@@ -163,8 +157,8 @@ if [[ "$MODE" == "local" ]]; then
   wait_for_embedding_service() {
     local timeout="$1"
     local interval="$2"
-    local health_url="${EMBEDDING_SERVICE_URL%/}/health"
-    local base_url="${EMBEDDING_SERVICE_URL%/}/"
+    local health_url="${EMBEDDING_UPSTREAM_URL%/}/health"
+    local base_url="${EMBEDDING_UPSTREAM_URL%/}/"
 
     if wait_for_http "Embedding service" "$health_url" "$timeout" "$interval"; then
       return 0

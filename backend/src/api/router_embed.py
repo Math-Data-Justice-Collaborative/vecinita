@@ -87,12 +87,8 @@ def _normalize_embedding_service_url(url: str | None) -> str:
 
 
 def _embedding_service_url() -> str:
-    configured = (
-        os.getenv("VECINITA_EMBEDDING_API_URL")
-        or os.getenv("MODAL_EMBEDDING_ENDPOINT")
-        or os.getenv("EMBEDDING_SERVICE_URL")
-        or EMBEDDING_SERVICE_URL
-    )
+    """Resolve upstream embedding HTTP base (see ``src.config.EMBEDDING_SERVICE_URL``)."""
+    configured = EMBEDDING_SERVICE_URL
     base = _normalize_embedding_service_url(configured)
     rewritten = rewrite_deprecated_modal_embedding_host(base)
     return (rewritten or base).rstrip("/")

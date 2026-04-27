@@ -202,11 +202,9 @@ def test_ip06_agent_to_embedding_direct_endpoint_headers(monkeypatch) -> None:
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "auto")
     monkeypatch.setenv("MODAL_TOKEN_ID", "ak-ip06-contract")
     monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-ip06-contract")
-    monkeypatch.delenv("VECINITA_EMBEDDING_API_URL", raising=False)
     monkeypatch.setenv(
-        "MODAL_EMBEDDING_ENDPOINT", "https://vecinita--vecinita-embedding-web-app.modal.run"
+        "EMBEDDING_UPSTREAM_URL", "https://vecinita--vecinita-embedding-web-app.modal.run"
     )
-    monkeypatch.delenv("EMBEDDING_SERVICE_URL", raising=False)
     monkeypatch.setenv("EMBEDDING_SERVICE_AUTH_TOKEN", "embed-token")
 
     import src.config as app_config
@@ -408,7 +406,7 @@ def test_ip14_env_auth_contract_local_render_and_modal(monkeypatch) -> None:
     assert invoker.modal_function_invocation_enabled() is False
     invoker.enforce_modal_function_policy_for_urls(
         {
-            "EMBEDDING_SERVICE_URL": "http://localhost:8001",
+            "EMBEDDING_UPSTREAM_URL": "http://localhost:8001",
             "OLLAMA_BASE_URL": "http://localhost:11434",
         }
     )
@@ -420,7 +418,7 @@ def test_ip14_env_auth_contract_local_render_and_modal(monkeypatch) -> None:
     monkeypatch.setenv("MODAL_TOKEN_SECRET", "as-ip14-contract")
     assert invoker.modal_function_invocation_enabled() is True
     invoker.enforce_modal_function_policy_for_urls(
-        {"EMBEDDING_SERVICE_URL": "https://vecinita--vecinita-embedding-web-app.modal.run"}
+        {"EMBEDDING_UPSTREAM_URL": "https://vecinita--vecinita-embedding-web-app.modal.run"}
     )
 
     # Misconfigured Render contract must fail fast so CI blocks bad deploy config.
@@ -429,5 +427,5 @@ def test_ip14_env_auth_contract_local_render_and_modal(monkeypatch) -> None:
     monkeypatch.delenv("MODAL_TOKEN_SECRET", raising=False)
     with pytest.raises(RuntimeError, match="Modal tokens are missing"):
         invoker.enforce_modal_function_policy_for_urls(
-            {"VECINITA_MODEL_API_URL": "https://vecinita--vecinita-model-api.modal.run"}
+            {"OLLAMA_BASE_URL": "https://vecinita--vecinita-model-api.modal.run"}
         )

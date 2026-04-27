@@ -20,9 +20,7 @@ def gateway_client(env_vars, monkeypatch):
         monkeypatch.setenv(key, value)
 
     monkeypatch.setenv("AGENT_SERVICE_URL", "http://localhost:8000")
-    monkeypatch.setenv("EMBEDDING_SERVICE_URL", "http://localhost:8001")
-    # Clear MODAL_EMBEDDING_ENDPOINT so localhost defaults are used
-    monkeypatch.delenv("MODAL_EMBEDDING_ENDPOINT", raising=False)
+    monkeypatch.setenv("EMBEDDING_UPSTREAM_URL", "http://localhost:8001")
 
     # Import and reload module to pick up env vars
     import src.api.main
@@ -550,16 +548,12 @@ class TestEnvironmentConfiguration:
         assert src.api.main.AGENT_SERVICE_URL == "http://vecinita-agent.internal:10000"
 
     def test_embedding_service_url_from_env(self, env_vars, monkeypatch):
-        """Test embedding service URL uses canonical env key precedence."""
-        # Canonical precedence is:
-        # VECINITA_EMBEDDING_API_URL > MODAL_EMBEDDING_ENDPOINT > EMBEDDING_SERVICE_URL > default
+        """Test embedding service URL is driven by ``EMBEDDING_UPSTREAM_URL`` (via ``src.config``)."""
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
 
         canonical_url = "https://test-embedding-via-canonical.run"
-        monkeypatch.setenv("VECINITA_EMBEDDING_API_URL", canonical_url)
-        monkeypatch.setenv("MODAL_EMBEDDING_ENDPOINT", "https://legacy-modal.run")
-        monkeypatch.setenv("EMBEDDING_SERVICE_URL", "http://legacy-embedding-service:8001")
+        monkeypatch.setenv("EMBEDDING_UPSTREAM_URL", canonical_url)
 
         # Reload module to pick up new environment variables
         import src.api.main
