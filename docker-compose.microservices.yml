@@ -61,7 +61,7 @@ services:
     environment:
       SERVICE_AUTH_ENABLED: "false"
       DATABASE_URL: postgresql://postgres:postgres@vecinita-postgres-ms:5432/postgres
-      VECINITA_EMBEDDING_API_URL: http://vecinita-embedding-ms:8011
+      EMBEDDING_UPSTREAM_URL: http://vecinita-embedding-ms:8011
     ports:
       - "8020:8020"
     depends_on:
@@ -81,7 +81,7 @@ services:
     environment:
       PORT: 8000
       OLLAMA_BASE_URL: http://vecinita-model-ms:8000
-      EMBEDDING_SERVICE_URL: http://vecinita-embedding-ms:8011
+      EMBEDDING_UPSTREAM_URL: http://vecinita-embedding-ms:8011
       DATABASE_URL: postgresql://postgres:postgres@vecinita-postgres-ms:5432/postgres
       DEFAULT_PROVIDER: ollama
       OLLAMA_MODEL: llama3.2
@@ -104,7 +104,7 @@ services:
     environment:
       PORT: 8004
       AGENT_SERVICE_URL: http://vecinita-chat-agent-ms:8000
-      EMBEDDING_SERVICE_URL: http://vecinita-embedding-ms:8011
+      EMBEDDING_UPSTREAM_URL: http://vecinita-embedding-ms:8011
       DATABASE_URL: postgresql://postgres:postgres@vecinita-postgres-ms:5432/postgres
       DEV_ADMIN_ENABLED: "true"
       DEV_ADMIN_BEARER_TOKEN: vecinita-dev-admin-token-2026

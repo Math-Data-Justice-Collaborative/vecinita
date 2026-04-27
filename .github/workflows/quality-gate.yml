@@ -51,6 +51,31 @@ jobs:
         working-directory: backend
         run: uv run mypy src
 
+      - name: Install ripgrep (Modal HTTP ban scanner)
+        run: sudo apt-get update -qq && sudo apt-get install -y ripgrep
+
+      - name: Modal HTTP ban (SC-005 / FR-001)
+        continue-on-error: true
+        run: make check-modal-http
+
+      - name: Set up Node.js (OpenAPI Generator CLI via npx)
+        uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+
+      - name: OpenAPI codegen verify (drift gate when schema URL repo vars are set)
+        env:
+          GATEWAY_SCHEMA_URL: ${{ vars.GATEWAY_SCHEMA_URL }}
+          DATA_MANAGEMENT_SCHEMA_URL: ${{ vars.DATA_MANAGEMENT_SCHEMA_URL }}
+          AGENT_SCHEMA_URL: ${{ vars.AGENT_SCHEMA_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GATEWAY_SCHEMA_URL:-}" ] || [ -z "${DATA_MANAGEMENT_SCHEMA_URL:-}" ] || [ -z "${AGENT_SCHEMA_URL:-}" ]; then
+            echo "::notice title=openapi-codegen-verify::Skipping make openapi-codegen-verify — set repository variables GATEWAY_SCHEMA_URL, DATA_MANAGEMENT_SCHEMA_URL, and AGENT_SCHEMA_URL to enable."
+            exit 0
+          fi
+          make openapi-codegen-verify
+
   frontend-quality:
     runs-on: ubuntu-22.04
     steps:

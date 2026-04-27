@@ -108,6 +108,10 @@ make test-e2e
 make test-microservices-contracts
 ```
 
+### OpenAPI clients and env (feature 015)
+
+Canonical commands live in the root **README** under *OpenAPI clients and Modal HTTP ban* (`make openapi-codegen`, `make openapi-codegen-verify`, `make check-modal-http`). For operator-oriented setup, schema URLs, and staging notes, use [`specs/015-openapi-sdk-clients/quickstart.md`](./specs/015-openapi-sdk-clients/quickstart.md).
+
 ### Configuration
 
 - **EditorConfig**: `.editorconfig` for consistent settings

@@ -1,0 +1,3 @@
+# One literal host fragment per line (matched with ripgrep -F). Lines starting with # are ignored.
+# See specs/015-openapi-sdk-clients/contracts/modal-http-ban-sc005.md
+modal.run

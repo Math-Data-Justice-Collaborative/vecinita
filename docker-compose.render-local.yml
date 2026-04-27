@@ -80,10 +80,8 @@ services:
       RENDER: "true"
       RENDER_SERVICE_ID: "local-render-sim"
       AGENT_SERVICE_URL: "http://vecinita-agent:8000"
-      MODAL_OLLAMA_ENDPOINT: "http://vecinita-model-ms-render:8000"
-      MODAL_EMBEDDING_ENDPOINT: "http://vecinita-embedding-ms-render:8011"
       OLLAMA_BASE_URL: "http://vecinita-model-ms-render:8000"
-      EMBEDDING_SERVICE_URL: "http://vecinita-embedding-ms-render:8011"
+      EMBEDDING_UPSTREAM_URL: "http://vecinita-embedding-ms-render:8011"
       RENDER_REMOTE_INFERENCE_ONLY: "true"
     depends_on:
       model-service:

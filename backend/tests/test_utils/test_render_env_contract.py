@@ -19,10 +19,10 @@ def minimal_valid_render_env():
         "MODAL_FUNCTION_INVOCATION": "auto",
         "MODAL_WORKSPACE": "vecinita",
         "OLLAMA_MODEL": "gemma3",
+        "OLLAMA_BASE_URL": "https://vecinita--vecinita-model-api.modal.run",
+        "EMBEDDING_UPSTREAM_URL": "https://vecinita--vecinita-embedding-api.modal.run",
         "RENDER_REMOTE_INFERENCE_ONLY": "true",
         "SCRAPER_API_KEYS": "key1,key2",
-        "VECINITA_MODEL_API_URL": "https://vecinita--vecinita-model-api.modal.run",
-        "VECINITA_EMBEDDING_API_URL": "https://vecinita--vecinita-embedding-api.modal.run",
         "VECINITA_SCRAPER_API_URL": "https://scraper.modal.run",
         "VITE_GATEWAY_URL": "https://gateway.onrender.com/api/v1",
         "VITE_BACKEND_URL": "https://agent.onrender.com",
@@ -61,15 +61,15 @@ def test_validate_shared_render_env_flags_missing_and_inconsistent_values(minima
         "DB_DATA_MODE": "auto",
         "RENDER_REMOTE_INFERENCE_ONLY": "false",
         "MODAL_FUNCTION_INVOCATION": "0",
-        "VECINITA_MODEL_API_URL": "not-a-url",
-        "VECINITA_EMBEDDING_API_URL": "https://embedding.example.com",
+        "OLLAMA_BASE_URL": "not-a-url",
+        "EMBEDDING_UPSTREAM_URL": "https://embedding.example.com",
         "VECINITA_SCRAPER_API_URL": "https://scraper.example.com/jobs",
     }
 
     result = validate_shared_render_env(env)
 
     assert "DATABASE_URL must use postgres:// or postgresql:// scheme" in result.errors
-    assert "VECINITA_MODEL_API_URL must be an absolute http(s) URL in HTTP mode" in result.errors
+    assert "OLLAMA_BASE_URL must be an absolute http(s) URL in HTTP mode" in result.errors
     assert "RENDER_REMOTE_INFERENCE_ONLY must be enabled for Render runtime" in result.errors
     assert "DB_DATA_MODE must be set to postgres for Render runtime" in result.errors
 

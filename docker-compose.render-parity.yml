@@ -86,9 +86,8 @@ services:
       OPENAI_MODEL_NAME: "${OPENAI_MODEL_NAME:-gpt-4o-mini}"
       
       # Embedding service (local or Modal)
-      EMBEDDING_SERVICE_URL: "${EMBEDDING_SERVICE_URL:-http://vecinita-embedding:8080}"
+      EMBEDDING_UPSTREAM_URL: "${EMBEDDING_UPSTREAM_URL:-http://vecinita-embedding:8080}"
       EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:-}"
-      VECINITA_EMBEDDING_API_URL: "${VECINITA_EMBEDDING_API_URL:-}"
       
       # Optional scraper/reindex service
       REINDEX_SERVICE_URL: "${REINDEX_SERVICE_URL:-}"
@@ -152,9 +151,8 @@ services:
       OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
       
       # Embedding service for discovery
-      EMBEDDING_SERVICE_URL: "${EMBEDDING_SERVICE_URL:-http://vecinita-embedding:8080}"
+      EMBEDDING_UPSTREAM_URL: "${EMBEDDING_UPSTREAM_URL:-http://vecinita-embedding:8080}"
       EMBEDDING_SERVICE_AUTH_TOKEN: "${EMBEDDING_SERVICE_AUTH_TOKEN:-}"
-      VECINITA_EMBEDDING_API_URL: "${VECINITA_EMBEDDING_API_URL:-}"
       
       # Reindex/scraper for admin endpoints
       REINDEX_SERVICE_URL: "${REINDEX_SERVICE_URL:-}"
@@ -228,7 +226,7 @@ services:
   # OPTIONAL: EMBEDDING SERVICE — Local embedding microservice
   # ============================================================================
   # Uncomment this section if you want to test local embedding service instead
-  # of using Modal. By default, EMBEDDING_SERVICE_URL points to this.
+  # of using Modal. By default, EMBEDDING_UPSTREAM_URL points to this.
   #
   # vecinita-embedding:
   #   build:

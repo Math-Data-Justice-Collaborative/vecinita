@@ -16,6 +16,7 @@ import psycopg2  # type: ignore[import-untyped]
 from fastapi import APIRouter, Depends, HTTPException
 from psycopg2.extras import RealDictCursor  # type: ignore[import-untyped]
 
+from src.config import EMBEDDING_SERVICE_URL as _CONFIG_EMBEDDING_SERVICE_URL
 from src.utils.database_url import get_resolved_database_url
 from src.utils.tags import build_bilingual_tag_fields, normalize_tags
 
@@ -46,11 +47,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/documents", tags=["Documents (Public)"])
 
-EMBEDDING_SERVICE_URL = (
-    os.getenv("MODAL_EMBEDDING_ENDPOINT")
-    or os.getenv("EMBEDDING_SERVICE_URL")
-    or "http://localhost:8001"
-)
+EMBEDDING_SERVICE_URL = _CONFIG_EMBEDDING_SERVICE_URL or "http://localhost:8001"
 UPLOAD_STORAGE_BUCKET = os.getenv("UPLOADS_STORAGE_BUCKET") or os.getenv(
     "DOCUMENTS_UPLOADS_BUCKET", "documents"
 )

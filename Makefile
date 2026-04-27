@@ -27,7 +27,8 @@
 	env-sync-contract render-connectivity-tests render-all-offline-contract-tests \
 	render-deploy-trigger render-deploy-wait \
 	render-services render-deploy-status render-deploy-show render-service-env render-logs \
-	docs-install docs-serve docs-build docs-deploy-check
+	docs-install docs-serve docs-build docs-deploy-check \
+	openapi-codegen openapi-codegen-verify check-modal-http
 
 help:
 	@echo "Vecinita root Makefile"
@@ -463,6 +464,18 @@ quality-full:
 	@$(MAKE) quality && $(MAKE) test-unit && $(MAKE) test-imported && $(MAKE) test-integration-gateway-fast && $(MAKE) test-integration-service-contracts
 
 ci: quality-full
+
+# OpenAPI client regeneration (requires GATEWAY_SCHEMA_URL, DATA_MANAGEMENT_SCHEMA_URL, AGENT_SCHEMA_URL).
+openapi-codegen:
+	@bash scripts/openapi_codegen.sh
+
+# Regenerate then fail if packages/openapi-clients is not committed in sync (FR-003 drift gate).
+openapi-codegen-verify: openapi-codegen
+	@git diff --exit-code -- packages/openapi-clients/
+
+# FR-001 / SC-005: block Modal-assigned HTTP URL patterns and client+host lines (see scripts/check_modal_http_ban.py).
+check-modal-http:
+	@python3 scripts/check_modal_http_ban.py
 
 test-unit: test-backend-unit test-frontend-unit
 

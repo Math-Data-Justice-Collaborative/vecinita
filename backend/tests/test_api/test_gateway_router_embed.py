@@ -330,15 +330,23 @@ class TestEmbeddingUpstreamUrlResolution:
     """``_embedding_service_url`` must rewrite legacy Modal container hosts (no HTTP)."""
 
     def test_rewrites_legacy_vecinita_modal_host(self, monkeypatch):
+        import importlib
+
         monkeypatch.delenv("RENDER", raising=False)
         monkeypatch.delenv("RENDER_SERVICE_ID", raising=False)
         monkeypatch.delenv("LOCAL_EMBEDDING_SERVICE_URL", raising=False)
         monkeypatch.setenv(
-            "VECINITA_EMBEDDING_API_URL",
+            "EMBEDDING_UPSTREAM_URL",
             "https://vecinita--vecinita-embedding-embeddingservicecontainer-api.modal.run",
         )
 
-        from src.api import router_embed
+        import src.api.router_embed as router_embed
+        import src.config as cfg
+        import src.service_endpoints as ep
+
+        importlib.reload(cfg)
+        importlib.reload(ep)
+        importlib.reload(router_embed)
 
         resolved = router_embed._embedding_service_url()
         assert resolved == "https://vecinita--vecinita-embedding-web-app.modal.run"

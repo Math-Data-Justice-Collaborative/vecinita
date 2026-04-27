@@ -16,6 +16,7 @@ from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field
 
+from src.config import EMBEDDING_SERVICE_URL, OLLAMA_BASE_URL
 from src.services.llm import LocalLLMClientManager
 from src.utils.database_url import get_resolved_database_url
 from src.utils.resource_metadata import infer_resource_language_metadata
@@ -132,11 +133,7 @@ class DatabaseUploader:
             return
 
         manager = LocalLLMClientManager(
-            base_url=(
-                os.getenv("MODAL_OLLAMA_ENDPOINT")
-                or os.getenv("OLLAMA_BASE_URL")
-                or "http://localhost:11434"
-            ),
+            base_url=(OLLAMA_BASE_URL or "http://localhost:11434"),
             default_model=os.getenv("OLLAMA_MODEL", "gemma3"),
             api_key=(
                 os.getenv("OLLAMA_API_KEY")
@@ -440,11 +437,7 @@ class DatabaseUploader:
         }
 
         # Try embedding service first (lightweight, scalable)
-        embedding_service_url = (
-            os.getenv("MODAL_EMBEDDING_ENDPOINT")
-            or os.getenv("EMBEDDING_SERVICE_URL")
-            or "http://localhost:8001"
-        )
+        embedding_service_url = EMBEDDING_SERVICE_URL or "http://localhost:8001"
 
         if EMBEDDING_SERVICE_AVAILABLE:
             try:
@@ -461,7 +454,7 @@ class DatabaseUploader:
                 if strict_startup:
                     raise RuntimeError(
                         "Embedding service validation failed during scraper uploader startup. "
-                        "Set EMBEDDING_SERVICE_URL to a reachable Modal endpoint, or set "
+                        "Set EMBEDDING_UPSTREAM_URL (or legacy keys copied via env aliases) to a reachable embedding HTTP origin, or set "
                         "EMBEDDING_STRICT_STARTUP=false only for local development fallbacks."
                     ) from e
 

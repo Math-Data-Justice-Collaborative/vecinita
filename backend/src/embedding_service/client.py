@@ -174,9 +174,7 @@ class EmbeddingServiceClient(Embeddings):
         # Also include explicit endpoint env vars so one stale variable does not
         # block startup when another valid endpoint is configured.
         env_candidates = [
-            os.getenv("VECINITA_EMBEDDING_API_URL", "").strip(),
-            os.getenv("MODAL_EMBEDDING_ENDPOINT", "").strip(),
-            os.getenv("EMBEDDING_SERVICE_URL", "").strip(),
+            os.getenv("EMBEDDING_UPSTREAM_URL", "").strip(),
         ]
         for candidate in env_candidates:
             if candidate:
