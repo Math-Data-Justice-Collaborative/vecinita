@@ -51,6 +51,17 @@
       "CrawlConfig": {
         "description": "Tuning knobs for the Crawl4AI crawl stage.",
         "properties": {
+          "delay_before_return_html_seconds": {
+            "default": 1.5,
+            "description": "Extra settle time before HTML snapshot when wait_for_content is enabled.",
+            "examples": [
+              1.5
+            ],
+            "maximum": 30.0,
+            "minimum": 0.0,
+            "title": "Delay Before Return Html Seconds",
+            "type": "number"
+          },
           "headless": {
             "default": true,
             "description": "Run the browser headless.",
@@ -87,6 +98,17 @@
             "maximum": 10.0,
             "minimum": 1.0,
             "title": "Max Depth",
+            "type": "integer"
+          },
+          "max_direct_fetch_bytes": {
+            "default": 15000000,
+            "description": "Maximum bytes to download for direct PDF/text fetches (non-browser path).",
+            "examples": [
+              15000000
+            ],
+            "maximum": 50000000.0,
+            "minimum": 64000.0,
+            "title": "Max Direct Fetch Bytes",
             "type": "integer"
           },
           "timeout_seconds": {
