@@ -762,7 +762,9 @@ dm-openapi-diff:
 
 # FR-007 / FR-008: Pact provider replay (skips unless env vars + generated pacts exist).
 pact-verify-providers:
-	cd backend && uv run pytest tests/pact/test_chat_gateway_provider_verify.py tests/pact/test_dm_api_provider_verify.py tests/pact/test_agent_provider_verify.py -q
+	cd backend && uv run pytest tests/pact/test_chat_gateway_provider_verify.py tests/pact/test_dm_api_provider_verify.py tests/pact/test_agent_provider_verify.py tests/pact/test_modal_sdk_message_pact_provider_verify.py -q && \
+		PYTHONPATH=../services/data-management-api/packages/service-clients:../services/data-management-api/packages/shared-schemas:../services/data-management-api/packages/shared-config:../services/data-management-api/apps/backend \
+		uv run pytest ../services/data-management-api/packages/service-clients/tests/pact/test_dm_service_clients_modal_message_pact_provider_verify.py -q
 
 test-frontend-e2e:
 	cd frontend && npm run test:e2e

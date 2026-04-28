@@ -1,0 +1,29 @@
+---
+description: Keep environment variables in one canonical file and one short approved list
+alwaysApply: true
+---
+
+# Unified environment variables
+
+Keep one canonical environment file for committed defaults and examples: `.env.local.example`.
+
+## Requirements
+
+- Add new environment variables only in `.env.local.example`.
+- Do not introduce additional committed env files for the same purpose (for example `.env.example`, `.env.dev.example`, or duplicated per-service examples) unless the task explicitly requires and documents an exception.
+- Keep the variable list short and unified. Reuse existing keys before adding new ones.
+- If a variable is removed or renamed, update all code/docs references in the same task.
+
+## Examples
+
+```bash
+# BAD: defining new keys in a second example file
+# .env.example
+NEW_API_URL=...
+```
+
+```bash
+# GOOD: keep the key in the canonical file
+# .env.local.example
+NEW_API_URL=...
+```

@@ -1,0 +1,28 @@
+---
+description: Require root cause analysis over temporary fixes
+alwaysApply: true
+---
+
+# Root Cause Analysis First
+
+When handling bugs, regressions, or failing tests, fix the underlying cause instead of applying a temporary patch.
+
+## Required behavior
+
+- Reproduce and understand the issue before editing code.
+- Identify and explain the root cause in implementation notes.
+- Prefer the smallest durable fix that removes the cause of failure.
+- Avoid workaround-only changes (quick patches, band-aids, TODO deferrals) unless explicitly requested.
+- If a temporary mitigation is unavoidable, clearly label it as temporary, explain risk, and include a follow-up task to remove it.
+
+## Verification expectations
+
+- Add or update a test that fails before the fix and passes after it when practical.
+- Confirm related flows still work to avoid regressions.
+
+## Example
+
+```text
+Bad: "Add null check here so it stops crashing."
+Good: "Find why null is produced, fix that source path, and keep a guard only as defense-in-depth."
+```

@@ -1,0 +1,22 @@
+---
+description: Enforce cross-service drift prevention guardrails
+alwaysApply: true
+---
+
+# Service Drift Guardrails
+
+Use these non-negotiable policies to prevent backend, frontend, and service drift.
+
+## Required guardrails
+
+- Keep backend and frontend API contracts in sync within the same task. If backend schema, routes, payloads, or response shapes change, update generated clients/types and callers in that same change.
+- Keep one canonical committed environment defaults/examples file: `.env.local.example`.
+- For bugs and regressions, fix root cause first. Avoid workaround-only patches unless explicitly requested.
+- Do not mark work done or ready until `make ci` passes from repository root.
+
+## PR-ready checklist
+
+- [ ] Backend and frontend contract changes are synchronized.
+- [ ] Environment variable changes are reflected in `.env.local.example` only.
+- [ ] Root cause and regression risk are addressed.
+- [ ] `make ci` passes.
