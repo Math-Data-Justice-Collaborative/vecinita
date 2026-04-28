@@ -30,3 +30,7 @@ cd backend && PYTHONPATH=../services/data-management-api/packages/service-client
 ```
 
 Root **Makefile** target **`pact-verify-providers`** runs the HTTP provider checks plus the Modal SDK message verifiers (they **skip** unless the matching env var is set and the generated pact JSON exists).
+
+## CI / dependency parity
+
+Python consumer modules under ``tests/pact/`` import ``pact`` at **module import** time. GitHub Actions and ``make ci`` install dependencies with ``uv sync --frozen --extra ci``, which resolves **`vecinita[ci]`** only; UV ``[dependency-groups]`` are a separate knob. If ``pact-python`` were listed only in a dependency group and not in the **`ci``** extra, pytest would fail during **collection** with ``ModuleNotFoundError: No module named 'pact'`` (markers are applied after imports). See **TESTING_DOCUMENTATION.md** (“Backend `vecinita[ci]` …”) and ``tests/contracts/test_backend_ci_extra_includes_pact_python_contract.py``.

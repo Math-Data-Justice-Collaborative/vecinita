@@ -35,6 +35,8 @@ jobs:
         with:
           version: "latest"
 
+      # Installs [project.optional-dependencies].ci only (not UV [dependency-groups]).
+      # Pytest imports tests/pact/*.py during collection before -m deselection; pact-python must stay in .ci.
       - name: Install backend CI dependencies (locked; matches local uv)
         working-directory: backend
         run: uv sync --frozen --extra ci

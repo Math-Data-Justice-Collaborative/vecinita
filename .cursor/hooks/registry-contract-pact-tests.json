@@ -23,6 +23,14 @@
       "command": "cd backend && uv run pytest tests/contracts/test_gitignore_schemathesis_artifacts.py -q --tb=short"
     },
     {
+      "id": "backend.contracts.test_backend_ci_extra_includes_pact_python_contract",
+      "path_prefixes": [
+        "backend/pyproject.toml",
+        "backend/tests/contracts/test_backend_ci_extra_includes_pact_python_contract.py"
+      ],
+      "command": "cd backend && uv run pytest tests/contracts/test_backend_ci_extra_includes_pact_python_contract.py -q --tb=short"
+    },
+    {
       "id": "backend.contracts.test_env_sync_github_actions_bundle",
       "path_prefixes": ["backend/tests/contracts/test_env_sync_github_actions_bundle.py"],
       "command": "cd backend && uv run pytest tests/contracts/test_env_sync_github_actions_bundle.py -q --tb=short"

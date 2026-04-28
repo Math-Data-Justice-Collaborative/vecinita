@@ -20,6 +20,12 @@ This section is the **single** place for merge-blocking vs informational contrac
 | Local / release prep | `make pact-verify-providers` (pytest under `backend/tests/pact/`); see `backend/tests/pact/README.md` | Policy: default-branch / pre-release (not every PR). |
 | Manual | `.github/workflows/real-stack-wiring.yml` `workflow_dispatch` | Informational anchor for compose/Render smoke (**FR-006** / SC-003). |
 
+#### Backend `vecinita[ci]`, UV dependency-groups, and Pact (pytest collection)
+
+- Merge-blocking backend jobs and root **`make ci`** run **`cd backend && uv sync --frozen --extra ci`**, which installs **`[project.optional-dependencies].ci`** only. UV **`[dependency-groups]`** in `backend/pyproject.toml` are **not** implied by `--extra ci` unless you pass an explicit `--group` flag.
+- **Pytest** imports every file under `backend/tests/` during collection **before** applying `-m` markers. Any `ModuleNotFoundError` during import aborts the run, even when the failing module would have been deselected (for example, `tests/pact/*.py` is marked `integration` but still imported when the command uses `-m "not integration …"`).
+- **Invariant:** keep **`pact-python`** in the **`ci`** optional-dependency list while gateway Python consumer pacts live under `backend/tests/pact/`. **`backend/tests/contracts/test_backend_ci_extra_includes_pact_python_contract.py`** asserts this so the misconfiguration cannot regress silently.
+
 ### Schemathesis & OpenAPI
 
 - **Config:** `backend/schemathesis.toml` (hooks `tests.schemathesis_hooks`, `continue-on-failure`, gateway `/api/v1/(scrape|modal-jobs)` tuning including **modal-jobs** when present in the live gateway OpenAPI).
