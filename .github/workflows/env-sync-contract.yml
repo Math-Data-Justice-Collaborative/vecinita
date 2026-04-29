@@ -57,7 +57,8 @@ jobs:
           version: "latest"
 
       - name: Sync dependencies
-        # pytest lives in optional-dependencies.ci; base sync has no test runner
+        # pytest + pact-python live in optional-dependencies.ci (not UV dependency-groups);
+        # pytest imports tests/ during collection before marker filters.
         run: uv sync --frozen --extra ci
 
       - name: Run env sync contract tests

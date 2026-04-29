@@ -135,6 +135,8 @@ ci = [
     "hypothesis>=6.0.0",
     "schemathesis>=4.14.3",
     "tracecov>=0.3.0",
+    # Consumer pact tests under tests/pact/ import ``pact``; collection runs before marker deselection.
+    "pact-python>=3.3.0",
     "types-requests>=2.32.4.20260324",
     "types-PyYAML>=6.0.12",
     "black==26.3.1",

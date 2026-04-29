@@ -1,0 +1,21 @@
+---
+description: Keep frontend endpoint calls aligned with backend schema changes
+alwaysApply: true
+---
+
+# Backend schema to frontend sync
+
+When a backend API schema, request/response contract, route, or status code changes, update frontend calls for that same endpoint in the same task.
+
+## Required updates
+
+- Regenerate or update typed API clients/types derived from backend OpenAPI/contracts.
+- Update frontend request payloads, query params, headers, and response handling to match the new schema.
+- Update endpoint paths/method usage where renamed, moved, or deprecated.
+- Remove or migrate frontend code that depends on removed fields or old response shapes.
+
+## Verification before completion
+
+- Confirm frontend compiles/types check after schema-driven changes.
+- Update or add tests covering the changed endpoint contract (backend and frontend where applicable).
+- Do not mark work complete while backend schema and frontend endpoint usage are out of sync.

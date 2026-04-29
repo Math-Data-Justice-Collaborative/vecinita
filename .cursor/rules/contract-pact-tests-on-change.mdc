@@ -1,0 +1,25 @@
+---
+description: When changing contracts, Pact surfaces, or schema artifacts, update matching tests in the same task
+alwaysApply: true
+---
+
+# Contract, Pact, and schema changes require matching tests
+
+If the edit touches **integration contracts**, **Pact consumers/providers**, **shared Pact payloads**, **OpenAPI or JSON schemas** that define HTTP or RPC behavior, or **env/render contract checks**, finish the task only after the **tests that lock that behavior** are updated or added in the same change.
+
+## What to update
+
+- **Python**: `pytest` files under `**/tests/contracts/**`, `**/tests/pact/**`, or `@pytest.mark.contract` / Pact tests next to the code you changed. Adjust payloads (e.g. `*_pact_payloads.py`, `scraper_modal_embedding_payloads.py`) when request/response shapes change.
+- **TypeScript**: Vitest Pact files (`**/*.pact.test.ts`, `**/tests/pact/**`, `vitest.pact.config.ts`, `pactSetup.ts`) when the HTTP surface or mocks they assert changes.
+- **OpenAPI / typed clients**: After regenerating or hand-editing contracts, extend or fix **contract tests and Pact expectations** that encode the same shapes (not only unit tests unrelated to the API).
+
+## Registry for edit-time hooks
+
+When you add or rename a contract or Pact test file (or a path that should re-run a suite after edits), add a row to `.cursor/hooks/registry-contract-pact-tests.json` so the `afterFileEdit` / `afterTabFileEdit` hook stays aligned.
+
+## Verification
+
+- Run the affected pytest file(s) or `npm run test:pact` (or the scoped `vitest run … --config vitest.pact.config.ts` for the app you touched).
+- Do not treat contract/schema work as complete if consumer Pact JSON, matchers, or provider verify steps are stale relative to the new behavior.
+
+For full-stack API schema and frontend callers, also follow **Backend schema to frontend sync** (`.cursor/rules/backend-schema-frontend-sync.mdc`).

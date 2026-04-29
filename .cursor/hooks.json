@@ -1,11 +1,31 @@
 {
   "version": 1,
   "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": ".cursor/hooks/enforce-drift-gates.sh",
+        "matcher": "^(git\\s+commit\\b|gh\\s+pr\\s+create\\b)",
+        "timeout": 1200,
+        "failClosed": true
+      }
+    ],
     "stop": [
       {
         "command": ".cursor/hooks/run-ci-on-stop.sh",
         "timeout": 1200,
         "loop_limit": 8
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": ".cursor/hooks/run-contract-pact-tests-on-edit.sh",
+        "timeout": 600
+      }
+    ],
+    "afterTabFileEdit": [
+      {
+        "command": ".cursor/hooks/run-contract-pact-tests-on-edit.sh",
+        "timeout": 600
       }
     ]
   }

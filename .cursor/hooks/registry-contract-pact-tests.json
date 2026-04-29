@@ -1,0 +1,151 @@
+{
+  "version": 1,
+  "description": "Each entry maps path_prefixes (repo-relative, forward slashes) to the command that exercises one contract or Pact test surface. Used by run-contract-pact-tests-on-edit.sh.",
+  "entries": [
+    {
+      "id": "backend.contracts.test_gateway_modal_http_fallback_policy_contract",
+      "path_prefixes": ["backend/tests/contracts/test_gateway_modal_http_fallback_policy_contract.py"],
+      "command": "cd backend && uv run pytest tests/contracts/test_gateway_modal_http_fallback_policy_contract.py -q --tb=short"
+    },
+    {
+      "id": "backend.contracts.test_gateway_modal_sdk_rpc_contract",
+      "path_prefixes": ["backend/tests/contracts/test_gateway_modal_sdk_rpc_contract.py"],
+      "command": "cd backend && uv run pytest tests/contracts/test_gateway_modal_sdk_rpc_contract.py -q --tb=short"
+    },
+    {
+      "id": "backend.contracts.test_env_sync_contract",
+      "path_prefixes": ["backend/tests/contracts/test_env_sync_contract.py"],
+      "command": "cd backend && uv run pytest tests/contracts/test_env_sync_contract.py -q --tb=short"
+    },
+    {
+      "id": "backend.contracts.test_gitignore_schemathesis_artifacts",
+      "path_prefixes": ["backend/tests/contracts/test_gitignore_schemathesis_artifacts.py"],
+      "command": "cd backend && uv run pytest tests/contracts/test_gitignore_schemathesis_artifacts.py -q --tb=short"
+    },
+    {
+      "id": "backend.contracts.test_backend_ci_extra_includes_pact_python_contract",
+      "path_prefixes": [
+        "backend/pyproject.toml",
+        "backend/tests/contracts/test_backend_ci_extra_includes_pact_python_contract.py"
+      ],
+      "command": "cd backend && uv run pytest tests/contracts/test_backend_ci_extra_includes_pact_python_contract.py -q --tb=short"
+    },
+    {
+      "id": "backend.contracts.test_env_sync_github_actions_bundle",
+      "path_prefixes": ["backend/tests/contracts/test_env_sync_github_actions_bundle.py"],
+      "command": "cd backend && uv run pytest tests/contracts/test_env_sync_github_actions_bundle.py -q --tb=short"
+    },
+    {
+      "id": "backend.pact.test_gateway_embedding_http_consumer_pact",
+      "path_prefixes": ["backend/tests/pact/test_gateway_embedding_http_consumer_pact.py"],
+      "command": "cd backend && uv run pytest tests/pact/test_gateway_embedding_http_consumer_pact.py -q --tb=short"
+    },
+    {
+      "id": "backend.pact.test_gateway_modal_sdk_message_pact",
+      "path_prefixes": [
+        "backend/tests/pact/test_gateway_modal_sdk_message_pact.py",
+        "backend/tests/pact/modal_sdk_pact_payloads.py"
+      ],
+      "command": "cd backend && uv run pytest tests/pact/test_gateway_modal_sdk_message_pact.py -q --tb=short"
+    },
+    {
+      "id": "backend.pact.test_gateway_agent_consumer_pact",
+      "path_prefixes": ["backend/tests/pact/test_gateway_agent_consumer_pact.py"],
+      "command": "cd backend && uv run pytest tests/pact/test_gateway_agent_consumer_pact.py -q --tb=short"
+    },
+    {
+      "id": "backend.pact.test_modal_sdk_message_pact_provider_verify",
+      "path_prefixes": ["backend/tests/pact/test_modal_sdk_message_pact_provider_verify.py"],
+      "command": "cd backend && uv run pytest tests/pact/test_modal_sdk_message_pact_provider_verify.py -q --tb=short"
+    },
+    {
+      "id": "backend.pact.test_chat_gateway_provider_verify",
+      "path_prefixes": ["backend/tests/pact/test_chat_gateway_provider_verify.py"],
+      "command": "cd backend && uv run pytest tests/pact/test_chat_gateway_provider_verify.py -q --tb=short"
+    },
+    {
+      "id": "backend.pact.test_dm_api_provider_verify",
+      "path_prefixes": ["backend/tests/pact/test_dm_api_provider_verify.py"],
+      "command": "cd backend && uv run pytest tests/pact/test_dm_api_provider_verify.py -q --tb=short"
+    },
+    {
+      "id": "backend.pact.test_agent_provider_verify",
+      "path_prefixes": ["backend/tests/pact/test_agent_provider_verify.py"],
+      "command": "cd backend && uv run pytest tests/pact/test_agent_provider_verify.py -q --tb=short"
+    },
+    {
+      "id": "scraper.tests.conftest_contract_pact",
+      "path_prefixes": ["services/scraper/tests/conftest.py"],
+      "command": "cd services/scraper && PYTHONPATH=src pytest tests/pact/ tests/unit/test_embedding_client_modal_contract.py -q --tb=short"
+    },
+    {
+      "id": "scraper.pact.test_scraper_embedding_modal_message_pact",
+      "path_prefixes": [
+        "services/scraper/tests/pact/test_scraper_embedding_modal_message_pact.py",
+        "services/scraper/tests/scraper_modal_embedding_payloads.py"
+      ],
+      "command": "cd services/scraper && PYTHONPATH=src pytest tests/pact/test_scraper_embedding_modal_message_pact.py -q --tb=short"
+    },
+    {
+      "id": "scraper.pact.test_scraper_embedding_modal_message_pact_provider_verify",
+      "path_prefixes": ["services/scraper/tests/pact/test_scraper_embedding_modal_message_pact_provider_verify.py"],
+      "command": "cd services/scraper && PYTHONPATH=src pytest tests/pact/test_scraper_embedding_modal_message_pact_provider_verify.py -q --tb=short"
+    },
+    {
+      "id": "scraper.unit.test_embedding_client_modal_contract",
+      "path_prefixes": [
+        "services/scraper/tests/unit/test_embedding_client_modal_contract.py",
+        "services/scraper/src/vecinita_scraper/clients/embedding_client.py"
+      ],
+      "command": "cd services/scraper && PYTHONPATH=src pytest tests/unit/test_embedding_client_modal_contract.py -q --tb=short"
+    },
+    {
+      "id": "dm_api.contracts.test_dm_api_jobs_proxy_forwarding_contract",
+      "path_prefixes": ["services/data-management-api/tests/test_dm_api_jobs_proxy_forwarding_contract.py"],
+      "command": "cd backend && PYTHONPATH=../services/data-management-api/packages/service-clients:../services/data-management-api/packages/shared-schemas:../services/data-management-api/packages/shared-config:../services/data-management-api/apps/backend uv run pytest ../services/data-management-api/tests/test_dm_api_jobs_proxy_forwarding_contract.py -q --tb=short"
+    },
+    {
+      "id": "dm_api.contracts.test_dm_api_modal_rpc_contract",
+      "path_prefixes": ["services/data-management-api/tests/test_dm_api_modal_rpc_contract.py"],
+      "command": "cd backend && PYTHONPATH=../services/data-management-api/packages/service-clients:../services/data-management-api/packages/shared-schemas:../services/data-management-api/packages/shared-config:../services/data-management-api/apps/backend uv run pytest ../services/data-management-api/tests/test_dm_api_modal_rpc_contract.py -q --tb=short"
+    },
+    {
+      "id": "dm_api.pact.dm_api_jobs_proxy_scraper_consumer_pact",
+      "path_prefixes": ["services/data-management-api/tests/pact/dm_api_jobs_proxy_scraper_consumer_pact.py"],
+      "command": "cd backend && PYTHONPATH=../services/data-management-api/packages/service-clients:../services/data-management-api/packages/shared-schemas:../services/data-management-api/packages/shared-config:../services/data-management-api/apps/backend uv run pytest ../services/data-management-api/tests/pact/dm_api_jobs_proxy_scraper_consumer_pact.py -q --tb=short"
+    },
+    {
+      "id": "dm_service_clients.pact.test_dm_service_clients_modal_message_pact",
+      "path_prefixes": [
+        "services/data-management-api/packages/service-clients/tests/pact/test_dm_service_clients_modal_message_pact.py",
+        "services/data-management-api/packages/service-clients/tests/dm_modal_rpc_payloads.py"
+      ],
+      "command": "cd backend && PYTHONPATH=../services/data-management-api/packages/service-clients:../services/data-management-api/packages/shared-schemas:../services/data-management-api/packages/shared-config:../services/data-management-api/apps/backend uv run pytest ../services/data-management-api/packages/service-clients/tests/pact/test_dm_service_clients_modal_message_pact.py -q --tb=short"
+    },
+    {
+      "id": "dm_service_clients.pact.test_dm_service_clients_modal_message_pact_provider_verify",
+      "path_prefixes": [
+        "services/data-management-api/packages/service-clients/tests/pact/test_dm_service_clients_modal_message_pact_provider_verify.py"
+      ],
+      "command": "cd backend && PYTHONPATH=../services/data-management-api/packages/service-clients:../services/data-management-api/packages/shared-schemas:../services/data-management-api/packages/shared-config:../services/data-management-api/apps/backend uv run pytest ../services/data-management-api/packages/service-clients/tests/pact/test_dm_service_clients_modal_message_pact_provider_verify.py -q --tb=short"
+    },
+    {
+      "id": "frontend.pact.chat_gateway_pact",
+      "path_prefixes": [
+        "frontend/tests/pact/chat-gateway.pact.test.ts",
+        "frontend/tests/pact/pactSetup.ts",
+        "frontend/vitest.pact.config.ts"
+      ],
+      "command": "cd frontend && npx vitest run tests/pact/chat-gateway.pact.test.ts --config vitest.pact.config.ts"
+    },
+    {
+      "id": "dm_frontend.pact.dm_api_pact",
+      "path_prefixes": [
+        "apps/data-management-frontend/tests/pact/dm-api.pact.test.ts",
+        "apps/data-management-frontend/tests/pact/pactSetup.ts",
+        "apps/data-management-frontend/vitest.pact.config.ts"
+      ],
+      "command": "cd apps/data-management-frontend && npx vitest run tests/pact/dm-api.pact.test.ts --config vitest.pact.config.ts"
+    }
+  ]
+}

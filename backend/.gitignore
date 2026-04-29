@@ -18,6 +18,7 @@ htmlcov/
 *.pytest_cache/
 tests/pytest.log
 tests/__pycache__/
+pacts/
 
 # IDEs
 .vscode/
