@@ -13,8 +13,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	pkg-config && \
 	rm -rf /var/lib/apt/lists/*
 
-# Copy only what's needed for dependency installation
-COPY pyproject.toml ./
+# Copy manifests first so this layer invalidates when pins change (uv.lock + pyproject stay in sync in CI).
+# Installs still use the curated runtime list below (not full uv.lock export) to keep image size small for Render.
+COPY pyproject.toml uv.lock ./
 
 # Install dependencies to /install (NO EMBEDDING MODELS!)
 # Embeddings handled by separate embedding service - saves ~50MB+ memory

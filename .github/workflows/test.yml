@@ -65,6 +65,10 @@ jobs:
       uses: astral-sh/setup-uv@v8.0.0
       with:
         version: "latest"
+        enable-cache: true
+        cache-dependency-glob: |
+          backend/uv.lock
+          backend/pyproject.toml
 
     # [project.optional-dependencies].ci only (see TESTING_DOCUMENTATION.md: pact-python / pytest collection).
     - name: Install backend CI dependencies (locked; matches local uv)
@@ -518,9 +522,10 @@ jobs:
         PYTHONPATH: ${{ github.workspace }}/backend
         EMBEDDING_STRICT_STARTUP: 'false'
 
-  backend-schema:
+  # Schemathesis + TraceCov: one OpenAPI per pytest session (see Makefile test-schemathesis).
+  # Split into three parallel jobs for wall-clock; DM OpenAPI drift runs once on the gateway job.
+  backend-schema-gateway:
     runs-on: ubuntu-22.04
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
@@ -552,7 +557,7 @@ jobs:
         echo "REINDEX_TRIGGER_TOKEN=test-reindex-token" >> .env
         echo "REINDEX_SERVICE_URL=https://example.modal.run" >> .env
 
-    - name: Run backend schema tests
+    - name: Run gateway Schemathesis (TraceCov)
       working-directory: backend
       env:
         PYTHONPATH: ${{ github.workspace }}/backend
@@ -564,15 +569,8 @@ jobs:
         pytest tests/integration/test_api_schema_schemathesis.py -q \
           --tracecov-format=html,text \
           --tracecov-report-html-path=schema-coverage-gateway-pytest.html \
+          --tracecov-fail-under=100 \
           --junit-xml=schema-test-results-gateway.xml
-        pytest tests/integration/test_agent_api_schema_schemathesis.py -q \
-          --tracecov-format=html,text \
-          --tracecov-report-html-path=schema-coverage-agent-pytest.html \
-          --junit-xml=schema-test-results-agent.xml
-        pytest tests/integration/test_data_management_api_schema_schemathesis.py -q \
-          --tracecov-format=html,text \
-          --tracecov-report-html-path=schema-coverage-data-management-pytest.html \
-          --junit-xml=schema-test-results-data-management.xml
 
     - name: DM OpenAPI snapshot drift (SC-002)
       working-directory: ${{ github.workspace }}
@@ -580,18 +578,132 @@ jobs:
         DATA_MANAGEMENT_SCHEMA_URL: ${{ secrets.DATA_MANAGEMENT_SCHEMA_URL }}
       run: python3 scripts/dm_openapi_diff.py
 
-    - name: Upload backend schema artifacts
+    - name: Upload gateway schema artifacts
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: backend-schema-artifacts
+        name: backend-schema-gateway-artifacts
         path: |
           backend/schema-test-results-gateway.xml
-          backend/schema-test-results-agent.xml
-          backend/schema-test-results-data-management.xml
           backend/schema-coverage.html
           backend/schema-coverage-gateway-pytest.html
+          backend/schemathesis-report/schema-coverage-*.html
+        if-no-files-found: warn
+
+  backend-schema-agent:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        submodules: 'false'
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.10"
+        cache: 'pip'
+
+    - name: Install Python dependencies (lean CI)
+      working-directory: backend
+      run: |
+        python -m pip install --upgrade pip
+        pip install --no-cache-dir ".[ci]"
+
+    - name: Create .env file for schema tests
+      working-directory: backend
+      run: |
+        echo "DATABASE_URL=${{ secrets.DATABASE_URL || 'postgresql://test' }}" >> .env
+        echo "OLLAMA_BASE_URL=http://localhost:11434" >> .env
+        echo "OLLAMA_MODEL=gemma3" >> .env
+        echo "USE_LOCAL_EMBEDDINGS=true" >> .env
+        echo "EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2" >> .env
+        echo "EMBEDDING_SERVICE_AUTH_TOKEN=test-embed-token" >> .env
+        echo "EMBEDDING_STRICT_STARTUP=false" >> .env
+        echo "REINDEX_TRIGGER_TOKEN=test-reindex-token" >> .env
+        echo "REINDEX_SERVICE_URL=https://example.modal.run" >> .env
+
+    - name: Run agent Schemathesis (TraceCov)
+      working-directory: backend
+      env:
+        PYTHONPATH: ${{ github.workspace }}/backend
+        EMBEDDING_STRICT_STARTUP: 'false'
+        SCHEMATHESIS_HOOKS: tests.schemathesis_hooks
+        SCRAPER_API_KEYS: ${{ secrets.SCRAPER_API_KEYS }}
+        SCRAPER_SCHEMATHESIS_BEARER: ${{ secrets.SCRAPER_SCHEMATHESIS_BEARER }}
+      run: |
+        pytest tests/integration/test_agent_api_schema_schemathesis.py -q \
+          --tracecov-format=html,text \
+          --tracecov-report-html-path=schema-coverage-agent-pytest.html \
+          --tracecov-fail-under=100 \
+          --junit-xml=schema-test-results-agent.xml
+
+    - name: Upload agent schema artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-schema-agent-artifacts
+        path: |
+          backend/schema-test-results-agent.xml
           backend/schema-coverage-agent-pytest.html
+          backend/schemathesis-report/schema-coverage-*.html
+        if-no-files-found: warn
+
+  backend-schema-data-management:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        submodules: 'false'
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.10"
+        cache: 'pip'
+
+    - name: Install Python dependencies (lean CI)
+      working-directory: backend
+      run: |
+        python -m pip install --upgrade pip
+        pip install --no-cache-dir ".[ci]"
+
+    - name: Create .env file for schema tests
+      working-directory: backend
+      run: |
+        echo "DATABASE_URL=${{ secrets.DATABASE_URL || 'postgresql://test' }}" >> .env
+        echo "OLLAMA_BASE_URL=http://localhost:11434" >> .env
+        echo "OLLAMA_MODEL=gemma3" >> .env
+        echo "USE_LOCAL_EMBEDDINGS=true" >> .env
+        echo "EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2" >> .env
+        echo "EMBEDDING_SERVICE_AUTH_TOKEN=test-embed-token" >> .env
+        echo "EMBEDDING_STRICT_STARTUP=false" >> .env
+        echo "REINDEX_TRIGGER_TOKEN=test-reindex-token" >> .env
+        echo "REINDEX_SERVICE_URL=https://example.modal.run" >> .env
+
+    - name: Run data-management Schemathesis (TraceCov)
+      working-directory: backend
+      env:
+        PYTHONPATH: ${{ github.workspace }}/backend
+        EMBEDDING_STRICT_STARTUP: 'false'
+        SCHEMATHESIS_HOOKS: tests.schemathesis_hooks
+        SCRAPER_API_KEYS: ${{ secrets.SCRAPER_API_KEYS }}
+        SCRAPER_SCHEMATHESIS_BEARER: ${{ secrets.SCRAPER_SCHEMATHESIS_BEARER }}
+      run: |
+        pytest tests/integration/test_data_management_api_schema_schemathesis.py -q \
+          --tracecov-format=html,text \
+          --tracecov-report-html-path=schema-coverage-data-management-pytest.html \
+          --tracecov-fail-under=100 \
+          --junit-xml=schema-test-results-data-management.xml
+
+    - name: Upload data-management schema artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-schema-data-management-artifacts
+        path: |
+          backend/schema-test-results-data-management.xml
           backend/schema-coverage-data-management-pytest.html
           backend/schemathesis-report/schema-coverage-*.html
         if-no-files-found: warn

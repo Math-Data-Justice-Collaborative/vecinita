@@ -17,7 +17,7 @@
 	typecheck-scraper \
 	test-integration-gateway-fast test-integration-gateway-full test-integration-gateway \
 	test-all-integration test-cross-integration test-cross-e2e \
-	test-schemathesis test-schemathesis-gateway test-schemathesis-gateway-stateful test-schemathesis-agent test-schemathesis-data-management test-schemathesis-cli test-schemathesis-cli-agent \
+	test-schemathesis test-schemathesis-parallel test-schemathesis-gateway test-schemathesis-gateway-stateful test-schemathesis-agent test-schemathesis-data-management test-schemathesis-cli test-schemathesis-cli-agent \
 	test-fr005-schemathesis-baseline dm-openapi-diff pact-verify-providers \
 	scraper-run scraper-run-verbose scraper-run-verbos scraper-run-clean scraper-validate-postgres scraper-pull \
 	active-crawl active-crawl-live active-crawl-validate active-crawl-pipeline \
@@ -112,7 +112,8 @@ help:
 	@echo "  make test-frontend-e2e                   Run frontend Playwright tests"
 	@echo ""
 	@echo "Schemathesis (OpenAPI contract)"
-	@echo "  make test-schemathesis                   Run gateway + agent + data-management Schemathesis pytest suites (TraceCov per suite)"
+	@echo "  make test-schemathesis                   Run gateway + agent + data-management Schemathesis pytest suites (TraceCov per suite, sequential)"
+	@echo "  make test-schemathesis-parallel          Same three suites via make -j3 (high CPU/RAM; mirrors CI parallelism)"
 	@echo "  make test-schemathesis-gateway           Gateway ASGI schema tests (mocked upstreams)"
 	@echo "  make test-schemathesis-gateway-stateful  Gateway job stateful Schemathesis (pytest; mocked)"
 	@echo "  make test-schemathesis-agent             Agent ASGI schema tests (mocked LLM/embeddings)"
@@ -719,6 +720,11 @@ test-schemathesis-data-management:
 		--tracecov-report-html-path=schema-coverage-data-management-pytest.html \
 		--tracecov-fail-under=100 \
 		--junit-xml=schema-test-results-data-management.xml
+
+# CI runs gateway / agent / data-management schema jobs in parallel; locally this optional target
+# fans out three processes—use when you have cores and RAM to spare.
+test-schemathesis-parallel:
+	@$(MAKE) -j3 test-schemathesis-gateway test-schemathesis-agent test-schemathesis-data-management
 
 test-schemathesis:
 	@# One OpenAPI per TraceCov session (see tests/integration/conftest.py); run suites separately.
