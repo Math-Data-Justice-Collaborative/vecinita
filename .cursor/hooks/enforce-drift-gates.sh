@@ -94,29 +94,31 @@ def touched(prefix: str) -> bool:
 checks: list[str] = []
 
 schema_markers = (
+    "apis/gateway/openapi.json",
     "backend/openapi.json",
+    "apis/gateway/src/api",
     "backend/src/api",
     "backend/src/routes",
     "backend/src/models",
     "packages/openapi-clients",
     "scripts/openapi_codegen.sh",
-    "services/data-management-api/apps/backend",
-    "services/data-management-api/packages/service-clients",
+    "apis/data-management-api/apps/backend",
+    "apis/data-management-api/packages/service-clients",
 )
 if any(touched(marker) for marker in schema_markers):
     checks.append("openapi-codegen-verify")
 
-if touched("backend"):
+if touched("apis/gateway") or touched("apis/agent") or touched("backend"):
     checks.extend(["lint-backend", "typecheck-backend"])
-if touched("frontend"):
+if touched("frontends/chat"):
     checks.extend(["lint-frontend", "typecheck-frontend"])
-if touched("apps/data-management-frontend"):
+if touched("frontends/data-management"):
     checks.append("lint-data-management-frontend")
-if touched("services/scraper"):
+if touched("modal-apps/scraper"):
     checks.extend(["lint-scraper", "typecheck-scraper"])
-if touched("services/embedding-modal"):
+if touched("modal-apps/embedding-modal"):
     checks.append("lint-embedding-modal")
-if touched("services/model-modal"):
+if touched("modal-apps/model-modal"):
     checks.append("lint-model-modal")
 
 for check in checks:

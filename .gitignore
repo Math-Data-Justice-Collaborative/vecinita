@@ -41,9 +41,11 @@ env/
 env.bak/
 venv.bak/
 
-# Local backend build outputs
+# Local gateway build outputs (legacy backend/ paths kept until fully purged)
 backend/lib/
 backend/lib64/
+apis/gateway/lib/
+apis/gateway/lib64/
 
 # IDE/editor
 .idea/
@@ -102,14 +104,21 @@ data/*.txt
 !data/README.md
 docs/archive/
 backend/data/output/
+apis/gateway/data/output/
 .last-run.json
 *.pdf
 
 # Runtime state files (embedding service, model selection)
 backend/src/embedding_service/selection.json
 backend/src/agent/data/model_selection.json
+apis/gateway/src/embedding_service/selection.json
+apis/agent/src/agent/data/model_selection.json
 backend/integration-test-results.local-ci.xml
 backend/schema-test-results.local-ci.xml
 backend/test-results.local-ci.xml
 backend/schemathesis-report/junit-gateway.xml
+apis/gateway/integration-test-results.local-ci.xml
+apis/gateway/schema-test-results.local-ci.xml
+apis/gateway/test-results.local-ci.xml
+apis/gateway/schemathesis-report/junit-gateway.xml
 .cursor/mcp.json

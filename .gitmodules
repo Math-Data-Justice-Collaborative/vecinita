@@ -8,7 +8,7 @@
 	url = https://github.com/Math-Data-Justice-Collaborative/vecinita-data-management-frontend.git
 	branch = main
 
-[submodule "services/data-management-api"]
+[submodule "apis/data-management-api"]
 	path = apis/data-management-api
 	url = https://github.com/Math-Data-Justice-Collaborative/vecinita-data-management.git
 	branch = main
