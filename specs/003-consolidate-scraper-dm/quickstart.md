@@ -31,7 +31,7 @@ Expect **not** `500` when tier is healthy (list may be empty with **200**).
 
 **After** removal: re-run the same suite; failures block merge.
 
-Suggested location for fixtures: `services/data-management-api/tests/parity/` (create during
+Suggested location for fixtures: `apis/data-management-api/tests/parity/` (create during
 implementation).
 
 ## 3. Live Schemathesis (errors + warnings)

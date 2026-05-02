@@ -9,6 +9,27 @@
 
 **Vecinita** is a bilingual (English/Spanish) community Q&A assistant powered by LangGraph, combining vector database search, FAQ lookup, and web search to provide accurate answers with source attribution.
 
+## Monorepo layout refactor (feature 018)
+
+The repo is moving to a **strict canonical tree** (`apis/`, `modal-apps/`, `frontends/`, `packages/`, `clients/apis/`, …). Until `git mv` phases finish, **legacy paths** below remain the live code locations.
+
+| What you need | Where to look |
+|-----------------|---------------|
+| **Legacy → canonical map (single source of truth)** | [`specs/018-strict-monorepo-layout/artifacts/path-mapping.md`](./specs/018-strict-monorepo-layout/artifacts/path-mapping.md) |
+| **Implementation plan** | [`specs/018-strict-monorepo-layout/plan.md`](./specs/018-strict-monorepo-layout/plan.md) |
+| **One-page target tree + “where does X live?”** | [`docs/monorepo-layout.md`](./docs/monorepo-layout.md) |
+
+**Target layout (end state):**
+
+```text
+apis/{gateway,agent,data-management-api}/
+modal-apps/{scraper,embedding-modal,model-modal}/
+frontends/{chat,data-management}/
+packages/python/db/          # shared API DB helpers (FR-004)
+clients/apis/{gateway,agent,data-management-api}/
+contracts/  infra/  scripts/  specs/  Makefile  .env.local.example  render.yaml
+```
+
 ## Architecture
 
 Vecinita uses a **microservice architecture** with agent, gateway, model, embedding, scraper, and frontend services:
@@ -24,6 +45,8 @@ Vecinita uses a **microservice architecture** with agent, gateway, model, embedd
 All services communicate via HTTP and can be deployed on Render's free tier ($0/month).
 
 ## Project Structure
+
+**Note:** This section describes the **current** on-disk layout (`backend/`, `frontends/chat/`, `modal-apps/`, `services/*`, …). For the **canonical target** and path-map `row_id`s, see [`docs/monorepo-layout.md`](./docs/monorepo-layout.md).
 
 This is a monorepo with separate backend and frontend:
 
@@ -46,7 +69,7 @@ vecinita/
 │   │   └── data_scrape_load.sh  # Data pipeline orchestrator
 │   └── tests/                   # 108 backend tests (pytest)
 │
-├── frontend/                     # React frontend (Vite + Tailwind)
+├── frontends/chat/               # React chat UI (Vite + Tailwind; git submodule)
 │   ├── src/
 │   │   ├── App.jsx              # Main app component
 │   │   └── components/
@@ -204,7 +227,7 @@ When using Ollama, `OLLAMA_MODEL` defaults to **`gemma3`** in code and templates
 #### Frontend (React)
 
 ```bash
-cd frontend
+cd frontends/chat
 
 # Install dependencies
 npm install
@@ -328,8 +351,8 @@ cd backend
 uv sync
 uv run pytest -q
 
-# frontend
-cd ../frontend
+# chat frontend
+cd ../frontends/chat
 npm install
 npm run test -- --run
 
@@ -347,7 +370,7 @@ Test coverage:
 ### Frontend Tests
 
 ```bash
-cd frontend
+cd frontends/chat
 npm run test                     # Unit tests (Vitest)
 npm run test:coverage            # Coverage report
 npm run test:e2e                 # E2E tests (Playwright)
@@ -403,7 +426,7 @@ The deploy workflow triggers only after the `Tests` workflow completes successfu
 ### Getting Started
 - **[QUICKSTART.md](docs/guides/QUICKSTART.md)** - Complete setup guide (Docker + Local development)
 - **[backend/README.md](backend/README.md)** - Backend API and tools documentation
-- **[frontend/README.md](frontend/README.md)** - Frontend components and testing
+- **[frontends/chat/README.md](frontends/chat/README.md)** - Chat frontend components and testing
 
 ### Deployment
 - Service repositories own their deploy documentation and workflow details.
@@ -513,7 +536,7 @@ EMBEDDING_UPSTREAM_URL=http://embedding-service:8001      # Embedding upstream U
 
 1. Create a feature branch from `main`
 2. Make changes with tests
-3. Run test suites: `cd backend && uv run pytest` and `cd frontend && npm run test`
+3. Run test suites: `cd backend && uv run pytest` and `cd frontends/chat && npm run test`
 4. Submit PR with clear description
 
 ## License

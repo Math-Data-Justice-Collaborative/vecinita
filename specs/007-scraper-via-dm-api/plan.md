@@ -1,7 +1,7 @@
 # Implementation Plan: Modal function calls + API routing (DM stack & gateway/agent)
 
 **Branch**: `008-scraper-via-dm-api` | **Date**: 2026-04-22 | **Spec**: [spec.md](./spec.md)  
-**Input**: Base spec in `specs/007-scraper-via-dm-api/spec.md`. Planning addendum: use **Modal function invocation** (`Function.from_name` + `.remote()` / `.spawn()` with `FunctionCall` polling where needed) from **`services/data-management-api/`** for **scraper**, **embedding**, and **model** paths used by **ingest** and related DM operations—**not** public `*.modal.run` HTTP entrypoints for those call paths when Modal is the target. **Contracts and integration** between the DM API and Modal-deployed apps **must have automated tests** (mocks/stubs for unit speed; optional live smoke behind flags). **Gateway** (`backend/` gateway surface) continues to call the **agent** service over HTTP; the **agent** must **only** use Modal **function** calls for Modal-backed work (**no** direct Modal web endpoints for those responsibilities). Frontends: **data-management** → DM API only; **main** `frontend/` → gateway only (per spec FR-001/FR-002).
+**Input**: Base spec in `specs/007-scraper-via-dm-api/spec.md`. Planning addendum: use **Modal function invocation** (`Function.from_name` + `.remote()` / `.spawn()` with `FunctionCall` polling where needed) from **`apis/data-management-api/`** for **scraper**, **embedding**, and **model** paths used by **ingest** and related DM operations—**not** public `*.modal.run` HTTP entrypoints for those call paths when Modal is the target. **Contracts and integration** between the DM API and Modal-deployed apps **must have automated tests** (mocks/stubs for unit speed; optional live smoke behind flags). **Gateway** (`backend/` gateway surface) continues to call the **agent** service over HTTP; the **agent** must **only** use Modal **function** calls for Modal-backed work (**no** direct Modal web endpoints for those responsibilities). Frontends: **data-management** → DM API only; **main** `frontend/` → gateway only (per spec FR-001/FR-002).
 
 ## Summary
 
@@ -15,7 +15,7 @@ Shift **server-side** integration so **data-management-api** orchestrates scrape
 
 ## Technical Context
 
-**Language/Version**: Python 3.11+ for `services/data-management-api/`, gateway, and agent (`backend/`); TypeScript for `frontend/` and `apps/data-management-frontend/`.  
+**Language/Version**: Python 3.11+ for `apis/data-management-api/`, gateway, and agent (`backend/`); TypeScript for `frontend/` and `apps/data-management-frontend/`.  
 **Primary Dependencies**: FastAPI, Pydantic v2, **modal** SDK (where function invocation runs), httpx, existing `service_clients` / `shared-schemas` in DM API; gateway `src/services/modal/invoker.py` as reference implementation.  
 **Storage**: Unchanged for this plan slice (Postgres / gateway persistence as today); focus is transport and invocation.  
 **Testing**: **pytest** + `pytest-asyncio` in DM API packages; **monkeypatch** / fakes for `modal.Function`, `FunctionCall`; existing **Schemathesis** norms for HTTP OpenAPI (`TESTING_DOCUMENTATION.md`, `backend/schemathesis.toml`); optional **live** Modal smoke gated on tokens (non-PR).  
@@ -55,7 +55,7 @@ specs/007-scraper-via-dm-api/
 ### Source code (implementation targets)
 
 ```text
-services/data-management-api/
+apis/data-management-api/
   packages/service-clients/          # Modal invoker + HTTP clients (landed: modal_invoker.py)
   apps/backend/                       # FastAPI routers (submodule may be sparse—wire ScraperClient here when present)
   packages/shared-config/            # MODAL_* settings fields (landed)
@@ -114,4 +114,4 @@ No unjustified constitution violations.
 
 ## Phase 2 (task generation)
 
-Use `/speckit.tasks` to break down: DM API Modal adapter, replace direct Modal HTTP in service-clients, agent/gateway policy alignment, frontend env audits, CI targets, documentation updates for `services/data-management-api/docs/architecture.md` (currently describes direct frontend → Modal; must match spec).
+Use `/speckit.tasks` to break down: DM API Modal adapter, replace direct Modal HTTP in service-clients, agent/gateway policy alignment, frontend env audits, CI targets, documentation updates for `apis/data-management-api/docs/architecture.md` (currently describes direct frontend → Modal; must match spec).

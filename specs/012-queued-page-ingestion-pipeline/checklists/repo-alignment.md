@@ -12,7 +12,7 @@
 
 ## Plan ↔ repository paths
 
-- [x] CHK004 Does every **primary touchpoint** under **Plan §Source code** resolve to an existing path today (`backend/src/api/router_modal_jobs.py`, `router_scraper_pipeline_ingest.py`, `main.py`, `backend/src/services/modal/invoker.py`, `modal_scraper_pipeline_persist.py`, `services/scraper/.../gateway_http.py`, `render.yaml`, `docs/deployment/*.md`)? [Completeness, Plan §Source code]
+- [x] CHK004 Does every **primary touchpoint** under **Plan §Source code** resolve to an existing path today (`backend/src/api/router_modal_jobs.py`, `router_scraper_pipeline_ingest.py`, `main.py`, `backend/src/services/modal/invoker.py`, `modal_scraper_pipeline_persist.py`, `modal-apps/scraper/.../gateway_http.py`, `render.yaml`, `docs/deployment/*.md`)? [Completeness, Plan §Source code]
 - [x] CHK005 Are **new** modules introduced only in **`tasks.md`** (e.g. **`pipeline_stage.py`**, **`chunking_defaults.py`**, new test files) either reflected in **`plan.md`** “Source code” tree or explicitly called out as *net-new in implementation* so the plan is not read as exhaustive? [Gap, tasks T007, T037, Plan §Source code]
 - [x] CHK006 Does the plan’s reference to **`TESTING_DOCUMENTATION.md`** at repo root remain accurate (file exists, name unchanged)? [Consistency, Plan §Technical Context]
 

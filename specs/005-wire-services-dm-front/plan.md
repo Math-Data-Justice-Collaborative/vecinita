@@ -61,7 +61,7 @@ apps/data-management-frontend/
   tests/e2e/                          # existing Playwright-style tests — extend
 
 backend/                              # gateway + agent — Schemathesis + Pact provider
-services/data-management-api/         # DM API — Schemathesis + Pact provider + shared-schemas
+apis/data-management-api/         # DM API — Schemathesis + Pact provider + shared-schemas
 
 .env.local.example
 TESTING_DOCUMENTATION.md              # normative CI matrix

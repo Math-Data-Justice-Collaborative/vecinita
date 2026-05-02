@@ -19,7 +19,7 @@
      - `specs/005-wire-services-dm-front/artifacts/dm-openapi.snapshot.json`
      - `openapitools.json`
    - **`uv.lock` files (every committed copy)**  
-     `backend/uv.lock`, `services/scraper/uv.lock`, `services/data-management-api/packages/shared-config/uv.lock`, `tests/uv.lock`, `services/model-modal/uv.lock`, `services/embedding-modal/uv.lock`
+     `backend/uv.lock`, `modal-apps/scraper/uv.lock`, `apis/data-management-api/packages/shared-config/uv.lock`, `tests/uv.lock`, `modal-apps/model-modal/uv.lock`, `modal-apps/embedding-modal/uv.lock`
    - **`package-lock.json` files (every committed copy)**  
      `frontend/package-lock.json`, `apps/data-management-frontend/package-lock.json`, `website/package-lock.json`  
      *(There is no root `package-lock.json` today; add it here if one is introduced.)*

@@ -13,7 +13,7 @@ Logical names below tie runtime roles to template variables (see root `.env.loca
 | **gateway** | Chat browser → gateway base URL / Vite proxy | `VITE_GATEWAY_URL`, `VITE_BACKEND_URL`, `VITE_GATEWAY_PROXY_TARGET` |
 | **agent** | Gateway process → LangGraph agent HTTP | `AGENT_SERVICE_URL`; Render may use `fromService` in `render.yaml` |
 | **dm_api** | DM SPA → data-management scraper HTTP API | `VITE_VECINITA_SCRAPER_API_URL`; optional `VITE_VECINITA_GATEWAY_URL` when modal-jobs flag is on |
-| **dm_frontend** | DM SPA dev origin (CORS / local smoke) | Documented dev origin (e.g. `http://localhost:5174`); align with CORS allowlists in `services/data-management-api/README.md` |
+| **dm_frontend** | DM SPA dev origin (CORS / local smoke) | Documented dev origin (e.g. `http://localhost:5174`); align with CORS allowlists in `apis/data-management-api/README.md` |
 
 ## Variable roles
 

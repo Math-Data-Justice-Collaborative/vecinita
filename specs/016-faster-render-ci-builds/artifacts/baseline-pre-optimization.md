@@ -83,7 +83,7 @@ Per root **`render.yaml`**, only **`vecinita-agent`** uses **`dockerfilePath: ./
 | Root `render.yaml` | vecinita-gateway | `./backend/Dockerfile.gateway` | `./backend` | Same context as agent; no shrink without splitting images. |
 | Root `render.yaml` | vecinita-frontend | `./frontend/Dockerfile` | `./frontend` | Minimal. |
 | Root `render.yaml` | vecinita-data-management-frontend-v1 | `./apps/data-management-frontend/Dockerfile` | `./apps/data-management-frontend` | Minimal. |
-| Root `render.yaml` | vecinita-data-management-api-v1 | `./services/scraper/Dockerfile` | `./services/scraper` | Minimal. |
+| Root `render.yaml` | vecinita-data-management-api-v1 | `./modal-apps/scraper/Dockerfile` | `./modal-apps/scraper` | Minimal. |
 | `apps/data-management-frontend/render.yaml` | vecinita-data-management-frontend-v1 | `./apps/frontend/Dockerfile` | `./apps/frontend` | **Inconsistent** with repo tree (`apps/frontend/` absent; DM UI lives under `apps/data-management-frontend/`). **No path change in US2** — update this blueprint deliberately in a follow-up if it is still used. |
 
 **Conclusion:** No `dockerContext` shrink in US2 beyond **`backend/.dockerignore`** reducing bytes sent for `./backend` builds.

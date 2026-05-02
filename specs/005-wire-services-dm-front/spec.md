@@ -3,7 +3,7 @@
 **Feature Branch**: `005-wire-services-dm-front`  
 **Created**: 2026-04-21  
 **Status**: Draft  
-**Input**: User description: wire the main chat `frontend/` to the gateway and agent services using values defined in the unified root `.env` (and documented templates such as `.env.local.example`); connect `apps/data-management-frontend` to `services/data-management-api` so runtime configuration, request/response models, and API contracts stay aligned.
+**Input**: User description: wire the main chat `frontend/` to the gateway and agent services using values defined in the unified root `.env` (and documented templates such as `.env.local.example`); connect `apps/data-management-frontend` to `apis/data-management-api` so runtime configuration, request/response models, and API contracts stay aligned.
 
 ## Clarifications
 
@@ -39,7 +39,7 @@ As a developer running the chat stack locally or against Render, I want `VITE_GA
 
 ### User Story 2 — Data management UI talks to the bundled API (Priority: P1)
 
-As an operator using the data-management dashboard, I want `VITE_VECINITA_SCRAPER_API_URL` (and optional `VITE_VECINITA_GATEWAY_URL` for gateway modal jobs) to target the process started from `services/data-management-api` so scrape job CRUD and health checks hit the correct service.
+As an operator using the data-management dashboard, I want `VITE_VECINITA_SCRAPER_API_URL` (and optional `VITE_VECINITA_GATEWAY_URL` for gateway modal jobs) to target the process started from `apis/data-management-api` so scrape job CRUD and health checks hit the correct service.
 
 **Why this priority**: Misaligned URLs produce silent failures or wrong backends.
 
@@ -76,7 +76,7 @@ As a maintainer, I want a repeatable way to keep TypeScript client shapes and Py
 - **CI cost**: Default PR checks must not require a full Docker Compose gateway+agent+DM stack; real-stack jobs are allowed to be slower and run outside the default PR merge path.
 - **Pact workflow**: Broker vs **local pact file** publishing must be documented so contributors know how to run consumer tests offline and how CI publishes or verifies pacts without leaking secrets.
 - **Two consumers**: Chat (`frontend/`) and DM (`apps/data-management-frontend/`) both run consumer contracts; documentation MUST state whether they share one **Pact broker** and naming/tag strategy or use **isolated** flows so pactfiles and provider verifications do not collide.
-- **CORS documentation location**: CORS allowlist guidance for the DM API MUST live in **existing** published docs (prefer `services/data-management-api/README.md` or root env template comments); avoid requiring new files under the submodule unless they already exist in the tree.
+- **CORS documentation location**: CORS allowlist guidance for the DM API MUST live in **existing** published docs (prefer `apis/data-management-api/README.md` or root env template comments); avoid requiring new files under the submodule unless they already exist in the tree.
 
 ## Requirements *(mandatory)*
 
@@ -101,7 +101,7 @@ As a maintainer, I want a repeatable way to keep TypeScript client shapes and Py
 ### Assumptions
 
 - Operators use template files (`.env.example`, `.env.local.example`) for documentation; real `.env` is gitignored and not copied into specs.
-- `services/data-management-api` continues to expose the scraper-compatible HTTP surface expected by the DM frontend unless a migration is explicitly specified in a follow-up spec.
+- `apis/data-management-api` continues to expose the scraper-compatible HTTP surface expected by the DM frontend unless a migration is explicitly specified in a follow-up spec.
 
 ## Success Criteria *(mandatory)*
 
