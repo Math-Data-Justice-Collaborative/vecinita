@@ -16,10 +16,10 @@ on:
       - "scripts/env_sync.py"
       - "scripts/github/validate_render_env.py"
       - "scripts/github/validate_render_env_parity.py"
-      - "backend/tests/contracts/test_env_sync_github_actions_bundle.py"
+      - "apis/gateway/tests/contracts/test_env_sync_github_actions_bundle.py"
       - "services/**/config.py"
       - "services/**/shared_config/**"
-      - "backend/src/utils/render_env_contract.py"
+      - "apis/gateway/src/utils/render_env_contract.py"
   pull_request:
     branches: [main, develop]
     paths:
@@ -32,10 +32,10 @@ on:
       - "scripts/env_sync.py"
       - "scripts/github/validate_render_env.py"
       - "scripts/github/validate_render_env_parity.py"
-      - "backend/tests/contracts/test_env_sync_github_actions_bundle.py"
+      - "apis/gateway/tests/contracts/test_env_sync_github_actions_bundle.py"
       - "services/**/config.py"
       - "services/**/shared_config/**"
-      - "backend/src/utils/render_env_contract.py"
+      - "apis/gateway/src/utils/render_env_contract.py"
   workflow_dispatch:
 
 jobs:
@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend
+        working-directory: apis/gateway
 
     steps:
       - uses: actions/checkout@v5

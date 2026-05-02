@@ -8,12 +8,13 @@ on:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
-      - "backend/**"
-      - "frontend/**"
-      - "apps/data-management-frontend/**"
-      - "services/data-management-api/packages/**"
-      - "services/data-management-api/Dockerfile"
-      - "services/scraper/**"
+      - "apis/gateway/**"
+      - "apis/agent/**"
+      - "frontends/chat/**"
+      - "frontends/data-management/**"
+      - "apis/data-management-api/packages/**"
+      - "apis/data-management-api/Dockerfile"
+      - "modal-apps/scraper/**"
       - "render.yaml"
       - "render.staging.yaml"
       - ".github/workflows/render-deploy.yml"
@@ -21,12 +22,13 @@ on:
   push:
     branches: [main]
     paths:
-      - "backend/**"
-      - "frontend/**"
-      - "apps/data-management-frontend/**"
-      - "services/data-management-api/packages/**"
-      - "services/data-management-api/Dockerfile"
-      - "services/scraper/**"
+      - "apis/gateway/**"
+      - "apis/agent/**"
+      - "frontends/chat/**"
+      - "frontends/data-management/**"
+      - "apis/data-management-api/packages/**"
+      - "apis/data-management-api/Dockerfile"
+      - "modal-apps/scraper/**"
       - "render.yaml"
       - ".github/workflows/render-deploy.yml"
       - ".github/workflows/render-post-deploy.yml"
@@ -46,7 +48,7 @@ jobs:
           submodules: false
 
       - name: Checkout contract test submodules
-        run: git submodule update --init --depth 1 services/embedding-modal services/model-modal
+        run: git submodule update --init --depth 1 modal-apps/embedding-modal modal-apps/model-modal
 
       - name: Validate production Render env contract
         run: python3 scripts/github/validate_render_env.py .env.prod.render
@@ -66,25 +68,25 @@ jobs:
           version: "latest"
 
       - name: Install backend CI dependencies (locked; matches local uv)
-        working-directory: backend
+        working-directory: apis/gateway
         run: uv sync --frozen --extra ci
 
       - name: Lint backend (Ruff)
-        working-directory: backend
+        working-directory: apis/gateway
         run: uv run ruff check src tests
 
       - name: Check backend formatting (Black)
-        working-directory: backend
+        working-directory: apis/gateway
         run: uv run black --check src tests scripts
 
       - name: Type check backend (mypy)
-        working-directory: backend
-        run: uv run mypy src
+        working-directory: apis/gateway
+        run: uv run python -m mypy src
 
       - name: Run backend fast tests (non-LLM)
-        working-directory: backend
+        working-directory: apis/gateway
         env:
-          PYTHONPATH: ${{ github.workspace }}/backend
+          PYTHONPATH: ${{ github.workspace }}/apis/gateway
           EMBEDDING_STRICT_STARTUP: 'false'
         run: |
           cat > .env <<'EOF'
@@ -109,33 +111,33 @@ jobs:
           submodules: false
 
       - name: Checkout frontend submodule
-        run: git submodule update --init --depth 1 frontend
+        run: git submodule update --init --depth 1 frontends/chat
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: frontends/chat/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: frontend
+        working-directory: frontends/chat
         run: npm ci
 
       - name: Lint frontend
-        working-directory: frontend
+        working-directory: frontends/chat
         run: npm run lint -- --quiet
 
       - name: Check frontend formatting (Prettier)
-        working-directory: frontend
+        working-directory: frontends/chat
         run: npm run format
 
       - name: Type check frontend
-        working-directory: frontend
+        working-directory: frontends/chat
         run: npm run typecheck
 
       - name: Run frontend unit tests with coverage
-        working-directory: frontend
+        working-directory: frontends/chat
         run: npm run test:coverage:unit
 
   deploy-staging:
