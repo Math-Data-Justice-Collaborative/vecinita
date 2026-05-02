@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Sync vecinita-scraper (services/scraper) with origin/main using rebase + tags.
+# Sync vecinita-scraper (modal-apps/scraper) with origin/main using rebase + tags.
 # Use this when VS Code / `git pull --tags origin main` fails with:
 #   fatal: Not possible to fast-forward, aborting.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SC="${ROOT}/services/scraper"
+SC="${ROOT}/modal-apps/scraper"
 
 if [[ ! -f "${SC}/.git" ]] && [[ ! -d "${SC}/.git" ]]; then
   echo "Expected git checkout at ${SC}" >&2

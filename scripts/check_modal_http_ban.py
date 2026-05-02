@@ -32,7 +32,7 @@ ALLOWLIST_FILE = REPO_ROOT / "config" / "modal_http_ban_allowlist_paths.txt"
 DEFAULT_ROOTS = (
     "backend",
     "services",
-    "frontend",
+    "frontends",
     "apps",
     "packages",
     "scripts",
@@ -60,7 +60,7 @@ RG_NEGATED_GLOBS = (
     "!**/packages/openapi-clients/**",
     "!**/backend/tests/**",
     "!**/services/**/tests/**",
-    "!**/frontend/tests/**",
+    "!**/frontends/**/tests/**",
     "!**/apps/**/tests/**",
     "!**/*.test.ts",
     "!**/*.test.tsx",
