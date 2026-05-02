@@ -1,9 +1,9 @@
 FROM node:20-alpine AS builder
 
 WORKDIR /app
-COPY apps/data-management-frontend/package.json apps/data-management-frontend/package-lock.json ./
+COPY frontends/data-management/package.json frontends/data-management/package-lock.json ./
 RUN npm ci
-COPY apps/data-management-frontend .
+COPY frontends/data-management .
 RUN npm run build
 
 FROM node:20-alpine
