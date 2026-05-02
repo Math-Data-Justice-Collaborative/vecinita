@@ -18,9 +18,11 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-BACKEND_ROOT = REPO_ROOT / "backend"
-if str(BACKEND_ROOT) not in sys.path:
-    sys.path.insert(0, str(BACKEND_ROOT))
+_GATEWAY = REPO_ROOT / "apis" / "gateway"
+_LEGACY = REPO_ROOT / "backend"
+PY_ROOT = _GATEWAY if (_GATEWAY / "src").is_dir() else _LEGACY
+if str(PY_ROOT) not in sys.path:
+    sys.path.insert(0, str(PY_ROOT))
 
 from src.utils.render_env_contract import parse_env_file  # noqa: E402
 
