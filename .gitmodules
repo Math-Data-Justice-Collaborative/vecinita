@@ -1,29 +1,29 @@
-[submodule "frontend"]
-	path = frontend
+[submodule "frontends/chat"]
+	path = frontends/chat
 	url = https://github.com/Math-Data-Justice-Collaborative/Vecinitafrontend.git
 	branch = dev
 
-[submodule "apps/data-management-frontend"]
-	path = apps/data-management-frontend
+[submodule "frontends/data-management"]
+	path = frontends/data-management
 	url = https://github.com/Math-Data-Justice-Collaborative/vecinita-data-management-frontend.git
 	branch = main
 
 [submodule "services/data-management-api"]
-	path = services/data-management-api
+	path = apis/data-management-api
 	url = https://github.com/Math-Data-Justice-Collaborative/vecinita-data-management.git
 	branch = main
 
-[submodule "services/scraper"]
-	path = services/scraper
+[submodule "modal-apps/scraper"]
+	path = modal-apps/scraper
 	url = https://github.com/Math-Data-Justice-Collaborative/vecinita-scraper.git
 	branch = main
 
-[submodule "services/embedding-modal"]
-	path = services/embedding-modal
+[submodule "modal-apps/embedding-modal"]
+	path = modal-apps/embedding-modal
 	url = https://github.com/Math-Data-Justice-Collaborative/vecinita-embedding.git
 	branch = main
 
-[submodule "services/model-modal"]
-	path = services/model-modal
+[submodule "modal-apps/model-modal"]
+	path = modal-apps/model-modal
 	url = https://github.com/Math-Data-Justice-Collaborative/vecinita-model.git
 	branch = main
