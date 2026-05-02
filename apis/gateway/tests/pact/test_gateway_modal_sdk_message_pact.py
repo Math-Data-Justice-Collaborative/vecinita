@@ -27,11 +27,11 @@ _ORDER = (
 
 
 def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[3]
+    return Path(__file__).resolve().parents[4]
 
 
 def _pact_output_dir() -> Path:
-    return _repo_root() / "backend" / "pacts"
+    return _repo_root() / "apis" / "gateway" / "pacts"
 
 
 def test_gateway_modal_sdk_sync_message_pact() -> None:

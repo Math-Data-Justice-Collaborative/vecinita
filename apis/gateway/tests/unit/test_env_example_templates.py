@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-_REPO_ROOT = Path(__file__).resolve().parents[3]
+_REPO_ROOT = Path(__file__).resolve().parents[4]
 _C4B = "Canonical environment catalog: repo root .env.example"
 
 # Assignment RHS that look like real secrets (not placeholders).

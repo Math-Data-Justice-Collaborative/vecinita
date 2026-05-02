@@ -1,7 +1,7 @@
 """Contract sync tests for backend embedding models vs service schemas.
 
 These tests ensure backend request/response models remain compatible with the
-canonical service contracts exposed by services/embedding-modal.
+canonical service contracts exposed by modal-apps/embedding-modal.
 """
 
 from __future__ import annotations
@@ -17,8 +17,8 @@ pytestmark = pytest.mark.unit
 
 
 def _load_embedding_service_schemas_module():
-    repo_root = Path(__file__).resolve().parents[3]
-    module_path = repo_root / "services" / "embedding-modal" / "src" / "vecinita" / "schemas.py"
+    repo_root = Path(__file__).resolve().parents[4]
+    module_path = repo_root / "modal-apps" / "embedding-modal" / "src" / "vecinita" / "schemas.py"
 
     spec = importlib.util.spec_from_file_location("embedding_modal_schemas", module_path)
     assert spec and spec.loader, f"Unable to load service schemas from {module_path}"

@@ -101,9 +101,9 @@ _modal_deploy_in_service() {
 init_submodules() {
     echo -e "${BLUE}→ Ensuring service submodules are present...${NC}"
     git submodule update --init --depth 1 \
-        services/embedding-modal \
-        services/model-modal \
-        services/scraper
+        modal-apps/embedding-modal \
+        modal-apps/model-modal \
+        modal-apps/scraper
 }
 
 if [ "$DEPLOY_EMBEDDING" = true ] || [ "$DEPLOY_MODEL" = true ] || [ "$DEPLOY_SCRAPER" = true ]; then
@@ -112,22 +112,22 @@ fi
 
 if [ "$DEPLOY_EMBEDDING" = true ]; then
     echo -e "${BLUE}→ Deploying embedding Modal app...${NC}"
-    _modal_deploy_in_service services/embedding-modal main.py
+    _modal_deploy_in_service modal-apps/embedding-modal main.py
     echo -e "${GREEN}✓ Embedding Modal app deployed${NC}\n"
 fi
 
 if [ "$DEPLOY_MODEL" = true ]; then
     echo -e "${BLUE}→ Deploying model Modal app...${NC}"
-    _modal_deploy_in_service services/model-modal main.py
+    _modal_deploy_in_service modal-apps/model-modal main.py
     echo -e "${GREEN}✓ Model Modal app deployed${NC}\n"
 fi
 
 if [ "$DEPLOY_SCRAPER" = true ]; then
     echo -e "${BLUE}→ Deploying scraper workers...${NC}"
-    _modal_deploy_in_service services/scraper modal_workers_entry.py
+    _modal_deploy_in_service modal-apps/scraper modal_workers_entry.py
     if [ "$DEPLOY_SCRAPER_HTTP" = 1 ]; then
         echo -e "${BLUE}→ Deploying scraper HTTP API...${NC}"
-        _modal_deploy_in_service services/scraper modal_api_entry.py
+        _modal_deploy_in_service modal-apps/scraper modal_api_entry.py
     else
         echo -e "${YELLOW}  Skipped vecinita_scraper/api (HTTP) — omit --no-web to deploy.${NC}"
     fi
@@ -138,7 +138,7 @@ if [ "$DEPLOY_LEGACY_SCRAPER_CRON" = true ]; then
     echo -e "${YELLOW}→ Deploying legacy scraper cron (backend/src/services/scraper/modal_app.py)...${NC}"
     modal deploy backend/src/services/scraper/modal_app.py
     echo -e "${YELLOW}⚠ This overwrites the Modal app named in MODAL_SCRAPER_APP_NAME if it matches${NC}"
-    echo -e "${YELLOW}  the workers app; prefer migrating cron to services/scraper.${NC}\n"
+    echo -e "${YELLOW}  the workers app; prefer migrating cron to modal-apps/scraper.${NC}\n"
 fi
 
 echo -e "${GREEN}======================================"

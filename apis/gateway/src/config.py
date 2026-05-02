@@ -14,6 +14,7 @@ import yaml
 from dotenv import load_dotenv
 
 from . import env_deprecation as _env_deprecation
+from .utils.corpus_db_guard import validate_canonical_database_url
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _BACKEND_ROOT = Path(__file__).resolve().parents[1]
@@ -231,6 +232,7 @@ DEFAULT_PROVIDER: str = os.getenv("DEFAULT_PROVIDER", "ollama").lower()
 # ---------------------------------------------------------------------------
 DATABASE_URL: str = os.getenv("DATABASE_URL", "")
 DB_DATA_MODE: str = "postgres"
+CORPUS_DB_VALIDATION = validate_canonical_database_url(service_name="gateway")
 
 
 def resolve_data_db_mode() -> str:

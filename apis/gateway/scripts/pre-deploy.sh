@@ -1,5 +1,5 @@
 #!/bin/bash
-# backend/scripts/pre-deploy.sh
+# apis/gateway/scripts/pre-deploy.sh (legacy path: backend/scripts/pre-deploy.sh)
 #
 # Pre-deployment hook for Render.
 # This script runs BEFORE the service starts on each deploy.
@@ -13,10 +13,21 @@
 # - 0     → success, safe to proceed with deployment
 # - 1     → failure, Render will cancel deploy and keep old instances
 #
-# Usage (in render.yaml):
-#   preDeployCommand: ./backend/scripts/pre-deploy.sh
+# Usage (in render.yaml): run from repo root or from the service WORKDIR (/app in Docker).
+#   preDeployCommand: ./apis/gateway/scripts/pre-deploy.sh
 
 set -e  # Exit on any error
+
+# Python package root: flat image layout (.), monorepo apis/gateway, or legacy backend/.
+if [ -f "src/config.py" ] && [ -d "scripts" ]; then
+  PY_ROOT="."
+elif [ -f "apis/gateway/src/config.py" ]; then
+  PY_ROOT="apis/gateway"
+elif [ -f "backend/src/config.py" ]; then
+  PY_ROOT="backend"
+else
+  PY_ROOT=""
+fi
 
 echo "=========================================="
 echo "Vecinita Pre-Deploy Script"
@@ -90,9 +101,9 @@ fi
 echo -e "\n${YELLOW}[3/4]${NC} Running database migrations..."
 
 # Try to run Alembic if it exists
-if [ -f "backend/alembic.ini" ] && command -v alembic &> /dev/null; then
+if [ -n "$PY_ROOT" ] && [ -f "${PY_ROOT}/alembic.ini" ] && command -v alembic &> /dev/null; then
   echo "  Running: alembic upgrade head"
-  cd backend && alembic upgrade head
+  (cd "${PY_ROOT}" && alembic upgrade head)
   if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓${NC} Migrations completed successfully"
   else
@@ -100,13 +111,13 @@ if [ -f "backend/alembic.ini" ] && command -v alembic &> /dev/null; then
     exit 1
   fi
 # Try to run schema bootstrap script if it exists
-elif [ -f "backend/scripts/schema_install.sql" ]; then
+elif [ -n "$PY_ROOT" ] && [ -f "${PY_ROOT}/scripts/schema_install.sql" ]; then
   echo "  Running: schema_install.sql"
   PGPASSWORD="$DB_PASSWORD" psql \
     -h "$DB_HOST" \
     -U "$DB_USER" \
     -d "$DB_NAME" \
-    -f "backend/scripts/schema_install.sql"
+    -f "${PY_ROOT}/scripts/schema_install.sql"
   
   if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓${NC} Schema installed successfully"
@@ -115,9 +126,9 @@ elif [ -f "backend/scripts/schema_install.sql" ]; then
     exit 1
   fi
 # Try Python bootstrap if it exists
-elif [ -f "backend/src/config.py" ]; then
+elif [ -n "$PY_ROOT" ] && [ -f "${PY_ROOT}/src/config.py" ]; then
   echo "  Running: schema bootstrap (Python)"
-  cd backend
+  cd "${PY_ROOT}"
   python -c "
 import os
 import sys

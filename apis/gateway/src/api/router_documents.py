@@ -17,6 +17,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from psycopg2.extras import RealDictCursor  # type: ignore[import-untyped]
 
 from src.config import EMBEDDING_SERVICE_URL as _CONFIG_EMBEDDING_SERVICE_URL
+from src.services.corpus.corpus_projection_service import should_fail_closed_for_projection_error
 from src.utils.database_url import get_resolved_database_url
 from src.utils.tags import build_bilingual_tag_fields, normalize_tags
 
@@ -191,7 +192,10 @@ def _normalize_public_source(raw: dict[str, Any]) -> dict[str, Any]:
         "source_domain": domain,
         "title": raw.get("title") or raw.get("document_title"),
         "description": raw.get("description"),
+        "resource_type": raw.get("resource_type") or metadata.get("resource_type") or "document",
+        "format": raw.get("format") or metadata.get("format") or "unknown",
         "author": raw.get("author"),
+        "organization": raw.get("organization") or metadata.get("organization") or "unknown",
         "published_date": raw.get("published_date"),
         "first_scraped_at": raw.get("first_scraped_at") or raw.get("created_at"),
         "last_scraped_at": raw.get("last_scraped_at") or raw.get("updated_at"),
@@ -209,6 +213,18 @@ def _normalize_public_source(raw: dict[str, Any]) -> dict[str, Any]:
         "is_bilingual": is_bilingual,
         "download_url": download_url,
         "downloadable": bool(download_url),
+        "embedding_status": (
+            raw.get("embedding_status") or metadata.get("embedding_status") or "completed"
+        ),
+        "source_of_truth": raw.get("source_of_truth")
+        or metadata.get("source_of_truth")
+        or "postgres",
+        "canonical_visibility_updated_at": (
+            raw.get("canonical_visibility_updated_at")
+            or metadata.get("canonical_visibility_updated_at")
+            or raw.get("updated_at")
+            or raw.get("created_at")
+        ),
     }
 
 
@@ -293,7 +309,7 @@ def _raise_documents_error(endpoint_name: str, exc: Exception) -> None:
     if isinstance(exc, HTTPException):
         raise exc
 
-    if _is_data_backend_unavailable_error(exc):
+    if _is_data_backend_unavailable_error(exc) or should_fail_closed_for_projection_error(exc):
         logger.warning("%s degraded: Postgres unavailable (%s)", endpoint_name, exc)
         raise HTTPException(
             status_code=503,

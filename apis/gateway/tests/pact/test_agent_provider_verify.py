@@ -22,11 +22,11 @@ from pact import Verifier
 
 
 def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[3]
+    return Path(__file__).resolve().parents[4]
 
 
 def _pact_file() -> Path:
-    return _repo_root() / "backend" / "pacts" / "vecinita-gateway-vecinita-agent.json"
+    return _repo_root() / "apis" / "gateway" / "pacts" / "vecinita-gateway-vecinita-agent.json"
 
 
 @pytest.mark.integration

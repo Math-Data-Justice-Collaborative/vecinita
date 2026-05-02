@@ -108,7 +108,7 @@ def _coerce_optional_model_id(model: str | None) -> str | None:
 
 
 # IDs accepted by Modal ``chat_completion`` (``vecinita-model``).
-# Keep in sync with ``services/model-modal/src/vecinita/config.py`` ``SUPPORTED_MODELS``.
+# Keep in sync with ``modal-apps/model-modal/src/vecinita/config.py`` ``SUPPORTED_MODELS``.
 _MODAL_NATIVE_FUNCTION_CHAT_MODEL_IDS: frozenset[str] = frozenset(
     {
         "gemma3",

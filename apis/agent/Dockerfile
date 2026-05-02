@@ -1,6 +1,6 @@
-# Backend Dockerfile (Vecinita FastAPI Agent - ULTRA Memory Optimized for Render)
-# Calls separate embedding service for embeddings - ZERO local embedding models!
-# For scraping with Playwright, see Dockerfile.scraper
+# Vecinita FastAPI Agent — build from repository root (dockerContext: .).
+# Calls separate embedding service for embeddings — zero local embedding models.
+# For scraping with Playwright, see apis/gateway/Dockerfile.scraper
 
 # Build stage - install dependencies
 FROM python:3.11-slim-bookworm AS builder
@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Copy manifests first so this layer invalidates when pins change (uv.lock + pyproject stay in sync in CI).
 # Installs still use the curated runtime list below (not full uv.lock export) to keep image size small for Render.
-COPY pyproject.toml uv.lock ./
+COPY apis/gateway/pyproject.toml apis/gateway/uv.lock ./
 
 # Install dependencies to /install (NO EMBEDDING MODELS!)
 # Embeddings handled by separate embedding service - saves ~50MB+ memory
@@ -46,9 +46,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy installed packages from builder
 COPY --from=builder /install /usr/local
 
-# Copy application code
-COPY src/ ./src/
-COPY scripts/ ./scripts/
+# Application source (canonical tree under apis/gateway/src; includes apis/agent via symlink)
+COPY apis/gateway/src ./src/
+COPY apis/gateway/scripts ./scripts/
 
 # Python env flags
 ENV PYTHONUNBUFFERED=1

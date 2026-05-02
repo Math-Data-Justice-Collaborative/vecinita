@@ -16,11 +16,11 @@ from tests.pact.modal_sdk_pact_payloads import MODAL_RPC_RESPONSES
 
 
 def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[3]
+    return Path(__file__).resolve().parents[4]
 
 
 def _pact_file() -> Path:
-    return _repo_root() / "backend" / "pacts" / "vecinita-gateway-vecinita-modal-sdk.json"
+    return _repo_root() / "apis" / "gateway" / "pacts" / "vecinita-gateway-vecinita-modal-sdk.json"
 
 
 @pytest.mark.integration

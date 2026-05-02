@@ -1,5 +1,4 @@
-# Dedicated gateway Dockerfile for Render deployments.
-# Keeps the gateway on its own image path so deploys can be rolled independently.
+# Dedicated gateway Dockerfile for Render deployments (build from repo root: dockerContext: .).
 
 FROM python:3.11-slim-bookworm AS builder
 
@@ -10,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	pkg-config && \
 	rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml ./
+COPY apis/gateway/pyproject.toml ./
 
 RUN pip install --no-cache-dir --upgrade pip && \
 	pip install --prefix=/install --no-cache-dir --retries 5 --default-timeout=1000 \
@@ -35,8 +34,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /install /usr/local
-COPY src/ ./src/
-COPY scripts/ ./scripts/
+COPY apis/gateway/src ./src/
+COPY apis/gateway/scripts ./scripts/
 
 ENV PYTHONUNBUFFERED=1
 ENV TF_ENABLE_ONEDNN_OPTS=0

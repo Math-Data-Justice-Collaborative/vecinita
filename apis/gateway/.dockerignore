@@ -1,4 +1,4 @@
-# Render / local builds with dockerContext: ./backend (see specs/016 T013).
+# Render / local builds with dockerContext: ./apis/gateway (embedding/scraper) or repo root for gateway/agent images (see specs/016 / 018).
 # Keep runtime markdown under src/ (e.g. system_rules.md, FAQs).
 
 tests/

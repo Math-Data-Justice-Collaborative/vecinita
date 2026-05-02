@@ -1,7 +1,7 @@
 """Consumer Pact: gateway -> agent internal HTTP contract (`AGENT_SERVICE_URL`).
 
 Generates:
-    backend/pacts/vecinita-gateway-vecinita-agent.json
+    apis/gateway/pacts/vecinita-gateway-vecinita-agent.json
 """
 
 from __future__ import annotations
@@ -17,11 +17,11 @@ pytestmark = [pytest.mark.integration, pytest.mark.contract]
 
 
 def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[3]
+    return Path(__file__).resolve().parents[4]
 
 
 def _pact_output_dir() -> Path:
-    return _repo_root() / "backend" / "pacts"
+    return _repo_root() / "apis" / "gateway" / "pacts"
 
 
 def _build_gateway_ask_client(agent_base_url: str, monkeypatch: pytest.MonkeyPatch) -> TestClient:

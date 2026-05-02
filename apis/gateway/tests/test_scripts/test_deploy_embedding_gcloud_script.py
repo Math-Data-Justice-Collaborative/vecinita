@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-SCRIPT_PATH = Path("backend/scripts/deploy_embedding_gcloud.sh")
+SCRIPT_PATH = Path("apis/gateway/scripts/deploy_embedding_gcloud.sh")
 if not SCRIPT_PATH.exists():
     SCRIPT_PATH = Path("scripts/deploy_embedding_gcloud.sh")
 

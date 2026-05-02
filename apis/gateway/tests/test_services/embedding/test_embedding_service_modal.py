@@ -1,4 +1,4 @@
-"""Unit tests for the canonical Modal embedding entrypoint (``services/embedding-modal``)."""
+"""Unit tests for the canonical Modal embedding entrypoint (``modal-apps/embedding-modal``)."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from fastapi.testclient import TestClient
 pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-EMBEDDING_MODAL_SRC = REPO_ROOT / "services" / "embedding-modal" / "src"
+EMBEDDING_MODAL_SRC = REPO_ROOT / "modal-apps" / "embedding-modal" / "src"
 
 
 class _FakeVector:

@@ -11,7 +11,7 @@ for strict schema coverage gates.
 **Feature 007** (``specs/007-scraper-via-dm-api``): scrape/job HTTP surfaces on the DM API remain
 covered by this parametrized suite plus ``tests/schemathesis_hooks.py`` DM hooks
 (``_data_management_job_id``, bearer auth). No duplicate DM-only harness under
-``services/data-management-api/tests/`` unless a route is unreachable from the
+``apis/data-management-api/tests/`` unless a route is unreachable from the
 backend pytest entrypoint (document splits in ``modal-migration-inventory.md``).
 """
 

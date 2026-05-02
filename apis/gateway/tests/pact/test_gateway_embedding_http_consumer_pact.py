@@ -19,11 +19,11 @@ pytestmark = [pytest.mark.integration, pytest.mark.contract]
 
 
 def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[3]
+    return Path(__file__).resolve().parents[4]
 
 
 def _pact_output_dir() -> Path:
-    return _repo_root() / "backend" / "pacts"
+    return _repo_root() / "apis" / "gateway" / "pacts"
 
 
 def _embed_http_fallback_client(mock_base: str, monkeypatch: pytest.MonkeyPatch) -> TestClient:

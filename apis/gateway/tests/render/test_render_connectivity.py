@@ -15,12 +15,12 @@ from unittest.mock import patch
 import pytest
 import yaml
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 RENDER_YAML = REPO_ROOT / "render.yaml"
 RENDER_STAGING_YAML = REPO_ROOT / "render.staging.yaml"
 RENDER_BLUEPRINT_YAML = REPO_ROOT / "render.blueprint.yaml"
-GATEWAY_DOCKERFILE = REPO_ROOT / "backend" / "Dockerfile.gateway"
-GATEWAY_START_SCRIPT = REPO_ROOT / "backend" / "scripts" / "start_gateway_render.sh"
+GATEWAY_DOCKERFILE = REPO_ROOT / "apis" / "gateway" / "Dockerfile.gateway"
+GATEWAY_START_SCRIPT = REPO_ROOT / "apis" / "gateway" / "scripts" / "start_gateway_render.sh"
 
 pytestmark = pytest.mark.render_connectivity
 
@@ -221,8 +221,8 @@ def test_gateway_services_use_gateway_dockerfile_with_safe_start_script(
     svc = _find_service(data, service_name)
     assert svc is not None, f"{service_name} not found in {render_yaml_path.name}"
     assert svc.get("runtime") == "docker"
-    assert svc.get("dockerfilePath") == "./backend/Dockerfile.gateway"
-    assert svc.get("dockerContext") == "./backend"
+    assert svc.get("dockerfilePath") == "./apis/gateway/Dockerfile.gateway"
+    assert svc.get("dockerContext") == "."
     assert (
         svc.get("dockerCommand") == "/bin/sh ./scripts/start_gateway_render.sh"
     ), f"{service_name} must use the dedicated gateway start script to avoid Render Docker command quoting issues"

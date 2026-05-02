@@ -25,7 +25,7 @@ from src.services.scraper.uploader import DatabaseUploader
 pytestmark = pytest.mark.integration
 
 
-WORKSPACE_ROOT = Path(__file__).resolve().parents[3]
+WORKSPACE_ROOT = Path(__file__).resolve().parents[4]
 
 
 def _read_workspace_file(*parts: str) -> str:
@@ -51,7 +51,7 @@ class _JsonResponse:
 
 def test_ip01_frontend_to_gateway_contract_file_wiring() -> None:
     """IP-01: Frontend -> Gateway URL and ask/stream path contract."""
-    content = _read_workspace_file("frontend", "src", "app", "services", "agentService.ts")
+    content = _read_workspace_file("frontends", "chat", "src", "app", "services", "agentService.ts")
 
     assert "VITE_GATEWAY_URL" in content
     assert "VITE_BACKEND_URL" in content
@@ -61,7 +61,7 @@ def test_ip01_frontend_to_gateway_contract_file_wiring() -> None:
 
 def test_ip02_frontend_to_direct_admin_auth_contract_file_wiring() -> None:
     """IP-02: Frontend -> direct admin auth env vars and session storage contract."""
-    content = _read_workspace_file("frontend", "src", "app", "context", "AuthContext.tsx")
+    content = _read_workspace_file("frontends", "chat", "src", "app", "context", "AuthContext.tsx")
 
     assert "VITE_ADMIN_AUTH_ENABLED" in content
     assert "vecinita-admin-session" in content
@@ -386,8 +386,10 @@ def test_ip12_documents_router_mixed_datasource_contract(monkeypatch) -> None:
 
 def test_ip13_direct_modal_endpoint_contract_files() -> None:
     """IP-13: Service endpoint contracts prefer direct Modal URLs and no routing token headers."""
-    service_endpoints_content = _read_workspace_file("backend", "src", "service_endpoints.py")
-    embed_router_content = _read_workspace_file("backend", "src", "api", "router_embed.py")
+    service_endpoints_content = _read_workspace_file(
+        "apis", "gateway", "src", "service_endpoints.py"
+    )
+    embed_router_content = _read_workspace_file("apis", "gateway", "src", "api", "router_embed.py")
 
     assert "vecinita--vecinita-scraper-api-fastapi.modal.run/jobs" in service_endpoints_content
     assert '"X-Service-Token"' not in embed_router_content

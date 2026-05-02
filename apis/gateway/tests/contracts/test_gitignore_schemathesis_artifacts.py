@@ -1,4 +1,4 @@
-"""Regression: Schemathesis CLI writes JUnit under backend/schemathesis-report/ (see schemathesis.toml).
+"""Regression: Schemathesis CLI writes JUnit under apis/gateway/schemathesis-report/ (see schemathesis.toml).
 
 ``run_schemathesis_live.sh`` emits ``junit-gateway.xml`` there; the path must stay in the repo
 ``.gitignore`` so it is never committed accidentally.
@@ -10,9 +10,9 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 GITIGNORE = REPO_ROOT / ".gitignore"
-_EXPECTED_LINE = "backend/schemathesis-report/junit-gateway.xml"
+_EXPECTED_LINE = "apis/gateway/schemathesis-report/junit-gateway.xml"
 
 pytestmark = pytest.mark.unit
 

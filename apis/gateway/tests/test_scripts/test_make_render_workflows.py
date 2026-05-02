@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-MAKEFILE_PATH = Path(__file__).resolve().parents[3] / "Makefile"
+MAKEFILE_PATH = Path(__file__).resolve().parents[4] / "Makefile"
 
 
 def _content() -> str:

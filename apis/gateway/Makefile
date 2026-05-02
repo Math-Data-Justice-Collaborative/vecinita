@@ -13,7 +13,7 @@ lint-fix: format
 	uv run ruff check --fix src tests
 
 typecheck:
-	uv run mypy src
+	uv run python -m mypy src
 
 audit:
 	uv run --with pip-audit pip-audit --progress-spinner off --desc \

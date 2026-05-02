@@ -442,7 +442,7 @@ async def root(request: Request):
     - For API clients (Accept: application/json): returns JSON service info
     """
     # Check if frontend is built and available
-    frontend_dist = Path(__file__).parent.parent.parent.parent / "frontend" / "dist"
+    frontend_dist = Path(__file__).parent.parent.parent.parent / "frontends" / "chat" / "dist"
     frontend_available = frontend_dist.exists() and (frontend_dist / "index.html").exists()
 
     # Check Accept header to determine response type
@@ -456,7 +456,7 @@ async def root(request: Request):
     if frontend_available:
         front_message = " | Frontend available at /"
     else:
-        front_message = " | Frontend not built (use: npm run build in frontend/)"
+        front_message = " | Frontend not built (use: npm run build in frontends/chat/)"
 
     return GatewayPublicRootResponse(
         service="Vecinita Unified API Gateway",
@@ -630,7 +630,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 # ============================================================================
 
 # Mount frontend distribution files at root if they exist
-frontend_dist = Path(__file__).parent.parent.parent.parent / "frontend" / "dist"
+frontend_dist = Path(__file__).parent.parent.parent.parent / "frontends" / "chat" / "dist"
 if frontend_dist.exists():
     print(f"[Gateway] Frontend detected at {frontend_dist}")
     try:
@@ -640,7 +640,7 @@ if frontend_dist.exists():
         print(f"[Gateway] Warning: Could not mount frontend: {e}")
 else:
     print(f"[Gateway] Frontend not found at {frontend_dist}")
-    print("[Gateway] To generate frontend: cd frontend && npm install && npm run build")
+    print("[Gateway] To generate frontend: cd frontends/chat && npm install && npm run build")
 
 
 # ============================================================================

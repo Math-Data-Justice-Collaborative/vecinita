@@ -1,6 +1,6 @@
 """Modal deployment entrypoint for scheduled / invoked reindex jobs.
 
-HTTP scraping and job APIs are deployed from ``services/scraper`` (Modal apps
+HTTP scraping and job APIs are deployed from ``modal-apps/scraper`` (Modal apps
 ``vecinita-scraper`` workers and ``vecinita-scraper-api``). This module remains
 for the legacy **non-HTTP** ``run_reindex`` / ``weekly_reindex`` definitions
 until that cron path is fully migrated to the scraper service repo.
