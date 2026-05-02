@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import pytest
 
+from tests.integration._agent_schemathesis_stable_ops import AGENT_STABLE_OPERATIONS
+
 schemathesis = pytest.importorskip("schemathesis")
 hypothesis = pytest.importorskip("hypothesis")
 HealthCheck = hypothesis.HealthCheck
@@ -44,15 +46,7 @@ schema = schemathesis.pytest.from_fixture("agent_schema")
 )
 def test_agent_openapi_stable_operations(case):
     """No 5xx on a small allowlist of cheap, deterministic agent routes."""
-    allowed_operations = {
-        ("GET", "/"),
-        ("GET", "/health"),
-        ("GET", "/config"),
-        ("GET", "/privacy"),
-        ("GET", "/model-selection"),
-    }
-
-    if (case.method, case.path) not in allowed_operations:
+    if (case.method, case.path) not in AGENT_STABLE_OPERATIONS:
         pytest.skip("Operation excluded from stable agent Schemathesis contract run")
 
     case.call_and_validate(

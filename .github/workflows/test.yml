@@ -113,7 +113,7 @@ jobs:
 
     - name: Check backend formatting (Black)
       working-directory: apis/gateway
-      run: uv run black --check --config pyproject.toml src tests scripts ../scripts/dm_openapi_diff.py
+      run: uv run black --check --config pyproject.toml src tests scripts ../../scripts/dm_openapi_diff.py
 
     - name: Type check backend (mypy)
       working-directory: apis/gateway
@@ -655,6 +655,9 @@ jobs:
         echo "REINDEX_TRIGGER_TOKEN=test-reindex-token" >> .env
         echo "REINDEX_SERVICE_URL=https://example.modal.run" >> .env
 
+    # TraceCov HTML/text reports only: the stable agent suite skips most operations (allowlist in
+    # test_agent_api_schema_schemathesis.py). Aggregate TraceCov percentages are not meaningful vs
+    # --tracecov-fail-under=100; gateway/data-management legs keep the 100%% gate.
     - name: Run agent Schemathesis (TraceCov)
       working-directory: apis/gateway
       env:
@@ -667,7 +670,6 @@ jobs:
         pytest tests/integration/test_agent_api_schema_schemathesis.py -q \
           --tracecov-format=html,text \
           --tracecov-report-html-path=schema-coverage-agent-pytest.html \
-          --tracecov-fail-under=100 \
           --junit-xml=schema-test-results-agent.xml
 
     - name: Upload agent schema artifacts

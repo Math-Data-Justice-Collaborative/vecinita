@@ -11,12 +11,16 @@ agent, data-management) disable TraceCov (``return None``); run those targets se
 
 from __future__ import annotations
 
+import copy
 import os
 from typing import Any
 
 import pytest
 
+from tests.integration._agent_schemathesis_stable_ops import AGENT_STABLE_OPERATIONS
 from tests.integration._dm_schemathesis_auth import scraper_bearer_token
+
+_OAS_HTTP_METHODS = frozenset({"get", "put", "post", "delete", "options", "head", "patch", "trace"})
 
 
 def _active_nodeids(session: pytest.Session) -> list[str]:
@@ -75,6 +79,38 @@ def _agent_openapi_dict() -> dict[str, Any]:
     return app.openapi()
 
 
+def _filter_openapi_to_allowed_operations(
+    full: dict[str, Any], allowed: frozenset[tuple[str, str]]
+) -> dict[str, Any]:
+    """Drop path operations not in ``allowed`` so TraceCov matches Schemathesis allowlists."""
+    out = copy.deepcopy(full)
+    paths = out.get("paths")
+    if not isinstance(paths, dict):
+        return out
+    new_paths: dict[str, Any] = {}
+    for path, path_item in paths.items():
+        if not isinstance(path_item, dict):
+            new_paths[path] = path_item
+            continue
+        kept: dict[str, Any] = {}
+        passthrough: dict[str, Any] = {}
+        for key, val in path_item.items():
+            kl = key.lower()
+            if kl in _OAS_HTTP_METHODS:
+                if (kl.upper(), path) in allowed:
+                    kept[key] = val
+            elif key.startswith("x-"):
+                passthrough[key] = val
+            else:
+                passthrough[key] = val
+        if not kept:
+            continue
+        merged = {**passthrough, **kept}
+        new_paths[path] = merged
+    out["paths"] = new_paths
+    return out
+
+
 def _gateway_openapi_dict() -> dict[str, Any] | None:
     """Gateway OpenAPI for TraceCov without importlib.reload (avoids clashing with tests)."""
     saved: dict[str, str | None] = {}
@@ -110,7 +146,7 @@ def tracecov_schema(request: pytest.FixtureRequest) -> dict[str, Any] | None:
     if target is None:
         return None
     if target == "agent":
-        return _agent_openapi_dict()
+        return _filter_openapi_to_allowed_operations(_agent_openapi_dict(), AGENT_STABLE_OPERATIONS)
     if target == "gateway":
         return _gateway_openapi_dict()
     if target == "data-management":
