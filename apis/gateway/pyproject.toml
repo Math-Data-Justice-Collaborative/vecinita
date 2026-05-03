@@ -110,7 +110,8 @@ dev = [
     "pytest-cov>=5.0.0",
     "hypothesis>=6.0.0",
     "schemathesis>=4.14.3",
-    "tracecov>=0.3.0",
+    # Cap below 0.20: TraceCov 0.20.x can report 0% schema coverage on CI (pip resolves latest).
+    "tracecov>=0.19.3,<0.20",
     # httpx pinned in base (litellm); no duplicate here
     # Code Quality Tools (pin Black — must match uv.lock; CI uses uv sync --frozen)
     "black==26.3.1",
@@ -134,7 +135,7 @@ ci = [
     "pytest-cov>=5.0.0",
     "hypothesis>=6.0.0",
     "schemathesis>=4.14.3",
-    "tracecov>=0.3.0",
+    "tracecov>=0.19.3,<0.20",
     # Consumer pact tests under tests/pact/ import ``pact``; collection runs before marker deselection.
     "pact-python>=3.3.0",
     "types-requests>=2.32.4.20260324",

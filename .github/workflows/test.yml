@@ -511,6 +511,9 @@ jobs:
       with:
         submodules: 'false'
 
+    - name: Checkout data-management API (corpus conflict tests import vecinita_dm_api)
+      run: git submodule update --init --depth 1 apis/data-management-api
+
     - name: Set up Python 3.10
       uses: actions/setup-python@v6
       with:

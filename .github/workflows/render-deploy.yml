@@ -86,7 +86,7 @@ jobs:
       - name: Run backend fast tests (non-LLM)
         working-directory: apis/gateway
         env:
-          PYTHONPATH: ${{ github.workspace }}/apis/gateway
+          PYTHONPATH: ${{ github.workspace }}/apis/gateway:${{ github.workspace }}/modal-apps/embedding-modal/src
           EMBEDDING_STRICT_STARTUP: 'false'
         run: |
           cat > .env <<'EOF'

@@ -15,7 +15,8 @@ from fastapi.testclient import TestClient
 
 pytestmark = pytest.mark.unit
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
+# One level deeper than ``tests/integration/`` (``test_services/embedding/``) → extra ``.parent``.
+REPO_ROOT = Path(__file__).resolve().parents[5]
 EMBEDDING_MODAL_SRC = REPO_ROOT / "modal-apps" / "embedding-modal" / "src"
 
 
