@@ -16,6 +16,14 @@
         "loop_limit": 8
       }
     ],
+    "subagentStop": [
+      {
+        "command": ".cursor/hooks/push-deploy-debug-workflow-subagent-stop.sh",
+        "matcher": "push-deploy-debug-workflow",
+        "timeout": 30,
+        "loop_limit": 3
+      }
+    ],
     "afterFileEdit": [
       {
         "command": ".cursor/hooks/run-contract-pact-tests-on-edit.sh",
