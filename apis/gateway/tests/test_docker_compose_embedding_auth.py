@@ -6,7 +6,8 @@ import yaml
 
 
 def test_prod_compose_sets_embedding_auth_token_for_required_services():
-    compose_path = Path(__file__).resolve().parents[2].joinpath("docker-compose.yml")
+    # tests/ → gateway/ → apis/ → repo root (compose lives at monorepo root, not under apis/)
+    compose_path = Path(__file__).resolve().parents[3] / "docker-compose.yml"
     compose = yaml.safe_load(compose_path.read_text())
 
     services = compose.get("services") or {}

@@ -2,9 +2,9 @@
 
 from pathlib import Path
 
-SCRIPT_PATH = Path("run/dev-session.sh")
-if not SCRIPT_PATH.exists():
-    SCRIPT_PATH = Path("../run/dev-session.sh")
+# tests/test_scripts/ → tests/ → gateway/ → apis/ → repo root (script lives at run/dev-session.sh)
+REPO_ROOT = Path(__file__).resolve().parents[4]
+SCRIPT_PATH = REPO_ROOT / "run" / "dev-session.sh"
 
 
 def _script_text() -> str:
