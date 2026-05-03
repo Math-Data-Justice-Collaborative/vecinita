@@ -18,7 +18,9 @@ except ModuleNotFoundError:  # pragma: no cover
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-PYPROJECT = REPO_ROOT / "backend" / "pyproject.toml"
+_PY_GATEWAY = REPO_ROOT / "apis" / "gateway" / "pyproject.toml"
+_PY_LEGACY = REPO_ROOT / "backend" / "pyproject.toml"
+PYPROJECT = _PY_GATEWAY if _PY_GATEWAY.is_file() else _PY_LEGACY
 
 FORBIDDEN = {
     "fastembed": "scraper-only embedding optimization can pull py-rust-stemmers",

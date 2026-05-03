@@ -218,8 +218,8 @@ services:
     runtime: docker
     region: virginia
     plan: starter  # adjust for load; starter = 512MB RAM
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    dockerfilePath: ./apis/agent/Dockerfile
+    dockerContext: .
     autoDeployTrigger: checksPass  # deploy only after CI checks pass (Render blueprint spec)
     healthCheckPath: /health
     preDeployCommand: ""  # migrations run here if needed; currently in startup
@@ -296,8 +296,8 @@ services:
     runtime: docker
     region: virginia
     plan: starter
-    dockerfilePath: ./backend/Dockerfile.gateway
-    dockerContext: ./backend
+    dockerfilePath: ./apis/gateway/Dockerfile.gateway
+    dockerContext: .
     dockerCommand: /bin/sh ./scripts/start_gateway_render.sh
     autoDeployTrigger: checksPass
     healthCheckPath: /health
@@ -377,8 +377,8 @@ services:
     runtime: docker
     region: virginia
     plan: starter
-    dockerfilePath: ./frontend/Dockerfile
-    dockerContext: ./frontend
+    dockerfilePath: ./frontends/chat/Dockerfile
+    dockerContext: ./frontends/chat
     autoDeployTrigger: checksPass
     healthCheckPath: /
     preDeployCommand: ""

@@ -17,8 +17,8 @@
 **Purpose**: Baseline and inventory before code changes.
 
 - [X] T001 Create `specs/003-consolidate-scraper-dm/baseline-notes-schemathesis.md` capturing current live gateway host, failing operations (`/api/v1/modal-jobs/scraper*`, `GET /api/v1/ask`), and warning classes (404, schema mismatch, coverage) from the latest `make test-schemathesis-cli` run
-- [X] T002 [P] Create `specs/003-consolidate-scraper-dm/inventory-dm-api-submodule-imports.md` listing every Python import path under `services/data-management-api/` that references `apps/backend/scraper-service/`, `apps/backend/embedding-service/`, or `apps/backend/model-service/`
-- [X] T003 [P] Audit `services/data-management-api/packages/service-clients/service_clients/{scraper_client,embedding_client,model_client}.py` against `inventory-dm-api-submodule-imports.md` and note missing RPCs or routes to implement in later tasks
+- [X] T002 [P] Create `specs/003-consolidate-scraper-dm/inventory-dm-api-submodule-imports.md` listing every Python import path under `apis/data-management-api/` that references `apps/backend/scraper-service/`, `apps/backend/embedding-service/`, or `apps/backend/model-service/`
+- [X] T003 [P] Audit `apis/data-management-api/packages/service-clients/service_clients/{scraper_client,embedding_client,model_client}.py` against `inventory-dm-api-submodule-imports.md` and note missing RPCs or routes to implement in later tasks
 
 ---
 
@@ -70,8 +70,8 @@
 
 - [X] T017 [P] [US2] Update root `README.md` or `CONTRIBUTING.md` with an explicit **“Canonical scraper”** subsection linking to `services/scraper/` and `specs/003-consolidate-scraper-dm/contracts/dm-api-remote-service-integration.md`
 - [X] T018 [P] [US2] Update `services/scraper/README.md` (create if absent) stating it is the only scraper implementation tree and listing how DM API should call it (HTTP base URL)
-- [X] T019 [US2] Migrate **consumer modules outside** `services/data-management-api/apps/backend/scraper-service/` that still import the submodule path or duplicate scraper orchestration so they use `services/data-management-api/packages/service-clients/service_clients/scraper_client.py` only (no parallel business logic); avoid relying on long-lived feature work **inside** the submodule tree before **T027** deletes it
-- [X] T020 [US2] Add focused pytest under `services/data-management-api/packages/service-clients/tests/` (create folder if needed) mocking `httpx` for `ScraperClient` success and upstream **5xx** mapping to stable client errors
+- [X] T019 [US2] Migrate **consumer modules outside** `apis/data-management-api/apps/backend/scraper-service/` that still import the submodule path or duplicate scraper orchestration so they use `apis/data-management-api/packages/service-clients/service_clients/scraper_client.py` only (no parallel business logic); avoid relying on long-lived feature work **inside** the submodule tree before **T027** deletes it
+- [X] T020 [US2] Add focused pytest under `apis/data-management-api/packages/service-clients/tests/` (create folder if needed) mocking `httpx` for `ScraperClient` success and upstream **5xx** mapping to stable client errors
 
 **Checkpoint**: Maintainer story **SC-002** documentation path is real; clients route through `service_clients`.
 
@@ -81,23 +81,23 @@
 
 **Goal**: Remove `scraper-service`, `embedding-service`, and `model-service` **git submodules**; DM API relies on env-configured remote URLs and `packages/service-clients`.
 
-**Independent Test**: `services/data-management-api/.gitmodules` has no entries for those three backends; `git clone --recurse-submodules` no longer pulls them; parity suite passes.
+**Independent Test**: `apis/data-management-api/.gitmodules` has no entries for those three backends; `git clone --recurse-submodules` no longer pulls them; parity suite passes.
 
 ### Tests for User Story 3
 
-- [X] T021 [P] [US3] Create `services/data-management-api/tests/parity/test_remote_clients_parity.py` (or `tests/parity/` per plan) with JSON-normalized fixtures comparing mocked legacy submodule responses vs `ScraperClient`/`EmbeddingClient`/`ModelClient` behavior for the same logical operations
-- [X] T022 [P] [US3] Add CI-friendly unit tests with `respx` or `httpx.MockTransport` in `services/data-management-api/packages/service-clients/tests/test_embedding_client.py` and `test_model_client.py` mirroring patterns used for scraper client
+- [X] T021 [P] [US3] Create `apis/data-management-api/tests/parity/test_remote_clients_parity.py` (or `tests/parity/` per plan) with JSON-normalized fixtures comparing mocked legacy submodule responses vs `ScraperClient`/`EmbeddingClient`/`ModelClient` behavior for the same logical operations
+- [X] T022 [P] [US3] Add CI-friendly unit tests with `respx` or `httpx.MockTransport` in `apis/data-management-api/packages/service-clients/tests/test_embedding_client.py` and `test_model_client.py` mirroring patterns used for scraper client
 
 ### Implementation for User Story 3
 
-- [X] T023 [US3] Extend `services/data-management-api/packages/shared-config/` (or the existing settings module used by DM API entrypoints) to load `SCRAPER_SERVICE_BASE_URL`, `EMBEDDING_SERVICE_BASE_URL`, `MODEL_SERVICE_BASE_URL` per `specs/003-consolidate-scraper-dm/contracts/dm-api-remote-service-integration.md`
-- [X] T024 [US3] Fill in missing methods on `services/data-management-api/packages/service-clients/service_clients/embedding_client.py` and `model_client.py` required by consumers found in `inventory-dm-api-submodule-imports.md`
+- [X] T023 [US3] Extend `apis/data-management-api/packages/shared-config/` (or the existing settings module used by DM API entrypoints) to load `SCRAPER_SERVICE_BASE_URL`, `EMBEDDING_SERVICE_BASE_URL`, `MODEL_SERVICE_BASE_URL` per `specs/003-consolidate-scraper-dm/contracts/dm-api-remote-service-integration.md`
+- [X] T024 [US3] Fill in missing methods on `apis/data-management-api/packages/service-clients/service_clients/embedding_client.py` and `model_client.py` required by consumers found in `inventory-dm-api-submodule-imports.md`
 - [X] T025 [US3] Replace imports from submodule paths in DM API consumer modules (paths listed in `inventory-dm-api-submodule-imports.md`) with calls into `packages/service-clients`; confirm **no regression** to ingestion safeguards (robots, rate limits, retention defaults) by running existing scrape-related tests in `services/scraper/` / DM API suites touched by the change, or document “no logic change” in the PR with reviewer sign-off (constitution **III**)
-- [X] T026 [US3] Run parity tests (`services/data-management-api/tests/parity/…`) until diffs are empty or documented deltas are approved in `specs/003-consolidate-scraper-dm/baseline-notes-schemathesis.md`
-- [X] T027 [US3] Remove submodule directories `services/data-management-api/apps/backend/scraper-service/`, `embedding-service/`, and `model-service/` from the tracked tree per git submodule removal procedure
-- [X] T028 [US3] Edit `services/data-management-api/.gitmodules` to delete the three submodule sections and update root `.github/workflows/*.yml` (and `Makefile` targets if any) that run `git submodule update` for DM API
+- [X] T026 [US3] Run parity tests (`apis/data-management-api/tests/parity/…`) until diffs are empty or documented deltas are approved in `specs/003-consolidate-scraper-dm/baseline-notes-schemathesis.md`
+- [X] T027 [US3] Remove submodule directories `apis/data-management-api/apps/backend/scraper-service/`, `embedding-service/`, and `model-service/` from the tracked tree per git submodule removal procedure
+- [X] T028 [US3] Edit `apis/data-management-api/.gitmodules` to delete the three submodule sections and update root `.github/workflows/*.yml` (and `Makefile` targets if any) that run `git submodule update` for DM API
 - [X] T029 [US3] Update `render.yaml` and any DM API Docker build docs so images/build contexts do not assume submodule checkout of those three services
-- [X] T030 [US3] Refresh `services/data-management-api/README.md` setup steps: remote base URLs, sample `.env`, and removal of submodule init instructions
+- [X] T030 [US3] Refresh `apis/data-management-api/README.md` setup steps: remote base URLs, sample `.env`, and removal of submodule init instructions
 
 **Checkpoint**: **SC-003** binary satisfied; US3 acceptance scenarios hold.
 

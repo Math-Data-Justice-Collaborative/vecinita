@@ -5,8 +5,8 @@ services:
     runtime: docker
     region: virginia
     plan: free
-    dockerfilePath: ./backend/Dockerfile.embedding
-    dockerContext: ./backend
+    dockerfilePath: ./apis/gateway/Dockerfile.embedding
+    dockerContext: ./apis/gateway
     autoDeployTrigger: checksPass
     
     envVars:
@@ -25,8 +25,8 @@ services:
     runtime: docker
     region: virginia
     plan: free
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    dockerfilePath: ./apis/agent/Dockerfile
+    dockerContext: .
     autoDeployTrigger: checksPass
     
     envVars:
@@ -50,8 +50,8 @@ services:
     name: vecinita-scraper
     runtime: docker
     region: virginia
-    dockerfilePath: ./backend/Dockerfile.scraper
-    dockerContext: ./backend
+    dockerfilePath: ./apis/gateway/Dockerfile.scraper
+    dockerContext: ./apis/gateway
     schedule: "0 2 * * *"  # Daily at 2 AM UTC
     envVars:
       - key: PYTHONUNBUFFERED
@@ -68,8 +68,8 @@ services:
     runtime: docker
     region: virginia
     plan: free
-    dockerfilePath: ./frontend/Dockerfile
-    dockerContext: ./frontend
+    dockerfilePath: ./frontends/chat/Dockerfile
+    dockerContext: ./frontends/chat
     autoDeployTrigger: checksPass
     
     healthCheckPath: /health

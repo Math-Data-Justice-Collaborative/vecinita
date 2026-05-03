@@ -28,7 +28,7 @@ Scope audited:
   - [.github/workflows/frontend-coverage.yml](../../.github/workflows/frontend-coverage.yml#L29)
   - [.github/workflows/frontend-coverage.yml](../../.github/workflows/frontend-coverage.yml#L32-L33)
 - Frontend Docker build uses local frontend manifests:
-  - [frontend/Dockerfile](../../frontend/Dockerfile#L24-L27)
+  - [frontends/chat/Dockerfile](../../frontends/chat/Dockerfile#L24-L27)
 
 ### Backend requirements consumption is service-local
 

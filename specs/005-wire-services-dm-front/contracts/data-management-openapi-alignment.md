@@ -2,12 +2,12 @@
 
 ## Purpose
 
-Ensure `apps/data-management-frontend` request bodies, query parameters, and JSON response shapes for **scrape jobs** (and any shared types in `modal-types`) remain compatible with the HTTP API served by **`services/data-management-api`** (scraper FastAPI application) and with **`packages/shared-schemas`** where those models are authoritative.
+Ensure `apps/data-management-frontend` request bodies, query parameters, and JSON response shapes for **scrape jobs** (and any shared types in `modal-types`) remain compatible with the HTTP API served by **`apis/data-management-api`** (scraper FastAPI application) and with **`packages/shared-schemas`** where those models are authoritative.
 
 ## Source of truth
 
 1. **Runtime behavior**: FastAPI route handlers and response models on the scraper app bundled in the data-management API image.
-2. **Shared Python models**: `services/data-management-api/packages/shared-schemas/shared_schemas/scraper.py` (`ScrapeRequest`, `ScrapeResult`, and any job DTOs re-exported from there).
+2. **Shared Python models**: `apis/data-management-api/packages/shared-schemas/shared_schemas/scraper.py` (`ScrapeRequest`, `ScrapeResult`, and any job DTOs re-exported from there).
 3. **Machine-readable contract**: OpenAPI 3 JSON from the running service (`/openapi.json` when enabled).
 
 ## Frontend surfaces

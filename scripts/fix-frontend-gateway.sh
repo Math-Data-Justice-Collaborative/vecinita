@@ -75,8 +75,8 @@ gh variable set VITE_GATEWAY_URL \
 # Step 3: Update .env files
 echo -e "\n${YELLOW}[3/4] Updating Local .env Files${NC}"
 
-FRONTEND_ENV_FILE="./frontend/.env"
-FRONTEND_ENV_PROD_FILE="./frontend/.env.production"
+FRONTEND_ENV_FILE="./frontends/chat/.env"
+FRONTEND_ENV_PROD_FILE="./frontends/chat/.env.production"
 
 if [ -f "$FRONTEND_ENV_FILE" ]; then
   echo -e "${BLUE}Updating $FRONTEND_ENV_FILE${NC}"
@@ -118,7 +118,7 @@ echo -e "\n${YELLOW}[4/4] Committing Changes${NC}"
 
 if [ "$(git -C . status --porcelain | wc -l)" -gt 0 ]; then
   echo -e "${BLUE}Changes detected, committing...${NC}"
-  git add frontend/.env frontend/.env.production 2>/dev/null || true
+  git add frontends/chat/.env frontends/chat/.env.production 2>/dev/null || true
   
   git commit -m "fix: Set VITE_GATEWAY_URL to deployed gateway URL
 

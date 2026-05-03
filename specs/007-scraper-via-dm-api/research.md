@@ -27,7 +27,7 @@
 
 ## Decision 4 — Code layout: minimal duplication first
 
-**Rationale**: Introduce `services/data-management-api/.../modal_invoker.py` (name TBD in tasks) mirroring the subset of `backend/src/services/modal/invoker.py` needed for DM (scrape job lifecycle, embed single/batch, model chat if required for ingest). **Extract a shared package** only if a second consumer needs identical code in the same release; otherwise YAGNI to avoid packaging cycles between `backend/` and `services/data-management-api/`.
+**Rationale**: Introduce `apis/data-management-api/.../modal_invoker.py` (name TBD in tasks) mirroring the subset of `backend/src/services/modal/invoker.py` needed for DM (scrape job lifecycle, embed single/batch, model chat if required for ingest). **Extract a shared package** only if a second consumer needs identical code in the same release; otherwise YAGNI to avoid packaging cycles between `backend/` and `apis/data-management-api/`.
 
 **Alternatives considered**:
 

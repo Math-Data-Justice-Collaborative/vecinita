@@ -1,8 +1,8 @@
 # DM API submodule import inventory — `003-consolidate-scraper-dm`
 
 Generated for **T002**. Python references to `vecinita_scraper` / submodule trees live **inside**
-`services/data-management-api/apps/backend/scraper-service/` (the git submodule checkout). No
-matches were found under `services/data-management-api/` **outside** that tree for path strings
+`apis/data-management-api/apps/backend/scraper-service/` (the git submodule checkout). No
+matches were found under `apis/data-management-api/` **outside** that tree for path strings
 `apps/backend/scraper-service`, `embedding-service`, or `model-service` in import statements (those
 paths are filesystem locations, not import paths).
 
@@ -30,9 +30,9 @@ Primary package: `vecinita_scraper` (relative imports within the checkout). Repr
 - **ScraperClient**: `scrape`, `health` — extend when inventory shows additional REST surfaces needed by DM UI.
 - **EmbeddingClient** / **ModelClient**: mirror scraper pattern when DM consumers require more than health + single call.
 
-_Re-run `rg vecinita_scraper services/data-management-api` after submodule removal (**T027**) to confirm zero unexpected imports._
+_Re-run `rg vecinita_scraper apis/data-management-api` after submodule removal (**T027**) to confirm zero unexpected imports._
 
-**T019 (2026-04-19)**: `rg vecinita_scraper` under `services/data-management-api/packages/` is empty; under `services/data-management-api/apps/` matches only `apps/backend/scraper-service/`. No DM consumers outside the submodule import `vecinita_scraper` today.
+**T019 (2026-04-19)**: `rg vecinita_scraper` under `apis/data-management-api/packages/` is empty; under `apis/data-management-api/apps/` matches only `apps/backend/scraper-service/`. No DM consumers outside the submodule import `vecinita_scraper` today.
 
 ---
 

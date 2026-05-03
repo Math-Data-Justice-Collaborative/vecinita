@@ -45,7 +45,7 @@ Use this mapping as source-of-truth when implementing infra changes:
 - **Render Postgres / pgvector**: Stores document chunks with embeddings and powers vector similarity search
 - **LLM**: Groq's Llama 3.1 8B (configured via `GROQ_API_KEY`)
 - **Embeddings**: HuggingFace `sentence-transformers/all-MiniLM-L6-v2` (local, fast)
-- **Web UI**: [../frontend/index.html](../frontend/index.html)—chat frontend entrypoint
+- **Web UI**: [../frontends/chat/index.html](../frontends/chat/index.html)—chat frontend entrypoint
 
 ## Data Pipeline & Configuration
 

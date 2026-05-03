@@ -47,7 +47,7 @@ name|relative/path|fallback_branch
 Example:
 
 ```text
-data-management|services/data-management-api|main
+data-management|apis/data-management-api|main
 data-management-frontend|apps/data-management-frontend|main
 direct-routing|services/direct-routing|main
 ```

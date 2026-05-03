@@ -1,5 +1,14 @@
 # Testing & Quality Assurance Report
 
+## Canonical Corpus Sync Gates (Feature 017)
+
+- Impacted-suite classifier: `python3 scripts/ci/impacted_corpus_test_suites.py --mode impacted --emit-json`
+- Full suite selector: `python3 scripts/ci/impacted_corpus_test_suites.py --mode full --emit-json`
+- Threshold policy (line coverage): pact `>=95`, contract `>=95`, integration `>=90`, system `>=85`
+- Provider pact verification:
+  - DM API provider: `apis/data-management-api/tests/pact/test_dm_frontend_provider_verify.py`
+  - Gateway provider: `backend/tests/pact/test_frontend_documents_provider_verify.py`
+
 ## Contract & schema testing matrix (FR-004–FR-008, SC-002–SC-006)
 
 This section is the **single** place for merge-blocking vs informational contract work (replaces earlier `005-wire-services-dm-front` draft fragments).
@@ -8,15 +17,15 @@ This section is the **single** place for merge-blocking vs informational contrac
 
 | Product line | `consumer` name | Scope |
 |--------------|-----------------|-------|
-| Chat (`frontend/`) | `vecinita-chat-frontend` | Gateway/agent HTTP used by the SPA (**FR-007**); non-streaming paths in Pact. |
-| DM (`apps/data-management-frontend/`) | `vecinita-dm-frontend` | Scraper `/health`, `/jobs`, cancel against **data-management API** only (`VITE_DM_API_BASE_URL`); see **primary-flow matrix** in [`specs/007-scraper-via-dm-api/quickstart.md`](specs/007-scraper-via-dm-api/quickstart.md). |
+| Chat (`frontends/chat/`) | `vecinita-chat-frontend` | Gateway/agent HTTP used by the SPA (**FR-007**); non-streaming paths in Pact. |
+| DM (`frontends/data-management/`) | `vecinita-dm-frontend` | Scraper `/health`, `/jobs`, cancel against **data-management API** only (`VITE_DM_API_BASE_URL`); see **primary-flow matrix** in [`specs/007-scraper-via-dm-api/quickstart.md`](specs/007-scraper-via-dm-api/quickstart.md). |
 
-**Broker vs checked-in pactfiles:** this repo uses **checked-in** pact JSON under `frontend/pacts/` and `apps/data-management-frontend/pacts/` for offline PR runs. A broker remains optional for teams that adopt it; never commit broker credentials.
+**Broker vs checked-in pactfiles:** this repo uses **checked-in** pact JSON under `frontends/chat/pacts/` and `frontends/data-management/pacts/` for offline PR runs. A broker remains optional for teams that adopt it; never commit broker credentials.
 
 | When | What runs | Merge-blocking? |
 |------|-----------|-----------------|
-| Push/PR **`test.yml`** (`main` / `develop`) | **`frontend-unit`:** `npm run test:pact` in `frontend/`. **`data-management-frontend-ci`:** `npm run test:pact` in `apps/data-management-frontend/` (same job as Vitest; requires `CROSS_REPO_WORKFLOW_TOKEN` so the DM submodule is checked out). | Yes, when the job runs. |
-| PR (`pr-wiring-contract-consumers.yml`) | `npm run test:pact` in `frontend/` and `apps/data-management-frontend/` | Yes (on matching path filters). |
+| Push/PR **`test.yml`** (`main` / `develop`) | **`frontend-unit`:** `npm run test:pact` in `frontends/chat/`. **`data-management-frontend-ci`:** `npm run test:pact` in `frontends/data-management/` (same job as Vitest; requires `CROSS_REPO_WORKFLOW_TOKEN` so the DM submodule is checked out). | Yes, when the job runs. |
+| PR (`pr-wiring-contract-consumers.yml`) | `npm run test:pact` in `frontends/chat/` and `frontends/data-management/` | Yes (on matching path filters). |
 | Local / release prep | `make pact-verify-providers` (pytest under `backend/tests/pact/`); see `backend/tests/pact/README.md` | Policy: default-branch / pre-release (not every PR). |
 | Manual | `.github/workflows/real-stack-wiring.yml` `workflow_dispatch` | Informational anchor for compose/Render smoke (**FR-006** / SC-003). |
 
@@ -29,12 +38,13 @@ This section is the **single** place for merge-blocking vs informational contrac
 ### Schemathesis & OpenAPI
 
 - **Config:** `backend/schemathesis.toml` (hooks `tests.schemathesis_hooks`, `continue-on-failure`, gateway `/api/v1/(scrape|modal-jobs)` tuning including **modal-jobs** when present in the live gateway OpenAPI).
-- **Default-branch job `backend-schema` (`.github/workflows/test.yml`):** pytest `test_api_schema_schemathesis`, `test_agent_api_schema_schemathesis`, `test_data_management_api_schema_schemathesis` — **FR-005** baseline; DM leg skips without scraper secrets. **DM OpenAPI drift:** `python3 scripts/dm_openapi_diff.py` vs `specs/005-wire-services-dm-front/artifacts/dm-openapi.snapshot.json` (**SC-002**); optional `DATA_MANAGEMENT_SCHEMA_URL` secret.
-- **Makefile:** `make test-schemathesis`, `make test-schemathesis-data-management`, `make test-fr005-schemathesis-baseline`, `make dm-openapi-diff`, `make test-schemathesis-cli` (see `make help`).
+- **Default-branch jobs (`.github/workflows/test.yml`):** three **parallel** jobs — `backend-schema-gateway`, `backend-schema-agent`, `backend-schema-data-management` — run the same pytest files as before (`test_api_schema_schemathesis`, `test_agent_api_schema_schemathesis`, `test_data_management_api_schema_schemathesis`) with **`--tracecov-fail-under=100`** on each leg (**FR-005**). The **gateway** job also runs **DM OpenAPI drift** (`python3 scripts/dm_openapi_diff.py` vs `specs/005-wire-services-dm-front/artifacts/dm-openapi.snapshot.json`, **SC-002**); optional `DATA_MANAGEMENT_SCHEMA_URL` secret. The data-management pytest leg still **skips** without scraper secrets (merge-blocking job stays green). **Branch protection:** if settings still required the old single check `Tests / backend-schema`, add the three new job names (or use an equivalent ruleset) — see `specs/016-faster-render-ci-builds/artifacts/required-checks-inventory.md` (**FR-004**).
+- **`backend-quality`** in `test.yml` and **`quality-gate.yml`** use **`astral-sh/setup-uv`** with **`enable-cache: true`** keyed on `backend/uv.lock` + `backend/pyproject.toml`.
+- **Makefile:** `make test-schemathesis` (sequential), `make test-schemathesis-parallel` (`make -j3` of gateway/agent/data-management targets — optional local mirror of CI parallelism), `make test-schemathesis-data-management`, `make test-fr005-schemathesis-baseline`, `make dm-openapi-diff`, `make test-schemathesis-cli` (see `make help`).
 
 ### Typed DM client (**FR-010**)
 
-- `npm run codegen:api` in `apps/data-management-frontend/` regenerates `src/app/api/types/dm-openapi.generated.ts` from the **same committed snapshot** used by `dm_openapi_diff.py`.
+- `npm run codegen:api` in `frontends/data-management/` regenerates `src/app/api/types/dm-openapi.generated.ts` from the **same committed snapshot** used by `dm_openapi_diff.py`.
 - App types: `src/app/api/types/index.ts` re-exports generated scraper shapes via `modal-types.ts`; corpus DTOs stay in `dm-api-dtos.ts` until a corpus OpenAPI is pinned.
 
 ## Executive Summary
@@ -95,10 +105,10 @@ To keep CI output actionable, service test runs now suppress two known third-par
 
 Current configuration locations:
 
-- `services/model-modal/pyproject.toml` (`[tool.pytest.ini_options].filterwarnings`)
-- `services/model-modal/Makefile` (`PYTHONWARNINGS`)
-- `services/scraper/pyproject.toml` (`[tool.pytest.ini_options].filterwarnings`)
-- `services/scraper/Makefile` (`PYTHONWARNINGS`)
+- `modal-apps/model-modal/pyproject.toml` (`[tool.pytest.ini_options].filterwarnings`)
+- `modal-apps/model-modal/Makefile` (`PYTHONWARNINGS`)
+- `modal-apps/scraper/pyproject.toml` (`[tool.pytest.ini_options].filterwarnings`)
+- `modal-apps/scraper/Makefile` (`PYTHONWARNINGS`)
 
 This keeps test logs focused on regressions and does not change test assertions or coverage thresholds.
 
@@ -204,9 +214,9 @@ This explains why tests needed adjustment when `.env` contains `MODAL_EMBEDDING_
 
 ## OpenAPI Schema Validation (Schemathesis)
 
-**Offline (pytest / CI):** Schemathesis exercises the **gateway** and **agent** OpenAPI descriptions in-process with mocked upstreams (`make test-schemathesis-gateway`, `make test-schemathesis-agent`). The **data-management (scraper) API** also has an offline ASGI suite under [`services/scraper/tests/integration/test_openapi_schemathesis.py`](services/scraper/tests/integration/test_openapi_schemathesis.py) (runs with `make test` in `services/scraper/` / CI `scraper-ci`).
+**Offline (pytest / CI):** Schemathesis exercises the **gateway** and **agent** OpenAPI descriptions in-process with mocked upstreams (`make test-schemathesis-gateway`, `make test-schemathesis-agent`). The **data-management (scraper) API** also has an offline ASGI suite under [`modal-apps/scraper/tests/integration/test_openapi_schemathesis.py`](modal-apps/scraper/tests/integration/test_openapi_schemathesis.py) (runs with `make test` in `modal-apps/scraper/` / CI `scraper-ci`).
 
-**Live pytest — data-management public OpenAPI:** [`backend/tests/integration/test_data_management_api_schema_schemathesis.py`](backend/tests/integration/test_data_management_api_schema_schemathesis.py) loads the deployed spec (default lx27) and runs positive-generation Schemathesis with TraceCov. Tests are **skipped** when neither `SCRAPER_SCHEMATHESIS_BEARER` nor `SCRAPER_API_KEYS` is set (CI without secrets passes). For a strict **100%** TraceCov gate on that surface only, use **`make test-schemathesis-data-management`** (or `cd backend && make test-schema-data-management`). Aggregate **`make test-schemathesis`** runs gateway, then agent, then this file as a third pytest; each leg uses **`--tracecov-fail-under=100`** when it executes (the DM leg still **passes without secrets** because those tests are skipped and TraceCov stays inactive for that session).
+**Live pytest — data-management public OpenAPI:** [`backend/tests/integration/test_data_management_api_schema_schemathesis.py`](backend/tests/integration/test_data_management_api_schema_schemathesis.py) loads the deployed spec (default lx27) and runs positive-generation Schemathesis with TraceCov. Tests are **skipped** when neither `SCRAPER_SCHEMATHESIS_BEARER` nor `SCRAPER_API_KEYS` is set (CI without secrets passes). For a strict **100%** TraceCov gate on that surface only, use **`make test-schemathesis-data-management`** (or `cd backend && make test-schema-data-management`). Aggregate **`make test-schemathesis`** runs gateway, then agent, then this file as a third pytest; each leg uses **`--tracecov-fail-under=100`** when it executes (the DM leg still **passes without secrets** because those tests are skipped and TraceCov stays inactive for that session). **CI** runs the same three files as **parallel** workflow jobs (`backend-schema-*` in `test.yml`).
 
 **Live CLI (`make test-schemathesis-cli`):** [`backend/scripts/run_schemathesis_live.sh`](backend/scripts/run_schemathesis_live.sh) runs Schemathesis against deployed **gateway** and **data-management** OpenAPI. Configure `GATEWAY_SCHEMA_URL` and/or `DATA_MANAGEMENT_SCHEMA_URL` (defaults apply when unset). Set optional **`AGENT_SCHEMA_URL`** (e.g. `https://vecinita-agent-lx27.onrender.com/openapi.json`) for a third pass (positive mode, `/ask` routes excluded). For pytest-based live agent fuzzing, use **`make test-schemathesis-cli-agent`** with `RENDER_AGENT_URL` in `.env`.
 
@@ -279,7 +289,7 @@ The gateway proxies to `REINDEX_SERVICE_URL` (and `REINDEX_TRIGGER_TOKEN`). If t
 - `backend/tests/integration/test_api_schema_schemathesis.py` — gateway ASGI suite (+ `clone_gateway_schema_path_prefix` helper for focused runs)
 - `backend/tests/integration/test_gateway_scrape_stateful.py` — gateway scrape job stateful (mocked)
 - `backend/tests/integration/test_gateway_modal_jobs_stateful.py` — gateway Modal job routes stateful (mocked invoker)
-- `services/scraper/tests/integration/test_openapi_schemathesis.py` — data-management (scraper) ASGI suite
+- `modal-apps/scraper/tests/integration/test_openapi_schemathesis.py` — data-management (scraper) ASGI suite
 - `backend/tests/integration/test_agent_api_schema_schemathesis.py` — agent ASGI suite
 - `backend/tests/integration/test_data_management_api_schema_schemathesis.py` — live public data-management OpenAPI (TraceCov; skipped without scraper auth)
 - `backend/tests/live/test_live_schemathesis.py` — live agent Schemathesis (+ isolated `GET /ask` budget)
@@ -291,6 +301,7 @@ The gateway proxies to `REINDEX_SERVICE_URL` (and `REINDEX_TRIGGER_TOKEN`). If t
 
 ```bash
 make test-schemathesis                    # gateway, then agent, then data-management (third pytest; DM skipped without keys)
+make test-schemathesis-parallel             # same three legs as make -j3 (optional; high CPU/RAM)
 make test-schemathesis-gateway
 make test-schemathesis-gateway-stateful
 make test-schemathesis-agent

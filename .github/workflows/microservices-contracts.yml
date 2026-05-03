@@ -35,7 +35,7 @@ jobs:
           token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
       - name: Checkout required service submodules
-        run: git submodule update --init --depth 1 services/model-modal
+        run: git submodule update --init --depth 1 modal-apps/model-modal
 
       - name: Build selected microservices images
         run: |

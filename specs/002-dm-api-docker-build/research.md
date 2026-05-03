@@ -17,7 +17,7 @@
 
 **Alternatives considered**:
 
-- **Optimize a different Dockerfile** (e.g. under `services/data-management-api/`) — **rejected**
+- **Optimize a different Dockerfile** (e.g. under `apis/data-management-api/`) — **rejected**
   for production scope: blueprint explicitly builds **`services/scraper`** to avoid nested submodule
   init on Render.
 - **Require prebuilt registry images only** — deferred: would change deploy workflow and ownership;

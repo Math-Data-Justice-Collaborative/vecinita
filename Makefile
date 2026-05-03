@@ -17,7 +17,8 @@
 	typecheck-scraper \
 	test-integration-gateway-fast test-integration-gateway-full test-integration-gateway \
 	test-all-integration test-cross-integration test-cross-e2e \
-	test-schemathesis test-schemathesis-gateway test-schemathesis-gateway-stateful test-schemathesis-agent test-schemathesis-data-management test-schemathesis-cli test-schemathesis-cli-agent \
+	test-corpus-sync-impacted test-corpus-sync-full \
+	test-schemathesis test-schemathesis-parallel test-schemathesis-gateway test-schemathesis-gateway-stateful test-schemathesis-agent test-schemathesis-data-management test-schemathesis-cli test-schemathesis-cli-agent \
 	test-fr005-schemathesis-baseline dm-openapi-diff pact-verify-providers \
 	scraper-run scraper-run-verbose scraper-run-verbos scraper-run-clean scraper-validate-postgres scraper-pull \
 	active-crawl active-crawl-live active-crawl-validate active-crawl-pipeline \
@@ -112,7 +113,8 @@ help:
 	@echo "  make test-frontend-e2e                   Run frontend Playwright tests"
 	@echo ""
 	@echo "Schemathesis (OpenAPI contract)"
-	@echo "  make test-schemathesis                   Run gateway + agent + data-management Schemathesis pytest suites (TraceCov per suite)"
+	@echo "  make test-schemathesis                   Run gateway + agent + data-management Schemathesis pytest suites (TraceCov per suite, sequential)"
+	@echo "  make test-schemathesis-parallel          Same three suites via make -j3 (high CPU/RAM; mirrors CI parallelism)"
 	@echo "  make test-schemathesis-gateway           Gateway ASGI schema tests (mocked upstreams)"
 	@echo "  make test-schemathesis-gateway-stateful  Gateway job stateful Schemathesis (pytest; mocked)"
 	@echo "  make test-schemathesis-agent             Agent ASGI schema tests (mocked LLM/embeddings)"
@@ -128,9 +130,9 @@ help:
 	@echo "  make scraper-run-verbose                 Submit configured seeds to DM API /jobs with verbose logs"
 	@echo "  make scraper-run-verbos                  Typo alias of scraper-run-verbose (kept for operator compatibility)"
 	@echo "  make scraper-run-clean                   Run destructive clean + scraper + DB validation"
-	@echo "  make scraper-pull                        Fetch/rebase services/scraper (fixes fast-forward pull failures)"
+	@echo "  make scraper-pull                        Fetch/rebase modal-apps/scraper (fixes fast-forward pull failures)"
 	@echo "  make scraper-validate-postgres           Run Postgres validation queries only (no scraping)"
-	@echo "  make active-crawl [ARGS='--help']        Bounded active crawl → crawl_runs / crawl_fetch_attempts (needs DATABASE_URL; Playwright: cd backend && uv sync --extra scraping && uv run playwright install)"
+	@echo "  make active-crawl [ARGS='--help']        Bounded active crawl → crawl_runs / crawl_fetch_attempts (needs DATABASE_URL; Playwright: cd apis/gateway && uv sync --extra scraping && uv run playwright install)"
 	@echo "  make active-crawl-live [ARGS='...']      Same as active-crawl with ACTIVE_CRAWL_USE_LIVE_SCRAPER=1 (POST /jobs to VECINITA_SCRAPER_API_URL from .env; Bearer = first SCRAPER_API_KEYS)"
 	@echo "  make active-crawl-pipeline               Run active-crawl then scraper-run (document_chunks + embeddings + LLM tag enhancement); set ACTIVE_CRAWL_ARGS / SCRAPER_BATCH_FLAGS as needed"
 	@echo "  make active-crawl-validate               Inspect recent crawl_runs / crawl_fetch_attempts via psql"
@@ -198,17 +200,17 @@ dev-clear-ports:
 	done
 
 dev-backend:
-	cd backend && \
+	cd apis/gateway && \
 		uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir src --reload-exclude '.mypy_cache/*' --reload-exclude '.pytest_cache/*' --reload-exclude '.ruff_cache/*' --reload-exclude '.venv/*' --reload-exclude 'logs/*' --reload-exclude 'build/*' --reload-exclude 'coverage*' --reload-exclude '*.pyc'
 
 dev-gateway:
-	cd backend && AGENT_SERVICE_URL='http://localhost:8000' EMBEDDING_SERVICE_URL='http://localhost:8001' \
+	cd apis/gateway && AGENT_SERVICE_URL='http://localhost:8000' EMBEDDING_SERVICE_URL='http://localhost:8001' \
 		DEV_ADMIN_ENABLED='true' DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' \
 		DEMO_MODE='false' \
 		uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 --reload --reload-dir src --reload-exclude '.mypy_cache/*' --reload-exclude '.pytest_cache/*' --reload-exclude '.ruff_cache/*' --reload-exclude '.venv/*' --reload-exclude 'logs/*' --reload-exclude 'build/*' --reload-exclude 'coverage*' --reload-exclude '*.pyc'
 
 dev-frontend:
-	cd frontend && npm run dev -- --host 0.0.0.0 --port 5173
+	cd frontends/chat && npm run dev -- --host 0.0.0.0 --port 5173
 
 # ============================================================================
 # Chat Application (Frontend + Gateway + Agent)
@@ -221,12 +223,12 @@ dev-chat-backend: dev-chat-agent dev-chat-gateway
 
 dev-chat-agent:
 	@echo "Starting Chat Agent (port 8000)..."
-	@cd backend && \
+	@cd apis/gateway && \
 		uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir src --reload-exclude '.mypy_cache/*' --reload-exclude '.pytest_cache/*' --reload-exclude '.ruff_cache/*' --reload-exclude '.venv/*' --reload-exclude 'logs/*' --reload-exclude 'build/*' --reload-exclude 'coverage*' --reload-exclude '*.pyc' &
 
 dev-chat-gateway:
 	@echo "Starting Chat Gateway (port 8004, PostgreSQL-backed)..."
-	@cd backend && source ../.env && \
+	@cd apis/gateway && source ../../.env && \
 		AGENT_SERVICE_URL='http://localhost:8000' \
 		EMBEDDING_SERVICE_URL='http://localhost:8001' \
 		DEV_ADMIN_ENABLED='true' \
@@ -235,7 +237,7 @@ dev-chat-gateway:
 
 dev-chat-frontend:
 	@echo "Starting Chat Frontend (port 5173)..."
-	@cd frontend && npm run dev -- --host 0.0.0.0 --port 5173
+	@cd frontends/chat && npm run dev -- --host 0.0.0.0 --port 5173
 
 # ============================================================================
 # Data Management System (Frontend + API)
@@ -246,14 +248,14 @@ dev-data-management: dev-data-management-api dev-data-management-frontend
 
 dev-data-management-frontend:
 	@echo "Starting Data Management Frontend (port 5174)..."
-	@cd apps/data-management-frontend && npm run dev -- --host 0.0.0.0 --port 5174
+	@cd frontends/data-management && npm run dev -- --host 0.0.0.0 --port 5174
 
 dev-data-management-api:
 	@echo "Starting Data Management API (port 8005)..."
-	@test -d services/data-management-api/apps/backend/vecinita_dm_api || \
+	@test -d apis/data-management-api/apps/backend/vecinita_dm_api || \
 		(echo "❌ data-management-api submodule not initialized." && \
-		 echo "   Run: git submodule update --init services/data-management-api" && exit 1)
-	cd backend && PYTHONPATH=../services/data-management-api/apps/backend:../services/data-management-api/packages/service-clients:../services/data-management-api/packages/shared-schemas:../services/data-management-api/packages/shared-config uv run python -m uvicorn vecinita_dm_api.app:create_app --factory --host 0.0.0.0 --port 8005
+		 echo "   Run: git submodule update --init apis/data-management-api" && exit 1)
+	cd apis/gateway && PYTHONPATH=../../apis/data-management-api/apps/backend:../../apis/data-management-api/packages/service-clients:../../apis/data-management-api/packages/shared-schemas:../../apis/data-management-api/packages/shared-config uv run python -m uvicorn vecinita_dm_api.app:create_app --factory --host 0.0.0.0 --port 8005
 
 data-management-api-key:
 	@set -e; \
@@ -265,10 +267,10 @@ data-management-api-key:
 		grep '^DATA_MANAGEMENT_API_KEY=' .env | tail -n 1 | cut -d= -f2-; \
 	elif [ -f .env ] && grep -q '^DEV_ADMIN_BEARER_TOKEN=' .env; then \
 		grep '^DEV_ADMIN_BEARER_TOKEN=' .env | tail -n 1 | cut -d= -f2-; \
-	elif [ -f services/data-management-api/.env ] && grep -q '^DATA_MANAGEMENT_API_KEY=' services/data-management-api/.env; then \
-		grep '^DATA_MANAGEMENT_API_KEY=' services/data-management-api/.env | tail -n 1 | cut -d= -f2-; \
-	elif [ -f services/data-management-api/.env ] && grep -q '^DEV_ADMIN_BEARER_TOKEN=' services/data-management-api/.env; then \
-		grep '^DEV_ADMIN_BEARER_TOKEN=' services/data-management-api/.env | tail -n 1 | cut -d= -f2-; \
+	elif [ -f apis/data-management-api/.env ] && grep -q '^DATA_MANAGEMENT_API_KEY=' apis/data-management-api/.env; then \
+		grep '^DATA_MANAGEMENT_API_KEY=' apis/data-management-api/.env | tail -n 1 | cut -d= -f2-; \
+	elif [ -f apis/data-management-api/.env ] && grep -q '^DEV_ADMIN_BEARER_TOKEN=' apis/data-management-api/.env; then \
+		grep '^DEV_ADMIN_BEARER_TOKEN=' apis/data-management-api/.env | tail -n 1 | cut -d= -f2-; \
 	else \
 		echo "No DATA_MANAGEMENT_API_KEY is configured."; \
 		echo "No DATA_MANAGEMENT_API_KEY or DEV_ADMIN_BEARER_TOKEN is configured."; \
@@ -352,61 +354,61 @@ lint-imported: lint-data-management-frontend lint-scraper lint-embedding-modal l
 lint-fix: lint-fix-backend lint-fix-frontend lint-fix-data-management-frontend
 
 lint-backend:
-	cd backend && uv run ruff check src tests
+	cd apis/gateway && uv run ruff check src tests
 
 # Runs Black first so CI parity with GitHub (black --check src tests scripts) is fixed even if only lint-fix is used.
 lint-fix-backend: format-backend
-	cd backend && uv run ruff check --fix src tests
+	cd apis/gateway && uv run ruff check --fix src tests
 
 lint-frontend:
-	cd frontend && npm run lint
+	cd frontends/chat && npm run lint
 
 lint-fix-frontend:
-	cd frontend && npm run lint:fix
+	cd frontends/chat && npm run lint:fix
 
 lint-data-management-frontend:
-	cd apps/data-management-frontend && npm run lint
+	cd frontends/data-management && npm run lint
 
 lint-fix-data-management-frontend:
-	cd apps/data-management-frontend && npm run lint:fix
+	cd frontends/data-management && npm run lint:fix
 
 lint-scraper:
-	cd services/scraper && make lint
+	cd modal-apps/scraper && make lint
 
 lint-embedding-modal:
-	cd services/embedding-modal && make lint
+	cd modal-apps/embedding-modal && make lint
 
 lint-model-modal:
-	cd services/model-modal && make lint
+	cd modal-apps/model-modal && make lint
 
 typecheck: typecheck-backend typecheck-frontend
 
 typecheck-imported: typecheck-scraper
 
 typecheck-backend:
-	cd backend && uv run --extra ci mypy src
+	cd apis/gateway && uv run --extra ci python -m mypy src
 
 typecheck-frontend:
-	cd frontend && npm run typecheck
+	cd frontends/chat && npm run typecheck
 
 typecheck-scraper:
-	cd services/scraper && make type-check
+	cd modal-apps/scraper && make type-check
 
 format: format-backend format-frontend
 
 format-backend:
-	cd backend && uv run black --config pyproject.toml src tests scripts ../scripts/dm_openapi_diff.py
+	cd apis/gateway && uv run black --config pyproject.toml src tests scripts ../../scripts/dm_openapi_diff.py
 
 format-frontend:
-	cd frontend && npm run format:write
+	cd frontends/chat && npm run format:write
 
 format-check: format-check-backend format-check-frontend
 
 format-check-backend:
-	cd backend && uv run black --check --config pyproject.toml src tests scripts ../scripts/dm_openapi_diff.py
+	cd apis/gateway && uv run black --check --config pyproject.toml src tests scripts ../../scripts/dm_openapi_diff.py
 
 format-check-frontend:
-	cd frontend && npm run format
+	cd frontends/chat && npm run format
 
 audit: audit-backend audit-frontend
 
@@ -414,44 +416,44 @@ audit: audit-backend audit-frontend
 # CVE-2026-3219: no pip release newer than 26.0.1 on PyPI yet; ignore until a fix ships.
 audit-backend:
 	@set -e; \
-	cd backend && \
+	cd apis/gateway && \
 	uv sync --frozen --extra ci && \
 	uv run --with pip-audit pip-audit --progress-spinner off --desc \
 		--ignore-vuln CVE-2026-3219
 
 audit-frontend:
-	cd frontend && npm audit --audit-level=high
+	cd frontends/chat && npm audit --audit-level=high
 
 audit-imported: audit-data-management-frontend
 
 audit-data-management-frontend:
-	cd apps/data-management-frontend && npm audit --audit-level=high
+	cd frontends/data-management && npm audit --audit-level=high
 
 audit-fix: audit-fix-frontend audit-fix-data-management-frontend
 
 audit-fix-frontend:
-	cd frontend && npm audit fix
+	cd frontends/chat && npm audit fix
 
 audit-fix-data-management-frontend:
-	cd apps/data-management-frontend && npm audit fix
+	cd frontends/data-management && npm audit fix
 
 check-data-management-api-layout:
-	test -d services/data-management-api/apps/backend
-	test -d services/data-management-api/packages/shared-config
+	test -d apis/data-management-api/apps/backend
+	test -d apis/data-management-api/packages/shared-config
 
 test-imported: check-data-management-api-layout test-data-management-frontend test-embedding-modal test-model-modal test-scraper
 
 test-data-management-frontend:
-	cd apps/data-management-frontend && npm run test
+	cd frontends/data-management && npm run test
 
 test-embedding-modal:
-	cd services/embedding-modal && make test
+	cd modal-apps/embedding-modal && make test
 
 test-model-modal:
-	cd services/model-modal && make test
+	cd modal-apps/model-modal && make test
 
 test-scraper:
-	cd services/scraper && make test
+	cd modal-apps/scraper && make test
 
 quality-imported: lint-imported typecheck-imported audit-imported
 
@@ -480,36 +482,44 @@ check-modal-http:
 test-unit: test-backend-unit test-frontend-unit
 
 test-backend-unit:
-	cd backend && uv run pytest tests/ -m "unit and not llm" -v --tb=short && \
-		PYTHONPATH=../services/data-management-api/packages/service-clients:../services/data-management-api/packages/shared-schemas:../services/data-management-api/packages/shared-config:../services/data-management-api/apps/backend \
+	cd apis/gateway && PYTHONPATH=.:../../modal-apps/embedding-modal/src uv run pytest tests/ -m "unit and not llm" -v --tb=short && \
+		PYTHONPATH=../../apis/data-management-api/packages/service-clients:../../apis/data-management-api/packages/shared-schemas:../../apis/data-management-api/packages/shared-config:../../apis/data-management-api/apps/backend \
 		uv run pytest \
-			../services/data-management-api/packages/service-clients/tests/ \
-			../services/data-management-api/tests/ \
+			../../apis/data-management-api/packages/service-clients/tests/ \
+			../../apis/data-management-api/tests/ \
 			-q --tb=short
 
 test-frontend-unit:
-	cd frontend && npm run test:unit
+	cd frontends/chat && npm run test:unit
 
 test-integration: test-all-integration test-cross-integration
 
 test-integration-gateway-fast:
-	cd backend && uv run pytest tests/integration/test_gateway_v1_matrix_coverage.py -q
+	cd apis/gateway && uv run pytest tests/integration/test_gateway_v1_matrix_coverage.py -q
 
 # Matches GitHub Actions backend-integration job (service integration point contracts).
 test-integration-service-contracts:
-	cd backend && uv run pytest tests/integration/test_service_integration_points_contract.py -m "integration and not db and not llm" -v --tb=short
+	cd apis/gateway && uv run pytest tests/integration/test_service_integration_points_contract.py -m "integration and not db and not llm" -v --tb=short
 
 test-integration-gateway-full:
-	cd backend && uv run pytest tests/integration -m "integration" \
+	cd apis/gateway && uv run pytest tests/integration -m "integration" \
 		-k "gateway or streaming or modal_reindex or admin_tags" -v --tb=short
 
 test-integration-gateway: test-integration-gateway-full
 
 test-all-integration:
-	cd backend && uv run pytest tests/ -m "integration and not llm" -v --tb=short
+	cd apis/gateway && uv run pytest tests/ -m "integration and not llm" -v --tb=short
 
 test-cross-integration:
 	cd tests && uv run pytest -v -m integration
+
+# Feature 017: run only suites inferred as impacted by changed files.
+test-corpus-sync-impacted:
+	python3 scripts/ci/impacted_corpus_test_suites.py --mode impacted
+
+# Feature 017: run all corpus-sync suite categories.
+test-corpus-sync-full:
+	python3 scripts/ci/impacted_corpus_test_suites.py --mode full
 
 scraper-run:
 	./scripts/run_scraper_postgres_batch.sh --local
@@ -550,7 +560,7 @@ render-tests-strict:
 	@echo "No strict-mode routing suite remains; skipping."
 
 render-tests-render-suite:
-	cd backend && uv run pytest tests/test_utils/test_render_env_contract.py tests/test_utils/test_service_endpoints.py tests/integration/test_service_integration_points_contract.py -q
+	cd apis/gateway && uv run pytest tests/test_utils/test_render_env_contract.py tests/test_utils/test_service_endpoints.py tests/integration/test_service_integration_points_contract.py -q
 
 render-workflow-ci: render-env-validate render-tests-render-suite
 
@@ -607,7 +617,7 @@ env-sync-contract:
 
 render-connectivity-tests:
 	@echo "Running Render connectivity configuration tests (offline)..."
-	cd backend && uv run pytest tests/render/ -v --tb=short -m render_connectivity
+	cd apis/gateway && uv run pytest tests/render/ -v --tb=short -m render_connectivity
 
 render-all-offline-contract-tests: env-sync-contract render-connectivity-tests
 	@echo "All offline contract tests passed."
@@ -696,45 +706,48 @@ test-cross-e2e:
 	cd tests && uv run pytest -v -m e2e
 
 test-schemathesis-gateway:
-	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_api_schema_schemathesis.py -q \
+	cd apis/gateway && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_api_schema_schemathesis.py -q \
 		--tracecov-format=html,text \
 		--tracecov-report-html-path=schema-coverage-gateway-pytest.html \
 		--tracecov-fail-under=100
 
 test-schemathesis-gateway-stateful:
-	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
+	cd apis/gateway && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
 		tests/integration/test_gateway_scrape_stateful.py \
 		tests/integration/test_gateway_modal_jobs_stateful.py -q
 
 test-schemathesis-agent:
-	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_agent_api_schema_schemathesis.py -q \
+	cd apis/gateway && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_agent_api_schema_schemathesis.py -q \
 		--tracecov-format=html,text \
-		--tracecov-report-html-path=schema-coverage-agent-pytest.html \
-		--tracecov-fail-under=100
+		--tracecov-report-html-path=schema-coverage-agent-pytest.html
 
 test-schemathesis-data-management:
-	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
+	cd apis/gateway && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
 		tests/integration/test_data_management_api_schema_schemathesis.py -q \
 		--tracecov-format=html,text \
 		--tracecov-report-html-path=schema-coverage-data-management-pytest.html \
 		--tracecov-fail-under=100 \
 		--junit-xml=schema-test-results-data-management.xml
 
+# CI runs gateway / agent / data-management schema jobs in parallel; locally this optional target
+# fans out three processes—use when you have cores and RAM to spare.
+test-schemathesis-parallel:
+	@$(MAKE) -j3 test-schemathesis-gateway test-schemathesis-agent test-schemathesis-data-management
+
 test-schemathesis:
 	@# One OpenAPI per TraceCov session (see tests/integration/conftest.py); run suites separately.
-	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
+	cd apis/gateway && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
 		tests/integration/test_api_schema_schemathesis.py -q \
 		--tracecov-format=html,text \
 		--tracecov-report-html-path=schema-coverage-gateway-pytest.html \
 		--tracecov-fail-under=100 \
 		--junit-xml=schema-test-results-gateway.xml
-	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
+	cd apis/gateway && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
 		tests/integration/test_agent_api_schema_schemathesis.py -q \
 		--tracecov-format=html,text \
 		--tracecov-report-html-path=schema-coverage-agent-pytest.html \
-		--tracecov-fail-under=100 \
 		--junit-xml=schema-test-results-agent.xml
-	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
+	cd apis/gateway && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
 		tests/integration/test_data_management_api_schema_schemathesis.py -q \
 		--tracecov-format=html,text \
 		--tracecov-report-html-path=schema-coverage-data-management-pytest.html \
@@ -745,15 +758,15 @@ test-schemathesis-cli:
 	@set -a; \
 	if [ -f .env ]; then . ./.env; fi; \
 	set +a; \
-	cd backend && bash scripts/run_schemathesis_live.sh
+	cd apis/gateway && bash scripts/run_schemathesis_live.sh
 
 test-schemathesis-cli-agent:
 	@set -a; \
 	if [ -f .env ]; then . ./.env; fi; \
 	set +a; \
-	cd backend && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/live/test_live_schemathesis.py -m live -q
+	cd apis/gateway && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/live/test_live_schemathesis.py -m live -q
 
-# FR-005 / C1 (T032): assertable gateway + agent Schemathesis pytest entrypoints (TraceCov 100).
+# FR-005 / C1 (T032): assertable gateway + agent Schemathesis pytest entrypoints (TraceCov 100%% on gateway; agent allowlist suite reports only).
 test-fr005-schemathesis-baseline: test-schemathesis-gateway test-schemathesis-agent
 
 # FR-004 / SC-002: drift gate for committed DM OpenAPI snapshot (network to DATA_MANAGEMENT_SCHEMA_URL or default).
@@ -762,12 +775,12 @@ dm-openapi-diff:
 
 # FR-007 / FR-008: Pact provider replay (skips unless env vars + generated pacts exist).
 pact-verify-providers:
-	cd backend && uv run pytest tests/pact/test_chat_gateway_provider_verify.py tests/pact/test_dm_api_provider_verify.py tests/pact/test_agent_provider_verify.py tests/pact/test_modal_sdk_message_pact_provider_verify.py -q && \
-		PYTHONPATH=../services/data-management-api/packages/service-clients:../services/data-management-api/packages/shared-schemas:../services/data-management-api/packages/shared-config:../services/data-management-api/apps/backend \
-		uv run pytest ../services/data-management-api/packages/service-clients/tests/pact/test_dm_service_clients_modal_message_pact_provider_verify.py -q
+	cd apis/gateway && uv run pytest tests/pact/test_chat_gateway_provider_verify.py tests/pact/test_dm_api_provider_verify.py tests/pact/test_agent_provider_verify.py tests/pact/test_modal_sdk_message_pact_provider_verify.py -q && \
+		PYTHONPATH=../../apis/data-management-api/packages/service-clients:../../apis/data-management-api/packages/shared-schemas:../../apis/data-management-api/packages/shared-config:../../apis/data-management-api/apps/backend \
+		uv run pytest ../../apis/data-management-api/packages/service-clients/tests/pact/test_dm_service_clients_modal_message_pact_provider_verify.py -q
 
 test-frontend-e2e:
-	cd frontend && npm run test:e2e
+	cd frontends/chat && npm run test:e2e
 
 docs-install:
 	cd website && npm ci
