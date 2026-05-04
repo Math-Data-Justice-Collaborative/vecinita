@@ -1,0 +1,36 @@
+# Feature 019: single merge gate job — validate committed manifest + attestation only (FR-004, FR-010).
+name: CI attestation gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+    inputs:
+      max_age_hours:
+        description: Override max attestation age (hours); default 48
+        required: false
+        type: string
+        default: "48"
+
+jobs:
+  attestation-gate:
+    name: attestation-gate
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate manifest and attestation
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          MAX_AGE_INPUT: ${{ github.event.inputs.max_age_hours }}
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ] && [ -n "${MAX_AGE_INPUT}" ]; then
+            export CI_ATTESTATION_MAX_AGE_HOURS="${MAX_AGE_INPUT}"
+          fi
+          python3 scripts/ci/ci_attestation_validate.py \
+            --manifest .ci/required-checks.json \
+            --attestation .ci/ci-attestation.json \
+            --max-age-hours "${CI_ATTESTATION_MAX_AGE_HOURS:-48}"

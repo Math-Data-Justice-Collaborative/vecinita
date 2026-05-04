@@ -109,6 +109,29 @@ make test-e2e
 make test-microservices-contracts
 ```
 
+### CI attestation gate (feature 019)
+
+Merge blocking for the manifest-defined bar uses **committed JSON** under `.ci/` plus a single GitHub Actions job (**`ci-attestation-gate.yml`**, job **`attestation-gate`**). Hosted CI does **not** re-run `make ci` for merge proof (**Option A**); you run checks locally and refresh the attestation.
+
+```bash
+make ci-attestation           # runs manifest commands (includes make ci), writes .ci/ci-attestation.json
+make ci-attestation-validate  # same validation as CI
+```
+
+- **Changing checks:** edit `.ci/required-checks.json`, then rerun `make ci-attestation` and commit both files.
+- **Risks (must be documented for contributors):** no mandatory hosted re-run of manifest checks for merge; fork/untrusted machine attestation; environment drift; bad-faith or mistaken claims. Optional mitigations stay advisory unless promoted via manifest + **FR-010** (see `specs/019-contract-ci-json-gate/spec.md` **SC-005**).
+- **Details:** [`specs/019-contract-ci-json-gate/quickstart.md`](./specs/019-contract-ci-json-gate/quickstart.md).
+
+#### SC-003 — Documentation-only review checklist (five questions)
+
+For reviewers **not** involved in authoring the gate docs: **30 minutes**, published contributor docs only, answer all five. **Success:** ≥4 correct per reviewer; average across **three** independent reviewers on the same doc revision. Maintainer answer key: [`specs/019-contract-ci-json-gate/artifacts/sc-003-review-answer-key.md`](./specs/019-contract-ci-json-gate/artifacts/sc-003-review-answer-key.md).
+
+1. If `.ci/ci-attestation.json` is missing but `.ci/required-checks.json` is valid, does the attestation gate job pass?
+2. Does merge under this gate require GitHub Actions to re-run `make ci` on the PR runner for the same change?
+3. Name **two** of the **minimum accepted risks** that contributor-facing docs must list verbatim (see **SC-005**).
+4. You add a new `id` to `.ci/required-checks.json`. What must you do before the gate can pass again?
+5. The attestation’s `generated_at` is **older** than the configured maximum age when the gate runs. Does the job pass?
+
 ### OpenAPI clients and env (feature 015)
 
 Canonical commands live in the root **README** under *OpenAPI clients and Modal HTTP ban* (`make openapi-codegen`, `make openapi-codegen-verify`, `make check-modal-http`). For operator-oriented setup, schema URLs, and staging notes, use [`specs/015-openapi-sdk-clients/quickstart.md`](./specs/015-openapi-sdk-clients/quickstart.md).

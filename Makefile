@@ -29,7 +29,8 @@
 	render-deploy-trigger render-deploy-wait \
 	render-services render-deploy-status render-deploy-show render-service-env render-logs \
 	docs-install docs-serve docs-build docs-deploy-check \
-	openapi-codegen openapi-codegen-verify check-modal-http
+	openapi-codegen openapi-codegen-verify check-modal-http \
+	ci-attestation ci-attestation-validate
 
 help:
 	@echo "Vecinita root Makefile"
@@ -467,6 +468,14 @@ quality-full:
 
 ci: quality-full
 
+# Feature 019: regenerate committed CI attestation from `.ci/required-checks.json` (runs `make ci` and other manifest commands).
+ci-attestation:
+	python3 scripts/ci/ci_attestation_generate.py
+
+# Feature 019: validate manifest + attestation (same logic as the GitHub Actions gate job).
+ci-attestation-validate:
+	python3 scripts/ci/ci_attestation_validate.py
+
 # OpenAPI client regeneration (requires GATEWAY_SCHEMA_URL, DATA_MANAGEMENT_SCHEMA_URL, AGENT_SCHEMA_URL).
 openapi-codegen:
 	@bash scripts/openapi_codegen.sh
@@ -709,7 +718,7 @@ test-schemathesis-gateway:
 	cd apis/gateway && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/integration/test_api_schema_schemathesis.py -q \
 		--tracecov-format=html,text \
 		--tracecov-report-html-path=schema-coverage-gateway-pytest.html \
-		--tracecov-fail-under=100
+		--tracecov-fail-under-operations=100
 
 test-schemathesis-gateway-stateful:
 	cd apis/gateway && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
@@ -726,7 +735,7 @@ test-schemathesis-data-management:
 		tests/integration/test_data_management_api_schema_schemathesis.py -q \
 		--tracecov-format=html,text \
 		--tracecov-report-html-path=schema-coverage-data-management-pytest.html \
-		--tracecov-fail-under=100 \
+		--tracecov-fail-under-operations=100 \
 		--junit-xml=schema-test-results-data-management.xml
 
 # CI runs gateway / agent / data-management schema jobs in parallel; locally this optional target
@@ -740,7 +749,7 @@ test-schemathesis:
 		tests/integration/test_api_schema_schemathesis.py -q \
 		--tracecov-format=html,text \
 		--tracecov-report-html-path=schema-coverage-gateway-pytest.html \
-		--tracecov-fail-under=100 \
+		--tracecov-fail-under-operations=100 \
 		--junit-xml=schema-test-results-gateway.xml
 	cd apis/gateway && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest \
 		tests/integration/test_agent_api_schema_schemathesis.py -q \
@@ -751,7 +760,7 @@ test-schemathesis:
 		tests/integration/test_data_management_api_schema_schemathesis.py -q \
 		--tracecov-format=html,text \
 		--tracecov-report-html-path=schema-coverage-data-management-pytest.html \
-		--tracecov-fail-under=100 \
+		--tracecov-fail-under-operations=100 \
 		--junit-xml=schema-test-results-data-management.xml
 
 test-schemathesis-cli:
@@ -766,7 +775,7 @@ test-schemathesis-cli-agent:
 	set +a; \
 	cd apis/gateway && SCHEMATHESIS_HOOKS=tests.schemathesis_hooks uv run pytest tests/live/test_live_schemathesis.py -m live -q
 
-# FR-005 / C1 (T032): assertable gateway + agent Schemathesis pytest entrypoints (TraceCov 100%% on gateway; agent allowlist suite reports only).
+# FR-005 / C1 (T032): assertable gateway + agent Schemathesis pytest entrypoints (TraceCov operations 100%% on gateway; agent allowlist suite reports only).
 test-fr005-schemathesis-baseline: test-schemathesis-gateway test-schemathesis-agent
 
 # FR-004 / SC-002: drift gate for committed DM OpenAPI snapshot (network to DATA_MANAGEMENT_SCHEMA_URL or default).

@@ -54,3 +54,13 @@ def test_resolve_tracecov_target_mixed_two_disables_tracecov():
 
 def test_resolve_tracecov_target_unrelated():
     assert _resolve_tracecov_target(["tests/unit/test_foo.py::t"]) is None
+
+
+def test_bind_pytest_tracecov_coverage_map_roundtrip():
+    import tests.schemathesis_hooks as sh
+
+    sentinel = object()
+    sh.bind_pytest_tracecov_coverage_map(sentinel)
+    assert getattr(sh, "_PYTEST_TRACECOV_MAP", None) is sentinel
+    sh.bind_pytest_tracecov_coverage_map(None)
+    assert getattr(sh, "_PYTEST_TRACECOV_MAP", None) is None

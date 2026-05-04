@@ -1,0 +1,11 @@
+{
+  "format_version": 1,
+  "run_id": "44444444-4444-4444-8444-444444444444",
+  "generated_at": "2026-05-04T12:00:00Z",
+  "checks": [
+    {
+      "id": "make-ci",
+      "status": "failed"
+    }
+  ]
+}

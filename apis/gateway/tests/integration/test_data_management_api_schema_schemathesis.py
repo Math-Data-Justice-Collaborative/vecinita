@@ -5,7 +5,7 @@ OpenAPI: https://vecinita-data-management-api-v1-lx27.onrender.com/openapi.json
 Requires ``SCRAPER_API_KEYS`` or ``SCRAPER_SCHEMATHESIS_BEARER`` (see ``run_schemathesis_live.sh``).
 Collection skips this file when unset so CI without secrets stays green.
 
-TraceCov: run alone (``make test-schemathesis-data-management``) with ``--tracecov-fail-under=100``
+TraceCov: run alone (``make test-schemathesis-data-management``) with ``--tracecov-fail-under-operations=100``
 for strict schema coverage gates.
 
 **Feature 007** (``specs/007-scraper-via-dm-api``): scrape/job HTTP surfaces on the DM API remain

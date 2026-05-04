@@ -24,6 +24,35 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+# Session ``CoverageMap`` for pytest + Schemathesis (set by ``tests/integration/conftest.py``).
+# TraceCov's pytest plugin only stashes the map; Schemathesis 4.x does not forward recorder events
+# to TraceCov unless VCR/HAR/JUnit/Allure writers are enabled, so we record here in ``after_validate``.
+_PYTEST_TRACECOV_MAP: Any = None
+
+
+def bind_pytest_tracecov_coverage_map(coverage_map: Any) -> None:
+    """Bind or clear the map used by :func:`after_validate` (session autouse in integration conftest)."""
+    global _PYTEST_TRACECOV_MAP
+    _PYTEST_TRACECOV_MAP = coverage_map
+
+
+def _record_pytest_tracecov_from_case_response(case: Any, response: Any) -> None:
+    cov = _PYTEST_TRACECOV_MAP
+    if cov is None or response is None:
+        return
+    operation = getattr(case, "operation", None)
+    if operation is None:
+        return
+    try:
+        from tracecov.schemathesis.helpers import from_response
+    except Exception:  # pragma: no cover - optional during partial installs
+        return
+    try:
+        interaction = from_response(case.method, response)
+        cov.record_schemathesis_interactions(case.method, operation.full_path, [interaction])
+    except Exception:  # pragma: no cover - streaming / odd transports should not break API tests
+        logger.debug("tracecov pytest bridge: skipped record", exc_info=True)
+
 
 def _patch_tracecov_cli_coverage_threshold() -> None:
     """Fail ``schemathesis run`` when TraceCov schema coverage is below a minimum.
@@ -265,7 +294,8 @@ def after_validate(  # noqa: ANN001
     Use for metrics, cassette writers, or failure logging. Keep work cheap: this
     runs for every validated case in examples, coverage, fuzzing, and stateful phases.
     """
-    _ = context, case, response
+    _record_pytest_tracecov_from_case_response(case, response)
+    _ = context
     if not _hooks_verbose() or not results:
         return
     try:

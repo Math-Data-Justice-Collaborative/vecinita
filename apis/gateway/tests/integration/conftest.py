@@ -1,8 +1,9 @@
 """Integration test defaults: TraceCov schema map for Schemathesis pytest runs.
 
 Schemathesis + TraceCov per https://schemathesis.readthedocs.io/en/stable/guides/coverage/
-requires a session ``tracecov_schema`` fixture (see ``tracecov.pytest_plugin``). Without it,
-TraceCov stays dormant even when ``tracecov.schemathesis.install()`` runs (CLI-only).
+needs a session ``tracecov_schema`` fixture (see ``tracecov.pytest_plugin``). Without it,
+the coverage map is not built. ``tracecov.schemathesis.install()`` alone is CLI-oriented;
+pytest recording is wired via ``tests.schemathesis_hooks`` + ``_vecinita_tracecov_pytest_schemathesis_bind``.
 
 We expose one OpenAPI document per pytest session. Mixed suites (more than one of gateway,
 agent, data-management) disable TraceCov (``return None``); run those targets separately
@@ -13,6 +14,7 @@ from __future__ import annotations
 
 import copy
 import os
+from collections.abc import Generator
 from typing import Any
 
 import pytest
@@ -21,6 +23,12 @@ from tests.integration._agent_schemathesis_stable_ops import AGENT_STABLE_OPERAT
 from tests.integration._dm_schemathesis_auth import scraper_bearer_token
 
 _OAS_HTTP_METHODS = frozenset({"get", "put", "post", "delete", "options", "head", "patch", "trace"})
+
+# TraceCov must not require coverage for operations Schemathesis never runs (project config).
+# See ``apis/gateway/schemathesis.toml``: ``POST /api/v1/scrape/reindex`` has ``enabled = false``.
+_GATEWAY_TRACECOV_EXCLUDED_OPERATIONS: frozenset[tuple[str, str]] = frozenset(
+    {("POST", "/api/v1/scrape/reindex")}
+)
 
 
 def _active_nodeids(session: pytest.Session) -> list[str]:
@@ -111,6 +119,39 @@ def _filter_openapi_to_allowed_operations(
     return out
 
 
+def _filter_openapi_excluding_operations(
+    full: dict[str, Any], excluded: frozenset[tuple[str, str]]
+) -> dict[str, Any]:
+    """Drop path operations present in ``excluded`` (same shape as :func:`_filter_openapi_to_allowed_operations`)."""
+    out = copy.deepcopy(full)
+    paths = out.get("paths")
+    if not isinstance(paths, dict):
+        return out
+    new_paths: dict[str, Any] = {}
+    for path, path_item in paths.items():
+        if not isinstance(path_item, dict):
+            new_paths[path] = path_item
+            continue
+        kept: dict[str, Any] = {}
+        passthrough: dict[str, Any] = {}
+        for key, val in path_item.items():
+            kl = key.lower()
+            if kl in _OAS_HTTP_METHODS:
+                if (kl.upper(), path) in excluded:
+                    continue
+                kept[key] = val
+            elif key.startswith("x-"):
+                passthrough[key] = val
+            else:
+                passthrough[key] = val
+        if not kept:
+            continue
+        merged = {**passthrough, **kept}
+        new_paths[path] = merged
+    out["paths"] = new_paths
+    return out
+
+
 def _gateway_openapi_dict() -> dict[str, Any] | None:
     """Gateway OpenAPI for TraceCov without importlib.reload (avoids clashing with tests)."""
     saved: dict[str, str | None] = {}
@@ -148,7 +189,20 @@ def tracecov_schema(request: pytest.FixtureRequest) -> dict[str, Any] | None:
     if target == "agent":
         return _filter_openapi_to_allowed_operations(_agent_openapi_dict(), AGENT_STABLE_OPERATIONS)
     if target == "gateway":
-        return _gateway_openapi_dict()
+        base = _gateway_openapi_dict()
+        if base is None:
+            return None
+        return _filter_openapi_excluding_operations(base, _GATEWAY_TRACECOV_EXCLUDED_OPERATIONS)
     if target == "data-management":
         return _fetch_dm_openapi_dict()
     return None
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _vecinita_tracecov_pytest_schemathesis_bind(tracecov_map: Any) -> Generator[None, None, None]:
+    """Wire TraceCov's session map to ``tests.schemathesis_hooks`` for pytest + Schemathesis."""
+    from tests import schemathesis_hooks
+
+    schemathesis_hooks.bind_pytest_tracecov_coverage_map(tracecov_map)
+    yield
+    schemathesis_hooks.bind_pytest_tracecov_coverage_map(None)

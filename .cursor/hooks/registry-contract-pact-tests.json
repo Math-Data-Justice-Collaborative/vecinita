@@ -185,6 +185,15 @@
       "id": "backend.pact.test_frontend_documents_provider_verify",
       "path_prefixes": ["apis/gateway/tests/pact/test_frontend_documents_provider_verify.py"],
       "command": "cd apis/gateway && uv run pytest tests/pact/test_frontend_documents_provider_verify.py -q --tb=short"
+    },
+    {
+      "id": "backend.contracts.test_ci_attestation_validate_contract",
+      "path_prefixes": [
+        "apis/gateway/tests/contracts/test_ci_attestation_validate_contract.py",
+        "scripts/ci/ci_attestation_validate.py",
+        "specs/019-contract-ci-json-gate/fixtures/"
+      ],
+      "command": "cd apis/gateway && uv run pytest tests/contracts/test_ci_attestation_validate_contract.py -q --tb=short"
     }
   ]
 }

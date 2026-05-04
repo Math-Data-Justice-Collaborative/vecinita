@@ -1,0 +1,11 @@
+{
+  "manifest_version": 1,
+  "checks": [
+    {
+      "id": "make-ci",
+      "title": "Full local CI",
+      "description": "Fixture manifest aligned with contracts/required-checks-manifest.md.",
+      "command": "make ci"
+    }
+  ]
+}
