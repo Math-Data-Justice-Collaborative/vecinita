@@ -47,7 +47,7 @@ Modal Services (representative layout; exact app names follow your Modal workspa
 
 Summarized from [`specs/012-queued-page-ingestion-pipeline/research.md`](../../specs/012-queued-page-ingestion-pipeline/research.md) **Decision 1–2**:
 
-- **Timeouts:** Modal `@app.function` stubs for scraper/processor/chunk/embed workers use explicit **`timeout=`** (seconds) so a hung crawl or embed step cannot wedge a container indefinitely; tune per environment in `services/scraper/src/vecinita_scraper/workers/*.py` after measuring p95 page time.
+- **Timeouts:** Modal `@app.function` stubs for scraper/processor/chunk/embed workers use explicit **`timeout=`** (seconds) so a hung crawl or embed step cannot wedge a container indefinitely; tune per environment in `modal-apps/scraper/src/vecinita_scraper/workers/*.py` after measuring p95 page time.
 - **Invocation:** Prefer **`spawn`** / **`spawn_map`** for drain-driven work where completion is tracked via Postgres/queues rather than blocking the gateway HTTP worker on `.remote()` for long jobs.
 - **Observability:** Pass the gateway **correlation id** into Modal job metadata and worker HTTP headers (`X-Request-Id` on pipeline ingest) so **SC-007** join-up works across Render logs and Modal logs (**Decision 2**).
 
@@ -96,7 +96,7 @@ modal token info
 
 ### Step 2: Deploy Services
 
-Canonical **deploy** entry files (add `src/` to `sys.path` so packages resolve) are `services/embedding-modal/main.py`, `services/model-modal/main.py`, `services/scraper/modal_workers_entry.py`, and `services/scraper/modal_api_entry.py`. Modal 1.x: `@modal.asgi_app()` handlers are **nullary**; see the [Modal 1.0 migration guide](https://modal.com/docs/guide/modal-1-0-migration) and [managing deployments](https://modal.com/docs/guide/managing-deployments).
+Canonical **deploy** entry files (add `src/` to `sys.path` so packages resolve) are `modal-apps/embedding-modal/main.py`, `modal-apps/model-modal/main.py`, `modal-apps/scraper/modal_workers_entry.py`, and `modal-apps/scraper/modal_api_entry.py`. Modal 1.x: `@modal.asgi_app()` handlers are **nullary**; see the [Modal 1.0 migration guide](https://modal.com/docs/guide/modal-1-0-migration) and [managing deployments](https://modal.com/docs/guide/managing-deployments).
 
 ```bash
 # Embedding + model + scraper (workers + HTTP API)
@@ -172,7 +172,7 @@ Modal documents two common patterns ([Apps, Functions, and entrypoints](https://
 2. **Ephemeral app** (`modal run` or `app.run()` in a script) — for local smoke tests or batch jobs: use `with app.run():` and call `.remote()` on the **function object** defined next to your `modal.App` (e.g. a `@app.local_entrypoint()` that calls `embed_query.remote(...)`), as in the Modal guide. Example direct remote entrypoint:
 
    ```bash
-   cd services/embedding-modal
+   cd modal-apps/embedding-modal
    PYTHONPATH=src modal run main.py::app.embed_query -- "hello"
    ```
 
@@ -182,9 +182,9 @@ Modal documents two common patterns ([Apps, Functions, and entrypoints](https://
 
 Continuous deployment follows Modal’s GitHub Actions pattern ([Modal: Continuous deployment](https://modal.com/docs/guide/continuous-deployment)): after the **`Tests`** workflow completes **successfully** on **`main`**, `.github/workflows/modal-deploy.yml` checks out the **same commit** that CI validated and deploys, in order:
 
-1. **Embedding** — `services/embedding-modal/main.py`
-2. **Model** — `services/model-modal/main.py`
-3. **Scraper** — `services/scraper/modal_workers_entry.py` then `modal_api_entry.py`
+1. **Embedding** — `modal-apps/embedding-modal/main.py`
+2. **Model** — `modal-apps/model-modal/main.py`
+3. **Scraper** — `modal-apps/scraper/modal_workers_entry.py` then `modal_api_entry.py`
 
 You can also run **Actions → Modal Deployment → Run workflow** (`workflow_dispatch`) to deploy the selected services from the branch you choose.
 
@@ -347,7 +347,7 @@ curl -fsS -X POST "https://<vecinita-scraper-api-host>/jobs" \
 
 ### Secrets Management
 
-Modal secrets are configured per-app and referenced from each service’s Modal entrypoint (for example `services/scraper/src/vecinita_scraper/api/app.py`).
+Modal secrets are configured per-app and referenced from each service’s Modal entrypoint (for example `modal-apps/scraper/src/vecinita_scraper/api/app.py`).
 
 ```python
 @modal.asgi_app()

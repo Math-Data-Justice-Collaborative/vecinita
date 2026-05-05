@@ -57,7 +57,7 @@
 ## Dependencies and assumptions
 
 - [ ] CHK026 Is dependency on **`TESTING_DOCUMENTATION.md`** version or section pinned so contract gates do not silently move? [Dependency, Traceability, Spec §FR-005, Spec §User Story 3]
-- [ ] CHK027 Is the assumption “**services/data-management-api** exposes scraper-compatible HTTP” validated with a link or version pin to that API’s contract doc? [Assumption, Spec §Assumptions]
+- [ ] CHK027 Is the assumption “**apis/data-management-api** exposes scraper-compatible HTTP” validated with a link or version pin to that API’s contract doc? [Assumption, Spec §Assumptions]
 
 ## Ambiguities and conflicts
 

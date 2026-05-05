@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Define the **server-side** integration contract when `services/data-management-api` calls Modal-deployed apps **without** using public Modal FastAPI URLs for scraper, embedding, or model ingest paths.
+Define the **server-side** integration contract when `apis/data-management-api` calls Modal-deployed apps **without** using public Modal FastAPI URLs for scraper, embedding, or model ingest paths.
 
 ## Modal SDK surface (caller side)
 

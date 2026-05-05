@@ -1,0 +1,11 @@
+{
+  "manifest_version": 1,
+  "checks": [
+    {
+      "id": "make-ci",
+      "title": "Full local CI",
+      "description": "Constitution merge-ready aggregate (see FR-011).",
+      "command": "make ci"
+    }
+  ]
+}

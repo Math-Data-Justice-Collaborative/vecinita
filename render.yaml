@@ -25,8 +25,8 @@ services:
     runtime: docker
     region: virginia
     plan: starter
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    dockerfilePath: ./apis/agent/Dockerfile
+    dockerContext: .
     autoDeployTrigger: checksPass
     healthCheckPath: /health
     envVars:
@@ -167,8 +167,8 @@ services:
     runtime: docker
     region: virginia
     plan: starter
-    dockerfilePath: ./frontend/Dockerfile
-    dockerContext: ./frontend
+    dockerfilePath: ./frontends/chat/Dockerfile
+    dockerContext: ./frontends/chat
     autoDeployTrigger: checksPass
     healthCheckPath: /health
     envVars:
@@ -199,8 +199,8 @@ services:
     runtime: docker
     region: virginia
     plan: starter
-    dockerfilePath: ./backend/Dockerfile.gateway
-    dockerContext: ./backend
+    dockerfilePath: ./apis/gateway/Dockerfile.gateway
+    dockerContext: .
     dockerCommand: /bin/sh ./scripts/start_gateway_render.sh
     autoDeployTrigger: checksPass
     healthCheckPath: /health
@@ -331,8 +331,8 @@ services:
     runtime: docker
     region: virginia
     plan: starter
-    dockerfilePath: ./apps/data-management-frontend/Dockerfile
-    dockerContext: ./apps/data-management-frontend
+    dockerfilePath: ./frontends/data-management/Dockerfile
+    dockerContext: ./frontends/data-management
     autoDeployTrigger: checksPass
     healthCheckPath: /
     envVars:
@@ -348,15 +348,15 @@ services:
         sync: false
 
   # API image is vecinita-scraper. Build from the monorepo's top-level
-  # services/scraper submodule — no nested checkouts under services/data-management-api
+  # modal-apps/scraper submodule — no nested checkouts under apis/data-management-api
   # (backend service submodules removed per 003-consolidate-scraper-dm).
   - type: web
     name: vecinita-data-management-api-v1
     runtime: docker
     region: virginia
     plan: starter
-    dockerfilePath: ./services/scraper/Dockerfile
-    dockerContext: ./services/scraper
+    dockerfilePath: ./modal-apps/scraper/Dockerfile
+    dockerContext: ./modal-apps/scraper
     autoDeployTrigger: checksPass
     healthCheckPath: /health
     envVars:

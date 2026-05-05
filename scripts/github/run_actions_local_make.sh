@@ -46,7 +46,7 @@ echo "quality-gate.yml checks are included in \`make ci\` (via quality-full → 
 
 section "env-sync-contract.yml"
 (
-	cd backend
+	cd apis/gateway
 	SKIP_AGENT_MAIN_IMPORT=true uv run python -m pytest tests/contracts/test_env_sync_contract.py tests/contracts/test_env_sync_github_actions_bundle.py -v --tb=short -m contract
 )
 
@@ -80,7 +80,7 @@ make render-workflow-ci render-connectivity-tests
 
 section "backend-coverage.yml"
 (
-	cd backend
+	cd apis/gateway
 	: >.env
 	{
 		echo "DATABASE_URL=postgresql://test"
@@ -93,7 +93,7 @@ section "backend-coverage.yml"
 		echo "REINDEX_TRIGGER_TOKEN=test-reindex-token"
 		echo "REINDEX_SERVICE_URL=https://example.modal.run"
 	} >>.env
-	export PYTHONPATH="${ROOT}/backend:${ROOT}/services/embedding-modal/src"
+	export PYTHONPATH="${ROOT}/apis/gateway:${ROOT}/modal-apps/embedding-modal/src"
 	export SKIP_AGENT_MAIN_IMPORT=true
 	export EMBEDDING_STRICT_STARTUP=false
 	uv run pytest tests/ -m "not integration and not e2e and not llm" -v --tb=short \
@@ -106,7 +106,7 @@ section "backend-coverage.yml"
 
 section "frontend-coverage.yml"
 (
-	cd frontend
+	cd frontends/chat
 	npm ci
 	npm run test:coverage:unit
 )

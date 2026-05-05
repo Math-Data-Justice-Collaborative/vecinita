@@ -90,7 +90,7 @@ render.yaml              # dockerfilePath + dockerContext for vecinita-data-mana
 ```
 
 **Structure Decision**: Implement under **`services/scraper/`** only for Dockerfile/context
-ignore rules. **Do not** switch production to `services/data-management-api/.../Dockerfile` without
+ignore rules. **Do not** switch production to `apis/data-management-api/.../Dockerfile` without
 an explicit operator decision—that path exists for other workflows but **Render** intentionally
 uses the submodule root per comments in `render.yaml`.
 

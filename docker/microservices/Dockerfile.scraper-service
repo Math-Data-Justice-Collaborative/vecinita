@@ -2,16 +2,16 @@ FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app/services/scraper/src
+    PYTHONPATH=/app/modal-apps/scraper/src
 
 WORKDIR /app
 
-COPY services/scraper/pyproject.toml /app/services/scraper/pyproject.toml
-COPY services/scraper/README.md /app/services/scraper/README.md
-COPY services/scraper/src /app/services/scraper/src
+COPY modal-apps/scraper/pyproject.toml /app/modal-apps/scraper/pyproject.toml
+COPY modal-apps/scraper/README.md /app/modal-apps/scraper/README.md
+COPY modal-apps/scraper/src /app/modal-apps/scraper/src
 
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
-    && pip install --no-cache-dir -e /app/services/scraper
+    && pip install --no-cache-dir -e /app/modal-apps/scraper
 
 EXPOSE 8020
 

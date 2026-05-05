@@ -5,7 +5,7 @@
 
 ## Normative rules
 
-1. **Forbidden**: Any HTTP client library call (`httpx`, `requests`, `urllib.request`, `fetch`, Axios, etc.) whose **request URL host** matches a **blocked pattern** (below), in **any** file under version control—including `services/scraper/` Modal app sources.
+1. **Forbidden**: Any HTTP client library call (`httpx`, `requests`, `urllib.request`, `fetch`, Axios, etc.) whose **request URL host** matches a **blocked pattern** (below), in **any** file under version control—including `modal-apps/scraper/` Modal app sources.
 
 2. **Allowed**: **Modal SDK** usage (`modal.Function.from_name`, `.remote()`, `.spawn`, `.map`, `@app.function`, etc.) for reaching Modal-hosted compute.
 

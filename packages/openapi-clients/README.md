@@ -7,7 +7,7 @@ Typed clients for **Gateway**, **Data Management**, and **Agent** are generated 
 | Path | Generator (`-g`) | Consumers (planned) |
 |------|-------------------|------------------------|
 | `python/gateway/` | `python-pydantic-v1` | `backend/`, shared Python services |
-| `python/data_management/` | `python-pydantic-v1` | `services/data-management-api/` |
+| `python/data_management/` | `python-pydantic-v1` | `apis/data-management-api/` |
 | `python/agent/` | `python-pydantic-v1` | `backend/` |
 | `typescript-axios/gateway/` | `typescript-axios` | `frontend/` |
 | `typescript-axios/data_management/` | `typescript-axios` | `apps/data-management-frontend/` |

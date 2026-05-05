@@ -9,8 +9,8 @@ on:
   pull_request:
     branches: [main, develop]
     paths:
-      - "frontend/**"
-      - "apps/data-management-frontend/**"
+      - "frontends/chat/**"
+      - "frontends/data-management/**"
       - ".github/workflows/pr-wiring-contract-consumers.yml"
 
 concurrency:
@@ -38,25 +38,25 @@ jobs:
           submodules: "false"
 
       - name: Init frontend submodule
-        run: git submodule update --init --depth 1 frontend
+        run: git submodule update --init --depth 1 frontends/chat
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: frontends/chat/package-lock.json
 
       - name: Install dependencies
-        working-directory: frontend
+        working-directory: frontends/chat
         run: npm ci
 
       - name: Pact consumer (Vitest)
-        working-directory: frontend
+        working-directory: frontends/chat
         run: npm run test:pact
 
       - name: Unit tests (Vitest)
-        working-directory: frontend
+        working-directory: frontends/chat
         run: npm run test:unit
 
   dm-frontend-pact:
@@ -71,23 +71,23 @@ jobs:
           token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
       - name: Init data-management frontend submodule
-        run: git submodule update --init --depth 1 apps/data-management-frontend
+        run: git submodule update --init --depth 1 frontends/data-management
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: apps/data-management-frontend/package-lock.json
+          cache-dependency-path: frontends/data-management/package-lock.json
 
       - name: Install dependencies
-        working-directory: apps/data-management-frontend
+        working-directory: frontends/data-management
         run: npm ci
 
       - name: Pact consumer (Vitest)
-        working-directory: apps/data-management-frontend
+        working-directory: frontends/data-management
         run: npm run test:pact
 
       - name: Unit tests (Vitest)
-        working-directory: apps/data-management-frontend
+        working-directory: frontends/data-management
         run: npm run test

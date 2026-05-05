@@ -2,7 +2,7 @@
 
 ## Preconditions
 
-- Monorepo cloned; Python envs for `services/data-management-api` and `backend/` per root docs.
+- Monorepo cloned; Python envs for `apis/data-management-api` and `backend/` per root docs.
 - Optional: Modal account and tokens for **live** function tests (not required for default `pytest` with mocks).
 
 ## Environment variables (conceptual)
@@ -32,7 +32,7 @@ Align with gateway naming where possible:
 
 ```bash
 # DM API tests (from data-management-api workspace / uv)
-cd services/data-management-api && uv run pytest packages/service-clients/tests tests -q
+cd apis/data-management-api && uv run pytest packages/service-clients/tests tests -q
 
 # Gateway / agent policy tests
 cd backend && pytest tests/test_services tests/test_api -q

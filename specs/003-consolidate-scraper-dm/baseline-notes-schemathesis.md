@@ -85,11 +85,11 @@ alignment; document any env-only waiver with owner sign-off here.
 
 ### Remote client parity (**T026**)
 
-- `services/data-management-api/tests/parity/test_remote_clients_parity.py` is exercised from repo root via **`make test-backend-unit`** (PYTHONPATH includes `service-clients` + `shared-schemas`). Last green run bundled with backend unit suite: **2026-04-19** (CI).
+- `apis/data-management-api/tests/parity/test_remote_clients_parity.py` is exercised from repo root via **`make test-backend-unit`** (PYTHONPATH includes `service-clients` + `shared-schemas`). Last green run bundled with backend unit suite: **2026-04-19** (CI).
 
 ### Submodule → HTTP client migration (**T025** / **T027**)
 
-- `rg vecinita_scraper services/data-management-api/packages` → **no** matches.
+- `rg vecinita_scraper apis/data-management-api/packages` → **no** matches.
 - **T027 (2026-04-19)**: Nested DM API submodules `apps/backend/{scraper,embedding,model}-service` removed; `.gitmodules` retains `apps/frontend` only. Root `render.yaml` already builds the data-management API image from monorepo `services/scraper`; standalone DM `Dockerfile` clones [vecinita-scraper](https://github.com/Math-Data-Justice-Collaborative/vecinita-scraper) at build time.
 
 ## Gateway → agent timeout chain (**T031** — measured in code, 2026-04-19)

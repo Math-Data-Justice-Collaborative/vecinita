@@ -18,7 +18,7 @@ Modal worker ──HTTPS──► Render: vecinita-gateway
             Header: X-Scraper-Pipeline-Ingest-Token: <secret>
 ```
 
-**FR-013**: Only **gateway** and **co-released** worker processes (same release train as gateway—typically Modal app deployed from `services/scraper` revision paired in CI/docs) invoke Modal for scrape/embed/LLM stages of **this** pipeline. No third Render web service introduces parallel Modal callers for the same steps without a spec amendment.
+**FR-013**: Only **gateway** and **co-released** worker processes (same release train as gateway—typically Modal app deployed from `modal-apps/scraper` revision paired in CI/docs) invoke Modal for scrape/embed/LLM stages of **this** pipeline. No third Render web service introduces parallel Modal callers for the same steps without a spec amendment.
 
 ## Required / referenced environment variables
 
@@ -32,7 +32,7 @@ Modal worker ──HTTPS──► Render: vecinita-gateway
 
 ## Pipeline stage persistence (normative — resolves analyze **A1**)
 
-**Decision (v1):** Persist **`pipeline_stage`**, **`error_category`**, and related operator fields using **structured data in existing rows** first—e.g. `scraping_jobs.metadata` jsonb and/or a documented prefix in `error_message`—so Modal workers and gateway stays backward-compatible without blocking on DDL. **Only** introduce new SQL columns under `services/scraper/migrations/` when profiling or operator UX requires indexed queries on those fields; then run the explicit migration task (see **T018** in `tasks.md`) and bump contract notes here.
+**Decision (v1):** Persist **`pipeline_stage`**, **`error_category`**, and related operator fields using **structured data in existing rows** first—e.g. `scraping_jobs.metadata` jsonb and/or a documented prefix in `error_message`—so Modal workers and gateway stays backward-compatible without blocking on DDL. **Only** introduce new SQL columns under `modal-apps/scraper/migrations/` when profiling or operator UX requires indexed queries on those fields; then run the explicit migration task (see **T018** in `tasks.md`) and bump contract notes here.
 
 ## Internal pipeline ingest (server-to-server)
 

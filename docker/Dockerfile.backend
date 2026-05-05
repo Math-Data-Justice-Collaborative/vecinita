@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy project manifest (top-level) for dependency resolution if needed
-COPY backend/pyproject.toml ./pyproject.toml
+COPY apis/gateway/pyproject.toml ./pyproject.toml
 
 # Upgrade pip and install combined runtime dependencies into /install
 # Includes agent deps + embedding deps
@@ -41,8 +41,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /install /usr/local
 
 # Copy application code (agent + embedding service)
-COPY backend/src ./src
-COPY backend/scripts ./scripts
+COPY apis/gateway/src ./src
+COPY apis/gateway/scripts ./scripts
 
 # Environment
 ENV PYTHONUNBUFFERED=1 \

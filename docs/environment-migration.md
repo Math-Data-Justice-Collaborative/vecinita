@@ -5,7 +5,7 @@ This document supports **Feature 010 — minimal environment configuration** (`s
 ## Overview
 
 - **Canonical template**: repository root [`.env.example`](../.env.example) lists the full variable catalog, grouped into **`### REQUIRED — default local`** and **`### OPTIONAL PROFILE: <id>`** sections.
-- **Subsidiary templates** (`backend/.env.example`, `frontend/.env.example`, etc.) stay minimal and point to the root catalog (see contract **C4b** in `specs/010-minimal-env-config/contracts/configuration-resolution.md`).
+- **Subsidiary templates** (`backend/.env.example`, `frontends/chat/.env.example`, etc.) stay minimal and point to the root catalog (see contract **C4b** in `specs/010-minimal-env-config/contracts/configuration-resolution.md`).
 - **Legacy names** remain accepted for a published window; runtime warns with **names only** and maps via `config/env_aliases.example.yaml`, Pydantic `AliasChoices`, and backend bootstrap copy in `backend/src/env_deprecation.py`.
 
 ### Anchor targets (FR-010)
@@ -28,7 +28,7 @@ Per **SC-002** clarification, the **pre-change baseline** is the **deduplicated 
 **Snapshot for reproducibility** (post-migration commit capturing this work):
 
 - **Git SHA**: update to the merge commit of this feature when opening the PR (`git rev-parse HEAD` on the merged branch).
-- **Paths union** (repo-relative): `.env.example`, `.env.local.example`, `backend/.env.example`, `frontend/.env.example`, `apps/data-management-frontend/.env.example`, `services/scraper/.env.example`, `services/model-modal/.env.example`, `tests/.env.example`, `deploy/gcp/.env.example`.
+- **Paths union** (repo-relative): `.env.example`, `.env.local.example`, `backend/.env.example`, `frontends/chat/.env.example`, `frontends/data-management/.env.example`, `modal-apps/scraper/.env.example`, `modal-apps/model-modal/.env.example`, `tests/.env.example`, `deploy/gcp/.env.example`.
 
 **Illustrative raw-name union** (all assignment keys in root + former local template, pre-classification): **102** distinct names in root `.env.example` ∪ `.env.local.example` before this feature’s template split (see inventory).
 
@@ -86,10 +86,10 @@ Repo-relative paths (T001 / T002):
 - `.env.example`
 - `.env.local.example`
 - `backend/.env.example`
-- `frontend/.env.example`
-- `apps/data-management-frontend/.env.example`
-- `services/scraper/.env.example`
-- `services/model-modal/.env.example`
+- `frontends/chat/.env.example`
+- `frontends/data-management/.env.example`
+- `modal-apps/scraper/.env.example`
+- `modal-apps/model-modal/.env.example`
 - `tests/.env.example`
 - `deploy/gcp/.env.example`
 
@@ -97,7 +97,7 @@ Repo-relative paths (T001 / T002):
 
 For a follow-up audit, search for `os.getenv` / `load_dotenv` outside:
 
-- `services/data-management-api/packages/shared-config/`
+- `apis/data-management-api/packages/shared-config/`
 - `backend/src/config.py`
 
 Notable call sites include `backend/src/api/main.py`, `backend/src/agent/main.py`, and service `main.py` modules. Wiring every path through shared loaders is **out of MVP** unless listed in `tasks.md`.

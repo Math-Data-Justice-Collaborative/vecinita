@@ -17,8 +17,8 @@ git clone https://github.com/Math-Data-Justice-Collaborative/vecinita
 cd vecinita
 
 # Install dependencies
-cd backend && uv sync
-cd ../frontend && npm install
+cd apis/gateway && uv sync
+cd ../frontends/chat && npm install
 
 # Start the full stack in tmux
 make dev
@@ -33,11 +33,12 @@ make dev-frontend
 
 ```
 vecinita/
-├── backend/           # FastAPI + LangChain/LangGraph
+├── apis/gateway/      # Gateway FastAPI + shared Python `src/`, tests, uv lockfile
+├── apis/agent/        # Agent Dockerfile + canonical `src/agent/` (symlinked from gateway `src/agent`)
 │   ├── src/          # Source code
 │   ├── tests/        # Unit tests
 │   └── pyproject.toml
-├── frontend/          # React + TypeScript + Vite
+├── frontends/chat/    # React + TypeScript + Vite (chat UI submodule)
 │   ├── src/          # React components
 │   ├── docs/         # Frontend documentation
 │   └── package.json
@@ -49,11 +50,11 @@ vecinita/
 ### Canonical scraper
 
 The **only** supported scraper implementation and orchestration code lives under
-[`services/scraper/`](./services/scraper/) (the `vecinita_scraper` package used by Modal, Docker, and CI).
+[`modal-apps/scraper/`](./modal-apps/scraper/) (the `vecinita_scraper` package used by Modal, Docker, and CI).
 
 The **data-management-api** and other backends must **not** duplicate that logic: call a deployed
 scraper over HTTP using `SCRAPER_SERVICE_BASE_URL` and the typed client in
-[`services/data-management-api/packages/service-clients/`](./services/data-management-api/packages/service-clients/)
+[`apis/data-management-api/packages/service-clients/`](./apis/data-management-api/packages/service-clients/)
 (`ScraperClient`). See the normative remote contract in
 [`specs/003-consolidate-scraper-dm/contracts/dm-api-remote-service-integration.md`](./specs/003-consolidate-scraper-dm/contracts/dm-api-remote-service-integration.md).
 
@@ -84,7 +85,7 @@ make lint-frontend
 make typecheck-frontend
 
 # Or run frontend scripts directly
-cd frontend
+cd frontends/chat
 npm run format
 npm run format:write
 npm run lint
@@ -108,6 +109,29 @@ make test-e2e
 make test-microservices-contracts
 ```
 
+### CI attestation gate (feature 019)
+
+Merge blocking for the manifest-defined bar uses **committed JSON** under `.ci/` plus a single GitHub Actions job (**`ci-attestation-gate.yml`**, job **`attestation-gate`**). Hosted CI does **not** re-run `make ci` for merge proof (**Option A**); you run checks locally and refresh the attestation.
+
+```bash
+make ci-attestation           # runs manifest commands (includes make ci), writes .ci/ci-attestation.json
+make ci-attestation-validate  # same validation as CI
+```
+
+- **Changing checks:** edit `.ci/required-checks.json`, then rerun `make ci-attestation` and commit both files.
+- **Risks (must be documented for contributors):** no mandatory hosted re-run of manifest checks for merge; fork/untrusted machine attestation; environment drift; bad-faith or mistaken claims. Optional mitigations stay advisory unless promoted via manifest + **FR-010** (see `specs/019-contract-ci-json-gate/spec.md` **SC-005**).
+- **Details:** [`specs/019-contract-ci-json-gate/quickstart.md`](./specs/019-contract-ci-json-gate/quickstart.md).
+
+#### SC-003 — Documentation-only review checklist (five questions)
+
+For reviewers **not** involved in authoring the gate docs: **30 minutes**, published contributor docs only, answer all five. **Success:** ≥4 correct per reviewer; average across **three** independent reviewers on the same doc revision. Maintainer answer key: [`specs/019-contract-ci-json-gate/artifacts/sc-003-review-answer-key.md`](./specs/019-contract-ci-json-gate/artifacts/sc-003-review-answer-key.md).
+
+1. If `.ci/ci-attestation.json` is missing but `.ci/required-checks.json` is valid, does the attestation gate job pass?
+2. Does merge under this gate require GitHub Actions to re-run `make ci` on the PR runner for the same change?
+3. Name **two** of the **minimum accepted risks** that contributor-facing docs must list verbatim (see **SC-005**).
+4. You add a new `id` to `.ci/required-checks.json`. What must you do before the gate can pass again?
+5. The attestation’s `generated_at` is **older** than the configured maximum age when the gate runs. Does the job pass?
+
 ### OpenAPI clients and env (feature 015)
 
 Canonical commands live in the root **README** under *OpenAPI clients and Modal HTTP ban* (`make openapi-codegen`, `make openapi-codegen-verify`, `make check-modal-http`). For operator-oriented setup, schema URLs, and staging notes, use [`specs/015-openapi-sdk-clients/quickstart.md`](./specs/015-openapi-sdk-clients/quickstart.md).
@@ -130,7 +154,7 @@ make test-integration-gateway-full
 ### Frontend Tests
 
 ```bash
-cd frontend
+cd frontends/chat
 npm run test:unit
 npm run test:watch
 npm run test:coverage
@@ -163,8 +187,8 @@ make test-e2e
 2. **Write code** following project standards
 
 3. **Run tests locally**:
-   - `cd backend && uv run pytest`
-   - `cd frontend && npm test`
+   - `cd apis/gateway && uv run pytest`
+   - `cd frontends/chat && npm test`
    - `cd tests && uv run pytest -v`
 
 4. **Commit with clear messages**:

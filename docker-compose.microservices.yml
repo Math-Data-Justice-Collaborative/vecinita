@@ -30,7 +30,7 @@ services:
 
   model-service:
     build:
-      context: ./services/model-modal
+      context: ./modal-apps/model-modal
       dockerfile: Dockerfile
     container_name: vecinita-model-ms
     environment:
@@ -74,8 +74,8 @@ services:
 
   chat-agent:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apis/agent/Dockerfile
     container_name: vecinita-chat-agent-ms
     command: ["sh", "-c", "uvicorn src.agent.main:app --host 0.0.0.0 --port 8000"]
     environment:
@@ -97,8 +97,8 @@ services:
 
   chat-gateway:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apis/gateway/Dockerfile.gateway
     container_name: vecinita-chat-gateway-ms
     command: ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port 8004"]
     environment:
@@ -119,7 +119,7 @@ services:
 
   chat-frontend:
     build:
-      context: ./frontend
+      context: ./frontends/chat
       dockerfile: Dockerfile
       args:
         VITE_GATEWAY_URL: http://localhost:8004/api/v1

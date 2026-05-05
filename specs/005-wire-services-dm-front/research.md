@@ -20,7 +20,7 @@
 
 ## 4. Models and contracts alignment (DM)
 
-- **Decision**: Use **OpenAPI as the contract hub**: export JSON from the running data-management API (same app as `services/data-management-api` image) and either (a) generate TypeScript types for `rag-api` boundaries, or (b) add a CI script that **diffs** exported OpenAPI against a checked-in snapshot and fails on unexpected breaking changes. Treat **`services/data-management-api/packages/shared-schemas`** (e.g. `ScrapeRequest`) as the semantic source that should match FastAPI route models.
+- **Decision**: Use **OpenAPI as the contract hub**: export JSON from the running data-management API (same app as `apis/data-management-api` image) and either (a) generate TypeScript types for `rag-api` boundaries, or (b) add a CI script that **diffs** exported OpenAPI against a checked-in snapshot and fails on unexpected breaking changes. Treat **`apis/data-management-api/packages/shared-schemas`** (e.g. `ScrapeRequest`) as the semantic source that should match FastAPI route models.
 - **Rationale**: Constitution requires explicit contracts; OpenAPI is already the norm for gateway/agent (`GATEWAY_SCHEMA_URL`, `AGENT_SCHEMA_URL`).
 - **Alternatives considered**: Manual-only checklist — rejected; does not scale. Full protobuf — rejected; not in stack.
 

@@ -1,0 +1,9 @@
+[run]
+include =
+    ../modal-apps/embedding-modal/src/vecinita/app.py
+    src/services/embedding/models.py
+    src/utils/tags.py
+
+[report]
+fail_under = 98
+show_missing = true

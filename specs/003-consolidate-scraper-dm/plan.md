@@ -17,7 +17,7 @@ threshold shortfalls).
 Deliver **three** intertwined outcomes: (1) **Operational reliability** — hosted scraping job APIs
 and related persistence paths must not return undocumented `5xx` when dependencies are healthy, and
 must not leak internal DNS names to clients (per **FR-001** / **FR-002**). (2) **Repository
-simplification** — remove `services/data-management-api` git **submodules** for
+simplification** — remove `apis/data-management-api` git **submodules** for
 `scraper-service`, `embedding-service`, and `model-service` in favor of **remote HTTP integration
 only** (clarification **B**), with a **single authoritative** scraper source tree under
 `services/scraper`. (3) **Contract-test quality** — drive live **Schemathesis** (and related hooks)
@@ -42,8 +42,8 @@ test-schemathesis-cli`** / `backend/scripts/run_schemathesis_live.sh`; hooks in
 `backend/tests/schemathesis_hooks.py`; `make ci` before merge.  
 **Target Platform**: Render (gateway, DM API, scraper image); Modal workers; local Docker for parity.  
 **Project Type**: Monorepo — `backend/` (gateway), `services/scraper/` (canonical scraper),
-`services/data-management-api/apps/backend/` (DM API; currently **submodules** per
-[.gitmodules](../../services/data-management-api/.gitmodules)).  
+`apis/data-management-api/apps/backend/` (DM API; currently **submodules** per
+[.gitmodules](../../apis/data-management-api/.gitmodules)).  
 **Performance Goals**: Non-streaming **ask** within gateway timeout budget for representative
 questions (**FR-007** / **SC-005**); Modal job control plane responsive enough for contract phases
 (`request-timeout` in `backend/schemathesis.toml` is 180s baseline).  
@@ -95,7 +95,7 @@ backend/
 services/scraper/               # Canonical scraper package + Dockerfile (Render)
 ├── src/vecinita_scraper/
 
-services/data-management-api/
+apis/data-management-api/
 ├── .gitmodules                 # Submodule definitions to remove (scraper, embedding, model)
 ├── apps/backend/
 │   ├── scraper-service/        # Submodule path → replace with HTTP client to services/scraper deployable

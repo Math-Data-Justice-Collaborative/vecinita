@@ -15,7 +15,7 @@
 
 | Language / runtime | OpenAPI Generator `-g` | Primary consumers |
 |--------------------|----------------------|---------------------|
-| Python | `python-pydantic-v1` | `backend/`, `services/data-management-api/` packages |
+| Python | `python-pydantic-v1` | `backend/`, `apis/data-management-api/` packages |
 | TypeScript (Node) | `typescript-node` | Node-only scripts or services (if any); else optional |
 | TypeScript (Axios) | `typescript-axios` | `frontend/`, `apps/data-management-frontend/` |
 

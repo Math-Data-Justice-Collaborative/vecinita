@@ -3,7 +3,7 @@
 **Feature Branch**: `008-scraper-via-dm-api`  
 **Created**: 2026-04-22  
 **Status**: Draft  
-**Input**: User description: "We're moving the scraper interface, instead of being a Modal.com endpoint is going to be accessed through services/data-management-api/ we can call the function calls from the modal service services/scraper/ but not the endpoint. Ensure that the all the backend calls from apps/data-management-frontend/ are going to services/data-management-api/ and that all the backend calls from frontend/ are going to the gateway please."
+**Input**: User description: "We're moving the scraper interface, instead of being a Modal.com endpoint is going to be accessed through apis/data-management-api/ we can call the function calls from the modal service services/scraper/ but not the endpoint. Ensure that the all the backend calls from apps/data-management-frontend/ are going to apis/data-management-api/ and that all the backend calls from frontend/ are going to the gateway please."
 
 ## Clarifications
 
@@ -103,4 +103,4 @@ Platform automation or the data-management backend invokes scraper, embedding, a
 - The “main frontend” and “data-management frontend” are distinct deployable clients with separate base-URL configuration; each can be validated independently.
 - **Production and staging** use the clarified **functions-first** posture for the hosted compute platform; **non-production** may use a documented HTTP fallback for developers only (**FR-009**).
 - Authentication and authorization for scraping actions remain enforced at the data-management backend (and gateway for main-app flows) as they are today or stricter; this feature does not relax those gates.
-- Naming paths like `apps/data-management-frontend/`, `frontend/`, `services/data-management-api/`, and `services/scraper/` refer to the repository’s agreed ownership boundaries. **Modal** is the concrete hosted compute platform referenced in clarifications; integration details remain in implementation plans and contracts.
+- Naming paths like `apps/data-management-frontend/`, `frontend/`, `apis/data-management-api/`, and `services/scraper/` refer to the repository’s agreed ownership boundaries. **Modal** is the concrete hosted compute platform referenced in clarifications; integration details remain in implementation plans and contracts.

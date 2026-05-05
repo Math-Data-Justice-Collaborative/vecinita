@@ -7,12 +7,14 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      - 'backend/**'
+      - 'apis/gateway/**'
+      - 'apis/agent/**'
       - '.github/workflows/backend-coverage.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
-      - 'backend/**'
+      - 'apis/gateway/**'
+      - 'apis/agent/**'
       - '.github/workflows/backend-coverage.yml'
   workflow_dispatch:
 
@@ -27,7 +29,7 @@ jobs:
         submodules: 'false'
 
     - name: Checkout contract test submodules
-      run: git submodule update --init --depth 1 services/embedding-modal services/model-modal
+      run: git submodule update --init --depth 1 modal-apps/embedding-modal modal-apps/model-modal
 
     - name: Validate production Render env contract
       run: python3 scripts/github/validate_render_env.py .env.prod.render
@@ -54,13 +56,13 @@ jobs:
           pkg-config
 
     - name: Install Python dependencies (lean CI)
-      working-directory: backend
+      working-directory: apis/gateway
       run: |
         python -m pip install --upgrade pip
         pip install --no-cache-dir ".[ci]"
 
     - name: Create .env file for tests
-      working-directory: backend
+      working-directory: apis/gateway
       run: |
         echo "DATABASE_URL=${{ secrets.DATABASE_URL || 'postgresql://test' }}" >> .env
         echo "OLLAMA_BASE_URL=http://localhost:11434" >> .env
@@ -73,9 +75,9 @@ jobs:
         echo "REINDEX_SERVICE_URL=https://example.modal.run" >> .env
 
     - name: Run backend fast tests with coverage
-      working-directory: backend
+      working-directory: apis/gateway
       env:
-        PYTHONPATH: ${{ github.workspace }}/backend:${{ github.workspace }}/services/embedding-modal/src
+        PYTHONPATH: ${{ github.workspace }}/apis/gateway:${{ github.workspace }}/modal-apps/embedding-modal/src
         SKIP_AGENT_MAIN_IMPORT: 'true'
         EMBEDDING_STRICT_STARTUP: 'false'
       run: |
@@ -86,30 +88,8 @@ jobs:
           --cov-config=.coveragerc.unit --cov-report=xml --cov-report=term --junit-xml=test-results.xml \
           --cov-fail-under=98
 
-    - name: Run backend schema conformance suite
-      working-directory: backend
-      env:
-        PYTHONPATH: ${{ github.workspace }}/backend
-        EMBEDDING_STRICT_STARTUP: 'false'
-        SCHEMATHESIS_HOOKS: tests.schemathesis_hooks
-        SCRAPER_API_KEYS: ${{ secrets.SCRAPER_API_KEYS }}
-        SCRAPER_SCHEMATHESIS_BEARER: ${{ secrets.SCRAPER_SCHEMATHESIS_BEARER }}
-      run: |
-        pytest tests/integration/test_api_schema_schemathesis.py -q \
-          --tracecov-format=html,text \
-          --tracecov-report-html-path=schema-coverage-gateway-pytest.html \
-          --junit-xml=schema-test-results-gateway.xml
-        pytest tests/integration/test_agent_api_schema_schemathesis.py -q \
-          --tracecov-format=html,text \
-          --tracecov-report-html-path=schema-coverage-agent-pytest.html \
-          --junit-xml=schema-test-results-agent.xml
-        pytest tests/integration/test_data_management_api_schema_schemathesis.py -q \
-          --tracecov-format=html,text \
-          --tracecov-report-html-path=schema-coverage-data-management-pytest.html \
-          --junit-xml=schema-test-results-data-management.xml
-
     - name: Summarize coverage
-      working-directory: backend
+      working-directory: apis/gateway
       run: |
         python - <<'PY'
         import xml.etree.ElementTree as ET
@@ -122,22 +102,14 @@ jobs:
             f.write(f"Backend line coverage: {line_rate:.2f}%\n")
         PY
 
-    - name: Upload backend coverage and schema artifacts
+    - name: Upload backend coverage artifacts
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: backend-coverage-and-schema-artifacts
+        name: backend-coverage-artifacts
         path: |
-          backend/coverage.xml
-          backend/test-results.xml
-          backend/schema-test-results-gateway.xml
-          backend/schema-test-results-agent.xml
-          backend/schema-test-results-data-management.xml
-          backend/coverage-summary.txt
-          backend/schema-coverage.html
-          backend/schema-coverage-gateway-pytest.html
-          backend/schema-coverage-agent-pytest.html
-          backend/schema-coverage-data-management-pytest.html
-          backend/schemathesis-report/schema-coverage-*.html
+          apis/gateway/coverage.xml
+          apis/gateway/test-results.xml
+          apis/gateway/coverage-summary.txt
         if-no-files-found: warn
 

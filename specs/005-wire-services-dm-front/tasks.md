@@ -14,7 +14,7 @@
 
 ## Path conventions
 
-Monorepo: `frontend/`, `apps/data-management-frontend/`, `backend/`, `services/data-management-api/`, root `TESTING_DOCUMENTATION.md`, `.github/workflows/`, `.env.local.example`.
+Monorepo: `frontend/`, `apps/data-management-frontend/`, `backend/`, `apis/data-management-api/`, root `TESTING_DOCUMENTATION.md`, `.github/workflows/`, `.env.local.example`.
 
 ---
 
@@ -41,7 +41,7 @@ Monorepo: `frontend/`, `apps/data-management-frontend/`, `backend/`, `services/d
 - [x] T008 Refactor `apps/data-management-frontend/src/app/api/rag-api.ts` to import DTO types from `apps/data-management-frontend/src/app/api/types/index.ts` per **FR-003** / **FR-010** (depends on T006). **Phase 2 slice**: wire `rag-api.ts` to **interim** `types/index.ts` exports only so US1/US2 can ship. **US3 slice (after T029)** on the same files: switch imports to **generated** exports, remove duplicate hand-written bodies from **T006**, and satisfy **FR-010** single-source—this second slice does **not** gate Phases 3–4 (**O1**).
 - [x] T009 [P] Document DM OpenAPI URL and gateway modal-jobs OpenAPI scope for Schemathesis in `TESTING_DOCUMENTATION.md` referencing `backend/schemathesis.toml` per [plan.md](./plan.md) **Testing strategy**
 - [x] T010 Document chat **Pact provider verification** command(s) and merge-blocking policy for gateway/agent under `backend/` in `TESTING_DOCUMENTATION.md` per **FR-007** / **FR-005**
-- [x] T011 Document DM **Pact provider verification** command(s) for `services/data-management-api/` in `TESTING_DOCUMENTATION.md` per **FR-008**
+- [x] T011 Document DM **Pact provider verification** command(s) for `apis/data-management-api/` in `TESTING_DOCUMENTATION.md` per **FR-008**
 - [x] T012 Extend `specs/005-wire-services-dm-front/quickstart.md` with headings for Pact, Schemathesis, and Playwright env vars per **SC-001**; add a short pointer to the **ServiceEndpointConfig** catalog in `specs/005-wire-services-dm-front/contracts/env-wiring-chat-gateway-agent.md` §ServiceEndpointConfig catalog
 
 ---
@@ -83,7 +83,7 @@ Monorepo: `frontend/`, `apps/data-management-frontend/`, `backend/`, `services/d
 ### Implementation for User Story 2
 
 - [x] T022 [US2] Align `apps/data-management-frontend/.env.example` with root `.env.local.example` for DM ports and `VITE_VECINITA_GATEWAY_URL` per **FR-001** / **FR-003**
-- [x] T023 [P] [US2] Document CORS dev origins (`http://localhost:5174`, etc.) primarily in `services/data-management-api/README.md` (create **CORS subsection** if missing); fallback to root `.env.local.example` comments — do **not** require `packages/shared-config/README.md` unless that file already exists in the submodule
+- [x] T023 [P] [US2] Document CORS dev origins (`http://localhost:5174`, etc.) primarily in `apis/data-management-api/README.md` (create **CORS subsection** if missing); fallback to root `.env.local.example` comments — do **not** require `packages/shared-config/README.md` unless that file already exists in the submodule
 
 **Checkpoint**: User Stories 1 and 2 independently testable.
 

@@ -71,10 +71,10 @@ fi
 
 # Test 4: Check .env.production exists locally
 echo -e "\n${YELLOW}[4/5] Checking Local Environment Files${NC}"
-if [ -f "./frontend/.env.production" ]; then
+if [ -f "./frontends/chat/.env.production" ]; then
   echo -e "${GREEN}✓ .env.production file exists${NC}"
-  if grep -q "VITE_GATEWAY_URL" ./frontend/.env.production; then
-    GATEWAY_VALUE=$(grep "VITE_GATEWAY_URL" ./frontend/.env.production | cut -d= -f2)
+  if grep -q "VITE_GATEWAY_URL" ./frontends/chat/.env.production; then
+    GATEWAY_VALUE=$(grep "VITE_GATEWAY_URL" ./frontends/chat/.env.production | cut -d= -f2)
     echo "    Value: $GATEWAY_VALUE"
     if [[ "$GATEWAY_VALUE" == *"onrender.com"* ]]; then
       echo -e "${GREEN}✓ VITE_GATEWAY_URL points to Render gateway${NC}"

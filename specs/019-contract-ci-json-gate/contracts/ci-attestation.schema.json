@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vecinita.local/specs/019-contract-ci-json-gate/contracts/ci-attestation.schema.json",
+  "title": "Vecinita CI attestation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format_version", "run_id", "generated_at", "checks"],
+  "properties": {
+    "format_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Attestation format version (FR-003)."
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 8,
+      "description": "Unique run identifier (e.g. UUID v4)."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC completion time for the attestation."
+    },
+    "git_head": {
+      "type": "string",
+      "minLength": 7,
+      "maxLength": 40,
+      "description": "Optional abbreviated commit SHA for correlation."
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["passed", "failed"]
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}

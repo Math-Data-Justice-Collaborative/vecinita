@@ -20,7 +20,7 @@ All steps use **placeholder** values from `.env.local.example` / package `.env.e
 
 ## 2. Data management frontend ↔ data-management API
 
-1. Start **`services/data-management-api`** (convention **8005**).
+1. Start **`apis/data-management-api`** (convention **8005**).
 2. `apps/data-management-frontend/.env` with `VITE_VECINITA_SCRAPER_API_URL=http://localhost:8005` (or your port).
 3. Run DM Vite dev server; open scrape jobs and confirm diagnostics + `/health`.
 

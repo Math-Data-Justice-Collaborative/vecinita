@@ -34,24 +34,28 @@ jobs:
         uses: astral-sh/setup-uv@v8.0.0
         with:
           version: "latest"
+          enable-cache: true
+          cache-dependency-glob: |
+            apis/gateway/uv.lock
+            apis/gateway/pyproject.toml
 
       # Installs [project.optional-dependencies].ci only (not UV [dependency-groups]).
       # Pytest imports tests/pact/*.py during collection before -m deselection; pact-python must stay in .ci.
       - name: Install backend CI dependencies (locked; matches local uv)
-        working-directory: backend
+        working-directory: apis/gateway
         run: uv sync --frozen --extra ci
 
       - name: Lint backend (Ruff)
-        working-directory: backend
+        working-directory: apis/gateway
         run: uv run ruff check src tests
 
       - name: Check backend formatting (Black)
-        working-directory: backend
+        working-directory: apis/gateway
         run: uv run black --check src tests scripts
 
       - name: Type check backend (mypy)
-        working-directory: backend
-        run: uv run mypy src
+        working-directory: apis/gateway
+        run: uv run python -m mypy src
 
       - name: Install ripgrep (Modal HTTP ban scanner)
         run: sudo apt-get update -qq && sudo apt-get install -y ripgrep
@@ -87,29 +91,29 @@ jobs:
           submodules: false
 
       - name: Checkout frontend submodule
-        run: git submodule update --init --depth 1 frontend
+        run: git submodule update --init --depth 1 frontends/chat
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: frontends/chat/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: frontend
+        working-directory: frontends/chat
         run: npm ci
 
       - name: Lint frontend
-        working-directory: frontend
+        working-directory: frontends/chat
         run: npm run lint
 
       - name: Check frontend formatting (Prettier)
-        working-directory: frontend
+        working-directory: frontends/chat
         run: npm run format
 
       - name: Type check frontend
-        working-directory: frontend
+        working-directory: frontends/chat
         run: npm run typecheck
 
   data-management-api-structure:
@@ -124,13 +128,13 @@ jobs:
           token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
       - name: Checkout data-management API submodule
-        run: git submodule update --init --depth 1 services/data-management-api
+        run: git submodule update --init --depth 1 apis/data-management-api
 
       - name: Validate imported data-management repo structure
         run: |
-          test -f services/data-management-api/.gitmodules
-          test -d services/data-management-api/apps/backend
-          test -d services/data-management-api/apps/frontend
+          test -f apis/data-management-api/.gitmodules
+          test -d apis/data-management-api/apps/backend
+          test -d apis/data-management-api/apps/frontend
 
   data-management-frontend-quality:
     needs: [workflow-context]
@@ -144,25 +148,25 @@ jobs:
           token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
       - name: Checkout data-management frontend submodule
-        run: git submodule update --init --depth 1 apps/data-management-frontend
+        run: git submodule update --init --depth 1 frontends/data-management
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: apps/data-management-frontend/package-lock.json
+          cache-dependency-path: frontends/data-management/package-lock.json
 
       - name: Install data-management frontend dependencies
-        working-directory: apps/data-management-frontend
+        working-directory: frontends/data-management
         run: npm ci
 
       - name: Lint data-management frontend
-        working-directory: apps/data-management-frontend
+        working-directory: frontends/data-management
         run: npm run lint
 
       - name: Build data-management frontend
-        working-directory: apps/data-management-frontend
+        working-directory: frontends/data-management
         run: npm run build
 
   scraper-quality:
@@ -177,7 +181,7 @@ jobs:
           token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
       - name: Checkout scraper submodule
-        run: git submodule update --init --depth 1 services/scraper
+        run: git submodule update --init --depth 1 modal-apps/scraper
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v6
@@ -186,21 +190,21 @@ jobs:
           cache: pip
 
       - name: Install scraper dependencies
-        working-directory: services/scraper
+        working-directory: modal-apps/scraper
         run: |
           python -m pip install --upgrade pip
           pip install --no-cache-dir -e ".[dev]"
 
       - name: Lint scraper
-        working-directory: services/scraper
+        working-directory: modal-apps/scraper
         run: make lint
 
       - name: Check scraper formatting
-        working-directory: services/scraper
+        working-directory: modal-apps/scraper
         run: black --check src/ tests/
 
       - name: Type check scraper
-        working-directory: services/scraper
+        working-directory: modal-apps/scraper
         run: make type-check
 
   embedding-modal-quality:
@@ -212,7 +216,7 @@ jobs:
           submodules: false
 
       - name: Checkout embedding-modal submodule
-        run: git submodule update --init --depth 1 services/embedding-modal
+        run: git submodule update --init --depth 1 modal-apps/embedding-modal
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v6
@@ -221,14 +225,14 @@ jobs:
           cache: pip
 
       - name: Install embedding-modal dependencies
-        working-directory: services/embedding-modal
+        working-directory: modal-apps/embedding-modal
         run: |
           python -m pip install --upgrade pip
           python -m pip install --upgrade setuptools wheel
           pip install ".[dev]"
 
       - name: Lint embedding-modal
-        working-directory: services/embedding-modal
+        working-directory: modal-apps/embedding-modal
         run: make lint
 
   model-modal-quality:
@@ -240,7 +244,7 @@ jobs:
           submodules: false
 
       - name: Checkout model-modal submodule
-        run: git submodule update --init --depth 1 services/model-modal
+        run: git submodule update --init --depth 1 modal-apps/model-modal
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v6
@@ -249,12 +253,12 @@ jobs:
           cache: pip
 
       - name: Install model-modal dependencies
-        working-directory: services/model-modal
+        working-directory: modal-apps/model-modal
         run: |
           python -m pip install --upgrade pip
           python -m pip install --upgrade setuptools wheel
           pip install ".[dev]"
 
       - name: Lint model-modal
-        working-directory: services/model-modal
+        working-directory: modal-apps/model-modal
         run: make lint

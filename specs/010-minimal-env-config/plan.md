@@ -14,7 +14,7 @@ Consolidate Vecinita’s environment surface into a **minimal, auditable** set: 
 **Storage**: PostgreSQL (`DATABASE_URL` / `DB_*`); Supabase (HTTP URL + keys).  
 **Testing**: `pytest` via `make ci` / component test targets; add or extend **offline** tests for env resolution and template hygiene (no live credentials).  
 **Target Platform**: Linux dev + Render-hosted production; local Docker optional.  
-**Project Type**: Monorepo **web app + multiple Python services** (`backend/`, `frontend/`, `apps/data-management-frontend/`, `services/data-management-api/`, `services/scraper/`, Modal workers under `services/*`).  
+**Project Type**: Monorepo **web app + multiple Python services** (`backend/`, `frontend/`, `apps/data-management-frontend/`, `apis/data-management-api/`, `modal-apps/scraper/`, Modal workers under `modal-apps/*` and `services/*`).  
 **Performance Goals**: Configuration load is cold-path only; no strict latency SLO—keep resolution **O(number of fields)** with **cached** `BaseSettings` instances (`@lru_cache` pattern already in `shared_config`).  
 **Constraints**: **Secrets must not** appear in committed templates, logs, or deprecation warnings; **Vite** exposes only `VITE_*`—cannot rely on server-only YAML in browser bundle without code generation or doc-derived copy; respect **service boundaries** (no new magic cross-service imports without contract).  
 **Scale/Scope**: Unify **root** `.env.example` / `.env.local.example` story (today both exist with overlapping intent); trim **subsidiary** `.env.example` files to pointers per FR-001; optional **repo-root** `config/` defaults file(s) for non-secrets consumed by Python loaders only.
@@ -74,13 +74,13 @@ frontend/
 apps/data-management-frontend/
 └── .env.example
 
-services/data-management-api/
+apis/data-management-api/
 ├── packages/shared-config/
 │   └── shared_config/__init__.py   # BaseServiceSettings — extend for aliases / defaults
 └── apps/backend/
 
-services/scraper/.env.example
-services/model-modal/.env.example
+modal-apps/scraper/.env.example
+modal-apps/model-modal/.env.example
 deploy/gcp/.env.example
 tests/.env.example
 

@@ -1,0 +1,19 @@
+# Render / local builds with dockerContext: ./apis/gateway (embedding/scraper) or repo root for gateway/agent images (see specs/016 / 018).
+# Keep runtime markdown under src/ (e.g. system_rules.md, FAQs).
+
+tests/
+**/__pycache__/
+**/*.pyc
+.pytest_cache/
+htmlcov/
+.coverage
+.git
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Broad markdown ignore + explicit keep for shipped agent data (cannot exclude src/**/*.md).
+**/*.md
+!src/**/*.md

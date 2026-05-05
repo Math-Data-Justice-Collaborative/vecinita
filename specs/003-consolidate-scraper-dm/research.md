@@ -52,7 +52,7 @@ current call shapes but delegates to **httpx** (or existing HTTP stack). (3) Run
 
 **Decision**: Use **deterministic HTTP fixtures**: capture method, path, query, body hash, status,
 and a **normalized JSON** projection (sorted keys, strip timestamps/UUIDs replaced with placeholders
-or compare structural equality in tests). Store under `services/data-management-api/tests/parity/`
+or compare structural equality in tests). Store under `apis/data-management-api/tests/parity/`
 (or agreed location). Run **before** and **after** switch; CI job optional if secrets required, else
 nightly staging.
 

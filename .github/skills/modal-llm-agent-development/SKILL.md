@@ -13,9 +13,9 @@ Use this skill when implementing or debugging Modal code for LLM/agent services 
 ## When to use
 
 Use for tasks involving:
-- `services/model-modal`
-- `services/embedding-modal`
-- `services/scraper` Modal deployment flow
+- `modal-apps/model-modal`
+- `modal-apps/embedding-modal`
+- `modal-apps/scraper` Modal deployment flow
 - Modal routing integration (`services/direct-routing`) from backend callers
 - Local workflows that use `modal run`, `modal serve`, or `modal deploy`
 
@@ -37,7 +37,7 @@ Do not use for generic FastAPI-only changes unrelated to Modal runtime behavior.
 Use this for weight/model prep and one-off jobs:
 
 ```bash
-cd services/model-modal
+cd modal-apps/model-modal
 # Default image pulls gemma3; override when testing another registry id:
 PYTHONPATH=src python3 -m modal run src/vecinita/app.py::download_model --model-name gemma3
 ```
@@ -54,14 +54,14 @@ make modal-model-download-default
 Use for active endpoint development with hot reload:
 
 ```bash
-cd services/model-modal
+cd modal-apps/model-modal
 PYTHONPATH=src python3 -m modal serve src/vecinita/app.py
 ```
 
 For embedding service:
 
 ```bash
-cd services/embedding-modal
+cd modal-apps/embedding-modal
 python3.11 -m modal serve main.py
 ```
 
@@ -70,10 +70,10 @@ python3.11 -m modal serve main.py
 Use only when requested:
 
 ```bash
-cd services/model-modal
+cd modal-apps/model-modal
 PYTHONPATH=src python3 -m modal deploy src/vecinita/app.py
 
-cd services/embedding-modal
+cd modal-apps/embedding-modal
 python3.11 -m modal deploy main.py
 ```
 

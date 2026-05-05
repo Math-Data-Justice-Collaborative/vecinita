@@ -49,7 +49,7 @@
 - [X] T013 [US1] Update `docs/deployment/RENDER_SHARED_ENV_CONTRACT.md` so connectivity URLs match **FR-004** only; mark deprecated vars as removed with migration pointer to this spec; add an explicit **FR-006** note that operators must not introduce parallel “shadow” base-URL variables for the same logical destination as `RENDER_GATEWAY_URL` / `RENDER_AGENT_URL` / `DATA_MANAGEMENT_API_URL` (list legacy names to delete)
 - [X] T014 [US1] Update `render.yaml` (and any `render.*.yaml` fragments) so no service sets the five forbidden vars; align gateway/agent/DM env groups with `DATABASE_URL`, `RENDER_GATEWAY_URL`, `RENDER_AGENT_URL`, `DATA_MANAGEMENT_API_URL`, schema URL vars
 - [X] T015 [P] [US1] Update `docs/deployment/MODAL_DEPLOYMENT.md` to state **SDK-only** to Modal compute (per clarification B) and list Modal **token** vars separately from **HTTP base** vars
-- [X] T016 [US1] Grep and fix Python settings modules that still read forbidden names (e.g. `backend/src/config/`, `backend/src/settings.py`, `services/data-management-api/**/settings*`) replacing resolution with `RENDER_GATEWAY_URL` / `RENDER_AGENT_URL` / `DATA_MANAGEMENT_API_URL` + generated clients (stub behind feature flag only if unavoidable—prefer direct cut)
+- [X] T016 [US1] Grep and fix Python settings modules that still read forbidden names (e.g. `backend/src/config/`, `backend/src/settings.py`, `apis/data-management-api/**/settings*`) replacing resolution with `RENDER_GATEWAY_URL` / `RENDER_AGENT_URL` / `DATA_MANAGEMENT_API_URL` + generated clients (stub behind feature flag only if unavoidable—prefer direct cut)
 - [X] T017 [P] [US1] Grep and fix `frontend/` and `apps/data-management-frontend/` Vite env templates (`*.example`, `vite.config.ts` docs) for forbidden vars
 - [X] T018 [US1] Run staging smoke checklist from [quickstart.md](./quickstart.md) section 1–3 and record results in PR description; for **SC-004**, when **`docs/deployment/SC004_STAGING_RELEASE_CHECKLIST.md`** exists (**T045**), link it and note baseline date; **until T045 merges**, state that the operator checklist is **pending**, link [quickstart.md](./quickstart.md) §7 (Staging release), and point to **T045** in this `tasks.md` so early US1 PRs stay honest
 
@@ -73,7 +73,7 @@
 - [ ] T021 [US2] Run `make openapi-codegen` once with valid schema URLs; commit generated trees under `packages/openapi-clients/` **or** commit checksum manifest per [contracts/openapi-codegen-layout.md](./contracts/openapi-codegen-layout.md)—pick one approach in PR and align T010
 - [ ] T022 [US2] Add thin Python wrapper module `backend/src/services/http_clients/gateway_client.py` (or extend existing package) that configures generated gateway client with `RENDER_GATEWAY_URL` + auth from existing middleware patterns
 - [ ] T023 [P] [US2] Migrate high-traffic gateway call sites in `backend/src/services/` from hand `httpx` URLs to generated client (incremental PRs per subdirectory: `llm/`, `embedding_service/`, `scraper/` as applicable)
-- [ ] T024 [P] [US2] Migrate `services/data-management-api/packages/service-clients/` HTTP helpers to generated **DM** Python client from `packages/openapi-clients/python/data_management/`
+- [ ] T024 [P] [US2] Migrate `apis/data-management-api/packages/service-clients/` HTTP helpers to generated **DM** Python client from `packages/openapi-clients/python/data_management/`
 - [ ] T025 [US2] Replace `apps/data-management-frontend/package.json` script `codegen:api` path away from **only** `openapi-typescript` snapshot: add `openapi-codegen` npm script calling OpenAPI Generator `typescript-axios` into `apps/data-management-frontend/src/app/api/generated/` (or shared package) per [research.md](./research.md) Decision 4
 - [ ] T026 [P] [US2] Update `frontend/` services that call gateway/agent to consume `typescript-axios` generated clients from `packages/openapi-clients/typescript-axios/` with `VITE_*` base URL wiring
 - [ ] T027 [US2] Ensure **FR-007**: add or extend live/smoke test in `backend/tests/live/` or documented `make` target using generated clients against `RENDER_GATEWAY_URL` / `DATA_MANAGEMENT_API_URL` / `RENDER_AGENT_URL` when env present
@@ -85,7 +85,7 @@
 
 ## Phase 5: User Story 3 — Modal SDK only, no HTTP to Modal hosts (Priority: P1)
 
-**Goal**: **FR-001**, **FR-005** behavioral half, **SC-001**, **SC-005** — remove `httpx`/`requests` to `*.modal.run` everywhere including `services/scraper/`.
+**Goal**: **FR-001**, **FR-005** behavioral half, **SC-001**, **SC-005** — remove `httpx`/`requests` to `*.modal.run` everywhere including `modal-apps/scraper/`.
 
 **Independent Test**: `make check-modal-http` exits 0; Modal flows use `modal.Function.from_name` / `.remote()` in `backend/src/services/modal/invoker.py`, `packages/service-clients/service_clients/modal_invoker.py`, and scraper Modal modules.
 
@@ -95,10 +95,10 @@
 
 ### Implementation for User Story 3
 
-- [ ] T030 [US3] Inventory all Python `httpx`/`requests` calls to hosts matching `config/modal_http_ban_patterns.txt` under `backend/`, `services/scraper/`, `services/data-management-api/`; list in `specs/015-openapi-sdk-clients/artifacts/modal-http-inventory.md`
-- [ ] T031 [P] [US3] Refactor `backend/src/services/modal/invoker.py` and `services/data-management-api/packages/service-clients/service_clients/modal_invoker.py` so **no** code path issues HTTP to Modal hosts (SDK-only per spec)
+- [ ] T030 [US3] Inventory all Python `httpx`/`requests` calls to hosts matching `config/modal_http_ban_patterns.txt` under `backend/`, `modal-apps/scraper/`, `apis/data-management-api/`; list in `specs/015-openapi-sdk-clients/artifacts/modal-http-inventory.md`
+- [ ] T031 [P] [US3] Refactor `backend/src/services/modal/invoker.py` and `apis/data-management-api/packages/service-clients/service_clients/modal_invoker.py` so **no** code path issues HTTP to Modal hosts (SDK-only per spec)
 - [ ] T032 [P] [US3] Refactor `backend/src/embedding_service/modal_embeddings.py` and `backend/src/services/llm/client_manager.py` to remove Modal HTTP URLs; route via Modal SDK or Gateway/DM generated clients
-- [ ] T033 [P] [US3] Refactor `services/scraper/` Modal entry modules (`services/scraper/modal_api_entry.py`, `modal_workers_entry.py`, `backend/src/services/scraper/modal_app.py`) to eliminate HTTP client calls to Modal deployment hosts
+- [ ] T033 [P] [US3] Refactor `modal-apps/scraper/` Modal entry modules (`modal-apps/scraper/modal_api_entry.py`, `modal_workers_entry.py`, `backend/src/services/scraper/modal_app.py`) to eliminate HTTP client calls to Modal deployment hosts
 - [ ] T034 [US3] Remove any remaining reads of `MODAL_OLLAMA_ENDPOINT`, `MODAL_EMBEDDING_ENDPOINT`, `VECINITA_MODEL_API_URL`, `VECINITA_EMBEDDING_API_URL`, `EMBEDDING_SERVICE_URL` from Python/TS runtime code (`rg` across repo; exclude `specs/` prose)
 - [ ] T035 [US3] Enable `backend/tests/scripts/test_modal_http_ban.py` (from T008) fully—remove skips once `make check-modal-http` is green on branch
 - [ ] T036 [US3] Flip CI (T009) from optional to **required** merge gate once green on `015-openapi-sdk-clients`
@@ -177,7 +177,7 @@ Deliver **US1 + US3 + SC-005 gate** first (operator clarity + Modal safety), the
 ```bash
 # After T022 lands, in parallel:
 # Developer A: T023 backend/src/services/llm/
-# Developer B: T024 services/data-management-api/packages/service-clients/
+# Developer B: T024 apis/data-management-api/packages/service-clients/
 # Developer C: T026 frontend/ axios client wiring
 ```
 

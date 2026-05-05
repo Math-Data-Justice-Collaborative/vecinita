@@ -24,7 +24,7 @@ services:
   # -------------------------------------------------------------------------
   model-service:
     build:
-      context: ./services/model-modal
+      context: ./modal-apps/model-modal
       dockerfile: Dockerfile
     container_name: vecinita-model-ms-render
     environment:
@@ -71,8 +71,8 @@ services:
   # -------------------------------------------------------------------------
   agent:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apis/agent/Dockerfile
     container_name: vecinita-agent
     env_file:
       - .env.render-local
@@ -97,8 +97,8 @@ services:
   # -------------------------------------------------------------------------
   gateway:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apis/gateway/Dockerfile.gateway
     container_name: vecinita-gateway
     command: uvicorn src.api.main:app --host 0.0.0.0 --port 8004
     env_file:
@@ -117,7 +117,7 @@ services:
   # -------------------------------------------------------------------------
   frontend:
     build:
-      context: ./frontend
+      context: ./frontends/chat
       dockerfile: Dockerfile
     container_name: vecinita-frontend
     environment:
