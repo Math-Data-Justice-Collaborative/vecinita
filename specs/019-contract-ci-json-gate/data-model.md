@@ -31,18 +31,25 @@
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | string | yes | References `RequiredCheck.id`. |
+| `title` | string | v2 yes | Human-readable check title copied from manifest. |
+| `command` | string | v2 yes | Executed shell command from manifest. |
 | `status` | string | yes | `passed` or `failed` (extensible enum later). |
+| `exit_code` | integer | v2 yes | Process exit code for the command run. |
+| `started_at` | string | v2 yes | ISO-8601 UTC start time for this check run. |
 | `finished_at` | string | no | ISO-8601 UTC end time for this check (optional in v1 if only top-level `generated_at` is used). |
+| `duration_seconds` | number | v2 yes | Elapsed wall-clock runtime for this check. |
+| `stdout` | string | v2 yes | Captured stdout for this check command. |
+| `stderr` | string | v2 yes | Captured stderr for this check command. |
 
 ## Entity: CiAttestation (file)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `format_version` | integer | yes | Attestation format version (FR-003); starts at `1`. |
+| `format_version` | integer | yes | Attestation format version (FR-003); `1` (minimal) or `2` (detailed outputs). |
 | `run_id` | string | yes | Unique run identifier (UUID v4 per research). |
 | `generated_at` | string | yes | ISO-8601 UTC when attestation was finalized (FR-002, FR-006). |
 | `git_head` | string | no | Abbreviated commit SHA for correlation. |
-| `checks` | array of CheckOutcome | yes | Must include exactly the manifest ids, each `passed` for merge. |
+| `checks` | array of CheckOutcome | yes | Must include exactly the manifest ids, each `passed` for merge; v2 includes per-check execution output details. |
 
 **State / transitions**
 

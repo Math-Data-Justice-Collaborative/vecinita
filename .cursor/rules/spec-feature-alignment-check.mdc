@@ -1,0 +1,28 @@
+---
+description: Ensure code changes stay aligned with feature specs
+alwaysApply: true
+---
+
+# Spec To Code Alignment Check
+
+When making code changes, verify implementation aligns with the relevant feature specification under `specs/`.
+
+## Required behavior
+
+- Before finalizing implementation, identify the relevant feature spec in `specs/` and confirm the code changes match the intended behavior and constraints.
+- If implementation and spec conflict, stop and ask the user how they want to proceed before continuing.
+- Do not silently reinterpret or override spec requirements when there is ambiguity or mismatch.
+- If the user chooses to deviate from spec, explicitly confirm that decision in chat and proceed with their direction.
+
+## User verification prompt guidance
+
+When mismatch is found, ask for a decision in clear terms:
+
+- What the spec says.
+- What the code currently does (or needs to do).
+- Available paths (update code to spec, update spec, or intentionally diverge).
+
+## Completion checklist
+
+- [ ] Relevant `specs/` feature doc reviewed for this change.
+- [ ] Implementation matches spec, or user-approved divergence is recorded in chat.

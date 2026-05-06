@@ -8,7 +8,7 @@
   "properties": {
     "format_version": {
       "type": "integer",
-      "const": 1,
+      "enum": [1, 2],
       "description": "Attestation format version (FR-003)."
     },
     "run_id": {
@@ -25,7 +25,7 @@
       "type": "string",
       "minLength": 7,
       "maxLength": 40,
-      "description": "Optional abbreviated commit SHA for correlation."
+      "description": "Abbreviated commit SHA for correlation and commit-parity validation."
     },
     "checks": {
       "type": "array",
@@ -46,6 +46,29 @@
           "finished_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "title": {
+            "type": "string"
+          },
+          "command": {
+            "type": "string"
+          },
+          "exit_code": {
+            "type": "integer"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "duration_seconds": {
+            "type": "number",
+            "minimum": 0
+          },
+          "stdout": {
+            "type": "string"
+          },
+          "stderr": {
+            "type": "string"
           }
         }
       }

@@ -11,24 +11,35 @@ _Summary:_
 _Details:_
 <!-- List key implementation details, new modules, important refactors, or behavior changes. -->
 
-### 2. Testing performed
+### 2. Verification performed
 
-**Pytest commands run (copy/paste exact commands):**
-<!-- e.g., `uv run pytest -m "unit"` or `uv run pytest tests/test_main.py` -->
+**Commands run (copy/paste exact commands):**
+<!-- Include focused checks + final repo gate -->
 - 
+- `make ci`
 
-**pytest markers covered in this PR:**
-- [ ] `unit`
-- [ ] `integration`
-- [ ] `db`
-- [ ] `api`
-- [ ] `ui`
-- [ ] Other: <!-- describe if applicable -->
+**Result summary:**
+<!-- Note pass/fail and any important context -->
 
-**Test notes / output (if relevant):**
-<!-- Mention any flaky tests, temporarily skipped tests, or special setup required. -->
+### 3. CI attestation gate (required for merge)
 
-### 3. Impact on data pipeline & Q&A behavior
+- [ ] `.ci/required-checks.json` reviewed (or updated if contract changed)
+- [ ] `.ci/ci-attestation.json` regenerated on this branch
+- [ ] `git_head` in attestation matches current branch tip
+- [ ] `make ci-attestation-validate` passes locally
+
+_Attestation refresh command(s) used:_
+<!-- e.g., `make ci-attestation && make ci-attestation-validate` -->
+
+### 4. API / contract sync (if applicable)
+
+- [ ] No API contract changes
+- [ ] Backend schema/routes changed and frontend/generated clients updated in same PR
+- [ ] Contract/Pact/schema tests updated for changed wire behavior
+
+_If contract changed, list impacted endpoints/schemas and test updates:_
+
+### 5. Impact on data pipeline & Q&A behavior
 
 **Data scraping / ingestion:**
 - [ ] No changes
@@ -49,7 +60,7 @@ _Details:_
 
 _If any box above is checked, briefly describe the expected impact and any migration or backfill steps needed:_
 
-### 4. Docker & environment variables
+### 6. Docker & environment variables
 
 **Docker / Compose:**
 - [ ] No Docker changes
@@ -62,12 +73,12 @@ _If any box above is checked, briefly describe the expected impact and any migra
 - [ ] Existing env vars changed or removed
 
 _List any new or changed env vars (name + brief purpose):_
-<!-- e.g., `GROQ_API_KEY` – API key for Llama 3.1 via Groq -->
+<!-- Canonical committed defaults must be updated in `.env.local.example` -->
 
 _Deployment / runtime notes (if any):_
 <!-- e.g., "Requires `.env` update in production and staging before deploy." -->
 
-### 5. Dependencies & UV sync checklist
+### 7. Dependencies & UV sync checklist
 
 **Python dependencies (pyproject / uv):**
 - [ ] No dependency changes
@@ -77,25 +88,27 @@ _Deployment / runtime notes (if any):_
 
 _If dependencies changed, explain why and call out any version pinning or platform-specific notes:_
 
-### 6. Breaking changes / migrations
+### 8. Breaking changes / migrations
 
 - [ ] No breaking changes
 - [ ] Breaking change (describe below)
 
 _Describe any breaking changes, required DB migrations, or one-time scripts:_
 
-### 7. Related issues / context
+### 9. Related issues / context
 
 - Related issue(s): <!-- e.g., Closes #123, Relates to #456 -->
 - Additional context or design notes (if any):
 
-### 8. Checklist
+### 10. Checklist
 
 - [ ] Code follows project style and guidelines
 - [ ] Tests added/updated as needed
-- [ ] `uv run pytest` passes locally for relevant markers
+- [ ] Root cause fixed (no workaround-only patch)
+- [ ] `make ci` passes from repo root
 - [ ] Docs / comments updated where appropriate
-- [ ] Manual testing performed against running FastAPI app (if applicable)
+- [ ] If env vars changed, `.env.local.example` updated
+- [ ] Manual testing performed against running app(s) (if applicable)
 
 <!--
 Notes:

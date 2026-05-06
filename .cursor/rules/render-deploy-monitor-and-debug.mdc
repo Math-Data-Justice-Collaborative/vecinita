@@ -1,0 +1,21 @@
+---
+description: Monitor and debug Render deploys after CI passes
+alwaysApply: true
+---
+
+# Render Deploy Monitor And Debug Loop
+
+When an agent-driven Render deploy starts, treat deployment follow-through as required work.
+
+## Required workflow
+
+1. Start Render deployment steps only after GitHub CI for the relevant commit/branch is green.
+2. Use the Render hook/workflow to poll deployment status continuously until terminal state.
+3. If deployment fails, investigate logs and deployment details to identify the root cause.
+4. Apply a durable fix (not a workaround-only patch), validate locally (`make ci` from repo root), and redeploy.
+5. Repeat poll -> diagnose -> fix -> redeploy until the latest deploy succeeds or a true external blocker is identified.
+
+## Completion gate
+
+- Do not mark the task complete while the latest Render deploy is still running or failed.
+- If blocked by an external dependency/manual action, report the blocker clearly and state the exact next user action required.

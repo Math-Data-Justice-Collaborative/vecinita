@@ -9,6 +9,7 @@ import subprocess
 import sys
 import uuid
 from datetime import datetime, timezone
+from time import monotonic
 from pathlib import Path
 from typing import Any
 
@@ -29,8 +30,9 @@ def _load_manifest(path: Path) -> list[dict[str, Any]]:
     return out
 
 
-def _run_check(command: str, cwd: Path) -> int:
-    """Run shell command with bash strict mode semantics."""
+def _run_check_detailed(command: str, cwd: Path) -> tuple[int, str, str, str, str, float]:
+    start_dt = datetime.now(timezone.utc)
+    start_mono = monotonic()
     script = f"set -euo pipefail; {command}"
     proc = subprocess.run(
         ["bash", "-lc", script],
@@ -38,7 +40,18 @@ def _run_check(command: str, cwd: Path) -> int:
         capture_output=True,
         text=True,
     )
-    return proc.returncode
+    elapsed = monotonic() - start_mono
+    end_dt = datetime.now(timezone.utc)
+    started_at = start_dt.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    finished_at = end_dt.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return (
+        proc.returncode,
+        proc.stdout,
+        proc.stderr,
+        started_at,
+        finished_at,
+        round(elapsed, 3),
+    )
 
 
 def main() -> None:
@@ -57,14 +70,23 @@ def main() -> None:
 
     for entry in checks_def:
         cid = entry["id"]
+        title = entry.get("title", cid)
         cmd = entry["command"]
-        code = _run_check(cmd, repo)
+        code, stdout_text, stderr_text, started_at, finished_at, duration_seconds = _run_check_detailed(cmd, repo)
         ok = code == 0
         if not ok:
             any_failed = True
         item: dict[str, Any] = {
             "id": cid,
+            "title": title,
+            "command": cmd,
             "status": "passed" if ok else "failed",
+            "exit_code": code,
+            "started_at": started_at,
+            "finished_at": finished_at,
+            "duration_seconds": duration_seconds,
+            "stdout": stdout_text,
+            "stderr": stderr_text,
         }
         results.append(item)
 
@@ -86,7 +108,7 @@ def main() -> None:
         pass
 
     payload: dict[str, Any] = {
-        "format_version": 1,
+        "format_version": 2,
         "run_id": run_id,
         "generated_at": generated_at,
         "checks": results,

@@ -19,7 +19,12 @@ From the **repository root**:
 make ci-attestation
 ```
 
-This reads `.ci/required-checks.json`, runs each manifest `command` (including `make ci`), and writes `.ci/ci-attestation.json` with `format_version`, UUID v4 `run_id`, UTC ISO-8601 `generated_at`, and per-check `status`.
+This reads `.ci/required-checks.json`, runs each manifest `command` (including `make ci`), and writes `.ci/ci-attestation.json` with:
+- `format_version` (currently `2`)
+- UUID v4 `run_id`
+- UTC ISO-8601 `generated_at`
+- current commit `git_head`
+- per-check details: `id`, `title`, `command`, `status`, `exit_code`, `started_at`, `finished_at`, `duration_seconds`, `stdout`, `stderr`
 
 Commit **both** `.ci/required-checks.json` (when changed) and `.ci/ci-attestation.json` with your PR.
 
@@ -44,6 +49,7 @@ Override max age (hours) via `CI_ATTESTATION_MAX_AGE_HOURS` or `--max-age-hours`
 
 - Pull requests and pushes to `main` / `develop` run workflow **`.github/workflows/ci-attestation-gate.yml`**, job **`attestation-gate`**, which executes `scripts/ci/ci_attestation_validate.py` against the **committed** `.ci/required-checks.json` and `.ci/ci-attestation.json` only (no hosted re-run of manifest commands).
 - If either file is missing, malformed, stale, or any required check is not `passed`, the job fails with stderr containing an **FR-009** primary category (`missing_file`, `io_or_parse`, `schema`, `staleness`, `incomplete_manifest`, `failed_check`) and `[manifest]` / `[attestation]` scope.
+- Staleness includes both age window validation and `git_head` parity with the branch tip being validated.
 
 ## Manual max-age override (optional)
 

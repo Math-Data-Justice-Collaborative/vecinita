@@ -24,18 +24,22 @@ def _run(
     attestation: Path,
     *,
     max_age_hours: float = 1_000_000.0,
+    expected_git_head: str | None = None,
 ) -> subprocess.CompletedProcess[str]:
+    cmd = [
+        sys.executable,
+        str(_SCRIPT),
+        "--manifest",
+        str(manifest),
+        "--attestation",
+        str(attestation),
+        "--max-age-hours",
+        str(max_age_hours),
+    ]
+    if expected_git_head is not None:
+        cmd.extend(["--expected-git-head", expected_git_head])
     return subprocess.run(
-        [
-            sys.executable,
-            str(_SCRIPT),
-            "--manifest",
-            str(manifest),
-            "--attestation",
-            str(attestation),
-            "--max-age-hours",
-            str(max_age_hours),
-        ],
+        cmd,
         cwd=_REPO_ROOT,
         capture_output=True,
         text=True,
@@ -55,6 +59,15 @@ def _touch_fresh_attestation(attestation: Path) -> None:
     data["generated_at"] = (
         datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     )
+    head_proc = subprocess.run(
+        ["git", "rev-parse", "--short", "HEAD"],
+        cwd=_REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if head_proc.returncode == 0 and head_proc.stdout.strip():
+        data["git_head"] = head_proc.stdout.strip()
     attestation.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
@@ -139,3 +152,78 @@ def test_unknown_top_level_attestation_property_emits_schema() -> None:
         proc = _run(m, a)
         assert proc.returncode != 0
         assert "schema" in proc.stderr
+
+
+def test_git_head_mismatch_emits_staleness() -> None:
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        m, a = _copy_pair("manifest-valid-minimal.json", "attestation-valid.json", tmp)
+        _touch_fresh_attestation(a)
+        data = json.loads(a.read_text(encoding="utf-8"))
+        data["git_head"] = "deadbee"
+        a.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        proc = _run(m, a)
+        assert proc.returncode != 0
+        assert "staleness" in proc.stderr
+
+
+def test_expected_git_head_allows_pr_merge_checkout() -> None:
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        m, a = _copy_pair("manifest-valid-minimal.json", "attestation-valid.json", tmp)
+        _touch_fresh_attestation(a)
+        data = json.loads(a.read_text(encoding="utf-8"))
+        attestation_git_head = data["git_head"]
+        assert isinstance(attestation_git_head, str)
+        proc = _run(m, a, expected_git_head=f"{attestation_git_head}abcdef")
+        assert proc.returncode == 0, proc.stderr
+
+
+def test_git_head_ancestor_of_expected_head_is_allowed() -> None:
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        m, a = _copy_pair("manifest-valid-minimal.json", "attestation-valid.json", tmp)
+        _touch_fresh_attestation(a)
+        head_proc = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=_REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        parent_proc = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD^"],
+            cwd=_REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if head_proc.returncode != 0 or parent_proc.returncode != 0:
+            pytest.skip("requires at least two commits")
+        data = json.loads(a.read_text(encoding="utf-8"))
+        data["git_head"] = parent_proc.stdout.strip()
+        a.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        proc = _run(m, a, expected_git_head=head_proc.stdout.strip())
+        assert proc.returncode == 0, proc.stderr
+
+
+def test_detailed_v2_attestation_passes() -> None:
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        m, a = _copy_pair("manifest-valid-minimal.json", "attestation-valid.json", tmp)
+        _touch_fresh_attestation(a)
+        base = json.loads(a.read_text(encoding="utf-8"))
+        base["format_version"] = 2
+        check = base["checks"][0]
+        check["title"] = "Full local CI"
+        check["command"] = "make ci"
+        check["exit_code"] = 0
+        now = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+        check["started_at"] = now
+        check["finished_at"] = now
+        check["duration_seconds"] = 0.0
+        check["stdout"] = "ok"
+        check["stderr"] = ""
+        a.write_text(json.dumps(base, indent=2) + "\n", encoding="utf-8")
+        proc = _run(m, a)
+        assert proc.returncode == 0, proc.stderr
