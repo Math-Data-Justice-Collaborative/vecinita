@@ -14,8 +14,8 @@ When an agent-driven Render deploy starts, treat deployment follow-through as re
    - PR title includes `[render preview]`.
    - Render preview deploy reaches a terminal success state before merge readiness.
    - A committed Render live attestation exists and validates for the PR head.
-3. Use the Render hook/workflow to poll deployment status continuously until terminal state.
-4. If deployment fails, investigate logs and deployment details to identify the root cause.
+3. Use **Render MCP** to poll deployment status until terminal state (do not rely on dashboard-only guesses). Before calling tools, read each tool’s JSON schema from the enabled server’s folder under the Cursor MCP descriptors (e.g. `mcps/project-0-vecinita-render/tools/` or `mcps/plugin-render-render/tools/`). Typical flow: **`get_selected_workspace`** / **`list_workspaces`** → **`select_workspace`** only when the user has explicitly chosen a workspace (required for some hosts) → **`list_services`** (set **`includePreviews`: true** when checking PR previews) → **`list_deploys`** per **`serviceId`** → **`get_deploy`** until terminal → **`list_logs`** on failure. Prefer the **project-scoped** Render MCP server (**`project-0-vecinita-render`**) when it is enabled; otherwise use the **Render plugin** server (**`plugin-render-render`**) after the user has authenticated and selected a workspace in Cursor. The **`afterShellExecution`** hook may still log deploy snapshots via `RENDER_API_KEY` + `scripts/github/render_inspect.py` when env vars are set; that is supplementary, not a substitute for agent MCP polling when MCP is available.
+4. If deployment fails, investigate logs and deployment details via **`list_logs`** / **`get_deploy`** (and the Render Dashboard only when MCP is unavailable) to identify the root cause.
 5. Apply a durable fix (not a workaround-only patch), validate locally (`make ci` from repo root), and redeploy.
 6. Repeat poll -> diagnose -> fix -> redeploy until the latest deploy succeeds or a true external blocker is identified.
 

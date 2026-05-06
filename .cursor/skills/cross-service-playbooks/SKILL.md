@@ -41,10 +41,11 @@ Use these playbooks so backend, frontend, generated clients, and docs stay align
 **Goal:** Narrow which tier failed, then reproduce with the smallest surface.
 
 1. **Classify the failure:** gateway vs agent vs frontend vs data-management vs Modal worker vs DB/auth. Use logs and HTTP status from the edge the user hit first.
-2. **Config sanity:** compare runtime env to `docs/deployment/RENDER_SHARED_ENV_CONTRACT.md`; run `make render-env-validate` when validating Render-oriented env bundles.
-3. **Contract sanity:** if the symptom is 4xx/5xx or wrong payloads, diff behavior against OpenAPI—regenerate clients if schemas moved (`make openapi-codegen-verify` when URLs are available).
-4. **Tests:** reproduce with a focused test or `make test-schemathesis-cli` / live Schemathesis flows described in `TESTING_DOCUMENTATION.md` when the issue is HTTP contract drift.
-5. **Exit criteria:** root cause fixed (not only symptoms), regression test where practical, `make ci` green.
+2. **Render platform state (agents):** when the failure is deploy-time, preview-only, or you need authoritative service URLs and deploy ids, use **Render MCP** before guessing from old docs. Read tool schemas from the MCP descriptor folder, then call tools in order: **`list_services`** (use **`includePreviews`: true** for PR preview services), **`list_deploys`**, **`get_deploy`** until status is terminal, **`list_logs`** on failure. Prefer MCP server **`project-0-vecinita-render`** when it is enabled in the workspace; otherwise **`plugin-render-render`** after the user has authenticated and selected a Render workspace in Cursor (do not auto-**`select_workspace`** without explicit user choice when the skill requires it). If MCP is unavailable, fall back to the Render Dashboard and any repo scripts (e.g. `scripts/github/render_inspect.py` when `RENDER_API_KEY` is set).
+3. **Config sanity:** compare runtime env to `docs/deployment/RENDER_SHARED_ENV_CONTRACT.md`; run `make render-env-validate` when validating Render-oriented env bundles.
+4. **Contract sanity:** if the symptom is 4xx/5xx or wrong payloads, diff behavior against OpenAPI—regenerate clients if schemas moved (`make openapi-codegen-verify` when URLs are available).
+5. **Tests:** reproduce with a focused test or `make test-schemathesis-cli` / live Schemathesis flows described in `TESTING_DOCUMENTATION.md` when the issue is HTTP contract drift.
+6. **Exit criteria:** root cause fixed (not only symptoms), regression test where practical, `make ci` green.
 
 ## Quick checklist (copy into a PR comment)
 

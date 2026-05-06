@@ -16,3 +16,4 @@ For pull requests targeting `main` where Render previews are used:
 - Treat `Render Preview Attestation Gate` GitHub Actions failures as blocking.
 - Do not report a PR as merge-ready until preview deploy status is healthy/live and attestation validation passes.
 - If validation fails, refresh live checks against the current preview environment, regenerate/update `.ci/render-live-attestation.json`, and re-run verification.
+- When discovering preview URLs, commit SHAs on preview services, or deploy status, use **Render MCP** (see **render-deploy-monitor-and-debug**): e.g. **`list_services`** with **`includePreviews`: true**, then **`list_deploys`** / **`get_deploy`** for the matching `… PR #<n>` services—prefer **`project-0-vecinita-render`** when enabled, else **`plugin-render-render`** after auth/workspace selection.

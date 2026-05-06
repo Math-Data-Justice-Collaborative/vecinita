@@ -92,7 +92,8 @@ if ("all workflow runs for this commit succeeded" in summary) and (not render_do
     msg = (
         "GitHub Actions look **all green** in the summary, but there is no **`## Render deploy summary`**, "
         "**`## Render failure summary`**, or **Render deploy skipped** line. If Phase **E** is satisfied, "
-        "run **Phase F** now: Render MCP `list_services` / `list_deploys` / `get_deploy` until terminal, "
+        "run **Phase F** now: Render MCP on **`project-0-vecinita-render`** (or **`plugin-render-render`** after user auth/workspace): "
+        "`list_services` with **`includePreviews`** for PR previews, then `list_deploys` / `get_deploy` until terminal, "
         "then summarize with **`## Render deploy summary`** or **`## Render failure summary`** and debug "
         "any failures per the agent instructions."
     )

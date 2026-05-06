@@ -40,6 +40,7 @@ Run the CI test and make sure that the tests are passing; if not, fix the root c
 - Do not skip tests or checks with bypass flags unless explicitly requested.
 - If contract/API behavior changes, update corresponding contract tests in the same task.
 - If a failure cannot be reproduced locally, state the blocker and request missing context (exact job/log/commit).
+- If CI failures are **Render Preview Attestation Gate** or other **deploy/preview** checks, triage with **Render MCP** (`list_services` with **`includePreviews`**, `list_deploys`, `get_deploy`, `list_logs`) per `.cursor/skills/cross-service-playbooks/SKILL.md` §3 and `.cursor/agents/push-deploy-debug-workflow.md` Phase F—not only by re-running `make ci` without verifying deploy state.
 
 ## Output format
 

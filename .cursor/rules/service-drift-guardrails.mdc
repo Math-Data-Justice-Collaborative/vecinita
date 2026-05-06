@@ -13,6 +13,7 @@ Use these non-negotiable policies to prevent backend, frontend, and service drif
 - Keep one canonical committed environment defaults/examples file: `.env.local.example`.
 - For bugs and regressions, fix root cause first. Avoid workaround-only patches unless explicitly requested.
 - Do not mark work done or ready until `make ci` passes from repository root.
+- When the task depends on **Render** (deploy status, preview URLs, logs, or live env on services), use **Render MCP** with the workflow in **render-deploy-monitor-and-debug**—prefer **`project-0-vecinita-render`**, then **`plugin-render-render`** after user auth/workspace—instead of guessing from stale URLs or unverified assumptions.
 
 ## PR-ready checklist
 
