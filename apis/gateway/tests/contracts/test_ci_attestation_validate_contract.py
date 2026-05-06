@@ -179,6 +179,34 @@ def test_expected_git_head_allows_pr_merge_checkout() -> None:
         assert proc.returncode == 0, proc.stderr
 
 
+def test_git_head_ancestor_of_expected_head_is_allowed() -> None:
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        m, a = _copy_pair("manifest-valid-minimal.json", "attestation-valid.json", tmp)
+        _touch_fresh_attestation(a)
+        head_proc = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=_REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        parent_proc = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD^"],
+            cwd=_REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if head_proc.returncode != 0 or parent_proc.returncode != 0:
+            pytest.skip("requires at least two commits")
+        data = json.loads(a.read_text(encoding="utf-8"))
+        data["git_head"] = parent_proc.stdout.strip()
+        a.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        proc = _run(m, a, expected_git_head=head_proc.stdout.strip())
+        assert proc.returncode == 0, proc.stderr
+
+
 def test_detailed_v2_attestation_passes() -> None:
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)

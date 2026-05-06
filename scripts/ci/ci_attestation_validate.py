@@ -292,6 +292,24 @@ def _normalize_expected_head(expected_head: str, short_len: int) -> str:
     return normalized.lower()[:short_len]
 
 
+def _is_ancestor(commit: str, descendant: str) -> bool:
+    try:
+        proc = subprocess.run(
+            ["git", "merge-base", "--is-ancestor", commit, descendant],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError as exc:
+        _fail("io_or_parse", "validator", f"failed ancestry check: {exc}")
+    if proc.returncode == 0:
+        return True
+    if proc.returncode in (1, 128):
+        return False
+    _fail("io_or_parse", "validator", f"failed ancestry check: {proc.stderr.strip()}")
+    return False
+
+
 def _validate_git_head(attestation: dict[str, Any], expected_git_head: str | None = None) -> None:
     git_head = attestation.get("git_head")
     if not isinstance(git_head, str) or not git_head.strip():
@@ -301,11 +319,13 @@ def _validate_git_head(attestation: dict[str, Any], expected_git_head: str | Non
         resolved = _normalize_expected_head(expected, len(git_head))
     else:
         resolved = _resolve_local_head(len(git_head))
-    if resolved != git_head:
+    # The attestation is generated before it is committed, so allow it to be
+    # either the exact expected commit or an ancestor of it.
+    if resolved != git_head and not _is_ancestor(git_head, resolved):
         _fail(
             "staleness",
             "attestation",
-            f"git_head {git_head!r} does not match current HEAD {resolved!r}",
+            f"git_head {git_head!r} is not equal to or ancestor of current HEAD {resolved!r}",
         )
 
 
