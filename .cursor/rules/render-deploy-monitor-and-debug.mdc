@@ -10,12 +10,17 @@ When an agent-driven Render deploy starts, treat deployment follow-through as re
 ## Required workflow
 
 1. Start Render deployment steps only after GitHub CI for the relevant commit/branch is green.
-2. Use the Render hook/workflow to poll deployment status continuously until terminal state.
-3. If deployment fails, investigate logs and deployment details to identify the root cause.
-4. Apply a durable fix (not a workaround-only patch), validate locally (`make ci` from repo root), and redeploy.
-5. Repeat poll -> diagnose -> fix -> redeploy until the latest deploy succeeds or a true external blocker is identified.
+2. For pull requests targeting `main`, enforce Render PR preview prerequisites:
+   - PR title includes `[render preview]`.
+   - Render preview deploy reaches a terminal success state before merge readiness.
+   - A committed Render live attestation exists and validates for the PR head.
+3. Use the Render hook/workflow to poll deployment status continuously until terminal state.
+4. If deployment fails, investigate logs and deployment details to identify the root cause.
+5. Apply a durable fix (not a workaround-only patch), validate locally (`make ci` from repo root), and redeploy.
+6. Repeat poll -> diagnose -> fix -> redeploy until the latest deploy succeeds or a true external blocker is identified.
 
 ## Completion gate
 
 - Do not mark the task complete while the latest Render deploy is still running or failed.
+- Do not mark a PR merge-ready when Render preview deploy/live checks or render live attestation are missing or failing.
 - If blocked by an external dependency/manual action, report the blocker clearly and state the exact next user action required.

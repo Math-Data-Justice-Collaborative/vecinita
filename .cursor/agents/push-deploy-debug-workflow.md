@@ -49,6 +49,7 @@ Maintain and **update after every material step** a single markdown block titled
 6. **PR (root vecinita)**  
    - Default branch name (from `gh repo view`).  
    - Head branch, PR # / URL if open, **created vs existing**.  
+   - If PR base is `main`, title includes **`[render preview]`**.
    - `gh pr checks` rollup (or link): pending / success / failure counts after CI.
 
 7. **CI watch (GitHub Actions)**  
@@ -114,6 +115,7 @@ Goal: **mainline GitHub PR** for the same branch you pushed so CI and reviewers 
    - If **no open PR**: `gh pr create -R "$REPO" --base <default> --head "$HEAD_BRANCH"` with title/body from recent commits (or `--fill` if appropriate).  
    - If **PR exists**: optionally `gh pr edit` only if the user asked for description/title updates.  
 5. Record PR #, URL, base/head in ledger §6. Creating a PR may enqueue **additional** `pull_request` workflows—**Phase D** must still wait on **all** runs for the relevant commit(s) per poll skill.
+6. If base branch is `main`, ensure the PR title contains **`[render preview]`**. If missing, update title before CI/Render summary.
 
 ### Phase D — GitHub Actions poll (after pushes / PR exists)
 
@@ -140,12 +142,13 @@ Goal: **mainline GitHub PR** for the same branch you pushed so CI and reviewers 
 2. **Find latest deploys:** For each monitored **`serviceId`**, **`list_deploys`** (limit 10). Prefer deploys whose **commit** matches root `HEAD` SHA, else the newest deploy **after** the GitHub-green timestamp.  
 3. **Poll:** Repeat **`get_deploy`** on in-progress deploys every **30–90s** until each is **terminal** (`live`, `deactivated`, or failure states such as **build failed** / **update failed**—use API `status` field names from MCP responses). Respect a **~90 min** cap; if hit, summarize partial state and URLs.  
 4. **Success path:** When all monitored deploys are **healthy/live** (per Render), ledger §8 table and emit **`## Render deploy summary`** (services, deploy ids, commit, dashboard links).  
-5. **Failure path:** For any failed deploy:  
+5. **Preview live attestation:** For PRs to `main`, verify `.ci/render-live-attestation.json` exists, is fresh, and is tied to the current PR head before declaring merge-ready.  
+6. **Failure path:** For any failed deploy:  
    - **`list_logs`** (and `get_deploy` details) to capture the first actionable errors.  
    - Emit **`## Render failure summary`** (service, deploy id, 5–15 line log excerpt, **hypothesis** in plain language).  
    - Follow **cross-service-playbooks** §3 and **render-debug** patterns: env contract (`make render-env-validate` when applicable), code fixes, not workaround-only.  
    - **`make ci`** from root; commit; **Phase B → C → PR → D → E → F** again; increment **Render loop iteration**.  
-6. Repeat until Render is green or you are **blocked** (missing secrets, external quota, user decision).
+7. Repeat until Render is green or you are **blocked** (missing secrets, external quota, user decision).
 
 ### Phase G — Stop conditions
 
@@ -158,3 +161,4 @@ Goal: **mainline GitHub PR** for the same branch you pushed so CI and reviewers 
 - Always include **`## CI error summary`** or the all-green CI sentence when Phase D completes for a pushed commit.  
 - After Phase F, include **`## Render deploy summary`** or **`## Render failure summary`** as appropriate.  
 - Never claim “CI green” or “Render live” until the polls and MCP/Dashboard evidence are recorded in the ledger.
+- For PRs to `main`, never claim merge-ready until `[render preview]` title and render live attestation checks are explicitly recorded.

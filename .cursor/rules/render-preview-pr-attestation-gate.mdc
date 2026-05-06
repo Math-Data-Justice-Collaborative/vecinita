@@ -1,0 +1,18 @@
+---
+description: Require Render preview PR title and live attestation before merge readiness
+alwaysApply: true
+---
+
+# Render Preview PR Attestation Gate
+
+For pull requests targeting `main` where Render previews are used:
+
+- PR title must include `[render preview]`.
+- A committed `.ci/render-live-attestation.json` must exist and validate.
+- The attestation must be fresh, tied to the PR head SHA, and report all live checks passed.
+
+## Enforcement expectations
+
+- Treat `Render Preview Attestation Gate` GitHub Actions failures as blocking.
+- Do not report a PR as merge-ready until preview deploy status is healthy/live and attestation validation passes.
+- If validation fails, refresh live checks against the current preview environment, regenerate/update `.ci/render-live-attestation.json`, and re-run verification.

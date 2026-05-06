@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Cursor beforeShellExecution hook:
-# - Intercepts `git commit ...` and `gh pr create ...`
+# - Intercepts `git commit ...` and `gh pr create/edit ...`
 # - Enforces drift gates before the shell command is allowed:
 #   1) OpenAPI client sync check when schema/client surfaces are touched
 #   2) Lint/type checks for touched services only
@@ -34,6 +34,7 @@ INPUT="$(cat || true)"
 readarray -t PARSED < <(
   python3 - "$INPUT" <<'PY'
 import json
+import shlex
 import sys
 
 raw = sys.argv[1]
@@ -45,18 +46,48 @@ except json.JSONDecodeError:
     raise SystemExit(0)
 
 cmd = str(payload.get("command") or "").strip()
-is_target = int(cmd.startswith("git commit") or cmd.startswith("gh pr create"))
+is_target = int(
+    cmd.startswith("git commit")
+    or cmd.startswith("gh pr create")
+    or cmd.startswith("gh pr edit")
+)
+is_pr_command = int(cmd.startswith("gh pr create") or cmd.startswith("gh pr edit"))
+title = ""
+if is_pr_command:
+    try:
+        tokens = shlex.split(cmd)
+    except ValueError:
+        tokens = []
+    for i, token in enumerate(tokens):
+        if token == "--title" and i + 1 < len(tokens):
+            title = tokens[i + 1]
+            break
 print(cmd)
 print(is_target)
+print(is_pr_command)
+print(title)
 PY
 )
 
 COMMAND="${PARSED[0]:-}"
 IS_TARGET="${PARSED[1]:-0}"
+IS_PR_COMMAND="${PARSED[2]:-0}"
+PR_TITLE="${PARSED[3]:-}"
 
 if [[ "$IS_TARGET" != "1" ]]; then
   emit_allow
   exit 0
+fi
+
+if [[ "$IS_PR_COMMAND" == "1" ]]; then
+  if [[ -z "$PR_TITLE" ]]; then
+    emit_deny "Render preview policy: include a PR title using --title and include the token [render preview] for manual Render PR previews."
+    exit 0
+  fi
+  if [[ "${PR_TITLE,,}" != *"[render preview]"* ]]; then
+    emit_deny "Render preview policy: PR title must include [render preview] so Render creates/manual-manages the preview environment."
+    exit 0
+  fi
 fi
 
 if ! command -v git >/dev/null 2>&1; then

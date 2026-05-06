@@ -64,6 +64,15 @@ render_done = any(
     )
 )
 
+preview_attestation_done = any(
+    m in summary
+    for m in (
+        "render live attestation",
+        "render-preview-attestation-gate",
+        ".ci/render-live-attestation.json",
+    )
+)
+
 if no_push:
     print("{}")
     raise SystemExit(0)
@@ -86,6 +95,20 @@ if ("all workflow runs for this commit succeeded" in summary) and (not render_do
         "run **Phase F** now: Render MCP `list_services` / `list_deploys` / `get_deploy` until terminal, "
         "then summarize with **`## Render deploy summary`** or **`## Render failure summary`** and debug "
         "any failures per the agent instructions."
+    )
+    print(json.dumps({"followup_message": msg}))
+    raise SystemExit(0)
+
+if (
+    ("all workflow runs for this commit succeeded" in summary)
+    and render_done
+    and (not preview_attestation_done)
+):
+    msg = (
+        "Render deploy monitoring is present, but there is no clear mention of **Render live attestation** "
+        "(`.ci/render-live-attestation.json`) or the **render-preview-attestation-gate** status. "
+        "For PRs targeting `main`, confirm title includes `[render preview]`, refresh live attestation "
+        "after preview checks pass, and include that evidence in the summary."
     )
     print(json.dumps({"followup_message": msg}))
     raise SystemExit(0)

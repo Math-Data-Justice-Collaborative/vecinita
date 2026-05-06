@@ -11,6 +11,7 @@ After any push to GitHub, treat workflow monitoring as required follow-through.
 
 - Identify the pushed commit/branch and immediately check GitHub Actions runs triggered by that push.
 - Continue monitoring until all workflows for that push reach a terminal state.
+- Treat `Render Preview Attestation Gate` failures as merge blockers: fix PR title (`[render preview]`) and refresh `.ci/render-live-attestation.json` with passing live checks.
 - If any workflow fails, investigate logs and fix the root cause locally (not a workaround-only patch).
 - Re-run local validation (`make ci` from repository root) before pushing the fix.
 - Push fixes and repeat monitor -> diagnose -> fix until all workflows for the latest push pass.

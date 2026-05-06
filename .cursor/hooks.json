@@ -4,7 +4,7 @@
     "beforeShellExecution": [
       {
         "command": ".cursor/hooks/enforce-drift-gates.sh",
-        "matcher": "^(git\\s+commit\\b|gh\\s+pr\\s+create\\b)",
+        "matcher": "^(git\\s+commit\\b|gh\\s+pr\\s+(create|edit)\\b)",
         "timeout": 1200,
         "failClosed": true
       }

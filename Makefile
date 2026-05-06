@@ -30,7 +30,7 @@
 	render-services render-deploy-status render-deploy-show render-service-env render-logs \
 	docs-install docs-serve docs-build docs-deploy-check \
 	openapi-codegen openapi-codegen-verify check-modal-http \
-	ci-attestation ci-attestation-validate
+	ci-attestation ci-attestation-validate render-live-attestation-generate render-live-attestation-validate
 
 help:
 	@echo "Vecinita root Makefile"
@@ -150,6 +150,8 @@ help:
 	@echo "  make render-local-validate [ENV_FILE=...] Validate env contract + compose syntax"
 	@echo "  make render-local-check [ENV_FILE=...]   Smart check: preflight always, live checks if stack is up"
 	@echo "  make render-local-check-live [ENV_FILE=...] Force live local Render smoke/runbook checks"
+	@echo "  make render-live-attestation-generate     Probe preview URL and write .ci/render-live-attestation.json"
+	@echo "  make render-live-attestation-validate     Validate .ci/render-live-attestation.json policy/freshness"
 	@echo ""
 	@echo "Env key standardization + contract tests"
 	@echo "  make env-sync-contract                   Cross-platform env key sync contract tests (no secrets)"
@@ -477,6 +479,27 @@ ci-attestation:
 # Feature 019: validate manifest + attestation (same logic as the GitHub Actions gate job).
 ci-attestation-validate:
 	python3 scripts/ci/ci_attestation_validate.py
+
+# Generate Render preview live attestation by probing the preview URL.
+# Required env:
+#   RENDER_PREVIEW_BASE_URL=https://<preview>.onrender.com
+#   RENDER_PREVIEW_PR_TITLE='[render preview] ...'
+render-live-attestation-generate:
+	python3 scripts/ci/render_live_attestation_generate.py \
+		--preview-base-url "$(RENDER_PREVIEW_BASE_URL)" \
+		--pr-title "$(RENDER_PREVIEW_PR_TITLE)" \
+		$(foreach p,$(RENDER_LIVE_CHECK_PATHS),--path "$(p)")
+
+# Validate Render preview live attestation for PR merge-readiness.
+# Optional env:
+#   EXPECTED_GIT_HEAD=<sha>
+#   EXPECTED_PR_TITLE='[render preview] ...'
+render-live-attestation-validate:
+	python3 scripts/ci/render_live_attestation_validate.py \
+		--attestation .ci/render-live-attestation.json \
+		--max-age-hours $(or $(MAX_AGE_HOURS),24) \
+		--expected-git-head "$(EXPECTED_GIT_HEAD)" \
+		--expected-pr-title "$(EXPECTED_PR_TITLE)"
 
 # OpenAPI client regeneration (requires GATEWAY_SCHEMA_URL, DATA_MANAGEMENT_SCHEMA_URL, AGENT_SCHEMA_URL).
 openapi-codegen:
