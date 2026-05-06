@@ -46,8 +46,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy installed packages from builder
 COPY --from=builder /install /usr/local
 
-# Application source (canonical tree under apis/gateway/src; includes apis/agent via symlink)
+# Application source
+# Copy gateway shared modules, then overwrite ``src/agent`` with the real agent
+# package so runtime imports do not rely on a repo-local symlink target.
 COPY apis/gateway/src ./src/
+COPY apis/agent/src/agent ./src/agent/
 COPY apis/gateway/scripts ./scripts/
 
 # Python env flags
