@@ -267,13 +267,10 @@ def _validate_coverage(manifest_ids: list[str], attestation: dict[str, Any], sco
             _fail("incomplete_manifest", scope, f"unexpected attestation id {cid!r} not in manifest")
 
 
-def _validate_git_head(attestation: dict[str, Any]) -> None:
-    git_head = attestation.get("git_head")
-    if not isinstance(git_head, str) or not git_head.strip():
-        _fail("schema", "attestation", "git_head is required for commit-based validation")
+def _resolve_local_head(short_len: int) -> str:
     try:
         proc = subprocess.run(
-            ["git", "rev-parse", "--verify", f"--short={len(git_head)}", "HEAD"],
+            ["git", "rev-parse", "--verify", f"--short={short_len}", "HEAD"],
             capture_output=True,
             text=True,
             check=False,
@@ -285,6 +282,25 @@ def _validate_git_head(attestation: dict[str, Any]) -> None:
     resolved = proc.stdout.strip()
     if not resolved:
         _fail("io_or_parse", "validator", "failed to resolve current HEAD")
+    return resolved
+
+
+def _normalize_expected_head(expected_head: str, short_len: int) -> str:
+    normalized = expected_head.strip()
+    if not re.fullmatch(r"[0-9a-fA-F]{7,40}", normalized):
+        _fail("schema", "validator", "expected_git_head must be a hex SHA (7-40 chars)")
+    return normalized.lower()[:short_len]
+
+
+def _validate_git_head(attestation: dict[str, Any], expected_git_head: str | None = None) -> None:
+    git_head = attestation.get("git_head")
+    if not isinstance(git_head, str) or not git_head.strip():
+        _fail("schema", "attestation", "git_head is required for commit-based validation")
+    expected = expected_git_head.strip() if isinstance(expected_git_head, str) else ""
+    if expected:
+        resolved = _normalize_expected_head(expected, len(git_head))
+    else:
+        resolved = _resolve_local_head(len(git_head))
     if resolved != git_head:
         _fail(
             "staleness",
@@ -313,6 +329,12 @@ def main() -> None:
         default=48.0,
         help="Maximum attestation age in hours (FR-006)",
     )
+    parser.add_argument(
+        "--expected-git-head",
+        type=str,
+        default="",
+        help="Expected commit SHA for attestation git_head (e.g., PR head SHA)",
+    )
     args = parser.parse_args()
 
     env_hours = os.environ.get("CI_ATTESTATION_MAX_AGE_HOURS")
@@ -340,7 +362,7 @@ def main() -> None:
     if _staleness_fail(generated_at, start, max_age):
         _fail("staleness", "attestation", "generated_at is outside the configured freshness window")
 
-    _validate_git_head(attestation)
+    _validate_git_head(attestation, args.expected_git_head)
     _validate_coverage(manifest_ids, attestation, "attestation")
 
     sys.exit(0)

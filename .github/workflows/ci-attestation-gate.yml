@@ -25,6 +25,7 @@ jobs:
         env:
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           MAX_AGE_INPUT: ${{ github.event.inputs.max_age_hours }}
+          EXPECTED_GIT_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
           if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ] && [ -n "${MAX_AGE_INPUT}" ]; then
@@ -33,4 +34,5 @@ jobs:
           python3 scripts/ci/ci_attestation_validate.py \
             --manifest .ci/required-checks.json \
             --attestation .ci/ci-attestation.json \
-            --max-age-hours "${CI_ATTESTATION_MAX_AGE_HOURS:-48}"
+            --max-age-hours "${CI_ATTESTATION_MAX_AGE_HOURS:-48}" \
+            --expected-git-head "${EXPECTED_GIT_HEAD}"

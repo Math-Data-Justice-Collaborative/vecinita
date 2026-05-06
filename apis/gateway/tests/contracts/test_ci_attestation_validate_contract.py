@@ -24,18 +24,22 @@ def _run(
     attestation: Path,
     *,
     max_age_hours: float = 1_000_000.0,
+    expected_git_head: str | None = None,
 ) -> subprocess.CompletedProcess[str]:
+    cmd = [
+        sys.executable,
+        str(_SCRIPT),
+        "--manifest",
+        str(manifest),
+        "--attestation",
+        str(attestation),
+        "--max-age-hours",
+        str(max_age_hours),
+    ]
+    if expected_git_head is not None:
+        cmd.extend(["--expected-git-head", expected_git_head])
     return subprocess.run(
-        [
-            sys.executable,
-            str(_SCRIPT),
-            "--manifest",
-            str(manifest),
-            "--attestation",
-            str(attestation),
-            "--max-age-hours",
-            str(max_age_hours),
-        ],
+        cmd,
         cwd=_REPO_ROOT,
         capture_output=True,
         text=True,
@@ -161,6 +165,18 @@ def test_git_head_mismatch_emits_staleness() -> None:
         proc = _run(m, a)
         assert proc.returncode != 0
         assert "staleness" in proc.stderr
+
+
+def test_expected_git_head_allows_pr_merge_checkout() -> None:
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        m, a = _copy_pair("manifest-valid-minimal.json", "attestation-valid.json", tmp)
+        _touch_fresh_attestation(a)
+        data = json.loads(a.read_text(encoding="utf-8"))
+        attestation_git_head = data["git_head"]
+        assert isinstance(attestation_git_head, str)
+        proc = _run(m, a, expected_git_head=f"{attestation_git_head}abcdef")
+        assert proc.returncode == 0, proc.stderr
 
 
 def test_detailed_v2_attestation_passes() -> None:
