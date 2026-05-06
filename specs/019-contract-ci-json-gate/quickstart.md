@@ -19,7 +19,12 @@ From the **repository root**:
 make ci-attestation
 ```
 
-This reads `.ci/required-checks.json`, runs each manifest `command` (including `make ci`), and writes `.ci/ci-attestation.json` with `format_version`, UUID v4 `run_id`, UTC ISO-8601 `generated_at`, current commit `git_head`, and per-check `status`.
+This reads `.ci/required-checks.json`, runs each manifest `command` (including `make ci`), and writes `.ci/ci-attestation.json` with:
+- `format_version` (currently `2`)
+- UUID v4 `run_id`
+- UTC ISO-8601 `generated_at`
+- current commit `git_head`
+- per-check details: `id`, `title`, `command`, `status`, `exit_code`, `started_at`, `finished_at`, `duration_seconds`, `stdout`, `stderr`
 
 Commit **both** `.ci/required-checks.json` (when changed) and `.ci/ci-attestation.json` with your PR.
 

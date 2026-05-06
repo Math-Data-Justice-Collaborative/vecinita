@@ -161,3 +161,25 @@ def test_git_head_mismatch_emits_staleness() -> None:
         proc = _run(m, a)
         assert proc.returncode != 0
         assert "staleness" in proc.stderr
+
+
+def test_detailed_v2_attestation_passes() -> None:
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        m, a = _copy_pair("manifest-valid-minimal.json", "attestation-valid.json", tmp)
+        _touch_fresh_attestation(a)
+        base = json.loads(a.read_text(encoding="utf-8"))
+        base["format_version"] = 2
+        check = base["checks"][0]
+        check["title"] = "Full local CI"
+        check["command"] = "make ci"
+        check["exit_code"] = 0
+        now = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+        check["started_at"] = now
+        check["finished_at"] = now
+        check["duration_seconds"] = 0.0
+        check["stdout"] = "ok"
+        check["stderr"] = ""
+        a.write_text(json.dumps(base, indent=2) + "\n", encoding="utf-8")
+        proc = _run(m, a)
+        assert proc.returncode == 0, proc.stderr

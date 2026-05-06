@@ -12,3 +12,31 @@ repos:
     hooks:
       - id: gitleaks
         args: ["protect", "--staged", "--redact", "--config=.gitleaks.toml"]
+
+  - repo: local
+    hooks:
+      - id: ci-before-commit
+        name: Run full CI before commit
+        language: system
+        pass_filenames: false
+        always_run: true
+        entry: bash -lc 'set -euo pipefail; make ci'
+
+      - id: ci-attestation-required
+        name: Require fresh CI attestation in commit
+        language: system
+        pass_filenames: false
+        always_run: true
+        entry: >
+          bash -lc '
+          set -euo pipefail
+          if ! git diff --cached --name-only -- ".ci/ci-attestation.json" | rg -q "^\.ci/ci-attestation\.json$"; then
+            echo "ERROR: .ci/ci-attestation.json must be refreshed and staged before commit."
+            echo "Run: make ci-attestation && make ci-attestation-validate && git add .ci/ci-attestation.json"
+            exit 1
+          fi
+          python3 scripts/ci/ci_attestation_validate.py \
+            --manifest .ci/required-checks.json \
+            --attestation .ci/ci-attestation.json \
+            --max-age-hours "${CI_ATTESTATION_MAX_AGE_HOURS:-48}"
+          '
