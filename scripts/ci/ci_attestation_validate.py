@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import sys
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -174,6 +175,32 @@ def _validate_coverage(manifest_ids: list[str], attestation: dict[str, Any], sco
             _fail("incomplete_manifest", scope, f"unexpected attestation id {cid!r} not in manifest")
 
 
+def _validate_git_head(attestation: dict[str, Any]) -> None:
+    git_head = attestation.get("git_head")
+    if not isinstance(git_head, str) or not git_head.strip():
+        _fail("schema", "attestation", "git_head is required for commit-based validation")
+    try:
+        proc = subprocess.run(
+            ["git", "rev-parse", "--verify", f"--short={len(git_head)}", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError as exc:
+        _fail("io_or_parse", "validator", f"failed to resolve current HEAD: {exc}")
+    if proc.returncode != 0:
+        _fail("io_or_parse", "validator", f"failed to resolve current HEAD: {proc.stderr.strip()}")
+    resolved = proc.stdout.strip()
+    if not resolved:
+        _fail("io_or_parse", "validator", "failed to resolve current HEAD")
+    if resolved != git_head:
+        _fail(
+            "staleness",
+            "attestation",
+            f"git_head {git_head!r} does not match current HEAD {resolved!r}",
+        )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -221,6 +248,7 @@ def main() -> None:
     if _staleness_fail(generated_at, start, max_age):
         _fail("staleness", "attestation", "generated_at is outside the configured freshness window")
 
+    _validate_git_head(attestation)
     _validate_coverage(manifest_ids, attestation, "attestation")
 
     sys.exit(0)

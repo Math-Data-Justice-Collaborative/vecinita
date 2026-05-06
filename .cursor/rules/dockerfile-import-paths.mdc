@@ -1,0 +1,33 @@
+---
+description: Validate Dockerfile copy/import source paths
+globs: "{Dockerfile,**/Dockerfile,**/Dockerfile.*}"
+alwaysApply: false
+---
+
+# Dockerfile Import/Copy Paths
+
+When editing Dockerfiles, verify that file imports via `COPY`/`ADD` use valid paths from the build context.
+
+- Treat `COPY <src> <dest>` and `ADD <src> <dest>` sources as relative to the Docker build context, not the Dockerfile location.
+- If a Dockerfile lives in a subdirectory, do not assume `COPY ./...` resolves next to that Dockerfile unless the build context is set to that directory.
+- Prefer explicit paths that match repository layout used by `docker build -f <path-to-dockerfile> <context>`.
+- For multi-stage builds, ensure `COPY --from=<stage>` references an existing stage alias.
+- If path assumptions are unclear, require the exact build command in docs or comments.
+
+## Examples
+
+```dockerfile
+# ❌ BAD: assumes package.json is beside this Dockerfile
+COPY package.json package-lock.json ./
+
+# ✅ GOOD: explicit source path from repo-root build context
+COPY frontends/chat/package.json frontends/chat/package-lock.json ./
+```
+
+```dockerfile
+# ❌ BAD: stage alias typo
+COPY --from=buildr /app/dist /app/dist
+
+# ✅ GOOD: stage alias matches declared stage
+COPY --from=builder /app/dist /app/dist
+```

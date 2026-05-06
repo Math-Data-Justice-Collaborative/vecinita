@@ -55,6 +55,15 @@ def _touch_fresh_attestation(attestation: Path) -> None:
     data["generated_at"] = (
         datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     )
+    head_proc = subprocess.run(
+        ["git", "rev-parse", "--short", "HEAD"],
+        cwd=_REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if head_proc.returncode == 0 and head_proc.stdout.strip():
+        data["git_head"] = head_proc.stdout.strip()
     attestation.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
@@ -139,3 +148,16 @@ def test_unknown_top_level_attestation_property_emits_schema() -> None:
         proc = _run(m, a)
         assert proc.returncode != 0
         assert "schema" in proc.stderr
+
+
+def test_git_head_mismatch_emits_staleness() -> None:
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        m, a = _copy_pair("manifest-valid-minimal.json", "attestation-valid.json", tmp)
+        _touch_fresh_attestation(a)
+        data = json.loads(a.read_text(encoding="utf-8"))
+        data["git_head"] = "deadbee"
+        a.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        proc = _run(m, a)
+        assert proc.returncode != 0
+        assert "staleness" in proc.stderr

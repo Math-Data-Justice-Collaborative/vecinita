@@ -5,7 +5,7 @@ This directory holds the **required-check manifest** and **local test attestatio
 | File | Role |
 |------|------|
 | `required-checks.json` | Authoritative list of merge-blocking checks (`id`, `title`, `command`). |
-| `ci-attestation.json` | JSON emitted by the local workflow: per-check outcomes, `run_id`, `generated_at`. |
+| `ci-attestation.json` | JSON emitted by the local workflow: per-check outcomes, `run_id`, `generated_at`, `git_head`. |
 
 ## Trust boundary (Option A)
 
