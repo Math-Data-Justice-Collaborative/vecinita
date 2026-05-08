@@ -47,6 +47,11 @@ def _pg_connect(*args: Any, **kwargs: Any):  # noqa: ANN401
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/documents", tags=["Documents (Public)"])
+_DOCUMENTS_404_RESPONSE = {
+    404: {
+        "description": "Source not found for the requested URL.",
+    }
+}
 
 EMBEDDING_SERVICE_URL = _CONFIG_EMBEDDING_SERVICE_URL or "http://localhost:8001"
 UPLOAD_STORAGE_BUCKET = os.getenv("UPLOADS_STORAGE_BUCKET") or os.getenv(
@@ -486,7 +491,11 @@ async def documents_overview(
 # ---------------------------------------------------------------------------
 
 
-@router.get("/preview", response_model=DocumentsPreviewResponse)
+@router.get(
+    "/preview",
+    response_model=DocumentsPreviewResponse,
+    responses=_DOCUMENTS_404_RESPONSE,
+)
 async def documents_preview(
     params: Annotated[DocumentsPreviewQueryParams, Depends()],
 ) -> DocumentsPreviewResponse:
@@ -538,7 +547,11 @@ async def documents_preview(
         _raise_documents_error("documents_preview", exc)
 
 
-@router.get("/download-url", response_model=DocumentsDownloadUrlResponse)
+@router.get(
+    "/download-url",
+    response_model=DocumentsDownloadUrlResponse,
+    responses=_DOCUMENTS_404_RESPONSE,
+)
 async def documents_download_url(
     params: Annotated[DocumentsDownloadUrlQueryParams, Depends()],
 ) -> DocumentsDownloadUrlResponse:

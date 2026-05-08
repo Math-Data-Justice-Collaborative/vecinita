@@ -36,7 +36,7 @@ class ScrapeStartRequest(BaseModel):
         ...,
         min_length=1,
         description="URLs to scrape (minimum 1, maximum configured in gateway)",
-        examples=["https://example.com/docs", "https://example.com/blog"],
+        examples=[["https://example.com/docs", "https://example.com/blog"]],
     )
     force_loader: LoaderType = Field(
         default=LoaderType.AUTO,

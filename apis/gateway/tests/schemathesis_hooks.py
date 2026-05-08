@@ -145,8 +145,8 @@ _DEFAULT_SCRAPE_JOB_ID = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 _DEFAULT_SCRAPE_TARGET_URL = "https://example.com/page"
 # Tracked Modal registry ids (live runs: set to a real id to avoid repeated 404 warnings).
 _DEFAULT_MODAL_REGISTRY_JOB_ID = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-_DEFAULT_STREAM_QUESTION = "What is Vecinita?"
-_DEFAULT_ASK_QUESTION = "What is Vecinita?"
+_DEFAULT_STREAM_QUESTION = "hello"
+_DEFAULT_ASK_QUESTION = "hello"
 # Data Management (scraper) API — https://vecinita-data-management-api-v1-lx27.onrender.com/openapi.json
 _DEFAULT_DM_JOB_ID = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 _DM_SUBMIT_URL = "https://example.org/page"
