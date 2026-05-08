@@ -1,0 +1,56 @@
+---
+description: Schemathesis (OpenAPI/GraphQL property-based API testing) — config, hooks, pytest, and CI patterns
+globs: "{**/schemathesis.toml,**/schemathesis_hooks.py,**/*schemathesis*.py,**/run_schemathesis*.sh}"
+alwaysApply: false
+---
+
+# Schemathesis best practices
+
+Primary docs: [Schemathesis](https://schemathesis.readthedocs.io/en/stable/), [configuration reference](https://schemathesis.readthedocs.io/en/stable/reference/configuration/), [hooks](https://schemathesis.readthedocs.io/en/stable/hooks/), [extending](https://schemathesis.readthedocs.io/en/stable/guides/extending/), [stateful](https://schemathesis.readthedocs.io/en/stable/stateful-testing/), [CI/CD](https://schemathesis.readthedocs.io/en/stable/guides/cicd/), [FAQ](https://schemathesis.readthedocs.io/en/stable/faq/). Prefer current **stable** URLs; use the [migration guide](https://schemathesis.readthedocs.io/en/stable/migration/) after upgrades.
+
+## Configuration (`schemathesis.toml` and CLI)
+
+- **Precedence (highest wins):** CLI flags → per-operation phase settings → global phases → `[[operations]]` blocks → `[[project]]` → file defaults. Document intentional overrides in comments when non-obvious.
+- **Environment substitution:** Use `${VAR_NAME}` in TOML for secrets and host-specific values; values resolve when config is loaded (including under pytest).
+- **Operation targeting:** Prefer `include-name` (e.g. `POST /users/`), `include-path` / `include-path-regex`, `include-operation-id`, or tags — not ad-hoc disabling elsewhere. Merging: operation-level phase flags combine with global defaults; verify behavior in docs when toggling stateful per route.
+- **Parameters:** Use `[parameters]` or `[[operations]].parameters` for stable IDs; disambiguate duplicate names with dotted keys (e.g. `path.user_id` vs `query.user_id`).
+- **Network:** Set `request-timeout`, `wait-for-schema`, and `request-retries` explicitly for live targets; distinguish **request timeout** from **Hypothesis deadline** (FAQ).
+- **Hypothesis:** Tune `[generation]` / `max-examples`; use `suppress-health-check` only when justified (e.g. `filter_too_much`, `too_slow` on path-heavy APIs). Use `seed` when you need a reproducible CLI run.
+- **Warnings:** In CI, consider `warnings.fail-on` for classes like `validation_mismatch` or `missing_test_data` so schema drift surfaces as failures, not noise.
+
+## Data generation and phases
+
+- Schemathesis generates **schema-conformant and boundary** data; servers may still reject cases where business rules exceed the OpenAPI spec — fix the schema, add hooks, or add filters; do not treat every 422 as a Schemathesis bug.
+- Know **phases** (`explicit`, `examples`, `fuzzing`, `stateful`, etc.): options like `fill-missing` under `[phases.examples]` affect how examples are used. **Stateful** chains operations (links / dependencies); cap `max-steps` and disable stateful for routes where invalid sequences or side effects dominate (see project `schemathesis.toml` patterns).
+- **Phase compatibility:** `filter_*` / `map_*` / `flatmap_*` hooks on components do not apply the same way in all phases (e.g. coverage-oriented phases may bypass the strategy pipeline). Check [hook phase compatibility](https://schemathesis.readthedocs.io/en/stable/reference/hooks/) before relying on a hook for fuzzing-only behavior.
+
+## Hooks and extensions
+
+- Register hooks via **`hooks = "package.module"`** in `schemathesis.toml` and/or **`SCHEMATHESIS_HOOKS`** for `schemathesis run`; for pytest, importing hooks from **`conftest.py`** or a shared hooks module is fine if the plugin loads them.
+- **Naming:** `filter_<part>`, `map_<part>`, `flatmap_<part>` for `query`, `headers`, `path_parameters`, `body`, `case`. For `filter_*`, **any** hook returning `False` drops the case (later hooks are skipped). **`map_*`** chain in registration order; **`flatmap_*`** returns a Hypothesis `SearchStrategy` when one field’s strategy must depend on another.
+- Use **`@hook.apply_to(...)`** / **`skip_for`** to scope hooks instead of giant `if` branches inside every hook.
+- Prefer **`map_*`** for deterministic substitutions (real IDs, auth); use **`flatmap_*`** for dependent generation. Use **`before_call`** only when mutating the assembled case is truly necessary.
+- **Custom checks:** `@schemathesis.check` for invariants not expressible in OpenAPI; keep checks fast and side-effect free.
+- **Custom OpenAPI formats:** `schemathesis.openapi.format(name, strategy)` when the spec uses a `format` your stack relies on.
+
+## Pytest integration
+
+- Use **`pytest.importorskip("schemathesis")`** (and `hypothesis` if needed) so optional envs skip cleanly.
+- Load built-in checks explicitly when you rely on them: e.g. `schemathesis.checks.load_all_checks()` plus any spec-specific checks (e.g. `response_schema_conformance`).
+- Prefer **`@settings(max_examples=..., deadline=..., suppress_health_check=...)`** on parametrized tests for local speed; keep CLI `max-examples` aligned for comparable coverage.
+- **`case.call_and_validate()`** (or async equivalents) should match how the app is served (ASGI vs WSGI vs real base URL). Reuse app fixtures and auth the same way production clients would.
+
+## Checks and responses
+
+- Enable/disable checks per surface in **`[checks]`** or per-operation — e.g. disable **`unsupported_method`** when the Allow-header noise is intentional (see project `TESTING_DOCUMENTATION.md` / gateway `schemathesis.toml`).
+- Treat **5xx** and **response/schema mismatch** as primary Schemathesis signals; triage **4xx** by whether the spec allows that status for the generated case.
+
+## This repository (Vecinita)
+
+- Gateway: **`apis/gateway/schemathesis.toml`**, hooks in **`apis/gateway/tests/schemathesis_hooks.py`**, pytest wiring in **`apis/gateway/tests/integration/conftest.py`**. Run **`make test-schemathesis`** / **`make test-schemathesis-cli`** from the repo root per `Makefile` and `TESTING_DOCUMENTATION.md`.
+- **`SCHEMATHESIS_HOOKS=tests.schemathesis_hooks`** is the standard entry for Makefile targets; keep hooks idempotent and safe when TraceCov or coverage tooling is optional.
+- **TraceCov:** Schema coverage thresholds for CLI may be enforced via env (e.g. `SCHEMATHESIS_COVERAGE_FAIL_UNDER`), not arbitrary extra keys in `schemathesis.toml`, because the config schema is strict — follow existing comments in `schemathesis.toml` and `schemathesis_hooks.py`.
+
+## When changing OpenAPI or tests together
+
+- If the edit changes HTTP contracts exercised by Schemathesis, update **hooks**, **stable IDs**, **`[[operations]]`**, and **checks** in the same change, and extend **contract / Schemathesis tests** per `.cursor/rules/contract-pact-tests-on-change.mdc`.
