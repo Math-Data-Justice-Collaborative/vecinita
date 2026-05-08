@@ -26,7 +26,7 @@ def minimal_valid_render_env():
         "VECINITA_SCRAPER_API_URL": "https://scraper.modal.run",
         "VITE_GATEWAY_URL": "https://gateway.onrender.com/api/v1",
         "VITE_BACKEND_URL": "https://agent.onrender.com",
-        "VITE_VECINITA_SCRAPER_API_URL": "https://scraper.modal.run",
+        "VITE_DM_API_BASE_URL": "https://vecinita-data-management-api-v1.example.com",
     }
 
 

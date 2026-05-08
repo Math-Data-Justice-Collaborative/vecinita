@@ -27,7 +27,7 @@
 
 | Field / env var | Type | Description |
 |-----------------|------|---------------|
-| `VITE_VECINITA_SCRAPER_API_URL` | absolute URL | Base origin for scraper API (`/health`, `/jobs`…); required for non-localhost dashboards. |
+| `VITE_DM_API_BASE_URL` | absolute URL | Base origin for data-management HTTP API (`/health`, `/jobs`…); required for non-localhost dashboards. |
 | `VITE_DEFAULT_SCRAPER_USER_ID` | string | Default user id on job requests. |
 | `VITE_USE_GATEWAY_MODAL_JOBS` | boolean string | When true, use gateway modal-jobs scraper root. |
 | `VITE_VECINITA_GATEWAY_URL` | URL | Gateway origin for modal-jobs path when flag enabled. |
@@ -55,7 +55,7 @@ Align these between **Python** (`shared_schemas.scraper`, FastAPI routes in scra
 
 ## Validation rules
 
-- DM dashboard: `VITE_VECINITA_SCRAPER_API_URL` must be a valid `http:` or `https:` URL when not in mock mode (`getScraperConfigDiagnostic`).
+- DM dashboard: `VITE_DM_API_BASE_URL` must be a valid `http:` or `https:` URL when not in mock mode (`getScraperConfigDiagnostic`).
 - Chat: relative gateway URL only where `agentApiResolution` explicitly supports current host (localhost vs deployed).
 
 ## State transitions

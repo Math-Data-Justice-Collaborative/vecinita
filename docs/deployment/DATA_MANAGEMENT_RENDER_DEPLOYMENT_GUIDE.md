@@ -12,7 +12,7 @@ This guide provides step-by-step instructions for deploying the data management 
 User Browser
     ↓
 vecinita-data-management-frontend (Render Static Site)
-    ↓ HTTP Calls with VITE_VECINITA_SCRAPER_API_URL
+    ↓ HTTP Calls with VITE_DM_API_BASE_URL
 vecinita-modal-proxy (Render Web Service)
     ↓ Routes to Modal endpoints
 ├─ vecinita-scraper (Modal)
@@ -87,7 +87,7 @@ Navigate to **Service → Environment** and add:
 
 | Variable | Value | Notes |
 |----------|-------|-------|
-| `VITE_VECINITA_SCRAPER_API_URL` | `https://vecinita-modal-proxy.onrender.com` | The proxy URL from Phase 1 |
+| `VITE_DM_API_BASE_URL` | `https://vecinita-modal-proxy.onrender.com` | The proxy URL from Phase 1 |
 | `VITE_DEFAULT_SCRAPER_USER_ID` | `frontend-user` | Optional; default user ID for jobs |
 
 #### 3. Capture the Frontend URL
@@ -187,7 +187,7 @@ The orchestrator dispatches workflows to both repos and waits for completion.
 
 | Variable | Purpose | Example |
 |----------|---------|---------|
-| `VITE_VECINITA_SCRAPER_API_URL` | **Required.** Proxy service URL for API calls | `https://vecinita-modal-proxy.onrender.com` |
+| `VITE_DM_API_BASE_URL` | **Required.** Proxy service URL for API calls | `https://vecinita-modal-proxy.onrender.com` |
 | `VITE_DEFAULT_SCRAPER_USER_ID` | Optional user ID prefix for job tracking | `frontend-user` |
 
 ### Proxy (Runtime — Configurable Anytime)
@@ -210,11 +210,11 @@ The orchestrator dispatches workflows to both repos and waits for completion.
 
 ### Frontend Shows "API Not Configured" Banner
 
-**Cause:** `VITE_VECINITA_SCRAPER_API_URL` is not set or incorrect.
+**Cause:** `VITE_DM_API_BASE_URL` is not set or incorrect.
 
 **Fix:**
 1. Go to frontend service → **Environment**
-2. Verify `VITE_VECINITA_SCRAPER_API_URL` is set to the proxy URL
+2. Verify `VITE_DM_API_BASE_URL` is set to the proxy URL
 3. Trigger a new deploy (frontend must rebuild with the correct value)
 
 ### Proxy Returns 401 on Requests

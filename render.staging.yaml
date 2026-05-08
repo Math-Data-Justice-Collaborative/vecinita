@@ -324,7 +324,7 @@ services:
     envVars:
       - key: PORT
         value: "10000"
-      - key: VITE_VECINITA_SCRAPER_API_URL
+      - key: VITE_DM_API_BASE_URL
         sync: false
       - key: VITE_OLLAMA_BASE_URL
         sync: false

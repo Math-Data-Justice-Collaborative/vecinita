@@ -141,7 +141,7 @@ curl https://vecinita-data-management-api-v1.onrender.com/health
 ```
 User Browser
     ↓
-Frontend (Render) ── VITE_VECINITA_SCRAPER_API_URL ──→ API (Render)
+Frontend (Render) ── VITE_DM_API_BASE_URL ──→ API (Render)
                                                           ↓
                                                     VECINITA_SCRAPER_API_URL
                                                           ↓

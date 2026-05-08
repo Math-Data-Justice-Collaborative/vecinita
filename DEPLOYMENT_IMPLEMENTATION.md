@@ -80,7 +80,7 @@ In Render Dashboard for each service, set:
 - `CORS_ORIGINS=https://vecinita-data-management-frontend.onrender.com`
 
 **Frontend (vecinita-data-management-frontend):**
-- `VITE_VECINITA_SCRAPER_API_URL=https://vecinita-modal-proxy.onrender.com`
+- `VITE_DM_API_BASE_URL=https://vecinita-modal-proxy.onrender.com`
 
 ---
 

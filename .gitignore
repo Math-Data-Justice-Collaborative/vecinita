@@ -122,3 +122,4 @@ apis/gateway/schema-test-results.local-ci.xml
 apis/gateway/test-results.local-ci.xml
 apis/gateway/schemathesis-report/junit-gateway.xml
 .cursor/mcp.json
+apis/gateway/schemathesis-report/*

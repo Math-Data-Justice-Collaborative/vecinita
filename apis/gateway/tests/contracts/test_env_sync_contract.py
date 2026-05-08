@@ -44,7 +44,7 @@ def test_local_template_contains_core_cross_service_keys() -> None:
         "EMBEDDING_UPSTREAM_URL",
         "VECINITA_SCRAPER_API_URL",
         "VITE_GATEWAY_URL",
-        "VITE_VECINITA_SCRAPER_API_URL",
+        "VITE_DM_API_BASE_URL",
         "MODAL_TOKEN_ID",
         "MODAL_TOKEN_SECRET",
         "MODAL_FUNCTION_INVOCATION",

@@ -105,7 +105,7 @@ Expected response:
 
 The frontend is already configured to use:
 ```
-VITE_VECINITA_SCRAPER_API_URL=https://vecinita-data-management-api-v1.onrender.com
+VITE_DM_API_BASE_URL=https://vecinita-data-management-api-v1.onrender.com
 ```
 
 No additional frontend configuration is needed.
