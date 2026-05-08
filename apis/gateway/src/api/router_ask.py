@@ -55,18 +55,20 @@ _GATEWAY_ASK_STREAM_SSE_200: dict[str, Any] = {
             "schema": {
                 "type": "object",
                 "properties": {
-                    "type": {
+                    "event": {
                         "type": "string",
-                        "examples": [
-                            "thinking",
-                            "complete",
-                            "error",
-                            "tool_event",
-                            "clarification",
-                        ],
+                        "description": "SSE event name (defaults to message).",
+                        "examples": ["message"],
+                    },
+                    "data": {
+                        "type": "string",
+                        "description": (
+                            "JSON-encoded event payload. The decoded payload includes "
+                            "`type` such as thinking, complete, error, tool_event, or clarification."
+                        ),
                     },
                 },
-                "required": ["type"],
+                "required": ["data"],
             }
         }
     },
