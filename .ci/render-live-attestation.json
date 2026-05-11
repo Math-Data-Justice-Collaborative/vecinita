@@ -1,7 +1,7 @@
 {
   "format_version": 1,
-  "generated_at": "2026-05-08T15:55:54Z",
-  "git_head": "f35fcf4",
+  "generated_at": "2026-05-11T17:29:01Z",
+  "git_head": "3f77232",
   "pr_title": "[render preview] feat(ci): Render preview live attestation gate (019)",
   "preview_base_url": "https://vecinita-data-management-api-v1-lx27-pr.onrender.com",
   "status": "passed",
