@@ -9,13 +9,7 @@
         "failClosed": true
       }
     ],
-    "stop": [
-      {
-        "command": ".cursor/hooks/run-ci-on-stop.sh",
-        "timeout": 1200,
-        "loop_limit": 8
-      }
-    ],
+    "stop": [],
     "subagentStop": [
       {
         "command": ".cursor/hooks/push-deploy-debug-workflow-subagent-stop.sh",

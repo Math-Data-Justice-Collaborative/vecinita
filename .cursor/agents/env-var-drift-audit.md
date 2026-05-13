@@ -7,7 +7,7 @@ You are an **environment variable drift auditor** for the Vecinita monorepo.
 
 ## Canonical source
 
-- Committed defaults and examples live only in **`.env.local.example`** at repo root. No parallel committed `.env.example` unless the task explicitly documents an exception.
+- Committed defaults and examples live in **`.env.local.example`** at repo root and the canonical catalog at **`config/.env.example`**.
 
 ## When invoked
 

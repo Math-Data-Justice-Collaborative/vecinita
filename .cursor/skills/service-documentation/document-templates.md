@@ -401,9 +401,14 @@ Internal and external dependencies required by this service.
 
 ## Overview
 
-Key architectural and technical decisions (ADR-style) for this service.
+Key architectural and technical decisions (ADR-style) for this service, including
+both resolved decisions and pending choices requiring user input.
 
-## Decisions
+## Decided
+
+| ID | Decision | Chosen | Alternatives Rejected | Date | Reversibility |
+|----|----------|--------|----------------------|------|---------------|
+| TD-001 | <title> | <option chosen> | <other options> | YYYY-MM-DD | easy/moderate/hard |
 
 ### TD-001: <Decision Title>
 
@@ -413,8 +418,47 @@ Key architectural and technical decisions (ADR-style) for this service.
 | Date | YYYY-MM-DD |
 | Context | Why this decision was needed |
 | Decision | What was decided |
-| Alternatives considered | What else was evaluated |
+| Rationale | Evidence-based reason for the choice |
+| Alternatives considered | What else was evaluated and why rejected |
 | Consequences | Trade-offs and implications |
+| Reversibility | easy / moderate / hard |
+
+## Pending (Requiring Decision)
+
+| ID | Decision | Options | Impact | Risk of Deferral | Recommendation |
+|----|----------|---------|--------|------------------|----------------|
+| PTD-001 | <title> | A, B, C | <what it affects> | <risk> | <agent rec> |
+
+### PTD-001: <Pending Decision Title>
+
+| Property | Value |
+|----------|-------|
+| Status | pending |
+| Identified | YYYY-MM-DD |
+| Evidence | <what in the codebase shows this is undecided> |
+| Impact | <what this affects — reliability, performance, maintainability> |
+| Decision deadline | <when this must be resolved> |
+
+**Options researched:**
+
+**Option A: <name>**
+- How it works: <paragraph>
+- Pros: <bullets>
+- Cons: <bullets>
+- Effort: S/M/L/XL
+- Reversibility: easy/moderate/hard
+- Ecosystem fit: <how well it aligns with existing stack>
+
+**Option B: <name>**
+- How it works: <paragraph>
+- Pros: <bullets>
+- Cons: <bullets>
+- Effort: S/M/L/XL
+- Reversibility: easy/moderate/hard
+- Ecosystem fit: <how well it aligns with existing stack>
+
+**Recommendation:** <option> — <evidence-based rationale>
+**Risk of continued deferral:** <what gets worse the longer this waits>
 
 ## Related Documents
 
