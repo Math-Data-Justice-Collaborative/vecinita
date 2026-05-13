@@ -386,6 +386,32 @@ services:
       - key: UPSTREAM_TIMEOUT_SECONDS
         value: "55"
 
+  - type: web
+    name: vecinita-docs-site
+    runtime: docker
+    region: virginia
+    plan: starter
+    dockerfilePath: ./apps/docs-site/Dockerfile
+    dockerContext: ./apps/docs-site
+    autoDeployTrigger: checksPass
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: "10000"
+
+  - type: pserv
+    name: vecinita-pgadmin
+    runtime: docker
+    region: virginia
+    plan: starter
+    dockerfilePath: ./apps/pgadmin/Dockerfile
+    dockerContext: ./apps/pgadmin
+    envVars:
+      - key: PGADMIN_DEFAULT_EMAIL
+        sync: false
+      - key: PGADMIN_DEFAULT_PASSWORD
+        sync: false
+
 databases:
   - name: vecinita-postgres
     region: virginia

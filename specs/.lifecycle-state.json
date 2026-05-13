@@ -46,9 +46,9 @@
         "020-flatten-submodules-monorepo-layout": { "status": "completed", "completed_at": "2026-05-13T14:00:00Z" },
         "021-gateway-agent-extraction": { "status": "completed", "completed_at": "2026-05-13T21:55:00Z" },
         "022-vllm-llamaindex-integration": { "status": "completed", "completed_at": "2026-05-13T23:50:00Z" },
-        "023-schema-per-service-migration": { "status": "not_started", "completed_at": null },
-        "024-render-docker-ci-consolidation": { "status": "not_started", "completed_at": null },
-        "025-environment-consolidation": { "status": "not_started", "completed_at": null }
+        "023-schema-per-service-migration": { "status": "completed", "completed_at": "2026-05-13T23:55:00Z" },
+        "024-render-docker-ci-consolidation": { "status": "completed", "completed_at": "2026-05-13T23:55:00Z" },
+        "025-environment-consolidation": { "status": "completed", "completed_at": "2026-05-13T23:55:00Z" }
       }
     },
     "5_validate": {

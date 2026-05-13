@@ -1,0 +1,10 @@
+name: Deploy - Render
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Render auto-deploys via checksPass trigger - this workflow is a placeholder for deploy hooks"

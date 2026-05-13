@@ -1,4 +1,4 @@
-.PHONY: help \
+.PHONY: help setup-env \
 	dev dev-tmux dev-attach dev-stop dev-clear-ports \
 	dev-chat dev-chat-backend dev-chat-gateway dev-chat-frontend \
 	dev-data-management dev-data-management-frontend dev-data-management-api data-management-api-key data-management \
@@ -178,6 +178,19 @@ help:
 	@echo "  make docs-serve                          Start docs site locally"
 	@echo "  make docs-build                          Build docs site"
 	@echo "  make docs-deploy-check                   Validate docs build for Pages"
+
+setup-env:
+	@echo "Setting up environment files from .environments/*.env.example..."
+	@for example in .environments/*.env.example; do \
+		target="$${example%.example}"; \
+		if [ ! -f "$$target" ]; then \
+			cp "$$example" "$$target"; \
+			echo "  Created $$target"; \
+		else \
+			echo "  Skipped $$target (already exists)"; \
+		fi \
+	done
+	@echo "Done. Edit .environments/*.env files with your local values."
 
 dev:
 	./scripts/run/dev-session.sh start
@@ -600,13 +613,13 @@ render-tests-render-suite:
 render-workflow-ci: render-env-validate render-tests-render-suite
 
 render-local-up:
-	docker compose -f docker-compose.render-local.yml up -d --build
+	docker compose --profile full up -d --build
 
 render-local-down:
-	docker compose -f docker-compose.render-local.yml down -v --remove-orphans
+	docker compose --profile full down -v --remove-orphans
 
 render-local-logs:
-	docker compose -f docker-compose.render-local.yml logs -f
+	docker compose --profile full logs -f
 
 render-local-check:
 	@set -e; \
@@ -619,7 +632,7 @@ render-local-check:
 		fi; \
 		echo "[render-local-check] Preflight validation (env + compose config)"; \
 		python3 scripts/github/validate_render_env.py "$$env_file"; \
-		docker compose -f docker-compose.render-local.yml config >/dev/null; \
+		docker compose --profile full config >/dev/null; \
 		if curl -fsS --max-time 2 http://localhost:8000/health >/dev/null 2>&1; then \
 			echo "[render-local-check] Local Render stack detected; running live checks"; \
 			ENV_FILE="$$env_file" ./scripts/local-render-check.sh --skip-simulation; \
@@ -643,7 +656,7 @@ render-local-validate:
 			temp_env_created=1; \
 		fi; \
 		python3 scripts/github/validate_render_env.py "$$env_file"; \
-		docker compose -f docker-compose.render-local.yml config >/dev/null; \
+		docker compose --profile full config >/dev/null; \
 		if [ "$$temp_env_created" = "1" ]; then rm -f .env.render-local; fi; \
 		echo "Render local preflight OK (env contract + compose config)"
 
@@ -718,22 +731,22 @@ render-logs:
 	fi
 
 microservices-up:
-	docker compose -f docker-compose.microservices.yml up -d
+	docker compose --profile services up -d
 
 microservices-down:
-	docker compose -f docker-compose.microservices.yml down -v --remove-orphans
+	docker compose --profile services down -v --remove-orphans
 
 microservices-logs:
-	docker compose -f docker-compose.microservices.yml logs -f
+	docker compose --profile services logs -f
 
 test-microservices-contracts:
 	cd tests && REQUIRE_MICROSERVICES=1 uv run pytest integration/test_microservices_contracts.py -v
 
 test-microservices:
 	@set -e; \
-		docker compose -f docker-compose.microservices.yml up -d; \
+		docker compose --profile services up -d; \
 		cd tests && REQUIRE_MICROSERVICES=1 uv run pytest integration/test_microservices_contracts.py -v; \
-		docker compose -f ../docker-compose.microservices.yml down -v --remove-orphans
+		docker compose --profile services down -v --remove-orphans
 
 test-e2e: test-cross-e2e test-frontend-e2e
 
