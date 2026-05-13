@@ -11,8 +11,8 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
-from src.utils.database_url import get_resolved_database_url
-from src.utils.postgres_json_sanitize import sanitize_postgres_json_payload, sanitize_postgres_text
+from vecinita_common.utils.database_url import get_resolved_database_url
+from vecinita_common.utils.postgres_json_sanitize import sanitize_postgres_json_payload, sanitize_postgres_text
 
 try:
     import psycopg2  # type: ignore[import-untyped]
@@ -75,7 +75,7 @@ _NON_CANCELLABLE = frozenset({"completed", "failed", "cancelled"})
 def _reraise_psycopg_sanitized(exc: BaseException) -> None:
     """Map psycopg2 failures to sanitized ``RuntimeError`` messages for HTTP 503 responses."""
     if psycopg2 is not None and isinstance(exc, psycopg2.Error):
-        from src.utils.gateway_dependency_errors import client_safe_message_for_dependency_failure
+        from vecinita_common.utils.gateway_dependency_errors import client_safe_message_for_dependency_failure
 
         raise RuntimeError(client_safe_message_for_dependency_failure(exc)) from exc
     raise exc

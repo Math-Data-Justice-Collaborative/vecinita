@@ -16,10 +16,10 @@ import psycopg2  # type: ignore[import-untyped]
 from fastapi import APIRouter, Depends, HTTPException
 from psycopg2.extras import RealDictCursor  # type: ignore[import-untyped]
 
-from src.config import EMBEDDING_SERVICE_URL as _CONFIG_EMBEDDING_SERVICE_URL
-from src.services.corpus.corpus_projection_service import should_fail_closed_for_projection_error
-from src.utils.database_url import get_resolved_database_url
-from src.utils.tags import build_bilingual_tag_fields, normalize_tags
+from vecinita_config.config import EMBEDDING_SERVICE_URL as _CONFIG_EMBEDDING_SERVICE_URL
+from vecinita_common.utils.corpus_projection import should_fail_closed_for_projection_error
+from vecinita_common.utils.database_url import get_resolved_database_url
+from vecinita_common.utils.tags import build_bilingual_tag_fields, normalize_tags
 
 from .models import (
     DocumentsChunkStatisticsQueryParams,

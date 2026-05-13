@@ -171,7 +171,7 @@ def _build_hub_guards() -> tuple[Any, Any]:
         input_guard = grd.Guard()
         output_guard = None
 
-        from src.config import GUARDRAILS_PII
+        from vecinita_config.config import GUARDRAILS_PII
 
         if GUARDRAILS_PII:
             attr_candidates = ["DetectPII", "PIIFilter", "PiiFilter"]
@@ -382,7 +382,7 @@ def validate_input(
     Returns GuardResult(passed=False, reason=...) if any guard fails.
     The agent should short-circuit and return reason to the user directly.
     """
-    from src.config import (
+    from vecinita_config.config import (
         GUARDRAILS_ENABLED,
         GUARDRAILS_PII,
         GUARDRAILS_PROMPT_INJECTION,
@@ -510,7 +510,7 @@ def validate_output(text: str) -> GuardResult:
     Returns GuardResult(passed=False, reason=...) if the output should
     be replaced with a safe fallback message.
     """
-    from src.config import (
+    from vecinita_config.config import (
         GUARDRAILS_ENABLED,
         GUARDRAILS_HALLUCINATION,
         GUARDRAILS_TOXICITY,

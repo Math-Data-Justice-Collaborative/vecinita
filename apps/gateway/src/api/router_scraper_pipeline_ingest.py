@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Path, Request, st
 from pydantic import BaseModel, Field
 
 from src.services.ingestion import modal_scraper_pipeline_persist as pipeline_persist
-from src.utils.scraper_api_keys import scraper_api_key_segments
+from vecinita_common.utils.scraper_api_keys import scraper_api_key_segments
 
 router = APIRouter(
     prefix="/internal/scraper-pipeline",

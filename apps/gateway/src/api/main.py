@@ -88,15 +88,15 @@ def _running_on_render() -> bool:
 
 # Import normalized endpoints from central config (ensures consistency across services).
 # config._normalize_internal_service_url() handles Render vs local-dev logic.
-from src.config import EMBEDDING_SERVICE_URL
-from src.services.modal.invoker import enforce_modal_function_policy_for_urls
-from src.service_endpoints import (
+from vecinita_config.config import EMBEDDING_SERVICE_URL
+from vecinita_common.modal.invoker import enforce_modal_function_policy_for_urls
+from vecinita_config.service_endpoints import (
     AGENT_SERVICE_URL,
     MODEL_ENDPOINT,
     SCRAPER_ENDPOINT,
     log_endpoint_summary as _log_ep_summary,
 )
-from src.utils.database_url import get_resolved_database_url
+from vecinita_common.utils.database_url import get_resolved_database_url
 
 DATABASE_URL = get_resolved_database_url()
 

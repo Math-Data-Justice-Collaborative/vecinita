@@ -15,7 +15,7 @@ import httpx
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi import Path as PathParam
 
-from src.services.modal.invoker import (
+from vecinita_common.modal.invoker import (
     invoke_modal_scraper_reindex,
     modal_function_invocation_enabled,
 )

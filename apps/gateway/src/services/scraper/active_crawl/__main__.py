@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from src.services.scraper.active_crawl.config import ActiveCrawlConfig, validate_live_scraper_config
 from src.services.scraper.active_crawl.persistence import CrawlRepository
 from src.services.scraper.active_crawl.runner import run_active_crawl
-from src.utils.database_url import get_resolved_database_url
+from vecinita_common.utils.database_url import get_resolved_database_url
 
 
 def _repo_root() -> Path:

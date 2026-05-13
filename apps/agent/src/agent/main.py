@@ -106,8 +106,8 @@ from src.agent.openapi_examples import (
     AGENT_MODEL_SELECTION_BODY,
     AGENT_TEST_DB_SEARCH_QUERY,
 )
-from src.services.llm import LocalLLMClientManager, coerce_optional_query_str
-from src.utils.tags import parse_tags_input
+from vecinita_common.llm import LocalLLMClientManager, coerce_optional_query_str
+from vecinita_common.utils.tags import parse_tags_input
 
 from .tools.clarify_question import create_clarify_question_tool
 
@@ -280,14 +280,14 @@ app.add_middleware(
 
 # --- Load Environment Variables & Validate ---
 # Import normalized endpoints from central config (ensures consistency across services).
-from src.config import (
+from vecinita_config.config import (
     EMBEDDING_SERVICE_URL,
     OLLAMA_BASE_URL,
     _normalize_internal_service_url,
     _running_on_render,
     resolve_data_db_mode,
 )
-from src.services.modal.invoker import enforce_modal_function_policy_for_urls
+from vecinita_common.modal.invoker import enforce_modal_function_policy_for_urls
 
 # Keep these helpers bound on this module for legacy imports and tests.
 _RENDER_URL_HELPERS = (_normalize_internal_service_url, _running_on_render)
@@ -336,7 +336,7 @@ llm_client_manager = LocalLLMClientManager(**llm_manager_kwargs)
 try:
     # Emit a single structured summary of all resolved service endpoints and
     # policy flags so operators can confirm routing without reading env var dumps.
-    from src.service_endpoints import log_endpoint_summary as _log_ep_summary
+    from vecinita_config.service_endpoints import log_endpoint_summary as _log_ep_summary
 
     _log_ep_summary(logger)
     enforce_modal_function_policy_for_urls(
@@ -414,7 +414,7 @@ try:
     )
 
     try:
-        from src.embedding_service.client import create_embedding_client
+        from vecinita_common.embedding.client import create_embedding_client
 
         embedding_model = create_embedding_client(
             embedding_service_url,
@@ -696,7 +696,7 @@ def _startup_config_summary() -> dict[str, Any]:
 
 
 def _run_startup_preflight() -> dict[str, Any]:
-    from src.config import resolve_data_db_mode
+    from vecinita_config.config import resolve_data_db_mode
 
     data_mode = resolve_data_db_mode()
 

@@ -183,7 +183,7 @@ GET /
 ### Python Client
 
 ```python
-from src.embedding_service.client import create_embedding_client
+from vecinita_common.embedding.client import create_embedding_client
 
 # Initialize (remote service)
 client = create_embedding_client("http://embedding-service:8001")

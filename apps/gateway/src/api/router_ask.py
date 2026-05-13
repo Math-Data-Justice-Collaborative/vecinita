@@ -19,8 +19,8 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 
-from src.config import normalize_agent_service_url
-from src.service_endpoints import AGENT_SERVICE_URL
+from vecinita_config.config import normalize_agent_service_url
+from vecinita_config.service_endpoints import AGENT_SERVICE_URL
 
 from .models import (
     AskResponse,

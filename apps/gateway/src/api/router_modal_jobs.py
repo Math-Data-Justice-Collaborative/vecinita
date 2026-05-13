@@ -14,7 +14,7 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field, HttpUrl
 
 from src.api.models import ErrorResponse, ValidationErrorResponse
 from src.services.ingestion import modal_scraper_persist
-from src.services.modal.invoker import (
+from vecinita_common.modal.invoker import (
     get_modal_function_call_result,
     invoke_modal_scrape_job_cancel,
     invoke_modal_scrape_job_get,
@@ -23,10 +23,10 @@ from src.services.modal.invoker import (
     modal_function_invocation_enabled,
     spawn_modal_scraper_reindex,
 )
-from src.services.modal.job_registry import modal_job_registry
-from src.utils.database_url import get_resolved_database_url
-from src.utils.gateway_dependency_errors import client_safe_message_for_dependency_failure
-from src.utils.postgres_json_sanitize import sanitize_postgres_json_payload, sanitize_postgres_text
+from vecinita_common.modal.job_registry import modal_job_registry
+from vecinita_common.utils.database_url import get_resolved_database_url
+from vecinita_common.utils.gateway_dependency_errors import client_safe_message_for_dependency_failure
+from vecinita_common.utils.postgres_json_sanitize import sanitize_postgres_json_payload, sanitize_postgres_text
 
 logger = logging.getLogger(__name__)
 

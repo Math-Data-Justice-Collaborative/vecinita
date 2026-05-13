@@ -17,8 +17,8 @@ try:
 except Exception:  # pragma: no cover - optional dependency in some test/runtime profiles
     psycopg2 = None  # type: ignore[assignment]
 
-from src import config as app_config
-from src.utils.tags import infer_tags_from_text, normalize_tags
+from vecinita_config import config as app_config
+from vecinita_common.utils.tags import infer_tags_from_text, normalize_tags
 
 logger = logging.getLogger(__name__)
 _LAST_SEARCH_STATUS = "not_run"

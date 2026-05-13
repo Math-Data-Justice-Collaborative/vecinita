@@ -16,11 +16,11 @@ from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field
 
-from src.config import EMBEDDING_SERVICE_URL, OLLAMA_BASE_URL
-from src.services.llm import LocalLLMClientManager
-from src.utils.database_url import get_resolved_database_url
-from src.utils.resource_metadata import infer_resource_language_metadata
-from src.utils.tags import build_bilingual_tag_fields, infer_tags_from_text, normalize_tags
+from vecinita_config.config import EMBEDDING_SERVICE_URL, OLLAMA_BASE_URL
+from vecinita_common.llm import LocalLLMClientManager
+from vecinita_common.utils.database_url import get_resolved_database_url
+from vecinita_common.utils.resource_metadata import infer_resource_language_metadata
+from vecinita_common.utils.tags import build_bilingual_tag_fields, infer_tags_from_text, normalize_tags
 
 try:
     import psycopg2
@@ -32,7 +32,7 @@ except Exception:
 
 # Import embedding service client (preferred)
 try:
-    from src.embedding_service.client import create_embedding_client
+    from vecinita_common.embedding.client import create_embedding_client
 
     EMBEDDING_SERVICE_AVAILABLE = True
 except ImportError:

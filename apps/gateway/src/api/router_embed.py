@@ -13,13 +13,13 @@ import httpx
 import numpy as np
 from fastapi import APIRouter, Depends, HTTPException
 
-from src.config import (
+from vecinita_config.config import (
     _normalize_internal_service_url,
     _running_on_render,
     rewrite_deprecated_modal_embedding_host,
 )
-from src.service_endpoints import EMBEDDING_ENDPOINT
-from src.services.modal.invoker import (
+from vecinita_config.service_endpoints import EMBEDDING_ENDPOINT
+from vecinita_common.modal.invoker import (
     invoke_modal_embedding_batch,
     invoke_modal_embedding_single,
     modal_function_invocation_enabled,

@@ -1,12 +1,17 @@
 [project]
 name = "vecinita-common"
 version = "0.1.0"
-description = "Shared types, constants, and error classes for Vecinita services"
+description = "Shared types, constants, utilities, and cross-cutting services for Vecinita"
 requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2.0",
+    "httpx>=0.28.0",
+    "modal>=1.3.5",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["vecinita_common"]

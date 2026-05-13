@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
-from src.utils.database_url import get_resolved_database_url
+from vecinita_common.utils.database_url import get_resolved_database_url
 
 log = logging.getLogger("vecinita_pipeline.active_crawl.persistence")
 

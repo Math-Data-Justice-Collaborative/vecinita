@@ -6,7 +6,7 @@ tree does not depend on ``src.agent`` after the apis/agent vs apis/gateway split
 
 from __future__ import annotations
 
-from src.gateway_openapi_ask_examples import (
+from vecinita_common.openapi_examples import (
     AGENT_ASK_CONTEXT_ANSWER,
     AGENT_ASK_FLAG_FALSE,
     AGENT_ASK_FLAG_TRUE,
