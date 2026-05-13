@@ -1,0 +1,64 @@
+---
+description: Require docstrings and inline comments when writing code
+globs: "**/*.{ts,tsx,py}"
+alwaysApply: false
+---
+
+# Docstrings and Inline Comments
+
+When implementing code, always include docstrings and inline comments.
+
+## Docstrings
+
+Every function, class, and method must have a docstring explaining its purpose, parameters, and return value.
+
+### TypeScript / TSX
+
+Use JSDoc-style comments:
+
+```typescript
+/**
+ * Calculates the total price including tax for a list of items.
+ * @param items - Cart items with price and quantity
+ * @param taxRate - Tax rate as a decimal (e.g. 0.08 for 8%)
+ * @returns Total price after tax, rounded to two decimal places
+ */
+function calculateTotal(items: CartItem[], taxRate: number): number {
+```
+
+### Python
+
+Use triple-quote docstrings:
+
+```python
+def calculate_total(items: list[CartItem], tax_rate: float) -> float:
+    """Calculate the total price including tax for a list of items.
+
+    Args:
+        items: Cart items with price and quantity.
+        tax_rate: Tax rate as a decimal (e.g. 0.08 for 8%).
+
+    Returns:
+        Total price after tax, rounded to two decimal places.
+    """
+```
+
+## Inline Comments
+
+Add inline comments that explain **why** something is done, non-obvious logic, or business rules — not just what the code literally does.
+
+```typescript
+// ❌ BAD — restates the code
+const total = price * quantity; // multiply price by quantity
+
+// ✅ GOOD — explains intent or constraint
+const total = price * quantity; // pre-tax subtotal used downstream by tax calc
+```
+
+```python
+# ❌ BAD
+results.sort(key=lambda x: x.score)  # sort by score
+
+# ✅ GOOD
+results.sort(key=lambda x: x.score)  # ascending so lowest-risk items surface first
+```

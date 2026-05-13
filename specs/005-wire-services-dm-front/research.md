@@ -14,7 +14,7 @@
 
 ## 3. Data-management frontend → API base URL
 
-- **Decision**: Standardize on **`VITE_VECINITA_SCRAPER_API_URL`** pointing at the HTTP origin serving scraper-compatible routes (local default **`http://localhost:8005`** per specs and `.env.example` comments). Document **`VITE_USE_GATEWAY_MODAL_JOBS`** + **`VITE_VECINITA_GATEWAY_URL`** as the optional path for gateway-owned Modal job rows.
+- **Decision**: Standardize on **`VITE_DM_API_BASE_URL`** pointing at the HTTP origin serving scraper-compatible routes (local default **`http://localhost:8005`** per specs and `.env.example` comments). Document **`VITE_USE_GATEWAY_MODAL_JOBS`** + **`VITE_VECINITA_GATEWAY_URL`** as the optional path for gateway-owned Modal job rows.
 - **Rationale**: Matches `apps/data-management-frontend/src/app/api/scraper-config.ts` (`scraperJobsApiRoot`, `gatewayModalJobsScraperRoot`).
 - **Alternatives considered**: Renaming env vars — deferred; high churn for Docker and Render blueprints.
 

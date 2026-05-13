@@ -86,7 +86,7 @@ Option B: GitHub CLI (Recommended for automation)
 Option C: Git Push (Automatic trigger)
   [ ] Step 3C.1: Run commands:
      
-     git add frontends/chat/.env.production
+     git add apps/chat-frontend/.env.production
      git commit -m "fix: Configure gateway URL for production"
      git push origin main
   

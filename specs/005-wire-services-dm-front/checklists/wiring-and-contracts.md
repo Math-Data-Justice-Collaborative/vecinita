@@ -11,7 +11,7 @@
 ## Requirement completeness
 
 - [ ] CHK001 Are **all** env vars that affect chat↔gateway↔agent resolution explicitly listed or cross-referenced in **FR-001** / **FR-002**, including proxy-only vars (`VITE_GATEWAY_PROXY_TARGET`) and schema URLs used for contracts? [Completeness, Spec §FR-001–FR-002, Plan §Technical Context]
-- [ ] CHK002 Are requirements present for **both** DM connection modes (direct `VITE_VECINITA_SCRAPER_API_URL` vs gateway modal-jobs when `VITE_USE_GATEWAY_MODAL_JOBS` is set), not only the default path? [Completeness, Spec §FR-003, Spec §User Story 2]
+- [ ] CHK002 Are requirements present for **both** DM connection modes (direct `VITE_DM_API_BASE_URL` vs gateway modal-jobs when `VITE_USE_GATEWAY_MODAL_JOBS` is set), not only the default path? [Completeness, Spec §FR-003, Spec §User Story 2]
 - [ ] CHK003 Is the **complete** set of HTTP surfaces that **FR-007** and **FR-008** must cover enumerated (paths, methods, or reference to a pact catalog), or is intentional deferral marked as a gap? [Completeness, Gap, Spec §FR-007–FR-008]
 - [ ] CHK004 Are requirements stated for **provider** verification artifacts (where results are published, who reads them) in addition to consumer runs on PR? [Completeness, Spec §FR-007–FR-008, Spec §SC-002–SC-005]
 - [ ] CHK005 Does **FR-004** name the authoritative OpenAPI/schema artifact (file path, CI artifact name, or generation step) rather than only “alignment” in the abstract? [Completeness, Clarity, Spec §FR-004]

@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "service-clients"
+version = "0.1.0"
+description = "Typed HTTP clients for Vecinita service-to-service communication"
+requires-python = ">=3.11"
+dependencies = [
+    "httpx>=0.27.0",
+    "modal>=1.3.5",
+    "pydantic>=2.6.0",
+    "shared-schemas",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "respx>=0.21.0",
+    "ruff>=0.3.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["service_clients"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

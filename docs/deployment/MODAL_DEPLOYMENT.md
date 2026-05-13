@@ -51,7 +51,7 @@ Summarized from [`specs/012-queued-page-ingestion-pipeline/research.md`](../../s
 - **Invocation:** Prefer **`spawn`** / **`spawn_map`** for drain-driven work where completion is tracked via Postgres/queues rather than blocking the gateway HTTP worker on `.remote()` for long jobs.
 - **Observability:** Pass the gateway **correlation id** into Modal job metadata and worker HTTP headers (`X-Request-Id` on pipeline ingest) so **SC-007** join-up works across Render logs and Modal logs (**Decision 2**).
 
-**Frontend (data management) — feature 007:** Point ``VITE_DM_API_BASE_URL`` (or legacy ``VITE_VECINITA_SCRAPER_API_URL``) at the **data-management API** origin; scrape job CRUD uses ``{DM}/jobs``. The gateway ``/api/v1/modal-jobs/scraper`` path remains for **gateway-owned** operator tools, not as the default DM SPA configuration. When legacy scraper ``*.modal.run`` ASGI endpoints still exist for other clients, treat the **DM API deployment** as **authoritative** for DM dashboard scraping.
+**Frontend (data management) — feature 007:** Point ``VITE_DM_API_BASE_URL`` at the **data-management API** origin; scrape job CRUD uses ``{DM}/jobs``. The gateway ``/api/v1/modal-jobs/scraper`` path remains for **gateway-owned** operator tools, not as the default DM SPA configuration. When legacy scraper ``*.modal.run`` ASGI endpoints still exist for other clients, treat the **DM API deployment** as **authoritative** for DM dashboard scraping.
 
 ## Prerequisites
 

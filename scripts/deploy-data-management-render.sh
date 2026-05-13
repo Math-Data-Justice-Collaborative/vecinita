@@ -173,7 +173,7 @@ echo "     • VECINITA_SCRAPER_API_URL"
 echo "     • CORS_ORIGINS (after frontend deploy)"
 echo ""
 echo "   Frontend (vecinita-data-management-frontend):"
-echo "     • VITE_VECINITA_SCRAPER_API_URL (set to proxy URL)"
+echo "     • VITE_DM_API_BASE_URL (data-management API public origin, or proxy URL if applicable)"
 echo ""
 
 echo -e "\n${BLUE}Status Check Commands:${NC}"

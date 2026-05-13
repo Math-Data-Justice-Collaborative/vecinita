@@ -31,6 +31,13 @@ _Details:_
 _Attestation refresh command(s) used:_
 <!-- e.g., `make ci-attestation && make ci-attestation-validate` -->
 
+### 3b. Render preview live attestation (required for PRs to `main`)
+
+- [ ] PR title contains `[render preview]`
+- [ ] `.ci/render-live-attestation.json` updated for this PR head
+- [ ] Render preview deploy reached live/healthy status
+- [ ] `make render-live-attestation-validate` passes locally
+
 ### 4. API / contract sync (if applicable)
 
 - [ ] No API contract changes

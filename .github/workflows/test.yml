@@ -54,7 +54,7 @@ jobs:
       run: |
         set -euo pipefail
         changed_files="$(git diff --name-only HEAD~1..HEAD || true)"
-        if echo "$changed_files" | grep -E 'specs/.*/contracts/|openapi|apis/gateway/tests/pact|apis/data-management-api/tests/pact' >/dev/null; then
+        if echo "$changed_files" | grep -E 'specs/.*/contracts/|openapi|apps/gateway/tests/pact|apps/data-management-api/tests/pact' >/dev/null; then
           python3 scripts/ci/impacted_corpus_test_suites.py --mode impacted --emit-json
         fi
 
@@ -91,7 +91,7 @@ jobs:
         submodules: 'false'
 
     - name: Checkout contract test submodules
-      run: git submodule update --init --depth 1 modal-apps/embedding-modal modal-apps/model-modal
+      run: git submodule update --init --depth 1 apps/embedding-worker apps/vllm-inference
 
     - name: Install uv
       uses: astral-sh/setup-uv@v8.0.0
@@ -99,24 +99,24 @@ jobs:
         version: "latest"
         enable-cache: true
         cache-dependency-glob: |
-          apis/gateway/uv.lock
-          apis/gateway/pyproject.toml
+          apps/gateway/uv.lock
+          apps/gateway/pyproject.toml
 
     # [project.optional-dependencies].ci only (see TESTING_DOCUMENTATION.md: pact-python / pytest collection).
     - name: Install backend CI dependencies (locked; matches local uv)
-      working-directory: apis/gateway
+      working-directory: apps/gateway
       run: uv sync --frozen --extra ci
 
     - name: Lint backend (Ruff)
-      working-directory: apis/gateway
+      working-directory: apps/gateway
       run: uv run ruff check src tests
 
     - name: Check backend formatting (Black)
-      working-directory: apis/gateway
+      working-directory: apps/gateway
       run: uv run black --check --config pyproject.toml src tests scripts ../../scripts/dm_openapi_diff.py
 
     - name: Type check backend (mypy)
-      working-directory: apis/gateway
+      working-directory: apps/gateway
       run: uv run python -m mypy src
 
   frontend-quality:
@@ -128,29 +128,29 @@ jobs:
         submodules: 'false'
 
     - name: Checkout frontend submodule
-      run: git submodule update --init --depth 1 frontends/chat
+      run: git submodule update --init --depth 1 apps/chat-frontend
 
     - name: Set up Node.js
       uses: actions/setup-node@v5
       with:
         node-version: '20'
         cache: 'npm'
-        cache-dependency-path: frontends/chat/package-lock.json
+        cache-dependency-path: apps/chat-frontend/package-lock.json
 
     - name: Install frontend dependencies
-      working-directory: frontends/chat
+      working-directory: apps/chat-frontend
       run: npm ci
 
     - name: Lint frontend
-      working-directory: frontends/chat
+      working-directory: apps/chat-frontend
       run: npm run lint
 
     - name: Check frontend formatting (Prettier)
-      working-directory: frontends/chat
+      working-directory: apps/chat-frontend
       run: npm run format
 
     - name: Type check frontend
-      working-directory: frontends/chat
+      working-directory: apps/chat-frontend
       run: npm run typecheck
 
   data-management-api-structure:
@@ -165,13 +165,13 @@ jobs:
         token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
     - name: Checkout data-management API submodule
-      run: git submodule update --init --depth 1 apis/data-management-api
+      run: git submodule update --init --depth 1 apps/data-management-api
 
     - name: Validate imported data-management repo structure
       run: |
-        test -f apis/data-management-api/.gitmodules
-        test -d apis/data-management-api/apps/backend
-        test -d apis/data-management-api/apps/frontend
+        test -f apps/data-management-api/.gitmodules
+        test -d apps/data-management-api/apps/backend
+        test -d apps/data-management-api/apps/frontend
 
   data-management-frontend-quality:
     needs: [workflow-context]
@@ -185,25 +185,25 @@ jobs:
         token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
     - name: Checkout data-management frontend submodule
-      run: git submodule update --init --depth 1 frontends/data-management
+      run: git submodule update --init --depth 1 apps/data-management-frontend
 
     - name: Set up Node.js
       uses: actions/setup-node@v5
       with:
         node-version: '20'
         cache: 'npm'
-        cache-dependency-path: frontends/data-management/package-lock.json
+        cache-dependency-path: apps/data-management-frontend/package-lock.json
 
     - name: Install data-management frontend dependencies
-      working-directory: frontends/data-management
+      working-directory: apps/data-management-frontend
       run: npm ci
 
     - name: Lint data-management frontend
-      working-directory: frontends/data-management
+      working-directory: apps/data-management-frontend
       run: npm run lint
 
     - name: Build data-management frontend
-      working-directory: frontends/data-management
+      working-directory: apps/data-management-frontend
       run: npm run build
 
   data-management-frontend-ci:
@@ -218,25 +218,25 @@ jobs:
         token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
     - name: Checkout data-management frontend submodule
-      run: git submodule update --init --depth 1 frontends/data-management
+      run: git submodule update --init --depth 1 apps/data-management-frontend
 
     - name: Set up Node.js
       uses: actions/setup-node@v5
       with:
         node-version: '20'
         cache: 'npm'
-        cache-dependency-path: frontends/data-management/package-lock.json
+        cache-dependency-path: apps/data-management-frontend/package-lock.json
 
     - name: Install data-management frontend dependencies
-      working-directory: frontends/data-management
+      working-directory: apps/data-management-frontend
       run: npm ci
 
     - name: Run data-management frontend tests
-      working-directory: frontends/data-management
+      working-directory: apps/data-management-frontend
       run: npm run test
 
     - name: Pact consumer (DM → scraper / modal-jobs)
-      working-directory: frontends/data-management
+      working-directory: apps/data-management-frontend
       run: npm run test:pact
 
   embedding-modal-quality:
@@ -248,7 +248,7 @@ jobs:
         submodules: 'false'
 
     - name: Checkout embedding-modal submodule
-      run: git submodule update --init --depth 1 modal-apps/embedding-modal
+      run: git submodule update --init --depth 1 apps/embedding-worker
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v6
@@ -257,14 +257,14 @@ jobs:
         cache: 'pip'
 
     - name: Install embedding-modal dependencies
-      working-directory: modal-apps/embedding-modal
+      working-directory: apps/embedding-worker
       run: |
         python -m pip install --upgrade pip
         python -m pip install --upgrade setuptools wheel
         pip install ".[dev]"
 
     - name: Lint embedding-modal
-      working-directory: modal-apps/embedding-modal
+      working-directory: apps/embedding-worker
       run: make lint
 
   embedding-modal-ci:
@@ -276,7 +276,7 @@ jobs:
         submodules: 'false'
 
     - name: Checkout embedding-modal submodule
-      run: git submodule update --init --depth 1 modal-apps/embedding-modal
+      run: git submodule update --init --depth 1 apps/embedding-worker
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v6
@@ -285,14 +285,14 @@ jobs:
         cache: 'pip'
 
     - name: Install embedding-modal dependencies
-      working-directory: modal-apps/embedding-modal
+      working-directory: apps/embedding-worker
       run: |
         python -m pip install --upgrade pip
         python -m pip install --upgrade setuptools wheel
         pip install ".[dev]"
 
     - name: Run embedding-modal tests
-      working-directory: modal-apps/embedding-modal
+      working-directory: apps/embedding-worker
       run: make test
 
   model-modal-quality:
@@ -304,7 +304,7 @@ jobs:
         submodules: 'false'
 
     - name: Checkout model-modal submodule
-      run: git submodule update --init --depth 1 modal-apps/model-modal
+      run: git submodule update --init --depth 1 apps/vllm-inference
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v6
@@ -313,14 +313,14 @@ jobs:
         cache: 'pip'
 
     - name: Install model-modal dependencies
-      working-directory: modal-apps/model-modal
+      working-directory: apps/vllm-inference
       run: |
         python -m pip install --upgrade pip
         python -m pip install --upgrade setuptools wheel
         pip install ".[dev]"
 
     - name: Lint model-modal
-      working-directory: modal-apps/model-modal
+      working-directory: apps/vllm-inference
       run: make lint
 
   model-modal-ci:
@@ -332,7 +332,7 @@ jobs:
         submodules: 'false'
 
     - name: Checkout model-modal submodule
-      run: git submodule update --init --depth 1 modal-apps/model-modal
+      run: git submodule update --init --depth 1 apps/vllm-inference
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v6
@@ -341,14 +341,14 @@ jobs:
         cache: 'pip'
 
     - name: Install model-modal dependencies
-      working-directory: modal-apps/model-modal
+      working-directory: apps/vllm-inference
       run: |
         python -m pip install --upgrade pip
         python -m pip install --upgrade setuptools wheel
         pip install ".[dev]"
 
     - name: Run model-modal tests
-      working-directory: modal-apps/model-modal
+      working-directory: apps/vllm-inference
       run: make test
 
   scraper-quality:
@@ -363,7 +363,7 @@ jobs:
         token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
     - name: Checkout scraper submodule
-      run: git submodule update --init --depth 1 modal-apps/scraper
+      run: git submodule update --init --depth 1 apps/scraper-worker
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v6
@@ -372,21 +372,21 @@ jobs:
         cache: 'pip'
 
     - name: Install scraper dependencies
-      working-directory: modal-apps/scraper
+      working-directory: apps/scraper-worker
       run: |
         python -m pip install --upgrade pip
         pip install --no-cache-dir -e ".[dev]"
 
     - name: Lint scraper
-      working-directory: modal-apps/scraper
+      working-directory: apps/scraper-worker
       run: make lint
 
     - name: Check scraper formatting
-      working-directory: modal-apps/scraper
+      working-directory: apps/scraper-worker
       run: black --check src/ tests/
 
     - name: Type check scraper
-      working-directory: modal-apps/scraper
+      working-directory: apps/scraper-worker
       run: make type-check
 
   scraper-ci:
@@ -401,7 +401,7 @@ jobs:
         token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
     - name: Checkout scraper submodule
-      run: git submodule update --init --depth 1 modal-apps/scraper
+      run: git submodule update --init --depth 1 apps/scraper-worker
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v6
@@ -410,13 +410,13 @@ jobs:
         cache: 'pip'
 
     - name: Install scraper dependencies
-      working-directory: modal-apps/scraper
+      working-directory: apps/scraper-worker
       run: |
         python -m pip install --upgrade pip
         pip install --no-cache-dir -e ".[dev]"
 
     - name: Run scraper tests
-      working-directory: modal-apps/scraper
+      working-directory: apps/scraper-worker
       run: make test
 
   backend-ci:
@@ -429,7 +429,7 @@ jobs:
         submodules: 'false'
 
     - name: Checkout contract test submodules
-      run: git submodule update --init --depth 1 modal-apps/embedding-modal modal-apps/model-modal
+      run: git submodule update --init --depth 1 apps/embedding-worker apps/vllm-inference
 
     - name: Free disk space
       run: |
@@ -457,7 +457,7 @@ jobs:
           pkg-config
 
     - name: Install Python dependencies (lean CI)
-      working-directory: apis/gateway
+      working-directory: apps/gateway
       run: |
         python -m pip install --upgrade pip
         pip install --no-cache-dir ".[ci]"
@@ -467,7 +467,7 @@ jobs:
       run: echo "Playwright browser install skipped in CI"
 
     - name: Create .env file for tests
-      working-directory: apis/gateway
+      working-directory: apps/gateway
       run: |
         echo "DATABASE_URL=${{ secrets.DATABASE_URL || 'postgresql://test' }}" >> .env
         echo "OLLAMA_BASE_URL=http://localhost:11434" >> .env
@@ -481,7 +481,7 @@ jobs:
       shell: bash
 
     - name: Run backend fast tests
-      working-directory: apis/gateway
+      working-directory: apps/gateway
       run: |
         pytest tests/ -m "not integration and not e2e and not llm" -v --tb=short --junit-xml=test-results.xml \
           --cov=vecinita.app \
@@ -490,16 +490,16 @@ jobs:
           --cov-config=.coveragerc.unit --cov-report=xml --cov-report=html --cov-report=term \
           --cov-fail-under=98
       env:
-        PYTHONPATH: ${{ github.workspace }}/apis/gateway:${{ github.workspace }}/modal-apps/embedding-modal/src
+        PYTHONPATH: ${{ github.workspace }}/apps/gateway:${{ github.workspace }}/apps/embedding-worker/src
         SKIP_AGENT_MAIN_IMPORT: 'true'
         EMBEDDING_STRICT_STARTUP: 'false'
 
     - name: API regression - ask config returns JSON
-      working-directory: apis/gateway
+      working-directory: apps/gateway
       run: |
         pytest tests/test_api/test_gateway_router_ask.py -k "get_ask_config_success" -v --tb=short
       env:
-        PYTHONPATH: ${{ github.workspace }}/apis/gateway
+        PYTHONPATH: ${{ github.workspace }}/apps/gateway
         EMBEDDING_STRICT_STARTUP: 'false'
 
   backend-integration:
@@ -512,7 +512,7 @@ jobs:
         submodules: 'false'
 
     - name: Checkout data-management API (corpus conflict tests import vecinita_dm_api)
-      run: git submodule update --init --depth 1 apis/data-management-api
+      run: git submodule update --init --depth 1 apps/data-management-api
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v6
@@ -530,13 +530,13 @@ jobs:
           pkg-config
 
     - name: Install Python dependencies (lean CI)
-      working-directory: apis/gateway
+      working-directory: apps/gateway
       run: |
         python -m pip install --upgrade pip
         pip install --no-cache-dir ".[ci]"
 
     - name: Create .env file for tests
-      working-directory: apis/gateway
+      working-directory: apps/gateway
       run: |
         echo "DATABASE_URL=${{ secrets.DATABASE_URL || 'postgresql://test' }}" >> .env
         echo "OLLAMA_BASE_URL=http://localhost:11434" >> .env
@@ -550,11 +550,11 @@ jobs:
       shell: bash
 
     - name: Run backend integration tests (non-DB/non-LLM)
-      working-directory: apis/gateway
+      working-directory: apps/gateway
       run: |
         pytest tests/ -m "integration and not db and not llm" -v --tb=short --junit-xml=integration-test-results.xml
       env:
-        PYTHONPATH: ${{ github.workspace }}/apis/gateway
+        PYTHONPATH: ${{ github.workspace }}/apps/gateway
         EMBEDDING_STRICT_STARTUP: 'false'
 
   frontend-unit:
@@ -567,25 +567,25 @@ jobs:
         submodules: 'false'
 
     - name: Checkout frontend submodule
-      run: git submodule update --init --depth 1 frontends/chat
+      run: git submodule update --init --depth 1 apps/chat-frontend
 
     - name: Set up Node.js
       uses: actions/setup-node@v5
       with:
         node-version: '20'
         cache: 'npm'
-        cache-dependency-path: frontends/chat/package-lock.json
+        cache-dependency-path: apps/chat-frontend/package-lock.json
 
     - name: Install frontend dependencies
-      working-directory: frontends/chat
+      working-directory: apps/chat-frontend
       run: npm ci
 
     - name: Run frontend unit tests
-      working-directory: frontends/chat
+      working-directory: apps/chat-frontend
       run: npm run test:coverage:unit
 
     - name: Pact consumer (chat → gateway)
-      working-directory: frontends/chat
+      working-directory: apps/chat-frontend
       run: npm run test:pact
 
   # ---------------------------------------------------------------------------
@@ -634,21 +634,21 @@ jobs:
             build-essential graphviz graphviz-dev pkg-config postgresql-client
 
       - name: Install Python dependencies (lean CI)
-        working-directory: apis/gateway
+        working-directory: apps/gateway
         run: |
           python -m pip install --upgrade pip
           pip install --no-cache-dir ".[ci]"
 
       - name: Run DB migrations
         run: |
-          bash apis/gateway/scripts/run_migrations.sh
+          bash apps/gateway/scripts/run_migrations.sh
 
       - name: Verify pgvector and schema
         run: |
           psql "$DATABASE_URL" -c "SELECT '[1,2,3]'::vector;" -c "\dt"
 
       - name: Create .env file for tests
-        working-directory: apis/gateway
+        working-directory: apps/gateway
         run: |
           echo "DATABASE_URL=${DATABASE_URL}" >> .env
           echo "OLLAMA_BASE_URL=http://localhost:11434" >> .env
@@ -661,9 +661,9 @@ jobs:
           echo "REINDEX_SERVICE_URL=https://example.modal.run" >> .env
 
       - name: Run integration tests against pgvector DB
-        working-directory: apis/gateway
+        working-directory: apps/gateway
         env:
-          PYTHONPATH: ${{ github.workspace }}/apis/gateway
+          PYTHONPATH: ${{ github.workspace }}/apps/gateway
           EMBEDDING_STRICT_STARTUP: 'false'
         run: |
           set +e

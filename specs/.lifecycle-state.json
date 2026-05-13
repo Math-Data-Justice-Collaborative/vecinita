@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "current_stage": 4,
+  "started_at": "2026-05-12T02:08:00Z",
+  "updated_at": "2026-05-13T13:30:00Z",
+  "stages": {
+    "1_decompose": {
+      "status": "completed",
+      "completed_at": "2026-05-12T12:30:00Z"
+    },
+    "2_document": {
+      "status": "completed",
+      "services": {
+        "chat-frontend": { "status": "completed", "completed_at": "2026-05-12T17:35:00Z" },
+        "data-management-frontend": { "status": "completed", "completed_at": "2026-05-12T17:35:00Z" },
+        "docs-site": { "status": "completed", "completed_at": "2026-05-12T17:35:00Z" },
+        "gateway": { "status": "completed", "completed_at": "2026-05-12T17:19:00Z" },
+        "agent": { "status": "completed", "completed_at": "2026-05-12T17:21:00Z" },
+        "data-management-api": { "status": "completed", "completed_at": "2026-05-12T17:23:00Z" },
+        "pgadmin": { "status": "completed", "completed_at": "2026-05-12T17:35:00Z" },
+        "vllm-inference": { "status": "completed", "completed_at": "2026-05-12T17:24:00Z" },
+        "embedding-worker": { "status": "completed", "completed_at": "2026-05-12T17:30:00Z" },
+        "scraper-worker": { "status": "completed", "completed_at": "2026-05-12T17:30:00Z" },
+        "indexing-worker": { "status": "completed", "completed_at": "2026-05-12T17:30:00Z" }
+      }
+    },
+    "3_verify": {
+      "status": "skipped",
+      "services": {
+        "chat-frontend": { "status": "skipped", "accuracy_pct": null, "completed_at": "2026-05-12T17:35:00Z" },
+        "data-management-frontend": { "status": "skipped", "accuracy_pct": null, "completed_at": "2026-05-12T17:35:00Z" },
+        "docs-site": { "status": "skipped", "accuracy_pct": null, "completed_at": "2026-05-12T17:35:00Z" },
+        "gateway": { "status": "skipped", "accuracy_pct": null, "completed_at": "2026-05-12T17:35:00Z" },
+        "agent": { "status": "skipped", "accuracy_pct": null, "completed_at": "2026-05-12T17:35:00Z" },
+        "data-management-api": { "status": "skipped", "accuracy_pct": null, "completed_at": "2026-05-12T17:35:00Z" },
+        "pgadmin": { "status": "skipped", "accuracy_pct": null, "completed_at": "2026-05-12T17:35:00Z" },
+        "vllm-inference": { "status": "skipped", "accuracy_pct": null, "completed_at": "2026-05-12T17:35:00Z" },
+        "embedding-worker": { "status": "skipped", "accuracy_pct": null, "completed_at": "2026-05-12T17:35:00Z" },
+        "scraper-worker": { "status": "skipped", "accuracy_pct": null, "completed_at": "2026-05-12T17:35:00Z" },
+        "indexing-worker": { "status": "skipped", "accuracy_pct": null, "completed_at": "2026-05-12T17:35:00Z" }
+      }
+    },
+    "4_implement": {
+      "status": "in_progress",
+      "specs": {
+        "020-flatten-submodules-monorepo-layout": { "status": "completed", "completed_at": "2026-05-13T14:00:00Z" },
+        "021-gateway-agent-extraction": { "status": "completed", "completed_at": "2026-05-13T21:55:00Z" },
+        "022-vllm-llamaindex-integration": { "status": "not_started", "completed_at": null },
+        "023-schema-per-service-migration": { "status": "not_started", "completed_at": null },
+        "024-render-docker-ci-consolidation": { "status": "not_started", "completed_at": null },
+        "025-environment-consolidation": { "status": "not_started", "completed_at": null }
+      }
+    },
+    "5_validate": {
+      "status": "not_started",
+      "groups_passed": [],
+      "groups_failed": [],
+      "completed_at": null
+    }
+  }
+}

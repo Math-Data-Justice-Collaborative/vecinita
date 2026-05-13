@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: data-management-api-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-layout:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate repository layout and package metadata
+        run: |
+          python - <<'PY'
+          import configparser
+          from pathlib import Path
+          import tomllib
+
+          required_paths = [
+              Path('.gitmodules'),
+              Path('apps'),
+              Path('apps/backend'),
+              Path('infra/docker-compose.yml'),
+              Path('packages/shared-config/pyproject.toml'),
+              Path('packages/shared-logging/pyproject.toml'),
+              Path('packages/shared-schemas/pyproject.toml'),
+              Path('packages/service-clients/pyproject.toml'),
+          ]
+
+          missing = [str(path) for path in required_paths if not path.exists()]
+          if missing:
+              raise SystemExit(f'Missing required paths: {missing}')
+
+          parser = configparser.ConfigParser()
+          parser.read('.gitmodules')
+
+          expected_submodules = {
+              'submodule "apps/frontend"': ('apps/frontend', 'Math-Data-Justice-Collaborative/vecinita-data-management-frontend.git'),
+          }
+
+          for section, (path_value, url_suffix) in expected_submodules.items():
+              if section not in parser:
+                  raise SystemExit(f'Missing submodule section: {section}')
+
+              actual_path = parser[section].get('path')
+              actual_url = parser[section].get('url')
+
+              if actual_path != path_value:
+                  raise SystemExit(f'Unexpected path for {section}: {actual_path}')
+
+              if not actual_url or not actual_url.endswith(url_suffix):
+                  raise SystemExit(f'Unexpected URL for {section}: {actual_url}')
+
+          for pyproject in Path('packages').glob('*/pyproject.toml'):
+              with pyproject.open('rb') as handle:
+                  tomllib.load(handle)
+
+          print('Repository layout, submodule metadata, and package metadata validated.')
+          PY

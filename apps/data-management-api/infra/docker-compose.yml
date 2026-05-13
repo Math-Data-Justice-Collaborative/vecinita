@@ -1,0 +1,68 @@
+# Local development orchestration for the Vecinita platform.
+# IMPORTANT: Use Docker Compose v2 (`docker compose ...`), not legacy
+# `docker-compose` v1. Legacy v1 can fail during recreate with:
+#   KeyError: 'ContainerConfig'
+# Supported command:
+#   docker compose --env-file .env -f infra/docker-compose.yml up -d --build
+#
+# NOTE: scraper-service and embedding-service are Modal serverless deployments
+# and are NOT included here. Deploy them from the vecinita-scraper / vecinita-embedding
+# repositories (or the vecinita monorepo `modal-apps/scraper`, `modal-apps/embedding-modal`).
+# Then set VECINITA_SCRAPER_API_URL and EMBEDDING_UPSTREAM_URL in a .env
+# file or pass them as environment variables before running compose.
+
+services:
+  frontend:
+    build:
+      context: ../apps/frontend
+      dockerfile: ../../infra/docker/frontend.Dockerfile
+      args:
+        # VITE_* vars are baked into the bundle at build time — must be args, not runtime env
+        - VITE_OLLAMA_BASE_URL=${VITE_OLLAMA_BASE_URL:-https://vecinita--vecinita-model-api.modal.run}
+        - VITE_DM_API_BASE_URL=${VITE_DM_API_BASE_URL:-http://localhost:8005}
+        - VITE_EMBEDDING_UPSTREAM_URL=${VITE_EMBEDDING_UPSTREAM_URL:-https://vecinita--vecinita-embedding-web-app.modal.run}
+    ports:
+      - "3000:3000"
+
+  model-service:
+    build:
+      context: ..
+      dockerfile: infra/docker/model-service.Dockerfile
+    ports:
+      - "8003:8000"
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - APP_NAME=vecinita-model-local
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # One-shot service: pulls llama3.2 into the shared ollama-data volume then exits.
+  # On subsequent runs the volume cache means no re-download.
+  ollama-setup:
+    image: ollama/ollama:latest
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    volumes:
+      - ollama-data:/root/.ollama
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: ["ollama", "pull", "llama3.2"]
+    restart: "no"
+
+volumes:
+  ollama-data:

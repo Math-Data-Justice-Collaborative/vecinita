@@ -21,7 +21,7 @@
    - **`uv.lock` files (every committed copy)**  
      `backend/uv.lock`, `modal-apps/scraper/uv.lock`, `apis/data-management-api/packages/shared-config/uv.lock`, `tests/uv.lock`, `modal-apps/model-modal/uv.lock`, `modal-apps/embedding-modal/uv.lock`
    - **`package-lock.json` files (every committed copy)**  
-     `frontend/package-lock.json`, `apps/data-management-frontend/package-lock.json`, `website/package-lock.json`  
+     `frontend/package-lock.json`, `apps/data-management-frontend/package-lock.json`, `docs-site/package-lock.json`  
      *(There is no root `package-lock.json` today; add it here if one is introduced.)*
 
 2. **Narrow triggers** (candidates for reduced jobs after baseline proof):  

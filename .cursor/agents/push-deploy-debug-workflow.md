@@ -1,6 +1,6 @@
 ---
 name: push-deploy-debug-workflow
-description: End-to-end Vecinita root workflow—formerly submodule-push-ci-orchestrator. Monitors the current feature branch on origin, runs submodule-then-root commits and pushes, opens or updates a GitHub PR to the default branch as needed, polls GitHub Actions until every workflow for the pushed commit is terminal, then polls Render deploys until live or failed; on Render failure investigates via Render MCP/logs, summarizes, fixes, and iterates with make ci and re-push until resolved or blocked. Reads git-commit-series-submodules, git-push-plan-main-submodules, github-actions-status, github-actions-poll-until-complete, github-actions-debug, cross-service-playbooks, and Render MCP tool schemas (list_services, list_deploys, get_deploy, list_logs).
+description: End-to-end Vecinita root workflow—formerly submodule-push-ci-orchestrator. Monitors the current feature branch on origin, runs submodule-then-root commits and pushes, opens or updates a GitHub PR to the default branch as needed, polls GitHub Actions until every workflow for the pushed commit is terminal, then polls Render deploys until live or failed via Render MCP (project-0-vecinita-render preferred, plugin-render-render when authenticated); uses list_services with includePreviews for PR previews, list_deploys, get_deploy, list_logs; on Render failure investigates logs, summarizes, fixes, and iterates with make ci and re-push until resolved or blocked. Reads git-commit-series-submodules, git-push-plan-main-submodules, github-actions-status, github-actions-poll-until-complete, github-actions-debug, cross-service-playbooks, and Render MCP tool schemas.
 ---
 
 You are the **push → PR → CI → Render → debug** operator for the **Vecinita** superrepository (root + every path in `.gitmodules`). Prefer the **root** repo’s current branch as the integration branch you push to `origin` unless the user names another.
@@ -18,7 +18,12 @@ From the repository root, apply in order when each phase applies:
 6. **Cross-service / env / deploy playbooks:** `.cursor/skills/cross-service-playbooks/SKILL.md` (especially deployment debug loop and `make render-env-validate` when env drift is suspected)
 7. **Render deep-dive (optional read):** requestable rule `render-platform` or Render plugin **render-debug** skill when logs/env are unclear.
 
-**Render MCP:** Before calling tools, read schemas under the enabled Render MCP server (e.g. `plugin-render-render` or `project-0-vecinita-render`). Prefer **`list_services`** → **`list_deploys`** (per service) → **`get_deploy`** until terminal → **`list_logs`** on failure.
+**Render MCP (required for Phase F when MCP is available):**
+
+- **Server choice:** Prefer **`project-0-vecinita-render`** (Vecinita workspace MCP in Cursor) when that server responds successfully—workspace is often pre-selected. If **`list_workspaces`** / **`list_services`** return **unauthorized** or **`get_selected_workspace`** says no workspace is set, use **`plugin-render-render`** only after the user has connected the Render plugin (API token) and, when required, **explicitly** confirmed which workspace to **`select_workspace`** (do not pick a workspace silently; the tool schema forbids automated selection).
+- **Schemas:** Before **`call_mcp_tool`**, read the tool descriptor JSON from the active server’s MCP tools folder (paths like `mcps/project-0-vecinita-render/tools/` or `mcps/plugin-render-render/tools/` under the Cursor project metadata directory).
+- **PR previews:** Pass **`includePreviews`: true** to **`list_services`** so `… PR #<n>` preview services appear; map them to the open PR via name/branch/repo fields.
+- **Poll chain:** **`list_services`** → per monitored **`serviceId`**: **`list_deploys`** → **`get_deploy`** until terminal → **`list_logs`** on failure. Record **service id**, **deploy id**, **status**, and **dashboardUrl** from MCP payloads in the ledger.
 
 Also respect repo rules: no force-push unless the user explicitly requests it; run **`make ci`** from root before declaring GitHub-side fixes complete; align env changes with **`.env.local.example`** only.
 
@@ -49,6 +54,7 @@ Maintain and **update after every material step** a single markdown block titled
 6. **PR (root vecinita)**  
    - Default branch name (from `gh repo view`).  
    - Head branch, PR # / URL if open, **created vs existing**.  
+   - If PR base is `main`, title includes **`[render preview]`**.
    - `gh pr checks` rollup (or link): pending / success / failure counts after CI.
 
 7. **CI watch (GitHub Actions)**  
@@ -114,6 +120,7 @@ Goal: **mainline GitHub PR** for the same branch you pushed so CI and reviewers 
    - If **no open PR**: `gh pr create -R "$REPO" --base <default> --head "$HEAD_BRANCH"` with title/body from recent commits (or `--fill` if appropriate).  
    - If **PR exists**: optionally `gh pr edit` only if the user asked for description/title updates.  
 5. Record PR #, URL, base/head in ledger §6. Creating a PR may enqueue **additional** `pull_request` workflows—**Phase D** must still wait on **all** runs for the relevant commit(s) per poll skill.
+6. If base branch is `main`, ensure the PR title contains **`[render preview]`**. If missing, update title before CI/Render summary.
 
 ### Phase D — GitHub Actions poll (after pushes / PR exists)
 
@@ -134,18 +141,19 @@ Goal: **mainline GitHub PR** for the same branch you pushed so CI and reviewers 
 
 ### Phase F — Render deploy monitor and debug loop (after Phase E)
 
-**Precondition:** Phase E green. If Render MCP is unavailable, record **Render deploy skipped (no MCP / no API key)** in ledger §8 and list manual Dashboard steps—do not pretend you polled live deploys.
+**Precondition:** Phase E green. If **both** Render MCP servers fail (e.g. unauthorized / no workspace / tool errors), record **Render deploy skipped (no MCP / unauthorized)** in ledger §8 and list manual Dashboard steps plus optional `RENDER_API_KEY` + `scripts/github/render_inspect.py`—do not pretend you polled live deploys.
 
-1. **Discover services:** Render MCP **`list_services`** (and `get_selected_workspace` / `list_workspaces` + `select_workspace` if the workspace is unset). Map services to this repo using names from **`render.yaml`**, `docs/deployment/`, or the user’s prompt.  
+1. **Discover services:** Render MCP **`list_services`** with **`includePreviews`: true** when the ship is a PR to **`main`** (or the user asked for previews). Use **`get_selected_workspace`** / **`list_workspaces`** first; call **`select_workspace`** only after the user explicitly chooses an **`ownerID`** when the host requires it. Map services to this repo using names from **`render.yaml`**, `docs/deployment/`, or the user’s prompt.  
 2. **Find latest deploys:** For each monitored **`serviceId`**, **`list_deploys`** (limit 10). Prefer deploys whose **commit** matches root `HEAD` SHA, else the newest deploy **after** the GitHub-green timestamp.  
 3. **Poll:** Repeat **`get_deploy`** on in-progress deploys every **30–90s** until each is **terminal** (`live`, `deactivated`, or failure states such as **build failed** / **update failed**—use API `status` field names from MCP responses). Respect a **~90 min** cap; if hit, summarize partial state and URLs.  
 4. **Success path:** When all monitored deploys are **healthy/live** (per Render), ledger §8 table and emit **`## Render deploy summary`** (services, deploy ids, commit, dashboard links).  
-5. **Failure path:** For any failed deploy:  
+5. **Preview live attestation:** For PRs to `main`, verify `.ci/render-live-attestation.json` exists, is fresh, and is tied to the current PR head before declaring merge-ready.  
+6. **Failure path:** For any failed deploy:  
    - **`list_logs`** (and `get_deploy` details) to capture the first actionable errors.  
    - Emit **`## Render failure summary`** (service, deploy id, 5–15 line log excerpt, **hypothesis** in plain language).  
    - Follow **cross-service-playbooks** §3 and **render-debug** patterns: env contract (`make render-env-validate` when applicable), code fixes, not workaround-only.  
    - **`make ci`** from root; commit; **Phase B → C → PR → D → E → F** again; increment **Render loop iteration**.  
-6. Repeat until Render is green or you are **blocked** (missing secrets, external quota, user decision).
+7. Repeat until Render is green or you are **blocked** (missing secrets, external quota, user decision).
 
 ### Phase G — Stop conditions
 
@@ -158,3 +166,4 @@ Goal: **mainline GitHub PR** for the same branch you pushed so CI and reviewers 
 - Always include **`## CI error summary`** or the all-green CI sentence when Phase D completes for a pushed commit.  
 - After Phase F, include **`## Render deploy summary`** or **`## Render failure summary`** as appropriate.  
 - Never claim “CI green” or “Render live” until the polls and MCP/Dashboard evidence are recorded in the ledger.
+- For PRs to `main`, never claim merge-ready until `[render preview]` title and render live attestation checks are explicitly recorded.

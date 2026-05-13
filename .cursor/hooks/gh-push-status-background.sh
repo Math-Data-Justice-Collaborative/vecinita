@@ -4,7 +4,11 @@
 # - Spawns a non-blocking background collector that records:
 #   1) GitHub Actions workflow runs for the current HEAD commit
 #   2) Open PR details for the current branch (if one exists)
-#   3) Render deploy status snapshots for configured service ids
+#   3) Render deploy status snapshots for configured service ids (REST via RENDER_API_KEY)
+#
+# Agents: for authoritative deploy polling, preview discovery, and logs, use **Render MCP**
+# (`project-0-vecinita-render` or `plugin-render-render`) per `.cursor/agents/push-deploy-debug-workflow.md`
+# Phase F—this hook’s Render section is a best-effort log append only when env vars are set.
 
 set -euo pipefail
 
@@ -126,7 +130,15 @@ LOG_FILE=".cursor/hooks/logs/gh-push-status-${STAMP}.log"
   echo
   echo "== Pull Request (current branch) =="
   if gh pr view --json number,title,url,state,isDraft,headRefName,baseRefName --jq "{number, title, state, isDraft, headRefName, baseRefName, url}" 2>/dev/null; then
-    :
+    PR_BASE="$(gh pr view --json baseRefName --jq .baseRefName 2>/dev/null || true)"
+    PR_TITLE="$(gh pr view --json title --jq .title 2>/dev/null || true)"
+    if [[ "$PR_BASE" == "main" ]]; then
+      if [[ "${PR_TITLE,,}" != *"[render preview]"* ]]; then
+        echo "[cursor hook] WARNING: PR targets main but title is missing [render preview]."
+      else
+        echo "[cursor hook] Render preview title token detected."
+      fi
+    fi
   else
     echo "[cursor hook] no open PR detected for branch ${BRANCH}."
   fi

@@ -58,7 +58,7 @@ services:
   vecinita-agent:
     build:
       context: .
-      dockerfile: apis/agent/Dockerfile
+      dockerfile: apps/agent/Dockerfile
     container_name: vecinita-agent
     ports:
       - "10000:10000"
@@ -120,7 +120,7 @@ services:
   vecinita-gateway:
     build:
       context: .
-      dockerfile: apis/gateway/Dockerfile.gateway
+      dockerfile: apps/gateway/Dockerfile.gateway
     container_name: vecinita-gateway
     command: ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port 8080"]
     ports:
@@ -193,7 +193,7 @@ services:
   # ============================================================================
   vecinita-frontend:
     build:
-      context: ./frontends/chat
+      context: ./apps/chat-frontend
       dockerfile: Dockerfile
       args:
         VITE_GATEWAY_URL: "http://localhost:8080/api/v1"
@@ -231,7 +231,7 @@ services:
   # vecinita-embedding:
   #   build:
   #     context: .
-  #     dockerfile: apis/gateway/Dockerfile.embedding
+  #     dockerfile: apps/gateway/Dockerfile.embedding
   #   container_name: vecinita-embedding
   #   ports:
   #     - "8080:8080"

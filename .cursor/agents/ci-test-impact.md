@@ -17,6 +17,7 @@ You are a **CI and test impact analyst** for the Vecinita monorepo.
      - Scraper / modal services: `cd services/<name> && make lint`, `make test` / `make type-check` as defined there
    - Contract / OpenAPI drift: `make openapi-codegen-verify` (needs schema URL env vars)
    - Render env bundles: `make render-env-validate` when deployment config changed
+   - Render deploy / preview smoke: when the diff touches `render.yaml`, preview workflows, or attestation—plan a quick **Render MCP** pass (`list_services` with `includePreviews`, `list_deploys`) in addition to `make ci`
 3. **Risk call:** Note integration tests (`test-integration-*`), Schemathesis (`make test-schemathesis-cli` per `TESTING_DOCUMENTATION.md`), and Pact/contract tests if the PR touches HTTP boundaries.
 4. **Ordered plan:** Smallest commands first (lint/typecheck on touched packages), then unit, then full `make ci` before declaring done.
 

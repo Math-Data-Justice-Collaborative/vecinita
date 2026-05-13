@@ -8,34 +8,32 @@ on:
     branches: [main, develop]
     paths:
       - "render.yaml"
-      - "render.staging.yaml"
-      - ".env.prod.render.example"
-      - ".env.staging.render.example"
+      - "config/.env.prod.render.example"
+      - "config/.env.staging.render.example"
       - ".env.local.example"
       - ".github/workflows/**"
       - "scripts/env_sync.py"
       - "scripts/github/validate_render_env.py"
       - "scripts/github/validate_render_env_parity.py"
-      - "apis/gateway/tests/contracts/test_env_sync_github_actions_bundle.py"
-      - "services/**/config.py"
-      - "services/**/shared_config/**"
-      - "apis/gateway/src/utils/render_env_contract.py"
+      - "apps/gateway/tests/contracts/test_env_sync_github_actions_bundle.py"
+      - "apps/**/config.py"
+      - "apps/**/shared_config/**"
+      - "apps/gateway/src/utils/render_env_contract.py"
   pull_request:
     branches: [main, develop]
     paths:
       - "render.yaml"
-      - "render.staging.yaml"
-      - ".env.prod.render.example"
-      - ".env.staging.render.example"
+      - "config/.env.prod.render.example"
+      - "config/.env.staging.render.example"
       - ".env.local.example"
       - ".github/workflows/**"
       - "scripts/env_sync.py"
       - "scripts/github/validate_render_env.py"
       - "scripts/github/validate_render_env_parity.py"
-      - "apis/gateway/tests/contracts/test_env_sync_github_actions_bundle.py"
+      - "apps/gateway/tests/contracts/test_env_sync_github_actions_bundle.py"
       - "services/**/config.py"
       - "services/**/shared_config/**"
-      - "apis/gateway/src/utils/render_env_contract.py"
+      - "apps/gateway/src/utils/render_env_contract.py"
   workflow_dispatch:
 
 jobs:
@@ -44,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apis/gateway
+        working-directory: apps/gateway
 
     steps:
       - uses: actions/checkout@v5

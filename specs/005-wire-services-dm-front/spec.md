@@ -39,7 +39,7 @@ As a developer running the chat stack locally or against Render, I want `VITE_GA
 
 ### User Story 2 — Data management UI talks to the bundled API (Priority: P1)
 
-As an operator using the data-management dashboard, I want `VITE_VECINITA_SCRAPER_API_URL` (and optional `VITE_VECINITA_GATEWAY_URL` for gateway modal jobs) to target the process started from `apis/data-management-api` so scrape job CRUD and health checks hit the correct service.
+As an operator using the data-management dashboard, I want `VITE_DM_API_BASE_URL` (and optional `VITE_VECINITA_GATEWAY_URL` for gateway modal jobs) to target the process started from `apis/data-management-api` so scrape job CRUD and health checks hit the correct service.
 
 **Why this priority**: Misaligned URLs produce silent failures or wrong backends.
 
@@ -84,7 +84,7 @@ As a maintainer, I want a repeatable way to keep TypeScript client shapes and Py
 
 - **FR-001**: Document and implement a single mapping from unified env templates (root `.env.local.example`, `frontend/.env.example`, `apps/data-management-frontend/.env.example`) to runtime services so `make` / Compose / Render setups do not contradict each other for gateway, agent, and DM API ports.
 - **FR-002**: Chat frontend MUST consume gateway base URL via `VITE_GATEWAY_URL` or `VITE_BACKEND_URL` with behavior consistent with existing `frontend/src/app/services/agentService.ts` and resolution helpers.
-- **FR-003**: Data-management frontend MUST resolve API base via `VITE_VECINITA_SCRAPER_API_URL` (and optional gateway vars) consistent with `apps/data-management-frontend/src/app/api/scraper-config.ts`.
+- **FR-003**: Data-management frontend MUST resolve API base via `VITE_DM_API_BASE_URL` (and optional gateway vars) consistent with `apps/data-management-frontend/src/app/api/scraper-config.ts`.
 - **FR-004**: Add or extend an automated check (script, CI job, or test) that validates alignment between data-management API OpenAPI (or shared schema package) and the TypeScript types or fetch layer the dashboard uses for scrape jobs and related entities.
 - **FR-005**: Gateway and agent HTTP surfaces used by the chat app MUST satisfy **both**: (a) server-side OpenAPI contract tests (e.g. **Schemathesis**) per `TESTING_DOCUMENTATION.md`, and (b) **FR-007** consumer-driven contracts from `frontend/`. DM HTTP surfaces MUST satisfy **FR-004** and **FR-008**. Any intentional gap MUST be documented with rationale and an alternate verification plan. **Regression**: existing **gateway + agent** Schemathesis jobs already in CI MUST keep passing when this feature merges; new work only **extends** coverage (e.g. DM OpenAPI / modal-jobs paths).
 - **FR-006 (integration testing in CI)**: On **pull requests**, automated frontend tests MUST run without a mandatory live gateway+agent (or full DM) stack—using mocks, MSW, fixtures, or fast client-level tests. At least one **documented** workflow (default branch after merge, **cron** schedule, or **`workflow_dispatch`**) MUST run **real-stack** integration tests that start or target real gateway and agent processes (and DM API when DM wiring changes), so cross-service URL and proxy behavior is exercised regularly.

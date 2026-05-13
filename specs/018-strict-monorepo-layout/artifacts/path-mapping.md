@@ -33,4 +33,21 @@ Snapshot of root `render.yaml` **web** services whose `dockerfilePath` / `docker
 | `vecinita-data-management-frontend-v1` | `./frontends/data-management/Dockerfile` | `./frontends/data-management` | PM-002 |
 | `vecinita-data-management-api-v1` | `./modal-apps/scraper/Dockerfile` | `./modal-apps/scraper` | PM-003 (DM API image built from scraper tree; path updated with submodule move) |
 
-_Add rows for Makefile targets beyond **PM-013**, workflow subtrees, nested compose under `services/*`, and any `auth/`, `config/`, `deploy/` relocations as they are decided (**PM-016+**)._
+_Add rows for Makefile targets beyond **PM-013**, workflow subtrees, nested compose under `services/*`, and any future relocations as they are decided._
+
+### Repo cleanup (2026-05-11)
+
+| row_id | legacy_path | canonical_path | status | notes |
+|--------|-------------|----------------|--------|-------|
+| PM-016 | `auth/` | _(deleted)_ | done | Vestigial dir — no tracked source, only cache artifacts and one test-results XML |
+| PM-017 | `run/` | `scripts/run/` | done | Automation scripts moved under `scripts/`; Makefile refs updated |
+| PM-018 | `dev-session.sh`, `setup.sh`, `setup_local_dev.sh` (root) | `scripts/` | done | Root shell scripts consolidated into `scripts/` |
+| PM-019 | `deploy/` | `infrastructure/deploy/` | done | Deploy scripts moved under `infrastructure/` |
+| PM-020 | `docker/` | `infrastructure/docker/` | done | Docker helpers moved under `infrastructure/`; docker-compose refs updated |
+| PM-021 | `website/` | `docs-site/` | done | Docusaurus site renamed; CI workflow + doc refs updated |
+| PM-022 | Root `Dockerfile` | _(deleted)_ | done | Legacy — referenced non-existent `backend/` paths |
+| PM-023 | `render.blueprint.yaml`, `render.staging.yaml` | _(deleted)_ | done | Stale; root `render.yaml` is canonical (FR-008) |
+| PM-024 | `runtime.txt` | _(deleted)_ | done | Heroku artifact; no references |
+| PM-025 | `requirements.txt` (root) | _(deleted)_ | done | Superseded by per-service `pyproject.toml` |
+| PM-026 | `.env.example`, `.env.prod.render.example`, `.env.staging.render.example` (root) | `config/` | done | Env example files consolidated into `config/`; `.env.local.example` stays at root per FR-007 |
+| PM-027 | `apps/`, `services/` | _(deleted)_ | done | Empty vestigial dirs removed |

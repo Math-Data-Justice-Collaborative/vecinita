@@ -70,7 +70,7 @@ Monorepo: `frontend/`, `apps/data-management-frontend/`, `backend/`, `apis/data-
 
 ## Phase 4: User Story 2 — Data management UI talks to bundled API (Priority: P1)
 
-**Goal**: DM dashboard uses `VITE_VECINITA_SCRAPER_API_URL` and optional gateway modal-jobs base; `/health` and `/jobs` succeed with CORS.
+**Goal**: DM dashboard uses `VITE_DM_API_BASE_URL` and optional gateway modal-jobs base; `/health` and `/jobs` succeed with CORS.
 
 **Independent Test**: Run DM API on configured port; set `apps/data-management-frontend/.env`; dashboard diagnostics + job list per [spec.md](./spec.md) User Story 2.
 

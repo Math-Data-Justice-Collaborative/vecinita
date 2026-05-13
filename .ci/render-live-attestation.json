@@ -1,0 +1,24 @@
+{
+  "format_version": 1,
+  "generated_at": "2026-05-11T17:29:01Z",
+  "git_head": "3f77232",
+  "pr_title": "[render preview] feat(ci): Render preview live attestation gate (019)",
+  "preview_base_url": "https://vecinita-data-management-api-v1-lx27-pr.onrender.com",
+  "status": "passed",
+  "live_checks": [
+    {
+      "id": "health",
+      "status": "passed",
+      "url": "https://vecinita-data-management-api-v1-lx27-pr.onrender.com/health",
+      "status_code": 200,
+      "notes": "{\"status\":\"ok\",\"service\":\"vecinita-scraper\"}"
+    },
+    {
+      "id": "openapi.json",
+      "status": "passed",
+      "url": "https://vecinita-data-management-api-v1-lx27-pr.onrender.com/openapi.json",
+      "status_code": 200,
+      "notes": "{\"openapi\":\"3.1.0\",\"info\":{\"title\":\"Vecinita Scraper\",\"description\":\"Serverless web scraping pipeline with job queue management\",\"version\":\"0.1.0\"},\"paths\":{\"/\":{\"get\":{\"tags\":[\"meta\"],\"summary\":\"Service index\",\"description\":\"Public landing"
+    }
+  ]
+}

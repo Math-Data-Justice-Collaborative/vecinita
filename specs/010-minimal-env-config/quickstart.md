@@ -4,9 +4,9 @@ Use this after implementation lands to confirm behavior matches `spec.md` and `c
 
 ## 1. Templates and pointers
 
-1. Open the **root** canonical template (expected: `.env.example` after consolidation).
+1. Open the **root** canonical template (expected: `config/.env.example` after consolidation).
 2. Confirm sections distinguish **required** default-local keys vs **optional profiles**.
-3. Open each subsidiary `*.env.example` **and** (when pointer-only) **`/.env.local.example`**; within the **first 40 lines**, confirm the exact substring **`Canonical environment catalog: repo root .env.example`** appears (contract C4b).
+3. Open each subsidiary `*.env.example` **and** (when pointer-only) **`/.env.local.example`**; within the **first 40 lines**, confirm the exact substring **`Canonical environment catalog: config/.env.example`** appears (contract C4b).
 
 ## 2. No secrets in repo examples
 

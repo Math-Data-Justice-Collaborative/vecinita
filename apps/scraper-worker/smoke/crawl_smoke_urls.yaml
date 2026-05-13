@@ -1,0 +1,25 @@
+# Smoke URLs for spec 011 / SC-001 (≥2 HTML, 1 PDF, 1 plain text, 1 extra).
+# Schema: list of { url: str, kind: html|pdf|text|any, notes: str, live: bool }
+# Replace example.com placeholders with operator-approved public URLs before relying on live runs.
+
+entries:
+  - url: "https://www.w3.org/TR/REC-html40/"
+    kind: html
+    notes: "Stable public HTML document (W3C)."
+    live: true
+  - url: "https://example.com/"
+    kind: html
+    notes: "Placeholder second HTML — replace with a second public-sector HTML page."
+    live: false
+  - url: "https://www.w3.org/WAI/WCAG21/Techniques/pdf/img/captcha-no-example.pdf"
+    kind: pdf
+    notes: "Small public PDF sample from W3C techniques tree (verify URL periodically)."
+    live: true
+  - url: "https://www.rfc-editor.org/rfc/rfc2324.txt"
+    kind: text
+    notes: "Plain-text RFC (ietf mirror)."
+    live: true
+  - url: "https://www.usa.gov/"
+    kind: any
+    notes: "Additional public-sector style origin (may be script-heavy)."
+    live: true

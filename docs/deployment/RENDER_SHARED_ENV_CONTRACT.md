@@ -6,8 +6,8 @@ deploy. Variables marked **Required** will cause startup failures if missing.
 
 Shared contract templates:
 
-- `.env.prod.render.example`
-- `.env.staging.render.example`
+- `config/.env.prod.render.example`
+- `config/.env.staging.render.example`
 
 Use these template files as the authoritative key sets for CI contract/parity checks.
 
@@ -19,8 +19,8 @@ Values you keep in gitignored **`.env`**, **`.env.local`**, **`.env.prod.render`
 
 | Where you work | Template to copy keys from |
 |----------------|----------------------------|
-| Production Render Environment Group / per-service env | [`.env.prod.render.example`](../../.env.prod.render.example) |
-| Staging Render Environment Group / per-service env | [`.env.staging.render.example`](../../.env.staging.render.example) |
+| Production Render Environment Group / per-service env | [`config/.env.prod.render.example`](../../config/.env.prod.render.example) |
+| Staging Render Environment Group / per-service env | [`config/.env.staging.render.example`](../../config/.env.staging.render.example) |
 | Local full-stack development | [`.env.local.example`](../../.env.local.example) |
 
 **Modal:** On Render, set **`MODAL_TOKEN_ID`** and **`MODAL_TOKEN_SECRET`**. When **`OLLAMA_BASE_URL`**, **`EMBEDDING_UPSTREAM_URL`**, or other resolved URLs point at **`*.modal.run`**, also set **`MODAL_FUNCTION_INVOCATION=auto`** (or **`1`**) so the agent and gateway use Modal **`Function.from_name`** instead of raw HTTP to deprecated ASGI endpoints (see `backend/src/services/modal/invoker.py`). With **`auto`**, invocation turns on only when both **`MODAL_TOKEN_*`** values are set. If your local `.env` only has **`MODAL_TOKEN_ID`** / **`MODAL_TOKEN_SECRET`** (see `.env.local.example`), paste the same token values into Render using the **`MODAL_TOKEN_*`** names — production/staging services do not read `MODAL_API_TOKEN_*`.
@@ -70,13 +70,8 @@ rebuilding the image.
 
 | Variable | Required | Description |
 |---|---|---|
-| `VITE_DM_API_BASE_URL` | **Required** (preferred) | Same value as the historical `VITE_VECINITA_SCRAPER_API_URL`: public origin of **`vecinita-data-management-api-v1`** (no `*.modal.run`). |
-| `VITE_VECINITA_SCRAPER_API_URL` | Legacy alias | Still accepted if `VITE_DM_API_BASE_URL` is unset. |
+| `VITE_DM_API_BASE_URL` | **Required** | Public HTTP(S) origin of **`vecinita-data-management-api-v1`** (no direct `*.modal.run` in the browser; SC-001 / SC-005). |
 | `VITE_DEFAULT_SCRAPER_USER_ID` | Optional | Default user ID submitted with scraping jobs. Defaults to `frontend-user` if absent. |
-
-> **Naming note:** `VITE_VECINITA_SCRAPER_API_URL` is the historical name for the
-> data-management API base URL. Despite the `SCRAPER` in the name, it points at the
-> data-management API web service, not directly at the Modal scraper endpoint.
 
 **Partial rollout (007):** When the scraper’s legacy `*.modal.run` ASGI remains deployed for
 non-operator clients, treat the **Render `vecinita-data-management-api` URL** (and matching
@@ -112,7 +107,7 @@ Blueprint builds [`modal-apps/scraper`](../../modal-apps/scraper) (`vecinita_scr
 
 > **Region and CORS setup order (critical):**
 > 1. Deploy `vecinita-data-management-api-v1` (and staging equivalent) with `SCRAPER_API_KEYS`, `DATABASE_URL`, and upstream URLs set.
-> 2. Deploy `vecinita-data-management-frontend-v1` and set `VITE_VECINITA_SCRAPER_API_URL` to this API’s public URL.
+> 2. Deploy `vecinita-data-management-frontend-v1` and set `VITE_DM_API_BASE_URL` to this API’s public URL.
 > 3. Set `CORS_ORIGINS` on the API to that frontend origin.
 
 ---

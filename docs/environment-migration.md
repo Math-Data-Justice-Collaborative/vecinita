@@ -4,7 +4,7 @@ This document supports **Feature 010 — minimal environment configuration** (`s
 
 ## Overview
 
-- **Canonical template**: repository root [`.env.example`](../.env.example) lists the full variable catalog, grouped into **`### REQUIRED — default local`** and **`### OPTIONAL PROFILE: <id>`** sections.
+- **Canonical template**: repository [`config/.env.example`](../config/.env.example) lists the full variable catalog, grouped into **`### REQUIRED — default local`** and **`### OPTIONAL PROFILE: <id>`** sections.
 - **Subsidiary templates** (`backend/.env.example`, `frontends/chat/.env.example`, etc.) stay minimal and point to the root catalog (see contract **C4b** in `specs/010-minimal-env-config/contracts/configuration-resolution.md`).
 - **Legacy names** remain accepted for a published window; runtime warns with **names only** and maps via `config/env_aliases.example.yaml`, Pydantic `AliasChoices`, and backend bootstrap copy in `backend/src/env_deprecation.py`.
 
@@ -28,11 +28,11 @@ Per **SC-002** clarification, the **pre-change baseline** is the **deduplicated 
 **Snapshot for reproducibility** (post-migration commit capturing this work):
 
 - **Git SHA**: update to the merge commit of this feature when opening the PR (`git rev-parse HEAD` on the merged branch).
-- **Paths union** (repo-relative): `.env.example`, `.env.local.example`, `backend/.env.example`, `frontends/chat/.env.example`, `frontends/data-management/.env.example`, `modal-apps/scraper/.env.example`, `modal-apps/model-modal/.env.example`, `tests/.env.example`, `deploy/gcp/.env.example`.
+- **Paths union** (repo-relative): `config/.env.example`, `.env.local.example`, `backend/.env.example`, `frontends/chat/.env.example`, `frontends/data-management/.env.example`, `modal-apps/scraper/.env.example`, `modal-apps/model-modal/.env.example`, `tests/.env.example`, `infrastructure/deploy/gcp/.env.example`.
 
-**Illustrative raw-name union** (all assignment keys in root + former local template, pre-classification): **102** distinct names in root `.env.example` ∪ `.env.local.example` before this feature’s template split (see inventory).
+**Illustrative raw-name union** (all assignment keys in root + former local template, pre-classification): **102** distinct names in root `config/.env.example` ∪ `.env.local.example` before this feature’s template split (see inventory).
 
-**Post-change “required for default local”** (names under **`### REQUIRED — default local`** in root `.env.example` only): **7** distinct names — **> 50%** reduction versus the illustrative union above for SC-002 evidence (classification-based metric per spec).
+**Post-change “required for default local”** (names under **`### REQUIRED — default local`** in root `config/.env.example` only): **7** distinct names — **> 50%** reduction versus the illustrative union above for SC-002 evidence (classification-based metric per spec).
 
 ## Placeholder mapping table {#mapping-table}
 
@@ -83,7 +83,7 @@ For **backend** `backend/src/config.py` (and services using the same pattern):
 
 Repo-relative paths (T001 / T002):
 
-- `.env.example`
+- `config/.env.example`
 - `.env.local.example`
 - `backend/.env.example`
 - `frontends/chat/.env.example`
@@ -91,7 +91,7 @@ Repo-relative paths (T001 / T002):
 - `modal-apps/scraper/.env.example`
 - `modal-apps/model-modal/.env.example`
 - `tests/.env.example`
-- `deploy/gcp/.env.example`
+- `infrastructure/deploy/gcp/.env.example`
 
 ### Optional: Python entrypoints outside central loaders (FR-008 audit)
 

@@ -210,7 +210,7 @@ curl -X PATCH \
   -d '{
     "envVars": [
       {
-        "key": "VITE_VECINITA_SCRAPER_API_URL",
+        "key": "VITE_DM_API_BASE_URL",
         "value": "https://vecinita-modal-proxy.onrender.com"
       }
     ]

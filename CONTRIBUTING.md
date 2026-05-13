@@ -17,8 +17,8 @@ git clone https://github.com/Math-Data-Justice-Collaborative/vecinita
 cd vecinita
 
 # Install dependencies
-cd apis/gateway && uv sync
-cd ../frontends/chat && npm install
+cd apps/gateway && uv sync
+cd ../apps/chat-frontend && npm install
 
 # Start the full stack in tmux
 make dev
@@ -33,12 +33,12 @@ make dev-frontend
 
 ```
 vecinita/
-├── apis/gateway/      # Gateway FastAPI + shared Python `src/`, tests, uv lockfile
-├── apis/agent/        # Agent Dockerfile + canonical `src/agent/` (symlinked from gateway `src/agent`)
+├── apps/gateway/      # Gateway FastAPI + shared Python `src/`, tests, uv lockfile
+├── apps/agent/        # Agent Dockerfile + canonical `src/agent/` (symlinked from gateway `src/agent`)
 │   ├── src/          # Source code
 │   ├── tests/        # Unit tests
 │   └── pyproject.toml
-├── frontends/chat/    # React + TypeScript + Vite (chat UI submodule)
+├── apps/chat-frontend/    # React + TypeScript + Vite (chat UI submodule)
 │   ├── src/          # React components
 │   ├── docs/         # Frontend documentation
 │   └── package.json
@@ -50,11 +50,11 @@ vecinita/
 ### Canonical scraper
 
 The **only** supported scraper implementation and orchestration code lives under
-[`modal-apps/scraper/`](./modal-apps/scraper/) (the `vecinita_scraper` package used by Modal, Docker, and CI).
+[`apps/scraper-worker/`](./apps/scraper-worker/) (the `vecinita_scraper` package used by Modal, Docker, and CI).
 
 The **data-management-api** and other backends must **not** duplicate that logic: call a deployed
 scraper over HTTP using `SCRAPER_SERVICE_BASE_URL` and the typed client in
-[`apis/data-management-api/packages/service-clients/`](./apis/data-management-api/packages/service-clients/)
+[`apps/data-management-api/packages/service-clients/`](./apps/data-management-api/packages/service-clients/)
 (`ScraperClient`). See the normative remote contract in
 [`specs/003-consolidate-scraper-dm/contracts/dm-api-remote-service-integration.md`](./specs/003-consolidate-scraper-dm/contracts/dm-api-remote-service-integration.md).
 
@@ -85,7 +85,7 @@ make lint-frontend
 make typecheck-frontend
 
 # Or run frontend scripts directly
-cd frontends/chat
+cd apps/chat-frontend
 npm run format
 npm run format:write
 npm run lint
@@ -154,7 +154,7 @@ make test-integration-gateway-full
 ### Frontend Tests
 
 ```bash
-cd frontends/chat
+cd apps/chat-frontend
 npm run test:unit
 npm run test:watch
 npm run test:coverage
@@ -187,8 +187,8 @@ make test-e2e
 2. **Write code** following project standards
 
 3. **Run tests locally**:
-   - `cd apis/gateway && uv run pytest`
-   - `cd frontends/chat && npm test`
+   - `cd apps/gateway && uv run pytest`
+   - `cd apps/chat-frontend && npm test`
    - `cd tests && uv run pytest -v`
 
 4. **Commit with clear messages**:

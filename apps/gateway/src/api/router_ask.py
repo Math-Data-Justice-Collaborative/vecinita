@@ -1,0 +1,553 @@
+"""
+Unified API Gateway - Q&A Router
+
+Endpoints for querying the knowledge base with LangGraph agent.
+Proxies requests to the agent service running on port 8000.
+
+Demo mode available via DEMO_MODE=true environment variable for testing without agent service.
+"""
+
+import logging
+import os
+import threading
+import time
+from collections.abc import AsyncGenerator
+from typing import Annotated, Any
+from uuid import uuid4
+
+import httpx
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
+
+from vecinita_config.config import normalize_agent_service_url
+from vecinita_config.service_endpoints import AGENT_SERVICE_URL
+
+from .models import (
+    AskResponse,
+    ErrorResponse,
+    GatewayAskConfigPayload,
+    GatewayAskQueryParams,
+    SourceCitation,
+    ValidationErrorResponse,
+)
+
+router = APIRouter(prefix="/ask", tags=["Q&A"])
+logger = logging.getLogger(__name__)
+
+
+def _raise_if_invalid_ask_model(model: str | None) -> None:
+    """Reject numeric-only ``model`` query values (e.g. fuzzed ``0``) that upstream Ollama treats as model names."""
+    if model is not None and model.strip().isdigit():
+        raise HTTPException(
+            status_code=422,
+            detail="model must be a named upstream model id, not a numeric placeholder",
+        )
+
+
+# OpenAPI 3.x: per-event schema for SSE (Schemathesis validates each parsed event; see docs).
+_GATEWAY_ASK_STREAM_SSE_200: dict[str, Any] = {
+    "description": (
+        "Server-Sent Events stream. Each `data:` line carries a JSON object with a `type` field "
+        "(e.g. thinking, complete, error)."
+    ),
+    "content": {
+        "text/event-stream": {
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "event": {
+                        "type": "string",
+                        "description": "SSE event name (defaults to message).",
+                        "examples": ["message"],
+                    },
+                    "data": {
+                        "type": "string",
+                        "description": (
+                            "JSON-encoded event payload. The decoded payload includes "
+                            "`type` such as thinking, complete, error, tool_event, or clarification."
+                        ),
+                    },
+                },
+                "required": ["data"],
+            }
+        }
+    },
+}
+
+_GATEWAY_ASK_OPENAPI_RESPONSES: dict[int | str, dict[str, Any]] = {
+    401: {
+        "model": ErrorResponse,
+        "description": "Authentication required when ENABLE_AUTH=true (missing/invalid Bearer).",
+    },
+    422: {
+        "model": ValidationErrorResponse,
+        "description": "Invalid query parameters.",
+    },
+    503: {"model": ErrorResponse, "description": "Cannot reach agent service."},
+    504: {"model": ErrorResponse, "description": "Agent request timed out."},
+    500: {"model": ErrorResponse, "description": "Unexpected gateway or upstream failure."},
+}
+
+# Agent service URL is resolved via the centralized service_endpoints module.
+DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
+_AGENT_CLIENT: httpx.AsyncClient | None = None
+_AGENT_CLIENT_LOCK = threading.Lock()
+
+
+def _agent_service_url() -> str:
+    """Resolve agent URL dynamically so monkeypatched env vars apply in tests/runtime."""
+    raw = os.getenv("AGENT_SERVICE_URL")
+    if raw is not None and raw.strip():
+        return normalize_agent_service_url(raw)
+    return AGENT_SERVICE_URL
+
+
+def _read_positive_timeout(name: str, default: float) -> float:
+    raw_value = os.getenv(name, str(default))
+    try:
+        parsed_value = float(raw_value)
+    except (TypeError, ValueError):
+        return default
+
+    return parsed_value if parsed_value > 0 else default
+
+
+def _get_agent_timeout() -> float:
+    # Default aligns with backend/schemathesis.toml request-timeout for live contract tests.
+    return _read_positive_timeout("AGENT_TIMEOUT", 180.0)
+
+
+def _get_agent_stream_timeout() -> float:
+    return _read_positive_timeout("AGENT_STREAM_TIMEOUT", 180.0)
+
+
+def _agent_httpx_timeout(*, for_stream: bool) -> httpx.Timeout:
+    """Bounded connect/pool timeouts plus env-driven read timeout (agent can be slow)."""
+    read_s = _get_agent_stream_timeout() if for_stream else _get_agent_timeout()
+    connect_s = _read_positive_timeout("AGENT_HTTP_CONNECT_TIMEOUT", 10.0)
+    pool_s = _read_positive_timeout("AGENT_HTTP_POOL_TIMEOUT", 10.0)
+    return httpx.Timeout(connect=connect_s, read=read_s, write=read_s, pool=pool_s)
+
+
+def _get_agent_client() -> httpx.AsyncClient | None:
+    """Reuse one HTTP client to avoid per-request connection setup overhead."""
+    global _AGENT_CLIENT
+
+    def _client_is_closed(client: httpx.AsyncClient | None) -> bool:
+        if client is None:
+            return True
+        if not isinstance(client, httpx.AsyncClient):
+            return True
+        return bool(getattr(client, "is_closed", False))
+
+    if _client_is_closed(_AGENT_CLIENT):
+        with _AGENT_CLIENT_LOCK:
+            if _client_is_closed(_AGENT_CLIENT):
+                _AGENT_CLIENT = httpx.AsyncClient(
+                    limits=httpx.Limits(max_connections=100, max_keepalive_connections=20),
+                )
+    return _AGENT_CLIENT
+
+
+def _fallback_ask_config() -> dict[str, Any]:
+    """Return a safe fallback config when agent service is unavailable."""
+    default_provider = "ollama"
+    default_model = os.getenv("OLLAMA_MODEL", "gemma3")
+    return {
+        "providers": [
+            {
+                "name": default_provider,
+                "models": [default_model],
+                "default": True,
+            }
+        ],
+        "models": {default_provider: [default_model]},
+        "defaultProvider": default_provider,
+        "defaultModel": default_model,
+        "service_status": "degraded",
+    }
+
+
+def _normalize_agent_config(agent_data: dict[str, Any]) -> dict[str, Any]:
+    """Normalize agent /config payload to frontend-expected shape."""
+    models_value = agent_data.get("models")
+    providers_value = agent_data.get("providers")
+    raw_models: dict[str, Any] = models_value if isinstance(models_value, dict) else {}
+    raw_providers: list[Any] = providers_value if isinstance(providers_value, list) else []
+
+    normalized_providers: list[dict[str, Any]] = []
+
+    for index, provider in enumerate(raw_providers):
+        if not isinstance(provider, dict):
+            continue
+
+        provider_name = provider.get("name") or provider.get("key")
+        if not provider_name:
+            continue
+
+        provider_models = raw_models.get(provider_name, [])
+        if not isinstance(provider_models, list):
+            provider_models = []
+
+        normalized_providers.append(
+            {
+                "name": provider_name,
+                "models": provider_models,
+                "default": bool(provider.get("default", index == 0)),
+            }
+        )
+
+    if not normalized_providers and raw_models:
+        for index, (provider_name, provider_models) in enumerate(raw_models.items()):
+            if not isinstance(provider_models, list):
+                provider_models = []
+            normalized_providers.append(
+                {
+                    "name": provider_name,
+                    "models": provider_models,
+                    "default": index == 0,
+                }
+            )
+
+    if not normalized_providers:
+        return _fallback_ask_config()
+
+    default_provider_obj = next(
+        (provider for provider in normalized_providers if provider.get("default")),
+        normalized_providers[0],
+    )
+    default_provider = default_provider_obj.get("name")
+    default_model = next(iter(default_provider_obj.get("models") or []), None)
+
+    return {
+        "providers": normalized_providers,
+        "models": raw_models,
+        "defaultProvider": default_provider,
+        "defaultModel": default_model,
+        "service_status": "ok",
+    }
+
+
+def get_demo_response(question: str, lang: str | None = None) -> AskResponse:
+    """Generate a demo response when agent service is unavailable or DEMO_MODE=true."""
+    return AskResponse(
+        question=question,
+        answer=(
+            "This is a demo response from the Vecinita Unified API Gateway. "
+            "The agent service is not currently connected (expected to be running at "
+            f"{_agent_service_url()}). "
+            "To start the agent service:\n\n"
+            "```bash\n"
+            "cd backend\n"
+            "python -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000\n"
+            "```\n\n"
+            "For now, this gateway is in demo/documentation mode. All API endpoints are fully documented "
+            "in the Swagger UI at /docs, and the request/response models include comprehensive examples."
+        ),
+        sources=[
+            SourceCitation(
+                url="https://github.com/acadiagit/vecinita",
+                title="Vecinita GitHub Repository",
+                chunk_id="demo-001",
+                relevance=0.95,
+                excerpt="Vecinita is a RAG Q&A Assistant using LangChain, LangGraph, and Render Postgres.",
+            ),
+            SourceCitation(
+                url="http://localhost:8004/docs",
+                title="API Documentation (Swagger UI)",
+                chunk_id="demo-002",
+                relevance=0.88,
+                excerpt="Complete OpenAPI documentation with request/response examples for all endpoints.",
+            ),
+        ],
+        language=lang or "en",
+        model="demo-mode",
+        response_time_ms=0,
+        token_usage={"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+    )
+
+
+@router.get("", response_model=AskResponse, responses=_GATEWAY_ASK_OPENAPI_RESPONSES)
+async def ask_question(
+    params: Annotated[GatewayAskQueryParams, Depends()],
+) -> AskResponse:
+    """
+    Ask a question and get an answer with source citations.
+
+    The system will detect the query language (Spanish/English) automatically
+    and return answers with source attribution.
+
+    Args:
+        question: User's question
+        thread_id: Optional conversation thread ID for context
+        lang: Optional language override (es, en, etc.)
+        provider: Optional local provider override; non-local values are ignored by the agent
+        model: Optional local model override
+
+    Returns:
+        Answer with sources and metadata
+    """
+    _raise_if_invalid_ask_model(params.model)
+    # Return demo response if demo mode enabled or agent service unavailable
+    if DEMO_MODE:
+        return get_demo_response(params.question, params.lang)
+
+    try:
+        started_at = time.perf_counter()
+        # Build query parameters for agent service
+        upstream: dict[str, Any] = {"question": params.question}
+        if params.thread_id:
+            upstream["thread_id"] = params.thread_id
+        if params.context_answer:
+            upstream["context_answer"] = params.context_answer
+        if params.lang:
+            upstream["lang"] = params.lang
+        if params.provider:
+            upstream["provider"] = params.provider
+        if params.model:
+            upstream["model"] = params.model
+        if params.tags:
+            upstream["tags"] = params.tags
+        upstream["tag_match_mode"] = params.tag_match_mode
+        upstream["include_untagged_fallback"] = str(params.include_untagged_fallback).lower()
+        upstream["rerank"] = str(params.rerank).lower()
+        upstream["rerank_top_k"] = params.rerank_top_k
+
+        # Forward request to agent service
+        client = _get_agent_client()
+        if client is None:
+            raise HTTPException(status_code=503, detail="Agent service client not available")
+        response = await client.get(
+            f"{_agent_service_url()}/ask",
+            params=upstream,
+            timeout=_agent_httpx_timeout(for_stream=False),
+        )
+        response.raise_for_status()
+        data = response.json()
+
+        # Map agent response to gateway format
+        return AskResponse(
+            question=params.question,
+            answer=data.get("answer", ""),
+            sources=data.get("sources", []),
+            language=data.get("language", params.lang or "en"),
+            model=data.get("model", "unknown"),
+            response_time_ms=(
+                data.get("response_time_ms")
+                if isinstance(data.get("response_time_ms"), int)
+                else int((time.perf_counter() - started_at) * 1000)
+            ),
+            token_usage=(
+                data.get("token_usage") if isinstance(data.get("token_usage"), dict) else None
+            ),
+            latency_breakdown=(
+                data.get("latency_breakdown")
+                if isinstance(data.get("latency_breakdown"), dict)
+                else None
+            ),
+        )
+
+    except httpx.TimeoutException as exc:
+        raise HTTPException(
+            status_code=504, detail="Agent service timeout - question took too long to process"
+        ) from exc
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=e.response.status_code, detail=f"Agent service error: {e.response.text}"
+        ) from e
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=503, detail=f"Unable to connect to agent service: {str(e)}"
+        ) from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e
+
+
+async def sse_stream_forward_generator(
+    question: str,
+    request_id: str,
+    thread_id: str | None = None,
+    context_answer: str | None = None,
+    lang: str | None = None,
+    provider: str | None = None,
+    model: str | None = None,
+    tags: str | None = None,
+    tag_match_mode: str = "any",
+    include_untagged_fallback: bool = True,
+    rerank: bool = False,
+    rerank_top_k: int = 10,
+) -> AsyncGenerator[bytes, None]:
+    """
+    Generator that forwards SSE events from agent service.
+
+    Yields SSE-formatted events from the agent's streaming endpoint.
+    """
+    try:
+        started_at = time.perf_counter()
+        first_chunk_latency_ms: int | None = None
+        chunk_count = 0
+
+        # Build query parameters
+        params: dict[str, Any] = {"question": question}
+        if thread_id:
+            params["thread_id"] = thread_id
+        if context_answer:
+            params["context_answer"] = context_answer
+        if lang:
+            params["lang"] = lang
+        if provider:
+            params["provider"] = provider
+        if model:
+            params["model"] = model
+        if tags:
+            params["tags"] = tags
+        params["tag_match_mode"] = tag_match_mode
+        params["include_untagged_fallback"] = str(include_untagged_fallback).lower()
+        params["rerank"] = str(rerank).lower()
+        params["rerank_top_k"] = rerank_top_k
+
+        logger.info(
+            "SSE stream start request_id=%s thread_id=%s question_length=%s",
+            request_id,
+            thread_id,
+            len(question or ""),
+        )
+
+        # Stream from agent service
+        client = _get_agent_client()
+        if client is None:
+            raise RuntimeError("Agent service client not available")
+        async with client.stream(
+            "GET",
+            f"{_agent_service_url()}/ask-stream",
+            params=params,
+            timeout=_agent_httpx_timeout(for_stream=True),
+        ) as response:
+            response.raise_for_status()
+
+            # Forward raw SSE bytes from agent to preserve event boundaries.
+            async for chunk in response.aiter_bytes():
+                if chunk:
+                    chunk_count += 1
+                    if first_chunk_latency_ms is None:
+                        first_chunk_latency_ms = int((time.perf_counter() - started_at) * 1000)
+                        logger.info(
+                            "SSE first chunk request_id=%s latency_ms=%s",
+                            request_id,
+                            first_chunk_latency_ms,
+                        )
+                    yield chunk
+
+        logger.info(
+            "SSE stream completed request_id=%s chunks=%s first_chunk_latency_ms=%s",
+            request_id,
+            chunk_count,
+            first_chunk_latency_ms,
+        )
+
+    except httpx.TimeoutException:
+        logger.warning("SSE stream timeout request_id=%s", request_id)
+        error_event = 'data: {"type": "error", "message": "Request timeout"}\n\n'
+        yield error_event.encode("utf-8")
+    except httpx.HTTPStatusError as e:
+        logger.warning(
+            "SSE stream http error request_id=%s status=%s", request_id, e.response.status_code
+        )
+        error_event = (
+            f'data: {{"type": "error", "message": "Agent error: {e.response.status_code}"}}\n\n'
+        )
+        yield error_event.encode("utf-8")
+    except httpx.RequestError as e:
+        logger.warning("SSE stream request error request_id=%s error=%s", request_id, str(e))
+        error_event = f'data: {{"type": "error", "message": "Connection failed: {str(e)}"}}\n\n'
+        yield error_event.encode("utf-8")
+    except Exception as e:
+        logger.exception("SSE stream internal error request_id=%s", request_id)
+        error_event = f'data: {{"type": "error", "message": "Internal error: {str(e)}"}}\n\n'
+        yield error_event.encode("utf-8")
+
+
+@router.get(
+    "/stream",
+    responses={200: _GATEWAY_ASK_STREAM_SSE_200, **_GATEWAY_ASK_OPENAPI_RESPONSES},
+)
+async def ask_question_stream(
+    params: Annotated[GatewayAskQueryParams, Depends()],
+):
+    """
+    Ask a question and stream the response as Server-Sent Events (SSE).
+
+    Forwards streaming from the agent service for real-time updates.
+
+    Event types:
+    - thinking: Agent is processing (with status message)
+    - tool_event: Compact tool lifecycle updates (start/result/error)
+    - complete: Final answer with sources
+    - clarification: Agent needs more info
+    - error: Something went wrong
+
+    Args:
+        question: User's question
+        thread_id: Optional conversation thread ID for context
+        lang: Optional language override (es, en, etc.)
+        provider: Optional local provider override; non-local values are ignored by the agent
+        model: Optional local model override
+
+    Returns:
+        StreamingResponse with SSE events
+    """
+    request_id = str(uuid4())
+    logger.info(
+        "Incoming /ask/stream request_id=%s thread_id=%s question_length=%s",
+        request_id,
+        params.thread_id,
+        len(params.question or ""),
+    )
+    _raise_if_invalid_ask_model(params.model)
+
+    return StreamingResponse(
+        sse_stream_forward_generator(
+            params.question,
+            request_id,
+            params.thread_id,
+            params.context_answer,
+            params.lang,
+            params.provider,
+            params.model,
+            params.tags,
+            params.tag_match_mode,
+            params.include_untagged_fallback,
+            params.rerank,
+            params.rerank_top_k,
+        ),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",  # Disable nginx buffering
+        },
+    )
+
+
+@router.get("/config", response_model=GatewayAskConfigPayload)
+async def get_ask_config() -> GatewayAskConfigPayload:
+    """
+    Get current Q&A configuration for the local LLM runtime.
+
+    Forwards to agent service /config endpoint.
+
+    Returns:
+        Configuration with available providers and models
+    """
+    try:
+        client = _get_agent_client()
+        if client is None:
+            return GatewayAskConfigPayload.model_validate(_fallback_ask_config())
+        response = await client.get(f"{_agent_service_url()}/config", timeout=10.0)
+        response.raise_for_status()
+        return GatewayAskConfigPayload.model_validate(_normalize_agent_config(response.json()))
+
+    except httpx.RequestError:
+        return GatewayAskConfigPayload.model_validate(_fallback_ask_config())
+    except Exception:
+        return GatewayAskConfigPayload.model_validate(_fallback_ask_config())

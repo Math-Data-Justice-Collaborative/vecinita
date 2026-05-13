@@ -50,7 +50,7 @@ services:
   # Embedding Service - Lightweight microservice for text embeddings
   embedding-service:
     build:
-      context: ./apis/gateway
+      context: ./apps/gateway
       dockerfile: Dockerfile.embedding
     container_name: vecinita-embedding-dev
     ports:
@@ -76,7 +76,7 @@ services:
   vecinita-agent:
     build:
       context: .
-      dockerfile: apis/agent/Dockerfile
+      dockerfile: apps/agent/Dockerfile
     container_name: vecinita-agent-dev
     ports:
       - "18000:8000"
@@ -119,7 +119,7 @@ services:
   vecinita-gateway:
     build:
       context: .
-      dockerfile: apis/gateway/Dockerfile.gateway
+      dockerfile: apps/gateway/Dockerfile.gateway
     container_name: vecinita-gateway-dev
     ports:
       - "18004:8004"
@@ -162,7 +162,7 @@ services:
   # Frontend - Vite React application
   frontend:
     build:
-      context: ./frontends/chat
+      context: ./apps/chat-frontend
       dockerfile: Dockerfile
       args:
         VITE_GATEWAY_URL: "${VITE_GATEWAY_URL:-http://localhost:18004/api/v1}"

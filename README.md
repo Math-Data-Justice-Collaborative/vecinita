@@ -9,25 +9,15 @@
 
 **Vecinita** is a bilingual (English/Spanish) community Q&A assistant powered by LangGraph, combining vector database search, FAQ lookup, and web search to provide accurate answers with source attribution.
 
-## Monorepo layout refactor (feature 018)
+## Monorepo Layout
 
-The repo is moving to a **strict canonical tree** (`apis/`, `modal-apps/`, `frontends/`, `packages/`, `clients/apis/`, …). Until `git mv` phases finish, **legacy paths** below remain the live code locations.
-
-| What you need | Where to look |
-|-----------------|---------------|
-| **Legacy → canonical map (single source of truth)** | [`specs/018-strict-monorepo-layout/artifacts/path-mapping.md`](./specs/018-strict-monorepo-layout/artifacts/path-mapping.md) |
-| **Implementation plan** | [`specs/018-strict-monorepo-layout/plan.md`](./specs/018-strict-monorepo-layout/plan.md) |
-| **One-page target tree + “where does X live?”** | [`docs/monorepo-layout.md`](./docs/monorepo-layout.md) |
-
-**Target layout (end state):**
+All services live under `apps/`, shared code under `packages/`, and per-service env files under `.environments/`. See `specs/monorepo-decomposition/` for the full decomposition analysis.
 
 ```text
-apis/{gateway,agent,data-management-api}/
-modal-apps/{scraper,embedding-modal,model-modal}/
-frontends/{chat,data-management}/
-packages/python/db/          # shared API DB helpers (FR-004)
-clients/apis/{gateway,agent,data-management-api}/
-contracts/  infra/  scripts/  specs/  Makefile  .env.local.example  render.yaml
+apps/{gateway,agent,data-management-api,chat-frontend,data-management-frontend,
+      docs-site,pgadmin,vllm-inference,embedding-worker,scraper-worker,indexing-worker}/
+packages/{db,config,common}/
+.environments/
 ```
 
 ## Architecture
@@ -46,7 +36,7 @@ All services communicate via HTTP and can be deployed on Render's free tier ($0/
 
 ## Project Structure
 
-**Note:** This section describes the **current** on-disk layout (`backend/`, `frontends/chat/`, `modal-apps/`, `services/*`, …). For the **canonical target** and path-map `row_id`s, see [`docs/monorepo-layout.md`](./docs/monorepo-layout.md).
+**Note:** Services live under `apps/`, shared libraries under `packages/`. See the Monorepo Layout section above for the full directory tree.
 
 This is a monorepo with separate backend and frontend:
 
@@ -69,7 +59,7 @@ vecinita/
 │   │   └── data_scrape_load.sh  # Data pipeline orchestrator
 │   └── tests/                   # 108 backend tests (pytest)
 │
-├── frontends/chat/               # React chat UI (Vite + Tailwind; git submodule)
+├── apps/chat-frontend/           # React chat UI (Vite + Tailwind)
 │   ├── src/
 │   │   ├── App.jsx              # Main app component
 │   │   └── components/
@@ -198,11 +188,11 @@ cd backend
 uv sync
 
 # Set environment variables (recommended: use a .env file)
-# 1) Copy the repository root `.env.example` to `.env` (or `.env.local`)
+# 1) Copy the repository `config/.env.example` to `.env` (or `.env.local`)
 # 2) Set variables under `### REQUIRED — default local` first, then optional profiles as needed
 # 3) See docs/environment-migration.md for aliases, profiles, and merge order
 # .env is already ignored by .gitignore and should not be committed
-cp ../.env.example ../.env  # or create manually
+cp ../config/.env.example ../.env  # or create manually
 
 # Run the agent server
 uv run -m uvicorn src.agent.main:app --reload
@@ -222,12 +212,12 @@ DEEPSEEK_API_KEY=...
 OPEN_API_KEY=...
 ```
 
-When using Ollama, `OLLAMA_MODEL` defaults to **`gemma3`** in code and templates if unset (see root `.env.example`).
+When using Ollama, `OLLAMA_MODEL` defaults to **`gemma3`** in code and templates if unset (see `config/.env.example`).
 
 #### Frontend (React)
 
 ```bash
-cd frontends/chat
+cd apps/chat-frontend
 
 # Install dependencies
 npm install
@@ -256,7 +246,7 @@ make test-frontend-e2e
 ## Environment Variables
 
 - Manage secrets locally using the `.env` file at the repo root.
-- The canonical catalog is **`.env.example`** at the repository root (grouped into required vs optional profiles).
+- The canonical catalog is **`config/.env.example`** (grouped into required vs optional profiles).
 - Do not commit `.env` or any real secrets; `.gitignore` already excludes common env files.
 - **Migration guide**: [docs/environment-migration.md](docs/environment-migration.md) (legacy names, baseline counts, YAML merge order).
 - Frontend can use `.env.local` for values like `VITE_GATEWAY_URL` (preferred) or `VITE_BACKEND_URL` (legacy fallback); subsidiary `*/.env.example` files point at the root catalog.
@@ -352,7 +342,7 @@ uv sync
 uv run pytest -q
 
 # chat frontend
-cd ../frontends/chat
+cd ../apps/chat-frontend
 npm install
 npm run test -- --run
 
@@ -370,7 +360,7 @@ Test coverage:
 ### Frontend Tests
 
 ```bash
-cd frontends/chat
+cd apps/chat-frontend
 npm run test                     # Unit tests (Vitest)
 npm run test:coverage            # Coverage report
 npm run test:e2e                 # E2E tests (Playwright)
@@ -378,7 +368,7 @@ npm run test:e2e                 # E2E tests (Playwright)
 
 ## Documentation Site
 
-The project now includes a Docusaurus site in `website/` that publishes docs from `docs/`.
+The project now includes a Docusaurus site in `apps/docs-site/` that publishes docs from `docs/`.
 
 - Local run: `make docs-serve`
 - Build check: `make docs-build`
@@ -426,7 +416,7 @@ The deploy workflow triggers only after the `Tests` workflow completes successfu
 ### Getting Started
 - **[QUICKSTART.md](docs/guides/QUICKSTART.md)** - Complete setup guide (Docker + Local development)
 - **[backend/README.md](backend/README.md)** - Backend API and tools documentation
-- **[frontends/chat/README.md](frontends/chat/README.md)** - Chat frontend components and testing
+- **[apps/chat-frontend/README.md](apps/chat-frontend/README.md)** - Chat frontend components and testing
 
 ### Deployment
 - Service repositories own their deploy documentation and workflow details.
@@ -536,7 +526,7 @@ EMBEDDING_UPSTREAM_URL=http://embedding-service:8001      # Embedding upstream U
 
 1. Create a feature branch from `main`
 2. Make changes with tests
-3. Run test suites: `cd backend && uv run pytest` and `cd frontends/chat && npm run test`
+3. Run test suites: `cd backend && uv run pytest` and `cd apps/chat-frontend && npm run test`
 4. Submit PR with clear description
 
 ## License
