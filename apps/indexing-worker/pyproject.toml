@@ -1,10 +1,20 @@
 [project]
 name = "vecinita-indexing-worker"
 version = "0.1.0"
-description = "Document indexing pipeline: single-doc, batch, selective re-index, full rebuild"
+description = "Document indexing pipeline on Modal with 4 modes: single-doc, batch, selective, full rebuild"
 requires-python = ">=3.11"
 dependencies = [
     "modal>=1.3.5",
+    "llama-index-core",
+    "llama-index-embeddings-huggingface",
+    "psycopg2-binary>=2.9.9",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0.0",
+    "ruff>=0.11.0",
 ]
 
 [build-system]

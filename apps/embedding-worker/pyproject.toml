@@ -1,50 +1,22 @@
 [project]
-name = "vecinita-embedding"
+name = "vecinita-embedding-worker"
 version = "0.1.0"
-description = "Fast open-source text embedding API deployed on Modal"
+description = "LlamaIndex document embedding worker on Modal GPU"
 requires-python = ">=3.11"
 dependencies = [
-    "fastembed>=0.7.4",
-    "fastapi[standard]>=0.135.1",
     "modal>=1.3.5",
+    "llama-index-core",
+    "llama-index-embeddings-huggingface",
+    "psycopg2-binary>=2.9.9",
+    "pydantic>=2.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "httpx>=0.28.1",
-    "pytest>=8.3.5",
-    "pytest-cov>=6.0.0",
+    "pytest>=9.0.0",
     "ruff>=0.11.0",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/vecinita"]
-
-[tool.pytest.ini_options]
-addopts = "--cov --cov-report=term-missing --cov-report=xml"
-testpaths = ["tests"]
-markers = [
-    "integration: exercises the FastAPI application boundary",
-    "live: exercises deployed API endpoints over the network",
-]
-
-[tool.coverage.run]
-branch = true
-source = ["src/vecinita"]
-
-[tool.coverage.report]
-fail_under = 95
-show_missing = true
-skip_covered = false
-
-[tool.ruff]
-line-length = 88
-target-version = "py311"
-
-[tool.ruff.lint]
-select = ["E", "F", "I", "B"]
-

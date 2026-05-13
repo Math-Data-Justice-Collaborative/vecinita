@@ -142,14 +142,14 @@ def _invoke_env() -> str | None:
 
 
 def invoke_modal_embedding_single(text: str) -> dict[str, Any]:
-    app_name = os.getenv("MODAL_EMBEDDING_APP_NAME", "vecinita-embedding")
+    app_name = os.getenv("MODAL_EMBEDDING_APP_NAME", "vecinita-embedding-worker")
     fn_name = os.getenv("MODAL_EMBEDDING_SINGLE_FUNCTION", "embed_query")
     fn = _lookup_function(app_name, fn_name, _invoke_env())
     return fn.remote(text)
 
 
 def invoke_modal_embedding_batch(texts: list[str]) -> dict[str, Any]:
-    app_name = os.getenv("MODAL_EMBEDDING_APP_NAME", "vecinita-embedding")
+    app_name = os.getenv("MODAL_EMBEDDING_APP_NAME", "vecinita-embedding-worker")
     fn_name = os.getenv("MODAL_EMBEDDING_BATCH_FUNCTION", "embed_batch")
     fn = _lookup_function(app_name, fn_name, _invoke_env())
     return fn.remote(texts)
@@ -171,7 +171,7 @@ def invoke_modal_scraper_reindex(clean: bool, stream: bool, verbose: bool) -> di
 def invoke_modal_model_chat(
     model: str, messages: list[dict[str, str]], temperature: float
 ) -> dict[str, Any]:
-    app_name = os.getenv("MODAL_MODEL_APP_NAME", "vecinita-model")
+    app_name = os.getenv("MODAL_MODEL_APP_NAME", "vecinita-vllm-inference")
     fn_name = os.getenv("MODAL_MODEL_CHAT_FUNCTION", "chat_completion")
     fn = _lookup_function(app_name, fn_name, _invoke_env())
     return fn.remote(model=model, messages=messages, temperature=temperature)
