@@ -423,6 +423,7 @@ audit-backend:
 	cd apis/gateway && \
 	uv sync --frozen --extra ci && \
 	uv run --with pip-audit pip-audit --progress-spinner off --desc \
+		--skip-editable \
 		--ignore-vuln CVE-2026-3219 \
 		--ignore-vuln CVE-2026-6357
 
