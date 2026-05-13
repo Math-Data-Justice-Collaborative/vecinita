@@ -7,13 +7,13 @@ on:
   push:
     branches: [main]
     paths:
-      - "website/**"
+      - "apps/docs-site/**"
       - "docs/**"
       - ".github/workflows/docs-gh-pages.yml"
   pull_request:
     branches: [main]
     paths:
-      - "website/**"
+      - "apps/docs-site/**"
       - "docs/**"
       - ".github/workflows/docs-gh-pages.yml"
   workflow_dispatch:
@@ -37,7 +37,7 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: website/package-lock.json
+          cache-dependency-path: apps/docs-site/package-lock.json
 
       - name: Install docs dependencies
         working-directory: website
@@ -54,7 +54,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          build_dir="${GITHUB_WORKSPACE}/website/build"
+          build_dir="${GITHUB_WORKSPACE}/apps/docs-site/build"
           tmp_dir="$(mktemp -d)"
           cp -R "${build_dir}/." "${tmp_dir}/"
 

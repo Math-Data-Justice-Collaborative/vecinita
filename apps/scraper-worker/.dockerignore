@@ -1,0 +1,51 @@
+# Lockfile not used by the image (pip installs from pyproject); omitting shrinks Render context.
+uv.lock
+
+# Local setuptools metadata (never needed in the image)
+**/vecinita_scraper.egg-info
+**/*.egg-info
+
+# Git / VCS
+.git
+.gitignore
+**/.git
+
+# Python environments and caches
+.venv
+venv
+**/__pycache__
+**/*.py[cod]
+*$py.class
+.pytest_cache
+.mypy_cache
+.hypothesis
+.ruff_cache
+.coverage
+htmlcov
+*.egg-info
+.eggs
+dist
+build
+
+# Tests and local dev (not needed for pip install . in release image)
+tests
+**/tests
+
+# Tooling / IDE
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+
+# Modal / local secrets (never ship)
+.env
+.env.*
+!.env.example
+
+# Documentation not required at install time (README still copied explicitly in Dockerfile)
+# Keep README.md in context — do NOT ignore README.md
+
+# Large dev artifacts sometimes present in submodule checkouts
+*.log
+*.sqlite3

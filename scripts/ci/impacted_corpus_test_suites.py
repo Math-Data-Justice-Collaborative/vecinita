@@ -19,39 +19,39 @@ SUITE_RULES: tuple[SuiteRule, ...] = (
     SuiteRule(
         "pact",
         (
-            "frontends/chat/tests/pact/",
-            "frontends/data-management/tests/pact/",
-            "apis/gateway/tests/pact/",
+            "apps/chat-frontend/tests/pact/",
+            "apps/data-management-frontend/tests/pact/",
+            "apps/gateway/tests/pact/",
             "backend/tests/pact/",
         ),
     ),
     SuiteRule(
         "contract",
         (
-            "apis/gateway/tests/contracts/",
+            "apps/gateway/tests/contracts/",
             "backend/tests/contracts/",
-            "apis/data-management-api/tests/",
+            "apps/data-management-api/tests/",
             "specs/017-canonical-postgres-sync/contracts/",
         ),
     ),
     SuiteRule(
         "integration",
         (
-            "apis/gateway/tests/integration/",
+            "apps/gateway/tests/integration/",
             "backend/tests/integration/",
-            "apis/gateway/src/",
+            "apps/gateway/src/",
             "backend/src/",
-            "apis/data-management-api/apps/backend/",
+            "apps/data-management-api/apps/backend/",
         ),
     ),
-    SuiteRule("system", ("frontends/chat/tests/e2e/", "frontends/chat/src/features/documents/", "frontends/data-management/src/")),
+    SuiteRule("system", ("apps/chat-frontend/tests/e2e/", "apps/chat-frontend/src/features/documents/", "apps/data-management-frontend/src/")),
 )
 
 SUITE_COMMANDS: dict[str, str] = {
     "pact": "make pact-verify-providers",
-    "contract": "cd apis/gateway && uv run pytest tests/contracts -m contract -q --tb=short",
+    "contract": "cd apps/gateway && uv run pytest tests/contracts -m contract -q --tb=short",
     "integration": "make test-integration",
-    "system": "cd frontends/chat && npm run test:e2e",
+    "system": "cd apps/chat-frontend && npm run test:e2e",
 }
 
 

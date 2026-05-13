@@ -6,10 +6,10 @@ set -euo pipefail
 # DESCRIPTION: Configure GCE firewall/tag (optional), then start Vecinita dev stack
 #              on docker-compose.dev.yml with public-friendly frontend API URLs.
 # USAGE:
-#   ./run/start_dev_public.sh --external-ip <EXTERNAL_IP>
+#   ./scripts/run/start_dev_public.sh --external-ip <EXTERNAL_IP>
 #
 # Optional GCloud setup (requires authenticated gcloud + permissions):
-#   ./run/start_dev_public.sh \
+#   ./scripts/run/start_dev_public.sh \
 #     --external-ip <EXTERNAL_IP> \
 #     --project <GCP_PROJECT_ID> \
 #     --zone <GCE_ZONE> \

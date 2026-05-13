@@ -6,8 +6,8 @@ set -euo pipefail
 # DESCRIPTION: Stop and remove Vecinita dev stack resources created by
 #              docker-compose.dev.yml. Removes orphans by default.
 # USAGE:
-#   ./run/stop_dev_public.sh
-#   ./run/stop_dev_public.sh --volumes
+#   ./scripts/run/stop_dev_public.sh
+#   ./scripts/run/stop_dev_public.sh --volumes
 # ==============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "decisions": [
+    {
+      "id": "TD-001",
+      "title": "Monorepo Directory Layout",
+      "stage": "1_decompose",
+      "status": "decided",
+      "chosen_option": "apps/ + packages/ (all deployable units in apps/, shared code in packages/)",
+      "rationale": "Simplest mental model: apps/ = things that deploy, packages/ = things that are imported. Consistent with Turborepo/Nx conventions.",
+      "timestamp": "2026-05-12T12:08:00Z",
+      "affects_services": ["all"],
+      "reversibility": "easy",
+      "deferred_risk": null
+    },
+    {
+      "id": "TD-002",
+      "title": "Database Strategy",
+      "stage": "1_decompose",
+      "status": "decided",
+      "chosen_option": "Schema-per-service (logical separation within single PostgreSQL instance)",
+      "rationale": "Enforces boundaries via naming conventions while keeping a single DB plan. Natural path to full isolation if needed later.",
+      "timestamp": "2026-05-12T12:08:00Z",
+      "affects_services": ["gateway", "agent", "data-management-api"],
+      "reversibility": "moderate",
+      "deferred_risk": null
+    },
+    {
+      "id": "TD-003",
+      "title": "Local Development Environment",
+      "stage": "1_decompose",
+      "status": "decided",
+      "chosen_option": "Docker Compose with profiles",
+      "rationale": "Single docker-compose.yml with profiles allows selective startup: core (postgres+pgadmin), services (gateway+agent), gpu (Modal workers).",
+      "timestamp": "2026-05-12T12:08:00Z",
+      "affects_services": ["all"],
+      "reversibility": "easy",
+      "deferred_risk": null
+    },
+    {
+      "id": "TD-004",
+      "title": "PgAdmin Deployment",
+      "stage": "1_decompose",
+      "status": "decided",
+      "chosen_option": "Deploy to Render as private service (not publicly accessible)",
+      "rationale": "Provides prod DB management without public exposure. Accessible via Render's internal network.",
+      "timestamp": "2026-05-12T12:08:00Z",
+      "affects_services": ["pgadmin"],
+      "reversibility": "easy",
+      "deferred_risk": null
+    },
+    {
+      "id": "TD-005",
+      "title": "CI Strategy",
+      "stage": "1_decompose",
+      "status": "decided",
+      "chosen_option": "One workflow per app (path-filtered, only runs when that app changes)",
+      "rationale": "Fast CI for solo developer — only affected services rebuild on push. Reduces wait time.",
+      "timestamp": "2026-05-12T12:08:00Z",
+      "affects_services": ["all"],
+      "reversibility": "easy",
+      "deferred_risk": null
+    },
+    {
+      "id": "TD-006",
+      "title": "OpenAPI Client Generation",
+      "stage": "1_decompose",
+      "status": "decided",
+      "chosen_option": "Drop generated OpenAPI clients — use simple HTTP clients",
+      "rationale": "Less complexity for solo developer. Generated clients add maintenance burden without proportional value at this scale.",
+      "timestamp": "2026-05-12T12:08:00Z",
+      "affects_services": ["gateway", "agent"],
+      "reversibility": "moderate",
+      "deferred_risk": null
+    },
+    {
+      "id": "TD-007",
+      "title": "Python Dependency Management",
+      "stage": "4_implement",
+      "status": "decided",
+      "chosen_option": "uv — use uv for dependency management",
+      "rationale": "Already partially in use in the project. Fast resolver, pyproject.toml-native, supports editable installs for shared packages.",
+      "timestamp": "2026-05-13T13:30:00Z",
+      "affects_services": ["gateway", "agent", "data-management-api", "workers"],
+      "reversibility": "easy",
+      "deferred_risk": null
+    },
+    {
+      "id": "TD-008",
+      "title": "LLM Provider Strategy",
+      "stage": "1_decompose",
+      "status": "deferred",
+      "chosen_option": "deferred",
+      "rationale": "Defaulting to vLLM as primary + existing API providers as fallbacks via LlamaIndex router. Confirm during implementation.",
+      "timestamp": "2026-05-12T12:08:00Z",
+      "affects_services": ["agent", "vllm-inference"],
+      "reversibility": "easy",
+      "deferred_risk": "Low — LlamaIndex supports multiple LLM backends. Provider configuration is runtime, not architectural."
+    },
+    {
+      "id": "TD-009",
+      "title": "LLM Model Selection for vLLM",
+      "stage": "1_decompose",
+      "status": "deferred",
+      "chosen_option": "deferred",
+      "rationale": "Design for flexibility. Model choice affects GPU requirements and Modal config but not service architecture.",
+      "timestamp": "2026-05-12T12:08:00Z",
+      "affects_services": ["vllm-inference"],
+      "reversibility": "easy",
+      "deferred_risk": "Low — vLLM supports model swapping at startup. No code changes needed."
+    }
+  ]
+}

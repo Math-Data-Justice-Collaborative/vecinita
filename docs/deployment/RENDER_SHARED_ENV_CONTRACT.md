@@ -6,8 +6,8 @@ deploy. Variables marked **Required** will cause startup failures if missing.
 
 Shared contract templates:
 
-- `.env.prod.render.example`
-- `.env.staging.render.example`
+- `config/.env.prod.render.example`
+- `config/.env.staging.render.example`
 
 Use these template files as the authoritative key sets for CI contract/parity checks.
 
@@ -19,8 +19,8 @@ Values you keep in gitignored **`.env`**, **`.env.local`**, **`.env.prod.render`
 
 | Where you work | Template to copy keys from |
 |----------------|----------------------------|
-| Production Render Environment Group / per-service env | [`.env.prod.render.example`](../../.env.prod.render.example) |
-| Staging Render Environment Group / per-service env | [`.env.staging.render.example`](../../.env.staging.render.example) |
+| Production Render Environment Group / per-service env | [`config/.env.prod.render.example`](../../config/.env.prod.render.example) |
+| Staging Render Environment Group / per-service env | [`config/.env.staging.render.example`](../../config/.env.staging.render.example) |
 | Local full-stack development | [`.env.local.example`](../../.env.local.example) |
 
 **Modal:** On Render, set **`MODAL_TOKEN_ID`** and **`MODAL_TOKEN_SECRET`**. When **`OLLAMA_BASE_URL`**, **`EMBEDDING_UPSTREAM_URL`**, or other resolved URLs point at **`*.modal.run`**, also set **`MODAL_FUNCTION_INVOCATION=auto`** (or **`1`**) so the agent and gateway use Modal **`Function.from_name`** instead of raw HTTP to deprecated ASGI endpoints (see `backend/src/services/modal/invoker.py`). With **`auto`**, invocation turns on only when both **`MODAL_TOKEN_*`** values are set. If your local `.env` only has **`MODAL_TOKEN_ID`** / **`MODAL_TOKEN_SECRET`** (see `.env.local.example`), paste the same token values into Render using the **`MODAL_TOKEN_*`** names — production/staging services do not read `MODAL_API_TOKEN_*`.

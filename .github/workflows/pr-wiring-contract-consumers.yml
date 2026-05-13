@@ -9,8 +9,8 @@ on:
   pull_request:
     branches: [main, develop]
     paths:
-      - "frontends/chat/**"
-      - "frontends/data-management/**"
+      - "apps/chat-frontend/**"
+      - "apps/data-management-frontend/**"
       - ".github/workflows/pr-wiring-contract-consumers.yml"
 
 concurrency:
@@ -38,25 +38,25 @@ jobs:
           submodules: "false"
 
       - name: Init frontend submodule
-        run: git submodule update --init --depth 1 frontends/chat
+        run: git submodule update --init --depth 1 apps/chat-frontend
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: frontends/chat/package-lock.json
+          cache-dependency-path: apps/chat-frontend/package-lock.json
 
       - name: Install dependencies
-        working-directory: frontends/chat
+        working-directory: apps/chat-frontend
         run: npm ci
 
       - name: Pact consumer (Vitest)
-        working-directory: frontends/chat
+        working-directory: apps/chat-frontend
         run: npm run test:pact
 
       - name: Unit tests (Vitest)
-        working-directory: frontends/chat
+        working-directory: apps/chat-frontend
         run: npm run test:unit
 
   dm-frontend-pact:
@@ -71,23 +71,23 @@ jobs:
           token: ${{ secrets.CROSS_REPO_WORKFLOW_TOKEN }}
 
       - name: Init data-management frontend submodule
-        run: git submodule update --init --depth 1 frontends/data-management
+        run: git submodule update --init --depth 1 apps/data-management-frontend
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: frontends/data-management/package-lock.json
+          cache-dependency-path: apps/data-management-frontend/package-lock.json
 
       - name: Install dependencies
-        working-directory: frontends/data-management
+        working-directory: apps/data-management-frontend
         run: npm ci
 
       - name: Pact consumer (Vitest)
-        working-directory: frontends/data-management
+        working-directory: apps/data-management-frontend
         run: npm run test:pact
 
       - name: Unit tests (Vitest)
-        working-directory: frontends/data-management
+        working-directory: apps/data-management-frontend
         run: npm run test

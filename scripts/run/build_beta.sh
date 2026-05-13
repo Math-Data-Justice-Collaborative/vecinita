@@ -1,5 +1,5 @@
 #!/bin/bash
-# run/build_beta.sh
+# scripts/run/build_beta.sh
 
 echo "🐳 Building Vecinita BETA image..."
 

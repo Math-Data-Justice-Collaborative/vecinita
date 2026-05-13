@@ -30,7 +30,7 @@ services:
 
   model-service:
     build:
-      context: ./modal-apps/model-modal
+      context: ./apps/vllm-inference
       dockerfile: Dockerfile
     container_name: vecinita-model-ms
     environment:
@@ -46,7 +46,7 @@ services:
   embedding-service:
     build:
       context: .
-      dockerfile: docker/microservices/Dockerfile.embedding-modal
+      dockerfile: infrastructure/docker/microservices/Dockerfile.embedding-modal
     container_name: vecinita-embedding-ms
     ports:
       - "8011:8011"
@@ -56,7 +56,7 @@ services:
   scraper-service:
     build:
       context: .
-      dockerfile: docker/microservices/Dockerfile.scraper-service
+      dockerfile: infrastructure/docker/microservices/Dockerfile.scraper-service
     container_name: vecinita-scraper-ms
     environment:
       SERVICE_AUTH_ENABLED: "false"
@@ -75,7 +75,7 @@ services:
   chat-agent:
     build:
       context: .
-      dockerfile: apis/agent/Dockerfile
+      dockerfile: apps/agent/Dockerfile
     container_name: vecinita-chat-agent-ms
     command: ["sh", "-c", "uvicorn src.agent.main:app --host 0.0.0.0 --port 8000"]
     environment:
@@ -98,7 +98,7 @@ services:
   chat-gateway:
     build:
       context: .
-      dockerfile: apis/gateway/Dockerfile.gateway
+      dockerfile: apps/gateway/Dockerfile.gateway
     container_name: vecinita-chat-gateway-ms
     command: ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port 8004"]
     environment:
@@ -119,7 +119,7 @@ services:
 
   chat-frontend:
     build:
-      context: ./frontends/chat
+      context: ./apps/chat-frontend
       dockerfile: Dockerfile
       args:
         VITE_GATEWAY_URL: http://localhost:8004/api/v1
@@ -135,7 +135,7 @@ services:
   data-manager-frontend:
     build:
       context: .
-      dockerfile: docker/microservices/Dockerfile.data-management-frontend
+      dockerfile: infrastructure/docker/microservices/Dockerfile.data-management-frontend
     container_name: vecinita-data-manager-frontend-ms
     ports:
       - "4173:4173"

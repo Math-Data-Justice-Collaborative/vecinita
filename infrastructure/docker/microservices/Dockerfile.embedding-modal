@@ -10,7 +10,7 @@ WORKDIR /app
 COPY modal-apps/embedding-modal/pyproject.toml /app/modal-apps/embedding-modal/pyproject.toml
 COPY modal-apps/embedding-modal/README.md /app/modal-apps/embedding-modal/README.md
 COPY modal-apps/embedding-modal/src /app/modal-apps/embedding-modal/src
-COPY docker/microservices/embedding_asgi.py /app/embedding_asgi.py
+COPY infrastructure/docker/microservices/embedding_asgi.py /app/embedding_asgi.py
 
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
     && pip install --no-cache-dir -e /app/modal-apps/embedding-modal

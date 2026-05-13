@@ -24,7 +24,7 @@ services:
   # -------------------------------------------------------------------------
   model-service:
     build:
-      context: ./modal-apps/model-modal
+      context: ./apps/vllm-inference
       dockerfile: Dockerfile
     container_name: vecinita-model-ms-render
     environment:
@@ -45,7 +45,7 @@ services:
   embedding-service:
     build:
       context: .
-      dockerfile: docker/microservices/Dockerfile.embedding-modal
+      dockerfile: infrastructure/docker/microservices/Dockerfile.embedding-modal
     container_name: vecinita-embedding-ms-render
     environment:
       PORT: "8011"
@@ -72,7 +72,7 @@ services:
   agent:
     build:
       context: .
-      dockerfile: apis/agent/Dockerfile
+      dockerfile: apps/agent/Dockerfile
     container_name: vecinita-agent
     env_file:
       - .env.render-local
@@ -98,7 +98,7 @@ services:
   gateway:
     build:
       context: .
-      dockerfile: apis/gateway/Dockerfile.gateway
+      dockerfile: apps/gateway/Dockerfile.gateway
     container_name: vecinita-gateway
     command: uvicorn src.api.main:app --host 0.0.0.0 --port 8004
     env_file:
@@ -117,7 +117,7 @@ services:
   # -------------------------------------------------------------------------
   frontend:
     build:
-      context: ./frontends/chat
+      context: ./apps/chat-frontend
       dockerfile: Dockerfile
     container_name: vecinita-frontend
     environment:

@@ -88,7 +88,7 @@ resolve_local_embed_token() {
     fi
   done
 
-  local env_files=("$ROOT_DIR/apis/gateway/.env" "$ROOT_DIR/.env")
+  local env_files=("$ROOT_DIR/apps/gateway/.env" "$ROOT_DIR/.env")
   local env_file
   for env_file in "${env_files[@]}"; do
     for key in "${env_keys[@]}"; do
@@ -115,7 +115,7 @@ resolve_env_value() {
     fi
   done
 
-  local env_files=("$ROOT_DIR/apis/gateway/.env" "$ROOT_DIR/.env")
+  local env_files=("$ROOT_DIR/apps/gateway/.env" "$ROOT_DIR/.env")
   local env_file
   for env_file in "${env_files[@]}"; do
     for key in "$@"; do
@@ -132,7 +132,7 @@ resolve_env_value() {
 
 print_usage() {
   cat <<EOF
-Usage: ./run/dev-session.sh [start|attach|stop|restart]
+Usage: ./scripts/run/dev-session.sh [start|attach|stop|restart]
 
 Commands:
   start       Start all local dev services in one terminal with cascading logs (default)
@@ -419,10 +419,10 @@ start_single_terminal_session() {
   DEV_RUNNING=1
   trap cleanup_single_terminal INT TERM EXIT
 
-  run_with_prefix "embedding" bash -lc "cd '$ROOT_DIR/apis/gateway' && EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' uv run -m uvicorn src.embedding_service.main:app --host 0.0.0.0 --port 8001 ${uvicorn_reload_args}"
-  run_with_prefix "agent" bash -lc "cd '$ROOT_DIR/apis/gateway' && ANONYMIZED_TELEMETRY='false' OLLAMA_BASE_URL=\"\${OLLAMA_BASE_URL:-$DEFAULT_MODAL_MODEL_URL}\" OLLAMA_API_KEY=\"\${OLLAMA_API_KEY:-\${MODAL_API_KEY:-\${MODAL_TOKEN_SECRET:-\${MODAL_TOKEN_SECRET:-}}}}\" EMBEDDING_UPSTREAM_URL=\"\${EMBEDDING_UPSTREAM_URL:-$DEFAULT_MODAL_EMBEDDING_URL}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' DEFAULT_PROVIDER='ollama' DEFAULT_MODEL='' uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 ${uvicorn_reload_args}"
-  run_with_prefix "gateway" bash -lc "cd '$ROOT_DIR/apis/gateway' && AGENT_SERVICE_URL='http://localhost:8000' EMBEDDING_UPSTREAM_URL=\"\${EMBEDDING_UPSTREAM_URL:-$DEFAULT_MODAL_EMBEDDING_URL}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' ANONYMIZED_TELEMETRY='false' DEV_ADMIN_ENABLED='true' DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' DEMO_MODE='false' uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 ${uvicorn_reload_args}"
-  run_with_prefix "frontend" bash -lc "cd '$ROOT_DIR/frontends/chat' && npm run dev -- --host 0.0.0.0 --port 5173"
+  run_with_prefix "embedding" bash -lc "cd '$ROOT_DIR/apps/gateway' && EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' uv run -m uvicorn src.embedding_service.main:app --host 0.0.0.0 --port 8001 ${uvicorn_reload_args}"
+  run_with_prefix "agent" bash -lc "cd '$ROOT_DIR/apps/gateway' && ANONYMIZED_TELEMETRY='false' OLLAMA_BASE_URL=\"\${OLLAMA_BASE_URL:-$DEFAULT_MODAL_MODEL_URL}\" OLLAMA_API_KEY=\"\${OLLAMA_API_KEY:-\${MODAL_API_KEY:-\${MODAL_TOKEN_SECRET:-\${MODAL_TOKEN_SECRET:-}}}}\" EMBEDDING_UPSTREAM_URL=\"\${EMBEDDING_UPSTREAM_URL:-$DEFAULT_MODAL_EMBEDDING_URL}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' DEFAULT_PROVIDER='ollama' DEFAULT_MODEL='' uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 ${uvicorn_reload_args}"
+  run_with_prefix "gateway" bash -lc "cd '$ROOT_DIR/apps/gateway' && AGENT_SERVICE_URL='http://localhost:8000' EMBEDDING_UPSTREAM_URL=\"\${EMBEDDING_UPSTREAM_URL:-$DEFAULT_MODAL_EMBEDDING_URL}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' ANONYMIZED_TELEMETRY='false' DEV_ADMIN_ENABLED='true' DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' DEMO_MODE='false' uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 ${uvicorn_reload_args}"
+  run_with_prefix "frontend" bash -lc "cd '$ROOT_DIR/apps/chat-frontend' && npm run dev -- --host 0.0.0.0 --port 5173"
 
   if ! wait_for_http_ready "Frontend" "http://localhost:5173/" "${DEV_FRONTEND_READY_TIMEOUT:-180}"; then
     echo "Warning: frontend readiness check timed out; inspect logs above."
@@ -469,10 +469,10 @@ start_session() {
   tmux split-window -v -t "$SESSION_NAME":dev.3
   tmux select-layout -t "$SESSION_NAME":dev tiled
 
-  tmux send-keys -t "$SESSION_NAME":dev.0 "cd '$ROOT_DIR/apis/gateway' && echo '[embedding] EMBEDDING_SERVICE_AUTH_TOKEN=$embed_token uv run -m uvicorn src.embedding_service.main:app --port 8001 ${uvicorn_reload_args}' && EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' uv run -m uvicorn src.embedding_service.main:app --host 0.0.0.0 --port 8001 ${uvicorn_reload_args}" C-m
-  tmux send-keys -t "$SESSION_NAME":dev.1 "cd '$ROOT_DIR/apis/gateway' && echo '[agent] uv run -m uvicorn src.agent.main:app --port 8000 ${uvicorn_reload_args}' && ANONYMIZED_TELEMETRY='false' OLLAMA_BASE_URL=\"\${OLLAMA_BASE_URL:-$DEFAULT_MODAL_MODEL_URL}\" OLLAMA_API_KEY=\"\${OLLAMA_API_KEY:-\${MODAL_API_KEY:-\${MODAL_TOKEN_SECRET:-\${MODAL_TOKEN_SECRET:-}}}}\" EMBEDDING_UPSTREAM_URL=\"\${EMBEDDING_UPSTREAM_URL:-$DEFAULT_MODAL_EMBEDDING_URL}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' DEFAULT_PROVIDER='ollama' DEFAULT_MODEL='' uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 ${uvicorn_reload_args}" C-m
-  tmux send-keys -t "$SESSION_NAME":dev.2 "cd '$ROOT_DIR/apis/gateway' && echo '[gateway] uv run -m uvicorn src.api.main:app --port 8004 ${uvicorn_reload_args}' && AGENT_SERVICE_URL='http://localhost:8000' EMBEDDING_UPSTREAM_URL=\"\${EMBEDDING_UPSTREAM_URL:-$DEFAULT_MODAL_EMBEDDING_URL}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' ANONYMIZED_TELEMETRY='false' DEV_ADMIN_ENABLED='true' DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' DEMO_MODE='false' uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 ${uvicorn_reload_args}" C-m
-  tmux send-keys -t "$SESSION_NAME":dev.3 "cd '$ROOT_DIR/frontends/chat' && echo '[frontend] npm run dev -- --host 0.0.0.0 --port 5173' && npm run dev -- --host 0.0.0.0 --port 5173" C-m
+  tmux send-keys -t "$SESSION_NAME":dev.0 "cd '$ROOT_DIR/apps/gateway' && echo '[embedding] EMBEDDING_SERVICE_AUTH_TOKEN=$embed_token uv run -m uvicorn src.embedding_service.main:app --port 8001 ${uvicorn_reload_args}' && EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' uv run -m uvicorn src.embedding_service.main:app --host 0.0.0.0 --port 8001 ${uvicorn_reload_args}" C-m
+  tmux send-keys -t "$SESSION_NAME":dev.1 "cd '$ROOT_DIR/apps/gateway' && echo '[agent] uv run -m uvicorn src.agent.main:app --port 8000 ${uvicorn_reload_args}' && ANONYMIZED_TELEMETRY='false' OLLAMA_BASE_URL=\"\${OLLAMA_BASE_URL:-$DEFAULT_MODAL_MODEL_URL}\" OLLAMA_API_KEY=\"\${OLLAMA_API_KEY:-\${MODAL_API_KEY:-\${MODAL_TOKEN_SECRET:-\${MODAL_TOKEN_SECRET:-}}}}\" EMBEDDING_UPSTREAM_URL=\"\${EMBEDDING_UPSTREAM_URL:-$DEFAULT_MODAL_EMBEDDING_URL}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' DEFAULT_PROVIDER='ollama' DEFAULT_MODEL='' uv run -m uvicorn src.agent.main:app --host 0.0.0.0 --port 8000 ${uvicorn_reload_args}" C-m
+  tmux send-keys -t "$SESSION_NAME":dev.2 "cd '$ROOT_DIR/apps/gateway' && echo '[gateway] uv run -m uvicorn src.api.main:app --port 8004 ${uvicorn_reload_args}' && AGENT_SERVICE_URL='http://localhost:8000' EMBEDDING_UPSTREAM_URL=\"\${EMBEDDING_UPSTREAM_URL:-$DEFAULT_MODAL_EMBEDDING_URL}\" EMBEDDING_SERVICE_AUTH_TOKEN='$embed_token' ANONYMIZED_TELEMETRY='false' DEV_ADMIN_ENABLED='true' DEV_ADMIN_BEARER_TOKEN='vecinita-dev-admin-token-2026' DEMO_MODE='false' uv run -m uvicorn src.api.main:app --host 0.0.0.0 --port 8004 ${uvicorn_reload_args}" C-m
+  tmux send-keys -t "$SESSION_NAME":dev.3 "cd '$ROOT_DIR/apps/chat-frontend' && echo '[frontend] npm run dev -- --host 0.0.0.0 --port 5173' && npm run dev -- --host 0.0.0.0 --port 5173" C-m
   tmux send-keys -t "$SESSION_NAME":dev.4 "cd '$ROOT_DIR' && echo '[idle] reserved pane for ad-hoc commands' && bash" C-m
   tmux send-keys -t "$SESSION_NAME":dev.5 "cd '$ROOT_DIR' && echo '[idle] reserved pane for ad-hoc commands' && bash" C-m
 
@@ -490,7 +490,7 @@ start_session() {
   echo ""
   echo "Session '$SESSION_NAME' started."
   echo "Attach: tmux attach -t $SESSION_NAME"
-  echo "Stop:   ./run/dev-session.sh stop"
+  echo "Stop:   ./scripts/run/dev-session.sh stop"
   echo ""
   tmux attach -t "$SESSION_NAME"
 }
@@ -513,7 +513,7 @@ attach_session() {
   if tmux_has_session; then
     tmux attach -t "$SESSION_NAME"
   else
-    echo "No session found. Run: ./run/dev-session.sh start"
+    echo "No session found. Run: ./scripts/run/dev-session.sh start"
     exit 1
   fi
 }

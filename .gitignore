@@ -6,8 +6,13 @@
 config/defaults.yaml
 env.txt
 !.env.local.example
-!.env.prod.render.example
-!.env.staging.render.example
+!config/.env.example
+!config/.env.prod.render.example
+!config/.env.staging.render.example
+
+# Centralized env files — secrets ignored, examples tracked
+.environments/*.env
+!.environments/*.env.example
 
 # Python
 __pycache__/
@@ -41,11 +46,9 @@ env/
 env.bak/
 venv.bak/
 
-# Local gateway build outputs (legacy backend/ paths kept until fully purged)
-backend/lib/
-backend/lib64/
-apis/gateway/lib/
-apis/gateway/lib64/
+# Local gateway build outputs
+apps/gateway/lib/
+apps/gateway/lib64/
 
 # IDE/editor
 .idea/
@@ -87,39 +90,30 @@ coverage.xml
 .ipynb_checkpoints
 .python-version
 
+# Build artifacts
+coverage/
+playwright-report/
+test-results/
+.docusaurus/
+
+# Schemathesis
+schemathesis-report/
+
 # Project-specific
 *.bck
 utils/old_vector_loader
 node_modules/
-frontend/node_modules/
-frontend/dist/
-frontend/coverage/
-frontend/.eslintcache
-frontend/test-results/
-frontend/playwright-report/
-test-results/
 data/archive/
 data/*.txt
 !data/urls.txt
 !data/README.md
 docs/archive/
-backend/data/output/
-apis/gateway/data/output/
+apps/gateway/data/output/
 .last-run.json
 *.pdf
 
 # Runtime state files (embedding service, model selection)
-backend/src/embedding_service/selection.json
-backend/src/agent/data/model_selection.json
-apis/gateway/src/embedding_service/selection.json
-apis/agent/src/agent/data/model_selection.json
-backend/integration-test-results.local-ci.xml
-backend/schema-test-results.local-ci.xml
-backend/test-results.local-ci.xml
-backend/schemathesis-report/junit-gateway.xml
-apis/gateway/integration-test-results.local-ci.xml
-apis/gateway/schema-test-results.local-ci.xml
-apis/gateway/test-results.local-ci.xml
-apis/gateway/schemathesis-report/junit-gateway.xml
+apps/gateway/src/embedding_service/selection.json
+apps/agent/src/agent/data/model_selection.json
+*-test-results*.xml
 .cursor/mcp.json
-apis/gateway/schemathesis-report/*

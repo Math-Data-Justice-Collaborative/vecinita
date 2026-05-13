@@ -15,10 +15,10 @@
 
 | Layer | File | Purpose |
 |-------|------|---------|
-| Canonical | `.env.example` | Full catalog, all profiles |
+| Canonical | `config/.env.example` | Full catalog, all profiles |
 | Local pointer | `.env.local.example` | Quick-start instructions |
-| Render prod | `.env.prod.render.example` | Production secrets template |
-| Render staging | `.env.staging.render.example` | Staging parity template |
+| Render prod | `config/.env.prod.render.example` | Production secrets template |
+| Render staging | `config/.env.staging.render.example` | Staging parity template |
 | Per-service | `apis/gateway/.env.example` | Backend-only overrides |
 | Per-service | `frontends/chat/.env.example` | Chat frontend VITE_* vars |
 | Per-service | `frontends/data-management/.env.example` | DM frontend VITE_* vars |
@@ -249,7 +249,7 @@ Minimal env surface — the embedding app relies on Modal Secrets for auth token
 
 ---
 
-### Website (`website/`)
+### Website (`docs-site/`)
 
 **Deploy target:** Static (no env vars required)
 

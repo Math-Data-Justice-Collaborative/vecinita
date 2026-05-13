@@ -6,12 +6,12 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - "modal-apps/scraper/**"
+      - "apps/scraper-worker/**"
       - ".github/workflows/scraper-docker-image.yml"
   pull_request:
     branches: [main, develop]
     paths:
-      - "modal-apps/scraper/**"
+      - "apps/scraper-worker/**"
       - ".github/workflows/scraper-docker-image.yml"
   workflow_dispatch:
 
@@ -31,16 +31,16 @@ jobs:
           submodules: "false"
 
       - name: Init scraper submodule
-        run: git submodule update --init --depth 1 modal-apps/scraper
+        run: git submodule update --init --depth 1 apps/scraper-worker
 
       - name: Docker build (timed)
         run: |
           set -euo pipefail
           start=$(date +%s)
           docker build \
-            -f modal-apps/scraper/Dockerfile \
+            -f apps/scraper-worker/Dockerfile \
             -t vecinita-scraper:ci \
-            modal-apps/scraper
+            apps/scraper-worker
           end=$(date +%s)
           sec=$((end - start))
           echo "docker_build_elapsed_sec=${sec}"

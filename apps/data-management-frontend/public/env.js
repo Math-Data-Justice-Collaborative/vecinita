@@ -1,0 +1,1 @@
+window.__VECINITA_ENV__ = window.__VECINITA_ENV__ || {};

@@ -35,9 +35,9 @@
 
 ### C4b — Required pointer substring (tests)
 
-Every **subsidiary** committed `*.env.example` (all paths under the repo except the root `/.env.example` itself) MUST contain the following **exact substring** within the **first 40 lines** of the file so `backend/tests/unit/test_env_example_templates.py` can assert it without ambiguity:
+Every **subsidiary** committed `*.env.example` (all paths under the repo except `/config/.env.example` itself) MUST contain the following **exact substring** within the **first 40 lines** of the file so `backend/tests/unit/test_env_example_templates.py` can assert it without ambiguity:
 
-`Canonical environment catalog: repo root .env.example`
+`Canonical environment catalog: config/.env.example`
 
 **Also**: `/.env.local.example` MUST include the same substring within its **first 40 lines** whenever that file is a **pointer** to the root catalog (not the full variable list), so it is covered by the same contract tests as other subsidiary templates.
 

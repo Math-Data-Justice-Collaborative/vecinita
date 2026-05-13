@@ -1,0 +1,13 @@
+[project]
+name = "vecinita-config"
+version = "0.1.0"
+description = "Shared configuration loading and environment variable parsing for Vecinita services"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic-settings>=2.0",
+    "pyyaml>=6.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -1,0 +1,12 @@
+[project]
+name = "vecinita-common"
+version = "0.1.0"
+description = "Shared types, constants, and error classes for Vecinita services"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

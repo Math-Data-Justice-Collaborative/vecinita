@@ -1,0 +1,4 @@
+[submodule "apps/frontend"]
+	path = apps/frontend
+	url = https://github.com/Math-Data-Justice-Collaborative/vecinita-data-management-frontend.git
+	branch = main
