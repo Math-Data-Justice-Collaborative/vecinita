@@ -1,5 +1,6 @@
 ---
 name: e2e-test-runner
+model: composer-2-fast
 description: Runs end-to-end test suites across the Vecinita monorepo and reports failures with root-cause context. Use proactively after UI changes, user journey changes, full-stack wiring changes, or when the user asks to run E2E tests, verify user flows, check Playwright tests, or validate frontend-backend integration.
 ---
 

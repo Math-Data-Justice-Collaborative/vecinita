@@ -1,5 +1,6 @@
 ---
 name: ci-test-impact
+model: composer-2-fast
 description: Maps code changes to CI and test targets for fast feedback before full make ci. Use proactively on large diffs, multi-package PRs, or when estimating risk before merge; delegate in parallel with contract and env drift agents.
 ---
 

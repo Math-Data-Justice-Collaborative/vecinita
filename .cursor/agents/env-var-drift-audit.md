@@ -1,5 +1,6 @@
 ---
 name: env-var-drift-audit
+model: composer-2-fast
 description: Compares runtime environment variable reads against the canonical committed example file. Use proactively when adding config, touching deployment docs, Render env, or any PR that introduces process.env / os.environ / getenv usage.
 ---
 

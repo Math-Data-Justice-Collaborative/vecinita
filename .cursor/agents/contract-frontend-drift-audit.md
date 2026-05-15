@@ -1,5 +1,6 @@
 ---
 name: contract-frontend-drift-audit
+model: composer-2-fast
 description: Scans API contract surfaces (OpenAPI, generated clients, backend routers) against frontend callers for drift. Use proactively after gateway/agent/data-management API changes, OpenAPI regenerations, or PRs touching packages/openapi-clients or frontend services.
 ---
 

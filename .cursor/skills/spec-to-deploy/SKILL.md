@@ -405,6 +405,21 @@ Deferred decisions that block the next stage MUST be resolved before proceeding.
 Deferred decisions that don't block may carry forward but must be resolved by
 Phase 6 at the latest.
 
+## Execution environment
+
+This skill runs **locally** on the developer's machine with access to system
+tools. The agent MUST NOT assume it is in a sandboxed or cloud environment.
+
+- **Install dependencies**: Use `uv`, `pip`, `npm`, and system package managers
+  to install whatever is needed to run tests, linters, and builds.
+- **Run real tests**: Execute `pytest`, `vitest`, `make ci`, Docker builds, and
+  any other validation commands directly. Do not substitute static checks for
+  real test execution when the toolchain is available.
+- **Use Docker**: If Docker is available, use it for integration tests,
+  database setup, and local service validation.
+- **Database access**: Use `psql` or service connections when PostgreSQL is
+  available locally or via Docker.
+
 ## Behavioral rules
 
 - **One stage at a time**: Complete the current stage before advancing.

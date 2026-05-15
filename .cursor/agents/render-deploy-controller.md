@@ -1,5 +1,6 @@
 ---
 name: render-deploy-controller
+model: claude-4.6-opus-max-thinking
 description: Render deployment specialist for creating, monitoring, and controlling services and deploys via the Render MCP. Use proactively when scaffolding new Render services, checking deploy status, reading logs, updating env vars, or managing the Render platform lifecycle for Vecinita services.
 ---
 

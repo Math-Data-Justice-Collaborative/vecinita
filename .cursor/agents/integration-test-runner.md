@@ -1,5 +1,6 @@
 ---
 name: integration-test-runner
+model: composer-2-fast
 description: Runs integration test suites across the Vecinita monorepo and reports failures with root-cause context. Use proactively after code changes that touch service boundaries, API contracts, database interactions, or cross-service communication. Also use when the user asks to run integration tests, verify service wiring, check contracts, or validate Render/microservices configuration.
 ---
 

@@ -1,5 +1,6 @@
 ---
 name: unit-test-runner
+model: composer-2-fast
 description: Runs unit test suites across the Vecinita monorepo and reports failures with root-cause context. Use proactively after code changes, before commits, or when the user asks to run tests, check tests, or verify changes.
 ---
 

@@ -1,5 +1,6 @@
 ---
 name: modal-deploy-controller
+model: claude-4.6-opus-max-thinking
 description: Modal deployment specialist for creating, monitoring, and controlling Modal apps via the CLI. Use proactively when scaffolding new Modal services, deploying apps, checking app status, reading logs, debugging deploy failures, or managing the Modal platform lifecycle for Vecinita GPU/serverless workloads.
 ---
 

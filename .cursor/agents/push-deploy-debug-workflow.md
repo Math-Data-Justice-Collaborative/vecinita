@@ -1,5 +1,6 @@
 ---
 name: push-deploy-debug-workflow
+model: claude-4.6-opus-max-thinking
 description: End-to-end Vecinita root workflow—formerly submodule-push-ci-orchestrator. Monitors the current feature branch on origin, runs submodule-then-root commits and pushes, opens or updates a GitHub PR to the default branch as needed, polls GitHub Actions until every workflow for the pushed commit is terminal, then polls Render deploys until live or failed via Render MCP (project-0-vecinita-render preferred, plugin-render-render when authenticated); uses list_services with includePreviews for PR previews, list_deploys, get_deploy, list_logs; on Render failure investigates logs, summarizes, fixes, and iterates with make ci and re-push until resolved or blocked. Reads git-commit-series-submodules, git-push-plan-main-submodules, github-actions-status, github-actions-poll-until-complete, github-actions-debug, cross-service-playbooks, and Render MCP tool schemas.
 ---
 
