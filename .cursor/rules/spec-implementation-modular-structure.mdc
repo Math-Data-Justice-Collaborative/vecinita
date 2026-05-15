@@ -1,0 +1,48 @@
+---
+description: Keep spec-to-deploy implementation inside apps/packages boundaries and modular services
+alwaysApply: true
+---
+
+# Spec Implementation — Modular Monorepo Structure
+
+During **spec-to-deploy Stage 4** (and any feature work under `specs/NNN-*/`), place code in the owning service and preserve separation defined in `specs/monorepo-decomposition/`.
+
+## Layout
+
+| Path | Role |
+|------|------|
+| `apps/<service>/` | One deployable unit per directory (gateway, agent, workers, frontends) |
+| `packages/<name>/` | Shared libraries only (`db`, `config`, `common`) — not feature logic |
+| `tests/` | Cross-stack integration only; default unit tests live in the owning app |
+
+## Before editing
+
+1. Identify the **owning service** from `specs/monorepo-decomposition/02-app-inventory.md` and `specs/authoritative/<service>/`.
+2. Confirm **call direction** in `04-dependency-graph.md` (e.g. frontends → APIs → workers → DB).
+3. Split multi-service requirements into **one task per service**; note HTTP/Modal boundaries in the task list.
+
+## Do
+
+- Implement feature code inside the service that owns the data or runtime (Render vs Modal).
+- Share cross-cutting code via `packages/` when 2+ services need it and the surface is stable (`10-shared-code-strategy.md`).
+- Use **HTTP, OpenAPI, or Modal SDK** for cross-service behavior — not private imports across `apps/`.
+- Colocate tests with the service (`apps/<svc>/tests/`, `apps/<svc>/src/`, frontend `tests/` or `e2e/`).
+- Import `packages/db` models only for the **service’s own schema** at runtime.
+
+## Do not
+
+- Add business logic to `packages/` to avoid choosing a service owner.
+- Import another app’s `src/` (e.g. `apps/gateway` importing `apps/agent/src/...`).
+- Duplicate the same module in two apps instead of extracting to `packages/` (when extraction criteria in `10-shared-code-strategy.md` are met).
+- Put gateway-only routing in workers, or worker/GPU logic in Render APIs, without an explicit spec-approved boundary change.
+
+## Fuzzy boundaries — stop and ask
+
+If the change touches **gateway vs agent**, **gateway vs data-management-api**, or adds a new shared package, stop and ask the user before proceeding (`ask-dont-assume`).
+
+## Checklist (each implementation batch)
+
+- [ ] Changes live under the correct `apps/<service>/` (or approved `packages/` extraction).
+- [ ] No new cross-app Python/TS imports; inter-service calls use documented APIs.
+- [ ] Matches `specs/NNN-*/` and authoritative service docs.
+- [ ] Tests added in the owning service’s test tree.

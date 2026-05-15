@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.utils.corpus_db_guard import validate_canonical_database_url
+from vecinita_common.utils.corpus_db_guard import validate_canonical_database_url
 
 pytestmark = [pytest.mark.unit, pytest.mark.contract]
 

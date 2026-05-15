@@ -1,6 +1,6 @@
 """Resolved Postgres DSN from environment (canonical DATABASE_URL + DB_URL alias)."""
 
-from src.utils.database_url import get_resolved_database_url
+from vecinita_common.utils.database_url import get_resolved_database_url
 
 
 def test_get_resolved_database_url_prefers_database_url(monkeypatch):

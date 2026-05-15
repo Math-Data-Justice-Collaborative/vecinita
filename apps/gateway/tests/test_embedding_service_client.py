@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from src.embedding_service.client import EmbeddingServiceClient, create_embedding_client
+from vecinita_common.embedding.client import EmbeddingServiceClient, create_embedding_client
 
 pytestmark = pytest.mark.unit
 
@@ -44,7 +44,7 @@ def test_create_embedding_client_validate_on_init(monkeypatch):
 
     monkeypatch.setattr(EmbeddingServiceClient, "validate_connection", fake_validate)
     monkeypatch.setattr(
-        "src.embedding_service.client.modal_function_invocation_enabled", lambda: False
+        "vecinita_common.embedding.client.modal_function_invocation_enabled", lambda: False
     )
 
     create_embedding_client("http://embedding-service:8001", validate_on_init=True)
@@ -187,7 +187,7 @@ def test_create_embedding_client_passes_explicit_auth_token(monkeypatch):
 
     monkeypatch.setattr(EmbeddingServiceClient, "__init__", fake_init)
     monkeypatch.setattr(
-        "src.embedding_service.client.modal_function_invocation_enabled", lambda: False
+        "vecinita_common.embedding.client.modal_function_invocation_enabled", lambda: False
     )
 
     create_embedding_client(
@@ -203,7 +203,7 @@ def test_create_embedding_client_passes_explicit_auth_token(monkeypatch):
 
 def test_embedding_service_client_rejects_modal_run_url(monkeypatch):
     monkeypatch.setattr(
-        "src.embedding_service.client.modal_function_invocation_enabled", lambda: False
+        "vecinita_common.embedding.client.modal_function_invocation_enabled", lambda: False
     )
     with pytest.raises(ValueError, match="EmbeddingServiceClient cannot use"):
         EmbeddingServiceClient(base_url="https://example.modal.run")
@@ -211,7 +211,7 @@ def test_embedding_service_client_rejects_modal_run_url(monkeypatch):
 
 def test_embedding_service_client_rejects_modal_run_when_modal_sdk_enabled(monkeypatch):
     monkeypatch.setattr(
-        "src.embedding_service.client.modal_function_invocation_enabled", lambda: True
+        "vecinita_common.embedding.client.modal_function_invocation_enabled", lambda: True
     )
     with pytest.raises(ValueError, match="Do not point EmbeddingServiceClient"):
         EmbeddingServiceClient(base_url="https://example.modal.run")
@@ -219,17 +219,17 @@ def test_embedding_service_client_rejects_modal_run_when_modal_sdk_enabled(monke
 
 def test_create_embedding_client_uses_modal_sdk_when_invocation_enabled(monkeypatch):
     monkeypatch.setattr(
-        "src.embedding_service.client.modal_function_invocation_enabled", lambda: True
+        "vecinita_common.embedding.client.modal_function_invocation_enabled", lambda: True
     )
     monkeypatch.setattr(
-        "src.embedding_service.modal_embeddings.invoke_modal_embedding_single",
+        "vecinita_common.embedding.modal_embeddings.invoke_modal_embedding_single",
         lambda _text: {"embedding": [0.25, 0.5], "model": "m", "dimension": 2},
     )
     monkeypatch.setattr(
-        "src.embedding_service.modal_embeddings.invoke_modal_embedding_batch",
+        "vecinita_common.embedding.modal_embeddings.invoke_modal_embedding_batch",
         lambda _texts: {"embeddings": [[1.0, 2.0]], "model": "m", "dimension": 2},
     )
-    from src.embedding_service.modal_embeddings import ModalSdkEmbeddings
+    from vecinita_common.embedding.modal_embeddings import ModalSdkEmbeddings
 
     emb = create_embedding_client(
         "https://labels-only.modal.run", validate_on_init=False, auth_token="ignored"
@@ -242,7 +242,7 @@ def test_create_embedding_client_uses_modal_sdk_when_invocation_enabled(monkeypa
 
 def test_create_embedding_client_modal_sdk_validate_on_init(monkeypatch):
     monkeypatch.setattr(
-        "src.embedding_service.client.modal_function_invocation_enabled", lambda: True
+        "vecinita_common.embedding.client.modal_function_invocation_enabled", lambda: True
     )
 
     validated = {"called": False}
@@ -252,7 +252,7 @@ def test_create_embedding_client_modal_sdk_validate_on_init(monkeypatch):
         return self.base_url
 
     monkeypatch.setattr(
-        "src.embedding_service.modal_embeddings.ModalSdkEmbeddings.validate_connection",
+        "vecinita_common.embedding.modal_embeddings.ModalSdkEmbeddings.validate_connection",
         _fake_validate,
     )
 

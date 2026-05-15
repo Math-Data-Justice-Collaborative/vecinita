@@ -1,6 +1,6 @@
 import pytest
 
-from src.utils.tags import build_bilingual_tag_fields, infer_tags_from_text
+from vecinita_common.utils.tags import build_bilingual_tag_fields, infer_tags_from_text
 
 pytestmark = pytest.mark.unit
 

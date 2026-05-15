@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from src.utils.render_env_contract import parse_env_file, validate_shared_render_env
+from vecinita_common.utils.render_env_contract import parse_env_file, validate_shared_render_env
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 

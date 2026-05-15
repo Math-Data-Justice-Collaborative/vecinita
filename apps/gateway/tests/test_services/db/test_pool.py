@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from src.services.db import pool
+from vecinita_db import pool
 
 pytestmark = pytest.mark.unit
 

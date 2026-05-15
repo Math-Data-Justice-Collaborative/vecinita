@@ -1,6 +1,6 @@
 import pytest
 
-from src.utils.tags import (
+from vecinita_common.utils.tags import (
     MAX_TAG_COUNT,
     MAX_TAG_LENGTH,
     _normalize_noncanonical_tag,

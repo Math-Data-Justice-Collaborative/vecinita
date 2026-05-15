@@ -261,7 +261,7 @@ class TestStartupWithValidConfiguration:
 
         reload(agent_main)
 
-        with patch("src.config.resolve_data_db_mode", return_value="postgres"):
+        with patch("vecinita_config.config.resolve_data_db_mode", return_value="postgres"):
             with patch.object(
                 agent_main,
                 "_probe_postgres_connectivity",
@@ -305,7 +305,7 @@ class TestPreflightModeSelectionConsistency:
         monkeypatch.delenv("RENDER", raising=False)
         monkeypatch.delenv("RENDER_SERVICE_ID", raising=False)
 
-        import src.config as config_module
+        import vecinita_config.config as config_module
         from src.agent import main as agent_main
 
         importlib.reload(config_module)
@@ -327,7 +327,7 @@ class TestPreflightModeSelectionConsistency:
         monkeypatch.delenv("RENDER", raising=False)
         monkeypatch.delenv("RENDER_SERVICE_ID", raising=False)
 
-        import src.config as config_module
+        import vecinita_config.config as config_module
         from src.agent import main as agent_main
 
         importlib.reload(config_module)

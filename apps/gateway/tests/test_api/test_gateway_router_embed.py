@@ -341,8 +341,8 @@ class TestEmbeddingUpstreamUrlResolution:
         )
 
         import src.api.router_embed as router_embed
-        import src.config as cfg
-        import src.service_endpoints as ep
+        import vecinita_config.config as cfg
+        import vecinita_config.service_endpoints as ep
 
         importlib.reload(cfg)
         importlib.reload(ep)

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.embedding_service.modal_embeddings import ModalSdkEmbeddings
+from vecinita_common.embedding.modal_embeddings import ModalSdkEmbeddings
 
 pytestmark = pytest.mark.unit
 
@@ -17,7 +17,7 @@ def test_base_url_defaults_to_modal_scheme(monkeypatch):
 
 def test_validate_connection_calls_embed_query(monkeypatch):
     monkeypatch.setattr(
-        "src.embedding_service.modal_embeddings.invoke_modal_embedding_single",
+        "vecinita_common.embedding.modal_embeddings.invoke_modal_embedding_single",
         lambda _text: {"embedding": [0.1], "model": "m", "dimension": 1},
     )
     emb = ModalSdkEmbeddings(logical_url="modal://test/embed_query")
@@ -26,7 +26,7 @@ def test_validate_connection_calls_embed_query(monkeypatch):
 
 def test_embed_query_returns_embedding(monkeypatch):
     monkeypatch.setattr(
-        "src.embedding_service.modal_embeddings.invoke_modal_embedding_single",
+        "vecinita_common.embedding.modal_embeddings.invoke_modal_embedding_single",
         lambda _text: {"embedding": [0.1, 0.2]},
     )
     emb = ModalSdkEmbeddings()
@@ -35,7 +35,7 @@ def test_embed_query_returns_embedding(monkeypatch):
 
 def test_embed_query_raises_when_embedding_missing(monkeypatch):
     monkeypatch.setattr(
-        "src.embedding_service.modal_embeddings.invoke_modal_embedding_single",
+        "vecinita_common.embedding.modal_embeddings.invoke_modal_embedding_single",
         lambda _text: {"model": "m"},
     )
     emb = ModalSdkEmbeddings()
@@ -50,7 +50,7 @@ def test_embed_documents_returns_empty_for_empty_input():
 
 def test_embed_documents_returns_embeddings(monkeypatch):
     monkeypatch.setattr(
-        "src.embedding_service.modal_embeddings.invoke_modal_embedding_batch",
+        "vecinita_common.embedding.modal_embeddings.invoke_modal_embedding_batch",
         lambda _texts: {"embeddings": [[1.0], [2.0]]},
     )
     emb = ModalSdkEmbeddings()
@@ -59,7 +59,7 @@ def test_embed_documents_returns_embeddings(monkeypatch):
 
 def test_embed_documents_raises_when_embeddings_missing(monkeypatch):
     monkeypatch.setattr(
-        "src.embedding_service.modal_embeddings.invoke_modal_embedding_batch",
+        "vecinita_common.embedding.modal_embeddings.invoke_modal_embedding_batch",
         lambda _texts: {"model": "m"},
     )
     emb = ModalSdkEmbeddings()
@@ -70,7 +70,7 @@ def test_embed_documents_raises_when_embeddings_missing(monkeypatch):
 @pytest.mark.asyncio
 async def test_async_embed_query_delegates(monkeypatch):
     monkeypatch.setattr(
-        "src.embedding_service.modal_embeddings.invoke_modal_embedding_single",
+        "vecinita_common.embedding.modal_embeddings.invoke_modal_embedding_single",
         lambda _text: {"embedding": [0.9]},
     )
     emb = ModalSdkEmbeddings()
@@ -80,7 +80,7 @@ async def test_async_embed_query_delegates(monkeypatch):
 @pytest.mark.asyncio
 async def test_async_embed_documents_delegates(monkeypatch):
     monkeypatch.setattr(
-        "src.embedding_service.modal_embeddings.invoke_modal_embedding_batch",
+        "vecinita_common.embedding.modal_embeddings.invoke_modal_embedding_batch",
         lambda _texts: {"embeddings": [[0.7]]},
     )
     emb = ModalSdkEmbeddings()

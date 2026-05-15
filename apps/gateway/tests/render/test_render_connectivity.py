@@ -136,9 +136,9 @@ def test_model_and_embedding_endpoints_no_localhost_on_render():
     with patch.dict(os.environ, render_env, clear=False):
         # Force re-import of config and service_endpoints
         for mod_name in list(sys.modules.keys()):
-            if "src.config" in mod_name or "src.service_endpoints" in mod_name:
+            if "vecinita_config.config" in mod_name or "vecinita_config.service_endpoints" in mod_name:
                 del sys.modules[mod_name]
-        from src.service_endpoints import EMBEDDING_ENDPOINT, MODEL_ENDPOINT  # noqa: PLC0415
+        from vecinita_config.service_endpoints import EMBEDDING_ENDPOINT, MODEL_ENDPOINT  # noqa: PLC0415
 
         assert (
             "localhost" not in MODEL_ENDPOINT.lower()
@@ -164,9 +164,9 @@ def test_modal_endpoints_use_direct_modal_hosts():
 
     with patch.dict(os.environ, render_env, clear=False):
         for mod_name in list(sys.modules.keys()):
-            if "src.config" in mod_name or "src.service_endpoints" in mod_name:
+            if "vecinita_config.config" in mod_name or "vecinita_config.service_endpoints" in mod_name:
                 del sys.modules[mod_name]
-        from src.service_endpoints import EMBEDDING_ENDPOINT, MODEL_ENDPOINT  # noqa: PLC0415
+        from vecinita_config.service_endpoints import EMBEDDING_ENDPOINT, MODEL_ENDPOINT  # noqa: PLC0415
 
         assert (
             "modal.run" in MODEL_ENDPOINT
@@ -192,9 +192,9 @@ def test_allowed_origins_read_from_correct_env_key():
 
     with patch.dict(os.environ, env_override, clear=False):
         for mod_name in list(sys.modules.keys()):
-            if "src.config" in mod_name or "src.service_endpoints" in mod_name:
+            if "vecinita_config.config" in mod_name or "vecinita_config.service_endpoints" in mod_name:
                 del sys.modules[mod_name]
-        from src.service_endpoints import get_allowed_origins  # noqa: PLC0415
+        from vecinita_config.service_endpoints import get_allowed_origins  # noqa: PLC0415
 
         origins = get_allowed_origins()
         assert "https://app.example.com" in origins

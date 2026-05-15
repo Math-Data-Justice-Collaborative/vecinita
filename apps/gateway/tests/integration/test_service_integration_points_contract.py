@@ -190,7 +190,7 @@ def test_ip06_agent_to_embedding_direct_endpoint_headers(monkeypatch) -> None:
         captured["auth_token"] = auth_token
         return Mock(base_url=url, embed_query=Mock(return_value=[0.1] * 384))
 
-    fake_client_module = sys.modules.get("src.embedding_service.client")
+    fake_client_module = sys.modules.get("vecinita_common.embedding.client")
     if fake_client_module is None:
         pytest.skip("embedding service client module is unavailable in this test environment")
 
@@ -207,7 +207,7 @@ def test_ip06_agent_to_embedding_direct_endpoint_headers(monkeypatch) -> None:
     )
     monkeypatch.setenv("EMBEDDING_SERVICE_AUTH_TOKEN", "embed-token")
 
-    import src.config as app_config
+    import vecinita_config.config as app_config
 
     importlib.reload(app_config)
 
@@ -224,7 +224,7 @@ def test_ip07_agent_to_model_uses_direct_modal_fallback_on_render(monkeypatch) -
     """IP-07: Agent model URL normalizes to direct Modal endpoint on Render."""
     monkeypatch.setenv("RENDER", "true")
 
-    import src.config as app_config
+    import vecinita_config.config as app_config
 
     importlib.reload(app_config)
 
@@ -259,7 +259,7 @@ def test_ip08_agent_tools_postgres_fallback_with_database_url(monkeypatch) -> No
     )
     monkeypatch.setattr(db_search_module, "_query_postgres_fallback", postgres_mock)
 
-    import src.config as app_config
+    import vecinita_config.config as app_config
 
     importlib.reload(app_config)
 
@@ -295,7 +295,7 @@ def test_ip09_agent_tools_remain_postgres_only(monkeypatch) -> None:
     )
     monkeypatch.setattr(db_search_module, "_query_postgres_fallback", postgres_mock)
 
-    import src.config as app_config
+    import vecinita_config.config as app_config
 
     importlib.reload(app_config)
 
@@ -397,7 +397,7 @@ def test_ip13_direct_modal_endpoint_contract_files() -> None:
 
 def test_ip14_env_auth_contract_local_render_and_modal(monkeypatch) -> None:
     """IP-14: Env/auth contract across local HTTP and Render+Modal invocation modes."""
-    from src.services.modal import invoker
+    from vecinita_common.modal import invoker
 
     # Local development contract: no Modal invocation requirement for non-Modal endpoints.
     monkeypatch.delenv("RENDER", raising=False)

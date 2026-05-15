@@ -1,6 +1,6 @@
 import pytest
 
-from src.utils.resource_metadata import infer_resource_language_metadata
+from vecinita_common.utils.resource_metadata import infer_resource_language_metadata
 
 pytestmark = pytest.mark.unit
 

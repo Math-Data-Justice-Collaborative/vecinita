@@ -217,7 +217,7 @@ def _reload_gateway_with_mocks(monkeypatch: pytest.MonkeyPatch, *, enable_auth: 
     import src.api.router_documents as router_documents
     import src.api.router_embed as router_embed
     import src.api.router_modal_jobs as router_modal_jobs
-    import src.services.modal.invoker as invoker_module
+    import vecinita_common.modal.invoker as invoker_module
 
     monkeypatch.setattr(
         invoker_module, "enforce_modal_function_policy_for_urls", lambda _urls: None

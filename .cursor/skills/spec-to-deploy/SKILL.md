@@ -1,11 +1,11 @@
 ---
 name: spec-to-deploy
-description: End-to-end lifecycle orchestrator that chains monorepo decomposition, per-service documentation, doc verification, spec implementation, and test validation into a single resumable pipeline with state tracking. Use when the user asks to run the full lifecycle, implement everything, go from spec to deploy, or resume a prior lifecycle run.
+description: End-to-end lifecycle orchestrator that chains monorepo decomposition, per-service documentation, doc verification, spec implementation, and a parallel quality sweep (format, typecheck, lint, test per service/sub-folder) into a single resumable pipeline with state tracking. Use when the user asks to run the full lifecycle, implement everything, go from spec to deploy, or resume a prior lifecycle run.
 ---
 
 # Spec-to-Deploy Lifecycle
 
-Orchestrate five skills in sequence with persistent state so the pipeline can be paused and resumed at any point.
+Orchestrate five skills in sequence with persistent state so the pipeline can be paused and resumed at any point. After implementation (Stage 4), Stage 5 fans out parallel agents to run formatting, typechecking, linting, and tests per service and sub-folder.
 
 ## Pipeline stages
 
@@ -14,8 +14,8 @@ Orchestrate five skills in sequence with persistent state so the pipeline can be
 | 1 | Decompose | `monorepo-decomposition` | `specs/monorepo-decomposition/` | User approves decomposition |
 | 2 | Document | `service-documentation` | `specs/authoritative/<svc>/` per service | All services documented |
 | 3 | Verify | `doc-verification` | `VERIFICATION-REPORT.md` per service | All docs verified |
-| 4 | Implement | `spec-implementation` | Code + tests per numbered spec | `make ci` passes per spec |
-| 5 | Validate | `test-group-runner` | Test run summary | All selected groups pass |
+| 4 | Implement | `spec-implementation` | Code + tests per numbered spec | Spec tasks complete |
+| 5 | Quality sweep | *(this skill — Phase 5)* | Per-unit quality report + optional `make ci` | User-selected checks pass |
 
 ## State file
 
@@ -63,10 +63,26 @@ startup and writes it after every stage transition.
         }
       }
     },
-    "5_validate": {
+    "5_quality_sweep": {
       "status": "not_started | in_progress | completed | skipped",
-      "groups_passed": [],
-      "groups_failed": [],
+      "agent_count": null,
+      "units": {
+        "<unit-id>": {
+          "path": "apps/gateway",
+          "status": "not_started | in_progress | completed | skipped | failed",
+          "checks": {
+            "format": "not_started | pass | fail | skip | n/a",
+            "typecheck": "not_started | pass | fail | skip | n/a",
+            "lint": "not_started | pass | fail | skip | n/a",
+            "test": "not_started | pass | fail | skip | n/a"
+          },
+          "completed_at": null
+        }
+      },
+      "make_ci": {
+        "status": "not_started | pass | fail | skipped",
+        "completed_at": null
+      },
       "completed_at": null
     }
   }
@@ -202,28 +218,188 @@ from a prior run).
 **On all specs complete**: update `4_implement.status = "completed"`,
 `current_stage = 5`. Write state file.
 
-### Phase 5 — Validate (test-group-runner)
-
-1. Follow the `test-group-runner` skill workflow (Phase 1 through Phase 4).
-2. Record `groups_passed` and `groups_failed` from the final summary.
-3. Update `5_validate.status = "completed"`.
-4. Write state file.
-
-**If failures remain** after the test-group-runner finishes:
+**Gate** before entering Phase 5:
 
 ```
 Use AskQuestion with:
-  id: "post_validate"
-  prompt: "<N> test groups still failing. What next?"
+  id: "gate_implement"
+  prompt: "All specs implemented. Proceed to the quality sweep (format, typecheck, lint, test per service)?"
   options:
-    - id: "rerun"      label: "Re-run failed groups"
-    - id: "fix_impl"   label: "Go back to implementation (Stage 4) for fixes"
-    - id: "accept"     label: "Accept current state — mark lifecycle complete"
-    - id: "pause"      label: "Pause — resume later"
+    - id: "proceed"  label: "Yes — run quality sweep"
+    - id: "pause"    label: "Pause here — resume later"
 ```
 
-If `fix_impl`: set `current_stage = 4`, identify which specs are affected by
-failures, reset those specs to `in_progress`, and re-enter Phase 4.
+### Phase 5 — Quality sweep (parallel agents)
+
+Run **after Stage 4 implementation is complete** (all targeted specs marked
+`completed` or `skipped`). This stage validates every service and relevant
+sub-folder with four check types: **format**, **typecheck**, **lint**, **test**.
+
+Do not advance to Phase 6 until the user has chosen how many agents to use and
+the sweep finishes (or the user explicitly accepts partial failure).
+
+#### 5.0 — Discover validation units
+
+Build the unit list from the repo (do not rely on memory). Start from
+`specs/monorepo-decomposition/02-app-inventory.md` when present; always verify
+against the filesystem and root `Makefile` targets.
+
+**Canonical units** (add or remove based on what exists on disk):
+
+| Unit ID | Path | Format | Typecheck | Lint | Test |
+|---------|------|--------|-----------|------|------|
+| `gateway` | `apps/gateway/` | `make format-check-backend` | `make typecheck-backend` | `make lint-backend` | `cd apps/gateway && uv run pytest tests/ -m "unit and not llm" -v --tb=short` |
+| `chat-frontend` | `apps/chat-frontend/` | `make format-check-frontend` | `make typecheck-frontend` | `make lint-frontend` | `make test-frontend-unit` |
+| `data-management-frontend` | `apps/data-management-frontend/` | n/a (no root target) | n/a | `make lint-data-management-frontend` | `make test-data-management-frontend` |
+| `scraper-worker` | `apps/scraper-worker/` | `cd apps/scraper-worker && make format` (check mode if available) | `make typecheck-scraper` | `make lint-scraper` | `make test-scraper` |
+| `embedding-worker` | `apps/embedding-worker/` | per-app `Makefile` | n/a | `make lint-embedding-modal` | `make test-embedding-modal` |
+| `vllm-inference` | `apps/vllm-inference/` | per-app `Makefile` | n/a | `make lint-model-modal` | `make test-model-modal` |
+| `packages-common` | `packages/common/` | via gateway Black scope | via `make typecheck-backend` | via `make lint-backend` | gateway unit tests covering imports |
+| `packages-config` | `packages/config/` | same as above | same | same | same |
+| `packages-db` | `packages/db/` | same | same | same | same |
+| `dm-api-backend` | `apps/data-management-api/apps/backend/` | n/a | n/a | n/a | `make test-backend-unit` (DM paths) |
+| `dm-api-service-clients` | `apps/data-management-api/packages/service-clients/` | n/a | n/a | n/a | included in `test-backend-unit` |
+| `cross-stack-tests` | `tests/` | n/a | n/a | n/a | `cd tests && uv run pytest -m "not e2e and not integration" -v --tb=short` |
+
+For each unit, mark checks `n/a` when no Makefile target exists. Record the
+resolved unit map in `5_quality_sweep.units` (all `not_started` initially) and
+write the state file.
+
+Present a short plan table (unit × applicable checks) before spawning agents.
+
+#### 5.1 — Ask agent count (required)
+
+**Always** ask how many parallel agents to spawn before starting work:
+
+```
+Use AskQuestion with:
+  id: "quality_sweep_agent_count"
+  prompt: "Implementation is complete. How many parallel agents should run format, typecheck, lint, and test checks across services and sub-folders?"
+  options:
+    - id: "1"       label: "1 agent — run everything sequentially"
+    - id: "2"       label: "2 agents"
+    - id: "4"       label: "4 agents (balanced default)"
+    - id: "8"       label: "8 agents (maximum parallelism)"
+    - id: "custom"  label: "Custom count — I'll specify a number"
+```
+
+If `custom`: ask the user for a positive integer (1–16). Store the chosen
+value in `5_quality_sweep.agent_count` and write state.
+
+Optionally narrow scope before spawning:
+
+```
+Use AskQuestion with:
+  id: "quality_sweep_scope"
+  prompt: "Which validation units should the sweep cover?"
+  options:
+    - id: "all"           label: "All discovered units"
+    - id: "changed_only"  label: "Only units touched by this lifecycle (git diff vs main)"
+    - id: "select"        label: "Let me pick units"
+```
+
+If `select`: multi-select from the unit list; mark unselected units `skipped`.
+
+#### 5.2 — Build work items and partition
+
+Flatten applicable checks into **work items**:
+
+```text
+{ "unit_id": "gateway", "check": "lint", "command": "make lint-backend", "cwd": "<repo-root>" }
+```
+
+Skip items where the unit's check is `n/a` or the unit is `skipped`.
+
+Partition items across `agent_count` queues (round-robin by unit first, then
+check, so one agent tends to own whole services). Example with 4 agents and 24
+items: 6 items per agent.
+
+#### 5.3 — Spawn agents
+
+Use the **Task** tool with `subagent_type: "shell"` (or `generalPurpose` when
+investigation is needed). Launch up to `agent_count` tasks **in parallel** per
+batch; wait for the batch to finish before starting the next batch if there are
+more items than agents.
+
+**Each agent prompt must include:**
+
+- Repository root absolute path
+- Its assigned work items (unit, check, exact command, cwd)
+- Instruction to run commands from repo root unless `cwd` differs
+- Instruction to capture exit code, stdout/stderr tail on failure, and duration
+- Instruction **not** to edit files (read-only validation)
+- Return format: markdown table of `unit | check | status | command | notes`
+
+**Check-type hints** (pass through to agents):
+
+| Check | On failure, agent should |
+|-------|--------------------------|
+| format | Report diff-producing files; do not auto-format unless user later approves |
+| typecheck | Include mypy/tsc error lines and file paths |
+| lint | Include ruff/eslint rule codes |
+| test | Include `file::test` and assertion excerpt; classify per unit-test-runner conventions |
+
+After each agent returns, merge results into `5_quality_sweep.units.<id>.checks`
+(`pass` / `fail` / `skip`) and write state immediately.
+
+#### 5.4 — Optional full CI gate
+
+After per-unit sweeps, ask whether to run the monorepo gate:
+
+```
+Use AskQuestion with:
+  id: "quality_sweep_make_ci"
+  prompt: "Per-unit checks finished (<N> failed, <M> passed). Run full `make ci` from repo root?"
+  options:
+    - id: "yes"     label: "Yes — run make ci"
+    - id: "no"      label: "No — skip full CI for now"
+    - id: "failed"  label: "Only if all per-unit checks passed"
+```
+
+If yes (or `failed` and zero per-unit failures): run `make ci` in the
+foreground (not delegated). Record `5_quality_sweep.make_ci.status`.
+
+Reference `.cursor/skills/test/SKILL.md` for failure escalation when tests fail
+during `make ci` (present failures, ask before editing).
+
+#### 5.5 — Sweep summary and gate
+
+Present:
+
+```markdown
+## Quality Sweep Summary
+
+Agents used: <N>
+| Unit | Format | Typecheck | Lint | Test |
+|------|--------|-----------|------|------|
+| gateway | pass | pass | fail | pass |
+| ... | ... | ... | ... | ... |
+
+make ci: pass | fail | skipped
+```
+
+Update `5_quality_sweep.status = "completed"` when the user accepts the outcome
+or all non-skipped checks pass. Set `current_stage` to 6 (lifecycle complete).
+Write state file.
+
+**If failures remain:**
+
+```
+Use AskQuestion with:
+  id: "post_quality_sweep"
+  prompt: "<N> unit checks still failing. What next?"
+  options:
+    - id: "rerun_failed"  label: "Re-run only failed unit/check pairs"
+    - id: "fix_impl"      label: "Go back to implementation (Stage 4) for fixes"
+    - id: "accept"        label: "Accept current state — mark lifecycle complete"
+    - id: "pause"         label: "Pause — resume later"
+```
+
+If `fix_impl`: set `current_stage = 4`, map failures to affected specs, reset
+those specs to `in_progress`, and re-enter Phase 4. After fixes, re-run Phase 5
+from 5.0 (re-ask agent count if the user wants a different parallelism).
+
+If `rerun_failed`: rebuild work items only for `fail` checks and repeat 5.2–5.3.
 
 ### Phase 6 — Lifecycle complete
 
@@ -238,7 +414,7 @@ Present the final lifecycle summary:
 | Document | Completed | N/M services documented |
 | Verify | Completed | Average accuracy: X% |
 | Implement | Completed | N specs implemented |
-| Validate | Completed | N/M test groups passing |
+| Quality sweep | Completed | N/M unit checks passing; make ci: pass/fail/skipped |
 
 ### Services
 | Service | Documented | Verified | Accuracy |
@@ -387,7 +563,7 @@ Maintain a running decisions log at `specs/.technical-decisions-log.json`:
 | 2 — Document | Undocumented architectural choices discovered, technology gaps identified |
 | 3 — Verify | Contradictions revealing undecided approaches, stale decisions needing refresh |
 | 4 — Implement | Library/framework choices, API design patterns, data modeling approaches, testing strategy, infrastructure configuration |
-| 5 — Validate | Performance trade-offs, coverage strategy, acceptance criteria interpretation |
+| 5 — Quality sweep | Parallelism vs feedback speed, which units to include, whether to run full `make ci`, failure triage vs accept |
 
 ### Gate integration
 
@@ -439,6 +615,14 @@ tools. The agent MUST NOT assume it is in a sandboxed or cloud environment.
   without checking current state of libraries, pricing, or compatibility.
 - **Ask before skipping**: Never auto-skip a stage. Always confirm with the
   user, even if prior output exists.
+- **Quality sweep agent count is mandatory**: Never spawn parallel validation
+  agents until the user answers `quality_sweep_agent_count`. Default parallelism
+  is not assumed.
+- **Validation agents are read-only**: Shell/generalPurpose agents in Phase 5
+  run checks only; they do not apply fixes. Route fixes through Phase 4 or
+  explicit user approval per `.cursor/skills/test/SKILL.md`.
+- **Respect agent budget**: Do not exceed the user-chosen `agent_count` in a
+  single parallel batch. Queue remaining work items for subsequent batches.
 - **State is source of truth**: If the state file says a service is
   `completed` but the output directory is missing, flag the inconsistency
   and ask the user how to proceed.

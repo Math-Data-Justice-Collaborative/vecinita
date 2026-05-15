@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from src.utils.gateway_dependency_errors import client_safe_message_for_dependency_failure
+from vecinita_common.utils.gateway_dependency_errors import client_safe_message_for_dependency_failure
 
 
 def test_dns_translate_host_message_sanitized():

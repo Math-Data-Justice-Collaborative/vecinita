@@ -1,0 +1,43 @@
+---
+description: Follow docs/testing journey catalogue and maintenance rules when adding or changing tests
+globs: "docs/testing/**,**/e2e/**,**/tests/**"
+alwaysApply: false
+---
+
+# docs/testing Guidelines
+
+When adding or changing tests, follow [`docs/testing/JOURNEYS.md`](docs/testing/JOURNEYS.md). It is the canonical user-journey catalogue for E2E coverage.
+
+## Journey catalogue (`JOURNEYS.md`)
+
+Each row must include: **ID**, **Name**, **User Type**, **Entry URL**, **Expected Outcome**, **Spec** (exact spec file path).
+
+| Rule | Detail |
+|------|--------|
+| Stable IDs | Never renumber `J001`–`J026`; new journeys get the next free ID (`J027`, …). |
+| New journey | Add one table row **before or with** the Playwright spec; reference the real file path. |
+| Removed journey | Delete or merge the row when the test is removed; do not leave stale IDs. |
+| Spec paths | Use repo paths, e.g. `apps/chat-frontend/e2e/journey-chat.spec.ts` (not legacy `frontend/e2e/…`). |
+
+## Implementing journey tests
+
+- Place chat UI journeys under `apps/chat-frontend/e2e/journey-{chat,documents,admin}.spec.ts`.
+- Name tests so they map clearly to a journey ID (comment or test title: `J027 — …`).
+- One journey per user-visible outcome; do not fold unrelated flows into one ID.
+
+```typescript
+// ✅ GOOD — new journey documented and implemented together
+// docs/testing/JOURNEYS.md: | J027 | Export chat transcript | Anonymous | `/` | Download starts | apps/chat-frontend/e2e/journey-chat.spec.ts |
+test("J027 export chat transcript", async ({ page }) => { /* … */ });
+
+// ❌ BAD — spec added with no JOURNEYS.md row
+test("export works", async ({ page }) => { /* … */ });
+```
+
+## Before finishing test work
+
+- [ ] `docs/testing/JOURNEYS.md` updated if journeys were added, renamed, or removed.
+- [ ] Spec column points at the file that actually contains the test.
+- [ ] IDs are stable and sequential for new journeys only.
+
+If `apps/chat-frontend/e2e/USER_JOURNEYS.md` exists, keep its journey list consistent with `docs/testing/JOURNEYS.md`.

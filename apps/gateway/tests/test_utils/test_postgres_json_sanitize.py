@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import UserDict
 
-from src.utils.postgres_json_sanitize import sanitize_postgres_json_payload, sanitize_postgres_text
+from vecinita_common.utils.postgres_json_sanitize import sanitize_postgres_json_payload, sanitize_postgres_text
 
 
 def test_sanitize_postgres_text_strips_nul() -> None:

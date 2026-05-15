@@ -6,7 +6,7 @@ Test script demonstrating the HTML cleaner functionality.
 import sys
 from pathlib import Path
 
-from src.utils import HTMLCleaner
+from vecinita_common.utils import HTMLCleaner
 
 # Ensure src is on sys.path before importing
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))

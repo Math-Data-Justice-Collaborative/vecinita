@@ -7,7 +7,7 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def clear_lookup_cache():
-    from src.services.modal import invoker
+    from vecinita_common.modal import invoker
 
     invoker._lookup_function.cache_clear()
     yield
@@ -15,7 +15,7 @@ def clear_lookup_cache():
 
 
 def test_modal_function_invocation_unset_off_even_with_tokens(monkeypatch):
-    from src.services.modal.invoker import modal_function_invocation_enabled
+    from vecinita_common.modal.invoker import modal_function_invocation_enabled
 
     monkeypatch.delenv("MODAL_FUNCTION_INVOCATION", raising=False)
     monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")
@@ -24,7 +24,7 @@ def test_modal_function_invocation_unset_off_even_with_tokens(monkeypatch):
 
 
 def test_modal_function_invocation_auto_off_without_tokens(monkeypatch):
-    from src.services.modal.invoker import modal_function_invocation_enabled
+    from vecinita_common.modal.invoker import modal_function_invocation_enabled
 
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "auto")
     for key in (
@@ -38,7 +38,7 @@ def test_modal_function_invocation_auto_off_without_tokens(monkeypatch):
 
 
 def test_modal_function_invocation_auto_on_with_canonical_tokens(monkeypatch):
-    from src.services.modal.invoker import modal_function_invocation_enabled
+    from vecinita_common.modal.invoker import modal_function_invocation_enabled
 
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "auto")
     monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")
@@ -47,7 +47,7 @@ def test_modal_function_invocation_auto_on_with_canonical_tokens(monkeypatch):
 
 
 def test_modal_function_invocation_auto_on_with_legacy_api_tokens(monkeypatch):
-    from src.services.modal.invoker import modal_function_invocation_enabled
+    from vecinita_common.modal.invoker import modal_function_invocation_enabled
 
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "auto")
     monkeypatch.delenv("MODAL_TOKEN_ID", raising=False)
@@ -58,7 +58,7 @@ def test_modal_function_invocation_auto_on_with_legacy_api_tokens(monkeypatch):
 
 
 def test_modal_function_invocation_explicit_http_disables_despite_tokens(monkeypatch):
-    from src.services.modal.invoker import modal_function_invocation_enabled
+    from vecinita_common.modal.invoker import modal_function_invocation_enabled
 
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "http")
     monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")
@@ -67,7 +67,7 @@ def test_modal_function_invocation_explicit_http_disables_despite_tokens(monkeyp
 
 
 def test_modal_function_invocation_explicit_auto_uses_token_gate(monkeypatch):
-    from src.services.modal.invoker import modal_function_invocation_enabled
+    from vecinita_common.modal.invoker import modal_function_invocation_enabled
 
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "auto")
     monkeypatch.delenv("MODAL_TOKEN_ID", raising=False)
@@ -78,7 +78,7 @@ def test_modal_function_invocation_explicit_auto_uses_token_gate(monkeypatch):
 
 
 def test_modal_function_invocation_explicit_true_without_tokens(monkeypatch):
-    from src.services.modal.invoker import modal_function_invocation_enabled
+    from vecinita_common.modal.invoker import modal_function_invocation_enabled
 
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
     monkeypatch.delenv("MODAL_TOKEN_ID", raising=False)
@@ -87,7 +87,7 @@ def test_modal_function_invocation_explicit_true_without_tokens(monkeypatch):
 
 
 def test_invoke_modal_scraper_reindex_uses_spawn_and_get(monkeypatch):
-    from src.services.modal import invoker
+    from vecinita_common.modal import invoker
 
     class _Call:
         def get(self, timeout=None):
@@ -109,7 +109,7 @@ def test_invoke_modal_scraper_reindex_uses_spawn_and_get(monkeypatch):
 
 
 def test_modal_function_invocation_mode_variants(monkeypatch):
-    from src.services.modal.invoker import modal_function_invocation_mode
+    from vecinita_common.modal.invoker import modal_function_invocation_mode
 
     monkeypatch.delenv("MODAL_FUNCTION_INVOCATION", raising=False)
     assert modal_function_invocation_mode() == "off"
@@ -125,7 +125,7 @@ def test_modal_function_invocation_mode_variants(monkeypatch):
 
 
 def test_enforce_modal_function_policy_for_urls_requires_mode(monkeypatch):
-    from src.services.modal.invoker import enforce_modal_function_policy_for_urls
+    from vecinita_common.modal.invoker import enforce_modal_function_policy_for_urls
 
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "0")
     with pytest.raises(RuntimeError, match="Configured Modal HTTP endpoints require Modal"):
@@ -135,7 +135,7 @@ def test_enforce_modal_function_policy_for_urls_requires_mode(monkeypatch):
 
 
 def test_enforce_modal_function_policy_for_urls_requires_tokens(monkeypatch):
-    from src.services.modal.invoker import enforce_modal_function_policy_for_urls
+    from vecinita_common.modal.invoker import enforce_modal_function_policy_for_urls
 
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "1")
     monkeypatch.delenv("MODAL_TOKEN_ID", raising=False)
@@ -150,7 +150,7 @@ def test_enforce_modal_function_policy_for_urls_requires_tokens(monkeypatch):
 
 
 def test_enforce_modal_function_policy_for_urls_allows_non_modal(monkeypatch):
-    from src.services.modal.invoker import enforce_modal_function_policy_for_urls
+    from vecinita_common.modal.invoker import enforce_modal_function_policy_for_urls
 
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "0")
     enforce_modal_function_policy_for_urls({"OLLAMA_BASE_URL": "http://localhost:11434"})
@@ -159,7 +159,7 @@ def test_enforce_modal_function_policy_for_urls_allows_non_modal(monkeypatch):
 def test_enforce_modal_function_policy_allows_modal_hosts_when_auto_and_tokens_configured(
     monkeypatch,
 ):
-    from src.services.modal.invoker import enforce_modal_function_policy_for_urls
+    from vecinita_common.modal.invoker import enforce_modal_function_policy_for_urls
 
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "auto")
     monkeypatch.setenv("MODAL_TOKEN_ID", "ak-test")

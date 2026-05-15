@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from src.services.db import security
+from vecinita_db import security
 
 pytestmark = pytest.mark.unit
 

@@ -526,7 +526,7 @@ class TestEnvironmentConfiguration:
 
         # Reload service_endpoints then main so module-level AGENT_SERVICE_URL rebinds.
         import src.api.main
-        import src.service_endpoints as ep
+        import vecinita_config.service_endpoints as ep
 
         importlib.reload(ep)
         importlib.reload(src.api.main)
@@ -541,7 +541,7 @@ class TestEnvironmentConfiguration:
         monkeypatch.setenv("AGENT_SERVICE_URL", "vecinita-agent.internal:10000")
 
         import src.api.main
-        import src.service_endpoints as ep
+        import vecinita_config.service_endpoints as ep
 
         importlib.reload(ep)
         importlib.reload(src.api.main)
@@ -557,9 +557,9 @@ class TestEnvironmentConfiguration:
 
         # Reload module to pick up new environment variables
         import src.api.main
-        import src.config
+        import vecinita_config.config
 
-        importlib.reload(src.config)
+        importlib.reload(vecinita_config.config)
         importlib.reload(src.api.main)
         assert src.api.main.EMBEDDING_SERVICE_URL == canonical_url
 

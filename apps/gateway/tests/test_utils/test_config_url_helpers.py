@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.config import normalize_agent_service_url, rewrite_deprecated_modal_embedding_host
+from vecinita_config.config import normalize_agent_service_url, rewrite_deprecated_modal_embedding_host
 
 pytestmark = pytest.mark.unit
 

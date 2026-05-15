@@ -41,8 +41,8 @@ def test_embed_returns_503_when_resolved_upstream_is_modal_and_modal_rpc_off(mon
     monkeypatch.setenv("MODAL_FUNCTION_INVOCATION", "0")
 
     import src.api.router_embed as router_embed
-    import src.config as cfg
-    import src.service_endpoints as ep
+    import vecinita_config.config as cfg
+    import vecinita_config.service_endpoints as ep
 
     importlib.reload(cfg)
     importlib.reload(ep)

@@ -1,4 +1,4 @@
-from src.utils.tags import canonicalize_tag, normalize_tag_fields, normalize_tags, parse_tags_input
+from vecinita_common.utils.tags import canonicalize_tag, normalize_tag_fields, normalize_tags, parse_tags_input
 
 
 def test_normalize_tags_maps_bilingual_aliases_to_canonical_values():

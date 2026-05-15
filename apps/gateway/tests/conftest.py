@@ -84,7 +84,7 @@ def _agent_module_path_compatibility():
         sys.modules["torch"] = fake_torch
 
     # Stub embedding service client before importing src.agent.main.
-    fake_embedding_module = types.ModuleType("src.embedding_service.client")
+    fake_embedding_module = types.ModuleType("vecinita_common.embedding.client")
     fake_psycopg2_module = types.ModuleType("psycopg2")
     fake_psycopg2_extras_module = types.ModuleType("psycopg2.extras")
 
@@ -97,7 +97,7 @@ def _agent_module_path_compatibility():
     fake_embedding_module.create_embedding_client = _fake_create_embedding_client
     fake_psycopg2_extras_module.RealDictCursor = object
     fake_psycopg2_module.extras = fake_psycopg2_extras_module
-    sys.modules["src.embedding_service.client"] = fake_embedding_module
+    sys.modules["vecinita_common.embedding.client"] = fake_embedding_module
     sys.modules["psycopg2"] = fake_psycopg2_module
     sys.modules["psycopg2.extras"] = fake_psycopg2_extras_module
 
@@ -113,8 +113,6 @@ def _agent_module_path_compatibility():
     for _k, _v in _test_env_defaults.items():
         _original_env[_k] = os.environ.get(_k)
         os.environ[_k] = _v
-
-    __import__("src.agent.main")
 
     yield
 
@@ -155,28 +153,9 @@ def fastapi_client(env_vars, monkeypatch):
     for key, value in env_vars.items():
         monkeypatch.setenv(key, value)
 
-    # Patch dependencies before importing app
-    from unittest.mock import MagicMock
+    from src.api.main import app
 
-    with (
-        patch("src.agent.main.ChatOllama") as mock_ollama,
-        patch("src.agent.main.HuggingFaceEmbeddings") as mock_embeddings,
-    ):
-        # Setup mocks
-        mock_llm = MagicMock()
-        mock_response = MagicMock()
-        mock_response.content = "Test response"
-        mock_llm.invoke.return_value = mock_response
-        mock_ollama.return_value = mock_llm
-
-        mock_embedding_model = MagicMock()
-        mock_embedding_model.embed_query.return_value = [0.1] * 384
-        mock_embeddings.return_value = mock_embedding_model
-
-        # Import after mocks are set
-        from src.agent.main import app
-
-        return TestClient(app)
+    return TestClient(app)
 
 
 @pytest.fixture

@@ -19,8 +19,8 @@ pytestmark = pytest.mark.unit
 
 def _reload(monkeypatch_env: dict[str, str] | None = None):
     """Reload both config and service_endpoints so module-level constants re-evaluate."""
-    import src.config as cfg_mod
-    import src.service_endpoints as ep_mod
+    import vecinita_config.config as cfg_mod
+    import vecinita_config.service_endpoints as ep_mod
 
     if monkeypatch_env is not None:
         with patch.dict("os.environ", monkeypatch_env, clear=False):
@@ -102,7 +102,7 @@ class TestIsRenderStrictMode:
     def test_returns_true_when_render_remote_only_enabled(self, monkeypatch):
         monkeypatch.setenv("RENDER_REMOTE_INFERENCE_ONLY", "true")
 
-        import src.service_endpoints as ep
+        import vecinita_config.service_endpoints as ep
 
         importlib.reload(ep)
         assert ep.is_render_strict_mode() is True
@@ -110,7 +110,7 @@ class TestIsRenderStrictMode:
     def test_returns_false_when_one_flag_missing(self, monkeypatch):
         monkeypatch.delenv("RENDER_REMOTE_INFERENCE_ONLY", raising=False)
 
-        import src.service_endpoints as ep
+        import vecinita_config.service_endpoints as ep
 
         importlib.reload(ep)
         assert ep.is_render_strict_mode() is False
@@ -118,7 +118,7 @@ class TestIsRenderStrictMode:
     def test_returns_false_when_both_flags_absent(self, monkeypatch):
         monkeypatch.delenv("RENDER_REMOTE_INFERENCE_ONLY", raising=False)
 
-        import src.service_endpoints as ep
+        import vecinita_config.service_endpoints as ep
 
         importlib.reload(ep)
         assert ep.is_render_strict_mode() is False
@@ -126,7 +126,7 @@ class TestIsRenderStrictMode:
     def test_accepts_numeric_truthy_values(self, monkeypatch):
         monkeypatch.setenv("RENDER_REMOTE_INFERENCE_ONLY", "1")
 
-        import src.service_endpoints as ep
+        import vecinita_config.service_endpoints as ep
 
         importlib.reload(ep)
         assert ep.is_render_strict_mode() is True
@@ -134,7 +134,7 @@ class TestIsRenderStrictMode:
     def test_rejects_false_strings(self, monkeypatch):
         monkeypatch.setenv("RENDER_REMOTE_INFERENCE_ONLY", "0")
 
-        import src.service_endpoints as ep
+        import vecinita_config.service_endpoints as ep
 
         importlib.reload(ep)
         assert ep.is_render_strict_mode() is False
@@ -148,14 +148,14 @@ class TestIsRenderStrictMode:
 class TestIsRender:
     def test_returns_true_on_render(self, monkeypatch):
         monkeypatch.setenv("RENDER", "true")
-        import src.service_endpoints as ep
+        import vecinita_config.service_endpoints as ep
 
         assert ep.is_render() is True
 
     def test_returns_false_off_render(self, monkeypatch):
         monkeypatch.delenv("RENDER", raising=False)
         monkeypatch.delenv("RENDER_SERVICE_ID", raising=False)
-        import src.service_endpoints as ep
+        import vecinita_config.service_endpoints as ep
 
         assert ep.is_render() is False
 
@@ -171,7 +171,7 @@ class TestGetAllowedOrigins:
             "ALLOWED_ORIGINS",
             "https://vecinita-frontend.onrender.com,https://staging.vecinita.com",
         )
-        import src.service_endpoints as ep
+        import vecinita_config.service_endpoints as ep
 
         importlib.reload(ep)
         origins = ep.get_allowed_origins()
@@ -183,7 +183,7 @@ class TestGetAllowedOrigins:
             "ALLOWED_ORIGINS",
             "https://a.example.com https://b.example.com",
         )
-        import src.service_endpoints as ep
+        import vecinita_config.service_endpoints as ep
 
         importlib.reload(ep)
         origins = ep.get_allowed_origins()
@@ -191,14 +191,14 @@ class TestGetAllowedOrigins:
 
     def test_returns_wildcard_when_not_set(self, monkeypatch):
         monkeypatch.delenv("ALLOWED_ORIGINS", raising=False)
-        import src.service_endpoints as ep
+        import vecinita_config.service_endpoints as ep
 
         importlib.reload(ep)
         assert ep.get_allowed_origins() == ["*"]
 
     def test_strips_whitespace_from_entries(self, monkeypatch):
         monkeypatch.setenv("ALLOWED_ORIGINS", "  https://a.com , https://b.com  ")
-        import src.service_endpoints as ep
+        import vecinita_config.service_endpoints as ep
 
         importlib.reload(ep)
         origins = ep.get_allowed_origins()

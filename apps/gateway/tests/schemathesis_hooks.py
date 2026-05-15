@@ -334,7 +334,7 @@ def map_body(context: HookContext, body):  # noqa: ANN001
             "stream": False,
         }
     if path == "/api/v1/modal-jobs/scraper" and method == "POST":
-        from src.utils.postgres_json_sanitize import sanitize_postgres_json_payload
+        from vecinita_common.utils.postgres_json_sanitize import sanitize_postgres_json_payload
 
         out = dict(body) if isinstance(body, dict) else {}
         for key in ("crawl_config", "chunking_config", "metadata"):

@@ -21,7 +21,7 @@ def test_run_startup_preflight_ok(preflight_module, monkeypatch):
     monkeypatch.setattr(preflight_module, "_probe_guardrails_loaded", lambda: (True, "ok"))
     monkeypatch.setattr(preflight_module, "_probe_postgres_connectivity", lambda: (True, "ok"))
 
-    with patch("src.config.resolve_data_db_mode", return_value="postgres"):
+    with patch("vecinita_config.config.resolve_data_db_mode", return_value="postgres"):
         result = preflight_module._run_startup_preflight()
 
     assert result["status"] == "ok"
@@ -36,7 +36,7 @@ def test_run_startup_preflight_reports_postgres_backend(preflight_module, monkey
     monkeypatch.setattr(preflight_module, "_probe_guardrails_loaded", lambda: (True, "ok"))
     monkeypatch.setattr(preflight_module, "_probe_postgres_connectivity", lambda: (True, "ok"))
 
-    with patch("src.config.resolve_data_db_mode", return_value="postgres"):
+    with patch("vecinita_config.config.resolve_data_db_mode", return_value="postgres"):
         result = preflight_module._run_startup_preflight()
 
     assert result["status"] == "ok"
@@ -55,7 +55,7 @@ def test_run_startup_preflight_degraded_postgres(preflight_module, monkeypatch):
         lambda: (False, "database_url_not_configured"),
     )
 
-    with patch("src.config.resolve_data_db_mode", return_value="postgres"):
+    with patch("vecinita_config.config.resolve_data_db_mode", return_value="postgres"):
         result = preflight_module._run_startup_preflight()
 
     assert result["status"] == "degraded"
@@ -84,7 +84,7 @@ def test_run_startup_preflight_degraded_when_db_url_is_placeholder(preflight_mod
     monkeypatch.setenv("DATABASE_URL", "postgresql://test")
     monkeypatch.setattr(preflight_module, "_probe_guardrails_loaded", lambda: (True, "ok"))
 
-    with patch("src.config.resolve_data_db_mode", return_value="postgres"):
+    with patch("vecinita_config.config.resolve_data_db_mode", return_value="postgres"):
         result = preflight_module._run_startup_preflight()
 
     assert result["status"] == "degraded"
@@ -105,7 +105,7 @@ def test_run_startup_preflight_degraded_dns_error(preflight_module, monkeypatch)
         ),
     )
 
-    with patch("src.config.resolve_data_db_mode", return_value="postgres"):
+    with patch("vecinita_config.config.resolve_data_db_mode", return_value="postgres"):
         result = preflight_module._run_startup_preflight()
 
     assert result["status"] == "degraded"

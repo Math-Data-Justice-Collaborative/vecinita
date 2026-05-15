@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.utils.scraper_api_keys import iter_scraper_api_key_segment_errors
+from vecinita_common.utils.scraper_api_keys import iter_scraper_api_key_segment_errors
 
 pytestmark = pytest.mark.unit
 

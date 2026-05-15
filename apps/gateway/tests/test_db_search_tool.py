@@ -302,7 +302,7 @@ def test_db_search_uses_postgres_fallback_when_data_mode_is_postgres(
     )
     monkeypatch.setattr(db_search_module, "_query_postgres_fallback", mock_postgres)
 
-    import src.config as app_config
+    import vecinita_config.config as app_config
 
     importlib.reload(app_config)
 
@@ -326,7 +326,7 @@ def test_db_search_prefers_postgres_when_database_url_present(monkeypatch, mock_
     postgres_mock = Mock(return_value=[])
     monkeypatch.setattr(db_search_module, "_query_postgres_fallback", postgres_mock)
 
-    import src.config as app_config
+    import vecinita_config.config as app_config
 
     importlib.reload(app_config)
 

@@ -33,20 +33,20 @@ def mock_embedding_model():
 @pytest.fixture
 def embedding_app(mock_embedding_model):
     """Create embedding service app for testing."""
-    from src.embedding_service import main as server_module
+    from vecinita_common.embedding import main as server_module
 
     server = importlib.reload(server_module)
     server._embedding_model = None
     server._auth_token = None
 
-    with patch("src.embedding_service.main.get_embedding_model", return_value=mock_embedding_model):
+    with patch("vecinita_common.embedding.main.get_embedding_model", return_value=mock_embedding_model):
         yield server.app
 
 
 @pytest.fixture
 def embedding_client(embedding_app, mock_embedding_model):
     """Create test client for embedding service."""
-    with patch("src.embedding_service.main.get_embedding_model", return_value=mock_embedding_model):
+    with patch("vecinita_common.embedding.main.get_embedding_model", return_value=mock_embedding_model):
         return TestClient(embedding_app)
 
 
@@ -63,7 +63,7 @@ class TestEmbeddingHealth:
 
 class TestEmbeddingAuth:
     def test_embed_rejects_unauthorized_when_token_enabled(self, embedding_client):
-        from src.embedding_service import main as server
+        from vecinita_common.embedding import main as server
 
         server._auth_token = "test-token"
         response = embedding_client.post("/embed", json={"text": "hello"})
@@ -72,13 +72,13 @@ class TestEmbeddingAuth:
     def test_embed_skips_app_auth_when_disabled_for_modal(self, monkeypatch, mock_embedding_model):
         monkeypatch.setenv("EMBEDDING_DISABLE_APP_AUTH", "true")
 
-        from src.embedding_service import main as server_module
+        from vecinita_common.embedding import main as server_module
 
         server = importlib.reload(server_module)
         server._embedding_model = None
 
         with patch(
-            "src.embedding_service.main.get_embedding_model", return_value=mock_embedding_model
+            "vecinita_common.embedding.main.get_embedding_model", return_value=mock_embedding_model
         ):
             client = TestClient(server.app)
             response = client.post("/embed", json={"text": "hello"})
@@ -86,7 +86,7 @@ class TestEmbeddingAuth:
         assert response.status_code == 200
 
     def test_embed_accepts_token_header(self, embedding_client):
-        from src.embedding_service import main as server
+        from vecinita_common.embedding import main as server
 
         server._auth_token = "test-token"
         response = embedding_client.post(
@@ -97,7 +97,7 @@ class TestEmbeddingAuth:
         assert response.status_code == 200
 
     def test_embed_accepts_bearer_token_when_auth_enabled(self, embedding_client):
-        from src.embedding_service import main as server
+        from vecinita_common.embedding import main as server
 
         server._auth_token = "test-token"
         response = embedding_client.post(
@@ -230,7 +230,7 @@ class TestConfigEndpoints:
 
     def test_set_config_locked_config(self, embedding_client):
         """Test that locked config cannot be changed."""
-        with patch("src.embedding_service.main._lock_selection", True):
+        with patch("vecinita_common.embedding.main._lock_selection", True):
             request_data = {
                 "provider": "huggingface",
                 "model": "sentence-transformers/all-MiniLM-L6-v2",
@@ -259,7 +259,7 @@ class TestSimilarityEndpoint:
         import numpy as np
 
         with (
-            patch("src.embedding_service.main.get_embedding_model") as mock_model,
+            patch("vecinita_common.embedding.main.get_embedding_model") as mock_model,
             patch(
                 "sklearn.metrics.pairwise.cosine_similarity",
                 return_value=np.array([[0.9, 0.7, 0.5]]),
@@ -290,7 +290,7 @@ class TestSimilarityEndpoint:
 
     def test_similarity_results_sorted(self, embedding_client):
         """Test that similarity results are sorted by score."""
-        with patch("src.embedding_service.main.get_embedding_model"):
+        with patch("vecinita_common.embedding.main.get_embedding_model"):
             request_data = {
                 "query_request": {"text": "test"},
                 "texts_request": {"texts": ["a", "b", "c"]},
@@ -308,13 +308,13 @@ class TestEmbedRequestModel:
 
     def test_embed_request_valid(self, embedding_client):
         """Test valid EmbedRequest."""
-        from src.embedding_service.main import EmbedRequest
+        from vecinita_common.embedding.main import EmbedRequest
 
         req = EmbedRequest(text="test text")
         assert req.text == "test text"
 
     def test_embed_request_accepts_legacy_query_field(self, embedding_client):
-        from src.embedding_service.main import EmbedRequest
+        from vecinita_common.embedding.main import EmbedRequest
 
         req = EmbedRequest.model_validate({"query": "from query field"})
         assert req.text == "from query field"
@@ -324,7 +324,7 @@ class TestEmbedRequestModel:
         """Test EmbedRequest rejects empty inputs."""
         from pydantic import ValidationError
 
-        from src.embedding_service.main import EmbedRequest
+        from vecinita_common.embedding.main import EmbedRequest
 
         with pytest.raises(ValidationError):
             EmbedRequest.model_validate({"text": ""})
@@ -333,7 +333,7 @@ class TestEmbedRequestModel:
         """Test EmbedRequest respects max_length."""
         from pydantic import ValidationError
 
-        from src.embedding_service.main import EmbedRequest
+        from vecinita_common.embedding.main import EmbedRequest
 
         with pytest.raises(ValidationError):
             EmbedRequest.model_validate({"text": "x" * 10001})
@@ -344,21 +344,21 @@ class TestBatchEmbedRequestModel:
 
     def test_batch_embed_request_valid(self, embedding_client):
         """Test valid BatchEmbedRequest."""
-        from src.embedding_service.main import BatchEmbedRequest
+        from vecinita_common.embedding.main import BatchEmbedRequest
 
         req = BatchEmbedRequest(texts=["text1", "text2"])
         assert len(req.texts) == 2
 
     def test_batch_embed_request_min_items(self, embedding_client):
         """Test BatchEmbedRequest respects min_items."""
-        from src.embedding_service.main import BatchEmbedRequest
+        from vecinita_common.embedding.main import BatchEmbedRequest
 
         with pytest.raises(ValueError):
             BatchEmbedRequest(texts=[])
 
     def test_batch_embed_request_max_items(self, embedding_client):
         """Test BatchEmbedRequest respects max_items."""
-        from src.embedding_service.main import BatchEmbedRequest
+        from vecinita_common.embedding.main import BatchEmbedRequest
 
         with pytest.raises(ValueError):
             BatchEmbedRequest(texts=["text"] * 101)
@@ -369,7 +369,7 @@ class TestEmbeddingResponseModel:
 
     def test_embedding_response_valid(self, embedding_client):
         """Test valid EmbeddingResponse."""
-        from src.embedding_service.main import EmbeddingResponse
+        from vecinita_common.embedding.main import EmbeddingResponse
 
         resp = EmbeddingResponse(embedding=[0.1] * 384, dimension=384, model="test-model")
         assert resp.dimension == 384
@@ -381,7 +381,7 @@ class TestBatchEmbeddingResponseModel:
 
     def test_batch_embedding_response_valid(self, embedding_client):
         """Test valid BatchEmbeddingResponse."""
-        from src.embedding_service.main import BatchEmbeddingResponse
+        from vecinita_common.embedding.main import BatchEmbeddingResponse
 
         resp = BatchEmbeddingResponse(
             embeddings=[[0.1] * 384, [0.2] * 384], dimension=384, count=2, model="test-model"
