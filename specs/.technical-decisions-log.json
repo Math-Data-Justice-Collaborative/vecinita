@@ -88,26 +88,26 @@
     {
       "id": "TD-008",
       "title": "LLM Provider Strategy",
-      "stage": "1_decompose",
-      "status": "deferred",
-      "chosen_option": "deferred",
-      "rationale": "Defaulting to vLLM as primary + existing API providers as fallbacks via LlamaIndex router. Confirm during implementation.",
-      "timestamp": "2026-05-12T12:08:00Z",
+      "stage": "5_validate",
+      "status": "decided",
+      "chosen_option": "vLLM only — no fallback, return 503 when unavailable",
+      "rationale": "Simplest operational model. No silent fallback to external providers; explicit failure signals infrastructure issues clearly.",
+      "timestamp": "2026-05-15T13:00:00Z",
       "affects_services": ["agent", "vllm-inference"],
       "reversibility": "easy",
-      "deferred_risk": "Low — LlamaIndex supports multiple LLM backends. Provider configuration is runtime, not architectural."
+      "deferred_risk": null
     },
     {
       "id": "TD-009",
       "title": "LLM Model Selection for vLLM",
-      "stage": "1_decompose",
-      "status": "deferred",
-      "chosen_option": "deferred",
-      "rationale": "Design for flexibility. Model choice affects GPU requirements and Modal config but not service architecture.",
-      "timestamp": "2026-05-12T12:08:00Z",
+      "stage": "5_validate",
+      "status": "decided",
+      "chosen_option": "Llama 3.1 8B (Meta) — fast, compact, fits any GPU",
+      "rationale": "Good balance of capability and resource efficiency. Runs on A100-40GB with room to spare, fast inference, strong general-purpose performance.",
+      "timestamp": "2026-05-15T13:00:00Z",
       "affects_services": ["vllm-inference"],
       "reversibility": "easy",
-      "deferred_risk": "Low — vLLM supports model swapping at startup. No code changes needed."
+      "deferred_risk": null
     }
   ]
 }
