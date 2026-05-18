@@ -1,5 +1,0 @@
-{
-  "provider": "huggingface",
-  "model": "sentence-transformers/all-MiniLM-L6-v2",
-  "lock": false
-}
