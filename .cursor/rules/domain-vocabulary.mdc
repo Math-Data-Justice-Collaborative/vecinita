@@ -1,0 +1,53 @@
+---
+description: Enforces correct domain terminology from the RFantibody spec
+globs: ""
+alwaysApply: true
+---
+
+# Domain Vocabulary
+
+Use consistent, spec-defined terminology throughout code, comments, docs, and commit
+messages. Sources: `docs/feature-list.md`, `docs/spec.md`, `docs/api-contract.md`.
+
+## Critical Distinctions
+
+| Correct | Incorrect | Why |
+|---------|-----------|-----|
+| **RF2** or **RoseTTAFold2** | Rosetta, RoseTTAFold, RF | RF2 is a PyTorch deep learning model, NOT the Rosetta molecular modeling suite. The repo uses antibody-finetuned RoseTTAFold2. Confusion leads to wrong dependencies. |
+| **RFdiffusion** | RF diffusion, rfdiff, RFD | Upstream project name, one word |
+| **ProteinMPNN** | proteinmpnn, MPNN, protein-mpnn | Upstream project name, CamelCase |
+| **CDR loop** | binding loop, variable loop | Complementarity-Determining Region — the standard term |
+| **epitope** | binding site (on antigen) | The specific region on the antigen that the antibody binds |
+| **antigen** | target protein (ambiguous) | The molecule the antibody is designed to bind |
+| **antibody** / **nanobody** | binder (ambiguous) | Antibody for scFv, nanobody for VHH |
+| **VHH** | vhh, Vhh | Variable domain of Heavy chain of Heavy-chain-only antibody |
+| **scFv** | scfv, ScFv | Single-chain variable fragment |
+
+## Parameter Names
+
+Use exact parameter names from `docs/config-spec.md`:
+
+| Parameter | Correct | Do not use |
+|-----------|---------|------------|
+| Diffusion steps | `diffuser_T` | `timesteps`, `T`, `num_steps` |
+| Hotspot fraction | `hotspot_show_prop` | `hotspot_ratio`, `hotspot_frac` |
+| MPNN temperature | `mpnn_temperature` | `temperature`, `temp`, `sampling_temp` |
+| Sequences per backbone | `mpnn_seqs_per_struct` | `num_seqs`, `seqs_per_backbone` |
+| RF2 recycling | `rf2_num_recycles` | `recycles`, `num_recycles` |
+| pAE threshold | `rf2_pae_threshold` | `pae_cutoff`, `pae_filter` |
+| RMSD threshold | `rf2_rmsd_threshold` | `rmsd_cutoff`, `rmsd_filter` |
+| TCR mode | `tcr_mode` | `tcr`, `use_tcr`, `tcr_mhc` |
+
+## Quality Metrics
+
+| Metric | Full Name | Description |
+|--------|-----------|-------------|
+| **pAE** | Predicted Alignment Error | Interface confidence score from RF2 |
+| **pBind** | Predicted Binding | Binding confidence score from RF2 |
+| **self-consistency RMSD** | Self-consistency backbone RMSD | Re-prediction without template, backbone RMSD in Angstroms |
+| **Quiver** | Quiver batch format | PDB batch format used between pipeline stages |
+
+## When in Doubt
+
+If a term not listed here is needed, check the upstream RFantibody repo and paper first.
+If still ambiguous, raise `[Ambiguity]` with the candidate terms and a recommendation.

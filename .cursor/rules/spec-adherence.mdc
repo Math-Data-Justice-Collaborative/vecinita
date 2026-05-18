@@ -1,0 +1,65 @@
+---
+description: Enforces spec-adherence, phased workflow, tech choices, and question-raising before code changes
+alwaysApply: true
+---
+
+# Spec Adherence
+
+Before making any code change, verify:
+
+1. **Spec exists**: Check that a relevant spec in `docs/` covers the work (feature-list,
+   spec, config-spec, execution-plan, modal-integration, or data-staging-plan). If no spec
+   covers this change, raise a `[Decision]` via AskQuestion: proceed without a spec, or
+   create one first.
+
+2. **Phased workflow**: Check `docs/execution-plan.md` §Current State for the active phase,
+   milestone, and task. The work being done must belong to the active phase.
+   - If the work is in a **future phase**, stop and raise a `[Decision]`: "This task belongs
+     to Phase N but we are in Phase M. Skip ahead, or complete current phase first?"
+   - If a task has **unmet dependencies** (depends-on column), do not start it. Work on the
+     blocking task first or raise it to the user.
+   - After completing a task, update its status to `completed` in the Task Tracking table
+     and set the Completed date. Move the active task pointer in Current State to the next
+     pending task.
+
+3. **Phase gates**: Before starting work in a new phase, verify the previous phase's gate
+   criteria (see Phase Gate Check sections in the execution plan). If any gate criterion
+   is not met:
+   - List the unmet criteria
+   - Raise a `[Decision]` via AskQuestion: "Phase N gate not fully met. Proceed anyway,
+     or resolve the remaining criteria first?"
+   - Record the gate check result in the Phase Gate Log
+
+4. **Tech choices**: Use only the tools, libraries, and patterns documented in the specs.
+   Primary references: `docs/execution-plan.md` §Tech Stack Summary and
+   `docs/dependency-inventory.md`. If a new dependency or tool is needed:
+   - Raise it as a `[Decision]` via AskQuestion with a recommendation
+   - On approval, back-add the choice to the relevant spec document
+   - Append to the Resolution Log in `docs/research-brief.md`
+
+5. **Uncertainty = question**: If anything is unclear — a parameter value, an algorithm
+   detail, a scope boundary, a naming convention — raise it via AskQuestion with:
+   - Category label: `[Decision]`, `[Ambiguity]`, `[Uncertainty]`
+   - Evidence from the specs or codebase
+   - A recommended option as the first choice
+   - "Let me explain / provide more context" as the last option
+   Never silently guess. Never invent values not in the specs.
+
+6. **Back-add on-the-fly decisions**: When any tech choice or design decision is made during
+   implementation that isn't already in the specs:
+   - Update the relevant spec document in `docs/`
+   - Update `docs/execution-plan.md` if it affects the plan
+   - Append to the Resolution Log in `docs/research-brief.md`
+   - If the decision creates a new convention, add or update a rule in `.cursor/rules/`
+
+7. **Task status bookkeeping**: Keep the execution plan in sync with actual progress:
+   - When starting a task: set status to `in_progress` in the Task Tracking table and
+     update Current State
+   - When finishing a task: set status to `completed`, record date, advance Current State
+   - When blocked: set status to `blocked`, note the blocker in Blocked By, raise it to
+     the user
+   - Use TodoWrite for in-session tracking; the execution plan on disk is the persistent
+     source of truth
+
+8. **Citation**: When a code decision was shaped by a spec, include a brief comment in the
+   commit or PR description referencing the source (e.g., "per spec.md §Component Details").
