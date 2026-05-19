@@ -21,11 +21,8 @@ services:
       http_path: /health
       initial_delay_seconds: 30
       period_seconds: 10
-    build_command: >-
-      curl -LsSf https://astral.sh/uv/install.sh | sh &&
-      export PATH="$HOME/.local/bin:$PATH" &&
-      uv sync --group dev
-    run_command: /workspace/.venv/bin/uvicorn vecinita_chat_rag_backend.app:create_app --factory --host 0.0.0.0 --port 8080
+    build_command: uv sync --group dev
+    run_command: python3 -m uvicorn vecinita_chat_rag_backend.app:create_app --factory --host 0.0.0.0 --port 8080
     envs:
       - key: DATABASE_URL
         scope: RUN_TIME
