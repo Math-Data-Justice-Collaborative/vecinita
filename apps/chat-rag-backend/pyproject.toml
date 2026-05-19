@@ -4,9 +4,14 @@ version = "0.1.0"
 description = "ChatRAG FastAPI backend (DigitalOcean)"
 requires-python = ">=3.11,<3.12"
 dependencies = [
+    "fastapi>=0.115,<1",
+    "httpx>=0.27,<1",
+    "sqlalchemy>=2.0.49",
+    "psycopg>=3.3.4",
     "vecinita-rag",
     "vecinita-shared-schemas",
     "vecinita-embedding-client",
+    "vecinita-llm-client",
 ]
 
 [build-system]
@@ -20,3 +25,4 @@ packages = ["vecinita_chat_rag_backend"]
 vecinita-rag = { workspace = true }
 vecinita-shared-schemas = { workspace = true }
 vecinita-embedding-client = { workspace = true }
+vecinita-llm-client = { workspace = true }

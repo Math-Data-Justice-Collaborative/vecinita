@@ -1718,14 +1718,24 @@ name = "vecinita-chat-rag-backend"
 version = "0.1.0"
 source = { editable = "apps/chat-rag-backend" }
 dependencies = [
+    { name = "fastapi" },
+    { name = "httpx" },
+    { name = "psycopg" },
+    { name = "sqlalchemy" },
     { name = "vecinita-embedding-client" },
+    { name = "vecinita-llm-client" },
     { name = "vecinita-rag" },
     { name = "vecinita-shared-schemas" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "fastapi", specifier = ">=0.115,<1" },
+    { name = "httpx", specifier = ">=0.27,<1" },
+    { name = "psycopg", specifier = ">=3.3.4" },
+    { name = "sqlalchemy", specifier = ">=2.0.49" },
     { name = "vecinita-embedding-client", editable = "packages/embedding-client" },
+    { name = "vecinita-llm-client", editable = "packages/llm-client" },
     { name = "vecinita-rag", editable = "packages/rag" },
     { name = "vecinita-shared-schemas", editable = "packages/shared-schemas" },
 ]
