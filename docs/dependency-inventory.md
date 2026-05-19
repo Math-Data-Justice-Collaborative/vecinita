@@ -18,7 +18,8 @@
 | pgvector (python) | TBD | Vector type | PostgreSQL | |
 | httpx | TBD | Modal HTTP clients | BSD | |
 | modal | >=1.2,<2 | Workers + ASGI | Apache-2.0 | Template registry |
-| **vllm** | TBD (pin at T9.2) | **Primary** LLM on Modal **T4**; model **Qwen2.5-1.5B-Instruct** | Apache-2.0 | ADR-009, 04-tech-plan |
+| **vllm** | **0.6.x** (Modal image only) | **Primary** LLM on Modal **T4**; model **Qwen2.5-1.5B-Instruct** | Apache-2.0 | ADR-009, infra/modal/llm_app.py |
+| **vecinita-llm-client** | workspace | HTTP client to Modal LLM (`httpx`) | — | T9.3 |
 | fastembed | TBD | 384-dim embeddings (Modal) | MIT | |
 | langdetect or equivalent | TBD | Bilingual auto-detect | | |
 | pytest / httpx | dev | Tests | | |
