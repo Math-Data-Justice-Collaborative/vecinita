@@ -22,7 +22,7 @@ FORBIDDEN_TABLES: Final[frozenset[str]] = frozenset(
 def _database_url() -> str:
     return os.environ.get(
         "DATABASE_URL",
-        "postgresql://vecinita:vecinita@localhost:5432/vecinita",
+        "postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
     )
 
 
@@ -32,4 +32,4 @@ def test_no_pii_tables_in_database_metadata() -> None:
     from vecinita_database.privacy import find_forbidden_tables
 
     found = find_forbidden_tables(_database_url())
-    assert found == [], f"Forbidden tables present: {sorted(found)}"
+    assert not found, f"Forbidden tables present: {sorted(found)}"
