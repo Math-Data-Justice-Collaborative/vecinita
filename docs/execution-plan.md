@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 2: Data Management |
-| **Active milestone** | M7: Data Management Frontend |
-| **Active task** | T7.1 |
-| **Tasks completed** | 36 / 73 |
+| **Active milestone** | M8: packages/rag |
+| **Active task** | T8.1 |
+| **Tasks completed** | 41 / 73 |
 | **Last updated** | 2026-05-19 |
 
 ## Template
@@ -197,11 +197,11 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps |
 |---|------|------|--------|-------------|------------|-----------|
-| T7.1 | Vite React scaffold `apps/data-management-frontend` | Config | pending | feature-list F12 | T1.1 | — |
-| T7.2 | Jobs submit + poll UI | Code | pending | user-journeys UJ-002 | T6.3, T7.1 | — |
-| T7.3 | Corpus list/delete UI | Code | pending | UJ-003 | T4.3, T7.2 | — |
-| T7.4 | Vitest smoke for job form component | Test | pending | test-plan.md | T7.2 | — |
-| T7.5 | Test: UJ-003 corpus delete E2E (`tests/e2e/test_uj003_corpus_delete.py`) | Test | pending | UJ-003, AC-D4 | T4.3, T7.3 | D1 |
+| T7.1 | Vite React scaffold `apps/data-management-frontend` | Config | completed | feature-list F12 | T1.1 | — |
+| T7.2 | Jobs submit + poll UI | Code | completed | user-journeys UJ-002 | T6.3, T7.1 | — |
+| T7.3 | Corpus list/delete UI | Code | completed | UJ-003 | T4.3, T7.2 | — |
+| T7.4 | Vitest smoke for job form component | Test | completed | test-plan.md | T7.2 | — |
+| T7.5 | Test: UJ-003 corpus delete E2E (`tests/e2e/test_uj003_corpus_delete.py`) | Test | completed | UJ-003, AC-D4 | T4.3, T7.3 | D1 |
 
 #### Phase 2 Gate Check
 
@@ -360,8 +360,8 @@ main
 | PR-4 | Major | Phase 1 | phase/1-foundation | main | pending |
 | PR-5 | Minor | M4 | feat/M4-internal-write-api | phase/2-data-management | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/23 |
 | PR-6 | Minor | M5 | feat/M5-fastembed-modal | phase/2-data-management | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/24 |
-| PR-7 | Minor | M6 | feat/M6-modal-ingest | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/25 |
-| PR-8 | Minor | M7 | feat/M7-data-mgmt-frontend | phase/2-data-management | pending |
+| PR-7 | Minor | M6 | feat/M6-modal-ingest | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/25 |
+| PR-8 | Minor | M7 | feat/M7-data-mgmt-frontend | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/26 |
 | PR-9 | Major | Phase 2 | phase/2-data-management | main | pending |
 | PR-10 | Minor | M8 | feat/M8-packages-rag | phase/3-chatrag | pending |
 | PR-11 | Minor | M9 | feat/M9-vllm-modal | phase/3-chatrag | pending |
@@ -416,11 +416,11 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T6.5 | M6 | 2 | Test | completed | T6.4 | D4 | 2026-05-19 |
 | T6.6 | M6 | 2 | Test | completed | T6.4 | — | 2026-05-19 |
 | T6.7 | M6 | 2 | Test | completed | T6.3 | — | 2026-05-19 |
-| T7.1 | M7 | 2 | Config | pending | T1.1 | — | — |
-| T7.2 | M7 | 2 | Code | pending | T6.3, T7.1 | — | — |
-| T7.3 | M7 | 2 | Code | pending | T4.3, T7.2 | — | — |
-| T7.4 | M7 | 2 | Test | pending | T7.2 | — | — |
-| T7.5 | M7 | 2 | Test | pending | T4.3, T7.3 | D1 | — |
+| T7.1 | M7 | 2 | Config | completed | T1.1 | — | 2026-05-19 |
+| T7.2 | M7 | 2 | Code | completed | T6.3, T7.1 | — | 2026-05-19 |
+| T7.3 | M7 | 2 | Code | completed | T4.3, T7.2 | — | 2026-05-19 |
+| T7.4 | M7 | 2 | Test | completed | T7.2 | — | 2026-05-19 |
+| T7.5 | M7 | 2 | Test | completed | T4.3, T7.3 | D1 | 2026-05-19 |
 | T8.1 | M8 | 3 | Config | pending | T1.2 | — | — |
 | T8.2 | M8 | 3 | Test | pending | T2.6, T8.1 | D1 | — |
 | T8.3 | M8 | 3 | Test | pending | T8.2 | — | — |
