@@ -1,0 +1,21 @@
+# Local/staging non-secret defaults (config-spec.md §Configuration files).
+# Production secrets remain on DO/Modal platforms — not in this file.
+
+env: development
+
+chat_rag:
+  top_k: 5
+  request_timeout_s: 60
+
+ingest:
+  chunk_size_tokens: 256
+  scrape_timeout_s: 30
+
+services:
+  chat_rag_backend: http://localhost:8000
+  internal_write_api: http://localhost:8002
+  data_management_modal: http://localhost:8001
+  chat_rag_frontend: http://localhost:5173
+  data_management_frontend: http://localhost:5174
+  modal_embed: http://localhost:8003
+  modal_llm: http://localhost:8004
