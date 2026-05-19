@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 1: Foundation |
-| **Active milestone** | M1: Monorepo scaffold |
-| **Active task** | T2.1 |
-| **Tasks completed** | 6 / 73 |
+| **Active milestone** | M2: Database schema & privacy |
+| **Active task** | T2.2 |
+| **Tasks completed** | 7 / 73 |
 | **Last updated** | 2026-05-19 |
 
 ## Template
@@ -114,7 +114,7 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps |
 |---|------|------|--------|-------------|------------|-----------|
-| T2.1 | Test: `tests/privacy/test_no_pii_tables.py` (red) | Test | pending | test-plan TC-031, ADR-004 | T1.4 | — |
+| T2.1 | Test: `tests/privacy/test_no_pii_tables.py` (red) | Test | completed | test-plan TC-031, ADR-004 | T1.4 | — |
 | T2.2 | Alembic initial revision: documents, chunks, embeddings, jobs, config | Code | pending | data-management-plan.md §Schema | T2.1 | — |
 | T2.3 | Test: pgvector extension + `vector(384)` dimension check | Test | pending | data-management-plan D5 | T2.2 | — |
 | T2.4 | Implement migrations + `apps/database` Alembic env | Code | pending | feature-list F13 | T2.3 | — |
@@ -385,7 +385,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T1.4 | M1 | 1 | Test | completed | T1.3 | — | 2026-05-19 |
 | T1.5 | M1 | 1 | Config | completed | T1.2 | — | 2026-05-19 |
 | T1.6 | M1 | 1 | Config | completed | T1.1 | — | 2026-05-19 |
-| T2.1 | M2 | 1 | Test | pending | T1.4 | — | — |
+| T2.1 | M2 | 1 | Test | completed | T1.4 | — | 2026-05-19 |
 | T2.2 | M2 | 1 | Code | pending | T2.1 | — | — |
 | T2.3 | M2 | 1 | Test | pending | T2.2 | — | — |
 | T2.4 | M2 | 1 | Code | pending | T2.3 | — | — |
