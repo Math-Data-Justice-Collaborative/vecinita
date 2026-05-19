@@ -1,0 +1,36 @@
+# DigitalOcean App Platform — internal write API (ADR-007, sole DATABASE_URL for Modal)
+name: vecinita-internal-write-api
+region: nyc
+features:
+  - buildpack-stack=ubuntu-22
+
+services:
+  - name: api
+    github:
+      repo: Math-Data-Justice-Collaborative/vecinita
+      branch: main
+      deploy_on_push: true
+    source_dir: /
+    environment_slug: python
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    http_port: 8080
+    health_check:
+      http_path: /health
+    build_command: >-
+      curl -LsSf https://astral.sh/uv/install.sh | sh &&
+      export PATH="$HOME/.local/bin:$PATH" &&
+      uv sync --group dev
+    run_command: >-
+      uv run uvicorn vecinita_internal_write_api.app:create_app
+      --factory --host 0.0.0.0 --port 8080
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_INTERNAL_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_ENV
+        scope: RUN_TIME
+        value: staging

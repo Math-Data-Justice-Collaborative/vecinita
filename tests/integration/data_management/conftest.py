@@ -59,9 +59,7 @@ def dm_client(job_store: InMemoryJobStore, mock_write: _MockWriteClient) -> Test
             store=job_store,
             embed_client=_MockEmbedClient(),  # type: ignore[arg-type]
             write_client=mock_write,  # type: ignore[arg-type]
-            fetch_document=lambda url: fetch_html_fixture(
-                url, fixture_html=_FIXTURE_HTML
-            ),
+            fetch_document=lambda url: fetch_html_fixture(url, fixture_html=_FIXTURE_HTML),
         )
 
     app = create_app(

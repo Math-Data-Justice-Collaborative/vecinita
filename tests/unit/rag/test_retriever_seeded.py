@@ -24,4 +24,3 @@ def test_retriever_returns_seeded_chunk(corpus_db: str, embed_fn_food_pantry) ->
     assert chunks
     assert any("Food pantry" in chunk.text for chunk in chunks)
     assert chunks[0].language == "en"
-

@@ -12,9 +12,7 @@ from vecinita_ingest import (
     parse_html,
 )
 
-_FIXTURE = (
-    Path(__file__).resolve().parents[3] / "data" / "fixtures" / "ingest" / "sample-page.html"
-)
+_FIXTURE = Path(__file__).resolve().parents[3] / "data" / "fixtures" / "ingest" / "sample-page.html"
 
 
 def test_parse_html_fixture_extracts_title_and_body() -> None:

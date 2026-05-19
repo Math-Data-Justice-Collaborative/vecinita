@@ -7,7 +7,7 @@
 
 | Package | Version pin | Purpose | License | Notes |
 |---------|-------------|---------|---------|-------|
-| **llama-index** | **0.11.23** (`>=0.11.23,<0.12`) | **Core** RAG — retriever, query engine, synthesizer | MIT | RD-005, RD-023, ADR-006 |
+| **llama-index** | **0.13.x** (`>=0.13.0,<0.14`) | **Core** RAG — retriever, query engine, synthesizer | MIT | RD-005, RD-023, ADR-006; bumped for pip-audit (CI) |
 | **llama-index-vector-stores-postgres** | **0.2.x–0.8.x** (with core) | pgvector adapter (pinned; custom retriever uses corpus tables) | MIT | ADR-005 |
 | **langdetect** | **1.0.9+** | Bilingual query detection (ADR-013) | Apache-2.0 | T8.4 |
 | fastapi | TBD | HTTP APIs (DO) | MIT | |

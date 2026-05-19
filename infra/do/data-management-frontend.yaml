@@ -1,0 +1,28 @@
+# DigitalOcean App Platform — Data Management static site (F12)
+name: vecinita-data-management-frontend
+region: nyc
+
+static_sites:
+  - name: web
+    github:
+      repo: Math-Data-Justice-Collaborative/vecinita
+      branch: main
+      deploy_on_push: true
+    source_dir: apps/data-management-frontend
+    build_command: npm ci && npm run build
+    output_dir: dist
+    index_document: index.html
+    catchall_document: index.html
+    envs:
+      - key: VITE_VECINITA_ADMIN_API_URL
+        scope: BUILD_TIME
+        type: SECRET
+      - key: VITE_VECINITA_MODAL_PROXY_KEY
+        scope: BUILD_TIME
+        type: SECRET
+      - key: VITE_VECINITA_CORPUS_API_URL
+        scope: BUILD_TIME
+        type: SECRET
+      - key: VITE_VECINITA_CORPUS_API_KEY
+        scope: BUILD_TIME
+        type: SECRET
