@@ -1,0 +1,46 @@
+# DigitalOcean App Platform — ChatRAG Backend (ADR-010)
+# Apply: doctl apps create --spec infra/do/chat-rag-backend.yaml
+# Update: doctl apps update <app-id> --spec infra/do/chat-rag-backend.yaml
+name: vecinita-chat-rag-backend
+region: nyc
+features:
+  - buildpack-stack=ubuntu-22
+
+services:
+  - name: api
+    github:
+      repo: Math-Data-Justice-Collaborative/vecinita
+      branch: main
+      deploy_on_push: true
+    source_dir: /
+    environment_slug: python
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    http_port: 8080
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 30
+      period_seconds: 10
+    build_command: >-
+      curl -LsSf https://astral.sh/uv/install.sh | sh &&
+      export PATH="$HOME/.local/bin:$PATH" &&
+      uv sync --group dev
+    run_command: >-
+      uv run uvicorn vecinita_chat_rag_backend.app:create_app
+      --factory --host 0.0.0.0 --port 8080
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_MODAL_EMBED_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_MODAL_LLM_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_TOP_K
+        scope: RUN_TIME
+        value: "5"
+      - key: VECINITA_ENV
+        scope: RUN_TIME
+        value: staging

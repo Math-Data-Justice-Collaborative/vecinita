@@ -1,7 +1,14 @@
 [
   {
-    "question_en": "When are food pantry hours updated?",
-    "question_es": "¿Cuándo se actualizan los horarios del banco de alimentos?",
+    "question": "When are food pantry hours updated?",
+    "expected_doc_url": "fixture://corpus/en/community-resources.md"
+  },
+  {
+    "question": "¿Cuándo se actualizan los horarios del banco de alimentos?",
+    "expected_doc_url": "fixture://corpus/es/recursos-comunitarios.md"
+  },
+  {
+    "question": "Does the library offer free Wi-Fi?",
     "expected_doc_url": "fixture://corpus/en/community-resources.md"
   }
 ]

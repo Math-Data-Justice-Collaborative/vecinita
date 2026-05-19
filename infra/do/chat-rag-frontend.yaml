@@ -1,0 +1,19 @@
+# DigitalOcean App Platform — ChatRAG static site (F11)
+name: vecinita-chat-rag-frontend
+region: nyc
+
+static_sites:
+  - name: web
+    github:
+      repo: Math-Data-Justice-Collaborative/vecinita
+      branch: main
+      deploy_on_push: true
+    source_dir: apps/chat-rag-frontend
+    build_command: npm ci && npm run build
+    output_dir: dist
+    index_document: index.html
+    catchall_document: index.html
+    envs:
+      - key: VITE_VECINITA_CHAT_API_URL
+        scope: BUILD_TIME
+        type: SECRET
