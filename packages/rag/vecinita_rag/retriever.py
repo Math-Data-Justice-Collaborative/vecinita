@@ -78,10 +78,14 @@ class CorpusPgvectorRetriever(BaseRetriever):
             """
         )
         with self._engine.connect() as conn:
-            rows = conn.execute(
-                sql,
-                {"query_embedding": literal, "top_k": self._top_k},
-            ).mappings().all()
+            rows = (
+                conn.execute(
+                    sql,
+                    {"query_embedding": literal, "top_k": self._top_k},
+                )
+                .mappings()
+                .all()
+            )
 
         chunks: list[RetrievedChunk] = []
         for row in rows:

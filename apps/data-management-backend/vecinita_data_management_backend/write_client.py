@@ -28,9 +28,7 @@ class InternalWriteClient:
         resolved_url = base_url or os.environ.get(_ENV_WRITE_URL)
         resolved_key = api_key or os.environ.get(_ENV_API_KEY)
         if not resolved_url or not resolved_key:
-            raise InternalWriteClientError(
-                f"{_ENV_WRITE_URL} and {_ENV_API_KEY} are required"
-            )
+            raise InternalWriteClientError(f"{_ENV_WRITE_URL} and {_ENV_API_KEY} are required")
         self._base_url = resolved_url.rstrip("/")
         self._api_key = resolved_key
         self._owns = http_client is None

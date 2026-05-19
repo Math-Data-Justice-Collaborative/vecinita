@@ -35,9 +35,11 @@ def attach_embeddings(
     """Assign basis vectors per chunk text match (for deterministic retrieval)."""
     engine = create_engine(database_url)
     with engine.begin() as conn:
-        rows = conn.execute(
-            text("SELECT c.id, c.text FROM chunks c ORDER BY c.chunk_index")
-        ).mappings().all()
+        rows = (
+            conn.execute(text("SELECT c.id, c.text FROM chunks c ORDER BY c.chunk_index"))
+            .mappings()
+            .all()
+        )
         for row in rows:
             index = default_index
             for substring, basis_idx in match_substrings.items():

@@ -41,7 +41,9 @@ class _MockLlmClient:
 @pytest.fixture(scope="module")
 def bootstrapped_stack() -> str:
     if not postgres_is_ready():
-        pytest.skip("Postgres not available — run: docker compose -f infra/docker-compose.yml up -d postgres")
+        pytest.skip(
+            "Postgres not available — run: docker compose -f infra/docker-compose.yml up -d postgres"
+        )
 
     url = default_database_url()
     run_alembic_upgrade_head(url)
@@ -73,7 +75,9 @@ def bootstrap_client(bootstrapped_stack: str) -> TestClient:
 
 
 def test_vecinita_yaml_documents_local_defaults() -> None:
-    assert _VECINITA_YAML.is_file(), "infra/vecinita.yaml required for local defaults (config-spec.md)"
+    assert _VECINITA_YAML.is_file(), (
+        "infra/vecinita.yaml required for local defaults (config-spec.md)"
+    )
     data = yaml.safe_load(_VECINITA_YAML.read_text(encoding="utf-8"))
     assert data["env"] == "development"
     assert data["chat_rag"]["top_k"] == 5

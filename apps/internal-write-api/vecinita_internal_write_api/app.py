@@ -134,15 +134,19 @@ def create_app() -> FastAPI:
     )
     def list_documents() -> list[DocumentSummary]:
         with engine.connect() as conn:
-            rows = conn.execute(
-                text(
-                    """
+            rows = (
+                conn.execute(
+                    text(
+                        """
                     SELECT id, url, title, language
                     FROM documents
                     ORDER BY created_at DESC
                     """
+                    )
                 )
-            ).mappings().all()
+                .mappings()
+                .all()
+            )
         return [
             DocumentSummary(
                 document_id=row["id"],

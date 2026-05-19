@@ -85,9 +85,7 @@ class LlmClient:
             },
         ) as response:
             if response.status_code >= 400:
-                raise LlmClientError(
-                    f"generate_stream failed with status {response.status_code}"
-                )
+                raise LlmClientError(f"generate_stream failed with status {response.status_code}")
             for line in response.iter_lines():
                 if not line or not line.startswith("data: "):
                     continue

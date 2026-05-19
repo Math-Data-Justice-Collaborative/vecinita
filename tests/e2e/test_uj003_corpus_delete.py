@@ -47,7 +47,9 @@ async def test_uj003_corpus_delete(write_client: AsyncClient) -> None:
                 {
                     "url": doc_url,
                     "title": "UJ-003 delete target",
-                    "chunks": [{"chunk_index": 0, "text": "stale content", "embedding": _EMBEDDING}],
+                    "chunks": [
+                        {"chunk_index": 0, "text": "stale content", "embedding": _EMBEDDING}
+                    ],
                 }
             ]
         },
