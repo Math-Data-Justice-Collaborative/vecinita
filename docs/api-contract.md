@@ -108,6 +108,36 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
 
 ---
 
+## Modal LLM (vecinita-llm)
+
+Base path: `/` on Modal app `vecinita-llm` (GPU T4, scale-to-zero). Consumer: ChatRAG Backend via `VECINITA_MODAL_LLM_URL`.
+
+### POST `/generate`
+
+- **Purpose**: Non-streaming text generation from prompt + retrieved context.
+- **Request**:
+
+```json
+{
+  "prompt": "string",
+  "max_tokens": 512,
+  "temperature": 0.2
+}
+```
+
+- **Response** `200`: `{"text": "string"}`
+
+### POST `/generate/stream`
+
+- **Purpose**: SSE token stream for ChatRAG `/api/v1/ask/stream`.
+- **Response** `200` `text/event-stream`: `data: {"token": "..."}` events, final `data: {"done": true}`.
+
+### GET `/health`
+
+- **Response** `200`: `{"status": "ok"}`
+
+---
+
 ## DO internal write API (service-to-service)
 
 Base path: `/internal/v1` (audited S6.2).

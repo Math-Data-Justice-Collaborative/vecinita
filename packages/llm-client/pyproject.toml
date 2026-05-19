@@ -1,0 +1,15 @@
+[project]
+name = "vecinita-llm-client"
+version = "0.1.0"
+description = "HTTP client for Modal vLLM service"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "httpx>=0.27,<1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["vecinita_llm_client"]
