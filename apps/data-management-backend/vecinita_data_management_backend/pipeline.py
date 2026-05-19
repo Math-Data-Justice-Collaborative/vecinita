@@ -6,11 +6,11 @@ from hashlib import sha256
 from typing import Protocol
 from uuid import UUID
 
+from pydantic import HttpUrl
 from vecinita_embedding_client import EmbeddingClient
 from vecinita_ingest import chunk_text, fetch_url
 from vecinita_ingest.models import ScrapedDocument
 from vecinita_ingest.scrape import parse_html
-from pydantic import HttpUrl
 from vecinita_shared_schemas.internal_write import BatchUpsertRequest, ChunkUpsert, DocumentUpsert
 
 from vecinita_data_management_backend.store import JobStore

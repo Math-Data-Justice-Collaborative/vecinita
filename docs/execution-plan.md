@@ -205,9 +205,9 @@
 
 #### Phase 2 Gate Check
 
-- [ ] `pytest tests/e2e/test_uj002*.py test_uj006*.py test_uj008*.py` passes (local tier)
-- [ ] Modal deploy configs documented in `infra/modal/`
-- [ ] No `DATABASE_URL` in Modal worker code (static check / scope-reviewer)
+- [x] `pytest tests/e2e/test_uj002*.py test_uj006*.py test_uj008*.py` passes (local tier)
+- [x] Modal deploy configs documented in `infra/modal/`
+- [x] No `DATABASE_URL` in Modal worker code (static check / scope-reviewer)
 
 ---
 
@@ -458,7 +458,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | Phase | Gate Check Date | Result | Notes |
 |-------|----------------|--------|-------|
 | 1 | — | — | — |
-| 2 | — | — | — |
+| 2 | 2026-05-19 | **pass** | E2E UJ-002/006/008 (4 tests incl. UJ-003); ruff/pyright clean; 36 pytest; Modal README + apps; no DATABASE_URL in Modal paths |
 | 3 | — | — | — |
 | 4 | — | — | — |
 
