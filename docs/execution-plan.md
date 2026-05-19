@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 3: ChatRAG |
-| **Active milestone** | M8: packages/rag |
-| **Active task** | T8.1 |
-| **Tasks completed** | 41 / 73 |
+| **Active milestone** | M9: vLLM Modal service |
+| **Active task** | T9.1 |
+| **Tasks completed** | 46 / 73 |
 | **Last updated** | 2026-05-19 |
 
 ## Template
@@ -223,11 +223,11 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps |
 |---|------|------|--------|-------------|------------|-----------|
-| T8.1 | Pin `llama-index` + `llama-index-vector-stores-postgres` 0.11.x | Config | pending | dependency-inventory, ADR-006 | T1.2 | — |
-| T8.2 | Test: retriever returns seeded chunk (unit) | Test | pending | test-plan TC-001 | T2.6, T8.1 | D1 |
-| T8.3 | Test: empty retrieval message (TC-003) | Test | pending | UJ-005 | T8.2 | — |
-| T8.4 | Implement query engine + bilingual detect hook | Code | pending | spec.md §ChatRAG, ADR-013 | T8.3 | — |
-| T8.5 | Test: Spanish question → Spanish chunk (TC-011) | Test | pending | UJ-001 | T8.4 | D2 |
+| T8.1 | Pin `llama-index` + `llama-index-vector-stores-postgres` 0.11.x | Config | completed | dependency-inventory, ADR-006 | T1.2 | — |
+| T8.2 | Test: retriever returns seeded chunk (unit) | Test | completed | test-plan TC-001 | T2.6, T8.1 | D1 |
+| T8.3 | Test: empty retrieval message (TC-003) | Test | completed | UJ-005 | T8.2 | — |
+| T8.4 | Implement query engine + bilingual detect hook | Code | completed | spec.md §ChatRAG, ADR-013 | T8.3 | — |
+| T8.5 | Test: Spanish question → Spanish chunk (TC-011) | Test | completed | UJ-001 | T8.4 | D2 |
 
 #### M9: vLLM Modal service
 
@@ -421,11 +421,11 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T7.3 | M7 | 2 | Code | completed | T4.3, T7.2 | — | 2026-05-19 |
 | T7.4 | M7 | 2 | Test | completed | T7.2 | — | 2026-05-19 |
 | T7.5 | M7 | 2 | Test | completed | T4.3, T7.3 | D1 | 2026-05-19 |
-| T8.1 | M8 | 3 | Config | pending | T1.2 | — | — |
-| T8.2 | M8 | 3 | Test | pending | T2.6, T8.1 | D1 | — |
-| T8.3 | M8 | 3 | Test | pending | T8.2 | — | — |
-| T8.4 | M8 | 3 | Code | pending | T8.3 | — | — |
-| T8.5 | M8 | 3 | Test | pending | T8.4 | D2 | — |
+| T8.1 | M8 | 3 | Config | completed | T1.2 | — | 2026-05-19 |
+| T8.2 | M8 | 3 | Test | completed | T2.6, T8.1 | D1 | 2026-05-19 |
+| T8.3 | M8 | 3 | Test | completed | T8.2 | — | 2026-05-19 |
+| T8.4 | M8 | 3 | Code | completed | T8.3 | — | 2026-05-19 |
+| T8.5 | M8 | 3 | Test | completed | T8.4 | D2 | 2026-05-19 |
 | T9.1 | M9 | 3 | Config | pending | T1.1 | D7 | — |
 | T9.2 | M9 | 3 | Code | pending | T9.1 | D7 | — |
 | T9.3 | M9 | 3 | Test | pending | T9.2 | — | — |
