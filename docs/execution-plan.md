@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 3: ChatRAG |
-| **Active milestone** | M13: CI |
-| **Active task** | T13.1 |
-| **Tasks completed** | 63 / 73 |
+| **Active milestone** | M14: Staging deploy |
+| **Active task** | T14.1 |
+| **Tasks completed** | 67 / 73 |
 | **Last updated** | 2026-05-19 |
 
 ## Template
@@ -294,10 +294,10 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps |
 |---|------|------|--------|-------------|------------|-----------|
-| T13.1 | GitHub Actions: ruff, pyright, pytest, pip-audit (blocking) | Config | pending | test-plan §CI/CD | T1.5 | — |
-| T13.2 | Frontend eslint + vitest in CI | Config | pending | test-plan.md | T7.1, T11.1 | — |
-| T13.3 | Privacy + OpenAPI validator hooks in CI | Config | pending | 03-plan-tooling skills | T13.1 | — |
-| T13.4 | CI/static check: no `DATABASE_URL` in Modal worker paths (ADR-007) | Config | pending | ADR-007, Phase 2 gate | T6.4 | — |
+| T13.1 | GitHub Actions: ruff, pyright, pytest, pip-audit (blocking) | Config | completed | test-plan §CI/CD | T1.5 | — |
+| T13.2 | Frontend eslint + vitest in CI | Config | completed | test-plan.md | T7.1, T11.1 | — |
+| T13.3 | Privacy + OpenAPI validator hooks in CI | Config | completed | 03-plan-tooling skills | T13.1 | — |
+| T13.4 | CI/static check: no `DATABASE_URL` in Modal worker paths (ADR-007) | Config | completed | ADR-007, Phase 2 gate | T6.4 | — |
 
 #### M14: Staging deploy & smoke
 
@@ -369,7 +369,7 @@ main
 | PR-13 | Minor | M11 | feat/M11-chat-rag-frontend | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/30 |
 | PR-14 | Major | Phase 3 | phase/3-chatrag | main | pending |
 | PR-15 | Minor | M12 | feat/M12-local-dev | main | open |
-| PR-16 | Minor | M13 | feat/M13-ci | phase/4-integration | pending |
+| PR-16 | Minor | M13 | feat/M13-ci | main | open |
 | PR-17 | Minor | M14 | feat/M14-staging-deploy | phase/4-integration | pending |
 | PR-18 | Major | Phase 4 | phase/4-integration | main | pending |
 
@@ -443,10 +443,10 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T12.1 | M12 | 4 | Test | completed | T10.3, T6.3 | D1–D5 | 2026-05-19 |
 | T12.2 | M12 | 4 | Docs | completed | T12.1 | — | 2026-05-19 |
 | T12.3 | M12 | 4 | Docs | completed | T12.2 | — | 2026-05-19 |
-| T13.1 | M13 | 4 | Config | pending | T1.5 | — | — |
-| T13.2 | M13 | 4 | Config | pending | T7.1, T11.1 | — | — |
-| T13.3 | M13 | 4 | Config | pending | T13.1 | — | — |
-| T13.4 | M13 | 4 | Config | pending | T6.4 | — | — |
+| T13.1 | M13 | 4 | Config | completed | T1.5 | — | 2026-05-19 |
+| T13.2 | M13 | 4 | Config | completed | T7.1, T11.1 | — | 2026-05-19 |
+| T13.3 | M13 | 4 | Config | completed | T13.1 | — | 2026-05-19 |
+| T13.4 | M13 | 4 | Config | completed | T6.4 | — | 2026-05-19 |
 | T14.1 | M14 | 4 | Config | pending | T13.1 | — | — |
 | T14.2 | M14 | 4 | Docs | pending | T14.1 | — | — |
 | T14.3 | M14 | 4 | Config | pending | T14.1 | D1–D7 | — |
