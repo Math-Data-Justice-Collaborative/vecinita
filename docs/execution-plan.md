@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 1: Foundation |
 | **Active milestone** | M3: OpenAPI & shared schemas |
-| **Active task** | T3.1 |
-| **Tasks completed** | 14 / 73 |
+| **Active task** | T3.4 |
+| **Tasks completed** | 17 / 73 |
 | **Last updated** | 2026-05-19 |
 
 ## Template
@@ -131,9 +131,9 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps |
 |---|------|------|--------|-------------|------------|-----------|
-| T3.1 | `openapi/chat-rag.yaml` — ask, ask/stream, health | Docs | pending | api-contract.md, ADR-011 | T1.1 | — |
-| T3.2 | `openapi/data-management.yaml` — jobs, health | Docs | pending | api-contract.md | T1.1 | — |
-| T3.3 | `openapi/internal-write.yaml` — write + corpus CRUD | Docs | pending | spec.md §DO internal write API | T2.2 | — |
+| T3.1 | `openapi/chat-rag.yaml` — ask, ask/stream, health | Docs | completed | api-contract.md, ADR-011 | T1.1 | — |
+| T3.2 | `openapi/data-management.yaml` — jobs, health | Docs | completed | api-contract.md | T1.1 | — |
+| T3.3 | `openapi/internal-write.yaml` — write + corpus CRUD | Docs | completed | spec.md §DO internal write API | T2.2 | — |
 | T3.4 | `packages/shared-schemas` Pydantic models from OpenAPI | Code | pending | ADR-011 | T3.1–T3.3 | — |
 | T3.5 | Test: reject identity fields in ask body (red) | Test | pending | test-plan TC-030, config-spec | T3.4 | — |
 | T3.6 | Validation layer for identity deny-list | Code | pending | ADR-004, config-spec | T3.5 | — |
@@ -394,9 +394,9 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T2.7 | M2 | 1 | Config | completed | T2.5 | D1–D4 | 2026-05-19 |
 | T2.8 | M2 | 1 | Code | completed | T2.5 | D3 | 2026-05-19 |
 | T2.9 | M2 | 1 | Code | completed | T2.5 | D4 | 2026-05-19 |
-| T3.1 | M3 | 1 | Docs | pending | T1.1 | — | — |
-| T3.2 | M3 | 1 | Docs | pending | T1.1 | — | — |
-| T3.3 | M3 | 1 | Docs | pending | T2.2 | — | — |
+| T3.1 | M3 | 1 | Docs | completed | T1.1 | — | 2026-05-19 |
+| T3.2 | M3 | 1 | Docs | completed | T1.1 | — | 2026-05-19 |
+| T3.3 | M3 | 1 | Docs | completed | T2.2 | — | 2026-05-19 |
 | T3.4 | M3 | 1 | Code | pending | T3.1–T3.3 | — | — |
 | T3.5 | M3 | 1 | Test | pending | T3.4 | — | — |
 | T3.6 | M3 | 1 | Code | pending | T3.5 | — | — |
