@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 3: ChatRAG |
-| **Active milestone** | M10: ChatRAG Backend |
-| **Active task** | T10.1 |
-| **Tasks completed** | 49 / 73 |
+| **Active milestone** | M11: ChatRAG Frontend |
+| **Active task** | T11.1 |
+| **Tasks completed** | 56 / 73 |
 | **Last updated** | 2026-05-19 |
 
 ## Template
@@ -245,13 +245,13 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps |
 |---|------|------|--------|-------------|------------|-----------|
-| T10.1 | Test: `POST /api/v1/ask` integration (mock Modal) | Test | pending | test-plan TC-002 | T8.4, T5.2, T9.3 | D1 |
-| T10.2 | Test: `POST /api/v1/ask/stream` SSE (TC-001) | Test | pending | UJ-001 | T10.1 | D1 |
-| T10.3 | FastAPI `apps/chat-rag-backend` routes + health | Code | pending | api-contract.md | T10.2 | — |
-| T10.4 | Wire `packages/rag` + config (`VECINITA_*`) | Code | pending | config-spec.md | T10.3 | — |
-| T10.5 | Test: reject identity fields E2E (`test_uj007`) | Test | pending | UJ-007, TC-030 | T3.6, T10.4 | — |
-| T10.6 | Test: UJ-001 ask + stream E2E (`tests/e2e/test_uj001_ask_stream.py`) | Test | pending | UJ-001, AC-C1 | T10.4, T11.2 | D1 |
-| T10.7 | Test: UJ-005 empty retrieval E2E (`tests/e2e/test_uj005_empty_retrieval.py`) | Test | pending | UJ-005, AC-C5 | T10.4 | D1 |
+| T10.1 | Test: `POST /api/v1/ask` integration (mock Modal) | Test | completed | test-plan TC-002 | T8.4, T5.2, T9.3 | D1 |
+| T10.2 | Test: `POST /api/v1/ask/stream` SSE (TC-001) | Test | completed | UJ-001 | T10.1 | D1 |
+| T10.3 | FastAPI `apps/chat-rag-backend` routes + health | Code | completed | api-contract.md | T10.2 | — |
+| T10.4 | Wire `packages/rag` + config (`VECINITA_*`) | Code | completed | config-spec.md | T10.3 | — |
+| T10.5 | Test: reject identity fields E2E (`test_uj007`) | Test | completed | UJ-007, TC-030 | T3.6, T10.4 | — |
+| T10.6 | Test: UJ-001 ask + stream E2E (`tests/e2e/test_uj001_ask_stream.py`) | Test | completed | UJ-001, AC-C1 | T10.4, T11.2 | D1 |
+| T10.7 | Test: UJ-005 empty retrieval E2E (`tests/e2e/test_uj005_empty_retrieval.py`) | Test | completed | UJ-005, AC-C5 | T10.4 | D1 |
 
 #### M11: ChatRAG Frontend
 
@@ -364,8 +364,8 @@ main
 | PR-8 | Minor | M7 | feat/M7-data-mgmt-frontend | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/26 |
 | PR-9 | Major | Phase 2 | phase/2-data-management | main | pending |
 | PR-10 | Minor | M8 | feat/M8-packages-rag | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/27 |
-| PR-11 | Minor | M9 | feat/M9-vllm-modal | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/28 |
-| PR-12 | Minor | M10 | feat/M10-chat-rag-backend | phase/3-chatrag | pending |
+| PR-11 | Minor | M9 | feat/M9-vllm-modal | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/28 |
+| PR-12 | Minor | M10 | feat/M10-chat-rag-backend | main | open |
 | PR-13 | Minor | M11 | feat/M11-chat-rag-frontend | phase/3-chatrag | pending |
 | PR-14 | Major | Phase 3 | phase/3-chatrag | main | pending |
 | PR-15 | Minor | M12 | feat/M12-local-dev | phase/4-integration | pending |
@@ -429,13 +429,13 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T9.1 | M9 | 3 | Config | completed | T1.1 | D7 | 2026-05-19 |
 | T9.2 | M9 | 3 | Code | completed | T9.1 | D7 | 2026-05-19 |
 | T9.3 | M9 | 3 | Test | completed | T9.2 | — | 2026-05-19 |
-| T10.1 | M10 | 3 | Test | pending | T8.4, T5.2, T9.3 | D1 | — |
-| T10.2 | M10 | 3 | Test | pending | T10.1 | D1 | — |
-| T10.3 | M10 | 3 | Code | pending | T10.2 | — | — |
-| T10.4 | M10 | 3 | Code | pending | T10.3 | — | — |
-| T10.5 | M10 | 3 | Test | pending | T3.6, T10.4 | — | — |
-| T10.6 | M10 | 3 | Test | pending | T10.4, T11.2 | D1 | — |
-| T10.7 | M10 | 3 | Test | pending | T10.4 | D1 | — |
+| T10.1 | M10 | 3 | Test | completed | T8.4, T5.2, T9.3 | D1 | 2026-05-19 |
+| T10.2 | M10 | 3 | Test | completed | T10.1 | D1 | 2026-05-19 |
+| T10.3 | M10 | 3 | Code | completed | T10.2 | — | 2026-05-19 |
+| T10.4 | M10 | 3 | Code | completed | T10.3 | — | 2026-05-19 |
+| T10.5 | M10 | 3 | Test | completed | T3.6, T10.4 | — | 2026-05-19 |
+| T10.6 | M10 | 3 | Test | completed | T10.4, T11.2 | D1 | 2026-05-19 |
+| T10.7 | M10 | 3 | Test | completed | T10.4 | D1 | 2026-05-19 |
 | T11.1 | M11 | 3 | Config | pending | T1.1 | — | — |
 | T11.2 | M11 | 3 | Code | pending | T10.3, T11.1 | — | — |
 | T11.3 | M11 | 3 | Code | pending | T11.2 | — | — |
