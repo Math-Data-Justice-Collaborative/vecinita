@@ -363,7 +363,7 @@ main
 | PR-7 | Minor | M6 | feat/M6-modal-ingest | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/25 |
 | PR-8 | Minor | M7 | feat/M7-data-mgmt-frontend | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/26 |
 | PR-9 | Major | Phase 2 | phase/2-data-management | main | pending |
-| PR-10 | Minor | M8 | feat/M8-packages-rag | phase/3-chatrag | pending |
+| PR-10 | Minor | M8 | feat/M8-packages-rag | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/27 |
 | PR-11 | Minor | M9 | feat/M9-vllm-modal | phase/3-chatrag | pending |
 | PR-12 | Minor | M10 | feat/M10-chat-rag-backend | phase/3-chatrag | pending |
 | PR-13 | Minor | M11 | feat/M11-chat-rag-frontend | phase/3-chatrag | pending |
