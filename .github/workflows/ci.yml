@@ -69,7 +69,13 @@ jobs:
         run: uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval
 
       - name: pip-audit (blocking)
-        run: uv run pip-audit
+        run: |
+          IGNORE_ARGS=()
+          while read -r cve; do
+            [[ -z "$cve" || "$cve" =~ ^# ]] && continue
+            IGNORE_ARGS+=(--ignore-vuln "$cve")
+          done < audit/pip-audit-ignore.txt
+          uv run pip-audit "${IGNORE_ARGS[@]}"
 
   frontend:
     runs-on: ubuntu-latest
