@@ -1,0 +1,86 @@
+"""Internal write API integration tests (ADR-007, test-plan)."""
+
+from __future__ import annotations
+
+import os
+from uuid import uuid4
+
+import pytest
+from httpx import ASGITransport, AsyncClient
+
+pytestmark = pytest.mark.integration
+
+_API_KEY = "test-internal-key"
+_EMBEDDING = [0.01] * 384
+
+
+def _database_url() -> str:
+    return os.environ.get(
+        "DATABASE_URL",
+        "postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
+    )
+
+
+@pytest.fixture
+def internal_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _API_KEY)
+    monkeypatch.setenv("DATABASE_URL", _database_url())
+
+
+@pytest.fixture
+async def write_client(internal_api_key: None):
+    from vecinita_internal_write_api.app import create_app
+
+    app = create_app()
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        yield client
+
+
+@pytest.fixture
+def seeded_corpus() -> None:
+    from vecinita_database.seeds.load import load_corpus
+
+    load_corpus(database_url=_database_url())
+
+
+@pytest.mark.asyncio
+async def test_batch_upsert_requires_auth(write_client: AsyncClient, seeded_corpus: None) -> None:
+    payload = {
+        "documents": [
+            {
+                "url": f"https://example.com/{uuid4()}",
+                "chunks": [{"chunk_index": 0, "text": "hello", "embedding": _EMBEDDING}],
+            }
+        ]
+    }
+    response = await write_client.post("/internal/v1/documents/batch", json=payload)
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_batch_upsert_chunks_with_auth(
+    write_client: AsyncClient, seeded_corpus: None
+) -> None:
+    doc_url = f"https://example.com/write-api/{uuid4()}"
+    payload = {
+        "documents": [
+            {
+                "url": doc_url,
+                "title": "Write API test",
+                "language": "en",
+                "chunks": [
+                    {"chunk_index": 0, "text": "First chunk", "embedding": _EMBEDDING},
+                    {"chunk_index": 1, "text": "Second chunk", "embedding": _EMBEDDING},
+                ],
+            }
+        ]
+    }
+    response = await write_client.post(
+        "/internal/v1/documents/batch",
+        json=payload,
+        headers={"Authorization": f"Bearer {_API_KEY}"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["upserted_chunks"] == 2
