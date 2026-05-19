@@ -11,6 +11,7 @@ WORKSPACE_PACKAGES: Final[tuple[str, ...]] = (
     "vecinita_rag",
     "vecinita_ingest",
     "vecinita_embedding_client",
+    "vecinita_llm_client",
     "vecinita_shared_schemas",
     "vecinita_chat_rag_backend",
     "vecinita_data_management_backend",

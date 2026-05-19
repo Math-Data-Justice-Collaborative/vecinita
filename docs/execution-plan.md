@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 3: ChatRAG |
-| **Active milestone** | M9: vLLM Modal service |
-| **Active task** | T9.1 |
-| **Tasks completed** | 46 / 73 |
+| **Active milestone** | M10: ChatRAG Backend |
+| **Active task** | T10.1 |
+| **Tasks completed** | 49 / 73 |
 | **Last updated** | 2026-05-19 |
 
 ## Template
@@ -235,9 +235,9 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps |
 |---|------|------|--------|-------------|------------|-----------|
-| T9.1 | Modal app `vecinita-llm` GPU T4, scale-to-zero | Config | pending | ADR-009, deployment-integration | T1.1 | D7 |
-| T9.2 | vLLM serve **Qwen2.5-1.5B-Instruct** + health route | Code | pending | 04-tech-plan model decision | T9.1 | D7 |
-| T9.3 | Test: LLM HTTP client mock streaming contract | Test | pending | test-plan TC-001 | T9.2 | — |
+| T9.1 | Modal app `vecinita-llm` GPU T4, scale-to-zero | Config | completed | ADR-009, deployment-integration | T1.1 | D7 |
+| T9.2 | vLLM serve **Qwen2.5-1.5B-Instruct** + health route | Code | completed | 04-tech-plan model decision | T9.1 | D7 |
+| T9.3 | Test: LLM HTTP client mock streaming contract | Test | completed | test-plan TC-001 | T9.2 | — |
 
 #### M10: ChatRAG Backend
 
@@ -364,7 +364,7 @@ main
 | PR-8 | Minor | M7 | feat/M7-data-mgmt-frontend | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/26 |
 | PR-9 | Major | Phase 2 | phase/2-data-management | main | pending |
 | PR-10 | Minor | M8 | feat/M8-packages-rag | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/27 |
-| PR-11 | Minor | M9 | feat/M9-vllm-modal | phase/3-chatrag | pending |
+| PR-11 | Minor | M9 | feat/M9-vllm-modal | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/28 |
 | PR-12 | Minor | M10 | feat/M10-chat-rag-backend | phase/3-chatrag | pending |
 | PR-13 | Minor | M11 | feat/M11-chat-rag-frontend | phase/3-chatrag | pending |
 | PR-14 | Major | Phase 3 | phase/3-chatrag | main | pending |
@@ -426,9 +426,9 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T8.3 | M8 | 3 | Test | completed | T8.2 | — | 2026-05-19 |
 | T8.4 | M8 | 3 | Code | completed | T8.3 | — | 2026-05-19 |
 | T8.5 | M8 | 3 | Test | completed | T8.4 | D2 | 2026-05-19 |
-| T9.1 | M9 | 3 | Config | pending | T1.1 | D7 | — |
-| T9.2 | M9 | 3 | Code | pending | T9.1 | D7 | — |
-| T9.3 | M9 | 3 | Test | pending | T9.2 | — | — |
+| T9.1 | M9 | 3 | Config | completed | T1.1 | D7 | 2026-05-19 |
+| T9.2 | M9 | 3 | Code | completed | T9.1 | D7 | 2026-05-19 |
+| T9.3 | M9 | 3 | Test | completed | T9.2 | — | 2026-05-19 |
 | T10.1 | M10 | 3 | Test | pending | T8.4, T5.2, T9.3 | D1 | — |
 | T10.2 | M10 | 3 | Test | pending | T10.1 | D1 | — |
 | T10.3 | M10 | 3 | Code | pending | T10.2 | — | — |
