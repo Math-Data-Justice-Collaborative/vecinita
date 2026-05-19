@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 1: Foundation |
-| **Active milestone** | M4: DO internal write API |
-| **Active task** | T4.1 |
-| **Tasks completed** | 21 / 73 |
+| **Active milestone** | M5: FastEmbed Modal service |
+| **Active task** | T5.1 |
+| **Tasks completed** | 25 / 73 |
 | **Last updated** | 2026-05-19 |
 
 ## Template
@@ -161,10 +161,10 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps |
 |---|------|------|--------|-------------|------------|-----------|
-| T4.1 | Test: write API auth + upsert chunks (`tests/integration/test_write_api.py`) | Test | pending | test-plan, ADR-007 | T3.4, T2.4 | D1 |
-| T4.2 | FastAPI app `apps/internal-write-api` | Code | pending | spec.md §DO internal write API | T4.1 | — |
-| T4.3 | Corpus list/delete endpoints | Code | pending | feature-list F9 | T4.2 | — |
-| T4.4 | Test: corpus delete excludes chunks (TC-012 prep) | Test | pending | test-plan TC-012 | T4.3 | D1 |
+| T4.1 | Test: write API auth + upsert chunks (`tests/integration/test_write_api.py`) | Test | completed | test-plan, ADR-007 | T3.4, T2.4 | D1 |
+| T4.2 | FastAPI app `apps/internal-write-api` | Code | completed | spec.md §DO internal write API | T4.1 | — |
+| T4.3 | Corpus list/delete endpoints | Code | completed | feature-list F9 | T4.2 | — |
+| T4.4 | Test: corpus delete excludes chunks (TC-012 prep) | Test | completed | test-plan TC-012 | T4.3 | D1 |
 
 #### M5: FastEmbed Modal service
 
@@ -401,10 +401,10 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T3.5 | M3 | 1 | Test | completed | T3.4 | — | 2026-05-19 |
 | T3.6 | M3 | 1 | Code | completed | T3.5 | — | 2026-05-19 |
 | T3.7 | M3 | 1 | Code | completed | T1.3 | — | 2026-05-19 |
-| T4.1 | M4 | 2 | Test | pending | T3.4, T2.4 | D1 | — |
-| T4.2 | M4 | 2 | Code | pending | T4.1 | — | — |
-| T4.3 | M4 | 2 | Code | pending | T4.2 | — | — |
-| T4.4 | M4 | 2 | Test | pending | T4.3 | D1 | — |
+| T4.1 | M4 | 2 | Test | completed | T3.4, T2.4 | D1 | 2026-05-19 |
+| T4.2 | M4 | 2 | Code | completed | T4.1 | — | 2026-05-19 |
+| T4.3 | M4 | 2 | Code | completed | T4.2 | — | 2026-05-19 |
+| T4.4 | M4 | 2 | Test | completed | T4.3 | D1 | 2026-05-19 |
 | T5.1 | M5 | 2 | Test | pending | T1.3 | — | — |
 | T5.2 | M5 | 2 | Code | pending | T5.1 | — | — |
 | T5.3 | M5 | 2 | Code | pending | T5.2 | D6 | — |
