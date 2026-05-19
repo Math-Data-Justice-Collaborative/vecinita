@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 1: Foundation |
-| **Active milestone** | M3: OpenAPI & shared schemas |
-| **Active task** | T3.4 |
-| **Tasks completed** | 17 / 73 |
+| **Active milestone** | M4: DO internal write API |
+| **Active task** | T4.1 |
+| **Tasks completed** | 21 / 73 |
 | **Last updated** | 2026-05-19 |
 
 ## Template
@@ -134,10 +134,10 @@
 | T3.1 | `openapi/chat-rag.yaml` — ask, ask/stream, health | Docs | completed | api-contract.md, ADR-011 | T1.1 | — |
 | T3.2 | `openapi/data-management.yaml` — jobs, health | Docs | completed | api-contract.md | T1.1 | — |
 | T3.3 | `openapi/internal-write.yaml` — write + corpus CRUD | Docs | completed | spec.md §DO internal write API | T2.2 | — |
-| T3.4 | `packages/shared-schemas` Pydantic models from OpenAPI | Code | pending | ADR-011 | T3.1–T3.3 | — |
-| T3.5 | Test: reject identity fields in ask body (red) | Test | pending | test-plan TC-030, config-spec | T3.4 | — |
-| T3.6 | Validation layer for identity deny-list | Code | pending | ADR-004, config-spec | T3.5 | — |
-| T3.7 | Shared observability: structured logging + `VECINITA_LOG_*`; no prompt persistence (F17, AC-P4) | Code | pending | feature-list F17, ADR-004 | T1.3 | — |
+| T3.4 | `packages/shared-schemas` Pydantic models from OpenAPI | Code | completed | ADR-011 | T3.1–T3.3 | — |
+| T3.5 | Test: reject identity fields in ask body (red) | Test | completed | test-plan TC-030, config-spec | T3.4 | — |
+| T3.6 | Validation layer for identity deny-list | Code | completed | ADR-004, config-spec | T3.5 | — |
+| T3.7 | Shared observability: structured logging + `VECINITA_LOG_*`; no prompt persistence (F17, AC-P4) | Code | completed | feature-list F17, ADR-004 | T1.3 | — |
 
 #### Phase 1 Gate Check
 
@@ -354,8 +354,8 @@ main
 
 | PR | Type | Milestone/Phase | Branch | Target | Status |
 |----|------|-----------------|--------|--------|--------|
-| PR-1 | Minor | M1 | feat/M1-monorepo-scaffold | phase/1-foundation | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/20 |
-| PR-2 | Minor | M2 | feat/M2-database-privacy | phase/1-foundation | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/21 |
+| PR-1 | Minor | M1 | feat/M1-monorepo-scaffold | phase/1-foundation | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/20 |
+| PR-2 | Minor | M2 | feat/M2-database-privacy | phase/1-foundation | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/21 |
 | PR-3 | Minor | M3 | feat/M3-openapi-schemas | phase/1-foundation | pending |
 | PR-4 | Major | Phase 1 | phase/1-foundation | main | pending |
 | PR-5 | Minor | M4 | feat/M4-internal-write-api | phase/2-data-management | pending |
@@ -397,10 +397,10 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T3.1 | M3 | 1 | Docs | completed | T1.1 | — | 2026-05-19 |
 | T3.2 | M3 | 1 | Docs | completed | T1.1 | — | 2026-05-19 |
 | T3.3 | M3 | 1 | Docs | completed | T2.2 | — | 2026-05-19 |
-| T3.4 | M3 | 1 | Code | pending | T3.1–T3.3 | — | — |
-| T3.5 | M3 | 1 | Test | pending | T3.4 | — | — |
-| T3.6 | M3 | 1 | Code | pending | T3.5 | — | — |
-| T3.7 | M3 | 1 | Code | pending | T1.3 | — | — |
+| T3.4 | M3 | 1 | Code | completed | T3.1–T3.3 | — | 2026-05-19 |
+| T3.5 | M3 | 1 | Test | completed | T3.4 | — | 2026-05-19 |
+| T3.6 | M3 | 1 | Code | completed | T3.5 | — | 2026-05-19 |
+| T3.7 | M3 | 1 | Code | completed | T1.3 | — | 2026-05-19 |
 | T4.1 | M4 | 2 | Test | pending | T3.4, T2.4 | D1 | — |
 | T4.2 | M4 | 2 | Code | pending | T4.1 | — | — |
 | T4.3 | M4 | 2 | Code | pending | T4.2 | — | — |
