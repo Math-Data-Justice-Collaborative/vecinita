@@ -21,9 +21,7 @@ services:
       curl -LsSf https://astral.sh/uv/install.sh | sh &&
       export PATH="$HOME/.local/bin:$PATH" &&
       uv sync --group dev
-    run_command: >-
-      .venv/bin/uvicorn vecinita_internal_write_api.app:create_app
-      --factory --host 0.0.0.0 --port 8080
+    run_command: /workspace/.venv/bin/uvicorn vecinita_internal_write_api.app:create_app --factory --host 0.0.0.0 --port 8080
     envs:
       - key: DATABASE_URL
         scope: RUN_TIME
