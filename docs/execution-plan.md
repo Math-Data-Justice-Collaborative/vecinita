@@ -9,7 +9,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 2: Data Management |
+| **Active phase** | Phase 3: ChatRAG |
 | **Active milestone** | M8: packages/rag |
 | **Active task** | T8.1 |
 | **Tasks completed** | 41 / 73 |
@@ -141,11 +141,11 @@
 
 #### Phase 1 Gate Check
 
-- [ ] All M1–M3 tasks completed
-- [ ] `alembic upgrade head` succeeds on empty docker-compose DB
-- [ ] `pytest tests/smoke tests/privacy tests/integration/test_seed.py -q` passes
-- [ ] ruff + pyright clean
-- [ ] OpenAPI files present and referenced in api-contract.md
+- [x] All M1–M3 tasks completed
+- [x] `alembic upgrade head` succeeds on empty docker-compose DB
+- [x] `pytest tests/smoke tests/privacy tests/integration/test_seed.py -q` passes
+- [x] ruff + pyright clean
+- [x] OpenAPI files present and referenced in api-contract.md
 
 ---
 
@@ -457,7 +457,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 
 | Phase | Gate Check Date | Result | Notes |
 |-------|----------------|--------|-------|
-| 1 | — | — | — |
+| 1 | 2026-05-19 | **pass** | M1–M3 complete; alembic head; 12 pytest smoke/privacy/seed; ruff/pyright; OpenAPI in repo + api-contract.md |
 | 2 | 2026-05-19 | **pass** | E2E UJ-002/006/008 (4 tests incl. UJ-003); ruff/pyright clean; 36 pytest; Modal README + apps; no DATABASE_URL in Modal paths |
 | 3 | — | — | — |
 | 4 | — | — | — |
