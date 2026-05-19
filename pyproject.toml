@@ -67,6 +67,7 @@ markers = [
     "integration: integration tests (may need docker-compose DB)",
     "e2e: end-to-end user journey tests",
     "privacy: privacy schema guardrail tests",
+    "unit: fast unit tests without external services",
 ]
 asyncio_mode = "auto"
 

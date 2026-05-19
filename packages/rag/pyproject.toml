@@ -3,7 +3,13 @@ name = "vecinita-rag"
 version = "0.1.0"
 description = "Shared LlamaIndex RAG pipelines"
 requires-python = ">=3.11,<3.12"
-dependencies = []
+dependencies = [
+    "langdetect>=1.0.9",
+    "llama-index>=0.11.23,<0.12",
+    "llama-index-vector-stores-postgres>=0.2,<0.9",
+    "psycopg>=3.3.4",
+    "sqlalchemy>=2.0.49",
+]
 
 [build-system]
 requires = ["hatchling"]
