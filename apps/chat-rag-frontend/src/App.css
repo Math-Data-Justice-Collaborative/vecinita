@@ -1,0 +1,138 @@
+:root {
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  color: #1a1a1a;
+  background: #f6f7f9;
+}
+
+.app {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+header h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.75rem;
+}
+
+.subtitle {
+  margin: 0 0 1.5rem;
+  color: #555;
+}
+
+.chat-panel {
+  background: #fff;
+  border: 1px solid #dde1e6;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.message-list {
+  min-height: 12rem;
+  max-height: 28rem;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.empty-hint {
+  color: #666;
+  font-style: italic;
+}
+
+.message {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border-radius: 6px;
+}
+
+.message-user {
+  background: #e8f0fe;
+}
+
+.message-assistant {
+  background: #f1f3f4;
+}
+
+.message-role {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #444;
+}
+
+.message-content {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.sources {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #ccc;
+}
+
+.sources h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+}
+
+.sources ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.9rem;
+}
+
+.source-score {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.chat-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.chat-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  font: inherit;
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background: #1a73e8;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button.secondary {
+  background: #e8eaed;
+  color: #333;
+}
+
+.error {
+  color: #b3261e;
+  margin: 0 0 0.75rem;
+}
