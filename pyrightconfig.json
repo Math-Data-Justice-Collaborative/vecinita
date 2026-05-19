@@ -1,0 +1,8 @@
+{
+  "include": ["apps", "packages", "tests"],
+  "exclude": ["**/__pycache__", ".venv", ".pytest_cache"],
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "standard",
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false
+}
