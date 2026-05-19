@@ -13,12 +13,26 @@ One App spec per deployable (multi-app topology). Region: **nyc** (US-only per A
 
 ## Prerequisites
 
-- [doctl](https://docs.digitalocean.com/reference/doctl/) authenticated
+- **API token:** `DIGITALOCEAN_TOKEN` with App Platform read/write
+- **CLI (pick one):**
+  - [pydo](https://docs.digitalocean.com/reference/pydo/reference/) — `scripts/deploy/do_apps.py` (preferred in CI/agents)
+  - [doctl](https://docs.digitalocean.com/reference/doctl/) — equivalent commands below
 - DO Managed Postgres with `pgvector` enabled
 - Modal apps deployed; copy embed/LLM URLs into ChatRAG backend secrets
 - Secrets matrix: [docs/staging-secrets-matrix.md](../../docs/staging-secrets-matrix.md)
 
 ## Create apps (staging)
+
+**pydo (recommended):**
+
+```bash
+export DIGITALOCEAN_TOKEN='...'
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py create-all
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py list
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls   # staging smoke env hints
+```
+
+**doctl (equivalent):**
 
 ```bash
 doctl apps create --spec infra/do/internal-write-api.yaml
@@ -31,9 +45,12 @@ Set **SECRET** env vars in the DO dashboard (or `doctl apps update`) before firs
 
 ## Post-deploy
 
+Full procedure: [docs/staging-runbook.md](../../docs/staging-runbook.md).
+
 ```bash
 export VECINITA_STAGING_CHAT_URL=https://<chat-rag-backend>.ondigitalocean.app
 export VECINITA_STAGING_WRITE_URL=https://<internal-write-api>.ondigitalocean.app
+export VECINITA_STAGING_DATABASE_URL='postgresql://...'   # H2 (or DATABASE_URL)
 bash scripts/deploy/staging_smoke.sh
 ```
 

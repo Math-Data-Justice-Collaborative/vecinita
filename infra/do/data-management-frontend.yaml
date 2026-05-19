@@ -1,5 +1,6 @@
 # DigitalOcean App Platform — Data Management static site (F12)
-name: vecinita-data-management-frontend
+# DO App spec `name` max 32 chars (was vecinita-data-management-frontend)
+name: vecinita-admin-frontend
 region: nyc
 
 static_sites:
