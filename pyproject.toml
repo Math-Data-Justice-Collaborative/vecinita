@@ -20,6 +20,7 @@ dev = [
     "vecinita-embedding-client",
     "vecinita-ingest",
     "vecinita-internal-write-api",
+    "vecinita-llm-client",
     "vecinita-rag",
     "vecinita-shared-schemas",
 ]
@@ -29,6 +30,7 @@ members = [
     "packages/rag",
     "packages/ingest",
     "packages/embedding-client",
+    "packages/llm-client",
     "packages/shared-schemas",
     "apps/chat-rag-backend",
     "apps/data-management-backend",
@@ -45,6 +47,7 @@ vecinita-chat-rag-backend = { workspace = true }
 vecinita-data-management-backend = { workspace = true }
 vecinita-database = { workspace = true }
 vecinita-internal-write-api = { workspace = true }
+vecinita-llm-client = { workspace = true }
 
 [tool.ruff]
 line-length = 100
