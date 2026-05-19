@@ -3,7 +3,11 @@ name = "vecinita-database"
 version = "0.1.0"
 description = "Alembic migrations, seeds, and privacy tests"
 requires-python = ">=3.11,<3.12"
-dependencies = []
+dependencies = [
+    "alembic>=1.13,<2",
+    "psycopg[binary]>=3.1,<4",
+    "sqlalchemy>=2.0,<3",
+]
 
 [build-system]
 requires = ["hatchling"]

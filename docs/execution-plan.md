@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 1: Foundation |
-| **Active milestone** | M1: Monorepo scaffold |
-| **Active task** | T2.1 |
-| **Tasks completed** | 6 / 73 |
+| **Active milestone** | M3: OpenAPI & shared schemas |
+| **Active task** | T3.1 |
+| **Tasks completed** | 14 / 73 |
 | **Last updated** | 2026-05-19 |
 
 ## Template
@@ -114,15 +114,15 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps |
 |---|------|------|--------|-------------|------------|-----------|
-| T2.1 | Test: `tests/privacy/test_no_pii_tables.py` (red) | Test | pending | test-plan TC-031, ADR-004 | T1.4 | — |
-| T2.2 | Alembic initial revision: documents, chunks, embeddings, jobs, config | Code | pending | data-management-plan.md §Schema | T2.1 | — |
-| T2.3 | Test: pgvector extension + `vector(384)` dimension check | Test | pending | data-management-plan D5 | T2.2 | — |
-| T2.4 | Implement migrations + `apps/database` Alembic env | Code | pending | feature-list F13 | T2.3 | — |
-| T2.5 | Seed scripts + `data/fixtures/corpus/{en,es}/` | Code | pending | feature-list F14, data-mgmt D1–D2 | T2.4 | D1, D2 |
-| T2.6 | Test: seed load + row counts (`tests/integration/test_seed.py`) | Test | pending | data-management-plan §Verification | T2.5 | D1, D2 |
-| T2.7 | `data/fixtures/MANIFEST.json` checksums | Config | pending | data-management-plan.md | T2.5 | D1–D4 |
-| T2.8 | Eval Q&A fixtures `data/fixtures/eval/` (D3) | Code | pending | feature-list F14, data-mgmt D3 | T2.5 | D3 |
-| T2.9 | Ingest HTML fixture `data/fixtures/ingest/` (D4) | Code | pending | data-management-plan D4 | T2.5 | D4 |
+| T2.1 | Test: `tests/privacy/test_no_pii_tables.py` (red) | Test | completed | test-plan TC-031, ADR-004 | T1.4 | — |
+| T2.2 | Alembic initial revision: documents, chunks, embeddings, jobs, config | Code | completed | data-management-plan.md §Schema | T2.1 | — |
+| T2.3 | Test: pgvector extension + `vector(384)` dimension check | Test | completed | data-management-plan D5 | T2.2 | — |
+| T2.4 | Implement migrations + `apps/database` Alembic env | Code | completed | feature-list F13 | T2.3 | — |
+| T2.5 | Seed scripts + `data/fixtures/corpus/{en,es}/` | Code | completed | feature-list F14, data-mgmt D1–D2 | T2.4 | D1, D2 |
+| T2.6 | Test: seed load + row counts (`tests/integration/test_seed.py`) | Test | completed | data-management-plan §Verification | T2.5 | D1, D2 |
+| T2.7 | `data/fixtures/MANIFEST.json` checksums | Config | completed | data-management-plan.md | T2.5 | D1–D4 |
+| T2.8 | Eval Q&A fixtures `data/fixtures/eval/` (D3) | Code | completed | feature-list F14, data-mgmt D3 | T2.5 | D3 |
+| T2.9 | Ingest HTML fixture `data/fixtures/ingest/` (D4) | Code | completed | data-management-plan D4 | T2.5 | D4 |
 
 #### M3: OpenAPI & shared schemas
 
@@ -354,7 +354,7 @@ main
 
 | PR | Type | Milestone/Phase | Branch | Target | Status |
 |----|------|-----------------|--------|--------|--------|
-| PR-1 | Minor | M1 | feat/M1-monorepo-scaffold | phase/1-foundation | pending |
+| PR-1 | Minor | M1 | feat/M1-monorepo-scaffold | phase/1-foundation | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/20 |
 | PR-2 | Minor | M2 | feat/M2-database-privacy | phase/1-foundation | pending |
 | PR-3 | Minor | M3 | feat/M3-openapi-schemas | phase/1-foundation | pending |
 | PR-4 | Major | Phase 1 | phase/1-foundation | main | pending |
@@ -385,15 +385,15 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T1.4 | M1 | 1 | Test | completed | T1.3 | — | 2026-05-19 |
 | T1.5 | M1 | 1 | Config | completed | T1.2 | — | 2026-05-19 |
 | T1.6 | M1 | 1 | Config | completed | T1.1 | — | 2026-05-19 |
-| T2.1 | M2 | 1 | Test | pending | T1.4 | — | — |
-| T2.2 | M2 | 1 | Code | pending | T2.1 | — | — |
-| T2.3 | M2 | 1 | Test | pending | T2.2 | — | — |
-| T2.4 | M2 | 1 | Code | pending | T2.3 | — | — |
-| T2.5 | M2 | 1 | Code | pending | T2.4 | D1, D2 | — |
-| T2.6 | M2 | 1 | Test | pending | T2.5 | D1, D2 | — |
-| T2.7 | M2 | 1 | Config | pending | T2.5 | D1–D4 | — |
-| T2.8 | M2 | 1 | Code | pending | T2.5 | D3 | — |
-| T2.9 | M2 | 1 | Code | pending | T2.5 | D4 | — |
+| T2.1 | M2 | 1 | Test | completed | T1.4 | — | 2026-05-19 |
+| T2.2 | M2 | 1 | Code | completed | T2.1 | — | 2026-05-19 |
+| T2.3 | M2 | 1 | Test | completed | T2.2 | — | 2026-05-19 |
+| T2.4 | M2 | 1 | Code | completed | T2.3 | — | 2026-05-19 |
+| T2.5 | M2 | 1 | Code | completed | T2.4 | D1, D2 | 2026-05-19 |
+| T2.6 | M2 | 1 | Test | completed | T2.5 | D1, D2 | 2026-05-19 |
+| T2.7 | M2 | 1 | Config | completed | T2.5 | D1–D4 | 2026-05-19 |
+| T2.8 | M2 | 1 | Code | completed | T2.5 | D3 | 2026-05-19 |
+| T2.9 | M2 | 1 | Code | completed | T2.5 | D4 | 2026-05-19 |
 | T3.1 | M3 | 1 | Docs | pending | T1.1 | — | — |
 | T3.2 | M3 | 1 | Docs | pending | T1.1 | — | — |
 | T3.3 | M3 | 1 | Docs | pending | T2.2 | — | — |

@@ -1,0 +1,7 @@
+[
+  {
+    "question_en": "When are food pantry hours updated?",
+    "question_es": "¿Cuándo se actualizan los horarios del banco de alimentos?",
+    "expected_doc_url": "fixture://corpus/en/community-resources.md"
+  }
+]
