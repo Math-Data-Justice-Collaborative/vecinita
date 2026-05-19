@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 3: ChatRAG |
-| **Active milestone** | M14: Staging deploy |
-| **Active task** | T14.1 |
-| **Tasks completed** | 67 / 73 |
+| **Active milestone** | Phase 4 gate / M14 complete |
+| **Active task** | Phase 4 gate check |
+| **Tasks completed** | 72 / 73 |
 | **Last updated** | 2026-05-19 |
 
 ## Template
@@ -305,11 +305,11 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps |
 |---|------|------|--------|-------------|------------|-----------|
-| T14.1 | DO App specs (multi-app) + Modal deploy scripts | Config | pending | ADR-010, deployment-integration | T13.1 | — |
-| T14.2 | Staging secrets matrix doc | Docs | pending | deployment-integration §Secrets | T14.1 | — |
-| T14.3 | Deploy staging; run H1–H3 smoke | Config | pending | 15-service-health tiers | T14.1 | D1–D7 |
-| T14.4 | Cost monitoring baseline (80%/100% of $50) | Docs | pending | risk-register R1 | T14.3 | — |
-| T14.5 | Eval benchmark run (D3): ≥80% relevance on fixture set (AC benchmarks) | Test | pending | acceptance-criteria benchmarks | T2.8, T8.4 | D3 |
+| T14.1 | DO App specs (multi-app) + Modal deploy scripts | Config | completed | ADR-010, deployment-integration | T13.1 | — |
+| T14.2 | Staging secrets matrix doc | Docs | completed | deployment-integration §Secrets | T14.1 | — |
+| T14.3 | Deploy staging; run H1–H3 smoke | Config | completed | 15-service-health tiers | T14.1 | D1–D7 |
+| T14.4 | Cost monitoring baseline (80%/100% of $50) | Docs | completed | risk-register R1 | T14.3 | — |
+| T14.5 | Eval benchmark run (D3): ≥80% relevance on fixture set (AC benchmarks) | Test | completed | acceptance-criteria benchmarks | T2.8, T8.4 | D3 |
 
 #### Phase 4 Gate Check
 
@@ -368,9 +368,9 @@ main
 | PR-12 | Minor | M10 | feat/M10-chat-rag-backend | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/29 |
 | PR-13 | Minor | M11 | feat/M11-chat-rag-frontend | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/30 |
 | PR-14 | Major | Phase 3 | phase/3-chatrag | main | pending |
-| PR-15 | Minor | M12 | feat/M12-local-dev | main | open |
-| PR-16 | Minor | M13 | feat/M13-ci | main | open |
-| PR-17 | Minor | M14 | feat/M14-staging-deploy | phase/4-integration | pending |
+| PR-15 | Minor | M12 | feat/M12-local-dev | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/31 |
+| PR-16 | Minor | M13 | feat/M13-ci | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/32 |
+| PR-17 | Minor | M14 | feat/M14-staging-deploy | main | open |
 | PR-18 | Major | Phase 4 | phase/4-integration | main | pending |
 
 ## Task Tracking
@@ -447,11 +447,11 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T13.2 | M13 | 4 | Config | completed | T7.1, T11.1 | — | 2026-05-19 |
 | T13.3 | M13 | 4 | Config | completed | T13.1 | — | 2026-05-19 |
 | T13.4 | M13 | 4 | Config | completed | T6.4 | — | 2026-05-19 |
-| T14.1 | M14 | 4 | Config | pending | T13.1 | — | — |
-| T14.2 | M14 | 4 | Docs | pending | T14.1 | — | — |
-| T14.3 | M14 | 4 | Config | pending | T14.1 | D1–D7 | — |
-| T14.4 | M14 | 4 | Docs | pending | T14.3 | — | — |
-| T14.5 | M14 | 4 | Test | pending | T2.8, T8.4 | D3 | — |
+| T14.1 | M14 | 4 | Config | completed | T13.1 | — | 2026-05-19 |
+| T14.2 | M14 | 4 | Docs | completed | T14.1 | — | 2026-05-19 |
+| T14.3 | M14 | 4 | Config | completed | T14.1 | D1–D7 | 2026-05-19 |
+| T14.4 | M14 | 4 | Docs | completed | T14.3 | — | 2026-05-19 |
+| T14.5 | M14 | 4 | Test | completed | T2.8, T8.4 | D3 | 2026-05-19 |
 
 ## Phase Gate Log
 
@@ -487,4 +487,4 @@ CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, py
 - [x] vLLM model — Qwen2.5-1.5B-Instruct on T4
 - [x] Cost gate — pilot fits ≤ $50 with scale-to-zero; consolidate DO if overrun
 - [ ] Exact LlamaIndex patch versions — pin at T8.1 during build
-- [ ] DO App Platform component YAML — finalize at T14.1
+- [x] DO App Platform component YAML — finalize at T14.1
