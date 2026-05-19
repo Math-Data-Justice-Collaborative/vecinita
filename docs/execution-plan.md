@@ -10,8 +10,8 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 3: ChatRAG |
-| **Active milestone** | Phase 4 gate / M14 complete |
-| **Active task** | Phase 4 gate check |
+| **Active milestone** | Phase 4 complete (gate partial) |
+| **Active task** | 11-verify-impl / deploy when ready |
 | **Tasks completed** | 72 / 73 |
 | **Last updated** | 2026-05-19 |
 
@@ -313,10 +313,10 @@
 
 #### Phase 4 Gate Check
 
-- [ ] Full `pytest` + vitest green in CI
-- [ ] Staging `/health` and sample ask succeed
-- [ ] Cost estimate documented ≤ $50 or consolidation ADR filed
-- [ ] `docs/data-staging-state.md` all required assets `verified`
+- [x] Full `pytest` + vitest green in CI (main CI run 2026-05-19; local 53 passed, 3 skipped; vitest 4/4)
+- [ ] Staging `/health` and sample ask succeed — **deferred**: no `VECINITA_STAGING_*` URLs; run `scripts/deploy/staging_smoke.sh` after DO/Modal deploy
+- [x] Cost estimate documented ≤ $50 (`docs/cost-monitoring.md` pilot ~$42–48/mo)
+- [ ] `docs/data-staging-state.md` all required assets `verified` — D1–D5 verified; **D6/D7 pending** (Modal weights on first deploy)
 
 ---
 
@@ -370,7 +370,7 @@ main
 | PR-14 | Major | Phase 3 | phase/3-chatrag | main | pending |
 | PR-15 | Minor | M12 | feat/M12-local-dev | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/31 |
 | PR-16 | Minor | M13 | feat/M13-ci | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/32 |
-| PR-17 | Minor | M14 | feat/M14-staging-deploy | main | open |
+| PR-17 | Minor | M14 | feat/M14-staging-deploy | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/33 |
 | PR-18 | Major | Phase 4 | phase/4-integration | main | pending |
 
 ## Task Tracking
@@ -460,7 +460,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | 1 | 2026-05-19 | **pass** | M1–M3 complete; alembic head; 12 pytest smoke/privacy/seed; ruff/pyright; OpenAPI in repo + api-contract.md |
 | 2 | 2026-05-19 | **pass** | E2E UJ-002/006/008 (4 tests incl. UJ-003); ruff/pyright clean; 36 pytest; Modal README + apps; no DATABASE_URL in Modal paths |
 | 3 | — | — | — |
-| 4 | — | — | — |
+| 4 | 2026-05-19 | **partial** | Automation PASS (CI main green, ruff/pyright/pytest/vitest, UJ-004 bootstrap, eval ≥80%). **Deferred:** live staging H1–H3 (no deploy URLs); D6/D7 Modal weights until first `modal deploy`. |
 
 ## Hook Configuration
 
