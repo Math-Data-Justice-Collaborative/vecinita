@@ -6,7 +6,6 @@ import contextlib
 
 import pytest
 from fastapi.testclient import TestClient
-
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.pipeline import run_ingest_job
 from vecinita_data_management_backend.store import InMemoryJobStore

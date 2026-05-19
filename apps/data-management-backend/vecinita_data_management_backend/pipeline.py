@@ -8,7 +8,9 @@ from uuid import UUID
 
 from vecinita_embedding_client import EmbeddingClient
 from vecinita_ingest import chunk_text, fetch_url
+from vecinita_ingest.models import ScrapedDocument
 from vecinita_ingest.scrape import parse_html
+from pydantic import HttpUrl
 from vecinita_shared_schemas.internal_write import BatchUpsertRequest, ChunkUpsert, DocumentUpsert
 
 from vecinita_data_management_backend.store import JobStore
@@ -16,7 +18,7 @@ from vecinita_data_management_backend.write_client import InternalWriteClient
 
 
 class DocumentFetcher(Protocol):
-    def __call__(self, url: str) -> object: ...
+    def __call__(self, url: str) -> ScrapedDocument: ...
 
 
 def run_ingest_job(
@@ -33,18 +35,16 @@ def run_ingest_job(
 
     store.update_job(job_id, status="running")
     fetcher = fetch_document or fetch_url
-    chunk_size = int(record.options.get("chunk_size_tokens", 256))
+    raw_chunk_size = record.options.get("chunk_size_tokens", 256)
+    chunk_size = int(raw_chunk_size) if isinstance(raw_chunk_size, (int, str)) else 256
 
     try:
         documents: list[DocumentUpsert] = []
         for url in record.urls:
             scraped = fetcher(url)
-            if hasattr(scraped, "text"):
-                text = scraped.text
-                title = scraped.title
-                source_url = scraped.url
-            else:
-                raise TypeError("fetch_document must return ScrapedDocument")
+            text = scraped.text
+            title = scraped.title
+            source_url = scraped.url
 
             chunks = chunk_text(text, chunk_size_tokens=chunk_size)
             if not chunks:
@@ -57,7 +57,7 @@ def run_ingest_job(
             ]
             documents.append(
                 DocumentUpsert(
-                    url=source_url,
+                    url=HttpUrl(source_url),
                     title=title,
                     content_hash=sha256(text.encode("utf-8")).hexdigest(),
                     chunks=chunk_models,
@@ -77,7 +77,7 @@ def run_ingest_job(
         raise
 
 
-def fetch_html_fixture(url: str, *, fixture_html: str) -> object:
+def fetch_html_fixture(url: str, *, fixture_html: str) -> ScrapedDocument:
     """Test helper: return parsed HTML without HTTP."""
     from vecinita_ingest.models import ScrapedDocument
 
