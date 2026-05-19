@@ -9,10 +9,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 1: Foundation |
-| **Active milestone** | M6: Modal ingest (ASGI + workers) |
-| **Active task** | T6.1 |
-| **Tasks completed** | 29 / 73 |
+| **Active phase** | Phase 2: Data Management |
+| **Active milestone** | M7: Data Management Frontend |
+| **Active task** | T7.1 |
+| **Tasks completed** | 36 / 73 |
 | **Last updated** | 2026-05-19 |
 
 ## Template
@@ -183,13 +183,13 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps |
 |---|------|------|--------|-------------|------------|-----------|
-| T6.1 | `packages/ingest` scrape + chunk unit tests | Test | pending | feature-list F7 | T1.3 | D4 |
-| T6.2 | Implement scrape/chunk helpers | Code | pending | spec.md §Data Management | T6.1 | — |
-| T6.3 | Modal ASGI `/jobs` + `requires_proxy_auth` | Code | pending | ADR-002, RD-019 | T3.2, T4.2 | — |
-| T6.4 | Modal queue worker: scrape → embed → DO write API | Code | pending | spec.md §Ingest path | T6.2, T5.2, T4.2 | D4, D6 |
-| T6.5 | Test: job lifecycle mocked (`tests/e2e/test_uj002_ingest_job.py`) | Test | pending | UJ-002, TC-010 | T6.4 | D4 |
-| T6.6 | Test: job failure (`tests/e2e/test_uj006_job_failure.py`) | Test | pending | UJ-006, TC-013 | T6.4 | — |
-| T6.7 | Test: unauthorized (`tests/e2e/test_uj008_unauthorized_admin.py`) | Test | pending | UJ-008, TC-014 | T6.3 | — |
+| T6.1 | `packages/ingest` scrape + chunk unit tests | Test | completed | feature-list F7 | T1.3 | D4 |
+| T6.2 | Implement scrape/chunk helpers | Code | completed | spec.md §Data Management | T6.1 | — |
+| T6.3 | Modal ASGI `/jobs` + `requires_proxy_auth` | Code | completed | ADR-002, RD-019 | T3.2, T4.2 | — |
+| T6.4 | Modal queue worker: scrape → embed → DO write API | Code | completed | spec.md §Ingest path | T6.2, T5.2, T4.2 | D4, D6 |
+| T6.5 | Test: job lifecycle mocked (`tests/e2e/test_uj002_ingest_job.py`) | Test | completed | UJ-002, TC-010 | T6.4 | D4 |
+| T6.6 | Test: job failure (`tests/e2e/test_uj006_job_failure.py`) | Test | completed | UJ-006, TC-013 | T6.4 | — |
+| T6.7 | Test: unauthorized (`tests/e2e/test_uj008_unauthorized_admin.py`) | Test | completed | UJ-008, TC-014 | T6.3 | — |
 
 #### M7: Data Management Frontend
 
@@ -359,7 +359,7 @@ main
 | PR-3 | Minor | M3 | feat/M3-openapi-schemas | phase/1-foundation | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/22 |
 | PR-4 | Major | Phase 1 | phase/1-foundation | main | pending |
 | PR-5 | Minor | M4 | feat/M4-internal-write-api | phase/2-data-management | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/23 |
-| PR-6 | Minor | M5 | feat/M5-fastembed-modal | phase/2-data-management | pending |
+| PR-6 | Minor | M5 | feat/M5-fastembed-modal | phase/2-data-management | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/24 |
 | PR-7 | Minor | M6 | feat/M6-modal-ingest | phase/2-data-management | pending |
 | PR-8 | Minor | M7 | feat/M7-data-mgmt-frontend | phase/2-data-management | pending |
 | PR-9 | Major | Phase 2 | phase/2-data-management | main | pending |
@@ -409,13 +409,13 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T5.2 | M5 | 2 | Code | completed | T5.1 | — | 2026-05-19 |
 | T5.3 | M5 | 2 | Code | completed | T5.2 | D6 | 2026-05-19 |
 | T5.4 | M5 | 2 | Test | completed | T5.3 | D6 | 2026-05-19 |
-| T6.1 | M6 | 2 | Test | pending | T1.3 | D4 | — |
-| T6.2 | M6 | 2 | Code | pending | T6.1 | — | — |
-| T6.3 | M6 | 2 | Code | pending | T3.2, T4.2 | — | — |
-| T6.4 | M6 | 2 | Code | pending | T6.2, T5.2, T4.2 | D4, D6 | — |
-| T6.5 | M6 | 2 | Test | pending | T6.4 | D4 | — |
-| T6.6 | M6 | 2 | Test | pending | T6.4 | — | — |
-| T6.7 | M6 | 2 | Test | pending | T6.3 | — | — |
+| T6.1 | M6 | 2 | Test | completed | T1.3 | D4 | 2026-05-19 |
+| T6.2 | M6 | 2 | Code | completed | T6.1 | — | 2026-05-19 |
+| T6.3 | M6 | 2 | Code | completed | T3.2, T4.2 | — | 2026-05-19 |
+| T6.4 | M6 | 2 | Code | completed | T6.2, T5.2, T4.2 | D4, D6 | 2026-05-19 |
+| T6.5 | M6 | 2 | Test | completed | T6.4 | D4 | 2026-05-19 |
+| T6.6 | M6 | 2 | Test | completed | T6.4 | — | 2026-05-19 |
+| T6.7 | M6 | 2 | Test | completed | T6.3 | — | 2026-05-19 |
 | T7.1 | M7 | 2 | Config | pending | T1.1 | — | — |
 | T7.2 | M7 | 2 | Code | pending | T6.3, T7.1 | — | — |
 | T7.3 | M7 | 2 | Code | pending | T4.3, T7.2 | — | — |
