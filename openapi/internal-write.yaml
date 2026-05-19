@@ -1,0 +1,201 @@
+openapi: 3.0.3
+info:
+  title: Vecinita DO Internal Write API
+  version: 0.1.0
+  description: Service-to-service writes from Modal workers (sole DATABASE_URL holder).
+servers:
+  - url: /internal/v1
+    description: Internal write API (DigitalOcean)
+paths:
+  /documents/batch:
+    post:
+      operationId: upsertDocumentsBatch
+      summary: Upsert documents, chunks, and embeddings
+      security:
+        - internalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchUpsertRequest"
+      responses:
+        "200":
+          description: Upsert counts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchUpsertResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /documents:
+    get:
+      operationId: listDocuments
+      summary: List corpus documents
+      security:
+        - internalApiKey: []
+      responses:
+        "200":
+          description: Document list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DocumentSummary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /documents/{document_id}:
+    delete:
+      operationId: deleteDocument
+      summary: Delete document and dependent chunks/embeddings
+      security:
+        - internalApiKey: []
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /health:
+    get:
+      operationId: health
+      summary: Service health
+      responses:
+        "200":
+          description: Health status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+components:
+  securitySchemes:
+    internalApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: API key
+      description: VECINITA_INTERNAL_API_KEY
+  schemas:
+    EmbeddingVector:
+      type: array
+      minItems: 384
+      maxItems: 384
+      items:
+        type: number
+        format: float
+    ChunkUpsert:
+      type: object
+      required:
+        - chunk_index
+        - text
+        - embedding
+      properties:
+        chunk_index:
+          type: integer
+          minimum: 0
+        text:
+          type: string
+        embedding:
+          $ref: "#/components/schemas/EmbeddingVector"
+    DocumentUpsert:
+      type: object
+      required:
+        - url
+        - chunks
+      properties:
+        url:
+          type: string
+          format: uri
+        title:
+          type: string
+          nullable: true
+        content_hash:
+          type: string
+          nullable: true
+        language:
+          type: string
+          nullable: true
+        chunks:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/ChunkUpsert"
+    BatchUpsertRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - documents
+      properties:
+        documents:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/DocumentUpsert"
+    BatchUpsertResponse:
+      type: object
+      required:
+        - upserted_chunks
+      properties:
+        upserted_chunks:
+          type: integer
+          minimum: 0
+    DocumentSummary:
+      type: object
+      required:
+        - document_id
+        - url
+      properties:
+        document_id:
+          type: string
+          format: uuid
+        url:
+          type: string
+        title:
+          type: string
+          nullable: true
+        language:
+          type: string
+          nullable: true
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+    ErrorBody:
+      type: object
+      properties:
+        detail:
+          type: string
+  responses:
+    ValidationError:
+      description: Invalid payload
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
+    Unauthorized:
+      description: Missing or invalid internal API key
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
+    NotFound:
+      description: Unknown document
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"

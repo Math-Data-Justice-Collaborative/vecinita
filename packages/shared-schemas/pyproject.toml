@@ -3,7 +3,9 @@ name = "vecinita-shared-schemas"
 version = "0.1.0"
 description = "Shared Pydantic models aligned with OpenAPI contracts"
 requires-python = ">=3.11,<3.12"
-dependencies = []
+dependencies = [
+    "pydantic>=2.7,<3",
+]
 
 [build-system]
 requires = ["hatchling"]
