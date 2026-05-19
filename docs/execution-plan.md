@@ -356,7 +356,7 @@ main
 |----|------|-----------------|--------|--------|--------|
 | PR-1 | Minor | M1 | feat/M1-monorepo-scaffold | phase/1-foundation | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/20 |
 | PR-2 | Minor | M2 | feat/M2-database-privacy | phase/1-foundation | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/21 |
-| PR-3 | Minor | M3 | feat/M3-openapi-schemas | phase/1-foundation | pending |
+| PR-3 | Minor | M3 | feat/M3-openapi-schemas | phase/1-foundation | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/22 |
 | PR-4 | Major | Phase 1 | phase/1-foundation | main | pending |
 | PR-5 | Minor | M4 | feat/M4-internal-write-api | phase/2-data-management | pending |
 | PR-6 | Minor | M5 | feat/M5-fastembed-modal | phase/2-data-management | pending |
