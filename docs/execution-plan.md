@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 1: Foundation |
-| **Active milestone** | M5: FastEmbed Modal service |
-| **Active task** | T5.1 |
-| **Tasks completed** | 25 / 73 |
+| **Active milestone** | M6: Modal ingest (ASGI + workers) |
+| **Active task** | T6.1 |
+| **Tasks completed** | 29 / 73 |
 | **Last updated** | 2026-05-19 |
 
 ## Template
@@ -172,10 +172,10 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps |
 |---|------|------|--------|-------------|------------|-----------|
-| T5.1 | Test: embedding client mock contract (`tests/unit/test_embedding_client.py`) | Test | pending | ADR-008 | T1.3 | — |
-| T5.2 | `packages/embedding-client` HTTP client | Code | pending | spec.md §Modal FastEmbed | T5.1 | — |
-| T5.3 | Modal app `vecinita-embedding` + volume `embedding-models` | Code | pending | deployment-integration.md | T5.2 | D6 |
-| T5.4 | Test: 384-dim vector shape integration (mocked HTTP) | Test | pending | data-management-plan §Verification | T5.3 | D6 |
+| T5.1 | Test: embedding client mock contract (`tests/unit/test_embedding_client.py`) | Test | completed | ADR-008 | T1.3 | — |
+| T5.2 | `packages/embedding-client` HTTP client | Code | completed | spec.md §Modal FastEmbed | T5.1 | — |
+| T5.3 | Modal app `vecinita-embedding` + volume `embedding-models` | Code | completed | deployment-integration.md | T5.2 | D6 |
+| T5.4 | Test: 384-dim vector shape integration (mocked HTTP) | Test | completed | data-management-plan §Verification | T5.3 | D6 |
 
 #### M6: Modal ingest (ASGI + workers)
 
@@ -358,7 +358,7 @@ main
 | PR-2 | Minor | M2 | feat/M2-database-privacy | phase/1-foundation | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/21 |
 | PR-3 | Minor | M3 | feat/M3-openapi-schemas | phase/1-foundation | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/22 |
 | PR-4 | Major | Phase 1 | phase/1-foundation | main | pending |
-| PR-5 | Minor | M4 | feat/M4-internal-write-api | phase/2-data-management | pending |
+| PR-5 | Minor | M4 | feat/M4-internal-write-api | phase/2-data-management | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/23 |
 | PR-6 | Minor | M5 | feat/M5-fastembed-modal | phase/2-data-management | pending |
 | PR-7 | Minor | M6 | feat/M6-modal-ingest | phase/2-data-management | pending |
 | PR-8 | Minor | M7 | feat/M7-data-mgmt-frontend | phase/2-data-management | pending |
@@ -405,10 +405,10 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T4.2 | M4 | 2 | Code | completed | T4.1 | — | 2026-05-19 |
 | T4.3 | M4 | 2 | Code | completed | T4.2 | — | 2026-05-19 |
 | T4.4 | M4 | 2 | Test | completed | T4.3 | D1 | 2026-05-19 |
-| T5.1 | M5 | 2 | Test | pending | T1.3 | — | — |
-| T5.2 | M5 | 2 | Code | pending | T5.1 | — | — |
-| T5.3 | M5 | 2 | Code | pending | T5.2 | D6 | — |
-| T5.4 | M5 | 2 | Test | pending | T5.3 | D6 | — |
+| T5.1 | M5 | 2 | Test | completed | T1.3 | — | 2026-05-19 |
+| T5.2 | M5 | 2 | Code | completed | T5.1 | — | 2026-05-19 |
+| T5.3 | M5 | 2 | Code | completed | T5.2 | D6 | 2026-05-19 |
+| T5.4 | M5 | 2 | Test | completed | T5.3 | D6 | 2026-05-19 |
 | T6.1 | M6 | 2 | Test | pending | T1.3 | D4 | — |
 | T6.2 | M6 | 2 | Code | pending | T6.1 | — | — |
 | T6.3 | M6 | 2 | Code | pending | T3.2, T4.2 | — | — |
