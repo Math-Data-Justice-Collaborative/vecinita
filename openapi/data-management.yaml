@@ -1,0 +1,177 @@
+openapi: 3.0.3
+info:
+  title: Vecinita Data Management API
+  version: 0.1.0
+  description: Modal ASGI job API (infrastructure auth via Modal proxy).
+servers:
+  - url: /
+    description: Modal ASGI app
+paths:
+  /jobs:
+    post:
+      operationId: createJob
+      summary: Enqueue scrape→chunk→embed pipeline
+      security:
+        - modalProxyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateJobRequest"
+      responses:
+        "202":
+          description: Job accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateJobResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /jobs/{job_id}:
+    get:
+      operationId: getJob
+      summary: Job status
+      security:
+        - modalProxyAuth: []
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Job record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /health:
+    get:
+      operationId: health
+      summary: Service health
+      responses:
+        "200":
+          description: Health status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+components:
+  securitySchemes:
+    modalProxyAuth:
+      type: apiKey
+      in: header
+      name: Modal-Key
+      description: Modal proxy authentication (requires_proxy_auth)
+  schemas:
+    CreateJobRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - urls
+      properties:
+        urls:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            format: uri
+        options:
+          type: object
+          additionalProperties: false
+          properties:
+            chunk_size_tokens:
+              type: integer
+              minimum: 64
+              maximum: 2048
+    CreateJobResponse:
+      type: object
+      required:
+        - job_id
+        - status
+      properties:
+        job_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - pending
+    Job:
+      type: object
+      required:
+        - job_id
+        - status
+        - urls
+        - created_at
+        - updated_at
+      properties:
+        job_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - pending
+            - running
+            - completed
+            - failed
+        urls:
+          type: array
+          items:
+            type: string
+            format: uri
+        error_code:
+          type: string
+          nullable: true
+        error_message:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+    ErrorBody:
+      type: object
+      properties:
+        detail:
+          type: string
+  responses:
+    ValidationError:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
+    Unauthorized:
+      description: Missing or invalid infrastructure credentials
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
+    NotFound:
+      description: Unknown job
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
