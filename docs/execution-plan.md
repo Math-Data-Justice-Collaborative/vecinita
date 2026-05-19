@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 3: ChatRAG |
-| **Active milestone** | M11: ChatRAG Frontend |
-| **Active task** | T11.1 |
-| **Tasks completed** | 56 / 73 |
+| **Active milestone** | M12: Local dev (F18) |
+| **Active task** | T12.1 |
+| **Tasks completed** | 60 / 73 |
 | **Last updated** | 2026-05-19 |
 
 ## Template
@@ -259,10 +259,10 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps |
 |---|------|------|--------|-------------|------------|-----------|
-| T11.1 | Vite React scaffold `apps/chat-rag-frontend` | Config | pending | feature-list F11 | T1.1 | — |
-| T11.2 | Streaming chat UI + source citations | Code | pending | UJ-001 | T10.3, T11.1 | — |
-| T11.3 | Client-side-only history (no server session) | Code | pending | feature-list F3, ADR-004 | T11.2 | — |
-| T11.4 | Vitest smoke chat component | Test | pending | test-plan.md | T11.2 | — |
+| T11.1 | Vite React scaffold `apps/chat-rag-frontend` | Config | completed | feature-list F11 | T1.1 | — |
+| T11.2 | Streaming chat UI + source citations | Code | completed | UJ-001 | T10.3, T11.1 | — |
+| T11.3 | Client-side-only history (no server session) | Code | completed | feature-list F3, ADR-004 | T11.2 | — |
+| T11.4 | Vitest smoke chat component | Test | completed | test-plan.md | T11.2 | — |
 
 #### Phase 3 Gate Check
 
@@ -365,8 +365,8 @@ main
 | PR-9 | Major | Phase 2 | phase/2-data-management | main | pending |
 | PR-10 | Minor | M8 | feat/M8-packages-rag | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/27 |
 | PR-11 | Minor | M9 | feat/M9-vllm-modal | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/28 |
-| PR-12 | Minor | M10 | feat/M10-chat-rag-backend | main | open |
-| PR-13 | Minor | M11 | feat/M11-chat-rag-frontend | phase/3-chatrag | pending |
+| PR-12 | Minor | M10 | feat/M10-chat-rag-backend | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/29 |
+| PR-13 | Minor | M11 | feat/M11-chat-rag-frontend | main | open |
 | PR-14 | Major | Phase 3 | phase/3-chatrag | main | pending |
 | PR-15 | Minor | M12 | feat/M12-local-dev | phase/4-integration | pending |
 | PR-16 | Minor | M13 | feat/M13-ci | phase/4-integration | pending |
@@ -436,10 +436,10 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T10.5 | M10 | 3 | Test | completed | T3.6, T10.4 | — | 2026-05-19 |
 | T10.6 | M10 | 3 | Test | completed | T10.4, T11.2 | D1 | 2026-05-19 |
 | T10.7 | M10 | 3 | Test | completed | T10.4 | D1 | 2026-05-19 |
-| T11.1 | M11 | 3 | Config | pending | T1.1 | — | — |
-| T11.2 | M11 | 3 | Code | pending | T10.3, T11.1 | — | — |
-| T11.3 | M11 | 3 | Code | pending | T11.2 | — | — |
-| T11.4 | M11 | 3 | Test | pending | T11.2 | — | — |
+| T11.1 | M11 | 3 | Config | completed | T1.1 | — | 2026-05-19 |
+| T11.2 | M11 | 3 | Code | completed | T10.3, T11.1 | — | 2026-05-19 |
+| T11.3 | M11 | 3 | Code | completed | T11.2 | — | 2026-05-19 |
+| T11.4 | M11 | 3 | Test | completed | T11.2 | — | 2026-05-19 |
 | T12.1 | M12 | 4 | Test | pending | T10.3, T6.3 | D1–D5 | — |
 | T12.2 | M12 | 4 | Docs | pending | T12.1 | — | — |
 | T12.3 | M12 | 4 | Docs | pending | T12.2 | — | — |
