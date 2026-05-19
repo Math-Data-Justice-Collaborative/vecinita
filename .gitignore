@@ -3,6 +3,8 @@
 .env.*
 *.env
 !*.env.example
+.deploy-keys.local
+prod.env
 
 # Python
 __pycache__/
@@ -28,3 +30,4 @@ dist/
 *.log
 .coverage
 htmlcov/
+*.env

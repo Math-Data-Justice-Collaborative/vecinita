@@ -26,7 +26,7 @@ services:
       export PATH="$HOME/.local/bin:$PATH" &&
       uv sync --group dev
     run_command: >-
-      uv run uvicorn vecinita_chat_rag_backend.app:create_app
+      .venv/bin/uvicorn vecinita_chat_rag_backend.app:create_app
       --factory --host 0.0.0.0 --port 8080
     envs:
       - key: DATABASE_URL

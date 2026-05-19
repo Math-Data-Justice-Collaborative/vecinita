@@ -131,6 +131,84 @@ def cmd_deploy(client, name: str) -> int:
     return 0
 
 
+def _set_env_value(spec: dict[str, Any], key: str, value: str) -> None:
+    """Set env var on all services/static_sites in spec."""
+    for section in ("services", "static_sites", "workers", "jobs"):
+        for comp in spec.get(section) or []:
+            envs = comp.setdefault("envs", [])
+            for env in envs:
+                if env.get("key") == key:
+                    env["value"] = value
+                    env["type"] = env.get("type", "GENERAL")
+                    if env.get("type") == "SECRET":
+                        env["value"] = value
+                    return
+            envs.append({"key": key, "value": value, "scope": "RUN_TIME", "type": "SECRET"})
+
+
+def _apply_env_from_os(spec: dict[str, Any], keys: list[str], scope: str = "RUN_TIME") -> None:
+    for key in keys:
+        val = os.environ.get(key, "").strip()
+        if not val:
+            continue
+        for section in ("services", "static_sites", "workers", "jobs"):
+            for comp in spec.get(section) or []:
+                envs = comp.setdefault("envs", [])
+                for env in envs:
+                    if env.get("key") == key:
+                        env["value"] = val
+                        env["type"] = env.get("type", "SECRET")
+                        env["scope"] = env.get("scope", scope)
+                        break
+                else:
+                    envs.append(
+                        {
+                            "key": key,
+                            "value": val,
+                            "scope": scope,
+                            "type": "SECRET",
+                        }
+                    )
+
+
+def cmd_sync_secrets(client, name: str) -> int:
+    """Push env vars from shell into app spec via apps.update."""
+    apps = _iter_apps(client)
+    app = _find_app(apps, name)
+    if not app:
+        raise SystemExit(f"No app named {name!r}")
+    spec_path = next((p for p in DEFAULT_SPECS if _load_spec(p)["name"] == name), None)
+    if spec_path is None:
+        raise SystemExit(f"No YAML spec for {name!r}")
+    spec = _load_spec(spec_path)
+    if name == "vecinita-internal-write-api":
+        _apply_env_from_os(spec, ["DATABASE_URL", "VECINITA_INTERNAL_API_KEY"])
+    elif name == "vecinita-chat-rag-backend":
+        _apply_env_from_os(
+            spec,
+            ["DATABASE_URL", "VECINITA_MODAL_EMBED_URL", "VECINITA_MODAL_LLM_URL"],
+        )
+    elif name == "vecinita-chat-rag-frontend":
+        _apply_env_from_os(
+            spec, ["VITE_VECINITA_CHAT_API_URL"], scope="BUILD_TIME"
+        )
+    elif name == "vecinita-admin-frontend":
+        _apply_env_from_os(
+            spec,
+            [
+                "VITE_VECINITA_ADMIN_API_URL",
+                "VITE_VECINITA_MODAL_PROXY_KEY",
+                "VITE_VECINITA_CORPUS_API_URL",
+                "VITE_VECINITA_CORPUS_API_KEY",
+            ],
+            scope="BUILD_TIME",
+        )
+    app_id = app["id"]
+    client.apps.update(id=app_id, body={"spec": spec})
+    print(f"Updated secrets for {name} ({app_id})")
+    return 0
+
+
 def cmd_urls(client) -> int:
     """Print staging smoke env hints for vecinita-* apps."""
     apps = _iter_apps(client)
@@ -159,6 +237,8 @@ def main() -> int:
     p_dep = sub.add_parser("deploy", help="Trigger deployment for existing app by spec name")
     p_dep.add_argument("--name", required=True, help="App spec name field")
     sub.add_parser("urls", help="Print VECINITA_STAGING_* export lines")
+    p_sync = sub.add_parser("sync-secrets", help="Update app spec env from shell")
+    p_sync.add_argument("--name", required=True, help="App spec name field")
     args = parser.parse_args()
     client = _client()
     if args.command == "list":
@@ -171,6 +251,8 @@ def main() -> int:
         return cmd_deploy(client, args.name)
     if args.command == "urls":
         return cmd_urls(client)
+    if args.command == "sync-secrets":
+        return cmd_sync_secrets(client, args.name)
     raise SystemExit(f"Unknown command: {args.command}")
 
 

@@ -22,7 +22,7 @@ services:
       export PATH="$HOME/.local/bin:$PATH" &&
       uv sync --group dev
     run_command: >-
-      uv run uvicorn vecinita_internal_write_api.app:create_app
+      .venv/bin/uvicorn vecinita_internal_write_api.app:create_app
       --factory --host 0.0.0.0 --port 8080
     envs:
       - key: DATABASE_URL
