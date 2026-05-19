@@ -358,7 +358,7 @@ main
 | PR-2 | Minor | M2 | feat/M2-database-privacy | phase/1-foundation | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/21 |
 | PR-3 | Minor | M3 | feat/M3-openapi-schemas | phase/1-foundation | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/22 |
 | PR-4 | Major | Phase 1 | phase/1-foundation | main | pending |
-| PR-5 | Minor | M4 | feat/M4-internal-write-api | phase/2-data-management | pending |
+| PR-5 | Minor | M4 | feat/M4-internal-write-api | phase/2-data-management | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/23 |
 | PR-6 | Minor | M5 | feat/M5-fastembed-modal | phase/2-data-management | pending |
 | PR-7 | Minor | M6 | feat/M6-modal-ingest | phase/2-data-management | pending |
 | PR-8 | Minor | M7 | feat/M7-data-mgmt-frontend | phase/2-data-management | pending |
