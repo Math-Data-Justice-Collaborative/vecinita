@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import pytest
-from vecinita_rag.retriever import CorpusPgvectorRetriever
-
 from tests.unit.rag.conftest import attach_embeddings, basis_vector
+from vecinita_rag.retriever import CorpusPgvectorRetriever
 
 pytestmark = pytest.mark.integration
 

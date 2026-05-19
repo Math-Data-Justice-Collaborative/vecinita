@@ -1,4 +1,4 @@
-"""T14.3: H1–H3 staging smoke when VECINITA_STAGING_* URLs are set (live tier T3)."""
+"""T14.3: H1-H3 staging smoke when VECINITA_STAGING_* URLs are set (live tier T3)."""
 
 from __future__ import annotations
 
