@@ -360,7 +360,7 @@ main
 | PR-4 | Major | Phase 1 | phase/1-foundation | main | pending |
 | PR-5 | Minor | M4 | feat/M4-internal-write-api | phase/2-data-management | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/23 |
 | PR-6 | Minor | M5 | feat/M5-fastembed-modal | phase/2-data-management | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/24 |
-| PR-7 | Minor | M6 | feat/M6-modal-ingest | phase/2-data-management | pending |
+| PR-7 | Minor | M6 | feat/M6-modal-ingest | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/25 |
 | PR-8 | Minor | M7 | feat/M7-data-mgmt-frontend | phase/2-data-management | pending |
 | PR-9 | Major | Phase 2 | phase/2-data-management | main | pending |
 | PR-10 | Minor | M8 | feat/M8-packages-rag | phase/3-chatrag | pending |
