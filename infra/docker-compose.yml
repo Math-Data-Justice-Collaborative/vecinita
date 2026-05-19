@@ -1,0 +1,22 @@
+# Local Postgres 15 + pgvector for development (F18, RD-011).
+# Usage: docker compose -f infra/docker-compose.yml up -d postgres
+services:
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: vecinita-postgres
+    environment:
+      POSTGRES_USER: vecinita
+      POSTGRES_PASSWORD: vecinita
+      POSTGRES_DB: vecinita
+    ports:
+      - "5432:5432"
+    volumes:
+      - vecinita_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vecinita -d vecinita"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  vecinita_postgres_data:
