@@ -1,0 +1,22 @@
+[project]
+name = "vecinita-chat-rag-backend"
+version = "0.1.0"
+description = "ChatRAG FastAPI backend (DigitalOcean)"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "vecinita-rag",
+    "vecinita-shared-schemas",
+    "vecinita-embedding-client",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["vecinita_chat_rag_backend"]
+
+[tool.uv.sources]
+vecinita-rag = { workspace = true }
+vecinita-shared-schemas = { workspace = true }
+vecinita-embedding-client = { workspace = true }

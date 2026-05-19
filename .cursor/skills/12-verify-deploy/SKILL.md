@@ -1,0 +1,203 @@
+---
+name: 12-verify-deploy
+description: >
+  Pre-deploy gate. Verifies the deployment strategy is sound and all prerequisites are met.
+  Walks through potential failure modes and mitigations with the user. Checks configuration,
+  secrets, data management, rollback plan, and resource allocation against the deployment spec.
+---
+
+# 12 — Verify Deploy Strategy
+
+Pre-deploy gate verifying that the deployment strategy planned in Stage 04 still holds
+after implementation, and all deployment prerequisites are met.
+
+**Cross-cutting:** [considerations.md](../considerations.md).
+
+## Prerequisites
+
+1. **11-verify-impl** must be `completed` — implementation verified by user
+2. Required:
+   - Deployment plan document (e.g., `docs/deployment-integration.md`, `docs/deployment-plan.md`)
+   - `docs/execution-plan.md` — §Tech Stack for deployment tools
+   - `docs/implementation-verification.md` — confirmation implementation is approved
+3. If data assets exist: `docs/data-management-plan.md` and `docs/data-management-state.md`
+
+## Why This Stage Exists Separately from Stage 04
+
+Stage 04 (tech plan) **designs** the deployment strategy. Stage 12 **verifies** that:
+- The strategy still applies after implementation (no drift)
+- All prerequisites are actually in place (secrets, volumes, configs)
+- Failure modes have been addressed
+- The user has reviewed the rollback plan
+
+## State Management
+
+Track via `workflow-state.yaml` §stages.12-verify-deploy.
+
+## Workflow
+
+### Phase 1 — Pre-Deploy Checks (Parallel Agents)
+
+Launch parallel agents:
+
+**Agent 1 — Configuration Validation**:
+- Read deployment plan
+- Verify all required configuration is present (no `⚠️ Needs human input` markers)
+- Check app name, entry files, function definitions
+- Return: list of missing or incomplete items
+
+**Agent 2 — Secrets Check**:
+- Cross-reference deployment plan §Secrets with actual secret configuration
+- For Modal: `modal secret list`
+- For other platforms: check environment or secret manager
+- Return: pass/fail per secret
+
+**Agent 3 — Data & Volume Check** (if applicable):
+- Verify data assets are staged for deployment
+- For Modal: check volumes exist and contain expected files
+- For other platforms: check equivalent storage
+- Return: pass/fail per asset
+
+**Agent 4 — Resource Allocation Check**:
+- Verify compute resources match deployment plan
+- GPU allocation, container count, scaling config
+- Return: spec compliance report
+
+**Agent 5 — Template Deploy Validation** (if template selected): Read
+`workflow-state.yaml` §template and [template-registry.md](../template-registry.md).
+- Verify `.github/workflows/deploy_to_modal.yml` matches template CI/CD pattern
+- Verify deploy command is ` platform deploy -m src.app`
+- Verify GitHub repo secrets are documented (`MODAL_TOKEN_ID`, `MODAL_TOKEN_SECRET`)
+- For job template: verify GPU classes match `template.gpu_tiers`, verify cache volume
+  name is `cognichem-{service_name}-cache`
+- For utility template: verify `min_containers` setting
+- Cross-check: deployment plan doc references match actual `src/app.py` app name
+- Return: template deploy conformance report
+
+### Phase 2 — Failure Mode Analysis
+
+Walk through potential deployment failure modes with the user:
+
+For each potential failure mode identified from the deployment plan:
+
+```
+prompt: "[Deploy Risk] Container image build failure:
+  Risk: Dependencies may fail to install in the production image.
+  
+  Current mitigation: [from deployment plan, or 'none documented']
+  
+  Recommendation: Add a Dockerfile health check and test the image locally before
+  deploying."
+
+options:
+  1. "Approve mitigation — this is sufficient"
+  2. "Add mitigation — I'll describe what to add"
+  3. "Accept risk — no mitigation needed"
+  4. "Let me explain / provide more context"
+```
+
+Common failure modes to check:
+- Image build failure (dependency installation)
+- Secret missing at runtime
+- Data/volume mount failure
+- GPU unavailability
+- Network/port binding issues
+- Cold start timeout
+- Memory exhaustion
+- Auth/CORS issues
+
+### Phase 3 — Rollback Plan Review
+
+Present the rollback plan for verification:
+
+```
+prompt: "Rollback plan review:
+  
+  Current plan: [from deployment plan]
+  Rollback command: [e.g., 'modal app stop [app-name]']
+  
+  Is this rollback plan complete and correct?"
+
+options:
+  1. "Approve — rollback plan is correct"
+  2. "Modify — I'll update the rollback procedure"
+  3. "Skip — no rollback needed for this deployment"
+  4. "Let me explain / provide more context"
+```
+
+### Phase 4 — Produce Deploy Checklist
+
+Write `docs/deploy-checklist.md`:
+
+```markdown
+# Deploy Checklist
+
+> Generated: [date]
+> Status: [ready / not ready]
+> Deployment plan: [docs/deployment-plan.md]
+
+## Pre-Deploy
+
+- [ ] Configuration complete (no gaps)
+- [ ] All secrets configured
+- [ ] Data assets staged (if applicable)
+- [ ] Resource allocation verified
+- [ ] Rollback plan reviewed
+
+## Failure Mitigations
+
+| # | Risk | Mitigation | Status |
+|---|------|-----------|--------|
+| 1 | Image build failure | Local image test | approved |
+| 2 | Secret missing | Pre-deploy secret check | approved |
+| ... |
+
+## Rollback
+
+- Command: [rollback command]
+- Procedure: [step-by-step rollback]
+- Last known good: [commit/tag]
+
+## Sign-Off
+
+- [ ] User approved deployment (11-verify-impl)
+- [ ] Deploy strategy verified (this checklist)
+- [ ] Ready to deploy
+```
+
+### Phase 5 — Summary
+
+```
+Deploy Strategy Verification Complete.
+
+Pre-deploy checks:
+  Configuration: [PASS/FAIL]
+  Secrets:       [PASS/FAIL] — [N] configured
+  Data/Volumes:  [PASS/FAIL/N/A] — [N] verified
+  Resources:     [PASS/FAIL]
+
+Failure mitigations: [N] risks addressed
+Rollback plan: [reviewed/updated/skipped]
+
+Deploy gate:
+  ✓ QA checks passed (09-qa)
+  ✓ E2E behaviors passed (10-e2e)
+  ✓ Implementation verified (11-verify-impl)
+  ✓ Deploy strategy verified
+  → Ready for deployment
+
+Artifacts:
+  docs/deploy-checklist.md — verified checklist
+
+Next step: 13-deploy-smoke
+```
+
+**State**: Set status to `completed`.
+
+## Output Rules
+
+1. **Verification, not planning**: This stage verifies the existing strategy, not creates one.
+2. **Failure modes are mandatory**: Walk through potential failures even if plan looks complete.
+3. **Rollback is required**: Every deployment must have a documented rollback procedure.
+4. **User approves risks**: Every accepted risk requires explicit user acknowledgment.
+5. **Checklist persists**: The deploy checklist is a reusable artifact for future deploys.

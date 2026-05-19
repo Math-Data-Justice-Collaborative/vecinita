@@ -1,124 +1,30 @@
-# Environment variables
+# Environment
 .env
 .env.*
 *.env
-# Local non-secret defaults override (see config/defaults.example.yaml)
-config/defaults.yaml
-env.txt
-!.env.local.example
-!.env.prod.render.example
-!.env.staging.render.example
+!*.env.example
 
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
-build/
-dist/
-downloads/
-eggs/
-.eggs/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
-*.egg
+.venv/
+venv/
 .mypy_cache/
 .pytest_cache/
 .ruff_cache/
-.tox/
-.hypothesis/
 
-# Virtual environments
-venv/
-ENV/
-env/
-.venv/
-env.bak/
-venv.bak/
-
-# Local gateway build outputs (legacy backend/ paths kept until fully purged)
-backend/lib/
-backend/lib64/
-apis/gateway/lib/
-apis/gateway/lib64/
-
-# IDE/editor
-.idea/
-# Track team VS Code defaults; keep other .vscode/ files local (e.g. mcp.json).
-.vscode/*
-!.vscode/settings.json
-*.swp
-*.swo
-*~
-
-# OS files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Docker
-.docker/
-docker-compose.override.yml
-
-# Logs and reports
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-htmlcov/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-
-# Jupyter / python version
-.ipynb_checkpoints
-.python-version
-
-# Project-specific
-*.bck
-utils/old_vector_loader
+# Node
 node_modules/
-frontend/node_modules/
-frontend/dist/
-frontend/coverage/
-frontend/.eslintcache
-frontend/test-results/
-frontend/playwright-report/
-test-results/
-data/archive/
-data/*.txt
-!data/urls.txt
-!data/README.md
-docs/archive/
-backend/data/output/
-apis/gateway/data/output/
-.last-run.json
-*.pdf
+dist/
+.next/
 
-# Runtime state files (embedding service, model selection)
-backend/src/embedding_service/selection.json
-backend/src/agent/data/model_selection.json
-apis/gateway/src/embedding_service/selection.json
-apis/agent/src/agent/data/model_selection.json
-backend/integration-test-results.local-ci.xml
-backend/schema-test-results.local-ci.xml
-backend/test-results.local-ci.xml
-backend/schemathesis-report/junit-gateway.xml
-apis/gateway/integration-test-results.local-ci.xml
-apis/gateway/schema-test-results.local-ci.xml
-apis/gateway/test-results.local-ci.xml
-apis/gateway/schemathesis-report/junit-gateway.xml
-.cursor/mcp.json
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Build / caches
+*.log
+.coverage
+htmlcov/

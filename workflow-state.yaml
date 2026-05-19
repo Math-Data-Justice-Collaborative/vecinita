@@ -1,0 +1,253 @@
+# Vecinita pipeline state — see .cursor/skills/pipeline/SKILL.md
+project:
+  name: Vecinita
+  description: Monorepo — bilingual community Q&A RAG + data management (5 apps; zero personal data, cost/sovereignty constraints)
+  output_directory: docs/
+
+stages:
+  00-context:
+    status: completed
+    started_at: "2026-05-19"
+    completed_at: "2026-05-19"
+    phases:
+      phase1a_agents:
+        status: completed
+      phase1b_ecosystem:
+        status: completed
+        note: advisory scan only — user selected greenfield APIs (R3)
+      phase1c_template:
+        status: completed
+      phase2_cross_reference:
+        status: completed
+      phase3_surface_issues:
+        status: completed
+      phase4_context_brief:
+        status: completed
+  01-requirements:
+    status: completed
+    completed_at: "2026-05-19"
+    started_at: "2026-05-19"
+    substeps:
+      interviews:
+        completed: 13
+        total: 13
+        current_template: null
+        current_section: null
+      manifest_approved: true
+      approved_documents:
+        - feature-list
+        - spec
+        - user-journeys
+        - test-plan
+        - config-spec
+        - api-contract
+        - data-management-plan
+        - deployment-integration
+        - acceptance-criteria
+        - dependency-inventory
+        - roadmap
+        - glossary
+        - risk-register
+      skipped_documents:
+        - migration-plan
+      notes:
+        dependency_inventory: "User wants vLLM and LlamaIndex evaluated in interview"
+  02-verify-plan:
+    status: completed
+    started_at: "2026-05-19"
+    completed_at: "2026-05-19"
+    partial_rerun_at: "2026-05-19"
+    partial_rerun_note: "Drift scan D1-D4; no new interview statements"
+    documents_total: 13
+    statements_total: 52
+    drift_fixes: 4
+    auto_approved: 28
+    user_approved: 19
+    modified: 6
+    contradictions_resolved: 4
+  03-plan-tooling:
+    status: completed
+    started_at: "2026-05-19"
+    completed_at: "2026-05-19"
+    guardrails:
+      rules_rewritten: 4
+      hooks_updated: 2
+      skills: [config-validator, api-contract-validator, privacy-schema-validator]
+      agents: [scope-reviewer, spec-consultant]
+  04-tech-plan:
+    status: completed
+    started_at: "2026-05-19"
+    completed_at: "2026-05-19"
+    substeps:
+      phase1_toolchain: completed
+      phase2_interview: completed
+      phase3_execution_plan: completed
+      phase4_user_review: completed
+  05-verify-tech:
+    status: completed
+    started_at: "2026-05-19"
+    completed_at: "2026-05-19"
+    documents_total: 6
+    statements_total: 48
+    auto_approved: 27
+    audit_fixes: 12
+    deferred: 3
+    consistency_issues_found: 21
+    consistency_issues_resolved: 15
+  06-tech-tooling:
+    status: completed
+    started_at: "2026-05-19"
+    completed_at: "2026-05-19"
+    rules:
+      new: 0
+      merged: 8
+    hooks:
+      new: 3
+      merged: 8
+    configs:
+      - pyproject.toml
+      - pyrightconfig.json
+      - .github/workflows/ci.yml
+    verification: passed
+  07-build:
+    status: in_progress
+    started_at: "2026-05-19"
+    note: "M1 complete (T1.1–T1.6); M2 next"
+  08-verify-build:
+    status: pending
+  09-qa:
+    status: pending
+  10-e2e:
+    status: pending
+  11-verify-impl:
+    status: pending
+  12-verify-deploy:
+    status: pending
+  13-deploy-smoke:
+    status: pending
+
+agents:
+  repo_researcher:
+    status: completed
+    target: /root/GitHub/VECINA/vecinita
+  paper_analyst:
+    status: skipped
+    reason: no paper provided
+
+phase1b_ecosystem:
+  status: completed
+  org_directory: /root/GitHub/VECINA
+  repos_discovered: 7
+  repos_selected: []
+  constraints_found: 0
+  patterns_adopted: 6
+  divergence_risks: 4
+  note: "User chose greenfield APIs — siblings advisory only (ADR-003)"
+
+template:
+  id: api+worker
+  repo: null
+  selected_at: 00-context
+  classification_confidence: high
+  overridden_by_user: false
+  service_name: vecinita
+  database: digitalocean-managed-postgres
+  vector_store: pgvector
+  deploy:
+    primary: hybrid
+    modal: [data-management-workers, embedding, optional-llm]
+    digitalocean: [chat-rag-backend, chat-rag-frontend, data-management-frontend, database, optional-gateway]
+
+applications:
+  - id: chat-rag-backend
+    platform: digitalocean
+  - id: chat-rag-frontend
+    platform: digitalocean
+  - id: data-management-backend
+    platform: modal
+    secondary_platform: digitalocean
+  - id: data-management-frontend
+    platform: digitalocean
+  - id: database
+    platform: digitalocean-managed-postgres
+  - id: internal-write-api
+    platform: digitalocean
+    note: sixth deployable per ADR-010; sole Modal write path to Postgres
+
+issue_log:
+  - id: ISS-001
+    category: contradiction
+    summary: ".cursor/rules describe RFantibody/Modal job; project is Vecinita RAG 5-app"
+    status: resolved
+    resolved_at: "2026-05-19"
+    resolution: "03-plan-tooling replaced rules, hooks, skills, agents for Vecinita"
+    blocking_for: null
+  - id: ISS-002
+    category: decision
+    summary: "No identity auth in app — infrastructure gates only (R5, R11, ADR-004)"
+    status: resolved
+    blocking_for: null
+  - id: ISS-003
+    category: ambiguity
+    summary: "API gateway — dedicated DO BFF vs merged backends (R6)"
+    status: resolved
+    resolved_at: "2026-05-19"
+    resolution: "04-tech-plan TP-001 — defer gateway to post-v1; direct URLs"
+    blocking_for: null
+
+decisions_log:
+  - R1: five-app monorepo in vecinita — ADR-001
+  - R2: hybrid Modal + DigitalOcean — ADR-002
+  - R3: greenfield APIs, siblings reference only — ADR-003
+  - R4: DigitalOcean Managed Postgres + pgvector for Database app
+  - R5: no identity auth — infra credentials only — ADR-004
+  - R9: minimize cost — ADR-004
+  - R10: data sovereignty US-only self-hosted default — ADR-004
+  - R10a: US regions nyc1/sfo3 — user confirmed
+  - R9: budget 25 target / 50 cap USD per month — user confirmed
+  - R11: zero personal data option B — ADR-004
+  - R6: gateway deferred post-v1 (TP-001) — 04-tech-plan
+  - TP-001: no BFF v1 — 04-tech-plan
+  - TP-002: Qwen2.5-1.5B vLLM T4 — 04-tech-plan
+  - TP-009: cost pilot ≤ $50 — execution-plan.md
+  - R7: RFantibody rules tooling debt → resolved in 03-plan-tooling (2026-05-19)
+  - R8: embedding dimension TBD (reference 384) → 01-requirements
+
+artifacts:
+  - docs/context-brief.md
+  - docs/feature-list.md
+  - docs/spec.md
+  - docs/user-journeys.md
+  - docs/test-plan.md
+  - docs/config-spec.md
+  - docs/api-contract.md
+  - docs/data-management-plan.md
+  - docs/deployment-integration.md
+  - docs/acceptance-criteria.md
+  - docs/dependency-inventory.md
+  - docs/roadmap.md
+  - docs/glossary.md
+  - docs/risk-register.md
+  - docs/requirements-decisions.md
+  - docs/adr/ADR-001-five-app-architecture.md
+  - docs/adr/ADR-002-hybrid-modal-digitalocean.md
+  - docs/adr/ADR-003-greenfield-sibling-apis.md
+  - docs/adr/ADR-004-cost-sovereignty-zero-personal-data.md
+  - docs/execution-plan.md
+  - docs/data-staging-state.md
+  - docs/tech-audit.md
+  - docs/tech-decisions.md
+  - pyproject.toml
+  - pyrightconfig.json
+  - .github/workflows/ci.yml
+
+constraints:
+  cost:
+    target_usd_per_month: 25
+    cap_usd_per_month: 50
+  data_sovereignty:
+    region: us_only
+    preferred_do_regions: [nyc1, sfo3]
+    self_hosted_inference_default: true
+  personal_data: none_option_b
+  privacy_enforcement: schema_api_logs_tests_ci

@@ -1,46 +1,50 @@
 {
+  "$schema": "https://unpkg.com/cursor-hooks@latest/schema/hooks.schema.json",
   "version": 1,
   "hooks": {
-    "beforeShellExecution": [
+    "preToolUse": [
       {
-        "command": ".cursor/hooks/enforce-drift-gates.sh",
-        "matcher": "^(git\\s+commit\\b|gh\\s+pr\\s+create\\b)",
-        "timeout": 1200,
-        "failClosed": true
-      }
-    ],
-    "stop": [
+        "command": "uv run python .cursor/hooks/scope_check.py",
+        "matcher": "Write",
+        "timeout": 10
+      },
       {
-        "command": ".cursor/hooks/run-ci-on-stop.sh",
-        "timeout": 1200,
-        "loop_limit": 8
-      }
-    ],
-    "subagentStop": [
+        "command": "uv run python .cursor/hooks/pre_task_check.py",
+        "matcher": "Write",
+        "timeout": 10
+      },
       {
-        "command": ".cursor/hooks/push-deploy-debug-workflow-subagent-stop.sh",
-        "matcher": "push-deploy-debug-workflow",
-        "timeout": 30,
-        "loop_limit": 3
+        "command": "uv run python .cursor/hooks/pr_checklist.py",
+        "matcher": "Shell",
+        "timeout": 10
       }
     ],
     "afterFileEdit": [
       {
-        "command": ".cursor/hooks/run-contract-pact-tests-on-edit.sh",
-        "timeout": 600
-      }
-    ],
-    "afterTabFileEdit": [
+        "command": "uv run python .cursor/hooks/ruff_after_edit.py",
+        "matcher": "Write",
+        "timeout": 120
+      },
       {
-        "command": ".cursor/hooks/run-contract-pact-tests-on-edit.sh",
-        "timeout": 600
-      }
-    ],
-    "afterShellExecution": [
+        "command": "uv run python .cursor/hooks/format_check.py",
+        "matcher": "Write",
+        "timeout": 30
+      },
       {
-        "command": ".cursor/hooks/gh-push-status-background.sh",
-        "matcher": "^(git\\s+push\\b|make\\s+render-deploy-trigger\\b|make\\s+data-management\\b)",
+        "command": "uv run python .cursor/hooks/typecheck.py",
+        "matcher": "Write",
+        "timeout": 120
+      },
+      {
+        "command": "uv run python .cursor/hooks/feature_drift.py",
+        "matcher": "Write",
         "timeout": 10
+      }
+    ],
+    "stop": [
+      {
+        "command": "uv run python .cursor/hooks/pytest_on_agent_stop.py",
+        "timeout": 600
       }
     ]
   }

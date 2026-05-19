@@ -1,0 +1,76 @@
+[project]
+name = "vecinita"
+version = "0.1.0"
+description = "Vecinita — bilingual community Q&A RAG + data management"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pip-audit>=2.7",
+    "pyright>=1.1.389",
+    "pytest>=8.3",
+    "ruff>=0.8",
+    "vecinita-chat-rag-backend",
+    "vecinita-data-management-backend",
+    "vecinita-database",
+    "vecinita-embedding-client",
+    "vecinita-ingest",
+    "vecinita-internal-write-api",
+    "vecinita-rag",
+    "vecinita-shared-schemas",
+]
+
+[tool.uv.workspace]
+members = [
+    "packages/rag",
+    "packages/ingest",
+    "packages/embedding-client",
+    "packages/shared-schemas",
+    "apps/chat-rag-backend",
+    "apps/data-management-backend",
+    "apps/database",
+    "apps/internal-write-api",
+]
+
+[tool.uv.sources]
+vecinita-rag = { workspace = true }
+vecinita-ingest = { workspace = true }
+vecinita-embedding-client = { workspace = true }
+vecinita-shared-schemas = { workspace = true }
+vecinita-chat-rag-backend = { workspace = true }
+vecinita-data-management-backend = { workspace = true }
+vecinita-database = { workspace = true }
+vecinita-internal-write-api = { workspace = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["apps", "packages", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q --tb=short"
+markers = [
+    "integration: integration tests (may need docker-compose DB)",
+    "e2e: end-to-end user journey tests",
+    "privacy: privacy schema guardrail tests",
+]
+
+[tool.pyright]
+include = ["apps", "packages", "tests"]
+exclude = ["**/__pycache__", ".venv", ".pytest_cache"]
+pythonVersion = "3.11"
+typeCheckingMode = "standard"
+reportMissingImports = true
+reportMissingTypeStubs = false

@@ -1,0 +1,13 @@
+[project]
+name = "vecinita-embedding-client"
+version = "0.1.0"
+description = "HTTP client for Modal FastEmbed service"
+requires-python = ">=3.11,<3.12"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["vecinita_embedding_client"]

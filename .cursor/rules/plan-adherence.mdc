@@ -1,0 +1,67 @@
+---
+description: Enforces that all work maps to the approved product plan (features, components, dependencies)
+globs: ""
+alwaysApply: true
+---
+
+# Plan Adherence
+
+Before implementing any feature, creating any file, or adding any dependency, verify it
+traces to the approved product plan.
+
+## Feature Scope
+
+All implementation work must map to an approved feature in `docs/feature-list.md`:
+
+| Feature | Scope |
+|---------|-------|
+| F1 | RFdiffusion CDR backbone generation |
+| F2 | ProteinMPNN sequence design |
+| F3 | RF2 in-silico validation |
+| F4 | TCR-MHC prediction mode |
+| F5 | Full pipeline orchestration (F1→F2→F3) |
+| F6 | Model weight management (internal) |
+| F7 | Batch design generation |
+| F8 | Fine-tuning (all 3 models) |
+| F9 | Multi-GPU inference |
+
+If work does not map to F1–F9, raise `[Scope Drift]` via AskQuestion:
+- Cite the code or file being created
+- Explain which feature it was intended for
+- First option: "Map to feature FN — here's why..."
+- Last option: "Let me explain / provide more context"
+
+### Out of Scope (do not implement)
+
+- Rosetta scoring / PyRosetta (ddG/SAP) — permanently excluded per R2 and ADR-006
+- Training from scratch — fine-tuning only (F8)
+- Web UI / dashboard — API-only via Modal
+- Distributed multi-machine inference — single-container multi-GPU only (F9)
+
+## Component Verification
+
+New files must map to an approved component from `docs/spec.md` §Component Overview:
+
+| Component | Expected Location |
+|-----------|------------------|
+| Modal App | `src/app.py` |
+| RFdiffusion Stage | `src/rfdiffusion_stage.py` | <!-- ADR-002: flat modules -->
+| ProteinMPNN Stage | `src/proteinmpnn_stage.py` | <!-- ADR-002: flat modules -->
+| RF2 Stage | `src/rf2_stage.py` | <!-- ADR-002: flat modules -->
+| Config Module | `src/config.py` |
+| Pipeline Orchestrator | `src/pipeline.py` |
+| Output Packaging | `src/output.py` |
+| Weight Manager | `src/weights.py` |
+| Fine-Tune Module | `src/finetune/` |
+| Tests | `tests/` (mirroring `src/` structure) |
+
+Files outside these locations require justification. Raise `[Scope Drift]` if a new
+component is being introduced that isn't in the spec.
+
+## Dependency Verification
+
+Before adding any new dependency, check `docs/dependency-inventory.md`. If the dependency
+is not listed:
+1. Raise `[Decision]` with a recommendation
+2. On approval, back-add to `docs/dependency-inventory.md`
+3. Append to the Resolution Log in `docs/research-brief.md`

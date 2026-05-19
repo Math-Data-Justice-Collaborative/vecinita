@@ -1,0 +1,67 @@
+---
+description: Enforces CogniChem Job template patterns for this Modal service
+globs: ""
+alwaysApply: true
+---
+
+# Template Conformance (Job)
+
+This project follows the CogniChem **Job** template (`template-modal-job`). All Modal
+constructs must match the job template patterns documented in
+`.cursor/skills/template-registry.md`.
+
+## File Layout
+
+```
+src/
+├── __init__.py
+├── app.py                # Modal app definition, GPU class variants
+├── pipeline.py           # Pipeline orchestrator (Modal-agnostic core logic)
+├── weights.py            # Weight manager (Modal-agnostic core logic)
+├── config.py             # Config parsing, validation, defaults
+├── rfdiffusion_stage.py  # RFdiffusion CLI wrapper (subprocess) — ADR-002
+├── proteinmpnn_stage.py  # ProteinMPNN CLI wrapper (subprocess) — ADR-002
+├── rf2_stage.py          # RF2 CLI wrapper (subprocess) — ADR-002
+├── output.py             # Output packaging (ZIP, results.json)
+└── finetune/             # Fine-tuning module (Python API) — ADR-003
+```
+
+Stage wrappers are flat modules at `src/` root (ADR-002) to avoid namespace collision
+with the upstream `rfantibody` package.
+
+Files outside this layout should be justified. Surface `[Template Drift]` if the structure
+diverges without a prior ADR.
+
+## Modal Patterns (Required)
+
+- **App name**: `cognichem-rfantibody`
+- **GPU class variants**: Per-tier classes for each entry point
+  (e.g., `PipelineT4`, `PipelineA100_40`, `RFdiffusionH100`, `FineTuneA100_80`)
+- **`@modal.enter()`**: Required for weight loading on container startup
+- **Weights volume**: `modal.Volume.from_name("cognichem-rfantibody-weights", create_if_missing=True)`
+- **Job manager**: Each `run()` calls `i_am_running(modal.current_function_call_id())`
+- **Signature**: `run(self, payload: dict) -> Tuple[str, bytes]`
+- **Timeout**: 7200s
+- **Deploy command**: `modal deploy -m src.app`
+
+## Separation of Concerns
+
+- **`src/app.py`**: Modal wiring only — class definitions, volumes, GPU config, enter/run
+  methods that delegate to core logic
+- **Core logic modules** (`pipeline.py`, `weights.py`, `rfantibody/`): No Modal imports.
+  Pure Python, locally testable.
+- If Modal imports appear in any file other than `src/app.py`, surface `[Template Drift]`
+
+## Naming Conventions
+
+- App: `cognichem-rfantibody`
+- Volume: `cognichem-rfantibody-cache` (weights), `cognichem-rfantibody-data` (runs)
+- Classes: `{Component}{GPUTier}` (e.g., `PipelineA100_40`, `RF2H100`)
+- Entry point: `src/app.py` (per ADR-001)
+
+## When Drift Is Acceptable
+
+Template drift is **advisory, not blocking**. If drift is intentional:
+1. Explain the rationale
+2. Create an ADR documenting the deviation
+3. Update this rule if the deviation becomes the new convention
