@@ -3,7 +3,7 @@
 | App | Module | Deploy command |
 |-----|--------|----------------|
 | `vecinita-embedding` | `infra/modal/embedding_app.py` | `modal deploy infra/modal/embedding_app.py` |
-| Data Management ASGI + workers | (M6) | TBD |
+| `vecinita-data-management` | `infra/modal/data_management_app.py` | `modal deploy infra/modal/data_management_app.py` |
 | `vecinita-llm` | (M9) | TBD |
 
 ## vecinita-embedding (FastEmbed)
