@@ -67,7 +67,11 @@ def load_corpus(*, database_url: str | None = None) -> dict[str, int]:
                 body = path.read_text(encoding="utf-8")
                 content_hash = hashlib.sha256(body.encode("utf-8")).hexdigest()
                 title_line = next(
-                    (line.lstrip("# ").strip() for line in body.splitlines() if line.startswith("#")),
+                    (
+                        line.lstrip("# ").strip()
+                        for line in body.splitlines()
+                        if line.startswith("#")
+                    ),
                     path.stem,
                 )
                 url = _fixture_url(language, path)
