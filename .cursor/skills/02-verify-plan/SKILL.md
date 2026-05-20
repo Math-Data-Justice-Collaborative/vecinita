@@ -57,6 +57,14 @@ Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 Progress is never lost. Every verdict is written to the decision log and state
 immediately after the user responds.
 
+### Commit-as-you-go
+
+Commit artifacts to an appropriate branch before transitioning to the next stage or
+asking the user a blocking question. Branch type per
+[workflow-state-reference.md](../workflow-state-reference.md) §Git history.
+Record every commit in `workflow-state.yaml` §`git_history.commits` with
+`stage: "02-verify-plan"`.
+
 ## Workflow
 
 ### Phase 1 — Inventory Documents

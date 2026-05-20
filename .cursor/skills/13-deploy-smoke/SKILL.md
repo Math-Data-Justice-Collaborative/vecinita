@@ -40,6 +40,14 @@ Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 3. **If `in_progress` or `failed`**: Report what happened. Resume or restart.
 4. **If `pending`**: Start fresh.
 
+### Commit-as-you-go
+
+Commit artifacts to an appropriate branch before transitioning to the next stage or
+asking the user a blocking question. Branch type per
+[workflow-state-reference.md](../workflow-state-reference.md) §Git history.
+Record every commit in `workflow-state.yaml` §`git_history.commits` with
+`stage: "13-deploy-smoke"`.
+
 ### State file: `docs/deploy-state.md`
 
 ```markdown

@@ -53,6 +53,14 @@ Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 3. **If `in_progress`**: Report what was created so far. Ask: "Resume or restart?"
 4. **If `pending`**: Start fresh.
 
+### Commit-as-you-go
+
+Commit artifacts to an appropriate branch before transitioning to the next stage or
+asking the user a blocking question. Branch type per
+[workflow-state-reference.md](../workflow-state-reference.md) §Git history.
+Record every commit in `workflow-state.yaml` §`git_history.commits` with
+`stage: "03-plan-tooling"`.
+
 ## Workflow
 
 ### Phase 1 — Analyze Plan for Tooling Needs

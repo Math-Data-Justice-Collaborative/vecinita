@@ -34,6 +34,14 @@ Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
 **Detail:** `docs/service-health-state.md` and per-run reports under `docs/service-health-reports/`.
 
+### Commit-as-you-go
+
+Commit artifacts to an appropriate branch before transitioning to the next stage or
+asking the user a blocking question. Branch type per
+[workflow-state-reference.md](../workflow-state-reference.md) §Git history.
+Record every commit in `workflow-state.yaml` §`git_history.commits` with
+`stage: "15-service-health"`.
+
 ## Two-layer model
 
 | Layer | Question | Pass when |

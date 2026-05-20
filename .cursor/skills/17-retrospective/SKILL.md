@@ -94,6 +94,14 @@ On invocation:
 
 After every substep: update the active cycle immediately.
 
+### Commit-as-you-go
+
+Commit artifacts to an appropriate branch before transitioning to the next stage or
+asking the user a blocking question. Branch type per
+[workflow-state-reference.md](../workflow-state-reference.md) §Git history.
+Record every commit in `workflow-state.yaml` §`git_history.commits` with
+`stage: "17-retrospective"`.
+
 ### Artifacts
 
 | Artifact | Path |

@@ -112,6 +112,14 @@ phase1b_ecosystem:
   divergence_risks: <N>
 ```
 
+### Commit-as-you-go
+
+Commit artifacts to an appropriate branch before transitioning to the next stage or
+asking the user a blocking question. Branch type per
+[workflow-state-reference.md](../workflow-state-reference.md) §Git history.
+Record every commit in `workflow-state.yaml` §`git_history.commits` with
+`stage: "00-context"`.
+
 ## Workflow
 
 ### Phase 1A — Run Analysis Agents
