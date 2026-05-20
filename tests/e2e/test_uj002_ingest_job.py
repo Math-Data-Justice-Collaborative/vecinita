@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import pytest
 from fastapi.testclient import TestClient
 from vecinita_data_management_backend.store import InMemoryJobStore
+
+pytestmark = pytest.mark.e2e
 
 
 def test_ingest_job_lifecycle(dm_client: TestClient, job_store: InMemoryJobStore) -> None:

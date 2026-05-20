@@ -23,6 +23,7 @@ def build_retriever(
     top_k: int = 5,
     score_threshold: float | None = None,
 ) -> CorpusPgvectorRetriever:
+    """Construct a pgvector retriever wired to the given embed function."""
     return CorpusPgvectorRetriever(
         embed_fn=embed_fn,
         database_url=database_url,
@@ -39,6 +40,7 @@ def build_query_engine(
     top_k: int = 5,
     score_threshold: float | None = None,
 ) -> RetrieverQueryEngine:
+    """Assemble a LlamaIndex query engine with corpus retrieval and LLM synthesis."""
     retriever = build_retriever(
         embed_fn,
         database_url=database_url,
@@ -50,6 +52,7 @@ def build_query_engine(
 
 
 def answer_without_context(question: str) -> RagAnswer:
+    """Return the bilingual no-context message when retrieval finds nothing."""
     language = detect_query_language(question)
     return RagAnswer(answer=no_context_message(language), language=language, sources=[])
 
@@ -60,6 +63,7 @@ def answer_from_chunks(
     *,
     answer_text: str | None = None,
 ) -> RagAnswer:
+    """Build a RagAnswer from retrieved chunks and optional pre-generated text."""
     language = detect_query_language(question)
     if not chunks:
         return answer_without_context(question)
@@ -74,6 +78,7 @@ def synthesize_with_llm(
     chunks: list[RetrievedChunk],
     llm: LLM,
 ) -> RagAnswer:
+    """Synthesize an answer from chunks using a LlamaIndex response synthesizer."""
     if not chunks:
         return answer_without_context(question)
     language = detect_query_language(question)

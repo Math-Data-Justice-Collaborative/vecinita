@@ -12,7 +12,18 @@ description: >
 Break technical plan documents into provable statements, risk-classify, and verify
 consistency with the approved product plan.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+## Connectivity (stage 05)
+
+Verify technical statements:
+
+- Execution plan lists connectivity tasks (not only “deploy” and “health check”)
+- Test plan H0c/H0i/H4/H5 align with [connectivity-gates.md](../connectivity-gates.md)
+- Secrets matrix includes CORS + VITE rows for every browser path
+- No task assumes “smoke script = UI verified” without H4–H5
+
+Auto-approve only when product plan already requires connectivity tiers (02 pass).
 
 ## Prerequisites
 
@@ -30,9 +41,10 @@ consistency with the approved product plan.
 Follow [considerations.md](../considerations.md) §Uncertainty. Technical verification
 surfaces issues at the intersection of product requirements and technical implementation.
 
-## State Management
+## State management
 
-Track progress via `workflow-state.yaml` §stages.05-verify-tech.
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.05-verify-tech`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
 ### On invocation — check state
 
@@ -40,6 +52,14 @@ Track progress via `workflow-state.yaml` §stages.05-verify-tech.
 2. **If `completed`**: Ask: "Reuse existing audit, or re-run?"
 3. **If `in_progress`**: Resume from where we left off.
 4. **If `pending`**: Start fresh.
+
+### Commit-as-you-go
+
+Commit artifacts to an appropriate branch before transitioning to the next stage or
+asking the user a blocking question. Branch type per
+[workflow-state-reference.md](../workflow-state-reference.md) §Git history.
+Record every commit in `workflow-state.yaml` §`git_history.commits` with
+`stage: "05-verify-tech"`.
 
 ## Workflow
 

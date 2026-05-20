@@ -1,5 +1,8 @@
 # 17-retrospective — Reference
 
+Canonical state file: repo-root [`workflow-state.yaml`](../../workflow-state.yaml).
+Shared rules: [workflow-state-reference.md](../workflow-state-reference.md).
+
 ## YAML schema
 
 Append to `workflow-state.yaml`:

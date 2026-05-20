@@ -12,7 +12,13 @@ description: >
 Run quality checks in parallel, auto-correct where possible, and surface non-trivial
 failures to the user.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+## Connectivity (stage 08)
+
+**Blocking:** `tests/unit/test_cors_policy.py` and `tests/integration` must pass.
+Report connectivity artifact presence (`test_staging_connectivity.py`, `verify_connectivity.sh`)
+in `docs/verification-report.md`. See connectivity-gates §Stage 08.
 
 ## When to Use
 
@@ -40,10 +46,12 @@ Unlike a traditional gate that blocks until everything is clean, this skill uses
 1. `docs/execution-plan.md` — §Tech Stack Summary for tool commands
 2. Source files and tests must exist
 
-## State Management
+## State management
 
-Writes results to `docs/verification-report.md`. Updated at each invocation (overwritten).
-Also updates `workflow-state.yaml` §stages.08-verify-build.
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.08-verify-build`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+
+**Detail:** `docs/verification-report.md` — overwrite each run; set `report` on the stage block.
 
 ## Workflow
 
@@ -61,7 +69,11 @@ Launch agents in **one** message:
 
 **Agent 3 — Typechecker**: Run typecheck, parse errors.
 
-**Agent 4 — Test Suite**: Run full test suite, parse results.
+**Agent 4 — Test Suite**: Run full test suite, parse results. Must include **H0c**
+`tests/unit/test_cors_policy.py` (blocking for hybrid UI deploys).
+
+**Agent 4b — Connectivity policy** (Vecinita hybrid): Confirm `configure_cors` on browser-facing
+FastAPI apps and `tests/smoke/test_staging_connectivity.py` exists per connectivity-gates.
 
 **Agent 5 — Security**: Always runs:
 - `pip-audit` for dependency CVEs

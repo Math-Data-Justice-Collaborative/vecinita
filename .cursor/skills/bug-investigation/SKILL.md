@@ -14,7 +14,25 @@ Use this skill whenever a **failure** is caught or reported — in [14-hotfix](.
 CI, or ad-hoc user reports. Stage-specific skills add deploy/Modal context; **this skill owns
 the artifact layout and TDD loop.**
 
-**Cross-cutting:** [considerations.md](../considerations.md) §1, §7.
+**Cross-cutting:** [considerations.md](../considerations.md) §1, §7, [connectivity-gates.md](../connectivity-gates.md).
+
+## Connectivity classification
+
+During intake (Phase 0), ask whether the failure is **browser connectivity** vs **logic/data**:
+
+| Class | Examples | Repro focus |
+|-------|----------|-------------|
+| **connectivity** | Failed to fetch, CORS error, empty `VITE_*` | H4/H5 assertions; OPTIONS + bundle hosts |
+| **integration** | Write API 401, Modal key mismatch | H0i or live API with correct headers |
+| **domain** | Wrong answer, bad retrieval | H3 / unit tests |
+
+Route connectivity bugs through CORS/`VITE_*` fix before deep RAG changes. See connectivity-gates §Stage 14.
+
+## State management
+
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) — update
+§`stages.14-hotfix` when invoked from hotfix/deploy health; append blockers to `issue_log`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
 ## One bug, three artifacts
 

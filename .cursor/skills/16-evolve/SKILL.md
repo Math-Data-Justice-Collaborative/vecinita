@@ -15,7 +15,11 @@ description: >
 Take an **existing** CogniChem service from change request through updated specs, verified
 plans, implementation, and redeploy — reusing stages **00–15** in **delta mode**.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+**Connectivity:** Any evolve cycle that adds or changes **browser-facing** surfaces must re-run
+the applicable rows in connectivity-gates §Pipeline stages 00–15 (at minimum: 01/04 spec delta,
+07 implementation, 12–13 redeploy with H4–H5).
 
 **User is the source of truth.** Interview before editing specs or code. Every ambiguous,
 uncertain, or contradictory finding uses **AskQuestion** — never guess.
@@ -60,7 +64,10 @@ Do not post interview prompts as markdown lists expecting inline replies.
 
 ## State management
 
-### Evolve cycles in `workflow-state.yaml`
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) — top-level
+`evolve_cycles[]` (not under `stages`). Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+
+### Evolve cycles
 
 Each invocation starts or resumes an **evolve cycle** — see [reference.md](reference.md) for the
 YAML schema. Append under `evolve_cycles:` (create the key if absent).
@@ -72,6 +79,20 @@ On invocation:
 3. If none in progress, start **Phase 0 — Change intake** (below).
 
 After every substep: update the active cycle immediately (status, `current_stage`, artifacts, ADRs).
+
+### Git branch and commit-as-you-go
+
+Each evolve cycle works on a dedicated branch:
+
+```
+evolve/{cycle-id}-{slug}
+```
+
+Record the branch in `git_history.branches` on creation. Commit delta specs, code changes,
+and test updates as they happen — never accumulate uncommitted work across substeps.
+After each commit, append to `git_history.commits` with `stage: "16-evolve"`.
+
+When the cycle is complete, create a PR from the evolve branch to main.
 
 ### Decision and ADR logging
 

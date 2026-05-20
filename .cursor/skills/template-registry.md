@@ -127,7 +127,8 @@ Combines API and worker layouts:
 
 ## Template Selection Output
 
-Record in `workflow-state.yaml`:
+Record in repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`template` (see
+[workflow-state-reference.md](workflow-state-reference.md)):
 
 ```yaml
 template:

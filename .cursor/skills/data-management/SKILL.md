@@ -24,15 +24,24 @@ Vecinita depends on:
 
 This skill bridges **04-tech-plan** (`docs/data-management-plan.md`) and **07-build**.
 
+## Connectivity note
+
+Data-management enables **H0i/H2/H3** (DB + server-side RAG). It does **not** replace **H4–H5**
+(browser CORS + `VITE_*`). After staging seed, run `verify_connectivity.sh` at deploy per
+[connectivity-gates.md](../connectivity-gates.md).
+
 ## Prerequisites
 
 1. `docs/data-management-plan.md` (from doc-planner or 04-tech-plan)
 2. `docs/deployment-integration.md` — DB URL pattern, migration hook
 3. `docs/execution-plan.md` — tasks listing data deps
 
-## State
+## State management
 
-Track in `docs/data-management-state.md` (same phase table pattern as legacy data-staging).
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.data-management`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+
+**Detail:** `docs/data-management-state.md` — phase table; mirror completion into YAML immediately.
 
 ## Workflow (summary)
 

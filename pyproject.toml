@@ -69,6 +69,7 @@ addopts = "-q --tb=short"
 markers = [
     "integration: integration tests (may need docker-compose DB)",
     "e2e: end-to-end user journey tests",
+    "live: requires deployed staging URLs (VECINITA_STAGING_*); excluded from T0 CI",
     "privacy: privacy schema guardrail tests",
     "unit: fast unit tests without external services",
 ]

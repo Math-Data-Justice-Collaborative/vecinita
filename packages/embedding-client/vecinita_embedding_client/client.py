@@ -30,7 +30,11 @@ class EmbeddingClient:
             raise EmbeddingClientError(f"{_ENV_EMBED_URL} or base_url is required")
         self._base_url = resolved.rstrip("/")
         self._owns_client = http_client is None
-        self._client = http_client or httpx.Client(base_url=self._base_url, timeout=timeout)
+        self._client = http_client or httpx.Client(
+            base_url=self._base_url,
+            timeout=timeout,
+            follow_redirects=True,
+        )
 
     def close(self) -> None:
         if self._owns_client:

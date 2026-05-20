@@ -18,6 +18,16 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 
 app = modal.App(APP_NAME)
 
+_PKG_ROOT = "/opt/vecinita"
+_PYTHONPATH = ":".join(
+    [
+        f"{_PKG_ROOT}/packages/ingest",
+        f"{_PKG_ROOT}/packages/embedding-client",
+        f"{_PKG_ROOT}/packages/shared-schemas",
+        f"{_PKG_ROOT}/apps/data-management-backend",
+    ]
+)
+
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .pip_install(
@@ -25,18 +35,19 @@ image = (
         "httpx>=0.27,<1",
         "pydantic>=2.7,<3",
     )
-    .add_local_python_source(_REPO_ROOT / "packages" / "ingest" / "vecinita_ingest", copy=True)
-    .add_local_python_source(
-        _REPO_ROOT / "packages" / "embedding-client" / "vecinita_embedding_client",
-        copy=True,
+    .env({"PYTHONPATH": _PYTHONPATH})
+    .add_local_dir(_REPO_ROOT / "packages" / "ingest", remote_path=f"{_PKG_ROOT}/packages/ingest")
+    .add_local_dir(
+        _REPO_ROOT / "packages" / "embedding-client",
+        remote_path=f"{_PKG_ROOT}/packages/embedding-client",
     )
-    .add_local_python_source(
-        _REPO_ROOT / "packages" / "shared-schemas" / "vecinita_shared_schemas",
-        copy=True,
+    .add_local_dir(
+        _REPO_ROOT / "packages" / "shared-schemas",
+        remote_path=f"{_PKG_ROOT}/packages/shared-schemas",
     )
-    .add_local_python_source(
-        _REPO_ROOT / "apps" / "data-management-backend" / "vecinita_data_management_backend",
-        copy=True,
+    .add_local_dir(
+        _REPO_ROOT / "apps" / "data-management-backend",
+        remote_path=f"{_PKG_ROOT}/apps/data-management-backend",
     )
 )
 

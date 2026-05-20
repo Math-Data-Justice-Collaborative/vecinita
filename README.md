@@ -26,7 +26,7 @@ export DATABASE_URL=postgresql+psycopg://vecinita:vecinita@localhost:5432/vecini
 cd apps/database && uv run alembic upgrade head && uv run python -c "from vecinita_database.seeds.load import load_corpus; load_corpus()"
 
 # 3. Tests (mocks Modal — no deploy required)
-cd ../.. && uv sync && uv run pytest tests/ -q
+cd ../.. && bash scripts/run_tests.sh -q
 ```
 
 Full bootstrap: **[docs/LOCAL_DEV.md](docs/LOCAL_DEV.md)** · non-secret defaults: **[infra/vecinita.yaml](infra/vecinita.yaml)**

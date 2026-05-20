@@ -46,6 +46,14 @@ audit **fails** if any are found in scope — remove or replace before merge, st
 
 When in doubt whether terms forbid commercial use, tier **BLOCKED** and cite evidence; do not mark OK.
 
+## State management
+
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.audit-licenses`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+
+On start: `status: in_progress`. On completion: `status: completed`, set `report` path,
+`flags_count`, append report to `artifacts`. On BLOCKED findings, add `issue_log` entries.
+
 ## When to use
 
 | Trigger | Scope |

@@ -23,6 +23,7 @@ def _normalize_database_url(url: str) -> str:
 
 
 def database_url_from_env() -> str:
+    """Read and normalize DATABASE_URL for SQLAlchemy pgvector access."""
     url = os.environ.get("DATABASE_URL")
     if not url:
         raise RuntimeError("DATABASE_URL is required for pgvector retrieval")
@@ -124,6 +125,7 @@ class CorpusPgvectorRetriever(BaseRetriever):
 
 
 def chunks_to_nodes(chunks: list[RetrievedChunk]) -> list[NodeWithScore]:
+    """Convert retrieved chunks to LlamaIndex nodes for synthesis."""
     nodes: list[NodeWithScore] = []
     for chunk in chunks:
         node = TextNode(

@@ -22,6 +22,7 @@ _JOB_STATUS = ("pending", "running", "completed", "failed")
 
 
 def upgrade() -> None:
+    """Create corpus tables, pgvector extension, and job status enum."""
     op.execute("CREATE EXTENSION IF NOT EXISTS vector")
 
     op.create_table(
@@ -117,6 +118,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    """Drop corpus tables and the pgvector extension."""
     op.drop_table("config")
     op.drop_table("jobs")
     op.drop_table("embeddings")

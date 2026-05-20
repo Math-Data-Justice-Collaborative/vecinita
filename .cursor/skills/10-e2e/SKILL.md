@@ -10,7 +10,19 @@ description: >
 
 Verify that user journeys described in product requirements actually work end-to-end.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+## Connectivity (stage 10)
+
+| Tier | What it validates | What it does **not** validate |
+|------|-------------------|-------------------------------|
+| T0 | In-process UJ (`tests/e2e`, not live) | CORS, `VITE_*` bundle |
+| T1 | `tests/integration` (H0i) | Browser |
+| T2 | 13-deploy-smoke H1–**H5** | — |
+| T3 | Live UJ + optional browser MCP | — |
+
+Record in `docs/e2e-report.md`: separate columns for **T0**, **T2 connectivity**, **T3 browser**.
+Mocks passing T0 ≠ production UI connected. See connectivity-gates §Stage 10.
 
 ## When to Use
 
@@ -24,7 +36,7 @@ Determined from product requirements at runtime:
 
 | Project Type | Signals | Mechanism | Tool |
 |-------------|---------|-----------|------|
-| Web app | UI components, routes, pages in spec | Browser automation | cursor-ide-browser MCP |
+| Web app | UI components, routes, pages in spec | Browser automation | cursor-ide-browser MCP (after H4–H5 pass) |
 | API / service | REST/gRPC endpoints in spec | HTTP requests | curl / httpx / requests |
 | CLI tool | CLI flags in config-spec | Shell execution | Shell tool |
 | Library | Import/call patterns in spec | Import + call | Python/Node REPL |
@@ -44,8 +56,8 @@ If ambiguous, surface `[Decision]` for 11-verify-impl.
 |------|-------------|------------------|
 | T0 Local | **10-e2e** | `pytest tests/e2e/ -m "e2e and not live"` (TestClient + test DB) |
 | T1 Integration | **10-e2e** or **08-verify-build** | `pytest tests/integration/` |
-| T2 Deploy smoke | **13-deploy-smoke** | `GET /health` + H3 ingest/query on staging |
-| T3 Live | **15-service-health** | Full UJ suite vs `E2E_BASE_URL` |
+| T2 Deploy smoke | **13-deploy-smoke** | H1–H3 API + **H4–H5 browser connectivity** on staging |
+| T3 Live | **15-service-health** | Full UJ suite vs staging URLs; optional browser UJ (H6) |
 
 ### Journey → test file matrix
 
@@ -74,9 +86,10 @@ passing T0 does not satisfy T3** — record T3 status separately.
 4. For APIs: endpoint accessible for testing
 5. For CLIs: binary/script executable
 
-## State Management
+## State management
 
-Track via `workflow-state.yaml` §stages.10-e2e.
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.10-e2e`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
 ## Workflow
 

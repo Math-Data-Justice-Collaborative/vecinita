@@ -6,8 +6,9 @@ import os
 
 import httpx
 import pytest
+from tests.smoke.staging_h2 import assert_h2_database_ready, staging_database_url
 
-pytestmark = pytest.mark.e2e
+pytestmark = [pytest.mark.e2e, pytest.mark.live]
 
 
 def _staging_chat_url() -> str | None:
@@ -27,6 +28,13 @@ def test_h1_chat_health(staging_chat_url: str) -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["status"] == "ok"
+
+
+def test_h2_database_ready() -> None:
+    url = staging_database_url()
+    if not url:
+        pytest.skip("Set VECINITA_STAGING_DATABASE_URL or DATABASE_URL for H2")
+    assert_h2_database_ready(url)
 
 
 def test_h3_sample_ask(staging_chat_url: str) -> None:

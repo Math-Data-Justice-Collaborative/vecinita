@@ -56,6 +56,7 @@ class _TextExtractor(HTMLParser):
 
 
 def parse_html(html: str, *, url: str) -> ScrapedDocument:
+    """Extract title and visible text from HTML without network I/O."""
     parser = _TextExtractor()
     parser.feed(html)
     return ScrapedDocument(url=url, title=parser.title, text=parser.text_content())
@@ -67,6 +68,7 @@ def fetch_url(
     client: httpx.Client | None = None,
     timeout: float = 30.0,
 ) -> ScrapedDocument:
+    """Fetch a public URL and return normalized title and body text."""
     owns = client is None
     http = client or httpx.Client(timeout=timeout, follow_redirects=True)
     try:

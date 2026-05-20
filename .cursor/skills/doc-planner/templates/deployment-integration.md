@@ -79,7 +79,17 @@ How the RAG API, data-management layer, and database are deployed and wired toge
 | Trigger | Steps |
 |---------|-------|
 | PR | lint, typecheck, unit + integration tests (ephemeral DB) |
-| merge to main | build image, migrate staging, deploy, smoke H1–H3 |
+| merge to main | build image, migrate staging, deploy, smoke H1–H3 + **H4–H5** (`verify_connectivity.sh`) |
+
+## Browser connectivity (static UI + separate APIs)
+
+Document per `.cursor/skills/connectivity-gates.md`:
+
+- **Build-time:** `VITE_*` on each frontend (DO BUILD_TIME secrets); redeploy frontend after URL change
+- **Run-time:** `VECINITA_CORS_ORIGINS` on each browser-facing API (comma-separated frontend origins)
+- **Staging env:** `VECINITA_STAGING_*_FRONTEND_URL` for H4–H5 gates
+
+Without CORS or a same-origin BFF, production UI will show “Failed to fetch” while `curl` smokes pass.
 
 ## Observability
 

@@ -1,4 +1,5 @@
-# Vecinita pipeline state — see .cursor/skills/pipeline/SKILL.md
+# Vecinita pipeline state — canonical schema: .cursor/skills/workflow-state-reference.md
+overall_status: in_progress
 project:
   name: Vecinita
   description: Monorepo — bilingual community Q&A RAG + data management (5 apps; zero personal data, cost/sovereignty constraints)
@@ -114,17 +115,97 @@ stages:
     started_at: "2026-05-19"
     note: "M1 complete (T1.1–T1.6); M2 next"
   08-verify-build:
-    status: pending
+    status: completed
+    started_at: "2026-05-19"
+    completed_at: "2026-05-19"
+    scope: standalone
+    overall: pass
+    report: docs/verification-report.md
   09-qa:
-    status: pending
+    status: completed
+    started_at: "2026-05-19"
+    completed_at: "2026-05-19"
+    report: docs/qa-report.md
+    overall: pass
   10-e2e:
-    status: pending
+    status: completed
+    started_at: "2026-05-19"
+    completed_at: "2026-05-19"
+    report: docs/e2e-report.md
+    mechanism: api
+    t0: pass
+    t1_integration: pass
+    t3_live: pending
+    journeys_passed: 8
+    journeys_failed: 0
   11-verify-impl:
-    status: pending
+    status: completed
+    started_at: "2026-05-19"
+    completed_at: "2026-05-19"
+    note: "Journeys + features approved; T3 post-deploy waiver accepted at 12-verify-deploy"
   12-verify-deploy:
-    status: pending
+    status: completed
+    started_at: "2026-05-19"
+    completed_at: "2026-05-19"
+    report: docs/deploy-checklist.md
+    deploy_ready: false
+    blockers:
+      - modal secret vecinita-data-management missing
+      - vecinita-data-management app stopped
+      - DO apps/secrets unverified (operator)
+      - D7 staged_procedure
   13-deploy-smoke:
+    status: completed
+    started_at: "2026-05-19"
+    completed_at: "2026-05-20"
+    report: docs/deploy-report.md
+    chat_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
+    note: "Staging hybrid deploy; H1-H3 smoke passed"
+  14-hotfix:
+    status: completed
+    completed_at: "2026-05-20"
+    bug_report: docs/bug-reports/BUG-2026-05-20-vllm-shutdown-warnings.md
+    summary: "vLLM fp16 kwargs + NCCL shutdown on Modal exit"
+  15-service-health:
+    status: completed
+    started_at: "2026-05-20"
+    completed_at: "2026-05-20"
+    environment: staging
+    tiers: [H1, H2, H3]
+    infra: pass
+    e2e: pass
+    overall: pass
+    report: docs/service-health-reports/2026-05-20-staging-post-deploy.md
+    advisories:
+      - llm_cold_start_may_exceed_60s
+      - data_mgmt_health_requires_proxy_auth
+  17-retrospective:
     status: pending
+  gather-context:
+    status: skipped
+    note: "Superseded by 00-context for this project; key reserved for doc-planner path"
+  doc-planner:
+    status: skipped
+    note: "Superseded by 01-requirements pipeline path"
+  audit-docs:
+    status: skipped
+    note: "Superseded by 02-verify-plan pipeline path"
+  build-planner:
+    status: skipped
+    note: "Superseded by 04-tech-plan pipeline path"
+  data-management:
+    status: completed
+    note: "Corpus/migrations verified per data-management-plan"
+  audit-licenses:
+    status: pending
+  clone-repos:
+    status: pending
+  config-validator:
+    status: completed
+    note: "Validators installed in 03-plan-tooling"
+
+evolve_cycles: []
+retrospective_cycles: []
 
 agents:
   repo_researcher:
@@ -240,6 +321,94 @@ artifacts:
   - pyproject.toml
   - pyrightconfig.json
   - .github/workflows/ci.yml
+  - docs/verification-report.md
+  - docs/qa-report.md
+  - docs/e2e-report.md
+  - docs/deploy-checklist.md
+  - docs/implementation-verification.md
+
+git_history:
+  current_branch: feat/connectivity-gates
+  branches:
+    - name: feat/connectivity-gates
+      purpose: "H0c/H4/H5 connectivity gates, CORS, commit-as-you-go skill updates"
+      base: main
+      status: open
+      created_at: "2026-05-20"
+      pr_url: null
+  commits:
+    - sha: e3c952e
+      branch: feat/connectivity-gates
+      message: "feat: add connectivity gates (H0c/H0i/H4/H5) across skills 00-15"
+      stage: "17-retrospective"
+      files_changed: 31
+      timestamp: "2026-05-20T23:00:00Z"
+    - sha: 4ec5113
+      branch: feat/connectivity-gates
+      message: "feat: CORS middleware + H0c/H4/H5 tests for browser connectivity"
+      stage: "17-retrospective"
+      files_changed: 12
+      timestamp: "2026-05-20T23:05:00Z"
+    - sha: 797c15a
+      branch: feat/connectivity-gates
+      message: "feat: do_apps.py urls --frontend + sync-secrets CORS support"
+      stage: "17-retrospective"
+      files_changed: 1
+      timestamp: "2026-05-20T23:06:00Z"
+    - sha: 6515d60
+      branch: feat/connectivity-gates
+      message: "docs: product planning specs and ADRs (stages 00-03)"
+      stage: "17-retrospective"
+      files_changed: 29
+      timestamp: "2026-05-20T23:07:00Z"
+    - sha: 8890935
+      branch: feat/connectivity-gates
+      message: "docs: tech plan, QA, deploy, and service health reports (stages 04-15)"
+      stage: "17-retrospective"
+      files_changed: 18
+      timestamp: "2026-05-20T23:08:00Z"
+    - sha: 52188ca
+      branch: feat/connectivity-gates
+      message: "chore: update remaining skill references and templates"
+      stage: "17-retrospective"
+      files_changed: 10
+      timestamp: "2026-05-20T23:09:00Z"
+    - sha: a1d94d2
+      branch: feat/connectivity-gates
+      message: "chore: CI, deploy-preflight workflow, gitleaks, pyproject updates"
+      stage: "17-retrospective"
+      files_changed: 5
+      timestamp: "2026-05-20T23:10:00Z"
+    - sha: acecc09
+      branch: feat/connectivity-gates
+      message: "fix: type annotations and linting across apps and packages"
+      stage: "17-retrospective"
+      files_changed: 20
+      timestamp: "2026-05-20T23:11:00Z"
+    - sha: ad64d7b
+      branch: feat/connectivity-gates
+      message: "feat: Modal apps, deploy scripts, and operator tooling"
+      stage: "17-retrospective"
+      files_changed: 14
+      timestamp: "2026-05-20T23:12:00Z"
+    - sha: 17b21e4
+      branch: feat/connectivity-gates
+      message: "test: e2e, smoke, and integration test harness"
+      stage: "17-retrospective"
+      files_changed: 18
+      timestamp: "2026-05-20T23:13:00Z"
+    - sha: 8738198
+      branch: feat/connectivity-gates
+      message: "chore: update workflow-state.yaml with stage progress through deploy"
+      stage: "17-retrospective"
+      files_changed: 1
+      timestamp: "2026-05-20T23:14:00Z"
+    - sha: 5a522b3
+      branch: feat/connectivity-gates
+      message: "chore: update audit-docs SKILL.md connectivity section"
+      stage: "17-retrospective"
+      files_changed: 1
+      timestamp: "2026-05-20T23:15:00Z"
 
 constraints:
   cost:

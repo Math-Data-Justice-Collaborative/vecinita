@@ -121,6 +121,7 @@ def load_corpus(*, database_url: str | None = None) -> dict[str, int]:
 
 
 def main() -> None:
+    """CLI entrypoint: load fixture corpus into Postgres."""
     counts = load_corpus()
     print(f"Seeded {counts['documents']} documents, {counts['chunks']} chunks")
 

@@ -70,17 +70,19 @@ with multiple questions rather than interrupting the user repeatedly. Group by c
   respond, proceed with the recommended option and note the assumption in the Research Brief
   with a `⚠️ Assumed:` prefix.
 
-## State Management
+## State management
 
-This skill tracks its own progress via `{output_directory}/gather-context-state.md`. This
-file is the source of truth for what has been done, what hasn't, and whether to continue.
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.gather-context`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+
+Legacy `docs/gather-context-state.md` is **deprecated** — mirror phase progress into YAML only.
 
 ### On invocation — check state
 
 Before doing any work:
 
-1. Check if `{output_directory}/gather-context-state.md` exists.
-2. **If it exists**, read it and determine the current status:
+1. Read `workflow-state.yaml` §`stages.gather-context` (create key `pending` if missing).
+2. Determine status from YAML (not from a separate state file):
    - **`complete`**: The skill has already finished. Ask the user via AskQuestion:
      - "Reuse the existing Research Brief as-is"
      - "Update — re-run only incomplete phases and merge"
@@ -93,32 +95,26 @@ Before doing any work:
      - "Retry the failed phase"
      - "Restart from the beginning"
      - "Abort — I'll fix the issue first"
-3. **If it does not exist**: Start fresh. Create the state file at the beginning of Phase 1.
+3. **If `pending`**: Start fresh. Set `in_progress` + `started_at` at Phase 1.
 
-### State file format
+### YAML substeps (§`stages.gather-context`)
 
-```markdown
-# Gather Context State
+```yaml
+status: pending | in_progress | completed | failed
+started_at: YYYY-MM-DD
+completed_at: YYYY-MM-DD
+phases:
+  phase1_agents: { status: pending }
+  phase2_cross_reference: { status: pending }
+  phase3_surface_issues: { status: pending }
+  phase4_research_brief: { status: pending }
+agents:
+  paper_analyst: { status: pending }
+  repo_researcher: { status: pending }
+report: docs/research-brief.md
+```
 
-> **Last updated**: [date/time]
-> **Status**: pending | in_progress | complete | failed
-
-## Progress
-
-| Phase | Description | Status | Started | Completed | Notes |
-|-------|-------------|--------|---------|-----------|-------|
-| 1 | Run Analysis Agents | pending | — | — | — |
-| 2 | Cross-Reference & Detect Issues | pending | — | — | — |
-| 3 | Surface Issues to User | pending | — | — | — |
-| 4 | Produce Research Brief | pending | — | — | — |
-| 5 | Summary | pending | — | — | — |
-
-## Agent Status
-
-| Agent | Status | Output Size | Notes |
-|-------|--------|-------------|-------|
-| paper-analyst | pending | — | — |
-| repo-researcher | pending | — | — |
+Also update top-level `workflow-state.yaml` §`agents` when subagents finish.
 
 ## Issue Tracking
 
@@ -140,7 +136,7 @@ Before doing any work:
 
 ### Updating state
 
-After each phase completes (or fails), immediately update `gather-context-state.md`:
+After each phase completes (or fails), immediately update `workflow-state.yaml` §`stages.gather-context`:
 - Set the phase status to `completed` (or `failed` with notes)
 - Update the Agent Status table after Phase 1
 - Update Issue Tracking after Phases 2 and 3
@@ -161,7 +157,7 @@ Collect these from the user (check README.md, conversation context, or ask):
 
 ### Phase 1 — Run Analysis Agents
 
-**State**: Create `gather-context-state.md` if it doesn't exist. Set overall status to
+**State**: Ensure `workflow-state.yaml` §`stages.gather-context` exists. Set status to
 `in_progress`. Set Phase 1 status to `in_progress` with the current timestamp.
 
 Launch both agents in parallel using the Task tool:
@@ -309,6 +305,6 @@ to `complete`. Set Waiting on to `nothing`.
 5. **No silent resolution**: Per the Uncertainty Resolution Protocol — never pick an answer
    to a blocking issue without the user's input. Advisory issues may be assumed, but must be
    marked with `⚠️ Assumed:`.
-6. **State-managed**: All progress is tracked in `gather-context-state.md`. State writes
+6. **State-managed**: All progress is tracked in `workflow-state.yaml` §`stages.gather-context`. State writes
    happen immediately after each phase. On re-invocation, the state file determines whether
    to resume, update, or regenerate — see State Management section above.

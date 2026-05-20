@@ -14,6 +14,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import ValidationError
 from sqlalchemy import create_engine, text
 from vecinita_shared_schemas.chat_rag import AskRequest, AskResponse, HealthResponse, Source
+from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.validation import validate_ask_request
 
 from vecinita_chat_rag_backend.config import ChatRagSettings
@@ -21,6 +22,7 @@ from vecinita_chat_rag_backend.service import ChatRagService
 
 
 async def parse_ask_body(request: Request) -> AskRequest:
+    """Parse JSON ask body and reject identity fields per ADR-004."""
     try:
         payload: Any = await request.json()
     except json.JSONDecodeError as exc:
@@ -59,7 +61,9 @@ def create_app(
     settings: ChatRagSettings | None = None,
     chat_service: ChatRagService | None = None,
 ) -> FastAPI:
+    """Build the ChatRAG FastAPI app with health, ask, and streaming routes."""
     app = FastAPI(title="Vecinita ChatRAG", version="0.1.0")
+    configure_cors(app)
     resolved_settings = settings
     resolved_service = chat_service
 

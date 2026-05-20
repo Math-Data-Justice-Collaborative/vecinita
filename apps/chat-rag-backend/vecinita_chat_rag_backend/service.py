@@ -43,6 +43,8 @@ def _to_ask_response(result: RagAnswer) -> AskResponse:
 
 
 class ChatRagService:
+    """Orchestrate retrieval and LLM answer generation for /ask endpoints."""
+
     def __init__(
         self,
         *,

@@ -10,6 +10,12 @@ Clone multiple GitHub repos from a single organization into a local directory.
 
 **Cross-cutting:** [considerations.md](../considerations.md) (usually N/A for this skill).
 
+## State management
+
+Optional: update repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.clone-repos`
+with `repos_cloned`, `status`, and `completed_at` when a batch finishes.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+
 ## Inputs
 
 Collect three things from the user (ask for any that are missing):

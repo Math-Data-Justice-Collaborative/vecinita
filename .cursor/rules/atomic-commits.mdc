@@ -17,6 +17,9 @@ Every commit must be **atomic** — one logical change, codebase valid after eac
    - Fix commits: `[T1.2] fix: correct input validation`
    - Config commits: `chore: configure ruff linter`
    - Refactor commits: `[M1] refactor: extract shared utilities`
+   - Doc commits: `docs: add staging runbook`
+   - Hotfix commits: `hotfix: [description] (#issue if applicable)`
+   - Skill/rule commits: `chore(skills): update connectivity gates`
 
 3. **Post-commit checks**: After every commit, the codebase must:
    - Pass all existing tests
@@ -27,16 +30,36 @@ Every commit must be **atomic** — one logical change, codebase valid after eac
 4. **No WIP commits**: Every commit is complete and reviewable. If work is in progress,
    do not commit until the task is done.
 
+5. **Commit-as-you-go**: Skills must commit before:
+   - Transitioning to the next pipeline stage
+   - Asking the user a blocking AskQuestion
+   - Running a gate check
+   - Ending a session/turn
+   Never leave uncommitted work across session boundaries.
+
+6. **Record in workflow-state**: After every commit, append to
+   `workflow-state.yaml` §`git_history.commits` with sha, branch, message,
+   stage, files_changed, and timestamp. See
+   `.cursor/skills/workflow-state-reference.md` §Git history.
+
 ## Branches
 
-Follow the branch structure from `docs/execution-plan.md` §Git Strategy:
+Follow the branch naming from `.cursor/skills/workflow-state-reference.md` §Git history:
 
-- **Milestone branches**: `feat/M[N]-[slug]` — one per milestone, branched from the phase branch
-- **Phase branches**: `phase/[N]-[slug]` — one per phase, branched from main
-- Create the branch before starting the first task of a milestone
+| Change type | Branch pattern | Base |
+|-------------|----------------|------|
+| Feature / milestone | `feat/{slug}` or `feat/M{N}-{slug}` | `main` or phase branch |
+| Bug fix (hotfix) | `fix/{slug}` | `main` |
+| Docs-only change | `docs/{slug}` | `main` |
+| Skill / tooling | `chore/{slug}` | `main` |
+| Infra / deploy | `infra/{slug}` | `main` |
+| Evolve cycle | `evolve/{cycle-id}-{slug}` | `main` |
+| Milestone (build phase) | `feat/M[N]-[slug]` | phase branch |
+| Phase | `phase/[N]-[slug]` | `main` |
 
-If the branch does not exist yet, create it. Check the PR Plan table in the execution plan
-for the correct branch name and target.
+- Create the branch before starting the first task of a milestone.
+- Record every branch in `workflow-state.yaml` §`git_history.branches`.
+- When a branch is merged or closed, update its status (never delete the entry).
 
 ## Pull Requests
 

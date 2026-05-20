@@ -17,10 +17,30 @@ and alignment with `docs/deployment-integration.md` — without assuming a hotfi
 **Code failures:** [bug-investigation](../bug-investigation/SKILL.md) → `docs/bug-reports/BUG-*.md`
 + `tests/bugs/test_bug_*.py` before 14-hotfix.
 
-**Cross-cutting:** [considerations.md](../considerations.md), [deployment-catalog.md](../deployment-catalog.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [deployment-catalog.md](../deployment-catalog.md), [connectivity-gates.md](../connectivity-gates.md).
 
-**User is source of truth.** AskQuestion sets infra depth, E2E tier (H0–H4), target URL, and
+## Connectivity (stage 15)
+
+Default depth for UI-related reports: **H4–H5 before H3**. Integration regressions: **H0i** locally.
+See connectivity-gates §Stage 15 for tier definitions (H4 ≠ old “full UJ” only).
+
+**User is source of truth.** AskQuestion sets infra depth, health tier (H0–H6), target URL, and
 whether to run costly full corpus smokes.
+
+## State management
+
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.15-service-health`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+
+**Detail:** `docs/service-health-state.md` and per-run reports under `docs/service-health-reports/`.
+
+### Commit-as-you-go
+
+Commit artifacts to an appropriate branch before transitioning to the next stage or
+asking the user a blocking question. Branch type per
+[workflow-state-reference.md](../workflow-state-reference.md) §Git history.
+Record every commit in `workflow-state.yaml` §`git_history.commits` with
+`stage: "15-service-health"`.
 
 ## Two-layer model
 
@@ -39,16 +59,19 @@ Record **Infra overall**, **E2E overall**, and **Overall** separately in the rep
 | H1 | Liveness | `GET {base}/health` → 200 |
 | H2 | DB ready | migrations at head; pool connects |
 | H3 | RAG smoke | ingest fixture → query hits expected id |
-| H4 | Full UJ suite | `pytest tests/e2e/ --base-url={staging}` |
+| H4 | Browser CORS | `tests/smoke/test_staging_connectivity.py` (live) |
+| H5 | Frontend bundle | `verify_connectivity.sh` / connectivity pytest |
+| H6 | Full UJ suite | `pytest tests/e2e/ -m live` or browser automation |
 
 | Trigger | Recommend infra | Recommend behavior |
 |---------|-----------------|-------------------|
 | Routine | H1 + H2 | H3 |
-| Post-deploy / post-hotfix | H1–H2 + deploy metadata | H3 |
+| Post-deploy / post-hotfix | H1–H2 + deploy metadata | H3 + **H4–H5** |
+| User-reported “UI broken / Failed to fetch” | H4–H5 first | H3 |
 | User-reported bad answers | H2 + logs | H3 + eval_set case |
-| Weekly deep | H1–H2 + backlog metrics | H4 (explicit approval) |
+| Weekly deep | H1–H2 + backlog metrics | H6 (explicit approval) |
 
-Never auto-run **H4** without AskQuestion approval.
+Never auto-run **H6** (full browser UJ) without AskQuestion approval.
 
 ## Test-driven investigation
 
@@ -75,6 +98,7 @@ then production checks.
 ### Phase 2 — Behavior checks
 
 - Run approved H3 script or documented curl sequence from `docs/user-journeys.md`
+- If UI involved: run `bash scripts/deploy/verify_connectivity.sh` (H4–H5)
 - Compare to eval_set expected chunk ids when available
 - Capture latency for query path (informational)
 

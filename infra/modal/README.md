@@ -8,6 +8,28 @@
 
 Run commands from the **repo root** with Modal CLI authenticated (`modal token new`).
 
+## Workspace (required)
+
+All Vecinita Modal apps must deploy to the **`vecinita`** workspace — not `fontface` or other profiles.
+
+```bash
+modal profile activate vecinita
+# or rely on deploy scripts (they call scripts/modal_ensure_workspace.sh):
+bash scripts/deploy/modal.sh
+```
+
+Deployed URLs use the workspace prefix, e.g.  
+`https://vecinita--vecinita-embedding-embedding-api.modal.run`
+
+To retire mistaken deploys on another workspace:
+
+```bash
+modal profile activate fontface
+modal app stop vecinita-embedding
+modal app stop vecinita-llm
+modal profile activate vecinita
+```
+
 ## Local `modal serve` (F18)
 
 Use separate terminals. After each `serve`, copy the printed URL into your env (see [docs/LOCAL_DEV.md](../../docs/LOCAL_DEV.md)).
@@ -16,7 +38,8 @@ Use separate terminals. After each `serve`, copy the printed URL into your env (
 
 ```bash
 modal serve infra/modal/embedding_app.py
-# → set VECINITA_MODAL_EMBED_URL to the /embed base (tunnel URL)
+# → set VECINITA_MODAL_EMBED_URL to the ASGI base URL from deploy output
+#   (e.g. https://<workspace>--vecinita-embedding-embedding-api.modal.run)
 ```
 
 Endpoints: `GET /health`, `POST /embed`, `POST /embed/batch`
@@ -44,7 +67,22 @@ Requires the **internal write API** running locally on port 8002 with `DATABASE_
 
 **Note:** `pytest` and most CI jobs **do not** require Modal — HTTP clients are mocked. Use `serve` when exercising real embed/LLM/GPU paths.
 
+
+## Staging model weights (D6 / D7)
+
+Before marking FastEmbed or Qwen assets **verified** in `docs/data-staging-state.md`, populate Modal volumes:
+
+```bash
+./scripts/stage_modal_weights.sh
+```
+
+This deploys embed/LLM apps (by default), runs one-shot `stage_embedding_weights` / `stage_llm_weights` jobs, and prints curl/pytest verification steps. Live smoke: `tests/smoke/test_modal_weights_staged.py` with `VECINITA_MODAL_EMBED_URL` and `VECINITA_MODAL_LLM_URL`.
+
 ## Deploy (staging/production)
+
+Use `bash scripts/deploy/modal.sh` (enforces **vecinita** workspace).
+
+**Secret (data-management):** Create `vecinita-data-management` in the [vecinita workspace](https://modal.com/secrets/vecinita/main) with `VECINITA_MODAL_EMBED_URL`, `VECINITA_INTERNAL_WRITE_URL`, `VECINITA_INTERNAL_API_KEY` before deploying `data_management_app.py`.
 
 ## vecinita-embedding (FastEmbed)
 
@@ -54,6 +92,8 @@ Requires the **internal write API** running locally on port 8002 with `DATABASE_
 - **Consumer env:** `VECINITA_MODAL_EMBED_URL` on DO backends (`packages/embedding-client`)
 
 First deploy downloads weights into the Modal volume; allow several minutes on cold start.
+
+**Staging:** `./scripts/stage_modal_weights.sh` (see `docs/data-staging-state.md`).
 
 ## vecinita-llm (vLLM)
 

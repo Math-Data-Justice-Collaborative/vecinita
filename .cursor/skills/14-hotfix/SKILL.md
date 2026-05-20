@@ -18,7 +18,20 @@ re-running the pipeline.
 **Bug artifacts (required):** [bug-investigation](../bug-investigation/SKILL.md) —
 `docs/bug-reports/BUG-*.md`, `tests/bugs/test_bug_*.py`, one fix per bug.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+## Connectivity (stage 14)
+
+Classify failures before coding:
+
+| Symptom class | First checks |
+|---------------|--------------|
+| “Failed to fetch”, CORS in DevTools | H4 (`test_staging_connectivity` or curl OPTIONS) |
+| Wrong API host in UI | H5 bundle grep |
+| Bad RAG answer, API 200 | H3 — not connectivity |
+
+Repro tests in `tests/bugs/` may import `tests.helpers.connectivity`. After fix, run
+`verify_connectivity.sh` if deployables changed. See connectivity-gates §Stage 14.
 
 **User is the source of truth.** Do not assume symptoms, severity, or deploy intent — ask
 via interview (Phase 0) before investigation or code.
@@ -166,9 +179,10 @@ or architectural changes (new ADR + plan update).
    `docs/spec.md`; plus `config-spec.md`, `api-contract.md`, `deployment-integration.md` when relevant
 4. Git repo is clean (no uncommitted work)
 
-## State Management
+## State management
 
-Track via `workflow-state.yaml` §stages.14-hotfix (append if section doesn't exist).
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.14-hotfix`
+(append section if missing). Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
 ### Hotfix log: `docs/hotfix-log.md`
 
@@ -544,18 +558,28 @@ moving to Phase 2.
 
 ### Phase 2 — Branch & Fix
 
-#### Step 1 — Create hotfix branch
+#### Step 1 — Create fix branch
 
 Branch from the current deployed state (main or the deploy tag):
 
 ```
-hotfix/[issue-slug]
+fix/[issue-slug]
 ```
 
 Examples:
-- `hotfix/fix-null-response`
-- `hotfix/bump-torch-2.3.1`
-- `hotfix/rotate-api-key`
+- `fix/null-response`
+- `fix/bump-torch-2.3.1`
+- `fix/rotate-api-key`
+
+Record the branch in `workflow-state.yaml` §`git_history.branches`:
+
+```yaml
+- name: fix/null-response
+  purpose: "Fix null pipeline response on empty input"
+  base: main
+  status: open
+  created_at: "YYYY-MM-DD"
+```
 
 #### Step 2 — Confirm repro test still red
 
@@ -662,7 +686,7 @@ during Layer 2–3; keep `fixing` until Layer 1 passes.
 
 ### Phase 3 — Commit & PR
 
-#### Step 1 — Atomic commit
+#### Step 1 — Atomic commit & record
 
 ```
 hotfix: [description] (#[issue] if applicable)
@@ -670,6 +694,21 @@ hotfix: [description] (#[issue] if applicable)
 
 One commit per hotfix. If the fix touches multiple concerns, split into
 multiple hotfixes (separate branches, separate PRs).
+
+After committing, append to `workflow-state.yaml` §`git_history.commits`:
+
+```yaml
+- sha: <short-sha>
+  branch: fix/<slug>
+  message: "hotfix: <description>"
+  stage: "14-hotfix"
+  files_changed: <count>
+  timestamp: "<ISO-8601>"
+```
+
+**Commit-as-you-go:** Also commit the bug report and repro test as separate
+earlier commits on the fix branch (e.g. after Phase 1.25 repro test is written,
+commit it even though the test is red — it documents the failure).
 
 #### Step 2 — Create PR
 

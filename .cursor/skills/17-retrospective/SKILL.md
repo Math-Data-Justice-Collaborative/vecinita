@@ -17,7 +17,10 @@ Meta-improvement stage: mine **conversation evidence**, compare it to **skills 0
 **workflow artifacts**, then run a structured **user interview** to learn and plan better
 process — without re-running the pipeline.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+When reviewing pipeline gaps, ask whether **connectivity tiers** (H0c/H0i/H4/H5) were skipped or
+misunderstood in the session under review.
 
 **User is the source of truth.** Agent-inferred themes are hypotheses until the user
 confirms via **AskQuestion**. Do not edit skills, rules, or product code until **Phase 6 —
@@ -75,7 +78,10 @@ Transcript paths and parsing: [reference.md](reference.md) §Conversation logs.
 
 ## State management
 
-### Retrospective cycles in `workflow-state.yaml`
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) — top-level
+`retrospective_cycles[]`. Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+
+### Retrospective cycles
 
 Each invocation starts or resumes a **retrospective cycle** — schema in
 [reference.md](reference.md) §YAML schema.
@@ -87,6 +93,14 @@ On invocation:
 3. If none in progress, start **Phase 0 — Intake**.
 
 After every substep: update the active cycle immediately.
+
+### Commit-as-you-go
+
+Commit artifacts to an appropriate branch before transitioning to the next stage or
+asking the user a blocking question. Branch type per
+[workflow-state-reference.md](../workflow-state-reference.md) §Git history.
+Record every commit in `workflow-state.yaml` §`git_history.commits` with
+`stage: "17-retrospective"`.
 
 ### Artifacts
 

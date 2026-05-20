@@ -21,6 +21,8 @@ def _normalize_database_url(url: str) -> str:
 
 @dataclass(frozen=True)
 class ChatRagSettings:
+    """Runtime settings for retrieval, embedding, and LLM upstreams."""
+
     database_url: str
     top_k: int
     embed_url: str | None

@@ -1,9 +1,12 @@
 """Modal app: vecinita-embedding — FastEmbed 384-dim (ADR-008).
 
 Deploy: modal deploy infra/modal/embedding_app.py
+Stage weights: modal run infra/modal/embedding_app.py::stage_embedding_weights
 """
 
 from __future__ import annotations
+
+import json
 
 import modal
 
@@ -16,8 +19,24 @@ model_volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
-    .pip_install("fastapi>=0.115,<1", "fastembed>=0.4,<0.5", "pydantic>=2.7,<3")
+    .pip_install("fastembed>=0.4,<0.5", "pydantic>=2.7,<3", "starlette>=0.38,<1")
 )
+
+
+@app.function(
+    image=image,
+    volumes={"/models": model_volume},
+    timeout=600,
+)
+def stage_embedding_weights() -> str:
+    """One-shot: download FastEmbed model into the embedding-models volume."""
+    from fastembed import TextEmbedding
+
+    model = TextEmbedding(model_name=MODEL_NAME, cache_dir="/models")
+    vectors = list(model.embed(["vecinita staging warmup"]))
+    dim = len(vectors[0])
+    model_volume.commit()
+    return f"staged {MODEL_NAME} dim={dim}"
 
 
 @app.cls(
@@ -39,9 +58,12 @@ class EmbeddingService:
 
 @app.function(image=image)
 @modal.asgi_app()
-def fastapi_app():
-    from fastapi import FastAPI
-    from pydantic import BaseModel, ConfigDict, Field
+def embedding_api():
+    from pydantic import BaseModel, ConfigDict, Field, ValidationError
+    from starlette.applications import Starlette
+    from starlette.requests import Request
+    from starlette.responses import JSONResponse
+    from starlette.routing import Route
 
     class EmbedRequest(BaseModel):
         model_config = ConfigDict(extra="forbid")
@@ -51,27 +73,33 @@ def fastapi_app():
         model_config = ConfigDict(extra="forbid")
         texts: list[str] = Field(..., min_length=1)
 
-    class EmbedResponse(BaseModel):
-        embedding: list[float]
-
-    class EmbedBatchResponse(BaseModel):
-        embeddings: list[list[float]]
-
-    web = FastAPI(title="vecinita-embedding", version="0.1.0")
     service = EmbeddingService()
 
-    @web.get("/health")
-    def health() -> dict[str, str]:
-        return {"status": "ok"}
+    async def health(_: Request) -> JSONResponse:
+        return JSONResponse({"status": "ok"})
 
-    @web.post("/embed", response_model=EmbedResponse)
-    def embed(body: EmbedRequest) -> EmbedResponse:
-        vectors = service.embed_texts.remote([body.text])
-        return EmbedResponse(embedding=vectors[0])
+    async def embed(request: Request) -> JSONResponse:
+        try:
+            payload = json.loads(await request.body())
+            item = EmbedRequest.model_validate(payload)
+        except (json.JSONDecodeError, ValidationError) as exc:
+            return JSONResponse({"detail": str(exc)}, status_code=422)
+        vectors = service.embed_texts.remote([item.text])
+        return JSONResponse({"embedding": vectors[0]})
 
-    @web.post("/embed/batch", response_model=EmbedBatchResponse)
-    def embed_batch(body: EmbedBatchRequest) -> EmbedBatchResponse:
-        vectors = service.embed_texts.remote(body.texts)
-        return EmbedBatchResponse(embeddings=vectors)
+    async def embed_batch(request: Request) -> JSONResponse:
+        try:
+            payload = json.loads(await request.body())
+            item = EmbedBatchRequest.model_validate(payload)
+        except (json.JSONDecodeError, ValidationError) as exc:
+            return JSONResponse({"detail": str(exc)}, status_code=422)
+        vectors = service.embed_texts.remote(item.texts)
+        return JSONResponse({"embeddings": vectors})
 
-    return web
+    return Starlette(
+        routes=[
+            Route("/health", health, methods=["GET"]),
+            Route("/embed", embed, methods=["POST"]),
+            Route("/embed/batch", embed_batch, methods=["POST"]),
+        ]
+    )
