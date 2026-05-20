@@ -10,6 +10,8 @@ from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.pipeline import run_ingest_job
 from vecinita_data_management_backend.store import InMemoryJobStore
 
+pytestmark = pytest.mark.e2e
+
 
 def test_ingest_job_failure(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", "test-proxy-key")
