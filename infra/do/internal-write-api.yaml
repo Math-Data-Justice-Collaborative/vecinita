@@ -29,3 +29,6 @@ services:
       - key: VECINITA_ENV
         scope: RUN_TIME
         value: staging
+      - key: VECINITA_CORS_ORIGINS
+        scope: RUN_TIME
+        type: SECRET

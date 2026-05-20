@@ -9,6 +9,7 @@ from uuid import UUID
 from fastapi import Depends, FastAPI, Header, HTTPException, status
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
+from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.internal_write import (
     BatchUpsertRequest,
     BatchUpsertResponse,
@@ -51,7 +52,9 @@ def _require_internal_key(
 
 
 def create_app() -> FastAPI:
+    """Build the internal write API (sole holder of DATABASE_URL)."""
     app = FastAPI(title="Vecinita Internal Write API", version="0.1.0")
+    configure_cors(app, extra_allow_headers=["Authorization"])
     engine = _engine()
 
     @app.get("/health", response_model=HealthResponse)

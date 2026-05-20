@@ -8,6 +8,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, status
+from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.data_management import (
     CreateJobRequest,
     CreateJobResponse,
@@ -43,7 +44,9 @@ def create_app(
     require_proxy_auth: bool = True,
     pipeline_runner: Callable[[UUID], None] | None = None,
 ) -> FastAPI:
+    """Build the Data Management ASGI app with job routes and optional pipeline runner."""
     app = FastAPI(title="Vecinita Data Management", version="0.1.0")
+    configure_cors(app, extra_allow_headers=[_PROXY_HEADER])
     job_store = store or InMemoryJobStore()
     runner = pipeline_runner
 
