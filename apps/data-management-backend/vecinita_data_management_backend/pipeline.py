@@ -18,6 +18,8 @@ from vecinita_data_management_backend.write_client import InternalWriteClient
 
 
 class DocumentFetcher(Protocol):
+    """Callable that fetches a URL and returns normalized page text."""
+
     def __call__(self, url: str) -> ScrapedDocument: ...
 
 
@@ -29,6 +31,7 @@ def run_ingest_job(
     write_client: InternalWriteClient,
     fetch_document: DocumentFetcher | None = None,
 ) -> None:
+    """Run scrape → chunk → embed → upsert for one job and update store status."""
     record = store.get_job(job_id)
     if record is None:
         raise KeyError(job_id)

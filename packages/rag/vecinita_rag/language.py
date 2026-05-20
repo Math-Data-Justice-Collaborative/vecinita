@@ -22,6 +22,7 @@ def detect_query_language(question: str) -> str:
 
 
 def no_context_message(language: str) -> str:
+    """Return the fixed no-context copy for English or Spanish."""
     from vecinita_rag.constants import NO_CONTEXT_MESSAGE_EN, NO_CONTEXT_MESSAGE_ES
 
     return NO_CONTEXT_MESSAGE_ES if language == "es" else NO_CONTEXT_MESSAGE_EN

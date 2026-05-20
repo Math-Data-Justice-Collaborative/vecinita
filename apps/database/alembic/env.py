@@ -28,6 +28,7 @@ target_metadata = None
 
 
 def run_migrations_offline() -> None:
+    """Run Alembic migrations with a URL only (no live DB connection)."""
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
@@ -41,6 +42,7 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
+    """Run Alembic migrations against a live database connection."""
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",

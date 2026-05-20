@@ -12,6 +12,8 @@ from vecinita_shared_schemas.data_management import Job
 
 @dataclass
 class JobRecord:
+    """Internal ingest job state before API schema mapping."""
+
     job_id: UUID
     status: str
     urls: list[str]
@@ -23,6 +25,8 @@ class JobRecord:
 
 
 class JobStore:
+    """Persistence interface for ingest job lifecycle."""
+
     def create_job(self, urls: list[str], options: dict[str, object] | None = None) -> JobRecord:
         raise NotImplementedError
 
@@ -41,6 +45,8 @@ class JobStore:
 
 
 class InMemoryJobStore(JobStore):
+    """Thread-safe in-process job store for Modal v1."""
+
     def __init__(self) -> None:
         self._jobs: dict[UUID, JobRecord] = {}
         self._lock = Lock()
@@ -83,6 +89,7 @@ class InMemoryJobStore(JobStore):
 
 
 def job_record_to_schema(record: JobRecord) -> Job:
+    """Map a store record to the public Job API model."""
     return Job(
         job_id=record.job_id,
         status=record.status,  # type: ignore[arg-type]

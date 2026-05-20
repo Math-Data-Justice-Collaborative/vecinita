@@ -8,6 +8,8 @@ from uuid import UUID
 
 @dataclass(frozen=True)
 class RetrievedChunk:
+    """One ranked corpus passage returned by vector search."""
+
     chunk_id: UUID
     document_id: UUID
     text: str
@@ -19,6 +21,8 @@ class RetrievedChunk:
 
 @dataclass(frozen=True)
 class RagAnswer:
+    """Final RAG answer with detected language and cited sources."""
+
     answer: str
     language: str
     sources: list[RetrievedChunk]

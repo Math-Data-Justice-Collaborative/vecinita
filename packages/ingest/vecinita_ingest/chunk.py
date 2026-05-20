@@ -16,6 +16,7 @@ def estimate_tokens(text: str) -> int:
 
 
 def chunk_text(text: str, *, chunk_size_tokens: int = DEFAULT_CHUNK_SIZE_TOKENS) -> list[str]:
+    """Split plain text into paragraph-aware chunks bounded by token estimate."""
     if chunk_size_tokens < MIN_CHUNK_SIZE_TOKENS:
         msg = f"chunk_size_tokens must be ≥ {MIN_CHUNK_SIZE_TOKENS}"
         raise ValueError(msg)

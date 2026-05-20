@@ -10,12 +10,16 @@ from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 
 class JobOptions(BaseModel):
+    """Optional ingest tuning parameters for a job."""
+
     model_config = ConfigDict(extra="forbid")
 
     chunk_size_tokens: int | None = Field(default=None, ge=64, le=2048)
 
 
 class CreateJobRequest(BaseModel):
+    """POST /jobs request to enqueue URL ingestion."""
+
     model_config = ConfigDict(extra="forbid")
 
     urls: list[HttpUrl] = Field(..., min_length=1)
@@ -23,11 +27,15 @@ class CreateJobRequest(BaseModel):
 
 
 class CreateJobResponse(BaseModel):
+    """POST /jobs 202 response with new job identifier."""
+
     job_id: UUID
     status: Literal["pending"]
 
 
 class Job(BaseModel):
+    """GET /jobs/{job_id} ingest job status snapshot."""
+
     job_id: UUID
     status: Literal["pending", "running", "completed", "failed"]
     urls: list[HttpUrl]
@@ -38,4 +46,6 @@ class Job(BaseModel):
 
 
 class HealthResponse(BaseModel):
+    """GET /health liveness response."""
+
     status: Literal["ok"]

@@ -13,10 +13,12 @@ _ENV_API_KEY: Final[str] = "VECINITA_INTERNAL_API_KEY"
 
 
 class InternalWriteClientError(RuntimeError):
-    pass
+    """Raised when internal write API configuration or requests fail."""
 
 
 class InternalWriteClient:
+    """POST document batches to the DO internal write API."""
+
     def __init__(
         self,
         base_url: str | None = None,
