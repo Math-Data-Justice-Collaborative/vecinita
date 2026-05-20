@@ -25,17 +25,23 @@ This skill requires **doc-planner** to have completed. Before starting:
    `research-brief.md`, `deployment-integration.md`, and `data-management-plan.md`).
 2. If missing, inform the user and invoke doc-planner first.
 
-## Idempotency & Resumption
+## State management
 
-This skill is idempotent. On re-invocation:
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.audit-docs`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
-1. Check if `{output_directory}/audit-state.md` exists.
-2. **If it exists**: Read it. Determine which document and statement the audit paused at.
-   Ask the user: "Resume from where we left off, or restart the audit?"
-3. **If it does not exist**: Start a fresh audit.
+**Detail:** `docs/audit-state.md` may mirror statement counts — do not use it as the only
+source of stage completion.
 
-Progress is never lost — every decision is written to the decision log and state file
-immediately after the user responds.
+### On invocation
+
+1. Read `workflow-state.yaml` §`stages.audit-docs` (and `docs/audit-state.md` if present).
+2. **If `completed`**: Ask reuse / partial re-audit / full restart.
+3. **If `in_progress`**: Resume from recorded document/statement counters in YAML.
+4. **If `pending`**: Start fresh; set `in_progress` + `started_at`.
+
+Every user decision: update YAML immediately; append resolutions to `decisions_log` when they
+affect downstream specs.
 
 ## Workflow
 
@@ -153,7 +159,7 @@ revisited in a second pass after all other statements are processed.
 
 #### After each verdict
 
-1. Update `audit-state.md`:
+1. Update `workflow-state.yaml` §`stages.audit-docs` and mirror counts in `audit-state.md`:
    - Increment the reviewed/approved/denied/modified counters
    - Advance the Current Position to the next statement
    - Update the Document Progress row
@@ -165,7 +171,7 @@ revisited in a second pass after all other statements are processed.
 
 When all statements in a document are reviewed, before moving to the next:
 
-1. Mark the document as `completed` in `audit-state.md`
+1. Mark the document as `completed` in §`stages.audit-docs` and `audit-state.md`
 2. Report a document summary to the user:
 
 ```
@@ -221,7 +227,7 @@ Artifacts:
 Next step: run build-planner to create an execution plan from the audited specs.
 ```
 
-Update `audit-state.md` status to `complete`.
+Set `workflow-state.yaml` §`stages.audit-docs.status: completed` and `audit-state.md` to complete.
 
 ## Output Rules
 
