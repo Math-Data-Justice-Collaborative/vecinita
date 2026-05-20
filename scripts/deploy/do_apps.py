@@ -181,12 +181,20 @@ def cmd_sync_secrets(client, name: str) -> int:
     if spec_path is None:
         raise SystemExit(f"No YAML spec for {name!r}")
     spec = _load_spec(spec_path)
-    if name == "vecinita-internal-write-api":
-        _apply_env_from_os(spec, ["DATABASE_URL", "VECINITA_INTERNAL_API_KEY"])
-    elif name == "vecinita-chat-rag-backend":
+    if name == "vecinita-chat-rag-backend":
         _apply_env_from_os(
             spec,
-            ["DATABASE_URL", "VECINITA_MODAL_EMBED_URL", "VECINITA_MODAL_LLM_URL"],
+            [
+                "DATABASE_URL",
+                "VECINITA_MODAL_EMBED_URL",
+                "VECINITA_MODAL_LLM_URL",
+                "VECINITA_CORS_ORIGINS",
+            ],
+        )
+    elif name == "vecinita-internal-write-api":
+        _apply_env_from_os(
+            spec,
+            ["DATABASE_URL", "VECINITA_INTERNAL_API_KEY", "VECINITA_CORS_ORIGINS"],
         )
     elif name == "vecinita-chat-rag-frontend":
         _apply_env_from_os(
@@ -209,20 +217,46 @@ def cmd_sync_secrets(client, name: str) -> int:
     return 0
 
 
-def cmd_urls(client) -> int:
-    """Print staging smoke env hints for vecinita-* apps."""
+def cmd_urls(client, *, include_frontends: bool = False) -> int:
+    """Print staging smoke / connectivity env hints for vecinita-* apps."""
     apps = _iter_apps(client)
     by_name = {(a.get("spec") or {}).get("name"): a for a in apps}
     chat = by_name.get("vecinita-chat-rag-backend")
     write = by_name.get("vecinita-internal-write-api")
+    chat_fe = by_name.get("vecinita-chat-rag-frontend")
+    admin_fe = by_name.get("vecinita-admin-frontend")
+    found = False
     if chat:
         url = chat.get("default_ingress") or chat.get("live_url")
-        print(f"export VECINITA_STAGING_CHAT_URL={url}")
+        if url:
+            print(f"export VECINITA_STAGING_CHAT_URL={url}")
+            found = True
     if write:
         url = write.get("default_ingress") or write.get("live_url")
-        print(f"export VECINITA_STAGING_WRITE_URL={url}")
-    if not chat and not write:
-        print("# No vecinita chat/write apps found — run create-all first.", file=sys.stderr)
+        if url:
+            print(f"export VECINITA_STAGING_WRITE_URL={url}")
+            found = True
+    if include_frontends:
+        if chat_fe:
+            url = chat_fe.get("default_ingress") or chat_fe.get("live_url")
+            if url:
+                print(f"export VECINITA_STAGING_CHAT_FRONTEND_URL={url}")
+                found = True
+        if admin_fe:
+            url = admin_fe.get("default_ingress") or admin_fe.get("live_url")
+            if url:
+                print(f"export VECINITA_STAGING_ADMIN_FRONTEND_URL={url}")
+                found = True
+        print(
+            "# Modal admin API (set manually after modal deploy):",
+            file=sys.stderr,
+        )
+        print(
+            "# export VECINITA_STAGING_ADMIN_API_URL=https://vecinita--vecinita-data-management-fastapi-app.modal.run",
+            file=sys.stderr,
+        )
+    if not found:
+        print("# No vecinita apps found — run create-all first.", file=sys.stderr)
         return 1
     return 0
 
@@ -236,7 +270,12 @@ def main() -> int:
     sub.add_parser("create-all", help="Create all four infra/do/*.yaml apps (idempotent)")
     p_dep = sub.add_parser("deploy", help="Trigger deployment for existing app by spec name")
     p_dep.add_argument("--name", required=True, help="App spec name field")
-    sub.add_parser("urls", help="Print VECINITA_STAGING_* export lines")
+    p_urls = sub.add_parser("urls", help="Print VECINITA_STAGING_* export lines")
+    p_urls.add_argument(
+        "--frontend",
+        action="store_true",
+        help="Include VECINITA_STAGING_*_FRONTEND_URL for H4/H5 connectivity",
+    )
     p_sync = sub.add_parser("sync-secrets", help="Update app spec env from shell")
     p_sync.add_argument("--name", required=True, help="App spec name field")
     args = parser.parse_args()
@@ -250,7 +289,7 @@ def main() -> int:
     if args.command == "deploy":
         return cmd_deploy(client, args.name)
     if args.command == "urls":
-        return cmd_urls(client)
+        return cmd_urls(client, include_frontends=getattr(args, "frontend", False))
     if args.command == "sync-secrets":
         return cmd_sync_secrets(client, args.name)
     raise SystemExit(f"Unknown command: {args.command}")
