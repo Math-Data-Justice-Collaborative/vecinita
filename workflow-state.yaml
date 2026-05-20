@@ -327,6 +327,89 @@ artifacts:
   - docs/deploy-checklist.md
   - docs/implementation-verification.md
 
+git_history:
+  current_branch: feat/connectivity-gates
+  branches:
+    - name: feat/connectivity-gates
+      purpose: "H0c/H4/H5 connectivity gates, CORS, commit-as-you-go skill updates"
+      base: main
+      status: open
+      created_at: "2026-05-20"
+      pr_url: null
+  commits:
+    - sha: e3c952e
+      branch: feat/connectivity-gates
+      message: "feat: add connectivity gates (H0c/H0i/H4/H5) across skills 00-15"
+      stage: "17-retrospective"
+      files_changed: 31
+      timestamp: "2026-05-20T23:00:00Z"
+    - sha: 4ec5113
+      branch: feat/connectivity-gates
+      message: "feat: CORS middleware + H0c/H4/H5 tests for browser connectivity"
+      stage: "17-retrospective"
+      files_changed: 12
+      timestamp: "2026-05-20T23:05:00Z"
+    - sha: 797c15a
+      branch: feat/connectivity-gates
+      message: "feat: do_apps.py urls --frontend + sync-secrets CORS support"
+      stage: "17-retrospective"
+      files_changed: 1
+      timestamp: "2026-05-20T23:06:00Z"
+    - sha: 6515d60
+      branch: feat/connectivity-gates
+      message: "docs: product planning specs and ADRs (stages 00-03)"
+      stage: "17-retrospective"
+      files_changed: 29
+      timestamp: "2026-05-20T23:07:00Z"
+    - sha: 8890935
+      branch: feat/connectivity-gates
+      message: "docs: tech plan, QA, deploy, and service health reports (stages 04-15)"
+      stage: "17-retrospective"
+      files_changed: 18
+      timestamp: "2026-05-20T23:08:00Z"
+    - sha: 52188ca
+      branch: feat/connectivity-gates
+      message: "chore: update remaining skill references and templates"
+      stage: "17-retrospective"
+      files_changed: 10
+      timestamp: "2026-05-20T23:09:00Z"
+    - sha: a1d94d2
+      branch: feat/connectivity-gates
+      message: "chore: CI, deploy-preflight workflow, gitleaks, pyproject updates"
+      stage: "17-retrospective"
+      files_changed: 5
+      timestamp: "2026-05-20T23:10:00Z"
+    - sha: acecc09
+      branch: feat/connectivity-gates
+      message: "fix: type annotations and linting across apps and packages"
+      stage: "17-retrospective"
+      files_changed: 20
+      timestamp: "2026-05-20T23:11:00Z"
+    - sha: ad64d7b
+      branch: feat/connectivity-gates
+      message: "feat: Modal apps, deploy scripts, and operator tooling"
+      stage: "17-retrospective"
+      files_changed: 14
+      timestamp: "2026-05-20T23:12:00Z"
+    - sha: 17b21e4
+      branch: feat/connectivity-gates
+      message: "test: e2e, smoke, and integration test harness"
+      stage: "17-retrospective"
+      files_changed: 18
+      timestamp: "2026-05-20T23:13:00Z"
+    - sha: 8738198
+      branch: feat/connectivity-gates
+      message: "chore: update workflow-state.yaml with stage progress through deploy"
+      stage: "17-retrospective"
+      files_changed: 1
+      timestamp: "2026-05-20T23:14:00Z"
+    - sha: 5a522b3
+      branch: feat/connectivity-gates
+      message: "chore: update audit-docs SKILL.md connectivity section"
+      stage: "17-retrospective"
+      files_changed: 1
+      timestamp: "2026-05-20T23:15:00Z"
+
 constraints:
   cost:
     target_usd_per_month: 25

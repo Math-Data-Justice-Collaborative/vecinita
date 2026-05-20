@@ -143,11 +143,25 @@ For each task in order (respecting dependencies):
 3. Run full test suite (not just new tests)
 4. Fix any failures before proceeding
 
-#### Step 4 — Commit
+#### Step 4 — Commit & record
 
-1. Stage all task-related files
-2. Commit: `[T{id}] {type}: {description}`
-3. Verify clean state
+1. Verify correct branch is checked out (create `feat/M{N}-{slug}` if needed)
+2. Stage all task-related files
+3. Commit: `[T{id}] {type}: {description}`
+4. Verify clean state (`git status`)
+5. Append to `workflow-state.yaml` §`git_history.commits`:
+   ```yaml
+   - sha: <short-sha>
+     branch: feat/M{N}-{slug}
+     message: "[T{id}] {type}: {description}"
+     stage: "07-build"
+     files_changed: <count>
+     timestamp: "<ISO-8601>"
+   ```
+6. Commit the workflow-state update (same or next commit)
+
+**Never leave uncommitted work.** If an AskQuestion, gate check, or session end
+is imminent, commit first. Progress lost to uncommitted work is unrecoverable.
 
 #### Step 5 — Update state
 

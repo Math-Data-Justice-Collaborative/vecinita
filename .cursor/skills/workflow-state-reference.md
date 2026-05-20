@@ -41,7 +41,110 @@ decisions_log: []
 artifacts: []    # paths produced; append on completion
 evolve_cycles: []      # 16-evolve — see 16-evolve/reference.md
 retrospective_cycles: [] # 17-retrospective — see 17-retrospective/reference.md
+
+git_history:     # commit and branch tracking — see §Git history
+  current_branch: string
+  branches: []   # active branches with purpose and base
+  commits: []    # recent commit log (append-only)
 ```
+
+## Git history
+
+Skills that produce code, docs, tests, infra, or config changes **must commit as they go**
+and record the commit in `workflow-state.yaml` §`git_history`. This is the persistent
+record that survives session boundaries.
+
+### Branch naming
+
+| Change type | Branch pattern | Base |
+|-------------|----------------|------|
+| Feature / milestone task | `feat/{slug}` | `main` or phase branch |
+| Bug fix (hotfix) | `fix/{slug}` | `main` |
+| Docs-only change | `docs/{slug}` | `main` |
+| Skill / tooling change | `chore/{slug}` | `main` |
+| Connectivity / infra | `infra/{slug}` | `main` |
+| Evolve cycle | `evolve/{cycle-id}-{slug}` | `main` |
+
+Slug should be short and descriptive (e.g. `feat/cors-middleware`, `fix/vllm-shutdown`,
+`docs/staging-runbook`).
+
+### Commit protocol (commit-as-you-go)
+
+Every skill that writes files **must** commit before:
+
+1. **Transitioning to the next stage** — uncommitted work is lost if the session ends
+2. **Asking the user a blocking question** — commits preserve progress
+3. **Running a gate check** — gates operate on committed state
+4. **Ending a turn** — always commit before returning control
+
+Steps per commit:
+
+1. Verify the working tree is on the correct branch (create if needed)
+2. `git add` only files related to the current logical unit
+3. Commit with the message format from `atomic-commits.mdc`
+4. Append to `workflow-state.yaml` §`git_history.commits`
+5. Verify clean state (`git status`)
+
+### `git_history` schema
+
+```yaml
+git_history:
+  current_branch: feat/connectivity-gates
+  branches:
+    - name: feat/connectivity-gates
+      purpose: "H0c/H4/H5 connectivity gates across skills"
+      base: main
+      status: open          # open | merged | closed
+      created_at: "2026-05-20"
+      pr_url: null           # set when PR is created
+    - name: fix/vllm-shutdown
+      purpose: "vLLM fp16 kwargs + NCCL shutdown warnings"
+      base: main
+      status: merged
+      created_at: "2026-05-20"
+      merged_at: "2026-05-20"
+  commits:
+    - sha: abc1234
+      branch: feat/connectivity-gates
+      message: "feat: add connectivity gates (H0c/H0i/H4/H5) across skills 00-15"
+      stage: "14-hotfix"      # which pipeline stage produced this
+      files_changed: 31
+      timestamp: "2026-05-20T19:00:00Z"
+    - sha: def5678
+      branch: feat/connectivity-gates
+      message: "feat: CORS middleware + H0c/H4/H5 tests"
+      stage: "14-hotfix"
+      files_changed: 12
+      timestamp: "2026-05-20T19:05:00Z"
+```
+
+### Rules
+
+| Rule | Detail |
+|------|--------|
+| **Append-only** | Never remove commits from the log; branches move to `merged`/`closed` |
+| **Stage attribution** | Every commit records which pipeline stage produced it |
+| **Branch lifecycle** | Create → work → PR → merge → record `merged_at` |
+| **Session boundary** | On session end, `current_branch` reflects actual `git branch --show-current` |
+| **Resume** | On session start, read `git_history` to know which branches exist and their purpose |
+
+### Which skills commit
+
+| Skill | Commits? | Branch type |
+|-------|----------|-------------|
+| 00-context through 03-plan-tooling | Yes (docs, rules, hooks) | `docs/*` or `chore/*` |
+| 04-tech-plan through 06-tech-tooling | Yes (execution plan, tooling) | `docs/*` or `chore/*` |
+| 07-build / build-executor | Yes (code, tests, specs) | `feat/M{N}-*` per milestone |
+| 08-verify-build | Amend or new commit (auto-fixes) | Same branch as 07-build |
+| 09-qa | Yes (report) | `docs/qa-report` or same phase branch |
+| 10-e2e | Yes (tests, report) | `docs/e2e-report` or same phase branch |
+| 11-verify-impl | Yes (patches, report) | Same phase branch |
+| 12-verify-deploy | Yes (checklist) | `docs/deploy-checklist` or same phase branch |
+| 13-deploy-smoke | Yes (deploy state, report) | `chore/deploy-*` |
+| 14-hotfix | Yes (fix + test) | `fix/*` |
+| 15-service-health | Yes (reports) | `docs/health-*` or `fix/*` if code changes |
+| 16-evolve | Yes (delta specs + code) | `evolve/*` |
+| 17-retrospective | Yes (skill patches) | `chore/retro-*` |
 
 ## Stage status values
 

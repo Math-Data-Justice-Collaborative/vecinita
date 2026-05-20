@@ -80,6 +80,20 @@ On invocation:
 
 After every substep: update the active cycle immediately (status, `current_stage`, artifacts, ADRs).
 
+### Git branch and commit-as-you-go
+
+Each evolve cycle works on a dedicated branch:
+
+```
+evolve/{cycle-id}-{slug}
+```
+
+Record the branch in `git_history.branches` on creation. Commit delta specs, code changes,
+and test updates as they happen — never accumulate uncommitted work across substeps.
+After each commit, append to `git_history.commits` with `stage: "16-evolve"`.
+
+When the cycle is complete, create a PR from the evolve branch to main.
+
 ### Decision and ADR logging
 
 Per [considerations.md](../considerations.md) §8:

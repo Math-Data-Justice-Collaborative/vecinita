@@ -156,11 +156,21 @@ Pipeline State:
 
 ### State updates
 
-After each stage completes (or fails), immediately update `workflow-state.yaml`:
-- Set stage status
-- Update timestamps
-- Record artifacts produced
-- Log any issues in the issue_log
+After each stage completes (or fails), immediately:
+
+1. **Commit all stage artifacts** to the appropriate branch (see `workflow-state-reference.md`
+   §Git history for branch type). Never leave uncommitted work between stages.
+2. Update `workflow-state.yaml`:
+   - Set stage status
+   - Update timestamps
+   - Record artifacts produced
+   - Log any issues in the issue_log
+   - Append commit(s) to `git_history.commits` with stage attribution
+   - Update `git_history.current_branch`
+3. Commit the workflow-state update itself (can be the same commit as artifacts).
+
+**Commit-as-you-go is mandatory.** If a session ends unexpectedly, all progress since the
+last commit is lost. Commit early and often — at least once per substep completion.
 
 ## Workflow
 

@@ -148,11 +148,25 @@ After implementing the task:
 3. **Run tests**: Run the full test suite (not just the new test). All must pass.
 4. If any check fails, fix the issue before proceeding. Do not commit broken code.
 
-#### Step 4 — Commit
+#### Step 4 — Commit & record
 
-1. Stage all files related to this task.
-2. Commit with the format: `[T{id}] {type}: {description}` (per `atomic-commits.mdc`).
-3. Verify the commit is clean: no untracked files, no unstaged changes for this task.
+1. Verify correct branch is checked out (create `feat/M{N}-{slug}` if needed).
+2. Stage all files related to this task.
+3. Commit with the format: `[T{id}] {type}: {description}` (per `atomic-commits.mdc`).
+4. Verify the commit is clean: no untracked files, no unstaged changes for this task.
+5. Append to `workflow-state.yaml` §`git_history.commits`:
+   ```yaml
+   - sha: <short-sha>
+     branch: <current-branch>
+     message: "[T{id}] {type}: {description}"
+     stage: "07-build"
+     files_changed: <count>
+     timestamp: "<ISO-8601>"
+   ```
+6. Commit the workflow-state update (same or next commit).
+
+**Never leave uncommitted work.** If an AskQuestion, gate check, or session end
+is imminent, commit first. Progress lost to uncommitted work is unrecoverable.
 
 #### Step 5 — Update state
 

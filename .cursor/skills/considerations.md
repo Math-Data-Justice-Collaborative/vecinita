@@ -247,3 +247,28 @@ to `workflow-state.yaml` immediately. Do not use legacy-only files
 - Every substep completion triggers a state write
 - If a session ends mid-skill, all progress up to the last completed substep is preserved
 - On re-invocation, the state file determines resume position
+
+### Commit-as-you-go (§12)
+
+All skills that produce files **must commit before**:
+
+1. Transitioning to the next stage
+2. Asking the user a blocking AskQuestion
+3. Running a gate check
+4. Ending a session/turn
+
+Branch naming by change type, commit recording in `git_history`, and per-skill branch
+type: see [workflow-state-reference.md](workflow-state-reference.md) §Git history.
+
+| Change type | Branch pattern |
+|-------------|----------------|
+| Feature / milestone | `feat/{slug}` |
+| Bug fix | `fix/{slug}` |
+| Docs-only | `docs/{slug}` |
+| Skill / tooling | `chore/{slug}` |
+| Infra / deploy | `infra/{slug}` |
+| Evolve cycle | `evolve/{cycle-id}-{slug}` |
+
+Every commit appends to `workflow-state.yaml` §`git_history.commits` with stage
+attribution. The git history in workflow-state is the persistent record that survives
+session boundaries — on resume, read it to know what was committed and where.
