@@ -314,7 +314,7 @@
 #### Phase 4 Gate Check
 
 - [x] Full `pytest` + vitest green in CI (main CI run 2026-05-19; local 53 passed, 3 skipped; vitest 4/4)
-- [ ] Staging `/health` and sample ask succeed — **deferred**: no `VECINITA_STAGING_*` URLs; run `scripts/deploy/staging_smoke.sh` after DO/Modal deploy
+- [ ] Staging H1–H3 succeed — **deferred** until deploy URLs exist; operator procedure: [staging-runbook.md](staging-runbook.md) (`scripts/deploy/staging_smoke.sh`, `tests/smoke/test_staging_health.py`)
 - [x] Cost estimate documented ≤ $50 (`docs/cost-monitoring.md` pilot ~$42–48/mo)
 - [ ] `docs/data-staging-state.md` all required assets `verified` — D1–D5 verified; **D6/D7 pending** (Modal weights on first deploy)
 

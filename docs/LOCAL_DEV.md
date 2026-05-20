@@ -60,10 +60,14 @@ uv run uvicorn vecinita_internal_write_api.app:create_app --factory --host 0.0.0
 export DATABASE_URL=postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita
 export VECINITA_MODAL_EMBED_URL=http://localhost:8003   # after modal serve embedding
 export VECINITA_MODAL_LLM_URL=http://localhost:8004     # after modal serve llm
+
+# Staging/prod (vecinita Modal workspace — see infra/modal/env.example):
+# export VECINITA_MODAL_EMBED_URL=https://vecinita--vecinita-embedding-embedding-api.modal.run
+# export VECINITA_MODAL_LLM_URL=https://vecinita--vecinita-llm-fastapi-app.modal.run
 uv run uvicorn vecinita_chat_rag_backend.app:create_app --factory --host 0.0.0.0 --port 8000
 ```
 
-For API-only work without Modal, use `pytest` — integration tests mock embed/LLM HTTP.
+For API-only work without Modal, use **`uv run pytest`** (or `bash scripts/run_tests.sh`) — integration tests mock embed/LLM HTTP. Bare `pytest` will not resolve workspace packages.
 
 ## 4. Frontends
 
