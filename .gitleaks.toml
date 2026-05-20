@@ -1,0 +1,31 @@
+# Vecinita gitleaks configuration (QA-005).
+#
+# PR / CI: scan the current working tree only (no git history):
+#   gitleaks detect --no-git --config .gitleaks.toml
+#
+# Full history (local ops / audit): expect ~54 advisory hits in deleted pre-Vecinita
+# paths unless allowlisted below. Do not fail release gates on history-only findings.
+#
+# See docs/security/gitleaks-resolution.md
+
+title = "Vecinita gitleaks"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Deleted legacy monolith paths (placeholder tokens in docs/tests only; QA-005)"
+paths = [
+  # Removed backend / scraper-worker tree
+  '''(?:^|/)backend(?:/.*)?$''',
+  '''(?:^|/)apps/scraper-worker(?:/.*)?$''',
+  # Legacy root-level deployment docs (not in current tree)
+  '''(?:^|/)(?:DATA_MANAGEMENT_SETUP_COMPLETE|DEPLOYMENT_IMPLEMENTATION|DEPLOYMENT_QUICK_START|DEPLOY_DATA_MANAGEMENT_API|ENV_VARIABLES_REFERENCE|QUICKSTART_DATA_MANAGEMENT_API)\.md$''',
+  # Legacy docs/ subtrees
+  '''(?:^|/)docs/guides(?:/.*)?$''',
+  '''(?:^|/)docs/reference(?:/.*)?$''',
+  '''(?:^|/)docs/deployment(?:/.*)?$''',
+  '''(?:^|/)docs/reports(?:/.*)?$''',
+  # Render LLM context files removed from .github/
+  '''(?:^|/)\.github/(?:llm-txt/)?render-llm\.txt$''',
+]

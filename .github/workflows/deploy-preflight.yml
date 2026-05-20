@@ -1,0 +1,46 @@
+# Pre-deploy gate on main — build smoke + Modal secrets (no live deploy).
+# Modal has no `deploy --dry-run`; verify_build.sh imports app modules instead.
+name: Deploy preflight
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-preflight-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build smoke (uv sync + Modal app import)
+        run: bash scripts/deploy/verify_build.sh
+
+  modal-secrets:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.MODAL_TOKEN_ID != '' && secrets.MODAL_TOKEN_SECRET != '' }}
+    env:
+      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Modal CLI
+        run: pip install 'modal>=1.2.6,<2'
+
+      - name: Verify Modal secrets and volumes
+        run: bash scripts/deploy/verify_secrets.sh

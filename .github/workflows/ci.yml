@@ -52,6 +52,19 @@ jobs:
       - name: OpenAPI specs present
         run: bash scripts/check_openapi_specs.sh
 
+      - name: Secret patterns (current tree)
+        run: bash scripts/check_secrets.sh
+
+      - name: Install gitleaks
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v8.24.2/gitleaks_8.24.2_linux_x64.tar.gz" \
+            | tar xz -C /tmp
+          sudo install -m 0755 /tmp/gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
+      - name: Gitleaks (current tree only)
+        run: gitleaks detect --no-git --config .gitleaks.toml
+
       - name: Ruff lint
         run: uv run ruff check apps packages tests
 
