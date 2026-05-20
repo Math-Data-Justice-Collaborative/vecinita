@@ -12,7 +12,20 @@ description: >
 Collect all verification results and walk the user through a final check that the
 implementation matches their requirements.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+## Connectivity (stage 11)
+
+Before approving **UI features** (e.g. F11 Chat UI, F12 Admin UI):
+
+| Check | Source |
+|-------|--------|
+| T0 passes | e2e-report (in-process — not browser CORS) |
+| Connectivity plan exists | test-plan H4–H5 + deploy-checklist rows from 12 |
+| Waiver | User AskQuestion if staging H4–H5 deferred to 13 only — document in e2e-report |
+
+Per-journey AskQuestion for browser UJs: “Does T0 prove this in production browser?” — if no,
+record **T3/connectivity pending**; do not mark journey approved without waiver.
 
 ## Prerequisites
 
@@ -27,9 +40,11 @@ implementation matches their requirements.
 This is the user's final say before deployment. Every previous stage was about
 correctness against specs; this stage is about correctness against **user intent**.
 
-## State Management
+## State management
 
-Track via `workflow-state.yaml` §stages.11-verify-impl.
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.11-verify-impl`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md). Update immediately after
+each feature/journey approval substep.
 
 ## Workflow
 

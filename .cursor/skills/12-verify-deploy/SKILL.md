@@ -3,7 +3,8 @@ name: 12-verify-deploy
 description: >
   Pre-deploy gate. Verifies the deployment strategy is sound and all prerequisites are met.
   Walks through potential failure modes and mitigations with the user. Checks configuration,
-  secrets, data management, rollback plan, and resource allocation against the deployment spec.
+  secrets, browser connectivity readiness (CORS + VITE_*), data management, rollback plan,
+  and resource allocation against the deployment spec.
 ---
 
 # 12 — Verify Deploy Strategy
@@ -11,7 +12,13 @@ description: >
 Pre-deploy gate verifying that the deployment strategy planned in Stage 04 still holds
 after implementation, and all deployment prerequisites are met.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+## Connectivity (stage 12)
+
+Run **Agent 6** and populate deploy-checklist connectivity rows (H0c, VITE matrix, CORS origins,
+`verify_connectivity.sh` planned). Sign-off means “ready for 13 including H4–H5,” not API-only.
+See connectivity-gates §Stage 12.
 
 ## Prerequisites
 
@@ -30,9 +37,10 @@ Stage 04 (tech plan) **designs** the deployment strategy. Stage 12 **verifies** 
 - Failure modes have been addressed
 - The user has reviewed the rollback plan
 
-## State Management
+## State management
 
-Track via `workflow-state.yaml` §stages.12-verify-deploy.
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.12-verify-deploy`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
 ## Workflow
 
@@ -74,6 +82,14 @@ Launch parallel agents:
 - Cross-check: deployment plan doc references match actual `src/app.py` app name
 - Return: template deploy conformance report
 
+**Agent 6 — Browser connectivity readiness** (required for Vecinita hybrid / any static UI + separate API hosts):
+- Read [connectivity-gates.md](../connectivity-gates.md)
+- Verify `tests/unit/test_cors_policy.py` exists and passes (`H0c`)
+- Verify each FastAPI `create_app` uses `vecinita_shared_schemas.cors.configure_cors`
+- Cross-check `docs/staging-secrets-matrix.md`: every `VITE_*` row has a matching API URL + `VECINITA_CORS_ORIGINS` entry
+- Confirm `scripts/deploy/verify_connectivity.sh` and `tests/smoke/test_staging_connectivity.py` are present
+- Return: pass/fail + missing wiring items (do **not** assume H1–H3 alone is enough)
+
 ### Phase 2 — Failure Mode Analysis
 
 Walk through potential deployment failure modes with the user:
@@ -104,7 +120,7 @@ Common failure modes to check:
 - Network/port binding issues
 - Cold start timeout
 - Memory exhaustion
-- Auth/CORS issues
+- **Auth/CORS / browser connectivity** — static frontend on different origin than API; mitigated by `VECINITA_CORS_ORIGINS` + H4/H5 gates (see connectivity-gates)
 
 ### Phase 3 — Rollback Plan Review
 
@@ -143,6 +159,10 @@ Write `docs/deploy-checklist.md`:
 - [ ] Data assets staged (if applicable)
 - [ ] Resource allocation verified
 - [ ] Rollback plan reviewed
+- [ ] H0c CORS unit tests pass (`pytest tests/unit/test_cors_policy.py`)
+- [ ] Frontend `VITE_*` ↔ API URL matrix complete (connectivity-gates §Wiring)
+- [ ] `VECINITA_CORS_ORIGINS` documented per API service for staging/prod
+- [ ] Post-deploy H4–H5 command documented (`verify_connectivity.sh`)
 
 ## Failure Mitigations
 
@@ -184,7 +204,7 @@ Deploy gate:
   ✓ E2E behaviors passed (10-e2e)
   ✓ Implementation verified (11-verify-impl)
   ✓ Deploy strategy verified
-  → Ready for deployment
+  → Ready for deployment (API + browser connectivity plan verified)
 
 Artifacts:
   docs/deploy-checklist.md — verified checklist

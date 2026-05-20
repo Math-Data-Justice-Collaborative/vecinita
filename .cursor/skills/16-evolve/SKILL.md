@@ -15,7 +15,11 @@ description: >
 Take an **existing** CogniChem service from change request through updated specs, verified
 plans, implementation, and redeploy — reusing stages **00–15** in **delta mode**.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+**Connectivity:** Any evolve cycle that adds or changes **browser-facing** surfaces must re-run
+the applicable rows in connectivity-gates §Pipeline stages 00–15 (at minimum: 01/04 spec delta,
+07 implementation, 12–13 redeploy with H4–H5).
 
 **User is the source of truth.** Interview before editing specs or code. Every ambiguous,
 uncertain, or contradictory finding uses **AskQuestion** — never guess.
@@ -60,7 +64,10 @@ Do not post interview prompts as markdown lists expecting inline replies.
 
 ## State management
 
-### Evolve cycles in `workflow-state.yaml`
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) — top-level
+`evolve_cycles[]` (not under `stages`). Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+
+### Evolve cycles
 
 Each invocation starts or resumes an **evolve cycle** — see [reference.md](reference.md) for the
 YAML schema. Append under `evolve_cycles:` (create the key if absent).

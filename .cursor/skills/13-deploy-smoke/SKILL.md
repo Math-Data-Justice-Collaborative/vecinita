@@ -1,16 +1,21 @@
 ---
 name: 13-deploy-smoke
 description: >
-  Executes the deployment, runs smoke tests to verify the deployed service works, performs
-  health checks, generates changelog, and sets up monitoring baseline. Final stage in the
-  pipeline. Blocking — user must approve deployment results.
+  Executes the deployment, runs API smokes (H1–H3) plus browser connectivity gates (H4–H5:
+  CORS + frontend bundle wiring), health checks, changelog, and monitoring baseline. Final
+  pipeline stage. Blocking — user must approve deployment results.
 ---
 
 # 13 — Deploy & Smoke Check
 
 Deploy the application and verify it works with smoke tests and health checks.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+## Connectivity (stage 13)
+
+Mandatory sequence: **H0c** (pre) → deploy → **H1–H3** → **`verify_connectivity.sh`** (H4–H5).
+Do not mark `deployed` without H4–H5 pass or user-waived checklist entry. See connectivity-gates §Stage 13.
 
 ## Prerequisites
 
@@ -21,9 +26,12 @@ Deploy the application and verify it works with smoke tests and health checks.
    - `docs/test-plan.md` — smoke test definitions
 3. Deployment platform CLI/tools must be installed and authenticated
 
-## State Management
+## State management
 
-Track via `workflow-state.yaml` §stages.13-deploy-smoke and `docs/deploy-state.md`.
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.13-deploy-smoke`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+
+**Detail:** `docs/deploy-state.md` — sync URL/status with YAML on each deploy step.
 
 ### On invocation — check state
 
@@ -68,8 +76,10 @@ Track via `workflow-state.yaml` §stages.13-deploy-smoke and `docs/deploy-state.
 Before production deploy:
 
 1. T0 green: `pytest tests/e2e/ -m "e2e and not live"`
-2. Migrations apply on staging DB: `alembic upgrade head`
-3. Optional: `scripts/rag_smoke.py` against local TestClient
+2. **H0c green:** `pytest tests/unit/test_cors_policy.py` (browser CORS on all FastAPI apps)
+3. Migrations apply on staging DB: `alembic upgrade head`
+4. Optional: `scripts/rag_smoke.py` against local TestClient
+5. **Connectivity readiness (12):** `docs/deploy-checklist.md` includes H0c + `VITE_*` / `VECINITA_CORS_ORIGINS` rows per [connectivity-gates.md](../connectivity-gates.md)
 
 **Deploy gate**: T1 fail → 14-hotfix or fix-in-place; do not deploy.
 
@@ -96,25 +106,37 @@ Capture full stdout/stderr.
 
 ### Phase 2 — Smoke Tests (Parallel Agents)
 
-Run minimal smoke tests against the deployed service:
+Run **backend** smokes first, then **browser connectivity** (H4–H5). Backend-only pass is **not**
+sufficient for Vecinita hybrid deploys — see [connectivity-gates.md](../connectivity-gates.md).
 
-**Agent 1 — Connectivity**:
-- Verify the service is reachable
-- Check response status codes
-- Verify TLS (if applicable)
+**Operator env (staging):**
+
+```bash
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend
+# Set VECINITA_STAGING_ADMIN_API_URL from Modal deploy output
+export VECINITA_STAGING_ADMIN_API_URL=https://vecinita--vecinita-data-management-fastapi-app.modal.run
+```
+
+**Agent 1 — API connectivity (H1)**:
+- `bash scripts/deploy/staging_smoke.sh` or `tests/smoke/test_staging_health.py -m live`
+- Verify TLS, `/health` 200 on ChatRAG + write API
 - Return: pass/fail, response times
 
-**Agent 2 — Functional Smoke**:
-- Run minimal test defined in test-plan.md (simplest valid input → valid output)
-- Include **negative paths**: invalid `chunk_size`, missing required fields → expect
-  validation error or `partial_failure` ZIP per config-spec (UJ-009, UJ-010)
-- Verify response format matches API contract
-- `POST /ingest` with fixture → `POST /query` with eval question → expected `source_ids`
+**Agent 2 — Functional smoke (H2–H3)**:
+- H2: DB pool + Alembic head (`staging_h2.py`)
+- H3: `POST /api/v1/ask` with fixture question (warm LLM first if cold — see deploy-report)
+- Negative API paths per test-plan / config-spec where applicable
 - Return: pass/fail, response details
 
-**Agent 3 — Resource Verification**:
+**Agent 3 — Browser connectivity (H4–H5)** — **blocking**:
+- Run `bash scripts/deploy/verify_connectivity.sh` (H0c + live H4/H5 when URLs set)
+- **H4:** CORS `OPTIONS` from each frontend origin → API returns `Access-Control-Allow-Origin`
+- **H5:** Live JS bundle contains expected API hosts (not `localhost`)
+- Return: pass/fail per tier; cite failing origin/path
+
+**Agent 4 — Resource verification**:
 - DB pool healthy; worker backlog below threshold
-- Check no container crash loops
+- No container crash loops on DO/Modal
 - Return: resource status report
 
 If any smoke test fails, present to user:
@@ -176,8 +198,11 @@ Write `docs/deploy-report.md`:
 ## Smoke Tests
 | Test | Status | Response Time |
 |------|--------|---------------|
-| Connectivity | PASS | [ms] |
-| Functional | PASS | [ms] |
+| H1 API connectivity | PASS | [ms] |
+| H2 DB | PASS | — |
+| H3 RAG ask | PASS | [ms] |
+| H4 CORS (browser) | PASS | — |
+| H5 Frontend bundle | PASS | — |
 | Resources | PASS | — |
 
 ## Health Check
@@ -237,7 +262,8 @@ If the user requests a rollback:
 1. **Pre-deploy checks done**: Never deploy without 12-verify-deploy passing.
 2. **Failures require user choice**: Every failure gets AskQuestion with options.
 3. **Max 3 deploy retries**: Prevent infinite loops.
-4. **Smoke tests are minimal**: Quick validation, not full test suite.
-5. **Rollback documented**: Every deployment has a rollback command.
-6. **State persists**: Deploy state survives session boundaries.
-7. **Changelog**: Aggregate commits into structured changelog at deploy time.
+4. **Smoke tests are minimal**: Quick validation, not full test suite — but **must include H4–H5** for multi-origin UI deploys.
+5. **Never mark deployed** if H4/H5 fail without documented user waiver in deploy-checklist.
+6. **Rollback documented**: Every deployment has a rollback command.
+7. **State persists**: Deploy state survives session boundaries.
+8. **Changelog**: Aggregate commits into structured changelog at deploy time.

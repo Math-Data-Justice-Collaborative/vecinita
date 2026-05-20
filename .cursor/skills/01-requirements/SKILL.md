@@ -13,7 +13,20 @@ description: >
 Interview the user to fill spec document templates. Template-driven: for each approved
 template section, ask targeted questions to fill it.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+## Connectivity (stage 01)
+
+Product specs **must** define browser wiring before build:
+
+| Document | Required content |
+|----------|------------------|
+| `docs/test-plan.md` | Tiers H0c (CORS unit), H0i (integration), H4–H5 (live connectivity); UJ ↔ test mapping |
+| `docs/deployment-integration.md` | `VITE_*` build-time URLs; `VECINITA_CORS_ORIGINS`; redeploy order (API CORS before UI sign-off) |
+| `docs/user-journeys.md` | Browser steps for UI journeys; E2E tier (T0 vs T2 vs T3) — Vitest alone is not T3 |
+| `docs/config-spec.md` | Env names for CORS and frontend API bases |
+
+Ask in interview if UI calls APIs on a **different origin** than the static site.
 
 ## Prerequisites
 
@@ -33,9 +46,10 @@ Follow [considerations.md](../considerations.md) §Uncertainty. During interview
 any contradictions in user's answers, ambiguities in scope, and decisions that affect
 multiple templates.
 
-## State Management
+## State management
 
-Track progress via `workflow-state.yaml` §stages.01-requirements.
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.01-requirements`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
 ### On invocation — check state
 

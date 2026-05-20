@@ -23,6 +23,20 @@ Map each journey to test modules under `tests/e2e/` and TC-IDs below.
 |---------|---------|------------------|-----------|--------------|
 | UJ-001 | F# | `test_uj001_*.py` | [optional] | TC-001 |
 
+## Connectivity & wiring (multi-app / UI)
+
+If static frontends call APIs on **different origins**, document tiers per
+`.cursor/skills/connectivity-gates.md`:
+
+| Tier | Scope | Command |
+|------|-------|---------|
+| H0c | CORS policy (in-process) | `pytest tests/unit/test_cors_policy.py` |
+| H0i | Cross-service integration | `pytest tests/integration` |
+| H4 | Live CORS preflight | `pytest tests/smoke/test_staging_connectivity.py -m live` |
+| H5 | Frontend bundle URLs | `scripts/deploy/verify_connectivity.sh` |
+
+Vitest/component tests are **not** a substitute for H4–H5.
+
 ## Test Strategy
 
 | Level | Framework | Scope | Run Command | Est. Duration |

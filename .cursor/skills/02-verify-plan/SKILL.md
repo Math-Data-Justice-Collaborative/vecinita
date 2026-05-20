@@ -12,7 +12,18 @@ description: >
 Break spec documents into provable statements, risk-classify each, and walk the user through
 medium/low confidence statements for approval/denial/modification.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+## Connectivity (stage 02)
+
+When auditing product specs, include **falsifiable statements** such as:
+
+- “Staging smoke is only `GET /health`” → **deny** for UI products; require H4–H5 in test-plan
+- “E2E is covered by Vitest component tests” → **deny** as sole live proof; mocks ≠ CORS
+- “Frontends and APIs share one origin” → verify against deployment-integration topology
+
+Flag contradictions where `user-journeys.md` describes browser flows but `test-plan.md` has no
+connectivity tiers. Record fixes in audit report before 03-plan-tooling.
 
 ## Prerequisites
 
@@ -28,9 +39,10 @@ If any prerequisite is missing, inform the user and invoke 01-requirements first
 Follow [considerations.md](../considerations.md) §Uncertainty. Issues found during
 verification are surfaced via AskQuestion with category labels.
 
-## State Management
+## State management
 
-Track progress via `workflow-state.yaml` §stages.02-verify-plan.
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.02-verify-plan`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
 ### On invocation — check state
 

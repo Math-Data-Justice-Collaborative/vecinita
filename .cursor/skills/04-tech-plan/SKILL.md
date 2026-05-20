@@ -12,7 +12,19 @@ description: >
 Interview the user to produce technical implementation documents: execution plan, dependency
 inventory, ADRs, deployment plan, and data management plan.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+## Connectivity (stage 04)
+
+Technical plan **must** include executable connectivity work:
+
+| Deliverable | Content |
+|-------------|---------|
+| `docs/execution-plan.md` | Tasks: `configure_cors` on each browser-facing FastAPI app; `tests/unit/test_cors_policy.py`; `tests/smoke/test_staging_connectivity.py`; `scripts/deploy/verify_connectivity.sh` |
+| `docs/staging-secrets-matrix.md` | `VECINITA_CORS_ORIGINS`, all `VITE_*`, staging `VECINITA_STAGING_*_FRONTEND_URL` |
+| ADR (if needed) | Defer BFF/gateway (TP-001) → explicit CORS strategy |
+
+Interview: confirm frontend↔API origin map for staging and production.
 
 ## Prerequisites
 
@@ -36,9 +48,10 @@ surface:
 - **[Ambiguity]**: Spec section too vague for technical implementation
 - **[Contradiction]**: Technical choice conflicts with a product requirement
 
-## State Management
+## State management
 
-Track progress via `workflow-state.yaml` §stages.04-tech-plan.
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.04-tech-plan`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
 ### On invocation — check state
 

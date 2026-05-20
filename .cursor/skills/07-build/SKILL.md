@@ -12,7 +12,12 @@ description: >
 Execute the execution plan: implement tasks in TDD order, commit atomically, create PRs
 at milestone and phase boundaries, and orchestrate parallel agents for independent work.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+## Connectivity (stage 07)
+
+Implement and test **all three** layers from connectivity-gates: H0i (integration), H0c (CORS),
+and live scripts (for 13). See §Stage 07 in connectivity-gates for task completion criteria.
 
 ## Throughput
 
@@ -40,10 +45,12 @@ dependencies, data management, branches, and checks allow — across **multiple 
 3. **Data management** (if applicable): Check `docs/data-management-plan.md`. Tasks with data
    dependencies are blocked until data is staged. Offer to run data-staging if needed.
 
-## State Management
+## State management
 
-Uses `docs/execution-plan.md` §Current State as the persistent tracker.
-Also updates `workflow-state.yaml` §stages.07-build.
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.07-build`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+
+**Detail:** `docs/execution-plan.md` §Current State — update **both** on every task/milestone change.
 
 ### On invocation
 
@@ -113,6 +120,12 @@ For each task in order (respecting dependencies):
 2. Implement to make preceding tests pass
 3. Run tests — should now pass (green phase)
 4. Refactor if needed, keeping tests green
+
+**Browser-facing FastAPI** (ChatRAG, internal write, Modal data-mgmt ASGI):
+- Call `vecinita_shared_schemas.cors.configure_cors` in `create_app`
+- Extend `tests/unit/test_cors_policy.py` for new routes if needed
+- Add/update `tests/integration` when wiring crosses apps (H0i)
+- Task is not complete until **H0c + H0i** pass (see [connectivity-gates.md](../connectivity-gates.md) §Stage 07)
 
 **For all tasks**:
 - Follow tech stack from execution plan

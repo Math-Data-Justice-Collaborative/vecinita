@@ -21,7 +21,9 @@ deploy verification (12–13). Not a mandate — user selections and ADRs overri
 | **Docker Compose** | Local dev / CI integration | `docker compose up`, test DB |
 | **Kubernetes** | Org standard for multi-service | Helm release, job cron for worker |
 
-Record chosen target in `docs/deployment-plan.md` and `workflow-state.yaml` §deploy.
+Record chosen target in `docs/deployment-plan.md` and repo-root
+[`workflow-state.yaml`](../../workflow-state.yaml) §`template.deploy` (see
+[workflow-state-reference.md](workflow-state-reference.md)).
 
 ## Embeddings & LLM (external APIs)
 
@@ -59,7 +61,11 @@ Never commit secrets. Use platform secret stores (Render, GitHub Actions secrets
 | H1 | Deployed liveness | `GET /health` → 200 |
 | H2 | DB ready | Migrations applied; `SELECT 1` |
 | H3 | RAG smoke | Ingest fixture doc → query returns expected chunk id |
-| H4 | Full UJ suite | All `tests/e2e/` against staging URL |
+| H4 | Browser CORS | `OPTIONS` from frontend origin → `Access-Control-Allow-Origin` |
+| H5 | Frontend bundle | Live JS contains staging API hosts (not `localhost`) |
+| H6 | Full UJ suite | All `tests/e2e/` against staging URL or browser automation |
+
+**Detail:** [connectivity-gates.md](connectivity-gates.md) — required for Vecinita hybrid (DO static + APIs).
 
 ## Performance planning hooks
 

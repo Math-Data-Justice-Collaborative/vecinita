@@ -16,7 +16,9 @@ Execute the build-planner's execution plan: implement tasks in TDD order, commit
 create PRs at milestone and phase boundaries, and orchestrate parallel agents for independent
 work.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+**Connectivity:** Same obligations as [07-build](../07-build/SKILL.md) §Connectivity (stage 07) — H0c, H0i, CORS on browser-facing APIs.
 
 ## Throughput (single invocation)
 
@@ -53,14 +55,16 @@ data management, branches, and checks allow—across **multiple milestones** whe
    non-blocking.
 5. **Specs**: `docs/` must contain the spec documents referenced by the execution plan.
 
-## State Management
+## State management
 
-This skill is resumable. It uses `docs/execution-plan.md` §Current State as the persistent
-state tracker.
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.07-build`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+
+**Detail:** `docs/execution-plan.md` §Current State — update **both** on every task/milestone change.
 
 ### On invocation
 
-1. Read `docs/execution-plan.md` §Current State.
+1. Read `workflow-state.yaml` §`stages.07-build` and `docs/execution-plan.md` §Current State.
 2. Determine the active phase, milestone, and task.
 3. Report the current position to the user:
 

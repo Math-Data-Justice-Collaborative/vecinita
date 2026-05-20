@@ -15,7 +15,13 @@ description: >
 Analyze existing artifacts (codebase, paper, docs, prior work) and produce a structured
 context brief for downstream skills.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+## Connectivity (stage 00)
+
+In `docs/context-brief.md`, document **multi-app topology**: which deployables are browser-facing,
+which API origins they call, and whether CORS or a BFF is planned. Flag **browser integration risk**
+when static UI and APIs are on different hosts (Vecinita hybrid default).
 
 ## When to Use
 
@@ -61,9 +67,10 @@ Collect from the user (check conversation context or ask):
 | Org directory | No | — | Parent directory containing sibling repos (e.g., `C:\Users\...\CogniChem`). When provided, enables ecosystem scanning (Phase 1B). If omitted, ask whether the project belongs to a multi-repo organization. |
 | Output directory | No | `docs/` | Where to write context-brief.md |
 
-## State Management
+## State management
 
-This skill tracks progress via `workflow-state.yaml` §stages.00-context.
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.00-context`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
 ### On invocation — check state
 
@@ -224,8 +231,9 @@ For each user-selected repo, launch a `subagent_type: "explore"` agent to extrac
    import conventions, error handling patterns
 4. **Data flow**: How data moves between this repo and others — REST calls, queue
    messages, shared databases, file handoffs, Modal volume paths
-5. **Auth & networking**: How services authenticate with each other, CORS config,
-   internal vs external endpoints
+5. **Auth & networking**: How services authenticate with each other, **CORS / BFF / same-origin**
+   for browser clients, internal vs external endpoints — record gaps in context brief per
+   [connectivity-gates.md](../connectivity-gates.md) §Stage 00
 6. **Shared dependencies**: Common libraries, pinned versions that must stay aligned,
    internal packages imported across repos
 

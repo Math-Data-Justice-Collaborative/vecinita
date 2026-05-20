@@ -11,7 +11,22 @@ description: >
 Create dev tooling hooks, rules, and configuration that enforce technical standards during
 implementation.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+## Connectivity (stage 06)
+
+Dev tooling must catch wiring regressions **before** 13-deploy-smoke:
+
+| Check | Requirement |
+|-------|-------------|
+| CI pytest | Includes `tests/unit/test_cors_policy.py` and `tests/integration` |
+| Smoke layout | `tests/smoke/test_staging_connectivity.py` exists (`@pytest.mark.live`) |
+| Scripts | `scripts/deploy/verify_connectivity.sh` executable |
+| Docs | `docs/staging-runbook.md` documents H4–H5 env vars |
+
+Optional hook: run `test_cors_policy.py` on files under `apps/*/app.py` when touched.
+
+Record verification in stage `workflow-state.yaml` block (06 `verification`).
 
 ## Prerequisites
 
@@ -30,9 +45,10 @@ Technical tooling must be installed **before** build execution (Stage 07) becaus
 - Build execution rules enforce pre/post task validation
 - Without these, code quality degrades silently
 
-## State Management
+## State management
 
-Track progress via `workflow-state.yaml` §stages.06-tech-tooling.
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.06-tech-tooling`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
 ### On invocation — check state
 

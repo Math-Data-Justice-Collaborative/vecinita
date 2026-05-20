@@ -13,7 +13,19 @@ Create Cursor tooling (hooks, rules, skills, agents) that prevent drift from the
 product plan. These guardrails enforce scope boundaries and plan adherence during all
 subsequent stages.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+## Connectivity (stage 03)
+
+Plan guardrails must prevent **UI-without-wiring** drift:
+
+| Tooling | Enforcement |
+|---------|-------------|
+| Rule (plan-adherence or domain) | New browser-facing API → must trace to connectivity tasks in execution plan |
+| Skill pointer | Link [connectivity-gates.md](../connectivity-gates.md) from README or 07-build rule |
+| Scope reviewer | Flag features F11/F12 (frontends) without H4/H5 in approved test-plan |
+
+Do not mark 03 complete if specs lack connectivity tiers and no ADR waives browser E2E.
 
 ## Prerequisites
 
@@ -29,9 +41,10 @@ Tooling must be installed **before** technical planning (Stage 04) because:
 - Architecture choices must align with approved features
 - Without guardrails, drift accumulates silently and is expensive to fix later
 
-## State Management
+## State management
 
-Track progress via `workflow-state.yaml` §stages.03-plan-tooling.
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.03-plan-tooling`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
 ### On invocation — check state
 
@@ -63,6 +76,7 @@ For each finding, determine what type of tooling can enforce it:
 | Naming conventions | Rule | Enforce naming patterns in code |
 | Data model | Skill | Validate schema changes against spec |
 | API surface | Skill | Validate endpoint changes against contract |
+| Browser connectivity | Rule + connectivity-gates.md | UI features require CORS/VITE test tiers in approved test-plan |
 | Domain vocabulary | Rule | Suggest correct terms when wrong ones are used |
 
 ### Phase 2 — Present Tooling Plan

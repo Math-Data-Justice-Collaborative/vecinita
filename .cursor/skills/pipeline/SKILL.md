@@ -4,7 +4,8 @@ description: >
   End-to-end orchestration skill that takes a project from requirements interview through
   deployment. Combines stages 00-context through 15-service-health into a single resumable
   pipeline with YAML state tracking, phase gates, transition checks, and cross-stage
-  consistency verification. Use when the user wants to build Vecinita (RAG + data management),
+  consistency verification, and connectivity gates (CORS, VITE_*, integration, H4–H5) across
+  stages 00–15. Use when the user wants to build Vecinita (RAG + data management),
   run the full pipeline, go end-to-end, deploy from scratch, or asks "build this".
   Post-deployment surgical edits use 14-hotfix; production health checks use
   15-service-health without re-running the pipeline. Structured feature additions and scope
@@ -25,6 +26,10 @@ user-approved. The user is the source of truth at every stage.
 
 Shared policy (feedback loops, changelogs, performance testing, spec vs code root cause):
 [considerations.md](../considerations.md).
+
+**Connectivity & wiring (all stages 00–15):** [connectivity-gates.md](../connectivity-gates.md) —
+CORS, `VITE_*`, integration tests (H0i), and live browser gates (H4–H5). Each stage skill
+includes a §Connectivity section; phase gates below enforce the cumulative checklist.
 
 ## Pipeline Overview
 
@@ -93,12 +98,15 @@ Collect from the user at start (check conversation context or ask):
 | **Deploy target** | No | — | Modal, Render, AWS, etc. |
 | **Template** | No | auto-detect | Template from [template-registry.md](../template-registry.md). Auto-detected during 00-context or 01-requirements. User can override. |
 
-## State Management
+## State management
+
+All stages use repo-root [`workflow-state.yaml`](../../workflow-state.yaml). Schema:
+[workflow-state-reference.md](../workflow-state-reference.md).
 
 ### Centralized state: `workflow-state.yaml`
 
-Single source of truth for pipeline position. See `docs/pipeline-v2-design.md` for
-the full YAML schema.
+Single source of truth for pipeline position (repo root). Schema, skill keys, and update
+rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
 ### On invocation
 
@@ -189,6 +197,8 @@ template during Phase 1C. If 00-context is skipped, template selection defers to
 
 **Phase A→B Gate Check**:
 - [ ] All spec documents generated (01-requirements), including `docs/user-journeys.md`
+- [ ] **test-plan.md** defines connectivity tiers (H0c, H0i, H4, H5) per connectivity-gates
+- [ ] **deployment-integration.md** documents `VITE_*` + `VECINITA_CORS_ORIGINS` (or BFF ADR)
 - [ ] Product audit complete (02-verify-plan)
 - [ ] Plan tooling installed (03-plan-tooling)
 
@@ -214,8 +224,10 @@ If gate fails, report unmet criteria and ask user how to proceed.
 
 **Phase B→C Gate Check**:
 - [ ] Execution plan approved (04-tech-plan + 05-verify-tech)
+- [ ] Execution plan includes connectivity tasks (CORS middleware, integration tests, verify script)
 - [ ] Consistency check passed (05-verify-tech)
 - [ ] Technical tooling installed (06-tech-tooling)
+- [ ] CI will run `test_cors_policy.py` + `tests/integration` (06-tech-tooling)
 
 ### Stage 07 — Technical Execution (Build)
 
@@ -234,6 +246,7 @@ Not invoked separately — called by 07-build at milestone/phase boundaries.
 - [ ] All execution plan tasks completed
 - [ ] All milestone PRs created
 - [ ] Latest verify-build passes
+- [ ] **H0c + H0i green** (`test_cors_policy.py`, `tests/integration`)
 
 Launch both in parallel:
 - [09-qa](../09-qa/SKILL.md) — full codebase QA
@@ -256,10 +269,11 @@ Invoke [12-verify-deploy](../12-verify-deploy/SKILL.md).
 **Deploy Gate Check**:
 - [ ] QA passed (09-qa)
 - [ ] E2E passed (10-e2e)
-- [ ] Implementation verified (11-verify-impl)
-- [ ] Deploy strategy verified (12-verify-deploy)
+- [ ] Implementation verified (11-verify-impl) — UI features have connectivity plan or waiver
+- [ ] Deploy strategy verified (12-verify-deploy) — H0c/H4/H5 checklist rows
 
-Invoke [13-deploy-smoke](../13-deploy-smoke/SKILL.md).
+Invoke [13-deploy-smoke](../13-deploy-smoke/SKILL.md). Post-deploy must pass **H4–H5**
+browser connectivity ([connectivity-gates.md](../connectivity-gates.md)), not only H1–H3 API smokes.
 
 ### Stage 14 — Hotfix (On-Demand, Repeatable)
 
@@ -280,7 +294,7 @@ Not part of the linear pipeline. Best after 13-deploy-smoke when a deployed envi
 **Check**: User wants production health review, retrieval quality issues, DB/migration problems,
 or evidence before a hotfix.
 - Invoke [15-service-health](../15-service-health/SKILL.md)
-- Interview → infra (health, migrations, secrets) + behavior (ingest/query smokes H3–H4)
+- Interview → infra (health, migrations, secrets) + behavior (H3 + **H4–H5** on UI issues)
 - Test-driven failures; 14-hotfix handoff with repro test
 - Records in `docs/service-health-reports/` and `docs/service-health-state.md`
 

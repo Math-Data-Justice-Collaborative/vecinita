@@ -57,7 +57,7 @@ Atomic commits and PRs use structured messages, but **nothing automatically beco
 | **01-requirements / 04-tech-plan** | Ensure specs cover query latency, ingest throughput, embedding/LLM cost, and DB sizing where requirements imply them. Stack choices per [deployment-catalog.md](deployment-catalog.md). If unknown, surface `[Ambiguity]`. |
 | **08-verify-build** | When test-plan.md defines perf commands/thresholds, run them. |
 | **09-qa** | Report perf-related findings in QA report. |
-| **13-deploy-smoke** | Post-deploy smoke may include response-time checks. |
+| **13-deploy-smoke** | Post-deploy smoke: H1–H3 **plus** H4–H5 browser connectivity per [connectivity-gates.md](connectivity-gates.md). |
 
 If perf requirements are unknown, surface `[Ambiguity]` during planning — do not invent SLOs.
 
@@ -185,7 +185,24 @@ When a later decision overrides an earlier one:
 1. Set the old ADR's status to `Superseded by ADR-{NNN}`
 2. Reference the old ADR in the new one's Context section
 
-## 9. Template conformance
+## 9. Multi-app browser connectivity (skills 00–15)
+
+Hybrid deploys (static frontend on host A, API on host B) require **two** wiring layers plus
+**integration** tests for server-side paths:
+
+| Layer | Mechanism | Verified by |
+|-------|-----------|-------------|
+| In-process integration | APIs + DB + mocked upstreams | **H0i** `tests/integration` |
+| Build-time | `VITE_*` baked into JS | **H5** bundle check |
+| Run-time | `VECINITA_CORS_ORIGINS` on APIs | **H0c** unit + **H4** live |
+
+**Every pipeline skill 00–15** has stage-specific obligations in
+[connectivity-gates.md](connectivity-gates.md) §Pipeline stages 00–15. The orchestrator
+([pipeline/SKILL.md](pipeline/SKILL.md)) enforces phase gates that reference those rows.
+
+Do not treat `curl` API smokes (H1–H3) or Vitest mocks as proof the UI works in production.
+
+## 10. Template conformance
 
 When a project is built from an org template (see [template-registry.md](template-registry.md)),
 every stage should respect the template's structural patterns:
@@ -203,22 +220,26 @@ every stage should respect the template's structural patterns:
 If the user approves the drift, create an ADR documenting the deviation and why it was
 accepted. The template is a starting point, not a cage.
 
-## 10. State management
+## 11. State management
 
 ### YAML state
 
-The pipeline uses `workflow-state.yaml` as the centralized state file:
-- Tracks pipeline stages 00–17 with substep-level granularity (17 = retrospective meta-stage)
+The pipeline uses repo-root [`workflow-state.yaml`](../workflow-state.yaml) as the **only**
+canonical pipeline state file. Full schema, skill→key mapping, and update rules:
+[workflow-state-reference.md](workflow-state-reference.md).
+
+- Tracks pipeline stages 00–17 plus auxiliary keys (`gather-context`, `build-planner`, …)
 - Phase gates with criteria checklists
-- Issue log for cross-stage issues
-- Decisions log for all user decisions
-- Artifact tracking with paths and status
+- `issue_log` for cross-stage issues
+- `decisions_log` for user decisions
+- `artifacts` list; `evolve_cycles` / `retrospective_cycles` for 16/17
 
-### Per-skill state
+### Per-skill detail state
 
-Individual skills may also maintain their own detailed state (e.g., execution-plan.md
-§Current State for 07-build). The YAML state is the pipeline-level view; per-skill
-state is the detail view.
+Detail files (e.g. `docs/execution-plan.md` §Current State for 07-build,
+`docs/deploy-state.md` for deploy) hold substeps. **Stage completion** must still be written
+to `workflow-state.yaml` immediately. Do not use legacy-only files
+(`gather-context-state.md`, `audit-state.md`) without mirroring into YAML.
 
 ### Persistence rules
 

@@ -13,8 +13,9 @@ description: >
 Run all quality checks in parallel, collect results, and walk the user through any failures
 with actionable recommendations.
 
-**Cross-cutting:** [considerations.md](../considerations.md) — performance checks, spec vs code
-failures, release documentation.
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+
+**Connectivity:** Same blocking checks as [08-verify-build](../08-verify-build/SKILL.md) §Connectivity — H0c + `tests/integration` must pass.
 
 ## When to use
 
@@ -31,12 +32,19 @@ failures, release documentation.
 3. If the execution plan is missing, ask the user for the tool commands directly via
    AskQuestion.
 
-## State Management
+## State management
 
-This skill writes its results to `docs/verification-report.md`. On re-invocation:
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.08-verify-build`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
-1. If the report exists, ask the user: "Re-run all checks, or review the last report?"
-2. If re-running, overwrite the previous report.
+**Detail:** `docs/verification-report.md` — overwrite on each run; set `report` path on the stage block.
+
+### On invocation
+
+1. Read `workflow-state.yaml` §`stages.08-verify-build`.
+2. If the report exists, ask the user: "Re-run all checks, or review the last report?"
+3. If re-running, overwrite the previous report and set stage `status: in_progress`.
+4. On completion: `status: completed`, `overall: pass|fail`, append `docs/verification-report.md` to `artifacts`.
 
 ## Workflow
 

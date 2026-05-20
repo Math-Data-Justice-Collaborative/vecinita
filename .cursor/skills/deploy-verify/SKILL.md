@@ -11,7 +11,7 @@ description: >
 Deploy the RAG API (and worker if separate), run database migrations, and validate
 the deployment against `docs/deployment-integration.md`.
 
-**Cross-cutting:** [considerations.md](../considerations.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 
 ## Prerequisites
 
@@ -20,9 +20,12 @@ the deployment against `docs/deployment-integration.md`.
 3. `docs/data-management-plan.md` — migration revision, seed policy
 4. Build/verify green (08-verify-build / 09-qa) unless user waives
 
-## State
+## State management
 
-`docs/deploy-state.md` — status, URL, commit, step log.
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.13-deploy-smoke`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+
+**Detail:** `docs/deploy-state.md` — status, URL, commit, step log (sync with YAML on each deploy step).
 
 ## Workflow (summary)
 
@@ -44,6 +47,7 @@ Run **migrations** on target before traffic.
 
 - `GET /health` → 200
 - H3 smoke: ingest fixture doc → query returns expected source id
+- **H4–H5:** `bash scripts/deploy/verify_connectivity.sh` (CORS + frontend bundle)
 - Worker: one job completes if separate service
 - Query p95 logged (informational)
 
