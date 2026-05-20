@@ -3,6 +3,13 @@
 Validates that settings and API payload fields in code match `docs/config-spec.md`.
 Use when adding query/ingest parameters, defaults, validation rules, or admin config.
 
+## State management
+
+Read repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`template` and
+§`stages.config-validator` before validating. After a validation pass invoked as part of
+03-plan-tooling or evolve, set §`stages.config-validator.status` and log drift in `issue_log`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+
 ## Triggers
 
 - New env var or settings field in `src/config.py`

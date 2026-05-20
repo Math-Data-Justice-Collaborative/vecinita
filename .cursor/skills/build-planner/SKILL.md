@@ -24,14 +24,22 @@ to have been run first.
    - **If it exists**: Read it. Ask the user whether to reuse, update, or regenerate.
 2. Check that doc-planner output exists (at minimum: `research-brief.md` and the mandatory
    `deployment-integration.md`). If missing, inform the user and invoke doc-planner first.
-3. Check that `{output_directory}/audit-state.md` exists and its status is `complete`.
-   - **If missing or incomplete**: Inform the user that audit-docs has not finished. The
-     specs have not been verified. Ask: "Run audit-docs first, or proceed with unaudited
-     specs?" If proceeding unaudited, flag this in the execution plan as
-     `⚠️ Built from unaudited specs`.
+3. Read `workflow-state.yaml` §`stages.audit-docs` (and legacy `docs/audit-state.md` if present).
+   - **If audit-docs not `completed`**: Inform the user that audit-docs has not finished.
+     Ask: "Run audit-docs first, or proceed with unaudited specs?" If proceeding unaudited,
+     flag in the execution plan as `⚠️ Built from unaudited specs` and log in `issue_log`.
 4. If audit-docs was completed, read `audit-decisions.md` for any denied or modified
    statements — these corrections are already applied to the source docs, but the decision
-   log provides context for planning decisions.
+     log provides context for planning decisions.
+
+## State management
+
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.build-planner`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+
+On invocation: read §`stages.build-planner`. When `docs/execution-plan.md` is approved, set
+`status: completed`, record `completed_at`, and append the plan to `artifacts`. Pipeline path
+uses `04-tech-plan` instead — then keep `stages.build-planner.status: skipped`.
 
 ## Uncertainty Resolution Protocol
 

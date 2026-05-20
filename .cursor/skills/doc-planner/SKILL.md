@@ -26,6 +26,15 @@ This skill requires the **gather-context** skill to have been run first. Before 
 3. **If it does not exist**: Invoke the [gather-context](../gather-context/SKILL.md) skill with
    the same inputs (repository URL, paper path, output directory). Wait for it to complete.
 
+## State management
+
+**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.doc-planner`.
+Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+
+On invocation: read §`stages.doc-planner`; on manifest approval and each generated doc, update
+substeps and append paths to top-level `artifacts`. If the project uses pipeline
+`01-requirements` instead, set `stages.doc-planner.status: skipped` and do not duplicate work.
+
 The Research Brief provides:
 - Paper-analyst and repo-researcher reports (full text in collapsible sections)
 - Cross-Reference Matrix (paper vs repo alignment on key topics)

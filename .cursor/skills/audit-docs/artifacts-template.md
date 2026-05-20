@@ -2,7 +2,10 @@
 
 Templates for the three files created during Phase 3.
 
-## 1. `audit-state.md` — Progress tracker
+## 1. `audit-state.md` — Progress tracker (detail mirror)
+
+Primary stage state: repo-root `workflow-state.yaml` §`stages.audit-docs`
+(see [workflow-state-reference.md](../workflow-state-reference.md)).
 
 ```markdown
 # Audit State
