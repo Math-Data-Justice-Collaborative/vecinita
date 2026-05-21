@@ -19,6 +19,8 @@
 | 10 | T3 live pytest (`tests/smoke -m live`) | pass | 11/11; Modal LLM JSON body + D7 staged |
 | 11 | Re-validate (13-deploy-smoke) | pass | 2026-05-20: T0 11/11, H1–H3, T3 11/11; commit `c4bc847` |
 | 12 | Re-deploy Modal + DO (force_build) | pass | 2026-05-20: `c4bc847`; H3 cold-start 504 until LLM warm (~19s) |
+| 13 | H4/H5 connectivity gates | pass (waiver) | 2026-05-21: H4 DO CORS pass; H4 Modal waiver (proxy auth blocks preflight); H5 pass |
+| 14 | CORS redeploy (DO backends) | pass | 2026-05-21: `VECINITA_CORS_ORIGINS` pushed via live spec update |
 
 ## DigitalOcean project
 

@@ -34,6 +34,26 @@ Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
 **Detail:** `docs/service-health-state.md` and per-run reports under `docs/service-health-reports/`.
 
+### Deployment record (consumed from `workflow-state.yaml` §`deployment`)
+
+On invocation, read `deployment` to obtain target URLs and prior tier results **without
+re-discovering or re-running already-passed checks**:
+
+| Field | Use in 15-service-health |
+|-------|--------------------------|
+| `deployment.staging.urls.*` | Base URLs for H1–H5 checks — skip interview for known URLs |
+| `deployment.staging.health_tiers.*` | Pre-fill status; only re-run `pending` or stale tiers |
+| `deployment.staging.drift` | If `true`, recommend H1–H3 revalidation |
+| `deployment.staging.commit_deployed` | Compare to expected SHA for deploy-drift detection |
+| `deployment.local_build.status` | If `green`, skip local integration rerun unless user requests |
+| `deployment.url_discovery.method` | Command to refresh `null` URLs before checks |
+
+**After running checks**, update `deployment.staging.health_tiers.*` with new results so
+that subsequent 11-verify-impl or future 15 invocations see current state.
+
+If `deployment.staging.urls` has `null` entries needed for the requested tier, run
+`deployment.url_discovery.method` first and update `workflow-state.yaml`.
+
 ### Commit-as-you-go
 
 Commit artifacts to an appropriate branch before transitioning to the next stage or

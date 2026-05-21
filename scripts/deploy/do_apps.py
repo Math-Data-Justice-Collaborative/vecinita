@@ -172,15 +172,17 @@ def _apply_env_from_os(spec: dict[str, Any], keys: list[str], scope: str = "RUN_
 
 
 def cmd_sync_secrets(client, name: str) -> int:
-    """Push env vars from shell into app spec via apps.update."""
+    """Push env vars from shell into the live app spec via apps.update.
+
+    Reads the LIVE spec (not the YAML file) to preserve existing encrypted
+    secrets.  Only env vars present in the current shell are overwritten;
+    encrypted ``EV[...]`` values for other keys remain untouched.
+    """
     apps = _iter_apps(client)
     app = _find_app(apps, name)
     if not app:
         raise SystemExit(f"No app named {name!r}")
-    spec_path = next((p for p in DEFAULT_SPECS if _load_spec(p)["name"] == name), None)
-    if spec_path is None:
-        raise SystemExit(f"No YAML spec for {name!r}")
-    spec = _load_spec(spec_path)
+    spec = app.get("spec") or {}
     if name == "vecinita-chat-rag-backend":
         _apply_env_from_os(
             spec,

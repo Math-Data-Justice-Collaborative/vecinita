@@ -36,6 +36,7 @@ applications: [] # Vecinita deployables (when applicable)
 agents:          # subagent status (00-context)
 phase1b_ecosystem: {}
 constraints: {}  # cost, sovereignty, privacy
+deployment: {}   # local build + staging URLs + health tiers — see §Deployment
 issue_log: []
 decisions_log: []
 artifacts: []    # paths produced; append on completion
@@ -47,6 +48,58 @@ git_history:     # commit and branch tracking — see §Git history
   branches: []   # active branches with purpose and base
   commits: []    # recent commit log (append-only)
 ```
+
+## Deployment
+
+Shared record of local build status and staging deployment state. Written by **13-deploy-smoke**,
+consumed by **11-verify-impl**, **15-service-health**, and any future skill that needs the
+deployed URL or tier status without re-discovering it.
+
+```yaml
+deployment:
+  local_build:
+    status: green | red | pending     # T0 e2e suite pass/fail
+    last_verified: "YYYY-MM-DD"
+    commit: <short sha>               # HEAD when T0 was last run
+    branch: main
+    command: "uv run pytest tests/e2e/ -m 'e2e and not live' -v"
+    t0_result: pass | fail
+    t0_journeys_passed: <int>
+  staging:
+    status: deployed | pending | failed | rolled_back
+    last_verified: "YYYY-MM-DD"
+    commit_deployed: <short sha>      # what is actually live
+    commit_head: <short sha>          # repo HEAD at last check
+    drift: true | false               # commit_deployed != commit_head
+    urls:
+      chat_rag_backend: <url> | null
+      internal_write_api: <url> | null
+      chat_rag_frontend: <url> | null
+      admin_frontend: <url> | null
+      modal_data_management: <url> | null
+    health_tiers:
+      h1_liveness: pass | fail | pending
+      h2_db_ready: pass | fail | pending
+      h3_rag_smoke: pass | fail | pending
+      h4_cors_preflight: pass | fail | pending
+      h5_frontend_bundle: pass | fail | pending
+      h6_browser_uj: pass | fail | pending | waived_v1
+    notes: []                          # advisory strings
+  url_discovery:
+    method: "uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend"
+    modal_admin_manual: true           # Modal admin URL must be set manually
+```
+
+### Rules
+
+| Rule | Detail |
+|------|--------|
+| **Writer** | 13-deploy-smoke is the primary writer; 15-service-health updates `health_tiers` after re-checks |
+| **Reader** | 11-verify-impl and 15-service-health read on invocation to avoid re-discovery |
+| **Null URLs** | If a URL is `null` and the tier needs it, run `url_discovery.method` first |
+| **Drift** | Set `drift: true` when `commit_deployed` != `commit_head`; recommend H1–H3 revalidation |
+| **Tier updates** | After any H-tier check, update the corresponding field immediately |
+| **Notes** | Append advisory strings (cold-start, waivers, blockers) — append-only, prune on deploy |
 
 ## Git history
 

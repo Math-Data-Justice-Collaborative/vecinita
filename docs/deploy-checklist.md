@@ -122,10 +122,24 @@
 | Implementation (11) | **Approved** (journeys F1–F18); T3 waiver documented |
 | Deploy strategy (12) | **This checklist** |
 
+## Connectivity Gates (H4/H5) — 2026-05-21
+
+| Gate | Status | Detail |
+|------|--------|--------|
+| H0c CORS policy (local) | PASS | `pytest tests/unit/test_cors_policy.py` |
+| H4 ChatRAG CORS | PASS | Preflight returns 200 + correct `ACAO` |
+| H4 Write API CORS | PASS | Preflight returns 200 + correct `ACAO` |
+| H4 Modal data-mgmt CORS | **WAIVER** | `requires_proxy_auth` blocks OPTIONS at proxy (401); user-approved waiver |
+| H5 Chat frontend bundle | PASS | Bundle contains ChatRAG backend host |
+| H5 Admin frontend bundle | PASS | Bundle contains write API + Modal hosts |
+
+**Modal H4 waiver:** Modal's proxy auth operates before ASGI app; browsers never send auth on OPTIONS preflight per CORS spec. Deferred to post-v1 (app-level auth or DO proxy).
+
 ## Sign-Off
 
 - [x] User approved implementation (11-verify-impl) — journeys + features 2026-05-19
 - [x] Deploy strategy verified (failure modes + rollback acknowledged 2026-05-19)
+- [x] Connectivity gates (H4/H5) — 4/5 pass, 1 waiver (Modal proxy auth) 2026-05-21
 - [ ] Ready to deploy (resolve blocking gaps §Gaps)
 
 ### Operator commands (added 12-verify-deploy)

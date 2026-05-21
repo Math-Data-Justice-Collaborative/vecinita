@@ -35,6 +35,24 @@ record **T3/connectivity pending**; do not mark journey approved without waiver.
 4. `docs/feature-list.md` — the authoritative scope
 5. `docs/user-journeys.md` — UJ-NNN interview prompts (§Interview per journey)
 
+## Deployment state (consumed from `workflow-state.yaml`)
+
+Read `workflow-state.yaml` §`deployment` on invocation to determine what is available
+for verification without re-discovering URLs or re-running builds:
+
+| Field | Use in 11-verify-impl |
+|-------|----------------------|
+| `deployment.local_build.status` | T0 pass/fail — skip re-run if `green` and `commit` matches HEAD |
+| `deployment.local_build.t0_journeys_passed` | Pre-fill journey signoff table |
+| `deployment.staging.urls.*` | Pass to T3 / H4–H5 checks (or flag `null` as blocker) |
+| `deployment.staging.health_tiers.*` | Pre-fill tier status; only re-run `pending` tiers |
+| `deployment.staging.drift` | If `true`, note that deployed commit lags HEAD |
+| `deployment.url_discovery.method` | Command to refresh URLs when `null` |
+
+Do **not** re-discover staging URLs manually. If `deployment.staging.urls` has `null`
+entries needed for UI feature verification, run `deployment.url_discovery.method` and
+update `workflow-state.yaml` before proceeding.
+
 ## Why This Stage Blocks
 
 This is the user's final say before deployment. Every previous stage was about

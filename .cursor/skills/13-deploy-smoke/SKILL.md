@@ -33,9 +33,27 @@ Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
 **Detail:** `docs/deploy-state.md` — sync URL/status with YAML on each deploy step.
 
+### Deployment record (`workflow-state.yaml` §`deployment`)
+
+This stage **writes** the `deployment` section that downstream skills (11, 15) consume:
+
+| On event | Update |
+|----------|--------|
+| Deploy succeeds | `deployment.staging.status: deployed`, `commit_deployed`, URLs |
+| H1–H3 pass | `deployment.staging.health_tiers.h1/h2/h3: pass` |
+| H4–H5 pass | `deployment.staging.health_tiers.h4/h5: pass` |
+| H4–H5 not run | `deployment.staging.health_tiers.h4/h5: pending` + note |
+| Local T0 verified | `deployment.local_build.status: green`, `t0_result`, journey count |
+| URL discovered | `deployment.staging.urls.<app>: <url>` |
+| Commit drift | `deployment.staging.drift: true` when `commit_deployed != commit_head` |
+
+**After each smoke phase**, update `workflow-state.yaml` §`deployment` immediately so
+that 15-service-health and 11-verify-impl can read current tier status without re-running
+checks. Use `deployment.url_discovery.method` to refresh URLs when needed.
+
 ### On invocation — check state
 
-1. Read both state sources.
+1. Read both state sources (`stages.13-deploy-smoke` and `deployment`).
 2. **If `deployed`**: Ask: "Re-deploy, validate existing, or rollback?"
 3. **If `in_progress` or `failed`**: Report what happened. Resume or restart.
 4. **If `pending`**: Start fresh.
