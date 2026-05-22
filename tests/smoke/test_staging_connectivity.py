@@ -89,7 +89,7 @@ def test_h4_modal_data_mgmt_cors_preflight(admin_frontend: str) -> None:
         origin=admin_frontend,
         path="/jobs",
         method="POST",
-        extra_request_headers=["content-type", "modal-key"],
+        extra_request_headers=["content-type", "x-vecinita-proxy-key"],
         timeout=60.0,
     )
 

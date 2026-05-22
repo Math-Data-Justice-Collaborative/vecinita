@@ -18,7 +18,8 @@ from vecinita_shared_schemas.data_management import (
 
 from vecinita_data_management_backend.store import InMemoryJobStore, JobStore, job_record_to_schema
 
-_PROXY_HEADER = "Modal-Key"
+# Modal reserves Modal-Key / Modal-Secret for workspace proxy auth tokens — do not use for app secrets.
+_PROXY_HEADER = "X-Vecinita-Proxy-Key"
 
 
 def _check_proxy_auth(
@@ -38,15 +39,27 @@ def _check_proxy_auth(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
 
+_STAGING_CORS_ORIGINS = ",".join(
+    [
+        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app",
+        "https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app",
+    ]
+)
+
+
 def create_app(
     *,
     store: JobStore | None = None,
     require_proxy_auth: bool = True,
     pipeline_runner: Callable[[UUID], None] | None = None,
+    cors_env_value: str | None = None,
 ) -> FastAPI:
     """Build the Data Management ASGI app with job routes and optional pipeline runner."""
     app = FastAPI(title="Vecinita Data Management", version="0.1.0")
-    configure_cors(app, extra_allow_headers=[_PROXY_HEADER])
+    resolved_cors = cors_env_value
+    if resolved_cors is None:
+        resolved_cors = os.environ.get("VECINITA_CORS_ORIGINS", "").strip() or _STAGING_CORS_ORIGINS
+    configure_cors(app, extra_allow_headers=[_PROXY_HEADER], env_value=resolved_cors)
     job_store = store or InMemoryJobStore()
     runner = pipeline_runner
 

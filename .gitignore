@@ -5,6 +5,7 @@
 !*.env.example
 .deploy-keys.local
 prod.env
+.tmp/
 
 # Python
 __pycache__/

@@ -4,7 +4,8 @@ Deploy from repo root:
   modal deploy infra/modal/data_management_app.py
 
 Requires Modal secret `vecinita-data-management` with:
-VECINITA_MODAL_EMBED_URL, VECINITA_INTERNAL_WRITE_URL, VECINITA_INTERNAL_API_KEY
+VECINITA_MODAL_EMBED_URL, VECINITA_INTERNAL_WRITE_URL, VECINITA_INTERNAL_API_KEY,
+VECINITA_MODAL_PROXY_KEY, VECINITA_CORS_ORIGINS (admin frontend origin)
 """
 
 from __future__ import annotations
@@ -14,7 +15,17 @@ from pathlib import Path
 import modal
 
 APP_NAME = "vecinita-data-management"
-_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _resolve_repo_root() -> Path:
+    """Repo root when deploying from infra/modal; /opt/vecinita when Modal mounts at /root."""
+    here = Path(__file__).resolve()
+    if here.parent.name == "modal" and here.parent.parent.name == "infra":
+        return here.parents[2]
+    return Path("/opt/vecinita")
+
+
+_REPO_ROOT = _resolve_repo_root()
 
 app = modal.App(APP_NAME)
 
@@ -57,7 +68,8 @@ image = (
     secrets=[modal.Secret.from_name("vecinita-data-management")],
     timeout=600,
 )
-@modal.asgi_app(requires_proxy_auth=True)
+# Edge proxy auth blocks browser OPTIONS preflight (CORS); Modal-Key enforced in FastAPI.
+@modal.asgi_app(requires_proxy_auth=False)
 def fastapi_app():
     from uuid import UUID
 

@@ -68,7 +68,7 @@ def dm_client(job_store: InMemoryJobStore, mock_write: _MockWriteClient) -> Test
         pipeline_runner=runner,
     )
     client = TestClient(app)
-    client.headers.update({"Modal-Key": _PROXY_KEY})
+    client.headers.update({"X-Vecinita-Proxy-Key": _PROXY_KEY})
     return client
 
 

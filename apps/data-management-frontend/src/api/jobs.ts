@@ -18,7 +18,7 @@ export async function createJob(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Modal-Key": options.modalKey,
+      "X-Vecinita-Proxy-Key": options.modalKey,
     },
     body: JSON.stringify(body),
   });
@@ -31,7 +31,7 @@ export async function createJob(
 
 export async function getJob(options: JobsClientOptions, jobId: string): Promise<Job> {
   const response = await fetch(`${options.baseUrl}/jobs/${jobId}`, {
-    headers: { "Modal-Key": options.modalKey },
+    headers: { "X-Vecinita-Proxy-Key": options.modalKey },
   });
   if (!response.ok) {
     const detail = await response.text();

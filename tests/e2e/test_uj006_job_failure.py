@@ -45,7 +45,7 @@ def test_ingest_job_failure(monkeypatch: pytest.MonkeyPatch) -> None:
 
     app = create_app(store=store, require_proxy_auth=True, pipeline_runner=runner)
     client = TestClient(app)
-    client.headers["Modal-Key"] = "test-proxy-key"
+    client.headers["X-Vecinita-Proxy-Key"] = "test-proxy-key"
 
     create = client.post("/jobs", json={"urls": ["https://invalid.example/bad"]})
     assert create.status_code == 202
