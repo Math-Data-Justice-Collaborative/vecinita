@@ -21,7 +21,9 @@ from infra.modal.llm_app import (  # noqa: E402
 def test_llm_engine_kwargs_use_half_dtype_on_t4() -> None:
     kwargs = _llm_engine_kwargs(max_model_len=512)
     assert kwargs["dtype"] == "half"
-    assert kwargs["hf_overrides"]["torch_dtype"] == "float16"
+    hf_overrides = kwargs["hf_overrides"]
+    assert isinstance(hf_overrides, dict)
+    assert hf_overrides["torch_dtype"] == "float16"
 
 
 def test_shutdown_vllm_engine_destroys_process_group_when_initialized(
