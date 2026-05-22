@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ChatPanel } from "../components/ChatPanel";
@@ -19,6 +19,7 @@ function sseResponse(body: string): Response {
 describe("ChatPanel", () => {
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
@@ -53,6 +54,42 @@ describe("ChatPanel", () => {
         body: JSON.stringify({ question: "When is the food pantry open?" }),
       }),
     );
+  });
+
+  it("shows warm-up status when the first ask attempt fails transiently", async () => {
+    vi.useFakeTimers();
+
+    const okSse =
+      'data: {"token":"Hi"}\n\n' +
+      'data: {"sources":[]}\n\n' +
+      'data: {"done":true}\n\n';
+
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+        .mockResolvedValueOnce(sseResponse(okSse)),
+    );
+
+    render(<ChatPanel />);
+    fireEvent.change(screen.getByLabelText(/your question/i), {
+      target: { value: "Hello?" },
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /^ask$/i }));
+      await Promise.resolve();
+    });
+
+    expect(screen.getByRole("status")).toHaveTextContent(/starting up/i);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000);
+    });
+
+    expect(screen.getByText(/^Hi$/)).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("keeps history client-side and clears on demand", async () => {

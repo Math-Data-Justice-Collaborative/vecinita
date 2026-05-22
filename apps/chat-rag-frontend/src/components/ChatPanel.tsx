@@ -1,6 +1,13 @@
 import { FormEvent, useState } from "react";
 
-import { isDoneEvent, isSourcesEvent, isTokenEvent, streamAsk } from "../api/ask";
+import {
+  COLD_START_STATUS_MESSAGE,
+  formatAskFailureMessage,
+  isDoneEvent,
+  isSourcesEvent,
+  isTokenEvent,
+  streamAsk,
+} from "../api/ask";
 import type { Source } from "../api/types";
 import { requireChatApiConfig } from "../config";
 import { useChatHistory } from "../hooks/useChatHistory";
@@ -9,6 +16,7 @@ import { SourceList } from "./SourceList";
 export function ChatPanel() {
   const [question, setQuestion] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const {
     messages,
@@ -27,6 +35,7 @@ export function ChatPanel() {
     }
 
     setError(null);
+    setStatusMessage(null);
     setLoading(true);
     appendUserMessage(trimmed);
     setQuestion("");
@@ -36,7 +45,12 @@ export function ChatPanel() {
       const { baseUrl } = requireChatApiConfig();
       let sources: Source[] = [];
 
-      for await (const chunk of streamAsk(trimmed, baseUrl)) {
+      for await (const chunk of streamAsk(trimmed, baseUrl, {
+        onRetry: () => {
+          setStatusMessage(COLD_START_STATUS_MESSAGE);
+        },
+      })) {
+        setStatusMessage(null);
         if (isTokenEvent(chunk)) {
           appendAssistantToken(assistantId, chunk.token);
         } else if (isSourcesEvent(chunk)) {
@@ -48,10 +62,11 @@ export function ChatPanel() {
 
       setAssistantSources(assistantId, sources);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Request failed";
+      const message = formatAskFailureMessage(err);
       setError(message);
       appendAssistantToken(assistantId, message);
     } finally {
+      setStatusMessage(null);
       setLoading(false);
     }
   }
@@ -71,6 +86,12 @@ export function ChatPanel() {
           ))
         )}
       </div>
+
+      {statusMessage ? (
+        <p className="status-hint" role="status">
+          {statusMessage}
+        </p>
+      ) : null}
 
       {error ? (
         <p className="error" role="alert">
