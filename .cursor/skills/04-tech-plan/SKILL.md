@@ -12,6 +12,7 @@ description: >
 Interview the user to produce technical implementation documents: execution plan, dependency
 inventory, ADRs, deployment plan, and data management plan.
 
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 
 ## Connectivity (stage 04)

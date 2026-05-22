@@ -12,6 +12,7 @@ description: >
 Execute the execution plan: implement tasks in TDD order, commit atomically, create PRs
 at milestone and phase boundaries, and orchestrate parallel agents for independent work.
 
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 
 ## Connectivity (stage 07)

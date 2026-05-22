@@ -1,0 +1,28 @@
+---
+description: >
+  Modal @modal.method wrappers are not plain callables inside LlmService.
+  Use private helpers or .local()/.remote() (BUG-2026-05-21 stream_tokens).
+globs:
+  - infra/modal/llm_app.py
+  - infra/modal/**/*.py
+  - tests/bugs/test_bug_2026_05_21_stream_tokens_function_not_callable.py
+---
+
+# Modal LLM intra-class method calls
+
+In `LlmService` (and similar `@modal.cls` services):
+
+1. **Never call `self.<name>(...)`** when `<name>` is decorated with `@modal.method` —
+   it is a Modal `Function`, not a Python callable (`TypeError: 'Function' object is not callable`).
+2. **Shared GPU logic** belongs in a **private undecorated helper** (e.g. `_generate_text()`)
+   used by both `complete` and `stream_tokens`.
+3. **Cross-method Modal calls** use `.local()`, `.remote()`, or `.remote_gen()` explicitly.
+4. **Container teardown**: GPU classes that init vLLM/NCCL should use `@modal.exit()` to
+   destroy process groups (see BUG-2026-05-20).
+5. Keep AST regression in `tests/bugs/test_bug_2026_05_21_stream_tokens_function_not_callable.py`.
+
+Before merging LLM changes, run:
+
+```bash
+pytest tests/bugs/test_bug_2026_05_21_stream_tokens_function_not_callable.py -v
+```

@@ -1,0 +1,25 @@
+---
+description: >
+  ChatRAG + Modal LLM: instruct chat template, retrieval score threshold,
+  repetition_penalty — prevents boilerplate loops (BUG-2026-05-21 repetitive answer).
+globs:
+  - apps/chat-rag-backend/**
+  - packages/llm-client/**
+  - infra/modal/llm_app.py
+  - tests/bugs/test_bug_2026_05_21_repetitive_assistant_answer.py
+---
+
+# ChatRAG and LLM output quality
+
+When editing chat generation or retrieval:
+
+1. **Instruct models** (e.g. Qwen2.5-Instruct): build prompts with the model's **chat template**,
+   not raw user text completion — avoids generic assistant loops.
+2. **Retrieval**: set `score_threshold` from `VECINITA_MIN_RETRIEVAL_SCORE` (or config-spec default);
+   do not return near-zero fixture chunks to the LLM.
+3. **vLLM sampling**: use `repetition_penalty` > 1.0 for streaming/non-stream paths in `_generate_text`.
+4. **Cap tokens** for chat via `VECINITA_CHAT_MAX_TOKENS` — avoid huge `max_tokens` defaults on small models.
+5. Extend `tests/bugs/test_bug_2026_05_21_repetitive_assistant_answer.py` when changing these defaults.
+
+Staging smoke: after deploy, H3 ask should not repeat the same sentence dozens of times;
+sources should not list integration fixtures below the min score.

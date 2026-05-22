@@ -10,6 +10,7 @@ description: >
 
 Verify that user journeys described in product requirements actually work end-to-end.
 
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 
 ## Connectivity (stage 10)

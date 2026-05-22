@@ -18,12 +18,18 @@ EmbedFn = Callable[[str], list[float]]
 
 
 def _build_prompt(question: str, chunks: list[RetrievedChunk]) -> str:
+    """Qwen2.5-Instruct chat format — plain completion prompts loop on generic filler."""
     context = "\n\n".join(chunk.text for chunk in chunks)
     return (
-        "Answer using only the context below. Be concise.\n\n"
+        "<|im_start|>system\n"
+        "Answer community questions using only the context below. Be concise. "
+        "If the context does not answer the question, say you do not have that information.\n"
+        "\n"
+        f"<|im_start|>user\n"
         f"Context:\n{context}\n\n"
-        f"Question: {question}\n\n"
-        "Answer:"
+        f"Question: {question}\n"
+        "\n"
+        "<|im_start|>assistant\n"
     )
 
 
@@ -50,9 +56,11 @@ class ChatRagService:
         *,
         retriever: CorpusPgvectorRetriever,
         llm_client: LlmClient,
+        chat_max_tokens: int = 256,
     ) -> None:
         self._retriever = retriever
         self._llm = llm_client
+        self._chat_max_tokens = chat_max_tokens
 
     @classmethod
     def from_settings(cls, settings: ChatRagSettings) -> ChatRagService:
@@ -69,15 +77,22 @@ class ChatRagService:
             embed_fn=embed_fn,
             database_url=settings.database_url,
             top_k=settings.top_k,
+            score_threshold=settings.min_retrieval_score,
         )
-        return cls(retriever=retriever, llm_client=llm_client)
+        return cls(
+            retriever=retriever,
+            llm_client=llm_client,
+            chat_max_tokens=settings.chat_max_tokens,
+        )
 
     def ask(self, question: str) -> AskResponse:
         chunks = self._retriever.retrieve_chunks(question)
         if not chunks:
             return _to_ask_response(answer_without_context(question))
         prompt = _build_prompt(question, chunks)
-        answer_text = self._llm.generate(prompt)
+        answer_text = self._llm.generate(
+            prompt, max_tokens=self._chat_max_tokens
+        )
         result = answer_from_chunks(question, chunks, answer_text=answer_text)
         return _to_ask_response(result)
 
@@ -88,7 +103,9 @@ class ChatRagService:
             yield result.answer
             return
         prompt = _build_prompt(question, chunks)
-        yield from self._llm.generate_stream(prompt)
+        yield from self._llm.generate_stream(
+            prompt, max_tokens=self._chat_max_tokens
+        )
 
     def retrieve_sources(self, question: str) -> list[Source]:
         chunks = self._retriever.retrieve_chunks(question)

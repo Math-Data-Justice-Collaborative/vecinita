@@ -57,6 +57,8 @@ Every bug report must contain, at minimum:
 4. **Repro test** — path, assertion, red/green dates, TDD iteration log
 5. **Fix** — files and approach (fill when patching)
 6. **Interview record** — AskQuestion answers
+7. **Prevention & countermeasures** — Phase 5.0 answers (detection, automated/process guards, follow-ups)
+8. **Cursor rule** — path, draft, declined, or deferred (Phase 5.1 in [14-hotfix](../14-hotfix/SKILL.md))
 
 ## Workflow (TDD + interviews)
 
@@ -84,6 +86,8 @@ Failure detected
 └──────┬──────┘         (max 3 fix cycles — then escalate)
        ▼
  Verify (layered per 14-hotfix when deploying)
+       ▼
+ Prevention interview + Cursor rule ask (14-hotfix Phase 5)
 ```
 
 | Gate | Blocking? | AskQuestion `id` |
@@ -92,8 +96,12 @@ Failure detected
 | Repro test red + user match | Yes | `bug_repro_matches` |
 | Root cause agreed | Yes | `bug_root_cause` |
 | Fix verified | Yes | `bug_verified` |
+| Prevention & countermeasures | Yes (14-hotfix close) | `prevention_*` batches, `prevention_plan_confirm` |
+| Cursor rule offer | Yes (ask always) | `prevention_cursor_rule`, optional `cursor_rule_approve_draft` |
 
 **No fix before confirmed repro** unless user waives via AskQuestion (`bug_repro_waiver`, `[Decision]`).
+
+**No `resolved` before prevention interview** unless waived (`prevention_interview_waiver`) — see 14-hotfix Phase 5.
 
 ## Interactive questions (required)
 

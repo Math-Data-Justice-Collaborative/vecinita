@@ -12,6 +12,7 @@ description: >
 Collect all verification results and walk the user through a final check that the
 implementation matches their requirements.
 
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 
 ## Connectivity (stage 11)

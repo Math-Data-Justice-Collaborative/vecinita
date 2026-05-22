@@ -13,6 +13,7 @@ Create Cursor tooling (hooks, rules, skills, agents) that prevent drift from the
 product plan. These guardrails enforce scope boundaries and plan adherence during all
 subsequent stages.
 
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 
 ## Connectivity (stage 03)

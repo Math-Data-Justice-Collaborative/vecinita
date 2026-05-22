@@ -6,7 +6,8 @@ Every pipeline skill (00–17), orchestrator ([pipeline](pipeline/SKILL.md)), an
 (build-executor, gather-context, doc-planner, etc.) **reads and updates this file**. Do not
 create parallel pipeline state files unless noted below as *detail-only* supplements.
 
-Orchestration policy: [considerations.md](considerations.md) §11.
+Stage conventions: [pipeline-preamble.md](pipeline-preamble.md). Orchestration policy:
+[considerations.md](considerations.md) §11.
 
 **Connectivity:** All stages 00–15 apply [connectivity-gates.md](connectivity-gates.md); record
 connectivity artifacts in `artifacts[]` when produced (`test_cors_policy.py`, `verify_connectivity.sh`, etc.).
@@ -232,6 +233,7 @@ Use `started_at` / `completed_at` (ISO date `YYYY-MM-DD`) when transitioning.
 | `bug-investigation` | (via `14-hotfix` or `issue_log`) | repro test in `tests/bugs/` |
 | `15-service-health` | `stages.15-service-health` | `docs/service-health-state.md` |
 | `16-evolve` | `evolve_cycles[]` | per `16-evolve/reference.md` |
+| `18-add-feature` | `evolve_cycles[]` (`cycle_type: feature`) | per `18-add-feature/reference.md` |
 | `17-retrospective` | `retrospective_cycles[]` | per `17-retrospective/reference.md` |
 | `audit-licenses` | `stages.audit-licenses` | flags in `docs/` or stage `report` |
 | `clone-repos` | `stages.clone-repos` | — |

@@ -23,6 +23,8 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | Variable | Type | Default | Required | Description |
 |----------|------|---------|----------|-------------|
 | `VECINITA_TOP_K` | int | `5` | No | Retrieval chunk count |
+| `VECINITA_MIN_RETRIEVAL_SCORE` | float | `0.2` | No | Minimum pgvector similarity (`1 - distance`); chunks below are dropped |
+| `VECINITA_CHAT_MAX_TOKENS` | int | `256` | No | Max tokens sent to Modal LLM per chat answer |
 | `VECINITA_MODAL_EMBED_URL` | string | — | Yes (prod) | Modal FastEmbed base URL |
 | `VECINITA_MODAL_LLM_URL` | string | — | Yes (prod) | Modal LLM base URL |
 | `VECINITA_MODAL_TOKEN_ID` | string | — | Yes (DO→Modal) | Modal credential (DO secret) |
@@ -67,6 +69,8 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | Rule | Enforcement |
 |------|-------------|
 | `VECINITA_TOP_K` ≥ 1 and ≤ 50 | Config module at startup |
+| `VECINITA_MIN_RETRIEVAL_SCORE` ≥ 0 and < 1 | Config module at startup |
+| `VECINITA_CHAT_MAX_TOKENS` ≥ 32 and ≤ 2048 | Config module at startup |
 | `VECINITA_CHUNK_SIZE_TOKENS` ≥ 64 | Ingest validation |
 | Reject unknown `VECINITA_*` in strict mode | Optional dev strictness |
 | No identity fields in public API bodies | OpenAPI + Pydantic models |

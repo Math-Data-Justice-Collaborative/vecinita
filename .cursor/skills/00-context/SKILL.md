@@ -15,6 +15,7 @@ description: >
 Analyze existing artifacts (codebase, paper, docs, prior work) and produce a structured
 context brief for downstream skills.
 
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 
 ## Connectivity (stage 00)

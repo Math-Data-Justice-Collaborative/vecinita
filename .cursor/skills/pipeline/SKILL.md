@@ -8,10 +8,10 @@ description: >
   stages 00–15. Use when the user wants to build Vecinita (RAG + data management),
   run the full pipeline, go end-to-end, deploy from scratch, or asks "build this".
   Post-deployment surgical edits use 14-hotfix; production health checks use
-  15-service-health without re-running the pipeline. Structured feature additions and scope
-  changes on an existing deployed app use 16-evolve (re-runs 00-15 selectively in delta mode).
-  Process improvement and lessons learned use 17-retrospective (reviews conversation logs
-  and skills 00-16 with the user — does not change product code by default).
+  15-service-health without re-running the pipeline. Net-new product features use
+  18-add-feature (interactive intake, delta specs, selective 00–15). Broader scope changes use
+  16-evolve (same delta engine). Process improvement uses 17-retrospective (reviews logs and
+  skills 00–17 — does not change product code by default).
 ---
 
 # Pipeline
@@ -23,6 +23,8 @@ Build a deployable service from product requirements through deployment, end-to-
 Take a project from initial concept through deployed, verified service. Every step —
 from understanding requirements to deploying code — is structured, audited, and
 user-approved. The user is the source of truth at every stage.
+
+**Stage conventions (00–18):** [pipeline-preamble.md](../pipeline-preamble.md).
 
 Shared policy (feedback loops, changelogs, performance testing, spec vs code root cause):
 [considerations.md](../considerations.md).
@@ -65,9 +67,10 @@ includes a §Connectivity section; phase gates below enforce the cumulative chec
 ╚════════════════════════════════════════════════════════════╝
           │ Structured change / new feature
           ▼
-╔═══ PHASE F: EVOLVE (on-demand, repeatable) ══════════════════╗
-║  16-evolve — interview → delta specs → verify → build →     ║
-║              verify → deploy (selective 00-15 re-run)        ║
+╔═══ PHASE F: FEATURE & EVOLVE (on-demand, repeatable) ════════╗
+║  18-add-feature — new Fn: interview → specs → tooling →     ║
+║                   build → verify → deploy (00–15 delta)     ║
+║  16-evolve — scope/API/arch changes (same engine, broader)   ║
 ╚════════════════════════════════════════════════════════════╝
           │ Lessons learned / process tuning
           ▼
@@ -81,6 +84,8 @@ includes a §Connectivity section; phase gates below enforce the cumulative chec
 
 - **Which skill should I use?** → [docs/skill-routing.md](../../docs/skill-routing.md)
 - **Post-deploy testing tiers** → [ADR-004](../../docs/adr/ADR-004.md)
+- **Add a new product feature** → [18-add-feature](../18-add-feature/SKILL.md)
+- **Broader evolve / scope change** → [16-evolve](../16-evolve/SKILL.md)
 - **Process retrospective** → [17-retrospective](../17-retrospective/SKILL.md)
 
 ## Inputs
@@ -308,19 +313,28 @@ or evidence before a hotfix.
 - Test-driven failures; 14-hotfix handoff with repro test
 - Records in `docs/service-health-reports/` and `docs/service-health-state.md`
 
+### Stage 18 — Add Feature (On-Demand, Repeatable)
+
+Preferred entry when the user wants a **new product feature** (new Fn in `feature-list.md`).
+Uses the same evolve-cycle engine as 16-evolve with feature-specific intake and mandatory
+phase checkpoints (specs → plan tooling → tech tooling → build → verify → deploy smoke).
+
+**Check**: User says "add a feature", "new capability", or describes net-new functionality.
+- Invoke [18-add-feature](../18-add-feature/SKILL.md)
+- Extended product interview → allocate Fn → delta specs → 03/06 tooling if needed → 07–13
+- Interactive progress digests after each phase; 11-verify-impl signs off the Fn
+- Does not replace 14-hotfix (bugs) or greenfield [pipeline](SKILL.md)
+
 ### Stage 16 — Evolve (On-Demand, Repeatable)
 
-Not part of the linear greenfield pipeline. Use after Phase D (or whenever specs + code exist)
-when the user wants a **structured change** — new feature, scope update, API/config change —
-not a surgical hotfix.
+Broader **structured changes** — API-only deltas, docs corrections, architectural updates, or
+scope changes that may not add a new Fn. New features can use 16-evolve but **18-add-feature**
+is the recommended path.
 
-**Check**: User wants to add capability, change product scope, or run a full spec→plan→build→
-verify→deploy loop for an existing service.
+**Check**: Scope/API/arch change, or user explicitly invokes evolve (not "add feature").
 - Invoke [16-evolve](../16-evolve/SKILL.md)
-- Interviews user, builds impact/routing plan, re-invokes 00–15 **selectively** in delta mode
-- ADR + cross-doc consistency required; AskQuestion for all blocking ambiguity
+- Impact/routing plan; re-invokes 00–15 **selectively** in delta mode
 - Each invocation is an **evolve cycle** (`workflow-state.yaml` §evolve_cycles)
-- Does not replace 14-hotfix (bugs) or full pipeline restart (greenfield)
 
 ### Stage 17 — Retrospective (On-Demand, Repeatable)
 
@@ -331,10 +345,10 @@ Not part of the linear greenfield pipeline. Use after any meaningful stretch of 
 **Check**: User asks for retrospective, lessons learned, pipeline tuning, or skill review.
 - Invoke [17-retrospective](../17-retrospective/SKILL.md)
 - Mines agent conversation logs (with consent), `workflow-state.yaml`, and `docs/`
-- Compares evidence to skills **00–16**; interviews user via AskQuestion (went well / improve)
+- Compares evidence to skills **00–18**; interviews user via AskQuestion (went well / improve)
 - Brainstorms solutions; ends with AskQuestion-driven skill patches (Phase 6 workshop)
 - Routes remaining actions to backlog, ADR, or commit/PR if user requests
-- Does **not** replace 14-hotfix, 16-evolve, or re-running build phases by default
+- Does **not** replace 14-hotfix, 16-evolve, 18-add-feature, or re-running build phases by default
 
 ## Transition Checks
 
@@ -389,7 +403,8 @@ Every stage boundary is safe to stop. Natural pause points:
 - **After 13-deploy-smoke** — Done (deploy complete)
 - **14-hotfix** — On-demand surgical patches
 - **15-service-health** — On-demand Modal ops investigation
-- **16-evolve** — On-demand structured feature/scope changes (after initial build)
+- **18-add-feature** — On-demand new Fn (after initial build)
+- **16-evolve** — On-demand broader scope/API/arch changes
 - **17-retrospective** — On-demand process improvement (any time after work has run)
 
 ## Summary

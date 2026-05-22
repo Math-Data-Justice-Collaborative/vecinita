@@ -1,6 +1,6 @@
 # BUG-2026-05-22 — Admin DELETE document Failed to fetch (CORS)
 
-> Status: **verifying**  
+> Status: **resolved**  
 > Feature: **F12** (admin corpus / internal write API)  
 > Component: `packages/shared-schemas/vecinita_shared_schemas/cors.py`, `apps/internal-write-api`
 
@@ -97,7 +97,8 @@ Admin frontend `DELETE /internal/v1/documents/{id}` triggers a CORS preflight; S
 | L1 | Bug repro + `test_cors_policy.py` + full pytest |
 | L2 | User DELETE in admin UI |
 | L3 | Live OPTIONS DELETE preflight on staging write URL |
-| L4 | Post-deploy admin DELETE + 15-service-health |
+| L3 | Live DELETE preflight — **pass** 2026-05-22, commit `5c81e2d`, deployment `cf535ade` |
+| L4 | User confirmed admin DELETE works in production — **pass** 2026-05-22 |
 
 ## TDD iteration log
 
@@ -105,3 +106,32 @@ Admin frontend `DELETE /internal/v1/documents/{id}` triggers a CORS preflight; S
 |-----|--------|--------|
 | 1 | DELETE preflight repro test | red — 400 Disallowed CORS method |
 | 2 | Add DELETE to `configure_cors` allow_methods | green — bug + H0c tests pass |
+
+## Interview record (Phase 5)
+
+| Question | Answer |
+|----------|--------|
+| Recurrence risk | Very likely on new HTTP verbs |
+| Detect earlier | Multiple: H0c CI, H4 deploy, PR checklist |
+| Automated | connectivity-gates doc (+ tests already shipped) |
+| Process | deploy-checklist + connectivity-gates |
+| When / who | Now — agent |
+
+## Prevention & countermeasures
+
+| Action | Status |
+|--------|--------|
+| `connectivity-gates.md` §CORS HTTP methods | **done** |
+| `deploy-checklist.md` H4 DELETE preflight row | **done** |
+| Cursor rule `.cursor/rules/cors-browser-methods.mdc` | **done** |
+| PR checklist row (CORS verbs = route verbs) | follow-up in reviews |
+
+## Cursor rule
+
+- **Path:** `.cursor/rules/cors-browser-methods.mdc`
+- **Scope:** `configure_cors`, browser-facing `app.py`, CORS tests
+- **Declined:** no
+
+## Follow-ups
+
+- When adding PUT/PATCH routes, extend H0c/H4 the same way as DELETE.

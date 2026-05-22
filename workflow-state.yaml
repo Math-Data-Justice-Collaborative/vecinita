@@ -173,22 +173,23 @@ stages:
     note: "Staging hybrid deploy; H1-H3 smoke passed; H4/H5 connectivity validated 2026-05-21 (Modal H4 waiver)"
   14-hotfix:
     status: completed
-    completed_at: "2026-05-20"
-    bug_report: docs/bug-reports/BUG-2026-05-20-vllm-shutdown-warnings.md
-    summary: "vLLM fp16 kwargs + NCCL shutdown on Modal exit"
+    completed_at: "2026-05-21"
+    bug_report: docs/bug-reports/BUG-2026-05-21-stream-tokens-function-not-callable.md
+    summary: "stream_tokens Modal Function not callable — _generate_text helper"
   15-service-health:
     status: completed
-    started_at: "2026-05-20"
-    completed_at: "2026-05-20"
+    started_at: "2026-05-21"
+    completed_at: "2026-05-21"
     environment: staging
-    tiers: [H1, H2, H3]
+    tiers: [H0, H1, H2, H3, H4, H5, H6]
     infra: pass
     e2e: pass
     overall: pass
-    report: docs/service-health-reports/2026-05-20-staging-post-deploy.md
+    report: docs/service-health-reports/2026-05-21-staging-routine-full.md
     advisories:
-      - llm_cold_start_may_exceed_60s
-      - data_mgmt_health_requires_proxy_auth
+      - llm_cold_start_do_504_until_warm
+      - modal_h4_cors_waived_proxy_auth
+      - deploy_drift_c4bc847_vs_4d2f665
   17-retrospective:
     status: pending
   gather-context:
@@ -227,7 +228,7 @@ deployment:
     status: deployed
     last_verified: "2026-05-21"
     commit_deployed: c4bc847
-    commit_head: 36d3d64
+    commit_head: 4d2f665
     drift: true
     urls:
       chat_rag_backend: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app

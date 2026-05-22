@@ -7,7 +7,8 @@ description: >
   verification, and deploy stages with delta spec updates, cross-document consistency checks,
   and ADR logging. Use when adding features to an existing app, changing product scope,
   updating specs after deployment, or running a structured change request — not for surgical
-  bug fixes (14-hotfix) or greenfield builds (pipeline).
+  bug fixes (14-hotfix) or greenfield builds (pipeline). Net-new product features with
+  full interactive checkpoints prefer 18-add-feature (orchestrates this skill's routing).
 ---
 
 # 16 — Evolve
@@ -15,6 +16,7 @@ description: >
 Take an **existing** CogniChem service from change request through updated specs, verified
 plans, implementation, and redeploy — reusing stages **00–15** in **delta mode**.
 
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 
 **Connectivity:** Any evolve cycle that adds or changes **browser-facing** surfaces must re-run
@@ -28,7 +30,8 @@ uncertain, or contradictory finding uses **AskQuestion** — never guess.
 
 | Situation | Use |
 |-----------|-----|
-| Add a new feature (F1–F9) to a deployed app | **16-evolve** |
+| Add a new product feature (new Fn) | [18-add-feature](../18-add-feature/SKILL.md) |
+| Scope/API/arch change (may or may not add Fn) | **16-evolve** |
 | Change scope, API, config, or acceptance criteria | **16-evolve** |
 | Architectural or dependency change affecting multiple docs | **16-evolve** |
 | Bug fix, regression, small patch on production | [14-hotfix](../14-hotfix/SKILL.md) |

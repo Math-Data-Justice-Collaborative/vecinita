@@ -80,3 +80,29 @@ User: fix locally + Modal ephemeral as needed, then deploy.
 |-----|--------|--------|
 | 1 | Add repro test for shutdown helper | green (3/3) |
 | 2 | `modal run LlmService.complete` post-deploy | no bf16/NCCL lines in log grep |
+
+## Interview record (Phase 5)
+
+| Question | Answer |
+|----------|--------|
+| Grouped with BUG-2026-05-21 stream_tokens (Modal LLM) | same Phase 5 session |
+| Recurrence risk | Very likely on LLM lifecycle changes |
+| Detect earlier | AST / bug repro tests |
+| Cursor rule | Shared `modal-llm-method-calls.mdc` (+ exit handler in fix) |
+
+## Prevention & countermeasures
+
+| Action | Status |
+|--------|--------|
+| `@modal.exit()` + `_shutdown_vllm_engine()` | **done** (fix) |
+| `test_bug_2026_05_20_vllm_shutdown_warnings.py` | **done** |
+| Cursor rule (lifecycle section in `modal-llm-method-calls.mdc`) | **done** |
+
+## Cursor rule
+
+- **Path:** `.cursor/rules/modal-llm-method-calls.mdc` (§ Container teardown)
+- **Declined:** no
+
+## Follow-ups
+
+- None — log hygiene only; no user-facing regression.

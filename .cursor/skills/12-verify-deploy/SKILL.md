@@ -12,6 +12,7 @@ description: >
 Pre-deploy gate verifying that the deployment strategy planned in Stage 04 still holds
 after implementation, and all deployment prerequisites are met.
 
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 
 ## Connectivity (stage 12)

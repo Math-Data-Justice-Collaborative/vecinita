@@ -11,6 +11,7 @@ description: >
 Create dev tooling hooks, rules, and configuration that enforce technical standards during
 implementation.
 
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 
 ## Connectivity (stage 06)

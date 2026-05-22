@@ -102,6 +102,25 @@ https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app,https://vecinita-adm
 | Internal write API | Admin frontend origin |
 | Modal data-mgmt | Admin origin + `Modal-Key` header |
 
+### CORS HTTP methods (browser verbs)
+
+`configure_cors()` `allow_methods` must include **every HTTP verb** exposed on browser-facing
+routes — not only GET/POST. Browsers send OPTIONS preflight for DELETE, PUT, PATCH, etc.
+
+| App | Route verbs (v1) | Required in `allow_methods` |
+|-----|------------------|----------------------------|
+| ChatRAG backend | GET, POST (stream) | GET, POST, OPTIONS |
+| Internal write API | GET, POST, DELETE | GET, POST, DELETE, OPTIONS |
+| Modal data-mgmt | GET, POST (jobs) | GET, POST, OPTIONS |
+
+**H0c:** For each verb, OPTIONS with `Access-Control-Request-Method: <VERB>` must return 200 and
+list `<VERB>` in `access-control-allow-methods` (`tests/unit/test_cors_policy.py`).
+
+**H4 (live):** Mirror H0c on staging URLs; internal-write-api must include DELETE preflight on
+`/internal/v1/documents/{id}` (`test_h4_write_api_cors_preflight_delete_document`).
+
+Source: BUG-2026-05-22 — admin DELETE Failed to fetch when DELETE was omitted from CORS.
+
 ## Commands
 
 ```bash
@@ -125,7 +144,8 @@ uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| UI “Failed to fetch” | Missing CORS | `VECINITA_CORS_ORIGINS` + redeploy APIs |
+| UI “Failed to fetch” | Missing CORS origin | `VECINITA_CORS_ORIGINS` + redeploy APIs |
+| UI “Failed to fetch”, origin OK, DELETE/PUT fails | Missing verb in `allow_methods` | Add verb to `cors.py` + H0c/H4 OPTIONS test (§CORS HTTP methods) |
 | “Set VITE_VECINITA_*” in UI | Empty build secrets | DO BUILD_TIME secrets + redeploy **frontend** |
 | Bundle has `localhost` | Wrong `VITE_*` at build | `sync-secrets` + `force_build` |
 | H3 pass, H4 fail | Backend-only validation | `verify_connectivity.sh` |

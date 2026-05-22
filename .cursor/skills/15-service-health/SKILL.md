@@ -17,6 +17,7 @@ and alignment with `docs/deployment-integration.md` — without assuming a hotfi
 **Code failures:** [bug-investigation](../bug-investigation/SKILL.md) → `docs/bug-reports/BUG-*.md`
 + `tests/bugs/test_bug_*.py` before 14-hotfix.
 
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
 **Cross-cutting:** [considerations.md](../considerations.md), [deployment-catalog.md](../deployment-catalog.md), [connectivity-gates.md](../connectivity-gates.md).
 
 ## Connectivity (stage 15)

@@ -12,6 +12,7 @@ description: >
 Break technical plan documents into provable statements, risk-classify, and verify
 consistency with the approved product plan.
 
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 
 ## Connectivity (stage 05)

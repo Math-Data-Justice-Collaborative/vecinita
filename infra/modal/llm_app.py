@@ -113,19 +113,33 @@ class LlmService:
         _shutdown_vllm_engine(getattr(self, "_llm", None))
         self._llm = None
 
-    @modal.method()
-    def complete(self, prompt: str, *, max_tokens: int = 512, temperature: float = 0.2) -> str:
+    def _generate_text(
+        self, prompt: str, *, max_tokens: int = 512, temperature: float = 0.2
+    ) -> str:
+        """Shared vLLM generate path — do not call self.complete() from other methods."""
         from vllm import SamplingParams
 
-        params = SamplingParams(max_tokens=max_tokens, temperature=temperature)
+        params = SamplingParams(
+            max_tokens=max_tokens,
+            temperature=temperature,
+            repetition_penalty=1.15,
+        )
         outputs = self._llm.generate([prompt], params)
         return outputs[0].outputs[0].text
+
+    @modal.method()
+    def complete(self, prompt: str, *, max_tokens: int = 512, temperature: float = 0.2) -> str:
+        return self._generate_text(
+            prompt, max_tokens=max_tokens, temperature=temperature
+        )
 
     @modal.method()
     def stream_tokens(
         self, prompt: str, *, max_tokens: int = 512, temperature: float = 0.2
     ):
-        text = self.complete(prompt, max_tokens=max_tokens, temperature=temperature)
+        text = self._generate_text(
+            prompt, max_tokens=max_tokens, temperature=temperature
+        )
         for piece in text.split():
             yield piece + " "
 

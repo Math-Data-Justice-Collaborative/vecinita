@@ -1,5 +1,9 @@
 # Cross-cutting considerations (`.cursor/skills`)
 
+**Numbered stages (00–18):** Shared structure, gates, state, and AskQuestion rules are in
+[pipeline-preamble.md](pipeline-preamble.md). This file holds policy detail referenced from
+the preamble and from each stage skill.
+
 Use this file from any skill here so behavior stays aligned without copying long prose into every `SKILL.md`.
 
 ## 1. Root cause: spec vs code vs infra

@@ -129,6 +129,7 @@
 | H0c CORS policy (local) | PASS | `pytest tests/unit/test_cors_policy.py` |
 | H4 ChatRAG CORS | PASS | Preflight returns 200 + correct `ACAO` |
 | H4 Write API CORS | PASS | Preflight returns 200 + correct `ACAO` |
+| H4 Write API DELETE preflight | PASS | OPTIONS with `Access-Control-Request-Method: DELETE` → 200, `DELETE` in allow-methods (BUG-2026-05-22) |
 | H4 Modal data-mgmt CORS | **WAIVER** | `requires_proxy_auth` blocks OPTIONS at proxy (401); user-approved waiver |
 | H5 Chat frontend bundle | PASS | Bundle contains ChatRAG backend host |
 | H5 Admin frontend bundle | PASS | Bundle contains write API + Modal hosts |

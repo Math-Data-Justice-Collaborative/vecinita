@@ -17,6 +17,7 @@ Meta-improvement stage: mine **conversation evidence**, compare it to **skills 0
 **workflow artifacts**, then run a structured **user interview** to learn and plan better
 process — without re-running the pipeline.
 
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 
 When reviewing pipeline gaps, ask whether **connectivity tiers** (H0c/H0i/H4/H5) were skipped or
@@ -36,7 +37,8 @@ AskQuestion approval (or defer/waive). Backlog-only items never auto-edit.
 | Pipeline felt slow, confusing, or repetitive | **17-retrospective** |
 | Before changing skills 00–16 org-wide | **17-retrospective** (evidence first) |
 | Production bug or patch | [14-hotfix](../14-hotfix/SKILL.md) |
-| New feature or scope change | [16-evolve](../16-evolve/SKILL.md) |
+| New product feature | [18-add-feature](../18-add-feature/SKILL.md) |
+| Scope/API change (no new Fn) | [16-evolve](../16-evolve/SKILL.md) |
 | Modal health investigation only | [15-service-health](../15-service-health/SKILL.md) |
 
 ## Prerequisites

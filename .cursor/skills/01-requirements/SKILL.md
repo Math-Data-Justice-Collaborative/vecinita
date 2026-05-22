@@ -13,6 +13,7 @@ description: >
 Interview the user to fill spec document templates. Template-driven: for each approved
 template section, ask targeted questions to fill it.
 
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 
 ## Connectivity (stage 01)

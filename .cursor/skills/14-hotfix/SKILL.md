@@ -4,8 +4,9 @@ description: >
   Surgical post-deployment edits: bug fixes, patches, small behavioral changes, and
   dependency updates applied to a deployed codebase without re-running the pipeline.
   Test-driven investigation: one bug = docs/bug-reports/BUG-*.md (logs + investigation MD),
-  tests/bugs/test_bug_*.py (red then green), one fix. AskQuestion interviews at each gate.
-  See bug-investigation skill. Interview, verification plan, spec checks, deploy only with
+  tests/bugs/test_bug_*.py (red then green), one fix. AskQuestion interviews at each gate,
+  including Phase 5 prevention/countermeasures and optional Cursor rule creation. See
+  bug-investigation skill. Interview, verification plan, spec checks, deploy only with
   user approval. Never re-runs entire phases.
 ---
 
@@ -18,6 +19,7 @@ re-running the pipeline.
 **Bug artifacts (required):** [bug-investigation](../bug-investigation/SKILL.md) —
 `docs/bug-reports/BUG-*.md`, `tests/bugs/test_bug_*.py`, one fix per bug.
 
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 
 ## Connectivity (stage 14)
@@ -63,6 +65,8 @@ User failure report
 └──────┬───────┘         (if still RED after fix → iterate, max 3)
        ▼
  Layered verification (2b) + deploy (4) per verification plan
+       ▼
+ Phase 5 prevention interview (countermeasures) + optional Cursor rule
 ```
 
 | Rule | Detail |
@@ -93,6 +97,8 @@ Reference: [considerations.md](../considerations.md) §7 (Uncertainty / AskQuest
 | Verification plan (Step 0.5) | One AskQuestion with 2–3 `questions` (success criteria, checks, monitoring) |
 | Post-deploy verified? (Phase 4) | AskQuestion: Production fixed · Still broken · I'll verify later |
 | Follow-up monitoring (Phase 4.4) | AskQuestion: schedule 15-service-health · user monitors · no follow-up |
+| Prevention / countermeasures (Phase 5.0) | **2–3 AskQuestion batches** (detection, countermeasures, priority) — see Phase 5 |
+| Cursor rule offer (Phase 5.1) | AskQuestion: create rule now · draft for review · no · defer to 03/06 · explain |
 | Repro test matches symptom? (Phase 1.25) | AskQuestion: Yes · Adjust test · Can't reproduce yet · I'll explain |
 | Investigation iteration (Phase 1) | AskQuestion: Agree root cause · Different hypothesis · Pause |
 | Repro still red after fix? (Phase 2) | AskQuestion before next patch — iterate / escalate |
@@ -207,8 +213,9 @@ persistent **Investigation** section, repro test metadata, fix, verification).
 first open. **Workflow and AskQuestion gates:** [bug-investigation](../bug-investigation/SKILL.md).
 
 **Repro test (required):** `tests/bugs/test_bug_YYYY_MM_DD_[slug].py` — one module per bug;
-see bug-investigation skill. Extend the template **Verification plan** and layered verification
-sections in the bug report when running this hotfix skill (Phase 0 Step 0.5 onward).
+see bug-investigation skill. Extend the template **Verification plan**, layered verification,
+**Prevention & countermeasures**, and **Cursor rule** sections when running this skill (Phase 0
+Step 0.5 onward; prevention filled in Phase 5).
 
 ### On invocation
 
@@ -228,15 +235,22 @@ production before any patch or deploy.
 ┌──────────┐     ┌─────────────┐     ┌──────────────┐     ┌─────────────┐     ┌──────────────┐
 │ Interview│ ──► │ Repro test  │ ──► │ Investigate  │ ──► │ Fix (green) │ ──► │ Verify (2b)  │
 │ + verify │     │ RED (1.25)  │     │ + user loop  │     │ (Phase 2)  │     │ + deploy (4) │
-│ plan (0) │     │ user confirms│     │ (Phase 1)   │     │              │     └──────────────┘
-└──────────┘     └─────────────┘     └──────────────┘     └─────────────┘
+│ plan (0) │     │ user confirms│     │ (Phase 1)   │     │              │     └──────┬───────┘
+└──────────┘     └─────────────┘     └──────────────┘     └─────────────┘            │
+                                                                                        ▼
+                                                                              ┌──────────────────┐
+                                                                              │ Prevent (5.0)    │
+                                                                              │ + Cursor rule?   │
+                                                                              │ (5.1) → close    │
+                                                                              └──────────────────┘
 ```
 
 Do not skip Phase 0, **repro test (red) + user confirmation**, the verification plan, the
-bug report, layered verification, or deploy approval to rush a patch. **Do not patch
-production code before a failing repro test matches the user's report** (unless waived via
-AskQuestion). **Green repro tests alone are not closure** — complete verification layers in
-the environment the user cares about.
+bug report, layered verification, deploy approval, or **Phase 5 prevention interview** to rush
+a patch. **Do not patch production code before a failing repro test matches the user's report**
+(unless waived via AskQuestion). **Green repro tests alone are not closure** — complete
+verification layers in the environment the user cares about, then **AskQuestion countermeasures**
+and whether to add a **Cursor rule**.
 
 ### Phase 0 — User interview (required)
 
@@ -814,17 +828,104 @@ After Layer 4 passes (or user defers with a scheduled check), call **AskQuestion
 monitoring table with date and result. If the issue recurred, reopen bug report status to
 `fixing` and loop Phase 1–2b (counts toward iteration limit).
 
-### Phase 5 — Record & Close
+### Phase 5 — Record, prevent & close
 
-#### Finalize bug report
+Phase 5 closes the hotfix loop with a **mandatory prevention interview** (how to counter this
+bug class in the future) and an **optional Cursor rule** so agents do not repeat the same
+mistake. **Every step uses AskQuestion** — do not skip by proposing countermeasures in chat only.
+
+**Blocking:** Do not set the bug report to `resolved` until Phase 5.0 completes (or user
+waives via AskQuestion `id`: `prevention_interview_waiver`, `[Decision]`). Phase 5.1 (Cursor rule)
+is optional but must still be **asked** — user may decline.
+
+**Investigate-only / wont-fix:** Run a shortened Phase 5.0 (detection + process countermeasures);
+still offer Phase 5.1 Cursor rule when the failure class is repeatable.
+
+#### Step 5.0 — Prevention & countermeasures interview (required)
+
+Embed in each batch `prompt`: one-line **root cause**, **symptom class** (connectivity / code /
+config / data), and **what we already shipped** (fix + tests). Record all answers in the bug
+report section **Prevention & countermeasures** and **Interview record**.
+
+**Batch P-A — Recurrence & detection** (`id`s: `prevention_recurrence_risk`, `prevention_detect_earlier`)
+
+| `id` | `prompt` | Example `options` |
+|------|----------|-------------------|
+| `prevention_recurrence_risk` | How likely is this exact failure (or same class) to happen again? | Very likely without changes · Possible on similar changes · Unlikely once fixed · I'll explain |
+| `prevention_detect_earlier` | Where should we catch this **before** production? | CI unit/H0c · Deploy smoke H4–H5 · Code review checklist · Runtime monitoring · Multiple — I'll explain |
+
+**Batch P-B — What to do (countermeasures)** (`id`s: `prevention_automated`, `prevention_code_hardening`, `prevention_process`)
+
+| `id` | `prompt` | Example `options` |
+|------|----------|-------------------|
+| `prevention_automated` | What **automated** guards should we add or strengthen? | Bug repro test only (done) · Extend H0c/H4 in CI · New integration test · Staging smoke in 13 · None — fix is enough · I'll explain |
+| `prevention_code_hardening` | Any **code** changes beyond the minimal hotfix? | Allow-list all HTTP methods in CORS helper · Stricter validation at boundary · Refactor risky module · No — hotfix only · I'll explain |
+| `prevention_process` | What **process / docs** changes? | Update connectivity-gates · Deploy checklist row · Spec patch (config/api) · ADR · None · I'll explain |
+
+**Batch P-C — Priority & ownership** (`id`s: `prevention_when`, `prevention_who`)
+
+| `id` | `prompt` | Example `options` |
+|------|----------|-------------------|
+| `prevention_when` | When should follow-up countermeasures land? | Now (same session/PR) · Next PR · Backlog / 16-evolve · Won't do — accept risk · I'll explain |
+| `prevention_who` | Who implements follow-ups? | Agent now (if in scope) · I'll do it · Team ticket · Defer to pipeline 03/06 tooling stage |
+
+**Agent actions after P-A–P-C**
+
+1. Map answers to concrete artifacts (test path, `docs/deploy-checklist.md` row, `.cursor/rules/*.mdc`,
+   `connectivity-gates.md`, ADR). List each in **Prevention & countermeasures → Planned actions**.
+2. Implement items the user chose **Now** and that fit hotfix scope (e.g. extra H4 test — already
+   done for CORS DELETE). Log deferred items under **Follow-ups** with owner and trigger.
+3. If user selects **Backlog / 16-evolve** or **03/06 tooling**, append `workflow-state.yaml`
+   `issue_log` with category `prevention-deferred` and link to BUG report.
+
+Call **AskQuestion** (`id`: `prevention_plan_confirm`) — embed planned actions summary in `prompt`:
+
+| `options` |
+|-----------|
+| Proceed — record plan and continue to Cursor rule question |
+| Adjust countermeasures — I'll explain |
+| Skip follow-ups — hotfix + repro test is enough |
+| **Let me explain / provide more context** (last) |
+
+#### Step 5.1 — Cursor rule to prevent recurrence (required ask, optional create)
+
+After Step 5.0 confirms, call **AskQuestion** (`id`: `prevention_cursor_rule`).
+
+Embed in `prompt`: root cause, symptom class, and **recommended rule scope** (one sentence —
+e.g. "CORS `allow_methods` must include every HTTP verb exposed by FastAPI routes").
+
+| `options` (first = recommend when recurrence risk is not "Unlikely") |
+|---------------------------------------------------------------------|
+| Yes — create `.cursor/rules/` rule now (I'll approve draft) |
+| Draft rule text for my review — don't write file yet |
+| No — tests and docs are sufficient |
+| Defer — handle in 03-plan-tooling or 06-tech-tooling |
+| **Let me explain / provide more context** (last) |
+
+| Choice | Action |
+|--------|--------|
+| **Yes — create now** | Draft rule (name, globs, 5–15 lines). Call **AskQuestion** (`id`: `cursor_rule_approve_draft`) with draft body summary. On approve, write `.cursor/rules/<slug>.mdc` using [create-rule](/root/.cursor/skills-cursor/create-rule/SKILL.md); link path in bug report **Cursor rule** |
+| **Draft for review** | Paste draft in chat + save under bug report **Cursor rule → Draft**; no file until user approves in a later session |
+| **No** | Record "declined" in bug report |
+| **Defer** | Record target stage (03/06) in **Follow-ups** |
+
+**Rule content guidelines**
+
+- **One concern per rule** — match this bug class, not generic coding standards.
+- Cite evidence: BUG ID, root cause, repro test path.
+- Prefer `globs` targeting affected files (e.g. `packages/shared-schemas/**/cors.py`, `**/app.py`).
+- Do not duplicate existing rules — read `.cursor/rules/` first; extend or reference if overlap.
+
+#### Step 5.2 — Finalize bug report
 
 1. Set status to `resolved` (or `wont-fix` if closed without code change) — only when all
-   required verification layers in the plan are **pass** or explicitly waived by user
+   required verification layers in the plan are **pass** or explicitly waived by user **and**
+   Phase 5.0 (and 5.1 ask) are complete
 2. Complete **Timeline**, **Fix**, **Verification plan**, all **Verification** layers,
-   **Post-deploy monitoring**, and **Follow-ups**
+   **Post-deploy monitoring**, **Prevention & countermeasures**, **Cursor rule** (if any), and **Follow-ups**
 3. Ensure **Regression prevention** lists every new test and any smoke/monitoring updates
 
-#### Update hotfix log
+#### Step 5.3 — Update hotfix log
 
 Append to `docs/hotfix-log.md`:
 
@@ -840,19 +941,19 @@ Append to `docs/hotfix-log.md`:
 | Deployed | Yes/No + date |
 | Verified | Layer summary (e.g. L1–4 pass, or L1–2 local-only) |
 
-#### Update state
+#### Step 5.4 — Update state
 
-- `workflow-state.yaml` §stages.14-hotfix: increment hotfix count, log entry
+- `workflow-state.yaml` §stages.14-hotfix: increment hotfix count, log entry; note if Cursor rule created
 - If spec was patched, check staleness: warn if downstream artifacts consumed
   the old spec version
 
-#### Create ADR (if applicable)
+#### Step 5.5 — Create ADR (if applicable)
 
 If the hotfix involved a non-obvious decision (e.g., chose workaround over proper
 fix, changed behavior intentionally, accepted a known limitation), create an ADR
 per [considerations.md](../considerations.md) §ADR logging. Set Stage to `14-hotfix`.
 
-#### Summary
+#### Step 5.6 — Summary
 
 ```
 Hotfix Complete.
@@ -865,6 +966,8 @@ Hotfix Complete.
   Verified:    Layer 1 [pass] · Layer 2 [pass] · Layer 3 [pass/skip] · Layer 4 [pass/skip]
   Deployed:    [yes/no] — commit [SHA]
   Monitoring:  [none | user | 15-service-health scheduled]
+  Prevention:  [countermeasures recorded; follow-ups]
+  Cursor rule: [path or declined/deferred]
   PR:          [URL]
   Commit:      [SHA]
 
@@ -898,6 +1001,8 @@ When multiple issues are reported at once:
 | Fix requires schema/API change | **AskQuestion** `[Decision]` — breaking change risk |
 | Repro test won't go red after 3 adjust cycles | **AskQuestion** — waive, production-only repro, or pause for evidence |
 | Fix applied but repro still red after 3 cycles | Escalate per iteration limit — bug report + recommended path |
+| User skips prevention interview | **AskQuestion** `prevention_interview_waiver` — document waiver in bug report |
+| Same bug class ≥2 hotfixes in 90 days | Recommend Cursor rule + 16-evolve; batch in Phase 5.0 |
 
 ## Output Rules
 
@@ -930,6 +1035,10 @@ When multiple issues are reported at once:
     state file, ADR if applicable.
 18. **Fix in place**: Never re-run pipeline phases. Surgical patches only.
 19. **Escalate scope creep**: If the fix grows beyond a patch, **AskQuestion** before continuing.
+20. **Prevention interview required**: Phase 5.0 countermeasures via AskQuestion (batches P-A–P-C +
+    confirm) before `resolved`; record in bug report **Prevention & countermeasures**.
+21. **Cursor rule ask required**: Phase 5.1 — always AskQuestion whether to create a rule; implement
+    only on user approval per [create-rule](/root/.cursor/skills-cursor/create-rule/SKILL.md).
 
 ## Related stages
 

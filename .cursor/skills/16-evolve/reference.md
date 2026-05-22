@@ -10,6 +10,8 @@ Append to `workflow-state.yaml`:
 ```yaml
 evolve_cycles:
   - id: EV-001                    # Sequential: EV-001, EV-002, ...
+    cycle_type: general           # general (16-evolve) | feature (18-add-feature)
+    feature_id: null              # e.g. F19 when cycle_type: feature
     title: "Add batch export API" # Short label from intake
     status: in_progress           # pending | in_progress | completed | cancelled
     started: "2026-05-17"
