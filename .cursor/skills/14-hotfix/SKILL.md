@@ -6,8 +6,8 @@ description: >
   Test-driven investigation: one bug = docs/bug-reports/BUG-*.md (logs + investigation MD),
   tests/bugs/test_bug_*.py (red then green), one fix. AskQuestion interviews at each gate,
   including Phase 5 prevention/countermeasures and optional Cursor rule creation. See
-  bug-investigation skill. Interview, verification plan, spec checks, deploy only with
-  user approval. Never re-runs entire phases.
+  bug-investigation skill. Interview, verification plan, spec checks, main CI parity before
+  PR and gh run on main after merge, deploy only with user approval. Never re-runs entire phases.
 ---
 
 # 14 — Hotfix
@@ -35,6 +35,57 @@ Classify failures before coding:
 
 Repro tests in `tests/bugs/` may import `tests.helpers.connectivity`. After fix, run
 `verify_connectivity.sh` if deployables changed. See connectivity-gates §Stage 14.
+
+## Main CI (GitHub Actions)
+
+Hotfixes that merge to `main` must not leave **main CI red**. Source of truth:
+`.github/workflows/ci.yml` (jobs: `python`, `frontend`). Command parity:
+[09-qa](../09-qa/SKILL.md) Phase 1 — do not invent alternate lint/test paths.
+
+| When | Check | Blocking |
+|------|-------|----------|
+| **Before PR** (Phase 2 Step 4, Layer 1) | **CI parity (local)** — run the same steps as `ci.yml` on the fix branch | **Yes** — do not open/merge PR with known CI failures |
+| **After push** (Phase 3 Step 2, before merge) | **PR branch CI (remote)** — latest `CI` run on the pushed fix branch is `success` | **Yes** — fix and re-push before merge when feasible |
+| **After merge** (Phase 3 Step 2 or Phase 2b closure) | **Main CI (remote)** — latest `CI` workflow on `main` for merged SHA is `success` | **Yes** for hotfix closure unless user waives via AskQuestion (`id`: `main_ci_waiver`) |
+
+**CI parity (local) — minimum before PR**
+
+```bash
+uv sync --group dev
+bash scripts/check_modal_no_database_url.sh
+bash scripts/check_openapi_specs.sh
+bash scripts/check_secrets.sh
+uv run ruff check apps packages tests
+uv run ruff format --check apps packages tests
+uv run pyright apps packages tests
+uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval
+# pip-audit: see ci.yml + audit/pip-audit-ignore.txt
+# migrations: apps/database — alembic upgrade head (needs Postgres; match CI service or skip with waiver)
+cd apps/chat-rag-frontend && npm ci && npm run lint && npm test
+cd apps/data-management-frontend && npm ci && npm run lint && npm test
+```
+
+**PR branch CI (remote) — after `git push`**
+
+```bash
+bash scripts/ci/watch_github_ci.sh fix/<slug>   # or current branch
+# or: gh run list --branch <branch> --workflow ci.yml --limit 3 && gh run watch <run-id>
+```
+
+Fix failing steps locally (§CI parity), push again, re-watch. Do not merge with a red PR CI run
+unless user waives via AskQuestion (`id`: `pr_ci_waiver`).
+
+**Main CI (remote) — after merge to `main`**
+
+```bash
+gh run list --branch main --workflow ci.yml --limit 3
+gh run watch <run-id>   # until python + frontend jobs complete
+gh run view <run-id> --json conclusion,status,headSha,url
+```
+
+Record in the bug report **Verification → CI**: local parity pass/fail, run URL, job conclusions.
+If a step fails on `main` but is **unrelated** to the hotfix (pre-existing), call **AskQuestion**
+(`id`: `main_ci_unrelated_fail`) — fix in same hotfix · separate chore PR · waive with documented risk.
 
 **User is the source of truth.** Do not assume symptoms, severity, or deploy intent — ask
 via interview (Phase 0) before investigation or code.
@@ -370,7 +421,7 @@ section.
 | `id` | `prompt` | Example `options` |
 |------|----------|-------------------|
 | `success_criterion` | What must be true for you to call this fixed? | Original error gone · Specific output/behavior · Test case passes · I'll define in text |
-| `verification_checks` | Which checks should we run after the fix? | Unit tests only · Unit + user repro · Unit + Modal smoke on affected class · Full pipeline smoke · I'll explain |
+| `verification_checks` | Which checks should we run after the fix? | Unit tests only · **Full main CI parity (local) + gh on main after merge** (recommended) · Unit + user repro · Unit + Modal smoke on affected class · Full pipeline smoke · I'll explain |
 | `monitoring_followup` | After deploy, how should we confirm it stays fixed? | I'll watch production myself · Re-check Modal logs in 24h · Run 15-service-health follow-up · No deploy — local only · I'll explain |
 
 **Derive checks from specs when the user is unsure:**
@@ -634,6 +685,10 @@ Write the minimal code change to make the repro test(s) pass:
 2. Run typechecker
 3. Run full test suite — all must pass (not just the new test)
 4. If any previously passing test fails, fix the regression before committing
+5. **Main CI parity (local):** Run **CI parity** commands from §Main CI on the fix branch.
+   Both `python`-equivalent and `frontend` matrix must pass before Phase 3 PR. If Postgres
+   is unavailable locally, run pytest without migration-dependent tests only after
+   **AskQuestion** waiver — note gap in bug report.
 
 Set bug report status to `fixing` when the branch is created; move to `verifying` after
 post-fix checks pass locally.
@@ -648,7 +703,7 @@ the bug report after each layer.
 
 | Layer | When | What to run | Pass criteria |
 |-------|------|-------------|---------------|
-| **1 — Automated** | Always | Linter, typecheck, full `pytest`; new regression test red→green | All pass; new test guards the bug |
+| **1 — Automated** | Always | Linter, typecheck, full `pytest`; **CI parity (local)** per §Main CI; new regression test red→green | All pass; new test guards the bug; CI parity green before PR |
 | **2 — Reproduction** | Always (unless investigate-only) | User repro from Phase 0; or scripted equivalent | Symptom absent; capture log/output |
 | **3 — Pre-deploy smoke** | Before Phase 4 deploy | Checks from Step 0.5 `verification_checks` that do not need production | Modal invoke or `e2e_verify` journey passes |
 | **4 — Production** | After Phase 4 deploy | Post-deploy smoke + log review on affected function | No recurrence; user confirms |
@@ -657,9 +712,10 @@ the bug report after each layer.
 
 1. Confirm repro test was **red** before fix and **green** after (document in **Repro test** + Layer 1).
 2. Run full unit test suite — all must pass.
-3. If verification plan or changed files touch orchestration/config/output: run
+3. Run **CI parity (local)** per §Main CI; record pass/fail per job (`python`, `frontend`).
+4. If verification plan or changed files touch orchestration/config/output: run
    `python tests/e2e_verify.py` and record pass/fail summary in the report.
-4. Update bug report **Verification → Layer 1** checkboxes.
+5. Update bug report **Verification → Layer 1** checkboxes.
 
 **Layer 2 — Reproduction (required)**
 
@@ -739,8 +795,17 @@ PR from hotfix branch to main (or current deploy branch):
   - **Tests**: New regression test(s) added
   - **Blast radius**: Files changed, downstream impact assessment
 
-Call **AskQuestion** (`id`: `hotfix_pr_merge`) before merge — options: Approve merge · Request
-changes · Merge later · Let me explain / provide more context. Never auto-merge.
+Call **AskQuestion** (`id`: `hotfix_pr_merge`) before merge — embed **CI parity (local)** and
+**PR branch CI (remote)** summary in the `prompt`. Options: Approve merge · Request changes ·
+Merge later · Let me explain / provide more context. Never auto-merge.
+
+**After merge — main CI (required for closure)**
+
+1. `gh run watch` (or poll) until the latest `CI` workflow on `main` for the merge commit finishes.
+2. Both `python` and `frontend` jobs must be `success`. Record run URL in bug report **Verification → CI**.
+3. If main CI fails, **try to fix** (chore PR or same-session patch) before marking `resolved`.
+   Do not mark `resolved` while main is red — treat as verify iteration (Phase 2b) or open
+   follow-up per AskQuestion `main_ci_unrelated_fail` (§Main CI).
 
 ### Phase 4 — Deploy to production (user-approved)
 
@@ -853,13 +918,13 @@ report section **Prevention & countermeasures** and **Interview record**.
 | `id` | `prompt` | Example `options` |
 |------|----------|-------------------|
 | `prevention_recurrence_risk` | How likely is this exact failure (or same class) to happen again? | Very likely without changes · Possible on similar changes · Unlikely once fixed · I'll explain |
-| `prevention_detect_earlier` | Where should we catch this **before** production? | CI unit/H0c · Deploy smoke H4–H5 · Code review checklist · Runtime monitoring · Multiple — I'll explain |
+| `prevention_detect_earlier` | Where should we catch this **before** production? | **Main CI (ci.yml) on PR** · CI unit/H0c · Deploy smoke H4–H5 · Code review checklist · Runtime monitoring · Multiple — I'll explain |
 
 **Batch P-B — What to do (countermeasures)** (`id`s: `prevention_automated`, `prevention_code_hardening`, `prevention_process`)
 
 | `id` | `prompt` | Example `options` |
 |------|----------|-------------------|
-| `prevention_automated` | What **automated** guards should we add or strengthen? | Bug repro test only (done) · Extend H0c/H4 in CI · New integration test · Staging smoke in 13 · None — fix is enough · I'll explain |
+| `prevention_automated` | What **automated** guards should we add or strengthen? | Bug repro test only (done) · **Strengthen ci.yml step** (secrets, H0c, new test) · Extend H0c/H4 in CI · New integration test · Staging smoke in 13 · None — fix is enough · I'll explain |
 | `prevention_code_hardening` | Any **code** changes beyond the minimal hotfix? | Allow-list all HTTP methods in CORS helper · Stricter validation at boundary · Refactor risky module · No — hotfix only · I'll explain |
 | `prevention_process` | What **process / docs** changes? | Update connectivity-gates · Deploy checklist row · Spec patch (config/api) · ADR · None · I'll explain |
 
@@ -1026,6 +1091,9 @@ When multiple issues are reported at once:
     work; cite acceptance-criteria / test-plan TC-IDs in the bug report.
 12. **Layered verification**: Layers 1–2 always; Layer 3 before deploy; Layer 4 after deploy.
     Record pass/fail and evidence per layer. Do not mark `resolved` with open Layer 4.
+12b. **Main CI**: CI parity (local) before PR; **PR branch CI after push**; `gh run` on `main`
+    after merge — both jobs `success` unless explicitly waived (§Main CI). See
+    [ci-after-push.mdc](../../rules/ci-after-push.mdc).
 13. **Iterate until verified**: Green repro tests are not closure — confirm the verification
     plan in the environments it specifies; loop back if not (max 3 iterations per skill).
 14. **Post-deploy monitoring**: Phase 4.4 — schedule 15-service-health, user watch, or

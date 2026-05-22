@@ -1,0 +1,65 @@
+---
+description: After pushing to GitHub, verify CI is green (or fix failures) before closing work
+alwaysApply: true
+---
+
+# CI after push
+
+Whenever you **`git push`** (or ask the user to push) to `origin`, treat **GitHub Actions CI**
+as part of done — not optional.
+
+Source of truth: `.github/workflows/ci.yml` (jobs: `python`, `frontend`).
+
+## After every push
+
+1. Identify the branch you pushed (e.g. `fix/foo`, `feat/M3-bar`, `main`).
+2. Wait for the latest run:
+
+```bash
+gh run list --branch <branch> --workflow ci.yml --limit 3
+gh run watch <run-id> --exit-status
+gh run view <run-id> --json conclusion,status,headSha,url
+```
+
+3. **Pass:** both `python` and `frontend` jobs `success` → record run URL in PR comment, bug report, or session summary.
+4. **Fail:** read failing job logs (`gh run view <run-id> --log-failed`), fix on the same branch, push again, re-watch until green or user waives.
+
+Do not mark a hotfix **resolved**, a milestone **complete**, or a PR **ready to merge** while CI is red on that branch (unless user explicitly waives via AskQuestion).
+
+## Before the first push (CI parity)
+
+Run the same checks CI runs locally when the change touches Python, frontends, secrets, or workflows:
+
+```bash
+uv sync --group dev
+bash scripts/check_modal_no_database_url.sh
+bash scripts/check_openapi_specs.sh
+bash scripts/check_secrets.sh
+uv run ruff check apps packages tests
+uv run ruff format --check apps packages tests
+uv run pyright apps packages tests
+uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval
+cd apps/chat-rag-frontend && npm ci && npm run lint && npm test
+cd apps/data-management-frontend && npm ci && npm run lint && npm test
+```
+
+Full parity list: [14-hotfix](../.cursor/skills/14-hotfix/SKILL.md) §Main CI, [09-qa](../.cursor/skills/09-qa/SKILL.md) Phase 1.
+
+## Merge to `main`
+
+After merge, watch CI on **`main`** for the merge commit SHA (required for 14-hotfix closure and 15-service-health **H0ci**):
+
+```bash
+gh run list --branch main --workflow ci.yml --limit 3
+gh run watch <run-id> --exit-status
+```
+
+If `main` is red after your merge, **try to fix** (same-session chore commit or follow-up PR) before declaring production health **Overall PASS**.
+
+## Related
+
+| Stage / rule | CI expectation |
+|--------------|----------------|
+| 14-hotfix | Local parity before PR; `main` green after merge |
+| 15-service-health | **H0ci** blocking post-hotfix/post-merge |
+| atomic-commits | Post-commit local checks; post-push remote CI |

@@ -79,6 +79,7 @@ deployment:
       admin_frontend: <url> | null
       modal_data_management: <url> | null
     health_tiers:
+      h0ci_github_main: pass | fail | pending   # latest .github/workflows/ci.yml on main (15-service-health)
       h1_liveness: pass | fail | pending
       h2_db_ready: pass | fail | pending
       h3_rag_smoke: pass | fail | pending

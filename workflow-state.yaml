@@ -237,6 +237,7 @@ deployment:
       admin_frontend: https://vecinita-admin-frontend-ef4ob.ondigitalocean.app
       modal_data_management: https://vecinita--vecinita-data-management-fastapi-app.modal.run
     health_tiers:
+      h0ci_github_main: fail
       h1_liveness: pass
       h2_db_ready: pass
       h3_rag_smoke: pass

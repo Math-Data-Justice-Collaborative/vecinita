@@ -37,6 +37,12 @@ After completing a task, before committing:
 5. **Update state**: Only mark the task `completed` after the commit succeeds and all checks
    pass.
 
+## After push (remote CI)
+
+When the task branch is pushed to `origin`, follow [ci-after-push.mdc](ci-after-push.mdc):
+watch `.github/workflows/ci.yml` on that branch and **fix failures before** opening or merging
+a PR. After merge to `main`, confirm CI is green on `main` (15-service-health **H0ci**).
+
 ## Milestone Boundaries
 
 When all tasks in a milestone are `completed`:

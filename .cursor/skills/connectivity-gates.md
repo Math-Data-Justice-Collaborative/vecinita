@@ -29,6 +29,7 @@ Without `CORSMiddleware` (or a same-origin BFF per TP-001), browsers block reque
 | H0 | Local unit | CI, 07 | `pytest tests/unit` | CI |
 | **H0c** | **CORS policy (in-process)** | CI, 07 | `pytest tests/unit/test_cors_policy.py` | **CI** |
 | **H0i** | **Integration wiring** | CI, 07, 10 | `pytest tests/integration` | **CI** |
+| **H0ci** | **GitHub main CI** | 14, 15 | `gh run list --branch main --workflow ci.yml` | **15 post-hotfix**; **14 after merge** |
 | H1 | API liveness | 13, 15 | `GET {API}/health` | 13 |
 | H2 | DB ready | 13, 15 | `staging_h2.py` / Alembic | 13 |
 | H3 | API RAG smoke | 13, 15 | `POST {CHAT}/api/v1/ask` | 13 |
@@ -57,8 +58,8 @@ Without `CORSMiddleware` (or a same-origin BFF per TP-001), browsers block reque
 | **11-verify-impl** | UI features (F11/F12): require connectivity plan or H4/H5 waiver before approve |
 | **12-verify-deploy** | Agent 6 + checklist: CORS origins, `VITE_*` matrix, scripts exist |
 | **13-deploy-smoke** | Pre: H0c; post: `verify_connectivity.sh` (H4–H5 blocking) |
-| **14-hotfix** | Classify “Failed to fetch” as connectivity first; repro may use H4 assertion |
-| **15-service-health** | Post-deploy: H4–H5 on UI complaints; H0i on integration regressions |
+| **14-hotfix** | Classify “Failed to fetch” as connectivity first; repro may use H4 assertion; **CI parity (local) before PR**; **`gh run` on `main` after merge** (§Main CI in 14-hotfix) |
+| **15-service-health** | Post-deploy: H4–H5 on UI complaints; H0i on integration regressions; **H0ci** — GitHub `ci.yml` on `main` green (blocking post-hotfix) |
 
 Stages **16-evolve** and **17-retrospective** must re-apply the rows above for any new UI or API surface.
 

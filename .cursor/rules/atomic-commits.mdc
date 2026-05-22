@@ -27,17 +27,22 @@ Every commit must be **atomic** — one logical change, codebase valid after eac
    - Pass the typechecker
    If any check fails, fix it in the same commit (amend) — do not leave a broken commit.
 
-4. **No WIP commits**: Every commit is complete and reviewable. If work is in progress,
+4. **After push to origin**: Run GitHub CI verification per
+   [ci-after-push.mdc](ci-after-push.mdc) — `gh run watch` until `python` and `frontend`
+   jobs succeed, or fix and push again. Optional helper:
+   `bash scripts/ci/watch_github_ci.sh [branch]`.
+
+5. **No WIP commits**: Every commit is complete and reviewable. If work is in progress,
    do not commit until the task is done.
 
-5. **Commit-as-you-go**: Skills must commit before:
+6. **Commit-as-you-go**: Skills must commit before:
    - Transitioning to the next pipeline stage
    - Asking the user a blocking AskQuestion
    - Running a gate check
    - Ending a session/turn
    Never leave uncommitted work across session boundaries.
 
-6. **Record in workflow-state**: After every commit, append to
+7. **Record in workflow-state**: After every commit, append to
    `workflow-state.yaml` §`git_history.commits` with sha, branch, message,
    stage, files_changed, and timestamp. See
    `.cursor/skills/workflow-state-reference.md` §Git history.
