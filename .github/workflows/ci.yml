@@ -52,6 +52,9 @@ jobs:
       - name: OpenAPI specs present
         run: bash scripts/check_openapi_specs.sh
 
+      - name: Install ripgrep (secret pattern scan)
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
+
       - name: Secret patterns (current tree)
         run: bash scripts/check_secrets.sh
 
