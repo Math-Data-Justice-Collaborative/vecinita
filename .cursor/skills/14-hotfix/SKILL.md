@@ -20,7 +20,8 @@ re-running the pipeline.
 `docs/bug-reports/BUG-*.md`, `tests/bugs/test_bug_*.py`, one fix per bug.
 
 **Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
-**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+**Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).  
+**Modal data-mgmt auth header:** [modal-proxy-header](../modal-proxy-header/SKILL.md).
 
 ## Connectivity (stage 14)
 

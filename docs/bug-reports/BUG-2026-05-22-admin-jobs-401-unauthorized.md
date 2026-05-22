@@ -1,6 +1,6 @@
 # BUG-2026-05-22 — Admin POST /jobs returns 401 Unauthorized
 
-> Status: **verifying** (Modal deployed; admin FE rebuild in progress)  
+> Status: **resolved** (PR #35; Modal + admin FE live with `X-Vecinita-Proxy-Key`)  
 > Feature: **F8** (data management / ingest jobs)  
 > Component: `apps/data-management-backend`, DO `vecinita-admin-frontend`, Modal secret `vecinita-data-management`
 
@@ -126,7 +126,7 @@ User confirmed repro matches symptom (Phase 1.25).
 **Deploy:**
 
 - `modal deploy infra/modal/data_management_app.py` — **done** (2026-05-22).
-- `do_apps.py deploy --name vecinita-admin-frontend` — **in progress** (deployment `732e16e3-…`).
+- Merged [PR #35](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/35); DO `deploy_on_push` + manual deploy triggered.
 
 **Optional:** Rotate `VECINITA_MODAL_PROXY_KEY` after exposure in intake.
 
