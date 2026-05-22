@@ -90,9 +90,7 @@ class ChatRagService:
         if not chunks:
             return _to_ask_response(answer_without_context(question))
         prompt = _build_prompt(question, chunks)
-        answer_text = self._llm.generate(
-            prompt, max_tokens=self._chat_max_tokens
-        )
+        answer_text = self._llm.generate(prompt, max_tokens=self._chat_max_tokens)
         result = answer_from_chunks(question, chunks, answer_text=answer_text)
         return _to_ask_response(result)
 
@@ -103,9 +101,7 @@ class ChatRagService:
             yield result.answer
             return
         prompt = _build_prompt(question, chunks)
-        yield from self._llm.generate_stream(
-            prompt, max_tokens=self._chat_max_tokens
-        )
+        yield from self._llm.generate_stream(prompt, max_tokens=self._chat_max_tokens)
 
     def retrieve_sources(self, question: str) -> list[Source]:
         chunks = self._retriever.retrieve_chunks(question)

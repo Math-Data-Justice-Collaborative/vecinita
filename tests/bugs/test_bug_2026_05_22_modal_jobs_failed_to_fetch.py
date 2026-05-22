@@ -16,9 +16,7 @@ from vecinita_data_management_backend.app import create_app as create_data_mgmt_
 
 ADMIN_ORIGIN = "https://vecinita-admin-frontend.example.com"
 _MODAL_APP = Path(__file__).resolve().parents[2] / "infra" / "modal" / "data_management_app.py"
-_LIVE_MODAL_JOBS = (
-    "https://vecinita--vecinita-data-management-fastapi-app.modal.run/jobs"
-)
+_LIVE_MODAL_JOBS = "https://vecinita--vecinita-data-management-fastapi-app.modal.run/jobs"
 
 
 @pytest.fixture(autouse=True)

@@ -61,13 +61,10 @@ def check_migrations_at_head(url: str) -> None:
         raise RuntimeError("alembic heads returned no revision")
     if not current_revs:
         raise RuntimeError(
-            "no alembic revision on database; run: "
-            "cd apps/database && uv run alembic upgrade head"
+            "no alembic revision on database; run: cd apps/database && uv run alembic upgrade head"
         )
     if current_revs != head_revs:
-        raise RuntimeError(
-            f"database revision {sorted(current_revs)} != head {sorted(head_revs)}"
-        )
+        raise RuntimeError(f"database revision {sorted(current_revs)} != head {sorted(head_revs)}")
 
 
 def assert_h2_database_ready(url: str | None = None) -> None:
