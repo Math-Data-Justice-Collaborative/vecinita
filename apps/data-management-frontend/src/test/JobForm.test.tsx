@@ -41,7 +41,7 @@ describe("JobForm", () => {
       "http://localhost:8001/jobs",
       expect.objectContaining({
         method: "POST",
-        headers: expect.objectContaining({ "Modal-Key": "test-proxy-key" }),
+        headers: expect.objectContaining({ "X-Vecinita-Proxy-Key": "test-proxy-key" }),
       }),
     );
   });

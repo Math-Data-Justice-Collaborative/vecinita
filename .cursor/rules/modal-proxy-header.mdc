@@ -1,0 +1,14 @@
+---
+description: Modal reserves Modal-Key for workspace proxy tokens; Vecinita app auth uses X-Vecinita-Proxy-Key.
+globs:
+  - apps/data-management-backend/**
+  - apps/data-management-frontend/**
+  - infra/modal/data_management_app.py
+  - tests/bugs/test_bug_2026_05_22_admin_jobs_401_unauthorized.py
+---
+
+# Modal app proxy auth header
+
+- **Never** use `Modal-Key` / `Modal-Secret` for `VECINITA_MODAL_PROXY_KEY` — reserved by Modal.
+- **Use** `X-Vecinita-Proxy-Key` in FastAPI (`Header(alias=...)`), admin `fetch`, and CORS `allow_headers`.
+- Skill: `.cursor/skills/modal-proxy-header/SKILL.md`

@@ -82,7 +82,9 @@ This deploys embed/LLM apps (by default), runs one-shot `stage_embedding_weights
 
 Use `bash scripts/deploy/modal.sh` (enforces **vecinita** workspace).
 
-**Secret (data-management):** Create `vecinita-data-management` in the [vecinita workspace](https://modal.com/secrets/vecinita/main) with `VECINITA_MODAL_EMBED_URL`, `VECINITA_INTERNAL_WRITE_URL`, `VECINITA_INTERNAL_API_KEY` before deploying `data_management_app.py`.
+**Secret (data-management):** Create `vecinita-data-management` in the [vecinita workspace](https://modal.com/secrets/vecinita/main) with `VECINITA_MODAL_EMBED_URL`, `VECINITA_INTERNAL_WRITE_URL`, `VECINITA_INTERNAL_API_KEY`, `VECINITA_MODAL_PROXY_KEY`, and `VECINITA_CORS_ORIGINS` (admin + chat frontend origins) before deploying `data_management_app.py`. If `VECINITA_CORS_ORIGINS` is omitted, the app falls back to staging DO origins baked into `create_app()`.
+
+**Proxy key parity (H5):** `VECINITA_MODAL_PROXY_KEY` must equal DigitalOcean `VITE_VECINITA_MODAL_PROXY_KEY` on `vecinita-admin-frontend` (build-time). After any change, rebuild the admin frontend. Check with `bash scripts/deploy/check_proxy_key_parity.sh` when both values are exported in your shell.
 
 ## vecinita-embedding (FastEmbed)
 

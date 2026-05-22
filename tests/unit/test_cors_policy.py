@@ -83,7 +83,7 @@ def test_data_management_cors_preflight_on_jobs() -> None:
         headers={
             "Origin": ADMIN_ORIGIN,
             "Access-Control-Request-Method": "POST",
-            "Access-Control-Request-Headers": "content-type, modal-key",
+            "Access-Control-Request-Headers": "content-type, x-vecinita-proxy-key",
         },
     )
     assert response.status_code == 200

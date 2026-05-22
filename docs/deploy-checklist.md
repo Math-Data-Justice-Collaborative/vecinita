@@ -89,7 +89,7 @@
 | 5 | DO ↔ Modal network / wrong URLs | `staging_smoke.sh` H1–H3; `vecinita--` prefix | **approved** |
 | 6 | vLLM cold start / timeout | `timeout=600`; AC-C6 → T3 post-deploy | **approved** (T3 waiver) |
 | 7 | Memory / OOM on DO basic-xxs | Monitor DO metrics; tier upgrade if needed | advisory |
-| 8 | Admin auth / proxy key mismatch | Key parity matrix; UJ-008 T0 | **approved** (with #5) |
+| 8 | Admin auth / proxy key mismatch | `docs/staging-secrets-matrix.md`; `scripts/deploy/check_proxy_key_parity.sh`; UJ-008 / BUG-2026-05-22-admin-jobs-401 | **approved** (with #5) |
 
 ## Rollback
 

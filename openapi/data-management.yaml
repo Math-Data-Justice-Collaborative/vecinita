@@ -70,8 +70,8 @@ components:
     modalProxyAuth:
       type: apiKey
       in: header
-      name: Modal-Key
-      description: Modal proxy authentication (requires_proxy_auth)
+      name: X-Vecinita-Proxy-Key
+      description: App proxy key (VECINITA_MODAL_PROXY_KEY); not Modal-Key — reserved by Modal
   schemas:
     CreateJobRequest:
       type: object
