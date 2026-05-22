@@ -8,12 +8,7 @@ from pathlib import Path
 
 def test_data_management_app_imports_when_modal_mounts_at_root(tmp_path: Path) -> None:
     """Modal copies the deploy module to /root/data_management_app.py — parents[2] must not crash."""
-    source = (
-        Path(__file__).resolve().parents[2]
-        / "infra"
-        / "modal"
-        / "data_management_app.py"
-    )
+    source = Path(__file__).resolve().parents[2] / "infra" / "modal" / "data_management_app.py"
     mounted = tmp_path / "data_management_app.py"
     mounted.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
 
@@ -22,4 +17,4 @@ def test_data_management_app_imports_when_modal_mounts_at_root(tmp_path: Path) -
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
-    assert module._REPO_ROOT == Path("/opt/vecinita")
+    assert Path("/opt/vecinita") == module._REPO_ROOT
