@@ -30,7 +30,7 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_MODAL_TOKEN_ID` | string | — | Yes (DO→Modal) | Modal credential (DO secret) |
 | `VECINITA_MODAL_TOKEN_SECRET` | string | — | Yes | Modal credential |
 | `VECINITA_LLM_BACKEND` | string | `vllm` | No | `vllm` primary; `ollama` fallback only per ADR-009 |
-| `VECINITA_REQUEST_TIMEOUT_S` | int | `60` | No | Upstream Modal timeout |
+| `VECINITA_REQUEST_TIMEOUT_S` | int | `120` | No | Upstream Modal timeout (cold-start margin; see R5) |
 
 ### DO internal write API
 

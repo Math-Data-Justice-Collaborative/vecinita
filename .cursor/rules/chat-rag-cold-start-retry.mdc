@@ -1,0 +1,25 @@
+---
+description: ChatRAG cold-start — retry transient ask failures and warm-up UX (BUG-2026-05-22)
+globs: apps/chat-rag-frontend/src/api/ask.ts,apps/chat-rag-frontend/src/components/ChatPanel.tsx,packages/shared-schemas/vecinita_shared_schemas/transient_http.py
+alwaysApply: false
+---
+
+# ChatRAG cold-start handling
+
+When editing chat ask/stream or upstream timeout config:
+
+1. **`streamAsk` must auto-retry** transient failures: browser network errors (`TypeError`)
+   and HTTP **502 / 503 / 504**. Policy lives in
+   `packages/shared-schemas/vecinita_shared_schemas/transient_http.py` — keep TS constants
+   in sync (`COLD_START_ASK_MAX_ATTEMPTS`, delay).
+2. **Do not surface raw "Failed to fetch" / "Network Error"** on the first cold start.
+   Show `COLD_START_STATUS_MESSAGE` during retries; use `formatAskFailureMessage` on final
+   failure only.
+3. **Extend regression tests** when changing retry policy:
+   - `apps/chat-rag-frontend/src/api/ask.test.ts`
+   - `tests/bugs/test_bug_2026_05_22_chat_cold_start_network_error.py`
+4. **Backend timeout:** `VECINITA_REQUEST_TIMEOUT_S` default is **120** (cold-start margin per
+   R5). Do not lower without ADR.
+
+Symptom: first ask after Modal LLM scale-to-zero fails; second manual ask works → missing retry
+or timeout too short, not CORS.

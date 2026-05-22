@@ -150,6 +150,7 @@ uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend
 | “Set VITE_VECINITA_*” in UI | Empty build secrets | DO BUILD_TIME secrets + redeploy **frontend** |
 | Bundle has `localhost` | Wrong `VITE_*` at build | `sync-secrets` + `force_build` |
 | H3 pass, H4 fail | Backend-only validation | `verify_connectivity.sh` |
+| H3 pass after warm, first ask fails / “Network Error” | Modal LLM cold start > gateway timeout | Frontend auto-retry (`streamAsk`); raise `VECINITA_REQUEST_TIMEOUT_S`; warm LLM before demos |
 | Integration pass, UI fail | No H4/H5 run | Run live connectivity tier |
 
 ## Artifact checklist (must exist before 13)

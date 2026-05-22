@@ -50,5 +50,5 @@ class ChatRagSettings:
             chat_max_tokens=_int_env("VECINITA_CHAT_MAX_TOKENS", 256),
             embed_url=os.environ.get("VECINITA_MODAL_EMBED_URL"),
             llm_url=os.environ.get("VECINITA_MODAL_LLM_URL"),
-            request_timeout_s=float(os.environ.get("VECINITA_REQUEST_TIMEOUT_S", "60")),
+            request_timeout_s=float(os.environ.get("VECINITA_REQUEST_TIMEOUT_S", "120")),
         )

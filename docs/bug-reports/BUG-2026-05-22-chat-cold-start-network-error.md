@@ -1,6 +1,6 @@
 # BUG-2026-05-22 — Chat cold-start Network Error
 
-> Status: **investigating**  
+> Status: **resolved** (PR #37; DO chat-rag-frontend 2026-05-22; user verified)
 > Feature: **F2** (ChatRAG ask / stream)  
 > Component: `apps/chat-rag-frontend`, `apps/chat-rag-backend`, Modal `vecinita-llm`
 
@@ -104,33 +104,50 @@ surfaced raw errors (e.g. "Failed to fetch") immediately with no warm-up UX.
 - [x] Repro test red → green
 - [x] Bug repro tests pass
 - [x] Frontend vitest + lint pass
-- [ ] Full pytest suite
-- [ ] CI parity (local)
+- [x] Full pytest (bugs + unit)
+- [x] PR branch CI green (26316165050)
+- [x] Main CI green (26316208500)
 
 ### Layer 2 — Reproduction
 
-- [ ] Staging cold-start repro (user)
+- [x] User confirmed staging cold-start UX fixed
 
 ### Layer 3 — Pre-deploy smoke
 
-- [ ] Redeploy chat-rag-frontend to DO
+- [x] DO chat-rag-frontend redeploy (ec573222)
 
 ### Layer 4 — Production
 
-- [ ] User confirms cold-start UX improved
+- [x] User confirms cold-start UX improved
 
 ### CI
 
 | Check | Result | URL |
 |-------|--------|-----|
-| Local parity | pending | — |
-| PR branch CI | pending | — |
-| Main CI | pending | — |
+| Local parity | pass (vitest + bugs) | — |
+| PR branch CI | success | https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/26316165050 |
+| Main CI | success | https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/26316208500 |
 
 ## Prevention & countermeasures
 
-_TBD — Phase 5._
+| Question | Answer |
+|----------|--------|
+| Recurrence risk | Possible on similar timeout/retry gaps |
+| Detect earlier | Main CI (frontend vitest on PR) |
+| Automated | Bug repro tests (done) |
+| Code hardening | Raise `VECINITA_REQUEST_TIMEOUT_S` default to 120 (follow-up) |
+| Process | connectivity-gates failure signature row |
+| When / who | Now / agent |
+
+## Post-deploy monitoring
+
+15-service-health follow-up scheduled per user verification plan.
+
+## Cursor rule
+
+`.cursor/rules/chat-rag-cold-start-retry.mdc`
 
 ## Follow-ups
 
-- Consider ops runbook: warm LLM before demos (`modal run infra/modal/llm_app.py::LlmService.complete`)
+- Ops: warm LLM before demos (`modal run infra/modal/llm_app.py::LlmService.complete`)
+
