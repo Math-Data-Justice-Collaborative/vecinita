@@ -53,6 +53,27 @@ def test_internal_write_cors_preflight_on_documents(monkeypatch: pytest.MonkeyPa
     assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
 
 
+def test_internal_write_cors_preflight_allows_delete_document(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    if not os.environ.get("DATABASE_URL"):
+        pytest.skip("DATABASE_URL required for internal write app import")
+    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", "test-key")
+    client = TestClient(create_write_app())
+    response = client.options(
+        "/internal/v1/documents/00000000-0000-0000-0000-000000000001",
+        headers={
+            "Origin": ADMIN_ORIGIN,
+            "Access-Control-Request-Method": "DELETE",
+            "Access-Control-Request-Headers": "authorization",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
+    allow_methods = response.headers.get("access-control-allow-methods", "").upper()
+    assert "DELETE" in allow_methods
+
+
 def test_data_management_cors_preflight_on_jobs() -> None:
     client = TestClient(
         create_data_mgmt_app(require_proxy_auth=False),

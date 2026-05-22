@@ -36,6 +36,10 @@ def assert_cors_preflight(
     assert allow_origin in (origin, "*"), (
         f"Expected Access-Control-Allow-Origin {origin!r}, got {allow_origin!r}"
     )
+    allow_methods = response.headers.get("access-control-allow-methods", "").upper()
+    assert method.upper() in allow_methods or "*" in allow_methods, (
+        f"CORS must allow {method!r}; got access-control-allow-methods={allow_methods!r}"
+    )
 
 
 def fetch_main_js_url(frontend_base: str, timeout: float = 30.0) -> str:

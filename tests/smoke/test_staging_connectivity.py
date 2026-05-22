@@ -67,6 +67,19 @@ def test_h4_write_api_cors_preflight(admin_frontend: str) -> None:
     )
 
 
+def test_h4_write_api_cors_preflight_delete_document(admin_frontend: str) -> None:
+    write_url = _env("VECINITA_STAGING_WRITE_URL")
+    if not write_url:
+        pytest.skip("Set VECINITA_STAGING_WRITE_URL")
+    assert_cors_preflight(
+        api_base=write_url,
+        origin=admin_frontend,
+        path="/internal/v1/documents/00000000-0000-0000-0000-000000000001",
+        method="DELETE",
+        extra_request_headers=["authorization"],
+    )
+
+
 def test_h4_modal_data_mgmt_cors_preflight(admin_frontend: str) -> None:
     admin_api = _env("VECINITA_STAGING_ADMIN_API_URL")
     if not admin_api:
