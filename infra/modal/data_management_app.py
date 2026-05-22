@@ -75,11 +75,12 @@ def fastapi_app():
 
     from vecinita_data_management_backend.app import create_app
     from vecinita_data_management_backend.pipeline import run_ingest_job
-    from vecinita_data_management_backend.store import InMemoryJobStore
+    from vecinita_data_management_backend.store import DictJobStore
     from vecinita_data_management_backend.write_client import InternalWriteClient
     from vecinita_embedding_client import EmbeddingClient
 
-    store = InMemoryJobStore()
+    jobs_dict = modal.Dict.from_name("vecinita-data-management-jobs", create_if_missing=True)
+    store = DictJobStore(jobs_dict)
     embed = EmbeddingClient()
     write = InternalWriteClient()
 
