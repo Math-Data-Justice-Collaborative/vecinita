@@ -14,11 +14,12 @@ from vecinita_shared_schemas.data_management import Job
 
 @dataclass
 class JobRecord:
-    """Internal ingest job state before API schema mapping."""
+    """Internal ingest or retag job state before API schema mapping."""
 
     job_id: UUID
     status: str
     urls: list[str]
+    job_type: str = "ingest"
     error_code: str | None = None
     error_message: str | None = None
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
@@ -29,7 +30,13 @@ class JobRecord:
 class JobStore:
     """Persistence interface for ingest job lifecycle."""
 
-    def create_job(self, urls: list[str], options: dict[str, object] | None = None) -> JobRecord:
+    def create_job(
+        self,
+        urls: list[str],
+        options: dict[str, object] | None = None,
+        *,
+        job_type: str = "ingest",
+    ) -> JobRecord:
         raise NotImplementedError
 
     def get_job(self, job_id: UUID) -> JobRecord | None:
@@ -51,6 +58,7 @@ def _record_to_payload(record: JobRecord) -> dict[str, Any]:
         "job_id": str(record.job_id),
         "status": record.status,
         "urls": record.urls,
+        "job_type": record.job_type,
         "error_code": record.error_code,
         "error_message": record.error_message,
         "created_at": record.created_at.isoformat(),
@@ -64,6 +72,7 @@ def _payload_to_record(payload: dict[str, Any]) -> JobRecord:
         job_id=UUID(str(payload["job_id"])),
         status=str(payload["status"]),
         urls=[str(url) for url in payload["urls"]],
+        job_type=str(payload.get("job_type") or "ingest"),
         error_code=payload.get("error_code"),
         error_message=payload.get("error_message"),
         created_at=datetime.fromisoformat(str(payload["created_at"])),
@@ -78,11 +87,18 @@ class DictJobStore(JobStore):
     def __init__(self, backing: MutableMapping[str, dict[str, Any]]) -> None:
         self._jobs = backing
 
-    def create_job(self, urls: list[str], options: dict[str, object] | None = None) -> JobRecord:
+    def create_job(
+        self,
+        urls: list[str],
+        options: dict[str, object] | None = None,
+        *,
+        job_type: str = "ingest",
+    ) -> JobRecord:
         record = JobRecord(
             job_id=uuid4(),
             status="pending",
             urls=urls,
+            job_type=job_type,
             options=options or {},
         )
         self._jobs[str(record.job_id)] = _record_to_payload(record)
@@ -125,11 +141,18 @@ class InMemoryJobStore(JobStore):
         self._jobs: dict[UUID, JobRecord] = {}
         self._lock = Lock()
 
-    def create_job(self, urls: list[str], options: dict[str, object] | None = None) -> JobRecord:
+    def create_job(
+        self,
+        urls: list[str],
+        options: dict[str, object] | None = None,
+        *,
+        job_type: str = "ingest",
+    ) -> JobRecord:
         record = JobRecord(
             job_id=uuid4(),
             status="pending",
             urls=urls,
+            job_type=job_type,
             options=options or {},
         )
         with self._lock:

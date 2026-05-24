@@ -1,4 +1,4 @@
-import type { DocumentSummary } from "./types";
+import type { ChunkDetail, DocumentSummary, TagInput } from "./types";
 
 export interface CorpusClientOptions {
   baseUrl: string;
@@ -18,6 +18,72 @@ export async function listDocuments(options: CorpusClientOptions): Promise<Docum
     throw new Error(detail || `List documents failed (${response.status})`);
   }
   return response.json() as Promise<DocumentSummary[]>;
+}
+
+export async function listDocumentChunks(
+  options: CorpusClientOptions,
+  documentId: string,
+): Promise<ChunkDetail[]> {
+  const response = await fetch(`${options.baseUrl}/internal/v1/documents/${documentId}/chunks`, {
+    headers: authHeaders(options.apiKey),
+  });
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(detail || `List chunks failed (${response.status})`);
+  }
+  return response.json() as Promise<ChunkDetail[]>;
+}
+
+export async function patchDocumentTags(
+  options: CorpusClientOptions,
+  documentId: string,
+  tags: TagInput[],
+): Promise<TagInput[]> {
+  const response = await fetch(`${options.baseUrl}/internal/v1/documents/${documentId}/tags`, {
+    method: "PATCH",
+    headers: { ...authHeaders(options.apiKey), "Content-Type": "application/json" },
+    body: JSON.stringify({ tags, source: "human" }),
+  });
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(detail || `Patch document tags failed (${response.status})`);
+  }
+  const body = (await response.json()) as { tags: TagInput[] };
+  return body.tags;
+}
+
+export async function patchChunkTags(
+  options: CorpusClientOptions,
+  chunkId: string,
+  tags: TagInput[],
+): Promise<TagInput[]> {
+  const response = await fetch(`${options.baseUrl}/internal/v1/chunks/${chunkId}/tags`, {
+    method: "PATCH",
+    headers: { ...authHeaders(options.apiKey), "Content-Type": "application/json" },
+    body: JSON.stringify({ tags, source: "human" }),
+  });
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(detail || `Patch chunk tags failed (${response.status})`);
+  }
+  const body = (await response.json()) as { tags: TagInput[] };
+  return body.tags;
+}
+
+export async function retagDocument(
+  options: CorpusClientOptions,
+  documentId: string,
+): Promise<string> {
+  const response = await fetch(`${options.baseUrl}/internal/v1/documents/${documentId}/retag`, {
+    method: "POST",
+    headers: authHeaders(options.apiKey),
+  });
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(detail || `Retag failed (${response.status})`);
+  }
+  const body = (await response.json()) as { job_id: string };
+  return body.job_id;
 }
 
 export async function deleteDocument(

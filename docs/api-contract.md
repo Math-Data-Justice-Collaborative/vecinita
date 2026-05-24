@@ -1,7 +1,7 @@
 # API Contract
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-19  
+> **Last updated**: 2026-05-24 (EV-001)  
 > **OpenAPI**: Source of truth in repo — `openapi/chat-rag.yaml`, `openapi/data-management.yaml`, `openapi/internal-write.yaml`
 
 Contracts are **greenfield** (ADR-003). Public routes must not accept identity fields (`email`, `user_id`, `name`, etc.).
@@ -20,9 +20,12 @@ Base path: `/api/v1`
 
 ```json
 {
-  "question": "string (required, 1-4000 chars)"
+  "question": "string (required, 1-4000 chars)",
+  "tags": ["string (optional, max 10)"]
 }
 ```
+
+When `tags` is non-empty, retrieval filters by those tags only (LLM tag inference skipped). When omitted or empty, backend infers tags from the question before retrieval.
 
 - **Response** `200`:
 
@@ -51,6 +54,42 @@ Base path: `/api/v1`
 - **Request**: Same as `/ask`.
 - **Response**: `text/event-stream` — events: `token`, `sources`, `done`.
 - **Errors**: Same as `/ask`.
+
+### GET `/api/v1/documents`
+
+- **Purpose**: Public corpus browse (F19).
+- **Auth**: None.
+- **Query**: `tags` (repeatable), `q` (title/URL search), `page` (default 1), `page_size` (default 20, max 100).
+- **Response** `200`:
+
+```json
+{
+  "items": [
+    {
+      "document_id": "uuid",
+      "title": "string | null",
+      "url": "string",
+      "language": "en | es",
+      "tags": [{"slug": "housing", "label": "Housing"}]
+    }
+  ],
+  "page": 1,
+  "page_size": 20,
+  "total": 42
+}
+```
+
+### GET `/api/v1/documents/{document_id}`
+
+- **Purpose**: Document detail for browse; user opens `url` externally (UJ-010).
+- **Auth**: None.
+- **Response** `200`: document metadata + `tags[]`.
+
+### GET `/api/v1/tags`
+
+- **Purpose**: Tag facet list for browse sidebar and chat tag chips.
+- **Auth**: None.
+- **Response** `200`: `{"tags": [{"slug": "...", "label": "...", "language": "en|es", "document_count": N}]}`
 
 ### GET `/health`
 
@@ -158,7 +197,25 @@ Base path: `/internal/v1` (audited S6.2).
 
 - **Purpose**: Remove document and dependent chunks/embeddings (UJ-003).
 
-⚠️ **Not discussed:** Full batch schema fields — define in OpenAPI during 07-build.
+### GET `/internal/v1/documents/{document_id}/chunks`
+
+- **Purpose**: Admin chunk viewer (F21).
+- **Response** `200`: array of `{chunk_id, chunk_index, text, token_count, tags[]}`.
+
+### PATCH `/internal/v1/documents/{document_id}/tags`
+
+- **Purpose**: Replace document tags (human edit); max 10 tags.
+- **Request**: `{"tags": [{"slug": "...", "label": "..."}], "source": "human"}`.
+
+### PATCH `/internal/v1/chunks/{chunk_id}/tags`
+
+- **Purpose**: Replace chunk tags; max 5 tags; unions with document tags at retrieval.
+
+### POST `/internal/v1/documents/{document_id}/retag`
+
+- **Purpose**: Trigger LLM re-tag for document (F20); returns updated tags or async job id (04-tech-plan).
+
+Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequest` delta.
 
 ---
 

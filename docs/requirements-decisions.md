@@ -1,7 +1,7 @@
 # Requirements decisions log
 
 > **Stage**: 01-requirements  
-> **Last updated**: 2026-05-19
+> **Last updated**: 2026-05-24 (EV-001 delta)
 
 | ID | Topic | Decision | ADR | Source |
 |----|-------|----------|-----|--------|
@@ -42,6 +42,34 @@
 | TP-007 | Postgres tier | DO Managed **1 GB basic** start |
 | TP-008 | LlamaIndex | Pin **0.11.x** at build task T8.1 |
 | TP-009 | Cost gate | Pilot **~$42–48/mo** feasible ≤ $50 with scale-to-zero GPU |
+
+## EV-001 resolutions (2026-05-24)
+
+| ID | Topic | Decision | ADR |
+|----|-------|----------|-----|
+| RD-024 | EV-001 manifest | Update all mandatory + recommended spec docs | ADR-014 |
+| RD-025 | Chunk tag retrieval | **Union** chunk tags with document tags | ADR-014 |
+| RD-026 | Browse open document | **External source URL only** (not in-app full text) | ADR-014 |
+| RD-027 | RAG tag combine | User-selected tags only when set; LLM infers when none | ADR-014 |
+| RD-028 | Tag limits | Max **10** document / **5** chunk tags | ADR-014 |
+| RD-029 | Browse UX | Tags + title/URL search; **20** per page | ADR-014 |
+| RD-030 | Tag language | Match `document.language` (en/es) | ADR-014 |
+| RD-031 | Seed tags | Ship starter tag list in fixtures/DB | ADR-014 |
+| RD-032 | Chat tag UI | Tag filter **chips in chat sidebar** | ADR-014 |
+| RD-033 | Feature IDs | **F19** browse, **F20** LLM tag, **F21** admin chunks/tags, **F22** tag RAG | ADR-014 |
+
+## 04-tech-plan EV-001 resolutions (2026-05-24)
+
+| ID | Topic | Decision | ADR |
+|----|-------|----------|-----|
+| TP-010 | Ingest tagging step | After chunking, **before** embed | ADR-015 |
+| TP-011 | Admin LLM re-tag | **Async Modal job** | ADR-015 |
+| TP-012 | Re-tag job polling | Extend **`jobs`** table (`job_type=retag`) | ADR-015 |
+| TP-013 | Retrieval SQL | **Union match** (document OR chunk tag) | ADR-015 |
+| TP-014 | Tag inference LLM | **Same vLLM** + `VECINITA_LLM_TAG_MAX_TOKENS` | ADR-015 |
+| TP-015 | Browse UI route | **`/corpus`** page + chat sidebar chips | ADR-015 |
+| TP-016 | EV-001 branch | **`evolve/EV-001-corpus-tags`** from main | ADR-015 |
+| TP-017 | EV-001 LLM cost | Extra calls **within ≤ $50/mo** cap | ADR-015 |
 
 Unresolved:
 

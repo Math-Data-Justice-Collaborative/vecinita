@@ -36,6 +36,36 @@ def test_chat_rag_cors_preflight_on_ask_stream() -> None:
     assert response.headers.get("access-control-allow-origin") == CHAT_ORIGIN
 
 
+def test_chat_rag_cors_preflight_on_browse_documents() -> None:
+    """TC-046: OPTIONS on GET /api/v1/documents from chat frontend origin."""
+    client = TestClient(create_chat_app())
+    response = client.options(
+        "/api/v1/documents",
+        headers={
+            "Origin": CHAT_ORIGIN,
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == CHAT_ORIGIN
+
+
+def test_chat_rag_cors_preflight_on_tags() -> None:
+    """TC-046: OPTIONS on GET /api/v1/tags from chat frontend origin."""
+    client = TestClient(create_chat_app())
+    response = client.options(
+        "/api/v1/tags",
+        headers={
+            "Origin": CHAT_ORIGIN,
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == CHAT_ORIGIN
+
+
 def test_internal_write_cors_preflight_on_documents(monkeypatch: pytest.MonkeyPatch) -> None:
     if not os.environ.get("DATABASE_URL"):
         pytest.skip("DATABASE_URL required for internal write app import")
@@ -88,6 +118,48 @@ def test_data_management_cors_preflight_on_jobs() -> None:
     )
     assert response.status_code == 200
     assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
+
+
+def test_internal_write_cors_preflight_on_document_tags_patch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    if not os.environ.get("DATABASE_URL"):
+        pytest.skip("DATABASE_URL required for internal write app import")
+    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", "test-key")
+    client = TestClient(create_write_app())
+    response = client.options(
+        "/internal/v1/documents/00000000-0000-0000-0000-000000000001/tags",
+        headers={
+            "Origin": ADMIN_ORIGIN,
+            "Access-Control-Request-Method": "PATCH",
+            "Access-Control-Request-Headers": "authorization, content-type",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
+    allow_methods = response.headers.get("access-control-allow-methods", "").upper()
+    assert "PATCH" in allow_methods
+
+
+def test_internal_write_cors_preflight_on_chunk_tags_patch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    if not os.environ.get("DATABASE_URL"):
+        pytest.skip("DATABASE_URL required for internal write app import")
+    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", "test-key")
+    client = TestClient(create_write_app())
+    response = client.options(
+        "/internal/v1/chunks/00000000-0000-0000-0000-000000000001/tags",
+        headers={
+            "Origin": ADMIN_ORIGIN,
+            "Access-Control-Request-Method": "PATCH",
+            "Access-Control-Request-Headers": "authorization, content-type",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
+    allow_methods = response.headers.get("access-control-allow-methods", "").upper()
+    assert "PATCH" in allow_methods
 
 
 def test_no_cors_middleware_when_origins_unset(monkeypatch: pytest.MonkeyPatch) -> None:

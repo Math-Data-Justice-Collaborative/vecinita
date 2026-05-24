@@ -6,24 +6,35 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 
 
 class JobOptions(BaseModel):
-    """Optional ingest tuning parameters for a job."""
+    """Optional ingest or retag tuning parameters for a job."""
 
     model_config = ConfigDict(extra="forbid")
 
     chunk_size_tokens: int | None = Field(default=None, ge=64, le=2048)
+    job_type: Literal["ingest", "retag"] = "ingest"
+    document_id: UUID | None = None
 
 
 class CreateJobRequest(BaseModel):
-    """POST /jobs request to enqueue URL ingestion."""
+    """POST /jobs request to enqueue URL ingestion or LLM retag."""
 
     model_config = ConfigDict(extra="forbid")
 
-    urls: list[HttpUrl] = Field(..., min_length=1)
+    urls: list[HttpUrl] = Field(default_factory=list)
     options: JobOptions | None = None
+
+    @model_validator(mode="after")
+    def validate_job_payload(self) -> CreateJobRequest:
+        job_type = self.options.job_type if self.options else "ingest"
+        if job_type == "ingest" and not self.urls:
+            raise ValueError("urls required for ingest jobs")
+        if job_type == "retag" and (self.options is None or self.options.document_id is None):
+            raise ValueError("document_id required for retag jobs")
+        return self
 
 
 class CreateJobResponse(BaseModel):

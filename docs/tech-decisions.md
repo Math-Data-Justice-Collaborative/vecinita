@@ -2,7 +2,7 @@
 
 > **Stage**: 05-verify-tech  
 > **Extends**: docs/requirements-decisions.md, docs/product-decisions.md  
-> **Last updated**: 2026-05-19
+> **Last updated**: 2026-05-24
 
 ## 05-verify-tech resolutions
 
@@ -20,6 +20,35 @@
 | TV-010 | D4 ingest fixture | Add **T2.9** before ingest tests | TS-C19 | execution-plan.md |
 | TV-011 | Modal DB boundary | Add **T13.4** CI grep for `DATABASE_URL` in Modal paths | TS-C13 | execution-plan.md |
 | TV-012 | T1.1 scaffold | Explicit `apps/internal-write-api` in layout task | TS-C16 | execution-plan.md |
+
+## EV-001 04-tech-plan resolutions (2026-05-24)
+
+| ID | Topic | Decision | ADR |
+|----|-------|----------|-----|
+| TV-013 | Ingest tagging order | After chunk, before embed | ADR-015 TP-010 |
+| TV-014 | Admin retag | Async job; `job_type=retag` on jobs table | ADR-015 TP-011, TP-012 |
+| TV-015 | Tag filter SQL | Union match (doc OR chunk) | ADR-015 TP-013 |
+| TV-016 | Tag inference | Same Modal vLLM | ADR-015 TP-014 |
+| TV-017 | Browse UI | `/corpus` route + sidebar chips | ADR-015 TP-015 |
+| TV-018 | EV-001 task count | **38** new tasks (T15.1–T19.5 incl. T18.7); **111** total | execution-plan.md |
+| TV-019 | Data deps D8/D9 | Seed tags verified; tagged corpus pending | data-management-plan.md |
+| TV-020 | Connectivity | Extend TC-046 / staging smoke for browse GET | T17.4, T19.2–T19.3 |
+
+## EV-001 05-verify-tech resolutions (2026-05-24)
+
+| ID | Topic | Decision | Stmt | Source docs updated |
+|----|-------|----------|------|---------------------|
+| TV-021 | T18.6 AC mapping | **AC-T4** (admin tags), not AC-T3 | TS-EV001-01 | execution-plan.md |
+| TV-022 | T16.4 vs T18.3 | Ingest batch tag upsert vs admin GET/PATCH split | TS-EV001-02, TS-EV001-03 | execution-plan.md |
+| TV-023 | packages/tagging | Approved component in spec + inventory | TS-EV001-10 | spec.md, dependency-inventory.md |
+| TV-024 | Batch retag | **Per-document only** in v1 | TS-EV001-09 | feature-list.md |
+| TV-025 | Admin PATCH CORS | Add **T18.7** + **TC-049** | TS-EV001-04 | execution-plan.md, test-plan.md |
+| TV-026 | H5 browse gate | Add **T19.5**; Phase 5 exit gate includes H5 | TS-EV001-05 | execution-plan.md |
+| TV-027 | test-plan connectivity | §Connectivity tiers (H0c/H0i/H4/H5) | TS-EV001-06 | test-plan.md |
+| TV-028 | AC-T2 / UJ-010 | **TC-048** Vitest external URL | TS-EV001-07 | test-plan.md, execution-plan.md |
+| TV-029 | Traceability tidy | AC-T6 cites, config wiring, RD-030 on T16.2, T19.1 secrets note | TS-EV001-08+ | execution-plan.md, staging-secrets-matrix.md |
+| TV-030 | Task count | **38** EV-001 tasks; **111** total | — | execution-plan.md |
+| TV-031 | UJ-002 TC mapping | Remove erroneous TC-011 from UJ-002 row | TS-EV001-15 | test-plan.md |
 
 ## Deferred / accepted without plan change
 

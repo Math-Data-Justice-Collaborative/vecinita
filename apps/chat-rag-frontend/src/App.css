@@ -136,3 +136,78 @@ button.secondary {
   color: #b3261e;
   margin: 0 0 0.75rem;
 }
+
+.app-nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tag-chip {
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: #e8eaed;
+  color: #333;
+  font-size: 0.85rem;
+}
+
+.tag-chip.active {
+  background: #1a73e8;
+  color: #fff;
+}
+
+.corpus-browse {
+  background: #fff;
+  border: 1px solid #dde1e6;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.corpus-toolbar {
+  margin-bottom: 1rem;
+}
+
+.corpus-search input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  font: inherit;
+}
+
+.corpus-list {
+  list-style: none;
+  margin: 1rem 0;
+  padding: 0;
+}
+
+.corpus-item {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.corpus-item h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+}
+
+.corpus-tags {
+  margin: 0 0 0.5rem;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.corpus-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}

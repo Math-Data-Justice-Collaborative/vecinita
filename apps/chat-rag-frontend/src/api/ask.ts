@@ -44,11 +44,16 @@ function sleep(ms: number): Promise<void> {
 async function* streamAskOnce(
   question: string,
   baseUrl: string,
+  tags?: string[],
 ): AsyncGenerator<StreamEvent> {
+  const body: { question: string; tags?: string[] } = { question };
+  if (tags && tags.length > 0) {
+    body.tags = tags;
+  }
   const response = await fetch(`${baseUrl}/api/v1/ask/stream`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify(body),
   });
   if (!response.ok) {
     const detail = await response.text();
@@ -90,6 +95,7 @@ async function* streamAskOnce(
 }
 
 export type StreamAskOptions = {
+  tags?: string[];
   onRetry?: (attempt: number, maxAttempts: number) => void;
 };
 
@@ -103,7 +109,7 @@ export async function* streamAsk(
 
   for (let attempt = 1; attempt <= COLD_START_ASK_MAX_ATTEMPTS; attempt++) {
     try {
-      yield* streamAskOnce(question, baseUrl);
+      yield* streamAskOnce(question, baseUrl, options?.tags);
       return;
     } catch (err) {
       const status = err instanceof AskStreamError ? err.status : undefined;

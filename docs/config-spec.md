@@ -1,7 +1,7 @@
 # Configuration Specification
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-19
+> **Last updated**: 2026-05-24 (EV-001)
 
 ## Precedence
 
@@ -31,6 +31,10 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_MODAL_TOKEN_SECRET` | string | — | Yes | Modal credential |
 | `VECINITA_LLM_BACKEND` | string | `vllm` | No | `vllm` primary; `ollama` fallback only per ADR-009 |
 | `VECINITA_REQUEST_TIMEOUT_S` | int | `120` | No | Upstream Modal timeout (cold-start margin; see R5) |
+| `VECINITA_BROWSE_PAGE_SIZE` | int | `20` | No | Default page size for `GET /api/v1/documents` |
+| `VECINITA_MAX_TAGS_PER_DOCUMENT` | int | `10` | No | Hard cap on document tags |
+| `VECINITA_MAX_TAGS_PER_CHUNK` | int | `5` | No | Hard cap on chunk tags |
+| `VECINITA_TAG_SEED_PATH` | string | `data/fixtures/tags/seed_tags.json` | No | Starter tag vocabulary for LLM + browse facets |
 
 ### DO internal write API
 
@@ -47,6 +51,7 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_INTERNAL_API_KEY` | string | — | Yes | Matches DO secret |
 | `VECINITA_CHUNK_SIZE_TOKENS` | int | `256` | No | Ingest chunk target (tokenizer-based) |
 | `VECINITA_SCRAPE_TIMEOUT_S` | int | `30` | No | Per-URL fetch timeout |
+| `VECINITA_LLM_TAG_MAX_TOKENS` | int | `128` | No | Max tokens for LLM tagging completion per document |
 
 ### Frontends
 
@@ -54,6 +59,8 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 |----------|------|---------|----------|-------------|
 | `VITE_VECINITA_CHAT_API_URL` | string | `http://localhost:8000` | Yes (build) | ChatRAG Backend base |
 | `VITE_VECINITA_ADMIN_API_URL` | string | — | Yes | Modal ASGI or gateway URL for jobs |
+| `VITE_VECINITA_CORPUS_API_URL` | string | — | Yes (admin) | Internal write API base for corpus/tag admin |
+| `VITE_VECINITA_CORPUS_API_KEY` | string | — | Yes (admin build) | Bearer token for tag/chunk admin routes |
 
 ## Recommended defaults (spec)
 
@@ -72,6 +79,9 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_MIN_RETRIEVAL_SCORE` ≥ 0 and < 1 | Config module at startup |
 | `VECINITA_CHAT_MAX_TOKENS` ≥ 32 and ≤ 2048 | Config module at startup |
 | `VECINITA_CHUNK_SIZE_TOKENS` ≥ 64 | Ingest validation |
+| `VECINITA_MAX_TAGS_PER_DOCUMENT` ≥ 1 and ≤ 20 | Config module |
+| `VECINITA_MAX_TAGS_PER_CHUNK` ≥ 1 and ≤ 10 | Config module |
+| `VECINITA_BROWSE_PAGE_SIZE` ≥ 1 and ≤ 100 | Config module |
 | Reject unknown `VECINITA_*` in strict mode | Optional dev strictness |
 | No identity fields in public API bodies | OpenAPI + Pydantic models |
 

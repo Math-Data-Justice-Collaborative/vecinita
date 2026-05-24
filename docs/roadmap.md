@@ -1,7 +1,7 @@
 # Roadmap
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-19
+> **Last updated**: 2026-05-24 (EV-001)
 
 ## Vision
 
@@ -40,7 +40,19 @@ Deliver a **cost-conscious, US-hosted, zero-PII** bilingual community Q&A platfo
 - [ ] Cost estimate ≤ $50/mo validation
 - [ ] 11-verify-impl + 13-deploy-smoke
 
-### Phase 5: Post-v1 (deferred)
+### Phase 5: EV-001 — Corpus tags & browse (in progress)
+
+**Branch:** `evolve/EV-001-corpus-tags`  
+**ADR:** ADR-014 (product), ADR-015 (technical)
+
+- [ ] M15: Tag schema + fixtures (D8 verified, D9 pending)
+- [ ] M16: LLM auto-tag at ingest + admin re-tag job (F20)
+- [ ] M17: Public browse API, `/corpus` UI, tag-filtered RAG (F19, F22)
+- [ ] M18: Admin chunk viewer & tag editor (F21)
+- [ ] M19: Staging deploy + browse CORS smoke (TC-046)
+- [ ] UJ-009–UJ-012 E2E (local tier)
+
+### Phase 6: Post-v1 (deferred)
 
 - [ ] Dedicated API gateway (R6)
 - [ ] Multimodal / PDF ingest

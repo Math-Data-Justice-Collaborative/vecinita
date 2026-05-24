@@ -1,8 +1,8 @@
 # Context Brief — Vecinita (5-app monorepo)
 
 **Stage:** 00-context  
-**Date:** 2026-05-19  
-**Status:** Complete (regenerated)
+**Date:** 2026-05-19 (regenerated); **EV-001 delta:** 2026-05-24  
+**Status:** Complete (EV-001 delta merged)
 
 ---
 
@@ -81,6 +81,14 @@ Modal GPU tiers (if LLM/embedding on Modal): see `.cursor/skills/deployment-cata
 | R10 | Decision | Data sovereignty | **US-only** DO + Modal regions; no third-party LLM by default — ADR-004 |
 | R10a | Decision | Region | **United States** (`nyc1` / `sfo3` or Modal US workspace) — user confirmed |
 | R11 | Decision | Personal data | **Zero personal data (option B)** — no visitor or operator PII in Vecinita storage; stateless chat — ADR-004 |
+| R12 | Decision | Tag granularity (EV-001) | **Document-level primary**; chunk-level overrides for admin fine-tuning — ADR-014 |
+| R13 | Decision | Community corpus access (EV-001) | **Browse + filter by tags**; full document text on explicit open — ADR-014 |
+| R14 | Decision | Frontend targets (EV-001) | **Both** — community browse in chat-rag-frontend; admin chunks/tags in data-management-frontend — ADR-014 |
+| R15 | Decision | LLM tagging trigger (EV-001) | **Auto on ingest + admin re-run/override** — ADR-014 |
+| R16 | Decision | RAG tag filter (EV-001) | **User-selected tags + LLM-inferred tags from question** — ADR-014 |
+| R17 | Decision | Public read API (EV-001) | **ChatRAG backend** public GET routes (no secrets) — ADR-014 |
+| R18 | Decision | Tag vocabulary (EV-001) | **Hybrid** — suggested/controlled list + admin can add tags — ADR-014 |
+| R19 | Decision | Evolve routing (EV-001) | **Start 16-evolve** cycle for F19–F22 — user confirmed 2026-05-24 |
 
 ---
 
@@ -288,3 +296,91 @@ Monorepo with `backend/` (gateway :8004, agent :8000, embedding :8001), `auth/`,
 **proxy:** Render FastAPI, routes `/jobs/*`, `/model/*`, `/embedding/*`, injects Modal credentials server-side.
 
 </details>
+
+<details>
+<summary>explore — EV-001 repo scan (2026-05-24)</summary>
+
+Full structured report: corpus schema without tags; chat frontend ask-only; admin CorpusList list/delete only; retriever pgvector-only; ingest pipeline without LLM tagging step. Public read APIs and tag CRUD absent. Admin secrets embedded via VITE_* build-time vars. Staging URLs in workflow-state deployment.staging.urls.
+
+</details>
+
+---
+
+## 11. EV-001 Feature Delta — Corpus Tags & Community Browse
+
+**Evolve cycle:** EV-001 (2026-05-24)  
+**User intent:** Community members browse/filter corpus by tags; LLM and human tags improve RAG; admins view chunks and edit tags.
+
+### Current implementation gap (repo scan 2026-05-24)
+
+| Capability | Status | Key evidence |
+|------------|--------|--------------|
+| Tag tables / API | **Missing** | `apps/database/alembic/versions/20260519_0001_initial_corpus_schema.py` — documents/chunks/embeddings only |
+| Public document browse | **Missing** | Chat frontend: ask/stream only (`apps/chat-rag-frontend/src/api/ask.ts`) |
+| Admin chunk viewer | **Missing** | Admin UI: list/delete documents only (`CorpusList.tsx`) |
+| Tag-filtered retrieval | **Missing** | `packages/rag/vecinita_rag/retriever.py` — pgvector only, no tag JOIN |
+| LLM tagging in ingest | **Missing** | `pipeline.py` — scrape → chunk → embed → batch upsert |
+
+### Proposed features (for 01-requirements delta)
+
+| ID | Feature | Apps |
+|----|---------|------|
+| F19 | Public corpus browse & tag filter | chat-rag-frontend, chat-rag-backend |
+| F20 | LLM auto-tagging at ingest + admin re-tag | data-management-backend, Modal LLM |
+| F21 | Admin chunk viewer & tag editor | data-management-frontend, internal-write-api |
+| F22 | Tag-aware RAG (user filter + LLM inference) | chat-rag-backend, packages/rag |
+
+### Multi-app topology (connectivity)
+
+```mermaid
+flowchart LR
+  subgraph community [Community browser]
+    ChatFE[chat-rag-frontend]
+  end
+  subgraph public_api [Public read - new]
+    ChatAPI[chat-rag-backend GET /api/v1/documents]
+  end
+  subgraph admin [Admin operator]
+    AdminFE[data-management-frontend]
+  end
+  subgraph protected [Protected write]
+    Modal[Modal /jobs + ingest]
+    WriteAPI[internal-write-api]
+  end
+  PG[(Postgres tags + corpus)]
+  ChatFE -->|ask + browse| ChatAPI
+  ChatFE --> ChatAPI
+  AdminFE --> Modal
+  AdminFE --> WriteAPI
+  ChatAPI --> PG
+  Modal --> WriteAPI
+  WriteAPI --> PG
+```
+
+**Browser integration risks:**
+
+| Risk | Mitigation |
+|------|------------|
+| New public GET routes need CORS on chat backend | Re-run H4 after deploy; extend `VECINITA_CORS_ORIGINS` if needed |
+| Admin tag writes via `VITE_VECINITA_CORPUS_API_KEY` in static bundle | Known v1 weakness; evaluate server-side admin proxy in 04-tech-plan |
+| LLM tagging adds ingest latency/cost | Batch tag step; cap tags per doc in config-spec |
+
+### Cross-reference: EV-001 vs ADR-004
+
+| Requirement | Compatible? | Notes |
+|-------------|-------------|-------|
+| No user accounts for community browse | Yes | Public read same as public ask |
+| Tag provenance without operator PII | Yes | Store `source: llm \| human` only — no `created_by` user row |
+| Corpus is public content | Yes | Tags are metadata on public documents |
+| No chat history in DB | Yes | Tag filter is per-request on AskRequest |
+
+### Unresolved gaps (EV-001 → 01-requirements)
+
+1. **Exact tag schema** — normalized `tags` table vs JSONB on documents; max tags per document/chunk.
+2. **LLM tag prompt & model** — reuse Qwen instruct vs smaller classifier; bilingual tag labels.
+3. **Chunk override semantics** — union vs replace document tags at retrieval time.
+4. **Admin PATCH API shape** — extend internal-write vs new `/internal/v1/tags` routes.
+5. **Browse UX** — pagination, search by title/url, tag facet UI in chat-rag-frontend.
+6. **Eval fixtures** — tagged seed documents for CI retrieval tests.
+
+**ADR:** [ADR-014](adr/ADR-014-corpus-tagging-and-browse.md)

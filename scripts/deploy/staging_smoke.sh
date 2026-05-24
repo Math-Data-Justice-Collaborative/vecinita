@@ -65,9 +65,35 @@ print('OK: ask returned answer in', p['language'])
   echo "H3: sample ask latency ${elapsed_ms}ms (informative; p95 gate: uv run pytest tests/smoke/test_staging_latency.py -m live)"
 }
 
+run_h3b_browse() {
+  local chat_url="${VECINITA_STAGING_CHAT_URL:-}"
+  if [[ -z "$chat_url" ]]; then
+    echo "H3b: skipped (set VECINITA_STAGING_CHAT_URL)"
+    return 0
+  fi
+
+  RAN=$((RAN + 1))
+  echo "H3b: EV-001 browse GET smoke (/api/v1/documents, /api/v1/tags)"
+  curl -fsS "${chat_url%/}/api/v1/documents?page=1&page_size=5" | tee /tmp/vecinita-browse-docs.json
+  python3 -c "
+import json
+p=json.load(open('/tmp/vecinita-browse-docs.json'))
+assert 'items' in p and 'total' in p, p
+print('OK: browse documents returned', len(p['items']), 'items (total', p['total'], ')')
+"
+  curl -fsS "${chat_url%/}/api/v1/tags" | tee /tmp/vecinita-browse-tags.json
+  python3 -c "
+import json
+p=json.load(open('/tmp/vecinita-browse-tags.json'))
+assert 'tags' in p, p
+print('OK: browse tags returned', len(p['tags']), 'facets')
+"
+}
+
 run_h1
 run_h2
 run_h3
+run_h3b_browse
 
 if [[ "$RAN" -eq 0 ]]; then
   echo "No staging checks ran; set VECINITA_STAGING_CHAT_URL and/or DATABASE_URL."

@@ -1,7 +1,7 @@
 # Data Management Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-19
+> **Last updated**: 2026-05-24 (EV-001 tagging schema)
 
 ## Overview
 
@@ -25,7 +25,8 @@ Vecinita stores **public corpus data only** in DO Postgres: documents, chunks, 3
 | D4 | Ingest HTML fixture | corpus_fixture | `data/fixtures/ingest/` | none | TC-010 |
 | D5 | Alembic migrations | migration | `apps/database/alembic/` | none | All DB tests |
 | D6 | FastEmbed model weights | model_weights | Hugging Face → Modal volume | HF token if gated | Modal embed |
-| D7 | vLLM model weights | model_weights | Hugging Face / vendor → Modal volume | TBD | Modal LLM |
+| D8 | Seed tag vocabulary | config_fixture | `data/fixtures/tags/seed_tags.json` | none | TC-041, F20 |
+| D9 | Tagged corpus eval | corpus_fixture | `data/fixtures/corpus/tagged/` | none | TC-040, TC-044 |
 
 ## Schema (allowed tables)
 
@@ -36,8 +37,11 @@ Vecinita stores **public corpus data only** in DO Postgres: documents, chunks, 3
 | `embeddings` | vector(384) + chunk_id | No |
 | `jobs` | Scrape job status, urls | No |
 | `config` | Operational flags | No |
+| `tags` | Normalized tag labels (language, slug) | No |
+| `document_tags` | Document ↔ tag assignments (`source`: llm \| human) | No |
+| `chunk_tags` | Chunk ↔ tag assignments (`source`: llm \| human) | No |
 
-**Forbidden:** `users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`, `auth_*` — enforced by migrations + `tests/privacy/`.
+**Forbidden:** `users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`, `auth_*`, `created_by`, operator identity columns on tag tables — enforced by migrations + `tests/privacy/`.
 
 ## Sources
 
