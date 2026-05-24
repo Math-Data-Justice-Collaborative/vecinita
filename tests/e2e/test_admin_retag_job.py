@@ -7,13 +7,13 @@ from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import HttpUrl
 from sqlalchemy import create_engine, text
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.jobs import run_job
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_embedding_client import EMBEDDING_DIMENSION
 from vecinita_internal_write_api.app import create_app as create_write_app
-from pydantic import HttpUrl
 from vecinita_shared_schemas.internal_write import (
     BatchUpsertRequest,
     ChunkUpsert,
