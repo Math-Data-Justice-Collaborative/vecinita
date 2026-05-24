@@ -1,0 +1,12 @@
+{
+  "tags": [
+    { "slug": "housing", "label_en": "Housing", "label_es": "Vivienda" },
+    { "slug": "legal", "label_en": "Legal", "label_es": "Legal" },
+    { "slug": "benefits", "label_en": "Benefits", "label_es": "Beneficios" },
+    { "slug": "health", "label_en": "Health", "label_es": "Salud" },
+    { "slug": "employment", "label_en": "Employment", "label_es": "Empleo" },
+    { "slug": "immigration", "label_en": "Immigration", "label_es": "Inmigración" },
+    { "slug": "education", "label_en": "Education", "label_es": "Educación" },
+    { "slug": "community", "label_en": "Community", "label_es": "Comunidad" }
+  ]
+}
