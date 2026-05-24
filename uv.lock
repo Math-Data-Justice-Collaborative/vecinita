@@ -1765,6 +1765,7 @@ dependencies = [
     { name = "vecinita-llm-client" },
     { name = "vecinita-rag" },
     { name = "vecinita-shared-schemas" },
+    { name = "vecinita-tagging" },
 ]
 
 [package.metadata]
@@ -1777,6 +1778,7 @@ requires-dist = [
     { name = "vecinita-llm-client", editable = "packages/llm-client" },
     { name = "vecinita-rag", editable = "packages/rag" },
     { name = "vecinita-shared-schemas", editable = "packages/shared-schemas" },
+    { name = "vecinita-tagging", editable = "packages/tagging" },
 ]
 
 [[package]]

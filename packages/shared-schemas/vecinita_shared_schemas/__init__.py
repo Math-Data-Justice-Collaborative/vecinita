@@ -1,6 +1,17 @@
 """Shared Pydantic models and cross-cutting helpers (ADR-011)."""
 
-from vecinita_shared_schemas.chat_rag import AskRequest, AskResponse, HealthResponse, Source
+from vecinita_shared_schemas.chat_rag import (
+    AskRequest,
+    AskResponse,
+    DocumentBrowseDetail,
+    DocumentBrowseItem,
+    DocumentBrowsePage,
+    HealthResponse,
+    Source,
+    TagFacet,
+    TagListResponse,
+    TagSummary,
+)
 from vecinita_shared_schemas.data_management import CreateJobRequest, CreateJobResponse, Job
 from vecinita_shared_schemas.internal_write import (
     BatchUpsertRequest,
@@ -24,10 +35,16 @@ __all__ = [
     "BatchUpsertResponse",
     "CreateJobRequest",
     "CreateJobResponse",
+    "DocumentBrowseDetail",
+    "DocumentBrowseItem",
+    "DocumentBrowsePage",
     "DocumentSummary",
     "HealthResponse",
     "Job",
     "Source",
+    "TagFacet",
+    "TagListResponse",
+    "TagSummary",
     "configure_logging",
     "find_identity_fields",
     "log_request_event",

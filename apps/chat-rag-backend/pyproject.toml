@@ -12,6 +12,7 @@ dependencies = [
     "vecinita-shared-schemas",
     "vecinita-embedding-client",
     "vecinita-llm-client",
+    "vecinita-tagging",
 ]
 
 [build-system]
@@ -26,3 +27,4 @@ vecinita-rag = { workspace = true }
 vecinita-shared-schemas = { workspace = true }
 vecinita-embedding-client = { workspace = true }
 vecinita-llm-client = { workspace = true }
+vecinita-tagging = { workspace = true }

@@ -12,7 +12,7 @@ pytestmark = pytest.mark.e2e
 
 
 class _EmptyRetriever:
-    def retrieve_chunks(self, query: str):  # type: ignore[no-untyped-def]
+    def retrieve_chunks(self, query: str, *, tag_slugs: list[str] | None = None):  # type: ignore[no-untyped-def]
         return []
 
 

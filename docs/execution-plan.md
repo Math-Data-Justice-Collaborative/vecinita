@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 5: EV-001 Corpus tags & browse |
-| **Active milestone** | M17: Public browse API, tag RAG, ChatRAG UI |
-| **Active task** | T17.1 — regenerate shared-schemas from OpenAPI 0.2.0 |
-| **Tasks completed** | 88 / 111 |
+| **Active milestone** | M18: Admin chunk viewer & tag editor |
+| **Active task** | T18.1 — admin chunk list integration test (red) |
+| **Tasks completed** | 99 / 111 |
 | **Last updated** | 2026-05-24 |
 | **Evolve cycle** | EV-001 (F19–F22) |
 
@@ -368,17 +368,17 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
-| T17.1 | Regenerate shared-schemas from OpenAPI 0.2.0 tag/browse models | Code | pending | ADR-011, openapi/chat-rag.yaml | T15.2, T3.4 | — | EV-001 | F19, F22 |
-| T17.2 | Test: TC-040, TC-041 browse API integration (red) | Test | pending | UJ-009, test-plan | T17.1, T15.6 | D9 | EV-001 | F19 |
-| T17.3 | ChatRAG backend: `GET /api/v1/documents`, `/tags`, `/documents/{id}`; wire browse `VECINITA_*` config | Code | pending | api-contract.md, config-spec, F19 | T17.2 | — | EV-001 | F19 |
-| T17.4 | Test: TC-046 CORS preflight on browse GET (`tests/unit/test_cors_policy.py`) | Test | pending | connectivity-gates H4 | T17.3 | — | EV-001 | F19 |
-| T17.5 | `packages/rag` tag-filter SQL (union match) + LLM tag inference hook | Code | pending | ADR-015 TP-013, RD-027 | T16.2, T8.4 | D9 | EV-001 | F22 |
-| T17.6 | Test: TC-044, TC-045 tag-filtered retrieval unit tests | Test | pending | UJ-012, test-plan, acceptance-criteria AC-T5, AC-T6 | T17.5 | D9 | EV-001 | F22 |
-| T17.7 | Wire `AskRequest.tags[]` on ask/stream routes | Code | pending | openapi/chat-rag.yaml | T17.5, T10.4 | — | EV-001 | F22 |
-| T17.8 | ChatRAG frontend `/corpus` browse page (tags, search, pagination, external URL) | Code | pending | UJ-009, UJ-010, AC-T2, ADR-015 TP-015 | T17.3, T11.1 | — | EV-001 | F19 |
-| T17.9 | Chat sidebar tag filter chips → ask/stream payload | Code | pending | RD-032, UJ-012 | T17.7, T11.2 | — | EV-001 | F22 |
-| T17.10 | Vitest: browse list + tag chip + external URL link (TC-048) | Test | pending | UJ-010, AC-T2, test-plan TC-048 | T17.8, T17.9 | — | EV-001 | F19, F22 |
-| T17.11 | E2E: UJ-009 browse, UJ-012 tag-filtered ask | Test | pending | acceptance-criteria AC-T1, AC-T5 | T17.8, T17.9 | D9 | EV-001 | F19, F22 |
+| T17.1 | Regenerate shared-schemas from OpenAPI 0.2.0 tag/browse models | Code | completed | ADR-011, openapi/chat-rag.yaml | T15.2, T3.4 | — | EV-001 | F19, F22 |
+| T17.2 | Test: TC-040, TC-041 browse API integration (red) | Test | completed | UJ-009, test-plan | T17.1, T15.6 | D9 | EV-001 | F19 |
+| T17.3 | ChatRAG backend: `GET /api/v1/documents`, `/tags`, `/documents/{id}`; wire browse `VECINITA_*` config | Code | completed | api-contract.md, config-spec, F19 | T17.2 | — | EV-001 | F19 |
+| T17.4 | Test: TC-046 CORS preflight on browse GET (`tests/unit/test_cors_policy.py`) | Test | completed | connectivity-gates H4 | T17.3 | — | EV-001 | F19 |
+| T17.5 | `packages/rag` tag-filter SQL (union match) + LLM tag inference hook | Code | completed | ADR-015 TP-013, RD-027 | T16.2, T8.4 | D9 | EV-001 | F22 |
+| T17.6 | Test: TC-044, TC-045 tag-filtered retrieval unit tests | Test | completed | UJ-012, test-plan, acceptance-criteria AC-T5, AC-T6 | T17.5 | D9 | EV-001 | F22 |
+| T17.7 | Wire `AskRequest.tags[]` on ask/stream routes | Code | completed | openapi/chat-rag.yaml | T17.5, T10.4 | — | EV-001 | F22 |
+| T17.8 | ChatRAG frontend `/corpus` browse page (tags, search, pagination, external URL) | Code | completed | UJ-009, UJ-010, AC-T2, ADR-015 TP-015 | T17.3, T11.1 | — | EV-001 | F19 |
+| T17.9 | Chat sidebar tag filter chips → ask/stream payload | Code | completed | RD-032, UJ-012 | T17.7, T11.2 | — | EV-001 | F22 |
+| T17.10 | Vitest: browse list + tag chip + external URL link (TC-048) | Test | completed | UJ-010, AC-T2, test-plan TC-048 | T17.8, T17.9 | — | EV-001 | F19, F22 |
+| T17.11 | E2E: UJ-009 browse, UJ-012 tag-filtered ask | Test | completed | acceptance-criteria AC-T1, AC-T5 | T17.8, T17.9 | D9 | EV-001 | F19, F22 |
 
 #### M18: Admin chunk viewer & tag editor (F21)
 
@@ -481,7 +481,7 @@ main
 | PR-17 | Minor | M14 | feat/M14-staging-deploy | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/33 |
 | PR-18 | Major | Phase 4 | phase/4-integration | main | pending |
 | PR-19 | Minor | M15 | feat/M15-tag-schema | evolve/EV-001-corpus-tags | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/38 |
-| PR-20 | Minor | M16 | feat/M16-ingest-tagging | evolve/EV-001-corpus-tags | pending |
+| PR-20 | Minor | M16 | feat/M16-ingest-tagging | evolve/EV-001-corpus-tags | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/39 |
 | PR-21 | Minor | M17 | feat/M17-browse-tag-rag | evolve/EV-001-corpus-tags | pending |
 | PR-22 | Minor | M18 | feat/M18-admin-tags | evolve/EV-001-corpus-tags | pending |
 | PR-23 | Minor | M19 | feat/M19-ev001-deploy | evolve/EV-001-corpus-tags | pending |
@@ -580,17 +580,17 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T16.6 | M16 | 5 | Code | completed | T16.2, T6.3 | — | EV-001 | 2026-05-24 |
 | T16.7 | M16 | 5 | Code | completed | T16.6, T16.4 | — | EV-001 | 2026-05-24 |
 | T16.8 | M16 | 5 | Test | completed | T16.7 | D9 | EV-001 | 2026-05-24 |
-| T17.1 | M17 | 5 | Code | pending | T15.2, T3.4 | — | EV-001 |
-| T17.2 | M17 | 5 | Test | pending | T17.1, T15.6 | D9 | EV-001 |
-| T17.3 | M17 | 5 | Code | pending | T17.2 | — | EV-001 |
-| T17.4 | M17 | 5 | Test | pending | T17.3 | — | EV-001 |
-| T17.5 | M17 | 5 | Code | pending | T16.2, T8.4 | D9 | EV-001 |
-| T17.6 | M17 | 5 | Test | pending | T17.5 | D9 | EV-001 |
-| T17.7 | M17 | 5 | Code | pending | T17.5, T10.4 | — | EV-001 |
-| T17.8 | M17 | 5 | Code | pending | T17.3, T11.1 | — | EV-001 |
-| T17.9 | M17 | 5 | Code | pending | T17.7, T11.2 | — | EV-001 |
-| T17.10 | M17 | 5 | Test | pending | T17.8, T17.9 | — | EV-001 |
-| T17.11 | M17 | 5 | Test | pending | T17.8, T17.9 | D9 | EV-001 |
+| T17.1 | M17 | 5 | Code | completed | T15.2, T3.4 | — | EV-001 | 2026-05-24 |
+| T17.2 | M17 | 5 | Test | completed | T17.1, T15.6 | D9 | EV-001 | 2026-05-24 |
+| T17.3 | M17 | 5 | Code | completed | T17.2 | — | EV-001 | 2026-05-24 |
+| T17.4 | M17 | 5 | Test | completed | T17.3 | — | EV-001 | 2026-05-24 |
+| T17.5 | M17 | 5 | Code | completed | T16.2, T8.4 | D9 | EV-001 | 2026-05-24 |
+| T17.6 | M17 | 5 | Test | completed | T17.5 | D9 | EV-001 | 2026-05-24 |
+| T17.7 | M17 | 5 | Code | completed | T17.5, T10.4 | — | EV-001 | 2026-05-24 |
+| T17.8 | M17 | 5 | Code | completed | T17.3, T11.1 | — | EV-001 | 2026-05-24 |
+| T17.9 | M17 | 5 | Code | completed | T17.7, T11.2 | — | EV-001 | 2026-05-24 |
+| T17.10 | M17 | 5 | Test | completed | T17.8, T17.9 | — | EV-001 | 2026-05-24 |
+| T17.11 | M17 | 5 | Test | completed | T17.8, T17.9 | D9 | EV-001 | 2026-05-24 |
 | T18.1 | M18 | 5 | Test | pending | T15.2 | D9 | EV-001 |
 | T18.2 | M18 | 5 | Test | pending | T15.2 | D9 | EV-001 |
 | T18.3 | M18 | 5 | Code | pending | T18.1, T18.2 | — | EV-001 |
