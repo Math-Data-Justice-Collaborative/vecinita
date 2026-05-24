@@ -21,3 +21,17 @@ export interface DocumentSummary {
   title: string | null;
   language: string | null;
 }
+
+export interface TagInput {
+  slug: string;
+  label: string;
+  source?: "llm" | "human";
+}
+
+export interface ChunkDetail {
+  chunk_id: string;
+  chunk_index: number;
+  text: string;
+  token_count: number | null;
+  tags: TagInput[];
+}

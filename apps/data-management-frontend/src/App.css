@@ -38,12 +38,55 @@ label {
 }
 
 textarea,
-input[type="number"] {
+input[type="number"],
+input[type="text"],
+input[type="search"] {
   width: 100%;
   box-sizing: border-box;
   margin-top: 0.25rem;
   padding: 0.5rem;
   font: inherit;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+button.secondary {
+  background: #e8eaed;
+  color: #333;
+}
+
+.document-admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.chunk-list {
+  list-style: none;
+  padding: 0;
+}
+
+.chunk-item {
+  border-top: 1px solid #eee;
+  padding: 1rem 0;
+}
+
+.chunk-text {
+  white-space: pre-wrap;
+  background: #f6f7f9;
+  padding: 0.75rem;
+  border-radius: 4px;
+  max-height: 12rem;
+  overflow: auto;
+}
+
+.status-hint {
+  color: #555;
 }
 
 button {

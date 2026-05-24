@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 5: EV-001 Corpus tags & browse |
-| **Active milestone** | M18: Admin chunk viewer & tag editor |
-| **Active task** | T18.1 — admin chunk list integration test (red) |
-| **Tasks completed** | 99 / 111 |
+| **Active milestone** | M19: EV-001 deploy & connectivity smoke |
+| **Active task** | T19.1 — update staging-secrets-matrix for browse VITE URL |
+| **Tasks completed** | 106 / 111 |
 | **Last updated** | 2026-05-24 |
 | **Evolve cycle** | EV-001 (F19–F22) |
 
@@ -387,13 +387,13 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
-| T18.1 | Test: TC-042 admin chunk list (`tests/integration/test_admin_chunks.py`) | Test | pending | UJ-011 | T15.2 | D9 | EV-001 | F21 |
-| T18.2 | Test: TC-043 tag cap enforcement (max 10 doc / 5 chunk) | Test | pending | RD-028 | T15.2 | D9 | EV-001 | F21 |
-| T18.3 | Internal write API: `GET .../chunks`, PATCH document/chunk tag routes | Code | pending | openapi/internal-write.yaml | T18.1, T18.2 | — | EV-001 | F21 |
-| T18.4 | Admin UI: chunk viewer (read-only text per chunk) | Code | pending | UJ-011, F21 | T18.3, T7.1 | — | EV-001 | F21 |
-| T18.5 | Admin UI: tag editor + retag job trigger/poll | Code | pending | UJ-011, ADR-015 | T16.7, T18.4 | — | EV-001 | F21 |
-| T18.6 | E2E: UJ-011 admin tags (`tests/e2e/test_uj011_admin_tags.py`) | Test | pending | acceptance-criteria AC-T4 | T18.5 | D9 | EV-001 | F21 |
-| T18.7 | Test: TC-049 CORS PATCH preflight on admin tag routes (`test_cors_policy.py` + staging) | Test | pending | connectivity-gates H4, test-plan TC-049 | T18.3 | — | EV-001 | F21 |
+| T18.1 | Test: TC-042 admin chunk list (`tests/integration/test_admin_chunks.py`) | Test | completed | UJ-011 | T15.2 | D9 | EV-001 | F21 |
+| T18.2 | Test: TC-043 tag cap enforcement (max 10 doc / 5 chunk) | Test | completed | RD-028 | T15.2 | D9 | EV-001 | F21 |
+| T18.3 | Internal write API: `GET .../chunks`, PATCH document/chunk tag routes | Code | completed | openapi/internal-write.yaml | T18.1, T18.2 | — | EV-001 | F21 |
+| T18.4 | Admin UI: chunk viewer (read-only text per chunk) | Code | completed | UJ-011, F21 | T18.3, T7.1 | — | EV-001 | F21 |
+| T18.5 | Admin UI: tag editor + retag job trigger/poll | Code | completed | UJ-011, ADR-015 | T16.7, T18.4 | — | EV-001 | F21 |
+| T18.6 | E2E: UJ-011 admin tags (`tests/e2e/test_uj011_admin_tags.py`) | Test | completed | acceptance-criteria AC-T4 | T18.5 | D9 | EV-001 | F21 |
+| T18.7 | Test: TC-049 CORS PATCH preflight on admin tag routes (`test_cors_policy.py` + staging) | Test | completed | connectivity-gates H4, test-plan TC-049 | T18.3 | — | EV-001 | F21 |
 
 #### M19: EV-001 deploy & connectivity
 
@@ -482,7 +482,7 @@ main
 | PR-18 | Major | Phase 4 | phase/4-integration | main | pending |
 | PR-19 | Minor | M15 | feat/M15-tag-schema | evolve/EV-001-corpus-tags | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/38 |
 | PR-20 | Minor | M16 | feat/M16-ingest-tagging | evolve/EV-001-corpus-tags | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/39 |
-| PR-21 | Minor | M17 | feat/M17-browse-tag-rag | evolve/EV-001-corpus-tags | pending |
+| PR-21 | Minor | M17 | feat/M17-browse-tag-rag | evolve/EV-001-corpus-tags | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/40 |
 | PR-22 | Minor | M18 | feat/M18-admin-tags | evolve/EV-001-corpus-tags | pending |
 | PR-23 | Minor | M19 | feat/M19-ev001-deploy | evolve/EV-001-corpus-tags | pending |
 | PR-24 | Major | Phase 5 / EV-001 | evolve/EV-001-corpus-tags | main | pending |
@@ -591,13 +591,13 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T17.9 | M17 | 5 | Code | completed | T17.7, T11.2 | — | EV-001 | 2026-05-24 |
 | T17.10 | M17 | 5 | Test | completed | T17.8, T17.9 | — | EV-001 | 2026-05-24 |
 | T17.11 | M17 | 5 | Test | completed | T17.8, T17.9 | D9 | EV-001 | 2026-05-24 |
-| T18.1 | M18 | 5 | Test | pending | T15.2 | D9 | EV-001 |
-| T18.2 | M18 | 5 | Test | pending | T15.2 | D9 | EV-001 |
-| T18.3 | M18 | 5 | Code | pending | T18.1, T18.2 | — | EV-001 |
-| T18.4 | M18 | 5 | Code | pending | T18.3, T7.1 | — | EV-001 |
-| T18.5 | M18 | 5 | Code | pending | T16.7, T18.4 | — | EV-001 |
-| T18.6 | M18 | 5 | Test | pending | T18.5 | D9 | EV-001 |
-| T18.7 | M18 | 5 | Test | pending | T18.3 | — | EV-001 |
+| T18.1 | M18 | 5 | Test | completed | T15.2 | D9 | EV-001 | 2026-05-24 |
+| T18.2 | M18 | 5 | Test | completed | T15.2 | D9 | EV-001 | 2026-05-24 |
+| T18.3 | M18 | 5 | Code | completed | T18.1, T18.2 | — | EV-001 | 2026-05-24 |
+| T18.4 | M18 | 5 | Code | completed | T18.3, T7.1 | — | EV-001 | 2026-05-24 |
+| T18.5 | M18 | 5 | Code | completed | T16.7, T18.4 | — | EV-001 | 2026-05-24 |
+| T18.6 | M18 | 5 | Test | completed | T18.5 | D9 | EV-001 | 2026-05-24 |
+| T18.7 | M18 | 5 | Test | completed | T18.3 | — | EV-001 | 2026-05-24 |
 | T19.1 | M19 | 5 | Docs | pending | T17.3 | — | EV-001 |
 | T19.2 | M19 | 5 | Test | pending | T17.4 | — | EV-001 |
 | T19.3 | M19 | 5 | Config | pending | T19.2 | — | EV-001 |

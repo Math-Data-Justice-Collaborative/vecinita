@@ -28,6 +28,16 @@ class ChunkUpsert(BaseModel):
     embedding: list[float] = Field(..., min_length=384, max_length=384)
 
 
+class ChunkDetail(BaseModel):
+    """Chunk row for admin viewer."""
+
+    chunk_id: UUID
+    chunk_index: int
+    text: str
+    token_count: int | None = None
+    tags: list[TagInput] = Field(default_factory=list)
+
+
 class DocumentUpsert(BaseModel):
     """Document metadata plus embedded chunks for batch upsert."""
 
