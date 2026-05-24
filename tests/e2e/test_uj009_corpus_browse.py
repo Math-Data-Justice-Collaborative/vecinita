@@ -52,6 +52,4 @@ def test_uj009_corpus_browse_list_and_tags(browse_e2e_client: TestClient) -> Non
     assert housing_only.status_code == 200
     housing_items = housing_only.json()["items"]
     assert housing_items
-    assert all(
-        any(tag["slug"] == "housing" for tag in item["tags"]) for item in housing_items
-    )
+    assert all(any(tag["slug"] == "housing" for tag in item["tags"]) for item in housing_items)

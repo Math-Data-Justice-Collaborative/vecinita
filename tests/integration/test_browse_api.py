@@ -53,9 +53,7 @@ def test_tc040_browse_documents_paginated_with_tags(browse_client: TestClient) -
     assert filtered.status_code == 200
     housing_items = filtered.json()["items"]
     assert housing_items
-    assert all(
-        any(tag["slug"] == "housing" for tag in item["tags"]) for item in housing_items
-    )
+    assert all(any(tag["slug"] == "housing" for tag in item["tags"]) for item in housing_items)
 
     search = browse_client.get("/api/v1/documents", params={"q": "Legal Aid"})
     assert search.status_code == 200
