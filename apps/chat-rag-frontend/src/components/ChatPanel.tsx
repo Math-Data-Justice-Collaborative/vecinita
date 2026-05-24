@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 import {
   COLD_START_STATUS_MESSAGE,
@@ -8,9 +8,11 @@ import {
   isTokenEvent,
   streamAsk,
 } from "../api/ask";
+import { fetchTags, type TagFacet } from "../api/browse";
 import type { Source } from "../api/types";
 import { requireChatApiConfig } from "../config";
 import { useChatHistory } from "../hooks/useChatHistory";
+import { TagFilterChips } from "./TagFilterChips";
 import { SourceList } from "./SourceList";
 
 export function ChatPanel() {
@@ -18,6 +20,8 @@ export function ChatPanel() {
   const [error, setError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [tagFacets, setTagFacets] = useState<TagFacet[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const {
     messages,
     appendUserMessage,
@@ -26,6 +30,30 @@ export function ChatPanel() {
     setAssistantSources,
     clearHistory,
   } = useChatHistory();
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadTags() {
+      try {
+        const response = await fetchTags();
+        if (!cancelled) {
+          setTagFacets(response.tags);
+        }
+      } catch {
+        // Tag chips are optional; chat still works without facets.
+      }
+    }
+    void loadTags();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  function toggleTag(slug: string) {
+    setSelectedTags((current) =>
+      current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug],
+    );
+  }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -46,6 +74,7 @@ export function ChatPanel() {
       let sources: Source[] = [];
 
       for await (const chunk of streamAsk(trimmed, baseUrl, {
+        tags: selectedTags.length > 0 ? selectedTags : undefined,
         onRetry: () => {
           setStatusMessage(COLD_START_STATUS_MESSAGE);
         },
@@ -73,6 +102,9 @@ export function ChatPanel() {
 
   return (
     <section className="chat-panel" aria-label="Community Q&A chat">
+      {tagFacets.length > 0 ? (
+        <TagFilterChips tags={tagFacets} selected={selectedTags} onToggle={toggleTag} />
+      ) : null}
       <div className="message-list" data-testid="message-list">
         {messages.length === 0 ? (
           <p className="empty-hint">Ask a question in English or Spanish about your community.</p>

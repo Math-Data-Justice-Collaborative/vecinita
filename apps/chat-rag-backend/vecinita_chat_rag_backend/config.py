@@ -37,6 +37,7 @@ class ChatRagSettings:
     request_timeout_s: float
     min_retrieval_score: float = 0.2
     chat_max_tokens: int = 256
+    browse_page_size: int = 20
 
     @classmethod
     def from_env(cls) -> ChatRagSettings:
@@ -48,6 +49,7 @@ class ChatRagSettings:
             top_k=_int_env("VECINITA_TOP_K", 5),
             min_retrieval_score=_float_env("VECINITA_MIN_RETRIEVAL_SCORE", 0.2),
             chat_max_tokens=_int_env("VECINITA_CHAT_MAX_TOKENS", 256),
+            browse_page_size=_int_env("VECINITA_BROWSE_PAGE_SIZE", 20),
             embed_url=os.environ.get("VECINITA_MODAL_EMBED_URL"),
             llm_url=os.environ.get("VECINITA_MODAL_LLM_URL"),
             request_timeout_s=float(os.environ.get("VECINITA_REQUEST_TIMEOUT_S", "120")),

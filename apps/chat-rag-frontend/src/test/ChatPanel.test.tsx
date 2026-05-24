@@ -16,6 +16,27 @@ function sseResponse(body: string): Response {
   });
 }
 
+function mockFetchRouter(handlers: {
+  tags?: Response | (() => Response);
+  stream?: Response | (() => Response);
+}) {
+  return vi.fn((input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    if (url.includes("/api/v1/tags")) {
+      const response = handlers.tags ?? new Response(JSON.stringify({ tags: [] }), { status: 200 });
+      return Promise.resolve(typeof response === "function" ? response() : response);
+    }
+    if (url.includes("/api/v1/ask/stream")) {
+      const response = handlers.stream;
+      if (!response) {
+        return Promise.reject(new Error("Unexpected ask/stream fetch"));
+      }
+      return Promise.resolve(typeof response === "function" ? response() : response);
+    }
+    return Promise.reject(new Error(`Unexpected fetch: ${url}`));
+  });
+}
+
 describe("ChatPanel", () => {
   afterEach(() => {
     cleanup();
@@ -30,7 +51,12 @@ describe("ChatPanel", () => {
       'data: {"sources":[{"chunk_id":"c1","document_id":"d1","title":"Food pantry","url":"https://example.com","score":0.9}]}\n\n' +
       'data: {"done":true}\n\n';
 
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(sseResponse(sse)));
+    vi.stubGlobal(
+      "fetch",
+      mockFetchRouter({
+        stream: sseResponse(sse),
+      }),
+    );
 
     render(<ChatPanel />);
     fireEvent.change(screen.getByLabelText(/your question/i), {
@@ -64,12 +90,23 @@ describe("ChatPanel", () => {
       'data: {"sources":[]}\n\n' +
       'data: {"done":true}\n\n';
 
+    const streamFetch = vi
+      .fn()
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockImplementation(async () => sseResponse(okSse));
+
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockRejectedValueOnce(new TypeError("Failed to fetch"))
-        .mockResolvedValueOnce(sseResponse(okSse)),
+      vi.fn((input: RequestInfo | URL) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.includes("/api/v1/tags")) {
+          return Promise.resolve(new Response(JSON.stringify({ tags: [] }), { status: 200 }));
+        }
+        if (url.includes("/api/v1/ask/stream")) {
+          return streamFetch();
+        }
+        return Promise.reject(new Error(`Unexpected fetch: ${url}`));
+      }),
     );
 
     render(<ChatPanel />);
@@ -97,7 +134,12 @@ describe("ChatPanel", () => {
       'data: {"token":"Hi"}\n\n' +
       'data: {"sources":[]}\n\n' +
       'data: {"done":true}\n\n';
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(sseResponse(sse)));
+    vi.stubGlobal(
+      "fetch",
+      mockFetchRouter({
+        stream: sseResponse(sse),
+      }),
+    );
 
     render(<ChatPanel />);
     fireEvent.change(screen.getByLabelText(/your question/i), {

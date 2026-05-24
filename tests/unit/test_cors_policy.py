@@ -36,6 +36,36 @@ def test_chat_rag_cors_preflight_on_ask_stream() -> None:
     assert response.headers.get("access-control-allow-origin") == CHAT_ORIGIN
 
 
+def test_chat_rag_cors_preflight_on_browse_documents() -> None:
+    """TC-046: OPTIONS on GET /api/v1/documents from chat frontend origin."""
+    client = TestClient(create_chat_app())
+    response = client.options(
+        "/api/v1/documents",
+        headers={
+            "Origin": CHAT_ORIGIN,
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == CHAT_ORIGIN
+
+
+def test_chat_rag_cors_preflight_on_tags() -> None:
+    """TC-046: OPTIONS on GET /api/v1/tags from chat frontend origin."""
+    client = TestClient(create_chat_app())
+    response = client.options(
+        "/api/v1/tags",
+        headers={
+            "Origin": CHAT_ORIGIN,
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == CHAT_ORIGIN
+
+
 def test_internal_write_cors_preflight_on_documents(monkeypatch: pytest.MonkeyPatch) -> None:
     if not os.environ.get("DATABASE_URL"):
         pytest.skip("DATABASE_URL required for internal write app import")

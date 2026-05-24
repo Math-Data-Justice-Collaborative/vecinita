@@ -7,7 +7,7 @@ from collections.abc import Callable
 
 from llama_index.core.base.base_retriever import BaseRetriever
 from llama_index.core.schema import NodeWithScore, QueryBundle, TextNode
-from sqlalchemy import create_engine, text
+from sqlalchemy import bindparam, create_engine, text
 from sqlalchemy.engine import Engine
 
 from vecinita_rag.constants import DEFAULT_TOP_K, EMBEDDING_DIMENSION, MAX_TOP_K, MIN_TOP_K
@@ -58,11 +58,39 @@ class CorpusPgvectorRetriever(BaseRetriever):
         self._top_k = top_k
         self._score_threshold = score_threshold
 
-    def retrieve_chunks(self, query: str) -> list[RetrievedChunk]:
+    def retrieve_chunks(
+        self,
+        query: str,
+        *,
+        tag_slugs: list[str] | None = None,
+    ) -> list[RetrievedChunk]:
         query_vector = self._embed_fn(query)
         literal = _vector_literal(query_vector)
-        sql = text(
+        tag_clause = ""
+        params: dict[str, object] = {"query_embedding": literal, "top_k": self._top_k}
+        if tag_slugs:
+            tag_clause = """
+              AND (
+                EXISTS (
+                  SELECT 1
+                  FROM document_tags dt
+                  JOIN tags t ON t.id = dt.tag_id
+                  WHERE dt.document_id = d.id
+                    AND t.slug IN :tag_slugs
+                )
+                OR EXISTS (
+                  SELECT 1
+                  FROM chunk_tags ct
+                  JOIN tags t ON t.id = ct.tag_id
+                  WHERE ct.chunk_id = c.id
+                    AND t.slug IN :tag_slugs
+                )
+              )
             """
+            params["tag_slugs"] = tuple(tag_slugs)
+
+        sql = text(
+            f"""
             SELECT
                 c.id AS chunk_id,
                 d.id AS document_id,
@@ -74,15 +102,19 @@ class CorpusPgvectorRetriever(BaseRetriever):
             FROM embeddings e
             JOIN chunks c ON c.id = e.chunk_id
             JOIN documents d ON d.id = c.document_id
+            WHERE 1=1
+            {tag_clause}
             ORDER BY e.embedding <=> CAST(:query_embedding AS vector)
             LIMIT :top_k
             """
         )
+        if tag_slugs:
+            sql = sql.bindparams(bindparam("tag_slugs", expanding=True))
         with self._engine.connect() as conn:
             rows = (
                 conn.execute(
                     sql,
-                    {"query_embedding": literal, "top_k": self._top_k},
+                    params,
                 )
                 .mappings()
                 .all()

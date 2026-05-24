@@ -68,6 +68,22 @@ class LlmTagClient:
         filtered = [slug for slug in slugs if slug in allowed]
         return filtered[:max_tags]
 
+    def infer_query_tags(
+        self,
+        *,
+        question: str,
+        vocabulary: list[str],
+        max_tags: int = 3,
+    ) -> list[str]:
+        """Return tag slugs inferred from a community question."""
+        return self.infer_document_tags(
+            title="",
+            text=question,
+            language="en",
+            vocabulary=vocabulary,
+            max_tags=max_tags,
+        )
+
 
 def _build_document_tag_prompt(
     *,
