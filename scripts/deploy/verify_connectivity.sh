@@ -6,7 +6,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-echo "==> H0c local CORS policy tests"
+echo "==> H0c local CORS policy tests (incl. TC-046 browse GET, TC-049 admin PATCH)"
 uv run pytest tests/unit/test_cors_policy.py -q
 
 CHAT_API="${VECINITA_STAGING_CHAT_URL:-}"
@@ -20,7 +20,7 @@ if [[ -z "$CHAT_API" && -z "$CHAT_FE" && -z "$WRITE_API" && -z "$ADMIN_FE" ]]; t
   exit 0
 fi
 
-echo "==> H4/H5 live staging connectivity pytest"
+echo "==> H4/H5 live staging connectivity pytest (browse GET /api/v1/documents,/tags; admin PATCH)"
 export VECINITA_STAGING_CHAT_URL="$CHAT_API"
 export VECINITA_STAGING_CHAT_FRONTEND_URL="$CHAT_FE"
 export VECINITA_STAGING_WRITE_URL="$WRITE_API"

@@ -11,6 +11,7 @@
 | **H1** | Liveness | `GET {CHAT_URL}/health` → 200, `{"status":"ok"}`; optional write API |
 | **H2** | DB ready | `SELECT 1` via SQLAlchemy pool; `alembic current` revision == `alembic heads` |
 | **H3** | RAG smoke | `POST {CHAT_URL}/api/v1/ask` with pantry question → `answer` + `language` in `en`/`es` |
+| **H3b** | Browse smoke (EV-001) | `GET {CHAT_URL}/api/v1/documents` + `/api/v1/tags` → paginated items + tag facets |
 | **H4** | Browser CORS | `OPTIONS` from frontend origin → API returns `Access-Control-Allow-Origin` |
 | **H5** | Frontend bundle | Live JS contains staging API hosts (not `localhost`) |
 
@@ -55,6 +56,11 @@ CI on `main`: `.github/workflows/deploy-preflight.yml` (needs GitHub `MODAL_TOKE
 
    - Deploy order: `internal-write-api` → `chat-rag-backend` → frontends (specs in `create-all`)  
    - Set secrets from [staging-secrets-matrix.md](staging-secrets-matrix.md) before apps go healthy.
+
+   **EV-001 redeploy order:** Deploy `chat-rag-backend` (browse GET routes + CORS) and
+   `internal-write-api` (PATCH tag routes) **before** frontends. Browse uses existing
+   `VITE_VECINITA_CHAT_API_URL` — no new chat frontend secret; rebuild chat frontend after
+   backend is live so H5 bundle includes `/api/v1/documents` and `/api/v1/tags`.
 
 5. **Smoke** — after DO apps report running:
 
