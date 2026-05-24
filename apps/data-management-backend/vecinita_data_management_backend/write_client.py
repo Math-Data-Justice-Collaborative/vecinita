@@ -4,9 +4,17 @@ from __future__ import annotations
 
 import os
 from typing import Final
+from uuid import UUID
 
 import httpx
-from vecinita_shared_schemas.internal_write import BatchUpsertRequest, BatchUpsertResponse
+from vecinita_shared_schemas.internal_write import (
+    BatchUpsertRequest,
+    BatchUpsertResponse,
+    DocumentDetail,
+    TagInput,
+    TagPatchRequest,
+    TagPatchResponse,
+)
 
 _ENV_WRITE_URL: Final[str] = "VECINITA_INTERNAL_WRITE_URL"
 _ENV_API_KEY: Final[str] = "VECINITA_INTERNAL_API_KEY"
@@ -17,7 +25,7 @@ class InternalWriteClientError(RuntimeError):
 
 
 class InternalWriteClient:
-    """POST document batches to the DO internal write API."""
+    """Call DO internal write API document and tag routes."""
 
     def __init__(
         self,
@@ -40,14 +48,41 @@ class InternalWriteClient:
         if self._owns:
             self._client.close()
 
+    def _headers(self) -> dict[str, str]:
+        return {"Authorization": f"Bearer {self._api_key}"}
+
     def upsert_batch(self, body: BatchUpsertRequest) -> BatchUpsertResponse:
         response = self._client.post(
             "/internal/v1/documents/batch",
             json=body.model_dump(mode="json"),
-            headers={"Authorization": f"Bearer {self._api_key}"},
+            headers=self._headers(),
         )
         if response.status_code >= 400:
             raise InternalWriteClientError(
                 f"upsert_batch failed: {response.status_code} {response.text}"
             )
         return BatchUpsertResponse.model_validate(response.json())
+
+    def get_document_detail(self, document_id: UUID) -> DocumentDetail:
+        response = self._client.get(
+            f"/internal/v1/documents/{document_id}",
+            headers=self._headers(),
+        )
+        if response.status_code >= 400:
+            raise InternalWriteClientError(
+                f"get_document_detail failed: {response.status_code} {response.text}"
+            )
+        return DocumentDetail.model_validate(response.json())
+
+    def patch_document_tags(self, document_id: UUID, tags: list[TagInput]) -> TagPatchResponse:
+        body = TagPatchRequest(tags=tags, source="llm")
+        response = self._client.patch(
+            f"/internal/v1/documents/{document_id}/tags",
+            json=body.model_dump(mode="json"),
+            headers=self._headers(),
+        )
+        if response.status_code >= 400:
+            raise InternalWriteClientError(
+                f"patch_document_tags failed: {response.status_code} {response.text}"
+            )
+        return TagPatchResponse.model_validate(response.json())

@@ -13,9 +13,16 @@ from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.internal_write import (
     BatchUpsertRequest,
     BatchUpsertResponse,
+    DocumentDetail,
     DocumentSummary,
     HealthResponse,
+    RetagJobResponse,
+    TagPatchRequest,
+    TagPatchResponse,
 )
+
+from vecinita_internal_write_api.jobs_client import DataManagementJobsClient
+from vecinita_internal_write_api.tags import replace_document_tags
 
 
 def _normalize_database_url(url: str) -> str:
@@ -51,11 +58,12 @@ def _require_internal_key(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
 
-def create_app() -> FastAPI:
+def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAPI:
     """Build the internal write API (sole holder of DATABASE_URL)."""
     app = FastAPI(title="Vecinita Internal Write API", version="0.1.0")
     configure_cors(app, extra_allow_headers=["Authorization"])
     engine = _engine()
+    retag_jobs = jobs_client
 
     @app.get("/health", response_model=HealthResponse)
     def health() -> HealthResponse:
@@ -128,7 +136,110 @@ def create_app() -> FastAPI:
                     )
                     upserted += 1
 
+                if document.tags is not None:
+                    replace_document_tags(
+                        conn,
+                        document_id=doc_id,
+                        tags=document.tags,
+                        language=document.language or "en",
+                    )
+
         return BatchUpsertResponse(upserted_chunks=upserted)
+
+    @app.get(
+        "/internal/v1/documents/{document_id}",
+        response_model=DocumentDetail,
+        dependencies=[Depends(_require_internal_key)],
+    )
+    def get_document_detail(document_id: UUID) -> DocumentDetail:
+        with engine.connect() as conn:
+            row = (
+                conn.execute(
+                    text(
+                        """
+                        SELECT id, url, title, language
+                        FROM documents
+                        WHERE id = :document_id
+                        """
+                    ),
+                    {"document_id": document_id},
+                )
+                .mappings()
+                .first()
+            )
+            if row is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+            chunks = (
+                conn.execute(
+                    text(
+                        """
+                    SELECT text
+                    FROM chunks
+                    WHERE document_id = :document_id
+                    ORDER BY chunk_index ASC
+                    """
+                    ),
+                    {"document_id": document_id},
+                )
+                .scalars()
+                .all()
+            )
+        return DocumentDetail(
+            document_id=row["id"],
+            url=row["url"],
+            title=row["title"],
+            language=row["language"],
+            text="\n\n".join(chunks),
+        )
+
+    @app.patch(
+        "/internal/v1/documents/{document_id}/tags",
+        response_model=TagPatchResponse,
+        dependencies=[Depends(_require_internal_key)],
+    )
+    def patch_document_tags(document_id: UUID, body: TagPatchRequest) -> TagPatchResponse:
+        with engine.begin() as conn:
+            row = (
+                conn.execute(
+                    text("SELECT id, language FROM documents WHERE id = :document_id"),
+                    {"document_id": document_id},
+                )
+                .mappings()
+                .first()
+            )
+            if row is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+            tags = [
+                tag.model_copy(update={"source": tag.source or body.source}) for tag in body.tags
+            ]
+            replace_document_tags(
+                conn,
+                document_id=document_id,
+                tags=tags,
+                language=row["language"] or "en",
+            )
+        return TagPatchResponse(tags=tags)
+
+    @app.post(
+        "/internal/v1/documents/{document_id}/retag",
+        response_model=RetagJobResponse,
+        dependencies=[Depends(_require_internal_key)],
+    )
+    def retag_document(document_id: UUID) -> RetagJobResponse:
+        if retag_jobs is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Retag job client not configured",
+            )
+        with engine.connect() as conn:
+            exists = conn.execute(
+                text("SELECT id FROM documents WHERE id = :document_id"),
+                {"document_id": document_id},
+            ).scalar_one_or_none()
+        if exists is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        job_id = retag_jobs.enqueue_retag(document_id)
+        return RetagJobResponse(job_id=job_id)
 
     @app.get(
         "/internal/v1/documents",
