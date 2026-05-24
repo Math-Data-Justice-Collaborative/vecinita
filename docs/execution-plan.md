@@ -480,7 +480,7 @@ main
 | PR-16 | Minor | M13 | feat/M13-ci | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/32 |
 | PR-17 | Minor | M14 | feat/M14-staging-deploy | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/33 |
 | PR-18 | Major | Phase 4 | phase/4-integration | main | pending |
-| PR-19 | Minor | M15 | feat/M15-tag-schema | evolve/EV-001-corpus-tags | pending |
+| PR-19 | Minor | M15 | feat/M15-tag-schema | evolve/EV-001-corpus-tags | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/38 |
 | PR-20 | Minor | M16 | feat/M16-ingest-tagging | evolve/EV-001-corpus-tags | pending |
 | PR-21 | Minor | M17 | feat/M17-browse-tag-rag | evolve/EV-001-corpus-tags | pending |
 | PR-22 | Minor | M18 | feat/M18-admin-tags | evolve/EV-001-corpus-tags | pending |
