@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 5: EV-001 Corpus tags & browse |
 | **Active milestone** | M16: Ingest LLM tagging & admin re-tag |
-| **Active task** | T16.1 — LLM tag client mock contract test |
-| **Tasks completed** | 79 / 111 |
+| **Active task** | T16.3 — ingest pipeline tagging step |
+| **Tasks completed** | 81 / 111 |
 | **Last updated** | 2026-05-24 |
 | **Evolve cycle** | EV-001 (F19–F22) |
 
@@ -352,8 +352,8 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
-| T16.1 | Test: LLM tag client mock contract (`tests/unit/test_llm_tag_client.py`) | Test | in_progress | ADR-015 TP-014 | T9.3 | — | EV-001 | F20, F22 |
-| T16.2 | `packages/tagging` — prompt, vocabulary merge, cap enforcement, config validation, RD-030 language | Code | pending | config-spec, RD-028, RD-030 | T16.1 | D8 | EV-001 | F20, F22 |
+| T16.1 | Test: LLM tag client mock contract (`tests/unit/test_llm_tag_client.py`) | Test | completed | ADR-015 TP-014 | T9.3 | — | EV-001 | F20, F22 |
+| T16.2 | `packages/tagging` — prompt, vocabulary merge, cap enforcement, config validation, RD-030 language | Code | completed | config-spec, RD-028, RD-030 | T16.1 | D8 | EV-001 | F20, F22 |
 | T16.3 | Ingest pipeline: tag after chunk, before embed; include tags in DO batch write | Code | pending | ADR-015 TP-010, spec.md §Ingest | T16.2, T6.4, T15.2 | D8 | EV-001 | F20 |
 | T16.4 | Internal write API: tag upsert on ingest batch write path only | Code | pending | openapi/internal-write.yaml, ADR-015 TP-010 | T15.2, T4.2 | — | EV-001 | F20 |
 | T16.5 | Test: TC-047 ingest LLM auto-tag E2E (`tests/e2e/test_uj002_ingest_tagging.py`) | Test | pending | UJ-002, TC-047, acceptance-criteria AC-T3 | T16.3, T16.4 | D4, D8 | EV-001 | F20 |
@@ -572,8 +572,8 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T15.4 | M15 | 5 | Code | completed | T15.2 | D8 | EV-001 | 2026-05-24 |
 | T15.5 | M15 | 5 | Code | completed | T15.4 | D9 | EV-001 | 2026-05-24 |
 | T15.6 | M15 | 5 | Test | completed | T15.5 | D8, D9 | EV-001 | 2026-05-24 |
-| T16.1 | M16 | 5 | Test | in_progress | T9.3 | — | EV-001 |
-| T16.2 | M16 | 5 | Code | pending | T16.1 | D8 | EV-001 |
+| T16.1 | M16 | 5 | Test | completed | T9.3 | — | EV-001 | 2026-05-24 |
+| T16.2 | M16 | 5 | Code | completed | T16.1 | D8 | EV-001 | 2026-05-24 |
 | T16.3 | M16 | 5 | Code | pending | T16.2, T6.4, T15.2 | D8 | EV-001 |
 | T16.4 | M16 | 5 | Code | pending | T15.2, T4.2 | — | EV-001 |
 | T16.5 | M16 | 5 | Test | pending | T16.3, T16.4 | D4, D8 | EV-001 |
