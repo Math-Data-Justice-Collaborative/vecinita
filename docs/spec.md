@@ -3,7 +3,7 @@
 > **Project**: Vecinita  
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Version**: greenfield (`fresh-start` branch)  
-> **Last updated**: 2026-05-19
+> **Last updated**: 2026-05-24 (EV-001 delta)
 
 ## Overview
 
@@ -54,6 +54,7 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 | Shared RAG | LlamaIndex pipelines | `packages/rag` | LlamaIndex, pgvector client |
 | Shared ingest | Scrape/chunk helpers | `packages/ingest` | — |
 | Embedding client | HTTP client to Modal FastEmbed | `packages/embedding-client` | Modal |
+| Shared tagging | LLM/human tag prompts, vocabulary merge, cap enforcement | `packages/tagging` | Modal LLM (vLLM), config-spec |
 
 **Package rule (RD-014):** `packages/*` must not import `apps/*`; apps depend on packages only.
 
@@ -61,13 +62,13 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 
 ### ChatRAG Backend
 
-- **Purpose**: Stateless bilingual Q&A with retrieval and streaming generation.
-- **Inputs**: `POST /api/v1/ask`, `POST /api/v1/ask/stream` (JSON body: question text; optional client metadata without identity fields).
+- **Purpose**: Stateless bilingual Q&A with retrieval and streaming generation; **public corpus read** (EV-001).
+- **Inputs**: `POST /api/v1/ask`, `POST /api/v1/ask/stream` (JSON: question; optional `tags[]`); **GET** `/api/v1/documents`, `/api/v1/tags`, `/api/v1/documents/{id}` (public browse).
 - **Outputs**: Answer JSON or SSE token stream; source chunk references (IDs, not PII).
 - **Algorithm**:
   1. Auto-detect query language (en/es).
   2. Embed query via Modal FastEmbed (HTTP).
-  3. pgvector similarity search (top_k) on DO Postgres.
+  3. pgvector similarity search (top_k) on DO Postgres; **optional tag filter** (user-selected or LLM-inferred).
   4. LlamaIndex synthesize with retrieved context.
   5. Stream or return completion via Modal LLM HTTP.
 - **Key parameters**: See `docs/config-spec.md` (pending): `top_k`, model names, timeouts.
@@ -77,10 +78,10 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 
 ### ChatRAG Frontend
 
-- **Purpose**: Public chat UI; client-side conversation state only.
-- **Inputs**: User messages in browser.
-- **Outputs**: Rendered answers; calls streaming endpoint.
-- **Source**: feature-list F11
+- **Purpose**: Public chat UI; client-side conversation state only; **corpus browse** and **tag filter sidebar** (EV-001).
+- **Inputs**: User messages in browser; tag chip selection for RAG; browse filters (tags, title/URL search).
+- **Outputs**: Rendered answers; calls streaming endpoint; browse list opens **original document URL** in new tab (no in-app reader).
+- **Source**: feature-list F11, F19, F22
 
 ### Data Management (Modal ASGI + workers)
 
@@ -90,17 +91,19 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 - **Algorithm** (ingest):
   1. ASGI enqueues scrape job on Modal queue.
   2. Worker fetches URL, normalizes HTML/text.
-  3. Chunk text; call FastEmbed on Modal.
-  4. **POST chunks/embeddings to DO internal write API** (not direct Postgres).
-  5. Update job status via DO API or job store on DO.
-- **Source**: feature-list F7–F10; RD-016
+  3. Chunk text.
+  4. **LLM auto-tag** document (and optional chunk tags) from seeded vocabulary + allow new tags (F20).
+  5. Call FastEmbed on Modal.
+  6. **POST chunks/embeddings/tags to DO internal write API** (not direct Postgres).
+  7. Update job status via DO API or job store on DO.
+- **Source**: feature-list F7–F10, F20; RD-016
 
 ### DO internal write API
 
 - **Purpose**: Sole component(s) with `DATABASE_URL`; accepts service-authenticated writes from Modal.
-- **Inputs**: Authenticated requests (mTLS, API key, or private network) with document/chunk/embedding payloads.
-- **Outputs**: Upserted rows; corpus list/delete for admin.
-- **Source**: RD-016 contradiction resolution
+- **Inputs**: Authenticated requests (mTLS, API key, or private network) with document/chunk/embedding/tag payloads; chunk list; tag PATCH.
+- **Outputs**: Upserted rows; corpus list/delete; chunk list; tag CRUD for admin (F21).
+- **Source**: RD-016; EV-001 / ADR-014
 
 ### Database app
 
@@ -124,12 +127,15 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 | 1. Submit scrape job | URL list | Admin UI → Modal ASGI `POST /jobs` | job_id | Infra auth only |
 | 2. Scrape | job_id, URLs | Modal worker fetches HTML | raw text | No PII stored |
 | 3. Chunk | raw text | Split per config `chunk_size` | chunk records | — |
-| 4. Embed | chunks | Modal FastEmbed | 384-dim vectors | — |
-| 5. Persist | chunks + vectors | Modal → **DO internal write API** | Postgres rows | **No Modal DATABASE_URL** |
-| 6. Query | user question | ChatRAG Backend | — | Stateless |
-| 7. Embed query | question text | Modal FastEmbed | query vector | — |
-| 8. Retrieve | query vector | pgvector on DO | top_k chunks | LlamaIndex retriever |
-| 9. Generate | context + question | Modal LLM | answer / stream | No server chat history |
+| 4. LLM tag | chunks + seed vocab | Modal LLM | document/chunk tags (`llm`) | Max 10/5 tags |
+| 5. Embed | chunks | Modal FastEmbed | 384-dim vectors | — |
+| 6. Persist | chunks + vectors + tags | Modal → **DO internal write API** | Postgres rows | **No Modal DATABASE_URL** |
+| 7. Browse | tag/search filters | ChatRAG GET APIs | document list | Public |
+| 8. Query | user question + optional tags | ChatRAG Backend | — | Stateless |
+| 9. Resolve tags | tags[] or question | User tags OR LLM infer | tag filter set | User tags win if set |
+| 10. Embed query | question text | Modal FastEmbed | query vector | — |
+| 11. Retrieve | query vector + tags | pgvector + tag JOIN | top_k chunks | Union doc+chunk tags |
+| 12. Generate | context + question | Modal LLM | answer / stream | No server chat history |
 
 ### Query path (detail)
 
@@ -168,7 +174,7 @@ Migrations and CI must reject tables/columns including:
 
 `users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`, `auth_*`
 
-Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config` (and operational non-PII metadata).
+Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config`, `tags`, `document_tags`, `chunk_tags` (EV-001). Tag provenance: `source` enum only — no operator identity columns.
 
 ### Assumptions
 
@@ -189,8 +195,15 @@ Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config` (and oper
 
 | Service | Method | Path | Notes |
 |---------|--------|------|-------|
-| ChatRAG | POST | `/api/v1/ask` | Non-streaming Q&A |
-| ChatRAG | POST | `/api/v1/ask/stream` | SSE streaming |
+| ChatRAG | POST | `/api/v1/ask` | Non-streaming Q&A; optional `tags[]` |
+| ChatRAG | POST | `/api/v1/ask/stream` | SSE streaming; optional `tags[]` |
+| ChatRAG | GET | `/api/v1/documents` | Public browse (tags, q, pagination) |
+| ChatRAG | GET | `/api/v1/documents/{id}` | Public document detail + tags |
+| ChatRAG | GET | `/api/v1/tags` | Public tag list (facets) |
+| Internal write | GET | `/internal/v1/documents/{id}/chunks` | Admin chunk list |
+| Internal write | PATCH | `/internal/v1/documents/{id}/tags` | Admin document tags |
+| Internal write | PATCH | `/internal/v1/chunks/{id}/tags` | Admin chunk tags |
+| Internal write | POST | `/internal/v1/documents/{id}/retag` | Admin LLM re-tag (proposed) |
 | Data Mgmt (Modal) | POST/GET | `/jobs`, `/jobs/{id}` | Proxy auth |
 | Health | GET | `/health` | All HTTP services |
 

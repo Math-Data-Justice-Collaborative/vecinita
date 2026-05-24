@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
   title: Vecinita ChatRAG API
-  version: 0.1.0
-  description: Bilingual community Q&A (stateless; no identity fields in request bodies).
+  version: 0.2.0
+  description: Bilingual community Q&A and public corpus browse (stateless; no identity fields).
 servers:
   - url: /api/v1
     description: ChatRAG backend (DigitalOcean)
@@ -49,6 +49,74 @@ paths:
           $ref: "#/components/responses/ValidationError"
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
+  /documents:
+    get:
+      operationId: listDocumentsPublic
+      summary: Browse corpus documents (public)
+      parameters:
+        - name: tags
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Paginated document list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentBrowsePage"
+  /documents/{document_id}:
+    get:
+      operationId: getDocumentPublic
+      summary: Document detail for browse
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Document metadata and tags
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentBrowseDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /tags:
+    get:
+      operationId: listTagsPublic
+      summary: Tag facets for browse and chat filters
+      responses:
+        "200":
+          description: Tag list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagListResponse"
   /health:
     get:
       operationId: health
@@ -72,6 +140,92 @@ components:
           type: string
           minLength: 1
           maxLength: 4000
+        tags:
+          type: array
+          maxItems: 10
+          items:
+            type: string
+            minLength: 1
+            maxLength: 64
+    TagSummary:
+      type: object
+      required:
+        - slug
+        - label
+      properties:
+        slug:
+          type: string
+        label:
+          type: string
+    DocumentBrowseItem:
+      type: object
+      required:
+        - document_id
+        - url
+        - tags
+      properties:
+        document_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          nullable: true
+        url:
+          type: string
+        language:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/TagSummary"
+    DocumentBrowsePage:
+      type: object
+      required:
+        - items
+        - page
+        - page_size
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentBrowseItem"
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total:
+          type: integer
+    DocumentBrowseDetail:
+      allOf:
+        - $ref: "#/components/schemas/DocumentBrowseItem"
+    TagFacet:
+      type: object
+      required:
+        - slug
+        - label
+        - language
+        - document_count
+      properties:
+        slug:
+          type: string
+        label:
+          type: string
+        language:
+          type: string
+        document_count:
+          type: integer
+          minimum: 0
+    TagListResponse:
+      type: object
+      required:
+        - tags
+      properties:
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/TagFacet"
     Source:
       type: object
       required:
@@ -144,6 +298,12 @@ components:
             $ref: "#/components/schemas/ErrorBody"
     ServiceUnavailable:
       description: Upstream dependency unavailable
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
+    NotFound:
+      description: Unknown document
       content:
         application/json:
           schema:

@@ -2,8 +2,8 @@
 
 > **Stage**: 02-verify-plan  
 > **Started**: 2026-05-19  
-> **Status**: completed (2026-05-19)  
-> **Partial re-run**: 2026-05-19 (drift scan; no new user interview items)
+> **Status**: completed (2026-05-24 EV-001 delta)  
+> **Partial re-run**: 2026-05-24 (EV-001 F19–F22 delta audit)
 
 ## Document inventory
 
@@ -136,3 +136,71 @@ See [product-decisions.md](product-decisions.md). Contradictions C1–C4 resolve
 **Source documents updated:** 11 files — initial 8 + partial re-run (`feature-list.md`, `deployment-integration.md`, `adr/ADR-001-five-app-architecture.md`, `requirements-decisions.md`).
 
 **Next step:** [03-plan-tooling](.cursor/skills/03-plan-tooling/SKILL.md) — rewrite stale RFantibody `.cursor/rules/` (ISS-001).
+
+---
+
+## EV-001 delta audit (2026-05-24)
+
+**Scope:** F19–F22 product docs updated in 01-requirements (ADR-014). Full consistency pass across 13 spec documents; focus on new journeys UJ-009–UJ-012 and tag/browse connectivity.
+
+### Auto-approved (high confidence) — 14 statements
+
+Derived from `requirements-decisions.md` RD-024–RD-033 and ADR-014:
+
+| Stmt ID | Statement (summary) | Source |
+|---------|---------------------|--------|
+| S-EV1.1 | F19 public corpus browse + tag filter on ChatRAG | RD-033 |
+| S-EV1.2 | F20 LLM auto-tag at ingest + admin re-tag | RD-033 |
+| S-EV1.3 | F21 admin chunk viewer & tag editor | RD-033 |
+| S-EV1.4 | F22 tag-aware RAG (user filter + LLM inference) | RD-033 |
+| S-EV1.5 | Chunk tags union with document tags at retrieval | RD-025 |
+| S-EV1.6 | Browse opens external source URL only (no in-app reader) | RD-026 |
+| S-EV1.7 | User-selected tags only when set; LLM infers when none | RD-027 |
+| S-EV1.8 | Max 10 document / 5 chunk tags | RD-028 |
+| S-EV1.9 | Browse: tags + title/URL search; 20 per page | RD-029 |
+| S-EV1.10 | Tag labels match `document.language` (en/es) | RD-030 |
+| S-EV1.11 | Seed tag vocabulary in fixtures/DB | RD-031 |
+| S-EV1.12 | Tag filter chips in chat sidebar | RD-032 |
+| S-EV1.13 | Public read routes on chat-rag-backend only | ADR-014 |
+| S-EV1.14 | UJ-009–UJ-012 mapped to F19–F22 | Feature matrix |
+
+### Consistency check (EV-001)
+
+| Check | Result | Notes |
+|-------|--------|-------|
+| Feature ↔ Spec | **Pass** | F19–F22 in spec.md components + data flow |
+| Feature ↔ Journey | **Pass** | UJ-009–012 cover F19–F22 |
+| Journey ↔ Test | **Pass** (after C2 fix) | UJ-009–012 have planned e2e modules + TC IDs |
+| Feature ↔ Test | **Pass** (after C1 fix) | TC-040–047 cover EV-001 |
+| Spec ↔ Config | **Pass** | `VECINITA_BROWSE_PAGE_SIZE`, tag caps in config-spec |
+| Test ↔ Acceptance | **Pass** (after C1 fix) | AC-T1–T7 reference TC/UJ IDs |
+| Connectivity | **Pass** | deployment-integration EV-001 H4; TC-046; redeploy order documented |
+| Scope boundaries | **Pass** | No public write paths; admin via internal-write only |
+
+### Contradictions resolved (EV-001)
+
+| ID | Issue | Resolution |
+|----|-------|------------|
+| **C1** | AC-T3 cited TC-043 (admin limits) for ingest LLM tags | Added **TC-047**; AC-T3 → TC-047 |
+| **C2** | test-plan E2E table said UJ-001–008 only | Fixed → **UJ-001–012** |
+
+### Reviewed (medium / low)
+
+| Stmt ID | Verdict | Action |
+|---------|---------|--------|
+| S-EV1.15 | approved | Admin `VITE_VECINITA_CORPUS_API_KEY` acceptable v1 (ADR-014 known weakness) |
+
+**Deferred to 04-tech-plan (not blocking):** admin retag sync vs async; SQL union semantics for chunk tag overrides (requirements-decisions unresolved list).
+
+### EV-001 summary
+
+| Metric | Count |
+|--------|-------|
+| New statements audited | 17 |
+| Auto-approved (high) | 14 |
+| User-approved / modified | 3 |
+| Contradictions found | 2 |
+| Contradictions resolved | 2 |
+| Source documents updated | 2 (`test-plan.md`, `acceptance-criteria.md`) |
+
+**Next step (EV-001 routing):** [04-tech-plan](.cursor/skills/04-tech-plan/SKILL.md) — 03-plan-tooling skipped for EV-001.

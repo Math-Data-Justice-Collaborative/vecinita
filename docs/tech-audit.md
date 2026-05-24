@@ -83,3 +83,69 @@ See `docs/tech-decisions.md` and audit Pass 1 table (TS-EP-01 … TS-ADR-04): Py
 - `docs/tech-audit.md` (this file)
 - `docs/tech-decisions.md`
 - Updated: `docs/execution-plan.md`, `docs/test-plan.md`, `docs/adr/ADR-001-*`, `docs/adr/ADR-002-*`, `docs/deployment-integration.md`, `workflow-state.yaml`
+
+---
+
+## EV-001 delta audit (2026-05-24)
+
+> **Stage**: 05-verify-tech (EV-001)  
+> **Evolve cycle**: EV-001 (F19–F22)  
+> **Prerequisite**: 04-tech-plan completed; 02-verify-plan product delta passed
+
+### Document inventory
+
+| # | Document | Statements reviewed | Result |
+|---|----------|---------------------|--------|
+| 1 | Execution plan (Phase 5) | 18 | Updated (11 tasks/deps/gates) |
+| 2 | ADR-015 | 8 | Pass (auto-approved) |
+| 3 | Dependency inventory | 2 | Updated (`packages/tagging`) |
+| 4 | test-plan.md | 6 | Updated (connectivity §, TC-048/049) |
+| 5 | spec.md | 1 | Updated (tagging component) |
+| 6 | staging-secrets-matrix | 1 | Updated (browse VITE note) |
+| 7 | feature-list F20 | 1 | Narrowed batch retag scope |
+
+### Results summary
+
+| Metric | Count |
+|--------|-------|
+| Documents audited | 7 |
+| Total statements | 37 |
+| Auto-approved (high) | 8 (TP-010–TP-017, ADR-015) |
+| User-approved (medium/low) | 15 |
+| Denied | 0 |
+| Modified via verdict | 11 source-doc edits |
+| Skipped | 0 |
+
+### Consistency check (EV-001)
+
+| Area | Checks | Issues found | Resolved |
+|------|--------|--------------|----------|
+| Product ↔ Technical | 12 | 6 | 6 |
+| Internal Technical | 8 | 9 | 9 |
+| Connectivity | 5 | 3 | 3 |
+| **Total** | 25 | 15 | 15 |
+
+### Auto-approved (high) — TP-010 through TP-017
+
+Ingest tag-after-chunk-before-embed; async retag via `jobs.job_type=retag`; union SQL tag filter; same vLLM for inference; `/corpus` browse route; `evolve/EV-001-corpus-tags` branch; LLM cost within ≤ $50/mo cap.
+
+### User-resolved issues
+
+| Stmt | Resolution |
+|------|------------|
+| TS-EV001-01 | T18.6 → AC-T4 |
+| TS-EV001-02/03 | T16.4 ingest-only; T18.3 admin PATCH; T18.1/2 depend T15.2 |
+| TS-EV001-04 | T18.7 + TC-049 PATCH CORS |
+| TS-EV001-05 | T19.5 H5; Phase 5 gate H4+H5 |
+| TS-EV001-06 | test-plan connectivity tiers |
+| TS-EV001-07 | TC-048 + UJ-010 cites |
+| TS-EV001-09 | Per-document retag only |
+| TS-EV001-10 | `packages/tagging` in spec + inventory |
+| TS-EV001-08+ | AC-T6, config wiring, RD-030, T19.1, inventory date, UJ-002 typo |
+
+### Phase B gate (EV-001 partial)
+
+- [x] EV-001 execution plan audited
+- [x] Consistency check complete (15/15 resolved)
+- [x] Connectivity tasks include H4 + H5 + admin PATCH (not deploy-only)
+- [ ] **06-tech-tooling** skipped for EV-001 per routing — **next: 07-build** (M15)

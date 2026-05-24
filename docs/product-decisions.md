@@ -49,3 +49,12 @@ Chronological verdicts from product plan verification. Auto-approved entries tra
 | 2026-05-19 | S12.2 | approved | Modal apps in US workspace |
 
 | 2026-05-19 | D1–D4 | auto-fixed | Partial re-run: F14/TBD params, deploy checklist, ADR-001 invites, RD-006 note |
+
+## EV-001 delta (2026-05-24)
+
+| Timestamp | Stmt ID | Verdict | Notes |
+|-----------|---------|---------|-------|
+| 2026-05-24 | S-EV1.1–S-EV1.14 | auto-approved | F19–F22 scope from RD-024–RD-033 / ADR-014 |
+| 2026-05-24 | S-EV1.C1 | modified | Added TC-047 ingest LLM auto-tag; AC-T3 → TC-047 |
+| 2026-05-24 | S-EV1.C2 | approved | test-plan E2E local scope → UJ-001–012 |
+| 2026-05-24 | S-EV1.15 | approved | VITE admin corpus API key acceptable v1; ADR-014 noted |

@@ -1,6 +1,10 @@
 {
   "corpus/en/community-resources.md": "7c223470614ea643b3e5c74b1934f273c3743def4534f87a7fa135366f6ea8b5",
   "corpus/es/recursos-comunitarios.md": "e2c8773e50cd01d17662b44b651871ba9869431d62dccebf6262b8c1c2f19161",
+  "corpus/tagged/en/housing-rights.md": "50d4058b9b20c738886433cfe32296a417f3e88e7ccba676176f7859d1a89975",
+  "corpus/tagged/en/legal-aid-overview.md": "383ace9663e58acaa844f41edd19efe8bdefbb514f7ce3791c957b21883ac96d",
+  "corpus/tagged/manifest.json": "0e7fd76bfb77d15faf9ecf969748754cb2845092f522732ac6061a9c146a31d9",
+  "tags/seed_tags.json": "8df09f40263319d12b9490086abe0b2bb315df753a272d8485de852c9775cdb4",
   "eval/qa_pairs.json": "52091ae21ea0705917c7f43781e6d008e289b010e2f1e32057b32a3db819ff2d",
   "ingest/sample-page.html": "64d7255d43828157869ebcbba069eeb5c574fde96b261bba4a3ff117027e2403"
 }

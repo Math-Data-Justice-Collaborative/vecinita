@@ -2,8 +2,8 @@
 
 > **Project**: Vecinita  
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
-> **Last updated**: 2026-05-19  
-> **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md))
+> **Last updated**: 2026-05-24  
+> **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014)
 
 ## Summary
 
@@ -27,6 +27,10 @@
 | F16 | Infrastructure-only protection (data-mgmt APIs) | Implemented | Cross-cutting | data-management-backend | 11-verify-impl 2026-05-19 |
 | F17 | Basic observability (no PII in logs) | Implemented | Cross-cutting | all deployables | 11-verify-impl 2026-05-19 |
 | F18 | Local dev: docker-compose + Modal serve | Implemented | Cross-cutting | infra/ | 11-verify-impl 2026-05-19 |
+| F19 | Public corpus browse & tag filter | Planned | ChatRAG | chat-rag-backend, chat-rag-frontend | EV-001 01-requirements 2026-05-24 |
+| F20 | LLM auto-tagging at ingest + admin re-tag | Planned | Data Management | data-management-backend, Modal LLM | EV-001 01-requirements 2026-05-24 |
+| F21 | Admin chunk viewer & tag editor | Planned | Data Management | data-management-frontend, internal-write-api | EV-001 01-requirements 2026-05-24 |
+| F22 | Tag-aware RAG retrieval | Planned | ChatRAG | chat-rag-backend, packages/rag | EV-001 01-requirements 2026-05-24 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -200,6 +204,10 @@
 | F16 Infra auth | No | Yes | No | No |
 | F17 Observability | Yes | Yes | Yes | Yes |
 | F18 Local dev | Yes | Yes | Yes | Yes |
+| F19 Corpus browse | Yes | No | No | No |
+| F20 LLM tagging | No | Yes | Yes | Yes |
+| F21 Admin chunks/tags | No | Yes | Yes | No |
+| F22 Tag-filtered RAG | Yes | No | Yes | No |
 
 ## Out of Scope (v1)
 
@@ -211,6 +219,47 @@
 | Multi-region / non-US deployment | Data sovereignty R10a | User interview |
 | Analytics with identity (Segment, PostHog user IDs) | Zero personal data | User interview |
 | Server-side chat history in DB | **Forbidden** — audited S1.14; F3 + ADR-004 | ADR-004 |
+
+### F19: Public corpus browse & tag filter
+
+- **What it does**: Community members browse the public corpus, filter by tags, search by title/URL text, and open the original source URL (external link).
+- **Inputs**: Optional tag filters; optional search query (`q`); pagination (`page`, `page_size` default 20).
+- **Outputs**: Paginated document list (id, title, url, language, tags); document detail with tags and source URL.
+- **Key parameters**:
+  | Parameter | Default | Range | Description |
+  |-----------|---------|-------|-------------|
+  | `page_size` | `20` (`VECINITA_BROWSE_PAGE_SIZE`) | 1–100 | Documents per browse page |
+- **Limitations**: No in-app full-text reader — open document navigates to **original URL** (RD-026). No login. Public read API on ChatRAG backend only.
+- **Source**: EV-001 / ADR-014; user interview 2026-05-24
+
+### F20: LLM auto-tagging at ingest + admin re-tag
+
+- **What it does**: After chunking, LLM assigns document-level tags (and optional chunk tags) from hybrid vocabulary; admin can re-run LLM tagging or edit tags manually.
+- **Inputs**: Document text/chunks; seeded suggested tag list; admin trigger per document (single-document retag in v1).
+- **Outputs**: Tag rows with `source: llm | human`; max **10** tags per document, **5** per chunk (RD-028).
+- **Key parameters**:
+  | Parameter | Default | Description |
+  |-----------|---------|-------------|
+  | `max_tags_per_document` | `10` | Hard cap |
+  | `max_tags_per_chunk` | `5` | Hard cap |
+- **Limitations**: Tag labels match `document.language` (en/es) (RD-030). Self-hosted Modal LLM only (ADR-009). No operator identity stored (ADR-004).
+- **Source**: EV-001 / ADR-014
+
+### F21: Admin chunk viewer & tag editor
+
+- **What it does**: Operators view chunk list for a document (read-only text) and edit tags at document and chunk level (human or trigger LLM re-tag).
+- **Inputs**: Infrastructure auth; document_id; tag payloads.
+- **Outputs**: Updated `document_tags` / `chunk_tags` via internal-write API.
+- **Limitations**: No Vecinita user accounts (F16). Chunk tags **union** with document tags at retrieval (RD-025).
+- **Source**: EV-001 / ADR-014
+
+### F22: Tag-aware RAG retrieval
+
+- **What it does**: Retrieval filters chunks by tags when user selects tag chips in chat sidebar; if no tags selected, LLM infers relevant tags from the question.
+- **Inputs**: `AskRequest` with optional `tags[]`; question text for LLM tag inference.
+- **Outputs**: Filtered retrieval + answer; when user selected tags, **only user tags apply** (LLM inference skipped) (RD-027).
+- **Limitations**: Tag filter is pre-retrieval SQL join; must not log tag selections as identity (ADR-004).
+- **Source**: EV-001 / ADR-014
 
 ## Planned / Deferred (post-v1)
 

@@ -61,6 +61,8 @@ def load_corpus(*, database_url: str | None = None) -> dict[str, int]:
             if not language_dir.is_dir():
                 continue
             language = language_dir.name
+            if language not in {"en", "es"}:
+                continue
             for path in sorted(language_dir.glob("**/*")):
                 if not path.is_file() or path.suffix.lower() not in {".md", ".txt"}:
                     continue

@@ -1,7 +1,7 @@
 # Deployment Integration Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-19 (04-tech-plan)
+> **Last updated**: 2026-05-24 (EV-001 connectivity delta)
 
 ## Overview
 
@@ -40,6 +40,17 @@ Hybrid deployment: **DigitalOcean** (US `nyc1` or `sfo3`) for ChatRAG Backend, i
 | Modal tokens | Modal dashboard; not in browser |
 
 Frontends receive **public** API base URLs only at build time (`VITE_*`).
+
+### EV-001 — Browser connectivity (F19–F22)
+
+| Variable | App | Purpose |
+|----------|-----|---------|
+| `VITE_VECINITA_CHAT_API_URL` | chat-rag-frontend | Ask + **public browse** (`GET /api/v1/documents`, `/tags`) |
+| `VECINITA_CORS_ORIGINS` | chat-rag-backend | Must include chat frontend origin for new **GET** routes (H4) |
+| `VITE_VECINITA_CORPUS_API_URL` | data-management-frontend | Admin chunk/tag PATCH routes |
+| `VITE_VECINITA_CORPUS_API_KEY` | data-management-frontend | Bearer for internal-write (build-time; review in 04-tech-plan) |
+
+**Redeploy order (EV-001):** Deploy chat-rag-backend with CORS + new routes **before** chat-rag-frontend browse UI sign-off (H4–H5).
 
 ## Entrypoints & triggers
 

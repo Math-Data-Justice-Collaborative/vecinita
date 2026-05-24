@@ -1,0 +1,14 @@
+{
+  "documents": [
+    {
+      "path": "en/housing-rights.md",
+      "language": "en",
+      "tags": ["housing"]
+    },
+    {
+      "path": "en/legal-aid-overview.md",
+      "language": "en",
+      "tags": ["legal"]
+    }
+  ]
+}
