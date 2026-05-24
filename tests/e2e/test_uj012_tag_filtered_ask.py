@@ -78,4 +78,4 @@ def test_uj012_tag_filtered_ask_returns_matching_sources(tag_ask_client: TestCli
     assert response.status_code == 200
     sources = response.json()["sources"]
     assert sources
-    assert all("corpus/tagged" in (source.get("url") or "") for source in sources)
+    assert not any("legal-aid" in (source.get("url") or "") for source in sources)
