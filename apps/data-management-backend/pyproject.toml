@@ -9,6 +9,7 @@ dependencies = [
     "vecinita-embedding-client",
     "vecinita-ingest",
     "vecinita-shared-schemas",
+    "vecinita-tagging",
 ]
 
 [build-system]
@@ -22,3 +23,4 @@ packages = ["vecinita_data_management_backend"]
 vecinita-ingest = { workspace = true }
 vecinita-shared-schemas = { workspace = true }
 vecinita-embedding-client = { workspace = true }
+vecinita-tagging = { workspace = true }

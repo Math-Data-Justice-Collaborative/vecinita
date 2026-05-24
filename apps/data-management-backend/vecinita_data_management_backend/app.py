@@ -83,11 +83,17 @@ def create_app(
         _: None = Depends(auth_dep),
     ) -> CreateJobResponse:
         options: dict[str, object] = {}
-        if body.options and body.options.chunk_size_tokens is not None:
-            options["chunk_size_tokens"] = body.options.chunk_size_tokens
+        job_type = "ingest"
+        if body.options is not None:
+            job_type = body.options.job_type
+            if body.options.chunk_size_tokens is not None:
+                options["chunk_size_tokens"] = body.options.chunk_size_tokens
+            if body.options.document_id is not None:
+                options["document_id"] = str(body.options.document_id)
         record = job_store.create_job(
             urls=[str(url) for url in body.urls],
             options=options,
+            job_type=job_type,
         )
         if runner is not None:
             background.add_task(runner, record.job_id)

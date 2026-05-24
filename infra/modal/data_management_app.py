@@ -34,6 +34,8 @@ _PYTHONPATH = ":".join(
     [
         f"{_PKG_ROOT}/packages/ingest",
         f"{_PKG_ROOT}/packages/embedding-client",
+        f"{_PKG_ROOT}/packages/llm-client",
+        f"{_PKG_ROOT}/packages/tagging",
         f"{_PKG_ROOT}/packages/shared-schemas",
         f"{_PKG_ROOT}/apps/data-management-backend",
     ]
@@ -57,6 +59,18 @@ image = (
         remote_path=f"{_PKG_ROOT}/packages/shared-schemas",
     )
     .add_local_dir(
+        _REPO_ROOT / "packages" / "llm-client",
+        remote_path=f"{_PKG_ROOT}/packages/llm-client",
+    )
+    .add_local_dir(
+        _REPO_ROOT / "packages" / "tagging",
+        remote_path=f"{_PKG_ROOT}/packages/tagging",
+    )
+    .add_local_dir(
+        _REPO_ROOT / "data" / "fixtures" / "tags",
+        remote_path=f"{_PKG_ROOT}/data/fixtures/tags",
+    )
+    .add_local_dir(
         _REPO_ROOT / "apps" / "data-management-backend",
         remote_path=f"{_PKG_ROOT}/apps/data-management-backend",
     )
@@ -74,22 +88,30 @@ def fastapi_app():
     from uuid import UUID
 
     from vecinita_data_management_backend.app import create_app
-    from vecinita_data_management_backend.pipeline import run_ingest_job
+    from vecinita_data_management_backend.jobs import run_job
     from vecinita_data_management_backend.store import DictJobStore
     from vecinita_data_management_backend.write_client import InternalWriteClient
     from vecinita_embedding_client import EmbeddingClient
+    from vecinita_llm_client import LlmClient
+    from vecinita_tagging.llm_client import LlmTagClient
 
     jobs_dict = modal.Dict.from_name("vecinita-data-management-jobs", create_if_missing=True)
     store = DictJobStore(jobs_dict)
     embed = EmbeddingClient()
     write = InternalWriteClient()
+    tag_client: LlmTagClient | None = None
+    try:
+        tag_client = LlmTagClient(LlmClient())
+    except Exception:
+        tag_client = None
 
     def runner(job_id: UUID) -> None:
-        run_ingest_job(
+        run_job(
             job_id,
             store=store,
             embed_client=embed,
             write_client=write,
+            tag_client=tag_client,
         )
 
     return create_app(store=store, pipeline_runner=runner)
