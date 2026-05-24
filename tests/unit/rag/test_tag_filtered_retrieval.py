@@ -55,8 +55,8 @@ def test_tc044_user_selected_tag_filter(tagged_corpus_db: str) -> None:
     assert legal_chunks
     housing_urls = {chunk.url for chunk in housing_chunks}
     legal_urls = {chunk.url for chunk in legal_chunks}
-    assert all("housing-rights" in url for url in housing_urls)
-    assert all("legal-aid" in url for url in legal_urls)
+    assert all("housing-rights" in (url or "") for url in housing_urls)
+    assert all("legal-aid" in (url or "") for url in legal_urls)
 
 
 def test_tc045_inferred_tags_when_none_selected() -> None:
