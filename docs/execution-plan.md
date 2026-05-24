@@ -484,7 +484,7 @@ main
 | PR-20 | Minor | M16 | feat/M16-ingest-tagging | evolve/EV-001-corpus-tags | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/39 |
 | PR-21 | Minor | M17 | feat/M17-browse-tag-rag | evolve/EV-001-corpus-tags | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/40 |
 | PR-22 | Minor | M18 | feat/M18-admin-tags | evolve/EV-001-corpus-tags | merged |
-| PR-23 | Minor | M19 | feat/M19-ev001-deploy | evolve/EV-001-corpus-tags | pending |
+| PR-23 | Minor | M19 | feat/M19-ev001-deploy | evolve/EV-001-corpus-tags | merged |
 | PR-24 | Major | Phase 5 / EV-001 | evolve/EV-001-corpus-tags | main | pending |
 
 ## Task Tracking
