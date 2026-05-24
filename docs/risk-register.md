@@ -1,7 +1,7 @@
 # Risk Register
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-19
+> **Last updated**: 2026-05-24 (EV-001)
 
 | # | Risk | Likelihood | Impact | Mitigation | Status |
 |---|------|------------|--------|------------|--------|
@@ -14,6 +14,8 @@
 | R7 | Third-party LLM introduced by dependency | Low | High | Dependency audit; ADR for exceptions | Open |
 | R8 | LlamaIndex version incompatibility with pgvector | Medium | Medium | Pin versions; integration tests | Open |
 | R9 | Multi-app DO secrets sprawl | Medium | Low | Document secret matrix in deploy plan | Open |
+| R10 | LLM tagging increases ingest cost/latency | Medium | Medium | Cap tags; batch tag step; monitor Modal spend | Open (EV-001) |
+| R11 | Admin corpus API key in static frontend bundle | Medium | High | BFF/server proxy in 04-tech-plan; rotate keys | Open (EV-001) |
 
 ## Risk details
 

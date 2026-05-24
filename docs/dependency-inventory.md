@@ -1,7 +1,7 @@
 # Dependency Inventory
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-19 (04-tech-plan)
+> **Last updated**: 2026-05-24 (05-verify-tech EV-001)
 
 ## Runtime dependencies (Python — planned)
 
@@ -20,6 +20,7 @@
 | modal | >=1.2,<2 | Workers + ASGI | Apache-2.0 | Template registry |
 | **vllm** | **0.6.x** (Modal image only) | **Primary** LLM on Modal **T4**; model **Qwen2.5-1.5B-Instruct** | Apache-2.0 | ADR-009, infra/modal/llm_app.py |
 | **vecinita-llm-client** | workspace | HTTP client to Modal LLM (`httpx`) | — | T9.3 |
+| **vecinita-tagging** (`packages/tagging`) | workspace | LLM tag prompts, vocabulary merge, caps; reuses vLLM HTTP | — | EV-001 F20/F22; no new Modal deployable |
 | fastembed | TBD | 384-dim embeddings (Modal) | MIT | |
 | langdetect or equivalent | TBD | Bilingual auto-detect | | |
 | pytest / httpx | dev | Tests | | |

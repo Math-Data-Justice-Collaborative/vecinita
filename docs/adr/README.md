@@ -17,6 +17,7 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 | [ADR-011](ADR-011-openapi-contract-source-of-truth.md) | OpenAPI as API contract source of truth | Accepted | 01-requirements |
 | [ADR-012](ADR-012-monorepo-packages-boundary.md) | Monorepo `apps/` and `packages/` dependency rule | Accepted | 01-requirements |
 | [ADR-013](ADR-013-bilingual-auto-detect.md) | Bilingual Q&A with automatic language detection | Accepted | 01-requirements |
+| [ADR-014](ADR-014-corpus-tagging-and-browse.md) | Corpus tagging, community browse, tag-filtered RAG | Accepted | 00-context (EV-001) |
 
 ## Deferred (no ADR file yet)
 

@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [requirements-decisions.md](requirements-decisions.md)  
-> **Last updated**: 2026-05-19
+> **Last updated**: 2026-05-24 (EV-001: UJ-009–UJ-012)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI steps** are waived at T0 — see `tests/e2e/README.md` (Vitest component smoke only).
@@ -19,6 +19,10 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-006 | Scrape job failure | Operator | Job poll `GET /jobs/{id}` | F8 | local |
 | UJ-007 | Reject identity fields in API | Client (malformed or policy test) | ChatRAG or write API | F15 | local |
 | UJ-008 | Unauthorized data-mgmt access | Anonymous client | Modal/DO data-mgmt routes | F16 | local |
+| UJ-009 | Browse corpus by tags & search | Community member | ChatRAG Frontend → `GET /api/v1/documents` | F19 | local |
+| UJ-010 | Open corpus document (source URL) | Community member | Browse list → external `url` | F19 | local |
+| UJ-011 | Admin view chunks & edit tags | Operator | Admin UI → internal-write chunk/tag APIs | F20, F21 | local |
+| UJ-012 | Ask with tag filter (sidebar) | Community member | Chat sidebar tags → `POST /api/v1/ask/stream` | F22 | local |
 
 ## Journey Details
 
@@ -171,3 +175,84 @@ Product-facing journeys describe what a **caller** does — not internal module 
 **Acceptance**: No job created; no corpus mutation.
 
 **Automated tests**: `tests/e2e/test_uj008_unauthorized_admin.py`
+
+---
+
+### UJ-009: Browse corpus by tags & search
+
+**Actor**: Community member (no account)
+
+**Goal**: Discover corpus documents and narrow by tags or title/URL search.
+
+**Steps**:
+
+1. Open ChatRAG web UI; navigate to **Corpus** (or browse panel).
+2. Optionally select one or more tag filters from facet list (`GET /api/v1/tags`).
+3. Optionally enter search text (title/URL match).
+4. UI calls `GET /api/v1/documents?tags=...&q=...&page=1&page_size=20`.
+5. User sees paginated list (title, tags, language); 20 per page.
+
+**Acceptance**: No login; results match filters; empty state when no matches.
+
+**Automated tests**: `tests/e2e/test_uj009_corpus_browse.py` (planned)
+
+**Browser / connectivity**: ChatRAG frontend origin → ChatRAG backend GET routes; H4 CORS on new paths.
+
+---
+
+### UJ-010: Open corpus document (source URL)
+
+**Actor**: Community member
+
+**Goal**: Read the original public source of a corpus document.
+
+**Steps**:
+
+1. From browse list (UJ-009), click a document.
+2. UI opens the document's **original URL** in a new browser tab (not in-app full text).
+
+**Acceptance**: Link matches `documents.url`; no auth required.
+
+**Automated tests**: Covered by UJ-009 UI unit tests + API contract tests.
+
+---
+
+### UJ-011: Admin view chunks & edit tags
+
+**Actor**: Operator (platform credential)
+
+**Goal**: Inspect how a document was chunked and curate tags for better retrieval.
+
+**Steps**:
+
+1. Open Data Management admin UI; select document from corpus list.
+2. View chunk list (`GET /internal/v1/documents/{id}/chunks`) — read-only chunk text.
+3. Edit document tags and/or per-chunk tags (human `source: human`).
+4. Optionally trigger **LLM re-tag** for document (`POST .../retag` or admin action).
+5. Confirm tags appear in community browse and affect RAG (UJ-012).
+
+**Acceptance**: Max 10 document / 5 chunk tags enforced; no operator identity stored; unauthorized → 401.
+
+**Automated tests**: `tests/e2e/test_uj011_admin_tags.py` (planned)
+
+---
+
+### UJ-012: Ask with tag filter (sidebar)
+
+**Actor**: Community member
+
+**Goal**: Narrow RAG answers to documents matching selected tags.
+
+**Steps**:
+
+1. Open ChatRAG UI; optional: select tag chips in **chat sidebar**.
+2. Type question; UI calls `POST /api/v1/ask/stream` with `question` and optional `tags[]`.
+3. If **tags selected**: retrieval filters by those tags only (LLM tag inference skipped).
+4. If **no tags selected**: backend LLM infers relevant tags from question, then retrieves.
+5. User receives streamed answer with sources.
+
+**Acceptance**: Filtered retrieval returns only matching tagged content; bilingual behavior unchanged (F1).
+
+**Automated tests**: `tests/e2e/test_uj012_tag_filtered_ask.py` (planned)
+
+**Interview (11)**: "When I filter by tag X, do answers cite only documents tagged X?"

@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita staging  
 > **Source**: `docs/deployment-integration.md` §Secrets, ADR-007, ADR-010  
-> **Last updated**: 2026-05-19 (T14.2)
+> **Last updated**: 2026-05-24 (EV-001 T19.1 — browse API shares chat VITE URL)
 
 Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — never commit to git.
 
@@ -32,7 +32,7 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 
 | Variable | App | Description |
 |----------|-----|-------------|
-| `VITE_VECINITA_CHAT_API_URL` | chat-rag-frontend | Public ChatRAG backend URL |
+| `VITE_VECINITA_CHAT_API_URL` | chat-rag-frontend | Public ChatRAG backend URL (**ask + browse** `/api/v1/documents`, `/tags` — EV-001) |
 | `VITE_VECINITA_ADMIN_API_URL` | data-management-frontend | Modal data-mgmt ASGI URL |
 | `VITE_VECINITA_MODAL_PROXY_KEY` | data-management-frontend | Edge proxy key for `/jobs` |
 | `VITE_VECINITA_CORPUS_API_URL` | data-management-frontend | Internal write API URL |

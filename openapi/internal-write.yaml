@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Vecinita DO Internal Write API
-  version: 0.1.0
+  version: 0.2.0
   description: Service-to-service writes from Modal workers (sole DATABASE_URL holder).
 servers:
   - url: /internal/v1
@@ -67,6 +67,120 @@ paths:
           $ref: "#/components/responses/NotFound"
         "401":
           $ref: "#/components/responses/Unauthorized"
+  /documents/{document_id}/chunks:
+    get:
+      operationId: listDocumentChunks
+      summary: List chunks for admin viewer
+      security:
+        - internalApiKey: []
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Chunk list with tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChunkDetail"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /documents/{document_id}/tags:
+    patch:
+      operationId: patchDocumentTags
+      summary: Replace document tags (human or llm batch)
+      security:
+        - internalApiKey: []
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TagPatchRequest"
+      responses:
+        "200":
+          description: Updated tags
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagPatchResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /documents/{document_id}/retag:
+    post:
+      operationId: retagDocumentLlm
+      summary: Re-run LLM tagging for a document
+      security:
+        - internalApiKey: []
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Updated tags from LLM
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagPatchResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /chunks/{chunk_id}/tags:
+    patch:
+      operationId: patchChunkTags
+      summary: Replace chunk-level tags
+      security:
+        - internalApiKey: []
+      parameters:
+        - name: chunk_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TagPatchRequest"
+      responses:
+        "200":
+          description: Updated chunk tags
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagPatchResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
   /health:
     get:
       operationId: health
@@ -130,6 +244,72 @@ components:
           minItems: 1
           items:
             $ref: "#/components/schemas/ChunkUpsert"
+        tags:
+          type: array
+          maxItems: 10
+          items:
+            $ref: "#/components/schemas/TagInput"
+    TagInput:
+      type: object
+      required:
+        - slug
+        - label
+      properties:
+        slug:
+          type: string
+        label:
+          type: string
+        source:
+          type: string
+          enum:
+            - llm
+            - human
+    TagPatchRequest:
+      type: object
+      required:
+        - tags
+        - source
+      properties:
+        tags:
+          type: array
+          maxItems: 10
+          items:
+            $ref: "#/components/schemas/TagInput"
+        source:
+          type: string
+          enum:
+            - llm
+            - human
+    TagPatchResponse:
+      type: object
+      required:
+        - tags
+      properties:
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/TagInput"
+    ChunkDetail:
+      type: object
+      required:
+        - chunk_id
+        - chunk_index
+        - text
+      properties:
+        chunk_id:
+          type: string
+          format: uuid
+        chunk_index:
+          type: integer
+        text:
+          type: string
+        token_count:
+          type: integer
+          nullable: true
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/TagInput"
     BatchUpsertRequest:
       type: object
       additionalProperties: false
@@ -166,6 +346,10 @@ components:
         language:
           type: string
           nullable: true
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/TagInput"
     HealthResponse:
       type: object
       required:
