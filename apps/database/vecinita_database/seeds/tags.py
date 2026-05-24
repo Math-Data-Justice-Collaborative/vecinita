@@ -109,11 +109,7 @@ def load_tagged_corpus(*, database_url: str | None = None) -> dict[str, int]:
             body = body_path.read_text(encoding="utf-8")
             content_hash = hashlib.sha256(body.encode("utf-8")).hexdigest()
             title_line = next(
-                (
-                    line.lstrip("# ").strip()
-                    for line in body.splitlines()
-                    if line.startswith("#")
-                ),
+                (line.lstrip("# ").strip() for line in body.splitlines() if line.startswith("#")),
                 body_path.stem,
             )
             url = f"fixture://corpus/tagged/{rel_path.as_posix()}"

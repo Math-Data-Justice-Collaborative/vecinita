@@ -22,9 +22,7 @@ def test_tag_tables_exist_after_migrations() -> None:
     from vecinita_database.privacy import TAG_TABLES, find_missing_tag_tables
 
     missing = find_missing_tag_tables(_database_url())
-    assert not missing, (
-        f"Missing tag tables: {sorted(missing)}; expected {sorted(TAG_TABLES)}"
-    )
+    assert not missing, f"Missing tag tables: {sorted(missing)}; expected {sorted(TAG_TABLES)}"
 
 
 @pytest.mark.privacy
