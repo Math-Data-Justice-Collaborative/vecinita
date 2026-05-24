@@ -7,7 +7,8 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 from vecinita_data_management_backend.app import create_app
-from vecinita_data_management_backend.pipeline import fetch_html_fixture, run_ingest_job
+from vecinita_data_management_backend.jobs import run_job
+from vecinita_data_management_backend.pipeline import fetch_html_fixture
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_embedding_client import EMBEDDING_DIMENSION
 
@@ -54,7 +55,7 @@ def mock_write() -> _MockWriteClient:
 @pytest.fixture
 def dm_client(job_store: InMemoryJobStore, mock_write: _MockWriteClient) -> TestClient:
     def runner(job_id):  # type: ignore[no-untyped-def]
-        run_ingest_job(
+        run_job(
             job_id,
             store=job_store,
             embed_client=_MockEmbedClient(),  # type: ignore[arg-type]

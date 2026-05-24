@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 5: EV-001 Corpus tags & browse |
-| **Active milestone** | M16: Ingest LLM tagging & admin re-tag |
-| **Active task** | T16.1 — LLM tag client mock contract test |
-| **Tasks completed** | 79 / 111 |
+| **Active milestone** | M17: Public browse API, tag RAG, ChatRAG UI |
+| **Active task** | T17.1 — regenerate shared-schemas from OpenAPI 0.2.0 |
+| **Tasks completed** | 88 / 111 |
 | **Last updated** | 2026-05-24 |
 | **Evolve cycle** | EV-001 (F19–F22) |
 
@@ -352,14 +352,14 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
-| T16.1 | Test: LLM tag client mock contract (`tests/unit/test_llm_tag_client.py`) | Test | pending | ADR-015 TP-014 | T9.3 | — | EV-001 | F20, F22 |
-| T16.2 | `packages/tagging` — prompt, vocabulary merge, cap enforcement, config validation, RD-030 language | Code | pending | config-spec, RD-028, RD-030 | T16.1 | D8 | EV-001 | F20, F22 |
-| T16.3 | Ingest pipeline: tag after chunk, before embed; include tags in DO batch write | Code | pending | ADR-015 TP-010, spec.md §Ingest | T16.2, T6.4, T15.2 | D8 | EV-001 | F20 |
-| T16.4 | Internal write API: tag upsert on ingest batch write path only | Code | pending | openapi/internal-write.yaml, ADR-015 TP-010 | T15.2, T4.2 | — | EV-001 | F20 |
-| T16.5 | Test: TC-047 ingest LLM auto-tag E2E (`tests/e2e/test_uj002_ingest_tagging.py`) | Test | pending | UJ-002, TC-047, acceptance-criteria AC-T3 | T16.3, T16.4 | D4, D8 | EV-001 | F20 |
-| T16.6 | Modal retag worker + `job_type=retag` enqueue | Code | pending | ADR-015 TP-011, TP-012 | T16.2, T6.3 | — | EV-001 | F20, F21 |
-| T16.7 | `POST /internal/v1/documents/{id}/retag` → job id; poll `GET /jobs/{id}` | Code | pending | openapi/internal-write.yaml | T16.6, T16.4 | — | EV-001 | F21 |
-| T16.8 | Test: admin async retag lifecycle (mock LLM) | Test | pending | UJ-011, ADR-015 | T16.7 | D9 | EV-001 | F21 |
+| T16.1 | Test: LLM tag client mock contract (`tests/unit/test_llm_tag_client.py`) | Test | completed | ADR-015 TP-014 | T9.3 | — | EV-001 | F20, F22 |
+| T16.2 | `packages/tagging` — prompt, vocabulary merge, cap enforcement, config validation, RD-030 language | Code | completed | config-spec, RD-028, RD-030 | T16.1 | D8 | EV-001 | F20, F22 |
+| T16.3 | Ingest pipeline: tag after chunk, before embed; include tags in DO batch write | Code | completed | ADR-015 TP-010, spec.md §Ingest | T16.2, T6.4, T15.2 | D8 | EV-001 | F20 |
+| T16.4 | Internal write API: tag upsert on ingest batch write path only | Code | completed | openapi/internal-write.yaml, ADR-015 TP-010 | T15.2, T4.2 | — | EV-001 | F20 |
+| T16.5 | Test: TC-047 ingest LLM auto-tag E2E (`tests/e2e/test_uj002_ingest_tagging.py`) | Test | completed | UJ-002, TC-047, acceptance-criteria AC-T3 | T16.3, T16.4 | D4, D8 | EV-001 | F20 |
+| T16.6 | Modal retag worker + `job_type=retag` enqueue | Code | completed | ADR-015 TP-011, TP-012 | T16.2, T6.3 | — | EV-001 | F20, F21 |
+| T16.7 | `POST /internal/v1/documents/{id}/retag` → job id; poll `GET /jobs/{id}` | Code | completed | openapi/internal-write.yaml | T16.6, T16.4 | — | EV-001 | F21 |
+| T16.8 | Test: admin async retag lifecycle (mock LLM) | Test | completed | UJ-011, ADR-015 | T16.7 | D9 | EV-001 | F21 |
 
 #### M17: Public browse API, tag RAG, ChatRAG UI (F19, F22)
 
@@ -480,7 +480,7 @@ main
 | PR-16 | Minor | M13 | feat/M13-ci | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/32 |
 | PR-17 | Minor | M14 | feat/M14-staging-deploy | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/33 |
 | PR-18 | Major | Phase 4 | phase/4-integration | main | pending |
-| PR-19 | Minor | M15 | feat/M15-tag-schema | evolve/EV-001-corpus-tags | pending |
+| PR-19 | Minor | M15 | feat/M15-tag-schema | evolve/EV-001-corpus-tags | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/38 |
 | PR-20 | Minor | M16 | feat/M16-ingest-tagging | evolve/EV-001-corpus-tags | pending |
 | PR-21 | Minor | M17 | feat/M17-browse-tag-rag | evolve/EV-001-corpus-tags | pending |
 | PR-22 | Minor | M18 | feat/M18-admin-tags | evolve/EV-001-corpus-tags | pending |
@@ -572,14 +572,14 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T15.4 | M15 | 5 | Code | completed | T15.2 | D8 | EV-001 | 2026-05-24 |
 | T15.5 | M15 | 5 | Code | completed | T15.4 | D9 | EV-001 | 2026-05-24 |
 | T15.6 | M15 | 5 | Test | completed | T15.5 | D8, D9 | EV-001 | 2026-05-24 |
-| T16.1 | M16 | 5 | Test | pending | T9.3 | — | EV-001 |
-| T16.2 | M16 | 5 | Code | pending | T16.1 | D8 | EV-001 |
-| T16.3 | M16 | 5 | Code | pending | T16.2, T6.4, T15.2 | D8 | EV-001 |
-| T16.4 | M16 | 5 | Code | pending | T15.2, T4.2 | — | EV-001 |
-| T16.5 | M16 | 5 | Test | pending | T16.3, T16.4 | D4, D8 | EV-001 |
-| T16.6 | M16 | 5 | Code | pending | T16.2, T6.3 | — | EV-001 |
-| T16.7 | M16 | 5 | Code | pending | T16.6, T16.4 | — | EV-001 |
-| T16.8 | M16 | 5 | Test | pending | T16.7 | D9 | EV-001 |
+| T16.1 | M16 | 5 | Test | completed | T9.3 | — | EV-001 | 2026-05-24 |
+| T16.2 | M16 | 5 | Code | completed | T16.1 | D8 | EV-001 | 2026-05-24 |
+| T16.3 | M16 | 5 | Code | completed | T16.2, T6.4, T15.2 | D8 | EV-001 | 2026-05-24 |
+| T16.4 | M16 | 5 | Code | completed | T15.2, T4.2 | — | EV-001 | 2026-05-24 |
+| T16.5 | M16 | 5 | Test | completed | T16.3, T16.4 | D4, D8 | EV-001 | 2026-05-24 |
+| T16.6 | M16 | 5 | Code | completed | T16.2, T6.3 | — | EV-001 | 2026-05-24 |
+| T16.7 | M16 | 5 | Code | completed | T16.6, T16.4 | — | EV-001 | 2026-05-24 |
+| T16.8 | M16 | 5 | Test | completed | T16.7 | D9 | EV-001 | 2026-05-24 |
 | T17.1 | M17 | 5 | Code | pending | T15.2, T3.4 | — | EV-001 |
 | T17.2 | M17 | 5 | Test | pending | T17.1, T15.6 | D9 | EV-001 |
 | T17.3 | M17 | 5 | Code | pending | T17.2 | — | EV-001 |
