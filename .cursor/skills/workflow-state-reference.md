@@ -2,9 +2,13 @@
 
 **Single source of truth:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml).
 
-Every pipeline skill (00–17), orchestrator ([pipeline](pipeline/SKILL.md)), and auxiliary skill
-(build-executor, gather-context, doc-planner, etc.) **reads and updates this file**. Do not
-create parallel pipeline state files unless noted below as *detail-only* supplements.
+Every pipeline skill (00–17), orchestrator ([pipeline](pipeline/SKILL.md)), auxiliary skills
+(build-executor, gather-context, doc-planner, etc.), and
+[workflow-state-manager](../agents/workflow-state-manager.md) use this file.
+
+**Only workflow-state-manager may write `workflow-state.yaml`.** Other skills invoke the agent
+for `read_context` and `update` operations — see
+[workflow-state-agent-protocol.md](workflow-state-agent-protocol.md).
 
 Stage conventions: [pipeline-preamble.md](pipeline-preamble.md). Orchestration policy:
 [considerations.md](considerations.md) §11.
@@ -234,7 +238,6 @@ Use `started_at` / `completed_at` (ISO date `YYYY-MM-DD`) when transitioning.
 | `bug-investigation` | (via `14-hotfix` or `issue_log`) | repro test in `tests/bugs/` |
 | `15-service-health` | `stages.15-service-health` | `docs/service-health-state.md` |
 | `16-evolve` | `evolve_cycles[]` | per `16-evolve/reference.md` |
-| `18-add-feature` | `evolve_cycles[]` (`cycle_type: feature`) | per `18-add-feature/reference.md` |
 | `17-retrospective` | `retrospective_cycles[]` | per `17-retrospective/reference.md` |
 | `audit-licenses` | `stages.audit-licenses` | flags in `docs/` or stage `report` |
 | `clone-repos` | `stages.clone-repos` | — |
@@ -245,22 +248,17 @@ Use `started_at` / `completed_at` (ISO date `YYYY-MM-DD`) when transitioning.
 
 ## Standard skill block (copy pattern)
 
+See [workflow-state-agent-protocol.md](workflow-state-agent-protocol.md) for the mandatory
+read/update protocol. Stage-specific **detail file** sync rules belong in each SKILL.md.
+
 ```markdown
 ## State management
 
-**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.{key}`.
-Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+**Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
+**Stage key:** `stages.{key}`.
 
-### On invocation
-1. Read `workflow-state.yaml` §`stages.{key}` (and `template` / `issue_log` if relevant).
-2. If `completed`: AskQuestion — reuse / update / regenerate.
-3. If `in_progress`: report substeps; offer resume or restart.
-4. If `pending` | `skipped`: start fresh; set `in_progress` + `started_at`.
-
-### On substep completion
-- Update §`stages.{key}` immediately (status, counters, `report` path).
-- Append new artifact paths to top-level `artifacts`.
-- Log cross-stage blockers in `issue_log`; user decisions in `decisions_log`.
+### Detail tracker (this stage)
+{path and sync rules — e.g. execution-plan.md §Current State}
 ```
 
 ## Issue and decision logs

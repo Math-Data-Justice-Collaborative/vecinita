@@ -4,7 +4,8 @@ description: >
   Executes the implementation plan task-by-task following TDD ordering, spec-adherence rules,
   and atomic commit conventions. Orchestrates parallel agents for independent tasks, manages
   branches and PRs, invokes 08-verify-build at milestone boundaries, and keeps the execution
-  plan in sync with progress. Maximizes throughput per invocation.
+  plan in sync with progress. Supports delta mode for feature addition via evolve cycles.
+  Use when implementing tasks or adding features to an existing app (with active evolve cycle).
 ---
 
 # 07 — Technical Execution (Build)
@@ -12,8 +13,9 @@ description: >
 Execute the execution plan: implement tasks in TDD order, commit atomically, create PRs
 at milestone and phase boundaries, and orchestrate parallel agents for independent work.
 
-**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
 ## Connectivity (stage 07)
 
@@ -48,8 +50,12 @@ dependencies, data management, branches, and checks allow — across **multiple 
 
 ## State management
 
-**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.07-build`.
-Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+**Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
+**Stage key:** `stages.07-build`.
+
+Invoke **workflow-state-manager** `read_context` before any other action; `update` after each
+substep. **Do not** edit `workflow-state.yaml` directly.
+
 
 **Detail:** `docs/execution-plan.md` §Current State — update **both** on every task/milestone change.
 
@@ -71,6 +77,12 @@ Execution State:
 
 4. Start the Task Loop without AskQuestion unless tasks are `blocked` or the user
    narrowed scope.
+
+## Delta / feature-addition mode
+
+- Implement **only** pending tasks tagged with `evolve_cycle_id` or listed in cycle scope.
+- Support multiple Fn in one branch (`evolve/{cycle-id}-{slug}`).
+- PR title/body references evolve cycle and feature IDs.
 
 ## Workflow
 

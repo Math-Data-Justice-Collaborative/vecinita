@@ -12,8 +12,9 @@ description: >
 Run quality checks in parallel, auto-correct where possible, and surface non-trivial
 failures to the user.
 
-**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
 ## Connectivity (stage 08)
 
@@ -49,10 +50,19 @@ Unlike a traditional gate that blocks until everything is clean, this skill uses
 
 ## State management
 
-**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.08-verify-build`.
-Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+**Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
+**Stage key:** `stages.08-verify-build`.
+
+Invoke **workflow-state-manager** `read_context` before any other action; `update` after each
+substep. **Do not** edit `workflow-state.yaml` directly.
+
 
 **Detail:** `docs/verification-report.md` — overwrite each run; set `report` on the stage block.
+
+## Delta / feature-addition mode
+
+- Run at **07-build milestone boundaries** for delta tasks only.
+- Scope verification to changed modules and tests tied to new Fn.
 
 ## Workflow
 

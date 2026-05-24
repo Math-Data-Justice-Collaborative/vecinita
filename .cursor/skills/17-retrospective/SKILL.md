@@ -17,8 +17,9 @@ Meta-improvement stage: mine **conversation evidence**, compare it to **skills 0
 **workflow artifacts**, then run a structured **user interview** to learn and plan better
 process — without re-running the pipeline.
 
-**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
 When reviewing pipeline gaps, ask whether **connectivity tiers** (H0c/H0i/H4/H5) were skipped or
 misunderstood in the session under review.
@@ -37,7 +38,7 @@ AskQuestion approval (or defer/waive). Backlog-only items never auto-edit.
 | Pipeline felt slow, confusing, or repetitive | **17-retrospective** |
 | Before changing skills 00–16 org-wide | **17-retrospective** (evidence first) |
 | Production bug or patch | [14-hotfix](../14-hotfix/SKILL.md) |
-| New product feature | [18-add-feature](../18-add-feature/SKILL.md) |
+| New product feature | [16-evolve](../16-evolve/SKILL.md) |
 | Scope/API change (no new Fn) | [16-evolve](../16-evolve/SKILL.md) |
 | Modal health investigation only | [15-service-health](../15-service-health/SKILL.md) |
 
@@ -80,7 +81,12 @@ Transcript paths and parsing: [reference.md](reference.md) §Conversation logs.
 
 ## State management
 
-**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) — top-level
+**Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
+**Stage key:** `stages.17-retrospective`.
+
+Invoke **workflow-state-manager** `read_context` before any other action; `update` after each
+substep. **Do not** edit `workflow-state.yaml` directly.
+
 `retrospective_cycles[]`. Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
 ### Retrospective cycles
@@ -112,6 +118,10 @@ Record every commit in `workflow-state.yaml` §`git_history.commits` with
 | Rolling backlog | `docs/retrospective-actions.md` (append; create if missing) |
 | Skill patch proposals | Section in report + optional PR checklist (no auto-edit) |
 
+## Delta / feature-addition mode
+
+If retrospective follows a feature cycle, mine `evolve_cycles[]` and feature IDs for evidence.
+Does not implement features — process improvement only.
 ## Workflow overview
 
 ```

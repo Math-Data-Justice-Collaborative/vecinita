@@ -15,8 +15,9 @@ description: >
 Analyze existing artifacts (codebase, paper, docs, prior work) and produce a structured
 context brief for downstream skills.
 
-**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
 ## Connectivity (stage 00)
 
@@ -70,12 +71,16 @@ Collect from the user (check conversation context or ask):
 
 ## State management
 
-**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.00-context`.
-Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+**Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
+**Stage key:** `stages.00-context`.
+
+Invoke **workflow-state-manager** `read_context` before any other action; `update` after each
+substep. **Do not** edit `workflow-state.yaml` directly.
+
 
 ### On invocation — check state
 
-1. Read `workflow-state.yaml` §stages.00-context.
+1. Use **workflow-state-manager** context brief for §stages.00-context (from agent `read_context`).
 2. **If `completed`**: Ask the user:
    - "Reuse the existing context brief as-is"
    - "Update — re-run only for new/changed inputs"
@@ -120,6 +125,14 @@ asking the user a blocking question. Branch type per
 [workflow-state-reference.md](../workflow-state-reference.md) §Git history.
 Record every commit in `workflow-state.yaml` §`git_history.commits` with
 `stage: "00-context"`.
+
+## Delta / feature-addition mode
+
+When invoked from **16-evolve** or user adds features with new upstream paper/repo context:
+
+- Run only for **new external context** not already in `docs/context-brief.md`.
+- Merge findings into context-brief; do not regenerate unrelated sections.
+- Tag agent updates with `evolve_cycle_id` and affected `feature_ids`.
 
 ## Workflow
 

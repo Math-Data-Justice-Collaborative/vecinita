@@ -11,8 +11,9 @@ description: >
 Create dev tooling hooks, rules, and configuration that enforce technical standards during
 implementation.
 
-**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
 ## Connectivity (stage 06)
 
@@ -48,12 +49,16 @@ Technical tooling must be installed **before** build execution (Stage 07) becaus
 
 ## State management
 
-**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.06-tech-tooling`.
-Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+**Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
+**Stage key:** `stages.06-tech-tooling`.
+
+Invoke **workflow-state-manager** `read_context` before any other action; `update` after each
+substep. **Do not** edit `workflow-state.yaml` directly.
+
 
 ### On invocation — check state
 
-1. Read `workflow-state.yaml` §stages.06-tech-tooling.
+1. Use **workflow-state-manager** context brief for §stages.06-tech-tooling (from agent `read_context`).
 2. **If `completed`**: Ask: "Reuse existing tooling, update, or regenerate?"
 3. **If `in_progress`**: Report progress. Resume or restart.
 4. **If `pending`**: Start fresh.
@@ -65,6 +70,13 @@ asking the user a blocking question. Branch type per
 [workflow-state-reference.md](../workflow-state-reference.md) §Git history.
 Record every commit in `workflow-state.yaml` §`git_history.commits` with
 `stage: "06-tech-tooling"`.
+
+## Delta / feature-addition mode
+
+Run when evolve cycle adds **new dependencies, hooks, CI steps, or formatters**:
+
+- Update `docs/dependency-inventory.md` for new packages.
+- Extend hooks/CI only for stack changes in cycle scope.
 
 ## Workflow
 

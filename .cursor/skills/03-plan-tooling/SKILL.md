@@ -13,8 +13,9 @@ Create Cursor tooling (hooks, rules, skills, agents) that prevent drift from the
 product plan. These guardrails enforce scope boundaries and plan adherence during all
 subsequent stages.
 
-**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
 ## Connectivity (stage 03)
 
@@ -44,12 +45,16 @@ Tooling must be installed **before** technical planning (Stage 04) because:
 
 ## State management
 
-**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.03-plan-tooling`.
-Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+**Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
+**Stage key:** `stages.03-plan-tooling`.
+
+Invoke **workflow-state-manager** `read_context` before any other action; `update` after each
+substep. **Do not** edit `workflow-state.yaml` directly.
+
 
 ### On invocation — check state
 
-1. Read `workflow-state.yaml` §stages.03-plan-tooling.
+1. Use **workflow-state-manager** context brief for §stages.03-plan-tooling (from agent `read_context`).
 2. **If `completed`**: Ask: "Reuse existing tooling, update, or regenerate?"
 3. **If `in_progress`**: Report what was created so far. Ask: "Resume or restart?"
 4. **If `pending`**: Start fresh.
@@ -59,8 +64,16 @@ Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 Commit artifacts to an appropriate branch before transitioning to the next stage or
 asking the user a blocking question. Branch type per
 [workflow-state-reference.md](../workflow-state-reference.md) §Git history.
-Record every commit in `workflow-state.yaml` §`git_history.commits` with
+Record every commit via **workflow-state-manager** `update` → `git_history.commits` with
 `stage: "03-plan-tooling"`.
+
+## Delta / feature-addition mode
+
+When new features need guardrails:
+
+- Add or update **rules, hooks, skills, agents** only for risks introduced by new Fn.
+- Skip if pure code-only change behind existing plan-adherence rules (confirm via AskQuestion).
+- Register **workflow-state-manager** in agents if not already present.
 
 ## Workflow
 
@@ -186,6 +199,8 @@ Each skill gets a `SKILL.md` with:
 
 Create project-specific agents in `.cursor/agents/`:
 
+- **workflow-state-manager** (required): Sole writer of `workflow-state.yaml` — see
+  [`.cursor/agents/workflow-state-manager.md`](../../agents/workflow-state-manager.md)
 - **Scope reviewer**: An agent that reviews PRs or changes for scope alignment
 - **Spec consultant**: An agent that can answer "does this align with the spec?" questions
 

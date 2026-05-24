@@ -12,8 +12,9 @@ description: >
 Pre-deploy gate verifying that the deployment strategy planned in Stage 04 still holds
 after implementation, and all deployment prerequisites are met.
 
-**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
 ## Connectivity (stage 12)
 
@@ -40,8 +41,17 @@ Stage 04 (tech plan) **designs** the deployment strategy. Stage 12 **verifies** 
 
 ## State management
 
-**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.12-verify-deploy`.
-Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+**Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
+**Stage key:** `stages.12-verify-deploy`.
+
+Invoke **workflow-state-manager** `read_context` before any other action; `update` after each
+substep. **Do not** edit `workflow-state.yaml` directly.
+
+
+## Delta / feature-addition mode
+
+- Pre-deploy checklist scoped to **changed surfaces** (API, UI, secrets, Modal) in this cycle.
+- Re-run connectivity rows from connectivity-gates for browser-facing changes.
 
 ## Workflow
 

@@ -12,8 +12,9 @@ description: >
 Collect all verification results and walk the user through a final check that the
 implementation matches their requirements.
 
-**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
 ## Connectivity (stage 11)
 
@@ -61,9 +62,18 @@ correctness against specs; this stage is about correctness against **user intent
 
 ## State management
 
-**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.11-verify-impl`.
-Rules: [workflow-state-reference.md](../workflow-state-reference.md). Update immediately after
+**Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
+**Stage key:** `stages.11-verify-impl`.
+
+Invoke **workflow-state-manager** `read_context` before any other action; `update` after each
+substep. **Do not** edit `workflow-state.yaml` directly.
+
 each feature/journey approval substep.
+
+## Delta / feature-addition mode
+
+- **Interactive approval per Fn** — present acceptance criteria status for each feature in cycle.
+- Block deploy gate until user approves, denies, or modifies each new capability.
 
 ## Workflow
 

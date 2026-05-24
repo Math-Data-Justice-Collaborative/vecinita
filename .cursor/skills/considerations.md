@@ -1,6 +1,7 @@
 # Cross-cutting considerations (`.cursor/skills`)
 
-**Numbered stages (00–18):** Shared structure, gates, state, and AskQuestion rules are in
+**Numbered stages (00–17):** Shared structure, gates, state (via
+[workflow-state-manager](../agents/workflow-state-manager.md)), and AskQuestion rules are in
 [pipeline-preamble.md](pipeline-preamble.md). This file holds policy detail referenced from
 the preamble and from each stage skill.
 

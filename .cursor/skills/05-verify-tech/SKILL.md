@@ -12,8 +12,9 @@ description: >
 Break technical plan documents into provable statements, risk-classify, and verify
 consistency with the approved product plan.
 
-**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
 ## Connectivity (stage 05)
 
@@ -44,12 +45,16 @@ surfaces issues at the intersection of product requirements and technical implem
 
 ## State management
 
-**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.05-verify-tech`.
-Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+**Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
+**Stage key:** `stages.05-verify-tech`.
+
+Invoke **workflow-state-manager** `read_context` before any other action; `update` after each
+substep. **Do not** edit `workflow-state.yaml` directly.
+
 
 ### On invocation — check state
 
-1. Read `workflow-state.yaml` §stages.05-verify-tech.
+1. Use **workflow-state-manager** context brief for §stages.05-verify-tech (from agent `read_context`).
 2. **If `completed`**: Ask: "Reuse existing audit, or re-run?"
 3. **If `in_progress`**: Resume from where we left off.
 4. **If `pending`**: Start fresh.
@@ -61,6 +66,11 @@ asking the user a blocking question. Branch type per
 [workflow-state-reference.md](../workflow-state-reference.md) §Git history.
 Record every commit in `workflow-state.yaml` §`git_history.commits` with
 `stage: "05-verify-tech"`.
+
+## Delta / feature-addition mode
+
+- Verify **changed** technical statements and cross-doc consistency vs updated product specs.
+- Focus audit on new Fn, new dependencies, and affected execution-plan tasks.
 
 ## Workflow
 

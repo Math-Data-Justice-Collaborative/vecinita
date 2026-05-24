@@ -7,17 +7,21 @@ Skills for building **Vecinita** — a RAG service with database-backed data man
 
 **Single file:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml)
 
-**Schema and update rules:** [workflow-state-reference.md](workflow-state-reference.md)
+**Sole writer:** [workflow-state-manager](../agents/workflow-state-manager.md) — pipeline
+skills invoke the agent for `read_context` and `update`; they do not edit the YAML directly.
 
-Every stage skill reads and updates the same YAML on invocation and after each substep.
+**Schema and protocol:** [workflow-state-reference.md](workflow-state-reference.md),
+[workflow-state-agent-protocol.md](workflow-state-agent-protocol.md)
+
 Detail trackers (`docs/execution-plan.md`, `docs/deploy-state.md`, etc.) supplement but do not
-replace `workflow-state.yaml`.
+replace workflow-state.
 
 ## Quick routing
 
 | Goal | Skill |
 |------|--------|
 | Full greenfield build | [pipeline](pipeline/SKILL.md) |
+| **Add feature(s) to existing app** | [16-evolve](16-evolve/SKILL.md) |
 | Requirements interview | [01-requirements](01-requirements/SKILL.md) |
 | Technical plan | [04-tech-plan](04-tech-plan/SKILL.md) |
 | Implement tasks | [07-build](07-build/SKILL.md) |
@@ -25,6 +29,14 @@ replace `workflow-state.yaml`.
 | Production health | [15-service-health](15-service-health/SKILL.md) |
 | Bug fix after deploy | [14-hotfix](14-hotfix/SKILL.md) |
 | CORS / UI wiring gates (all stages) | [connectivity-gates](connectivity-gates.md) |
+
+**Any stage 00–17** can accept "add features X, Y, Z" when an evolve cycle is active (delta
+mode). Without a cycle, [workflow-state-manager](../agents/workflow-state-manager.md) routes
+to **16-evolve**.
+
+## Shared preamble
+
+All numbered skills (00–17) follow [pipeline-preamble.md](pipeline-preamble.md).
 
 ## Templates
 

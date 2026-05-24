@@ -19,8 +19,9 @@ re-running the pipeline.
 **Bug artifacts (required):** [bug-investigation](../bug-investigation/SKILL.md) —
 `docs/bug-reports/BUG-*.md`, `tests/bugs/test_bug_*.py`, one fix per bug.
 
-**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).  
+**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 **Modal data-mgmt auth header:** [modal-proxy-header](../modal-proxy-header/SKILL.md).
 
 ## Connectivity (stage 14)
@@ -239,7 +240,12 @@ or architectural changes (new ADR + plan update).
 
 ## State management
 
-**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.14-hotfix`
+**Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
+**Stage key:** `stages.14-hotfix`.
+
+Invoke **workflow-state-manager** `read_context` before any other action; `update` after each
+substep. **Do not** edit `workflow-state.yaml` directly.
+
 (append section if missing). Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
 ### Hotfix log: `docs/hotfix-log.md`
@@ -277,6 +283,13 @@ Step 0.5 onward; prevention filled in Phase 5).
 4. Skim `docs/feature-list.md` and `docs/spec.md` §Component Overview (spec baseline)
 5. Report current state in chat (status summary only — not a question), then **immediately
    call AskQuestion Step 0.1** — do not jump to code.
+
+## Delta / feature-addition mode
+
+If user request is **feature addition** (not a bug):
+
+- workflow-state-manager will **block** — route to [16-evolve](16-evolve/SKILL.md).
+- Hotfix remains surgical: one bug, one repro test, one fix.
 
 ## Workflow
 

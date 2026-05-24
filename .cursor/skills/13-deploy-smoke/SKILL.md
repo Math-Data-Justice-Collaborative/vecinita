@@ -10,8 +10,9 @@ description: >
 
 Deploy the application and verify it works with smoke tests and health checks.
 
-**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
 ## Connectivity (stage 13)
 
@@ -29,8 +30,12 @@ Do not mark `deployed` without H4–H5 pass or user-waived checklist entry. See 
 
 ## State management
 
-**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.13-deploy-smoke`.
-Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+**Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
+**Stage key:** `stages.13-deploy-smoke`.
+
+Invoke **workflow-state-manager** `read_context` before any other action; `update` after each
+substep. **Do not** edit `workflow-state.yaml` directly.
+
 
 **Detail:** `docs/deploy-state.md` — sync URL/status with YAML on each deploy step.
 
@@ -95,6 +100,11 @@ Record every commit in `workflow-state.yaml` §`git_history.commits` with
 | Commit | — |
 | Branch | — |
 ```
+
+## Delta / feature-addition mode
+
+- Redeploy only services affected by new Fn; run H1–H5 for changed browser/API paths.
+- Update deployment block via workflow-state-manager after smokes.
 
 ## Workflow
 

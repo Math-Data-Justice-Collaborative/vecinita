@@ -2,10 +2,10 @@
 name: 01-requirements
 description: >
   Interviews the user to produce spec-driven development documents (feature-list, spec,
-  user-journeys, config-spec, test-plan, etc.) using template-driven questioning. If 00-context ran,
-  pre-populates answers from the context brief. Walks through each template section with
-  targeted questions in batches. Produces the same downstream spec documents as the legacy
-  doc-planner but sourced from user interviews instead of paper analysis.
+  user-journeys, config-spec, test-plan, etc.) using template-driven questioning. Supports
+  delta mode when adding features to an existing app (multiple Fn per evolve cycle). If
+  00-context ran, pre-populates answers from the context brief. Use for requirements
+  interview, add feature delta specs, or evolve-cycle product planning.
 ---
 
 # 01 — Product Requirements Interview
@@ -13,8 +13,9 @@ description: >
 Interview the user to fill spec document templates. Template-driven: for each approved
 template section, ask targeted questions to fill it.
 
-**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
 ## Connectivity (stage 01)
 
@@ -49,12 +50,16 @@ multiple templates.
 
 ## State management
 
-**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.01-requirements`.
-Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+**Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
+**Stage key:** `stages.01-requirements`.
+
+Invoke **workflow-state-manager** `read_context` before any other action; `update` after each
+substep. **Do not** edit `workflow-state.yaml` directly.
+
 
 ### On invocation — check state
 
-1. Read `workflow-state.yaml` §stages.01-requirements.
+1. Use **workflow-state-manager** context brief for §stages.01-requirements (from agent `read_context`).
 2. **If `completed`**: Ask: "Reuse existing specs, update specific documents, or restart?"
 3. **If `in_progress`**: Report progress (templates completed, current position). Ask:
    "Resume from where we left off, or restart?"
@@ -75,6 +80,15 @@ asking the user a blocking question. Branch type per
 [workflow-state-reference.md](../workflow-state-reference.md) §Git history.
 Record every commit in `workflow-state.yaml` §`git_history.commits` with
 `stage: "01-requirements"`.
+
+## Delta / feature-addition mode
+
+When user adds features or `mode: delta` / active evolve cycle:
+
+- Update **only** Fn sections and templates listed in `affected_artifacts`.
+- Support **multiple Fn** in one cycle — one interview batch per feature or grouped by domain.
+- Prefix decisions in `requirements-decisions.md` with `EV-NNN / Fnn`.
+- Do not delete unrelated spec sections; mark deprecated Fn with status + ADR.
 
 ## Workflow
 

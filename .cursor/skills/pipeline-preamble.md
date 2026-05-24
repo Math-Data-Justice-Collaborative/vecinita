@@ -1,11 +1,14 @@
-# Pipeline skills preamble (00–18)
+# Pipeline skills preamble (00–17)
 
 Shared conventions for numbered pipeline stage skills. Every stage `SKILL.md` under
-`.cursor/skills/00-context` … `18-add-feature` follows this preamble unless a stage
+`.cursor/skills/00-context` … `17-retrospective` follows this preamble unless a stage
 explicitly documents an exception.
 
 **Orchestrators** (not numbered stages): [pipeline](pipeline/SKILL.md),
-[16-evolve](16-evolve/SKILL.md), [18-add-feature](18-add-feature/SKILL.md).
+[16-evolve](16-evolve/SKILL.md).
+
+**State agent (mandatory):** [workflow-state-manager](../agents/workflow-state-manager.md) —
+sole writer of `workflow-state.yaml`.
 
 **Deep policy** (do not duplicate in each skill): [considerations.md](considerations.md),
 [connectivity-gates.md](connectivity-gates.md),
@@ -22,10 +25,13 @@ explicitly documents an exception.
 | **07–08** | C — Build | Build, verify build (milestone gate) |
 | **09–13** | D — Verify & deploy | QA + E2E (parallel), verify impl, verify deploy, deploy smoke |
 | **14–15** | E — Maintenance (on-demand) | Hotfix, service health |
-| **16–18** | F — Change (on-demand) | Evolve, retrospective, add feature |
+| **16–17** | F — Change & learn (on-demand) | Evolve (features + scope), retrospective |
 
-Stages are **linear in greenfield** ([pipeline](pipeline/SKILL.md)). Stages **14–18** are
+Stages are **linear in greenfield** ([pipeline](pipeline/SKILL.md)). Stages **14–17** are
 **on-demand** and may re-invoke subsets of 00–15 in **delta mode**.
+
+**Any stage 00–17** may accept a user request to **add features** onto the current application
+when an active evolve cycle exists or after prerequisite checks pass — see §Feature addition.
 
 ---
 
@@ -38,7 +44,7 @@ Each numbered skill includes YAML frontmatter:
 name: NN-short-name    # matches folder, lowercase hyphens
 description: >
   Third-person summary: WHAT the stage does and WHEN to invoke it.
-  Include trigger terms (e.g. "requirements interview", "deploy smoke").
+  Include trigger terms (e.g. "requirements interview", "deploy smoke", "add feature").
 ---
 ```
 
@@ -58,11 +64,12 @@ Most stage skills use this section order (omit sections that do not apply):
 | **Connectivity (stage NN)** | Stage-specific obligations from connectivity-gates |
 | **When to use / Prerequisites** | Upstream stages, artifacts, gates |
 | **Uncertainty / AskQuestion** | Pointer to considerations §7 |
-| **State management** | `workflow-state.yaml` key + on-invocation rules |
+| **State management** | workflow-state-manager agent — read/update protocol |
+| **Delta / feature-addition mode** | Behavior when adding features or in evolve cycle |
 | **Workflow** | Step-by-step work for this stage |
 | **Output rules** | Artifacts, commits, handoff to next stage |
 
-Orchestrators (16, 18) add: routing plans, phase gates, safe stopping points, child-skill tables.
+Orchestrators (16) add: routing plans, phase gates, safe stopping points, child-skill tables.
 
 ---
 
@@ -80,34 +87,76 @@ connectivity-gates — hybrid deploys (static UI + separate API) are never “AP
 
 ---
 
-## 5. State management
+## 5. State management (workflow-state-manager)
 
 **Single canonical file:** repo-root [`workflow-state.yaml`](../workflow-state.yaml).
 
+**Sole writer:** [workflow-state-manager](../agents/workflow-state-manager.md). Pipeline skills
+**must not** read or edit `workflow-state.yaml` directly — always invoke the agent.
+
 | Rule | Requirement |
 |------|-------------|
-| **Read first** | First action on every invocation |
-| **Write immediately** | After each substep — never buffer |
-| **Resume** | `status`, timestamps, substeps determine position |
-| **Stage key** | `stages.{skill-id}` (e.g. `stages.07-build`) |
-| **Cycles** | `evolve_cycles[]` (16, 18), `retrospective_cycles[]` (17) |
-| **Cross-stage issues** | `issue_log` with category + evidence |
-| **Artifacts** | Append paths to top-level `artifacts[]` on completion |
+| **Read first** | Invoke agent `operation: read_context` as first action on every invocation |
+| **Write via agent** | Invoke agent `operation: update` after each substep — never buffer |
+| **Resume** | Agent context brief reports `status`, timestamps, substeps, active cycles |
+| **Stage key** | Agent maps `skill_id` → `stages.{key}` (e.g. `stages.07-build`) |
+| **Cycles** | `evolve_cycles[]` (16-evolve), `retrospective_cycles[]` (17) |
+| **Cross-stage issues** | Agent appends `issue_log` with category + evidence |
+| **Artifacts** | Agent appends paths to top-level `artifacts[]` on completion |
+| **Deviations** | Agent returns **blocking** issues → skill must AskQuestion; do not proceed |
 
 ### On invocation (standard pattern)
 
-1. Read `workflow-state.yaml` for this stage’s block (and `template` / `issue_log` if relevant).
-2. If **`completed`**: AskQuestion — reuse / update section / restart.
-3. If **`in_progress`**: Report substeps; AskQuestion — resume or restart.
-4. If **`pending`** or **`skipped`**: Start or remain skipped per stage rules.
-5. Set `in_progress` + `started_at` when work begins.
+1. Invoke **workflow-state-manager** with `read_context` + `skill_id` + optional `user_intent`.
+2. If agent returns **blocking deviations**: AskQuestion with evidence; stop until resolved or user waives.
+3. If stage **`completed`**: AskQuestion — reuse / update section / restart (agent confirms).
+4. If **`in_progress`**: Report substeps from context brief; AskQuestion — resume or restart.
+5. If **`pending`** or **`skipped`**: Start or remain skipped per stage rules.
+6. After work begins, invoke agent `update` to set `in_progress` + `started_at`.
 
 Detail state may also live in stage reports (`docs/execution-plan.md`, `docs/qa-report.md`, etc.);
-**stage completion** must still be mirrored in `workflow-state.yaml`.
+**stage completion** must still be mirrored via agent `update`.
+
+Schema detail: [workflow-state-reference.md](workflow-state-reference.md).
 
 ---
 
-## 6. User authority and AskQuestion
+## 6. Feature addition (any stage)
+
+Users may say **"add features X, Y, Z"** at any point — not only via 16-evolve.
+
+| Situation | Behavior |
+|-----------|----------|
+| **Existing app, no active evolve cycle** | Agent blocks → recommend [16-evolve](16-evolve/SKILL.md) (one cycle, multiple Fn) |
+| **Active evolve cycle** | Current stage runs in **delta mode** for scoped Fn |
+| **Greenfield (no specs yet)** | Route to [pipeline](pipeline/SKILL.md) or 01-requirements |
+| **User names features at stage N** | Stage invokes agent with `user_intent`; agent sets `mode: delta` when cycle active |
+
+**Default for multiple features:** one **evolve cycle** with multiple **Fn** (e.g. F19, F20, F21)
+— shared specs and build where dependencies allow.
+
+**Orchestrator:** [16-evolve](16-evolve/SKILL.md) owns intake, routing, phase checkpoints, and
+multi-feature cycles. Individual stages execute their slice in delta mode when invoked directly
+or as child of 16-evolve.
+
+---
+
+## 7. Delta mode
+
+When `mode: delta` or an active `evolve_cycles[]` entry applies:
+
+- Pass evolve context to child stages: `evolve_cycle_id`, `feature_ids[]`, `scope`,
+  `affected_artifacts[]`, `delta_only: true`.
+- Update **only** sections tied to the change; no full doc regeneration without user approval.
+- One child stage at a time (except **09 + 10** in parallel).
+- **16-evolve** adds mandatory **phase checkpoints** (digest + AskQuestion) between A–D.
+
+Per-stage delta rules live in each skill §Delta / feature-addition mode and
+[16-evolve/reference.md](16-evolve/reference.md).
+
+---
+
+## 8. User authority and AskQuestion
 
 **The user is the source of truth.** Specs and plans trace to interview answers or explicit
 approvals — not agent inference.
@@ -117,20 +166,22 @@ approvals — not agent inference.
 | Rule | Detail |
 |------|--------|
 | **Blocking issues** | Never silently resolve — always AskQuestion |
+| **Agent deviations** | Present agent evidence verbatim; first option = recommended path |
 | **Batching** | 2–4 questions per call when found together |
 | **Recommendation** | First option = recommended with rationale |
 | **Escape hatch** | Last option = `Let me explain / provide more context` |
 | **Categories** | Label prompts: `[Decision]`, `[Ambiguity]`, `[Contradiction]`, `[Uncertainty]`, `[Scope Drift]`, `[Template Drift]` |
-| **Evidence** | Cite spec section, code path, or user answer |
+| **Evidence** | Cite spec section, code path, workflow-state, or user answer |
 
 Stages that **collect choices for a later stage** (e.g. 09-qa → 11-verify-impl) may defer
 AskQuestion to the handoff skill; that exception must be stated in the stage SKILL.md.
 
 ---
 
-## 7. Phase gates and prerequisites
+## 9. Phase gates and prerequisites
 
 Downstream stages **must not start** until upstream gates pass (unless user waives via AskQuestion).
+The **workflow-state-manager** enforces this in `read_context`; skills treat blocking deviations as hard stops.
 
 | Gate | Requires |
 |------|----------|
@@ -145,7 +196,7 @@ cross-doc consistency, scope drift, staleness, template drift.
 
 ---
 
-## 8. Git, branches, and commits
+## 10. Git, branches, and commits
 
 Per [considerations.md](considerations.md) §11–12 and [workflow-state-reference.md](workflow-state-reference.md) §Git history:
 
@@ -153,15 +204,15 @@ Per [considerations.md](considerations.md) §11–12 and [workflow-state-referen
 |------|--------|
 | **Commit-as-you-go** | Commit before next stage, blocking AskQuestion, gate check, or session end |
 | **Atomic commits** | One logical change; repo valid after each commit |
-| **Record commits** | Append `git_history.commits` with `stage: "NN-…"` |
+| **Record commits** | Agent `update` appends `git_history.commits` with `stage: "NN-…"` |
 | **Branches** | `feat/`, `fix/`, `docs/`, `chore/`, `infra/`, `evolve/{id}-{slug}` |
 
 **User rule override:** Do not commit unless the user asked — pipeline skills still **prepare**
-commits and record intent in workflow-state when commits are deferred.
+commits and record intent via agent when commits are deferred.
 
 ---
 
-## 9. Decisions, ADRs, and fix-in-place
+## 11. Decisions, ADRs, and fix-in-place
 
 | Mechanism | When |
 |-----------|------|
@@ -174,7 +225,7 @@ Classify failures per considerations §1: **spec** vs **code** vs **infra** vs *
 
 ---
 
-## 10. Specs and artifacts
+## 12. Specs and artifacts
 
 | Convention | Detail |
 |------------|--------|
@@ -189,7 +240,7 @@ stages **03** and **06** install or update those guardrails.
 
 ---
 
-## 11. Verification and connectivity tiers
+## 13. Verification and connectivity tiers
 
 | Tier | Meaning | Typical stage |
 |------|---------|---------------|
@@ -201,12 +252,12 @@ stages **03** and **06** install or update those guardrails.
 `curl` API success is **not** proof the UI works in production. Vitest mocks are **not** T3 E2E.
 
 Live H1–H5, DO deploy, Modal deploy, and hotfix production verification **must** load operator
-secrets from repo-root **`prod.env`** (see §16) before running shell commands — do not ask the
+secrets from repo-root **`prod.env`** (see §17) before running shell commands — do not ask the
 user to paste tokens when `prod.env` exists.
 
 ---
 
-## 12. Stage roles (summary)
+## 14. Stage roles (summary)
 
 | Skill | Primary output | Blocks |
 |-------|----------------|--------|
@@ -226,37 +277,26 @@ user to paste tokens when `prod.env` exists.
 | **13-deploy-smoke** | Deploy, smokes, CHANGELOG | Yes (end of D) |
 | **14-hotfix** | BUG report + fix + optional redeploy | On-demand |
 | **15-service-health** | Health report | On-demand |
-| **16-evolve** | Delta specs + selective 00–15 | On-demand |
+| **16-evolve** | Features, delta specs, selective 00–15, checkpoints | On-demand |
 | **17-retrospective** | Retro report + skill patches | On-demand |
-| **18-add-feature** | New Fn + selective 00–15 + checkpoints | On-demand |
 
 ---
 
-## 13. Delta mode (16, 18)
-
-When evolving or adding a feature:
-
-- Pass `mode: evolve`, `delta_only: true`, `evolve_cycle_id`, `affected_artifacts` to child stages.
-- Update **only** sections tied to the change; no full doc regeneration without user approval.
-- One child stage at a time (except **09 + 10** in parallel).
-- **18-add-feature** adds mandatory **phase checkpoints** (digest + AskQuestion) between A–D.
-
----
-
-## 14. Standard cross-cutting line (for SKILL.md)
+## 15. Standard cross-cutting line (for SKILL.md)
 
 Paste immediately after the stage title paragraph:
 
 ```markdown
-**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 ```
 
-Then add the stage-specific **Connectivity (stage NN)** section.
+Then add the stage-specific **Connectivity (stage NN)** section (when applicable).
 
 ---
 
-## 15. Safe stopping and session end
+## 16. Safe stopping and session end
 
 Every **stage boundary** is a safe stop. Natural pause points:
 
@@ -264,14 +304,14 @@ Every **stage boundary** is a safe stop. Natural pause points:
 - After **08** at a milestone — partial build verified
 - After **11** — built and verified; deploy optional
 - After **13** — deployed
-- Mid **evolve/feature cycle** — see 16/18 §Safe stopping points
+- Mid **evolve cycle** — see 16-evolve §Safe stopping points
 
-On session end: workflow-state must reflect last completed substep; uncommitted work is a
-process violation unless the user deferred commits.
+On session end: invoke workflow-state-manager `update` to reflect last completed substep;
+uncommitted work is a process violation unless the user deferred commits.
 
 ---
 
-## 16. Operator environment (`prod.env`)
+## 17. Operator environment (`prod.env`)
 
 Repo-root **`prod.env`** is the canonical **local operator secrets file** (gitignored per
 `.gitignore`). Stages **13–15**, **14-hotfix** deploy phases, and any live `pytest -m live` /

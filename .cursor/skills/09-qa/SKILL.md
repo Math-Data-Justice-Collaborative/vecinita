@@ -12,8 +12,9 @@ description: >
 
 Final quality assurance pass on the **complete** codebase after the build is done.
 
-**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
 ## Connectivity (stage 09)
 
@@ -53,8 +54,12 @@ Do not mark QA PASS if H0c fails. See connectivity-gates §Stage 09.
 
 ## State management
 
-**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.09-qa`.
-Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+**Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
+**Stage key:** `stages.09-qa`.
+
+Invoke **workflow-state-manager** `read_context` before any other action; `update` after each
+substep. **Do not** edit `workflow-state.yaml` directly.
+
 
 Update §`stages.09-qa`:
 
@@ -70,6 +75,11 @@ Update §`stages.09-qa`:
 Append `docs/qa-report.md` to §`artifacts` when created.
 
 ---
+
+## Delta / feature-addition mode
+
+- Scope QA report to **affected Fn**, apps, and journeys in the active evolve cycle.
+- Do not re-audit entire codebase unless user requests full 09 pass.
 
 ## Workflow
 

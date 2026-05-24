@@ -10,8 +10,9 @@ Append to `workflow-state.yaml`:
 ```yaml
 evolve_cycles:
   - id: EV-001                    # Sequential: EV-001, EV-002, ...
-    cycle_type: general           # general (16-evolve) | feature (18-add-feature)
-    feature_id: null              # e.g. F19 when cycle_type: feature
+    cycle_type: general           # general | feature (multi-Fn feature addition)
+    feature_ids: []               # e.g. [F19, F20, F21] — multi-Fn in one cycle
+    feature_id: null              # deprecated; use feature_ids
     title: "Add batch export API" # Short label from intake
     status: in_progress           # pending | in_progress | completed | cancelled
     started: "2026-05-17"
@@ -48,6 +49,12 @@ evolve_cycles:
       a_to_b: pending             # pending | passed | waived
       b_to_c: pending
       c_to_d: pending
+      deploy: pending
+    checkpoints:                  # mandatory for feature cycles; recommended for all
+      phase_a: pending
+      phase_b: pending
+      phase_c: pending
+      phase_d: pending
       deploy: pending
     adrs:
       - docs/adr/ADR-004.md
@@ -194,3 +201,128 @@ Create or append per cycle:
 | Production bug found during 09/10/13 | [14-hotfix](../14-hotfix/SKILL.md) with repro test |
 | Deploy OK but ops uncertainty | [15-service-health](../15-service-health/SKILL.md) |
 | Scope grew beyond cycle | New evolve cycle EV-{N+1} — do not expand silently |
+
+---
+
+## Fn allocation (multi-feature cycles)
+
+**Default:** one evolve cycle, multiple Fn (F19, F20, F21).
+
+1. Open `docs/feature-list.md` Summary table.
+2. Assign next ids sequentially (highest F# + 1, +2, …).
+3. Add rows: `| Fnn | {title} | Planned | {category} | {apps} | 16-evolve EV-NNN |`
+4. Add **Feature Details** §Fnn for each feature.
+5. Update cross-linked docs in `affected_artifacts` — do not delete unrelated Fn.
+
+Removed features: mark Deprecated + ADR; never reuse Fn ids.
+
+## Feature intake batches
+
+Use **AskQuestion** per batch (2–4 questions). Wait for all answers before the next batch.
+For **multiple features**, repeat behavior/platform batches per feature or group related Fn.
+
+### Batch 1 — Problem
+
+| Prompt theme | Purpose |
+|--------------|---------|
+| Who uses this and when? | Personas, journey anchor |
+| What problem does it solve? | Motivation |
+| How will we know it works? | Measurable success |
+
+### Batch 2 — Behavior
+
+| Prompt theme | Purpose |
+|--------------|---------|
+| Primary user flow (step by step) | user-journeys.md |
+| Inputs and outputs (types, formats) | spec, api-contract |
+| Error / empty / loading behavior | test-plan edge cases |
+
+### Batch 3 — Boundaries
+
+| Prompt theme | Purpose |
+|--------------|---------|
+| Explicitly out of scope | Scope creep guard |
+| Breaking API or config changes? | versioning, deploy risk |
+| Privacy / PII / retention | Vecinita guardrails |
+
+### Batch 4 — Platform
+
+| Prompt theme | Purpose |
+|--------------|---------|
+| Which app(s): chat-rag, data-mgmt, database, Modal? | feature-list Category/App |
+| New env vars or secrets? | config-spec, 12-verify-deploy |
+| Browser / CORS / VITE_* changes? | connectivity-gates |
+
+### Batch 5 — Quality & tests
+
+| Prompt theme | Purpose |
+|--------------|---------|
+| Latency / throughput expectations | 04-tech-plan, perf in test-plan |
+| Acceptance scenarios (Given/When/Then) | test-plan, 11-verify-impl |
+| Smoke vs full E2E tier (T0/T2/T3) | 10-e2e, 13-deploy-smoke |
+
+## Default routing (net-new feature(s))
+
+| Stage | Default |
+|-------|---------|
+| 00-context | Skip |
+| 01-requirements | Run (delta) |
+| 02-verify-plan | Run |
+| 03-plan-tooling | Run if new guardrails; else confirm skip via AskQuestion |
+| 04-tech-plan | Run |
+| 05-verify-tech | Run |
+| 06-tech-tooling | Run if new deps or hooks |
+| 07-build, 08 | Run |
+| 09-qa, 10-e2e | Run (parallel) |
+| 11-verify-impl | Run — **user signs off each Fn** |
+| 12, 13 | Run unless user waives deploy |
+
+## Checkpoint digest
+
+After phases A, B, C, D, and deploy — present to user before continuing:
+
+```markdown
+## Evolve cycle {EV-NNN} — {title}
+
+**Phase completed:** {A|B|C|D|Deploy}
+**Feature IDs:** {F19, F20, F21}
+**Stages run:** {list}
+**Specs touched:** {paths}
+**Code:** branch `{branch}`, commits {n}, PR {url or "none"}
+**Tests:** pytest {pass/fail}
+**Smokes:** {H1–H5 summary or "not run"}
+**Open issues:** {issue_log ids or "none"}
+
+### What changed (plain language)
+{2–4 sentences}
+
+### Your review
+- Does behavior match what you asked for?
+- Any acceptance scenario missing?
+```
+
+| Field | Source |
+|-------|--------|
+| pytest summary | Last `08-verify-build` or local run |
+| E2E / smoke | `docs/e2e-report.md`, deploy H1–H5 |
+| Spec paths | `evolve_cycles[].artifacts` |
+| PR URL | `git_history` / gh |
+| Acceptance | `docs/test-plan.md` rows per Fn |
+
+## Spec documents typically touched (features)
+
+| Document | Typical delta |
+|----------|----------------|
+| `docs/feature-list.md` | New Fn rows + details |
+| `docs/spec.md` | Component behavior |
+| `docs/user-journeys.md` | New or extended journey |
+| `docs/test-plan.md` | Tests + H tiers |
+| `docs/acceptance-criteria.md` | Fn acceptance |
+| `docs/config-spec.md` | New parameters |
+| `docs/api-contract.md` | New/changed endpoints |
+| `docs/execution-plan.md` | Tasks, milestones |
+| `docs/dependency-inventory.md` | New packages |
+| `docs/data-management-plan.md` | Corpus/schema if ingest changes |
+
+Prefix decisions in `docs/requirements-decisions.md` / `docs/tech-decisions.md` with
+`EV-NNN / Fnn`.

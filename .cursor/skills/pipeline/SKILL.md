@@ -8,10 +8,9 @@ description: >
   stages 00–15. Use when the user wants to build Vecinita (RAG + data management),
   run the full pipeline, go end-to-end, deploy from scratch, or asks "build this".
   Post-deployment surgical edits use 14-hotfix; production health checks use
-  15-service-health without re-running the pipeline. Net-new product features use
-  18-add-feature (interactive intake, delta specs, selective 00–15). Broader scope changes use
-  16-evolve (same delta engine). Process improvement uses 17-retrospective (reviews logs and
-  skills 00–17 — does not change product code by default).
+  15-service-health without re-running the pipeline. Add features to an existing app
+  (including multiple Fn in one cycle) via 16-evolve or any stage 00–17 in delta mode.
+  Process improvement uses 17-retrospective (reviews logs and skills 00–17).
 ---
 
 # Pipeline
@@ -24,7 +23,8 @@ Take a project from initial concept through deployed, verified service. Every st
 from understanding requirements to deploying code — is structured, audited, and
 user-approved. The user is the source of truth at every stage.
 
-**Stage conventions (00–18):** [pipeline-preamble.md](../pipeline-preamble.md).
+**Stage conventions (00–17):** [pipeline-preamble.md](../pipeline-preamble.md).
+**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
 Shared policy (feedback loops, changelogs, performance testing, spec vs code root cause):
 [considerations.md](../considerations.md).
@@ -67,25 +67,18 @@ includes a §Connectivity section; phase gates below enforce the cumulative chec
 ╚════════════════════════════════════════════════════════════╝
           │ Structured change / new feature
           ▼
-╔═══ PHASE F: FEATURE & EVOLVE (on-demand, repeatable) ════════╗
-║  18-add-feature — new Fn: interview → specs → tooling →     ║
-║                   build → verify → deploy (00–15 delta)     ║
-║  16-evolve — scope/API/arch changes (same engine, broader)   ║
-╚════════════════════════════════════════════════════════════╝
-          │ Lessons learned / process tuning
-          ▼
-╔═══ PHASE G: RETROSPECTIVE (on-demand, repeatable) ═══════════╗
-║  17-retrospective — mine transcripts + state → interview →    ║
-║     brainstorm → skill update workshop → action backlog       ║
-╚════════════════════════════════════════════════════════════╝
+╔═══ PHASE F: EVOLVE & RETROSPECTIVE (on-demand, repeatable) ══╗
+║  16-evolve — features (multi-Fn), scope/API/arch, delta 00–15 ║
+║  17-retrospective — process improvement from logs + state     ║
+╚══════════════════════════════════════════════════════════════╝
 ```
 
 ## Quick start
 
 - **Which skill should I use?** → [docs/skill-routing.md](../../docs/skill-routing.md)
 - **Post-deploy testing tiers** → [ADR-004](../../docs/adr/ADR-004.md)
-- **Add a new product feature** → [18-add-feature](../18-add-feature/SKILL.md)
-- **Broader evolve / scope change** → [16-evolve](../16-evolve/SKILL.md)
+- **Add feature(s) to existing app** → [16-evolve](../16-evolve/SKILL.md)
+- **Broader scope/API/arch change** → [16-evolve](../16-evolve/SKILL.md)
 - **Process retrospective** → [17-retrospective](../17-retrospective/SKILL.md)
 
 ## Inputs
@@ -105,13 +98,18 @@ Collect from the user at start (check conversation context or ask):
 
 ## State management
 
-All stages use repo-root [`workflow-state.yaml`](../../workflow-state.yaml). Schema:
-[workflow-state-reference.md](../workflow-state-reference.md).
+**Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
 
-### Centralized state: `workflow-state.yaml`
+The pipeline orchestrator invokes **workflow-state-manager** at start and after each stage
+transition. Child stages also invoke the agent — **only workflow-state-manager writes**
+`workflow-state.yaml`.
 
-Single source of truth for pipeline position (repo root). Schema, skill keys, and update
-rules: [workflow-state-reference.md](../workflow-state-reference.md).
+Schema reference: [workflow-state-reference.md](../workflow-state-reference.md).
+
+### Centralized state
+
+Single source of truth for pipeline position (repo root). The orchestrator passes
+`user_intent` (including feature-addition requests) to the agent on every stage handoff.
 
 ### On invocation
 
@@ -313,28 +311,19 @@ or evidence before a hotfix.
 - Test-driven failures; 14-hotfix handoff with repro test
 - Records in `docs/service-health-reports/` and `docs/service-health-state.md`
 
-### Stage 18 — Add Feature (On-Demand, Repeatable)
-
-Preferred entry when the user wants a **new product feature** (new Fn in `feature-list.md`).
-Uses the same evolve-cycle engine as 16-evolve with feature-specific intake and mandatory
-phase checkpoints (specs → plan tooling → tech tooling → build → verify → deploy smoke).
-
-**Check**: User says "add a feature", "new capability", or describes net-new functionality.
-- Invoke [18-add-feature](../18-add-feature/SKILL.md)
-- Extended product interview → allocate Fn → delta specs → 03/06 tooling if needed → 07–13
-- Interactive progress digests after each phase; 11-verify-impl signs off the Fn
-- Does not replace 14-hotfix (bugs) or greenfield [pipeline](SKILL.md)
-
 ### Stage 16 — Evolve (On-Demand, Repeatable)
 
-Broader **structured changes** — API-only deltas, docs corrections, architectural updates, or
-scope changes that may not add a new Fn. New features can use 16-evolve but **18-add-feature**
-is the recommended path.
+Primary entry for **adding features** to an existing app (including **multiple Fn in one
+cycle**), scope/API/arch changes, and structured change requests. Any stage 00–17 may accept
+feature requests; when no evolve cycle is active, **workflow-state-manager** blocks and
+recommends 16-evolve.
 
-**Check**: Scope/API/arch change, or user explicitly invokes evolve (not "add feature").
+**Check**: User says "add features X, Y, Z", "new capability", scope/API/arch change, or
+structured change request.
 - Invoke [16-evolve](../16-evolve/SKILL.md)
-- Impact/routing plan; re-invokes 00–15 **selectively** in delta mode
-- Each invocation is an **evolve cycle** (`workflow-state.yaml` §evolve_cycles)
+- Feature intake → allocate Fn(s) → routing plan → re-invoke 00–15 **selectively** in delta mode
+- Mandatory phase checkpoints (A–D, deploy); 11-verify-impl signs off each Fn
+- Does not replace 14-hotfix (bugs) or greenfield [pipeline](SKILL.md)
 
 ### Stage 17 — Retrospective (On-Demand, Repeatable)
 
@@ -345,10 +334,10 @@ Not part of the linear greenfield pipeline. Use after any meaningful stretch of 
 **Check**: User asks for retrospective, lessons learned, pipeline tuning, or skill review.
 - Invoke [17-retrospective](../17-retrospective/SKILL.md)
 - Mines agent conversation logs (with consent), `workflow-state.yaml`, and `docs/`
-- Compares evidence to skills **00–18**; interviews user via AskQuestion (went well / improve)
+- Compares evidence to skills **00–17**; interviews user via AskQuestion (went well / improve)
 - Brainstorms solutions; ends with AskQuestion-driven skill patches (Phase 6 workshop)
 - Routes remaining actions to backlog, ADR, or commit/PR if user requests
-- Does **not** replace 14-hotfix, 16-evolve, 18-add-feature, or re-running build phases by default
+- Does **not** replace 14-hotfix, 16-evolve, or re-running build phases by default
 
 ## Transition Checks
 
@@ -378,7 +367,19 @@ Between each stage, verify:
    has not been contradicted by stage outputs. If a stage produced artifacts that diverge
    from the template pattern without an ADR, surface as `[Template Drift]`.
 
-Log all transition issues in `workflow-state.yaml` §issue_log.
+Log all transition issues via **workflow-state-manager** `update` → `issue_log`.
+
+## Feature addition routing
+
+When the user requests new features on an **existing** application:
+
+| Entry point | Behavior |
+|-------------|----------|
+| **16-evolve** | Recommended orchestrator — multi-Fn cycle, checkpoints, routing |
+| **Any stage 00–17** | Agent `read_context` detects feature intent; runs delta mode if cycle active, else blocks → 16-evolve |
+| **pipeline** | Greenfield only; if specs exist, suggest 16-evolve instead |
+
+See [pipeline-preamble.md](../pipeline-preamble.md) §Feature addition.
 
 ## Feedback Loop: Fix in Place
 
@@ -403,8 +404,7 @@ Every stage boundary is safe to stop. Natural pause points:
 - **After 13-deploy-smoke** — Done (deploy complete)
 - **14-hotfix** — On-demand surgical patches
 - **15-service-health** — On-demand Modal ops investigation
-- **18-add-feature** — On-demand new Fn (after initial build)
-- **16-evolve** — On-demand broader scope/API/arch changes
+- **16-evolve** — On-demand features (multi-Fn), scope/API/arch, delta 00–15
 - **17-retrospective** — On-demand process improvement (any time after work has run)
 
 ## Summary

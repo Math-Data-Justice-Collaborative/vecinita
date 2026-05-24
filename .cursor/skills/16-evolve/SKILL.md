@@ -1,23 +1,24 @@
 ---
 name: 16-evolve
 description: >
-  Evolves an existing deployed service through the full 00-15 planning-build-verify-deploy
-  loop for new features, scope changes, or architectural updates. Interviews the user on
-  desired changes, routes selectively through product planning, technical planning, build,
-  verification, and deploy stages with delta spec updates, cross-document consistency checks,
-  and ADR logging. Use when adding features to an existing app, changing product scope,
-  updating specs after deployment, or running a structured change request — not for surgical
-  bug fixes (14-hotfix) or greenfield builds (pipeline). Net-new product features with
-  full interactive checkpoints prefer 18-add-feature (orchestrates this skill's routing).
+  Evolves an existing deployed service: add one or more product features (multiple Fn in one
+  cycle), scope/API/arch changes, or structured change requests. Interviews the user, routes
+  selectively through product planning, technical planning, build, verification, and deploy
+  with delta spec updates, mandatory phase checkpoints, and ADR logging. Use when adding
+  features X Y Z to the current app, changing scope after deployment, or running a change
+  request — not for surgical bugs (14-hotfix) or greenfield (pipeline). Any stage 00–17 may
+  accept feature requests; this skill orchestrates multi-feature cycles when no cycle is active.
 ---
 
 # 16 — Evolve
 
-Take an **existing** CogniChem service from change request through updated specs, verified
-plans, implementation, and redeploy — reusing stages **00–15** in **delta mode**.
+Take an **existing** service from change request (including **multiple new features in one
+cycle**) through updated specs, verified plans, implementation, and redeploy — reusing stages
+**00–15** in **delta mode**.
 
-**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
+**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
 **Connectivity:** Any evolve cycle that adds or changes **browser-facing** surfaces must re-run
 the applicable rows in connectivity-gates §Pipeline stages 00–15 (at minimum: 01/04 spec delta,
@@ -30,14 +31,18 @@ uncertain, or contradictory finding uses **AskQuestion** — never guess.
 
 | Situation | Use |
 |-----------|-----|
-| Add a new product feature (new Fn) | [18-add-feature](../18-add-feature/SKILL.md) |
+| **Add feature(s)** — "add X, Y, Z", new Fn, user-visible capability | **16-evolve** |
 | Scope/API/arch change (may or may not add Fn) | **16-evolve** |
 | Change scope, API, config, or acceptance criteria | **16-evolve** |
 | Architectural or dependency change affecting multiple docs | **16-evolve** |
 | Bug fix, regression, small patch on production | [14-hotfix](../14-hotfix/SKILL.md) |
 | Greenfield service from scratch | [pipeline](../pipeline/SKILL.md) |
 | Modal ops / health investigation only | [15-service-health](../15-service-health/SKILL.md) |
-| Lessons learned / improve skills 00–16 | [17-retrospective](../17-retrospective/SKILL.md) |
+| Lessons learned / improve skills 00–17 | [17-retrospective](../17-retrospective/SKILL.md) |
+
+**Any stage 00–17** may receive a feature-addition request. If no active evolve cycle exists,
+that stage's workflow-state-manager context will **block** and recommend **16-evolve** — start
+here for net-new feature work on an existing app.
 
 ## Prerequisites
 
@@ -48,7 +53,7 @@ Before starting an evolve cycle:
 3. **Codebase exists** with a deployable artifact (or user confirms build-only evolve).
 
 If prerequisites are missing, ask via AskQuestion: run full [pipeline](../pipeline/SKILL.md) first,
-or proceed with a reduced doc set (record waiver in the evolve cycle log).
+or proceed with a reduced doc set (record waiver via workflow-state-manager).
 
 ## Interactive questions (required)
 
@@ -57,242 +62,163 @@ or proceed with a reduced doc set (record waiver in the evolve cycle log).
 
 | Situation | Pattern |
 |-----------|---------|
-| Change intake | 2–4 `questions` per batch; wait for all answers |
+| Change / feature intake | 2–4 `questions` per batch; wait for all answers |
 | Single gate or approval | One AskQuestion; first option = recommendation; last = `Let me explain / provide more context` |
 | Impact / stage routing | Present recommended stage list; user confirms or adjusts |
 | Ambiguity / contradiction | Category label in prompt: `[Decision]`, `[Ambiguity]`, `[Contradiction]`, `[Uncertainty]` |
-| Phase gate failure | List unmet criteria; ask proceed anyway or resolve first |
+| Phase gate failure | List unmet criteria; **block** until resolved (no silent proceed) |
+| Phase checkpoint (A–D, deploy) | Progress digest + AskQuestion before next phase |
 
 Do not post interview prompts as markdown lists expecting inline replies.
 
 ## State management
 
-**Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) — top-level
-`evolve_cycles[]` (not under `stages`). Rules: [workflow-state-reference.md](../workflow-state-reference.md).
+**Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
 
-### Evolve cycles
-
-Each invocation starts or resumes an **evolve cycle** — see [reference.md](reference.md) for the
-YAML schema. Append under `evolve_cycles:` (create the key if absent).
+**Primary state:** `evolve_cycles[]` (not under `stages`). Schema: [reference.md](reference.md).
 
 On invocation:
 
-1. Read `workflow-state.yaml`.
-2. If an evolve cycle is `in_progress`, report position and ask: resume / abandon / start new.
-3. If none in progress, start **Phase 0 — Change intake** (below).
+1. Invoke **workflow-state-manager** `read_context` with `skill_id: 16-evolve` and `user_intent`.
+2. If an evolve cycle is `in_progress`, report position; AskQuestion: resume / abandon / start new.
+3. If none in progress, start **Phase 0 — Change / feature intake**.
 
-After every substep: update the active cycle immediately (status, `current_stage`, artifacts, ADRs).
+After every substep: agent `update` on the active cycle (status, `current_stage`, artifacts, ADRs,
+checkpoints, `git_history`).
 
 ### Git branch and commit-as-you-go
 
-Each evolve cycle works on a dedicated branch:
+Each evolve cycle works on `evolve/{cycle-id}-{slug}`. Record branch via agent on creation.
+Commit deltas as you go; agent `update` appends `git_history.commits` with `stage: "16-evolve"`.
+When complete, create a PR from the evolve branch to main.
 
-```
-evolve/{cycle-id}-{slug}
-```
+## Delta / feature-addition mode
 
-Record the branch in `git_history.branches` on creation. Commit delta specs, code changes,
-and test updates as they happen — never accumulate uncommitted work across substeps.
-After each commit, append to `git_history.commits` with `stage: "16-evolve"`.
-
-When the cycle is complete, create a PR from the evolve branch to main.
-
-### Decision and ADR logging
-
-Per [considerations.md](../considerations.md) §8:
-
-- Create `docs/adr/ADR-{NNN}.md` for every resolved `[Decision]`, `[Contradiction]`, and
-  non-obvious `[Ambiguity]`.
-- Append to `docs/evolve-decisions.md` (create per cycle if missing).
-- Record ADR paths on the active `evolve_cycles[]` entry.
+This skill **orchestrates** delta mode for all child stages. See [reference.md](reference.md)
+for multi-Fn cycles, intake batches, checkpoints, and routing matrix.
 
 ## Workflow overview
 
 ```
-Change intake (Phase 0)
+Change / feature intake (Phase 0)
        │
        ▼
-Impact analysis → stage routing plan (user approves)
+Fn allocation (multi-Fn) + impact analysis → routing plan (user approves)
        │
        ▼
 ┌──────────────────────────────────────────────────────────┐
-│  A: Product     01-requirements* → 02-verify-plan* →     │
-│     planning    03-plan-tooling*                         │
+│  A: Product     01* → 02* → 03*                          │
 ├──────────────────────────────────────────────────────────┤
-│  B: Technical   04-tech-plan* → 05-verify-tech* →        │
-│     planning    06-tech-tooling*                         │
+│  B: Technical   04* → 05* → 06*                          │
 ├──────────────────────────────────────────────────────────┤
-│  C: Build       07-build* ◄── 08-verify-build            │
+│  C: Build       07* ◄── 08*                              │
 ├──────────────────────────────────────────────────────────┤
-│  D: Verify &    09-qa* + 10-e2e* → 11-verify-impl* →   │
-│     deploy      12-verify-deploy* → 13-deploy-smoke*     │
+│  D: Verify      09* + 10* → 11* → 12* → 13*              │
 └──────────────────────────────────────────────────────────┘
        │
        ▼
-Evolve summary + optional 14-hotfix / 15-service-health follow-up
+Evolve summary + optional 14-hotfix / 15-service-health / 17-retrospective
 
-* = invoke only if impact analysis marks stage required (see reference.md)
+* = invoke only if routing plan marks stage required
+**Checkpoints:** mandatory digest + AskQuestion after phases A, B, C, D, and deploy
 ```
 
-## Phase 0 — Change intake
+## Phase 0 — Change / feature intake
 
-Interview the user until the change is concrete enough for impact analysis.
+Interview until the change is concrete enough for Fn allocation and impact analysis.
 
-**Batch 1 — Intent**
+**For net-new features**, use intake batches in [reference.md](reference.md) §Feature intake batches.
 
-| Question | Purpose |
-|----------|---------|
-| What do you want to change? | Feature, behavior, API, config, docs-only, etc. |
-| Why now? | Priority, deadline, blocking issue |
-| Success criteria | How we know the evolve cycle is done |
+**For general changes**, use:
 
-**Batch 2 — Scope boundaries**
+| Batch | Topics |
+|-------|--------|
+| **Intent** | What to change, why now, success criteria |
+| **Scope** | In/out of scope, breaking vs compatible, features affected |
+| **Constraints** | Cost, latency, data, deploy target |
 
-| Question | Purpose |
-|----------|---------|
-| In scope / out of scope | Prevent scope creep |
-| Breaking vs backward-compatible | API and deploy risk |
-| Features affected | Map to `docs/feature-list.md` (F1–F9 or new Fn) |
+Surface **immediately** via AskQuestion anything ambiguous, uncertain, or contradictory.
 
-**Batch 3 — Constraints**
+**Approval gate:** AskQuestion — "Proceed to allocate Fn(s) and impact analysis on this scope?"
 
-| Question | Purpose |
-|----------|---------|
-| GPU / cost / latency expectations | Feed 04-tech-plan if relevant |
-| Data / weights / secrets | Feed data-staging and 12-verify-deploy |
-| Deploy target unchanged? | Modal vs other |
+Record approved scope in `docs/evolve-decisions.md` §Cycle {id} — Scope (via committed doc;
+agent records cycle metadata).
 
-Surface **immediately** via AskQuestion anything that is ambiguous, uncertain, or
-contradictory (user answers vs existing specs vs codebase).
+## Phase 1 — Fn allocation, impact analysis, routing
 
-**Approval gate:** AskQuestion — "Proceed with impact analysis on this scope?" with options:
-Proceed (recommended) / Adjust scope / Cancel evolve.
-
-Record approved scope verbatim in `docs/evolve-decisions.md` §Cycle {id} — Scope.
-
-## Phase 1 — Impact analysis and routing
-
-1. Read current `docs/feature-list.md`, `docs/spec.md`, `docs/execution-plan.md` (if present),
-   and relevant config/API docs.
-2. List **artifacts to update** (which spec files, which code areas, tests, ADRs).
-3. Build **stage routing plan** using [reference.md](reference.md) §Stage routing matrix.
-4. Flag **staleness**: downstream docs that consumed old spec text.
-5. Present plan via AskQuestion — user confirms stages to run or adjusts.
-
-Default routing (adjust per change):
-
-| Change type | Typical stages |
-|-------------|----------------|
-| New feature Fn | 01, 02, 04, 05, 07, 08, 09, 10, 11, 12, 13 |
-| Config / API only | 01 (delta), 02 (affected docs), 04 (delta), 05, 07, 09, 10, 11, 12, 13 |
-| Docs-only correction | 01 (delta), 02 — **no 07–13** unless user requests |
-| New Cursor rule/hook | 03 or 06 + affected verify stages |
-| New external repo/paper context | 00 → then product stages |
-
-**Never re-run a completed stage** unless the user approves or impact analysis requires it.
+1. **Multi-feature default:** one cycle, multiple Fn — assign F19, F20, F21 from `feature-list.md`.
+2. List **artifacts to update** and **routing_plan** — [reference.md](reference.md) §Stage routing matrix.
+3. Default for net-new features: 01, 02, 03 (if guardrails), 04, 05, 06 (if stack), 07–13.
+4. Present plan via AskQuestion; user confirms or adjusts stages.
+5. Agent `update`: create evolve cycle with `feature_ids: [F19, F20, ...]`, `checkpoints`, routing.
 
 ## Phase 2 — Execute routed stages (delta mode)
 
-Invoke child skills **one stage at a time** (except 09+10 parallel). Pass **evolve context**
-to each child:
+Invoke child skills **one at a time** (except 09+10 parallel). Pass evolve context:
 
-- `mode: evolve`
-- `evolve_cycle_id: {id}`
-- `scope: {approved scope from Phase 0}`
-- `affected_artifacts: [paths]`
-- `delta_only: true` — update only sections tied to the change; do not regenerate entire docs
+```yaml
+mode: evolve
+evolve_cycle_id: EV-NNN
+feature_ids: [F19, F20, F21]
+scope: <approved Phase 0>
+affected_artifacts: [paths]
+delta_only: true
+```
 
-### Stage invocation rules
+Child skills invoke **workflow-state-manager** themselves; 16-evolve verifies transition checks
+between stages.
 
-| Stage | Skill | Evolve behavior |
-|-------|-------|-----------------|
-| 00-context | [00-context](../00-context/SKILL.md) | Only if new paper/repo/docs; merge into context-brief |
-| 01-requirements | [01-requirements](../01-requirements/SKILL.md) | Delta interview on affected templates/sections only |
-| 02-verify-plan | [02-verify-plan](../02-verify-plan/SKILL.md) | Audit changed docs + consistency across full doc set |
-| 03-plan-tooling | [03-plan-tooling](../03-plan-tooling/SKILL.md) | Only if new rules/hooks/skills needed for the change |
-| 04-tech-plan | [04-tech-plan](../04-tech-plan/SKILL.md) | Delta on execution plan — new tasks/milestones, not full rewrite |
-| 05-verify-tech | [05-verify-tech](../05-verify-tech/SKILL.md) | Verify changed statements + cross-doc vs product specs |
-| 06-tech-tooling | [06-tech-tooling](../06-tech-tooling/SKILL.md) | Only if stack/hooks change |
-| 07-build | [07-build](../07-build/SKILL.md) | Implement new/changed tasks only; respect execution-plan gates |
-| 08-verify-build | [08-verify-build](../08-verify-build/SKILL.md) | At 07 milestone boundaries (not separate invoke) |
-| 09-qa + 10-e2e | [09-qa](../09-qa/SKILL.md), [10-e2e](../10-e2e/SKILL.md) | Parallel; scope to affected features/journeys |
-| 11-verify-impl | [11-verify-impl](../11-verify-impl/SKILL.md) | Feature-level approval for changed areas |
-| 12-verify-deploy | [12-verify-deploy](../12-verify-deploy/SKILL.md) | Pre-deploy gate for this evolve cycle |
-| 13-deploy-smoke | [13-deploy-smoke](../13-deploy-smoke/SKILL.md) | Redeploy + smoke; append to deploy-report / CHANGELOG |
+### Interactive checkpoint
 
-Between each stage, run **transition checks** (same as [pipeline](../pipeline/SKILL.md)):
+After phases **A, B, C, D**, and after **13-deploy-smoke**, present progress digest then AskQuestion
+before continuing. Template: [reference.md](reference.md) §Checkpoint digest.
 
-1. Artifact verification — expected outputs exist
-2. Cross-stage consistency — downstream matches upstream
-3. Scope drift — change still matches approved Phase 0 scope
-4. Staleness warnings — list docs not re-verified
-5. Template drift — `[Template Drift]` if structural patterns change without ADR
+For **11-verify-impl**, include **per–acceptance-criterion** status for each Fn.
 
-Log issues in `workflow-state.yaml` §issue_log with `evolve_cycle_id`.
+### Phase gates (blocking)
 
-### Phase gates (evolve)
+| Gate | Criteria |
+|------|----------|
+| **A→B** | Fn in feature-list; delta specs; 02 pass; 03 if routed |
+| **B→C** | Execution-plan tasks approved; 05 pass; 06 if routed |
+| **C→D** | All Fn tasks done; latest 08 pass |
+| **Deploy** | 09+10 pass; 11+12 user-approved; deploy approved |
 
-| Gate | Criteria | Blocking |
-|------|----------|----------|
-| A→B | Delta specs written; 02-verify-plan pass on affected docs; 03 if required | Yes |
-| B→C | Execution plan delta approved; 05-verify-tech pass; 06 if required | Yes |
-| C→D | All new/changed tasks completed; latest 08-verify-build pass | Yes |
-| Deploy | 09+10 pass; 11+12 approved; user approves deploy | Yes |
-
-On gate failure: list unmet criteria → AskQuestion → fix in place per considerations §2.
+On failure: list unmet criteria → AskQuestion → fix in place per considerations §2.
 
 ## Phase 3 — Consistency verification
 
-After **02-verify-plan** and again after **05-verify-tech**, run an explicit consistency pass:
-
-| Check | Action on failure |
-|-------|-------------------|
-| feature-list ↔ spec | AskQuestion `[Contradiction]` |
-| spec ↔ config-spec ↔ api-contract | AskQuestion `[Contradiction]` |
-| spec ↔ test-plan ↔ acceptance-criteria | AskQuestion `[Ambiguity]` |
-| execution-plan ↔ feature-list | AskQuestion `[Decision]` — add tasks or defer feature |
-| ADRs ↔ spec claims | Update spec or supersede ADR |
-| Code ↔ spec (spot-check) | Route to 07-build or 14-hotfix |
-
-Full checklist: [reference.md](reference.md) §Consistency checklist.
+After **02-verify-plan** and **05-verify-tech**, run [reference.md](reference.md) §Consistency checklist.
 
 ## Phase 4 — Close evolve cycle
 
-1. Write `docs/evolve-report-{cycle-id}.md` — scope, stages run, ADRs, deploy URL, open issues.
-2. Update `workflow-state.yaml` — cycle `status: completed`, timestamps, artifact list.
-3. Append evolve summary to `docs/CHANGELOG.md` or `docs/deploy-report.md` if deployed.
-4. Present summary to user; AskQuestion: done / run 15-service-health / open 14-hotfix follow-up.
+1. Write `docs/evolve-report-{cycle-id}.md`.
+2. Agent `update`: cycle `status: completed`, timestamps, artifacts.
+3. Append CHANGELOG / deploy-report if deployed.
+4. AskQuestion: done / 15-service-health / 14-hotfix / 17-retrospective.
 
 ## Fix in place
 
-Same as pipeline: **never re-run entire phases** for verification failures.
-
-| Issue | Action |
-|-------|--------|
-| Code bug found in 09/10 | Targeted fix via 07-build or 14-hotfix |
-| Spec wrong | Surgical spec patch → re-run only affected verify stage |
-| Scope creep discovered | AskQuestion — expand cycle or defer to new cycle |
-| Deploy failure | 12-verify-deploy checklist → fix → re-run 13 only |
+Same as pipeline — never re-run entire phases for verification failures.
 
 ## Safe stopping points
 
-- After impact analysis approved (plan only, no code)
-- After Phase A (product docs updated and verified)
-- After Phase B (execution plan delta approved)
-- After 07-build milestone (partial implementation)
-- After 11-verify-impl (verified, deploy optional)
+- After Phase 0–1 (Fn + routing approved; no code)
+- After Phase A (specs + 03 guardrails)
+- After Phase B (execution plan approved)
+- After Phase C (implemented, not deployed)
+- After 11-verify-impl (verified; deploy optional)
 
 ## Output rules
 
 1. **One routed stage at a time** (except 09+10).
 2. **Delta by default** — full regeneration only with user approval.
-3. **ADR for structural decisions** — no silent tech choices.
-4. **AskQuestion for all blocking uncertainty** — cite evidence in every prompt.
-5. **State persists** — evolve cycles survive session boundaries.
-6. **Child skills own detail** — 16-evolve orchestrates; do not duplicate 01/02/04 interview scripts.
+3. **Multi-Fn in one cycle** unless user splits via AskQuestion.
+4. **Checkpoints mandatory** between phases A–D and deploy.
+5. **Child skills own detail** — 16-evolve orchestrates; read child SKILL.md when invoking.
+6. **State via agent only** — never edit `workflow-state.yaml` directly.
 
 ## Additional resources
 
-- Stage routing matrix and YAML schema: [reference.md](reference.md)
+- YAML schema, feature intake, checkpoints: [reference.md](reference.md)
 - Full pipeline diagram: [pipeline/SKILL.md](../pipeline/SKILL.md)
-- ADR template and numbering: [considerations.md](../considerations.md) §8
