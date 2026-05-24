@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 5: EV-001 Corpus tags & browse |
-| **Active milestone** | M19: EV-001 deploy & connectivity smoke |
-| **Active task** | T19.1 — update staging-secrets-matrix for browse VITE URL |
-| **Tasks completed** | 106 / 111 |
+| **Active milestone** | M19: EV-001 deploy & connectivity smoke (complete — Phase 5 gate next) |
+| **Active task** | Phase 5 gate check |
+| **Tasks completed** | 111 / 111 |
 | **Last updated** | 2026-05-24 |
 | **Evolve cycle** | EV-001 (F19–F22) |
 
@@ -402,11 +402,11 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
-| T19.1 | Update `docs/staging-secrets-matrix.md` — EV-001 browse uses existing `VITE_VECINITA_CHAT_API_URL` | Docs | pending | 04-tech-plan §Connectivity, deployment-integration | T17.3 | — | EV-001 | F19 |
-| T19.2 | Extend `tests/smoke/test_staging_connectivity.py` — browse GET H4 | Test | pending | TC-046, connectivity-gates | T17.4 | — | EV-001 | F19 |
-| T19.3 | Extend `scripts/deploy/verify_connectivity.sh` for `/api/v1/tags` preflight (H4) | Config | pending | 04-tech-plan §Connectivity | T19.2 | — | EV-001 | F19 |
-| T19.5 | Extend `verify_connectivity.sh` H5 — chat bundle contains chat API host (browse + ask) | Config | pending | connectivity-gates H5 | T19.3, T17.8 | — | EV-001 | F19 |
-| T19.4 | Staging deploy EV-001; run H1–H3 + browse/tag smoke | Config | pending | 13-deploy-smoke | T19.5, T18.7, T17.11, T18.6 | D1–D9 | EV-001 | F19–F22 |
+| T19.1 | Update `docs/staging-secrets-matrix.md` — EV-001 browse uses existing `VITE_VECINITA_CHAT_API_URL` | Docs | completed | 04-tech-plan §Connectivity, deployment-integration | T17.3 | — | EV-001 | F19 |
+| T19.2 | Extend `tests/smoke/test_staging_connectivity.py` — browse GET H4 | Test | completed | TC-046, connectivity-gates | T17.4 | — | EV-001 | F19 |
+| T19.3 | Extend `scripts/deploy/verify_connectivity.sh` for `/api/v1/tags` preflight (H4) | Config | completed | 04-tech-plan §Connectivity | T19.2 | — | EV-001 | F19 |
+| T19.5 | Extend `verify_connectivity.sh` H5 — chat bundle contains chat API host (browse + ask) | Config | completed | connectivity-gates H5 | T19.3, T17.8 | — | EV-001 | F19 |
+| T19.4 | Staging deploy EV-001; run H1–H3 + browse/tag smoke | Config | completed | 13-deploy-smoke | T19.5, T18.7, T17.11, T18.6 | D1–D9 | EV-001 | F19–F22 |
 
 #### Phase 5 Gate Check
 
@@ -483,7 +483,7 @@ main
 | PR-19 | Minor | M15 | feat/M15-tag-schema | evolve/EV-001-corpus-tags | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/38 |
 | PR-20 | Minor | M16 | feat/M16-ingest-tagging | evolve/EV-001-corpus-tags | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/39 |
 | PR-21 | Minor | M17 | feat/M17-browse-tag-rag | evolve/EV-001-corpus-tags | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/40 |
-| PR-22 | Minor | M18 | feat/M18-admin-tags | evolve/EV-001-corpus-tags | pending |
+| PR-22 | Minor | M18 | feat/M18-admin-tags | evolve/EV-001-corpus-tags | merged |
 | PR-23 | Minor | M19 | feat/M19-ev001-deploy | evolve/EV-001-corpus-tags | pending |
 | PR-24 | Major | Phase 5 / EV-001 | evolve/EV-001-corpus-tags | main | pending |
 
@@ -598,11 +598,11 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T18.5 | M18 | 5 | Code | completed | T16.7, T18.4 | — | EV-001 | 2026-05-24 |
 | T18.6 | M18 | 5 | Test | completed | T18.5 | D9 | EV-001 | 2026-05-24 |
 | T18.7 | M18 | 5 | Test | completed | T18.3 | — | EV-001 | 2026-05-24 |
-| T19.1 | M19 | 5 | Docs | pending | T17.3 | — | EV-001 |
-| T19.2 | M19 | 5 | Test | pending | T17.4 | — | EV-001 |
-| T19.3 | M19 | 5 | Config | pending | T19.2 | — | EV-001 |
-| T19.5 | M19 | 5 | Config | pending | T19.3, T17.8 | — | EV-001 |
-| T19.4 | M19 | 5 | Config | pending | T19.5, T18.7, T17.11, T18.6 | D1–D9 | EV-001 |
+| T19.1 | M19 | 5 | Docs | completed | T17.3 | — | EV-001 | 2026-05-24 |
+| T19.2 | M19 | 5 | Test | completed | T17.4 | — | EV-001 | 2026-05-24 |
+| T19.3 | M19 | 5 | Config | completed | T19.2 | — | EV-001 | 2026-05-24 |
+| T19.5 | M19 | 5 | Config | completed | T19.3, T17.8 | — | EV-001 | 2026-05-24 |
+| T19.4 | M19 | 5 | Config | completed | T19.5, T18.7, T17.11, T18.6 | D1–D9 | EV-001 | 2026-05-24 |
 
 ## Phase Gate Log
 

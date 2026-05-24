@@ -54,6 +54,28 @@ def test_h4_chat_backend_cors_preflight(chat_api: str, chat_frontend: str) -> No
     )
 
 
+def test_h4_chat_backend_cors_preflight_browse_documents(chat_api: str, chat_frontend: str) -> None:
+    """TC-046 live: OPTIONS on GET /api/v1/documents from chat frontend origin."""
+    assert_cors_preflight(
+        api_base=chat_api,
+        origin=chat_frontend,
+        path="/api/v1/documents",
+        method="GET",
+        extra_request_headers=["content-type"],
+    )
+
+
+def test_h4_chat_backend_cors_preflight_browse_tags(chat_api: str, chat_frontend: str) -> None:
+    """TC-046 live: OPTIONS on GET /api/v1/tags from chat frontend origin."""
+    assert_cors_preflight(
+        api_base=chat_api,
+        origin=chat_frontend,
+        path="/api/v1/tags",
+        method="GET",
+        extra_request_headers=["content-type"],
+    )
+
+
 def test_h4_write_api_cors_preflight(admin_frontend: str) -> None:
     write_url = _env("VECINITA_STAGING_WRITE_URL")
     if not write_url:
@@ -80,6 +102,34 @@ def test_h4_write_api_cors_preflight_delete_document(admin_frontend: str) -> Non
     )
 
 
+def test_h4_write_api_cors_preflight_patch_document_tags(admin_frontend: str) -> None:
+    """TC-049 live: OPTIONS on PATCH document tags from admin frontend origin."""
+    write_url = _env("VECINITA_STAGING_WRITE_URL")
+    if not write_url:
+        pytest.skip("Set VECINITA_STAGING_WRITE_URL")
+    assert_cors_preflight(
+        api_base=write_url,
+        origin=admin_frontend,
+        path="/internal/v1/documents/00000000-0000-0000-0000-000000000001/tags",
+        method="PATCH",
+        extra_request_headers=["authorization", "content-type"],
+    )
+
+
+def test_h4_write_api_cors_preflight_patch_chunk_tags(admin_frontend: str) -> None:
+    """TC-049 live: OPTIONS on PATCH chunk tags from admin frontend origin."""
+    write_url = _env("VECINITA_STAGING_WRITE_URL")
+    if not write_url:
+        pytest.skip("Set VECINITA_STAGING_WRITE_URL")
+    assert_cors_preflight(
+        api_base=write_url,
+        origin=admin_frontend,
+        path="/internal/v1/chunks/00000000-0000-0000-0000-000000000001/tags",
+        method="PATCH",
+        extra_request_headers=["authorization", "content-type"],
+    )
+
+
 def test_h4_modal_data_mgmt_cors_preflight(admin_frontend: str) -> None:
     admin_api = _env("VECINITA_STAGING_ADMIN_API_URL")
     if not admin_api:
@@ -100,6 +150,9 @@ def test_h5_chat_frontend_bundle_points_at_backend(chat_frontend: str, chat_api:
     host = httpx.URL(chat_api).host
     assert host
     assert_bundle_contains_hosts(js, [host])
+    # EV-001 browse routes share VITE_VECINITA_CHAT_API_URL (ask + corpus).
+    assert "/api/v1/documents" in js, "Browse documents path missing from chat bundle"
+    assert "/api/v1/tags" in js, "Browse tags path missing from chat bundle"
 
 
 def test_h5_admin_frontend_bundle_has_modal_and_write_hosts(
