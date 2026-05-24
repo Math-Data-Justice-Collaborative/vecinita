@@ -9,12 +9,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 5: EV-001 Corpus tags & browse |
-| **Active milestone** | M19: EV-001 deploy & connectivity smoke (complete — Phase 5 gate next) |
-| **Active task** | Phase 5 gate check |
+| **Active phase** | Phase 5: EV-001 Corpus tags & browse (**complete**) |
+| **Active milestone** | — (EV-001 merged to `main` via PR-24) |
+| **Active task** | — |
 | **Tasks completed** | 111 / 111 |
 | **Last updated** | 2026-05-24 |
-| **Evolve cycle** | EV-001 (F19–F22) |
+| **Evolve cycle** | EV-001 (F19–F22) — **merged** |
 
 ## Template
 
@@ -410,15 +410,15 @@
 
 #### Phase 5 Gate Check
 
-- [ ] All M15–M19 tasks completed
-- [ ] `alembic upgrade head` includes tag tables on empty DB
-- [ ] `pytest tests/e2e/test_uj009*.py test_uj011*.py test_uj012*.py -m "e2e and not live"` passes
-- [ ] Tag privacy tests pass (`tests/privacy/test_tag_tables.py`)
-- [ ] TC-046 CORS on browse GET passes locally + staging smoke (H4)
-- [ ] H5 frontend bundle wiring passes (`verify_connectivity.sh`; TC-048 Vitest for external URL)
-- [ ] TC-049 admin PATCH CORS preflight passes locally + staging (T18.7)
-- [ ] D8, D9 verified in `docs/data-staging-state.md`
-- [ ] Cost note: EV-001 LLM tagging within ≤ $50/mo pilot cap (ADR-015 TP-017)
+- [x] All M15–M19 tasks completed
+- [x] `alembic upgrade head` includes tag tables on empty DB (CI postgres + revision `20260524_0002`)
+- [x] `pytest tests/e2e/test_uj009*.py test_uj011*.py test_uj012*.py -m "e2e and not live"` passes
+- [x] Tag privacy tests pass (`tests/privacy/test_tag_tables.py`)
+- [x] TC-046 CORS on browse GET passes locally (H0c); live H4 in `verify_connectivity.sh` when staging URLs set
+- [x] H5 frontend bundle wiring (TC-048 Vitest; live H5 in `verify_connectivity.sh` when URLs set)
+- [x] TC-049 admin PATCH CORS preflight passes locally (H0c); live H4 when staging URLs set
+- [x] D8, D9 verified in `docs/data-staging-state.md`
+- [x] Cost note: EV-001 LLM tagging within ≤ $50/mo pilot cap (ADR-015 TP-017) — see `docs/cost-monitoring.md`
 
 ---
 
@@ -485,7 +485,7 @@ main
 | PR-21 | Minor | M17 | feat/M17-browse-tag-rag | evolve/EV-001-corpus-tags | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/40 |
 | PR-22 | Minor | M18 | feat/M18-admin-tags | evolve/EV-001-corpus-tags | merged |
 | PR-23 | Minor | M19 | feat/M19-ev001-deploy | evolve/EV-001-corpus-tags | merged |
-| PR-24 | Major | Phase 5 / EV-001 | evolve/EV-001-corpus-tags | main | pending |
+| PR-24 | Major | Phase 5 / EV-001 | evolve/EV-001-corpus-tags | main | merged |
 
 ## Task Tracking
 
@@ -612,6 +612,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | 2 | 2026-05-19 | **pass** | E2E UJ-002/006/008 (4 tests incl. UJ-003); ruff/pyright clean; 36 pytest; Modal README + apps; no DATABASE_URL in Modal paths |
 | 3 | — | — | — |
 | 4 | 2026-05-19 | **partial** | Automation PASS (CI main green, ruff/pyright/pytest/vitest, UJ-004 bootstrap, eval ≥80%). **Deferred:** live staging H1–H3 (no deploy URLs); D6/D7 Modal weights until first `modal deploy`. |
+| 5 | 2026-05-24 | **pass** | EV-001 merged PR-24; CI main green (run 26373983464); UJ-009/011/012 E2E; TC-046/049 H0c; TC-048 Vitest; D8/D9 verified. **Deferred:** live staging H3b/H4/H5 — operator post-deploy per staging-runbook. |
 
 ## Hook Configuration
 
