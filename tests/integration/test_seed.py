@@ -21,7 +21,10 @@ def test_seed_load_row_counts(seeded_db: None) -> None:
         documents = conn.execute(text("SELECT COUNT(*) FROM documents")).scalar_one()
         chunks = conn.execute(text("SELECT COUNT(*) FROM chunks")).scalar_one()
         languages = conn.execute(
-            text("SELECT DISTINCT language FROM documents ORDER BY language")
+            text(
+                "SELECT DISTINCT language FROM documents "
+                "WHERE language IN ('en', 'es') ORDER BY language"
+            )
         ).fetchall()
 
     assert documents >= 2

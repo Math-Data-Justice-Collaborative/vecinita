@@ -12,7 +12,9 @@ Track asset staging before build tasks with Data Deps run.
 | Seed corpus ES | D2 | verified | 2026-05-19 | `data/fixtures/corpus/es/` |
 | Eval Q&A pairs | D3 | verified | 2026-05-19 | `data/fixtures/eval/qa_pairs.json` |
 | Ingest HTML fixture | D4 | verified | 2026-05-19 | `data/fixtures/ingest/sample-page.html` |
-| Alembic migrations | D5 | verified | 2026-05-19 | `apps/database/alembic/versions/20260519_0001` |
+| Alembic migrations | D5 | verified | 2026-05-24 | `apps/database/alembic/versions/` incl. `20260524_0002` |
+| Seed tag vocabulary | D8 | verified | 2026-05-24 | `data/fixtures/tags/seed_tags.json` |
+| Tagged corpus fixtures | D9 | verified | 2026-05-24 | `data/fixtures/corpus/tagged/` |
 | FastEmbed weights | D6 | verified | 2026-05-19 | **`vecinita`** workspace; volume `embedding-models`; URL `https://vecinita--vecinita-embedding-embedding-api.modal.run` |
 | Qwen2.5-1.5B-Instruct | D7 | staged_procedure | — | **`vecinita`** workspace; deployed `vecinita-llm`; run `stage_llm_weights` to verify volume |
 

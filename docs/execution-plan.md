@@ -1,19 +1,20 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, ADR-001–013
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, ADR-001–015
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 3: ChatRAG |
-| **Active milestone** | Phase 4 complete (gate partial) |
-| **Active task** | 11-verify-impl / deploy when ready |
-| **Tasks completed** | 72 / 73 |
-| **Last updated** | 2026-05-19 |
+| **Active phase** | Phase 5: EV-001 Corpus tags & browse |
+| **Active milestone** | M16: Ingest LLM tagging & admin re-tag |
+| **Active task** | T16.1 — LLM tag client mock contract test |
+| **Tasks completed** | 79 / 111 |
+| **Last updated** | 2026-05-24 |
+| **Evolve cycle** | EV-001 (F19–F22) |
 
 ## Template
 
@@ -80,6 +81,8 @@
 | D5 | Alembic migrations | migration | — | pending | T3.2+ |
 | D6 | FastEmbed weights | model_weights | ~100–500 MB | pending | T6.3 |
 | D7 | Qwen2.5-1.5B-Instruct weights | model_weights | ~3 GB | pending | T10.3 |
+| D8 | Seed tag vocabulary | config_fixture | < 50 KB | verified | T15.4, T15.6, TC-041, F20 |
+| D9 | Tagged corpus fixtures | corpus_fixture | < 2 MB | pending | T15.5, T17.2, TC-040, TC-044 |
 
 **Data management gate:** Assets must be `verified` in `docs/data-staging-state.md` before dependent tasks start.
 
@@ -320,6 +323,105 @@
 
 ---
 
+### Phase 5: EV-001 — Corpus tags & browse
+
+**Objective:** Tag schema, LLM tagging at ingest, public browse API, admin chunk/tag editor, tag-aware RAG (F19–F22).  
+**Evolve cycle:** EV-001  
+**Feature IDs:** F19, F20, F21, F22  
+**Entry gate:** EV-001 product specs approved (02-verify-plan); tech decisions ADR-015.  
+**Exit gate:** UJ-009–UJ-012 E2E pass (local tier); browse GET **H4** CORS + **H5** frontend bundle wiring verified; staging deploy smoke for tag routes (incl. admin PATCH preflight).
+
+#### M15: Tag schema & fixtures
+
+**Goal:** Alembic tag tables, seed vocabulary, tagged corpus fixtures, privacy guardrails.  
+**Branch:** `feat/M15-tag-schema` → `evolve/EV-001-corpus-tags`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T15.1 | Test: tag tables have no identity columns (`tests/privacy/test_tag_tables.py`) | Test | completed | test-plan TC-031, ADR-004 | T2.4 | — | EV-001 | F20, F21 |
+| T15.2 | Alembic revision: `tags`, `document_tags`, `chunk_tags`; extend `jobs.job_type` | Code | completed | data-management-plan §Schema, ADR-014 | T15.1 | — | EV-001 | F20, F21 |
+| T15.3 | Test: tag FK constraints + migration upgrade (`tests/integration/test_tag_schema.py`) | Test | completed | data-management-plan | T15.2 | — | EV-001 | F20 |
+| T15.4 | Seed loader for `data/fixtures/tags/seed_tags.json` (D8) | Code | completed | RD-031, config-spec | T15.2 | D8 | EV-001 | F20 |
+| T15.5 | Tagged corpus fixtures `data/fixtures/corpus/tagged/` (D9) | Code | completed | test-plan TC-040, TC-044 | T15.4 | D9 | EV-001 | F19, F22 |
+| T15.6 | Test: seed tags + tagged corpus load (`tests/integration/test_tag_seed.py`) | Test | completed | test-plan TC-041 | T15.5 | D8, D9 | EV-001 | F19, F20 |
+
+#### M16: Ingest LLM tagging & admin re-tag (F20)
+
+**Goal:** LLM auto-tag after chunk/before embed; internal-write tag upsert; async retag job.  
+**Branch:** `feat/M16-ingest-tagging` → `evolve/EV-001-corpus-tags`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T16.1 | Test: LLM tag client mock contract (`tests/unit/test_llm_tag_client.py`) | Test | pending | ADR-015 TP-014 | T9.3 | — | EV-001 | F20, F22 |
+| T16.2 | `packages/tagging` — prompt, vocabulary merge, cap enforcement, config validation, RD-030 language | Code | pending | config-spec, RD-028, RD-030 | T16.1 | D8 | EV-001 | F20, F22 |
+| T16.3 | Ingest pipeline: tag after chunk, before embed; include tags in DO batch write | Code | pending | ADR-015 TP-010, spec.md §Ingest | T16.2, T6.4, T15.2 | D8 | EV-001 | F20 |
+| T16.4 | Internal write API: tag upsert on ingest batch write path only | Code | pending | openapi/internal-write.yaml, ADR-015 TP-010 | T15.2, T4.2 | — | EV-001 | F20 |
+| T16.5 | Test: TC-047 ingest LLM auto-tag E2E (`tests/e2e/test_uj002_ingest_tagging.py`) | Test | pending | UJ-002, TC-047, acceptance-criteria AC-T3 | T16.3, T16.4 | D4, D8 | EV-001 | F20 |
+| T16.6 | Modal retag worker + `job_type=retag` enqueue | Code | pending | ADR-015 TP-011, TP-012 | T16.2, T6.3 | — | EV-001 | F20, F21 |
+| T16.7 | `POST /internal/v1/documents/{id}/retag` → job id; poll `GET /jobs/{id}` | Code | pending | openapi/internal-write.yaml | T16.6, T16.4 | — | EV-001 | F21 |
+| T16.8 | Test: admin async retag lifecycle (mock LLM) | Test | pending | UJ-011, ADR-015 | T16.7 | D9 | EV-001 | F21 |
+
+#### M17: Public browse API, tag RAG, ChatRAG UI (F19, F22)
+
+**Goal:** Public GET browse routes, union tag-filter retriever, `/corpus` UI, chat sidebar chips.  
+**Branch:** `feat/M17-browse-tag-rag` → `evolve/EV-001-corpus-tags`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T17.1 | Regenerate shared-schemas from OpenAPI 0.2.0 tag/browse models | Code | pending | ADR-011, openapi/chat-rag.yaml | T15.2, T3.4 | — | EV-001 | F19, F22 |
+| T17.2 | Test: TC-040, TC-041 browse API integration (red) | Test | pending | UJ-009, test-plan | T17.1, T15.6 | D9 | EV-001 | F19 |
+| T17.3 | ChatRAG backend: `GET /api/v1/documents`, `/tags`, `/documents/{id}`; wire browse `VECINITA_*` config | Code | pending | api-contract.md, config-spec, F19 | T17.2 | — | EV-001 | F19 |
+| T17.4 | Test: TC-046 CORS preflight on browse GET (`tests/unit/test_cors_policy.py`) | Test | pending | connectivity-gates H4 | T17.3 | — | EV-001 | F19 |
+| T17.5 | `packages/rag` tag-filter SQL (union match) + LLM tag inference hook | Code | pending | ADR-015 TP-013, RD-027 | T16.2, T8.4 | D9 | EV-001 | F22 |
+| T17.6 | Test: TC-044, TC-045 tag-filtered retrieval unit tests | Test | pending | UJ-012, test-plan, acceptance-criteria AC-T5, AC-T6 | T17.5 | D9 | EV-001 | F22 |
+| T17.7 | Wire `AskRequest.tags[]` on ask/stream routes | Code | pending | openapi/chat-rag.yaml | T17.5, T10.4 | — | EV-001 | F22 |
+| T17.8 | ChatRAG frontend `/corpus` browse page (tags, search, pagination, external URL) | Code | pending | UJ-009, UJ-010, AC-T2, ADR-015 TP-015 | T17.3, T11.1 | — | EV-001 | F19 |
+| T17.9 | Chat sidebar tag filter chips → ask/stream payload | Code | pending | RD-032, UJ-012 | T17.7, T11.2 | — | EV-001 | F22 |
+| T17.10 | Vitest: browse list + tag chip + external URL link (TC-048) | Test | pending | UJ-010, AC-T2, test-plan TC-048 | T17.8, T17.9 | — | EV-001 | F19, F22 |
+| T17.11 | E2E: UJ-009 browse, UJ-012 tag-filtered ask | Test | pending | acceptance-criteria AC-T1, AC-T5 | T17.8, T17.9 | D9 | EV-001 | F19, F22 |
+
+#### M18: Admin chunk viewer & tag editor (F21)
+
+**Goal:** Admin UI for chunks and tags; human PATCH; retag trigger.  
+**Branch:** `feat/M18-admin-tags` → `evolve/EV-001-corpus-tags`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T18.1 | Test: TC-042 admin chunk list (`tests/integration/test_admin_chunks.py`) | Test | pending | UJ-011 | T15.2 | D9 | EV-001 | F21 |
+| T18.2 | Test: TC-043 tag cap enforcement (max 10 doc / 5 chunk) | Test | pending | RD-028 | T15.2 | D9 | EV-001 | F21 |
+| T18.3 | Internal write API: `GET .../chunks`, PATCH document/chunk tag routes | Code | pending | openapi/internal-write.yaml | T18.1, T18.2 | — | EV-001 | F21 |
+| T18.4 | Admin UI: chunk viewer (read-only text per chunk) | Code | pending | UJ-011, F21 | T18.3, T7.1 | — | EV-001 | F21 |
+| T18.5 | Admin UI: tag editor + retag job trigger/poll | Code | pending | UJ-011, ADR-015 | T16.7, T18.4 | — | EV-001 | F21 |
+| T18.6 | E2E: UJ-011 admin tags (`tests/e2e/test_uj011_admin_tags.py`) | Test | pending | acceptance-criteria AC-T4 | T18.5 | D9 | EV-001 | F21 |
+| T18.7 | Test: TC-049 CORS PATCH preflight on admin tag routes (`test_cors_policy.py` + staging) | Test | pending | connectivity-gates H4, test-plan TC-049 | T18.3 | — | EV-001 | F21 |
+
+#### M19: EV-001 deploy & connectivity
+
+**Goal:** Staging secrets, connectivity smoke for new routes, EV-001 deploy validation.  
+**Branch:** `feat/M19-ev001-deploy` → `evolve/EV-001-corpus-tags`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T19.1 | Update `docs/staging-secrets-matrix.md` — EV-001 browse uses existing `VITE_VECINITA_CHAT_API_URL` | Docs | pending | 04-tech-plan §Connectivity, deployment-integration | T17.3 | — | EV-001 | F19 |
+| T19.2 | Extend `tests/smoke/test_staging_connectivity.py` — browse GET H4 | Test | pending | TC-046, connectivity-gates | T17.4 | — | EV-001 | F19 |
+| T19.3 | Extend `scripts/deploy/verify_connectivity.sh` for `/api/v1/tags` preflight (H4) | Config | pending | 04-tech-plan §Connectivity | T19.2 | — | EV-001 | F19 |
+| T19.5 | Extend `verify_connectivity.sh` H5 — chat bundle contains chat API host (browse + ask) | Config | pending | connectivity-gates H5 | T19.3, T17.8 | — | EV-001 | F19 |
+| T19.4 | Staging deploy EV-001; run H1–H3 + browse/tag smoke | Config | pending | 13-deploy-smoke | T19.5, T18.7, T17.11, T18.6 | D1–D9 | EV-001 | F19–F22 |
+
+#### Phase 5 Gate Check
+
+- [ ] All M15–M19 tasks completed
+- [ ] `alembic upgrade head` includes tag tables on empty DB
+- [ ] `pytest tests/e2e/test_uj009*.py test_uj011*.py test_uj012*.py -m "e2e and not live"` passes
+- [ ] Tag privacy tests pass (`tests/privacy/test_tag_tables.py`)
+- [ ] TC-046 CORS on browse GET passes locally + staging smoke (H4)
+- [ ] H5 frontend bundle wiring passes (`verify_connectivity.sh`; TC-048 Vitest for external URL)
+- [ ] TC-049 admin PATCH CORS preflight passes locally + staging (T18.7)
+- [ ] D8, D9 verified in `docs/data-staging-state.md`
+- [ ] Cost note: EV-001 LLM tagging within ≤ $50/mo pilot cap (ADR-015 TP-017)
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -348,6 +450,12 @@ main
       ├── feat/M12-local-dev
       ├── feat/M13-ci
       └── feat/M14-staging-deploy
+ └── evolve/EV-001-corpus-tags (from main)
+      ├── feat/M15-tag-schema
+      ├── feat/M16-ingest-tagging
+      ├── feat/M17-browse-tag-rag
+      ├── feat/M18-admin-tags
+      └── feat/M19-ev001-deploy
 ```
 
 ### PR Plan
@@ -372,6 +480,12 @@ main
 | PR-16 | Minor | M13 | feat/M13-ci | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/32 |
 | PR-17 | Minor | M14 | feat/M14-staging-deploy | main | merged — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/33 |
 | PR-18 | Major | Phase 4 | phase/4-integration | main | pending |
+| PR-19 | Minor | M15 | feat/M15-tag-schema | evolve/EV-001-corpus-tags | pending |
+| PR-20 | Minor | M16 | feat/M16-ingest-tagging | evolve/EV-001-corpus-tags | pending |
+| PR-21 | Minor | M17 | feat/M17-browse-tag-rag | evolve/EV-001-corpus-tags | pending |
+| PR-22 | Minor | M18 | feat/M18-admin-tags | evolve/EV-001-corpus-tags | pending |
+| PR-23 | Minor | M19 | feat/M19-ev001-deploy | evolve/EV-001-corpus-tags | pending |
+| PR-24 | Major | Phase 5 / EV-001 | evolve/EV-001-corpus-tags | main | pending |
 
 ## Task Tracking
 
@@ -452,6 +566,43 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T14.3 | M14 | 4 | Config | completed | T14.1 | D1–D7 | 2026-05-19 |
 | T14.4 | M14 | 4 | Docs | completed | T14.3 | — | 2026-05-19 |
 | T14.5 | M14 | 4 | Test | completed | T2.8, T8.4 | D3 | 2026-05-19 |
+| T15.1 | M15 | 5 | Test | completed | T2.4 | — | EV-001 | 2026-05-24 |
+| T15.2 | M15 | 5 | Code | completed | T15.1 | — | EV-001 | 2026-05-24 |
+| T15.3 | M15 | 5 | Test | completed | T15.2 | — | EV-001 | 2026-05-24 |
+| T15.4 | M15 | 5 | Code | completed | T15.2 | D8 | EV-001 | 2026-05-24 |
+| T15.5 | M15 | 5 | Code | completed | T15.4 | D9 | EV-001 | 2026-05-24 |
+| T15.6 | M15 | 5 | Test | completed | T15.5 | D8, D9 | EV-001 | 2026-05-24 |
+| T16.1 | M16 | 5 | Test | pending | T9.3 | — | EV-001 |
+| T16.2 | M16 | 5 | Code | pending | T16.1 | D8 | EV-001 |
+| T16.3 | M16 | 5 | Code | pending | T16.2, T6.4, T15.2 | D8 | EV-001 |
+| T16.4 | M16 | 5 | Code | pending | T15.2, T4.2 | — | EV-001 |
+| T16.5 | M16 | 5 | Test | pending | T16.3, T16.4 | D4, D8 | EV-001 |
+| T16.6 | M16 | 5 | Code | pending | T16.2, T6.3 | — | EV-001 |
+| T16.7 | M16 | 5 | Code | pending | T16.6, T16.4 | — | EV-001 |
+| T16.8 | M16 | 5 | Test | pending | T16.7 | D9 | EV-001 |
+| T17.1 | M17 | 5 | Code | pending | T15.2, T3.4 | — | EV-001 |
+| T17.2 | M17 | 5 | Test | pending | T17.1, T15.6 | D9 | EV-001 |
+| T17.3 | M17 | 5 | Code | pending | T17.2 | — | EV-001 |
+| T17.4 | M17 | 5 | Test | pending | T17.3 | — | EV-001 |
+| T17.5 | M17 | 5 | Code | pending | T16.2, T8.4 | D9 | EV-001 |
+| T17.6 | M17 | 5 | Test | pending | T17.5 | D9 | EV-001 |
+| T17.7 | M17 | 5 | Code | pending | T17.5, T10.4 | — | EV-001 |
+| T17.8 | M17 | 5 | Code | pending | T17.3, T11.1 | — | EV-001 |
+| T17.9 | M17 | 5 | Code | pending | T17.7, T11.2 | — | EV-001 |
+| T17.10 | M17 | 5 | Test | pending | T17.8, T17.9 | — | EV-001 |
+| T17.11 | M17 | 5 | Test | pending | T17.8, T17.9 | D9 | EV-001 |
+| T18.1 | M18 | 5 | Test | pending | T15.2 | D9 | EV-001 |
+| T18.2 | M18 | 5 | Test | pending | T15.2 | D9 | EV-001 |
+| T18.3 | M18 | 5 | Code | pending | T18.1, T18.2 | — | EV-001 |
+| T18.4 | M18 | 5 | Code | pending | T18.3, T7.1 | — | EV-001 |
+| T18.5 | M18 | 5 | Code | pending | T16.7, T18.4 | — | EV-001 |
+| T18.6 | M18 | 5 | Test | pending | T18.5 | D9 | EV-001 |
+| T18.7 | M18 | 5 | Test | pending | T18.3 | — | EV-001 |
+| T19.1 | M19 | 5 | Docs | pending | T17.3 | — | EV-001 |
+| T19.2 | M19 | 5 | Test | pending | T17.4 | — | EV-001 |
+| T19.3 | M19 | 5 | Config | pending | T19.2 | — | EV-001 |
+| T19.5 | M19 | 5 | Config | pending | T19.3, T17.8 | — | EV-001 |
+| T19.4 | M19 | 5 | Config | pending | T19.5, T18.7, T17.11, T18.6 | D1–D9 | EV-001 |
 
 ## Phase Gate Log
 
@@ -478,13 +629,16 @@ CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, py
 |------|------|-------|
 | T0 | Unit | All packages — mocked I/O |
 | T1 | Integration | DO APIs + test Postgres — mocked Modal HTTP |
-| T2 | Local E2E | UJ-001–008 — docker-compose + mocks |
-| T3 | Live staging | Post T14.3 — 10-e2e / 15-service-health |
+| T2 | Local E2E | UJ-001–012 — docker-compose + mocks |
+| T3 | Live staging | Post T14.3 / T19.4 — 10-e2e / 15-service-health |
 
 ## Open Questions
 
 - [x] Gateway R6 — deferred (direct URLs)
 - [x] vLLM model — Qwen2.5-1.5B-Instruct on T4
 - [x] Cost gate — pilot fits ≤ $50 with scale-to-zero; consolidate DO if overrun
+- [x] EV-001 ingest tagging step — after chunk, before embed (TP-010)
+- [x] EV-001 admin retag — async Modal job via `jobs.job_type=retag` (TP-011, TP-012)
+- [x] EV-001 retrieval SQL — union match document OR chunk (TP-013)
+- [x] EV-001 tag inference — same vLLM (TP-014)
 - [ ] Exact LlamaIndex patch versions — pin at T8.1 during build
-- [x] DO App Platform component YAML — finalize at T14.1
