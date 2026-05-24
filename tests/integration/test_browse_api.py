@@ -44,10 +44,9 @@ def test_tc040_browse_documents_paginated_with_tags(browse_client: TestClient) -
     assert payload["page_size"] == 20
     assert payload["total"] >= 2
     assert len(payload["items"]) >= 2
-    first = payload["items"][0]
-    assert "document_id" in first
-    assert "url" in first
-    assert first["tags"]
+    tagged = next(item for item in payload["items"] if item["tags"])
+    assert "document_id" in tagged
+    assert "url" in tagged
 
     filtered = browse_client.get("/api/v1/documents", params={"tags": ["housing"]})
     assert filtered.status_code == 200

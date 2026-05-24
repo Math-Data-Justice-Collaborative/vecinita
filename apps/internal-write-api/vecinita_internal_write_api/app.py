@@ -13,16 +13,23 @@ from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.internal_write import (
     BatchUpsertRequest,
     BatchUpsertResponse,
+    ChunkDetail,
     DocumentDetail,
     DocumentSummary,
     HealthResponse,
     RetagJobResponse,
+    TagInput,
     TagPatchRequest,
     TagPatchResponse,
 )
 
 from vecinita_internal_write_api.jobs_client import DataManagementJobsClient
-from vecinita_internal_write_api.tags import replace_document_tags
+from vecinita_internal_write_api.tags import (
+    replace_chunk_tags,
+    replace_document_tags,
+    validate_chunk_tag_count,
+    validate_document_tag_count,
+)
 
 
 def _normalize_database_url(url: str) -> str:
@@ -198,6 +205,7 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
         dependencies=[Depends(_require_internal_key)],
     )
     def patch_document_tags(document_id: UUID, body: TagPatchRequest) -> TagPatchResponse:
+        validate_document_tag_count(body.tags)
         with engine.begin() as conn:
             row = (
                 conn.execute(
@@ -215,6 +223,108 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
             replace_document_tags(
                 conn,
                 document_id=document_id,
+                tags=tags,
+                language=row["language"] or "en",
+            )
+        return TagPatchResponse(tags=tags)
+
+    @app.get(
+        "/internal/v1/documents/{document_id}/chunks",
+        response_model=list[ChunkDetail],
+        dependencies=[Depends(_require_internal_key)],
+    )
+    def list_document_chunks(document_id: UUID) -> list[ChunkDetail]:
+        with engine.connect() as conn:
+            doc = (
+                conn.execute(
+                    text("SELECT id, language FROM documents WHERE id = :document_id"),
+                    {"document_id": document_id},
+                )
+                .mappings()
+                .first()
+            )
+            if doc is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+            language = doc["language"] or "en"
+            rows = (
+                conn.execute(
+                    text(
+                        """
+                        SELECT c.id, c.chunk_index, c.text, c.token_count
+                        FROM chunks c
+                        WHERE c.document_id = :document_id
+                        ORDER BY c.chunk_index ASC
+                        """
+                    ),
+                    {"document_id": document_id},
+                )
+                .mappings()
+                .all()
+            )
+            details: list[ChunkDetail] = []
+            for row in rows:
+                tag_rows = (
+                    conn.execute(
+                        text(
+                            """
+                            SELECT t.slug, t.label, ct.source
+                            FROM chunk_tags ct
+                            JOIN tags t ON t.id = ct.tag_id
+                            WHERE ct.chunk_id = :chunk_id
+                              AND t.language = :language
+                            ORDER BY t.slug
+                            """
+                        ),
+                        {"chunk_id": row["id"], "language": language},
+                    )
+                    .mappings()
+                    .all()
+                )
+                details.append(
+                    ChunkDetail(
+                        chunk_id=row["id"],
+                        chunk_index=row["chunk_index"],
+                        text=row["text"],
+                        token_count=row["token_count"],
+                        tags=[
+                            TagInput(slug=tag["slug"], label=tag["label"], source=tag["source"])
+                            for tag in tag_rows
+                        ],
+                    )
+                )
+        return details
+
+    @app.patch(
+        "/internal/v1/chunks/{chunk_id}/tags",
+        response_model=TagPatchResponse,
+        dependencies=[Depends(_require_internal_key)],
+    )
+    def patch_chunk_tags(chunk_id: UUID, body: TagPatchRequest) -> TagPatchResponse:
+        validate_chunk_tag_count(body.tags)
+        with engine.begin() as conn:
+            row = (
+                conn.execute(
+                    text(
+                        """
+                        SELECT c.id, d.language
+                        FROM chunks c
+                        JOIN documents d ON d.id = c.document_id
+                        WHERE c.id = :chunk_id
+                        """
+                    ),
+                    {"chunk_id": chunk_id},
+                )
+                .mappings()
+                .first()
+            )
+            if row is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+            tags = [
+                tag.model_copy(update={"source": tag.source or body.source}) for tag in body.tags
+            ]
+            replace_chunk_tags(
+                conn,
+                chunk_id=chunk_id,
                 tags=tags,
                 language=row["language"] or "en",
             )
