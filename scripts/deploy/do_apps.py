@@ -195,7 +195,13 @@ def cmd_sync_secrets(client, name: str) -> int:
     elif name == "vecinita-internal-write-api":
         _apply_env_from_os(
             spec,
-            ["DATABASE_URL", "VECINITA_INTERNAL_API_KEY", "VECINITA_CORS_ORIGINS"],
+            [
+                "DATABASE_URL",
+                "VECINITA_INTERNAL_API_KEY",
+                "VECINITA_CORS_ORIGINS",
+                "VECINITA_MODAL_DATA_MGMT_URL",
+                "VECINITA_MODAL_PROXY_KEY",
+            ],
         )
     elif name == "vecinita-chat-rag-frontend":
         _apply_env_from_os(spec, ["VITE_VECINITA_CHAT_API_URL"], scope="BUILD_TIME")
