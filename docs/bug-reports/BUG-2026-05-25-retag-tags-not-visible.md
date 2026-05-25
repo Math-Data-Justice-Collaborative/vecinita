@@ -1,6 +1,6 @@
 # BUG-2026-05-25 — Retag writes document tags but chunk list shows empty tags
 
-> Status: **verifying**
+> Status: **resolved**
 > Feature: **F20** (LLM auto-tagging at ingest + admin re-tag), **F21** (admin chunk/tag editor)
 > Component: `apps/internal-write-api/vecinita_internal_write_api/app.py`, `apps/data-management-frontend/src/components/DocumentAdmin.tsx`
 
@@ -166,19 +166,34 @@ Classification: **Code bug** — missing read path for document-level tags in bo
 
 ## Prevention & countermeasures
 
-Pending Phase 5.
+### Interview record
+
+| ID | Question | Answer |
+|----|----------|--------|
+| prevention_recurrence_risk | Recurrence risk | Very likely without changes — other write endpoints may lack read paths |
+| prevention_detect_earlier | Where to catch earlier | E2E test that verifies retag results visible |
+| prevention_automated | Guards to add | E2E retag visibility test |
+| prevention_process | Process changes | Cursor rule — write-read parity |
+| prevention_when | When | Now (same session) |
+| prevention_who | Who | Agent now |
+
+### Planned actions
+
+1. **Done**: E2E test `tests/e2e/test_admin_retag_job.py::test_admin_retag_tags_visible_via_get_endpoint`
+2. **Done**: Cursor rule `.cursor/rules/write-read-parity.mdc`
 
 ## Cursor rule
 
-Pending Phase 5.
+`.cursor/rules/write-read-parity.mdc` — every PATCH/POST write endpoint needs a corresponding GET read endpoint.
 
 ## Regression prevention
 
-Pending.
+- `tests/bugs/test_bug_2026_05_25_retag_tags_not_visible.py`
+- `tests/e2e/test_admin_retag_job.py::test_admin_retag_tags_visible_via_get_endpoint`
 
 ## Follow-ups
 
-None yet.
+None — all actions complete.
 
 ## Timeline
 
@@ -187,3 +202,5 @@ None yet.
 | User report | 2026-05-25 |
 | Investigation start | 2026-05-25 |
 | Root cause confirmed | 2026-05-25 |
+| Fix applied | 2026-05-25 |
+| PR #48 created | 2026-05-25 |
