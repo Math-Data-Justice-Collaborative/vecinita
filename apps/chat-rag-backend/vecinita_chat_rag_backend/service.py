@@ -105,7 +105,10 @@ class ChatRagService:
 
     def _retrieve(self, request: AskRequest) -> list[RetrievedChunk]:
         tag_slugs = self._retrieval_tags(request)
-        return self._retriever.retrieve_chunks(request.question, tag_slugs=tag_slugs)
+        chunks = self._retriever.retrieve_chunks(request.question, tag_slugs=tag_slugs)
+        if not chunks and tag_slugs:
+            chunks = self._retriever.retrieve_chunks(request.question, tag_slugs=None)
+        return chunks
 
     def ask(self, request: AskRequest) -> AskResponse:
         chunks = self._retrieve(request)
