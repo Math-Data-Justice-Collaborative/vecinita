@@ -24,9 +24,7 @@ import httpx
 
 ROOT = Path(__file__).resolve().parents[2]
 SECRET_JSON = ROOT / ".tmp" / "vecinita-data-management-secret.json"
-ADMIN_BUNDLE = (
-    "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app/assets/index-DQAu-JA9.js"
-)
+ADMIN_BUNDLE = "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app/assets/index-DQAu-JA9.js"
 MODAL_JOBS = "https://vecinita--vecinita-data-management-fastapi-app.modal.run/jobs"
 ADMIN_ORIGIN = "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app"
 

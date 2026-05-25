@@ -9,6 +9,7 @@ Examples:
   uv run --with pydo --with pyyaml scripts/deploy/do_apps.py create-all
   uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy --name vecinita-chat-rag-backend
 """
+
 from __future__ import annotations
 
 import argparse
@@ -38,9 +39,7 @@ def _client():
         ) from exc
     token = os.environ.get("DIGITALOCEAN_TOKEN", "").strip()
     if not token:
-        raise SystemExit(
-            "DIGITALOCEAN_TOKEN is unset. Create a DO API token with Apps read/write."
-        )
+        raise SystemExit("DIGITALOCEAN_TOKEN is unset. Create a DO API token with Apps read/write.")
     return Client(token=token)
 
 
@@ -199,9 +198,7 @@ def cmd_sync_secrets(client, name: str) -> int:
             ["DATABASE_URL", "VECINITA_INTERNAL_API_KEY", "VECINITA_CORS_ORIGINS"],
         )
     elif name == "vecinita-chat-rag-frontend":
-        _apply_env_from_os(
-            spec, ["VITE_VECINITA_CHAT_API_URL"], scope="BUILD_TIME"
-        )
+        _apply_env_from_os(spec, ["VITE_VECINITA_CHAT_API_URL"], scope="BUILD_TIME")
     elif name == "vecinita-admin-frontend":
         _apply_env_from_os(
             spec,

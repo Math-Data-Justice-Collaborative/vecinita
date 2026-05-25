@@ -101,7 +101,7 @@ Run when evolve cycle adds **new dependencies, hooks, CI steps, or formatters**:
 - Re-run connectivity rows from connectivity-gates for browser-facing changes.""",
     "13-deploy-smoke": """## Delta / feature-addition mode
 
-- Redeploy only services affected by new Fn; run H1–H5 for changed browser/API paths.
+- Redeploy only services affected by new Fn; run H1-H5 for changed browser/API paths.
 - Update deployment block via workflow-state-manager after smokes.""",
     "14-hotfix": """## Delta / feature-addition mode
 
@@ -155,8 +155,8 @@ def patch_skill(skill_id: str) -> bool:
     original = text
 
     # Remove legacy 18-add-feature references
-    text = text.replace("stages 00–18", "stages 00–17")
-    text = text.replace("00–18", "00–17")
+    text = text.replace("stages 00\u201318", "stages 00-17")
+    text = text.replace("00\u201318", "00-17")
     text = re.sub(
         r"\[18-add-feature\]\([^\)]+\)",
         "[16-evolve](../16-evolve/SKILL.md)",

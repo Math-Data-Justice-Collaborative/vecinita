@@ -9,8 +9,8 @@
 
 | Check | Status | Findings | Auto-Fixed | Tool |
 |-------|--------|----------|------------|------|
-| Lint | **PASS** | 0 | 0 | ruff 0.11.12 |
-| Format | **PASS** | 0 | 0 | ruff format |
+| Lint | **PASS** | 5 (RUF001) | 5 auto-fixed | ruff 0.11.12 |
+| Format | **PASS** | 2 files | 2 auto-fixed | ruff format |
 | Typecheck | **PASS** | 0 errors | — | pyright (94 files) |
 | Tests (full) | **PASS** | 1 flake (advisory) | — | pytest 9.0.3 |
 | Tests (H0c CORS) | **PASS** | 10/10 passed | — | pytest |
@@ -28,19 +28,14 @@
 
 ### Lint (ruff check)
 
-```
-All checks passed!
-```
-
-Zero findings across `apps/`, `packages/`, `tests/`, `scripts/`.
+5 findings in `scripts/patch_pipeline_skills_state_agent.py` — RUF001 (ambiguous EN DASH
+U+2013 in string literals). Auto-fixed by replacing with HYPHEN-MINUS U+002D or `\u2013`
+escape for intentional match patterns. Re-check: all passed.
 
 ### Format (ruff format --check)
 
-```
-93 files already formatted
-```
-
-Zero files need reformatting.
+2 files needed reformatting: `scripts/deploy/do_apps.py`, `scripts/deploy/sync_modal_proxy_key.py`.
+Auto-formatted. Re-check: all files already formatted.
 
 ### Typecheck (pyright)
 
