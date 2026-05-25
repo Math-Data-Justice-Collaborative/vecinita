@@ -1,6 +1,6 @@
 # BUG-2026-05-25 — Retag job fails: "tag_client is required for retag jobs"
 
-> Status: **fixing**  
+> Status: **verifying**  
 > Feature: **F20** (LLM auto-tagging at ingest + admin re-tag), **F21** (admin chunk/tag editor)  
 > Component: `infra/modal/data_management_app.py`
 
@@ -153,15 +153,29 @@ Classification: **Config + code bug** — missing env var documentation + silent
 
 ## Post-deploy monitoring
 
-_Pending verification plan answers_
+15-service-health follow-up after deploy — user requested.
 
 ## Prevention & countermeasures
 
-_Pending Phase 5_
+### Interview record
+
+| ID | Question | Answer |
+|----|----------|--------|
+| prevention_recurrence_risk | Recurrence risk | Very likely without changes — other services may have same pattern |
+| prevention_detect_earlier | Where to catch earlier | Code review checklist |
+| prevention_automated | Guards to add | Bug repro test only (done) |
+| prevention_process | Process changes | Cursor rule — Modal apps must log service client init failures |
+| prevention_when | When | Now (same session) |
+| prevention_who | Who | Agent |
+
+### Planned actions
+
+1. **Done**: Repro tests `tests/bugs/test_bug_2026_05_25_retag_tag_client_none.py`
+2. **Done**: Cursor rule `.cursor/rules/modal-service-client-init.mdc`
 
 ## Cursor rule
 
-_Pending Phase 5_
+`.cursor/rules/modal-service-client-init.mdc` — Modal app modules must log warnings when service client init fails; never silently swallow.
 
 ## Regression prevention
 
@@ -169,7 +183,8 @@ _Pending Phase 5_
 
 ## Follow-ups
 
-_Pending_
+- **User action**: Add `VECINITA_MODAL_LLM_URL` to Modal secret `vecinita-data-management` (value: `https://vecinita--vecinita-llm-fastapi-app.modal.run`), then `modal deploy infra/modal/data_management_app.py`
+- Verify retag works end-to-end after deploy (Layer 4)
 
 ## Timeline
 
@@ -177,3 +192,6 @@ _Pending_
 |-------|------|
 | User report | 2026-05-25 |
 | Investigation start | 2026-05-25 |
+| Root cause confirmed | 2026-05-25 |
+| Fix applied | 2026-05-25 |
+| PR #47 merged | 2026-05-25 |
