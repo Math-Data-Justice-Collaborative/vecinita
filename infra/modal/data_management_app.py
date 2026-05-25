@@ -5,14 +5,18 @@ Deploy from repo root:
 
 Requires Modal secret `vecinita-data-management` with:
 VECINITA_MODAL_EMBED_URL, VECINITA_INTERNAL_WRITE_URL, VECINITA_INTERNAL_API_KEY,
-VECINITA_MODAL_PROXY_KEY, VECINITA_CORS_ORIGINS (admin frontend origin)
+VECINITA_MODAL_PROXY_KEY, VECINITA_CORS_ORIGINS (admin frontend origin),
+VECINITA_MODAL_LLM_URL (required for retag and LLM tagging at ingest)
 """
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 import modal
+
+logger = logging.getLogger(__name__)
 
 APP_NAME = "vecinita-data-management"
 
@@ -104,6 +108,12 @@ def fastapi_app():
     try:
         tag_client = LlmTagClient(LlmClient())
     except Exception:
+        logger.warning(
+            "LlmTagClient init failed — retag jobs will fail. "
+            "Ensure VECINITA_MODAL_LLM_URL is set in Modal secret '%s'.",
+            APP_NAME,
+            exc_info=True,
+        )
         tag_client = None
 
     def runner(job_id: UUID) -> None:
