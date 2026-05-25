@@ -46,6 +46,7 @@ image = (
     .pip_install(
         "fastapi>=0.115,<1",
         "httpx>=0.27,<1",
+        "langdetect>=1.0.9",
         "pydantic>=2.7,<3",
     )
     .env({"PYTHONPATH": _PYTHONPATH})
