@@ -1,0 +1,24 @@
+---
+description: Modal app modules must log warnings when service client initialization fails — never silently swallow
+globs:
+  - infra/modal/*.py
+alwaysApply: false
+---
+# Modal service client initialization
+
+When a Modal app module (`infra/modal/*.py`) initializes an external service
+client (e.g. `LlmClient`, `EmbeddingClient`, `InternalWriteClient`):
+
+1. **Never silently swallow** initialization errors with a bare `except Exception:
+   client = None`. Always `logger.warning(…, exc_info=True)` so the failure is
+   visible in Modal container logs.
+
+2. **Document required env vars** in the module docstring. The docstring's
+   "Requires Modal secret" list must match `docs/staging-secrets-matrix.md`.
+
+3. If the client is **optional** for some job types (e.g. `tag_client` is needed
+   for retag but not ingest), log explicitly which job types will be affected.
+
+Evidence: BUG-2026-05-25-retag-tag-client-none — silent `except Exception` hid
+a missing `VECINITA_MODAL_LLM_URL`, causing every retag job to fail with no
+diagnostic output.
