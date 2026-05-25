@@ -1,0 +1,26 @@
+---
+description: Factory-created FastAPI apps must auto-resolve external dependencies from env vars
+globs:
+  - apps/**/app.py
+alwaysApply: false
+---
+# Factory-created FastAPI apps must auto-resolve external dependencies
+
+When a FastAPI `create_app()` function is called via uvicorn `--factory` (no arguments),
+it must auto-create all external clients from environment variables.
+
+Do not require explicit constructor arguments for dependencies that have env-var fallbacks.
+Wrap client creation in a try/except that returns None when env vars are missing, so the
+app still starts (other endpoints work) but the specific endpoint returns a clear error.
+
+When adding a new external dependency to `create_app()`:
+1. Add a `_default_<client>()` helper that reads from env vars
+2. Use it as a fallback: `client = explicit_arg if explicit_arg is not None else _default_<client>()`
+3. Add the env vars to the DO app spec in `infra/do/`
+4. Add the env vars to `do_apps.py` `cmd_sync_secrets`
+5. Write a test that calls `create_app()` without args and verifies the endpoint works
+
+Evidence: BUG-2026-05-25 — retag returned 503 because `DataManagementJobsClient` was
+not created from env vars in the factory path.
+
+Test: `tests/bugs/test_bug_2026_05_25_retag_503_not_configured.py`
