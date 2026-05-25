@@ -1,6 +1,6 @@
 # BUG-2026-05-25 — Modal data-management crash: langdetect not installed
 
-> Status: **investigating**  
+> Status: **resolved**  
 > Feature: **F19–F22** (corpus tagging / EV-001)  
 > Component: `infra/modal/data_management_app.py`, `packages/tagging`
 
@@ -109,34 +109,45 @@ Add `"langdetect>=1.0.9"` to the `pip_install()` chain in
 | EV-001 deployed (introduced tagging) | 2026-05-25 |
 | User reported crash | 2026-05-25 |
 | Bug report opened | 2026-05-25 |
+| Fix merged (PR #45) | 2026-05-25 |
+| Deployed to Modal | 2026-05-25 |
+| Verified in production | 2026-05-25 |
 
 ## Verification
 
 ### Layer 1 — Automated
-- [ ] Repro test red before fix
-- [ ] Repro test green after fix
-- [ ] Full CI parity (local) pass
+- [x] Repro test red before fix
+- [x] Repro test green after fix
+- [x] Full CI parity (local) pass
+- [x] GitHub CI on main: success (run 26421411122)
 
 ### Layer 2 — Reproduction
-- [ ] Import chain `vecinita_tagging.vocabulary` succeeds locally
+- [x] Import chain `vecinita_tagging.vocabulary` succeeds locally
 
 ### Layer 3 — Pre-deploy smoke
-- [ ] Modal deploy succeeds (user-approved)
+- [x] Modal deploy succeeds (user-approved)
 
 ### Layer 4 — Production
-- [ ] App responds to requests post-deploy (user-approved)
+- [x] App responds HTTP 200 on /health
+- [x] /jobs returns 405 (correct — rejects GET)
+- [x] User confirmed production fixed
 
 ## Prevention & countermeasures
 
-_(Filled in Phase 5)_
+- **Recurrence risk:** Very likely without changes — any new package dep could be missed
+- **Detection:** CI test + code review (generalized test covers all mounted packages)
+- **Automated guard:** Generalized test `test_modal_image_includes_all_mounted_package_deps`
+  checks ALL packages mounted in the data-management Modal image
+- **Cursor rule:** `.cursor/rules/modal-image-deps.mdc` reminds agents to update pip_install
+  when adding deps to mounted packages
 
 ## Cursor rule
 
-_(Filled in Phase 5)_
+`.cursor/rules/modal-image-deps.mdc` — created 2026-05-25
 
 ## Follow-ups
 
-_(Filled in Phase 5)_
+None — generalized test + Cursor rule cover the prevention.
 
 ## Regression prevention
 

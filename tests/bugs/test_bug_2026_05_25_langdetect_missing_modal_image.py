@@ -2,6 +2,8 @@
 
 The tagging package declares langdetect>=1.0.9 but the Modal image only pip_installs
 fastapi, httpx, and pydantic. Container crashes on startup with ModuleNotFoundError.
+
+Generalized: checks ALL mounted packages' external deps are in pip_install().
 """
 
 from __future__ import annotations
@@ -10,8 +12,11 @@ import ast
 import re
 from pathlib import Path
 
-_MODAL_APP = Path(__file__).resolve().parents[2] / "infra" / "modal" / "data_management_app.py"
-_TAGGING_PYPROJECT = Path(__file__).resolve().parents[2] / "packages" / "tagging" / "pyproject.toml"
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_MODAL_APP = _REPO_ROOT / "infra" / "modal" / "data_management_app.py"
+_PACKAGES_DIR = _REPO_ROOT / "packages"
+
+_MOUNTED_PACKAGES = ["ingest", "embedding-client", "llm-client", "tagging", "shared-schemas"]
 
 
 def _extract_pip_install_args(source: str) -> list[str]:
@@ -50,32 +55,39 @@ def _extract_external_deps(pyproject_text: str) -> list[str]:
     return deps
 
 
-def test_modal_image_includes_langdetect() -> None:
-    """Modal data-management image must pip_install langdetect (required by vecinita-tagging)."""
+def _get_image_pip_packages() -> list[str]:
+    """Return lowercase package names from the Modal image pip_install()."""
     source = _MODAL_APP.read_text(encoding="utf-8")
     pip_args = _extract_pip_install_args(source)
-    pip_package_names = [re.split(r"[><=!~\[]", arg)[0].strip() for arg in pip_args]
+    return [re.split(r"[><=!~\[]", arg)[0].strip().lower() for arg in pip_args]
 
+
+def test_modal_image_includes_langdetect() -> None:
+    """Modal data-management image must pip_install langdetect (required by vecinita-tagging)."""
+    pip_package_names = _get_image_pip_packages()
     assert "langdetect" in pip_package_names, (
-        f"langdetect not found in Modal image pip_install(). "
-        f"Installed: {pip_args}. "
-        f"packages/tagging requires langdetect>=1.0.9 but it is not in the container image."
+        "langdetect not found in Modal image pip_install(). "
+        "packages/tagging requires langdetect>=1.0.9 but it is not in the container image."
     )
 
 
-def test_modal_image_includes_all_tagging_external_deps() -> None:
-    """All external (non-workspace) deps of vecinita-tagging must be in the Modal image."""
-    source = _MODAL_APP.read_text(encoding="utf-8")
-    pip_args = _extract_pip_install_args(source)
-    pip_package_names = [re.split(r"[><=!~\[]", arg)[0].strip().lower() for arg in pip_args]
+def test_modal_image_includes_all_mounted_package_deps() -> None:
+    """All external deps of every mounted package must be in the Modal image pip_install."""
+    pip_package_names = _get_image_pip_packages()
 
-    pyproject_text = _TAGGING_PYPROJECT.read_text(encoding="utf-8")
-    external_deps = _extract_external_deps(pyproject_text)
+    all_missing: dict[str, list[str]] = {}
+    for pkg_dir_name in _MOUNTED_PACKAGES:
+        pyproject = _PACKAGES_DIR / pkg_dir_name / "pyproject.toml"
+        if not pyproject.exists():
+            continue
+        external_deps = _extract_external_deps(pyproject.read_text(encoding="utf-8"))
+        missing = [dep for dep in external_deps if dep.lower() not in pip_package_names]
+        if missing:
+            all_missing[pkg_dir_name] = missing
 
-    missing = [dep for dep in external_deps if dep.lower() not in pip_package_names]
-    assert not missing, (
-        f"Modal data-management image is missing pip packages required by vecinita-tagging: "
-        f"{missing}. These must be added to pip_install() in {_MODAL_APP.name}."
+    assert not all_missing, (
+        f"Modal data-management image is missing pip packages required by mounted packages: "
+        f"{all_missing}. Add them to pip_install() in {_MODAL_APP.name}."
     )
 
 

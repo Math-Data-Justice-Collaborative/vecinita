@@ -1,0 +1,23 @@
+# Modal image pip_install must include mounted package deps
+
+When adding or modifying dependencies in any package under `packages/*/pyproject.toml`
+that is mounted into a Modal app via `add_local_dir()`:
+
+1. **Check the Modal image**: `add_local_dir()` copies source files only — it does NOT
+   install Python dependencies. Any external (non-workspace) dependency declared in
+   a mounted package's `pyproject.toml` must also appear in the Modal image's
+   `pip_install()` call.
+
+2. **Which Modal apps mount packages**:
+   - `infra/modal/data_management_app.py` — mounts: ingest, embedding-client, llm-client,
+     tagging, shared-schemas, data-management-backend
+   - Check `infra/modal/embedding_app.py` and `infra/modal/llm_app.py` if they also mount
+     workspace packages
+
+3. **When to update**: Every time you add a new dependency to a mounted package, add it
+   to the relevant Modal app's `pip_install()` in the same commit.
+
+4. **Regression test**: `tests/bugs/test_bug_2026_05_25_langdetect_missing_modal_image.py`
+   will catch any missing deps for the data-management app.
+
+Evidence: BUG-2026-05-25 — langdetect missing from Modal image caused full app crash.
