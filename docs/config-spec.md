@@ -47,7 +47,7 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 
 | Variable | Type | Default | Required | Description |
 |----------|------|---------|----------|-------------|
-| `VECINITA_DO_WRITE_API_URL` | string | — | Yes | DO internal write API base URL |
+| `VECINITA_INTERNAL_WRITE_URL` | string | — | Yes | DO internal write API base URL <!-- 12-verify-deploy: code uses this name, not VECINITA_DO_WRITE_API_URL --> |
 | `VECINITA_INTERNAL_API_KEY` | string | — | Yes | Matches DO secret |
 | `VECINITA_CHUNK_SIZE_TOKENS` | int | `256` | No | Ingest chunk target (tokenizer-based) |
 | `VECINITA_SCRAPE_TIMEOUT_S` | int | `30` | No | Per-URL fetch timeout |

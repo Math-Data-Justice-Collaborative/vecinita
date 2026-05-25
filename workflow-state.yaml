@@ -139,30 +139,46 @@ stages:
     report: docs/verification-report.md
   09-qa:
     status: completed
-    started_at: "2026-05-19"
-    completed_at: "2026-05-19"
+    started_at: "2026-05-25"
+    completed_at: "2026-05-25"
     report: docs/qa-report.md
-    overall: pass
+    overall: pass_with_advisories
   10-e2e:
     status: completed
     started_at: "2026-05-19"
     completed_at: "2026-05-19"
+    partial_rerun_at: "2026-05-25"
+    partial_rerun_note: "EV-001 delta — UJ-009–UJ-012 (F19–F22); T0 16 passed, T1 21 passed, FE 10 passed"
     report: docs/e2e-report.md
     mechanism: api
     t0: pass
     t1_integration: pass
     t3_live: pending
-    journeys_passed: 8
+    journeys_passed: 12
     journeys_failed: 0
+    ev001_journeys_added: 4
+    ev001_tests_passed: 5
   11-verify-impl:
     status: completed
     started_at: "2026-05-19"
     completed_at: "2026-05-19"
+    partial_rerun_at: "2026-05-25"
+    partial_rerun_note: "EV-001 delta — F19-F22 all approved; AC-T6 partial (T3 deferred)"
+    report: docs/implementation-verification.md
+    substeps:
+      phase1_collect: completed
+      phase2_completeness: completed
+      phase3a_journey_signoff: completed
+      phase3_feature_approval: completed
+      phase5_scope: completed
+      phase6_report: completed
     note: "Journeys + features approved; T3 post-deploy waiver accepted at 12-verify-deploy"
   12-verify-deploy:
     status: completed
     started_at: "2026-05-19"
     completed_at: "2026-05-19"
+    partial_rerun_at: "2026-05-25"
+    partial_rerun_note: "EV-001 delta — deploy checklist for F19-F22 corpus tagging features"
     report: docs/deploy-checklist.md
     deploy_ready: false
     blockers:
@@ -173,20 +189,26 @@ stages:
   13-deploy-smoke:
     status: completed
     started_at: "2026-05-19"
-    completed_at: "2026-05-21"
+    completed_at: "2026-05-25"
+    partial_rerun_at: "2026-05-25"
+    partial_rerun_note: "EV-001 delta — full redeploy with tag schema, browse, admin, retag features"
     report: docs/deploy-report.md
     chat_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
-    connectivity_validated_at: "2026-05-21"
+    connectivity_validated_at: "2026-05-25"
     h0c: pass
     h1: pass
     h2: pass
     h3: pass
+    h3b_browse: pass
     h4_do: pass
     h4_modal: waiver
     h4_modal_note: "Modal requires_proxy_auth blocks OPTIONS preflight at proxy; user-approved waiver"
     h5: pass
     cors_deployed: true
-    note: "Staging hybrid deploy; H1-H3 smoke passed; H4/H5 connectivity validated 2026-05-21 (Modal H4 waiver)"
+    deploy_time_fixes:
+      - "98cc2ac: tag inference chat template + graceful fallback"
+      - "4a1598f: fallback to unfiltered retrieval when tag filter yields empty"
+    note: "EV-001 staging hybrid deploy; tag migration + all 7 services redeployed; H1-H3b/H4/H5 pass (Modal H4 waiver)"
   14-hotfix:
     status: completed
     completed_at: "2026-05-21"
@@ -234,36 +256,41 @@ stages:
 deployment:
   local_build:
     status: green
-    last_verified: "2026-05-20"
-    commit: 36d3d64
+    last_verified: "2026-05-25"
+    commit: 4a1598f
     branch: main
     command: "uv run pytest tests/e2e/ -m 'e2e and not live' -v"
     t0_result: pass
-    t0_journeys_passed: 8
+    t0_journeys_passed: 16
   staging:
     status: deployed
-    last_verified: "2026-05-21"
-    commit_deployed: c4bc847
-    commit_head: 4d2f665
-    drift: true
+    last_verified: "2026-05-25"
+    commit_deployed: 4a1598f
+    commit_head: 4a1598f
+    drift: false
     urls:
       chat_rag_backend: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
       internal_write_api: https://vecinita-internal-write-api-icze4.ondigitalocean.app
       chat_rag_frontend: https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app
       admin_frontend: https://vecinita-admin-frontend-ef4ob.ondigitalocean.app
       modal_data_management: https://vecinita--vecinita-data-management-fastapi-app.modal.run
+      modal_embedding: https://vecinita--vecinita-embedding-embedding-api.modal.run
+      modal_llm: https://vecinita--vecinita-llm-fastapi-app.modal.run
     health_tiers:
-      h0ci_github_main: fail
+      h0ci_github_main: pending
       h1_liveness: pass
       h2_db_ready: pass
       h3_rag_smoke: pass
+      h3b_browse: pass
       h4_cors_preflight: pass
+      h4_modal: waiver
       h5_frontend_bundle: pass
       h6_browser_uj: waived_v1
     notes:
-      - "H4 Modal data-mgmt waiver — requires_proxy_auth blocks OPTIONS preflight (user-approved 2026-05-21)"
-      - "LLM cold-start may exceed 60s — warm before H3 suite"
-      - "CORS origins deployed to ChatRAG + write API via live spec update 2026-05-21"
+      - "EV-001 deployed 2026-05-25 — tag schema + browse + admin tags + retag worker"
+      - "H4 Modal data-mgmt waiver — requires_proxy_auth blocks OPTIONS preflight (user-approved)"
+      - "LLM cold-start ~5-10s after scaledown; tag inference adds ~3s to ask latency"
+      - "Deploy-time fixes: chat template prompt + retrieval fallback"
   url_discovery:
     method: "uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend"
     modal_admin_manual: true
@@ -273,10 +300,10 @@ evolve_cycles:
     cycle_type: feature
     feature_ids: [F19, F20, F21, F22]
     title: "Corpus tags, community browse, admin chunk/tag editing"
-    status: in_progress
+    status: completed
     started: "2026-05-24"
-    completed: null
-    note: "M15 tag schema & fixtures complete (T15.1-T15.6)"
+    completed: "2026-05-25"
+    note: "Deployed 2026-05-25 — all tiers pass (H4 Modal waiver); 2 deploy-time fixes"
     scope_summary: |
       Community members browse and filter corpus documents by tags (full text on open).
       LLM auto-tags at ingest; admins view chunks and edit document/chunk tags (human or LLM).
@@ -298,7 +325,7 @@ evolve_cycles:
       skipped_stages:
         - 03-plan-tooling
         - 06-tech-tooling
-    current_stage: 07-build
+    current_stage: completed
     stages:
       00-context:
         status: completed
@@ -353,17 +380,69 @@ evolve_cycles:
           - docs/dependency-inventory.md
           - docs/feature-list.md
           - docs/staging-secrets-matrix.md
+      09-qa:
+        status: completed
+        completed: "2026-05-25"
+        artifacts_updated:
+          - docs/qa-report.md
+      10-e2e:
+        status: completed
+        completed: "2026-05-25"
+        artifacts_updated:
+          - docs/e2e-report.md
+      11-verify-impl:
+        status: completed
+        completed: "2026-05-25"
+        artifacts_updated:
+          - docs/implementation-verification.md
+          - docs/feature-list.md
+          - docs/acceptance-criteria.md
+      12-verify-deploy:
+        status: completed
+        started_at: "2026-05-25"
+        completed: "2026-05-25"
+        report: docs/deploy-checklist.md
+        substeps:
+          phase1_agents: completed
+          phase2_failure_modes: completed
+          phase3_rollback: completed
+          phase4_checklist: completed
+          phase5_summary: completed
+        results:
+          configuration: pass
+          secrets: pass
+          data_volumes: pass_with_advisory
+          resources: pass
+          template: pass
+          connectivity: pass
+          d7_blocker: "verify LLM weights before deploy (user-requested)"
+          deploy_ready: true
+          rollback_plan: "approved - option A (leave tag tables)"
+      13-deploy-smoke:
+        status: completed
+        started_at: "2026-05-25"
+        completed: "2026-05-25"
+        report: docs/deploy-report.md
+        results:
+          h1: pass
+          h2: pass
+          h3: pass
+          h3b_browse: pass
+          h4_do: pass
+          h4_modal: waiver
+          h5: pass
+          deploy_time_fixes: 2
     gates:
       a_to_b: passed
       b_to_c: passed
-      c_to_d: pending
-      deploy: pending
+      c_to_d: passed
+      deploy: passed
     checkpoints:
       phase_a: passed
       phase_b: passed
-      phase_c: pending
-      phase_d: pending
-      deploy: pending
+      phase_c: passed
+      phase_d: passed
+      deploy: passed
     adrs:
       - docs/adr/ADR-014-corpus-tagging-and-browse.md
       - docs/adr/ADR-015-ev001-tagging-implementation.md
@@ -502,6 +581,7 @@ decisions_log:
   - "EV-001 02-verify-plan delta complete — TC-047, UJ-001-012 E2E scope — 2026-05-24"
   - "EV-001 04-tech-plan delta — TP-010–TP-017 — ADR-015 — 2026-05-24"
   - "EV-001 05-verify-tech delta — TV-021–TV-031 — 15 consistency fixes — 2026-05-24"
+  - "EV-001 11-verify-impl delta — F19-F22 all approved; AC-T6 partial (T3 deferred); gate c_to_d passed — 2026-05-25"
 
 artifacts:
   - docs/context-brief.md
@@ -544,7 +624,7 @@ artifacts:
   - openapi/internal-write.yaml (0.2.0)
 
 git_history:
-  current_branch: feat/M15-tag-schema
+  current_branch: main
   branches:
     - name: feat/M15-tag-schema
       purpose: "EV-001 Phase 5 — M15 tag schema & fixtures (07-build)"

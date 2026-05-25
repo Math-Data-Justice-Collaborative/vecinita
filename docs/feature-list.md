@@ -27,10 +27,10 @@
 | F16 | Infrastructure-only protection (data-mgmt APIs) | Implemented | Cross-cutting | data-management-backend | 11-verify-impl 2026-05-19 |
 | F17 | Basic observability (no PII in logs) | Implemented | Cross-cutting | all deployables | 11-verify-impl 2026-05-19 |
 | F18 | Local dev: docker-compose + Modal serve | Implemented | Cross-cutting | infra/ | 11-verify-impl 2026-05-19 |
-| F19 | Public corpus browse & tag filter | Planned | ChatRAG | chat-rag-backend, chat-rag-frontend | EV-001 01-requirements 2026-05-24 |
-| F20 | LLM auto-tagging at ingest + admin re-tag | Planned | Data Management | data-management-backend, Modal LLM | EV-001 01-requirements 2026-05-24 |
-| F21 | Admin chunk viewer & tag editor | Planned | Data Management | data-management-frontend, internal-write-api | EV-001 01-requirements 2026-05-24 |
-| F22 | Tag-aware RAG retrieval | Planned | ChatRAG | chat-rag-backend, packages/rag | EV-001 01-requirements 2026-05-24 |
+| F19 | Public corpus browse & tag filter | Implemented | ChatRAG | chat-rag-backend, chat-rag-frontend | 11-verify-impl 2026-05-25 |
+| F20 | LLM auto-tagging at ingest + admin re-tag | Implemented | Data Management | data-management-backend, Modal LLM | 11-verify-impl 2026-05-25 |
+| F21 | Admin chunk viewer & tag editor | Implemented | Data Management | data-management-frontend, internal-write-api | 11-verify-impl 2026-05-25 |
+| F22 | Tag-aware RAG retrieval | Implemented | ChatRAG | chat-rag-backend, packages/rag | 11-verify-impl 2026-05-25 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 

@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita staging  
 > **Source**: `docs/deployment-integration.md` §Secrets, ADR-007, ADR-010  
-> **Last updated**: 2026-05-24 (EV-001 T19.1 — browse API shares chat VITE URL)
+> **Last updated**: 2026-05-25 (12-verify-deploy Agent 2 audit — name fix, EV-001 vars)
 
 Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — never commit to git.
 
@@ -16,6 +16,7 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 | `VECINITA_MODAL_TOKEN_ID` | If Modal auth | DO→Modal credential |
 | `VECINITA_MODAL_TOKEN_SECRET` | If Modal auth | DO→Modal credential |
 | `VECINITA_TOP_K` | No | Default `5` |
+| `VECINITA_BROWSE_PAGE_SIZE` | No | Default `20` — EV-001 browse pagination |
 | `VECINITA_ENV` | No | Set `staging` |
 | `VECINITA_CORS_ORIGINS` | Yes (browser UI) | Comma-separated frontend origins, e.g. `https://vecinita-chat-rag-frontend-….ondigitalocean.app` |
 
@@ -25,6 +26,10 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 |----------|----------|-------------|
 | `DATABASE_URL` | Yes | Same Postgres as ChatRAG (write path) |
 | `VECINITA_INTERNAL_API_KEY` | Yes | Bearer token for Modal workers |
+| `VECINITA_MODAL_DATA_MGMT_URL` | Yes (EV-001) | Modal data-mgmt base URL — retag job dispatch |
+| `VECINITA_MODAL_PROXY_KEY` | Yes (EV-001) | Proxy auth key for Modal data-mgmt `/jobs` retag endpoint |
+| `VECINITA_MAX_TAGS_PER_DOCUMENT` | No | Default `10` — EV-001 tag cap enforcement |
+| `VECINITA_MAX_TAGS_PER_CHUNK` | No | Default `5` — EV-001 tag cap enforcement |
 | `VECINITA_ENV` | No | `staging` |
 | `VECINITA_CORS_ORIGINS` | Yes (browser UI) | Must include admin frontend origin |
 
@@ -42,13 +47,18 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `VECINITA_DO_WRITE_API_URL` | Yes | DO internal write API base URL |
+| `VECINITA_INTERNAL_WRITE_URL` | Yes | DO internal write API base URL (code reads this name, not `VECINITA_DO_WRITE_API_URL`) |
 | `VECINITA_INTERNAL_API_KEY` | Yes | Must match DO write API secret |
 | `VECINITA_MODAL_PROXY_KEY` | Yes | ASGI `requires_proxy_auth` |
+| `VECINITA_MODAL_EMBED_URL` | Yes | Modal `vecinita-embedding` base URL — used by ingest workers |
+| `VECINITA_MODAL_LLM_URL` | Yes (EV-001) | Modal `vecinita-llm` base URL — LLM tagging at ingest |
 | `VECINITA_CORS_ORIGINS` | Yes (browser UI) | Admin frontend origin; redeploy after change |
-| `VECINITA_CHUNK_SIZE_TOKENS` | No | Default `256` |
+| `VECINITA_LLM_TAG_MAX_TOKENS` | No | Default `128` — EV-001 LLM tag generation token limit |
+| `VECINITA_TAG_SEED_PATH` | No | Default `data/fixtures/tags/seed_tags.json` — EV-001 tag vocabulary path |
 
 **Forbidden on Modal:** `DATABASE_URL` (ADR-007).
+
+**Name correction (12-verify-deploy):** Code reads `VECINITA_INTERNAL_WRITE_URL`, not the previously documented `VECINITA_DO_WRITE_API_URL`. The Modal secret `vecinita-data-management` was already created with the correct name during 13-deploy-smoke. The `config-spec.md` reference to `VECINITA_DO_WRITE_API_URL` is stale — the code and deploy scripts use `VECINITA_INTERNAL_WRITE_URL`.
 
 ## Modal — Embedding / LLM
 

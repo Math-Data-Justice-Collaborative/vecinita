@@ -33,15 +33,15 @@
 - [x] **AC-I1**: Documented local bootstrap succeeds (UJ-004). — 11-verify-impl
 - [x] **AC-I2**: All `/health` endpoints return 200 when dependencies up. — 11-verify-impl when deps up
 
-### EV-001 — Corpus tags & browse (F19–F22) — planned
+### EV-001 — Corpus tags & browse (F19–F22)
 
-- [ ] **AC-T1**: Community can browse documents with tag + title/URL search; 20 per page (UJ-009, TC-040).
-- [ ] **AC-T2**: Opening a document navigates to original source URL (UJ-010).
-- [ ] **AC-T3**: Ingest assigns LLM tags; max 10 doc / 5 chunk tags (F20, TC-047).
-- [ ] **AC-T4**: Admin views chunks and edits tags without Vecinita login (UJ-011, TC-042).
-- [ ] **AC-T5**: Chat with selected tags retrieves only matching corpus (UJ-012, TC-044).
-- [ ] **AC-T6**: Chat without tags uses LLM-inferred tag filter (TC-045).
-- [ ] **AC-T7**: CORS preflight passes for new public GET routes from chat frontend (TC-046, H4).
+- [x] **AC-T1**: Community can browse documents with tag + title/URL search; 20 per page (UJ-009, TC-040). — 11-verify-impl T0
+- [x] **AC-T2**: Opening a document navigates to original source URL (UJ-010). — 11-verify-impl FE
+- [x] **AC-T3**: Ingest assigns LLM tags; max 10 doc / 5 chunk tags (F20, TC-047). — 11-verify-impl T0
+- [x] **AC-T4**: Admin views chunks and edits tags without Vecinita login (UJ-011, TC-042). — 11-verify-impl T0
+- [x] **AC-T5**: Chat with selected tags retrieves only matching corpus (UJ-012, TC-044). — 11-verify-impl T0
+- [ ] **AC-T6**: Chat without tags uses LLM-inferred tag filter (TC-045). — partial (mock); real LLM deferred to T3
+- [x] **AC-T7**: CORS preflight passes for new public GET routes from chat frontend (TC-046, H4). — H0c met; H4 live pending staging
 
 ## Quantitative benchmarks
 

@@ -1,101 +1,87 @@
 # Deploy Report
 
-> Date: 2026-05-20 (connectivity gates validated 2026-05-21)
+> Date: 2026-05-25
 > Status: **deployed**
-> Primary URL: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
+> Version: 0.2.0 (EV-001)
+> Commit: `4a1598f`
 
 ## Pre-Deploy
 
-- Checklist: partial pass with documented T3 post-deploy waiver ([deploy-checklist.md](deploy-checklist.md))
-- T0 e2e: **PASS** (11/11, `pytest tests/e2e/ -m "e2e and not live"`)
-- Migrations: **PASS** (`alembic upgrade head` on `vecinita-staging`)
+- Checklist: all items passed (`docs/deploy-checklist.md`)
+- D7 LLM weights: verified (health 200, `/generate` tested)
+- T0 e2e: 16/16 passed
+- H0c CORS: 9/9 passed (TC-046 browse GET, TC-049 admin PATCH)
+- verify_build: PASS (deps, ADR-007, Modal app imports)
 
 ## Deployment
 
-| Component | Command / tool | Result |
-|-----------|----------------|--------|
-| Modal | `scripts/deploy/modal.sh` | SUCCESS |
-| DO apps | `scripts/deploy/do_apps.py` (pydo) | SUCCESS |
-| Postgres | pydo `create_cluster` | SUCCESS |
+| Step | Command | Duration | Result |
+|------|---------|----------|--------|
+| Database | `alembic upgrade head` (20260519_0001 → 20260524_0002) | 1s | SUCCESS |
+| Modal (3 apps) | `bash scripts/deploy/modal.sh` | 11s | SUCCESS |
+| DO chat-rag-backend | `do_apps.py deploy` | ~150s | SUCCESS |
+| DO internal-write-api | `do_apps.py deploy` | ~150s | SUCCESS |
+| DO chat-rag-frontend | `do_apps.py deploy` | ~120s | SUCCESS |
+| DO admin-frontend | `do_apps.py deploy` | ~120s | SUCCESS |
 
-**ChatRAG backend fix:** Build without `uv sync --group dev` produced an image missing `uvicorn`. Restored `build_command: uv sync --group dev`; deploy **ACTIVE** in ~2 min.
+**Deploy-time fixes (committed during deploy):**
+1. `98cc2ac` — Tag inference chat template + graceful fallback
+2. `4a1598f` — Fallback to unfiltered retrieval when tag filter yields empty
+
+Both fixes were pushed to main and chat-rag-backend redeployed before smoke completion.
 
 ## Smoke Tests
 
-| Test | Status | Response Time |
-|------|--------|---------------|
-| H1 ChatRAG `/health` | PASS | ~830 ms |
-| H1 Write API `/health` | PASS | — |
-| H2 DB + Alembic | PASS | — |
-| H3 `POST /api/v1/ask` | PASS | ~4911 ms |
-| H4 ChatRAG CORS preflight | PASS | — |
-| H4 Write API CORS preflight | PASS | — |
-| H4 Modal data-mgmt CORS | **WAIVER** | 401 — see §Connectivity |
-| H5 Chat frontend bundle wiring | PASS | — |
-| H5 Admin frontend bundle wiring | PASS | — |
-
-H3 returned a valid `answer` + `language: en` with fixture `sources` on re-validate (~1.7s warm; first cold run may 504 until Modal LLM scales up).
-
-### Connectivity Gates (H4/H5) — 2026-05-21
-
-**CORS setup:** Pushed `VECINITA_CORS_ORIGINS` to ChatRAG backend and internal write API via live spec update (pydo `apps.update` with plaintext values). DO's encrypted `EV[...]` values cannot be roundtripped via `apps.update` — must provide plaintext for all secrets when updating spec.
-
-| Gate | Status | Detail |
-|------|--------|--------|
-| H0c local CORS | PASS | `pytest tests/unit/test_cors_policy.py` (3 pass, 1 skip) |
-| H4 ChatRAG backend | PASS | `Access-Control-Allow-Origin: https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app` |
-| H4 Internal write API | PASS | `Access-Control-Allow-Origin: https://vecinita-admin-frontend-ef4ob.ondigitalocean.app` |
-| H4 Modal data-mgmt | **WAIVER** | Modal `requires_proxy_auth` intercepts OPTIONS preflight at proxy (401). Architectural limitation — browsers never send auth on preflight per CORS spec. User-approved waiver. |
-| H5 Chat frontend bundle | PASS | Bundle contains ChatRAG backend host |
-| H5 Admin frontend bundle | PASS | Bundle contains write API + Modal data-mgmt hosts |
-
-**H4 Modal waiver rationale:** Modal's proxy auth operates before the ASGI app receives requests. OPTIONS preflights carry no auth per [CORS spec](https://developer.mozilla.org/en-US/docs/Glossary/Preflight_request). Resolution deferred — options: app-level auth (remove `requires_proxy_auth`, check Modal-Key in FastAPI middleware), or proxy admin calls through DO. Admin UI functionality that calls Modal data-mgmt directly will need `no-cors` mode or a DO proxy in production.
-
-### Re-validation (2026-05-20)
-
-| Check | Result |
-|-------|--------|
-| T0 `pytest tests/e2e/ -m "e2e and not live"` | PASS |
-| `staging_smoke.sh` H1–H3 | PASS |
-| T3 `pytest tests/smoke -m live` | PASS (11/11) |
-| Code at validation | `c4bc847` on `main` |
-
-### Re-deploy (2026-05-20)
-
-| Step | Command | Result |
-|------|---------|--------|
-| Modal | `scripts/deploy/modal.sh` | SUCCESS (embedding, data-mgmt, LLM) |
-| DO apps | `do_apps.py deploy --name` ×4 (`force_build`) | SUCCESS — all ACTIVE |
-| Post-smoke | H1–H3 + T3 live | PASS after LLM warm (~19s cold start) |
-
-### CORS redeploy (2026-05-21)
-
-| Step | Detail |
-|------|--------|
-| `apps.update` ChatRAG | Added `VECINITA_CORS_ORIGINS` with plaintext value; auto-deploy ACTIVE |
-| `apps.update` Write API | Added `VECINITA_CORS_ORIGINS` with plaintext value; auto-deploy ACTIVE |
-| H1 post-CORS | ChatRAG `{"status":"ok","dependencies":{...}}` — all deps healthy |
-| H4/H5 pytest | 4 pass, 1 waiver (Modal) |
-
-**Note:** When using `do_apps.py sync-secrets`, provide ALL secret values in the shell env — DO's `apps.update` replaces the entire spec, and encrypted `EV[...]` values cannot be sent back. Use the pydo live-spec-update pattern (read spec → modify only target env → update) with plaintext values.
+| Test | Status | Response Time | Notes |
+|------|--------|---------------|-------|
+| H1 API connectivity (ChatRAG) | **PASS** | <1s | `{"status":"ok","dependencies":{"postgres":"ok","modal_embed":"ok","modal_llm":"ok"}}` |
+| H1 API connectivity (Write API) | **PASS** | <1s | `{"status":"ok"}` |
+| H2 DB pool + Alembic head | **PASS** | — | Pool connects; revision == head (20260524_0002) |
+| H3 RAG ask | **PASS** | 7148ms | Answer returned in `en`; includes tag inference + LLM (cold) |
+| H3b Browse documents | **PASS** | <1s | 5 items (total 11); pagination working |
+| H3b Browse tags | **PASS** | <1s | 3 tag facets (housing, benefits, legal) |
+| H4 ChatRAG CORS | **PASS** | — | OPTIONS preflight from chat frontend origin |
+| H4 Write API CORS | **PASS** | — | OPTIONS preflight including PATCH method |
+| H4 Modal data-mgmt | **WAIVER** | — | `requires_proxy_auth` blocks OPTIONS (existing user-approved waiver) |
+| H5 Chat frontend bundle | **PASS** | — | Bundle contains ChatRAG backend host (browse + ask) |
+| H5 Admin frontend bundle | **PASS** | — | Bundle contains write API + Modal hosts |
 
 ## Health Check
 
-- ChatRAG dependencies: postgres ok, modal_embed ok, modal_llm ok
-- No container crash loops on active backends
+- Error rate: 0% (all endpoints responding)
+- Avg response time: H3 ask 7.1s (cold LLM; warm ~3s), browse <1s
+- Container restarts: 0
+- All 4 DO apps: ACTIVE
+- All 3 Modal apps: deployed (embedding, data-management, llm)
 
 ## Monitoring Baseline
 
-- DO: 4 apps in `vecinita` project, `basic-xxs`, region `nyc`
-- Postgres: `vecinita-staging` online
-- Modal: scale-to-zero GPU/CPU apps on `vecinita` workspace
+- ChatRAG `/health`: postgres ok, modal_embed ok, modal_llm ok
+- LLM cold-start: ~5-10s first request after scaledown (300s window)
+- Browse latency: <1s (DB query, no external calls)
+- Tag inference adds ~3s to ask latency (LLM call for tag extraction)
+
+## URLs
+
+| Service | URL |
+|---------|-----|
+| ChatRAG backend | https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app |
+| Internal write API | https://vecinita-internal-write-api-icze4.ondigitalocean.app |
+| ChatRAG frontend | https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app |
+| Admin frontend | https://vecinita-admin-frontend-ef4ob.ondigitalocean.app |
+| Modal embedding | https://vecinita--vecinita-embedding-embedding-api.modal.run |
+| Modal LLM | https://vecinita--vecinita-llm-fastapi-app.modal.run |
+| Modal data-mgmt | https://vecinita--vecinita-data-management-fastapi-app.modal.run |
 
 ## Rollback
 
-- Modal: `modal app stop vecinita-<app>`
-- DO: redeploy previous deployment in App Platform or `do_apps.py deploy`
-- Last known good (pre-deploy tag): `324bb50`
+| Field | Value |
+|-------|-------|
+| Command (DO) | Redeploy previous app spec via dashboard or `do_apps.py` |
+| Command (Modal) | `modal app stop vecinita-data-management` |
+| DB rollback | Option A: leave tag tables in place (no data loss) |
+| Last known good (pre-EV-001) | `c4bc847` |
 
 ## Changelog
 
-See [CHANGELOG.md](../CHANGELOG.md) (staging deploy slice).
+See `CHANGELOG.md` — version 0.2.0 (EV-001).

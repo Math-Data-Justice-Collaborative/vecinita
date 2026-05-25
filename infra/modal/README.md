@@ -56,7 +56,7 @@ Endpoints: `GET /health`, `POST /generate`, `POST /generate/stream`
 ### Data management ASGI
 
 ```bash
-export VECINITA_DO_WRITE_API_URL=http://localhost:8002
+export VECINITA_INTERNAL_WRITE_URL=http://localhost:8002
 export VECINITA_INTERNAL_API_KEY=dev-internal-key
 export VECINITA_MODAL_PROXY_KEY=dev-proxy-key
 modal serve infra/modal/data_management_app.py
