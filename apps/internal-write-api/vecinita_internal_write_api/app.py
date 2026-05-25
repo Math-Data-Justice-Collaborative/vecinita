@@ -23,7 +23,10 @@ from vecinita_shared_schemas.internal_write import (
     TagPatchResponse,
 )
 
-from vecinita_internal_write_api.jobs_client import DataManagementJobsClient
+from vecinita_internal_write_api.jobs_client import (
+    DataManagementJobsClient,
+    DataManagementJobsClientError,
+)
 from vecinita_internal_write_api.tags import (
     replace_chunk_tags,
     replace_document_tags,
@@ -65,12 +68,20 @@ def _require_internal_key(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
 
+def _default_jobs_client() -> DataManagementJobsClient | None:
+    """Auto-create a DataManagementJobsClient from env vars when available."""
+    try:
+        return DataManagementJobsClient()
+    except DataManagementJobsClientError:
+        return None
+
+
 def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAPI:
     """Build the internal write API (sole holder of DATABASE_URL)."""
     app = FastAPI(title="Vecinita Internal Write API", version="0.1.0")
     configure_cors(app, extra_allow_headers=["Authorization"])
     engine = _engine()
-    retag_jobs = jobs_client
+    retag_jobs = jobs_client if jobs_client is not None else _default_jobs_client()
 
     @app.get("/health", response_model=HealthResponse)
     def health() -> HealthResponse:

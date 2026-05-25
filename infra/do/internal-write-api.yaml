@@ -32,3 +32,9 @@ services:
       - key: VECINITA_CORS_ORIGINS
         scope: RUN_TIME
         type: SECRET
+      - key: VECINITA_MODAL_DATA_MGMT_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_MODAL_PROXY_KEY
+        scope: RUN_TIME
+        type: SECRET
