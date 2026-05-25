@@ -1,0 +1,22 @@
+---
+description: Every data-mutating endpoint needs a corresponding read endpoint
+globs:
+  - apps/internal-write-api/**/*.py
+  - apps/chat-rag-backend/**/*.py
+  - apps/data-management-backend/**/*.py
+---
+# Write-read endpoint parity
+
+Every PATCH or POST endpoint that creates or updates a resource must have a corresponding
+GET endpoint that retrieves the same data shape.
+
+When adding a new write endpoint:
+1. Verify a GET read endpoint exists for the resource at the same path or parent path
+2. If no GET exists, add one in the same PR
+3. Verify the frontend or client has a function to call the GET endpoint
+4. Add an E2E or integration test that writes then reads the resource
+
+Evidence: BUG-2026-05-25-retag-tags-not-visible — `PATCH /documents/{id}/tags` existed
+but no `GET /documents/{id}/tags`, so retag results were invisible in the admin UI.
+
+Test: `tests/e2e/test_admin_retag_job.py::test_admin_retag_tags_visible_via_get_endpoint`

@@ -1,6 +1,6 @@
 # BUG-2026-05-25 — Retag writes document tags but chunk list shows empty tags
 
-> Status: **investigating**
+> Status: **verifying**
 > Feature: **F20** (LLM auto-tagging at ingest + admin re-tag), **F21** (admin chunk/tag editor)
 > Component: `apps/internal-write-api/vecinita_internal_write_api/app.py`, `apps/data-management-frontend/src/components/DocumentAdmin.tsx`
 
@@ -113,24 +113,34 @@ Classification: **Code bug** — missing read path for document-level tags in bo
 
 | Test | Path | Status |
 |------|------|--------|
-| Document tags not visible in chunk list after retag | `tests/bugs/test_bug_2026_05_25_retag_tags_not_visible.py` | pending |
+| Document tags retrievable after patch | `tests/bugs/test_bug_2026_05_25_retag_tags_not_visible.py::test_document_tags_retrievable_after_patch` | red → green |
 
 ### TDD iteration log
 
 | # | Date | Action | Result |
 |---|------|--------|--------|
+| 1 | 2026-05-25 | Write repro test — assert GET /documents/{id}/tags returns 200 with tags after PATCH | RED: 405 Method Not Allowed (endpoint doesn't exist) |
+| 2 | 2026-05-25 | User confirmed repro matches symptom | confirmed |
+| 3 | 2026-05-25 | Apply fix: add GET endpoint + frontend loadDocumentTags | GREEN |
 
 ## Fix
 
-Pending.
+**Three changes:**
+
+1. **`apps/internal-write-api/vecinita_internal_write_api/app.py`**: Added `GET /internal/v1/documents/{document_id}/tags` endpoint that queries `document_tags` joined with `tags` for the document's language and returns `TagPatchResponse`.
+
+2. **`apps/data-management-frontend/src/api/corpus.ts`**: Added `listDocumentTags()` function that calls the new GET endpoint.
+
+3. **`apps/data-management-frontend/src/components/DocumentAdmin.tsx`**: Added `loadDocumentTags` callback that fetches document-level tags on component mount and after retag job completes, populating the `docTags` input field so the user can see retag results.
 
 ## Verification
 
 ### Layer 1 — Automated
 
-- [ ] Repro test red → green
-- [ ] Full unit test suite passes
-- [ ] Lint + typecheck pass
+- [x] Repro test red → green
+- [x] Full unit test suite passes (67 passed, 4 skipped; 1 pre-existing unrelated failure in test_tag_filtered_retrieval)
+- [x] Lint + typecheck pass (ruff, pyright, tsc)
+- [x] Frontend tests pass (vitest 2 passed)
 - [ ] CI parity (local) pass
 
 ### Layer 2 — Reproduction
