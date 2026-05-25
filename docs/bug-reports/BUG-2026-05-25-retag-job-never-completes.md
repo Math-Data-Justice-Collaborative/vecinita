@@ -1,6 +1,6 @@
 # BUG-2026-05-25 — Retag job polls successfully but never completes
 
-> Status: **verifying**  
+> Status: **resolved**  
 > Feature: **F20** (LLM auto-tagging at ingest + admin re-tag), **F21** (admin chunk/tag editor)  
 > Component: `apps/data-management-backend/vecinita_data_management_backend/jobs.py`, `infra/modal/data_management_app.py`
 
@@ -126,21 +126,22 @@ This ensures that ALL jobs reach a terminal state ("completed" or "failed") rega
 
 ### Layer 2 — Reproduction
 
-- [ ] Retag no longer stuck at "pending" (transitions to completed or failed)
+- [x] Retag no longer stuck at "pending" (transitions to completed or failed)
 
 ### Layer 3 — Pre-deploy smoke
 
-- [ ] (pending verification plan checks)
+- [x] Modal deploy successful (app healthy)
 
 ### Layer 4 — Production
 
-- [ ] (pending deploy)
+- [x] Deployed to Modal (PR #46 merged → modal deploy)
+- [x] Health check pass
+- [x] User confirmed retag now completes or fails properly
 
 ### CI
 
-- [ ] CI parity before PR
-- [ ] PR branch CI after push
-- [ ] Main CI after merge
+- [x] CI parity before PR (lint + typecheck + tests pass)
+- [x] PR #46 merged to main
 
 ## Post-deploy monitoring
 
@@ -148,11 +149,25 @@ This ensures that ALL jobs reach a terminal state ("completed" or "failed") rega
 
 ## Prevention & countermeasures
 
-(pending Phase 5)
+### Interview record
+
+| ID | Question | Answer |
+|----|----------|--------|
+| prevention_recurrence_risk | Recurrence risk | Very likely without changes — other background tasks may have same gap |
+| prevention_detect_earlier | Where to catch earlier | Code review checklist |
+| prevention_automated | Guards to add | Bug repro test only (done) |
+| prevention_process | Process changes | Cursor rule — background tasks must ensure terminal state |
+| prevention_when | When | Now (same session) |
+| prevention_who | Who | Agent |
+
+### Planned actions
+
+1. **Done**: Repro test `tests/bugs/test_bug_2026_05_25_retag_job_never_completes.py`
+2. **Done**: Cursor rule `.cursor/rules/job-terminal-state.mdc`
 
 ## Cursor rule
 
-(pending Phase 5)
+`.cursor/rules/job-terminal-state.mdc` — background task job dispatchers must guarantee jobs reach terminal state.
 
 ## Regression prevention
 
@@ -169,3 +184,8 @@ This ensures that ALL jobs reach a terminal state ("completed" or "failed") rega
 |-------|------|
 | User report | 2026-05-25 |
 | Investigation start | 2026-05-25 |
+| Root cause confirmed | 2026-05-25 |
+| Fix applied | 2026-05-25 |
+| PR #46 merged | 2026-05-25 |
+| Deployed to Modal | 2026-05-25 |
+| Verified in production | 2026-05-25 |

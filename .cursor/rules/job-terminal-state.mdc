@@ -1,0 +1,48 @@
+---
+description: Background task job dispatchers must guarantee jobs reach terminal state
+globs: ["**/jobs.py", "**/pipeline.py", "**/data_management_app.py"]
+---
+# Job terminal state guarantee
+
+Background tasks that execute jobs (ingest, retag, or any future job type) must ensure
+the job reaches a terminal state ("completed" or "failed") regardless of where an
+exception occurs.
+
+## Required pattern
+
+Any function called from `BackgroundTasks.add_task(runner, job_id)` must wrap the entire
+job execution in a try/except that:
+
+1. Catches `Exception`
+2. Checks if the job already has a terminal status (from inner handlers)
+3. If not terminal, calls `store.update_job(job_id, status="failed", error_code=..., error_message=...)`
+4. Re-raises the exception for logging
+
+```python
+def runner(job_id: UUID) -> None:
+    try:
+        run_job(job_id, store=store, ...)
+    except Exception as exc:
+        record = store.get_job(job_id)
+        if record is not None and record.status not in ("completed", "failed"):
+            store.update_job(job_id, status="failed", ...)
+        raise
+```
+
+## Never allow
+
+- A job staying at "pending" after the background task exits
+- A job staying at "running" after the background task exits
+- An exception escaping without updating job status
+- A silent `except Exception: pass` that hides job failures
+
+## When adding new job types
+
+1. Add the job type dispatch to `run_job()` INSIDE the existing try/except
+2. Ensure validation errors (missing client, bad options) are caught by the outer handler
+3. Add a test in `tests/bugs/` that verifies the new job type reaches "failed" on error
+
+Evidence: BUG-2026-05-25 — retag jobs stuck at "pending" because RuntimeError escaped
+before run_retag_job's own try/except could mark it "failed".
+
+Test: `tests/bugs/test_bug_2026_05_25_retag_job_never_completes.py`
