@@ -95,13 +95,16 @@ def _build_document_tag_prompt(
 ) -> str:
     vocab_csv = ", ".join(vocabulary)
     return (
-        "You assign corpus tags for a community document.\n"
+        "<|im_start|>system\n"
+        "You assign corpus tags for a community document. "
+        'Respond with JSON only: {"tags": ["slug1", "slug2"]}. '
+        "Use only slugs from the allowed list.\n"
+        "<|im_start|>user\n"
         f"Document language: {language}\n"
         f"Allowed tag slugs (choose up to {max_tags}): {vocab_csv}\n"
         f"Title: {title}\n"
         f"Text:\n{text}\n"
-        'Respond with JSON only: {"tags": ["slug1", "slug2"]}\n'
-        "Use only slugs from the allowed list."
+        "<|im_start|>assistant\n"
     )
 
 
