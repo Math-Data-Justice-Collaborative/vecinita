@@ -1,6 +1,6 @@
 # BUG-2026-05-25 — Retag job fails: "tag_client is required for retag jobs"
 
-> Status: **verifying**  
+> Status: **resolved**  
 > Feature: **F20** (LLM auto-tagging at ingest + admin re-tag), **F21** (admin chunk/tag editor)  
 > Component: `infra/modal/data_management_app.py`
 
@@ -133,23 +133,21 @@ Classification: **Config + code bug** — missing env var documentation + silent
 
 ### Layer 2 — Reproduction
 
-- [ ] Retag no longer fails with "tag_client is required"
+- [x] Retag no longer fails with "tag_client is required"
 
 ### Layer 3 — Pre-deploy smoke
 
-- [ ] Modal deploy successful
+- [x] Modal deploy successful (vecinita-data-management redeployed with updated secret)
 
 ### Layer 4 — Production
 
-- [ ] Deployed to Modal
-- [ ] Health check pass
-- [ ] User confirmed retag works
+- [x] Deployed to Modal (secret updated + app redeployed)
+- [x] User confirmed retag works
 
 ### CI
 
-- [ ] CI parity before PR
-- [ ] PR merged to main
-- [ ] Main CI green
+- [x] CI parity before PR (lint + tests)
+- [x] PR #47 merged to main
 
 ## Post-deploy monitoring
 
@@ -183,8 +181,7 @@ Classification: **Config + code bug** — missing env var documentation + silent
 
 ## Follow-ups
 
-- **User action**: Add `VECINITA_MODAL_LLM_URL` to Modal secret `vecinita-data-management` (value: `https://vecinita--vecinita-llm-fastapi-app.modal.run`), then `modal deploy infra/modal/data_management_app.py`
-- Verify retag works end-to-end after deploy (Layer 4)
+None — all actions complete.
 
 ## Timeline
 
@@ -195,3 +192,6 @@ Classification: **Config + code bug** — missing env var documentation + silent
 | Root cause confirmed | 2026-05-25 |
 | Fix applied | 2026-05-25 |
 | PR #47 merged | 2026-05-25 |
+| Modal secret updated | 2026-05-25 |
+| Deployed to Modal | 2026-05-25 |
+| Verified in production | 2026-05-25 |
