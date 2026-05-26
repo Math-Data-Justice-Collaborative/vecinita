@@ -144,6 +144,70 @@ class DocumentHistoryResponse(BaseModel):
     versions: list[DocumentVersionEntry]
 
 
+class BulkFailure(BaseModel):
+    """Single item failure in a bulk operation."""
+
+    id: UUID
+    error: str
+
+
+class BulkResultResponse(BaseModel):
+    """Partial-success response for bulk operations (TP-024)."""
+
+    successes: int
+    failures: list[BulkFailure] = Field(default_factory=list)
+
+
+class BulkDeleteRequest(BaseModel):
+    """DELETE /internal/v1/documents/bulk request body."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    document_ids: list[UUID] = Field(..., min_length=1, max_length=100)
+
+
+class BulkTagRequest(BaseModel):
+    """PATCH /internal/v1/documents/bulk/tags request body."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    document_ids: list[UUID] = Field(..., min_length=1, max_length=100)
+    add_tags: list[TagInput] = Field(default_factory=list)
+    remove_tags: list[str] = Field(default_factory=list)
+
+
+class BulkRetagRequest(BaseModel):
+    """POST /internal/v1/documents/bulk/retag request body."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    document_ids: list[UUID] = Field(..., min_length=1, max_length=100)
+
+
+class BulkRetagResponse(BaseModel):
+    """POST /internal/v1/documents/bulk/retag response."""
+
+    job_ids: list[UUID]
+
+
+class MetadataUpdates(BaseModel):
+    """Fields to update in bulk metadata PATCH."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    title: str | None = None
+    language: str | None = None
+
+
+class BulkMetadataRequest(BaseModel):
+    """PATCH /internal/v1/documents/bulk/metadata request body."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    document_ids: list[UUID] = Field(..., min_length=1, max_length=100)
+    updates: MetadataUpdates
+
+
 class StatsServedRequest(BaseModel):
     """POST /internal/v1/stats/served request body."""
 

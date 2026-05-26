@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import uuid
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -32,7 +33,9 @@ def client():
     os.environ["VECINITA_INTERNAL_API_KEY"] = _API_KEY
     from vecinita_internal_write_api.app import create_app
 
-    return TestClient(create_app())
+    mock_jobs = MagicMock()
+    mock_jobs.enqueue_retag.side_effect = lambda _doc_id: uuid.uuid4()
+    return TestClient(create_app(jobs_client=mock_jobs))
 
 
 def _auth() -> dict[str, str]:

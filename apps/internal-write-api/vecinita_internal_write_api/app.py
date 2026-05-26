@@ -16,6 +16,13 @@ from vecinita_shared_schemas.internal_write import (
     AuditLogResponse,
     BatchUpsertRequest,
     BatchUpsertResponse,
+    BulkDeleteRequest,
+    BulkFailure,
+    BulkMetadataRequest,
+    BulkResultResponse,
+    BulkRetagRequest,
+    BulkRetagResponse,
+    BulkTagRequest,
     ChunkDetail,
     DocumentDetail,
     DocumentHistoryResponse,
@@ -199,6 +206,206 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 )
 
         return BatchUpsertResponse(upserted_chunks=upserted)
+
+    @app.delete(
+        "/internal/v1/documents/bulk",
+        response_model=BulkResultResponse,
+        dependencies=[Depends(_require_internal_key)],
+    )
+    def bulk_delete(body: BulkDeleteRequest) -> BulkResultResponse:
+        successes = 0
+        failures: list[BulkFailure] = []
+        request_id = _uuid.uuid4()
+        for doc_id in body.document_ids:
+            with engine.begin() as conn:
+                doc_row = (
+                    conn.execute(
+                        text("SELECT id, url, title FROM documents WHERE id = :id"),
+                        {"id": doc_id},
+                    )
+                    .mappings()
+                    .first()
+                )
+                if doc_row is None:
+                    failures.append(BulkFailure(id=doc_id, error="Document not found"))
+                    continue
+                emit_audit_event(
+                    conn,
+                    event_type="document.deleted",
+                    entity_type="document",
+                    entity_id=doc_id,
+                    request_id=request_id,
+                    payload={"title": doc_row["title"], "url": doc_row["url"]},
+                )
+                conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+                successes += 1
+        return BulkResultResponse(successes=successes, failures=failures)
+
+    @app.patch(
+        "/internal/v1/documents/bulk/tags",
+        response_model=BulkResultResponse,
+        dependencies=[Depends(_require_internal_key)],
+    )
+    def bulk_tag(body: BulkTagRequest) -> BulkResultResponse:
+        successes = 0
+        failures: list[BulkFailure] = []
+        request_id = _uuid.uuid4()
+        for doc_id in body.document_ids:
+            with engine.begin() as conn:
+                doc_row = (
+                    conn.execute(
+                        text("SELECT id, title, language FROM documents WHERE id = :id"),
+                        {"id": doc_id},
+                    )
+                    .mappings()
+                    .first()
+                )
+                if doc_row is None:
+                    failures.append(BulkFailure(id=doc_id, error="Document not found"))
+                    continue
+                language = doc_row["language"] or "en"
+                existing_tags = (
+                    conn.execute(
+                        text(
+                            "SELECT t.slug, t.label, dt.source "
+                            "FROM document_tags dt "
+                            "JOIN tags t ON t.id = dt.tag_id "
+                            "WHERE dt.document_id = :doc_id AND t.language = :lang"
+                        ),
+                        {"doc_id": doc_id, "lang": language},
+                    )
+                    .mappings()
+                    .all()
+                )
+                current = {
+                    row["slug"]: TagInput(
+                        slug=row["slug"], label=row["label"], source=row["source"]
+                    )
+                    for row in existing_tags
+                }
+                for slug in body.remove_tags:
+                    current.pop(slug, None)
+                for tag in body.add_tags:
+                    current[tag.slug] = tag
+                final_tags = list(current.values())
+                if len(final_tags) > 10:
+                    failures.append(BulkFailure(id=doc_id, error="Tag cap exceeded (max 10)"))
+                    continue
+                replace_document_tags(
+                    conn,
+                    document_id=doc_id,
+                    tags=final_tags,
+                    language=language,
+                )
+                tag_snapshot = [
+                    {"slug": t.slug, "label": t.label, "source": t.source or "llm"}
+                    for t in final_tags
+                ]
+                emit_audit_event(
+                    conn,
+                    event_type="document.tagged",
+                    entity_type="document",
+                    entity_id=doc_id,
+                    request_id=request_id,
+                    payload={"tags": tag_snapshot},
+                )
+                create_document_version(
+                    conn,
+                    document_id=doc_id,
+                    title=doc_row["title"],
+                    language=doc_row["language"],
+                    tags_snapshot=tag_snapshot,
+                )
+                successes += 1
+        return BulkResultResponse(successes=successes, failures=failures)
+
+    @app.post(
+        "/internal/v1/documents/bulk/retag",
+        response_model=BulkRetagResponse,
+        status_code=status.HTTP_202_ACCEPTED,
+        dependencies=[Depends(_require_internal_key)],
+    )
+    def bulk_retag(body: BulkRetagRequest) -> BulkRetagResponse:
+        if retag_jobs is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Retag job client not configured",
+            )
+        job_ids: list[UUID] = []
+        request_id = _uuid.uuid4()
+        for doc_id in body.document_ids:
+            with engine.begin() as conn:
+                exists = conn.execute(
+                    text("SELECT id FROM documents WHERE id = :id"), {"id": doc_id}
+                ).scalar_one_or_none()
+                if exists is None:
+                    continue
+                job_id = retag_jobs.enqueue_retag(doc_id)
+                job_ids.append(job_id)
+                emit_audit_event(
+                    conn,
+                    event_type="document.retagged",
+                    entity_type="document",
+                    entity_id=doc_id,
+                    request_id=request_id,
+                    payload={"job_id": str(job_id)},
+                )
+        return BulkRetagResponse(job_ids=job_ids)
+
+    @app.patch(
+        "/internal/v1/documents/bulk/metadata",
+        response_model=BulkResultResponse,
+        dependencies=[Depends(_require_internal_key)],
+    )
+    def bulk_metadata(body: BulkMetadataRequest) -> BulkResultResponse:
+        successes = 0
+        failures: list[BulkFailure] = []
+        request_id = _uuid.uuid4()
+        for doc_id in body.document_ids:
+            with engine.begin() as conn:
+                doc_row = (
+                    conn.execute(
+                        text("SELECT id, title, language FROM documents WHERE id = :id"),
+                        {"id": doc_id},
+                    )
+                    .mappings()
+                    .first()
+                )
+                if doc_row is None:
+                    failures.append(BulkFailure(id=doc_id, error="Document not found"))
+                    continue
+                set_clauses: list[str] = ["updated_at = now()"]
+                params: dict[str, object] = {"id": doc_id}
+                new_title = doc_row["title"]
+                new_language = doc_row["language"]
+                if body.updates.title is not None:
+                    set_clauses.append("title = :title")
+                    params["title"] = body.updates.title
+                    new_title = body.updates.title
+                if body.updates.language is not None:
+                    set_clauses.append("language = :language")
+                    params["language"] = body.updates.language
+                    new_language = body.updates.language
+                conn.execute(
+                    text(f"UPDATE documents SET {', '.join(set_clauses)} WHERE id = :id"),
+                    params,
+                )
+                emit_audit_event(
+                    conn,
+                    event_type="document.edited",
+                    entity_type="document",
+                    entity_id=doc_id,
+                    request_id=request_id,
+                    payload={k: v for k, v in body.updates.__dict__.items() if v is not None},
+                )
+                create_document_version(
+                    conn,
+                    document_id=doc_id,
+                    title=new_title,
+                    language=new_language,
+                )
+                successes += 1
+        return BulkResultResponse(successes=successes, failures=failures)
 
     @app.get(
         "/internal/v1/documents/{document_id}",
