@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 6: EV-002 Backend — Schema, Audit, Stats, Bulk |
-| **Active milestone** | M23: Bulk operations endpoints |
-| **Active task** | T23.1 |
-| **Tasks completed** | 129 / 184 |
+| **Active milestone** | M24: Health aggregator & stats summary |
+| **Active task** | T24.1 |
+| **Tasks completed** | 137 / 184 |
 | **Last updated** | 2026-05-26 |
 | **Evolve cycle** | EV-002 (F23–F29) — **in_progress** |
 
@@ -480,14 +480,14 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
-| T23.1 | Test: `DELETE /internal/v1/documents/bulk` deletes up to 100 + emits audit (`tests/e2e/test_uj015_bulk_delete.py`) — red | Test | pending | UJ-015, TC-053, AC-E5 | T21.3, T20.4 | D1 | EV-002 | F27 |
-| T23.2 | Implement bulk delete endpoint (partial success pattern per TP-024) | Code | pending | api-contract §DELETE /documents/bulk, TP-024 | T23.1 | — | EV-002 | F27 |
-| T23.3 | Test: `PATCH /internal/v1/documents/bulk/tags` respects max-10 cap + emits audit (`tests/e2e/test_uj016_bulk_tag.py`) — red | Test | pending | UJ-016, TC-055, AC-E6 | T21.3 | D1 | EV-002 | F27 |
-| T23.4 | Implement bulk tag endpoint (add + remove; cap enforcement) | Code | pending | api-contract §PATCH /documents/bulk/tags | T23.3 | — | EV-002 | F27 |
-| T23.5 | Test: `POST /internal/v1/documents/bulk/retag` enqueues retag jobs — red | Test | pending | api-contract §POST /documents/bulk/retag | T23.2 | — | EV-002 | F27 |
-| T23.6 | Implement bulk retag endpoint | Code | pending | api-contract §POST /documents/bulk/retag | T23.5 | — | EV-002 | F27 |
-| T23.7 | Test: `PATCH /internal/v1/documents/bulk/metadata` updates title/language + emits audit — red | Test | pending | api-contract §PATCH /documents/bulk/metadata | T21.3 | D1 | EV-002 | F27 |
-| T23.8 | Implement bulk metadata endpoint | Code | pending | api-contract §PATCH /documents/bulk/metadata | T23.7 | — | EV-002 | F27 |
+| T23.1 | Test: `DELETE /internal/v1/documents/bulk` deletes up to 100 + emits audit (`tests/e2e/test_uj015_bulk_delete.py`) — red | Test | completed | UJ-015, TC-053, AC-E5 | T21.3, T20.4 | D1 | EV-002 | F27 |
+| T23.2 | Implement bulk delete endpoint (partial success pattern per TP-024) | Code | completed | api-contract §DELETE /documents/bulk, TP-024 | T23.1 | — | EV-002 | F27 |
+| T23.3 | Test: `PATCH /internal/v1/documents/bulk/tags` respects max-10 cap + emits audit (`tests/e2e/test_uj016_bulk_tag.py`) — red | Test | completed | UJ-016, TC-055, AC-E6 | T21.3 | D1 | EV-002 | F27 |
+| T23.4 | Implement bulk tag endpoint (add + remove; cap enforcement) | Code | completed | api-contract §PATCH /documents/bulk/tags | T23.3 | — | EV-002 | F27 |
+| T23.5 | Test: `POST /internal/v1/documents/bulk/retag` enqueues retag jobs — red | Test | completed | api-contract §POST /documents/bulk/retag | T23.2 | — | EV-002 | F27 |
+| T23.6 | Implement bulk retag endpoint | Code | completed | api-contract §POST /documents/bulk/retag | T23.5 | — | EV-002 | F27 |
+| T23.7 | Test: `PATCH /internal/v1/documents/bulk/metadata` updates title/language + emits audit — red | Test | completed | api-contract §PATCH /documents/bulk/metadata | T21.3 | D1 | EV-002 | F27 |
+| T23.8 | Implement bulk metadata endpoint | Code | completed | api-contract §PATCH /documents/bulk/metadata | T23.7 | — | EV-002 | F27 |
 
 #### M24: Health aggregator & stats summary (F25, F26)
 
@@ -872,14 +872,14 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T22.4 | M22 | 6 | Code | completed | T22.3 | — | EV-002 | 2026-05-26 |
 | T22.5 | M22 | 6 | Code | completed | T22.2, T10.4 | — | EV-002 | 2026-05-26 |
 | T22.6 | M22 | 6 | Test | completed | T22.5 | D1 | EV-002 | 2026-05-26 |
-| T23.1 | M23 | 6 | Test | pending | T21.3, T20.4 | D1 | EV-002 | — |
-| T23.2 | M23 | 6 | Code | pending | T23.1 | — | EV-002 | — |
-| T23.3 | M23 | 6 | Test | pending | T21.3 | D1 | EV-002 | — |
-| T23.4 | M23 | 6 | Code | pending | T23.3 | — | EV-002 | — |
-| T23.5 | M23 | 6 | Test | pending | T23.2 | — | EV-002 | — |
-| T23.6 | M23 | 6 | Code | pending | T23.5 | — | EV-002 | — |
-| T23.7 | M23 | 6 | Test | pending | T21.3 | D1 | EV-002 | — |
-| T23.8 | M23 | 6 | Code | pending | T23.7 | — | EV-002 | — |
+| T23.1 | M23 | 6 | Test | completed | T21.3, T20.4 | D1 | EV-002 | 2026-05-26 |
+| T23.2 | M23 | 6 | Code | completed | T23.1 | — | EV-002 | 2026-05-26 |
+| T23.3 | M23 | 6 | Test | completed | T21.3 | D1 | EV-002 | 2026-05-26 |
+| T23.4 | M23 | 6 | Code | completed | T23.3 | — | EV-002 | 2026-05-26 |
+| T23.5 | M23 | 6 | Test | completed | T23.2 | — | EV-002 | 2026-05-26 |
+| T23.6 | M23 | 6 | Code | completed | T23.5 | — | EV-002 | 2026-05-26 |
+| T23.7 | M23 | 6 | Test | completed | T21.3 | D1 | EV-002 | 2026-05-26 |
+| T23.8 | M23 | 6 | Code | completed | T23.7 | — | EV-002 | 2026-05-26 |
 | T24.1 | M24 | 6 | Test | pending | T20.4 | — | EV-002 | — |
 | T24.2 | M24 | 6 | Code | pending | T24.1 | — | EV-002 | — |
 | T24.3 | M24 | 6 | Test | pending | T22.4, T21.5 | — | EV-002 | — |
