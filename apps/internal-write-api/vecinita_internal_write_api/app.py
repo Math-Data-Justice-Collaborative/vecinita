@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import uuid as _uuid
 from typing import Annotated
 from uuid import UUID
 
@@ -23,6 +24,7 @@ from vecinita_shared_schemas.internal_write import (
     TagPatchResponse,
 )
 
+from vecinita_internal_write_api.audit import create_document_version, emit_audit_event
 from vecinita_internal_write_api.jobs_client import (
     DataManagementJobsClient,
     DataManagementJobsClientError,
@@ -94,6 +96,7 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     )
     def batch_upsert(body: BatchUpsertRequest) -> BatchUpsertResponse:
         upserted = 0
+        request_id = _uuid.uuid4()
         with engine.begin() as conn:
             for document in body.documents:
                 doc_id = conn.execute(
@@ -154,6 +157,7 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                     )
                     upserted += 1
 
+                tag_slugs = []
                 if document.tags is not None:
                     replace_document_tags(
                         conn,
@@ -161,6 +165,30 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                         tags=document.tags,
                         language=document.language or "en",
                     )
+                    tag_slugs = [
+                        {"slug": t.slug, "label": t.label, "source": t.source or "llm"}
+                        for t in document.tags
+                    ]
+
+                emit_audit_event(
+                    conn,
+                    event_type="document.created",
+                    entity_type="document",
+                    entity_id=doc_id,
+                    request_id=request_id,
+                    payload={
+                        "url": str(document.url),
+                        "title": document.title,
+                        "language": document.language,
+                    },
+                )
+                create_document_version(
+                    conn,
+                    document_id=doc_id,
+                    title=document.title,
+                    language=document.language,
+                    tags_snapshot=tag_slugs,
+                )
 
         return BatchUpsertResponse(upserted_chunks=upserted)
 
@@ -261,10 +289,11 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     )
     def patch_document_tags(document_id: UUID, body: TagPatchRequest) -> TagPatchResponse:
         validate_document_tag_count(body.tags)
+        request_id = _uuid.uuid4()
         with engine.begin() as conn:
             row = (
                 conn.execute(
-                    text("SELECT id, language FROM documents WHERE id = :document_id"),
+                    text("SELECT id, title, language FROM documents WHERE id = :document_id"),
                     {"document_id": document_id},
                 )
                 .mappings()
@@ -280,6 +309,25 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 document_id=document_id,
                 tags=tags,
                 language=row["language"] or "en",
+            )
+            tag_snapshot = [
+                {"slug": t.slug, "label": t.label, "source": t.source or body.source}
+                for t in tags
+            ]
+            emit_audit_event(
+                conn,
+                event_type="document.tagged",
+                entity_type="document",
+                entity_id=document_id,
+                request_id=request_id,
+                payload={"tags": tag_snapshot},
+            )
+            create_document_version(
+                conn,
+                document_id=document_id,
+                title=row["title"],
+                language=row["language"],
+                tags_snapshot=tag_snapshot,
             )
         return TagPatchResponse(tags=tags)
 
@@ -356,12 +404,13 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     )
     def patch_chunk_tags(chunk_id: UUID, body: TagPatchRequest) -> TagPatchResponse:
         validate_chunk_tag_count(body.tags)
+        request_id = _uuid.uuid4()
         with engine.begin() as conn:
             row = (
                 conn.execute(
                     text(
                         """
-                        SELECT c.id, d.language
+                        SELECT c.id, c.document_id, d.language
                         FROM chunks c
                         JOIN documents d ON d.id = c.document_id
                         WHERE c.id = :chunk_id
@@ -383,6 +432,19 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 tags=tags,
                 language=row["language"] or "en",
             )
+            emit_audit_event(
+                conn,
+                event_type="chunk.tagged",
+                entity_type="chunk",
+                entity_id=chunk_id,
+                request_id=request_id,
+                payload={
+                    "tags": [
+                        {"slug": t.slug, "label": t.label, "source": t.source or body.source}
+                        for t in tags
+                    ]
+                },
+            )
         return TagPatchResponse(tags=tags)
 
     @app.post(
@@ -396,14 +458,23 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Retag job client not configured",
             )
-        with engine.connect() as conn:
+        request_id = _uuid.uuid4()
+        with engine.begin() as conn:
             exists = conn.execute(
                 text("SELECT id FROM documents WHERE id = :document_id"),
                 {"document_id": document_id},
             ).scalar_one_or_none()
-        if exists is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
-        job_id = retag_jobs.enqueue_retag(document_id)
+            if exists is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+            job_id = retag_jobs.enqueue_retag(document_id)
+            emit_audit_event(
+                conn,
+                event_type="document.retagged",
+                entity_type="document",
+                entity_id=document_id,
+                request_id=request_id,
+                payload={"job_id": str(job_id)},
+            )
         return RetagJobResponse(job_id=job_id)
 
     @app.get(
@@ -442,12 +513,31 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
         dependencies=[Depends(_require_internal_key)],
     )
     def delete_document(document_id: UUID) -> None:
+        request_id = _uuid.uuid4()
         with engine.begin() as conn:
-            deleted = conn.execute(
-                text("DELETE FROM documents WHERE id = :document_id RETURNING id"),
+            doc_row = (
+                conn.execute(
+                    text(
+                        "SELECT id, url, title FROM documents WHERE id = :document_id"
+                    ),
+                    {"document_id": document_id},
+                )
+                .mappings()
+                .first()
+            )
+            if doc_row is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+            emit_audit_event(
+                conn,
+                event_type="document.deleted",
+                entity_type="document",
+                entity_id=document_id,
+                request_id=request_id,
+                payload={"title": doc_row["title"], "url": doc_row["url"]},
+            )
+            conn.execute(
+                text("DELETE FROM documents WHERE id = :document_id"),
                 {"document_id": document_id},
-            ).scalar_one_or_none()
-        if deleted is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+            )
 
     return app
