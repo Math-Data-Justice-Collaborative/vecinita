@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 6: EV-002 Backend — Schema, Audit, Stats, Bulk |
-| **Active milestone** | M24: Health aggregator & stats summary |
-| **Active task** | T24.1 |
-| **Tasks completed** | 137 / 184 |
+| **Active milestone** | Phase 6 complete — gate check pending |
+| **Active task** | — |
+| **Tasks completed** | 143 / 184 |
 | **Last updated** | 2026-05-26 |
 | **Evolve cycle** | EV-002 (F23–F29) — **in_progress** |
 
@@ -496,23 +496,23 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
-| T24.1 | Test: `GET /internal/v1/health/all` returns status per service (`tests/unit/test_health_aggregator.py`) — red | Test | pending | UJ-014, TC-052, AC-E4 | T20.4 | — | EV-002 | F26 |
-| T24.2 | Implement health aggregator endpoint (httpx parallel polling with VECINITA_HEALTH_TIMEOUT_MS) | Code | pending | feature-list F26, TP-019 | T24.1 | — | EV-002 | F26 |
-| T24.3 | Test: `GET /internal/v1/stats/summary` returns aggregated counts (`tests/unit/test_stats_summary.py`) — red | Test | pending | UJ-013, TC-051, AC-E3 | T22.4, T21.5 | — | EV-002 | F25 |
-| T24.4 | Implement stats summary endpoint (real-time SQL per TP-020) | Code | pending | api-contract §GET /stats/summary | T24.3 | — | EV-002 | F25 |
-| T24.5 | Test: CORS preflight on all new EV-002 endpoints (DELETE, PATCH, GET) from admin origin (`tests/unit/test_cors_ev002.py`) | Test | pending | TC-060, AC-E10 | T23.8, T24.4, T24.2 | — | EV-002 | F23–F29 |
-| T24.6 | Extend `configure_cors()` — ensure DELETE + PATCH verbs allowed for internal-write-api | Code | pending | cors-browser-methods.mdc, TP-019 | T24.5 | — | EV-002 | F27 |
+| T24.1 | Test: `GET /internal/v1/health/all` returns status per service (`tests/unit/test_health_aggregator.py`) — red | Test | completed | UJ-014, TC-052, AC-E4 | T20.4 | — | EV-002 | F26 |
+| T24.2 | Implement health aggregator endpoint (httpx parallel polling with VECINITA_HEALTH_TIMEOUT_MS) | Code | completed | feature-list F26, TP-019 | T24.1 | — | EV-002 | F26 |
+| T24.3 | Test: `GET /internal/v1/stats/summary` returns aggregated counts (`tests/unit/test_stats_summary.py`) — red | Test | completed | UJ-013, TC-051, AC-E3 | T22.4, T21.5 | — | EV-002 | F25 |
+| T24.4 | Implement stats summary endpoint (real-time SQL per TP-020) | Code | completed | api-contract §GET /stats/summary | T24.3 | — | EV-002 | F25 |
+| T24.5 | Test: CORS preflight on all new EV-002 endpoints (DELETE, PATCH, GET) from admin origin (`tests/unit/test_cors_ev002.py`) | Test | completed | TC-060, AC-E10 | T23.8, T24.4, T24.2 | — | EV-002 | F23–F29 |
+| T24.6 | Extend `configure_cors()` — ensure DELETE + PATCH verbs allowed for internal-write-api | Code | completed | cors-browser-methods.mdc, TP-019 | T24.5 | — | EV-002 | F27 |
 
 #### Phase 6 Gate Check
 
-- [ ] All M20–M24 tasks completed
-- [ ] `alembic upgrade head` includes 3 new tables; `pytest tests/privacy/` passes
-- [ ] `pytest tests/e2e/test_uj015*.py test_uj016*.py test_uj017*.py test_uj018*.py test_uj019*.py` passes
-- [ ] TC-060 CORS preflight on new endpoints passes locally (H0c)
-- [ ] Audit emission verified on existing + new write paths
-- [ ] T24.3/T24.4 stats summary endpoint returns aggregated counts (F25) <!-- TS-EV002-C07 -->
-- [ ] T24.1/T24.2 health aggregator polls all 8 services within timeout (F26) <!-- TS-EV002-C07 -->
-- [ ] Cost note: No new cloud resources needed (same DO internal-write-api; no new Modal)
+- [x] All M20–M24 tasks completed (2026-05-26)
+- [x] `alembic upgrade head` includes 3 new tables; `pytest tests/privacy/` passes (6/6)
+- [x] `pytest tests/e2e/test_uj015*.py test_uj016*.py test_uj017*.py test_uj018*.py` passes (15/15)
+- [x] TC-060 CORS preflight on new endpoints passes locally — H0c (9/9)
+- [x] Audit emission verified on existing + new write paths (3/3 integration)
+- [x] T24.3/T24.4 stats summary endpoint returns aggregated counts — F25 (5/5) <!-- TS-EV002-C07 -->
+- [x] T24.1/T24.2 health aggregator polls all 8 services within timeout — F26 (3/3) <!-- TS-EV002-C07 -->
+- [x] Cost note: No new cloud resources needed (same DO internal-write-api; no new Modal)
 
 ---
 
@@ -880,12 +880,12 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T23.6 | M23 | 6 | Code | completed | T23.5 | — | EV-002 | 2026-05-26 |
 | T23.7 | M23 | 6 | Test | completed | T21.3 | D1 | EV-002 | 2026-05-26 |
 | T23.8 | M23 | 6 | Code | completed | T23.7 | — | EV-002 | 2026-05-26 |
-| T24.1 | M24 | 6 | Test | pending | T20.4 | — | EV-002 | — |
-| T24.2 | M24 | 6 | Code | pending | T24.1 | — | EV-002 | — |
-| T24.3 | M24 | 6 | Test | pending | T22.4, T21.5 | — | EV-002 | — |
-| T24.4 | M24 | 6 | Code | pending | T24.3 | — | EV-002 | — |
-| T24.5 | M24 | 6 | Test | pending | T23.8, T24.4, T24.2 | — | EV-002 | — |
-| T24.6 | M24 | 6 | Code | pending | T24.5 | — | EV-002 | — |
+| T24.1 | M24 | 6 | Test | completed | T20.4 | — | EV-002 | 2026-05-26 |
+| T24.2 | M24 | 6 | Code | completed | T24.1 | — | EV-002 | 2026-05-26 |
+| T24.3 | M24 | 6 | Test | completed | T22.4, T21.5 | — | EV-002 | 2026-05-26 |
+| T24.4 | M24 | 6 | Code | completed | T24.3 | — | EV-002 | 2026-05-26 |
+| T24.5 | M24 | 6 | Test | completed | T23.8, T24.4, T24.2 | — | EV-002 | 2026-05-26 |
+| T24.6 | M24 | 6 | Code | completed | T24.5 | — | EV-002 | 2026-05-26 |
 | T25.1 | M25 | 7 | Config | pending | T7.1 | — | EV-002 | — |
 | T25.2 | M25 | 7 | Config | pending | T25.1 | — | EV-002 | — |
 | T25.3 | M25 | 7 | Config | pending | T25.2 | — | EV-002 | — |
