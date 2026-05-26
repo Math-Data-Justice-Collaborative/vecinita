@@ -12,11 +12,15 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.internal_write import (
+    AuditLogEntry,
+    AuditLogResponse,
     BatchUpsertRequest,
     BatchUpsertResponse,
     ChunkDetail,
     DocumentDetail,
+    DocumentHistoryResponse,
     DocumentSummary,
+    DocumentVersionEntry,
     HealthResponse,
     RetagJobResponse,
     TagInput,
@@ -539,5 +543,123 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 text("DELETE FROM documents WHERE id = :document_id"),
                 {"document_id": document_id},
             )
+
+    @app.get(
+        "/internal/v1/audit",
+        response_model=AuditLogResponse,
+        dependencies=[Depends(_require_internal_key)],
+    )
+    def get_audit_log(
+        page: int = 1,
+        page_size: int = 50,
+        event_type: str | None = None,
+        entity_type: str | None = None,
+        entity_id: UUID | None = None,
+        since: str | None = None,
+        until: str | None = None,
+    ) -> AuditLogResponse:
+        page = max(1, page)
+        page_size = min(max(1, page_size), 200)
+        offset = (page - 1) * page_size
+
+        where_clauses: list[str] = []
+        params: dict[str, object] = {"limit": page_size, "offset": offset}
+
+        if event_type:
+            where_clauses.append("event_type = :event_type")
+            params["event_type"] = event_type
+        if entity_type:
+            where_clauses.append("entity_type = :entity_type")
+            params["entity_type"] = entity_type
+        if entity_id:
+            where_clauses.append("entity_id = :entity_id")
+            params["entity_id"] = entity_id
+        if since:
+            where_clauses.append("created_at >= :since")
+            params["since"] = since
+        if until:
+            where_clauses.append("created_at <= :until")
+            params["until"] = until
+
+        where_sql = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
+
+        with engine.connect() as conn:
+            total = conn.execute(
+                text(f"SELECT COUNT(*) FROM audit_log {where_sql}"),
+                params,
+            ).scalar_one()
+
+            rows = (
+                conn.execute(
+                    text(
+                        f"SELECT id, event_type, entity_type, entity_id, "
+                        f"request_id, payload, created_at "
+                        f"FROM audit_log {where_sql} "
+                        f"ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
+                    ),
+                    params,
+                )
+                .mappings()
+                .all()
+            )
+
+        return AuditLogResponse(
+            items=[
+                AuditLogEntry(
+                    id=row["id"],
+                    event_type=row["event_type"],
+                    entity_type=row["entity_type"],
+                    entity_id=row["entity_id"],
+                    request_id=row["request_id"],
+                    payload=row["payload"],
+                    created_at=row["created_at"],
+                )
+                for row in rows
+            ],
+            page=page,
+            page_size=page_size,
+            total_count=total,
+        )
+
+    @app.get(
+        "/internal/v1/documents/{document_id}/history",
+        response_model=DocumentHistoryResponse,
+        dependencies=[Depends(_require_internal_key)],
+    )
+    def get_document_history(document_id: UUID) -> DocumentHistoryResponse:
+        with engine.connect() as conn:
+            doc_exists = conn.execute(
+                text("SELECT id FROM documents WHERE id = :document_id"),
+                {"document_id": document_id},
+            ).scalar_one_or_none()
+            if doc_exists is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+
+            rows = (
+                conn.execute(
+                    text(
+                        "SELECT version_number, title, language, tags_snapshot, created_at "
+                        "FROM document_versions WHERE document_id = :doc_id "
+                        "ORDER BY version_number ASC"
+                    ),
+                    {"doc_id": document_id},
+                )
+                .mappings()
+                .all()
+            )
+
+        return DocumentHistoryResponse(
+            document_id=document_id,
+            versions=[
+                DocumentVersionEntry(
+                    version_number=row["version_number"],
+                    title=row["title"],
+                    language=row["language"],
+                    tags_snapshot=row["tags_snapshot"],
+                    created_at=row["created_at"],
+                )
+                for row in rows
+            ],
+        )
 
     return app

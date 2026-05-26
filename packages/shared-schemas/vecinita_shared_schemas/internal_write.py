@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from datetime import datetime
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
@@ -103,6 +104,44 @@ class RetagJobResponse(BaseModel):
     """POST retag enqueue response."""
 
     job_id: UUID
+
+
+class AuditLogEntry(BaseModel):
+    """Single audit log row for GET /internal/v1/audit."""
+
+    id: UUID
+    event_type: str
+    entity_type: str
+    entity_id: UUID
+    request_id: UUID
+    payload: dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime
+
+
+class AuditLogResponse(BaseModel):
+    """Paginated audit log response."""
+
+    items: list[AuditLogEntry]
+    page: int
+    page_size: int
+    total_count: int
+
+
+class DocumentVersionEntry(BaseModel):
+    """Single version snapshot for GET /internal/v1/documents/{id}/history."""
+
+    version_number: int
+    title: str | None = None
+    language: str | None = None
+    tags_snapshot: list[dict[str, Any]] = Field(default_factory=list)
+    created_at: datetime
+
+
+class DocumentHistoryResponse(BaseModel):
+    """Per-document version history."""
+
+    document_id: UUID
+    versions: list[DocumentVersionEntry]
 
 
 class HealthResponse(BaseModel):
