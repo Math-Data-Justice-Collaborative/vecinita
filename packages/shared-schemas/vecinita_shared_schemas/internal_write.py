@@ -238,6 +238,50 @@ class TopServedResponse(BaseModel):
     items: list[TopServedItem]
 
 
+class ServiceHealth(BaseModel):
+    """Health status of a single upstream service."""
+
+    status: Literal["up", "down"]
+    latency_ms: int | None = None
+    error: str | None = None
+
+
+class HealthAggregateResponse(BaseModel):
+    """GET /internal/v1/health/all response."""
+
+    status: Literal["healthy", "degraded"]
+    services: dict[str, ServiceHealth]
+    checked_at: datetime
+
+
+class TagCount(BaseModel):
+    """Tag with document count for stats summary."""
+
+    slug: str
+    label: str
+    document_count: int
+
+
+class RecentActivity(BaseModel):
+    """Recent audit event for stats summary dashboard."""
+
+    event_type: str
+    entity_id: UUID
+    created_at: datetime
+    summary: str | None = None
+
+
+class StatsSummaryResponse(BaseModel):
+    """GET /internal/v1/stats/summary response."""
+
+    total_documents: int
+    total_chunks: int
+    tag_distribution: list[TagCount]
+    language_breakdown: dict[str, int]
+    recent_activity: list[RecentActivity]
+    top_served: list[TopServedItem]
+
+
 class HealthResponse(BaseModel):
     """GET /health liveness response."""
 

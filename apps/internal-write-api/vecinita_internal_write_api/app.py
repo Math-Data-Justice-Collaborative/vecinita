@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import os
+import time
 import uuid as _uuid
+from datetime import UTC, datetime
 from typing import Annotated
 from uuid import UUID
 
+import httpx
 from fastapi import Depends, FastAPI, Header, HTTPException, status
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
@@ -28,10 +31,15 @@ from vecinita_shared_schemas.internal_write import (
     DocumentHistoryResponse,
     DocumentSummary,
     DocumentVersionEntry,
+    HealthAggregateResponse,
     HealthResponse,
+    RecentActivity,
     RetagJobResponse,
+    ServiceHealth,
     StatsServedRequest,
     StatsServedResponse,
+    StatsSummaryResponse,
+    TagCount,
     TagInput,
     TagPatchRequest,
     TagPatchResponse,
@@ -865,6 +873,151 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                     created_at=row["created_at"],
                 )
                 for row in rows
+            ],
+        )
+
+    @app.get(
+        "/internal/v1/health/all",
+        response_model=HealthAggregateResponse,
+        dependencies=[Depends(_require_internal_key)],
+    )
+    def health_all() -> HealthAggregateResponse:
+        timeout_ms = int(os.environ.get("VECINITA_HEALTH_TIMEOUT_MS", "3000"))
+        timeout_s = timeout_ms / 1000.0
+
+        service_urls: dict[str, str | None] = {
+            "chat_rag_backend": os.environ.get("VECINITA_CHAT_RAG_URL"),
+            "modal_data_management": os.environ.get("VECINITA_MODAL_DATA_MGMT_URL"),
+            "modal_embedding": os.environ.get("VECINITA_MODAL_EMBED_URL"),
+            "modal_llm": os.environ.get("VECINITA_MODAL_LLM_URL"),
+            "chat_rag_frontend": os.environ.get("VECINITA_CHAT_FRONTEND_URL"),
+            "admin_frontend": os.environ.get("VECINITA_ADMIN_FRONTEND_URL"),
+        }
+
+        results: dict[str, ServiceHealth] = {}
+
+        db_start = time.monotonic()
+        try:
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            db_ms = int((time.monotonic() - db_start) * 1000)
+            results["database"] = ServiceHealth(status="up", latency_ms=db_ms)
+        except Exception as exc:
+            results["database"] = ServiceHealth(status="down", error=str(exc))
+
+        results["internal_write_api"] = ServiceHealth(status="up", latency_ms=0)
+
+        for svc_name, url in service_urls.items():
+            if not url:
+                results[svc_name] = ServiceHealth(status="down", error="not configured")
+                continue
+            start = time.monotonic()
+            try:
+                health_url = f"{url.rstrip('/')}/health"
+                resp = httpx.get(health_url, timeout=timeout_s)
+                ms = int((time.monotonic() - start) * 1000)
+                if resp.status_code == 200:
+                    results[svc_name] = ServiceHealth(status="up", latency_ms=ms)
+                else:
+                    results[svc_name] = ServiceHealth(
+                        status="down", error=f"HTTP {resp.status_code}"
+                    )
+            except Exception as exc:
+                results[svc_name] = ServiceHealth(status="down", error=str(exc))
+
+        all_up = all(s.status == "up" for s in results.values())
+        return HealthAggregateResponse(
+            status="healthy" if all_up else "degraded",
+            services=results,
+            checked_at=datetime.now(UTC),
+        )
+
+    @app.get(
+        "/internal/v1/stats/summary",
+        response_model=StatsSummaryResponse,
+        dependencies=[Depends(_require_internal_key)],
+    )
+    def stats_summary() -> StatsSummaryResponse:
+        with engine.connect() as conn:
+            total_docs = conn.execute(text("SELECT COUNT(*) FROM documents")).scalar_one()
+
+            total_chunks = conn.execute(text("SELECT COUNT(*) FROM chunks")).scalar_one()
+
+            tag_rows = (
+                conn.execute(
+                    text(
+                        "SELECT t.slug, t.label, COUNT(dt.document_id) AS doc_count "
+                        "FROM tags t "
+                        "JOIN document_tags dt ON dt.tag_id = t.id "
+                        "GROUP BY t.slug, t.label "
+                        "ORDER BY doc_count DESC LIMIT 50"
+                    )
+                )
+                .mappings()
+                .all()
+            )
+
+            lang_rows = (
+                conn.execute(
+                    text(
+                        "SELECT COALESCE(language, 'unknown') AS lang, COUNT(*) AS cnt "
+                        "FROM documents GROUP BY language"
+                    )
+                )
+                .mappings()
+                .all()
+            )
+
+            recent_rows = (
+                conn.execute(
+                    text(
+                        "SELECT event_type, entity_id, created_at "
+                        "FROM audit_log ORDER BY created_at DESC LIMIT 20"
+                    )
+                )
+                .mappings()
+                .all()
+            )
+
+            top_rows = (
+                conn.execute(
+                    text(
+                        "SELECT s.document_id, d.title, d.url, "
+                        "       s.served_count, s.last_served_at "
+                        "FROM document_serving_stats s "
+                        "LEFT JOIN documents d ON d.id = s.document_id "
+                        "ORDER BY s.served_count DESC LIMIT 10"
+                    )
+                )
+                .mappings()
+                .all()
+            )
+
+        return StatsSummaryResponse(
+            total_documents=total_docs,
+            total_chunks=total_chunks,
+            tag_distribution=[
+                TagCount(slug=row["slug"], label=row["label"], document_count=row["doc_count"])
+                for row in tag_rows
+            ],
+            language_breakdown={row["lang"]: row["cnt"] for row in lang_rows},
+            recent_activity=[
+                RecentActivity(
+                    event_type=row["event_type"],
+                    entity_id=row["entity_id"],
+                    created_at=row["created_at"],
+                )
+                for row in recent_rows
+            ],
+            top_served=[
+                TopServedItem(
+                    document_id=row["document_id"],
+                    title=row["title"],
+                    url=row["url"],
+                    served_count=row["served_count"],
+                    last_served_at=row["last_served_at"],
+                )
+                for row in top_rows
             ],
         )
 
