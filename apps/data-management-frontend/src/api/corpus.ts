@@ -34,6 +34,21 @@ export async function listDocumentChunks(
   return response.json() as Promise<ChunkDetail[]>;
 }
 
+export async function listDocumentTags(
+  options: CorpusClientOptions,
+  documentId: string,
+): Promise<TagInput[]> {
+  const response = await fetch(`${options.baseUrl}/internal/v1/documents/${documentId}/tags`, {
+    headers: authHeaders(options.apiKey),
+  });
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(detail || `List document tags failed (${response.status})`);
+  }
+  const body = (await response.json()) as { tags: TagInput[] };
+  return body.tags;
+}
+
 export async function patchDocumentTags(
   options: CorpusClientOptions,
   documentId: string,

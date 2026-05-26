@@ -2,6 +2,7 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 
 import {
   listDocumentChunks,
+  listDocumentTags,
   patchChunkTags,
   patchDocumentTags,
   retagDocument,
@@ -32,6 +33,16 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
   const [status, setStatus] = useState<string | null>(null);
   const [retagJobId, setRetagJobId] = useState<string | null>(null);
 
+  const loadDocumentTags = useCallback(async () => {
+    try {
+      const client = requireCorpusConfig();
+      const tags = await listDocumentTags(client, document.document_id);
+      setDocTags(tagsToInput(tags));
+    } catch {
+      // Non-fatal — document tags are supplementary to chunk view
+    }
+  }, [document.document_id]);
+
   const loadChunks = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -51,7 +62,8 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
 
   useEffect(() => {
     void loadChunks();
-  }, [loadChunks]);
+    void loadDocumentTags();
+  }, [loadChunks, loadDocumentTags]);
 
   useEffect(() => {
     if (!retagJobId) {
@@ -69,6 +81,7 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
             setStatus("LLM re-tag job completed.");
             setRetagJobId(null);
             void loadChunks();
+            void loadDocumentTags();
           } else if (job.status === "failed") {
             setError(job.error_message ?? "Retag job failed");
             setRetagJobId(null);
@@ -85,7 +98,7 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [retagJobId, loadChunks]);
+  }, [retagJobId, loadChunks, loadDocumentTags]);
 
   async function handleSaveDocumentTags(event: FormEvent) {
     event.preventDefault();

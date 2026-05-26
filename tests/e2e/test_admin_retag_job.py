@@ -189,3 +189,30 @@ def test_admin_retag_job_lifecycle(
         ).fetchall()
 
     assert [row[0] for row in slugs] == ["benefits"]
+
+
+def test_admin_retag_tags_visible_via_get_endpoint(
+    retag_clients: tuple[TestClient, TestClient, InMemoryJobStore],
+) -> None:
+    """After retag, GET /documents/{id}/tags must return the inferred tags.
+
+    Regression guard for BUG-2026-05-25-retag-tags-not-visible: retag wrote
+    document tags but the admin UI had no read path to display them.
+    """
+    write_client_api, _dm_client, _store = retag_clients
+
+    list_resp = write_client_api.get("/internal/v1/documents")
+    assert list_resp.status_code == 200
+    document_id = list_resp.json()[0]["document_id"]
+
+    retag_resp = write_client_api.post(f"/internal/v1/documents/{document_id}/retag")
+    assert retag_resp.status_code == 200
+
+    tags_resp = write_client_api.get(f"/internal/v1/documents/{document_id}/tags")
+    assert tags_resp.status_code == 200, (
+        f"GET /documents/{{id}}/tags should return 200 after retag; got {tags_resp.status_code}"
+    )
+    tag_slugs = sorted(t["slug"] for t in tags_resp.json()["tags"])
+    assert tag_slugs == ["benefits"], (
+        f"Expected retag to produce ['benefits'] via GET endpoint; got {tag_slugs}"
+    )

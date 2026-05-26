@@ -210,6 +210,50 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
             text="\n\n".join(chunks),
         )
 
+    @app.get(
+        "/internal/v1/documents/{document_id}/tags",
+        response_model=TagPatchResponse,
+        dependencies=[Depends(_require_internal_key)],
+    )
+    def get_document_tags(document_id: UUID) -> TagPatchResponse:
+        with engine.connect() as conn:
+            doc = (
+                conn.execute(
+                    text("SELECT id, language FROM documents WHERE id = :document_id"),
+                    {"document_id": document_id},
+                )
+                .mappings()
+                .first()
+            )
+            if doc is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Not found"
+                )
+            language = doc["language"] or "en"
+            tag_rows = (
+                conn.execute(
+                    text(
+                        """
+                        SELECT t.slug, t.label, dt.source
+                        FROM document_tags dt
+                        JOIN tags t ON t.id = dt.tag_id
+                        WHERE dt.document_id = :document_id
+                          AND t.language = :language
+                        ORDER BY t.slug
+                        """
+                    ),
+                    {"document_id": document_id, "language": language},
+                )
+                .mappings()
+                .all()
+            )
+        return TagPatchResponse(
+            tags=[
+                TagInput(slug=row["slug"], label=row["label"], source=row["source"])
+                for row in tag_rows
+            ]
+        )
+
     @app.patch(
         "/internal/v1/documents/{document_id}/tags",
         response_model=TagPatchResponse,
