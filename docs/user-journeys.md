@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [requirements-decisions.md](requirements-decisions.md)  
-> **Last updated**: 2026-05-24 (EV-001: UJ-009–UJ-012)
+> **Last updated**: 2026-05-26 (EV-002: UJ-013–UJ-019)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI steps** are waived at T0 — see `tests/e2e/README.md` (Vitest component smoke only).
@@ -23,6 +23,13 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-010 | Open corpus document (source URL) | Community member | Browse list → external `url` | F19 | local |
 | UJ-011 | Admin view chunks & edit tags | Operator | Admin UI → internal-write chunk/tag APIs | F20, F21 | local |
 | UJ-012 | Ask with tag filter (sidebar) | Community member | Chat sidebar tags → `POST /api/v1/ask/stream` | F22 | local |
+| UJ-013 | View admin summary dashboard | Operator | Admin UI → `/internal/v1/stats/summary` | F25 | local |
+| UJ-014 | Check system health | Operator | Admin UI → multiple `/health` endpoints | F26 | local |
+| UJ-015 | Bulk delete documents | Operator | Admin UI bulk select → `DELETE /internal/v1/documents/bulk` | F27 | local |
+| UJ-016 | Bulk tag documents | Operator | Admin UI bulk select → `PATCH /internal/v1/documents/bulk/tags` | F27 | local |
+| UJ-017 | View global audit log | Operator | Admin UI → `GET /internal/v1/audit` | F29 | local |
+| UJ-018 | View document version history | Operator | Admin UI document detail → `GET /internal/v1/documents/{id}/history` | F29 | local |
+| UJ-019 | View top served documents | Operator | Admin summary dashboard → `GET /internal/v1/stats/top-served` | F28 | local |
 
 ## Journey Details
 
@@ -256,3 +263,184 @@ Product-facing journeys describe what a **caller** does — not internal module 
 **Automated tests**: `tests/e2e/test_uj012_tag_filtered_ask.py` (planned)
 
 **Interview (11)**: "When I filter by tag X, do answers cite only documents tagged X?"
+
+---
+
+### UJ-013: View admin summary dashboard
+
+**Actor**: Operator (platform credential)
+
+**Goal**: Get a quick overview of corpus health, activity, and usage statistics.
+
+**Steps**:
+
+1. Open Data Management admin UI; navigate to **Dashboard** tab/page.
+2. Dashboard loads aggregated stats from `GET /internal/v1/stats/summary`.
+3. Operator sees: total documents, total chunks, tag distribution, job stats, language breakdown, recent activity feed, storage usage, top served documents.
+4. Operator clicks "Refresh" to reload stats.
+
+**Acceptance**: All stat cards render with correct counts; loading state shown during fetch; error state if API unreachable.
+
+**Automated tests**: `tests/e2e/test_uj013_admin_dashboard.py` (planned)
+
+---
+
+### UJ-014: Check system health
+
+**Actor**: Operator
+
+**Goal**: Verify all Vecinita services are operational from a single admin view.
+
+**Steps**:
+
+1. Open admin UI; navigate to **Health** tab/page.
+2. UI calls each service's `/health` endpoint directly (CORS required).
+3. Operator sees status grid: green (up), red (down), yellow (degraded/timeout) for each of 8 services.
+4. Operator clicks "Refresh" to re-check all services.
+
+**Acceptance**: All services reachable display green; unreachable services display red with error detail; checks complete within `VECINITA_HEALTH_TIMEOUT_MS` per service.
+
+**Automated tests**: `tests/e2e/test_uj014_health_dashboard.py` (planned)
+
+**Browser / connectivity**: Admin frontend origin must have CORS access to all service health endpoints (internal-write-api, chat-rag-backend, data-mgmt-backend Modal, static frontends, Modal LLM/embed).
+
+---
+
+### UJ-015: Bulk delete documents
+
+**Actor**: Operator
+
+**Goal**: Remove multiple stale documents from the corpus in one operation.
+
+**Steps**:
+
+1. Open admin corpus list; enable selection mode (checkboxes appear).
+2. Select multiple documents (checkbox click or shift+click range).
+3. Click "Bulk Delete" in the toolbar.
+4. Confirm destructive action in modal dialog (lists document count).
+5. UI calls `DELETE /internal/v1/documents/bulk` with document IDs.
+6. Documents removed; audit log records each deletion (F29).
+7. List refreshes showing remaining documents.
+
+**Acceptance**: Selected documents removed; audit_log has entries for each deleted document; ChatRAG no longer retrieves deleted content; max 100 per operation enforced.
+
+**Automated tests**: `tests/e2e/test_uj015_bulk_delete.py` (planned)
+
+---
+
+### UJ-016: Bulk tag documents
+
+**Actor**: Operator
+
+**Goal**: Apply or remove tags across multiple documents at once.
+
+**Steps**:
+
+1. Select multiple documents (same selection UX as UJ-015).
+2. Click "Bulk Tag" in toolbar.
+3. Enter tags to add and/or tags to remove in a dialog.
+4. Confirm; UI calls `PATCH /internal/v1/documents/bulk/tags` with add/remove lists.
+5. Tags applied; audit log records each tag change (F29).
+6. Corpus list refreshes showing updated tag chips (F24).
+
+**Acceptance**: Tags applied/removed correctly; max 10 document tags enforced per document; audit entries created; unauthorized → 401.
+
+**Automated tests**: `tests/e2e/test_uj016_bulk_tag.py` (planned)
+
+---
+
+### UJ-017: View global audit log
+
+**Actor**: Operator
+
+**Goal**: Review all recent changes across the corpus for compliance/debugging.
+
+**Steps**:
+
+1. Open admin UI; navigate to **Audit Log** tab/page.
+2. UI calls `GET /internal/v1/audit?page=1&page_size=50`.
+3. Operator sees chronological list of events (newest first) with: event type, entity, timestamp, payload summary.
+4. Operator filters by event type (e.g., "deleted only") or date range.
+5. Operator clicks an event to expand full payload (before/after diff).
+
+**Acceptance**: Events displayed in reverse chronological order; filters work correctly; pagination works; no personal data visible in entries.
+
+**Automated tests**: `tests/e2e/test_uj017_audit_log.py` (planned)
+
+---
+
+### UJ-018: View document version history
+
+**Actor**: Operator
+
+**Goal**: See what has changed for a specific document over time (title, language, tags).
+
+**Steps**:
+
+1. Open document detail (from corpus list or audit log link).
+2. Click "History" tab/section.
+3. UI calls `GET /internal/v1/documents/{id}/history`.
+4. Operator sees version timeline: version number, timestamp, what changed (title, language, tags before/after).
+5. Operator can compare any two versions visually.
+
+**Acceptance**: Version list shows all changes; tags_snapshot is accurate; versions are immutable (no editing history entries); deleted documents show history up to deletion.
+
+**Automated tests**: `tests/e2e/test_uj018_document_history.py` (planned)
+
+---
+
+### UJ-019: View top served documents
+
+**Actor**: Operator
+
+**Goal**: Understand which corpus documents are most cited in RAG responses.
+
+**Steps**:
+
+1. Open admin dashboard (UJ-013).
+2. Locate "Top Served Documents" widget.
+3. See ranked list of documents by serve count (highest first) with last-served timestamp.
+4. Click a document to navigate to its detail/history view.
+
+**Acceptance**: Ranking matches actual `document_serving_stats` data; documents with zero serves are excluded; list refreshes with dashboard.
+
+**Automated tests**: `tests/e2e/test_uj019_top_served.py` (planned)
+
+---
+
+### UJ-020: Navigate modernized admin UI
+
+**Actor**: Operator
+
+**Goal**: Use the redesigned admin interface with modern styling and light/dark theme.
+
+**Steps**:
+
+1. Open Data Management admin UI in a browser.
+2. UI loads with shadcn/ui component library (Tailwind CSS + Radix primitives).
+3. Theme automatically matches system preference (light or dark mode).
+4. Navigate between pages (Dashboard, Corpus, Health, Audit Log) using sidebar or top navigation.
+5. All pages render with consistent spacing, typography, color tokens, and responsive layout.
+
+**Acceptance**: All pages render without visual regressions; theme toggle respects system preference; navigation between all admin sections works; responsive at 768px and 1280px breakpoints; accessible (keyboard nav, ARIA labels on interactive elements).
+
+**Automated tests**: `tests/e2e/test_uj020_admin_ui.py` (planned — Vitest component + visual snapshot)
+
+---
+
+### UJ-021: View document tags in corpus list
+
+**Actor**: Operator
+
+**Goal**: See which tags are assigned to documents at a glance without opening each document.
+
+**Steps**:
+
+1. Open admin corpus list (existing view).
+2. Each document row displays colored tag chips/badges below the document title.
+3. Tags are color-coded by source: one color for LLM-assigned, another for human-assigned.
+4. Operator can visually scan tags across the list to identify tagging gaps or patterns.
+
+**Acceptance**: Tags render for all documents that have them; empty state (no tags) shows nothing or a subtle "no tags" indicator; tag chips match the tag data from the API response; color coding distinguishes LLM vs human source.
+
+**Automated tests**: `tests/e2e/test_uj021_tag_display.py` (planned — Vitest component)

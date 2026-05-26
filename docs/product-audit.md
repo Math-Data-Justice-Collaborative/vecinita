@@ -204,3 +204,81 @@ Derived from `requirements-decisions.md` RD-024–RD-033 and ADR-014:
 | Source documents updated | 2 (`test-plan.md`, `acceptance-criteria.md`) |
 
 **Next step (EV-001 routing):** [04-tech-plan](.cursor/skills/04-tech-plan/SKILL.md) — 03-plan-tooling skipped for EV-001.
+
+---
+
+## EV-002 Delta Audit (2026-05-26)
+
+### Scope
+
+Features F23–F29: Admin UI overhaul, tag display, summary dashboard, health dashboard,
+bulk operations, serving statistics, audit log & version history.
+
+### Auto-approved (high confidence): 14 statements
+
+All derived directly from user interview (RD-034–RD-052):
+
+| Stmt ID | Feature | Statement | Source |
+|---------|---------|-----------|--------|
+| S-EV2.1 | F23 | Admin UI uses shadcn/ui (Tailwind + Radix) | RD-035 |
+| S-EV2.2 | F23 | System-preference light/dark theme | RD-036 |
+| S-EV2.3 | F24 | Tag chips inline below document title, color-coded by source | RD-037 |
+| S-EV2.4 | F25 | Dashboard shows 8 stat types | RD-038 |
+| S-EV2.5 | F26 | Health dashboard monitors 8 services, manual refresh | RD-039 |
+| S-EV2.6 | F26 | Frontend-direct calls to /health | RD-040 |
+| S-EV2.7 | F27 | Bulk ops: delete, tag, retag, metadata; checkboxes + shift+click | RD-041 |
+| S-EV2.8 | F27 | No inline content editing; re-ingest required | RD-042 |
+| S-EV2.9 | F28 | Document-level only serving stats | RD-043 |
+| S-EV2.10 | F28 | Async fire-and-forget POST from chat-rag-backend | RD-044 |
+| S-EV2.11 | F29 | 7 event types in audit log | RD-046 |
+| S-EV2.12 | F29 | Version history: metadata + tags only | RD-047 |
+| S-EV2.13 | F29 | Global audit log page + per-document history | RD-048 |
+| S-EV2.14 | F29 | Configurable retention, default 365 days | RD-049 |
+
+### Contradiction resolved
+
+| ID | Issue | User verdict | Resolution |
+|----|-------|-------------|------------|
+| S-EV2.C1 | User requested "by what IP and where" but ADR-016 rejects IP storage (ADR-004 compliance) | **Approved ADR-016** | No IP stored; request_id only. Platform access logs provide IP outside Vecinita boundary. |
+
+### Reviewed (medium / low)
+
+| Stmt ID | Confidence | Verdict | Action |
+|---------|------------|---------|--------|
+| S-EV2.15 | Medium | approved | 9 new API endpoints on internal-write-api follow /internal/v1/ convention |
+| S-EV2.16 | Medium | approved | Bulk delete hard-delete, max 100, audit record preserved |
+| S-EV2.17 | Medium | approved | document_serving_stats table; async fire-and-forget; dashboard-only display |
+| S-EV2.18 | Medium | approved | Health: manual refresh, frontend-direct, Postgres proxied via internal-write-api |
+| S-EV2.19 | Medium | approved | CORS on all new EV-002 endpoints for admin frontend origin |
+| S-EV2.20 | Medium | approved | 3 new tables in allow-list; privacy tests updated |
+| S-EV2.21 | Low | approved | New VITE_VECINITA_*_HEALTH_URL env vars + timeout (5000ms default) |
+| S-EV2.22 | Low | added | Acceptance criteria for F23-F29 (AC-E1 through AC-E11) |
+| S-EV2.23 | Medium | modified | F23 and F24 each get a dedicated UJ (UJ-020, UJ-021) |
+
+### Consistency check (EV-002)
+
+| Check | Result | Action |
+|-------|--------|--------|
+| Feature ↔ Spec | **Pass** | F23–F29 mapped to spec §DO internal write API, §Data Flow |
+| Feature ↔ Journey | **Pass** (after fix) | Added UJ-020 (F23), UJ-021 (F24) per user request |
+| Journey ↔ Test | **Pass** (after fix) | Added TC-062, TC-063 (UJ-020), TC-064 (UJ-021) |
+| Feature ↔ Test | **Pass** | TC-050–TC-064 cover F23–F29 |
+| Feature ↔ Acceptance | **Pass** (after fix) | Added AC-E1 through AC-E11 |
+| Spec ↔ Config | **Pass** | New env vars documented in config-spec |
+| Cross-doc naming | **Pass** | Consistent: audit_log, document_versions, document_serving_stats |
+| Scope boundaries | **Pass** | No privacy violations; ADR-016 approved |
+| Template conformance | **Pass** | api+worker template; new endpoints on internal-write-api (DO) |
+
+### EV-002 summary
+
+| Metric | Count |
+|--------|-------|
+| New statements audited | 24 |
+| Auto-approved (high) | 14 |
+| User-approved (medium/low) | 9 |
+| Modified | 1 (UJ-020/UJ-021 added) |
+| Contradictions found | 1 |
+| Contradictions resolved | 1 |
+| Source documents updated | 3 (`acceptance-criteria.md`, `user-journeys.md`, `test-plan.md`) |
+
+**Next step (EV-002 routing):** 04-tech-plan — 03-plan-tooling skipped for EV-002.

@@ -1,8 +1,8 @@
 # Context Brief — Vecinita (5-app monorepo)
 
 **Stage:** 00-context  
-**Date:** 2026-05-19 (regenerated); **EV-001 delta:** 2026-05-24  
-**Status:** Complete (EV-001 delta merged)
+**Date:** 2026-05-19 (regenerated); **EV-001 delta:** 2026-05-24; **EV-002 delta:** 2026-05-26  
+**Status:** Complete (EV-002 delta merged)
 
 ---
 
@@ -384,3 +384,238 @@ flowchart LR
 6. **Eval fixtures** — tagged seed documents for CI retrieval tests.
 
 **ADR:** [ADR-014](adr/ADR-014-corpus-tagging-and-browse.md)
+
+---
+
+## 12. EV-002 Feature Delta — Admin Dashboard, Bulk Ops, Usage Stats & Audit Log
+
+**Evolve cycle:** EV-002 (2026-05-26)  
+**User intent:** Improve admin dashboard CSS/UX, add summary statistics, health check dashboard, bulk corpus operations, document usage stats, and audit log with version history.
+
+### Current implementation gap (codebase analysis 2026-05-26)
+
+| Capability | Status | Key evidence |
+|------------|--------|--------------|
+| Admin CSS/styling | **Minimal** | `apps/data-management-frontend/src/App.css` — 127 lines vanilla CSS; system-ui font; no UI framework; no component library |
+| Document tags in list | **Partial** | `CorpusList.tsx` shows title/URL/language but NOT tags; tags only visible after clicking "Manage tags" → `DocumentAdmin.tsx` |
+| Summary statistics | **Missing** | No dashboard page; no aggregate queries; no statistics components |
+| Health check dashboard | **Missing** | Health endpoints exist on all 5 services (`/health`) but no admin UI to visualize status |
+| Bulk operations | **Missing** | `CorpusList.tsx` handles single-document delete only; no multi-select; no bulk tag/metadata edit |
+| Usage statistics | **Missing** | `CorpusPgvectorRetriever` returns chunks but does NOT log which documents were served; no `retrieval_stats` table |
+| Audit log | **Missing** | No audit table; no event logging middleware; no change tracking; no version history |
+| Frontend routing | **Missing** | Single-page layout (`App.tsx` renders `JobForm` + `CorpusList` inline); no React Router |
+
+### Current admin UI component inventory
+
+| File | Purpose | Lines |
+|------|---------|-------|
+| `App.tsx` | Root component — renders header, JobForm, CorpusList | 16 |
+| `App.css` | Global vanilla CSS — cards, forms, buttons, chunk list | 127 |
+| `CorpusList.tsx` | Document list with per-doc delete + "Manage tags" button | 102 |
+| `DocumentAdmin.tsx` | Chunk viewer + document/chunk tag editor + LLM retag | 206 |
+| `JobForm.tsx` | Ingest job submission form | — |
+| `main.tsx` | React root | — |
+
+### Current database schema
+
+**Tables (2 migrations):**
+
+| Table | Columns | Source |
+|-------|---------|--------|
+| `documents` | id (uuid PK), url (text, unique), title, content_hash, language, created_at, updated_at | 0001 |
+| `chunks` | id (uuid PK), document_id (FK→documents), chunk_index, text, token_count, created_at | 0001 |
+| `embeddings` | id (uuid PK), chunk_id (FK→chunks, unique), embedding (vector(384)), created_at | 0001 |
+| `jobs` | id (uuid PK), status, urls (jsonb), error_code, error_message, job_type, created_at, updated_at | 0001+0002 |
+| `config` | key (text PK), value (jsonb), updated_at | 0001 |
+| `tags` | id (uuid PK), slug (text), label (text), language (varchar(8)), created_at | 0002 |
+| `document_tags` | document_id+tag_id (composite PK), source (llm/human), created_at | 0002 |
+| `chunk_tags` | chunk_id+tag_id (composite PK), source (llm/human), created_at | 0002 |
+
+### Current API endpoint inventory
+
+**chat-rag-backend:**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/health` | Liveness + dependency checks (postgres, modal_embed, modal_llm) |
+| POST | `/api/v1/ask` | RAG question answering |
+| POST | `/api/v1/ask/stream` | Streaming RAG response |
+| GET | `/api/v1/documents` | Public corpus browse (paginated, tag filter) |
+| GET | `/api/v1/documents/{id}` | Public document detail |
+| GET | `/api/v1/tags` | Public tag facet list |
+
+**internal-write-api:**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/health` | Liveness |
+| POST | `/internal/v1/documents/batch` | Batch document upsert (ingest) |
+| GET | `/internal/v1/documents/{id}` | Document detail |
+| GET | `/internal/v1/documents/{id}/tags` | Document tags |
+| PATCH | `/internal/v1/documents/{id}/tags` | Update document tags |
+| GET | `/internal/v1/documents/{id}/chunks` | Chunk list |
+| PATCH | `/internal/v1/chunks/{id}/tags` | Update chunk tags |
+| POST | `/internal/v1/documents/{id}/retag` | Queue LLM retag job |
+| GET | `/internal/v1/documents` | List all documents |
+| DELETE | `/internal/v1/documents/{id}` | Delete document + cascade |
+
+**data-management-backend (Modal):**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/health` | Liveness |
+| POST | `/jobs` | Create ingest/retag job |
+| GET | `/jobs/{id}` | Job status |
+
+**Modal services:**
+
+| Service | Health path | Other routes |
+|---------|------------|--------------|
+| embedding | `/health` | `/embed`, `/embed/batch` |
+| llm | `/health` | `/generate`, `/generate/stream` |
+
+### Privacy constraints for new tables (ADR-004)
+
+The `privacy.py` module forbids these table names: `users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`. It also forbids identity columns: `created_by`, `updated_by`, `user_id`, `operator_id`, `admin_id`, `email`, `name`, `phone`, `address`, `account_id`, `profile_id`, `invite_id`, `session_id`.
+
+**Impact on EV-002:** The new `audit_log` and `document_retrieval_stats` tables are NOT in the forbidden list and are safe to create. The audit log's IP hash column must avoid forbidden names — use `actor_ip_hash` (not `user_id`, `created_by`, etc.).
+
+### Proposed features (for 01-requirements delta)
+
+| ID | Feature | Apps | New tables |
+|----|---------|------|------------|
+| F23 | Admin UI overhaul (Tailwind CSS + React Router) | data-management-frontend | None |
+| F24 | Admin summary statistics dashboard | data-management-frontend, internal-write-api | None (aggregate queries) |
+| F25 | System health check dashboard | data-management-frontend, all backends | None |
+| F26 | Bulk corpus document operations | data-management-frontend, internal-write-api | None |
+| F27 | Document retrieval usage statistics | chat-rag-backend, internal-write-api, database | `document_retrieval_stats` |
+| F28 | Corpus audit log & version history | internal-write-api, data-management-frontend, database | `audit_log` |
+
+### Feature details
+
+**F23 — Admin UI overhaul:**
+- Add Tailwind CSS for modern, utility-first styling (R25)
+- Add React Router for page-based navigation: `/dashboard`, `/corpus`, `/health`, `/audit` (R27)
+- Show document tags inline in corpus list (currently hidden behind "Manage tags" click)
+- Responsive layout, improved cards, tables, badges, status indicators
+- Consistent design language across all new pages
+
+**F24 — Admin summary statistics dashboard:**
+- Dashboard landing page (`/dashboard`) showing aggregate statistics
+- Document count, chunk count, embedding count
+- Tag distribution (top tags with counts)
+- Job status summary (pending/running/completed/failed)
+- Retrieval statistics (top served documents from F27)
+- All data from aggregate SQL queries on existing + new tables
+
+**F25 — System health check dashboard:**
+- Health page (`/health`) polling `/health` endpoints for all services (R24)
+- Services: chat-rag-backend, internal-write-api, data-management-backend (Modal), embedding (Modal), LLM (Modal)
+- Green/red status indicator per service
+- Dependency status from chat-rag-backend's health response (postgres, modal_embed, modal_llm)
+- Auto-refresh polling (e.g., every 30s)
+- Service URLs from VITE_* environment variables
+
+**F26 — Bulk corpus document operations:**
+- Multi-select checkboxes in corpus document list
+- Bulk tag assignment/removal (select N documents → apply/remove tags)
+- Bulk metadata editing: title, URL, language (R22)
+- Bulk delete with confirmation dialog
+- New internal-write-api endpoints: `PATCH /internal/v1/documents/bulk/tags`, `PATCH /internal/v1/documents/bulk/metadata`, `DELETE /internal/v1/documents/bulk`
+- CORS must include PATCH verb for internal-write-api
+
+**F27 — Document retrieval usage statistics:**
+- New table: `document_retrieval_stats` (document_id FK, retrieval_count integer, last_retrieved_at timestamp)
+- Increment counter when document's chunks are returned in RAG responses (R23)
+- Async/batched counter update to avoid adding latency to RAG responses
+- Display retrieval counts in admin corpus list and statistics dashboard
+- New internal-write-api GET endpoint for stats: `GET /internal/v1/stats/retrieval`
+
+**F28 — Corpus audit log & version history:**
+- New table: `audit_log` (id uuid, entity_type text, entity_id uuid, action text, changes jsonb, actor_ip_hash text, created_at timestamptz) (R26)
+- Actions tracked: document_create, document_update, document_delete, tag_add, tag_remove, bulk_tag, bulk_delete, bulk_metadata_update
+- JSONB `changes` column stores diff/snapshot of what changed — serves as version history (R26)
+- `actor_ip_hash`: SHA-256(client_ip + daily_salt) for audit trail without raw PII (R20)
+- Middleware on internal-write-api to auto-record audit entries on mutations
+- Admin UI audit trail page (`/audit`) with per-document filtering
+- No `created_by`, `user_id`, or other forbidden identity columns (ADR-004 compatible)
+
+### Multi-app topology (connectivity for EV-002)
+
+```mermaid
+flowchart LR
+  subgraph admin [Admin operator]
+    AdminFE[data-management-frontend]
+  end
+  subgraph read_api [Read endpoints - new]
+    WriteAPI_Stats[internal-write-api GET /stats]
+    WriteAPI_Audit[internal-write-api GET /audit]
+  end
+  subgraph write_api [Write endpoints - extended]
+    WriteAPI_Bulk[internal-write-api PATCH/DELETE bulk]
+  end
+  subgraph health [Health polling]
+    ChatAPI[chat-rag-backend /health]
+    WriteAPI_H[internal-write-api /health]
+    Modal_DM[Modal data-mgmt /health]
+    Modal_Embed[Modal embed /health]
+    Modal_LLM[Modal LLM /health]
+  end
+  subgraph rag [RAG retrieval - instrumented]
+    ChatRAG[chat-rag-backend /ask]
+  end
+  PG[(Postgres audit_log + retrieval_stats)]
+  AdminFE -->|dashboard + corpus + audit| WriteAPI_Stats
+  AdminFE -->|audit trail| WriteAPI_Audit
+  AdminFE -->|bulk ops| WriteAPI_Bulk
+  AdminFE -->|health polling| ChatAPI
+  AdminFE -->|health polling| WriteAPI_H
+  AdminFE -->|health polling| Modal_DM
+  WriteAPI_Bulk --> PG
+  WriteAPI_Stats --> PG
+  WriteAPI_Audit --> PG
+  ChatRAG -->|increment retrieval count| PG
+```
+
+**Browser integration risks:**
+
+| Risk | Mitigation |
+|------|------------|
+| CORS must allow PATCH verb on internal-write-api for bulk metadata | Add PATCH to `configure_cors()` + H0c test |
+| Health polling to Modal services requires CORS or proxy | Route through internal-write-api aggregator endpoint (avoids Modal CORS waiver issue) |
+| Tailwind CSS bundle size | Purge unused styles in Vite build |
+| Audit log JSONB diff storage growth | Add retention policy (e.g., 90 days) or archival plan |
+
+### Cross-reference: EV-002 vs ADR-004
+
+| Requirement | Compatible? | Notes |
+|-------------|-------------|-------|
+| No user accounts for admin dashboard | Yes | Dashboard uses infra-only auth (VECINITA_INTERNAL_API_KEY) |
+| Hashed IP instead of raw PII | Yes | SHA-256(IP + daily_salt) — not reversible without salt (R20) |
+| No identity columns in new tables | Yes | Use `actor_ip_hash` not `user_id`/`created_by` |
+| Retrieval stats are aggregate | Yes | Document-level counts, no per-user tracking |
+| Audit log contains no operator identity | Yes | Only hashed IP + action + diff |
+
+### Unresolved gaps (EV-002 → 01-requirements)
+
+1. **Tailwind CSS configuration** — Tailwind v3 vs v4; PostCSS plugin vs standalone CLI; Vite integration.
+2. **Health polling architecture** — Admin frontend polls health endpoints directly (CORS needed on Modal) vs internal-write-api aggregates all health checks (single CORS-friendly endpoint).
+3. **Retrieval counter update mechanism** — Sync in retriever (adds latency) vs async fire-and-forget (eventual consistency) vs batch (periodic DB update).
+4. **Audit log salt rotation** — Daily salt storage mechanism (environment variable vs config table); salt rotation procedure.
+5. **Bulk operation limits** — Max documents per bulk operation (50? 100? unlimited?).
+6. **Audit log retention** — How long to keep audit entries; archival strategy.
+7. **Statistics refresh rate** — Real-time vs cached (e.g., 5-minute materialized view).
+8. **React Router base path** — Confirm admin frontend is served at root `/` on DO static site.
+
+### Resolution Log (EV-002)
+
+| ID | Category | Issue | Resolution |
+|----|----------|-------|------------|
+| R20 | Contradiction | Audit log IP tracking vs ADR-004 zero PII | **Hashed/anonymized IP** — SHA-256(IP + daily_salt); audit trail without raw PII |
+| R21 | Decision | Orchestration for feature addition | **Full evolve cycle EV-002** — structured delta 00→01→04→07→13 |
+| R22 | Ambiguity | Bulk edit scope | **Bulk metadata editing** — tags + title + URL + other fields for multiple documents |
+| R23 | Decision | Usage statistics granularity | **Document-level retrieval count** — minimal overhead; increment when chunks served |
+| R24 | Ambiguity | Health dashboard scope | **Live status page** — polls /health endpoints, green/red indicators per service |
+| R25 | Decision | CSS/styling approach | **Tailwind CSS** — utility-first, modern look, fast development |
+| R26 | Decision | Version history implementation | **Audit log IS version history** — JSONB diff/snapshot per action (event-sourcing style) |
+| R27 | Decision | Frontend navigation | **React Router** — URL-based pages (/dashboard, /corpus, /health, /audit) |

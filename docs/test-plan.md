@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-24 (EV-001)  
+> **Last updated**: 2026-05-26 (EV-002)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -9,6 +9,8 @@
 Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Management (scrape→embed→store via Modal + DO write API), Database migrations/seeds, privacy enforcement, and local E2E mapped to UJ-001–UJ-012.
 
 **EV-001 (planned):** Corpus browse (F19), LLM/human tagging (F20–F21), tag-filtered RAG (F22).
+
+**EV-002 (planned):** Admin UI overhaul (F23), tag display (F24), admin dashboard (F25), health check (F26), bulk ops (F27), serving stats (F28), audit log & versions (F29).
 
 **Excludes (v1):** Playwright full UI E2E (see `tests/e2e/README.md` waiver; Vitest component smoke only), real Modal invocations in CI, multimodal ingest, fine-tuning.
 
@@ -30,6 +32,13 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-010 Open source URL | Vitest in `chat-rag-frontend` | TC-048 |
 | UJ-011 Admin tags/chunks | `tests/e2e/test_uj011_admin_tags.py` | TC-042, TC-043, TC-049 |
 | UJ-012 Tag-filtered ask | `tests/e2e/test_uj012_tag_filtered_ask.py` | TC-044, TC-045 |
+| UJ-013 Admin dashboard | `tests/e2e/test_uj013_admin_dashboard.py` | TC-050, TC-051 |
+| UJ-014 Health check | `tests/e2e/test_uj014_health_dashboard.py` | TC-052 |
+| UJ-015 Bulk delete | `tests/e2e/test_uj015_bulk_delete.py` | TC-053, TC-054 |
+| UJ-016 Bulk tag | `tests/e2e/test_uj016_bulk_tag.py` | TC-055 |
+| UJ-017 Global audit log | `tests/e2e/test_uj017_audit_log.py` | TC-056, TC-057 |
+| UJ-018 Document history | `tests/e2e/test_uj018_document_history.py` | TC-058 |
+| UJ-019 Top served docs | `tests/e2e/test_uj019_top_served.py` | TC-059 |
 
 **E2E tier (v1):** `local` — TestClient, test Postgres (Docker/testcontainers), **mocked Modal** HTTP.
 
@@ -193,6 +202,95 @@ EV-001 adds **TC-046** (browse GET H4), **TC-049** (admin PATCH H4), **TC-048** 
 
 - **Objective**: OPTIONS from admin frontend origin succeeds for internal-write PATCH tag routes.
 - **Expected**: `Access-Control-Allow-Methods` includes `PATCH`; origin allowed.
+
+### TC-050: Admin dashboard stats (UJ-013)
+
+- **Objective**: `GET /internal/v1/stats/summary` returns correct aggregated counts.
+- **Input**: Seeded corpus with known document/chunk/tag counts.
+- **Expected**: 200; JSON with `total_documents`, `total_chunks`, `tag_distribution`, `job_stats`, `language_breakdown`, `storage_estimate_bytes`.
+
+### TC-051: Dashboard recent activity feed (UJ-013)
+
+- **Objective**: Stats summary includes recent activity from audit log.
+- **Input**: Perform operations (create, delete, tag) then query summary.
+- **Expected**: `recent_activity` array contains events in reverse chronological order.
+
+### TC-052: Health check all services (UJ-014)
+
+- **Objective**: Each service health endpoint responds correctly.
+- **Input**: Call `/health` on internal-write-api, chat-rag-backend (test instances); mock other services.
+- **Expected**: 200 with `{"status": "ok"}` from each; timeout handled gracefully.
+
+### TC-053: Bulk delete (UJ-015)
+
+- **Objective**: `DELETE /internal/v1/documents/bulk` removes multiple documents atomically.
+- **Input**: 3 seeded documents; bulk delete request with their IDs.
+- **Expected**: All 3 removed; audit_log has 3 `document.deleted` entries with same `request_id`; subsequent retrieval excludes them.
+
+### TC-054: Bulk delete max limit (UJ-015)
+
+- **Objective**: Bulk delete rejects >100 document IDs.
+- **Input**: 101 document IDs.
+- **Expected**: 400 validation error.
+
+### TC-055: Bulk tag add/remove (UJ-016)
+
+- **Objective**: `PATCH /internal/v1/documents/bulk/tags` applies/removes tags across multiple documents.
+- **Input**: 3 documents; add tag "housing", remove tag "legal".
+- **Expected**: Tags updated; max 10 per document enforced; audit entries for each.
+
+### TC-056: Audit log pagination (UJ-017)
+
+- **Objective**: `GET /internal/v1/audit` supports pagination and filtering.
+- **Input**: Generate 60 audit events; request page 2 with page_size=50.
+- **Expected**: 200; 10 items on page 2; total_count accurate.
+
+### TC-057: Audit log event type filter (UJ-017)
+
+- **Objective**: Audit log filters by event_type.
+- **Input**: Mixed events; filter `event_type=document.deleted`.
+- **Expected**: Only delete events returned.
+
+### TC-058: Document version history (UJ-018)
+
+- **Objective**: `GET /internal/v1/documents/{id}/history` returns version timeline.
+- **Input**: Create document; change title; change tags twice.
+- **Expected**: 3 versions; each has correct title/language/tags_snapshot at that point in time.
+
+### TC-059: Serving stats increment (UJ-019, F28)
+
+- **Objective**: `POST /internal/v1/stats/served` increments document counters.
+- **Input**: POST with `document_ids: [uuid1, uuid2]`; repeat for uuid1.
+- **Expected**: uuid1 `served_count=2`, uuid2 `served_count=1`; `last_served_at` updated.
+
+### TC-060: CORS preflight on new EV-002 endpoints (H4)
+
+- **Objective**: OPTIONS from admin frontend origin succeeds for new bulk/stats/audit routes.
+- **Expected**: `Access-Control-Allow-Methods` includes `DELETE`, `PATCH`, `GET`; origin allowed.
+
+### TC-061: Audit retention cleanup (F29)
+
+- **Objective**: Audit records older than `VECINITA_AUDIT_RETENTION_DAYS` are eligible for cleanup.
+- **Input**: Insert audit record with `created_at` older than retention period; trigger cleanup.
+- **Expected**: Old record removed; recent records retained.
+
+### TC-062: Admin UI renders shadcn/ui components (UJ-020)
+
+- **Objective**: Data management frontend loads with shadcn/ui styled components and correct theme.
+- **Input**: Render admin app in test environment; check system preference theme (light/dark).
+- **Expected**: Components use Tailwind classes; theme CSS variables match system preference; no unstyled content flash (FOUC).
+
+### TC-063: Admin navigation between sections (UJ-020)
+
+- **Objective**: Admin can navigate between Dashboard, Corpus, Health, Audit Log pages.
+- **Input**: Click each navigation item.
+- **Expected**: Page renders without errors; URL updates; active nav item highlighted.
+
+### TC-064: Tag chips in corpus list (UJ-021)
+
+- **Objective**: Corpus list displays tag chips for each document.
+- **Input**: Seeded documents with mix of LLM and human tags; render CorpusList component.
+- **Expected**: Tag chips visible below document title; LLM tags have different visual style than human tags; documents with no tags show graceful empty state.
 
 ## Test Data
 

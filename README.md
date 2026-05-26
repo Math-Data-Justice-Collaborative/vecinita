@@ -31,9 +31,21 @@ cd ../.. && bash scripts/run_tests.sh -q
 
 Full bootstrap: **[docs/LOCAL_DEV.md](docs/LOCAL_DEV.md)** · non-secret defaults: **[infra/vecinita.yaml](infra/vecinita.yaml)**
 
+## Features (v1 + EV-001 + EV-002)
+
+| Area | Features |
+|------|----------|
+| ChatRAG | Bilingual Q&A, streaming, tag-filtered RAG, corpus browse |
+| Data Management | URL ingest, job queue, corpus CRUD, LLM auto-tagging |
+| Admin Dashboard | Summary stats, health checks, bulk operations, audit log |
+| Data Integrity | Serving statistics, version history, configurable retention |
+| Privacy | Zero personal data (ADR-004), no IP tracking (ADR-016) |
+
 ## Docs
 
+- [Feature list](docs/feature-list.md) — F1–F29
 - [Execution plan](docs/execution-plan.md)
 - [API contract](docs/api-contract.md)
 - [Config spec](docs/config-spec.md)
+- [ADR index](docs/adr/README.md)
 - [Modal apps](infra/modal/README.md)

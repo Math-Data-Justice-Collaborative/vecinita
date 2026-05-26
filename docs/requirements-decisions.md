@@ -1,7 +1,7 @@
 # Requirements decisions log
 
 > **Stage**: 01-requirements  
-> **Last updated**: 2026-05-24 (EV-001 delta)
+> **Last updated**: 2026-05-26 (EV-002 delta)
 
 | ID | Topic | Decision | ADR | Source |
 |----|-------|----------|-----|--------|
@@ -71,6 +71,31 @@
 | TP-016 | EV-001 branch | **`evolve/EV-001-corpus-tags`** from main | ADR-015 |
 | TP-017 | EV-001 LLM cost | Extra calls **within ≤ $50/mo** cap | ADR-015 |
 
+## EV-002 resolutions (2026-05-26)
+
+| ID | Topic | Decision | ADR |
+|----|-------|----------|-----|
+| RD-034 | EV-002 feature scope | F23–F29: Admin UI overhaul, tag display, dashboard, health, bulk ops, serving stats, audit log | ADR-016 |
+| RD-035 | Admin UI framework | **shadcn/ui** (Tailwind + Radix) for data-management-frontend | — |
+| RD-036 | Theme | **System preference** (auto light/dark) | — |
+| RD-037 | Tag display | **Colored chips inline** in corpus list (below title) | — |
+| RD-038 | Dashboard stats | All 8 stat types: docs, chunks, tags, jobs, languages, activity, storage, top served | — |
+| RD-039 | Health services | All 8 services monitored; **manual refresh only** | — |
+| RD-040 | Health mechanism | **Frontend-direct** calls to each `/health` endpoint (requires CORS) | — |
+| RD-041 | Bulk operations | Delete, tag, retag, metadata edit; checkboxes + shift+click; max 100 per op | — |
+| RD-042 | Content editing | **No** inline content editing; content changes require re-ingest | — |
+| RD-043 | Serving stats scope | **Document-level only**; increment on successful response; dashboard display only | — |
+| RD-044 | Stats write mechanism | Chat-rag-backend **async POST** to internal-write-api (`/stats/served`) | — |
+| RD-045 | Audit log privacy | **No IP** stored; request_id only (ADR-004 compliance) | ADR-016 |
+| RD-046 | Audit events | All 7 event types (create, delete, edit, tag, retag, bulk, job state) | ADR-016 |
+| RD-047 | Version history scope | **Metadata + tags** only (not full content) | ADR-016 |
+| RD-048 | Audit UI | **Both** global log page AND per-document history view | ADR-016 |
+| RD-049 | Audit retention | **Configurable** (`VECINITA_AUDIT_RETENTION_DAYS`, default 365) | ADR-016 |
+| RD-050 | New tables | `audit_log`, `document_versions`, `document_serving_stats` — approved schema | ADR-016 |
+| RD-051 | shadcn/ui deps | Approved: tailwindcss, @radix-ui/*, cva, clsx, tailwind-merge, lucide-react | — |
+| RD-052 | Bulk delete limit | **Max 100** documents per operation | — |
+
 Unresolved:
 
 - Exact LlamaIndex / vLLM patch pins at implementation (T8.1, T9.2)
+- shadcn/ui exact component versions (pin at build time)

@@ -1,7 +1,7 @@
 # Dependency Inventory
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-24 (05-verify-tech EV-001)
+> **Last updated**: 2026-05-26 (EV-002)
 
 ## Runtime dependencies (Python — planned)
 
@@ -39,11 +39,21 @@
 
 ## Runtime dependencies (Node)
 
-| Package | Purpose | License |
-|---------|---------|---------|
-| react | 18.x UI | MIT |
-| vite | Build | MIT |
-| vitest | Frontend smoke tests | MIT |
+| Package | Purpose | License | Notes |
+|---------|---------|---------|-------|
+| react | 18.x UI | MIT | |
+| vite | Build | MIT | |
+| vitest | Frontend smoke tests | MIT | |
+| **tailwindcss** | ^3.4 Utility-first CSS | MIT | EV-002 F23 (admin UI); TP-018 |
+| **postcss** | CSS processing | MIT | Required by Tailwind v3 |
+| **autoprefixer** | Vendor prefixes | MIT | Required by Tailwind v3 |
+| **@radix-ui/*** | Accessible component primitives | MIT | shadcn/ui foundation |
+| **class-variance-authority** | Variant styling | Apache-2.0 | shadcn/ui utility |
+| **clsx** | Conditional classnames | MIT | shadcn/ui utility |
+| **tailwind-merge** | Tailwind class dedup | MIT | shadcn/ui utility |
+| **lucide-react** | Icons | ISC | shadcn/ui icons |
+| **react-router** | ^7.x Admin routing | MIT | EV-002 F23; TP-021 |
+| **react-router-dom** | ^7.x DOM bindings | MIT | EV-002 F23; TP-021 |
 
 ## Build dependencies
 

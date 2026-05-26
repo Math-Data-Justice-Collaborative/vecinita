@@ -58,3 +58,19 @@ Chronological verdicts from product plan verification. Auto-approved entries tra
 | 2026-05-24 | S-EV1.C1 | modified | Added TC-047 ingest LLM auto-tag; AC-T3 → TC-047 |
 | 2026-05-24 | S-EV1.C2 | approved | test-plan E2E local scope → UJ-001–012 |
 | 2026-05-24 | S-EV1.15 | approved | VITE admin corpus API key acceptable v1; ADR-014 noted |
+
+## EV-002 delta (2026-05-26)
+
+| Timestamp | Stmt ID | Verdict | Notes |
+|-----------|---------|---------|-------|
+| 2026-05-26 | S-EV2.1–S-EV2.14 | auto-approved | F23–F29 scope from RD-034–RD-052 / ADR-016 |
+| 2026-05-26 | S-EV2.C1 | approved | ADR-016 stands: no IP stored, request_id only (user approved) |
+| 2026-05-26 | S-EV2.15 | approved | 9 new endpoints on internal-write-api, /internal/v1/ paths |
+| 2026-05-26 | S-EV2.16 | approved | Bulk delete: hard-delete, max 100, audit record preserved |
+| 2026-05-26 | S-EV2.17 | approved | Serving stats: new table, async fire-and-forget, dashboard-only |
+| 2026-05-26 | S-EV2.18 | approved | Health: manual refresh, frontend-direct, Postgres proxied |
+| 2026-05-26 | S-EV2.19 | approved | CORS on all new EV-002 endpoints from admin frontend origin |
+| 2026-05-26 | S-EV2.20 | approved | 3 new tables in allow-list; privacy tests updated |
+| 2026-05-26 | S-EV2.21 | approved | New VITE_VECINITA_*_HEALTH_URL env vars + timeout default 5000ms |
+| 2026-05-26 | S-EV2.22 | added | AC-E1–AC-E11 acceptance criteria for F23–F29 |
+| 2026-05-26 | S-EV2.23 | modified | UJ-020 (F23 admin UI) + UJ-021 (F24 tag display) added per user request |

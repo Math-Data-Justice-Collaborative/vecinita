@@ -2,8 +2,8 @@
 
 > **Project**: Vecinita  
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
-> **Last updated**: 2026-05-24  
-> **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014)
+> **Last updated**: 2026-05-26  
+> **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016)
 
 ## Summary
 
@@ -31,6 +31,13 @@
 | F20 | LLM auto-tagging at ingest + admin re-tag | Implemented | Data Management | data-management-backend, Modal LLM | 11-verify-impl 2026-05-25 |
 | F21 | Admin chunk viewer & tag editor | Implemented | Data Management | data-management-frontend, internal-write-api | 11-verify-impl 2026-05-25 |
 | F22 | Tag-aware RAG retrieval | Implemented | ChatRAG | chat-rag-backend, packages/rag | 11-verify-impl 2026-05-25 |
+| F23 | Admin UI CSS/UX overhaul (shadcn/ui) | Planned | Data Management | data-management-frontend | EV-002 2026-05-26 |
+| F24 | Tag display in corpus list | Planned | Data Management | data-management-frontend, internal-write-api | EV-002 2026-05-26 |
+| F25 | Admin summary dashboard | Planned | Data Management | data-management-frontend, internal-write-api | EV-002 2026-05-26 |
+| F26 | System health check dashboard | Planned | Cross-cutting | data-management-frontend, all services | EV-002 2026-05-26 |
+| F27 | Bulk corpus operations | Planned | Data Management | data-management-frontend, internal-write-api | EV-002 2026-05-26 |
+| F28 | Source serving statistics | Planned | Cross-cutting | chat-rag-backend, internal-write-api, database | EV-002 2026-05-26 |
+| F29 | Audit log & version history | Planned | Data Management | internal-write-api, data-management-frontend, database | EV-002 2026-05-26 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -208,6 +215,13 @@
 | F20 LLM tagging | No | Yes | Yes | Yes |
 | F21 Admin chunks/tags | No | Yes | Yes | No |
 | F22 Tag-filtered RAG | Yes | No | Yes | No |
+| F23 Admin UI shadcn/ui | No | Yes | No | No |
+| F24 Tag display in list | No | Yes | No | No |
+| F25 Admin dashboard | No | Yes | Yes | No |
+| F26 Health check dashboard | Yes | Yes | No | Yes |
+| F27 Bulk corpus ops | No | Yes | Yes | No |
+| F28 Serving statistics | Yes | Yes | Yes | No |
+| F29 Audit log & versions | No | Yes | Yes | No |
 
 ## Out of Scope (v1)
 
@@ -260,6 +274,122 @@
 - **Outputs**: Filtered retrieval + answer; when user selected tags, **only user tags apply** (LLM inference skipped) (RD-027).
 - **Limitations**: Tag filter is pre-retrieval SQL join; must not log tag selections as identity (ADR-004).
 - **Source**: EV-001 / ADR-014
+
+### F23: Admin UI CSS/UX overhaul (shadcn/ui)
+
+- **What it does**: Modernizes the data-management-frontend with shadcn/ui components (Tailwind + Radix), system-preference light/dark theme, polished layout, and accessible component patterns.
+- **Inputs**: Existing components (JobForm, CorpusList, DocumentAdmin) refactored to use shadcn primitives.
+- **Outputs**: Visually cohesive admin interface with consistent spacing, typography, color tokens, and responsive layout.
+- **Key dependencies**: tailwindcss, @radix-ui/*, class-variance-authority, clsx, tailwind-merge, lucide-react.
+- **Limitations**: Admin UI only — chat-rag-frontend is a separate concern. No new functionality, purely presentational overhaul.
+- **Source**: EV-002 / user interview 2026-05-26
+
+### F24: Tag display in corpus document list
+
+- **What it does**: Shows document tags as colored chips/badges inline under each document title in the corpus list view, without requiring the user to open the DocumentAdmin panel.
+- **Inputs**: Document list API response extended to include tags per document.
+- **Outputs**: Tag chips rendered below document title in CorpusList; color-coded by source (LLM vs human).
+- **Limitations**: Read-only display; editing still requires opening DocumentAdmin or using bulk operations (F27).
+- **Source**: EV-002 / user interview 2026-05-26
+
+### F25: Admin summary dashboard
+
+- **What it does**: Dedicated dashboard panel showing aggregated system statistics for the corpus and platform.
+- **Inputs**: New backend stats endpoint(s) returning aggregated counts and distributions.
+- **Outputs**: Dashboard cards/widgets displaying:
+  | Statistic | Description |
+  |-----------|-------------|
+  | Total documents | Count of documents in corpus |
+  | Total chunks | Count of chunks across all documents |
+  | Tag distribution | Top tags by document count (bar/list) |
+  | Job statistics | Total jobs, success/fail rate, recent jobs |
+  | Language breakdown | Documents per language (en/es/other) |
+  | Recent activity | Latest ingests, edits, deletions feed |
+  | Storage usage | Estimated DB size |
+  | Top served documents | Most-cited documents from F28 stats |
+- **Limitations**: Stats are point-in-time snapshots (no real-time streaming). Storage size is an estimate from `pg_total_relation_size`.
+- **Source**: EV-002 / user interview 2026-05-26
+
+### F26: System health check dashboard
+
+- **What it does**: Admin dashboard page showing live health status of all Vecinita services, with manual refresh.
+- **Inputs**: Frontend calls each service's `/health` endpoint directly (requires CORS from all services).
+- **Outputs**: Service status grid showing up/down/degraded for:
+  | Service | Health endpoint |
+  |---------|----------------|
+  | Internal Write API (DO) | `GET /health` |
+  | Data Management Backend (Modal) | `GET /health` |
+  | Chat RAG Backend (DO) | `GET /health` |
+  | Chat RAG Frontend (DO) | HTTP 200 check |
+  | Data Management Frontend (DO) | HTTP 200 check |
+  | PostgreSQL | Connection check via internal-write-api |
+  | Modal vLLM | `/health` or model endpoint |
+  | Modal FastEmbed | `/health` endpoint |
+- **Key parameters**:
+  | Parameter | Default | Description |
+  |-----------|---------|-------------|
+  | `VECINITA_HEALTH_TIMEOUT_MS` | `5000` | Timeout per service health check |
+- **Limitations**: Manual refresh only (no auto-poll). Frontend-initiated checks require CORS headers on all services. Postgres health proxied through internal-write-api (not direct connection from browser).
+- **Source**: EV-002 / user interview 2026-05-26
+
+### F27: Bulk corpus operations
+
+- **What it does**: Multi-select documents in the admin corpus list and apply bulk actions: delete, tag, LLM re-tag, edit metadata (title/language).
+- **Inputs**: Checkbox + shift+click selection UI; bulk action toolbar; confirmation dialogs for destructive actions.
+- **Outputs**: Bulk operations applied to selected documents via batch API calls; audit log entries for each affected document (F29).
+- **Supported bulk actions**:
+  | Action | API call | Destructive |
+  |--------|----------|-------------|
+  | Bulk delete | `DELETE /internal/v1/documents/bulk` | Yes (confirm) |
+  | Bulk tag | `PATCH /internal/v1/documents/bulk/tags` | No |
+  | Bulk LLM re-tag | `POST /internal/v1/documents/bulk/retag` | No |
+  | Bulk edit metadata | `PATCH /internal/v1/documents/bulk/metadata` | No |
+- **Limitations**: No bulk content editing (content changes require re-ingest). Bulk delete is irreversible (but audit log preserves record of deletion). Maximum 100 documents per bulk operation.
+- **Source**: EV-002 / user interview 2026-05-26
+
+### F28: Source serving statistics
+
+- **What it does**: Tracks how many times each document was cited in a successful RAG response, displayed on the admin summary dashboard.
+- **Inputs**: After each successful RAG answer, chat-rag-backend asynchronously POSTs document IDs to `POST /internal/v1/stats/served` on internal-write-api.
+- **Outputs**: `document_serving_stats` table with per-document served count and last-served timestamp; displayed in F25 dashboard as "Top served documents".
+- **Key parameters**:
+  | Parameter | Default | Description |
+  |-----------|---------|-------------|
+  | `VECINITA_STATS_ENABLED` | `true` | Enable/disable serving stats recording |
+- **Schema**: `document_serving_stats(document_id UUID FK, served_count INTEGER DEFAULT 0, last_served_at TIMESTAMPTZ)`
+- **Limitations**: Document-level only (not chunk-level). Counter increments on successful response only. Async fire-and-forget POST — stats failure does not affect RAG response. Dashboard display only (not shown inline in corpus list).
+- **Source**: EV-002 / user interview 2026-05-26
+
+### F29: Audit log & version history
+
+- **What it does**: Immutable event log tracking all corpus modifications plus metadata/tag version snapshots, viewable as a global log and per-document history timeline.
+- **Inputs**: All write operations on documents, chunks, tags, and jobs automatically emit audit events. No personal data stored — uses `request_id` for correlation only (ADR-016).
+- **Outputs**: Two new tables and two UI views:
+  | Table | Purpose |
+  |-------|---------|
+  | `audit_log` | Immutable event stream (event_type, entity_type, entity_id, request_id, payload JSONB, created_at) |
+  | `document_versions` | Metadata/tag snapshots (document_id, version_number, title, language, tags_snapshot JSONB, created_at) |
+- **Event types**:
+  | Event | Trigger |
+  |-------|---------|
+  | `document.created` | Ingest completes |
+  | `document.deleted` | Single or bulk delete |
+  | `document.edited` | Metadata change (title, language) |
+  | `document.tagged` | Tags added/removed (human or LLM) |
+  | `document.retagged` | LLM re-tag triggered |
+  | `bulk_action` | Any bulk operation (payload lists affected IDs) |
+  | `job.state_change` | Job status transition |
+- **UI views**:
+  | View | Location |
+  |------|----------|
+  | Global audit log | New admin page — filterable by event type, entity, date range |
+  | Per-document history | Document detail panel — chronological timeline of changes |
+- **Key parameters**:
+  | Parameter | Default | Range | Description |
+  |-----------|---------|-------|-------------|
+  | `VECINITA_AUDIT_RETENTION_DAYS` | `365` | 30–∞ | Days to retain audit records (0 = forever) |
+- **Limitations**: No IP addresses stored (ADR-016). No personal data. Version history covers metadata + tags only (not chunk text content). Configurable retention with background cleanup job.
+- **Source**: EV-002 / user interview 2026-05-26; ADR-016
 
 ## Planned / Deferred (post-v1)
 

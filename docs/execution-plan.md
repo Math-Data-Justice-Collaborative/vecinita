@@ -1,20 +1,20 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, ADR-001–015
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, ADR-001–017
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 5: EV-001 Corpus tags & browse (**complete**) |
-| **Active milestone** | — (EV-001 merged to `main` via PR-24) |
-| **Active task** | — |
-| **Tasks completed** | 111 / 111 |
-| **Last updated** | 2026-05-24 |
-| **Evolve cycle** | EV-001 (F19–F22) — **merged** |
+| **Active phase** | Phase 6: EV-002 Backend — Schema, Audit, Stats, Bulk |
+| **Active milestone** | M20: EV-002 Schema migration |
+| **Active task** | T20.1 |
+| **Tasks completed** | 111 / 184 |
+| **Last updated** | 2026-05-26 |
+| **Evolve cycle** | EV-002 (F23–F29) — **in_progress** |
 
 ## Template
 
@@ -422,6 +422,231 @@
 
 ---
 
+---
+
+### Phase 6: EV-002 Backend — Schema, Audit, Stats, Bulk (F27–F29, F25–F26)
+
+**Objective:** New tables (audit_log, document_versions, document_serving_stats), audit emission helpers, serving stats endpoints, bulk operation endpoints, health aggregator, and stats summary — all on internal-write-api.  
+**Entry gate:** EV-002 04-tech-plan approved; Phase 5 gate passed.  
+**Exit gate:** All new endpoints pass integration tests; privacy tests pass with 3 new tables in allow-list; audit events emitted correctly.  
+**Evolve cycle:** EV-002 (F23–F29)
+
+#### M20: EV-002 Schema migration
+
+**Goal:** Alembic migration for `audit_log`, `document_versions`, `document_serving_stats`; privacy allow-list update.  
+**Branch:** `feat/M20-ev002-schema` → `evolve/EV-002-admin-overhaul`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T20.1 | Test: privacy allow-list includes 3 new tables (`tests/privacy/test_ev002_tables.py`) — red | Test | pending | ADR-016, AC-E11 | T15.2 | — | EV-002 | F28, F29 |
+| T20.2 | Alembic migration `20260526_0003_ev002_audit_stats.py`: `audit_log`, `document_versions`, `document_serving_stats` | Code | pending | ADR-016 §Schema, api-contract F28/F29 | T20.1 | — | EV-002 | F28, F29 |
+| T20.3 | Update privacy allow-list (`vecinita_database/privacy.py`) to include new tables | Code | pending | spec.md §Forbidden schema | T20.2 | — | EV-002 | F28, F29 |
+| T20.4 | Test: migration applies cleanly + table structure matches spec (integration) | Test | pending | data-management-plan §Verification | T20.3 | — | EV-002 | F28, F29 |
+
+#### M21: Audit log & version history endpoints (F29)
+
+**Goal:** `emit_audit_event()` helper, version snapshot creation, GET endpoints for audit log and document history.  
+**Branch:** `feat/M21-audit-endpoints` → `evolve/EV-002-admin-overhaul`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T21.1 | Test: `emit_audit_event()` inserts audit_log row with correct fields (`tests/unit/test_audit_helpers.py`) — red | Test | pending | api-contract F29, ADR-016 | T20.4 | — | EV-002 | F29 |
+| T21.2 | Implement `emit_audit_event()` + `create_document_version()` helpers in internal-write-api | Code | pending | ADR-016, TP-023 (explicit calls) | T21.1 | — | EV-002 | F29 |
+| T21.3 | Wire `emit_audit_event()` into existing write endpoints (batch_upsert, delete_document, patch_document_tags, patch_chunk_tags, retag_document) | Code | pending | TP-023, TP-025 | T21.2 | — | EV-002 | F29 |
+| T21.4 | Test: existing write ops now emit audit events (`tests/integration/test_audit_emission.py`) | Test | pending | TC-056, AC-E8 | T21.3 | D1 | EV-002 | F29 |
+| T21.5 | Implement `GET /internal/v1/audit` — paginated, filterable by event_type/entity_type/date | Code | pending | api-contract §GET /internal/v1/audit | T21.2 | — | EV-002 | F29 |
+| T21.6 | Test: audit log pagination + filters (`tests/e2e/test_uj017_audit_log.py`) | Test | pending | UJ-017, TC-056, TC-057, AC-E8 | T21.5 | — | EV-002 | F29 |
+| T21.7 | Implement `GET /internal/v1/documents/{id}/history` — version timeline | Code | pending | api-contract §GET /documents/{id}/history | T21.2 | — | EV-002 | F29 |
+| T21.8 | Test: document version history (`tests/e2e/test_uj018_document_history.py`) | Test | pending | UJ-018, TC-058, AC-E9 | T21.7, T21.3 | — | EV-002 | F29 |
+
+#### M22: Serving stats endpoints (F28)
+
+**Goal:** `POST /internal/v1/stats/served`, `GET /internal/v1/stats/top-served`, fire-and-forget integration in chat-rag-backend.  
+**Branch:** `feat/M22-serving-stats` → `evolve/EV-002-admin-overhaul`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T22.1 | Test: `POST /internal/v1/stats/served` upserts counter (`tests/integration/test_serving_stats.py`) — red | Test | pending | TC-059, AC-E7 | T20.4 | — | EV-002 | F28 |
+| T22.2 | Implement `POST /internal/v1/stats/served` (upsert into document_serving_stats) | Code | pending | api-contract §POST /stats/served | T22.1 | — | EV-002 | F28 |
+| T22.3 | Test: `GET /internal/v1/stats/top-served` returns ranked list | Test | pending | api-contract §GET /stats/top-served, UJ-019 | T22.2 | — | EV-002 | F28 |
+| T22.4 | Implement `GET /internal/v1/stats/top-served` | Code | pending | api-contract §GET /stats/top-served | T22.3 | — | EV-002 | F28 |
+| T22.5 | Integrate async fire-and-forget `POST /stats/served` in chat-rag-backend after successful RAG response | Code | pending | TP-022, spec.md §Data Flow step 13 | T22.2, T10.4 | — | EV-002 | F28 |
+| T22.6 | Test: chat-rag-backend fires stats POST on successful ask (`tests/integration/test_stats_fire_forget.py`) | Test | pending | TP-022 | T22.5 | D1 | EV-002 | F28 |
+
+#### M23: Bulk operations endpoints (F27)
+
+**Goal:** Bulk delete, bulk tag, bulk retag, bulk metadata — partial success, audit emission.  
+**Branch:** `feat/M23-bulk-ops` → `evolve/EV-002-admin-overhaul`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T23.1 | Test: `DELETE /internal/v1/documents/bulk` deletes up to 100 + emits audit (`tests/e2e/test_uj015_bulk_delete.py`) — red | Test | pending | UJ-015, TC-053, AC-E5 | T21.3, T20.4 | D1 | EV-002 | F27 |
+| T23.2 | Implement bulk delete endpoint (partial success pattern per TP-024) | Code | pending | api-contract §DELETE /documents/bulk, TP-024 | T23.1 | — | EV-002 | F27 |
+| T23.3 | Test: `PATCH /internal/v1/documents/bulk/tags` respects max-10 cap + emits audit (`tests/e2e/test_uj016_bulk_tag.py`) — red | Test | pending | UJ-016, TC-055, AC-E6 | T21.3 | D1 | EV-002 | F27 |
+| T23.4 | Implement bulk tag endpoint (add + remove; cap enforcement) | Code | pending | api-contract §PATCH /documents/bulk/tags | T23.3 | — | EV-002 | F27 |
+| T23.5 | Test: `POST /internal/v1/documents/bulk/retag` enqueues retag jobs — red | Test | pending | api-contract §POST /documents/bulk/retag | T23.2 | — | EV-002 | F27 |
+| T23.6 | Implement bulk retag endpoint | Code | pending | api-contract §POST /documents/bulk/retag | T23.5 | — | EV-002 | F27 |
+| T23.7 | Test: `PATCH /internal/v1/documents/bulk/metadata` updates title/language + emits audit — red | Test | pending | api-contract §PATCH /documents/bulk/metadata | T21.3 | D1 | EV-002 | F27 |
+| T23.8 | Implement bulk metadata endpoint | Code | pending | api-contract §PATCH /documents/bulk/metadata | T23.7 | — | EV-002 | F27 |
+
+#### M24: Health aggregator & stats summary (F25, F26)
+
+**Goal:** `GET /internal/v1/health/all` aggregator, `GET /internal/v1/stats/summary` dashboard endpoint.  
+**Branch:** `feat/M24-health-stats` → `evolve/EV-002-admin-overhaul`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T24.1 | Test: `GET /internal/v1/health/all` returns status per service (`tests/unit/test_health_aggregator.py`) — red | Test | pending | UJ-014, TC-052, AC-E4 | T20.4 | — | EV-002 | F26 |
+| T24.2 | Implement health aggregator endpoint (httpx parallel polling with VECINITA_HEALTH_TIMEOUT_MS) | Code | pending | feature-list F26, TP-019 | T24.1 | — | EV-002 | F26 |
+| T24.3 | Test: `GET /internal/v1/stats/summary` returns aggregated counts (`tests/unit/test_stats_summary.py`) — red | Test | pending | UJ-013, TC-051, AC-E3 | T22.4, T21.5 | — | EV-002 | F25 |
+| T24.4 | Implement stats summary endpoint (real-time SQL per TP-020) | Code | pending | api-contract §GET /stats/summary | T24.3 | — | EV-002 | F25 |
+| T24.5 | Test: CORS preflight on all new EV-002 endpoints (DELETE, PATCH, GET) from admin origin (`tests/unit/test_cors_ev002.py`) | Test | pending | TC-060, AC-E10 | T23.8, T24.4, T24.2 | — | EV-002 | F23–F29 |
+| T24.6 | Extend `configure_cors()` — ensure DELETE + PATCH verbs allowed for internal-write-api | Code | pending | cors-browser-methods.mdc, TP-019 | T24.5 | — | EV-002 | F27 |
+
+#### Phase 6 Gate Check
+
+- [ ] All M20–M24 tasks completed
+- [ ] `alembic upgrade head` includes 3 new tables; `pytest tests/privacy/` passes
+- [ ] `pytest tests/e2e/test_uj015*.py test_uj016*.py test_uj017*.py test_uj018*.py test_uj019*.py` passes
+- [ ] TC-060 CORS preflight on new endpoints passes locally (H0c)
+- [ ] Audit emission verified on existing + new write paths
+- [ ] T24.3/T24.4 stats summary endpoint returns aggregated counts (F25) <!-- TS-EV002-C07 -->
+- [ ] T24.1/T24.2 health aggregator polls all 8 services within timeout (F26) <!-- TS-EV002-C07 -->
+- [ ] Cost note: No new cloud resources needed (same DO internal-write-api; no new Modal)
+
+---
+
+### Phase 7: EV-002 Frontend — Admin UI Overhaul (F23, F24, F25, F26, F27, F29)
+
+**Objective:** shadcn/ui migration, React Router navigation, tag display, dashboard, health, bulk ops, audit log UI — all in data-management-frontend.  
+**Entry gate:** Phase 6 gate passed (all backend endpoints functional).  
+**Exit gate:** All admin pages render; Vitest component tests pass; admin navigation works across all sections.  
+**Evolve cycle:** EV-002 (F23–F29)
+
+#### M25: shadcn/ui scaffold + routing (F23)
+
+**Goal:** Install Tailwind v3, shadcn/ui init, React Router v7, layout shell with navigation.  
+**Branch:** `feat/M25-shadcn-routing` → `evolve/EV-002-admin-overhaul`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T25.1 | Install Tailwind v3 + PostCSS + autoprefixer in data-management-frontend | Config | pending | dependency-inventory, TP-018 | T7.1 | — | EV-002 | F23 |
+| T25.2 | Run `npx shadcn-ui@latest init`; configure `components.json` (New York style, CSS variables) | Config | pending | TP-026 | T25.1 | — | EV-002 | F23 |
+| T25.3 | Add shadcn components: Button, Card, Badge, Table, Dialog, Sheet, Tabs, Input, Select, Checkbox | Config | pending | feature-list F23 | T25.2 | — | EV-002 | F23 |
+| T25.4 | Install react-router v7; create route structure (/dashboard, /corpus, /health, /audit) | Config | pending | TP-021, UJ-020 | T25.2 | — | EV-002 | F23 |
+| T25.5 | Implement layout shell: sidebar navigation, system-preference dark/light theme, responsive | Code | pending | UJ-020, AC-E1 | T25.3, T25.4 | — | EV-002 | F23 |
+| T25.6 | Migrate existing JobForm and CorpusList to shadcn/ui components (preserve functionality) | Code | pending | feature-list F23 | T25.5 | — | EV-002 | F23 |
+| T25.7 | Test: admin navigation between pages + theme toggle (`tests/frontend/test_admin_nav.test.tsx`) | Test | pending | TC-063, UJ-020 | T25.5 | — | EV-002 | F23 |
+
+#### M26: Tag display + corpus modernization (F24)
+
+**Goal:** Tag chips in corpus list, color-coded by source (LLM vs human), modernized list layout.  
+**Branch:** `feat/M26-tag-display` → `evolve/EV-002-admin-overhaul`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T26.1 | Extend corpus list API call to include document tags in response | Code | pending | api-contract, feature-list F24 | T25.6 | — | EV-002 | F24 |
+| T26.2 | Implement TagBadge component (color-coded: LLM=blue, human=green) | Code | pending | UJ-021, AC-E2 | T25.3 | — | EV-002 | F24 |
+| T26.3 | Render tag chips below document title in CorpusList | Code | pending | UJ-021, AC-E2 | T26.1, T26.2 | — | EV-002 | F24 |
+| T26.4 | Test: tag chips render for seeded documents (`tests/frontend/test_tag_chips.test.tsx`) | Test | pending | TC-064, UJ-021 | T26.3 | — | EV-002 | F24 |
+
+#### M27: Dashboard + health pages (F25, F26)
+
+**Goal:** Admin summary dashboard with stat cards; health status grid with polling.  
+**Branch:** `feat/M27-dashboard-health` → `evolve/EV-002-admin-overhaul`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T27.1 | Implement Dashboard page — stat cards (documents, chunks, tags, jobs, languages, storage) | Code | pending | UJ-013, feature-list F25, AC-E3 | T25.5, T24.4 | — | EV-002 | F25 |
+| T27.2 | Implement "Top Served Documents" widget on Dashboard | Code | pending | UJ-019, feature-list F28 | T27.1, T22.4 | — | EV-002 | F28 |
+| T27.3 | Implement "Recent Activity" feed widget from audit log | Code | pending | feature-list F25 | T27.1, T21.5 | — | EV-002 | F25, F29 |
+| T27.4 | Test: dashboard renders all stat types with loading/error states (`tests/frontend/test_dashboard.test.tsx`) | Test | pending | TC-051, AC-E3 | T27.3 | — | EV-002 | F25 |
+| T27.5 | Implement Health page — service status grid with manual refresh | Code | pending | UJ-014, feature-list F26, AC-E4 | T25.5, T24.2 | — | EV-002 | F26 |
+| T27.6 | Test: health page shows up/down per service (`tests/frontend/test_health_page.test.tsx`) | Test | pending | TC-052, AC-E4 | T27.5 | — | EV-002 | F26 |
+
+#### M28: Bulk operations UI (F27)
+
+**Goal:** Multi-select checkbox, bulk action toolbar, confirmation dialogs, partial success feedback.  
+**Branch:** `feat/M28-bulk-ops-ui` → `evolve/EV-002-admin-overhaul`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T28.1 | Add multi-select checkboxes to corpus list + "select all" + shift-click | Code | pending | UJ-015, feature-list F27 | T26.3 | — | EV-002 | F27 |
+| T28.2 | Implement bulk action toolbar (delete, tag, retag, edit metadata) — appears when selection > 0 | Code | pending | feature-list F27, AC-E5/E6 | T28.1 | — | EV-002 | F27 |
+| T28.3 | Implement bulk delete dialog (confirmation + partial success display) | Code | pending | UJ-015, TP-024 | T28.2, T23.2 | — | EV-002 | F27 |
+| T28.4 | Implement bulk tag dialog (add/remove tags) | Code | pending | UJ-016 | T28.2, T23.4 | — | EV-002 | F27 |
+| T28.5 | Implement bulk metadata edit dialog (title/language) | Code | pending | feature-list F27 | T28.2, T23.8 | — | EV-002 | F27 |
+| T28.6 | Test: bulk select + delete flow (`tests/frontend/test_bulk_ops.test.tsx`) | Test | pending | AC-E5, AC-E6 | T28.5 | — | EV-002 | F27 |
+
+#### M29: Audit log + version history UI (F29)
+
+**Goal:** Global audit log page with filters; per-document history timeline in document detail.  
+**Branch:** `feat/M29-audit-ui` → `evolve/EV-002-admin-overhaul`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T29.1 | Implement Audit Log page — table with event_type, entity, timestamp, payload summary | Code | pending | UJ-017, feature-list F29, AC-E8 | T25.5, T21.5 | — | EV-002 | F29 |
+| T29.2 | Add filters: event_type dropdown, date range picker, entity_id search | Code | pending | UJ-017 | T29.1 | — | EV-002 | F29 |
+| T29.3 | Add expandable payload detail (JSON diff viewer) per audit entry | Code | pending | UJ-017 | T29.1 | — | EV-002 | F29 |
+| T29.4 | Implement per-document history timeline in document detail view | Code | pending | UJ-018, AC-E9 | T29.1, T21.7 | — | EV-002 | F29 |
+| T29.5 | Test: audit log page pagination + filter (`tests/frontend/test_audit_page.test.tsx`) | Test | pending | TC-056, TC-057 | T29.3 | — | EV-002 | F29 |
+| T29.6 | Test: document history timeline renders (`tests/frontend/test_doc_history.test.tsx`) | Test | pending | TC-058 | T29.4 | — | EV-002 | F29 |
+
+#### Phase 7 Gate Check
+
+- [ ] All M25–M29 tasks completed
+- [ ] `cd apps/data-management-frontend && npm run lint && npm test` passes
+- [ ] All admin pages accessible via React Router (/dashboard, /corpus, /health, /audit)
+- [ ] Theme toggle follows system preference; responsive at 768px + 1280px
+- [ ] Vitest component tests cover all new pages/components
+
+---
+
+### Phase 8: EV-002 Integration & Deploy (F28, F29)
+
+**Objective:** Audit retention background job, CORS + connectivity verification, staging deploy with full validation.  
+**Entry gate:** Phase 7 gate passed.  
+**Exit gate:** Staging deploy with H1–H5 passing; all EV-002 endpoints operational.  
+**Evolve cycle:** EV-002 (F23–F29)
+
+#### M30: Audit retention + integration polish
+
+**Goal:** Background cleanup job for audit retention; OpenAPI spec updates; E2E integration.  
+**Branch:** `feat/M30-retention-integration` → `evolve/EV-002-admin-overhaul`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T30.1 | Test: audit cleanup deletes records older than retention period (`tests/unit/test_audit_retention.py`) — red | Test | pending | TC-061, TP-027 | T21.5 | — | EV-002 | F29 |
+| T30.2 | Implement `cleanup_audit_log()` function + daily background trigger (Modal cron or DO cron job) | Code | pending | TP-027, feature-list F29 | T30.1 | — | EV-002 | F29 |
+| T30.3 | Update `openapi/internal-write.yaml` with all EV-002 endpoints | Docs | pending | ADR-011 | T24.6 | — | EV-002 | F23–F29 |
+| T30.4 | Full E2E integration test: ingest → stats increment → audit → bulk delete → verify history (`tests/e2e/test_ev002_integration.py`) | Test | pending | UJ-013–UJ-021 | T29.6, T22.6, T23.2 | D1 | EV-002 | F25–F29 |
+
+#### M31: EV-002 Deploy & connectivity
+
+**Goal:** Staging secrets, CORS, deploy sequence, H1–H5 verification.  
+**Branch:** `feat/M31-ev002-deploy` → `evolve/EV-002-admin-overhaul`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T31.1 | Update `docs/staging-secrets-matrix.md` — new env vars (VECINITA_HEALTH_TIMEOUT_MS, VECINITA_STATS_ENABLED, VECINITA_AUDIT_RETENTION_DAYS) | Docs | pending | staging-secrets-matrix, config-spec | T30.3 | — | EV-002 | F25–F29 |
+| T31.2 | Extend `tests/smoke/test_staging_connectivity.py` — EV-002 endpoints H4 preflight | Test | pending | TC-060, AC-E10, connectivity-gates | T24.6 | — | EV-002 | F23–F29 |
+| T31.3 | Extend `scripts/deploy/verify_connectivity.sh` for EV-002 routes | Config | pending | connectivity-gates H4 | T31.2 | — | EV-002 | F23–F29 |
+| T31.4 | Deploy: run Alembic migration (new tables) | Config | pending | TP-029 step 1 | T31.1 | — | EV-002 | F28, F29 |
+| T31.5 | Deploy: redeploy internal-write-api (new endpoints) | Config | pending | TP-029 step 2 | T31.4 | — | EV-002 | F25–F29 |
+| T31.6 | Deploy: redeploy chat-rag-backend (stats POST integration) | Config | pending | TP-029 step 3 | T31.5 | — | EV-002 | F28 |
+| T31.7 | Deploy: redeploy admin frontend (full UI overhaul) | Config | pending | TP-029 step 4 | T31.6 | — | EV-002 | F23–F29 |
+| T31.8 | Run H1–H5 staging validation | Config | pending | 13-deploy-smoke | T31.7 | — | EV-002 | F23–F29 |
+
+#### Phase 8 Gate Check
+
+- [ ] All M30–M31 tasks completed
+- [ ] Staging deploy successful; H1–H5 passing
+- [ ] Audit retention cleanup verified on staging
+- [ ] OpenAPI spec matches deployed routes
+- [ ] No new cloud cost (same DO internal-write-api; audit retention runs on existing infra)
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -456,6 +681,19 @@ main
       ├── feat/M17-browse-tag-rag
       ├── feat/M18-admin-tags
       └── feat/M19-ev001-deploy
+ └── evolve/EV-002-admin-overhaul (from main)
+      ├── feat/M20-ev002-schema
+      ├── feat/M21-audit-endpoints
+      ├── feat/M22-serving-stats
+      ├── feat/M23-bulk-ops
+      ├── feat/M24-health-stats
+      ├── feat/M25-shadcn-routing
+      ├── feat/M26-tag-display
+      ├── feat/M27-dashboard-health
+      ├── feat/M28-bulk-ops-ui
+      ├── feat/M29-audit-ui
+      ├── feat/M30-retention-integration
+      └── feat/M31-ev002-deploy
 ```
 
 ### PR Plan
@@ -486,6 +724,19 @@ main
 | PR-22 | Minor | M18 | feat/M18-admin-tags | evolve/EV-001-corpus-tags | merged |
 | PR-23 | Minor | M19 | feat/M19-ev001-deploy | evolve/EV-001-corpus-tags | merged |
 | PR-24 | Major | Phase 5 / EV-001 | evolve/EV-001-corpus-tags | main | merged |
+| PR-25 | Minor | M20 | feat/M20-ev002-schema | evolve/EV-002-admin-overhaul | pending |
+| PR-26 | Minor | M21 | feat/M21-audit-endpoints | evolve/EV-002-admin-overhaul | pending |
+| PR-27 | Minor | M22 | feat/M22-serving-stats | evolve/EV-002-admin-overhaul | pending |
+| PR-28 | Minor | M23 | feat/M23-bulk-ops | evolve/EV-002-admin-overhaul | pending |
+| PR-29 | Minor | M24 | feat/M24-health-stats | evolve/EV-002-admin-overhaul | pending |
+| PR-30 | Minor | M25 | feat/M25-shadcn-routing | evolve/EV-002-admin-overhaul | pending |
+| PR-31 | Minor | M26 | feat/M26-tag-display | evolve/EV-002-admin-overhaul | pending |
+| PR-32 | Minor | M27 | feat/M27-dashboard-health | evolve/EV-002-admin-overhaul | pending |
+| PR-33 | Minor | M28 | feat/M28-bulk-ops-ui | evolve/EV-002-admin-overhaul | pending |
+| PR-34 | Minor | M29 | feat/M29-audit-ui | evolve/EV-002-admin-overhaul | pending |
+| PR-35 | Minor | M30 | feat/M30-retention-integration | evolve/EV-002-admin-overhaul | pending |
+| PR-36 | Minor | M31 | feat/M31-ev002-deploy | evolve/EV-002-admin-overhaul | pending |
+| PR-37 | Major | Phase 6–8 / EV-002 | evolve/EV-002-admin-overhaul | main | pending |
 
 ## Task Tracking
 
@@ -603,6 +854,79 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T19.3 | M19 | 5 | Config | completed | T19.2 | — | EV-001 | 2026-05-24 |
 | T19.5 | M19 | 5 | Config | completed | T19.3, T17.8 | — | EV-001 | 2026-05-24 |
 | T19.4 | M19 | 5 | Config | completed | T19.5, T18.7, T17.11, T18.6 | D1–D9 | EV-001 | 2026-05-24 |
+| T20.1 | M20 | 6 | Test | pending | T15.2 | — | EV-002 | — |
+| T20.2 | M20 | 6 | Code | pending | T20.1 | — | EV-002 | — |
+| T20.3 | M20 | 6 | Code | pending | T20.2 | — | EV-002 | — |
+| T20.4 | M20 | 6 | Test | pending | T20.3 | — | EV-002 | — |
+| T21.1 | M21 | 6 | Test | pending | T20.4 | — | EV-002 | — |
+| T21.2 | M21 | 6 | Code | pending | T21.1 | — | EV-002 | — |
+| T21.3 | M21 | 6 | Code | pending | T21.2 | — | EV-002 | — |
+| T21.4 | M21 | 6 | Test | pending | T21.3 | D1 | EV-002 | — |
+| T21.5 | M21 | 6 | Code | pending | T21.2 | — | EV-002 | — |
+| T21.6 | M21 | 6 | Test | pending | T21.5 | — | EV-002 | — |
+| T21.7 | M21 | 6 | Code | pending | T21.2 | — | EV-002 | — |
+| T21.8 | M21 | 6 | Test | pending | T21.7, T21.3 | — | EV-002 | — |
+| T22.1 | M22 | 6 | Test | pending | T20.4 | — | EV-002 | — |
+| T22.2 | M22 | 6 | Code | pending | T22.1 | — | EV-002 | — |
+| T22.3 | M22 | 6 | Test | pending | T22.2 | — | EV-002 | — |
+| T22.4 | M22 | 6 | Code | pending | T22.3 | — | EV-002 | — |
+| T22.5 | M22 | 6 | Code | pending | T22.2, T10.4 | — | EV-002 | — |
+| T22.6 | M22 | 6 | Test | pending | T22.5 | D1 | EV-002 | — |
+| T23.1 | M23 | 6 | Test | pending | T21.3, T20.4 | D1 | EV-002 | — |
+| T23.2 | M23 | 6 | Code | pending | T23.1 | — | EV-002 | — |
+| T23.3 | M23 | 6 | Test | pending | T21.3 | D1 | EV-002 | — |
+| T23.4 | M23 | 6 | Code | pending | T23.3 | — | EV-002 | — |
+| T23.5 | M23 | 6 | Test | pending | T23.2 | — | EV-002 | — |
+| T23.6 | M23 | 6 | Code | pending | T23.5 | — | EV-002 | — |
+| T23.7 | M23 | 6 | Test | pending | T21.3 | D1 | EV-002 | — |
+| T23.8 | M23 | 6 | Code | pending | T23.7 | — | EV-002 | — |
+| T24.1 | M24 | 6 | Test | pending | T20.4 | — | EV-002 | — |
+| T24.2 | M24 | 6 | Code | pending | T24.1 | — | EV-002 | — |
+| T24.3 | M24 | 6 | Test | pending | T22.4, T21.5 | — | EV-002 | — |
+| T24.4 | M24 | 6 | Code | pending | T24.3 | — | EV-002 | — |
+| T24.5 | M24 | 6 | Test | pending | T23.8, T24.4, T24.2 | — | EV-002 | — |
+| T24.6 | M24 | 6 | Code | pending | T24.5 | — | EV-002 | — |
+| T25.1 | M25 | 7 | Config | pending | T7.1 | — | EV-002 | — |
+| T25.2 | M25 | 7 | Config | pending | T25.1 | — | EV-002 | — |
+| T25.3 | M25 | 7 | Config | pending | T25.2 | — | EV-002 | — |
+| T25.4 | M25 | 7 | Config | pending | T25.2 | — | EV-002 | — |
+| T25.5 | M25 | 7 | Code | pending | T25.3, T25.4 | — | EV-002 | — |
+| T25.6 | M25 | 7 | Code | pending | T25.5 | — | EV-002 | — |
+| T25.7 | M25 | 7 | Test | pending | T25.5 | — | EV-002 | — |
+| T26.1 | M26 | 7 | Code | pending | T25.6 | — | EV-002 | — |
+| T26.2 | M26 | 7 | Code | pending | T25.3 | — | EV-002 | — |
+| T26.3 | M26 | 7 | Code | pending | T26.1, T26.2 | — | EV-002 | — |
+| T26.4 | M26 | 7 | Test | pending | T26.3 | — | EV-002 | — |
+| T27.1 | M27 | 7 | Code | pending | T25.5, T24.4 | — | EV-002 | — |
+| T27.2 | M27 | 7 | Code | pending | T27.1, T22.4 | — | EV-002 | — |
+| T27.3 | M27 | 7 | Code | pending | T27.1, T21.5 | — | EV-002 | — |
+| T27.4 | M27 | 7 | Test | pending | T27.3 | — | EV-002 | — |
+| T27.5 | M27 | 7 | Code | pending | T25.5, T24.2 | — | EV-002 | — |
+| T27.6 | M27 | 7 | Test | pending | T27.5 | — | EV-002 | — |
+| T28.1 | M28 | 7 | Code | pending | T26.3 | — | EV-002 | — |
+| T28.2 | M28 | 7 | Code | pending | T28.1 | — | EV-002 | — |
+| T28.3 | M28 | 7 | Code | pending | T28.2, T23.2 | — | EV-002 | — |
+| T28.4 | M28 | 7 | Code | pending | T28.2, T23.4 | — | EV-002 | — |
+| T28.5 | M28 | 7 | Code | pending | T28.2, T23.8 | — | EV-002 | — |
+| T28.6 | M28 | 7 | Test | pending | T28.5 | — | EV-002 | — |
+| T29.1 | M29 | 7 | Code | pending | T25.5, T21.5 | — | EV-002 | — |
+| T29.2 | M29 | 7 | Code | pending | T29.1 | — | EV-002 | — |
+| T29.3 | M29 | 7 | Code | pending | T29.1 | — | EV-002 | — |
+| T29.4 | M29 | 7 | Code | pending | T29.1, T21.7 | — | EV-002 | — |
+| T29.5 | M29 | 7 | Test | pending | T29.3 | — | EV-002 | — |
+| T29.6 | M29 | 7 | Test | pending | T29.4 | — | EV-002 | — |
+| T30.1 | M30 | 8 | Test | pending | T21.5 | — | EV-002 | — |
+| T30.2 | M30 | 8 | Code | pending | T30.1 | — | EV-002 | — |
+| T30.3 | M30 | 8 | Docs | pending | T24.6 | — | EV-002 | — |
+| T30.4 | M30 | 8 | Test | pending | T29.6, T22.6, T23.2 | D1 | EV-002 | — |
+| T31.1 | M31 | 8 | Docs | pending | T30.3 | — | EV-002 | — |
+| T31.2 | M31 | 8 | Test | pending | T24.6 | — | EV-002 | — |
+| T31.3 | M31 | 8 | Config | pending | T31.2 | — | EV-002 | — |
+| T31.4 | M31 | 8 | Config | pending | T31.1 | — | EV-002 | — |
+| T31.5 | M31 | 8 | Config | pending | T31.4 | — | EV-002 | — |
+| T31.6 | M31 | 8 | Config | pending | T31.5 | — | EV-002 | — |
+| T31.7 | M31 | 8 | Config | pending | T31.6 | — | EV-002 | — |
+| T31.8 | M31 | 8 | Config | pending | T31.7 | — | EV-002 | — |
 
 ## Phase Gate Log
 
@@ -643,3 +967,15 @@ CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, py
 - [x] EV-001 retrieval SQL — union match document OR chunk (TP-013)
 - [x] EV-001 tag inference — same vLLM (TP-014)
 - [ ] Exact LlamaIndex patch versions — pin at T8.1 during build
+- [x] EV-002 Tailwind version — v3 (TP-018)
+- [x] EV-002 Health dashboard architecture — aggregator on internal-write-api (TP-019)
+- [x] EV-002 Stats refresh — real-time SQL (TP-020)
+- [x] EV-002 React Router — v7 (TP-021)
+- [x] EV-002 Serving stats — async fire-and-forget (TP-022)
+- [x] EV-002 Audit emission — explicit helper calls (TP-023)
+- [x] EV-002 Bulk transactions — partial success (TP-024)
+- [x] EV-002 Version snapshots — on audit event (TP-025)
+- [x] EV-002 shadcn/ui — npx init (TP-026)
+- [x] EV-002 Audit retention — background cleanup job (TP-027)
+- [x] EV-002 Frontend testing — Vitest + Testing Library (TP-028)
+- [x] EV-002 Deploy order — migration → write-api → chat-rag → frontend (TP-029)

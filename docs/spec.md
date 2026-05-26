@@ -3,7 +3,7 @@
 > **Project**: Vecinita  
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Version**: greenfield (`fresh-start` branch)  
-> **Last updated**: 2026-05-24 (EV-001 delta)
+> **Last updated**: 2026-05-26 (EV-002 delta)
 
 ## Overview
 
@@ -100,10 +100,22 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 
 ### DO internal write API
 
-- **Purpose**: Sole component(s) with `DATABASE_URL`; accepts service-authenticated writes from Modal.
-- **Inputs**: Authenticated requests (mTLS, API key, or private network) with document/chunk/embedding/tag payloads; chunk list; tag PATCH.
-- **Outputs**: Upserted rows; corpus list/delete; chunk list; tag CRUD for admin (F21).
-- **Source**: RD-016; EV-001 / ADR-014
+- **Purpose**: Sole component(s) with `DATABASE_URL`; accepts service-authenticated writes from Modal; serves stats, audit, bulk operations, and health aggregation (EV-002).
+- **Inputs**: Authenticated requests (mTLS, API key, or private network) with document/chunk/embedding/tag payloads; chunk list; tag PATCH; bulk operations (F27); stats increment (F28); audit queries (F29).
+- **Outputs**: Upserted rows; corpus list/delete; chunk list; tag CRUD for admin (F21); aggregated stats (F25); audit log entries (F29); serving stats (F28).
+- **New endpoints (EV-002)**:
+  | Method | Path | Feature |
+  |--------|------|---------|
+  | GET | `/internal/v1/stats/summary` | F25 — aggregated dashboard stats |
+  | POST | `/internal/v1/stats/served` | F28 — increment serving counter |
+  | GET | `/internal/v1/stats/top-served` | F28 — top served documents |
+  | DELETE | `/internal/v1/documents/bulk` | F27 — bulk delete |
+  | PATCH | `/internal/v1/documents/bulk/tags` | F27 — bulk tag |
+  | POST | `/internal/v1/documents/bulk/retag` | F27 — bulk LLM re-tag |
+  | PATCH | `/internal/v1/documents/bulk/metadata` | F27 — bulk edit metadata |
+  | GET | `/internal/v1/audit` | F29 — global audit log (paginated, filterable) |
+  | GET | `/internal/v1/documents/{id}/history` | F29 — per-document version history |
+- **Source**: RD-016; EV-001 / ADR-014; EV-002
 
 ### Database app
 
@@ -136,6 +148,8 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 | 10. Embed query | question text | Modal FastEmbed | query vector | — |
 | 11. Retrieve | query vector + tags | pgvector + tag JOIN | top_k chunks | Union doc+chunk tags |
 | 12. Generate | context + question | Modal LLM | answer / stream | No server chat history |
+| 13. Record stats | response doc IDs | ChatRAG → internal write API `POST /stats/served` | serving counter++ | Async fire-and-forget (F28) |
+| 14. Emit audit | write operation | Internal write API middleware | audit_log row | Immutable, request_id only (F29) |
 
 ### Query path (detail)
 
@@ -174,7 +188,7 @@ Migrations and CI must reject tables/columns including:
 
 `users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`, `auth_*`
 
-Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config`, `tags`, `document_tags`, `chunk_tags` (EV-001). Tag provenance: `source` enum only — no operator identity columns.
+Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config`, `tags`, `document_tags`, `chunk_tags` (EV-001), `audit_log`, `document_versions`, `document_serving_stats` (EV-002). Tag provenance: `source` enum only — no operator identity columns. Audit log: `request_id` only — no IP/identity columns (ADR-016).
 
 ### Assumptions
 
@@ -205,6 +219,16 @@ Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config`, `tags`, 
 | Internal write | PATCH | `/internal/v1/chunks/{id}/tags` | Admin chunk tags |
 | Internal write | POST | `/internal/v1/documents/{id}/retag` | Admin LLM re-tag (proposed) |
 | Data Mgmt (Modal) | POST/GET | `/jobs`, `/jobs/{id}` | Proxy auth |
+| Internal write | GET | `/internal/v1/stats/summary` | Dashboard aggregated stats (F25) |
+| Internal write | POST | `/internal/v1/stats/served` | Increment serving counter (F28) |
+| Internal write | GET | `/internal/v1/stats/top-served` | Top served documents (F28) |
+| Internal write | DELETE | `/internal/v1/documents/bulk` | Bulk delete (F27) |
+| Internal write | PATCH | `/internal/v1/documents/bulk/tags` | Bulk tag (F27) |
+| Internal write | POST | `/internal/v1/documents/bulk/retag` | Bulk LLM re-tag (F27) |
+| Internal write | PATCH | `/internal/v1/documents/bulk/metadata` | Bulk edit metadata (F27) |
+| Internal write | GET | `/internal/v1/audit` | Global audit log (F29) |
+| Internal write | GET | `/internal/v1/documents/{id}/history` | Per-document history (F29) |
+| Internal write | GET | `/internal/v1/health/all` | Health aggregator — polls all 8 services (F26, TP-019) |
 | Health | GET | `/health` | All HTTP services |
 
 Full schemas: `docs/api-contract.md` (interview pending); OpenAPI files in repo (required).
@@ -213,5 +237,5 @@ Full schemas: `docs/api-contract.md` (interview pending); OpenAPI files in repo 
 
 - [feature-list.md](feature-list.md)
 - [context-brief.md](context-brief.md)
-- [ADR index](adr/README.md) — ADR-001 through ADR-013
+- [ADR index](adr/README.md) — ADR-001 through ADR-016
 - [requirements-decisions.md](requirements-decisions.md)

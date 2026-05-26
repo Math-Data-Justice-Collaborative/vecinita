@@ -149,3 +149,70 @@ Ingest tag-after-chunk-before-embed; async retag via `jobs.job_type=retag`; unio
 - [x] Consistency check complete (15/15 resolved)
 - [x] Connectivity tasks include H4 + H5 + admin PATCH (not deploy-only)
 - [ ] **06-tech-tooling** skipped for EV-001 per routing — **next: 07-build** (M15)
+
+---
+
+## EV-002 delta audit (2026-05-26)
+
+> **Stage**: 05-verify-tech (EV-002)  
+> **Evolve cycle**: EV-002 (F23–F29)  
+> **Prerequisite**: 04-tech-plan completed; 02-verify-plan product delta passed
+
+### Document inventory
+
+| # | Document | Statements reviewed | Result |
+|---|----------|---------------------|--------|
+| 1 | Execution plan (Phases 6–8) | 13 | Updated (task count, Phase 6 gate) |
+| 2 | ADR-017 | 12 | Pass (auto-approved — all from interview) |
+| 3 | Dependency inventory | 2 | Pass (Node packages) |
+| 4 | Config spec | 3 | Updated (removed VITE_* health vars, added aggregator vars) |
+| 5 | Staging secrets matrix | 2 | Updated (VECINITA_HEALTH_DATA_MGMT_URL) |
+| 6 | API contract | 4 | Updated (bulk response schemas, health/all endpoint) |
+| 7 | Acceptance criteria | 1 | Updated (AC-E5 wording) |
+| 8 | Spec.md | 1 | Updated (health/all in API surface) |
+
+### Results summary
+
+| Metric | Count |
+|--------|-------|
+| Documents audited | 8 |
+| Total statements | 23 |
+| Auto-approved (high) | 15 (TP-018–TP-029, phases, deps) |
+| User-approved (medium/low) | 8 |
+| Denied | 0 |
+| Modified via verdict | 7 source-doc edits |
+| Skipped | 0 |
+
+### Consistency check (EV-002)
+
+| Area | Checks | Issues found | Resolved |
+|------|--------|--------------|----------|
+| Product ↔ Technical | 9 | 3 | 3 |
+| Internal Technical | 8 | 5 | 5 |
+| **Total** | 17 | 8 | 8 |
+
+### Auto-approved (high) — TP-018 through TP-029
+
+Tailwind v3; health aggregator on internal-write-api (avoids Modal CORS); real-time SQL stats; React Router v7; fire-and-forget serving stats; explicit audit helpers; partial-success bulk; version snapshots on audit; shadcn/ui npx init; background audit retention (365d); Vitest + Testing Library; sequential deploy order.
+
+### User-resolved issues
+
+| Stmt | Resolution |
+|------|------------|
+| TS-EV002-C01 | Remove `VITE_*` health URLs from config-spec; frontend uses aggregator via `VITE_VECINITA_CORPUS_API_URL` |
+| TS-EV002-C02 | Fix AC-E5: "atomically" → "independently with partial-success" (TP-024 alignment) |
+| TS-EV002-C03 | Fix api-contract: bulk endpoint responses use `{successes, failures}` per TP-024 |
+| TS-EV002-C04 | Add `GET /internal/v1/health/all` to api-contract (was missing) |
+| TS-EV002-C05 | Add `VECINITA_HEALTH_DATA_MGMT_URL` to staging-secrets-matrix; 4 total health URLs + derived |
+| TS-EV002-C06 | Fix task count: 73 EV-002 tasks, 184 total (was erroneously 52/163) |
+| TS-EV002-C07 | Add M24 (F25/F26) coverage to Phase 6 gate criteria |
+| TS-EV002-C08 | Accept frontend code-before-test pattern (consistent with M7/M11, TV-D02) |
+
+### Phase B gate (EV-002 partial)
+
+- [x] EV-002 execution plan audited
+- [x] Consistency check complete (8/8 resolved)
+- [x] Config spec aligned with TP-019 aggregator decision
+- [x] Bulk response schemas aligned with TP-024 partial success
+- [x] Health aggregator endpoint documented in api-contract + spec
+- [ ] **06-tech-tooling** skipped for EV-002 per routing — **next: 07-build** (M20)

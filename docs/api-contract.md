@@ -1,7 +1,7 @@
 # API Contract
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-24 (EV-001)  
+> **Last updated**: 2026-05-26 (EV-002)  
 > **OpenAPI**: Source of truth in repo — `openapi/chat-rag.yaml`, `openapi/data-management.yaml`, `openapi/internal-write.yaml`
 
 Contracts are **greenfield** (ADR-003). Public routes must not accept identity fields (`email`, `user_id`, `name`, etc.).
@@ -216,6 +216,239 @@ Base path: `/internal/v1` (audited S6.2).
 - **Purpose**: Trigger LLM re-tag for document (F20); returns updated tags or async job id (04-tech-plan).
 
 Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequest` delta.
+
+### GET `/internal/v1/documents/{document_id}/tags`
+
+- **Purpose**: Read document tags (write-read parity with PATCH).
+- **Response** `200`: `{"tags": [{"slug": "...", "label": "...", "source": "llm|human"}]}`
+
+### GET `/internal/v1/health/all` (EV-002 / F26)
+
+- **Purpose**: Backend health aggregator — polls all services and returns unified status (TP-019). Admin frontend calls this single endpoint instead of polling services directly.
+- **Response** `200`:
+
+```json
+{
+  "status": "healthy",
+  "services": {
+    "internal_write_api": {"status": "up", "latency_ms": 5},
+    "chat_rag_backend": {"status": "up", "latency_ms": 120},
+    "database": {"status": "up", "latency_ms": 8},
+    "modal_data_management": {"status": "up", "latency_ms": 450},
+    "modal_embedding": {"status": "up", "latency_ms": 230},
+    "modal_llm": {"status": "down", "error": "timeout"},
+    "chat_rag_frontend": {"status": "up", "latency_ms": 80},
+    "admin_frontend": {"status": "up", "latency_ms": 75}
+  },
+  "checked_at": "ISO8601"
+}
+```
+
+- **Behavior**: Polls each service `/health` endpoint with `VECINITA_HEALTH_TIMEOUT_MS` timeout. Service URLs from env vars (see staging-secrets-matrix). Static frontends checked by HTTP GET.
+
+### GET `/internal/v1/stats/summary` (EV-002 / F25)
+
+- **Purpose**: Aggregated dashboard statistics for admin UI.
+- **Response** `200`:
+
+```json
+{
+  "total_documents": 42,
+  "total_chunks": 1680,
+  "tag_distribution": [
+    {"slug": "housing", "label": "Housing", "document_count": 15}
+  ],
+  "job_stats": {
+    "total": 100,
+    "completed": 85,
+    "failed": 10,
+    "pending": 3,
+    "running": 2
+  },
+  "language_breakdown": {"en": 30, "es": 12},
+  "recent_activity": [
+    {
+      "event_type": "document.created",
+      "entity_id": "uuid",
+      "created_at": "ISO8601",
+      "summary": "Ingested example.com/page"
+    }
+  ],
+  "storage_estimate_bytes": 52428800,
+  "top_served": [
+    {"document_id": "uuid", "title": "...", "served_count": 150, "last_served_at": "ISO8601"}
+  ]
+}
+```
+
+### POST `/internal/v1/stats/served` (EV-002 / F28)
+
+- **Purpose**: Increment serving counters after successful RAG response.
+- **Request**:
+
+```json
+{
+  "document_ids": ["uuid", "uuid"]
+}
+```
+
+- **Response** `202`: `{"acknowledged": true}`
+- **Behavior**: Fire-and-forget; failure does not block caller. Upserts into `document_serving_stats`.
+
+### GET `/internal/v1/stats/top-served` (EV-002 / F28)
+
+- **Purpose**: Top served documents for dashboard widget.
+- **Query**: `limit` (default 10, max 100).
+- **Response** `200`:
+
+```json
+{
+  "items": [
+    {"document_id": "uuid", "title": "...", "url": "...", "served_count": 150, "last_served_at": "ISO8601"}
+  ]
+}
+```
+
+### DELETE `/internal/v1/documents/bulk` (EV-002 / F27)
+
+- **Purpose**: Bulk delete multiple documents.
+- **Request**:
+
+```json
+{
+  "document_ids": ["uuid", "uuid"]
+}
+```
+
+- **Validation**: Max 100 IDs per request.
+- **Response** `200`: <!-- TS-EV002-C03: partial success per TP-024 -->
+
+```json
+{
+  "successes": 8,
+  "failures": [
+    {"id": "uuid", "error": "Document not found"}
+  ]
+}
+```
+
+- **Side effects**: Emits `document.deleted` audit event per successfully deleted document (same `request_id`); cascades to chunks/embeddings.
+
+### PATCH `/internal/v1/documents/bulk/tags` (EV-002 / F27)
+
+- **Purpose**: Bulk add/remove tags across multiple documents.
+- **Request**:
+
+```json
+{
+  "document_ids": ["uuid", "uuid"],
+  "add_tags": [{"slug": "housing", "label": "Housing"}],
+  "remove_tags": ["legal"]
+}
+```
+
+- **Validation**: Max 100 documents; max 10 tags per document after application.
+- **Response** `200`: <!-- TS-EV002-C03: partial success per TP-024 -->
+
+```json
+{
+  "successes": 3,
+  "failures": [
+    {"id": "uuid", "error": "Tag cap exceeded (max 10)"}
+  ]
+}
+```
+
+- **Side effects**: Emits `document.tagged` audit event per successfully updated document; creates document_versions entries.
+
+### POST `/internal/v1/documents/bulk/retag` (EV-002 / F27)
+
+- **Purpose**: Trigger LLM re-tag for multiple documents.
+- **Request**: `{"document_ids": ["uuid", "uuid"]}`
+- **Validation**: Max 100 documents.
+- **Response** `202`: `{"job_ids": ["uuid", "uuid"]}` (one job per document).
+- **Side effects**: Emits `document.retagged` audit event per document.
+
+### PATCH `/internal/v1/documents/bulk/metadata` (EV-002 / F27)
+
+- **Purpose**: Bulk edit document metadata (title, language).
+- **Request**:
+
+```json
+{
+  "document_ids": ["uuid", "uuid"],
+  "updates": {
+    "title": "New Title (optional)",
+    "language": "es (optional)"
+  }
+}
+```
+
+- **Validation**: Max 100 documents; only provided fields are updated.
+- **Response** `200`: <!-- TS-EV002-C03: partial success per TP-024 -->
+
+```json
+{
+  "successes": 2,
+  "failures": [
+    {"id": "uuid", "error": "Document not found"}
+  ]
+}
+```
+
+- **Side effects**: Emits `document.edited` audit event per successfully updated document; creates document_versions entries.
+
+### GET `/internal/v1/audit` (EV-002 / F29)
+
+- **Purpose**: Global audit log (paginated, filterable).
+- **Query**: `page` (default 1), `page_size` (default 50, max 200), `event_type` (filter), `entity_type` (filter), `entity_id` (filter), `since` (ISO8601), `until` (ISO8601).
+- **Response** `200`:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "event_type": "document.deleted",
+      "entity_type": "document",
+      "entity_id": "uuid",
+      "request_id": "uuid",
+      "payload": {"title": "Old Title", "url": "https://..."},
+      "created_at": "ISO8601"
+    }
+  ],
+  "page": 1,
+  "page_size": 50,
+  "total_count": 1200
+}
+```
+
+### GET `/internal/v1/documents/{document_id}/history` (EV-002 / F29)
+
+- **Purpose**: Per-document version history (metadata + tag snapshots).
+- **Response** `200`:
+
+```json
+{
+  "document_id": "uuid",
+  "versions": [
+    {
+      "version_number": 1,
+      "title": "Original Title",
+      "language": "en",
+      "tags_snapshot": [{"slug": "housing", "label": "Housing", "source": "llm"}],
+      "created_at": "ISO8601"
+    },
+    {
+      "version_number": 2,
+      "title": "Updated Title",
+      "language": "en",
+      "tags_snapshot": [{"slug": "housing", "label": "Housing", "source": "human"}, {"slug": "legal", "label": "Legal", "source": "human"}],
+      "created_at": "ISO8601"
+    }
+  ]
+}
+```
 
 ---
 

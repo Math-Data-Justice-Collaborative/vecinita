@@ -1,7 +1,7 @@
 # Configuration Specification
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-24 (EV-001)
+> **Last updated**: 2026-05-26 (EV-002)
 
 ## Precedence
 
@@ -42,6 +42,13 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 |----------|------|---------|----------|-------------|
 | `VECINITA_INTERNAL_API_KEY` | string | — | Yes | Shared secret Modal workers use |
 | `DATABASE_URL` | string | — | Yes | Postgres |
+| `VECINITA_AUDIT_RETENTION_DAYS` | int | `365` | No | Days to retain audit records (0 = forever); F29/ADR-016 |
+| `VECINITA_STATS_ENABLED` | string | `true` | No | Enable serving stats recording (F28) |
+| `VECINITA_HEALTH_TIMEOUT_MS` | int | `5000` | No | Timeout per service health poll in aggregator (F26); TP-019 |
+| `VECINITA_HEALTH_CHAT_RAG_URL` | string | — | Yes (EV-002) | Chat-rag-backend URL for health aggregator |
+| `VECINITA_HEALTH_EMBED_URL` | string | — | Yes (EV-002) | Modal embedding URL for health aggregator |
+| `VECINITA_HEALTH_LLM_URL` | string | — | Yes (EV-002) | Modal LLM URL for health aggregator |
+| `VECINITA_HEALTH_DATA_MGMT_URL` | string | — | Yes (EV-002) | Modal data-mgmt URL for health aggregator |
 
 ### Data Management (Modal)
 
@@ -61,6 +68,9 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VITE_VECINITA_ADMIN_API_URL` | string | — | Yes | Modal ASGI or gateway URL for jobs |
 | `VITE_VECINITA_CORPUS_API_URL` | string | — | Yes (admin) | Internal write API base for corpus/tag admin |
 | `VITE_VECINITA_CORPUS_API_KEY` | string | — | Yes (admin build) | Bearer token for tag/chunk admin routes |
+
+<!-- TP-019 / TS-EV002-C01: Health dashboard uses backend aggregator at GET /internal/v1/health/all
+     (via VITE_VECINITA_CORPUS_API_URL). Frontend does NOT poll services directly. -->
 
 ## Recommended defaults (spec)
 
@@ -82,6 +92,9 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_MAX_TAGS_PER_DOCUMENT` ≥ 1 and ≤ 20 | Config module |
 | `VECINITA_MAX_TAGS_PER_CHUNK` ≥ 1 and ≤ 10 | Config module |
 | `VECINITA_BROWSE_PAGE_SIZE` ≥ 1 and ≤ 100 | Config module |
+| `VECINITA_AUDIT_RETENTION_DAYS` ≥ 0 (0 = forever) | Config module |
+| `VECINITA_STATS_ENABLED` in `true`, `false` | Config module |
+| `VECINITA_HEALTH_TIMEOUT_MS` ≥ 1000 and ≤ 30000 | Config module (internal-write-api) |
 | Reject unknown `VECINITA_*` in strict mode | Optional dev strictness |
 | No identity fields in public API bodies | OpenAPI + Pydantic models |
 

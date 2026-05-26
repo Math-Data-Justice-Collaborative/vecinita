@@ -10,8 +10,8 @@ stages:
     status: completed
     started_at: "2026-05-19"
     completed_at: "2026-05-19"
-    partial_rerun_at: "2026-05-24"
-    partial_rerun_note: "EV-001 delta — corpus tags, community browse, admin chunk/tag editing"
+    partial_rerun_at: "2026-05-26"
+    partial_rerun_note: "EV-002 delta — admin dashboard overhaul, bulk ops, usage stats, audit log"
     phases:
       phase1a_agents:
         status: completed
@@ -61,8 +61,8 @@ stages:
     status: completed
     started_at: "2026-05-24"
     completed_at: "2026-05-24"
-    partial_rerun_at: "2026-05-24"
-    partial_rerun_note: "EV-001 delta F19-F22 — 17 statements, 2 contradictions resolved"
+    partial_rerun_at: "2026-05-26"
+    partial_rerun_note: "EV-002 delta F23-F29 — 24 statements, 1 contradiction resolved, 3 docs updated"
     documents_total: 13
     statements_total: 52
     drift_fixes: 4
@@ -73,6 +73,11 @@ stages:
     ev001_statements: 17
     ev001_auto_approved: 14
     ev001_user_approved: 3
+    ev002_statements: 24
+    ev002_auto_approved: 14
+    ev002_user_approved: 9
+    ev002_modified: 1
+    ev002_contradictions_resolved: 1
   03-plan-tooling:
     status: completed
     started_at: "2026-05-19"
@@ -86,8 +91,8 @@ stages:
     status: completed
     started_at: "2026-05-19"
     completed_at: "2026-05-24"
-    partial_rerun_at: "2026-05-24"
-    partial_rerun_note: "EV-001 delta F19-F22 — tech plan interview in progress"
+    partial_rerun_at: "2026-05-26"
+    partial_rerun_note: "EV-002 delta F23-F29 — tech plan interview complete; Phase 6-8 execution plan"
     substeps:
       phase1_toolchain: completed
       phase2_interview: completed
@@ -97,8 +102,8 @@ stages:
     status: completed
     started_at: "2026-05-19"
     completed_at: "2026-05-19"
-    partial_rerun_at: "2026-05-24"
-    partial_rerun_note: "EV-001 delta F19-F22 — 37 statements, 15 consistency fixes"
+    partial_rerun_at: "2026-05-26"
+    partial_rerun_note: "EV-002 delta F23-F29 — 23 statements, 8 consistency fixes, 7 source-doc edits"
     documents_total: 6
     statements_total: 48
     auto_approved: 27
@@ -111,6 +116,13 @@ stages:
     ev001_auto_approved: 8
     ev001_user_approved: 15
     ev001_consistency_resolved: 15
+    ev002_documents_total: 8
+    ev002_statements_total: 23
+    ev002_auto_approved: 15
+    ev002_user_approved: 8
+    ev002_consistency_found: 8
+    ev002_consistency_resolved: 8
+    ev002_source_edits: 7
   06-tech-tooling:
     status: completed
     started_at: "2026-05-19"
@@ -486,6 +498,104 @@ evolve_cycles:
       - path: openapi/internal-write.yaml
         status: completed
     issues: []
+  - id: EV-002
+    cycle_type: feature
+    feature_ids: [F23, F24, F25, F26, F27, F28]
+    title: "Admin dashboard overhaul, bulk ops, usage stats, audit log"
+    status: in_progress
+    started: "2026-05-26"
+    scope_summary: |
+      F23: Admin UI overhaul (Tailwind CSS + React Router navigation).
+      F24: Admin summary statistics dashboard (document/chunk/tag/job aggregates).
+      F25: System health check dashboard (live service status polling).
+      F26: Bulk corpus document operations (metadata editing, bulk delete, bulk tags).
+      F27: Document retrieval usage statistics (new table, counter on RAG responses).
+      F28: Corpus audit log & version history (new table, hashed IP, JSONB diffs).
+    routing_plan:
+      required_stages:
+        - 00-context
+        - 01-requirements
+        - 02-verify-plan
+        - 04-tech-plan
+        - 05-verify-tech
+        - 07-build
+        - 09-qa
+        - 10-e2e
+        - 11-verify-impl
+        - 12-verify-deploy
+        - 13-deploy-smoke
+      skipped_stages:
+        - 03-plan-tooling
+        - 06-tech-tooling
+    current_stage: 07-build
+    stages:
+      00-context:
+        status: completed
+        completed: "2026-05-26"
+        artifacts_updated:
+          - docs/context-brief.md
+      01-requirements:
+        status: completed
+        completed: "2026-05-26"
+        note: "Specs pre-populated during 00-context; F23-F29 in all docs; RD-034–RD-052 recorded"
+        artifacts_updated:
+          - docs/feature-list.md
+          - docs/spec.md
+          - docs/user-journeys.md
+          - docs/test-plan.md
+          - docs/config-spec.md
+          - docs/api-contract.md
+          - docs/acceptance-criteria.md
+          - docs/requirements-decisions.md
+          - docs/adr/ADR-016-audit-log-no-ip.md
+      02-verify-plan:
+        status: completed
+        completed: "2026-05-26"
+        artifacts_updated:
+          - docs/product-audit.md
+          - docs/product-decisions.md
+          - docs/acceptance-criteria.md
+          - docs/user-journeys.md
+          - docs/test-plan.md
+      04-tech-plan:
+        status: completed
+        started: "2026-05-26"
+        completed: "2026-05-26"
+        artifacts_updated:
+          - docs/execution-plan.md
+          - docs/adr/ADR-017-ev002-implementation.md
+          - docs/dependency-inventory.md
+          - docs/staging-secrets-matrix.md
+      05-verify-tech:
+        status: completed
+        completed: "2026-05-26"
+        artifacts_updated:
+          - docs/tech-audit.md
+          - docs/tech-decisions.md
+          - docs/config-spec.md
+          - docs/api-contract.md
+          - docs/acceptance-criteria.md
+          - docs/spec.md
+          - docs/staging-secrets-matrix.md
+          - docs/execution-plan.md
+    gates:
+      a_to_b: passed
+      b_to_c: pending
+      c_to_d: pending
+      deploy: pending
+    checkpoints:
+      phase_a: passed
+      phase_b: passed
+      phase_c: pending
+      phase_d: pending
+      deploy: pending
+    adrs:
+      - docs/adr/ADR-016-audit-log-no-ip.md
+      - docs/adr/ADR-017-ev002-implementation.md
+    artifacts:
+      - path: docs/context-brief.md
+        status: completed
+    issues: []
 retrospective_cycles: []
 
 agents:
@@ -582,6 +692,11 @@ decisions_log:
   - "EV-001 04-tech-plan delta — TP-010–TP-017 — ADR-015 — 2026-05-24"
   - "EV-001 05-verify-tech delta — TV-021–TV-031 — 15 consistency fixes — 2026-05-24"
   - "EV-001 11-verify-impl delta — F19-F22 all approved; AC-T6 partial (T3 deferred); gate c_to_d passed — 2026-05-25"
+  - "EV-002: admin dashboard + bulk ops + usage stats + audit log — F23-F28 — 2026-05-26"
+  - "R20-R27: EV-002 context decisions — context-brief §12 — 2026-05-26"
+  - "EV-002 02-verify-plan delta complete — 24 statements, ADR-016 approved (no IP), UJ-020/021 + AC-E1-E11 added — 2026-05-26"
+  - "EV-002 04-tech-plan delta — TP-018–TP-029 — ADR-017 — Phase 6-8 execution plan (73 tasks, 12 milestones) — 2026-05-26"
+  - "EV-002 05-verify-tech delta — TV-032–TV-039 — 23 statements, 8 consistency fixes, 7 source-doc edits — 2026-05-26"
 
 artifacts:
   - docs/context-brief.md
@@ -607,6 +722,7 @@ artifacts:
   - docs/adr/ADR-004-cost-sovereignty-zero-personal-data.md
   - docs/adr/ADR-014-corpus-tagging-and-browse.md
   - docs/adr/ADR-015-ev001-tagging-implementation.md
+  - docs/adr/ADR-017-ev002-implementation.md
   - docs/execution-plan.md
   - docs/data-staging-state.md
   - docs/tech-audit.md

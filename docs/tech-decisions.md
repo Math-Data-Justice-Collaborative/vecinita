@@ -2,7 +2,7 @@
 
 > **Stage**: 05-verify-tech  
 > **Extends**: docs/requirements-decisions.md, docs/product-decisions.md  
-> **Last updated**: 2026-05-24
+> **Last updated**: 2026-05-26 (EV-002)
 
 ## 05-verify-tech resolutions
 
@@ -57,6 +57,36 @@
 | TV-D01 | AC-C4 load test | Privacy schema covered by T2.1 (TC-031); full load test deferred to post-v1 ops |
 | TV-D02 | TDD ordering (T3.4, T9.2, T7.2) | Scaffold/stub tasks; tests follow in same milestone — no reorder |
 | TV-D03 | Ingest config explicit tests | Bounds enforced via T6.2/T10.4 wiring to config-spec at implementation |
+
+## EV-002 04-tech-plan decisions (2026-05-26)
+
+| ID | Topic | Decision | ADR |
+|----|-------|----------|-----|
+| TP-018 | Tailwind version | **v3** (PostCSS + tailwind.config.js; stable shadcn/ui recipes) | ADR-017 |
+| TP-019 | Health dashboard arch | **Aggregator** on internal-write-api (avoids Modal CORS) | ADR-017 |
+| TP-020 | Stats refresh | **Real-time SQL** (no caching at pilot scale) | ADR-017 |
+| TP-021 | React Router | **v7** (latest stable) | ADR-017 |
+| TP-022 | Serving stats mechanism | **Async fire-and-forget** httpx background task | ADR-017 |
+| TP-023 | Audit emission | **Explicit helper calls** (no middleware/triggers) | ADR-017 |
+| TP-024 | Bulk transactionality | **Partial success** (process each doc independently) | ADR-017 |
+| TP-025 | Version snapshots | **On audit event** (tied to emission) | ADR-017 |
+| TP-026 | shadcn/ui install | **npx init** (standard copy-paste approach) | ADR-017 |
+| TP-027 | Audit retention | **Background cleanup job** (daily cron) | ADR-017 |
+| TP-028 | Frontend testing | **Vitest + Testing Library** (component tests) | ADR-017 |
+| TP-029 | Deploy order | **Sequential**: migration → write-api → chat-rag → frontend | ADR-017 |
+
+## EV-002 05-verify-tech resolutions (2026-05-26)
+
+| ID | Topic | Decision | Stmt | Source docs updated |
+|----|-------|----------|------|---------------------|
+| TV-032 | Config-spec health vars | Remove `VITE_*` health URLs; frontend uses aggregator via `VITE_VECINITA_CORPUS_API_URL` (TP-019) | TS-EV002-C01 | config-spec.md |
+| TV-033 | AC-E5 wording | "atomically" → "independently with partial-success reporting" (TP-024) | TS-EV002-C02 | acceptance-criteria.md |
+| TV-034 | Bulk response schemas | All bulk endpoints use `{successes, failures}` per TP-024 | TS-EV002-C03 | api-contract.md |
+| TV-035 | Health aggregator endpoint | Add `GET /internal/v1/health/all` to api-contract + spec | TS-EV002-C04 | api-contract.md, spec.md |
+| TV-036 | Health service URLs | Add `VECINITA_HEALTH_DATA_MGMT_URL`; derive others from existing vars | TS-EV002-C05 | staging-secrets-matrix.md, config-spec.md |
+| TV-037 | Task count | **73** EV-002 tasks, **184** total (was erroneous 52/163) | TS-EV002-C06 | execution-plan.md |
+| TV-038 | Phase 6 gate | Add F25/F26 (M24) explicit criteria | TS-EV002-C07 | execution-plan.md |
+| TV-039 | Frontend TDD | Accept code-before-test for UI (consistent with TV-D02) | TS-EV002-C08 | — (no change) |
 
 ## Open (implementation-time)
 

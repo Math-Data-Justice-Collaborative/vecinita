@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita staging  
 > **Source**: `docs/deployment-integration.md` §Secrets, ADR-007, ADR-010  
-> **Last updated**: 2026-05-25 (12-verify-deploy Agent 2 audit — name fix, EV-001 vars)
+> **Last updated**: 2026-05-26 (EV-002 — health/stats/audit env vars)
 
 Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — never commit to git.
 
@@ -30,6 +30,13 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 | `VECINITA_MODAL_PROXY_KEY` | Yes (EV-001) | Proxy auth key for Modal data-mgmt `/jobs` retag endpoint |
 | `VECINITA_MAX_TAGS_PER_DOCUMENT` | No | Default `10` — EV-001 tag cap enforcement |
 | `VECINITA_MAX_TAGS_PER_CHUNK` | No | Default `5` — EV-001 tag cap enforcement |
+| `VECINITA_HEALTH_TIMEOUT_MS` | No | Default `5000` — EV-002 health aggregator timeout per service (F26) |
+| `VECINITA_STATS_ENABLED` | No | Default `true` — EV-002 enable/disable serving stats (F28) |
+| `VECINITA_AUDIT_RETENTION_DAYS` | No | Default `365` — EV-002 audit log retention period (F29) |
+| `VECINITA_HEALTH_CHAT_RAG_URL` | Yes (EV-002) | Chat-rag-backend URL for health aggregator polling |
+| `VECINITA_HEALTH_EMBED_URL` | Yes (EV-002) | Modal embedding URL for health aggregator polling |
+| `VECINITA_HEALTH_LLM_URL` | Yes (EV-002) | Modal LLM URL for health aggregator polling |
+| `VECINITA_HEALTH_DATA_MGMT_URL` | Yes (EV-002) | Modal data-mgmt URL for health aggregator polling |
 | `VECINITA_ENV` | No | `staging` |
 | `VECINITA_CORS_ORIGINS` | Yes (browser UI) | Must include admin frontend origin |
 
@@ -69,7 +76,7 @@ No Vecinita Postgres secrets. HF model cache uses Modal volumes `embedding-model
 | Variable | Used by |
 |----------|---------|
 | `VECINITA_STAGING_CHAT_URL` | H1/H3 — `scripts/deploy/staging_smoke.sh`, `tests/smoke/test_staging_health.py` (skip if unset) |
-| `VECINITA_STAGING_WRITE_URL` | Optional H1 check on write API |
+| `VECINITA_STAGING_WRITE_URL` | Optional H1 check on write API; EV-002 bulk/stats/audit endpoints |
 | `VECINITA_STAGING_DATABASE_URL` | H2 — staging DB URL; falls back to `DATABASE_URL` |
 | `VECINITA_STAGING_CHAT_FRONTEND_URL` | H4–H5 — chat UI origin |
 | `VECINITA_STAGING_ADMIN_FRONTEND_URL` | H4–H5 — admin UI origin |
