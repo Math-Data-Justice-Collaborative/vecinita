@@ -25,6 +25,37 @@ TAG_TABLES: Final[frozenset[str]] = frozenset(
     }
 )
 
+EV002_TABLES: Final[frozenset[str]] = frozenset(
+    {
+        "audit_log",
+        "document_versions",
+        "document_serving_stats",
+    }
+)
+
+FORBIDDEN_EV002_IDENTITY_COLUMNS: Final[frozenset[str]] = frozenset(
+    {
+        "created_by",
+        "updated_by",
+        "user_id",
+        "operator_id",
+        "admin_id",
+        "email",
+        "name",
+        "phone",
+        "address",
+        "account_id",
+        "profile_id",
+        "invite_id",
+        "session_id",
+        "ip_address",
+        "ip",
+        "remote_addr",
+        "user_agent",
+        "geo_location",
+    }
+)
+
 FORBIDDEN_TAG_IDENTITY_COLUMNS: Final[frozenset[str]] = frozenset(
     {
         "created_by",
@@ -80,6 +111,32 @@ def find_identity_columns_on_tag_tables(database_url: str) -> dict[str, list[str
             col
             for col in columns
             if col in FORBIDDEN_TAG_IDENTITY_COLUMNS or col.startswith("auth_")
+        )
+        if forbidden:
+            violations[table] = forbidden
+    return violations
+
+
+def find_missing_ev002_tables(database_url: str) -> set[str]:
+    """Return EV-002 table names absent from the public schema."""
+    engine = create_engine(_normalize_database_url(database_url))
+    inspector = inspect(engine)
+    present = set(inspector.get_table_names(schema="public"))
+    return set(EV002_TABLES - present)
+
+
+def find_identity_columns_on_ev002_tables(database_url: str) -> dict[str, list[str]]:
+    """Return forbidden identity column names per EV-002 table (ADR-016)."""
+    engine = create_engine(_normalize_database_url(database_url))
+    inspector = inspect(engine)
+    present = set(inspector.get_table_names(schema="public"))
+    violations: dict[str, list[str]] = {}
+    for table in sorted(EV002_TABLES & present):
+        columns = {col["name"] for col in inspector.get_columns(table, schema="public")}
+        forbidden = sorted(
+            col
+            for col in columns
+            if col in FORBIDDEN_EV002_IDENTITY_COLUMNS or col.startswith("auth_")
         )
         if forbidden:
             violations[table] = forbidden
