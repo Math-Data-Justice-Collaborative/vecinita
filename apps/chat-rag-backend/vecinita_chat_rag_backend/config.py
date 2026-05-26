@@ -38,6 +38,8 @@ class ChatRagSettings:
     min_retrieval_score: float = 0.2
     chat_max_tokens: int = 256
     browse_page_size: int = 20
+    internal_write_url: str | None = None
+    internal_api_key: str | None = None
 
     @classmethod
     def from_env(cls) -> ChatRagSettings:
@@ -53,4 +55,6 @@ class ChatRagSettings:
             embed_url=os.environ.get("VECINITA_MODAL_EMBED_URL"),
             llm_url=os.environ.get("VECINITA_MODAL_LLM_URL"),
             request_timeout_s=float(os.environ.get("VECINITA_REQUEST_TIMEOUT_S", "120")),
+            internal_write_url=os.environ.get("VECINITA_INTERNAL_WRITE_URL"),
+            internal_api_key=os.environ.get("VECINITA_INTERNAL_API_KEY"),
         )

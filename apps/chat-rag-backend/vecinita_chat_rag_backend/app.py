@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
 from collections.abc import Iterator
 from typing import Annotated, Any
@@ -65,6 +66,29 @@ def _source_payload(sources: list[Source]) -> list[dict[str, Any]]:
     return encoded
 
 
+def _fire_stats(
+    sources: list[Source],
+    internal_write_url: str | None,
+    internal_api_key: str | None,
+) -> None:
+    """Fire-and-forget POST to /stats/served. Failures are silently ignored."""
+    if not internal_write_url or not sources:
+        return
+    doc_ids = list({str(s.document_id) for s in sources if s.document_id})
+    if not doc_ids:
+        return
+    headers: dict[str, str] = {}
+    if internal_api_key:
+        headers["Authorization"] = f"Bearer {internal_api_key}"
+    with contextlib.suppress(Exception):
+        httpx.post(
+            f"{internal_write_url.rstrip('/')}/internal/v1/stats/served",
+            json={"document_ids": doc_ids},
+            headers=headers,
+            timeout=5.0,
+        )
+
+
 def create_app(
     *,
     settings: ChatRagSettings | None = None,
@@ -109,12 +133,15 @@ def create_app(
     async def ask(request: Request) -> AskResponse:
         body = await parse_ask_body(request)
         try:
-            return get_service().ask(body)
+            result = get_service().ask(body)
         except Exception as exc:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Upstream unavailable",
             ) from exc
+        cfg = get_settings()
+        _fire_stats(result.sources, cfg.internal_write_url, cfg.internal_api_key)
+        return result
 
     @app.post("/api/v1/ask/stream")
     async def ask_stream(request: Request) -> StreamingResponse:
