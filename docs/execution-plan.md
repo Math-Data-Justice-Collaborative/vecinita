@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 6: EV-002 Backend — Schema, Audit, Stats, Bulk |
-| **Active milestone** | M20: EV-002 Schema migration |
-| **Active task** | T20.1 |
-| **Tasks completed** | 111 / 184 |
+| **Active milestone** | M23: Bulk operations endpoints |
+| **Active task** | T23.1 |
+| **Tasks completed** | 129 / 184 |
 | **Last updated** | 2026-05-26 |
 | **Evolve cycle** | EV-002 (F23–F29) — **in_progress** |
 
@@ -438,10 +438,10 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
-| T20.1 | Test: privacy allow-list includes 3 new tables (`tests/privacy/test_ev002_tables.py`) — red | Test | pending | ADR-016, AC-E11 | T15.2 | — | EV-002 | F28, F29 |
-| T20.2 | Alembic migration `20260526_0003_ev002_audit_stats.py`: `audit_log`, `document_versions`, `document_serving_stats` | Code | pending | ADR-016 §Schema, api-contract F28/F29 | T20.1 | — | EV-002 | F28, F29 |
-| T20.3 | Update privacy allow-list (`vecinita_database/privacy.py`) to include new tables | Code | pending | spec.md §Forbidden schema | T20.2 | — | EV-002 | F28, F29 |
-| T20.4 | Test: migration applies cleanly + table structure matches spec (integration) | Test | pending | data-management-plan §Verification | T20.3 | — | EV-002 | F28, F29 |
+| T20.1 | Test: privacy allow-list includes 3 new tables (`tests/privacy/test_ev002_tables.py`) — red | Test | completed | ADR-016, AC-E11 | T15.2 | — | EV-002 | F28, F29 |
+| T20.2 | Alembic migration `20260526_0003_ev002_audit_stats.py`: `audit_log`, `document_versions`, `document_serving_stats` | Code | completed | ADR-016 §Schema, api-contract F28/F29 | T20.1 | — | EV-002 | F28, F29 |
+| T20.3 | Update privacy allow-list (`vecinita_database/privacy.py`) to include new tables | Code | completed | spec.md §Forbidden schema | T20.2 | — | EV-002 | F28, F29 |
+| T20.4 | Test: migration applies cleanly + table structure matches spec (integration) | Test | completed | data-management-plan §Verification | T20.3 | — | EV-002 | F28, F29 |
 
 #### M21: Audit log & version history endpoints (F29)
 
@@ -466,12 +466,12 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
-| T22.1 | Test: `POST /internal/v1/stats/served` upserts counter (`tests/integration/test_serving_stats.py`) — red | Test | pending | TC-059, AC-E7 | T20.4 | — | EV-002 | F28 |
-| T22.2 | Implement `POST /internal/v1/stats/served` (upsert into document_serving_stats) | Code | pending | api-contract §POST /stats/served | T22.1 | — | EV-002 | F28 |
-| T22.3 | Test: `GET /internal/v1/stats/top-served` returns ranked list | Test | pending | api-contract §GET /stats/top-served, UJ-019 | T22.2 | — | EV-002 | F28 |
-| T22.4 | Implement `GET /internal/v1/stats/top-served` | Code | pending | api-contract §GET /stats/top-served | T22.3 | — | EV-002 | F28 |
-| T22.5 | Integrate async fire-and-forget `POST /stats/served` in chat-rag-backend after successful RAG response | Code | pending | TP-022, spec.md §Data Flow step 13 | T22.2, T10.4 | — | EV-002 | F28 |
-| T22.6 | Test: chat-rag-backend fires stats POST on successful ask (`tests/integration/test_stats_fire_forget.py`) | Test | pending | TP-022 | T22.5 | D1 | EV-002 | F28 |
+| T22.1 | Test: `POST /internal/v1/stats/served` upserts counter (`tests/integration/test_serving_stats.py`) — red | Test | completed | TC-059, AC-E7 | T20.4 | — | EV-002 | F28 |
+| T22.2 | Implement `POST /internal/v1/stats/served` (upsert into document_serving_stats) | Code | completed | api-contract §POST /stats/served | T22.1 | — | EV-002 | F28 |
+| T22.3 | Test: `GET /internal/v1/stats/top-served` returns ranked list | Test | completed | api-contract §GET /stats/top-served, UJ-019 | T22.2 | — | EV-002 | F28 |
+| T22.4 | Implement `GET /internal/v1/stats/top-served` | Code | completed | api-contract §GET /stats/top-served | T22.3 | — | EV-002 | F28 |
+| T22.5 | Integrate async fire-and-forget `POST /stats/served` in chat-rag-backend after successful RAG response | Code | completed | TP-022, spec.md §Data Flow step 13 | T22.2, T10.4 | — | EV-002 | F28 |
+| T22.6 | Test: chat-rag-backend fires stats POST on successful ask (`tests/unit/test_stats_fire_and_forget.py`) | Test | completed | TP-022 | T22.5 | D1 | EV-002 | F28 |
 
 #### M23: Bulk operations endpoints (F27)
 
@@ -854,24 +854,24 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T19.3 | M19 | 5 | Config | completed | T19.2 | — | EV-001 | 2026-05-24 |
 | T19.5 | M19 | 5 | Config | completed | T19.3, T17.8 | — | EV-001 | 2026-05-24 |
 | T19.4 | M19 | 5 | Config | completed | T19.5, T18.7, T17.11, T18.6 | D1–D9 | EV-001 | 2026-05-24 |
-| T20.1 | M20 | 6 | Test | pending | T15.2 | — | EV-002 | — |
-| T20.2 | M20 | 6 | Code | pending | T20.1 | — | EV-002 | — |
-| T20.3 | M20 | 6 | Code | pending | T20.2 | — | EV-002 | — |
-| T20.4 | M20 | 6 | Test | pending | T20.3 | — | EV-002 | — |
-| T21.1 | M21 | 6 | Test | pending | T20.4 | — | EV-002 | — |
-| T21.2 | M21 | 6 | Code | pending | T21.1 | — | EV-002 | — |
-| T21.3 | M21 | 6 | Code | pending | T21.2 | — | EV-002 | — |
-| T21.4 | M21 | 6 | Test | pending | T21.3 | D1 | EV-002 | — |
-| T21.5 | M21 | 6 | Code | pending | T21.2 | — | EV-002 | — |
-| T21.6 | M21 | 6 | Test | pending | T21.5 | — | EV-002 | — |
-| T21.7 | M21 | 6 | Code | pending | T21.2 | — | EV-002 | — |
-| T21.8 | M21 | 6 | Test | pending | T21.7, T21.3 | — | EV-002 | — |
-| T22.1 | M22 | 6 | Test | pending | T20.4 | — | EV-002 | — |
-| T22.2 | M22 | 6 | Code | pending | T22.1 | — | EV-002 | — |
-| T22.3 | M22 | 6 | Test | pending | T22.2 | — | EV-002 | — |
-| T22.4 | M22 | 6 | Code | pending | T22.3 | — | EV-002 | — |
-| T22.5 | M22 | 6 | Code | pending | T22.2, T10.4 | — | EV-002 | — |
-| T22.6 | M22 | 6 | Test | pending | T22.5 | D1 | EV-002 | — |
+| T20.1 | M20 | 6 | Test | completed | T15.2 | — | EV-002 | 2026-05-26 |
+| T20.2 | M20 | 6 | Code | completed | T20.1 | — | EV-002 | 2026-05-26 |
+| T20.3 | M20 | 6 | Code | completed | T20.2 | — | EV-002 | 2026-05-26 |
+| T20.4 | M20 | 6 | Test | completed | T20.3 | — | EV-002 | 2026-05-26 |
+| T21.1 | M21 | 6 | Test | completed | T20.4 | — | EV-002 | 2026-05-26 |
+| T21.2 | M21 | 6 | Code | completed | T21.1 | — | EV-002 | 2026-05-26 |
+| T21.3 | M21 | 6 | Code | completed | T21.2 | — | EV-002 | 2026-05-26 |
+| T21.4 | M21 | 6 | Test | completed | T21.3 | D1 | EV-002 | 2026-05-26 |
+| T21.5 | M21 | 6 | Code | completed | T21.2 | — | EV-002 | 2026-05-26 |
+| T21.6 | M21 | 6 | Test | completed | T21.5 | — | EV-002 | 2026-05-26 |
+| T21.7 | M21 | 6 | Code | completed | T21.2 | — | EV-002 | 2026-05-26 |
+| T21.8 | M21 | 6 | Test | completed | T21.7, T21.3 | — | EV-002 | 2026-05-26 |
+| T22.1 | M22 | 6 | Test | completed | T20.4 | — | EV-002 | 2026-05-26 |
+| T22.2 | M22 | 6 | Code | completed | T22.1 | — | EV-002 | 2026-05-26 |
+| T22.3 | M22 | 6 | Test | completed | T22.2 | — | EV-002 | 2026-05-26 |
+| T22.4 | M22 | 6 | Code | completed | T22.3 | — | EV-002 | 2026-05-26 |
+| T22.5 | M22 | 6 | Code | completed | T22.2, T10.4 | — | EV-002 | 2026-05-26 |
+| T22.6 | M22 | 6 | Test | completed | T22.5 | D1 | EV-002 | 2026-05-26 |
 | T23.1 | M23 | 6 | Test | pending | T21.3, T20.4 | D1 | EV-002 | — |
 | T23.2 | M23 | 6 | Code | pending | T23.1 | — | EV-002 | — |
 | T23.3 | M23 | 6 | Test | pending | T21.3 | D1 | EV-002 | — |
