@@ -23,9 +23,13 @@ from vecinita_shared_schemas.internal_write import (
     DocumentVersionEntry,
     HealthResponse,
     RetagJobResponse,
+    StatsServedRequest,
+    StatsServedResponse,
     TagInput,
     TagPatchRequest,
     TagPatchResponse,
+    TopServedItem,
+    TopServedResponse,
 )
 
 from vecinita_internal_write_api.audit import create_document_version, emit_audit_event
@@ -258,9 +262,7 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 .first()
             )
             if doc is None:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Not found"
-                )
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
             language = doc["language"] or "en"
             tag_rows = (
                 conn.execute(
@@ -315,8 +317,7 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 language=row["language"] or "en",
             )
             tag_snapshot = [
-                {"slug": t.slug, "label": t.label, "source": t.source or body.source}
-                for t in tags
+                {"slug": t.slug, "label": t.label, "source": t.source or body.source} for t in tags
             ]
             emit_audit_event(
                 conn,
@@ -521,9 +522,7 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
         with engine.begin() as conn:
             doc_row = (
                 conn.execute(
-                    text(
-                        "SELECT id, url, title FROM documents WHERE id = :document_id"
-                    ),
+                    text("SELECT id, url, title FROM documents WHERE id = :document_id"),
                     {"document_id": document_id},
                 )
                 .mappings()
@@ -660,6 +659,67 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 )
                 for row in rows
             ],
+        )
+
+    @app.post(
+        "/internal/v1/stats/served",
+        response_model=StatsServedResponse,
+        status_code=status.HTTP_202_ACCEPTED,
+        dependencies=[Depends(_require_internal_key)],
+    )
+    def stats_served(body: StatsServedRequest) -> StatsServedResponse:
+        for doc_id in body.document_ids:
+            try:
+                with engine.begin() as conn:
+                    conn.execute(
+                        text(
+                            "INSERT INTO document_serving_stats "
+                            "(document_id, served_count, last_served_at) "
+                            "VALUES (:doc_id, 1, now()) "
+                            "ON CONFLICT (document_id) DO UPDATE "
+                            "SET served_count = document_serving_stats.served_count + 1, "
+                            "    last_served_at = now()"
+                        ),
+                        {"doc_id": doc_id},
+                    )
+            except Exception:
+                pass
+        return StatsServedResponse()
+
+    @app.get(
+        "/internal/v1/stats/top-served",
+        response_model=TopServedResponse,
+        dependencies=[Depends(_require_internal_key)],
+    )
+    def top_served(limit: int = 10) -> TopServedResponse:
+        limit = min(max(1, limit), 100)
+        with engine.connect() as conn:
+            rows = (
+                conn.execute(
+                    text(
+                        "SELECT s.document_id, d.title, d.url, "
+                        "       s.served_count, s.last_served_at "
+                        "FROM document_serving_stats s "
+                        "LEFT JOIN documents d ON d.id = s.document_id "
+                        "ORDER BY s.served_count DESC "
+                        "LIMIT :limit"
+                    ),
+                    {"limit": limit},
+                )
+                .mappings()
+                .all()
+            )
+        return TopServedResponse(
+            items=[
+                TopServedItem(
+                    document_id=row["document_id"],
+                    title=row["title"],
+                    url=row["url"],
+                    served_count=row["served_count"],
+                    last_served_at=row["last_served_at"],
+                )
+                for row in rows
+            ]
         )
 
     return app

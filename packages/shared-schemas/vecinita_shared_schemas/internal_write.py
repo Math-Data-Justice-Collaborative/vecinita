@@ -144,6 +144,36 @@ class DocumentHistoryResponse(BaseModel):
     versions: list[DocumentVersionEntry]
 
 
+class StatsServedRequest(BaseModel):
+    """POST /internal/v1/stats/served request body."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    document_ids: list[UUID] = Field(..., min_length=1)
+
+
+class StatsServedResponse(BaseModel):
+    """Acknowledged fire-and-forget response."""
+
+    acknowledged: bool = True
+
+
+class TopServedItem(BaseModel):
+    """Single row in GET /internal/v1/stats/top-served."""
+
+    document_id: UUID
+    title: str | None = None
+    url: str | None = None
+    served_count: int
+    last_served_at: datetime | None = None
+
+
+class TopServedResponse(BaseModel):
+    """GET /internal/v1/stats/top-served response."""
+
+    items: list[TopServedItem]
+
+
 class HealthResponse(BaseModel):
     """GET /health liveness response."""
 
