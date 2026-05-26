@@ -41,7 +41,8 @@ def _database_url() -> str:
 @pytest.mark.privacy
 def test_ev002_tables_exist_after_migrations() -> None:
     """EV-002 tables are present once Alembic head is applied."""
-    from vecinita_database.privacy import EV002_TABLES as ALLOWED, find_missing_ev002_tables
+    from vecinita_database.privacy import EV002_TABLES as ALLOWED
+    from vecinita_database.privacy import find_missing_ev002_tables
 
     missing = find_missing_ev002_tables(_database_url())
     assert not missing, f"Missing EV-002 tables: {sorted(missing)}; expected {sorted(ALLOWED)}"
@@ -60,7 +61,6 @@ def test_ev002_tables_have_no_identity_columns() -> None:
 def test_audit_log_has_no_ip_column() -> None:
     """audit_log must not store IP addresses per ADR-016."""
     from sqlalchemy import create_engine, inspect
-
     from vecinita_database.privacy import _normalize_database_url
 
     engine = create_engine(_normalize_database_url(_database_url()))

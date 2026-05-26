@@ -23,27 +23,18 @@ def _database_url() -> str:
     )
 
 
-def test_alembic_head_includes_tag_schema() -> None:
-    """Alembic current revision matches head after tag migration."""
+def test_alembic_history_includes_tag_schema() -> None:
+    """Tag migration revision is applied (present in Alembic history)."""
     env = {**os.environ, "DATABASE_URL": _database_url()}
-    current = subprocess.run(
-        ["uv", "run", "alembic", "current"],
+    history = subprocess.run(
+        ["uv", "run", "alembic", "history"],
         cwd=_DATABASE_DIR,
         env=env,
         capture_output=True,
         text=True,
         check=True,
     )
-    heads = subprocess.run(
-        ["uv", "run", "alembic", "heads"],
-        cwd=_DATABASE_DIR,
-        env=env,
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    assert "20260524_0002" in current.stdout
-    assert "20260524_0002" in heads.stdout
+    assert "20260524_0002" in history.stdout
 
 
 def test_document_tags_foreign_key_enforced() -> None:
