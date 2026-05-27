@@ -1,13 +1,73 @@
 import type { TagInput } from "./types";
 import type { CorpusClientOptions } from "./corpus";
 
+/** Wire format from GET /internal/v1/stats/summary — docs/api-contract.md */
+export interface StatsSummaryApiResponse {
+  total_documents: number;
+  total_chunks: number;
+  tag_distribution: { slug: string; label: string; document_count: number }[];
+  language_breakdown: Record<string, number>;
+  recent_activity: {
+    event_type: string;
+    entity_id: string;
+    created_at: string;
+    summary?: string | null;
+  }[];
+  top_served: {
+    document_id: string;
+    title: string | null;
+    served_count: number;
+    url?: string | null;
+    last_served_at?: string | null;
+  }[];
+}
+
 export interface StatsSummary {
   total_documents: number;
   total_chunks: number;
   tag_distribution: { tag: string; count: number }[];
   language_breakdown: { language: string; count: number }[];
-  recent_activity: { event_type: string; entity_type: string; entity_id: string; timestamp: string }[];
+  recent_activity: {
+    event_type: string;
+    entity_type: string;
+    entity_id: string;
+    timestamp: string;
+    summary: string | null;
+  }[];
   top_served: { document_id: string; title: string | null; served_count: number }[];
+}
+
+function entityTypeFromEventType(eventType: string): string {
+  const dot = eventType.indexOf(".");
+  return dot >= 0 ? eventType.slice(0, dot) : eventType;
+}
+
+/** Normalized for DashboardPage rendering. */
+export function parseStatsSummary(raw: StatsSummaryApiResponse): StatsSummary {
+  return {
+    total_documents: raw.total_documents,
+    total_chunks: raw.total_chunks,
+    tag_distribution: raw.tag_distribution.map((row) => ({
+      tag: row.label || row.slug,
+      count: row.document_count,
+    })),
+    language_breakdown: Object.entries(raw.language_breakdown).map(([language, count]) => ({
+      language,
+      count,
+    })),
+    recent_activity: raw.recent_activity.map((row) => ({
+      event_type: row.event_type,
+      entity_type: entityTypeFromEventType(row.event_type),
+      entity_id: row.entity_id,
+      timestamp: row.created_at,
+      summary: row.summary ?? null,
+    })),
+    top_served: raw.top_served.map((row) => ({
+      document_id: row.document_id,
+      title: row.title,
+      served_count: row.served_count,
+    })),
+  };
 }
 
 /** Wire format from GET /internal/v1/health/all — docs/api-contract.md */
@@ -54,7 +114,8 @@ export async function fetchStatsSummary(options: CorpusClientOptions): Promise<S
   if (!response.ok) {
     throw new Error(`Stats summary failed (${String(response.status)})`);
   }
-  return response.json() as Promise<StatsSummary>;
+  const raw = (await response.json()) as StatsSummaryApiResponse;
+  return parseStatsSummary(raw);
 }
 
 export async function fetchHealthAggregate(options: CorpusClientOptions): Promise<HealthAggregate> {

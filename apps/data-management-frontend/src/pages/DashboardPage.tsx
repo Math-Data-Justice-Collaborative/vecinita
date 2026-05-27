@@ -136,9 +136,11 @@ export function DashboardPage() {
               <div className="space-y-3">
                 {stats.recent_activity.map((event, idx) => (
                   <div key={idx} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <Badge variant="outline">{event.event_type}</Badge>
-                      <span className="text-muted-foreground">{event.entity_type}</span>
+                      <span className="text-muted-foreground truncate">
+                        {event.summary ?? event.entity_type}
+                      </span>
                     </div>
                     <span className="text-xs text-muted-foreground">
                       {new Date(event.timestamp).toLocaleString()}

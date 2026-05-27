@@ -5,24 +5,30 @@ import { MemoryRouter } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { DashboardPage } from "@/pages/DashboardPage";
 
+/** api-contract wire shape for GET /internal/v1/stats/summary */
 const MOCK_STATS = {
   total_documents: 42,
   total_chunks: 256,
   tag_distribution: [
-    { tag: "housing", count: 15 },
-    { tag: "legal", count: 10 },
+    { slug: "housing", label: "Housing", document_count: 15 },
+    { slug: "legal", label: "Legal", document_count: 10 },
   ],
-  language_breakdown: [
-    { language: "en", count: 30 },
-    { language: "es", count: 12 },
-  ],
+  language_breakdown: { en: 30, es: 12 },
   recent_activity: [
-    { event_type: "document.created", entity_type: "document", entity_id: "abc", timestamp: "2026-05-26T10:00:00Z" },
-    { event_type: "document.tagged", entity_type: "document", entity_id: "def", timestamp: "2026-05-26T09:00:00Z" },
+    {
+      event_type: "document.created",
+      entity_id: "abc",
+      created_at: "2026-05-26T10:00:00Z",
+      summary: "Created doc",
+    },
+    {
+      event_type: "document.tagged",
+      entity_id: "def",
+      created_at: "2026-05-26T09:00:00Z",
+      summary: null,
+    },
   ],
-  top_served: [
-    { document_id: "aaa", title: "Top Doc", served_count: 100 },
-  ],
+  top_served: [{ document_id: "aaa", title: "Top Doc", served_count: 100 }],
 };
 
 function renderDashboard() {
