@@ -20,7 +20,7 @@ if [[ -z "$CHAT_API" && -z "$CHAT_FE" && -z "$WRITE_API" && -z "$ADMIN_FE" ]]; t
   exit 0
 fi
 
-echo "==> H4/H5 live staging connectivity pytest (browse GET /api/v1/documents,/tags; admin PATCH)"
+echo "==> H4/H5 live staging connectivity pytest (browse, admin PATCH, EV-002 bulk/stats/audit)"
 export VECINITA_STAGING_CHAT_URL="$CHAT_API"
 export VECINITA_STAGING_CHAT_FRONTEND_URL="$CHAT_FE"
 export VECINITA_STAGING_WRITE_URL="$WRITE_API"

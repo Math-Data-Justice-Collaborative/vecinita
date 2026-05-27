@@ -155,6 +155,90 @@ def test_h5_chat_frontend_bundle_points_at_backend(chat_frontend: str, chat_api:
     assert "/api/v1/tags" in js, "Browse tags path missing from chat bundle"
 
 
+def test_h4_write_api_cors_preflight_bulk_delete(admin_frontend: str) -> None:
+    """EV-002 TC-060: OPTIONS on DELETE /internal/v1/documents/bulk from admin frontend."""
+    write_url = _env("VECINITA_STAGING_WRITE_URL")
+    if not write_url:
+        pytest.skip("Set VECINITA_STAGING_WRITE_URL")
+    assert_cors_preflight(
+        api_base=write_url,
+        origin=admin_frontend,
+        path="/internal/v1/documents/bulk",
+        method="DELETE",
+        extra_request_headers=["authorization", "content-type"],
+    )
+
+
+def test_h4_write_api_cors_preflight_bulk_tags(admin_frontend: str) -> None:
+    """EV-002 TC-060: OPTIONS on PATCH /internal/v1/documents/bulk/tags from admin frontend."""
+    write_url = _env("VECINITA_STAGING_WRITE_URL")
+    if not write_url:
+        pytest.skip("Set VECINITA_STAGING_WRITE_URL")
+    assert_cors_preflight(
+        api_base=write_url,
+        origin=admin_frontend,
+        path="/internal/v1/documents/bulk/tags",
+        method="PATCH",
+        extra_request_headers=["authorization", "content-type"],
+    )
+
+
+def test_h4_write_api_cors_preflight_bulk_metadata(admin_frontend: str) -> None:
+    """EV-002 TC-060: OPTIONS on PATCH /internal/v1/documents/bulk/metadata from admin frontend."""
+    write_url = _env("VECINITA_STAGING_WRITE_URL")
+    if not write_url:
+        pytest.skip("Set VECINITA_STAGING_WRITE_URL")
+    assert_cors_preflight(
+        api_base=write_url,
+        origin=admin_frontend,
+        path="/internal/v1/documents/bulk/metadata",
+        method="PATCH",
+        extra_request_headers=["authorization", "content-type"],
+    )
+
+
+def test_h4_write_api_cors_preflight_audit_log(admin_frontend: str) -> None:
+    """EV-002 TC-060: OPTIONS on GET /internal/v1/audit from admin frontend."""
+    write_url = _env("VECINITA_STAGING_WRITE_URL")
+    if not write_url:
+        pytest.skip("Set VECINITA_STAGING_WRITE_URL")
+    assert_cors_preflight(
+        api_base=write_url,
+        origin=admin_frontend,
+        path="/internal/v1/audit",
+        method="GET",
+        extra_request_headers=["authorization"],
+    )
+
+
+def test_h4_write_api_cors_preflight_stats_summary(admin_frontend: str) -> None:
+    """EV-002 TC-060: OPTIONS on GET /internal/v1/stats/summary from admin frontend."""
+    write_url = _env("VECINITA_STAGING_WRITE_URL")
+    if not write_url:
+        pytest.skip("Set VECINITA_STAGING_WRITE_URL")
+    assert_cors_preflight(
+        api_base=write_url,
+        origin=admin_frontend,
+        path="/internal/v1/stats/summary",
+        method="GET",
+        extra_request_headers=["authorization"],
+    )
+
+
+def test_h4_write_api_cors_preflight_health_all(admin_frontend: str) -> None:
+    """EV-002 TC-060: OPTIONS on GET /internal/v1/health/all from admin frontend."""
+    write_url = _env("VECINITA_STAGING_WRITE_URL")
+    if not write_url:
+        pytest.skip("Set VECINITA_STAGING_WRITE_URL")
+    assert_cors_preflight(
+        api_base=write_url,
+        origin=admin_frontend,
+        path="/internal/v1/health/all",
+        method="GET",
+        extra_request_headers=["authorization"],
+    )
+
+
 def test_h5_admin_frontend_bundle_has_modal_and_write_hosts(
     admin_frontend: str,
 ) -> None:

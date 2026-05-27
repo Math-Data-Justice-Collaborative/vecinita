@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 8: EV-002 Integration & Deploy |
 | **Active milestone** | M31: EV-002 Deploy & connectivity |
-| **Active task** | T31.1 |
-| **Tasks completed** | 176 / 184 |
+| **Active task** | T31.4 |
+| **Tasks completed** | 179 / 184 |
 | **Last updated** | 2026-05-26 |
 | **Evolve cycle** | EV-002 (F23–F29) — **in_progress** |
 
@@ -628,9 +628,9 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
-| T31.1 | Update `docs/staging-secrets-matrix.md` — new env vars (VECINITA_HEALTH_TIMEOUT_MS, VECINITA_STATS_ENABLED, VECINITA_AUDIT_RETENTION_DAYS) | Docs | pending | staging-secrets-matrix, config-spec | T30.3 | — | EV-002 | F25–F29 |
-| T31.2 | Extend `tests/smoke/test_staging_connectivity.py` — EV-002 endpoints H4 preflight | Test | pending | TC-060, AC-E10, connectivity-gates | T24.6 | — | EV-002 | F23–F29 |
-| T31.3 | Extend `scripts/deploy/verify_connectivity.sh` for EV-002 routes | Config | pending | connectivity-gates H4 | T31.2 | — | EV-002 | F23–F29 |
+| T31.1 | Update `docs/staging-secrets-matrix.md` — new env vars (VECINITA_HEALTH_TIMEOUT_MS, VECINITA_STATS_ENABLED, VECINITA_AUDIT_RETENTION_DAYS) | Docs | completed | staging-secrets-matrix, config-spec | T30.3 | — | EV-002 | F25–F29 |
+| T31.2 | Extend `tests/smoke/test_staging_connectivity.py` — EV-002 endpoints H4 preflight | Test | completed | TC-060, AC-E10, connectivity-gates | T24.6 | — | EV-002 | F23–F29 |
+| T31.3 | Extend `scripts/deploy/verify_connectivity.sh` for EV-002 routes | Config | completed | connectivity-gates H4 | T31.2 | — | EV-002 | F23–F29 |
 | T31.4 | Deploy: run Alembic migration (new tables) | Config | pending | TP-029 step 1 | T31.1 | — | EV-002 | F28, F29 |
 | T31.5 | Deploy: redeploy internal-write-api (new endpoints) | Config | pending | TP-029 step 2 | T31.4 | — | EV-002 | F25–F29 |
 | T31.6 | Deploy: redeploy chat-rag-backend (stats POST integration) | Config | pending | TP-029 step 3 | T31.5 | — | EV-002 | F28 |
