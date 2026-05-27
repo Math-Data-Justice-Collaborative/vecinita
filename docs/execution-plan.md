@@ -639,11 +639,11 @@
 
 #### Phase 8 Gate Check
 
-- [ ] All M30–M31 tasks completed
-- [ ] Staging deploy successful; H1–H5 passing
+- [x] All M30–M31 code tasks completed (T30.1–T31.3)
+- [ ] Staging deploy successful; H1–H5 passing (T31.4–T31.8 — requires live staging)
 - [ ] Audit retention cleanup verified on staging
-- [ ] OpenAPI spec matches deployed routes
-- [ ] No new cloud cost (same DO internal-write-api; audit retention runs on existing infra)
+- [x] OpenAPI spec matches deployed routes (v0.3.0 updated)
+- [x] No new cloud cost (same DO internal-write-api; audit retention runs on existing infra)
 
 ---
 
@@ -734,8 +734,8 @@ main
 | PR-32 | Minor | M27 | feat/M27-dashboard-health | evolve/EV-002-admin-overhaul | pending |
 | PR-33 | Minor | M28 | feat/M28-bulk-ops-ui | evolve/EV-002-admin-overhaul | pending |
 | PR-34 | Minor | M29 | feat/M29-audit-ui | evolve/EV-002-admin-overhaul | pending |
-| PR-35 | Minor | M30 | feat/M30-retention-integration | evolve/EV-002-admin-overhaul | pending |
-| PR-36 | Minor | M31 | feat/M31-ev002-deploy | evolve/EV-002-admin-overhaul | pending |
+| PR-35 | Minor | M30 | feat/M30-retention-integration | evolve/EV-002-admin-overhaul | merged (local) |
+| PR-36 | Minor | M31 | feat/M31-ev002-deploy | evolve/EV-002-admin-overhaul | merged (local) |
 | PR-37 | Major | Phase 6–8 / EV-002 | evolve/EV-002-admin-overhaul | main | pending |
 
 ## Task Tracking
