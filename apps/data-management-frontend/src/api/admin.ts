@@ -10,6 +10,16 @@ export interface StatsSummary {
   top_served: { document_id: string; title: string | null; served_count: number }[];
 }
 
+/** Wire format from GET /internal/v1/health/all — docs/api-contract.md */
+export interface HealthAggregateApiResponse {
+  status: "healthy" | "degraded";
+  services: Record<
+    string,
+    { status: "up" | "down"; latency_ms: number | null; error: string | null }
+  >;
+  checked_at: string;
+}
+
 export interface ServiceHealth {
   name: string;
   status: "healthy" | "unhealthy";
@@ -17,10 +27,24 @@ export interface ServiceHealth {
   error: string | null;
 }
 
+/** Normalized for HealthPage rendering. */
 export interface HealthAggregate {
   overall: "healthy" | "degraded";
   services: ServiceHealth[];
   checked_at: string;
+}
+
+export function parseHealthAggregate(raw: HealthAggregateApiResponse): HealthAggregate {
+  return {
+    overall: raw.status,
+    checked_at: raw.checked_at,
+    services: Object.entries(raw.services).map(([name, svc]) => ({
+      name,
+      status: svc.status === "up" ? "healthy" : "unhealthy",
+      latency_ms: svc.latency_ms,
+      error: svc.error,
+    })),
+  };
 }
 
 export async function fetchStatsSummary(options: CorpusClientOptions): Promise<StatsSummary> {
@@ -40,7 +64,8 @@ export async function fetchHealthAggregate(options: CorpusClientOptions): Promis
   if (!response.ok) {
     throw new Error(`Health check failed (${String(response.status)})`);
   }
-  return response.json() as Promise<HealthAggregate>;
+  const raw = (await response.json()) as HealthAggregateApiResponse;
+  return parseHealthAggregate(raw);
 }
 
 export interface BulkResult {
