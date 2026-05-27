@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 7: EV-002 Frontend — Admin UI Overhaul |
-| **Active milestone** | M26: Tag display + corpus modernization |
-| **Active task** | T26.1 |
-| **Tasks completed** | 150 / 184 |
+| **Active milestone** | M27: Dashboard + health pages |
+| **Active task** | T27.1 |
+| **Tasks completed** | 154 / 184 |
 | **Last updated** | 2026-05-26 |
 | **Evolve cycle** | EV-002 (F23–F29) — **in_progress** |
 
@@ -545,10 +545,10 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
-| T26.1 | Extend corpus list API call to include document tags in response | Code | pending | api-contract, feature-list F24 | T25.6 | — | EV-002 | F24 |
-| T26.2 | Implement TagBadge component (color-coded: LLM=blue, human=green) | Code | pending | UJ-021, AC-E2 | T25.3 | — | EV-002 | F24 |
-| T26.3 | Render tag chips below document title in CorpusList | Code | pending | UJ-021, AC-E2 | T26.1, T26.2 | — | EV-002 | F24 |
-| T26.4 | Test: tag chips render for seeded documents (`tests/frontend/test_tag_chips.test.tsx`) | Test | pending | TC-064, UJ-021 | T26.3 | — | EV-002 | F24 |
+| T26.1 | Extend corpus list API call to include document tags in response | Code | completed | api-contract, feature-list F24 | T25.6 | — | EV-002 | F24 |
+| T26.2 | Implement TagBadge component (color-coded: LLM=blue, human=green) | Code | completed | UJ-021, AC-E2 | T25.3 | — | EV-002 | F24 |
+| T26.3 | Render tag chips below document title in CorpusList | Code | completed | UJ-021, AC-E2 | T26.1, T26.2 | — | EV-002 | F24 |
+| T26.4 | Test: tag chips render for seeded documents (`tests/frontend/test_tag_chips.test.tsx`) | Test | completed | TC-064, UJ-021 | T26.3 | — | EV-002 | F24 |
 
 #### M27: Dashboard + health pages (F25, F26)
 

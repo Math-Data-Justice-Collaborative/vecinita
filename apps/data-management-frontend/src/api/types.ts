@@ -20,6 +20,7 @@ export interface DocumentSummary {
   url: string;
   title: string | null;
   language: string | null;
+  tags?: TagInput[];
 }
 
 export interface TagInput {

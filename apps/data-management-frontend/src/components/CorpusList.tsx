@@ -7,6 +7,7 @@ import { DocumentAdmin } from "./DocumentAdmin";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TagBadge } from "@/components/TagBadge";
 
 export function CorpusList() {
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
@@ -86,7 +87,16 @@ export function CorpusList() {
                 <TableBody>
                   {documents.map((doc) => (
                     <TableRow key={doc.document_id}>
-                      <TableCell className="font-medium">{doc.title ?? "(untitled)"}</TableCell>
+                      <TableCell>
+                        <div className="font-medium">{doc.title ?? "(untitled)"}</div>
+                        {doc.tags && doc.tags.length > 0 && (
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {doc.tags.map((tag) => (
+                              <TagBadge key={tag.slug} tag={tag} />
+                            ))}
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <a
                           href={doc.url}
