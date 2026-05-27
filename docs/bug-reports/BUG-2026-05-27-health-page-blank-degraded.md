@@ -1,6 +1,6 @@
 # BUG-2026-05-27 — Admin Health page blank after load (degraded API shape)
 
-**Status:** verifying  
+**Status:** resolved  
 **Severity:** high (admin health dashboard unusable)  
 **Feature:** EV-002 / F26 — health aggregator UI  
 **Reported:** 2026-05-27
@@ -62,6 +62,8 @@ Production URL: https://vecinita-admin-frontend-ef4ob.ondigitalocean.app/health
 
 - `apps/data-management-frontend/src/api/admin.ts`: `parseHealthAggregate()` maps api-contract
   `status` + `services` object (`up`/`down`) → UI model with `overall` + service array.
+- **PR:** https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/49 — merged 2026-05-27 (`0b87431` on `main`).
+- **CI:** main workflow success on merge commit (`26522237797`).
 
 ## Verification plan
 
@@ -69,4 +71,20 @@ Production URL: https://vecinita-admin-frontend-ef4ob.ondigitalocean.app/health
 - Layer 2: user reloads `/health` on staging after deploy
 - Layer 4: production admin FE after deploy approval
 
-Note: `modal_embedding` HTTP 404 is separate (Modal deploy/URL); Health page should show it as down, not blank.
+**Out of scope (user 2026-05-27):** `modal_embedding` HTTP 404 is **infra/Modal** (wrong URL or embedding app not deployed), not this UI hotfix. After admin frontend deploy, Health lists `modal_embedding` as **down** with error `HTTP 404` while overall stays **degraded**. Greening that check is a separate follow-up (deploy/fix `vecinita-embedding` + `VECINITA_MODAL_EMBED_URL`).
+
+## Verification
+
+| Layer | Result | Evidence |
+|-------|--------|----------|
+| L1 Automated | pass | admin FE lint + tests (6 health tests) |
+| L2 Reproduction | pass | Browser `/health` after deploy — service cards render |
+| L3 Pre-deploy | skip | N/A (deployed via DO auto from `main`) |
+| L4 Production | pass | DO deploy `b1621da1` @ commit `32f687a` (2026-05-27); live page shows `modal_embedding` → `HTTP 404`, not blank |
+| CI | pass | PR #49 merge run `26522237797`; post-merge `32f687a` run `26522714900` |
+
+## Follow-ups
+
+| Item | Owner | When |
+|------|-------|------|
+| `modal_embedding` 404 — Modal deploy / URL | Infra / separate hotfix | Backlog (optional) |

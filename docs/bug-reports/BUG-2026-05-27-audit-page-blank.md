@@ -1,6 +1,6 @@
 # BUG-2026-05-27 — Admin Audit page blank after load (API shape drift)
 
-**Status:** fixing  
+**Status:** verifying  
 **Severity:** high (admin audit log unusable)  
 **Feature:** EV-002 / F29 — audit log UI  
 **Reported:** 2026-05-27
@@ -77,3 +77,14 @@ API response (200, truncated):
 | L1 | admin FE `npm run lint` + `npm test` |
 | L2 | User reloads `/audit` on production after deploy |
 | L4 | Production admin FE after deploy approval |
+
+## Verification
+
+| Layer | Result | Evidence |
+|-------|--------|----------|
+| L1 Automated | pass | 34 admin FE tests; repro test green |
+| CI main | pass | https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/26541716359 |
+| Deploy preflight | fail (0 jobs) | Pre-existing workflow issue on main — not caused by this hotfix |
+| L4 Production | pending | DO auto-deploy from `9b38b57` — reload `/audit` after deploy completes |
+
+**Commit:** `9b38b57` on `main`

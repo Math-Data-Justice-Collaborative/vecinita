@@ -1,13 +1,22 @@
 ---
-description: After every git push, watch GitHub CI until python + frontend jobs pass (blocking)
+description: After every git push, watch GitHub CI (and deploy preflight on main) until green
 alwaysApply: true
 ---
 
 # CI after push (blocking)
 
-**A push is not done until CI is green** on that branch. Do not end the session, open a PR as ready, or mark work complete after `git push` without watching the run.
+**A push is not done until required workflows are green** on that branch. Do not end the
+session, open a PR as ready, or mark work complete after `git push` without watching.
 
-Workflow: `.github/workflows/ci.yml` — jobs **`python`** and **`frontend`** (both must succeed).
+## Workflows (by branch)
+
+| Branch | Workflows | Must pass |
+|--------|-----------|-----------|
+| Any (`main`, `feat/**`, PRs) | `.github/workflows/ci.yml` | `python`, `frontend` (matrix) |
+| **`main` only** | `.github/workflows/deploy-preflight.yml` | `build-smoke`; `modal-secrets` if repo secrets set |
+
+**Common mistake:** Watching only `ci.yml` while `deploy-preflight` stays red on `main`.
+That workflow runs on every `main` push (Modal import smoke + optional secrets check).
 
 ## After every push (required)
 
@@ -16,23 +25,30 @@ Workflow: `.github/workflows/ci.yml` — jobs **`python`** and **`frontend`** (b
 bash scripts/ci/watch_github_ci.sh [branch]
 ```
 
-Or manually:
+The script waits for a run on **`origin/<branch>` HEAD** for each required workflow, then
+`gh run watch` until success. On `main` it watches **both** `ci.yml` and `deploy-preflight.yml`.
+
+Manual equivalent:
 
 ```bash
-gh run list --branch <branch> --workflow ci.yml --limit 1
-gh run watch <run-id> --exit-status
-gh run view <run-id> --json conclusion,status,headSha,url
+BRANCH=main
+SHA=$(git rev-parse origin/$BRANCH)
+for wf in ci.yml deploy-preflight.yml; do
+  gh run list --branch "$BRANCH" --workflow "$wf" --json databaseId,headSha,conclusion \
+    | jq --arg sha "$SHA" 'first(.[] | select(.headSha == $sha))'
+done
 ```
 
 | Outcome | Action |
 |---------|--------|
-| **success** | Record run URL in PR / summary; proceed |
+| **success** (all required workflows) | Record run URLs; proceed |
 | **failure** | `gh run view <run-id> --log-failed` → fix → push again → re-watch |
+| **cancelled** (0 jobs on preflight) | Another push superseded this run — finish watch before pushing again |
 | **User waives** | AskQuestion only; note waiver in PR/summary |
 
 ## Before the first push (local parity)
 
-When changes touch Python, frontends, workflows, or secrets, run CI-equivalent checks locally:
+When changes touch Python, frontends, workflows, Modal, or secrets:
 
 ```bash
 uv sync --group dev
@@ -48,17 +64,33 @@ cd apps/chat-rag-frontend && npm ci && npm run lint && npm test
 cd apps/data-management-frontend && npm ci && npm run lint && npm test
 ```
 
+**Before push to `main`** (matches deploy-preflight `build-smoke` job):
+
+```bash
+bash scripts/deploy/verify_build.sh
+```
+
 ## After merge to `main`
 
-Watch CI on **`main`** for the merge commit (H0ci / 15-service-health). If `main` is red after your merge, fix in the same session before declaring deploy/health **PASS**.
+Watch **CI + deploy preflight** on `main` for the merge commit (H0ci / 15-service-health):
+
+```bash
+bash scripts/ci/watch_github_ci.sh main
+```
+
+If `main` is red after your merge, fix in the same session before declaring deploy/health **PASS**.
 
 ## Do not
 
-- Mark hotfix **resolved**, milestone **complete**, or PR **ready to merge** while CI is red on that branch.
-- Ask the user to push without planning to watch CI afterward.
+- Report "CI green" after watching only `ci.yml` on a **`main`** push.
+- Chain multiple `git push` commands to `main` without waiting — deploy-preflight used to
+  cancel prior runs and show false failures in the Actions UI.
+- Mark hotfix **resolved**, milestone **complete**, or PR **ready to merge** while any
+  required workflow is red on that branch.
 
 ## Related
 
 - `atomic-commits.mdc` — local checks before commit
 - `14-hotfix` / `09-qa` skills — full parity lists
 - `no-operator-spec-commits.mdc` — operator spec git guard
+- `docs/staging-runbook.md` — deploy-preflight + `MODAL_TOKEN_*`

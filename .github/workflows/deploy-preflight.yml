@@ -7,9 +7,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Do not cancel in-progress runs: rapid main pushes otherwise leave every run as
+# "failure" with 0 jobs (agents only watched ci.yml and thought main was green).
 concurrency:
   group: deploy-preflight-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build-smoke:
