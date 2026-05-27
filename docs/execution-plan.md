@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 7: EV-002 Frontend — Admin UI Overhaul |
-| **Active milestone** | M28: Bulk operations UI |
-| **Active task** | T28.1 |
-| **Tasks completed** | 160 / 184 |
+| **Active milestone** | M29: Audit log + version history UI |
+| **Active task** | T29.1 |
+| **Tasks completed** | 166 / 184 |
 | **Last updated** | 2026-05-26 |
 | **Evolve cycle** | EV-002 (F23–F29) — **in_progress** |
 
@@ -571,12 +571,12 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
-| T28.1 | Add multi-select checkboxes to corpus list + "select all" + shift-click | Code | pending | UJ-015, feature-list F27 | T26.3 | — | EV-002 | F27 |
-| T28.2 | Implement bulk action toolbar (delete, tag, retag, edit metadata) — appears when selection > 0 | Code | pending | feature-list F27, AC-E5/E6 | T28.1 | — | EV-002 | F27 |
-| T28.3 | Implement bulk delete dialog (confirmation + partial success display) | Code | pending | UJ-015, TP-024 | T28.2, T23.2 | — | EV-002 | F27 |
-| T28.4 | Implement bulk tag dialog (add/remove tags) | Code | pending | UJ-016 | T28.2, T23.4 | — | EV-002 | F27 |
-| T28.5 | Implement bulk metadata edit dialog (title/language) | Code | pending | feature-list F27 | T28.2, T23.8 | — | EV-002 | F27 |
-| T28.6 | Test: bulk select + delete flow (`tests/frontend/test_bulk_ops.test.tsx`) | Test | pending | AC-E5, AC-E6 | T28.5 | — | EV-002 | F27 |
+| T28.1 | Add multi-select checkboxes to corpus list + "select all" + shift-click | Code | completed | UJ-015, feature-list F27 | T26.3 | — | EV-002 | F27 |
+| T28.2 | Implement bulk action toolbar (delete, tag, retag, edit metadata) — appears when selection > 0 | Code | completed | feature-list F27, AC-E5/E6 | T28.1 | — | EV-002 | F27 |
+| T28.3 | Implement bulk delete dialog (confirmation + partial success display) | Code | completed | UJ-015, TP-024 | T28.2, T23.2 | — | EV-002 | F27 |
+| T28.4 | Implement bulk tag dialog (add/remove tags) | Code | completed | UJ-016 | T28.2, T23.4 | — | EV-002 | F27 |
+| T28.5 | Implement bulk metadata edit dialog (title/language) | Code | completed | feature-list F27 | T28.2, T23.8 | — | EV-002 | F27 |
+| T28.6 | Test: bulk select + delete flow (`tests/frontend/test_bulk_ops.test.tsx`) | Test | completed | AC-E5, AC-E6 | T28.5 | — | EV-002 | F27 |
 
 #### M29: Audit log + version history UI (F29)
 

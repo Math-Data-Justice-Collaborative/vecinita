@@ -1,3 +1,4 @@
+import type { TagInput } from "./types";
 import type { CorpusClientOptions } from "./corpus";
 
 export interface StatsSummary {
@@ -40,4 +41,51 @@ export async function fetchHealthAggregate(options: CorpusClientOptions): Promis
     throw new Error(`Health check failed (${response.status})`);
   }
   return response.json() as Promise<HealthAggregate>;
+}
+
+export interface BulkResult {
+  successes: string[];
+  failures: { document_id: string; error: string }[];
+}
+
+export async function bulkDeleteDocuments(
+  options: CorpusClientOptions,
+  documentIds: string[],
+): Promise<BulkResult> {
+  const response = await fetch(`${options.baseUrl}/internal/v1/documents/bulk`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${options.apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ document_ids: documentIds }),
+  });
+  if (!response.ok) throw new Error(`Bulk delete failed (${response.status})`);
+  return response.json() as Promise<BulkResult>;
+}
+
+export async function bulkTagDocuments(
+  options: CorpusClientOptions,
+  documentIds: string[],
+  addTags: TagInput[],
+  removeSlugs: string[],
+): Promise<BulkResult> {
+  const response = await fetch(`${options.baseUrl}/internal/v1/documents/bulk/tags`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${options.apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ document_ids: documentIds, add: addTags, remove: removeSlugs }),
+  });
+  if (!response.ok) throw new Error(`Bulk tag failed (${response.status})`);
+  return response.json() as Promise<BulkResult>;
+}
+
+export async function bulkUpdateMetadata(
+  options: CorpusClientOptions,
+  documentIds: string[],
+  updates: { title?: string; language?: string },
+): Promise<BulkResult> {
+  const response = await fetch(`${options.baseUrl}/internal/v1/documents/bulk/metadata`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${options.apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ document_ids: documentIds, ...updates }),
+  });
+  if (!response.ok) throw new Error(`Bulk metadata update failed (${response.status})`);
+  return response.json() as Promise<BulkResult>;
 }
