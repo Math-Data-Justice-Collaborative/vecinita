@@ -3,6 +3,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { JobForm } from "../components/JobForm";
 
+function jsonResponse(body: object): Response {
+  return new Response(JSON.stringify(body), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
 describe("JobForm", () => {
   afterEach(() => {
     cleanup();
@@ -12,20 +19,18 @@ describe("JobForm", () => {
   it("parses URLs and shows completed job status", async () => {
     const fetchMock = vi
       .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ job_id: "11111111-1111-4111-8111-111111111111", status: "pending" }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
+      .mockResolvedValueOnce(
+        jsonResponse({ job_id: "11111111-1111-4111-8111-111111111111", status: "pending" }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
           job_id: "11111111-1111-4111-8111-111111111111",
           status: "completed",
           urls: ["https://example.com/page"],
           created_at: "2026-05-19T00:00:00Z",
           updated_at: "2026-05-19T00:00:01Z",
         }),
-      });
+      );
     vi.stubGlobal("fetch", fetchMock);
 
     render(<JobForm />);
