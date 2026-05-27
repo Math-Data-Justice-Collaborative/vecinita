@@ -58,15 +58,18 @@
 | Modal LLM | https://vecinita--vecinita-llm-fastapi-app.modal.run |
 | Modal data-mgmt | https://vecinita--vecinita-data-management-fastapi-app.modal.run |
 
-## Operator spec files (local, secrets)
+## Operator spec files (local only — gitignored)
+
+Export with `doctl apps spec get <app-id> -o yaml > <name>-spec.yaml` for operator reference.
+These paths are in `.gitignore` and must **never** be pushed (they contain `EV[...]` DO secrets).
 
 | File | Purpose |
 |------|---------|
-| `chat-rag-spec.yaml` | ChatRAG DO spec; includes `VECINITA_INTERNAL_API_KEY` for staging smokes |
-| `internal-write-api-spec.yaml` | Write API DO spec export (`doctl apps spec get`) |
-| `admin-fe-spec.yaml` | Admin frontend DO spec (encrypted `VITE_*` secrets) |
+| `chat-rag-spec.yaml` | ChatRAG DO spec export |
+| `internal-write-api-spec.yaml` | Write API DO spec export |
+| `admin-fe-spec.yaml` | Admin frontend DO spec export |
 
-Use for `VECINITA_STAGING_INTERNAL_API_KEY` when running `staging_smoke.sh` / T3 tests. **Do not commit** plaintext secrets.
+For staging smokes, set `VECINITA_STAGING_INTERNAL_API_KEY` in `prod.env` (not committed).
 
 ## Rollback
 

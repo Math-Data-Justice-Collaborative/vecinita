@@ -5,10 +5,10 @@
 !*.env.example
 .deploy-keys.local
 prod.env
-# DO app spec exports with runtime secrets (operator-local)
-chat-rag-spec.yaml
-admin-fe-spec.yaml
-internal-write-api-spec.yaml
+# DO App Platform spec exports (doctl apps spec get) — NEVER commit; contains EV[...] secrets
+/admin-fe-spec.yaml
+/internal-write-api-spec.yaml
+/chat-rag-spec.yaml
 .tmp/
 
 # Python
