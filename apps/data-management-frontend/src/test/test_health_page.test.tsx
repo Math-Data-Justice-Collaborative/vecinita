@@ -5,13 +5,14 @@ import { MemoryRouter } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { HealthPage } from "@/pages/HealthPage";
 
+/** api-contract shape (status + services object map, up/down). */
 const MOCK_HEALTH = {
-  overall: "healthy" as const,
-  services: [
-    { name: "chat-rag-backend", status: "healthy", latency_ms: 45, error: null },
-    { name: "internal-write-api", status: "healthy", latency_ms: 30, error: null },
-    { name: "modal-embedding", status: "unhealthy", latency_ms: null, error: "Connection refused" },
-  ],
+  status: "healthy" as const,
+  services: {
+    chat_rag_backend: { status: "up", latency_ms: 45, error: null },
+    internal_write_api: { status: "up", latency_ms: 30, error: null },
+    modal_embedding: { status: "down", latency_ms: null, error: "Connection refused" },
+  },
   checked_at: "2026-05-26T10:00:00Z",
 };
 
@@ -49,10 +50,10 @@ describe("Health page", () => {
     renderHealth();
 
     await waitFor(() => {
-      expect(screen.getByText("chat-rag-backend")).toBeInTheDocument();
+      expect(screen.getByText("chat_rag_backend")).toBeInTheDocument();
     });
-    expect(screen.getByText("internal-write-api")).toBeInTheDocument();
-    expect(screen.getByText("modal-embedding")).toBeInTheDocument();
+    expect(screen.getByText("internal_write_api")).toBeInTheDocument();
+    expect(screen.getByText("modal_embedding")).toBeInTheDocument();
 
     expect(screen.getByText("45 ms")).toBeInTheDocument();
     expect(screen.getByText("Connection refused")).toBeInTheDocument();
@@ -81,14 +82,14 @@ describe("Health page", () => {
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ ...MOCK_HEALTH, overall: "degraded" }),
+        json: async () => ({ ...MOCK_HEALTH, status: "degraded" }),
       });
     vi.stubGlobal("fetch", fetchMock);
 
     renderHealth();
 
     await waitFor(() => {
-      expect(screen.getByText("chat-rag-backend")).toBeInTheDocument();
+      expect(screen.getByText("chat_rag_backend")).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole("button", { name: /refresh/i }));

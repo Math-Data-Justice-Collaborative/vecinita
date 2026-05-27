@@ -1,40 +1,45 @@
 ---
-description: After pushing to GitHub, verify CI is green (or fix failures) before closing work
+description: After every git push, watch GitHub CI until python + frontend jobs pass (blocking)
 alwaysApply: true
 ---
 
-# CI after push
+# CI after push (blocking)
 
-Whenever you **`git push`** (or ask the user to push) to `origin`, treat **GitHub Actions CI**
-as part of done — not optional.
+**A push is not done until CI is green** on that branch. Do not end the session, open a PR as ready, or mark work complete after `git push` without watching the run.
 
-Source of truth: `.github/workflows/ci.yml` (jobs: `python`, `frontend`).
+Workflow: `.github/workflows/ci.yml` — jobs **`python`** and **`frontend`** (both must succeed).
 
-## After every push
-
-1. Identify the branch you pushed (e.g. `fix/foo`, `feat/M3-bar`, `main`).
-2. Wait for the latest run:
+## After every push (required)
 
 ```bash
-gh run list --branch <branch> --workflow ci.yml --limit 3
+# From repo root; branch defaults to current
+bash scripts/ci/watch_github_ci.sh [branch]
+```
+
+Or manually:
+
+```bash
+gh run list --branch <branch> --workflow ci.yml --limit 1
 gh run watch <run-id> --exit-status
 gh run view <run-id> --json conclusion,status,headSha,url
 ```
 
-3. **Pass:** both `python` and `frontend` jobs `success` → record run URL in PR comment, bug report, or session summary.
-4. **Fail:** read failing job logs (`gh run view <run-id> --log-failed`), fix on the same branch, push again, re-watch until green or user waives.
+| Outcome | Action |
+|---------|--------|
+| **success** | Record run URL in PR / summary; proceed |
+| **failure** | `gh run view <run-id> --log-failed` → fix → push again → re-watch |
+| **User waives** | AskQuestion only; note waiver in PR/summary |
 
-Do not mark a hotfix **resolved**, a milestone **complete**, or a PR **ready to merge** while CI is red on that branch (unless user explicitly waives via AskQuestion).
+## Before the first push (local parity)
 
-## Before the first push (CI parity)
-
-Run the same checks CI runs locally when the change touches Python, frontends, secrets, or workflows:
+When changes touch Python, frontends, workflows, or secrets, run CI-equivalent checks locally:
 
 ```bash
 uv sync --group dev
 bash scripts/check_modal_no_database_url.sh
 bash scripts/check_openapi_specs.sh
 bash scripts/check_secrets.sh
+bash scripts/check_no_operator_specs_tracked.sh
 uv run ruff check apps packages tests
 uv run ruff format --check apps packages tests
 uv run basedpyright apps packages tests
@@ -43,23 +48,17 @@ cd apps/chat-rag-frontend && npm ci && npm run lint && npm test
 cd apps/data-management-frontend && npm ci && npm run lint && npm test
 ```
 
-Full parity list: [14-hotfix](../.cursor/skills/14-hotfix/SKILL.md) §Main CI, [09-qa](../.cursor/skills/09-qa/SKILL.md) Phase 1.
+## After merge to `main`
 
-## Merge to `main`
+Watch CI on **`main`** for the merge commit (H0ci / 15-service-health). If `main` is red after your merge, fix in the same session before declaring deploy/health **PASS**.
 
-After merge, watch CI on **`main`** for the merge commit SHA (required for 14-hotfix closure and 15-service-health **H0ci**):
+## Do not
 
-```bash
-gh run list --branch main --workflow ci.yml --limit 3
-gh run watch <run-id> --exit-status
-```
-
-If `main` is red after your merge, **try to fix** (same-session chore commit or follow-up PR) before declaring production health **Overall PASS**.
+- Mark hotfix **resolved**, milestone **complete**, or PR **ready to merge** while CI is red on that branch.
+- Ask the user to push without planning to watch CI afterward.
 
 ## Related
 
-| Stage / rule | CI expectation |
-|--------------|----------------|
-| 14-hotfix | Local parity before PR; `main` green after merge |
-| 15-service-health | **H0ci** blocking post-hotfix/post-merge |
-| atomic-commits | Post-commit local checks; post-push remote CI |
+- `atomic-commits.mdc` — local checks before commit
+- `14-hotfix` / `09-qa` skills — full parity lists
+- `no-operator-spec-commits.mdc` — operator spec git guard

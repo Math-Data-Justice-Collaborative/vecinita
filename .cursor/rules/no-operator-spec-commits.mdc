@@ -1,0 +1,48 @@
+---
+description: Never commit DO operator spec exports (EV[...] secrets); use infra/do and prod.env
+alwaysApply: true
+---
+
+# DO operator specs — never commit
+
+DigitalOcean App Platform spec **exports** contain encrypted secrets (`EV[1:...]`) and sometimes plaintext keys. They must stay **local and gitignored**.
+
+## Blocked paths (never `git add` / commit)
+
+| File | Source |
+|------|--------|
+| `admin-fe-spec.yaml` | `doctl apps spec get` (admin frontend) |
+| `internal-write-api-spec.yaml` | `doctl apps spec get` (write API) |
+| `chat-rag-spec.yaml` | `doctl apps spec get` (chat-rag backend) |
+
+Also never commit: `prod.env`, `.env`, `.deploy-keys.local`.
+
+## Use instead
+
+| Need | Location |
+|------|----------|
+| Deployable app shape (no secret values) | `infra/do/*.yaml` — `type: SECRET` placeholders only |
+| Runtime secrets for smokes / deploy | `prod.env` (gitignored); export `VECINITA_STAGING_INTERNAL_API_KEY` etc. |
+| Live spec reference | Export to repo-root `*-spec.yaml` locally; do not push |
+
+```bash
+# Local export only (output is gitignored)
+doctl apps spec get <app-id> -o yaml > admin-fe-spec.yaml
+```
+
+## Agent rules
+
+- Do **not** create, edit, or stage root `*-spec.yaml` exports in commits.
+- Do **not** paste `EV[1:...]` blobs or API keys into tracked files (`infra/do`, docs, workflows).
+- If the user asks to commit operator specs, refuse and point to `infra/do/` + `prod.env`.
+- If files were staged by mistake: `git rm --cached admin-fe-spec.yaml internal-write-api-spec.yaml chat-rag-spec.yaml` — do not use history rewrite unless they were already pushed.
+
+## CI guard
+
+`scripts/check_no_operator_specs_tracked.sh` fails if any blocked path is tracked. Run before PR:
+
+```bash
+bash scripts/check_no_operator_specs_tracked.sh
+```
+
+See `docs/deploy-report.md` §Operator spec files.
