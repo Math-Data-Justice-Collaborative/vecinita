@@ -4,10 +4,17 @@ from __future__ import annotations
 
 import os
 import uuid
+from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from tests.helpers.json_response import (
+    json_int,
+    json_object_list,
+    response_json_object,
+)
+from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
 
 pytestmark = [
     pytest.mark.e2e,
@@ -70,9 +77,10 @@ def two_docs(client, engine):
         )
         assert resp.status_code == 200
         with engine.connect() as conn:
-            doc_id = conn.execute(
-                text("SELECT id FROM documents WHERE url = :url"), {"url": url}
-            ).scalar_one()
+            doc_id_raw = sqlalchemy_scalar_one(
+                conn.execute(text("SELECT id FROM documents WHERE url = :url"), {"url": url})
+            )
+            doc_id = UUID(str(doc_id_raw))
         doc_ids.append(str(doc_id))
 
     yield doc_ids
@@ -80,7 +88,9 @@ def two_docs(client, engine):
     with engine.begin() as conn:
         for doc_id in doc_ids:
             conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
-            conn.execute(text("DELETE FROM document_versions WHERE document_id = :id"), {"id": doc_id})
+            conn.execute(
+                text("DELETE FROM document_versions WHERE document_id = :id"), {"id": doc_id}
+            )
             conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
@@ -95,13 +105,13 @@ def test_ev002_full_integration_flow(client, two_docs) -> None:
         headers=_auth(),
     )
     assert resp.status_code == 202
-    assert resp.json()["acknowledged"] is True
+    assert response_json_object(resp)["acknowledged"] is True
 
     # 2. GET /stats/summary — verify documents counted
     resp = client.get("/internal/v1/stats/summary", headers=_auth())
     assert resp.status_code == 200
-    summary = resp.json()
-    assert summary["total_documents"] >= 2
+    summary = response_json_object(resp)
+    assert json_int(summary, "total_documents") >= 2
 
     # 3. GET /audit — verify audit events from batch upsert
     resp = client.get(
@@ -109,18 +119,20 @@ def test_ev002_full_integration_flow(client, two_docs) -> None:
         headers=_auth(),
     )
     assert resp.status_code == 200
-    audit = resp.json()
-    assert audit["total_count"] >= 1
+    audit = response_json_object(resp)
+    assert json_int(audit, "total_count") >= 1
 
     # 4. DELETE /documents/bulk — bulk delete doc_b
-    resp = client.delete(
+    resp = client.request(
+        "DELETE",
         "/internal/v1/documents/bulk",
         json={"document_ids": [doc_b]},
         headers=_auth(),
     )
     assert resp.status_code == 200
-    result = resp.json()
-    assert doc_b in result["successes"]
+    result = response_json_object(resp)
+    assert json_int(result, "successes") == 1
+    assert json_object_list(result, "failures") == []
 
     # 5. GET /audit — verify document.deleted event for doc_b
     resp = client.get(
@@ -128,7 +140,7 @@ def test_ev002_full_integration_flow(client, two_docs) -> None:
         headers=_auth(),
     )
     assert resp.status_code == 200
-    assert resp.json()["total_count"] >= 1
+    assert json_int(response_json_object(resp), "total_count") >= 1
 
     # 6. GET /documents/{doc_a}/history — verify doc_a has creation event
     resp = client.get(
@@ -136,7 +148,7 @@ def test_ev002_full_integration_flow(client, two_docs) -> None:
         headers=_auth(),
     )
     assert resp.status_code == 200
-    history = resp.json()
-    assert len(history) >= 1
-    event_types = [e["event_type"] for e in history]
-    assert "document.created" in event_types
+    history = response_json_object(resp)
+    versions = json_object_list(history, "versions")
+    assert len(versions) >= 1
+    assert json_int(versions[0], "version_number") == 1

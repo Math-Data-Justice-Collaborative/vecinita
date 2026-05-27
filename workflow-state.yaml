@@ -144,11 +144,12 @@ stages:
     note: "Phase 5 EV-001; M15 complete; active T16.1"
   08-verify-build:
     status: completed
-    started_at: "2026-05-19"
-    completed_at: "2026-05-19"
+    started_at: "2026-05-27"
+    completed_at: "2026-05-27"
     scope: standalone
-    overall: pass
+    overall: fail
     report: docs/verification-report.md
+    notes: "6 pytest failures on evolve/EV-002-admin-overhaul; lint/typecheck/frontends pass; 18 files auto-formatted uncommitted"
   09-qa:
     status: completed
     started_at: "2026-05-25"

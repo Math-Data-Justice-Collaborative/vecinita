@@ -6,10 +6,12 @@ import os
 import subprocess
 import uuid
 from pathlib import Path
+from uuid import UUID
 
 import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import IntegrityError
+from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
 
 pytestmark = pytest.mark.integration
 
@@ -142,13 +144,16 @@ def test_document_versions_unique_constraint() -> None:
     """(document_id, version_number) must be unique."""
     engine = create_engine(_database_url())
     with engine.begin() as conn:
-        doc_id = conn.execute(
-            text(
-                "INSERT INTO documents (url, title, language) "
-                "VALUES (:url, 'Test Doc', 'en') RETURNING id"
-            ),
-            {"url": f"https://test.example.com/ev002-uniq-{uuid.uuid4().hex[:8]}"},
-        ).scalar_one()
+        doc_id_raw = sqlalchemy_scalar_one(
+            conn.execute(
+                text(
+                    "INSERT INTO documents (url, title, language) "
+                    "VALUES (:url, 'Test Doc', 'en') RETURNING id"
+                ),
+                {"url": f"https://test.example.com/ev002-uniq-{uuid.uuid4().hex[:8]}"},
+            )
+        )
+        doc_id = UUID(str(doc_id_raw))
 
         conn.execute(
             text(
@@ -185,23 +190,28 @@ def test_serving_stats_upsert_counter() -> None:
     """served_count defaults to 0 and can be incremented."""
     engine = create_engine(_database_url())
     with engine.begin() as conn:
-        doc_id = conn.execute(
-            text(
-                "INSERT INTO documents (url, title, language) "
-                "VALUES (:url, 'Stats Test', 'en') RETURNING id"
-            ),
-            {"url": f"https://test.example.com/ev002-stats-{uuid.uuid4().hex[:8]}"},
-        ).scalar_one()
-
+        doc_id_raw = sqlalchemy_scalar_one(
+            conn.execute(
+                text(
+                    "INSERT INTO documents (url, title, language) "
+                    "VALUES (:url, 'Stats Test', 'en') RETURNING id"
+                ),
+                {"url": f"https://test.example.com/ev002-stats-{uuid.uuid4().hex[:8]}"},
+            )
+        )
+        doc_id = UUID(str(doc_id_raw))
         conn.execute(
             text("INSERT INTO document_serving_stats (document_id) VALUES (:doc_id)"),
             {"doc_id": doc_id},
         )
 
-        count = conn.execute(
-            text("SELECT served_count FROM document_serving_stats WHERE document_id = :doc_id"),
-            {"doc_id": doc_id},
-        ).scalar_one()
+        count_raw = sqlalchemy_scalar_one(
+            conn.execute(
+                text("SELECT served_count FROM document_serving_stats WHERE document_id = :doc_id"),
+                {"doc_id": doc_id},
+            )
+        )
+        count = scalar_int(count_raw)
         assert count == 0
 
         conn.execute(
@@ -213,8 +223,11 @@ def test_serving_stats_upsert_counter() -> None:
             {"doc_id": doc_id},
         )
 
-        count = conn.execute(
-            text("SELECT served_count FROM document_serving_stats WHERE document_id = :doc_id"),
-            {"doc_id": doc_id},
-        ).scalar_one()
+        count_after_raw = sqlalchemy_scalar_one(
+            conn.execute(
+                text("SELECT served_count FROM document_serving_stats WHERE document_id = :doc_id"),
+                {"doc_id": doc_id},
+            )
+        )
+        count = scalar_int(count_after_raw)
         assert count == 1
