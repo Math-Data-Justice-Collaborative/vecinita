@@ -1,13 +1,21 @@
-"""Audit event emission and document version snapshots (ADR-016, TP-023, TP-025)."""
+"""Audit event emission, document version snapshots, and retention cleanup.
+
+ADR-016: audit event emission (TP-023, TP-025)
+TP-027: audit log retention with configurable period
+"""
 
 from __future__ import annotations
 
 import json
+import logging
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
 from sqlalchemy import text
-from sqlalchemy.engine import Connection
+from sqlalchemy.engine import Connection, Engine
+
+logger = logging.getLogger(__name__)
 
 
 def emit_audit_event(
@@ -69,3 +77,16 @@ def create_document_version(
         },
     )
     return next_version
+
+
+def cleanup_audit_log(engine: Engine, *, retention_days: int = 365) -> int:
+    """Delete audit_log rows older than `retention_days`. Returns deleted count."""
+    cutoff = datetime.now(UTC) - timedelta(days=retention_days)
+    with engine.begin() as conn:
+        result = conn.execute(
+            text("DELETE FROM audit_log WHERE created_at < :cutoff"),
+            {"cutoff": cutoff},
+        )
+        deleted = result.rowcount
+    logger.info("audit retention: deleted %d events older than %s", deleted, cutoff.isoformat())
+    return deleted

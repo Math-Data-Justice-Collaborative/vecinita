@@ -9,10 +9,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 7: EV-002 Frontend — Admin UI Overhaul |
-| **Active milestone** | Phase 7 complete — gate passed |
-| **Active task** | — |
-| **Tasks completed** | 172 / 184 |
+| **Active phase** | Phase 8: EV-002 Integration & Deploy |
+| **Active milestone** | M31: EV-002 Deploy & connectivity |
+| **Active task** | T31.1 |
+| **Tasks completed** | 176 / 184 |
 | **Last updated** | 2026-05-26 |
 | **Evolve cycle** | EV-002 (F23–F29) — **in_progress** |
 
@@ -616,10 +616,10 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
-| T30.1 | Test: audit cleanup deletes records older than retention period (`tests/unit/test_audit_retention.py`) — red | Test | pending | TC-061, TP-027 | T21.5 | — | EV-002 | F29 |
-| T30.2 | Implement `cleanup_audit_log()` function + daily background trigger (Modal cron or DO cron job) | Code | pending | TP-027, feature-list F29 | T30.1 | — | EV-002 | F29 |
-| T30.3 | Update `openapi/internal-write.yaml` with all EV-002 endpoints | Docs | pending | ADR-011 | T24.6 | — | EV-002 | F23–F29 |
-| T30.4 | Full E2E integration test: ingest → stats increment → audit → bulk delete → verify history (`tests/e2e/test_ev002_integration.py`) | Test | pending | UJ-013–UJ-021 | T29.6, T22.6, T23.2 | D1 | EV-002 | F25–F29 |
+| T30.1 | Test: audit cleanup deletes records older than retention period (`tests/unit/test_audit_retention.py`) — red | Test | completed | TC-061, TP-027 | T21.5 | — | EV-002 | F29 |
+| T30.2 | Implement `cleanup_audit_log()` function + daily background trigger (Modal cron or DO cron job) | Code | completed | TP-027, feature-list F29 | T30.1 | — | EV-002 | F29 |
+| T30.3 | Update `openapi/internal-write.yaml` with all EV-002 endpoints | Docs | completed | ADR-011 | T24.6 | — | EV-002 | F23–F29 |
+| T30.4 | Full E2E integration test: ingest → stats increment → audit → bulk delete → verify history (`tests/e2e/test_ev002_integration.py`) | Test | completed | UJ-013–UJ-021 | T29.6, T22.6, T23.2 | D1 | EV-002 | F25–F29 |
 
 #### M31: EV-002 Deploy & connectivity
 
