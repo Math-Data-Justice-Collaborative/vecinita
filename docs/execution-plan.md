@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 7: EV-002 Frontend — Admin UI Overhaul |
-| **Active milestone** | M27: Dashboard + health pages |
-| **Active task** | T27.1 |
-| **Tasks completed** | 154 / 184 |
+| **Active milestone** | M28: Bulk operations UI |
+| **Active task** | T28.1 |
+| **Tasks completed** | 160 / 184 |
 | **Last updated** | 2026-05-26 |
 | **Evolve cycle** | EV-002 (F23–F29) — **in_progress** |
 
@@ -557,12 +557,12 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
-| T27.1 | Implement Dashboard page — stat cards (documents, chunks, tags, jobs, languages, storage) | Code | pending | UJ-013, feature-list F25, AC-E3 | T25.5, T24.4 | — | EV-002 | F25 |
-| T27.2 | Implement "Top Served Documents" widget on Dashboard | Code | pending | UJ-019, feature-list F28 | T27.1, T22.4 | — | EV-002 | F28 |
-| T27.3 | Implement "Recent Activity" feed widget from audit log | Code | pending | feature-list F25 | T27.1, T21.5 | — | EV-002 | F25, F29 |
-| T27.4 | Test: dashboard renders all stat types with loading/error states (`tests/frontend/test_dashboard.test.tsx`) | Test | pending | TC-051, AC-E3 | T27.3 | — | EV-002 | F25 |
-| T27.5 | Implement Health page — service status grid with manual refresh | Code | pending | UJ-014, feature-list F26, AC-E4 | T25.5, T24.2 | — | EV-002 | F26 |
-| T27.6 | Test: health page shows up/down per service (`tests/frontend/test_health_page.test.tsx`) | Test | pending | TC-052, AC-E4 | T27.5 | — | EV-002 | F26 |
+| T27.1 | Implement Dashboard page — stat cards (documents, chunks, tags, jobs, languages, storage) | Code | completed | UJ-013, feature-list F25, AC-E3 | T25.5, T24.4 | — | EV-002 | F25 |
+| T27.2 | Implement "Top Served Documents" widget on Dashboard | Code | completed | UJ-019, feature-list F28 | T27.1, T22.4 | — | EV-002 | F28 |
+| T27.3 | Implement "Recent Activity" feed widget from audit log | Code | completed | feature-list F25 | T27.1, T21.5 | — | EV-002 | F25, F29 |
+| T27.4 | Test: dashboard renders all stat types with loading/error states (`tests/frontend/test_dashboard.test.tsx`) | Test | completed | TC-051, AC-E3 | T27.3 | — | EV-002 | F25 |
+| T27.5 | Implement Health page — service status grid with manual refresh | Code | completed | UJ-014, feature-list F26, AC-E4 | T25.5, T24.2 | — | EV-002 | F26 |
+| T27.6 | Test: health page shows up/down per service (`tests/frontend/test_health_page.test.tsx`) | Test | completed | TC-052, AC-E4 | T27.5 | — | EV-002 | F26 |
 
 #### M28: Bulk operations UI (F27)
 
