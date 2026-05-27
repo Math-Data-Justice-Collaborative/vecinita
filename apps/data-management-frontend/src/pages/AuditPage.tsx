@@ -96,7 +96,7 @@ export function AuditPage() {
                 id="filter-event-type"
                 data-testid="filter-event-type"
                 value={eventTypeFilter}
-                onChange={(e) => setEventTypeFilter(e.target.value)}
+                onChange={(e) => { setEventTypeFilter(e.target.value); }}
                 placeholder="document.created"
                 className="w-48"
               />
@@ -107,7 +107,7 @@ export function AuditPage() {
                 id="filter-entity-id"
                 data-testid="filter-entity-id"
                 value={entityIdFilter}
-                onChange={(e) => setEntityIdFilter(e.target.value)}
+                onChange={(e) => { setEntityIdFilter(e.target.value); }}
                 placeholder="doc-aaa..."
                 className="w-48"
               />
@@ -138,7 +138,7 @@ export function AuditPage() {
                     key={event.id}
                     event={event}
                     expanded={expandedIds.has(event.id)}
-                    onToggle={() => toggleExpand(event.id)}
+                    onToggle={() => { toggleExpand(event.id); }}
                   />
                 ))}
               </TableBody>

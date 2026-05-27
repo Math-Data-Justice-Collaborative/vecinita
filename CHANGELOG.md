@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0] — 2026-05-27
+
+### EV-002: Admin Dashboard, Bulk Ops, Usage Stats, Audit Log (F23–F28)
+
+**Features:**
+- **M23–M28**: Admin UI overhaul (Tailwind + React Router), summary stats dashboard, system health aggregator, bulk corpus operations, serving statistics, audit log & document version history
+- **Alembic** `20260526_0003`: `audit_log`, `document_versions`, `document_serving_stats`
+- **Deploy** (TP-029): migration → internal-write-api → chat-rag-backend → admin frontend @ `0a2f813` (`evolve/EV-002-admin-overhaul`)
+
+**Smoke validation (staging):**
+- H1–H3b, T3 admin API (4/4), H4–H5 connectivity — all pass; Modal H4 waiver retained
+
 ## [0.2.0] — 2026-05-25
 
 ### EV-001: Corpus Tags, Community Browse, Admin Chunk/Tag Editing (F19–F22)

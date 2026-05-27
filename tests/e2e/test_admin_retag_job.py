@@ -3,12 +3,19 @@
 from __future__ import annotations
 
 import os
+from typing import cast
 from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import HttpUrl
 from sqlalchemy import create_engine, text
+from tests.helpers.json_response import (
+    json_list,
+    json_str,
+    response_json_list,
+    response_json_object,
+)
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.jobs import run_job
 from vecinita_data_management_backend.store import InMemoryJobStore
@@ -22,6 +29,7 @@ from vecinita_shared_schemas.internal_write import (
     TagInput,
     TagPatchResponse,
 )
+from vecinita_shared_schemas.json_types import as_json_object
 
 pytestmark = pytest.mark.e2e
 
@@ -163,15 +171,16 @@ def test_admin_retag_job_lifecycle(
 
     list_resp = write_client_api.get("/internal/v1/documents")
     assert list_resp.status_code == 200
-    document_id = list_resp.json()[0]["document_id"]
+    docs = response_json_list(list_resp)
+    document_id = json_str(as_json_object(cast(object, docs[0])), "document_id")
 
     retag_resp = write_client_api.post(f"/internal/v1/documents/{document_id}/retag")
     assert retag_resp.status_code == 200
-    job_id = retag_resp.json()["job_id"]
+    job_id = json_str(response_json_object(retag_resp), "job_id")
 
     status = dm_client.get(f"/jobs/{job_id}")
     assert status.status_code == 200
-    assert status.json()["status"] == "completed"
+    assert json_str(response_json_object(status), "status") == "completed"
 
     engine = create_engine(os.environ["DATABASE_URL"])
     with engine.connect() as conn:
@@ -203,7 +212,8 @@ def test_admin_retag_tags_visible_via_get_endpoint(
 
     list_resp = write_client_api.get("/internal/v1/documents")
     assert list_resp.status_code == 200
-    document_id = list_resp.json()[0]["document_id"]
+    docs = response_json_list(list_resp)
+    document_id = json_str(as_json_object(cast(object, docs[0])), "document_id")
 
     retag_resp = write_client_api.post(f"/internal/v1/documents/{document_id}/retag")
     assert retag_resp.status_code == 200
@@ -212,7 +222,10 @@ def test_admin_retag_tags_visible_via_get_endpoint(
     assert tags_resp.status_code == 200, (
         f"GET /documents/{{id}}/tags should return 200 after retag; got {tags_resp.status_code}"
     )
-    tag_slugs = sorted(t["slug"] for t in tags_resp.json()["tags"])
+    tag_slugs = sorted(
+        json_str(as_json_object(cast(object, tag)), "slug")
+        for tag in json_list(response_json_object(tags_resp), "tags")
+    )
     assert tag_slugs == ["benefits"], (
         f"Expected retag to produce ['benefits'] via GET endpoint; got {tag_slugs}"
     )

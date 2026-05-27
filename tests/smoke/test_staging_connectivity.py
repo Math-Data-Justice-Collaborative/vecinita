@@ -239,6 +239,48 @@ def test_h4_write_api_cors_preflight_health_all(admin_frontend: str) -> None:
     )
 
 
+def test_h4_write_api_cors_preflight_bulk_retag(admin_frontend: str) -> None:
+    """EV-002 TC-060: OPTIONS on POST /internal/v1/documents/bulk/retag from admin frontend."""
+    write_url = _env("VECINITA_STAGING_WRITE_URL")
+    if not write_url:
+        pytest.skip("Set VECINITA_STAGING_WRITE_URL")
+    assert_cors_preflight(
+        api_base=write_url,
+        origin=admin_frontend,
+        path="/internal/v1/documents/bulk/retag",
+        method="POST",
+        extra_request_headers=["authorization", "content-type"],
+    )
+
+
+def test_h4_write_api_cors_preflight_stats_served(admin_frontend: str) -> None:
+    """EV-002 TC-060: OPTIONS on POST /internal/v1/stats/served from admin frontend."""
+    write_url = _env("VECINITA_STAGING_WRITE_URL")
+    if not write_url:
+        pytest.skip("Set VECINITA_STAGING_WRITE_URL")
+    assert_cors_preflight(
+        api_base=write_url,
+        origin=admin_frontend,
+        path="/internal/v1/stats/served",
+        method="POST",
+        extra_request_headers=["authorization", "content-type"],
+    )
+
+
+def test_h4_write_api_cors_preflight_stats_top_served(admin_frontend: str) -> None:
+    """EV-002 TC-060: OPTIONS on GET /internal/v1/stats/top-served from admin frontend."""
+    write_url = _env("VECINITA_STAGING_WRITE_URL")
+    if not write_url:
+        pytest.skip("Set VECINITA_STAGING_WRITE_URL")
+    assert_cors_preflight(
+        api_base=write_url,
+        origin=admin_frontend,
+        path="/internal/v1/stats/top-served",
+        method="GET",
+        extra_request_headers=["authorization"],
+    )
+
+
 def test_h5_admin_frontend_bundle_has_modal_and_write_hosts(
     admin_frontend: str,
 ) -> None:

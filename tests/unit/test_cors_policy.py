@@ -6,6 +6,7 @@ import os
 
 import pytest
 from fastapi.testclient import TestClient
+from tests.helpers.json_response import header_str
 from vecinita_chat_rag_backend.app import create_app as create_chat_app
 from vecinita_data_management_backend.app import create_app as create_data_mgmt_app
 from vecinita_internal_write_api.app import create_app as create_write_app
@@ -100,7 +101,7 @@ def test_internal_write_cors_preflight_allows_delete_document(
     )
     assert response.status_code == 200
     assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
-    allow_methods = response.headers.get("access-control-allow-methods", "").upper()
+    allow_methods = header_str(response.headers, "access-control-allow-methods").upper()
     assert "DELETE" in allow_methods
 
 
@@ -137,7 +138,7 @@ def test_internal_write_cors_preflight_on_document_tags_patch(
     )
     assert response.status_code == 200
     assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
-    allow_methods = response.headers.get("access-control-allow-methods", "").upper()
+    allow_methods = header_str(response.headers, "access-control-allow-methods").upper()
     assert "PATCH" in allow_methods
 
 
@@ -158,7 +159,7 @@ def test_internal_write_cors_preflight_on_chunk_tags_patch(
     )
     assert response.status_code == 200
     assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
-    allow_methods = response.headers.get("access-control-allow-methods", "").upper()
+    allow_methods = header_str(response.headers, "access-control-allow-methods").upper()
     assert "PATCH" in allow_methods
 
 

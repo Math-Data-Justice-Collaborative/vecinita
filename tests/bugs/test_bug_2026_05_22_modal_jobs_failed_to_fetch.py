@@ -12,6 +12,7 @@ from pathlib import Path
 import httpx
 import pytest
 from fastapi.testclient import TestClient
+from tests.helpers.json_response import header_str
 from vecinita_data_management_backend.app import create_app as create_data_mgmt_app
 
 ADMIN_ORIGIN = "https://vecinita-admin-frontend.example.com"
@@ -52,7 +53,7 @@ def test_data_mgmt_options_preflight_without_modal_key_succeeds() -> None:
     )
     assert response.status_code == 200, response.text
     assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
-    allow_methods = response.headers.get("access-control-allow-methods", "").upper()
+    allow_methods = header_str(response.headers, "access-control-allow-methods").upper()
     assert "POST" in allow_methods
 
 
@@ -71,7 +72,7 @@ def test_live_modal_jobs_options_preflight_succeeds() -> None:
     assert response.status_code == 200, (
         f"Expected 200 CORS preflight, got {response.status_code}: {response.text[:200]}"
     )
-    origin = response.headers.get("access-control-allow-origin")
+    origin = header_str(response.headers, "access-control-allow-origin")
     assert origin in (
         "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app",
         "*",

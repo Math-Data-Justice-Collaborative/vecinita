@@ -6,6 +6,7 @@ import contextlib
 
 import pytest
 from fastapi.testclient import TestClient
+from tests.helpers.json_response import json_str, response_json_object
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.pipeline import run_ingest_job
 from vecinita_data_management_backend.store import InMemoryJobStore
@@ -49,8 +50,8 @@ def test_ingest_job_failure(monkeypatch: pytest.MonkeyPatch) -> None:
 
     create = client.post("/jobs", json={"urls": ["https://invalid.example/bad"]})
     assert create.status_code == 202
-    job_id = create.json()["job_id"]
+    job_id = json_str(response_json_object(create), "job_id")
 
-    body = client.get(f"/jobs/{job_id}").json()
+    body = response_json_object(client.get(f"/jobs/{job_id}"))
     assert body["status"] == "failed"
     assert body["error_code"]

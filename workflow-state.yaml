@@ -1,5 +1,5 @@
 # Vecinita pipeline state — canonical schema: .cursor/skills/workflow-state-reference.md
-overall_status: in_progress
+overall_status: completed
 project:
   name: Vecinita
   description: Monorepo — bilingual community Q&A RAG + data management (5 apps; zero personal data, cost/sovereignty constraints)
@@ -139,80 +139,83 @@ stages:
       - .github/workflows/ci.yml
     verification: passed
   07-build:
-    status: in_progress
+    status: completed
     started_at: "2026-05-19"
-    note: "Phase 5 EV-001; M15 complete; active T16.1"
+    completed_at: "2026-05-27"
+    note: "Phase 8 EV-002 complete — 184/184 tasks per execution-plan.md; gate passed 2026-05-27"
   08-verify-build:
     status: completed
     started_at: "2026-05-27"
     completed_at: "2026-05-27"
     scope: standalone
-    overall: fail
+    overall: pass
     report: docs/verification-report.md
-    notes: "6 pytest failures on evolve/EV-002-admin-overhaul; lint/typecheck/frontends pass; 18 files auto-formatted uncommitted"
+    notes: "Re-run after fixes: 158 passed 31 skipped; commits 901bc2d + follow-up fix"
   09-qa:
     status: completed
-    started_at: "2026-05-25"
-    completed_at: "2026-05-25"
+    started_at: "2026-05-27"
+    completed_at: "2026-05-27"
     report: docs/qa-report.md
     overall: pass_with_advisories
+    note: "Re-run on evolve/EV-002-admin-overhaul @ 98bb7f8; 158 passed 31 skipped; blocking green"
   10-e2e:
     status: completed
     started_at: "2026-05-19"
-    completed_at: "2026-05-19"
-    partial_rerun_at: "2026-05-25"
-    partial_rerun_note: "EV-001 delta — UJ-009–UJ-012 (F19–F22); T0 16 passed, T1 21 passed, FE 10 passed"
+    completed_at: "2026-05-27"
+    partial_rerun_at: "2026-05-27"
+    partial_rerun_note: "EV-002 delta — UJ-013–UJ-021 (F23–F29); T0 40 passed, T1 35 passed, FE 40 passed (32 data-mgmt + 8 chat-rag)"
     report: docs/e2e-report.md
-    mechanism: api
+    mechanism: api+frontend
     t0: pass
     t1_integration: pass
     t3_live: pending
-    journeys_passed: 12
+    journeys_passed: 21
     journeys_failed: 0
     ev001_journeys_added: 4
     ev001_tests_passed: 5
+    ev002_journeys_added: 9
+    ev002_tests_passed: 40
   11-verify-impl:
     status: completed
-    started_at: "2026-05-19"
-    completed_at: "2026-05-19"
-    partial_rerun_at: "2026-05-25"
-    partial_rerun_note: "EV-001 delta — F19-F22 all approved; AC-T6 partial (T3 deferred)"
+    started_at: "2026-05-27"
+    completed_at: "2026-05-27"
+    partial_rerun_at: "2026-05-27"
+    partial_rerun_note: "EV-002 delta F23-F29 — implementation verification complete"
     report: docs/implementation-verification.md
     substeps:
+      current: phase6_report
       phase1_collect: completed
       phase2_completeness: completed
       phase3a_journey_signoff: completed
       phase3_feature_approval: completed
       phase5_scope: completed
       phase6_report: completed
-    note: "Journeys + features approved; T3 post-deploy waiver accepted at 12-verify-deploy"
+    note: "EV-002 delta partial rerun — F23-F29 all journeys and features user-approved; T3 pending post-deploy"
   12-verify-deploy:
     status: completed
-    started_at: "2026-05-19"
-    completed_at: "2026-05-19"
+    started_at: "2026-05-27"
+    completed_at: "2026-05-27"
     partial_rerun_at: "2026-05-25"
     partial_rerun_note: "EV-001 delta — deploy checklist for F19-F22 corpus tagging features"
     report: docs/deploy-checklist.md
-    deploy_ready: false
+    deploy_ready: true
     blockers:
-      - modal secret vecinita-data-management missing
-      - vecinita-data-management app stopped
-      - DO apps/secrets unverified (operator)
-      - D7 staged_procedure
+      - "Staging DB migration to 20260526_0003 required before deploy (operator action)"
   13-deploy-smoke:
     status: completed
     started_at: "2026-05-19"
-    completed_at: "2026-05-25"
-    partial_rerun_at: "2026-05-25"
-    partial_rerun_note: "EV-001 delta — full redeploy with tag schema, browse, admin, retag features"
+    completed_at: "2026-05-27"
+    partial_rerun_at: "2026-05-27"
+    partial_rerun_note: "EV-002 delta validate — H1-H5 + T3 pass; deployed @ 0a2f813 evolve/EV-002-admin-overhaul"
     report: docs/deploy-report.md
     chat_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
-    connectivity_validated_at: "2026-05-25"
+    connectivity_validated_at: "2026-05-27"
     h0c: pass
     h1: pass
     h2: pass
     h3: pass
     h3b_browse: pass
+    h3_ev002_t3: pass
     h4_do: pass
     h4_modal: waiver
     h4_modal_note: "Modal requires_proxy_auth blocks OPTIONS preflight at proxy; user-approved waiver"
@@ -221,7 +224,7 @@ stages:
     deploy_time_fixes:
       - "98cc2ac: tag inference chat template + graceful fallback"
       - "4a1598f: fallback to unfiltered retrieval when tag filter yields empty"
-    note: "EV-001 staging hybrid deploy; tag migration + all 7 services redeployed; H1-H3b/H4/H5 pass (Modal H4 waiver)"
+    note: "EV-002 deployed 2026-05-27 @ 0a2f813 (evolve/EV-002-admin-overhaul); H1-H5 + T3 pass (Modal H4 waiver)"
   14-hotfix:
     status: completed
     completed_at: "2026-05-21"
@@ -277,10 +280,10 @@ deployment:
     t0_journeys_passed: 16
   staging:
     status: deployed
-    last_verified: "2026-05-25"
-    commit_deployed: 4a1598f
-    commit_head: 4a1598f
-    drift: false
+    last_verified: "2026-05-27"
+    commit_deployed: 0a2f813
+    commit_head: 98bb7f8
+    drift: true
     urls:
       chat_rag_backend: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
       internal_write_api: https://vecinita-internal-write-api-icze4.ondigitalocean.app
@@ -295,15 +298,14 @@ deployment:
       h2_db_ready: pass
       h3_rag_smoke: pass
       h3b_browse: pass
+      h3_ev002_admin: pass
       h4_cors_preflight: pass
       h4_modal: waiver
       h5_frontend_bundle: pass
       h6_browser_uj: waived_v1
     notes:
-      - "EV-001 deployed 2026-05-25 — tag schema + browse + admin tags + retag worker"
-      - "H4 Modal data-mgmt waiver — requires_proxy_auth blocks OPTIONS preflight (user-approved)"
-      - "LLM cold-start ~5-10s after scaledown; tag inference adds ~3s to ask latency"
-      - "Deploy-time fixes: chat template prompt + retrieval fallback"
+      - "EV-002 deployed 2026-05-27 @ 0a2f813 (evolve branch); T3 4/4 pass"
+      - "Local HEAD 98bb7f8 ahead of deployed — merge to main advisory"
   url_discovery:
     method: "uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend"
     modal_admin_manual: true
@@ -503,8 +505,10 @@ evolve_cycles:
     cycle_type: feature
     feature_ids: [F23, F24, F25, F26, F27, F28]
     title: "Admin dashboard overhaul, bulk ops, usage stats, audit log"
-    status: in_progress
+    status: completed
     started: "2026-05-26"
+    completed: "2026-05-27"
+    note: "Deployed 2026-05-27 @ 0a2f813 — H1-H5 + T3 pass (H4 Modal waiver); drift vs HEAD 98bb7f8"
     scope_summary: |
       F23: Admin UI overhaul (Tailwind CSS + React Router navigation).
       F24: Admin summary statistics dashboard (document/chunk/tag/job aggregates).
@@ -528,7 +532,7 @@ evolve_cycles:
       skipped_stages:
         - 03-plan-tooling
         - 06-tech-tooling
-    current_stage: 07-build
+    current_stage: completed
     stages:
       00-context:
         status: completed
@@ -579,17 +583,34 @@ evolve_cycles:
           - docs/spec.md
           - docs/staging-secrets-matrix.md
           - docs/execution-plan.md
+      10-e2e:
+        status: completed
+        completed: "2026-05-27"
+        artifacts_updated:
+          - docs/e2e-report.md
+      11-verify-impl:
+        status: completed
+        completed_at: "2026-05-27"
+      12-verify-deploy:
+        status: completed
+        started_at: "2026-05-27"
+        completed_at: "2026-05-27"
+        report: docs/deploy-checklist.md
+      13-deploy-smoke:
+        status: completed
+        completed_at: "2026-05-27"
+        report: docs/deploy-report.md
     gates:
       a_to_b: passed
-      b_to_c: pending
-      c_to_d: pending
-      deploy: pending
+      b_to_c: passed
+      c_to_d: passed
+      deploy: passed
     checkpoints:
       phase_a: passed
       phase_b: passed
-      phase_c: pending
-      phase_d: pending
-      deploy: pending
+      phase_c: passed
+      phase_d: passed
+      deploy: passed
     adrs:
       - docs/adr/ADR-016-audit-log-no-ip.md
       - docs/adr/ADR-017-ev002-implementation.md
@@ -698,6 +719,8 @@ decisions_log:
   - "EV-002 02-verify-plan delta complete — 24 statements, ADR-016 approved (no IP), UJ-020/021 + AC-E1-E11 added — 2026-05-26"
   - "EV-002 04-tech-plan delta — TP-018–TP-029 — ADR-017 — Phase 6-8 execution plan (73 tasks, 12 milestones) — 2026-05-26"
   - "EV-002 05-verify-tech delta — TV-032–TV-039 — 23 statements, 8 consistency fixes, 7 source-doc edits — 2026-05-26"
+  - "EV-002 11-verify-impl: UJ-013–UJ-021 and F23–F29 approved by user 2026-05-27; T3 live waiver until 13-deploy-smoke"
+  - "EV-002 12-verify-deploy: failure mitigations approved; rollback plan approved; deploy_ready=true pending staging DB migration"
 
 artifacts:
   - docs/context-brief.md

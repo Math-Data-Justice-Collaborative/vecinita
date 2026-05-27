@@ -6,6 +6,7 @@ import os
 
 import httpx
 import pytest
+from tests.helpers.json_response import json_str, response_json_object
 from tests.smoke.staging_h2 import assert_h2_database_ready, staging_database_url
 
 pytestmark = [pytest.mark.e2e, pytest.mark.live]
@@ -26,7 +27,7 @@ def staging_chat_url() -> str:
 def test_h1_chat_health(staging_chat_url: str) -> None:
     response = httpx.get(f"{staging_chat_url}/health", timeout=30.0)
     assert response.status_code == 200
-    body = response.json()
+    body = response_json_object(response)
     assert body["status"] == "ok"
 
 
@@ -44,7 +45,7 @@ def test_h3_sample_ask(staging_chat_url: str) -> None:
         timeout=60.0,
     )
     assert response.status_code == 200
-    payload = response.json()
+    payload = response_json_object(response)
     assert payload.get("answer")
     assert payload.get("language") in ("en", "es")
 
@@ -55,4 +56,4 @@ def test_h1_write_api_health() -> None:
         pytest.skip("VECINITA_STAGING_WRITE_URL not set")
     response = httpx.get(f"{write_url.rstrip('/')}/health", timeout=30.0)
     assert response.status_code == 200
-    assert response.json()["status"] == "ok"
+    assert json_str(response_json_object(response), "status") == "ok"

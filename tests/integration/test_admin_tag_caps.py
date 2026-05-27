@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import os
+from typing import cast
 from uuid import uuid4
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from tests.helpers.json_response import find_json_object_by_str, json_str, response_json_list
+from vecinita_shared_schemas.json_types import as_json_object
 
 pytestmark = pytest.mark.integration
 
@@ -63,13 +66,16 @@ async def _seed_document(client: AsyncClient) -> tuple[str, str]:
         "/internal/v1/documents",
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
-    doc = next(item for item in list_response.json() if item["url"] == doc_url)
+    items = response_json_list(list_response)
+    doc = find_json_object_by_str(items, "url", doc_url)
+    document_id = json_str(doc, "document_id")
     chunks_response = await client.get(
-        f"/internal/v1/documents/{doc['document_id']}/chunks",
+        f"/internal/v1/documents/{document_id}/chunks",
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
-    chunk_id = chunks_response.json()[0]["chunk_id"]
-    return doc["document_id"], chunk_id
+    chunk_rows = response_json_list(chunks_response)
+    chunk_id = json_str(as_json_object(cast(object, chunk_rows[0])), "chunk_id")
+    return document_id, chunk_id
 
 
 @pytest.mark.asyncio

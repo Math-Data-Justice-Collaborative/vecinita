@@ -24,7 +24,7 @@ export async function createJob(
   });
   if (!response.ok) {
     const detail = await response.text();
-    throw new Error(detail || `Create job failed (${response.status})`);
+    throw new Error(detail || `Create job failed (${String(response.status)})`);
   }
   return response.json() as Promise<CreateJobResponse>;
 }
@@ -35,7 +35,7 @@ export async function getJob(options: JobsClientOptions, jobId: string): Promise
   });
   if (!response.ok) {
     const detail = await response.text();
-    throw new Error(detail || `Get job failed (${response.status})`);
+    throw new Error(detail || `Get job failed (${String(response.status)})`);
   }
   return response.json() as Promise<Job>;
 }

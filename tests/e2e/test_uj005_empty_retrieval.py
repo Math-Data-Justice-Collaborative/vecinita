@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
+from tests.helpers.json_response import json_str, response_json_object
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import ChatRagService
@@ -51,6 +52,6 @@ def test_uj005_empty_retrieval_message(empty_client: TestClient) -> None:
         json={"question": "What is the quantum flux capacitor rating?"},
     )
     assert response.status_code == 200
-    body = response.json()
+    body = response_json_object(response)
     assert body["sources"] == []
-    assert "corpus" in body["answer"].lower()
+    assert "corpus" in json_str(body, "answer").lower()

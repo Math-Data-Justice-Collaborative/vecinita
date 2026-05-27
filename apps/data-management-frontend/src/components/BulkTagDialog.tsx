@@ -77,11 +77,11 @@ export function BulkTagDialog({ open, onOpenChange, documentIds, onComplete }: B
         <div className="space-y-3">
           <div className="space-y-2">
             <Label htmlFor="add-tags">Add tags (comma-separated)</Label>
-            <Input id="add-tags" value={addInput} onChange={(e) => setAddInput(e.target.value)} placeholder="housing, legal" />
+            <Input id="add-tags" value={addInput} onChange={(e) => { setAddInput(e.target.value); }} placeholder="housing, legal" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="remove-tags">Remove tags (comma-separated slugs)</Label>
-            <Input id="remove-tags" value={removeInput} onChange={(e) => setRemoveInput(e.target.value)} placeholder="outdated" />
+            <Input id="remove-tags" value={removeInput} onChange={(e) => { setRemoveInput(e.target.value); }} placeholder="outdated" />
           </div>
         </div>
 

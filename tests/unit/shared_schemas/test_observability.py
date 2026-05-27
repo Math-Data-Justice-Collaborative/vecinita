@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 import logging
+from typing import cast
 
+from vecinita_shared_schemas.json_types import as_json_object
 from vecinita_shared_schemas.observability import JsonLogFormatter, log_request_event
 
 
@@ -22,7 +24,7 @@ def test_json_formatter_redacts_question_field() -> None:
     record.question = "secret user question"
     record.request_id = "req-1"
     line = formatter.format(record)
-    payload = json.loads(line)
+    payload = as_json_object(cast(object, json.loads(line)))
     assert payload["question"] == "<redacted>"
     assert payload["request_id"] == "req-1"
 

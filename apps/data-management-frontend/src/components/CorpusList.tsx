@@ -94,7 +94,7 @@ export function CorpusList() {
       </CardHeader>
       <CardContent>
         {selected ? (
-          <DocumentAdmin document={selected} onClose={() => setSelected(null)} />
+          <DocumentAdmin document={selected} onClose={() => { setSelected(null); }} />
         ) : (
           <>
             {selectedIds.size > 0 && (
@@ -107,7 +107,7 @@ export function CorpusList() {
                   variant="destructive"
                   size="sm"
                   data-testid="bulk-delete-btn"
-                  onClick={() => setBulkDeleteOpen(true)}
+                  onClick={() => { setBulkDeleteOpen(true); }}
                 >
                   <Trash2 className="mr-1 h-4 w-4" />
                   Delete
@@ -116,7 +116,7 @@ export function CorpusList() {
                   variant="outline"
                   size="sm"
                   data-testid="bulk-tag-btn"
-                  onClick={() => setBulkTagOpen(true)}
+                  onClick={() => { setBulkTagOpen(true); }}
                 >
                   <Tags className="mr-1 h-4 w-4" />
                   Tag
@@ -125,7 +125,7 @@ export function CorpusList() {
                   variant="outline"
                   size="sm"
                   data-testid="bulk-metadata-btn"
-                  onClick={() => setBulkMetadataOpen(true)}
+                  onClick={() => { setBulkMetadataOpen(true); }}
                 >
                   <FileEdit className="mr-1 h-4 w-4" />
                   Metadata
@@ -166,7 +166,7 @@ export function CorpusList() {
                       <TableCell>
                         <Checkbox
                           checked={selectedIds.has(doc.document_id)}
-                          onCheckedChange={() => toggleId(doc.document_id)}
+                          onCheckedChange={() => { toggleId(doc.document_id); }}
                           aria-label={`Select ${doc.title ?? doc.url}`}
                         />
                       </TableCell>
@@ -193,7 +193,7 @@ export function CorpusList() {
                       <TableCell>{doc.language ?? "—"}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="outline" size="sm" onClick={() => setSelected(doc)}>
+                          <Button variant="outline" size="sm" onClick={() => { setSelected(doc); }}>
                             Manage tags
                           </Button>
                           <Button

@@ -2,8 +2,8 @@
 
 > **Project**: Vecinita  
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
-> **Last updated**: 2026-05-26  
-> **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016)
+> **Last updated**: 2026-05-27  
+> **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018)
 
 ## Summary
 
@@ -31,13 +31,14 @@
 | F20 | LLM auto-tagging at ingest + admin re-tag | Implemented | Data Management | data-management-backend, Modal LLM | 11-verify-impl 2026-05-25 |
 | F21 | Admin chunk viewer & tag editor | Implemented | Data Management | data-management-frontend, internal-write-api | 11-verify-impl 2026-05-25 |
 | F22 | Tag-aware RAG retrieval | Implemented | ChatRAG | chat-rag-backend, packages/rag | 11-verify-impl 2026-05-25 |
-| F23 | Admin UI CSS/UX overhaul (shadcn/ui) | Planned | Data Management | data-management-frontend | EV-002 2026-05-26 |
-| F24 | Tag display in corpus list | Planned | Data Management | data-management-frontend, internal-write-api | EV-002 2026-05-26 |
-| F25 | Admin summary dashboard | Planned | Data Management | data-management-frontend, internal-write-api | EV-002 2026-05-26 |
-| F26 | System health check dashboard | Planned | Cross-cutting | data-management-frontend, all services | EV-002 2026-05-26 |
-| F27 | Bulk corpus operations | Planned | Data Management | data-management-frontend, internal-write-api | EV-002 2026-05-26 |
-| F28 | Source serving statistics | Planned | Cross-cutting | chat-rag-backend, internal-write-api, database | EV-002 2026-05-26 |
-| F29 | Audit log & version history | Planned | Data Management | internal-write-api, data-management-frontend, database | EV-002 2026-05-26 |
+| F23 | Admin UI CSS/UX overhaul (shadcn/ui) | Implemented | Data Management | data-management-frontend | 11-verify-impl 2026-05-27 |
+| F24 | Tag display in corpus list | Implemented | Data Management | data-management-frontend, internal-write-api | 11-verify-impl 2026-05-27 |
+| F25 | Admin summary dashboard | Implemented | Data Management | data-management-frontend, internal-write-api | 11-verify-impl 2026-05-27 |
+| F26 | System health check dashboard | Implemented | Cross-cutting | data-management-frontend, all services | 11-verify-impl 2026-05-27 |
+| F27 | Bulk corpus operations | Implemented | Data Management | data-management-frontend, internal-write-api | 11-verify-impl 2026-05-27 |
+| F28 | Source serving statistics | Implemented | Cross-cutting | chat-rag-backend, internal-write-api, database | 11-verify-impl 2026-05-27 |
+| F29 | Audit log & version history | Implemented | Data Management | internal-write-api, data-management-frontend, database | 11-verify-impl 2026-05-27 |
+| F30 | Strict static typing (no `Any` / `any`) | Implemented | Cross-cutting | all Python + TS apps | EV-003 2026-05-27 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -390,6 +391,21 @@
   | `VECINITA_AUDIT_RETENTION_DAYS` | `365` | 30–∞ | Days to retain audit records (0 = forever) |
 - **Limitations**: No IP addresses stored (ADR-016). No personal data. Version history covers metadata + tags only (not chunk text content). Configurable retention with background cleanup job.
 - **Source**: EV-002 / user interview 2026-05-26; ADR-016
+
+### F30: Strict static typing (no `Any` / `any`)
+
+- **What it does**: Blocks `typing.Any` in Python and `any` in TypeScript across CI, hooks, and documented local commands.
+- **Inputs**: Source changes in `apps/`, `packages/`, `tests/`, and both frontends.
+- **Outputs**: Failing CI/lint on explicit or unsafe-any violations; `docs/typing-policy.md` as developer reference.
+- **Key tools**:
+  | Layer | Tool | Rule |
+  |-------|------|------|
+  | Python lint | Ruff | `ANN401` |
+  | Python types | basedpyright | `reportExplicitAny` |
+  | TS lint | typescript-eslint | `no-explicit-any`, `no-unsafe-*` |
+  | TS compile | `tsc` | `strict`, `noImplicitAny` |
+- **Limitations**: `reportAny` and ESLint `strictTypeChecked` not enabled (see typing-policy).
+- **Source**: EV-003; ADR-018
 
 ## Planned / Deferred (post-v1)
 

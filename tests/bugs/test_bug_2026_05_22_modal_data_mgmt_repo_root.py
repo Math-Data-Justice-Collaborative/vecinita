@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+from typing import cast
 
 
 def test_data_management_app_imports_when_modal_mounts_at_root(tmp_path: Path) -> None:
@@ -17,4 +18,5 @@ def test_data_management_app_imports_when_modal_mounts_at_root(tmp_path: Path) -
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
-    assert Path("/opt/vecinita") == module._REPO_ROOT
+    repo_root = cast(object, module._REPO_ROOT)
+    assert Path("/opt/vecinita") == Path(str(repo_root))

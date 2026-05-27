@@ -6,10 +6,12 @@ import os
 import subprocess
 import uuid
 from pathlib import Path
+from uuid import UUID
 
 import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import IntegrityError
+from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
 
 pytestmark = pytest.mark.integration
 
@@ -42,15 +44,18 @@ def test_document_tags_foreign_key_enforced() -> None:
     engine = create_engine(_database_url())
     bogus_document = uuid.uuid4()
     with engine.begin() as conn:
-        tag_id = conn.execute(
-            text(
-                """
-                INSERT INTO tags (slug, label, language)
-                VALUES ('fk-test-doc', 'FK Test', 'en')
-                RETURNING id
-                """
+        tag_id_raw = sqlalchemy_scalar_one(
+            conn.execute(
+                text(
+                    """
+                    INSERT INTO tags (slug, label, language)
+                    VALUES ('fk-test-doc', 'FK Test', 'en')
+                    RETURNING id
+                    """
+                )
             )
-        ).scalar_one()
+        )
+        tag_id = UUID(str(tag_id_raw))
         with pytest.raises(IntegrityError):
             conn.execute(
                 text(
@@ -68,15 +73,18 @@ def test_chunk_tags_foreign_key_enforced() -> None:
     engine = create_engine(_database_url())
     bogus_chunk = uuid.uuid4()
     with engine.begin() as conn:
-        tag_id = conn.execute(
-            text(
-                """
-                INSERT INTO tags (slug, label, language)
-                VALUES ('fk-test-chunk', 'FK Test Chunk', 'en')
-                RETURNING id
-                """
+        tag_id_raw = sqlalchemy_scalar_one(
+            conn.execute(
+                text(
+                    """
+                    INSERT INTO tags (slug, label, language)
+                    VALUES ('fk-test-chunk', 'FK Test Chunk', 'en')
+                    RETURNING id
+                    """
+                )
             )
-        ).scalar_one()
+        )
+        tag_id = UUID(str(tag_id_raw))
         with pytest.raises(IntegrityError):
             conn.execute(
                 text(

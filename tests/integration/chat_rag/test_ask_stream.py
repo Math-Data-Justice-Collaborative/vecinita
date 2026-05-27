@@ -3,18 +3,20 @@
 from __future__ import annotations
 
 import json
+from typing import cast
 
 import pytest
 from fastapi.testclient import TestClient
+from vecinita_shared_schemas.json_types import JsonObject, as_json_object
 
 pytestmark = pytest.mark.integration
 
 
-def _parse_sse(raw: str) -> list[dict]:
-    events: list[dict] = []
+def _parse_sse(raw: str) -> list[JsonObject]:
+    events: list[JsonObject] = []
     for line in raw.splitlines():
         if line.startswith("data: "):
-            events.append(json.loads(line.removeprefix("data: ")))
+            events.append(as_json_object(cast(object, json.loads(line.removeprefix("data: ")))))
     return events
 
 

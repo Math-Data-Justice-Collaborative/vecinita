@@ -28,7 +28,7 @@ export async function fetchStatsSummary(options: CorpusClientOptions): Promise<S
     headers: { Authorization: `Bearer ${options.apiKey}` },
   });
   if (!response.ok) {
-    throw new Error(`Stats summary failed (${response.status})`);
+    throw new Error(`Stats summary failed (${String(response.status)})`);
   }
   return response.json() as Promise<StatsSummary>;
 }
@@ -38,7 +38,7 @@ export async function fetchHealthAggregate(options: CorpusClientOptions): Promis
     headers: { Authorization: `Bearer ${options.apiKey}` },
   });
   if (!response.ok) {
-    throw new Error(`Health check failed (${response.status})`);
+    throw new Error(`Health check failed (${String(response.status)})`);
   }
   return response.json() as Promise<HealthAggregate>;
 }
@@ -57,7 +57,7 @@ export async function bulkDeleteDocuments(
     headers: { Authorization: `Bearer ${options.apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({ document_ids: documentIds }),
   });
-  if (!response.ok) throw new Error(`Bulk delete failed (${response.status})`);
+  if (!response.ok) throw new Error(`Bulk delete failed (${String(response.status)})`);
   return response.json() as Promise<BulkResult>;
 }
 
@@ -72,7 +72,7 @@ export async function bulkTagDocuments(
     headers: { Authorization: `Bearer ${options.apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({ document_ids: documentIds, add: addTags, remove: removeSlugs }),
   });
-  if (!response.ok) throw new Error(`Bulk tag failed (${response.status})`);
+  if (!response.ok) throw new Error(`Bulk tag failed (${String(response.status)})`);
   return response.json() as Promise<BulkResult>;
 }
 
@@ -103,7 +103,7 @@ export async function fetchAuditLog(
   const response = await fetch(url.toString(), {
     headers: { Authorization: `Bearer ${options.apiKey}` },
   });
-  if (!response.ok) throw new Error(`Audit log failed (${response.status})`);
+  if (!response.ok) throw new Error(`Audit log failed (${String(response.status)})`);
   return response.json() as Promise<AuditPage>;
 }
 
@@ -114,7 +114,7 @@ export async function fetchDocumentHistory(
   const response = await fetch(`${options.baseUrl}/internal/v1/audit?entity_id=${documentId}`, {
     headers: { Authorization: `Bearer ${options.apiKey}` },
   });
-  if (!response.ok) throw new Error(`Document history failed (${response.status})`);
+  if (!response.ok) throw new Error(`Document history failed (${String(response.status)})`);
   const body = (await response.json()) as { events: AuditEvent[] };
   return body.events;
 }
@@ -129,6 +129,6 @@ export async function bulkUpdateMetadata(
     headers: { Authorization: `Bearer ${options.apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({ document_ids: documentIds, ...updates }),
   });
-  if (!response.ok) throw new Error(`Bulk metadata update failed (${response.status})`);
+  if (!response.ok) throw new Error(`Bulk metadata update failed (${String(response.status)})`);
   return response.json() as Promise<BulkResult>;
 }

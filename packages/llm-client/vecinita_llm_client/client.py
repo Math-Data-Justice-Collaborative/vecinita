@@ -5,9 +5,10 @@ from __future__ import annotations
 import json
 import os
 from collections.abc import Iterator
-from typing import Final
+from typing import Final, cast
 
 import httpx
+from vecinita_shared_schemas.json_types import as_json_object
 
 _ENV_LLM_URL: Final[str] = "VECINITA_MODAL_LLM_URL"
 
@@ -66,7 +67,7 @@ class LlmClient:
             raise LlmClientError(
                 f"generate failed with status {response.status_code}: {response.text}"
             )
-        data = response.json()
+        data = as_json_object(cast(object, response.json()))
         text = data.get("text")
         if not isinstance(text, str):
             raise LlmClientError("generate response missing 'text' string")
@@ -93,7 +94,9 @@ class LlmClient:
             for line in response.iter_lines():
                 if not line or not line.startswith("data: "):
                     continue
-                payload = json.loads(line.removeprefix("data: ").strip())
+                payload = as_json_object(
+                    cast(object, json.loads(line.removeprefix("data: ").strip()))
+                )
                 if payload.get("done"):
                     break
                 token = payload.get("token")

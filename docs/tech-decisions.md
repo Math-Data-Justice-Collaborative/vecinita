@@ -83,7 +83,7 @@
 | TV-033 | AC-E5 wording | "atomically" → "independently with partial-success reporting" (TP-024) | TS-EV002-C02 | acceptance-criteria.md |
 | TV-034 | Bulk response schemas | All bulk endpoints use `{successes, failures}` per TP-024 | TS-EV002-C03 | api-contract.md |
 | TV-035 | Health aggregator endpoint | Add `GET /internal/v1/health/all` to api-contract + spec | TS-EV002-C04 | api-contract.md, spec.md |
-| TV-036 | Health service URLs | Add `VECINITA_HEALTH_DATA_MGMT_URL`; derive others from existing vars | TS-EV002-C05 | staging-secrets-matrix.md, config-spec.md |
+| TV-036 | Health service URLs | Use `VECINITA_CHAT_RAG_URL`, `VECINITA_MODAL_*`, frontend URLs on write API | TS-EV002-C05 | staging-secrets-matrix.md, config-spec.md |
 | TV-037 | Task count | **73** EV-002 tasks, **184** total (was erroneous 52/163) | TS-EV002-C06 | execution-plan.md |
 | TV-038 | Phase 6 gate | Add F25/F26 (M24) explicit criteria | TS-EV002-C07 | execution-plan.md |
 | TV-039 | Frontend TDD | Accept code-before-test for UI (consistent with TV-D02) | TS-EV002-C08 | — (no change) |

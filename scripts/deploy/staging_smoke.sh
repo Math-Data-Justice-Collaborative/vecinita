@@ -90,10 +90,34 @@ print('OK: browse tags returned', len(p['tags']), 'facets')
 "
 }
 
+run_t3_ev002() {
+  local write_url="${VECINITA_STAGING_WRITE_URL:-}"
+  local api_key="${VECINITA_STAGING_INTERNAL_API_KEY:-}"
+  if [[ -z "$api_key" && -f "$REPO_ROOT/chat-rag-spec.yaml" ]]; then
+    api_key="$(python3 -c "
+import re, pathlib
+text = pathlib.Path('$REPO_ROOT/chat-rag-spec.yaml').read_text()
+m = re.search(r'VECINITA_INTERNAL_API_KEY[\\s\\S]*?value:\\s*\"([^\"]+)\"', text)
+print(m.group(1) if m else '', end='')
+" 2>/dev/null || true)"
+  fi
+  if [[ -z "$write_url" || -z "$api_key" ]]; then
+    echo "T3 EV-002: skipped (set VECINITA_STAGING_WRITE_URL and VECINITA_STAGING_INTERNAL_API_KEY, or add chat-rag-spec.yaml)"
+    return 0
+  fi
+
+  RAN=$((RAN + 1))
+  echo "T3 EV-002: Admin API smokes (stats, health, audit)"
+  export VECINITA_STAGING_WRITE_URL="$write_url"
+  export VECINITA_STAGING_INTERNAL_API_KEY="$api_key"
+  uv run pytest tests/smoke/test_staging_ev002_admin.py -m live -q
+}
+
 run_h1
 run_h2
 run_h3
 run_h3b_browse
+run_t3_ev002
 
 if [[ "$RAN" -eq 0 ]]; then
   echo "No staging checks ran; set VECINITA_STAGING_CHAT_URL and/or DATABASE_URL."

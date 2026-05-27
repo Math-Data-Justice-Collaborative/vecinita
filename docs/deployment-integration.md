@@ -1,7 +1,7 @@
 # Deployment Integration Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-24 (EV-001 connectivity delta)
+> **Last updated**: 2026-05-27 (EV-002 admin dashboard delta)
 
 ## Overview
 
@@ -51,6 +51,36 @@ Frontends receive **public** API base URLs only at build time (`VITE_*`).
 | `VITE_VECINITA_CORPUS_API_KEY` | data-management-frontend | Bearer for internal-write (build-time; review in 04-tech-plan) |
 
 **Redeploy order (EV-001):** Deploy chat-rag-backend with CORS + new routes **before** chat-rag-frontend browse UI sign-off (H4–H5).
+
+### EV-002 — Admin dashboard, bulk ops, stats, audit (F23–F29)
+
+| Variable | App | Purpose |
+|----------|-----|---------|
+| `VECINITA_CHAT_RAG_URL` | internal-write-api | Health aggregator polls ChatRAG `/health` |
+| `VECINITA_MODAL_EMBED_URL` / `LLM_URL` / `DATA_MGMT_URL` | internal-write-api | Health aggregator polls Modal services |
+| `VECINITA_CHAT_FRONTEND_URL` / `ADMIN_FRONTEND_URL` | internal-write-api | Health aggregator HTTP check on static sites |
+| `VECINITA_HEALTH_TIMEOUT_MS` | internal-write-api | Per-service timeout (default 5000 ms) |
+| `VECINITA_INTERNAL_WRITE_URL` + `VECINITA_INTERNAL_API_KEY` | chat-rag-backend | Fire-and-forget `POST /internal/v1/stats/served` after ask |
+| `VECINITA_STATS_ENABLED` | chat-rag-backend | Disable stats POST when `false` |
+| `VECINITA_AUDIT_RETENTION_DAYS` | internal-write-api | `POST /internal/v1/audit/cleanup` retention (default 365; `0` = skip) |
+
+New write API routes (admin UI via `VITE_VECINITA_CORPUS_API_URL` + Bearer):
+
+- `GET /internal/v1/stats/summary`, `GET /internal/v1/stats/top-served`, `POST /internal/v1/stats/served`
+- `GET /internal/v1/health/all`
+- `DELETE/PATCH/POST` `/internal/v1/documents/bulk*`
+- `GET /internal/v1/audit`, `GET /internal/v1/documents/{id}/history`, `POST /internal/v1/audit/cleanup`
+
+**Alembic:** revision `20260526_0003` (`audit_log`, `document_versions`, `document_serving_stats`).
+
+**Redeploy order (EV-002, TP-029):**
+
+1. `alembic upgrade head` on staging/prod Postgres
+2. `internal-write-api` (new endpoints + health env vars)
+3. `chat-rag-backend` (stats POST integration)
+4. `data-management-frontend` (admin UI overhaul)
+
+Modal apps **do not** require redeploy for EV-002 (health aggregator on DO write API per ADR-017).
 
 ## Entrypoints & triggers
 

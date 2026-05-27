@@ -1,4 +1,4 @@
-"""Cursor afterFileEdit hook: run Pyright on edited Python files.
+"""Cursor afterFileEdit hook: run basedpyright on edited Python files.
 
 Returns type errors in additional_context. Always exits 0.
 """
@@ -52,7 +52,7 @@ def main() -> int:
 
     try:
         proc = subprocess.run(
-            ["uv", "run", "pyright", str(file_path.resolve())],
+            ["uv", "run", "basedpyright", str(file_path.resolve())],
             cwd=repo,
             capture_output=True,
             text=True,
@@ -67,7 +67,7 @@ def main() -> int:
         error_lines = [l for l in lines if "error:" in l.lower()]
         if error_lines:
             summary = "\n".join(error_lines[:20])
-            result = {"additional_context": f"[pyright] Type errors:\n{summary}"}
+            result = {"additional_context": f"[basedpyright] Type errors:\n{summary}"}
         else:
             result = {}
     else:

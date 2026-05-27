@@ -82,7 +82,7 @@ export function JobForm({ onJobUpdate }: JobFormProps) {
               id="urls"
               rows={5}
               value={urlsText}
-              onChange={(e) => setUrlsText(e.target.value)}
+              onChange={(e) => { setUrlsText(e.target.value); }}
               placeholder="https://example.org/community/page"
               disabled={busy}
             />
@@ -94,7 +94,7 @@ export function JobForm({ onJobUpdate }: JobFormProps) {
               type="number"
               min={64}
               value={chunkSize}
-              onChange={(e) => setChunkSize(e.target.value)}
+              onChange={(e) => { setChunkSize(e.target.value); }}
               disabled={busy}
             />
           </div>

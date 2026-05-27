@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Literal
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+
+from vecinita_shared_schemas.json_types import JsonObject
 
 
 class TagInput(BaseModel):
@@ -114,7 +116,7 @@ class AuditLogEntry(BaseModel):
     entity_type: str
     entity_id: UUID
     request_id: UUID
-    payload: dict[str, Any] = Field(default_factory=dict)
+    payload: JsonObject = Field(default_factory=dict)
     created_at: datetime
 
 
@@ -127,13 +129,20 @@ class AuditLogResponse(BaseModel):
     total_count: int
 
 
+class AuditCleanupResponse(BaseModel):
+    """Result of POST /internal/v1/audit/cleanup."""
+
+    deleted: int
+    retention_days: int
+
+
 class DocumentVersionEntry(BaseModel):
     """Single version snapshot for GET /internal/v1/documents/{id}/history."""
 
     version_number: int
     title: str | None = None
     language: str | None = None
-    tags_snapshot: list[dict[str, Any]] = Field(default_factory=list)
+    tags_snapshot: list[dict[str, object]] = Field(default_factory=list)
     created_at: datetime
 
 

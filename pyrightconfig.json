@@ -1,8 +1,10 @@
 {
   "include": ["apps", "packages", "tests"],
-  "exclude": ["**/__pycache__", ".venv", ".pytest_cache"],
+  "exclude": ["**/__pycache__", ".venv", ".pytest_cache", "**/node_modules"],
   "pythonVersion": "3.11",
   "typeCheckingMode": "standard",
   "reportMissingImports": true,
-  "reportMissingTypeStubs": false
+  "reportMissingTypeStubs": false,
+  "reportExplicitAny": "error",
+  "reportAny": "error"
 }

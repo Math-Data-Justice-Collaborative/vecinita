@@ -9,6 +9,13 @@ from llama_index.core.base.base_retriever import BaseRetriever
 from llama_index.core.schema import NodeWithScore, QueryBundle, TextNode
 from sqlalchemy import bindparam, create_engine, text
 from sqlalchemy.engine import Engine
+from vecinita_shared_schemas.db_mapping import (
+    mapping_row,
+    row_str,
+    row_str_optional,
+    row_uuid,
+    scalar_float,
+)
 
 from vecinita_rag.constants import DEFAULT_TOP_K, EMBEDDING_DIMENSION, MAX_TOP_K, MIN_TOP_K
 from vecinita_rag.types import RetrievedChunk
@@ -121,19 +128,20 @@ class CorpusPgvectorRetriever(BaseRetriever):
             )
 
         chunks: list[RetrievedChunk] = []
-        for row in rows:
-            score = float(row["score"])
+        for raw_row in rows:
+            row = mapping_row(raw_row)
+            score = scalar_float(row["score"])
             if self._score_threshold is not None and score < self._score_threshold:
                 continue
             chunks.append(
                 RetrievedChunk(
-                    chunk_id=row["chunk_id"],
-                    document_id=row["document_id"],
-                    text=row["text"],
+                    chunk_id=row_uuid(row, "chunk_id"),
+                    document_id=row_uuid(row, "document_id"),
+                    text=row_str(row, "text"),
                     score=score,
-                    title=row["title"],
-                    url=row["url"],
-                    language=row["language"],
+                    title=row_str_optional(row, "title"),
+                    url=row_str_optional(row, "url"),
+                    language=row_str(row, "language"),
                 )
             )
         return chunks

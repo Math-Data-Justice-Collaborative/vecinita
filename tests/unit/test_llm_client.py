@@ -2,16 +2,19 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import httpx
 import pytest
 from vecinita_llm_client import LlmClient, LlmClientError
+from vecinita_shared_schemas.json_types import as_json_object
 
 
 def test_generate_returns_text() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         import json as json_lib
 
-        payload = json_lib.loads(request.content.decode())
+        payload = as_json_object(cast(object, json_lib.loads(request.content.decode())))
         assert request.url.path == "/generate"
         assert payload["prompt"] == "Answer briefly: food pantry hours?"
         return httpx.Response(200, json={"text": "Hours are posted on Monday."})

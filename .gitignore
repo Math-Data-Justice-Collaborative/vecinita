@@ -5,6 +5,10 @@
 !*.env.example
 .deploy-keys.local
 prod.env
+# DO app spec exports with runtime secrets (operator-local)
+chat-rag-spec.yaml
+admin-fe-spec.yaml
+internal-write-api-spec.yaml
 .tmp/
 
 # Python

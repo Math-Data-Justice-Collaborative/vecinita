@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import cast
 
 import pytest
 import yaml
@@ -12,12 +13,14 @@ from tests.e2e.local_bootstrap import (
     postgres_is_ready,
     run_alembic_upgrade_head,
 )
+from tests.helpers.json_response import json_int, json_object_get, json_str, response_json_object
 from tests.unit.rag.conftest import attach_embeddings, basis_vector
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import ChatRagService
 from vecinita_database.seeds.load import load_corpus
 from vecinita_rag.retriever import CorpusPgvectorRetriever
+from vecinita_shared_schemas.json_types import as_json_object
 
 pytestmark = [pytest.mark.e2e, pytest.mark.integration]
 
@@ -78,25 +81,28 @@ def test_vecinita_yaml_documents_local_defaults() -> None:
     assert _VECINITA_YAML.is_file(), (
         "infra/vecinita.yaml required for local defaults (config-spec.md)"
     )
-    data = yaml.safe_load(_VECINITA_YAML.read_text(encoding="utf-8"))
+    data = as_json_object(cast(object, yaml.safe_load(_VECINITA_YAML.read_text(encoding="utf-8"))))
     assert data["env"] == "development"
-    assert data["chat_rag"]["top_k"] == 5
-    assert "localhost" in data["services"]["chat_rag_backend"]
+    chat_rag = json_object_get(data, "chat_rag")
+    assert json_int(chat_rag, "top_k") == 5
+    services = json_object_get(data, "services")
+    assert "localhost" in json_str(services, "chat_rag_backend")
 
 
 def test_uj004_bootstrap_health_and_ask(bootstrap_client: TestClient) -> None:
     health = bootstrap_client.get("/health")
     assert health.status_code == 200
-    body = health.json()
+    body = response_json_object(health)
     assert body["status"] == "ok"
-    assert body["dependencies"]["postgres"] == "ok"
+    dependencies = json_object_get(body, "dependencies")
+    assert json_str(dependencies, "postgres") == "ok"
 
     ask = bootstrap_client.post(
         "/api/v1/ask",
         json={"question": "What are the food pantry hours?"},
     )
     assert ask.status_code == 200
-    payload = ask.json()
+    payload = response_json_object(ask)
     assert payload["language"] == "en"
     assert payload["answer"]
     assert isinstance(payload["sources"], list)

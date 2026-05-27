@@ -8,12 +8,15 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import cast
 from uuid import UUID
 
 from sqlalchemy import text
 from sqlalchemy.engine import Connection, Engine
+from vecinita_shared_schemas.db_mapping import scalar_int
+from vecinita_shared_schemas.json_types import JsonObject
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +28,7 @@ def emit_audit_event(
     entity_type: str,
     entity_id: UUID,
     request_id: UUID,
-    payload: dict[str, Any] | None = None,
+    payload: JsonObject | None = None,
 ) -> None:
     """Insert an audit_log row within the caller's transaction."""
     conn.execute(
@@ -49,16 +52,21 @@ def create_document_version(
     document_id: UUID,
     title: str | None,
     language: str | None,
-    tags_snapshot: list[dict[str, Any]] | None = None,
+    tags_snapshot: Sequence[Mapping[str, object]] | None = None,
 ) -> int:
     """Create a version snapshot, auto-incrementing version_number. Returns the new version."""
-    current_max = conn.execute(
-        text(
-            "SELECT COALESCE(MAX(version_number), 0) "
-            "FROM document_versions WHERE document_id = :doc_id"
-        ),
-        {"doc_id": document_id},
-    ).scalar_one()
+    current_max = scalar_int(
+        cast(
+            object,
+            conn.execute(
+                text(
+                    "SELECT COALESCE(MAX(version_number), 0) "
+                    "FROM document_versions WHERE document_id = :doc_id"
+                ),
+                {"doc_id": document_id},
+            ).scalar_one(),
+        )
+    )
 
     next_version = current_max + 1
 

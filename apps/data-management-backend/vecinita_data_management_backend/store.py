@@ -6,7 +6,7 @@ from collections.abc import MutableMapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from threading import Lock
-from typing import Any
+from typing import TypedDict
 from uuid import UUID, uuid4
 
 from vecinita_shared_schemas.data_management import Job
@@ -25,6 +25,18 @@ class JobRecord:
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     options: dict[str, object] = field(default_factory=dict)
+
+
+class JobPayload(TypedDict):
+    job_id: str
+    status: str
+    urls: list[str]
+    job_type: str
+    error_code: str | None
+    error_message: str | None
+    created_at: str
+    updated_at: str
+    options: dict[str, object]
 
 
 class JobStore:
@@ -53,7 +65,7 @@ class JobStore:
         raise NotImplementedError
 
 
-def _record_to_payload(record: JobRecord) -> dict[str, Any]:
+def _record_to_payload(record: JobRecord) -> JobPayload:
     return {
         "job_id": str(record.job_id),
         "status": record.status,
@@ -67,7 +79,7 @@ def _record_to_payload(record: JobRecord) -> dict[str, Any]:
     }
 
 
-def _payload_to_record(payload: dict[str, Any]) -> JobRecord:
+def _payload_to_record(payload: JobPayload) -> JobRecord:
     return JobRecord(
         job_id=UUID(str(payload["job_id"])),
         status=str(payload["status"]),
@@ -84,7 +96,7 @@ def _payload_to_record(payload: dict[str, Any]) -> JobRecord:
 class DictJobStore(JobStore):
     """Job store backed by a shared mapping (e.g. modal.Dict) visible across Modal workers."""
 
-    def __init__(self, backing: MutableMapping[str, dict[str, Any]]) -> None:
+    def __init__(self, backing: MutableMapping[str, JobPayload]) -> None:
         self._jobs = backing
 
     def create_job(

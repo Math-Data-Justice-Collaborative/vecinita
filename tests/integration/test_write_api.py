@@ -7,6 +7,7 @@ from uuid import uuid4
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from tests.helpers.json_response import response_json_object
 
 pytestmark = pytest.mark.integration
 
@@ -82,7 +83,7 @@ async def test_batch_upsert_chunks_with_auth(
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
     assert response.status_code == 200
-    body = response.json()
+    body = response_json_object(response)
     assert body["upserted_chunks"] == 2
 
 

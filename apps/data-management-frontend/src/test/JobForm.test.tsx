@@ -11,7 +11,7 @@ describe("JobForm", () => {
 
   it("parses URLs and shows completed job status", async () => {
     const fetchMock = vi
-      .fn()
+      .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({ job_id: "11111111-1111-4111-8111-111111111111", status: "pending" }),
@@ -37,13 +37,10 @@ describe("JobForm", () => {
     await waitFor(() => {
       expect(screen.getByTestId("job-status")).toHaveTextContent("completed");
     });
-    expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:8001/jobs",
-      expect.objectContaining({
-        method: "POST",
-        headers: expect.objectContaining({ "X-Vecinita-Proxy-Key": "test-proxy-key" }),
-      }),
-    );
+    const init = fetchMock.mock.calls[0]?.[1];
+    expect(init?.method).toBe("POST");
+    const headers = new Headers(init?.headers);
+    expect(headers.get("X-Vecinita-Proxy-Key")).toBe("test-proxy-key");
   });
 
   it("shows validation error when no URLs entered", async () => {

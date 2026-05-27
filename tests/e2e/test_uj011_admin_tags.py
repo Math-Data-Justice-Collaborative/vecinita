@@ -3,10 +3,19 @@
 from __future__ import annotations
 
 import os
+from typing import cast
 from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
+from tests.helpers.json_response import (
+    find_json_object_by_str,
+    json_list,
+    json_str,
+    response_json_list,
+    response_json_object,
+)
+from vecinita_shared_schemas.json_types import as_json_object
 
 pytestmark = pytest.mark.e2e
 
@@ -54,16 +63,18 @@ def test_uj011_admin_chunks_and_tag_patch(admin_write_client: TestClient) -> Non
         "/internal/v1/documents",
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
-    document_id = next(row["document_id"] for row in listing.json() if row["url"] == doc_url)
+    rows = response_json_list(listing)
+    document_id = json_str(find_json_object_by_str(rows, "url", doc_url), "document_id")
 
     chunks = admin_write_client.get(
         f"/internal/v1/documents/{document_id}/chunks",
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
     assert chunks.status_code == 200
-    body = chunks.json()
-    assert len(body) == 1
-    assert "Chunk alpha" in body[0]["text"]
+    chunk_rows = response_json_list(chunks)
+    assert len(chunk_rows) == 1
+    first_chunk = as_json_object(cast(object, chunk_rows[0]))
+    assert "Chunk alpha" in str(first_chunk["text"])
 
     patched = admin_write_client.patch(
         f"/internal/v1/documents/{document_id}/tags",
@@ -74,4 +85,6 @@ def test_uj011_admin_chunks_and_tag_patch(admin_write_client: TestClient) -> Non
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
     assert patched.status_code == 200
-    assert patched.json()["tags"][0]["slug"] == "housing"
+    tag_rows = json_list(response_json_object(patched), "tags")
+    first_tag = as_json_object(cast(object, tag_rows[0]))
+    assert json_str(first_tag, "slug") == "housing"

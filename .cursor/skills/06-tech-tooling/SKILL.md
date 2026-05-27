@@ -88,7 +88,7 @@ Read `docs/execution-plan.md` §Tech Stack Summary to determine:
 |----------|------|------------|---------|
 | Linter | [e.g., Ruff] | [e.g., ruff.toml] | [e.g., ruff check .] |
 | Formatter | [e.g., Ruff format] | [same or separate] | [e.g., ruff format --check .] |
-| Typechecker | [e.g., Pyright] | [e.g., pyrightconfig.json] | [e.g., pyright] |
+| Typechecker | basedpyright | `pyproject.toml` `[tool.basedpyright]`, `pyrightconfig.json` | `uv run basedpyright` (ADR-018) |
 | Test runner | [e.g., pytest] | [e.g., pyproject.toml] | [e.g., pytest -v] |
 
 If any tool is not configured, surface as `[Decision]` via AskQuestion with recommendations.
@@ -206,7 +206,7 @@ Create tool configuration files:
 - **Formatter config** (e.g., in `pyproject.toml [tool.black]`, `.prettierrc`)
   - Line length, quote style, indentation from specs or conventions
 
-- **Typechecker config** (e.g., `pyrightconfig.json`, `tsconfig.json`)
+- **Typechecker config** (`pyrightconfig.json`, `[tool.basedpyright]`, `docs/typing-policy.md`, `tsconfig.json`)
   - Strictness level from tech plan
   - Include/exclude patterns matching project structure
 

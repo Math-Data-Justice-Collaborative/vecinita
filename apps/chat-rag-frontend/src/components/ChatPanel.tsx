@@ -138,7 +138,7 @@ export function ChatPanel() {
           name="question"
           rows={3}
           value={question}
-          onChange={(e) => setQuestion(e.target.value)}
+          onChange={(e) => { setQuestion(e.target.value); }}
           disabled={loading}
           placeholder="e.g. When is the food pantry open?"
         />

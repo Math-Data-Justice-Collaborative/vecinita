@@ -4,13 +4,16 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import cast
 
 import pytest
 from sqlalchemy import create_engine, text
 from tests.e2e.local_bootstrap import postgres_is_ready
+from tests.helpers.json_response import json_str
 from tests.unit.rag.conftest import attach_embeddings, basis_vector
 from vecinita_database.seeds.load import _database_url, load_corpus
 from vecinita_rag.retriever import CorpusPgvectorRetriever
+from vecinita_shared_schemas.json_types import JsonObject, as_json_object
 
 pytestmark = pytest.mark.integration
 
@@ -45,8 +48,12 @@ def eval_db() -> str:
     return url
 
 
-def _load_pairs() -> list[dict]:
-    return json.loads(_EVAL_PATH.read_text(encoding="utf-8"))
+def _load_pairs() -> list[JsonObject]:
+    raw = cast(object, json.loads(_EVAL_PATH.read_text(encoding="utf-8")))
+    if not isinstance(raw, list):
+        msg = f"Expected JSON array in {_EVAL_PATH}"
+        raise TypeError(msg)
+    return [as_json_object(cast(object, item)) for item in raw]
 
 
 def test_eval_retrieval_relevance_at_least_eighty_percent(eval_db: str) -> None:
@@ -68,8 +75,8 @@ def test_eval_retrieval_relevance_at_least_eighty_percent(eval_db: str) -> None:
 
     hits = 0
     for pair in pairs:
-        question = pair["question"]
-        expected_url = pair["expected_doc_url"]
+        question = json_str(pair, "question")
+        expected_url = json_str(pair, "expected_doc_url")
         chunks = retriever.retrieve_chunks(question)
         urls = {chunk.url for chunk in chunks if chunk.url}
         if expected_url in urls:

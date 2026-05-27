@@ -7,7 +7,9 @@ import logging
 import os
 import sys
 from datetime import UTC, datetime
-from typing import Any, Final
+from typing import Final, cast
+
+from vecinita_shared_schemas.json_types import JsonObject
 
 LOG_LEVEL_ENV: Final[str] = "VECINITA_LOG_LEVEL"
 REQUEST_ID_KEY: Final[str] = "request_id"
@@ -33,14 +35,15 @@ class JsonLogFormatter(logging.Formatter):
         self._service_name = service_name
 
     def format(self, record: logging.LogRecord) -> str:
-        payload: dict[str, Any] = {
+        payload: JsonObject = {
             "timestamp": datetime.now(UTC).isoformat(),
             "level": record.levelname,
             "logger": record.name,
             SERVICE_NAME_KEY: self._service_name,
             "message": record.getMessage(),
         }
-        for key, value in record.__dict__.items():
+        for key in record.__dict__:
+            value = cast(object, record.__dict__[key])
             if key.startswith("_") or key in {
                 "name",
                 "msg",
@@ -96,7 +99,7 @@ def log_request_event(
     route: str,
     status_code: int,
     latency_ms: float,
-    **extra: Any,
+    **extra: str | int | float | bool | None,
 ) -> None:
     """Log an HTTP request summary without prompt content."""
     safe_extra = {k: "<redacted>" if k in _REDACTED_KEYS else v for k, v in extra.items()}

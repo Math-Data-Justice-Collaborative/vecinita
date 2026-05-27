@@ -7,17 +7,20 @@ interface ThemeProviderState {
   setTheme: (theme: Theme) => void;
 }
 
-const ThemeProviderContext = createContext<ThemeProviderState>({
-  theme: "system",
-  setTheme: () => undefined,
-});
+const ThemeProviderContext = createContext<ThemeProviderState | null>(null);
 
 const STORAGE_KEY = "vecinita-ui-theme";
 
+function readStoredTheme(): Theme {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored === "dark" || stored === "light" || stored === "system") {
+    return stored;
+  }
+  return "system";
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(STORAGE_KEY) as Theme) || "system",
-  );
+  const [theme, setTheme] = useState<Theme>(readStoredTheme);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -45,6 +48,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 export function useTheme() {
   const context = useContext(ThemeProviderContext);
-  if (context === undefined) throw new Error("useTheme must be used within a ThemeProvider");
+  if (context === null) {
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
   return context;
 }

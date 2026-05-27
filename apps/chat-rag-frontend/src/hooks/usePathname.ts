@@ -5,9 +5,9 @@ export function usePathname(): { pathname: string; navigate: (path: string) => v
   const [pathname, setPathname] = useState(() => window.location.pathname);
 
   useEffect(() => {
-    const onPopState = () => setPathname(window.location.pathname);
+    const onPopState = () => { setPathname(window.location.pathname); };
     window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
+    return () => { window.removeEventListener("popstate", onPopState); };
   }, []);
 
   const navigate = useCallback((path: string) => {

@@ -121,7 +121,7 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
                 type="button"
                 className={active ? "tag-chip active" : "tag-chip"}
                 aria-pressed={active}
-                onClick={() => toggleTag(tag.slug)}
+                onClick={() => { toggleTag(tag.slug); }}
               >
                 {tag.label}
               </button>
@@ -161,7 +161,7 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
           type="button"
           className="secondary"
           disabled={page <= 1}
-          onClick={() => setPage((current) => Math.max(1, current - 1))}
+          onClick={() => { setPage((current) => Math.max(1, current - 1)); }}
         >
           Previous
         </button>
@@ -172,7 +172,7 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
           type="button"
           className="secondary"
           disabled={page >= totalPages}
-          onClick={() => setPage((current) => current + 1)}
+          onClick={() => { setPage((current) => current + 1); }}
         >
           Next
         </button>

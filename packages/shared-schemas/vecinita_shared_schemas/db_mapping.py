@@ -1,0 +1,79 @@
+"""Typed accessors for SQLAlchemy row mappings (reportAny-safe)."""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import TypeVar, cast
+from uuid import UUID
+
+T = TypeVar("T")
+
+
+def mapping_row(row: object) -> Mapping[str, object]:
+    """Narrow a SQLAlchemy RowMapping to Mapping[str, object] for keyed access."""
+    if isinstance(row, Mapping):
+        return row
+    msg = f"Expected mapping row, got {type(row).__name__}"
+    raise TypeError(msg)
+
+
+def row_value(row: Mapping[str, object], key: str) -> object:
+    return row[key]
+
+
+def row_str(row: Mapping[str, object], key: str) -> str:
+    return str(row[key])
+
+
+def row_str_optional(row: Mapping[str, object], key: str) -> str | None:
+    value = row[key]
+    if value is None:
+        return None
+    return str(value)
+
+
+def row_int(row: Mapping[str, object], key: str) -> int:
+    value = row[key]
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    return int(str(value))
+
+
+def row_uuid(row: Mapping[str, object], key: str) -> UUID:
+    value = row[key]
+    if isinstance(value, UUID):
+        return value
+    return UUID(str(value))
+
+
+def scalar_int(value: object) -> int:
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    return int(str(value))
+
+
+def scalar_float(value: object) -> float:
+    if isinstance(value, float):
+        return value
+    if isinstance(value, int):
+        return float(value)
+    return float(str(value))
+
+
+def scalar_uuid(value: object) -> UUID:
+    if isinstance(value, UUID):
+        return value
+    return UUID(str(value))
+
+
+def sqlalchemy_scalar_one(result: object) -> object:
+    """Narrow SQLAlchemy Result.scalar_one() (typed Any upstream) to object."""
+    scalar_one = getattr(result, "scalar_one", None)
+    if not callable(scalar_one):
+        msg = f"Expected SQLAlchemy result with scalar_one(), got {type(result).__name__}"
+        raise TypeError(msg)
+    return cast(object, scalar_one())

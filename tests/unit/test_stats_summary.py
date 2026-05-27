@@ -6,6 +6,7 @@ import os
 
 import pytest
 from fastapi.testclient import TestClient
+from tests.helpers.json_response import response_json_object
 
 pytestmark = pytest.mark.unit
 
@@ -35,7 +36,7 @@ def _auth() -> dict[str, str]:
 def test_stats_summary_returns_counts(client) -> None:
     resp = client.get("/internal/v1/stats/summary", headers=_auth())
     assert resp.status_code == 200
-    data = resp.json()
+    data = response_json_object(resp)
     assert "total_documents" in data
     assert "total_chunks" in data
     assert isinstance(data["total_documents"], int)
@@ -44,27 +45,27 @@ def test_stats_summary_returns_counts(client) -> None:
 
 def test_stats_summary_includes_tag_distribution(client) -> None:
     resp = client.get("/internal/v1/stats/summary", headers=_auth())
-    data = resp.json()
+    data = response_json_object(resp)
     assert "tag_distribution" in data
     assert isinstance(data["tag_distribution"], list)
 
 
 def test_stats_summary_includes_language_breakdown(client) -> None:
     resp = client.get("/internal/v1/stats/summary", headers=_auth())
-    data = resp.json()
+    data = response_json_object(resp)
     assert "language_breakdown" in data
     assert isinstance(data["language_breakdown"], dict)
 
 
 def test_stats_summary_includes_recent_activity(client) -> None:
     resp = client.get("/internal/v1/stats/summary", headers=_auth())
-    data = resp.json()
+    data = response_json_object(resp)
     assert "recent_activity" in data
     assert isinstance(data["recent_activity"], list)
 
 
 def test_stats_summary_includes_top_served(client) -> None:
     resp = client.get("/internal/v1/stats/summary", headers=_auth())
-    data = resp.json()
+    data = response_json_object(resp)
     assert "top_served" in data
     assert isinstance(data["top_served"], list)

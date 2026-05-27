@@ -80,3 +80,7 @@ def test_cors_stats_top_served(client) -> None:
 
 def test_cors_audit_log(client) -> None:
     _preflight(client, "/internal/v1/audit", "GET")
+
+
+def test_cors_audit_cleanup(client) -> None:
+    _preflight(client, "/internal/v1/audit/cleanup", "POST")

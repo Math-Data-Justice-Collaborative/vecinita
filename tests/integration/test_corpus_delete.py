@@ -8,6 +8,7 @@ from uuid import uuid4
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import create_engine, text
+from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
 
 pytestmark = pytest.mark.integration
 
@@ -59,7 +60,10 @@ async def test_delete_document_removes_chunks_and_embeddings(write_client: Async
         "/internal/v1/documents",
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
-    doc_id = next(item["document_id"] for item in listed.json() if item["url"] == doc_url)
+    from tests.helpers.json_response import find_json_object_by_str, json_str, response_json_list
+
+    items = response_json_list(listed)
+    doc_id = json_str(find_json_object_by_str(items, "url", doc_url), "document_id")
 
     delete = await write_client.delete(
         f"/internal/v1/documents/{doc_id}",
@@ -69,27 +73,32 @@ async def test_delete_document_removes_chunks_and_embeddings(write_client: Async
 
     engine = create_engine(_database_url())
     with engine.connect() as conn:
-        chunks = conn.execute(
-            text(
-                """
-                SELECT COUNT(*) FROM chunks c
-                JOIN documents d ON d.id = c.document_id
-                WHERE d.url = :url
-                """
-            ),
-            {"url": doc_url},
-        ).scalar_one()
-        embeddings = conn.execute(
-            text(
-                """
-                SELECT COUNT(*) FROM embeddings e
-                JOIN chunks c ON c.id = e.chunk_id
-                JOIN documents d ON d.id = c.document_id
-                WHERE d.url = :url
-                """
-            ),
-            {"url": doc_url},
-        ).scalar_one()
-
+        chunks_raw = sqlalchemy_scalar_one(
+            conn.execute(
+                text(
+                    """
+                    SELECT COUNT(*) FROM chunks c
+                    JOIN documents d ON d.id = c.document_id
+                    WHERE d.url = :url
+                    """
+                ),
+                {"url": doc_url},
+            )
+        )
+        chunks = scalar_int(chunks_raw)
+        embeddings_raw = sqlalchemy_scalar_one(
+            conn.execute(
+                text(
+                    """
+                    SELECT COUNT(*) FROM embeddings e
+                    JOIN chunks c ON c.id = e.chunk_id
+                    JOIN documents d ON d.id = c.document_id
+                    WHERE d.url = :url
+                    """
+                ),
+                {"url": doc_url},
+            )
+        )
+        embeddings = scalar_int(embeddings_raw)
     assert chunks == 0
     assert embeddings == 0

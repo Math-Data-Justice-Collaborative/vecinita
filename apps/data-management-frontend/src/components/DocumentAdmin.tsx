@@ -91,7 +91,7 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
             setRetagJobId(null);
           }
         })
-        .catch((err) => {
+        .catch((err: unknown) => {
           if (!cancelled) {
             setError(err instanceof Error ? err.message : "Failed to poll retag job");
             setRetagJobId(null);
@@ -167,7 +167,7 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
           <Input
             id="doc-tags"
             value={docTags}
-            onChange={(e) => setDocTags(e.target.value)}
+            onChange={(e) => { setDocTags(e.target.value); }}
             placeholder="housing, legal"
           />
         </div>
@@ -196,10 +196,10 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
                 id={`chunk-tags-${chunk.chunk_id}`}
                 value={chunkTagDrafts[chunk.chunk_id] ?? ""}
                 onChange={(e) =>
-                  setChunkTagDrafts((current) => ({
+                  { setChunkTagDrafts((current) => ({
                     ...current,
                     [chunk.chunk_id]: e.target.value,
-                  }))
+                  })); }
                 }
               />
             </div>

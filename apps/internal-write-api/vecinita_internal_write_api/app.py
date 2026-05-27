@@ -26,6 +26,7 @@ from vecinita_shared_schemas.db_mapping import (
     scalar_uuid,
 )
 from vecinita_shared_schemas.internal_write import (
+    AuditCleanupResponse,
     AuditLogEntry,
     AuditLogResponse,
     BatchUpsertRequest,
@@ -59,7 +60,11 @@ from vecinita_shared_schemas.internal_write import (
 )
 from vecinita_shared_schemas.json_types import as_json_object
 
-from vecinita_internal_write_api.audit import create_document_version, emit_audit_event
+from vecinita_internal_write_api.audit import (
+    cleanup_audit_log,
+    create_document_version,
+    emit_audit_event,
+)
 from vecinita_internal_write_api.jobs_client import (
     DataManagementJobsClient,
     DataManagementJobsClientError,
@@ -914,6 +919,18 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
             page_size=page_size,
             total_count=total,
         )
+
+    @app.post(
+        "/internal/v1/audit/cleanup",
+        response_model=AuditCleanupResponse,
+        dependencies=[Depends(_require_internal_key)],
+    )
+    def audit_cleanup() -> AuditCleanupResponse:
+        retention_days = int(os.environ.get("VECINITA_AUDIT_RETENTION_DAYS", "365"))
+        if retention_days <= 0:
+            return AuditCleanupResponse(deleted=0, retention_days=retention_days)
+        deleted = cleanup_audit_log(engine, retention_days=retention_days)
+        return AuditCleanupResponse(deleted=deleted, retention_days=retention_days)
 
     @app.get(
         "/internal/v1/documents/{document_id}/history",

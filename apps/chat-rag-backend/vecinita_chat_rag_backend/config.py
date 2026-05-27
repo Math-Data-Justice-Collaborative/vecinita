@@ -20,6 +20,13 @@ def _float_env(name: str, default: float) -> float:
     return float(raw)
 
 
+def _bool_env(name: str, default: bool) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in ("1", "true", "yes", "on")
+
+
 def _normalize_database_url(url: str) -> str:
     if url.startswith("postgresql://"):
         return url.replace("postgresql://", "postgresql+psycopg://", 1)
@@ -40,6 +47,7 @@ class ChatRagSettings:
     browse_page_size: int = 20
     internal_write_url: str | None = None
     internal_api_key: str | None = None
+    stats_enabled: bool = True
 
     @classmethod
     def from_env(cls) -> ChatRagSettings:
@@ -57,4 +65,5 @@ class ChatRagSettings:
             request_timeout_s=float(os.environ.get("VECINITA_REQUEST_TIMEOUT_S", "120")),
             internal_write_url=os.environ.get("VECINITA_INTERNAL_WRITE_URL"),
             internal_api_key=os.environ.get("VECINITA_INTERNAL_API_KEY"),
+            stats_enabled=_bool_env("VECINITA_STATS_ENABLED", True),
         )

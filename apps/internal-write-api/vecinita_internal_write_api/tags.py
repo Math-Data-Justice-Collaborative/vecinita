@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import os
-from typing import Any
+from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
+from vecinita_shared_schemas.db_mapping import scalar_uuid, sqlalchemy_scalar_one
 from vecinita_shared_schemas.internal_write import TagInput
 
 _MAX_TAGS_PER_DOCUMENT = int(os.environ.get("VECINITA_MAX_TAGS_PER_DOCUMENT", "10"))
@@ -33,7 +34,7 @@ def validate_chunk_tag_count(tags: list[TagInput]) -> None:
 def replace_document_tags(
     conn: Connection,
     *,
-    document_id: Any,
+    document_id: UUID,
     tags: list[TagInput],
     language: str,
 ) -> None:
@@ -43,18 +44,22 @@ def replace_document_tags(
         {"document_id": document_id},
     )
     for tag in tags:
-        tag_id = conn.execute(
-            text(
-                """
-                INSERT INTO tags (slug, label, language)
-                VALUES (:slug, :label, :language)
-                ON CONFLICT (slug, language) DO UPDATE
-                SET label = EXCLUDED.label
-                RETURNING id
-                """
-            ),
-            {"slug": tag.slug, "label": tag.label, "language": language},
-        ).scalar_one()
+        tag_id = scalar_uuid(
+            sqlalchemy_scalar_one(
+                conn.execute(
+                    text(
+                        """
+                        INSERT INTO tags (slug, label, language)
+                        VALUES (:slug, :label, :language)
+                        ON CONFLICT (slug, language) DO UPDATE
+                        SET label = EXCLUDED.label
+                        RETURNING id
+                        """
+                    ),
+                    {"slug": tag.slug, "label": tag.label, "language": language},
+                )
+            )
+        )
         source = tag.source or "llm"
         conn.execute(
             text(
@@ -72,7 +77,7 @@ def replace_document_tags(
 def replace_chunk_tags(
     conn: Connection,
     *,
-    chunk_id: Any,
+    chunk_id: UUID,
     tags: list[TagInput],
     language: str,
 ) -> None:
@@ -82,18 +87,22 @@ def replace_chunk_tags(
         {"chunk_id": chunk_id},
     )
     for tag in tags:
-        tag_id = conn.execute(
-            text(
-                """
-                INSERT INTO tags (slug, label, language)
-                VALUES (:slug, :label, :language)
-                ON CONFLICT (slug, language) DO UPDATE
-                SET label = EXCLUDED.label
-                RETURNING id
-                """
-            ),
-            {"slug": tag.slug, "label": tag.label, "language": language},
-        ).scalar_one()
+        tag_id = scalar_uuid(
+            sqlalchemy_scalar_one(
+                conn.execute(
+                    text(
+                        """
+                        INSERT INTO tags (slug, label, language)
+                        VALUES (:slug, :label, :language)
+                        ON CONFLICT (slug, language) DO UPDATE
+                        SET label = EXCLUDED.label
+                        RETURNING id
+                        """
+                    ),
+                    {"slug": tag.slug, "label": tag.label, "language": language},
+                )
+            )
+        )
         source = tag.source or "llm"
         conn.execute(
             text(

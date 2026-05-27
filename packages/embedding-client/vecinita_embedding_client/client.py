@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import os
-from typing import Final
+from typing import Final, cast
 
 import httpx
+from vecinita_shared_schemas.json_types import as_json_object
 
 EMBEDDING_DIMENSION: Final[int] = 384
 _ENV_EMBED_URL: Final[str] = "VECINITA_MODAL_EMBED_URL"
@@ -52,7 +53,7 @@ class EmbeddingClient:
             raise EmbeddingClientError(
                 f"embed failed with status {response.status_code}: {response.text}"
             )
-        data = response.json()
+        data = as_json_object(cast(object, response.json()))
         vector = data.get("embedding")
         if not isinstance(vector, list):
             raise EmbeddingClientError("embed response missing 'embedding' list")
@@ -64,7 +65,7 @@ class EmbeddingClient:
             raise EmbeddingClientError(
                 f"embed_batch failed with status {response.status_code}: {response.text}"
             )
-        data = response.json()
+        data = as_json_object(cast(object, response.json()))
         vectors = data.get("embeddings")
         if not isinstance(vectors, list):
             raise EmbeddingClientError("embed_batch response missing 'embeddings' list")

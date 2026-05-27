@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita staging  
 > **Source**: `docs/deployment-integration.md` §Secrets, ADR-007, ADR-010  
-> **Last updated**: 2026-05-26 (EV-002 — health/stats/audit env vars)
+> **Last updated**: 2026-05-27 (EV-002 — reconciled health env names with runtime code)
 
 Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — never commit to git.
 
@@ -17,6 +17,9 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 | `VECINITA_MODAL_TOKEN_SECRET` | If Modal auth | DO→Modal credential |
 | `VECINITA_TOP_K` | No | Default `5` |
 | `VECINITA_BROWSE_PAGE_SIZE` | No | Default `20` — EV-001 browse pagination |
+| `VECINITA_STATS_ENABLED` | No | Default `true` — EV-002 disable fire-and-forget stats POST (F28) |
+| `VECINITA_INTERNAL_WRITE_URL` | Yes (EV-002) | DO internal write API base — stats POST after ask (F28) |
+| `VECINITA_INTERNAL_API_KEY` | Yes (EV-002) | Bearer for stats POST; must match write API secret |
 | `VECINITA_ENV` | No | Set `staging` |
 | `VECINITA_CORS_ORIGINS` | Yes (browser UI) | Comma-separated frontend origins, e.g. `https://vecinita-chat-rag-frontend-….ondigitalocean.app` |
 
@@ -31,12 +34,13 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 | `VECINITA_MAX_TAGS_PER_DOCUMENT` | No | Default `10` — EV-001 tag cap enforcement |
 | `VECINITA_MAX_TAGS_PER_CHUNK` | No | Default `5` — EV-001 tag cap enforcement |
 | `VECINITA_HEALTH_TIMEOUT_MS` | No | Default `5000` — EV-002 health aggregator timeout per service (F26) |
-| `VECINITA_STATS_ENABLED` | No | Default `true` — EV-002 enable/disable serving stats (F28) |
-| `VECINITA_AUDIT_RETENTION_DAYS` | No | Default `365` — EV-002 audit log retention period (F29) |
-| `VECINITA_HEALTH_CHAT_RAG_URL` | Yes (EV-002) | Chat-rag-backend URL for health aggregator polling |
-| `VECINITA_HEALTH_EMBED_URL` | Yes (EV-002) | Modal embedding URL for health aggregator polling |
-| `VECINITA_HEALTH_LLM_URL` | Yes (EV-002) | Modal LLM URL for health aggregator polling |
-| `VECINITA_HEALTH_DATA_MGMT_URL` | Yes (EV-002) | Modal data-mgmt URL for health aggregator polling |
+| `VECINITA_AUDIT_RETENTION_DAYS` | No | Default `365` — EV-002 audit retention for `POST /internal/v1/audit/cleanup` (F29); `0` = skip |
+| `VECINITA_CHAT_RAG_URL` | Yes (EV-002) | Chat-rag-backend URL for `GET /internal/v1/health/all` polling |
+| `VECINITA_MODAL_EMBED_URL` | Yes (EV-002) | Modal embedding URL for health aggregator |
+| `VECINITA_MODAL_LLM_URL` | Yes (EV-002) | Modal LLM URL for health aggregator |
+| `VECINITA_MODAL_DATA_MGMT_URL` | Yes (EV-001/002) | Modal data-mgmt URL — retag dispatch + health poll |
+| `VECINITA_CHAT_FRONTEND_URL` | Yes (EV-002) | Chat static site URL for health aggregator HTTP check |
+| `VECINITA_ADMIN_FRONTEND_URL` | Yes (EV-002) | Admin static site URL for health aggregator HTTP check |
 | `VECINITA_ENV` | No | `staging` |
 | `VECINITA_CORS_ORIGINS` | Yes (browser UI) | Must include admin frontend origin |
 
@@ -81,6 +85,7 @@ No Vecinita Postgres secrets. HF model cache uses Modal volumes `embedding-model
 | `VECINITA_STAGING_CHAT_FRONTEND_URL` | H4–H5 — chat UI origin |
 | `VECINITA_STAGING_ADMIN_FRONTEND_URL` | H4–H5 — admin UI origin |
 | `VECINITA_STAGING_ADMIN_API_URL` | H4 — Modal data-mgmt base URL |
+| `VECINITA_STAGING_INTERNAL_API_KEY` | T3 / H3c — Bearer for write API admin smokes (EV-002) |
 
 See [staging-runbook.md](staging-runbook.md) for deploy order and Phase 4 gate checklist.
 See [.cursor/skills/connectivity-gates.md](../.cursor/skills/connectivity-gates.md) for full gate matrix.

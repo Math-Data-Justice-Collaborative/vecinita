@@ -6,10 +6,11 @@ import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Final
+from typing import Final, cast
 
 import langdetect
 from vecinita_shared_schemas.internal_write import TagInput
+from vecinita_shared_schemas.json_types import as_json_object
 
 _ENV_TAG_SEED_PATH: Final[str] = "VECINITA_TAG_SEED_PATH"
 _DEFAULT_TAG_SEED_PATH: Final[str] = "data/fixtures/tags/seed_tags.json"
@@ -37,15 +38,22 @@ def default_seed_path() -> Path:
 def load_seed_vocabulary(path: Path | None = None) -> list[SeedTag]:
     """Load starter tag vocabulary from seed_tags.json."""
     seed_path = path or default_seed_path()
-    payload = json.loads(seed_path.read_text(encoding="utf-8"))
-    return [
-        SeedTag(
-            slug=str(entry["slug"]),
-            label_en=str(entry["label_en"]),
-            label_es=str(entry["label_es"]),
+    payload = as_json_object(cast(object, json.loads(seed_path.read_text(encoding="utf-8"))))
+    tags_raw = payload.get("tags")
+    if not isinstance(tags_raw, list):
+        msg = "seed_tags.json must contain a 'tags' array"
+        raise ValueError(msg)
+    tags: list[SeedTag] = []
+    for raw_entry in tags_raw:
+        entry = as_json_object(cast(object, raw_entry))
+        tags.append(
+            SeedTag(
+                slug=str(entry["slug"]),
+                label_en=str(entry["label_en"]),
+                label_es=str(entry["label_es"]),
+            )
         )
-        for entry in payload["tags"]
-    ]
+    return tags
 
 
 def vocabulary_slugs(vocabulary: list[SeedTag]) -> list[str]:

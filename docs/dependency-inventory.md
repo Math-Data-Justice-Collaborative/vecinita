@@ -59,9 +59,10 @@
 
 | Tool | Purpose |
 |------|---------|
-| ruff | Python lint + format |
-| pyright | Python types (CI + hooks) |
-| eslint | TS/JS lint |
+| ruff | Python lint + format (`ANN401` bans `typing.Any`) |
+| basedpyright | Python types (CI + hooks; `reportExplicitAny`) |
+| eslint | TS/JS lint (`no-explicit-any`, `no-unsafe-*`) |
+| typescript-eslint | Type-aware ESLint for frontends |
 
 ## Hardware requirements
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import contextlib
 import json
 from collections.abc import Iterator
-from typing import Annotated, Any
+from typing import Annotated, cast
 from uuid import UUID
 
 import httpx
@@ -24,6 +24,7 @@ from vecinita_shared_schemas.chat_rag import (
     TagListResponse,
 )
 from vecinita_shared_schemas.cors import configure_cors
+from vecinita_shared_schemas.json_types import as_json_object
 from vecinita_shared_schemas.validation import validate_ask_request
 
 from vecinita_chat_rag_backend.browse import get_document, list_documents, list_tag_facets
@@ -34,11 +35,12 @@ from vecinita_chat_rag_backend.service import ChatRagService
 async def parse_ask_body(request: Request) -> AskRequest:
     """Parse JSON ask body and reject identity fields per ADR-004."""
     try:
-        payload: Any = await request.json()
+        raw_payload = cast(object, await request.json())
     except json.JSONDecodeError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid JSON") from exc
-    if not isinstance(payload, dict):
+    if not isinstance(raw_payload, dict):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="JSON object required")
+    payload = as_json_object(raw_payload)
     try:
         return validate_ask_request(payload)
     except ValidationError as exc:
@@ -55,13 +57,14 @@ def _check_dependency(url: str | None, path: str = "/health") -> str:
         return "error"
 
 
-def _source_payload(sources: list[Source]) -> list[dict[str, Any]]:
-    encoded: list[dict[str, Any]] = []
+def _source_payload(sources: list[Source]) -> list[dict[str, object]]:
+    encoded: list[dict[str, object]] = []
     for source in sources:
-        item = jsonable_encoder(source)
+        item = as_json_object(cast(object, jsonable_encoder(source)))
         for key in ("chunk_id", "document_id"):
-            if key in item and isinstance(item[key], UUID):
-                item[key] = str(item[key])
+            field = item.get(key)
+            if isinstance(field, UUID):
+                item[key] = str(field)
         encoded.append(item)
     return encoded
 
@@ -70,9 +73,11 @@ def _fire_stats(
     sources: list[Source],
     internal_write_url: str | None,
     internal_api_key: str | None,
+    *,
+    stats_enabled: bool = True,
 ) -> None:
     """Fire-and-forget POST to /stats/served. Failures are silently ignored."""
-    if not internal_write_url or not sources:
+    if not stats_enabled or not internal_write_url or not sources:
         return
     doc_ids = list({str(s.document_id) for s in sources if s.document_id})
     if not doc_ids:
@@ -140,7 +145,12 @@ def create_app(
                 detail="Upstream unavailable",
             ) from exc
         cfg = get_settings()
-        _fire_stats(result.sources, cfg.internal_write_url, cfg.internal_api_key)
+        _fire_stats(
+            result.sources,
+            cfg.internal_write_url,
+            cfg.internal_api_key,
+            stats_enabled=cfg.stats_enabled,
+        )
         return result
 
     @app.post("/api/v1/ask/stream")

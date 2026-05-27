@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import json
+from typing import cast
 
 import httpx
 import pytest
+from tests.helpers.json_response import json_str
 from vecinita_llm_client import LlmClient
+from vecinita_shared_schemas.json_types import as_json_object
 from vecinita_tagging.llm_client import LlmTagClient, LlmTagClientError
 
 _VOCABULARY = ["housing", "legal", "benefits", "health"]
@@ -14,10 +17,10 @@ _VOCABULARY = ["housing", "legal", "benefits", "health"]
 
 def test_infer_document_tags_parses_json_slugs() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
-        payload = json.loads(request.content.decode())
+        payload = as_json_object(cast(object, json.loads(request.content.decode())))
         assert request.url.path == "/generate"
         assert payload["max_tokens"] == 128
-        assert "housing" in payload["prompt"]
+        assert "housing" in json_str(payload, "prompt")
         return httpx.Response(
             200,
             json={"text": '{"tags": ["housing", "legal"]}'},

@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-05-26 (EV-002)
+> **Last updated**: 2026-05-27 (EV-002 signoff)
 
 ## Per-feature criteria
 
@@ -45,17 +45,17 @@
 
 ### EV-002 — Admin overhaul, bulk ops, stats, audit (F23–F29)
 
-- [ ] **AC-E1**: Admin UI renders with shadcn/ui components, light/dark theme follows system preference (UJ-020, F23).
-- [ ] **AC-E2**: Corpus list shows tag chips inline per document without opening detail (UJ-021, F24).
-- [ ] **AC-E3**: Admin summary dashboard displays all 8 stat types with loading/error states (UJ-013, TC-051, F25).
-- [ ] **AC-E4**: Health dashboard shows up/down/degraded for all 8 services within timeout (UJ-014, TC-052, F26).
-- [ ] **AC-E5**: Bulk delete removes up to 100 documents independently with partial-success reporting; audit log records each deletion (UJ-015, TC-053, F27). <!-- TS-EV002-C02: aligned with TP-024 partial success -->
-- [ ] **AC-E6**: Bulk tag add/remove respects max 10 tags per document; audit entries created (UJ-016, TC-055, F27).
-- [ ] **AC-E7**: `POST /internal/v1/stats/served` increments counters; top-served displays on dashboard (UJ-019, TC-059, F28).
-- [ ] **AC-E8**: Global audit log paginates and filters by event_type/date; no IP/identity in entries (UJ-017, TC-056/057, F29).
-- [ ] **AC-E9**: Per-document version history shows title/language/tags at each point in time (UJ-018, TC-058, F29).
-- [ ] **AC-E10**: CORS preflight passes for all new EV-002 endpoints from admin frontend origin (TC-060, H4).
-- [ ] **AC-E11**: 3 new tables (audit_log, document_versions, document_serving_stats) in allow-list; privacy tests pass.
+- [x] **AC-E1**: Admin UI renders with shadcn/ui components, light/dark theme follows system preference (UJ-020, F23). — 11-verify-impl FE
+- [x] **AC-E2**: Corpus list shows tag chips inline per document without opening detail (UJ-021, F24). — 11-verify-impl FE
+- [x] **AC-E3**: Admin summary dashboard displays all 8 stat types with loading/error states (UJ-013, TC-051, F25). — 11-verify-impl T0 + FE
+- [x] **AC-E4**: Health dashboard shows up/down/degraded for all 8 services within timeout (UJ-014, TC-052, F26). — 11-verify-impl T0 + FE
+- [x] **AC-E5**: Bulk delete removes up to 100 documents independently with partial-success reporting; audit log records each deletion (UJ-015, TC-053, F27). <!-- TS-EV002-C02: aligned with TP-024 partial success --> — 11-verify-impl T0
+- [x] **AC-E6**: Bulk tag add/remove respects max 10 tags per document; audit entries created (UJ-016, TC-055, F27). — 11-verify-impl T0
+- [x] **AC-E7**: `POST /internal/v1/stats/served` increments counters; top-served displays on dashboard (UJ-019, TC-059, F28). — 11-verify-impl T0 + FE
+- [x] **AC-E8**: Global audit log paginates and filters by event_type/date; no IP/identity in entries (UJ-017, TC-056/057, F29). — 11-verify-impl T0 + FE
+- [x] **AC-E9**: Per-document version history shows title/language/tags at each point in time (UJ-018, TC-058, F29). — 11-verify-impl T0 + FE
+- [ ] **AC-E10**: CORS preflight passes for all new EV-002 endpoints from admin frontend origin (TC-060, H4). — H0c met; H4 live pending staging
+- [x] **AC-E11**: 3 new tables (audit_log, document_versions, document_serving_stats) in allow-list; privacy tests pass. — 11-verify-impl
 
 ## Quantitative benchmarks
 

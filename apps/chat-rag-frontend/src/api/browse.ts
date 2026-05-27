@@ -38,7 +38,7 @@ export async function fetchDocuments(params: {
 }): Promise<DocumentBrowsePage> {
   const { baseUrl } = requireChatApiConfig();
   const search = new URLSearchParams();
-  params.tags?.forEach((tag) => search.append("tags", tag));
+  params.tags?.forEach((tag) => { search.append("tags", tag); });
   if (params.q) {
     search.set("q", params.q);
   }
@@ -49,7 +49,7 @@ export async function fetchDocuments(params: {
   const url = `${baseUrl}/api/v1/documents${query ? `?${query}` : ""}`;
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`Browse failed (${response.status})`);
+    throw new Error(`Browse failed (${String(response.status)})`);
   }
   return (await response.json()) as DocumentBrowsePage;
 }
@@ -58,7 +58,7 @@ export async function fetchTags(): Promise<TagListResponse> {
   const { baseUrl } = requireChatApiConfig();
   const response = await fetch(`${baseUrl}/api/v1/tags`);
   if (!response.ok) {
-    throw new Error(`Tags failed (${response.status})`);
+    throw new Error(`Tags failed (${String(response.status)})`);
   }
   return (await response.json()) as TagListResponse;
 }

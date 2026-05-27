@@ -70,7 +70,7 @@ function MobileHeader() {
             <SheetTitle>Vecinita</SheetTitle>
           </SheetHeader>
           <div className="px-3 py-4">
-            <NavItems onClick={() => setOpen(false)} />
+            <NavItems onClick={() => { setOpen(false); }} />
           </div>
           <Separator />
           <div className="px-3 py-3">

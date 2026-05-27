@@ -18,21 +18,21 @@ export default function App() {
           <button
             type="button"
             className={onCorpus ? "secondary" : undefined}
-            onClick={() => navigate("/")}
+            onClick={() => { navigate("/"); }}
           >
             Chat
           </button>
           <button
             type="button"
             className={onCorpus ? undefined : "secondary"}
-            onClick={() => navigate("/corpus")}
+            onClick={() => { navigate("/corpus"); }}
           >
             Corpus
           </button>
         </nav>
       </header>
       {onCorpus ? (
-        <CorpusBrowse onNavigateHome={() => navigate("/")} />
+        <CorpusBrowse onNavigateHome={() => { navigate("/"); }} />
       ) : (
         <ChatPanel />
       )}

@@ -4,10 +4,18 @@ from __future__ import annotations
 
 import os
 import uuid
+from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from tests.helpers.json_response import (
+    json_int,
+    json_object_list,
+    json_str,
+    response_json_object,
+)
+from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
 
 pytestmark = pytest.mark.integration
 
@@ -47,13 +55,16 @@ def sample_docs(engine):
     with engine.begin() as conn:
         for i in range(3):
             url = f"https://test.example.com/stats-{uuid.uuid4().hex[:8]}-{i}"
-            doc_id = conn.execute(
-                text(
-                    "INSERT INTO documents (url, title, language) "
-                    "VALUES (:url, :title, 'en') RETURNING id"
-                ),
-                {"url": url, "title": f"Stats Doc {i}"},
-            ).scalar_one()
+            doc_id_raw = sqlalchemy_scalar_one(
+                conn.execute(
+                    text(
+                        "INSERT INTO documents (url, title, language) "
+                        "VALUES (:url, :title, 'en') RETURNING id"
+                    ),
+                    {"url": url, "title": f"Stats Doc {i}"},
+                )
+            )
+            doc_id = UUID(str(doc_id_raw))
             doc_ids.append(doc_id)
     yield doc_ids
     with engine.begin() as conn:
@@ -79,7 +90,7 @@ def test_stats_served_upserts_counter(client, sample_docs) -> None:
         headers=_auth(),
     )
     assert resp.status_code == 202
-    assert resp.json()["acknowledged"] is True
+    assert response_json_object(resp)["acknowledged"] is True
 
     resp2 = client.post(
         "/internal/v1/stats/served",
@@ -92,10 +103,13 @@ def test_stats_served_upserts_counter(client, sample_docs) -> None:
 
     eng = _ce(_database_url())
     with eng.connect() as conn:
-        count = conn.execute(
-            text("SELECT served_count FROM document_serving_stats WHERE document_id = :id"),
-            {"id": sample_docs[0]},
-        ).scalar_one()
+        count_raw = sqlalchemy_scalar_one(
+            conn.execute(
+                text("SELECT served_count FROM document_serving_stats WHERE document_id = :id"),
+                {"id": sample_docs[0]},
+            )
+        )
+        count = scalar_int(count_raw)
     assert count == 2
 
 
@@ -125,9 +139,10 @@ def test_top_served_returns_ranked_list(client, sample_docs) -> None:
 
     resp = client.get("/internal/v1/stats/top-served?limit=10", headers=_auth())
     assert resp.status_code == 200
-    items = resp.json()["items"]
+    items = json_object_list(response_json_object(resp), "items")
     assert len(items) >= 2
 
-    our_items = [item for item in items if item["document_id"] in [str(d) for d in sample_docs]]
+    sample_id_strs = [str(d) for d in sample_docs]
+    our_items = [item for item in items if json_str(item, "document_id") in sample_id_strs]
     if len(our_items) >= 2:
-        assert our_items[0]["served_count"] >= our_items[1]["served_count"]
+        assert json_int(our_items[0], "served_count") >= json_int(our_items[1], "served_count")

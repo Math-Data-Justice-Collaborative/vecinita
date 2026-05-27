@@ -146,6 +146,34 @@ def test_ask_succeeds_even_if_stats_post_fails(
     assert data["answer"] == "test answer"
 
 
+def test_ask_skips_stats_when_disabled(settings: ChatRagSettings) -> None:
+    """When VECINITA_STATS_ENABLED is false, no stats POST is attempted."""
+    from vecinita_chat_rag_backend.app import create_app
+
+    disabled_settings = ChatRagSettings(
+        database_url=settings.database_url,
+        top_k=settings.top_k,
+        embed_url=settings.embed_url,
+        llm_url=settings.llm_url,
+        request_timeout_s=settings.request_timeout_s,
+        internal_write_url=settings.internal_write_url,
+        internal_api_key=settings.internal_api_key,
+        stats_enabled=False,
+    )
+    app = create_app(
+        settings=disabled_settings,
+        chat_service=StubChatRagService(),  # type: ignore[arg-type]
+    )
+    tc = TestClient(app)
+    with patch("vecinita_chat_rag_backend.app.httpx") as mock_httpx_module:
+        post_mock = MagicMock()
+        mock_httpx_module.post = post_mock
+        resp = tc.post("/api/v1/ask", json={"question": "test question"})
+
+    assert resp.status_code == 200
+    post_mock.assert_not_called()
+
+
 def test_ask_skips_stats_when_no_internal_url(mock_service: StubChatRagService) -> None:
     """When internal_write_url is None, no stats POST is attempted."""
     settings = ChatRagSettings(

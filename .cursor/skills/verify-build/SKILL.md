@@ -56,7 +56,7 @@ Read `docs/execution-plan.md` §Tech Stack Summary to determine:
 |-------|------|---------|--------|
 | Lint | [e.g., Ruff] | [e.g., `ruff check .`] | execution-plan.md |
 | Format | [e.g., Ruff format] | [e.g., `ruff format --check .`] | execution-plan.md |
-| Typecheck | [e.g., Pyright] | [e.g., `pyright`] | execution-plan.md |
+| Typecheck | basedpyright | `uv run basedpyright apps packages tests` | `docs/typing-policy.md` |
 | Tests | [e.g., pytest] | [e.g., `pytest -v`] | execution-plan.md |
 | Performance (optional) | [e.g., pytest marker, locust, `ab`/`hey`] | per test-plan.md / execution-plan.md | test-plan.md |
 | Security | `pip-audit` + secret scan | `pip-audit` + `rg` patterns | always |

@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 
 import httpx
+from tests.helpers.json_response import header_str
 
 
 def assert_cors_preflight(
@@ -31,11 +32,11 @@ def assert_cors_preflight(
     assert response.status_code in (200, 204), (
         f"CORS preflight {response.status_code}: {response.text[:200]}"
     )
-    allow_origin = response.headers.get("access-control-allow-origin")
+    allow_origin = header_str(response.headers, "access-control-allow-origin")
     assert allow_origin in (origin, "*"), (
         f"Expected Access-Control-Allow-Origin {origin!r}, got {allow_origin!r}"
     )
-    allow_methods = response.headers.get("access-control-allow-methods", "").upper()
+    allow_methods = header_str(response.headers, "access-control-allow-methods").upper()
     assert method.upper() in allow_methods or "*" in allow_methods, (
         f"CORS must allow {method!r}; got access-control-allow-methods={allow_methods!r}"
     )

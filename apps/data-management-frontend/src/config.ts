@@ -1,9 +1,9 @@
 /** Build-time config per docs/config-spec.md (VITE_VECINITA_*). */
 
-export const adminApiUrl = import.meta.env.VITE_VECINITA_ADMIN_API_URL ?? "";
-export const modalProxyKey = import.meta.env.VITE_VECINITA_MODAL_PROXY_KEY ?? "";
-export const corpusApiUrl = import.meta.env.VITE_VECINITA_CORPUS_API_URL ?? "";
-export const corpusApiKey = import.meta.env.VITE_VECINITA_CORPUS_API_KEY ?? "";
+export const adminApiUrl = import.meta.env.VITE_VECINITA_ADMIN_API_URL;
+export const modalProxyKey = import.meta.env.VITE_VECINITA_MODAL_PROXY_KEY;
+export const corpusApiUrl = import.meta.env.VITE_VECINITA_CORPUS_API_URL;
+export const corpusApiKey = import.meta.env.VITE_VECINITA_CORPUS_API_KEY;
 
 export function requireAdminConfig(): { baseUrl: string; modalKey: string } {
   if (!adminApiUrl || !modalProxyKey) {

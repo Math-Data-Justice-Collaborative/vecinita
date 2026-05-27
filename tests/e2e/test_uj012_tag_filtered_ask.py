@@ -7,12 +7,14 @@ import os
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from tests.helpers.json_response import json_object_list, json_str, response_json_object
 from tests.unit.rag.conftest import attach_embeddings, basis_vector
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import ChatRagService
 from vecinita_database.seeds.tags import load_seed_tags, load_tagged_corpus
 from vecinita_rag.retriever import CorpusPgvectorRetriever
+from vecinita_shared_schemas.json_types import JsonObject
 
 pytestmark = pytest.mark.e2e
 
@@ -76,6 +78,12 @@ def test_uj012_tag_filtered_ask_returns_matching_sources(tag_ask_client: TestCli
         json={"question": "What are my tenant rights?", "tags": ["housing"]},
     )
     assert response.status_code == 200
-    sources = response.json()["sources"]
+    sources = json_object_list(response_json_object(response), "sources")
     assert sources
-    assert not any("legal-aid" in (source.get("url") or "") for source in sources)
+
+    def _source_url(source: JsonObject) -> str:
+        if "url" not in source:
+            return ""
+        return json_str(source, "url")
+
+    assert not any("legal-aid" in _source_url(source) for source in sources)

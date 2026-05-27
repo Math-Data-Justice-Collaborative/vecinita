@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import os
 import uuid
+from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
 
 pytestmark = pytest.mark.integration
 
@@ -76,10 +78,10 @@ def test_batch_upsert_emits_document_created_audit(client, engine) -> None:
     assert resp.status_code == 200
 
     with engine.connect() as conn:
-        doc_id = conn.execute(
-            text("SELECT id FROM documents WHERE url = :url"), {"url": url}
-        ).scalar_one()
-
+        doc_id_raw = sqlalchemy_scalar_one(
+            conn.execute(text("SELECT id FROM documents WHERE url = :url"), {"url": url})
+        )
+        doc_id = UUID(str(doc_id_raw))
         audit_row = (
             conn.execute(
                 text(
@@ -115,14 +117,16 @@ def test_delete_document_emits_audit(client, engine) -> None:
     """delete_document emits document.deleted audit event."""
     url = f"https://test.example.com/audit-del-{uuid.uuid4().hex[:8]}"
     with engine.begin() as conn:
-        doc_id = conn.execute(
-            text(
-                "INSERT INTO documents (url, title, language) "
-                "VALUES (:url, 'Delete Me', 'en') RETURNING id"
-            ),
-            {"url": url},
-        ).scalar_one()
-
+        doc_id_raw = sqlalchemy_scalar_one(
+            conn.execute(
+                text(
+                    "INSERT INTO documents (url, title, language) "
+                    "VALUES (:url, 'Delete Me', 'en') RETURNING id"
+                ),
+                {"url": url},
+            )
+        )
+        doc_id = UUID(str(doc_id_raw))
     resp = client.delete(
         f"/internal/v1/documents/{doc_id}",
         headers=_auth(),
@@ -149,14 +153,16 @@ def test_patch_document_tags_emits_audit_and_version(client, engine) -> None:
     """patch_document_tags emits document.tagged + creates version snapshot."""
     url = f"https://test.example.com/audit-tag-{uuid.uuid4().hex[:8]}"
     with engine.begin() as conn:
-        doc_id = conn.execute(
-            text(
-                "INSERT INTO documents (url, title, language) "
-                "VALUES (:url, 'Tag Me', 'en') RETURNING id"
-            ),
-            {"url": url},
-        ).scalar_one()
-
+        doc_id_raw = sqlalchemy_scalar_one(
+            conn.execute(
+                text(
+                    "INSERT INTO documents (url, title, language) "
+                    "VALUES (:url, 'Tag Me', 'en') RETURNING id"
+                ),
+                {"url": url},
+            )
+        )
+        doc_id = UUID(str(doc_id_raw))
     resp = client.patch(
         f"/internal/v1/documents/{doc_id}/tags",
         json={

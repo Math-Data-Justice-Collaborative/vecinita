@@ -12,11 +12,19 @@ After fix:
 from __future__ import annotations
 
 import os
+from typing import cast
 from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import HttpUrl
+from tests.helpers.json_response import (
+    find_json_object_by_str,
+    json_list,
+    json_str,
+    response_json_list,
+    response_json_object,
+)
 from vecinita_embedding_client import EMBEDDING_DIMENSION
 from vecinita_internal_write_api.app import create_app as create_write_app
 from vecinita_shared_schemas.internal_write import (
@@ -24,6 +32,7 @@ from vecinita_shared_schemas.internal_write import (
     ChunkUpsert,
     DocumentUpsert,
 )
+from vecinita_shared_schemas.json_types import as_json_object
 
 _EMBEDDING = [0.01] * EMBEDDING_DIMENSION
 _WRITE_KEY = "test-write-key"
@@ -68,10 +77,9 @@ def seeded_document_id(write_client: TestClient) -> UUID:
     )
     assert resp.status_code == 200, resp.text
 
-    docs = write_client.get("/internal/v1/documents").json()
-    target = [d for d in docs if d["url"] == "https://example.com/retag-visible-test"]
-    assert target, "Seeded document not found"
-    return UUID(target[0]["document_id"])
+    docs = response_json_list(write_client.get("/internal/v1/documents"))
+    target = find_json_object_by_str(docs, "url", "https://example.com/retag-visible-test")
+    return UUID(json_str(target, "document_id"))
 
 
 @pytest.mark.e2e
@@ -101,8 +109,8 @@ def test_document_tags_retrievable_after_patch(
     assert tags_resp.status_code == 200, (
         f"GET /documents/{{id}}/tags should return 200; got {tags_resp.status_code}: {tags_resp.text}"
     )
-    tags = tags_resp.json()["tags"]
-    slugs = sorted(t["slug"] for t in tags)
+    tags = json_list(response_json_object(tags_resp), "tags")
+    slugs = sorted(json_str(as_json_object(cast(object, tag)), "slug") for tag in tags)
     assert slugs == ["benefits", "housing"], (
         f"Expected document tags ['benefits', 'housing']; got {slugs}"
     )

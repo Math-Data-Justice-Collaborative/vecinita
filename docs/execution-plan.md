@@ -31,9 +31,10 @@
 |----------|--------|--------|----------------|
 | Language (Python) | **3.11** | 04-tech-plan interview | spec.md H10 |
 | Language (Node) | **20 LTS** | dependency-inventory.md | Frontends |
-| Linter | **Ruff** | hooks + 03-plan-tooling | test-plan.md |
+| Linter | **Ruff** (+ `ANN401` no-Any) | hooks + ADR-018 | `docs/typing-policy.md` |
 | Formatter | **Ruff format** | hooks | test-plan.md |
-| Typechecker | **Pyright** | 04-tech-plan; `.cursor/hooks/typecheck.py` | test-plan.md (supersedes mypy) |
+| Typechecker | **basedpyright** (`reportExplicitAny`) | ADR-018; `.cursor/hooks/typecheck.py` | `docs/typing-policy.md` (supersedes pyright/mypy) |
+| TS type safety | **ESLint** `no-explicit-any` + `no-unsafe-*` | ADR-018 | `docs/typing-policy.md` |
 | Test runner | **pytest** | test-plan.md | §Test Strategy |
 | Frontend tests | **Vitest** | test-plan.md | Frontends |
 | Package manager | **uv** | hooks (`uv run`) | monorepo workspace |
@@ -92,7 +93,7 @@
 
 **Objective:** Monorepo scaffold, database schema, privacy guardrails, OpenAPI skeletons, dev tooling baseline.  
 **Entry gate:** Execution plan approved (04-tech-plan Phase 4).  
-**Exit gate:** Migrations apply on empty DB; privacy tests pass; ruff + pyright clean on scaffold; pytest runs (smoke).
+**Exit gate:** Migrations apply on empty DB; privacy tests pass; ruff + basedpyright clean on scaffold; pytest runs (smoke).
 
 #### M1: Monorepo scaffold
 
@@ -105,7 +106,7 @@
 | T1.2 | Root `pyproject.toml` uv workspace + Python 3.11 pin | Config | completed | dependency-inventory.md | T1.1 | — |
 | T1.3 | Placeholder `__init__.py` / package stubs per app | Config | completed | ADR-012 | T1.2 | — |
 | T1.4 | Test: smoke import all packages (`tests/smoke/test_imports.py`) | Test | completed | test-plan.md §Smoke | T1.3 | — |
-| T1.5 | Configure ruff + pyright (`pyproject.toml`, `pyrightconfig.json`) | Config | completed | 04-tech-plan | T1.2 | — |
+| T1.5 | Configure ruff + basedpyright (`pyproject.toml`, `pyrightconfig.json`; ADR-018) | Config | completed | 04-tech-plan | T1.2 | — |
 | T1.6 | `infra/docker-compose.yml` Postgres 15 + pgvector image | Config | completed | deployment-integration.md | T1.1 | — |
 
 **Parallelizable:** T1.1, T1.6 after T1.1 starts.
@@ -147,7 +148,7 @@
 - [x] All M1–M3 tasks completed
 - [x] `alembic upgrade head` succeeds on empty docker-compose DB
 - [x] `pytest tests/smoke tests/privacy tests/integration/test_seed.py -q` passes
-- [x] ruff + pyright clean
+- [x] ruff + basedpyright clean (no `Any`; see `docs/typing-policy.md`)
 - [x] OpenAPI files present and referenced in api-contract.md
 
 ---
@@ -297,7 +298,7 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps |
 |---|------|------|--------|-------------|------------|-----------|
-| T13.1 | GitHub Actions: ruff, pyright, pytest, pip-audit (blocking) | Config | completed | test-plan §CI/CD | T1.5 | — |
+| T13.1 | GitHub Actions: ruff, basedpyright, pytest, pip-audit (blocking) | Config | completed | test-plan §CI/CD | T1.5 | — |
 | T13.2 | Frontend eslint + vitest in CI | Config | completed | test-plan.md | T7.1, T11.1 | — |
 | T13.3 | Privacy + OpenAPI validator hooks in CI | Config | completed | 03-plan-tooling skills | T13.1 | — |
 | T13.4 | CI/static check: no `DATABASE_URL` in Modal worker paths (ADR-007) | Config | completed | ADR-007, Phase 2 gate | T6.4 | — |
@@ -651,7 +652,7 @@
 
 ### Commit rules
 
-Atomic commits per task: `[T1.1] type: description`. Post-commit: ruff, pyright, full pytest.
+Atomic commits per task: `[T1.1] type: description`. Post-commit: ruff, basedpyright, full pytest (see `docs/typing-policy.md`).
 
 ### Branch workflow
 
@@ -943,10 +944,10 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | Hook | Event | Tool | Config | Purpose |
 |------|-------|------|--------|---------|
 | Lint/format | afterFileEdit | Ruff | `pyproject.toml` | Style + lint |
-| Typecheck | afterFileEdit | Pyright | `pyrightconfig.json` | Types |
+| Typecheck | afterFileEdit | basedpyright | `pyrightconfig.json` / `[tool.basedpyright]` | No `Any` (ADR-018) |
 | Scope | afterFileEdit | scope_check.py | `.cursor/hooks/` | Plan drift |
 
-CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, pyright, template-check, pre-task, post-test-sync, pr-checklist.
+CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, basedpyright, template-check, pre-task, post-test-sync, pr-checklist. Typing policy: `docs/typing-policy.md`.
 
 ## Modal test tiers (ADR-004 / test-plan)
 

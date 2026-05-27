@@ -5,7 +5,7 @@ from __future__ import annotations
 from uuid import UUID
 
 from sqlalchemy import bindparam, create_engine, text
-from sqlalchemy.engine import Engine
+from sqlalchemy.engine import Connection, Engine
 from vecinita_shared_schemas.chat_rag import (
     DocumentBrowseDetail,
     DocumentBrowseItem,
@@ -13,6 +13,15 @@ from vecinita_shared_schemas.chat_rag import (
     TagFacet,
     TagListResponse,
     TagSummary,
+)
+from vecinita_shared_schemas.db_mapping import (
+    mapping_row,
+    row_int,
+    row_str,
+    row_str_optional,
+    row_uuid,
+    scalar_int,
+    sqlalchemy_scalar_one,
 )
 
 _TAG_SQL = text(
@@ -26,6 +35,17 @@ _TAG_SQL = text(
     ORDER BY t.slug
     """
 )
+
+
+def _tag_summaries(conn: Connection, document_id: UUID) -> list[TagSummary]:
+    tag_rows = conn.execute(_TAG_SQL, {"document_id": document_id}).mappings().all()
+    return [
+        TagSummary(
+            slug=row_str(mapping_row(tag), "slug"),
+            label=row_str(mapping_row(tag), "label"),
+        )
+        for tag in tag_rows
+    ]
 
 
 def list_documents(
@@ -79,18 +99,19 @@ def list_documents(
         list_sql = list_sql.bindparams(bindparam("tag_slugs", expanding=True))
 
     with engine.connect() as conn:
-        total = int(conn.execute(count_sql, params).scalar_one())
+        total = scalar_int(sqlalchemy_scalar_one(conn.execute(count_sql, params)))
         rows = conn.execute(list_sql, params).mappings().all()
         items: list[DocumentBrowseItem] = []
-        for row in rows:
-            tag_rows = conn.execute(_TAG_SQL, {"document_id": row["id"]}).mappings().all()
+        for raw_row in rows:
+            row = mapping_row(raw_row)
+            doc_id = row_uuid(row, "id")
             items.append(
                 DocumentBrowseItem(
-                    document_id=row["id"],
-                    title=row["title"],
-                    url=row["url"],
-                    language=row["language"],
-                    tags=[TagSummary(slug=tag["slug"], label=tag["label"]) for tag in tag_rows],
+                    document_id=doc_id,
+                    title=row_str_optional(row, "title"),
+                    url=row_str(row, "url"),
+                    language=row_str_optional(row, "language"),
+                    tags=_tag_summaries(conn, doc_id),
                 )
             )
 
@@ -112,16 +133,16 @@ def get_document(engine: Engine, document_id: UUID) -> DocumentBrowseDetail | No
         """
     )
     with engine.connect() as conn:
-        row = conn.execute(doc_sql, {"document_id": document_id}).mappings().one_or_none()
-        if row is None:
+        raw_row = conn.execute(doc_sql, {"document_id": document_id}).mappings().one_or_none()
+        if raw_row is None:
             return None
-        tag_rows = conn.execute(_TAG_SQL, {"document_id": document_id}).mappings().all()
+        row = mapping_row(raw_row)
         return DocumentBrowseDetail(
-            document_id=row["id"],
-            title=row["title"],
-            url=row["url"],
-            language=row["language"],
-            tags=[TagSummary(slug=tag["slug"], label=tag["label"]) for tag in tag_rows],
+            document_id=row_uuid(row, "id"),
+            title=row_str_optional(row, "title"),
+            url=row_str(row, "url"),
+            language=row_str_optional(row, "language"),
+            tags=_tag_summaries(conn, document_id),
         )
 
 
@@ -146,10 +167,10 @@ def list_tag_facets(engine: Engine) -> TagListResponse:
     return TagListResponse(
         tags=[
             TagFacet(
-                slug=row["slug"],
-                label=row["label"],
-                language=row["language"],
-                document_count=int(row["document_count"]),
+                slug=row_str(mapping_row(row), "slug"),
+                label=row_str(mapping_row(row), "label"),
+                language=row_str(mapping_row(row), "language"),
+                document_count=row_int(mapping_row(row), "document_count"),
             )
             for row in rows
         ]

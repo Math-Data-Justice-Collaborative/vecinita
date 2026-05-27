@@ -6,6 +6,7 @@ import math
 import time
 
 import httpx
+from tests.helpers.json_response import response_json_object
 
 P95_THRESHOLD_S = 15.0
 DEFAULT_SAMPLE_COUNT = 5
@@ -40,7 +41,7 @@ def measure_staging_ask_p95(
             )
             elapsed = time.perf_counter() - start
             response.raise_for_status()
-            payload = response.json()
+            payload = response_json_object(response)
             if not payload.get("answer"):
                 msg = "staging ask returned empty answer"
                 raise AssertionError(msg)

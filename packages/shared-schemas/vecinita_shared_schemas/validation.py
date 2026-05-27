@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Final
+from collections.abc import Mapping
+from typing import Final
 
 from pydantic import ValidationError
 
@@ -23,12 +24,12 @@ FORBIDDEN_IDENTITY_FIELDS: Final[frozenset[str]] = frozenset(
 )
 
 
-def find_identity_fields(payload: dict[str, Any]) -> list[str]:
+def find_identity_fields(payload: Mapping[str, object]) -> list[str]:
     """Return identity field names present at the top level of a JSON body."""
     return sorted(key for key in payload if key in FORBIDDEN_IDENTITY_FIELDS)
 
 
-def validate_ask_request(payload: dict[str, Any]) -> AskRequest:
+def validate_ask_request(payload: Mapping[str, object]) -> AskRequest:
     """Parse and validate ChatRAG ask body; reject identity fields explicitly."""
     identity = find_identity_fields(payload)
     if identity:

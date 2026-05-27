@@ -62,6 +62,9 @@ CI on `main`: `.github/workflows/deploy-preflight.yml` (needs GitHub `MODAL_TOKE
    `VITE_VECINITA_CHAT_API_URL` — no new chat frontend secret; rebuild chat frontend after
    backend is live so H5 bundle includes `/api/v1/documents` and `/api/v1/tags`.
 
+   **EV-002 redeploy order (TP-029):** `alembic upgrade head` → `internal-write-api` →
+   `chat-rag-backend` → `data-management-frontend`. Modal apps do not need redeploy.
+
 5. **Smoke** — after DO apps report running:
 
    ```bash
@@ -82,7 +85,7 @@ CI on `main`: `.github/workflows/deploy-preflight.yml` (needs GitHub `MODAL_TOKE
    Equivalent pytest (skips unset tiers):
 
    ```bash
-   uv run pytest tests/smoke/test_staging_health.py tests/smoke/test_staging_gate.py tests/smoke/test_staging_latency.py tests/smoke/test_staging_connectivity.py -m live
+   uv run pytest tests/smoke/test_staging_health.py tests/smoke/test_staging_gate.py tests/smoke/test_staging_latency.py tests/smoke/test_staging_connectivity.py tests/smoke/test_staging_ev002_admin.py -m live
    ```
 
 ## Operator env vars
@@ -95,6 +98,7 @@ CI on `main`: `.github/workflows/deploy-preflight.yml` (needs GitHub `MODAL_TOKE
 | `VECINITA_STAGING_ADMIN_FRONTEND_URL` | H4, H5 | No — skip admin wiring if unset |
 | `VECINITA_STAGING_ADMIN_API_URL` | H4 (Modal jobs CORS) | No |
 | `VECINITA_STAGING_DATABASE_URL` | H2 | No — falls back to `DATABASE_URL` |
+| `VECINITA_STAGING_INTERNAL_API_KEY` | T3 (EV-002 admin) | No — skip `test_staging_ev002_admin.py` if unset |
 | `DATABASE_URL` | H2 | No — used when staging-specific URL unset |
 | `VECINITA_CORS_ORIGINS` | H4 (on API containers) | **Yes** on each FastAPI deploy — comma-separated frontend origins |
 

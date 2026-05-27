@@ -32,6 +32,9 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_LLM_BACKEND` | string | `vllm` | No | `vllm` primary; `ollama` fallback only per ADR-009 |
 | `VECINITA_REQUEST_TIMEOUT_S` | int | `120` | No | Upstream Modal timeout (cold-start margin; see R5) |
 | `VECINITA_BROWSE_PAGE_SIZE` | int | `20` | No | Default page size for `GET /api/v1/documents` |
+| `VECINITA_STATS_ENABLED` | string | `true` | No | Fire-and-forget stats POST after ask (F28); `false` disables |
+| `VECINITA_INTERNAL_WRITE_URL` | string | — | Yes (EV-002) | Internal write API base for stats POST |
+| `VECINITA_INTERNAL_API_KEY` | string | — | Yes (EV-002) | Bearer for stats POST; must match write API |
 | `VECINITA_MAX_TAGS_PER_DOCUMENT` | int | `10` | No | Hard cap on document tags |
 | `VECINITA_MAX_TAGS_PER_CHUNK` | int | `5` | No | Hard cap on chunk tags |
 | `VECINITA_TAG_SEED_PATH` | string | `data/fixtures/tags/seed_tags.json` | No | Starter tag vocabulary for LLM + browse facets |
@@ -42,13 +45,14 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 |----------|------|---------|----------|-------------|
 | `VECINITA_INTERNAL_API_KEY` | string | — | Yes | Shared secret Modal workers use |
 | `DATABASE_URL` | string | — | Yes | Postgres |
-| `VECINITA_AUDIT_RETENTION_DAYS` | int | `365` | No | Days to retain audit records (0 = forever); F29/ADR-016 |
-| `VECINITA_STATS_ENABLED` | string | `true` | No | Enable serving stats recording (F28) |
+| `VECINITA_AUDIT_RETENTION_DAYS` | int | `365` | No | Days for `POST /internal/v1/audit/cleanup` (F29); `0` skips delete |
 | `VECINITA_HEALTH_TIMEOUT_MS` | int | `5000` | No | Timeout per service health poll in aggregator (F26); TP-019 |
-| `VECINITA_HEALTH_CHAT_RAG_URL` | string | — | Yes (EV-002) | Chat-rag-backend URL for health aggregator |
-| `VECINITA_HEALTH_EMBED_URL` | string | — | Yes (EV-002) | Modal embedding URL for health aggregator |
-| `VECINITA_HEALTH_LLM_URL` | string | — | Yes (EV-002) | Modal LLM URL for health aggregator |
-| `VECINITA_HEALTH_DATA_MGMT_URL` | string | — | Yes (EV-002) | Modal data-mgmt URL for health aggregator |
+| `VECINITA_CHAT_RAG_URL` | string | — | Yes (EV-002) | Chat-rag-backend URL for health aggregator |
+| `VECINITA_MODAL_EMBED_URL` | string | — | Yes (EV-002) | Modal embedding URL for health aggregator |
+| `VECINITA_MODAL_LLM_URL` | string | — | Yes (EV-002) | Modal LLM URL for health aggregator |
+| `VECINITA_MODAL_DATA_MGMT_URL` | string | — | Yes (EV-001/002) | Modal data-mgmt URL for health aggregator |
+| `VECINITA_CHAT_FRONTEND_URL` | string | — | Yes (EV-002) | Chat static site URL for health aggregator |
+| `VECINITA_ADMIN_FRONTEND_URL` | string | — | Yes (EV-002) | Admin static site URL for health aggregator |
 
 ### Data Management (Modal)
 

@@ -91,7 +91,7 @@ describe("ChatPanel", () => {
       'data: {"done":true}\n\n';
 
     const streamFetch = vi
-      .fn()
+      .fn<() => Promise<Response>>()
       .mockRejectedValueOnce(new TypeError("Failed to fetch"))
       .mockImplementation(async () => sseResponse(okSse));
 

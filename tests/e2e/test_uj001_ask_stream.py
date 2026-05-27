@@ -4,25 +4,28 @@ from __future__ import annotations
 
 import json
 import time
+from typing import cast
 
 import pytest
 from fastapi.testclient import TestClient
+from tests.helpers.json_response import json_object_list, json_str, response_json_object
 from tests.unit.rag.conftest import attach_embeddings, basis_vector
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import ChatRagService
 from vecinita_rag.retriever import CorpusPgvectorRetriever
+from vecinita_shared_schemas.json_types import JsonObject, as_json_object
 
 pytestmark = [pytest.mark.e2e, pytest.mark.integration]
 
 _P95_INFORMATIVE_S = 15.0
 
 
-def _parse_sse(raw: str) -> list[dict]:
-    events: list[dict] = []
+def _parse_sse(raw: str) -> list[JsonObject]:
+    events: list[JsonObject] = []
     for line in raw.splitlines():
         if line.startswith("data: "):
-            events.append(json.loads(line.removeprefix("data: ")))
+            events.append(as_json_object(cast(object, json.loads(line.removeprefix("data: ")))))
     return events
 
 
@@ -32,11 +35,12 @@ def test_uj001_ask_and_stream(chat_client: TestClient) -> None:
         json={"question": "What are the food pantry hours?"},
     )
     assert ask.status_code == 200
-    body = ask.json()
+    body = response_json_object(ask)
     assert body["language"] == "en"
     assert body["answer"]
-    assert len(body["sources"]) >= 1
-    assert body["sources"][0]["chunk_id"]
+    sources = json_object_list(body, "sources")
+    assert len(sources) >= 1
+    assert json_str(sources[0], "chunk_id")
 
     stream = chat_client.post(
         "/api/v1/ask/stream",
@@ -91,13 +95,15 @@ def test_uj001_spanish_ask_returns_spanish_answer(spanish_chat_client: TestClien
         json={"question": "¿Cuándo publica horarios el banco de alimentos?"},
     )
     assert response.status_code == 200
-    body = response.json()
+    body = response_json_object(response)
     assert body["language"] == "es"
     assert body["answer"]
-    assert len(body["sources"]) >= 1
+    sources = json_object_list(body, "sources")
+    answer = json_str(body, "answer")
+    assert len(sources) >= 1
     assert (
-        any("banco de alimentos" in (s.get("title") or "").lower() for s in body["sources"])
-        or "banco de alimentos" in body["answer"].lower()
+        any("banco de alimentos" in json_str(source, "title").lower() for source in sources)
+        or "banco de alimentos" in answer.lower()
     )
 
 

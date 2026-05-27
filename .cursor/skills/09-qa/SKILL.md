@@ -89,7 +89,8 @@ Read from disk (do not guess commands):
 
 | Source | Use for |
 |--------|---------|
-| `docs/execution-plan.md` §Tech Stack Summary | ruff, pyright, pytest, pip-audit, vitest |
+| `docs/execution-plan.md` §Tech Stack Summary | ruff, basedpyright, pytest, pip-audit, vitest |
+| `docs/typing-policy.md` | No `Any`/`any` (ADR-018) |
 | `.github/workflows/ci.yml` | CI parity (exact paths, ignore files, frontend matrix) |
 | `docs/data-staging-state.md` | D1–D7 asset status |
 | `workflow-state.yaml` §`template` | Layout / Modal / deploy pattern |
@@ -100,7 +101,7 @@ Read from disk (do not guess commands):
 ```bash
 uv run ruff check apps packages tests
 uv run ruff format --check apps packages tests
-uv run pyright apps packages tests
+uv run basedpyright apps packages tests
 uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval
 uv run pip-audit  # with audit/pip-audit-ignore.txt if present
 bash scripts/check_secrets.sh
@@ -135,7 +136,7 @@ checks. Do not block the whole QA on optional live Modal/staging unless env vars
 
 #### Agent 3 — Typechecker
 
-- `uv run pyright apps packages tests`
+- `uv run basedpyright apps packages tests`
 - Return: error/warning count; **PASS** if zero errors
 
 #### Agent 4 — Test suite (Python + frontend)
@@ -274,7 +275,7 @@ report, use a **follow-up pass** (not a re-run of 09):
 2. Spawn **parallel Task agents** (one concern per agent), e.g.:
    - **D6/D7** — `scripts/stage_modal_weights.sh`, `scripts/modal_ensure_workspace.sh`, update `docs/data-staging-state.md`; enforce **vecinita** Modal profile; stop mistaken deploys on other workspaces via `scripts/teardown_fontface_vecinita.sh`
    - **Secrets history** — `.gitleaks.toml`, `scripts/check_secrets.sh`, CI `--no-git`, `docs/security/gitleaks-resolution.md` (no history rewrite unless user requests)
-   - **Docstrings** — public symbols in `apps/` + `packages/`; verify ruff/pyright
+   - **Docstrings** — public symbols in `apps/` + `packages/`; verify ruff/basedpyright (no `Any`)
    - **Phase 4 staging** — H2 in `staging_smoke.sh`, `docs/staging-runbook.md`, skip-safe `tests/smoke/test_staging_health.py`
 3. Re-run **blocking** checks only for touched areas; update `docs/qa-report.md` or add a short **QA remediation** note with date.
 4. **Modal workspace rule:** all Vecinita deploys → profile **`vecinita`**; URLs must use `vecinita--` prefix; document in `infra/modal/env.example`.

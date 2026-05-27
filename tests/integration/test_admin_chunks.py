@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import os
+from typing import cast
 from uuid import uuid4
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from tests.helpers.json_response import find_json_object_by_str, json_str, response_json_list
+from vecinita_shared_schemas.json_types import as_json_object
 
 pytestmark = pytest.mark.integration
 
@@ -67,8 +70,9 @@ async def _upsert_document(client: AsyncClient, *, with_tags: bool = False) -> s
         "/internal/v1/documents",
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
-    doc = next(item for item in list_response.json() if item["url"] == doc_url)
-    return doc["document_id"]
+    items = response_json_list(list_response)
+    doc = find_json_object_by_str(items, "url", doc_url)
+    return json_str(doc, "document_id")
 
 
 @pytest.mark.asyncio
@@ -89,8 +93,10 @@ async def test_tc042_admin_chunk_list_returns_text(write_client: AsyncClient) ->
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
     assert response.status_code == 200
-    chunks = response.json()
+    chunks = response_json_list(response)
+    first = as_json_object(cast(object, chunks[0]))
+    second = as_json_object(cast(object, chunks[1]))
     assert len(chunks) == 2
-    assert chunks[0]["chunk_index"] == 0
-    assert "First admin chunk" in chunks[0]["text"]
-    assert chunks[1]["chunk_index"] == 1
+    assert first["chunk_index"] == 0
+    assert "First admin chunk" in str(first["text"])
+    assert second["chunk_index"] == 1

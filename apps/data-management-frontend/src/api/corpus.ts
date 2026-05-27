@@ -15,7 +15,7 @@ export async function listDocuments(options: CorpusClientOptions): Promise<Docum
   });
   if (!response.ok) {
     const detail = await response.text();
-    throw new Error(detail || `List documents failed (${response.status})`);
+    throw new Error(detail || `List documents failed (${String(response.status)})`);
   }
   return response.json() as Promise<DocumentSummary[]>;
 }
@@ -29,7 +29,7 @@ export async function listDocumentChunks(
   });
   if (!response.ok) {
     const detail = await response.text();
-    throw new Error(detail || `List chunks failed (${response.status})`);
+    throw new Error(detail || `List chunks failed (${String(response.status)})`);
   }
   return response.json() as Promise<ChunkDetail[]>;
 }
@@ -43,7 +43,7 @@ export async function listDocumentTags(
   });
   if (!response.ok) {
     const detail = await response.text();
-    throw new Error(detail || `List document tags failed (${response.status})`);
+    throw new Error(detail || `List document tags failed (${String(response.status)})`);
   }
   const body = (await response.json()) as { tags: TagInput[] };
   return body.tags;
@@ -56,12 +56,15 @@ export async function patchDocumentTags(
 ): Promise<TagInput[]> {
   const response = await fetch(`${options.baseUrl}/internal/v1/documents/${documentId}/tags`, {
     method: "PATCH",
-    headers: { ...authHeaders(options.apiKey), "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${options.apiKey}`,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ tags, source: "human" }),
   });
   if (!response.ok) {
     const detail = await response.text();
-    throw new Error(detail || `Patch document tags failed (${response.status})`);
+    throw new Error(detail || `Patch document tags failed (${String(response.status)})`);
   }
   const body = (await response.json()) as { tags: TagInput[] };
   return body.tags;
@@ -74,12 +77,15 @@ export async function patchChunkTags(
 ): Promise<TagInput[]> {
   const response = await fetch(`${options.baseUrl}/internal/v1/chunks/${chunkId}/tags`, {
     method: "PATCH",
-    headers: { ...authHeaders(options.apiKey), "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${options.apiKey}`,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ tags, source: "human" }),
   });
   if (!response.ok) {
     const detail = await response.text();
-    throw new Error(detail || `Patch chunk tags failed (${response.status})`);
+    throw new Error(detail || `Patch chunk tags failed (${String(response.status)})`);
   }
   const body = (await response.json()) as { tags: TagInput[] };
   return body.tags;
@@ -95,7 +101,7 @@ export async function retagDocument(
   });
   if (!response.ok) {
     const detail = await response.text();
-    throw new Error(detail || `Retag failed (${response.status})`);
+    throw new Error(detail || `Retag failed (${String(response.status)})`);
   }
   const body = (await response.json()) as { job_id: string };
   return body.job_id;
@@ -114,6 +120,6 @@ export async function deleteDocument(
   }
   if (!response.ok && response.status !== 204) {
     const detail = await response.text();
-    throw new Error(detail || `Delete failed (${response.status})`);
+    throw new Error(detail || `Delete failed (${String(response.status)})`);
   }
 }

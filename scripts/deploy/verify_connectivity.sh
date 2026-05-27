@@ -6,8 +6,8 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-echo "==> H0c local CORS policy tests (incl. TC-046 browse GET, TC-049 admin PATCH)"
-uv run pytest tests/unit/test_cors_policy.py -q
+echo "==> H0c local CORS policy tests (incl. TC-046 browse GET, TC-049 admin PATCH, TC-060 EV-002)"
+uv run pytest tests/unit/test_cors_policy.py tests/unit/test_cors_ev002.py -q
 
 CHAT_API="${VECINITA_STAGING_CHAT_URL:-}"
 CHAT_FE="${VECINITA_STAGING_CHAT_FRONTEND_URL:-}"

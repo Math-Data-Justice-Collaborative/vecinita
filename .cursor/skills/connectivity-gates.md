@@ -111,7 +111,7 @@ routes — not only GET/POST. Browsers send OPTIONS preflight for DELETE, PUT, P
 | App | Route verbs (v1) | Required in `allow_methods` |
 |-----|------------------|----------------------------|
 | ChatRAG backend | GET, POST (stream) | GET, POST, OPTIONS |
-| Internal write API | GET, POST, DELETE | GET, POST, DELETE, OPTIONS |
+| Internal write API | GET, POST, PATCH, DELETE (incl. EV-002 bulk/stats/audit) | GET, POST, PATCH, DELETE, OPTIONS |
 | Modal data-mgmt | GET, POST (jobs) | GET, POST, OPTIONS |
 
 **H0c:** For each verb, OPTIONS with `Access-Control-Request-Method: <VERB>` must return 200 and
@@ -126,7 +126,7 @@ Source: BUG-2026-05-22 — admin DELETE Failed to fetch when DELETE was omitted 
 
 ```bash
 # CI / pre-deploy (blocking)
-uv run pytest tests/unit/test_cors_policy.py tests/integration -q
+uv run pytest tests/unit/test_cors_policy.py tests/unit/test_cors_ev002.py tests/integration -q
 
 # Staging post-deploy (blocking for 13 when env set)
 export VECINITA_STAGING_CHAT_URL=...

@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import httpx
 import pytest
 from vecinita_embedding_client import EMBEDDING_DIMENSION, EmbeddingClient, EmbeddingClientError
+from vecinita_shared_schemas.json_types import as_json_object
 
 _SAMPLE = [0.1] * EMBEDDING_DIMENSION
 
@@ -15,7 +18,7 @@ def test_embed_single_returns_384_dimensions() -> None:
 
         assert request.method == "POST"
         assert request.url.path == "/embed"
-        payload = json.loads(request.content.decode())
+        payload = as_json_object(cast(object, json.loads(request.content.decode())))
         assert payload == {"text": "hello world"}
         return httpx.Response(200, json={"embedding": _SAMPLE})
 
@@ -33,7 +36,7 @@ def test_embed_batch_returns_list_of_384_vectors() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         import json
 
-        payload = json.loads(request.content.decode())
+        payload = as_json_object(cast(object, json.loads(request.content.decode())))
         assert request.url.path == "/embed/batch"
         assert payload == {"texts": ["a", "b"]}
         return httpx.Response(200, json={"embeddings": [_SAMPLE, _SAMPLE]})

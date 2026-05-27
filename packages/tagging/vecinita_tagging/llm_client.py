@@ -5,9 +5,10 @@ from __future__ import annotations
 import json
 import os
 import re
-from typing import Final
+from typing import Final, cast
 
 from vecinita_llm_client import LlmClient, LlmClientError
+from vecinita_shared_schemas.json_types import as_json_object
 
 _ENV_TAG_MAX_TOKENS: Final[str] = "VECINITA_LLM_TAG_MAX_TOKENS"
 _DEFAULT_TAG_MAX_TOKENS: Final[int] = 128
@@ -114,7 +115,7 @@ def _parse_tag_slugs(raw: str) -> list[str]:
     if fence:
         payload = fence.group(1)
     try:
-        data = json.loads(payload)
+        data = as_json_object(cast(object, json.loads(payload)))
     except json.JSONDecodeError as exc:
         raise LlmTagClientError(f"tag response is not valid JSON: {exc}") from exc
     tags = data.get("tags")

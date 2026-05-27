@@ -70,7 +70,7 @@ Per [connectivity-gates.md](../.cursor/skills/connectivity-gates.md). Backend-on
 | H5 | Frontend bundle wiring | `scripts/deploy/verify_connectivity.sh` | 13-deploy-smoke (when URLs set) |
 
 EV-001 adds **TC-046** (browse GET H4), **TC-049** (admin PATCH H4), **TC-048** (Vitest external URL link, supports H5 browse path).
-| Lint / types | ruff, **pyright**, eslint | CI | 04-tech-plan; 06-tech-tooling workflows |
+| Lint / types | ruff (`ANN401`), **basedpyright** (`reportExplicitAny`), eslint (`no-explicit-any`, `no-unsafe-*`) | CI | ADR-018; `docs/typing-policy.md` |
 | Security | pip-audit (**blocking** high/critical), secret scan | CI | 04-tech-plan TP-006 |
 
 **Modal in CI:** Mock only (no live Modal in v1 CI).
@@ -320,8 +320,8 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 
 **PR pipeline (target):**
 
-1. ruff + pyright (Python) — per TP-005 / execution-plan (supersedes mypy)
-2. eslint (frontends)
+1. ruff + basedpyright (Python) — no `typing.Any` (ADR-018; supersedes pyright/mypy)
+2. eslint (frontends) — no `any` / unsafe-any flows (`docs/typing-policy.md`)
 3. `uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval` (or `bash scripts/run_tests.sh`)
 4. Vitest (frontends)
 5. pip-audit (advisory or blocking per 04-tech-plan)

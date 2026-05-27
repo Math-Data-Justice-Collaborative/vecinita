@@ -19,7 +19,7 @@ export function TagFilterChips({ tags, selected, onToggle }: TagFilterChipsProps
             type="button"
             className={active ? "tag-chip active" : "tag-chip"}
             aria-pressed={active}
-            onClick={() => onToggle(tag.slug)}
+            onClick={() => { onToggle(tag.slug); }}
           >
             {tag.label}
           </button>

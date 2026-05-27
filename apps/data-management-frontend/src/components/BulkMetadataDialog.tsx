@@ -73,11 +73,11 @@ export function BulkMetadataDialog({ open, onOpenChange, documentIds, onComplete
         <div className="space-y-3">
           <div className="space-y-2">
             <Label htmlFor="bulk-title">Title</Label>
-            <Input id="bulk-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="New title (optional)" />
+            <Input id="bulk-title" value={title} onChange={(e) => { setTitle(e.target.value); }} placeholder="New title (optional)" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="bulk-language">Language</Label>
-            <Input id="bulk-language" value={language} onChange={(e) => setLanguage(e.target.value)} placeholder="en, es, etc. (optional)" />
+            <Input id="bulk-language" value={language} onChange={(e) => { setLanguage(e.target.value); }} placeholder="en, es, etc. (optional)" />
           </div>
         </div>
 

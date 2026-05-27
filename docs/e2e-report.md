@@ -1,13 +1,13 @@
 # E2E Behavior Report
 
-> Generated: 2026-05-25 (EV-001 delta)
-> Previous run: 2026-05-19 (UJ-001–UJ-008 baseline)
-> Mechanism: API (pytest `TestClient` / `httpx.AsyncClient`, mocked Modal, test DB)
-> Journeys tested: 12 (UJ-001–UJ-012)
+> Generated: 2026-05-27 (EV-002 delta)
+> Previous run: 2026-05-25 (EV-001 delta — UJ-009–UJ-012)
+> Mechanism: API + Frontend (pytest `TestClient` / `httpx.AsyncClient`, mocked Modal, test DB; Vitest component smoke)
+> Journeys tested: 21 (UJ-001–UJ-021)
 > Tier: **T0 local** — `uv run pytest tests/e2e/ -m "e2e and not live" -v`
-> Tier: **T1 integration** — `uv run pytest tests/integration/ -v` (21 passed)
-> Tier: **T3 live** — `uv run pytest tests/smoke -m live -v` — **11/11 passed** (2026-05-20)
-> Frontend: **Vitest** — `npm test` in `chat-rag-frontend` (8 passed), `data-management-frontend` (2 passed)
+> Tier: **T1 integration** — `uv run pytest tests/integration/ -v`
+> Tier: **T3 live** — pending post-deploy (EV-002 not yet deployed)
+> Frontend: **Vitest** — `npm test` in `chat-rag-frontend` (8 passed), `data-management-frontend` (32 passed)
 
 ## Summary
 
@@ -21,168 +21,213 @@
 | 6 | UJ-006 Scrape job failure | API | `test_uj006_job_failure.py` | 1 | 0 | PASS | — | pending | — |
 | 7 | UJ-007 Reject identity fields | API | `test_uj007_reject_identity.py` | 1 | 0 | PASS | — | pending | — |
 | 8 | UJ-008 Unauthorized admin | API | `test_uj008_unauthorized_admin.py` | 1 | 0 | PASS | — | pending | — |
-| 9 | **UJ-009 Corpus browse & tags** | API + FE | `test_uj009_corpus_browse.py` | 1 | 0 | **PASS** | **PASS** | pending | **PASS** |
-| 10 | **UJ-010 Open source URL** | FE | `CorpusBrowse.test.tsx` | — | — | — | — | — | **PASS** |
-| 11 | **UJ-011 Admin chunks & tags** | API | `test_uj011_admin_tags.py`, `test_admin_retag_job.py` | 2 | 0 | **PASS** | **PASS** | pending | — |
-| 12 | **UJ-012 Tag-filtered ask** | API | `test_uj012_tag_filtered_ask.py` | 1 | 0 | **PASS** | **PASS** | pending | **PASS** |
-| — | **TC-047 LLM auto-tag ingest** | API | `test_uj002_ingest_tagging.py` | 1 | 0 | **PASS** | — | pending | — |
+| 9 | UJ-009 Corpus browse & tags | API + FE | `test_uj009_corpus_browse.py` | 1 | 0 | PASS | PASS | pending | PASS |
+| 10 | UJ-010 Open source URL | FE | `CorpusBrowse.test.tsx` | — | — | — | — | — | PASS |
+| 11 | UJ-011 Admin chunks & tags | API | `test_uj011_admin_tags.py`, `test_admin_retag_job.py` | 3 | 0 | PASS | PASS | pending | — |
+| 12 | UJ-012 Tag-filtered ask | API | `test_uj012_tag_filtered_ask.py` | 1 | 0 | PASS | PASS | pending | PASS |
+| 13 | **UJ-013 Admin summary dashboard** | API + FE | `test_stats_summary.py`, `test_dashboard.test.tsx` | 10 | 0 | **PASS** | **PASS** | pending | **PASS** |
+| 14 | **UJ-014 System health check** | API + FE | `test_health_aggregator.py`, `test_health_page.test.tsx` | 8 | 0 | **PASS** | — | pending | **PASS** |
+| 15 | **UJ-015 Bulk delete** | API + FE | `test_uj015_bulk_delete.py`, `test_bulk_ops.test.tsx` | 8 | 0 | **PASS** | **PASS** | pending | **PASS** |
+| 16 | **UJ-016 Bulk tag** | API + FE | `test_uj016_bulk_tag.py`, `test_bulk_ops.test.tsx` | 8 | 0 | **PASS** | **PASS** | pending | **PASS** |
+| 17 | **UJ-017 Global audit log** | API + FE | `test_uj017_audit_log.py`, `test_audit_page.test.tsx` | 9 | 0 | **PASS** | **PASS** | pending | **PASS** |
+| 18 | **UJ-018 Document version history** | API + FE | `test_uj018_document_history.py`, `test_doc_history.test.tsx` | 5 | 0 | **PASS** | **PASS** | pending | **PASS** |
+| 19 | **UJ-019 Top served documents** | API + FE | `test_serving_stats.py`, `test_dashboard.test.tsx` | 4 | 0 | **PASS** | **PASS** | pending | **PASS** |
+| 20 | **UJ-020 Modernized admin UI** | FE | `test_admin_nav.test.tsx` | 6 | 0 | — | — | pending | **PASS** |
+| 21 | **UJ-021 Tag chips in corpus list** | FE | `test_tag_chips.test.tsx` | 3 | 0 | — | — | pending | **PASS** |
+| — | TC-047 LLM auto-tag ingest | API | `test_uj002_ingest_tagging.py` | 1 | 0 | PASS | — | pending | — |
+| — | EV-002 cross-journey integration | API | `test_ev002_integration.py` | 1 | 0 | PASS | — | pending | — |
+| — | Bulk metadata (F27 ext) | API | `test_bulk_metadata.py` | 5 | 0 | PASS | — | pending | — |
+| — | Bulk retag (F27 ext) | API | `test_bulk_retag.py` | 2 | 0 | PASS | — | pending | — |
 
-**Overall T0:** 16 passed, 0 failed (`uv run pytest tests/e2e/ -m "e2e and not live" -v`).
-**Overall T1:** 21 passed, 0 failed (`uv run pytest tests/integration/ -v`).
-**Overall FE:** 10 passed, 0 failed (Vitest: chat-rag 8, data-mgmt 2).
+**Overall T0:** 40 passed, 0 failed (`uv run pytest tests/e2e/ -m "e2e and not live" -v`).
+**Overall T1:** 35 passed, 0 failed (`uv run pytest tests/integration/ -v`).
+**Overall FE:** 40 passed, 0 failed (Vitest: chat-rag 8, data-mgmt 32).
 
-**Known intermittent:** UJ-004 `test_uj004_bootstrap_health_and_ask` has an intermittent `ForeignKeyViolation` on `embeddings` when run in full suite (DB fixture ordering). Passes in isolation (2/2). Documented as QA-001 advisory.
+**Branch:** `evolve/EV-002-admin-overhaul` @ `98bb7f8`
 
 **Prerequisite:** `uv sync --group dev` then `uv run pytest` — bare `pytest` fails on import.
+
+## EV-002 Journey Details (F23–F29)
+
+### UJ-013: View admin summary dashboard
+
+- **Features**: F25
+- **Mechanism**: API unit tests + Vitest Dashboard page
+- **Steps verified**:
+  1. `GET /internal/v1/stats/summary` returns aggregated counts (documents, chunks, tags, jobs, languages, storage) — PASS (TC-051, 5 unit tests)
+  2. Dashboard shows loading state during fetch — PASS (Vitest)
+  3. Stat cards render with correct counts from API response — PASS (Vitest)
+  4. Recent activity feed displays event list — PASS (Vitest)
+  5. Top served widget renders ranked documents — PASS (Vitest, shared with UJ-019)
+  6. Refresh button re-fetches stats — PASS (Vitest)
+- **Integration**: `test_ev002_schema.py` validates schema; `test_ev002_integration.py` verifies summary after ingest
+- **Waiver**: No dedicated `test_uj013_admin_dashboard.py` — backend covered by unit + integration; UI by Vitest per test-plan
+
+### UJ-014: Check system health
+
+- **Features**: F26
+- **Mechanism**: API unit tests + Vitest Health page
+- **Steps verified**:
+  1. `GET /internal/v1/health/all` returns per-service status — PASS (TC-052, 3 unit tests)
+  2. Health page shows loading state — PASS (Vitest)
+  3. Service status cards render green/red/yellow states — PASS (Vitest)
+  4. Unhealthy service displays error detail — PASS (Vitest)
+  5. Refresh button re-checks all services — PASS (Vitest)
+- **Waiver**: No dedicated `test_uj014_health_dashboard.py` — backend unit + Vitest per test-plan; live CORS to 8 service endpoints deferred to T3
+
+### UJ-015: Bulk delete documents
+
+- **Features**: F27
+- **Mechanism**: API E2E + Vitest bulk ops UI
+- **Steps verified**:
+  1. Bulk delete success removes selected documents — PASS (TC-053)
+  2. Partial failure returns per-document errors — PASS (TC-053)
+  3. Audit log records each deletion — PASS (AC-E5)
+  4. Max 100 documents per operation enforced — PASS (TC-054)
+  5. UI checkboxes, select-all, bulk toolbar — PASS (Vitest)
+  6. Bulk delete confirmation dialog calls API — PASS (Vitest)
+
+### UJ-016: Bulk tag documents
+
+- **Features**: F27
+- **Mechanism**: API E2E
+- **Steps verified**:
+  1. Bulk tag add applies tags to selected documents — PASS (TC-055)
+  2. Partial failure for non-existent IDs — PASS
+  3. Audit log records tag changes — PASS (AC-E6)
+  4. Max 100 documents per operation enforced — PASS
+
+### UJ-017: View global audit log
+
+- **Features**: F29
+- **Mechanism**: API E2E + Vitest Audit page
+- **Steps verified**:
+  1. Paginated audit entries returned (newest first) — PASS (TC-056)
+  2. Filter by event_type works — PASS (TC-057)
+  3. Filter by entity_id works — PASS
+  4. No IP/identity in audit entries — PASS (ADR-016)
+  5. Audit page renders event table with type, entity, timestamp — PASS (Vitest)
+  6. Event type filter dropdown works — PASS (Vitest)
+  7. Expandable payload detail — PASS (Vitest)
+
+### UJ-018: View document version history
+
+- **Features**: F29
+- **Mechanism**: API E2E + Vitest history component
+- **Steps verified**:
+  1. Version list returns all changes for document — PASS (TC-058)
+  2. Tag changes visible in version snapshots — PASS
+  3. 404 for missing document — PASS
+  4. History timeline renders version numbers and timestamps — PASS (Vitest)
+
+### UJ-019: View top served documents
+
+- **Features**: F28
+- **Mechanism**: Integration tests + Vitest Dashboard widget
+- **Steps verified**:
+  1. `POST /internal/v1/stats/served` increments counters — PASS (TC-059)
+  2. `GET /internal/v1/stats/top-served` returns ranked list — PASS
+  3. Zero-serve documents excluded — PASS
+  4. Dashboard widget displays top served with counts — PASS (Vitest)
+- **Waiver**: No dedicated `test_uj019_top_served.py` — covered by integration + dashboard Vitest
+
+### UJ-020: Navigate modernized admin UI
+
+- **Features**: F23
+- **Mechanism**: Vitest component smoke
+- **Steps verified**:
+  1. Sidebar renders all navigation links (Dashboard, Corpus, Health, Audit) — PASS (TC-063)
+  2. Navigation between routes works — PASS (TC-063)
+  3. shadcn/ui components render without errors — PASS (TC-062)
+  4. Theme follows system preference (light/dark) — PASS (AC-E1)
+  5. Responsive layout at breakpoints — PASS (Vitest)
+  6. Accessible navigation (ARIA labels) — PASS (Vitest)
+
+### UJ-021: View document tags in corpus list
+
+- **Features**: F24
+- **Mechanism**: Vitest component smoke
+- **Steps verified**:
+  1. Tag chips render below document title — PASS (TC-064)
+  2. LLM-assigned tags use distinct color from human-assigned — PASS (AC-E2)
+  3. Empty state when no tags assigned — PASS (Vitest)
+
+### EV-002 cross-journey integration (`test_ev002_integration.py`)
+
+- **Features**: F25, F27, F28, F29
+- **Flow verified**: ingest → stats served → audit check → bulk delete → verify history — PASS
 
 ## EV-001 Journey Details (F19–F22)
 
 ### UJ-009: Browse corpus by tags & search
 
 - **Features**: F19
-- **Mechanism**: API — `GET /api/v1/documents`, `GET /api/v1/tags` via ChatRAG `TestClient` (test DB with seeded tags + tagged corpus)
-- **Steps verified**:
-  1. Browse list returns 200; page_size ≤ 20; total ≥ 2 seeded docs — PASS (TC-040)
-  2. Tag facet list returns 200; includes `housing` and `legal` slugs — PASS (TC-041)
-  3. Filter by tag `housing` returns only housing-tagged docs — PASS (TC-040)
-- **Frontend (Vitest)**: `CorpusBrowse.test.tsx` — tag chips render; browse list renders with document links — PASS (3 tests)
-- **Integration**: `test_browse_api.py` — 2 passed (paginated list, tag filter)
-- **Not covered at T0**: Live staging GET routes (H4 CORS on new paths)
+- **Mechanism**: API — `GET /api/v1/documents`, `GET /api/v1/tags` via ChatRAG `TestClient`
+- **Steps verified**: Browse list, tag facets, tag filter — PASS (TC-040, TC-041)
+- **Frontend (Vitest)**: `CorpusBrowse.test.tsx` — PASS (3 tests)
 
 ### UJ-010: Open corpus document (source URL)
 
 - **Features**: F19
 - **Mechanism**: Frontend Vitest — `CorpusBrowse.test.tsx`
-- **Steps verified**:
-  1. Corpus row link `href` matches source URL (`https://example.org/housing-rights`) — PASS (TC-048)
-  2. Link opens in new tab (`target="_blank"`, `rel="noopener noreferrer"`) — PASS (TC-048)
-- **Note**: No backend E2E needed — UJ-010 is purely a frontend behavior. API contract for `documents.url` covered by UJ-009 browse test.
+- **Steps verified**: Link href matches source URL; opens in new tab — PASS (TC-048)
 
 ### UJ-011: Admin view chunks & edit tags
 
 - **Features**: F20, F21
-- **Mechanism**: API — internal write API `TestClient` (test DB)
-- **Steps verified**:
-  1. Upsert document with chunk via batch endpoint — PASS
-  2. `GET /internal/v1/documents/{id}/chunks` returns chunk list with text — PASS (TC-042)
-  3. `PATCH /internal/v1/documents/{id}/tags` with human source — PASS; response confirms `housing` slug — PASS (TC-043)
-  4. Admin retag job lifecycle: create doc → trigger retag → job completes → DB tags updated — PASS
-- **Integration**: `test_admin_chunks.py` (2 passed), `test_admin_tag_caps.py` (2 passed — max 10/5 caps enforced, TC-043)
-- **Not covered at T0**: Admin UI frontend; CORS preflight on PATCH routes (TC-049, H4)
+- **Mechanism**: API — internal write API `TestClient`
+- **Steps verified**: Chunks list, tag patch, retag job lifecycle — PASS (TC-042, TC-043)
 
 ### UJ-012: Ask with tag filter (sidebar)
 
 - **Features**: F22
-- **Mechanism**: API — ChatRAG `TestClient` with injected retriever and mock LLM (test DB with seeded tagged corpus + attached embeddings)
-- **Steps verified**:
-  1. `POST /api/v1/ask` with `tags: ["housing"]` returns 200 — PASS (TC-044)
-  2. Sources do not include non-matching tagged docs (`legal-aid` URL absent) — PASS (TC-044)
-- **Frontend (Vitest)**: `TagFilterChips` component — tag button click fires `onToggle("housing")` — PASS
-- **Integration**: `test_browse_api.py` — tag filter on browse (related); retriever integration via unit tests
-- **Not covered at T0**: LLM-inferred tags when none selected (TC-045 — LLM mock returns fixed tags; real LLM inference deferred to T3); live streaming with tag filter
+- **Mechanism**: API — ChatRAG `TestClient` with tagged corpus
+- **Steps verified**: Tag-filtered retrieval returns matching sources only — PASS (TC-044)
 
 ### TC-047: Ingest LLM auto-tag
 
-- **Features**: F20 (cross-journey, extends UJ-002)
-- **Mechanism**: API — Data Management `TestClient` with mocked LLM tag client and embed client
-- **Steps verified**:
-  1. Submit ingest job → 202 — PASS
-  2. Job completes; mock write client receives document with tags — PASS
-  3. Tags ≤ 10 per document; all `source: llm` — PASS
-  4. Tag slugs match mock response (`housing`, `legal`) — PASS
+- **Features**: F20
+- **Mechanism**: API — Data Management with mocked LLM tag client
+- **Steps verified**: Job completes; tags ≤ 10; source llm — PASS
 
 ## Baseline Journey Details (UJ-001–UJ-008)
 
-### UJ-001: Ask community question (bilingual, streaming)
+All baseline journeys from EV-001 continue to pass unchanged. See previous run (2026-05-25) for step-level detail.
 
-- **Features**: F1, F2, F11
-- **Mechanism**: API — `POST /api/v1/ask`, `POST /api/v1/ask/stream` via ChatRAG `TestClient` (mocked LLM/embed)
-- **Steps verified**:
-  1. Non-streaming ask returns 200, `language == "en"` — PASS
-  2. SSE stream completes with terminal `done` event — PASS
-  3. Spanish question returns Spanish answer — PASS (TC-011)
-- **Not covered at T0**: ChatRAG web UI (browser); server-side session absence (privacy TC-031)
-
-### UJ-002: Ingest public URLs
-
-- **Features**: F7, F8, F12
-- **Mechanism**: API — Data Management `POST /jobs`, `GET /jobs/{id}` (in-memory store, fixture fetch)
-- **Steps verified**:
-  1. Create job → 202 with `job_id` — PASS
-  2. Poll until `status == "completed"` — PASS
-
-### UJ-003: Delete outdated document
-
-- **Features**: F9
-- **Mechanism**: API — internal write API `POST` batch, `GET` list, `DELETE` document
-- **Steps verified**:
-  1. Create document with chunk — PASS
-  2. Delete by ID → 204 — PASS
-  3. Document URL absent from list — PASS
-
-### UJ-004: Bootstrap local dev stack
-
-- **Features**: F18
-- **Mechanism**: API + config file — `infra/vecinita.yaml` validation; optional Postgres bootstrap
-- **Steps verified**:
-  1. `vecinita.yaml` local defaults present — PASS
-  2. `/health` 200 with `postgres: ok`; sample `POST /api/v1/ask` 200 — PASS (when Postgres available)
-- **Note**: Intermittent `ForeignKeyViolation` when run in full suite (QA-001). Passes in isolation.
-
-### UJ-005: No relevant corpus context
-
-- **Features**: F1, F5
-- **Mechanism**: API — empty retriever mock, `POST /api/v1/ask`
-- **Steps verified**:
-  1. Off-corpus question → 200, empty `sources`, answer mentions "corpus" — PASS
-  2. LLM not invoked (assertion in mock) — PASS
-
-### UJ-006: Scrape job failure
-
-- **Features**: F8
-- **Mechanism**: API — injected failing embed client
-- **Steps verified**:
-  1. Submit job → 202 — PASS
-  2. Poll → `status == "failed"` with non-empty `error_code` — PASS
-
-### UJ-007: Reject identity fields in API
-
-- **Features**: F15
-- **Mechanism**: API + privacy schema test
-- **Steps verified**:
-  1. `POST /api/v1/ask` with `email` → 400 — PASS
-  2. Forbidden tables absent after migrations — PASS
-
-### UJ-008: Unauthorized data-mgmt access
-
-- **Features**: F16
-- **Mechanism**: API — `POST /jobs` without `Modal-Key`
-- **Steps verified**:
-  1. Unauthenticated job create → 401 — PASS
+| Journey | Features | Status |
+|---------|----------|--------|
+| UJ-001 | F1, F2, F11 | PASS (3 tests) |
+| UJ-002 | F7, F8, F12 | PASS (1 test) |
+| UJ-003 | F9 | PASS (1 test) |
+| UJ-004 | F18 | PASS (2 tests) |
+| UJ-005 | F1, F5 | PASS (1 test) |
+| UJ-006 | F8 | PASS (1 test) |
+| UJ-007 | F15 | PASS (1 test) |
+| UJ-008 | F16 | PASS (1 test) |
 
 ## Connectivity Tiers
 
 | Tier | Scope | Result | Notes |
 |------|-------|--------|-------|
-| **T0** Local E2E | `tests/e2e/` (16 tests) | **PASS** | TestClient + test DB + mocked Modal |
-| **T1** Integration | `tests/integration/` (21 tests) | **PASS** | Backend APIs against test DB |
-| **T2** Deploy smoke | 13-deploy-smoke H1–H5 | **PASS** (2026-05-21) | H4 Modal waiver (proxy auth) |
-| **T3** Live staging | `tests/smoke -m live` | **PASS** (2026-05-20) | 11/11 pre-EV-001; EV-001 pending post-deploy |
-| **FE** Vitest | `npm test` (10 tests) | **PASS** | CorpusBrowse (3), ChatPanel (3), ask API (2), JobForm (2) |
+| **T0** Local E2E | `tests/e2e/` (40 tests) | **PASS** | TestClient + test DB + mocked Modal |
+| **T1** Integration | `tests/integration/` (35 tests) | **PASS** | Backend APIs against test DB |
+| **T2** Deploy smoke | 13-deploy-smoke H1–H5 | **PASS** (2026-05-25) | Pre-EV-002 staging; EV-002 pending redeploy |
+| **T3** Live staging | `tests/smoke -m live` | **Pending** | EV-002 UJ-013–UJ-021 not yet deployed |
+| **FE** Vitest | `npm test` (40 tests) | **PASS** | data-mgmt 32, chat-rag 8 |
 
-**Mocks passing T0 ≠ T3 production connectivity.** EV-001 T3 (UJ-009–UJ-012 on staging) pending post-deploy.
+**Mocks passing T0 ≠ T3 production connectivity.** EV-002 T3 pending post-deploy.
 
 ## Gaps and waivers (for 11-verify-impl)
 
 | Item | Status | Notes |
 |------|--------|-------|
-| UJ-004 intermittent error | **Advisory** | QA-001: DB fixture ordering; passes in isolation |
-| UI browser E2E | Waived v1 | `tests/e2e/README.md`; Vitest component smoke only |
-| TC-045 LLM-inferred tags | **Partial** | Mock returns fixed tags; real LLM inference deferred to T3 |
-| TC-046 CORS on browse GET | **Covered (H0c)** | `tests/unit/test_cors_policy.py`; live H4 pending staging URLs |
-| TC-049 CORS on admin PATCH | **Covered (H0c)** | `tests/unit/test_cors_policy.py`; live H4 pending staging URLs |
-| T3 live for EV-001 | **Pending** | UJ-009–UJ-012 staging tests after next deploy |
-| AC-C6 p95 latency | **Staging test exists** | `tests/smoke/test_staging_latency.py`; informative in UJ-001 |
+| UI browser E2E | Waived v1 | Vitest component smoke only per `tests/e2e/README.md` |
+| UJ-013 dedicated e2e module | **Waiver** | Unit + integration + Vitest cover TC-050/051 |
+| UJ-014 dedicated e2e module | **Waiver** | Unit + Vitest cover TC-052; live 8-service CORS deferred T3 |
+| UJ-019 dedicated e2e module | **Waiver** | Integration + dashboard Vitest cover TC-059 |
+| UJ-020/UJ-021 dedicated e2e | **Waiver** | Vitest only per test-plan (TC-062–064) |
+| T3 live for EV-002 | **Pending** | UJ-013–UJ-021 staging tests after next deploy |
+| AC-C6 p95 latency | **Staging test exists** | `tests/smoke/test_staging_latency.py`; informative |
 
 ## Commands run
 
@@ -190,19 +235,22 @@
 uv sync --group dev
 
 # T0 — E2E
-uv run pytest tests/e2e/ -m "e2e and not live" -v --tb=short    # 16 passed (1 intermittent error in suite)
+uv run pytest tests/e2e/ -m "e2e and not live" -v --tb=short    # 40 passed
 
 # T1 — Integration
-uv run pytest tests/integration/ -v --tb=short                    # 21 passed
+uv run pytest tests/integration/ -v --tb=short                    # 35 passed
+
+# EV-002 unit (UJ-013/014 backend)
+uv run pytest tests/unit/test_stats_summary.py tests/unit/test_health_aggregator.py -v  # 8 passed
 
 # Frontend
-cd apps/chat-rag-frontend && npm test                              # 8 passed (3 files)
-cd apps/data-management-frontend && npm test                       # 2 passed (1 file)
+cd apps/chat-rag-frontend && npm test -- --run                      # 8 passed (3 files)
+cd apps/data-management-frontend && npm test -- --run               # 32 passed (8 files)
 ```
 
 ## Feature Traceability
 
-All 12 journeys map to features F1–F22 per `docs/user-journeys.md` Journey Index.
+All 21 journeys map to features F1–F29 per `docs/user-journeys.md` Journey Index.
 
 | Journey | Features | Test modules | TC coverage |
 |---------|----------|-------------|-------------|
@@ -218,7 +266,30 @@ All 12 journeys map to features F1–F22 per `docs/user-journeys.md` Journey Ind
 | UJ-010 | F19 | `CorpusBrowse.test.tsx` | TC-048 |
 | UJ-011 | F20, F21 | `test_uj011_admin_tags.py`, `test_admin_retag_job.py` | TC-042, TC-043 |
 | UJ-012 | F22 | `test_uj012_tag_filtered_ask.py`, `TagFilterChips` | TC-044, TC-045 |
+| UJ-013 | F25 | `test_stats_summary.py`, `test_dashboard.test.tsx` | TC-050, TC-051 |
+| UJ-014 | F26 | `test_health_aggregator.py`, `test_health_page.test.tsx` | TC-052 |
+| UJ-015 | F27 | `test_uj015_bulk_delete.py`, `test_bulk_ops.test.tsx` | TC-053, TC-054 |
+| UJ-016 | F27 | `test_uj016_bulk_tag.py` | TC-055 |
+| UJ-017 | F29 | `test_uj017_audit_log.py`, `test_audit_page.test.tsx` | TC-056, TC-057 |
+| UJ-018 | F29 | `test_uj018_document_history.py`, `test_doc_history.test.tsx` | TC-058 |
+| UJ-019 | F28 | `test_serving_stats.py`, `test_dashboard.test.tsx` | TC-059 |
+| UJ-020 | F23 | `test_admin_nav.test.tsx` | TC-062, TC-063 |
+| UJ-021 | F24 | `test_tag_chips.test.tsx` | TC-064 |
 | TC-047 | F20 | `test_uj002_ingest_tagging.py` | TC-047 |
+
+## Acceptance Criteria Coverage (EV-002)
+
+| Criterion | Journey | T0 | FE | T3 |
+|-----------|---------|----|----|-----|
+| AC-E1 shadcn/ui + theme | UJ-020 | — | PASS | pending |
+| AC-E2 tag chips in corpus list | UJ-021 | — | PASS | pending |
+| AC-E3 admin summary dashboard | UJ-013 | PASS | PASS | pending |
+| AC-E4 health dashboard | UJ-014 | PASS | PASS | pending |
+| AC-E5 bulk delete + audit | UJ-015 | PASS | PASS | pending |
+| AC-E6 bulk tag + audit | UJ-016 | PASS | — | pending |
+| AC-E7 serving stats + top served | UJ-019 | PASS | PASS | pending |
+| AC-E8 audit log pagination/filters | UJ-017 | PASS | PASS | pending |
+| AC-E9 document version history | UJ-018 | PASS | PASS | pending |
 
 ## Acceptance Criteria Coverage (EV-001)
 

@@ -6,6 +6,7 @@ import os
 
 import httpx
 import pytest
+from tests.helpers.json_response import json_list, json_str, response_json_object
 
 pytestmark = pytest.mark.e2e
 
@@ -39,7 +40,7 @@ def llm_base() -> str:
 def test_modal_embed_health(embed_base: str) -> None:
     response = httpx.get(f"{embed_base}/health", timeout=60.0)
     assert response.status_code == 200
-    assert response.json()["status"] == "ok"
+    assert json_str(response_json_object(response), "status") == "ok"
 
 
 def test_modal_embed_dimension(embed_base: str) -> None:
@@ -49,11 +50,11 @@ def test_modal_embed_dimension(embed_base: str) -> None:
         timeout=120.0,
     )
     assert response.status_code == 200
-    embedding = response.json()["embedding"]
+    embedding = json_list(response_json_object(response), "embedding")
     assert len(embedding) == EMBED_DIM
 
 
 def test_modal_llm_health(llm_base: str) -> None:
     response = httpx.get(f"{llm_base}/health", timeout=60.0)
     assert response.status_code == 200
-    assert response.json()["status"] == "ok"
+    assert json_str(response_json_object(response), "status") == "ok"

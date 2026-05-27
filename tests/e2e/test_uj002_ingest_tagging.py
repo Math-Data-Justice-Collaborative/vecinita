@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from tests.helpers.json_response import json_str, response_json_object
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.pipeline import fetch_html_fixture, run_ingest_job
 from vecinita_data_management_backend.store import InMemoryJobStore
@@ -96,11 +97,11 @@ def test_ingest_job_assigns_llm_document_tags(
         },
     )
     assert create.status_code == 202
-    job_id = create.json()["job_id"]
+    job_id = json_str(response_json_object(create), "job_id")
 
     status = client.get(f"/jobs/{job_id}")
     assert status.status_code == 200
-    assert status.json()["status"] == "completed"
+    assert json_str(response_json_object(status), "status") == "completed"
 
     assert mock_write.last_batch is not None
     document = mock_write.last_batch.documents[0]  # type: ignore[attr-defined]

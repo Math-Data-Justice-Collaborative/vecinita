@@ -11,6 +11,7 @@ from pathlib import Path
 
 import httpx
 import pytest
+from tests.helpers.json_response import json_str, response_json_object
 from tests.smoke.staging_h2 import assert_h2_database_ready, staging_database_url
 
 pytestmark = [pytest.mark.e2e, pytest.mark.live]
@@ -40,7 +41,7 @@ def test_gate_staging_h1_chat_liveness() -> None:
         pytest.skip("Set VECINITA_STAGING_CHAT_URL to verify live H1")
     response = httpx.get(f"{chat_url.rstrip('/')}/health", timeout=30.0)
     assert response.status_code == 200
-    assert response.json()["status"] == "ok"
+    assert json_str(response_json_object(response), "status") == "ok"
 
 
 def test_gate_staging_h2_database_ready() -> None:
@@ -62,6 +63,6 @@ def test_gate_staging_h3_sample_ask() -> None:
         timeout=60.0,
     )
     assert response.status_code == 200
-    payload = response.json()
+    payload = response_json_object(response)
     assert payload.get("answer")
     assert payload.get("language") in ("en", "es")

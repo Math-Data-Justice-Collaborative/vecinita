@@ -58,7 +58,7 @@ bash scripts/check_openapi_specs.sh
 bash scripts/check_secrets.sh
 uv run ruff check apps packages tests
 uv run ruff format --check apps packages tests
-uv run pyright apps packages tests
+uv run basedpyright apps packages tests
 uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval
 # pip-audit: see ci.yml + audit/pip-audit-ignore.txt
 # migrations: apps/database — alembic upgrade head (needs Postgres; match CI service or skip with waiver)

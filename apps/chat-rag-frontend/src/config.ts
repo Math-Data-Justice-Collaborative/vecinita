@@ -1,6 +1,6 @@
 /** Build-time config per docs/config-spec.md (VITE_VECINITA_*). */
 
-export const chatApiUrl = import.meta.env.VITE_VECINITA_CHAT_API_URL ?? "";
+export const chatApiUrl = import.meta.env.VITE_VECINITA_CHAT_API_URL;
 
 export function requireChatApiConfig(): { baseUrl: string } {
   if (!chatApiUrl) {

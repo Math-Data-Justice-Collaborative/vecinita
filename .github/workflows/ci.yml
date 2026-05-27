@@ -74,8 +74,8 @@ jobs:
       - name: Ruff format
         run: uv run ruff format --check apps packages tests
 
-      - name: Pyright
-        run: uv run pyright apps packages tests
+      - name: Basedpyright
+        run: uv run basedpyright apps packages tests
 
       - name: Apply database migrations
         working-directory: apps/database

@@ -9,6 +9,7 @@ from __future__ import annotations
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
+from tests.helpers.json_response import json_str, response_json_object
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.store import DictJobStore, InMemoryJobStore
 
@@ -30,27 +31,33 @@ def test_post_on_one_dict_store_get_on_another_returns_404() -> None:
 
     create = post_client.post("/jobs", json={"urls": ["https://example.com/"]})
     assert create.status_code == 202
-    job_id = create.json()["job_id"]
+    job_id = json_str(response_json_object(create), "job_id")
 
     status = get_client.get(f"/jobs/{job_id}")
     assert status.status_code == 404
-    assert status.json() == {"detail": "Not found"}
+    assert response_json_object(status) == {"detail": "Not found"}
 
 
 def test_shared_dict_store_get_returns_200_after_post() -> None:
     """Green target: one backing dict (or modal.Dict) visible to all handlers."""
+    from collections.abc import MutableMapping
+    from typing import cast
+
+    from vecinita_data_management_backend.store import JobPayload
+
     backing: dict[str, dict[str, object]] = {}
-    store = DictJobStore(backing)
+    store = DictJobStore(cast(MutableMapping[str, JobPayload], backing))
     client = TestClient(create_app(store=store, require_proxy_auth=False))
 
     create = client.post("/jobs", json={"urls": ["https://example.com/"]})
     assert create.status_code == 202
-    job_id = create.json()["job_id"]
+    job_id = json_str(response_json_object(create), "job_id")
 
     status = client.get(f"/jobs/{job_id}")
     assert status.status_code == 200
-    assert status.json()["job_id"] == job_id
-    assert status.json()["status"] == "pending"
+    status_body = response_json_object(status)
+    assert json_str(status_body, "job_id") == job_id
+    assert json_str(status_body, "status") == "pending"
 
 
 def test_get_unknown_job_id_returns_404() -> None:
@@ -59,4 +66,4 @@ def test_get_unknown_job_id_returns_404() -> None:
     missing = uuid4()
     response = client.get(f"/jobs/{missing}")
     assert response.status_code == 404
-    assert response.json() == {"detail": "Not found"}
+    assert response_json_object(response) == {"detail": "Not found"}

@@ -58,7 +58,7 @@ async function* streamAskOnce(
   if (!response.ok) {
     const detail = await response.text();
     throw new AskStreamError(
-      detail || `Ask failed (${response.status})`,
+      detail || `Ask failed (${String(response.status)})`,
       response.status,
     );
   }
@@ -70,7 +70,7 @@ async function* streamAskOnce(
   const decoder = new TextDecoder();
   let buffer = "";
 
-  while (true) {
+  for (;;) {
     const { done, value } = await reader.read();
     if (done) {
       break;
