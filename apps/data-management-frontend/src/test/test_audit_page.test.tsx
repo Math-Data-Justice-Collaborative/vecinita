@@ -6,13 +6,14 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuditPage } from "@/pages/AuditPage";
 
 const MOCK_AUDIT = {
-  events: [
+  items: [
     {
       id: "evt-1",
       event_type: "document.created",
       entity_type: "document",
       entity_id: "doc-aaa",
-      timestamp: "2026-05-26T10:00:00Z",
+      request_id: "req-1",
+      created_at: "2026-05-26T10:00:00Z",
       payload: { title: "Housing Guide", url: "https://example.com/housing" },
     },
     {
@@ -20,7 +21,8 @@ const MOCK_AUDIT = {
       event_type: "document.tagged",
       entity_type: "document",
       entity_id: "doc-bbb",
-      timestamp: "2026-05-26T09:30:00Z",
+      request_id: "req-2",
+      created_at: "2026-05-26T09:30:00Z",
       payload: { tags_added: ["legal"] },
     },
     {
@@ -28,11 +30,12 @@ const MOCK_AUDIT = {
       event_type: "document.deleted",
       entity_type: "document",
       entity_id: "doc-ccc",
-      timestamp: "2026-05-26T09:00:00Z",
+      request_id: "req-3",
+      created_at: "2026-05-26T09:00:00Z",
       payload: {},
     },
   ],
-  total: 3,
+  total_count: 3,
   page: 1,
   page_size: 50,
 };
@@ -86,8 +89,8 @@ describe("Audit log page", () => {
         ok: true,
         json: async () => ({
           ...MOCK_AUDIT,
-          events: [MOCK_AUDIT.events[0]],
-          total: 1,
+          items: [MOCK_AUDIT.items[0]],
+          total_count: 1,
         }),
       });
     vi.stubGlobal("fetch", fetchMock);

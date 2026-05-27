@@ -101,6 +101,24 @@ export async function bulkTagDocuments(
   return response.json() as Promise<BulkResult>;
 }
 
+/** Wire format from GET /internal/v1/audit — docs/api-contract.md */
+export interface AuditLogEntryApi {
+  id: string;
+  event_type: string;
+  entity_type: string;
+  entity_id: string;
+  request_id: string;
+  payload: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface AuditLogResponseApi {
+  items: AuditLogEntryApi[];
+  page: number;
+  page_size: number;
+  total_count: number;
+}
+
 export interface AuditEvent {
   id: string;
   event_type: string;
@@ -110,11 +128,28 @@ export interface AuditEvent {
   payload: Record<string, unknown>;
 }
 
+/** Normalized for AuditPage rendering. */
 export interface AuditPage {
   events: AuditEvent[];
   total: number;
   page: number;
   page_size: number;
+}
+
+export function parseAuditLogResponse(raw: AuditLogResponseApi): AuditPage {
+  return {
+    page: raw.page,
+    page_size: raw.page_size,
+    total: raw.total_count,
+    events: raw.items.map((item) => ({
+      id: item.id,
+      event_type: item.event_type,
+      entity_type: item.entity_type,
+      entity_id: item.entity_id,
+      timestamp: item.created_at,
+      payload: item.payload,
+    })),
+  };
 }
 
 export async function fetchAuditLog(
@@ -129,7 +164,8 @@ export async function fetchAuditLog(
     headers: { Authorization: `Bearer ${options.apiKey}` },
   });
   if (!response.ok) throw new Error(`Audit log failed (${String(response.status)})`);
-  return response.json() as Promise<AuditPage>;
+  const raw = (await response.json()) as AuditLogResponseApi;
+  return parseAuditLogResponse(raw);
 }
 
 export async function fetchDocumentHistory(
@@ -140,8 +176,8 @@ export async function fetchDocumentHistory(
     headers: { Authorization: `Bearer ${options.apiKey}` },
   });
   if (!response.ok) throw new Error(`Document history failed (${String(response.status)})`);
-  const body = (await response.json()) as { events: AuditEvent[] };
-  return body.events;
+  const raw = (await response.json()) as AuditLogResponseApi;
+  return parseAuditLogResponse(raw).events;
 }
 
 export async function bulkUpdateMetadata(

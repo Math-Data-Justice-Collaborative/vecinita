@@ -5,13 +5,14 @@ import { MemoryRouter } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { DocumentHistory } from "@/components/DocumentHistory";
 
-const MOCK_HISTORY = [
+const MOCK_HISTORY_ITEMS = [
   {
     id: "evt-1",
     event_type: "document.created",
     entity_type: "document",
     entity_id: "doc-aaa",
-    timestamp: "2026-05-26T10:00:00Z",
+    request_id: "req-1",
+    created_at: "2026-05-26T10:00:00Z",
     payload: { title: "Housing Guide" },
   },
   {
@@ -19,7 +20,8 @@ const MOCK_HISTORY = [
     event_type: "document.tagged",
     entity_type: "document",
     entity_id: "doc-aaa",
-    timestamp: "2026-05-26T11:00:00Z",
+    request_id: "req-2",
+    created_at: "2026-05-26T11:00:00Z",
     payload: { tags_added: ["housing"] },
   },
 ];
@@ -43,7 +45,12 @@ describe("Document history timeline", () => {
   it("renders timeline events for a document", async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ events: MOCK_HISTORY }),
+      json: async () => ({
+        items: MOCK_HISTORY_ITEMS,
+        page: 1,
+        page_size: 50,
+        total_count: 2,
+      }),
     });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -58,7 +65,7 @@ describe("Document history timeline", () => {
   it("shows empty state when no history exists", async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ events: [] }),
+      json: async () => ({ items: [], page: 1, page_size: 50, total_count: 0 }),
     });
     vi.stubGlobal("fetch", fetchMock);
 
