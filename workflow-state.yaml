@@ -281,9 +281,9 @@ deployment:
   staging:
     status: deployed
     last_verified: "2026-05-27"
-    commit_deployed: 0a2f813
-    commit_head: 98bb7f8
-    drift: true
+    commit_deployed: 7f38c58
+    commit_head: 7f38c58
+    drift: false
     urls:
       chat_rag_backend: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
       internal_write_api: https://vecinita-internal-write-api-icze4.ondigitalocean.app
@@ -304,8 +304,7 @@ deployment:
       h5_frontend_bundle: pass
       h6_browser_uj: waived_v1
     notes:
-      - "EV-002 deployed 2026-05-27 @ 0a2f813 (evolve branch); T3 4/4 pass"
-      - "Local HEAD 98bb7f8 ahead of deployed — merge to main advisory"
+      - "EV-002 merged to main 2026-05-27; DO apps github branch set to main"
   url_discovery:
     method: "uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend"
     modal_admin_manual: true

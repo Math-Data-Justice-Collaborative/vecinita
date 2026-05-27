@@ -1,0 +1,32 @@
+---
+description: Enforce no Any/any — use basedpyright, Ruff ANN401, and TS no-unsafe rules
+alwaysApply: true
+---
+
+# Strict typing (no `Any` / `any`)
+
+Source of truth: `docs/typing-policy.md` (ADR-018).
+
+## Python
+
+- Do **not** import or annotate with `typing.Any`.
+- Use `JsonObject` / `Mapping[str, object]` / `TypedDict` / concrete types instead.
+- CI and hooks run **`basedpyright`** with `reportExplicitAny = error`, not standalone pyright.
+- Ruff **`ANN401`** is enabled — do not disable without ADR update.
+
+## TypeScript
+
+- Do **not** use explicit `any` or untyped values that trigger `no-unsafe-*` ESLint errors.
+- Type `vi.fn<...>()` and fetch mocks in tests.
+- Frontends: `strict` + `noImplicitAny` in `tsconfig.json`.
+
+## Before claiming done
+
+```bash
+uv run ruff check apps packages tests
+uv run basedpyright apps packages tests
+cd apps/chat-rag-frontend && npm run lint
+cd apps/data-management-frontend && npm run lint
+```
+
+See also `ci-after-push.mdc` for full CI parity.
