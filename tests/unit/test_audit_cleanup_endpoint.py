@@ -23,7 +23,9 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     return TestClient(create_app())
 
 
-def test_audit_cleanup_uses_retention_env(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_audit_cleanup_uses_retention_env(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setenv("VECINITA_AUDIT_RETENTION_DAYS", "90")
     with patch(
         "vecinita_internal_write_api.app.cleanup_audit_log",
