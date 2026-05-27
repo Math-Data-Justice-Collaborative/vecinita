@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Vecinita DO Internal Write API
-  version: 0.2.0
+  version: 0.3.0
   description: Service-to-service writes from Modal workers (sole DATABASE_URL holder).
 servers:
   - url: /internal/v1
@@ -181,6 +181,236 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
+  /documents/bulk:
+    delete:
+      operationId: bulkDeleteDocuments
+      summary: Bulk delete documents (EV-002 F27)
+      security:
+        - internalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkDeleteRequest"
+      responses:
+        "200":
+          description: Partial success result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkResultResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /documents/bulk/tags:
+    patch:
+      operationId: bulkTagDocuments
+      summary: Bulk add/remove tags (EV-002 F27)
+      security:
+        - internalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkTagRequest"
+      responses:
+        "200":
+          description: Partial success result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkResultResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /documents/bulk/retag:
+    post:
+      operationId: bulkRetagDocuments
+      summary: Bulk LLM retag (EV-002 F27)
+      security:
+        - internalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkDeleteRequest"
+      responses:
+        "202":
+          description: Retag jobs enqueued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkRetagResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /documents/bulk/metadata:
+    patch:
+      operationId: bulkUpdateMetadata
+      summary: Bulk update document metadata (EV-002 F27)
+      security:
+        - internalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkMetadataRequest"
+      responses:
+        "200":
+          description: Partial success result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkResultResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /documents/{document_id}/history:
+    get:
+      operationId: getDocumentHistory
+      summary: Per-document audit history (EV-002 F29)
+      security:
+        - internalApiKey: []
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Document history events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditEvent"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /audit:
+    get:
+      operationId: getAuditLog
+      summary: Query audit log with filters (EV-002 F29)
+      security:
+        - internalApiKey: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 200
+        - name: event_type
+          in: query
+          schema:
+            type: string
+        - name: entity_type
+          in: query
+          schema:
+            type: string
+        - name: entity_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: since
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: until
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Paginated audit events
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLogResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /stats/served:
+    post:
+      operationId: recordStatsServed
+      summary: Increment serving counters (EV-002 F28)
+      security:
+        - internalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatsServedRequest"
+      responses:
+        "202":
+          description: Acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsServedResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /stats/top-served:
+    get:
+      operationId: getTopServed
+      summary: Top served documents ranked (EV-002 F28)
+      security:
+        - internalApiKey: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Ranked list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TopServedResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /stats/summary:
+    get:
+      operationId: getStatsSummary
+      summary: Dashboard aggregate statistics (EV-002 F25)
+      security:
+        - internalApiKey: []
+      responses:
+        "200":
+          description: Summary stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsSummaryResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /health/all:
+    get:
+      operationId: getHealthAggregate
+      summary: Aggregate health of all services (EV-002 F26)
+      security:
+        - internalApiKey: []
+      responses:
+        "200":
+          description: Service health grid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthAggregateResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /health:
     get:
       operationId: health
@@ -350,6 +580,265 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TagInput"
+    BulkDeleteRequest:
+      type: object
+      required:
+        - document_ids
+      properties:
+        document_ids:
+          type: array
+          maxItems: 100
+          items:
+            type: string
+            format: uuid
+    BulkTagRequest:
+      type: object
+      required:
+        - document_ids
+      properties:
+        document_ids:
+          type: array
+          maxItems: 100
+          items:
+            type: string
+            format: uuid
+        add:
+          type: array
+          items:
+            $ref: "#/components/schemas/TagInput"
+        remove:
+          type: array
+          items:
+            type: string
+    BulkMetadataRequest:
+      type: object
+      required:
+        - document_ids
+      properties:
+        document_ids:
+          type: array
+          maxItems: 100
+          items:
+            type: string
+            format: uuid
+        title:
+          type: string
+          nullable: true
+        language:
+          type: string
+          nullable: true
+    BulkResultResponse:
+      type: object
+      required:
+        - successes
+        - failures
+      properties:
+        successes:
+          type: array
+          items:
+            type: string
+            format: uuid
+        failures:
+          type: array
+          items:
+            type: object
+            properties:
+              document_id:
+                type: string
+                format: uuid
+              error:
+                type: string
+    BulkRetagResponse:
+      type: object
+      required:
+        - successes
+        - failures
+      properties:
+        successes:
+          type: array
+          items:
+            type: object
+            properties:
+              document_id:
+                type: string
+                format: uuid
+              job_id:
+                type: string
+        failures:
+          type: array
+          items:
+            type: object
+            properties:
+              document_id:
+                type: string
+                format: uuid
+              error:
+                type: string
+    AuditEvent:
+      type: object
+      required:
+        - id
+        - event_type
+        - entity_type
+        - entity_id
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+        entity_type:
+          type: string
+        entity_id:
+          type: string
+          format: uuid
+        request_id:
+          type: string
+          format: uuid
+        payload:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+    AuditLogResponse:
+      type: object
+      required:
+        - events
+        - total
+        - page
+        - page_size
+      properties:
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditEvent"
+        total:
+          type: integer
+        page:
+          type: integer
+        page_size:
+          type: integer
+    StatsServedRequest:
+      type: object
+      required:
+        - document_ids
+      properties:
+        document_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+    StatsServedResponse:
+      type: object
+      required:
+        - acknowledged
+      properties:
+        acknowledged:
+          type: boolean
+        count:
+          type: integer
+    TopServedResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              document_id:
+                type: string
+                format: uuid
+              title:
+                type: string
+                nullable: true
+              served_count:
+                type: integer
+    StatsSummaryResponse:
+      type: object
+      required:
+        - total_documents
+        - total_chunks
+      properties:
+        total_documents:
+          type: integer
+        total_chunks:
+          type: integer
+        tag_distribution:
+          type: array
+          items:
+            type: object
+            properties:
+              tag:
+                type: string
+              count:
+                type: integer
+        language_breakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              language:
+                type: string
+              count:
+                type: integer
+        recent_activity:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditEvent"
+        top_served:
+          type: array
+          items:
+            type: object
+            properties:
+              document_id:
+                type: string
+                format: uuid
+              title:
+                type: string
+                nullable: true
+              served_count:
+                type: integer
+    ServiceHealth:
+      type: object
+      required:
+        - name
+        - status
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum:
+            - healthy
+            - unhealthy
+        latency_ms:
+          type: number
+          nullable: true
+        error:
+          type: string
+          nullable: true
+    HealthAggregateResponse:
+      type: object
+      required:
+        - overall
+        - services
+        - checked_at
+      properties:
+        overall:
+          type: string
+          enum:
+            - healthy
+            - degraded
+        services:
+          type: array
+          items:
+            $ref: "#/components/schemas/ServiceHealth"
+        checked_at:
+          type: string
+          format: date-time
     HealthResponse:
       type: object
       required:
