@@ -1,8 +1,14 @@
+import path from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
   define: {
     "import.meta.env.VITE_VECINITA_ADMIN_API_URL": JSON.stringify("http://localhost:8001"),
     "import.meta.env.VITE_VECINITA_MODAL_PROXY_KEY": JSON.stringify("test-proxy-key"),
@@ -12,5 +18,6 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
+    css: true,
   },
 });

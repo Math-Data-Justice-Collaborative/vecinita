@@ -3,6 +3,11 @@ import { useCallback, useState } from "react";
 import { createJob, getJob, parseUrlsInput } from "../api/jobs";
 import type { Job } from "../api/types";
 import { requireAdminConfig } from "../config";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const POLL_MS = 2000;
 const TERMINAL: Job["status"][] = ["completed", "failed"];
@@ -65,48 +70,57 @@ export function JobForm({ onJobUpdate }: JobFormProps) {
   };
 
   return (
-    <section aria-labelledby="ingest-heading">
-      <h2 id="ingest-heading">Ingest URLs</h2>
-      <form onSubmit={(e) => void handleSubmit(e)}>
-        <label htmlFor="urls">Public URLs (one per line)</label>
-        <textarea
-          id="urls"
-          rows={5}
-          value={urlsText}
-          onChange={(e) => setUrlsText(e.target.value)}
-          placeholder="https://example.org/community/page"
-          disabled={busy}
-        />
-        <label htmlFor="chunk-size">Chunk size (tokens)</label>
-        <input
-          id="chunk-size"
-          type="number"
-          min={64}
-          value={chunkSize}
-          onChange={(e) => setChunkSize(e.target.value)}
-          disabled={busy}
-        />
-        <button type="submit" disabled={busy}>
-          {busy ? "Running…" : "Submit ingest job"}
-        </button>
-      </form>
-      {error ? (
-        <p role="alert" className="error">
-          {error}
-        </p>
-      ) : null}
-      {activeJob ? (
-        <div className="job-status" data-testid="job-status">
-          <p>
-            Job <code>{activeJob.job_id}</code>: <strong>{activeJob.status}</strong>
+    <Card>
+      <CardHeader>
+        <CardTitle>Ingest URLs</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="urls">Public URLs (one per line)</Label>
+            <Textarea
+              id="urls"
+              rows={5}
+              value={urlsText}
+              onChange={(e) => setUrlsText(e.target.value)}
+              placeholder="https://example.org/community/page"
+              disabled={busy}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="chunk-size">Chunk size (tokens)</Label>
+            <Input
+              id="chunk-size"
+              type="number"
+              min={64}
+              value={chunkSize}
+              onChange={(e) => setChunkSize(e.target.value)}
+              disabled={busy}
+            />
+          </div>
+          <Button type="submit" disabled={busy}>
+            {busy ? "Running…" : "Submit ingest job"}
+          </Button>
+        </form>
+        {error ? (
+          <p role="alert" className="mt-3 text-sm text-destructive">
+            {error}
           </p>
-          {activeJob.error_code ? (
-            <p className="error">
-              {activeJob.error_code}: {activeJob.error_message}
+        ) : null}
+        {activeJob ? (
+          <div className="mt-4 rounded-md bg-muted p-3" data-testid="job-status">
+            <p className="text-sm">
+              Job <code className="font-mono text-xs">{activeJob.job_id}</code>:{" "}
+              <strong>{activeJob.status}</strong>
             </p>
-          ) : null}
-        </div>
-      ) : null}
-    </section>
+            {activeJob.error_code ? (
+              <p className="mt-1 text-sm text-destructive">
+                {activeJob.error_code}: {activeJob.error_message}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
   );
 }

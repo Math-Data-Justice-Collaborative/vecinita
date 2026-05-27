@@ -9,10 +9,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 6: EV-002 Backend — Schema, Audit, Stats, Bulk |
-| **Active milestone** | Phase 6 complete — gate check pending |
-| **Active task** | — |
-| **Tasks completed** | 143 / 184 |
+| **Active phase** | Phase 7: EV-002 Frontend — Admin UI Overhaul |
+| **Active milestone** | M26: Tag display + corpus modernization |
+| **Active task** | T26.1 |
+| **Tasks completed** | 150 / 184 |
 | **Last updated** | 2026-05-26 |
 | **Evolve cycle** | EV-002 (F23–F29) — **in_progress** |
 
@@ -530,13 +530,13 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
-| T25.1 | Install Tailwind v3 + PostCSS + autoprefixer in data-management-frontend | Config | pending | dependency-inventory, TP-018 | T7.1 | — | EV-002 | F23 |
-| T25.2 | Run `npx shadcn-ui@latest init`; configure `components.json` (New York style, CSS variables) | Config | pending | TP-026 | T25.1 | — | EV-002 | F23 |
-| T25.3 | Add shadcn components: Button, Card, Badge, Table, Dialog, Sheet, Tabs, Input, Select, Checkbox | Config | pending | feature-list F23 | T25.2 | — | EV-002 | F23 |
-| T25.4 | Install react-router v7; create route structure (/dashboard, /corpus, /health, /audit) | Config | pending | TP-021, UJ-020 | T25.2 | — | EV-002 | F23 |
-| T25.5 | Implement layout shell: sidebar navigation, system-preference dark/light theme, responsive | Code | pending | UJ-020, AC-E1 | T25.3, T25.4 | — | EV-002 | F23 |
-| T25.6 | Migrate existing JobForm and CorpusList to shadcn/ui components (preserve functionality) | Code | pending | feature-list F23 | T25.5 | — | EV-002 | F23 |
-| T25.7 | Test: admin navigation between pages + theme toggle (`tests/frontend/test_admin_nav.test.tsx`) | Test | pending | TC-063, UJ-020 | T25.5 | — | EV-002 | F23 |
+| T25.1 | Install Tailwind v3 + PostCSS + autoprefixer in data-management-frontend | Config | completed | dependency-inventory, TP-018 | T7.1 | — | EV-002 | F23 |
+| T25.2 | Run `npx shadcn-ui@latest init`; configure `components.json` (New York style, CSS variables) | Config | completed | TP-026 | T25.1 | — | EV-002 | F23 |
+| T25.3 | Add shadcn components: Button, Card, Badge, Table, Dialog, Sheet, Tabs, Input, Select, Checkbox | Config | completed | feature-list F23 | T25.2 | — | EV-002 | F23 |
+| T25.4 | Install react-router v7; create route structure (/dashboard, /corpus, /health, /audit) | Config | completed | TP-021, UJ-020 | T25.2 | — | EV-002 | F23 |
+| T25.5 | Implement layout shell: sidebar navigation, system-preference dark/light theme, responsive | Code | completed | UJ-020, AC-E1 | T25.3, T25.4 | — | EV-002 | F23 |
+| T25.6 | Migrate existing JobForm and CorpusList to shadcn/ui components (preserve functionality) | Code | completed | feature-list F23 | T25.5 | — | EV-002 | F23 |
+| T25.7 | Test: admin navigation between pages + theme toggle (`tests/frontend/test_admin_nav.test.tsx`) | Test | completed | TC-063, UJ-020 | T25.5 | — | EV-002 | F23 |
 
 #### M26: Tag display + corpus modernization (F24)
 

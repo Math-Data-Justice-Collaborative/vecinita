@@ -1,16 +1,21 @@
-import { CorpusList } from "./components/CorpusList";
-import { JobForm } from "./components/JobForm";
-import "./App.css";
+import { Navigate, Route, Routes } from "react-router-dom";
+
+import { AdminLayout } from "@/components/AdminLayout";
+import { DashboardPage } from "@/pages/DashboardPage";
+import { CorpusPage } from "@/pages/CorpusPage";
+import { HealthPage } from "@/pages/HealthPage";
+import { AuditPage } from "@/pages/AuditPage";
 
 export default function App() {
   return (
-    <main className="app">
-      <header>
-        <h1>Vecinita Data Management</h1>
-        <p className="subtitle">Ingest public URLs and manage the corpus (F12).</p>
-      </header>
-      <JobForm />
-      <CorpusList />
-    </main>
+    <Routes>
+      <Route element={<AdminLayout />}>
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/corpus" element={<CorpusPage />} />
+        <Route path="/health" element={<HealthPage />} />
+        <Route path="/audit" element={<AuditPage />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Route>
+    </Routes>
   );
 }

@@ -10,6 +10,10 @@ import {
 import { getJob } from "../api/jobs";
 import type { ChunkDetail, DocumentSummary, TagInput } from "../api/types";
 import { requireAdminConfig, requireCorpusConfig } from "../config";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 
 type DocumentAdminProps = {
   document: DocumentSummary;
@@ -138,66 +142,74 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
   }
 
   return (
-    <section className="document-admin" aria-label="Document admin">
-      <div className="document-admin-header">
-        <h2>{document.title ?? document.url}</h2>
-        <button type="button" className="secondary" onClick={onClose}>
+    <div className="space-y-4" aria-label="Document admin">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">{document.title ?? document.url}</h3>
+        <Button variant="outline" size="sm" onClick={onClose}>
           Close
-        </button>
+        </Button>
       </div>
 
       {error ? (
-        <p className="error" role="alert">
+        <p className="text-sm text-destructive" role="alert">
           {error}
         </p>
       ) : null}
       {status ? (
-        <p className="status-hint" role="status">
+        <p className="text-sm text-muted-foreground" role="status">
           {status}
         </p>
       ) : null}
 
-      <form className="tag-editor" onSubmit={(e) => void handleSaveDocumentTags(e)}>
-        <label htmlFor="doc-tags">Document tags (comma-separated slugs, max 10)</label>
-        <input
-          id="doc-tags"
-          value={docTags}
-          onChange={(e) => setDocTags(e.target.value)}
-          placeholder="housing, legal"
-        />
-        <div className="form-actions">
-          <button type="submit">Save document tags</button>
-          <button type="button" className="secondary" onClick={() => void handleRetag()}>
+      <form onSubmit={(e) => void handleSaveDocumentTags(e)} className="space-y-3">
+        <div className="space-y-2">
+          <Label htmlFor="doc-tags">Document tags (comma-separated slugs, max 10)</Label>
+          <Input
+            id="doc-tags"
+            value={docTags}
+            onChange={(e) => setDocTags(e.target.value)}
+            placeholder="housing, legal"
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button type="submit" size="sm">
+            Save document tags
+          </Button>
+          <Button type="button" variant="secondary" size="sm" onClick={() => void handleRetag()}>
             LLM re-tag
-          </button>
+          </Button>
         </div>
       </form>
 
-      {loading ? <p>Loading chunks…</p> : null}
+      <Separator />
 
-      <ul className="chunk-list" data-testid="chunk-list">
+      {loading ? <p className="text-sm text-muted-foreground">Loading chunks…</p> : null}
+
+      <div className="space-y-4" data-testid="chunk-list">
         {chunks.map((chunk) => (
-          <li key={chunk.chunk_id} className="chunk-item">
-            <h3>Chunk {chunk.chunk_index + 1}</h3>
-            <pre className="chunk-text">{chunk.text}</pre>
-            <label htmlFor={`chunk-tags-${chunk.chunk_id}`}>Chunk tags (max 5)</label>
-            <input
-              id={`chunk-tags-${chunk.chunk_id}`}
-              value={chunkTagDrafts[chunk.chunk_id] ?? ""}
-              onChange={(e) =>
-                setChunkTagDrafts((current) => ({
-                  ...current,
-                  [chunk.chunk_id]: e.target.value,
-                }))
-              }
-            />
-            <button type="button" onClick={() => void handleSaveChunkTags(chunk.chunk_id)}>
+          <div key={chunk.chunk_id} className="space-y-2 rounded-md border p-4">
+            <h4 className="font-medium">Chunk {chunk.chunk_index + 1}</h4>
+            <pre className="max-h-48 overflow-auto rounded-md bg-muted p-3 text-sm">{chunk.text}</pre>
+            <div className="space-y-2">
+              <Label htmlFor={`chunk-tags-${chunk.chunk_id}`}>Chunk tags (max 5)</Label>
+              <Input
+                id={`chunk-tags-${chunk.chunk_id}`}
+                value={chunkTagDrafts[chunk.chunk_id] ?? ""}
+                onChange={(e) =>
+                  setChunkTagDrafts((current) => ({
+                    ...current,
+                    [chunk.chunk_id]: e.target.value,
+                  }))
+                }
+              />
+            </div>
+            <Button size="sm" variant="outline" onClick={() => void handleSaveChunkTags(chunk.chunk_id)}>
               Save chunk tags
-            </button>
-          </li>
+            </Button>
+          </div>
         ))}
-      </ul>
-    </section>
+      </div>
+    </div>
   );
 }
 
