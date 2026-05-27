@@ -6,6 +6,7 @@ import os
 
 import pytest
 from sqlalchemy import create_engine, text
+from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
 
 pytestmark = pytest.mark.integration
 
@@ -30,9 +31,10 @@ def test_pgvector_extension_enabled() -> None:
 def test_embeddings_column_is_vector_384() -> None:
     engine = create_engine(_database_url())
     with engine.connect() as conn:
-        dim = conn.execute(
-            text(
-                """
+        dim_raw = sqlalchemy_scalar_one(
+            conn.execute(
+                text(
+                    """
                 SELECT (regexp_match(
                     format_type(a.atttypid, a.atttypmod),
                     'vector\\((\\d+)\\)'
@@ -45,6 +47,8 @@ def test_embeddings_column_is_vector_384() -> None:
                   AND a.attname = 'embedding'
                   AND NOT a.attisdropped
                 """
+                )
             )
-        ).scalar_one()
+        )
+        dim = scalar_int(dim_raw)
     assert dim == 384

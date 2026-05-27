@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 from sqlalchemy import create_engine, text
 from vecinita_database.seeds.load import _database_url, load_corpus
+from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
 
 pytestmark = pytest.mark.integration
 
@@ -18,8 +19,10 @@ def seeded_db():
 def test_seed_load_row_counts(seeded_db: None) -> None:
     engine = create_engine(_database_url())
     with engine.connect() as conn:
-        documents = conn.execute(text("SELECT COUNT(*) FROM documents")).scalar_one()
-        chunks = conn.execute(text("SELECT COUNT(*) FROM chunks")).scalar_one()
+        documents_raw = sqlalchemy_scalar_one(conn.execute(text("SELECT COUNT(*) FROM documents")))
+        documents = scalar_int(documents_raw)
+        chunks_raw = sqlalchemy_scalar_one(conn.execute(text("SELECT COUNT(*) FROM chunks")))
+        chunks = scalar_int(chunks_raw)
         languages = conn.execute(
             text(
                 "SELECT DISTINCT language FROM documents "

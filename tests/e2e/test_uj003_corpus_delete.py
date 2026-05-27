@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import os
+from typing import cast
 from uuid import uuid4
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from tests.helpers.json_response import find_json_object_by_str, json_str, response_json_list
+from vecinita_shared_schemas.json_types import as_json_object
 
 pytestmark = pytest.mark.e2e
 
@@ -62,7 +65,8 @@ async def test_uj003_corpus_delete(write_client: AsyncClient) -> None:
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
     assert listed.status_code == 200
-    doc_id = next(item["document_id"] for item in listed.json() if item["url"] == doc_url)
+    items = response_json_list(listed)
+    doc_id = json_str(find_json_object_by_str(items, "url", doc_url), "document_id")
 
     delete = await write_client.delete(
         f"/internal/v1/documents/{doc_id}",
@@ -74,5 +78,5 @@ async def test_uj003_corpus_delete(write_client: AsyncClient) -> None:
         "/internal/v1/documents",
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
-    urls = [item["url"] for item in after.json()]
+    urls = [json_str(as_json_object(cast(object, row)), "url") for row in response_json_list(after)]
     assert doc_url not in urls

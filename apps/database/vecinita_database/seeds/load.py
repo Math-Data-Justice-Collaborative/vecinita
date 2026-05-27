@@ -6,8 +6,10 @@ import hashlib
 import os
 import re
 from pathlib import Path
+from typing import cast
 
 from sqlalchemy import create_engine, text
+from vecinita_shared_schemas.db_mapping import scalar_uuid
 
 _REPO_ROOT = Path(__file__).resolve().parents[4]
 _CORPUS_ROOT = _REPO_ROOT / "data" / "fixtures" / "corpus"
@@ -77,26 +79,31 @@ def load_corpus(*, database_url: str | None = None) -> dict[str, int]:
                     path.stem,
                 )
                 url = _fixture_url(language, path)
-                doc_id = conn.execute(
-                    text(
-                        """
-                        INSERT INTO documents (url, title, content_hash, language)
-                        VALUES (:url, :title, :content_hash, :language)
-                        ON CONFLICT (url) DO UPDATE
-                        SET title = EXCLUDED.title,
-                            content_hash = EXCLUDED.content_hash,
-                            language = EXCLUDED.language,
-                            updated_at = now()
-                        RETURNING id
-                        """
-                    ),
-                    {
-                        "url": url,
-                        "title": title_line,
-                        "content_hash": content_hash,
-                        "language": language,
-                    },
-                ).scalar_one()
+                doc_id = scalar_uuid(
+                    cast(
+                        object,
+                        conn.execute(
+                            text(
+                                """
+                            INSERT INTO documents (url, title, content_hash, language)
+                            VALUES (:url, :title, :content_hash, :language)
+                            ON CONFLICT (url) DO UPDATE
+                            SET title = EXCLUDED.title,
+                                content_hash = EXCLUDED.content_hash,
+                                language = EXCLUDED.language,
+                                updated_at = now()
+                            RETURNING id
+                            """
+                            ),
+                            {
+                                "url": url,
+                                "title": title_line,
+                                "content_hash": content_hash,
+                                "language": language,
+                            },
+                        ).scalar_one(),
+                    )
+                )
                 documents += 1
 
                 conn.execute(

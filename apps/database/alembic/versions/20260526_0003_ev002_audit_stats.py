@@ -49,7 +49,9 @@ def upgrade() -> None:
         sa.Column("version_number", sa.Integer(), nullable=False),
         sa.Column("title", sa.Text(), nullable=True),
         sa.Column("language", sa.String(length=8), nullable=True),
-        sa.Column("tags_snapshot", sa.JSON(), server_default=sa.text("'[]'::jsonb"), nullable=False),
+        sa.Column(
+            "tags_snapshot", sa.JSON(), server_default=sa.text("'[]'::jsonb"), nullable=False
+        ),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),

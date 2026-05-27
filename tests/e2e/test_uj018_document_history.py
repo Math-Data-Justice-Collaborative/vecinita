@@ -4,10 +4,19 @@ from __future__ import annotations
 
 import os
 import uuid
+from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from tests.helpers.json_response import (
+    json_int,
+    json_list,
+    json_object_list,
+    json_str,
+    response_json_object,
+)
+from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
 
 pytestmark = [
     pytest.mark.e2e,
@@ -67,10 +76,10 @@ def doc_with_versions(client, engine):
     assert resp.status_code == 200
 
     with engine.connect() as conn:
-        doc_id = conn.execute(
-            text("SELECT id FROM documents WHERE url = :url"), {"url": url}
-        ).scalar_one()
-
+        doc_id_raw = sqlalchemy_scalar_one(
+            conn.execute(text("SELECT id FROM documents WHERE url = :url"), {"url": url})
+        )
+        doc_id = UUID(str(doc_id_raw))
     client.patch(
         f"/internal/v1/documents/{doc_id}/tags",
         json={
@@ -96,28 +105,34 @@ def test_document_history_returns_versions(client, doc_with_versions) -> None:
     doc_id = doc_with_versions["doc_id"]
     resp = client.get(f"/internal/v1/documents/{doc_id}/history", headers=_auth())
     assert resp.status_code == 200
-    data = resp.json()
+    data = response_json_object(resp)
     assert data["document_id"] == str(doc_id)
-    assert len(data["versions"]) >= 2
+    versions = json_object_list(data, "versions")
+    assert len(versions) >= 2
 
-    v1 = data["versions"][0]
-    assert v1["version_number"] == 1
-    assert v1["title"] == "History Doc"
+    v1 = versions[0]
+    assert json_int(v1, "version_number") == 1
+    assert json_str(v1, "title") == "History Doc"
 
-    v2 = data["versions"][1]
-    assert v2["version_number"] == 2
-    assert any(t["slug"] == "housing" for t in v2["tags_snapshot"])
-    assert any(t["slug"] == "legal" for t in v2["tags_snapshot"])
+    v2 = versions[1]
+    assert json_int(v2, "version_number") == 2
+    v2_tags = json_object_list(v2, "tags_snapshot")
+    assert any(json_str(tag, "slug") == "housing" for tag in v2_tags)
+    assert any(json_str(tag, "slug") == "legal" for tag in v2_tags)
 
 
 def test_document_history_shows_tag_changes(client, doc_with_versions) -> None:
     """Version history captures tag changes at each version point."""
     doc_id = doc_with_versions["doc_id"]
     resp = client.get(f"/internal/v1/documents/{doc_id}/history", headers=_auth())
-    data = resp.json()
-
-    v1_tags = data["versions"][0].get("tags_snapshot", [])
-    v2_tags = data["versions"][1].get("tags_snapshot", [])
+    data = response_json_object(resp)
+    history_versions = json_object_list(data, "versions")
+    v1_tags = (
+        json_list(history_versions[0], "tags_snapshot")
+        if "tags_snapshot" in history_versions[0]
+        else []
+    )
+    v2_tags = json_list(history_versions[1], "tags_snapshot")
 
     assert len(v2_tags) > len(v1_tags), "v2 should have more tags than v1"
 

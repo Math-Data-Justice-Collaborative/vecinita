@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import os
 import uuid
+from uuid import UUID
 
 import pytest
 from sqlalchemy import create_engine, text
+from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
 
 pytestmark = pytest.mark.integration
 
@@ -28,13 +30,16 @@ def sample_document(engine):
     """Insert a document and return its id; clean up after test."""
     url = f"https://test.example.com/audit-{uuid.uuid4().hex[:8]}"
     with engine.begin() as conn:
-        doc_id = conn.execute(
-            text(
-                "INSERT INTO documents (url, title, language) "
-                "VALUES (:url, 'Audit Test Doc', 'en') RETURNING id"
-            ),
-            {"url": url},
-        ).scalar_one()
+        doc_id_raw = sqlalchemy_scalar_one(
+            conn.execute(
+                text(
+                    "INSERT INTO documents (url, title, language) "
+                    "VALUES (:url, 'Audit Test Doc', 'en') RETURNING id"
+                ),
+                {"url": url},
+            )
+        )
+        doc_id = UUID(str(doc_id_raw))
     yield doc_id
     with engine.begin() as conn:
         conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})

@@ -7,9 +7,13 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Any
+from typing import cast
+from uuid import UUID
 
 from sqlalchemy import create_engine, text
+from sqlalchemy.engine import Connection
+from vecinita_shared_schemas.db_mapping import scalar_uuid
+from vecinita_shared_schemas.json_types import as_json_object
 
 _REPO_ROOT = Path(__file__).resolve().parents[4]
 _TAG_SEED_PATH = _REPO_ROOT / "data" / "fixtures" / "tags" / "seed_tags.json"
@@ -51,16 +55,20 @@ def _chunk_text(body: str) -> list[str]:
 def load_seed_tags(*, database_url: str | None = None, seed_path: Path | None = None) -> int:
     """Insert bilingual starter tags from seed_tags.json."""
     path = seed_path or _TAG_SEED_PATH
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    tags = payload["tags"]
+    payload = as_json_object(cast(object, json.loads(path.read_text(encoding="utf-8"))))
+    tags_raw = payload.get("tags")
+    if not isinstance(tags_raw, list):
+        msg = "seed_tags.json must contain a 'tags' array"
+        raise ValueError(msg)
     engine = create_engine(database_url or _database_url())
     inserted = 0
 
     with engine.begin() as conn:
-        for entry in tags:
-            slug = entry["slug"]
+        for raw_entry in tags_raw:
+            entry = as_json_object(cast(object, raw_entry))
+            slug = str(entry["slug"])
             for language, label_key in (("en", "label_en"), ("es", "label_es")):
-                label = entry[label_key]
+                label = str(entry[label_key])
                 conn.execute(
                     text(
                         """
@@ -77,7 +85,7 @@ def load_seed_tags(*, database_url: str | None = None, seed_path: Path | None = 
     return inserted
 
 
-def _resolve_tag_id(conn: Any, *, slug: str, language: str) -> Any:
+def _resolve_tag_id(conn: Connection, *, slug: str, language: str) -> UUID:
     tag_id = conn.execute(
         text(
             """
@@ -89,22 +97,27 @@ def _resolve_tag_id(conn: Any, *, slug: str, language: str) -> Any:
     ).scalar_one_or_none()
     if tag_id is None:
         raise ValueError(f"Missing seed tag {slug!r} for language {language!r}")
-    return tag_id
+    return scalar_uuid(cast(object, tag_id))
 
 
 def load_tagged_corpus(*, database_url: str | None = None) -> dict[str, int]:
     """Load tagged fixture documents, chunks, and document tag assignments."""
     manifest_path = _TAGGED_ROOT / "manifest.json"
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest = as_json_object(cast(object, json.loads(manifest_path.read_text(encoding="utf-8"))))
+    documents_raw = manifest.get("documents")
+    if not isinstance(documents_raw, list):
+        msg = "tagged corpus manifest must contain a 'documents' array"
+        raise ValueError(msg)
     engine = create_engine(database_url or _database_url())
     documents = 0
     chunks = 0
     document_tags = 0
 
     with engine.begin() as conn:
-        for spec in manifest["documents"]:
-            rel_path = Path(spec["path"])
-            language = spec["language"]
+        for raw_spec in documents_raw:
+            spec = as_json_object(cast(object, raw_spec))
+            rel_path = Path(str(spec["path"]))
+            language = str(spec["language"])
             body_path = _TAGGED_ROOT / rel_path
             body = body_path.read_text(encoding="utf-8")
             content_hash = hashlib.sha256(body.encode("utf-8")).hexdigest()
@@ -113,26 +126,31 @@ def load_tagged_corpus(*, database_url: str | None = None) -> dict[str, int]:
                 body_path.stem,
             )
             url = f"fixture://corpus/tagged/{rel_path.as_posix()}"
-            doc_id = conn.execute(
-                text(
-                    """
-                    INSERT INTO documents (url, title, content_hash, language)
-                    VALUES (:url, :title, :content_hash, :language)
-                    ON CONFLICT (url) DO UPDATE
-                    SET title = EXCLUDED.title,
-                        content_hash = EXCLUDED.content_hash,
-                        language = EXCLUDED.language,
-                        updated_at = now()
-                    RETURNING id
-                    """
-                ),
-                {
-                    "url": url,
-                    "title": title_line,
-                    "content_hash": content_hash,
-                    "language": language,
-                },
-            ).scalar_one()
+            doc_id = scalar_uuid(
+                cast(
+                    object,
+                    conn.execute(
+                        text(
+                            """
+                        INSERT INTO documents (url, title, content_hash, language)
+                        VALUES (:url, :title, :content_hash, :language)
+                        ON CONFLICT (url) DO UPDATE
+                        SET title = EXCLUDED.title,
+                            content_hash = EXCLUDED.content_hash,
+                            language = EXCLUDED.language,
+                            updated_at = now()
+                        RETURNING id
+                        """
+                        ),
+                        {
+                            "url": url,
+                            "title": title_line,
+                            "content_hash": content_hash,
+                            "language": language,
+                        },
+                    ).scalar_one(),
+                )
+            )
             documents += 1
 
             conn.execute(
@@ -159,7 +177,12 @@ def load_tagged_corpus(*, database_url: str | None = None) -> dict[str, int]:
                 )
                 chunks += 1
 
-            for slug in spec["tags"]:
+            tags_raw = spec.get("tags")
+            if not isinstance(tags_raw, list):
+                msg = f"document spec {rel_path} must contain a 'tags' array"
+                raise ValueError(msg)
+            for raw_slug in tags_raw:
+                slug = str(raw_slug)
                 tag_id = _resolve_tag_id(conn, slug=slug, language=language)
                 conn.execute(
                     text(

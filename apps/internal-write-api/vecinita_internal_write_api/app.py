@@ -5,8 +5,9 @@ from __future__ import annotations
 import os
 import time
 import uuid as _uuid
+from collections.abc import Mapping
 from datetime import UTC, datetime
-from typing import Annotated
+from typing import Annotated, cast
 from uuid import UUID
 
 import httpx
@@ -14,6 +15,16 @@ from fastapi import Depends, FastAPI, Header, HTTPException, status
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from vecinita_shared_schemas.cors import configure_cors
+from vecinita_shared_schemas.db_mapping import (
+    mapping_row,
+    row_int,
+    row_str,
+    row_str_optional,
+    row_uuid,
+    row_value,
+    scalar_int,
+    scalar_uuid,
+)
 from vecinita_shared_schemas.internal_write import (
     AuditLogEntry,
     AuditLogResponse,
@@ -46,6 +57,7 @@ from vecinita_shared_schemas.internal_write import (
     TopServedItem,
     TopServedResponse,
 )
+from vecinita_shared_schemas.json_types import as_json_object
 
 from vecinita_internal_write_api.audit import create_document_version, emit_audit_event
 from vecinita_internal_write_api.jobs_client import (
@@ -58,6 +70,44 @@ from vecinita_internal_write_api.tags import (
     validate_chunk_tag_count,
     validate_document_tag_count,
 )
+
+
+def _row_datetime(row: Mapping[str, object], key: str) -> datetime:
+    value = row_value(row, key)
+    if isinstance(value, datetime):
+        return value
+    msg = f"Expected datetime for {key!r}, got {type(value).__name__}"
+    raise TypeError(msg)
+
+
+def _row_datetime_optional(row: Mapping[str, object], key: str) -> datetime | None:
+    value = row_value(row, key)
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value
+    msg = f"Expected datetime for {key!r}, got {type(value).__name__}"
+    raise TypeError(msg)
+
+
+def _tags_snapshot_list(value: object) -> list[dict[str, object]]:
+    if not isinstance(value, list):
+        return []
+    snapshots: list[dict[str, object]] = []
+    for item in value:
+        if isinstance(item, dict):
+            snapshots.append(item)
+    return snapshots
+
+
+def _tag_input_from_row(tag: Mapping[str, object]) -> TagInput:
+    return TagInput.model_validate(
+        {
+            "slug": row_str(tag, "slug"),
+            "label": row_str(tag, "label"),
+            "source": row_str(tag, "source"),
+        }
+    )
 
 
 def _normalize_database_url(url: str) -> str:
@@ -122,9 +172,12 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
         request_id = _uuid.uuid4()
         with engine.begin() as conn:
             for document in body.documents:
-                doc_id = conn.execute(
-                    text(
-                        """
+                doc_id = scalar_uuid(
+                    cast(
+                        object,
+                        conn.execute(
+                            text(
+                                """
                         INSERT INTO documents (url, title, content_hash, language)
                         VALUES (:url, :title, :content_hash, :language)
                         ON CONFLICT (url) DO UPDATE
@@ -134,14 +187,16 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                             updated_at = now()
                         RETURNING id
                         """
-                    ),
-                    {
-                        "url": str(document.url),
-                        "title": document.title,
-                        "content_hash": document.content_hash,
-                        "language": document.language,
-                    },
-                ).scalar_one()
+                            ),
+                            {
+                                "url": str(document.url),
+                                "title": document.title,
+                                "content_hash": document.content_hash,
+                                "language": document.language,
+                            },
+                        ).scalar_one(),
+                    )
+                )
 
                 conn.execute(
                     text("DELETE FROM chunks WHERE document_id = :document_id"),
@@ -149,20 +204,25 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 )
 
                 for chunk in document.chunks:
-                    chunk_id = conn.execute(
-                        text(
-                            """
+                    chunk_id = scalar_uuid(
+                        cast(
+                            object,
+                            conn.execute(
+                                text(
+                                    """
                             INSERT INTO chunks (document_id, chunk_index, text)
                             VALUES (:document_id, :chunk_index, :text)
                             RETURNING id
                             """
-                        ),
-                        {
-                            "document_id": doc_id,
-                            "chunk_index": chunk.chunk_index,
-                            "text": chunk.text,
-                        },
-                    ).scalar_one()
+                                ),
+                                {
+                                    "document_id": doc_id,
+                                    "chunk_index": chunk.chunk_index,
+                                    "text": chunk.text,
+                                },
+                            ).scalar_one(),
+                        )
+                    )
                     vector_literal = "[" + ",".join(str(v) for v in chunk.embedding) + "]"
                     conn.execute(
                         text(
@@ -237,13 +297,17 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 if doc_row is None:
                     failures.append(BulkFailure(id=doc_id, error="Document not found"))
                     continue
+                doc = mapping_row(doc_row)
                 emit_audit_event(
                     conn,
                     event_type="document.deleted",
                     entity_type="document",
                     entity_id=doc_id,
                     request_id=request_id,
-                    payload={"title": doc_row["title"], "url": doc_row["url"]},
+                    payload={
+                        "title": row_str_optional(doc, "title"),
+                        "url": row_str(doc, "url"),
+                    },
                 )
                 conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
                 successes += 1
@@ -271,7 +335,8 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 if doc_row is None:
                     failures.append(BulkFailure(id=doc_id, error="Document not found"))
                     continue
-                language = doc_row["language"] or "en"
+                doc = mapping_row(doc_row)
+                language = row_str_optional(doc, "language") or "en"
                 existing_tags = (
                     conn.execute(
                         text(
@@ -285,12 +350,11 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                     .mappings()
                     .all()
                 )
-                current = {
-                    row["slug"]: TagInput(
-                        slug=row["slug"], label=row["label"], source=row["source"]
-                    )
-                    for row in existing_tags
-                }
+                current: dict[str, TagInput] = {}
+                for raw_tag in existing_tags:
+                    tag = mapping_row(raw_tag)
+                    tag_input = _tag_input_from_row(tag)
+                    current[tag_input.slug] = tag_input
                 for slug in body.remove_tags:
                     current.pop(slug, None)
                 for tag in body.add_tags:
@@ -320,8 +384,8 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 create_document_version(
                     conn,
                     document_id=doc_id,
-                    title=doc_row["title"],
-                    language=doc_row["language"],
+                    title=row_str_optional(doc, "title"),
+                    language=row_str_optional(doc, "language"),
                     tags_snapshot=tag_snapshot,
                 )
                 successes += 1
@@ -382,10 +446,11 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 if doc_row is None:
                     failures.append(BulkFailure(id=doc_id, error="Document not found"))
                     continue
+                doc = mapping_row(doc_row)
                 set_clauses: list[str] = ["updated_at = now()"]
                 params: dict[str, object] = {"id": doc_id}
-                new_title = doc_row["title"]
-                new_language = doc_row["language"]
+                new_title = row_str_optional(doc, "title")
+                new_language = row_str_optional(doc, "language")
                 if body.updates.title is not None:
                     set_clauses.append("title = :title")
                     params["title"] = body.updates.title
@@ -404,7 +469,7 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                     entity_type="document",
                     entity_id=doc_id,
                     request_id=request_id,
-                    payload={k: v for k, v in body.updates.__dict__.items() if v is not None},
+                    payload=body.updates.model_dump(exclude_none=True),
                 )
                 create_document_version(
                     conn,
@@ -438,27 +503,32 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
             )
             if row is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
-            chunks = (
-                conn.execute(
-                    text(
-                        """
+            doc = mapping_row(row)
+            scalar_chunks = cast(
+                list[object],
+                list(
+                    conn.execute(
+                        text(
+                            """
                     SELECT text
                     FROM chunks
                     WHERE document_id = :document_id
                     ORDER BY chunk_index ASC
                     """
-                    ),
-                    {"document_id": document_id},
-                )
-                .scalars()
-                .all()
+                        ),
+                        {"document_id": document_id},
+                    )
+                    .scalars()
+                    .all()
+                ),
             )
+            chunk_texts = [str(chunk_text) for chunk_text in scalar_chunks]
         return DocumentDetail(
-            document_id=row["id"],
-            url=row["url"],
-            title=row["title"],
-            language=row["language"],
-            text="\n\n".join(chunks),
+            document_id=row_uuid(doc, "id"),
+            url=row_str(doc, "url"),
+            title=row_str_optional(doc, "title"),
+            language=row_str_optional(doc, "language"),
+            text="\n\n".join(chunk_texts),
         )
 
     @app.get(
@@ -478,7 +548,8 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
             )
             if doc is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
-            language = doc["language"] or "en"
+            doc_row = mapping_row(doc)
+            language = row_str_optional(doc_row, "language") or "en"
             tag_rows = (
                 conn.execute(
                     text(
@@ -496,12 +567,7 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 .mappings()
                 .all()
             )
-        return TagPatchResponse(
-            tags=[
-                TagInput(slug=row["slug"], label=row["label"], source=row["source"])
-                for row in tag_rows
-            ]
-        )
+        return TagPatchResponse(tags=[_tag_input_from_row(mapping_row(tag)) for tag in tag_rows])
 
     @app.patch(
         "/internal/v1/documents/{document_id}/tags",
@@ -522,6 +588,7 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
             )
             if row is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+            doc = mapping_row(row)
             tags = [
                 tag.model_copy(update={"source": tag.source or body.source}) for tag in body.tags
             ]
@@ -529,7 +596,7 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 conn,
                 document_id=document_id,
                 tags=tags,
-                language=row["language"] or "en",
+                language=row_str_optional(doc, "language") or "en",
             )
             tag_snapshot = [
                 {"slug": t.slug, "label": t.label, "source": t.source or body.source} for t in tags
@@ -545,8 +612,8 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
             create_document_version(
                 conn,
                 document_id=document_id,
-                title=row["title"],
-                language=row["language"],
+                title=row_str_optional(doc, "title"),
+                language=row_str_optional(doc, "language"),
                 tags_snapshot=tag_snapshot,
             )
         return TagPatchResponse(tags=tags)
@@ -568,7 +635,8 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
             )
             if doc is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
-            language = doc["language"] or "en"
+            doc_row = mapping_row(doc)
+            language = row_str_optional(doc_row, "language") or "en"
             rows = (
                 conn.execute(
                     text(
@@ -585,7 +653,9 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 .all()
             )
             details: list[ChunkDetail] = []
-            for row in rows:
+            for raw_row in rows:
+                chunk = mapping_row(raw_row)
+                chunk_id = row_uuid(chunk, "id")
                 tag_rows = (
                     conn.execute(
                         text(
@@ -598,21 +668,20 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                             ORDER BY t.slug
                             """
                         ),
-                        {"chunk_id": row["id"], "language": language},
+                        {"chunk_id": chunk_id, "language": language},
                     )
                     .mappings()
                     .all()
                 )
                 details.append(
                     ChunkDetail(
-                        chunk_id=row["id"],
-                        chunk_index=row["chunk_index"],
-                        text=row["text"],
-                        token_count=row["token_count"],
-                        tags=[
-                            TagInput(slug=tag["slug"], label=tag["label"], source=tag["source"])
-                            for tag in tag_rows
-                        ],
+                        chunk_id=chunk_id,
+                        chunk_index=row_int(chunk, "chunk_index"),
+                        text=row_str(chunk, "text"),
+                        token_count=row_int(chunk, "token_count")
+                        if chunk.get("token_count") is not None
+                        else None,
+                        tags=[_tag_input_from_row(mapping_row(tag)) for tag in tag_rows],
                     )
                 )
         return details
@@ -643,6 +712,7 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
             )
             if row is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+            chunk = mapping_row(row)
             tags = [
                 tag.model_copy(update={"source": tag.source or body.source}) for tag in body.tags
             ]
@@ -650,7 +720,7 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 conn,
                 chunk_id=chunk_id,
                 tags=tags,
-                language=row["language"] or "en",
+                language=row_str_optional(chunk, "language") or "en",
             )
             emit_audit_event(
                 conn,
@@ -719,10 +789,10 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
             )
         return [
             DocumentSummary(
-                document_id=row["id"],
-                url=row["url"],
-                title=row["title"],
-                language=row["language"],
+                document_id=row_uuid(mapping_row(row), "id"),
+                url=row_str(mapping_row(row), "url"),
+                title=row_str_optional(mapping_row(row), "title"),
+                language=row_str_optional(mapping_row(row), "language"),
             )
             for row in rows
         ]
@@ -745,13 +815,17 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
             )
             if doc_row is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+            doc = mapping_row(doc_row)
             emit_audit_event(
                 conn,
                 event_type="document.deleted",
                 entity_type="document",
                 entity_id=document_id,
                 request_id=request_id,
-                payload={"title": doc_row["title"], "url": doc_row["url"]},
+                payload={
+                    "title": row_str_optional(doc, "title"),
+                    "url": row_str(doc, "url"),
+                },
             )
             conn.execute(
                 text("DELETE FROM documents WHERE id = :document_id"),
@@ -798,10 +872,15 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
         where_sql = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
 
         with engine.connect() as conn:
-            total = conn.execute(
-                text(f"SELECT COUNT(*) FROM audit_log {where_sql}"),
-                params,
-            ).scalar_one()
+            total = scalar_int(
+                cast(
+                    object,
+                    conn.execute(
+                        text(f"SELECT COUNT(*) FROM audit_log {where_sql}"),
+                        params,
+                    ).scalar_one(),
+                )
+            )
 
             rows = (
                 conn.execute(
@@ -820,15 +899,16 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
         return AuditLogResponse(
             items=[
                 AuditLogEntry(
-                    id=row["id"],
-                    event_type=row["event_type"],
-                    entity_type=row["entity_type"],
-                    entity_id=row["entity_id"],
-                    request_id=row["request_id"],
-                    payload=row["payload"],
-                    created_at=row["created_at"],
+                    id=row_uuid(entry, "id"),
+                    event_type=row_str(entry, "event_type"),
+                    entity_type=row_str(entry, "entity_type"),
+                    entity_id=row_uuid(entry, "entity_id"),
+                    request_id=row_uuid(entry, "request_id"),
+                    payload=as_json_object(row_value(entry, "payload")),
+                    created_at=_row_datetime(entry, "created_at"),
                 )
-                for row in rows
+                for raw_row in rows
+                for entry in (mapping_row(raw_row),)
             ],
             page=page,
             page_size=page_size,
@@ -866,13 +946,14 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
             document_id=document_id,
             versions=[
                 DocumentVersionEntry(
-                    version_number=row["version_number"],
-                    title=row["title"],
-                    language=row["language"],
-                    tags_snapshot=row["tags_snapshot"],
-                    created_at=row["created_at"],
+                    version_number=row_int(version, "version_number"),
+                    title=row_str_optional(version, "title"),
+                    language=row_str_optional(version, "language"),
+                    tags_snapshot=_tags_snapshot_list(row_value(version, "tags_snapshot")),
+                    created_at=_row_datetime(version, "created_at"),
                 )
-                for row in rows
+                for raw_row in rows
+                for version in (mapping_row(raw_row),)
             ],
         )
 
@@ -939,9 +1020,13 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     )
     def stats_summary() -> StatsSummaryResponse:
         with engine.connect() as conn:
-            total_docs = conn.execute(text("SELECT COUNT(*) FROM documents")).scalar_one()
+            total_docs = scalar_int(
+                cast(object, conn.execute(text("SELECT COUNT(*) FROM documents")).scalar_one())
+            )
 
-            total_chunks = conn.execute(text("SELECT COUNT(*) FROM chunks")).scalar_one()
+            total_chunks = scalar_int(
+                cast(object, conn.execute(text("SELECT COUNT(*) FROM chunks")).scalar_one())
+            )
 
             tag_rows = (
                 conn.execute(
@@ -997,25 +1082,32 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
             total_documents=total_docs,
             total_chunks=total_chunks,
             tag_distribution=[
-                TagCount(slug=row["slug"], label=row["label"], document_count=row["doc_count"])
+                TagCount(
+                    slug=row_str(mapping_row(row), "slug"),
+                    label=row_str(mapping_row(row), "label"),
+                    document_count=row_int(mapping_row(row), "doc_count"),
+                )
                 for row in tag_rows
             ],
-            language_breakdown={row["lang"]: row["cnt"] for row in lang_rows},
+            language_breakdown={
+                row_str(mapping_row(row), "lang"): row_int(mapping_row(row), "cnt")
+                for row in lang_rows
+            },
             recent_activity=[
                 RecentActivity(
-                    event_type=row["event_type"],
-                    entity_id=row["entity_id"],
-                    created_at=row["created_at"],
+                    event_type=row_str(mapping_row(row), "event_type"),
+                    entity_id=row_uuid(mapping_row(row), "entity_id"),
+                    created_at=_row_datetime(mapping_row(row), "created_at"),
                 )
                 for row in recent_rows
             ],
             top_served=[
                 TopServedItem(
-                    document_id=row["document_id"],
-                    title=row["title"],
-                    url=row["url"],
-                    served_count=row["served_count"],
-                    last_served_at=row["last_served_at"],
+                    document_id=row_uuid(mapping_row(row), "document_id"),
+                    title=row_str_optional(mapping_row(row), "title"),
+                    url=row_str_optional(mapping_row(row), "url"),
+                    served_count=row_int(mapping_row(row), "served_count"),
+                    last_served_at=_row_datetime_optional(mapping_row(row), "last_served_at"),
                 )
                 for row in top_rows
             ],
@@ -1072,11 +1164,11 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
         return TopServedResponse(
             items=[
                 TopServedItem(
-                    document_id=row["document_id"],
-                    title=row["title"],
-                    url=row["url"],
-                    served_count=row["served_count"],
-                    last_served_at=row["last_served_at"],
+                    document_id=row_uuid(mapping_row(row), "document_id"),
+                    title=row_str_optional(mapping_row(row), "title"),
+                    url=row_str_optional(mapping_row(row), "url"),
+                    served_count=row_int(mapping_row(row), "served_count"),
+                    last_served_at=_row_datetime_optional(mapping_row(row), "last_served_at"),
                 )
                 for row in rows
             ]

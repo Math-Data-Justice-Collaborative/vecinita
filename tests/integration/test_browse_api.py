@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import os
+from typing import cast
 
 import pytest
 from fastapi.testclient import TestClient
+from tests.helpers.json_response import json_int, json_list, json_str, response_json_object
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_database.seeds.tags import load_seed_tags, load_tagged_corpus
+from vecinita_shared_schemas.json_types import JsonObject, as_json_object
 
 pytestmark = pytest.mark.integration
 
@@ -35,38 +38,60 @@ def browse_client() -> TestClient:
     return TestClient(create_app(settings=settings))
 
 
+def _item_has_tags(item: JsonObject) -> bool:
+    tags_value = item.get("tags")
+    return isinstance(tags_value, list) and len(tags_value) > 0
+
+
 def test_tc040_browse_documents_paginated_with_tags(browse_client: TestClient) -> None:
     """GET /api/v1/documents returns tagged fixture rows with pagination."""
     response = browse_client.get("/api/v1/documents")
     assert response.status_code == 200
-    payload = response.json()
+    payload = response_json_object(response)
     assert payload["page"] == 1
     assert payload["page_size"] == 20
-    assert payload["total"] >= 2
-    assert len(payload["items"]) >= 2
-    tagged = next(item for item in payload["items"] if item["tags"])
-    assert "document_id" in tagged
-    assert "url" in tagged
+    assert json_int(payload, "total") >= 2
+    items = json_list(payload, "items")
+    assert len(items) >= 2
+    tagged = next(item for item in items if _item_has_tags(as_json_object(cast(object, item))))
+    tagged_obj = as_json_object(cast(object, tagged))
+    assert "document_id" in tagged_obj
+    assert "url" in tagged_obj
 
     filtered = browse_client.get("/api/v1/documents", params={"tags": ["housing"]})
     assert filtered.status_code == 200
-    housing_items = filtered.json()["items"]
+    housing_items = json_list(response_json_object(filtered), "items")
     assert housing_items
-    assert all(any(tag["slug"] == "housing" for tag in item["tags"]) for item in housing_items)
+    for raw_item in housing_items:
+        item = as_json_object(cast(object, raw_item))
+        tag_entries = json_list(item, "tags")
+        assert any(
+            json_str(as_json_object(cast(object, tag)), "slug") == "housing" for tag in tag_entries
+        )
 
     search = browse_client.get("/api/v1/documents", params={"q": "Legal Aid"})
     assert search.status_code == 200
-    assert len(search.json()["items"]) == 1
-    assert "Legal Aid" in (search.json()["items"][0]["title"] or "")
+    search_items = json_list(response_json_object(search), "items")
+    assert len(search_items) == 1
+    first = as_json_object(cast(object, search_items[0]))
+    title = first.get("title")
+    assert title is not None and "Legal Aid" in str(title)
 
 
 def test_tc041_tag_facets_include_seeded_tags(browse_client: TestClient) -> None:
     """GET /api/v1/tags returns facets for tagged corpus documents."""
     response = browse_client.get("/api/v1/tags")
     assert response.status_code == 200
-    tags = response.json()["tags"]
-    slugs = {tag["slug"] for tag in tags}
+    tags_payload = response_json_object(response)
+    tags = json_list(tags_payload, "tags")
+    slugs = {json_str(as_json_object(cast(object, tag)), "slug") for tag in tags}
     assert "housing" in slugs
     assert "legal" in slugs
-    housing = next(tag for tag in tags if tag["slug"] == "housing" and tag["language"] == "en")
-    assert housing["document_count"] >= 1
+    housing = next(
+        tag
+        for tag in tags
+        if json_str(as_json_object(cast(object, tag)), "slug") == "housing"
+        and json_str(as_json_object(cast(object, tag)), "language") == "en"
+    )
+    housing_obj = as_json_object(cast(object, housing))
+    assert json_int(housing_obj, "document_count") >= 1

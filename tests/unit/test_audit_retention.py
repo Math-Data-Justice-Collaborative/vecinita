@@ -10,9 +10,7 @@ import pytest
 from sqlalchemy import create_engine, text
 from vecinita_internal_write_api.audit import emit_audit_event
 
-pytestmark = pytest.mark.skipif(
-    not os.environ.get("DATABASE_URL"), reason="DATABASE_URL required"
-)
+pytestmark = pytest.mark.skipif(not os.environ.get("DATABASE_URL"), reason="DATABASE_URL required")
 
 
 @pytest.fixture
@@ -37,10 +35,7 @@ def _seed_old_events(engine):
             payload={"test": "old_event_1"},
         )
         conn.execute(
-            text(
-                "UPDATE audit_log SET created_at = :ts "
-                "WHERE payload::text LIKE :pat"
-            ),
+            text("UPDATE audit_log SET created_at = :ts WHERE payload::text LIKE :pat"),
             {"ts": old_ts, "pat": "%old_event_1%"},
         )
 
@@ -53,10 +48,7 @@ def _seed_old_events(engine):
             payload={"test": "old_event_2"},
         )
         conn.execute(
-            text(
-                "UPDATE audit_log SET created_at = :ts "
-                "WHERE payload::text LIKE :pat"
-            ),
+            text("UPDATE audit_log SET created_at = :ts WHERE payload::text LIKE :pat"),
             {"ts": old_ts, "pat": "%old_event_2%"},
         )
 
@@ -69,10 +61,7 @@ def _seed_old_events(engine):
             payload={"test": "recent_event"},
         )
         conn.execute(
-            text(
-                "UPDATE audit_log SET created_at = :ts "
-                "WHERE payload::text LIKE :pat"
-            ),
+            text("UPDATE audit_log SET created_at = :ts WHERE payload::text LIKE :pat"),
             {"ts": recent_ts, "pat": "%recent_event%"},
         )
 
@@ -96,18 +85,12 @@ def test_cleanup_audit_log_deletes_old_records(engine, _seed_old_events) -> None
 
     with engine.connect() as conn:
         remaining = conn.execute(
-            text(
-                "SELECT COUNT(*) FROM audit_log "
-                "WHERE payload::text LIKE '%recent_event%'"
-            )
+            text("SELECT COUNT(*) FROM audit_log WHERE payload::text LIKE '%recent_event%'")
         ).scalar_one()
         assert remaining == 1
 
         old_remaining = conn.execute(
-            text(
-                "SELECT COUNT(*) FROM audit_log "
-                "WHERE payload::text LIKE '%old_event%'"
-            )
+            text("SELECT COUNT(*) FROM audit_log WHERE payload::text LIKE '%old_event%'")
         ).scalar_one()
         assert old_remaining == 0
 

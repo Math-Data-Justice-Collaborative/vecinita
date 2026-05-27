@@ -4,10 +4,15 @@ from __future__ import annotations
 
 import os
 import uuid
+from typing import cast
+from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from tests.helpers.json_response import json_list, json_str, response_json_object
+from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
+from vecinita_shared_schemas.json_types import as_json_object
 
 pytestmark = pytest.mark.e2e
 
@@ -45,13 +50,16 @@ def sample_docs(engine):
     with engine.begin() as conn:
         for i in range(2):
             url = f"https://bulk-tag-{uuid.uuid4().hex[:8]}-{i}.example.com"
-            doc_id = conn.execute(
-                text(
-                    "INSERT INTO documents (url, title, language) "
-                    "VALUES (:url, :title, 'en') RETURNING id"
-                ),
-                {"url": url, "title": f"Bulk Tag Doc {i}"},
-            ).scalar_one()
+            doc_id_raw = sqlalchemy_scalar_one(
+                conn.execute(
+                    text(
+                        "INSERT INTO documents (url, title, language) "
+                        "VALUES (:url, :title, 'en') RETURNING id"
+                    ),
+                    {"url": url, "title": f"Bulk Tag Doc {i}"},
+                )
+            )
+            doc_id = UUID(str(doc_id_raw))
             doc_ids.append(doc_id)
     yield doc_ids
     with engine.begin() as conn:
@@ -79,7 +87,7 @@ def test_bulk_tag_add(client, sample_docs) -> None:
         headers=_auth(),
     )
     assert resp.status_code == 200
-    data = resp.json()
+    data = response_json_object(resp)
     assert data["successes"] == 2
     assert data["failures"] == []
 
@@ -95,10 +103,11 @@ def test_bulk_tag_partial_failure_not_found(client, sample_docs) -> None:
         headers=_auth(),
     )
     assert resp.status_code == 200
-    data = resp.json()
+    data = response_json_object(resp)
     assert data["successes"] == 1
-    assert len(data["failures"]) == 1
-    assert data["failures"][0]["id"] == fake_id
+    failures = json_list(data, "failures")
+    assert len(failures) == 1
+    assert json_str(as_json_object(cast(object, failures[0])), "id") == fake_id
 
 
 def test_bulk_tag_emits_audit(client, sample_docs, engine) -> None:
