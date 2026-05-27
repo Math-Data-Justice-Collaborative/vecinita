@@ -11,7 +11,7 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `DATABASE_URL` | Yes | Managed Postgres connection string (read + pgvector) |
-| `VECINITA_MODAL_EMBED_URL` | Yes | Modal `vecinita-embedding` base URL (**`vecinita--`** workspace prefix) |
+| `VECINITA_MODAL_EMBED_URL` | Yes | Modal `vecinita-embedding` **base** URL (**`vecinita--`** prefix; no `/health` suffix) |
 | `VECINITA_MODAL_LLM_URL` | Yes | Modal `vecinita-llm` base URL |
 | `VECINITA_MODAL_TOKEN_ID` | If Modal auth | DO→Modal credential |
 | `VECINITA_MODAL_TOKEN_SECRET` | If Modal auth | DO→Modal credential |
@@ -36,7 +36,7 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 | `VECINITA_HEALTH_TIMEOUT_MS` | No | Default `5000` — EV-002 health aggregator timeout per service (F26) |
 | `VECINITA_AUDIT_RETENTION_DAYS` | No | Default `365` — EV-002 audit retention for `POST /internal/v1/audit/cleanup` (F29); `0` = skip |
 | `VECINITA_CHAT_RAG_URL` | Yes (EV-002) | Chat-rag-backend URL for `GET /internal/v1/health/all` polling |
-| `VECINITA_MODAL_EMBED_URL` | Yes (EV-002) | Modal embedding URL for health aggregator |
+| `VECINITA_MODAL_EMBED_URL` | Yes (EV-002) | Modal embedding **base** URL (no `/health` suffix); health poll appends `/health` |
 | `VECINITA_MODAL_LLM_URL` | Yes (EV-002) | Modal LLM URL for health aggregator |
 | `VECINITA_MODAL_DATA_MGMT_URL` | Yes (EV-001/002) | Modal data-mgmt URL — retag dispatch + health poll |
 | `VECINITA_CHAT_FRONTEND_URL` | Yes (EV-002) | Chat static site URL for health aggregator HTTP check |
