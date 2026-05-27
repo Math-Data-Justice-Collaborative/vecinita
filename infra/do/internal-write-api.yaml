@@ -38,3 +38,24 @@ services:
       - key: VECINITA_MODAL_PROXY_KEY
         scope: RUN_TIME
         type: SECRET
+      - key: VECINITA_MODAL_EMBED_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_MODAL_LLM_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_CHAT_RAG_URL
+        scope: RUN_TIME
+        value: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
+      - key: VECINITA_CHAT_FRONTEND_URL
+        scope: RUN_TIME
+        value: https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app
+      - key: VECINITA_ADMIN_FRONTEND_URL
+        scope: RUN_TIME
+        value: https://vecinita-admin-frontend-ef4ob.ondigitalocean.app
+      - key: VECINITA_HEALTH_TIMEOUT_MS
+        scope: RUN_TIME
+        value: "5000"
+      - key: VECINITA_AUDIT_RETENTION_DAYS
+        scope: RUN_TIME
+        value: "365"

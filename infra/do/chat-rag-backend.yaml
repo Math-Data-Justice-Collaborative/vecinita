@@ -42,3 +42,12 @@ services:
       - key: VECINITA_CORS_ORIGINS
         scope: RUN_TIME
         type: SECRET
+      - key: VECINITA_INTERNAL_WRITE_URL
+        scope: RUN_TIME
+        value: https://vecinita-internal-write-api-icze4.ondigitalocean.app
+      - key: VECINITA_INTERNAL_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_STATS_ENABLED
+        scope: RUN_TIME
+        value: "true"
