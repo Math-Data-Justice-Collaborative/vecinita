@@ -48,7 +48,7 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_AUDIT_RETENTION_DAYS` | int | `365` | No | Days for `POST /internal/v1/audit/cleanup` (F29); `0` skips delete |
 | `VECINITA_HEALTH_TIMEOUT_MS` | int | `5000` | No | Timeout per service health poll in aggregator (F26); TP-019 |
 | `VECINITA_CHAT_RAG_URL` | string | — | Yes (EV-002) | Chat-rag-backend URL for health aggregator |
-| `VECINITA_MODAL_EMBED_URL` | string | — | Yes (EV-002) | Modal embedding URL for health aggregator |
+| `VECINITA_MODAL_EMBED_URL` | string | — | Yes (EV-002) | Modal embedding **base** URL for health aggregator (no `/health` suffix) |
 | `VECINITA_MODAL_LLM_URL` | string | — | Yes (EV-002) | Modal LLM URL for health aggregator |
 | `VECINITA_MODAL_DATA_MGMT_URL` | string | — | Yes (EV-001/002) | Modal data-mgmt URL for health aggregator |
 | `VECINITA_CHAT_FRONTEND_URL` | string | — | Yes (EV-002) | Chat static site URL for health aggregator |

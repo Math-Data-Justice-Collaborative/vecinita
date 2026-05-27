@@ -77,6 +77,14 @@ from vecinita_internal_write_api.tags import (
 )
 
 
+def _dependency_health_url(base: str) -> str:
+    """Build liveness URL for an upstream base that may already end with /health."""
+    normalized = base.rstrip("/")
+    if normalized.endswith("/health"):
+        return normalized
+    return f"{normalized}/health"
+
+
 def _row_datetime(row: Mapping[str, object], key: str) -> datetime:
     value = row_value(row, key)
     if isinstance(value, datetime):
@@ -1011,7 +1019,7 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 continue
             start = time.monotonic()
             try:
-                health_url = f"{url.rstrip('/')}/health"
+                health_url = _dependency_health_url(url)
                 resp = httpx.get(health_url, timeout=timeout_s)
                 ms = int((time.monotonic() - start) * 1000)
                 if resp.status_code == 200:
