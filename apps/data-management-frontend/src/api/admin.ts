@@ -76,6 +76,49 @@ export async function bulkTagDocuments(
   return response.json() as Promise<BulkResult>;
 }
 
+export interface AuditEvent {
+  id: string;
+  event_type: string;
+  entity_type: string;
+  entity_id: string;
+  timestamp: string;
+  payload: Record<string, unknown>;
+}
+
+export interface AuditPage {
+  events: AuditEvent[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export async function fetchAuditLog(
+  options: CorpusClientOptions,
+  params?: { event_type?: string; entity_id?: string; page?: number },
+): Promise<AuditPage> {
+  const url = new URL(`${options.baseUrl}/internal/v1/audit`);
+  if (params?.event_type) url.searchParams.set("event_type", params.event_type);
+  if (params?.entity_id) url.searchParams.set("entity_id", params.entity_id);
+  if (params?.page) url.searchParams.set("page", String(params.page));
+  const response = await fetch(url.toString(), {
+    headers: { Authorization: `Bearer ${options.apiKey}` },
+  });
+  if (!response.ok) throw new Error(`Audit log failed (${response.status})`);
+  return response.json() as Promise<AuditPage>;
+}
+
+export async function fetchDocumentHistory(
+  options: CorpusClientOptions,
+  documentId: string,
+): Promise<AuditEvent[]> {
+  const response = await fetch(`${options.baseUrl}/internal/v1/audit?entity_id=${documentId}`, {
+    headers: { Authorization: `Bearer ${options.apiKey}` },
+  });
+  if (!response.ok) throw new Error(`Document history failed (${response.status})`);
+  const body = (await response.json()) as { events: AuditEvent[] };
+  return body.events;
+}
+
 export async function bulkUpdateMetadata(
   options: CorpusClientOptions,
   documentIds: string[],

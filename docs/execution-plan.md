@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 7: EV-002 Frontend — Admin UI Overhaul |
-| **Active milestone** | M29: Audit log + version history UI |
-| **Active task** | T29.1 |
-| **Tasks completed** | 166 / 184 |
+| **Active milestone** | Phase 7 complete — gate passed |
+| **Active task** | — |
+| **Tasks completed** | 172 / 184 |
 | **Last updated** | 2026-05-26 |
 | **Evolve cycle** | EV-002 (F23–F29) — **in_progress** |
 
@@ -585,20 +585,20 @@
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
-| T29.1 | Implement Audit Log page — table with event_type, entity, timestamp, payload summary | Code | pending | UJ-017, feature-list F29, AC-E8 | T25.5, T21.5 | — | EV-002 | F29 |
-| T29.2 | Add filters: event_type dropdown, date range picker, entity_id search | Code | pending | UJ-017 | T29.1 | — | EV-002 | F29 |
-| T29.3 | Add expandable payload detail (JSON diff viewer) per audit entry | Code | pending | UJ-017 | T29.1 | — | EV-002 | F29 |
-| T29.4 | Implement per-document history timeline in document detail view | Code | pending | UJ-018, AC-E9 | T29.1, T21.7 | — | EV-002 | F29 |
-| T29.5 | Test: audit log page pagination + filter (`tests/frontend/test_audit_page.test.tsx`) | Test | pending | TC-056, TC-057 | T29.3 | — | EV-002 | F29 |
-| T29.6 | Test: document history timeline renders (`tests/frontend/test_doc_history.test.tsx`) | Test | pending | TC-058 | T29.4 | — | EV-002 | F29 |
+| T29.1 | Implement Audit Log page — table with event_type, entity, timestamp, payload summary | Code | completed | UJ-017, feature-list F29, AC-E8 | T25.5, T21.5 | — | EV-002 | F29 |
+| T29.2 | Add filters: event_type dropdown, date range picker, entity_id search | Code | completed | UJ-017 | T29.1 | — | EV-002 | F29 |
+| T29.3 | Add expandable payload detail (JSON diff viewer) per audit entry | Code | completed | UJ-017 | T29.1 | — | EV-002 | F29 |
+| T29.4 | Implement per-document history timeline in document detail view | Code | completed | UJ-018, AC-E9 | T29.1, T21.7 | — | EV-002 | F29 |
+| T29.5 | Test: audit log page pagination + filter (`tests/frontend/test_audit_page.test.tsx`) | Test | completed | TC-056, TC-057 | T29.3 | — | EV-002 | F29 |
+| T29.6 | Test: document history timeline renders (`tests/frontend/test_doc_history.test.tsx`) | Test | completed | TC-058 | T29.4 | — | EV-002 | F29 |
 
 #### Phase 7 Gate Check
 
-- [ ] All M25–M29 tasks completed
-- [ ] `cd apps/data-management-frontend && npm run lint && npm test` passes
-- [ ] All admin pages accessible via React Router (/dashboard, /corpus, /health, /audit)
-- [ ] Theme toggle follows system preference; responsive at 768px + 1280px
-- [ ] Vitest component tests cover all new pages/components
+- [x] All M25–M29 tasks completed
+- [x] `cd apps/data-management-frontend && npm run lint && npm test` passes (0 errors, 32 tests pass)
+- [x] All admin pages accessible via React Router (/dashboard, /corpus, /health, /audit)
+- [x] Theme toggle follows system preference; responsive at 768px + 1280px
+- [x] Vitest component tests cover all new pages/components (8 test files, 32 tests)
 
 ---
 
