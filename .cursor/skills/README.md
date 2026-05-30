@@ -28,6 +28,7 @@ replace workflow-state.
 | Corpus + DB setup | [data-management](data-management/SKILL.md) |
 | Production health | [15-service-health](15-service-health/SKILL.md) |
 | Bug fix after deploy | [14-hotfix](14-hotfix/SKILL.md) |
+| GitHub Projects board setup | [github-projects](github-projects/SKILL.md) |
 | CORS / UI wiring gates (all stages) | [connectivity-gates](connectivity-gates.md) |
 
 **Any stage 00–17** can accept "add features X, Y, Z" when an evolve cycle is active (delta
