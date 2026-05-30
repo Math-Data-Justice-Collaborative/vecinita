@@ -52,13 +52,9 @@ Languages card: (empty — no number)
 - Red: renders "Invalid Date"; Languages count missing
 - Green: after `parseStatsSummary()` in `fetchStatsSummary` (user confirmed repro 2026-05-27)
 
-## Fix
-
-- `apps/data-management-frontend/src/api/admin.ts`: `StatsSummaryApiResponse` + `parseStatsSummary()`
-  maps `created_at` → `timestamp`, `language_breakdown` dict → array, tag rows → UI shape.
-- `fetchStatsSummary()` uses parser (parity with health/audit).
-- `DashboardPage.tsx`: show `summary` when present in activity rows.
-- Tests updated to api-contract wire mocks.
+- **PR:** https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/51 — merged 2026-05-27 (`0b82694` on `main`).
+- **CI:** PR branch + main `ci.yml` success; deploy-preflight cancelled (0 jobs, superseded push — non-blocking for FE-only hotfix).
+- **Deploy:** `vecinita-admin-frontend` DO deploy triggered 2026-05-27; bundle `index-ButgFDDr.js` includes `parseStatsSummary`.
 
 ## Verification
 
