@@ -77,7 +77,10 @@ describe("ChatPanel", () => {
       "http://localhost:8000/api/v1/ask/stream",
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({ question: "When is the food pantry open?" }),
+        body: JSON.stringify({
+          question: "When is the food pantry open?",
+          language: "en",
+        }),
       }),
     );
   });

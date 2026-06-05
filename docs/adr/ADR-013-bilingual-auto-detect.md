@@ -16,8 +16,8 @@ Operators may ingest corpus in either language; users should receive answers in 
 - **Detection:** Auto-detect query language on each request (library TBD in dependency inventory, e.g. `langdetect`).
 - **Response:** Generate answer in the **detected query language**; include `language` field in JSON response (`docs/api-contract.md`).
 - **Prompts:** LlamaIndex synthesis prompts in `packages/rag` respect detected language.
-- **Corpus:** No requirement that corpus be single-language; retrieval is language-agnostic on embeddings.
-- **UI:** ChatRAG Frontend may show detected language; optional client hint allowed if it does not carry identity fields.
+- **Corpus:** No requirement that corpus be single-language. When `AskRequest.language` is set (EV-005 UI toggle), retrieval filters `documents.language` to that value; when omitted, auto-detect from the question applies the same filter.
+- **UI:** ChatRAG Frontend exposes an EN/ES toggle (`localStorage`); selected language is sent as `language` on ask/stream and filters tag chips.
 
 ### Out of scope v1
 

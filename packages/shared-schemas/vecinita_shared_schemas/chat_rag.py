@@ -14,6 +14,7 @@ class AskRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     question: str = Field(..., min_length=1, max_length=4000)
+    language: Literal["en", "es"] | None = None
     tags: list[str] = Field(default_factory=list, max_length=10)
 
 

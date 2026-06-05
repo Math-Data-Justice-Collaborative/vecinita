@@ -140,6 +140,14 @@ components:
           type: string
           minLength: 1
           maxLength: 4000
+        language:
+          type: string
+          enum:
+            - en
+            - es
+          description: >
+            Corpus language filter and response language. When omitted, the backend
+            auto-detects from the question text (ADR-013).
         tags:
           type: array
           maxItems: 10

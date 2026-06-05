@@ -7,7 +7,8 @@ from typing import Literal, cast
 
 from vecinita_embedding_client import EmbeddingClient
 from vecinita_llm_client import LlmClient
-from vecinita_rag.engine import answer_from_chunks, answer_without_context
+from vecinita_rag.engine import answer_from_chunks
+from vecinita_rag.language import detect_query_language, no_context_message
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_rag.tag_inference import TagInferFn, resolve_retrieval_tags
 from vecinita_rag.types import RagAnswer, RetrievedChunk
@@ -96,6 +97,11 @@ class ChatRagService:
             tag_infer_fn=tag_infer_fn,
         )
 
+    def _effective_language(self, request: AskRequest) -> str:
+        if request.language is not None:
+            return request.language
+        return detect_query_language(request.question)
+
     def _retrieval_tags(self, request: AskRequest) -> list[str] | None:
         return resolve_retrieval_tags(
             question=request.question,
@@ -104,26 +110,47 @@ class ChatRagService:
         )
 
     def _retrieve(self, request: AskRequest) -> list[RetrievedChunk]:
+        language = self._effective_language(request)
         tag_slugs = self._retrieval_tags(request)
-        chunks = self._retriever.retrieve_chunks(request.question, tag_slugs=tag_slugs)
+        chunks = self._retriever.retrieve_chunks(
+            request.question,
+            tag_slugs=tag_slugs,
+            language=language,
+        )
         if not chunks and tag_slugs:
-            chunks = self._retriever.retrieve_chunks(request.question, tag_slugs=None)
+            chunks = self._retriever.retrieve_chunks(
+                request.question,
+                tag_slugs=None,
+                language=language,
+            )
         return chunks
 
     def ask(self, request: AskRequest) -> AskResponse:
+        language = self._effective_language(request)
         chunks = self._retrieve(request)
         if not chunks:
-            return _to_ask_response(answer_without_context(request.question))
+            return _to_ask_response(
+                RagAnswer(
+                    answer=no_context_message(language),
+                    language=language,
+                    sources=[],
+                )
+            )
         prompt = _build_prompt(request.question, chunks)
         answer_text = self._llm.generate(prompt, max_tokens=self._chat_max_tokens)
         result = answer_from_chunks(request.question, chunks, answer_text=answer_text)
+        result = RagAnswer(
+            answer=result.answer,
+            language=language,
+            sources=result.sources,
+        )
         return _to_ask_response(result)
 
     def ask_stream(self, request: AskRequest) -> Iterator[str]:
+        language = self._effective_language(request)
         chunks = self._retrieve(request)
         if not chunks:
-            result = answer_without_context(request.question)
-            yield result.answer
+            yield no_context_message(language)
             return
         prompt = _build_prompt(request.question, chunks)
         yield from self._llm.generate_stream(prompt, max_tokens=self._chat_max_tokens)
