@@ -1,3 +1,4 @@
+import type { Locale } from "../hooks/useLocale";
 import type { Source, StreamEvent } from "./types";
 
 /** Keep in sync with `vecinita_shared_schemas.transient_http`. */
@@ -44,11 +45,14 @@ function sleep(ms: number): Promise<void> {
 async function* streamAskOnce(
   question: string,
   baseUrl: string,
-  tags?: string[],
+  options?: { tags?: string[]; language?: Locale },
 ): AsyncGenerator<StreamEvent> {
-  const body: { question: string; tags?: string[] } = { question };
-  if (tags && tags.length > 0) {
-    body.tags = tags;
+  const body: { question: string; tags?: string[]; language?: Locale } = { question };
+  if (options?.language) {
+    body.language = options.language;
+  }
+  if (options?.tags && options.tags.length > 0) {
+    body.tags = options.tags;
   }
   const response = await fetch(`${baseUrl}/api/v1/ask/stream`, {
     method: "POST",
@@ -96,6 +100,7 @@ async function* streamAskOnce(
 
 export type StreamAskOptions = {
   tags?: string[];
+  language?: Locale;
   onRetry?: (attempt: number, maxAttempts: number) => void;
 };
 
@@ -109,7 +114,10 @@ export async function* streamAsk(
 
   for (let attempt = 1; attempt <= COLD_START_ASK_MAX_ATTEMPTS; attempt++) {
     try {
-      yield* streamAskOnce(question, baseUrl, options?.tags);
+      yield* streamAskOnce(question, baseUrl, {
+        tags: options?.tags,
+        language: options?.language,
+      });
       return;
     } catch (err) {
       const status = err instanceof AskStreamError ? err.status : undefined;

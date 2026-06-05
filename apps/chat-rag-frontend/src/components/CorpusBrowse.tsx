@@ -6,6 +6,8 @@ import {
   type DocumentBrowseItem,
   type TagFacet,
 } from "../api/browse";
+import { useLocale } from "../hooks/useLocale";
+import { LanguageToggle } from "./LanguageToggle";
 
 type CorpusBrowseProps = {
   onNavigateHome: () => void;
@@ -21,6 +23,7 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
   const [pageSize, setPageSize] = useState(20);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const { locale, setLocale } = useLocale();
 
   useEffect(() => {
     let cancelled = false;
@@ -94,6 +97,7 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
         <button type="button" className="secondary" onClick={onNavigateHome}>
           Back to chat
         </button>
+        <LanguageToggle locale={locale} onChange={setLocale} />
       </div>
 
       <form className="corpus-search" onSubmit={handleSearch}>
@@ -112,7 +116,7 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
 
       <div className="tag-chips" data-testid="browse-tag-chips">
         {tags
-          .filter((tag) => tag.language === "en")
+          .filter((tag) => tag.language === locale)
           .map((tag) => {
             const active = selectedTags.includes(tag.slug);
             return (

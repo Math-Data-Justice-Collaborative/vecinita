@@ -21,9 +21,12 @@ Base path: `/api/v1`
 ```json
 {
   "question": "string (required, 1-4000 chars)",
+  "language": "en | es (optional)",
   "tags": ["string (optional, max 10)"]
 }
 ```
+
+When `language` is set, retrieval filters `documents.language` to that value and the response uses the same language. When omitted, the backend auto-detects language from the question text (ADR-013).
 
 When `tags` is non-empty, retrieval filters by those tags only (LLM tag inference skipped). When omitted or empty, backend infers tags from the question before retrieval.
 

@@ -12,6 +12,8 @@ import { fetchTags, type TagFacet } from "../api/browse";
 import type { Source } from "../api/types";
 import { requireChatApiConfig } from "../config";
 import { useChatHistory } from "../hooks/useChatHistory";
+import { useLocale } from "../hooks/useLocale";
+import { LanguageToggle } from "./LanguageToggle";
 import { TagFilterChips } from "./TagFilterChips";
 import { SourceList } from "./SourceList";
 
@@ -22,6 +24,7 @@ export function ChatPanel() {
   const [loading, setLoading] = useState(false);
   const [tagFacets, setTagFacets] = useState<TagFacet[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const { locale, setLocale } = useLocale();
   const {
     messages,
     appendUserMessage,
@@ -74,6 +77,7 @@ export function ChatPanel() {
       let sources: Source[] = [];
 
       for await (const chunk of streamAsk(trimmed, baseUrl, {
+        language: locale,
         tags: selectedTags.length > 0 ? selectedTags : undefined,
         onRetry: () => {
           setStatusMessage(COLD_START_STATUS_MESSAGE);
@@ -102,8 +106,14 @@ export function ChatPanel() {
 
   return (
     <section className="chat-panel" aria-label="Community Q&A chat">
+      <LanguageToggle locale={locale} onChange={setLocale} />
       {tagFacets.length > 0 ? (
-        <TagFilterChips tags={tagFacets} selected={selectedTags} onToggle={toggleTag} />
+        <TagFilterChips
+          tags={tagFacets}
+          selected={selectedTags}
+          locale={locale}
+          onToggle={toggleTag}
+        />
       ) : null}
       <div className="message-list" data-testid="message-list">
         {messages.length === 0 ? (

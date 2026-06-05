@@ -70,11 +70,16 @@ class CorpusPgvectorRetriever(BaseRetriever):
         query: str,
         *,
         tag_slugs: list[str] | None = None,
+        language: str | None = None,
     ) -> list[RetrievedChunk]:
         query_vector = self._embed_fn(query)
         literal = _vector_literal(query_vector)
         tag_clause = ""
+        language_clause = ""
         params: dict[str, object] = {"query_embedding": literal, "top_k": self._top_k}
+        if language is not None:
+            language_clause = "AND d.language = :language"
+            params["language"] = language
         if tag_slugs:
             tag_clause = """
               AND (
@@ -110,6 +115,7 @@ class CorpusPgvectorRetriever(BaseRetriever):
             JOIN chunks c ON c.id = e.chunk_id
             JOIN documents d ON d.id = c.document_id
             WHERE 1=1
+            {language_clause}
             {tag_clause}
             ORDER BY e.embedding <=> CAST(:query_embedding AS vector)
             LIMIT :top_k

@@ -55,6 +55,7 @@ describe("Tag chips in chat", () => {
       <TagFilterChips
         tags={[{ slug: "housing", label: "Housing", language: "en", document_count: 1 }]}
         selected={[]}
+        locale="en"
         onToggle={onToggle}
       />,
     );
