@@ -246,6 +246,11 @@ stages:
       - deploy_drift_c4bc847_vs_4d2f665
   17-retrospective:
     status: pending
+  18-pr-review:
+    status: completed
+    started: "2026-06-12"
+    completed: "2026-06-12"
+    last_cycle: PRR-001
   gather-context:
     status: skipped
     note: "Superseded by 00-context for this project; key reserved for doc-planner path"
@@ -618,6 +623,28 @@ evolve_cycles:
         status: completed
     issues: []
 retrospective_cycles: []
+pr_review_cycles:
+  - id: PRR-001
+    pr_number: 60
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/60
+    title: "Fix/es en full UI"
+    status: completed
+    started: "2026-06-12"
+    completed: "2026-06-12"
+    head_ref: fix/es-en-full-ui
+    base_ref: main
+    verdict: COMMENT
+    blockers: 0
+    advisories: 6
+    praise: 4
+    ci_status: success
+    subagents:
+      bugbot: skipped
+      security_review: skipped
+    artifacts:
+      - path: .cursor/skills/18-pr-review/checklist.md
+        note: checklist source
+    gh_review_url: null
 
 agents:
   repo_researcher:

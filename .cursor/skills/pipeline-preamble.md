@@ -101,7 +101,7 @@ connectivity-gates — hybrid deploys (static UI + separate API) are never “AP
 | **Write via agent** | Invoke agent `operation: update` after each substep — never buffer |
 | **Resume** | Agent context brief reports `status`, timestamps, substeps, active cycles |
 | **Stage key** | Agent maps `skill_id` → `stages.{key}` (e.g. `stages.07-build`) |
-| **Cycles** | `evolve_cycles[]` (16-evolve), `retrospective_cycles[]` (17), `pr_review_cycles[]` (18-pr-review) |
+| **Cycles** | `evolve_cycles[]` (16-evolve), `retrospective_cycles[]` (17), `pr_review_cycles[]` (18-pr-review), `pr_remediation_cycles[]` (19-address-pr-review) |
 | **Cross-stage issues** | Agent appends `issue_log` with category + evidence |
 | **Artifacts** | Agent appends paths to top-level `artifacts[]` on completion |
 | **Deviations** | Agent returns **blocking** issues → skill must AskQuestion; do not proceed |

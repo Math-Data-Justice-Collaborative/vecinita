@@ -29,6 +29,7 @@ On-demand **Phase G** skill: structured pull-request review with findings posted
 | Review open PR before merge | **18-pr-review** |
 | Milestone or phase PR ready for human/agent review | **18-pr-review** |
 | Post structured feedback to GitHub | **18-pr-review** |
+| Fix review findings on the PR branch | [19-address-pr-review](../19-address-pr-review/SKILL.md) |
 | Production bug patch | [14-hotfix](../14-hotfix/SKILL.md) first, then **18-pr-review** on the fix PR |
 | Process retrospective | [17-retrospective](../17-retrospective/SKILL.md) |
 
@@ -119,7 +120,8 @@ If `gh` post fails, report error verbatim; retry once; then AskQuestion.
 
 1. workflow-state-manager `update` — complete `pr_review_cycles[]`.
 2. Chat summary: PR URL, verdict, blocker count, link to posted review.
-3. Do **not** fix code or push unless user explicitly asks in a follow-up.
+3. Do **not** fix code or push unless user explicitly asks in a follow-up — use
+   [19-address-pr-review](../19-address-pr-review/SKILL.md) for structured remediation.
 
 ## Output rules
 

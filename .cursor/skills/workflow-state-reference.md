@@ -2,7 +2,7 @@
 
 **Single source of truth:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml).
 
-Every pipeline skill (00–18), orchestrator ([pipeline](pipeline/SKILL.md)), auxiliary skills
+Every pipeline skill (00–19), orchestrator ([pipeline](pipeline/SKILL.md)), auxiliary skills
 (build-executor, gather-context, doc-planner, etc.), and
 [workflow-state-manager](../agents/workflow-state-manager.md) use this file.
 
@@ -48,6 +48,7 @@ artifacts: []    # paths produced; append on completion
 evolve_cycles: []      # 16-evolve — see 16-evolve/reference.md
 retrospective_cycles: [] # 17-retrospective — see 17-retrospective/reference.md
 pr_review_cycles: []    # 18-pr-review — see 18-pr-review/reference.md
+pr_remediation_cycles: []  # 19-address-pr-review — see 19-address-pr-review/reference.md
 
 git_history:     # commit and branch tracking — see §Git history
   current_branch: string
@@ -241,6 +242,7 @@ Use `started_at` / `completed_at` (ISO date `YYYY-MM-DD`) when transitioning.
 | `16-evolve` | `evolve_cycles[]` | per `16-evolve/reference.md` |
 | `17-retrospective` | `retrospective_cycles[]` | per `17-retrospective/reference.md` |
 | `18-pr-review` | `pr_review_cycles[]` | per `18-pr-review/reference.md` |
+| `19-address-pr-review` | `pr_remediation_cycles[]` | per `19-address-pr-review/reference.md` |
 | `audit-licenses` | `stages.audit-licenses` | flags in `docs/` or stage `report` |
 | `clone-repos` | `stages.clone-repos` | — |
 | `config-validator` | `stages.config-validator` | advisory; often nested under 03 |
