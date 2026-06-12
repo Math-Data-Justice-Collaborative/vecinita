@@ -1,7 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 
 import {
-  COLD_START_STATUS_MESSAGE,
   formatAskFailureMessage,
   isDoneEvent,
   isSourcesEvent,
@@ -11,9 +10,9 @@ import {
 import { fetchTags, type TagFacet } from "../api/browse";
 import type { Source } from "../api/types";
 import { requireChatApiConfig } from "../config";
-import { useChatHistory } from "../hooks/useChatHistory";
 import { useLocale } from "../hooks/useLocale";
-import { LanguageToggle } from "./LanguageToggle";
+import { useChatHistory } from "../hooks/useChatHistory";
+import { t } from "../i18n/messages";
 import { TagFilterChips } from "./TagFilterChips";
 import { SourceList } from "./SourceList";
 
@@ -24,7 +23,7 @@ export function ChatPanel() {
   const [loading, setLoading] = useState(false);
   const [tagFacets, setTagFacets] = useState<TagFacet[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const { locale, setLocale } = useLocale();
+  const { locale } = useLocale();
   const {
     messages,
     appendUserMessage,
@@ -80,7 +79,7 @@ export function ChatPanel() {
         language: locale,
         tags: selectedTags.length > 0 ? selectedTags : undefined,
         onRetry: () => {
-          setStatusMessage(COLD_START_STATUS_MESSAGE);
+          setStatusMessage(t(locale, "coldStartStatus"));
         },
       })) {
         setStatusMessage(null);
@@ -105,8 +104,7 @@ export function ChatPanel() {
   }
 
   return (
-    <section className="chat-panel" aria-label="Community Q&A chat">
-      <LanguageToggle locale={locale} onChange={setLocale} />
+    <section className="chat-panel" aria-label={t(locale, "chatPanelLabel")}>
       {tagFacets.length > 0 ? (
         <TagFilterChips
           tags={tagFacets}
@@ -117,13 +115,17 @@ export function ChatPanel() {
       ) : null}
       <div className="message-list" data-testid="message-list">
         {messages.length === 0 ? (
-          <p className="empty-hint">Ask a question in English or Spanish about your community.</p>
+          <p className="empty-hint">{t(locale, "emptyHint")}</p>
         ) : (
           messages.map((msg) => (
             <article key={msg.id} className={`message message-${msg.role}`} data-testid="message">
-              <p className="message-role">{msg.role === "user" ? "You" : "Vecinita"}</p>
+              <p className="message-role">
+                {msg.role === "user" ? t(locale, "roleUser") : t(locale, "roleAssistant")}
+              </p>
               <p className="message-content">{msg.content || (loading ? "…" : "")}</p>
-              {msg.sources && msg.sources.length > 0 ? <SourceList sources={msg.sources} /> : null}
+              {msg.sources && msg.sources.length > 0 ? (
+                <SourceList sources={msg.sources} locale={locale} />
+              ) : null}
             </article>
           ))
         )}
@@ -142,7 +144,7 @@ export function ChatPanel() {
       ) : null}
 
       <form className="chat-form" onSubmit={(e) => void handleSubmit(e)}>
-        <label htmlFor="question">Your question</label>
+        <label htmlFor="question">{t(locale, "yourQuestion")}</label>
         <textarea
           id="question"
           name="question"
@@ -150,11 +152,11 @@ export function ChatPanel() {
           value={question}
           onChange={(e) => { setQuestion(e.target.value); }}
           disabled={loading}
-          placeholder="e.g. When is the food pantry open?"
+          placeholder={t(locale, "questionPlaceholder")}
         />
         <div className="form-actions">
           <button type="submit" disabled={loading || !question.trim()}>
-            {loading ? "Asking…" : "Ask"}
+            {loading ? t(locale, "asking") : t(locale, "ask")}
           </button>
           <button
             type="button"
@@ -162,7 +164,7 @@ export function ChatPanel() {
             disabled={loading || messages.length === 0}
             onClick={clearHistory}
           >
-            Clear history
+            {t(locale, "clearHistory")}
           </button>
         </div>
       </form>

@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { CorpusBrowse } from "../components/CorpusBrowse";
+import { renderWithLocale } from "./renderWithLocale";
 
 vi.mock("../api/browse", () => ({
   fetchTags: vi.fn(async () => ({
@@ -32,7 +33,7 @@ describe("CorpusBrowse", () => {
   });
 
   it("TC-048: corpus row opens external source URL", async () => {
-    render(<CorpusBrowse onNavigateHome={() => undefined} />);
+    renderWithLocale(<CorpusBrowse onNavigateHome={() => undefined} />);
 
     const link = await screen.findByTestId("corpus-source-link");
     expect(link).toHaveAttribute("href", "https://example.org/housing-rights");
@@ -41,7 +42,7 @@ describe("CorpusBrowse", () => {
   });
 
   it("renders browse tag chips", async () => {
-    render(<CorpusBrowse onNavigateHome={() => undefined} />);
+    renderWithLocale(<CorpusBrowse onNavigateHome={() => undefined} />);
     expect(await screen.findByRole("button", { name: "Housing" })).toBeInTheDocument();
     expect(screen.getByTestId("browse-tag-chips")).toBeInTheDocument();
   });

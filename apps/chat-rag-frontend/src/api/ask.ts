@@ -1,4 +1,4 @@
-import type { Locale } from "../hooks/useLocale";
+import type { Locale } from "../hooks/useLocale.types";
 import type { Source, StreamEvent } from "./types";
 
 /** Keep in sync with `vecinita_shared_schemas.transient_http`. */

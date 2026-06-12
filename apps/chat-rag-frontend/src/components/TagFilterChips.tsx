@@ -1,5 +1,5 @@
 import type { TagFacet } from "../api/browse";
-import type { Locale } from "../hooks/useLocale";
+import type { Locale } from "../hooks/useLocale.types";
 
 type TagFilterChipsProps = {
   tags: TagFacet[];

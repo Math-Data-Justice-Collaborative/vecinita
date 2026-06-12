@@ -1,7 +1,8 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ChatPanel } from "../components/ChatPanel";
+import { renderWithLocale } from "./renderWithLocale";
 
 function sseResponse(body: string): Response {
   const stream = new ReadableStream({
@@ -58,7 +59,7 @@ describe("ChatPanel", () => {
       }),
     );
 
-    render(<ChatPanel />);
+    renderWithLocale(<ChatPanel />);
     fireEvent.change(screen.getByLabelText(/your question/i), {
       target: { value: "When is the food pantry open?" },
     });
@@ -112,7 +113,7 @@ describe("ChatPanel", () => {
       }),
     );
 
-    render(<ChatPanel />);
+    renderWithLocale(<ChatPanel />);
     fireEvent.change(screen.getByLabelText(/your question/i), {
       target: { value: "Hello?" },
     });
@@ -144,7 +145,7 @@ describe("ChatPanel", () => {
       }),
     );
 
-    render(<ChatPanel />);
+    renderWithLocale(<ChatPanel />);
     fireEvent.change(screen.getByLabelText(/your question/i), {
       target: { value: "Hello?" },
     });

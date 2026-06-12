@@ -1,4 +1,5 @@
-import type { Locale } from "../hooks/useLocale";
+import type { Locale } from "../hooks/useLocale.types";
+import { t } from "../i18n/messages";
 
 type LanguageToggleProps = {
   locale: Locale;
@@ -7,7 +8,12 @@ type LanguageToggleProps = {
 
 export function LanguageToggle({ locale, onChange }: LanguageToggleProps) {
   return (
-    <div className="language-toggle" role="group" aria-label="Language">
+    <div
+      className="language-toggle"
+      data-testid="language-toggle"
+      role="group"
+      aria-label={t(locale, "languageGroupLabel")}
+    >
       <button
         type="button"
         className={locale === "en" ? "lang-btn active" : "lang-btn"}
