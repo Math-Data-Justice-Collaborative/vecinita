@@ -122,7 +122,7 @@ Issue intake (2026-05-30) states **correct behavior:** language toggle filters c
 - `openapi/chat-rag.yaml` + `AskRequest.language` optional `en|es`
 - `CorpusPgvectorRetriever.retrieve_chunks(..., language=)` SQL filter
 - `ChatRagService._effective_language()` → retrieval + response language
-- Chat UI: `useLocale` (localStorage, browser default→EN), `LanguageToggle`, tag chips by locale
+- Chat UI: `useLocale` (localStorage, browser default→ES), `LanguageToggle`, tag chips by locale
 - Corpus browse: locale-aware UI chrome; tag filter by locale; document titles unchanged
 - ADR-013 + `api-contract.md` updated
 
