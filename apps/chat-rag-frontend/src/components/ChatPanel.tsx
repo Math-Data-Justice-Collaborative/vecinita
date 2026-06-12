@@ -94,7 +94,7 @@ export function ChatPanel() {
 
       setAssistantSources(assistantId, sources);
     } catch (err) {
-      const message = formatAskFailureMessage(err);
+      const message = formatAskFailureMessage(err, locale);
       setError(message);
       appendAssistantToken(assistantId, message);
     } finally {

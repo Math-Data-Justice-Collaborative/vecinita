@@ -17,6 +17,10 @@ const en = {
   clearHistory: "Clear history",
   coldStartStatus:
     "The assistant is starting up — this can take up to a minute on the first question…",
+  askStillStarting: "The assistant is still starting up. Please wait a moment and try again.",
+  askStartingWait: "The assistant is starting up — please wait a moment and try again.",
+  requestFailed: "Request failed",
+  filterByTopic: "Filter by topic",
   sourcesHeading: "Sources",
   corpusChunk: "Corpus chunk",
   backToChat: "Back to chat",
@@ -53,6 +57,12 @@ const es = {
   clearHistory: "Borrar historial",
   coldStartStatus:
     "El asistente se está iniciando — la primera pregunta puede tardar hasta un minuto…",
+  askStillStarting:
+    "El asistente aún se está iniciando. Espera un momento e inténtalo de nuevo.",
+  askStartingWait:
+    "El asistente se está iniciando — espera un momento e inténtalo de nuevo.",
+  requestFailed: "La solicitud falló",
+  filterByTopic: "Filtrar por tema",
   sourcesHeading: "Fuentes",
   corpusChunk: "Fragmento del corpus",
   backToChat: "Volver al chat",

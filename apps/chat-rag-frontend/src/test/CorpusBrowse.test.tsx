@@ -49,6 +49,10 @@ describe("CorpusBrowse", () => {
 });
 
 describe("Tag chips in chat", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it("loads tag filter chips from browse API", async () => {
     const { TagFilterChips } = await import("../components/TagFilterChips");
     const onToggle = vi.fn();
@@ -62,5 +66,21 @@ describe("Tag chips in chat", () => {
     );
     await fireEvent.click(screen.getByTestId("tag-filter-chips").querySelector("button")!);
     expect(onToggle).toHaveBeenCalledWith("housing");
+  });
+
+  it("localizes tag filter aria-label for Spanish locale", async () => {
+    const { TagFilterChips } = await import("../components/TagFilterChips");
+    render(
+      <TagFilterChips
+        tags={[{ slug: "vivienda", label: "Vivienda", language: "es", document_count: 1 }]}
+        selected={[]}
+        locale="es"
+        onToggle={vi.fn()}
+      />,
+    );
+    expect(screen.getByTestId("tag-filter-chips")).toHaveAttribute(
+      "aria-label",
+      "Filtrar por tema",
+    );
   });
 });

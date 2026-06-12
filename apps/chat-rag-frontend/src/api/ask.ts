@@ -1,4 +1,5 @@
 import type { Locale } from "../hooks/useLocale.types";
+import { t } from "../i18n/messages";
 import type { Source, StreamEvent } from "./types";
 
 /** Keep in sync with `vecinita_shared_schemas.transient_http`. */
@@ -146,21 +147,17 @@ export function isDoneEvent(event: StreamEvent): event is { done: true } {
 }
 
 /** User-facing message when all cold-start retries are exhausted. */
-export function formatAskFailureMessage(error: unknown): string {
+export function formatAskFailureMessage(error: unknown, locale: Locale): string {
   if (error instanceof AskStreamError && error.status !== undefined) {
     if (TRANSIENT_ASK_STATUSES.has(error.status)) {
-      return "The assistant is still starting up. Please wait a moment and try again.";
+      return t(locale, "askStillStarting");
     }
   }
   if (error instanceof TypeError) {
-    return "The assistant is starting up — please wait a moment and try again.";
+    return t(locale, "askStartingWait");
   }
   if (error instanceof Error) {
     return error.message;
   }
-  return "Request failed";
+  return t(locale, "requestFailed");
 }
-
-/** Shown while retrying after a transient cold-start failure. */
-export const COLD_START_STATUS_MESSAGE =
-  "The assistant is starting up — this can take up to a minute on the first question…";
