@@ -2,15 +2,16 @@
 name: pipeline
 description: >
   End-to-end orchestration skill that takes a project from requirements interview through
-  deployment. Combines stages 00-context through 15-service-health into a single resumable
+  deployment. Combines   stages 00-context through 18-pr-review into a single resumable
   pipeline with YAML state tracking, phase gates, transition checks, and cross-stage
   consistency verification, and connectivity gates (CORS, VITE_*, integration, H4–H5) across
   stages 00–15. Use when the user wants to build Vecinita (RAG + data management),
   run the full pipeline, go end-to-end, deploy from scratch, or asks "build this".
   Post-deployment surgical edits use 14-hotfix; production health checks use
   15-service-health without re-running the pipeline. Add features to an existing app
-  (including multiple Fn in one cycle) via 16-evolve or any stage 00–17 in delta mode.
+  (including multiple Fn in one cycle) via 16-evolve or any stage 00–18 in delta mode.
   Process improvement uses 17-retrospective (reviews logs and skills 00–17).
+  Pull request review uses 18-pr-review (posts to GitHub; never merges).
 ---
 
 # Pipeline
@@ -71,6 +72,11 @@ includes a §Connectivity section; phase gates below enforce the cumulative chec
 ║  16-evolve — features (multi-Fn), scope/API/arch, delta 00–15 ║
 ║  17-retrospective — process improvement from logs + state     ║
 ╚══════════════════════════════════════════════════════════════╝
+          │ PR review (on-demand)
+          ▼
+╔═══ PHASE G: REVIEW (on-demand) ═════════════════════════════╗
+║  18-pr-review — structured PR review posted to GitHub         ║
+╚══════════════════════════════════════════════════════════════╝
 ```
 
 ## Quick start
@@ -80,6 +86,7 @@ includes a §Connectivity section; phase gates below enforce the cumulative chec
 - **Add feature(s) to existing app** → [16-evolve](../16-evolve/SKILL.md)
 - **Broader scope/API/arch change** → [16-evolve](../16-evolve/SKILL.md)
 - **Process retrospective** → [17-retrospective](../17-retrospective/SKILL.md)
+- **Review a pull request** → [18-pr-review](../18-pr-review/SKILL.md)
 
 ## Inputs
 
