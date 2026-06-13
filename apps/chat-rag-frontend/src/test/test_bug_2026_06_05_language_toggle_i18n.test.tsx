@@ -72,4 +72,13 @@ describe("BUG-2026-06-05 — ChatRAG language toggle UI (EV-005 #57)", () => {
       screen.getByRole("button", { name: /^preguntar$/i }),
     ).toBeInTheDocument();
   });
+
+  it("syncs document.documentElement.lang with the active locale", () => {
+    localStorage.setItem("vecinita.locale", "es");
+    render(<App />);
+    expect(document.documentElement.lang).toBe("es");
+
+    fireEvent.click(screen.getByRole("button", { name: /^en$/i }));
+    expect(document.documentElement.lang).toBe("en");
+  });
 });

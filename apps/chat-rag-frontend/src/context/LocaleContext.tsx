@@ -1,4 +1,10 @@
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
 import type { Locale } from "../hooks/useLocale.types";
 import {
@@ -17,6 +23,10 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("vecinita.locale", next);
     setLocaleState(next);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
 
   const value = useMemo(() => ({ locale, setLocale }), [locale, setLocale]);
 
