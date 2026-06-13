@@ -34,30 +34,33 @@ def attach_embeddings(
 ) -> None:
     """Assign basis vectors per chunk text match (for deterministic retrieval)."""
     engine = create_engine(database_url)
-    with engine.begin() as conn:
-        rows = (
-            conn.execute(text("SELECT c.id, c.text FROM chunks c ORDER BY c.chunk_index"))
-            .mappings()
-            .all()
-        )
-        for row in rows:
-            index = default_index
-            for substring, basis_idx in match_substrings.items():
-                if substring in row["text"]:
-                    index = basis_idx
-                    break
-            vector = basis_vector(index)
-            conn.execute(
-                text(
-                    """
-                    INSERT INTO embeddings (chunk_id, embedding)
-                    VALUES (:chunk_id, CAST(:embedding AS vector))
-                    ON CONFLICT (chunk_id) DO UPDATE
-                    SET embedding = EXCLUDED.embedding
-                    """
-                ),
-                {"chunk_id": row["id"], "embedding": _vector_literal(vector)},
+    try:
+        with engine.begin() as conn:
+            rows = (
+                conn.execute(text("SELECT c.id, c.text FROM chunks c ORDER BY c.chunk_index"))
+                .mappings()
+                .all()
             )
+            for row in rows:
+                index = default_index
+                for substring, basis_idx in match_substrings.items():
+                    if substring in row["text"]:
+                        index = basis_idx
+                        break
+                vector = basis_vector(index)
+                conn.execute(
+                    text(
+                        """
+                        INSERT INTO embeddings (chunk_id, embedding)
+                        VALUES (:chunk_id, CAST(:embedding AS vector))
+                        ON CONFLICT (chunk_id) DO UPDATE
+                        SET embedding = EXCLUDED.embedding
+                        """
+                    ),
+                    {"chunk_id": row["id"], "embedding": _vector_literal(vector)},
+                )
+    finally:
+        engine.dispose()
 
 
 @pytest.fixture
@@ -65,8 +68,11 @@ def corpus_db() -> str:
     url = _database_url()
     load_corpus(database_url=url)
     engine = create_engine(url)
-    with engine.begin() as conn:
-        conn.execute(text("DELETE FROM embeddings"))
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("DELETE FROM embeddings"))
+    finally:
+        engine.dispose()
     return url
 
 

@@ -87,6 +87,12 @@ markers = [
     "unit: fast unit tests without external services",
 ]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = [
+    # LlamaIndex 0.13.x: upstream Field(validate_default=True) on union/type aliases.
+    # Vecinita-owned models are guarded by tests/unit/test_pydantic_field_metadata.py.
+    "ignore:The 'validate_default' attribute:pydantic.warnings.UnsupportedFieldAttributeWarning",
+]
 
 [tool.basedpyright]
 include = ["apps", "packages", "tests"]

@@ -36,6 +36,11 @@
         "timeout": 120
       },
       {
+        "command": "uv run python .cursor/hooks/pydantic_field_check.py",
+        "matcher": "Write",
+        "timeout": 10
+      },
+      {
         "command": "uv run python .cursor/hooks/feature_drift.py",
         "matcher": "Write",
         "timeout": 10

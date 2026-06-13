@@ -13,6 +13,7 @@ from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_rag.tag_inference import resolve_retrieval_tags
 from vecinita_rag.types import RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest
+from vecinita_shared_schemas.db_mapping import mapping_row, row_str
 
 pytestmark = pytest.mark.integration
 
@@ -56,8 +57,8 @@ def _document_tag_slugs(database_url: str, document_id: UUID) -> set[str]:
                 """
             ),
             {"document_id": document_id},
-        ).scalars()
-    return {str(slug) for slug in rows}
+        ).mappings().all()
+    return {row_str(mapping_row(row), "slug") for row in rows}
 
 
 def _assert_chunks_match_tag(
