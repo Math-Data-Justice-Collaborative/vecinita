@@ -1,7 +1,9 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import * as browse from "../api/browse";
 import { CorpusBrowse } from "../components/CorpusBrowse";
+import { renderWithLocale } from "./renderWithLocale";
 
 vi.mock("../api/browse", () => ({
   fetchTags: vi.fn(async () => ({
@@ -32,7 +34,7 @@ describe("CorpusBrowse", () => {
   });
 
   it("TC-048: corpus row opens external source URL", async () => {
-    render(<CorpusBrowse onNavigateHome={() => undefined} />);
+    renderWithLocale(<CorpusBrowse onNavigateHome={() => undefined} />);
 
     const link = await screen.findByTestId("corpus-source-link");
     expect(link).toHaveAttribute("href", "https://example.org/housing-rights");
@@ -41,25 +43,74 @@ describe("CorpusBrowse", () => {
   });
 
   it("renders browse tag chips", async () => {
-    render(<CorpusBrowse onNavigateHome={() => undefined} />);
-    expect(await screen.findByRole("button", { name: "Housing" })).toBeInTheDocument();
+    renderWithLocale(<CorpusBrowse onNavigateHome={() => undefined} />);
+    expect(
+      await screen.findByRole("button", { name: "Housing" }),
+    ).toBeInTheDocument();
     expect(screen.getByTestId("browse-tag-chips")).toBeInTheDocument();
+  });
+
+  it("shows localized Spanish error when tag fetch fails", async () => {
+    localStorage.setItem("vecinita.locale", "es");
+    vi.mocked(browse.fetchTags).mockRejectedValueOnce(
+      new Error("Tags failed (500)"),
+    );
+    renderWithLocale(<CorpusBrowse onNavigateHome={() => undefined} />);
+    expect(
+      await screen.findByText("No se pudieron cargar las etiquetas"),
+    ).toBeInTheDocument();
   });
 });
 
 describe("Tag chips in chat", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it("loads tag filter chips from browse API", async () => {
     const { TagFilterChips } = await import("../components/TagFilterChips");
     const onToggle = vi.fn();
     render(
       <TagFilterChips
-        tags={[{ slug: "housing", label: "Housing", language: "en", document_count: 1 }]}
+        tags={[
+          {
+            slug: "housing",
+            label: "Housing",
+            language: "en",
+            document_count: 1,
+          },
+        ]}
         selected={[]}
         locale="en"
         onToggle={onToggle}
       />,
     );
-    await fireEvent.click(screen.getByTestId("tag-filter-chips").querySelector("button")!);
+    await fireEvent.click(
+      screen.getByTestId("tag-filter-chips").querySelector("button")!,
+    );
     expect(onToggle).toHaveBeenCalledWith("housing");
+  });
+
+  it("localizes tag filter aria-label for Spanish locale", async () => {
+    const { TagFilterChips } = await import("../components/TagFilterChips");
+    render(
+      <TagFilterChips
+        tags={[
+          {
+            slug: "vivienda",
+            label: "Vivienda",
+            language: "es",
+            document_count: 1,
+          },
+        ]}
+        selected={[]}
+        locale="es"
+        onToggle={vi.fn()}
+      />,
+    );
+    expect(screen.getByTestId("tag-filter-chips")).toHaveAttribute(
+      "aria-label",
+      "Filtrar por tema",
+    );
   });
 });

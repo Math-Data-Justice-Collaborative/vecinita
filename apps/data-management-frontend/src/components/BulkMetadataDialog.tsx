@@ -21,7 +21,12 @@ interface BulkMetadataDialogProps {
   onComplete: () => void;
 }
 
-export function BulkMetadataDialog({ open, onOpenChange, documentIds, onComplete }: BulkMetadataDialogProps) {
+export function BulkMetadataDialog({
+  open,
+  onOpenChange,
+  documentIds,
+  onComplete,
+}: BulkMetadataDialogProps) {
   const [title, setTitle] = useState("");
   const [language, setLanguage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -44,7 +49,9 @@ export function BulkMetadataDialog({ open, onOpenChange, documentIds, onComplete
         onComplete();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Bulk metadata update failed");
+      setError(
+        err instanceof Error ? err.message : "Bulk metadata update failed",
+      );
     } finally {
       setBusy(false);
     }
@@ -65,19 +72,33 @@ export function BulkMetadataDialog({ open, onOpenChange, documentIds, onComplete
         <DialogHeader>
           <DialogTitle>Bulk Edit Metadata</DialogTitle>
           <DialogDescription>
-            Update metadata for {documentIds.length} document{documentIds.length !== 1 ? "s" : ""}.
-            Leave fields empty to skip.
+            Update metadata for {documentIds.length} document
+            {documentIds.length !== 1 ? "s" : ""}. Leave fields empty to skip.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div className="space-y-2">
             <Label htmlFor="bulk-title">Title</Label>
-            <Input id="bulk-title" value={title} onChange={(e) => { setTitle(e.target.value); }} placeholder="New title (optional)" />
+            <Input
+              id="bulk-title"
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+              }}
+              placeholder="New title (optional)"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="bulk-language">Language</Label>
-            <Input id="bulk-language" value={language} onChange={(e) => { setLanguage(e.target.value); }} placeholder="en, es, etc. (optional)" />
+            <Input
+              id="bulk-language"
+              value={language}
+              onChange={(e) => {
+                setLanguage(e.target.value);
+              }}
+              placeholder="en, es, etc. (optional)"
+            />
           </div>
         </div>
 
@@ -90,7 +111,9 @@ export function BulkMetadataDialog({ open, onOpenChange, documentIds, onComplete
         ) : null}
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={busy}>Cancel</Button>
+          <Button variant="outline" onClick={handleClose} disabled={busy}>
+            Cancel
+          </Button>
           <Button onClick={() => void handleSubmit()} disabled={busy}>
             {busy ? "Updating…" : "Update metadata"}
           </Button>

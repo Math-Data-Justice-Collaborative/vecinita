@@ -80,7 +80,7 @@ def doc_with_versions(client, engine):
             conn.execute(text("SELECT id FROM documents WHERE url = :url"), {"url": url})
         )
         doc_id = UUID(str(doc_id_raw))
-    client.patch(
+    tag_resp = client.patch(
         f"/internal/v1/documents/{doc_id}/tags",
         json={
             "tags": [
@@ -91,6 +91,7 @@ def doc_with_versions(client, engine):
         },
         headers=_auth(),
     )
+    assert tag_resp.status_code == 200, tag_resp.text
 
     yield {"doc_id": doc_id, "url": url}
 
@@ -125,6 +126,7 @@ def test_document_history_shows_tag_changes(client, doc_with_versions) -> None:
     """Version history captures tag changes at each version point."""
     doc_id = doc_with_versions["doc_id"]
     resp = client.get(f"/internal/v1/documents/{doc_id}/history", headers=_auth())
+    assert resp.status_code == 200, resp.text
     data = response_json_object(resp)
     history_versions = json_object_list(data, "versions")
     v1_tags = (

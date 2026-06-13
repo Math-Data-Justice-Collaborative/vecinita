@@ -14,8 +14,8 @@ Set `VITE_VECINITA_CHAT_API_URL` to the ChatRAG backend (default `http://localho
 
 ## Scripts
 
-| Command | Purpose |
-|---------|---------|
-| `npm run dev` | Vite dev server (port 5173) |
-| `npm run build` | Production build |
-| `npm test` | Vitest component tests |
+| Command         | Purpose                     |
+| --------------- | --------------------------- |
+| `npm run dev`   | Vite dev server (port 5173) |
+| `npm run build` | Production build            |
+| `npm test`      | Vitest component tests      |

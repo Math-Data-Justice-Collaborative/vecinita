@@ -66,7 +66,7 @@ update_payload:                   # required for operation: update
 ### Steps
 
 1. Read `workflow-state.yaml` (create via `init_project` if missing and skill allows).
-2. Resolve `skill_id` → `stages.{key}` or cycle type (`evolve_cycles[]`, `retrospective_cycles[]`).
+2. Resolve `skill_id` → `stages.{key}` or cycle type (`evolve_cycles[]`, `retrospective_cycles[]`, `pr_review_cycles[]`, `pr_remediation_cycles[]`).
 3. Compute **prerequisites** for this skill per its SKILL.md and preamble phase gates.
 4. Detect **user_intent**:
    - Feature addition keywords: "add feature", "new feature", "add Fn", "extend with", list of capabilities
@@ -278,6 +278,8 @@ On every commit the invoking skill reports:
 | 00-context … 15-service-health | `stages.{skill_id}` |
 | 16-evolve | `evolve_cycles[]` |
 | 17-retrospective | `retrospective_cycles[]` |
+| 18-pr-review | `pr_review_cycles[]` |
+| 19-address-pr-review | `pr_remediation_cycles[]` |
 | pipeline | `overall_status` + all stages |
 | build-executor, verify-build, deploy-verify | Alias to 07-build, 08-verify-build, 13-deploy-smoke |
 

@@ -126,6 +126,7 @@ def load_corpus(*, database_url: str | None = None) -> dict[str, int]:
                     )
                     chunks += 1
 
+    engine.dispose()
     return {"documents": documents, "chunks": chunks}
 
 

@@ -93,7 +93,7 @@ surfaced raw errors (e.g. "Failed to fetch") immediately with no warm-up UX.
 - **`packages/shared-schemas/vecinita_shared_schemas/transient_http.py`**: shared retry
   policy (network errors + 502/503/504; 3 attempts; 2.5s delay).
 - **`apps/chat-rag-frontend/src/api/ask.ts`**: auto-retry `streamAsk`; friendly
-  `formatAskFailureMessage`; `COLD_START_STATUS_MESSAGE`.
+  `formatAskFailureMessage(err, locale)`; `t(locale, "coldStartStatus")` during retries.
 - **`apps/chat-rag-frontend/src/components/ChatPanel.tsx`**: show warm-up status during
   retries; friendly errors instead of raw network messages.
 

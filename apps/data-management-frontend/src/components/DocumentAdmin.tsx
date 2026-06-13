@@ -25,13 +25,19 @@ function parseTagsInput(raw: string): TagInput[] {
     .split(",")
     .map((part) => part.trim())
     .filter(Boolean)
-    .map((slug) => ({ slug, label: slug.replace(/-/g, " "), source: "human" as const }));
+    .map((slug) => ({
+      slug,
+      label: slug.replace(/-/g, " "),
+      source: "human" as const,
+    }));
 }
 
 export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
   const [chunks, setChunks] = useState<ChunkDetail[]>([]);
   const [docTags, setDocTags] = useState("");
-  const [chunkTagDrafts, setChunkTagDrafts] = useState<Record<string, string>>({});
+  const [chunkTagDrafts, setChunkTagDrafts] = useState<Record<string, string>>(
+    {},
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
@@ -55,7 +61,9 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
       const rows = await listDocumentChunks(client, document.document_id);
       setChunks(rows);
       setChunkTagDrafts(
-        Object.fromEntries(rows.map((chunk) => [chunk.chunk_id, tagsToInput(chunk.tags)])),
+        Object.fromEntries(
+          rows.map((chunk) => [chunk.chunk_id, tagsToInput(chunk.tags)]),
+        ),
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load chunks");
@@ -93,7 +101,9 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
         })
         .catch((err: unknown) => {
           if (!cancelled) {
-            setError(err instanceof Error ? err.message : "Failed to poll retag job");
+            setError(
+              err instanceof Error ? err.message : "Failed to poll retag job",
+            );
             setRetagJobId(null);
           }
         });
@@ -109,10 +119,16 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
     setError(null);
     try {
       const client = requireCorpusConfig();
-      await patchDocumentTags(client, document.document_id, parseTagsInput(docTags));
+      await patchDocumentTags(
+        client,
+        document.document_id,
+        parseTagsInput(docTags),
+      );
       setStatus("Document tags saved.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save document tags");
+      setError(
+        err instanceof Error ? err.message : "Failed to save document tags",
+      );
     }
   }
 
@@ -120,11 +136,17 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
     setError(null);
     try {
       const client = requireCorpusConfig();
-      await patchChunkTags(client, chunkId, parseTagsInput(chunkTagDrafts[chunkId] ?? ""));
+      await patchChunkTags(
+        client,
+        chunkId,
+        parseTagsInput(chunkTagDrafts[chunkId] ?? ""),
+      );
       setStatus("Chunk tags saved.");
       await loadChunks();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save chunk tags");
+      setError(
+        err instanceof Error ? err.message : "Failed to save chunk tags",
+      );
     }
   }
 
@@ -137,14 +159,18 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
       setRetagJobId(jobId);
       setStatus(`Retag job queued (${jobId}).`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to queue retag job");
+      setError(
+        err instanceof Error ? err.message : "Failed to queue retag job",
+      );
     }
   }
 
   return (
     <div className="space-y-4" aria-label="Document admin">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">{document.title ?? document.url}</h3>
+        <h3 className="text-lg font-semibold">
+          {document.title ?? document.url}
+        </h3>
         <Button variant="outline" size="sm" onClick={onClose}>
           Close
         </Button>
@@ -161,13 +187,20 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
         </p>
       ) : null}
 
-      <form onSubmit={(e) => void handleSaveDocumentTags(e)} className="space-y-3">
+      <form
+        onSubmit={(e) => void handleSaveDocumentTags(e)}
+        className="space-y-3"
+      >
         <div className="space-y-2">
-          <Label htmlFor="doc-tags">Document tags (comma-separated slugs, max 10)</Label>
+          <Label htmlFor="doc-tags">
+            Document tags (comma-separated slugs, max 10)
+          </Label>
           <Input
             id="doc-tags"
             value={docTags}
-            onChange={(e) => { setDocTags(e.target.value); }}
+            onChange={(e) => {
+              setDocTags(e.target.value);
+            }}
             placeholder="housing, legal"
           />
         </div>
@@ -175,7 +208,12 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
           <Button type="submit" size="sm">
             Save document tags
           </Button>
-          <Button type="button" variant="secondary" size="sm" onClick={() => void handleRetag()}>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => void handleRetag()}
+          >
             LLM re-tag
           </Button>
         </div>
@@ -183,27 +221,37 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
 
       <Separator />
 
-      {loading ? <p className="text-sm text-muted-foreground">Loading chunks…</p> : null}
+      {loading ? (
+        <p className="text-sm text-muted-foreground">Loading chunks…</p>
+      ) : null}
 
       <div className="space-y-4" data-testid="chunk-list">
         {chunks.map((chunk) => (
           <div key={chunk.chunk_id} className="space-y-2 rounded-md border p-4">
             <h4 className="font-medium">Chunk {chunk.chunk_index + 1}</h4>
-            <pre className="max-h-48 overflow-auto rounded-md bg-muted p-3 text-sm">{chunk.text}</pre>
+            <pre className="max-h-48 overflow-auto rounded-md bg-muted p-3 text-sm">
+              {chunk.text}
+            </pre>
             <div className="space-y-2">
-              <Label htmlFor={`chunk-tags-${chunk.chunk_id}`}>Chunk tags (max 5)</Label>
+              <Label htmlFor={`chunk-tags-${chunk.chunk_id}`}>
+                Chunk tags (max 5)
+              </Label>
               <Input
                 id={`chunk-tags-${chunk.chunk_id}`}
                 value={chunkTagDrafts[chunk.chunk_id] ?? ""}
-                onChange={(e) =>
-                  { setChunkTagDrafts((current) => ({
+                onChange={(e) => {
+                  setChunkTagDrafts((current) => ({
                     ...current,
                     [chunk.chunk_id]: e.target.value,
-                  })); }
-                }
+                  }));
+                }}
               />
             </div>
-            <Button size="sm" variant="outline" onClick={() => void handleSaveChunkTags(chunk.chunk_id)}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => void handleSaveChunkTags(chunk.chunk_id)}
+            >
               Save chunk tags
             </Button>
           </div>

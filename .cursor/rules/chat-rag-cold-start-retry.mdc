@@ -13,8 +13,8 @@ When editing chat ask/stream or upstream timeout config:
    `packages/shared-schemas/vecinita_shared_schemas/transient_http.py` — keep TS constants
    in sync (`COLD_START_ASK_MAX_ATTEMPTS`, delay).
 2. **Do not surface raw "Failed to fetch" / "Network Error"** on the first cold start.
-   Show `COLD_START_STATUS_MESSAGE` during retries; use `formatAskFailureMessage` on final
-   failure only.
+   Show `t(locale, "coldStartStatus")` during retries; use `formatAskFailureMessage(err, locale)`
+   on final failure only.
 3. **Extend regression tests** when changing retry policy:
    - `apps/chat-rag-frontend/src/api/ask.test.ts`
    - `tests/bugs/test_bug_2026_05_22_chat_cold_start_network_error.py`

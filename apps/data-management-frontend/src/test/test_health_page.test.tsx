@@ -1,4 +1,10 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 
@@ -11,7 +17,11 @@ const MOCK_HEALTH = {
   services: {
     chat_rag_backend: { status: "up", latency_ms: 45, error: null },
     internal_write_api: { status: "up", latency_ms: 30, error: null },
-    modal_embedding: { status: "down", latency_ms: null, error: "Connection refused" },
+    modal_embedding: {
+      status: "down",
+      latency_ms: null,
+      error: "Connection refused",
+    },
   },
   checked_at: "2026-05-26T10:00:00Z",
 };
@@ -69,7 +79,9 @@ describe("Health page", () => {
     renderHealth();
 
     await waitFor(() => {
-      expect(screen.getByTestId("overall-status")).toHaveTextContent(/healthy/i);
+      expect(screen.getByTestId("overall-status")).toHaveTextContent(
+        /healthy/i,
+      );
     });
   });
 
@@ -95,7 +107,9 @@ describe("Health page", () => {
     fireEvent.click(screen.getByRole("button", { name: /refresh/i }));
 
     await waitFor(() => {
-      expect(screen.getByTestId("overall-status")).toHaveTextContent(/degraded/i);
+      expect(screen.getByTestId("overall-status")).toHaveTextContent(
+        /degraded/i,
+      );
     });
   });
 

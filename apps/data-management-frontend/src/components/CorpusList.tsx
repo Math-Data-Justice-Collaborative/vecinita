@@ -6,7 +6,14 @@ import { requireCorpusConfig } from "../config";
 import { DocumentAdmin } from "./DocumentAdmin";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TagBadge } from "@/components/TagBadge";
 import { BulkDeleteDialog } from "@/components/BulkDeleteDialog";
@@ -88,13 +95,23 @@ export function CorpusList() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Corpus Documents</CardTitle>
-        <Button variant="outline" size="sm" onClick={() => void refresh()} disabled={loading}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => void refresh()}
+          disabled={loading}
+        >
           Refresh
         </Button>
       </CardHeader>
       <CardContent>
         {selected ? (
-          <DocumentAdmin document={selected} onClose={() => { setSelected(null); }} />
+          <DocumentAdmin
+            document={selected}
+            onClose={() => {
+              setSelected(null);
+            }}
+          />
         ) : (
           <>
             {selectedIds.size > 0 && (
@@ -102,12 +119,16 @@ export function CorpusList() {
                 data-testid="bulk-toolbar"
                 className="mb-4 flex items-center gap-2 rounded-md border bg-muted p-2"
               >
-                <span className="text-sm font-medium">{selectedIds.size} selected</span>
+                <span className="text-sm font-medium">
+                  {selectedIds.size} selected
+                </span>
                 <Button
                   variant="destructive"
                   size="sm"
                   data-testid="bulk-delete-btn"
-                  onClick={() => { setBulkDeleteOpen(true); }}
+                  onClick={() => {
+                    setBulkDeleteOpen(true);
+                  }}
                 >
                   <Trash2 className="mr-1 h-4 w-4" />
                   Delete
@@ -116,7 +137,9 @@ export function CorpusList() {
                   variant="outline"
                   size="sm"
                   data-testid="bulk-tag-btn"
-                  onClick={() => { setBulkTagOpen(true); }}
+                  onClick={() => {
+                    setBulkTagOpen(true);
+                  }}
                 >
                   <Tags className="mr-1 h-4 w-4" />
                   Tag
@@ -125,7 +148,9 @@ export function CorpusList() {
                   variant="outline"
                   size="sm"
                   data-testid="bulk-metadata-btn"
-                  onClick={() => { setBulkMetadataOpen(true); }}
+                  onClick={() => {
+                    setBulkMetadataOpen(true);
+                  }}
                 >
                   <FileEdit className="mr-1 h-4 w-4" />
                   Metadata
@@ -141,7 +166,9 @@ export function CorpusList() {
             {loading ? (
               <p className="text-sm text-muted-foreground">Loading…</p>
             ) : documents.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No documents in corpus.</p>
+              <p className="text-sm text-muted-foreground">
+                No documents in corpus.
+              </p>
             ) : (
               <Table>
                 <TableHeader>
@@ -149,7 +176,10 @@ export function CorpusList() {
                     <TableHead className="w-10">
                       <Checkbox
                         data-testid="select-all"
-                        checked={selectedIds.size === documents.length && documents.length > 0}
+                        checked={
+                          selectedIds.size === documents.length &&
+                          documents.length > 0
+                        }
                         onCheckedChange={toggleAll}
                         aria-label="Select all"
                       />
@@ -162,16 +192,27 @@ export function CorpusList() {
                 </TableHeader>
                 <TableBody>
                   {documents.map((doc) => (
-                    <TableRow key={doc.document_id} data-state={selectedIds.has(doc.document_id) ? "selected" : undefined}>
+                    <TableRow
+                      key={doc.document_id}
+                      data-state={
+                        selectedIds.has(doc.document_id)
+                          ? "selected"
+                          : undefined
+                      }
+                    >
                       <TableCell>
                         <Checkbox
                           checked={selectedIds.has(doc.document_id)}
-                          onCheckedChange={() => { toggleId(doc.document_id); }}
+                          onCheckedChange={() => {
+                            toggleId(doc.document_id);
+                          }}
                           aria-label={`Select ${doc.title ?? doc.url}`}
                         />
                       </TableCell>
                       <TableCell>
-                        <div className="font-medium">{doc.title ?? "(untitled)"}</div>
+                        <div className="font-medium">
+                          {doc.title ?? "(untitled)"}
+                        </div>
                         {doc.tags && doc.tags.length > 0 && (
                           <div className="mt-1 flex flex-wrap gap-1">
                             {doc.tags.map((tag) => (
@@ -193,7 +234,13 @@ export function CorpusList() {
                       <TableCell>{doc.language ?? "—"}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="outline" size="sm" onClick={() => { setSelected(doc); }}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelected(doc);
+                            }}
+                          >
                             Manage tags
                           </Button>
                           <Button
@@ -202,7 +249,9 @@ export function CorpusList() {
                             onClick={() => void handleDelete(doc)}
                             disabled={deletingId === doc.document_id}
                           >
-                            {deletingId === doc.document_id ? "Deleting…" : "Delete"}
+                            {deletingId === doc.document_id
+                              ? "Deleting…"
+                              : "Delete"}
                           </Button>
                         </div>
                       </TableCell>

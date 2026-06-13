@@ -8,10 +8,12 @@ dependencies = []
 
 [dependency-groups]
 dev = [
+    "modal>=1.2.6,<2",
     "httpx>=0.27,<1",
     "pip-audit>=2.7",
     "basedpyright>=1.39.6",
     "pytest-asyncio>=0.24",
+    "pytest-cov>=6.0",
     "pytest>=8.3",
     "ruff>=0.8",
     "vecinita-chat-rag-backend",
@@ -31,6 +33,8 @@ dev = [
 override-dependencies = [
     "aiohttp>=3.14.0",
     "pip>=26.1.2",
+    # Transitive via llama-index-readers-file; pin patched release (CVE-2026-48155/48156).
+    "pypdf>=6.12.0",
 ]
 
 [tool.uv.workspace]
@@ -84,6 +88,36 @@ markers = [
     "unit: fast unit tests without external services",
 ]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = [
+    # LlamaIndex 0.13.x: upstream Field(validate_default=True) on union/type aliases.
+    # Vecinita-owned models are guarded by tests/unit/test_pydantic_field_metadata.py.
+    "ignore:The 'validate_default' attribute:pydantic.warnings.UnsupportedFieldAttributeWarning",
+]
+
+[tool.coverage.run]
+source = [
+    "packages/rag/vecinita_rag",
+    "packages/ingest/vecinita_ingest",
+    "packages/embedding-client/vecinita_embedding_client",
+    "packages/llm-client/vecinita_llm_client",
+    "packages/tagging/vecinita_tagging",
+    "packages/shared-schemas/vecinita_shared_schemas",
+    "apps/chat-rag-backend/vecinita_chat_rag_backend",
+    "apps/data-management-backend/vecinita_data_management_backend",
+    "apps/internal-write-api/vecinita_internal_write_api",
+    "apps/database/vecinita_database",
+]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/__init__.py",
+    "apps/database/alembic/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
 
 [tool.basedpyright]
 include = ["apps", "packages", "tests"]

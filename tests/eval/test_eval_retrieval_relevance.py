@@ -7,11 +7,10 @@ from pathlib import Path
 from typing import cast
 
 import pytest
-from sqlalchemy import create_engine, text
 from tests.e2e.local_bootstrap import postgres_is_ready
 from tests.helpers.json_response import json_str
-from tests.unit.rag.conftest import attach_embeddings, basis_vector
-from vecinita_database.seeds.load import _database_url, load_corpus
+from tests.unit.rag.conftest import basis_vector, seed_eval_corpus
+from vecinita_database.seeds.load import _database_url
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_shared_schemas.json_types import JsonObject, as_json_object
 
@@ -26,25 +25,7 @@ def eval_db() -> str:
     if not postgres_is_ready():
         pytest.skip("Postgres not available for eval benchmark")
     url = _database_url()
-    engine = create_engine(url)
-    with engine.begin() as conn:
-        conn.execute(text("DELETE FROM embeddings"))
-        conn.execute(text("DELETE FROM chunks"))
-        conn.execute(text("DELETE FROM documents"))
-    load_corpus(database_url=url)
-    attach_embeddings(
-        database_url=url,
-        match_substrings={
-            "Food pantry": 0,
-            "story time": 0,
-            "library": 1,
-            "Wi-Fi": 1,
-            "banco de alimentos": 2,
-            "biblioteca": 2,
-            "cuentacuentos": 2,
-        },
-        default_index=3,
-    )
+    seed_eval_corpus(database_url=url)
     return url
 
 

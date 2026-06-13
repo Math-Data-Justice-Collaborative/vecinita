@@ -27,7 +27,9 @@ const PRODUCTION_AUDIT_RESPONSE = {
       entity_type: "document",
       entity_id: "18799e37-372a-4ad4-a859-cecb65eb90fd",
       request_id: "69105205-a814-464e-a803-0c6a1fbfbcda",
-      payload: { tags: [{ slug: "housing", label: "Housing", source: "human" }] },
+      payload: {
+        tags: [{ slug: "housing", label: "Housing", source: "human" }],
+      },
       created_at: "2026-05-27T14:48:53.457930Z",
     },
   ],

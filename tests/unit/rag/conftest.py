@@ -6,7 +6,9 @@ import os
 
 import pytest
 from sqlalchemy import create_engine, text
+from tests.corpus_db_lock import corpus_db_lock
 from vecinita_database.seeds.load import load_corpus
+from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
 
 
 def _database_url() -> str:
@@ -26,47 +28,209 @@ def _vector_literal(values: list[float]) -> str:
     return "[" + ",".join(str(v) for v in values) + "]"
 
 
+# Integration/eval tests share one Postgres DB; corpus_db_lock (reentrant flock) serializes
+# TRUNCATE/load/attach and write API mutations. tests/conftest.py holds the lock per test.
+
+
+def _attach_embeddings_impl(
+    *,
+    database_url: str,
+    match_substrings: dict[str, int],
+    default_index: int = 1,
+) -> int:
+    engine = create_engine(database_url)
+    written = 0
+    try:
+        with engine.begin() as conn:
+            rows = (
+                conn.execute(text("SELECT c.id, c.text FROM chunks c ORDER BY c.chunk_index"))
+                .mappings()
+                .all()
+            )
+            for row in rows:
+                index = default_index
+                for substring, basis_idx in match_substrings.items():
+                    if substring in row["text"]:
+                        index = basis_idx
+                        break
+                vector = basis_vector(index)
+                conn.execute(
+                    text(
+                        """
+                        INSERT INTO embeddings (chunk_id, embedding)
+                        VALUES (:chunk_id, CAST(:embedding AS vector))
+                        ON CONFLICT (chunk_id) DO UPDATE
+                        SET embedding = EXCLUDED.embedding
+                        """
+                    ),
+                    {"chunk_id": row["id"], "embedding": _vector_literal(vector)},
+                )
+                written += 1
+    finally:
+        engine.dispose()
+    return written
+
+
 def attach_embeddings(
     *,
     database_url: str,
     match_substrings: dict[str, int],
     default_index: int = 1,
-) -> None:
-    """Assign basis vectors per chunk text match (for deterministic retrieval)."""
-    engine = create_engine(database_url)
-    with engine.begin() as conn:
-        rows = (
-            conn.execute(text("SELECT c.id, c.text FROM chunks c ORDER BY c.chunk_index"))
-            .mappings()
-            .all()
+) -> int:
+    """Assign basis vectors per chunk text match (for deterministic retrieval).
+
+    Returns the number of embedding rows written.
+    """
+    with corpus_db_lock():
+        return _attach_embeddings_impl(
+            database_url=database_url,
+            match_substrings=match_substrings,
+            default_index=default_index,
         )
-        for row in rows:
-            index = default_index
-            for substring, basis_idx in match_substrings.items():
-                if substring in row["text"]:
-                    index = basis_idx
-                    break
-            vector = basis_vector(index)
+
+
+def seed_corpus_with_embeddings(
+    *,
+    database_url: str,
+    match_substrings: dict[str, int],
+    default_index: int = 1,
+    reset: bool = True,
+) -> dict[str, int]:
+    """Reset (optional), load fixture corpus, and attach deterministic embeddings."""
+    with corpus_db_lock():
+        if reset:
+            _reset_corpus_tables_impl(database_url=database_url)
+        counts = load_corpus(database_url=database_url)
+        written = _attach_embeddings_impl(
+            database_url=database_url,
+            match_substrings=match_substrings,
+            default_index=default_index,
+        )
+    return {**counts, "embeddings": written}
+
+
+_EVAL_MATCH_SUBSTRINGS: dict[str, int] = {
+    "banco de alimentos": 2,
+    "cuentacuentos": 2,
+    "biblioteca": 2,
+    "Food pantry": 0,
+    "story time": 0,
+    "library": 1,
+    "Wi-Fi": 1,
+}
+
+
+def _reset_corpus_tables_impl(*, database_url: str) -> None:
+    engine = create_engine(database_url)
+    try:
+        with engine.begin() as conn:
             conn.execute(
                 text(
                     """
-                    INSERT INTO embeddings (chunk_id, embedding)
-                    VALUES (:chunk_id, CAST(:embedding AS vector))
-                    ON CONFLICT (chunk_id) DO UPDATE
-                    SET embedding = EXCLUDED.embedding
+                    TRUNCATE TABLE
+                        embeddings,
+                        chunk_tags,
+                        document_tags,
+                        chunks,
+                        documents
+                    RESTART IDENTITY CASCADE
                     """
-                ),
-                {"chunk_id": row["id"], "embedding": _vector_literal(vector)},
+                )
             )
+    finally:
+        engine.dispose()
+
+
+def reset_corpus_tables(*, database_url: str) -> None:
+    """Remove all corpus rows so eval/integration tests start from a clean slate."""
+    with corpus_db_lock():
+        _reset_corpus_tables_impl(database_url=database_url)
+
+
+def seed_eval_corpus(*, database_url: str) -> dict[str, int]:
+    """Load fixture corpus + deterministic embeddings for eval benchmarks."""
+    with corpus_db_lock():
+        _reset_corpus_tables_impl(database_url=database_url)
+        counts = load_corpus(database_url=database_url)
+        if counts["documents"] < 2 or counts["chunks"] < 2:
+            msg = f"eval corpus seed incomplete: {counts}"
+            raise RuntimeError(msg)
+        written = _attach_embeddings_impl(
+            database_url=database_url,
+            match_substrings=_EVAL_MATCH_SUBSTRINGS,
+            default_index=3,
+        )
+    if written < counts["chunks"]:
+        msg = f"eval embeddings incomplete: wrote {written} for {counts['chunks']} chunks"
+        raise RuntimeError(msg)
+    return counts
+
+
+def seed_spanish_only_corpus(*, database_url: str) -> dict[str, int]:
+    """Load corpus, drop English rows, attach ES embeddings (BUG-2026-06-05)."""
+    with corpus_db_lock():
+        _reset_corpus_tables_impl(database_url=database_url)
+        counts = load_corpus(database_url=database_url)
+        engine = create_engine(database_url)
+        try:
+            with engine.begin() as conn:
+                conn.execute(text("DELETE FROM embeddings"))
+                conn.execute(
+                    text(
+                        "DELETE FROM chunks WHERE document_id IN "
+                        "(SELECT id FROM documents WHERE language = 'en')"
+                    )
+                )
+                conn.execute(text("DELETE FROM documents WHERE language = 'en'"))
+                es_chunks = scalar_int(
+                    sqlalchemy_scalar_one(
+                        conn.execute(
+                            text(
+                                """
+                                SELECT COUNT(*)
+                                FROM chunks c
+                                JOIN documents d ON d.id = c.document_id
+                                WHERE d.language = 'es'
+                                """
+                            )
+                        )
+                    )
+                )
+                en_docs = scalar_int(
+                    sqlalchemy_scalar_one(
+                        conn.execute(text("SELECT COUNT(*) FROM documents WHERE language = 'en'"))
+                    )
+                )
+        finally:
+            engine.dispose()
+        if es_chunks < 1:
+            msg = f"spanish-only corpus missing ES chunks (found {es_chunks})"
+            raise RuntimeError(msg)
+        if en_docs != 0:
+            msg = f"spanish-only corpus still has {en_docs} English document(s)"
+            raise RuntimeError(msg)
+        written = _attach_embeddings_impl(
+            database_url=database_url,
+            match_substrings={"banco de alimentos": 0},
+            default_index=0,
+        )
+    if written < es_chunks:
+        msg = f"spanish-only embeddings incomplete: wrote {written} for {es_chunks} ES chunks"
+        raise RuntimeError(msg)
+    return {**counts, "es_chunks": es_chunks}
 
 
 @pytest.fixture
 def corpus_db() -> str:
     url = _database_url()
-    load_corpus(database_url=url)
-    engine = create_engine(url)
-    with engine.begin() as conn:
-        conn.execute(text("DELETE FROM embeddings"))
+    with corpus_db_lock():
+        load_corpus(database_url=url)
+        engine = create_engine(url)
+        try:
+            with engine.begin() as conn:
+                conn.execute(text("DELETE FROM embeddings"))
+        finally:
+            engine.dispose()
     return url
 
 

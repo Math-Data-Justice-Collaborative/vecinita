@@ -1,7 +1,7 @@
-# Pipeline skills preamble (00–17)
+# Pipeline skills preamble (00–18)
 
 Shared conventions for numbered pipeline stage skills. Every stage `SKILL.md` under
-`.cursor/skills/00-context` … `17-retrospective` follows this preamble unless a stage
+`.cursor/skills/00-context` … `18-pr-review` follows this preamble unless a stage
 explicitly documents an exception.
 
 **Orchestrators** (not numbered stages): [pipeline](pipeline/SKILL.md),
@@ -26,8 +26,9 @@ sole writer of `workflow-state.yaml`.
 | **09–13** | D — Verify & deploy | QA + E2E (parallel), verify impl, verify deploy, deploy smoke |
 | **14–15** | E — Maintenance (on-demand) | Hotfix, service health |
 | **16–17** | F — Change & learn (on-demand) | Evolve (features + scope), retrospective |
+| **18** | G — Review (on-demand) | PR review (GitHub post, no merge) |
 
-Stages are **linear in greenfield** ([pipeline](pipeline/SKILL.md)). Stages **14–17** are
+Stages are **linear in greenfield** ([pipeline](pipeline/SKILL.md)). Stages **14–18** are
 **on-demand** and may re-invoke subsets of 00–15 in **delta mode**.
 
 **Any stage 00–17** may accept a user request to **add features** onto the current application
@@ -100,7 +101,7 @@ connectivity-gates — hybrid deploys (static UI + separate API) are never “AP
 | **Write via agent** | Invoke agent `operation: update` after each substep — never buffer |
 | **Resume** | Agent context brief reports `status`, timestamps, substeps, active cycles |
 | **Stage key** | Agent maps `skill_id` → `stages.{key}` (e.g. `stages.07-build`) |
-| **Cycles** | `evolve_cycles[]` (16-evolve), `retrospective_cycles[]` (17) |
+| **Cycles** | `evolve_cycles[]` (16-evolve), `retrospective_cycles[]` (17), `pr_review_cycles[]` (18-pr-review), `pr_remediation_cycles[]` (19-address-pr-review) |
 | **Cross-stage issues** | Agent appends `issue_log` with category + evidence |
 | **Artifacts** | Agent appends paths to top-level `artifacts[]` on completion |
 | **Deviations** | Agent returns **blocking** issues → skill must AskQuestion; do not proceed |
@@ -287,7 +288,7 @@ user to paste tokens when `prod.env` exists.
 Paste immediately after the stage title paragraph:
 
 ```markdown
-**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 **State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 ```

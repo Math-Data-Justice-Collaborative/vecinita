@@ -48,7 +48,9 @@ describe("BUG-2026-05-27 health page blank on degraded api-contract shape", () =
     renderHealth();
 
     await waitFor(() => {
-      expect(screen.getByTestId("overall-status")).toHaveTextContent(/degraded/i);
+      expect(screen.getByTestId("overall-status")).toHaveTextContent(
+        /degraded/i,
+      );
     });
     expect(screen.getByText("modal_embedding")).toBeInTheDocument();
     expect(screen.getByText("HTTP 404")).toBeInTheDocument();

@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 from pydantic import HttpUrl
 from sqlalchemy import create_engine, text
 from tests.helpers.json_response import (
+    find_json_object_by_str,
     json_list,
     json_str,
     response_json_list,
@@ -36,6 +37,7 @@ pytestmark = pytest.mark.e2e
 _EMBEDDING = [0.01] * EMBEDDING_DIMENSION
 _PROXY_KEY = "test-proxy-key"
 _WRITE_KEY = "test-write-key"
+_RETAG_TARGET_URL = "https://example.com/retag-target"
 
 
 class _MockTagClient:
@@ -97,10 +99,15 @@ class _TestClientWriteClient:
         return None
 
 
+def _document_id_for_url(client: TestClient, url: str) -> str:
+    docs = response_json_list(client.get("/internal/v1/documents"))
+    return json_str(find_json_object_by_str(docs, "url", url), "document_id")
+
+
 @pytest.fixture
 def retag_clients(
     monkeypatch: pytest.MonkeyPatch,
-) -> tuple[TestClient, TestClient, InMemoryJobStore]:
+) -> tuple[TestClient, TestClient, InMemoryJobStore, str]:
     monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _WRITE_KEY)
     monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", _PROXY_KEY)
     monkeypatch.setenv(
@@ -118,7 +125,7 @@ def retag_clients(
         BatchUpsertRequest(
             documents=[
                 DocumentUpsert(
-                    url=HttpUrl("https://example.com/retag-target"),
+                    url=HttpUrl(_RETAG_TARGET_URL),
                     title="Retag me",
                     language="en",
                     chunks=[
@@ -161,18 +168,14 @@ def retag_clients(
     write_with_jobs = TestClient(create_write_app(jobs_client=_InlineJobsClient()))  # type: ignore[arg-type]
     write_with_jobs.headers.update({"Authorization": f"Bearer {_WRITE_KEY}"})
 
-    return write_with_jobs, dm_client, store
+    document_id = _document_id_for_url(write_with_jobs, _RETAG_TARGET_URL)
+    return write_with_jobs, dm_client, store, document_id
 
 
 def test_admin_retag_job_lifecycle(
-    retag_clients: tuple[TestClient, TestClient, InMemoryJobStore],
+    retag_clients: tuple[TestClient, TestClient, InMemoryJobStore, str],
 ) -> None:
-    write_client_api, dm_client, _store = retag_clients
-
-    list_resp = write_client_api.get("/internal/v1/documents")
-    assert list_resp.status_code == 200
-    docs = response_json_list(list_resp)
-    document_id = json_str(as_json_object(cast(object, docs[0])), "document_id")
+    write_client_api, dm_client, _store, document_id = retag_clients
 
     retag_resp = write_client_api.post(f"/internal/v1/documents/{document_id}/retag")
     assert retag_resp.status_code == 200
@@ -201,19 +204,14 @@ def test_admin_retag_job_lifecycle(
 
 
 def test_admin_retag_tags_visible_via_get_endpoint(
-    retag_clients: tuple[TestClient, TestClient, InMemoryJobStore],
+    retag_clients: tuple[TestClient, TestClient, InMemoryJobStore, str],
 ) -> None:
     """After retag, GET /documents/{id}/tags must return the inferred tags.
 
     Regression guard for BUG-2026-05-25-retag-tags-not-visible: retag wrote
     document tags but the admin UI had no read path to display them.
     """
-    write_client_api, _dm_client, _store = retag_clients
-
-    list_resp = write_client_api.get("/internal/v1/documents")
-    assert list_resp.status_code == 200
-    docs = response_json_list(list_resp)
-    document_id = json_str(as_json_object(cast(object, docs[0])), "document_id")
+    write_client_api, _dm_client, _store, document_id = retag_clients
 
     retag_resp = write_client_api.post(f"/internal/v1/documents/{document_id}/retag")
     assert retag_resp.status_code == 200

@@ -1,13 +1,6 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-type Theme = "dark" | "light" | "system";
-
-interface ThemeProviderState {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-}
-
-const ThemeProviderContext = createContext<ThemeProviderState | null>(null);
+import { ThemeProviderContext, type Theme } from "@/components/themeContext";
 
 const STORAGE_KEY = "vecinita-ui-theme";
 
@@ -27,7 +20,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     root.classList.remove("light", "dark");
 
     if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
+        ? "dark"
+        : "light";
       root.classList.add(systemTheme);
       return;
     }
@@ -43,13 +39,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     },
   };
 
-  return <ThemeProviderContext.Provider value={value}>{children}</ThemeProviderContext.Provider>;
-}
-
-export function useTheme() {
-  const context = useContext(ThemeProviderContext);
-  if (context === null) {
-    throw new Error("useTheme must be used within a ThemeProvider");
-  }
-  return context;
+  return (
+    <ThemeProviderContext.Provider value={value}>
+      {children}
+    </ThemeProviderContext.Provider>
+  );
 }

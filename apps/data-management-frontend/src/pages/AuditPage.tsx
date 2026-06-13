@@ -4,8 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { type AuditEvent, type AuditPage as AuditPageData, fetchAuditLog } from "@/api/admin";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  type AuditEvent,
+  type AuditPage as AuditPageData,
+  fetchAuditLog,
+} from "@/api/admin";
 import { requireCorpusConfig } from "@/config";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
@@ -26,7 +37,9 @@ export function AuditPage() {
         const result = await fetchAuditLog(client, params);
         setData(result);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load audit log");
+        setError(
+          err instanceof Error ? err.message : "Failed to load audit log",
+        );
       } finally {
         setLoading(false);
       }
@@ -59,7 +72,9 @@ export function AuditPage() {
       <div className="space-y-6">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Audit Log</h2>
-          <p className="text-muted-foreground">Event history and document changes.</p>
+          <p className="text-muted-foreground">
+            Event history and document changes.
+          </p>
         </div>
         <p className="text-muted-foreground">Loading…</p>
       </div>
@@ -72,7 +87,9 @@ export function AuditPage() {
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Audit Log</h2>
         </div>
-        <p role="alert" className="text-sm text-destructive">{error}</p>
+        <p role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
       </div>
     );
   }
@@ -81,7 +98,9 @@ export function AuditPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold tracking-tight">Audit Log</h2>
-        <p className="text-muted-foreground">Event history and document changes.</p>
+        <p className="text-muted-foreground">
+          Event history and document changes.
+        </p>
       </div>
 
       <Card>
@@ -91,28 +110,43 @@ export function AuditPage() {
         <CardContent>
           <div className="flex flex-wrap items-end gap-3">
             <div className="space-y-1">
-              <label className="text-sm font-medium" htmlFor="filter-event-type">Event type</label>
+              <label
+                className="text-sm font-medium"
+                htmlFor="filter-event-type"
+              >
+                Event type
+              </label>
               <Input
                 id="filter-event-type"
                 data-testid="filter-event-type"
                 value={eventTypeFilter}
-                onChange={(e) => { setEventTypeFilter(e.target.value); }}
+                onChange={(e) => {
+                  setEventTypeFilter(e.target.value);
+                }}
                 placeholder="document.created"
                 className="w-48"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium" htmlFor="filter-entity-id">Entity ID</label>
+              <label className="text-sm font-medium" htmlFor="filter-entity-id">
+                Entity ID
+              </label>
               <Input
                 id="filter-entity-id"
                 data-testid="filter-entity-id"
                 value={entityIdFilter}
-                onChange={(e) => { setEntityIdFilter(e.target.value); }}
+                onChange={(e) => {
+                  setEntityIdFilter(e.target.value);
+                }}
                 placeholder="doc-aaa..."
                 className="w-48"
               />
             </div>
-            <Button size="sm" onClick={handleApplyFilters} data-testid="apply-filters">
+            <Button
+              size="sm"
+              onClick={handleApplyFilters}
+              data-testid="apply-filters"
+            >
               Apply
             </Button>
           </div>
@@ -138,13 +172,17 @@ export function AuditPage() {
                     key={event.id}
                     event={event}
                     expanded={expandedIds.has(event.id)}
-                    onToggle={() => { toggleExpand(event.id); }}
+                    onToggle={() => {
+                      toggleExpand(event.id);
+                    }}
                   />
                 ))}
               </TableBody>
             </Table>
             {data.events.length === 0 && (
-              <p className="py-4 text-center text-sm text-muted-foreground">No audit events found.</p>
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                No audit events found.
+              </p>
             )}
             <p className="mt-3 text-xs text-muted-foreground">
               Showing {data.events.length} of {data.total} events
@@ -176,7 +214,11 @@ function AuditRow({
             className="rounded p-1 hover:bg-muted"
             aria-label={expanded ? "Collapse" : "Expand"}
           >
-            {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            {expanded ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
           </button>
         </TableCell>
         <TableCell>

@@ -9,6 +9,8 @@ BLOCKED=(
   admin-fe-spec.yaml
   internal-write-api-spec.yaml
   chat-rag-spec.yaml
+  prod.env
+  .deploy-keys.local
 )
 
 found=0
@@ -23,4 +25,4 @@ if (( found != 0 )); then
   exit 1
 fi
 
-echo "OK: operator DO spec exports are not tracked (see .gitignore)."
+echo "OK: operator DO spec exports and local secret files are not tracked (see .gitignore)."

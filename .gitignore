@@ -35,4 +35,5 @@ dist/
 *.log
 .coverage
 htmlcov/
+coverage/
 *.env

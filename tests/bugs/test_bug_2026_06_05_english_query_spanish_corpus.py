@@ -14,9 +14,7 @@ import os
 from pathlib import Path
 
 import pytest
-from sqlalchemy import create_engine, text
-from tests.unit.rag.conftest import attach_embeddings, basis_vector
-from vecinita_database.seeds.load import load_corpus
+from tests.unit.rag.conftest import basis_vector, seed_spanish_only_corpus
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_shared_schemas.chat_rag import AskRequest
 
@@ -37,22 +35,7 @@ def _database_url() -> str:
 def spanish_only_corpus_db() -> str:
     """Corpus with only Spanish documents (staging-like)."""
     url = _database_url()
-    load_corpus(database_url=url)
-    engine = create_engine(url)
-    with engine.begin() as conn:
-        conn.execute(text("DELETE FROM embeddings"))
-        conn.execute(
-            text(
-                "DELETE FROM chunks WHERE document_id IN "
-                "(SELECT id FROM documents WHERE language = 'en')"
-            )
-        )
-        conn.execute(text("DELETE FROM documents WHERE language = 'en'"))
-    attach_embeddings(
-        database_url=url,
-        match_substrings={"banco de alimentos": 0},
-        default_index=0,
-    )
+    seed_spanish_only_corpus(database_url=url)
     return url
 
 

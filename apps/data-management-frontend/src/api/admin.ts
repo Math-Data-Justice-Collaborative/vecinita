@@ -34,7 +34,11 @@ export interface StatsSummary {
     timestamp: string;
     summary: string | null;
   }[];
-  top_served: { document_id: string; title: string | null; served_count: number }[];
+  top_served: {
+    document_id: string;
+    title: string | null;
+    served_count: number;
+  }[];
 }
 
 function entityTypeFromEventType(eventType: string): string {
@@ -51,10 +55,12 @@ export function parseStatsSummary(raw: StatsSummaryApiResponse): StatsSummary {
       tag: row.label || row.slug,
       count: row.document_count,
     })),
-    language_breakdown: Object.entries(raw.language_breakdown).map(([language, count]) => ({
-      language,
-      count,
-    })),
+    language_breakdown: Object.entries(raw.language_breakdown).map(
+      ([language, count]) => ({
+        language,
+        count,
+      }),
+    ),
     recent_activity: raw.recent_activity.map((row) => ({
       event_type: row.event_type,
       entity_type: entityTypeFromEventType(row.event_type),
@@ -94,7 +100,9 @@ export interface HealthAggregate {
   checked_at: string;
 }
 
-export function parseHealthAggregate(raw: HealthAggregateApiResponse): HealthAggregate {
+export function parseHealthAggregate(
+  raw: HealthAggregateApiResponse,
+): HealthAggregate {
   return {
     overall: raw.status,
     checked_at: raw.checked_at,
@@ -107,7 +115,9 @@ export function parseHealthAggregate(raw: HealthAggregateApiResponse): HealthAgg
   };
 }
 
-export async function fetchStatsSummary(options: CorpusClientOptions): Promise<StatsSummary> {
+export async function fetchStatsSummary(
+  options: CorpusClientOptions,
+): Promise<StatsSummary> {
   const response = await fetch(`${options.baseUrl}/internal/v1/stats/summary`, {
     headers: { Authorization: `Bearer ${options.apiKey}` },
   });
@@ -118,7 +128,9 @@ export async function fetchStatsSummary(options: CorpusClientOptions): Promise<S
   return parseStatsSummary(raw);
 }
 
-export async function fetchHealthAggregate(options: CorpusClientOptions): Promise<HealthAggregate> {
+export async function fetchHealthAggregate(
+  options: CorpusClientOptions,
+): Promise<HealthAggregate> {
   const response = await fetch(`${options.baseUrl}/internal/v1/health/all`, {
     headers: { Authorization: `Bearer ${options.apiKey}` },
   });
@@ -138,12 +150,19 @@ export async function bulkDeleteDocuments(
   options: CorpusClientOptions,
   documentIds: string[],
 ): Promise<BulkResult> {
-  const response = await fetch(`${options.baseUrl}/internal/v1/documents/bulk`, {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${options.apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ document_ids: documentIds }),
-  });
-  if (!response.ok) throw new Error(`Bulk delete failed (${String(response.status)})`);
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/documents/bulk`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${options.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ document_ids: documentIds }),
+    },
+  );
+  if (!response.ok)
+    throw new Error(`Bulk delete failed (${String(response.status)})`);
   return response.json() as Promise<BulkResult>;
 }
 
@@ -153,12 +172,23 @@ export async function bulkTagDocuments(
   addTags: TagInput[],
   removeSlugs: string[],
 ): Promise<BulkResult> {
-  const response = await fetch(`${options.baseUrl}/internal/v1/documents/bulk/tags`, {
-    method: "PATCH",
-    headers: { Authorization: `Bearer ${options.apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ document_ids: documentIds, add: addTags, remove: removeSlugs }),
-  });
-  if (!response.ok) throw new Error(`Bulk tag failed (${String(response.status)})`);
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/documents/bulk/tags`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${options.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        document_ids: documentIds,
+        add: addTags,
+        remove: removeSlugs,
+      }),
+    },
+  );
+  if (!response.ok)
+    throw new Error(`Bulk tag failed (${String(response.status)})`);
   return response.json() as Promise<BulkResult>;
 }
 
@@ -224,7 +254,8 @@ export async function fetchAuditLog(
   const response = await fetch(url.toString(), {
     headers: { Authorization: `Bearer ${options.apiKey}` },
   });
-  if (!response.ok) throw new Error(`Audit log failed (${String(response.status)})`);
+  if (!response.ok)
+    throw new Error(`Audit log failed (${String(response.status)})`);
   const raw = (await response.json()) as AuditLogResponseApi;
   return parseAuditLogResponse(raw);
 }
@@ -233,10 +264,14 @@ export async function fetchDocumentHistory(
   options: CorpusClientOptions,
   documentId: string,
 ): Promise<AuditEvent[]> {
-  const response = await fetch(`${options.baseUrl}/internal/v1/audit?entity_id=${documentId}`, {
-    headers: { Authorization: `Bearer ${options.apiKey}` },
-  });
-  if (!response.ok) throw new Error(`Document history failed (${String(response.status)})`);
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/audit?entity_id=${documentId}`,
+    {
+      headers: { Authorization: `Bearer ${options.apiKey}` },
+    },
+  );
+  if (!response.ok)
+    throw new Error(`Document history failed (${String(response.status)})`);
   const raw = (await response.json()) as AuditLogResponseApi;
   return parseAuditLogResponse(raw).events;
 }
@@ -246,11 +281,18 @@ export async function bulkUpdateMetadata(
   documentIds: string[],
   updates: { title?: string; language?: string },
 ): Promise<BulkResult> {
-  const response = await fetch(`${options.baseUrl}/internal/v1/documents/bulk/metadata`, {
-    method: "PATCH",
-    headers: { Authorization: `Bearer ${options.apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ document_ids: documentIds, ...updates }),
-  });
-  if (!response.ok) throw new Error(`Bulk metadata update failed (${String(response.status)})`);
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/documents/bulk/metadata`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${options.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ document_ids: documentIds, ...updates }),
+    },
+  );
+  if (!response.ok)
+    throw new Error(`Bulk metadata update failed (${String(response.status)})`);
   return response.json() as Promise<BulkResult>;
 }

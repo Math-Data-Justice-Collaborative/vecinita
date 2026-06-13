@@ -17,24 +17,34 @@ export function useChatHistory() {
   }, []);
 
   const appendAssistantPlaceholder = useCallback(() => {
-    const message: ChatMessage = { id: newId(), role: "assistant", content: "" };
+    const message: ChatMessage = {
+      id: newId(),
+      role: "assistant",
+      content: "",
+    };
     setMessages((prev) => [...prev, message]);
     return message.id;
   }, []);
 
-  const appendAssistantToken = useCallback((messageId: string, token: string) => {
-    setMessages((prev) =>
-      prev.map((msg) =>
-        msg.id === messageId ? { ...msg, content: msg.content + token } : msg,
-      ),
-    );
-  }, []);
+  const appendAssistantToken = useCallback(
+    (messageId: string, token: string) => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId ? { ...msg, content: msg.content + token } : msg,
+        ),
+      );
+    },
+    [],
+  );
 
-  const setAssistantSources = useCallback((messageId: string, sources: Source[]) => {
-    setMessages((prev) =>
-      prev.map((msg) => (msg.id === messageId ? { ...msg, sources } : msg)),
-    );
-  }, []);
+  const setAssistantSources = useCallback(
+    (messageId: string, sources: Source[]) => {
+      setMessages((prev) =>
+        prev.map((msg) => (msg.id === messageId ? { ...msg, sources } : msg)),
+      );
+    },
+    [],
+  );
 
   const clearHistory = useCallback(() => {
     setMessages([]);

@@ -1,14 +1,59 @@
 :root {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
   line-height: 1.5;
   color: #1a1a1a;
   background: #f6f7f9;
 }
 
-.app {
+.app-shell {
   max-width: 48rem;
   margin: 0 auto;
   padding: 1.5rem;
+}
+
+.app-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.app-header-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.language-toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid #dde1e6;
+  border-radius: 999px;
+  background: #fff;
+}
+
+.lang-btn {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: transparent;
+  color: #333;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.lang-btn.active {
+  background: #1a73e8;
+  color: #fff;
+}
+
+.app {
+  margin: 0;
+  padding: 0;
 }
 
 header h1 {
