@@ -15,7 +15,9 @@
   },
   "dependencies": {
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "vecinita-frontend-i18n": "*",
+    "vecinita-frontend-ui": "*"
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",
