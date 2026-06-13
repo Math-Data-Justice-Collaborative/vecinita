@@ -34,6 +34,7 @@ dist/
 # Build / caches
 *.log
 .coverage
+.coverage-data/
 htmlcov/
 coverage/
 *.env
