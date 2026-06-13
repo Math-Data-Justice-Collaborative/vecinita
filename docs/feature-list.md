@@ -2,8 +2,8 @@
 
 > **Project**: Vecinita  
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
-> **Last updated**: 2026-05-27  
-> **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018)
+> **Last updated**: 2026-06-13  
+> **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** F31 (ADR-019)
 
 ## Summary
 
@@ -39,6 +39,7 @@
 | F28 | Source serving statistics | Implemented | Cross-cutting | chat-rag-backend, internal-write-api, database | 11-verify-impl 2026-05-27 |
 | F29 | Audit log & version history | Implemented | Data Management | internal-write-api, data-management-frontend, database | 11-verify-impl 2026-05-27 |
 | F30 | Strict static typing (no `Any` / `any`) | Implemented | Cross-cutting | all Python + TS apps | EV-003 2026-05-27 |
+| F31 | Per-component unit coverage gate (≥95% line + branch) | Planned | Cross-cutting | all `packages/*`, `apps/*` | EV-004 2026-06-13 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -406,6 +407,32 @@
   | TS compile | `tsc` | `strict`, `noImplicitAny` |
 - **Limitations**: `reportAny` and ESLint `strictTypeChecked` not enabled (see typing-policy).
 - **Source**: EV-003; ADR-018
+
+### F31: Per-component unit coverage gate (≥95% line + branch)
+
+- **What it does**: Enforces **≥95% line coverage** and **≥95% branch coverage** on each monorepo component (`packages/<name>`, `apps/<name>`) using unit tests only; **blocks CI** on failure.
+- **Inputs**: Source under the twelve gated paths; existing omit rules (`__init__.py`, alembic, test helpers).
+- **Outputs**: Passing `make test-unit-coverage` / CI coverage step; per-component table from `scripts/test/print_unit_coverage_summary.py`.
+- **Gated components (12)**:
+
+  | Component | Type |
+  |-----------|------|
+  | `packages/rag` | Python package |
+  | `packages/ingest` | Python package |
+  | `packages/embedding-client` | Python package |
+  | `packages/llm-client` | Python package |
+  | `packages/tagging` | Python package |
+  | `packages/shared-schemas` | Python package |
+  | `apps/chat-rag-backend` | Python app |
+  | `apps/data-management-backend` | Python app (includes Modal workers) |
+  | `apps/internal-write-api` | Python app |
+  | `apps/database` | Python app |
+  | `apps/chat-rag-frontend` | TypeScript app (Vitest) |
+  | `apps/data-management-frontend` | TypeScript app (Vitest) |
+
+- **Baseline (2026-06-13):** Combined unit coverage **61.0%** lines, **~42.9%** branches — all twelve components below 95% on at least one metric.
+- **Limitations**: Unit scope only (not integration/e2e); does not cover `scripts/`, `infra/`, or generated OpenAPI clients. Single milestone — no partial grandfathering.
+- **Source**: EV-004 / 01-requirements delta 2026-06-13; ADR-019
 
 ## Planned / Deferred (post-v1)
 

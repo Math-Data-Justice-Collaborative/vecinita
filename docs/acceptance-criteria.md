@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-05-27 (EV-002 signoff)
+> **Last updated**: 2026-06-13 (EV-004 F31)
 
 ## Per-feature criteria
 
@@ -57,12 +57,18 @@
 - [ ] **AC-E10**: CORS preflight passes for all new EV-002 endpoints from admin frontend origin (TC-060, H4). — H0c met; H4 live pending staging
 - [x] **AC-E11**: 3 new tables (audit_log, document_versions, document_serving_stats) in allow-list; privacy tests pass. — 11-verify-impl
 
+### EV-004 — Unit coverage gate (F31)
+
+- [ ] **AC-Q1**: Each of twelve components (`packages/*`, `apps/*`) reaches **≥95% line** and **≥95% branch** coverage in unit tests (`make test-unit-coverage`). — baseline 2026-06-13: 61% combined lines; none at 95% branch
+- [ ] **AC-Q2**: CI fails when any component is below either threshold (blocking gate). — implementation pending (ADR-019)
+- [ ] **AC-Q3**: Coverage exclusions match ADR-019 (`__init__.py`, alembic, test paths only). — verify at implementation
+
 ## Quantitative benchmarks
 
 | Benchmark | Metric | Target | Dataset | Spec reference |
 |-----------|--------|--------|---------|----------------|
 | Retrieval quality | Manual review | ≥80% "relevant" on eval fixture | `data/fixtures/eval/` | test-plan |
-| Coverage | Line coverage | ≥80% packages + backends | CI | test-plan |
+| Coverage (unit, per component) | Line + branch | ≥95% each on 12 components | CI (`make test-unit-coverage`) | test-plan, ADR-019 |
 | Cost | Monthly infra | ≤ $50 cap; $25 target documented | Deploy estimate | ADR-004 |
 | Latency | p95 ask | < 15s | Staging smoke | spec |
 

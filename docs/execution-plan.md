@@ -1,7 +1,7 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13)  
 > **Skill**: 04-tech-plan  
 > **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, ADR-001–017
 
@@ -9,12 +9,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 8 complete — gate passed |
-| **Active milestone** | — |
-| **Active task** | — |
-| **Tasks completed** | 184 / 184 |
-| **Last updated** | 2026-05-26 |
-| **Evolve cycle** | EV-002 (F23–F29) — **in_progress** |
+| **Active phase** | Phase 9 — EV-004 coverage gate |
+| **Active milestone** | M35 |
+| **Active task** | T36.1 (pending) |
+| **Tasks completed** | 202 / 207 |
+| **Last updated** | 2026-06-13 |
+| **Evolve cycle** | EV-004 (F31) — **in_progress** |
 
 ## Template
 
@@ -271,7 +271,7 @@
 #### Phase 3 Gate Check
 
 - [ ] `pytest tests/e2e/test_uj001*.py test_uj005*.py test_uj007*.py` passes
-- [ ] Coverage ≥ 80% on `packages/rag`, `packages/ingest`, backends (per test-plan)
+- [ ] Per-component unit coverage ≥ 95% line + 95% branch on all twelve components (F31 / ADR-019; `make test-unit-coverage`)
 - [ ] p95 latency measured in integration (informative; target < 15s excl. cold start)
 
 ---
@@ -648,6 +648,90 @@
 
 ---
 
+### Phase 9: EV-004 — Per-component coverage gate (F31)
+
+**Entry gate:** EV-004 01-requirements + 02-verify-plan complete; ADR-019 accepted.  
+**Exit gate:** AC-Q1–Q3; `make test-unit-coverage` exits 0; dedicated CI `coverage` job green.  
+**Evolve cycle:** EV-004 (F31)  
+**Branch root:** `evolve/EV-004-coverage-gate` (from `main`)
+
+**Tech decisions (04-tech-plan 2026-06-13):**
+
+| ID | Topic | Decision |
+|----|-------|----------|
+| TP-030 | Gate enforcement | `--enforce` on `print_unit_coverage_summary.py`; default via `unit_coverage.sh` |
+| TP-031 | CI wiring | Dedicated `coverage` job (Python 3.11 + Node 20; runs `make test-unit-coverage`) |
+| TP-032 | Milestones | M32 infra → M33 packages → M34 Python apps → M35 frontends → M36 verify |
+| TP-033 | Build order | Hardest baseline first within each milestone (tagging → … → chat-rag-frontend) |
+
+#### M32: Coverage gate infrastructure
+
+**Branch:** `feat/M32-coverage-gate-infra` → `evolve/EV-004-coverage-gate`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Cycle | Features |
+|---|------|------|--------|-------------|------------|-----------|-------|----------|
+| T32.1 | Test: `tests/unit/test_coverage_gate.py` — `--enforce` fails when fixture below 95% line or branch (red) | Test | completed | ADR-019, AC-Q2 | — | — | EV-004 | F31 |
+| T32.2 | Code: Add `--enforce` + threshold args to `print_unit_coverage_summary.py` | Code | completed | ADR-019, TP-030 | T32.1 | — | EV-004 | F31 |
+| T32.3 | Config: `unit_coverage.sh` + Makefile invoke summary with `--enforce` | Config | completed | TP-030 | T32.2 | — | EV-004 | F31 |
+| T32.4 | Config: Vitest `coverage.thresholds` (lines 95, branches 95) in both frontend `vitest.config.ts` | Config | completed | ADR-019 §Frontends, test-plan | T32.2 | — | EV-004 | F31 |
+| T32.5 | Config: Dedicated `coverage` job in `.github/workflows/ci.yml` (uv + Node 20; `make test-unit-coverage`) | Config | completed | TP-031, test-plan §CI/CD step 5 | T32.3, T32.4 | — | EV-004 | F31 |
+| T32.6 | Test: Gate unit tests green with synthetic coverage JSON fixtures | Test | completed | AC-Q2 | T32.5 | — | EV-004 | F31 |
+| T32.7 | Docs: Gate runbook in `docs/LOCAL_DEV.md` (local parity with CI job) | Docs | completed | test-plan | T32.6 | — | EV-004 | F31 |
+
+#### M33: Package unit coverage (hardest first)
+
+**Branch:** `feat/M33-package-coverage` → `evolve/EV-004-coverage-gate`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Cycle | Features |
+|---|------|------|--------|-------------|------------|-----------|-------|----------|
+| T33.1 | Test: Unit tests bring `packages/tagging` to ≥95% line + branch (baseline 57.7% / 16.7%) | Test | completed | ADR-019, test-plan | T32.6 | — | EV-004 | F31 |
+| T33.2 | Test: `packages/ingest` → ≥95% line + branch | Test | completed | test-plan | T33.1 | — | EV-004 | F31 |
+| T33.3 | Test: `packages/rag` → ≥95% line + branch | Test | completed | test-plan | T33.2 | — | EV-004 | F31 |
+| T33.4 | Test: `packages/embedding-client` → ≥95% line + branch | Test | completed | test-plan | T33.3 | — | EV-004 | F31 |
+| T33.5 | Test: `packages/shared-schemas` → ≥95% line + branch | Test | completed | test-plan | T33.4 | — | EV-004 | F31 |
+| T33.6 | Test: `packages/llm-client` → ≥95% line + branch | Test | completed | test-plan | T33.5 | — | EV-004 | F31 |
+
+#### M34: Python app unit coverage (hardest first)
+
+**Branch:** `feat/M34-python-app-coverage` → `evolve/EV-004-coverage-gate`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Cycle | Features |
+|---|------|------|--------|-------------|------------|-----------|-------|----------|
+| T34.1 | Test: `apps/data-management-backend` → ≥95% line + branch (incl. Modal worker modules) | Test | completed | ADR-019 §Modal, test-plan | T33.6 | 2026-06-12 | EV-004 | F31 |
+| T34.2 | Test: `apps/internal-write-api` → ≥95% line + branch | Test | completed | test-plan | T34.1 | 2026-06-12 | EV-004 | F31 |
+| T34.3 | Test: `apps/chat-rag-backend` → ≥95% line + branch | Test | completed | test-plan | T34.2 | 2026-06-12 | EV-004 | F31 |
+| T34.4 | Test: `apps/database` → ≥95% line + branch | Test | completed | test-plan | T34.3 | 2026-06-12 | EV-004 | F31 |
+
+#### M35: Frontend unit coverage
+
+**Branch:** `feat/M35-frontend-coverage` → `evolve/EV-004-coverage-gate`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Cycle | Features |
+|---|------|------|--------|-------------|------------|-----------|-------|----------|
+| T35.1 | Test: `apps/data-management-frontend` → ≥95% line + branch (Vitest) | Test | completed | ADR-019, test-plan | T34.4, T32.4 | 2026-06-13 | EV-004 | F31 |
+| T35.2 | Test: `apps/chat-rag-frontend` → ≥95% line + branch (Vitest) | Test | completed | test-plan | T35.1 | 2026-06-13 | EV-004 | F31 |
+
+#### M36: EV-004 verification & merge
+
+**Branch:** `feat/M36-ev004-verify` → `evolve/EV-004-coverage-gate`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Cycle | Features |
+|---|------|------|--------|-------------|------------|-----------|-------|----------|
+| T36.1 | Test: `make test-unit-coverage` exits 0 — all twelve components ≥95% (AC-Q1) | Test | pending | acceptance-criteria AC-Q1 | T35.2 | — | EV-004 | F31 |
+| T36.2 | Test: `tests/unit/test_coverage_exclusions.py` — omit rules match ADR-019 (AC-Q3) | Test | pending | AC-Q3, pyproject.toml omit | T36.1 | — | EV-004 | F31 |
+| T36.3 | Config: Extend `make ci` to run coverage gate (parity with dedicated CI job) | Config | pending | test-plan §CI/CD | T36.1 | — | EV-004 | F31 |
+| T36.4 | Docs: Mark AC-Q1–Q3 ready in acceptance-criteria; EV-004 section in evolve-decisions | Docs | pending | acceptance-criteria | T36.2, T36.3 | — | EV-004 | F31 |
+
+#### Phase 9 Gate Check
+
+- [ ] All M32–M36 tasks completed (207/207)
+- [ ] `make test-unit-coverage` exits 0 locally and in CI `coverage` job
+- [ ] Per-component table shows ≥95% line **and** ≥95% branch on all twelve components
+- [ ] AC-Q3 exclusions verified (`__init__.py`, alembic, test paths only)
+- [ ] No new runtime dependencies or deploy surface (quality-only cycle)
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -695,6 +779,12 @@ main
       ├── feat/M29-audit-ui
       ├── feat/M30-retention-integration
       └── feat/M31-ev002-deploy
+ └── evolve/EV-004-coverage-gate (from main)
+      ├── feat/M32-coverage-gate-infra
+      ├── feat/M33-package-coverage
+      ├── feat/M34-python-app-coverage
+      ├── feat/M35-frontend-coverage
+      └── feat/M36-ev004-verify
 ```
 
 ### PR Plan
@@ -738,6 +828,12 @@ main
 | PR-35 | Minor | M30 | feat/M30-retention-integration | evolve/EV-002-admin-overhaul | merged (local) |
 | PR-36 | Minor | M31 | feat/M31-ev002-deploy | evolve/EV-002-admin-overhaul | merged (local) |
 | PR-37 | Major | Phase 6–8 / EV-002 | evolve/EV-002-admin-overhaul | main | pending |
+| PR-38 | Minor | M32 | feat/M32-coverage-gate-infra | evolve/EV-004-coverage-gate | pending |
+| PR-39 | Minor | M33 | feat/M33-package-coverage | evolve/EV-004-coverage-gate | pending |
+| PR-40 | Minor | M34 | feat/M34-python-app-coverage | evolve/EV-004-coverage-gate | pending |
+| PR-41 | Minor | M35 | feat/M35-frontend-coverage | evolve/EV-004-coverage-gate | pending |
+| PR-42 | Minor | M36 | feat/M36-ev004-verify | evolve/EV-004-coverage-gate | pending |
+| PR-43 | Major | Phase 9 / EV-004 | evolve/EV-004-coverage-gate | main | pending |
 
 ## Task Tracking
 
@@ -928,6 +1024,29 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T31.6 | M31 | 8 | Config | pending | T31.5 | — | EV-002 | — |
 | T31.7 | M31 | 8 | Config | pending | T31.6 | — | EV-002 | — |
 | T31.8 | M31 | 8 | Config | pending | T31.7 | — | EV-002 | — |
+| T32.1 | M32 | 9 | Test | completed | — | — | EV-004 | — |
+| T32.2 | M32 | 9 | Code | completed | T32.1 | — | EV-004 | — |
+| T32.3 | M32 | 9 | Config | completed | T32.2 | — | EV-004 | — |
+| T32.4 | M32 | 9 | Config | completed | T32.2 | — | EV-004 | — |
+| T32.5 | M32 | 9 | Config | completed | T32.3, T32.4 | — | EV-004 | — |
+| T32.6 | M32 | 9 | Test | completed | T32.5 | — | EV-004 | — |
+| T32.7 | M32 | 9 | Docs | completed | T32.6 | — | EV-004 | — |
+| T33.1 | M33 | 9 | Test | completed | T32.6 | — | EV-004 | — |
+| T33.2 | M33 | 9 | Test | completed | T33.1 | — | EV-004 | — |
+| T33.3 | M33 | 9 | Test | completed | T33.2 | — | EV-004 | — |
+| T33.4 | M33 | 9 | Test | completed | T33.3 | — | EV-004 | — |
+| T33.5 | M33 | 9 | Test | completed | T33.4 | — | EV-004 | — |
+| T33.6 | M33 | 9 | Test | completed | T33.5 | — | EV-004 | — |
+| T34.1 | M34 | 9 | Test | completed | T33.6 | 2026-06-12 | EV-004 | — |
+| T34.2 | M34 | 9 | Test | completed | T34.1 | 2026-06-12 | EV-004 | — |
+| T34.3 | M34 | 9 | Test | completed | T34.2 | 2026-06-12 | EV-004 | — |
+| T34.4 | M34 | 9 | Test | completed | T34.3 | 2026-06-12 | EV-004 | — |
+| T35.1 | M35 | 9 | Test | completed | T34.4, T32.4 | 2026-06-13 | EV-004 | — |
+| T35.2 | M35 | 9 | Test | completed | T35.1 | 2026-06-13 | EV-004 | — |
+| T36.1 | M36 | 9 | Test | pending | T35.2 | — | EV-004 | — |
+| T36.2 | M36 | 9 | Test | pending | T36.1 | — | EV-004 | — |
+| T36.3 | M36 | 9 | Config | pending | T36.1 | — | EV-004 | — |
+| T36.4 | M36 | 9 | Docs | pending | T36.2, T36.3 | — | EV-004 | — |
 
 ## Phase Gate Log
 
@@ -980,3 +1099,7 @@ CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, ba
 - [x] EV-002 Audit retention — background cleanup job (TP-027)
 - [x] EV-002 Frontend testing — Vitest + Testing Library (TP-028)
 - [x] EV-002 Deploy order — migration → write-api → chat-rag → frontend (TP-029)
+- [x] EV-004 Gate enforcement — `--enforce` on summary script (TP-030)
+- [x] EV-004 CI coverage job — dedicated `coverage` job (TP-031)
+- [x] EV-004 Milestone split — M32–M36 (TP-032)
+- [x] EV-004 Component order — hardest baseline first (TP-033)

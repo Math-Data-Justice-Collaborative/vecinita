@@ -95,6 +95,19 @@
 | RD-051 | shadcn/ui deps | Approved: tailwindcss, @radix-ui/*, cva, clsx, tailwind-merge, lucide-react | — |
 | RD-052 | Bulk delete limit | **Max 100** documents per operation | — |
 
+## EV-004 resolutions (2026-06-13) — F31 coverage gate
+
+| ID | Topic | Decision | ADR |
+|----|-------|----------|-----|
+| RD-053 | Coverage target | **≥95% line** and **≥95% branch** per component | ADR-019 |
+| RD-054 | Granularity | Twelve gates: `packages/<name>` + `apps/<name>` (matches coverage summary script) | ADR-019 |
+| RD-055 | Test scope | **Unit only** — `tests/unit` + Vitest `--coverage` | ADR-019 |
+| RD-056 | CI enforcement | **Blocking** — fail pipeline on any component below threshold | ADR-019 |
+| RD-057 | Exclusions | Keep current pyproject/vitest omits (`__init__.py`, alembic, test helpers) | ADR-019 |
+| RD-058 | Modal backend | Include Modal worker code in `apps/data-management-backend` gate | ADR-019 |
+| RD-059 | Phasing | **Single milestone** — all twelve components before merge; no grandfathering | ADR-019 |
+| RD-060 | Frontends | Same 95% line + branch as backends | ADR-019 |
+
 Unresolved:
 
 - Exact LlamaIndex / vLLM patch pins at implementation (T8.1, T9.2)

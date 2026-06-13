@@ -154,4 +154,78 @@ describe("Bulk operations UI", () => {
       );
     });
   });
+
+  it("bulk tag opens dialog and applies tags", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ successes: ["aaa-111"], failures: [] }),
+      })
+      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderCorpus();
+
+    await waitFor(() => {
+      expect(screen.getByText("Doc A")).toBeInTheDocument();
+    });
+
+    const firstRow = screen.getByText("Doc A").closest("tr")!;
+    fireEvent.click(within(firstRow).getByRole("checkbox"));
+    fireEvent.click(screen.getByTestId("bulk-tag-btn"));
+
+    const dialog = await screen.findByRole("dialog");
+    fireEvent.change(within(dialog).getByLabelText(/add tags/i), {
+      target: { value: "legal" },
+    });
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: /apply tags/i }),
+    );
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("/bulk/tags"),
+        expect.objectContaining({ method: "PATCH" }),
+      );
+    });
+  });
+
+  it("bulk metadata opens dialog and updates fields", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ successes: ["aaa-111"], failures: [] }),
+      })
+      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderCorpus();
+
+    await waitFor(() => {
+      expect(screen.getByText("Doc A")).toBeInTheDocument();
+    });
+
+    const firstRow = screen.getByText("Doc A").closest("tr")!;
+    fireEvent.click(within(firstRow).getByRole("checkbox"));
+    fireEvent.click(screen.getByTestId("bulk-metadata-btn"));
+
+    const dialog = await screen.findByRole("dialog");
+    fireEvent.change(within(dialog).getByLabelText(/^title$/i), {
+      target: { value: "Updated title" },
+    });
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: /update metadata/i }),
+    );
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("/bulk/metadata"),
+        expect.objectContaining({ method: "PATCH" }),
+      );
+    });
+  });
 });

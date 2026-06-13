@@ -6,8 +6,13 @@ import json
 import logging
 from typing import cast
 
+import pytest
 from vecinita_shared_schemas.json_types import as_json_object
-from vecinita_shared_schemas.observability import JsonLogFormatter, log_request_event
+from vecinita_shared_schemas.observability import (
+    JsonLogFormatter,
+    configure_logging,
+    log_request_event,
+)
 
 
 def test_json_formatter_redacts_question_field() -> None:
@@ -51,3 +56,39 @@ def test_log_request_event_redacts_extra_prompt_keys() -> None:
         question="must not appear",
     )
     assert captured == ["<redacted>"]
+
+
+def test_json_formatter_includes_exception_text() -> None:
+    formatter = JsonLogFormatter("test-service")
+    try:
+        raise ValueError("boom")
+    except ValueError:
+        import sys
+
+        exc_info = sys.exc_info()
+
+    record = logging.LogRecord(
+        name="vecinita",
+        level=logging.ERROR,
+        pathname=__file__,
+        lineno=1,
+        msg="failed",
+        args=(),
+        exc_info=exc_info,
+    )
+    line = formatter.format(record)
+    payload = as_json_object(cast(object, json.loads(line)))
+
+    assert "exception" in payload
+    assert "boom" in str(payload["exception"])
+
+
+def test_configure_logging_uses_env_level(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("VECINITA_LOG_LEVEL", "WARNING")
+
+    logger = configure_logging("unit-test-service")
+
+    assert logger.name == "unit-test-service"
+    assert logging.getLogger().level == logging.WARNING

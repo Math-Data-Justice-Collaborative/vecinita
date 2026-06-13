@@ -117,6 +117,7 @@ Modal apps **do not** require redeploy for EV-002 (health aggregator on DO write
 - [ ] Load seed corpus (staging; production may include committed fixtures per data-management-plan)
 - [ ] Smoke: `/health`, UJ-001 sample ask
 - [ ] Privacy tests in CI green
+- [ ] **EV-004 (F31):** `coverage` CI job green on `main` — no redeploy; see [staging-runbook.md](staging-runbook.md) §EV-004 coverage gate
 
 ## Cost estimation
 
