@@ -250,7 +250,12 @@ stages:
     status: completed
     started: "2026-06-12"
     completed: "2026-06-12"
-    last_cycle: PRR-001
+    last_cycle: PRR-002
+  19-address-pr-review:
+    status: completed
+    started: "2026-06-12"
+    completed: "2026-06-12"
+    last_cycle: PRM-001
   gather-context:
     status: skipped
     note: "Superseded by 00-context for this project; key reserved for doc-planner path"
@@ -645,6 +650,108 @@ pr_review_cycles:
       - path: .cursor/skills/18-pr-review/checklist.md
         note: checklist source
     gh_review_url: null
+  - id: PRR-002
+    pr_number: 60
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/60
+    title: "Fix/es en full UI"
+    status: completed
+    started: "2026-06-12"
+    completed: "2026-06-12"
+    head_ref: fix/es-en-full-ui
+    base_ref: main
+    verdict: APPROVE
+    blockers: 0
+    advisories: 1
+    praise: 3
+    ci_status: success
+    head_sha: b6f6b54
+    linked_remediation_cycle_id: PRM-001
+    note: "re-review after PRM-001 remediation; advisory — LocaleContext eslint cosmetic"
+    subagents:
+      bugbot: skipped
+      security_review: skipped
+    artifacts:
+      - path: .cursor/skills/18-pr-review/checklist.md
+        note: checklist source
+    gh_review_url: null
+
+pr_remediation_cycles:
+  - id: PRM-001
+    pr_number: 60
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/60
+    linked_review_cycle_id: PRR-001
+    title: "Fix/es en full UI"
+    status: completed
+    started: "2026-06-12"
+    completed: "2026-06-12"
+    head_ref: fix/es-en-full-ui
+    base_ref: main
+    ci_status: success
+    counts:
+      fixed: 6
+      deferred: 0
+      wont_fix: 0
+    findings:
+      - id: F-001
+        source: review_body
+        severity: advisory
+        path: null
+        line: null
+        thread_id: null
+        status: fixed
+        commit: null
+        note: "PR body — summary, test plan, and review checklist alignment"
+      - id: F-002
+        source: review_body
+        severity: advisory
+        path: null
+        line: null
+        thread_id: null
+        status: fixed
+        commit: null
+        note: "Mark PR ready for review (draft → ready)"
+      - id: F-003
+        source: review_body
+        severity: advisory
+        path: null
+        line: null
+        thread_id: null
+        status: fixed
+        commit: null
+        note: "Mixed scope explained; Closes #54 and #57"
+      - id: F-004
+        source: inline
+        severity: advisory
+        path: apps/chat-rag-frontend/src/api/ask.ts
+        line: null
+        thread_id: null
+        status: fixed
+        commit: 8ff5f9c
+        note: "formatAskFailureMessage — localize ask failure copy"
+      - id: F-005
+        source: inline
+        severity: advisory
+        path: apps/chat-rag-frontend/src/components/TagFilterChips.tsx
+        line: null
+        thread_id: null
+        status: fixed
+        commit: 8ff5f9c
+        note: "TagFilterChips aria-label i18n"
+      - id: F-006
+        source: inline
+        severity: advisory
+        path: .cursor/rules/chat-rag-cold-start-retry.mdc
+        line: null
+        thread_id: null
+        status: fixed
+        commit: b6f6b54
+        note: "COLD_START dedup; bug report doc paths aligned with i18n"
+    commits:
+      - 8ff5f9c
+      - b6f6b54
+    head_sha: b6f6b54
+    follow_up:
+      pr_review_rerun: completed
 
 agents:
   repo_researcher:
@@ -790,7 +897,7 @@ artifacts:
   - openapi/internal-write.yaml (0.2.0)
 
 git_history:
-  current_branch: main
+  current_branch: fix/es-en-full-ui
   branches:
     - name: feat/M15-tag-schema
       purpose: "EV-001 Phase 5 — M15 tag schema & fixtures (07-build)"
@@ -804,6 +911,12 @@ git_history:
       status: open
       created_at: "2026-05-20"
       pr_url: null
+    - name: fix/es-en-full-ui
+      purpose: "PR #60 remediation — i18n fixes and review process items (PRM-001)"
+      base: main
+      status: open
+      created_at: "2026-06-12"
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/60
   commits:
     - sha: e3c952e
       branch: feat/connectivity-gates
@@ -877,6 +990,18 @@ git_history:
       stage: "17-retrospective"
       files_changed: 1
       timestamp: "2026-05-20T23:15:00Z"
+    - sha: 8ff5f9c
+      branch: fix/es-en-full-ui
+      message: "fix(review): localize ask failure copy and tag filter aria-label"
+      stage: "19-address-pr-review"
+      files_changed: 6
+      timestamp: "2026-06-12T18:16:56Z"
+    - sha: b6f6b54
+      branch: fix/es-en-full-ui
+      message: "docs: align bug reports and cold-start rule with i18n paths"
+      stage: "19-address-pr-review"
+      files_changed: 3
+      timestamp: "2026-06-12T18:16:56Z"
 
 constraints:
   cost:
