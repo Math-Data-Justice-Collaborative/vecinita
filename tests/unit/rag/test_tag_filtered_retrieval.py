@@ -7,7 +7,7 @@ from uuid import UUID
 
 import pytest
 from sqlalchemy import create_engine, text
-from tests.unit.rag.conftest import attach_embeddings, basis_vector
+from tests.unit.rag.conftest import attach_embeddings, basis_vector, reset_corpus_tables
 from vecinita_database.seeds.tags import load_seed_tags, load_tagged_corpus
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_rag.tag_inference import resolve_retrieval_tags
@@ -28,6 +28,7 @@ def _database_url() -> str:
 @pytest.fixture
 def tagged_corpus_db() -> str:
     url = _database_url()
+    reset_corpus_tables(database_url=url)
     load_seed_tags(database_url=url)
     load_tagged_corpus(database_url=url)
     engine = create_engine(url)

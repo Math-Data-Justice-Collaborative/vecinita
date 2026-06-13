@@ -13,6 +13,7 @@ dev = [
     "pip-audit>=2.7",
     "basedpyright>=1.39.6",
     "pytest-asyncio>=0.24",
+    "pytest-cov>=6.0",
     "pytest>=8.3",
     "ruff>=0.8",
     "vecinita-chat-rag-backend",
@@ -93,6 +94,30 @@ filterwarnings = [
     # Vecinita-owned models are guarded by tests/unit/test_pydantic_field_metadata.py.
     "ignore:The 'validate_default' attribute:pydantic.warnings.UnsupportedFieldAttributeWarning",
 ]
+
+[tool.coverage.run]
+source = [
+    "packages/rag/vecinita_rag",
+    "packages/ingest/vecinita_ingest",
+    "packages/embedding-client/vecinita_embedding_client",
+    "packages/llm-client/vecinita_llm_client",
+    "packages/tagging/vecinita_tagging",
+    "packages/shared-schemas/vecinita_shared_schemas",
+    "apps/chat-rag-backend/vecinita_chat_rag_backend",
+    "apps/data-management-backend/vecinita_data_management_backend",
+    "apps/internal-write-api/vecinita_internal_write_api",
+    "apps/database/vecinita_database",
+]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/__init__.py",
+    "apps/database/alembic/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
 
 [tool.basedpyright]
 include = ["apps", "packages", "tests"]

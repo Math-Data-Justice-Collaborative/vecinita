@@ -28,9 +28,8 @@ def _vector_literal(values: list[float]) -> str:
     return "[" + ",".join(str(v) for v in values) + "]"
 
 
-# Integration/eval tests share one Postgres DB; serialize corpus mutations so
-# TRUNCATE/load cannot interleave with attach_embeddings' SELECT-then-INSERT loop.
-# tests/conftest.py also holds corpus_db_lock for the full test via autouse fixture.
+# Integration/eval tests share one Postgres DB; corpus_db_lock (reentrant flock) serializes
+# TRUNCATE/load/attach and write API mutations. tests/conftest.py holds the lock per test.
 
 
 def _attach_embeddings_impl(
@@ -82,7 +81,7 @@ def attach_embeddings(
 
     Returns the number of embedding rows written.
     """
-    with corpus_db_lock:
+    with corpus_db_lock():
         return _attach_embeddings_impl(
             database_url=database_url,
             match_substrings=match_substrings,
@@ -98,7 +97,7 @@ def seed_corpus_with_embeddings(
     reset: bool = True,
 ) -> dict[str, int]:
     """Reset (optional), load fixture corpus, and attach deterministic embeddings."""
-    with corpus_db_lock:
+    with corpus_db_lock():
         if reset:
             _reset_corpus_tables_impl(database_url=database_url)
         counts = load_corpus(database_url=database_url)
@@ -126,7 +125,17 @@ def _reset_corpus_tables_impl(*, database_url: str) -> None:
     try:
         with engine.begin() as conn:
             conn.execute(
-                text("TRUNCATE TABLE embeddings, chunks, documents RESTART IDENTITY CASCADE")
+                text(
+                    """
+                    TRUNCATE TABLE
+                        embeddings,
+                        chunk_tags,
+                        document_tags,
+                        chunks,
+                        documents
+                    RESTART IDENTITY CASCADE
+                    """
+                )
             )
     finally:
         engine.dispose()
@@ -134,13 +143,13 @@ def _reset_corpus_tables_impl(*, database_url: str) -> None:
 
 def reset_corpus_tables(*, database_url: str) -> None:
     """Remove all corpus rows so eval/integration tests start from a clean slate."""
-    with corpus_db_lock:
+    with corpus_db_lock():
         _reset_corpus_tables_impl(database_url=database_url)
 
 
 def seed_eval_corpus(*, database_url: str) -> dict[str, int]:
     """Load fixture corpus + deterministic embeddings for eval benchmarks."""
-    with corpus_db_lock:
+    with corpus_db_lock():
         _reset_corpus_tables_impl(database_url=database_url)
         counts = load_corpus(database_url=database_url)
         if counts["documents"] < 2 or counts["chunks"] < 2:
@@ -159,7 +168,7 @@ def seed_eval_corpus(*, database_url: str) -> dict[str, int]:
 
 def seed_spanish_only_corpus(*, database_url: str) -> dict[str, int]:
     """Load corpus, drop English rows, attach ES embeddings (BUG-2026-06-05)."""
-    with corpus_db_lock:
+    with corpus_db_lock():
         _reset_corpus_tables_impl(database_url=database_url)
         counts = load_corpus(database_url=database_url)
         engine = create_engine(database_url)
@@ -187,10 +196,18 @@ def seed_spanish_only_corpus(*, database_url: str) -> dict[str, int]:
                         )
                     )
                 )
+                en_docs = scalar_int(
+                    sqlalchemy_scalar_one(
+                        conn.execute(text("SELECT COUNT(*) FROM documents WHERE language = 'en'"))
+                    )
+                )
         finally:
             engine.dispose()
         if es_chunks < 1:
             msg = f"spanish-only corpus missing ES chunks (found {es_chunks})"
+            raise RuntimeError(msg)
+        if en_docs != 0:
+            msg = f"spanish-only corpus still has {en_docs} English document(s)"
             raise RuntimeError(msg)
         written = _attach_embeddings_impl(
             database_url=database_url,
@@ -206,7 +223,7 @@ def seed_spanish_only_corpus(*, database_url: str) -> dict[str, int]:
 @pytest.fixture
 def corpus_db() -> str:
     url = _database_url()
-    with corpus_db_lock:
+    with corpus_db_lock():
         load_corpus(database_url=url)
         engine = create_engine(url)
         try:

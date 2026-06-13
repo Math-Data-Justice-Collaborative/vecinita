@@ -11,5 +11,12 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
+    coverage: {
+      provider: "v8",
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: ["src/**/*.test.{ts,tsx}", "src/test/**"],
+      reporter: ["json-summary", "html"],
+      reportsDirectory: "../../coverage/chat-rag-frontend",
+    },
   },
 });

@@ -21,7 +21,7 @@ NPM_LOCK := bash scripts/npm_with_lock.sh
 	lint lint-py lint-fe lint-fix lint-fix-py lint-fix-fe \
 	format format-py format-fe format-check format-check-py format-fe-check \
 	typecheck typecheck-py typecheck-fe \
-	test test-py test-fe test-unit test-integration test-e2e test-smoke test-privacy test-live \
+	test test-py test-fe test-unit test-unit-coverage test-integration test-e2e test-smoke test-privacy test-live \
 	build-frontend ci ci-guards audit audit-fe audit-fix check
 
 help: ## Show available targets
@@ -34,6 +34,7 @@ help: ## Show available targets
 	@echo "  make audit            # pip-audit (Python, with ignore list)"
 	@echo "  make audit-fix        # auto-fix CVEs, re-audit, then make check"
 	@echo "  make test             # full Python suite + frontend Vitest"
+	@echo "  make test-unit-coverage  # unit tests + per-package/app coverage summary"
 	@echo "  make ci               # CI-parity (guards, audit, tests, frontend build)"
 
 install: ## Install Python (uv) and frontend (npm ci) dependencies
@@ -118,6 +119,9 @@ typecheck: typecheck-py typecheck-fe ## Typecheck Python + both frontends (fail 
 
 test-unit: ## Pytest unit tests
 	$(UV) run pytest tests/unit
+
+test-unit-coverage: ## Unit tests with per-package/app coverage summary (htmlcov/, coverage/)
+	bash scripts/test/unit_coverage.sh
 
 test-integration: migrate ## Pytest integration tests (starts DB + migrates)
 	$(UV) run pytest tests/integration
