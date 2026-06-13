@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 9: EV-004 shared frontend i18n/UI |
 | **Active milestone** | M32: Workspace scaffold |
-| **Active task** | T32.2 |
-| **Tasks completed** | 184 / 222 |
+| **Active task** | T32.3 |
+| **Tasks completed** | 185 / 222 |
 | **Last updated** | 2026-06-13 |
 | **Evolve cycle** | EV-004 (F31) — **in_progress** |
 | **Git branch** | `feat/M32-workspace-scaffold` |
@@ -671,7 +671,7 @@ admin bilingual UI chrome; CI workspace wiring; frontend-only deploy.
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
 | T32.1 | Test: `frontend-i18n` strict `t()` keys (package Vitest TC-067) — red | Test | completed | test-plan TC-067, ADR-021 TP-032 | — | D10 | EV-004 | F31 |
-| T32.2 | Config: root `package.json` npm workspaces (`apps/*`, `packages/frontend-*`) | Config | pending | ADR-021 TP-035, dependency-inventory | — | — | EV-004 | F31 |
+| T32.2 | Config: root `package.json` npm workspaces (`apps/*`, `packages/frontend-*`) | Config | in_progress | ADR-021 TP-035, dependency-inventory | — | — | EV-004 | F31 |
 | T32.3 | Config: scaffold `packages/frontend-i18n` + `packages/frontend-ui` (package.json, tsconfig, vitest) | Config | pending | spec.md §Frontend i18n/UI, ADR-019/020 | T32.2 | — | EV-004 | F31 |
 | T32.4 | Test: workspace import resolution from both apps (smoke Vitest) | Test | pending | test-plan §EV-004 CI note | T32.3 | — | EV-004 | F31 |
 
@@ -1067,7 +1067,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T31.7 | M31 | 8 | Config | completed | T31.6 | — | EV-002 | — |
 | T31.8 | M31 | 8 | Config | completed | T31.7 | — | EV-002 | — |
 | T32.1 | M32 | 9 | Test | completed | — | D10 | EV-004 | F31 |
-| T32.2 | M32 | 9 | Config | pending | — | — | EV-004 | F31 |
+| T32.2 | M32 | 9 | Config | in_progress | — | — | EV-004 | F31 |
 | T32.3 | M32 | 9 | Config | pending | T32.2 | — | EV-004 | F31 |
 | T32.4 | M32 | 9 | Test | pending | T32.3 | — | EV-004 | F31 |
 | T33.1 | M33 | 9 | Test | pending | T32.1 | D10 | EV-004 | F31 |
