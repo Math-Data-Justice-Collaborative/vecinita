@@ -277,9 +277,9 @@ describe("ChatPanel", () => {
     ).toBeDisabled();
 
     const assistantMessage = screen.getAllByTestId("message")[1];
-    expect(assistantMessage.querySelector(".message-content")).toHaveTextContent(
-      "…",
-    );
+    expect(
+      assistantMessage.querySelector(".message-content"),
+    ).toHaveTextContent("…");
 
     releaseStream?.(
       sseResponse(
