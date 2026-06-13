@@ -1,5 +1,5 @@
 # Vecinita pipeline state — canonical schema: .cursor/skills/workflow-state-reference.md
-overall_status: completed
+overall_status: in_progress
 project:
   name: Vecinita
   description: Monorepo — bilingual community Q&A RAG + data management (5 apps; zero personal data, cost/sovereignty constraints)
@@ -30,8 +30,8 @@ stages:
     status: completed
     completed_at: "2026-05-19"
     started_at: "2026-05-19"
-    partial_rerun_at: "2026-05-24"
-    partial_rerun_note: "partial_rerun EV-001 2026-05-24"
+    partial_rerun_at: "2026-06-13"
+    partial_rerun_note: "EV-004 delta F31 — per-component 95% line+branch coverage gate"
     substeps:
       interviews:
         completed: 13
@@ -59,10 +59,10 @@ stages:
         dependency_inventory: "User wants vLLM and LlamaIndex evaluated in interview"
   02-verify-plan:
     status: completed
-    started_at: "2026-05-24"
-    completed_at: "2026-05-24"
-    partial_rerun_at: "2026-05-26"
-    partial_rerun_note: "EV-002 delta F23-F29 — 24 statements, 1 contradiction resolved, 3 docs updated"
+    started_at: "2026-06-13"
+    completed_at: "2026-06-13"
+    partial_rerun_at: "2026-06-13"
+    partial_rerun_note: "EV-004 delta F31 — 11 statements, 3 contradictions resolved, 1 doc updated"
     documents_total: 13
     statements_total: 52
     drift_fixes: 4
@@ -78,6 +78,11 @@ stages:
     ev002_user_approved: 9
     ev002_modified: 1
     ev002_contradictions_resolved: 1
+    ev004_statements: 11
+    ev004_auto_approved: 8
+    ev004_user_approved: 5
+    ev004_modified: 1
+    ev004_contradictions_resolved: 3
   03-plan-tooling:
     status: completed
     started_at: "2026-05-19"
@@ -91,8 +96,8 @@ stages:
     status: completed
     started_at: "2026-05-19"
     completed_at: "2026-05-24"
-    partial_rerun_at: "2026-05-26"
-    partial_rerun_note: "EV-002 delta F23-F29 — tech plan interview complete; Phase 6-8 execution plan"
+    partial_rerun_at: "2026-06-13"
+    partial_rerun_note: "EV-004 delta F31 — Phase 9 appended; TP-030–033"
     substeps:
       phase1_toolchain: completed
       phase2_interview: completed
@@ -139,10 +144,10 @@ stages:
       - .github/workflows/ci.yml
     verification: passed
   07-build:
-    status: completed
+    status: in_progress
     started_at: "2026-05-19"
     completed_at: "2026-05-27"
-    note: "Phase 8 EV-002 complete — 184/184 tasks per execution-plan.md; gate passed 2026-05-27"
+    note: "EV-004 Phase 9 M32 complete (T32.1-T32.7); M33 T33.1 next"
   08-verify-build:
     status: completed
     started_at: "2026-05-27"
@@ -627,6 +632,48 @@ evolve_cycles:
       - path: docs/context-brief.md
         status: completed
     issues: []
+  - id: EV-004
+    cycle_type: quality
+    feature_ids: [F31]
+    title: "Per-component unit coverage gate (95% line + branch)"
+    status: in_progress
+    started: "2026-06-13"
+    current_stage: 07-build
+    stages:
+      01-requirements:
+        status: completed
+        completed: "2026-06-13"
+        artifacts_updated:
+          - docs/feature-list.md
+          - docs/test-plan.md
+          - docs/acceptance-criteria.md
+          - docs/requirements-decisions.md
+          - docs/adr/ADR-019-per-component-coverage-95.md
+          - docs/evolve-decisions.md
+          - docs/adr/README.md
+      02-verify-plan:
+        status: completed
+        completed: "2026-06-13"
+        artifacts_updated:
+          - docs/product-audit.md
+          - docs/product-decisions.md
+          - docs/execution-plan.md
+      04-tech-plan:
+        status: completed
+        started: "2026-06-13"
+        completed: "2026-06-13"
+        artifacts_updated:
+          - docs/execution-plan.md
+          - docs/tech-decisions.md
+          - docs/evolve-decisions.md
+          - docs/adr/ADR-019-per-component-coverage-95.md
+          - docs/test-plan.md
+          - docs/staging-runbook.md
+          - docs/deployment-integration.md
+      07-build:
+        status: in_progress
+    adrs:
+      - docs/adr/ADR-019-per-component-coverage-95.md
 retrospective_cycles: []
 pr_review_cycles:
   - id: PRR-001
@@ -953,6 +1000,8 @@ decisions_log:
   - "EV-002 05-verify-tech delta — TV-032–TV-039 — 23 statements, 8 consistency fixes, 7 source-doc edits — 2026-05-26"
   - "EV-002 11-verify-impl: UJ-013–UJ-021 and F23–F29 approved by user 2026-05-27; T3 live waiver until 13-deploy-smoke"
   - "EV-002 12-verify-deploy: failure mitigations approved; rollback plan approved; deploy_ready=true pending staging DB migration"
+  - "EV-004: F31 per-component 95% line+branch unit coverage gate — RD-053–RD-060 — ADR-019 — 2026-06-13"
+  - "EV-004 02-verify-plan delta complete — 11 statements, 3 contradictions resolved — 2026-06-13"
 
 artifacts:
   - docs/context-brief.md
@@ -994,9 +1043,13 @@ artifacts:
   - data/fixtures/tags/seed_tags.json
   - openapi/chat-rag.yaml (0.2.0)
   - openapi/internal-write.yaml (0.2.0)
+  - docs/adr/ADR-019-per-component-coverage-95.md
+  - docs/evolve-decisions.md
+  - docs/adr/README.md
+  - docs/staging-runbook.md
 
 git_history:
-  current_branch: fix/es-en-full-ui
+  current_branch: tests/95-coverage
   branches:
     - name: feat/M15-tag-schema
       purpose: "EV-001 Phase 5 — M15 tag schema & fixtures (07-build)"

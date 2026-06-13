@@ -98,6 +98,8 @@ describe("Dashboard page", () => {
       expect(screen.getByText(/document\.created/)).toBeInTheDocument();
     });
     expect(screen.getByText(/document\.tagged/)).toBeInTheDocument();
+    expect(screen.getByText("Created doc")).toBeInTheDocument();
+    expect(screen.getByText("document")).toBeInTheDocument();
   });
 
   it("shows error state on fetch failure", async () => {
@@ -111,6 +113,54 @@ describe("Dashboard page", () => {
 
     await waitFor(() => {
       expect(screen.getByRole("alert")).toBeInTheDocument();
+    });
+  });
+
+  it("renders empty top served and recent activity states", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        ...MOCK_STATS,
+        top_served: [],
+        recent_activity: [],
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderDashboard();
+
+    await waitFor(() => {
+      expect(screen.getByText(/no serving data yet/i)).toBeInTheDocument();
+    });
+    expect(screen.getByText(/no recent activity/i)).toBeInTheDocument();
+  });
+
+  it("uses document_id when top served title is null", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        ...MOCK_STATS,
+        top_served: [{ document_id: "zzz", title: null, served_count: 3 }],
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderDashboard();
+
+    await waitFor(() => {
+      expect(screen.getByText("zzz")).toBeInTheDocument();
+    });
+  });
+
+  it("shows generic dashboard error for non-Error failures", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValueOnce("stats down"));
+
+    renderDashboard();
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Failed to load dashboard",
+      );
     });
   });
 });

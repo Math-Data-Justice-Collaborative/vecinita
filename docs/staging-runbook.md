@@ -127,6 +127,19 @@ Mark items in [execution-plan.md](execution-plan.md) Phase 4 Gate Check after ev
 | UI “Failed to fetch”, H3 pass | Missing CORS | Set `VECINITA_CORS_ORIGINS` on APIs; redeploy backends |
 | H5 shows `localhost` | Frontend built without `VITE_*` | Set DO BUILD_TIME secrets; redeploy frontends |
 
+## EV-004 coverage gate (F31) — CI smoke only
+
+**No staging deploy** for EV-004. The coverage gate is enforced in GitHub Actions only.
+
+| Check | How to verify |
+|-------|----------------|
+| Dedicated CI `coverage` job | `.github/workflows/ci.yml` — runs `make test-unit-coverage` (`--enforce` on summary script) |
+| Local parity | `make test-unit-coverage` exits 0 when all twelve components ≥95% line + branch |
+| Staging H1–H5 | **Unchanged** — no new secrets, CORS, or `VITE_*`; existing smokes still apply |
+| Post-merge health | `bash scripts/ci/watch_github_ci.sh main` — `coverage` job must be green on `main` |
+
+If the `coverage` job fails while `python` / `frontend` jobs pass, inspect `scripts/test/print_unit_coverage_summary.py` output for the failing component row.
+
 ## Related
 
 - `scripts/deploy/staging_smoke.sh` — shell H1–H3  

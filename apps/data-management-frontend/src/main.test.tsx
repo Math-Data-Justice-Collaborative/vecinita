@@ -1,0 +1,43 @@
+import { cleanup, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+const STATS = {
+  total_documents: 0,
+  total_chunks: 0,
+  tag_distribution: [],
+  language_breakdown: {},
+  recent_activity: [],
+  top_served: [],
+};
+
+describe("main entry", () => {
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="root"></div>';
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(STATS),
+      }),
+    );
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.resetModules();
+    vi.restoreAllMocks();
+  });
+
+  it("mounts the admin shell into #root", async () => {
+    await import("./main");
+
+    await waitFor(() => {
+      expect(screen.getByTestId("admin-nav")).toBeInTheDocument();
+    });
+  });
+
+  it("throws when #root is missing", async () => {
+    document.body.innerHTML = "";
+    await expect(import("./main")).rejects.toThrow(/root element/i);
+  });
+});

@@ -84,7 +84,8 @@ async function* streamAskOnce(
     }
     buffer += decoder.decode(value, { stream: true });
     const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
+    const remainder = lines.pop();
+    buffer = remainder === undefined ? "" : remainder;
     for (const line of lines) {
       const event = parseSseLine(line);
       if (event) {
@@ -132,7 +133,7 @@ export async function* streamAsk(
       }
       options?.onRetry?.(attempt, COLD_START_ASK_MAX_ATTEMPTS);
       await sleep(COLD_START_ASK_RETRY_DELAY_MS);
-      lastError = err instanceof Error ? err : new Error(String(err));
+      lastError = err as Error;
     }
   }
 

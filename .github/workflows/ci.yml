@@ -96,6 +96,31 @@ jobs:
           done < audit/pip-audit-ignore.txt
           uv run pip-audit "${IGNORE_ARGS[@]}"
 
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Sync dependencies
+        run: uv sync --group dev
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Unit coverage gate (F31 / ADR-019)
+        run: make test-unit-coverage
+
   frontend:
     runs-on: ubuntu-latest
     strategy:

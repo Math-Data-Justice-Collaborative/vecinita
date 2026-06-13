@@ -126,4 +126,37 @@ describe("Health page", () => {
       expect(screen.getByRole("alert")).toBeInTheDocument();
     });
   });
+
+  it("renders healthy service without latency or error text", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        status: "healthy",
+        services: {
+          chat_rag_backend: { status: "up", latency_ms: null, error: null },
+        },
+        checked_at: "2026-05-26T10:00:00Z",
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderHealth();
+
+    await waitFor(() => {
+      expect(screen.getByText("chat_rag_backend")).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/ms/)).not.toBeInTheDocument();
+  });
+
+  it("shows generic health error for non-Error failures", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValueOnce("health down"));
+
+    renderHealth();
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Failed to load health",
+      );
+    });
+  });
 });

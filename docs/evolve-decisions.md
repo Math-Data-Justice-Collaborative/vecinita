@@ -1,5 +1,40 @@
 # Evolve cycle decisions
 
+## EV-004 — Per-component unit coverage gate (F31)
+
+**Date:** 2026-06-13  
+**Status:** 04-tech-plan complete — 05-verify-tech next  
+**Type:** Cross-cutting quality / CI
+
+### Scope (approved)
+
+Raise unit-test coverage to **≥95% line and ≥95% branch** on **each** of twelve monorepo components (`packages/*`, `apps/*`). Unit tests only. **Blocking CI.** Single milestone (all components before merge).
+
+Baseline (2026-06-13): combined **61.0%** lines, **~42.9%** branches — largest gaps in backends and `data-management-frontend`.
+
+### Artifacts
+
+- `docs/feature-list.md` — F31
+- `docs/test-plan.md` — Metrics, CI step, component baseline table
+- `docs/acceptance-criteria.md` — AC-Q1–Q3
+- `docs/requirements-decisions.md` — RD-053–RD-060
+- `docs/adr/ADR-019-per-component-coverage-95.md`
+
+### Routing
+
+| Stage | Required |
+|-------|----------|
+| 01-requirements | Delta — complete |
+| 02-verify-plan | Verify F31 statements vs ADR-019 | Complete 2026-06-13 |
+| 04-tech-plan | Phase 9 tasks (T32–T36), TP-030–033 | Complete 2026-06-13 |
+| 05-verify-tech | Verify tech statements vs execution plan | Next |
+| 07-build | Tests + gate wiring |
+| 08-verify-build | Confirm all twelve components pass |
+
+Skipped unless drift: 03, 06, 12–13 (no deploy change).
+
+---
+
 ## EV-003 — Strict typing (no Any/any)
 
 **Date:** 2026-05-27  

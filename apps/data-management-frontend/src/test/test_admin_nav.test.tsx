@@ -75,4 +75,16 @@ describe("Admin navigation", () => {
     expect(toggles.length).toBeGreaterThan(0);
     fireEvent.click(toggles[0]);
   });
+
+  it("opens mobile navigation sheet", async () => {
+    renderApp();
+
+    fireEvent.click(screen.getByRole("button", { name: /open navigation/i }));
+    const sheetTitle = await screen.findAllByText("Vecinita");
+    expect(sheetTitle.length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("link", { name: /corpus/i }));
+    expect(
+      screen.getByText(/ingest urls and manage documents/i),
+    ).toBeInTheDocument();
+  });
 });

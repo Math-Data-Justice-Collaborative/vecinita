@@ -19,6 +19,7 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 | [ADR-013](ADR-013-bilingual-auto-detect.md) | Bilingual Q&A with automatic language detection | Accepted | 01-requirements |
 | [ADR-014](ADR-014-corpus-tagging-and-browse.md) | Corpus tagging, community browse, tag-filtered RAG | Accepted | 00-context (EV-001) |
 | [ADR-018](ADR-018-strict-typing-no-any.md) | Strict static typing — no `Any` / `any` | Accepted | EV-003 |
+| [ADR-019](ADR-019-per-component-coverage-95.md) | Per-component unit coverage gate — 95% line + branch | Accepted | EV-004 |
 
 ## Deferred (no ADR file yet)
 

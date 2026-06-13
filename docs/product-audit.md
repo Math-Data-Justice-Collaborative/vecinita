@@ -2,7 +2,7 @@
 
 > **Stage**: 02-verify-plan  
 > **Started**: 2026-05-19  
-> **Status**: completed (2026-05-24 EV-001 delta)  
+> **Status**: completed (2026-06-13 EV-004 F31 delta)  
 > **Partial re-run**: 2026-05-24 (EV-001 F19–F22 delta audit)
 
 ## Document inventory
@@ -282,3 +282,74 @@ All derived directly from user interview (RD-034–RD-052):
 | Source documents updated | 3 (`acceptance-criteria.md`, `user-journeys.md`, `test-plan.md`) |
 
 **Next step (EV-002 routing):** 04-tech-plan — 03-plan-tooling skipped for EV-002.
+
+---
+
+## EV-004 delta (2026-06-13) — F31 per-component coverage gate
+
+**Partial re-run:** EV-004 F31 — 11 statements, 3 contradictions resolved, 1 source doc updated.
+
+### Document inventory (delta)
+
+| # | Document | Statements | Status |
+|---|----------|------------|--------|
+| 1 | Feature List | 3 | Pass |
+| 2 | Test Plan | 3 | Pass |
+| 3 | Acceptance Criteria | 3 | Pass |
+| 4 | ADR-019 | 2 | Pass (reference) |
+
+Skipped (already audited in prior passes): spec, user-journeys, config-spec, deployment-integration.
+
+### Pass 1 — Auto-approved (high confidence)
+
+**Count: 8** — derived directly from RD-053–RD-060 (EV-004 interview).
+
+| Stmt ID | Statement (summary) | Source |
+|---------|---------------------|--------|
+| S-EV4.1 | ≥95% line + ≥95% branch per component | RD-053 |
+| S-EV4.2 | Twelve gates: `packages/<name>` + `apps/<name>` | RD-054 |
+| S-EV4.3 | Unit tests only (`tests/unit` + Vitest) | RD-055 |
+| S-EV4.4 | Blocking CI on any component below threshold | RD-056 |
+| S-EV4.5 | Exclusions: `__init__.py`, alembic, test paths | RD-057 |
+| S-EV4.6 | Modal worker code in `apps/data-management-backend` gate | RD-058 |
+| S-EV4.7 | Single milestone — all twelve before merge; no grandfathering | RD-059 |
+| S-EV4.8 | Frontends same 95% line + branch as backends | RD-060 |
+
+### Pass 2 — User review (medium/low)
+
+| Stmt ID | Confidence | Verdict | Action |
+|---------|------------|---------|--------|
+| S-EV4.9 | Medium | approved | Baseline 61.0% lines / ~42.9% branches (2026-06-13) |
+| S-EV4.10 | Medium | approved | Gate via `make test-unit-coverage` + summary script (exit non-zero pending) |
+| S-EV4.11 | Medium | approved | Out of scope: integration/e2e, scripts/, infra/, OpenAPI clients |
+| S-EV4.12 | Low | approved | Waive UJ requirement for F31 — AC-Q1–Q3 suffice (cross-cutting CI) |
+| S-EV4.13 | Low | approved | Waive dedicated TC-xxx — metrics table + CI step + AC-Q sufficient |
+| S-EV4.14 | Low | modified | Updated `execution-plan.md` Phase 3 gate: 80% → 95% per-component (ADR-019) |
+
+### Consistency check (EV-004)
+
+| Check | Result | Action |
+|-------|--------|--------|
+| Feature ↔ Spec | **Pass** | F31 in feature-list; ADR-019 canonical |
+| Feature ↔ Journey | **Pass (waived)** | No UJ for F31 — user approved waiver (cross-cutting quality) |
+| Journey ↔ Test | **N/A** | No journey for F31 |
+| Feature ↔ Test | **Pass (waived)** | AC-Q + metrics + CI step 5; no TC-xxx required |
+| Feature ↔ Acceptance | **Pass** | AC-Q1–Q3 cover F31 |
+| Spec ↔ Config | **Pass** | Exclusions reference pyproject/vitest configs |
+| Cross-doc naming | **Pass** | Twelve components consistent across feature-list, test-plan, ADR-019 |
+| Scope boundaries | **Pass** | Supersedes ≥80% unit target; retrieval ≥80% eval benchmark unchanged |
+| execution-plan drift | **Fixed** | Phase 3 gate updated to 95% per-component |
+
+### EV-004 summary
+
+| Metric | Count |
+|--------|-------|
+| New statements audited | 11 |
+| Auto-approved (high) | 8 |
+| User-approved (medium/low) | 5 |
+| Modified | 1 |
+| Contradictions found | 3 |
+| Contradictions resolved | 3 |
+| Source documents updated | 1 (`execution-plan.md`) |
+
+**Next step (EV-004 routing):** 04-tech-plan — gate script, CI wiring, Vitest thresholds, test backlog per component.

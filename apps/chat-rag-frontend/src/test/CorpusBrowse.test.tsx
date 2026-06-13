@@ -1,5 +1,5 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import * as browse from "../api/browse";
 import { CorpusBrowse } from "../components/CorpusBrowse";
@@ -28,9 +28,37 @@ vi.mock("../api/browse", () => ({
 }));
 
 describe("CorpusBrowse", () => {
+  beforeEach(() => {
+    localStorage.setItem("vecinita.locale", "en");
+    vi.mocked(browse.fetchTags).mockResolvedValue({
+      tags: [
+        {
+          slug: "housing",
+          label: "Housing",
+          language: "en",
+          document_count: 1,
+        },
+      ],
+    });
+    vi.mocked(browse.fetchDocuments).mockResolvedValue({
+      items: [
+        {
+          document_id: "00000000-0000-0000-0000-000000000001",
+          title: "Housing Rights Overview",
+          url: "https://example.org/housing-rights",
+          language: "en",
+          tags: [{ slug: "housing", label: "Housing" }],
+        },
+      ],
+      page: 1,
+      page_size: 20,
+      total: 1,
+    });
+  });
+
   afterEach(() => {
     cleanup();
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   it("TC-048: corpus row opens external source URL", async () => {
@@ -59,6 +87,140 @@ describe("CorpusBrowse", () => {
     expect(
       await screen.findByText("No se pudieron cargar las etiquetas"),
     ).toBeInTheDocument();
+  });
+
+  it("shows localized error when document fetch fails", async () => {
+    vi.mocked(browse.fetchDocuments).mockRejectedValueOnce(
+      new Error("Browse failed (500)"),
+    );
+    renderWithLocale(<CorpusBrowse onNavigateHome={() => undefined} />);
+    expect(
+      await screen.findByText(/failed to load documents/i),
+    ).toBeInTheDocument();
+  });
+
+  it("filters tag chips to the active locale", async () => {
+    vi.mocked(browse.fetchTags).mockResolvedValueOnce({
+      tags: [
+        {
+          slug: "housing",
+          label: "Housing",
+          language: "en",
+          document_count: 1,
+        },
+        {
+          slug: "vivienda",
+          label: "Vivienda",
+          language: "es",
+          document_count: 1,
+        },
+      ],
+    });
+    renderWithLocale(<CorpusBrowse onNavigateHome={() => undefined} />);
+    expect(
+      await screen.findByRole("button", { name: "Housing" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Vivienda" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("toggles tag filters and refetches documents", async () => {
+    renderWithLocale(<CorpusBrowse onNavigateHome={() => undefined} />);
+    const chip = await screen.findByRole("button", { name: "Housing" });
+    fireEvent.click(chip);
+    expect(chip).toHaveAttribute("aria-pressed", "true");
+    await screen.findByText(/housing rights overview/i);
+    expect(browse.fetchDocuments).toHaveBeenCalledWith(
+      expect.objectContaining({ tags: ["housing"] }),
+    );
+    fireEvent.click(chip);
+    expect(chip).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("paginates, searches, and navigates home", async () => {
+    const onNavigateHome = vi.fn();
+    vi.mocked(browse.fetchDocuments).mockResolvedValue({
+      items: [
+        {
+          document_id: "00000000-0000-0000-0000-000000000002",
+          title: null,
+          url: "https://example.org/untitled",
+          language: "en",
+          tags: [],
+        },
+      ],
+      page: 1,
+      page_size: 1,
+      total: 2,
+    });
+
+    renderWithLocale(<CorpusBrowse onNavigateHome={onNavigateHome} />);
+    expect(await screen.findByText("Untitled document")).toBeInTheDocument();
+    expect(screen.getByText("No tags")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/search title or url/i), {
+      target: { value: "pantry" },
+    });
+    fireEvent.submit(screen.getByRole("searchbox").closest("form")!);
+
+    fireEvent.click(screen.getByRole("button", { name: /^next$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^previous$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /back to chat/i }));
+
+    expect(onNavigateHome).toHaveBeenCalled();
+    expect(screen.getByText(/page 1 of 2/i)).toBeInTheDocument();
+  });
+
+  it("ignores whitespace-only search queries", async () => {
+    renderWithLocale(<CorpusBrowse onNavigateHome={() => undefined} />);
+    await screen.findByTestId("corpus-list");
+
+    fireEvent.change(screen.getByLabelText(/search title or url/i), {
+      target: { value: "   " },
+    });
+    fireEvent.submit(screen.getByRole("searchbox").closest("form")!);
+
+    expect(browse.fetchDocuments).toHaveBeenCalled();
+    const lastParams = vi.mocked(browse.fetchDocuments).mock.calls.at(-1)?.[0];
+    expect(lastParams?.q).toBeUndefined();
+  });
+
+  it("does not update state after unmount during document load", async () => {
+    let resolveDocs: ((value: browse.DocumentBrowsePage) => void) | undefined;
+    vi.mocked(browse.fetchDocuments).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveDocs = resolve;
+        }),
+    );
+
+    const { unmount } = renderWithLocale(
+      <CorpusBrowse onNavigateHome={() => undefined} />,
+    );
+    unmount();
+    resolveDocs?.({
+      items: [],
+      page: 1,
+      page_size: 20,
+      total: 0,
+    });
+  });
+
+  it("does not update tags after unmount during tag load", async () => {
+    let resolveTags: ((value: { tags: browse.TagFacet[] }) => void) | undefined;
+    vi.mocked(browse.fetchTags).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveTags = resolve;
+        }),
+    );
+
+    const { unmount } = renderWithLocale(
+      <CorpusBrowse onNavigateHome={() => undefined} />,
+    );
+    unmount();
+    resolveTags?.({ tags: [] });
   });
 });
 
@@ -103,7 +265,7 @@ describe("Tag chips in chat", () => {
             document_count: 1,
           },
         ]}
-        selected={[]}
+        selected={["vivienda"]}
         locale="es"
         onToggle={vi.fn()}
       />,
@@ -111,6 +273,9 @@ describe("Tag chips in chat", () => {
     expect(screen.getByTestId("tag-filter-chips")).toHaveAttribute(
       "aria-label",
       "Filtrar por tema",
+    );
+    expect(screen.getByRole("button", { name: "Vivienda" })).toHaveClass(
+      "active",
     );
   });
 });
