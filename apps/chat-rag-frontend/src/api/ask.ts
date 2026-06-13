@@ -133,7 +133,7 @@ export async function* streamAsk(
       }
       options?.onRetry?.(attempt, COLD_START_ASK_MAX_ATTEMPTS);
       await sleep(COLD_START_ASK_RETRY_DELAY_MS);
-      lastError = err as Error;
+      lastError = err instanceof Error ? err : new Error(String(err));
     }
   }
 
