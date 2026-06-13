@@ -3,7 +3,7 @@ import { useContext } from "react";
 import {
   LocaleContext,
   type LocaleContextValue,
-} from "../context/LocaleContext";
+} from "../context/localeContext";
 
 export type { Locale } from "./useLocale.types";
 
