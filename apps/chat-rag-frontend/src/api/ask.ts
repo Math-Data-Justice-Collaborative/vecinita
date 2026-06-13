@@ -162,12 +162,19 @@ export function formatAskFailureMessage(
     if (TRANSIENT_ASK_STATUSES.has(error.status)) {
       return t(locale, "askStillStarting");
     }
+    if (error.status === 401 || error.status === 403) {
+      return t(locale, "askUnauthorized");
+    }
+    if (error.status >= 500) {
+      return t(locale, "askServerError");
+    }
+    return t(locale, "requestFailed");
   }
   if (error instanceof TypeError) {
     return t(locale, "askStartingWait");
   }
   if (error instanceof Error) {
-    return error.message;
+    return t(locale, "requestFailed");
   }
   return t(locale, "requestFailed");
 }

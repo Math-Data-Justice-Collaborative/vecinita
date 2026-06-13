@@ -33,11 +33,9 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
         if (!cancelled) {
           setTags(response.tags);
         }
-      } catch (err) {
+      } catch {
         if (!cancelled) {
-          setError(
-            err instanceof Error ? err.message : t(locale, "loadTagsFailed"),
-          );
+          setError(t(locale, "loadTagsFailed"));
         }
       }
     }
@@ -63,13 +61,9 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
           setTotal(response.total);
           setPageSize(response.page_size);
         }
-      } catch (err) {
+      } catch {
         if (!cancelled) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : t(locale, "loadDocumentsFailed"),
-          );
+          setError(t(locale, "loadDocumentsFailed"));
         }
       } finally {
         if (!cancelled) {

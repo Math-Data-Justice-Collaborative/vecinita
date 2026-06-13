@@ -35,6 +35,21 @@ describe("formatAskFailureMessage i18n (PR #60 review)", () => {
     ).toMatch(/still starting up/i);
     expect(formatAskFailureMessage("unknown", "en")).toBe("Request failed");
   });
+
+  it("localizes non-transient HTTP errors instead of raw error.message", () => {
+    expect(formatAskFailureMessage(new Error("Internal server detail"), "en")).toBe(
+      "Request failed",
+    );
+    expect(
+      formatAskFailureMessage(new AskStreamError("fail", 500), "en"),
+    ).toMatch(/temporarily unavailable/i);
+    expect(
+      formatAskFailureMessage(new AskStreamError("fail", 403), "es"),
+    ).toMatch(/autorización/i);
+    expect(
+      formatAskFailureMessage(new AskStreamError("fail", 400), "es"),
+    ).toBe("La solicitud falló");
+  });
 });
 
 describe("streamAsk cold-start retry (BUG-2026-05-22)", () => {

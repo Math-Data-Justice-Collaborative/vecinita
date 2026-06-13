@@ -23,6 +23,8 @@ const en = {
   askStartingWait:
     "The assistant is starting up — please wait a moment and try again.",
   requestFailed: "Request failed",
+  askServerError: "The assistant is temporarily unavailable. Please try again.",
+  askUnauthorized: "You are not authorized to use the assistant.",
   filterByTopic: "Filter by topic",
   sourcesHeading: "Sources",
   corpusChunk: "Corpus chunk",
@@ -65,6 +67,9 @@ const es = {
   askStartingWait:
     "El asistente se está iniciando — espera un momento e inténtalo de nuevo.",
   requestFailed: "La solicitud falló",
+  askServerError:
+    "El asistente no está disponible temporalmente. Inténtalo de nuevo.",
+  askUnauthorized: "No tienes autorización para usar el asistente.",
   filterByTopic: "Filtrar por tema",
   sourcesHeading: "Fuentes",
   corpusChunk: "Fragmento del corpus",

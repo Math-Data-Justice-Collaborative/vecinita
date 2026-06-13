@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import * as browse from "../api/browse";
 import { CorpusBrowse } from "../components/CorpusBrowse";
 import { renderWithLocale } from "./renderWithLocale";
 
@@ -47,6 +48,17 @@ describe("CorpusBrowse", () => {
       await screen.findByRole("button", { name: "Housing" }),
     ).toBeInTheDocument();
     expect(screen.getByTestId("browse-tag-chips")).toBeInTheDocument();
+  });
+
+  it("shows localized Spanish error when tag fetch fails", async () => {
+    localStorage.setItem("vecinita.locale", "es");
+    vi.mocked(browse.fetchTags).mockRejectedValueOnce(
+      new Error("Tags failed (500)"),
+    );
+    renderWithLocale(<CorpusBrowse onNavigateHome={() => undefined} />);
+    expect(
+      await screen.findByText("No se pudieron cargar las etiquetas"),
+    ).toBeInTheDocument();
   });
 });
 
