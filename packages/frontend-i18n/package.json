@@ -11,6 +11,7 @@
     ".": "./src/index.ts"
   },
   "devDependencies": {
+    "jsdom": "^29.1.1",
     "typescript": "~5.6.3",
     "vitest": "^4.1.8"
   }
