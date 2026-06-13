@@ -176,10 +176,15 @@ stages:
       - .github/workflows/ci.yml
     verification: passed
   07-build:
-    status: completed
+    status: in_progress
     started_at: "2026-05-19"
     completed_at: "2026-05-27"
-    note: "Phase 8 EV-002 complete — 184/184 tasks per execution-plan.md; gate passed 2026-05-27"
+    partial_rerun_at: "2026-06-13"
+    partial_rerun_note: "EV-004 Phase 9 — M32 workspace scaffold (36 tasks)"
+    substeps:
+      current_task: T33.1
+      milestone: M32 completed
+    note: "EV-004 Phase 9 — M32 completed; T33.1 in progress"
   08-verify-build:
     status: completed
     started_at: "2026-05-27"
@@ -695,6 +700,7 @@ evolve_cycles:
         - 03-plan-tooling
         - 06-tech-tooling
     current_stage: 07-build
+    note: "07-build started — EV-004 Phase 9 M32 workspace scaffold"
     stages:
       00-context:
         status: completed
@@ -763,6 +769,10 @@ evolve_cycles:
           - docs/adr/ADR-019-shared-frontend-i18n.md
           - docs/adr/ADR-020-shared-frontend-ui.md
           - docs/product-audit.md
+      07-build:
+        status: in_progress
+        started: "2026-06-13"
+        note: "Phase 9 M32 completed; T33.1 in progress"
     gates:
       a_to_b: passed
       b_to_c: passed
@@ -1203,8 +1213,14 @@ artifacts:
   - openapi/internal-write.yaml (0.2.0)
 
 git_history:
-  current_branch: fix/es-en-full-ui
+  current_branch: feat/M32-workspace-scaffold
   branches:
+    - name: feat/M32-workspace-scaffold
+      purpose: "EV-004 M32 workspace scaffold"
+      base: main
+      status: open
+      created_at: "2026-06-13"
+      pr_url: null
     - name: feat/M15-tag-schema
       purpose: "EV-001 Phase 5 — M15 tag schema & fixtures (07-build)"
       base: main
@@ -1326,6 +1342,30 @@ git_history:
       stage: "19-address-pr-review"
       files_changed: 1
       timestamp: "2026-06-13T03:09:03Z"
+    - sha: c88fac6
+      branch: feat/M32-workspace-scaffold
+      message: "[T32.1] test: add TC-067 red Vitest for frontend-i18n t()"
+      stage: "07-build"
+      files_changed: 9
+      timestamp: "2026-06-13T23:52:27Z"
+    - sha: 3165af1
+      branch: feat/M32-workspace-scaffold
+      message: "[T32.2] config: add root npm workspaces for frontend packages"
+      stage: "07-build"
+      files_changed: 3
+      timestamp: "2026-06-13T23:53:45Z"
+    - sha: 8393a70
+      branch: feat/M32-workspace-scaffold
+      message: "[T32.3] config: scaffold frontend-i18n and frontend-ui workspace packages"
+      stage: "07-build"
+      files_changed: 9
+      timestamp: "2026-06-13T23:55:30Z"
+    - sha: 0d21b3b
+      branch: feat/M32-workspace-scaffold
+      message: "[T32.4] test: add workspace import smoke tests for both frontends"
+      stage: "07-build"
+      files_changed: 7
+      timestamp: "2026-06-13T23:56:50Z"
 
 constraints:
   cost:
