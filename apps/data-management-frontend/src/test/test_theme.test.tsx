@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -88,11 +88,10 @@ describe("ThemeProvider and ThemeToggle", () => {
   });
 
   it("throws when useTheme is used outside ThemeProvider", () => {
-    const Broken = () => {
-      useTheme();
-      return null;
-    };
-
-    expect(() => render(<Broken />)).toThrow(/ThemeProvider/i);
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    expect(() => renderHook(() => useTheme())).toThrow(/ThemeProvider/i);
+    consoleError.mockRestore();
   });
 });
