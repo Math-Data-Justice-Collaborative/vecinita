@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 
-import {
-  ThemeProviderContext,
-  type Theme,
-} from "@/components/themeContext";
+import { ThemeProviderContext, type Theme } from "@/components/themeContext";
 
 const STORAGE_KEY = "vecinita-ui-theme";
 

@@ -6,11 +6,10 @@ import os
 
 import pytest
 from fastapi.testclient import TestClient
-from tests.unit.rag.conftest import attach_embeddings, basis_vector
+from tests.unit.rag.conftest import basis_vector, seed_corpus_with_embeddings
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import ChatRagService
-from vecinita_database.seeds.load import load_corpus
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 
 _EMBED_URL = "http://embed.test"
@@ -53,8 +52,7 @@ class _MockLlmClient:
 @pytest.fixture
 def seeded_corpus_db() -> str:
     url = _database_url()
-    load_corpus(database_url=url)
-    attach_embeddings(
+    seed_corpus_with_embeddings(
         database_url=url,
         match_substrings={"Food pantry": 0, "banco de alimentos": 2},
         default_index=1,

@@ -14,8 +14,13 @@ title = "Vecinita gitleaks"
 useDefault = true
 
 [allowlist]
-description = "Deleted legacy monolith paths (placeholder tokens in docs/tests only; QA-005)"
+description = "Deleted legacy monolith paths + gitignored local runtime secrets (QA-005)"
 paths = [
+  # Gitignored local secret stores (never commit; see .gitignore + no-operator-spec-commits rule)
+  '''(?:^|/)\.deploy-keys\.local$''',
+  '''(?:^|/)prod\.env$''',
+  '''(?:^|/)\.tmp(?:/.*)?$''',
+  '''(?:^|/)(?:admin-fe-spec|internal-write-api-spec|chat-rag-spec)\.yaml$''',
   # Removed backend / scraper-worker tree
   '''(?:^|/)backend(?:/.*)?$''',
   '''(?:^|/)apps/scraper-worker(?:/.*)?$''',

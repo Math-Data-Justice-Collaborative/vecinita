@@ -4,7 +4,7 @@
 .DEFAULT_GOAL := help
 
 SHELL := /bin/bash
-.SHELLFLAGS := -eu -o pipefail -c
+.SHELLFLAGS := --noprofile --norc -eu -o pipefail -c
 
 UV := uv
 PYTHON_DIRS := apps packages tests
@@ -14,10 +14,11 @@ DATABASE_URL ?= postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita
 export DATABASE_URL
 
 FRONTENDS := chat-rag-frontend data-management-frontend
+NPM_LOCK := bash scripts/npm_with_lock.sh
 
 .PHONY: help install \
 	db-up db-wait db-ready db-down migrate \
-	lint lint-py lint-fe \
+	lint lint-py lint-fe lint-fix lint-fix-py lint-fix-fe \
 	format format-py format-fe format-check format-check-py format-fe-check \
 	typecheck typecheck-py typecheck-fe \
 	test test-py test-fe test-unit test-integration test-e2e test-smoke test-privacy test-live \
@@ -36,11 +37,13 @@ help: ## Show available targets
 	@echo "  make ci               # CI-parity (guards, audit, tests, frontend build)"
 
 install: ## Install Python (uv) and frontend (npm ci) dependencies
-	$(UV) sync --group dev
-	@for app in $(FRONTENDS); do \
+	@$(NPM_LOCK) bash -eu -o pipefail -c '\
+		$(UV) sync --group dev; \
+		for app in $(FRONTENDS); do \
 		echo "==> npm ci apps/$$app"; \
-		(cd apps/$$app && npm ci); \
-	done
+		rm -rf "apps/$$app/node_modules"; \
+		( cd apps/$$app && npm ci ) || exit 1; \
+	done'
 
 db-up: ## Start local Postgres (docker compose)
 	docker compose -f $(COMPOSE_FILE) up -d postgres
@@ -61,12 +64,23 @@ lint-py: ## Ruff lint (Python)
 	$(UV) run ruff check $(PYTHON_DIRS)
 
 lint-fe: ## ESLint (both frontends)
-	@for app in $(FRONTENDS); do \
+	@$(NPM_LOCK) bash -eu -o pipefail -c 'for app in $(FRONTENDS); do \
 		echo "==> npm run lint apps/$$app"; \
-		(cd apps/$$app && npm run lint); \
-	done
+		( cd apps/$$app && npm run lint ); \
+	done'
 
 lint: lint-py lint-fe ## Lint Python + both frontends (fail fast)
+
+lint-fix-py: ## Auto-fix Ruff lint (Python)
+	$(UV) run ruff check --fix $(PYTHON_DIRS)
+
+lint-fix-fe: ## Auto-fix ESLint (both frontends)
+	@$(NPM_LOCK) bash -eu -o pipefail -c 'for app in $(FRONTENDS); do \
+		echo "==> eslint --fix apps/$$app"; \
+		( cd apps/$$app && npx eslint src --fix ); \
+	done'
+
+lint-fix: lint-fix-py lint-fix-fe ## Auto-fix lint (Python + both frontends)
 
 format-check-py: ## Check Python formatting (ruff, no writes)
 	$(UV) run ruff format --check $(PYTHON_DIRS)
@@ -75,16 +89,16 @@ format-py: ## Fix Python formatting (ruff)
 	$(UV) run ruff format $(PYTHON_DIRS)
 
 format-fe-check: ## Check frontend formatting (Prettier, no writes)
-	@for app in $(FRONTENDS); do \
+	@$(NPM_LOCK) bash -eu -o pipefail -c 'for app in $(FRONTENDS); do \
 		echo "==> npm run format:check apps/$$app"; \
-		(cd apps/$$app && npm run format:check); \
-	done
+		( cd apps/$$app && npm run format:check ); \
+	done'
 
 format-fe: ## Fix frontend formatting (Prettier)
-	@for app in $(FRONTENDS); do \
+	@$(NPM_LOCK) bash -eu -o pipefail -c 'for app in $(FRONTENDS); do \
 		echo "==> npm run format apps/$$app"; \
-		(cd apps/$$app && npm run format); \
-	done
+		( cd apps/$$app && npm run format ); \
+	done'
 
 format-check: format-check-py format-fe-check ## Check Python + frontend formatting
 
@@ -94,10 +108,11 @@ typecheck-py: ## basedpyright (Python)
 	$(UV) run basedpyright $(PYTHON_DIRS)
 
 typecheck-fe: ## tsc --noEmit (both frontends)
-	@echo "==> tsc apps/chat-rag-frontend"
-	cd apps/chat-rag-frontend && npx tsc --noEmit
-	@echo "==> tsc apps/data-management-frontend"
-	cd apps/data-management-frontend && npx tsc -p tsconfig.build.json --noEmit
+	@$(NPM_LOCK) bash -eu -o pipefail -c '\
+		echo "==> tsc apps/chat-rag-frontend"; \
+		( cd apps/chat-rag-frontend && npx tsc --noEmit ); \
+		echo "==> tsc apps/data-management-frontend"; \
+		( cd apps/data-management-frontend && npx tsc -p tsconfig.build.json --noEmit )'
 
 typecheck: typecheck-py typecheck-fe ## Typecheck Python + both frontends (fail fast)
 
@@ -120,10 +135,10 @@ test-py: migrate ## Full Python test suite (matches CI pytest paths)
 	$(UV) run pytest $(PYTEST_DEFAULT)
 
 test-fe: ## Vitest (both frontends)
-	@for app in $(FRONTENDS); do \
+	@$(NPM_LOCK) bash -eu -o pipefail -c 'for app in $(FRONTENDS); do \
 		echo "==> npm test apps/$$app"; \
-		(cd apps/$$app && npm test); \
-	done
+		( cd apps/$$app && npm test ); \
+	done'
 
 test: test-py test-fe ## Full test suite: Python + frontends (fail fast)
 
@@ -131,10 +146,10 @@ test-live: ## Live staging smokes (requires VECINITA_STAGING_* env vars)
 	$(UV) run pytest tests/smoke -m live -v
 
 build-frontend: ## Production build (both frontends)
-	@for app in $(FRONTENDS); do \
+	@$(NPM_LOCK) bash -eu -o pipefail -c 'for app in $(FRONTENDS); do \
 		echo "==> npm run build apps/$$app"; \
-		(cd apps/$$app && npm run build); \
-	done
+		( cd apps/$$app && npm run build ); \
+	done'
 
 ci-guards: ## CI static guard scripts (secrets, OpenAPI, Modal boundary)
 	bash scripts/check_modal_no_database_url.sh
@@ -156,10 +171,10 @@ audit: ## pip-audit with repo ignore list (blocking in CI)
 	$(UV) run pip-audit "$${IGNORE_ARGS[@]}"
 
 audit-fe: ## npm audit (both frontends)
-	@for app in $(FRONTENDS); do \
+	@$(NPM_LOCK) bash -eu -o pipefail -c 'for app in $(FRONTENDS); do \
 		echo "==> npm audit apps/$$app"; \
-		(cd apps/$$app && npm audit); \
-	done
+		( cd apps/$$app && npm audit ); \
+	done'
 
 audit-fix: ## Auto-fix dependency CVEs (Python + frontends), then verify
 	@echo "==> pip-audit --fix (Python, no ignore list)"

@@ -75,6 +75,22 @@ jq 'length' /tmp/gitleaks.json
 
 Pull requests are not failed by historical placeholder tokens in deleted files.
 
+## Gitignored local runtime files
+
+Developers keep staging/deploy credentials in files that are **gitignored** and must never be
+committed:
+
+| Path | Purpose |
+|------|---------|
+| `prod.env` | Staging/prod env vars for smokes and deploy scripts |
+| `.deploy-keys.local` | Generated API keys for local deploy |
+| `.tmp/` | Ephemeral operator artifacts (e.g. DO secret JSON exports) |
+| `*-spec.yaml` (root) | Local `doctl apps spec get` exports (encrypted secrets) |
+
+These paths are allowlisted in `.gitleaks.toml` so `gitleaks detect --no-git` passes locally
+while CI still scans all **tracked** paths. Blocking gate remains `scripts/check_secrets.sh`
+under `apps/`, `packages/`, `tests/`, `infra/`, `openapi/`.
+
 ## Test fixtures
 
 Integration tests use synthetic values such as `test-internal-key` for `VECINITA_INTERNAL_API_KEY`. These are not production secrets and are outside the high-confidence pattern set in `check_secrets.sh`.

@@ -47,17 +47,21 @@ def tagged_corpus_db() -> str:
 def _document_tag_slugs(database_url: str, document_id: UUID) -> set[str]:
     engine = create_engine(database_url)
     with engine.connect() as conn:
-        rows = conn.execute(
-            text(
-                """
+        rows = (
+            conn.execute(
+                text(
+                    """
                 SELECT DISTINCT t.slug
                 FROM document_tags dt
                 JOIN tags t ON t.id = dt.tag_id
                 WHERE dt.document_id = :document_id
                 """
-            ),
-            {"document_id": document_id},
-        ).mappings().all()
+                ),
+                {"document_id": document_id},
+            )
+            .mappings()
+            .all()
+        )
     return {row_str(mapping_row(row), "slug") for row in rows}
 
 
