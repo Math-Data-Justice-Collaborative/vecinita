@@ -1,5 +1,5 @@
 # Vecinita pipeline state — canonical schema: .cursor/skills/workflow-state-reference.md
-overall_status: completed
+overall_status: in_progress
 project:
   name: Vecinita
   description: Monorepo — bilingual community Q&A RAG + data management (5 apps; zero personal data, cost/sovereignty constraints)
@@ -9,29 +9,36 @@ stages:
   00-context:
     status: completed
     started_at: "2026-05-19"
-    completed_at: "2026-05-19"
-    partial_rerun_at: "2026-05-26"
-    partial_rerun_note: "EV-002 delta — admin dashboard overhaul, bulk ops, usage stats, audit log"
+    completed_at: "2026-06-13"
+    partial_rerun_at: "2026-06-13"
+    partial_rerun_note: "EV-004 delta — admin dashboard en/es i18n (mirror ChatRAG) + shared component library (packages/frontend-ui + packages/frontend-i18n)"
     phases:
       phase1a_agents:
         status: completed
+        note: "Internal repo scan — ChatRAG i18n reference + admin string inventory; no external paper/repo"
       phase1b_ecosystem:
-        status: completed
-        note: advisory scan only — user selected greenfield APIs (R3)
+        status: skipped
+        note: "No new sibling integration; i18n is frontend-only delta"
       phase1c_template:
         status: completed
+        note: "No template change — existing multi-app utility pattern"
       phase2_cross_reference:
         status: completed
       phase3_surface_issues:
         status: completed
+        note: "R28-R33 resolved via AskQuestion 2026-06-13"
       phase4_context_brief:
         status: completed
+        artifacts:
+          - docs/context-brief.md §13
+          - docs/adr/ADR-019-shared-frontend-i18n.md
+          - docs/adr/ADR-020-shared-frontend-ui.md
   01-requirements:
     status: completed
-    completed_at: "2026-05-19"
-    started_at: "2026-05-19"
+    completed_at: "2026-06-13"
+    started_at: "2026-06-13"
     partial_rerun_at: "2026-05-24"
-    partial_rerun_note: "partial_rerun EV-001 2026-05-24"
+    partial_rerun_note: "EV-004 delta F31 — admin dashboard en/es i18n"
     substeps:
       interviews:
         completed: 13
@@ -57,12 +64,29 @@ stages:
         - migration-plan
       notes:
         dependency_inventory: "User wants vLLM and LlamaIndex evaluated in interview"
+        session: "EV-004 F31 delta interview complete — 3 batches; UJ-022 assigned (UJ-019 taken)"
+    artifacts_updated:
+      - docs/feature-list.md
+      - docs/spec.md
+      - docs/user-journeys.md
+      - docs/test-plan.md
+      - docs/config-spec.md
+      - docs/api-contract.md
+      - docs/deployment-integration.md
+      - docs/acceptance-criteria.md
+      - docs/dependency-inventory.md
+      - docs/roadmap.md
+      - docs/glossary.md
+      - docs/risk-register.md
+      - docs/data-management-plan.md
+      - docs/requirements-decisions.md
+      - docs/adr/ADR-020-shared-frontend-ui.md
   02-verify-plan:
     status: completed
     started_at: "2026-05-24"
-    completed_at: "2026-05-24"
-    partial_rerun_at: "2026-05-26"
-    partial_rerun_note: "EV-002 delta F23-F29 — 24 statements, 1 contradiction resolved, 3 docs updated"
+    completed_at: "2026-06-13"
+    partial_rerun_at: "2026-06-13"
+    partial_rerun_note: "EV-004 delta F31 — 21 statements, 2 contradictions resolved, 10 docs updated"
     documents_total: 13
     statements_total: 52
     drift_fixes: 4
@@ -78,6 +102,11 @@ stages:
     ev002_user_approved: 9
     ev002_modified: 1
     ev002_contradictions_resolved: 1
+    ev004_statements: 21
+    ev004_auto_approved: 15
+    ev004_user_approved: 5
+    ev004_denied: 1
+    ev004_contradictions_resolved: 2
   03-plan-tooling:
     status: completed
     started_at: "2026-05-19"
@@ -91,19 +120,20 @@ stages:
     status: completed
     started_at: "2026-05-19"
     completed_at: "2026-05-24"
-    partial_rerun_at: "2026-05-26"
-    partial_rerun_note: "EV-002 delta F23-F29 — tech plan interview complete; Phase 6-8 execution plan"
+    partial_rerun_at: "2026-06-13"
+    partial_rerun_note: "EV-004 delta F31 — 10 TP decisions, Phase 9 (36 tasks), ADR-021"
     substeps:
       phase1_toolchain: completed
       phase2_interview: completed
       phase3_execution_plan: completed
       phase4_user_review: completed
+      phase4_user_review_note: "tech plan approved 2026-06-13"
   05-verify-tech:
     status: completed
     started_at: "2026-05-19"
-    completed_at: "2026-05-19"
-    partial_rerun_at: "2026-05-26"
-    partial_rerun_note: "EV-002 delta F23-F29 — 23 statements, 8 consistency fixes, 7 source-doc edits"
+    completed_at: "2026-06-13"
+    partial_rerun_at: "2026-06-13"
+    partial_rerun_note: "EV-004 delta F31 — 34 statements, 12 consistency fixes, 11 source-doc edits"
     documents_total: 6
     statements_total: 48
     auto_approved: 27
@@ -123,6 +153,13 @@ stages:
     ev002_consistency_found: 8
     ev002_consistency_resolved: 8
     ev002_source_edits: 7
+    ev004_documents_total: 9
+    ev004_statements_total: 34
+    ev004_auto_approved: 10
+    ev004_user_approved: 12
+    ev004_consistency_found: 12
+    ev004_consistency_resolved: 12
+    ev004_source_edits: 11
   06-tech-tooling:
     status: completed
     started_at: "2026-05-19"
@@ -627,6 +664,164 @@ evolve_cycles:
       - path: docs/context-brief.md
         status: completed
     issues: []
+  - id: EV-004
+    cycle_type: feature
+    feature_ids: [F31]
+    title: "Admin dashboard bilingual UI (en/es)"
+    status: in_progress
+    started: "2026-06-13"
+    completed: null
+    scope_summary: |
+      F31: Admin UI bilingual (en/es) — mirror ChatRAG i18n.
+      Shared packages/frontend-i18n + packages/frontend-ui (shared Tailwind UI components).
+      vecinita.locale persistence (R28, R29).
+      Sidebar EN/ES toggle beside ThemeToggle (R31); UI chrome only (R30).
+      Component extraction from ChatRAG/admin into frontend-ui (R34-R38).
+      No backend or API contract changes.
+    routing_plan:
+      required_stages:
+        - 00-context
+        - 01-requirements
+        - 02-verify-plan
+        - 04-tech-plan
+        - 05-verify-tech
+        - 07-build
+        - 09-qa
+        - 10-e2e
+        - 11-verify-impl
+        - 12-verify-deploy
+        - 13-deploy-smoke
+      skipped_stages:
+        - 03-plan-tooling
+        - 06-tech-tooling
+    current_stage: 07-build
+    stages:
+      00-context:
+        status: completed
+        completed: "2026-06-13"
+        artifacts_updated:
+          - docs/context-brief.md
+          - docs/adr/ADR-019-shared-frontend-i18n.md
+          - docs/adr/ADR-020-shared-frontend-ui.md
+      01-requirements:
+        status: completed
+        started: "2026-06-13"
+        completed: "2026-06-13"
+        artifacts_updated:
+          - docs/feature-list.md
+          - docs/spec.md
+          - docs/user-journeys.md
+          - docs/test-plan.md
+          - docs/config-spec.md
+          - docs/api-contract.md
+          - docs/deployment-integration.md
+          - docs/acceptance-criteria.md
+          - docs/dependency-inventory.md
+          - docs/roadmap.md
+          - docs/glossary.md
+          - docs/risk-register.md
+          - docs/data-management-plan.md
+          - docs/requirements-decisions.md
+          - docs/adr/ADR-020-shared-frontend-ui.md
+      02-verify-plan:
+        status: completed
+        started: "2026-06-13"
+        completed: "2026-06-13"
+        artifacts_updated:
+          - docs/product-audit.md
+          - docs/product-decisions.md
+          - docs/feature-list.md
+          - docs/user-journeys.md
+          - docs/test-plan.md
+          - docs/acceptance-criteria.md
+          - docs/spec.md
+          - docs/context-brief.md
+          - docs/deployment-integration.md
+          - docs/adr/ADR-019-shared-frontend-i18n.md
+          - docs/adr/ADR-020-shared-frontend-ui.md
+          - docs/requirements-decisions.md
+      04-tech-plan:
+        status: completed
+        completed: "2026-06-13"
+        artifacts_updated:
+          - docs/execution-plan.md
+          - docs/adr/ADR-021-ev004-implementation.md
+          - docs/tech-decisions.md
+          - docs/deployment-integration.md
+          - docs/adr/README.md
+      05-verify-tech:
+        status: completed
+        completed: "2026-06-13"
+        artifacts_updated:
+          - docs/tech-audit.md
+          - docs/tech-decisions.md
+          - docs/execution-plan.md
+          - docs/test-plan.md
+          - docs/acceptance-criteria.md
+          - docs/deployment-integration.md
+          - docs/staging-secrets-matrix.md
+          - docs/adr/ADR-019-shared-frontend-i18n.md
+          - docs/adr/ADR-020-shared-frontend-ui.md
+          - docs/product-audit.md
+    gates:
+      a_to_b: passed
+      b_to_c: passed
+      c_to_d: pending
+      deploy: pending
+    checkpoints:
+      phase_a: passed
+      phase_b: passed
+      phase_c: pending
+      phase_d: pending
+      deploy: pending
+    adrs:
+      - docs/adr/ADR-019-shared-frontend-i18n.md
+      - docs/adr/ADR-020-shared-frontend-ui.md
+      - docs/adr/ADR-021-ev004-implementation.md
+    artifacts:
+      - path: docs/context-brief.md
+        status: completed
+      - path: docs/adr/ADR-019-shared-frontend-i18n.md
+        status: completed
+      - path: docs/adr/ADR-020-shared-frontend-ui.md
+        status: completed
+      - path: docs/feature-list.md
+        status: completed
+      - path: docs/spec.md
+        status: completed
+      - path: docs/user-journeys.md
+        status: completed
+      - path: docs/test-plan.md
+        status: completed
+      - path: docs/config-spec.md
+        status: completed
+      - path: docs/api-contract.md
+        status: completed
+      - path: docs/deployment-integration.md
+        status: completed
+      - path: docs/acceptance-criteria.md
+        status: completed
+      - path: docs/dependency-inventory.md
+        status: completed
+      - path: docs/roadmap.md
+        status: completed
+      - path: docs/glossary.md
+        status: completed
+      - path: docs/risk-register.md
+        status: completed
+      - path: docs/data-management-plan.md
+        status: completed
+      - path: docs/requirements-decisions.md
+        status: completed
+      - path: docs/execution-plan.md
+        status: completed
+      - path: docs/adr/ADR-021-ev004-implementation.md
+        status: completed
+      - path: docs/tech-decisions.md
+        status: completed
+      - path: docs/adr/README.md
+        status: completed
+    issues: []
 retrospective_cycles: []
 pr_review_cycles:
   - id: PRR-001
@@ -953,6 +1148,15 @@ decisions_log:
   - "EV-002 05-verify-tech delta — TV-032–TV-039 — 23 statements, 8 consistency fixes, 7 source-doc edits — 2026-05-26"
   - "EV-002 11-verify-impl: UJ-013–UJ-021 and F23–F29 approved by user 2026-05-27; T3 live waiver until 13-deploy-smoke"
   - "EV-002 12-verify-deploy: failure mitigations approved; rollback plan approved; deploy_ready=true pending staging DB migration"
+  - "EV-004 proposed (pending user confirmation): F31 admin dashboard bilingual en/es — mirror ChatRAG i18n — 2026-06-13"
+  - "EV-004 proposed F31 admin en/es i18n — user confirmed evolve routing 2026-06-13"
+  - "R28-R33 resolved — shared vecinita.locale, packages/frontend-i18n, UI chrome only, sidebar toggle"
+  - date: "2026-06-13"
+    note: "01-requirements EV-004 delta started — F31 admin i18n interview"
+  - "R34-R38 assumed — two packages frontend-i18n + frontend-ui, Tailwind shared UI, component extraction scope, npm workspaces — 2026-06-13"
+  - "EV-004 02-verify-plan delta complete — 21 statements, ThemeToggle to frontend-ui (RD-067), AC-F7 H5 — 2026-06-13"
+  - "EV-004 04-tech-plan delta — TP-030–TP-039 — ADR-021 — Phase 9 (36 tasks) — 2026-06-13"
+  - "EV-004 05-verify-tech delta — TV-041–TV-052 — 12 consistency fixes — 2026-06-13"
 
 artifacts:
   - docs/context-brief.md
@@ -979,6 +1183,9 @@ artifacts:
   - docs/adr/ADR-014-corpus-tagging-and-browse.md
   - docs/adr/ADR-015-ev001-tagging-implementation.md
   - docs/adr/ADR-017-ev002-implementation.md
+  - docs/adr/ADR-019-shared-frontend-i18n.md
+  - docs/adr/ADR-021-ev004-implementation.md
+  - docs/adr/README.md
   - docs/execution-plan.md
   - docs/data-staging-state.md
   - docs/tech-audit.md

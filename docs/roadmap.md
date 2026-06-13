@@ -1,7 +1,7 @@
 # Roadmap
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-24 (EV-001)
+> **Last updated**: 2026-06-13 (EV-004 F31)
 
 ## Vision
 
@@ -59,6 +59,18 @@ Deliver a **cost-conscious, US-hosted, zero-PII** bilingual community Q&A platfo
 - [ ] Model fine-tuning
 - [ ] Live staging E2E tier
 - [ ] Advanced admin analytics
+
+### Phase 7: EV-004 — Admin bilingual UI + shared frontend packages (in progress)
+
+**Cycle:** EV-004  
+**ADR:** ADR-019 (frontend-i18n), ADR-020 (frontend-ui)
+
+- [ ] F31: `packages/frontend-i18n` + `packages/frontend-ui` workspace packages
+- [ ] F31: Admin dashboard full en/es UI chrome (~120+ strings)
+- [ ] F31: ChatRAG migration to shared packages + full Tailwind layout
+- [ ] F31: Root npm workspaces + CI package build order
+- [ ] UJ-022 Vitest coverage (TC-065–TC-069)
+- [ ] Deploy both static frontends (no backend redeploy)
 
 ## Non-goals
 

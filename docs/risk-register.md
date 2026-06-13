@@ -1,7 +1,7 @@
 # Risk Register
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-24 (EV-001)
+> **Last updated**: 2026-06-13 (EV-004 F31)
 
 | # | Risk | Likelihood | Impact | Mitigation | Status |
 |---|------|------------|--------|------------|--------|
@@ -16,6 +16,9 @@
 | R9 | Multi-app DO secrets sprawl | Medium | Low | Document secret matrix in deploy plan | Open |
 | R10 | LLM tagging increases ingest cost/latency | Medium | Medium | Cap tags; batch tag step; monitor Modal spend | Open (EV-001) |
 | R11 | Admin corpus API key in static frontend bundle | Medium | High | BFF/server proxy in 04-tech-plan; rotate keys | Open (EV-001) |
+| R12 | Shared frontend package CI drift (workspace link breaks app build) | Medium | Medium | Root npm workspaces; CI builds packages before frontend matrix; pin workspace versions | Open (EV-004) |
+| R13 | ChatRAG Tailwind migration regressions during F31 | Medium | Medium | Vitest component tests; visual snapshot on key pages; incremental migration | Open (EV-004) |
+| R14 | i18n string drift between admin and ChatRAG | Low | Medium | Single `frontend-i18n` source; typed message keys; TC-066/069 | Mitigated (EV-004 design) |
 
 ## Risk details
 

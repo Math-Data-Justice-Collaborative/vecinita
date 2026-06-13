@@ -95,6 +95,26 @@
 | RD-051 | shadcn/ui deps | Approved: tailwindcss, @radix-ui/*, cva, clsx, tailwind-merge, lucide-react | — |
 | RD-052 | Bulk delete limit | **Max 100** documents per operation | — |
 
+## EV-004 resolutions (2026-06-13) — F31 admin bilingual + shared frontend packages
+
+| ID | Topic | Decision | ADR |
+|----|-------|----------|-----|
+| RD-053 | F31 scope | Admin full en/es UI + shared `frontend-i18n` + `frontend-ui`; migrate ChatRAG; no backend changes | ADR-019, ADR-020 |
+| RD-054 | Translation boundary | **UI chrome only** — corpus titles, tags, URLs, audit JSON, API errors unchanged (R30) | ADR-019 |
+| RD-055 | Package split | **Two packages** — pure TS i18n + React UI | ADR-019, ADR-020 |
+| RD-056 | ChatRAG Tailwind | **Full layout migration** to Tailwind in EV-004 (supersedes ADR-020 minimal scan-only) | ADR-020 |
+| RD-057 | npm workspaces | **Root workspaces** linking `apps/*` + `packages/frontend-*` | ADR-020 |
+| RD-058 | Message keys | **Dot-prefixed flat keys** — `chat.*`, `admin.*`, `shared.*` | ADR-019 |
+| RD-059 | Date/time locale | **Follow UI locale** in admin via `Intl` / `toLocaleString()` | — |
+| RD-060 | shadcn in shared package | **Re-export minimal set** — Button, Badge, Input, Label, Dialog from `frontend-ui` | ADR-020 |
+| RD-061 | Toggle placement | **Sidebar footer** beside ThemeToggle (desktop + mobile sheet) | — |
+| RD-062 | Delivery priority | **High** — ship F31 in EV-004 before next deploy | — |
+| RD-063 | User journey ID | **UJ-022** for admin language toggle (UJ-019 already assigned to top-served) | — |
+| RD-064 | Test strategy | Vitest mirror ChatRAG — package tests + `test_admin_language_toggle_i18n.test.tsx` | — |
+| RD-065 | API contract | **No changes** — client-only i18n | — |
+| RD-066 | Deploy order | Build shared packages → redeploy both frontends; no API/Modal redeploy | — |
+| RD-067 | ThemeToggle scope | **Extract to `frontend-ui`** — shared bilingual theme control (02-verify-plan S_EV4.L2 denied) | ADR-020 |
+
 Unresolved:
 
 - Exact LlamaIndex / vLLM patch pins at implementation (T8.1, T9.2)

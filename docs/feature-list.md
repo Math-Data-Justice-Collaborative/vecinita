@@ -2,8 +2,9 @@
 
 > **Project**: Vecinita  
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
-> **Last updated**: 2026-05-27  
-> **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018)
+> **Last updated**: 2026-06-13  
+> **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020)
+> **Last updated**: 2026-06-13 (EV-004 F31)
 
 ## Summary
 
@@ -39,6 +40,7 @@
 | F28 | Source serving statistics | Implemented | Cross-cutting | chat-rag-backend, internal-write-api, database | 11-verify-impl 2026-05-27 |
 | F29 | Audit log & version history | Implemented | Data Management | internal-write-api, data-management-frontend, database | 11-verify-impl 2026-05-27 |
 | F30 | Strict static typing (no `Any` / `any`) | Implemented | Cross-cutting | all Python + TS apps | EV-003 2026-05-27 |
+| F31 | Admin + shared frontend bilingual UI (en/es) | Planned | Cross-cutting | data-management-frontend, chat-rag-frontend, `packages/frontend-i18n`, `packages/frontend-ui` | EV-004 2026-06-13 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -223,6 +225,8 @@
 | F27 Bulk corpus ops | No | Yes | Yes | No |
 | F28 Serving statistics | Yes | Yes | Yes | No |
 | F29 Audit log & versions | No | Yes | Yes | No |
+| F30 Strict static typing | Yes | Yes | Yes | Yes |
+| F31 Bilingual UI (shared packages) | Yes | Yes | No | No |
 
 ## Out of Scope (v1)
 
@@ -407,6 +411,27 @@
 - **Limitations**: `reportAny` and ESLint `strictTypeChecked` not enabled (see typing-policy).
 - **Source**: EV-003; ADR-018
 
+### F31: Admin + shared frontend bilingual UI (en/es)
+
+- **What it does**: Delivers full static UI translation (English/Spanish) for the admin dashboard, mirrors ChatRAG locale behavior, and extracts shared i18n + UI packages consumed by both browser SPAs.
+- **Inputs**: Operator browser; optional prior `vecinita.locale` in `localStorage`; browser language for first visit.
+- **Outputs**: Rendered admin UI in selected locale; `document.documentElement.lang` set; dates formatted with UI locale; shared EN/ES message tables via `t(locale, key)`.
+- **Key parameters**:
+  | Parameter | Default | Range | Description |
+  |-----------|---------|-------|-------------|
+  | `vecinita.locale` | Browser-detected | `en` \| `es` | Shared `localStorage` key across both frontends |
+  | Browser fallback | `es` | — | Non-en/es browser languages default to Spanish (match ChatRAG) |
+- **Shared packages**:
+  | Package | npm name | Exports |
+  |---------|----------|---------|
+  | `packages/frontend-i18n` | `vecinita-frontend-i18n` | `Locale`, `detectBrowserLocale()`, `readStoredLocale()`, dot-prefixed `t()` (`chat.*`, `admin.*`, `shared.*`) |
+  | `packages/frontend-ui` | `vecinita-frontend-ui` | `LocaleProvider`, `useLocale`, `LanguageToggle`, `ThemeToggle`, `TagFilterChips`, `TagBadge`, `PaginationControls`; minimal shadcn re-exports (Button, Badge, Input, Label, Dialog) |
+- **Admin scope**: ~120+ static strings across Dashboard, Corpus, Health, Audit, bulk dialogs; EN/ES toggle in sidebar footer beside `ThemeToggle` (desktop + mobile sheet).
+- **ChatRAG scope**: Migrate app-local i18n to shared packages; **full Tailwind migration** of ChatRAG layout (not minimal scan-only); consume shared components.
+- **Limitations**: UI chrome only — corpus document titles, tag labels, URLs, audit JSON payloads, API `error_message`, and health/job status enums remain in source form (R30). No backend or API contract changes. No `Accept-Language` header in F31.
+- **Priority**: High — ship in EV-004 before next deploy.
+- **Source**: EV-004 user interview 2026-06-13; ADR-019, ADR-020 (amended); context-brief §13
+
 ## Planned / Deferred (post-v1)
 
 | # | Feature | Priority | Complexity | Notes |
@@ -432,6 +457,8 @@ vecinita/
     ingest/
     shared-schemas/
     embedding-client/
+    frontend-i18n/       # EV-004 F31 — locale utils + EN/ES messages
+    frontend-ui/         # EV-004 F31 — shared React + Tailwind components
   infra/
     docker-compose.yml
     modal/

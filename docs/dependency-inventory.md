@@ -1,7 +1,7 @@
 # Dependency Inventory
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-26 (EV-002)
+> **Last updated**: 2026-06-13 (EV-004 F31)
 
 ## Runtime dependencies (Python — planned)
 
@@ -54,6 +54,17 @@
 | **lucide-react** | Icons | ISC | shadcn/ui icons |
 | **react-router** | ^7.x Admin routing | MIT | EV-002 F23; TP-021 |
 | **react-router-dom** | ^7.x DOM bindings | MIT | EV-002 F23; TP-021 |
+| **vecinita-frontend-i18n** | workspace | Locale utils + EN/ES messages | — | EV-004 F31; `packages/frontend-i18n` |
+| **vecinita-frontend-ui** | workspace | Shared React locale/tag/pagination UI | — | EV-004 F31; depends on frontend-i18n |
+
+### EV-004 workspace packages (F31)
+
+| Package | Depends on | Consumed by |
+|---------|------------|-------------|
+| `packages/frontend-i18n` | none (pure TS) | `frontend-ui`, both frontends |
+| `packages/frontend-ui` | `frontend-i18n`, react, tailwindcss, minimal shadcn/Radix | both frontends |
+
+**Root npm workspaces** link apps → packages (no cross-app imports). ChatRAG adds Tailwind + PostCSS for full layout migration and shared component consumption.
 
 ## Build dependencies
 

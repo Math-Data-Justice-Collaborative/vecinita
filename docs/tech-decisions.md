@@ -2,7 +2,7 @@
 
 > **Stage**: 05-verify-tech  
 > **Extends**: docs/requirements-decisions.md, docs/product-decisions.md  
-> **Last updated**: 2026-05-26 (EV-002)
+> **Last updated**: 2026-06-13 (EV-004 delta)
 
 ## 05-verify-tech resolutions
 
@@ -74,6 +74,39 @@
 | TP-027 | Audit retention | **Background cleanup job** (daily cron) | ADR-017 |
 | TP-028 | Frontend testing | **Vitest + Testing Library** (component tests) | ADR-017 |
 | TP-029 | Deploy order | **Sequential**: migration → write-api → chat-rag → frontend | ADR-017 |
+
+## EV-004 04-tech-plan decisions (2026-06-13)
+
+| ID | Topic | Decision | ADR |
+|----|-------|----------|-----|
+| TP-030 | Git branch | Continue **`fix/es-en-full-ui`** — refactor PR #60 i18n into packages | ADR-021 |
+| TP-031 | Package consumption | **Source imports** via npm workspaces + Vite/tsconfig paths (no dist build) | ADR-021 |
+| TP-032 | Message typing | **Strict TypeScript** keyof on nested message object | ADR-021 |
+| TP-033 | ChatRAG Tailwind | **Full layout migration** — replace App.css with Tailwind | ADR-021 |
+| TP-034 | Locale default | **ES fallback** for non-en/es browsers; `vecinita.locale` shared | ADR-021 |
+| TP-035 | CI workspaces | **Root npm ci** + workspaces for `apps/*`, `packages/frontend-*` | ADR-021 |
+| TP-036 | Component extraction | **Full ADR-020 surface** including ThemeToggle | ADR-021 |
+| TP-037 | Admin strings | **All pages** ~120+ static keys (nav, pages, dialogs) | ADR-021 |
+| TP-038 | Deploy order | **Simultaneous** both frontends; no backend redeploy | ADR-021 |
+| TP-039 | Connectivity | **Extend H4/H5** smoke scripts for both frontend URLs | ADR-021 |
+| TV-040 | EV-004 task count | **39** new tasks (T32.1–T38.4 incl. T36.9–T36.10); **222** total | execution-plan.md |
+
+## EV-004 05-verify-tech resolutions (2026-06-13)
+
+| ID | Topic | Decision | Stmt | Source docs updated |
+|----|-------|----------|------|---------------------|
+| TV-041 | Phase 9 task count | **39** tasks (37 base + T36.9 TC-070 + T36.10 TC-071); **222** total | TS-EV004-C01, C04 | execution-plan.md, tech-decisions.md |
+| TV-042 | Completed count | **183/222** (was erroneous 184/220) | TS-EV004-C02 | execution-plan.md |
+| TV-043 | AC-F4/F5 tests | Add **TC-070** (Intl) + **TC-071** (R30 boundary) + **T36.9/T36.10** | TS-EV004-C04 | test-plan.md, acceptance-criteria.md, execution-plan.md |
+| TV-044 | ADR App.css drift | ChatRAG uses Tailwind layout per TP-033 — amend ADR-019/020 | TS-EV004-C06 | ADR-019, ADR-020 |
+| TV-045 | Consolidated table sync | T27.x–T31.x marked **completed** in Task Tracking | TS-EV004-C03 | execution-plan.md |
+| TV-046 | T33.3 TDD | Accept post-code message-key tests (consistent with TV-D02/TV-039) | TS-EV004-C05 | — (no change) |
+| TV-047 | Deploy wording | Workspace **source imports** — no dist build step | TS-EV004-C07 | deployment-integration.md |
+| TV-048 | T32.1 test path | Package Vitest only (TC-067) — no Python path | TS-EV004-C08 | execution-plan.md |
+| TV-049 | M37 CI deps | T37.1 depends on **T35.6 + T36.8** before workspace CI | TS-EV004-C09 | execution-plan.md |
+| TV-050 | UJ-022 TC index | Journey row lists **TC-065–TC-069** | TS-EV004-C10 | test-plan.md |
+| TV-051 | Secrets matrix EV-004 | No new vars; footnote confirms existing rows | TS-EV004-C11 | staging-secrets-matrix.md |
+| TV-052 | Product audit cross-ref | tech-audit EV-004 delta resolves task-count drift | TS-EV004-C12 | product-audit.md, tech-audit.md |
 
 ## EV-002 05-verify-tech resolutions (2026-05-26)
 
