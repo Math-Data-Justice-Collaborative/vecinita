@@ -18,7 +18,9 @@ export function LanguageToggle({ locale, onChange }: LanguageToggleProps) {
         type="button"
         className={locale === "en" ? "lang-btn active" : "lang-btn"}
         aria-pressed={locale === "en"}
-        onClick={() => { onChange("en"); }}
+        onClick={() => {
+          onChange("en");
+        }}
       >
         EN
       </button>
@@ -26,7 +28,9 @@ export function LanguageToggle({ locale, onChange }: LanguageToggleProps) {
         type="button"
         className={locale === "es" ? "lang-btn active" : "lang-btn"}
         aria-pressed={locale === "es"}
-        onClick={() => { onChange("es"); }}
+        onClick={() => {
+          onChange("es");
+        }}
       >
         ES
       </button>

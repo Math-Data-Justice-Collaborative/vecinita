@@ -10,7 +10,9 @@ export async function createJob(
   urls: string[],
   chunkSizeTokens?: number,
 ): Promise<CreateJobResponse> {
-  const body: { urls: string[]; options?: { chunk_size_tokens: number } } = { urls };
+  const body: { urls: string[]; options?: { chunk_size_tokens: number } } = {
+    urls,
+  };
   if (chunkSizeTokens !== undefined) {
     body.options = { chunk_size_tokens: chunkSizeTokens };
   }
@@ -29,7 +31,10 @@ export async function createJob(
   return response.json() as Promise<CreateJobResponse>;
 }
 
-export async function getJob(options: JobsClientOptions, jobId: string): Promise<Job> {
+export async function getJob(
+  options: JobsClientOptions,
+  jobId: string,
+): Promise<Job> {
   const response = await fetch(`${options.baseUrl}/jobs/${jobId}`, {
     headers: { "X-Vecinita-Proxy-Key": options.modalKey },
   });

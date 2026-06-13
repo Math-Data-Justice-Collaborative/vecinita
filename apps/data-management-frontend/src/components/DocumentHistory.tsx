@@ -34,7 +34,11 @@ export function DocumentHistory({ documentId }: DocumentHistoryProps) {
   }
 
   if (events.length === 0) {
-    return <p className="text-sm text-muted-foreground">No history for this document.</p>;
+    return (
+      <p className="text-sm text-muted-foreground">
+        No history for this document.
+      </p>
+    );
   }
 
   return (
@@ -45,7 +49,9 @@ export function DocumentHistory({ documentId }: DocumentHistoryProps) {
           <div key={event.id} className="relative">
             <div className="absolute -left-[1.4rem] top-1 h-2.5 w-2.5 rounded-full bg-primary" />
             <div className="flex items-center gap-2 text-sm">
-              <Badge variant="outline" className="text-xs">{event.event_type}</Badge>
+              <Badge variant="outline" className="text-xs">
+                {event.event_type}
+              </Badge>
               <span className="text-xs text-muted-foreground">
                 {new Date(event.timestamp).toLocaleString()}
               </span>

@@ -53,7 +53,9 @@ export function ChatPanel() {
 
   function toggleTag(slug: string) {
     setSelectedTags((current) =>
-      current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug],
+      current.includes(slug)
+        ? current.filter((item) => item !== slug)
+        : [...current, slug],
     );
   }
 
@@ -118,11 +120,19 @@ export function ChatPanel() {
           <p className="empty-hint">{t(locale, "emptyHint")}</p>
         ) : (
           messages.map((msg) => (
-            <article key={msg.id} className={`message message-${msg.role}`} data-testid="message">
+            <article
+              key={msg.id}
+              className={`message message-${msg.role}`}
+              data-testid="message"
+            >
               <p className="message-role">
-                {msg.role === "user" ? t(locale, "roleUser") : t(locale, "roleAssistant")}
+                {msg.role === "user"
+                  ? t(locale, "roleUser")
+                  : t(locale, "roleAssistant")}
               </p>
-              <p className="message-content">{msg.content || (loading ? "…" : "")}</p>
+              <p className="message-content">
+                {msg.content || (loading ? "…" : "")}
+              </p>
               {msg.sources && msg.sources.length > 0 ? (
                 <SourceList sources={msg.sources} locale={locale} />
               ) : null}
@@ -150,7 +160,9 @@ export function ChatPanel() {
           name="question"
           rows={3}
           value={question}
-          onChange={(e) => { setQuestion(e.target.value); }}
+          onChange={(e) => {
+            setQuestion(e.target.value);
+          }}
           disabled={loading}
           placeholder={t(locale, "questionPlaceholder")}
         />

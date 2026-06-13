@@ -15,12 +15,12 @@ Open http://localhost:5174
 
 ## Environment (build-time)
 
-| Variable | Purpose |
-|----------|---------|
-| `VITE_VECINITA_ADMIN_API_URL` | Modal Data Management `/jobs` base URL |
-| `VITE_VECINITA_MODAL_PROXY_KEY` | `Modal-Key` header (infrastructure auth) |
-| `VITE_VECINITA_CORPUS_API_URL` | DO internal write API base (local dev) |
-| `VITE_VECINITA_CORPUS_API_KEY` | Bearer token for corpus routes (dev/staging only) |
+| Variable                        | Purpose                                           |
+| ------------------------------- | ------------------------------------------------- |
+| `VITE_VECINITA_ADMIN_API_URL`   | Modal Data Management `/jobs` base URL            |
+| `VITE_VECINITA_MODAL_PROXY_KEY` | `Modal-Key` header (infrastructure auth)          |
+| `VITE_VECINITA_CORPUS_API_URL`  | DO internal write API base (local dev)            |
+| `VITE_VECINITA_CORPUS_API_KEY`  | Bearer token for corpus routes (dev/staging only) |
 
 Corpus calls hit the internal write API directly in local dev. Production should front the write API with a gateway so secrets are not embedded in static assets.
 

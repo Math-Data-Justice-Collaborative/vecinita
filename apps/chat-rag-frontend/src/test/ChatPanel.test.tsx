@@ -1,4 +1,10 @@
-import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ChatPanel } from "../components/ChatPanel";
@@ -24,15 +30,21 @@ function mockFetchRouter(handlers: {
   return vi.fn((input: RequestInfo | URL) => {
     const url = typeof input === "string" ? input : input.toString();
     if (url.includes("/api/v1/tags")) {
-      const response = handlers.tags ?? new Response(JSON.stringify({ tags: [] }), { status: 200 });
-      return Promise.resolve(typeof response === "function" ? response() : response);
+      const response =
+        handlers.tags ??
+        new Response(JSON.stringify({ tags: [] }), { status: 200 });
+      return Promise.resolve(
+        typeof response === "function" ? response() : response,
+      );
     }
     if (url.includes("/api/v1/ask/stream")) {
       const response = handlers.stream;
       if (!response) {
         return Promise.reject(new Error("Unexpected ask/stream fetch"));
       }
-      return Promise.resolve(typeof response === "function" ? response() : response);
+      return Promise.resolve(
+        typeof response === "function" ? response() : response,
+      );
     }
     return Promise.reject(new Error(`Unexpected fetch: ${url}`));
   });
@@ -104,7 +116,9 @@ describe("ChatPanel", () => {
       vi.fn((input: RequestInfo | URL) => {
         const url = typeof input === "string" ? input : input.toString();
         if (url.includes("/api/v1/tags")) {
-          return Promise.resolve(new Response(JSON.stringify({ tags: [] }), { status: 200 }));
+          return Promise.resolve(
+            new Response(JSON.stringify({ tags: [] }), { status: 200 }),
+          );
         }
         if (url.includes("/api/v1/ask/stream")) {
           return streamFetch();

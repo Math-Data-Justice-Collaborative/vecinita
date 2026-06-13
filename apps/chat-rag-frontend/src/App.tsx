@@ -22,14 +22,18 @@ function AppContent() {
             <button
               type="button"
               className={onCorpus ? "secondary" : undefined}
-              onClick={() => { navigate("/"); }}
+              onClick={() => {
+                navigate("/");
+              }}
             >
               {t(locale, "navChat")}
             </button>
             <button
               type="button"
               className={onCorpus ? undefined : "secondary"}
-              onClick={() => { navigate("/corpus"); }}
+              onClick={() => {
+                navigate("/corpus");
+              }}
             >
               {t(locale, "navCorpus")}
             </button>
@@ -39,7 +43,11 @@ function AppContent() {
       </header>
       <main className="app">
         {onCorpus ? (
-          <CorpusBrowse onNavigateHome={() => { navigate("/"); }} />
+          <CorpusBrowse
+            onNavigateHome={() => {
+              navigate("/");
+            }}
+          />
         ) : (
           <ChatPanel />
         )}

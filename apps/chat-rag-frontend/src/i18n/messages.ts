@@ -2,7 +2,8 @@ import type { Locale } from "../hooks/useLocale.types";
 
 const en = {
   appTitle: "Vecinita ChatRAG",
-  appSubtitle: "Bilingual community Q&A — answers stay in your browser only (F3).",
+  appSubtitle:
+    "Bilingual community Q&A — answers stay in your browser only (F3).",
   navChat: "Chat",
   navCorpus: "Corpus",
   languageGroupLabel: "Language",
@@ -17,8 +18,10 @@ const en = {
   clearHistory: "Clear history",
   coldStartStatus:
     "The assistant is starting up — this can take up to a minute on the first question…",
-  askStillStarting: "The assistant is still starting up. Please wait a moment and try again.",
-  askStartingWait: "The assistant is starting up — please wait a moment and try again.",
+  askStillStarting:
+    "The assistant is still starting up. Please wait a moment and try again.",
+  askStartingWait:
+    "The assistant is starting up — please wait a moment and try again.",
   requestFailed: "Request failed",
   filterByTopic: "Filter by topic",
   sourcesHeading: "Sources",
@@ -91,7 +94,10 @@ type MessageTable = {
 
 export const messages: Record<Locale, MessageTable> = { en, es };
 
-export function t(locale: Locale, key: Exclude<MessageKey, "pagination">): string;
+export function t(
+  locale: Locale,
+  key: Exclude<MessageKey, "pagination">,
+): string;
 export function t(
   locale: Locale,
   key: "pagination",

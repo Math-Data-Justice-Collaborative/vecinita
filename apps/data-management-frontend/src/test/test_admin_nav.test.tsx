@@ -27,24 +27,32 @@ describe("Admin navigation", () => {
     const nav = screen.getByTestId("admin-nav");
     expect(nav).toBeInTheDocument();
 
-    expect(screen.getByRole("link", { name: /dashboard/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /dashboard/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /corpus/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /health/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /audit log/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /audit log/i }),
+    ).toBeInTheDocument();
   });
 
   it("navigates to corpus page when clicking Corpus link", () => {
     renderApp();
 
     fireEvent.click(screen.getByRole("link", { name: /corpus/i }));
-    expect(screen.getByText(/ingest urls and manage documents/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/ingest urls and manage documents/i),
+    ).toBeInTheDocument();
   });
 
   it("navigates to health page", () => {
     renderApp();
 
     fireEvent.click(screen.getByRole("link", { name: /health/i }));
-    expect(screen.getByRole("heading", { name: /health/i, level: 2 })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /health/i, level: 2 }),
+    ).toBeInTheDocument();
   });
 
   it("navigates to audit log page", () => {

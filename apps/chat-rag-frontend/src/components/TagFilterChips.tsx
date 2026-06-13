@@ -9,7 +9,12 @@ type TagFilterChipsProps = {
   onToggle: (slug: string) => void;
 };
 
-export function TagFilterChips({ tags, selected, locale, onToggle }: TagFilterChipsProps) {
+export function TagFilterChips({
+  tags,
+  selected,
+  locale,
+  onToggle,
+}: TagFilterChipsProps) {
   const visibleTags = tags.filter((tag) => tag.language === locale);
 
   return (
@@ -26,7 +31,9 @@ export function TagFilterChips({ tags, selected, locale, onToggle }: TagFilterCh
             type="button"
             className={active ? "tag-chip active" : "tag-chip"}
             aria-pressed={active}
-            onClick={() => { onToggle(tag.slug); }}
+            onClick={() => {
+              onToggle(tag.slug);
+            }}
           >
             {tag.label}
           </button>

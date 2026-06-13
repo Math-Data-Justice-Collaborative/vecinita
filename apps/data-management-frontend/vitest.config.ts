@@ -10,10 +10,16 @@ export default defineConfig({
     },
   },
   define: {
-    "import.meta.env.VITE_VECINITA_ADMIN_API_URL": JSON.stringify("http://localhost:8001"),
-    "import.meta.env.VITE_VECINITA_MODAL_PROXY_KEY": JSON.stringify("test-proxy-key"),
-    "import.meta.env.VITE_VECINITA_CORPUS_API_URL": JSON.stringify("http://localhost:8002"),
-    "import.meta.env.VITE_VECINITA_CORPUS_API_KEY": JSON.stringify("test-corpus-key"),
+    "import.meta.env.VITE_VECINITA_ADMIN_API_URL": JSON.stringify(
+      "http://localhost:8001",
+    ),
+    "import.meta.env.VITE_VECINITA_MODAL_PROXY_KEY":
+      JSON.stringify("test-proxy-key"),
+    "import.meta.env.VITE_VECINITA_CORPUS_API_URL": JSON.stringify(
+      "http://localhost:8002",
+    ),
+    "import.meta.env.VITE_VECINITA_CORPUS_API_KEY":
+      JSON.stringify("test-corpus-key"),
   },
   test: {
     environment: "jsdom",

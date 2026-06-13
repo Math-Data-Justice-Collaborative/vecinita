@@ -48,7 +48,9 @@ async function* streamAskOnce(
   baseUrl: string,
   options?: { tags?: string[]; language?: Locale },
 ): AsyncGenerator<StreamEvent> {
-  const body: { question: string; tags?: string[]; language?: Locale } = { question };
+  const body: { question: string; tags?: string[]; language?: Locale } = {
+    question,
+  };
   if (options?.language) {
     body.language = options.language;
   }
@@ -122,7 +124,10 @@ export async function* streamAsk(
       return;
     } catch (err) {
       const status = err instanceof AskStreamError ? err.status : undefined;
-      if (!isTransientAskFailure(err, status) || attempt === COLD_START_ASK_MAX_ATTEMPTS) {
+      if (
+        !isTransientAskFailure(err, status) ||
+        attempt === COLD_START_ASK_MAX_ATTEMPTS
+      ) {
         throw err;
       }
       options?.onRetry?.(attempt, COLD_START_ASK_MAX_ATTEMPTS);
@@ -138,7 +143,9 @@ export function isTokenEvent(event: StreamEvent): event is { token: string } {
   return "token" in event;
 }
 
-export function isSourcesEvent(event: StreamEvent): event is { sources: Source[] } {
+export function isSourcesEvent(
+  event: StreamEvent,
+): event is { sources: Source[] } {
   return "sources" in event;
 }
 
@@ -147,7 +154,10 @@ export function isDoneEvent(event: StreamEvent): event is { done: true } {
 }
 
 /** User-facing message when all cold-start retries are exhausted. */
-export function formatAskFailureMessage(error: unknown, locale: Locale): string {
+export function formatAskFailureMessage(
+  error: unknown,
+  locale: Locale,
+): string {
   if (error instanceof AskStreamError && error.status !== undefined) {
     if (TRANSIENT_ASK_STATUSES.has(error.status)) {
       return t(locale, "askStillStarting");

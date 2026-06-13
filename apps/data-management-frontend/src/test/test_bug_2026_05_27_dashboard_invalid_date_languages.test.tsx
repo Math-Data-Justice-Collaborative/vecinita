@@ -2,7 +2,13 @@
  * BUG-2026-05-27: Dashboard Invalid Date + empty Languages when stats/summary returns api-contract shape.
  * @see docs/bug-reports/BUG-2026-05-27-dashboard-invalid-date-languages.md
  */
-import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 
@@ -32,7 +38,14 @@ const API_CONTRACT_STATS = {
       summary: null,
     },
   ],
-  top_served: [{ document_id: "aaa", title: "Top Doc", served_count: 100, last_served_at: null }],
+  top_served: [
+    {
+      document_id: "aaa",
+      title: "Top Doc",
+      served_count: 100,
+      last_served_at: null,
+    },
+  ],
 };
 
 function renderDashboard() {
@@ -71,6 +84,8 @@ describe("BUG-2026-05-27 dashboard Invalid Date and empty Languages on api-contr
 
     const languagesCard = screen.getByText("Languages").closest(".rounded-lg");
     expect(languagesCard).not.toBeNull();
-    expect(within(languagesCard as HTMLElement).getByText("2")).toBeInTheDocument();
+    expect(
+      within(languagesCard as HTMLElement).getByText("2"),
+    ).toBeInTheDocument();
   });
 });

@@ -36,7 +36,9 @@ export function HealthPage() {
       <div className="space-y-6">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Health</h2>
-          <p className="text-muted-foreground">Service status and connectivity.</p>
+          <p className="text-muted-foreground">
+            Service status and connectivity.
+          </p>
         </div>
         <p className="text-muted-foreground">Loading…</p>
       </div>
@@ -49,7 +51,9 @@ export function HealthPage() {
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Health</h2>
         </div>
-        <p role="alert" className="text-sm text-destructive">{error}</p>
+        <p role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
       </div>
     );
   }
@@ -61,7 +65,9 @@ export function HealthPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Health</h2>
-          <p className="text-muted-foreground">Service status and connectivity.</p>
+          <p className="text-muted-foreground">
+            Service status and connectivity.
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <Badge
@@ -74,8 +80,16 @@ export function HealthPage() {
           >
             {health.overall}
           </Badge>
-          <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading} aria-label="Refresh">
-            <RefreshCw className={cn("mr-2 h-4 w-4", loading && "animate-spin")} />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => void load()}
+            disabled={loading}
+            aria-label="Refresh"
+          >
+            <RefreshCw
+              className={cn("mr-2 h-4 w-4", loading && "animate-spin")}
+            />
             Refresh
           </Button>
         </div>
@@ -85,16 +99,22 @@ export function HealthPage() {
         {health.services.map((service) => (
           <Card key={service.name}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{service.name}</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                {service.name}
+              </CardTitle>
               <Badge
-                variant={service.status === "healthy" ? "default" : "destructive"}
+                variant={
+                  service.status === "healthy" ? "default" : "destructive"
+                }
               >
                 {service.status}
               </Badge>
             </CardHeader>
             <CardContent>
               {service.latency_ms !== null ? (
-                <p className="text-sm text-muted-foreground">{service.latency_ms} ms</p>
+                <p className="text-sm text-muted-foreground">
+                  {service.latency_ms} ms
+                </p>
               ) : null}
               {service.error ? (
                 <p className="text-sm text-destructive">{service.error}</p>

@@ -2,7 +2,14 @@ import { useCallback, useEffect, useState } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { type StatsSummary, fetchStatsSummary } from "@/api/admin";
 import { requireCorpusConfig } from "@/config";
 
@@ -34,7 +41,9 @@ export function DashboardPage() {
       <div className="space-y-6">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-          <p className="text-muted-foreground">Overview of your corpus and system health.</p>
+          <p className="text-muted-foreground">
+            Overview of your corpus and system health.
+          </p>
         </div>
         <p className="text-muted-foreground">Loading…</p>
       </div>
@@ -47,7 +56,9 @@ export function DashboardPage() {
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         </div>
-        <p role="alert" className="text-sm text-destructive">{error}</p>
+        <p role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
       </div>
     );
   }
@@ -58,13 +69,17 @@ export function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <p className="text-muted-foreground">Overview of your corpus and system health.</p>
+        <p className="text-muted-foreground">
+          Overview of your corpus and system health.
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Documents</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Documents
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total_documents}</div>
@@ -83,7 +98,9 @@ export function DashboardPage() {
             <CardTitle className="text-sm font-medium">Tags</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.tag_distribution.length}</div>
+            <div className="text-2xl font-bold">
+              {stats.tag_distribution.length}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -91,7 +108,9 @@ export function DashboardPage() {
             <CardTitle className="text-sm font-medium">Languages</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.language_breakdown.length}</div>
+            <div className="text-2xl font-bold">
+              {stats.language_breakdown.length}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -103,7 +122,9 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             {stats.top_served.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No serving data yet.</p>
+              <p className="text-sm text-muted-foreground">
+                No serving data yet.
+              </p>
             ) : (
               <Table>
                 <TableHeader>
@@ -116,7 +137,9 @@ export function DashboardPage() {
                   {stats.top_served.map((item) => (
                     <TableRow key={item.document_id}>
                       <TableCell>{item.title ?? item.document_id}</TableCell>
-                      <TableCell className="text-right">{item.served_count}</TableCell>
+                      <TableCell className="text-right">
+                        {item.served_count}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -131,11 +154,16 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             {stats.recent_activity.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No recent activity.</p>
+              <p className="text-sm text-muted-foreground">
+                No recent activity.
+              </p>
             ) : (
               <div className="space-y-3">
                 {stats.recent_activity.map((event, idx) => (
-                  <div key={idx} className="flex items-center justify-between text-sm">
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between text-sm"
+                  >
                     <div className="flex items-center gap-2 min-w-0">
                       <Badge variant="outline">{event.event_type}</Badge>
                       <span className="text-muted-foreground truncate">

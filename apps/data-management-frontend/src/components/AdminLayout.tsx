@@ -4,7 +4,13 @@ import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -26,7 +32,9 @@ function NavItems({ onClick }: { onClick?: () => void }) {
           className={({ isActive }) =>
             cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-              isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground",
+              isActive
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground",
             )
           }
         >
@@ -70,7 +78,11 @@ function MobileHeader() {
             <SheetTitle>Vecinita</SheetTitle>
           </SheetHeader>
           <div className="px-3 py-4">
-            <NavItems onClick={() => { setOpen(false); }} />
+            <NavItems
+              onClick={() => {
+                setOpen(false);
+              }}
+            />
           </div>
           <Separator />
           <div className="px-3 py-3">

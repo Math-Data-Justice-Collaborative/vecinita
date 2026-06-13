@@ -1,4 +1,11 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 
@@ -6,9 +13,27 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { CorpusList } from "@/components/CorpusList";
 
 const MOCK_DOCS = [
-  { document_id: "aaa-111", url: "https://example.com/a", title: "Doc A", language: "en", tags: [] },
-  { document_id: "bbb-222", url: "https://example.com/b", title: "Doc B", language: "es", tags: [] },
-  { document_id: "ccc-333", url: "https://example.com/c", title: "Doc C", language: "en", tags: [] },
+  {
+    document_id: "aaa-111",
+    url: "https://example.com/a",
+    title: "Doc A",
+    language: "en",
+    tags: [],
+  },
+  {
+    document_id: "bbb-222",
+    url: "https://example.com/b",
+    title: "Doc B",
+    language: "es",
+    tags: [],
+  },
+  {
+    document_id: "ccc-333",
+    url: "https://example.com/c",
+    title: "Doc C",
+    language: "en",
+    tags: [],
+  },
 ];
 
 function renderCorpus() {
@@ -61,7 +86,9 @@ describe("Bulk operations UI", () => {
     fireEvent.click(selectAll);
 
     const checkboxes = screen.getAllByRole("checkbox");
-    const checked = checkboxes.filter((cb) => cb.getAttribute("data-state") === "checked");
+    const checked = checkboxes.filter(
+      (cb) => cb.getAttribute("data-state") === "checked",
+    );
     expect(checked.length).toBeGreaterThanOrEqual(3);
   });
 
@@ -96,7 +123,10 @@ describe("Bulk operations UI", () => {
         ok: true,
         json: async () => ({ successes: ["aaa-111"], failures: [] }),
       })
-      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS.slice(1) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => MOCK_DOCS.slice(1),
+      });
     vi.stubGlobal("fetch", fetchMock);
 
     renderCorpus();

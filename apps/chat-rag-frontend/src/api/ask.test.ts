@@ -17,22 +17,22 @@ function sseResponse(body: string, status = 200): Response {
 
 describe("formatAskFailureMessage i18n (PR #60 review)", () => {
   it("returns Spanish cold-start copy when locale is es", () => {
-    expect(formatAskFailureMessage(new TypeError("Failed to fetch"), "es")).toMatch(
-      /asistente se está iniciando/i,
-    );
-    expect(formatAskFailureMessage(new AskStreamError("timeout", 504), "es")).toMatch(
-      /aún se está iniciando/i,
-    );
+    expect(
+      formatAskFailureMessage(new TypeError("Failed to fetch"), "es"),
+    ).toMatch(/asistente se está iniciando/i);
+    expect(
+      formatAskFailureMessage(new AskStreamError("timeout", 504), "es"),
+    ).toMatch(/aún se está iniciando/i);
     expect(formatAskFailureMessage("unknown", "es")).toBe("La solicitud falló");
   });
 
   it("returns English cold-start copy when locale is en", () => {
-    expect(formatAskFailureMessage(new TypeError("Failed to fetch"), "en")).toMatch(
-      /assistant is starting up/i,
-    );
-    expect(formatAskFailureMessage(new AskStreamError("timeout", 503), "en")).toMatch(
-      /still starting up/i,
-    );
+    expect(
+      formatAskFailureMessage(new TypeError("Failed to fetch"), "en"),
+    ).toMatch(/assistant is starting up/i);
+    expect(
+      formatAskFailureMessage(new AskStreamError("timeout", 503), "en"),
+    ).toMatch(/still starting up/i);
     expect(formatAskFailureMessage("unknown", "en")).toBe("Request failed");
   });
 });

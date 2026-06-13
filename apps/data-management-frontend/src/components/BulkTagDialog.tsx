@@ -21,7 +21,12 @@ interface BulkTagDialogProps {
   onComplete: () => void;
 }
 
-export function BulkTagDialog({ open, onOpenChange, documentIds, onComplete }: BulkTagDialogProps) {
+export function BulkTagDialog({
+  open,
+  onOpenChange,
+  documentIds,
+  onComplete,
+}: BulkTagDialogProps) {
   const [addInput, setAddInput] = useState("");
   const [removeInput, setRemoveInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -35,14 +40,23 @@ export function BulkTagDialog({ open, onOpenChange, documentIds, onComplete }: B
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean)
-      .map((slug) => ({ slug, label: slug.replace(/-/g, " "), source: "human" as const }));
+      .map((slug) => ({
+        slug,
+        label: slug.replace(/-/g, " "),
+        source: "human" as const,
+      }));
     const removeSlugs = removeInput
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
     try {
       const client = requireCorpusConfig();
-      const res = await bulkTagDocuments(client, documentIds, addTags, removeSlugs);
+      const res = await bulkTagDocuments(
+        client,
+        documentIds,
+        addTags,
+        removeSlugs,
+      );
       setResult(res);
       if (res.failures.length === 0) {
         onOpenChange(false);
@@ -70,18 +84,35 @@ export function BulkTagDialog({ open, onOpenChange, documentIds, onComplete }: B
         <DialogHeader>
           <DialogTitle>Bulk Tag</DialogTitle>
           <DialogDescription>
-            Add or remove tags for {documentIds.length} document{documentIds.length !== 1 ? "s" : ""}.
+            Add or remove tags for {documentIds.length} document
+            {documentIds.length !== 1 ? "s" : ""}.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div className="space-y-2">
             <Label htmlFor="add-tags">Add tags (comma-separated)</Label>
-            <Input id="add-tags" value={addInput} onChange={(e) => { setAddInput(e.target.value); }} placeholder="housing, legal" />
+            <Input
+              id="add-tags"
+              value={addInput}
+              onChange={(e) => {
+                setAddInput(e.target.value);
+              }}
+              placeholder="housing, legal"
+            />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="remove-tags">Remove tags (comma-separated slugs)</Label>
-            <Input id="remove-tags" value={removeInput} onChange={(e) => { setRemoveInput(e.target.value); }} placeholder="outdated" />
+            <Label htmlFor="remove-tags">
+              Remove tags (comma-separated slugs)
+            </Label>
+            <Input
+              id="remove-tags"
+              value={removeInput}
+              onChange={(e) => {
+                setRemoveInput(e.target.value);
+              }}
+              placeholder="outdated"
+            />
           </div>
         </div>
 
@@ -94,7 +125,9 @@ export function BulkTagDialog({ open, onOpenChange, documentIds, onComplete }: B
         ) : null}
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={busy}>Cancel</Button>
+          <Button variant="outline" onClick={handleClose} disabled={busy}>
+            Cancel
+          </Button>
           <Button onClick={() => void handleSubmit()} disabled={busy}>
             {busy ? "Applying…" : "Apply tags"}
           </Button>

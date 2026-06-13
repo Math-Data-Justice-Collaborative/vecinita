@@ -35,7 +35,9 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : t(locale, "loadTagsFailed"));
+          setError(
+            err instanceof Error ? err.message : t(locale, "loadTagsFailed"),
+          );
         }
       }
     }
@@ -63,7 +65,11 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : t(locale, "loadDocumentsFailed"));
+          setError(
+            err instanceof Error
+              ? err.message
+              : t(locale, "loadDocumentsFailed"),
+          );
         }
       } finally {
         if (!cancelled) {
@@ -80,7 +86,9 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
   function toggleTag(slug: string) {
     setPage(1);
     setSelectedTags((current) =>
-      current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug],
+      current.includes(slug)
+        ? current.filter((item) => item !== slug)
+        : [...current, slug],
     );
   }
 
@@ -92,7 +100,10 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
-    <section className="corpus-browse" aria-label={t(locale, "corpusBrowseLabel")}>
+    <section
+      className="corpus-browse"
+      aria-label={t(locale, "corpusBrowseLabel")}
+    >
       <div className="corpus-toolbar">
         <button type="button" className="secondary" onClick={onNavigateHome}>
           {t(locale, "backToChat")}
@@ -124,7 +135,9 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
                 type="button"
                 className={active ? "tag-chip active" : "tag-chip"}
                 aria-pressed={active}
-                onClick={() => { toggleTag(tag.slug); }}
+                onClick={() => {
+                  toggleTag(tag.slug);
+                }}
               >
                 {tag.label}
               </button>
@@ -145,7 +158,8 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
           <li key={item.document_id} className="corpus-item">
             <h2>{item.title ?? t(locale, "untitledDocument")}</h2>
             <p className="corpus-tags">
-              {item.tags.map((tag) => tag.label).join(", ") || t(locale, "noTags")}
+              {item.tags.map((tag) => tag.label).join(", ") ||
+                t(locale, "noTags")}
             </p>
             <a
               href={item.url}
@@ -164,7 +178,9 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
           type="button"
           className="secondary"
           disabled={page <= 1}
-          onClick={() => { setPage((current) => Math.max(1, current - 1)); }}
+          onClick={() => {
+            setPage((current) => Math.max(1, current - 1));
+          }}
         >
           {t(locale, "previous")}
         </button>
@@ -173,7 +189,9 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
           type="button"
           className="secondary"
           disabled={page >= totalPages}
-          onClick={() => { setPage((current) => current + 1); }}
+          onClick={() => {
+            setPage((current) => current + 1);
+          }}
         >
           {t(locale, "next")}
         </button>

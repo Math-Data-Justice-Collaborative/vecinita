@@ -18,7 +18,7 @@ FRONTENDS := chat-rag-frontend data-management-frontend
 .PHONY: help install \
 	db-up db-wait db-ready db-down migrate \
 	lint lint-py lint-fe \
-	format format-check \
+	format format-py format-fe format-check format-check-py format-fe-check \
 	typecheck typecheck-py typecheck-fe \
 	test test-py test-fe test-unit test-integration test-e2e test-smoke test-privacy test-live \
 	build-frontend ci ci-guards audit audit-fe audit-fix check
@@ -68,11 +68,27 @@ lint-fe: ## ESLint (both frontends)
 
 lint: lint-py lint-fe ## Lint Python + both frontends (fail fast)
 
-format-check: ## Check Python formatting (ruff, no writes)
+format-check-py: ## Check Python formatting (ruff, no writes)
 	$(UV) run ruff format --check $(PYTHON_DIRS)
 
-format: ## Fix Python formatting (ruff)
+format-py: ## Fix Python formatting (ruff)
 	$(UV) run ruff format $(PYTHON_DIRS)
+
+format-fe-check: ## Check frontend formatting (Prettier, no writes)
+	@for app in $(FRONTENDS); do \
+		echo "==> npm run format:check apps/$$app"; \
+		(cd apps/$$app && npm run format:check); \
+	done
+
+format-fe: ## Fix frontend formatting (Prettier)
+	@for app in $(FRONTENDS); do \
+		echo "==> npm run format apps/$$app"; \
+		(cd apps/$$app && npm run format); \
+	done
+
+format-check: format-check-py format-fe-check ## Check Python + frontend formatting
+
+format: format-py format-fe ## Fix Python + frontend formatting
 
 typecheck-py: ## basedpyright (Python)
 	$(UV) run basedpyright $(PYTHON_DIRS)

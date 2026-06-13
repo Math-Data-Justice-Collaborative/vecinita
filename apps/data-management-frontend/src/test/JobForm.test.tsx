@@ -1,4 +1,10 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { JobForm } from "../components/JobForm";
@@ -20,7 +26,10 @@ describe("JobForm", () => {
     const fetchMock = vi
       .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
       .mockResolvedValueOnce(
-        jsonResponse({ job_id: "11111111-1111-4111-8111-111111111111", status: "pending" }),
+        jsonResponse({
+          job_id: "11111111-1111-4111-8111-111111111111",
+          status: "pending",
+        }),
       )
       .mockResolvedValueOnce(
         jsonResponse({
@@ -51,6 +60,8 @@ describe("JobForm", () => {
   it("shows validation error when no URLs entered", async () => {
     render(<JobForm />);
     fireEvent.click(screen.getByRole("button", { name: /submit ingest/i }));
-    expect(await screen.findByRole("alert")).toHaveTextContent(/at least one url/i);
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /at least one url/i,
+    );
   });
 });

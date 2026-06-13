@@ -38,7 +38,9 @@ export async function fetchDocuments(params: {
 }): Promise<DocumentBrowsePage> {
   const { baseUrl } = requireChatApiConfig();
   const search = new URLSearchParams();
-  params.tags?.forEach((tag) => { search.append("tags", tag); });
+  params.tags?.forEach((tag) => {
+    search.append("tags", tag);
+  });
   if (params.q) {
     search.set("q", params.q);
   }

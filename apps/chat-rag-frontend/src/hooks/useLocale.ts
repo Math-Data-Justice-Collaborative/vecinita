@@ -1,6 +1,9 @@
 import { useContext } from "react";
 
-import { LocaleContext, type LocaleContextValue } from "../context/LocaleContext";
+import {
+  LocaleContext,
+  type LocaleContextValue,
+} from "../context/LocaleContext";
 
 export type { Locale } from "./useLocale.types";
 

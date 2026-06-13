@@ -43,7 +43,9 @@ describe("CorpusBrowse", () => {
 
   it("renders browse tag chips", async () => {
     renderWithLocale(<CorpusBrowse onNavigateHome={() => undefined} />);
-    expect(await screen.findByRole("button", { name: "Housing" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: "Housing" }),
+    ).toBeInTheDocument();
     expect(screen.getByTestId("browse-tag-chips")).toBeInTheDocument();
   });
 });
@@ -58,13 +60,22 @@ describe("Tag chips in chat", () => {
     const onToggle = vi.fn();
     render(
       <TagFilterChips
-        tags={[{ slug: "housing", label: "Housing", language: "en", document_count: 1 }]}
+        tags={[
+          {
+            slug: "housing",
+            label: "Housing",
+            language: "en",
+            document_count: 1,
+          },
+        ]}
         selected={[]}
         locale="en"
         onToggle={onToggle}
       />,
     );
-    await fireEvent.click(screen.getByTestId("tag-filter-chips").querySelector("button")!);
+    await fireEvent.click(
+      screen.getByTestId("tag-filter-chips").querySelector("button")!,
+    );
     expect(onToggle).toHaveBeenCalledWith("housing");
   });
 
@@ -72,7 +83,14 @@ describe("Tag chips in chat", () => {
     const { TagFilterChips } = await import("../components/TagFilterChips");
     render(
       <TagFilterChips
-        tags={[{ slug: "vivienda", label: "Vivienda", language: "es", document_count: 1 }]}
+        tags={[
+          {
+            slug: "vivienda",
+            label: "Vivienda",
+            language: "es",
+            document_count: 1,
+          },
+        ]}
         selected={[]}
         locale="es"
         onToggle={vi.fn()}
