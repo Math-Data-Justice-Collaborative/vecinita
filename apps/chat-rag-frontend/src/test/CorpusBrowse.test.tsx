@@ -207,6 +207,38 @@ describe("CorpusBrowse", () => {
     });
   });
 
+  it("does not set tag error after unmount when tag fetch fails", async () => {
+    let rejectTags: ((reason: unknown) => void) | undefined;
+    vi.mocked(browse.fetchTags).mockImplementation(
+      () =>
+        new Promise((_resolve, reject) => {
+          rejectTags = reject;
+        }),
+    );
+
+    const { unmount } = renderWithLocale(
+      <CorpusBrowse onNavigateHome={() => undefined} />,
+    );
+    unmount();
+    rejectTags?.(new Error("Tags failed (500)"));
+  });
+
+  it("does not set document error after unmount when document fetch fails", async () => {
+    let rejectDocs: ((reason: unknown) => void) | undefined;
+    vi.mocked(browse.fetchDocuments).mockImplementation(
+      () =>
+        new Promise((_resolve, reject) => {
+          rejectDocs = reject;
+        }),
+    );
+
+    const { unmount } = renderWithLocale(
+      <CorpusBrowse onNavigateHome={() => undefined} />,
+    );
+    unmount();
+    rejectDocs?.(new Error("Browse failed (500)"));
+  });
+
   it("does not update tags after unmount during tag load", async () => {
     let resolveTags: ((value: { tags: browse.TagFacet[] }) => void) | undefined;
     vi.mocked(browse.fetchTags).mockImplementation(

@@ -276,6 +276,11 @@ describe("ChatPanel", () => {
       await screen.findByRole("button", { name: /asking/i }),
     ).toBeDisabled();
 
+    const assistantMessage = screen.getAllByTestId("message")[1];
+    expect(assistantMessage.querySelector(".message-content")).toHaveTextContent(
+      "…",
+    );
+
     releaseStream?.(
       sseResponse(
         'data: {"token":"Done"}\n\n' +
