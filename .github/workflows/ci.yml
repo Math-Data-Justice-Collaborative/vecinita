@@ -137,6 +137,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: npm
+          cache-dependency-path: |
+            apps/chat-rag-frontend/package-lock.json
+            apps/data-management-frontend/package-lock.json
+
+      - name: Install frontend dependencies (chat-rag-frontend)
+        working-directory: apps/chat-rag-frontend
+        run: npm ci
+
+      - name: Install frontend dependencies (data-management-frontend)
+        working-directory: apps/data-management-frontend
+        run: npm ci
 
       - name: Unit coverage gate (F31 / ADR-019)
         run: make test-unit-coverage
