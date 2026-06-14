@@ -83,10 +83,10 @@ format-py: ## Fix Python formatting (ruff)
 	$(UV) run ruff format $(PYTHON_DIRS)
 
 format-fe-check: ## Check frontend formatting (Prettier, no writes)
-	@$(NPM_LOCK) $(NPM_WS) run format:check
+	@$(NPM_LOCK) $(NPM_WS) run 'format:check'
 
 format-fe: ## Fix frontend formatting (Prettier)
-	@$(NPM_LOCK) $(NPM_WS) run format
+	@$(NPM_LOCK) $(NPM_WS) run 'format'
 
 format-check: format-check-py format-fe-check ## Check Python + frontend formatting
 

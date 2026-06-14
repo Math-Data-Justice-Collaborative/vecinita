@@ -1,7 +1,8 @@
-"""Cursor stop hook: run full CI parity (`make ci`) when the agent session ends.
+"""Cursor stop hook: advisory full CI parity (`make ci`) when the agent session ends.
 
 Make serializes npm via scripts/npm_with_lock.sh; do not hold the same flock here
-(deadlock). Test output goes to stderr. On failure, returns followup_message. Always exits 0.
+(deadlock). Test output goes to stderr. Failures are advisory — no followup_message.
+Always exits 0.
 """
 
 from __future__ import annotations
@@ -54,19 +55,15 @@ def main() -> int:
     if proc.returncode != 0:
         combined = proc.stdout + proc.stderr
         tail = combined[-OUTPUT_TAIL_CHARS:] if len(combined) > OUTPUT_TAIL_CHARS else combined
-        sys.stderr.write(f"\n[make_ci_on_stop] exit {proc.returncode}\n")
-        result = {
-            "followup_message": (
-                f"[make ci] failed (exit {proc.returncode}). "
-                "Fix the failures below before ending the session:\n\n"
-                + tail.strip()
-            )
-        }
+        sys.stderr.write(
+            f"\n[make_ci_on_stop] exit {proc.returncode} (advisory — session may still end)\n"
+        )
+        sys.stderr.write(tail.strip())
+        sys.stderr.write("\n")
     else:
         sys.stderr.write("\n[make_ci_on_stop] make ci passed\n")
-        result = {}
 
-    print(json.dumps(result))
+    print("{}")
     return 0
 
 

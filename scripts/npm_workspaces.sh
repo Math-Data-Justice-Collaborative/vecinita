@@ -29,6 +29,7 @@ ensure_installed() {
     if needs_npm_ci; then
       echo "==> npm ci (root workspaces)"
       npm ci
+      cp package-lock.json node_modules/.package-lock.json
     fi
     return 0
   fi
@@ -51,6 +52,7 @@ case "$cmd" in
     if has_root_workspaces; then
       echo "==> npm ci (root workspaces)"
       npm ci
+      cp package-lock.json node_modules/.package-lock.json
     else
       install_legacy_apps
     fi
