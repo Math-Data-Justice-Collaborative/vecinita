@@ -11,9 +11,22 @@ has_root_workspaces() {
     && node -e "const p=require('./package.json'); process.exit(Array.isArray(p.workspaces)?0:1)"
 }
 
+needs_npm_ci() {
+  if [[ ! -x node_modules/.bin/eslint ]] || [[ ! -x node_modules/.bin/tsc ]]; then
+    return 0
+  fi
+  if [[ ! -f node_modules/.package-lock.json ]]; then
+    return 0
+  fi
+  if ! cmp -s package-lock.json node_modules/.package-lock.json; then
+    return 0
+  fi
+  return 1
+}
+
 ensure_installed() {
   if has_root_workspaces; then
-    if [[ ! -x node_modules/.bin/eslint ]] || [[ ! -x node_modules/.bin/tsc ]]; then
+    if needs_npm_ci; then
       echo "==> npm ci (root workspaces)"
       npm ci
     fi
