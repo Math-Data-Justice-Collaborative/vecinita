@@ -1,7 +1,7 @@
 # API Contract
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-26 (EV-002)  
+> **Last updated**: 2026-05-26 (EV-002); **2026-06-13** (EV-004 F31 api-contract note)  
 > **OpenAPI**: Source of truth in repo — `openapi/chat-rag.yaml`, `openapi/data-management.yaml`, `openapi/internal-write.yaml`
 
 Contracts are **greenfield** (ADR-003). Public routes must not accept identity fields (`email`, `user_id`, `name`, etc.).
@@ -452,6 +452,19 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
   ]
 }
 ```
+
+---
+
+## EV-004 — Client-only i18n (F31)
+
+**No new HTTP endpoints.** Bilingual admin UI and shared frontend packages do not change request/response schemas, auth, or error codes.
+
+| Topic | F31 behavior |
+|-------|--------------|
+| API language | Unchanged — backends continue auto-detect for RAG answers (F1) |
+| Admin UI strings | Translated client-side via `packages/frontend-i18n` |
+| Dynamic fields | Document `title`, tag `label`, `url`, audit JSON, `error_message` returned as stored |
+| Headers | No `Accept-Language` requirement in F31 |
 
 ---
 

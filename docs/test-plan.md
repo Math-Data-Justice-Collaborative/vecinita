@@ -12,7 +12,9 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 
 **EV-002 (planned):** Admin UI overhaul (F23), tag display (F24), admin dashboard (F25), health check (F26), bulk ops (F27), serving stats (F28), audit log & versions (F29).
 
-**Excludes (v1):** Playwright full UI E2E (see `tests/e2e/README.md` waiver; Vitest component smoke only), real Modal invocations in CI, multimodal ingest, fine-tuning.
+**EV-004 (planned):** Shared frontend i18n/UI packages (F31); admin bilingual UI; ChatRAG migration to shared packages + Tailwind; Vitest mirror of ChatRAG language-toggle tests.
+
+**Excludes (v1):**** Playwright full UI E2E (see `tests/e2e/README.md` waiver; Vitest component smoke only), real Modal invocations in CI, multimodal ingest, fine-tuning.
 
 **Live staging (post-deploy):** `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (`@pytest.mark.live`); skipped in CI until `VECINITA_STAGING_CHAT_URL` is set.
 
@@ -39,6 +41,9 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-017 Global audit log | `tests/e2e/test_uj017_audit_log.py` | TC-056, TC-057 |
 | UJ-018 Document history | `tests/e2e/test_uj018_document_history.py` | TC-058 |
 | UJ-019 Top served docs | `tests/e2e/test_uj019_top_served.py` | TC-059 |
+| UJ-020 Admin UI navigation | Vitest in `data-management-frontend` | TC-062, TC-063 |
+| UJ-021 Tag chips in corpus list | Vitest in `data-management-frontend` | TC-064 |
+| UJ-022 Admin language toggle | Vitest in `data-management-frontend` + `packages/frontend-ui` + `packages/frontend-i18n` | TC-065, TC-066, TC-067, TC-068, TC-069 |
 
 **E2E tier (v1):** `local` — TestClient, test Postgres (Docker/testcontainers), **mocked Modal** HTTP.
 
@@ -55,7 +60,9 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 
 **Runner:** Always use `uv run pytest` or `bash scripts/run_tests.sh` — bare `pytest` fails without workspace packages.
 
-| Frontend smoke | Vitest | Key React components | `npm test` in each frontend app |
+| Frontend smoke | Vitest | Key React components | `npm test` in each frontend app + `packages/frontend-ui` |
+
+**EV-004 CI note:** Root npm workspaces must install/build `packages/frontend-i18n` and `packages/frontend-ui` before frontend matrix jobs (`npm ci` from repo root or ordered workspace build).
 
 ## Connectivity tiers (browser)
 
@@ -70,6 +77,9 @@ Per [connectivity-gates.md](../.cursor/skills/connectivity-gates.md). Backend-on
 | H5 | Frontend bundle wiring | `scripts/deploy/verify_connectivity.sh` | 13-deploy-smoke (when URLs set) |
 
 EV-001 adds **TC-046** (browse GET H4), **TC-049** (admin PATCH H4), **TC-048** (Vitest external URL link, supports H5 browse path).
+
+EV-004 (F31): No new API routes — **H4/H5 regression required** at 13-deploy-smoke when both frontends redeploy (AC-F7); Vitest TC-065–TC-071 are T0 proof only.
+
 | Lint / types | ruff (`ANN401`), **basedpyright** (`reportExplicitAny`), eslint (`no-explicit-any`, `no-unsafe-*`) | CI | ADR-018; `docs/typing-policy.md` |
 | Security | pip-audit (**blocking** high/critical), secret scan | CI | 04-tech-plan TP-006 |
 
@@ -293,6 +303,48 @@ EV-001 adds **TC-046** (browse GET H4), **TC-049** (admin PATCH H4), **TC-048** 
 - **Objective**: Corpus list displays tag chips for each document.
 - **Input**: Seeded documents with mix of LLM and human tags; render CorpusList component.
 - **Expected**: Tag chips visible below document title; LLM tags have different visual style than human tags; documents with no tags show graceful empty state.
+
+### TC-065: Admin language toggle switches UI chrome (UJ-022, F31)
+
+- **Objective**: Admin EN/ES toggle updates static labels and persists locale.
+- **Input**: Render admin app with `LocaleProvider`; click ES then EN on `LanguageToggle`.
+- **Expected**: Nav labels (Dashboard, Corpus, Health, Audit Log) switch language; `document.documentElement.lang` matches; `localStorage.vecinita.locale` updated; reload preserves selection.
+
+### TC-066: Shared locale persistence across frontends (UJ-022, F31)
+
+- **Objective**: `vecinita.locale` is shared between ChatRAG and admin simulations.
+- **Input**: Set `localStorage.vecinita.locale` to `es`; mount ChatRAG and admin apps sequentially in Vitest with jsdom.
+- **Expected**: Both read `es` on init; `detectBrowserLocale()` fallback matches ChatRAG rules (non-en/es → ES).
+
+### TC-067: frontend-i18n message keys and t() (F31)
+
+- **Objective**: Dot-prefixed keys resolve for both locales; pagination helper formats correctly.
+- **Input**: Call `t("en", "shared.pagination", 1, 3, 42)` and Spanish equivalent.
+- **Expected**: Typed keys compile; EN/ES strings differ; unknown keys caught at typecheck.
+
+### TC-068: frontend-ui shared components render (F31)
+
+- **Objective**: `LanguageToggle`, `ThemeToggle`, `PaginationControls`, `TagBadge` render with Tailwind classes in Vitest.
+- **Input**: Mount components wrapped in `LocaleProvider`.
+- **Expected**: Accessible roles (`role="group"` on toggle); no unstyled content; locale prop flows to labels.
+
+### TC-069: ChatRAG migrated i18n imports (F31)
+
+- **Objective**: ChatRAG tests pass using shared packages (regression for BUG-2026-06-05 language toggle).
+- **Input**: Run migrated `test_bug_2026_06_05_language_toggle_i18n.test.tsx` (or successor) against shared imports.
+- **Expected**: Same behavior as pre-migration; no app-local duplicate `messages.ts`.
+
+### TC-070: Intl timestamp formatting per UI locale (UJ-022, AC-F4, F31)
+
+- **Objective**: Audit/dashboard timestamps format with active UI locale.
+- **Input**: Render admin page with fixed UTC timestamp; toggle locale EN → ES.
+- **Expected**: `Intl.DateTimeFormat` (or equivalent) output differs by locale; no hardcoded English month names when ES selected.
+
+### TC-071: R30 translation boundary — dynamic content untranslated (AC-F5, F31)
+
+- **Objective**: Corpus titles, tag labels, URLs, audit payloads, and API error strings remain in source language regardless of UI locale.
+- **Input**: Render admin Corpus/Audit views with Spanish UI locale and mixed EN/ES corpus fixtures.
+- **Expected**: Static chrome in ES; document titles, tag text, audit JSON, and API `error_message` unchanged from backend values.
 
 ## Test Data
 

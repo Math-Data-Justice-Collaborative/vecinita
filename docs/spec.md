@@ -3,7 +3,7 @@
 > **Project**: Vecinita  
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Version**: greenfield (`fresh-start` branch)  
-> **Last updated**: 2026-05-26 (EV-002 delta)
+> **Last updated**: 2026-06-13 (EV-004 F31 delta)
 
 ## Overview
 
@@ -48,13 +48,15 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 | ChatRAG Frontend | Bilingual chat UI, streaming display | `apps/chat-rag-frontend` | ChatRAG Backend API |
 | Data Management ASGI | Job API, operator-facing HTTP (Modal proxy auth) | `apps/data-management-backend` (Modal) | Modal queues, DO internal write API |
 | Ingest workers | Scrape → chunk → embed → call DO write API | Modal (`apps/data-management-backend`) | FastEmbed, DO internal API |
-| Data Management Frontend | Jobs + corpus admin UI | `apps/data-management-frontend` | Modal ASGI (+ DO routes if needed) |
+| Data Management Frontend | Jobs + corpus admin UI; **bilingual UI chrome** (EV-004 F31) | `apps/data-management-frontend` | Modal ASGI, internal-write API, `packages/frontend-*` |
 | Database app | Alembic, pgvector, seeds, privacy tests | `apps/database` | Postgres |
 | Internal write API | Upsert documents/chunks/embeddings; corpus CRUD | DO App Platform (**standalone** service) | Postgres only |
 | Shared RAG | LlamaIndex pipelines | `packages/rag` | LlamaIndex, pgvector client |
 | Shared ingest | Scrape/chunk helpers | `packages/ingest` | — |
 | Embedding client | HTTP client to Modal FastEmbed | `packages/embedding-client` | Modal |
 | Shared tagging | LLM/human tag prompts, vocabulary merge, cap enforcement | `packages/tagging` | Modal LLM (vLLM), config-spec |
+| **Frontend i18n** | Locale detection, storage, EN/ES message tables (`t()`) | `packages/frontend-i18n` | None (pure TS) — EV-004 F31 |
+| **Frontend UI** | Shared React locale provider, language toggle, tag/pagination primitives | `packages/frontend-ui` | `frontend-i18n`, Tailwind, minimal shadcn — EV-004 F31 |
 
 **Package rule (RD-014):** `packages/*` must not import `apps/*`; apps depend on packages only.
 
@@ -78,10 +80,10 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 
 ### ChatRAG Frontend
 
-- **Purpose**: Public chat UI; client-side conversation state only; **corpus browse** and **tag filter sidebar** (EV-001).
-- **Inputs**: User messages in browser; tag chip selection for RAG; browse filters (tags, title/URL search).
-- **Outputs**: Rendered answers; calls streaming endpoint; browse list opens **original document URL** in new tab (no in-app reader).
-- **Source**: feature-list F11, F19, F22
+- **Purpose**: Public chat UI; client-side conversation state only; **corpus browse** and **tag filter sidebar** (EV-001); **bilingual UI chrome** via shared packages (EV-004 F31).
+- **Inputs**: User messages in browser; tag chip selection for RAG; browse filters (tags, title/URL search); locale from `vecinita.locale` / browser detect.
+- **Outputs**: Rendered answers; calls streaming endpoint; browse list opens **original document URL** in new tab (no in-app reader); UI strings from `packages/frontend-i18n`.
+- **Source**: feature-list F11, F19, F22, F31
 
 ### Data Management (Modal ASGI + workers)
 
@@ -131,6 +133,28 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 - **Outputs**: Vectors or completions/streams.
 - **Note**: **vLLM primary** on Modal (ADR-009); Ollama documented as fallback if cost proof fails in `04-tech-plan`.
 - **Source**: ADR-002, ADR-004
+
+### Frontend i18n (`packages/frontend-i18n`) — EV-004 F31
+
+- **Purpose**: Pure TypeScript locale utilities and EN/ES message tables shared by both browser SPAs.
+- **Inputs**: Browser `navigator.language`; optional `localStorage` value at key `vecinita.locale`.
+- **Outputs**: Resolved `Locale` (`en` \| `es`); translated strings via `t(locale, key, ...)` with dot-prefixed keys (`chat.*`, `admin.*`, `shared.*`).
+- **Algorithm**:
+  1. On load: read `vecinita.locale` from `localStorage` if valid.
+  2. Else `detectBrowserLocale()`: `en*` → `en`, `es*` → `es`, otherwise **ES**.
+  3. Persist user selection back to `vecinita.locale` (shared across apps on same browser profile).
+- **Error handling**: Unknown message keys fail at compile time (typed keys); runtime missing key returns key string (dev guard).
+- **Source**: ADR-019; feature-list F31
+
+### Frontend UI (`packages/frontend-ui`) — EV-004 F31
+
+- **Purpose**: Shared React + Tailwind components for consistent bilingual UX across ChatRAG and admin.
+- **Exports**: `LocaleProvider`, `useLocale`, `LanguageToggle`, `ThemeToggle`, `TagFilterChips`, `TagBadge`, `PaginationControls`; minimal shadcn re-exports (`Button`, `Badge`, `Input`, `Label`, `Dialog`).
+- **Inputs**: React tree wrapped in `LocaleProvider`; components read locale via `useLocale()`.
+- **Outputs**: Accessible UI controls; sets `document.documentElement.lang` on locale change.
+- **Styling**: Tailwind CSS in package; admin consumes directly; ChatRAG migrates layout to Tailwind in EV-004.
+- **Dependency rule**: Depends on `frontend-i18n` only; must not import `apps/*`.
+- **Source**: ADR-020 (amended); feature-list F31
 
 ## Data Flow
 

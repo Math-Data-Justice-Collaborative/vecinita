@@ -3,18 +3,19 @@
 > **Project**: Vecinita  
 > **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, ADR-001–017
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, ADR-001–021
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 9 — EV-004 coverage gate |
-| **Active milestone** | M35 |
-| **Active task** | T36.1 (pending) |
-| **Tasks completed** | 202 / 207 |
+| **Active phase** | Phase 9: EV-004 shared frontend i18n/UI |
+| **Active milestone** | M32: Workspace scaffold |
+| **Active task** | M33 / T33.1 |
+| **Tasks completed** | 187 / 222 |
 | **Last updated** | 2026-06-13 |
 | **Evolve cycle** | EV-004 (F31) — **in_progress** |
+| **Git branch** | `feat/M32-workspace-scaffold` |
 
 ## Template
 
@@ -37,7 +38,10 @@
 | TS type safety | **ESLint** `no-explicit-any` + `no-unsafe-*` | ADR-018 | `docs/typing-policy.md` |
 | Test runner | **pytest** | test-plan.md | §Test Strategy |
 | Frontend tests | **Vitest** | test-plan.md | Frontends |
-| Package manager | **uv** | hooks (`uv run`) | monorepo workspace |
+| Package manager | **uv** (Python) + **npm workspaces** (frontends) | TP-035, ADR-012 | monorepo workspace |
+| Frontend workspaces | **root package.json** — `apps/*`, `packages/frontend-*` | TP-035 | F31 |
+| Shared i18n | **`packages/frontend-i18n`** — strict typed `t()` | TP-032, ADR-019 | F31 |
+| Shared UI | **`packages/frontend-ui`** — React + Tailwind | TP-036, ADR-020 | F31 |
 | RAG framework | **LlamaIndex 0.11.x** (pinned at M9) | ADR-006, interview | F4 |
 | Vector store | **pgvector** 384-dim | ADR-005, ADR-008 | F5, F10 |
 | Embeddings | **FastEmbed** on Modal | ADR-008 | F10 |
@@ -84,6 +88,8 @@
 | D7 | Qwen2.5-1.5B-Instruct weights | model_weights | ~3 GB | pending | T10.3 |
 | D8 | Seed tag vocabulary | config_fixture | < 50 KB | verified | T15.4, T15.6, TC-041, F20 |
 | D9 | Tagged corpus fixtures | corpus_fixture | < 2 MB | pending | T15.5, T17.2, TC-040, TC-044 |
+| D10 | Frontend i18n messages | workspace_package | repo-local | verified | T33.1–T33.4, T36.3–T36.6 |
+| D11 | Frontend UI components | workspace_package | repo-local | verified | T34.1–T34.7 |
 
 **Data management gate:** Assets must be `verified` in `docs/data-staging-state.md` before dependent tasks start.
 
@@ -648,87 +654,119 @@
 
 ---
 
-### Phase 9: EV-004 — Per-component coverage gate (F31)
+### Phase 9: EV-004 — Shared frontend i18n/UI + admin bilingual (F31)
 
-**Entry gate:** EV-004 01-requirements + 02-verify-plan complete; ADR-019 accepted.  
-**Exit gate:** AC-Q1–Q3; `make test-unit-coverage` exits 0; dedicated CI `coverage` job green.  
-**Evolve cycle:** EV-004 (F31)  
-**Branch root:** `evolve/EV-004-coverage-gate` (from `main`)
+**Objective**: Workspace packages `frontend-i18n` + `frontend-ui`; ChatRAG full Tailwind migration;
+admin bilingual UI chrome; CI workspace wiring; frontend-only deploy.
+**Entry gate**: EV-004 04-tech-plan approved (ADR-021, TP-030–TP-039).
+**Exit gate**: Both frontends deployed; H4/H5 regression pass; AC-F1–AC-F7 met; UJ-022 Vitest green.
 
-**Tech decisions (04-tech-plan 2026-06-13):**
+**Evolve cycle:** EV-004 | **Feature IDs:** F31 | **Branch:** `fix/es-en-full-ui` (TP-030)
 
-| ID | Topic | Decision |
-|----|-------|----------|
-| TP-030 | Gate enforcement | `--enforce` on `print_unit_coverage_summary.py`; default via `unit_coverage.sh` |
-| TP-031 | CI wiring | Dedicated `coverage` job (Python 3.11 + Node 20; runs `make test-unit-coverage`) |
-| TP-032 | Milestones | M32 infra → M33 packages → M34 Python apps → M35 frontends → M36 verify |
-| TP-033 | Build order | Hardest baseline first within each milestone (tagging → … → chat-rag-frontend) |
+#### M32: Workspace scaffold — npm workspaces
 
-#### M32: Coverage gate infrastructure
+**Goal**: Root workspace config; package scaffolds; import resolution smoke tests.
+**Acceptance**: Both apps resolve `vecinita-frontend-i18n` and `vecinita-frontend-ui` imports.
 
-**Branch:** `feat/M32-coverage-gate-infra` → `evolve/EV-004-coverage-gate`
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T32.1 | Test: `frontend-i18n` strict `t()` keys (package Vitest TC-067) — red | Test | completed | test-plan TC-067, ADR-021 TP-032 | — | D10 | EV-004 | F31 |
+| T32.2 | Config: root `package.json` npm workspaces (`apps/*`, `packages/frontend-*`) | Config | completed | ADR-021 TP-035, dependency-inventory | — | — | EV-004 | F31 |
+| T32.3 | Config: scaffold `packages/frontend-i18n` + `packages/frontend-ui` (package.json, tsconfig, vitest) | Config | completed | spec.md §Frontend i18n/UI, ADR-019/020 | T32.2 | — | EV-004 | F31 |
+| T32.4 | Test: workspace import resolution from both apps (smoke Vitest) | Test | completed | test-plan §EV-004 CI note | T32.3 | — | EV-004 | F31 |
 
-| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Cycle | Features |
-|---|------|------|--------|-------------|------------|-----------|-------|----------|
-| T32.1 | Test: `tests/unit/test_coverage_gate.py` — `--enforce` fails when fixture below 95% line or branch (red) | Test | completed | ADR-019, AC-Q2 | — | — | EV-004 | F31 |
-| T32.2 | Code: Add `--enforce` + threshold args to `print_unit_coverage_summary.py` | Code | completed | ADR-019, TP-030 | T32.1 | — | EV-004 | F31 |
-| T32.3 | Config: `unit_coverage.sh` + Makefile invoke summary with `--enforce` | Config | completed | TP-030 | T32.2 | — | EV-004 | F31 |
-| T32.4 | Config: Vitest `coverage.thresholds` (lines 95, branches 95) in both frontend `vitest.config.ts` | Config | completed | ADR-019 §Frontends, test-plan | T32.2 | — | EV-004 | F31 |
-| T32.5 | Config: Dedicated `coverage` job in `.github/workflows/ci.yml` (uv + Node 20; `make test-unit-coverage`) | Config | completed | TP-031, test-plan §CI/CD step 5 | T32.3, T32.4 | — | EV-004 | F31 |
-| T32.6 | Test: Gate unit tests green with synthetic coverage JSON fixtures | Test | completed | AC-Q2 | T32.5 | — | EV-004 | F31 |
-| T32.7 | Docs: Gate runbook in `docs/LOCAL_DEV.md` (local parity with CI job) | Docs | completed | test-plan | T32.6 | — | EV-004 | F31 |
+#### M33: frontend-i18n package
 
-#### M33: Package unit coverage (hardest first)
+**Goal**: Pure TS locale utils + typed EN/ES message tables (`chat.*`, `admin.*`, `shared.*`).
+**Acceptance**: TC-067 green; ChatRAG strings migrated from app-local `messages.ts`.
 
-**Branch:** `feat/M33-package-coverage` → `evolve/EV-004-coverage-gate`
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T33.1 | Test: `detectBrowserLocale`, `readStoredLocale`, `LOCALE_STORAGE_KEY` (TC-066 partial) — red | Test | pending | test-plan TC-066, config-spec §Browser locale | T32.1 | D10 | EV-004 | F31 |
+| T33.2 | Code: implement `frontend-i18n` — `Locale`, storage, `t()`, message map | Code | pending | ADR-019, ADR-021 TP-032/TP-034 | T33.1 | D10 | EV-004 | F31 |
+| T33.3 | Test: admin message key samples per page namespace | Test | pending | feature-list F31, UJ-022 | T33.2 | D10 | EV-004 | F31 |
+| T33.4 | Code: migrate ChatRAG strings from `apps/chat-rag-frontend/src/i18n/messages.ts` | Code | pending | ADR-019, TC-069 | T33.2 | D10 | EV-004 | F31 |
+| T33.5 | Docs: verify `dependency-inventory.md` workspace package entries | Docs | pending | dependency-inventory §EV-004 | T33.4 | — | EV-004 | F31 |
 
-| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Cycle | Features |
-|---|------|------|--------|-------------|------------|-----------|-------|----------|
-| T33.1 | Test: Unit tests bring `packages/tagging` to ≥95% line + branch (baseline 57.7% / 16.7%) | Test | completed | ADR-019, test-plan | T32.6 | — | EV-004 | F31 |
-| T33.2 | Test: `packages/ingest` → ≥95% line + branch | Test | completed | test-plan | T33.1 | — | EV-004 | F31 |
-| T33.3 | Test: `packages/rag` → ≥95% line + branch | Test | completed | test-plan | T33.2 | — | EV-004 | F31 |
-| T33.4 | Test: `packages/embedding-client` → ≥95% line + branch | Test | completed | test-plan | T33.3 | — | EV-004 | F31 |
-| T33.5 | Test: `packages/shared-schemas` → ≥95% line + branch | Test | completed | test-plan | T33.4 | — | EV-004 | F31 |
-| T33.6 | Test: `packages/llm-client` → ≥95% line + branch | Test | completed | test-plan | T33.5 | — | EV-004 | F31 |
+#### M34: frontend-ui shared components
 
-#### M34: Python app unit coverage (hardest first)
+**Goal**: React + Tailwind shared components per ADR-020; package Vitest with Tailwind.
+**Acceptance**: TC-068 green for all exported components.
 
-**Branch:** `feat/M34-python-app-coverage` → `evolve/EV-004-coverage-gate`
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T34.1 | Test: `LocaleProvider` + `LanguageToggle` (TC-068) — red | Test | pending | test-plan TC-068, UJ-022 | T33.2 | D11 | EV-004 | F31 |
+| T34.2 | Code: `LocaleProvider`, `useLocale`, `document.documentElement.lang` sync | Code | pending | ADR-020, config-spec §Browser locale | T34.1 | D11 | EV-004 | F31 |
+| T34.3 | Code: `LanguageToggle` — accessible EN/ES pill (`role="group"`) | Code | pending | ADR-020, RD-061 | T34.2 | D11 | EV-004 | F31 |
+| T34.4 | Code: `ThemeToggle`, `TagBadge`, `PaginationControls`, `TagFilterChips` | Code | pending | ADR-020 TP-036, RD-067 | T34.2 | D11 | EV-004 | F31 |
+| T34.5 | Config: minimal shadcn re-exports in `frontend-ui` (Button, Badge, Input, Label, Dialog) | Config | pending | ADR-020 RD-060 | T34.4 | D11 | EV-004 | F31 |
+| T34.6 | Config: `frontend-ui` Vitest + Tailwind/PostCSS test environment | Config | pending | test-plan TC-068, ADR-021 TP-031 | T34.5 | D11 | EV-004 | F31 |
+| T34.7 | Test: `ThemeToggle`, `PaginationControls`, `TagBadge` render (TC-068) | Test | pending | test-plan TC-068 | T34.6 | D11 | EV-004 | F31 |
 
-| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Cycle | Features |
-|---|------|------|--------|-------------|------------|-----------|-------|----------|
-| T34.1 | Test: `apps/data-management-backend` → ≥95% line + branch (incl. Modal worker modules) | Test | completed | ADR-019 §Modal, test-plan | T33.6 | 2026-06-12 | EV-004 | F31 |
-| T34.2 | Test: `apps/internal-write-api` → ≥95% line + branch | Test | completed | test-plan | T34.1 | 2026-06-12 | EV-004 | F31 |
-| T34.3 | Test: `apps/chat-rag-backend` → ≥95% line + branch | Test | completed | test-plan | T34.2 | 2026-06-12 | EV-004 | F31 |
-| T34.4 | Test: `apps/database` → ≥95% line + branch | Test | completed | test-plan | T34.3 | 2026-06-12 | EV-004 | F31 |
+#### M35: ChatRAG migration — Tailwind + shared packages
 
-#### M35: Frontend unit coverage
+**Goal**: Full ChatRAG layout Tailwind migration; remove app-local i18n/components.
+**Acceptance**: TC-069 green; all chat-rag-frontend Vitest pass including language-toggle bug test.
 
-**Branch:** `feat/M35-frontend-coverage` → `evolve/EV-004-coverage-gate`
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T35.1 | Test: migrated TC-069 + `test_bug_2026_06_05_language_toggle_i18n` against shared imports — red | Test | pending | test-plan TC-069, UJ-022 | T34.3, T33.4 | — | EV-004 | F31 |
+| T35.2 | Config: Tailwind v3 + PostCSS in chat-rag-frontend; content paths include `packages/frontend-ui` | Config | pending | ADR-021 TP-033/TP-031, RD-056 | T32.3 | — | EV-004 | F31 |
+| T35.3 | Code: migrate `App.css` layout to Tailwind utilities | Code | pending | ADR-020, RD-056 | T35.2 | — | EV-004 | F31 |
+| T35.4 | Code: replace app-local `LocaleContext`, `LanguageToggle`, `messages.ts` with shared packages | Code | pending | ADR-019, TP-030 | T35.1, T34.3 | — | EV-004 | F31 |
+| T35.5 | Code: replace app-local `TagFilterChips` with `frontend-ui` import | Code | pending | ADR-020 | T34.4, T35.3 | — | EV-004 | F31 |
+| T35.6 | Test: full chat-rag-frontend Vitest suite green | Test | pending | test-plan §Frontend | T35.4, T35.5 | — | EV-004 | F31 |
 
-| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Cycle | Features |
-|---|------|------|--------|-------------|------------|-----------|-------|----------|
-| T35.1 | Test: `apps/data-management-frontend` → ≥95% line + branch (Vitest) | Test | completed | ADR-019, test-plan | T34.4, T32.4 | 2026-06-13 | EV-004 | F31 |
-| T35.2 | Test: `apps/chat-rag-frontend` → ≥95% line + branch (Vitest) | Test | completed | test-plan | T35.1 | 2026-06-13 | EV-004 | F31 |
+#### M36: Admin bilingual UI
 
-#### M36: EV-004 verification & merge
+**Goal**: All admin static strings EN/ES; sidebar language toggle; Intl timestamps.
+**Acceptance**: TC-065–TC-071 green; AC-F1, AC-F4, AC-F5.
 
-**Branch:** `feat/M36-ev004-verify` → `evolve/EV-004-coverage-gate`
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T36.1 | Test: admin language toggle (`test_admin_language_toggle_i18n.test.tsx` TC-065) — red | Test | pending | test-plan TC-065, UJ-022 | T34.3 | — | EV-004 | F31 |
+| T36.2 | Code: wrap admin in `LocaleProvider`; sidebar `LanguageToggle` beside `ThemeToggle` | Code | pending | UJ-022, RD-061 | T36.1 | — | EV-004 | F31 |
+| T36.3 | Code: translate `AdminLayout` nav + mobile sheet strings | Code | pending | feature-list F31, ADR-021 TP-037 | T36.2 | D10 | EV-004 | F31 |
+| T36.4 | Code: translate `DashboardPage` + `CorpusPage` static strings | Code | pending | ADR-021 TP-037 | T36.3 | D10 | EV-004 | F31 |
+| T36.5 | Code: translate `HealthPage` + `AuditPage` static strings | Code | pending | ADR-021 TP-037 | T36.3 | D10 | EV-004 | F31 |
+| T36.6 | Code: translate bulk dialogs, `JobForm`, `DocumentAdmin`, `CorpusList` | Code | pending | ADR-021 TP-037 | T36.3 | D10 | EV-004 | F31 |
+| T36.7 | Code: `Intl` timestamp/date formatting per UI locale (AC-F4) | Code | pending | config-spec §Date/time, RD-059 | T36.4, T36.5 | — | EV-004 | F31 |
+| T36.9 | Test: Intl timestamp formatting per active locale (TC-070, AC-F4) — red | Test | pending | test-plan TC-070 | T36.7 | — | EV-004 | F31 |
+| T36.10 | Test: R30 boundary — corpus/tag/API content untranslated (TC-071, AC-F5) — red | Test | pending | test-plan TC-071 | T36.6 | — | EV-004 | F31 |
+| T36.8 | Test: TC-066 cross-app locale persistence + admin Vitest suite green | Test | pending | test-plan TC-066 | T36.6, T36.7, T36.9, T36.10 | — | EV-004 | F31 |
 
-| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Cycle | Features |
-|---|------|------|--------|-------------|------------|-----------|-------|----------|
-| T36.1 | Test: `make test-unit-coverage` exits 0 — all twelve components ≥95% (AC-Q1) | Test | pending | acceptance-criteria AC-Q1 | T35.2 | — | EV-004 | F31 |
-| T36.2 | Test: `tests/unit/test_coverage_exclusions.py` — omit rules match ADR-019 (AC-Q3) | Test | pending | AC-Q3, pyproject.toml omit | T36.1 | — | EV-004 | F31 |
-| T36.3 | Config: Extend `make ci` to run coverage gate (parity with dedicated CI job) | Config | pending | test-plan §CI/CD | T36.1 | — | EV-004 | F31 |
-| T36.4 | Docs: Mark AC-Q1–Q3 ready in acceptance-criteria; EV-004 section in evolve-decisions | Docs | pending | acceptance-criteria | T36.2, T36.3 | — | EV-004 | F31 |
+#### M37: CI workspace integration
+
+**Goal**: CI installs workspaces from root; both frontends build with shared packages.
+**Acceptance**: `ci.yml` frontend matrix green on EV-004 branch.
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T37.1 | Config: `ci.yml` — root `npm ci` + workspace-aware frontend matrix | Config | pending | ADR-021 TP-035, test-plan §EV-004 CI | T32.2, T35.6, T36.8 | — | EV-004 | F31 |
+| T37.2 | Config: Vite `resolve.alias` + tsconfig `paths` in both frontends | Config | pending | ADR-021 TP-031 | T32.3 | — | EV-004 | F31 |
+| T37.3 | Test: root workspace `npm test` / Makefile target for local parity | Test | pending | ci-after-push.mdc | T37.1, T37.2 | — | EV-004 | F31 |
+
+#### M38: EV-004 deploy + connectivity
+
+**Goal**: Deploy both frontends; H4/H5 regression; no backend redeploy.
+**Acceptance**: AC-F6, AC-F7; deployment-integration §EV-004.
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | evolve_cycle_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|-----------------|-------------|
+| T38.1 | Test: extend `tests/smoke/test_staging_connectivity.py` — H4/H5 both frontends (AC-F7) | Test | pending | test-plan AC-F7, ADR-021 TP-039 | T37.3 | — | EV-004 | F31 |
+| T38.2 | Config: extend `scripts/deploy/verify_connectivity.sh` for EV-004 frontend URLs | Config | pending | connectivity-gates, TP-039 | T38.1 | — | EV-004 | F31 |
+| T38.3 | Config: deploy chat-rag-frontend + data-management-frontend (simultaneous per TP-038) | Config | pending | deployment-integration §EV-004, TP-038 | T36.8, T35.6 | — | EV-004 | F31 |
+| T38.4 | Config: H1–H5 staging validation post-deploy | Config | pending | 13-deploy-smoke, AC-F7 | T38.3 | — | EV-004 | F31 |
 
 #### Phase 9 Gate Check
 
-- [ ] All M32–M36 tasks completed (207/207)
-- [ ] `make test-unit-coverage` exits 0 locally and in CI `coverage` job
-- [ ] Per-component table shows ≥95% line **and** ≥95% branch on all twelve components
-- [ ] AC-Q3 exclusions verified (`__init__.py`, alembic, test paths only)
-- [ ] No new runtime dependencies or deploy surface (quality-only cycle)
+- [ ] All M32–M38 tasks completed (222/222)
+- [ ] Both frontends deployed; H4/H5 regression pass (AC-F7)
+- [ ] No backend/API/Modal redeploy required (AC-F6)
+- [ ] ChatRAG app-local i18n removed; shared packages consumed (AC-F3)
+- [ ] Admin ~120+ static strings translated EN/ES (AC-F1)
+- [ ] `vecinita.locale` shared across frontends (AC-F2)
+- [ ] CI frontend matrix uses root npm workspaces (TP-035)
 
 ---
 
@@ -779,12 +817,14 @@ main
       ├── feat/M29-audit-ui
       ├── feat/M30-retention-integration
       └── feat/M31-ev002-deploy
- └── evolve/EV-004-coverage-gate (from main)
-      ├── feat/M32-coverage-gate-infra
-      ├── feat/M33-package-coverage
-      ├── feat/M34-python-app-coverage
-      ├── feat/M35-frontend-coverage
-      └── feat/M36-ev004-verify
+ └── evolve/EV-004-admin-i18n (from main; active: fix/es-en-full-ui per TP-030)
+      ├── feat/M32-workspace-scaffold
+      ├── feat/M33-frontend-i18n
+      ├── feat/M34-frontend-ui
+      ├── feat/M35-chatrag-migration
+      ├── feat/M36-admin-i18n
+      ├── feat/M37-ci-workspaces
+      └── feat/M38-ev004-deploy
 ```
 
 ### PR Plan
@@ -828,12 +868,14 @@ main
 | PR-35 | Minor | M30 | feat/M30-retention-integration | evolve/EV-002-admin-overhaul | merged (local) |
 | PR-36 | Minor | M31 | feat/M31-ev002-deploy | evolve/EV-002-admin-overhaul | merged (local) |
 | PR-37 | Major | Phase 6–8 / EV-002 | evolve/EV-002-admin-overhaul | main | pending |
-| PR-38 | Minor | M32 | feat/M32-coverage-gate-infra | evolve/EV-004-coverage-gate | pending |
-| PR-39 | Minor | M33 | feat/M33-package-coverage | evolve/EV-004-coverage-gate | pending |
-| PR-40 | Minor | M34 | feat/M34-python-app-coverage | evolve/EV-004-coverage-gate | pending |
-| PR-41 | Minor | M35 | feat/M35-frontend-coverage | evolve/EV-004-coverage-gate | pending |
-| PR-42 | Minor | M36 | feat/M36-ev004-verify | evolve/EV-004-coverage-gate | pending |
-| PR-43 | Major | Phase 9 / EV-004 | evolve/EV-004-coverage-gate | main | pending |
+| PR-38 | Minor | M32 | feat/M32-workspace-scaffold | fix/es-en-full-ui | pending |
+| PR-39 | Minor | M33 | feat/M33-frontend-i18n | fix/es-en-full-ui | pending |
+| PR-40 | Minor | M34 | feat/M34-frontend-ui | fix/es-en-full-ui | pending |
+| PR-41 | Minor | M35 | feat/M35-chatrag-migration | fix/es-en-full-ui | pending |
+| PR-42 | Minor | M36 | feat/M36-admin-i18n | fix/es-en-full-ui | pending |
+| PR-43 | Minor | M37 | feat/M37-ci-workspaces | fix/es-en-full-ui | pending |
+| PR-44 | Minor | M38 | feat/M38-ev004-deploy | fix/es-en-full-ui | pending |
+| PR-45 | Major | Phase 9 / EV-004 | fix/es-en-full-ui | main | pending |
 
 ## Task Tracking
 
@@ -994,59 +1036,75 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T26.2 | M26 | 7 | Code | pending | T25.3 | — | EV-002 | — |
 | T26.3 | M26 | 7 | Code | pending | T26.1, T26.2 | — | EV-002 | — |
 | T26.4 | M26 | 7 | Test | pending | T26.3 | — | EV-002 | — |
-| T27.1 | M27 | 7 | Code | pending | T25.5, T24.4 | — | EV-002 | — |
-| T27.2 | M27 | 7 | Code | pending | T27.1, T22.4 | — | EV-002 | — |
-| T27.3 | M27 | 7 | Code | pending | T27.1, T21.5 | — | EV-002 | — |
-| T27.4 | M27 | 7 | Test | pending | T27.3 | — | EV-002 | — |
-| T27.5 | M27 | 7 | Code | pending | T25.5, T24.2 | — | EV-002 | — |
-| T27.6 | M27 | 7 | Test | pending | T27.5 | — | EV-002 | — |
-| T28.1 | M28 | 7 | Code | pending | T26.3 | — | EV-002 | — |
-| T28.2 | M28 | 7 | Code | pending | T28.1 | — | EV-002 | — |
-| T28.3 | M28 | 7 | Code | pending | T28.2, T23.2 | — | EV-002 | — |
-| T28.4 | M28 | 7 | Code | pending | T28.2, T23.4 | — | EV-002 | — |
-| T28.5 | M28 | 7 | Code | pending | T28.2, T23.8 | — | EV-002 | — |
-| T28.6 | M28 | 7 | Test | pending | T28.5 | — | EV-002 | — |
-| T29.1 | M29 | 7 | Code | pending | T25.5, T21.5 | — | EV-002 | — |
-| T29.2 | M29 | 7 | Code | pending | T29.1 | — | EV-002 | — |
-| T29.3 | M29 | 7 | Code | pending | T29.1 | — | EV-002 | — |
-| T29.4 | M29 | 7 | Code | pending | T29.1, T21.7 | — | EV-002 | — |
-| T29.5 | M29 | 7 | Test | pending | T29.3 | — | EV-002 | — |
-| T29.6 | M29 | 7 | Test | pending | T29.4 | — | EV-002 | — |
-| T30.1 | M30 | 8 | Test | pending | T21.5 | — | EV-002 | — |
-| T30.2 | M30 | 8 | Code | pending | T30.1 | — | EV-002 | — |
-| T30.3 | M30 | 8 | Docs | pending | T24.6 | — | EV-002 | — |
-| T30.4 | M30 | 8 | Test | pending | T29.6, T22.6, T23.2 | D1 | EV-002 | — |
-| T31.1 | M31 | 8 | Docs | pending | T30.3 | — | EV-002 | — |
-| T31.2 | M31 | 8 | Test | pending | T24.6 | — | EV-002 | — |
-| T31.3 | M31 | 8 | Config | pending | T31.2 | — | EV-002 | — |
-| T31.4 | M31 | 8 | Config | pending | T31.1 | — | EV-002 | — |
-| T31.5 | M31 | 8 | Config | pending | T31.4 | — | EV-002 | — |
-| T31.6 | M31 | 8 | Config | pending | T31.5 | — | EV-002 | — |
-| T31.7 | M31 | 8 | Config | pending | T31.6 | — | EV-002 | — |
-| T31.8 | M31 | 8 | Config | pending | T31.7 | — | EV-002 | — |
-| T32.1 | M32 | 9 | Test | completed | — | — | EV-004 | — |
-| T32.2 | M32 | 9 | Code | completed | T32.1 | — | EV-004 | — |
-| T32.3 | M32 | 9 | Config | completed | T32.2 | — | EV-004 | — |
-| T32.4 | M32 | 9 | Config | completed | T32.2 | — | EV-004 | — |
-| T32.5 | M32 | 9 | Config | completed | T32.3, T32.4 | — | EV-004 | — |
-| T32.6 | M32 | 9 | Test | completed | T32.5 | — | EV-004 | — |
-| T32.7 | M32 | 9 | Docs | completed | T32.6 | — | EV-004 | — |
-| T33.1 | M33 | 9 | Test | completed | T32.6 | — | EV-004 | — |
-| T33.2 | M33 | 9 | Test | completed | T33.1 | — | EV-004 | — |
-| T33.3 | M33 | 9 | Test | completed | T33.2 | — | EV-004 | — |
-| T33.4 | M33 | 9 | Test | completed | T33.3 | — | EV-004 | — |
-| T33.5 | M33 | 9 | Test | completed | T33.4 | — | EV-004 | — |
-| T33.6 | M33 | 9 | Test | completed | T33.5 | — | EV-004 | — |
-| T34.1 | M34 | 9 | Test | completed | T33.6 | 2026-06-12 | EV-004 | — |
-| T34.2 | M34 | 9 | Test | completed | T34.1 | 2026-06-12 | EV-004 | — |
-| T34.3 | M34 | 9 | Test | completed | T34.2 | 2026-06-12 | EV-004 | — |
-| T34.4 | M34 | 9 | Test | completed | T34.3 | 2026-06-12 | EV-004 | — |
-| T35.1 | M35 | 9 | Test | completed | T34.4, T32.4 | 2026-06-13 | EV-004 | — |
-| T35.2 | M35 | 9 | Test | completed | T35.1 | 2026-06-13 | EV-004 | — |
-| T36.1 | M36 | 9 | Test | pending | T35.2 | — | EV-004 | — |
-| T36.2 | M36 | 9 | Test | pending | T36.1 | — | EV-004 | — |
-| T36.3 | M36 | 9 | Config | pending | T36.1 | — | EV-004 | — |
-| T36.4 | M36 | 9 | Docs | pending | T36.2, T36.3 | — | EV-004 | — |
+| T27.1 | M27 | 7 | Code | completed | T25.5, T24.4 | — | EV-002 | — |
+| T27.2 | M27 | 7 | Code | completed | T27.1, T22.4 | — | EV-002 | — |
+| T27.3 | M27 | 7 | Code | completed | T27.1, T21.5 | — | EV-002 | — |
+| T27.4 | M27 | 7 | Test | completed | T27.3 | — | EV-002 | — |
+| T27.5 | M27 | 7 | Code | completed | T25.5, T24.2 | — | EV-002 | — |
+| T27.6 | M27 | 7 | Test | completed | T27.5 | — | EV-002 | — |
+| T28.1 | M28 | 7 | Code | completed | T26.3 | — | EV-002 | — |
+| T28.2 | M28 | 7 | Code | completed | T28.1 | — | EV-002 | — |
+| T28.3 | M28 | 7 | Code | completed | T28.2, T23.2 | — | EV-002 | — |
+| T28.4 | M28 | 7 | Code | completed | T28.2, T23.4 | — | EV-002 | — |
+| T28.5 | M28 | 7 | Code | completed | T28.2, T23.8 | — | EV-002 | — |
+| T28.6 | M28 | 7 | Test | completed | T28.5 | — | EV-002 | — |
+| T29.1 | M29 | 7 | Code | completed | T25.5, T21.5 | — | EV-002 | — |
+| T29.2 | M29 | 7 | Code | completed | T29.1 | — | EV-002 | — |
+| T29.3 | M29 | 7 | Code | completed | T29.1 | — | EV-002 | — |
+| T29.4 | M29 | 7 | Code | completed | T29.1, T21.7 | — | EV-002 | — |
+| T29.5 | M29 | 7 | Test | completed | T29.3 | — | EV-002 | — |
+| T29.6 | M29 | 7 | Test | completed | T29.4 | — | EV-002 | — |
+| T30.1 | M30 | 8 | Test | completed | T21.5 | — | EV-002 | — |
+| T30.2 | M30 | 8 | Code | completed | T30.1 | — | EV-002 | — |
+| T30.3 | M30 | 8 | Docs | completed | T24.6 | — | EV-002 | — |
+| T30.4 | M30 | 8 | Test | completed | T29.6, T22.6, T23.2 | D1 | EV-002 | — |
+| T31.1 | M31 | 8 | Docs | completed | T30.3 | — | EV-002 | — |
+| T31.2 | M31 | 8 | Test | completed | T24.6 | — | EV-002 | — |
+| T31.3 | M31 | 8 | Config | completed | T31.2 | — | EV-002 | — |
+| T31.4 | M31 | 8 | Config | completed | T31.1 | — | EV-002 | — |
+| T31.5 | M31 | 8 | Config | completed | T31.4 | — | EV-002 | — |
+| T31.6 | M31 | 8 | Config | completed | T31.5 | — | EV-002 | — |
+| T31.7 | M31 | 8 | Config | completed | T31.6 | — | EV-002 | — |
+| T31.8 | M31 | 8 | Config | completed | T31.7 | — | EV-002 | — |
+| T32.1 | M32 | 9 | Test | completed | — | D10 | EV-004 | F31 |
+| T32.2 | M32 | 9 | Config | completed | — | — | EV-004 | F31 |
+| T32.3 | M32 | 9 | Config | completed | T32.2 | — | EV-004 | F31 |
+| T32.4 | M32 | 9 | Test | completed | T32.3 | — | EV-004 | F31 |
+| T33.1 | M33 | 9 | Test | pending | T32.1 | D10 | EV-004 | F31 |
+| T33.2 | M33 | 9 | Code | pending | T33.1 | D10 | EV-004 | F31 |
+| T33.3 | M33 | 9 | Test | pending | T33.2 | D10 | EV-004 | F31 |
+| T33.4 | M33 | 9 | Code | pending | T33.2 | D10 | EV-004 | F31 |
+| T33.5 | M33 | 9 | Docs | pending | T33.4 | — | EV-004 | F31 |
+| T34.1 | M34 | 9 | Test | pending | T33.2 | D11 | EV-004 | F31 |
+| T34.2 | M34 | 9 | Code | pending | T34.1 | D11 | EV-004 | F31 |
+| T34.3 | M34 | 9 | Code | pending | T34.2 | D11 | EV-004 | F31 |
+| T34.4 | M34 | 9 | Code | pending | T34.2 | D11 | EV-004 | F31 |
+| T34.5 | M34 | 9 | Config | pending | T34.4 | D11 | EV-004 | F31 |
+| T34.6 | M34 | 9 | Config | pending | T34.5 | D11 | EV-004 | F31 |
+| T34.7 | M34 | 9 | Test | pending | T34.6 | D11 | EV-004 | F31 |
+| T35.1 | M35 | 9 | Test | pending | T34.3, T33.4 | — | EV-004 | F31 |
+| T35.2 | M35 | 9 | Config | pending | T32.3 | — | EV-004 | F31 |
+| T35.3 | M35 | 9 | Code | pending | T35.2 | — | EV-004 | F31 |
+| T35.4 | M35 | 9 | Code | pending | T35.1, T34.3 | — | EV-004 | F31 |
+| T35.5 | M35 | 9 | Code | pending | T34.4, T35.3 | — | EV-004 | F31 |
+| T35.6 | M35 | 9 | Test | pending | T35.4, T35.5 | — | EV-004 | F31 |
+| T36.1 | M36 | 9 | Test | pending | T34.3 | — | EV-004 | F31 |
+| T36.2 | M36 | 9 | Code | pending | T36.1 | — | EV-004 | F31 |
+| T36.3 | M36 | 9 | Code | pending | T36.2 | D10 | EV-004 | F31 |
+| T36.4 | M36 | 9 | Code | pending | T36.3 | D10 | EV-004 | F31 |
+| T36.5 | M36 | 9 | Code | pending | T36.3 | D10 | EV-004 | F31 |
+| T36.6 | M36 | 9 | Code | pending | T36.3 | D10 | EV-004 | F31 |
+| T36.7 | M36 | 9 | Code | pending | T36.4, T36.5 | — | EV-004 | F31 |
+| T36.9 | M36 | 9 | Test | pending | T36.7 | — | EV-004 | F31 |
+| T36.10 | M36 | 9 | Test | pending | T36.6 | — | EV-004 | F31 |
+| T36.8 | M36 | 9 | Test | pending | T36.6, T36.7, T36.9, T36.10 | — | EV-004 | F31 |
+| T37.1 | M37 | 9 | Config | pending | T32.2, T35.6, T36.8 | — | EV-004 | F31 |
+| T37.2 | M37 | 9 | Config | pending | T32.3 | — | EV-004 | F31 |
+| T37.3 | M37 | 9 | Test | pending | T37.1, T37.2 | — | EV-004 | F31 |
+| T38.1 | M38 | 9 | Test | pending | T37.3 | — | EV-004 | F31 |
+| T38.2 | M38 | 9 | Config | pending | T38.1 | — | EV-004 | F31 |
+| T38.3 | M38 | 9 | Config | pending | T36.8, T35.6 | — | EV-004 | F31 |
+| T38.4 | M38 | 9 | Config | pending | T38.3 | — | EV-004 | F31 |
 
 ## Phase Gate Log
 
@@ -1099,7 +1157,13 @@ CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, ba
 - [x] EV-002 Audit retention — background cleanup job (TP-027)
 - [x] EV-002 Frontend testing — Vitest + Testing Library (TP-028)
 - [x] EV-002 Deploy order — migration → write-api → chat-rag → frontend (TP-029)
-- [x] EV-004 Gate enforcement — `--enforce` on summary script (TP-030)
-- [x] EV-004 CI coverage job — dedicated `coverage` job (TP-031)
-- [x] EV-004 Milestone split — M32–M36 (TP-032)
-- [x] EV-004 Component order — hardest baseline first (TP-033)
+- [x] EV-004 git branch — continue `fix/es-en-full-ui` (TP-030)
+- [x] EV-004 package consumption — source imports via npm workspaces (TP-031)
+- [x] EV-004 message typing — strict TypeScript keys (TP-032)
+- [x] EV-004 ChatRAG Tailwind — full layout migration (TP-033)
+- [x] EV-004 locale default — ES fallback (TP-034)
+- [x] EV-004 CI — root npm workspaces (TP-035)
+- [x] EV-004 component extraction — full ADR-020 surface (TP-036)
+- [x] EV-004 admin strings — all pages ~120+ keys (TP-037)
+- [x] EV-004 deploy order — simultaneous both frontends (TP-038)
+- [x] EV-004 connectivity — extend H4/H5 smoke (TP-039)

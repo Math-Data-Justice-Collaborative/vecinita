@@ -9,29 +9,36 @@ stages:
   00-context:
     status: completed
     started_at: "2026-05-19"
-    completed_at: "2026-05-19"
-    partial_rerun_at: "2026-05-26"
-    partial_rerun_note: "EV-002 delta — admin dashboard overhaul, bulk ops, usage stats, audit log"
+    completed_at: "2026-06-13"
+    partial_rerun_at: "2026-06-13"
+    partial_rerun_note: "EV-004 delta — admin dashboard en/es i18n (mirror ChatRAG) + shared component library (packages/frontend-ui + packages/frontend-i18n)"
     phases:
       phase1a_agents:
         status: completed
+        note: "Internal repo scan — ChatRAG i18n reference + admin string inventory; no external paper/repo"
       phase1b_ecosystem:
-        status: completed
-        note: advisory scan only — user selected greenfield APIs (R3)
+        status: skipped
+        note: "No new sibling integration; i18n is frontend-only delta"
       phase1c_template:
         status: completed
+        note: "No template change — existing multi-app utility pattern"
       phase2_cross_reference:
         status: completed
       phase3_surface_issues:
         status: completed
+        note: "R28-R33 resolved via AskQuestion 2026-06-13"
       phase4_context_brief:
         status: completed
+        artifacts:
+          - docs/context-brief.md §13
+          - docs/adr/ADR-019-shared-frontend-i18n.md
+          - docs/adr/ADR-020-shared-frontend-ui.md
   01-requirements:
     status: completed
-    completed_at: "2026-05-19"
-    started_at: "2026-05-19"
-    partial_rerun_at: "2026-06-13"
-    partial_rerun_note: "EV-004 delta F31 — per-component 95% line+branch coverage gate"
+    completed_at: "2026-06-13"
+    started_at: "2026-06-13"
+    partial_rerun_at: "2026-05-24"
+    partial_rerun_note: "EV-004 delta F31 — admin dashboard en/es i18n"
     substeps:
       interviews:
         completed: 13
@@ -57,12 +64,29 @@ stages:
         - migration-plan
       notes:
         dependency_inventory: "User wants vLLM and LlamaIndex evaluated in interview"
+        session: "EV-004 F31 delta interview complete — 3 batches; UJ-022 assigned (UJ-019 taken)"
+    artifacts_updated:
+      - docs/feature-list.md
+      - docs/spec.md
+      - docs/user-journeys.md
+      - docs/test-plan.md
+      - docs/config-spec.md
+      - docs/api-contract.md
+      - docs/deployment-integration.md
+      - docs/acceptance-criteria.md
+      - docs/dependency-inventory.md
+      - docs/roadmap.md
+      - docs/glossary.md
+      - docs/risk-register.md
+      - docs/data-management-plan.md
+      - docs/requirements-decisions.md
+      - docs/adr/ADR-020-shared-frontend-ui.md
   02-verify-plan:
     status: completed
-    started_at: "2026-06-13"
+    started_at: "2026-05-24"
     completed_at: "2026-06-13"
     partial_rerun_at: "2026-06-13"
-    partial_rerun_note: "EV-004 delta F31 — 11 statements, 3 contradictions resolved, 1 doc updated"
+    partial_rerun_note: "EV-004 delta F31 — 21 statements, 2 contradictions resolved, 10 docs updated"
     documents_total: 13
     statements_total: 52
     drift_fixes: 4
@@ -78,11 +102,11 @@ stages:
     ev002_user_approved: 9
     ev002_modified: 1
     ev002_contradictions_resolved: 1
-    ev004_statements: 11
-    ev004_auto_approved: 8
+    ev004_statements: 21
+    ev004_auto_approved: 15
     ev004_user_approved: 5
-    ev004_modified: 1
-    ev004_contradictions_resolved: 3
+    ev004_denied: 1
+    ev004_contradictions_resolved: 2
   03-plan-tooling:
     status: completed
     started_at: "2026-05-19"
@@ -97,18 +121,19 @@ stages:
     started_at: "2026-05-19"
     completed_at: "2026-05-24"
     partial_rerun_at: "2026-06-13"
-    partial_rerun_note: "EV-004 delta F31 — Phase 9 appended; TP-030–033"
+    partial_rerun_note: "EV-004 delta F31 — 10 TP decisions, Phase 9 (36 tasks), ADR-021"
     substeps:
       phase1_toolchain: completed
       phase2_interview: completed
       phase3_execution_plan: completed
       phase4_user_review: completed
+      phase4_user_review_note: "tech plan approved 2026-06-13"
   05-verify-tech:
     status: completed
     started_at: "2026-05-19"
-    completed_at: "2026-05-19"
-    partial_rerun_at: "2026-05-26"
-    partial_rerun_note: "EV-002 delta F23-F29 — 23 statements, 8 consistency fixes, 7 source-doc edits"
+    completed_at: "2026-06-13"
+    partial_rerun_at: "2026-06-13"
+    partial_rerun_note: "EV-004 delta F31 — 34 statements, 12 consistency fixes, 11 source-doc edits"
     documents_total: 6
     statements_total: 48
     auto_approved: 27
@@ -128,6 +153,13 @@ stages:
     ev002_consistency_found: 8
     ev002_consistency_resolved: 8
     ev002_source_edits: 7
+    ev004_documents_total: 9
+    ev004_statements_total: 34
+    ev004_auto_approved: 10
+    ev004_user_approved: 12
+    ev004_consistency_found: 12
+    ev004_consistency_resolved: 12
+    ev004_source_edits: 11
   06-tech-tooling:
     status: completed
     started_at: "2026-05-19"
@@ -147,7 +179,12 @@ stages:
     status: in_progress
     started_at: "2026-05-19"
     completed_at: "2026-05-27"
-    note: "EV-004 Phase 9 M32 complete (T32.1-T32.7); M33 T33.1 next"
+    partial_rerun_at: "2026-06-13"
+    partial_rerun_note: "EV-004 Phase 9 — M32 workspace scaffold (36 tasks)"
+    substeps:
+      current_task: T33.1
+      milestone: M32 completed
+    note: "EV-004 Phase 9 — M32 completed; T33.1 in progress"
   08-verify-build:
     status: completed
     started_at: "2026-05-27"
@@ -255,12 +292,12 @@ stages:
     status: completed
     started: "2026-06-12"
     completed: "2026-06-13"
-    last_cycle: PRR-006
+    last_cycle: PRR-008
   19-address-pr-review:
     status: completed
     started: "2026-06-13"
     completed: "2026-06-13"
-    last_cycle: PRM-004
+    last_cycle: PRM-005
   gather-context:
     status: skipped
     note: "Superseded by 00-context for this project; key reserved for doc-planner path"
@@ -633,47 +670,168 @@ evolve_cycles:
         status: completed
     issues: []
   - id: EV-004
-    cycle_type: quality
+    cycle_type: feature
     feature_ids: [F31]
-    title: "Per-component unit coverage gate (95% line + branch)"
+    title: "Admin dashboard bilingual UI (en/es)"
     status: in_progress
     started: "2026-06-13"
+    completed: null
+    scope_summary: |
+      F31: Admin UI bilingual (en/es) — mirror ChatRAG i18n.
+      Shared packages/frontend-i18n + packages/frontend-ui (shared Tailwind UI components).
+      vecinita.locale persistence (R28, R29).
+      Sidebar EN/ES toggle beside ThemeToggle (R31); UI chrome only (R30).
+      Component extraction from ChatRAG/admin into frontend-ui (R34-R38).
+      No backend or API contract changes.
+    routing_plan:
+      required_stages:
+        - 00-context
+        - 01-requirements
+        - 02-verify-plan
+        - 04-tech-plan
+        - 05-verify-tech
+        - 07-build
+        - 09-qa
+        - 10-e2e
+        - 11-verify-impl
+        - 12-verify-deploy
+        - 13-deploy-smoke
+      skipped_stages:
+        - 03-plan-tooling
+        - 06-tech-tooling
     current_stage: 07-build
+    note: "07-build started — EV-004 Phase 9 M32 workspace scaffold"
     stages:
+      00-context:
+        status: completed
+        completed: "2026-06-13"
+        artifacts_updated:
+          - docs/context-brief.md
+          - docs/adr/ADR-019-shared-frontend-i18n.md
+          - docs/adr/ADR-020-shared-frontend-ui.md
       01-requirements:
-        status: completed
-        completed: "2026-06-13"
-        artifacts_updated:
-          - docs/feature-list.md
-          - docs/test-plan.md
-          - docs/acceptance-criteria.md
-          - docs/requirements-decisions.md
-          - docs/adr/ADR-019-per-component-coverage-95.md
-          - docs/evolve-decisions.md
-          - docs/adr/README.md
-      02-verify-plan:
-        status: completed
-        completed: "2026-06-13"
-        artifacts_updated:
-          - docs/product-audit.md
-          - docs/product-decisions.md
-          - docs/execution-plan.md
-      04-tech-plan:
         status: completed
         started: "2026-06-13"
         completed: "2026-06-13"
         artifacts_updated:
-          - docs/execution-plan.md
-          - docs/tech-decisions.md
-          - docs/evolve-decisions.md
-          - docs/adr/ADR-019-per-component-coverage-95.md
+          - docs/feature-list.md
+          - docs/spec.md
+          - docs/user-journeys.md
           - docs/test-plan.md
-          - docs/staging-runbook.md
+          - docs/config-spec.md
+          - docs/api-contract.md
           - docs/deployment-integration.md
+          - docs/acceptance-criteria.md
+          - docs/dependency-inventory.md
+          - docs/roadmap.md
+          - docs/glossary.md
+          - docs/risk-register.md
+          - docs/data-management-plan.md
+          - docs/requirements-decisions.md
+          - docs/adr/ADR-020-shared-frontend-ui.md
+      02-verify-plan:
+        status: completed
+        started: "2026-06-13"
+        completed: "2026-06-13"
+        artifacts_updated:
+          - docs/product-audit.md
+          - docs/product-decisions.md
+          - docs/feature-list.md
+          - docs/user-journeys.md
+          - docs/test-plan.md
+          - docs/acceptance-criteria.md
+          - docs/spec.md
+          - docs/context-brief.md
+          - docs/deployment-integration.md
+          - docs/adr/ADR-019-shared-frontend-i18n.md
+          - docs/adr/ADR-020-shared-frontend-ui.md
+          - docs/requirements-decisions.md
+      04-tech-plan:
+        status: completed
+        completed: "2026-06-13"
+        artifacts_updated:
+          - docs/execution-plan.md
+          - docs/adr/ADR-021-ev004-implementation.md
+          - docs/tech-decisions.md
+          - docs/deployment-integration.md
+          - docs/adr/README.md
+      05-verify-tech:
+        status: completed
+        completed: "2026-06-13"
+        artifacts_updated:
+          - docs/tech-audit.md
+          - docs/tech-decisions.md
+          - docs/execution-plan.md
+          - docs/test-plan.md
+          - docs/acceptance-criteria.md
+          - docs/deployment-integration.md
+          - docs/staging-secrets-matrix.md
+          - docs/adr/ADR-019-shared-frontend-i18n.md
+          - docs/adr/ADR-020-shared-frontend-ui.md
+          - docs/product-audit.md
       07-build:
         status: in_progress
+        started: "2026-06-13"
+        note: "Phase 9 M32 completed; T33.1 in progress"
+    gates:
+      a_to_b: passed
+      b_to_c: passed
+      c_to_d: pending
+      deploy: pending
+    checkpoints:
+      phase_a: passed
+      phase_b: passed
+      phase_c: pending
+      phase_d: pending
+      deploy: pending
     adrs:
-      - docs/adr/ADR-019-per-component-coverage-95.md
+      - docs/adr/ADR-019-shared-frontend-i18n.md
+      - docs/adr/ADR-020-shared-frontend-ui.md
+      - docs/adr/ADR-021-ev004-implementation.md
+    artifacts:
+      - path: docs/context-brief.md
+        status: completed
+      - path: docs/adr/ADR-019-shared-frontend-i18n.md
+        status: completed
+      - path: docs/adr/ADR-020-shared-frontend-ui.md
+        status: completed
+      - path: docs/feature-list.md
+        status: completed
+      - path: docs/spec.md
+        status: completed
+      - path: docs/user-journeys.md
+        status: completed
+      - path: docs/test-plan.md
+        status: completed
+      - path: docs/config-spec.md
+        status: completed
+      - path: docs/api-contract.md
+        status: completed
+      - path: docs/deployment-integration.md
+        status: completed
+      - path: docs/acceptance-criteria.md
+        status: completed
+      - path: docs/dependency-inventory.md
+        status: completed
+      - path: docs/roadmap.md
+        status: completed
+      - path: docs/glossary.md
+        status: completed
+      - path: docs/risk-register.md
+        status: completed
+      - path: docs/data-management-plan.md
+        status: completed
+      - path: docs/requirements-decisions.md
+        status: completed
+      - path: docs/execution-plan.md
+        status: completed
+      - path: docs/adr/ADR-021-ev004-implementation.md
+        status: completed
+      - path: docs/tech-decisions.md
+        status: completed
+      - path: docs/adr/README.md
+        status: completed
+    issues: []
 retrospective_cycles: []
 pr_review_cycles:
   - id: PRR-001
@@ -804,6 +962,48 @@ pr_review_cycles:
       bugbot: skipped
       security_review: skipped
     note: "Re-review after PRM-003; all checks green; merge-ready"
+  - id: PRR-007
+    pr_number: 62
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/62
+    title: "[M32] Workspace scaffold"
+    status: completed
+    started: "2026-06-13"
+    completed: "2026-06-13"
+    head_ref: feat/M32-workspace-scaffold
+    base_ref: main
+    head_sha: 0fbafee3afd859734eea11f971d2829c59239655
+    verdict: COMMENT
+    blockers: 0
+    advisories: 4
+    praise: 4
+    ci_status: success
+    subagents:
+      bugbot: "completed (3 advisories triaged)"
+      security_review: "manual_pass (subagent diff unavailable)"
+    artifacts:
+      - path: .cursor/skills/18-pr-review/checklist.md
+        note: checklist source
+    gh_review_url: null
+  - id: PRR-008
+    pr_number: 62
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/62
+    title: "[M32] Workspace scaffold"
+    status: completed
+    started: "2026-06-13"
+    completed: "2026-06-13"
+    head_ref: feat/M32-workspace-scaffold
+    base_ref: main
+    head_sha: 4a7cf3d82be60e9677217d0262484bed59098bbf
+    verdict: COMMENT
+    blockers: 0
+    advisories: 3
+    praise: 4
+    ci_status: partial
+    linked_remediation_cycle_id: PRM-005
+    subagents:
+      bugbot: "coverage job npm install gap"
+      security_review: pass
+    note: "Re-review after PRM-005; python+frontend green, coverage red"
 
 pr_remediation_cycles:
   - id: PRM-001
@@ -1059,6 +1259,66 @@ pr_remediation_cycles:
     follow_up:
       pr_review_rerun: declined
 
+  - id: PRM-005
+    pr_number: 62
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/62
+    linked_review_cycle_id: PRR-007
+    title: "[M32] Workspace scaffold"
+    status: completed
+    started: "2026-06-13"
+    completed: "2026-06-13"
+    head_ref: feat/M32-workspace-scaffold
+    base_ref: main
+    ci_status: partial
+    head_sha: 4a7cf3d82be60e9677217d0262484bed59098bbf
+    counts:
+      fixed: 3
+      deferred: 1
+      wont_fix: 1
+    findings:
+      - id: F-001
+        source: inline
+        severity: advisory
+        path: .github/workflows/ci.yml
+        line: 177
+        thread_id: PRRT_kwDORy2YAM6JXZTI
+        status: deferred
+        commit: null
+        note: "Package-level TC-067 / frontend-ui Vitest gated in M33/T37 per review"
+      - id: F-002
+        source: inline
+        severity: advisory
+        path: scripts/npm_workspaces.sh
+        line: 16
+        thread_id: PRRT_kwDORy2YAM6JXZTU
+        status: fixed
+        commit: 693dda3
+        note: "needs_npm_ci compares package-lock.json to node_modules/.package-lock.json"
+      - id: F-003
+        source: review_body
+        severity: advisory
+        path: .cursor/skills/export-cursor-toolkit
+        line: null
+        thread_id: null
+        status: fixed
+        commit: f1bb79b
+        note: "Removed from M32 PR; chore/export-cursor-toolkit @ 15d8c30"
+      - id: F-004
+        source: review_body
+        severity: advisory
+        path: null
+        line: null
+        thread_id: null
+        status: wont_fix
+        commit: null
+        note: "No tracking issue; optional Closes #N"
+    commits:
+      - 693dda3
+      - 91e7bab
+      - f1bb79b
+    follow_up:
+      pr_review_rerun: completed
+
 agents:
   repo_researcher:
     status: completed
@@ -1160,8 +1420,15 @@ decisions_log:
   - "EV-002 05-verify-tech delta — TV-032–TV-039 — 23 statements, 8 consistency fixes, 7 source-doc edits — 2026-05-26"
   - "EV-002 11-verify-impl: UJ-013–UJ-021 and F23–F29 approved by user 2026-05-27; T3 live waiver until 13-deploy-smoke"
   - "EV-002 12-verify-deploy: failure mitigations approved; rollback plan approved; deploy_ready=true pending staging DB migration"
-  - "EV-004: F31 per-component 95% line+branch unit coverage gate — RD-053–RD-060 — ADR-019 — 2026-06-13"
-  - "EV-004 02-verify-plan delta complete — 11 statements, 3 contradictions resolved — 2026-06-13"
+  - "EV-004 proposed (pending user confirmation): F31 admin dashboard bilingual en/es — mirror ChatRAG i18n — 2026-06-13"
+  - "EV-004 proposed F31 admin en/es i18n — user confirmed evolve routing 2026-06-13"
+  - "R28-R33 resolved — shared vecinita.locale, packages/frontend-i18n, UI chrome only, sidebar toggle"
+  - date: "2026-06-13"
+    note: "01-requirements EV-004 delta started — F31 admin i18n interview"
+  - "R34-R38 assumed — two packages frontend-i18n + frontend-ui, Tailwind shared UI, component extraction scope, npm workspaces — 2026-06-13"
+  - "EV-004 02-verify-plan delta complete — 21 statements, ThemeToggle to frontend-ui (RD-067), AC-F7 H5 — 2026-06-13"
+  - "EV-004 04-tech-plan delta — TP-030–TP-039 — ADR-021 — Phase 9 (36 tasks) — 2026-06-13"
+  - "EV-004 05-verify-tech delta — TV-041–TV-052 — 12 consistency fixes — 2026-06-13"
 
 artifacts:
   - docs/context-brief.md
@@ -1188,6 +1455,9 @@ artifacts:
   - docs/adr/ADR-014-corpus-tagging-and-browse.md
   - docs/adr/ADR-015-ev001-tagging-implementation.md
   - docs/adr/ADR-017-ev002-implementation.md
+  - docs/adr/ADR-019-shared-frontend-i18n.md
+  - docs/adr/ADR-021-ev004-implementation.md
+  - docs/adr/README.md
   - docs/execution-plan.md
   - docs/data-staging-state.md
   - docs/tech-audit.md
@@ -1209,8 +1479,14 @@ artifacts:
   - docs/staging-runbook.md
 
 git_history:
-  current_branch: tests/95-coverage
+  current_branch: feat/M32-workspace-scaffold
   branches:
+    - name: feat/M32-workspace-scaffold
+      purpose: "EV-004 M32 workspace scaffold"
+      base: main
+      status: open
+      created_at: "2026-06-13"
+      pr_url: null
     - name: feat/M15-tag-schema
       purpose: "EV-001 Phase 5 — M15 tag schema & fixtures (07-build)"
       base: main
@@ -1332,6 +1608,30 @@ git_history:
       stage: "19-address-pr-review"
       files_changed: 1
       timestamp: "2026-06-13T03:09:03Z"
+    - sha: c88fac6
+      branch: feat/M32-workspace-scaffold
+      message: "[T32.1] test: add TC-067 red Vitest for frontend-i18n t()"
+      stage: "07-build"
+      files_changed: 9
+      timestamp: "2026-06-13T23:52:27Z"
+    - sha: 3165af1
+      branch: feat/M32-workspace-scaffold
+      message: "[T32.2] config: add root npm workspaces for frontend packages"
+      stage: "07-build"
+      files_changed: 3
+      timestamp: "2026-06-13T23:53:45Z"
+    - sha: 8393a70
+      branch: feat/M32-workspace-scaffold
+      message: "[T32.3] config: scaffold frontend-i18n and frontend-ui workspace packages"
+      stage: "07-build"
+      files_changed: 9
+      timestamp: "2026-06-13T23:55:30Z"
+    - sha: 0d21b3b
+      branch: feat/M32-workspace-scaffold
+      message: "[T32.4] test: add workspace import smoke tests for both frontends"
+      stage: "07-build"
+      files_changed: 7
+      timestamp: "2026-06-13T23:56:50Z"
 
 constraints:
   cost:

@@ -1,0 +1,43 @@
+---
+description: Local CI parity — auto-fix hooks vs agent-fix checks before session end
+alwaysApply: true
+---
+
+# Local CI Parity
+
+Hooks and `make ci` split **auto-fixable** checks from **agent-fixable** checks.
+
+## Auto-fixed on edit (hooks)
+
+After saves under `apps/`, `packages/`, or `tests/`:
+
+| Stack | Hook order | Behavior |
+|-------|------------|----------|
+| Python | 1 → 2 | `make format-py lint-fix-py`, then basedpyright on the edited file |
+| Frontend apps + packages | 1 → 2 | Scoped Prettier + ESLint --fix for the edited workspace, then scoped `npm run typecheck` |
+
+Hook scripts: `.cursor/hooks/make_format_lint_fix.py`, `.cursor/hooks/typecheck.py`.
+
+Unfixable issues are injected as `additional_context` — fix them before ending the session.
+
+## Agent must fix manually
+
+Before ending, ensure `make ci` would pass for:
+
+- Type errors (basedpyright / tsc) the hooks reported
+- Lint issues ruff or eslint cannot auto-fix
+- Tests: `make test-py`, `make test-fe`
+- CI guards: `make ci-guards`
+- Security audit: `make audit`
+- Production build: `make build-frontend`
+
+While working, run targeted checks: `make check`, `make test`, `make typecheck`.
+
+## Stop hook (advisory)
+
+`make ci` runs on agent stop. Failures log to stderr but do **not** block ending.
+Treat stderr output as required follow-up unless the user explicitly waived CI.
+
+## Reference
+
+Full parity: `make ci` in the repo Makefile (matches `.github/workflows/ci.yml`).

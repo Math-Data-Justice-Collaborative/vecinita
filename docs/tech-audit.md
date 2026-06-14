@@ -216,3 +216,75 @@ Tailwind v3; health aggregator on internal-write-api (avoids Modal CORS); real-t
 - [x] Bulk response schemas aligned with TP-024 partial success
 - [x] Health aggregator endpoint documented in api-contract + spec
 - [ ] **06-tech-tooling** skipped for EV-002 per routing — **next: 07-build** (M20)
+
+---
+
+## EV-004 delta audit (2026-06-13)
+
+> **Stage**: 05-verify-tech (EV-004)  
+> **Evolve cycle**: EV-004 (F31)  
+> **Prerequisite**: 04-tech-plan completed; 02-verify-plan product delta passed
+
+### Document inventory
+
+| # | Document | Statements reviewed | Result |
+|---|----------|---------------------|--------|
+| 1 | Execution plan (Phase 9) | 14 | Updated (task count, deps, T36.9/T36.10, consolidated sync) |
+| 2 | ADR-021 | 10 | Pass (auto-approved — TP-030–TP-039) |
+| 3 | ADR-019 / ADR-020 | 2 | Updated (Tailwind layout wording) |
+| 4 | deployment-integration.md | 2 | Updated (source imports wording) |
+| 5 | test-plan.md | 4 | Updated (TC-070/071, UJ-022 index) |
+| 6 | acceptance-criteria.md | 2 | Updated (AC-F4/F5 TC refs) |
+| 7 | staging-secrets-matrix.md | 1 | Updated (EV-004 footnote) |
+| 8 | tech-decisions.md | 12 | Updated (TV-041–TV-052) |
+| 9 | product-audit.md | 1 | Cross-ref to this audit |
+
+### Results summary
+
+| Metric | Count |
+|--------|-------|
+| Documents audited | 9 |
+| Total statements | 34 |
+| Auto-approved (high) | 10 (TP-030–TP-039) |
+| User-approved (medium/low) | 12 |
+| Denied | 0 |
+| Modified via verdict | 11 source-doc edits |
+| Skipped | 0 |
+
+### Consistency check (EV-004)
+
+| Area | Checks | Issues found | Resolved |
+|------|--------|--------------|----------|
+| Product ↔ Technical | 10 | 4 | 4 |
+| Internal Technical | 8 | 8 | 8 |
+| Connectivity | 3 | 0 | 0 |
+| **Total** | 21 | 12 | 12 |
+
+### Auto-approved (high) — TP-030 through TP-039
+
+Continue PR #60 branch; source imports via npm workspaces; strict typed `t()`; full ChatRAG Tailwind migration; ES locale fallback; root npm CI workspaces; full ADR-020 component surface; all admin static strings; simultaneous frontend deploy; extend H4/H5 smoke.
+
+### User-resolved issues
+
+| Stmt | Resolution |
+|------|------------|
+| TS-EV004-C01 | 39 Phase 9 tasks (37 + T36.9/T36.10); 222 total (TV-041) |
+| TS-EV004-C02 | Completed count **183/222** (TV-042) |
+| TS-EV004-C03 | Consolidated Task Tracking T27.x–T31.x → completed (TV-045) |
+| TS-EV004-C04 | TC-070 + TC-071 + T36.9/T36.10 for AC-F4/F5 (TV-043) |
+| TS-EV004-C05 | Accept T33.3 post-code test pattern (TV-046) |
+| TS-EV004-C06 | ADR-019/020 — Tailwind layout, not App.css (TV-044) |
+| TS-EV004-C07 | deployment-integration — workspace source imports (TV-047) |
+| TS-EV004-C08 | T32.1 Vitest only (TV-048) |
+| TS-EV004-C09 | T37.1 deps on T35.6 + T36.8 (TV-049) |
+| TS-EV004-C10 | UJ-022 lists TC-065–TC-069 (TV-050) |
+| TS-EV004-C11 | staging-secrets-matrix EV-004 footnote (TV-051) |
+| TS-EV004-C12 | product-audit cross-ref (TV-052) |
+
+### Phase B gate (EV-004 partial)
+
+- [x] EV-004 execution plan audited
+- [x] Consistency check complete (12/12 resolved)
+- [x] Connectivity tasks include H4 + H5 for both frontends (M38)
+- [x] AC-F4/AC-F5 have dedicated test coverage (TC-070/071)
+- [ ] **06-tech-tooling** skipped for EV-004 per routing — **next: 07-build** (M32)

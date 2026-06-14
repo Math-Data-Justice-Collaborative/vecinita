@@ -19,12 +19,8 @@ echo "==> Python unit tests (tests/unit)"
 	--cov-report=html:htmlcov
 
 echo "==> TypeScript unit tests (Vitest + coverage)"
-bash scripts/npm_with_lock.sh bash -eu -o pipefail -c '
-	for app in '"${FRONTENDS[*]}"'; do
-		echo "==> vitest --coverage apps/$app"
-		( cd "apps/$app" && npm run test:coverage )
-	done
-'
+bash scripts/npm_with_lock.sh bash scripts/npm_workspaces.sh run test:coverage \
+	vecinita-chat-rag-frontend vecinita-data-management-frontend
 
 echo ""
 "$UV" run python scripts/test/print_unit_coverage_summary.py --enforce

@@ -1,7 +1,7 @@
 # Glossary
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-24 (EV-001)
+> **Last updated**: 2026-06-13 (EV-004 F31)
 
 | Term | Definition | Context |
 |------|------------|---------|
@@ -25,3 +25,7 @@
 | **Tag source** | Provenance `llm` or `human` — no operator identity | ADR-014, ADR-004 |
 | **Seed tag vocabulary** | Starter tag list loaded from `data/fixtures/tags/seed_tags.json` | F20, RD-031 |
 | **Corpus browse** | Public paginated document discovery in ChatRAG frontend | F19, UJ-009 |
+| **UI locale** | Browser UI language (`en` \| `es`) stored in `localStorage` key `vecinita.locale` | F31, ADR-019 |
+| **UI chrome** | Static frontend labels (nav, buttons, empty states) — distinct from corpus content language | F31, R30 |
+| **frontend-i18n** | Workspace package `vecinita-frontend-i18n` — locale detection + message tables | F31 |
+| **frontend-ui** | Workspace package `vecinita-frontend-ui` — shared React bilingual UI components | F31, ADR-020 |

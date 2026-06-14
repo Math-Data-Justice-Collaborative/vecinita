@@ -15,6 +15,8 @@ Bilingual community Q&A (ChatRAG) and corpus data management — hybrid **Digita
 
 Shared logic: `packages/rag`, `packages/ingest`, `packages/embedding-client`, `packages/llm-client`.
 
+**EV-004 (planned):** Shared frontend packages — `packages/frontend-i18n` (en/es locale + messages) and `packages/frontend-ui` (React components consumed by both frontends). UI locale persists in browser `localStorage` key `vecinita.locale`.
+
 ## Quick start (local)
 
 ```bash
@@ -31,19 +33,19 @@ cd ../.. && bash scripts/run_tests.sh -q
 
 Full bootstrap: **[docs/LOCAL_DEV.md](docs/LOCAL_DEV.md)** · non-secret defaults: **[infra/vecinita.yaml](infra/vecinita.yaml)**
 
-## Features (v1 + EV-001 + EV-002)
+## Features (v1 + EV-001 + EV-002 + EV-004)
 
 | Area | Features |
 |------|----------|
-| ChatRAG | Bilingual Q&A, streaming, tag-filtered RAG, corpus browse |
+| ChatRAG | Bilingual Q&A, streaming, tag-filtered RAG, corpus browse, **en/es UI chrome** (F31 shared packages) |
 | Data Management | URL ingest, job queue, corpus CRUD, LLM auto-tagging |
-| Admin Dashboard | Summary stats, health checks, bulk operations, audit log |
+| Admin Dashboard | Summary stats, health checks, bulk operations, audit log, **en/es UI chrome** (F31) |
 | Data Integrity | Serving statistics, version history, configurable retention |
 | Privacy | Zero personal data (ADR-004), no IP tracking (ADR-016) |
 
 ## Docs
 
-- [Feature list](docs/feature-list.md) — F1–F29
+- [Feature list](docs/feature-list.md) — F1–F31
 - [Execution plan](docs/execution-plan.md)
 - [API contract](docs/api-contract.md)
 - [Config spec](docs/config-spec.md)

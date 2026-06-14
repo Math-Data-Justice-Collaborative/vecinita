@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [requirements-decisions.md](requirements-decisions.md)  
-> **Last updated**: 2026-05-26 (EV-002: UJ-013–UJ-019)
+> **Last updated**: 2026-06-13 (EV-004: UJ-022 admin i18n)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI steps** are waived at T0 — see `tests/e2e/README.md` (Vitest component smoke only).
@@ -30,6 +30,9 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-017 | View global audit log | Operator | Admin UI → `GET /internal/v1/audit` | F29 | local |
 | UJ-018 | View document version history | Operator | Admin UI document detail → `GET /internal/v1/documents/{id}/history` | F29 | local |
 | UJ-019 | View top served documents | Operator | Admin summary dashboard → `GET /internal/v1/stats/top-served` | F28 | local |
+| UJ-020 | Navigate modernized admin UI | Operator | Admin UI shadcn/Tailwind navigation | F23 | local |
+| UJ-021 | View document tags in corpus list | Operator | Admin corpus list → tag chips | F24 | local |
+| UJ-022 | Switch admin UI language (en/es) | Operator | Admin UI sidebar `LanguageToggle` → `packages/frontend-i18n` | F31 | local |
 
 ## Journey Details
 
@@ -444,3 +447,29 @@ Product-facing journeys describe what a **caller** does — not internal module 
 **Acceptance**: Tags render for all documents that have them; empty state (no tags) shows nothing or a subtle "no tags" indicator; tag chips match the tag data from the API response; color coding distinguishes LLM vs human source.
 
 **Automated tests**: `tests/e2e/test_uj021_tag_display.py` (planned — Vitest component)
+
+---
+
+### UJ-022: Switch admin UI language (en/es)
+
+**Actor**: Operator
+
+**Goal**: Use the admin dashboard in English or Spanish with the same locale behavior as ChatRAG, including persistence across page reloads and both Vecinita frontends in the same browser.
+
+**Steps**:
+
+1. Open Data Management admin UI (any page).
+2. Locate EN/ES language toggle in sidebar footer beside theme control (desktop) or mobile nav sheet footer.
+3. Select **ES** — navigation labels, headings, buttons, empty states, and validation messages update to Spanish; `document.documentElement.lang` becomes `es`.
+4. Navigate to Dashboard, Corpus, Health, and Audit — all static UI chrome remains in Spanish.
+5. Reload browser — UI stays Spanish (`vecinita.locale` in `localStorage`).
+6. Open ChatRAG frontend in same browser — UI uses same stored locale.
+7. Switch back to **EN** — admin UI returns to English; ChatRAG reflects change on next load or toggle.
+
+**Acceptance**: All ~120+ static admin strings translated; corpus document titles, tag labels, URLs, audit event types, and API error text remain in source language (R30); audit/dashboard timestamps use UI locale via `Intl` / `toLocaleString()`; no API calls change; toggle is keyboard-accessible.
+
+**Not translated**: Document `title`, tag `label`, `url`, audit JSON payloads, health `overall` / service status strings, job status enums, API `error_message`.
+
+**Automated tests**: `apps/data-management-frontend/src/test/test_admin_language_toggle_i18n.test.tsx`; `packages/frontend-ui` Vitest; migrated ChatRAG i18n tests import shared packages.
+
+**E2E tier**: local (Vitest component smoke); live browser toggle waived at T0 (same as other admin UI journeys).

@@ -1,8 +1,8 @@
 # Context Brief — Vecinita (5-app monorepo)
 
 **Stage:** 00-context  
-**Date:** 2026-05-19 (regenerated); **EV-001 delta:** 2026-05-24; **EV-002 delta:** 2026-05-26  
-**Status:** Complete (EV-002 delta merged)
+**Date:** 2026-05-19 (regenerated); **EV-001 delta:** 2026-05-24; **EV-002 delta:** 2026-05-26; **EV-004 delta:** 2026-06-13 (updated shared UI library scope)  
+**Status:** Complete (EV-004 delta merged; §13 expanded 2026-06-13)
 
 ---
 
@@ -619,3 +619,144 @@ flowchart LR
 | R25 | Decision | CSS/styling approach | **Tailwind CSS** — utility-first, modern look, fast development |
 | R26 | Decision | Version history implementation | **Audit log IS version history** — JSONB diff/snapshot per action (event-sourcing style) |
 | R27 | Decision | Frontend navigation | **React Router** — URL-based pages (/dashboard, /corpus, /health, /audit) |
+
+---
+
+## 13. EV-004 delta — Admin dashboard bilingual UI + shared frontend packages (en/es)
+
+**Date:** 2026-06-13 (updated)  
+**Cycle:** EV-004  
+**Feature:** F31 — Admin UI bilingual (en/es) + shared frontend component library  
+**Apps:** `data-management-frontend`, `chat-rag-frontend` (both consume shared packages)
+
+### Executive summary
+
+Operators use the **data-management-frontend** admin SPA (Dashboard, Corpus, Health, Audit) with **English-only UI chrome** today. ChatRAG already ships **en/es** via `LocaleProvider`, `LanguageToggle`, and `i18n/messages.ts` with `localStorage` key `vecinita.locale` ([Repo: `apps/chat-rag-frontend/src/`]). EV-004 adds the same operator experience to the admin dashboard: **full static UI translation**, sidebar **EN/ES toggle** beside `ThemeToggle`, and **shared locale persistence** across both browser apps.
+
+EV-004 also introduces **two workspace TypeScript packages** under `packages/` (per ADR-012 dependency rule):
+
+| Package | npm name | Role |
+|---------|----------|------|
+| `packages/frontend-i18n` | `vecinita-frontend-i18n` | Locale detection, storage, namespaced `t()` messages (`chat.*`, `admin.*`, `shared.*`) |
+| `packages/frontend-ui` | `vecinita-frontend-ui` | Shared React components — `LanguageToggle`, `LocaleProvider`, tag chips/badges, pagination controls |
+
+Both frontends migrate off duplicated app-local i18n/UI primitives. App-specific pages (ChatPanel, AdminLayout, bulk dialogs) remain in each app; only cross-app UI patterns move to the shared library.
+
+No backend or API contract changes are required. Corpus document titles, tag labels, URLs, audit JSON payloads, and API error/status enums remain in source form (same as ChatRAG corpus browse).
+
+### Template selection (unchanged)
+
+| Field | Value |
+|-------|--------|
+| Template ID | `api` + `worker` multi-app (no change) |
+| Confidence | high |
+| Service name | `vecinita` |
+
+### Multi-app topology & connectivity
+
+| App | Browser-facing | API origins | i18n impact |
+|-----|----------------|-------------|-------------|
+| data-management-frontend | Yes (DO static) | internal-write-api, data-mgmt Modal proxy | **New** — client-only locale |
+| chat-rag-frontend | Yes | chat-rag-backend | **Existing** — migrate to shared packages |
+
+**Browser integration risk:** None for CORS/BFF. Locale is `localStorage` + `document.documentElement.lang`; both frontends on different DO hosts still share `vecinita.locale` when operators use the same browser profile.
+
+### Shared package architecture
+
+Per ADR-012: `packages/*` must not import `apps/*`; both frontends import shared packages via npm workspace (`file:` or root `workspaces` field).
+
+```
+packages/frontend-i18n/     ← pure TS (no React); locale utils + message tables
+packages/frontend-ui/       ← React + Tailwind; depends on frontend-i18n
+apps/chat-rag-frontend/     ← imports both; adds Tailwind to consume frontend-ui
+apps/data-management-frontend/  ← imports both; already Tailwind/shadcn
+```
+
+**⚠️ Assumed (R35–R38):** Two-package split; Tailwind-based `frontend-ui`; ChatRAG adds Tailwind for shared component consumption; npm workspaces at repo root.
+
+### Reference implementation (ChatRAG)
+
+| Piece | Location |
+|-------|----------|
+| Locale type + detect + storage | [Repo: `apps/chat-rag-frontend/src/hooks/useLocale.types.ts`] |
+| React context | [Repo: `apps/chat-rag-frontend/src/context/LocaleContext.tsx`] |
+| Message tables + `t()` | [Repo: `apps/chat-rag-frontend/src/i18n/messages.ts`] |
+| Toggle UI | [Repo: `apps/chat-rag-frontend/src/components/LanguageToggle.tsx`] |
+| Regression tests | [Repo: `apps/chat-rag-frontend/src/test/test_bug_2026_06_05_language_toggle_i18n.test.tsx`] |
+
+**Default locale:** `detectBrowserLocale()` — `en` if browser starts with `en`, `es` if starts with `es`, else **ES** (not EN).
+
+### Admin UI string inventory (translate in F31)
+
+Static English strings identified in `apps/data-management-frontend/src/` (approx. **120+** user-visible strings):
+
+| Area | Files | Examples |
+|------|-------|----------|
+| Navigation | `AdminLayout.tsx` | Dashboard, Corpus, Health, Audit Log, Open navigation |
+| Dashboard | `DashboardPage.tsx` | Total Documents, Top Served Documents, Loading…, Failed to load dashboard |
+| Corpus | `CorpusPage.tsx`, `JobForm.tsx`, `CorpusList.tsx` | Ingest URLs, Manage tags, bulk toolbar, delete confirm |
+| Document admin | `DocumentAdmin.tsx`, `DocumentHistory.tsx` | Chunk tags, LLM re-tag, save status messages |
+| Bulk dialogs | `BulkDeleteDialog.tsx`, `BulkTagDialog.tsx`, `BulkMetadataDialog.tsx` | Confirm/cancel, success/failure summaries |
+| Health | `HealthPage.tsx` | Refresh, Last checked, Failed to load health |
+| Audit | `AuditPage.tsx` | Filters, Event type, Expand/Collapse, pagination text |
+| Chrome | `ThemeToggle.tsx` | Toggle theme |
+
+**Not translated (R30):** document `title`, tag `label`, `url`, audit `event_type` / `entity_type`, health `overall` / `service.status` API values, job `status` enums, `error_message` from APIs.
+
+### Shared component inventory (extract to `packages/frontend-ui`)
+
+| Component | ChatRAG source | Admin source | Shared behavior |
+|-----------|----------------|--------------|-----------------|
+| `LocaleProvider` | `context/LocaleContext.tsx` | *(new)* | React context; sets `document.documentElement.lang`; reads/writes `vecinita.locale` |
+| `LanguageToggle` | `components/LanguageToggle.tsx` | *(new in AdminLayout footer)* | EN/ES pill toggle; uses `t(locale, "shared.languageGroupLabel")` |
+| `TagFilterChips` | `components/TagFilterChips.tsx` | — | Interactive filter chips; locale-filtered tag facets |
+| `TagBadge` | — | `components/TagBadge.tsx` | Read-only tag pill; LLM vs manual color variant |
+| `PaginationControls` | inline in `CorpusBrowse.tsx` | inline in `AuditPage.tsx` | Previous/Next + page summary via `t(locale, "shared.pagination", ...)` |
+| `ThemeToggle` | — | `components/ThemeToggle.tsx` | System-preference light/dark toggle; bilingual labels via `frontend-i18n` (02-verify-plan S_EV4.L2 denied — extract to shared package) |
+
+**Not extracted in EV-004** (app-specific): `ChatPanel`, `CorpusBrowse` page shell, `AdminLayout`, shadcn `ui/*` primitives, bulk dialogs.
+
+**Styling note:** `frontend-ui` ships Tailwind-styled components. ChatRAG adds Tailwind + PostCSS to scan `packages/frontend-ui` (R36). Admin already uses Tailwind; may drop local `TagBadge` after migration.
+
+### Cross-reference matrix
+
+| Topic | ChatRAG (today) | Admin (today) | EV-004 target |
+|-------|-----------------|---------------|---------------|
+| UI locale toggle | Header EN/ES | None | Shared `LanguageToggle` in header (ChatRAG) + sidebar footer (admin) |
+| `vecinita.locale` storage | Yes | No | Shared (R28) via `frontend-i18n` |
+| Message source | App-local `i18n/messages.ts` | Hardcoded English | Shared `packages/frontend-i18n` (R29) |
+| React locale context | App-local `LocaleContext` | None | Shared `packages/frontend-ui` `LocaleProvider` (R37) |
+| Tag UI | `TagFilterChips` (CSS) | `TagBadge` (Tailwind) | Unified in `frontend-ui` (R37) |
+| Pagination | CorpusBrowse inline | AuditPage inline | Shared `PaginationControls` (R37) |
+| `document.documentElement.lang` | Yes | No | Yes |
+| Corpus content language | Unchanged | Unchanged | Unchanged |
+| npm workspaces | Per-app lockfiles only | Per-app lockfiles only | Root workspaces linking apps → packages (R38) |
+
+### Data & asset requirements
+
+No new external datasets, model weights, or API assets. New workspace packages: `packages/frontend-i18n` (TypeScript only) and `packages/frontend-ui` (React + Tailwind). CI frontend matrix must install/build shared packages before app builds.
+
+### Unresolved gaps (EV-004 → 01-requirements / 04-tech-plan)
+
+1. **ChatRAG Tailwind adoption depth** — Minimal (shared-package scan only) vs full App.css → Tailwind migration for ChatRAG-specific layout.
+2. **Message key namespaces** — Flat keys with prefixes (`chat.appTitle`, `admin.navDashboard`, `shared.loading`) in one `t()` table vs nested objects.
+3. **Vitest coverage** — Mirror ChatRAG repro tests for admin (`test_admin_language_toggle_i18n.test.tsx`); add package-level tests in `packages/frontend-ui`.
+4. **Date/time formatting** — `toLocaleString()` without explicit locale today; may follow UI locale in follow-up.
+5. **CI workspace wiring** — Root `package.json` workspaces vs `file:../../packages/frontend-i18n` in each app; lockfile strategy (single root lock vs per-app).
+6. **shadcn in shared package** — Re-export shadcn primitives from `frontend-ui` vs keep shadcn admin-local only.
+
+### Resolution Log (EV-004)
+
+| ID | Category | Issue | Resolution |
+|----|----------|-------|------------|
+| R28 | Decision | Locale persistence across apps | **Shared `vecinita.locale`** — same detect/fallback as ChatRAG |
+| R29 | Decision | i18n code location | **Shared `packages/frontend-i18n`** — both frontends import locale utils + messages; see ADR-019 |
+| R30 | Ambiguity | Dynamic / API-sourced strings | **UI chrome only** — match ChatRAG; corpus titles, tags, audit payloads unchanged |
+| R31 | Decision | Toggle placement | **Sidebar footer** (desktop) + mobile sheet footer, beside `ThemeToggle` |
+| R32 | Decision | Pipeline routing | **EV-004 evolve cycle** — 00-context → 01-requirements delta → 04-tech-plan → 07-build |
+| R33 | Decision | Context brief handling | **Partial update** — §13 only; prior sections unchanged |
+| R34 | Decision | Context brief rerun | **⚠️ Assumed: Update §13** — extend EV-004 with shared component library (user request 2026-06-13) |
+| R35 | Decision | Package structure | **⚠️ Assumed: Two packages** — `frontend-i18n` + `frontend-ui`; see ADR-020 |
+| R36 | Decision | Shared component styling | **⚠️ Assumed: Tailwind in `frontend-ui`** — ChatRAG adds Tailwind to consume shared styled components |
+| R37 | Decision | Component extraction scope | **⚠️ Assumed: i18n core + LanguageToggle + LocaleProvider + TagBadge/TagFilterChips + PaginationControls** |
+| R38 | Decision | npm workspace wiring | **⚠️ Assumed: Root npm workspaces** linking both apps to `packages/frontend-*` |

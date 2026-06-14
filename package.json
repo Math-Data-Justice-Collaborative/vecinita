@@ -1,0 +1,15 @@
+{
+  "name": "vecinita",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/frontend-*"
+  ],
+  "scripts": {
+    "test:frontend-i18n": "npm test -w vecinita-frontend-i18n",
+    "test:frontend-ui": "npm test -w vecinita-frontend-ui"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.8"
+  }
+}

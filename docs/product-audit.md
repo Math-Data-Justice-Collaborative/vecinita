@@ -285,71 +285,78 @@ All derived directly from user interview (RD-034–RD-052):
 
 ---
 
-## EV-004 delta (2026-06-13) — F31 per-component coverage gate
+## EV-004 Delta Audit (2026-06-13)
 
-**Partial re-run:** EV-004 F31 — 11 statements, 3 contradictions resolved, 1 source doc updated.
+### Scope
 
-### Document inventory (delta)
+Feature F31: Admin + shared frontend bilingual UI (en/es); workspace packages
+`frontend-i18n` and `frontend-ui`; ChatRAG migration to shared packages + full Tailwind.
 
-| # | Document | Statements | Status |
-|---|----------|------------|--------|
-| 1 | Feature List | 3 | Pass |
-| 2 | Test Plan | 3 | Pass |
-| 3 | Acceptance Criteria | 3 | Pass |
-| 4 | ADR-019 | 2 | Pass (reference) |
+### Auto-approved (high confidence): 15 statements
 
-Skipped (already audited in prior passes): spec, user-journeys, config-spec, deployment-integration.
+All derived directly from user interview (RD-053–RD-066, RD-067 partial):
 
-### Pass 1 — Auto-approved (high confidence)
+| Stmt ID | Feature | Statement | Source |
+|---------|---------|-----------|--------|
+| S-EV4.1 | F31 | Admin full en/es UI + shared packages; migrate ChatRAG; no backend changes | RD-053 |
+| S-EV4.2 | F31 | UI chrome only — corpus titles, tags, URLs, audit JSON, API errors unchanged | RD-054 |
+| S-EV4.3 | F31 | Two packages: pure TS `frontend-i18n` + React `frontend-ui` | RD-055 |
+| S-EV4.4 | F31 | ChatRAG full Tailwind layout migration in EV-004 | RD-056 |
+| S-EV4.5 | F31 | Root npm workspaces for `apps/*` + `packages/frontend-*` | RD-057 |
+| S-EV4.6 | F31 | Dot-prefixed message keys: `chat.*`, `admin.*`, `shared.*` | RD-058 |
+| S-EV4.7 | F31 | Audit/dashboard timestamps follow UI locale via `Intl` | RD-059 |
+| S-EV4.8 | F31 | Minimal shadcn re-exports from `frontend-ui` | RD-060 |
+| S-EV4.9 | F31 | Language toggle in sidebar footer beside theme control | RD-061 |
+| S-EV4.10 | F31 | High priority — ship before next deploy | RD-062 |
+| S-EV4.11 | F31 | UJ-022 for admin language toggle | RD-063 |
+| S-EV4.12 | F31 | Vitest mirror ChatRAG language-toggle tests | RD-064 |
+| S-EV4.13 | F31 | No API contract changes — client-only i18n | RD-065 |
+| S-EV4.14 | F31 | Deploy: build packages → redeploy both frontends; no API/Modal | RD-066 |
+| S-EV4.15 | F31 | Shared `localStorage` key `vecinita.locale` across both frontends | RD-053, ADR-019 |
 
-**Count: 8** — derived directly from RD-053–RD-060 (EV-004 interview).
-
-| Stmt ID | Statement (summary) | Source |
-|---------|---------------------|--------|
-| S-EV4.1 | ≥95% line + ≥95% branch per component | RD-053 |
-| S-EV4.2 | Twelve gates: `packages/<name>` + `apps/<name>` | RD-054 |
-| S-EV4.3 | Unit tests only (`tests/unit` + Vitest) | RD-055 |
-| S-EV4.4 | Blocking CI on any component below threshold | RD-056 |
-| S-EV4.5 | Exclusions: `__init__.py`, alembic, test paths | RD-057 |
-| S-EV4.6 | Modal worker code in `apps/data-management-backend` gate | RD-058 |
-| S-EV4.7 | Single milestone — all twelve before merge; no grandfathering | RD-059 |
-| S-EV4.8 | Frontends same 95% line + branch as backends | RD-060 |
-
-### Pass 2 — User review (medium/low)
+### Reviewed (medium / low)
 
 | Stmt ID | Confidence | Verdict | Action |
 |---------|------------|---------|--------|
-| S-EV4.9 | Medium | approved | Baseline 61.0% lines / ~42.9% branches (2026-06-13) |
-| S-EV4.10 | Medium | approved | Gate via `make test-unit-coverage` + summary script (exit non-zero pending) |
-| S-EV4.11 | Medium | approved | Out of scope: integration/e2e, scripts/, infra/, OpenAPI clients |
-| S-EV4.12 | Low | approved | Waive UJ requirement for F31 — AC-Q1–Q3 suffice (cross-cutting CI) |
-| S-EV4.13 | Low | approved | Waive dedicated TC-xxx — metrics table + CI step + AC-Q sufficient |
-| S-EV4.14 | Low | modified | Updated `execution-plan.md` Phase 3 gate: 80% → 95% per-component (ADR-019) |
+| S-EV4.M1 | Medium | approved | ~120+ admin static strings scope retained |
+| S-EV4.M2 | Medium | approved | Full ChatRAG Tailwind migration confirmed in scope |
+| S-EV4.M3 | Medium | approved | Typed message keys + runtime dev fallback |
+| S-EV4.C3 | Medium | approved | H4/H5 regression at deploy — added AC-F7, test-plan note |
+| S-EV4.L1 | Low | approved | Non-en/es browser default → ES (match ChatRAG) |
+| S-EV4.L2 | Low | **denied** | ThemeToggle **extracted** to `frontend-ui` — RD-067; ADR-019/020/spec updated |
+
+### Contradictions resolved
+
+| ID | Issue | User verdict | Resolution |
+|----|-------|-------------|------------|
+| S-EV4.C1 | Feature matrix missing F30, F31 | **Fix matrix** | Added F30/F31 rows to feature-list matrix |
+| S-EV4.C2 | Journey index / E2E table missing UJ-020, UJ-021 | **Fix index** | Added UJ-020/UJ-021 to user-journeys index + test-plan E2E table |
 
 ### Consistency check (EV-004)
 
 | Check | Result | Action |
 |-------|--------|--------|
-| Feature ↔ Spec | **Pass** | F31 in feature-list; ADR-019 canonical |
-| Feature ↔ Journey | **Pass (waived)** | No UJ for F31 — user approved waiver (cross-cutting quality) |
-| Journey ↔ Test | **N/A** | No journey for F31 |
-| Feature ↔ Test | **Pass (waived)** | AC-Q + metrics + CI step 5; no TC-xxx required |
-| Feature ↔ Acceptance | **Pass** | AC-Q1–Q3 cover F31 |
-| Spec ↔ Config | **Pass** | Exclusions reference pyproject/vitest configs |
-| Cross-doc naming | **Pass** | Twelve components consistent across feature-list, test-plan, ADR-019 |
-| Scope boundaries | **Pass** | Supersedes ≥80% unit target; retrieval ≥80% eval benchmark unchanged |
-| execution-plan drift | **Fixed** | Phase 3 gate updated to 95% per-component |
+| Feature ↔ Spec | **Pass** | F31 maps to `frontend-i18n`, `frontend-ui`, both frontends |
+| Feature ↔ Journey | **Pass** (after fix) | UJ-022 for F31; UJ-020/021 index restored |
+| Journey ↔ Test | **Pass** (after fix) | TC-065–TC-069 + TC-062–064 for UJ-020/021 |
+| Feature ↔ Test | **Pass** | TC-065–TC-071 cover F31 |
+| Feature ↔ Acceptance | **Pass** | AC-F1–AC-F7 for F31 |
+| Spec ↔ Config | **Pass** | Browser locale in config-spec §Browser locale |
+| Test ↔ Connectivity | **Pass** (after fix) | AC-F7 + test-plan H4/H5 regression note |
+| Cross-doc naming | **Pass** | `vecinita.locale`, package names consistent |
+| Scope boundaries | **Pass** | No API/backend changes; R30 translation boundary |
+| Template conformance | **Pass** | npm workspaces + DO static frontends |
 
 ### EV-004 summary
 
 | Metric | Count |
 |--------|-------|
-| New statements audited | 11 |
-| Auto-approved (high) | 8 |
+| New statements audited | 21 |
+| Auto-approved (high) | 15 |
 | User-approved (medium/low) | 5 |
-| Modified | 1 |
-| Contradictions found | 3 |
-| Contradictions resolved | 3 |
-| Source documents updated | 1 (`execution-plan.md`) |
+| Denied / modified | 1 (ThemeToggle → shared package) |
+| Contradictions found | 2 |
+| Contradictions resolved | 2 |
+| Source documents updated | 10 |
 
-**Next step (EV-004 routing):** 04-tech-plan — gate script, CI wiring, Vitest thresholds, test backlog per component.
+**Next step (EV-004 routing):** [05-verify-tech](.cursor/skills/05-verify-tech/SKILL.md) complete — see `docs/tech-audit.md` §EV-004 delta (2026-06-13) for task-count reconciliation (TV-041–TV-052).

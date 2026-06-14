@@ -1,7 +1,7 @@
 # Data Management Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-24 (EV-001 tagging schema)
+> **Last updated**: 2026-06-13 (EV-004 F31 workspace packages)
 
 ## Overview
 
@@ -27,6 +27,10 @@ Vecinita stores **public corpus data only** in DO Postgres: documents, chunks, 3
 | D6 | FastEmbed model weights | model_weights | Hugging Face → Modal volume | HF token if gated | Modal embed |
 | D8 | Seed tag vocabulary | config_fixture | `data/fixtures/tags/seed_tags.json` | none | TC-041, F20 |
 | D9 | Tagged corpus eval | corpus_fixture | `data/fixtures/corpus/tagged/` | none | TC-040, TC-044 |
+| D10 | Frontend i18n messages | workspace_package | `packages/frontend-i18n` | none | TC-067, F31 |
+| D11 | Frontend UI components | workspace_package | `packages/frontend-ui` | none | TC-068, F31 |
+
+**EV-004 note:** D10/D11 are repo-local TypeScript packages (no external download). CI must build them before frontend Vitest matrix jobs.
 
 ## Schema (allowed tables)
 

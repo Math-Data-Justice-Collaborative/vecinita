@@ -38,3 +38,4 @@ dist/
 htmlcov/
 coverage/
 *.env
+.coverage-data/data-management.json

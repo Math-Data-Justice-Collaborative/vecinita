@@ -1,6 +1,7 @@
 """Cursor afterFileEdit hook: auto-fix formatting and lint via Make targets.
 
-Runs scoped `make format-* lint-fix-*` targets when a formattable source file is edited.
+Python: `make format-py lint-fix-py`.
+Frontend apps/packages: scoped Prettier + ESLint --fix for the edited workspace.
 Skips when CI holds the shared repo lock to avoid npm ci corruption. Always exits 0.
 """
 
@@ -13,56 +14,33 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from hook_paths import (
+    find_repo_root,
+    format_lint_targets,
+    frontend_format_lint_workspace,
+)
 from repo_make_lock import repo_lock
 
-FORMATTABLE_SUFFIXES = frozenset(
-    {
-        ".py",
-        ".pyi",
-        ".ts",
-        ".tsx",
-        ".js",
-        ".jsx",
-        ".css",
-        ".scss",
-        ".json",
-        ".md",
-        ".html",
-        ".yaml",
-        ".yml",
-    }
-)
-SOURCE_ROOTS = frozenset({"apps", "packages", "tests"})
-FRONTENDS = frozenset({"chat-rag-frontend", "data-management-frontend"})
 
-
-def find_repo_root(start: Path) -> Path | None:
-    p = start if start.is_dir() else start.parent
-    for candidate in [p, *p.parents]:
-        if (candidate / "pyproject.toml").is_file() or (candidate / ".git").is_dir():
-            return candidate
-    return None
-
-
-def make_targets(repo: Path, file_path: Path) -> list[str]:
+def run_frontend_format_lint(
+    repo: Path, workspace: str
+) -> subprocess.CompletedProcess[str] | None:
+    shell_cmd = (
+        "bash scripts/npm_workspaces.sh install && "
+        f"bash scripts/npm_workspaces.sh run format {workspace} && "
+        f"npm exec -w {workspace} -- eslint src --fix"
+    )
+    cmd = ["bash", "scripts/npm_with_lock.sh", "bash", "-eu", "-o", "pipefail", "-c", shell_cmd]
     try:
-        rel = file_path.resolve().relative_to(repo.resolve())
-    except ValueError:
-        return []
-
-    parts = rel.parts
-    if not parts or parts[0] not in SOURCE_ROOTS:
-        return []
-    if file_path.suffix not in FORMATTABLE_SUFFIXES:
-        return []
-
-    if file_path.suffix in {".py", ".pyi"} and parts[0] in {"apps", "packages", "tests"}:
-        return ["format-py", "lint-fix-py"]
-
-    if len(parts) >= 2 and parts[0] == "apps" and parts[1] in FRONTENDS:
-        return ["format-fe", "lint-fix-fe"]
-
-    return []
+        return subprocess.run(
+            cmd,
+            cwd=repo,
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return None
 
 
 def main() -> int:
@@ -83,8 +61,10 @@ def main() -> int:
         print("{}")
         return 0
 
-    targets = make_targets(repo, file_path)
-    if not targets:
+    targets = format_lint_targets(repo, file_path)
+    workspace = frontend_format_lint_workspace(repo, file_path)
+
+    if not targets and workspace is None:
         print("{}")
         return 0
 
@@ -93,20 +73,38 @@ def main() -> int:
             print("{}")
             return 0
 
-        try:
-            proc = subprocess.run(
-                ["make", *targets],
-                cwd=repo,
-                capture_output=True,
-                text=True,
-                timeout=300,
-            )
-        except (FileNotFoundError, subprocess.TimeoutExpired):
-            print("{}")
-            return 0
+        outputs: list[str] = []
+        failed = False
 
-    if proc.returncode != 0:
-        output = "\n".join(part.strip() for part in (proc.stdout, proc.stderr) if part.strip())
+        if targets:
+            try:
+                proc = subprocess.run(
+                    ["make", *targets],
+                    cwd=repo,
+                    capture_output=True,
+                    text=True,
+                    timeout=300,
+                )
+            except (FileNotFoundError, subprocess.TimeoutExpired):
+                print("{}")
+                return 0
+            if proc.returncode != 0:
+                failed = True
+                outputs.append(proc.stdout)
+                outputs.append(proc.stderr)
+
+        if workspace is not None:
+            proc = run_frontend_format_lint(repo, workspace)
+            if proc is None:
+                print("{}")
+                return 0
+            if proc.returncode != 0:
+                failed = True
+                outputs.append(proc.stdout)
+                outputs.append(proc.stderr)
+
+    if failed:
+        output = "\n".join(part.strip() for part in outputs if part and part.strip())
         result = {
             "additional_context": (
                 "[make format/lint-fix] Auto-fix failed. Remaining issues:\n" + output

@@ -57,11 +57,15 @@
 - [ ] **AC-E10**: CORS preflight passes for all new EV-002 endpoints from admin frontend origin (TC-060, H4). — H0c met; H4 live pending staging
 - [x] **AC-E11**: 3 new tables (audit_log, document_versions, document_serving_stats) in allow-list; privacy tests pass. — 11-verify-impl
 
-### EV-004 — Unit coverage gate (F31)
+### EV-004 — Shared frontend i18n/UI + admin bilingual (F31)
 
-- [ ] **AC-Q1**: Each of twelve components (`packages/*`, `apps/*`) reaches **≥95% line** and **≥95% branch** coverage in unit tests (`make test-unit-coverage`). — baseline 2026-06-13: 61% combined lines; none at 95% branch
-- [ ] **AC-Q2**: CI fails when any component is below either threshold (blocking gate). — implementation pending (ADR-019)
-- [ ] **AC-Q3**: Coverage exclusions match ADR-019 (`__init__.py`, alembic, test paths only). — verify at implementation
+- [ ] **AC-F1**: Admin UI displays all static chrome in EN and ES via sidebar language toggle (UJ-022, TC-065). — pending build
+- [ ] **AC-F2**: Locale persists in `vecinita.locale` across reload; ChatRAG and admin share storage in same browser (UJ-022, TC-066). — pending build
+- [ ] **AC-F3**: Shared packages (`frontend-i18n`, `frontend-ui`) consumed by both frontends; ChatRAG app-local i18n removed (TC-069). — pending build
+- [ ] **AC-F4**: Audit/dashboard timestamps format with active UI locale (UJ-022, TC-070). — pending build
+- [ ] **AC-F5**: Corpus titles, tag labels, URLs, audit payloads, API errors remain untranslated (R30, TC-071). — pending build
+- [ ] **AC-F6**: No API or CORS **policy** changes required for F31 deploy. — spec confirmed
+- [ ] **AC-F7**: H4/H5 connectivity regression passes after redeploying both frontends (bundle wiring + CORS preflight; no new routes). — pending 13-deploy-smoke
 
 ## Quantitative benchmarks
 

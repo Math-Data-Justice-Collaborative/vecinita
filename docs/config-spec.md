@@ -1,7 +1,7 @@
 # Configuration Specification
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-26 (EV-002)
+> **Last updated**: 2026-06-13 (EV-004 F31)
 
 ## Precedence
 
@@ -72,6 +72,20 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VITE_VECINITA_ADMIN_API_URL` | string | — | Yes | Modal ASGI or gateway URL for jobs |
 | `VITE_VECINITA_CORPUS_API_URL` | string | — | Yes (admin) | Internal write API base for corpus/tag admin |
 | `VITE_VECINITA_CORPUS_API_KEY` | string | — | Yes (admin build) | Bearer token for tag/chunk admin routes |
+
+### Browser locale (EV-004 F31 — not server env)
+
+| Key | Storage | Default | Values | Description |
+|-----|---------|---------|--------|-------------|
+| `vecinita.locale` | `localStorage` | Browser-detected | `en` \| `es` | Shared UI locale for ChatRAG + admin; `detectBrowserLocale()` when unset |
+
+**Detection rules:** `navigator.language` starting with `en` → `en`; starting with `es` → `es`; otherwise **ES** (matches ChatRAG).
+
+**HTML:** `LocaleProvider` sets `document.documentElement.lang` to active locale.
+
+**Date/time:** Admin audit timestamps and dashboard dates use UI locale in `Intl.DateTimeFormat` / `toLocaleString()` (F31).
+
+<!-- No VITE_* locale vars — i18n is client-only; no CORS impact -->
 
 <!-- TP-019 / TS-EV002-C01: Health dashboard uses backend aggregator at GET /internal/v1/health/all
      (via VITE_VECINITA_CORPUS_API_URL). Frontend does NOT poll services directly. -->

@@ -79,10 +79,12 @@ Chronological verdicts from product plan verification. Auto-approved entries tra
 
 | Timestamp | Stmt ID | Verdict | Notes |
 |-----------|---------|---------|-------|
-| 2026-06-13 | S-EV4.1–S-EV4.8 | auto-approved | F31 scope from RD-053–RD-060 / ADR-019 |
-| 2026-06-13 | S-EV4.9 | approved | Baseline 61.0% lines / ~42.9% branches (2026-06-13) |
-| 2026-06-13 | S-EV4.10 | approved | Gate command: `make test-unit-coverage` + summary script |
-| 2026-06-13 | S-EV4.11 | approved | Out-of-scope list for F31 (integration/e2e, scripts/, infra/, OpenAPI) |
-| 2026-06-13 | S-EV4.12 | approved | Waive UJ requirement for F31 — AC-Q1–Q3 suffice |
-| 2026-06-13 | S-EV4.13 | approved | Waive dedicated TC-xxx — metrics + CI step + AC-Q sufficient |
-| 2026-06-13 | S-EV4.14 | modified | execution-plan Phase 3 gate: 80% → 95% per-component (ADR-019) |
+| 2026-06-13 | S-EV4.1–S-EV4.15 | auto-approved | F31 scope from RD-053–RD-066 / ADR-019, ADR-020 |
+| 2026-06-13 | S-EV4.M1 | approved | ~120+ admin static strings scope |
+| 2026-06-13 | S-EV4.M2 | approved | Full ChatRAG Tailwind migration in EV-004 |
+| 2026-06-13 | S-EV4.M3 | approved | Typed i18n keys + runtime dev fallback |
+| 2026-06-13 | S-EV4.C1 | fixed | Feature matrix: added F30, F31 rows |
+| 2026-06-13 | S-EV4.C2 | fixed | Journey index + test-plan E2E table: UJ-020, UJ-021 |
+| 2026-06-13 | S-EV4.C3 | approved | H4/H5 regression at deploy — AC-F7 added |
+| 2026-06-13 | S-EV4.L1 | approved | Non-en/es browser default → ES |
+| 2026-06-13 | S-EV4.L2 | denied | ThemeToggle extracted to `frontend-ui` — RD-067 |

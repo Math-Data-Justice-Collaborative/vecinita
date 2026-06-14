@@ -1,7 +1,7 @@
 # Deployment Integration Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-27 (EV-002 admin dashboard delta)
+> **Last updated**: 2026-06-13 (EV-004 F31 delta)
 
 ## Overview
 
@@ -81,6 +81,30 @@ New write API routes (admin UI via `VITE_VECINITA_CORPUS_API_URL` + Bearer):
 4. `data-management-frontend` (admin UI overhaul)
 
 Modal apps **do not** require redeploy for EV-002 (health aggregator on DO write API per ADR-017).
+
+### EV-004 — Shared frontend i18n/UI + admin bilingual (F31)
+
+**Scope:** Client-only locale; no new backend env vars, secrets, or CORS changes.
+
+| Artifact | Platform | Notes |
+|----------|----------|-------|
+| `packages/frontend-i18n` | npm workspace | Pure TS; linked via workspace source imports in CI |
+| `packages/frontend-ui` | npm workspace | React + Tailwind + minimal shadcn; bundled via Vite from source |
+| chat-rag-frontend | DO static | Tailwind migration + shared package imports |
+| data-management-frontend | DO static | LocaleProvider + ~120+ translated strings |
+
+**Monorepo wiring:** Root `package.json` npm workspaces for `apps/*` and `packages/frontend-*` (R38). CI frontend matrix installs from root or builds packages before app `npm ci`.
+
+**Browser locale:** `localStorage` key `vecinita.locale` — shared across both DO static origins when operator uses same browser profile; no cross-origin cookie.
+
+**Redeploy order (EV-004):**
+
+1. CI links shared packages via npm workspaces (source imports — no separate `dist/` build per TP-031)
+2. Deploy **chat-rag-frontend** and **data-management-frontend** in the same release window (TP-038)
+
+No redeploy required: chat-rag-backend, internal-write-api, Modal apps, Postgres.
+
+**Post-deploy validation (EV-004):** Run H4/H5 connectivity regression on both frontend URLs (AC-F7) — no new API routes, but bundle wiring must include shared workspace packages.
 
 ## Entrypoints & triggers
 

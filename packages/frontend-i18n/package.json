@@ -1,0 +1,25 @@
+{
+  "name": "vecinita-frontend-i18n",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.16.0",
+    "eslint": "^9.16.0",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.8.4",
+    "typescript": "~5.6.3",
+    "typescript-eslint": "^8.18.0",
+    "vitest": "^4.1.8"
+  }
+}

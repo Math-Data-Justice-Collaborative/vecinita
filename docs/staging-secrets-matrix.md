@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita staging  
 > **Source**: `docs/deployment-integration.md` §Secrets, ADR-007, ADR-010  
-> **Last updated**: 2026-05-27 (EV-002 — reconciled health env names with runtime code)
+> **Last updated**: 2026-06-13 (EV-004 — no new secrets; existing VITE/CORS rows sufficient per AC-F6)
 
 Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — never commit to git.
 
@@ -96,3 +96,7 @@ See [.cursor/skills/connectivity-gates.md](../.cursor/skills/connectivity-gates.
 2. Update matching Modal secret.  
 3. Redeploy affected apps (`doctl apps create-deployment`, `modal deploy`).  
 4. Re-run `bash scripts/deploy/staging_smoke.sh`.
+
+## EV-004 (F31) — no new secrets
+
+EV-004 is client-only i18n/UI. **No new environment variables** or CORS policy changes (AC-F6). Existing `VITE_*` rows for both DO static frontends and `VECINITA_CORS_ORIGINS` on backends remain sufficient. Re-run H4/H5 after redeploying both frontends (AC-F7).
