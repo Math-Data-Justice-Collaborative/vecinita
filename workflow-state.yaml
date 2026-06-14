@@ -292,11 +292,11 @@ stages:
     status: completed
     started: "2026-06-12"
     completed: "2026-06-13"
-    last_cycle: PRR-007
+    last_cycle: PRR-008
   19-address-pr-review:
-    status: in_progress
+    status: completed
     started: "2026-06-13"
-    completed: null
+    completed: "2026-06-13"
     last_cycle: PRM-005
   gather-context:
     status: skipped
@@ -984,6 +984,26 @@ pr_review_cycles:
       - path: .cursor/skills/18-pr-review/checklist.md
         note: checklist source
     gh_review_url: null
+  - id: PRR-008
+    pr_number: 62
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/62
+    title: "[M32] Workspace scaffold"
+    status: completed
+    started: "2026-06-13"
+    completed: "2026-06-13"
+    head_ref: feat/M32-workspace-scaffold
+    base_ref: main
+    head_sha: 4a7cf3d82be60e9677217d0262484bed59098bbf
+    verdict: COMMENT
+    blockers: 0
+    advisories: 3
+    praise: 4
+    ci_status: partial
+    linked_remediation_cycle_id: PRM-005
+    subagents:
+      bugbot: "coverage job npm install gap"
+      security_review: pass
+    note: "Re-review after PRM-005; python+frontend green, coverage red"
 
 pr_remediation_cycles:
   - id: PRM-001
@@ -1244,12 +1264,13 @@ pr_remediation_cycles:
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/62
     linked_review_cycle_id: PRR-007
     title: "[M32] Workspace scaffold"
-    status: in_progress
+    status: completed
     started: "2026-06-13"
-    completed: null
+    completed: "2026-06-13"
     head_ref: feat/M32-workspace-scaffold
     base_ref: main
-    ci_status: not_pushed
+    ci_status: partial
+    head_sha: 4a7cf3d82be60e9677217d0262484bed59098bbf
     counts:
       fixed: 3
       deferred: 1
@@ -1296,7 +1317,7 @@ pr_remediation_cycles:
       - 91e7bab
       - f1bb79b
     follow_up:
-      pr_review_rerun: offered
+      pr_review_rerun: completed
 
 agents:
   repo_researcher:
