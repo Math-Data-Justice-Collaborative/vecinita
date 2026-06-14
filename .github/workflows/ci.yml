@@ -138,16 +138,10 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: |
-            apps/chat-rag-frontend/package-lock.json
-            apps/data-management-frontend/package-lock.json
+          cache-dependency-path: package-lock.json
 
-      - name: Install frontend dependencies (chat-rag-frontend)
-        working-directory: apps/chat-rag-frontend
-        run: npm ci
-
-      - name: Install frontend dependencies (data-management-frontend)
-        working-directory: apps/data-management-frontend
+      - name: Install workspace dependencies
+        working-directory: .
         run: npm ci
 
       - name: Unit coverage gate (F31 / ADR-019)
