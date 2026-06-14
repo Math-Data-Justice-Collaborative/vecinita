@@ -292,12 +292,12 @@ stages:
     status: completed
     started: "2026-06-12"
     completed: "2026-06-13"
-    last_cycle: PRR-006
+    last_cycle: PRR-007
   19-address-pr-review:
-    status: completed
+    status: in_progress
     started: "2026-06-13"
-    completed: "2026-06-13"
-    last_cycle: PRM-004
+    completed: null
+    last_cycle: PRM-005
   gather-context:
     status: skipped
     note: "Superseded by 00-context for this project; key reserved for doc-planner path"
@@ -962,6 +962,28 @@ pr_review_cycles:
       bugbot: skipped
       security_review: skipped
     note: "Re-review after PRM-003; all checks green; merge-ready"
+  - id: PRR-007
+    pr_number: 62
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/62
+    title: "[M32] Workspace scaffold"
+    status: completed
+    started: "2026-06-13"
+    completed: "2026-06-13"
+    head_ref: feat/M32-workspace-scaffold
+    base_ref: main
+    head_sha: 0fbafee3afd859734eea11f971d2829c59239655
+    verdict: COMMENT
+    blockers: 0
+    advisories: 4
+    praise: 4
+    ci_status: success
+    subagents:
+      bugbot: "completed (3 advisories triaged)"
+      security_review: "manual_pass (subagent diff unavailable)"
+    artifacts:
+      - path: .cursor/skills/18-pr-review/checklist.md
+        note: checklist source
+    gh_review_url: null
 
 pr_remediation_cycles:
   - id: PRM-001
@@ -1216,6 +1238,65 @@ pr_remediation_cycles:
       - 0506721
     follow_up:
       pr_review_rerun: declined
+
+  - id: PRM-005
+    pr_number: 62
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/62
+    linked_review_cycle_id: PRR-007
+    title: "[M32] Workspace scaffold"
+    status: in_progress
+    started: "2026-06-13"
+    completed: null
+    head_ref: feat/M32-workspace-scaffold
+    base_ref: main
+    ci_status: not_pushed
+    counts:
+      fixed: 3
+      deferred: 1
+      wont_fix: 1
+    findings:
+      - id: F-001
+        source: inline
+        severity: advisory
+        path: .github/workflows/ci.yml
+        line: 177
+        thread_id: PRRT_kwDORy2YAM6JXZTI
+        status: deferred
+        commit: null
+        note: "Package-level TC-067 / frontend-ui Vitest gated in M33/T37 per review"
+      - id: F-002
+        source: inline
+        severity: advisory
+        path: scripts/npm_workspaces.sh
+        line: 16
+        thread_id: PRRT_kwDORy2YAM6JXZTU
+        status: fixed
+        commit: 693dda3
+        note: "needs_npm_ci compares package-lock.json to node_modules/.package-lock.json"
+      - id: F-003
+        source: review_body
+        severity: advisory
+        path: .cursor/skills/export-cursor-toolkit
+        line: null
+        thread_id: null
+        status: fixed
+        commit: f1bb79b
+        note: "Removed from M32 PR; chore/export-cursor-toolkit @ 15d8c30"
+      - id: F-004
+        source: review_body
+        severity: advisory
+        path: null
+        line: null
+        thread_id: null
+        status: wont_fix
+        commit: null
+        note: "No tracking issue; optional Closes #N"
+    commits:
+      - 693dda3
+      - 91e7bab
+      - f1bb79b
+    follow_up:
+      pr_review_rerun: offered
 
 agents:
   repo_researcher:
