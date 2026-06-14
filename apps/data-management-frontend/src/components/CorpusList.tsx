@@ -32,23 +32,35 @@ export function CorpusList() {
   const [bulkTagOpen, setBulkTagOpen] = useState(false);
   const [bulkMetadataOpen, setBulkMetadataOpen] = useState(false);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (isActive: () => boolean = () => true) => {
     setError(null);
     setLoading(true);
     try {
       const client = requireCorpusConfig();
       const list = await listDocuments(client);
+      if (!isActive()) {
+        return;
+      }
       setDocuments(list);
       setSelectedIds(new Set());
     } catch (err) {
+      if (!isActive()) {
+        return;
+      }
       setError(err instanceof Error ? err.message : "Failed to load corpus");
     } finally {
-      setLoading(false);
+      if (isActive()) {
+        setLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
-    void refresh();
+    let cancelled = false;
+    void refresh(() => !cancelled);
+    return () => {
+      cancelled = true;
+    };
   }, [refresh]);
 
   const handleDelete = async (doc: DocumentSummary) => {

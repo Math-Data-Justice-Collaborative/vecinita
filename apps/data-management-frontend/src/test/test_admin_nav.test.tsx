@@ -1,5 +1,11 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -16,6 +22,13 @@ function renderApp(initialRoute = "/dashboard") {
 }
 
 describe("Admin navigation", () => {
+  beforeEach(() => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => [] }),
+    );
+  });
+
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
@@ -37,13 +50,16 @@ describe("Admin navigation", () => {
     ).toBeInTheDocument();
   });
 
-  it("navigates to corpus page when clicking Corpus link", () => {
+  it("navigates to corpus page when clicking Corpus link", async () => {
     renderApp();
 
     fireEvent.click(screen.getByRole("link", { name: /corpus/i }));
     expect(
       screen.getByText(/ingest urls and manage documents/i),
     ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/no documents in corpus/i)).toBeInTheDocument();
+    });
   });
 
   it("navigates to health page", () => {
@@ -86,5 +102,8 @@ describe("Admin navigation", () => {
     expect(
       screen.getByText(/ingest urls and manage documents/i),
     ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/no documents in corpus/i)).toBeInTheDocument();
+    });
   });
 });
