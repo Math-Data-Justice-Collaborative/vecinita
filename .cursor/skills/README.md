@@ -28,7 +28,6 @@ replace workflow-state.
 | Corpus + DB setup | [data-management](data-management/SKILL.md) |
 | Production health | [15-service-health](15-service-health/SKILL.md) |
 | Bug fix after deploy | [14-hotfix](14-hotfix/SKILL.md) |
-| Export toolkit to another repo | [export-cursor-toolkit](export-cursor-toolkit/SKILL.md) |
 | GitHub Projects board setup | [github-projects](github-projects/SKILL.md) |
 | CORS / UI wiring gates (all stages) | [connectivity-gates](connectivity-gates.md) |
 
