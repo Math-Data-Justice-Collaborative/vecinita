@@ -252,4 +252,41 @@ describe("CorpusList", () => {
       ).toBeDisabled();
     });
   });
+
+  it("ignores successful load after unmount", async () => {
+    let resolveFetch: (value: Response) => void = () => undefined;
+    const pendingFetch = new Promise<Response>((resolve) => {
+      resolveFetch = resolve;
+    });
+    vi.stubGlobal("fetch", vi.fn().mockReturnValue(pendingFetch));
+
+    const { unmount } = renderCorpus();
+    unmount();
+
+    resolveFetch({
+      ok: true,
+      json: async () => MOCK_DOCS,
+    } as Response);
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+  });
+
+  it("ignores load error after unmount", async () => {
+    let rejectFetch: (reason?: unknown) => void = () => undefined;
+    const pendingFetch = new Promise<Response>((_, reject) => {
+      rejectFetch = reject;
+    });
+    vi.stubGlobal("fetch", vi.fn().mockReturnValue(pendingFetch));
+
+    const { unmount } = renderCorpus();
+    unmount();
+
+    rejectFetch(new Error("load failed after unmount"));
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+  });
 });
