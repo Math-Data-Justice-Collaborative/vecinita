@@ -65,4 +65,4 @@ This error originated in "src/test/test_admin_nav.test.tsx" test file.
 | Layer | Result | Evidence |
 |-------|--------|----------|
 | L1 Automated | pass (local) | `npm run lint`, `npm test` (172 tests), `npm run build` |
-| CI | pending | push + watch `frontend (data-management-frontend)` |
+| CI | pass | [run 27515013178](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/27515013178) — python, both frontends, coverage |
