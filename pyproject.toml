@@ -122,6 +122,7 @@ skip_covered = false
 [tool.basedpyright]
 include = ["apps", "packages", "tests"]
 exclude = ["**/__pycache__", ".venv", ".pytest_cache", "**/node_modules"]
+extraPaths = [".cursor/hooks"]
 pythonVersion = "3.11"
 typeCheckingMode = "standard"
 reportMissingImports = true

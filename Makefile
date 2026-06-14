@@ -14,6 +14,8 @@ DATABASE_URL ?= postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita
 export DATABASE_URL
 
 FRONTENDS := chat-rag-frontend data-management-frontend
+FE_WORKSPACES := vecinita-frontend-i18n vecinita-frontend-ui \
+	vecinita-chat-rag-frontend vecinita-data-management-frontend
 NPM_LOCK := bash scripts/npm_with_lock.sh
 NPM_WS := bash scripts/npm_workspaces.sh
 
@@ -59,17 +61,17 @@ migrate: db-ready ## Apply Alembic migrations
 lint-py: ## Ruff lint (Python)
 	$(UV) run ruff check $(PYTHON_DIRS)
 
-lint-fe: ## ESLint (both frontends)
-	@$(NPM_LOCK) $(NPM_WS) run lint
+lint-fe: ## ESLint (frontend apps + packages)
+	@$(NPM_LOCK) $(NPM_WS) run lint $(FE_WORKSPACES)
 
-lint: lint-py lint-fe ## Lint Python + both frontends (fail fast)
+lint: lint-py lint-fe ## Lint Python + frontends (fail fast)
 
 lint-fix-py: ## Auto-fix Ruff lint (Python)
 	$(UV) run ruff check --fix $(PYTHON_DIRS)
 
-lint-fix-fe: ## Auto-fix ESLint (both frontends)
+lint-fix-fe: ## Auto-fix ESLint (frontend apps + packages)
 	@$(NPM_LOCK) bash -eu -o pipefail -c '$(NPM_WS) install; \
-		for ws in vecinita-chat-rag-frontend vecinita-data-management-frontend; do \
+		for ws in $(FE_WORKSPACES); do \
 			echo "==> eslint --fix -w $$ws"; \
 			npm exec -w "$$ws" -- eslint src --fix; \
 		done'
@@ -83,10 +85,10 @@ format-py: ## Fix Python formatting (ruff)
 	$(UV) run ruff format $(PYTHON_DIRS)
 
 format-fe-check: ## Check frontend formatting (Prettier, no writes)
-	@$(NPM_LOCK) $(NPM_WS) run 'format:check'
+	@$(NPM_LOCK) $(NPM_WS) run 'format:check' $(FE_WORKSPACES)
 
 format-fe: ## Fix frontend formatting (Prettier)
-	@$(NPM_LOCK) $(NPM_WS) run 'format'
+	@$(NPM_LOCK) $(NPM_WS) run 'format' $(FE_WORKSPACES)
 
 format-check: format-check-py format-fe-check ## Check Python + frontend formatting
 
@@ -95,10 +97,8 @@ format: format-py format-fe ## Fix Python + frontend formatting
 typecheck-py: ## basedpyright (Python)
 	$(UV) run basedpyright $(PYTHON_DIRS)
 
-typecheck-fe: ## tsc --noEmit (workspace frontends + packages)
-	@$(NPM_LOCK) $(NPM_WS) run typecheck \
-		vecinita-frontend-i18n vecinita-frontend-ui \
-		vecinita-chat-rag-frontend vecinita-data-management-frontend
+typecheck-fe: ## tsc --noEmit (frontend apps + packages)
+	@$(NPM_LOCK) $(NPM_WS) run typecheck $(FE_WORKSPACES)
 
 typecheck: typecheck-py typecheck-fe ## Typecheck Python + both frontends (fail fast)
 

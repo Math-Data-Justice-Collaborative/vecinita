@@ -1,6 +1,7 @@
 """Cursor afterFileEdit hook: auto-fix formatting and lint via Make targets.
 
-Runs scoped `make format-* lint-fix-*` targets when a formattable source file is edited.
+Python: `make format-py lint-fix-py`.
+Frontend apps/packages: scoped Prettier + ESLint --fix for the edited workspace.
 Skips when CI holds the shared repo lock to avoid npm ci corruption. Always exits 0.
 """
 
