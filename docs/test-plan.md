@@ -85,7 +85,9 @@ EV-004 (F31): No new API routes — **H4/H5 regression required** at 13-deploy-s
 
 **Modal in CI:** Mock only (no live Modal in v1 CI).
 
-**Coverage gate:** ≥ **80%** on `packages/rag`, `packages/ingest`, and backend app code (excludes generated OpenAPI clients if any).
+**Coverage gate (EV-004 / F31):** **≥ 95% line** and **≥ 95% branch** on **each** of twelve components (`packages/<name>`, `apps/<name>`). Unit tests only (`tests/unit` + Vitest). Blocking in CI. Excludes `__init__.py`, alembic migrations, and test helper paths per ADR-019. Supersedes the prior **≥ 80%** aggregate target for unit scope.
+
+**Prior v1 gate (superseded for unit scope):** ≥ **80%** on `packages/rag`, `packages/ingest`, and backend app code (excludes generated OpenAPI clients if any).
 
 ## Test Cases
 
@@ -362,9 +364,32 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 | Metric | Threshold | Context |
 |--------|-----------|---------|
 | ChatRAG p95 latency | < 15s | Excludes cold start; spec RD-017 |
-| Coverage (packages + backends) | ≥ 80% | CI gate |
+| Coverage (per component, unit) | ≥ 95% **line** and ≥ 95% **branch** | Twelve components; CI blocking; ADR-019 |
 | Privacy tests | 100% pass | Blocking |
 | Ingest job success (fixture URLs) | 100% in CI | Mocked worker |
+
+### F31 coverage gate — gated components
+
+Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-coverage`.
+
+| Component | Baseline line % (2026-06-13) | Baseline branch % | Target |
+|-----------|------------------------------|-------------------|--------|
+| `packages/rag` | 73.2 | 50.0 | 95 / 95 |
+| `packages/ingest` | 71.4 | 55.0 | 95 / 95 |
+| `packages/embedding-client` | 84.8 | 64.3 | 95 / 95 |
+| `packages/llm-client` | 87.0 | 66.7 | 95 / 95 |
+| `packages/tagging` | 57.7 | 16.7 | 95 / 95 |
+| `packages/shared-schemas` | 88.9 | 52.2 | 95 / 95 |
+| `apps/chat-rag-backend` | 42.8 | 13.0 | 95 / 95 |
+| `apps/data-management-backend` | 41.5 | 1.5 | 95 / 95 |
+| `apps/internal-write-api` | 40.8 | 13.2 | 95 / 95 |
+| `apps/database` | 63.8 | 53.2 | 95 / 95 |
+| `apps/chat-rag-frontend` | 80.2 | 66.8 | 95 / 95 |
+| `apps/data-management-frontend` | 59.3 | 47.4 | 95 / 95 |
+
+**Run command:** `make test-unit-coverage` (must exit 0 once gate script is wired).
+
+**Exclusions:** Same as `pyproject.toml` `[tool.coverage.run].omit` and Vitest `coverage.exclude` in each frontend `vitest.config.ts`.
 
 ## CI/CD (v1)
 
@@ -376,7 +401,8 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 2. eslint (frontends) — no `any` / unsafe-any flows (`docs/typing-policy.md`)
 3. `uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval` (or `bash scripts/run_tests.sh`)
 4. Vitest (frontends)
-5. pip-audit (advisory or blocking per 04-tech-plan)
+5. **Unit coverage gate (F31):** dedicated CI `coverage` job runs `make test-unit-coverage` (`--enforce` on summary script; ADR-019, TP-031)
+6. pip-audit (advisory or blocking per 04-tech-plan)
 
 **Workflow:** `.github/workflows/ci.yml` (created in **06-tech-tooling**).
 

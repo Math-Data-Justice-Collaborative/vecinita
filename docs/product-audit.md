@@ -2,7 +2,7 @@
 
 > **Stage**: 02-verify-plan  
 > **Started**: 2026-05-19  
-> **Status**: completed (2026-05-24 EV-001 delta)  
+> **Status**: completed (2026-06-13 EV-004 F31 delta)  
 > **Partial re-run**: 2026-05-24 (EV-001 F19–F22 delta audit)
 
 ## Document inventory

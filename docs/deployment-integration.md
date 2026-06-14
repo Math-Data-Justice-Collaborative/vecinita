@@ -141,6 +141,7 @@ No redeploy required: chat-rag-backend, internal-write-api, Modal apps, Postgres
 - [ ] Load seed corpus (staging; production may include committed fixtures per data-management-plan)
 - [ ] Smoke: `/health`, UJ-001 sample ask
 - [ ] Privacy tests in CI green
+- [ ] **EV-004 (F31):** `coverage` CI job green on `main` — no redeploy; see [staging-runbook.md](staging-runbook.md) §EV-004 coverage gate
 
 ## Cost estimation
 

@@ -291,13 +291,13 @@ stages:
   18-pr-review:
     status: completed
     started: "2026-06-12"
-    completed: "2026-06-12"
-    last_cycle: PRR-004
+    completed: "2026-06-13"
+    last_cycle: PRR-006
   19-address-pr-review:
     status: completed
     started: "2026-06-13"
     completed: "2026-06-13"
-    last_cycle: PRM-002
+    last_cycle: PRM-004
   gather-context:
     status: skipped
     note: "Superseded by 00-context for this project; key reserved for doc-planner path"
@@ -919,6 +919,49 @@ pr_review_cycles:
     ci_status: success
     linked_remediation_cycle_id: PRM-002
     note: "PRR-004 re-review after PRM-002; merge-ready, PR still draft + stale body note"
+  - id: PRR-005
+    pr_number: 61
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/61
+    title: "tests: improve unit test coverage up to 99%"
+    status: completed
+    started: "2026-06-13"
+    completed: "2026-06-13"
+    head_ref: tests/95-coverage
+    base_ref: main
+    head_sha: b75181aeae1f02131a44eefc1ae87cf3fa7b957b
+    verdict: REQUEST_CHANGES
+    blockers: 2
+    advisories: 3
+    praise: 3
+    ci_status: "partial (python+frontend pass, coverage fail)"
+    subagents:
+      bugbot: failed
+      security_review: failed
+    artifacts:
+      - path: .cursor/skills/18-pr-review/checklist.md
+        note: checklist source
+    gh_review_url: null
+    note: "Manual triage; local make test-unit-coverage pass; subagents failed — could not compute diff"
+  - id: PRR-006
+    pr_number: 61
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/61
+    title: "tests: improve unit test coverage up to 99%"
+    status: completed
+    started: "2026-06-13"
+    completed: "2026-06-13"
+    head_ref: tests/95-coverage
+    base_ref: main
+    head_sha: 82f5324
+    verdict: APPROVE
+    blockers: 0
+    advisories: 0
+    praise: 3
+    ci_status: success
+    linked_remediation_cycle_id: PRM-003
+    subagents:
+      bugbot: skipped
+      security_review: skipped
+    note: "Re-review after PRM-003; all checks green; merge-ready"
 
 pr_remediation_cycles:
   - id: PRM-001
@@ -1056,6 +1099,123 @@ pr_remediation_cycles:
       - fe2ba55
     follow_up:
       pr_review_rerun: completed
+  - id: PRM-003
+    pr_number: 61
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/61
+    linked_review_cycle_id: PRR-005
+    title: "tests: improve unit test coverage up to 99%"
+    status: completed
+    started: "2026-06-13"
+    completed: "2026-06-13"
+    head_ref: tests/95-coverage
+    base_ref: main
+    ci_status: success
+    head_sha: 82f5324
+    counts:
+      fixed: 5
+      deferred: 0
+      wont_fix: 0
+    findings:
+      - id: F-001
+        source: inline
+        severity: blocker
+        path: .github/workflows/ci.yml
+        line: 142
+        thread_id: PRRT_kwDORy2YAM6JWdaC
+        status: fixed
+        commit: eea36e0
+        note: "npm ci for both frontends in coverage job"
+      - id: F-002
+        source: inline
+        severity: blocker
+        path: .coverage-data/data-management.json
+        line: 1
+        thread_id: PRRT_kwDORy2YAM6JWdaV
+        status: fixed
+        commit: 0c1072c
+        note: "removed artifact; gitignore .coverage-data/"
+      - id: F-003
+        source: inline
+        severity: advisory
+        path: .github/workflows/ci.yml
+        line: 99
+        thread_id: PRRT_kwDORy2YAM6JWdat
+        status: fixed
+        commit: null
+        note: "PR body filled via gh pr edit"
+      - id: F-004
+        source: review_body
+        severity: advisory
+        path: null
+        line: null
+        thread_id: null
+        status: fixed
+        commit: null
+        note: "Marked ready for review after CI green"
+      - id: F-005
+        source: review_body
+        severity: advisory
+        path: apps/chat-rag-frontend/src/api/ask.ts
+        line: 136
+        thread_id: null
+        status: fixed
+        commit: ebcdfd6
+        note: "Restored instanceof Error guard for lastError"
+      - id: F-006
+        source: ci
+        severity: blocker
+        path: apps/chat-rag-frontend/src/test/CorpusBrowse.test.tsx
+        line: null
+        thread_id: null
+        status: fixed
+        commit: 82f5324
+        note: "Branch coverage 94.56% -> 95%+ after npm ci enabled full vitest gate"
+    commits:
+      - eea36e0
+      - 0c1072c
+      - ebcdfd6
+      - 82f5324
+    follow_up:
+      pr_review_rerun: completed
+  - id: PRM-004
+    pr_number: 61
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/61
+    linked_review_cycle_id: PRR-006
+    title: "tests: improve unit test coverage up to 99%"
+    status: completed
+    started: "2026-06-13"
+    completed: "2026-06-13"
+    head_ref: tests/95-coverage
+    base_ref: main
+    ci_status: not_pushed
+    head_sha: 0506721
+    counts:
+      fixed: 2
+      deferred: 0
+      wont_fix: 0
+    findings:
+      - id: F-001
+        source: proactive_scan
+        severity: advisory
+        path: apps/data-management-frontend/src/test/test_theme.test.tsx
+        line: 90
+        thread_id: null
+        status: fixed
+        commit: 0506721
+        note: "Suppress React console.error noise in useTheme guard test"
+      - id: F-002
+        source: proactive_scan
+        severity: advisory
+        path: workflow-state.yaml
+        line: null
+        thread_id: null
+        status: fixed
+        commit: null
+        note: "Sync PRR-005/006 and PRM-003 records to PR branch"
+    commits:
+      - 0506721
+    follow_up:
+      pr_review_rerun: declined
 
 agents:
   repo_researcher:
@@ -1211,6 +1371,10 @@ artifacts:
   - data/fixtures/tags/seed_tags.json
   - openapi/chat-rag.yaml (0.2.0)
   - openapi/internal-write.yaml (0.2.0)
+  - docs/adr/ADR-019-per-component-coverage-95.md
+  - docs/evolve-decisions.md
+  - docs/adr/README.md
+  - docs/staging-runbook.md
 
 git_history:
   current_branch: feat/M32-workspace-scaffold

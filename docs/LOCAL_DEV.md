@@ -102,6 +102,28 @@ curl -s -X POST http://localhost:8000/api/v1/ask \
 
 Automated UJ-004: `uv run pytest tests/e2e/test_uj004_local_bootstrap.py -q`
 
+## Unit coverage gate (F31 / ADR-019)
+
+Per-component **≥95% line and branch** coverage on all twelve `packages/*` and `apps/*` components. Enforced locally and in CI via `scripts/test/print_unit_coverage_summary.py --enforce`.
+
+**Run (same as CI `coverage` job):**
+
+```bash
+make test-unit-coverage
+```
+
+This runs Python `tests/unit` with pytest-cov, both frontends with Vitest coverage, then prints a per-component summary. Exit code **1** if any component is below 95% line or branch.
+
+**Gate unit tests only (no full suite):**
+
+```bash
+uv run pytest tests/unit/test_coverage_gate.py -q
+```
+
+**HTML reports:** `htmlcov/` (Python), `coverage/chat-rag-frontend/`, `coverage/data-management-frontend/`.
+
+See `docs/adr/ADR-019-per-component-coverage-95.md` and `docs/test-plan.md` §F31.
+
 ## Configuration
 
 | Source | Purpose |

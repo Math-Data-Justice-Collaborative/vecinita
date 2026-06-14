@@ -17,6 +17,10 @@ export default defineConfig({
       exclude: ["src/**/*.test.{ts,tsx}", "src/test/**"],
       reporter: ["json-summary", "html"],
       reportsDirectory: "../../coverage/chat-rag-frontend",
+      thresholds: {
+        lines: 95,
+        branches: 95,
+      },
     },
   },
 });

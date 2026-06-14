@@ -72,7 +72,7 @@
 | Benchmark | Metric | Target | Dataset | Spec reference |
 |-----------|--------|--------|---------|----------------|
 | Retrieval quality | Manual review | ≥80% "relevant" on eval fixture | `data/fixtures/eval/` | test-plan |
-| Coverage | Line coverage | ≥80% packages + backends | CI | test-plan |
+| Coverage (unit, per component) | Line + branch | ≥95% each on 12 components | CI (`make test-unit-coverage`) | test-plan, ADR-019 |
 | Cost | Monthly infra | ≤ $50 cap; $25 target documented | Deploy estimate | ADR-004 |
 | Latency | p95 ask | < 15s | Staging smoke | spec |
 

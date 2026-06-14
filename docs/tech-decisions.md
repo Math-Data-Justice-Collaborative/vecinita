@@ -121,6 +121,16 @@
 | TV-038 | Phase 6 gate | Add F25/F26 (M24) explicit criteria | TS-EV002-C07 | execution-plan.md |
 | TV-039 | Frontend TDD | Accept code-before-test for UI (consistent with TV-D02) | TS-EV002-C08 | — (no change) |
 
+## EV-004 04-tech-plan decisions (2026-06-13)
+
+| ID | Topic | Decision | ADR |
+|----|-------|----------|-----|
+| TP-030 | Gate enforcement | **`--enforce`** on `print_unit_coverage_summary.py`; `unit_coverage.sh` passes flag by default | ADR-019 |
+| TP-031 | CI wiring | **Dedicated `coverage` job** in `ci.yml` (Python 3.11 + Node 20; `make test-unit-coverage`) | ADR-019 |
+| TP-032 | Milestone split | **M32** gate infra → **M33** packages (6) → **M34** Python apps (4) → **M35** frontends (2) → **M36** verify | execution-plan.md |
+| TP-033 | Component order | **Hardest baseline first** within each milestone (tagging → … → chat-rag-frontend) | execution-plan.md |
+| TV-040 | EV-004 task count | **23** new tasks (T32.1–T36.4); **207** total | execution-plan.md |
+
 ## Open (implementation-time)
 
 - Exact LlamaIndex / vLLM patch pins (T8.1, T9.2)

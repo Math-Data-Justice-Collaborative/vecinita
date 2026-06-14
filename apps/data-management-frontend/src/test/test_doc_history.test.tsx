@@ -75,4 +75,17 @@ describe("Document history timeline", () => {
       expect(screen.getByText(/no history/i)).toBeInTheDocument();
     });
   });
+
+  it("shows empty state when fetch fails", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce({ ok: false, status: 500 });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderHistory();
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/no history for this document/i),
+      ).toBeInTheDocument();
+    });
+  });
 });

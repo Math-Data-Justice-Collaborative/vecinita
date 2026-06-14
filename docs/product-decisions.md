@@ -1,7 +1,7 @@
 # Product decisions log (02-verify-plan)
 
 > **Stage**: 02-verify-plan  
-> **Last updated**: 2026-05-19
+> **Last updated**: 2026-06-13 (EV-004 F31 delta)
 
 Chronological verdicts from product plan verification. Auto-approved entries trace to
 `docs/requirements-decisions.md` (interview).

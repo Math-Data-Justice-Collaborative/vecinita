@@ -96,6 +96,63 @@ jobs:
           done < audit/pip-audit-ignore.txt
           uv run pip-audit "${IGNORE_ARGS[@]}"
 
+  coverage:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg15
+        env:
+          POSTGRES_USER: vecinita
+          POSTGRES_PASSWORD: vecinita
+          POSTGRES_DB: vecinita
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U vecinita -d vecinita"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Sync dependencies
+        run: uv sync --group dev
+
+      - name: Apply database migrations
+        working-directory: apps/database
+        run: uv run alembic upgrade head
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: |
+            apps/chat-rag-frontend/package-lock.json
+            apps/data-management-frontend/package-lock.json
+
+      - name: Install frontend dependencies (chat-rag-frontend)
+        working-directory: apps/chat-rag-frontend
+        run: npm ci
+
+      - name: Install frontend dependencies (data-management-frontend)
+        working-directory: apps/data-management-frontend
+        run: npm ci
+
+      - name: Unit coverage gate (F31 / ADR-019)
+        run: make test-unit-coverage
+
   frontend:
     runs-on: ubuntu-latest
     strategy:

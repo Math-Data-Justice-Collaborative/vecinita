@@ -150,4 +150,86 @@ describe("Audit log page", () => {
       expect(screen.getByRole("alert")).toBeInTheDocument();
     });
   });
+
+  it("collapses expanded payload row", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => MOCK_AUDIT,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderAudit();
+
+    await waitFor(() => {
+      expect(screen.getByText("document.created")).toBeInTheDocument();
+    });
+
+    const expandBtn = screen.getAllByTestId("expand-payload")[0];
+    fireEvent.click(expandBtn);
+    expect(screen.getByText(/housing guide/i)).toBeInTheDocument();
+
+    fireEvent.click(expandBtn);
+    expect(screen.queryByText(/housing guide/i)).not.toBeInTheDocument();
+  });
+
+  it("filters by entity id", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_AUDIT })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          ...MOCK_AUDIT,
+          items: [MOCK_AUDIT.items[0]],
+          total_count: 1,
+        }),
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderAudit();
+
+    await waitFor(() => {
+      expect(screen.getByText("document.created")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId("filter-entity-id"), {
+      target: { value: "doc-aaa" },
+    });
+    fireEvent.click(screen.getByTestId("apply-filters"));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it("shows empty audit table message", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        items: [],
+        total_count: 0,
+        page: 1,
+        page_size: 50,
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderAudit();
+
+    await waitFor(() => {
+      expect(screen.getByText(/no audit events found/i)).toBeInTheDocument();
+    });
+  });
+
+  it("shows generic audit error for non-Error failures", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValueOnce("audit down"));
+
+    renderAudit();
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Failed to load audit log",
+      );
+    });
+  });
 });

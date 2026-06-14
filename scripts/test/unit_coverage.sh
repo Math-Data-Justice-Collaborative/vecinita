@@ -27,4 +27,4 @@ bash scripts/npm_with_lock.sh bash -eu -o pipefail -c '
 '
 
 echo ""
-"$UV" run python scripts/test/print_unit_coverage_summary.py
+"$UV" run python scripts/test/print_unit_coverage_summary.py --enforce

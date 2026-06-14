@@ -84,7 +84,8 @@ async function* streamAskOnce(
     }
     buffer += decoder.decode(value, { stream: true });
     const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
+    const remainder = lines.pop();
+    buffer = remainder === undefined ? "" : remainder;
     for (const line of lines) {
       const event = parseSseLine(line);
       if (event) {

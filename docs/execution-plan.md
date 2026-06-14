@@ -277,7 +277,7 @@
 #### Phase 3 Gate Check
 
 - [ ] `pytest tests/e2e/test_uj001*.py test_uj005*.py test_uj007*.py` passes
-- [ ] Coverage ≥ 80% on `packages/rag`, `packages/ingest`, backends (per test-plan)
+- [ ] Per-component unit coverage ≥ 95% line + 95% branch on all twelve components (F31 / ADR-019; `make test-unit-coverage`)
 - [ ] p95 latency measured in integration (informative; target < 15s excl. cold start)
 
 ---
