@@ -9,6 +9,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
+import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 
@@ -49,7 +50,7 @@ const API_CONTRACT_STATS = {
 };
 
 function renderDashboard() {
-  return render(
+  return renderWithProviders(
     <ThemeProvider>
       <MemoryRouter>
         <DashboardPage />

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAdminT } from "@/hooks/useAdminT";
 
 const POLL_MS = 2000;
 const TERMINAL: Job["status"][] = ["completed", "failed"];
@@ -17,6 +18,7 @@ export interface JobFormProps {
 }
 
 export function JobForm({ onJobUpdate }: JobFormProps) {
+  const tr = useAdminT();
   const [urlsText, setUrlsText] = useState("");
   const [chunkSize, setChunkSize] = useState("256");
   const [busy, setBusy] = useState(false);
@@ -47,13 +49,13 @@ export function JobForm({ onJobUpdate }: JobFormProps) {
 
     const urls = parseUrlsInput(urlsText);
     if (urls.length === 0) {
-      setError("Enter at least one URL (one per line).");
+      setError(tr("admin.ingest.validation.noUrls"));
       return;
     }
 
     const parsedChunk = Number(chunkSize);
     if (!Number.isFinite(parsedChunk) || parsedChunk < 64) {
-      setError("Chunk size must be at least 64 tokens.");
+      setError(tr("admin.ingest.validation.chunkSizeMin"));
       return;
     }
 
@@ -63,7 +65,7 @@ export function JobForm({ onJobUpdate }: JobFormProps) {
       const created = await createJob(client, urls, parsedChunk);
       await pollUntilDone(created.job_id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Ingest failed");
+      setError(err instanceof Error ? err.message : tr("admin.ingest.failed"));
     } finally {
       setBusy(false);
     }
@@ -72,12 +74,12 @@ export function JobForm({ onJobUpdate }: JobFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Ingest URLs</CardTitle>
+        <CardTitle>{tr("admin.ingest.title")}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="urls">Public URLs (one per line)</Label>
+            <Label htmlFor="urls">{tr("admin.ingest.urlsLabel")}</Label>
             <Textarea
               id="urls"
               rows={5}
@@ -85,12 +87,14 @@ export function JobForm({ onJobUpdate }: JobFormProps) {
               onChange={(e) => {
                 setUrlsText(e.target.value);
               }}
-              placeholder="https://example.org/community/page"
+              placeholder={tr("admin.ingest.urlsPlaceholder")}
               disabled={busy}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="chunk-size">Chunk size (tokens)</Label>
+            <Label htmlFor="chunk-size">
+              {tr("admin.ingest.chunkSizeLabel")}
+            </Label>
             <Input
               id="chunk-size"
               type="number"
@@ -103,7 +107,7 @@ export function JobForm({ onJobUpdate }: JobFormProps) {
             />
           </div>
           <Button type="submit" disabled={busy}>
-            {busy ? "Running…" : "Submit ingest job"}
+            {busy ? tr("admin.ingest.running") : tr("admin.ingest.submit")}
           </Button>
         </form>
         {error ? (
@@ -117,7 +121,8 @@ export function JobForm({ onJobUpdate }: JobFormProps) {
             data-testid="job-status"
           >
             <p className="text-sm">
-              Job <code className="font-mono text-xs">{activeJob.job_id}</code>:{" "}
+              {tr("admin.ingest.jobStatusPrefix")}{" "}
+              <code className="font-mono text-xs">{activeJob.job_id}</code>:{" "}
               <strong>{activeJob.status}</strong>
             </p>
             {activeJob.error_code ? (

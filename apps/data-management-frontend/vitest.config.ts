@@ -7,6 +7,14 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "vecinita-frontend-i18n": path.resolve(
+        __dirname,
+        "../../packages/frontend-i18n/src/index.ts",
+      ),
+      "vecinita-frontend-ui": path.resolve(
+        __dirname,
+        "../../packages/frontend-ui/src/index.ts",
+      ),
     },
   },
   test: {

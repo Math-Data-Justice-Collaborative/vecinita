@@ -1,14 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
+import { useLocale } from "vecinita-frontend-ui";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { type HealthAggregate, fetchHealthAggregate } from "@/api/admin";
 import { requireCorpusConfig } from "@/config";
+import { useAdminT } from "@/hooks/useAdminT";
+import { formatLocaleDateTime } from "@/lib/formatLocaleDateTime";
 import { cn } from "@/lib/utils";
 
 export function HealthPage() {
+  const tr = useAdminT();
+  const { locale } = useLocale();
   const [health, setHealth] = useState<HealthAggregate | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,11 +26,13 @@ export function HealthPage() {
       const data = await fetchHealthAggregate(client);
       setHealth(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load health");
+      setError(
+        err instanceof Error ? err.message : tr("admin.health.loadFailed"),
+      );
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [tr]);
 
   useEffect(() => {
     void load();
@@ -35,12 +42,12 @@ export function HealthPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Health</h2>
-          <p className="text-muted-foreground">
-            Service status and connectivity.
-          </p>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {tr("admin.health.title")}
+          </h2>
+          <p className="text-muted-foreground">{tr("admin.health.subtitle")}</p>
         </div>
-        <p className="text-muted-foreground">Loading…</p>
+        <p className="text-muted-foreground">{tr("shared.loading")}</p>
       </div>
     );
   }
@@ -49,7 +56,9 @@ export function HealthPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Health</h2>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {tr("admin.health.title")}
+          </h2>
         </div>
         <p role="alert" className="text-sm text-destructive">
           {error}
@@ -64,10 +73,10 @@ export function HealthPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Health</h2>
-          <p className="text-muted-foreground">
-            Service status and connectivity.
-          </p>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {tr("admin.health.title")}
+          </h2>
+          <p className="text-muted-foreground">{tr("admin.health.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
           <Badge
@@ -85,12 +94,12 @@ export function HealthPage() {
             size="sm"
             onClick={() => void load()}
             disabled={loading}
-            aria-label="Refresh"
+            aria-label={tr("admin.health.refreshAria")}
           >
             <RefreshCw
               className={cn("mr-2 h-4 w-4", loading && "animate-spin")}
             />
-            Refresh
+            {tr("shared.refresh")}
           </Button>
         </div>
       </div>
@@ -113,7 +122,7 @@ export function HealthPage() {
             <CardContent>
               {service.latency_ms !== null ? (
                 <p className="text-sm text-muted-foreground">
-                  {service.latency_ms} ms
+                  {tr("admin.health.latencyMs", { ms: service.latency_ms })}
                 </p>
               ) : null}
               {service.error ? (
@@ -125,7 +134,9 @@ export function HealthPage() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Last checked: {new Date(health.checked_at).toLocaleString()}
+        {tr("admin.health.lastChecked", {
+          datetime: formatLocaleDateTime(locale, health.checked_at),
+        })}
       </p>
     </div>
   );

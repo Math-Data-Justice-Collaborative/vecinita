@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { type BulkResult, bulkDeleteDocuments } from "@/api/admin";
 import { requireCorpusConfig } from "@/config";
+import { useAdminT } from "@/hooks/useAdminT";
 
 interface BulkDeleteDialogProps {
   open: boolean;
@@ -25,6 +26,7 @@ export function BulkDeleteDialog({
   documentIds,
   onComplete,
 }: BulkDeleteDialogProps) {
+  const tr = useAdminT();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<BulkResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +43,9 @@ export function BulkDeleteDialog({
         onComplete();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Bulk delete failed");
+      setError(
+        err instanceof Error ? err.message : tr("admin.bulkDelete.failed"),
+      );
     } finally {
       setBusy(false);
     }
@@ -60,10 +64,9 @@ export function BulkDeleteDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Confirm Bulk Delete</DialogTitle>
+          <DialogTitle>{tr("admin.bulkDelete.title")}</DialogTitle>
           <DialogDescription>
-            This will permanently delete {documentIds.length} document
-            {documentIds.length !== 1 ? "s" : ""}. This action cannot be undone.
+            {tr("admin.bulkDelete.description", { n: documentIds.length })}
           </DialogDescription>
         </DialogHeader>
 
@@ -72,8 +75,10 @@ export function BulkDeleteDialog({
         {result && result.failures.length > 0 ? (
           <div className="space-y-2">
             <p className="text-sm">
-              {result.successes.length} deleted, {result.failures.length}{" "}
-              failed:
+              {tr("admin.bulkDelete.partialFailureHeader", {
+                deleted: result.successes.length,
+                failed: result.failures.length,
+              })}
             </p>
             <ul className="text-sm text-destructive">
               {result.failures.map((f) => (
@@ -87,14 +92,16 @@ export function BulkDeleteDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose} disabled={busy}>
-            Cancel
+            {tr("shared.cancel")}
           </Button>
           <Button
             variant="destructive"
             onClick={() => void handleConfirm()}
             disabled={busy}
           >
-            {busy ? "Deleting…" : "Confirm delete"}
+            {busy
+              ? tr("admin.actions.deleting")
+              : tr("admin.bulkDelete.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -19,7 +19,9 @@
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "vecinita-frontend-i18n": ["../../packages/frontend-i18n/src/index.ts"],
+      "vecinita-frontend-ui": ["../../packages/frontend-ui/src/index.ts"]
     }
   },
   "include": ["src"]

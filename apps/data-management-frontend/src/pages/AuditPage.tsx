@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useLocale } from "vecinita-frontend-ui";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,9 +19,12 @@ import {
   fetchAuditLog,
 } from "@/api/admin";
 import { requireCorpusConfig } from "@/config";
+import { useAdminT } from "@/hooks/useAdminT";
+import { formatLocaleDateTime } from "@/lib/formatLocaleDateTime";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 export function AuditPage() {
+  const tr = useAdminT();
   const [data, setData] = useState<AuditPageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,13 +42,13 @@ export function AuditPage() {
         setData(result);
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to load audit log",
+          err instanceof Error ? err.message : tr("admin.audit.loadFailed"),
         );
       } finally {
         setLoading(false);
       }
     },
-    [],
+    [tr],
   );
 
   useEffect(() => {
@@ -71,12 +75,12 @@ export function AuditPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Audit Log</h2>
-          <p className="text-muted-foreground">
-            Event history and document changes.
-          </p>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {tr("admin.audit.title")}
+          </h2>
+          <p className="text-muted-foreground">{tr("admin.audit.subtitle")}</p>
         </div>
-        <p className="text-muted-foreground">Loading…</p>
+        <p className="text-muted-foreground">{tr("shared.loading")}</p>
       </div>
     );
   }
@@ -85,7 +89,9 @@ export function AuditPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Audit Log</h2>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {tr("admin.audit.title")}
+          </h2>
         </div>
         <p role="alert" className="text-sm text-destructive">
           {error}
@@ -97,15 +103,17 @@ export function AuditPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Audit Log</h2>
-        <p className="text-muted-foreground">
-          Event history and document changes.
-        </p>
+        <h2 className="text-3xl font-bold tracking-tight">
+          {tr("admin.audit.title")}
+        </h2>
+        <p className="text-muted-foreground">{tr("admin.audit.subtitle")}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Filters</CardTitle>
+          <CardTitle className="text-base">
+            {tr("admin.audit.filters.title")}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap items-end gap-3">
@@ -114,7 +122,7 @@ export function AuditPage() {
                 className="text-sm font-medium"
                 htmlFor="filter-event-type"
               >
-                Event type
+                {tr("admin.audit.filters.eventTypeLabel")}
               </label>
               <Input
                 id="filter-event-type"
@@ -123,13 +131,13 @@ export function AuditPage() {
                 onChange={(e) => {
                   setEventTypeFilter(e.target.value);
                 }}
-                placeholder="document.created"
+                placeholder={tr("admin.audit.filters.eventTypePlaceholder")}
                 className="w-48"
               />
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium" htmlFor="filter-entity-id">
-                Entity ID
+                {tr("admin.audit.filters.entityIdLabel")}
               </label>
               <Input
                 id="filter-entity-id"
@@ -138,7 +146,7 @@ export function AuditPage() {
                 onChange={(e) => {
                   setEntityIdFilter(e.target.value);
                 }}
-                placeholder="doc-aaa..."
+                placeholder={tr("admin.audit.filters.entityIdPlaceholder")}
                 className="w-48"
               />
             </div>
@@ -147,7 +155,7 @@ export function AuditPage() {
               onClick={handleApplyFilters}
               data-testid="apply-filters"
             >
-              Apply
+              {tr("admin.audit.filters.apply")}
             </Button>
           </div>
         </CardContent>
@@ -160,10 +168,10 @@ export function AuditPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-8" />
-                  <TableHead>Event Type</TableHead>
-                  <TableHead>Entity</TableHead>
-                  <TableHead>Entity ID</TableHead>
-                  <TableHead>Timestamp</TableHead>
+                  <TableHead>{tr("admin.audit.table.eventType")}</TableHead>
+                  <TableHead>{tr("admin.audit.table.entity")}</TableHead>
+                  <TableHead>{tr("admin.audit.table.entityId")}</TableHead>
+                  <TableHead>{tr("admin.audit.table.timestamp")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -181,11 +189,14 @@ export function AuditPage() {
             </Table>
             {data.events.length === 0 && (
               <p className="py-4 text-center text-sm text-muted-foreground">
-                No audit events found.
+                {tr("admin.audit.empty")}
               </p>
             )}
             <p className="mt-3 text-xs text-muted-foreground">
-              Showing {data.events.length} of {data.total} events
+              {tr("admin.audit.showingCount", {
+                shown: data.events.length,
+                total: data.total,
+              })}
             </p>
           </CardContent>
         </Card>
@@ -203,6 +214,9 @@ function AuditRow({
   expanded: boolean;
   onToggle: () => void;
 }) {
+  const tr = useAdminT();
+  const { locale } = useLocale();
+
   return (
     <>
       <TableRow>
@@ -212,7 +226,11 @@ function AuditRow({
             onClick={onToggle}
             data-testid="expand-payload"
             className="rounded p-1 hover:bg-muted"
-            aria-label={expanded ? "Collapse" : "Expand"}
+            aria-label={
+              expanded
+                ? tr("admin.audit.expand.collapse")
+                : tr("admin.audit.expand.expand")
+            }
           >
             {expanded ? (
               <ChevronDown className="h-4 w-4" />
@@ -227,7 +245,7 @@ function AuditRow({
         <TableCell>{event.entity_type}</TableCell>
         <TableCell className="font-mono text-xs">{event.entity_id}</TableCell>
         <TableCell className="text-xs text-muted-foreground">
-          {new Date(event.timestamp).toLocaleString()}
+          {formatLocaleDateTime(locale, event.timestamp)}
         </TableCell>
       </TableRow>
       {expanded && (

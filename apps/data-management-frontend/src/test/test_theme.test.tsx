@@ -5,6 +5,7 @@ import {
   renderHook,
   screen,
 } from "@testing-library/react";
+import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -25,7 +26,7 @@ describe("ThemeProvider and ThemeToggle", () => {
   });
 
   it("defaults to system theme when storage is empty", () => {
-    render(
+    renderWithProviders(
       <ThemeProvider>
         <ThemeReader />
       </ThemeProvider>,
@@ -35,7 +36,7 @@ describe("ThemeProvider and ThemeToggle", () => {
 
   it("reads stored dark theme from localStorage", () => {
     localStorage.setItem("vecinita-ui-theme", "dark");
-    render(
+    renderWithProviders(
       <ThemeProvider>
         <ThemeReader />
       </ThemeProvider>,
@@ -46,7 +47,7 @@ describe("ThemeProvider and ThemeToggle", () => {
 
   it("applies light theme class", () => {
     localStorage.setItem("vecinita-ui-theme", "light");
-    render(
+    renderWithProviders(
       <ThemeProvider>
         <ThemeReader />
       </ThemeProvider>,
@@ -64,8 +65,7 @@ describe("ThemeProvider and ThemeToggle", () => {
         removeEventListener: vi.fn(),
       })),
     );
-
-    render(
+    renderWithProviders(
       <ThemeProvider>
         <ThemeReader />
       </ThemeProvider>,
@@ -76,7 +76,7 @@ describe("ThemeProvider and ThemeToggle", () => {
 
   it("cycles dark → light → system → dark via ThemeToggle", () => {
     localStorage.setItem("vecinita-ui-theme", "dark");
-    render(
+    renderWithProviders(
       <ThemeProvider>
         <ThemeToggle />
         <ThemeReader />

@@ -2,6 +2,8 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
+import { LocaleProvider } from "vecinita-frontend-ui";
+
 import { ThemeProvider } from "@/components/ThemeProvider";
 import App from "./App";
 import "./globals.css";
@@ -13,10 +15,12 @@ if (!root) {
 
 createRoot(root).render(
   <StrictMode>
-    <ThemeProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </ThemeProvider>
+    <LocaleProvider>
+      <ThemeProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ThemeProvider>
+    </LocaleProvider>
   </StrictMode>,
 );

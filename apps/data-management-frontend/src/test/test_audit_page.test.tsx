@@ -5,6 +5,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
+import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 
@@ -47,7 +48,7 @@ const MOCK_AUDIT = {
 };
 
 function renderAudit() {
-  return render(
+  return renderWithProviders(
     <ThemeProvider>
       <MemoryRouter>
         <AuditPage />

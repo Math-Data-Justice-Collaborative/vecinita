@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { useAdminT } from "@/hooks/useAdminT";
 
 type DocumentAdminProps = {
   document: DocumentSummary;
@@ -33,6 +34,7 @@ function parseTagsInput(raw: string): TagInput[] {
 }
 
 export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
+  const tr = useAdminT();
   const [chunks, setChunks] = useState<ChunkDetail[]>([]);
   const [docTags, setDocTags] = useState("");
   const [chunkTagDrafts, setChunkTagDrafts] = useState<Record<string, string>>(
@@ -66,11 +68,15 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
         ),
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load chunks");
+      setError(
+        err instanceof Error
+          ? err.message
+          : tr("admin.documentAdmin.loadChunksFailed"),
+      );
     } finally {
       setLoading(false);
     }
-  }, [document.document_id]);
+  }, [document.document_id, tr]);
 
   useEffect(() => {
     void loadChunks();
@@ -90,19 +96,23 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
             return;
           }
           if (job.status === "completed") {
-            setStatus("LLM re-tag job completed.");
+            setStatus(tr("admin.documentAdmin.retagCompleted"));
             setRetagJobId(null);
             void loadChunks();
             void loadDocumentTags();
           } else if (job.status === "failed") {
-            setError(job.error_message ?? "Retag job failed");
+            setError(
+              job.error_message ?? tr("admin.documentAdmin.retagFailed"),
+            );
             setRetagJobId(null);
           }
         })
         .catch((err: unknown) => {
           if (!cancelled) {
             setError(
-              err instanceof Error ? err.message : "Failed to poll retag job",
+              err instanceof Error
+                ? err.message
+                : tr("admin.documentAdmin.pollRetagFailed"),
             );
             setRetagJobId(null);
           }
@@ -112,7 +122,7 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [retagJobId, loadChunks, loadDocumentTags]);
+  }, [retagJobId, loadChunks, loadDocumentTags, tr]);
 
   async function handleSaveDocumentTags(event: FormEvent) {
     event.preventDefault();
@@ -124,10 +134,12 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
         document.document_id,
         parseTagsInput(docTags),
       );
-      setStatus("Document tags saved.");
+      setStatus(tr("admin.documentAdmin.docTagsSaved"));
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to save document tags",
+        err instanceof Error
+          ? err.message
+          : tr("admin.documentAdmin.saveDocTagsFailed"),
       );
     }
   }
@@ -141,11 +153,13 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
         chunkId,
         parseTagsInput(chunkTagDrafts[chunkId] ?? ""),
       );
-      setStatus("Chunk tags saved.");
+      setStatus(tr("admin.documentAdmin.chunkTagsSaved"));
       await loadChunks();
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to save chunk tags",
+        err instanceof Error
+          ? err.message
+          : tr("admin.documentAdmin.saveChunkTagsFailed"),
       );
     }
   }
@@ -157,22 +171,24 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
       const client = requireCorpusConfig();
       const jobId = await retagDocument(client, document.document_id);
       setRetagJobId(jobId);
-      setStatus(`Retag job queued (${jobId}).`);
+      setStatus(tr("admin.documentAdmin.retagQueued", { jobId }));
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to queue retag job",
+        err instanceof Error
+          ? err.message
+          : tr("admin.documentAdmin.queueRetagFailed"),
       );
     }
   }
 
   return (
-    <div className="space-y-4" aria-label="Document admin">
+    <div className="space-y-4" aria-label={tr("admin.documentAdmin.ariaLabel")}>
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">
           {document.title ?? document.url}
         </h3>
         <Button variant="outline" size="sm" onClick={onClose}>
-          Close
+          {tr("admin.actions.close")}
         </Button>
       </div>
 
@@ -193,7 +209,7 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
       >
         <div className="space-y-2">
           <Label htmlFor="doc-tags">
-            Document tags (comma-separated slugs, max 10)
+            {tr("admin.documentAdmin.docTagsLabel")}
           </Label>
           <Input
             id="doc-tags"
@@ -201,12 +217,12 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
             onChange={(e) => {
               setDocTags(e.target.value);
             }}
-            placeholder="housing, legal"
+            placeholder={tr("admin.documentAdmin.docTagsPlaceholder")}
           />
         </div>
         <div className="flex gap-2">
           <Button type="submit" size="sm">
-            Save document tags
+            {tr("admin.documentAdmin.saveDocTags")}
           </Button>
           <Button
             type="button"
@@ -214,7 +230,7 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
             size="sm"
             onClick={() => void handleRetag()}
           >
-            LLM re-tag
+            {tr("admin.documentAdmin.llmRetag")}
           </Button>
         </div>
       </form>
@@ -222,19 +238,25 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
       <Separator />
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading chunks…</p>
+        <p className="text-sm text-muted-foreground">
+          {tr("admin.documentAdmin.loadingChunks")}
+        </p>
       ) : null}
 
       <div className="space-y-4" data-testid="chunk-list">
         {chunks.map((chunk) => (
           <div key={chunk.chunk_id} className="space-y-2 rounded-md border p-4">
-            <h4 className="font-medium">Chunk {chunk.chunk_index + 1}</h4>
+            <h4 className="font-medium">
+              {tr("admin.documentAdmin.chunkTitle", {
+                n: chunk.chunk_index + 1,
+              })}
+            </h4>
             <pre className="max-h-48 overflow-auto rounded-md bg-muted p-3 text-sm">
               {chunk.text}
             </pre>
             <div className="space-y-2">
               <Label htmlFor={`chunk-tags-${chunk.chunk_id}`}>
-                Chunk tags (max 5)
+                {tr("admin.documentAdmin.chunkTagsLabel")}
               </Label>
               <Input
                 id={`chunk-tags-${chunk.chunk_id}`}
@@ -252,7 +274,7 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
               variant="outline"
               onClick={() => void handleSaveChunkTags(chunk.chunk_id)}
             >
-              Save chunk tags
+              {tr("admin.documentAdmin.saveChunkTags")}
             </Button>
           </div>
         ))}

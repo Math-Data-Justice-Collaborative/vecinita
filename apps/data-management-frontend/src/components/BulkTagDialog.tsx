@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { type BulkResult, bulkTagDocuments } from "@/api/admin";
 import { requireCorpusConfig } from "@/config";
+import { useAdminT } from "@/hooks/useAdminT";
 
 interface BulkTagDialogProps {
   open: boolean;
@@ -27,6 +28,7 @@ export function BulkTagDialog({
   documentIds,
   onComplete,
 }: BulkTagDialogProps) {
+  const tr = useAdminT();
   const [addInput, setAddInput] = useState("");
   const [removeInput, setRemoveInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -63,7 +65,7 @@ export function BulkTagDialog({
         onComplete();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Bulk tag failed");
+      setError(err instanceof Error ? err.message : tr("admin.bulkTag.failed"));
     } finally {
       setBusy(false);
     }
@@ -82,28 +84,27 @@ export function BulkTagDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Bulk Tag</DialogTitle>
+          <DialogTitle>{tr("admin.bulkTag.title")}</DialogTitle>
           <DialogDescription>
-            Add or remove tags for {documentIds.length} document
-            {documentIds.length !== 1 ? "s" : ""}.
+            {tr("admin.bulkTag.description", { n: documentIds.length })}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div className="space-y-2">
-            <Label htmlFor="add-tags">Add tags (comma-separated)</Label>
+            <Label htmlFor="add-tags">{tr("admin.bulkTag.addLabel")}</Label>
             <Input
               id="add-tags"
               value={addInput}
               onChange={(e) => {
                 setAddInput(e.target.value);
               }}
-              placeholder="housing, legal"
+              placeholder={tr("admin.bulkTag.addPlaceholder")}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="remove-tags">
-              Remove tags (comma-separated slugs)
+              {tr("admin.bulkTag.removeLabel")}
             </Label>
             <Input
               id="remove-tags"
@@ -111,7 +112,7 @@ export function BulkTagDialog({
               onChange={(e) => {
                 setRemoveInput(e.target.value);
               }}
-              placeholder="outdated"
+              placeholder={tr("admin.bulkTag.removePlaceholder")}
             />
           </div>
         </div>
@@ -120,16 +121,19 @@ export function BulkTagDialog({
 
         {result && result.failures.length > 0 ? (
           <p className="text-sm text-destructive">
-            {result.successes.length} updated, {result.failures.length} failed.
+            {tr("admin.bulk.partialFailureSummary", {
+              updated: result.successes.length,
+              failed: result.failures.length,
+            })}
           </p>
         ) : null}
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose} disabled={busy}>
-            Cancel
+            {tr("shared.cancel")}
           </Button>
           <Button onClick={() => void handleSubmit()} disabled={busy}>
-            {busy ? "Applying…" : "Apply tags"}
+            {busy ? tr("admin.bulkTag.applying") : tr("admin.bulkTag.apply")}
           </Button>
         </DialogFooter>
       </DialogContent>

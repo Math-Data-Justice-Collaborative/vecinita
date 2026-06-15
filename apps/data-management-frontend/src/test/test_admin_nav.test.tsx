@@ -5,6 +5,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
+import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 
@@ -12,12 +13,10 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import App from "../App";
 
 function renderApp(initialRoute = "/dashboard") {
-  return render(
-    <ThemeProvider>
-      <MemoryRouter initialEntries={[initialRoute]}>
-        <App />
-      </MemoryRouter>
-    </ThemeProvider>,
+  return renderWithProviders(
+    <MemoryRouter initialEntries={[initialRoute]}>
+      <App />
+    </MemoryRouter>,
   );
 }
 

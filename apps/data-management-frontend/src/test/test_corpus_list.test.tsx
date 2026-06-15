@@ -6,6 +6,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
+import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 
@@ -30,7 +31,7 @@ const MOCK_DOCS = [
 ];
 
 function renderCorpus() {
-  return render(
+  return renderWithProviders(
     <ThemeProvider>
       <MemoryRouter>
         <CorpusList />

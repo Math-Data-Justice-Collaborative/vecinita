@@ -6,6 +6,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
+import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ReactElement } from "react";
 
@@ -15,7 +16,7 @@ import { BulkMetadataDialog } from "@/components/BulkMetadataDialog";
 import { BulkTagDialog } from "@/components/BulkTagDialog";
 
 function renderWithTheme(ui: ReactElement) {
-  return render(<ThemeProvider>{ui}</ThemeProvider>);
+  return renderWithProviders(<ThemeProvider>{ui}</ThemeProvider>);
 }
 
 describe("Bulk dialog components", () => {
@@ -118,7 +119,7 @@ describe("Bulk dialog components", () => {
           onComplete={vi.fn()}
         />,
       );
-      expect(screen.getByText(/1 document\./i)).toBeInTheDocument();
+      expect(screen.getByText(/1 document\(s\)\./i)).toBeInTheDocument();
     });
 
     it("calls onComplete when closing after partial success", async () => {
@@ -343,7 +344,7 @@ describe("Bulk dialog components", () => {
           onComplete={vi.fn()}
         />,
       );
-      expect(screen.getByText(/2 documents\./i)).toBeInTheDocument();
+      expect(screen.getByText(/2 document\(s\)\./i)).toBeInTheDocument();
     });
 
     it("shows busy label while updating metadata", async () => {
@@ -497,7 +498,7 @@ describe("Bulk dialog components", () => {
         />,
       );
       const dialog = screen.getByRole("dialog");
-      expect(within(dialog).getByText(/2 documents/i)).toBeInTheDocument();
+      expect(within(dialog).getByText(/2 document\(s\)/i)).toBeInTheDocument();
     });
 
     it("shows generic delete error for non-Error failures", async () => {

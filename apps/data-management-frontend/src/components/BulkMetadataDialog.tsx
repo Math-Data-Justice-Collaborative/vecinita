@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { type BulkResult, bulkUpdateMetadata } from "@/api/admin";
 import { requireCorpusConfig } from "@/config";
+import { useAdminT } from "@/hooks/useAdminT";
 
 interface BulkMetadataDialogProps {
   open: boolean;
@@ -27,6 +28,7 @@ export function BulkMetadataDialog({
   documentIds,
   onComplete,
 }: BulkMetadataDialogProps) {
+  const tr = useAdminT();
   const [title, setTitle] = useState("");
   const [language, setLanguage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -50,7 +52,7 @@ export function BulkMetadataDialog({
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Bulk metadata update failed",
+        err instanceof Error ? err.message : tr("admin.bulkMetadata.failed"),
       );
     } finally {
       setBusy(false);
@@ -70,34 +72,37 @@ export function BulkMetadataDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Bulk Edit Metadata</DialogTitle>
+          <DialogTitle>{tr("admin.bulkMetadata.title")}</DialogTitle>
           <DialogDescription>
-            Update metadata for {documentIds.length} document
-            {documentIds.length !== 1 ? "s" : ""}. Leave fields empty to skip.
+            {tr("admin.bulkMetadata.description", { n: documentIds.length })}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div className="space-y-2">
-            <Label htmlFor="bulk-title">Title</Label>
+            <Label htmlFor="bulk-title">
+              {tr("admin.bulkMetadata.titleLabel")}
+            </Label>
             <Input
               id="bulk-title"
               value={title}
               onChange={(e) => {
                 setTitle(e.target.value);
               }}
-              placeholder="New title (optional)"
+              placeholder={tr("admin.bulkMetadata.titlePlaceholder")}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="bulk-language">Language</Label>
+            <Label htmlFor="bulk-language">
+              {tr("admin.bulkMetadata.languageLabel")}
+            </Label>
             <Input
               id="bulk-language"
               value={language}
               onChange={(e) => {
                 setLanguage(e.target.value);
               }}
-              placeholder="en, es, etc. (optional)"
+              placeholder={tr("admin.bulkMetadata.languagePlaceholder")}
             />
           </div>
         </div>
@@ -106,16 +111,21 @@ export function BulkMetadataDialog({
 
         {result && result.failures.length > 0 ? (
           <p className="text-sm text-destructive">
-            {result.successes.length} updated, {result.failures.length} failed.
+            {tr("admin.bulk.partialFailureSummary", {
+              updated: result.successes.length,
+              failed: result.failures.length,
+            })}
           </p>
         ) : null}
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose} disabled={busy}>
-            Cancel
+            {tr("shared.cancel")}
           </Button>
           <Button onClick={() => void handleSubmit()} disabled={busy}>
-            {busy ? "Updating…" : "Update metadata"}
+            {busy
+              ? tr("admin.bulkMetadata.updating")
+              : tr("admin.bulkMetadata.update")}
           </Button>
         </DialogFooter>
       </DialogContent>
