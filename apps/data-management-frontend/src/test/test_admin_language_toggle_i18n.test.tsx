@@ -1,15 +1,13 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
-import { LocaleProvider } from "vecinita-frontend-ui";
 import {
   detectBrowserLocale,
   LOCALE_STORAGE_KEY,
   readStoredLocale,
 } from "vecinita-frontend-i18n";
 
-import { ThemeProvider } from "@/components/ThemeProvider";
 import App from "../App";
 
 function renderAdmin(initialRoute = "/dashboard") {

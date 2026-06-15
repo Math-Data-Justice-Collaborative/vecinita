@@ -2,7 +2,7 @@
  * BUG-2026-05-27: Audit page blank when /internal/v1/audit returns api-contract shape.
  * @see docs/bug-reports/BUG-2026-05-27-audit-page-blank.md
  */
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";

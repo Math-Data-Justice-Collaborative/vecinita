@@ -1,7 +1,6 @@
 import {
   cleanup,
   fireEvent,
-  render,
   renderHook,
   screen,
 } from "@testing-library/react";

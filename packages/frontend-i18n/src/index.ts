@@ -4,5 +4,5 @@ export {
   detectBrowserLocale,
   readStoredLocale,
 } from "./locale";
-export type { MessageKey } from "./t";
+export type { MessageKey, StringMessageKey } from "./t";
 export { t } from "./t";

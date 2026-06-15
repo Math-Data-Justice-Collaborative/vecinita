@@ -4,7 +4,6 @@
  */
 import {
   cleanup,
-  render,
   screen,
   waitFor,
   within,
