@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { deleteDocument, listDocuments } from "../api/corpus";
 import type { DocumentSummary } from "../api/types";
@@ -24,6 +24,13 @@ import { useAdminT } from "@/hooks/useAdminT";
 
 export function CorpusList() {
   const tr = useAdminT();
+  // Keep the load path decoupled from `tr`: its identity changes on every
+  // EN/ES switch, and depending on it would refire the mount loader and clear
+  // the bulk selection on a locale change (BUG-2026-06-25).
+  const trRef = useRef(tr);
+  useEffect(() => {
+    trRef.current = tr;
+  }, [tr]);
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +60,7 @@ export function CorpusList() {
         setError(
           err instanceof Error
             ? err.message
-            : tr("admin.corpusList.loadFailed"),
+            : trRef.current("admin.corpusList.loadFailed"),
         );
       } finally {
         if (isActive()) {
@@ -61,7 +68,7 @@ export function CorpusList() {
         }
       }
     },
-    [tr],
+    [],
   );
 
   useEffect(() => {
