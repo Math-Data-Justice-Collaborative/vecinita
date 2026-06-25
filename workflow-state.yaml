@@ -187,12 +187,16 @@ stages:
     note: "EV-004 Phase 9 — M32 completed; T33.1 in progress"
   08-verify-build:
     status: completed
-    started_at: "2026-05-27"
-    completed_at: "2026-05-27"
+    started_at: "2026-06-25"
+    completed_at: "2026-06-25"
+    partial_rerun_at: "2026-06-25"
+    partial_rerun_note: "EV-004 delta — M32 workspace scaffold verification"
     scope: standalone
     overall: pass
     report: docs/verification-report.md
-    notes: "Re-run after fixes: 158 passed 31 skipped; commits 901bc2d + follow-up fix"
+    notes: "522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override bumps (aiohttp, msgpack, pypdf, starlette)"
+    substeps:
+      phase: complete
   09-qa:
     status: completed
     started_at: "2026-05-27"
