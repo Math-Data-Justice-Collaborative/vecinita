@@ -300,13 +300,13 @@ stages:
   18-pr-review:
     status: completed
     started: "2026-06-12"
-    completed: "2026-06-13"
-    last_cycle: PRR-008
+    completed: "2026-06-25"
+    last_cycle: PRR-009
   19-address-pr-review:
-    status: completed
-    started: "2026-06-13"
-    completed: "2026-06-13"
-    last_cycle: PRM-005
+    status: in_progress
+    started: "2026-06-25"
+    last_cycle: PRM-006
+    history_note: "PRM-005 closed PR #62 ([M32] Workspace scaffold) on 2026-06-13"
   gather-context:
     status: skipped
     note: "Superseded by 00-context for this project; key reserved for doc-planner path"
@@ -1016,6 +1016,28 @@ pr_review_cycles:
       bugbot: "coverage job npm install gap"
       security_review: pass
     note: "Re-review after PRM-005; python+frontend green, coverage red"
+  - id: PRR-009
+    pr_number: 66
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/66
+    title: "feat: integrate vecinita-frontend-i18n and vecinita-frontend-ui (F31 / EV-004)"
+    status: completed
+    started: "2026-06-25"
+    completed: "2026-06-25"
+    head_ref: fix/admin-ui-es-en-toggle
+    base_ref: main
+    verdict: REQUEST_CHANGES
+    verdict_note: "Posted as --comment review (GitHub blocks request-changes on own PR; reviewer == author joseph-c-mcguire). Inline comment on CorpusList.tsx:64."
+    blockers: 1
+    advisories: 6
+    praise: 4
+    ci_status: success
+    ci_note: "ci.yml green on head (python/coverage/frontend); deploy-preflight noise on branch, confirm on main post-merge"
+    gh_review_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/66
+    linked_remediation_cycle_id: PRM-006
+    subagents:
+      bugbot: completed
+      security_review: completed
+    note: "Draft PR; CI ci.yml green on head (python/coverage/frontend all success). 1 confirmed product regression (CorpusList locale toggle clears bulk selection), 2 session-doc logic inconsistencies, scope-mixing advisory."
 
 pr_remediation_cycles:
   - id: PRM-001
@@ -1331,6 +1353,65 @@ pr_remediation_cycles:
     follow_up:
       pr_review_rerun: completed
 
+  - id: PRM-006
+    pr_number: 66
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/66
+    linked_review_cycle_id: PRR-009
+    title: "feat: integrate vecinita-frontend-i18n and vecinita-frontend-ui (F31 / EV-004)"
+    status: in_progress
+    started: "2026-06-25"
+    completed: null
+    head_ref: fix/admin-ui-es-en-toggle
+    base_ref: main
+    ci_status: not_pushed
+    scope_note: "User scoped ALL findings (1 blocker + 6 advisories). Session orchestration waived."
+    counts:
+      fixed: 4
+      deferred: 0
+      wont_fix: 1
+    findings:
+      - id: F-001
+        source: inline
+        severity: blocker
+        path: apps/data-management-frontend/src/components/CorpusList.tsx
+        line: 64
+        thread_id: "PRRT_kwDORy2YAM6MYKzz"
+        comment_id: 3478151516
+        status: fixed
+        commit: a223190
+        note: "Decoupled load path from tr via trRef; mount effect stable so locale toggle no longer refetches/clears bulk selection. TDD repro test added (red->green). BUG-2026-06-25 report added."
+      - id: F-003
+        source: review_body
+        severity: advisory
+        path: ".cursor/agents/workflow-state-manager.md, .cursor/skills/00-context/SKILL.md, .cursor/skills/01-requirements/SKILL.md"
+        status: fixed
+        commit: 4296a41
+        note: "Fixed 3 session-model logic gaps: orchestrator routing exemption, open_session ordering, project.stages.{key} canonical vs legacy mirror."
+      - id: F-004
+        source: review_body
+        severity: advisory
+        path: packages/frontend-i18n/src/locale.ts
+        status: fixed
+        commit: d7af898
+        note: "Documented Spanish-first detectBrowserLocale fallback intent."
+      - id: F-005
+        source: review_body
+        severity: advisory
+        path: .github/workflows/ci.yml
+        status: fixed
+        commit: 733b8ba
+        note: "Added packages CI matrix job (frontend-i18n/frontend-ui lint+typecheck+test). QA-010."
+      - id: F-002
+        source: review_body
+        severity: advisory
+        status: wont_fix
+        note: "Scope-mixing (session-model + dep bumps bundled with F31). User chose not to split the PR; will reply on GitHub acknowledging the trade-off and keeping one PR. Session-model doc gaps were fixed in-place (F-003)."
+      - id: F-006
+        source: review_body
+        severity: advisory
+        status: pending
+        note: "Draft PR; will mark ready for review after CI green on fix/admin-ui-es-en-toggle."
+
 agents:
   repo_researcher:
     status: completed
@@ -1441,6 +1522,8 @@ decisions_log:
   - "EV-004 02-verify-plan delta complete — 21 statements, ThemeToggle to frontend-ui (RD-067), AC-F7 H5 — 2026-06-13"
   - "EV-004 04-tech-plan delta — TP-030–TP-039 — ADR-021 — Phase 9 (36 tasks) — 2026-06-13"
   - "EV-004 05-verify-tech delta — TV-041–TV-052 — 12 consistency fixes — 2026-06-13"
+  - date: "2026-06-25"
+    note: "Session orchestration waived (active_session not required) for 19-address-pr-review remediation of PR #66 (PRM-006 / PRR-009 findings). Rationale: process/review-followup work on an existing open PR; user approved proceeding directly without opening a formal session."
 
 artifacts:
   - docs/context-brief.md
@@ -1517,6 +1600,12 @@ git_history:
       status: open
       created_at: "2026-06-12"
       pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/60
+    - name: fix/admin-ui-es-en-toggle
+      purpose: "PR #66 review — F31/EV-004 frontend-i18n + frontend-ui integration"
+      base: main
+      status: open
+      created_at: "2026-06-25"
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/66
   commits:
     - sha: e3c952e
       branch: feat/connectivity-gates
@@ -1644,6 +1733,30 @@ git_history:
       stage: "07-build"
       files_changed: 7
       timestamp: "2026-06-13T23:56:50Z"
+    - sha: a223190
+      branch: fix/admin-ui-es-en-toggle
+      message: "fix(review): decouple CorpusList load path from tr so locale toggle keeps selection"
+      stage: "19-address-pr-review"
+      files_changed: 3
+      timestamp: "2026-06-25"
+    - sha: d7af898
+      branch: fix/admin-ui-es-en-toggle
+      message: "docs(review): document detectBrowserLocale Spanish-first fallback intent"
+      stage: "19-address-pr-review"
+      files_changed: 1
+      timestamp: "2026-06-25"
+    - sha: 733b8ba
+      branch: fix/admin-ui-es-en-toggle
+      message: "ci(review): run shared frontend package tests in CI (QA-010)"
+      stage: "19-address-pr-review"
+      files_changed: 1
+      timestamp: "2026-06-25"
+    - sha: 4296a41
+      branch: fix/admin-ui-es-en-toggle
+      message: "docs(review): resolve session-model logic gaps in workflow-state docs"
+      stage: "19-address-pr-review"
+      files_changed: 3
+      timestamp: "2026-06-25"
 
 constraints:
   cost:
