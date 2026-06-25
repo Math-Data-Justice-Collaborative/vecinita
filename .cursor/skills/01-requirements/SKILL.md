@@ -62,7 +62,9 @@ Per [sessions-reference.md](../sessions-reference.md) §10 and [workflow-state-a
 ## State management
 
 **Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
-**Stage key:** `stages.01-requirements`.
+**Stage key:** `project.stages.01-requirements` (canonical dual-layer baseline; the agent also
+maintains the legacy top-level `stages.01-requirements` mirror — treat `project.stages` as the
+source of truth).
 
 Invoke **workflow-state-manager** `read_context` before any other action; `update` after each
 substep. **Do not** edit `workflow-state.yaml` directly.
@@ -70,7 +72,7 @@ substep. **Do not** edit `workflow-state.yaml` directly.
 
 ### On invocation — check state
 
-1. Use **workflow-state-manager** context brief for §stages.01-requirements (from agent `read_context`).
+1. Use **workflow-state-manager** context brief for §`project.stages.01-requirements` (from agent `read_context`).
 2. **If `completed`**: Ask: "Reuse existing specs, update specific documents, or restart?"
 3. **If `in_progress`**: Report progress (templates completed, current position). Ask:
    "Resume from where we left off, or restart?"

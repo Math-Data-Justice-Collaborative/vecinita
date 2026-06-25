@@ -29,11 +29,15 @@ Run **before** context gathering when user intent implies bounded work (almost a
 
 1. If `active_session` exists: AskQuestion — resume / close and start new / abandon.
 2. Classify **session type** per [sessions-reference.md](../sessions-reference.md) §11.
-3. Agent `open_session`: increment `session_counter`, allocate `S{NNN}-{slug}`.
-4. Create `docs/sessions/SNNN-slug/` with `session-brief.md` (intent, type, scope).
-5. Propose `routing-plan.md` from default presets (§12); document skip rationale per omitted stage.
-6. **AskQuestion** — user approves or edits routing plan.
-7. Agent sets `active_session`; create branch `feat/SNNN-slug` (or `fix/`, `evolve/` per type).
+3. Propose the routing plan from default presets (§12); document skip rationale per omitted stage.
+4. **AskQuestion** — user approves or edits the routing plan.
+5. Agent `open_session` (a single call, **after** approval): increment `session_counter`,
+   allocate `S{NNN}-{slug}`, and set `active_session` with the approved `routing_plan` and
+   `artifacts_dir: docs/sessions/SNNN-slug/`. The agent rejects this call if an `active_session`
+   already exists (handle the existing one via step 1 first).
+6. Create `docs/sessions/SNNN-slug/` with `session-brief.md` (intent, type, scope) and
+   `routing-plan.md` (the approved plan).
+7. Create branch `feat/SNNN-slug` (or `fix/`, `evolve/` per type).
 8. Route to orchestrator when applicable:
    - `greenfield` → [pipeline](../pipeline/SKILL.md)
    - `feature` / `new_service` → [16-evolve](../16-evolve/SKILL.md)

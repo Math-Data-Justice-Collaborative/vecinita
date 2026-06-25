@@ -83,7 +83,10 @@ update_payload:                   # required for operation: update
 1. Read `workflow-state.yaml` (create via `init_project` if missing and skill allows).
 2. Resolve `skill_id` → `stages.{key}` or cycle type (`evolve_cycles[]`, `retrospective_cycles[]`, `pr_review_cycles[]`, `pr_remediation_cycles[]`).
 3. Resolve `active_session`: confirm it exists for stages 01–19, and that `skill_id` appears in
-   `active_session.routing_plan` (else flag a session/routing deviation).
+   `active_session.routing_plan` (else flag a session/routing deviation). **Exempt from the
+   routing-plan membership check:** `00-context` (the session opener) and the orchestrators
+   `pipeline` and `16-evolve` — these manage or seed the routing plan and do not appear as plan
+   entries themselves (the numbered stages they drive must still be listed).
 4. Compute **prerequisites** for this skill per its SKILL.md and preamble phase gates.
 5. Detect **user_intent**:
    - Feature addition keywords: "add feature", "new feature", "add Fn", "extend with", list of capabilities
@@ -250,7 +253,7 @@ Return **blocking** deviations when:
 | Deviation | Detection | Recommended resolution |
 |-----------|-----------|------------------------|
 | **No active session** | `active_session` null and `skill_id` is not `00-context` | Route to **00-context** to open/resume a session (or AskQuestion waive) |
-| **Skill not in routing plan** | `skill_id` absent from `active_session.routing_plan` | AskQuestion: amend routing plan or waive |
+| **Skill not in routing plan** | `skill_id` absent from `active_session.routing_plan` (does **not** apply to `00-context`, `pipeline`, or `16-evolve` — see read_context step 3) | AskQuestion: amend routing plan or waive |
 | **Missing prerequisite stage** | Upstream stage not `completed` / `skipped` / waived | Complete prerequisite or AskQuestion waive |
 | **Phase gate not met** | e.g. 07-build invoked but 04-06 incomplete | Route to blocking stage |
 | **Skill order violation** | Evolve cycle `current_stage` differs from invoked skill without user approval | Resume correct stage or AskQuestion |
@@ -328,7 +331,7 @@ On every commit the invoking skill reports:
 
 | skill_id | Primary state location |
 |----------|------------------------|
-| 00-context … 15-service-health | `stages.{skill_id}` |
+| 00-context … 15-service-health | `project.stages.{skill_id}` (canonical dual-layer baseline). The agent also maintains the legacy top-level `stages.{skill_id}` mirror for backward compatibility; skills should treat `project.stages.{skill_id}` as the source of truth. |
 | 16-evolve | `evolve_cycles[]` |
 | 17-retrospective | `retrospective_cycles[]` |
 | 18-pr-review | `pr_review_cycles[]` |
