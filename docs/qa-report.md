@@ -1,23 +1,23 @@
 # QA Report
 
 > **Project**: Vecinita
-> **Date**: 2026-05-27
+> **Date**: 2026-06-25
 > **Skill**: 09-qa (re-run)
-> **Scope**: Full codebase on active evolve branch (EV-002 in progress; 07-build not complete)
-> **Branch**: `evolve/EV-002-admin-overhaul` (HEAD `98bb7f8`)
+> **Scope**: Full codebase — EV-004 / F31 post-M32; Phase 9 build incomplete (M33+ pending)
+> **Branch**: `fix/admin-ui-es-en-toggle` (HEAD `d67da36`)
 
 ```text
 QA Results:
   Lint:           PASS — 0 issues
-  Format:         PASS — 0 files need formatting (142 files checked)
+  Format:         PASS — 0 files need formatting (180 files checked)
   Typecheck:      PASS — 0 errors, 0 warnings, 0 notes (basedpyright)
-  Tests (Python): PASS — 158 passed, 31 skipped, 0 failed
-  Tests (FE):     PASS — 40 passed (chat-rag 8, data-mgmt 32)
-  Security:       PASS — 0 CVEs; 0 secrets (tracked tree); 7 local-only (gitignored); 0 history
+  Tests (Python): PASS — 479 passed, 38 skipped, 0 failed (517 collected)
+  Tests (FE):     PASS — 267 passed (chat-rag 79, data-mgmt 182, i18n 5, ui 1)
+  Security:       PASS — 0 CVEs; 0 secrets (tracked tree); 0 gitleaks (tree + history)
   Cross-file:     0 unused imports; 0 cycles; docstrings not audited (advisory)
-  Dependencies:   32 outdated (advisory; pins intentional per LlamaIndex stack)
+  Dependencies:   51 outdated (advisory; pins intentional per LlamaIndex stack)
   Template:       PASS — layout, Modal isolation (1 deploy-script exception), OpenAPI, CI
-  Data / Modal:   D1–D5,D8–D9 verified; D6 verified; D7 staged_procedure; workspace vecinita
+  Data / Modal:   D1–D5,D8–D11 verified; D6 verified; D7 staged_procedure; workspace vecinita
 ```
 
 **Overall: PASS (with advisories)**
@@ -32,14 +32,14 @@ QA Results:
 | Format (ruff format) | **PASS** | 0 | 0 |
 | Typecheck (basedpyright) | **PASS** | 0 | 0 |
 | Tests (Python) | **PASS** | 0 | 1 (env-gated skips) |
-| Tests (Frontend) | **PASS** | 0 | 3 (ESLint react-refresh warnings) |
+| Tests (Frontend) | **PASS** | 0 | 0 |
 | Security — CVEs | **PASS** | 0 | 0 |
 | Security — secrets (tracked) | **PASS** | 0 | 0 |
-| Security — gitleaks tree | **PASS** | 0 | 7 (gitignored local files) |
+| Security — gitleaks tree | **PASS** | 0 | 0 |
 | Security — gitleaks history | **PASS** | 0 | 0 |
 | Security — dangerous patterns | **PASS** | 0 | 0 |
 | Cross-file | **PASS** | 0 | 1 (docstrings) |
-| Dependencies | **PASS** | 0 | 32 outdated |
+| Dependencies | **PASS** | 0 | 51 outdated |
 | Template conformance | **PASS** | 0 | 1 (modal in deploy script) |
 | Data staging | **PASS** | 0 | 1 (D7) |
 | CI scripts | **PASS** | 0 | 0 |
@@ -47,16 +47,19 @@ QA Results:
 | H0i integration | **PASS** | 0 | 0 |
 | H4–H5 staging | **ADVISORY** | — | Not run (staging URLs not set) |
 
-**Scope note:** `07-build` is `in_progress` (EV-002 Phase 6, task T21.1+ pending). This QA run covers the **current tree** on `evolve/EV-002-admin-overhaul`, not only merged `main`. Blocking checks are green; advisories carry forward for **11-verify-impl**.
+**Scope note:** `07-build` is `in_progress` for EV-004 Phase 9 (M32 completed; M33+ pending). This QA run covers the **current tree** on `fix/admin-ui-es-en-toggle`, not only merged `main`. Blocking checks are green; advisories carry forward for **11-verify-impl**.
+
+**08-verify-build alignment:** Same branch passed 08-verify-build on 2026-06-25 (`docs/verification-report.md`). Counts differ slightly (08 reported 522 passed / 32 skipped — likely pre/post test delta); this run's JUnit XML is authoritative for 09.
 
 ---
 
 ## Commands Run
 
-All commands from repo root on `evolve/EV-002-admin-overhaul` (`98bb7f8`).
+All commands from repo root on `fix/admin-ui-es-en-toggle` (`d67da36`).
 
 ```bash
 uv sync --group dev
+npm ci   # root workspace — required before frontend lint/test
 
 # Agent 1 — Lint
 uv run ruff check apps packages tests
@@ -68,11 +71,13 @@ uv run ruff format --check apps packages tests
 uv run basedpyright apps packages tests
 
 # Agent 4 — Tests (Python)
-uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval -rs --tb=no
+uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval --junitxml=/tmp/pytest-junit.xml -q --tb=no
 
 # Agent 4 — Tests (Frontend)
-cd apps/chat-rag-frontend && npm ci && npm run lint && npm test -- --run
-cd apps/data-management-frontend && npm ci && npm run lint && npm test -- --run
+cd apps/chat-rag-frontend && npm run lint && npm test -- --run
+cd apps/data-management-frontend && npm run lint && npm test -- --run
+cd packages/frontend-i18n && npm test
+cd packages/frontend-ui && npm test
 
 # Agent 5 — Security
 IGNORE_ARGS=(); while IFS= read -r cve; do [[ -z "$cve" || "$cve" =~ ^# ]] && continue; IGNORE_ARGS+=(--ignore-vuln "$cve"); done < audit/pip-audit-ignore.txt
@@ -91,6 +96,7 @@ uv pip list --outdated
 # Agent 8 — Template & platform
 bash scripts/check_modal_no_database_url.sh
 bash scripts/check_openapi_specs.sh
+bash scripts/check_no_operator_specs_tracked.sh
 rg 'import modal' --glob '*.py'
 
 # Agent 9 — H0c subset
@@ -114,7 +120,7 @@ All checks passed!
 **Result: PASS**
 
 ```
-142 files already formatted
+180 files already formatted
 ```
 
 ### Agent 3 — Typecheck (basedpyright)
@@ -129,23 +135,23 @@ All checks passed!
 
 #### Python (pytest)
 
-**Result: PASS — 158 passed, 31 skipped, 0 failed**
+**Result: PASS — 479 passed, 38 skipped, 0 failed (517 collected)**
 
 | Category | Count | Notes |
 |----------|-------|-------|
-| Passed | 158 | unit, integration, privacy, e2e, smoke, eval |
-| Skipped | 31 | Env-gated (see below) |
+| Passed | 479 | unit, integration, privacy, e2e, smoke, eval |
+| Skipped | 38 | Env-gated (see below) |
 | Failed | 0 | — |
-| Warnings | 1 | Pydantic `validate_default` — non-blocking (LlamaIndex upstream) |
+| Warnings | 1 | Starlette `httpx` deprecation — non-blocking |
 
 **Skipped tests (env-gated, expected locally):**
 
 | Test file | Skips | Reason |
 |-----------|-------|--------|
-| `tests/unit/test_audit_retention.py` | 1 | `DATABASE_URL` required |
 | `tests/unit/test_cors_policy.py` | 4 | `DATABASE_URL` required for internal-write-api import (H0c subset) |
-| `tests/smoke/test_modal_weights_staged.py` | 3 | `VECINITA_MODAL_EMBED_URL` / `VECINITA_MODAL_LLM_URL` not set |
-| `tests/smoke/test_staging_connectivity.py` | 14 | `VECINITA_STAGING_*` URLs not set (H4/H5) |
+| `tests/smoke/test_modal_weights_staged.py` | 2+ | `VECINITA_MODAL_EMBED_URL` / `VECINITA_MODAL_LLM_URL` not set |
+| `tests/smoke/test_staging_connectivity.py` | 20 | `VECINITA_STAGING_*` URLs not set (H4/H5) |
+| `tests/smoke/test_staging_ev002_admin.py` | 4 | `VECINITA_STAGING_WRITE_URL` not set |
 | `tests/smoke/test_staging_gate.py` | 2 | `VECINITA_STAGING_CHAT_URL` not set |
 | `tests/smoke/test_staging_health.py` | 3 | `VECINITA_STAGING_*` not set |
 | `tests/smoke/test_staging_latency.py` | 1 | `VECINITA_STAGING_CHAT_URL` not set (AC-C6) |
@@ -156,12 +162,14 @@ All checks passed!
 
 **Result: PASS**
 
-| App | Lint | Tests | Details |
-|-----|------|-------|---------|
-| `chat-rag-frontend` | PASS | 8 passed (3 files) | ChatPanel, ask API, CorpusBrowse |
-| `data-management-frontend` | PASS (3 warnings) | 32 passed (8 files) | Admin nav, dashboard, audit, health, tags, JobForm |
+| App / package | Lint | Tests | Details |
+|---------------|------|-------|---------|
+| `chat-rag-frontend` | PASS | 79 passed (14 files) | Includes F31 i18n/UI integration |
+| `data-management-frontend` | PASS | 182 passed (28 files) | Admin nav, dashboard, audit, theme, locale |
+| `frontend-i18n` (workspace) | — | 5 passed (1 file) | Typed `t()` helpers |
+| `frontend-ui` (workspace) | — | 1 passed (1 file) | Shared components |
 
-**ESLint warnings (advisory):** `react-refresh/only-export-components` in `ThemeProvider.tsx`, `badge.tsx`, `button.tsx` — shadcn pattern; 0 errors.
+**Note:** CI frontend matrix covers the two apps only; workspace package tests run locally as advisory (QA-010).
 
 ### Agent 5 — Security
 
@@ -181,24 +189,18 @@ OK: no high-confidence secret patterns in apps packages tests infra openapi.
 
 #### Gitleaks (current working tree)
 
-**Result: PASS (advisory — local gitignored files only)**
+**Result: PASS — 0 findings**
 
-7 hits in operator-only files (not tracked):
-
-| File | Hits | Git-tracked? |
-|------|------|--------------|
-| `prod.env` | 3 | No (`.gitignore`) |
-| `.deploy-keys.local` | 2 | No |
-| `.tmp/vecinita-data-management-secret.json` | 2 | No |
-
-CI clean checkout: **0** tree findings. Not blocking.
+```
+scanned ~8.49 MB in 5.48s — no leaks found
+```
 
 #### Gitleaks (git history)
 
 **Result: PASS — 0 findings**
 
 ```
-629 commits scanned. no leaks found.
+658 commits scanned. no leaks found.
 ```
 
 #### Dangerous patterns
@@ -211,24 +213,23 @@ CI clean checkout: **0** tree findings. Not blocking.
 |-------|--------|-------|
 | Unused imports (F401) | PASS | 0 |
 | Unused variables (F841) | PASS | 0 |
-| Circular deps | PASS | No cycles detected |
+| Circular deps | PASS | No cycles detected (manual import graph review) |
 | Dead code (vulture) | SKIPPED | Not installed |
 | Public docstrings | NOT AUDITED | Advisory — QA-002 |
 
 ### Agent 7 — Dependency Health
 
-**Result: PASS (advisory — 32 outdated packages)**
+**Result: PASS (advisory — 51 outdated packages)**
 
 Notable outdated (intentional pins per ADR-006):
 
 | Package | Current | Latest | Intentional? |
 |---------|---------|--------|--------------|
-| llama-index | 0.13.6 | 0.14.22 | **Yes** |
-| llama-index-core | 0.13.6 | 0.14.22 | **Yes** |
-| numpy | 1.26.4 | 2.4.6 | **Yes** — LlamaIndex compat |
-| openai | 1.109.1 | 2.38.0 | **Yes** |
+| llama-index | 0.13.x band | 0.14.x | **Yes** |
+| numpy | 1.26.4 | 2.4.x | **Yes** — LlamaIndex compat |
+| openai | 1.109.x | 2.x | **Yes** |
 
-Minor safe bumps: fastapi 0.136.1→0.136.3, SQLAlchemy 2.0.49→2.0.50, ruff 0.15.13→0.15.14.
+Minor safe bumps available: fastapi, alembic, basedpyright, coverage, etc.
 
 Missing dependencies: **0**.
 
@@ -242,8 +243,9 @@ Missing dependencies: **0**.
 | Modal isolation | `import modal` only under `infra/modal/` | 3 files in `infra/modal/` + `scripts/deploy/read_data_mgmt_secret.py` (operator one-off) | PASS* |
 | OpenAPI | specs parse | `check_openapi_specs.sh` OK | PASS |
 | No `DATABASE_URL` in Modal | script check | OK | PASS |
-| CI parity | matches Phase 1 | basedpyright, same pytest paths | PASS |
-| Modal workspace | `vecinita` profile | Documented; D6 URL uses `vecinita--` prefix | PASS |
+| Operator specs not tracked | script check | OK | PASS |
+| CI parity | matches Phase 1 | basedpyright, same pytest paths, frontend matrix | PASS |
+| Modal workspace | `vecinita` profile | Documented; deploy scripts use `vecinita--` prefix | PASS |
 
 \*Deploy script exception is documented operator tooling; not a runtime app path.
 
@@ -259,8 +261,26 @@ Missing dependencies: **0**.
 | FastEmbed weights | D6 | verified (`vecinita` workspace) |
 | Qwen2.5-1.5B | D7 | **staged_procedure** |
 | Seed tags, tagged corpus | D8, D9 | verified |
+| Frontend i18n messages | D10 | verified (repo-local) |
+| Frontend UI components | D11 | verified (repo-local) |
 
 **Deferred (no staging env locally):** H1–H3, H4–H5 — see `docs/staging-runbook.md`, `scripts/deploy/staging_smoke.sh`.
+
+**Modal live checks:** `VECINITA_MODAL_*` and `VECINITA_STAGING_*` unset — advisory only.
+
+---
+
+## Phase / Execution-Plan Alignment
+
+| Field | Value |
+|-------|-------|
+| Active evolve cycle | EV-004 (F31 — shared frontend i18n/UI) |
+| Active phase | Phase 9 — shared frontend i18n/UI |
+| Milestone completed | M32 (workspace scaffold) |
+| Next milestone | M33 (T33.1+) |
+| Build gate | **Partial** — 4/218 Phase 9 tasks done; user waived full-build gate for mid-milestone QA |
+
+Re-run 09 after M33+ lands materially new code or before EV-004 phase gate.
 
 ---
 
@@ -268,70 +288,28 @@ Missing dependencies: **0**.
 
 | ID | Severity | Finding | Suggested Action |
 |----|----------|---------|------------------|
-| QA-001 | **Advisory** | `07-build` still `in_progress` (EV-002 Phase 6; T21.1+ pending). QA green on current branch does not imply EV-002 complete. | Complete EV-002 milestones; re-run 09 after merge to `main` if tree changes materially. |
+| QA-001 | **Advisory** | `07-build` still `in_progress` (EV-004 Phase 9; M33+ pending). QA green on current branch does not imply EV-004 complete. | Complete Phase 9 milestones; re-run 09 after merge to `main` if tree changes materially. |
 | QA-002 | **Advisory** | Public docstrings not audited. | Optional doc pass on `apps/` + `packages/`. |
 | QA-003 | **Advisory** | D7 `staged_procedure` — LLM weights not verified on volume. | `scripts/stage_modal_weights.sh` on `vecinita` workspace; update `data-staging-state.md`. |
-| QA-004 | **Advisory** | 32 outdated dependencies; LlamaIndex pins intentional. | Bump safe patches; major bumps need ADR. |
-| QA-005 | **Advisory** | Gitleaks tree: 7 hits in gitignored local files only. | No action for CI. Optional: allowlist paths in `.gitleaks.toml` for local DX. |
+| QA-004 | **Advisory** | 51 outdated dependencies; LlamaIndex pins intentional. | Bump safe patches; major bumps need ADR. |
 | QA-006 | **Advisory** | Phase 4 H1–H3 / H4–H5 not run (no `VECINITA_STAGING_*`). | Operator: `staging_smoke.sh`, `verify_connectivity.sh` per staging-runbook. |
 | QA-007 | **Advisory** | 4 CORS tests skipped without local `DATABASE_URL`. | CI authoritative (postgres service). Local: `docker-compose` + `DATABASE_URL`. |
-| QA-008 | **Advisory** | Pydantic `validate_default` warning (LlamaIndex). | Upstream; no action until LlamaIndex patch. |
+| QA-008 | **Advisory** | Starlette `httpx` deprecation warning in test client. | Track upstream; optional `httpx2` when Starlette requires it. |
 | QA-009 | **Advisory** | `import modal` in `scripts/deploy/read_data_mgmt_secret.py` (outside `infra/modal/`). | Accept as operator script or move under `infra/modal/` if strict template enforcement desired. |
-| QA-010 | **Advisory** | data-mgmt frontend ESLint `react-refresh/only-export-components` (3 warnings). | shadcn convention; suppress or split exports if noise is unwanted. |
+| QA-010 | **Advisory** | `packages/frontend-i18n` and `packages/frontend-ui` tests pass locally but are not in CI frontend matrix. | Add workspace package test step to CI or rely on app-level coverage gate (`make test-unit-coverage`). |
 
 ---
 
-## Data Integrity / Modal Workspace
+## Handoff
 
-| Check | Expected | Actual |
-|-------|----------|--------|
-| Modal workspace profile | `vecinita` | Documented in `infra/modal/README.md`, `env.example` |
-| Deploy URL prefix | `vecinita--` | D6: `https://vecinita--vecinita-embedding-embedding-api.modal.run` |
-| Modal apps | embedding, llm, data-management | `infra/modal/*.py` |
-| Embed dimension | 384 | D6 verified |
+**Blocking:** None — safe to proceed to **11-verify-impl** for user sign-off on advisories.
 
----
+**Connectivity:**
 
-## Phase / Execution Plan Alignment
-
-| Area | Status | Notes |
+| Gate | Status | Notes |
 |------|--------|-------|
-| Phases 1–5 (greenfield + EV-001) | Completed per plan | Prior gate |
-| **EV-002** (F23–F29) | **In progress** | Phase 6 M20 complete; M21+ pending |
-| Phase 4 staging gates | Deferred | Operator env required |
-| D7 verification | Deferred | `staged_procedure` |
+| H0c (`test_cors_policy.py`) | **PASS** (5/9 locally; CI runs 9/9) | Blocking per connectivity-gates |
+| H0i (`tests/integration`) | **PASS** | Included in full pytest run |
+| H4–H5 (staging frontends) | **SKIPPED** | Set `VECINITA_STAGING_*_FRONTEND_URL` for live verification |
 
----
-
-## CI Parity
-
-Local checks align with `.github/workflows/ci.yml`:
-
-| CI Step | Local | Result |
-|---------|-------|--------|
-| Ruff lint / format | Same paths | PASS |
-| Basedpyright | Same paths | PASS |
-| Pytest | Same paths | PASS (158p / 31s local) |
-| pip-audit + ignore file | Same | PASS |
-| check_secrets / modal / openapi | Same | PASS |
-| Gitleaks `--no-git` | Same | 0 on clean checkout; 7 local gitignored |
-| Frontend matrix | Both apps | PASS |
-
-**Note:** CI sets `DATABASE_URL` — all CORS tests run in CI; 4 skipped locally.
-
----
-
-## Delta vs 2026-05-25 QA
-
-| Metric | 2026-05-25 (`main`) | 2026-05-27 (`evolve/EV-002-admin-overhaul`) |
-|--------|---------------------|---------------------------------------------|
-| Python tests passed | 91 | **158** |
-| Python skipped | 25 | **31** |
-| data-mgmt FE tests | 2 | **32** |
-| Formatted files | 115 | **142** |
-| Typechecker | pyright | **basedpyright** (ADR-018) |
-| Overall | pass_with_advisories | **pass_with_advisories** |
-
----
-
-*Report generated by 09-qa. No code changes applied. Handoff: **11-verify-impl**.*
+**Prior report superseded:** 2026-05-27 EV-002 report on `evolve/EV-002-admin-overhaul` — replace with this document for EV-004 context.

@@ -14,6 +14,7 @@ Interview the user to fill spec document templates. Template-driven: for each ap
 template section, ask targeted questions to fill it.
 
 **Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
+**Sessions:** [sessions-reference.md](../sessions-reference.md) — requires `active_session` unless waived; reports under `docs/sessions/{id}/reports/`.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 **State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
@@ -48,10 +49,22 @@ Follow [considerations.md](../considerations.md) §Uncertainty. During interview
 any contradictions in user's answers, ambiguities in scope, and decisions that affect
 multiple templates.
 
+## Session management
+
+Per [sessions-reference.md](../sessions-reference.md) §10 and [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
+
+1. Agent `read_context` must return `active_session` (or blocking deviation).
+2. Current stage must appear in `active_session.routing_plan` unless user amends plan.
+3. Write stage reports to `active_session.artifacts_dir/reports/` when this stage produces a report.
+4. On completion: update routing-plan entry status; mirror `project.stages.{key}` via agent `update`.
+5. **00-context** exempt from active_session requirement (session opener).
+
 ## State management
 
 **Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
-**Stage key:** `stages.01-requirements`.
+**Stage key:** `project.stages.01-requirements` (canonical dual-layer baseline; the agent also
+maintains the legacy top-level `stages.01-requirements` mirror — treat `project.stages` as the
+source of truth).
 
 Invoke **workflow-state-manager** `read_context` before any other action; `update` after each
 substep. **Do not** edit `workflow-state.yaml` directly.
@@ -59,7 +72,7 @@ substep. **Do not** edit `workflow-state.yaml` directly.
 
 ### On invocation — check state
 
-1. Use **workflow-state-manager** context brief for §stages.01-requirements (from agent `read_context`).
+1. Use **workflow-state-manager** context brief for §`project.stages.01-requirements` (from agent `read_context`).
 2. **If `completed`**: Ask: "Reuse existing specs, update specific documents, or restart?"
 3. **If `in_progress`**: Report progress (templates completed, current position). Ask:
    "Resume from where we left off, or restart?"

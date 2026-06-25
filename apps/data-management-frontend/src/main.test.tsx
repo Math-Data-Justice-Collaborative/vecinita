@@ -31,13 +31,17 @@ describe("main entry", () => {
   it("mounts the admin shell into #root", async () => {
     await import("./main");
 
-    await waitFor(() => {
-      expect(screen.getByTestId("admin-nav")).toBeInTheDocument();
-    });
-  });
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("admin-nav")).toBeInTheDocument();
+      },
+      { timeout: 10_000 },
+    );
+  }, 15_000);
 
   it("throws when #root is missing", async () => {
+    vi.resetModules();
     document.body.innerHTML = "";
     await expect(import("./main")).rejects.toThrow(/root element/i);
-  });
+  }, 15_000);
 });

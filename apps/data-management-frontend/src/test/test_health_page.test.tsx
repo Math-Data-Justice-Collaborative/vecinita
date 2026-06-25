@@ -1,10 +1,5 @@
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 
@@ -27,7 +22,7 @@ const MOCK_HEALTH = {
 };
 
 function renderHealth() {
-  return render(
+  return renderWithProviders(
     <ThemeProvider>
       <MemoryRouter>
         <HealthPage />

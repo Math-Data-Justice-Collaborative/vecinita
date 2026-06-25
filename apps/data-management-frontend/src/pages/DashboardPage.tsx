@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useLocale } from "vecinita-frontend-ui";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,8 +13,12 @@ import {
 } from "@/components/ui/table";
 import { type StatsSummary, fetchStatsSummary } from "@/api/admin";
 import { requireCorpusConfig } from "@/config";
+import { useAdminT } from "@/hooks/useAdminT";
+import { formatLocaleDateTime } from "@/lib/formatLocaleDateTime";
 
 export function DashboardPage() {
+  const tr = useAdminT();
+  const { locale } = useLocale();
   const [stats, setStats] = useState<StatsSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,11 +31,13 @@ export function DashboardPage() {
       const data = await fetchStatsSummary(client);
       setStats(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load dashboard");
+      setError(
+        err instanceof Error ? err.message : tr("admin.dashboard.loadFailed"),
+      );
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [tr]);
 
   useEffect(() => {
     void load();
@@ -40,12 +47,14 @@ export function DashboardPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {tr("admin.dashboard.title")}
+          </h2>
           <p className="text-muted-foreground">
-            Overview of your corpus and system health.
+            {tr("admin.dashboard.subtitle")}
           </p>
         </div>
-        <p className="text-muted-foreground">Loading…</p>
+        <p className="text-muted-foreground">{tr("shared.loading")}</p>
       </div>
     );
   }
@@ -54,7 +63,9 @@ export function DashboardPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {tr("admin.dashboard.title")}
+          </h2>
         </div>
         <p role="alert" className="text-sm text-destructive">
           {error}
@@ -68,9 +79,11 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <h2 className="text-3xl font-bold tracking-tight">
+          {tr("admin.dashboard.title")}
+        </h2>
         <p className="text-muted-foreground">
-          Overview of your corpus and system health.
+          {tr("admin.dashboard.subtitle")}
         </p>
       </div>
 
@@ -78,7 +91,7 @@ export function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Documents
+              {tr("admin.dashboard.stats.totalDocuments")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -87,7 +100,9 @@ export function DashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Chunks</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {tr("admin.dashboard.stats.totalChunks")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total_chunks}</div>
@@ -95,7 +110,9 @@ export function DashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tags</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {tr("admin.dashboard.stats.tags")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -105,7 +122,9 @@ export function DashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Languages</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {tr("admin.dashboard.stats.languages")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -118,19 +137,23 @@ export function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Top Served Documents</CardTitle>
+            <CardTitle>{tr("admin.dashboard.topServed.title")}</CardTitle>
           </CardHeader>
           <CardContent>
             {stats.top_served.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No serving data yet.
+                {tr("admin.dashboard.topServed.empty")}
               </p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Document</TableHead>
-                    <TableHead className="text-right">Served</TableHead>
+                    <TableHead>
+                      {tr("admin.dashboard.topServed.columnDocument")}
+                    </TableHead>
+                    <TableHead className="text-right">
+                      {tr("admin.dashboard.topServed.columnServed")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -150,12 +173,12 @@ export function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle>{tr("admin.dashboard.recentActivity.title")}</CardTitle>
           </CardHeader>
           <CardContent>
             {stats.recent_activity.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No recent activity.
+                {tr("admin.dashboard.recentActivity.empty")}
               </p>
             ) : (
               <div className="space-y-3">
@@ -171,7 +194,7 @@ export function DashboardPage() {
                       </span>
                     </div>
                     <span className="text-xs text-muted-foreground">
-                      {new Date(event.timestamp).toLocaleString()}
+                      {formatLocaleDateTime(locale, event.timestamp)}
                     </span>
                   </div>
                 ))}

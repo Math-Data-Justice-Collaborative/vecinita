@@ -17,6 +17,7 @@ cycle**) through updated specs, verified plans, implementation, and redeploy —
 **00–15** in **delta mode**.
 
 **Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
+**Sessions:** [sessions-reference.md](../sessions-reference.md) — requires `feature` or `new_service` active_session.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 **State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
@@ -40,20 +41,24 @@ uncertain, or contradictory finding uses **AskQuestion** — never guess.
 | Modal ops / health investigation only | [15-service-health](../15-service-health/SKILL.md) |
 | Lessons learned / improve skills 00–17 | [17-retrospective](../17-retrospective/SKILL.md) |
 
-**Any stage 00–17** may receive a feature-addition request. If no active evolve cycle exists,
-that stage's workflow-state-manager context will **block** and recommend **16-evolve** — start
-here for net-new feature work on an existing app.
+**Any stage 00–17** may receive a feature-addition request during an **active session** with
+type `feature` or `new_service` and an active evolve cycle. If no session exists,
+workflow-state-manager **blocks** and recommends **00-context** — then **16-evolve** for net-new
+feature work on an existing app.
 
 ## Prerequisites
 
 Before starting an evolve cycle:
 
-1. **`workflow-state.yaml` exists** with prior pipeline progress (ideally Phase D complete).
-2. **Spec documents exist** under `docs/` (at minimum `feature-list.md`, `spec.md`, `test-plan.md`).
-3. **Codebase exists** with a deployable artifact (or user confirms build-only evolve).
+1. **`active_session`** exists with type `feature` or `new_service` (opened by **00-context**).
+2. `routing-plan.md` lists required stages; user approved the plan.
+3. **`workflow-state.yaml` exists** with prior pipeline progress (ideally Phase D complete).
+4. **Spec documents exist** under `docs/` (at minimum `feature-list.md`, `spec.md`, `test-plan.md`).
+5. **Codebase exists** with a deployable artifact (or user confirms build-only evolve).
 
-If prerequisites are missing, ask via AskQuestion: run full [pipeline](../pipeline/SKILL.md) first,
-or proceed with a reduced doc set (record waiver via workflow-state-manager).
+If `active_session` is null, route to [00-context](../00-context/SKILL.md) first.
+If other prerequisites are missing, ask via AskQuestion: run full [pipeline](../pipeline/SKILL.md)
+first, or proceed with a reduced doc set (record waiver via workflow-state-manager).
 
 ## Interactive questions (required)
 
@@ -71,6 +76,13 @@ or proceed with a reduced doc set (record waiver via workflow-state-manager).
 
 Do not post interview prompts as markdown lists expecting inline replies.
 
+## Session management
+
+Orchestrator for `feature` and `new_service` sessions. Requires `active_session` from **00-context**.
+Writes summary to `docs/sessions/{id}/reports/evolve-summary.md`. Links `evolve_cycles[].session_id`.
+
+Per [sessions-reference.md](../sessions-reference.md) §10.
+
 ## State management
 
 **Agent protocol:** [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
@@ -80,8 +92,10 @@ Do not post interview prompts as markdown lists expecting inline replies.
 On invocation:
 
 1. Invoke **workflow-state-manager** `read_context` with `skill_id: 16-evolve` and `user_intent`.
-2. If an evolve cycle is `in_progress`, report position; AskQuestion: resume / abandon / start new.
-3. If none in progress, start **Phase 0 — Change / feature intake**.
+2. Verify `active_session.type` is `feature` or `new_service`; else block → **00-context**.
+3. Set `active_session.orchestrator: 16-evolve`; link `evolve_cycles[].session_id` to `active_session.id`.
+4. If an evolve cycle is `in_progress`, report position; AskQuestion: resume / abandon / start new.
+5. If none in progress, start **Phase 0 — Change / feature intake**.
 
 After every substep: agent `update` on the active cycle (status, `current_stage`, artifacts, ADRs,
 checkpoints, `git_history`).

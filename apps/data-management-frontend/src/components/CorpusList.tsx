@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { deleteDocument, listDocuments } from "../api/corpus";
 import type { DocumentSummary } from "../api/types";
@@ -20,8 +20,17 @@ import { BulkDeleteDialog } from "@/components/BulkDeleteDialog";
 import { BulkTagDialog } from "@/components/BulkTagDialog";
 import { BulkMetadataDialog } from "@/components/BulkMetadataDialog";
 import { Trash2, Tags, FileEdit } from "lucide-react";
+import { useAdminT } from "@/hooks/useAdminT";
 
 export function CorpusList() {
+  const tr = useAdminT();
+  // Keep the load path decoupled from `tr`: its identity changes on every
+  // EN/ES switch, and depending on it would refire the mount loader and clear
+  // the bulk selection on a locale change (BUG-2026-06-25).
+  const trRef = useRef(tr);
+  useEffect(() => {
+    trRef.current = tr;
+  }, [tr]);
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,28 +41,35 @@ export function CorpusList() {
   const [bulkTagOpen, setBulkTagOpen] = useState(false);
   const [bulkMetadataOpen, setBulkMetadataOpen] = useState(false);
 
-  const refresh = useCallback(async (isActive: () => boolean = () => true) => {
-    setError(null);
-    setLoading(true);
-    try {
-      const client = requireCorpusConfig();
-      const list = await listDocuments(client);
-      if (!isActive()) {
-        return;
+  const refresh = useCallback(
+    async (isActive: () => boolean = () => true) => {
+      setError(null);
+      setLoading(true);
+      try {
+        const client = requireCorpusConfig();
+        const list = await listDocuments(client);
+        if (!isActive()) {
+          return;
+        }
+        setDocuments(list);
+        setSelectedIds(new Set());
+      } catch (err) {
+        if (!isActive()) {
+          return;
+        }
+        setError(
+          err instanceof Error
+            ? err.message
+            : trRef.current("admin.corpusList.loadFailed"),
+        );
+      } finally {
+        if (isActive()) {
+          setLoading(false);
+        }
       }
-      setDocuments(list);
-      setSelectedIds(new Set());
-    } catch (err) {
-      if (!isActive()) {
-        return;
-      }
-      setError(err instanceof Error ? err.message : "Failed to load corpus");
-    } finally {
-      if (isActive()) {
-        setLoading(false);
-      }
-    }
-  }, []);
+    },
+    [],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -65,7 +81,7 @@ export function CorpusList() {
 
   const handleDelete = async (doc: DocumentSummary) => {
     const label = doc.title ?? doc.url;
-    if (!window.confirm(`Delete "${label}"? This cannot be undone.`)) {
+    if (!window.confirm(tr("admin.corpusList.deleteConfirm", { label }))) {
       return;
     }
     setDeletingId(doc.document_id);
@@ -75,7 +91,11 @@ export function CorpusList() {
       await deleteDocument(client, doc.document_id);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Delete failed");
+      setError(
+        err instanceof Error
+          ? err.message
+          : tr("admin.corpusList.deleteFailed"),
+      );
     } finally {
       setDeletingId(null);
     }
@@ -106,14 +126,14 @@ export function CorpusList() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Corpus Documents</CardTitle>
+        <CardTitle>{tr("admin.corpusList.title")}</CardTitle>
         <Button
           variant="outline"
           size="sm"
           onClick={() => void refresh()}
           disabled={loading}
         >
-          Refresh
+          {tr("shared.refresh")}
         </Button>
       </CardHeader>
       <CardContent>
@@ -132,7 +152,9 @@ export function CorpusList() {
                 className="mb-4 flex items-center gap-2 rounded-md border bg-muted p-2"
               >
                 <span className="text-sm font-medium">
-                  {selectedIds.size} selected
+                  {tr("admin.corpusList.selectedCount", {
+                    count: selectedIds.size,
+                  })}
                 </span>
                 <Button
                   variant="destructive"
@@ -143,7 +165,7 @@ export function CorpusList() {
                   }}
                 >
                   <Trash2 className="mr-1 h-4 w-4" />
-                  Delete
+                  {tr("admin.actions.delete")}
                 </Button>
                 <Button
                   variant="outline"
@@ -154,7 +176,7 @@ export function CorpusList() {
                   }}
                 >
                   <Tags className="mr-1 h-4 w-4" />
-                  Tag
+                  {tr("admin.actions.tag")}
                 </Button>
                 <Button
                   variant="outline"
@@ -165,7 +187,7 @@ export function CorpusList() {
                   }}
                 >
                   <FileEdit className="mr-1 h-4 w-4" />
-                  Metadata
+                  {tr("admin.actions.metadata")}
                 </Button>
               </div>
             )}
@@ -176,10 +198,12 @@ export function CorpusList() {
               </p>
             ) : null}
             {loading ? (
-              <p className="text-sm text-muted-foreground">Loading…</p>
+              <p className="text-sm text-muted-foreground">
+                {tr("shared.loading")}
+              </p>
             ) : documents.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No documents in corpus.
+                {tr("admin.corpusList.empty")}
               </p>
             ) : (
               <Table>
@@ -193,13 +217,17 @@ export function CorpusList() {
                           documents.length > 0
                         }
                         onCheckedChange={toggleAll}
-                        aria-label="Select all"
+                        aria-label={tr("admin.corpusList.selectAll")}
                       />
                     </TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead>URL</TableHead>
-                    <TableHead>Language</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{tr("admin.corpusList.columnTitle")}</TableHead>
+                    <TableHead>{tr("admin.corpusList.columnUrl")}</TableHead>
+                    <TableHead>
+                      {tr("admin.corpusList.columnLanguage")}
+                    </TableHead>
+                    <TableHead className="text-right">
+                      {tr("admin.corpusList.columnActions")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -218,12 +246,14 @@ export function CorpusList() {
                           onCheckedChange={() => {
                             toggleId(doc.document_id);
                           }}
-                          aria-label={`Select ${doc.title ?? doc.url}`}
+                          aria-label={tr("admin.corpusList.selectRow", {
+                            label: doc.title ?? doc.url,
+                          })}
                         />
                       </TableCell>
                       <TableCell>
                         <div className="font-medium">
-                          {doc.title ?? "(untitled)"}
+                          {doc.title ?? tr("admin.corpusList.untitled")}
                         </div>
                         {doc.tags && doc.tags.length > 0 && (
                           <div className="mt-1 flex flex-wrap gap-1">
@@ -243,7 +273,9 @@ export function CorpusList() {
                           {doc.url}
                         </a>
                       </TableCell>
-                      <TableCell>{doc.language ?? "—"}</TableCell>
+                      <TableCell>
+                        {doc.language ?? tr("shared.emDash")}
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
@@ -253,7 +285,7 @@ export function CorpusList() {
                               setSelected(doc);
                             }}
                           >
-                            Manage tags
+                            {tr("admin.corpusList.manageTags")}
                           </Button>
                           <Button
                             variant="destructive"
@@ -262,8 +294,8 @@ export function CorpusList() {
                             disabled={deletingId === doc.document_id}
                           >
                             {deletingId === doc.document_id
-                              ? "Deleting…"
-                              : "Delete"}
+                              ? tr("admin.actions.deleting")
+                              : tr("admin.actions.delete")}
                           </Button>
                         </div>
                       </TableCell>

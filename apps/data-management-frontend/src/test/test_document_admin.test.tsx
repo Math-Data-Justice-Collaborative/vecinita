@@ -1,10 +1,5 @@
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -20,7 +15,7 @@ const DOC = {
 
 function renderAdmin() {
   const onClose = vi.fn();
-  render(
+  renderWithProviders(
     <ThemeProvider>
       <DocumentAdmin document={DOC} onClose={onClose} />
     </ThemeProvider>,
@@ -302,7 +297,7 @@ describe("DocumentAdmin", () => {
 
   it("uses document url when title is missing", async () => {
     const onClose = vi.fn();
-    render(
+    renderWithProviders(
       <ThemeProvider>
         <DocumentAdmin document={{ ...DOC, title: null }} onClose={onClose} />
       </ThemeProvider>,

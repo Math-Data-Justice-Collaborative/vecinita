@@ -1,10 +1,5 @@
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { JobForm } from "../components/JobForm";
@@ -41,8 +36,7 @@ describe("JobForm", () => {
         }),
       );
     vi.stubGlobal("fetch", fetchMock);
-
-    render(<JobForm />);
+    renderWithProviders(<JobForm />);
     fireEvent.change(screen.getByLabelText(/public urls/i), {
       target: { value: "https://example.com/page\n" },
     });
@@ -58,7 +52,7 @@ describe("JobForm", () => {
   });
 
   it("shows validation error when no URLs entered", async () => {
-    render(<JobForm />);
+    renderWithProviders(<JobForm />);
     fireEvent.click(screen.getByRole("button", { name: /submit ingest/i }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
       /at least one url/i,
@@ -66,7 +60,7 @@ describe("JobForm", () => {
   });
 
   it("shows validation error for chunk size below minimum", async () => {
-    render(<JobForm />);
+    renderWithProviders(<JobForm />);
     fireEvent.change(screen.getByLabelText(/public urls/i), {
       target: { value: "https://example.com/page" },
     });
@@ -100,8 +94,7 @@ describe("JobForm", () => {
         }),
       );
     vi.stubGlobal("fetch", fetchMock);
-
-    render(<JobForm />);
+    renderWithProviders(<JobForm />);
     fireEvent.change(screen.getByLabelText(/public urls/i), {
       target: { value: "https://example.com/page" },
     });
@@ -147,8 +140,7 @@ describe("JobForm", () => {
         }),
       );
     vi.stubGlobal("fetch", fetchMock);
-
-    render(<JobForm />);
+    renderWithProviders(<JobForm />);
     fireEvent.change(screen.getByLabelText(/public urls/i), {
       target: { value: "https://example.com/page" },
     });
@@ -184,8 +176,7 @@ describe("JobForm", () => {
         }),
       );
     vi.stubGlobal("fetch", fetchMock);
-
-    render(<JobForm onJobUpdate={onJobUpdate} />);
+    renderWithProviders(<JobForm onJobUpdate={onJobUpdate} />);
     fireEvent.change(screen.getByLabelText(/public urls/i), {
       target: { value: "https://example.com/page" },
     });
@@ -215,8 +206,7 @@ describe("JobForm", () => {
         }),
       );
     vi.stubGlobal("fetch", fetchMock);
-
-    render(<JobForm />);
+    renderWithProviders(<JobForm />);
     fireEvent.change(screen.getByLabelText(/public urls/i), {
       target: { value: "https://example.com/page" },
     });
@@ -229,8 +219,7 @@ describe("JobForm", () => {
 
   it("shows generic ingest error for non-Error failures", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValueOnce("ingest down"));
-
-    render(<JobForm />);
+    renderWithProviders(<JobForm />);
     fireEvent.change(screen.getByLabelText(/public urls/i), {
       target: { value: "https://example.com/page" },
     });

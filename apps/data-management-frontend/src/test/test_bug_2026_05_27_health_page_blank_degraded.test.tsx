@@ -2,7 +2,8 @@
  * BUG-2026-05-27: Health page blank when /internal/v1/health/all returns api-contract shape.
  * @see docs/bug-reports/BUG-2026-05-27-health-page-blank-degraded.md
  */
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
+import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 
@@ -21,7 +22,7 @@ const PRODUCTION_DEGRADED_HEALTH = {
 };
 
 function renderHealth() {
-  return render(
+  return renderWithProviders(
     <ThemeProvider>
       <MemoryRouter>
         <HealthPage />

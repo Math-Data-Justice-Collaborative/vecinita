@@ -26,7 +26,15 @@ from understanding requirements to deploying code — is structured, audited, an
 user-approved. The user is the source of truth at every stage.
 
 **Stage conventions (00–17):** [pipeline-preamble.md](../pipeline-preamble.md).
+**Sessions:** [sessions-reference.md](../sessions-reference.md) — greenfield session orchestrator;
+requires a `greenfield` `active_session` opened by [00-context](../00-context/SKILL.md).
 **State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
+
+## Prerequisites
+
+1. **00-context** has opened a `greenfield` session and the user approved `routing-plan.md` (recommended).
+2. `active_session.orchestrator` is `pipeline` (set by 00 after approval).
+3. If `active_session` is null: route to [00-context](../00-context/SKILL.md) first (or user waives).
 
 Shared policy (feedback loops, changelogs, performance testing, spec vs code root cause):
 [considerations.md](../considerations.md).
@@ -84,8 +92,9 @@ includes a §Connectivity section; phase gates below enforce the cumulative chec
 ## Quick start
 
 - **Which skill should I use?** → [docs/skill-routing.md](../../docs/skill-routing.md)
+- **Open a session** → [00-context](../00-context/SKILL.md)
 - **Post-deploy testing tiers** → [ADR-004](../../docs/adr/ADR-004.md)
-- **Add feature(s) to existing app** → [16-evolve](../16-evolve/SKILL.md)
+- **Add feature(s) to existing app** → [00-context](../00-context/SKILL.md) → [16-evolve](../16-evolve/SKILL.md)
 - **Broader scope/API/arch change** → [16-evolve](../16-evolve/SKILL.md)
 - **Process retrospective** → [17-retrospective](../17-retrospective/SKILL.md)
 - **Review a pull request** → [18-pr-review](../18-pr-review/SKILL.md)
@@ -115,6 +124,13 @@ transition. Child stages also invoke the agent — **only workflow-state-manager
 `workflow-state.yaml`.
 
 Schema reference: [workflow-state-reference.md](../workflow-state-reference.md).
+
+## Session management
+
+Requires `active_session` with type `greenfield` (or user waiver). Sets
+`active_session.orchestrator: pipeline`. Runs only stages listed in
+`docs/sessions/{id}/routing-plan.md`. On Phase D complete, participate in the session close
+checkpoint per [sessions-reference.md](../sessions-reference.md) §4.
 
 ### Centralized state
 

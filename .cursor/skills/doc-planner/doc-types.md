@@ -5,6 +5,21 @@ Each entry defines when the document is relevant, its file path convention, and 
 
 ---
 
+## Standing vs session/ephemeral corpus
+
+**Standing** docs below live in `docs/` root and are long-lived project truth.
+
+**Ephemeral / session** outputs live under `docs/sessions/{session-id}/` or `workflow-state.yaml`
+§`artifacts` — never as standing `docs/` root files: execution-plan, config-spec, research-brief,
+context-brief (project mode), scoped briefs under `docs/context/`, and session reports
+(`reports/qa-report.md`, `reports/e2e-report.md`, `reports/verification-report.md`, etc.),
+checkpoints, and evolve summaries.
+
+**Session index:** `docs/sessions/README.md`. Convention:
+[sessions-reference.md](../sessions-reference.md).
+
+---
+
 ## 1. Roadmap
 
 **When relevant**: Always — every project benefits from a phased plan.

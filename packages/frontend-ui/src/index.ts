@@ -1,2 +1,3 @@
-/** Stub — components exported in M34 (T34.x). */
-export {};
+export { LanguageToggle } from "./LanguageToggle";
+export { LocaleProvider } from "./LocaleProvider";
+export { useLocale } from "./useLocale";
