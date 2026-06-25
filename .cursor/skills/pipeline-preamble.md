@@ -4,15 +4,38 @@ Shared conventions for numbered pipeline stage skills. Every stage `SKILL.md` un
 `.cursor/skills/00-context` … `18-pr-review` follows this preamble unless a stage
 explicitly documents an exception.
 
-**Orchestrators** (not numbered stages): [pipeline](pipeline/SKILL.md),
-[16-evolve](16-evolve/SKILL.md).
+**Orchestrators** (not numbered stages): [pipeline](pipeline/SKILL.md) (greenfield **session**),
+[16-evolve](16-evolve/SKILL.md) (feature / new_service **sessions**).
 
 **State agent (mandatory):** [workflow-state-manager](../agents/workflow-state-manager.md) —
 sole writer of `workflow-state.yaml`.
 
+**Sessions:** [sessions-reference.md](sessions-reference.md) — session-first work model; ephemeral
+reports under `docs/sessions/{session-id}/`, standing specs stay in `docs/` root.
+
 **Deep policy** (do not duplicate in each skill): [considerations.md](considerations.md),
 [connectivity-gates.md](connectivity-gates.md),
 [workflow-state-reference.md](workflow-state-reference.md).
+
+---
+
+## Sessions (session-first work model)
+
+Every bounded unit of work runs inside a **session** with an explicit, user-approved routing
+plan. Full convention: [sessions-reference.md](sessions-reference.md).
+
+| Concept | Summary |
+|---------|---------|
+| **Session** | `S{NNN}-{slug}` bounded work unit; opened by [00-context](00-context/SKILL.md), tracked in `workflow-state.yaml` §`active_session` |
+| **Session types** | `greenfield`, `feature`, `new_service`, `hotfix`, `integration`, `ops`, `process` |
+| **Routing plan** | `docs/sessions/{id}/routing-plan.md` — approved stage list + skip rationale |
+| **Reports** | Stage outputs under `docs/sessions/{id}/reports/` (not `docs/` root) |
+| **Standing docs** | Long-lived specs stay in `docs/` root; session deltas append a §Session changelog |
+| **Dual-layer state** | `project.stages.*` = historical baseline; `active_session` = current work unit |
+
+**Stage obligation (01–19):** require `active_session` (else block → 00-context), confirm the
+stage is in `active_session.routing_plan`, write reports to `active_session.artifacts_dir/reports/`,
+and mirror `project.stages.{key}` on completion. **00-context** is the session opener and is exempt.
 
 ---
 
@@ -288,7 +311,8 @@ user to paste tokens when `prod.env` exists.
 Paste immediately after the stage title paragraph:
 
 ```markdown
-**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–18.
+**Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–19.
+**Sessions:** [sessions-reference.md](../sessions-reference.md) — requires `active_session` unless waived; reports under `docs/sessions/{id}/reports/`.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 **State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 ```

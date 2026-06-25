@@ -2,9 +2,9 @@
 name: workflow-state-manager
 description: >
   Sole owner of repo-root workflow-state.yaml. Invoked at the start and end of every pipeline
-  skill (00-17), pipeline orchestrator, and auxiliary skills that track pipeline progress.
-  Reads state, validates prerequisites, detects deviations, returns context briefs, and applies
-  structured updates. Pipeline skills must
+  skill (00-19), pipeline orchestrator, and auxiliary skills that track pipeline progress.
+  Reads state, validates prerequisites, detects deviations, returns context briefs, opens and
+  closes sessions, and applies structured updates. Pipeline skills must
   never edit workflow-state.yaml directly — only this agent writes the file.
 ---
 
@@ -15,17 +15,31 @@ or skill allowed to read and write [`workflow-state.yaml`](../../workflow-state.
 
 **Stage conventions:** [`.cursor/skills/pipeline-preamble.md`](../skills/pipeline-preamble.md)
 
+**Sessions:** [`.cursor/skills/sessions-reference.md`](../skills/sessions-reference.md)
+
 ---
 
 ## Responsibilities
 
 | Responsibility | Detail |
 |----------------|--------|
-| **Read context** | On skill invocation — return position, prerequisites, active cycles, next step |
+| **Read context** | On skill invocation — return position, **active_session**, prerequisites, active cycles, next step, blocking deviations |
 | **Apply updates** | After each substep — validate payload, write YAML, confirm |
-| **Detect deviations** | Block when prerequisites fail, stage order violated, or scope drift |
-| **Feature addition** | Detect "add feature(s) X, Y, Z" intent; ensure evolve cycle or delta mode |
+| **Open session** | `open_session` — allocate `S{NNN}-{slug}`, set `active_session`, increment `session_counter` |
+| **Close session** | `close_session` — archive to `sessions[]`, clear `active_session` |
+| **Detect deviations** | Block when prerequisites fail, stage order violated, session missing, or scope drift |
+| **Feature addition** | Detect "add feature(s) X, Y, Z" intent; ensure session + evolve cycle or delta mode |
 | **Raise to user** | Return blocking issues with category, evidence, recommended path for AskQuestion |
+
+## Session-first rules
+
+- **Stages 01–19 require `active_session`** unless the user waived orchestration (record in `decisions_log`).
+- Session artifacts live under `docs/sessions/{session-id}/` — see [sessions-reference.md](../skills/sessions-reference.md).
+- Session/ephemeral plans (execution-plan, config-spec, research-brief) go in §`artifacts[]` with
+  optional `session_id`, not as standing `docs/` root files (except approved standing-doc deltas).
+- Record commits in §`git_history.commits` after every atomic commit; include `session_id` when set.
+- `evolve_cycles[].session_id` must match `active_session.id` when both are active.
+- Maintain the **dual layer**: `project.stages.*` = historical baseline; `active_session` = current work unit.
 
 You do **not** implement product code, write specs, or run tests. You manage state only.
 
@@ -46,8 +60,9 @@ touched `workflow-state.yaml`.
 The invoking skill passes a JSON-like block in its prompt:
 
 ```yaml
-operation: read_context | update | init_project
+operation: read_context | update | init_project | open_session | close_session
 skill_id: "07-build"              # skill directory name
+session_id: "S042-live-e2e"       # optional; required to resume/close a session
 user_intent: "add features X, Y, Z"  # optional; verbatim user goal
 mode: greenfield | delta | evolve   # optional; auto-detect if omitted
 evolve_context:                   # optional; from 16-evolve parent
@@ -67,13 +82,15 @@ update_payload:                   # required for operation: update
 
 1. Read `workflow-state.yaml` (create via `init_project` if missing and skill allows).
 2. Resolve `skill_id` → `stages.{key}` or cycle type (`evolve_cycles[]`, `retrospective_cycles[]`, `pr_review_cycles[]`, `pr_remediation_cycles[]`).
-3. Compute **prerequisites** for this skill per its SKILL.md and preamble phase gates.
-4. Detect **user_intent**:
+3. Resolve `active_session`: confirm it exists for stages 01–19, and that `skill_id` appears in
+   `active_session.routing_plan` (else flag a session/routing deviation).
+4. Compute **prerequisites** for this skill per its SKILL.md and preamble phase gates.
+5. Detect **user_intent**:
    - Feature addition keywords: "add feature", "new feature", "add Fn", "extend with", list of capabilities
    - If feature intent and no active evolve cycle → recommend starting or resuming **16-evolve**
    - If feature intent and current skill can run in **delta mode** with active cycle → OK
-5. Detect **deviations** (see §Deviation detection).
-6. Return **context brief** (markdown).
+6. Detect **deviations** (see §Deviation detection).
+7. Return **context brief** (markdown).
 
 ### Context brief template
 
@@ -82,6 +99,7 @@ update_payload:                   # required for operation: update
 
 **Skill:** {skill_id}
 **Overall status:** {overall_status}
+**Active session:** {SNNN-slug or none} — type {type}, stage {current_stage}
 **Mode:** {greenfield | delta | evolve}
 **Active evolve cycle:** {EV-NNN or none} — {title}
 **Feature IDs in cycle:** {F19, F20 or none}
@@ -188,7 +206,40 @@ Create minimal scaffold from workflow-state-reference.md §Initializing a new pr
 - File missing AND invoking skill is `pipeline`, `01-requirements`, or `00-context`
 - User approved greenfield start
 
-Set `overall_status: in_progress` and all stages `pending`.
+Set `overall_status: in_progress` and all stages `pending`. Initialize `session_counter: 0`,
+`active_session: null`, `sessions: []`, and `project.stages: {}`.
+
+---
+
+## Operation: open_session
+
+Invoked by **00-context** (the session opener) after the user approves `routing-plan.md`.
+
+### Steps
+
+1. Increment `session_counter`; allocate `id: S{NNN:03d}-{slug}` (slug from intent).
+2. Build `active_session` per workflow-state-reference.md §Sessions (`type`, `intent`, `branch`,
+   `orchestrator`, `artifacts_dir: docs/sessions/{id}/`, `routing_plan`, `current_stage`, `started_at`).
+3. Write `active_session` and the incremented `session_counter`.
+4. Return the new `id` and `artifacts_dir` so 00-context can create the session folder.
+
+Reject if `active_session` is already set — return the existing session and ask the caller to
+resume, close, or abandon it first.
+
+---
+
+## Operation: close_session
+
+Invoked by an orchestrator or **00-context** when all routing-plan stages are `completed` or
+`skipped` (with rationale) and the user approves the close checkpoint.
+
+### Steps
+
+1. Verify every `active_session.routing_plan` entry is `completed` or `skipped`.
+2. Set `active_session.status: completed`, add `completed_at`.
+3. Append the session to `sessions[]` (archive entry).
+4. Mirror final stage statuses into `project.stages.*`.
+5. Set `active_session: null`.
 
 ---
 
@@ -198,6 +249,8 @@ Return **blocking** deviations when:
 
 | Deviation | Detection | Recommended resolution |
 |-----------|-----------|------------------------|
+| **No active session** | `active_session` null and `skill_id` is not `00-context` | Route to **00-context** to open/resume a session (or AskQuestion waive) |
+| **Skill not in routing plan** | `skill_id` absent from `active_session.routing_plan` | AskQuestion: amend routing plan or waive |
 | **Missing prerequisite stage** | Upstream stage not `completed` / `skipped` / waived | Complete prerequisite or AskQuestion waive |
 | **Phase gate not met** | e.g. 07-build invoked but 04-06 incomplete | Route to blocking stage |
 | **Skill order violation** | Evolve cycle `current_stage` differs from invoked skill without user approval | Resume correct stage or AskQuestion |

@@ -5,6 +5,11 @@ project:
   description: Monorepo — bilingual community Q&A RAG + data management (5 apps; zero personal data, cost/sovereignty constraints)
   output_directory: docs/
 
+# Session-first work model — see .cursor/skills/sessions-reference.md
+session_counter: 0          # increment when allocating S{NNN}-{slug}
+active_session: null        # current bounded work unit; null when none in flight
+sessions: []                # archived completed sessions
+
 stages:
   00-context:
     status: completed
@@ -199,11 +204,11 @@ stages:
       phase: complete
   09-qa:
     status: completed
-    started_at: "2026-05-27"
-    completed_at: "2026-05-27"
+    started_at: "2026-06-25"
+    completed_at: "2026-06-25"
     report: docs/qa-report.md
     overall: pass_with_advisories
-    note: "Re-run on evolve/EV-002-admin-overhaul @ 98bb7f8; 158 passed 31 skipped; blocking green"
+    note: "EV-004/F31 post-M32 full-repo QA; 479 passed 38 skipped Python; 267 FE tests; advisories QA-001\u2013010"
   10-e2e:
     status: completed
     started_at: "2026-05-19"
@@ -777,6 +782,9 @@ evolve_cycles:
         status: in_progress
         started: "2026-06-13"
         note: "Phase 9 M32 completed; T33.1 in progress"
+      09-qa:
+        status: completed
+        completed_at: "2026-06-25"
     gates:
       a_to_b: passed
       b_to_c: passed

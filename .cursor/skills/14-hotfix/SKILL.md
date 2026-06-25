@@ -20,6 +20,7 @@ re-running the pipeline.
 `docs/bug-reports/BUG-*.md`, `tests/bugs/test_bug_*.py`, one fix per bug.
 
 **Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
+**Sessions:** [sessions-reference.md](../sessions-reference.md) — requires `active_session` unless waived; reports under `docs/sessions/{id}/reports/`.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).  
 **State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 **Modal data-mgmt auth header:** [modal-proxy-header](../modal-proxy-header/SKILL.md).
@@ -237,6 +238,17 @@ or architectural changes (new ADR + plan update).
 3. **Spec suite** (see Spec conformance §Spec registry) — at minimum `docs/feature-list.md`,
    `docs/spec.md`; plus `config-spec.md`, `api-contract.md`, `deployment-integration.md` when relevant
 4. Git repo is clean (no uncommitted work)
+
+## Session management
+
+Per [sessions-reference.md](../sessions-reference.md) §10 and [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
+
+1. Agent `read_context` must return `active_session` (or blocking deviation).
+2. Current stage must appear in `active_session.routing_plan` unless user amends plan.
+3. Write stage reports to `active_session.artifacts_dir/reports/` when this stage produces a report.
+4. On completion: update routing-plan entry status; mirror `project.stages.{key}` via agent `update`.
+5. **00-context** exempt from active_session requirement (session opener).
+Report: `reports/hotfix.md`; BUG reports stay in `docs/bug-reports/`.
 
 ## State management
 

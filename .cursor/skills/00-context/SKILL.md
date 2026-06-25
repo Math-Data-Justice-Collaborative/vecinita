@@ -1,13 +1,15 @@
 ---
 name: 00-context
 description: >
-  Analyzes any existing codebase, documentation, research paper, or prior work the user
-  provides. Produces a context brief that pre-fills Stage 01 (requirements interview).
-  Runs paper-analyst and repo-researcher agents in parallel when applicable, cross-references
-  findings, and surfaces contradictions/ambiguities/decisions to the user. When the project
-  belongs to a multi-repo organization, scans sibling repos to discover integration patterns,
-  API contracts, deployment conventions, and shared dependencies that constrain this project's
-  design. Optional stage — skipped when the user has no existing artifacts.
+  Recommended entry for every work session. Classifies session type (greenfield, feature,
+  hotfix, integration, new_service, ops, process), allocates SNNN-slug, writes session-brief
+  and routing-plan, and sets active_session. Also analyzes any existing codebase, documentation,
+  research paper, or prior work the user provides, producing a context brief that pre-fills
+  Stage 01 (requirements interview). Runs paper-analyst and repo-researcher agents in parallel
+  when applicable, cross-references findings, and surfaces contradictions/ambiguities/decisions.
+  When the project belongs to a multi-repo organization, scans sibling repos to discover
+  integration patterns, API contracts, deployment conventions, and shared dependencies. Use
+  before requirements, features, live E2E, integrations, or evolve cycles.
 ---
 
 # 00 — Context Gathering
@@ -16,8 +18,30 @@ Analyze existing artifacts (codebase, paper, docs, prior work) and produce a str
 context brief for downstream skills.
 
 **Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
+**Sessions:** [sessions-reference.md](../sessions-reference.md) — **session opener**; allocates
+`SNNN-slug`, routing plan, `active_session`.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 **State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
+
+## Phase 0 — Session open (default)
+
+Run **before** context gathering when user intent implies bounded work (almost always).
+
+1. If `active_session` exists: AskQuestion — resume / close and start new / abandon.
+2. Classify **session type** per [sessions-reference.md](../sessions-reference.md) §11.
+3. Agent `open_session`: increment `session_counter`, allocate `S{NNN}-{slug}`.
+4. Create `docs/sessions/SNNN-slug/` with `session-brief.md` (intent, type, scope).
+5. Propose `routing-plan.md` from default presets (§12); document skip rationale per omitted stage.
+6. **AskQuestion** — user approves or edits routing plan.
+7. Agent sets `active_session`; create branch `feat/SNNN-slug` (or `fix/`, `evolve/` per type).
+8. Route to orchestrator when applicable:
+   - `greenfield` → [pipeline](../pipeline/SKILL.md)
+   - `feature` / `new_service` → [16-evolve](../16-evolve/SKILL.md)
+   - `hotfix` → [14-hotfix](../14-hotfix/SKILL.md)
+   - others → first stage in routing plan
+
+Skip Phase 0 only when resuming an existing `active_session` or the user explicitly waived
+session orchestration (record via agent `decisions_log`).
 
 ## Connectivity (stage 00)
 
@@ -68,6 +92,17 @@ Collect from the user (check conversation context or ask):
 | Existing docs | If docs | — | Paths to existing documentation |
 | Org directory | No | — | Parent directory containing sibling repos (e.g., `C:\Users\...\CogniChem`). When provided, enables ecosystem scanning (Phase 1B). If omitted, ask whether the project belongs to a multi-repo organization. |
 | Output directory | No | `docs/` | Where to write context-brief.md |
+
+## Session management (session opener)
+
+**00-context** opens sessions — it does **not** require a pre-existing `active_session`.
+
+- **Phase 0** allocates `SNNN-slug`, writes `session-brief.md` and `routing-plan.md`, and sets
+  `active_session` (via agent `open_session`) after user approval.
+- Context phases (1A–4) run per **project** / **scoped** mode; link outputs in `session-brief.md`.
+- **Session close:** when the routing plan is complete, checkpoint AskQuestion → agent `close_session`.
+
+See [sessions-reference.md](../sessions-reference.md) §4 and §11.
 
 ## State management
 

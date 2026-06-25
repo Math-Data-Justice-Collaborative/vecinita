@@ -11,6 +11,7 @@ description: >
 Deploy the application and verify it works with smoke tests and health checks.
 
 **Preamble:** [pipeline-preamble.md](../pipeline-preamble.md) — shared conventions for stages 00–17.
+**Sessions:** [sessions-reference.md](../sessions-reference.md) — requires `active_session` unless waived; reports under `docs/sessions/{id}/reports/`.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 **State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
@@ -27,6 +28,17 @@ Do not mark `deployed` without H4–H5 pass or user-waived checklist entry. See 
    - Deployment plan document — deploy commands and configuration
    - `docs/test-plan.md` — smoke test definitions
 3. Deployment platform CLI/tools must be installed and authenticated
+
+## Session management
+
+Per [sessions-reference.md](../sessions-reference.md) §10 and [workflow-state-agent-protocol.md](../workflow-state-agent-protocol.md).
+
+1. Agent `read_context` must return `active_session` (or blocking deviation).
+2. Current stage must appear in `active_session.routing_plan` unless user amends plan.
+3. Write stage reports to `active_session.artifacts_dir/reports/` when this stage produces a report.
+4. On completion: update routing-plan entry status; mirror `project.stages.{key}` via agent `update`.
+5. **00-context** exempt from active_session requirement (session opener).
+Report: `reports/deploy-smoke.md`.
 
 ## State management
 
