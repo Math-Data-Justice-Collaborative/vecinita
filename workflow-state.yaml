@@ -303,8 +303,9 @@ stages:
     completed: "2026-06-25"
     last_cycle: PRR-009
   19-address-pr-review:
-    status: in_progress
+    status: completed
     started: "2026-06-25"
+    completed: "2026-06-25"
     last_cycle: PRM-006
     history_note: "PRM-005 closed PR #62 ([M32] Workspace scaffold) on 2026-06-13"
   gather-context:
@@ -1358,17 +1359,21 @@ pr_remediation_cycles:
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/66
     linked_review_cycle_id: PRR-009
     title: "feat: integrate vecinita-frontend-i18n and vecinita-frontend-ui (F31 / EV-004)"
-    status: in_progress
+    status: completed
     started: "2026-06-25"
-    completed: null
+    completed: "2026-06-25"
     head_ref: fix/admin-ui-es-en-toggle
     base_ref: main
-    ci_status: not_pushed
+    ci_status: success
+    ci_note: "ci.yml green on fix/admin-ui-es-en-toggle @ 9c573ea: python, coverage, both frontend, and new packages matrix (frontend-i18n/frontend-ui) all success. Run 28206732867."
     scope_note: "User scoped ALL findings (1 blocker + 6 advisories). Session orchestration waived."
+    resolution_note: "F-001 inline thread (PRRT_kwDORy2YAM6MYKzz) replied (comment 3478243851) and resolved. Advisories answered in PR issue comment 4805017576. F-002 won't-split acknowledged. PR not merged (user merges manually)."
     counts:
-      fixed: 4
+      fixed: 5
       deferred: 0
       wont_fix: 1
+    follow_up:
+      pr_review_rerun: offered
     findings:
       - id: F-001
         source: inline
@@ -1409,8 +1414,8 @@ pr_remediation_cycles:
       - id: F-006
         source: review_body
         severity: advisory
-        status: pending
-        note: "Draft PR; will mark ready for review after CI green on fix/admin-ui-es-en-toggle."
+        status: fixed
+        note: "PR marked ready for review (gh pr ready 66) after CI green."
 
 agents:
   repo_researcher:
@@ -1756,6 +1761,12 @@ git_history:
       message: "docs(review): resolve session-model logic gaps in workflow-state docs"
       stage: "19-address-pr-review"
       files_changed: 3
+      timestamp: "2026-06-25"
+    - sha: 9c573ea
+      branch: fix/admin-ui-es-en-toggle
+      message: "chore(state): record PRR-009 review and PRM-006 remediation for PR #66"
+      stage: "19-address-pr-review"
+      files_changed: 1
       timestamp: "2026-06-25"
 
 constraints:
