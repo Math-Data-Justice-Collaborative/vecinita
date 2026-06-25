@@ -2,12 +2,7 @@
  * BUG-2026-05-27: Dashboard Invalid Date + empty Languages when stats/summary returns api-contract shape.
  * @see docs/bug-reports/BUG-2026-05-27-dashboard-invalid-date-languages.md
  */
-import {
-  cleanup,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react";
+import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";

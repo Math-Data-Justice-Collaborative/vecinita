@@ -1,9 +1,4 @@
-import {
-  cleanup,
-  fireEvent,
-  renderHook,
-  screen,
-} from "@testing-library/react";
+import { cleanup, fireEvent, renderHook, screen } from "@testing-library/react";
 import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
