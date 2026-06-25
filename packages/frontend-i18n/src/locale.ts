@@ -10,6 +10,10 @@ export function detectBrowserLocale(): Locale {
   if (lang.startsWith("en")) {
     return "en";
   }
+  // Spanish-first default: Vecinita serves a primarily Spanish-speaking
+  // community, so browsers reporting neither es nor en fall back to es. The
+  // admin UI shares this default but always exposes the EN/ES toggle, and an
+  // explicit choice is persisted via readStoredLocale().
   return "es";
 }
 
