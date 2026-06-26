@@ -162,10 +162,11 @@ For each task in order (respecting dependencies):
 
 #### Step 3 — Post-task checks
 
-1. Run linter on changed files
+1. Run linter **and `ruff format` in write mode** on changed files (not just `--check` — CI runs `ruff format --check` and will fail on unformatted commits)
 2. Run typechecker
 3. Run full test suite (not just new tests)
-4. Fix any failures before proceeding
+4. **If frontend or unit-tested code changed**, run the CI coverage gate locally: `make test-unit-coverage` (or, for a frontend-only change, `cd apps/<app> && npm run test:coverage` — no DB needed). This enforces the 95% frontend branch gate that plain `vitest run` skips. New React polling/list components routinely miss branches on the **poll interval, refresh handler, unmount guards, and error/`??` fallbacks** — cover these before commit.
+5. Fix any failures before proceeding
 
 #### Step 4 — Commit & record
 

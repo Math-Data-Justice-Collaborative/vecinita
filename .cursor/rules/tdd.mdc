@@ -1,24 +1,26 @@
 ---
-description: Enforces test-driven development — write tests before implementation
-globs: "**/*.py"
-alwaysApply: false
+description: Enforces test-driven development — write tests before implementation (all stacks)
+alwaysApply: true
 ---
 
 # Test-Driven Development
 
-When implementing any feature or component:
+TDD is the process for **every** new function, feature, or behavior change, on **all** stacks
+(Python `pytest`, frontend `vitest`). Always write the test case(s) first, then implement.
 
-1. **Test first**: Write the test before the implementation. The test should fail initially
-   (red phase), then pass after implementation (green phase), then be cleaned up (refactor
-   phase).
+1. **Test first (hard ordering gate)**: Write the test before writing the implementation, then
+   **run it and watch it fail** (red) for the right reason. Only then write the minimal code to
+   make it pass (green), then refactor. Do not write production code for a behavior that has no
+   failing test yet.
 
 2. **Coverage requirement**: Every new public function, class, or module must have a
    corresponding test. Reference `docs/test-plan.md` for test case definitions and
    `docs/acceptance-criteria.md` for pass/fail thresholds.
 
-3. **Test location**: Place tests in the project's `tests/` directory. Mirror the source
-   directory structure:
-   - `src/pipeline/preprocess.py` → `tests/pipeline/test_preprocess.py`
+3. **Test location**: Mirror the source structure.
+   - Python: `tests/` (e.g. `…/pipeline.py` → `tests/unit/.../test_pipeline.py`).
+   - Frontend: colocated `apps/*/src/**/*.test.{ts,tsx}`.
+   - End-to-end / journeys: `tests/e2e/` (API) + Vitest UI tests — see `e2e-coverage.mdc`.
    - Tracked bugs (14-hotfix / 15-modal-health): `tests/bugs/test_bug_YYYY_MM_DD_[slug].py`
      with report `docs/bug-reports/BUG-YYYY-MM-DD-[slug].md` — see `bug-investigation.mdc`
 

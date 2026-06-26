@@ -140,6 +140,27 @@ EV-004 (F31): No new API routes — **H4/H5 regression required** at 13-deploy-s
 - **Input**: No auth header.
 - **Expected**: No job row created.
 
+### TC-048: Ingest resilient to non-JSON LLM tag completion (UJ-002, UJ-023, #88)
+
+- **Objective**: A best-effort tag-inference failure (empty / non-JSON `vecinita-llm`
+  completion → `LlmTagClientError`) must not fail the ingest job.
+- **Input**: Ingest job whose tag client raises `LlmTagClientError`.
+- **Expected**: Job `completed` (not `failed`); document/chunks/embeddings written with no LLM
+  tags; completed job observable via `GET /jobs`.
+- **Test**: `tests/e2e/test_uj002_ingest_tag_resilience.py`;
+  `tests/bugs/test_bug_2026_06_26_ingest_tag_nonjson_fails_job.py`.
+
+### TC-049: Job Management list endpoint (UJ-023, F32, #89)
+
+- **Objective**: `GET /jobs` backs the Job Management tab — newest-first, status filter,
+  failed jobs surface error, jobs persist independent of client navigation.
+- **Input**: Multiple jobs across states (completed + failed); `GET /jobs` and
+  `GET /jobs?status=…`.
+- **Expected**: All jobs returned newest-first; `?status=` filters correctly; failed job
+  exposes `error_code`/`error_message`; a re-fetch (post-navigation) still lists the job.
+- **Test**: `tests/e2e/test_uj023_job_management.py`;
+  UI: `apps/data-management-frontend/src/test/test_job_management_navigation.test.tsx`.
+
 ### TC-020: Local bootstrap smoke (UJ-004)
 
 - **Objective**: Documented commands produce healthy stack.

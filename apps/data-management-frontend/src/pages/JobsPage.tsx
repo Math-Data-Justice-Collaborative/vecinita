@@ -66,7 +66,9 @@ export function JobsPage() {
     } catch (err) {
       if (!isActive()) return;
       setError(
-        err instanceof Error ? err.message : trRef.current("admin.jobs.loadFailed"),
+        err instanceof Error
+          ? err.message
+          : trRef.current("admin.jobs.loadFailed"),
       );
     } finally {
       if (isActive()) setLoading(false);
@@ -154,7 +156,9 @@ export function JobsPage() {
                         {job.urls.length > 0
                           ? job.urls[0]
                           : tr("shared.emDash")}
-                        {job.urls.length > 1 ? ` (+${String(job.urls.length - 1)})` : ""}
+                        {job.urls.length > 1
+                          ? ` (+${String(job.urls.length - 1)})`
+                          : ""}
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
                         {formatLocaleDateTime(locale, job.updated_at)}

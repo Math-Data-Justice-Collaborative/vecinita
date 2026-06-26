@@ -1,5 +1,12 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { BarChart3, FileText, Heart, ListChecks, ScrollText, Menu } from "lucide-react";
+import {
+  BarChart3,
+  FileText,
+  Heart,
+  ListChecks,
+  ScrollText,
+  Menu,
+} from "lucide-react";
 import { useState } from "react";
 import { LanguageToggle, useLocale } from "vecinita-frontend-ui";
 

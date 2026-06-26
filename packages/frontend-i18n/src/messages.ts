@@ -217,7 +217,8 @@ const esStrings = {
   "admin.audit.empty": "No se encontraron eventos de auditoría.",
   "admin.audit.showingCount": "Mostrando {shown} de {total} eventos",
   "admin.jobs.title": "Gestión de trabajos",
-  "admin.jobs.subtitle": "Seguimiento de trabajos en ejecución, completados y fallidos.",
+  "admin.jobs.subtitle":
+    "Seguimiento de trabajos en ejecución, completados y fallidos.",
   "admin.jobs.loadFailed": "No se pudieron cargar los trabajos",
   "admin.jobs.empty": "Aún no hay trabajos.",
   "admin.jobs.columnJob": "Trabajo",

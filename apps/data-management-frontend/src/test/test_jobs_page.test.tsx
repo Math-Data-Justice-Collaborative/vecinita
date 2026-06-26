@@ -98,7 +98,9 @@ describe("JobsPage", () => {
     renderWithProviders(<JobsPage />);
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent(/failed to load jobs/i);
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /failed to load jobs/i,
+      );
     });
   });
 

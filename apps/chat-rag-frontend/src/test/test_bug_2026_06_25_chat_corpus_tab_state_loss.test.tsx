@@ -96,6 +96,8 @@ describe("BUG-2026-06-25 — chat survives the Corpus tab round-trip (#53)", () 
     expect(screen.getByLabelText(/your question/i)).toBeInTheDocument();
     expect(screen.getByText(question)).toBeInTheDocument();
     expect(screen.getByText(/Local aid info\./)).toBeInTheDocument();
-    expect(screen.queryByText(/ask a question in english/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/ask a question in english/i),
+    ).not.toBeInTheDocument();
   });
 });

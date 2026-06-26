@@ -1,0 +1,41 @@
+---
+description: Every new feature needs end-to-end coverage at the layer where behavior is consumed
+alwaysApply: true
+---
+
+# E2E coverage for new features
+
+Unit/pipeline tests are necessary but **not sufficient**. A feature is not done until it has
+an end-to-end test at the layer where the behavior is actually consumed.
+
+**Evidence:** BUG-2026-06-26 (#88) — a non-JSON LLM tag completion failing the ingest job
+passed all unit tests but broke in staging, because no e2e drove `POST /jobs` → runner →
+`GET /jobs`. The regression surfaced at the app boundary, where no test existed.
+
+## Required for every feature (Fn)
+
+1. **API e2e** in `tests/e2e/` via FastAPI `TestClient` — exercise the real route(s)
+   end-to-end (create → read/list), not just the inner function. See `tests/e2e/README.md`.
+2. **UI e2e** (Vitest) for any user-facing journey — render the real `App`/page through the
+   router and assert the journey, e.g. cross-tab navigation, not just the isolated component.
+3. **Spec mapping** — add/extend a journey in `docs/user-journeys.md` (UJ-NNN) and a case in
+   `docs/test-plan.md` (TC-NNN); reference the feature and issue.
+
+## Regression fixes
+
+When fixing a bug, the guard test must live **at the layer where the symptom surfaced**, in
+addition to the pipeline/unit repro. A pipeline unit test alone would not have caught #88.
+
+| Symptom layer | Add e2e here |
+|---|---|
+| API / job behavior | `tests/e2e/test_*.py` (TestClient through the app) |
+| Frontend journey (navigation, polling, state loss) | `apps/*/src/test/*.test.tsx` (full `App` + router) |
+
+## Example (do this)
+
+```python
+# tests/e2e/test_uj002_ingest_tag_resilience.py — drives the route, not just run_ingest_job
+create = client.post("/jobs", json={"urls": [...], "options": {"chunk_size_tokens": 64}})
+assert client.get(f"/jobs/{job_id}").json()["status"] == "completed"  # not "failed"
+assert job_id in {j["job_id"] for j in client.get("/jobs").json()["jobs"]}  # observable
+```

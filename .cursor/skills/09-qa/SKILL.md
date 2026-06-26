@@ -128,6 +128,12 @@ cd apps/chat-rag-frontend && npm ci && npm run lint && npm test -- --run
 cd apps/data-management-frontend && npm ci && npm run lint && npm test -- --run
 ```
 
+**Coverage gate (CI parity — run from repo root):** `make test-unit-coverage` enforces the
+95% frontend branch gate (and Python unit coverage); for a frontend-only change use
+`cd apps/<app> && npm run test:coverage` (no DB needed). Plain `vitest run` does **not**
+enforce coverage, so QA must run this to match CI's `coverage` job — a **separate required CI
+job** distinct from the `frontend` matrix.
+
 ---
 
 ### Phase 2 — Run QA Checks
@@ -161,9 +167,10 @@ Return:
 
 - Python: passed / failed / skipped (list skipped reasons if env-gated)
 - Frontend: per-app pass/fail
+- **Coverage gate** (`make test-unit-coverage`): pass/fail vs the 95% FE branch threshold
 - Note non-blocking warnings (e.g. Pydantic/LlamaIndex `validate_default`)
 
-**PASS** if zero failures (skips are OK when documented).
+**PASS** if zero failures **and** the coverage gate passes (skips are OK when documented).
 
 #### Agent 5 — Security
 
@@ -252,6 +259,7 @@ QA Results:
   Typecheck:      [PASS/FAIL] — [N] errors
   Tests (Python): [PASS/FAIL] — [N] passed, [N] skipped, [N] failed
   Tests (FE):     [PASS/FAIL] — [N] passed per app
+  Coverage gate:  [PASS/FAIL] — FE branch ≥95% (make test-unit-coverage)
   Security:       [PASS/FAIL] — [N] CVEs; [N] secrets (tree); [N] history (advisory)
   Cross-file:     [N] unused imports; [N] cycles; [N] docstrings missing (advisory)
   Dependencies:   [N] outdated (advisory); [N] missing

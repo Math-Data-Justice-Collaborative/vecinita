@@ -33,6 +33,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-020 | Navigate modernized admin UI | Operator | Admin UI shadcn/Tailwind navigation | F23 | local |
 | UJ-021 | View document tags in corpus list | Operator | Admin corpus list → tag chips | F24 | local |
 | UJ-022 | Switch admin UI language (en/es) | Operator | Admin UI sidebar `LanguageToggle` → `packages/frontend-i18n` | F31 | local |
+| UJ-023 | View & track jobs in Job Management tab | Operator | Admin UI → `GET /jobs` | F32 (#88, #89) | local |
 
 ## Journey Details
 
@@ -473,3 +474,28 @@ Product-facing journeys describe what a **caller** does — not internal module 
 **Automated tests**: `apps/data-management-frontend/src/test/test_admin_language_toggle_i18n.test.tsx`; `packages/frontend-ui` Vitest; migrated ChatRAG i18n tests import shared packages.
 
 **E2E tier**: local (Vitest component smoke); live browser toggle waived at T0 (same as other admin UI journeys).
+
+
+
+### UJ-023: View & track jobs in Job Management tab
+
+**Actor**: Operator
+
+**Goal**: See every ingest/retag job (running, completed, failed) from a dedicated admin tab, with failed jobs surfacing their error, regardless of where the job was started or whether the operator navigated away.
+
+**Steps**:
+
+1. Start an ingest job on the **Corpus** tab (`POST /jobs`).
+2. Navigate to another tab (e.g. Dashboard) and back to **Jobs** — the job is **not** lost; the Job Management tab re-fetches `GET /jobs` (server-sourced, ADR-023), so running/completed/failed jobs remain visible (regression class of #53/#89).
+3. A job whose LLM tag completion was empty / non-JSON still appears as **completed** (tagging is best-effort, #88) — the document is ingested without LLM tags rather than the whole job failing.
+4. A genuinely failed job (e.g. bad URL, retag tag error) appears as **failed** with its `error_code` and `error_message`.
+5. Optionally filter by status via `GET /jobs?status=…`.
+
+**Acceptance**: `GET /jobs` returns jobs newest-first with optional `status` filter; failed jobs expose `error_code`/`error_message`; a non-JSON tag completion does not fail an ingest job; job list persists across in-app navigation because it is server-sourced.
+
+**Automated tests**:
+- API E2E: `tests/e2e/test_uj023_job_management.py` (list ordering, status filter, failed error surfacing, server-sourced persistence); `tests/e2e/test_uj002_ingest_tag_resilience.py` (#88 non-JSON tag completion → job completed, document written without tags, job observable in list).
+- Regression (pipeline): `tests/bugs/test_bug_2026_06_26_ingest_tag_nonjson_fails_job.py`.
+- UI E2E (Vitest): `apps/data-management-frontend/src/test/test_job_management_navigation.test.tsx` (job started on Corpus still visible after switching to Jobs); `apps/data-management-frontend/src/test/test_jobs_page.test.tsx`.
+
+**E2E tier**: local (API TestClient + Vitest component smoke); live browser waived at T0 (same as other admin UI journeys).
