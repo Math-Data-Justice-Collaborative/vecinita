@@ -7,8 +7,12 @@ Stage weights: modal run infra/modal/llm_app.py::stage_llm_weights
 from __future__ import annotations
 
 import json
+import logging
+import time
 
 import modal
+
+logger = logging.getLogger("vecinita.llm")
 
 APP_NAME = "vecinita-llm"
 VOLUME_NAME = "llm-models"
@@ -25,6 +29,9 @@ def _llm_engine_kwargs(*, max_model_len: int) -> dict[str, object]:
         "dtype": "half",
         "hf_overrides": {"torch_dtype": "float16"},
         "gpu_memory_utilization": 0.9,
+        # Skip CUDA graph capture at startup — removes seconds of cold-start init
+        # for a small model on T4 (S001 Tier-0, ADR-022 budget-safe combo).
+        "enforce_eager": True,
     }
 
 
@@ -62,14 +69,11 @@ def _shutdown_vllm_engine(llm: object | None) -> None:
 app = modal.App(APP_NAME)
 model_volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
 
-image = (
-    modal.Image.debian_slim(python_version="3.11")
-    .pip_install(
-        "pydantic>=2.7,<3",
-        "starlette>=0.37,<1",
-        "transformers>=4.44,<4.47",
-        "vllm>=0.6.3,<0.7",
-    )
+image = modal.Image.debian_slim(python_version="3.11").pip_install(
+    "pydantic>=2.7,<3",
+    "starlette>=0.37,<1",
+    "transformers>=4.44,<4.47",
+    "vllm>=0.6.3,<0.7",
 )
 
 
@@ -104,9 +108,38 @@ def stage_llm_weights() -> str:
 class LlmService:
     @modal.enter()
     def load_model(self) -> None:
-        from vllm import LLM
+        # S001 P1 cold-start instrumentation: break the cold path into import
+        # (torch ≈ 20k file ops — snapshot-able), engine construct (vLLM init +
+        # CUDA + weight load from Volume — NOT snapshot-able) and warm-up. The
+        # gate (ADR-022) needs construct/init to dominate weight load before P2.
+        # For the weight-load-vs-engine-init split inside `construct_s`, read
+        # vLLM's own "Loading weights took ..." line in the same container log.
+        t_enter = time.perf_counter()
 
+        t0 = time.perf_counter()
+        from vllm import LLM, SamplingParams
+
+        import_s = time.perf_counter() - t0
+
+        t1 = time.perf_counter()
         self._llm = LLM(**_llm_engine_kwargs(max_model_len=1024))
+        construct_s = time.perf_counter() - t1
+
+        # Warm-up forward pass: fold first-token init into startup and give a
+        # measurable t4 (Modal docs recommend warming up before serving).
+        t2 = time.perf_counter()
+        self._llm.generate(["warmup"], SamplingParams(max_tokens=1))
+        warmup_s = time.perf_counter() - t2
+
+        logger.warning(
+            "cold_start_breakdown import_s=%.2f construct_s=%.2f warmup_s=%.2f "
+            "total_enter_s=%.2f (construct_s includes vLLM engine init + weight load; "
+            "see vLLM 'Loading weights took' log for the split)",
+            import_s,
+            construct_s,
+            warmup_s,
+            time.perf_counter() - t_enter,
+        )
 
     @modal.exit()
     def unload_model(self) -> None:
@@ -129,17 +162,11 @@ class LlmService:
 
     @modal.method()
     def complete(self, prompt: str, *, max_tokens: int = 512, temperature: float = 0.2) -> str:
-        return self._generate_text(
-            prompt, max_tokens=max_tokens, temperature=temperature
-        )
+        return self._generate_text(prompt, max_tokens=max_tokens, temperature=temperature)
 
     @modal.method()
-    def stream_tokens(
-        self, prompt: str, *, max_tokens: int = 512, temperature: float = 0.2
-    ):
-        text = self._generate_text(
-            prompt, max_tokens=max_tokens, temperature=temperature
-        )
+    def stream_tokens(self, prompt: str, *, max_tokens: int = 512, temperature: float = 0.2):
+        text = self._generate_text(prompt, max_tokens=max_tokens, temperature=temperature)
         for piece in text.split():
             yield piece + " "
 
@@ -163,6 +190,14 @@ def fastapi_app():
     service = LlmService()
 
     async def health(_: Request) -> JSONResponse:
+        return JSONResponse({"status": "ok"})
+
+    async def warm(_: Request) -> JSONResponse:
+        """Boot LlmService (T4 GPU) during user think-time (S001 T11).
+
+        `/health` only warms this ASGI web fn; pre-warm must invoke the GPU class.
+        """
+        service.complete.remote("warmup", max_tokens=1)
         return JSONResponse({"status": "ok"})
 
     async def generate(request: Request) -> JSONResponse:
@@ -197,6 +232,7 @@ def fastapi_app():
     return Starlette(
         routes=[
             Route("/health", health, methods=["GET"]),
+            Route("/warm", warm, methods=["POST"]),
             Route("/generate", generate, methods=["POST"]),
             Route("/generate/stream", generate_stream, methods=["POST"]),
         ]
