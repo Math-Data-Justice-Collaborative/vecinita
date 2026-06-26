@@ -41,14 +41,15 @@ active_session:             # current bounded work unit; null when none in fligh
   orchestrator: 16-evolve
   artifacts_dir: docs/sessions/S003-persistent-chat-history/
   started_at: "2026-06-26"
-  current_stage: "01-requirements"
+  current_stage: "04-tech-plan"
   linked_issues: []
   routing_plan:
     - stage: 00-context
       status: completed
       note: "context-brief §14 added (F33); decisions R39-R42; session-brief + routing-plan written; commit a0cf185"
     - stage: 01-requirements
-      status: pending
+      status: completed
+      note: "F33 docs delta written — feature-list F33, UJ-024/UJ-025, TC-072–TC-076, AC-S1–AC-S7, RD-068–RD-072, ADR-023. R43–R47 resolved."
     - stage: 04-tech-plan
       status: pending
     - stage: 07-build
@@ -1935,6 +1936,8 @@ decisions_log:
     note: "S002 stages 09-12 run 2026-06-26 — QA fail (typecheck reportAny + live GET /jobs 405); T0 e2e pass; 11-verify-impl user-amended; 12 deploy not ready"
   - date: "2026-06-26"
     note: "S002-admin-job-management PARKED (status paused) to open S003-persistent-chat-history (session_counter=3; type feature; orchestrator 16-evolve). New feature: browser-local ephemeral chat history on chat-rag-frontend — persist active conversation across refresh/tab-away (sessionStorage, device-only) + list of previous conversations. User decisions: pause S002 + open new; scope=both (persist + previous-chats list); privacy=sessionStorage (narrower footprint than localStorage); routing=evolve-lite 00→01→04→07→09→10→12→13 (skip 02,03,05,06,11). Branch feat/S003-persistent-chat-history off main."
+  - date: "2026-06-26"
+    note: "S003 01-requirements F33 delta interview complete — 5 decisions R43-R47. R43: sessionStorage confirmed (per-tab acceptable; covers refresh + tab-away/return; brand-new tab empty is OK) — keeps R41. R44: conversation boundary = explicit 'New chat' button archives current + starts fresh. R45: previous-chats cap = keep last 10, FIFO eviction. R46: previous-chat label = first user message + relative timestamp. R47: clear semantics = 'Clear' resets active conversation; per-item delete + 'Clear all history' for the list; storage updated accordingly. stages.01-requirements (active_session) set in_progress; docs to be authored by user."
 
 artifacts:
   - docs/context-brief.md

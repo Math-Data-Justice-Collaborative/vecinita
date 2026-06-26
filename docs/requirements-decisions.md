@@ -1,7 +1,7 @@
 # Requirements decisions log
 
 > **Stage**: 01-requirements  
-> **Last updated**: 2026-05-26 (EV-002 delta)
+> **Last updated**: 2026-06-26 (S003 delta — F33)
 
 | ID | Topic | Decision | ADR | Source |
 |----|-------|----------|-----|--------|
@@ -115,7 +115,23 @@
 | RD-066 | Deploy order | Build shared packages → redeploy both frontends; no API/Modal redeploy | — |
 | RD-067 | ThemeToggle scope | **Extract to `frontend-ui`** — shared bilingual theme control (02-verify-plan S_EV4.L2 denied) | ADR-020 |
 
+## S003 resolutions (2026-06-26) — F33 browser-local persistent chat history
+
+Context decisions R39–R42 set in 00-context (context-brief §14): R39 park S002; R40 scope = both; R41 `sessionStorage`; R42 evolve-lite routing. The 01-requirements interview resolved the remaining gaps (R43–R47):
+
+| ID | Topic | Decision | ADR | Source |
+|----|-------|----------|-----|--------|
+| RD-068 | Tab-scope confirmation (R43) | **`sessionStorage` confirmed** — persists across refresh + leaving/returning to the same tab; a brand-new/duplicate tab starting empty is acceptable (per-tab by design); keeps R41 | ADR-023 | F33 interview Q `tab_scope` |
+| RD-069 | Conversation boundary (R44) | Explicit **"New chat"** button archives the current conversation to the list and starts a fresh one | ADR-023 | F33 interview Q `boundary` |
+| RD-070 | History cap / eviction (R45) | Keep the **last 10** conversations; FIFO eviction of oldest | — | F33 interview Q `cap` |
+| RD-071 | Previous-chat label (R46) | **First user message** (truncated) **+ relative timestamp** | — | F33 interview Q `title` |
+| RD-072 | Clear / delete semantics (R47) | **"Clear"** resets active conversation; **per-item delete** + **"Clear all history"** manage the list; `sessionStorage` updated accordingly | — | F33 interview Q `clear` |
+
+S003 artifacts: feature-list F33; user-journeys UJ-024/UJ-025; test-plan TC-072–TC-076; acceptance-criteria AC-S1–AC-S7; ADR-023.
+
 Unresolved:
 
 - Exact LlamaIndex / vLLM patch pins at implementation (T8.1, T9.2)
 - shadcn/ui exact component versions (pin at build time)
+- F33: exact `sessionStorage` key name, serialized schema/versioning, and truncation length for labels — pin in 04-tech-plan / 07-build.
+- F33: update `.cursor/rules/frontend-session-state-lifting.mdc` "within the SPA only" wording to permit device-only, tab-scoped persistence — do in 04-tech-plan/07-build (03/06 tooling stages skipped per evolve-lite).

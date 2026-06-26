@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [requirements-decisions.md](requirements-decisions.md)  
-> **Last updated**: 2026-06-13 (EV-004: UJ-022 admin i18n)
+> **Last updated**: 2026-06-26 (S003: UJ-024/UJ-025 browser-local chat history)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI steps** are waived at T0 — see `tests/e2e/README.md` (Vitest component smoke only).
@@ -34,6 +34,8 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-021 | View document tags in corpus list | Operator | Admin corpus list → tag chips | F24 | local |
 | UJ-022 | Switch admin UI language (en/es) | Operator | Admin UI sidebar `LanguageToggle` → `packages/frontend-i18n` | F31 | local |
 | UJ-023 | View & track jobs in Job Management tab | Operator | Admin UI → `GET /jobs` | F32 (#88, #89) | local |
+| UJ-024 | Conversation persists across refresh / tab-away | Community member | ChatRAG Frontend → `sessionStorage` (device-only) | F33 | local |
+| UJ-025 | Revisit a previous conversation | Community member | ChatRAG Frontend previous-chats list → `sessionStorage` | F33 | local |
 
 ## Journey Details
 
@@ -499,3 +501,47 @@ Product-facing journeys describe what a **caller** does — not internal module 
 - UI E2E (Vitest): `apps/data-management-frontend/src/test/test_job_management_navigation.test.tsx` (job started on Corpus still visible after switching to Jobs); `apps/data-management-frontend/src/test/test_jobs_page.test.tsx`.
 
 **E2E tier**: local (API TestClient + Vitest component smoke); live browser waived at T0 (same as other admin UI journeys).
+
+---
+
+### UJ-024: Conversation persists across refresh / tab-away
+
+**Actor**: Community member (no account)
+
+**Goal**: Not lose the current chat when the page reloads or when leaving the ChatRAG tab and returning — without any server-side history.
+
+**Steps**:
+
+1. Open ChatRAG web UI and ask one or more questions (UJ-001); answers stream in with sources.
+2. The active conversation is written to `sessionStorage` (device-only; never sent to the server).
+3. **Refresh the page** (or switch to another browser tab/app and come back to this tab) — the full conversation (user turns + assistant answers + sources) is rehydrated from `sessionStorage` and rendered.
+4. Continue the conversation; new turns persist the same way.
+5. If `sessionStorage` is unavailable/full, the app keeps working with in-memory state only (no crash, no error toast required).
+
+**Acceptance**: After a page reload (and after tab-away/return within the same tab), the prior conversation is restored from `sessionStorage`; no `POST` carries history to the server; no server-side session/message row is created (F3, ADR-023). A brand-new tab starts empty (per-tab by design, R43). Closing the tab clears the store.
+
+**Automated tests**: `apps/chat-rag-frontend/src/test/test_chat_history_persistence.test.tsx` (Vitest + jsdom `sessionStorage`): rehydrate after remount; graceful fallback when storage throws.
+
+**E2E tier**: local (Vitest component/app smoke through the real `App` + router; jsdom `sessionStorage`). Live browser refresh covered as a connectivity-neutral UI check at 10-e2e.
+
+---
+
+### UJ-025: Revisit a previous conversation
+
+**Actor**: Community member (no account)
+
+**Goal**: Open an earlier chat from a list of previous conversations on the main page.
+
+**Steps**:
+
+1. With an active conversation in progress, click **"New chat"** — the current conversation is archived to the previous-chats list and a fresh conversation starts (R44).
+2. The main page shows a **previous-chats list**, each item labeled with the **first user message + relative timestamp** (R46), newest first, capped at the **last 10** (oldest evicted, R45).
+3. Select a previous conversation — it loads as the active conversation (messages + sources restored from `sessionStorage`).
+4. Manage history: **per-item delete** removes one conversation; **"Clear all history"** empties the list; **"Clear"** resets the active conversation (R47). Storage is updated to match.
+5. All of the above persists across refresh/tab-away (UJ-024).
+
+**Acceptance**: Starting a "New chat" preserves the prior conversation in the list; the list shows correct labels, ordering, and the 10-item cap with FIFO eviction; selecting an item restores that conversation; delete / clear-all / clear update both the UI and `sessionStorage`; nothing is sent to the server.
+
+**Automated tests**: `apps/chat-rag-frontend/src/test/test_previous_chats_list.test.tsx` (Vitest): new-chat archival, cap/eviction, label derivation, select-to-restore, delete + clear-all semantics.
+
+**E2E tier**: local (Vitest component/app smoke). Live browser waived at T0 (consistent with other ChatRAG UI journeys).
