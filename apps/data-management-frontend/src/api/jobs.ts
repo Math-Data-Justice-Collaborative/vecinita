@@ -1,4 +1,4 @@
-import type { CreateJobResponse, Job } from "./types";
+import type { CreateJobResponse, Job, JobList, JobStatus } from "./types";
 
 export interface JobsClientOptions {
   baseUrl: string;
@@ -43,6 +43,22 @@ export async function getJob(
     throw new Error(detail || `Get job failed (${String(response.status)})`);
   }
   return response.json() as Promise<Job>;
+}
+
+export async function listJobs(
+  options: JobsClientOptions,
+  status?: JobStatus,
+): Promise<Job[]> {
+  const query = status ? `?status=${encodeURIComponent(status)}` : "";
+  const response = await fetch(`${options.baseUrl}/jobs${query}`, {
+    headers: { "X-Vecinita-Proxy-Key": options.modalKey },
+  });
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(detail || `List jobs failed (${String(response.status)})`);
+  }
+  const body = (await response.json()) as JobList;
+  return body.jobs;
 }
 
 export function parseUrlsInput(raw: string): string[] {

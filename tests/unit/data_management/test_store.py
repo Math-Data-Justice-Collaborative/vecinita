@@ -28,6 +28,40 @@ def test_job_store_base_methods_raise_not_implemented() -> None:
     with pytest.raises(NotImplementedError):
         store.update_job(uuid4(), status="failed")
 
+    with pytest.raises(NotImplementedError):
+        store.list_jobs()
+
+
+def test_in_memory_list_jobs_sorted_newest_first() -> None:
+    store = InMemoryJobStore()
+    first = store.create_job(urls=["https://example.com/1"])
+    second = store.create_job(urls=["https://example.com/2"])
+    store.update_job(second.job_id, status="completed")
+
+    jobs = store.list_jobs()
+
+    assert {job.job_id for job in jobs} == {first.job_id, second.job_id}
+    # Sorted descending by created_at (newest first).
+    assert all(
+        jobs[i].created_at >= jobs[i + 1].created_at for i in range(len(jobs) - 1)
+    )
+
+
+def test_dict_list_jobs_sorted_newest_first() -> None:
+    backing: dict[str, JobPayload] = {}
+    store = DictJobStore(cast(MutableMapping[str, JobPayload], backing))
+    first = store.create_job(urls=["https://example.com/a"])
+    second = store.create_job(urls=["https://example.com/b"], job_type="retag")
+
+    jobs = store.list_jobs()
+
+    assert {job.job_id for job in jobs} == {first.job_id, second.job_id}
+    assert all(
+        jobs[i].created_at >= jobs[i + 1].created_at for i in range(len(jobs) - 1)
+    )
+    retag = next(job for job in jobs if job.job_type == "retag")
+    assert retag.job_id == second.job_id
+
 
 def test_in_memory_job_store_lifecycle() -> None:
     store = InMemoryJobStore()

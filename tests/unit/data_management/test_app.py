@@ -158,6 +158,49 @@ def test_create_job_with_minimal_ingest_options() -> None:
     assert record.options == {}
 
 
+def test_list_jobs_returns_all_jobs() -> None:
+    store = InMemoryJobStore()
+    store.create_job(urls=["https://example.com/a"])
+    store.create_job(urls=["https://example.com/b"], job_type="retag")
+    client = TestClient(create_app(store=store, require_proxy_auth=False))
+
+    response = client.get("/jobs")
+
+    assert response.status_code == 200
+    body = response_json_object(response)
+    jobs = body["jobs"]
+    assert isinstance(jobs, list)
+    assert len(jobs) == 2
+
+
+def test_list_jobs_filters_by_status() -> None:
+    store = InMemoryJobStore()
+    done = store.create_job(urls=["https://example.com/a"])
+    store.update_job(done.job_id, status="completed")
+    store.create_job(urls=["https://example.com/b"])
+    client = TestClient(create_app(store=store, require_proxy_auth=False))
+
+    response = client.get("/jobs", params={"status": "completed"})
+
+    assert response.status_code == 200
+    jobs = response_json_object(response)["jobs"]
+    assert isinstance(jobs, list)
+    assert len(jobs) == 1
+    assert jobs[0]["job_id"] == str(done.job_id)
+    assert jobs[0]["status"] == "completed"
+
+
+def test_list_jobs_requires_proxy_key_when_auth_enabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", _PROXY_KEY)
+    client = TestClient(create_app(require_proxy_auth=True))
+
+    response = client.get("/jobs")
+
+    assert response.status_code == 401
+
+
 def test_create_app_uses_explicit_cors_env_value() -> None:
     app = create_app(
         require_proxy_auth=False,
