@@ -28,7 +28,9 @@ describe("BUG-2026-06-26 jobs dialog aria warning", () => {
   });
 
   it("does not warn when opening mobile navigation on the Jobs page", async () => {
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const warnSpy = vi
+      .spyOn(console, "warn")
+      .mockImplementation(() => undefined);
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(jsonResponse({ jobs: [] })),
