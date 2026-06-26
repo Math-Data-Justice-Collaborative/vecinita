@@ -41,12 +41,12 @@ active_session:             # current bounded work unit; null when none in fligh
   orchestrator: 16-evolve
   artifacts_dir: docs/sessions/S003-persistent-chat-history/
   started_at: "2026-06-26"
-  current_stage: "00-context"
+  current_stage: "01-requirements"
   linked_issues: []
   routing_plan:
     - stage: 00-context
-      status: in_progress
-      note: "session opener; feature delta — browser-local persistent chat history"
+      status: completed
+      note: "context-brief §14 added (F33); decisions R39-R42; session-brief + routing-plan written; commit a0cf185"
     - stage: 01-requirements
       status: pending
     - stage: 04-tech-plan
@@ -2255,6 +2255,12 @@ git_history:
       message: "docs: register F32 Job Management tab + GET /jobs contract + ADR-023 (#88, #89)"
       stage: "04-tech-plan"
       files_changed: 3
+      timestamp: "2026-06-26"
+    - sha: a0cf185
+      branch: feat/S003-persistent-chat-history
+      message: "chore(session): open S003 persistent-chat-history; park S002"
+      stage: "00-context"
+      files_changed: 4
       timestamp: "2026-06-26"
 
 constraints:
