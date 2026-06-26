@@ -4,6 +4,14 @@ project:
   name: Vecinita
   description: Monorepo — bilingual community Q&A RAG + data management (5 apps; zero personal data, cost/sovereignty constraints)
   output_directory: docs/
+  stages:
+    13-deploy-smoke:
+      status: completed
+      started_at: "2026-06-26"
+      completed_at: "2026-06-26"
+      partial_rerun_at: "2026-06-26"
+      partial_rerun_note: "S001 Modal GPU snapshot + DO warm path deploy"
+      report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
 
 # Session-first work model — see .cursor/skills/sessions-reference.md
 session_counter: 1          # increment when allocating S{NNN}-{slug}
@@ -16,7 +24,7 @@ active_session:             # current bounded work unit; null when none in fligh
   orchestrator: pipeline
   artifacts_dir: docs/sessions/S001-modal-cold-start-snapshot/
   started_at: "2026-06-25"
-  current_stage: 13-deploy-smoke
+  current_stage: 15-service-health
   routing_plan:
     - stage: 00-context
       status: completed
@@ -26,13 +34,19 @@ active_session:             # current bounded work unit; null when none in fligh
     - stage: 08-verify-build
       status: completed
       completed_at: "2026-06-25"
+    - stage: 09-qa
+      status: completed
+      completed_at: "2026-06-25"
+      user_amended: true
+      note: "User-invoked (not in original S001 routing plan); full-repo QA @ 4f3f741 — pass_with_advisories; report docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md"
     - stage: 12-verify-deploy
       status: completed
       completed_at: "2026-06-25"
       user_amended: true
       note: "User-invoked (not in original S001 routing plan); pre-deploy agents all PASS; checklist written @ f766233; user signed off on all 7 failure mitigations + rollback plan 2026-06-25"
     - stage: 13-deploy-smoke
-      status: pending
+      status: completed
+      completed_at: "2026-06-26"
     - stage: 15-service-health
       status: pending
   skipped_stages:
@@ -64,6 +78,10 @@ active_session:             # current bounded work unit; null when none in fligh
       kind: report
       session_id: S001-modal-cold-start-snapshot
       stage: 12-verify-deploy
+    - path: docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md
+      kind: report
+      session_id: S001-modal-cold-start-snapshot
+      stage: 09-qa
 sessions: []                # archived completed sessions
 
 stages:
@@ -264,9 +282,17 @@ stages:
     status: completed
     started_at: "2026-06-25"
     completed_at: "2026-06-25"
+    partial_rerun_at: "2026-06-25"
+    partial_rerun_note: "S001 branch full-repo QA @ 4f3f741; 500 passed 38 skipped Python; 271 FE tests; advisories QA-001\u2013011 (QA-010 resolved in CI)"
     report: docs/qa-report.md
     overall: pass_with_advisories
     note: "EV-004/F31 post-M32 full-repo QA; 479 passed 38 skipped Python; 267 FE tests; advisories QA-001\u2013010"
+    s001:
+      report: docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md
+      branch: feat/S001-modal-cold-start-snapshot
+      commit: 4f3f741
+      overall: pass_with_advisories
+      note: "S001 branch full-repo QA @ 4f3f741; 500 passed 38 skipped Python; 271 FE tests; advisories QA-001\u2013011 (QA-010 resolved in CI)"
   10-e2e:
     status: completed
     started_at: "2026-05-19"
@@ -331,11 +357,11 @@ stages:
         connectivity: pass
   13-deploy-smoke:
     status: completed
-    started_at: "2026-05-19"
-    completed_at: "2026-05-27"
-    partial_rerun_at: "2026-05-27"
-    partial_rerun_note: "EV-002 delta validate — H1-H5 + T3 pass; deployed @ 0a2f813 evolve/EV-002-admin-overhaul"
-    report: docs/deploy-report.md
+    started_at: "2026-06-26"
+    completed_at: "2026-06-26"
+    partial_rerun_at: "2026-06-26"
+    partial_rerun_note: "S001 Modal GPU snapshot + DO warm path deploy"
+    report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
     chat_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
     connectivity_validated_at: "2026-05-27"
     h0c: pass
@@ -419,10 +445,11 @@ deployment:
     t0_journeys_passed: 16
   staging:
     status: deployed
-    last_verified: "2026-05-27"
-    commit_deployed: 7f38c58
-    commit_head: 7f38c58
+    last_verified: "2026-06-26"
+    commit_deployed: "4f3f741"
+    commit_head: "4f3f741"
     drift: false
+    branch: "feat/S001-modal-cold-start-snapshot"
     urls:
       chat_rag_backend: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
       internal_write_api: https://vecinita-internal-write-api-icze4.ondigitalocean.app
@@ -444,6 +471,9 @@ deployment:
       h6_browser_uj: waived_v1
     notes:
       - "EV-002 merged to main 2026-05-27; DO apps github branch set to main"
+      - "S001 deployed 2026-06-26: Modal llm+embedding snapshots; DO chat apps on feat/S001-modal-cold-start-snapshot @ 4f3f741"
+      - "S001 cold+prewarm ask 14.3s (< 60s DO gateway target)"
+      - "DO chat apps branch pinned to feature branch until merge to main"
   url_discovery:
     method: "uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend"
     modal_admin_manual: true
@@ -1612,6 +1642,9 @@ decisions_log:
     note: "S001 12-verify-deploy user-invoked — stage amended into S001 routing plan (was 00→07→08→13→15). Pre-deploy agents all PASS (configuration, secrets, data/volumes, resources, template, connectivity); checklist @ docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-checklist.md (f766233). deploy_ready=true pending user sign-off on failure modes + rollback — stage held in_progress until sign-off, then advance to 13-deploy-smoke."
   - date: "2026-06-25"
     note: "S001 12-verify-deploy COMPLETE — user signed off on all 7 failure mitigations (approve_all) and the rollback plan (approve_rollback). Stage marked completed (phases 2/3/5 done); deploy_ready=true. active_session.current_stage advanced to 13-deploy-smoke."
+  - date: "2026-06-25"
+    note: "S001 09-qa user-invoked (not in original S001 routing plan; stage amended into routing_plan with user_amended=true). Full-repo QA on feat/S001-modal-cold-start-snapshot @ 4f3f741 — overall pass_with_advisories, all blocking checks green (500 passed/38 skipped Python; 271 FE tests). Advisories QA-001–011 (QA-010 resolved in CI). Reports: docs/qa-report.md + docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md."
+  - "S001 13-deploy-smoke COMPLETE 2026-06-26 — H1-H5 pass; cold+prewarm ask 14.3s; DO chat on feat branch"
 
 artifacts:
   - docs/context-brief.md
@@ -1661,6 +1694,7 @@ artifacts:
   - docs/adr/README.md
   - docs/staging-runbook.md
   - docs/sessions/S001-modal-cold-start-snapshot/reports/p2-snapshot-deploy.md
+  - docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md
 
 git_history:
   current_branch: feat/S001-modal-cold-start-snapshot
