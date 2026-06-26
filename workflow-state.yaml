@@ -67,6 +67,10 @@ active_session:             # current bounded work unit; null when none in fligh
     - stage: 15-service-health
       status: completed
       completed_at: "2026-06-25"
+    - stage: 19-address-pr-review
+      status: in_progress
+      user_amended: true
+      note: "User adopted PR #68 review remediation (PRM-007 / linked PRR-010) into S001 routing plan 2026-06-25; 2 advisories from the chat corpus-tab hotfix."
   skipped_stages:
     - stage: 01-requirements
       reason: "perf change to already-specced service under ADR-009"
@@ -446,12 +450,12 @@ stages:
     status: completed
     started: "2026-06-12"
     completed: "2026-06-25"
-    last_cycle: PRR-009
+    last_cycle: PRR-010
   19-address-pr-review:
-    status: completed
+    status: in_progress
     started: "2026-06-25"
-    completed: "2026-06-25"
-    last_cycle: PRM-006
+    completed: null
+    last_cycle: PRM-007
     history_note: "PRM-005 closed PR #62 ([M32] Workspace scaffold) on 2026-06-13"
   gather-context:
     status: skipped
@@ -1188,6 +1192,29 @@ pr_review_cycles:
       bugbot: completed
       security_review: completed
     note: "Draft PR; CI ci.yml green on head (python/coverage/frontend all success). 1 confirmed product regression (CorpusList locale toggle clears bulk selection), 2 session-doc logic inconsistencies, scope-mixing advisory."
+  - id: PRR-010
+    pr_number: 68
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/68
+    title: "[hotfix] Preserve chat history across Corpus tab navigation (#53)"
+    status: completed
+    started: "2026-06-25"
+    completed: "2026-06-25"
+    head_ref: fix/chat-tab-corpus-state
+    base_ref: main
+    head_sha: 552d996
+    verdict: APPROVE
+    verdict_note: "Posted as --comment review (GitHub blocks self-approval; reviewer == author joseph-c-mcguire). 0 blockers."
+    blockers: 0
+    advisories: 2
+    praise: 4
+    ci_status: success
+    ci_note: "ci.yml green @ 552d996 — python, coverage, both frontends, packages matrix (run 28213921192). Base main: deploy-preflight runs post-merge."
+    gh_review_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/68
+    subagents:
+      bugbot: completed
+      security_review: completed
+    session_note: "Session orchestration waived — review-followup on existing open PR; not in S001 routing plan (precedent: 2026-06-25 PR #66 review waiver)."
+    note: "Hotfix lifts useChatHistory to AppContent shell; #53 fix correct, CI green, security clean. Bugbot 1 medium (partial state lift: loading/in-flight stream not lifted → mid-stream tab switch can spawn concurrent stream) triaged 🟡 non-blocking; inline on ChatPanel.tsx:43. 2nd 🟡: unused fallback hook when prop supplied (cosmetic)."
 
 pr_remediation_cycles:
   - id: PRM-001
@@ -1565,6 +1592,44 @@ pr_remediation_cycles:
         severity: advisory
         status: fixed
         note: "PR marked ready for review (gh pr ready 66) after CI green."
+  - id: PRM-007
+    pr_number: 68
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/68
+    linked_review_cycle_id: PRR-010
+    title: "[hotfix] Preserve chat history across Corpus tab navigation (#53)"
+    status: in_progress
+    started: "2026-06-25"
+    completed: null
+    head_ref: fix/chat-tab-corpus-state
+    base_ref: main
+    ci_status: not_pushed
+    scope_note: "User scoped both advisories (scope=both). Session adopted into S001 routing plan (user choice 'adopt')."
+    counts:
+      fixed: 2
+      deferred: 0
+      wont_fix: 0
+    findings:
+      - id: F-001
+        source: inline
+        severity: advisory
+        path: apps/chat-rag-frontend/src/components/ChatPanel.tsx
+        line: 43
+        thread_id: "PRRT_kwDORy2YAM6MaHMh"
+        status: fixed
+        note: "Partial state lift (concurrency defect): lifted loading+setLoading into useChatHistory so in-flight ask state survives the Corpus round-trip and blocks a concurrent stream. Full bug-investigation: BUG-2026-06-25-chat-mid-stream-corpus-concurrent-ask. AbortController deliberately deferred (would change ask.ts API surface)."
+      - id: F-002
+        source: review_body
+        severity: advisory
+        path: apps/chat-rag-frontend/src/components/ChatPanel.tsx
+        status: fixed
+        note: "Unused fallback hook when prop supplied: split ChatPanel into ChatPanelView (requires chat) + ChatPanelStandalone (calls useChatHistory). Hook now only runs when no chat is injected, eliminating the wasted hook while honoring rules-of-hooks."
+    artifacts:
+      - path: docs/bug-reports/BUG-2026-06-25-chat-mid-stream-corpus-concurrent-ask.md
+        note: "F-001 bug report (full bug-investigation)"
+      - path: apps/chat-rag-frontend/src/test/test_bug_2026_06_25_chat_mid_stream_corpus_concurrent_ask.test.tsx
+        note: "F-001 red->green regression test"
+    follow_up:
+      pr_review_rerun: offered
 
 agents:
   repo_researcher:
