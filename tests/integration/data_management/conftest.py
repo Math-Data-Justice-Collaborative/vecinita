@@ -74,5 +74,7 @@ def dm_client(job_store: InMemoryJobStore, mock_write: _MockWriteClient) -> Test
 
 
 @pytest.fixture(autouse=True)
-def proxy_key_env(monkeypatch: pytest.MonkeyPatch) -> None:
+def proxy_key_env(monkeypatch: pytest.MonkeyPatch, request: pytest.FixtureRequest) -> None:
+    if request.node.get_closest_marker("live"):
+        return
     monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", _PROXY_KEY)

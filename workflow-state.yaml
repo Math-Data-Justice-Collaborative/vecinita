@@ -41,7 +41,7 @@ active_session:             # current bounded work unit; null when none in fligh
   orchestrator: 16-evolve
   artifacts_dir: docs/sessions/S002-admin-job-management/
   started_at: "2026-06-26"
-  current_stage: "12-verify-deploy (awaiting user: push/PR/merge/deploy)"
+  current_stage: "11-verify-impl"
   linked_issues: [88, 89]
   routing_plan:
     - stage: 00-context
@@ -58,12 +58,23 @@ active_session:             # current bounded work unit; null when none in fligh
       note: "#88 graceful ingest tagging fix (TDD) + #89 GET /jobs API/store + JobsPage/nav/i18n; all unit/integration/bugs/non-live-e2e + 186 data-mgmt FE tests green"
     - stage: 09-qa
       status: completed
-      note: "ruff + basedpyright clean; Python unit/integration/bugs + non-live e2e pass; data-management-frontend lint/typecheck/186 tests pass; frontend-i18n key parity pass"
+      partial_rerun_at: "2026-06-26"
+      note: "Initial run: ruff + basedpyright clean; Python unit/integration/bugs + non-live e2e pass; data-management-frontend lint/typecheck/186 tests pass; frontend-i18n key parity pass. Partial rerun 2026-06-26 post-hotfix — overall FAIL: typecheck (reportAny) + live GET /jobs 405. Report: docs/sessions/S002-admin-job-management/reports/qa-report.md"
+    - stage: 14-hotfix
+      status: in_progress
+      user_amended: true
+      note: "User-amended into S002 routing plan 2026-06-26 (after 09-qa, before 10-e2e). In-session bug fixes for F32 surface: (1) jobs dialog/sheet aria-describedby warning (FE) — local fix uncommitted; (2) GET /jobs 405 on production Modal data-management — deploy gap. Two separate bug reports + repro tests per bug-investigation. Bugs remain open."
     - stage: 10-e2e
-      status: pending
-      note: "live browser UJ deferred until deploy"
+      status: completed
+      partial_rerun_at: "2026-06-26"
+      note: "T0 pass (45 tests); T3 live FAIL — Modal GET /jobs 405. Report: docs/sessions/S002-admin-job-management/reports/e2e-report.md"
+    - stage: 11-verify-impl
+      status: in_progress
+      user_amended: true
+      note: "User-amended into S002 routing plan 2026-06-26 (was skipped). In_progress pending user AskQuestion responses. Report: docs/sessions/S002-admin-job-management/reports/verify-impl.md"
     - stage: 12-verify-deploy
-      status: pending
+      status: completed
+      note: "deploy_ready: false; checklist written. Blockers: Modal redeploy (GET /jobs 405) + typecheck (reportAny) fix. Report: docs/sessions/S002-admin-job-management/reports/deploy-checklist.md"
     - stage: 13-deploy-smoke
       status: pending
   skipped_stages:
@@ -75,14 +86,28 @@ active_session:             # current bounded work unit; null when none in fligh
       reason: "evolve-lite — small tech delta"
     - stage: 06-tech-tooling
       reason: "no new tooling/guardrails"
-    - stage: 11-verify-impl
-      reason: "covered by 09-qa + 10-e2e + 13 smoke"
   artifacts:
     - docs/sessions/S002-admin-job-management/session-brief.md
     - docs/sessions/S002-admin-job-management/routing-plan.md
     - docs/bug-reports/BUG-2026-06-26-ingest-tag-nonjson-fails-job.md
     - docs/adr/ADR-023-job-management-and-ingest-tag-resilience.md
     - tests/bugs/test_bug_2026_06_26_ingest_tag_nonjson_fails_job.py
+    - path: docs/sessions/S002-admin-job-management/reports/qa-report.md
+      kind: report
+      session_id: S002-admin-job-management
+      stage: 09-qa
+    - path: docs/sessions/S002-admin-job-management/reports/e2e-report.md
+      kind: report
+      session_id: S002-admin-job-management
+      stage: 10-e2e
+    - path: docs/sessions/S002-admin-job-management/reports/verify-impl.md
+      kind: report
+      session_id: S002-admin-job-management
+      stage: 11-verify-impl
+    - path: docs/sessions/S002-admin-job-management/reports/deploy-checklist.md
+      kind: report
+      session_id: S002-admin-job-management
+      stage: 12-verify-deploy
 sessions:                   # archived completed sessions
   - id: S001-modal-cold-start-snapshot
     type: ops
@@ -377,12 +402,18 @@ stages:
       commit: 4f3f741
       overall: pass_with_advisories
       note: "S001 branch full-repo QA @ 4f3f741; 500 passed 38 skipped Python; 271 FE tests; advisories QA-001\u2013011 (QA-010 resolved in CI)"
+    s002:
+      report: docs/sessions/S002-admin-job-management/reports/qa-report.md
+      branch: feat/S002-admin-job-management
+      partial_rerun_at: "2026-06-26"
+      overall: fail
+      note: "S002 partial rerun post-hotfix 2026-06-26 — overall FAIL: typecheck (reportAny) + live GET /jobs 405."
   10-e2e:
     status: completed
     started_at: "2026-05-19"
     completed_at: "2026-05-27"
-    partial_rerun_at: "2026-05-27"
-    partial_rerun_note: "EV-002 delta — UJ-013–UJ-021 (F23–F29); T0 40 passed, T1 35 passed, FE 40 passed (32 data-mgmt + 8 chat-rag)"
+    partial_rerun_at: "2026-06-26"
+    partial_rerun_note: "S002 delta — F32 Job Management; T0 pass (45 tests); T3 live FAIL (GET /jobs 405)"
     report: docs/e2e-report.md
     mechanism: api+frontend
     t0: pass
@@ -394,13 +425,21 @@ stages:
     ev001_tests_passed: 5
     ev002_journeys_added: 9
     ev002_tests_passed: 40
+    s002:
+      report: docs/sessions/S002-admin-job-management/reports/e2e-report.md
+      branch: feat/S002-admin-job-management
+      partial_rerun_at: "2026-06-26"
+      t0: pass
+      t0_tests: 45
+      t3_live: fail
+      t3_live_note: "GET /jobs returns 405 on production Modal data-management"
   11-verify-impl:
-    status: completed
+    status: in_progress
     started_at: "2026-05-27"
     completed_at: "2026-05-27"
-    partial_rerun_at: "2026-05-27"
-    partial_rerun_note: "EV-002 delta F23-F29 — implementation verification complete"
-    report: docs/implementation-verification.md
+    partial_rerun_at: "2026-06-26"
+    partial_rerun_note: "S002 delta F32 — implementation verification in progress, pending user AskQuestion responses"
+    report: docs/sessions/S002-admin-job-management/reports/verify-impl.md
     substeps:
       current: phase6_report
       phase1_collect: completed
@@ -409,17 +448,23 @@ stages:
       phase3_feature_approval: completed
       phase5_scope: completed
       phase6_report: completed
-    note: "EV-002 delta partial rerun — F23-F29 all journeys and features user-approved; T3 pending post-deploy"
+    note: "S002 partial rerun — user-amended into routing plan; in_progress pending user AskQuestion responses. (EV-002 prior run: F23-F29 all journeys and features user-approved.)"
   12-verify-deploy:
     status: completed
     started_at: "2026-05-27"
-    completed_at: "2026-06-25"
-    partial_rerun_at: "2026-06-25"
-    partial_rerun_note: "S001 — Modal cold-start snapshot pre-deploy checklist complete; user-invoked (not in original S001 routing plan); pre-deploy agents all PASS; user signed off on all 7 failure mitigations + rollback plan 2026-06-25"
-    report: docs/deploy-checklist.md
-    deploy_ready: true
+    completed_at: "2026-06-26"
+    partial_rerun_at: "2026-06-26"
+    partial_rerun_note: "S002 — F32 Job Management pre-deploy checklist; deploy_ready=false; blockers: Modal redeploy (GET /jobs 405) + typecheck (reportAny) fix"
+    report: docs/sessions/S002-admin-job-management/reports/deploy-checklist.md
+    deploy_ready: false
     blockers:
-      - "Staging DB migration to 20260526_0003 required before deploy (operator action)"
+      - "Modal data-management redeploy required — GET /jobs returns 405 in production"
+      - "Typecheck (basedpyright reportAny) must be fixed before deploy"
+    s002:
+      report: docs/sessions/S002-admin-job-management/reports/deploy-checklist.md
+      branch: feat/S002-admin-job-management
+      completed_at: "2026-06-26"
+      deploy_ready: false
     s001:
       report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-checklist.md
       branch: feat/S001-modal-cold-start-snapshot
@@ -464,17 +509,39 @@ stages:
       - "4a1598f: fallback to unfiltered retrieval when tag filter yields empty"
     note: "EV-002 deployed 2026-05-27 @ 0a2f813 (evolve/EV-002-admin-overhaul); H1-H5 + T3 pass (Modal H4 waiver)"
   14-hotfix:
-    status: completed
-    completed_at: "2026-06-25"
-    bug_report: docs/bug-reports/BUG-2026-06-25-chat-disappears-on-corpus-tab.md
-    summary: "Chat history lost on Corpus tab switch (#53) — useChatHistory lifted to app shell"
-    branch: fix/chat-tab-corpus-state
-    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/68
-    head_sha: 6f7875f
-    verified: "L1-L2 pass; ci.yml green @ 6f7875f"
-    cursor_rule: .cursor/rules/frontend-session-state-lifting.mdc
-    deploy: "after merge to main (user triggers)"
-    history_note: "prior: BUG-2026-05-21-stream-tokens-function-not-callable.md (2026-05-21)"
+    status: in_progress
+    started_at: "2026-06-26"
+    partial_rerun_at: "2026-06-26"
+    partial_rerun_note: "S002 in-session hotfix — F32 Job Management surface; user-amended into S002 routing plan after 09-qa"
+    session_id: S002-admin-job-management
+    branch: feat/S002-admin-job-management
+    bugs:
+      - id: BUG-2026-06-26-jobs-dialog-aria-warning
+        summary: "Jobs page dialog/sheet emits aria-describedby (DialogContent) accessibility warning"
+        layer: frontend
+        bug_report: docs/bug-reports/BUG-2026-06-26-jobs-dialog-aria-warning.md
+        repro_test: apps/data-management-frontend/src/test/test_bug_2026_06_26_jobs_dialog_aria_warning.test.tsx
+        status: open
+      - id: BUG-2026-06-26-get-jobs-405-modal-production
+        summary: "GET /jobs returns 405 Method Not Allowed on production Modal data-management service"
+        layer: api
+        bug_report: docs/bug-reports/BUG-2026-06-26-get-jobs-405-modal-production.md
+        repro_test: tests/e2e/test_bug_2026_06_26_get_jobs_405.py
+        status: open
+    note: "Two distinct F32 (#89) bugs surfaced post-build; fixing in-session on feat/S002 before deploy (12/13 still pending). Follows bug-investigation: one report + one repro test per bug."
+    history:
+      - status: completed
+        completed_at: "2026-06-25"
+        bug_report: docs/bug-reports/BUG-2026-06-25-chat-disappears-on-corpus-tab.md
+        summary: "Chat history lost on Corpus tab switch (#53) — useChatHistory lifted to app shell"
+        branch: fix/chat-tab-corpus-state
+        pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/68
+        head_sha: 6f7875f
+        verified: "L1-L2 pass; ci.yml green @ 6f7875f"
+        cursor_rule: .cursor/rules/frontend-session-state-lifting.mdc
+        deploy: "after merge to main (user triggers)"
+      - bug_report: docs/bug-reports/BUG-2026-05-21-stream-tokens-function-not-callable.md
+        completed_at: "2026-05-21"
   15-service-health:
     status: completed
     started_at: "2026-06-25"
@@ -1818,6 +1885,10 @@ decisions_log:
     note: "S002-admin-job-management OPENED (session_counter=2; type feature; orchestrator 16-evolve) — combined #88 hotfix (best-effort LLM tagging so a tag failure degrades to no LLM tags instead of failing ingest/retag jobs) + #89 evolve feature (admin Job Management tab + GET /jobs list API + list_jobs store method). User-approved evolve-lite routing 00→01→04→07→09→10→12→13 (skipped 02,03,05,06,11); full scope. Branch feat/S002-admin-job-management."
   - date: "2026-06-26"
     note: "S002 07-build complete — #88 ingest tagging now best-effort (graceful degradation, repro test BUG-2026-06-26); #89 GET /jobs list API + list_jobs store + server-backed admin Job Management tab (F32, ADR-023). 09-qa green. Awaiting user decision on push/PR/deploy (DO chat apps currently pinned to feat/S001 branch; staging DB migration blocker noted in 12-verify-deploy)."
+  - date: "2026-06-26"
+    note: "S002 14-hotfix user-amended into routing plan (after 09-qa, before 10-e2e; user_amended=true). Two in-session F32 (#89) bug fixes on feat/S002-admin-job-management: (1) BUG-2026-06-26-jobs-dialog-aria-warning (FE DialogContent aria-describedby), (2) BUG-2026-06-26-get-jobs-405-modal-production (GET /jobs 405 on production Modal data-management). stages.14-hotfix set in_progress (partial rerun; prior #53 PR #68 record preserved under history). Per bug-investigation: one report + one repro test per bug. NOTE: GET /jobs is not yet deployed from S002 — confirm which branch/env serves the Jobs tab before assuming a pure code defect (possible deploy/branch-pin cause)."
+  - date: "2026-06-26"
+    note: "S002 stages 09-12 run 2026-06-26 — QA fail (typecheck reportAny + live GET /jobs 405); T0 e2e pass; 11-verify-impl user-amended; 12 deploy not ready"
 
 artifacts:
   - docs/context-brief.md
@@ -1869,6 +1940,10 @@ artifacts:
   - docs/sessions/S001-modal-cold-start-snapshot/reports/p2-snapshot-deploy.md
   - docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md
   - docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
+  - docs/sessions/S002-admin-job-management/reports/qa-report.md
+  - docs/sessions/S002-admin-job-management/reports/e2e-report.md
+  - docs/sessions/S002-admin-job-management/reports/verify-impl.md
+  - docs/sessions/S002-admin-job-management/reports/deploy-checklist.md
 
 git_history:
   current_branch: feat/S002-admin-job-management

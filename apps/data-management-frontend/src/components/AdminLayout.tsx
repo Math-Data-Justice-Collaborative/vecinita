@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -119,6 +120,9 @@ function MobileHeader({ showChrome }: { showChrome: boolean }) {
         <SheetContent side="left" className="w-60 p-0">
           <SheetHeader className="border-b px-4 py-3">
             <SheetTitle>{tr("admin.appTitle")}</SheetTitle>
+            <SheetDescription className="sr-only">
+              {tr("admin.nav.mobileMenuDescription")}
+            </SheetDescription>
           </SheetHeader>
           <div className="px-3 py-4">
             <NavItems
