@@ -960,7 +960,7 @@ main
 | PR-43 | Minor | M37 | feat/M37-ci-workspaces | fix/es-en-full-ui | pending |
 | PR-44 | Minor | M38 | feat/M38-ev004-deploy | fix/es-en-full-ui | pending |
 | PR-45 | Major | Phase 9 / EV-004 | fix/es-en-full-ui | main | pending |
-| PR-46 | Major | Phase 10 / S003 | feat/S003-persistent-chat-history | main | pending |
+| PR-46 | Major | Phase 10 / S003 | feat/S003-persistent-chat-history | main | open ([#96](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/96)) |
 
 S003 is evolve-lite + frontend-only: M39–M42 land as atomic commits on the single
 `feat/S003-persistent-chat-history` branch (one PR to `main`, PR-46), matching the S002 pattern.

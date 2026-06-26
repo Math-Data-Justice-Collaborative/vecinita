@@ -5,6 +5,14 @@ project:
   description: Monorepo — bilingual community Q&A RAG + data management (5 apps; zero personal data, cost/sovereignty constraints)
   output_directory: docs/
   stages:
+    07-build:
+      status: completed
+      completed_at: "2026-06-26"
+      session_id: S003-persistent-chat-history
+      branch: feat/S003-persistent-chat-history
+      feature: F33
+      phase: "Phase 10 (M39–M42)"
+      note: "S003 F33 browser-local persistent chat history — M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green"
     13-deploy-smoke:
       status: completed
       started_at: "2026-06-26"
@@ -41,7 +49,7 @@ active_session:             # current bounded work unit; null when none in fligh
   orchestrator: 16-evolve
   artifacts_dir: docs/sessions/S003-persistent-chat-history/
   started_at: "2026-06-26"
-  current_stage: "07-build"
+  current_stage: "09-qa"
   linked_issues: []
   routing_plan:
     - stage: 00-context
@@ -54,7 +62,9 @@ active_session:             # current bounded work unit; null when none in fligh
       status: completed
       note: "Phase 10 added (M39-M42, 17 tasks T39.1-T42.3); decisions TP-S003-01..12; ADR-024 authored; frontend-session-state-lifting.mdc updated for device-only sessionStorage; report at docs/sessions/S003-persistent-chat-history/reports/tech-plan.md"
     - stage: 07-build
-      status: pending
+      status: completed
+      completed_at: "2026-06-26"
+      note: "M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green"
     - stage: 09-qa
       status: pending
     - stage: 10-e2e
@@ -421,6 +431,15 @@ stages:
       completed_tasks: [S001-T1, S001-T4, S001-T5, S001-T6, S001-T7, S001-T8, S001-T9, S001-T10, S001-T11]
       note: "T8 deploy done; snapshot restore confirmed; cold /generate 21.5s vs ~68s baseline"
     note: "S001 07-build — T1-T9,T10,T11 shipped; T12 CPU-snapshot/collapse web-fn hop next"
+    s003:
+      status: completed
+      session_id: S003-persistent-chat-history
+      branch: feat/S003-persistent-chat-history
+      completed_at: "2026-06-26"
+      feature: F33
+      phase: "Phase 10 (M39–M42)"
+      milestones: [M39, M40, M41, M42]
+      note: "S003 F33 browser-local persistent chat history build complete — M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green"
   08-verify-build:
     status: completed
     started_at: "2026-06-25"
@@ -1940,6 +1959,8 @@ decisions_log:
   - date: "2026-06-26"
     note: "S003 01-requirements F33 delta interview complete — 5 decisions R43-R47. R43: sessionStorage confirmed (per-tab acceptable; covers refresh + tab-away/return; brand-new tab empty is OK) — keeps R41. R44: conversation boundary = explicit 'New chat' button archives current + starts fresh. R45: previous-chats cap = keep last 10, FIFO eviction. R46: previous-chat label = first user message + relative timestamp. R47: clear semantics = 'Clear' resets active conversation; per-item delete + 'Clear all history' for the list; storage updated accordingly. stages.01-requirements (active_session) set in_progress; docs to be authored by user."
   - "S003 04-tech-plan: F33 tech decisions TP-S003-01..12 resolved (sessionStorage key vecinita.chat.history.v1, useConversationStore architecture, previous-chats panel in ChatPanel, app-local i18n with EV-004 merge-coordination caveat, ADR-024). Execution-plan Phase 10 added: 17 tasks, total 239. 2026-06-26."
+  - date: "2026-06-26"
+    note: "S003 07-build COMPLETE — F33 browser-local persistent chat history (Phase 10, M39–M42). 4 atomic commits on feat/S003-persistent-chat-history: 14af2a5 (T39.1-T39.5 useConversationStore sessionStorage persistence), accd98f (T40.1-T40.4 rehydrate on mount), 1bf6d17 (T41.1-T41.5 previous-chats list new-chat/select/delete/clear + i18n), d22e040 (T42.1-T42.3 AC-S6 privacy + Phase 10 gate). Phase 10 gate PASS; 115 FE tests + 95% coverage + build green. routing_plan 07-build → completed; active_session.current_stage advanced to 09-qa (next pending)."
 
 artifacts:
   - docs/context-brief.md
@@ -2278,6 +2299,30 @@ git_history:
       message: "[S003] docs: tech plan for F33 browser-local persistent chat history (04-tech-plan)"
       stage: "04-tech-plan"
       files_changed: 9
+      timestamp: "2026-06-26"
+    - sha: 14af2a5
+      branch: feat/S003-persistent-chat-history
+      message: "[T39.1-T39.5] feat: useConversationStore sessionStorage persistence layer (F33)"
+      stage: "07-build"
+      files_changed: 3
+      timestamp: "2026-06-26"
+    - sha: accd98f
+      branch: feat/S003-persistent-chat-history
+      message: "[T40.1-T40.4] feat: rehydrate active conversation from sessionStorage on mount (F33)"
+      stage: "07-build"
+      files_changed: 6
+      timestamp: "2026-06-26"
+    - sha: 1bf6d17
+      branch: feat/S003-persistent-chat-history
+      message: "[T41.1-T41.5] feat: previous-chats list with new-chat/select/delete/clear + i18n (F33)"
+      stage: "07-build"
+      files_changed: 9
+      timestamp: "2026-06-26"
+    - sha: d22e040
+      branch: feat/S003-persistent-chat-history
+      message: "[T42.1-T42.3] test: AC-S6 chat-history privacy + Phase 10 gate (F33)"
+      stage: "07-build"
+      files_changed: 3
       timestamp: "2026-06-26"
 
 constraints:
