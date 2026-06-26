@@ -4,16 +4,17 @@ from __future__ import annotations
 
 import os
 from collections.abc import Callable
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
-from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, status
+from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query, status
 from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.data_management import (
     CreateJobRequest,
     CreateJobResponse,
     HealthResponse,
     Job,
+    JobList,
 )
 
 from vecinita_data_management_backend.store import InMemoryJobStore, JobStore, job_record_to_schema
@@ -98,6 +99,19 @@ def create_app(
         if runner is not None:
             background.add_task(runner, record.job_id)
         return CreateJobResponse(job_id=record.job_id, status="pending")
+
+    @app.get("/jobs", response_model=JobList)
+    def list_jobs(
+        status_filter: Annotated[
+            Literal["pending", "running", "completed", "failed"] | None,
+            Query(alias="status"),
+        ] = None,
+        _: None = Depends(auth_dep),
+    ) -> JobList:
+        records = job_store.list_jobs()
+        if status_filter is not None:
+            records = [record for record in records if record.status == status_filter]
+        return JobList(jobs=[job_record_to_schema(record) for record in records])
 
     @app.get("/jobs/{job_id}", response_model=Job)
     def get_job(job_id: UUID, _: None = Depends(auth_dep)) -> Job:

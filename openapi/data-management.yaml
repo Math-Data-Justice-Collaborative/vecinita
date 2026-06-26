@@ -30,6 +30,31 @@ paths:
           $ref: "#/components/responses/ValidationError"
         "401":
           $ref: "#/components/responses/Unauthorized"
+    get:
+      operationId: listJobs
+      summary: List jobs (newest first)
+      security:
+        - modalProxyAuth: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - pending
+              - running
+              - completed
+              - failed
+      responses:
+        "200":
+          description: Job list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /jobs/{job_id}:
     get:
       operationId: getJob
@@ -125,6 +150,12 @@ components:
             - running
             - completed
             - failed
+        job_type:
+          type: string
+          enum:
+            - ingest
+            - retag
+          default: ingest
         urls:
           type: array
           items:
@@ -142,6 +173,15 @@ components:
         updated_at:
           type: string
           format: date-time
+    JobList:
+      type: object
+      required:
+        - jobs
+      properties:
+        jobs:
+          type: array
+          items:
+            $ref: "#/components/schemas/Job"
     HealthResponse:
       type: object
       required:

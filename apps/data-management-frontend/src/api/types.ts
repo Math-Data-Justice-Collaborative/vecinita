@@ -1,13 +1,19 @@
 export type JobStatus = "pending" | "running" | "completed" | "failed";
+export type JobType = "ingest" | "retag";
 
 export interface Job {
   job_id: string;
   status: JobStatus;
+  job_type?: JobType;
   urls: string[];
   error_code?: string | null;
   error_message?: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface JobList {
+  jobs: Job[];
 }
 
 export interface CreateJobResponse {

@@ -49,11 +49,18 @@ class Job(BaseModel):
 
     job_id: UUID
     status: Literal["pending", "running", "completed", "failed"]
+    job_type: Literal["ingest", "retag"] = "ingest"
     urls: list[HttpUrl]
     error_code: str | None = None
     error_message: str | None = None
     created_at: datetime
     updated_at: datetime
+
+
+class JobList(BaseModel):
+    """GET /jobs list response, newest first."""
+
+    jobs: list[Job]
 
 
 class HealthResponse(BaseModel):

@@ -64,6 +64,10 @@ class JobStore:
     ) -> JobRecord:
         raise NotImplementedError
 
+    def list_jobs(self) -> list[JobRecord]:
+        """Return all jobs, newest first."""
+        raise NotImplementedError
+
 
 def _record_to_payload(record: JobRecord) -> JobPayload:
     return {
@@ -145,6 +149,11 @@ class DictJobStore(JobStore):
         self._jobs[key] = _record_to_payload(record)
         return record
 
+    def list_jobs(self) -> list[JobRecord]:
+        records = [_payload_to_record(payload) for payload in self._jobs.values()]
+        records.sort(key=lambda record: record.created_at, reverse=True)
+        return records
+
 
 class InMemoryJobStore(JobStore):
     """Thread-safe in-process job store for local tests and single-worker runs."""
@@ -196,12 +205,19 @@ class InMemoryJobStore(JobStore):
             record.updated_at = datetime.now(UTC)
             return record
 
+    def list_jobs(self) -> list[JobRecord]:
+        with self._lock:
+            records = list(self._jobs.values())
+        records.sort(key=lambda record: record.created_at, reverse=True)
+        return records
+
 
 def job_record_to_schema(record: JobRecord) -> Job:
     """Map a store record to the public Job API model."""
     return Job(
         job_id=record.job_id,
         status=record.status,  # type: ignore[arg-type]
+        job_type=record.job_type,  # type: ignore[arg-type]
         urls=record.urls,  # type: ignore[arg-type]
         error_code=record.error_code,
         error_message=record.error_message,

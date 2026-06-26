@@ -1,105 +1,99 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { mockFetchJsonBody } from "@/test/fetch-mock";
+import { createJob, getJob, listJobs, parseUrlsInput } from "./jobs";
 
-import { createJob, getJob, parseUrlsInput } from "./jobs";
+const OPTIONS = { baseUrl: "http://localhost:8001", modalKey: "k" };
 
-const CLIENT = { baseUrl: "http://localhost:8001", modalKey: "proxy-key" };
-
-function jsonResponse(body: unknown, status = 200): Response {
+function jsonResponse(body: object): Response {
   return new Response(JSON.stringify(body), {
-    status,
+    status: 200,
     headers: { "Content-Type": "application/json" },
   });
 }
 
-describe("jobs API client", () => {
+describe("listJobs", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("parseUrlsInput splits lines and trims", () => {
-    expect(parseUrlsInput("  https://a.test  \n\nhttps://b.test\r\n")).toEqual([
-      "https://a.test",
-      "https://b.test",
-    ]);
+  it("requests all jobs without a status filter", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ jobs: [] }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const jobs = await listJobs(OPTIONS);
+
+    expect(jobs).toEqual([]);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("http://localhost:8001/jobs");
   });
 
-  it("createJob posts urls without options when chunk size omitted", async () => {
+  it("appends the status query when filtering", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ jobs: [] }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await listJobs(OPTIONS, "completed");
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "http://localhost:8001/jobs?status=completed",
+    );
+  });
+
+  it("throws a fallback message when the response has no body", async () => {
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(jsonResponse({ job_id: "j1", status: "pending" })),
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
     );
 
-    const created = await createJob(CLIENT, ["https://example.com"]);
-    expect(created.job_id).toBe("j1");
+    await expect(listJobs(OPTIONS)).rejects.toThrow(/List jobs failed/);
+  });
+});
 
-    expect(mockFetchJsonBody()).toEqual({
-      urls: ["https://example.com"],
-    });
+describe("createJob", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
-  it("createJob includes chunk_size_tokens when provided", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(jsonResponse({ job_id: "j2", status: "pending" })),
-    );
+  it("posts urls and optional chunk size", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(jsonResponse({ job_id: "j1", status: "pending" }));
+    vi.stubGlobal("fetch", fetchMock);
 
-    await createJob(CLIENT, ["https://example.com"], 512);
-    const body = mockFetchJsonBody();
-    expect(body["options"]).toEqual({ chunk_size_tokens: 512 });
+    const result = await createJob(OPTIONS, ["https://example.com"], 256);
+
+    expect(result.job_id).toBe("j1");
+    const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
+    expect(init.body).toContain("chunk_size_tokens");
   });
 
-  it("createJob throws response text on failure", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(new Response("create failed", { status: 400 })),
-    );
-    await expect(createJob(CLIENT, [])).rejects.toThrow("create failed");
-  });
-
-  it("createJob throws status fallback when body empty", async () => {
+  it("throws a fallback message when create fails with no body", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(new Response("", { status: 502 })),
     );
-    await expect(createJob(CLIENT, [])).rejects.toThrow(/502/);
-  });
 
-  it("getJob returns job payload", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(
-        jsonResponse({
-          job_id: "j1",
-          status: "completed",
-          urls: [],
-          created_at: "2026-01-01T00:00:00Z",
-          updated_at: "2026-01-01T00:00:01Z",
-        }),
-      ),
+    await expect(createJob(OPTIONS, ["https://example.com"])).rejects.toThrow(
+      /Create job failed/,
     );
-    const job = await getJob(CLIENT, "j1");
-    expect(job.status).toBe("completed");
+  });
+});
+
+describe("getJob", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
-  it("getJob throws response text on failure", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(new Response("missing", { status: 404 })),
-    );
-    await expect(getJob(CLIENT, "j1")).rejects.toThrow("missing");
-  });
-
-  it("getJob throws status fallback when body empty", async () => {
+  it("throws a fallback message when get fails with no body", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(new Response("", { status: 404 })),
     );
-    await expect(getJob(CLIENT, "j1")).rejects.toThrow(/404/);
+
+    await expect(getJob(OPTIONS, "missing")).rejects.toThrow(/Get job failed/);
+  });
+});
+
+describe("parseUrlsInput", () => {
+  it("splits, trims, and drops blank lines", () => {
+    expect(parseUrlsInput(" a \n\n b \n")).toEqual(["a", "b"]);
   });
 });

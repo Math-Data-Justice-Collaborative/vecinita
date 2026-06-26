@@ -41,6 +41,7 @@
 | F29 | Audit log & version history | Implemented | Data Management | internal-write-api, data-management-frontend, database | 11-verify-impl 2026-05-27 |
 | F30 | Strict static typing (no `Any` / `any`) | Implemented | Cross-cutting | all Python + TS apps | EV-003 2026-05-27 |
 | F31 | Admin + shared frontend bilingual UI (en/es) | Planned | Cross-cutting | data-management-frontend, chat-rag-frontend, `packages/frontend-i18n`, `packages/frontend-ui` | EV-004 2026-06-13 |
+| F32 | Admin Job Management tab (list jobs) | Implemented | Data Management | data-management-backend, data-management-frontend | S002 2026-06-26 (#89) |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -431,6 +432,17 @@
 - **Limitations**: UI chrome only — corpus document titles, tag labels, URLs, audit JSON payloads, API `error_message`, and health/job status enums remain in source form (R30). No backend or API contract changes. No `Accept-Language` header in F31.
 - **Priority**: High — ship in EV-004 before next deploy.
 - **Source**: EV-004 user interview 2026-06-13; ADR-019, ADR-020 (amended); context-brief §13
+
+### F32: Admin Job Management tab (list jobs)
+
+- **What it does**: Adds a Job Management tab to the admin dashboard that lists all ingest/retag jobs (running, completed, failed) sourced from a new server-backed list endpoint. Because job state is read from the server (not component-local React state), switching tabs and returning no longer drops running/failed job info (the original symptom in #89; same class as #53).
+- **Inputs**: Operator browser; `GET /jobs` on the data-management backend (optional `?status=` filter).
+- **Outputs**: Table of jobs with short job id, type (ingest/retag), status badge, source URLs, last-updated time, and `error_code: error_message` for failed jobs; polled while open; manual refresh.
+- **Backend**: `GET /jobs` list endpoint (newest first) + `list_jobs()` on `JobStore` / `DictJobStore` / `InMemoryJobStore`; `job_type` added to the `Job` schema; `JobList` response model; OpenAPI `openapi/data-management.yaml` updated.
+- **Frontend**: New `/jobs` route + sidebar nav item (`ListChecks`); `JobsPage`; `listJobs()` client; en/es i18n (`admin.nav.jobs`, `admin.jobs.*`).
+- **Limitations**: No PII in listings (URLs + status only, ADR-004). No job cancellation/retry in this iteration. Status/type enums localized; error messages remain in source form (consistent with F31 R30).
+- **Priority**: High — pairs with #88 ingest tag resilience.
+- **Source**: S002 session (GitHub #89); related bug #88 (graceful ingest tagging).
 
 ## Planned / Deferred (post-v1)
 
