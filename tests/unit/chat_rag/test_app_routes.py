@@ -124,6 +124,24 @@ def test_warm_modal_services_warms_embed_and_llm_in_parallel() -> None:
     mock_warm.assert_any_call("http://llm.test", timeout_s=120.0)
 
 
+def test_warm_modal_services_skips_when_urls_missing() -> None:
+    with patch("vecinita_chat_rag_backend.app._warm_modal_url") as mock_warm:
+        _warm_modal_services(None, None, request_timeout_s=30.0)
+    mock_warm.assert_not_called()
+
+
+def test_warm_modal_services_warms_embed_only() -> None:
+    with patch("vecinita_chat_rag_backend.app._warm_modal_url") as mock_warm:
+        _warm_modal_services("http://embed.test", None, request_timeout_s=30.0)
+    mock_warm.assert_called_once_with("http://embed.test", timeout_s=30.0)
+
+
+def test_warm_modal_services_warms_llm_only() -> None:
+    with patch("vecinita_chat_rag_backend.app._warm_modal_url") as mock_warm:
+        _warm_modal_services(None, "http://llm.test", request_timeout_s=30.0)
+    mock_warm.assert_called_once_with("http://llm.test", timeout_s=30.0)
+
+
 def test_warm_modal_endpoint_schedules_background_warm(client: TestClient) -> None:
     with patch("vecinita_chat_rag_backend.app._warm_modal_services") as mock_warm:
         response = client.post("/api/v1/warm")
@@ -150,6 +168,29 @@ def test_source_payload_stringifies_uuid_fields() -> None:
             )
         ]
     )
+    assert payload[0]["chunk_id"] == str(chunk_id)
+    assert payload[0]["document_id"] == str(document_id)
+
+
+def test_source_payload_stringifies_uuid_when_encoder_returns_uuid() -> None:
+    chunk_id = uuid4()
+    document_id = uuid4()
+    source = Source(
+        chunk_id=chunk_id,
+        document_id=document_id,
+        title="Doc",
+        url="https://example.com",
+        score=0.5,
+    )
+    with patch("vecinita_chat_rag_backend.app.jsonable_encoder") as mock_encoder:
+        mock_encoder.return_value = {
+            "chunk_id": chunk_id,
+            "document_id": document_id,
+            "title": "Doc",
+            "url": "https://example.com",
+            "score": 0.5,
+        }
+        payload = _source_payload([source])
     assert payload[0]["chunk_id"] == str(chunk_id)
     assert payload[0]["document_id"] == str(document_id)
 
@@ -300,6 +341,19 @@ def test_fire_stats_noops_when_disabled() -> None:
 def test_fire_stats_noops_when_no_sources() -> None:
     with patch("vecinita_chat_rag_backend.app.httpx.post") as mock_post:
         _fire_stats([], "http://write.test", "secret-key")
+    mock_post.assert_not_called()
+
+
+def test_fire_stats_noops_when_sources_lack_document_id() -> None:
+    source_without_doc = Source.model_construct(
+        chunk_id=uuid4(),
+        document_id=None,
+        title="Doc",
+        url="https://example.com",
+        score=0.5,
+    )
+    with patch("vecinita_chat_rag_backend.app.httpx.post") as mock_post:
+        _fire_stats([source_without_doc], "http://write.test", "secret-key")
     mock_post.assert_not_called()
 
 
