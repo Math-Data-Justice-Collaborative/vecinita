@@ -59,3 +59,7 @@ export function useChatHistory() {
     clearHistory,
   };
 }
+
+/** Shape returned by {@link useChatHistory}; lifted to the app shell so it
+ *  survives Chat ⇄ Corpus navigation (BUG-2026-06-25, issue #53). */
+export type ChatHistory = ReturnType<typeof useChatHistory>;

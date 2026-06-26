@@ -2,6 +2,7 @@ import { ChatPanel } from "./components/ChatPanel";
 import { CorpusBrowse } from "./components/CorpusBrowse";
 import { LanguageToggle } from "./components/LanguageToggle";
 import { LocaleProvider } from "./context/LocaleContext";
+import { useChatHistory } from "./hooks/useChatHistory";
 import { useLocale } from "./hooks/useLocale";
 import { usePathname } from "./hooks/usePathname";
 import { t } from "./i18n/messages";
@@ -10,6 +11,9 @@ import "./App.css";
 function AppContent() {
   const { pathname, navigate } = usePathname();
   const { locale, setLocale } = useLocale();
+  // Owned by the always-mounted shell so the conversation survives navigation
+  // to the Corpus tab and back (BUG-2026-06-25, issue #53).
+  const chat = useChatHistory();
   const onCorpus = pathname === "/corpus" || pathname.endsWith("/corpus");
 
   return (
@@ -49,7 +53,7 @@ function AppContent() {
             }}
           />
         ) : (
-          <ChatPanel />
+          <ChatPanel chat={chat} />
         )}
       </main>
     </div>

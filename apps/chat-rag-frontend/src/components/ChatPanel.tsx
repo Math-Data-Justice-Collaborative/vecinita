@@ -12,12 +12,19 @@ import { prewarmChatServices } from "../api/warm";
 import type { Source } from "../api/types";
 import { requireChatApiConfig } from "../config";
 import { useLocale } from "../hooks/useLocale";
-import { useChatHistory } from "../hooks/useChatHistory";
+import { useChatHistory, type ChatHistory } from "../hooks/useChatHistory";
 import { t } from "../i18n/messages";
 import { TagFilterChips } from "./TagFilterChips";
 import { SourceList } from "./SourceList";
 
-export function ChatPanel() {
+type ChatPanelProps = {
+  /** Conversation history lifted to the app shell so it survives Chat ⇄ Corpus
+   *  navigation (BUG-2026-06-25, issue #53). Falls back to local state when
+   *  omitted (standalone use / unit tests). */
+  chat?: ChatHistory;
+};
+
+export function ChatPanel({ chat }: ChatPanelProps = {}) {
   const [question, setQuestion] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -25,6 +32,7 @@ export function ChatPanel() {
   const [tagFacets, setTagFacets] = useState<TagFacet[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const { locale } = useLocale();
+  const fallbackHistory = useChatHistory();
   const {
     messages,
     appendUserMessage,
@@ -32,7 +40,7 @@ export function ChatPanel() {
     appendAssistantToken,
     setAssistantSources,
     clearHistory,
-  } = useChatHistory();
+  } = chat ?? fallbackHistory;
 
   useEffect(() => {
     try {
