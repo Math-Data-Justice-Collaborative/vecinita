@@ -13,6 +13,7 @@ import type { Source } from "../api/types";
 import { requireChatApiConfig } from "../config";
 import { useLocale } from "../hooks/useLocale";
 import { useChatHistory, type ChatHistory } from "../hooks/useChatHistory";
+import { useConversationStore } from "../hooks/useConversationStore";
 import { t } from "../i18n/messages";
 import { TagFilterChips } from "./TagFilterChips";
 import { SourceList } from "./SourceList";
@@ -31,7 +32,8 @@ type ChatPanelProps = {
  * (PR #68 review), while still honoring the rules of hooks.
  */
 function ChatPanelStandalone() {
-  const chat = useChatHistory();
+  const store = useConversationStore();
+  const chat = useChatHistory(store);
   return <ChatPanelView chat={chat} />;
 }
 

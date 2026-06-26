@@ -12,11 +12,11 @@
 | **Active phase** | Phase 9: EV-004 shared frontend i18n/UI |
 | **Active milestone** | M32: Workspace scaffold |
 | **Active task** | M33 / T33.1 |
-| **Tasks completed** | 192 / 239 |
+| **Tasks completed** | 196 / 239 |
 | **Last updated** | 2026-06-26 |
 | **Evolve cycle** | EV-004 (F31) — **in_progress** |
 | **Git branch** | `feat/M32-workspace-scaffold` |
-| **Active session** | S003-persistent-chat-history (Phase 10, F33) — 07-build **in progress**: M39 conversation store complete (T39.1–T39.5); next M40 shell wiring; on `feat/S003-persistent-chat-history` |
+| **Active session** | S003-persistent-chat-history (Phase 10, F33) — 07-build **in progress**: M39–M40 complete (store + shell wiring + rehydration; #53 guard green); next M41 previous-chats UI; on `feat/S003-persistent-chat-history` |
 
 ## Template
 
@@ -805,10 +805,10 @@ it; rehydrate on mount; preserve Chat ⇄ Corpus state guard (#53).
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|------------|-------------|
-| T40.1 | Test: real `App` remount rehydrates conversation + sources in order (TC-072, UJ-024) — red | Test | pending | test-plan TC-072, UJ-024 | T39.5 | — | S003 | F33 |
-| T40.2 | Code: refactor `useChatHistory` to back onto store active slice (keep public shape + `loading`) | Code | pending | ADR-024 TP-S003-02 | T40.1 | — | S003 | F33 |
-| T40.3 | Code: wire store in `AppContent`; pass through to `ChatPanel`; preserve #53 lifting | Code | pending | ADR-024, frontend-session-state-lifting.mdc | T40.2 | — | S003 | F33 |
-| T40.4 | Test: regression — Chat ⇄ Corpus navigation state-loss guard (#53) still passes | Test | pending | `test_bug_2026_06_25_chat_corpus_tab_state_loss` | T40.3 | — | S003 | F33 |
+| T40.1 | Test: real `App` remount rehydrates conversation + sources in order (TC-072, UJ-024) — red | Test | completed | test-plan TC-072, UJ-024 | T39.5 | — | S003 | F33 |
+| T40.2 | Code: refactor `useChatHistory` to back onto store active slice (keep public shape + `loading`) | Code | completed | ADR-024 TP-S003-02 | T40.1 | — | S003 | F33 |
+| T40.3 | Code: wire store in `AppContent`; pass through to `ChatPanel`; preserve #53 lifting | Code | completed | ADR-024, frontend-session-state-lifting.mdc | T40.2 | — | S003 | F33 |
+| T40.4 | Test: regression — Chat ⇄ Corpus navigation state-loss guard (#53) still passes | Test | completed | `test_bug_2026_06_25_chat_corpus_tab_state_loss` | T40.3 | — | S003 | F33 |
 
 #### M41: Previous-chats list UI + new-chat / select / delete / clear
 
@@ -1192,10 +1192,10 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T39.3 | M39 | 10 | Code | completed | T39.1, T39.2 | — | S003 | F33 |
 | T39.4 | M39 | 10 | Test | completed | T39.3 | — | S003 | F33 |
 | T39.5 | M39 | 10 | Code | completed | T39.4 | — | S003 | F33 |
-| T40.1 | M40 | 10 | Test | pending | T39.5 | — | S003 | F33 |
-| T40.2 | M40 | 10 | Code | pending | T40.1 | — | S003 | F33 |
-| T40.3 | M40 | 10 | Code | pending | T40.2 | — | S003 | F33 |
-| T40.4 | M40 | 10 | Test | pending | T40.3 | — | S003 | F33 |
+| T40.1 | M40 | 10 | Test | completed | T39.5 | — | S003 | F33 |
+| T40.2 | M40 | 10 | Code | completed | T40.1 | — | S003 | F33 |
+| T40.3 | M40 | 10 | Code | completed | T40.2 | — | S003 | F33 |
+| T40.4 | M40 | 10 | Test | completed | T40.3 | — | S003 | F33 |
 | T41.1 | M41 | 10 | Test | pending | T40.4 | — | S003 | F33 |
 | T41.2 | M41 | 10 | Code | pending | T41.1 | — | S003 | F33 |
 | T41.3 | M41 | 10 | Code | pending | T41.2 | — | S003 | F33 |
