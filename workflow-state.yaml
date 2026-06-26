@@ -12,6 +12,23 @@ project:
       partial_rerun_at: "2026-06-26"
       partial_rerun_note: "S001 Modal GPU snapshot + DO warm path deploy"
       report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
+    15-service-health:
+      status: completed
+      started_at: "2026-06-25"
+      completed_at: "2026-06-25"
+      partial_rerun_at: "2026-06-25"
+      partial_rerun_note: "S001 post-deploy health — H1-H5 pass; warm ask 2.9s; H0ci main green advisory"
+      environment: staging
+      infra: pass
+      e2e: pass
+      overall: pass
+      report: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
+      tiers: [H1, H2, H3, H3b, H4, H5, H0ci]
+      advisories:
+        - do_branch_pin_feat_S001
+        - modal_h4_cors_waived_proxy_auth
+        - s001_t12_pending
+        - h0ci_blocking_after_merge
 
 # Session-first work model — see .cursor/skills/sessions-reference.md
 session_counter: 1          # increment when allocating S{NNN}-{slug}
@@ -24,7 +41,7 @@ active_session:             # current bounded work unit; null when none in fligh
   orchestrator: pipeline
   artifacts_dir: docs/sessions/S001-modal-cold-start-snapshot/
   started_at: "2026-06-25"
-  current_stage: 15-service-health
+  current_stage: "evaluate session close (07-build T12 still in_progress)"
   routing_plan:
     - stage: 00-context
       status: completed
@@ -48,7 +65,8 @@ active_session:             # current bounded work unit; null when none in fligh
       status: completed
       completed_at: "2026-06-26"
     - stage: 15-service-health
-      status: pending
+      status: completed
+      completed_at: "2026-06-25"
   skipped_stages:
     - stage: 01-requirements
       reason: "perf change to already-specced service under ADR-009"
@@ -82,6 +100,10 @@ active_session:             # current bounded work unit; null when none in fligh
       kind: report
       session_id: S001-modal-cold-start-snapshot
       stage: 09-qa
+    - path: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
+      kind: report
+      session_id: S001-modal-cold-start-snapshot
+      stage: 15-service-health
 sessions: []                # archived completed sessions
 
 stages:
@@ -386,18 +408,31 @@ stages:
     summary: "stream_tokens Modal Function not callable — _generate_text helper"
   15-service-health:
     status: completed
-    started_at: "2026-05-21"
-    completed_at: "2026-05-21"
+    started_at: "2026-06-25"
+    completed_at: "2026-06-25"
+    partial_rerun_at: "2026-06-25"
+    partial_rerun_note: "S001 post-deploy health — H1-H5 pass; warm ask 2.9s; H0ci main green advisory"
     environment: staging
-    tiers: [H0, H1, H2, H3, H4, H5, H6]
     infra: pass
     e2e: pass
     overall: pass
-    report: docs/service-health-reports/2026-05-21-staging-routine-full.md
+    report: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
+    tiers: [H1, H2, H3, H3b, H4, H5, H0ci]
     advisories:
-      - llm_cold_start_do_504_until_warm
+      - do_branch_pin_feat_S001
       - modal_h4_cors_waived_proxy_auth
-      - deploy_drift_c4bc847_vs_4d2f665
+      - s001_t12_pending
+      - h0ci_blocking_after_merge
+    history:
+      - environment: staging
+        completed_at: "2026-05-21"
+        tiers: [H0, H1, H2, H3, H4, H5, H6]
+        overall: pass
+        report: docs/service-health-reports/2026-05-21-staging-routine-full.md
+        advisories:
+          - llm_cold_start_do_504_until_warm
+          - modal_h4_cors_waived_proxy_auth
+          - deploy_drift_c4bc847_vs_4d2f665
   17-retrospective:
     status: pending
   18-pr-review:
@@ -445,7 +480,7 @@ deployment:
     t0_journeys_passed: 16
   staging:
     status: deployed
-    last_verified: "2026-06-26"
+    last_verified: "2026-06-25"
     commit_deployed: "4f3f741"
     commit_head: "4f3f741"
     drift: false
@@ -459,7 +494,7 @@ deployment:
       modal_embedding: https://vecinita--vecinita-embedding-embedding-api.modal.run
       modal_llm: https://vecinita--vecinita-llm-fastapi-app.modal.run
     health_tiers:
-      h0ci_github_main: pending
+      h0ci_github_main: pass
       h1_liveness: pass
       h2_db_ready: pass
       h3_rag_smoke: pass
@@ -1645,6 +1680,8 @@ decisions_log:
   - date: "2026-06-25"
     note: "S001 09-qa user-invoked (not in original S001 routing plan; stage amended into routing_plan with user_amended=true). Full-repo QA on feat/S001-modal-cold-start-snapshot @ 4f3f741 — overall pass_with_advisories, all blocking checks green (500 passed/38 skipped Python; 271 FE tests). Advisories QA-001–011 (QA-010 resolved in CI). Reports: docs/qa-report.md + docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md."
   - "S001 13-deploy-smoke COMPLETE 2026-06-26 — H1-H5 pass; cold+prewarm ask 14.3s; DO chat on feat branch"
+  - date: "2026-06-25"
+    note: "S001 15-service-health COMPLETE — H1-H5 pass; warm ask 2.9s; H0ci main green (advisory); report docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md"
 
 artifacts:
   - docs/context-brief.md
@@ -1695,6 +1732,7 @@ artifacts:
   - docs/staging-runbook.md
   - docs/sessions/S001-modal-cold-start-snapshot/reports/p2-snapshot-deploy.md
   - docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md
+  - docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
 
 git_history:
   current_branch: feat/S001-modal-cold-start-snapshot
