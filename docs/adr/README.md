@@ -23,6 +23,8 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 | [ADR-020](ADR-020-shared-frontend-ui.md) | Shared frontend UI component package | Accepted | 00-context (EV-004) |
 | [ADR-021](ADR-021-ev004-implementation.md) | EV-004 implementation decisions (TP-030–TP-039) | Accepted | 04-tech-plan (EV-004) |
 | [ADR-022](ADR-022-gpu-memory-snapshot-cold-start.md) | GPU Memory Snapshots for vLLM cold-start reduction | Proposed (spike) | 00-context (S001) |
+| [ADR-023](ADR-023-device-only-tab-scoped-chat-persistence.md) | Device-only, tab-scoped client-side chat persistence (sessionStorage) | Accepted | 01-requirements (S003) |
+| [ADR-024](ADR-024-chat-history-persistence-design.md) | ChatRAG chat-history persistence design (`useConversationStore` + sessionStorage) | Accepted | 04-tech-plan (S003) |
 
 ## Deferred (no ADR file yet)
 

@@ -760,3 +760,78 @@ No new external datasets, model weights, or API assets. New workspace packages: 
 | R36 | Decision | Shared component styling | **⚠️ Assumed: Tailwind in `frontend-ui`** — ChatRAG adds Tailwind to consume shared styled components |
 | R37 | Decision | Component extraction scope | **⚠️ Assumed: i18n core + LanguageToggle + LocaleProvider + TagBadge/TagFilterChips + PaginationControls** |
 | R38 | Decision | npm workspace wiring | **⚠️ Assumed: Root npm workspaces** linking both apps to `packages/frontend-*` |
+
+## 14. S003 delta — Browser-local persistent chat history (sessionStorage + previous-chats list)
+
+**Date:** 2026-06-26  
+**Session:** S003-persistent-chat-history (type feature, orchestrator 16-evolve)  
+**Feature:** F33 — Browser-local ephemeral chat history + previous-chats list  
+**App:** `chat-rag-frontend` (frontend-only delta; no backend/API/contract changes)
+
+### Executive summary
+
+The chat-rag-frontend main page keeps the conversation in in-memory React state
+(`useChatHistory`) lifted to the always-mounted `AppContent` shell. That survives **in-app**
+Chat ⇄ Corpus navigation (BUG-2026-06-25 / #53, PR #68) but is **lost on page refresh, tab
+close, or switching browser tabs** because nothing is persisted to browser storage. S003 adds:
+
+1. **Persistence of the active conversation** across refresh / tab-away / browser-tab switching
+   using **`sessionStorage`** (device-only; never transmitted; cleared when the tab closes).
+2. **A selectable list of previous conversations** on the main page so users can revisit prior
+   chats.
+
+### Key decisions (AskQuestion 2026-06-26)
+
+| ID | Category | Topic | Resolution |
+|----|----------|-------|------------|
+| R39 | Decision | Active-session handling | **Park S002** (status `paused`, branch preserved) and open S003 |
+| R40 | Decision | Feature scope | **Both** — persist active conversation **and** previous-chats list |
+| R41 | Decision | Storage mechanism / privacy | **`sessionStorage`** (not localStorage) — narrower footprint; survives refresh + tab-away, cleared on tab close |
+| R42 | Decision | Routing | **evolve-lite** 00→01→04→07→09→10→12→13 (skip 02,03,05,06,11) |
+
+### Privacy / spec alignment (must resolve in 01/04)
+
+- **F3 ("Stateless chat — no server-side history")** remains true: the server stays stateless.
+  S003 history is strictly **client-side / device-only**. Downstream specs must keep this
+  distinction explicit (client-side history ≠ server-side history).
+- **ADR-004** and **`.cursor/rules/frontend-session-state-lifting.mdc`** currently read
+  "client-side-only … never persist to the server or to storage that leaves the browser" and
+  "lift it within the SPA only." `sessionStorage` does not leave the browser, but the "within
+  the SPA only" wording is in tension with persisting to web storage. **01-requirements /
+  04-tech-plan must update ADR-004 + the rule** to explicitly permit **device-only,
+  tab-scoped** persistence (sessionStorage) and document why (user R41).
+- Privacy guardrails (`F15`, privacy-schema-validator) target server-side schemas/logs and are
+  unaffected — no chat content reaches the server or logs.
+
+### Touch points (reference)
+
+| Piece | Location |
+|-------|----------|
+| Chat history hook (in-memory today) | [Repo: `apps/chat-rag-frontend/src/hooks/useChatHistory.ts`] |
+| App shell owner of `chat` | [Repo: `apps/chat-rag-frontend/src/App.tsx` (`AppContent`)] |
+| Chat view consuming `chat` prop | [Repo: `apps/chat-rag-frontend/src/components/ChatPanel.tsx`] |
+| Message/Source types | [Repo: `apps/chat-rag-frontend/src/api/types.ts`] |
+| i18n message table (new keys for previous-chats UI) | [Repo: `apps/chat-rag-frontend/src/i18n/messages.ts`] |
+| State-lifting rule (to update) | [Repo: `.cursor/rules/frontend-session-state-lifting.mdc`] |
+| Existing regression guard | [Repo: `apps/chat-rag-frontend/src/test/test_bug_2026_06_25_chat_corpus_tab_state_loss.test.tsx`] |
+
+### Unresolved gaps (for 01-requirements)
+
+- **Previous-chats data model:** what defines a "previous conversation" boundary (a chat ends
+  when the user starts a new one via a "New chat" action vs. time-based)? How many to keep
+  (cap/eviction)? Title derivation (first user message vs. timestamp)?
+- **sessionStorage scope caveat:** `sessionStorage` is **per-tab** — a brand-new browser tab
+  does not inherit another tab's history. Confirm this matches the user's "go to another tab"
+  expectation (it covers refresh + switching to an already-open tab and back, not opening a
+  fresh duplicate tab).
+- **Quota / serialization:** message list with streamed assistant content + sources must
+  serialize safely and handle `sessionStorage` quota / disabled-storage gracefully.
+- **Clear semantics:** how "Clear history" and selecting a previous chat interact with the
+  persisted store.
+
+### Out of scope
+
+- No server-side chat/session persistence (ADR-004 / F3).
+- No cross-device, cross-browser, or cross-tab(new-tab) sync.
+- No persistence surviving browser-tab close (sessionStorage by design, R41).
+- No changes to `data-management-frontend`.

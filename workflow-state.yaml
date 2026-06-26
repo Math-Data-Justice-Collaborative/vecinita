@@ -5,6 +5,14 @@ project:
   description: Monorepo — bilingual community Q&A RAG + data management (5 apps; zero personal data, cost/sovereignty constraints)
   output_directory: docs/
   stages:
+    07-build:
+      status: completed
+      completed_at: "2026-06-26"
+      session_id: S003-persistent-chat-history
+      branch: feat/S003-persistent-chat-history
+      feature: F33
+      phase: "Phase 10 (M39–M42)"
+      note: "S003 F33 browser-local persistent chat history — M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green"
     13-deploy-smoke:
       status: completed
       started_at: "2026-06-26"
@@ -31,84 +39,132 @@ project:
         - h0ci_blocking_after_merge
 
 # Session-first work model — see .cursor/skills/sessions-reference.md
-session_counter: 2          # increment when allocating S{NNN}-{slug}
+session_counter: 3          # increment when allocating S{NNN}-{slug}
 active_session:             # current bounded work unit; null when none in flight
-  id: S002-admin-job-management
+  id: S003-persistent-chat-history
   type: feature
   status: in_progress
-  intent: "Combined session for GitHub issues #88 + #89. #88 (bug/hotfix): ingest/retag jobs fail entirely when vecinita-llm tag completion is empty/non-JSON (LlmTagClientError) — make tagging best-effort so a tag failure degrades to no LLM tags instead of failing the job. #89 (feature/evolve): add a Job Management tab to the admin dashboard backed by a new GET /jobs list API + list_jobs store method, so running/completed/failed jobs are visible and survive in-app navigation (today JobForm local state is dropped on tab change, like #53)."
-  branch: feat/S002-admin-job-management
+  intent: "Add browser-local, ephemeral chat history to the chat-rag-frontend main page. (a) Persist the active conversation across page refresh, tab-away, and switching browser tabs using sessionStorage (device-only, never sent to server; cleared when the browser tab is closed). (b) Keep a selectable list of previous conversations so users can revisit past chats. Frontend-only delta; no backend/API/contract changes. Privacy: sessionStorage chosen over localStorage for a narrower footprint (user decision)."
+  branch: feat/S003-persistent-chat-history
   orchestrator: 16-evolve
-  artifacts_dir: docs/sessions/S002-admin-job-management/
+  artifacts_dir: docs/sessions/S003-persistent-chat-history/
   started_at: "2026-06-26"
-  current_stage: "11-verify-impl"
-  linked_issues: [88, 89]
+  current_stage: "09-qa"
+  linked_issues: []
   routing_plan:
     - stage: 00-context
       status: completed
-      note: "session opener; #88 + #89 issues created"
+      note: "context-brief §14 added (F33); decisions R39-R42; session-brief + routing-plan written; commit a0cf185"
     - stage: 01-requirements
       status: completed
-      note: "doc delta — F32 registered in feature-list + api-contract GET /jobs + job_type; no separate interview"
+      note: "F33 docs delta written — feature-list F33, UJ-024/UJ-025, TC-072–TC-076, AC-S1–AC-S7, RD-068–RD-072, ADR-023. R43–R47 resolved."
     - stage: 04-tech-plan
       status: completed
-      note: "ADR-023 best-effort ingest tagging + server-backed Job Management tab"
+      note: "Phase 10 added (M39-M42, 17 tasks T39.1-T42.3); decisions TP-S003-01..12; ADR-024 authored; frontend-session-state-lifting.mdc updated for device-only sessionStorage; report at docs/sessions/S003-persistent-chat-history/reports/tech-plan.md"
     - stage: 07-build
       status: completed
-      note: "#88 graceful ingest tagging fix (TDD) + #89 GET /jobs API/store + JobsPage/nav/i18n; all unit/integration/bugs/non-live-e2e + 186 data-mgmt FE tests green"
+      completed_at: "2026-06-26"
+      note: "M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green"
     - stage: 09-qa
-      status: completed
-      partial_rerun_at: "2026-06-26"
-      note: "Initial run: ruff + basedpyright clean; Python unit/integration/bugs + non-live e2e pass; data-management-frontend lint/typecheck/186 tests pass; frontend-i18n key parity pass. Partial rerun 2026-06-26 post-hotfix — overall FAIL: typecheck (reportAny) + live GET /jobs 405. Report: docs/sessions/S002-admin-job-management/reports/qa-report.md"
-    - stage: 14-hotfix
-      status: in_progress
-      user_amended: true
-      note: "User-amended into S002 routing plan 2026-06-26 (after 09-qa, before 10-e2e). In-session bug fixes for F32 surface: (1) jobs dialog/sheet aria-describedby warning (FE) — local fix uncommitted; (2) GET /jobs 405 on production Modal data-management — deploy gap. Two separate bug reports + repro tests per bug-investigation. Bugs remain open."
+      status: pending
     - stage: 10-e2e
-      status: completed
-      partial_rerun_at: "2026-06-26"
-      note: "T0 pass (45 tests); T3 live FAIL — Modal GET /jobs 405. Report: docs/sessions/S002-admin-job-management/reports/e2e-report.md"
-    - stage: 11-verify-impl
-      status: in_progress
-      user_amended: true
-      note: "User-amended into S002 routing plan 2026-06-26 (was skipped). In_progress pending user AskQuestion responses. Report: docs/sessions/S002-admin-job-management/reports/verify-impl.md"
+      status: pending
     - stage: 12-verify-deploy
-      status: completed
-      note: "deploy_ready: false; checklist written. Blockers: Modal redeploy (GET /jobs 405) + typecheck (reportAny) fix. Report: docs/sessions/S002-admin-job-management/reports/deploy-checklist.md"
+      status: pending
     - stage: 13-deploy-smoke
       status: pending
   skipped_stages:
     - stage: 02-verify-plan
-      reason: "evolve-lite — small well-understood delta"
+      reason: "evolve-lite — small well-understood frontend delta"
     - stage: 03-plan-tooling
       reason: "no new tooling/guardrails"
     - stage: 05-verify-tech
       reason: "evolve-lite — small tech delta"
     - stage: 06-tech-tooling
       reason: "no new tooling/guardrails"
+    - stage: 11-verify-impl
+      reason: "evolve-lite — covered by 09-qa + 10-e2e"
   artifacts:
-    - docs/sessions/S002-admin-job-management/session-brief.md
-    - docs/sessions/S002-admin-job-management/routing-plan.md
-    - docs/bug-reports/BUG-2026-06-26-ingest-tag-nonjson-fails-job.md
-    - docs/adr/ADR-023-job-management-and-ingest-tag-resilience.md
-    - tests/bugs/test_bug_2026_06_26_ingest_tag_nonjson_fails_job.py
-    - path: docs/sessions/S002-admin-job-management/reports/qa-report.md
-      kind: report
-      session_id: S002-admin-job-management
-      stage: 09-qa
-    - path: docs/sessions/S002-admin-job-management/reports/e2e-report.md
-      kind: report
-      session_id: S002-admin-job-management
-      stage: 10-e2e
-    - path: docs/sessions/S002-admin-job-management/reports/verify-impl.md
-      kind: report
-      session_id: S002-admin-job-management
-      stage: 11-verify-impl
-    - path: docs/sessions/S002-admin-job-management/reports/deploy-checklist.md
-      kind: report
-      session_id: S002-admin-job-management
-      stage: 12-verify-deploy
+    - docs/sessions/S003-persistent-chat-history/session-brief.md
+    - docs/sessions/S003-persistent-chat-history/routing-plan.md
 sessions:                   # archived completed sessions
+  - id: S002-admin-job-management
+    type: feature
+    status: paused
+    paused_at: "2026-06-26"
+    pause_note: "Parked mid-flight at 11-verify-impl to start S003 (browser-local persistent chat history feature, user request). Open blockers carried forward: Modal GET /jobs 405 (BUG-2026-06-26-get-jobs-405-modal-production), typecheck reportAny, jobs dialog aria warning (BUG-2026-06-26-jobs-dialog-aria-warning), 12-verify-deploy deploy_ready=false, 13-deploy-smoke pending. Branch feat/S002-admin-job-management preserved."
+    intent: "Combined session for GitHub issues #88 + #89. #88 (bug/hotfix): ingest/retag jobs fail entirely when vecinita-llm tag completion is empty/non-JSON (LlmTagClientError) — make tagging best-effort so a tag failure degrades to no LLM tags instead of failing the job. #89 (feature/evolve): add a Job Management tab to the admin dashboard backed by a new GET /jobs list API + list_jobs store method, so running/completed/failed jobs are visible and survive in-app navigation (today JobForm local state is dropped on tab change, like #53)."
+    branch: feat/S002-admin-job-management
+    orchestrator: 16-evolve
+    artifacts_dir: docs/sessions/S002-admin-job-management/
+    started_at: "2026-06-26"
+    current_stage: "11-verify-impl"
+    linked_issues: [88, 89]
+    routing_plan:
+      - stage: 00-context
+        status: completed
+        note: "session opener; #88 + #89 issues created"
+      - stage: 01-requirements
+        status: completed
+        note: "doc delta — F32 registered in feature-list + api-contract GET /jobs + job_type; no separate interview"
+      - stage: 04-tech-plan
+        status: completed
+        note: "ADR-023 best-effort ingest tagging + server-backed Job Management tab"
+      - stage: 07-build
+        status: completed
+        note: "#88 graceful ingest tagging fix (TDD) + #89 GET /jobs API/store + JobsPage/nav/i18n; all unit/integration/bugs/non-live-e2e + 186 data-mgmt FE tests green"
+      - stage: 09-qa
+        status: completed
+        partial_rerun_at: "2026-06-26"
+        note: "Initial run: ruff + basedpyright clean; Python unit/integration/bugs + non-live e2e pass; data-management-frontend lint/typecheck/186 tests pass; frontend-i18n key parity pass. Partial rerun 2026-06-26 post-hotfix — overall FAIL: typecheck (reportAny) + live GET /jobs 405. Report: docs/sessions/S002-admin-job-management/reports/qa-report.md"
+      - stage: 14-hotfix
+        status: in_progress
+        user_amended: true
+        note: "User-amended into S002 routing plan 2026-06-26 (after 09-qa, before 10-e2e). In-session bug fixes for F32 surface: (1) jobs dialog/sheet aria-describedby warning (FE) — local fix uncommitted; (2) GET /jobs 405 on production Modal data-management — deploy gap. Two separate bug reports + repro tests per bug-investigation. Bugs remain open."
+      - stage: 10-e2e
+        status: completed
+        partial_rerun_at: "2026-06-26"
+        note: "T0 pass (45 tests); T3 live FAIL — Modal GET /jobs 405. Report: docs/sessions/S002-admin-job-management/reports/e2e-report.md"
+      - stage: 11-verify-impl
+        status: in_progress
+        user_amended: true
+        note: "User-amended into S002 routing plan 2026-06-26 (was skipped). In_progress pending user AskQuestion responses. Report: docs/sessions/S002-admin-job-management/reports/verify-impl.md"
+      - stage: 12-verify-deploy
+        status: completed
+        note: "deploy_ready: false; checklist written. Blockers: Modal redeploy (GET /jobs 405) + typecheck (reportAny) fix. Report: docs/sessions/S002-admin-job-management/reports/deploy-checklist.md"
+      - stage: 13-deploy-smoke
+        status: pending
+    skipped_stages:
+      - stage: 02-verify-plan
+        reason: "evolve-lite — small well-understood delta"
+      - stage: 03-plan-tooling
+        reason: "no new tooling/guardrails"
+      - stage: 05-verify-tech
+        reason: "evolve-lite — small tech delta"
+      - stage: 06-tech-tooling
+        reason: "no new tooling/guardrails"
+    artifacts:
+      - docs/sessions/S002-admin-job-management/session-brief.md
+      - docs/sessions/S002-admin-job-management/routing-plan.md
+      - docs/bug-reports/BUG-2026-06-26-ingest-tag-nonjson-fails-job.md
+      - docs/adr/ADR-023-job-management-and-ingest-tag-resilience.md
+      - tests/bugs/test_bug_2026_06_26_ingest_tag_nonjson_fails_job.py
+      - path: docs/sessions/S002-admin-job-management/reports/qa-report.md
+        kind: report
+        session_id: S002-admin-job-management
+        stage: 09-qa
+      - path: docs/sessions/S002-admin-job-management/reports/e2e-report.md
+        kind: report
+        session_id: S002-admin-job-management
+        stage: 10-e2e
+      - path: docs/sessions/S002-admin-job-management/reports/verify-impl.md
+        kind: report
+        session_id: S002-admin-job-management
+        stage: 11-verify-impl
+      - path: docs/sessions/S002-admin-job-management/reports/deploy-checklist.md
+        kind: report
+        session_id: S002-admin-job-management
+        stage: 12-verify-deploy
   - id: S001-modal-cold-start-snapshot
     type: ops
     status: completed_with_deferrals
@@ -375,6 +431,15 @@ stages:
       completed_tasks: [S001-T1, S001-T4, S001-T5, S001-T6, S001-T7, S001-T8, S001-T9, S001-T10, S001-T11]
       note: "T8 deploy done; snapshot restore confirmed; cold /generate 21.5s vs ~68s baseline"
     note: "S001 07-build — T1-T9,T10,T11 shipped; T12 CPU-snapshot/collapse web-fn hop next"
+    s003:
+      status: completed
+      session_id: S003-persistent-chat-history
+      branch: feat/S003-persistent-chat-history
+      completed_at: "2026-06-26"
+      feature: F33
+      phase: "Phase 10 (M39–M42)"
+      milestones: [M39, M40, M41, M42]
+      note: "S003 F33 browser-local persistent chat history build complete — M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green"
   08-verify-build:
     status: completed
     started_at: "2026-06-25"
@@ -1889,6 +1954,13 @@ decisions_log:
     note: "S002 14-hotfix user-amended into routing plan (after 09-qa, before 10-e2e; user_amended=true). Two in-session F32 (#89) bug fixes on feat/S002-admin-job-management: (1) BUG-2026-06-26-jobs-dialog-aria-warning (FE DialogContent aria-describedby), (2) BUG-2026-06-26-get-jobs-405-modal-production (GET /jobs 405 on production Modal data-management). stages.14-hotfix set in_progress (partial rerun; prior #53 PR #68 record preserved under history). Per bug-investigation: one report + one repro test per bug. NOTE: GET /jobs is not yet deployed from S002 — confirm which branch/env serves the Jobs tab before assuming a pure code defect (possible deploy/branch-pin cause)."
   - date: "2026-06-26"
     note: "S002 stages 09-12 run 2026-06-26 — QA fail (typecheck reportAny + live GET /jobs 405); T0 e2e pass; 11-verify-impl user-amended; 12 deploy not ready"
+  - date: "2026-06-26"
+    note: "S002-admin-job-management PARKED (status paused) to open S003-persistent-chat-history (session_counter=3; type feature; orchestrator 16-evolve). New feature: browser-local ephemeral chat history on chat-rag-frontend — persist active conversation across refresh/tab-away (sessionStorage, device-only) + list of previous conversations. User decisions: pause S002 + open new; scope=both (persist + previous-chats list); privacy=sessionStorage (narrower footprint than localStorage); routing=evolve-lite 00→01→04→07→09→10→12→13 (skip 02,03,05,06,11). Branch feat/S003-persistent-chat-history off main."
+  - date: "2026-06-26"
+    note: "S003 01-requirements F33 delta interview complete — 5 decisions R43-R47. R43: sessionStorage confirmed (per-tab acceptable; covers refresh + tab-away/return; brand-new tab empty is OK) — keeps R41. R44: conversation boundary = explicit 'New chat' button archives current + starts fresh. R45: previous-chats cap = keep last 10, FIFO eviction. R46: previous-chat label = first user message + relative timestamp. R47: clear semantics = 'Clear' resets active conversation; per-item delete + 'Clear all history' for the list; storage updated accordingly. stages.01-requirements (active_session) set in_progress; docs to be authored by user."
+  - "S003 04-tech-plan: F33 tech decisions TP-S003-01..12 resolved (sessionStorage key vecinita.chat.history.v1, useConversationStore architecture, previous-chats panel in ChatPanel, app-local i18n with EV-004 merge-coordination caveat, ADR-024). Execution-plan Phase 10 added: 17 tasks, total 239. 2026-06-26."
+  - date: "2026-06-26"
+    note: "S003 07-build COMPLETE — F33 browser-local persistent chat history (Phase 10, M39–M42). 4 atomic commits on feat/S003-persistent-chat-history: 14af2a5 (T39.1-T39.5 useConversationStore sessionStorage persistence), accd98f (T40.1-T40.4 rehydrate on mount), 1bf6d17 (T41.1-T41.5 previous-chats list new-chat/select/delete/clear + i18n), d22e040 (T42.1-T42.3 AC-S6 privacy + Phase 10 gate). Phase 10 gate PASS; 115 FE tests + 95% coverage + build green. routing_plan 07-build → completed; active_session.current_stage advanced to 09-qa (next pending)."
 
 artifacts:
   - docs/context-brief.md
@@ -1946,8 +2018,13 @@ artifacts:
   - docs/sessions/S002-admin-job-management/reports/deploy-checklist.md
 
 git_history:
-  current_branch: feat/S002-admin-job-management
+  current_branch: feat/S003-persistent-chat-history
   branches:
+    - name: feat/S003-persistent-chat-history
+      base: main
+      status: open
+      purpose: "S003 browser-local persistent chat history (sessionStorage + previous-chats list) on chat-rag-frontend"
+      opened_at: "2026-06-26"
     - name: feat/S002-admin-job-management
       base: main
       status: open
@@ -2203,6 +2280,48 @@ git_history:
       branch: feat/S002-admin-job-management
       message: "docs: register F32 Job Management tab + GET /jobs contract + ADR-023 (#88, #89)"
       stage: "04-tech-plan"
+      files_changed: 3
+      timestamp: "2026-06-26"
+    - sha: a0cf185
+      branch: feat/S003-persistent-chat-history
+      message: "chore(session): open S003 persistent-chat-history; park S002"
+      stage: "00-context"
+      files_changed: 4
+      timestamp: "2026-06-26"
+    - sha: 636064c
+      branch: feat/S003-persistent-chat-history
+      message: "[S003] docs: add F33 browser-local persistent chat history (01-requirements)"
+      stage: "01-requirements"
+      files_changed: 8
+      timestamp: "2026-06-26"
+    - sha: a223089
+      branch: feat/S003-persistent-chat-history
+      message: "[S003] docs: tech plan for F33 browser-local persistent chat history (04-tech-plan)"
+      stage: "04-tech-plan"
+      files_changed: 9
+      timestamp: "2026-06-26"
+    - sha: 14af2a5
+      branch: feat/S003-persistent-chat-history
+      message: "[T39.1-T39.5] feat: useConversationStore sessionStorage persistence layer (F33)"
+      stage: "07-build"
+      files_changed: 3
+      timestamp: "2026-06-26"
+    - sha: accd98f
+      branch: feat/S003-persistent-chat-history
+      message: "[T40.1-T40.4] feat: rehydrate active conversation from sessionStorage on mount (F33)"
+      stage: "07-build"
+      files_changed: 6
+      timestamp: "2026-06-26"
+    - sha: 1bf6d17
+      branch: feat/S003-persistent-chat-history
+      message: "[T41.1-T41.5] feat: previous-chats list with new-chat/select/delete/clear + i18n (F33)"
+      stage: "07-build"
+      files_changed: 9
+      timestamp: "2026-06-26"
+    - sha: d22e040
+      branch: feat/S003-persistent-chat-history
+      message: "[T42.1-T42.3] test: AC-S6 chat-history privacy + Phase 10 gate (F33)"
+      stage: "07-build"
       files_changed: 3
       timestamp: "2026-06-26"
 
