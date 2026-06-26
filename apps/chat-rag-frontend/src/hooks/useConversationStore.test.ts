@@ -84,6 +84,59 @@ describe("useConversationStore", () => {
     expect(futureVersion.result.current.previous).toHaveLength(0);
   });
 
+  it.each([
+    ["a non-object envelope", JSON.stringify("hello")],
+    [
+      "active is not a conversation",
+      JSON.stringify({ version: 1, active: "x", previous: [] }),
+    ],
+    [
+      "an active message is not an object",
+      JSON.stringify({
+        version: 1,
+        active: { id: "a", createdAt: 0, messages: ["nope"] },
+        previous: [],
+      }),
+    ],
+    [
+      "an active message has an invalid role",
+      JSON.stringify({
+        version: 1,
+        active: {
+          id: "a",
+          createdAt: 0,
+          messages: [{ id: "m", role: "bot", content: "x" }],
+        },
+        previous: [],
+      }),
+    ],
+    [
+      "a message source is not an object",
+      JSON.stringify({
+        version: 1,
+        active: {
+          id: "a",
+          createdAt: 0,
+          messages: [{ id: "m", role: "user", content: "x", sources: ["bad"] }],
+        },
+        previous: [],
+      }),
+    ],
+    [
+      "previous contains a non-conversation",
+      JSON.stringify({
+        version: 1,
+        active: { id: "a", createdAt: 0, messages: [] },
+        previous: ["x"],
+      }),
+    ],
+  ])("ignores an invalid stored payload (%s)", (_label, payload) => {
+    sessionStorage.setItem(CHAT_HISTORY_STORAGE_KEY, payload);
+    const { result } = renderHook(() => useConversationStore());
+    expect(result.current.active.messages).toHaveLength(0);
+    expect(result.current.previous).toHaveLength(0);
+  });
+
   it("caps the previous list at 10 conversations and evicts the oldest (TC-075)", () => {
     const { result } = renderHook(() => useConversationStore());
     for (let i = 0; i <= PREVIOUS_CHATS_CAP; i++) {

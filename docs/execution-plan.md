@@ -12,11 +12,11 @@
 | **Active phase** | Phase 9: EV-004 shared frontend i18n/UI |
 | **Active milestone** | M32: Workspace scaffold |
 | **Active task** | M33 / T33.1 |
-| **Tasks completed** | 196 / 239 |
+| **Tasks completed** | 201 / 239 |
 | **Last updated** | 2026-06-26 |
 | **Evolve cycle** | EV-004 (F31) — **in_progress** |
 | **Git branch** | `feat/M32-workspace-scaffold` |
-| **Active session** | S003-persistent-chat-history (Phase 10, F33) — 07-build **in progress**: M39–M40 complete (store + shell wiring + rehydration; #53 guard green); next M41 previous-chats UI; on `feat/S003-persistent-chat-history` |
+| **Active session** | S003-persistent-chat-history (Phase 10, F33) — 07-build **in progress**: M39–M41 complete (store + rehydration + previous-chats UI/i18n; 113 FE tests + 95% coverage green); next M42 privacy/full-suite; on `feat/S003-persistent-chat-history` |
 
 ## Template
 
@@ -818,11 +818,11 @@ per-item delete, clear-all, clear; labels (first msg ≤60 chars + relative ts);
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|------------|-------------|
-| T41.1 | Test: "New chat" archives active to list (label = first msg + relative ts) + empties active (TC-074, UJ-025) — red | Test | pending | test-plan TC-074, RD-069/071 | T40.4 | — | S003 | F33 |
-| T41.2 | Code: i18n keys (`newChat`, `previousChats`, `clearAllHistory`, `deleteConversation`, `noPreviousChats`) EN/ES in app-local `messages.ts` | Code | pending | TP-S003-04, feature-list F33 | T41.1 | — | S003 | F33 |
-| T41.3 | Code: `PreviousChatsList` collapsible panel in `ChatPanel`; label truncation (60) + `Intl.RelativeTimeFormat` | Code | pending | ADR-024 TP-S003-03/05 | T41.2 | — | S003 | F33 |
-| T41.4 | Code: New-chat button + clear / clear-all / per-item delete wired to store ops | Code | pending | ADR-024 TP-S003-08, RD-072 | T41.3 | — | S003 | F33 |
-| T41.5 | Test: select restores; per-item delete; clear-all; clear active (TC-076, R47) — red→green | Test | pending | test-plan TC-076, AC-S5 | T41.4 | — | S003 | F33 |
+| T41.1 | Test: "New chat" archives active to list (label = first msg + relative ts) + empties active (TC-074, UJ-025) — red | Test | completed | test-plan TC-074, RD-069/071 | T40.4 | — | S003 | F33 |
+| T41.2 | Code: i18n keys (`newChat`, `previousChats`, `clearAllHistory`, `deleteConversation`, `noPreviousChats`) EN/ES in app-local `messages.ts` | Code | completed | TP-S003-04, feature-list F33 | T41.1 | — | S003 | F33 |
+| T41.3 | Code: `PreviousChatsList` collapsible panel in `ChatPanel`; label truncation (60) + `Intl.RelativeTimeFormat` | Code | completed | ADR-024 TP-S003-03/05 | T41.2 | — | S003 | F33 |
+| T41.4 | Code: New-chat button + clear / clear-all / per-item delete wired to store ops | Code | completed | ADR-024 TP-S003-08, RD-072 | T41.3 | — | S003 | F33 |
+| T41.5 | Test: select restores; per-item delete; clear-all; clear active (TC-076, R47) — red→green | Test | completed | test-plan TC-076, AC-S5 | T41.4 | — | S003 | F33 |
 
 #### M42: Rule update, privacy verification, full suite
 
@@ -1196,11 +1196,11 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T40.2 | M40 | 10 | Code | completed | T40.1 | — | S003 | F33 |
 | T40.3 | M40 | 10 | Code | completed | T40.2 | — | S003 | F33 |
 | T40.4 | M40 | 10 | Test | completed | T40.3 | — | S003 | F33 |
-| T41.1 | M41 | 10 | Test | pending | T40.4 | — | S003 | F33 |
-| T41.2 | M41 | 10 | Code | pending | T41.1 | — | S003 | F33 |
-| T41.3 | M41 | 10 | Code | pending | T41.2 | — | S003 | F33 |
-| T41.4 | M41 | 10 | Code | pending | T41.3 | — | S003 | F33 |
-| T41.5 | M41 | 10 | Test | pending | T41.4 | — | S003 | F33 |
+| T41.1 | M41 | 10 | Test | completed | T40.4 | — | S003 | F33 |
+| T41.2 | M41 | 10 | Code | completed | T41.1 | — | S003 | F33 |
+| T41.3 | M41 | 10 | Code | completed | T41.2 | — | S003 | F33 |
+| T41.4 | M41 | 10 | Code | completed | T41.3 | — | S003 | F33 |
+| T41.5 | M41 | 10 | Test | completed | T41.4 | — | S003 | F33 |
 | T42.1 | M42 | 10 | Config | pending | — | — | S003 | F33 |
 | T42.2 | M42 | 10 | Test | pending | T41.5 | — | S003 | F33 |
 | T42.3 | M42 | 10 | Test | pending | T41.5, T40.4, T42.2 | — | S003 | F33 |

@@ -16,6 +16,11 @@ const en = {
   ask: "Ask",
   asking: "Asking…",
   clearHistory: "Clear history",
+  newChat: "New chat",
+  previousChats: "Previous chats",
+  clearAllHistory: "Clear all history",
+  deleteConversation: "Delete conversation",
+  noPreviousChats: "No previous chats yet.",
   coldStartStatus:
     "The assistant is starting up — this can take up to a minute on the first question…",
   askStillStarting:
@@ -60,6 +65,11 @@ const es = {
   ask: "Preguntar",
   asking: "Preguntando…",
   clearHistory: "Borrar historial",
+  newChat: "Chat nuevo",
+  previousChats: "Chats anteriores",
+  clearAllHistory: "Borrar todo el historial",
+  deleteConversation: "Eliminar conversación",
+  noPreviousChats: "Aún no hay chats anteriores.",
   coldStartStatus:
     "El asistente se está iniciando — la primera pregunta puede tardar hasta un minuto…",
   askStillStarting:
