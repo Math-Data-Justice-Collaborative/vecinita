@@ -31,84 +31,136 @@ project:
         - h0ci_blocking_after_merge
 
 # Session-first work model — see .cursor/skills/sessions-reference.md
-session_counter: 1          # increment when allocating S{NNN}-{slug}
+session_counter: 2          # increment when allocating S{NNN}-{slug}
 active_session:             # current bounded work unit; null when none in flight
-  id: S001-modal-cold-start-snapshot
-  type: ops
+  id: S002-admin-job-management
+  type: feature
   status: in_progress
-  intent: "Reduce vecinita-llm (and secondarily vecinita-embedding) Modal cold-start latency so the first cold chat ask stops exceeding DigitalOcean's ~60s gateway timeout, while preserving scale-to-zero per ADR-004. Mechanism under test: Modal GPU Memory Snapshots (gated on instrumentation)."
-  branch: feat/S001-modal-cold-start-snapshot
-  orchestrator: pipeline
-  artifacts_dir: docs/sessions/S001-modal-cold-start-snapshot/
-  started_at: "2026-06-25"
-  current_stage: "evaluate session close (07-build T12 still in_progress)"
+  intent: "Combined session for GitHub issues #88 + #89. #88 (bug/hotfix): ingest/retag jobs fail entirely when vecinita-llm tag completion is empty/non-JSON (LlmTagClientError) — make tagging best-effort so a tag failure degrades to no LLM tags instead of failing the job. #89 (feature/evolve): add a Job Management tab to the admin dashboard backed by a new GET /jobs list API + list_jobs store method, so running/completed/failed jobs are visible and survive in-app navigation (today JobForm local state is dropped on tab change, like #53)."
+  branch: feat/S002-admin-job-management
+  orchestrator: 16-evolve
+  artifacts_dir: docs/sessions/S002-admin-job-management/
+  started_at: "2026-06-26"
+  current_stage: "01-requirements"
+  linked_issues: [88, 89]
   routing_plan:
     - stage: 00-context
       status: completed
-    - stage: 07-build
-      status: in_progress
-      note: "T1-T9,T10,T11 shipped; T12 web-fn hop next"
-    - stage: 08-verify-build
-      status: completed
-      completed_at: "2026-06-25"
-    - stage: 09-qa
-      status: completed
-      completed_at: "2026-06-25"
-      user_amended: true
-      note: "User-invoked (not in original S001 routing plan); full-repo QA @ 4f3f741 — pass_with_advisories; report docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md"
-    - stage: 12-verify-deploy
-      status: completed
-      completed_at: "2026-06-25"
-      user_amended: true
-      note: "User-invoked (not in original S001 routing plan); pre-deploy agents all PASS; checklist written @ f766233; user signed off on all 7 failure mitigations + rollback plan 2026-06-25"
-    - stage: 13-deploy-smoke
-      status: completed
-      completed_at: "2026-06-26"
-    - stage: 15-service-health
-      status: completed
-      completed_at: "2026-06-25"
-    - stage: 19-address-pr-review
-      status: in_progress
-      user_amended: true
-      note: "User adopted PR #68 review remediation (PRM-007 / linked PRR-010) into S001 routing plan 2026-06-25; 2 advisories from the chat corpus-tab hotfix."
-  skipped_stages:
+      note: "session opener; #88 + #89 issues created"
     - stage: 01-requirements
-      reason: "perf change to already-specced service under ADR-009"
-    - stage: 02-verify-plan
-      reason: "perf change to already-specced service under ADR-009"
-    - stage: 03-plan-tooling
-      reason: "perf change to already-specced service under ADR-009"
+      status: pending
+      note: "delta — add feature Fn for Job Management tab (#89)"
     - stage: 04-tech-plan
-      reason: "perf change to already-specced service under ADR-009"
-    - stage: 05-verify-tech
-      reason: "perf change to already-specced service under ADR-009"
-    - stage: 06-tech-tooling
-      reason: "perf change to already-specced service under ADR-009"
+      status: pending
+    - stage: 07-build
+      status: pending
+      note: "#88 bug-investigation TDD fix + #89 feature tasks"
+    - stage: 09-qa
+      status: pending
     - stage: 10-e2e
-      reason: "no new user journey"
+      status: pending
+    - stage: 12-verify-deploy
+      status: pending
+    - stage: 13-deploy-smoke
+      status: pending
+  skipped_stages:
+    - stage: 02-verify-plan
+      reason: "evolve-lite — small well-understood delta"
+    - stage: 03-plan-tooling
+      reason: "no new tooling/guardrails"
+    - stage: 05-verify-tech
+      reason: "evolve-lite — small tech delta"
+    - stage: 06-tech-tooling
+      reason: "no new tooling/guardrails"
+    - stage: 11-verify-impl
+      reason: "covered by 09-qa + 10-e2e + 13 smoke"
   artifacts:
-    - docs/sessions/S001-modal-cold-start-snapshot/session-brief.md
-    - docs/sessions/S001-modal-cold-start-snapshot/routing-plan.md
-    - docs/sessions/S001-modal-cold-start-snapshot/cold-start-spike-plan.md
-    - docs/sessions/S001-modal-cold-start-snapshot/reports/p1-cold-start-traces.md
-    - docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md
-    - path: docs/sessions/S001-modal-cold-start-snapshot/reports/verification-report.md
-      kind: report
-      session_id: S001-modal-cold-start-snapshot
-      stage: 08-verify-build
-    - path: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-checklist.md
-      kind: report
-      session_id: S001-modal-cold-start-snapshot
-      stage: 12-verify-deploy
-    - path: docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md
-      kind: report
-      session_id: S001-modal-cold-start-snapshot
-      stage: 09-qa
-    - path: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
-      kind: report
-      session_id: S001-modal-cold-start-snapshot
-      stage: 15-service-health
-sessions: []                # archived completed sessions
+    - docs/sessions/S002-admin-job-management/session-brief.md
+    - docs/sessions/S002-admin-job-management/routing-plan.md
+sessions:                   # archived completed sessions
+  - id: S001-modal-cold-start-snapshot
+    type: ops
+    status: completed_with_deferrals
+    intent: "Reduce vecinita-llm (and secondarily vecinita-embedding) Modal cold-start latency so the first cold chat ask stops exceeding DigitalOcean's ~60s gateway timeout, while preserving scale-to-zero per ADR-004. Mechanism under test: Modal GPU Memory Snapshots (gated on instrumentation)."
+    branch: feat/S001-modal-cold-start-snapshot
+    orchestrator: pipeline
+    artifacts_dir: docs/sessions/S001-modal-cold-start-snapshot/
+    started_at: "2026-06-25"
+    completed_at: "2026-06-26"
+    close_note: "Deploy (13-deploy-smoke) and health (15-service-health) complete and live; H1-H5 pass; cold+prewarm ask 14.3s. Closed with deferrals (see deferred_to_backlog)."
+    deferred_to_backlog:
+      - stage: 07-build
+        item: T12
+        note: "CPU-snapshot / collapse web-fn hop — open, deferred to backlog"
+      - stage: 19-address-pr-review
+        item: PRM-007
+        note: "PR #68 advisories (chat corpus-tab hotfix, linked PRR-010) — open, deferred to backlog"
+    routing_plan:
+      - stage: 00-context
+        status: completed
+      - stage: 07-build
+        status: in_progress
+        note: "T1-T9,T10,T11 shipped; T12 web-fn hop deferred to backlog"
+      - stage: 08-verify-build
+        status: completed
+        completed_at: "2026-06-25"
+      - stage: 09-qa
+        status: completed
+        completed_at: "2026-06-25"
+        user_amended: true
+        note: "User-invoked (not in original S001 routing plan); full-repo QA @ 4f3f741 — pass_with_advisories; report docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md"
+      - stage: 12-verify-deploy
+        status: completed
+        completed_at: "2026-06-25"
+        user_amended: true
+        note: "User-invoked (not in original S001 routing plan); pre-deploy agents all PASS; checklist written @ f766233; user signed off on all 7 failure mitigations + rollback plan 2026-06-25"
+      - stage: 13-deploy-smoke
+        status: completed
+        completed_at: "2026-06-26"
+      - stage: 15-service-health
+        status: completed
+        completed_at: "2026-06-25"
+      - stage: 19-address-pr-review
+        status: in_progress
+        user_amended: true
+        note: "User adopted PR #68 review remediation (PRM-007 / linked PRR-010) into S001 routing plan 2026-06-25; 2 advisories from the chat corpus-tab hotfix. Deferred to backlog at S001 close."
+    skipped_stages:
+      - stage: 01-requirements
+        reason: "perf change to already-specced service under ADR-009"
+      - stage: 02-verify-plan
+        reason: "perf change to already-specced service under ADR-009"
+      - stage: 03-plan-tooling
+        reason: "perf change to already-specced service under ADR-009"
+      - stage: 04-tech-plan
+        reason: "perf change to already-specced service under ADR-009"
+      - stage: 05-verify-tech
+        reason: "perf change to already-specced service under ADR-009"
+      - stage: 06-tech-tooling
+        reason: "perf change to already-specced service under ADR-009"
+      - stage: 10-e2e
+        reason: "no new user journey"
+    artifacts:
+      - docs/sessions/S001-modal-cold-start-snapshot/session-brief.md
+      - docs/sessions/S001-modal-cold-start-snapshot/routing-plan.md
+      - docs/sessions/S001-modal-cold-start-snapshot/cold-start-spike-plan.md
+      - docs/sessions/S001-modal-cold-start-snapshot/reports/p1-cold-start-traces.md
+      - docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md
+      - path: docs/sessions/S001-modal-cold-start-snapshot/reports/verification-report.md
+        kind: report
+        session_id: S001-modal-cold-start-snapshot
+        stage: 08-verify-build
+      - path: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-checklist.md
+        kind: report
+        session_id: S001-modal-cold-start-snapshot
+        stage: 12-verify-deploy
+      - path: docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md
+        kind: report
+        session_id: S001-modal-cold-start-snapshot
+        stage: 09-qa
+      - path: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
+        kind: report
+        session_id: S001-modal-cold-start-snapshot
+        stage: 15-service-health
 
 stages:
   00-context:
@@ -1754,6 +1806,10 @@ decisions_log:
   - "S001 13-deploy-smoke COMPLETE 2026-06-26 — H1-H5 pass; cold+prewarm ask 14.3s; DO chat on feat branch"
   - date: "2026-06-25"
     note: "S001 15-service-health COMPLETE — H1-H5 pass; warm ask 2.9s; H0ci main green (advisory); report docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md"
+  - date: "2026-06-26"
+    note: "S001-modal-cold-start-snapshot CLOSED (status completed_with_deferrals) — deploy (13-deploy-smoke) + health (15-service-health) complete and live. Leftover work deferred to backlog: 07-build T12 (CPU-snapshot / collapse web-fn hop) and 19-address-pr-review PRM-007 (PR #68 advisories, linked PRR-010) remain open. Archived to sessions[]; active_session cleared then reused by S002."
+  - date: "2026-06-26"
+    note: "S002-admin-job-management OPENED (session_counter=2; type feature; orchestrator 16-evolve) — combined #88 hotfix (best-effort LLM tagging so a tag failure degrades to no LLM tags instead of failing ingest/retag jobs) + #89 evolve feature (admin Job Management tab + GET /jobs list API + list_jobs store method). User-approved evolve-lite routing 00→01→04→07→09→10→12→13 (skipped 02,03,05,06,11); full scope. Branch feat/S002-admin-job-management."
 
 artifacts:
   - docs/context-brief.md
@@ -1807,8 +1863,13 @@ artifacts:
   - docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
 
 git_history:
-  current_branch: feat/S001-modal-cold-start-snapshot
+  current_branch: feat/S002-admin-job-management
   branches:
+    - name: feat/S002-admin-job-management
+      base: main
+      status: open
+      purpose: "S002 admin job management — #88 graceful tag degradation + #89 Job Management tab"
+      opened_at: "2026-06-26"
     - name: feat/S001-modal-cold-start-snapshot
       base: main
       status: open
