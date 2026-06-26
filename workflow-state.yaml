@@ -16,7 +16,7 @@ active_session:             # current bounded work unit; null when none in fligh
   orchestrator: pipeline
   artifacts_dir: docs/sessions/S001-modal-cold-start-snapshot/
   started_at: "2026-06-25"
-  current_stage: 07-build
+  current_stage: 13-deploy-smoke
   routing_plan:
     - stage: 00-context
       status: completed
@@ -24,7 +24,13 @@ active_session:             # current bounded work unit; null when none in fligh
       status: in_progress
       note: "T1-T9,T10,T11 shipped; T12 web-fn hop next"
     - stage: 08-verify-build
-      status: pending
+      status: completed
+      completed_at: "2026-06-25"
+    - stage: 12-verify-deploy
+      status: completed
+      completed_at: "2026-06-25"
+      user_amended: true
+      note: "User-invoked (not in original S001 routing plan); pre-deploy agents all PASS; checklist written @ f766233; user signed off on all 7 failure mitigations + rollback plan 2026-06-25"
     - stage: 13-deploy-smoke
       status: pending
     - stage: 15-service-health
@@ -50,6 +56,14 @@ active_session:             # current bounded work unit; null when none in fligh
     - docs/sessions/S001-modal-cold-start-snapshot/cold-start-spike-plan.md
     - docs/sessions/S001-modal-cold-start-snapshot/reports/p1-cold-start-traces.md
     - docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md
+    - path: docs/sessions/S001-modal-cold-start-snapshot/reports/verification-report.md
+      kind: report
+      session_id: S001-modal-cold-start-snapshot
+      stage: 08-verify-build
+    - path: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-checklist.md
+      kind: report
+      session_id: S001-modal-cold-start-snapshot
+      stage: 12-verify-deploy
 sessions: []                # archived completed sessions
 
 stages:
@@ -239,11 +253,11 @@ stages:
     started_at: "2026-06-25"
     completed_at: "2026-06-25"
     partial_rerun_at: "2026-06-25"
-    partial_rerun_note: "EV-004 delta — M32 workspace scaffold verification"
+    partial_rerun_note: "S001 — milestone-boundary verify PASS (T12 still pending in 07-build; 2 uncommitted eslint/prettier auto-fixes)"
     scope: standalone
     overall: pass
     report: docs/verification-report.md
-    notes: "522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override bumps (aiohttp, msgpack, pypdf, starlette)"
+    notes: "EV-004: 522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override bumps (aiohttp, msgpack, pypdf, starlette) | S001: milestone-boundary verify PASS; T12 still pending in 07-build; 2 uncommitted eslint/prettier auto-fixes"
     substeps:
       phase: complete
   09-qa:
@@ -289,13 +303,32 @@ stages:
   12-verify-deploy:
     status: completed
     started_at: "2026-05-27"
-    completed_at: "2026-05-27"
-    partial_rerun_at: "2026-05-25"
-    partial_rerun_note: "EV-001 delta — deploy checklist for F19-F22 corpus tagging features"
+    completed_at: "2026-06-25"
+    partial_rerun_at: "2026-06-25"
+    partial_rerun_note: "S001 — Modal cold-start snapshot pre-deploy checklist complete; user-invoked (not in original S001 routing plan); pre-deploy agents all PASS; user signed off on all 7 failure mitigations + rollback plan 2026-06-25"
     report: docs/deploy-checklist.md
     deploy_ready: true
     blockers:
       - "Staging DB migration to 20260526_0003 required before deploy (operator action)"
+    s001:
+      report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-checklist.md
+      branch: feat/S001-modal-cold-start-snapshot
+      commit: f766233
+      deploy_ready: true
+      deploy_ready_note: "User signed off on all 7 failure mitigations + rollback plan 2026-06-25"
+      substeps:
+        phase1_agents: completed
+        phase2_failure_modes: completed
+        phase3_rollback: completed
+        phase4_checklist: completed
+        phase5_summary: completed
+      results:
+        configuration: pass
+        secrets: pass
+        data_volumes: pass
+        resources: pass
+        template: pass
+        connectivity: pass
   13-deploy-smoke:
     status: completed
     started_at: "2026-05-19"
@@ -1575,6 +1608,10 @@ decisions_log:
     note: "Session orchestration waived (active_session not required) for 19-address-pr-review remediation of PR #66 (PRM-006 / PRR-009 findings). Rationale: process/review-followup work on an existing open PR; user approved proceeding directly without opening a formal session."
   - date: "2026-06-25"
     note: "S001-modal-cold-start-snapshot opened — user selected GPU memory snapshot spike to reduce Modal cold-start latency + formalize session (first session, allocated S001; type ops; routing 00→07→08→13→15, skipped 01-06 + 10-e2e per ADR-009)."
+  - date: "2026-06-25"
+    note: "S001 12-verify-deploy user-invoked — stage amended into S001 routing plan (was 00→07→08→13→15). Pre-deploy agents all PASS (configuration, secrets, data/volumes, resources, template, connectivity); checklist @ docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-checklist.md (f766233). deploy_ready=true pending user sign-off on failure modes + rollback — stage held in_progress until sign-off, then advance to 13-deploy-smoke."
+  - date: "2026-06-25"
+    note: "S001 12-verify-deploy COMPLETE — user signed off on all 7 failure mitigations (approve_all) and the rollback plan (approve_rollback). Stage marked completed (phases 2/3/5 done); deploy_ready=true. active_session.current_stage advanced to 13-deploy-smoke."
 
 artifacts:
   - docs/context-brief.md

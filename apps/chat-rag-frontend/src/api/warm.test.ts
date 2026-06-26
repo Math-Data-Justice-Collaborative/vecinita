@@ -9,7 +9,9 @@ describe("prewarmChatServices", () => {
   });
 
   it("POSTs to /api/v1/warm without blocking on failure", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 202 }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response(null, { status: 202 }));
     vi.stubGlobal("fetch", fetchMock);
 
     prewarmChatServices("https://chat.example.com");
@@ -23,10 +25,14 @@ describe("prewarmChatServices", () => {
   });
 
   it("swallows fetch errors silently", async () => {
-    const fetchMock = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValue(new TypeError("Failed to fetch"));
     vi.stubGlobal("fetch", fetchMock);
 
-    expect(() => prewarmChatServices("https://chat.example.com")).not.toThrow();
+    expect(() => {
+      prewarmChatServices("https://chat.example.com");
+    }).not.toThrow();
 
     await vi.waitFor(() => {
       expect(fetchMock).toHaveBeenCalled();
