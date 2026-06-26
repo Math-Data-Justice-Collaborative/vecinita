@@ -12,11 +12,11 @@
 | **Active phase** | Phase 9: EV-004 shared frontend i18n/UI |
 | **Active milestone** | M32: Workspace scaffold |
 | **Active task** | M33 / T33.1 |
-| **Tasks completed** | 201 / 239 |
+| **Tasks completed** | 204 / 239 |
 | **Last updated** | 2026-06-26 |
 | **Evolve cycle** | EV-004 (F31) — **in_progress** |
 | **Git branch** | `feat/M32-workspace-scaffold` |
-| **Active session** | S003-persistent-chat-history (Phase 10, F33) — 07-build **in progress**: M39–M41 complete (store + rehydration + previous-chats UI/i18n; 113 FE tests + 95% coverage green); next M42 privacy/full-suite; on `feat/S003-persistent-chat-history` |
+| **Active session** | S003-persistent-chat-history (Phase 10, F33) — 07-build **complete** (M39–M42, T39.1–T42.3); Phase 10 gate PASS; 115 FE tests + 95% coverage + build green. Next: 09-qa → 10-e2e → 12-verify-deploy → 13-deploy-smoke; on `feat/S003-persistent-chat-history` |
 
 ## Template
 
@@ -832,19 +832,25 @@ chat-rag-frontend Vitest suite green.
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|------------|-------------|
-| T42.1 | Config: verify `.cursor/rules/frontend-session-state-lifting.mdc` device-only `sessionStorage` allowance (updated in 04-tech-plan) + its `test_chat_history_persistence` regression-guard reference resolves | Config | pending | TP-S003-11, ADR-024 | T41.5 | — | S003 | F33 |
-| T42.2 | Test: AC-S6 — no `POST` carries history; no server session/message row; persistence per-tab | Test | pending | acceptance-criteria AC-S6, ADR-023 | T41.5 | — | S003 | F33 |
-| T42.3 | Test: full chat-rag-frontend Vitest suite green incl. existing bug tests | Test | pending | test-plan §Frontend | T41.5, T40.4, T42.2 | — | S003 | F33 |
+| T42.1 | Config: verify `.cursor/rules/frontend-session-state-lifting.mdc` device-only `sessionStorage` allowance (updated in 04-tech-plan) + its `test_chat_history_persistence` regression-guard reference resolves | Config | completed | TP-S003-11, ADR-024 | T41.5 | — | S003 | F33 |
+| T42.2 | Test: AC-S6 — no `POST` carries history; no server session/message row; persistence per-tab | Test | completed | acceptance-criteria AC-S6, ADR-023 | T41.5 | — | S003 | F33 |
+| T42.3 | Test: full chat-rag-frontend Vitest suite green incl. existing bug tests | Test | completed | test-plan §Frontend | T41.5, T40.4, T42.2 | — | S003 | F33 |
 
 #### Phase 10 Gate Check
 
-- [ ] All M39–M42 tasks completed (239/239)
-- [ ] TC-072–TC-076 green; UJ-024/UJ-025 covered (Vitest + jsdom `sessionStorage`)
-- [ ] AC-S1–AC-S7 met
-- [ ] Graceful fallback verified (TC-073, AC-S2)
-- [ ] `.cursor/rules/frontend-session-state-lifting.mdc` updated (ADR-023/024)
-- [ ] No API/contract/CORS changes (AC-S7); no backend/Modal redeploy
-- [ ] chat-rag-frontend Vitest suite green (incl. #53 navigation guard)
+- [x] All M39–M42 tasks completed (239/239)
+- [x] TC-072–TC-076 green; UJ-024/UJ-025 covered (Vitest + jsdom `sessionStorage`)
+- [x] AC-S1–AC-S7 met
+- [x] Graceful fallback verified (TC-073, AC-S2)
+- [x] `.cursor/rules/frontend-session-state-lifting.mdc` updated (ADR-023/024)
+- [x] No API/contract/CORS changes (AC-S7); no backend/Modal redeploy
+- [x] chat-rag-frontend Vitest suite green (incl. #53 navigation guard)
+
+**Phase Gate Log — Phase 10 (2026-06-26):** PASS. M39–M42 complete (T39.1–T42.3).
+115 chat-rag-frontend Vitest tests pass; 95% line/branch coverage gate green;
+`tsc --noEmit` + ESLint clean; production `vite build` succeeds. TC-072–TC-076,
+UJ-024/UJ-025, AC-S1–AC-S7 satisfied; #53 + mid-stream concurrency guards still
+green. Frontend-only — no API/contract/CORS or backend/Modal changes (AC-S7).
 
 ---
 
@@ -1201,9 +1207,9 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T41.3 | M41 | 10 | Code | completed | T41.2 | — | S003 | F33 |
 | T41.4 | M41 | 10 | Code | completed | T41.3 | — | S003 | F33 |
 | T41.5 | M41 | 10 | Test | completed | T41.4 | — | S003 | F33 |
-| T42.1 | M42 | 10 | Config | pending | — | — | S003 | F33 |
-| T42.2 | M42 | 10 | Test | pending | T41.5 | — | S003 | F33 |
-| T42.3 | M42 | 10 | Test | pending | T41.5, T40.4, T42.2 | — | S003 | F33 |
+| T42.1 | M42 | 10 | Config | completed | — | — | S003 | F33 |
+| T42.2 | M42 | 10 | Test | completed | T41.5 | — | S003 | F33 |
+| T42.3 | M42 | 10 | Test | completed | T41.5, T40.4, T42.2 | — | S003 | F33 |
 
 ## Phase Gate Log
 

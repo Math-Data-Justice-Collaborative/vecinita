@@ -69,13 +69,13 @@
 
 ### S003 — Browser-local persistent chat history (F33)
 
-- [ ] **AC-S1**: The active conversation (user turns + assistant answers + sources) is restored from `sessionStorage` after a page reload and after leaving/returning to the tab (UJ-024, TC-072). — pending build
-- [ ] **AC-S2**: When `sessionStorage` is full or disabled, chat still works in-memory with no uncaught error (UJ-024, TC-073). — pending build
-- [ ] **AC-S3**: "New chat" archives the current conversation to a previous-chats list and starts a fresh one; items are labeled with first user message + relative timestamp (UJ-025, TC-074, R44/R46). — pending build
-- [ ] **AC-S4**: The previous-chats list keeps the **last 10** conversations with FIFO eviction (UJ-025, TC-075, R45). — pending build
-- [ ] **AC-S5**: Selecting a previous conversation restores it; per-item delete, "Clear all history", and "Clear" update both UI and `sessionStorage` (UJ-025, TC-076, R47). — pending build
-- [ ] **AC-S6**: No chat history is sent to the server, persisted to the database, or written to logs; no server-side session/message row is created; persistence is per-tab and cleared on tab close (F3, ADR-004, ADR-023). — pending build + privacy review
-- [ ] **AC-S7**: No API, contract, or CORS **policy** changes for F33 (frontend-only delta). — spec confirmed
+- [x] **AC-S1**: The active conversation (user turns + assistant answers + sources) is restored from `sessionStorage` after a page reload and after leaving/returning to the tab (UJ-024, TC-072). — met (07-build M40; `test_chat_history_persistence.test.tsx`)
+- [x] **AC-S2**: When `sessionStorage` is full or disabled, chat still works in-memory with no uncaught error (UJ-024, TC-073). — met (07-build M39/M40; store + App-level fallback tests)
+- [x] **AC-S3**: "New chat" archives the current conversation to a previous-chats list and starts a fresh one; items are labeled with first user message + relative timestamp (UJ-025, TC-074, R44/R46). — met (07-build M41; `test_previous_chats_list.test.tsx`)
+- [x] **AC-S4**: The previous-chats list keeps the **last 10** conversations with FIFO eviction (UJ-025, TC-075, R45). — met (07-build M39; `useConversationStore.test.ts`)
+- [x] **AC-S5**: Selecting a previous conversation restores it; per-item delete, "Clear all history", and "Clear" update both UI and `sessionStorage` (UJ-025, TC-076, R47). — met (07-build M41; `test_previous_chats_list.test.tsx`)
+- [x] **AC-S6**: No chat history is sent to the server, persisted to the database, or written to logs; no server-side session/message row is created; persistence is per-tab and cleared on tab close (F3, ADR-004, ADR-023). — met (07-build M42; `test_chat_history_privacy.test.tsx`: ask payload carries no history; persisted only to tab-scoped `sessionStorage`)
+- [x] **AC-S7**: No API, contract, or CORS **policy** changes for F33 (frontend-only delta). — met (frontend-only delta; no `openapi/`, CORS, or backend changes in S003)
 
 ## Quantitative benchmarks
 
