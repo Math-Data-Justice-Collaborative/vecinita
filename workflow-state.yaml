@@ -229,10 +229,10 @@ stages:
     partial_rerun_at: "2026-06-25"
     partial_rerun_note: "S001 — Modal cold-start reduction (instrumentation, levers, pre-warm, GPU snapshot spike)"
     substeps:
-      current_task: S001-T12
+      current_task: S001-T9
       milestone: M32 completed
       completed_tasks: [S001-T1, S001-T4, S001-T5, S001-T6, S001-T7, S001-T8, S001-T9, S001-T10, S001-T11]
-      note: "T8-T9 GPU snapshot deploy+measure done; restore ~9s cold; ADR-022 Accepted; T12 web-fn hop next"
+      note: "T8 deploy done; snapshot restore confirmed; cold /generate 21.5s vs ~68s baseline"
     note: "S001 07-build — T1-T9,T10,T11 shipped; T12 CPU-snapshot/collapse web-fn hop next"
   08-verify-build:
     status: completed
@@ -1623,6 +1623,7 @@ artifacts:
   - docs/evolve-decisions.md
   - docs/adr/README.md
   - docs/staging-runbook.md
+  - docs/sessions/S001-modal-cold-start-snapshot/reports/p2-snapshot-deploy.md
 
 git_history:
   current_branch: feat/S001-modal-cold-start-snapshot
@@ -1843,6 +1844,12 @@ git_history:
       stage: "07-build"
       files_changed: 0
       timestamp: "2026-06-26T00:19:00Z"
+    - sha: ca77646
+      branch: feat/S001-modal-cold-start-snapshot
+      message: "[S001-T8,T9] perf(modal): GPU memory snapshot deploy + cold-start measurement"
+      stage: "07-build"
+      files_changed: 0
+      timestamp: "2026-06-26T00:20:00Z"
 
 constraints:
   cost:
