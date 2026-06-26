@@ -1,0 +1,25 @@
+---
+description: Keep session-scoped UI state above conditionally-rendered views
+globs: apps/*/src/**/*.tsx
+alwaysApply: false
+---
+
+# Lift session state above conditional views
+
+State that must survive in-app navigation (chat history, drafts, selections, scroll
+position) must NOT live inside a component that is conditionally mounted/unmounted by a
+router or tab switch. Unmounting destroys `useState`, silently wiping the data.
+
+1. **Own session state in an always-mounted shell.** Hold it in the layout/`AppContent`
+   component (or a Context provider) that stays mounted across route/tab changes, and pass
+   it into the view (e.g. `<ChatPanel chat={chat} />`).
+2. **Conditional render = unmount.** `cond ? <A/> : <B/>` and route switches unmount the
+   hidden branch. Anything its hooks held is gone on return — do not rely on it persisting.
+3. **Components stay reusable.** Prefer an optional prop with a local fallback
+   (`chat ?? useChatHistory()`) so the component still works standalone and in unit tests.
+   Always call the hook unconditionally (rules of hooks).
+4. **ADR-004:** Vecinita chat history is client-side-only — lift it within the SPA only;
+   never persist it to the server or to storage that leaves the browser.
+
+Regression guard: `apps/chat-rag-frontend/src/test/test_bug_2026_06_25_chat_corpus_tab_state_loss.test.tsx`
+(BUG-2026-06-25 / issue #53).

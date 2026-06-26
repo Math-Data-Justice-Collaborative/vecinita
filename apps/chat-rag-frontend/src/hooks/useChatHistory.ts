@@ -9,6 +9,11 @@ function newId(): string {
 /** Client-side-only conversation history (F3, ADR-004). Never sent to the server. */
 export function useChatHistory() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // In-flight ask state lives here (not inside ChatPanel) so it is lifted into
+  // the always-mounted shell alongside `messages`. This keeps Ask blocked while
+  // a stream is still running across a Chat ⇄ Corpus round-trip, preventing a
+  // concurrent stream (BUG-2026-06-25, PR #68).
+  const [loading, setLoading] = useState(false);
 
   const appendUserMessage = useCallback((content: string) => {
     const message: ChatMessage = { id: newId(), role: "user", content };
@@ -57,5 +62,11 @@ export function useChatHistory() {
     appendAssistantToken,
     setAssistantSources,
     clearHistory,
+    loading,
+    setLoading,
   };
 }
+
+/** Shape returned by {@link useChatHistory}; lifted to the app shell so it
+ *  survives Chat ⇄ Corpus navigation (BUG-2026-06-25, issue #53). */
+export type ChatHistory = ReturnType<typeof useChatHistory>;
