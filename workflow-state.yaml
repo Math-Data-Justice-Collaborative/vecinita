@@ -2265,6 +2265,12 @@ git_history:
       stage: "00-context"
       files_changed: 4
       timestamp: "2026-06-26"
+    - sha: 636064c
+      branch: feat/S003-persistent-chat-history
+      message: "[S003] docs: add F33 browser-local persistent chat history (01-requirements)"
+      stage: "01-requirements"
+      files_changed: 8
+      timestamp: "2026-06-26"
 
 constraints:
   cost:
