@@ -36,6 +36,7 @@ describe("Admin navigation", () => {
       screen.getByRole("link", { name: /dashboard/i }),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /corpus/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /jobs/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /health/i })).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /audit log/i }),

@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { BarChart3, FileText, Heart, ScrollText, Menu } from "lucide-react";
+import { BarChart3, FileText, Heart, ListChecks, ScrollText, Menu } from "lucide-react";
 import { useState } from "react";
 import { LanguageToggle, useLocale } from "vecinita-frontend-ui";
 
@@ -40,6 +40,7 @@ function NavItems({ onClick }: { onClick?: () => void }) {
       icon: BarChart3,
     },
     { to: "/corpus", label: tr("admin.nav.corpus"), icon: FileText },
+    { to: "/jobs", label: tr("admin.nav.jobs"), icon: ListChecks },
     { to: "/health", label: tr("admin.nav.health"), icon: Heart },
     {
       to: "/audit",
