@@ -22,7 +22,7 @@ active_session:             # current bounded work unit; null when none in fligh
       status: completed
     - stage: 07-build
       status: in_progress
-      note: "T1,T10,T11 shipped locally; T2 deploy+traces pending; P2 GPU snapshot gated on T3"
+      note: "T2,T3 completed; T4 P2 snapshot next; T1,T10,T11 shipped"
     - stage: 08-verify-build
       status: pending
     - stage: 13-deploy-smoke
@@ -48,6 +48,7 @@ active_session:             # current bounded work unit; null when none in fligh
     - docs/sessions/S001-modal-cold-start-snapshot/session-brief.md
     - docs/sessions/S001-modal-cold-start-snapshot/routing-plan.md
     - docs/sessions/S001-modal-cold-start-snapshot/cold-start-spike-plan.md
+    - docs/sessions/S001-modal-cold-start-snapshot/reports/p1-cold-start-traces.md
     - docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md
 sessions: []                # archived completed sessions
 
@@ -225,12 +226,13 @@ stages:
     status: in_progress
     started_at: "2026-05-19"
     completed_at: "2026-05-27"
-    partial_rerun_at: "2026-06-13"
-    partial_rerun_note: "EV-004 Phase 9 — M32 workspace scaffold (36 tasks)"
+    partial_rerun_at: "2026-06-25"
+    partial_rerun_note: "S001 — Modal cold-start reduction (instrumentation, levers, pre-warm, GPU snapshot spike)"
     substeps:
-      current_task: T33.1
+      current_task: T4
       milestone: M32 completed
-    note: "EV-004 Phase 9 — M32 completed; T33.1 in progress"
+      note: "T2 deploy+traces done; T3 gate PASS (init dominates weight load); P2 snapshot T4 next"
+    note: "S001 07-build — T2 deploy+traces done; T3 gate PASS (init dominates weight load); P2 snapshot T4 next; EV-004 Phase 9 M32 completed, T33.1 prior"
   08-verify-build:
     status: completed
     started_at: "2026-06-25"
@@ -1622,8 +1624,13 @@ artifacts:
   - docs/staging-runbook.md
 
 git_history:
-  current_branch: feat/M32-workspace-scaffold
+  current_branch: feat/S001-modal-cold-start-snapshot
   branches:
+    - name: feat/S001-modal-cold-start-snapshot
+      base: main
+      status: open
+      purpose: "S001 Modal cold-start reduction — instrumentation, budget-safe levers, pre-warm, GPU snapshot spike"
+      opened_at: "2026-06-25"
     - name: feat/M32-workspace-scaffold
       purpose: "EV-004 M32 workspace scaffold"
       base: main
@@ -1811,6 +1818,18 @@ git_history:
       stage: "19-address-pr-review"
       files_changed: 1
       timestamp: "2026-06-25"
+    - sha: f27b477
+      branch: feat/S001-modal-cold-start-snapshot
+      message: "[S001-T1,T10] perf(modal): cold-start instrumentation and budget-safe levers"
+      stage: "07-build"
+      files_changed: 8
+      timestamp: "2026-06-26T00:16:00Z"
+    - sha: 84c190d
+      branch: feat/S001-modal-cold-start-snapshot
+      message: "[S001-T11] perf(chat): pre-warm Modal LLM and embedding on chat mount"
+      stage: "07-build"
+      files_changed: 7
+      timestamp: "2026-06-26T00:17:00Z"
 
 constraints:
   cost:
