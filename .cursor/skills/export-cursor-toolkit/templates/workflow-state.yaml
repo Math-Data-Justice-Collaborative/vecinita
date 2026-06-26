@@ -1,0 +1,73 @@
+# Pipeline state — schema: .cursor/skills/workflow-state-reference.md
+# Exported empty template. Session/ephemeral plans (execution-plan, config-spec,
+# research-brief) are NOT standing docs — track progress here only.
+overall_status: pending
+project:
+  name: "{{PROJECT_NAME}}"
+  description: "{{PROJECT_DESCRIPTION}}"
+  output_directory: docs/
+
+stages:
+  00-context:
+    status: pending
+  01-requirements:
+    status: pending
+  02-verify-plan:
+    status: pending
+  03-plan-tooling:
+    status: pending
+  04-tech-plan:
+    status: pending
+  05-verify-tech:
+    status: pending
+  06-tech-tooling:
+    status: pending
+  07-build:
+    status: pending
+  08-verify-build:
+    status: pending
+  09-qa:
+    status: pending
+  10-e2e:
+    status: pending
+  11-verify-impl:
+    status: pending
+  12-verify-deploy:
+    status: pending
+  13-deploy-smoke:
+    status: pending
+  14-hotfix:
+    status: pending
+  15-service-health:
+    status: pending
+  16-evolve:
+    status: pending
+  17-retrospective:
+    status: pending
+  18-pr-review:
+    status: pending
+  19-address-pr-review:
+    status: pending
+
+template: null
+applications: []
+agents: {}
+phase1b_ecosystem: {}
+constraints: {}
+deployment:
+  local_build:
+    status: pending
+  staging:
+    status: pending
+issue_log: []
+decisions_log: []
+artifacts: []
+evolve_cycles: []
+retrospective_cycles: []
+pr_review_cycles: []
+pr_remediation_cycles: []
+
+git_history:
+  current_branch: main
+  branches: []
+  commits: []
