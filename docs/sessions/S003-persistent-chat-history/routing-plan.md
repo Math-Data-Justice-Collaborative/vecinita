@@ -7,8 +7,8 @@ Approved by user 2026-06-26 (AskQuestion: routing=approve, scope=both, privacy=s
 | 00-context | completed | Session opener; F33 + R39–R42; commit a0cf185 |
 | 01-requirements | completed | F33 docs delta — feature-list F33, UJ-024/025, TC-072–076, AC-S1–S7, RD-068–072, ADR-023 |
 | 04-tech-plan | completed | Phase 10 (M39–M42, 17 tasks); TP-S003-01–12; ADR-024; rule updated. Report: `reports/tech-plan.md` |
-| 07-build | pending | TDD: persistence hook + previous-chats list UI + i18n |
-| 09-qa | pending | Full-repo QA (lint/typecheck/tests) |
+| 07-build | completed | M39–M42 (T39.1–T42.3); Phase 10 gate PASS; 115 FE tests + 95% coverage + build green; PR [#96](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/96) |
+| 09-qa | pending | ← current stage |
 | 10-e2e | pending | New UJ: refresh/tab-away persistence + revisit a previous chat |
 | 12-verify-deploy | pending | Pre-deploy gate |
 | 13-deploy-smoke | pending | Deploy + H1–H5 smokes |
