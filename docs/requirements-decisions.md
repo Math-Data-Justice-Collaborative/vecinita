@@ -133,5 +133,5 @@ Unresolved:
 
 - Exact LlamaIndex / vLLM patch pins at implementation (T8.1, T9.2)
 - shadcn/ui exact component versions (pin at build time)
-- F33: exact `sessionStorage` key name, serialized schema/versioning, and truncation length for labels — pin in 04-tech-plan / 07-build.
-- F33: update `.cursor/rules/frontend-session-state-lifting.mdc` "within the SPA only" wording to permit device-only, tab-scoped persistence — do in 04-tech-plan/07-build (03/06 tooling stages skipped per evolve-lite).
+- ~~F33: exact `sessionStorage` key name, serialized schema/versioning, and truncation length for labels~~ — **resolved in 04-tech-plan**: key `vecinita.chat.history.v1`, versioned envelope `{version:1, active, previous[]}`, 60-char label truncation (TP-S003-01/05, ADR-024).
+- ~~F33: update `.cursor/rules/frontend-session-state-lifting.mdc` "within the SPA only" wording~~ — **resolved in 04-tech-plan**: rule amended to permit device-only, tab-scoped `sessionStorage` (TP-S003-11, ADR-023/024; T42.1).

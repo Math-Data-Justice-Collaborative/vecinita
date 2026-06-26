@@ -4,9 +4,9 @@ Approved by user 2026-06-26 (AskQuestion: routing=approve, scope=both, privacy=s
 
 | Stage | Status | Note |
 |---|---|---|
-| 00-context | in_progress | This session opener; feature delta — browser-local persistent chat history |
-| 01-requirements | pending | Delta — add Fn for persistent chat history + previous-chats list; UJ for revisit/persist; ADR-004 revisit |
-| 04-tech-plan | pending | Delta — sessionStorage persistence layer for `useChatHistory`; previous-conversations model + UI |
+| 00-context | completed | Session opener; F33 + R39–R42; commit a0cf185 |
+| 01-requirements | completed | F33 docs delta — feature-list F33, UJ-024/025, TC-072–076, AC-S1–S7, RD-068–072, ADR-023 |
+| 04-tech-plan | completed | Phase 10 (M39–M42, 17 tasks); TP-S003-01–12; ADR-024; rule updated. Report: `reports/tech-plan.md` |
 | 07-build | pending | TDD: persistence hook + previous-chats list UI + i18n |
 | 09-qa | pending | Full-repo QA (lint/typecheck/tests) |
 | 10-e2e | pending | New UJ: refresh/tab-away persistence + revisit a previous chat |
