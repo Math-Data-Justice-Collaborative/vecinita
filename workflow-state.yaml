@@ -6,8 +6,49 @@ project:
   output_directory: docs/
 
 # Session-first work model — see .cursor/skills/sessions-reference.md
-session_counter: 0          # increment when allocating S{NNN}-{slug}
-active_session: null        # current bounded work unit; null when none in flight
+session_counter: 1          # increment when allocating S{NNN}-{slug}
+active_session:             # current bounded work unit; null when none in flight
+  id: S001-modal-cold-start-snapshot
+  type: ops
+  status: in_progress
+  intent: "Reduce vecinita-llm (and secondarily vecinita-embedding) Modal cold-start latency so the first cold chat ask stops exceeding DigitalOcean's ~60s gateway timeout, while preserving scale-to-zero per ADR-004. Mechanism under test: Modal GPU Memory Snapshots (gated on instrumentation)."
+  branch: feat/S001-modal-cold-start-snapshot
+  orchestrator: pipeline
+  artifacts_dir: docs/sessions/S001-modal-cold-start-snapshot/
+  started_at: "2026-06-25"
+  current_stage: 07-build
+  routing_plan:
+    - stage: 00-context
+      status: completed
+    - stage: 07-build
+      status: in_progress
+      note: "T1,T10,T11 shipped locally; T2 deploy+traces pending; P2 GPU snapshot gated on T3"
+    - stage: 08-verify-build
+      status: pending
+    - stage: 13-deploy-smoke
+      status: pending
+    - stage: 15-service-health
+      status: pending
+  skipped_stages:
+    - stage: 01-requirements
+      reason: "perf change to already-specced service under ADR-009"
+    - stage: 02-verify-plan
+      reason: "perf change to already-specced service under ADR-009"
+    - stage: 03-plan-tooling
+      reason: "perf change to already-specced service under ADR-009"
+    - stage: 04-tech-plan
+      reason: "perf change to already-specced service under ADR-009"
+    - stage: 05-verify-tech
+      reason: "perf change to already-specced service under ADR-009"
+    - stage: 06-tech-tooling
+      reason: "perf change to already-specced service under ADR-009"
+    - stage: 10-e2e
+      reason: "no new user journey"
+  artifacts:
+    - docs/sessions/S001-modal-cold-start-snapshot/session-brief.md
+    - docs/sessions/S001-modal-cold-start-snapshot/routing-plan.md
+    - docs/sessions/S001-modal-cold-start-snapshot/cold-start-spike-plan.md
+    - docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md
 sessions: []                # archived completed sessions
 
 stages:
@@ -1529,6 +1570,8 @@ decisions_log:
   - "EV-004 05-verify-tech delta — TV-041–TV-052 — 12 consistency fixes — 2026-06-13"
   - date: "2026-06-25"
     note: "Session orchestration waived (active_session not required) for 19-address-pr-review remediation of PR #66 (PRM-006 / PRR-009 findings). Rationale: process/review-followup work on an existing open PR; user approved proceeding directly without opening a formal session."
+  - date: "2026-06-25"
+    note: "S001-modal-cold-start-snapshot opened — user selected GPU memory snapshot spike to reduce Modal cold-start latency + formalize session (first session, allocated S001; type ops; routing 00→07→08→13→15, skipped 01-06 + 10-e2e per ADR-009)."
 
 artifacts:
   - docs/context-brief.md
