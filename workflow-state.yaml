@@ -22,7 +22,7 @@ active_session:             # current bounded work unit; null when none in fligh
       status: completed
     - stage: 07-build
       status: in_progress
-      note: "T2,T3 completed; T4 P2 snapshot next; T1,T10,T11 shipped"
+      note: "T1-T6,T10,T11 shipped; T7 A/B enforce_eager next"
     - stage: 08-verify-build
       status: pending
     - stage: 13-deploy-smoke
@@ -229,10 +229,10 @@ stages:
     partial_rerun_at: "2026-06-25"
     partial_rerun_note: "S001 — Modal cold-start reduction (instrumentation, levers, pre-warm, GPU snapshot spike)"
     substeps:
-      current_task: T4
+      current_task: S001-T7
       milestone: M32 completed
-      note: "T2 deploy+traces done; T3 gate PASS (init dominates weight load); P2 snapshot T4 next"
-    note: "S001 07-build — T2 deploy+traces done; T3 gate PASS (init dominates weight load); P2 snapshot T4 next; EV-004 Phase 9 M32 completed, T33.1 prior"
+      note: "T4-T6 shipped (imports, enter split, GPU snapshot flags); T7 A/B enforce_eager next"
+    note: "S001 07-build — T2 deploy+traces done; T3 gate PASS (init dominates weight load); T4-T6 shipped (image.imports, @enter split, GPU snapshot flags); T7 A/B enforce_eager next; EV-004 Phase 9 M32 completed, T33.1 prior"
   08-verify-build:
     status: completed
     started_at: "2026-06-25"

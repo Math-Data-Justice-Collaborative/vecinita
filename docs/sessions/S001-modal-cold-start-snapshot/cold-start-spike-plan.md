@@ -173,9 +173,9 @@ those seconds land on the critical path that's already over the ~60s DO budget. 
 | T1 | Add cold-start timing instrumentation to `LlmService` + log breakdown | P1 | — | completed |
 | T2 | Deploy instrumented app to staging; collect ≥3 cold-start traces | P1 | T1 | completed |
 | T3 | Decision gate: compilation vs weight-load dominance → proceed/abort | P1 | T2 | completed (PASS → P2) |
-| T4 | Move imports to `image.imports()`; add snapshot env vars | P2 | T3 | pending |
-| T5 | Split `@modal.enter` snap/non-snap; KV-cache discard+recreate per Modal vLLM example | P2 | T4 | pending |
-| T6 | Enable `enable_memory_snapshot` + `enable_gpu_snapshot`; verify `@modal.exit` compat | P2 | T5 | pending |
+| T4 | Move imports to `image.imports()`; add snapshot env vars | P2 | T3 | completed |
+| T5 | Split `@modal.enter` snap/non-snap; KV-cache discard+recreate per Modal vLLM example | P2 | T4 | completed |
+| T6 | Enable `enable_memory_snapshot` + `enable_gpu_snapshot`; verify `@modal.exit` compat | P2 | T5 | completed |
 | T7 | A/B `enforce_eager` on/off with snapshot; pick winner | P2 | T6 | pending |
 | T8 | Deploy; force snapshot capture; confirm restore log/icon | P3 | T6 | pending |
 | T9 | Measure cold/warm ask; record in 15-service-health; update ADR-022 status | P3 | T8 | pending |

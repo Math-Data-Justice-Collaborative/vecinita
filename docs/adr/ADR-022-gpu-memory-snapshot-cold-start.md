@@ -30,8 +30,9 @@ dominates the cold path rather than weight loading (not snapshot-able).
 - Split `@modal.enter` into `snap=True` (engine/graph build, warm-up, KV-cache discarded) and
   `snap=False` (per-restore reinit).
 - Mitigations: `TORCHINDUCTOR_COMPILE_THREADS=1`, `XFORMERS_ENABLE_TRITON=1`, KV-cache
-  discard/recreate per Modal's official vLLM example, preserve existing `@modal.exit()` NCCL
-  teardown.
+  discard/recreate per Modal's official vLLM example (`sleep(level=1)` / `wake_up()`),
+  preserve existing `@modal.exit()` NCCL teardown.
+- **vLLM pin:** `0.7.x` in Modal image (sleep mode API; was `0.6.x`).
 
 This is a **spike with a kill switch**, not a committed design — GPU snapshots are alpha and
 vLLM is explicitly flagged by Modal as needing rewrites.

@@ -32,6 +32,8 @@ def _llm_engine_kwargs(*, max_model_len: int) -> dict[str, object]:
         # Skip CUDA graph capture at startup — removes seconds of cold-start init
         # for a small model on T4 (S001 Tier-0, ADR-022 budget-safe combo).
         "enforce_eager": True,
+        # Required for sleep(level=1) / wake_up() snapshot prep (S001 T5, vLLM 0.7+).
+        "enable_sleep_mode": True,
     }
 
 
@@ -69,12 +71,27 @@ def _shutdown_vllm_engine(llm: object | None) -> None:
 app = modal.App(APP_NAME)
 model_volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
 
-image = modal.Image.debian_slim(python_version="3.11").pip_install(
-    "pydantic>=2.7,<3",
-    "starlette>=0.37,<1",
-    "transformers>=4.44,<4.47",
-    "vllm>=0.6.3,<0.7",
+image = (
+    modal.Image.debian_slim(python_version="3.11")
+    .pip_install(
+        "pydantic>=2.7,<3",
+        "starlette>=0.37,<1",
+        "transformers>=4.44,<4.47",
+        "vllm>=0.7,<0.8",
+    )
+    .env(
+        {
+            # vLLM + GPU snapshot mitigations (S001 T4, ADR-022).
+            "TORCHINDUCTOR_COMPILE_THREADS": "1",
+            "XFORMERS_ENABLE_TRITON": "1",
+        }
+    )
 )
+
+# Import vLLM in global image scope so library init lands in the GPU memory
+# snapshot instead of every cold boot (S001 T4; split enter in T5).
+with image.imports():
+    from vllm import LLM, SamplingParams
 
 
 @app.function(
@@ -85,8 +102,6 @@ image = modal.Image.debian_slim(python_version="3.11").pip_install(
 )
 def stage_llm_weights() -> str:
     """One-shot: download Qwen weights into the llm-models volume (loads vLLM once)."""
-    from vllm import LLM, SamplingParams
-
     llm: LLM | None = None
     try:
         llm = LLM(**_llm_engine_kwargs(max_model_len=512))
@@ -104,22 +119,18 @@ def stage_llm_weights() -> str:
     volumes={"/models": model_volume},
     scaledown_window=300,
     timeout=600,
+    enable_memory_snapshot=True,
+    experimental_options={"enable_gpu_snapshot": True},
 )
 class LlmService:
-    @modal.enter()
+    @modal.enter(snap=True)
     def load_model(self) -> None:
-        # S001 P1 cold-start instrumentation: break the cold path into import
-        # (torch ≈ 20k file ops — snapshot-able), engine construct (vLLM init +
-        # CUDA + weight load from Volume — NOT snapshot-able) and warm-up. The
-        # gate (ADR-022) needs construct/init to dominate weight load before P2.
-        # For the weight-load-vs-engine-init split inside `construct_s`, read
-        # vLLM's own "Loading weights took ..." line in the same container log.
+        # S001 P1 cold-start instrumentation: vLLM import is in image.imports()
+        # (T4) so import_s is ~0 on restore; construct_s still captures engine
+        # init + weight load. For the weight-load split, read vLLM's
+        # "Loading weights took ..." line in the same container log.
         t_enter = time.perf_counter()
-
-        t0 = time.perf_counter()
-        from vllm import LLM, SamplingParams
-
-        import_s = time.perf_counter() - t0
+        import_s = 0.0
 
         t1 = time.perf_counter()
         self._llm = LLM(**_llm_engine_kwargs(max_model_len=1024))
@@ -131,6 +142,9 @@ class LlmService:
         self._llm.generate(["warmup"], SamplingParams(max_tokens=1))
         warmup_s = time.perf_counter() - t2
 
+        # Discard KV cache before GPU snapshot (Modal vLLM pattern, S001 T5).
+        self._llm.sleep(level=1)
+
         logger.warning(
             "cold_start_breakdown import_s=%.2f construct_s=%.2f warmup_s=%.2f "
             "total_enter_s=%.2f (construct_s includes vLLM engine init + weight load; "
@@ -141,6 +155,11 @@ class LlmService:
             time.perf_counter() - t_enter,
         )
 
+    @modal.enter(snap=False)
+    def restore_model(self) -> None:
+        """Recreate KV cache after snapshot restore (S001 T5)."""
+        self._llm.wake_up()
+
     @modal.exit()
     def unload_model(self) -> None:
         _shutdown_vllm_engine(getattr(self, "_llm", None))
@@ -150,8 +169,6 @@ class LlmService:
         self, prompt: str, *, max_tokens: int = 512, temperature: float = 0.2
     ) -> str:
         """Shared vLLM generate path — do not call self.complete() from other methods."""
-        from vllm import SamplingParams
-
         params = SamplingParams(
             max_tokens=max_tokens,
             temperature=temperature,
