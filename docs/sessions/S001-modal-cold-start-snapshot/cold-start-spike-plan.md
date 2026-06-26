@@ -177,8 +177,8 @@ those seconds land on the critical path that's already over the ~60s DO budget. 
 | T5 | Split `@modal.enter` snap/non-snap; KV-cache discard+recreate per Modal vLLM example | P2 | T4 | completed |
 | T6 | Enable `enable_memory_snapshot` + `enable_gpu_snapshot`; verify `@modal.exit` compat | P2 | T5 | completed |
 | T7 | A/B `enforce_eager` on/off with snapshot; pick winner | P2 | T6 | completed |
-| T8 | Deploy; force snapshot capture; confirm restore log/icon | P3 | T6 | pending |
-| T9 | Measure cold/warm ask; record in 15-service-health; update ADR-022 status | P3 | T8 | pending |
+| T8 | Deploy; force snapshot capture; confirm restore log/icon | P3 | T6 | completed |
+| T9 | Measure cold/warm ask; record in 15-service-health; update ADR-022 status | P3 | T8 | completed (preliminary — 15-service-health pending) |
 | T10 | (Parallel, budget-safe) ship `enforce_eager` + embedding scaledown | any | — | done (pre-warm split to T11) |
 | T11 | **PRIMARY** pre-warm-on-session-open: FE→backend async warm LLM + embedding on chat mount | any | — | completed |
 | T12 | CPU-snapshot or collapse the ASGI web-fn hop (remove 2nd cold start from path) | any | — | pending |

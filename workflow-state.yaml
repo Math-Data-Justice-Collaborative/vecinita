@@ -22,7 +22,7 @@ active_session:             # current bounded work unit; null when none in fligh
       status: completed
     - stage: 07-build
       status: in_progress
-      note: "T1-T7,T10,T11 shipped; T8 deploy+snapshot capture next"
+      note: "T1-T9,T10,T11 shipped; T12 web-fn hop next"
     - stage: 08-verify-build
       status: pending
     - stage: 13-deploy-smoke
@@ -229,10 +229,11 @@ stages:
     partial_rerun_at: "2026-06-25"
     partial_rerun_note: "S001 — Modal cold-start reduction (instrumentation, levers, pre-warm, GPU snapshot spike)"
     substeps:
-      current_task: S001-T8
+      current_task: S001-T12
       milestone: M32 completed
-      note: "T7 A/B enforce_eager toggle shipped; default true; T8 deploy+snapshot capture next"
-    note: "S001 07-build — T1-T7,T10,T11 shipped; T8 deploy+snapshot capture next; EV-004 Phase 9 M32 completed, T33.1 prior"
+      completed_tasks: [S001-T1, S001-T4, S001-T5, S001-T6, S001-T7, S001-T8, S001-T9, S001-T10, S001-T11]
+      note: "T8-T9 GPU snapshot deploy+measure done; restore ~9s cold; ADR-022 Accepted; T12 web-fn hop next"
+    note: "S001 07-build — T1-T9,T10,T11 shipped; T12 CPU-snapshot/collapse web-fn hop next"
   08-verify-build:
     status: completed
     started_at: "2026-06-25"
@@ -1830,6 +1831,18 @@ git_history:
       stage: "07-build"
       files_changed: 7
       timestamp: "2026-06-26T00:17:00Z"
+    - sha: ab99d82
+      branch: feat/S001-modal-cold-start-snapshot
+      message: "[S001-T4,T5,T6] perf(modal): cold-start lever implementation (T4-T6)"
+      stage: "07-build"
+      files_changed: 0
+      timestamp: "2026-06-26T00:18:00Z"
+    - sha: ecc062b
+      branch: feat/S001-modal-cold-start-snapshot
+      message: "[S001-T7] perf(modal): A/B enforce_eager toggle (default true)"
+      stage: "07-build"
+      files_changed: 0
+      timestamp: "2026-06-26T00:19:00Z"
 
 constraints:
   cost:

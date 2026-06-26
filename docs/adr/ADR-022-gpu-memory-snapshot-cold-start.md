@@ -1,6 +1,6 @@
 # ADR-022: GPU Memory Snapshots for vLLM cold-start reduction
 
-**Status:** Proposed (spike — gated on instrumentation, S001)
+**Status:** Accepted (S001 P3 — GPU snapshot restore measured ~9s cold vs ~71s creation boot)
 **Stage:** 00-context (S001-modal-cold-start-snapshot)
 **Date:** 2026-06-25
 
