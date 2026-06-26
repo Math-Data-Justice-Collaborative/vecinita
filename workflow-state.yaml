@@ -68,9 +68,10 @@ active_session:             # current bounded work unit; null when none in fligh
       status: completed
       completed_at: "2026-06-25"
     - stage: 19-address-pr-review
-      status: in_progress
+      status: completed
+      completed_at: "2026-06-25"
       user_amended: true
-      note: "User adopted PR #68 review remediation (PRM-007 / linked PRR-010) into S001 routing plan 2026-06-25; 2 advisories from the chat corpus-tab hotfix."
+      note: "User adopted PR #68 review remediation (PRM-007 / linked PRR-010) into S001 routing plan 2026-06-25; 2 advisories fixed (F-001 concurrency defect + F-002 cosmetic), CI green @ aaafe5f."
   skipped_stages:
     - stage: 01-requirements
       reason: "perf change to already-specced service under ADR-009"
@@ -452,9 +453,9 @@ stages:
     completed: "2026-06-25"
     last_cycle: PRR-010
   19-address-pr-review:
-    status: in_progress
+    status: completed
     started: "2026-06-25"
-    completed: null
+    completed: "2026-06-25"
     last_cycle: PRM-007
     history_note: "PRM-005 closed PR #62 ([M32] Workspace scaffold) on 2026-06-13"
   gather-context:
@@ -1597,13 +1598,16 @@ pr_remediation_cycles:
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/68
     linked_review_cycle_id: PRR-010
     title: "[hotfix] Preserve chat history across Corpus tab navigation (#53)"
-    status: in_progress
+    status: completed
     started: "2026-06-25"
-    completed: null
+    completed: "2026-06-25"
     head_ref: fix/chat-tab-corpus-state
     base_ref: main
-    ci_status: not_pushed
+    head_sha: aaafe5f
+    ci_status: success
+    ci_note: "ci.yml green @ aaafe5f (run 28214739565): python, coverage, both frontends, packages matrix."
     scope_note: "User scoped both advisories (scope=both). Session adopted into S001 routing plan (user choice 'adopt')."
+    resolution_note: "F-001 inline thread (PRRT_kwDORy2YAM6MaHMh) replied (comment 3478925311, commit d495103) and resolved. Both findings summarized in PR issue comment 4806062859. PR not merged (user merges manually)."
     counts:
       fixed: 2
       deferred: 0
@@ -1615,13 +1619,16 @@ pr_remediation_cycles:
         path: apps/chat-rag-frontend/src/components/ChatPanel.tsx
         line: 43
         thread_id: "PRRT_kwDORy2YAM6MaHMh"
+        comment_id: 3478925311
         status: fixed
-        note: "Partial state lift (concurrency defect): lifted loading+setLoading into useChatHistory so in-flight ask state survives the Corpus round-trip and blocks a concurrent stream. Full bug-investigation: BUG-2026-06-25-chat-mid-stream-corpus-concurrent-ask. AbortController deliberately deferred (would change ask.ts API surface)."
+        commit: d495103
+        note: "Partial state lift (concurrency defect): lifted loading+setLoading into useChatHistory so in-flight ask state survives the Corpus round-trip and blocks a concurrent stream. Full bug-investigation: BUG-2026-06-25-chat-mid-stream-corpus-concurrent-ask. AbortController deliberately deferred (would change ask.ts API surface). Inline thread resolved."
       - id: F-002
         source: review_body
         severity: advisory
         path: apps/chat-rag-frontend/src/components/ChatPanel.tsx
         status: fixed
+        commit: d495103
         note: "Unused fallback hook when prop supplied: split ChatPanel into ChatPanelView (requires chat) + ChatPanelStandalone (calls useChatHistory). Hook now only runs when no chat is injected, eliminating the wasted hook while honoring rules-of-hooks."
     artifacts:
       - path: docs/bug-reports/BUG-2026-06-25-chat-mid-stream-corpus-concurrent-ask.md

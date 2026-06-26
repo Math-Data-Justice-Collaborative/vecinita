@@ -121,7 +121,7 @@ no separate deploy — folds into the existing #53 hotfix PR.
 |-------|--------|----------|
 | L1 Automated | pass (local) | repro red→green; `npm run lint` clean; `npm test` 84 passed (17 files); `npm run build` (`tsc --noEmit` + `vite build`) ok |
 | L2 Reproduction | pass (local) | repro test executes the mid-stream Corpus round-trip (ask → Corpus → back → Ask stays "Asking"/disabled, no second stream) |
-| CI | pending | `ci.yml` on `fix/chat-tab-corpus-state` after push |
+| CI | pass | `ci.yml` run [28214739565](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/28214739565) success @ `aaafe5f` (python, coverage, both frontends, packages matrix) |
 
 **PR:** [#68](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/68) (not merged — awaiting user approval).
 
