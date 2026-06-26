@@ -33,6 +33,8 @@ dominates the cold path rather than weight loading (not snapshot-able).
   discard/recreate per Modal's official vLLM example (`sleep(level=1)` / `wake_up()`),
   preserve existing `@modal.exit()` NCCL teardown.
 - **vLLM pin:** `0.7.x` in Modal image (sleep mode API; was `0.6.x`).
+- **A/B lever:** `VECINITA_LLM_ENFORCE_EAGER` env (default `true`; S001 T7) — staging keeps
+  eager on until P3 traces confirm graph-capture + snapshot restore is faster.
 
 This is a **spike with a kill switch**, not a committed design — GPU snapshots are alpha and
 vLLM is explicitly flagged by Modal as needing rewrites.

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 
 import modal
@@ -17,6 +18,13 @@ logger = logging.getLogger("vecinita.llm")
 APP_NAME = "vecinita-llm"
 VOLUME_NAME = "llm-models"
 MODEL_ID = "Qwen/Qwen2.5-1.5B-Instruct"
+ENFORCE_EAGER_ENV = "VECINITA_LLM_ENFORCE_EAGER"
+
+
+def _enforce_eager_from_env() -> bool:
+    """S001 T7 A/B: toggle CUDA graph capture for snapshot cold-start experiments."""
+    raw = os.environ.get(ENFORCE_EAGER_ENV, "true").strip().lower()
+    return raw not in ("0", "false", "no", "off")
 
 
 def _llm_engine_kwargs(*, max_model_len: int) -> dict[str, object]:
@@ -29,9 +37,9 @@ def _llm_engine_kwargs(*, max_model_len: int) -> dict[str, object]:
         "dtype": "half",
         "hf_overrides": {"torch_dtype": "float16"},
         "gpu_memory_utilization": 0.9,
-        # Skip CUDA graph capture at startup — removes seconds of cold-start init
-        # for a small model on T4 (S001 Tier-0, ADR-022 budget-safe combo).
-        "enforce_eager": True,
+        # S001 T7 A/B: default eager (Tier-0); set VECINITA_LLM_ENFORCE_EAGER=false
+        # on a deploy branch to compare snapshot restore with CUDA graph capture.
+        "enforce_eager": _enforce_eager_from_env(),
         # Required for sleep(level=1) / wake_up() snapshot prep (S001 T5, vLLM 0.7+).
         "enable_sleep_mode": True,
     }

@@ -176,7 +176,7 @@ those seconds land on the critical path that's already over the ~60s DO budget. 
 | T4 | Move imports to `image.imports()`; add snapshot env vars | P2 | T3 | completed |
 | T5 | Split `@modal.enter` snap/non-snap; KV-cache discard+recreate per Modal vLLM example | P2 | T4 | completed |
 | T6 | Enable `enable_memory_snapshot` + `enable_gpu_snapshot`; verify `@modal.exit` compat | P2 | T5 | completed |
-| T7 | A/B `enforce_eager` on/off with snapshot; pick winner | P2 | T6 | pending |
+| T7 | A/B `enforce_eager` on/off with snapshot; pick winner | P2 | T6 | completed |
 | T8 | Deploy; force snapshot capture; confirm restore log/icon | P3 | T6 | pending |
 | T9 | Measure cold/warm ask; record in 15-service-health; update ADR-022 status | P3 | T8 | pending |
 | T10 | (Parallel, budget-safe) ship `enforce_eager` + embedding scaledown | any | — | done (pre-warm split to T11) |
@@ -208,6 +208,19 @@ Deliberately **not** changed:
 
 **Remaining Tier-0 item:** ~~pre-warm-on-chat-open~~ — **shipped in T11** (cross-app:
 `apps/chat-rag-frontend` + `apps/chat-rag-backend` + Modal `/warm` routes).
+
+### T7 — `enforce_eager` A/B (completed 2026-06-25)
+
+Toggle via Modal secret/env `VECINITA_LLM_ENFORCE_EAGER` (`true` default, `false`/`0`/`off`
+disables). Compare on two deploys after T8 snapshot capture:
+
+1. **Arm A (default):** `enforce_eager=true` — skips CUDA graph capture at engine init (Tier-0).
+2. **Arm B:** `enforce_eager=false` — allows graph capture; may interact with GPU snapshot
+   restore differently.
+3. **Measure:** `cold_start_breakdown` `construct_s` + wall-clock cold `/generate` (≥3 each).
+4. **Interim winner:** **`true` (default)** — P1 traces show engine/CUDA init dominates; eager
+   skips graph capture during snapshot *creation*. Arm B remains deployable for P3 confirmation;
+   revisit only if T9 shows faster cold restore with graphs snapshotted.
 
 > Validation note: these changes only take measurable effect on a **deployed** app. Snapshots
 > capture across the first several boots and per worker type — **~6 captures for CPU-only**
