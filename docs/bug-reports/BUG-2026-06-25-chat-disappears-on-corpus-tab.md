@@ -100,7 +100,9 @@ only after user approval.
 |-------|--------|----------|
 | L1 Automated | pass (local) | repro red→green; `npm run lint` clean; `npm test` 83 passed (16 files); `npm run build` (`tsc --noEmit` + `vite build`) ok |
 | L2 Reproduction | pass (local) | repro test executes issue #53 steps (ask → Corpus → back) and the conversation survives |
-| CI | pending | watch `ci.yml` on `fix/chat-tab-corpus-state` after push |
+| CI | pass | `ci.yml` run [28213699085](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/28213699085) success @ `9308ddb` (python, coverage, both frontends, packages matrix) |
+
+**PR:** [#68](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/68) (not merged — awaiting user approval).
 
 ## Regression prevention
 
