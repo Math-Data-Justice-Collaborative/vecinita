@@ -12,11 +12,11 @@
 | **Active phase** | Phase 9: EV-004 shared frontend i18n/UI |
 | **Active milestone** | M32: Workspace scaffold |
 | **Active task** | M33 / T33.1 |
-| **Tasks completed** | 187 / 239 |
+| **Tasks completed** | 192 / 239 |
 | **Last updated** | 2026-06-26 |
 | **Evolve cycle** | EV-004 (F31) — **in_progress** |
 | **Git branch** | `feat/M32-workspace-scaffold` |
-| **Active session** | S003-persistent-chat-history (Phase 10, F33) — 04-tech-plan **complete**, build pending; runs concurrently off `main` on `feat/S003-persistent-chat-history` |
+| **Active session** | S003-persistent-chat-history (Phase 10, F33) — 07-build **in progress**: M39 conversation store complete (T39.1–T39.5); next M40 shell wiring; on `feat/S003-persistent-chat-history` |
 
 ## Template
 
@@ -791,11 +791,11 @@ deserialize (`vecinita.chat.history.v1`), cap/eviction, graceful fallback.
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|------------|-------------|
-| T39.1 | Test: store rehydrates active conversation (+sources) from `sessionStorage` after remount (TC-072) — red | Test | pending | test-plan TC-072, ADR-024 | — | — | S003 | F33 |
-| T39.2 | Test: graceful fallback to in-memory when `sessionStorage` throws (TC-073) — red | Test | pending | test-plan TC-073, AC-S2 | — | — | S003 | F33 |
-| T39.3 | Code: implement `useConversationStore` — envelope schema v1, write-through, try/catch in-memory fallback | Code | pending | ADR-024 TP-S003-01/09/10 | T39.1, T39.2 | — | S003 | F33 |
-| T39.4 | Test: cap=10 FIFO eviction at store level (TC-075) — red | Test | pending | test-plan TC-075, RD-070 | T39.3 | — | S003 | F33 |
-| T39.5 | Code: store ops — `newChat`/`selectConversation`/`deleteConversation`/`clearAll` + cap/eviction | Code | pending | ADR-024 TP-S003-06/07/08 | T39.4 | — | S003 | F33 |
+| T39.1 | Test: store rehydrates active conversation (+sources) from `sessionStorage` after remount (TC-072) — red | Test | completed | test-plan TC-072, ADR-024 | — | — | S003 | F33 |
+| T39.2 | Test: graceful fallback to in-memory when `sessionStorage` throws (TC-073) — red | Test | completed | test-plan TC-073, AC-S2 | — | — | S003 | F33 |
+| T39.3 | Code: implement `useConversationStore` — envelope schema v1, write-through, try/catch in-memory fallback | Code | completed | ADR-024 TP-S003-01/09/10 | T39.1, T39.2 | — | S003 | F33 |
+| T39.4 | Test: cap=10 FIFO eviction at store level (TC-075) — red | Test | completed | test-plan TC-075, RD-070 | T39.3 | — | S003 | F33 |
+| T39.5 | Code: store ops — `newChat`/`selectConversation`/`deleteConversation`/`clearAll` + cap/eviction | Code | completed | ADR-024 TP-S003-06/07/08 | T39.4 | — | S003 | F33 |
 
 #### M40: Wire store into shell + active-conversation rehydration
 
@@ -1187,11 +1187,11 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T38.2 | M38 | 9 | Config | pending | T38.1 | — | EV-004 | F31 |
 | T38.3 | M38 | 9 | Config | pending | T36.8, T35.6 | — | EV-004 | F31 |
 | T38.4 | M38 | 9 | Config | pending | T38.3 | — | EV-004 | F31 |
-| T39.1 | M39 | 10 | Test | pending | — | — | S003 | F33 |
-| T39.2 | M39 | 10 | Test | pending | — | — | S003 | F33 |
-| T39.3 | M39 | 10 | Code | pending | T39.1, T39.2 | — | S003 | F33 |
-| T39.4 | M39 | 10 | Test | pending | T39.3 | — | S003 | F33 |
-| T39.5 | M39 | 10 | Code | pending | T39.4 | — | S003 | F33 |
+| T39.1 | M39 | 10 | Test | completed | — | — | S003 | F33 |
+| T39.2 | M39 | 10 | Test | completed | — | — | S003 | F33 |
+| T39.3 | M39 | 10 | Code | completed | T39.1, T39.2 | — | S003 | F33 |
+| T39.4 | M39 | 10 | Test | completed | T39.3 | — | S003 | F33 |
+| T39.5 | M39 | 10 | Code | completed | T39.4 | — | S003 | F33 |
 | T40.1 | M40 | 10 | Test | pending | T39.5 | — | S003 | F33 |
 | T40.2 | M40 | 10 | Code | pending | T40.1 | — | S003 | F33 |
 | T40.3 | M40 | 10 | Code | pending | T40.2 | — | S003 | F33 |
