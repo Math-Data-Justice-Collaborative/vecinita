@@ -128,6 +128,30 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
 }
 ```
 
+### GET `/jobs`
+
+- **Purpose**: List all jobs (newest first) for the admin Job Management tab (F32).
+- **Auth**: Infrastructure (Modal proxy).
+- **Query**: optional `status` filter (`pending | running | completed | failed`).
+- **Response** `200`:
+
+```json
+{
+  "jobs": [
+    {
+      "job_id": "uuid",
+      "status": "pending | running | completed | failed",
+      "job_type": "ingest | retag",
+      "urls": ["string"],
+      "error_code": "string | null",
+      "error_message": "string | null",
+      "created_at": "ISO8601",
+      "updated_at": "ISO8601"
+    }
+  ]
+}
+```
+
 ### GET `/jobs/{job_id}`
 
 - **Response** `200`:
@@ -136,6 +160,7 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
 {
   "job_id": "uuid",
   "status": "pending | running | completed | failed",
+  "job_type": "ingest | retag",
   "urls": ["string"],
   "error_code": "string | null",
   "error_message": "string | null",
