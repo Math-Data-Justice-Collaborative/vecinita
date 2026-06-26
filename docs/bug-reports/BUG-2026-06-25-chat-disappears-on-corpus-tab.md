@@ -107,3 +107,17 @@ only after user approval.
 ## Regression prevention
 
 - New regression test: `test_bug_2026_06_25_chat_corpus_tab_state_loss.test.tsx`.
+
+## Prevention & countermeasures
+
+| Action | Status |
+|--------|--------|
+| Regression Vitest test (red→green) | done |
+| Cursor rule `.cursor/rules/frontend-session-state-lifting.mdc` — lift session state above conditionally-rendered views (user-approved) | done |
+| Deploy to staging | after merge to `main` (user triggers) |
+
+## Cursor rule
+
+`.cursor/rules/frontend-session-state-lifting.mdc` — session-scoped UI state must be owned by
+an always-mounted shell (or context), not a conditionally-unmounted view. Approved by user
+2026-06-25.
