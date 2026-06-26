@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from hashlib import sha256
 from typing import Protocol
 from uuid import UUID
@@ -17,6 +18,7 @@ from vecinita_shared_schemas.internal_write import (
     DocumentUpsert,
     TagInput,
 )
+from vecinita_tagging.llm_client import LlmTagClientError
 from vecinita_tagging.vocabulary import (
     SeedTag,
     detect_document_language,
@@ -27,6 +29,8 @@ from vecinita_tagging.vocabulary import (
 
 from vecinita_data_management_backend.store import JobStore
 from vecinita_data_management_backend.write_client import InternalWriteClient
+
+logger = logging.getLogger(__name__)
 
 
 class DocumentFetcher(Protocol):
@@ -87,19 +91,30 @@ def run_ingest_job(
 
             tag_models: list[TagInput] | None = None
             if tag_client is not None and slug_vocab:
-                inferred = tag_client.infer_document_tags(
-                    title=title,
-                    text=text[:4000],
-                    language=language,
-                    vocabulary=slug_vocab,
-                    max_tags=max_document_tags,
-                )
-                tag_models = tag_inputs_for_slugs(
-                    inferred,
-                    vocabulary,
-                    language=language,
-                    source="llm",
-                )
+                # Tagging is best-effort: a tag-inference failure (empty / non-JSON LLM
+                # completion, transient client error) must not fail the ingest job (#88).
+                try:
+                    inferred = tag_client.infer_document_tags(
+                        title=title,
+                        text=text[:4000],
+                        language=language,
+                        vocabulary=slug_vocab,
+                        max_tags=max_document_tags,
+                    )
+                except LlmTagClientError as exc:
+                    logger.warning(
+                        "tag inference failed for %s; ingesting without LLM tags: %s",
+                        url,
+                        exc,
+                    )
+                    inferred = []
+                if inferred:
+                    tag_models = tag_inputs_for_slugs(
+                        inferred,
+                        vocabulary,
+                        language=language,
+                        source="llm",
+                    )
 
             embeddings = embed_client.embed_batch(chunks)
             chunk_models = [
