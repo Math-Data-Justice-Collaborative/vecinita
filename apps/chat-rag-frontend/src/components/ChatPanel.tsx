@@ -18,21 +18,37 @@ import { TagFilterChips } from "./TagFilterChips";
 import { SourceList } from "./SourceList";
 
 type ChatPanelProps = {
-  /** Conversation history lifted to the app shell so it survives Chat ⇄ Corpus
-   *  navigation (BUG-2026-06-25, issue #53). Falls back to local state when
-   *  omitted (standalone use / unit tests). */
+  /** Conversation history (and in-flight ask state) lifted to the app shell so it
+   *  survives Chat ⇄ Corpus navigation (BUG-2026-06-25, issue #53 + PR #68).
+   *  When omitted, a local instance is used (standalone use / unit tests). */
   chat?: ChatHistory;
 };
 
+/**
+ * Renders standalone with its own local chat history. Split out so the
+ * `useChatHistory` hook is only called when no `chat` is injected — when the app
+ * shell supplies one, `ChatPanelView` runs without an unused fallback hook
+ * (PR #68 review), while still honoring the rules of hooks.
+ */
+function ChatPanelStandalone() {
+  const chat = useChatHistory();
+  return <ChatPanelView chat={chat} />;
+}
+
 export function ChatPanel({ chat }: ChatPanelProps = {}) {
+  if (chat) {
+    return <ChatPanelView chat={chat} />;
+  }
+  return <ChatPanelStandalone />;
+}
+
+function ChatPanelView({ chat }: { chat: ChatHistory }) {
   const [question, setQuestion] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [tagFacets, setTagFacets] = useState<TagFacet[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const { locale } = useLocale();
-  const fallbackHistory = useChatHistory();
   const {
     messages,
     appendUserMessage,
@@ -40,7 +56,9 @@ export function ChatPanel({ chat }: ChatPanelProps = {}) {
     appendAssistantToken,
     setAssistantSources,
     clearHistory,
-  } = chat ?? fallbackHistory;
+    loading,
+    setLoading,
+  } = chat;
 
   useEffect(() => {
     try {
