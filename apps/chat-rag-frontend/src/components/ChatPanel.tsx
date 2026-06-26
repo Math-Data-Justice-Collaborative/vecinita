@@ -8,6 +8,7 @@ import {
   streamAsk,
 } from "../api/ask";
 import { fetchTags, type TagFacet } from "../api/browse";
+import { prewarmChatServices } from "../api/warm";
 import type { Source } from "../api/types";
 import { requireChatApiConfig } from "../config";
 import { useLocale } from "../hooks/useLocale";
@@ -32,6 +33,15 @@ export function ChatPanel() {
     setAssistantSources,
     clearHistory,
   } = useChatHistory();
+
+  useEffect(() => {
+    try {
+      const { baseUrl } = requireChatApiConfig();
+      prewarmChatServices(baseUrl);
+    } catch {
+      // Config missing in tests or misconfigured deploy; chat still works without pre-warm.
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;

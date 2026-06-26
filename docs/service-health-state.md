@@ -1,20 +1,23 @@
 # Service Health State
 
-> Last updated: 2026-05-22
+> Last updated: 2026-06-25
 
 | Field | Value |
 |-------|--------|
 | Environment | staging |
-| Infra overall | **PASS** (CI secret-pattern advisory; DO SHA drift advisory) |
+| Infra overall | **PASS** |
 | E2E overall | **PASS** |
 | Overall | **PASS** |
-| Last report | [2026-05-22-post-hotfix-jobs-get-404.md](service-health-reports/2026-05-22-post-hotfix-jobs-get-404.md) |
+| Last report | [S001 service-health.md](sessions/S001-modal-cold-start-snapshot/reports/service-health.md) |
+| Session | S001-modal-cold-start-snapshot |
+| Deployed SHA (staging) | `4f3f741` on `feat/S001-modal-cold-start-snapshot` |
+| Main SHA (H0ci) | `a235707` — CI green ([run 28207027346](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/28207027346)) |
 | Chat URL | https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app |
-| Deployed SHA (repo main) | `d79a06f` (PR #36 merged) |
 
 ## Open advisories
 
-1. Modal LLM scale-to-zero: first `/ask` after idle may hit DO NOT DO timeout on warm path (this run: 5.2s).
-2. GitHub CI `Secret patterns (current tree)` failing on main — unrelated to jobs hotfix; blocks full CI green.
-3. Local H0: `test_seed_load_row_counts` fails when staging DB has documents with `language=NULL`.
-4. DO staging apps may not yet reflect `d79a06f` — Modal data-mgmt already on hotfix.
+1. DO chat apps pinned to feature branch until S001 merges to `main`.
+2. H4 Modal data-mgmt CORS waived (`requires_proxy_auth` at proxy).
+3. 07-build T12 (web-fn hop) pending — not blocking health.
+4. Cold ask without pre-warm still exceeds 60s — browser path uses pre-warm on mount (S001 fix).
+5. Re-run blocking H0ci on `main` after S001 merge.

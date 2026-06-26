@@ -41,35 +41,32 @@ export function CorpusList() {
   const [bulkTagOpen, setBulkTagOpen] = useState(false);
   const [bulkMetadataOpen, setBulkMetadataOpen] = useState(false);
 
-  const refresh = useCallback(
-    async (isActive: () => boolean = () => true) => {
-      setError(null);
-      setLoading(true);
-      try {
-        const client = requireCorpusConfig();
-        const list = await listDocuments(client);
-        if (!isActive()) {
-          return;
-        }
-        setDocuments(list);
-        setSelectedIds(new Set());
-      } catch (err) {
-        if (!isActive()) {
-          return;
-        }
-        setError(
-          err instanceof Error
-            ? err.message
-            : trRef.current("admin.corpusList.loadFailed"),
-        );
-      } finally {
-        if (isActive()) {
-          setLoading(false);
-        }
+  const refresh = useCallback(async (isActive: () => boolean = () => true) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const client = requireCorpusConfig();
+      const list = await listDocuments(client);
+      if (!isActive()) {
+        return;
       }
-    },
-    [],
-  );
+      setDocuments(list);
+      setSelectedIds(new Set());
+    } catch (err) {
+      if (!isActive()) {
+        return;
+      }
+      setError(
+        err instanceof Error
+          ? err.message
+          : trRef.current("admin.corpusList.loadFailed"),
+      );
+    } finally {
+      if (isActive()) {
+        setLoading(false);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;

@@ -4,10 +4,106 @@ project:
   name: Vecinita
   description: Monorepo — bilingual community Q&A RAG + data management (5 apps; zero personal data, cost/sovereignty constraints)
   output_directory: docs/
+  stages:
+    13-deploy-smoke:
+      status: completed
+      started_at: "2026-06-26"
+      completed_at: "2026-06-26"
+      partial_rerun_at: "2026-06-26"
+      partial_rerun_note: "S001 Modal GPU snapshot + DO warm path deploy"
+      report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
+    15-service-health:
+      status: completed
+      started_at: "2026-06-25"
+      completed_at: "2026-06-25"
+      partial_rerun_at: "2026-06-25"
+      partial_rerun_note: "S001 post-deploy health — H1-H5 pass; warm ask 2.9s; H0ci main green advisory"
+      environment: staging
+      infra: pass
+      e2e: pass
+      overall: pass
+      report: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
+      tiers: [H1, H2, H3, H3b, H4, H5, H0ci]
+      advisories:
+        - do_branch_pin_feat_S001
+        - modal_h4_cors_waived_proxy_auth
+        - s001_t12_pending
+        - h0ci_blocking_after_merge
 
 # Session-first work model — see .cursor/skills/sessions-reference.md
-session_counter: 0          # increment when allocating S{NNN}-{slug}
-active_session: null        # current bounded work unit; null when none in flight
+session_counter: 1          # increment when allocating S{NNN}-{slug}
+active_session:             # current bounded work unit; null when none in flight
+  id: S001-modal-cold-start-snapshot
+  type: ops
+  status: in_progress
+  intent: "Reduce vecinita-llm (and secondarily vecinita-embedding) Modal cold-start latency so the first cold chat ask stops exceeding DigitalOcean's ~60s gateway timeout, while preserving scale-to-zero per ADR-004. Mechanism under test: Modal GPU Memory Snapshots (gated on instrumentation)."
+  branch: feat/S001-modal-cold-start-snapshot
+  orchestrator: pipeline
+  artifacts_dir: docs/sessions/S001-modal-cold-start-snapshot/
+  started_at: "2026-06-25"
+  current_stage: "evaluate session close (07-build T12 still in_progress)"
+  routing_plan:
+    - stage: 00-context
+      status: completed
+    - stage: 07-build
+      status: in_progress
+      note: "T1-T9,T10,T11 shipped; T12 web-fn hop next"
+    - stage: 08-verify-build
+      status: completed
+      completed_at: "2026-06-25"
+    - stage: 09-qa
+      status: completed
+      completed_at: "2026-06-25"
+      user_amended: true
+      note: "User-invoked (not in original S001 routing plan); full-repo QA @ 4f3f741 — pass_with_advisories; report docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md"
+    - stage: 12-verify-deploy
+      status: completed
+      completed_at: "2026-06-25"
+      user_amended: true
+      note: "User-invoked (not in original S001 routing plan); pre-deploy agents all PASS; checklist written @ f766233; user signed off on all 7 failure mitigations + rollback plan 2026-06-25"
+    - stage: 13-deploy-smoke
+      status: completed
+      completed_at: "2026-06-26"
+    - stage: 15-service-health
+      status: completed
+      completed_at: "2026-06-25"
+  skipped_stages:
+    - stage: 01-requirements
+      reason: "perf change to already-specced service under ADR-009"
+    - stage: 02-verify-plan
+      reason: "perf change to already-specced service under ADR-009"
+    - stage: 03-plan-tooling
+      reason: "perf change to already-specced service under ADR-009"
+    - stage: 04-tech-plan
+      reason: "perf change to already-specced service under ADR-009"
+    - stage: 05-verify-tech
+      reason: "perf change to already-specced service under ADR-009"
+    - stage: 06-tech-tooling
+      reason: "perf change to already-specced service under ADR-009"
+    - stage: 10-e2e
+      reason: "no new user journey"
+  artifacts:
+    - docs/sessions/S001-modal-cold-start-snapshot/session-brief.md
+    - docs/sessions/S001-modal-cold-start-snapshot/routing-plan.md
+    - docs/sessions/S001-modal-cold-start-snapshot/cold-start-spike-plan.md
+    - docs/sessions/S001-modal-cold-start-snapshot/reports/p1-cold-start-traces.md
+    - docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md
+    - path: docs/sessions/S001-modal-cold-start-snapshot/reports/verification-report.md
+      kind: report
+      session_id: S001-modal-cold-start-snapshot
+      stage: 08-verify-build
+    - path: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-checklist.md
+      kind: report
+      session_id: S001-modal-cold-start-snapshot
+      stage: 12-verify-deploy
+    - path: docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md
+      kind: report
+      session_id: S001-modal-cold-start-snapshot
+      stage: 09-qa
+    - path: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
+      kind: report
+      session_id: S001-modal-cold-start-snapshot
+      stage: 15-service-health
 sessions: []                # archived completed sessions
 
 stages:
@@ -184,31 +280,41 @@ stages:
     status: in_progress
     started_at: "2026-05-19"
     completed_at: "2026-05-27"
-    partial_rerun_at: "2026-06-13"
-    partial_rerun_note: "EV-004 Phase 9 — M32 workspace scaffold (36 tasks)"
+    partial_rerun_at: "2026-06-25"
+    partial_rerun_note: "S001 — Modal cold-start reduction (instrumentation, levers, pre-warm, GPU snapshot spike)"
     substeps:
-      current_task: T33.1
+      current_task: S001-T9
       milestone: M32 completed
-    note: "EV-004 Phase 9 — M32 completed; T33.1 in progress"
+      completed_tasks: [S001-T1, S001-T4, S001-T5, S001-T6, S001-T7, S001-T8, S001-T9, S001-T10, S001-T11]
+      note: "T8 deploy done; snapshot restore confirmed; cold /generate 21.5s vs ~68s baseline"
+    note: "S001 07-build — T1-T9,T10,T11 shipped; T12 CPU-snapshot/collapse web-fn hop next"
   08-verify-build:
     status: completed
     started_at: "2026-06-25"
     completed_at: "2026-06-25"
     partial_rerun_at: "2026-06-25"
-    partial_rerun_note: "EV-004 delta — M32 workspace scaffold verification"
+    partial_rerun_note: "S001 — milestone-boundary verify PASS (T12 still pending in 07-build; 2 uncommitted eslint/prettier auto-fixes)"
     scope: standalone
     overall: pass
     report: docs/verification-report.md
-    notes: "522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override bumps (aiohttp, msgpack, pypdf, starlette)"
+    notes: "EV-004: 522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override bumps (aiohttp, msgpack, pypdf, starlette) | S001: milestone-boundary verify PASS; T12 still pending in 07-build; 2 uncommitted eslint/prettier auto-fixes"
     substeps:
       phase: complete
   09-qa:
     status: completed
     started_at: "2026-06-25"
     completed_at: "2026-06-25"
+    partial_rerun_at: "2026-06-25"
+    partial_rerun_note: "S001 branch full-repo QA @ 4f3f741; 500 passed 38 skipped Python; 271 FE tests; advisories QA-001\u2013011 (QA-010 resolved in CI)"
     report: docs/qa-report.md
     overall: pass_with_advisories
     note: "EV-004/F31 post-M32 full-repo QA; 479 passed 38 skipped Python; 267 FE tests; advisories QA-001\u2013010"
+    s001:
+      report: docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md
+      branch: feat/S001-modal-cold-start-snapshot
+      commit: 4f3f741
+      overall: pass_with_advisories
+      note: "S001 branch full-repo QA @ 4f3f741; 500 passed 38 skipped Python; 271 FE tests; advisories QA-001\u2013011 (QA-010 resolved in CI)"
   10-e2e:
     status: completed
     started_at: "2026-05-19"
@@ -245,20 +351,39 @@ stages:
   12-verify-deploy:
     status: completed
     started_at: "2026-05-27"
-    completed_at: "2026-05-27"
-    partial_rerun_at: "2026-05-25"
-    partial_rerun_note: "EV-001 delta — deploy checklist for F19-F22 corpus tagging features"
+    completed_at: "2026-06-25"
+    partial_rerun_at: "2026-06-25"
+    partial_rerun_note: "S001 — Modal cold-start snapshot pre-deploy checklist complete; user-invoked (not in original S001 routing plan); pre-deploy agents all PASS; user signed off on all 7 failure mitigations + rollback plan 2026-06-25"
     report: docs/deploy-checklist.md
     deploy_ready: true
     blockers:
       - "Staging DB migration to 20260526_0003 required before deploy (operator action)"
+    s001:
+      report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-checklist.md
+      branch: feat/S001-modal-cold-start-snapshot
+      commit: f766233
+      deploy_ready: true
+      deploy_ready_note: "User signed off on all 7 failure mitigations + rollback plan 2026-06-25"
+      substeps:
+        phase1_agents: completed
+        phase2_failure_modes: completed
+        phase3_rollback: completed
+        phase4_checklist: completed
+        phase5_summary: completed
+      results:
+        configuration: pass
+        secrets: pass
+        data_volumes: pass
+        resources: pass
+        template: pass
+        connectivity: pass
   13-deploy-smoke:
     status: completed
-    started_at: "2026-05-19"
-    completed_at: "2026-05-27"
-    partial_rerun_at: "2026-05-27"
-    partial_rerun_note: "EV-002 delta validate — H1-H5 + T3 pass; deployed @ 0a2f813 evolve/EV-002-admin-overhaul"
-    report: docs/deploy-report.md
+    started_at: "2026-06-26"
+    completed_at: "2026-06-26"
+    partial_rerun_at: "2026-06-26"
+    partial_rerun_note: "S001 Modal GPU snapshot + DO warm path deploy"
+    report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
     chat_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
     connectivity_validated_at: "2026-05-27"
     h0c: pass
@@ -283,18 +408,31 @@ stages:
     summary: "stream_tokens Modal Function not callable — _generate_text helper"
   15-service-health:
     status: completed
-    started_at: "2026-05-21"
-    completed_at: "2026-05-21"
+    started_at: "2026-06-25"
+    completed_at: "2026-06-25"
+    partial_rerun_at: "2026-06-25"
+    partial_rerun_note: "S001 post-deploy health — H1-H5 pass; warm ask 2.9s; H0ci main green advisory"
     environment: staging
-    tiers: [H0, H1, H2, H3, H4, H5, H6]
     infra: pass
     e2e: pass
     overall: pass
-    report: docs/service-health-reports/2026-05-21-staging-routine-full.md
+    report: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
+    tiers: [H1, H2, H3, H3b, H4, H5, H0ci]
     advisories:
-      - llm_cold_start_do_504_until_warm
+      - do_branch_pin_feat_S001
       - modal_h4_cors_waived_proxy_auth
-      - deploy_drift_c4bc847_vs_4d2f665
+      - s001_t12_pending
+      - h0ci_blocking_after_merge
+    history:
+      - environment: staging
+        completed_at: "2026-05-21"
+        tiers: [H0, H1, H2, H3, H4, H5, H6]
+        overall: pass
+        report: docs/service-health-reports/2026-05-21-staging-routine-full.md
+        advisories:
+          - llm_cold_start_do_504_until_warm
+          - modal_h4_cors_waived_proxy_auth
+          - deploy_drift_c4bc847_vs_4d2f665
   17-retrospective:
     status: pending
   18-pr-review:
@@ -342,10 +480,11 @@ deployment:
     t0_journeys_passed: 16
   staging:
     status: deployed
-    last_verified: "2026-05-27"
-    commit_deployed: 7f38c58
-    commit_head: 7f38c58
+    last_verified: "2026-06-25"
+    commit_deployed: "4f3f741"
+    commit_head: "4f3f741"
     drift: false
+    branch: "feat/S001-modal-cold-start-snapshot"
     urls:
       chat_rag_backend: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
       internal_write_api: https://vecinita-internal-write-api-icze4.ondigitalocean.app
@@ -355,7 +494,7 @@ deployment:
       modal_embedding: https://vecinita--vecinita-embedding-embedding-api.modal.run
       modal_llm: https://vecinita--vecinita-llm-fastapi-app.modal.run
     health_tiers:
-      h0ci_github_main: pending
+      h0ci_github_main: pass
       h1_liveness: pass
       h2_db_ready: pass
       h3_rag_smoke: pass
@@ -367,6 +506,9 @@ deployment:
       h6_browser_uj: waived_v1
     notes:
       - "EV-002 merged to main 2026-05-27; DO apps github branch set to main"
+      - "S001 deployed 2026-06-26: Modal llm+embedding snapshots; DO chat apps on feat/S001-modal-cold-start-snapshot @ 4f3f741"
+      - "S001 cold+prewarm ask 14.3s (< 60s DO gateway target)"
+      - "DO chat apps branch pinned to feature branch until merge to main"
   url_discovery:
     method: "uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend"
     modal_admin_manual: true
@@ -1529,6 +1671,17 @@ decisions_log:
   - "EV-004 05-verify-tech delta — TV-041–TV-052 — 12 consistency fixes — 2026-06-13"
   - date: "2026-06-25"
     note: "Session orchestration waived (active_session not required) for 19-address-pr-review remediation of PR #66 (PRM-006 / PRR-009 findings). Rationale: process/review-followup work on an existing open PR; user approved proceeding directly without opening a formal session."
+  - date: "2026-06-25"
+    note: "S001-modal-cold-start-snapshot opened — user selected GPU memory snapshot spike to reduce Modal cold-start latency + formalize session (first session, allocated S001; type ops; routing 00→07→08→13→15, skipped 01-06 + 10-e2e per ADR-009)."
+  - date: "2026-06-25"
+    note: "S001 12-verify-deploy user-invoked — stage amended into S001 routing plan (was 00→07→08→13→15). Pre-deploy agents all PASS (configuration, secrets, data/volumes, resources, template, connectivity); checklist @ docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-checklist.md (f766233). deploy_ready=true pending user sign-off on failure modes + rollback — stage held in_progress until sign-off, then advance to 13-deploy-smoke."
+  - date: "2026-06-25"
+    note: "S001 12-verify-deploy COMPLETE — user signed off on all 7 failure mitigations (approve_all) and the rollback plan (approve_rollback). Stage marked completed (phases 2/3/5 done); deploy_ready=true. active_session.current_stage advanced to 13-deploy-smoke."
+  - date: "2026-06-25"
+    note: "S001 09-qa user-invoked (not in original S001 routing plan; stage amended into routing_plan with user_amended=true). Full-repo QA on feat/S001-modal-cold-start-snapshot @ 4f3f741 — overall pass_with_advisories, all blocking checks green (500 passed/38 skipped Python; 271 FE tests). Advisories QA-001–011 (QA-010 resolved in CI). Reports: docs/qa-report.md + docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md."
+  - "S001 13-deploy-smoke COMPLETE 2026-06-26 — H1-H5 pass; cold+prewarm ask 14.3s; DO chat on feat branch"
+  - date: "2026-06-25"
+    note: "S001 15-service-health COMPLETE — H1-H5 pass; warm ask 2.9s; H0ci main green (advisory); report docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md"
 
 artifacts:
   - docs/context-brief.md
@@ -1577,10 +1730,18 @@ artifacts:
   - docs/evolve-decisions.md
   - docs/adr/README.md
   - docs/staging-runbook.md
+  - docs/sessions/S001-modal-cold-start-snapshot/reports/p2-snapshot-deploy.md
+  - docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md
+  - docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
 
 git_history:
-  current_branch: feat/M32-workspace-scaffold
+  current_branch: feat/S001-modal-cold-start-snapshot
   branches:
+    - name: feat/S001-modal-cold-start-snapshot
+      base: main
+      status: open
+      purpose: "S001 Modal cold-start reduction — instrumentation, budget-safe levers, pre-warm, GPU snapshot spike"
+      opened_at: "2026-06-25"
     - name: feat/M32-workspace-scaffold
       purpose: "EV-004 M32 workspace scaffold"
       base: main
@@ -1768,6 +1929,36 @@ git_history:
       stage: "19-address-pr-review"
       files_changed: 1
       timestamp: "2026-06-25"
+    - sha: f27b477
+      branch: feat/S001-modal-cold-start-snapshot
+      message: "[S001-T1,T10] perf(modal): cold-start instrumentation and budget-safe levers"
+      stage: "07-build"
+      files_changed: 8
+      timestamp: "2026-06-26T00:16:00Z"
+    - sha: 84c190d
+      branch: feat/S001-modal-cold-start-snapshot
+      message: "[S001-T11] perf(chat): pre-warm Modal LLM and embedding on chat mount"
+      stage: "07-build"
+      files_changed: 7
+      timestamp: "2026-06-26T00:17:00Z"
+    - sha: ab99d82
+      branch: feat/S001-modal-cold-start-snapshot
+      message: "[S001-T4,T5,T6] perf(modal): cold-start lever implementation (T4-T6)"
+      stage: "07-build"
+      files_changed: 0
+      timestamp: "2026-06-26T00:18:00Z"
+    - sha: ecc062b
+      branch: feat/S001-modal-cold-start-snapshot
+      message: "[S001-T7] perf(modal): A/B enforce_eager toggle (default true)"
+      stage: "07-build"
+      files_changed: 0
+      timestamp: "2026-06-26T00:19:00Z"
+    - sha: ca77646
+      branch: feat/S001-modal-cold-start-snapshot
+      message: "[S001-T8,T9] perf(modal): GPU memory snapshot deploy + cold-start measurement"
+      stage: "07-build"
+      files_changed: 0
+      timestamp: "2026-06-26T00:20:00Z"
 
 constraints:
   cost:

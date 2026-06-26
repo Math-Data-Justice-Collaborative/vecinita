@@ -22,6 +22,7 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 | [ADR-019](ADR-019-shared-frontend-i18n.md) | Shared frontend i18n package (en/es) | Accepted | 00-context (EV-004) |
 | [ADR-020](ADR-020-shared-frontend-ui.md) | Shared frontend UI component package | Accepted | 00-context (EV-004) |
 | [ADR-021](ADR-021-ev004-implementation.md) | EV-004 implementation decisions (TP-030–TP-039) | Accepted | 04-tech-plan (EV-004) |
+| [ADR-022](ADR-022-gpu-memory-snapshot-cold-start.md) | GPU Memory Snapshots for vLLM cold-start reduction | Proposed (spike) | 00-context (S001) |
 
 ## Deferred (no ADR file yet)
 

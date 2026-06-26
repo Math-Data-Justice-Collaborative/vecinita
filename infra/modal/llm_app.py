@@ -7,12 +7,24 @@ Stage weights: modal run infra/modal/llm_app.py::stage_llm_weights
 from __future__ import annotations
 
 import json
+import logging
+import os
+import time
 
 import modal
+
+logger = logging.getLogger("vecinita.llm")
 
 APP_NAME = "vecinita-llm"
 VOLUME_NAME = "llm-models"
 MODEL_ID = "Qwen/Qwen2.5-1.5B-Instruct"
+ENFORCE_EAGER_ENV = "VECINITA_LLM_ENFORCE_EAGER"
+
+
+def _enforce_eager_from_env() -> bool:
+    """S001 T7 A/B: toggle CUDA graph capture for snapshot cold-start experiments."""
+    raw = os.environ.get(ENFORCE_EAGER_ENV, "true").strip().lower()
+    return raw not in ("0", "false", "no", "off")
 
 
 def _llm_engine_kwargs(*, max_model_len: int) -> dict[str, object]:
@@ -25,6 +37,11 @@ def _llm_engine_kwargs(*, max_model_len: int) -> dict[str, object]:
         "dtype": "half",
         "hf_overrides": {"torch_dtype": "float16"},
         "gpu_memory_utilization": 0.9,
+        # S001 T7 A/B: default eager (Tier-0); set VECINITA_LLM_ENFORCE_EAGER=false
+        # on a deploy branch to compare snapshot restore with CUDA graph capture.
+        "enforce_eager": _enforce_eager_from_env(),
+        # Required for sleep(level=1) / wake_up() snapshot prep (S001 T5, vLLM 0.7+).
+        "enable_sleep_mode": True,
     }
 
 
@@ -68,9 +85,21 @@ image = (
         "pydantic>=2.7,<3",
         "starlette>=0.37,<1",
         "transformers>=4.44,<4.47",
-        "vllm>=0.6.3,<0.7",
+        "vllm>=0.7,<0.8",
+    )
+    .env(
+        {
+            # vLLM + GPU snapshot mitigations (S001 T4, ADR-022).
+            "TORCHINDUCTOR_COMPILE_THREADS": "1",
+            "XFORMERS_ENABLE_TRITON": "1",
+        }
     )
 )
+
+# Import vLLM in global image scope so library init lands in the GPU memory
+# snapshot instead of every cold boot (S001 T4; split enter in T5).
+with image.imports():
+    from vllm import LLM, SamplingParams
 
 
 @app.function(
@@ -81,8 +110,6 @@ image = (
 )
 def stage_llm_weights() -> str:
     """One-shot: download Qwen weights into the llm-models volume (loads vLLM once)."""
-    from vllm import LLM, SamplingParams
-
     llm: LLM | None = None
     try:
         llm = LLM(**_llm_engine_kwargs(max_model_len=512))
@@ -100,13 +127,46 @@ def stage_llm_weights() -> str:
     volumes={"/models": model_volume},
     scaledown_window=300,
     timeout=600,
+    enable_memory_snapshot=True,
+    experimental_options={"enable_gpu_snapshot": True},
 )
 class LlmService:
-    @modal.enter()
+    @modal.enter(snap=True)
     def load_model(self) -> None:
-        from vllm import LLM
+        # S001 P1 cold-start instrumentation: vLLM import is in image.imports()
+        # (T4) so import_s is ~0 on restore; construct_s still captures engine
+        # init + weight load. For the weight-load split, read vLLM's
+        # "Loading weights took ..." line in the same container log.
+        t_enter = time.perf_counter()
+        import_s = 0.0
 
+        t1 = time.perf_counter()
         self._llm = LLM(**_llm_engine_kwargs(max_model_len=1024))
+        construct_s = time.perf_counter() - t1
+
+        # Warm-up forward pass: fold first-token init into startup and give a
+        # measurable t4 (Modal docs recommend warming up before serving).
+        t2 = time.perf_counter()
+        self._llm.generate(["warmup"], SamplingParams(max_tokens=1))
+        warmup_s = time.perf_counter() - t2
+
+        # Discard KV cache before GPU snapshot (Modal vLLM pattern, S001 T5).
+        self._llm.sleep(level=1)
+
+        logger.warning(
+            "cold_start_breakdown import_s=%.2f construct_s=%.2f warmup_s=%.2f "
+            "total_enter_s=%.2f (construct_s includes vLLM engine init + weight load; "
+            "see vLLM 'Loading weights took' log for the split)",
+            import_s,
+            construct_s,
+            warmup_s,
+            time.perf_counter() - t_enter,
+        )
+
+    @modal.enter(snap=False)
+    def restore_model(self) -> None:
+        """Recreate KV cache after snapshot restore (S001 T5)."""
+        self._llm.wake_up()
 
     @modal.exit()
     def unload_model(self) -> None:
@@ -117,8 +177,6 @@ class LlmService:
         self, prompt: str, *, max_tokens: int = 512, temperature: float = 0.2
     ) -> str:
         """Shared vLLM generate path — do not call self.complete() from other methods."""
-        from vllm import SamplingParams
-
         params = SamplingParams(
             max_tokens=max_tokens,
             temperature=temperature,
@@ -129,17 +187,11 @@ class LlmService:
 
     @modal.method()
     def complete(self, prompt: str, *, max_tokens: int = 512, temperature: float = 0.2) -> str:
-        return self._generate_text(
-            prompt, max_tokens=max_tokens, temperature=temperature
-        )
+        return self._generate_text(prompt, max_tokens=max_tokens, temperature=temperature)
 
     @modal.method()
-    def stream_tokens(
-        self, prompt: str, *, max_tokens: int = 512, temperature: float = 0.2
-    ):
-        text = self._generate_text(
-            prompt, max_tokens=max_tokens, temperature=temperature
-        )
+    def stream_tokens(self, prompt: str, *, max_tokens: int = 512, temperature: float = 0.2):
+        text = self._generate_text(prompt, max_tokens=max_tokens, temperature=temperature)
         for piece in text.split():
             yield piece + " "
 
@@ -163,6 +215,14 @@ def fastapi_app():
     service = LlmService()
 
     async def health(_: Request) -> JSONResponse:
+        return JSONResponse({"status": "ok"})
+
+    async def warm(_: Request) -> JSONResponse:
+        """Boot LlmService (T4 GPU) during user think-time (S001 T11).
+
+        `/health` only warms this ASGI web fn; pre-warm must invoke the GPU class.
+        """
+        service.complete.remote("warmup", max_tokens=1)
         return JSONResponse({"status": "ok"})
 
     async def generate(request: Request) -> JSONResponse:
@@ -197,6 +257,7 @@ def fastapi_app():
     return Starlette(
         routes=[
             Route("/health", health, methods=["GET"]),
+            Route("/warm", warm, methods=["POST"]),
             Route("/generate", generate, methods=["POST"]),
             Route("/generate/stream", generate_stream, methods=["POST"]),
         ]

@@ -26,10 +26,19 @@ function sseResponse(body: string): Response {
 
 function mockFetchRouter(handlers: {
   tags?: Response | (() => Response);
+  warm?: Response | (() => Response);
   stream?: Response | (() => Response);
 }) {
   return vi.fn((input: RequestInfo | URL) => {
     const url = typeof input === "string" ? input : input.toString();
+    if (url.includes("/api/v1/warm")) {
+      const response =
+        handlers.warm ??
+        new Response(JSON.stringify({ status: "warming" }), { status: 200 });
+      return Promise.resolve(
+        typeof response === "function" ? response() : response,
+      );
+    }
     if (url.includes("/api/v1/tags")) {
       const response =
         handlers.tags ??
@@ -56,6 +65,20 @@ describe("ChatPanel", () => {
     cleanup();
     vi.useRealTimers();
     vi.restoreAllMocks();
+  });
+
+  it("prewarms Modal services when the chat panel mounts", async () => {
+    const fetchMock = mockFetchRouter({});
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderWithLocale(<ChatPanel />);
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("/api/v1/warm"),
+        expect.objectContaining({ method: "POST" }),
+      );
+    });
   });
 
   it("streams answer tokens and shows source citations", async () => {
