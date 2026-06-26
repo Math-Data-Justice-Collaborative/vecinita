@@ -403,9 +403,16 @@ stages:
     note: "EV-002 deployed 2026-05-27 @ 0a2f813 (evolve/EV-002-admin-overhaul); H1-H5 + T3 pass (Modal H4 waiver)"
   14-hotfix:
     status: completed
-    completed_at: "2026-05-21"
-    bug_report: docs/bug-reports/BUG-2026-05-21-stream-tokens-function-not-callable.md
-    summary: "stream_tokens Modal Function not callable — _generate_text helper"
+    completed_at: "2026-06-25"
+    bug_report: docs/bug-reports/BUG-2026-06-25-chat-disappears-on-corpus-tab.md
+    summary: "Chat history lost on Corpus tab switch (#53) — useChatHistory lifted to app shell"
+    branch: fix/chat-tab-corpus-state
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/68
+    head_sha: 6f7875f
+    verified: "L1-L2 pass; ci.yml green @ 6f7875f"
+    cursor_rule: .cursor/rules/frontend-session-state-lifting.mdc
+    deploy: "after merge to main (user triggers)"
+    history_note: "prior: BUG-2026-05-21-stream-tokens-function-not-callable.md (2026-05-21)"
   15-service-health:
     status: completed
     started_at: "2026-06-25"
