@@ -42,9 +42,7 @@ def test_in_memory_list_jobs_sorted_newest_first() -> None:
 
     assert {job.job_id for job in jobs} == {first.job_id, second.job_id}
     # Sorted descending by created_at (newest first).
-    assert all(
-        jobs[i].created_at >= jobs[i + 1].created_at for i in range(len(jobs) - 1)
-    )
+    assert all(jobs[i].created_at >= jobs[i + 1].created_at for i in range(len(jobs) - 1))
 
 
 def test_dict_list_jobs_sorted_newest_first() -> None:
@@ -56,9 +54,7 @@ def test_dict_list_jobs_sorted_newest_first() -> None:
     jobs = store.list_jobs()
 
     assert {job.job_id for job in jobs} == {first.job_id, second.job_id}
-    assert all(
-        jobs[i].created_at >= jobs[i + 1].created_at for i in range(len(jobs) - 1)
-    )
+    assert all(jobs[i].created_at >= jobs[i + 1].created_at for i in range(len(jobs) - 1))
     retag = next(job for job in jobs if job.job_type == "retag")
     assert retag.job_id == second.job_id
 
