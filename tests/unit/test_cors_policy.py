@@ -67,6 +67,21 @@ def test_chat_rag_cors_preflight_on_tags() -> None:
     assert response.headers.get("access-control-allow-origin") == CHAT_ORIGIN
 
 
+def test_chat_rag_cors_preflight_on_warm() -> None:
+    """S001 T11: OPTIONS on POST /api/v1/warm from chat frontend origin."""
+    client = TestClient(create_chat_app())
+    response = client.options(
+        "/api/v1/warm",
+        headers={
+            "Origin": CHAT_ORIGIN,
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == CHAT_ORIGIN
+
+
 def test_internal_write_cors_preflight_on_documents(monkeypatch: pytest.MonkeyPatch) -> None:
     if not os.environ.get("DATABASE_URL"):
         pytest.skip("DATABASE_URL required for internal write app import")

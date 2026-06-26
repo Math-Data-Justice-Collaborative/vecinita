@@ -17,6 +17,8 @@ from vecinita_chat_rag_backend.app import (
     _check_dependency,
     _fire_stats,
     _source_payload,
+    _warm_modal_services,
+    _warm_modal_url,
     create_app,
     parse_ask_body,
 )
@@ -102,6 +104,36 @@ def test_check_dependency_error_on_non_200() -> None:
     with patch("vecinita_chat_rag_backend.app.httpx.get") as mock_get:
         mock_get.return_value = httpx.Response(503)
         assert _check_dependency("http://embed.test") == "error"
+
+
+def test_warm_modal_url_posts_to_warm_path() -> None:
+    with patch("vecinita_chat_rag_backend.app.httpx.post") as mock_post:
+        _warm_modal_url("http://llm.test", timeout_s=30.0)
+    mock_post.assert_called_once_with("http://llm.test/warm", timeout=30.0)
+
+
+def test_warm_modal_services_warms_embed_and_llm_in_parallel() -> None:
+    with patch("vecinita_chat_rag_backend.app._warm_modal_url") as mock_warm:
+        _warm_modal_services(
+            "http://embed.test",
+            "http://llm.test",
+            request_timeout_s=120.0,
+        )
+    assert mock_warm.call_count == 2
+    mock_warm.assert_any_call("http://embed.test", timeout_s=120.0)
+    mock_warm.assert_any_call("http://llm.test", timeout_s=120.0)
+
+
+def test_warm_modal_endpoint_schedules_background_warm(client: TestClient) -> None:
+    with patch("vecinita_chat_rag_backend.app._warm_modal_services") as mock_warm:
+        response = client.post("/api/v1/warm")
+    assert response.status_code == 200
+    assert response.json() == {"status": "warming"}
+    mock_warm.assert_called_once_with(
+        "http://embed.test",
+        "http://llm.test",
+        request_timeout_s=10.0,
+    )
 
 
 def test_source_payload_stringifies_uuid_fields() -> None:

@@ -5,11 +5,12 @@ from __future__ import annotations
 import contextlib
 import json
 from collections.abc import Iterator
+from concurrent.futures import ThreadPoolExecutor
 from typing import Annotated, cast
 from uuid import UUID
 
 import httpx
-from fastapi import FastAPI, HTTPException, Query, Request, status
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import StreamingResponse
 from pydantic import ValidationError
@@ -55,6 +56,26 @@ def _check_dependency(url: str | None, path: str = "/health") -> str:
         return "ok" if response.status_code == 200 else "error"
     except httpx.HTTPError:
         return "error"
+
+
+def _warm_modal_url(url: str, *, timeout_s: float) -> None:
+    """Best-effort POST /warm on one Modal app; failures are ignored (S001 T11)."""
+    with contextlib.suppress(Exception):
+        httpx.post(f"{url.rstrip('/')}/warm", timeout=timeout_s)
+
+
+def _warm_modal_services(
+    embed_url: str | None,
+    llm_url: str | None,
+    *,
+    request_timeout_s: float,
+) -> None:
+    """Boot Modal EmbeddingService and LlmService in parallel during user think-time."""
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        if embed_url:
+            executor.submit(_warm_modal_url, embed_url, timeout_s=request_timeout_s)
+        if llm_url:
+            executor.submit(_warm_modal_url, llm_url, timeout_s=request_timeout_s)
 
 
 def _source_payload(sources: list[Source]) -> list[dict[str, object]]:
@@ -133,6 +154,18 @@ def create_app(
         except Exception:
             deps["postgres"] = "error"
         return HealthResponse(status="ok", dependencies=deps)
+
+    @app.post("/api/v1/warm")
+    def warm_modal(background_tasks: BackgroundTasks) -> dict[str, str]:
+        """Fire-and-forget Modal pre-warm when the chat UI mounts (S001 T11)."""
+        cfg = get_settings()
+        background_tasks.add_task(
+            _warm_modal_services,
+            cfg.embed_url,
+            cfg.llm_url,
+            request_timeout_s=cfg.request_timeout_s,
+        )
+        return {"status": "warming"}
 
     @app.post("/api/v1/ask", response_model=AskResponse)
     async def ask(request: Request) -> AskResponse:
