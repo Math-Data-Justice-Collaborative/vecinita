@@ -13,7 +13,9 @@ import type { Source } from "../api/types";
 import { requireChatApiConfig } from "../config";
 import { useLocale } from "../hooks/useLocale";
 import { useChatHistory, type ChatHistory } from "../hooks/useChatHistory";
+import { useConversationStore } from "../hooks/useConversationStore";
 import { t } from "../i18n/messages";
+import { PreviousChatsList } from "./PreviousChatsList";
 import { TagFilterChips } from "./TagFilterChips";
 import { SourceList } from "./SourceList";
 
@@ -31,7 +33,8 @@ type ChatPanelProps = {
  * (PR #68 review), while still honoring the rules of hooks.
  */
 function ChatPanelStandalone() {
-  const chat = useChatHistory();
+  const store = useConversationStore();
+  const chat = useChatHistory(store);
   return <ChatPanelView chat={chat} />;
 }
 
@@ -58,6 +61,11 @@ function ChatPanelView({ chat }: { chat: ChatHistory }) {
     clearHistory,
     loading,
     setLoading,
+    previousChats,
+    newChat,
+    selectConversation,
+    deleteConversation,
+    clearAll,
   } = chat;
 
   useEffect(() => {
@@ -143,6 +151,13 @@ function ChatPanelView({ chat }: { chat: ChatHistory }) {
 
   return (
     <section className="chat-panel" aria-label={t(locale, "chatPanelLabel")}>
+      <PreviousChatsList
+        conversations={previousChats}
+        locale={locale}
+        onSelect={selectConversation}
+        onDelete={deleteConversation}
+        onClearAll={clearAll}
+      />
       {tagFacets.length > 0 ? (
         <TagFilterChips
           tags={tagFacets}
@@ -205,6 +220,14 @@ function ChatPanelView({ chat }: { chat: ChatHistory }) {
         <div className="form-actions">
           <button type="submit" disabled={loading || !question.trim()}>
             {loading ? t(locale, "asking") : t(locale, "ask")}
+          </button>
+          <button
+            type="button"
+            className="secondary"
+            disabled={loading || messages.length === 0}
+            onClick={newChat}
+          >
+            {t(locale, "newChat")}
           </button>
           <button
             type="button"

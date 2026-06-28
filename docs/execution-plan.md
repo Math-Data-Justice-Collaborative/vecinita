@@ -1,7 +1,7 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26)  
 > **Skill**: 04-tech-plan  
 > **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, ADR-001–021
 
@@ -12,10 +12,11 @@
 | **Active phase** | Phase 9: EV-004 shared frontend i18n/UI |
 | **Active milestone** | M32: Workspace scaffold |
 | **Active task** | M33 / T33.1 |
-| **Tasks completed** | 187 / 222 |
-| **Last updated** | 2026-06-13 |
+| **Tasks completed** | 204 / 239 |
+| **Last updated** | 2026-06-26 |
 | **Evolve cycle** | EV-004 (F31) — **in_progress** |
 | **Git branch** | `feat/M32-workspace-scaffold` |
+| **Active session** | S003-persistent-chat-history (Phase 10, F33) — 07-build **complete** (M39–M42, T39.1–T42.3); Phase 10 gate PASS; 115 FE tests + 95% coverage + build green. Next: 09-qa → 10-e2e → 12-verify-deploy → 13-deploy-smoke; on `feat/S003-persistent-chat-history` |
 
 ## Template
 
@@ -770,6 +771,96 @@ admin bilingual UI chrome; CI workspace wiring; frontend-only deploy.
 
 ---
 
+### Phase 10: S003 — Browser-local persistent chat history (F33)
+
+**Objective**: `localStorage`-backed conversation store (ADR-025; originally `sessionStorage`
+per ADR-023/024); rehydrate the active conversation across refresh/tab-away/tab-close/new-tab;
+previous-chats list with new-chat / select / delete / clear; EN/ES i18n; graceful in-memory
+fallback. **Frontend-only** in `apps/chat-rag-frontend`.
+**Entry gate**: S003 01-requirements complete (F33, ADR-023); 04-tech-plan approved
+(ADR-024, TP-S003-01–12).
+**Exit gate**: AC-S1–AC-S7 met; TC-072–TC-076 green; UJ-024/UJ-025 covered; full
+chat-rag-frontend Vitest suite green; **no API/contract/CORS changes** (AC-S7).
+
+**Session:** S003 (evolve-lite) | **Feature IDs:** F33 | **Branch:** `feat/S003-persistent-chat-history` (TP-S003-04, off `main`)
+
+#### M39: Conversation store — sessionStorage persistence layer
+
+**Goal**: `useConversationStore` — active + previous list, versioned envelope serialize/
+deserialize (`vecinita.chat.history.v1`), cap/eviction, graceful fallback.
+**Acceptance**: TC-072 (rehydrate), TC-073 (fallback), TC-075 (cap/FIFO) green at hook level.
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|------------|-------------|
+| T39.1 | Test: store rehydrates active conversation (+sources) from `sessionStorage` after remount (TC-072) — red | Test | completed | test-plan TC-072, ADR-024 | — | — | S003 | F33 |
+| T39.2 | Test: graceful fallback to in-memory when `sessionStorage` throws (TC-073) — red | Test | completed | test-plan TC-073, AC-S2 | — | — | S003 | F33 |
+| T39.3 | Code: implement `useConversationStore` — envelope schema v1, write-through, try/catch in-memory fallback | Code | completed | ADR-024 TP-S003-01/09/10 | T39.1, T39.2 | — | S003 | F33 |
+| T39.4 | Test: cap=10 FIFO eviction at store level (TC-075) — red | Test | completed | test-plan TC-075, RD-070 | T39.3 | — | S003 | F33 |
+| T39.5 | Code: store ops — `newChat`/`selectConversation`/`deleteConversation`/`clearAll` + cap/eviction | Code | completed | ADR-024 TP-S003-06/07/08 | T39.4 | — | S003 | F33 |
+
+#### M40: Wire store into shell + active-conversation rehydration
+
+**Goal**: `AppContent` owns the store; `useChatHistory` reads/writes the active slice through
+it; rehydrate on mount; preserve Chat ⇄ Corpus state guard (#53).
+**Acceptance**: TC-072 at App level (real `App` remount); #53 navigation guard still green.
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|------------|-------------|
+| T40.1 | Test: real `App` remount rehydrates conversation + sources in order (TC-072, UJ-024) — red | Test | completed | test-plan TC-072, UJ-024 | T39.5 | — | S003 | F33 |
+| T40.2 | Code: refactor `useChatHistory` to back onto store active slice (keep public shape + `loading`) | Code | completed | ADR-024 TP-S003-02 | T40.1 | — | S003 | F33 |
+| T40.3 | Code: wire store in `AppContent`; pass through to `ChatPanel`; preserve #53 lifting | Code | completed | ADR-024, frontend-session-state-lifting.mdc | T40.2 | — | S003 | F33 |
+| T40.4 | Test: regression — Chat ⇄ Corpus navigation state-loss guard (#53) still passes | Test | completed | `test_bug_2026_06_25_chat_corpus_tab_state_loss` | T40.3 | — | S003 | F33 |
+
+#### M41: Previous-chats list UI + new-chat / select / delete / clear
+
+**Goal**: collapsible previous-chats panel in `ChatPanel`; New chat, select-to-restore,
+per-item delete, clear-all, clear; labels (first msg ≤60 chars + relative ts); EN/ES i18n.
+**Acceptance**: TC-074, TC-076 green; AC-S3, AC-S5.
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|------------|-------------|
+| T41.1 | Test: "New chat" archives active to list (label = first msg + relative ts) + empties active (TC-074, UJ-025) — red | Test | completed | test-plan TC-074, RD-069/071 | T40.4 | — | S003 | F33 |
+| T41.2 | Code: i18n keys (`newChat`, `previousChats`, `clearAllHistory`, `deleteConversation`, `noPreviousChats`) EN/ES in app-local `messages.ts` | Code | completed | TP-S003-04, feature-list F33 | T41.1 | — | S003 | F33 |
+| T41.3 | Code: `PreviousChatsList` collapsible panel in `ChatPanel`; label truncation (60) + `Intl.RelativeTimeFormat` | Code | completed | ADR-024 TP-S003-03/05 | T41.2 | — | S003 | F33 |
+| T41.4 | Code: New-chat button + clear / clear-all / per-item delete wired to store ops | Code | completed | ADR-024 TP-S003-08, RD-072 | T41.3 | — | S003 | F33 |
+| T41.5 | Test: select restores; per-item delete; clear-all; clear active (TC-076, R47) — red→green | Test | completed | test-plan TC-076, AC-S5 | T41.4 | — | S003 | F33 |
+
+#### M42: Rule update, privacy verification, full suite
+
+**Goal**: amend session-state-lifting rule; assert no network/storage leakage; full
+chat-rag-frontend Vitest suite green.
+**Acceptance**: AC-S6 (no server/DB/log), AC-S7 (no API/CORS), full suite green.
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|------------|-------------|
+| T42.1 | Config: verify `.cursor/rules/frontend-session-state-lifting.mdc` device-only `sessionStorage` allowance (updated in 04-tech-plan) + its `test_chat_history_persistence` regression-guard reference resolves | Config | completed | TP-S003-11, ADR-024 | T41.5 | — | S003 | F33 |
+| T42.2 | Test: AC-S6 — no `POST` carries history; no server session/message row; persistence per-tab | Test | completed | acceptance-criteria AC-S6, ADR-023 | T41.5 | — | S003 | F33 |
+| T42.3 | Test: full chat-rag-frontend Vitest suite green incl. existing bug tests | Test | completed | test-plan §Frontend | T41.5, T40.4, T42.2 | — | S003 | F33 |
+
+#### Phase 10 Gate Check
+
+- [x] All M39–M42 tasks completed (239/239)
+- [x] TC-072–TC-076 green; UJ-024/UJ-025 covered (Vitest + jsdom `sessionStorage`)
+- [x] AC-S1–AC-S7 met
+- [x] Graceful fallback verified (TC-073, AC-S2)
+- [x] `.cursor/rules/frontend-session-state-lifting.mdc` updated (ADR-023/024)
+- [x] No API/contract/CORS changes (AC-S7); no backend/Modal redeploy
+- [x] chat-rag-frontend Vitest suite green (incl. #53 navigation guard)
+
+**Phase Gate Log — Phase 10 (2026-06-26):** PASS. M39–M42 complete (T39.1–T42.3).
+115 chat-rag-frontend Vitest tests pass; 95% line/branch coverage gate green;
+`tsc --noEmit` + ESLint clean; production `vite build` succeeds. TC-072–TC-076,
+UJ-024/UJ-025, AC-S1–AC-S7 satisfied; #53 + mid-stream concurrency guards still
+green. Frontend-only — no API/contract/CORS or backend/Modal changes (AC-S7).
+
+**Amendment — 2026-06-28 (07-build reopened, ADR-025):** Storage mechanism switched
+`sessionStorage` → `localStorage` (durable, cross-tab) at user request. Re-verified:
+116 chat-rag-frontend Vitest tests pass; 95% coverage gate green; `tsc --noEmit` +
+ESLint clean; `vite build` succeeds. AC-S1/AC-S2/AC-S5/AC-S6 wording updated; still
+frontend-only, no API/contract/CORS or backend/Modal changes (AC-S7).
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -876,6 +967,10 @@ main
 | PR-43 | Minor | M37 | feat/M37-ci-workspaces | fix/es-en-full-ui | pending |
 | PR-44 | Minor | M38 | feat/M38-ev004-deploy | fix/es-en-full-ui | pending |
 | PR-45 | Major | Phase 9 / EV-004 | fix/es-en-full-ui | main | pending |
+| PR-46 | Major | Phase 10 / S003 | feat/S003-persistent-chat-history | main | open ([#96](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/96)) |
+
+S003 is evolve-lite + frontend-only: M39–M42 land as atomic commits on the single
+`feat/S003-persistent-chat-history` branch (one PR to `main`, PR-46), matching the S002 pattern.
 
 ## Task Tracking
 
@@ -1105,6 +1200,23 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T38.2 | M38 | 9 | Config | pending | T38.1 | — | EV-004 | F31 |
 | T38.3 | M38 | 9 | Config | pending | T36.8, T35.6 | — | EV-004 | F31 |
 | T38.4 | M38 | 9 | Config | pending | T38.3 | — | EV-004 | F31 |
+| T39.1 | M39 | 10 | Test | completed | — | — | S003 | F33 |
+| T39.2 | M39 | 10 | Test | completed | — | — | S003 | F33 |
+| T39.3 | M39 | 10 | Code | completed | T39.1, T39.2 | — | S003 | F33 |
+| T39.4 | M39 | 10 | Test | completed | T39.3 | — | S003 | F33 |
+| T39.5 | M39 | 10 | Code | completed | T39.4 | — | S003 | F33 |
+| T40.1 | M40 | 10 | Test | completed | T39.5 | — | S003 | F33 |
+| T40.2 | M40 | 10 | Code | completed | T40.1 | — | S003 | F33 |
+| T40.3 | M40 | 10 | Code | completed | T40.2 | — | S003 | F33 |
+| T40.4 | M40 | 10 | Test | completed | T40.3 | — | S003 | F33 |
+| T41.1 | M41 | 10 | Test | completed | T40.4 | — | S003 | F33 |
+| T41.2 | M41 | 10 | Code | completed | T41.1 | — | S003 | F33 |
+| T41.3 | M41 | 10 | Code | completed | T41.2 | — | S003 | F33 |
+| T41.4 | M41 | 10 | Code | completed | T41.3 | — | S003 | F33 |
+| T41.5 | M41 | 10 | Test | completed | T41.4 | — | S003 | F33 |
+| T42.1 | M42 | 10 | Config | completed | — | — | S003 | F33 |
+| T42.2 | M42 | 10 | Test | completed | T41.5 | — | S003 | F33 |
+| T42.3 | M42 | 10 | Test | completed | T41.5, T40.4, T42.2 | — | S003 | F33 |
 
 ## Phase Gate Log
 
@@ -1167,3 +1279,10 @@ CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, ba
 - [x] EV-004 admin strings — all pages ~120+ keys (TP-037)
 - [x] EV-004 deploy order — simultaneous both frontends (TP-038)
 - [x] EV-004 connectivity — extend H4/H5 smoke (TP-039)
+- [x] S003 storage key + schema — `vecinita.chat.history.v1`, versioned envelope (TP-S003-01, ADR-024)
+- [x] **S003 storage mechanism — `localStorage`** (durable, cross-tab) per **ADR-025** (2026-06-28, 07-build reopened); reverses the `sessionStorage` choice in ADR-023/024 (R41/R43) at the user's request. Frontend-only; no API/contract/CORS change.
+- [x] S003 persistence architecture — `useConversationStore` in shell (TP-S003-02, ADR-024)
+- [x] S003 previous-chats UI — collapsible panel in ChatPanel (TP-S003-03, ADR-024)
+- [x] S003 label — first user msg ≤60 chars + `Intl.RelativeTimeFormat` (TP-S003-05)
+- [x] S003 failure mode — degrade silently to in-memory (TP-S003-09, TC-073)
+- [ ] **S003/EV-004 i18n merge coordination** — new chat-history keys added app-local; port to `packages/frontend-i18n` on second merge (TP-S003-04)

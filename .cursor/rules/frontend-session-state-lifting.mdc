@@ -18,8 +18,17 @@ router or tab switch. Unmounting destroys `useState`, silently wiping the data.
 3. **Components stay reusable.** Prefer an optional prop with a local fallback
    (`chat ?? useChatHistory()`) so the component still works standalone and in unit tests.
    Always call the hook unconditionally (rules of hooks).
-4. **ADR-004:** Vecinita chat history is client-side-only — lift it within the SPA only;
-   never persist it to the server or to storage that leaves the browser.
+4. **ADR-004 / ADR-023 / ADR-024 / ADR-025:** Vecinita chat history is **client-side-only
+   and never leaves the device**. Lift it within the SPA, and persist it **only** to
+   **device-local `localStorage`** (key `vecinita.chat.history.v1`, F33; per ADR-025 it is
+   durable and shared across tabs of the same origin). Never send it to the server, write it
+   to the database, emit it to logs, or transmit it off the device by any means (no network,
+   no cookies sent to the server). Storage access must be wrapped in try/catch and degrade to
+   in-memory state on failure (TC-073). *(Historical: ADR-023/024 used `sessionStorage`;
+   reversed to `localStorage` by ADR-025.)*
 
-Regression guard: `apps/chat-rag-frontend/src/test/test_bug_2026_06_25_chat_corpus_tab_state_loss.test.tsx`
-(BUG-2026-06-25 / issue #53).
+Regression guards:
+- `apps/chat-rag-frontend/src/test/test_bug_2026_06_25_chat_corpus_tab_state_loss.test.tsx`
+  (BUG-2026-06-25 / issue #53) — in-app navigation state survival.
+- `apps/chat-rag-frontend/src/test/test_chat_history_persistence.test.tsx`
+  (F33, UJ-024/UJ-025) — `localStorage` rehydration + graceful fallback.

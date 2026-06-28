@@ -3,6 +3,7 @@ import { CorpusBrowse } from "./components/CorpusBrowse";
 import { LanguageToggle } from "./components/LanguageToggle";
 import { LocaleProvider } from "./context/LocaleContext";
 import { useChatHistory } from "./hooks/useChatHistory";
+import { useConversationStore } from "./hooks/useConversationStore";
 import { useLocale } from "./hooks/useLocale";
 import { usePathname } from "./hooks/usePathname";
 import { t } from "./i18n/messages";
@@ -12,8 +13,11 @@ function AppContent() {
   const { pathname, navigate } = usePathname();
   const { locale, setLocale } = useLocale();
   // Owned by the always-mounted shell so the conversation survives navigation
-  // to the Corpus tab and back (BUG-2026-06-25, issue #53).
-  const chat = useChatHistory();
+  // to the Corpus tab and back (BUG-2026-06-25, issue #53) and is write-through
+  // to device-local `localStorage` so it survives refresh / tab-away, a tab
+  // close, and is shared with new tabs (F33, ADR-023/024/025).
+  const store = useConversationStore();
+  const chat = useChatHistory(store);
   const onCorpus = pathname === "/corpus" || pathname.endsWith("/corpus");
 
   return (

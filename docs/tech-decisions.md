@@ -131,7 +131,33 @@
 | TP-033 | Component order | **Hardest baseline first** within each milestone (tagging → … → chat-rag-frontend) | execution-plan.md |
 | TV-040 | EV-004 task count | **23** new tasks (T32.1–T36.4); **207** total | execution-plan.md |
 
+## S003 04-tech-plan decisions (2026-06-26) — F33 browser-local persistent chat history
+
+Frontend-only delta in `apps/chat-rag-frontend`. No backend, API, contract, or CORS policy
+changes (AC-S7). No new dependencies — `sessionStorage` and `Intl.RelativeTimeFormat` are
+browser built-ins. IDs are S003-namespaced to avoid collision with reused TP-NNN numbers.
+
+| ID | Topic | Decision | ADR/Ref |
+|----|-------|----------|---------|
+| TP-S003-01 | Storage key + schema | **`vecinita.chat.history.v1`**; versioned envelope `{ version: 1, active: Conversation, previous: Conversation[] }` reusing existing `ChatMessage`/`Source` types | ADR-024 |
+| TP-S003-02 | Persistence architecture | New **`useConversationStore`** hook (owns active + previous list, `sessionStorage`-backed write-through) lifted to the always-mounted `AppContent` shell; `useChatHistory` reads/writes the active slice through it | ADR-024 |
+| TP-S003-03 | Previous-chats UI placement | **Collapsible panel inside the Chat view** (`ChatPanel`), not the shell sidebar — scoped to the chat page (UJ-025), no Corpus-tab clutter | ADR-024 |
+| TP-S003-04 | i18n target for new strings | Add to **app-local `messages.ts` on `main`** (S003 branches from main; EV-004 i18n migration is on `fix/es-en-full-ui` and unmerged). Reconcile during whichever PR merges second — coordination risk, see Open Questions | — |
+| TP-S003-05 | Previous-chat label | **First user message truncated to 60 chars** + relative timestamp via **`Intl.RelativeTimeFormat`** (locale-aware) | RD-071, ADR-024 |
+| TP-S003-06 | History cap / eviction | **Last 10**, FIFO eviction of oldest — enforced in the store | RD-070 |
+| TP-S003-07 | Conversation boundary | Explicit **"New chat"** archives the active conversation to the list and starts a fresh one | RD-069 |
+| TP-S003-08 | Clear / delete semantics | **"Clear"** resets the active conversation; **per-item delete** + **"Clear all history"** manage the list; storage updated to match | RD-072 |
+| TP-S003-09 | Failure mode | Degrade **silently to in-memory** state when `sessionStorage` is full/disabled/throws; persistence disabled for the session, no uncaught error | TC-073, AC-S2 |
+| TP-S003-10 | Write timing | **Write-through on every state mutation** via the store. `sessionStorage` already survives same-tab refresh + tab-away, so no `visibilitychange`/`pagehide` flush is required (per-tab by design, cleared on tab close) | RD-068, ADR-023 |
+| TP-S003-11 | Rule update | Amend `.cursor/rules/frontend-session-state-lifting.mdc` to permit **device-only, tab-scoped `sessionStorage`** persistence (03/06 tooling stages skipped under evolve-lite, so done at 04-tech-plan/07-build) | ADR-023, ADR-024 |
+| TP-S003-12 | Scope guard | **No API/contract/CORS** changes; **no backend/Modal redeploy**; no `data-management-frontend` change | AC-S6, AC-S7 |
+| TV-S003-01 | Task count | **17** new tasks (T39.1–T42.3 across M39–M42); **239** total | execution-plan.md |
+| **TP-S003-13** | **Storage mechanism (reversal)** | **`localStorage`** instead of `sessionStorage` — chat history is **durable across tab close and shared across tabs** of the same origin, still device-local and never transmitted. Supersedes the `sessionStorage` choice in TP-S003-02/09/10/11. Same key/schema (`vecinita.chat.history.v1`, `version: 1`); same store architecture, cap, label, and fallback. Live multi-tab `storage`-event sync **not** implemented (last-write-wins). | **ADR-025** (2026-06-28, 07-build reopened) |
+
 ## Open (implementation-time)
 
 - Exact LlamaIndex / vLLM patch pins (T8.1, T9.2)
 - DO App Platform YAML (T14.1)
+- **F33 / EV-004 i18n merge coordination (TP-S003-04):** S003 adds chat-history strings to
+  app-local `messages.ts`; EV-004 migrates ChatRAG i18n to `packages/frontend-i18n`. Whichever
+  PR merges second must port the new keys into the shared package and resolve the conflict.

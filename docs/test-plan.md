@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-13 (EV-004 F31)  
+> **Last updated**: 2026-06-26 (S003 F33)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -13,6 +13,8 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 **EV-002 (planned):** Admin UI overhaul (F23), tag display (F24), admin dashboard (F25), health check (F26), bulk ops (F27), serving stats (F28), audit log & versions (F29).
 
 **EV-004 (planned):** Shared frontend i18n/UI packages (F31); admin bilingual UI; ChatRAG migration to shared packages + Tailwind; Vitest mirror of ChatRAG language-toggle tests.
+
+**S003 (planned):** Browser-local persistent chat history (F33) — `localStorage` rehydration of the active conversation across refresh/tab-away/tab-close/new-tab (UJ-024, ADR-025) and a previous-chats list with new-chat archival, cap/eviction, label derivation, select-to-restore, and clear/delete semantics (UJ-025). Frontend-only (Vitest + jsdom `localStorage`); no API/CORS changes.
 
 **Excludes (v1):**** Playwright full UI E2E (see `tests/e2e/README.md` waiver; Vitest component smoke only), real Modal invocations in CI, multimodal ingest, fine-tuning.
 
@@ -44,6 +46,8 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-020 Admin UI navigation | Vitest in `data-management-frontend` | TC-062, TC-063 |
 | UJ-021 Tag chips in corpus list | Vitest in `data-management-frontend` | TC-064 |
 | UJ-022 Admin language toggle | Vitest in `data-management-frontend` + `packages/frontend-ui` + `packages/frontend-i18n` | TC-065, TC-066, TC-067, TC-068, TC-069 |
+| UJ-024 Chat persists on refresh/tab-away | Vitest in `chat-rag-frontend` | TC-072, TC-073 |
+| UJ-025 Revisit previous conversation | Vitest in `chat-rag-frontend` | TC-074, TC-075, TC-076 |
 
 **E2E tier (v1):** `local` — TestClient, test Postgres (Docker/testcontainers), **mocked Modal** HTTP.
 
@@ -366,6 +370,36 @@ EV-004 (F31): No new API routes — **H4/H5 regression required** at 13-deploy-s
 - **Objective**: Corpus titles, tag labels, URLs, audit payloads, and API error strings remain in source language regardless of UI locale.
 - **Input**: Render admin Corpus/Audit views with Spanish UI locale and mixed EN/ES corpus fixtures.
 - **Expected**: Static chrome in ES; document titles, tag text, audit JSON, and API `error_message` unchanged from backend values.
+
+### TC-072: Active conversation rehydrates from localStorage (UJ-024, F33, ADR-025)
+
+- **Objective**: A conversation survives a page reload / component remount (and tab close / new tab) via `localStorage`.
+- **Input**: Render ChatRAG `App`; add user + assistant messages (with sources) to `useChatHistory`; unmount and remount the app (simulating refresh) with the same jsdom `localStorage`.
+- **Expected**: After remount, all prior messages and their sources render in order; no network call carries history; no server-side session created.
+
+### TC-073: Graceful fallback when localStorage unavailable (UJ-024, F33)
+
+- **Objective**: App degrades to in-memory state when `localStorage` throws (quota exceeded / disabled).
+- **Input**: Stub `localStorage.setItem`/`getItem` to throw; drive a conversation.
+- **Expected**: Chat still works in-memory; no uncaught error; persistence silently disabled for the session.
+
+### TC-074: "New chat" archives current conversation (UJ-025, F33)
+
+- **Objective**: Clicking "New chat" moves the active conversation into the previous-chats list and starts an empty one.
+- **Input**: Build a conversation; click "New chat".
+- **Expected**: Previous-chats list gains one entry labeled with first user message + relative timestamp (R46); active conversation is empty; both reflected in `localStorage`.
+
+### TC-075: Previous-chats cap and FIFO eviction (UJ-025, F33)
+
+- **Objective**: The list keeps the last 10 conversations, evicting the oldest.
+- **Input**: Archive 11 conversations via repeated "New chat".
+- **Expected**: List length is 10; newest first; the first-created conversation is evicted; persisted store matches.
+
+### TC-076: Select / delete / clear-all semantics (UJ-025, R47, F33)
+
+- **Objective**: Selecting restores a conversation; per-item delete and "Clear all history" update list + storage; "Clear" resets the active conversation.
+- **Input**: With several archived conversations, select one (restore), delete one, then "Clear all history"; separately invoke "Clear" on an active conversation.
+- **Expected**: Selected conversation becomes active with its messages/sources; deleted item removed; clear-all empties the list; "Clear" empties the active conversation; `localStorage` reflects each change.
 
 ## Test Data
 
