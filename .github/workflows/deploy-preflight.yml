@@ -34,15 +34,27 @@ jobs:
 
   modal-secrets:
     runs-on: ubuntu-latest
-    if: ${{ secrets.MODAL_TOKEN_ID != '' && secrets.MODAL_TOKEN_SECRET != '' }}
+    # secrets.* is not allowed in job-level `if` — detect tokens in a step instead.
     env:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
       MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
     steps:
       - uses: actions/checkout@v4
 
+      - name: Detect Modal GitHub secrets
+        id: modal_tokens
+        run: |
+          if [ -z "${MODAL_TOKEN_ID}" ] || [ -z "${MODAL_TOKEN_SECRET}" ]; then
+            echo "Modal GitHub secrets not configured — skipping verify_secrets.sh"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Install Modal CLI
+        if: steps.modal_tokens.outputs.skip != 'true'
         run: pip install 'modal>=1.2.6,<2'
 
       - name: Verify Modal secrets and volumes
+        if: steps.modal_tokens.outputs.skip != 'true'
         run: bash scripts/deploy/verify_secrets.sh
