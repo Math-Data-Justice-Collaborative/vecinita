@@ -129,6 +129,13 @@ Context decisions R39–R42 set in 00-context (context-brief §14): R39 park S00
 
 S003 artifacts: feature-list F33; user-journeys UJ-024/UJ-025; test-plan TC-072–TC-076; acceptance-criteria AC-S1–AC-S7; ADR-023.
 
+> **Reversal (2026-06-28, ADR-025):** At the user's request, the storage mechanism in **R41 /
+> R43 / RD-068** was changed from `sessionStorage` to **`localStorage`** so chat history is
+> **durable across tab close and shared across tabs** of the same origin (it remains
+> device-local and never leaves the device). RD-068's "per-tab / cleared on tab close" property
+> and RD-072's "`sessionStorage`" wording are superseded by ADR-025. All other S003 decisions
+> (RD-069–RD-071) are unchanged.
+
 Unresolved:
 
 - Exact LlamaIndex / vLLM patch pins at implementation (T8.1, T9.2)

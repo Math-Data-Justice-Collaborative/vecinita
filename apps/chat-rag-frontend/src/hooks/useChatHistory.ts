@@ -10,8 +10,8 @@ function newId(): string {
 /**
  * Client-side-only conversation history (F3, ADR-004). Never sent to the
  * server. Backs onto a {@link ConversationStore} so the active conversation is
- * write-through to device-only, tab-scoped `sessionStorage` and survives
- * refresh / tab-away (F33, ADR-023/024). The store is supplied by the
+ * write-through to device-local `localStorage` and survives refresh / tab-away,
+ * a tab close, and new tabs (F33, ADR-023/024/025). The store is supplied by the
  * always-mounted shell (or a standalone instance for tests / standalone use),
  * preserving the Chat ⇄ Corpus navigation guard (BUG-2026-06-25, issue #53).
  */

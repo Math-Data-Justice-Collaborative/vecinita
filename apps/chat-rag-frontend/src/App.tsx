@@ -14,8 +14,8 @@ function AppContent() {
   const { locale, setLocale } = useLocale();
   // Owned by the always-mounted shell so the conversation survives navigation
   // to the Corpus tab and back (BUG-2026-06-25, issue #53) and is write-through
-  // to device-only, tab-scoped `sessionStorage` so it survives refresh /
-  // tab-away (F33, ADR-023/024).
+  // to device-local `localStorage` so it survives refresh / tab-away, a tab
+  // close, and is shared with new tabs (F33, ADR-023/024/025).
   const store = useConversationStore();
   const chat = useChatHistory(store);
   const onCorpus = pathname === "/corpus" || pathname.endsWith("/corpus");

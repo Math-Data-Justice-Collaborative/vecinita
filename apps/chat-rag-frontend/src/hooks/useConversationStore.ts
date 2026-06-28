@@ -2,7 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { ChatMessage, Source } from "../api/types";
 
-/** Device-only, tab-scoped storage key (ADR-023/024, F33). */
+/** Device-local storage key (ADR-023/024/025, F33). Persisted to `localStorage`
+ *  so history survives a tab close and is shared across tabs of the same
+ *  origin; still device-only and never transmitted off the device. */
 export const CHAT_HISTORY_STORAGE_KEY = "vecinita.chat.history.v1";
 /** Keep at most the last N conversations in the previous-chats list (RD-070). */
 export const PREVIOUS_CHATS_CAP = 10;
@@ -13,7 +15,7 @@ export type Conversation = {
   createdAt: number;
 };
 
-/** Serialized envelope persisted to `sessionStorage` (ADR-024). */
+/** Serialized envelope persisted to `localStorage` (ADR-024/025). */
 type ChatHistoryEnvelope = {
   version: 1;
   active: Conversation;
@@ -93,7 +95,7 @@ function isEnvelope(value: unknown): value is ChatHistoryEnvelope {
 /** Read + validate the persisted envelope. Returns null on absence/corruption/failure. */
 function readEnvelope(): ChatHistoryEnvelope | null {
   try {
-    const raw = sessionStorage.getItem(CHAT_HISTORY_STORAGE_KEY);
+    const raw = localStorage.getItem(CHAT_HISTORY_STORAGE_KEY);
     if (!raw) {
       return null;
     }
@@ -120,9 +122,11 @@ export type ConversationStore = {
 
 /**
  * Owns the active conversation plus a capped previous-conversations list,
- * write-through to device-only, tab-scoped `sessionStorage` (ADR-023/024, F33).
- * Lifted to the app shell so it survives refresh / tab-away. Degrades silently
- * to in-memory state if `sessionStorage` is unavailable (TC-073, AC-S2).
+ * write-through to device-local `localStorage` (ADR-023/024/025, F33). Lifted to
+ * the app shell so it survives refresh / tab-away; because it is `localStorage`
+ * it also persists across a tab close and is shared with new tabs of the same
+ * origin. Degrades silently to in-memory state if `localStorage` is unavailable
+ * (TC-073, AC-S2).
  */
 export function useConversationStore(): ConversationStore {
   const [envelope, setEnvelope] = useState<ChatHistoryEnvelope>(
@@ -139,10 +143,7 @@ export function useConversationStore(): ConversationStore {
       return;
     }
     try {
-      sessionStorage.setItem(
-        CHAT_HISTORY_STORAGE_KEY,
-        JSON.stringify(envelope),
-      );
+      localStorage.setItem(CHAT_HISTORY_STORAGE_KEY, JSON.stringify(envelope));
     } catch {
       // Quota exceeded / storage disabled: persistence is silently disabled
       // for this session; chat keeps working in-memory (TC-073, AC-S2).

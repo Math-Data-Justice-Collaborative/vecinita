@@ -44,9 +44,10 @@ function stubFetch() {
 }
 
 /**
- * F33 / UJ-024 — the active conversation is persisted to device-only,
- * tab-scoped `sessionStorage` and rehydrated after a page reload (modeled here
- * as an `App` unmount + remount sharing the same jsdom `sessionStorage`).
+ * F33 / UJ-024 — the active conversation is persisted to device-local
+ * `localStorage` (ADR-025) and rehydrated after a page reload (modeled here as
+ * an `App` unmount + remount sharing the same jsdom `localStorage`). Because it
+ * is `localStorage`, it also survives a tab close and is shared with new tabs.
  */
 describe("F33 — chat history persists across refresh / tab-away (UJ-024)", () => {
   beforeEach(() => {
@@ -81,7 +82,7 @@ describe("F33 — chat history persists across refresh / tab-away (UJ-024)", () 
     });
 
     // Simulate a page reload: tear the app down and mount a fresh instance that
-    // shares the same jsdom `sessionStorage`.
+    // shares the same jsdom `localStorage`.
     firstRender.unmount();
     render(<App />);
 
@@ -95,7 +96,7 @@ describe("F33 — chat history persists across refresh / tab-away (UJ-024)", () 
     ).not.toBeInTheDocument();
   });
 
-  it("keeps chatting in-memory when sessionStorage is unavailable (TC-073, AC-S2)", async () => {
+  it("keeps chatting in-memory when localStorage is unavailable (TC-073, AC-S2)", async () => {
     vi.spyOn(Storage.prototype, "getItem").mockImplementation((key: string) => {
       if (key === "vecinita.chat.history.v1") {
         throw new Error("storage disabled");

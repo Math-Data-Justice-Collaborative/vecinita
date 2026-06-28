@@ -1,10 +1,15 @@
 # ADR-024: ChatRAG chat-history persistence design (`useConversationStore` + sessionStorage)
 
-**Status:** Accepted
+**Status:** Superseded in part by [ADR-025](ADR-025-chat-history-localstorage-persistence.md)
 **Stage:** 04-tech-plan (S003)
 **Date:** 2026-06-26
 **Feature:** F33 — Browser-local persistent chat history
 **Builds on:** ADR-023 (device-only, tab-scoped persistence policy)
+
+> **Update (2026-06-28, ADR-025):** §2/§3 below specify write-through to `sessionStorage`.
+> Per ADR-025 the store now writes to **`localStorage`** (durable, cross-tab). The
+> `useConversationStore` architecture, envelope schema (`vecinita.chat.history.v1`,
+> `version: 1`), cap/label/fallback design, and previous-chats UI are otherwise unchanged.
 
 ## Context
 

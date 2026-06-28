@@ -152,6 +152,7 @@ browser built-ins. IDs are S003-namespaced to avoid collision with reused TP-NNN
 | TP-S003-11 | Rule update | Amend `.cursor/rules/frontend-session-state-lifting.mdc` to permit **device-only, tab-scoped `sessionStorage`** persistence (03/06 tooling stages skipped under evolve-lite, so done at 04-tech-plan/07-build) | ADR-023, ADR-024 |
 | TP-S003-12 | Scope guard | **No API/contract/CORS** changes; **no backend/Modal redeploy**; no `data-management-frontend` change | AC-S6, AC-S7 |
 | TV-S003-01 | Task count | **17** new tasks (T39.1–T42.3 across M39–M42); **239** total | execution-plan.md |
+| **TP-S003-13** | **Storage mechanism (reversal)** | **`localStorage`** instead of `sessionStorage` — chat history is **durable across tab close and shared across tabs** of the same origin, still device-local and never transmitted. Supersedes the `sessionStorage` choice in TP-S003-02/09/10/11. Same key/schema (`vecinita.chat.history.v1`, `version: 1`); same store architecture, cap, label, and fallback. Live multi-tab `storage`-event sync **not** implemented (last-write-wins). | **ADR-025** (2026-06-28, 07-build reopened) |
 
 ## Open (implementation-time)
 

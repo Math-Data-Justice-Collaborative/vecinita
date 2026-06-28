@@ -42,7 +42,7 @@
 | F30 | Strict static typing (no `Any` / `any`) | Implemented | Cross-cutting | all Python + TS apps | EV-003 2026-05-27 |
 | F31 | Admin + shared frontend bilingual UI (en/es) | Planned | Cross-cutting | data-management-frontend, chat-rag-frontend, `packages/frontend-i18n`, `packages/frontend-ui` | EV-004 2026-06-13 |
 | F32 | Admin Job Management tab (list jobs) | Implemented | Data Management | data-management-backend, data-management-frontend | S002 2026-06-26 (#89) |
-| F33 | Browser-local persistent chat history (sessionStorage + previous-chats list) | Planned | ChatRAG | chat-rag-frontend | S003 2026-06-26 |
+| F33 | Browser-local persistent chat history (localStorage + previous-chats list) | Planned | ChatRAG | chat-rag-frontend | S003 2026-06-26; ADR-025 2026-06-28 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -75,7 +75,7 @@
 - **Inputs**: Single-turn or client-held multi-turn context in request body only (if multi-turn UX needed, context stays client-side).
 - **Outputs**: Per-request response only.
 - **Limitations**: No “resume conversation” across devices unless implemented in browser memory only.
-- **Client-side boundary (F33)**: F3 forbids **server-side** history only. F33 adds **device-only, tab-scoped** chat persistence in the browser via `sessionStorage` — never transmitted to the server, never written to the database or logs (ADR-023). F3 (server stays stateless) and F15 privacy guardrails are unaffected.
+- **Client-side boundary (F33)**: F3 forbids **server-side** history only. F33 adds **device-local** chat persistence in the browser via `localStorage` (ADR-025; originally `sessionStorage` per ADR-023) — never transmitted to the server, never written to the database or logs. F3 (server stays stateless) and F15 privacy guardrails are unaffected.
 - **Source**: ADR-004; user selected full ChatRAG core including stateless
 
 ### F4: LlamaIndex RAG orchestration
@@ -450,7 +450,7 @@
 
 ### F33: Browser-local persistent chat history (sessionStorage + previous-chats list)
 
-- **What it does**: Persists the ChatRAG main-page conversation in the browser so it is **not lost on page refresh** or when leaving the tab and returning, and keeps a selectable **list of previous conversations** the user can revisit. All storage is device-only via `sessionStorage` — never sent to the server, database, or logs.
+- **What it does**: Persists the ChatRAG main-page conversation in the browser so it is **not lost on page refresh**, when leaving the tab and returning, when **closing and reopening the tab**, or in a **new tab** of the same origin, and keeps a selectable **list of previous conversations** the user can revisit. All storage is device-local via `localStorage` (ADR-025; originally `sessionStorage` per ADR-023) — never sent to the server, database, or logs.
 - **Inputs**: Community member browser. Active conversation state (`useChatHistory`) lifted to the always-mounted `AppContent` shell (existing, from #53/PR #68); a "New chat" action; selecting/deleting a previous conversation.
 - **Outputs**:
   - **Active conversation** rehydrated from `sessionStorage` on mount (survives refresh + tab-away/return within the same tab).
@@ -458,18 +458,18 @@
 - **Key parameters / decisions**:
   | Parameter | Value | Source |
   |-----------|-------|--------|
-  | Storage mechanism | **`sessionStorage`** (device-only; per-tab; cleared on tab close) | R41, R43 |
+  | Storage mechanism | **`localStorage`** (device-local; durable across tab close; shared across tabs of the same origin; never leaves the device) | ADR-025 (reverses R41/R43 `sessionStorage`) |
   | Conversation boundary | Explicit **"New chat"** button archives the current conversation and starts a fresh one | R44 |
   | History cap | Keep the **last 10** conversations, FIFO eviction of oldest | R45 |
   | Previous-chat label | **First user message** (truncated) **+ relative timestamp** (e.g. "2h ago") | R46 |
   | Clear semantics | **"Clear"** resets the active conversation; **per-item delete** + **"Clear all history"** manage the list; `sessionStorage` updated accordingly | R47 |
 - **Limitations / scope**:
-  - **Per-tab** by design — a brand-new/duplicate browser tab starts empty; persistence does **not** survive closing the tab (R43; accepted by user). No cross-device, cross-browser, or cross-tab sync.
-  - No **server-side** chat/session persistence — F3 and ADR-004 server-statelessness are preserved (see ADR-023). No backend, API, or contract changes.
-  - Must serialize message list + sources safely and degrade gracefully when `sessionStorage` is full or disabled (no crash; fall back to in-memory).
+  - **Device-local & durable** (ADR-025) — history survives tab close / browser restart and is readable by new tabs of the same origin. **Live** sync between two simultaneously-open tabs (via `storage` events) is **not** implemented; concurrent tabs use last-write-wins. No cross-device or cross-browser sync.
+  - No **server-side** chat/session persistence — F3 and ADR-004 server-statelessness are preserved (see ADR-023/025). No backend, API, or contract changes.
+  - Must serialize message list + sources safely and degrade gracefully when `localStorage` is full or disabled (no crash; fall back to in-memory).
   - Frontend-only delta in `apps/chat-rag-frontend`; no change to `data-management-frontend`.
 - **Priority**: High — direct user request (S003).
-- **Source**: S003 session interview 2026-06-26 (R43–R47); context-brief §14 (F33, R39–R42); ADR-023.
+- **Source**: S003 session interview 2026-06-26 (R43–R47); context-brief §14 (F33, R39–R42); ADR-023; **ADR-025** (2026-06-28 — `localStorage` durable/cross-tab, reverses `sessionStorage`).
 
 ## Planned / Deferred (post-v1)
 

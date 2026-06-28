@@ -28,10 +28,11 @@ const askSse =
   'data: {"done":true}\n\n';
 
 /**
- * AC-S6 (F33, ADR-004/023): chat history is device-only. It is never sent to
- * the server (no history in the ask payload), and is persisted only to
- * tab-scoped `sessionStorage` — never to `localStorage`, cookies, or anything
- * that survives the tab / leaves the device.
+ * AC-S6 (F33, ADR-004/023/025): chat history is device-only. It is never sent
+ * to the server (no history in the ask payload), and is persisted only to
+ * device-local `localStorage` — never transmitted off the device. Per ADR-025
+ * the store uses `localStorage` (persists across tab close, shared across tabs
+ * of the same origin) rather than `sessionStorage`.
  */
 describe("F33 — chat history stays device-only (AC-S6)", () => {
   const askBodies: string[] = [];
@@ -90,20 +91,23 @@ describe("F33 — chat history stays device-only (AC-S6)", () => {
     expect(askBodies[1]).not.toContain("First private question?");
   });
 
-  it("persists history only to tab-scoped sessionStorage, never localStorage/cookies", async () => {
+  it("persists history to device-local localStorage, never sessionStorage/cookies", async () => {
     render(<App />);
     await ask("Where do I store this?");
 
-    const stored = sessionStorage.getItem("vecinita.chat.history.v1");
+    // Persisted to localStorage so it survives a tab close and is shared with
+    // other tabs of the same origin (ADR-025).
+    const stored = localStorage.getItem("vecinita.chat.history.v1");
     expect(stored).not.toBeNull();
     expect(stored).toContain("Where do I store this?");
 
-    expect(localStorage.getItem("vecinita.chat.history.v1")).toBeNull();
-    const localValues = Object.keys(localStorage).map(
-      (key) => localStorage.getItem(key) ?? "",
+    // Not written to sessionStorage or cookies, and never leaves the device.
+    expect(sessionStorage.getItem("vecinita.chat.history.v1")).toBeNull();
+    const sessionValues = Object.keys(sessionStorage).map(
+      (key) => sessionStorage.getItem(key) ?? "",
     );
     expect(
-      localValues.some((value) => value.includes("Where do I store this?")),
+      sessionValues.some((value) => value.includes("Where do I store this?")),
     ).toBe(false);
     expect(document.cookie).not.toContain("Where do I store this?");
   });

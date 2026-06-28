@@ -1,9 +1,14 @@
 # ADR-023: Device-only, tab-scoped client-side chat persistence (sessionStorage)
 
-**Status:** Accepted
+**Status:** Superseded in part by [ADR-025](ADR-025-chat-history-localstorage-persistence.md)
 **Stage:** 01-requirements (S003)
 **Date:** 2026-06-26
 **Feature:** F33 — Browser-local persistent chat history
+
+> **Update (2026-06-28, ADR-025):** The storage **mechanism** below (`sessionStorage`,
+> per-tab, cleared on tab close) was reversed by user request to **`localStorage`**
+> (durable, cross-tab) — see ADR-025. The device-only / never-off-device **policy** in this
+> ADR still holds; only the retention window and cross-tab visibility changed.
 
 ## Context
 

@@ -14,11 +14,11 @@ function userMessage(content: string): ChatMessage {
 
 describe("useConversationStore", () => {
   beforeEach(() => {
-    sessionStorage.clear();
+    localStorage.clear();
   });
 
   afterEach(() => {
-    sessionStorage.clear();
+    localStorage.clear();
     vi.restoreAllMocks();
   });
 
@@ -52,7 +52,24 @@ describe("useConversationStore", () => {
     expect(messages[1].sources?.[0].title).toBe("Pantry");
   });
 
-  it("falls back to in-memory state when sessionStorage throws (TC-073)", () => {
+  it("persists across separate store instances sharing localStorage (new tab / reopen, ADR-025)", () => {
+    const first = renderHook(() => useConversationStore());
+    act(() => {
+      first.result.current.setActiveMessages(() => [
+        userMessage("survives tab close"),
+      ]);
+    });
+    // A brand-new tab (or reopened browser) constructs a fresh store instance
+    // but reads the same device-local `localStorage`.
+    first.unmount();
+
+    const reopened = renderHook(() => useConversationStore());
+    expect(reopened.result.current.active.messages[0].content).toBe(
+      "survives tab close",
+    );
+  });
+
+  it("falls back to in-memory state when localStorage throws (TC-073)", () => {
     vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
       throw new Error("storage disabled");
     });
@@ -70,12 +87,12 @@ describe("useConversationStore", () => {
   });
 
   it("ignores corrupt or unsupported stored payloads", () => {
-    sessionStorage.setItem(CHAT_HISTORY_STORAGE_KEY, "{ not json");
+    localStorage.setItem(CHAT_HISTORY_STORAGE_KEY, "{ not json");
     const corrupt = renderHook(() => useConversationStore());
     expect(corrupt.result.current.active.messages).toHaveLength(0);
     corrupt.unmount();
 
-    sessionStorage.setItem(
+    localStorage.setItem(
       CHAT_HISTORY_STORAGE_KEY,
       JSON.stringify({ version: 2, active: {}, previous: [] }),
     );
@@ -131,7 +148,7 @@ describe("useConversationStore", () => {
       }),
     ],
   ])("ignores an invalid stored payload (%s)", (_label, payload) => {
-    sessionStorage.setItem(CHAT_HISTORY_STORAGE_KEY, payload);
+    localStorage.setItem(CHAT_HISTORY_STORAGE_KEY, payload);
     const { result } = renderHook(() => useConversationStore());
     expect(result.current.active.messages).toHaveLength(0);
     expect(result.current.previous).toHaveLength(0);

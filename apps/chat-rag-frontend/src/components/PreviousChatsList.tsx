@@ -17,7 +17,7 @@ type PreviousChatsListProps = {
 /**
  * Collapsible list of previous conversations on the main Chat page (F33,
  * UJ-025). Select restores a conversation; per-item delete and "Clear all
- * history" manage the device-only `sessionStorage`-backed list.
+ * history" manage the device-local `localStorage`-backed list.
  */
 export function PreviousChatsList({
   conversations,

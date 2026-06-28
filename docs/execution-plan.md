@@ -773,9 +773,10 @@ admin bilingual UI chrome; CI workspace wiring; frontend-only deploy.
 
 ### Phase 10: S003 — Browser-local persistent chat history (F33)
 
-**Objective**: `sessionStorage`-backed conversation store; rehydrate the active conversation
-across refresh/tab-away; previous-chats list with new-chat / select / delete / clear;
-EN/ES i18n; graceful in-memory fallback. **Frontend-only** in `apps/chat-rag-frontend`.
+**Objective**: `localStorage`-backed conversation store (ADR-025; originally `sessionStorage`
+per ADR-023/024); rehydrate the active conversation across refresh/tab-away/tab-close/new-tab;
+previous-chats list with new-chat / select / delete / clear; EN/ES i18n; graceful in-memory
+fallback. **Frontend-only** in `apps/chat-rag-frontend`.
 **Entry gate**: S003 01-requirements complete (F33, ADR-023); 04-tech-plan approved
 (ADR-024, TP-S003-01–12).
 **Exit gate**: AC-S1–AC-S7 met; TC-072–TC-076 green; UJ-024/UJ-025 covered; full
@@ -851,6 +852,12 @@ chat-rag-frontend Vitest suite green.
 `tsc --noEmit` + ESLint clean; production `vite build` succeeds. TC-072–TC-076,
 UJ-024/UJ-025, AC-S1–AC-S7 satisfied; #53 + mid-stream concurrency guards still
 green. Frontend-only — no API/contract/CORS or backend/Modal changes (AC-S7).
+
+**Amendment — 2026-06-28 (07-build reopened, ADR-025):** Storage mechanism switched
+`sessionStorage` → `localStorage` (durable, cross-tab) at user request. Re-verified:
+116 chat-rag-frontend Vitest tests pass; 95% coverage gate green; `tsc --noEmit` +
+ESLint clean; `vite build` succeeds. AC-S1/AC-S2/AC-S5/AC-S6 wording updated; still
+frontend-only, no API/contract/CORS or backend/Modal changes (AC-S7).
 
 ---
 
@@ -1273,6 +1280,7 @@ CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, ba
 - [x] EV-004 deploy order — simultaneous both frontends (TP-038)
 - [x] EV-004 connectivity — extend H4/H5 smoke (TP-039)
 - [x] S003 storage key + schema — `vecinita.chat.history.v1`, versioned envelope (TP-S003-01, ADR-024)
+- [x] **S003 storage mechanism — `localStorage`** (durable, cross-tab) per **ADR-025** (2026-06-28, 07-build reopened); reverses the `sessionStorage` choice in ADR-023/024 (R41/R43) at the user's request. Frontend-only; no API/contract/CORS change.
 - [x] S003 persistence architecture — `useConversationStore` in shell (TP-S003-02, ADR-024)
 - [x] S003 previous-chats UI — collapsible panel in ChatPanel (TP-S003-03, ADR-024)
 - [x] S003 label — first user msg ≤60 chars + `Intl.RelativeTimeFormat` (TP-S003-05)
