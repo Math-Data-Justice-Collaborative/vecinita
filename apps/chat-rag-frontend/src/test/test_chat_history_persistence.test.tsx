@@ -4,6 +4,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -41,6 +42,21 @@ function stubFetch() {
       );
     }),
   );
+}
+
+/** Ask one question and wait for its streamed answer to settle. */
+async function ask(question: string): Promise<void> {
+  const answersBefore = screen.queryAllByText(/Local aid info\./).length;
+  fireEvent.change(screen.getByLabelText(/your question/i), {
+    target: { value: question },
+  });
+  fireEvent.click(screen.getByRole("button", { name: /^ask$/i }));
+  await screen.findByText(question);
+  await waitFor(() => {
+    expect(screen.queryAllByText(/Local aid info\./)).toHaveLength(
+      answersBefore + 1,
+    );
+  });
 }
 
 /**
@@ -94,6 +110,55 @@ describe("F33 — chat history persists across refresh / tab-away (UJ-024)", () 
     expect(
       screen.queryByText(/ask a question in english/i),
     ).not.toBeInTheDocument();
+  });
+
+  it("continues a rehydrated conversation and re-persists the new turn (UJ-024 step 4)", async () => {
+    const firstRender = render(<App />);
+    await ask("First question after reload?");
+
+    // First reload: the conversation rehydrates from localStorage.
+    firstRender.unmount();
+    const secondRender = render(<App />);
+    expect(screen.getByText("First question after reload?")).toBeInTheDocument();
+
+    // Continue chatting after the reload — the appended turn must persist too.
+    await ask("Second question after reload?");
+    expect(screen.getByText("Second question after reload?")).toBeInTheDocument();
+
+    // Second reload: BOTH turns survive, proving the post-reload turn was
+    // written through to localStorage, not just held in memory.
+    secondRender.unmount();
+    render(<App />);
+    expect(screen.getByText("First question after reload?")).toBeInTheDocument();
+    expect(
+      screen.getByText("Second question after reload?"),
+    ).toBeInTheDocument();
+  });
+
+  it("rehydrates the archived previous-chats list after a reload / new tab (AC-S1, UJ-025)", async () => {
+    const firstRender = render(<App />);
+    await ask("Please archive this conversation?");
+
+    // Archive the active conversation, then start chatting in the fresh one.
+    fireEvent.click(screen.getByRole("button", { name: /new chat/i }));
+    await ask("This is the brand-new conversation?");
+
+    // Reload (or open a new tab of the same origin): both the active
+    // conversation AND the archived previous-chats list come back.
+    firstRender.unmount();
+    render(<App />);
+
+    expect(
+      screen.getByText("This is the brand-new conversation?"),
+    ).toBeInTheDocument();
+
+    const toggle = screen.getByRole("button", { name: /previous chats/i });
+    fireEvent.click(toggle);
+    expect(
+      within(screen.getByTestId("previous-chats-list")).getByText(
+        /please archive this conversation\?/i,
+      ),
+    ).toBeInTheDocument();
   });
 
   it("keeps chatting in-memory when localStorage is unavailable (TC-073, AC-S2)", async () => {

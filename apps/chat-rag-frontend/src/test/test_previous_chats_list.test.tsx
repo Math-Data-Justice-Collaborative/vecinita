@@ -145,6 +145,83 @@ describe("F33 — previous-chats list (UJ-025)", () => {
     fireEvent.click(screen.getByRole("button", { name: /clear history/i }));
     expect(screen.getByText(/ask a question in english/i)).toBeInTheDocument();
   });
+
+  it("caps the previous-chats list at 10 and evicts the oldest through the UI (TC-075, R45)", async () => {
+    render(<App />);
+
+    // Archive 11 conversations via repeated ask → "New chat".
+    for (let i = 0; i <= 10; i++) {
+      await ask(`conversation ${String(i)}?`);
+      fireEvent.click(screen.getByRole("button", { name: /new chat/i }));
+    }
+
+    expandPreviousChats();
+    const list = screen.getByTestId("previous-chats-list");
+
+    // Exactly the last 10 remain, newest first; the toggle reflects the count.
+    expect(within(list).getAllByRole("listitem")).toHaveLength(10);
+    expect(
+      screen.getByRole("button", { name: /previous chats/i }).textContent,
+    ).toContain("(10)");
+    expect(within(list).getByText(/conversation 10\?/i)).toBeInTheDocument();
+    // The very first conversation was evicted (FIFO).
+    expect(within(list).queryByText(/conversation 0\?/i)).not.toBeInTheDocument();
+  });
+
+  it("restores a previous conversation's sources, not just its text (TC-076, AC-S5)", async () => {
+    const sourceSse =
+      'data: {"token":"Housing answer."}\n\n' +
+      'data: {"sources":[{"chunk_id":"c1","document_id":"d1","title":"Housing aid","url":"https://example.com","score":0.9}]}\n\n' +
+      'data: {"done":true}\n\n';
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.includes("/api/v1/ask/stream")) {
+          return Promise.resolve(sseResponse(sourceSse));
+        }
+        return Promise.resolve(
+          new Response(JSON.stringify({ tags: [] }), { status: 200 }),
+        );
+      }),
+    );
+
+    render(<App />);
+    fireEvent.change(screen.getByLabelText(/your question/i), {
+      target: { value: "Where is housing aid?" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^ask$/i }));
+    await screen.findByText("Where is housing aid?");
+    await waitFor(() => {
+      expect(
+        screen.getByRole("link", { name: /housing aid/i }),
+      ).toBeInTheDocument();
+    });
+
+    // Archive it; the source link leaves the active view.
+    fireEvent.click(screen.getByRole("button", { name: /new chat/i }));
+    expect(
+      screen.queryByRole("link", { name: /housing aid/i }),
+    ).not.toBeInTheDocument();
+
+    // Restore it from the previous-chats list.
+    expandPreviousChats();
+    fireEvent.click(
+      within(screen.getByTestId("previous-chats-list")).getByText(
+        /where is housing aid\?/i,
+      ),
+    );
+
+    // Both the message text AND its restored sources render.
+    expect(
+      within(screen.getByTestId("message-list")).getByText(
+        "Where is housing aid?",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /housing aid/i }),
+    ).toBeInTheDocument();
+  });
 });
 
 describe("deriveConversationLabel", () => {
