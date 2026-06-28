@@ -8,11 +8,13 @@ project:
     07-build:
       status: completed
       completed_at: "2026-06-26"
+      reopened_at: "2026-06-28"
       session_id: S003-persistent-chat-history
       branch: feat/S003-persistent-chat-history
       feature: F33
       phase: "Phase 10 (M39–M42)"
       note: "S003 F33 browser-local persistent chat history — M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green"
+      reopen_note: "07-build reopened 2026-06-28 (explicit user approval) for an ADR-025 delta: chat-history storage switched sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only). Commit eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed."
     13-deploy-smoke:
       status: completed
       started_at: "2026-06-26"
@@ -64,7 +66,8 @@ active_session:             # current bounded work unit; null when none in fligh
     - stage: 07-build
       status: completed
       completed_at: "2026-06-26"
-      note: "M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green"
+      reopened_at: "2026-06-28"
+      note: "M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green. Reopened 2026-06-28 (user-approved) for ADR-025 storage-mechanism reversal: sessionStorage -> localStorage (durable, cross-tab, still device-only). ADR-025 authored at this stage (supersedes-in-part ADR-023, ADR-024). Commit eacf4ad; re-verified 116 FE tests + 95% coverage + build green; frontend-only, no API/contract/CORS change (AC-S7 preserved). Status remains completed."
     - stage: 09-qa
       status: pending
     - stage: 10-e2e
@@ -87,6 +90,7 @@ active_session:             # current bounded work unit; null when none in fligh
   artifacts:
     - docs/sessions/S003-persistent-chat-history/session-brief.md
     - docs/sessions/S003-persistent-chat-history/routing-plan.md
+    - docs/adr/ADR-025-chat-history-localstorage-persistence.md
 sessions:                   # archived completed sessions
   - id: S002-admin-job-management
     type: feature
@@ -436,10 +440,12 @@ stages:
       session_id: S003-persistent-chat-history
       branch: feat/S003-persistent-chat-history
       completed_at: "2026-06-26"
+      reopened_at: "2026-06-28"
       feature: F33
       phase: "Phase 10 (M39–M42)"
       milestones: [M39, M40, M41, M42]
       note: "S003 F33 browser-local persistent chat history build complete — M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green"
+      reopen_note: "07-build reopened 2026-06-28 (explicit user approval) for an ADR-025 delta: chat-history storage switched sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only). Commit eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed."
   08-verify-build:
     status: completed
     started_at: "2026-06-25"
@@ -1961,6 +1967,8 @@ decisions_log:
   - "S003 04-tech-plan: F33 tech decisions TP-S003-01..12 resolved (sessionStorage key vecinita.chat.history.v1, useConversationStore architecture, previous-chats panel in ChatPanel, app-local i18n with EV-004 merge-coordination caveat, ADR-024). Execution-plan Phase 10 added: 17 tasks, total 239. 2026-06-26."
   - date: "2026-06-26"
     note: "S003 07-build COMPLETE — F33 browser-local persistent chat history (Phase 10, M39–M42). 4 atomic commits on feat/S003-persistent-chat-history: 14af2a5 (T39.1-T39.5 useConversationStore sessionStorage persistence), accd98f (T40.1-T40.4 rehydrate on mount), 1bf6d17 (T41.1-T41.5 previous-chats list new-chat/select/delete/clear + i18n), d22e040 (T42.1-T42.3 AC-S6 privacy + Phase 10 gate). Phase 10 gate PASS; 115 FE tests + 95% coverage + build green. routing_plan 07-build → completed; active_session.current_stage advanced to 09-qa (next pending)."
+  - date: "2026-06-28"
+    note: "S003 07-build REOPENED (explicit user approval) to reverse an audited design decision: F33 chat-history storage switched sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only, never sent to server). ADR-025 authored at 07-build; supersedes-in-part ADR-023 and ADR-024. Commit eacf4ad (20 files). Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS change (AC-S7 preserved). stages.07-build.s003 + project.stages.07-build keep status completed (reopened_at recorded). active_session.current_stage unchanged (remains 09-qa)."
 
 artifacts:
   - docs/context-brief.md
@@ -2324,6 +2332,12 @@ git_history:
       stage: "07-build"
       files_changed: 3
       timestamp: "2026-06-26"
+    - sha: eacf4ad
+      branch: feat/S003-persistent-chat-history
+      message: "[S003] feat(F33): persist chat history via localStorage (durable, cross-tab) per ADR-025"
+      stage: "07-build"
+      files_changed: 20
+      timestamp: "2026-06-28"
 
 constraints:
   cost:
