@@ -1,0 +1,70 @@
+# Continuous deployment of Modal apps (ADR-002 hybrid: Modal workers + DO control plane).
+# Deploys embedding (CPU), data-management (ASGI / data path), and llm (GPU / T4) to the
+# vecinita workspace. Triggered only after the full CI suite passes on main, then re-runs
+# build-smoke + secrets checks in-job before the live deploy.
+# Pattern: https://modal.com/docs/guide/continuous-deployment
+name: Deploy Modal
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+# Never cancel an in-progress deploy; serialize redeploys instead.
+concurrency:
+  group: deploy-modal
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # CI runs on several branches; only deploy when CI succeeded on main.
+    # workflow_dispatch is always allowed (manual redeploy).
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event.workflow_run.conclusion == 'success' &&
+           github.event.workflow_run.head_branch == 'main') }}
+    env:
+      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Require Modal tokens
+        run: |
+          if [ -z "${MODAL_TOKEN_ID}" ] || [ -z "${MODAL_TOKEN_SECRET}" ]; then
+            echo "::error::MODAL_TOKEN_ID / MODAL_TOKEN_SECRET repo secrets are not set." >&2
+            echo "Add them under Settings -> Secrets and variables -> Actions." >&2
+            echo "See https://modal.com/docs/guide/continuous-deployment" >&2
+            exit 1
+          fi
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Modal CLI
+        run: pip install 'modal>=1.2.6,<2'
+
+      - name: Build smoke (uv sync + Modal app import)
+        run: bash scripts/deploy/verify_build.sh
+
+      - name: Verify Modal secrets and volumes
+        run: bash scripts/deploy/verify_secrets.sh
+
+      - name: Deploy Modal apps (embedding, data-management, llm)
+        run: bash scripts/deploy/modal.sh
+
+      - name: List deployed apps
+        run: modal app list

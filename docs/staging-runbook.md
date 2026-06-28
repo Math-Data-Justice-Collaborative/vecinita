@@ -28,6 +28,13 @@ bash scripts/deploy/verify_secrets.sh   # requires Modal auth + vecinita-data-ma
 
 CI on `main`: `.github/workflows/deploy-preflight.yml` (needs GitHub `MODAL_TOKEN_*` for secrets job).
 
+**Modal CD on `main`:** `.github/workflows/deploy-modal.yml` auto-deploys the three Modal
+apps after **CI** succeeds on `main` (re-runs build-smoke + secrets, then `scripts/deploy/modal.sh`).
+Requires repo secrets `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`
+([Modal continuous deployment](https://modal.com/docs/guide/continuous-deployment)).
+DigitalOcean apps auto-deploy on push to `main` via `deploy_on_push: true` in `infra/do/*.yaml`.
+Database migrations are **not** automated — run `alembic upgrade head` per the Deploy order below.
+
 ## Deploy order
 
 1. **Managed Postgres** — create DO database, enable `pgvector`, note connection string.

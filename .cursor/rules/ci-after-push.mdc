@@ -18,6 +18,13 @@ session, open a PR as ready, or mark work complete after `git push` without watc
 **Common mistake:** Watching only `ci.yml` while `deploy-preflight` stays red on `main`.
 That workflow runs on every `main` push (Modal import smoke + optional secrets check).
 
+**CD (not a push gate):** `.github/workflows/deploy-modal.yml` is **continuous deployment**,
+not a pre-merge check. It triggers via `workflow_run` after **CI succeeds on `main`**, then
+re-runs build-smoke + secrets and `modal deploy`s the three Modal apps (embedding,
+data-management, llm). Do not treat it as a "must pass before PR" gate; after a `main` merge,
+confirm it deployed (or was correctly skipped without Modal secrets). DigitalOcean apps
+auto-deploy separately via `deploy_on_push: true` in `infra/do/*.yaml`.
+
 ## After every push (required)
 
 ```bash
