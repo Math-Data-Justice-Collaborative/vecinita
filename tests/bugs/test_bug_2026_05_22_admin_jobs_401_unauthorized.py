@@ -16,7 +16,11 @@ _EXPECTED_KEY = "staging-proxy-key-for-repro"
 
 @pytest.fixture
 def proxy_key_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    from vecinita_shared_schemas.auth import reset_auth_config_for_tests
+
+    reset_auth_config_for_tests()
     monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", _EXPECTED_KEY)
+    monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "false")
 
 
 def test_create_job_with_wrong_modal_key_returns_401(proxy_key_env: None) -> None:

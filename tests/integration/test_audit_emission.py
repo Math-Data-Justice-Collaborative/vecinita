@@ -29,9 +29,14 @@ def engine():
 
 
 @pytest.fixture()
-def client():
-    os.environ["DATABASE_URL"] = _database_url()
-    os.environ["VECINITA_INTERNAL_API_KEY"] = _API_KEY
+def client(monkeypatch: pytest.MonkeyPatch):
+    from vecinita_shared_schemas.auth import reset_auth_config_for_tests
+
+    reset_auth_config_for_tests()
+    monkeypatch.setenv("DATABASE_URL", _database_url())
+    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _API_KEY)
+    monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
+    monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
     from vecinita_internal_write_api.app import create_app
 
     app = create_app()

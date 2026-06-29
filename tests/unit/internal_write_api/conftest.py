@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from vecinita_embedding_client import EMBEDDING_DIMENSION
+from vecinita_shared_schemas.auth import reset_auth_config_for_tests
 from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
 
 _API_KEY = "test-internal-key"
@@ -42,8 +43,11 @@ class StubJobsClient:
 
 @pytest.fixture()
 def internal_api_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    reset_auth_config_for_tests()
     monkeypatch.setenv("DATABASE_URL", database_url())
     monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _API_KEY)
+    monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
+    monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
 
 
 @pytest.fixture()

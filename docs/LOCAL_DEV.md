@@ -61,7 +61,7 @@ export DATABASE_URL=postgresql+psycopg://vecinita:vecinita@localhost:5432/vecini
 export VECINITA_MODAL_EMBED_URL=http://localhost:8003   # after modal serve embedding
 export VECINITA_MODAL_LLM_URL=http://localhost:8004     # after modal serve llm
 
-# Staging/prod (vecinita Modal workspace — see infra/modal/env.example):
+# Staging/prod (vecinita Modal workspace — see infra/modal/.env.example):
 # export VECINITA_MODAL_EMBED_URL=https://vecinita--vecinita-embedding-embedding-api.modal.run
 # export VECINITA_MODAL_LLM_URL=https://vecinita--vecinita-llm-fastapi-app.modal.run
 uv run uvicorn vecinita_chat_rag_backend.app:create_app --factory --host 0.0.0.0 --port 8000

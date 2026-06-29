@@ -12,6 +12,7 @@ paths:
       operationId: upsertDocumentsBatch
       summary: Upsert documents, chunks, and embeddings
       security:
+        - bearerAuth: []
         - internalApiKey: []
       requestBody:
         required: true
@@ -35,6 +36,7 @@ paths:
       operationId: listDocuments
       summary: List corpus documents
       security:
+        - bearerAuth: []
         - internalApiKey: []
       responses:
         "200":
@@ -52,6 +54,7 @@ paths:
       operationId: deleteDocument
       summary: Delete document and dependent chunks/embeddings
       security:
+        - bearerAuth: []
         - internalApiKey: []
       parameters:
         - name: document_id
@@ -72,6 +75,7 @@ paths:
       operationId: listDocumentChunks
       summary: List chunks for admin viewer
       security:
+        - bearerAuth: []
         - internalApiKey: []
       parameters:
         - name: document_id
@@ -98,6 +102,7 @@ paths:
       operationId: patchDocumentTags
       summary: Replace document tags (human or llm batch)
       security:
+        - bearerAuth: []
         - internalApiKey: []
       parameters:
         - name: document_id
@@ -130,6 +135,7 @@ paths:
       operationId: retagDocumentLlm
       summary: Re-run LLM tagging for a document
       security:
+        - bearerAuth: []
         - internalApiKey: []
       parameters:
         - name: document_id
@@ -154,6 +160,7 @@ paths:
       operationId: patchChunkTags
       summary: Replace chunk-level tags
       security:
+        - bearerAuth: []
         - internalApiKey: []
       parameters:
         - name: chunk_id
@@ -186,6 +193,7 @@ paths:
       operationId: bulkDeleteDocuments
       summary: Bulk delete documents (EV-002 F27)
       security:
+        - bearerAuth: []
         - internalApiKey: []
       requestBody:
         required: true
@@ -207,6 +215,7 @@ paths:
       operationId: bulkTagDocuments
       summary: Bulk add/remove tags (EV-002 F27)
       security:
+        - bearerAuth: []
         - internalApiKey: []
       requestBody:
         required: true
@@ -228,6 +237,7 @@ paths:
       operationId: bulkRetagDocuments
       summary: Bulk LLM retag (EV-002 F27)
       security:
+        - bearerAuth: []
         - internalApiKey: []
       requestBody:
         required: true
@@ -249,6 +259,7 @@ paths:
       operationId: bulkUpdateMetadata
       summary: Bulk update document metadata (EV-002 F27)
       security:
+        - bearerAuth: []
         - internalApiKey: []
       requestBody:
         required: true
@@ -270,6 +281,7 @@ paths:
       operationId: getDocumentHistory
       summary: Per-document audit history (EV-002 F29)
       security:
+        - bearerAuth: []
         - internalApiKey: []
       parameters:
         - name: document_id
@@ -294,6 +306,7 @@ paths:
       operationId: getAuditLog
       summary: Query audit log with filters (EV-002 F29)
       security:
+        - bearerAuth: []
         - internalApiKey: []
       parameters:
         - name: page
@@ -344,6 +357,7 @@ paths:
       operationId: recordStatsServed
       summary: Increment serving counters (EV-002 F28)
       security:
+        - bearerAuth: []
         - internalApiKey: []
       requestBody:
         required: true
@@ -365,6 +379,7 @@ paths:
       operationId: getTopServed
       summary: Top served documents ranked (EV-002 F28)
       security:
+        - bearerAuth: []
         - internalApiKey: []
       parameters:
         - name: limit
@@ -386,6 +401,7 @@ paths:
       operationId: getStatsSummary
       summary: Dashboard aggregate statistics (EV-002 F25)
       security:
+        - bearerAuth: []
         - internalApiKey: []
       responses:
         "200":
@@ -401,6 +417,7 @@ paths:
       operationId: getHealthAggregate
       summary: Aggregate health of all services (EV-002 F26)
       security:
+        - bearerAuth: []
         - internalApiKey: []
       responses:
         "200":
@@ -424,6 +441,11 @@ paths:
                 $ref: "#/components/schemas/HealthResponse"
 components:
   securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase access token (operator JWT); write routes require role admin
     internalApiKey:
       type: http
       scheme: bearer

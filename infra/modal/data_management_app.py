@@ -6,7 +6,9 @@ Deploy from repo root:
 Requires Modal secret `vecinita-data-management` with:
 VECINITA_MODAL_EMBED_URL, VECINITA_INTERNAL_WRITE_URL, VECINITA_INTERNAL_API_KEY,
 VECINITA_MODAL_PROXY_KEY, VECINITA_CORS_ORIGINS (admin frontend origin),
-VECINITA_MODAL_LLM_URL (required for retag and LLM tagging at ingest)
+VECINITA_MODAL_LLM_URL (required for retag and LLM tagging at ingest),
+SUPABASE_URL, VECINITA_AUTH_REQUIRED (EV-005 F34 admin JWT on /jobs*).
+See infra/modal/.env.example and docs/staging-secrets-matrix.md.
 """
 
 from __future__ import annotations
@@ -52,6 +54,8 @@ image = (
         "httpx>=0.27,<1",
         "langdetect>=1.0.9",
         "pydantic>=2.7,<3",
+        "PyJWT>=2.10,<3",
+        "cryptography>=42,<45",
     )
     .env({"PYTHONPATH": _PYTHONPATH})
     .add_local_dir(_REPO_ROOT / "packages" / "ingest", remote_path=f"{_PKG_ROOT}/packages/ingest")

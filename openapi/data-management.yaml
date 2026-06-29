@@ -12,7 +12,8 @@ paths:
       operationId: createJob
       summary: Enqueue scrape→chunk→embed pipeline
       security:
-        - modalProxyAuth: []
+        - bearerAuth: []
+          modalProxyAuth: []
       requestBody:
         required: true
         content:
@@ -34,7 +35,8 @@ paths:
       operationId: listJobs
       summary: List jobs (newest first)
       security:
-        - modalProxyAuth: []
+        - bearerAuth: []
+          modalProxyAuth: []
       parameters:
         - name: status
           in: query
@@ -60,7 +62,8 @@ paths:
       operationId: getJob
       summary: Job status
       security:
-        - modalProxyAuth: []
+        - bearerAuth: []
+          modalProxyAuth: []
       parameters:
         - name: job_id
           in: path
@@ -92,6 +95,11 @@ paths:
                 $ref: "#/components/schemas/HealthResponse"
 components:
   securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase access token (operator JWT); role from app_metadata.role
     modalProxyAuth:
       type: apiKey
       in: header

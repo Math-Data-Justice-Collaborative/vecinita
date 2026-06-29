@@ -156,6 +156,19 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 - **Dependency rule**: Depends on `frontend-i18n` only; must not import `apps/*`.
 - **Source**: ADR-020 (amended); feature-list F31
 
+### Admin authentication (Supabase Auth) — EV-005 F34
+
+- **Purpose**: Authenticate **operators** on the admin surfaces using **Supabase Auth**; gate the DM UI, DM API, and internal-write API. ChatRAG stays anonymous. Supersedes the ADR-004 infra-only admin protection (F16) for these surfaces (ADR-026).
+- **Identity provider**: Supabase project (canonical ref `cfuvghdsuwactfeamtym`, per `prod.env`; MCP access to be granted — R53). Operator identity/PII (email, name, password, invites) live **only** in Supabase `auth.*`; the Vecinita corpus DB stays PII-free.
+- **Registration**: **Invitation-only** — public sign-up disabled in Supabase; an `admin` invites by email; the invitee accepts via emailed link and sets a password. Login is **email + password** (RD-074).
+- **Roles**: `admin` (full read/write) and `viewer` (read-only), carried as a Supabase JWT claim (mechanism — `app_metadata` claim vs `user_roles` — decided in 04-tech-plan). Writes require `admin`; `viewer` → `403` (RD-075).
+- **Frontend (`apps/data-management-frontend`)**: `@supabase/supabase-js` browser session (SPA); login screen; protected routes (redirect to login when no session); current-user display + logout. Sends `Authorization: Bearer <supabase_jwt>` to admin APIs (RD-076).
+- **Backends (`apps/data-management-backend`, `apps/internal-write-api`)**: A FastAPI dependency verifies the Supabase JWT on each request; `401` on missing/invalid/expired token; role check for write routes (`403` for `viewer`). Service-to-service Modal→internal-write calls continue to use the existing `VECINITA_INTERNAL_API_KEY` (machine credential), distinct from operator JWTs.
+- **Audit attribution**: write helpers record `actor_id` (opaque Supabase user UUID) + `actor_role` on `audit_log` — no PII (extends ADR-016).
+- **Environment syncing**: Supabase **branching** (preview/staging via Git) on the canonical project; auth/schema migrations in repo; secrets via Modal/DO env, never tracked (RD-078, no-operator-spec-commits).
+- **ChatRAG CORS (anonymous, tightened)**: ChatRAG API restricts CORS to the **ChatRAG frontend origin only** (RD-079); admin APIs add `Authorization` to allowed headers.
+- **Source**: feature-list F34; ADR-026; context-brief §15; RD-073–RD-079
+
 ## Data Flow
 
 | Stage | Input | Transformation | Output | Notes |
@@ -199,7 +212,8 @@ Admin UI → Modal ASGI (/jobs) → Modal queue worker → scrape → chunk → 
 | H2 | Hybrid Modal + DigitalOcean; US regions only | ADR-002, R10a |
 | H3 | Greenfield APIs; OpenAPI required as source of truth | ADR-003, user interview |
 | H4 | DO Managed Postgres + pgvector; 384-dim default | ADR-005, ADR-008 |
-| H5 | Zero personal data — no user/admin tables, no server chat history | ADR-004 |
+| H5 | Zero personal data **in the corpus DB** — no user/admin/session/message tables, no server chat history. **Admin-surface operator identity lives in Supabase only** (EV-005 F34); corpus DB may store only an opaque Supabase user UUID + role for audit attribution | ADR-004, **ADR-026** |
+| H11 | **Admin surfaces require Supabase JWT** (DM UI/API, internal-write API); ChatRAG stays anonymous; invite-only registration; `admin`/`viewer` roles | ADR-026 (EV-005 F34) |
 | H6 | No paid third-party LLM/embed APIs as default | ADR-004, ADR-008, ADR-009 |
 | H7 | Cost ≤ $50/mo cap (target $25) | ADR-004, ADR-010 |
 | H8 | Only DO backends hold `DATABASE_URL` | ADR-007 |
@@ -213,6 +227,8 @@ Migrations and CI must reject tables/columns including:
 `users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`, `auth_*`
 
 Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config`, `tags`, `document_tags`, `chunk_tags` (EV-001), `audit_log`, `document_versions`, `document_serving_stats` (EV-002). Tag provenance: `source` enum only — no operator identity columns. Audit log: `request_id` only — no IP/identity columns (ADR-016).
+
+**EV-005 (F34) exception (corpus DB):** `audit_log` may add `actor_id` (opaque **Supabase user UUID**) + `actor_role` (`admin`/`viewer`) columns for attribution — **both non-PII**. No `email`/`name`/`password` column is permitted in the corpus DB. The forbidden list (`users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`, `auth_*`) still applies to the corpus DB; Supabase manages its own `auth.*` schema in a **separate** database (ADR-026).
 
 ### Assumptions
 
@@ -255,7 +271,15 @@ Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config`, `tags`, 
 | Internal write | GET | `/internal/v1/health/all` | Health aggregator — polls all 8 services (F26, TP-019) |
 | Health | GET | `/health` | All HTTP services |
 
-Full schemas: `docs/api-contract.md` (interview pending); OpenAPI files in repo (required).
+Full schemas: `docs/api-contract.md`; OpenAPI files in repo (required).
+
+**Auth (EV-005 F34):** Admin surfaces — Data Management API (Modal `/jobs`) and the **internal-write API** (`/internal/v1/*`) — require a valid **Supabase JWT** via `Authorization: Bearer` (`401` missing/invalid; `403` for `viewer` on writes). ChatRAG routes (`/api/v1/*`) stay **anonymous** with CORS restricted to the ChatRAG frontend origin. Modal→internal-write service calls keep the existing `VECINITA_INTERNAL_API_KEY`. Details: `docs/api-contract.md` §Authentication (ADR-026).
+
+## Session changelog
+
+| Session / cycle | Date | Change |
+|-----------------|------|--------|
+| S004 / EV-005 (F34) | 2026-06-28 | Added admin Supabase Auth: §Component Details "Admin authentication"; H5 amended + H11 added; forbidden-schema EV-005 exception (`actor_id`/`actor_role`); API surface auth note. Supersedes ADR-004 admin auth clause (ADR-026). |
 
 ## References
 

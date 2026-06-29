@@ -5,11 +5,9 @@ from __future__ import annotations
 from datetime import UTC, datetime
 
 import pytest
-from fastapi import HTTPException
 from vecinita_internal_write_api.app import (
     _dependency_health_url,
     _normalize_database_url,
-    _require_internal_key,
     _row_datetime,
     _row_datetime_optional,
     _tags_snapshot_list,
@@ -62,31 +60,3 @@ def test_tags_snapshot_list_filters_non_dict_items() -> None:
 
 def test_tags_snapshot_list_returns_empty_for_non_list() -> None:
     assert _tags_snapshot_list({"not": "a list"}) == []
-
-
-def test_require_internal_key_skips_when_key_missing(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.delenv("VECINITA_INTERNAL_API_KEY", raising=False)
-    with pytest.raises(HTTPException) as exc:
-        _require_internal_key(authorization="Bearer anything")
-    assert exc.value.status_code == 503
-
-
-def test_require_internal_key_rejects_missing_bearer(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", "expected")
-    with pytest.raises(HTTPException) as exc:
-        _require_internal_key(authorization=None)
-    assert exc.value.status_code == 401
-
-
-def test_require_internal_key_rejects_wrong_token(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", "expected")
-    with pytest.raises(HTTPException) as exc:
-        _require_internal_key(authorization="Bearer wrong")
-    assert exc.value.status_code == 401
-
-
-def test_require_internal_key_accepts_valid_token(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", "expected")
-    _require_internal_key(authorization="Bearer expected")

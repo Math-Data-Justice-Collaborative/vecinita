@@ -1,9 +1,22 @@
 import "@testing-library/jest-dom/vitest";
+import { afterEach, beforeEach, vi } from "vitest";
+
+import { setSupabaseClientForTests } from "@/auth/supabaseClient";
+
+import { installAuthenticatedSupabaseMock } from "./supabaseMock";
+
+beforeEach(() => {
+  installAuthenticatedSupabaseMock();
+});
+
+afterEach(() => {
+  setSupabaseClientForTests(null);
+});
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: (query: string) => ({
-    matches: false,
+    matches: query.includes("min-width: 768px"),
     media: query,
     onchange: null,
     addListener: () => undefined,

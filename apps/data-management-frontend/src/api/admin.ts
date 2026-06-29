@@ -119,7 +119,9 @@ export async function fetchStatsSummary(
   options: CorpusClientOptions,
 ): Promise<StatsSummary> {
   const response = await fetch(`${options.baseUrl}/internal/v1/stats/summary`, {
-    headers: { Authorization: `Bearer ${options.apiKey}` },
+    headers: {
+      Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+    },
   });
   if (!response.ok) {
     throw new Error(`Stats summary failed (${String(response.status)})`);
@@ -132,7 +134,9 @@ export async function fetchHealthAggregate(
   options: CorpusClientOptions,
 ): Promise<HealthAggregate> {
   const response = await fetch(`${options.baseUrl}/internal/v1/health/all`, {
-    headers: { Authorization: `Bearer ${options.apiKey}` },
+    headers: {
+      Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+    },
   });
   if (!response.ok) {
     throw new Error(`Health check failed (${String(response.status)})`);
@@ -155,7 +159,7 @@ export async function bulkDeleteDocuments(
     {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${options.apiKey}`,
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ document_ids: documentIds }),
@@ -177,7 +181,7 @@ export async function bulkTagDocuments(
     {
       method: "PATCH",
       headers: {
-        Authorization: `Bearer ${options.apiKey}`,
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -252,7 +256,9 @@ export async function fetchAuditLog(
   if (params?.entity_id) url.searchParams.set("entity_id", params.entity_id);
   if (params?.page) url.searchParams.set("page", String(params.page));
   const response = await fetch(url.toString(), {
-    headers: { Authorization: `Bearer ${options.apiKey}` },
+    headers: {
+      Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+    },
   });
   if (!response.ok)
     throw new Error(`Audit log failed (${String(response.status)})`);
@@ -267,7 +273,9 @@ export async function fetchDocumentHistory(
   const response = await fetch(
     `${options.baseUrl}/internal/v1/audit?entity_id=${documentId}`,
     {
-      headers: { Authorization: `Bearer ${options.apiKey}` },
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+      },
     },
   );
   if (!response.ok)
@@ -286,7 +294,7 @@ export async function bulkUpdateMetadata(
     {
       method: "PATCH",
       headers: {
-        Authorization: `Bearer ${options.apiKey}`,
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ document_ids: documentIds, ...updates }),

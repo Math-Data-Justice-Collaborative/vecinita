@@ -25,6 +25,8 @@ _EXPECTED_AUDIT_LOG_COLUMNS = {
     "request_id",
     "payload",
     "created_at",
+    "actor_id",
+    "actor_role",
 }
 
 _EXPECTED_DOCUMENT_VERSIONS_COLUMNS = {
@@ -70,8 +72,8 @@ def test_alembic_head_includes_ev002_migration() -> None:
         text=True,
         check=True,
     )
-    assert "20260526_0003" in current.stdout
-    assert "20260526_0003" in heads.stdout
+    assert "20260628_0004" in current.stdout
+    assert "20260628_0004" in heads.stdout
 
 
 def test_audit_log_columns_match_spec() -> None:

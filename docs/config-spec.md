@@ -1,7 +1,7 @@
 # Configuration Specification
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-13 (EV-004 F31)
+> **Last updated**: 2026-06-28 (S004/EV-005 F34 — Supabase admin auth)
 
 ## Precedence
 
@@ -54,6 +54,38 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_CHAT_FRONTEND_URL` | string | — | Yes (EV-002) | Chat static site URL for health aggregator |
 | `VECINITA_ADMIN_FRONTEND_URL` | string | — | Yes (EV-002) | Admin static site URL for health aggregator |
 
+### Admin auth — Supabase (EV-005 F34)
+
+Used by the **Data Management API** and the **Internal Write API** to verify operator Supabase
+JWTs (`Authorization: Bearer`), and by the **DM frontend** for the SPA session. Operator identity
+lives in Supabase only; the corpus DB stays PII-free (ADR-026). All values are **secrets** —
+delivered via Modal secrets / DO env, **never** committed (no-operator-spec-commits). Resolved in
+04-tech-plan (ADR-027) + 07-build (ADR-028): verification = **ES256/JWKS** from
+`{SUPABASE_URL}/auth/v1/.well-known/jwks.json`; role source = **`app_metadata.role`** read directly
+from the verified JWT (no `user_roles` table).
+
+**Backends (DM API + internal-write API):**
+
+| Variable | Type | Default | Required | Description |
+|----------|------|---------|----------|-------------|
+| `SUPABASE_URL` | string | — | Yes (admin) | Supabase project URL (canonical `https://cfuvghdsuwactfeamtym.supabase.co`); base for auth / admin API |
+| `SUPABASE_SECRET_KEY` | string (secret) | — | Yes (admin) | Server-side Supabase key for admin/auth operations (invite, first-admin seed; new key scheme, formerly service_role) |
+| `SUPABASE_JWT_AUD` | string | `authenticated` | No | Expected JWT `aud` claim for verification |
+| `VECINITA_AUTH_REQUIRED` | string | `true` | No | `true` enforces JWT on admin routes; `false` only for local dev without Supabase |
+
+> `SUPABASE_DATABASE_PASSWORD` / `SUPABASE_URI` are Supabase's own Postgres credentials (for
+> branching/migrations on the Supabase project via the Supabase CLI) — **not** the Vecinita corpus
+> `DATABASE_URL` (which stays DO-only, H8). First-admin bootstrap uses `SUPABASE_ADMIN_EMAIL` /
+> `SUPABASE_ADMIN_PASSWORD` (operator-only, in `prod.env`; never tracked). Invitation email delivery
+> requires a **custom SMTP** provider configured on the Supabase project (TP-S004-08).
+
+**DM frontend (build-time):**
+
+| Variable | Type | Default | Required | Description |
+|----------|------|---------|----------|-------------|
+| `VITE_SUPABASE_URL` | string | — | Yes (admin build) | Supabase project URL for `@supabase/supabase-js` |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | string | — | Yes (admin build) | Supabase **publishable** key (browser-safe; new key scheme, formerly anon) |
+
 ### Data Management (Modal)
 
 | Variable | Type | Default | Required | Description |
@@ -87,6 +119,13 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 
 <!-- No VITE_* locale vars — i18n is client-only; no CORS impact -->
 
+### CORS (EV-005 F34)
+
+`VECINITA_CORS_ORIGINS` (existing, per service) controls allowed browser origins.
+
+- **ChatRAG API** (`apps/chat-rag-backend`): set `VECINITA_CORS_ORIGINS` to the **ChatRAG frontend origin only** (strict — RD-079). No wildcard.
+- **Admin APIs** (DM API + internal-write API): allow the **admin frontend origin** and add `Authorization` to allowed request headers (so the bearer JWT preflight passes — H4).
+
 <!-- TP-019 / TS-EV002-C01: Health dashboard uses backend aggregator at GET /internal/v1/health/all
      (via VITE_VECINITA_CORPUS_API_URL). Frontend does NOT poll services directly. -->
 
@@ -115,6 +154,9 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_HEALTH_TIMEOUT_MS` ≥ 1000 and ≤ 30000 | Config module (internal-write-api) |
 | Reject unknown `VECINITA_*` in strict mode | Optional dev strictness |
 | No identity fields in public API bodies | OpenAPI + Pydantic models |
+| `VECINITA_AUTH_REQUIRED` in `true`, `false` | Config module (admin backends, F34) |
+| `SUPABASE_URL` set when `VECINITA_AUTH_REQUIRED=true` | Admin backend startup (F34; JWKS from URL) |
+| ChatRAG `VECINITA_CORS_ORIGINS` is non-wildcard, frontend origin only | Config / deploy review (F34, RD-079) |
 
 ## Configuration files
 

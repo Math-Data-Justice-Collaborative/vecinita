@@ -96,7 +96,7 @@ Chronological verdicts from product plan verification. Auto-approved entries tra
 ## Requirements decisions (01-requirements)
 
 > **Stage**: 01-requirements  
-> **Last updated**: 2026-06-26 (S003 delta — F33)
+> **Last updated**: 2026-06-28 (S004/EV-005 delta — F34 Supabase admin auth; see §EV-005 resolutions, RD-073–RD-079)
 
 | ID | Topic | Decision | ADR | Source |
 |----|-------|----------|-----|--------|
@@ -237,6 +237,53 @@ Unresolved:
 - shadcn/ui exact component versions (pin at build time)
 - ~~F33: exact `sessionStorage` key name, serialized schema/versioning, and truncation length for labels~~ — **resolved in 04-tech-plan**: key `vecinita.chat.history.v1`, versioned envelope `{version:1, active, previous[]}`, 60-char label truncation (TP-S003-01/05, ADR-024).
 - ~~F33: update `.cursor/rules/frontend-session-state-lifting.mdc` "within the SPA only" wording~~ — **resolved in 04-tech-plan**: rule amended to permit device-only, tab-scoped `sessionStorage` (TP-S003-11, ADR-023/024; T42.1).
+
+## EV-005 resolutions (2026-06-28) — F34 Supabase admin auth (#75)
+
+Context decisions R48–R54 set in 00-context (context-brief §15): R48 close S003; R49 admin-only
+auth reversal; R50 identity in Supabase; R51 invite-only + admin/viewer; R52 Supabase branching;
+R53 canonical project / MCP access; R54 evolve-lite routing. The 01-requirements interview
+(2026-06-28) resolved the remaining product gaps (RD-073–RD-079):
+
+| ID | Topic | Decision | ADR | Source |
+|----|-------|----------|-----|--------|
+| RD-073 | Auth scope (R49) | **Admin surfaces only** — DM UI, DM API, internal-write API require Supabase JWT; **ChatRAG stays anonymous** | ADR-026 | F34 interview Q `rag_scope` |
+| RD-074 | Credential type | **Email + password**; admin invites operator by email link; invitee sets password (invite-only) | ADR-026 | F34 interview Q `cred_type` |
+| RD-075 | Roles | **`admin`** (full) + **`viewer`** (read-only); writes require `admin` (`403` for viewer) | ADR-026 | F34 interview Q `cred_type` / R51 |
+| RD-076 | Token transport | **SPA** `@supabase/supabase-js` session → `Authorization: Bearer` JWT; FastAPI verifies per request | ADR-026 | F34 interview Q `token_transport` |
+| RD-077 | Identity / audit attribution (R50) | Identity/PII in **Supabase only**; corpus DB stores **opaque Supabase user UUID + role** on `audit_log` (`actor_id`/`actor_role`), no email/name | ADR-026, ADR-016 | F34 interview Q `audit_attr` |
+| RD-078 | Environment syncing (R52/R53) | **Supabase branching** on canonical project `cfuvghdsuwactfeamtym` (user to grant MCP access); migrations in repo; secrets via Modal/DO env, never tracked | ADR-026 | F34 interview Q `env_sync` / `canonical_project` |
+| RD-079 | ChatRAG CORS | **Strict** — ChatRAG API allows only the ChatRAG frontend origin; admin APIs add `Authorization` to allowed headers | ADR-026 | F34 interview Q `rag_scope` (user add-on) |
+
+EV-005 artifacts: feature-list F34; user-journeys UJ-026–UJ-029; test-plan TC-077–TC-086;
+acceptance-criteria AC-A1–AC-A10; ADR-026; config-spec §Admin auth + §CORS; api-contract §Authentication.
+
+Unresolved (for 04-tech-plan) — **all resolved 2026-06-28, see §EV-005 04-tech-plan decisions (ADR-027)**:
+
+- ~~JWT verification mechanism + role-claim source~~ → **HS256 shared secret** (`SUPABASE_JWT_SECRET`); role from **`app_metadata.role`** (TP-S004-01, TP-S004-02, ADR-027).
+- ~~JWT-verification library + `@supabase/supabase-js` pin~~ → **PyJWT `>=2.10,<3`**; **`@supabase/supabase-js ^2.108.2`** (TP-S004-04, ADR-027; back-added to `dependency-inventory.md`).
+- ~~Cost of Supabase Auth + branching vs ADR-004 ≤ $50/mo cap~~ → **cap raised to ~$75/mo** (Pro + ephemeral branching), user-approved; supersedes ADR-004 cost line (TP-S004-06, ADR-027).
+- ~~Grant Supabase MCP access to `cfuvghdsuwactfeamtym` (R53)~~ → **unblocked**: env-sync via **Supabase CLI + migrations-in-repo**, MCP-independent; MCP access optional (TP-S004-07, ADR-027).
+- ~~First-admin bootstrap~~ → **idempotent seed script** using `SUPABASE_SECRET_KEY`, sets `app_metadata.role=admin` (TP-S004-10, ADR-027).
+
+## EV-005 04-tech-plan decisions (2026-06-28) — F34 Supabase admin auth (#75)
+
+> **Stage**: 04-tech-plan (S004, evolve-lite) | **Session**: S004-supabase-auth | **ADR**: ADR-027
+
+| ID | Topic | Decision | ADR |
+|----|-------|----------|-----|
+| TP-S004-01 | JWT verification | **HS256 shared secret** (`SUPABASE_JWT_SECRET`); verify signature + `exp` + `aud`; `401` on missing/invalid/expired | ADR-027 §1 |
+| TP-S004-02 | Role source | **`app_metadata.role`** (`admin`\|`viewer`) read directly from the verified JWT — no hook, no DB round-trip; writes require `admin` (`403` viewer) | ADR-027 §2 |
+| TP-S004-03 | Shared verifier | New module **`vecinita_shared_schemas.auth`** in `packages/shared-schemas` (mirrors `.cors`); FastAPI dependency reused by DM backend + internal-write API; no new package | ADR-027 §3 |
+| TP-S004-04 | Dependency pins | **PyJWT `>=2.10,<3`** (HS256, no `cryptography` needed); **`@supabase/supabase-js ^2.108.2`** (DM frontend only) | ADR-027 §4 |
+| TP-S004-05 | DM backend (Modal) | Keep `X-Vecinita-Proxy-Key` (Modal proxy) **and** add Supabase JWT dependency (app-level) — both must pass | ADR-027 §5 |
+| TP-S004-06 | Cost cap | **Raised to ~$75/mo** (Pro $25 + existing ~$42–48; ephemeral branches); **supersedes ADR-004 $50 cap** — user-approved | ADR-027 §6 |
+| TP-S004-07 | Env sync / R53 | **Supabase Pro + Git-driven branching** (ephemeral previews); migrations-in-repo via **Supabase CLI**, MCP-independent (R53 unblocked) | ADR-027 §6 |
+| TP-S004-08 | Invite delivery | **`inviteUserByEmail` + custom SMTP** on the project; public sign-up disabled | ADR-027 §7 |
+| TP-S004-09 | Internal-write API auth | Accept **Supabase JWT (operator)** OR **`VECINITA_INTERNAL_API_KEY`** (service-to-service); operator writes require `admin` | ADR-027 §5 |
+| TP-S004-10 | First-admin bootstrap | **Idempotent seed script** via `SUPABASE_SECRET_KEY` admin API; sets `app_metadata.role=admin` from `SUPABASE_ADMIN_EMAIL`/`_PASSWORD` | ADR-027 §8 |
+| TP-S004-11 | Audit attribution schema | Alembic migration adds **nullable `actor_id` (UUID) + `actor_role` (text)** to `audit_log` — no PII (extends ADR-016) | ADR-027, ADR-016 |
+| TP-S004-12 | Branch / PR | Single branch **`feat/S004-supabase-auth`** (off `main`); atomic commits; one PR to `main` (S002/S003 evolve-lite pattern) | execution-plan.md Phase 11 |
 
 ## Technical decisions (05-verify-tech)
 

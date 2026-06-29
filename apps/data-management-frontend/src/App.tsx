@@ -1,16 +1,25 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
+import { ProtectedRoute } from "@/auth/ProtectedRoute";
 import { AdminLayout } from "@/components/AdminLayout";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { CorpusPage } from "@/pages/CorpusPage";
 import { JobsPage } from "@/pages/JobsPage";
 import { HealthPage } from "@/pages/HealthPage";
 import { AuditPage } from "@/pages/AuditPage";
+import { LoginPage } from "@/pages/LoginPage";
 
 export default function App() {
   return (
     <Routes>
-      <Route element={<AdminLayout />}>
+      <Route path="/login" element={<LoginPage />} />
+      <Route
+        element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/corpus" element={<CorpusPage />} />
         <Route path="/jobs" element={<JobsPage />} />

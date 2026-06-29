@@ -41,7 +41,33 @@ doctl apps create --spec infra/do/chat-rag-frontend.yaml
 doctl apps create --spec infra/do/data-management-frontend.yaml
 ```
 
-Set **SECRET** env vars in the DO dashboard (or `doctl apps update`) before first deploy succeeds.
+Set **SECRET** env vars in the DO dashboard (or sync from shell — see below) before first deploy succeeds.
+
+### Sync environment variables (EV-005 F34 + existing secrets)
+
+Template with placeholders: **[`.env.example`](.env.example)** (copy values into `prod.env`, never commit).
+
+```bash
+# Load operator env (prod.env is gitignored)
+set -a && source prod.env && set +a
+export DIGITALOCEAN_TOKEN='dop_v1_...'
+
+# Push shell env into one app (preserves other encrypted keys on the live spec)
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py sync-secrets --name vecinita-internal-write-api
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py sync-secrets --name vecinita-admin-frontend
+
+# Or all four apps at once
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py sync-all-secrets
+
+# Or sync every provider at once (Supabase JWKS check + Modal secret + DO apps)
+bash scripts/deploy/sync_env.sh --apply
+```
+
+After updating **BUILD_TIME** vars (`VITE_*`, `VITE_SUPABASE_*`), trigger a redeploy so the static site rebuilds:
+
+```bash
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy --name vecinita-admin-frontend
+```
 
 ## Post-deploy
 

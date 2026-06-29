@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 
 import { LocaleProvider } from "vecinita-frontend-ui";
 
+import { AuthProvider } from "@/auth/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import App from "./App";
 import "./globals.css";
@@ -18,7 +19,9 @@ createRoot(root).render(
     <LocaleProvider>
       <ThemeProvider>
         <BrowserRouter>
-          <App />
+          <AuthProvider>
+            <App />
+          </AuthProvider>
         </BrowserRouter>
       </ThemeProvider>
     </LocaleProvider>

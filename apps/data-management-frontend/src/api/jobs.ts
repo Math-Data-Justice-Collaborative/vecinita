@@ -3,6 +3,17 @@ import type { CreateJobResponse, Job, JobList, JobStatus } from "./types";
 export interface JobsClientOptions {
   baseUrl: string;
   modalKey: string;
+  accessToken?: string;
+}
+
+function jobsHeaders(options: JobsClientOptions): HeadersInit {
+  const headers: Record<string, string> = {
+    "X-Vecinita-Proxy-Key": options.modalKey,
+  };
+  if (options.accessToken) {
+    headers.Authorization = `Bearer ${options.accessToken}`;
+  }
+  return headers;
 }
 
 export async function createJob(
@@ -20,7 +31,7 @@ export async function createJob(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Vecinita-Proxy-Key": options.modalKey,
+      ...jobsHeaders(options),
     },
     body: JSON.stringify(body),
   });
@@ -36,7 +47,7 @@ export async function getJob(
   jobId: string,
 ): Promise<Job> {
   const response = await fetch(`${options.baseUrl}/jobs/${jobId}`, {
-    headers: { "X-Vecinita-Proxy-Key": options.modalKey },
+    headers: jobsHeaders(options),
   });
   if (!response.ok) {
     const detail = await response.text();
@@ -51,7 +62,7 @@ export async function listJobs(
 ): Promise<Job[]> {
   const query = status ? `?status=${encodeURIComponent(status)}` : "";
   const response = await fetch(`${options.baseUrl}/jobs${query}`, {
-    headers: { "X-Vecinita-Proxy-Key": options.modalKey },
+    headers: jobsHeaders(options),
   });
   if (!response.ok) {
     const detail = await response.text();

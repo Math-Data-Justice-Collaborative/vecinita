@@ -8,11 +8,9 @@
  * tab, and asserts the job is still visible (re-fetched from the server) rather than lost.
  */
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
-import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { MemoryRouter } from "react-router-dom";
 
-import App from "../App";
+import { renderAppRoutesReady } from "./renderAppHelpers";
 
 const JOB_ID = "11111111-1111-4111-8111-111111111111";
 
@@ -40,12 +38,8 @@ function urlOf(input: RequestInfo | URL): string {
   return input.url;
 }
 
-function renderApp(initialRoute = "/corpus") {
-  return renderWithProviders(
-    <MemoryRouter initialEntries={[initialRoute]}>
-      <App />
-    </MemoryRouter>,
-  );
+async function renderApp(initialRoute = "/corpus") {
+  return renderAppRoutesReady(initialRoute);
 }
 
 describe("Job Management navigation persistence (#89)", () => {
@@ -80,7 +74,7 @@ describe("Job Management navigation persistence (#89)", () => {
     );
     vi.stubGlobal("fetch", fetchMock);
 
-    renderApp("/corpus");
+    await renderApp("/corpus");
 
     // Start an ingest job from the Corpus tab and wait for it to complete locally.
     fireEvent.change(screen.getByLabelText(/public urls/i), {

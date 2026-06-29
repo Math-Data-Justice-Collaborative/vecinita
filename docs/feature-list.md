@@ -3,8 +3,8 @@
 > **Project**: Vecinita  
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
-> **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023)
-> **Last updated**: 2026-06-26 (S003 F33 — browser-local persistent chat history)
+> **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
+> **Last updated**: 2026-06-28 (S004/EV-005 F34 — Supabase Auth for admin surfaces, #75)
 
 ## Summary
 
@@ -43,6 +43,7 @@
 | F31 | Admin + shared frontend bilingual UI (en/es) | Planned | Cross-cutting | data-management-frontend, chat-rag-frontend, `packages/frontend-i18n`, `packages/frontend-ui` | EV-004 2026-06-13 |
 | F32 | Admin Job Management tab (list jobs) | Implemented | Data Management | data-management-backend, data-management-frontend | S002 2026-06-26 (#89) |
 | F33 | Browser-local persistent chat history (localStorage + previous-chats list) | Planned | ChatRAG | chat-rag-frontend | S003 2026-06-26; ADR-025 2026-06-28 |
+| F34 | Supabase Auth for admin surfaces (invite-only, admin+viewer) | Planned | Cross-cutting (admin) | data-management-frontend, data-management-backend, internal-write-api | S004/EV-005 2026-06-28; ADR-026 (#75) |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -232,12 +233,13 @@
 | F31 Bilingual UI (shared packages) | Yes | Yes | No | No |
 | F32 Admin Job Management tab | No | Yes | No | No |
 | F33 Persistent chat history (browser-local) | Yes | No | No | No |
+| F34 Supabase admin auth | No | Yes | No | No |
 
 ## Out of Scope (v1)
 
 | Item | Rationale | Source |
 |------|-----------|--------|
-| User/admin accounts, Supabase Auth, OAuth, invite-by-email | Zero personal data (ADR-004) | User interview |
+| ~~User/admin accounts, Supabase Auth, OAuth, invite-by-email~~ → **partially admitted in EV-005 (F34)** for **admin surfaces only**: Supabase Auth + email invite + password login + `admin`/`viewer` roles. **OAuth/social login remains out of scope.** Visitor (ChatRAG) auth still excluded. | Admin-surface auth required by #75; ADR-026 supersedes ADR-004 auth clause for admin only | User interview; #75; ADR-026 |
 | Paid third-party LLM/embed APIs as default | Cost + sovereignty (ADR-004) | User interview |
 | RFantibody / PyRosetta / protein design | Wrong product domain; stale rules only | User interview |
 | Multi-region / non-US deployment | Data sovereignty R10a | User interview |
@@ -470,6 +472,34 @@
   - Frontend-only delta in `apps/chat-rag-frontend`; no change to `data-management-frontend`.
 - **Priority**: High — direct user request (S003).
 - **Source**: S003 session interview 2026-06-26 (R43–R47); context-brief §14 (F33, R39–R42); ADR-023; **ADR-025** (2026-06-28 — `localStorage` durable/cross-tab, reverses `sessionStorage`).
+
+### F34: Supabase Auth for admin surfaces (invite-only, admin + viewer)
+
+- **What it does**: Adds a real **authentication interface** ([#75](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/75)) over the **admin surfaces** using **Supabase Auth**, so only permitted operators can manage the corpus, view dashboards, and call admin APIs. Registration is **invitation-only**. The public ChatRAG experience stays **anonymous and stateless** (F3 preserved). Supersedes the ADR-004 *no Supabase Auth / no identity* clause **for admin surfaces only** (ADR-026).
+- **Protected surfaces**:
+  | Surface | Path | Auth change |
+  |---------|------|-------------|
+  | Data Management UI | `apps/data-management-frontend/` | Login screen, `@supabase/supabase-js` session, protected routes, current-user display, logout |
+  | Data Management API | `apps/data-management-backend/` | Supabase JWT verification; `401` on missing/invalid token |
+  | Internal Write API | `apps/internal-write-api/` | Supabase JWT verification + role check; `403` for `viewer` on writes |
+- **Unchanged (anonymous)**: ChatRAG chat/query API + public corpus browse stay anonymous (no login). ChatRAG API additionally tightens **CORS to the ChatRAG frontend origin only** (RD-079).
+- **Inputs**: Operator browser; admin email invitation; email + password login; Supabase JWT (`Authorization: Bearer`) on admin API requests.
+- **Outputs**: Authenticated admin sessions; `401`/`403` for unauthenticated/under-privileged requests; audit log attributed to the **opaque Supabase user UUID + role** (no email/name in corpus DB).
+- **Key decisions**:
+  | Topic | Decision | Source |
+  |-------|----------|--------|
+  | Scope | Admin surfaces only; ChatRAG anonymous | R49, RD-073 |
+  | Registration | Invitation-only (public sign-up disabled) | R51, RD-074 |
+  | Credentials | Email + password; admin invites by email link | RD-074 |
+  | Roles | `admin` (full) + `viewer` (read-only) | R51, RD-075 |
+  | Token transport | SPA `supabase-js` session → `Authorization: Bearer` JWT; FastAPI verifies | RD-076 |
+  | Identity / PII residency | Identity in Supabase; corpus DB PII-free; audit actor = opaque Supabase UUID + role | R50, RD-077 |
+  | Environment syncing | Supabase **branching** on canonical project; migrations in repo; secrets via Modal/DO env | R52, RD-078 |
+  | ChatRAG CORS | Strict — only the ChatRAG frontend origin | RD-079 |
+- **Limitations / scope**: No OAuth/social login (this cycle). No RBAC beyond `admin` + `viewer`. No visitor authentication. No operator PII in the Vecinita corpus DB (only opaque UUID + role for attribution). Secrets never committed (no-operator-spec-commits). Cost of Supabase Auth + branching is sized against the ADR-004 ≤ $50/mo cap in 04-tech-plan.
+- **Privacy (F15 extended, not relaxed)**: corpus DB keeps the forbidden-table deny-list (`users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`, `auth_*`); Supabase manages its own `auth.*` schema in a separate database; `audit_log` may add only `actor_id` (UUID) + `actor_role`.
+- **Priority**: High — direct user request (#75); unblocks per-user dashboards and audit attribution.
+- **Source**: S004 / EV-005 interview 2026-06-28 (RD-073–RD-079); context-brief §15; ADR-026; #75.
 
 ## Planned / Deferred (post-v1)
 

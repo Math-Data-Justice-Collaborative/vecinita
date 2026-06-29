@@ -77,6 +77,19 @@
 - [x] **AC-S6**: No chat history is sent to the server, persisted to the database, or written to logs; no server-side session/message row is created; persistence is **device-local** (`localStorage`) and never leaves the device — durable across tab close and shared across tabs of the same origin (F3, ADR-004, ADR-023, ADR-025). — met (07-build M42; `test_chat_history_privacy.test.tsx`: ask payload carries no history; persisted only to device-local `localStorage`, never `sessionStorage`/cookies/network)
 - [x] **AC-S7**: No API, contract, or CORS **policy** changes for F33 (frontend-only delta). — met (frontend-only delta; no `openapi/`, CORS, or backend changes in S003)
 
+### EV-005 — Supabase admin auth (F34)
+
+- [ ] **AC-A1**: Unauthenticated requests (no / invalid / expired JWT) to the Data Management API and the internal-write API return **401**; no side effects (UJ-028, TC-078). — pending build
+- [ ] **AC-A2**: A valid Supabase JWT (role `admin`) authorizes admin API requests (UJ-026, TC-077). — pending build
+- [ ] **AC-A3**: `viewer` role is rejected (**403**) on write routes; `admin` succeeds (UJ-029, TC-079). — pending build
+- [ ] **AC-A4**: Registration is **invitation-only** — public sign-up is disabled; only invited identities can authenticate (UJ-027, TC-080). — pending build
+- [ ] **AC-A5**: The DM frontend redirects unauthenticated users to a login screen, surfaces the current user, and supports logout (UJ-026, TC-084). — pending build
+- [ ] **AC-A6**: Audit attribution records only the opaque Supabase user UUID + role (`actor_id`/`actor_role`); no email/name/PII in the corpus DB (UJ-029, TC-081, TC-086). — pending build
+- [ ] **AC-A7**: ChatRAG remains anonymous (no auth required) and the corpus DB remains PII-free — F3 and F15 preserved (TC-083, TC-086). — pending build
+- [ ] **AC-A8**: ChatRAG API enforces strict CORS limited to the ChatRAG frontend origin (TC-082, H4); admin APIs allow `Authorization` in preflight (TC-082, H4). — pending 13-deploy-smoke
+- [ ] **AC-A9**: No request/response schema changes to existing ChatRAG or admin endpoints — only auth (header) + 401/403 added on admin routes (api-contract §Authentication). — spec confirmed
+- [ ] **AC-A10**: Supabase environments are kept in sync via **branching** with migrations in the repo; all Supabase secrets are delivered via Modal/DO env and never committed (RD-078, no-operator-spec-commits). — verify at 12/13
+
 ## Quantitative benchmarks
 
 | Benchmark | Metric | Target | Dataset | Spec reference |

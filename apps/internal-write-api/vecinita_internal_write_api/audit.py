@@ -2,6 +2,7 @@
 
 ADR-016: audit event emission (TP-023, TP-025)
 TP-027: audit log retention with configurable period
+EV-005: optional actor_id / actor_role (opaque Supabase UUID + role, no PII)
 """
 
 from __future__ import annotations
@@ -9,6 +10,7 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import Mapping, Sequence
+from contextvars import ContextVar
 from datetime import UTC, datetime, timedelta
 from typing import cast
 from uuid import UUID
@@ -20,6 +22,20 @@ from vecinita_shared_schemas.json_types import JsonObject
 
 logger = logging.getLogger(__name__)
 
+_audit_actor: ContextVar[tuple[UUID | None, str | None]] = ContextVar(
+    "_audit_actor",
+    default=(None, None),
+)
+
+
+def bind_audit_actor(*, actor_id: UUID | None, actor_role: str | None) -> None:
+    """Set the actor for audit rows emitted in the current request (write routes)."""
+    _audit_actor.set((actor_id, actor_role))
+
+
+def clear_audit_actor() -> None:
+    _audit_actor.set((None, None))
+
 
 def emit_audit_event(
     conn: Connection,
@@ -29,12 +45,19 @@ def emit_audit_event(
     entity_id: UUID,
     request_id: UUID,
     payload: JsonObject | None = None,
+    actor_id: UUID | None = None,
+    actor_role: str | None = None,
 ) -> None:
     """Insert an audit_log row within the caller's transaction."""
+    if actor_id is None and actor_role is None:
+        actor_id, actor_role = _audit_actor.get()
     conn.execute(
         text(
-            "INSERT INTO audit_log (event_type, entity_type, entity_id, request_id, payload) "
-            "VALUES (:event_type, :entity_type, :entity_id, :request_id, CAST(:payload AS jsonb))"
+            "INSERT INTO audit_log "
+            "(event_type, entity_type, entity_id, request_id, payload, actor_id, actor_role) "
+            "VALUES "
+            "(:event_type, :entity_type, :entity_id, :request_id, "
+            "CAST(:payload AS jsonb), :actor_id, :actor_role)"
         ),
         {
             "event_type": event_type,
@@ -42,6 +65,8 @@ def emit_audit_event(
             "entity_id": entity_id,
             "request_id": request_id,
             "payload": json.dumps(payload or {}),
+            "actor_id": actor_id,
+            "actor_role": actor_role,
         },
     )
 

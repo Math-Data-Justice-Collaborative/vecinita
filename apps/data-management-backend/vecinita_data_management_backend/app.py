@@ -8,6 +8,7 @@ from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query, status
+from vecinita_shared_schemas.auth import AuthPrincipal, get_principal, require_role
 from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.data_management import (
     CreateJobRequest,
@@ -63,11 +64,21 @@ def create_app(
     configure_cors(app, extra_allow_headers=[_PROXY_HEADER], env_value=resolved_cors)
     job_store = store or InMemoryJobStore()
     runner = pipeline_runner
+    require_admin = require_role("admin")
 
     def auth_dep(
         modal_key: Annotated[str | None, Header(alias=_PROXY_HEADER)] = None,
-    ) -> None:
+        _principal: AuthPrincipal = Depends(get_principal),  # noqa: B008
+    ) -> AuthPrincipal:
         _check_proxy_auth(require_proxy_auth=require_proxy_auth, modal_key=modal_key)
+        return _principal
+
+    def write_auth_dep(
+        modal_key: Annotated[str | None, Header(alias=_PROXY_HEADER)] = None,
+        principal: AuthPrincipal = Depends(require_admin),  # noqa: B008
+    ) -> AuthPrincipal:
+        _check_proxy_auth(require_proxy_auth=require_proxy_auth, modal_key=modal_key)
+        return principal
 
     @app.get("/health", response_model=HealthResponse)
     def health() -> HealthResponse:
@@ -81,7 +92,7 @@ def create_app(
     def create_job(
         body: CreateJobRequest,
         background: BackgroundTasks,
-        _: None = Depends(auth_dep),
+        _: AuthPrincipal = Depends(write_auth_dep),  # noqa: B008
     ) -> CreateJobResponse:
         options: dict[str, object] = {}
         job_type = "ingest"
@@ -106,7 +117,7 @@ def create_app(
             Literal["pending", "running", "completed", "failed"] | None,
             Query(alias="status"),
         ] = None,
-        _: None = Depends(auth_dep),
+        _: AuthPrincipal = Depends(auth_dep),  # noqa: B008
     ) -> JobList:
         records = job_store.list_jobs()
         if status_filter is not None:
@@ -114,7 +125,7 @@ def create_app(
         return JobList(jobs=[job_record_to_schema(record) for record in records])
 
     @app.get("/jobs/{job_id}", response_model=Job)
-    def get_job(job_id: UUID, _: None = Depends(auth_dep)) -> Job:
+    def get_job(job_id: UUID, _: AuthPrincipal = Depends(auth_dep)) -> Job:  # noqa: B008
         record = job_store.get_job(job_id)
         if record is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")

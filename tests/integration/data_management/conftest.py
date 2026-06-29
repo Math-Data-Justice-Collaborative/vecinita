@@ -11,6 +11,7 @@ from vecinita_data_management_backend.jobs import run_job
 from vecinita_data_management_backend.pipeline import fetch_html_fixture
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_embedding_client import EMBEDDING_DIMENSION
+from vecinita_shared_schemas.auth import reset_auth_config_for_tests
 
 _FIXTURE_HTML = (
     Path(__file__).resolve().parents[3] / "data" / "fixtures" / "ingest" / "sample-page.html"
@@ -77,4 +78,6 @@ def dm_client(job_store: InMemoryJobStore, mock_write: _MockWriteClient) -> Test
 def proxy_key_env(monkeypatch: pytest.MonkeyPatch, request: pytest.FixtureRequest) -> None:
     if request.node.get_closest_marker("live"):
         return
+    reset_auth_config_for_tests()
     monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", _PROXY_KEY)
+    monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "false")

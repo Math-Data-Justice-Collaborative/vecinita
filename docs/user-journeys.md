@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-06-26 (S003: UJ-024/UJ-025 browser-local chat history)
+> **Last updated**: 2026-06-28 (S004/EV-005: UJ-026–UJ-029 Supabase admin auth, #75)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI steps** are waived at T0 — see `tests/e2e/README.md` (Vitest component smoke only).
@@ -36,6 +36,10 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-023 | View & track jobs in Job Management tab | Operator | Admin UI → `GET /jobs` | F32 (#88, #89) | local |
 | UJ-024 | Conversation persists across refresh / tab-away / tab-close / new tab | Community member | ChatRAG Frontend → `localStorage` (device-local) | F33 | local |
 | UJ-025 | Revisit a previous conversation | Community member | ChatRAG Frontend previous-chats list → `localStorage` | F33 | local |
+| UJ-026 | Admin logs in to the Data Management UI | Operator | DM Frontend login → Supabase Auth → protected routes | F34 | local |
+| UJ-027 | Admin invites an operator; invitee accepts | Admin operator | Supabase invite (email) → invitee sets password → login | F34 | local |
+| UJ-028 | Unauthenticated admin request rejected | Anonymous / expired-session client | DM API / internal-write API without valid JWT | F34 | local |
+| UJ-029 | Viewer is blocked from write actions | Viewer operator | DM UI / internal-write API write route | F34 | local |
 
 ## Journey Details
 
@@ -545,3 +549,88 @@ Product-facing journeys describe what a **caller** does — not internal module 
 **Automated tests**: `apps/chat-rag-frontend/src/test/test_previous_chats_list.test.tsx` (Vitest): new-chat archival, label derivation, select-to-restore (incl. restored **sources**, TC-076), the **10-item cap with FIFO eviction driven through the UI** (TC-075), delete + clear-all semantics.
 
 **E2E tier**: local (Vitest component/app smoke). Live browser waived at T0 (consistent with other ChatRAG UI journeys).
+
+---
+
+### UJ-026: Admin logs in to the Data Management UI
+
+**Actor**: Operator (Supabase identity — admin or viewer)
+
+**Goal**: Sign in once and reach the admin dashboard; unauthenticated visitors cannot see admin pages.
+
+**Steps**:
+
+1. Open the Data Management UI without a session → redirected to a **login screen** (protected routes).
+2. Enter email + password (Supabase Auth via `@supabase/supabase-js`).
+3. On success, the SPA stores the Supabase session; the operator lands on the dashboard with their **current user** shown (and a **logout** control).
+4. Subsequent admin API calls carry `Authorization: Bearer <supabase_jwt>`.
+5. Logging out clears the session and returns to the login screen.
+
+**Acceptance**: No session → all admin routes redirect to login; valid credentials → dashboard with current-user display + logout; admin API calls include the bearer JWT; logout clears the session. Operator identity is stored in **Supabase only** (no Vecinita user row).
+
+**Automated tests**: `apps/data-management-frontend/src/test/test_auth_login_protected_routes.test.tsx` (Vitest: redirect when unauthenticated, render on session, current-user + logout); API side covered by UJ-028.
+
+**Browser / connectivity**: DM frontend origin → DM API + internal-write API with `Authorization` header (H4 CORS includes `Authorization`).
+
+**E2E tier**: local (Vitest component/app smoke; API TestClient for token verification). Live browser login waived at T0 (consistent with other admin UI journeys).
+
+---
+
+### UJ-027: Admin invites an operator; invitee accepts
+
+**Actor**: Admin operator (inviter) + invited operator (invitee)
+
+**Goal**: Onboard a new operator **without** public sign-up.
+
+**Steps**:
+
+1. An `admin` invites a new operator by **email** (Supabase invite / magic link). Public sign-up is **disabled**, so this is the only way to create an account.
+2. The invitee receives an email, opens the link, and **sets a password**.
+3. The invitee logs in (UJ-026) with the assigned role (`admin` or `viewer`).
+4. Attempting to self-register without an invite is rejected.
+
+**Acceptance**: Only invited emails can create accounts; public sign-up returns an error / is unavailable; the invitee can log in after setting a password; role is assigned at/after invite.
+
+**Automated tests**: `tests/e2e/test_uj027_invite_only_registration.py` (asserts public sign-up is disabled / unauthorized; an invited identity can authenticate). Invite issuance is a Supabase admin operation (verified via Supabase config + integration, not by creating real mailboxes in CI).
+
+**E2E tier**: local (integration against a Supabase test/branch project or mocked admin API). Live invite flow verified at 10-e2e / 13-deploy-smoke.
+
+---
+
+### UJ-028: Unauthenticated admin request rejected
+
+**Actor**: Anonymous client, or a client with a missing/invalid/expired JWT
+
+**Goal**: Admin APIs are not accessible without a valid Supabase JWT.
+
+**Steps**:
+
+1. Call a Data Management API route or an internal-write `/internal/v1/*` route with **no** `Authorization` header → **401**.
+2. Call the same route with an **invalid or expired** JWT → **401**.
+3. No corpus mutation occurs; no job is created.
+
+**Acceptance**: Missing/invalid/expired token → `401`; no side effects. ChatRAG `/api/v1/*` is unaffected (stays anonymous). Service-to-service Modal→internal-write calls using `VECINITA_INTERNAL_API_KEY` continue to work.
+
+**Automated tests**: `tests/e2e/test_uj028_unauthenticated_admin.py` (401 on DM API + internal-write routes without/with bad JWT); `tests/e2e/test_uj001_ask_stream.py` confirms ChatRAG needs no auth.
+
+**E2E tier**: local (API TestClient with a stub/real Supabase JWKS). Live verified at 13-deploy-smoke.
+
+---
+
+### UJ-029: Viewer is blocked from write actions
+
+**Actor**: Operator with role `viewer`
+
+**Goal**: Read-only operators cannot mutate the corpus.
+
+**Steps**:
+
+1. A `viewer` logs in (UJ-026) and can **read** dashboards, corpus, audit, jobs.
+2. The `viewer` attempts a **write** (e.g. delete a document, edit tags, submit an ingest job) → **403** at the API; the UI hides or disables the write controls.
+3. An `admin` performing the same write succeeds and the action is attributed in `audit_log` to the admin's **opaque Supabase user UUID + role**.
+
+**Acceptance**: `viewer` → `403` on write routes; `admin` → success; `audit_log` records `actor_id` (UUID) + `actor_role` with **no** email/name; read routes work for both roles.
+
+**Automated tests**: `tests/e2e/test_uj029_role_gating.py` (viewer 403 on writes, admin 200; audit actor is opaque UUID + role, no PII); UI gating covered by `apps/data-management-frontend/src/test/test_role_gated_controls.test.tsx`.
+
+**E2E tier**: local (API TestClient + Vitest). Live verified at 13-deploy-smoke.

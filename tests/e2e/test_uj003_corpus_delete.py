@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from typing import cast
 from uuid import uuid4
 
@@ -15,19 +14,6 @@ pytestmark = pytest.mark.e2e
 
 _API_KEY = "test-internal-key"
 _EMBEDDING = [0.03] * 384
-
-
-def _database_url() -> str:
-    return os.environ.get(
-        "DATABASE_URL",
-        "postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
-    )
-
-
-@pytest.fixture
-def internal_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _API_KEY)
-    monkeypatch.setenv("DATABASE_URL", _database_url())
 
 
 @pytest.fixture

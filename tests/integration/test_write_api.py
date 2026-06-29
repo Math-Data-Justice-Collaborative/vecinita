@@ -23,12 +23,6 @@ def _database_url() -> str:
 
 
 @pytest.fixture
-def internal_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _API_KEY)
-    monkeypatch.setenv("DATABASE_URL", _database_url())
-
-
-@pytest.fixture
 async def write_client(internal_api_key: None):
     from vecinita_internal_write_api.app import create_app
 

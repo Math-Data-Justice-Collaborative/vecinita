@@ -88,7 +88,32 @@ It authenticates via repo secrets `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` (token
 profile needed; `scripts/modal_ensure_workspace.sh` verifies the workspace from `modal token info`).
 Manual redeploy: trigger the **Deploy Modal** workflow via `workflow_dispatch`.
 
-**Secret (data-management):** Create `vecinita-data-management` in the [vecinita workspace](https://modal.com/secrets/vecinita/main) with `VECINITA_MODAL_EMBED_URL`, `VECINITA_INTERNAL_WRITE_URL`, `VECINITA_INTERNAL_API_KEY`, `VECINITA_MODAL_PROXY_KEY`, and `VECINITA_CORS_ORIGINS` (admin + chat frontend origins) before deploying `data_management_app.py`. If `VECINITA_CORS_ORIGINS` is omitted, the app falls back to staging DO origins baked into `create_app()`.
+**Secret (data-management):** Create `vecinita-data-management` in the [vecinita workspace](https://modal.com/secrets/vecinita/main) using **[`.env.example`](.env.example)** as the key checklist:
+
+- `VECINITA_MODAL_EMBED_URL`, `VECINITA_INTERNAL_WRITE_URL`, `VECINITA_INTERNAL_API_KEY`
+- `VECINITA_MODAL_PROXY_KEY`, `VECINITA_CORS_ORIGINS`, `VECINITA_MODAL_LLM_URL`
+- `SUPABASE_URL`, `VECINITA_AUTH_REQUIRED` (EV-005 F34 — JWT on `/jobs*`)
+
+```bash
+set -a && source prod.env && set +a
+modal profile activate vecinita
+
+# Helper script (lists keys on dry run, writes with --apply):
+bash scripts/deploy/sync_modal_secret.sh --apply
+
+# Or the raw CLI equivalent:
+modal secret create --force vecinita-data-management \
+  VECINITA_MODAL_EMBED_URL="$VECINITA_MODAL_EMBED_URL" \
+  VECINITA_INTERNAL_WRITE_URL="$VECINITA_INTERNAL_WRITE_URL" \
+  VECINITA_INTERNAL_API_KEY="$VECINITA_INTERNAL_API_KEY" \
+  VECINITA_MODAL_PROXY_KEY="$VECINITA_MODAL_PROXY_KEY" \
+  VECINITA_CORS_ORIGINS="$VECINITA_CORS_ORIGINS" \
+  VECINITA_MODAL_LLM_URL="$VECINITA_MODAL_LLM_URL" \
+  SUPABASE_URL="$SUPABASE_URL" \
+  VECINITA_AUTH_REQUIRED="${VECINITA_AUTH_REQUIRED:-true}"
+```
+
+If `VECINITA_CORS_ORIGINS` is omitted, the app falls back to staging DO origins baked into `create_app()`.
 
 **Proxy key parity (H5):** `VECINITA_MODAL_PROXY_KEY` must equal DigitalOcean `VITE_VECINITA_MODAL_PROXY_KEY` on `vecinita-admin-frontend` (build-time). After any change, rebuild the admin frontend. Check with `bash scripts/deploy/check_proxy_key_parity.sh` when both values are exported in your shell.
 

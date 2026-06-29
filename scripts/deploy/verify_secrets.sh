@@ -31,7 +31,8 @@ if ! grep -qx "${REQUIRED_SECRET}" <<<"${secret_names}"; then
   echo "ERROR: missing Modal secret '${REQUIRED_SECRET}'." >&2
   echo "Create with keys (see infra/modal/README.md):" >&2
   echo "  VECINITA_MODAL_EMBED_URL, VECINITA_INTERNAL_WRITE_URL, VECINITA_INTERNAL_API_KEY" >&2
-  echo "  (plus VECINITA_MODAL_PROXY_KEY if not set elsewhere)" >&2
+  echo "  VECINITA_MODAL_PROXY_KEY, VECINITA_CORS_ORIGINS, VECINITA_MODAL_LLM_URL" >&2
+  echo "  SUPABASE_URL, VECINITA_AUTH_REQUIRED (EV-005 — see infra/modal/.env.example)" >&2
   echo "Existing secrets:" >&2
   echo "${secret_names}" >&2
   exit 1

@@ -5,6 +5,27 @@ project:
   description: Monorepo — bilingual community Q&A RAG + data management (5 apps; zero personal data, cost/sovereignty constraints)
   output_directory: docs/
   stages:
+    00-context:
+      status: completed
+      completed_at: "2026-06-28"
+      session_id: S004-supabase-auth
+      branch: feat/S004-supabase-auth
+      note: "S004 session opened for #75 Supabase admin auth (EV-005/F34); 5 gating decisions R48-R54; commit 9123b96. Handoff to 01-requirements."
+    01-requirements:
+      status: completed
+      completed_at: "2026-06-28"
+      session_id: S004-supabase-auth
+      last_delta: "S004/EV-005 F34 Supabase admin auth (2026-06-28)"
+      note: "EV-005/F34 delta: ADR-026 (supersedes ADR-004 auth clause, admin surfaces only), feature-list F34, UJ-026-UJ-029, TC-077-TC-086, AC-A1-AC-A10, RD-073-RD-079, config-spec Supabase env+CORS, api-contract Authentication, dependency-inventory EV-005 deps + Excluded reconciliation. Commit DEFERRED (commit-only-when-asked override). Open items handed to 04-tech-plan."
+    04-tech-plan:
+      status: completed
+      completed_at: "2026-06-28"
+      session_id: S004-supabase-auth
+      baseline_completed_at: "2026-05-24"
+      baseline_partial_rerun_at: "2026-06-13"
+      baseline_partial_rerun_note: "EV-004 delta F31 — 10 TP decisions, Phase 9 (36 tasks), ADR-021 (preserved in legacy stages.04-tech-plan)"
+      last_delta: "S004/EV-005 F34 Supabase admin auth tech plan (2026-06-28)"
+      note: "EV-005/F34 tech plan delta: ADR-027 (Supabase Auth verification + env sync) with TP-S004-01..12 — HS256 JWT verify (TP-S004-01), app_metadata.role claim source (TP-S004-02), shared vecinita_shared_schemas.auth, PyJWT>=2.10,<3 + @supabase/supabase-js ^2.108.2, Pro plan + ephemeral branching + CLI migrations-in-repo, inviteUserByEmail+SMTP, idempotent first-admin seed; cost cap raised to ~$75/mo (supersedes ADR-004 cap — user-approved). Phase 11 (M43-M47, T43.1-T47.6, 29 tasks) appended to execution-plan. R53 unblocked via Supabase CLI (MCP-independent). Commit DEFERRED (commit-only-when-asked override). Baseline partial_rerun info preserved in legacy stages.04-tech-plan."
     07-build:
       status: completed
       completed_at: "2026-06-26"
@@ -61,19 +82,28 @@ active_session:             # current bounded work unit; null when none in fligh
   orchestrator: 16-evolve
   artifacts_dir: docs/sessions/S004-supabase-auth/
   started_at: "2026-06-28"
-  current_stage: "00-context"
+  current_stage: "07-build"
   linked_issues: [75]
   evolve_cycle_id: EV-005
   routing_plan:
     - stage: 00-context
-      status: in_progress
-      note: "Session opened for #75 Supabase admin auth; scope + 5 gating decisions resolved (R: close S003, admin-only reversal, identity in Supabase, invite-only 2 roles, Supabase branching env sync)."
+      status: completed
+      completed_at: "2026-06-28"
+      note: "Session opened for #75; 5 gating decisions (R48-R54); context-brief §15 EV-005 delta; session-brief + routing-plan written; S003 closed; commit 9123b96. Handoff to 01-requirements."
     - stage: 01-requirements
-      status: pending
+      status: completed
+      started_at: "2026-06-28"
+      completed_at: "2026-06-28"
+      note: "EV-005/F34 Supabase admin auth requirements delta: ADR-026 (supersedes ADR-004 auth/identity clause for admin surfaces only), feature-list F34, UJ-026-UJ-029, TC-077-TC-086, AC-A1-AC-A10, RD-073-RD-079, config-spec Supabase env+CORS, api-contract Authentication, dependency-inventory EV-005 deps + Excluded reconciliation (pins deferred to 04-tech-plan). Commit DEFERRED (commit-only-when-asked override). Open items handed to 04-tech-plan."
     - stage: 04-tech-plan
-      status: pending
+      status: completed
+      started_at: "2026-06-28"
+      completed_at: "2026-06-28"
+      note: "EV-005/F34 tech plan: ADR-027 (HS256 verify TP-S004-01, app_metadata.role TP-S004-02, shared vecinita_shared_schemas.auth, PyJWT>=2.10,<3 + @supabase/supabase-js ^2.108.2, Pro+ephemeral branching + CLI migrations-in-repo, cost cap raised to ~$75/mo superseding ADR-004 — user-approved, inviteUserByEmail+SMTP, idempotent first-admin seed). Phase 11 (M43-M47, T43.1-T47.6, 29 tasks) appended to execution-plan; decisions/dependency-inventory/config-spec/api-contract updated. R53 unblocked (CLI, MCP-independent). Commit DEFERRED (commit-only-when-asked). Handoff to 07-build."
     - stage: 07-build
-      status: pending
+      status: in_progress
+      started_at: "2026-06-29"
+      note: "EV-005/F34 Supabase admin auth build (Phase 11, M43-M47). M47 T47.1-T47.6 completed 2026-06-29. Audit-actor fix in apps/internal-write-api: replaced ContextVar-based actor propagation with an explicit WriteActorDep dependency. Next: Phase 11 gate check + 08-verify-build."
     - stage: 08-verify-build
       status: pending
     - stage: 09-qa
@@ -95,6 +125,87 @@ active_session:             # current bounded work unit; null when none in fligh
       reason: "User-approved lite path."
     - stage: 11-verify-impl
       reason: "User-approved lite path; covered by 09-qa + 10-e2e."
+  artifacts:
+    - path: docs/sessions/S004-supabase-auth/session-brief.md
+      kind: session-brief
+      session_id: S004-supabase-auth
+      stage: 00-context
+    - path: docs/sessions/S004-supabase-auth/routing-plan.md
+      kind: routing-plan
+      session_id: S004-supabase-auth
+      stage: 00-context
+    - path: docs/context-brief.md
+      kind: context-brief-delta
+      session_id: S004-supabase-auth
+      stage: 00-context
+    - path: docs/adr/ADR-026-supabase-admin-auth.md
+      kind: adr
+      session_id: S004-supabase-auth
+      stage: 01-requirements
+    - path: docs/feature-list.md
+      kind: feature-list
+      session_id: S004-supabase-auth
+      stage: 01-requirements
+    - path: docs/spec.md
+      kind: spec
+      session_id: S004-supabase-auth
+      stage: 01-requirements
+    - path: docs/user-journeys.md
+      kind: user-journeys
+      session_id: S004-supabase-auth
+      stage: 01-requirements
+    - path: docs/test-plan.md
+      kind: test-plan
+      session_id: S004-supabase-auth
+      stage: 01-requirements
+    - path: docs/config-spec.md
+      kind: config-spec
+      session_id: S004-supabase-auth
+      stage: 01-requirements
+    - path: docs/api-contract.md
+      kind: api-contract
+      session_id: S004-supabase-auth
+      stage: 01-requirements
+    - path: docs/acceptance-criteria.md
+      kind: acceptance-criteria
+      session_id: S004-supabase-auth
+      stage: 01-requirements
+    - path: docs/decisions.md
+      kind: decisions
+      session_id: S004-supabase-auth
+      stage: 01-requirements
+    - path: docs/dependency-inventory.md
+      kind: dependency-inventory
+      session_id: S004-supabase-auth
+      stage: 01-requirements
+    - path: docs/adr/ADR-027-supabase-auth-verification-and-env-sync.md
+      kind: adr
+      session_id: S004-supabase-auth
+      stage: 04-tech-plan
+    - path: docs/sessions/S004-supabase-auth/reports/tech-plan.md
+      kind: tech-plan-report
+      session_id: S004-supabase-auth
+      stage: 04-tech-plan
+    - path: docs/execution-plan.md
+      kind: execution-plan
+      session_id: S004-supabase-auth
+      stage: 04-tech-plan
+    - path: docs/decisions.md
+      kind: decisions
+      session_id: S004-supabase-auth
+      stage: 04-tech-plan
+    - path: docs/dependency-inventory.md
+      kind: dependency-inventory
+      session_id: S004-supabase-auth
+      stage: 04-tech-plan
+    - path: docs/config-spec.md
+      kind: config-spec
+      session_id: S004-supabase-auth
+      stage: 04-tech-plan
+    - path: docs/api-contract.md
+      kind: api-contract
+      session_id: S004-supabase-auth
+      stage: 04-tech-plan
 sessions:                   # archived completed sessions
   - id: S003-persistent-chat-history
     type: feature
@@ -522,6 +633,16 @@ stages:
       milestones: [M39, M40, M41, M42]
       note: "S003 F33 browser-local persistent chat history build complete — M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green"
       reopen_note: "07-build reopened 2026-06-28 (explicit user approval) for an ADR-025 delta: chat-history storage switched sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only). Commit eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed."
+    s004:
+      status: in_progress
+      session_id: S004-supabase-auth
+      branch: feat/S004-supabase-auth
+      started_at: "2026-06-29"
+      feature: F34
+      phase: "Phase 11 (M43-M47, T43.1-T47.6, 29 tasks)"
+      milestones_completed: [M47]
+      completed_tasks: [T47.1, T47.2, T47.3, T47.4, T47.5, T47.6]
+      note: "S004/EV-005 F34 Supabase admin auth build. M47 T47.1-T47.6 completed 2026-06-29. Audit-actor fix in apps/internal-write-api: ContextVar-based actor propagation replaced with explicit WriteActorDep FastAPI dependency. Next: Phase 11 gate check + 08-verify-build."
   08-verify-build:
     status: completed
     started_at: "2026-06-25"
@@ -1289,8 +1410,66 @@ evolve_cycles:
     status: in_progress
     started: "2026-06-28"
     session_id: S004-supabase-auth
-    current_stage: "00-context"
-    note: "Admin-only Supabase Auth; ChatRAG anonymous; invite-only; admin+viewer roles; identity in Supabase; supersedes ADR-004 auth clause + revisits ADR-005."
+    current_stage: "07-build"
+    stages:
+      00-context:
+        status: completed
+        completed: "2026-06-28"
+      01-requirements:
+        status: completed
+        started_at: "2026-06-28"
+        completed_at: "2026-06-28"
+        artifacts_updated:
+          - docs/adr/ADR-026-supabase-admin-auth.md
+          - docs/feature-list.md
+          - docs/spec.md
+          - docs/user-journeys.md
+          - docs/test-plan.md
+          - docs/config-spec.md
+          - docs/api-contract.md
+          - docs/acceptance-criteria.md
+          - docs/decisions.md
+          - docs/dependency-inventory.md
+      04-tech-plan:
+        status: completed
+        started_at: "2026-06-28"
+        completed_at: "2026-06-28"
+        adr: ADR-027-supabase-auth-verification-and-env-sync
+        decisions: [TP-S004-01, TP-S004-02, TP-S004-03, TP-S004-04, TP-S004-05, TP-S004-06, TP-S004-07, TP-S004-08, TP-S004-09, TP-S004-10, TP-S004-11, TP-S004-12]
+        phase: "Phase 11 (M43-M47, T43.1-T47.6, 29 tasks)"
+        artifacts_updated:
+          - docs/adr/ADR-027-supabase-auth-verification-and-env-sync.md
+          - docs/sessions/S004-supabase-auth/reports/tech-plan.md
+          - docs/execution-plan.md
+          - docs/decisions.md
+          - docs/dependency-inventory.md
+          - docs/config-spec.md
+          - docs/api-contract.md
+        note: "TP-S004-01..12 resolved; cost cap raised to ~$75/mo (supersedes ADR-004 — user-approved); R53 unblocked via Supabase CLI (MCP-independent). Commit DEFERRED (commit-only-when-asked)."
+      07-build:
+        status: in_progress
+        started_at: "2026-06-29"
+        phase: "Phase 11 (M43-M47, T43.1-T47.6, 29 tasks)"
+        milestones_completed: [M47]
+        completed_tasks: [T47.1, T47.2, T47.3, T47.4, T47.5, T47.6]
+        completed: "2026-06-29"
+        note: "M47 T47.1-T47.6 completed 2026-06-29. Audit-actor fix in apps/internal-write-api: ContextVar-based actor propagation replaced with an explicit WriteActorDep FastAPI dependency. Next: Phase 11 gate check + 08-verify-build."
+    decisions:
+      - "RD-073: auth admin-surfaces-only; ChatRAG anonymous"
+      - "RD-074: email+password, invite-only (admin invites by email link)"
+      - "RD-075: roles admin (full) + viewer (read-only); writes require admin (403 for viewer)"
+      - "RD-076: SPA supabase-js session -> Authorization Bearer JWT; FastAPI verifies"
+      - "RD-077: identity in Supabase only; corpus DB audit actor = opaque Supabase UUID + role (no PII)"
+      - "RD-078: Supabase branching on canonical project cfuvghdsuwactfeamtym (grant MCP access); migrations in repo; secrets via Modal/DO env"
+      - "RD-079: strict ChatRAG CORS limited to ChatRAG frontend origin; admin APIs allow Authorization header"
+      - "TP-S004-01..12 (2026-06-28, ADR-027): HS256 JWT verify (TP-S004-01); role from app_metadata.role (TP-S004-02); shared vecinita_shared_schemas.auth; PyJWT>=2.10,<3 + @supabase/supabase-js ^2.108.2; Supabase Pro + ephemeral branching + CLI migrations-in-repo; inviteUserByEmail+SMTP; idempotent first-admin seed. Cost cap raised to ~$75/mo (supersedes ADR-004 cap — user-approved). R53 unblocked via Supabase CLI (MCP-independent). Phase 11 (M43-M47, 29 tasks) appended to execution-plan."
+    open_items_for_04_tech_plan:
+      - "JWT verify mechanism (JWKS vs shared secret)"
+      - "role-claim source"
+      - "dependency pins (supabase-js + Python JWT verify)"
+      - "cost vs ADR-004 cap"
+      - "grant MCP access to canonical project cfuvghdsuwactfeamtym (R53)"
+    note: "Admin-only Supabase Auth; ChatRAG anonymous; invite-only; admin+viewer roles; identity in Supabase; supersedes ADR-004 auth clause + revisits ADR-005. 01-requirements completed 2026-06-28 (RD-073-RD-079); commit DEFERRED per commit-only-when-asked override."
 retrospective_cycles: []
 pr_review_cycles:
   - id: PRR-001
@@ -2071,6 +2250,12 @@ decisions_log:
   - date: "2026-06-28"
     note: "S003 closed by user (2026-06-28) with 09-qa/10-e2e/12-verify-deploy/13-deploy-smoke deferred; F33 already merged to main via PRs #96/#97 (working tree clean on main). Closing to start auth session for GitHub #75. Session archived to sessions[] with status completed (deferred stages marked skipped + recorded in deferred_to_backlog); active_session cleared to null; session_counter remains 3 (next allocatable S004). project.stages baseline unchanged (07-build + 08-verify-build already mirrored completed for S003; deferred stages not promoted into the baseline; 13-deploy-smoke baseline stays S001 completed)."
   - "S004/EV-005 opened (2026-06-28) for GitHub #75 Supabase admin auth. Gating decisions: (1) admin-only reversal of ADR-004 (ChatRAG stays anonymous); (2) identity/PII in Supabase, corpus DB PII-free; (3) invite-only registration, public signup disabled; (4) two roles admin+viewer; (5) Supabase branching for env sync on canonical project. New superseding ADR required (ADR-004 auth clause, ADR-005)."
+  - date: "2026-06-28"
+    note: "Started 01-requirements F34 delta interview (EV-005/S004). Confirmed via Supabase MCP list_projects that MCP is scoped to org Cognitive Chemistry Labs (projects lrbhxyikeiwmuanqwdya, uysuznqtbajeejjvszxc) and CANNOT access prod.env canonical project cfuvghdsuwactfeamtym — R53 still open. prod.env now contains SUPABASE_URL/PUBLISHABLE_KEY/SECRET_KEY/URI/DATABASE_PASSWORD for cfuvghdsuwactfeamtym plus SUPABASE_ADMIN_EMAIL=admin@vecinita.admin (SUPABASE_ADMIN_PASSWORD empty)."
+  - date: "2026-06-28"
+    note: "S004/EV-005 04-tech-plan COMPLETE (F34 Supabase admin auth, evolve-lite). ADR-027 authored (Supabase Auth verification + env sync) resolving TP-S004-01..12: TP-S004-01 HS256 JWT verification; TP-S004-02 role claim from app_metadata.role; shared vecinita_shared_schemas.auth module; dependency pins PyJWT>=2.10,<3 (Python verify) + @supabase/supabase-js ^2.108.2 (SPA); Supabase Pro plan + ephemeral branching for env sync + CLI migrations-in-repo; admin onboarding via inviteUserByEmail + SMTP; idempotent first-admin seed. Cost cap raised from ADR-004's $25/$50 to ~$75/mo — supersedes ADR-004 cost cap, user-approved. R53 unblocked: Supabase CLI path is MCP-independent (no canonical-project MCP grant required). Phase 11 (M43-M47, T43.1-T47.6, 29 tasks) appended to execution-plan; docs/decisions.md, docs/dependency-inventory.md, docs/config-spec.md, docs/api-contract.md updated; tech-plan report at docs/sessions/S004-supabase-auth/reports/tech-plan.md. Commit DEFERRED per commit-only-when-asked override (no SHAs yet). active_session + EV-005 current_stage advanced to 07-build."
+  - date: "2026-06-29"
+    note: "S004/EV-005 07-build IN PROGRESS (F34 Supabase admin auth, Phase 11 M43-M47). M47 T47.1-T47.6 completed 2026-06-29. Audit-actor fix in apps/internal-write-api: ContextVar-based actor propagation replaced with an explicit WriteActorDep FastAPI dependency (clearer request-scoped actor wiring; avoids ContextVar leakage across requests). routing_plan 07-build pending -> in_progress; recorded in EV-005.stages.07-build + project.stages.07-build.s004 (legacy mirror). active_session.current_stage unchanged (07-build). Next: Phase 11 gate check + 08-verify-build."
 
 artifacts:
   - docs/context-brief.md
@@ -2128,8 +2313,13 @@ artifacts:
   - docs/sessions/S002-admin-job-management/reports/deploy-checklist.md
 
 git_history:
-  current_branch: main
+  current_branch: feat/S004-supabase-auth
   branches:
+    - name: feat/S004-supabase-auth
+      purpose: "EV-005 / F34 Supabase admin auth (#75)"
+      base: main
+      status: open
+      created_at: "2026-06-28"
     - name: feat/S003-persistent-chat-history
       base: main
       status: merged
@@ -2444,6 +2634,13 @@ git_history:
       stage: "07-build"
       files_changed: 20
       timestamp: "2026-06-28"
+    - sha: 9123b96
+      branch: feat/S004-supabase-auth
+      message: "[S004] docs: open Supabase admin-auth session (#75)"
+      stage: "00-context"
+      session_id: S004-supabase-auth
+      files_changed: 5
+      timestamp: "2026-06-28T22:20:00Z"
 
 constraints:
   cost:

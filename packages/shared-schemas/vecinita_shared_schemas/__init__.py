@@ -1,5 +1,18 @@
 """Shared Pydantic models and cross-cutting helpers (ADR-011)."""
 
+from vecinita_shared_schemas.auth import (
+    AuthConfig,
+    AuthContext,
+    AuthPrincipal,
+    get_auth_config,
+    get_principal,
+    require_admin_write,
+    require_authenticated,
+    require_role,
+    reset_auth_config_for_tests,
+    resolve_operator_or_service,
+    verify_supabase_jwt,
+)
 from vecinita_shared_schemas.chat_rag import (
     AskRequest,
     AskResponse,
@@ -31,6 +44,9 @@ __all__ = [
     "FORBIDDEN_IDENTITY_FIELDS",
     "AskRequest",
     "AskResponse",
+    "AuthConfig",
+    "AuthContext",
+    "AuthPrincipal",
     "BatchUpsertRequest",
     "BatchUpsertResponse",
     "CreateJobRequest",
@@ -47,6 +63,14 @@ __all__ = [
     "TagSummary",
     "configure_logging",
     "find_identity_fields",
+    "get_auth_config",
+    "get_principal",
     "log_request_event",
+    "require_admin_write",
+    "require_authenticated",
+    "require_role",
+    "reset_auth_config_for_tests",
+    "resolve_operator_or_service",
     "validate_ask_request",
+    "verify_supabase_jwt",
 ]

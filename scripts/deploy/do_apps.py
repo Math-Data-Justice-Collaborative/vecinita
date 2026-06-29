@@ -211,6 +211,9 @@ def cmd_sync_secrets(client, name: str) -> int:
                 "VECINITA_ADMIN_FRONTEND_URL",
                 "VECINITA_HEALTH_TIMEOUT_MS",
                 "VECINITA_AUDIT_RETENTION_DAYS",
+                "SUPABASE_URL",
+                "VECINITA_AUTH_REQUIRED",
+                "SUPABASE_JWT_AUD",
             ],
         )
     elif name == "vecinita-chat-rag-frontend":
@@ -223,6 +226,8 @@ def cmd_sync_secrets(client, name: str) -> int:
                 "VITE_VECINITA_MODAL_PROXY_KEY",
                 "VITE_VECINITA_CORPUS_API_URL",
                 "VITE_VECINITA_CORPUS_API_KEY",
+                "VITE_SUPABASE_URL",
+                "VITE_SUPABASE_PUBLISHABLE_KEY",
             ],
             scope="BUILD_TIME",
         )
@@ -230,6 +235,25 @@ def cmd_sync_secrets(client, name: str) -> int:
     client.apps.update(id=app_id, body={"spec": spec})
     print(f"Updated secrets for {name} ({app_id})")
     return 0
+
+
+def cmd_sync_all_secrets(client) -> int:
+    """Push env vars from shell into all four Vecinita DO apps."""
+    names = [
+        "vecinita-internal-write-api",
+        "vecinita-chat-rag-backend",
+        "vecinita-admin-frontend",
+        "vecinita-chat-rag-frontend",
+    ]
+    rc = 0
+    for name in names:
+        print(f"==> sync-secrets {name}")
+        try:
+            cmd_sync_secrets(client, name)
+        except SystemExit as exc:
+            print(exc, file=sys.stderr)
+            rc = 1
+    return rc
 
 
 def cmd_urls(client, *, include_frontends: bool = False) -> int:
@@ -293,6 +317,10 @@ def main() -> int:
     )
     p_sync = sub.add_parser("sync-secrets", help="Update app spec env from shell")
     p_sync.add_argument("--name", required=True, help="App spec name field")
+    sub.add_parser(
+        "sync-all-secrets",
+        help="Update all four Vecinita DO apps from shell env (see infra/do/.env.example)",
+    )
     args = parser.parse_args()
     client = _client()
     if args.command == "list":
@@ -307,6 +335,8 @@ def main() -> int:
         return cmd_urls(client, include_frontends=getattr(args, "frontend", False))
     if args.command == "sync-secrets":
         return cmd_sync_secrets(client, args.name)
+    if args.command == "sync-all-secrets":
+        return cmd_sync_all_secrets(client)
     raise SystemExit(f"Unknown command: {args.command}")
 
 

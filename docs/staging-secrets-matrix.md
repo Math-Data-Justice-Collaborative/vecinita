@@ -97,6 +97,55 @@ See [.cursor/skills/connectivity-gates.md](../.cursor/skills/connectivity-gates.
 3. Redeploy affected apps (`doctl apps create-deployment`, `modal deploy`).  
 4. Re-run `bash scripts/deploy/staging_smoke.sh`.
 
+## EV-005 (F34) — Supabase admin auth (#75)
+
+Identity for **admin surfaces only** (DM UI, DM Modal API, internal-write API). ChatRAG stays anonymous.
+
+### Supabase project (`cfuvghdsuwactfeamtym`)
+
+| Variable | Where | Required | Description |
+|----------|-------|----------|-------------|
+| `SUPABASE_URL` | DO write API, Modal DM ASGI, operator shell | Yes | `https://cfuvghdsuwactfeamtym.supabase.co` — JWKS at `/auth/v1/.well-known/jwks.json` (ES256, ADR-028) |
+| `SUPABASE_SECRET_KEY` | Operator shell / seed script only | Yes | Admin API (`inviteUserByEmail`, `seed_first_admin.py`) — **never** in browser builds |
+| `SUPABASE_PUBLISHABLE_KEY` | DM frontend build (`VITE_*`) | Yes | Browser-safe publishable key |
+| `SUPABASE_ADMIN_EMAIL` | `prod.env` / seed script | Bootstrap | First admin email (`admin@vecinita.admin`) |
+| `SUPABASE_ADMIN_PASSWORD` | `prod.env` / seed script | Bootstrap | First admin password — set before `scripts/seed_first_admin.py` |
+| `VECINITA_AUTH_REQUIRED` | Admin backends | No | Default `true`; `false` only for local dev without Supabase |
+| `SUPABASE_JWT_AUD` | Admin backends | No | Default `authenticated` |
+
+### DigitalOcean — Internal write API (add)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SUPABASE_URL` | Yes (F34) | JWKS verification for operator JWTs |
+
+### DigitalOcean — Static admin frontend (add build-time)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VITE_SUPABASE_URL` | Yes (F34) | Same as `SUPABASE_URL` |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Yes (F34) | Same as `SUPABASE_PUBLISHABLE_KEY` |
+
+### Modal — Data management ASGI (add)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SUPABASE_URL` | Yes (F34) | JWT verification (with existing `X-Vecinita-Proxy-Key`) |
+
+### Operator runbook (AC-A10)
+
+- **Invite operator:** Supabase Dashboard → Authentication → Users → Invite (or `inviteUserByEmail` with custom SMTP).
+- **Disable operator:** Dashboard → delete/ban user.
+- **Role change:** set `app_metadata.role` to `admin` or `viewer` (never `user_metadata`).
+- **First admin:** `uv run python scripts/seed_first_admin.py` (idempotent).
+- **Env sync:** `supabase/README.md` — ephemeral preview branches; tear down after PR merge.
+- **JWT key rotation:** automatic via JWKS refresh (no `SUPABASE_JWT_SECRET` with ES256).
+
+**Example env files (placeholders):** `infra/do/.env.example`, `infra/modal/.env.example`  
+**Push to DO:** `scripts/deploy/do_apps.py sync-secrets` or `sync-all-secrets` (see `infra/do/README.md`).  
+**Push everywhere (Supabase check + Modal + DO):** `bash scripts/deploy/sync_env.sh --apply`  
+**Push to Modal only:** `bash scripts/deploy/sync_modal_secret.sh --apply`
+
 ## EV-004 (F31) — no new secrets
 
 EV-004 is client-only i18n/UI. **No new environment variables** or CORS policy changes (AC-F6). Existing `VITE_*` rows for both DO static frontends and `VECINITA_CORS_ORIGINS` on backends remain sufficient. Re-run H4/H5 after redeploying both frontends (AC-F7).
