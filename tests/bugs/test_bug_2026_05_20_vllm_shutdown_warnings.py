@@ -6,16 +6,19 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import pytest
-
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
+
+from typing import TYPE_CHECKING
 
 from infra.modal.llm_app import (  # noqa: E402
     _llm_engine_kwargs,
     _shutdown_vllm_engine,
 )
+
+if TYPE_CHECKING:
+    import pytest
 
 
 def test_llm_engine_kwargs_use_half_dtype_on_t4() -> None:

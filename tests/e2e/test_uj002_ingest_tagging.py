@@ -6,11 +6,12 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-from tests.helpers.json_response import json_str, response_json_object
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.pipeline import fetch_html_fixture, run_ingest_job
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_embedding_client import EMBEDDING_DIMENSION
+
+from tests.helpers.json_response import json_str, response_json_object
 
 pytestmark = pytest.mark.e2e
 
@@ -62,7 +63,7 @@ def tagged_dm_client() -> tuple[TestClient, _MockWriteClient]:
     store = InMemoryJobStore()
     mock_write = _MockWriteClient()
 
-    def runner(job_id):  # type: ignore[no-untyped-def]
+    def runner(job_id) -> None:  # type: ignore[no-untyped-def]
         run_ingest_job(
             job_id,
             store=store,

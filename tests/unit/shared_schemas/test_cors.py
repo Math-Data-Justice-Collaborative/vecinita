@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
-import pytest
+from typing import TYPE_CHECKING
+
 from fastapi import FastAPI
 from vecinita_shared_schemas.cors import configure_cors, parse_cors_origins
+
+if TYPE_CHECKING:
+    import pytest
 
 
 def test_parse_cors_origins_splits_and_trims() -> None:

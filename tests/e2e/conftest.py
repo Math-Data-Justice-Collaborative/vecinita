@@ -3,14 +3,19 @@
 from __future__ import annotations
 
 import os
+from typing import TYPE_CHECKING
 
 import pytest
-from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from fastapi.testclient import TestClient
-from tests.unit.shared_schemas.auth_fixtures import generate_es256_keypair, make_auth_config
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.store import InMemoryJobStore
+from vecinita_internal_write_api.app import create_app as create_write_app
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests
+
+from tests.unit.shared_schemas.auth_fixtures import generate_es256_keypair, make_auth_config
+
+if TYPE_CHECKING:
+    from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 
 _API_KEY = "test-internal-key"
 _PROXY_KEY = "test-proxy-key"
@@ -25,6 +30,7 @@ def _database_url() -> str:
 
 @pytest.fixture
 def internal_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Configure internal-write API key auth env for E2E tests."""
     reset_auth_config_for_tests()
     monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _API_KEY)
     monkeypatch.setenv("DATABASE_URL", _database_url())
@@ -63,6 +69,4 @@ def dm_auth_client(
 def write_auth_client(supabase_auth_env: EllipticCurvePrivateKey) -> TestClient:
     """Internal-write API with Supabase JWT required."""
     _ = supabase_auth_env
-    from vecinita_internal_write_api.app import create_app
-
-    return TestClient(create_app())
+    return TestClient(create_write_app())

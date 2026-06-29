@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import cast
 
 import httpx
@@ -10,15 +11,16 @@ from vecinita_embedding_client import EMBEDDING_DIMENSION, EmbeddingClient, Embe
 from vecinita_shared_schemas.json_types import as_json_object
 
 _SAMPLE = [0.1] * EMBEDDING_DIMENSION
+_EXPECTED_BATCH_COUNT = 2
 
 
 def test_embed_single_returns_384_dimensions() -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
-        import json
+    """Embed returns a vector with the expected dimension for one text."""
 
+    def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "POST"
         assert request.url.path == "/embed"
-        payload = as_json_object(cast(object, json.loads(request.content.decode())))
+        payload = as_json_object(cast("object", json.loads(request.content.decode())))
         assert payload == {"text": "hello world"}
         return httpx.Response(200, json={"embedding": _SAMPLE})
 
@@ -33,10 +35,10 @@ def test_embed_single_returns_384_dimensions() -> None:
 
 
 def test_embed_batch_returns_list_of_384_vectors() -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
-        import json
+    """Embed batch returns one vector per input text."""
 
-        payload = as_json_object(cast(object, json.loads(request.content.decode())))
+    def handler(request: httpx.Request) -> httpx.Response:
+        payload = as_json_object(cast("object", json.loads(request.content.decode())))
         assert request.url.path == "/embed/batch"
         assert payload == {"texts": ["a", "b"]}
         return httpx.Response(200, json={"embeddings": [_SAMPLE, _SAMPLE]})
@@ -47,13 +49,15 @@ def test_embed_batch_returns_list_of_384_vectors() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://embed.test"),
     )
     vectors = client.embed_batch(["a", "b"])
-    assert len(vectors) == 2
+    assert len(vectors) == _EXPECTED_BATCH_COUNT
     assert all(len(v) == EMBEDDING_DIMENSION for v in vectors)
     client.close()
 
 
 def test_embed_raises_on_wrong_dimension() -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
+    """Embed raises when the server returns a wrong-dimension vector."""
+
+    def handler(_request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json={"embedding": [0.1, 0.2]})
 
     transport = httpx.MockTransport(handler)
@@ -67,7 +71,9 @@ def test_embed_raises_on_wrong_dimension() -> None:
 
 
 def test_embed_raises_on_http_error() -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
+    """Embed raises when the server responds with an HTTP error status."""
+
+    def handler(_request: httpx.Request) -> httpx.Response:
         return httpx.Response(503, json={"detail": "unavailable"})
 
     transport = httpx.MockTransport(handler)
@@ -83,6 +89,7 @@ def test_embed_raises_on_http_error() -> None:
 def test_embedding_client_requires_base_url_or_env(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Embedding client raises when neither base URL nor env var is set."""
     monkeypatch.delenv("VECINITA_MODAL_EMBED_URL", raising=False)
 
     with pytest.raises(EmbeddingClientError, match="VECINITA_MODAL_EMBED_URL"):
@@ -92,18 +99,19 @@ def test_embedding_client_requires_base_url_or_env(
 def test_embedding_client_context_manager_closes_owned_client(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Context manager closes the HTTP client it created itself."""
     closed: list[bool] = []
 
-    def handler(request: httpx.Request) -> httpx.Response:
+    def handler(_request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json={"embedding": _SAMPLE})
 
     base_client = httpx.Client
 
     def client_factory(**kwargs: object) -> httpx.Client:
         client = base_client(
-            base_url=cast(httpx.URL | str, kwargs.get("base_url", "")),
-            timeout=cast(float, kwargs.get("timeout", 30.0)),
-            follow_redirects=cast(bool, kwargs.get("follow_redirects", True)),
+            base_url=cast("httpx.URL | str", kwargs.get("base_url", "")),
+            timeout=cast("float", kwargs.get("timeout", 30.0)),
+            follow_redirects=cast("bool", kwargs.get("follow_redirects", True)),
             transport=httpx.MockTransport(handler),
         )
         original_close = client.close
@@ -124,6 +132,7 @@ def test_embedding_client_context_manager_closes_owned_client(
 
 
 def test_embed_raises_when_embedding_field_missing() -> None:
+    """Embed raises when the response is missing the embedding field."""
     transport = httpx.MockTransport(
         lambda _request: httpx.Response(200, json={"unexpected": []}),
     )
@@ -138,6 +147,7 @@ def test_embed_raises_when_embedding_field_missing() -> None:
 
 
 def test_embed_batch_raises_on_http_error() -> None:
+    """Embed batch raises when the server responds with an HTTP error status."""
     transport = httpx.MockTransport(lambda _request: httpx.Response(502, json={}))
     client = EmbeddingClient(
         "http://embed.test",
@@ -150,6 +160,7 @@ def test_embed_batch_raises_on_http_error() -> None:
 
 
 def test_embed_batch_raises_when_embeddings_field_missing() -> None:
+    """Embed batch raises when the response is missing the embeddings field."""
     transport = httpx.MockTransport(
         lambda _request: httpx.Response(200, json={"unexpected": []}),
     )
@@ -164,9 +175,10 @@ def test_embed_batch_raises_when_embeddings_field_missing() -> None:
 
 
 def test_embedding_client_does_not_close_injected_http_client() -> None:
+    """Closing the client must not close an externally injected HTTP client."""
     closed: list[bool] = []
 
-    def handler(request: httpx.Request) -> httpx.Response:
+    def handler(_request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json={"embedding": _SAMPLE})
 
     transport = httpx.MockTransport(handler)

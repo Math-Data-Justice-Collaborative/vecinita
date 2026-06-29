@@ -23,12 +23,12 @@ def _database_url() -> str:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def engine():
     return create_engine(_database_url())
 
 
-@pytest.fixture()
+@pytest.fixture
 def client(monkeypatch: pytest.MonkeyPatch):
     from vecinita_shared_schemas.auth import reset_auth_config_for_tests
 

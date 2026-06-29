@@ -4,16 +4,20 @@ from __future__ import annotations
 
 import os
 import uuid
-from collections.abc import Iterator
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
 from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Engine
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_rag.types import RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest, AskResponse, Source
 from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from sqlalchemy.engine import Engine
 
 
 def database_url() -> str:
@@ -23,7 +27,7 @@ def database_url() -> str:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def chat_settings(monkeypatch: pytest.MonkeyPatch) -> ChatRagSettings:
     monkeypatch.setenv("DATABASE_URL", database_url())
     return ChatRagSettings(
@@ -37,12 +41,12 @@ def chat_settings(monkeypatch: pytest.MonkeyPatch) -> ChatRagSettings:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def engine(chat_settings: ChatRagSettings) -> Engine:
     return create_engine(chat_settings.database_url)
 
 
-@pytest.fixture()
+@pytest.fixture
 def browse_document(engine: Engine) -> Iterator[tuple[UUID, str]]:
     """Insert a tagged browse document; delete after test."""
     doc_url = f"https://chat-rag-browse-{uuid.uuid4().hex[:10]}.example.com/"

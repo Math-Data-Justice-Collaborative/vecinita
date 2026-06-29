@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import cast
+from typing import Self, cast
 
 import httpx
 import pytest
@@ -18,7 +18,7 @@ def test_seed_first_admin_creates_user_when_missing(monkeypatch: pytest.MonkeyPa
         def __init__(self, *args: object, **kwargs: object) -> None:
             _ = (args, kwargs)
 
-        def __enter__(self) -> FakeClient:
+        def __enter__(self) -> Self:
             return self
 
         def __exit__(self, *args: object) -> None:
@@ -60,7 +60,7 @@ def test_seed_first_admin_updates_role_when_user_exists(monkeypatch: pytest.Monk
         def __init__(self, *args: object, **kwargs: object) -> None:
             _ = (args, kwargs)
 
-        def __enter__(self) -> FakeClient:
+        def __enter__(self) -> Self:
             return self
 
         def __exit__(self, *args: object) -> None:
@@ -75,11 +75,12 @@ def test_seed_first_admin_updates_role_when_user_exists(monkeypatch: pytest.Monk
 
         def post(self, path: str, **kwargs: object) -> httpx.Response:
             _ = (path, kwargs)
-            raise AssertionError("should not create when user exists")
+            msg = "should not create when user exists"
+            raise AssertionError(msg)
 
         def put(self, path: str, **kwargs: object) -> httpx.Response:
             assert path == f"/auth/v1/admin/users/{user_id}"
-            body = cast(dict[str, object], kwargs.get("json"))
+            body = cast("dict[str, object]", kwargs.get("json"))
             assert body == {"app_metadata": {"role": "admin"}}
             return httpx.Response(200, json={})
 
@@ -102,7 +103,7 @@ def test_seed_first_admin_idempotent_on_duplicate_create(monkeypatch: pytest.Mon
         def __init__(self, *args: object, **kwargs: object) -> None:
             _ = (args, kwargs)
 
-        def __enter__(self) -> FakeClient:
+        def __enter__(self) -> Self:
             return self
 
         def __exit__(self, *args: object) -> None:

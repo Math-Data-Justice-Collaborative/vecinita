@@ -14,9 +14,10 @@ import os
 from pathlib import Path
 
 import pytest
-from tests.unit.rag.conftest import basis_vector, seed_spanish_only_corpus
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_shared_schemas.chat_rag import AskRequest
+
+from tests.unit.rag.conftest import basis_vector, seed_spanish_only_corpus
 
 pytestmark = pytest.mark.integration
 

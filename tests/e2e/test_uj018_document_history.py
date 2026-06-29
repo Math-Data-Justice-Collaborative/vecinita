@@ -9,6 +9,8 @@ from uuid import UUID
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
+
 from tests.helpers.json_response import (
     json_int,
     json_list,
@@ -16,7 +18,6 @@ from tests.helpers.json_response import (
     json_str,
     response_json_object,
 )
-from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
 
 pytestmark = [
     pytest.mark.e2e,
@@ -33,12 +34,12 @@ def _database_url() -> str:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def engine():
     return create_engine(_database_url())
 
 
-@pytest.fixture()
+@pytest.fixture
 def client():
     os.environ["DATABASE_URL"] = _database_url()
     os.environ["VECINITA_INTERNAL_API_KEY"] = _API_KEY
@@ -52,7 +53,7 @@ def _auth() -> dict[str, str]:
     return {"Authorization": f"Bearer {_API_KEY}"}
 
 
-@pytest.fixture()
+@pytest.fixture
 def doc_with_versions(client, engine):
     """Create a document via batch_upsert (v1), then tag it (v2)."""
     url = f"https://test.example.com/uj018-{uuid.uuid4().hex[:8]}"

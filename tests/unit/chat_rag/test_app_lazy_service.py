@@ -5,9 +5,10 @@ from __future__ import annotations
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
-from tests.unit.chat_rag.conftest import StubChatRagService, database_url
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
+
+from tests.unit.chat_rag.conftest import StubChatRagService, database_url
 
 
 def test_ask_lazy_inits_service() -> None:

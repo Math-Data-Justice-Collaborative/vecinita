@@ -8,13 +8,14 @@ from typing import cast
 
 import pytest
 from fastapi.testclient import TestClient
-from tests.helpers.json_response import json_object_list, json_str, response_json_object
-from tests.unit.rag.conftest import attach_embeddings, basis_vector
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import ChatRagService
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_shared_schemas.json_types import JsonObject, as_json_object
+
+from tests.helpers.json_response import json_object_list, json_str, response_json_object
+from tests.unit.rag.conftest import attach_embeddings, basis_vector
 
 pytestmark = [pytest.mark.e2e, pytest.mark.integration]
 
@@ -25,7 +26,7 @@ def _parse_sse(raw: str) -> list[JsonObject]:
     events: list[JsonObject] = []
     for line in raw.splitlines():
         if line.startswith("data: "):
-            events.append(as_json_object(cast(object, json.loads(line.removeprefix("data: ")))))
+            events.append(as_json_object(cast("object", json.loads(line.removeprefix("data: ")))))
     return events
 
 

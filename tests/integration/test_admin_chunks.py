@@ -7,8 +7,9 @@ from uuid import uuid4
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from tests.helpers.json_response import find_json_object_by_str, json_str, response_json_list
 from vecinita_shared_schemas.json_types import as_json_object
+
+from tests.helpers.json_response import find_json_object_by_str, json_str, response_json_list
 
 pytestmark = pytest.mark.integration
 
@@ -80,8 +81,8 @@ async def test_tc042_admin_chunk_list_returns_text(write_client: AsyncClient) ->
     )
     assert response.status_code == 200
     chunks = response_json_list(response)
-    first = as_json_object(cast(object, chunks[0]))
-    second = as_json_object(cast(object, chunks[1]))
+    first = as_json_object(cast("object", chunks[0]))
+    second = as_json_object(cast("object", chunks[1]))
     assert len(chunks) == 2
     assert first["chunk_index"] == 0
     assert "First admin chunk" in str(first["text"])

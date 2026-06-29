@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from typing import TYPE_CHECKING, Never
 from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Engine
+from vecinita_internal_write_api.app import _database_url, _row_datetime_optional
+from vecinita_internal_write_api.audit import cleanup_audit_log, emit_audit_event
+from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
+
 from tests.helpers.json_response import (
     json_int,
     json_list,
@@ -22,9 +26,9 @@ from tests.unit.internal_write_api.conftest import (
     database_url,
     upsert_document_via_api,
 )
-from vecinita_internal_write_api.app import _database_url, _row_datetime_optional
-from vecinita_internal_write_api.audit import cleanup_audit_log, emit_audit_event
-from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
 
 
 def test_row_datetime_optional_raises_on_wrong_type() -> None:
@@ -144,10 +148,11 @@ def test_stats_served_swallows_per_document_errors(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     class _BrokenEngine:
-        def begin(self):
-            raise RuntimeError("write failed")
+        def begin(self) -> Never:
+            msg = "write failed"
+            raise RuntimeError(msg)
 
-    monkeypatch.setattr("vecinita_internal_write_api.app._engine", lambda: _BrokenEngine())
+    monkeypatch.setattr("vecinita_internal_write_api.app._engine", _BrokenEngine)
     from vecinita_internal_write_api.app import create_app
 
     client = TestClient(create_app())
@@ -166,7 +171,8 @@ def test_health_all_swallows_dependency_exceptions(
     monkeypatch.setenv("VECINITA_CHAT_RAG_URL", "http://chat-rag:8000")
 
     def _boom(_url: str, **_kwargs: object) -> None:
-        raise OSError("network down")
+        msg = "network down"
+        raise OSError(msg)
 
     with patch("vecinita_internal_write_api.app.httpx.get", side_effect=_boom):
         response = write_client.get("/internal/v1/health/all", headers=auth_headers())
@@ -177,7 +183,7 @@ def test_health_all_swallows_dependency_exceptions(
     assert json_str(chat, "status") == "down"
 
 
-@pytest.fixture()
+@pytest.fixture
 def engine() -> Engine:
     return create_engine(database_url())
 

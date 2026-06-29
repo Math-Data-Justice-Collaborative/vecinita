@@ -30,7 +30,7 @@ export type OperatorRole = "admin" | "viewer";
 export function roleFromAppMetadata(
   appMetadata: Record<string, unknown> | undefined,
 ): OperatorRole | null {
-  const role = appMetadata?.role;
+  const role = appMetadata?.["role"];
   if (role === "admin" || role === "viewer") {
     return role;
   }

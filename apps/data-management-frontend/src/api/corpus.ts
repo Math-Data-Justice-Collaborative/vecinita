@@ -2,8 +2,8 @@ import type { ChunkDetail, DocumentSummary, TagInput } from "./types";
 
 export interface CorpusClientOptions {
   baseUrl: string;
-  apiKey?: string;
-  accessToken?: string;
+  apiKey?: string | undefined;
+  accessToken?: string | undefined;
 }
 
 function authHeaders(options: CorpusClientOptions): Record<string, string> {

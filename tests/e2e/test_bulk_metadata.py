@@ -10,9 +10,10 @@ from uuid import UUID
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
-from tests.helpers.json_response import json_list, json_str, response_json_object
 from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
 from vecinita_shared_schemas.json_types import as_json_object
+
+from tests.helpers.json_response import json_list, json_str, response_json_object
 
 pytestmark = pytest.mark.e2e
 
@@ -26,12 +27,12 @@ def _database_url() -> str:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def engine():
     return create_engine(_database_url())
 
 
-@pytest.fixture()
+@pytest.fixture
 def client():
     os.environ["DATABASE_URL"] = _database_url()
     os.environ["VECINITA_INTERNAL_API_KEY"] = _API_KEY
@@ -44,7 +45,7 @@ def _auth() -> dict[str, str]:
     return {"Authorization": f"Bearer {_API_KEY}"}
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_docs(engine):
     doc_ids = []
     with engine.begin() as conn:
@@ -109,7 +110,7 @@ def test_bulk_metadata_partial_failure(client, sample_docs) -> None:
     assert data["successes"] == 1
     failures = json_list(data, "failures")
     assert len(failures) == 1
-    assert json_str(as_json_object(cast(object, failures[0])), "id") == fake_id
+    assert json_str(as_json_object(cast("object", failures[0])), "id") == fake_id
 
 
 def test_bulk_metadata_emits_audit(client, sample_docs, engine) -> None:

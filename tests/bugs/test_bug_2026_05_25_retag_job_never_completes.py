@@ -10,11 +10,14 @@ reaching a terminal state ("failed" with an error message).
 
 from __future__ import annotations
 
-from uuid import UUID
+from typing import TYPE_CHECKING
 
 import pytest
 from vecinita_data_management_backend.jobs import run_job
 from vecinita_data_management_backend.store import InMemoryJobStore
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 
 class _MockEmbedClient:
@@ -27,13 +30,16 @@ class _MockEmbedClient:
 
 class _MockWriteClient:
     def get_document_detail(self, document_id: UUID) -> object:
-        raise AssertionError("should not be called when tag_client is None")
+        msg = "should not be called when tag_client is None"
+        raise AssertionError(msg)
 
     def patch_document_tags(self, document_id: UUID, tags: list) -> object:
-        raise AssertionError("should not be called when tag_client is None")
+        msg = "should not be called when tag_client is None"
+        raise AssertionError(msg)
 
     def upsert_batch(self, body: object) -> object:
-        raise AssertionError("should not be called for retag jobs")
+        msg = "should not be called for retag jobs"
+        raise AssertionError(msg)
 
     def close(self) -> None:
         return None

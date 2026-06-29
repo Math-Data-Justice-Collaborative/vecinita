@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime  # noqa: TC003 — Pydantic field type
 from typing import Literal
-from uuid import UUID
+from uuid import UUID  # noqa: TC003 — Pydantic field type
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 
@@ -29,11 +29,14 @@ class CreateJobRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_job_payload(self) -> CreateJobRequest:
+        """Require URLs for ingest jobs and document_id for retag jobs."""
         job_type = self.options.job_type if self.options else "ingest"
         if job_type == "ingest" and not self.urls:
-            raise ValueError("urls required for ingest jobs")
+            msg = "urls required for ingest jobs"
+            raise ValueError(msg)
         if job_type == "retag" and (self.options is None or self.options.document_id is None):
-            raise ValueError("document_id required for retag jobs")
+            msg = "document_id required for retag jobs"
+            raise ValueError(msg)
         return self
 
 

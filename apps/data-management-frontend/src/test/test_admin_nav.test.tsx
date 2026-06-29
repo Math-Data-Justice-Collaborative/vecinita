@@ -100,7 +100,7 @@ describe("Admin navigation", () => {
 
     const toggles = screen.getAllByTestId("theme-toggle");
     expect(toggles.length).toBeGreaterThan(0);
-    fireEvent.click(toggles[0]);
+    fireEvent.click(toggles[0]!);
   });
 
   it("opens mobile navigation sheet", async () => {

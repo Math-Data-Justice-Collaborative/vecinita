@@ -7,12 +7,15 @@ from pathlib import Path
 from typing import cast
 
 import pytest
+from vecinita_database.seeds.load import (
+    _database_url,  # pyright: ignore[reportPrivateUsage]  # reuse canonical seed DB URL resolver
+)
+from vecinita_rag.retriever import CorpusPgvectorRetriever
+from vecinita_shared_schemas.json_types import JsonObject, as_json_object
+
 from tests.e2e.local_bootstrap import postgres_is_ready
 from tests.helpers.json_response import json_str
 from tests.unit.rag.conftest import basis_vector, seed_eval_corpus
-from vecinita_database.seeds.load import _database_url
-from vecinita_rag.retriever import CorpusPgvectorRetriever
-from vecinita_shared_schemas.json_types import JsonObject, as_json_object
 
 pytestmark = pytest.mark.integration
 
@@ -22,6 +25,7 @@ _RELEVANCE_THRESHOLD = 0.8
 
 @pytest.fixture
 def eval_db() -> str:
+    """Seed the eval corpus and return the database URL, skipping without Postgres."""
     if not postgres_is_ready():
         pytest.skip("Postgres not available for eval benchmark")
     url = _database_url()
@@ -30,14 +34,16 @@ def eval_db() -> str:
 
 
 def _load_pairs() -> list[JsonObject]:
-    raw = cast(object, json.loads(_EVAL_PATH.read_text(encoding="utf-8")))
-    if not isinstance(raw, list):
+    loaded = cast("object", json.loads(_EVAL_PATH.read_text(encoding="utf-8")))
+    if not isinstance(loaded, list):
         msg = f"Expected JSON array in {_EVAL_PATH}"
         raise TypeError(msg)
-    return [as_json_object(cast(object, item)) for item in raw]
+    entries = cast("list[object]", loaded)
+    return [as_json_object(item) for item in entries]
 
 
 def test_eval_retrieval_relevance_at_least_eighty_percent(eval_db: str) -> None:
+    """Retrieval relevance over the eval Q&A fixture meets the 80% threshold."""
     pairs = _load_pairs()
     assert pairs, "eval fixture must contain at least one Q&A pair"
 

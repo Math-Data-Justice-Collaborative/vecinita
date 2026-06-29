@@ -8,6 +8,13 @@ from typing import cast
 import pytest
 import yaml
 from fastapi.testclient import TestClient
+from vecinita_chat_rag_backend.app import create_app
+from vecinita_chat_rag_backend.config import ChatRagSettings
+from vecinita_chat_rag_backend.service import ChatRagService
+from vecinita_database.seeds.load import load_corpus
+from vecinita_rag.retriever import CorpusPgvectorRetriever
+from vecinita_shared_schemas.json_types import as_json_object
+
 from tests.e2e.local_bootstrap import (
     default_database_url,
     postgres_is_ready,
@@ -15,12 +22,6 @@ from tests.e2e.local_bootstrap import (
 )
 from tests.helpers.json_response import json_int, json_object_get, json_str, response_json_object
 from tests.unit.rag.conftest import attach_embeddings, basis_vector
-from vecinita_chat_rag_backend.app import create_app
-from vecinita_chat_rag_backend.config import ChatRagSettings
-from vecinita_chat_rag_backend.service import ChatRagService
-from vecinita_database.seeds.load import load_corpus
-from vecinita_rag.retriever import CorpusPgvectorRetriever
-from vecinita_shared_schemas.json_types import as_json_object
 
 pytestmark = [pytest.mark.e2e, pytest.mark.integration]
 
@@ -81,7 +82,9 @@ def test_vecinita_yaml_documents_local_defaults() -> None:
     assert _VECINITA_YAML.is_file(), (
         "infra/vecinita.yaml required for local defaults (config-spec.md)"
     )
-    data = as_json_object(cast(object, yaml.safe_load(_VECINITA_YAML.read_text(encoding="utf-8"))))
+    data = as_json_object(
+        cast("object", yaml.safe_load(_VECINITA_YAML.read_text(encoding="utf-8")))
+    )
     assert data["env"] == "development"
     chat_rag = json_object_get(data, "chat_rag")
     assert json_int(chat_rag, "top_k") == 5

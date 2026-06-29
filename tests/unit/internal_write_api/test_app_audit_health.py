@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Never
 from unittest.mock import patch
 
 import httpx
-import pytest
 from fastapi.testclient import TestClient
+
 from tests.helpers.json_response import json_int, json_str, response_json_object
 from tests.unit.internal_write_api.conftest import auth_headers, upsert_document_via_api
+
+if TYPE_CHECKING:
+    import pytest
 
 
 def test_audit_log_supports_filters(write_client: TestClient) -> None:
@@ -104,8 +108,9 @@ def test_health_all_database_down_marks_degraded(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     class _BrokenEngine:
-        def connect(self):
-            raise RuntimeError("db unavailable")
+        def connect(self) -> Never:
+            msg = "db unavailable"
+            raise RuntimeError(msg)
 
     monkeypatch.setenv("VECINITA_CHAT_RAG_URL", "http://chat-rag:8000")
     with patch("vecinita_internal_write_api.app._engine", return_value=_BrokenEngine()):

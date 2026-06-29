@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Never
 from uuid import uuid4
 
 import pytest
@@ -241,8 +242,9 @@ def test_run_retag_job_marks_failed_on_write_error() -> None:
         options={"document_id": str(document_id)},
     )
 
-    def _boom(_document_id, _tags):  # type: ignore[no-untyped-def]
-        raise RuntimeError("write unavailable")
+    def _boom(_document_id, _tags) -> Never:  # type: ignore[no-untyped-def]
+        msg = "write unavailable"
+        raise RuntimeError(msg)
 
     write_client.patch_document_tags = _boom  # type: ignore[method-assign]
 

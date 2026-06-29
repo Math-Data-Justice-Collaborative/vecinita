@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import langdetect
+
+from vecinita_rag.constants import NO_CONTEXT_MESSAGE_EN, NO_CONTEXT_MESSAGE_ES
 
 _SUPPORTED = frozenset({"en", "es"})
 
@@ -13,7 +17,10 @@ def detect_query_language(question: str) -> str:
     if not text:
         return "en"
     try:
-        code = langdetect.detect(text)
+        code = cast(
+            "str",
+            langdetect.detect(text),  # pyright: ignore[reportUnknownMemberType]  # langdetect is untyped
+        )
     except langdetect.LangDetectException:
         return "en"
     if code.startswith("es"):
@@ -23,6 +30,4 @@ def detect_query_language(question: str) -> str:
 
 def no_context_message(language: str) -> str:
     """Return the fixed no-context copy for English or Spanish."""
-    from vecinita_rag.constants import NO_CONTEXT_MESSAGE_EN, NO_CONTEXT_MESSAGE_ES
-
     return NO_CONTEXT_MESSAGE_ES if language == "es" else NO_CONTEXT_MESSAGE_EN

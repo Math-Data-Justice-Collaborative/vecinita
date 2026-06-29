@@ -4,15 +4,17 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
-import pytest
 from vecinita_shared_schemas.json_types import as_json_object
 from vecinita_shared_schemas.observability import (
     JsonLogFormatter,
     configure_logging,
     log_request_event,
 )
+
+if TYPE_CHECKING:
+    import pytest
 
 
 def test_json_formatter_redacts_question_field() -> None:
@@ -29,7 +31,7 @@ def test_json_formatter_redacts_question_field() -> None:
     record.question = "secret user question"
     record.request_id = "req-1"
     line = formatter.format(record)
-    payload = as_json_object(cast(object, json.loads(line)))
+    payload = as_json_object(cast("object", json.loads(line)))
     assert payload["question"] == "<redacted>"
     assert payload["request_id"] == "req-1"
 
@@ -61,7 +63,8 @@ def test_log_request_event_redacts_extra_prompt_keys() -> None:
 def test_json_formatter_includes_exception_text() -> None:
     formatter = JsonLogFormatter("test-service")
     try:
-        raise ValueError("boom")
+        msg = "boom"
+        raise ValueError(msg)
     except ValueError:
         import sys
 
@@ -77,7 +80,7 @@ def test_json_formatter_includes_exception_text() -> None:
         exc_info=exc_info,
     )
     line = formatter.format(record)
-    payload = as_json_object(cast(object, json.loads(line)))
+    payload = as_json_object(cast("object", json.loads(line)))
 
     assert "exception" in payload
     assert "boom" in str(payload["exception"])

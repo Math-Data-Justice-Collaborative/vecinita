@@ -19,6 +19,7 @@ def _database_url() -> str:
 
 @pytest.fixture
 def internal_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Configure internal-write API key auth env for integration tests."""
     reset_auth_config_for_tests()
     monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _API_KEY)
     monkeypatch.setenv("DATABASE_URL", _database_url())
@@ -28,4 +29,5 @@ def internal_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.fixture
 def internal_api_auth_headers() -> dict[str, str]:
+    """Return Authorization headers carrying the internal-write API key."""
     return {"Authorization": f"Bearer {_API_KEY}"}

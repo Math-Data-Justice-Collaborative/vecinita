@@ -9,13 +9,14 @@ from uuid import UUID
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
+
 from tests.helpers.json_response import (
     json_int,
     json_object_list,
     json_str,
     response_json_object,
 )
-from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
 
 pytestmark = pytest.mark.integration
 
@@ -29,12 +30,12 @@ def _database_url() -> str:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def engine():
     return create_engine(_database_url())
 
 
-@pytest.fixture()
+@pytest.fixture
 def client():
     os.environ["DATABASE_URL"] = _database_url()
     os.environ["VECINITA_INTERNAL_API_KEY"] = _API_KEY
@@ -48,7 +49,7 @@ def _auth() -> dict[str, str]:
     return {"Authorization": f"Bearer {_API_KEY}"}
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_docs(engine):
     """Insert 3 documents and return their ids; clean up after test."""
     doc_ids = []

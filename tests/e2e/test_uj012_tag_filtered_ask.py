@@ -3,18 +3,22 @@
 from __future__ import annotations
 
 import os
+from typing import TYPE_CHECKING
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
-from tests.helpers.json_response import json_object_list, json_str, response_json_object
-from tests.unit.rag.conftest import attach_embeddings, basis_vector
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import ChatRagService
 from vecinita_database.seeds.tags import load_seed_tags, load_tagged_corpus
 from vecinita_rag.retriever import CorpusPgvectorRetriever
-from vecinita_shared_schemas.json_types import JsonObject
+
+from tests.helpers.json_response import json_object_list, json_str, response_json_object
+from tests.unit.rag.conftest import attach_embeddings, basis_vector
+
+if TYPE_CHECKING:
+    from vecinita_shared_schemas.json_types import JsonObject
 
 pytestmark = pytest.mark.e2e
 

@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import uuid
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
-import pytest
-from fastapi.testclient import TestClient
+from vecinita_shared_schemas.json_types import as_json_object
+
 from tests.helpers.json_response import (
     json_list,
     json_str,
@@ -14,7 +14,10 @@ from tests.helpers.json_response import (
     response_json_object,
 )
 from tests.unit.internal_write_api.conftest import auth_headers, upsert_document_via_api
-from vecinita_shared_schemas.json_types import as_json_object
+
+if TYPE_CHECKING:
+    import pytest
+    from fastapi.testclient import TestClient
 
 
 def test_get_document_tags_returns_empty_for_untagged(write_client: TestClient) -> None:
@@ -39,7 +42,7 @@ def test_patch_document_tags_replaces_tags(write_client: TestClient) -> None:
     )
     assert response.status_code == 200
     tags = json_list(response_json_object(response), "tags")
-    first = as_json_object(cast(object, tags[0]))
+    first = as_json_object(cast("object", tags[0]))
     assert json_str(first, "slug") == "housing"
 
 
@@ -81,7 +84,7 @@ def test_list_document_chunks_returns_text(write_client: TestClient) -> None:
     assert response.status_code == 200
     chunks = response_json_list(response)
     assert len(chunks) == 1
-    first = as_json_object(cast(object, chunks[0]))
+    first = as_json_object(cast("object", chunks[0]))
     assert "Upserted chunk body" in json_str(first, "text")
 
 
@@ -91,7 +94,7 @@ def test_patch_chunk_tags_updates_chunk(write_client: TestClient) -> None:
         f"/internal/v1/documents/{document_id}/chunks",
         headers=auth_headers(),
     )
-    chunk_id = json_str(as_json_object(cast(object, response_json_list(chunks)[0])), "chunk_id")
+    chunk_id = json_str(as_json_object(cast("object", response_json_list(chunks)[0])), "chunk_id")
     response = write_client.patch(
         f"/internal/v1/chunks/{chunk_id}/tags",
         json={
@@ -102,7 +105,7 @@ def test_patch_chunk_tags_updates_chunk(write_client: TestClient) -> None:
     )
     assert response.status_code == 200
     tags = json_list(response_json_object(response), "tags")
-    assert json_str(as_json_object(cast(object, tags[0])), "slug") == "legal"
+    assert json_str(as_json_object(cast("object", tags[0])), "slug") == "legal"
 
 
 def test_patch_chunk_tags_404_for_unknown(write_client: TestClient) -> None:

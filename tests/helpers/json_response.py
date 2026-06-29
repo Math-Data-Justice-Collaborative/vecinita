@@ -14,7 +14,7 @@ class _JsonResponse(Protocol):
 
 def response_json_object(response: _JsonResponse) -> JsonObject:
     """Parse a FastAPI TestClient or httpx response body as JsonObject."""
-    return as_json_object(cast(object, response.json()))
+    return as_json_object(response.json())
 
 
 def header_str(headers: object, key: str, default: str = "") -> str:
@@ -22,7 +22,8 @@ def header_str(headers: object, key: str, default: str = "") -> str:
     if not isinstance(headers, Mapping):
         msg = f"Expected mapping headers, got {type(headers).__name__}"
         raise TypeError(msg)
-    value: object = headers.get(key, default)
+    mapping = cast("Mapping[str, object]", headers)
+    value: object = mapping.get(key, default)
     if value is None:
         return default
     return str(value)
@@ -34,25 +35,27 @@ def response_json_list(response: _JsonResponse) -> list[object]:
     if not isinstance(data, list):
         msg = f"Expected JSON array, got {type(data).__name__}"
         raise TypeError(msg)
-    return data
+    return cast("list[object]", data)
 
 
 def json_str(obj: JsonObject, key: str) -> str:
+    """Return the value at key coerced to str."""
     return str(obj[key])
 
 
 def json_list(obj: JsonObject, key: str) -> list[object]:
+    """Return the JSON array value at key."""
     value = obj[key]
     if not isinstance(value, list):
         msg = f"Expected list at {key!r}, got {type(value).__name__}"
         raise TypeError(msg)
-    return value
+    return cast("list[object]", value)
 
 
 def find_json_object_by_str(items: list[object], key: str, value: str) -> JsonObject:
     """Return the first JSON object in a list whose string field matches value."""
     for entry in items:
-        obj = as_json_object(cast(object, entry))
+        obj = as_json_object(entry)
         if key in obj and str(obj[key]) == value:
             return obj
     msg = f"No item with {key}={value!r} in list of {len(items)}"
@@ -60,6 +63,7 @@ def find_json_object_by_str(items: list[object], key: str, value: str) -> JsonOb
 
 
 def json_int(obj: JsonObject, key: str) -> int:
+    """Return the value at key coerced to int."""
     value = obj[key]
     if isinstance(value, int):
         return value
@@ -69,12 +73,14 @@ def json_int(obj: JsonObject, key: str) -> int:
 
 
 def json_object_list(obj: JsonObject, key: str) -> list[JsonObject]:
+    """Return the value at key as a list of JSON objects."""
     return json_object_items(obj[key])
 
 
 def json_object_get(obj: JsonObject, key: str, *, default: JsonObject | None = None) -> JsonObject:
+    """Return the JSON object at key, or default (empty object) when missing."""
     fallback: object = {} if default is None else default
-    return as_json_object(cast(object, obj.get(key, fallback)))
+    return as_json_object(obj.get(key, fallback))
 
 
 def json_object_items(raw: object) -> list[JsonObject]:
@@ -82,7 +88,5 @@ def json_object_items(raw: object) -> list[JsonObject]:
     if not isinstance(raw, list):
         msg = f"Expected JSON array, got {type(raw).__name__}"
         raise TypeError(msg)
-    items: list[JsonObject] = []
-    for entry in raw:
-        items.append(as_json_object(cast(object, entry)))
-    return items
+    entries = cast("list[object]", raw)
+    return [as_json_object(entry) for entry in entries]

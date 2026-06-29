@@ -17,7 +17,7 @@ import { installAuthenticatedSupabaseMock } from "./supabaseMock";
 import { renderWithProviders } from "./renderWithProviders";
 
 const { useMediaQueryMock } = vi.hoisted(() => ({
-  useMediaQueryMock: vi.fn(() => true),
+  useMediaQueryMock: vi.fn<(query: string) => boolean>(() => true),
 }));
 
 vi.mock("@/hooks/useMediaQuery", () => ({

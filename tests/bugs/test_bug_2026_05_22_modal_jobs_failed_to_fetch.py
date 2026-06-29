@@ -12,8 +12,9 @@ from pathlib import Path
 import httpx
 import pytest
 from fastapi.testclient import TestClient
-from tests.helpers.json_response import header_str
 from vecinita_data_management_backend.app import create_app as create_data_mgmt_app
+
+from tests.helpers.json_response import header_str
 
 ADMIN_ORIGIN = "https://vecinita-admin-frontend.example.com"
 _MODAL_APP = Path(__file__).resolve().parents[2] / "infra" / "modal" / "data_management_app.py"

@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
-from fastapi.testclient import TestClient
+
 from tests.helpers.json_response import json_str, response_json_object
-from vecinita_data_management_backend.store import InMemoryJobStore
+
+if TYPE_CHECKING:
+    from fastapi.testclient import TestClient
+    from vecinita_data_management_backend.store import InMemoryJobStore
 
 pytestmark = pytest.mark.e2e
 

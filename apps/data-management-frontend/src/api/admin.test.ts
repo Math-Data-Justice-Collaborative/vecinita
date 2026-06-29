@@ -23,7 +23,7 @@ const JWT_CLIENT = {
 
 function expectBearerJwt(init: RequestInit | undefined): void {
   const headers = init?.headers as Record<string, string> | undefined;
-  expect(headers?.Authorization).toBe("Bearer jwt-token");
+  expect(headers?.["Authorization"]).toBe("Bearer jwt-token");
 }
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -374,7 +374,7 @@ describe("admin API fetch helpers", () => {
       string,
       string
     >;
-    expect(headers.Authorization).toBe("Bearer ");
+    expect(headers["Authorization"]).toBe("Bearer ");
   });
 
   it("bulkTagDocuments and bulkUpdateMetadata use JWT bearer", async () => {
@@ -387,7 +387,7 @@ describe("admin API fetch helpers", () => {
       string,
       string
     >;
-    expect(tagHeaders.Authorization).toBe("Bearer jwt-token");
+    expect(tagHeaders["Authorization"]).toBe("Bearer jwt-token");
 
     vi.mocked(fetch).mockResolvedValue(
       jsonResponse({ successes: [], failures: [] }),
@@ -397,7 +397,7 @@ describe("admin API fetch helpers", () => {
       string,
       string
     >;
-    expect(metaHeaders.Authorization).toBe("Bearer jwt-token");
+    expect(metaHeaders["Authorization"]).toBe("Bearer jwt-token");
   });
 
   it("remaining fetch helpers tolerate missing bearer", async () => {

@@ -3,18 +3,21 @@
 from __future__ import annotations
 
 import uuid
-from typing import cast
+from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
-import pytest
-from fastapi.testclient import TestClient
+from vecinita_shared_schemas.json_types import as_json_object
+
 from tests.helpers.json_response import (
     json_str,
     response_json_list,
     response_json_object,
 )
 from tests.unit.internal_write_api.conftest import auth_headers, upsert_document_via_api
-from vecinita_shared_schemas.json_types import as_json_object
+
+if TYPE_CHECKING:
+    import pytest
+    from fastapi.testclient import TestClient
 
 
 def test_health_returns_ok(write_client: TestClient) -> None:
@@ -64,7 +67,7 @@ def test_list_documents_includes_seeded_doc(
     response = write_client.get("/internal/v1/documents", headers=auth_headers())
     assert response.status_code == 200
     ids = {
-        json_str(as_json_object(cast(object, item)), "document_id")
+        json_str(as_json_object(cast("object", item)), "document_id")
         for item in response_json_list(response)
     }
     assert str(seeded_document) in ids

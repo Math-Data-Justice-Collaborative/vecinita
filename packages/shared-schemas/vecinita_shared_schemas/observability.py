@@ -9,7 +9,7 @@ import sys
 from datetime import UTC, datetime
 from typing import Final, cast
 
-from vecinita_shared_schemas.json_types import JsonObject
+from vecinita_shared_schemas.json_types import JsonObject  # noqa: TC001 — runtime payload typing
 
 LOG_LEVEL_ENV: Final[str] = "VECINITA_LOG_LEVEL"
 REQUEST_ID_KEY: Final[str] = "request_id"
@@ -31,10 +31,12 @@ class JsonLogFormatter(logging.Formatter):
     """Emit one JSON object per log line without prompt-like fields."""
 
     def __init__(self, service_name: str) -> None:
+        """Store the emitting service name on each log record."""
         super().__init__()
         self._service_name = service_name
 
     def format(self, record: logging.LogRecord) -> str:
+        """Serialize ``record`` to one JSON line with sensitive fields redacted."""
         payload: JsonObject = {
             "timestamp": datetime.now(UTC).isoformat(),
             "level": record.levelname,
@@ -43,7 +45,7 @@ class JsonLogFormatter(logging.Formatter):
             "message": record.getMessage(),
         }
         for key in record.__dict__:
-            value = cast(object, record.__dict__[key])
+            value = cast("object", record.__dict__[key])
             if key.startswith("_") or key in {
                 "name",
                 "msg",
@@ -99,7 +101,7 @@ def log_request_event(
     route: str,
     status_code: int,
     latency_ms: float,
-    **extra: str | int | float | bool | None,
+    **extra: str | float | bool | None,
 ) -> None:
     """Log an HTTP request summary without prompt content."""
     safe_extra = {k: "<redacted>" if k in _REDACTED_KEYS else v for k, v in extra.items()}

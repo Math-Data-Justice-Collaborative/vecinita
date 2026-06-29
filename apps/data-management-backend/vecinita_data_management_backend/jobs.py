@@ -2,23 +2,35 @@
 
 from __future__ import annotations
 
-from uuid import UUID
-
-from vecinita_embedding_client import EmbeddingClient
-from vecinita_tagging.llm_client import LlmTagClient
+from typing import TYPE_CHECKING
 
 from vecinita_data_management_backend.pipeline import run_ingest_job, run_retag_job
-from vecinita_data_management_backend.store import JobStore
-from vecinita_data_management_backend.write_client import InternalWriteClient
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from vecinita_embedding_client import EmbeddingClient
+    from vecinita_tagging.llm_client import LlmTagClient
+
+    from vecinita_data_management_backend.pipeline import DocumentFetcher
+    from vecinita_data_management_backend.store import JobStore
+    from vecinita_data_management_backend.write_client import InternalWriteClient
 
 
-def run_job(
+def _require_tag_client(tag_client: LlmTagClient | None) -> LlmTagClient:
+    if tag_client is None:
+        msg = "tag_client is required for retag jobs"
+        raise RuntimeError(msg)
+    return tag_client
+
+
+def run_job(  # noqa: PLR0913  # job dispatch mirrors pipeline dependency surface
     job_id: UUID,
     *,
     store: JobStore,
     embed_client: EmbeddingClient,
     write_client: InternalWriteClient,
-    fetch_document=None,
+    fetch_document: DocumentFetcher | None = None,
     tag_client: LlmTagClient | None = None,
 ) -> None:
     """Run ingest or retag pipeline for a queued job."""
@@ -27,13 +39,11 @@ def run_job(
         raise KeyError(job_id)
     try:
         if record.job_type == "retag":
-            if tag_client is None:
-                raise RuntimeError("tag_client is required for retag jobs")
             run_retag_job(
                 job_id,
                 store=store,
                 write_client=write_client,
-                tag_client=tag_client,
+                tag_client=_require_tag_client(tag_client),
             )
             return
         run_ingest_job(

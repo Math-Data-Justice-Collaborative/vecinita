@@ -73,7 +73,7 @@ describe("TC-065: Admin language toggle (UJ-022, F31)", () => {
       screen.getByRole("link", { name: /^dashboard$/i }),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getAllByRole("button", { name: /^es$/i })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: /^es$/i })[0]!);
 
     expect(screen.getByRole("link", { name: /^panel$/i })).toBeInTheDocument();
     expect(

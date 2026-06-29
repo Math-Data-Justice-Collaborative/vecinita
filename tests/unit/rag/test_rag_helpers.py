@@ -49,7 +49,8 @@ def test_detect_query_language_uses_fallback_on_detection_failure(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     def _fail(_text: str) -> str:
-        raise langdetect.LangDetectException("fail", "detection failed")
+        msg = "fail"
+        raise langdetect.LangDetectException(msg, "detection failed")
 
     monkeypatch.setattr(langdetect, "detect", _fail)
 
@@ -209,7 +210,8 @@ def test_resolve_retrieval_tags_returns_none_without_infer_fn() -> None:
 
 def test_resolve_retrieval_tags_returns_none_when_inference_raises() -> None:
     def _fail(_question: str) -> list[str]:
-        raise RuntimeError("model unavailable")
+        msg = "model unavailable"
+        raise RuntimeError(msg)
 
     assert (
         resolve_retrieval_tags(

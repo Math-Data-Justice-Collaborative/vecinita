@@ -14,9 +14,11 @@ The fix must ensure:
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 from unittest.mock import patch
 
-import pytest
+if TYPE_CHECKING:
+    import pytest
 
 
 def test_tag_client_init_failure_is_logged(caplog: pytest.LogCaptureFixture) -> None:

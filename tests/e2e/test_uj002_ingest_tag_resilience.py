@@ -14,13 +14,14 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-from tests.helpers.json_response import json_object_list, json_str, response_json_object
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.pipeline import fetch_html_fixture, run_ingest_job
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_embedding_client import EMBEDDING_DIMENSION
 from vecinita_tagging.llm_client import LlmTagClientError
 from vecinita_tagging.vocabulary import SeedTag
+
+from tests.helpers.json_response import json_object_list, json_str, response_json_object
 
 pytestmark = pytest.mark.e2e
 
@@ -71,8 +72,9 @@ class _NonJsonTagClient:
         max_tags: int = 10,
     ) -> list[str]:
         _ = (title, text, language, vocabulary, max_tags)
+        msg = "tag response is not valid JSON: Expecting value: line 1 column 1 (char 0)"
         raise LlmTagClientError(
-            "tag response is not valid JSON: Expecting value: line 1 column 1 (char 0)"
+            msg
         )
 
 
@@ -84,7 +86,7 @@ def resilient_dm_client(
     store = InMemoryJobStore()
     write_client = _RecordingWriteClient()
 
-    def runner(job_id):  # type: ignore[no-untyped-def]
+    def runner(job_id) -> None:  # type: ignore[no-untyped-def]
         run_ingest_job(
             job_id,
             store=store,

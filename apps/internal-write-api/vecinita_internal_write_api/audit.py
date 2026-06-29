@@ -9,16 +9,19 @@ from __future__ import annotations
 
 import json
 import logging
-from collections.abc import Mapping, Sequence
 from contextvars import ContextVar
 from datetime import UTC, datetime, timedelta
-from typing import cast
-from uuid import UUID
+from typing import TYPE_CHECKING, cast
 
 from sqlalchemy import text
-from sqlalchemy.engine import Connection, Engine
 from vecinita_shared_schemas.db_mapping import scalar_int
-from vecinita_shared_schemas.json_types import JsonObject
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
+    from uuid import UUID
+
+    from sqlalchemy.engine import Connection, Engine
+    from vecinita_shared_schemas.json_types import JsonObject
 
 logger = logging.getLogger(__name__)
 
@@ -34,10 +37,11 @@ def bind_audit_actor(*, actor_id: UUID | None, actor_role: str | None) -> None:
 
 
 def clear_audit_actor() -> None:
+    """Clear request-scoped audit actor attribution."""
     _audit_actor.set((None, None))
 
 
-def emit_audit_event(
+def emit_audit_event(  # noqa: PLR0913  # audit rows need explicit attribution fields
     conn: Connection,
     *,
     event_type: str,
@@ -82,7 +86,7 @@ def create_document_version(
     """Create a version snapshot, auto-incrementing version_number. Returns the new version."""
     current_max = scalar_int(
         cast(
-            object,
+            "object",
             conn.execute(
                 text(
                     "SELECT COALESCE(MAX(version_number), 0) "

@@ -3,17 +3,22 @@
 from __future__ import annotations
 
 import os
-from uuid import UUID
+from typing import TYPE_CHECKING
 
 import pytest
 from sqlalchemy import create_engine, text
-from tests.unit.rag.conftest import attach_embeddings, basis_vector, reset_corpus_tables
 from vecinita_database.seeds.tags import load_seed_tags, load_tagged_corpus
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_rag.tag_inference import resolve_retrieval_tags
-from vecinita_rag.types import RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest
 from vecinita_shared_schemas.db_mapping import mapping_row, row_str
+
+from tests.unit.rag.conftest import attach_embeddings, basis_vector, reset_corpus_tables
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from vecinita_rag.types import RetrievedChunk
 
 pytestmark = pytest.mark.integration
 

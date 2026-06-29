@@ -46,7 +46,7 @@ function sleep(ms: number): Promise<void> {
 async function* streamAskOnce(
   question: string,
   baseUrl: string,
-  options?: { tags?: string[]; language?: Locale },
+  options?: { tags?: string[] | undefined; language?: Locale | undefined },
 ): AsyncGenerator<StreamEvent> {
   const body: { question: string; tags?: string[]; language?: Locale } = {
     question,
@@ -103,9 +103,9 @@ async function* streamAskOnce(
 }
 
 export type StreamAskOptions = {
-  tags?: string[];
-  language?: Locale;
-  onRetry?: (attempt: number, maxAttempts: number) => void;
+  tags?: string[] | undefined;
+  language?: Locale | undefined;
+  onRetry?: ((attempt: number, maxAttempts: number) => void) | undefined;
 };
 
 /** Stream ask tokens and sources from POST /api/v1/ask/stream (F2). */

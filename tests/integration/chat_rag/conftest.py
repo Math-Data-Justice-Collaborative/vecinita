@@ -3,14 +3,19 @@
 from __future__ import annotations
 
 import os
+from typing import TYPE_CHECKING
 
 import pytest
 from fastapi.testclient import TestClient
-from tests.unit.rag.conftest import basis_vector, seed_corpus_with_embeddings
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import ChatRagService
 from vecinita_rag.retriever import CorpusPgvectorRetriever
+
+from tests.unit.rag.conftest import basis_vector, seed_corpus_with_embeddings
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 _EMBED_URL = "http://embed.test"
 _LLM_URL = "http://llm.test"
@@ -23,22 +28,13 @@ def _database_url() -> str:
     )
 
 
-class _MockEmbedClient:
-    def embed(self, text: str) -> list[float]:
-        return basis_vector(0)
-
-    def embed_batch(self, texts: list[str]) -> list[list[float]]:
-        return [basis_vector(0) for _ in texts]
-
-    def close(self) -> None:
-        return None
-
-
 class _MockLlmClient:
     def generate(self, prompt: str, **kwargs: object) -> str:
+        _ = (prompt, kwargs)
         return "The food pantry posts hours on the city website each Monday."
 
-    def generate_stream(self, prompt: str, **kwargs: object):
+    def generate_stream(self, prompt: str, **kwargs: object) -> Iterator[str]:
+        _ = (prompt, kwargs)
         yield "The "
         yield "food "
         yield "pantry "
@@ -51,6 +47,7 @@ class _MockLlmClient:
 
 @pytest.fixture
 def seeded_corpus_db() -> str:
+    """Seed the corpus with embeddings and return the database URL."""
     url = _database_url()
     seed_corpus_with_embeddings(
         database_url=url,
@@ -62,6 +59,7 @@ def seeded_corpus_db() -> str:
 
 @pytest.fixture
 def chat_settings(seeded_corpus_db: str, monkeypatch: pytest.MonkeyPatch) -> ChatRagSettings:
+    """Build ChatRagSettings pointed at the seeded corpus DB."""
     monkeypatch.setenv("DATABASE_URL", seeded_corpus_db)
     return ChatRagSettings(
         database_url=seeded_corpus_db,
@@ -74,6 +72,7 @@ def chat_settings(seeded_corpus_db: str, monkeypatch: pytest.MonkeyPatch) -> Cha
 
 @pytest.fixture
 def chat_service(chat_settings: ChatRagSettings) -> ChatRagService:
+    """Construct a ChatRagService backed by the seeded corpus and mock LLM."""
     retriever = CorpusPgvectorRetriever(
         embed_fn=lambda _q: basis_vector(0),
         database_url=chat_settings.database_url,
@@ -84,5 +83,6 @@ def chat_service(chat_settings: ChatRagSettings) -> ChatRagService:
 
 @pytest.fixture
 def chat_client(chat_settings: ChatRagSettings, chat_service: ChatRagService) -> TestClient:
+    """Return a TestClient for the chat-RAG app with the seeded service."""
     app = create_app(settings=chat_settings, chat_service=chat_service)
     return TestClient(app)

@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import uuid
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Engine
+from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
+
 from tests.helpers.json_response import json_int, json_list, response_json_object
 from tests.unit.internal_write_api.conftest import (
     StubJobsClient,
@@ -16,15 +18,17 @@ from tests.unit.internal_write_api.conftest import (
     database_url,
     upsert_document_via_api,
 )
-from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
 
 
-@pytest.fixture()
+@pytest.fixture
 def engine() -> Engine:
     return create_engine(database_url())
 
 
-@pytest.fixture()
+@pytest.fixture
 def bulk_documents(engine: Engine):
     doc_ids: list[UUID] = []
     with engine.begin() as conn:

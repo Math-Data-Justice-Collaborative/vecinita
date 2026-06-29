@@ -4,22 +4,25 @@ from __future__ import annotations
 
 import os
 import uuid
-from typing import cast
+from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
 import pytest
-from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from vecinita_data_management_backend.store import InMemoryJobStore
+from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
+from vecinita_shared_schemas.json_types import as_json_object
+
 from tests.helpers.json_response import (
     find_json_object_by_str,
     json_str,
     response_json_list,
 )
 from tests.unit.shared_schemas.auth_fixtures import sign_test_jwt
-from vecinita_data_management_backend.store import InMemoryJobStore
-from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
-from vecinita_shared_schemas.json_types import as_json_object
+
+if TYPE_CHECKING:
+    from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 
 pytestmark = pytest.mark.e2e
 
@@ -109,7 +112,7 @@ def test_internal_write_viewer_cannot_delete_document(
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
     still_ids = [
-        json_str(as_json_object(cast(object, row)), "document_id")
+        json_str(as_json_object(cast("object", row)), "document_id")
         for row in response_json_list(still_there)
     ]
     assert doc_id in still_ids
@@ -156,7 +159,7 @@ def test_admin_write_records_opaque_audit_actor(
         assert audit_row is not None
         assert audit_row["actor_id"] == admin_id
         assert audit_row["actor_role"] == "admin"
-        payload = as_json_object(cast(object, audit_row["payload"]))
+        payload = as_json_object(cast("object", audit_row["payload"]))
         assert "email" not in payload
         assert "name" not in payload
 

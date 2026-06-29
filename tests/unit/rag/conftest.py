@@ -6,9 +6,10 @@ import os
 
 import pytest
 from sqlalchemy import create_engine, text
-from tests.corpus_db_lock import corpus_db_lock
 from vecinita_database.seeds.load import load_corpus
 from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
+
+from tests.corpus_db_lock import corpus_db_lock
 
 
 def _database_url() -> str:

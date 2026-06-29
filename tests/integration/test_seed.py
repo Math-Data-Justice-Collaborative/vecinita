@@ -11,9 +11,8 @@ pytestmark = pytest.mark.integration
 
 
 @pytest.fixture
-def seeded_db():
+def seeded_db() -> None:
     load_corpus(database_url=_database_url())
-    yield
 
 
 def test_seed_load_row_counts(seeded_db: None) -> None:

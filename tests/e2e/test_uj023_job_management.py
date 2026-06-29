@@ -15,11 +15,12 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-from tests.helpers.json_response import json_object_list, json_str, response_json_object
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.pipeline import fetch_html_fixture, run_ingest_job
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_embedding_client import EMBEDDING_DIMENSION
+
+from tests.helpers.json_response import json_object_list, json_str, response_json_object
 
 pytestmark = pytest.mark.e2e
 
@@ -53,7 +54,8 @@ class _MockWriteClient:
 
 def _fetch(url: str):  # type: ignore[no-untyped-def]
     if _BAD_URL in url:
-        raise ValueError("bad_url")
+        msg = "bad_url"
+        raise ValueError(msg)
     return fetch_html_fixture(url, fixture_html=_FIXTURE_HTML)
 
 
@@ -62,7 +64,7 @@ def dm_jobs_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", _PROXY_KEY)
     store = InMemoryJobStore()
 
-    def runner(job_id):  # type: ignore[no-untyped-def]
+    def runner(job_id) -> None:  # type: ignore[no-untyped-def]
         with contextlib.suppress(ValueError):
             run_ingest_job(
                 job_id,

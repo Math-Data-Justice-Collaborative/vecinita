@@ -3,17 +3,21 @@
 from __future__ import annotations
 
 import uuid
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from sqlalchemy import text
-from sqlalchemy.engine import Engine
-from tests.unit.chat_rag.conftest import database_url
 from vecinita_chat_rag_backend.browse import (
     engine_from_url,
     get_document,
     list_documents,
     list_tag_facets,
 )
+
+from tests.unit.chat_rag.conftest import database_url
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
 
 
 def test_engine_from_url_creates_engine() -> None:

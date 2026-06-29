@@ -5,10 +5,11 @@ from __future__ import annotations
 import re
 
 import httpx
+
 from tests.helpers.json_response import header_str
 
 
-def assert_cors_preflight(
+def assert_cors_preflight(  # noqa: PLR0913  # mirrors CORS preflight request fields; all keyword-only
     *,
     api_base: str,
     origin: str,
@@ -57,6 +58,7 @@ def assert_bundle_contains_hosts(
     *,
     forbidden_substrings: list[str] | None = None,
 ) -> None:
+    """Assert the frontend bundle references expected hosts and no dev URLs."""
     for host in expected_hosts:
         assert host in js_text, f"Expected host {host!r} in frontend bundle"
     for bad in forbidden_substrings or ("localhost:8000", "localhost:8001", "localhost:8002"):
@@ -64,4 +66,5 @@ def assert_bundle_contains_hosts(
 
 
 def extract_https_hosts(js_text: str) -> list[str]:
+    """Return all https:// hosts referenced in the bundle text."""
     return re.findall(r"https://[a-zA-Z0-9._-]+(?:\.[a-zA-Z0-9._-]+)+", js_text)

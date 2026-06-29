@@ -6,6 +6,7 @@ import os
 from typing import Final
 
 import pytest
+from vecinita_database.privacy import find_forbidden_tables
 
 FORBIDDEN_TABLES: Final[frozenset[str]] = frozenset(
     {
@@ -29,7 +30,5 @@ def _database_url() -> str:
 @pytest.mark.privacy
 def test_no_pii_tables_in_database_metadata() -> None:
     """Introspect live Postgres; fail if any forbidden table is present."""
-    from vecinita_database.privacy import find_forbidden_tables
-
     found = find_forbidden_tables(_database_url())
     assert not found, f"Forbidden tables present: {sorted(found)}"

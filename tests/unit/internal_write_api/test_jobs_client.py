@@ -69,8 +69,8 @@ def test_jobs_client_closes_owned_http_client() -> None:
 
     def client_factory(**kwargs: object) -> httpx.Client:
         http = base_client(
-            base_url=cast(str, kwargs.get("base_url", "")),
-            timeout=cast(float, kwargs.get("timeout", 60.0)),
+            base_url=cast("str", kwargs.get("base_url", "")),
+            timeout=cast("float", kwargs.get("timeout", 60.0)),
             transport=httpx.MockTransport(handler),
         )
         original_close = http.close

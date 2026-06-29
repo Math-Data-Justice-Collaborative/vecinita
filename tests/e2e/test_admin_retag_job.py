@@ -3,20 +3,12 @@
 from __future__ import annotations
 
 import os
-from typing import cast
-from uuid import UUID
+from typing import TYPE_CHECKING, cast
 
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import HttpUrl
 from sqlalchemy import create_engine, text
-from tests.helpers.json_response import (
-    find_json_object_by_str,
-    json_list,
-    json_str,
-    response_json_list,
-    response_json_object,
-)
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.jobs import run_job
 from vecinita_data_management_backend.store import InMemoryJobStore
@@ -31,6 +23,17 @@ from vecinita_shared_schemas.internal_write import (
     TagPatchResponse,
 )
 from vecinita_shared_schemas.json_types import as_json_object
+
+from tests.helpers.json_response import (
+    find_json_object_by_str,
+    json_list,
+    json_str,
+    response_json_list,
+    response_json_object,
+)
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 pytestmark = pytest.mark.e2e
 
@@ -221,7 +224,7 @@ def test_admin_retag_tags_visible_via_get_endpoint(
         f"GET /documents/{{id}}/tags should return 200 after retag; got {tags_resp.status_code}"
     )
     tag_slugs = sorted(
-        json_str(as_json_object(cast(object, tag)), "slug")
+        json_str(as_json_object(cast("object", tag)), "slug")
         for tag in json_list(response_json_object(tags_resp), "tags")
     )
     assert tag_slugs == ["benefits"], (

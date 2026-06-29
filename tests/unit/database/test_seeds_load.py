@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import patch
 
-import pytest
-from tests.unit.database.conftest import database_url
 from vecinita_database.seeds.load import (
     _chunk_text,
     _fixture_url,
@@ -14,6 +12,13 @@ from vecinita_database.seeds.load import (
     load_corpus,
     main,
 )
+
+from tests.unit.database.conftest import database_url
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    import pytest
 
 
 def test_normalize_database_url_upgrades_postgresql_scheme() -> None:

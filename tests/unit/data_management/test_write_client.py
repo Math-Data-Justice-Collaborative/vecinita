@@ -40,7 +40,7 @@ def test_upsert_batch_posts_documents() -> None:
     seen: list[dict[str, object]] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(cast(dict[str, object], json.loads(request.content.decode())))
+        seen.append(cast("dict[str, object]", json.loads(request.content.decode())))
         assert request.headers["Authorization"] == "Bearer test-key"
         return httpx.Response(200, json={"upserted_chunks": 2})
 
@@ -183,8 +183,8 @@ def test_write_client_closes_owned_client(monkeypatch: pytest.MonkeyPatch) -> No
 
     def client_factory(**kwargs: object) -> httpx.Client:
         client = base_client(
-            base_url=cast(str, kwargs.get("base_url", "")),
-            timeout=cast(float, kwargs.get("timeout", 60.0)),
+            base_url=cast("str", kwargs.get("base_url", "")),
+            timeout=cast("float", kwargs.get("timeout", 60.0)),
             transport=httpx.MockTransport(handler),
         )
         original_close = client.close

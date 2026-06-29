@@ -82,7 +82,7 @@ describe("createJob", () => {
 
     const headers = (fetchMock.mock.calls[0]?.[1] as RequestInit)
       .headers as Record<string, string>;
-    expect(headers.Authorization).toBe("Bearer jwt");
+    expect(headers["Authorization"]).toBe("Bearer jwt");
     expect(headers["X-Vecinita-Proxy-Key"]).toBe("k");
   });
 

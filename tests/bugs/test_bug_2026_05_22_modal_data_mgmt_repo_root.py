@@ -14,9 +14,10 @@ def test_data_management_app_imports_when_modal_mounts_at_root(tmp_path: Path) -
     mounted.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
 
     spec = importlib.util.spec_from_file_location("data_management_app_mounted", mounted)
-    assert spec and spec.loader
+    assert spec
+    assert spec.loader
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
-    repo_root = cast(object, module._REPO_ROOT)
+    repo_root = cast("object", module._REPO_ROOT)
     assert Path("/opt/vecinita") == Path(str(repo_root))

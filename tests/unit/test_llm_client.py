@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json as json_lib
 from typing import cast
 
 import httpx
@@ -11,10 +12,10 @@ from vecinita_shared_schemas.json_types import as_json_object
 
 
 def test_generate_returns_text() -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
-        import json as json_lib
+    """Generate posts the prompt and returns the response text."""
 
-        payload = as_json_object(cast(object, json_lib.loads(request.content.decode())))
+    def handler(request: httpx.Request) -> httpx.Response:
+        payload = as_json_object(cast("object", json_lib.loads(request.content.decode())))
         assert request.url.path == "/generate"
         assert payload["prompt"] == "Answer briefly: food pantry hours?"
         return httpx.Response(200, json={"text": "Hours are posted on Monday."})
@@ -30,6 +31,8 @@ def test_generate_returns_text() -> None:
 
 
 def test_generate_stream_yields_tokens() -> None:
+    """Generate-stream yields tokens parsed from the SSE stream."""
+
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.path == "/generate/stream"
         lines = [
@@ -50,7 +53,9 @@ def test_generate_stream_yields_tokens() -> None:
 
 
 def test_generate_raises_on_http_error() -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
+    """Generate raises when the server responds with an HTTP error status."""
+
+    def handler(_request: httpx.Request) -> httpx.Response:
         return httpx.Response(503, json={"detail": "gpu unavailable"})
 
     transport = httpx.MockTransport(handler)
@@ -64,6 +69,7 @@ def test_generate_raises_on_http_error() -> None:
 
 
 def test_llm_client_requires_base_url_or_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """LLM client raises when neither base URL nor env var is set."""
     monkeypatch.delenv("VECINITA_MODAL_LLM_URL", raising=False)
 
     with pytest.raises(LlmClientError, match="VECINITA_MODAL_LLM_URL"):
@@ -73,18 +79,19 @@ def test_llm_client_requires_base_url_or_env(monkeypatch: pytest.MonkeyPatch) ->
 def test_llm_client_context_manager_closes_owned_client(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Context manager closes the HTTP client it created itself."""
     closed: list[bool] = []
 
-    def handler(request: httpx.Request) -> httpx.Response:
+    def handler(_request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json={"text": "ok"})
 
     base_client = httpx.Client
 
     def client_factory(**kwargs: object) -> httpx.Client:
         client = base_client(
-            base_url=cast(httpx.URL | str, kwargs.get("base_url", "")),
-            timeout=cast(float, kwargs.get("timeout", 120.0)),
-            follow_redirects=cast(bool, kwargs.get("follow_redirects", True)),
+            base_url=cast("httpx.URL | str", kwargs.get("base_url", "")),
+            timeout=cast("float", kwargs.get("timeout", 120.0)),
+            follow_redirects=cast("bool", kwargs.get("follow_redirects", True)),
             transport=httpx.MockTransport(handler),
         )
         original_close = client.close
@@ -105,6 +112,7 @@ def test_llm_client_context_manager_closes_owned_client(
 
 
 def test_generate_raises_when_text_field_missing() -> None:
+    """Generate raises when the response is missing the text field."""
     transport = httpx.MockTransport(
         lambda _request: httpx.Response(200, json={"unexpected": "value"}),
     )
@@ -119,6 +127,7 @@ def test_generate_raises_when_text_field_missing() -> None:
 
 
 def test_generate_stream_raises_on_http_error() -> None:
+    """Generate-stream raises when the server responds with an error status."""
     transport = httpx.MockTransport(lambda _request: httpx.Response(503, json={}))
     client = LlmClient(
         "http://llm.test",
@@ -131,15 +140,10 @@ def test_generate_stream_raises_on_http_error() -> None:
 
 
 def test_generate_stream_skips_blank_and_non_data_lines() -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
-        content = "\n".join(
-            [
-                "",
-                "not-data",
-                'data: {"token": "Hi"}',
-                'data: {"done": true}',
-            ]
-        )
+    """Generate-stream ignores blank and non-data SSE lines."""
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        content = '\nnot-data\ndata: {"token": "Hi"}\ndata: {"done": true}'
         return httpx.Response(200, content=content)
 
     transport = httpx.MockTransport(handler)
@@ -153,14 +157,14 @@ def test_generate_stream_skips_blank_and_non_data_lines() -> None:
 
 
 def test_generate_stream_ignores_empty_and_non_string_tokens() -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
-        content = "\n".join(
-            [
-                'data: {"token": ""}',
-                'data: {"token": 123}',
-                'data: {"token": "Done"}',
-                'data: {"done": true}',
-            ]
+    """Generate-stream skips empty and non-string token values."""
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        content = (
+            'data: {"token": ""}\n'
+            'data: {"token": 123}\n'
+            'data: {"token": "Done"}\n'
+            'data: {"done": true}'
         )
         return httpx.Response(200, content=content)
 
@@ -175,6 +179,7 @@ def test_generate_stream_ignores_empty_and_non_string_tokens() -> None:
 
 
 def test_generate_stream_returns_no_tokens_when_body_empty() -> None:
+    """Generate-stream yields nothing when the response body is empty."""
     transport = httpx.MockTransport(lambda _request: httpx.Response(200, content=""))
     client = LlmClient(
         "http://llm.test",
@@ -186,9 +191,10 @@ def test_generate_stream_returns_no_tokens_when_body_empty() -> None:
 
 
 def test_llm_client_does_not_close_injected_http_client() -> None:
+    """Closing the client must not close an externally injected HTTP client."""
     closed: list[bool] = []
 
-    def handler(request: httpx.Request) -> httpx.Response:
+    def handler(_request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json={"text": "ok"})
 
     transport = httpx.MockTransport(handler)

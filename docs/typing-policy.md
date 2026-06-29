@@ -1,9 +1,14 @@
 # Typing policy — no `Any` / `any`
 
 > **Status:** Enforced in CI and Cursor hooks (ADR-018, EV-003)  
-> **Last updated:** 2026-05-27
+> **Last updated:** 2026-06-29
 
 Vecinita requires **strict static typing**. Do not use `typing.Any` in Python or `any` in TypeScript except where an external boundary cannot be typed and a documented waiver exists (none today).
+
+As of 2026-06-29 the linters/typecheckers run at their strictest sensible settings: Ruff
+`select = ["ALL"]`, basedpyright `typeCheckingMode = "strict"`, and all strict TypeScript
+compiler flags. See the per-stack sections below for the exact config and the small set of
+deliberately-ignored rules (formatter conflicts and mutually-incompatible rule pairs).
 
 ## Quick reference
 
@@ -18,16 +23,37 @@ Vecinita requires **strict static typing**. Do not use `typing.Any` in Python or
 
 ### Ruff
 
-- Rule **`ANN401`**: `typing.Any` is disallowed in annotations (function args, returns, variables).
-- Config: `[tool.ruff.lint]` → `select` includes `ANN401` in root `pyproject.toml`.
+- **`select = ["ALL"]`** — every Ruff rule family is enabled (the strictest setting),
+  including `ANN` (annotations, so `typing.Any` is still rejected via `ANN401`), `D`
+  (docstrings, google convention), `S` (security), `PL` (pylint), `TRY`, `EM`, `PT`, etc.
+- Config: `[tool.ruff.lint]` in root `pyproject.toml`.
+- **Deliberate `ignore` list** (only rules that conflict with our formatter or each other):
+  | Rule | Why ignored |
+  |------|-------------|
+  | `E501` | `ruff format` owns line wrapping |
+  | `COM812` | Conflicts with `ruff format` (Ruff officially recommends disabling) |
+  | `ISC001` | Conflicts with `ruff format` |
+  | `D203` | Mutually incompatible with `D211` (we keep `D211`) |
+  | `D213` | Mutually incompatible with `D212` (we keep `D212`) |
+- **Per-file ignores**: `tests/**` ignores **only** `S101` — `assert` is the foundation of
+  pytest; everything else (docstrings, annotations, magic-value constants, etc.) is enforced
+  in tests at the same strictness as production code.
+- `[tool.ruff.lint.pydocstyle] convention = "google"`.
 
 ### basedpyright
 
 - Package: **`basedpyright`** (Pyright-compatible; adds `reportExplicitAny`).
 - Config sections: `[tool.basedpyright]` in `pyproject.toml` and `pyrightconfig.json`.
 - Key settings:
+  - **`typeCheckingMode = "strict"`** — Pyright strict mode (the strongest sensible level;
+    `all` adds non-type stylistic rules like `reportUnusedCallResult` that cannot be resolved
+    by adding types). Strict requires complete type information everywhere.
   - **`reportExplicitAny = "error"`** — rejects `dict[str, Any]`, `payload: Any`, etc.
   - **`reportAny = "error"`** — rejects *using* values typed as `Any` (e.g. untyped SQLAlchemy scalars). Use `db_mapping` / `json_types` helpers.
+  - **`stubPath = "stubs"`** — local `.pyi` stubs for genuinely untyped third-party libs.
+- Untyped third-party libraries (e.g. LlamaIndex): resolve `reportUnknown*` by annotating the
+  call site, `cast(...)`, repo helpers (`db_mapping` / `json_types`), or local stubs under
+  `stubs/`. A targeted `# pyright: ignore[specificCode]  # reason` is a last resort only.
 - Excludes: `**/node_modules` under `apps/` (frontend vendored Python).
 
 ### Alternatives to `Any`
@@ -53,10 +79,23 @@ Config: `apps/*/eslint.config.js`.
 
 ### TypeScript compiler
 
-`tsconfig.json` per frontend:
+`tsconfig.json` per frontend app **and** shared `packages/frontend-*`:
 
-- `"strict": true`
-- `"noImplicitAny": true`
+- `"strict": true`, `"noImplicitAny": true`
+- `"noUnusedLocals"`, `"noUnusedParameters"`, `"noFallthroughCasesInSwitch"`,
+  `"noUncheckedSideEffectImports"`
+- **Added (strictest sensible set):** `"noUncheckedIndexedAccess"`,
+  `"exactOptionalPropertyTypes"`, `"noImplicitReturns"`, `"noImplicitOverride"`,
+  `"noPropertyAccessFromIndexSignature"`, `"verbatimModuleSyntax"`,
+  `"allowUnreachableCode": false`, `"allowUnusedLabels": false`,
+  `"forceConsistentCasingInFileNames"`
+
+Notes on the strict flags:
+- `exactOptionalPropertyTypes`: option-bag types that intentionally carry `undefined` declare
+  the property as `prop?: T | undefined` (the documented pattern), rather than omitting it.
+- `noPropertyAccessFromIndexSignature`: read index-signature properties with bracket access
+  (`obj["key"]`), including header maps and `Record<string, unknown>` type guards.
+- `verbatimModuleSyntax`: type-only imports must use `import { type X }` / `import type`.
 
 `npm run build` runs `tsc --noEmit` before Vite.
 

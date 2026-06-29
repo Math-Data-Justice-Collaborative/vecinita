@@ -3,17 +3,24 @@
 from __future__ import annotations
 
 import os
+from http import HTTPStatus
 from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
 from vecinita_internal_write_api.app import create_app
 
+from tests.helpers.json_response import response_json_object
+
 pytestmark = pytest.mark.unit
 
+_RETENTION_DAYS = 90
+_EXPECTED_DELETED = 3
 
-@pytest.fixture()
+
+@pytest.fixture
 def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    """Provide a TestClient for the internal write API with env configured."""
     db_url = os.environ.get(
         "DATABASE_URL",
         "postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
@@ -26,25 +33,30 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
 def test_audit_cleanup_uses_retention_env(
     client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setenv("VECINITA_AUDIT_RETENTION_DAYS", "90")
+    """Audit cleanup passes the configured retention window to the cleanup helper."""
+    monkeypatch.setenv("VECINITA_AUDIT_RETENTION_DAYS", str(_RETENTION_DAYS))
     with patch(
         "vecinita_internal_write_api.app.cleanup_audit_log",
-        return_value=3,
+        return_value=_EXPECTED_DELETED,
     ) as mock_cleanup:
         resp = client.post(
             "/internal/v1/audit/cleanup",
             headers={"Authorization": "Bearer test-key"},
         )
 
-    assert resp.status_code == 200
-    assert resp.json() == {"deleted": 3, "retention_days": 90}
+    assert resp.status_code == HTTPStatus.OK
+    assert response_json_object(resp) == {
+        "deleted": _EXPECTED_DELETED,
+        "retention_days": _RETENTION_DAYS,
+    }
     mock_cleanup.assert_called_once()
-    assert mock_cleanup.call_args.kwargs["retention_days"] == 90
+    assert mock_cleanup.call_args.kwargs["retention_days"] == _RETENTION_DAYS
 
 
 def test_audit_cleanup_skips_when_retention_zero(
     client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Audit cleanup skips the helper entirely when retention is zero."""
     monkeypatch.setenv("VECINITA_AUDIT_RETENTION_DAYS", "0")
     with patch("vecinita_internal_write_api.app.cleanup_audit_log") as mock_cleanup:
         resp = client.post(
@@ -52,6 +64,6 @@ def test_audit_cleanup_skips_when_retention_zero(
             headers={"Authorization": "Bearer test-key"},
         )
 
-    assert resp.status_code == 200
-    assert resp.json() == {"deleted": 0, "retention_days": 0}
+    assert resp.status_code == HTTPStatus.OK
+    assert response_json_object(resp) == {"deleted": 0, "retention_days": 0}
     mock_cleanup.assert_not_called()

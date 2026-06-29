@@ -27,6 +27,7 @@ class LlmTagClient:
         *,
         tag_max_tokens: int | None = None,
     ) -> None:
+        """Wrap ``llm_client`` with tag-specific token limits."""
         self._llm = llm_client
         if tag_max_tokens is not None:
             self._tag_max_tokens = tag_max_tokens
@@ -34,6 +35,7 @@ class LlmTagClient:
             self._tag_max_tokens = int(os.environ.get(_ENV_TAG_MAX_TOKENS, _DEFAULT_TAG_MAX_TOKENS))
 
     def close(self) -> None:
+        """Close the underlying LLM client."""
         self._llm.close()
 
     def infer_document_tags(
@@ -47,7 +49,8 @@ class LlmTagClient:
     ) -> list[str]:
         """Return tag slugs inferred for a document body."""
         if max_tags < 1:
-            raise LlmTagClientError("max_tags must be at least 1")
+            msg = "max_tags must be at least 1"
+            raise LlmTagClientError(msg)
         prompt = _build_document_tag_prompt(
             title=title,
             text=text,
@@ -115,10 +118,18 @@ def _parse_tag_slugs(raw: str) -> list[str]:
     if fence:
         payload = fence.group(1)
     try:
-        data = as_json_object(cast(object, json.loads(payload)))
+        data = as_json_object(cast("object", json.loads(payload)))
     except json.JSONDecodeError as exc:
-        raise LlmTagClientError(f"tag response is not valid JSON: {exc}") from exc
+        msg = f"tag response is not valid JSON: {exc}"
+        raise LlmTagClientError(msg) from exc
     tags = data.get("tags")
-    if not isinstance(tags, list) or not all(isinstance(tag, str) for tag in tags):
-        raise LlmTagClientError("tag response JSON must contain a 'tags' string array")
-    return tags
+    if not isinstance(tags, list):
+        msg = "tag response JSON must contain a 'tags' string array"
+        raise LlmTagClientError(msg)
+    tag_slugs: list[str] = []
+    for tag in cast("list[object]", tags):
+        if not isinstance(tag, str):
+            msg = "tag response JSON must contain a 'tags' string array"
+            raise LlmTagClientError(msg)
+        tag_slugs.append(tag)
+    return tag_slugs

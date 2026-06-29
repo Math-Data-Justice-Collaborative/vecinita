@@ -3,18 +3,13 @@
 from __future__ import annotations
 
 import time
+from typing import Annotated
 from uuid import uuid4
 
 import jwt
 import pytest
 from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
-from tests.unit.shared_schemas.auth_fixtures import (
-    InvalidSigningKeyResolver,
-    generate_es256_keypair,
-    make_auth_config,
-    sign_test_jwt,
-)
 from vecinita_shared_schemas.auth import (
     AuthConfig,
     AuthContext,
@@ -29,6 +24,13 @@ from vecinita_shared_schemas.auth import (
     reset_auth_config_for_tests,
     resolve_operator_or_service,
     verify_supabase_jwt,
+)
+
+from tests.unit.shared_schemas.auth_fixtures import (
+    InvalidSigningKeyResolver,
+    generate_es256_keypair,
+    make_auth_config,
+    sign_test_jwt,
 )
 
 pytestmark = pytest.mark.unit
@@ -288,11 +290,11 @@ def test_get_principal_and_resolve_operator_or_service_dependencies() -> None:
     app = FastAPI()
 
     @app.get("/principal")
-    def principal_route(principal: AuthPrincipal = Depends(get_principal)) -> dict[str, str]:  # noqa: B008
+    def principal_route(principal: Annotated[AuthPrincipal, Depends(get_principal)]) -> dict[str, str]:
         return {"role": principal.role}
 
     @app.get("/context")
-    def context_route(ctx: AuthContext = Depends(resolve_operator_or_service)) -> dict[str, bool]:  # noqa: B008
+    def context_route(ctx: Annotated[AuthContext, Depends(resolve_operator_or_service)]) -> dict[str, bool]:
         return {"service": ctx.is_service}
 
     reset_auth_config_for_tests()
@@ -347,7 +349,7 @@ def test_get_principal_reads_authorization_header() -> None:
     app = FastAPI()
 
     @app.get("/principal")
-    def principal_route(principal: AuthPrincipal = Depends(get_principal)) -> dict[str, str]:  # noqa: B008
+    def principal_route(principal: Annotated[AuthPrincipal, Depends(get_principal)]) -> dict[str, str]:
         return {"role": principal.role}
 
     client = TestClient(app)

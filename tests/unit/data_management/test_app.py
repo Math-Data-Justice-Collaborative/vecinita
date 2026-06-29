@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-import pytest
 from fastapi.testclient import TestClient
-from tests.helpers.json_response import json_str, response_json_object
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.store import InMemoryJobStore
+
+from tests.helpers.json_response import json_str, response_json_object
+
+if TYPE_CHECKING:
+    import pytest
 
 _PROXY_KEY = "unit-test-proxy-key"
 
@@ -82,7 +86,7 @@ def test_create_job_schedules_pipeline_runner() -> None:
         create_app(
             store=store,
             require_proxy_auth=False,
-            pipeline_runner=lambda job_id: scheduled.append(job_id),
+            pipeline_runner=scheduled.append,
         )
     )
 

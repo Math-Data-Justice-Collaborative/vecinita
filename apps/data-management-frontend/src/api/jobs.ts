@@ -3,7 +3,7 @@ import type { CreateJobResponse, Job, JobList, JobStatus } from "./types";
 export interface JobsClientOptions {
   baseUrl: string;
   modalKey: string;
-  accessToken?: string;
+  accessToken?: string | undefined;
 }
 
 function jobsHeaders(options: JobsClientOptions): Record<string, string> {
@@ -11,7 +11,7 @@ function jobsHeaders(options: JobsClientOptions): Record<string, string> {
     "X-Vecinita-Proxy-Key": options.modalKey,
   };
   if (options.accessToken) {
-    headers.Authorization = `Bearer ${options.accessToken}`;
+    headers["Authorization"] = `Bearer ${options.accessToken}`;
   }
   return headers;
 }

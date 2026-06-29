@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import uuid
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
 from fastapi import HTTPException
 from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Engine
-from tests.unit.internal_write_api.conftest import database_url
 from vecinita_internal_write_api.tags import (
     replace_chunk_tags,
     replace_document_tags,
@@ -19,13 +18,18 @@ from vecinita_internal_write_api.tags import (
 from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
 from vecinita_shared_schemas.internal_write import TagInput
 
+from tests.unit.internal_write_api.conftest import database_url
 
-@pytest.fixture()
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
+
+
+@pytest.fixture
 def engine() -> Engine:
     return create_engine(database_url())
 
 
-@pytest.fixture()
+@pytest.fixture
 def tagged_document(engine: Engine):
     doc_url = f"https://tag-test-{uuid.uuid4().hex[:10]}.example.com"
     with engine.begin() as conn:

@@ -7,8 +7,9 @@ from uuid import uuid4
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from tests.helpers.json_response import find_json_object_by_str, json_str, response_json_list
 from vecinita_shared_schemas.json_types import as_json_object
+
+from tests.helpers.json_response import find_json_object_by_str, json_str, response_json_list
 
 pytestmark = pytest.mark.integration
 
@@ -60,7 +61,7 @@ async def _seed_document(client: AsyncClient) -> tuple[str, str]:
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
     chunk_rows = response_json_list(chunks_response)
-    chunk_id = json_str(as_json_object(cast(object, chunk_rows[0])), "chunk_id")
+    chunk_id = json_str(as_json_object(cast("object", chunk_rows[0])), "chunk_id")
     return document_id, chunk_id
 
 

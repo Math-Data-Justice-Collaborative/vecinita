@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import logging
 from hashlib import sha256
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 from uuid import UUID
 
 from pydantic import HttpUrl
-from vecinita_embedding_client import EmbeddingClient
 from vecinita_ingest import chunk_text, fetch_url
 from vecinita_ingest.models import ScrapedDocument
 from vecinita_ingest.scrape import parse_html
@@ -27,16 +26,26 @@ from vecinita_tagging.vocabulary import (
     vocabulary_slugs,
 )
 
-from vecinita_data_management_backend.store import JobStore
-from vecinita_data_management_backend.write_client import InternalWriteClient
+if TYPE_CHECKING:
+    from vecinita_embedding_client import EmbeddingClient
+
+    from vecinita_data_management_backend.store import JobStore
+    from vecinita_data_management_backend.write_client import InternalWriteClient
 
 logger = logging.getLogger(__name__)
+
+
+def _raise_no_chunks(url: str) -> None:
+    msg = f"no chunks produced for {url}"
+    raise ValueError(msg)
 
 
 class DocumentFetcher(Protocol):
     """Callable that fetches a URL and returns normalized page text."""
 
-    def __call__(self, url: str) -> ScrapedDocument: ...
+    def __call__(self, url: str) -> ScrapedDocument:
+        """Fetch and normalize a document from a URL."""
+        ...
 
 
 class TagInferrer(Protocol):
@@ -50,10 +59,12 @@ class TagInferrer(Protocol):
         language: str,
         vocabulary: list[str],
         max_tags: int = 10,
-    ) -> list[str]: ...
+    ) -> list[str]:
+        """Return up to ``max_tags`` tag slugs for a document."""
+        ...
 
 
-def run_ingest_job(
+def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dependencies
     job_id: UUID,
     *,
     store: JobStore,
@@ -87,7 +98,7 @@ def run_ingest_job(
 
             chunks = chunk_text(text, chunk_size_tokens=chunk_size)
             if not chunks:
-                raise ValueError(f"no chunks produced for {url}")
+                _raise_no_chunks(url)
 
             tag_models: list[TagInput] | None = None
             if tag_client is not None and slug_vocab:
@@ -145,7 +156,7 @@ def run_ingest_job(
         raise
 
 
-def run_retag_job(
+def run_retag_job(  # noqa: PLR0913  # retag pipeline needs explicit stage dependencies
     job_id: UUID,
     *,
     store: JobStore,
@@ -159,11 +170,13 @@ def run_retag_job(
     if record is None:
         raise KeyError(job_id)
     if record.job_type != "retag":
-        raise ValueError(f"job {job_id} is not a retag job")
+        msg = f"job {job_id} is not a retag job"
+        raise ValueError(msg)
 
     document_id_raw = record.options.get("document_id")
     if not isinstance(document_id_raw, str):
-        raise ValueError("retag job missing document_id option")
+        msg = "retag job missing document_id option"
+        raise ValueError(msg)  # noqa: TRY004  # validation error for missing job option
 
     store.update_job(job_id, status="running")
     vocabulary = tag_vocabulary if tag_vocabulary is not None else load_seed_vocabulary()

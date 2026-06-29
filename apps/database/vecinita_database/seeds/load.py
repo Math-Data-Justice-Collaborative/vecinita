@@ -81,7 +81,7 @@ def load_corpus(*, database_url: str | None = None) -> dict[str, int]:
                 url = _fixture_url(language, path)
                 doc_id = scalar_uuid(
                     cast(
-                        object,
+                        "object",
                         conn.execute(
                             text(
                                 """
@@ -133,7 +133,9 @@ def load_corpus(*, database_url: str | None = None) -> dict[str, int]:
 def main() -> None:
     """CLI entrypoint: load fixture corpus into Postgres."""
     counts = load_corpus()
-    print(f"Seeded {counts['documents']} documents, {counts['chunks']} chunks")
+    print(  # noqa: T201  # CLI output
+        f"Seeded {counts['documents']} documents, {counts['chunks']} chunks"
+    )
 
 
 if __name__ == "__main__":

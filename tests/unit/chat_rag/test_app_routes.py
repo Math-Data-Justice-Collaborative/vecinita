@@ -11,8 +11,6 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 from starlette.requests import Request
-from tests.helpers.json_response import json_list, json_str, response_json_object
-from tests.unit.chat_rag.conftest import StubChatRagService, database_url
 from vecinita_chat_rag_backend.app import (
     _check_dependency,
     _fire_stats,
@@ -26,8 +24,11 @@ from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_shared_schemas.chat_rag import Source
 from vecinita_shared_schemas.json_types import as_json_object
 
+from tests.helpers.json_response import json_list, json_str, response_json_object
+from tests.unit.chat_rag.conftest import StubChatRagService, database_url
 
-@pytest.fixture()
+
+@pytest.fixture
 def client(chat_settings: ChatRagSettings) -> TestClient:
     service = StubChatRagService()
     return TestClient(create_app(settings=chat_settings, chat_service=service))  # type: ignore[arg-type]
@@ -290,7 +291,7 @@ def test_list_documents_route(
     assert response.status_code == 200
     body = response_json_object(response)
     items = json_list(body, "items")
-    assert any(json_str(as_json_object(cast(object, item)), "url") == doc_url for item in items)
+    assert any(json_str(as_json_object(cast("object", item)), "url") == doc_url for item in items)
 
 
 def test_get_document_route(
@@ -316,7 +317,7 @@ def test_list_tags_route(
     response = client.get("/api/v1/tags")
     assert response.status_code == 200
     tags = json_list(response_json_object(response), "tags")
-    assert any(json_str(as_json_object(cast(object, tag)), "slug") == "housing" for tag in tags)
+    assert any(json_str(as_json_object(cast("object", tag)), "slug") == "housing" for tag in tags)
 
 
 def test_fire_stats_noops_when_disabled() -> None:

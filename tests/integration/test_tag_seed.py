@@ -13,7 +13,7 @@ pytestmark = pytest.mark.integration
 def seeded_tags_and_corpus():
     tag_rows = load_seed_tags()
     corpus_counts = load_tagged_corpus()
-    yield {"tags": tag_rows, **corpus_counts}
+    return {"tags": tag_rows, **corpus_counts}
 
 
 def test_seed_tags_row_count(seeded_tags_and_corpus: dict[str, int]) -> None:

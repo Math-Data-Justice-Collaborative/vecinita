@@ -8,6 +8,7 @@ from unittest.mock import patch
 import httpx
 import pytest
 from fastapi.testclient import TestClient
+
 from tests.helpers.json_response import json_object_get, json_str, response_json_object
 
 pytestmark = pytest.mark.unit
@@ -22,7 +23,7 @@ def _database_url() -> str:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def client(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("DATABASE_URL", _database_url())
     monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _API_KEY)

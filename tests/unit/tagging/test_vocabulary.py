@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import langdetect
 import pytest
@@ -16,6 +16,9 @@ from vecinita_tagging.vocabulary import (
     tag_inputs_for_slugs,
     vocabulary_slugs,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 _SAMPLE_VOCAB = [
     SeedTag(slug="housing", label_en="Housing", label_es="Vivienda"),
@@ -107,7 +110,8 @@ def test_detect_document_language_uses_fallback_on_detection_failure(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     def _fail(_text: str) -> str:
-        raise langdetect.LangDetectException("fail", "detection failed")
+        msg = "fail"
+        raise langdetect.LangDetectException(msg, "detection failed")
 
     monkeypatch.setattr(langdetect, "detect", _fail)
 

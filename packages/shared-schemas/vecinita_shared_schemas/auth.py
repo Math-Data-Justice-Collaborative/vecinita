@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Annotated, Literal, Protocol
+from typing import TYPE_CHECKING, Annotated, Literal, Protocol, cast
 from uuid import UUID
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 import jwt
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
@@ -40,7 +42,7 @@ class AuthContext:
     is_service: bool
 
 
-def _env_bool(name: str, default: bool) -> bool:
+def _env_bool(name: str, *, default: bool) -> bool:
     raw = os.environ.get(name)
     if raw is None:
         return default
@@ -59,19 +61,22 @@ class AuthConfig:
 
     @classmethod
     def from_env(cls) -> AuthConfig:
+        """Build auth settings from process environment variables."""
         return cls(
             supabase_url=os.environ.get("SUPABASE_URL", "").rstrip("/"),
             jwt_aud=os.environ.get("SUPABASE_JWT_AUD", "authenticated"),
-            auth_required=_env_bool("VECINITA_AUTH_REQUIRED", True),
+            auth_required=_env_bool("VECINITA_AUTH_REQUIRED", default=True),
             internal_api_key=os.environ.get("VECINITA_INTERNAL_API_KEY"),
             signing_key_resolver=None,
         )
 
     @property
     def jwks_url(self) -> str:
+        """Return the Supabase JWKS URL for ES256 verification."""
         return f"{self.supabase_url}/auth/v1/.well-known/jwks.json"
 
     def resolve_signing_key(self, token: str) -> object:
+        """Resolve the public signing key for ``token`` via JWKS or test resolver."""
         if self.signing_key_resolver is not None:
             return self.signing_key_resolver.get_signing_key_from_jwt(token)
         client = PyJWKClient(self.jwks_url, cache_keys=True)
@@ -82,7 +87,8 @@ _default_config: AuthConfig | None = None
 
 
 def get_auth_config() -> AuthConfig:
-    global _default_config
+    """Return the process-wide auth config, loading from env on first call."""
+    global _default_config  # noqa: PLW0603 — module-level config cache
     if _default_config is None:
         _default_config = AuthConfig.from_env()
     return _default_config
@@ -90,7 +96,7 @@ def get_auth_config() -> AuthConfig:
 
 def reset_auth_config_for_tests() -> None:
     """Clear cached config so env overrides apply (tests only)."""
-    global _default_config
+    global _default_config  # noqa: PLW0603 — module-level config cache
     _default_config = None
 
 
@@ -105,7 +111,8 @@ def _role_from_payload(payload: dict[str, object]) -> Role:
     app_meta = payload.get("app_metadata")
     if not isinstance(app_meta, dict):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-    role_raw = app_meta.get("role")
+    app_metadata = cast("dict[str, object]", app_meta)
+    role_raw = app_metadata.get("role")
     if role_raw == "admin":
         return "admin"
     if role_raw == "viewer":

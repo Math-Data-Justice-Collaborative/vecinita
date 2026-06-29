@@ -18,7 +18,7 @@ export function setOperatorAccessToken(token: string | null): void {
 export function requireAdminConfig(): {
   baseUrl: string;
   modalKey: string;
-  accessToken?: string;
+  accessToken?: string | undefined;
 } {
   if (!adminApiUrl || !modalProxyKey) {
     throw new Error(
@@ -34,8 +34,8 @@ export function requireAdminConfig(): {
 
 export function requireCorpusConfig(): {
   baseUrl: string;
-  apiKey?: string;
-  accessToken?: string;
+  apiKey?: string | undefined;
+  accessToken?: string | undefined;
 } {
   if (!corpusApiUrl) {
     throw new Error("Set VITE_VECINITA_CORPUS_API_URL (see .env.example)");

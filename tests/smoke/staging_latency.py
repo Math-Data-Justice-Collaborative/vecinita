@@ -6,6 +6,7 @@ import math
 import time
 
 import httpx
+
 from tests.helpers.json_response import response_json_object
 
 P95_THRESHOLD_S = 15.0

@@ -6,10 +6,11 @@ import contextlib
 
 import pytest
 from fastapi.testclient import TestClient
-from tests.helpers.json_response import json_str, response_json_object
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.pipeline import run_ingest_job
 from vecinita_data_management_backend.store import InMemoryJobStore
+
+from tests.helpers.json_response import json_str, response_json_object
 
 pytestmark = pytest.mark.e2e
 
@@ -20,7 +21,8 @@ def test_ingest_job_failure(monkeypatch: pytest.MonkeyPatch) -> None:
 
     class _FailingEmbed:
         def embed_batch(self, texts: list[str]) -> list[list[float]]:
-            raise RuntimeError("embed_unavailable")
+            msg = "embed_unavailable"
+            raise RuntimeError(msg)
 
         def close(self) -> None:
             return None
@@ -34,7 +36,7 @@ def test_ingest_job_failure(monkeypatch: pytest.MonkeyPatch) -> None:
         def close(self) -> None:
             return None
 
-    def runner(job_id):  # type: ignore[no-untyped-def]
+    def runner(job_id) -> None:  # type: ignore[no-untyped-def]
         with contextlib.suppress(RuntimeError, ValueError):
             run_ingest_job(
                 job_id,

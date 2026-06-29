@@ -7,13 +7,16 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import cast
-from uuid import UUID
+from typing import TYPE_CHECKING, cast
 
 from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Connection
 from vecinita_shared_schemas.db_mapping import scalar_uuid
 from vecinita_shared_schemas.json_types import as_json_object
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from sqlalchemy.engine import Connection
 
 _REPO_ROOT = Path(__file__).resolve().parents[4]
 _TAG_SEED_PATH = _REPO_ROOT / "data" / "fixtures" / "tags" / "seed_tags.json"
@@ -55,17 +58,18 @@ def _chunk_text(body: str) -> list[str]:
 def load_seed_tags(*, database_url: str | None = None, seed_path: Path | None = None) -> int:
     """Insert bilingual starter tags from seed_tags.json."""
     path = seed_path or _TAG_SEED_PATH
-    payload = as_json_object(cast(object, json.loads(path.read_text(encoding="utf-8"))))
+    payload = as_json_object(cast("object", json.loads(path.read_text(encoding="utf-8"))))
     tags_raw = payload.get("tags")
     if not isinstance(tags_raw, list):
         msg = "seed_tags.json must contain a 'tags' array"
-        raise ValueError(msg)
+        raise ValueError(msg)  # noqa: TRY004  # seed JSON shape validation
+    tags_list: list[object] = cast("list[object]", tags_raw)
     engine = create_engine(database_url or _database_url())
     inserted = 0
 
     with engine.begin() as conn:
-        for raw_entry in tags_raw:
-            entry = as_json_object(cast(object, raw_entry))
+        for raw_entry in tags_list:
+            entry = as_json_object(raw_entry)
             slug = str(entry["slug"])
             for language, label_key in (("en", "label_en"), ("es", "label_es")):
                 label = str(entry[label_key])
@@ -96,26 +100,28 @@ def _resolve_tag_id(conn: Connection, *, slug: str, language: str) -> UUID:
         {"slug": slug, "language": language},
     ).scalar_one_or_none()
     if tag_id is None:
-        raise ValueError(f"Missing seed tag {slug!r} for language {language!r}")
-    return scalar_uuid(cast(object, tag_id))
+        msg = f"Missing seed tag {slug!r} for language {language!r}"
+        raise ValueError(msg)
+    return scalar_uuid(cast("object", tag_id))
 
 
 def load_tagged_corpus(*, database_url: str | None = None) -> dict[str, int]:
     """Load tagged fixture documents, chunks, and document tag assignments."""
     manifest_path = _TAGGED_ROOT / "manifest.json"
-    manifest = as_json_object(cast(object, json.loads(manifest_path.read_text(encoding="utf-8"))))
+    manifest = as_json_object(cast("object", json.loads(manifest_path.read_text(encoding="utf-8"))))
     documents_raw = manifest.get("documents")
     if not isinstance(documents_raw, list):
         msg = "tagged corpus manifest must contain a 'documents' array"
-        raise ValueError(msg)
+        raise ValueError(msg)  # noqa: TRY004  # manifest JSON shape validation
+    documents_list: list[object] = cast("list[object]", documents_raw)
     engine = create_engine(database_url or _database_url())
     documents = 0
     chunks = 0
     document_tags = 0
 
     with engine.begin() as conn:
-        for raw_spec in documents_raw:
-            spec = as_json_object(cast(object, raw_spec))
+        for raw_spec in documents_list:
+            spec = as_json_object(raw_spec)
             rel_path = Path(str(spec["path"]))
             language = str(spec["language"])
             body_path = _TAGGED_ROOT / rel_path
@@ -128,7 +134,7 @@ def load_tagged_corpus(*, database_url: str | None = None) -> dict[str, int]:
             url = f"fixture://corpus/tagged/{rel_path.as_posix()}"
             doc_id = scalar_uuid(
                 cast(
-                    object,
+                    "object",
                     conn.execute(
                         text(
                             """
@@ -180,8 +186,9 @@ def load_tagged_corpus(*, database_url: str | None = None) -> dict[str, int]:
             tags_raw = spec.get("tags")
             if not isinstance(tags_raw, list):
                 msg = f"document spec {rel_path} must contain a 'tags' array"
-                raise ValueError(msg)
-            for raw_slug in tags_raw:
+                raise ValueError(msg)  # noqa: TRY004  # document spec JSON shape validation
+            tags_list: list[object] = cast("list[object]", tags_raw)
+            for raw_slug in tags_list:
                 slug = str(raw_slug)
                 tag_id = _resolve_tag_id(conn, slug=slug, language=language)
                 conn.execute(

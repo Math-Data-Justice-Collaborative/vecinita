@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-from tests.helpers.json_response import json_str, response_json_object
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import ChatRagService
+
+from tests.helpers.json_response import json_str, response_json_object
 
 pytestmark = pytest.mark.e2e
 
@@ -25,10 +26,12 @@ class _EmptyRetriever:
 
 class _NoopLlm:
     def generate(self, prompt: str, **kwargs: object) -> str:
-        raise AssertionError("LLM should not be called for empty retrieval")
+        msg = "LLM should not be called for empty retrieval"
+        raise AssertionError(msg)
 
     def generate_stream(self, prompt: str, **kwargs: object):
-        raise AssertionError("LLM should not be called for empty retrieval")
+        msg = "LLM should not be called for empty retrieval"
+        raise AssertionError(msg)
         yield ""  # pragma: no cover
 
     def close(self) -> None:

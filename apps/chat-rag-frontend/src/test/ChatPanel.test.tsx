@@ -215,7 +215,7 @@ describe("ChatPanel", () => {
     await waitFor(() => {
       expect(screen.getAllByTestId("message")).toHaveLength(2);
     });
-    const assistant = screen.getAllByTestId("message")[1];
+    const assistant = screen.getAllByTestId("message")[1]!;
     expect(assistant.querySelector(".message-content")).toHaveTextContent("");
   });
 
@@ -299,7 +299,7 @@ describe("ChatPanel", () => {
       await screen.findByRole("button", { name: /asking/i }),
     ).toBeDisabled();
 
-    const assistantMessage = screen.getAllByTestId("message")[1];
+    const assistantMessage = screen.getAllByTestId("message")[1]!;
     expect(
       assistantMessage.querySelector(".message-content"),
     ).toHaveTextContent("…");
@@ -407,7 +407,7 @@ describe("ChatPanel", () => {
     const suggestions = screen.getByTestId("suggested-questions");
     expect(suggestions).toBeInTheDocument();
 
-    const firstChip = within(suggestions).getAllByRole("button")[0];
+    const firstChip = within(suggestions).getAllByRole("button")[0]!;
     fireEvent.click(firstChip);
     expect(screen.getByLabelText(/your question/i)).toHaveValue(
       firstChip.textContent,

@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
-from fastapi.testclient import TestClient
+
 from tests.helpers.json_response import json_int, json_object_list, json_str, response_json_object
+
+if TYPE_CHECKING:
+    from fastapi.testclient import TestClient
 
 pytestmark = pytest.mark.integration
 

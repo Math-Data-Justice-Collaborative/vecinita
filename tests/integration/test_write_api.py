@@ -7,6 +7,7 @@ from uuid import uuid4
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+
 from tests.helpers.json_response import response_json_object
 
 pytestmark = pytest.mark.integration

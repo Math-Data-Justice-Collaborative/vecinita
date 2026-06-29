@@ -72,8 +72,24 @@ target-version = "py311"
 src = ["apps", "packages", "tests"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "SIM", "RUF", "ANN401"]
-ignore = ["E501"]
+select = ["ALL"]
+ignore = [
+    # ruff format owns line wrapping / trailing commas. These rules conflict with the
+    # formatter and Ruff officially recommends disabling them when `ruff format` is used.
+    "E501",   # line-too-long (formatter wraps)
+    "COM812", # missing-trailing-comma (formatter owns commas)
+    "ISC001", # single-line-implicit-string-concatenation (formatter conflict)
+    # Mutually-incompatible docstring rule pairs (Ruff warns if both enabled). Keep D211/D212.
+    "D203",   # one-blank-line-before-class (conflicts with D211)
+    "D213",   # multi-line-summary-second-line (conflicts with D212)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# pytest's design is built on bare `assert`; rewriting asserts defeats the framework.
+"tests/**" = ["S101"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.ruff.format]
 quote-style = "double"
@@ -126,8 +142,9 @@ skip_covered = false
 include = ["apps", "packages", "tests"]
 exclude = ["**/__pycache__", ".venv", ".pytest_cache", "**/node_modules"]
 extraPaths = [".cursor/hooks"]
+stubPath = "stubs"
 pythonVersion = "3.11"
-typeCheckingMode = "standard"
+typeCheckingMode = "strict"
 reportMissingImports = true
 reportMissingTypeStubs = false
 reportExplicitAny = "error"

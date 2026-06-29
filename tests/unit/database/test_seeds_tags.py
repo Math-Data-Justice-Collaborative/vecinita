@@ -8,7 +8,6 @@ from pathlib import Path
 
 import pytest
 from sqlalchemy import create_engine
-from tests.unit.database.conftest import database_url
 from vecinita_database.seeds.tags import (
     _chunk_text,
     _normalize_database_url,
@@ -16,6 +15,8 @@ from vecinita_database.seeds.tags import (
     load_seed_tags,
     load_tagged_corpus,
 )
+
+from tests.unit.database.conftest import database_url
 
 
 def test_normalize_database_url_upgrades_postgresql_scheme() -> None:

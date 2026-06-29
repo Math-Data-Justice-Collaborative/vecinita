@@ -8,13 +8,16 @@ are still ingestable without LLM tags.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from vecinita_data_management_backend.pipeline import fetch_html_fixture, run_ingest_job
 from vecinita_data_management_backend.store import InMemoryJobStore
-from vecinita_ingest.models import ScrapedDocument
-from vecinita_shared_schemas.internal_write import BatchUpsertRequest
 from vecinita_tagging.llm_client import LlmTagClientError
 from vecinita_tagging.vocabulary import SeedTag
+
+if TYPE_CHECKING:
+    from vecinita_ingest.models import ScrapedDocument
+    from vecinita_shared_schemas.internal_write import BatchUpsertRequest
 
 _FIXTURE_HTML = (
     Path(__file__).resolve().parents[2] / "data" / "fixtures" / "ingest" / "sample-page.html"
@@ -51,8 +54,9 @@ class _NonJsonTagClient:
         max_tags: int = 10,
     ) -> list[str]:
         _ = (title, text, language, vocabulary, max_tags)
+        msg = "tag response is not valid JSON: Expecting value: line 1 column 1 (char 0)"
         raise LlmTagClientError(
-            "tag response is not valid JSON: Expecting value: line 1 column 1 (char 0)"
+            msg
         )
 
 

@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import os
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from llama_index.core.base.base_retriever import BaseRetriever
 from llama_index.core.schema import NodeWithScore, QueryBundle, TextNode
 from sqlalchemy import bindparam, create_engine, text
-from sqlalchemy.engine import Engine
 from vecinita_shared_schemas.db_mapping import (
     mapping_row,
     row_str,
@@ -20,7 +20,30 @@ from vecinita_shared_schemas.db_mapping import (
 from vecinita_rag.constants import DEFAULT_TOP_K, EMBEDDING_DIMENSION, MAX_TOP_K, MIN_TOP_K
 from vecinita_rag.types import RetrievedChunk
 
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
+
 EmbedFn = Callable[[str], list[float]]
+
+_BASE_SELECT_SQL = """
+            SELECT
+                c.id AS chunk_id,
+                d.id AS document_id,
+                c.text,
+                d.title,
+                d.url,
+                d.language,
+                1 - (e.embedding <=> CAST(:query_embedding AS vector)) AS score
+            FROM embeddings e
+            JOIN chunks c ON c.id = e.chunk_id
+            JOIN documents d ON d.id = c.document_id
+            WHERE 1=1
+            """
+
+_ORDER_LIMIT_SQL = """
+            ORDER BY e.embedding <=> CAST(:query_embedding AS vector)
+            LIMIT :top_k
+            """
 
 
 def _normalize_database_url(url: str) -> str:
@@ -33,7 +56,8 @@ def database_url_from_env() -> str:
     """Read and normalize DATABASE_URL for SQLAlchemy pgvector access."""
     url = os.environ.get("DATABASE_URL")
     if not url:
-        raise RuntimeError("DATABASE_URL is required for pgvector retrieval")
+        msg = "DATABASE_URL is required for pgvector retrieval"
+        raise RuntimeError(msg)
     return _normalize_database_url(url)
 
 
@@ -56,7 +80,8 @@ class CorpusPgvectorRetriever(BaseRetriever):
         top_k: int = DEFAULT_TOP_K,
         score_threshold: float | None = None,
     ) -> None:
-        super().__init__()
+        """Wire embed function, DB engine, and retrieval limits."""
+        super().__init__()  # pyright: ignore[reportUnknownMemberType]  # llama_index BaseRetriever is partially typed
         if not MIN_TOP_K <= top_k <= MAX_TOP_K:
             msg = f"top_k must be between {MIN_TOP_K} and {MAX_TOP_K}"
             raise ValueError(msg)
@@ -72,6 +97,7 @@ class CorpusPgvectorRetriever(BaseRetriever):
         tag_slugs: list[str] | None = None,
         language: str | None = None,
     ) -> list[RetrievedChunk]:
+        """Run pgvector search and return ranked chunks with optional tag/language filters."""
         query_vector = self._embed_fn(query)
         literal = _vector_literal(query_vector)
         tag_clause = ""
@@ -101,26 +127,7 @@ class CorpusPgvectorRetriever(BaseRetriever):
             """
             params["tag_slugs"] = tuple(tag_slugs)
 
-        sql = text(
-            f"""
-            SELECT
-                c.id AS chunk_id,
-                d.id AS document_id,
-                c.text,
-                d.title,
-                d.url,
-                d.language,
-                1 - (e.embedding <=> CAST(:query_embedding AS vector)) AS score
-            FROM embeddings e
-            JOIN chunks c ON c.id = e.chunk_id
-            JOIN documents d ON d.id = c.document_id
-            WHERE 1=1
-            {language_clause}
-            {tag_clause}
-            ORDER BY e.embedding <=> CAST(:query_embedding AS vector)
-            LIMIT :top_k
-            """
-        )
+        sql = text(_BASE_SELECT_SQL + language_clause + tag_clause + _ORDER_LIMIT_SQL)
         if tag_slugs:
             sql = sql.bindparams(bindparam("tag_slugs", expanding=True))
         with self._engine.connect() as conn:

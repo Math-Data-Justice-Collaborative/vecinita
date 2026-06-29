@@ -3,17 +3,21 @@
 from __future__ import annotations
 
 import os
+from typing import TYPE_CHECKING
 
 import pytest
-from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from fastapi.testclient import TestClient
-from tests.helpers.json_response import response_json_object
-from tests.unit.rag.conftest import basis_vector, seed_corpus_with_embeddings
-from tests.unit.shared_schemas.auth_fixtures import sign_test_jwt
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import ChatRagService
 from vecinita_rag.retriever import CorpusPgvectorRetriever
+
+from tests.helpers.json_response import response_json_object
+from tests.unit.rag.conftest import basis_vector, seed_corpus_with_embeddings
+from tests.unit.shared_schemas.auth_fixtures import sign_test_jwt
+
+if TYPE_CHECKING:
+    from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 
 pytestmark = pytest.mark.e2e
 

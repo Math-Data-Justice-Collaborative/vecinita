@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from typing import Never
 from uuid import UUID, uuid4
 
 import pytest
@@ -66,7 +67,7 @@ def test_run_job_dispatches_retag(
     record = store.create_job(urls=[], job_type="retag", options={"document_id": str(uuid4())})
     called: list[UUID] = []
 
-    def _retag(job_id, **kwargs):  # type: ignore[no-untyped-def]
+    def _retag(job_id, **kwargs) -> None:  # type: ignore[no-untyped-def]
         called.append(job_id)
         assert kwargs["tag_client"] is not None
 
@@ -93,7 +94,7 @@ def test_run_job_dispatches_ingest(
     record = store.create_job(urls=["https://example.com/page"])
     called: list[UUID] = []
 
-    def _ingest(job_id, **kwargs):  # type: ignore[no-untyped-def]
+    def _ingest(job_id, **kwargs) -> None:  # type: ignore[no-untyped-def]
         called.append(job_id)
 
     monkeypatch.setattr(
@@ -118,8 +119,9 @@ def test_run_job_skips_failure_update_when_job_already_terminal(
     record = store.create_job(urls=["https://example.com/page"])
     store.update_job(record.job_id, status="completed")
 
-    def _fail(_job_id, **_kwargs):  # type: ignore[no-untyped-def]
-        raise ValueError("late failure")
+    def _fail(_job_id, **_kwargs) -> Never:  # type: ignore[no-untyped-def]
+        msg = "late failure"
+        raise ValueError(msg)
 
     monkeypatch.setattr(
         "vecinita_data_management_backend.jobs.run_ingest_job",
@@ -145,8 +147,9 @@ def test_run_job_marks_failed_when_pipeline_raises(
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/page"])
 
-    def _fail(_job_id, **_kwargs):  # type: ignore[no-untyped-def]
-        raise ValueError("pipeline exploded")
+    def _fail(_job_id, **_kwargs) -> Never:  # type: ignore[no-untyped-def]
+        msg = "pipeline exploded"
+        raise ValueError(msg)
 
     monkeypatch.setattr(
         "vecinita_data_management_backend.jobs.run_ingest_job",

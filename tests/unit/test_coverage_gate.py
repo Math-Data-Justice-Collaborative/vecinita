@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -16,24 +17,32 @@ SUMMARY_SCRIPT = ROOT / "scripts" / "test" / "print_unit_coverage_summary.py"
 THRESHOLD = 95.0
 
 
+@dataclass(frozen=True)
+class _CoverageCounts:
+    """Line and branch coverage counts for a synthetic component fixture."""
+
+    lines_total: int
+    lines_covered: int
+    branches_total: int
+    branches_covered: int
+
+
 def _write_python_coverage(
     coverage_dir: Path,
     *,
     component_path: str,
-    lines_total: int,
-    lines_covered: int,
-    branches_total: int,
-    branches_covered: int,
+    counts: _CoverageCounts,
 ) -> None:
+    """Write a synthetic python.json coverage fixture for one component."""
     coverage_dir.mkdir(parents=True, exist_ok=True)
     payload = {
         "files": {
             component_path: {
                 "summary": {
-                    "num_statements": lines_total,
-                    "covered_lines": lines_covered,
-                    "num_branches": branches_total,
-                    "covered_branches": branches_covered,
+                    "num_statements": counts.lines_total,
+                    "covered_lines": counts.lines_covered,
+                    "num_branches": counts.branches_total,
+                    "covered_branches": counts.branches_covered,
                 }
             }
         }
@@ -49,6 +58,7 @@ def _run_summary(
     *,
     enforce: bool,
 ) -> subprocess.CompletedProcess[str]:
+    """Run the coverage summary script against a fixture directory."""
     command = [
         sys.executable,
         str(SUMMARY_SCRIPT),
@@ -61,7 +71,8 @@ def _run_summary(
     ]
     if enforce:
         command.append("--enforce")
-    return subprocess.run(
+    # Trusted: invokes the repo's own script via sys.executable with fixed args.
+    return subprocess.run(  # noqa: S603
         command,
         cwd=ROOT,
         check=False,
@@ -75,10 +86,12 @@ def test_enforce_fails_when_line_coverage_below_threshold(tmp_path: Path) -> Non
     _write_python_coverage(
         tmp_path,
         component_path="packages/tagging/tagging/core.py",
-        lines_total=100,
-        lines_covered=94,
-        branches_total=20,
-        branches_covered=20,
+        counts=_CoverageCounts(
+            lines_total=100,
+            lines_covered=94,
+            branches_total=20,
+            branches_covered=20,
+        ),
     )
 
     result = _run_summary(tmp_path, enforce=True)
@@ -92,10 +105,12 @@ def test_enforce_fails_when_branch_coverage_below_threshold(tmp_path: Path) -> N
     _write_python_coverage(
         tmp_path,
         component_path="packages/rag/rag/engine.py",
-        lines_total=100,
-        lines_covered=96,
-        branches_total=100,
-        branches_covered=94,
+        counts=_CoverageCounts(
+            lines_total=100,
+            lines_covered=96,
+            branches_total=100,
+            branches_covered=94,
+        ),
     )
 
     result = _run_summary(tmp_path, enforce=True)
@@ -109,10 +124,12 @@ def test_enforce_passes_when_all_components_meet_thresholds(tmp_path: Path) -> N
     _write_python_coverage(
         tmp_path,
         component_path="packages/shared-schemas/shared_schemas/models.py",
-        lines_total=100,
-        lines_covered=95,
-        branches_total=100,
-        branches_covered=95,
+        counts=_CoverageCounts(
+            lines_total=100,
+            lines_covered=95,
+            branches_total=100,
+            branches_covered=95,
+        ),
     )
 
     result = _run_summary(tmp_path, enforce=True)
@@ -125,10 +142,12 @@ def test_enforce_not_required_without_flag(tmp_path: Path) -> None:
     _write_python_coverage(
         tmp_path,
         component_path="packages/tagging/tagging/core.py",
-        lines_total=100,
-        lines_covered=50,
-        branches_total=20,
-        branches_covered=10,
+        counts=_CoverageCounts(
+            lines_total=100,
+            lines_covered=50,
+            branches_total=20,
+            branches_covered=10,
+        ),
     )
 
     result = _run_summary(tmp_path, enforce=False)

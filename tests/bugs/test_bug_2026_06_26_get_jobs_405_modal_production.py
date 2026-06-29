@@ -10,8 +10,9 @@ import os
 import httpx
 import pytest
 from fastapi.testclient import TestClient
-from tests.helpers.json_response import response_json_object
 from vecinita_data_management_backend.app import create_app
+
+from tests.helpers.json_response import response_json_object
 
 _LIVE_MODAL_JOBS = "https://vecinita--vecinita-data-management-fastapi-app.modal.run/jobs"
 _PROXY_KEY_ENV = "VECINITA_MODAL_PROXY_KEY"

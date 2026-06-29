@@ -18,9 +18,9 @@ def test_supabase_config_disables_public_signup() -> None:
     with _CONFIG_PATH.open("rb") as handle:
         config = tomllib.load(handle)
 
-    auth = cast(dict[str, object], config["auth"])
-    email = cast(dict[str, object], auth["email"])
-    sms = cast(dict[str, object], auth["sms"])
+    auth = cast("dict[str, object]", config["auth"])
+    email = cast("dict[str, object]", auth["email"])
+    sms = cast("dict[str, object]", auth["sms"])
     assert auth["enable_signup"] is False
     assert auth["enable_anonymous_sign_ins"] is False
     assert email["enable_signup"] is False

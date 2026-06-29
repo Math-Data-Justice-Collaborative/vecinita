@@ -8,6 +8,8 @@ from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
+from vecinita_shared_schemas.json_types import as_json_object
+
 from tests.helpers.json_response import (
     find_json_object_by_str,
     json_list,
@@ -15,7 +17,6 @@ from tests.helpers.json_response import (
     response_json_list,
     response_json_object,
 )
-from vecinita_shared_schemas.json_types import as_json_object
 
 pytestmark = pytest.mark.e2e
 
@@ -73,7 +74,7 @@ def test_uj011_admin_chunks_and_tag_patch(admin_write_client: TestClient) -> Non
     assert chunks.status_code == 200
     chunk_rows = response_json_list(chunks)
     assert len(chunk_rows) == 1
-    first_chunk = as_json_object(cast(object, chunk_rows[0]))
+    first_chunk = as_json_object(cast("object", chunk_rows[0]))
     assert "Chunk alpha" in str(first_chunk["text"])
 
     patched = admin_write_client.patch(
@@ -86,5 +87,5 @@ def test_uj011_admin_chunks_and_tag_patch(admin_write_client: TestClient) -> Non
     )
     assert patched.status_code == 200
     tag_rows = json_list(response_json_object(patched), "tags")
-    first_tag = as_json_object(cast(object, tag_rows[0]))
+    first_tag = as_json_object(cast("object", tag_rows[0]))
     assert json_str(first_tag, "slug") == "housing"

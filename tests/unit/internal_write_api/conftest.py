@@ -4,16 +4,20 @@ from __future__ import annotations
 
 import os
 import uuid
-from collections.abc import Iterator
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Engine
 from vecinita_embedding_client import EMBEDDING_DIMENSION
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests
 from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from sqlalchemy.engine import Engine
 
 _API_KEY = "test-internal-key"
 _EMBEDDING = [0.01] * EMBEDDING_DIMENSION
@@ -41,7 +45,7 @@ class StubJobsClient:
         return uuid.uuid4()
 
 
-@pytest.fixture()
+@pytest.fixture
 def internal_api_env(monkeypatch: pytest.MonkeyPatch) -> None:
     reset_auth_config_for_tests()
     monkeypatch.setenv("DATABASE_URL", database_url())
@@ -50,19 +54,19 @@ def internal_api_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
 
 
-@pytest.fixture()
+@pytest.fixture
 def engine(internal_api_env: None) -> Engine:
     return create_engine(database_url())
 
 
-@pytest.fixture()
+@pytest.fixture
 def write_client(internal_api_env: None) -> TestClient:
     from vecinita_internal_write_api.app import create_app
 
     return TestClient(create_app())
 
 
-@pytest.fixture()
+@pytest.fixture
 def write_client_with_jobs(internal_api_env: None) -> tuple[TestClient, StubJobsClient]:
     from vecinita_internal_write_api.app import create_app
 
@@ -71,7 +75,7 @@ def write_client_with_jobs(internal_api_env: None) -> tuple[TestClient, StubJobs
     return client, jobs
 
 
-@pytest.fixture()
+@pytest.fixture
 def seeded_document(engine: Engine) -> Iterator[UUID]:
     """Insert a document with one chunk and embedding; delete after test."""
     doc_url = f"https://unit-write-api-{uuid.uuid4().hex[:10]}.example.com"

@@ -40,9 +40,9 @@ function isSource(value: unknown): value is Source {
   }
   const candidate = value as Record<string, unknown>;
   return (
-    typeof candidate.chunk_id === "string" &&
-    typeof candidate.document_id === "string" &&
-    typeof candidate.score === "number"
+    typeof candidate["chunk_id"] === "string" &&
+    typeof candidate["document_id"] === "string" &&
+    typeof candidate["score"] === "number"
   );
 }
 
@@ -52,16 +52,15 @@ function isChatMessage(value: unknown): value is ChatMessage {
   }
   const candidate = value as Record<string, unknown>;
   if (
-    typeof candidate.id !== "string" ||
-    typeof candidate.content !== "string" ||
-    (candidate.role !== "user" && candidate.role !== "assistant")
+    typeof candidate["id"] !== "string" ||
+    typeof candidate["content"] !== "string" ||
+    (candidate["role"] !== "user" && candidate["role"] !== "assistant")
   ) {
     return false;
   }
-  if (candidate.sources !== undefined) {
-    return (
-      Array.isArray(candidate.sources) && candidate.sources.every(isSource)
-    );
+  const sources = candidate["sources"];
+  if (sources !== undefined) {
+    return Array.isArray(sources) && sources.every(isSource);
   }
   return true;
 }
@@ -72,10 +71,10 @@ function isConversation(value: unknown): value is Conversation {
   }
   const candidate = value as Record<string, unknown>;
   return (
-    typeof candidate.id === "string" &&
-    typeof candidate.createdAt === "number" &&
-    Array.isArray(candidate.messages) &&
-    candidate.messages.every(isChatMessage)
+    typeof candidate["id"] === "string" &&
+    typeof candidate["createdAt"] === "number" &&
+    Array.isArray(candidate["messages"]) &&
+    candidate["messages"].every(isChatMessage)
   );
 }
 
@@ -85,10 +84,10 @@ function isEnvelope(value: unknown): value is ChatHistoryEnvelope {
   }
   const candidate = value as Record<string, unknown>;
   return (
-    candidate.version === 1 &&
-    isConversation(candidate.active) &&
-    Array.isArray(candidate.previous) &&
-    candidate.previous.every(isConversation)
+    candidate["version"] === 1 &&
+    isConversation(candidate["active"]) &&
+    Array.isArray(candidate["previous"]) &&
+    candidate["previous"].every(isConversation)
   );
 }
 

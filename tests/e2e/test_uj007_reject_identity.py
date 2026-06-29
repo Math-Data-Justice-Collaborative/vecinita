@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-from tests.integration.chat_rag.conftest import _MockLlmClient
-from tests.unit.rag.conftest import basis_vector
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import ChatRagService
 from vecinita_rag.retriever import CorpusPgvectorRetriever
+
+from tests.integration.chat_rag.conftest import _MockLlmClient
+from tests.unit.rag.conftest import basis_vector
 
 pytestmark = pytest.mark.e2e
 

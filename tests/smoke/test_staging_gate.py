@@ -7,10 +7,12 @@ Live H1-H3 tiers skip when ``VECINITA_STAGING_*`` / ``DATABASE_URL`` are unset.
 from __future__ import annotations
 
 import os
+from http import HTTPStatus
 from pathlib import Path
 
 import httpx
 import pytest
+
 from tests.helpers.json_response import json_str, response_json_object
 from tests.smoke.staging_h2 import assert_h2_database_ready, staging_database_url
 
@@ -40,7 +42,7 @@ def test_gate_staging_h1_chat_liveness() -> None:
     if not chat_url:
         pytest.skip("Set VECINITA_STAGING_CHAT_URL to verify live H1")
     response = httpx.get(f"{chat_url.rstrip('/')}/health", timeout=30.0)
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert json_str(response_json_object(response), "status") == "ok"
 
 
@@ -62,7 +64,7 @@ def test_gate_staging_h3_sample_ask() -> None:
         json={"question": "What are the food pantry hours?"},
         timeout=60.0,
     )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     payload = response_json_object(response)
     assert payload.get("answer")
     assert payload.get("language") in ("en", "es")

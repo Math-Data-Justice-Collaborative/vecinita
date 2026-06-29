@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from typing import TYPE_CHECKING
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -10,6 +10,9 @@ from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import ChatRagService, _build_prompt, _to_ask_response
 from vecinita_rag.types import RagAnswer, RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 def _chunk(*, language: str = "en") -> RetrievedChunk:

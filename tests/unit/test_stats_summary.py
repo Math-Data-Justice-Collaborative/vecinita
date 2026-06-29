@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import os
+from http import HTTPStatus
 
 import pytest
 from fastapi.testclient import TestClient
+
 from tests.helpers.json_response import response_json_object
 
 pytestmark = pytest.mark.unit
@@ -14,28 +16,33 @@ _API_KEY = "test-internal-key"
 
 
 def _database_url() -> str:
+    """Return the configured database URL, falling back to the local default."""
     return os.environ.get(
         "DATABASE_URL",
         "postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
     )
 
 
-@pytest.fixture()
-def client():
+@pytest.fixture
+def client() -> TestClient:
+    """Provide a TestClient for the internal write API with env configured."""
     os.environ["DATABASE_URL"] = _database_url()
     os.environ["VECINITA_INTERNAL_API_KEY"] = _API_KEY
-    from vecinita_internal_write_api.app import create_app
+    # Import after env vars are set so app config reads them at startup.
+    from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
 
     return TestClient(create_app())
 
 
 def _auth() -> dict[str, str]:
+    """Return the bearer auth header for the internal API key."""
     return {"Authorization": f"Bearer {_API_KEY}"}
 
 
-def test_stats_summary_returns_counts(client) -> None:
+def test_stats_summary_returns_counts(client: TestClient) -> None:
+    """Stats summary returns integer document and chunk totals."""
     resp = client.get("/internal/v1/stats/summary", headers=_auth())
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
     data = response_json_object(resp)
     assert "total_documents" in data
     assert "total_chunks" in data
@@ -43,28 +50,32 @@ def test_stats_summary_returns_counts(client) -> None:
     assert isinstance(data["total_chunks"], int)
 
 
-def test_stats_summary_includes_tag_distribution(client) -> None:
+def test_stats_summary_includes_tag_distribution(client: TestClient) -> None:
+    """Stats summary includes a tag distribution list."""
     resp = client.get("/internal/v1/stats/summary", headers=_auth())
     data = response_json_object(resp)
     assert "tag_distribution" in data
     assert isinstance(data["tag_distribution"], list)
 
 
-def test_stats_summary_includes_language_breakdown(client) -> None:
+def test_stats_summary_includes_language_breakdown(client: TestClient) -> None:
+    """Stats summary includes a language breakdown mapping."""
     resp = client.get("/internal/v1/stats/summary", headers=_auth())
     data = response_json_object(resp)
     assert "language_breakdown" in data
     assert isinstance(data["language_breakdown"], dict)
 
 
-def test_stats_summary_includes_recent_activity(client) -> None:
+def test_stats_summary_includes_recent_activity(client: TestClient) -> None:
+    """Stats summary includes a recent activity list."""
     resp = client.get("/internal/v1/stats/summary", headers=_auth())
     data = response_json_object(resp)
     assert "recent_activity" in data
     assert isinstance(data["recent_activity"], list)
 
 
-def test_stats_summary_includes_top_served(client) -> None:
+def test_stats_summary_includes_top_served(client: TestClient) -> None:
+    """Stats summary includes a top-served list."""
     resp = client.get("/internal/v1/stats/summary", headers=_auth())
     data = response_json_object(resp)
     assert "top_served" in data

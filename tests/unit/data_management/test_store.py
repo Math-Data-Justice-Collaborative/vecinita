@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import MutableMapping
-from typing import cast
+from typing import TYPE_CHECKING, cast
 from uuid import uuid4
 
 import pytest
@@ -14,6 +13,9 @@ from vecinita_data_management_backend.store import (
     JobStore,
     job_record_to_schema,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import MutableMapping
 
 
 def test_job_store_base_methods_raise_not_implemented() -> None:
@@ -47,7 +49,7 @@ def test_in_memory_list_jobs_sorted_newest_first() -> None:
 
 def test_dict_list_jobs_sorted_newest_first() -> None:
     backing: dict[str, JobPayload] = {}
-    store = DictJobStore(cast(MutableMapping[str, JobPayload], backing))
+    store = DictJobStore(cast("MutableMapping[str, JobPayload]", backing))
     first = store.create_job(urls=["https://example.com/a"])
     second = store.create_job(urls=["https://example.com/b"], job_type="retag")
 
@@ -86,7 +88,7 @@ def test_in_memory_update_job_raises_for_missing_id() -> None:
 
 def test_dict_job_store_round_trip() -> None:
     backing: dict[str, JobPayload] = {}
-    store = DictJobStore(cast(MutableMapping[str, JobPayload], backing))
+    store = DictJobStore(cast("MutableMapping[str, JobPayload]", backing))
     record = store.create_job(urls=["https://example.com/b"], job_type="retag")
 
     fetched = store.get_job(record.job_id)
@@ -104,21 +106,21 @@ def test_dict_job_store_round_trip() -> None:
 
 
 def test_dict_job_store_update_raises_for_missing_id() -> None:
-    store = DictJobStore(cast(MutableMapping[str, JobPayload], {}))
+    store = DictJobStore(cast("MutableMapping[str, JobPayload]", {}))
 
     with pytest.raises(KeyError):
         store.update_job(uuid4(), status="failed")
 
 
 def test_dict_job_store_get_job_returns_none_for_missing() -> None:
-    store = DictJobStore(cast(MutableMapping[str, JobPayload], {}))
+    store = DictJobStore(cast("MutableMapping[str, JobPayload]", {}))
 
     assert store.get_job(uuid4()) is None
 
 
 def test_dict_job_store_update_only_error_code() -> None:
     backing: dict[str, JobPayload] = {}
-    store = DictJobStore(cast(MutableMapping[str, JobPayload], backing))
+    store = DictJobStore(cast("MutableMapping[str, JobPayload]", backing))
     record = store.create_job(urls=["https://example.com/f"])
 
     updated = store.update_job(record.job_id, error_code="Timeout")
@@ -129,7 +131,7 @@ def test_dict_job_store_update_only_error_code() -> None:
 
 def test_dict_job_store_update_only_status() -> None:
     backing: dict[str, JobPayload] = {}
-    store = DictJobStore(cast(MutableMapping[str, JobPayload], backing))
+    store = DictJobStore(cast("MutableMapping[str, JobPayload]", backing))
     record = store.create_job(urls=["https://example.com/d"])
 
     updated = store.update_job(record.job_id, status="running")
