@@ -6,12 +6,20 @@ is per-process, so GET returns 404 even with a valid job_id from POST.
 
 from __future__ import annotations
 
+from http import HTTPStatus
+from typing import TYPE_CHECKING, cast
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
-from tests.helpers.json_response import json_str, response_json_object
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.store import DictJobStore, InMemoryJobStore
+
+from tests.helpers.json_response import json_str, response_json_object
+
+if TYPE_CHECKING:
+    from collections.abc import MutableMapping
+
+    from vecinita_data_management_backend.store import JobPayload
 
 
 def test_in_memory_stores_are_not_shared_between_instances() -> None:
@@ -30,40 +38,36 @@ def test_post_on_one_dict_store_get_on_another_returns_404() -> None:
     get_client = TestClient(create_app(store=store_get, require_proxy_auth=False))
 
     create = post_client.post("/jobs", json={"urls": ["https://example.com/"]})
-    assert create.status_code == 202
+    assert create.status_code == HTTPStatus.ACCEPTED
     job_id = json_str(response_json_object(create), "job_id")
 
     status = get_client.get(f"/jobs/{job_id}")
-    assert status.status_code == 404
+    assert status.status_code == HTTPStatus.NOT_FOUND
     assert response_json_object(status) == {"detail": "Not found"}
 
 
 def test_shared_dict_store_get_returns_200_after_post() -> None:
     """Green target: one backing dict (or modal.Dict) visible to all handlers."""
-    from collections.abc import MutableMapping
-    from typing import cast
-
-    from vecinita_data_management_backend.store import JobPayload
-
     backing: dict[str, dict[str, object]] = {}
-    store = DictJobStore(cast(MutableMapping[str, JobPayload], backing))
+    store = DictJobStore(cast("MutableMapping[str, JobPayload]", backing))
     client = TestClient(create_app(store=store, require_proxy_auth=False))
 
     create = client.post("/jobs", json={"urls": ["https://example.com/"]})
-    assert create.status_code == 202
+    assert create.status_code == HTTPStatus.ACCEPTED
     job_id = json_str(response_json_object(create), "job_id")
 
     status = client.get(f"/jobs/{job_id}")
-    assert status.status_code == 200
+    assert status.status_code == HTTPStatus.OK
     status_body = response_json_object(status)
     assert json_str(status_body, "job_id") == job_id
     assert json_str(status_body, "status") == "pending"
 
 
 def test_get_unknown_job_id_returns_404() -> None:
+    """Get unknown job id returns 404."""
     store = DictJobStore({})
     client = TestClient(create_app(store=store, require_proxy_auth=False))
     missing = uuid4()
     response = client.get(f"/jobs/{missing}")
-    assert response.status_code == 404
+    assert response.status_code == HTTPStatus.NOT_FOUND
     assert response_json_object(response) == {"detail": "Not found"}

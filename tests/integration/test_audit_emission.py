@@ -4,12 +4,21 @@ from __future__ import annotations
 
 import os
 import uuid
+from http import HTTPStatus
+from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from vecinita_internal_write_api.app import create_app
+from vecinita_shared_schemas.auth import reset_auth_config_for_tests
 from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
+
+from tests.helpers.json_response import json_object_items, json_str
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
 
 pytestmark = pytest.mark.integration
 
@@ -23,16 +32,20 @@ def _database_url() -> str:
     )
 
 
-@pytest.fixture()
-def engine():
+@pytest.fixture
+def engine() -> Engine:
+    """Return a SQLAlchemy engine for the integration database."""
     return create_engine(_database_url())
 
 
-@pytest.fixture()
-def client():
-    os.environ["DATABASE_URL"] = _database_url()
-    os.environ["VECINITA_INTERNAL_API_KEY"] = _API_KEY
-    from vecinita_internal_write_api.app import create_app
+@pytest.fixture
+def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    """Return a TestClient with internal-write API auth configured."""
+    reset_auth_config_for_tests()
+    monkeypatch.setenv("DATABASE_URL", _database_url())
+    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _API_KEY)
+    monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
+    monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
 
     app = create_app()
     return TestClient(app)
@@ -42,7 +55,7 @@ def _auth() -> dict[str, str]:
     return {"Authorization": f"Bearer {_API_KEY}"}
 
 
-def _clear_audit(engine, entity_id: uuid.UUID) -> None:
+def _clear_audit(engine: Engine, entity_id: uuid.UUID) -> None:
     with engine.begin() as conn:
         conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": entity_id})
         conn.execute(
@@ -51,7 +64,7 @@ def _clear_audit(engine, entity_id: uuid.UUID) -> None:
         )
 
 
-def test_batch_upsert_emits_document_created_audit(client, engine) -> None:
+def test_batch_upsert_emits_document_created_audit(client: TestClient, engine: Engine) -> None:
     """batch_upsert emits document.created audit event + version snapshot."""
     url = f"https://test.example.com/audit-emit-{uuid.uuid4().hex[:8]}"
     resp = client.post(
@@ -75,7 +88,7 @@ def test_batch_upsert_emits_document_created_audit(client, engine) -> None:
         },
         headers=_auth(),
     )
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
 
     with engine.connect() as conn:
         doc_id_raw = sqlalchemy_scalar_one(
@@ -113,7 +126,7 @@ def test_batch_upsert_emits_document_created_audit(client, engine) -> None:
         conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
-def test_delete_document_emits_audit(client, engine) -> None:
+def test_delete_document_emits_audit(client: TestClient, engine: Engine) -> None:
     """delete_document emits document.deleted audit event."""
     url = f"https://test.example.com/audit-del-{uuid.uuid4().hex[:8]}"
     with engine.begin() as conn:
@@ -131,7 +144,7 @@ def test_delete_document_emits_audit(client, engine) -> None:
         f"/internal/v1/documents/{doc_id}",
         headers=_auth(),
     )
-    assert resp.status_code == 204
+    assert resp.status_code == HTTPStatus.NO_CONTENT
 
     with engine.connect() as conn:
         audit_row = (
@@ -149,7 +162,7 @@ def test_delete_document_emits_audit(client, engine) -> None:
     _clear_audit(engine, doc_id)
 
 
-def test_patch_document_tags_emits_audit_and_version(client, engine) -> None:
+def test_patch_document_tags_emits_audit_and_version(client: TestClient, engine: Engine) -> None:
     """patch_document_tags emits document.tagged + creates version snapshot."""
     url = f"https://test.example.com/audit-tag-{uuid.uuid4().hex[:8]}"
     with engine.begin() as conn:
@@ -171,7 +184,7 @@ def test_patch_document_tags_emits_audit_and_version(client, engine) -> None:
         },
         headers=_auth(),
     )
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
 
     with engine.connect() as conn:
         audit_row = (
@@ -198,7 +211,9 @@ def test_patch_document_tags_emits_audit_and_version(client, engine) -> None:
         )
         assert version_row is not None
         assert version_row["version_number"] >= 1
-        assert any(t["slug"] == "housing" for t in version_row["tags_snapshot"])
+        tags_snapshot_raw: object = cast("object", version_row["tags_snapshot"])
+        tags_snapshot = json_object_items(tags_snapshot_raw)
+        assert any(json_str(tag, "slug") == "housing" for tag in tags_snapshot)
 
     _clear_audit(engine, doc_id)
     with engine.begin() as conn:

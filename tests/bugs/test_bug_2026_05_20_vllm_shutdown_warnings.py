@@ -4,21 +4,25 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
-import pytest
+if TYPE_CHECKING:
+    import pytest
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+
 from infra.modal.llm_app import (  # noqa: E402
-    _llm_engine_kwargs,
-    _shutdown_vllm_engine,
+    _llm_engine_kwargs,  # pyright: ignore[reportPrivateUsage]  # bug repro tests teardown helpers
+    _shutdown_vllm_engine,  # pyright: ignore[reportPrivateUsage]  # bug repro tests teardown helpers
 )
 
 
 def test_llm_engine_kwargs_use_half_dtype_on_t4() -> None:
+    """Llm engine kwargs use half dtype on t4."""
     kwargs = _llm_engine_kwargs(max_model_len=512)
     assert kwargs["dtype"] == "half"
     hf_overrides = kwargs["hf_overrides"]
@@ -29,6 +33,7 @@ def test_llm_engine_kwargs_use_half_dtype_on_t4() -> None:
 def test_shutdown_vllm_engine_destroys_process_group_when_initialized(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Shutdown vllm engine destroys process group when initialized."""
     destroyed: list[bool] = []
 
     monkeypatch.setattr(
@@ -51,6 +56,7 @@ def test_shutdown_vllm_engine_destroys_process_group_when_initialized(
 def test_shutdown_vllm_engine_skips_destroy_when_not_initialized(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Shutdown vllm engine skips destroy when not initialized."""
     destroyed: list[bool] = []
 
     monkeypatch.setattr(

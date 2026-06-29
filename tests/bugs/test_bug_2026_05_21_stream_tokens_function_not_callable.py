@@ -19,7 +19,8 @@ def _find_stream_tokens_body(tree: ast.AST) -> ast.FunctionDef:
             for item in node.body:
                 if isinstance(item, ast.FunctionDef) and item.name == "stream_tokens":
                     return item
-    raise AssertionError("LlmService.stream_tokens not found in llm_app.py")
+    msg = "LlmService.stream_tokens not found in llm_app.py"
+    raise AssertionError(msg)
 
 
 def _calls_self_complete(func: ast.FunctionDef) -> bool:

@@ -5,6 +5,9 @@
     "apps/*",
     "packages/frontend-*"
   ],
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "test:frontend-i18n": "npm test -w vecinita-frontend-i18n",
     "test:frontend-ui": "npm test -w vecinita-frontend-ui"

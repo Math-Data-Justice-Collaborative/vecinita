@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterator
-from typing import Literal, cast
+from typing import TYPE_CHECKING, Literal
 
 from vecinita_embedding_client import EmbeddingClient
 from vecinita_llm_client import LlmClient
@@ -16,7 +16,8 @@ from vecinita_shared_schemas.chat_rag import AskRequest, AskResponse, Source
 from vecinita_tagging.llm_client import LlmTagClient
 from vecinita_tagging.vocabulary import load_seed_vocabulary, vocabulary_slugs
 
-from vecinita_chat_rag_backend.config import ChatRagSettings
+if TYPE_CHECKING:
+    from vecinita_chat_rag_backend.config import ChatRagSettings
 
 EmbedFn = Callable[[str], list[float]]
 
@@ -48,7 +49,7 @@ def _to_ask_response(result: RagAnswer) -> AskResponse:
         )
         for chunk in result.sources
     ]
-    language = cast(Literal["en", "es"], "es" if result.language == "es" else "en")
+    language: Literal["en", "es"] = "es" if result.language == "es" else "en"
     return AskResponse(answer=result.answer, language=language, sources=sources)
 
 
@@ -63,6 +64,7 @@ class ChatRagService:
         chat_max_tokens: int = 256,
         tag_infer_fn: TagInferFn | None = None,
     ) -> None:
+        """Wire retrieval, LLM, and optional tag inference for ask flows."""
         self._retriever = retriever
         self._llm = llm_client
         self._chat_max_tokens = chat_max_tokens
@@ -70,6 +72,7 @@ class ChatRagService:
 
     @classmethod
     def from_settings(cls, settings: ChatRagSettings) -> ChatRagService:
+        """Construct service clients and retriever from ChatRAG settings."""
         embed_client = EmbeddingClient(
             settings.embed_url,
             timeout=settings.request_timeout_s,
@@ -126,6 +129,7 @@ class ChatRagService:
         return chunks
 
     def ask(self, request: AskRequest) -> AskResponse:
+        """Retrieve context and generate a non-streaming answer."""
         language = self._effective_language(request)
         chunks = self._retrieve(request)
         if not chunks:
@@ -147,6 +151,7 @@ class ChatRagService:
         return _to_ask_response(result)
 
     def ask_stream(self, request: AskRequest) -> Iterator[str]:
+        """Stream LLM tokens for a question after retrieval."""
         language = self._effective_language(request)
         chunks = self._retrieve(request)
         if not chunks:
@@ -156,6 +161,7 @@ class ChatRagService:
         yield from self._llm.generate_stream(prompt, max_tokens=self._chat_max_tokens)
 
     def retrieve_sources(self, request: AskRequest) -> list[Source]:
+        """Return ranked source chunks without invoking the LLM."""
         chunks = self._retrieve(request)
         return [
             Source(

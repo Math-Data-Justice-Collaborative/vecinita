@@ -11,15 +11,24 @@ navigation (the source of truth is the server, so re-fetching after a tab switch
 from __future__ import annotations
 
 import contextlib
+from http import HTTPStatus
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 from fastapi.testclient import TestClient
-from tests.helpers.json_response import json_object_list, json_str, response_json_object
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.pipeline import fetch_html_fixture, run_ingest_job
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_embedding_client import EMBEDDING_DIMENSION
+from vecinita_shared_schemas.internal_write import BatchUpsertRequest, BatchUpsertResponse
+
+from tests.helpers.json_response import json_object_list, json_str, response_json_object
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from vecinita_ingest.models import ScrapedDocument
 
 pytestmark = pytest.mark.e2e
 
@@ -30,39 +39,45 @@ _PROXY_KEY = "test-proxy-key"
 _EMBED_VECTOR = [0.01] * EMBEDDING_DIMENSION
 _GOOD_URL = "https://example.com/sample-page.html"
 _BAD_URL = "https://invalid.example/bad-page.html"
+_EXPECTED_JOB_LIST_SIZE = 2
 
 
 class _MockEmbedClient:
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """Embed batch."""
         return [_EMBED_VECTOR for _ in texts]
 
     def close(self) -> None:
-        return None
+        """Close."""
+        return
 
 
 class _MockWriteClient:
-    def upsert_batch(self, body: object) -> object:
-        from vecinita_shared_schemas.internal_write import BatchUpsertResponse
-
-        chunks = sum(len(doc.chunks) for doc in body.documents)  # type: ignore[attr-defined]
+    def upsert_batch(self, body: BatchUpsertRequest) -> BatchUpsertResponse:
+        """Upsert batch."""
+        chunks = sum(len(doc.chunks) for doc in body.documents)
         return BatchUpsertResponse(upserted_chunks=chunks)
 
     def close(self) -> None:
-        return None
+        """Close."""
+        return
 
 
-def _fetch(url: str):  # type: ignore[no-untyped-def]
+def _fetch(url: str) -> ScrapedDocument:
     if _BAD_URL in url:
-        raise ValueError("bad_url")
+        msg = "bad_url"
+        raise ValueError(msg)
     return fetch_html_fixture(url, fixture_html=_FIXTURE_HTML)
 
 
 @pytest.fixture
 def dm_jobs_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    """Dm jobs client."""
     monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", _PROXY_KEY)
     store = InMemoryJobStore()
 
-    def runner(job_id):  # type: ignore[no-untyped-def]
+    def runner(job_id: UUID) -> None:
+        """Runner."""
         with contextlib.suppress(ValueError):
             run_ingest_job(
                 job_id,
@@ -80,17 +95,18 @@ def dm_jobs_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
 
 def _create_job(client: TestClient, url: str) -> str:
     create = client.post("/jobs", json={"urls": [url], "options": {"chunk_size_tokens": 64}})
-    assert create.status_code == 202
+    assert create.status_code == HTTPStatus.ACCEPTED
     return json_str(response_json_object(create), "job_id")
 
 
 def test_list_jobs_returns_all_states_newest_first(dm_jobs_client: TestClient) -> None:
+    """List jobs returns all states newest first."""
     completed_id = _create_job(dm_jobs_client, _GOOD_URL)  # created first -> older
     failed_id = _create_job(dm_jobs_client, _BAD_URL)  # created second -> newest
 
     body = response_json_object(dm_jobs_client.get("/jobs"))
     jobs = json_object_list(body, "jobs")
-    assert len(jobs) == 2
+    assert len(jobs) == _EXPECTED_JOB_LIST_SIZE
     # Newest first: the failed job was created last.
     assert json_str(jobs[0], "job_id") == failed_id
     assert json_str(jobs[1], "job_id") == completed_id
@@ -101,6 +117,7 @@ def test_list_jobs_returns_all_states_newest_first(dm_jobs_client: TestClient) -
 
 
 def test_list_jobs_status_filter(dm_jobs_client: TestClient) -> None:
+    """List jobs status filter."""
     completed_id = _create_job(dm_jobs_client, _GOOD_URL)
     failed_id = _create_job(dm_jobs_client, _BAD_URL)
 
@@ -119,6 +136,7 @@ def test_list_jobs_status_filter(dm_jobs_client: TestClient) -> None:
 
 
 def test_failed_job_surfaces_error_code_and_message(dm_jobs_client: TestClient) -> None:
+    """Failed job surfaces error code and message."""
     failed_id = _create_job(dm_jobs_client, _BAD_URL)
 
     body = response_json_object(dm_jobs_client.get("/jobs"))

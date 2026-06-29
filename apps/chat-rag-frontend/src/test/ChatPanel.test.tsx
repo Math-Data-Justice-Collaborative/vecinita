@@ -215,7 +215,7 @@ describe("ChatPanel", () => {
     await waitFor(() => {
       expect(screen.getAllByTestId("message")).toHaveLength(2);
     });
-    const assistant = screen.getAllByTestId("message")[1];
+    const assistant = screen.getAllByTestId("message")[1]!;
     expect(assistant.querySelector(".message-content")).toHaveTextContent("");
   });
 
@@ -299,7 +299,7 @@ describe("ChatPanel", () => {
       await screen.findByRole("button", { name: /asking/i }),
     ).toBeDisabled();
 
-    const assistantMessage = screen.getAllByTestId("message")[1];
+    const assistantMessage = screen.getAllByTestId("message")[1]!;
     expect(
       assistantMessage.querySelector(".message-content"),
     ).toHaveTextContent("…");
@@ -364,6 +364,21 @@ describe("ChatPanel", () => {
     expect(screen.queryAllByTestId("message")).toHaveLength(0);
   });
 
+  it("returns early when the form is submitted with an empty question", () => {
+    vi.stubGlobal("fetch", mockFetchRouter({}));
+
+    const { container } = renderWithLocale(<ChatPanel />);
+    const form = container.querySelector("form.chat-form");
+    expect(form).not.toBeNull();
+    fireEvent.submit(form as Element);
+
+    expect(screen.queryAllByTestId("message")).toHaveLength(0);
+    expect(fetch).not.toHaveBeenCalledWith(
+      expect.stringContaining("/api/v1/ask/stream"),
+      expect.anything(),
+    );
+  });
+
   it("includes the sidebar-selected tags in the ask request", async () => {
     const sse =
       'data: {"token":"Ok"}\n\n' +
@@ -407,7 +422,7 @@ describe("ChatPanel", () => {
     const suggestions = screen.getByTestId("suggested-questions");
     expect(suggestions).toBeInTheDocument();
 
-    const firstChip = within(suggestions).getAllByRole("button")[0];
+    const firstChip = within(suggestions).getAllByRole("button")[0]!;
     fireEvent.click(firstChip);
     expect(screen.getByLabelText(/your question/i)).toHaveValue(
       firstChip.textContent,

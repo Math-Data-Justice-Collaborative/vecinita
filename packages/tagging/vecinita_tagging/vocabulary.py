@@ -38,14 +38,14 @@ def default_seed_path() -> Path:
 def load_seed_vocabulary(path: Path | None = None) -> list[SeedTag]:
     """Load starter tag vocabulary from seed_tags.json."""
     seed_path = path or default_seed_path()
-    payload = as_json_object(cast(object, json.loads(seed_path.read_text(encoding="utf-8"))))
+    payload = as_json_object(cast("object", json.loads(seed_path.read_text(encoding="utf-8"))))
     tags_raw = payload.get("tags")
     if not isinstance(tags_raw, list):
         msg = "seed_tags.json must contain a 'tags' array"
-        raise ValueError(msg)
+        raise TypeError(msg)
     tags: list[SeedTag] = []
-    for raw_entry in tags_raw:
-        entry = as_json_object(cast(object, raw_entry))
+    for raw_entry in cast("list[object]", tags_raw):
+        entry = as_json_object(raw_entry)
         tags.append(
             SeedTag(
                 slug=str(entry["slug"]),

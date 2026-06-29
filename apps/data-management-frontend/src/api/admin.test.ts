@@ -16,6 +16,15 @@ import {
 } from "./admin";
 
 const CLIENT = { baseUrl: "http://localhost:8002", apiKey: "test-key" };
+const JWT_CLIENT = {
+  baseUrl: "http://localhost:8002",
+  accessToken: "jwt-token",
+};
+
+function expectBearerJwt(init: RequestInit | undefined): void {
+  const headers = init?.headers as Record<string, string> | undefined;
+  expect(headers?.["Authorization"]).toBe("Bearer jwt-token");
+}
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -276,5 +285,163 @@ describe("admin API fetch helpers", () => {
       vi.fn().mockResolvedValue(new Response("", { status: 404 })),
     );
     await expect(fetchDocumentHistory(CLIENT, "d1")).rejects.toThrow(/404/);
+  });
+
+  it("fetch helpers prefer accessToken over apiKey (F34)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          total_documents: 0,
+          total_chunks: 0,
+          tag_distribution: [],
+          language_breakdown: {},
+          recent_activity: [],
+          top_served: [],
+        }),
+      ),
+    );
+    await fetchStatsSummary(JWT_CLIENT);
+    expectBearerJwt(vi.mocked(fetch).mock.calls[0]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        status: "healthy",
+        checked_at: "2026-01-01T00:00:00Z",
+        services: {},
+      }),
+    );
+    await fetchHealthAggregate(JWT_CLIENT);
+    expectBearerJwt(vi.mocked(fetch).mock.calls[1]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({ successes: ["d1"], failures: [] }),
+    );
+    await bulkDeleteDocuments(JWT_CLIENT, ["d1"]);
+    expectBearerJwt(vi.mocked(fetch).mock.calls[2]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        items: [],
+        page: 1,
+        page_size: 50,
+        total_count: 0,
+      }),
+    );
+    await fetchAuditLog(JWT_CLIENT);
+    expectBearerJwt(vi.mocked(fetch).mock.calls[3]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        items: [],
+        page: 1,
+        page_size: 50,
+        total_count: 0,
+      }),
+    );
+    await fetchDocumentHistory(JWT_CLIENT, "d1");
+    expectBearerJwt(vi.mocked(fetch).mock.calls[4]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({ successes: ["d1"], failures: [] }),
+    );
+    await bulkTagDocuments(JWT_CLIENT, ["d1"], [], []);
+    expectBearerJwt(vi.mocked(fetch).mock.calls[5]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({ successes: ["d1"], failures: [] }),
+    );
+    await bulkUpdateMetadata(JWT_CLIENT, ["d1"], { title: "T" });
+    expectBearerJwt(vi.mocked(fetch).mock.calls[6]?.[1]);
+  });
+
+  it("fetch helpers send empty bearer when no token or api key", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          total_documents: 0,
+          total_chunks: 0,
+          tag_distribution: [],
+          language_breakdown: {},
+          recent_activity: [],
+          top_served: [],
+        }),
+      ),
+    );
+    await fetchStatsSummary({ baseUrl: CLIENT.baseUrl });
+    const headers = vi.mocked(fetch).mock.calls[0]?.[1]?.headers as Record<
+      string,
+      string
+    >;
+    expect(headers["Authorization"]).toBe("Bearer ");
+  });
+
+  it("bulkTagDocuments and bulkUpdateMetadata use JWT bearer", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(jsonResponse({ successes: [], failures: [] })),
+    );
+    await bulkTagDocuments(JWT_CLIENT, [], [], []);
+    const tagHeaders = vi.mocked(fetch).mock.calls[0]?.[1]?.headers as Record<
+      string,
+      string
+    >;
+    expect(tagHeaders["Authorization"]).toBe("Bearer jwt-token");
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({ successes: [], failures: [] }),
+    );
+    await bulkUpdateMetadata(JWT_CLIENT, [], {});
+    const metaHeaders = vi.mocked(fetch).mock.calls[1]?.[1]?.headers as Record<
+      string,
+      string
+    >;
+    expect(metaHeaders["Authorization"]).toBe("Bearer jwt-token");
+  });
+
+  it("remaining fetch helpers tolerate missing bearer", async () => {
+    const bare = { baseUrl: CLIENT.baseUrl };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((url: string) => {
+        if (url.includes("/health/all")) {
+          return Promise.resolve(
+            jsonResponse({
+              status: "healthy",
+              checked_at: "2026-01-01T00:00:00Z",
+              services: {},
+            }),
+          );
+        }
+        if (url.includes("/audit")) {
+          return Promise.resolve(
+            jsonResponse({
+              items: [],
+              page: 1,
+              page_size: 50,
+              total_count: 0,
+            }),
+          );
+        }
+        if (url.includes("/history")) {
+          return Promise.resolve(
+            jsonResponse({
+              items: [],
+              page: 1,
+              page_size: 50,
+              total_count: 0,
+            }),
+          );
+        }
+        return Promise.resolve(jsonResponse({ successes: [], failures: [] }));
+      }),
+    );
+    await fetchHealthAggregate(bare);
+    await fetchAuditLog(bare);
+    await fetchDocumentHistory(bare, "d1");
+    await bulkDeleteDocuments(bare, []);
+    await bulkTagDocuments(bare, [], [], []);
+    await bulkUpdateMetadata(bare, [], {});
   });
 });

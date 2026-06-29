@@ -3,30 +3,46 @@
 from __future__ import annotations
 
 import uuid
+from http import HTTPStatus
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
 from fastapi import HTTPException
-from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Engine
-from tests.unit.internal_write_api.conftest import database_url
+from sqlalchemy import (
+    create_engine,
+    text,
+)
 from vecinita_internal_write_api.tags import (
     replace_chunk_tags,
     replace_document_tags,
     validate_chunk_tag_count,
     validate_document_tag_count,
 )
-from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
+from vecinita_shared_schemas.db_mapping import (
+    sqlalchemy_scalar_one,
+)
 from vecinita_shared_schemas.internal_write import TagInput
 
+from tests.unit.internal_write_api.conftest import (
+    database_url,
+)
 
-@pytest.fixture()
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from sqlalchemy.engine import Engine
+
+
+@pytest.fixture
 def engine() -> Engine:
+    """Engine."""
     return create_engine(database_url())
 
 
-@pytest.fixture()
-def tagged_document(engine: Engine):
+@pytest.fixture
+def tagged_document(engine: Engine) -> Iterator[tuple[UUID, UUID]]:
+    """Tagged document."""
     doc_url = f"https://tag-test-{uuid.uuid4().hex[:10]}.example.com"
     with engine.begin() as conn:
         doc_id_raw = sqlalchemy_scalar_one(
@@ -57,17 +73,19 @@ def tagged_document(engine: Engine):
 def test_validate_document_tag_count_rejects_over_cap(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test validate document tag count rejects over cap."""
     monkeypatch.setattr("vecinita_internal_write_api.tags._MAX_TAGS_PER_DOCUMENT", 2)
     tags = [TagInput(slug=f"tag-{index}", label=f"Tag {index}", source="llm") for index in range(3)]
 
     with pytest.raises(HTTPException) as exc:
         validate_document_tag_count(tags)
-    assert exc.value.status_code == 400
+    assert exc.value.status_code == HTTPStatus.BAD_REQUEST
 
 
 def test_validate_chunk_tag_count_rejects_over_cap(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test validate chunk tag count rejects over cap."""
     monkeypatch.setattr("vecinita_internal_write_api.tags._MAX_TAGS_PER_CHUNK", 1)
     tags = [
         TagInput(slug="a", label="A", source="llm"),
@@ -76,10 +94,14 @@ def test_validate_chunk_tag_count_rejects_over_cap(
 
     with pytest.raises(HTTPException) as exc:
         validate_chunk_tag_count(tags)
-    assert exc.value.status_code == 400
+    assert exc.value.status_code == HTTPStatus.BAD_REQUEST
 
 
-def test_replace_document_tags_persists_tags(engine: Engine, tagged_document) -> None:
+def test_replace_document_tags_persists_tags(
+    engine: Engine,
+    tagged_document: tuple[UUID, UUID],
+) -> None:
+    """Test replace document tags persists tags."""
     doc_id, _chunk_id = tagged_document
     tags = [TagInput(slug="housing", label="Housing", source="llm")]
 
@@ -104,7 +126,11 @@ def test_replace_document_tags_persists_tags(engine: Engine, tagged_document) ->
     assert rows[0][1] == "llm"
 
 
-def test_replace_chunk_tags_persists_tags(engine: Engine, tagged_document) -> None:
+def test_replace_chunk_tags_persists_tags(
+    engine: Engine,
+    tagged_document: tuple[UUID, UUID],
+) -> None:
+    """Test replace chunk tags persists tags."""
     _doc_id, chunk_id = tagged_document
     tags = [TagInput(slug="legal", label="Legal", source="human")]
 

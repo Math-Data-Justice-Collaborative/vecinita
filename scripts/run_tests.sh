@@ -13,7 +13,7 @@ fi
 uv sync --group dev
 
 if [[ $# -eq 0 ]]; then
-  set -- tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval
+  set -- tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval tests/bugs
 fi
 
 exec uv run pytest "$@"

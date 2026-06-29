@@ -6,10 +6,8 @@
  */
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { MemoryRouter } from "react-router-dom";
 
-import App from "../App";
-import { renderWithProviders } from "./renderWithProviders";
+import { renderAppRoutesReady, useMediaQueryMock } from "./renderAppHelpers";
 
 const DIALOG_DESCRIPTION_WARNING =
   /Missing `Description` or `aria-describedby=\{undefined\}` for \{DialogContent\}/;
@@ -28,6 +26,7 @@ describe("BUG-2026-06-26 jobs dialog aria warning", () => {
   });
 
   it("does not warn when opening mobile navigation on the Jobs page", async () => {
+    useMediaQueryMock.mockReturnValue(false);
     const warnSpy = vi
       .spyOn(console, "warn")
       .mockImplementation(() => undefined);
@@ -36,11 +35,7 @@ describe("BUG-2026-06-26 jobs dialog aria warning", () => {
       vi.fn().mockResolvedValue(jsonResponse({ jobs: [] })),
     );
 
-    renderWithProviders(
-      <MemoryRouter initialEntries={["/jobs"]}>
-        <App />
-      </MemoryRouter>,
-    );
+    await renderAppRoutesReady("/jobs");
 
     await waitFor(() => {
       expect(screen.getByText(/no jobs yet/i)).toBeInTheDocument();

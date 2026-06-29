@@ -14,6 +14,7 @@ _DATABASE_APP = _REPO_ROOT / "apps" / "database"
 
 
 def default_database_url() -> str:
+    """Default database url."""
     return os.environ.get(
         "DATABASE_URL",
         "postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
@@ -21,14 +22,16 @@ def default_database_url() -> str:
 
 
 def postgres_is_ready(database_url: str | None = None) -> bool:
+    """Postgres is ready."""
     url = database_url or default_database_url()
     try:
         engine = create_engine(url)
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
-        return True
     except SQLAlchemyError:
         return False
+    else:
+        return True
 
 
 def run_alembic_upgrade_head(database_url: str | None = None) -> None:
@@ -37,7 +40,7 @@ def run_alembic_upgrade_head(database_url: str | None = None) -> None:
     env = os.environ.copy()
     env["DATABASE_URL"] = url
     subprocess.run(
-        ["uv", "run", "alembic", "upgrade", "head"],
+        ["uv", "run", "alembic", "upgrade", "head"],  # noqa: S607 # uv resolved from PATH in CI/dev
         cwd=_DATABASE_APP,
         check=True,
         env=env,

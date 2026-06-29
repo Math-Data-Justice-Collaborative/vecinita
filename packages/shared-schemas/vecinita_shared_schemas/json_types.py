@@ -15,4 +15,4 @@ def as_json_object(value: object) -> JsonObject:
     if not isinstance(value, dict):
         msg = f"Expected JSON object, got {type(value).__name__}"
         raise TypeError(msg)
-    return cast(JsonObject, value)
+    return cast("JsonObject", value)

@@ -3,19 +3,24 @@
 from __future__ import annotations
 
 import os
-from uuid import UUID
+from typing import TYPE_CHECKING
 
 from fastapi import HTTPException, status
 from sqlalchemy import text
-from sqlalchemy.engine import Connection
 from vecinita_shared_schemas.db_mapping import scalar_uuid, sqlalchemy_scalar_one
-from vecinita_shared_schemas.internal_write import TagInput
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from sqlalchemy.engine import Connection
+    from vecinita_shared_schemas.internal_write import TagInput
 
 _MAX_TAGS_PER_DOCUMENT = int(os.environ.get("VECINITA_MAX_TAGS_PER_DOCUMENT", "10"))
 _MAX_TAGS_PER_CHUNK = int(os.environ.get("VECINITA_MAX_TAGS_PER_CHUNK", "5"))
 
 
 def validate_document_tag_count(tags: list[TagInput]) -> None:
+    """Reject document tag lists above the configured cap."""
     if len(tags) > _MAX_TAGS_PER_DOCUMENT:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -24,6 +29,7 @@ def validate_document_tag_count(tags: list[TagInput]) -> None:
 
 
 def validate_chunk_tag_count(tags: list[TagInput]) -> None:
+    """Reject chunk tag lists above the configured cap."""
     if len(tags) > _MAX_TAGS_PER_CHUNK:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

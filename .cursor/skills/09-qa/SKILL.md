@@ -114,7 +114,7 @@ Read from disk (do not guess commands):
 uv run ruff check apps packages tests
 uv run ruff format --check apps packages tests
 uv run basedpyright apps packages tests
-uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval
+uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval tests/bugs
 uv run pip-audit  # with audit/pip-audit-ignore.txt if present
 bash scripts/check_secrets.sh
 bash scripts/check_modal_no_database_url.sh
@@ -298,7 +298,7 @@ report, use a **follow-up pass** (not a re-run of 09):
    - **Docstrings** — public symbols in `apps/` + `packages/`; verify ruff/basedpyright (no `Any`)
    - **Phase 4 staging** — H2 in `staging_smoke.sh`, `docs/staging-runbook.md`, skip-safe `tests/smoke/test_staging_health.py`
 3. Re-run **blocking** checks only for touched areas; update `docs/qa-report.md` or add a short **QA remediation** note with date.
-4. **Modal workspace rule:** all Vecinita deploys → profile **`vecinita`**; URLs must use `vecinita--` prefix; document in `infra/modal/env.example`.
+4. **Modal workspace rule:** all Vecinita deploys → profile **`vecinita`**; URLs must use `vecinita--` prefix; document in `infra/modal/.env.example`.
 
 Do not bundle unrelated fixes into one agent.
 

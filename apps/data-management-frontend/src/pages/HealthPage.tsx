@@ -18,24 +18,33 @@ export function HealthPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const client = requireCorpusConfig();
-      const data = await fetchHealthAggregate(client);
-      setHealth(data);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : tr("admin.health.loadFailed"),
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [tr]);
+  const load = useCallback(
+    async (isActive: () => boolean) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const client = requireCorpusConfig();
+        const data = await fetchHealthAggregate(client);
+        if (!isActive()) return;
+        setHealth(data);
+      } catch (err) {
+        if (!isActive()) return;
+        setError(
+          err instanceof Error ? err.message : tr("admin.health.loadFailed"),
+        );
+      } finally {
+        if (isActive()) setLoading(false);
+      }
+    },
+    [tr],
+  );
 
   useEffect(() => {
-    void load();
+    let active = true;
+    void load(() => active);
+    return () => {
+      active = false;
+    };
   }, [load]);
 
   if (loading && !health) {
@@ -67,6 +76,7 @@ export function HealthPage() {
     );
   }
 
+  /* v8 ignore next -- defensive: the health client throws on malformed payloads, so a falsy health with no error is unreachable */
   if (!health) return null;
 
   return (
@@ -92,7 +102,7 @@ export function HealthPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => void load()}
+            onClick={() => void load(() => true)}
             disabled={loading}
             aria-label={tr("admin.health.refreshAria")}
           >

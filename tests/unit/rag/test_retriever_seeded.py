@@ -2,14 +2,28 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
-from tests.unit.rag.conftest import attach_embeddings
-from vecinita_rag.retriever import CorpusPgvectorRetriever
+from vecinita_rag.retriever import (
+    CorpusPgvectorRetriever,
+)
+
+from tests.unit.rag.conftest import (
+    attach_embeddings,
+)
+
+if TYPE_CHECKING:
+    from vecinita_rag.retriever import EmbedFn
 
 pytestmark = pytest.mark.integration
 
 
-def test_retriever_returns_seeded_chunk(corpus_db: str, embed_fn_food_pantry) -> None:
+def test_retriever_returns_seeded_chunk(
+    corpus_db: str,
+    embed_fn_food_pantry: EmbedFn,
+) -> None:
+    """Test retriever returns seeded chunk."""
     attach_embeddings(
         database_url=corpus_db,
         match_substrings={"Food pantry": 0},
@@ -26,7 +40,8 @@ def test_retriever_returns_seeded_chunk(corpus_db: str, embed_fn_food_pantry) ->
     assert chunks[0].language == "en"
 
 
-def test_retriever_applies_score_threshold(corpus_db: str, embed_fn_food_pantry) -> None:
+def test_retriever_applies_score_threshold(corpus_db: str, embed_fn_food_pantry: EmbedFn) -> None:
+    """Test retriever applies score threshold."""
     attach_embeddings(
         database_url=corpus_db,
         match_substrings={"Food pantry": 0},
@@ -45,6 +60,7 @@ def test_retriever_applies_score_threshold(corpus_db: str, embed_fn_food_pantry)
 
 
 def test_retriever_filters_by_language(corpus_db: str) -> None:
+    """Test retriever filters by language."""
     attach_embeddings(
         database_url=corpus_db,
         match_substrings={"banco de alimentos": 2, "Food pantry": 0},

@@ -21,7 +21,8 @@ def _find_method_body(tree: ast.AST, class_name: str, method_name: str) -> ast.F
             for item in node.body:
                 if isinstance(item, ast.FunctionDef) and item.name == method_name:
                     return item
-    raise AssertionError(f"{class_name}.{method_name} not found")
+    msg = f"{class_name}.{method_name} not found"
+    raise AssertionError(msg)
 
 
 def _sampling_params_call_has_repetition_penalty(func: ast.FunctionDef) -> bool:
@@ -37,7 +38,7 @@ def _sampling_params_call_has_repetition_penalty(func: ast.FunctionDef) -> bool:
 
 
 def test_llm_sampling_params_include_repetition_penalty() -> None:
-    """vLLM must penalize token repetition to avoid assistant boilerplate loops."""
+    """VLLM must penalize token repetition to avoid assistant boilerplate loops."""
     tree = ast.parse(LLM_APP.read_text(encoding="utf-8"))
     generate_text = _find_method_body(tree, "LlmService", "_generate_text")
     assert _sampling_params_call_has_repetition_penalty(generate_text), (

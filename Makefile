@@ -7,7 +7,7 @@ SHELL := /bin/bash
 .SHELLFLAGS := --noprofile --norc -eu -o pipefail -c
 
 UV := uv
-PYTHON_DIRS := apps packages tests
+PYTHON_DIRS := apps packages tests infra scripts
 PYTEST_DEFAULT := tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval tests/bugs
 COMPOSE_FILE := infra/docker-compose.yml
 DATABASE_URL ?= postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita
@@ -137,6 +137,7 @@ build-frontend: ## Production build (both frontends)
 ci-guards: ## CI static guard scripts (secrets, OpenAPI, Modal boundary)
 	bash scripts/check_modal_no_database_url.sh
 	bash scripts/check_openapi_specs.sh
+	bash scripts/check_supabase_config.sh
 	bash scripts/check_secrets.sh
 	bash scripts/check_no_operator_specs_tracked.sh
 	@if command -v gitleaks >/dev/null 2>&1; then \

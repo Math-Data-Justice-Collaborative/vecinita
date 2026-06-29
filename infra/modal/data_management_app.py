@@ -6,15 +6,23 @@ Deploy from repo root:
 Requires Modal secret `vecinita-data-management` with:
 VECINITA_MODAL_EMBED_URL, VECINITA_INTERNAL_WRITE_URL, VECINITA_INTERNAL_API_KEY,
 VECINITA_MODAL_PROXY_KEY, VECINITA_CORS_ORIGINS (admin frontend origin),
-VECINITA_MODAL_LLM_URL (required for retag and LLM tagging at ingest)
+VECINITA_MODAL_LLM_URL (required for retag and LLM tagging at ingest),
+SUPABASE_URL, VECINITA_AUTH_REQUIRED (EV-005 F34 admin JWT on /jobs*).
+See infra/modal/.env.example and docs/staging-secrets-matrix.md.
 """
 
 from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING, cast
 
 import modal
+
+if TYPE_CHECKING:
+    from collections.abc import MutableMapping
+
+    from vecinita_data_management_backend.store import JobPayload
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +60,8 @@ image = (
         "httpx>=0.27,<1",
         "langdetect>=1.0.9",
         "pydantic>=2.7,<3",
+        "PyJWT>=2.10,<3",
+        "cryptography>=42,<45",
     )
     .env({"PYTHONPATH": _PYTHONPATH})
     .add_local_dir(_REPO_ROOT / "packages" / "ingest", remote_path=f"{_PKG_ROOT}/packages/ingest")
@@ -101,7 +111,8 @@ def fastapi_app():
     from vecinita_tagging.llm_client import LlmTagClient
 
     jobs_dict = modal.Dict.from_name("vecinita-data-management-jobs", create_if_missing=True)
-    store = DictJobStore(jobs_dict)
+    # modal.Dict is a MutableMapping at runtime but is not typed as one.
+    store = DictJobStore(cast("MutableMapping[str, JobPayload]", jobs_dict))
     embed = EmbeddingClient()
     write = InternalWriteClient()
     tag_client: LlmTagClient | None = None

@@ -10,6 +10,7 @@ import {
 import { useState } from "react";
 import { LanguageToggle, useLocale } from "vecinita-frontend-ui";
 
+import { useAuth } from "@/auth/authContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +24,34 @@ import {
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAdminT } from "@/hooks/useAdminT";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+
+function UserMenu() {
+  const tr = useAdminT();
+  const { user, signOut } = useAuth();
+
+  if (!user?.email) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-col gap-2" data-testid="admin-user-menu">
+      <p className="text-xs text-muted-foreground">
+        {tr("admin.auth.currentUser", { email: user.email })}
+      </p>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        data-testid="admin-sign-out"
+        onClick={() => {
+          void signOut();
+        }}
+      >
+        {tr("admin.auth.signOut")}
+      </Button>
+    </div>
+  );
+}
 
 function ChromeControls() {
   const { locale, setLocale } = useLocale();
@@ -93,7 +122,8 @@ function DesktopSidebar({ showChrome }: { showChrome: boolean }) {
         <NavItems />
       </div>
       {showChrome ? (
-        <div className="border-t px-3 py-3">
+        <div className="space-y-3 border-t px-3 py-3">
+          <UserMenu />
           <ChromeControls />
         </div>
       ) : null}

@@ -2,40 +2,62 @@
 
 from __future__ import annotations
 
+from http import HTTPStatus
 from uuid import UUID, uuid4
 
 import pytest
 from fastapi.testclient import TestClient
-from tests.helpers.json_response import json_str, response_json_object
-from vecinita_data_management_backend.app import create_app
+from vecinita_data_management_backend.app import (
+    create_app,
+)
 from vecinita_data_management_backend.store import InMemoryJobStore
+from vecinita_shared_schemas.auth import reset_auth_config_for_tests
+from vecinita_shared_schemas.json_types import as_json_object
+
+from tests.helpers.json_response import (
+    json_list,
+    json_str,
+    response_json_object,
+)
 
 _PROXY_KEY = "unit-test-proxy-key"
+_CHUNK_SIZE_TOKENS = 128
+_EXPECTED_JOB_LIST_COUNT = 2
+
+
+@pytest.fixture(autouse=True)
+def _disable_auth_required(monkeypatch: pytest.MonkeyPatch) -> None:  # pyright: ignore[reportUnusedFunction]
+    """Allow data-management routes to use the dev auth bypass in unit tests."""
+    reset_auth_config_for_tests()
+    monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "false")
 
 
 def test_health_returns_ok() -> None:
+    """Test health returns ok."""
     client = TestClient(create_app(require_proxy_auth=False))
 
     response = client.get("/health")
 
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response_json_object(response) == {"status": "ok"}
 
 
 def test_create_job_requires_proxy_key_when_auth_enabled(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test create job requires proxy key when auth enabled."""
     monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", _PROXY_KEY)
     client = TestClient(create_app(require_proxy_auth=True))
 
     response = client.post("/jobs", json={"urls": ["https://example.com/page"]})
 
-    assert response.status_code == 401
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
 def test_proxy_auth_not_configured_returns_503(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test proxy auth not configured returns 503."""
     monkeypatch.delenv("VECINITA_MODAL_PROXY_KEY", raising=False)
     monkeypatch.delenv("MODAL_PROXY_KEY", raising=False)
     client = TestClient(create_app(require_proxy_auth=True))
@@ -46,10 +68,11 @@ def test_proxy_auth_not_configured_returns_503(
         headers={"X-Vecinita-Proxy-Key": "any"},
     )
 
-    assert response.status_code == 503
+    assert response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
 
 
 def test_create_job_accepts_retag_options() -> None:
+    """Test create job accepts retag options."""
     store = InMemoryJobStore()
     document_id = uuid4()
     client = TestClient(create_app(store=store, require_proxy_auth=False))
@@ -61,34 +84,35 @@ def test_create_job_accepts_retag_options() -> None:
             "options": {
                 "job_type": "retag",
                 "document_id": str(document_id),
-                "chunk_size_tokens": 128,
+                "chunk_size_tokens": _CHUNK_SIZE_TOKENS,
             },
         },
     )
 
-    assert response.status_code == 202
+    assert response.status_code == HTTPStatus.ACCEPTED
     job_id = UUID(json_str(response_json_object(response), "job_id"))
     record = store.get_job(job_id)
     assert record is not None
     assert record.job_type == "retag"
     assert record.options["document_id"] == str(document_id)
-    assert record.options["chunk_size_tokens"] == 128
+    assert record.options["chunk_size_tokens"] == _CHUNK_SIZE_TOKENS
 
 
 def test_create_job_schedules_pipeline_runner() -> None:
+    """Test create job schedules pipeline runner."""
     scheduled: list[UUID] = []
     store = InMemoryJobStore()
     client = TestClient(
         create_app(
             store=store,
             require_proxy_auth=False,
-            pipeline_runner=lambda job_id: scheduled.append(job_id),
+            pipeline_runner=scheduled.append,
         )
     )
 
     response = client.post("/jobs", json={"urls": ["https://example.com/page"]})
 
-    assert response.status_code == 202
+    assert response.status_code == HTTPStatus.ACCEPTED
     job_id = UUID(json_str(response_json_object(response), "job_id"))
     assert scheduled == [job_id]
 
@@ -96,6 +120,7 @@ def test_create_job_schedules_pipeline_runner() -> None:
 def test_create_job_succeeds_with_valid_proxy_key(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test create job succeeds with valid proxy key."""
     monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", _PROXY_KEY)
     client = TestClient(create_app(require_proxy_auth=True))
 
@@ -105,16 +130,17 @@ def test_create_job_succeeds_with_valid_proxy_key(
         headers={"X-Vecinita-Proxy-Key": _PROXY_KEY},
     )
 
-    assert response.status_code == 202
+    assert response.status_code == HTTPStatus.ACCEPTED
 
 
 def test_create_job_without_options_uses_defaults() -> None:
+    """Test create job without options uses defaults."""
     store = InMemoryJobStore()
     client = TestClient(create_app(store=store, require_proxy_auth=False))
 
     response = client.post("/jobs", json={"urls": ["https://example.com/page"]})
 
-    assert response.status_code == 202
+    assert response.status_code == HTTPStatus.ACCEPTED
     job_id = UUID(json_str(response_json_object(response), "job_id"))
     record = store.get_job(job_id)
     assert record is not None
@@ -123,25 +149,28 @@ def test_create_job_without_options_uses_defaults() -> None:
 
 
 def test_get_job_returns_404_for_unknown_id() -> None:
+    """Test get job returns 404 for unknown id."""
     client = TestClient(create_app(require_proxy_auth=False))
 
     response = client.get(f"/jobs/{uuid4()}")
 
-    assert response.status_code == 404
+    assert response.status_code == HTTPStatus.NOT_FOUND
 
 
 def test_get_job_returns_existing_job() -> None:
+    """Test get job returns existing job."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/page"])
     client = TestClient(create_app(store=store, require_proxy_auth=False))
 
     response = client.get(f"/jobs/{record.job_id}")
 
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert json_str(response_json_object(response), "job_id") == str(record.job_id)
 
 
 def test_create_job_with_minimal_ingest_options() -> None:
+    """Test create job with minimal ingest options."""
     store = InMemoryJobStore()
     client = TestClient(create_app(store=store, require_proxy_auth=False))
 
@@ -150,7 +179,7 @@ def test_create_job_with_minimal_ingest_options() -> None:
         json={"urls": ["https://example.com/page"], "options": {"job_type": "ingest"}},
     )
 
-    assert response.status_code == 202
+    assert response.status_code == HTTPStatus.ACCEPTED
     job_id = UUID(json_str(response_json_object(response), "job_id"))
     record = store.get_job(job_id)
     assert record is not None
@@ -159,6 +188,7 @@ def test_create_job_with_minimal_ingest_options() -> None:
 
 
 def test_list_jobs_returns_all_jobs() -> None:
+    """Test list jobs returns all jobs."""
     store = InMemoryJobStore()
     store.create_job(urls=["https://example.com/a"])
     store.create_job(urls=["https://example.com/b"], job_type="retag")
@@ -166,14 +196,14 @@ def test_list_jobs_returns_all_jobs() -> None:
 
     response = client.get("/jobs")
 
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     body = response_json_object(response)
-    jobs = body["jobs"]
-    assert isinstance(jobs, list)
-    assert len(jobs) == 2
+    jobs = json_list(body, "jobs")
+    assert len(jobs) == _EXPECTED_JOB_LIST_COUNT
 
 
 def test_list_jobs_filters_by_status() -> None:
+    """Test list jobs filters by status."""
     store = InMemoryJobStore()
     done = store.create_job(urls=["https://example.com/a"])
     store.update_job(done.job_id, status="completed")
@@ -182,26 +212,28 @@ def test_list_jobs_filters_by_status() -> None:
 
     response = client.get("/jobs", params={"status": "completed"})
 
-    assert response.status_code == 200
-    jobs = response_json_object(response)["jobs"]
-    assert isinstance(jobs, list)
+    assert response.status_code == HTTPStatus.OK
+    jobs = json_list(response_json_object(response), "jobs")
     assert len(jobs) == 1
-    assert jobs[0]["job_id"] == str(done.job_id)
-    assert jobs[0]["status"] == "completed"
+    first_job = as_json_object(jobs[0])
+    assert json_str(first_job, "job_id") == str(done.job_id)
+    assert json_str(first_job, "status") == "completed"
 
 
 def test_list_jobs_requires_proxy_key_when_auth_enabled(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test list jobs requires proxy key when auth enabled."""
     monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", _PROXY_KEY)
     client = TestClient(create_app(require_proxy_auth=True))
 
     response = client.get("/jobs")
 
-    assert response.status_code == 401
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
 def test_create_app_uses_explicit_cors_env_value() -> None:
+    """Test create app uses explicit cors env value."""
     app = create_app(
         require_proxy_auth=False,
         cors_env_value="https://custom.example,https://other.example",
@@ -213,6 +245,7 @@ def test_create_app_uses_explicit_cors_env_value() -> None:
 def test_create_app_uses_staging_cors_when_env_empty(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test create app uses staging cors when env empty."""
     monkeypatch.delenv("VECINITA_CORS_ORIGINS", raising=False)
     app = create_app(require_proxy_auth=False, cors_env_value=None)
 

@@ -1,0 +1,138 @@
+# Supabase admin auth — config validation, local migration lint, and gated remote sync.
+# Implements ADR-027 §6 (CLI migrations-in-repo + ephemeral preview branches).
+# Corpus schema remains on DO Postgres via Alembic; this workflow covers Supabase identity only.
+name: Supabase
+
+on:
+  push:
+    branches: [main, "phase/**", "feat/**"]
+    paths:
+      - "supabase/**"
+      - ".github/workflows/supabase.yml"
+      - "scripts/check_supabase_config.sh"
+      - "scripts/supabase/**"
+  pull_request:
+    branches: [main, "phase/**"]
+    paths:
+      - "supabase/**"
+      - ".github/workflows/supabase.yml"
+      - "scripts/check_supabase_config.sh"
+      - "scripts/supabase/**"
+  workflow_dispatch:
+
+concurrency:
+  group: supabase-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  SUPABASE_PROJECT_REF: cfuvghdsuwactfeamtym
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Offline config contract
+        run: bash scripts/check_supabase_config.sh
+
+      - name: Start local Supabase stack
+        run: supabase start
+
+      - name: Lint and apply migrations locally (when present)
+        run: |
+          set -euo pipefail
+          if compgen -G "supabase/migrations/*.sql" > /dev/null; then
+            supabase db lint
+            supabase db reset --no-seed
+          else
+            echo "No supabase/migrations/*.sql yet — skipping db lint/reset"
+          fi
+
+      - name: Database tests (pgTAP, when present)
+        run: |
+          if [[ -d supabase/tests ]] && compgen -G "supabase/tests/*.sql" > /dev/null; then
+            supabase test db
+          else
+            echo "No supabase/tests/*.sql — skipping supabase test db"
+          fi
+
+      - name: Stop local stack
+        if: always()
+        run: supabase stop --no-backup
+
+  preview-branch:
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'pull_request'
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect Supabase access token
+        id: supabase_token
+        run: |
+          if [ -z "${SUPABASE_ACCESS_TOKEN}" ]; then
+            echo "SUPABASE_ACCESS_TOKEN not configured — skipping preview branch"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Supabase CLI
+        if: steps.supabase_token.outputs.skip != 'true'
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Create preview branch and apply repo state
+        if: steps.supabase_token.outputs.skip != 'true'
+        run: |
+          BRANCH="preview-pr-${{ github.event.pull_request.number }}"
+          bash scripts/supabase/ci_sync.sh preview-branch "$BRANCH"
+          echo "SUPABASE_PREVIEW_BRANCH=${BRANCH}" >> "$GITHUB_ENV"
+
+      - name: Tear down preview branch
+        if: always() && steps.supabase_token.outputs.skip != 'true'
+        run: bash scripts/supabase/ci_sync.sh delete-preview "${SUPABASE_PREVIEW_BRANCH}"
+
+  sync-production:
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect Supabase access token
+        id: supabase_token
+        run: |
+          if [ -z "${SUPABASE_ACCESS_TOKEN}" ]; then
+            echo "SUPABASE_ACCESS_TOKEN not configured — skipping production sync"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Supabase CLI
+        if: steps.supabase_token.outputs.skip != 'true'
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Push config and migrations to canonical project
+        if: steps.supabase_token.outputs.skip != 'true'
+        run: bash scripts/supabase/ci_sync.sh sync-production

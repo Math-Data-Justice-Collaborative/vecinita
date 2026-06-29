@@ -4,19 +4,28 @@ from __future__ import annotations
 
 import os
 import uuid
-from typing import cast
+from http import HTTPStatus
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
-from tests.helpers.json_response import json_list, json_str, response_json_object
+from vecinita_internal_write_api.app import create_app
 from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
 from vecinita_shared_schemas.json_types import as_json_object
+
+from tests.helpers.json_response import json_list, json_str, response_json_object
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from sqlalchemy.engine import Engine
 
 pytestmark = pytest.mark.e2e
 
 _API_KEY = "test-internal-key"
+_EXPECTED_BULK_SUCCESS_COUNT = 2
 
 
 def _database_url() -> str:
@@ -26,16 +35,17 @@ def _database_url() -> str:
     )
 
 
-@pytest.fixture()
-def engine():
+@pytest.fixture
+def engine() -> Engine:
+    """Engine."""
     return create_engine(_database_url())
 
 
-@pytest.fixture()
-def client():
+@pytest.fixture
+def client() -> TestClient:
+    """Client."""
     os.environ["DATABASE_URL"] = _database_url()
     os.environ["VECINITA_INTERNAL_API_KEY"] = _API_KEY
-    from vecinita_internal_write_api.app import create_app
 
     return TestClient(create_app())
 
@@ -44,9 +54,10 @@ def _auth() -> dict[str, str]:
     return {"Authorization": f"Bearer {_API_KEY}"}
 
 
-@pytest.fixture()
-def sample_docs(engine):
-    doc_ids = []
+@pytest.fixture
+def sample_docs(engine: Engine) -> Iterator[list[UUID]]:
+    """Sample docs."""
+    doc_ids: list[UUID] = []
     with engine.begin() as conn:
         for i in range(2):
             url = f"https://bulk-tag-{uuid.uuid4().hex[:8]}-{i}.example.com"
@@ -76,7 +87,8 @@ def sample_docs(engine):
             conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
-def test_bulk_tag_add(client, sample_docs) -> None:
+def test_bulk_tag_add(client: TestClient, sample_docs: list[UUID]) -> None:
+    """Bulk tag add."""
     resp = client.patch(
         "/internal/v1/documents/bulk/tags",
         json={
@@ -86,13 +98,14 @@ def test_bulk_tag_add(client, sample_docs) -> None:
         },
         headers=_auth(),
     )
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
     data = response_json_object(resp)
-    assert data["successes"] == 2
+    assert data["successes"] == _EXPECTED_BULK_SUCCESS_COUNT
     assert data["failures"] == []
 
 
-def test_bulk_tag_partial_failure_not_found(client, sample_docs) -> None:
+def test_bulk_tag_partial_failure_not_found(client: TestClient, sample_docs: list[UUID]) -> None:
+    """Bulk tag partial failure not found."""
     fake_id = str(uuid.uuid4())
     resp = client.patch(
         "/internal/v1/documents/bulk/tags",
@@ -102,15 +115,16 @@ def test_bulk_tag_partial_failure_not_found(client, sample_docs) -> None:
         },
         headers=_auth(),
     )
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
     data = response_json_object(resp)
     assert data["successes"] == 1
     failures = json_list(data, "failures")
     assert len(failures) == 1
-    assert json_str(as_json_object(cast(object, failures[0])), "id") == fake_id
+    assert json_str(as_json_object(failures[0]), "id") == fake_id
 
 
-def test_bulk_tag_emits_audit(client, sample_docs, engine) -> None:
+def test_bulk_tag_emits_audit(client: TestClient, sample_docs: list[UUID], engine: Engine) -> None:
+    """Bulk tag emits audit."""
     client.patch(
         "/internal/v1/documents/bulk/tags",
         json={
@@ -131,11 +145,12 @@ def test_bulk_tag_emits_audit(client, sample_docs, engine) -> None:
             assert row is not None
 
 
-def test_bulk_tag_max_100(client) -> None:
+def test_bulk_tag_max_100(client: TestClient) -> None:
+    """Bulk tag max 100."""
     ids = [str(uuid.uuid4()) for _ in range(101)]
     resp = client.patch(
         "/internal/v1/documents/bulk/tags",
         json={"document_ids": ids, "add_tags": [{"slug": "x", "label": "X"}]},
         headers=_auth(),
     )
-    assert resp.status_code == 422
+    assert resp.status_code == HTTPStatus.UNPROCESSABLE_ENTITY

@@ -116,6 +116,14 @@ FastAPI apps and `tests/smoke/test_staging_connectivity.py` exists per connectiv
 AskQuestion. Uses ` curl or httpx` ephemeral invocations (same minimum set as 13 Phase 1.5).
 Skip on Windows dev machines without platform CLI — record `SKIPPED` in verification report.
 
+**Agent 8b — Reviewer persona panel** (pre-PR early catch): Apply the role-based lenses in
+[18-pr-review/personas.md](../18-pr-review/personas.md) to the changed files — Staff Backend,
+Staff Frontend, Senior DevOps, CTO, Community Partner, Data & Privacy Steward. Activate only
+personas whose surface area the milestone touches (personas.md activation table). Record nits
+(🟡) and confirmed blockers (🔴) in the verification report so issues are caught before a PR
+is opened. Persona nits are advisory here; confirmed 🔴 follow the same surfacing as other
+blocking findings (Phase 4).
+
 **Agent 8 — Template Conformance** (if template selected): Read `workflow-state.yaml`
 §template and [template-registry.md](../template-registry.md). Verify:
 - File layout matches template structure (`src/app.py`, `src/service.py` or `src/utils.py`)
@@ -166,6 +174,7 @@ Write `docs/verification-report.md`:
 | Security | PASS/FAIL | [N] | — | pip-audit |
 | Performance | PASS/SKIPPED | — | — | [tool] |
 | Data | PASS/SKIPPED | — | — | verify_data.py |
+| Personas | PASS/ADVISORY | [N] nits / [N] 🔴 | — | personas.md |
 
 Overall: PASS / FAIL
 ```

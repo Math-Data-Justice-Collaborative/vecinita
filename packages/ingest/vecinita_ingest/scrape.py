@@ -21,7 +21,7 @@ class _TextExtractor(HTMLParser):
         self.title: str | None = None
         self._in_title = False
 
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:  # noqa: ARG002  # HTMLParser callback; attrs unused
         lower = tag.lower()
         if lower in _STRIP_TAGS:
             self._skip_depth += 1

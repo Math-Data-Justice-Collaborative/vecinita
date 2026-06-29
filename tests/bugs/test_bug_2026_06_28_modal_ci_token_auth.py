@@ -39,11 +39,11 @@ exit 1
     env = os.environ.copy()
     env["PATH"] = f"{tmp_path}:{env.get('PATH', '')}"
     env["HOME"] = str(tmp_path / "home")
-    env["MODAL_TOKEN_ID"] = "ak-test"
-    env["MODAL_TOKEN_SECRET"] = "as-test"
+    env["MODAL_TOKEN_ID"] = "ak-test"  # noqa: S105 # test fixture value, not a real secret
+    env["MODAL_TOKEN_SECRET"] = "as-test"  # noqa: S105 # test fixture value, not a real secret
 
     result = subprocess.run(
-        ["bash", "-c", "source scripts/modal_ensure_workspace.sh"],
+        ["bash", "-c", "source scripts/modal_ensure_workspace.sh"],  # noqa: S607 # bash from PATH in CI harness
         cwd=REPO_ROOT,
         env=env,
         capture_output=True,

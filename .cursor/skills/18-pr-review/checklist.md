@@ -103,6 +103,22 @@ Run rows that apply to touched paths.
 
 ---
 
+## P — Reviewer persona panel ([personas.md](personas.md))
+
+Apply the personas whose surface area the diff touches (see personas.md activation table).
+Each persona raises nits (🟡) and may escalate to 🔴 only with evidence in diff/CI/subagent.
+
+| # | Persona lens | Severity if fail |
+|---|------|------------------|
+| P1 | 🧱 Staff Backend — contracts, data integrity, retries, N+1, typing | 🔴 on data-loss/contract break; else 🟡 nit |
+| P2 | 🎨 Staff Frontend — a11y, state coverage, `VITE_*` wiring, bundle | 🔴 on broken journey/wiring; else 🟡 nit |
+| P3 | ☁️ Senior DevOps — secrets, CI parity, migration safety, rollback | 🔴 on secret/CI-red/irreversible migration; else 🟡 nit |
+| P4 | 🧭 CTO / Principal — scope, ADRs, architecture, cost, blast radius | 🔴 on scope/constraint violation or missing ADR; else 🟡 nit |
+| P5 | 🤝 Community Partner — plain language, i18n, trust & safety, journey fit | 🔴 on privacy/safety regression or broken journey; else 🟡 nit |
+| P6 | 🔐 Data & Privacy Steward — ACLs, PII, retention, no prod seed data | 🔴 on ACL bypass / PII leak / dev data to prod; else 🟡 nit |
+
+---
+
 ## H — Review delivery (required)
 
 | # | Item | Notes |

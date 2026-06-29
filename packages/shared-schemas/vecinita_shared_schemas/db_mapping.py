@@ -12,20 +12,23 @@ T = TypeVar("T")
 def mapping_row(row: object) -> Mapping[str, object]:
     """Narrow a SQLAlchemy RowMapping to Mapping[str, object] for keyed access."""
     if isinstance(row, Mapping):
-        return row
+        return cast("Mapping[str, object]", row)
     msg = f"Expected mapping row, got {type(row).__name__}"
     raise TypeError(msg)
 
 
 def row_value(row: Mapping[str, object], key: str) -> object:
+    """Return the raw value for ``key`` from a database row mapping."""
     return row[key]
 
 
 def row_str(row: Mapping[str, object], key: str) -> str:
+    """Return ``key`` from a row mapping coerced to ``str``."""
     return str(row[key])
 
 
 def row_str_optional(row: Mapping[str, object], key: str) -> str | None:
+    """Return ``key`` as ``str`` or ``None`` when the column value is null."""
     value = row[key]
     if value is None:
         return None
@@ -33,6 +36,7 @@ def row_str_optional(row: Mapping[str, object], key: str) -> str | None:
 
 
 def row_int(row: Mapping[str, object], key: str) -> int:
+    """Return ``key`` from a row mapping coerced to ``int``."""
     value = row[key]
     if isinstance(value, int):
         return value
@@ -42,6 +46,7 @@ def row_int(row: Mapping[str, object], key: str) -> int:
 
 
 def row_uuid(row: Mapping[str, object], key: str) -> UUID:
+    """Return ``key`` from a row mapping as a ``UUID``."""
     value = row[key]
     if isinstance(value, UUID):
         return value
@@ -49,6 +54,7 @@ def row_uuid(row: Mapping[str, object], key: str) -> UUID:
 
 
 def scalar_int(value: object) -> int:
+    """Coerce a scalar database value to ``int``."""
     if isinstance(value, int):
         return value
     if isinstance(value, float):
@@ -57,6 +63,7 @@ def scalar_int(value: object) -> int:
 
 
 def scalar_float(value: object) -> float:
+    """Coerce a scalar database value to ``float``."""
     if isinstance(value, float):
         return value
     if isinstance(value, int):
@@ -65,6 +72,7 @@ def scalar_float(value: object) -> float:
 
 
 def scalar_uuid(value: object) -> UUID:
+    """Coerce a scalar database value to ``UUID``."""
     if isinstance(value, UUID):
         return value
     return UUID(str(value))
@@ -76,4 +84,4 @@ def sqlalchemy_scalar_one(result: object) -> object:
     if not callable(scalar_one):
         msg = f"Expected SQLAlchemy result with scalar_one(), got {type(result).__name__}"
         raise TypeError(msg)
-    return cast(object, scalar_one())
+    return scalar_one()

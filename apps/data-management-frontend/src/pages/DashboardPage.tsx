@@ -23,24 +23,33 @@ export function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const client = requireCorpusConfig();
-      const data = await fetchStatsSummary(client);
-      setStats(data);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : tr("admin.dashboard.loadFailed"),
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [tr]);
+  const load = useCallback(
+    async (isActive: () => boolean) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const client = requireCorpusConfig();
+        const data = await fetchStatsSummary(client);
+        if (!isActive()) return;
+        setStats(data);
+      } catch (err) {
+        if (!isActive()) return;
+        setError(
+          err instanceof Error ? err.message : tr("admin.dashboard.loadFailed"),
+        );
+      } finally {
+        if (isActive()) setLoading(false);
+      }
+    },
+    [tr],
+  );
 
   useEffect(() => {
-    void load();
+    let active = true;
+    void load(() => active);
+    return () => {
+      active = false;
+    };
   }, [load]);
 
   if (loading) {
@@ -74,6 +83,7 @@ export function DashboardPage() {
     );
   }
 
+  /* v8 ignore next -- defensive: the stats client throws on malformed payloads, so a falsy stats with no error is unreachable */
   if (!stats) return null;
 
   return (

@@ -7,18 +7,29 @@ import textwrap
 from pathlib import Path
 
 import pytest
-from sqlalchemy import create_engine
-from tests.unit.database.conftest import database_url
+from sqlalchemy import (
+    create_engine,
+)
 from vecinita_database.seeds.tags import (
-    _chunk_text,
-    _normalize_database_url,
-    _resolve_tag_id,
+    _chunk_text,  # pyright: ignore[reportPrivateUsage]
+    _database_url,  # pyright: ignore[reportPrivateUsage]
+    _normalize_database_url,  # pyright: ignore[reportPrivateUsage]
+    _resolve_tag_id,  # pyright: ignore[reportPrivateUsage]
     load_seed_tags,
     load_tagged_corpus,
 )
 
+from tests.unit.database.conftest import (
+    database_url,
+)
+
+_MIN_CHUNK_COUNT = 2
+_SEED_TAG_COUNT = 16
+_OVERSIZED_PARA_LEN = 500
+
 
 def test_normalize_database_url_upgrades_postgresql_scheme() -> None:
+    """Test normalize database url upgrades postgresql scheme."""
     assert (
         _normalize_database_url("postgresql://user:pass@host/db")
         == "postgresql+psycopg://user:pass@host/db"
@@ -26,21 +37,25 @@ def test_normalize_database_url_upgrades_postgresql_scheme() -> None:
 
 
 def test_normalize_database_url_leaves_psycopg_unchanged() -> None:
+    """Test normalize database url leaves psycopg unchanged."""
     url = "postgresql+psycopg://user:pass@host/db"
     assert _normalize_database_url(url) == url
 
 
 def test_chunk_text_handles_single_oversized_paragraph() -> None:
-    chunks = _chunk_text("y" * 500)
+    """Test chunk text handles single oversized paragraph."""
+    chunks = _chunk_text("y" * _OVERSIZED_PARA_LEN)
     assert len(chunks) == 1
 
 
 def test_chunk_text_flushes_existing_buffer_before_overflow() -> None:
+    """Test chunk text flushes existing buffer before overflow."""
     chunks = _chunk_text(f"{'a' * 300}\n\n{'b' * 200}")
-    assert len(chunks) >= 2
+    assert len(chunks) >= _MIN_CHUNK_COUNT
 
 
 def test_chunk_text_flushes_buffer_on_overflow() -> None:
+    """Test chunk text flushes buffer on overflow."""
     body = textwrap.dedent(
         """
         Short intro.
@@ -53,10 +68,11 @@ def test_chunk_text_flushes_buffer_on_overflow() -> None:
         """
     )
     chunks = _chunk_text(body)
-    assert len(chunks) >= 2
+    assert len(chunks) >= _MIN_CHUNK_COUNT
 
 
 def test_load_seed_tags_rejects_invalid_payload(tmp_path: Path) -> None:
+    """Test load seed tags rejects invalid payload."""
     bad_path = tmp_path / "seed_tags.json"
     bad_path.write_text(json.dumps({"not_tags": []}), encoding="utf-8")
 
@@ -65,11 +81,13 @@ def test_load_seed_tags_rejects_invalid_payload(tmp_path: Path) -> None:
 
 
 def test_load_seed_tags_inserts_bilingual_rows() -> None:
+    """Test load seed tags inserts bilingual rows."""
     inserted = load_seed_tags(database_url=database_url())
-    assert inserted == 16
+    assert inserted == _SEED_TAG_COUNT
 
 
 def test_resolve_tag_id_raises_for_missing_tag() -> None:
+    """Test resolve tag id raises for missing tag."""
     engine = create_engine(database_url())
     with engine.begin() as conn, pytest.raises(ValueError, match="Missing seed tag"):
         _resolve_tag_id(conn, slug="does-not-exist", language="en")
@@ -78,6 +96,7 @@ def test_resolve_tag_id_raises_for_missing_tag() -> None:
 def test_load_tagged_corpus_rejects_invalid_manifest(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Test load tagged corpus rejects invalid manifest."""
     tagged_root = tmp_path / "tagged"
     tagged_root.mkdir()
     (tagged_root / "manifest.json").write_text(json.dumps({"documents": "bad"}), encoding="utf-8")
@@ -91,6 +110,7 @@ def test_load_tagged_corpus_rejects_document_without_tags(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test load tagged corpus rejects document without tags."""
     tagged_root = tmp_path / "tagged"
     doc_path = Path("en/missing-tags.md")
     (tagged_root / doc_path).parent.mkdir(parents=True)
@@ -109,17 +129,18 @@ def test_load_tagged_corpus_rejects_document_without_tags(
 
 
 def test_chunk_text_empty_body_returns_empty_list() -> None:
+    """Test chunk text empty body returns empty list."""
     assert _chunk_text("   \n\n  ") == []
 
 
 def test_database_url_reads_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    from vecinita_database.seeds.tags import _database_url
-
+    """Test database url reads env."""
     monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
     assert _database_url().startswith("postgresql+psycopg://")
 
 
 def test_load_tagged_corpus_loads_manifest_documents() -> None:
+    """Test load tagged corpus loads manifest documents."""
     load_seed_tags(database_url=database_url())
     counts = load_tagged_corpus(database_url=database_url())
     assert counts["documents"] >= 1

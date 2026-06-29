@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Callable
-from typing import Annotated, Literal
-from uuid import UUID
+from typing import TYPE_CHECKING, Annotated, Literal
+from uuid import UUID  # noqa: TC003  # FastAPI path params require UUID at runtime
 
 from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query, status
+from vecinita_shared_schemas.auth import AuthPrincipal, get_principal, require_role
 from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.data_management import (
     CreateJobRequest,
@@ -18,6 +18,9 @@ from vecinita_shared_schemas.data_management import (
 )
 
 from vecinita_data_management_backend.store import InMemoryJobStore, JobStore, job_record_to_schema
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 # Modal reserves Modal-Key / Modal-Secret for workspace proxy auth tokens — do not use for app secrets.
 _PROXY_HEADER = "X-Vecinita-Proxy-Key"
@@ -40,15 +43,10 @@ def _check_proxy_auth(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
 
-_STAGING_CORS_ORIGINS = ",".join(
-    [
-        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app",
-        "https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app",
-    ]
-)
+_STAGING_CORS_ORIGINS = "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app,https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app"
 
 
-def create_app(
+def create_app(  # noqa: C901  # FastAPI factory registers job routes inline
     *,
     store: JobStore | None = None,
     require_proxy_auth: bool = True,
@@ -63,14 +61,24 @@ def create_app(
     configure_cors(app, extra_allow_headers=[_PROXY_HEADER], env_value=resolved_cors)
     job_store = store or InMemoryJobStore()
     runner = pipeline_runner
+    require_admin = require_role("admin")
 
     def auth_dep(
         modal_key: Annotated[str | None, Header(alias=_PROXY_HEADER)] = None,
-    ) -> None:
+        _principal: AuthPrincipal = Depends(get_principal),
+    ) -> AuthPrincipal:
         _check_proxy_auth(require_proxy_auth=require_proxy_auth, modal_key=modal_key)
+        return _principal
+
+    def write_auth_dep(
+        modal_key: Annotated[str | None, Header(alias=_PROXY_HEADER)] = None,
+        principal: AuthPrincipal = Depends(require_admin),
+    ) -> AuthPrincipal:
+        _check_proxy_auth(require_proxy_auth=require_proxy_auth, modal_key=modal_key)
+        return principal
 
     @app.get("/health", response_model=HealthResponse)
-    def health() -> HealthResponse:
+    def health() -> HealthResponse:  # pyright: ignore[reportUnusedFunction]
         return HealthResponse(status="ok")
 
     @app.post(
@@ -78,10 +86,10 @@ def create_app(
         status_code=status.HTTP_202_ACCEPTED,
         response_model=CreateJobResponse,
     )
-    def create_job(
+    def create_job(  # pyright: ignore[reportUnusedFunction]
         body: CreateJobRequest,
         background: BackgroundTasks,
-        _: None = Depends(auth_dep),
+        _auth: AuthPrincipal = Depends(write_auth_dep),
     ) -> CreateJobResponse:
         options: dict[str, object] = {}
         job_type = "ingest"
@@ -101,12 +109,12 @@ def create_app(
         return CreateJobResponse(job_id=record.job_id, status="pending")
 
     @app.get("/jobs", response_model=JobList)
-    def list_jobs(
+    def list_jobs(  # pyright: ignore[reportUnusedFunction]
+        _auth: AuthPrincipal = Depends(auth_dep),
         status_filter: Annotated[
             Literal["pending", "running", "completed", "failed"] | None,
             Query(alias="status"),
         ] = None,
-        _: None = Depends(auth_dep),
     ) -> JobList:
         records = job_store.list_jobs()
         if status_filter is not None:
@@ -114,7 +122,10 @@ def create_app(
         return JobList(jobs=[job_record_to_schema(record) for record in records])
 
     @app.get("/jobs/{job_id}", response_model=Job)
-    def get_job(job_id: UUID, _: None = Depends(auth_dep)) -> Job:
+    def get_job(  # pyright: ignore[reportUnusedFunction]
+        job_id: UUID,
+        _auth: AuthPrincipal = Depends(auth_dep),
+    ) -> Job:
         record = job_store.get_job(job_id)
         if record is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")

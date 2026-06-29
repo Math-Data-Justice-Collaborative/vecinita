@@ -2,19 +2,13 @@
 
 from __future__ import annotations
 
+from http import HTTPStatus
 from pathlib import Path
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import pytest
 import yaml
 from fastapi.testclient import TestClient
-from tests.e2e.local_bootstrap import (
-    default_database_url,
-    postgres_is_ready,
-    run_alembic_upgrade_head,
-)
-from tests.helpers.json_response import json_int, json_object_get, json_str, response_json_object
-from tests.unit.rag.conftest import attach_embeddings, basis_vector
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import ChatRagService
@@ -22,7 +16,22 @@ from vecinita_database.seeds.load import load_corpus
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_shared_schemas.json_types import as_json_object
 
+from tests.e2e.local_bootstrap import (
+    default_database_url,
+    postgres_is_ready,
+    run_alembic_upgrade_head,
+)
+from tests.helpers.json_response import json_int, json_object_get, json_str, response_json_object
+from tests.unit.rag.conftest import attach_embeddings, basis_vector
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+
 pytestmark = [pytest.mark.e2e, pytest.mark.integration]
+
+_DEFAULT_TOP_K = 5
+
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _VECINITA_YAML = _REPO_ROOT / "infra" / "vecinita.yaml"
@@ -30,19 +39,25 @@ _VECINITA_YAML = _REPO_ROOT / "infra" / "vecinita.yaml"
 
 class _MockLlmClient:
     def generate(self, prompt: str, **kwargs: object) -> str:
+        """Generate."""
+        _ = (prompt, kwargs)
         return "Local bootstrap smoke answer."
 
-    def generate_stream(self, prompt: str, **kwargs: object):
+    def generate_stream(self, prompt: str, **kwargs: object) -> Iterator[str]:
+        """Generate stream."""
+        _ = (prompt, kwargs)
         yield "Local "
         yield "bootstrap "
         yield "smoke."
 
     def close(self) -> None:
-        return None
+        """Close."""
+        return
 
 
 @pytest.fixture(scope="module")
 def bootstrapped_stack() -> str:
+    """Bootstrapped stack."""
     if not postgres_is_ready():
         pytest.skip(
             "Postgres not available — run: docker compose -f infra/docker-compose.yml up -d postgres"
@@ -61,6 +76,7 @@ def bootstrapped_stack() -> str:
 
 @pytest.fixture
 def bootstrap_client(bootstrapped_stack: str) -> TestClient:
+    """Bootstrap client."""
     settings = ChatRagSettings(
         database_url=bootstrapped_stack,
         top_k=5,
@@ -78,20 +94,24 @@ def bootstrap_client(bootstrapped_stack: str) -> TestClient:
 
 
 def test_vecinita_yaml_documents_local_defaults() -> None:
+    """Vecinita yaml documents local defaults."""
     assert _VECINITA_YAML.is_file(), (
         "infra/vecinita.yaml required for local defaults (config-spec.md)"
     )
-    data = as_json_object(cast(object, yaml.safe_load(_VECINITA_YAML.read_text(encoding="utf-8"))))
+    data = as_json_object(
+        cast("object", yaml.safe_load(_VECINITA_YAML.read_text(encoding="utf-8")))
+    )
     assert data["env"] == "development"
     chat_rag = json_object_get(data, "chat_rag")
-    assert json_int(chat_rag, "top_k") == 5
+    assert json_int(chat_rag, "top_k") == _DEFAULT_TOP_K
     services = json_object_get(data, "services")
     assert "localhost" in json_str(services, "chat_rag_backend")
 
 
 def test_uj004_bootstrap_health_and_ask(bootstrap_client: TestClient) -> None:
+    """Uj004 bootstrap health and ask."""
     health = bootstrap_client.get("/health")
-    assert health.status_code == 200
+    assert health.status_code == HTTPStatus.OK
     body = response_json_object(health)
     assert body["status"] == "ok"
     dependencies = json_object_get(body, "dependencies")
@@ -101,7 +121,7 @@ def test_uj004_bootstrap_health_and_ask(bootstrap_client: TestClient) -> None:
         "/api/v1/ask",
         json={"question": "What are the food pantry hours?"},
     )
-    assert ask.status_code == 200
+    assert ask.status_code == HTTPStatus.OK
     payload = response_json_object(ask)
     assert payload["language"] == "en"
     assert payload["answer"]

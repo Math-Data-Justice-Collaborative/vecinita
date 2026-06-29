@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-26 (S003 F33)  
+> **Last updated**: 2026-06-28 (S004/EV-005 F34 — Supabase admin auth)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -48,6 +48,10 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-022 Admin language toggle | Vitest in `data-management-frontend` + `packages/frontend-ui` + `packages/frontend-i18n` | TC-065, TC-066, TC-067, TC-068, TC-069 |
 | UJ-024 Chat persists on refresh/tab-away | Vitest in `chat-rag-frontend` | TC-072, TC-073 |
 | UJ-025 Revisit previous conversation | Vitest in `chat-rag-frontend` | TC-074, TC-075, TC-076 |
+| UJ-026 Admin login (Supabase Auth) | `tests/e2e/test_uj028_unauthenticated_admin.py` + Vitest in `data-management-frontend` | TC-077, TC-084 |
+| UJ-027 Invite-only registration | `tests/e2e/test_uj027_invite_only_registration.py` | TC-080 |
+| UJ-028 Unauthenticated admin rejected | `tests/e2e/test_uj028_unauthenticated_admin.py` | TC-078, TC-083 |
+| UJ-029 Viewer blocked from writes | `tests/e2e/test_uj029_role_gating.py` + Vitest in `data-management-frontend` | TC-079, TC-081, TC-085 |
 
 **E2E tier (v1):** `local` — TestClient, test Postgres (Docker/testcontainers), **mocked Modal** HTTP.
 
@@ -83,6 +87,8 @@ Per [connectivity-gates.md](../.cursor/skills/connectivity-gates.md). Backend-on
 EV-001 adds **TC-046** (browse GET H4), **TC-049** (admin PATCH H4), **TC-048** (Vitest external URL link, supports H5 browse path).
 
 EV-004 (F31): No new API routes — **H4/H5 regression required** at 13-deploy-smoke when both frontends redeploy (AC-F7); Vitest TC-065–TC-071 are T0 proof only.
+
+EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG frontend origin) at H0c, re-checked at H4 (live). Admin APIs add `Authorization` to allowed request headers — **H4 preflight with `Access-Control-Request-Headers: authorization`** required at 13-deploy-smoke. Auth unit/integration (TC-077–TC-081, TC-086) run in CI; live auth gates (401/403, login) verified at 10-e2e / 13-deploy-smoke.
 
 | Lint / types | ruff (`ANN401`), **basedpyright** (`reportExplicitAny`), eslint (`no-explicit-any`, `no-unsafe-*`) | CI | ADR-018; `docs/typing-policy.md` |
 | Security | pip-audit (**blocking** high/critical), secret scan | CI | 04-tech-plan TP-006 |
@@ -401,6 +407,77 @@ EV-004 (F31): No new API routes — **H4/H5 regression required** at 13-deploy-s
 - **Input**: With several archived conversations, select one (restore), delete one, then "Clear all history"; separately invoke "Clear" on an active conversation.
 - **Expected**: Selected conversation becomes active with its messages/sources; deleted item removed; clear-all empties the list; "Clear" empties the active conversation; `localStorage` reflects each change.
 
+### EV-005 — Supabase admin auth (F34)
+
+> Integration tests verify Supabase JWTs without a live Supabase call by validating against a
+> test JWKS / signing key (or a Supabase test/branch project). No real mailboxes are created in CI.
+
+### TC-077: Valid Supabase JWT authorizes admin request (UJ-026, F34)
+
+- **Objective**: A request bearing a valid Supabase JWT is accepted by the DM API and internal-write API.
+- **Input**: `GET`/read route on DM API and internal-write API with `Authorization: Bearer <valid_jwt>` (role `admin`).
+- **Expected**: `200`; handler sees the authenticated identity (opaque UUID + role); no PII persisted to corpus DB.
+
+### TC-078: Missing/invalid/expired JWT rejected (UJ-028, F34)
+
+- **Objective**: Admin routes reject unauthenticated requests.
+- **Input**: Same routes with (a) no `Authorization`, (b) malformed token, (c) expired token.
+- **Expected**: `401` in all three cases; no corpus mutation; no job created.
+
+### TC-079: Role gating — viewer cannot write (UJ-029, F34)
+
+- **Objective**: Write routes require `admin`; `viewer` is rejected.
+- **Input**: A write route (e.g. `DELETE /internal/v1/documents/{id}`, `PATCH .../tags`, `POST /jobs`) with a valid `viewer` JWT, then with a valid `admin` JWT.
+- **Expected**: `viewer` → `403` (no side effect); `admin` → success.
+
+### TC-080: Invite-only registration — public sign-up disabled (UJ-027, F34)
+
+- **Objective**: New accounts can only be created by invitation.
+- **Input**: Attempt a public sign-up against the Supabase project config / auth API; attempt to authenticate as a non-invited identity.
+- **Expected**: Public sign-up is disabled/unauthorized; only an invited identity can authenticate.
+
+### TC-081: Audit attribution is non-PII (UJ-029, F34)
+
+- **Objective**: Writes are attributed to the opaque Supabase user UUID + role only.
+- **Input**: Perform an `admin` write that emits an audit event.
+- **Expected**: `audit_log` row has `actor_id` (UUID) + `actor_role`; no `email`/`name`/PII column present or populated.
+
+### TC-082: Strict CORS on ChatRAG API (H0c/H4, F34)
+
+- **Objective**: ChatRAG API allows only the ChatRAG frontend origin.
+- **Input**: CORS preflight (`OPTIONS`) to `POST /api/v1/ask` from the ChatRAG frontend origin and from a disallowed origin.
+- **Expected**: Allowed origin → permissive CORS headers; disallowed origin → no `Access-Control-Allow-Origin` (rejected).
+
+### TC-083: ChatRAG stays anonymous (UJ-028, F34, regression)
+
+- **Objective**: ChatRAG endpoints require no auth after F34.
+- **Input**: `POST /api/v1/ask` and `GET /api/v1/documents` with no `Authorization`.
+- **Expected**: `200` (normal RAG/browse behavior); identity fields still rejected (TC-030 unaffected).
+
+### TC-084: DM frontend protected route + login (UJ-026, F34)
+
+- **Objective**: Routes redirect to login when unauthenticated; render with a session; current-user + logout work.
+- **Input**: Render the DM `App` (Vitest) without a Supabase session, then with a mocked session.
+- **Expected**: No session → redirect to login; with session → admin page renders, current user shown, logout clears session.
+
+### TC-085: DM frontend hides/disables writes for viewer (UJ-029, F34)
+
+- **Objective**: Write controls are gated by role in the UI.
+- **Input**: Render DM admin views with a mocked `viewer` session, then `admin`.
+- **Expected**: `viewer` → write controls hidden/disabled; `admin` → write controls enabled.
+
+### TC-086: Corpus DB has no identity tables after F34 (privacy, extends TC-031)
+
+- **Objective**: Supabase Auth does not introduce identity tables into the corpus DB.
+- **Input**: Introspect corpus DB metadata after auth migrations.
+- **Expected**: Forbidden tables (`users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`, `auth_*`) absent; `audit_log.actor_id` is a UUID with no adjacent PII column.
+
+### TC-087: Supabase CI pipeline contract (F34, ADR-027 §6)
+
+- **Objective**: Repo-managed Supabase CI validates config offline and defines gated remote sync jobs.
+- **Input**: `tests/smoke/test_supabase_ci_contract.py` asserts `.github/workflows/supabase.yml`, `scripts/check_supabase_config.sh`, and `scripts/supabase/ci_sync.sh` exist with invite-only `config.toml` contract.
+- **Expected**: Smoke tests pass in CI; `validate` job runs on PRs without cloud secrets; cloud jobs skip when `SUPABASE_ACCESS_TOKEN` is unset.
+
 ## Test Data
 
 | Asset | Location | Used by |
@@ -454,7 +531,7 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 
 1. ruff + basedpyright (Python) — no `typing.Any` (ADR-018; supersedes pyright/mypy)
 2. eslint (frontends) — no `any` / unsafe-any flows (`docs/typing-policy.md`)
-3. `uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval` (or `bash scripts/run_tests.sh`)
+3. `uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval tests/bugs` (or `bash scripts/run_tests.sh`)
 4. Vitest (frontends)
 5. **Unit coverage gate (F31):** dedicated CI `coverage` job runs `make test-unit-coverage` (`--enforce` on summary script; ADR-019, TP-031)
 6. pip-audit (advisory or blocking per 04-tech-plan)

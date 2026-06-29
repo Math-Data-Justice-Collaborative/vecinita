@@ -1,0 +1,63 @@
+# For detailed configuration reference documentation, visit:
+# https://supabase.com/docs/guides/local-development/cli/config
+# Project: cfuvghdsuwactfeamtym (canonical Vecinita admin auth)
+
+project_id = "cfuvghdsuwactfeamtym"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:5173"
+additional_redirect_urls = [
+  "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app",
+  "http://127.0.0.1:5173",
+]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+enable_signup = false
+enable_anonymous_sign_ins = false
+
+[auth.email]
+enable_signup = false
+double_confirm_changes = true
+enable_confirmations = true
+secure_password_change = true
+max_frequency = "1s"
+
+# Custom SMTP — configure in Supabase Dashboard for production invite delivery (TP-S004-08).
+# Placeholders document the operator contract; live values are never committed.
+[auth.email.smtp]
+enabled = false
+host = "smtp.example.com"
+port = 587
+user = "smtp-user"
+pass = "env(SUPABASE_SMTP_PASS)"
+admin_email = "noreply@vecinita.admin"
+sender_name = "Vecinita Admin"
+
+[auth.sms]
+enable_signup = false

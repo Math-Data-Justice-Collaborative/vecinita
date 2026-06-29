@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import contextlib
 import json
-from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
-from typing import Annotated, cast
+from http import HTTPStatus
+from typing import TYPE_CHECKING, Annotated, cast
 from uuid import UUID
 
 import httpx
@@ -32,16 +32,19 @@ from vecinita_chat_rag_backend.browse import get_document, list_documents, list_
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import ChatRagService
 
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
 
 async def parse_ask_body(request: Request) -> AskRequest:
     """Parse JSON ask body and reject identity fields per ADR-004."""
     try:
-        raw_payload = cast(object, await request.json())
+        raw_payload = cast("object", await request.json())
     except json.JSONDecodeError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid JSON") from exc
     if not isinstance(raw_payload, dict):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="JSON object required")
-    payload = as_json_object(raw_payload)
+    payload = as_json_object(cast("object", raw_payload))
     try:
         return validate_ask_request(payload)
     except ValidationError as exc:
@@ -53,9 +56,10 @@ def _check_dependency(url: str | None, path: str = "/health") -> str:
         return "not_configured"
     try:
         response = httpx.get(f"{url.rstrip('/')}{path}", timeout=5.0)
-        return "ok" if response.status_code == 200 else "error"
     except httpx.HTTPError:
         return "error"
+    else:
+        return "ok" if response.status_code == HTTPStatus.OK else "error"
 
 
 def _warm_modal_url(url: str, *, timeout_s: float) -> None:
@@ -81,7 +85,7 @@ def _warm_modal_services(
 def _source_payload(sources: list[Source]) -> list[dict[str, object]]:
     encoded: list[dict[str, object]] = []
     for source in sources:
-        item = as_json_object(cast(object, jsonable_encoder(source)))
+        item = as_json_object(cast("object", jsonable_encoder(source)))
         for key in ("chunk_id", "document_id"):
             field = item.get(key)
             if isinstance(field, UUID):
@@ -115,7 +119,7 @@ def _fire_stats(
         )
 
 
-def create_app(
+def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route handlers inline
     *,
     settings: ChatRagSettings | None = None,
     chat_service: ChatRagService | None = None,
@@ -139,7 +143,7 @@ def create_app(
         return resolved_service
 
     @app.get("/health", response_model=HealthResponse)
-    def health() -> HealthResponse:
+    def health() -> HealthResponse:  # pyright: ignore[reportUnusedFunction]  # FastAPI route
         cfg = get_settings()
         deps = {
             "postgres": "error",
@@ -151,12 +155,12 @@ def create_app(
             with engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
             deps["postgres"] = "ok"
-        except Exception:
+        except Exception:  # noqa: BLE001  # health probe must tolerate any DB failure
             deps["postgres"] = "error"
         return HealthResponse(status="ok", dependencies=deps)
 
     @app.post("/api/v1/warm")
-    def warm_modal(background_tasks: BackgroundTasks) -> dict[str, str]:
+    def warm_modal(background_tasks: BackgroundTasks) -> dict[str, str]:  # pyright: ignore[reportUnusedFunction]
         """Fire-and-forget Modal pre-warm when the chat UI mounts (S001 T11)."""
         cfg = get_settings()
         background_tasks.add_task(
@@ -168,7 +172,7 @@ def create_app(
         return {"status": "warming"}
 
     @app.post("/api/v1/ask", response_model=AskResponse)
-    async def ask(request: Request) -> AskResponse:
+    async def ask(request: Request) -> AskResponse:  # pyright: ignore[reportUnusedFunction]
         body = await parse_ask_body(request)
         try:
             result = get_service().ask(body)
@@ -187,7 +191,7 @@ def create_app(
         return result
 
     @app.post("/api/v1/ask/stream")
-    async def ask_stream(request: Request) -> StreamingResponse:
+    async def ask_stream(request: Request) -> StreamingResponse:  # pyright: ignore[reportUnusedFunction]
         body = await parse_ask_body(request)
         try:
             service = get_service()
@@ -213,7 +217,7 @@ def create_app(
         return StreamingResponse(event_stream(), media_type="text/event-stream")
 
     @app.get("/api/v1/documents", response_model=DocumentBrowsePage)
-    def list_documents_public(
+    def list_documents_public(  # pyright: ignore[reportUnusedFunction]
         tags: Annotated[list[str] | None, Query()] = None,
         q: Annotated[str | None, Query()] = None,
         page: Annotated[int, Query(ge=1)] = 1,
@@ -231,7 +235,7 @@ def create_app(
         )
 
     @app.get("/api/v1/documents/{document_id}", response_model=DocumentBrowseDetail)
-    def get_document_public(document_id: UUID) -> DocumentBrowseDetail:
+    def get_document_public(document_id: UUID) -> DocumentBrowseDetail:  # pyright: ignore[reportUnusedFunction]
         cfg = get_settings()
         engine = create_engine(cfg.database_url)
         detail = get_document(engine, document_id)
@@ -240,7 +244,7 @@ def create_app(
         return detail
 
     @app.get("/api/v1/tags", response_model=TagListResponse)
-    def list_tags_public() -> TagListResponse:
+    def list_tags_public() -> TagListResponse:  # pyright: ignore[reportUnusedFunction]
         cfg = get_settings()
         engine = create_engine(cfg.database_url)
         return list_tag_facets(engine)

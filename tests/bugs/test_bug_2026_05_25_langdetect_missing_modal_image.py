@@ -12,6 +12,8 @@ import ast
 import re
 from pathlib import Path
 
+from vecinita_tagging import vocabulary
+
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _MODAL_APP = _REPO_ROOT / "infra" / "modal" / "data_management_app.py"
 _PACKAGES_DIR = _REPO_ROOT / "packages"
@@ -29,9 +31,11 @@ def _extract_pip_install_args(source: str) -> list[str]:
             and isinstance(node.func, ast.Attribute)
             and node.func.attr == "pip_install"
         ):
-            for arg in node.args:
-                if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
-                    pip_args.append(arg.value)
+            pip_args.extend(
+                arg.value
+                for arg in node.args
+                if isinstance(arg, ast.Constant) and isinstance(arg.value, str)
+            )
     return pip_args
 
 
@@ -93,7 +97,5 @@ def test_modal_image_includes_all_mounted_package_deps() -> None:
 
 def test_tagging_vocabulary_importable() -> None:
     """The import chain that crashes in Modal must work locally."""
-    from vecinita_tagging import vocabulary
-
     assert hasattr(vocabulary, "load_seed_vocabulary")
     assert hasattr(vocabulary, "detect_document_language")

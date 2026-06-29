@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 import os
-from typing import cast
+from http import HTTPStatus
 
 import pytest
 from fastapi.testclient import TestClient
+from vecinita_chat_rag_backend.app import create_app
+from vecinita_chat_rag_backend.config import ChatRagSettings
+from vecinita_database.seeds.tags import load_seed_tags, load_tagged_corpus
+from vecinita_shared_schemas.json_types import JsonObject, as_json_object
+
 from tests.helpers.json_response import (
     json_int,
     json_list,
@@ -14,12 +19,11 @@ from tests.helpers.json_response import (
     json_str,
     response_json_object,
 )
-from vecinita_chat_rag_backend.app import create_app
-from vecinita_chat_rag_backend.config import ChatRagSettings
-from vecinita_database.seeds.tags import load_seed_tags, load_tagged_corpus
-from vecinita_shared_schemas.json_types import JsonObject, as_json_object
 
 pytestmark = pytest.mark.e2e
+
+_BROWSE_PAGE_SIZE = 20
+_EXPECTED_MIN_DOCUMENTS = 2
 
 
 def _database_url() -> str:
@@ -31,6 +35,7 @@ def _database_url() -> str:
 
 @pytest.fixture
 def browse_e2e_client() -> TestClient:
+    """Browse e2e client."""
     load_seed_tags(database_url=_database_url())
     load_tagged_corpus(database_url=_database_url())
     settings = ChatRagSettings(
@@ -47,28 +52,27 @@ def browse_e2e_client() -> TestClient:
 def test_uj009_corpus_browse_list_and_tags(browse_e2e_client: TestClient) -> None:
     """Community member browses documents and tag facets."""
     documents = browse_e2e_client.get("/api/v1/documents")
-    assert documents.status_code == 200
+    assert documents.status_code == HTTPStatus.OK
     body = response_json_object(documents)
-    assert json_int(body, "page_size") <= 20
-    assert json_int(body, "total") >= 2
+    assert json_int(body, "page_size") <= _BROWSE_PAGE_SIZE
+    assert json_int(body, "total") >= _EXPECTED_MIN_DOCUMENTS
 
     tags = browse_e2e_client.get("/api/v1/tags")
-    assert tags.status_code == 200
+    assert tags.status_code == HTTPStatus.OK
     slugs = {
-        json_str(as_json_object(cast(object, tag)), "slug")
+        json_str(as_json_object(tag), "slug")
         for tag in json_list(response_json_object(tags), "tags")
     }
     assert {"housing", "legal"}.issubset(slugs)
 
     housing_only = browse_e2e_client.get("/api/v1/documents", params={"tags": ["housing"]})
-    assert housing_only.status_code == 200
+    assert housing_only.status_code == HTTPStatus.OK
     housing_items = json_object_list(response_json_object(housing_only), "items")
     assert housing_items
 
     def _has_housing_tag(item: JsonObject) -> bool:
         return any(
-            json_str(as_json_object(cast(object, tag)), "slug") == "housing"
-            for tag in json_list(item, "tags")
+            json_str(as_json_object(tag), "slug") == "housing" for tag in json_list(item, "tags")
         )
 
     assert all(_has_housing_tag(item) for item in housing_items)

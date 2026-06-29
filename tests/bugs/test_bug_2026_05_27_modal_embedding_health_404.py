@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import os
+from http import HTTPStatus
 from unittest.mock import patch
 
 import httpx
 import pytest
 from fastapi.testclient import TestClient
+from vecinita_internal_write_api.app import create_app
+
 from tests.helpers.json_response import json_object_get, json_str, response_json_object
 
 pytestmark = pytest.mark.unit
@@ -22,8 +25,9 @@ def _database_url() -> str:
     )
 
 
-@pytest.fixture()
-def client(monkeypatch: pytest.MonkeyPatch):
+@pytest.fixture
+def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    """Write API TestClient with modal embed URL ending in /health."""
     monkeypatch.setenv("DATABASE_URL", _database_url())
     monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _API_KEY)
     monkeypatch.setenv("VECINITA_CHAT_RAG_URL", "http://chat-rag:8000")
@@ -35,7 +39,6 @@ def client(monkeypatch: pytest.MonkeyPatch):
         "http://modal-embed:8002/health",
     )
     monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://modal-llm:8003")
-    from vecinita_internal_write_api.app import create_app
 
     return TestClient(create_app())
 
@@ -50,14 +53,14 @@ def test_health_all_modal_embedding_url_must_not_double_health_suffix(
     """When VECINITA_MODAL_EMBED_URL ends with /health, probe that URL once (not /health/health)."""
     probed: list[str] = []
 
-    def mock_get(url: str, **kwargs: object) -> httpx.Response:
+    def mock_get(url: str, **_kwargs: object) -> httpx.Response:
         probed.append(url)
-        return httpx.Response(200, json={"status": "ok"})
+        return httpx.Response(HTTPStatus.OK, json={"status": "ok"})
 
     with patch("vecinita_internal_write_api.app.httpx.get", side_effect=mock_get):
         resp = client.get("/internal/v1/health/all", headers=_auth())
 
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
     data = response_json_object(resp)
     services = json_object_get(data, "services")
     embedding = json_object_get(services, "modal_embedding")

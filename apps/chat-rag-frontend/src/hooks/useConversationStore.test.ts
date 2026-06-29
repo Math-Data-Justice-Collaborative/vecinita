@@ -48,8 +48,8 @@ describe("useConversationStore", () => {
     const second = renderHook(() => useConversationStore());
     const { messages } = second.result.current.active;
     expect(messages).toHaveLength(2);
-    expect(messages[0].content).toBe("Where is the food pantry?");
-    expect(messages[1].sources?.[0].title).toBe("Pantry");
+    expect(messages[0]?.content).toBe("Where is the food pantry?");
+    expect(messages[1]?.sources?.[0]?.title).toBe("Pantry");
   });
 
   it("persists across separate store instances sharing localStorage (new tab / reopen, ADR-025)", () => {
@@ -64,7 +64,7 @@ describe("useConversationStore", () => {
     first.unmount();
 
     const reopened = renderHook(() => useConversationStore());
-    expect(reopened.result.current.active.messages[0].content).toBe(
+    expect(reopened.result.current.active.messages[0]?.content).toBe(
       "survives tab close",
     );
   });
@@ -169,10 +169,10 @@ describe("useConversationStore", () => {
 
     const { previous } = result.current;
     expect(previous).toHaveLength(PREVIOUS_CHATS_CAP);
-    expect(previous[0].messages[0].content).toBe("conv 10");
-    expect(previous.some((conv) => conv.messages[0].content === "conv 0")).toBe(
-      false,
-    );
+    expect(previous[0]?.messages[0]?.content).toBe("conv 10");
+    expect(
+      previous.some((conv) => conv.messages[0]?.content === "conv 0"),
+    ).toBe(false);
   });
 
   it("selects, deletes, clears all, and clears the active conversation (TC-076)", () => {
@@ -192,18 +192,18 @@ describe("useConversationStore", () => {
     expect(result.current.previous).toHaveLength(2);
 
     const firstConv = result.current.previous.find(
-      (conv) => conv.messages[0].content === "first",
+      (conv) => conv.messages[0]?.content === "first",
     );
     act(() => {
       result.current.selectConversation(firstConv?.id ?? "");
     });
-    expect(result.current.active.messages[0].content).toBe("first");
+    expect(result.current.active.messages[0]?.content).toBe("first");
     expect(
       result.current.previous.some((conv) => conv.id === firstConv?.id),
     ).toBe(false);
 
     const secondConv = result.current.previous.find(
-      (conv) => conv.messages[0].content === "second",
+      (conv) => conv.messages[0]?.content === "second",
     );
     act(() => {
       result.current.deleteConversation(secondConv?.id ?? "");
@@ -238,7 +238,7 @@ describe("useConversationStore", () => {
     act(() => {
       result.current.newChat();
     });
-    const alphaId = result.current.previous[0].id;
+    const alphaId = result.current.previous[0]?.id ?? "";
     act(() => {
       result.current.setActiveMessages(() => [userMessage("beta")]);
     });
@@ -246,10 +246,10 @@ describe("useConversationStore", () => {
       result.current.selectConversation(alphaId);
     });
 
-    expect(result.current.active.messages[0].content).toBe("alpha");
+    expect(result.current.active.messages[0]?.content).toBe("alpha");
     expect(
       result.current.previous.some(
-        (conv) => conv.messages[0].content === "beta",
+        (conv) => conv.messages[0]?.content === "beta",
       ),
     ).toBe(true);
   });

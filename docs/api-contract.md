@@ -1,10 +1,27 @@
 # API Contract
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-26 (EV-002); **2026-06-13** (EV-004 F31 api-contract note)  
+> **Last updated**: 2026-06-28 (S004/EV-005 F34 — Supabase admin auth)  
 > **OpenAPI**: Source of truth in repo — `openapi/chat-rag.yaml`, `openapi/data-management.yaml`, `openapi/internal-write.yaml`
 
 Contracts are **greenfield** (ADR-003). Public routes must not accept identity fields (`email`, `user_id`, `name`, etc.).
+
+---
+
+## Authentication (EV-005 F34, ADR-026)
+
+| Surface | Auth | Notes |
+|---------|------|-------|
+| **ChatRAG Backend** (`/api/v1/*`, `/health`) | **None (anonymous)** | Stateless; CORS restricted to the ChatRAG frontend origin only (RD-079). Identity fields still rejected (`400`). |
+| **Data Management — Modal** (`/jobs*`) | **Supabase JWT** (operator) | `Authorization: Bearer <supabase_jwt>`; `401` missing/invalid. |
+| **Internal Write API** (`/internal/v1/*`) | **Supabase JWT** (operator) **or** `VECINITA_INTERNAL_API_KEY` (service-to-service) | Operator requests use the bearer JWT; Modal→write service calls keep the machine API key. Write routes require role `admin` (`403` for `viewer`). |
+
+- **Scheme**: OpenAPI `securitySchemes` — `bearerAuth` (`type: http`, `scheme: bearer`, `bearerFormat: JWT`) on admin routes; the internal-write API also documents the existing `apiKeyAuth` for service calls.
+- **Token**: Supabase-issued JWT obtained by the DM frontend via `@supabase/supabase-js`. Backends verify the **HS256** signature (`SUPABASE_JWT_SECRET`), `exp`, and `aud`; role read from the **`app_metadata.role`** claim (resolved 04-tech-plan, TP-S004-01/02, ADR-027).
+- **Roles**: `admin` (full read/write), `viewer` (read-only). Write methods (`POST`/`PATCH`/`DELETE`) require `admin`.
+- **Attribution**: write handlers record `actor_id` (opaque Supabase user UUID) + `actor_role` on `audit_log` — no email/name/PII (extends ADR-016).
+- **Errors**: `401` (missing/invalid/expired token), `403` (authenticated but insufficient role).
+- **No request/response schema changes** to existing ChatRAG or admin endpoints — only the auth requirement (header) and `401`/`403` responses are added on admin routes.
 
 ---
 
@@ -522,6 +539,7 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
 | Code | When |
 |------|------|
 | 400 | Validation, forbidden identity fields |
-| 401/403 | Missing/invalid infra credentials |
+| 401 | Missing/invalid/expired credentials — Supabase JWT on admin routes (F34) or service API key |
+| 403 | Authenticated but insufficient role — `viewer` attempting a write (F34) |
 | 404 | Unknown job or document |
 | 503 | Modal or Postgres unavailable |

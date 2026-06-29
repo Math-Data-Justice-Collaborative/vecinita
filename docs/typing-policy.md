@@ -1,34 +1,88 @@
 # Typing policy — no `Any` / `any`
 
 > **Status:** Enforced in CI and Cursor hooks (ADR-018, EV-003)  
-> **Last updated:** 2026-05-27
+> **Last updated:** 2026-06-29 (extended lint/type-check scope to `infra` + `scripts`)
 
 Vecinita requires **strict static typing**. Do not use `typing.Any` in Python or `any` in TypeScript except where an external boundary cannot be typed and a documented waiver exists (none today).
+
+As of 2026-06-29 the linters/typecheckers run at their strictest sensible settings: Ruff
+`select = ["ALL"]`, basedpyright `typeCheckingMode = "strict"`, and all strict TypeScript
+compiler flags. See the per-stack sections below for the exact config and the small set of
+deliberately-ignored rules (formatter conflicts and mutually-incompatible rule pairs).
 
 ## Quick reference
 
 | Check | Command |
 |-------|---------|
-| Python lint (includes `ANN401`) | `uv run ruff check apps packages tests` |
-| Python types | `uv run basedpyright apps packages tests` |
+| Python lint (includes `ANN401`) | `uv run ruff check apps packages tests infra scripts` |
+| Python format | `uv run ruff format --check apps packages tests infra scripts` |
+| Python types | `uv run basedpyright apps packages tests infra scripts` |
 | ChatRAG frontend | `cd apps/chat-rag-frontend && npm run lint && npm run build` |
 | Data-mgmt frontend | `cd apps/data-management-frontend && npm run lint && npm run build` |
+
+CI, the Makefile (`PYTHON_DIRS`), and the Cursor edit hooks all lint/format/type-check the
+same five Python roots: `apps`, `packages`, `tests`, `infra`, `scripts`.
 
 ## Python
 
 ### Ruff
 
-- Rule **`ANN401`**: `typing.Any` is disallowed in annotations (function args, returns, variables).
-- Config: `[tool.ruff.lint]` → `select` includes `ANN401` in root `pyproject.toml`.
+- **`select = ["ALL"]`** — every Ruff rule family is enabled (the strictest setting),
+  including `ANN` (annotations, so `typing.Any` is still rejected via `ANN401`), `D`
+  (docstrings, google convention), `S` (security), `PL` (pylint), `TRY`, `EM`, `PT`, etc.
+- Config: `[tool.ruff.lint]` in root `pyproject.toml`.
+- **Deliberate `ignore` list** (only rules that conflict with our formatter or each other):
+  | Rule | Why ignored |
+  |------|-------------|
+  | `E501` | `ruff format` owns line wrapping |
+  | `COM812` | Conflicts with `ruff format` (Ruff officially recommends disabling) |
+  | `ISC001` | Conflicts with `ruff format` |
+  | `D203` | Mutually incompatible with `D211` (we keep `D211`) |
+  | `D213` | Mutually incompatible with `D212` (we keep `D212`) |
+- **Per-file ignores** (`[tool.ruff.lint.per-file-ignores]`):
+  | Path | Ignored | Why |
+  |------|---------|-----|
+  | `tests/**` | `S101` | `assert` is the foundation of pytest |
+  | `packages/shared-schemas/vecinita_shared_schemas/*.py` | `TC001/2/3` | Pydantic v2 evaluates field annotations at runtime; TYPE_CHECKING-only imports would break model construction |
+  | `apps/data-management-backend/.../app.py` | `FAST002` | routes depend on `create_app()` closures; with `from __future__ import annotations`, FastAPI can't resolve a local closure inside `Annotated[..., Depends(local_fn)]`, so the `= Depends(...)` form is required |
+  | `infra/**` | Modal-glue rules (`PLC0415`, `BLE001`, `S110`, `ANN2xx`, `INP001`, `D1xx`, `TC00x`) | Modal requires in-function imports, GPU/NCCL teardown must swallow errors (BUG-2026-05-20), framework return types are imported inside the function, deploy entrypoint (not a library) |
+  | `scripts/**` | CLI/ops-script rules (`T201`, `INP001`, `S603/S607`, `ANN001/202/401`, `TRY003`, `EM10x`, `PLR2004`, `PLC0415`, `C901`, `PLR09xx`, `PTH101`, `D1xx`) | operational and one-off tooling: prints by design, calls known dev tools, tolerates loose typing/terse messages |
+- **`[tool.ruff.lint.flake8-bugbear] extend-immutable-calls`** lists FastAPI DI markers
+  (`fastapi.Depends`, `fastapi.Header`, `fastapi.Query`, …) so `= Depends(...)` defaults
+  satisfy `B008` repo-wide — the FastAPI-recommended config, instead of per-line `# noqa: B008`.
+- `[tool.ruff.lint.pydocstyle] convention = "google"`.
 
 ### basedpyright
 
 - Package: **`basedpyright`** (Pyright-compatible; adds `reportExplicitAny`).
 - Config sections: `[tool.basedpyright]` in `pyproject.toml` and `pyrightconfig.json`.
 - Key settings:
+  - **`typeCheckingMode = "strict"`** — Pyright strict mode (the strongest sensible level;
+    `all` adds non-type stylistic rules like `reportUnusedCallResult` that cannot be resolved
+    by adding types). Strict requires complete type information everywhere.
   - **`reportExplicitAny = "error"`** — rejects `dict[str, Any]`, `payload: Any`, etc.
   - **`reportAny = "error"`** — rejects *using* values typed as `Any` (e.g. untyped SQLAlchemy scalars). Use `db_mapping` / `json_types` helpers.
+  - **`stubPath = "stubs"`** — local `.pyi` stubs for genuinely untyped third-party libs.
+    Current stubs: `stubs/langdetect/__init__.pyi` (replaces the former `reportUnknown*`
+    waivers in `language.py` / `vocabulary.py`).
+- Untyped third-party libraries: resolve `reportUnknown*` by annotating the
+  call site, `cast(...)`, repo helpers (`db_mapping` / `json_types`), or local stubs under
+  `stubs/`. A targeted `# pyright: ignore[specificCode]  # reason` is a last resort only.
+  LlamaIndex is large and only partially typed; its few remaining `# pyright: ignore`
+  waivers in `packages/rag` (engine/retriever) are accepted rather than hand-stubbed.
 - Excludes: `**/node_modules` under `apps/` (frontend vendored Python).
+
+### `infra/` and `scripts/` execution environments
+
+`infra/modal` and `scripts/` are in the type-check scope but use per-root
+`executionEnvironments` (`[[tool.basedpyright.executionEnvironments]]` + the mirror in
+`pyrightconfig.json`). They are deploy/ops glue around libraries that are either GPU/ML
+runtime-only (`vllm`, `torch`, `fastembed` — present only inside the Modal image, not CI)
+or ephemeral `uv run --with` deps (`pydo`), and are otherwise largely untyped. The
+environments relax only the untyped-library-glue families (`reportMissingImports`,
+`reportUnknown*`, `reportAny`/`reportExplicitAny`, `reportMissingParameterType`) while
+keeping real-bug rules (`reportReturnType`, `reportArgumentType`, `reportOptionalMemberAccess`,
+`reportCallIssue`, …) at **error**, so genuine logic bugs are still caught.
 
 ### Alternatives to `Any`
 
@@ -49,14 +103,32 @@ Type-aware lint (`parserOptions.projectService: true`):
 
 Production `src/**` uses **`typescript-eslint` `strictTypeChecked`** (includes `no-explicit-any` and strict inference rules). Test files (`src/test/**`) keep `no-explicit-any` but relax mock-noisy rules (`require-await`, etc.).
 
-Config: `apps/*/eslint.config.js`.
+All four frontend workspaces (`apps/chat-rag-frontend`, `apps/data-management-frontend`,
+`packages/frontend-i18n`, `packages/frontend-ui`) enable `@typescript-eslint/no-unused-vars`
+with `argsIgnorePattern`/`varsIgnorePattern` `^_` for consistent treatment of intentionally
+unused, underscore-prefixed identifiers.
+
+Config: `apps/*/eslint.config.js` and `packages/frontend-*/eslint.config.js`.
 
 ### TypeScript compiler
 
-`tsconfig.json` per frontend:
+`tsconfig.json` per frontend app **and** shared `packages/frontend-*`:
 
-- `"strict": true`
-- `"noImplicitAny": true`
+- `"strict": true`, `"noImplicitAny": true`
+- `"noUnusedLocals"`, `"noUnusedParameters"`, `"noFallthroughCasesInSwitch"`,
+  `"noUncheckedSideEffectImports"`
+- **Added (strictest sensible set):** `"noUncheckedIndexedAccess"`,
+  `"exactOptionalPropertyTypes"`, `"noImplicitReturns"`, `"noImplicitOverride"`,
+  `"noPropertyAccessFromIndexSignature"`, `"verbatimModuleSyntax"`,
+  `"allowUnreachableCode": false`, `"allowUnusedLabels": false`,
+  `"forceConsistentCasingInFileNames"`
+
+Notes on the strict flags:
+- `exactOptionalPropertyTypes`: option-bag types that intentionally carry `undefined` declare
+  the property as `prop?: T | undefined` (the documented pattern), rather than omitting it.
+- `noPropertyAccessFromIndexSignature`: read index-signature properties with bracket access
+  (`obj["key"]`), including header maps and `Record<string, unknown>` type guards.
+- `verbatimModuleSyntax`: type-only imports must use `import { type X }` / `import type`.
 
 `npm run build` runs `tsc --noEmit` before Vite.
 
@@ -73,6 +145,12 @@ Avoid `expect.objectContaining` for headers when it triggers `no-unsafe-assignme
 ## Waivers
 
 - Pyright/basedpyright: use `# pyright: ignore[rule]` with a **specific rule code** only when unavoidable.
+- **Production code** must use `# pyright: ignore[rule]` (not `# type: ignore`). There are no
+  production `# type: ignore` comments today.
+- **`tests/**`** may use specific-coded `# type: ignore[code]` for third-party / mock typing
+  boundaries (e.g. monkeypatch, `vi.fn`-style fakes). Ruff `PGH003` (enabled via `select = ["ALL"]`)
+  already forbids blanket `# type: ignore`, so every such comment carries a rule code. Bare
+  `# type: ignore` is never allowed anywhere.
 - ESLint: `eslint-disable-next-line @typescript-eslint/<rule>` with justification in PR.
 - New waivers require updating this doc or an ADR amendment.
 

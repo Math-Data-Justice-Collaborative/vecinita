@@ -41,9 +41,11 @@ export function t(
   arg4?: number,
 ): string {
   if (key === "shared.pagination") {
+    /* v8 ignore start -- the shared.pagination overload requires page/totalPages/total, so the numeric defaults are unreachable via the typed API */
     const page = typeof arg2 === "number" ? arg2 : 1;
     const totalPages = typeof arg3 === "number" ? arg3 : 1;
     const total = typeof arg4 === "number" ? arg4 : 0;
+    /* v8 ignore stop */
     return paginationMessages[locale](page, totalPages, total);
   }
 

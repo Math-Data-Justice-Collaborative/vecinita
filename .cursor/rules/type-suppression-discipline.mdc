@@ -1,0 +1,44 @@
+---
+description: How to suppress type/lint errors under the strict regime (no blanket ignores)
+globs: **/*.py
+alwaysApply: false
+---
+
+# Type/lint suppression discipline
+
+Strict regime: Ruff `select = ["ALL"]`, basedpyright `strict` + `reportAny`/`reportExplicitAny`.
+**Fix the type, don't silence it.** Reach for a suppression only after the real fixes fail.
+
+## Fix first
+
+- JSON blobs → `JsonObject` / `as_json_object` (`vecinita_shared_schemas.json_types`).
+- SQLAlchemy rows/scalars → `vecinita_shared_schemas.db_mapping` helpers.
+- Untyped third-party lib used in >1 place → add a stub under `stubs/` (see `stubs/langdetect`),
+  not repeated inline ignores.
+- Pydantic round-trip (loose record → strict schema) → `Model.model_validate(...)`.
+
+## If you must suppress
+
+- **Never blanket.** `# type: ignore` / `# pyright: ignore` without a bracketed code is banned.
+- **Production / `infra/` / `scripts/`:** use `# pyright: ignore[rule]  # reason`.
+- **`tests/**` only:** specific-coded `# type: ignore[code]` is allowed for mock/monkeypatch
+  boundaries. `# type: ignore` is never allowed outside `tests/`.
+
+```python
+# BAD
+val = obj.thing  # type: ignore
+val = obj.thing  # pyright: ignore
+
+# GOOD (production)
+val = obj.thing  # pyright: ignore[reportUnknownMemberType]  # vendor lib is untyped
+
+# GOOD (tests/ only)
+monkeypatch.setattr(mod, "_x", fake)  # type: ignore[arg-type]
+```
+
+## Scope relaxations are config, not inline
+
+`infra/` and `scripts/` relaxations live in `[[tool.basedpyright.executionEnvironments]]` and
+Ruff `per-file-ignores`. Don't add new blanket relaxations without updating
+`docs/typing-policy.md`. Full rationale: `docs/typing-policy.md`; enforced by
+`.cursor/hooks/type_suppression_check.py` (catch) + Ruff `PGH003`.

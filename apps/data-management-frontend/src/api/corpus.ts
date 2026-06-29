@@ -2,18 +2,25 @@ import type { ChunkDetail, DocumentSummary, TagInput } from "./types";
 
 export interface CorpusClientOptions {
   baseUrl: string;
-  apiKey: string;
+  apiKey?: string | undefined;
+  accessToken?: string | undefined;
 }
 
-function authHeaders(apiKey: string): HeadersInit {
-  return { Authorization: `Bearer ${apiKey}` };
+function authHeaders(options: CorpusClientOptions): Record<string, string> {
+  const bearer = options.accessToken ?? options.apiKey;
+  if (!bearer) {
+    throw new Error(
+      "Corpus API requires Supabase session or VITE_VECINITA_CORPUS_API_KEY",
+    );
+  }
+  return { Authorization: `Bearer ${bearer}` };
 }
 
 export async function listDocuments(
   options: CorpusClientOptions,
 ): Promise<DocumentSummary[]> {
   const response = await fetch(`${options.baseUrl}/internal/v1/documents`, {
-    headers: authHeaders(options.apiKey),
+    headers: authHeaders(options),
   });
   if (!response.ok) {
     const detail = await response.text();
@@ -31,7 +38,7 @@ export async function listDocumentChunks(
   const response = await fetch(
     `${options.baseUrl}/internal/v1/documents/${documentId}/chunks`,
     {
-      headers: authHeaders(options.apiKey),
+      headers: authHeaders(options),
     },
   );
   if (!response.ok) {
@@ -50,7 +57,7 @@ export async function listDocumentTags(
   const response = await fetch(
     `${options.baseUrl}/internal/v1/documents/${documentId}/tags`,
     {
-      headers: authHeaders(options.apiKey),
+      headers: authHeaders(options),
     },
   );
   if (!response.ok) {
@@ -73,7 +80,7 @@ export async function patchDocumentTags(
     {
       method: "PATCH",
       headers: {
-        Authorization: `Bearer ${options.apiKey}`,
+        ...authHeaders(options),
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ tags, source: "human" }),
@@ -99,7 +106,7 @@ export async function patchChunkTags(
     {
       method: "PATCH",
       headers: {
-        Authorization: `Bearer ${options.apiKey}`,
+        ...authHeaders(options),
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ tags, source: "human" }),
@@ -123,7 +130,7 @@ export async function retagDocument(
     `${options.baseUrl}/internal/v1/documents/${documentId}/retag`,
     {
       method: "POST",
-      headers: authHeaders(options.apiKey),
+      headers: authHeaders(options),
     },
   );
   if (!response.ok) {
@@ -142,7 +149,7 @@ export async function deleteDocument(
     `${options.baseUrl}/internal/v1/documents/${documentId}`,
     {
       method: "DELETE",
-      headers: authHeaders(options.apiKey),
+      headers: authHeaders(options),
     },
   );
   if (response.status === 404) {

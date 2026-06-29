@@ -6,6 +6,7 @@ import os
 
 import httpx
 import pytest
+
 from tests.helpers.connectivity import (
     assert_bundle_contains_hosts,
     assert_cors_preflight,
@@ -22,6 +23,7 @@ def _env(name: str) -> str | None:
 
 @pytest.fixture
 def chat_api() -> str:
+    """Return the staging chat API base URL, skipping when unset."""
     url = _env("VECINITA_STAGING_CHAT_URL")
     if not url:
         pytest.skip("Set VECINITA_STAGING_CHAT_URL")
@@ -30,6 +32,7 @@ def chat_api() -> str:
 
 @pytest.fixture
 def chat_frontend() -> str:
+    """Return the staging chat frontend URL, skipping when unset."""
     url = _env("VECINITA_STAGING_CHAT_FRONTEND_URL")
     if not url:
         pytest.skip("Set VECINITA_STAGING_CHAT_FRONTEND_URL for H5")
@@ -38,6 +41,7 @@ def chat_frontend() -> str:
 
 @pytest.fixture
 def admin_frontend() -> str:
+    """Return the staging admin frontend URL, skipping when unset."""
     url = _env("VECINITA_STAGING_ADMIN_FRONTEND_URL")
     if not url:
         pytest.skip("Set VECINITA_STAGING_ADMIN_FRONTEND_URL for H5")
@@ -45,6 +49,7 @@ def admin_frontend() -> str:
 
 
 def test_h4_chat_backend_cors_preflight(chat_api: str, chat_frontend: str) -> None:
+    """H4: chat backend allows CORS preflight for the ask stream route."""
     assert_cors_preflight(
         api_base=chat_api,
         origin=chat_frontend,
@@ -77,6 +82,7 @@ def test_h4_chat_backend_cors_preflight_browse_tags(chat_api: str, chat_frontend
 
 
 def test_h4_write_api_cors_preflight(admin_frontend: str) -> None:
+    """H4: write API allows CORS preflight for listing documents."""
     write_url = _env("VECINITA_STAGING_WRITE_URL")
     if not write_url:
         pytest.skip("Set VECINITA_STAGING_WRITE_URL")
@@ -90,6 +96,7 @@ def test_h4_write_api_cors_preflight(admin_frontend: str) -> None:
 
 
 def test_h4_write_api_cors_preflight_delete_document(admin_frontend: str) -> None:
+    """H4: write API allows CORS preflight for deleting a document."""
     write_url = _env("VECINITA_STAGING_WRITE_URL")
     if not write_url:
         pytest.skip("Set VECINITA_STAGING_WRITE_URL")
@@ -131,6 +138,7 @@ def test_h4_write_api_cors_preflight_patch_chunk_tags(admin_frontend: str) -> No
 
 
 def test_h4_modal_data_mgmt_cors_preflight(admin_frontend: str) -> None:
+    """H4: Modal data-management API allows CORS preflight for jobs."""
     admin_api = _env("VECINITA_STAGING_ADMIN_API_URL")
     if not admin_api:
         pytest.skip("Set VECINITA_STAGING_ADMIN_API_URL for Modal CORS check")
@@ -145,6 +153,7 @@ def test_h4_modal_data_mgmt_cors_preflight(admin_frontend: str) -> None:
 
 
 def test_h5_chat_frontend_bundle_points_at_backend(chat_frontend: str, chat_api: str) -> None:
+    """H5: chat frontend bundle references the chat backend host and routes."""
     js_url = fetch_main_js_url(chat_frontend)
     js = httpx.get(js_url, timeout=30.0).text
     host = httpx.URL(chat_api).host
@@ -284,6 +293,7 @@ def test_h4_write_api_cors_preflight_stats_top_served(admin_frontend: str) -> No
 def test_h5_admin_frontend_bundle_has_modal_and_write_hosts(
     admin_frontend: str,
 ) -> None:
+    """H5: admin frontend bundle references the write API and Modal hosts."""
     write_url = _env("VECINITA_STAGING_WRITE_URL")
     admin_api = _env("VECINITA_STAGING_ADMIN_API_URL")
     if not write_url:

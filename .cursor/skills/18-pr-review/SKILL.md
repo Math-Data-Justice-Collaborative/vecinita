@@ -13,6 +13,7 @@ description: >
 On-demand **Phase G** skill: structured pull-request review with findings posted to GitHub.
 
 **Checklist:** [checklist.md](checklist.md) — Katy Huff + stevemao + Vecinita overlay.  
+**Reviewer personas:** [personas.md](personas.md) — role-based lenses (backend, frontend, DevOps, CTO, community, data/privacy) that add nits and catch issues early.  
 **GitHub commands:** [reference.md](reference.md).  
 **Preamble:** [pipeline-preamble.md](../pipeline-preamble.md).  
 **Sessions:** [sessions-reference.md](../sessions-reference.md) — requires `active_session` unless waived; reports under `docs/sessions/{id}/reports/`.  
@@ -107,6 +108,17 @@ Walk [checklist.md](checklist.md) sections **A → H**. For each failed row:
 - Draft inline comment text (path + line from diff).
 - Track blocker/advisory/praise counts.
 
+### Phase 3b — Persona panel
+
+Run the reviewer persona panel from [personas.md](personas.md) (checklist §P). Activate only
+the personas whose surface area the diff touches (personas.md activation table), then:
+
+- Walk each active persona's checklist against the diff; record 🔴 / 🟡 / 🟢.
+- De-duplicate against Phase 2 subagent and Phase 3 checklist findings; keep the strongest lens.
+- Tag each finding with its persona (e.g. `🟡 [Staff Backend] …`) for the review body.
+- Personas raise nits and catch issues early; they do **not** change the verdict matrix on
+  their own — only confirmed 🔴 (with diff/CI/subagent evidence) do.
+
 **Verdict matrix** (checklist §Verdict matrix):
 
 - Any 🔴 → `--request-changes`
@@ -121,7 +133,7 @@ Order:
 2. Post **review body** with:
    - **Praise** (🟢) — first section, specific
    - **Checklist results** — section pass/fail table
-   - **Findings** — 🔴 / 🟡 summary
+   - **Findings** — 🔴 / 🟡 summary, each tagged with its persona lens where applicable (§P)
    - **CI + subagents** — status lines
    - **Thank the author** — closing line (Katy Huff)
 3. `gh pr review` with correct event — **never merge**.

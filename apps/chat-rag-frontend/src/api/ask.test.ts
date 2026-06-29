@@ -370,6 +370,58 @@ describe("streamAsk cold-start retry (BUG-2026-05-22)", () => {
     expect(events).toEqual([{ done: true }]);
   });
 
+  it("parses a final SSE event left in the buffer without a trailing newline", async () => {
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('data: {"token":"Tail"}'));
+        controller.close();
+      },
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(stream, {
+          status: 200,
+          headers: { "Content-Type": "text/event-stream" },
+        }),
+      ),
+    );
+
+    const tokens: string[] = [];
+    for await (const event of streamAsk("Hi?", "http://localhost:8000")) {
+      if (isTokenEvent(event)) {
+        tokens.push(event.token);
+      }
+    }
+    expect(tokens).toEqual(["Tail"]);
+  });
+
+  it("ignores a non-event line left in the trailing buffer", async () => {
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(
+          new TextEncoder().encode('data: {"done":true}\n\n: trailing comment'),
+        );
+        controller.close();
+      },
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(stream, {
+          status: 200,
+          headers: { "Content-Type": "text/event-stream" },
+        }),
+      ),
+    );
+
+    const events: unknown[] = [];
+    for await (const event of streamAsk("Hi?", "http://localhost:8000")) {
+      events.push(event);
+    }
+    expect(events).toEqual([{ done: true }]);
+  });
+
   it("throws after exhausting transient retries", async () => {
     vi.useFakeTimers();
     vi.stubGlobal(

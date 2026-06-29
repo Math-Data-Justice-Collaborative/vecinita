@@ -60,4 +60,16 @@ describe("App navigation", () => {
       await screen.findByLabelText(/search title or url/i),
     ).toBeInTheDocument();
   });
+
+  it("collapses the sidebar via the scrim and re-opens it via the header toggle", () => {
+    const { container } = render(<App />);
+
+    const scrim = container.querySelector(".sidebar-scrim");
+    expect(scrim).not.toBeNull();
+    fireEvent.click(scrim as Element);
+    expect(container.querySelector(".sidebar-scrim")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: /toggle menu/i }));
+    expect(container.querySelector(".sidebar-scrim")).not.toBeNull();
+  });
 });

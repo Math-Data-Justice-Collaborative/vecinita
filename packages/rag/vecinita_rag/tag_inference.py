@@ -27,7 +27,7 @@ def resolve_retrieval_tags(
         return None
     try:
         inferred = infer_fn(question)
-    except Exception:
+    except Exception:  # noqa: BLE001  # infer_fn is external; any failure must not block retrieval
         _logger.warning("Tag inference failed for question; proceeding without tags", exc_info=True)
         return None
     return inferred or None

@@ -21,6 +21,7 @@ _OWNED_SCHEMA_MODULES = (
 
 @pytest.mark.parametrize("module_name", _OWNED_SCHEMA_MODULES)
 def test_owned_schema_modules_emit_no_field_metadata_warnings(module_name: str) -> None:
+    """Importing each owned schema module emits no field metadata warnings."""
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always", UnsupportedFieldAttributeWarning)
         importlib.import_module(module_name)

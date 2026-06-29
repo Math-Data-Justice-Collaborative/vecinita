@@ -23,6 +23,7 @@ WORKSPACE_PACKAGES: Final[tuple[str, ...]] = (
 
 @pytest.mark.parametrize("module_name", WORKSPACE_PACKAGES)
 def test_import_workspace_package(module_name: str) -> None:
+    """Each workspace package imports and reports version 0.1.0."""
     module = importlib.import_module(module_name)
     version: object = getattr(module, "__version__", None)
     assert version == "0.1.0"

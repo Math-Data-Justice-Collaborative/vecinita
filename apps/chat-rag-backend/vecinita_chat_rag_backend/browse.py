@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from uuid import UUID
+from typing import TYPE_CHECKING
 
 from sqlalchemy import bindparam, create_engine, text
-from sqlalchemy.engine import Connection, Engine
 from vecinita_shared_schemas.chat_rag import (
     DocumentBrowseDetail,
     DocumentBrowseItem,
@@ -23,6 +22,11 @@ from vecinita_shared_schemas.db_mapping import (
     scalar_int,
     sqlalchemy_scalar_one,
 )
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from sqlalchemy.engine import Connection, Engine
 
 _TAG_SQL = text(
     """
@@ -83,7 +87,9 @@ def list_documents(
 
     where_clause = f"WHERE {' AND '.join(filters)}" if filters else ""
 
-    count_sql = text(f"SELECT COUNT(*) FROM documents d {where_clause}")
+    count_sql = text(
+        f"SELECT COUNT(*) FROM documents d {where_clause}"  # noqa: S608  # fixed filter templates; values bound
+    )
     list_sql = text(
         f"""
         SELECT d.id, d.title, d.url, d.language
@@ -91,7 +97,7 @@ def list_documents(
         {where_clause}
         ORDER BY d.created_at DESC, d.url
         LIMIT :limit OFFSET :offset
-        """
+        """  # noqa: S608  # fixed filter templates; values bound
     )
 
     if tags:

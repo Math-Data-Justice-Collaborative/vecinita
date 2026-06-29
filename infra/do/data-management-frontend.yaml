@@ -29,3 +29,9 @@ static_sites:
       - key: VITE_VECINITA_CORPUS_API_KEY
         scope: BUILD_TIME
         type: SECRET
+      - key: VITE_SUPABASE_URL
+        scope: BUILD_TIME
+        type: SECRET
+      - key: VITE_SUPABASE_PUBLISHABLE_KEY
+        scope: BUILD_TIME
+        type: SECRET

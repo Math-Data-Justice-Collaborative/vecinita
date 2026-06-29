@@ -26,6 +26,11 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 | [ADR-023](ADR-023-device-only-tab-scoped-chat-persistence.md) | Device-only, tab-scoped client-side chat persistence (sessionStorage) | Superseded in part by ADR-025 | 01-requirements (S003) |
 | [ADR-024](ADR-024-chat-history-persistence-design.md) | ChatRAG chat-history persistence design (`useConversationStore` + sessionStorage) | Superseded in part by ADR-025 | 04-tech-plan (S003) |
 | [ADR-025](ADR-025-chat-history-localstorage-persistence.md) | Chat history persists via `localStorage` (durable, cross-tab) | Accepted | 07-build (S003) |
+| [ADR-026](ADR-026-supabase-admin-auth.md) | Supabase Auth for admin surfaces (invite-only, admin+viewer); supersedes ADR-004 auth clause for admin | Accepted | 01-requirements (S004/EV-005) |
+
+> **ADR-004 note:** ADR-026 supersedes the *no Supabase Auth / no identity* clause of ADR-004
+> **for admin surfaces only**. ADR-004's visitor zero-PII, stateless-chat, sovereignty, and cost
+> clauses remain in force.
 
 ## Deferred (no ADR file yet)
 

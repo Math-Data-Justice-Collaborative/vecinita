@@ -2,31 +2,36 @@
 
 from __future__ import annotations
 
+import os
+
 import pytest
 from sqlalchemy import create_engine, text
 from vecinita_database.seeds.tags import load_seed_tags, load_tagged_corpus
 
 pytestmark = pytest.mark.integration
 
+_EXPECTED_SEED_TAG_ROWS = 16
+_EXPECTED_TAGGED_DOCUMENTS = 2
+_EXPECTED_DOCUMENT_TAGS = 2
+
 
 @pytest.fixture
-def seeded_tags_and_corpus():
+def seeded_tags_and_corpus() -> dict[str, int]:
+    """Load seed tags and tagged corpus fixtures into the integration database."""
     tag_rows = load_seed_tags()
     corpus_counts = load_tagged_corpus()
-    yield {"tags": tag_rows, **corpus_counts}
+    return {"tags": tag_rows, **corpus_counts}
 
 
 def test_seed_tags_row_count(seeded_tags_and_corpus: dict[str, int]) -> None:
     """Starter vocabulary loads bilingual tag rows (8 slugs x 2 languages)."""
-    assert seeded_tags_and_corpus["tags"] == 16
+    assert seeded_tags_and_corpus["tags"] == _EXPECTED_SEED_TAG_ROWS
 
 
 def test_tagged_corpus_document_tags(seeded_tags_and_corpus: dict[str, int]) -> None:
     """Tagged fixtures assign distinct document-level tags for browse/RAG tests."""
-    import os
-
-    assert seeded_tags_and_corpus["documents"] == 2
-    assert seeded_tags_and_corpus["document_tags"] == 2
+    assert seeded_tags_and_corpus["documents"] == _EXPECTED_TAGGED_DOCUMENTS
+    assert seeded_tags_and_corpus["document_tags"] == _EXPECTED_DOCUMENT_TAGS
 
     database_url = os.environ.get(
         "DATABASE_URL",

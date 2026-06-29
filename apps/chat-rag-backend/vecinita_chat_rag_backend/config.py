@@ -20,7 +20,7 @@ def _float_env(name: str, default: float) -> float:
     return float(raw)
 
 
-def _bool_env(name: str, default: bool) -> bool:
+def _bool_env(name: str, default: bool) -> bool:  # noqa: FBT001  # internal helper mirrors _int_env/_float_env positional default style
     raw = os.environ.get(name)
     if raw is None:
         return default
@@ -51,9 +51,11 @@ class ChatRagSettings:
 
     @classmethod
     def from_env(cls) -> ChatRagSettings:
+        """Load settings from process environment variables."""
         database_url = os.environ.get("DATABASE_URL")
         if not database_url:
-            raise RuntimeError("DATABASE_URL is required for ChatRAG backend")
+            msg = "DATABASE_URL is required for ChatRAG backend"
+            raise RuntimeError(msg)
         return cls(
             database_url=_normalize_database_url(database_url),
             top_k=_int_env("VECINITA_TOP_K", 5),
@@ -65,5 +67,5 @@ class ChatRagSettings:
             request_timeout_s=float(os.environ.get("VECINITA_REQUEST_TIMEOUT_S", "120")),
             internal_write_url=os.environ.get("VECINITA_INTERNAL_WRITE_URL"),
             internal_api_key=os.environ.get("VECINITA_INTERNAL_API_KEY"),
-            stats_enabled=_bool_env("VECINITA_STATS_ENABLED", True),
+            stats_enabled=_bool_env("VECINITA_STATS_ENABLED", default=True),
         )

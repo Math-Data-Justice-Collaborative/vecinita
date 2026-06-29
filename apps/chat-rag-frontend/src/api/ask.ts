@@ -46,7 +46,7 @@ function sleep(ms: number): Promise<void> {
 async function* streamAskOnce(
   question: string,
   baseUrl: string,
-  options?: { tags?: string[]; language?: Locale },
+  options?: { tags?: string[] | undefined; language?: Locale | undefined },
 ): AsyncGenerator<StreamEvent> {
   const body: { question: string; tags?: string[]; language?: Locale } = {
     question,
@@ -84,8 +84,10 @@ async function* streamAskOnce(
     }
     buffer += decoder.decode(value, { stream: true });
     const lines = buffer.split("\n");
-    const remainder = lines.pop();
-    buffer = remainder === undefined ? "" : remainder;
+    // `String.split` always yields at least one element, so `pop()` is never
+    // undefined here; the `?? ""` only satisfies the `string | undefined` type.
+    /* v8 ignore next */
+    buffer = lines.pop() ?? "";
     for (const line of lines) {
       const event = parseSseLine(line);
       if (event) {
@@ -103,9 +105,9 @@ async function* streamAskOnce(
 }
 
 export type StreamAskOptions = {
-  tags?: string[];
-  language?: Locale;
-  onRetry?: (attempt: number, maxAttempts: number) => void;
+  tags?: string[] | undefined;
+  language?: Locale | undefined;
+  onRetry?: ((attempt: number, maxAttempts: number) => void) | undefined;
 };
 
 /** Stream ask tokens and sources from POST /api/v1/ask/stream (F2). */
@@ -133,10 +135,16 @@ export async function* streamAsk(
       }
       options?.onRetry?.(attempt, COLD_START_ASK_MAX_ATTEMPTS);
       await sleep(COLD_START_ASK_RETRY_DELAY_MS);
+      // Transient failures are always Error instances (TypeError or
+      // AskStreamError); the non-Error branch only satisfies the type checker.
+      /* v8 ignore next */
       lastError = err instanceof Error ? err : new Error(String(err));
     }
   }
 
+  // Unreachable: the loop always returns on success or throws on the final
+  // attempt. Retained as a defensive guard for the generator's exit contract.
+  /* v8 ignore next */
   throw lastError ?? new AskStreamError("Ask failed");
 }
 

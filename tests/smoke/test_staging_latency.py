@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 
 import pytest
+
 from tests.smoke.staging_latency import (
     DEFAULT_SAMPLE_COUNT,
     P95_THRESHOLD_S,
@@ -20,6 +21,7 @@ def _staging_chat_url() -> str | None:
 
 @pytest.fixture
 def staging_chat_url() -> str:
+    """Return the staging chat URL, skipping when it is not configured."""
     url = _staging_chat_url()
     if not url:
         pytest.skip("Set VECINITA_STAGING_CHAT_URL to measure staging p95 latency (AC-C6)")

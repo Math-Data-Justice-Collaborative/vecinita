@@ -9,14 +9,14 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 9: EV-004 shared frontend i18n/UI |
-| **Active milestone** | M32: Workspace scaffold |
-| **Active task** | M33 / T33.1 |
-| **Tasks completed** | 204 / 239 |
-| **Last updated** | 2026-06-26 |
-| **Evolve cycle** | EV-004 (F31) — **in_progress** |
-| **Git branch** | `feat/M32-workspace-scaffold` |
-| **Active session** | S003-persistent-chat-history (Phase 10, F33) — 07-build **complete** (M39–M42, T39.1–T42.3); Phase 10 gate PASS; 115 FE tests + 95% coverage + build green. Next: 09-qa → 10-e2e → 12-verify-deploy → 13-deploy-smoke; on `feat/S003-persistent-chat-history` |
+| **Active phase** | Phase 11: EV-005 — Supabase admin auth (F34) — **planned (04-tech-plan complete)** |
+| **Active milestone** | M47: Integration, privacy, OpenAPI & gate — **complete** |
+| **Active task** | Phase 11 gate check → **08-verify-build** |
+| **Tasks completed** | M47 T47.1–T47.6 completed (2026-06-29); M43–M46 on branch (uncommitted) |
+| **Last updated** | 2026-06-29 |
+| **Evolve cycle** | EV-005 (F34) — **07-build in progress** |
+| **Git branch** | `feat/S004-supabase-auth` |
+| **Active session** | S004-supabase-auth (Phase 11, F34) — evolve-lite. 01-requirements + 04-tech-plan **complete** (ADR-026, ADR-027, TP-S004-01–12). Next: 07-build (M43–M47). Lite path skips 02/03/05/06/11 |
 
 ## Template
 
@@ -32,7 +32,7 @@
 | Category | Choice | Source | Spec Reference |
 |----------|--------|--------|----------------|
 | Language (Python) | **3.11** | 04-tech-plan interview | spec.md H10 |
-| Language (Node) | **20 LTS** | dependency-inventory.md | Frontends |
+| Language (Node) | **24 LTS** | dependency-inventory.md; TP-S004-11 | Frontends |
 | Linter | **Ruff** (+ `ANN401` no-Any) | hooks + ADR-018 | `docs/typing-policy.md` |
 | Formatter | **Ruff format** | hooks | test-plan.md |
 | Typechecker | **basedpyright** (`reportExplicitAny`) | ADR-018; `.cursor/hooks/typecheck.py` | `docs/typing-policy.md` (supersedes pyright/mypy) |
@@ -69,6 +69,19 @@
 | **Total (pilot)** | **~$42–48** (typical) | Upper stress **≤ $50** with scale-to-zero GPU |
 
 **Gate result (TP-009):** Multi-app DO + vLLM **fits ≤ $50/mo** at pilot traffic with scale-to-zero GPU. Stress scenarios above $50 trigger consolidation (below) before cap breach. **$25/mo target** requires consolidation or minimal query volume — see mitigation.
+
+**Cost-cap change — EV-005 (TP-S004-06, ADR-027):** Adding **Supabase Pro ($25/mo**, incl. $10
+compute credits; required for branching) on top of the ~$42–48/mo above raises the all-in total to
+**~$67–75/mo**. This **exceeds the prior $50 hard cap**; the user **approved raising the cap to
+~$75/mo** (ADR-027 supersedes ADR-004's cost line). Branching is billed at `$0.01344`/preview
+branch/hour and is **outside** the spend cap → keep preview branches **ephemeral** (tear down after
+PR/migration). The org spend cap stays **ON** for non-branch usage.
+
+| Line item (EV-005 addition) | Est. $/mo | Notes |
+|-----------------------------|-----------|-------|
+| Supabase Pro (identity + auth) | 25 | Includes $10 compute credits |
+| Supabase preview branches | 0–10 | Ephemeral; ~$9.60/mo if a branch runs 24×7 |
+| **New all-in total** | **~$67–75** | New hard cap **~$75/mo** (ADR-027) |
 
 **If estimate exceeds $50 (Risk R1) — user lever order:**
 
@@ -861,6 +874,116 @@ frontend-only, no API/contract/CORS or backend/Modal changes (AC-S7).
 
 ---
 
+### Phase 11: EV-005 — Supabase admin auth (F34)
+
+**Objective**: Add a Supabase-Auth authentication interface for **admin surfaces only** — DM UI,
+DM API (Modal `/jobs*`), and internal-write API require a valid Supabase JWT; **ChatRAG stays
+anonymous**. Invite-only registration; `admin` + `viewer` roles; identity in Supabase (corpus DB
+PII-free); env-sync via Supabase branching + migrations-in-repo. Reverses ADR-004's auth clause for
+admin surfaces (ADR-026) and applies the 04-tech-plan tech decisions (ADR-027, TP-S004-01–12).
+**Entry gate**: S004 01-requirements complete (F34, ADR-026); 04-tech-plan approved
+(ADR-027, TP-S004-01–12). evolve-lite (02/03/05/06/11 skipped).
+**Exit gate**: AC-A1–AC-A10 met; TC-077–TC-086 green; UJ-026–UJ-029 covered; privacy tests
+(no corpus identity tables; `actor_id` UUID + no PII) green; ChatRAG strict CORS (H0c); full
+backend + DM-frontend suites green; OpenAPI `securitySchemes` updated.
+
+**Session:** S004 (evolve-lite) | **Feature IDs:** F34 | **Branch:** `feat/S004-supabase-auth` (TP-S004-12, off `main`)
+
+> Mechanism (TP-S004): HS256 verify with `SUPABASE_JWT_SECRET`; role from `app_metadata.role`;
+> shared verifier `vecinita_shared_schemas.auth`; PyJWT `>=2.10,<3`; `@supabase/supabase-js ^2.108.2`.
+
+#### M43: Supabase project + env-sync scaffolding (CLI/branching, invites, bootstrap)
+
+**Goal**: Repo-managed Supabase config: `supabase/` (CLI `config.toml`) with **public sign-up
+disabled** + invite/SMTP settings; migrations-in-repo + branching workflow docs; idempotent
+first-admin seed script; secrets matrix + operator runbook. **No app runtime code.**
+**Acceptance**: `supabase` config asserts signup disabled; seed script idempotent (mocked admin
+API); secrets matrix + runbook updated; AC-A10 plan in place.
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|------------|-------------|
+| T43.1 | Config: `supabase/config.toml` via Supabase CLI — disable public sign-up, enable invite flow, custom-SMTP placeholders; document branching (ephemeral previews) | Config | pending | ADR-027 §6/§7, TP-S004-07/08 | — | — | S004 | F34 |
+| T43.2 | Test: first-admin seed script idempotent + sets `app_metadata.role=admin` (mocked admin API) — red | Test | pending | ADR-027 §8, TP-S004-10 | — | — | S004 | F34 |
+| T43.3 | Code: `scripts/seed_first_admin.py` using `SUPABASE_SECRET_KEY` (idempotent; reads `SUPABASE_ADMIN_EMAIL/_PASSWORD`) | Code | pending | ADR-027 §8 | T43.2 | — | S004 | F34 |
+| T43.4 | Docs: `docs/staging-secrets-matrix.md` + operator runbook — `SUPABASE_JWT_SECRET`, `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `VITE_SUPABASE_*`, invite/disable/role-change, JWT-secret rotation, branch cleanup (AC-A10) | Docs | pending | config-spec §Admin auth, AC-A10 | T43.1 | — | S004 | F34 |
+| T43.5 | CI: `.github/workflows/supabase.yml` — offline validate + gated preview/sync (ADR-027 §6); `scripts/check_supabase_config.sh`; TC-087 | Config | completed | ADR-027 §6, test-plan TC-087 | T43.1 | — | S004 | F34 | 2026-06-29 |
+
+#### M44: Shared JWT verifier — `vecinita_shared_schemas.auth`
+
+**Goal**: HS256 verifier + FastAPI dependencies in `packages/shared-schemas`; principal = opaque
+Supabase `sub` UUID + `app_metadata.role`; `require_role("admin")`.
+**Acceptance**: TC-077 (valid admin authorizes), TC-078 (missing/invalid/expired → 401), role
+extraction unit-tested; basedpyright/ruff clean (no `Any`, ADR-018).
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|------------|-------------|
+| T44.1 | Test: verify valid HS256 token → principal(sub UUID, role) (TC-077); reject missing/invalid/expired/wrong-`aud` → 401 (TC-078) — red | Test | pending | test-plan TC-077/078, ADR-027 §1 | — | — | S004 | F34 |
+| T44.2 | Code: `vecinita_shared_schemas.auth` — `verify_supabase_jwt()` (PyJWT HS256, exp+aud), `get_principal` + `require_role(...)` FastAPI deps; `VECINITA_AUTH_REQUIRED` toggle | Code | pending | ADR-027 §1/§3, config-spec | T44.1 | — | S004 | F34 |
+| T44.3 | Test: role gating helper — `viewer` denied, `admin` allowed (TC-079 unit level) — red→green | Test | pending | test-plan TC-079, RD-075 | T44.2 | — | S004 | F34 |
+| T44.4 | Config: add **PyJWT `>=2.10,<3`** to `packages/shared-schemas` deps (TP-S004-04) | Config | pending | dependency-inventory §EV-005 | T44.2 | — | S004 | F34 |
+
+#### M45: Backend enforcement — DM API + internal-write API + audit attribution
+
+**Goal**: Apply the verifier as a dependency on DM Modal `/jobs*` (alongside `X-Vecinita-Proxy-Key`)
+and internal-write `/internal/v1/*` (JWT operator **or** `VECINITA_INTERNAL_API_KEY` service key);
+writes require `admin`; record non-PII `actor_id`/`actor_role`; tighten ChatRAG CORS.
+**Acceptance**: TC-077/078/079/081/083 green; Alembic migration adds `actor_id`+`actor_role`;
+TC-082 (ChatRAG strict CORS) at H0c.
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|------------|-------------|
+| T45.1 | Test (TestClient): DM `/jobs*` + internal-write routes reject no/invalid JWT → 401 (TC-078, UJ-028); ChatRAG stays anonymous (TC-083) — red | Test | pending | test-plan TC-078/083, UJ-028 | T44.2 | — | S004 | F34 |
+| T45.2 | Code: add JWT dependency to DM backend `/jobs*` (keep proxy header) and internal-write `/internal/v1/*` (JWT operator OR service API key) | Code | pending | ADR-027 §5, TP-S004-05/09 | T45.1 | — | S004 | F34 |
+| T45.3 | Test: `viewer` → 403 on write routes; `admin` → success (TC-079, UJ-029) — red | Test | pending | test-plan TC-079, AC-A3 | T45.2 | — | S004 | F34 |
+| T45.4 | Code: enforce `require_role("admin")` on write methods (POST/PATCH/DELETE) across internal-write routes | Code | pending | ADR-027 §2/§5 | T45.3 | D5 | S004 | F34 |
+| T45.5 | Test: Alembic migration adds nullable `actor_id` (UUID) + `actor_role`; audit attribution is non-PII (TC-081) — red | Test | pending | test-plan TC-081, ADR-016/027 | T45.2 | D5 | S004 | F34 |
+| T45.6 | Code: Alembic migration + write handlers set `actor_id`/`actor_role` from verified principal (no email/name) | Code | pending | ADR-027 §2, ADR-016 | T45.5 | D5 | S004 | F34 |
+| T45.7 | Code+Test: tighten ChatRAG `VECINITA_CORS_ORIGINS` to frontend origin only; admin APIs allow `Authorization` header — H0c OPTIONS (TC-082) | Code | pending | config-spec §CORS, RD-079, cors-browser-methods.mdc | T45.2 | — | S004 | F34 |
+
+#### M46: DM frontend auth — login, protected routes, role-gated controls
+
+**Goal**: `@supabase/supabase-js` session; login screen; protected routing; surface current user +
+logout; send `Authorization: Bearer` to admin APIs; hide/disable writes for `viewer`.
+**Acceptance**: TC-084 (protected route + login), TC-085 (viewer write controls hidden) green
+(Vitest); H4 preflight includes `Authorization`.
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|------------|-------------|
+| T46.1 | Test (Vitest): unauthenticated → redirect to login; renders on session; current-user + logout (TC-084, UJ-026) — red | Test | pending | test-plan TC-084, UJ-026 | — | — | S004 | F34 |
+| T46.2 | Config: add **`@supabase/supabase-js ^2.108.2`** to `apps/data-management-frontend`; `VITE_SUPABASE_*` wiring | Config | pending | dependency-inventory §EV-005, config-spec | T46.1 | — | S004 | F34 |
+| T46.3 | Code: Supabase client + auth context; Login screen (email+password / invite-accept); ProtectedRoute; current-user + logout in shell | Code | pending | ADR-026/027, UJ-026/027 | T46.2 | — | S004 | F34 |
+| T46.4 | Code: attach `Authorization: Bearer <jwt>` to admin API fetches (keep proxy header to DM Modal) | Code | pending | api-contract §Authentication, RD-076 | T46.3 | — | S004 | F34 |
+| T46.5 | Test+Code: role-gated controls — hide/disable write actions for `viewer` (TC-085, UJ-029) | Test | pending | test-plan TC-085, AC-A5 | T46.3 | — | S004 | F34 |
+
+#### M47: Integration, privacy, OpenAPI & gate
+
+**Goal**: e2e journeys, invite-only assertion, privacy guarantees, OpenAPI `securitySchemes`,
+full-suite + config validation.
+**Acceptance**: TC-080/086 green; UJ-026–029 covered; AC-A1–A10 satisfied (A8/A10 verified at
+12/13); OpenAPI updated; full backend + DM-frontend suites green.
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|------------|-------------|
+| T47.1 | Test (e2e): `tests/e2e/test_uj028_unauthenticated_admin.py` (401 across admin APIs; ChatRAG anonymous) — green | Test | completed | test-plan TC-078/083, UJ-028 | T45.2, T45.7 | — | S004 | F34 |
+| T47.2 | Test (e2e): `tests/e2e/test_uj027_invite_only_registration.py` — public sign-up disabled / unauthorized (TC-080, UJ-027) | Test | completed | test-plan TC-080, UJ-027 | T43.1 | — | S004 | F34 |
+| T47.3 | Test (e2e): `tests/e2e/test_uj029_role_gating.py` — viewer 403 / admin 200; audit actor = opaque UUID + role, no PII (TC-079/081) | Test | completed | test-plan TC-079/081, UJ-029 | T45.4, T45.6 | — | S004 | F34 |
+| T47.4 | Test (privacy): extend `tests/privacy/` — no `users`/`profiles`/`auth_*`/identity tables in corpus DB; `actor_id` is UUID, no PII columns (TC-086) | Test | completed | test-plan TC-086, ADR-026/027 | T45.6 | — | S004 | F34 |
+| T47.5 | Config: update OpenAPI (`openapi/`, `internal-write-api-spec.yaml`) — `bearerAuth` securityScheme on admin routes; keep `apiKeyAuth` for service calls (no request/response schema changes, AC-A9) | Config | completed | api-contract §Authentication, ADR-011 | T45.2 | — | S004 | F34 |
+| T47.6 | Test: full backend (pytest unit/integration/e2e/privacy) + DM-frontend Vitest suites green; config validation for `SUPABASE_*` / `VECINITA_AUTH_REQUIRED` | Test | completed | test-plan, acceptance-criteria AC-A1–A10 | T47.1–T47.5, T46.5 | — | S004 | F34 |
+
+#### Phase 11 Gate Check
+
+- [ ] All M43–M47 tasks completed (T43.1–T47.6)
+- [ ] TC-077–TC-086 green; UJ-026–UJ-029 covered
+- [ ] AC-A1–AC-A10 satisfied (AC-A8 CORS + AC-A10 env-sync/secrets verified at 12-verify-deploy / 13-deploy-smoke)
+- [ ] Privacy: no identity/PII tables in corpus DB; `actor_id` UUID + `actor_role` only (TC-086)
+- [ ] ChatRAG remains anonymous; strict CORS to frontend origin only (TC-082/083; H0c, H4 live)
+- [ ] OpenAPI `securitySchemes` updated; no request/response schema changes (AC-A9)
+- [ ] All Supabase secrets via Modal/DO env, never committed; first-admin seed idempotent
+- [ ] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -968,9 +1091,13 @@ main
 | PR-44 | Minor | M38 | feat/M38-ev004-deploy | fix/es-en-full-ui | pending |
 | PR-45 | Major | Phase 9 / EV-004 | fix/es-en-full-ui | main | pending |
 | PR-46 | Major | Phase 10 / S003 | feat/S003-persistent-chat-history | main | open ([#96](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/96)) |
+| PR-47 | Major | Phase 11 / S004 (EV-005) | feat/S004-supabase-auth | main | pending ([#75](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/75)) |
 
 S003 is evolve-lite + frontend-only: M39–M42 land as atomic commits on the single
 `feat/S003-persistent-chat-history` branch (one PR to `main`, PR-46), matching the S002 pattern.
+
+S004 (EV-005) is evolve-lite: M43–M47 land as atomic commits on the single
+`feat/S004-supabase-auth` branch (one PR to `main`, PR-47), matching the S002/S003 pattern.
 
 ## Task Tracking
 
@@ -1217,6 +1344,32 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T42.1 | M42 | 10 | Config | completed | — | — | S003 | F33 |
 | T42.2 | M42 | 10 | Test | completed | T41.5 | — | S003 | F33 |
 | T42.3 | M42 | 10 | Test | completed | T41.5, T40.4, T42.2 | — | S003 | F33 |
+| T43.1 | M43 | 11 | Config | pending | — | — | S004 | F34 |
+| T43.2 | M43 | 11 | Test | pending | — | — | S004 | F34 |
+| T43.3 | M43 | 11 | Code | pending | T43.2 | — | S004 | F34 |
+| T43.4 | M43 | 11 | Docs | pending | T43.1 | — | S004 | F34 |
+| T44.1 | M44 | 11 | Test | pending | — | — | S004 | F34 |
+| T44.2 | M44 | 11 | Code | pending | T44.1 | — | S004 | F34 |
+| T44.3 | M44 | 11 | Test | pending | T44.2 | — | S004 | F34 |
+| T44.4 | M44 | 11 | Config | pending | T44.2 | — | S004 | F34 |
+| T45.1 | M45 | 11 | Test | pending | T44.2 | — | S004 | F34 |
+| T45.2 | M45 | 11 | Code | pending | T45.1 | — | S004 | F34 |
+| T45.3 | M45 | 11 | Test | pending | T45.2 | — | S004 | F34 |
+| T45.4 | M45 | 11 | Code | pending | T45.3 | D5 | S004 | F34 |
+| T45.5 | M45 | 11 | Test | pending | T45.2 | D5 | S004 | F34 |
+| T45.6 | M45 | 11 | Code | pending | T45.5 | D5 | S004 | F34 |
+| T45.7 | M45 | 11 | Code | pending | T45.2 | — | S004 | F34 |
+| T46.1 | M46 | 11 | Test | pending | — | — | S004 | F34 |
+| T46.2 | M46 | 11 | Config | pending | T46.1 | — | S004 | F34 |
+| T46.3 | M46 | 11 | Code | pending | T46.2 | — | S004 | F34 |
+| T46.4 | M46 | 11 | Code | pending | T46.3 | — | S004 | F34 |
+| T46.5 | M46 | 11 | Test | pending | T46.3 | — | S004 | F34 |
+| T47.1 | M47 | 11 | Test | completed | T45.2, T45.7 | — | S004 | F34 |
+| T47.2 | M47 | 11 | Test | completed | T43.1 | — | S004 | F34 |
+| T47.3 | M47 | 11 | Test | completed | T45.4, T45.6 | — | S004 | F34 |
+| T47.4 | M47 | 11 | Test | completed | T45.6 | — | S004 | F34 |
+| T47.5 | M47 | 11 | Config | completed | T45.2 | — | S004 | F34 |
+| T47.6 | M47 | 11 | Test | completed | T47.1, T47.2, T47.3, T47.4, T47.5, T46.5 | — | S004 | F34 |
 
 ## Phase Gate Log
 
@@ -1252,6 +1405,12 @@ CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, ba
 - [x] Gateway R6 — deferred (direct URLs)
 - [x] vLLM model — Qwen2.5-1.5B-Instruct on T4
 - [x] Cost gate — pilot fits ≤ $50 with scale-to-zero; consolidate DO if overrun
+- [x] EV-005 JWT verification — HS256 shared secret `SUPABASE_JWT_SECRET` (TP-S004-01, ADR-027)
+- [x] EV-005 role source — `app_metadata.role`, read from verified JWT (TP-S004-02)
+- [x] EV-005 deps — PyJWT `>=2.10,<3`; `@supabase/supabase-js ^2.108.2` (TP-S004-04)
+- [x] EV-005 env sync — Supabase Pro + ephemeral branching + CLI migrations-in-repo (TP-S004-07)
+- [x] EV-005 cost cap — raised to ~$75/mo, supersedes ADR-004 (TP-S004-06, ADR-027)
+- [x] EV-005 invites / first-admin — `inviteUserByEmail` + custom SMTP; idempotent seed script (TP-S004-08/10)
 - [x] EV-001 ingest tagging step — after chunk, before embed (TP-010)
 - [x] EV-001 admin retag — async Modal job via `jobs.job_type=retag` (TP-011, TP-012)
 - [x] EV-001 retrieval SQL — union match document OR chunk (TP-013)

@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
 
 import {
   listDocumentChunks,
@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useAdminT } from "@/hooks/useAdminT";
+import { AdminWriteGate } from "@/components/AdminWriteGate";
 
 type DocumentAdminProps = {
   document: DocumentSummary;
@@ -151,6 +152,7 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
       await patchChunkTags(
         client,
         chunkId,
+        /* v8 ignore next -- drafts are populated with every loaded chunk; missing keys are defensive */
         parseTagsInput(chunkTagDrafts[chunkId] ?? ""),
       );
       setStatus(tr("admin.documentAdmin.chunkTagsSaved"));
@@ -203,37 +205,39 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
         </p>
       ) : null}
 
-      <form
-        onSubmit={(e) => void handleSaveDocumentTags(e)}
-        className="space-y-3"
-      >
-        <div className="space-y-2">
-          <Label htmlFor="doc-tags">
-            {tr("admin.documentAdmin.docTagsLabel")}
-          </Label>
-          <Input
-            id="doc-tags"
-            value={docTags}
-            onChange={(e) => {
-              setDocTags(e.target.value);
-            }}
-            placeholder={tr("admin.documentAdmin.docTagsPlaceholder")}
-          />
-        </div>
-        <div className="flex gap-2">
-          <Button type="submit" size="sm">
-            {tr("admin.documentAdmin.saveDocTags")}
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={() => void handleRetag()}
-          >
-            {tr("admin.documentAdmin.llmRetag")}
-          </Button>
-        </div>
-      </form>
+      <AdminWriteGate>
+        <form
+          onSubmit={(e) => void handleSaveDocumentTags(e)}
+          className="space-y-3"
+        >
+          <div className="space-y-2">
+            <Label htmlFor="doc-tags">
+              {tr("admin.documentAdmin.docTagsLabel")}
+            </Label>
+            <Input
+              id="doc-tags"
+              value={docTags}
+              onChange={(e) => {
+                setDocTags(e.target.value);
+              }}
+              placeholder={tr("admin.documentAdmin.docTagsPlaceholder")}
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button type="submit" size="sm">
+              {tr("admin.documentAdmin.saveDocTags")}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => void handleRetag()}
+            >
+              {tr("admin.documentAdmin.llmRetag")}
+            </Button>
+          </div>
+        </form>
+      </AdminWriteGate>
 
       <Separator />
 
@@ -260,6 +264,7 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
               </Label>
               <Input
                 id={`chunk-tags-${chunk.chunk_id}`}
+                /* v8 ignore next -- drafts are populated with every loaded chunk; missing keys are defensive */
                 value={chunkTagDrafts[chunk.chunk_id] ?? ""}
                 onChange={(e) => {
                   setChunkTagDrafts((current) => ({
@@ -269,13 +274,15 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
                 }}
               />
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => void handleSaveChunkTags(chunk.chunk_id)}
-            >
-              {tr("admin.documentAdmin.saveChunkTags")}
-            </Button>
+            <AdminWriteGate>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => void handleSaveChunkTags(chunk.chunk_id)}
+              >
+                {tr("admin.documentAdmin.saveChunkTags")}
+              </Button>
+            </AdminWriteGate>
           </div>
         ))}
       </div>

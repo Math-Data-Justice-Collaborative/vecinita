@@ -6,9 +6,13 @@ import os
 
 import pytest
 from sqlalchemy import create_engine, text
-from tests.corpus_db_lock import corpus_db_lock
 from vecinita_database.seeds.load import load_corpus
+from vecinita_rag.retriever import EmbedFn  # noqa: TC002
 from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
+
+from tests.corpus_db_lock import corpus_db_lock
+
+_MIN_CORPUS_ROWS = 2
 
 
 def _database_url() -> str:
@@ -19,6 +23,7 @@ def _database_url() -> str:
 
 
 def basis_vector(index: int, *, scale: float = 1.0) -> list[float]:
+    """Return a 384-dim one-hot basis vector for deterministic retrieval tests."""
     values = [0.0] * 384
     values[index % 384] = scale
     return values
@@ -152,7 +157,7 @@ def seed_eval_corpus(*, database_url: str) -> dict[str, int]:
     with corpus_db_lock():
         _reset_corpus_tables_impl(database_url=database_url)
         counts = load_corpus(database_url=database_url)
-        if counts["documents"] < 2 or counts["chunks"] < 2:
+        if counts["documents"] < _MIN_CORPUS_ROWS or counts["chunks"] < _MIN_CORPUS_ROWS:
             msg = f"eval corpus seed incomplete: {counts}"
             raise RuntimeError(msg)
         written = _attach_embeddings_impl(
@@ -222,6 +227,7 @@ def seed_spanish_only_corpus(*, database_url: str) -> dict[str, int]:
 
 @pytest.fixture
 def corpus_db() -> str:
+    """Load corpus rows and return the database URL for integration tests."""
     url = _database_url()
     with corpus_db_lock():
         load_corpus(database_url=url)
@@ -235,5 +241,10 @@ def corpus_db() -> str:
 
 
 @pytest.fixture
-def embed_fn_food_pantry():
-    return lambda _query: basis_vector(0)
+def embed_fn_food_pantry() -> EmbedFn:
+    """Return an embed function that maps any query to the food-pantry basis vector."""
+
+    def _embed(_query: str) -> list[float]:
+        return basis_vector(0)
+
+    return _embed

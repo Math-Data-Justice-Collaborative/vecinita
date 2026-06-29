@@ -1,23 +1,39 @@
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
-import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { MemoryRouter } from "react-router-dom";
 
-import App from "../App";
+import { renderAppRoutesReady, useMediaQueryMock } from "./renderAppHelpers";
+import { fetchInputUrl } from "./fetch-mock";
 
-function renderApp(initialRoute = "/dashboard") {
-  return renderWithProviders(
-    <MemoryRouter initialEntries={[initialRoute]}>
-      <App />
-    </MemoryRouter>,
-  );
+async function renderApp(initialRoute = "/dashboard") {
+  return renderAppRoutesReady(initialRoute);
 }
+
+const STATS_BODY = {
+  total_documents: 0,
+  total_chunks: 0,
+  tag_distribution: [],
+  language_breakdown: {},
+  recent_activity: [],
+  top_served: [],
+};
 
 describe("Admin navigation", () => {
   beforeEach(() => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue({ ok: true, json: async () => [] }),
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/stats")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => STATS_BODY,
+          });
+        }
+        if (url.includes("/internal/v1/documents")) {
+          return Promise.resolve({ ok: true, json: async () => [] });
+        }
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      }),
     );
   });
 
@@ -26,8 +42,8 @@ describe("Admin navigation", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders sidebar with all navigation links", () => {
-    renderApp();
+  it("renders sidebar with all navigation links", async () => {
+    await renderApp();
 
     const nav = screen.getByTestId("admin-nav");
     expect(nav).toBeInTheDocument();
@@ -44,7 +60,7 @@ describe("Admin navigation", () => {
   });
 
   it("navigates to corpus page when clicking Corpus link", async () => {
-    renderApp();
+    await renderApp();
 
     fireEvent.click(screen.getByRole("link", { name: /corpus/i }));
     expect(
@@ -55,8 +71,8 @@ describe("Admin navigation", () => {
     });
   });
 
-  it("navigates to health page", () => {
-    renderApp();
+  it("navigates to health page", async () => {
+    await renderApp();
 
     fireEvent.click(screen.getByRole("link", { name: /health/i }));
     expect(
@@ -64,29 +80,32 @@ describe("Admin navigation", () => {
     ).toBeInTheDocument();
   });
 
-  it("navigates to audit log page", () => {
-    renderApp();
+  it("navigates to audit log page", async () => {
+    await renderApp();
 
     fireEvent.click(screen.getByRole("link", { name: /audit log/i }));
     expect(screen.getByText(/event history/i)).toBeInTheDocument();
   });
 
-  it("redirects unknown routes to /dashboard", () => {
-    renderApp("/unknown-route");
+  it("redirects unknown routes to /dashboard", async () => {
+    await renderApp("/unknown-route");
 
-    expect(screen.getByText(/overview of your corpus/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/overview of your corpus/i)).toBeInTheDocument();
+    });
   });
 
-  it("theme toggle button exists and is clickable", () => {
-    renderApp();
+  it("theme toggle button exists and is clickable", async () => {
+    await renderApp();
 
     const toggles = screen.getAllByTestId("theme-toggle");
     expect(toggles.length).toBeGreaterThan(0);
-    fireEvent.click(toggles[0]);
+    fireEvent.click(toggles[0]!);
   });
 
   it("opens mobile navigation sheet", async () => {
-    renderApp();
+    useMediaQueryMock.mockReturnValue(false);
+    await renderApp();
 
     fireEvent.click(screen.getByRole("button", { name: /open navigation/i }));
     const sheetTitle = await screen.findAllByText("Vecinita");

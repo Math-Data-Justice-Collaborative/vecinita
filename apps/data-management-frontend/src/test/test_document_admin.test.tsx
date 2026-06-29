@@ -124,6 +124,48 @@ describe("DocumentAdmin", () => {
     });
   });
 
+  it("saves chunk tags using an empty draft when the field was not edited", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonOk([
+          {
+            chunk_id: "chunk-1",
+            chunk_index: 0,
+            text: "text",
+            tags: [],
+          },
+        ]),
+      )
+      .mockResolvedValueOnce(jsonOk({ tags: [] }))
+      .mockResolvedValueOnce(jsonOk({ tags: [] }))
+      .mockResolvedValueOnce(
+        jsonOk([
+          {
+            chunk_id: "chunk-1",
+            chunk_index: 0,
+            text: "text",
+            tags: [],
+          },
+        ]),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderAdmin();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /save chunk tags/i }),
+      ).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /save chunk tags/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("status")).toHaveTextContent(/chunk tags saved/i);
+    });
+  });
+
   it("saves chunk tags and reloads chunks", async () => {
     const fetchMock = vi
       .fn()
@@ -450,6 +492,44 @@ describe("DocumentAdmin", () => {
     });
   });
 
+  it("shows poll error when job status check fails with an Error", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonOk([
+          {
+            chunk_id: "chunk-1",
+            chunk_index: 0,
+            text: "text",
+            tags: [],
+          },
+        ]),
+      )
+      .mockResolvedValueOnce(jsonOk({ tags: [] }))
+      .mockResolvedValueOnce(jsonOk({ job_id: "retag-job-err" }))
+      .mockRejectedValueOnce(new Error("poll transport failed"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderAdmin();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /llm re-tag/i }),
+      ).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /llm re-tag/i }));
+    await vi.advanceTimersByTimeAsync(1600);
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "poll transport failed",
+      );
+    });
+  });
+
   it("shows poll error when job status check fails", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
 
@@ -486,6 +566,116 @@ describe("DocumentAdmin", () => {
         "Failed to poll retag job",
       );
     });
+  });
+
+  it("updates chunk tag drafts when typing in the chunk tags field", async () => {
+    renderAdmin();
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/chunk tags/i)).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByLabelText(/chunk tags/i), {
+      target: { value: "housing, legal" },
+    });
+
+    expect(screen.getByLabelText(/chunk tags/i)).toHaveValue("housing, legal");
+  });
+
+  it("ignores a retag poll error that resolves after unmount", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+
+    let rejectJob: (reason: unknown) => void = () => undefined;
+    const pendingJob = new Promise((_, reject) => {
+      rejectJob = reject;
+    });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonOk([
+          { chunk_id: "chunk-1", chunk_index: 0, text: "text", tags: [] },
+        ]),
+      )
+      .mockResolvedValueOnce(jsonOk({ tags: [] }))
+      .mockResolvedValueOnce(jsonOk({ job_id: "retag-job-unmount" }))
+      .mockReturnValueOnce(pendingJob);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { unmount } = renderWithProviders(
+      <ThemeProvider>
+        <DocumentAdmin document={DOC} onClose={vi.fn()} />
+      </ThemeProvider>,
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /llm re-tag/i }),
+      ).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /llm re-tag/i }));
+    await vi.advanceTimersByTimeAsync(1600);
+
+    unmount();
+    rejectJob("poll failed after unmount");
+    await vi.runAllTimersAsync();
+
+    vi.useRealTimers();
+  });
+
+  it("ignores a retag poll result that resolves after unmount", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+
+    let resolveJob: (value: unknown) => void = () => undefined;
+    const pendingJob = new Promise((resolve) => {
+      resolveJob = resolve;
+    });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonOk([
+          { chunk_id: "chunk-1", chunk_index: 0, text: "text", tags: [] },
+        ]),
+      )
+      .mockResolvedValueOnce(jsonOk({ tags: [] }))
+      .mockResolvedValueOnce(jsonOk({ job_id: "retag-job-unmount" }))
+      .mockReturnValueOnce(pendingJob);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const onClose = vi.fn();
+    const { unmount } = renderWithProviders(
+      <ThemeProvider>
+        <DocumentAdmin document={DOC} onClose={onClose} />
+      </ThemeProvider>,
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /llm re-tag/i }),
+      ).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /llm re-tag/i }));
+    await waitFor(() => {
+      expect(screen.getByRole("status")).toHaveTextContent(/retag job queued/i);
+    });
+
+    await vi.advanceTimersByTimeAsync(1600);
+
+    unmount();
+
+    resolveJob(
+      jsonOk({
+        job_id: "retag-job-unmount",
+        status: "completed",
+        urls: [],
+        created_at: "2026-01-01T00:00:00Z",
+        updated_at: "2026-01-01T00:01:00Z",
+      }),
+    );
+    await vi.runAllTimersAsync();
+
+    vi.useRealTimers();
   });
 
   it("uses default message when retag job fails without details", async () => {

@@ -1,19 +1,10 @@
 import { cleanup, fireEvent, screen } from "@testing-library/react";
-import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { MemoryRouter } from "react-router-dom";
 
-import { ThemeProvider } from "@/components/ThemeProvider";
-import App from "../App";
+import { renderAppRoutesReady } from "./renderAppHelpers";
 
-function renderApp(initialRoute = "/dashboard") {
-  return renderWithProviders(
-    <ThemeProvider>
-      <MemoryRouter initialEntries={[initialRoute]}>
-        <App />
-      </MemoryRouter>
-    </ThemeProvider>,
-  );
+async function renderApp(initialRoute = "/dashboard") {
+  return renderAppRoutesReady(initialRoute);
 }
 
 describe("BUG-2026-06-14 corpus list unmount during load", () => {
@@ -37,7 +28,7 @@ describe("BUG-2026-06-14 corpus list unmount during load", () => {
     vi.stubGlobal("fetch", vi.fn().mockReturnValue(pendingFetch));
 
     try {
-      const { unmount } = renderApp();
+      const { unmount } = await renderApp();
       fireEvent.click(screen.getByRole("link", { name: /corpus/i }));
       expect(
         screen.getByText(/ingest urls and manage documents/i),

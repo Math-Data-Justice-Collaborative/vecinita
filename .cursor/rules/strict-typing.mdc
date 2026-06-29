@@ -11,20 +11,27 @@ Source of truth: `docs/typing-policy.md` (ADR-018).
 
 - Do **not** import or annotate with `typing.Any`.
 - Use `JsonObject` / `Mapping[str, object]` / `TypedDict` / concrete types instead.
-- CI and hooks run **`basedpyright`** with `reportExplicitAny = error`, not standalone pyright.
-- Ruff **`ANN401`** is enabled — do not disable without ADR update.
+- CI and hooks run **`basedpyright`** in **`strict`** mode with `reportExplicitAny`/`reportAny = error`.
+- Ruff runs **`select = ["ALL"]`**. Only the documented `ignore`/per-file-ignore entries in
+  `pyproject.toml` are allowed (formatter conflicts + incompatible doc-rule pairs; `S101` in
+  `tests/`). Do **not** add new ignores, `# noqa`, or `# pyright: ignore` without a documented
+  reason; broad suppressions require an ADR update.
 
 ## TypeScript
 
 - Do **not** use explicit `any` or untyped values that trigger `no-unsafe-*` ESLint errors.
 - Type `vi.fn<...>()` and fetch mocks in tests.
-- Frontends: `strict` + `noImplicitAny` in `tsconfig.json`.
+- Frontends + `packages/frontend-*`: `strict` + all strict flags
+  (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `verbatimModuleSyntax`,
+  `noPropertyAccessFromIndexSignature`, …) in `tsconfig.json` — see `docs/typing-policy.md`.
+- Intentional-`undefined` optional props are typed `prop?: T | undefined`; index-signature
+  reads use bracket access; type-only imports use `import { type X }`.
 
 ## Before claiming done
 
 ```bash
-uv run ruff check apps packages tests
-uv run basedpyright apps packages tests
+uv run ruff check apps packages tests infra scripts
+uv run basedpyright apps packages tests infra scripts
 cd apps/chat-rag-frontend && npm run lint
 cd apps/data-management-frontend && npm run lint
 ```

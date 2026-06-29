@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from typing import Final
+from typing import TYPE_CHECKING, Final
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 from pydantic import ValidationError
 
@@ -34,8 +36,9 @@ def validate_ask_request(payload: Mapping[str, object]) -> AskRequest:
     identity = find_identity_fields(payload)
     if identity:
         field = identity[0]
+        title = "AskRequest"
         raise ValidationError.from_exception_data(
-            "AskRequest",
+            title,
             [
                 {
                     "type": "extra_forbidden",

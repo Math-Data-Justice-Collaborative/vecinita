@@ -32,9 +32,9 @@ export type TagListResponse = {
 };
 
 export async function fetchDocuments(params: {
-  tags?: string[];
-  q?: string;
-  page?: number;
+  tags?: string[] | undefined;
+  q?: string | undefined;
+  page?: number | undefined;
 }): Promise<DocumentBrowsePage> {
   const { baseUrl } = requireChatApiConfig();
   const search = new URLSearchParams();

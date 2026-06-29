@@ -18,13 +18,17 @@ from vecinita_shared_schemas.chat_rag import (
 )
 from vecinita_shared_schemas.data_management import JobOptions
 
+_EMBEDDING_DIM = 384
+
 
 def test_ask_request_model() -> None:
+    """Test ask request model."""
     model = AskRequest.model_validate({"question": "Hello"})
     assert model.question == "Hello"
 
 
 def test_create_job_request_model() -> None:
+    """Test create job request model."""
     model = CreateJobRequest.model_validate(
         {"urls": ["https://example.com/page"], "options": {"chunk_size_tokens": 256}}
     )
@@ -32,7 +36,8 @@ def test_create_job_request_model() -> None:
 
 
 def test_batch_upsert_embedding_dimension() -> None:
-    embedding = [0.0] * 384
+    """Test batch upsert embedding dimension."""
+    embedding = [0.0] * _EMBEDDING_DIM
     model = BatchUpsertRequest.model_validate(
         {
             "documents": [
@@ -43,15 +48,17 @@ def test_batch_upsert_embedding_dimension() -> None:
             ]
         }
     )
-    assert len(model.documents[0].chunks[0].embedding) == 384
+    assert len(model.documents[0].chunks[0].embedding) == _EMBEDDING_DIM
 
 
 def test_create_job_request_requires_urls_for_ingest() -> None:
+    """Test create job request requires urls for ingest."""
     with pytest.raises(ValueError, match="urls required"):
         CreateJobRequest.model_validate({"urls": [], "options": {"job_type": "ingest"}})
 
 
 def test_create_job_request_requires_document_id_for_retag() -> None:
+    """Test create job request requires document id for retag."""
     with pytest.raises(ValueError, match="document_id required"):
         CreateJobRequest.model_validate(
             {
@@ -62,6 +69,7 @@ def test_create_job_request_requires_document_id_for_retag() -> None:
 
 
 def test_chat_rag_models_validate() -> None:
+    """Test chat rag models validate."""
     chunk_id = uuid4()
     document_id = uuid4()
     source = Source.model_validate(

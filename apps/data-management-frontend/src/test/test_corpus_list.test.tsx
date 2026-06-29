@@ -162,6 +162,35 @@ describe("CorpusList", () => {
     });
   });
 
+  it("closes DocumentAdmin and returns to the corpus table", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS })
+      .mockResolvedValueOnce({ ok: true, json: async () => [] })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ tags: [] }) });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderCorpus();
+
+    await waitFor(() => {
+      expect(screen.getByText("Doc A")).toBeInTheDocument();
+    });
+
+    const row = screen.getByText("Doc A").closest("tr")!;
+    fireEvent.click(within(row).getByRole("button", { name: /manage tags/i }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Document admin")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /close/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText("Document admin")).not.toBeInTheDocument();
+      expect(screen.getByText("Doc A")).toBeInTheDocument();
+    });
+  });
+
   it("deselects all when select-all is toggled off", async () => {
     vi.stubGlobal(
       "fetch",
@@ -178,6 +207,28 @@ describe("CorpusList", () => {
     expect(screen.getByTestId("bulk-toolbar")).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId("select-all"));
+    expect(screen.queryByTestId("bulk-toolbar")).not.toBeInTheDocument();
+  });
+
+  it("toggles an individual row selection on and off", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS }),
+    );
+
+    renderCorpus();
+
+    await waitFor(() => {
+      expect(screen.getByText("Doc A")).toBeInTheDocument();
+    });
+
+    const row = screen.getByText("Doc A").closest("tr")!;
+    const checkbox = within(row).getByRole("checkbox");
+
+    fireEvent.click(checkbox);
+    expect(screen.getByTestId("bulk-toolbar")).toBeInTheDocument();
+
+    fireEvent.click(checkbox);
     expect(screen.queryByTestId("bulk-toolbar")).not.toBeInTheDocument();
   });
 
@@ -215,6 +266,51 @@ describe("CorpusList", () => {
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent("delete exploded");
     });
+  });
+
+  it("shows generic delete error for non-Error failures", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS })
+        .mockRejectedValueOnce("delete boom"),
+    );
+
+    renderCorpus();
+
+    await waitFor(() => {
+      expect(screen.getByText("Doc A")).toBeInTheDocument();
+    });
+
+    const row = screen.getByText("Doc A").closest("tr")!;
+    fireEvent.click(within(row).getByRole("button", { name: /^delete$/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent("Delete failed");
+    });
+  });
+
+  it("uses the document url in the delete confirmation when title is missing", async () => {
+    const confirmMock = vi.spyOn(window, "confirm").mockReturnValue(false);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS }),
+    );
+
+    renderCorpus();
+
+    await waitFor(() => {
+      expect(screen.getByText("(untitled)")).toBeInTheDocument();
+    });
+
+    const row = screen.getByText("(untitled)").closest("tr")!;
+    fireEvent.click(within(row).getByRole("button", { name: /^delete$/i }));
+
+    expect(confirmMock).toHaveBeenCalledWith(
+      expect.stringContaining("https://example.com/b"),
+    );
   });
 
   it("shows generic load error for non-Error failures", async () => {

@@ -4,22 +4,33 @@ from __future__ import annotations
 
 import os
 import uuid
+from http import HTTPStatus
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from vecinita_internal_write_api.app import create_app
+from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
+
 from tests.helpers.json_response import (
     json_int,
     json_object_list,
     json_str,
     response_json_object,
 )
-from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from sqlalchemy.engine import Engine
 
 pytestmark = pytest.mark.integration
 
 _API_KEY = "test-internal-key"
+_EXPECTED_SERVED_COUNT = 2
+_MIN_TOP_SERVED_ITEMS = 2
 
 
 def _database_url() -> str:
@@ -29,16 +40,17 @@ def _database_url() -> str:
     )
 
 
-@pytest.fixture()
-def engine():
+@pytest.fixture
+def engine() -> Engine:
+    """Return a SQLAlchemy engine for the integration database."""
     return create_engine(_database_url())
 
 
-@pytest.fixture()
-def client():
+@pytest.fixture
+def client() -> TestClient:
+    """Return a TestClient with internal-write API auth configured."""
     os.environ["DATABASE_URL"] = _database_url()
     os.environ["VECINITA_INTERNAL_API_KEY"] = _API_KEY
-    from vecinita_internal_write_api.app import create_app
 
     app = create_app()
     return TestClient(app)
@@ -48,10 +60,10 @@ def _auth() -> dict[str, str]:
     return {"Authorization": f"Bearer {_API_KEY}"}
 
 
-@pytest.fixture()
-def sample_docs(engine):
+@pytest.fixture
+def sample_docs(engine: Engine) -> Iterator[list[UUID]]:
     """Insert 3 documents and return their ids; clean up after test."""
-    doc_ids = []
+    doc_ids: list[UUID] = []
     with engine.begin() as conn:
         for i in range(3):
             url = f"https://test.example.com/stats-{uuid.uuid4().hex[:8]}-{i}"
@@ -81,7 +93,11 @@ def sample_docs(engine):
             conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
-def test_stats_served_upserts_counter(client, sample_docs) -> None:
+def test_stats_served_upserts_counter(
+    client: TestClient,
+    engine: Engine,
+    sample_docs: list[UUID],
+) -> None:
     """POST /stats/served increments served_count for each document_id."""
     doc_ids = [str(d) for d in sample_docs[:2]]
     resp = client.post(
@@ -89,7 +105,7 @@ def test_stats_served_upserts_counter(client, sample_docs) -> None:
         json={"document_ids": doc_ids},
         headers=_auth(),
     )
-    assert resp.status_code == 202
+    assert resp.status_code == HTTPStatus.ACCEPTED
     assert response_json_object(resp)["acknowledged"] is True
 
     resp2 = client.post(
@@ -97,12 +113,9 @@ def test_stats_served_upserts_counter(client, sample_docs) -> None:
         json={"document_ids": doc_ids[:1]},
         headers=_auth(),
     )
-    assert resp2.status_code == 202
+    assert resp2.status_code == HTTPStatus.ACCEPTED
 
-    from sqlalchemy import create_engine as _ce
-
-    eng = _ce(_database_url())
-    with eng.connect() as conn:
+    with engine.connect() as conn:
         count_raw = sqlalchemy_scalar_one(
             conn.execute(
                 text("SELECT served_count FROM document_serving_stats WHERE document_id = :id"),
@@ -110,10 +123,10 @@ def test_stats_served_upserts_counter(client, sample_docs) -> None:
             )
         )
         count = scalar_int(count_raw)
-    assert count == 2
+    assert count == _EXPECTED_SERVED_COUNT
 
 
-def test_stats_served_ignores_unknown_docs(client) -> None:
+def test_stats_served_ignores_unknown_docs(client: TestClient) -> None:
     """POST /stats/served with nonexistent doc_ids returns 202 (fire-and-forget)."""
     fake = [str(uuid.uuid4())]
     resp = client.post(
@@ -121,10 +134,10 @@ def test_stats_served_ignores_unknown_docs(client) -> None:
         json={"document_ids": fake},
         headers=_auth(),
     )
-    assert resp.status_code == 202
+    assert resp.status_code == HTTPStatus.ACCEPTED
 
 
-def test_top_served_returns_ranked_list(client, sample_docs) -> None:
+def test_top_served_returns_ranked_list(client: TestClient, sample_docs: list[UUID]) -> None:
     """GET /stats/top-served returns documents ranked by served_count."""
     client.post(
         "/internal/v1/stats/served",
@@ -138,11 +151,11 @@ def test_top_served_returns_ranked_list(client, sample_docs) -> None:
     )
 
     resp = client.get("/internal/v1/stats/top-served?limit=10", headers=_auth())
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
     items = json_object_list(response_json_object(resp), "items")
-    assert len(items) >= 2
+    assert len(items) >= _MIN_TOP_SERVED_ITEMS
 
     sample_id_strs = [str(d) for d in sample_docs]
     our_items = [item for item in items if json_str(item, "document_id") in sample_id_strs]
-    if len(our_items) >= 2:
+    if len(our_items) >= _MIN_TOP_SERVED_ITEMS:
         assert json_int(our_items[0], "served_count") >= json_int(our_items[1], "served_count")

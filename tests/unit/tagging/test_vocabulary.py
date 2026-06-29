@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import langdetect
 import pytest
@@ -16,6 +16,11 @@ from vecinita_tagging.vocabulary import (
     tag_inputs_for_slugs,
     vocabulary_slugs,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+_MIN_SEED_TAG_COUNT = 8
 
 _SAMPLE_VOCAB = [
     SeedTag(slug="housing", label_en="Housing", label_es="Vivienda"),
@@ -32,6 +37,7 @@ def test_default_seed_path_uses_env_when_file_exists(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test default seed path uses env when file exists."""
     seed_file = tmp_path / "custom_tags.json"
     seed_file.write_text('{"tags": []}', encoding="utf-8")
     monkeypatch.setenv("VECINITA_TAG_SEED_PATH", str(seed_file))
@@ -42,6 +48,7 @@ def test_default_seed_path_uses_env_when_file_exists(
 def test_default_seed_path_falls_back_to_repo_fixture(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test default seed path falls back to repo fixture."""
     monkeypatch.setenv("VECINITA_TAG_SEED_PATH", "/nonexistent/seed_tags.json")
 
     path = default_seed_path()
@@ -51,6 +58,7 @@ def test_default_seed_path_falls_back_to_repo_fixture(
 
 
 def test_load_seed_vocabulary_from_custom_path(tmp_path: Path) -> None:
+    """Test load seed vocabulary from custom path."""
     seed_path = tmp_path / "seed_tags.json"
     seed_path.write_text(
         json.dumps(
@@ -73,31 +81,36 @@ def test_load_seed_vocabulary_from_custom_path(tmp_path: Path) -> None:
 
 
 def test_load_seed_vocabulary_loads_repo_fixture() -> None:
+    """Test load seed vocabulary loads repo fixture."""
     tags = load_seed_vocabulary()
 
-    assert len(tags) >= 8
+    assert len(tags) >= _MIN_SEED_TAG_COUNT
     assert tags[0].slug == "housing"
 
 
 def test_load_seed_vocabulary_requires_tags_array(tmp_path: Path) -> None:
+    """Test load seed vocabulary requires tags array."""
     seed_path = tmp_path / "bad.json"
     seed_path.write_text('{"tags": "not-a-list"}', encoding="utf-8")
 
-    with pytest.raises(ValueError, match="tags"):
+    with pytest.raises(TypeError, match="tags"):
         load_seed_vocabulary(seed_path)
 
 
 def test_vocabulary_slugs_deduplicates_in_order() -> None:
+    """Test vocabulary slugs deduplicates in order."""
     assert vocabulary_slugs(_SAMPLE_VOCAB_WITH_DUP) == ["housing", "legal"]
 
 
 def test_detect_document_language_returns_es_for_spanish() -> None:
+    """Test detect document language returns es for spanish."""
     text = "Este documento explica los derechos de los inquilinos en español."
 
     assert detect_document_language(text) == "es"
 
 
 def test_detect_document_language_returns_en_for_english() -> None:
+    """Test detect document language returns en for english."""
     text = "This document explains tenant rights in plain English."
 
     assert detect_document_language(text) == "en"
@@ -106,8 +119,12 @@ def test_detect_document_language_returns_en_for_english() -> None:
 def test_detect_document_language_uses_fallback_on_detection_failure(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test detect document language uses fallback on detection failure."""
+
     def _fail(_text: str) -> str:
-        raise langdetect.LangDetectException("fail", "detection failed")
+        """Fail."""
+        msg = "fail"
+        raise langdetect.LangDetectException(msg, "detection failed")
 
     monkeypatch.setattr(langdetect, "detect", _fail)
 
@@ -115,6 +132,7 @@ def test_detect_document_language_uses_fallback_on_detection_failure(
 
 
 def test_tag_inputs_for_slugs_uses_english_labels() -> None:
+    """Test tag inputs for slugs uses english labels."""
     inputs = tag_inputs_for_slugs(
         ["housing", "missing"],
         _SAMPLE_VOCAB,
@@ -127,6 +145,7 @@ def test_tag_inputs_for_slugs_uses_english_labels() -> None:
 
 
 def test_tag_inputs_for_slugs_uses_spanish_labels_and_human_source() -> None:
+    """Test tag inputs for slugs uses spanish labels and human source."""
     inputs = tag_inputs_for_slugs(
         ["legal"],
         _SAMPLE_VOCAB,
@@ -138,6 +157,7 @@ def test_tag_inputs_for_slugs_uses_spanish_labels_and_human_source() -> None:
 
 
 def test_tag_inputs_for_slugs_skips_unknown_slugs() -> None:
+    """Test tag inputs for slugs skips unknown slugs."""
     inputs = tag_inputs_for_slugs(
         ["unknown"],
         _SAMPLE_VOCAB,

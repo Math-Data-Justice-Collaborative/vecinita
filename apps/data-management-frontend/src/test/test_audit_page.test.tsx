@@ -124,7 +124,7 @@ describe("Audit log page", () => {
       expect(screen.getByText("document.created")).toBeInTheDocument();
     });
 
-    const expandBtn = screen.getAllByTestId("expand-payload")[0];
+    const expandBtn = screen.getAllByTestId("expand-payload")[0]!;
     fireEvent.click(expandBtn);
 
     await waitFor(() => {
@@ -159,7 +159,7 @@ describe("Audit log page", () => {
       expect(screen.getByText("document.created")).toBeInTheDocument();
     });
 
-    const expandBtn = screen.getAllByTestId("expand-payload")[0];
+    const expandBtn = screen.getAllByTestId("expand-payload")[0]!;
     fireEvent.click(expandBtn);
     expect(screen.getByText(/housing guide/i)).toBeInTheDocument();
 

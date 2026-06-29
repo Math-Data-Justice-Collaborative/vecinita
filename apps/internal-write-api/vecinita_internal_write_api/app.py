@@ -2,18 +2,23 @@
 
 from __future__ import annotations
 
+import contextlib
 import os
 import time
 import uuid as _uuid
-from collections.abc import Mapping
 from datetime import UTC, datetime
-from typing import Annotated, cast
+from http import HTTPStatus
+from typing import TYPE_CHECKING, Annotated, cast
 from uuid import UUID
 
 import httpx
-from fastapi import Depends, FastAPI, Header, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Engine
+from vecinita_shared_schemas.auth import (
+    AuthContext,
+    require_admin_write,
+    require_authenticated,
+)
 from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.db_mapping import (
     mapping_row,
@@ -76,6 +81,13 @@ from vecinita_internal_write_api.tags import (
     validate_document_tag_count,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+    from sqlalchemy.engine import Engine
+
+_MAX_DOCUMENT_TAGS = 10
+
 
 def _dependency_health_url(base: str) -> str:
     """Build liveness URL for an upstream base that may already end with /health."""
@@ -106,11 +118,12 @@ def _row_datetime_optional(row: Mapping[str, object], key: str) -> datetime | No
 def _tags_snapshot_list(value: object) -> list[dict[str, object]]:
     if not isinstance(value, list):
         return []
-    snapshots: list[dict[str, object]] = []
-    for item in value:
-        if isinstance(item, dict):
-            snapshots.append(item)
-    return snapshots
+    value_list: list[object] = cast("list[object]", value)
+    return [
+        as_json_object(cast("object", raw_item))
+        for raw_item in value_list
+        if isinstance(raw_item, dict)
+    ]
 
 
 def _tag_input_from_row(tag: Mapping[str, object]) -> TagInput:
@@ -132,7 +145,8 @@ def _normalize_database_url(url: str) -> str:
 def _database_url() -> str:
     url = os.environ.get("DATABASE_URL")
     if not url:
-        raise RuntimeError("DATABASE_URL is required for internal write API")
+        msg = "DATABASE_URL is required for internal write API"
+        raise RuntimeError(msg)
     return _normalize_database_url(url)
 
 
@@ -140,20 +154,16 @@ def _engine() -> Engine:
     return create_engine(_database_url())
 
 
-def _require_internal_key(
-    authorization: Annotated[str | None, Header()] = None,
-) -> None:
-    expected = os.environ.get("VECINITA_INTERNAL_API_KEY")
-    if not expected:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Internal API key not configured",
-        )
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
-    token = authorization.removeprefix("Bearer ").strip()
-    if token != expected:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
+def _resolve_write_actor(
+    ctx: Annotated[AuthContext, Depends(require_admin_write)],
+) -> tuple[UUID | None, str | None]:
+    """Resolved operator actor for audit attribution on write routes."""
+    if ctx.is_service or ctx.principal is None:
+        return (None, None)
+    return (ctx.principal.sub, ctx.principal.role)
+
+
+WriteActorDep = Annotated[tuple[UUID | None, str | None], Depends(_resolve_write_actor)]
 
 
 def _default_jobs_client() -> DataManagementJobsClient | None:
@@ -164,7 +174,9 @@ def _default_jobs_client() -> DataManagementJobsClient | None:
         return None
 
 
-def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAPI:
+def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route handlers inline
+    *, jobs_client: DataManagementJobsClient | None = None
+) -> FastAPI:
     """Build the internal write API (sole holder of DATABASE_URL)."""
     app = FastAPI(title="Vecinita Internal Write API", version="0.1.0")
     configure_cors(app, extra_allow_headers=["Authorization"])
@@ -172,22 +184,22 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     retag_jobs = jobs_client if jobs_client is not None else _default_jobs_client()
 
     @app.get("/health", response_model=HealthResponse)
-    def health() -> HealthResponse:
+    def health() -> HealthResponse:  # pyright: ignore[reportUnusedFunction]
         return HealthResponse(status="ok")
 
     @app.post(
         "/internal/v1/documents/batch",
         response_model=BatchUpsertResponse,
-        dependencies=[Depends(_require_internal_key)],
     )
-    def batch_upsert(body: BatchUpsertRequest) -> BatchUpsertResponse:
+    def batch_upsert(body: BatchUpsertRequest, actor: WriteActorDep) -> BatchUpsertResponse:  # pyright: ignore[reportUnusedFunction]
+        actor_id, actor_role = actor
         upserted = 0
         request_id = _uuid.uuid4()
         with engine.begin() as conn:
             for document in body.documents:
                 doc_id = scalar_uuid(
                     cast(
-                        object,
+                        "object",
                         conn.execute(
                             text(
                                 """
@@ -219,7 +231,7 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 for chunk in document.chunks:
                     chunk_id = scalar_uuid(
                         cast(
-                            object,
+                            "object",
                             conn.execute(
                                 text(
                                     """
@@ -277,6 +289,8 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                         "title": document.title,
                         "language": document.language,
                     },
+                    actor_id=actor_id,
+                    actor_role=actor_role,
                 )
                 create_document_version(
                     conn,
@@ -291,9 +305,9 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     @app.delete(
         "/internal/v1/documents/bulk",
         response_model=BulkResultResponse,
-        dependencies=[Depends(_require_internal_key)],
     )
-    def bulk_delete(body: BulkDeleteRequest) -> BulkResultResponse:
+    def bulk_delete(body: BulkDeleteRequest, actor: WriteActorDep) -> BulkResultResponse:  # pyright: ignore[reportUnusedFunction]
+        actor_id, actor_role = actor
         successes = 0
         failures: list[BulkFailure] = []
         request_id = _uuid.uuid4()
@@ -321,6 +335,8 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                         "title": row_str_optional(doc, "title"),
                         "url": row_str(doc, "url"),
                     },
+                    actor_id=actor_id,
+                    actor_role=actor_role,
                 )
                 conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
                 successes += 1
@@ -329,9 +345,9 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     @app.patch(
         "/internal/v1/documents/bulk/tags",
         response_model=BulkResultResponse,
-        dependencies=[Depends(_require_internal_key)],
     )
-    def bulk_tag(body: BulkTagRequest) -> BulkResultResponse:
+    def bulk_tag(body: BulkTagRequest, actor: WriteActorDep) -> BulkResultResponse:  # pyright: ignore[reportUnusedFunction]
+        actor_id, actor_role = actor
         successes = 0
         failures: list[BulkFailure] = []
         request_id = _uuid.uuid4()
@@ -373,8 +389,13 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 for tag in body.add_tags:
                     current[tag.slug] = tag
                 final_tags = list(current.values())
-                if len(final_tags) > 10:
-                    failures.append(BulkFailure(id=doc_id, error="Tag cap exceeded (max 10)"))
+                if len(final_tags) > _MAX_DOCUMENT_TAGS:
+                    failures.append(
+                        BulkFailure(
+                            id=doc_id,
+                            error=f"Tag cap exceeded (max {_MAX_DOCUMENT_TAGS})",
+                        )
+                    )
                     continue
                 replace_document_tags(
                     conn,
@@ -393,6 +414,8 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                     entity_id=doc_id,
                     request_id=request_id,
                     payload={"tags": tag_snapshot},
+                    actor_id=actor_id,
+                    actor_role=actor_role,
                 )
                 create_document_version(
                     conn,
@@ -408,9 +431,9 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
         "/internal/v1/documents/bulk/retag",
         response_model=BulkRetagResponse,
         status_code=status.HTTP_202_ACCEPTED,
-        dependencies=[Depends(_require_internal_key)],
     )
-    def bulk_retag(body: BulkRetagRequest) -> BulkRetagResponse:
+    def bulk_retag(body: BulkRetagRequest, actor: WriteActorDep) -> BulkRetagResponse:  # pyright: ignore[reportUnusedFunction]
+        actor_id, actor_role = actor
         if retag_jobs is None:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -434,15 +457,17 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                     entity_id=doc_id,
                     request_id=request_id,
                     payload={"job_id": str(job_id)},
+                    actor_id=actor_id,
+                    actor_role=actor_role,
                 )
         return BulkRetagResponse(job_ids=job_ids)
 
     @app.patch(
         "/internal/v1/documents/bulk/metadata",
         response_model=BulkResultResponse,
-        dependencies=[Depends(_require_internal_key)],
     )
-    def bulk_metadata(body: BulkMetadataRequest) -> BulkResultResponse:
+    def bulk_metadata(body: BulkMetadataRequest, actor: WriteActorDep) -> BulkResultResponse:  # pyright: ignore[reportUnusedFunction]
+        actor_id, actor_role = actor
         successes = 0
         failures: list[BulkFailure] = []
         request_id = _uuid.uuid4()
@@ -473,7 +498,9 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                     params["language"] = body.updates.language
                     new_language = body.updates.language
                 conn.execute(
-                    text(f"UPDATE documents SET {', '.join(set_clauses)} WHERE id = :id"),
+                    text(
+                        f"UPDATE documents SET {', '.join(set_clauses)} WHERE id = :id"  # noqa: S608  # whitelisted columns only
+                    ),
                     params,
                 )
                 emit_audit_event(
@@ -483,6 +510,8 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                     entity_id=doc_id,
                     request_id=request_id,
                     payload=body.updates.model_dump(exclude_none=True),
+                    actor_id=actor_id,
+                    actor_role=actor_role,
                 )
                 create_document_version(
                     conn,
@@ -496,9 +525,9 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     @app.get(
         "/internal/v1/documents/{document_id}",
         response_model=DocumentDetail,
-        dependencies=[Depends(_require_internal_key)],
+        dependencies=[Depends(require_authenticated)],
     )
-    def get_document_detail(document_id: UUID) -> DocumentDetail:
+    def get_document_detail(document_id: UUID) -> DocumentDetail:  # pyright: ignore[reportUnusedFunction]
         with engine.connect() as conn:
             row = (
                 conn.execute(
@@ -518,7 +547,7 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
             doc = mapping_row(row)
             scalar_chunks = cast(
-                list[object],
+                "list[object]",
                 list(
                     conn.execute(
                         text(
@@ -547,9 +576,9 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     @app.get(
         "/internal/v1/documents/{document_id}/tags",
         response_model=TagPatchResponse,
-        dependencies=[Depends(_require_internal_key)],
+        dependencies=[Depends(require_authenticated)],
     )
-    def get_document_tags(document_id: UUID) -> TagPatchResponse:
+    def get_document_tags(document_id: UUID) -> TagPatchResponse:  # pyright: ignore[reportUnusedFunction]
         with engine.connect() as conn:
             doc = (
                 conn.execute(
@@ -585,9 +614,11 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     @app.patch(
         "/internal/v1/documents/{document_id}/tags",
         response_model=TagPatchResponse,
-        dependencies=[Depends(_require_internal_key)],
     )
-    def patch_document_tags(document_id: UUID, body: TagPatchRequest) -> TagPatchResponse:
+    def patch_document_tags(  # pyright: ignore[reportUnusedFunction]
+        document_id: UUID, body: TagPatchRequest, actor: WriteActorDep
+    ) -> TagPatchResponse:
+        actor_id, actor_role = actor
         validate_document_tag_count(body.tags)
         request_id = _uuid.uuid4()
         with engine.begin() as conn:
@@ -621,6 +652,8 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 entity_id=document_id,
                 request_id=request_id,
                 payload={"tags": tag_snapshot},
+                actor_id=actor_id,
+                actor_role=actor_role,
             )
             create_document_version(
                 conn,
@@ -634,9 +667,9 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     @app.get(
         "/internal/v1/documents/{document_id}/chunks",
         response_model=list[ChunkDetail],
-        dependencies=[Depends(_require_internal_key)],
+        dependencies=[Depends(require_authenticated)],
     )
-    def list_document_chunks(document_id: UUID) -> list[ChunkDetail]:
+    def list_document_chunks(document_id: UUID) -> list[ChunkDetail]:  # pyright: ignore[reportUnusedFunction]
         with engine.connect() as conn:
             doc = (
                 conn.execute(
@@ -702,9 +735,11 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     @app.patch(
         "/internal/v1/chunks/{chunk_id}/tags",
         response_model=TagPatchResponse,
-        dependencies=[Depends(_require_internal_key)],
     )
-    def patch_chunk_tags(chunk_id: UUID, body: TagPatchRequest) -> TagPatchResponse:
+    def patch_chunk_tags(  # pyright: ignore[reportUnusedFunction]
+        chunk_id: UUID, body: TagPatchRequest, actor: WriteActorDep
+    ) -> TagPatchResponse:
+        actor_id, actor_role = actor
         validate_chunk_tag_count(body.tags)
         request_id = _uuid.uuid4()
         with engine.begin() as conn:
@@ -747,15 +782,17 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                         for t in tags
                     ]
                 },
+                actor_id=actor_id,
+                actor_role=actor_role,
             )
         return TagPatchResponse(tags=tags)
 
     @app.post(
         "/internal/v1/documents/{document_id}/retag",
         response_model=RetagJobResponse,
-        dependencies=[Depends(_require_internal_key)],
     )
-    def retag_document(document_id: UUID) -> RetagJobResponse:
+    def retag_document(document_id: UUID, actor: WriteActorDep) -> RetagJobResponse:  # pyright: ignore[reportUnusedFunction]
+        actor_id, actor_role = actor
         if retag_jobs is None:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -777,15 +814,17 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 entity_id=document_id,
                 request_id=request_id,
                 payload={"job_id": str(job_id)},
+                actor_id=actor_id,
+                actor_role=actor_role,
             )
         return RetagJobResponse(job_id=job_id)
 
     @app.get(
         "/internal/v1/documents",
         response_model=list[DocumentSummary],
-        dependencies=[Depends(_require_internal_key)],
+        dependencies=[Depends(require_authenticated)],
     )
-    def list_documents() -> list[DocumentSummary]:
+    def list_documents() -> list[DocumentSummary]:  # pyright: ignore[reportUnusedFunction]
         with engine.connect() as conn:
             rows = (
                 conn.execute(
@@ -813,9 +852,9 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     @app.delete(
         "/internal/v1/documents/{document_id}",
         status_code=status.HTTP_204_NO_CONTENT,
-        dependencies=[Depends(_require_internal_key)],
     )
-    def delete_document(document_id: UUID) -> None:
+    def delete_document(document_id: UUID, actor: WriteActorDep) -> None:  # pyright: ignore[reportUnusedFunction]
+        actor_id, actor_role = actor
         request_id = _uuid.uuid4()
         with engine.begin() as conn:
             doc_row = (
@@ -839,6 +878,8 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                     "title": row_str_optional(doc, "title"),
                     "url": row_str(doc, "url"),
                 },
+                actor_id=actor_id,
+                actor_role=actor_role,
             )
             conn.execute(
                 text("DELETE FROM documents WHERE id = :document_id"),
@@ -848,9 +889,9 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     @app.get(
         "/internal/v1/audit",
         response_model=AuditLogResponse,
-        dependencies=[Depends(_require_internal_key)],
+        dependencies=[Depends(require_authenticated)],
     )
-    def get_audit_log(
+    def get_audit_log(  # noqa: PLR0913  # pyright: ignore[reportUnusedFunction]  # audit filters map to query params
         page: int = 1,
         page_size: int = 50,
         event_type: str | None = None,
@@ -884,12 +925,19 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
 
         where_sql = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
 
+        audit_list_sql = (
+            f"SELECT id, event_type, entity_type, entity_id, request_id, payload, created_at "  # noqa: S608  # fixed filter templates; values bound
+            f"FROM audit_log {where_sql} ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
+        )
+
         with engine.connect() as conn:
             total = scalar_int(
                 cast(
-                    object,
+                    "object",
                     conn.execute(
-                        text(f"SELECT COUNT(*) FROM audit_log {where_sql}"),
+                        text(
+                            f"SELECT COUNT(*) FROM audit_log {where_sql}"  # noqa: S608  # fixed filter templates; values bound
+                        ),
                         params,
                     ).scalar_one(),
                 )
@@ -897,12 +945,7 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
 
             rows = (
                 conn.execute(
-                    text(
-                        f"SELECT id, event_type, entity_type, entity_id, "
-                        f"request_id, payload, created_at "
-                        f"FROM audit_log {where_sql} "
-                        f"ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
-                    ),
+                    text(audit_list_sql),
                     params,
                 )
                 .mappings()
@@ -931,9 +974,8 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     @app.post(
         "/internal/v1/audit/cleanup",
         response_model=AuditCleanupResponse,
-        dependencies=[Depends(_require_internal_key)],
     )
-    def audit_cleanup() -> AuditCleanupResponse:
+    def audit_cleanup(_actor: WriteActorDep) -> AuditCleanupResponse:  # pyright: ignore[reportUnusedFunction]
         retention_days = int(os.environ.get("VECINITA_AUDIT_RETENTION_DAYS", "365"))
         if retention_days <= 0:
             return AuditCleanupResponse(deleted=0, retention_days=retention_days)
@@ -943,9 +985,9 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     @app.get(
         "/internal/v1/documents/{document_id}/history",
         response_model=DocumentHistoryResponse,
-        dependencies=[Depends(_require_internal_key)],
+        dependencies=[Depends(require_authenticated)],
     )
-    def get_document_history(document_id: UUID) -> DocumentHistoryResponse:
+    def get_document_history(document_id: UUID) -> DocumentHistoryResponse:  # pyright: ignore[reportUnusedFunction]
         with engine.connect() as conn:
             doc_exists = conn.execute(
                 text("SELECT id FROM documents WHERE id = :document_id"),
@@ -985,9 +1027,9 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     @app.get(
         "/internal/v1/health/all",
         response_model=HealthAggregateResponse,
-        dependencies=[Depends(_require_internal_key)],
+        dependencies=[Depends(require_authenticated)],
     )
-    def health_all() -> HealthAggregateResponse:
+    def health_all() -> HealthAggregateResponse:  # pyright: ignore[reportUnusedFunction]
         timeout_ms = int(os.environ.get("VECINITA_HEALTH_TIMEOUT_MS", "3000"))
         timeout_s = timeout_ms / 1000.0
 
@@ -1008,7 +1050,7 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 conn.execute(text("SELECT 1"))
             db_ms = int((time.monotonic() - db_start) * 1000)
             results["database"] = ServiceHealth(status="up", latency_ms=db_ms)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001  # aggregate health must tolerate any dependency failure
             results["database"] = ServiceHealth(status="down", error=str(exc))
 
         results["internal_write_api"] = ServiceHealth(status="up", latency_ms=0)
@@ -1022,13 +1064,13 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
                 health_url = _dependency_health_url(url)
                 resp = httpx.get(health_url, timeout=timeout_s)
                 ms = int((time.monotonic() - start) * 1000)
-                if resp.status_code == 200:
+                if resp.status_code == HTTPStatus.OK:
                     results[svc_name] = ServiceHealth(status="up", latency_ms=ms)
                 else:
                     results[svc_name] = ServiceHealth(
                         status="down", error=f"HTTP {resp.status_code}"
                     )
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001  # aggregate health must tolerate any dependency failure
                 results[svc_name] = ServiceHealth(status="down", error=str(exc))
 
         all_up = all(s.status == "up" for s in results.values())
@@ -1041,16 +1083,16 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
     @app.get(
         "/internal/v1/stats/summary",
         response_model=StatsSummaryResponse,
-        dependencies=[Depends(_require_internal_key)],
+        dependencies=[Depends(require_authenticated)],
     )
-    def stats_summary() -> StatsSummaryResponse:
+    def stats_summary() -> StatsSummaryResponse:  # pyright: ignore[reportUnusedFunction]
         with engine.connect() as conn:
             total_docs = scalar_int(
-                cast(object, conn.execute(text("SELECT COUNT(*) FROM documents")).scalar_one())
+                cast("object", conn.execute(text("SELECT COUNT(*) FROM documents")).scalar_one())
             )
 
             total_chunks = scalar_int(
-                cast(object, conn.execute(text("SELECT COUNT(*) FROM chunks")).scalar_one())
+                cast("object", conn.execute(text("SELECT COUNT(*) FROM chunks")).scalar_one())
             )
 
             tag_rows = (
@@ -1142,33 +1184,29 @@ def create_app(*, jobs_client: DataManagementJobsClient | None = None) -> FastAP
         "/internal/v1/stats/served",
         response_model=StatsServedResponse,
         status_code=status.HTTP_202_ACCEPTED,
-        dependencies=[Depends(_require_internal_key)],
     )
-    def stats_served(body: StatsServedRequest) -> StatsServedResponse:
+    def stats_served(body: StatsServedRequest, _actor: WriteActorDep) -> StatsServedResponse:  # pyright: ignore[reportUnusedFunction]
         for doc_id in body.document_ids:
-            try:
-                with engine.begin() as conn:
-                    conn.execute(
-                        text(
-                            "INSERT INTO document_serving_stats "
-                            "(document_id, served_count, last_served_at) "
-                            "VALUES (:doc_id, 1, now()) "
-                            "ON CONFLICT (document_id) DO UPDATE "
-                            "SET served_count = document_serving_stats.served_count + 1, "
-                            "    last_served_at = now()"
-                        ),
-                        {"doc_id": doc_id},
-                    )
-            except Exception:
-                pass
+            with contextlib.suppress(Exception), engine.begin() as conn:
+                conn.execute(
+                    text(
+                        "INSERT INTO document_serving_stats "
+                        "(document_id, served_count, last_served_at) "
+                        "VALUES (:doc_id, 1, now()) "
+                        "ON CONFLICT (document_id) DO UPDATE "
+                        "SET served_count = document_serving_stats.served_count + 1, "
+                        "    last_served_at = now()"
+                    ),
+                    {"doc_id": doc_id},
+                )
         return StatsServedResponse()
 
     @app.get(
         "/internal/v1/stats/top-served",
         response_model=TopServedResponse,
-        dependencies=[Depends(_require_internal_key)],
+        dependencies=[Depends(require_authenticated)],
     )
-    def top_served(limit: int = 10) -> TopServedResponse:
+    def top_served(limit: int = 10) -> TopServedResponse:  # pyright: ignore[reportUnusedFunction]
         limit = min(max(1, limit), 100)
         with engine.connect() as conn:
             rows = (

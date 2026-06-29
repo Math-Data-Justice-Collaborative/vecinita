@@ -1,8 +1,21 @@
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "./renderWithProviders";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { JobForm } from "../components/JobForm";
+import { installAuthenticatedSupabaseMock } from "./supabaseMock";
+
+async function renderReadyJobForm(
+  props?: React.ComponentProps<typeof JobForm>,
+) {
+  installAuthenticatedSupabaseMock();
+  renderWithProviders(<JobForm {...props} />);
+  await waitFor(() => {
+    expect(
+      screen.getByRole("button", { name: /submit ingest/i }),
+    ).toBeInTheDocument();
+  });
+}
 
 function jsonResponse(body: object): Response {
   return new Response(JSON.stringify(body), {
@@ -12,6 +25,10 @@ function jsonResponse(body: object): Response {
 }
 
 describe("JobForm", () => {
+  beforeEach(() => {
+    installAuthenticatedSupabaseMock();
+  });
+
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
@@ -36,7 +53,7 @@ describe("JobForm", () => {
         }),
       );
     vi.stubGlobal("fetch", fetchMock);
-    renderWithProviders(<JobForm />);
+    await renderReadyJobForm();
     fireEvent.change(screen.getByLabelText(/public urls/i), {
       target: { value: "https://example.com/page\n" },
     });
@@ -52,7 +69,7 @@ describe("JobForm", () => {
   });
 
   it("shows validation error when no URLs entered", async () => {
-    renderWithProviders(<JobForm />);
+    await renderReadyJobForm();
     fireEvent.click(screen.getByRole("button", { name: /submit ingest/i }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
       /at least one url/i,
@@ -60,7 +77,7 @@ describe("JobForm", () => {
   });
 
   it("shows validation error for chunk size below minimum", async () => {
-    renderWithProviders(<JobForm />);
+    await renderReadyJobForm();
     fireEvent.change(screen.getByLabelText(/public urls/i), {
       target: { value: "https://example.com/page" },
     });
@@ -94,7 +111,7 @@ describe("JobForm", () => {
         }),
       );
     vi.stubGlobal("fetch", fetchMock);
-    renderWithProviders(<JobForm />);
+    await renderReadyJobForm();
     fireEvent.change(screen.getByLabelText(/public urls/i), {
       target: { value: "https://example.com/page" },
     });
@@ -140,7 +157,7 @@ describe("JobForm", () => {
         }),
       );
     vi.stubGlobal("fetch", fetchMock);
-    renderWithProviders(<JobForm />);
+    await renderReadyJobForm();
     fireEvent.change(screen.getByLabelText(/public urls/i), {
       target: { value: "https://example.com/page" },
     });
@@ -176,7 +193,7 @@ describe("JobForm", () => {
         }),
       );
     vi.stubGlobal("fetch", fetchMock);
-    renderWithProviders(<JobForm onJobUpdate={onJobUpdate} />);
+    await renderReadyJobForm({ onJobUpdate });
     fireEvent.change(screen.getByLabelText(/public urls/i), {
       target: { value: "https://example.com/page" },
     });
@@ -206,7 +223,7 @@ describe("JobForm", () => {
         }),
       );
     vi.stubGlobal("fetch", fetchMock);
-    renderWithProviders(<JobForm />);
+    await renderReadyJobForm();
     fireEvent.change(screen.getByLabelText(/public urls/i), {
       target: { value: "https://example.com/page" },
     });
@@ -219,12 +236,28 @@ describe("JobForm", () => {
 
   it("shows generic ingest error for non-Error failures", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValueOnce("ingest down"));
-    renderWithProviders(<JobForm />);
+    await renderReadyJobForm();
     fireEvent.change(screen.getByLabelText(/public urls/i), {
       target: { value: "https://example.com/page" },
     });
     fireEvent.click(screen.getByRole("button", { name: /submit ingest/i }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Ingest failed");
+  });
+
+  it("surfaces the Error message when ingest creation throws an Error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValueOnce(new Error("create job exploded")),
+    );
+    await renderReadyJobForm();
+    fireEvent.change(screen.getByLabelText(/public urls/i), {
+      target: { value: "https://example.com/page" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit ingest/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "create job exploded",
+    );
   });
 });

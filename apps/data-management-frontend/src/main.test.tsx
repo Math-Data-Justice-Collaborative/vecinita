@@ -1,6 +1,8 @@
 import { cleanup, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { installAuthenticatedSupabaseMock } from "./test/supabaseMock";
+
 const STATS = {
   total_documents: 0,
   total_chunks: 0,
@@ -13,6 +15,7 @@ const STATS = {
 describe("main entry", () => {
   beforeEach(() => {
     document.body.innerHTML = '<div id="root"></div>';
+    installAuthenticatedSupabaseMock();
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({

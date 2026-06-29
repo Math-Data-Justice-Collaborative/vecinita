@@ -10,6 +10,7 @@ VECINITA_MODAL_DATA_MGMT_URL and VECINITA_MODAL_PROXY_KEY.
 from __future__ import annotations
 
 import os
+from http import HTTPStatus
 from uuid import uuid4
 
 import pytest
@@ -20,7 +21,7 @@ ADMIN_ORIGIN = "https://vecinita-admin-frontend.example.com"
 
 
 @pytest.fixture(autouse=True)
-def _env(monkeypatch: pytest.MonkeyPatch) -> None:
+def _env(monkeypatch: pytest.MonkeyPatch) -> None:  # pyright: ignore[reportUnusedFunction]
     monkeypatch.setenv(
         "VECINITA_CORS_ORIGINS",
         f"https://vecinita-chat-rag-frontend.example.com,{ADMIN_ORIGIN}",
@@ -47,7 +48,10 @@ def test_retag_not_503_when_modal_env_vars_configured() -> None:
         headers={"Authorization": "Bearer test-key"},
     )
 
-    assert resp.status_code != 503 or "not configured" not in resp.text.lower(), (
+    assert (
+        resp.status_code != HTTPStatus.SERVICE_UNAVAILABLE
+        or "not configured" not in resp.text.lower()
+    ), (
         f"Retag should not return 503 'not configured' when "
         f"VECINITA_MODAL_DATA_MGMT_URL and VECINITA_MODAL_PROXY_KEY are set; "
         f"got {resp.status_code}: {resp.text}"

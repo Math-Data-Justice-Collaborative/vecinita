@@ -1,7 +1,7 @@
 # Dependency Inventory
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-13 (EV-004 F31)
+> **Last updated**: 2026-06-28 (S004/EV-005 F34 — Supabase admin auth)
 
 ## Runtime dependencies (Python — planned)
 
@@ -39,6 +39,10 @@
 
 ## Runtime dependencies (Node)
 
+> **Node runtime:** **24 LTS** (current Active LTS). Pinned via `.nvmrc`, root
+> `package.json` `engines.node>=24`, and `.github/workflows/ci.yml` (`setup-node`).
+> Bumped from 20 LTS per TP-S004-11 (09-qa remediation).
+
 | Package | Purpose | License | Notes |
 |---------|---------|---------|-------|
 | react | 18.x UI | MIT | |
@@ -56,6 +60,7 @@
 | **react-router-dom** | ^7.x DOM bindings | MIT | EV-002 F23; TP-021 |
 | **vecinita-frontend-i18n** | workspace | Locale utils + EN/ES messages | — | EV-004 F31; `packages/frontend-i18n` |
 | **vecinita-frontend-ui** | workspace | Shared React locale/tag/pagination UI | — | EV-004 F31; depends on frontend-i18n |
+| **@supabase/supabase-js** | `^2.108.2` Supabase Auth browser session (DM frontend SPA) | MIT | **EV-005 F34** (ADR-026/027); admin frontend only; pinned 04-tech-plan (TP-S004-04) |
 
 ### EV-004 workspace packages (F31)
 
@@ -65,6 +70,20 @@
 | `packages/frontend-ui` | `frontend-i18n`, react, tailwindcss, minimal shadcn/Radix | both frontends |
 
 **Root npm workspaces** link apps → packages (no cross-app imports). ChatRAG adds Tailwind + PostCSS for full layout migration and shared component consumption.
+
+### EV-005 — Supabase admin auth (F34, ADR-026/027)
+
+| Dependency | Layer | Pin | Purpose | License | Notes |
+|------------|-------|-----|---------|---------|-------|
+| `@supabase/supabase-js` | Node (DM frontend) | `^2.108.2` | SPA auth session + login/invite-accept/logout flows | MIT | Admin frontend only (TP-S004-04) |
+| **PyJWT** | Python (`vecinita_shared_schemas.auth`) | `>=2.10,<3` | Verify Supabase JWT **ES256** via JWKS + `exp` + `aud`; read `app_metadata.role` | MIT | Requires **`cryptography`** for ES256 (ADR-028; supersedes ADR-027 HS256) |
+| **cryptography** | Python (`vecinita_shared_schemas.auth`) | `>=42,<45` | ES256 public-key verify for Supabase JWKS (ADR-028) | Apache-2.0 / BSD | Backend only; not needed on frontend |
+| **Supabase CLI** | dev/ops + CI | `>=2,<3` | Migrations-in-repo, branching, `supabase link`/`db push` | MIT | MCP-independent env sync (TP-S004-07); not a runtime dep |
+
+**Resolved in 04-tech-plan (ADR-027):** mechanism = **HS256 shared secret** (`SUPABASE_JWT_SECRET`),
+not JWKS; role source = **`app_metadata.role`** (not a `user_roles` table); shared verifier module
+**`vecinita_shared_schemas.auth`** reused by the DM backend + internal-write API. `cryptography` is
+**not** added (HS256 only).
 
 ## Build dependencies
 
@@ -87,21 +106,24 @@
 
 | Resource | Required | Purpose |
 |----------|----------|---------|
-| DO Managed Postgres | Yes | Vectors + corpus |
+| DO Managed Postgres | Yes | Vectors + corpus (stays PII-free) |
 | Modal workspace | Yes | Ingest, embed, vLLM |
 | Hugging Face (model download) | Yes | FastEmbed / LLM weights to Modal volume |
+| **Supabase project** (`cfuvghdsuwactfeamtym`) | **Yes (EV-005)** | **Admin auth identity provider** (**Pro plan** for branching) + Git-driven branching for env sync (F34, ADR-026/027); custom SMTP for invites; holds operator identity/PII (corpus DB stays PII-free) |
 | Paid OpenAI/Anthropic APIs | **No** (default) | ADR-004 |
 
 ## Excluded (must not add)
 
 | Package | Reason |
 |---------|--------|
-| supabase / supabase-auth | Violates zero personal data |
+| ~~supabase / supabase-auth~~ | **Admitted for admin surfaces in EV-005 (F34, ADR-026)** — Supabase Auth gates admin only; ChatRAG stays anonymous; corpus DB stays PII-free. **OAuth/social providers remain excluded** this cycle. |
 | PyRosetta / RFantibody stack | Wrong product |
 | Default OpenAI client as required dep | Cost + sovereignty |
+| Supabase Auth for **visitor/ChatRAG** surfaces; OAuth/social login | Out of scope (ADR-026) — visitors stay anonymous |
 
 ## Open questions
 
 - Exact `llama-index` patch version at T8.1 (0.11.x family locked)
 - vLLM package pin at T9.2
 - License audit before copying sibling code (`audit-licenses` skill)
+- ~~**EV-005 F34:** `@supabase/supabase-js` pin; Python JWT-verify library + pin; JWKS vs shared-secret; role-claim source~~ — **resolved 04-tech-plan + 07-build (ADR-027/028):** `@supabase/supabase-js ^2.108.2`; PyJWT `>=2.10,<3` + `cryptography`; **ES256/JWKS**; `app_metadata.role`

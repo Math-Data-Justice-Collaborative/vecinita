@@ -1,8 +1,9 @@
-"""Data-management integration/E2E fixtures."""
+"""Data-management integration/E2E fixtures (loaded via ``tests.conftest`` pytest_plugins)."""
 
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING, cast
 
 import pytest
 from fastapi.testclient import TestClient
@@ -11,6 +12,11 @@ from vecinita_data_management_backend.jobs import run_job
 from vecinita_data_management_backend.pipeline import fetch_html_fixture
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_embedding_client import EMBEDDING_DIMENSION
+from vecinita_shared_schemas.auth import reset_auth_config_for_tests
+from vecinita_shared_schemas.internal_write import BatchUpsertResponse
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 _FIXTURE_HTML = (
     Path(__file__).resolve().parents[3] / "data" / "fixtures" / "ingest" / "sample-page.html"
@@ -21,10 +27,12 @@ _EMBED_VECTOR = [0.01] * EMBEDDING_DIMENSION
 
 class _MockEmbedClient:
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """Embed batch."""
         return [_EMBED_VECTOR for _ in texts]
 
     def close(self) -> None:
-        return None
+        """Close."""
+        return
 
 
 class _MockWriteClient:
@@ -32,29 +40,34 @@ class _MockWriteClient:
         self.last_batch: object | None = None
 
     def upsert_batch(self, body: object) -> object:
+        """Upsert batch."""
         self.last_batch = body
-        from vecinita_shared_schemas.internal_write import BatchUpsertResponse
-
         chunks = sum(len(doc.chunks) for doc in body.documents)  # type: ignore[attr-defined]
         return BatchUpsertResponse(upserted_chunks=chunks)
 
     def close(self) -> None:
-        return None
+        """Close."""
+        return
 
 
 @pytest.fixture
 def job_store() -> InMemoryJobStore:
+    """Return a fresh in-memory job store."""
     return InMemoryJobStore()
 
 
 @pytest.fixture
 def mock_write() -> _MockWriteClient:
+    """Return a mock internal-write client recording the last batch."""
     return _MockWriteClient()
 
 
 @pytest.fixture
 def dm_client(job_store: InMemoryJobStore, mock_write: _MockWriteClient) -> TestClient:
-    def runner(job_id):  # type: ignore[no-untyped-def]
+    """Return a data-management TestClient with mocked embed/write pipeline."""
+
+    def runner(job_id: UUID) -> None:
+        """Runner."""
         run_job(
             job_id,
             store=job_store,
@@ -75,6 +88,10 @@ def dm_client(job_store: InMemoryJobStore, mock_write: _MockWriteClient) -> Test
 
 @pytest.fixture(autouse=True)
 def proxy_key_env(monkeypatch: pytest.MonkeyPatch, request: pytest.FixtureRequest) -> None:
-    if request.node.get_closest_marker("live"):
+    """Set proxy-key auth env unless the test is marked ``live``."""
+    node = cast("pytest.Item", request.node)
+    if node.get_closest_marker("live"):
         return
+    reset_auth_config_for_tests()
     monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", _PROXY_KEY)
+    monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "false")

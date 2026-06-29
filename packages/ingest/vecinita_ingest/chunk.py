@@ -15,6 +15,22 @@ def estimate_tokens(text: str) -> int:
     return len(text.split())
 
 
+def _split_oversized_paragraph(paragraph: str, chunk_size_tokens: int) -> list[str]:
+    """Split a paragraph that exceeds the token budget into word-bounded chunks."""
+    words = paragraph.split()
+    chunks: list[str] = []
+    start = 0
+    while start < len(words):
+        end = start
+        while end < len(words) and len(words[start:end]) <= chunk_size_tokens:
+            end += 1
+        if end == start:
+            end = start + 1
+        chunks.append(" ".join(words[start:end]))
+        start = end
+    return chunks
+
+
 def chunk_text(text: str, *, chunk_size_tokens: int = DEFAULT_CHUNK_SIZE_TOKENS) -> list[str]:
     """Split plain text into paragraph-aware chunks bounded by token estimate."""
     if chunk_size_tokens < MIN_CHUNK_SIZE_TOKENS:
@@ -40,16 +56,7 @@ def chunk_text(text: str, *, chunk_size_tokens: int = DEFAULT_CHUNK_SIZE_TOKENS)
         if estimate_tokens(paragraph) <= chunk_size_tokens:
             buffer = paragraph
         else:
-            words = paragraph.split()
-            start = 0
-            while start < len(words):
-                end = start
-                while end < len(words) and len(words[start:end]) <= chunk_size_tokens:
-                    end += 1
-                if end == start:
-                    end = start + 1
-                chunks.append(" ".join(words[start:end]))
-                start = end
+            chunks.extend(_split_oversized_paragraph(paragraph, chunk_size_tokens))
             buffer = ""
     if buffer:
         chunks.append(buffer)

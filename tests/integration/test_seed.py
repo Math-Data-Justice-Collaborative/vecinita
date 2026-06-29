@@ -2,21 +2,36 @@
 
 from __future__ import annotations
 
+import os
+
 import pytest
 from sqlalchemy import create_engine, text
-from vecinita_database.seeds.load import _database_url, load_corpus
+from vecinita_database.seeds.load import load_corpus
 from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
 
 pytestmark = pytest.mark.integration
 
 
+def _database_url() -> str:
+    return os.environ.get(
+        "DATABASE_URL",
+        "postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
+    )
+
+
+_MIN_DOCUMENTS = 2
+_MIN_CHUNKS = 2
+
+
 @pytest.fixture
-def seeded_db():
+def seeded_db() -> None:
+    """Load seed corpus rows into the integration database."""
     load_corpus(database_url=_database_url())
-    yield
 
 
-def test_seed_load_row_counts(seeded_db: None) -> None:
+@pytest.mark.usefixtures("seeded_db")
+def test_seed_load_row_counts() -> None:
+    """Seed load inserts at least two documents and chunks in en and es."""
     engine = create_engine(_database_url())
     with engine.connect() as conn:
         documents_raw = sqlalchemy_scalar_one(conn.execute(text("SELECT COUNT(*) FROM documents")))
@@ -30,6 +45,6 @@ def test_seed_load_row_counts(seeded_db: None) -> None:
             )
         ).fetchall()
 
-    assert documents >= 2
-    assert chunks >= 2
+    assert documents >= _MIN_DOCUMENTS
+    assert chunks >= _MIN_CHUNKS
     assert [row[0] for row in languages] == ["en", "es"]

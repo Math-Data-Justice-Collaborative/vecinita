@@ -26,6 +26,8 @@ export default defineConfig({
       VITE_VECINITA_MODAL_PROXY_KEY: "test-proxy-key",
       VITE_VECINITA_CORPUS_API_URL: "http://localhost:8002/",
       VITE_VECINITA_CORPUS_API_KEY: "test-corpus-key",
+      VITE_SUPABASE_URL: "https://test.supabase.co",
+      VITE_SUPABASE_PUBLISHABLE_KEY: "test-publishable",
     },
     coverage: {
       provider: "v8",

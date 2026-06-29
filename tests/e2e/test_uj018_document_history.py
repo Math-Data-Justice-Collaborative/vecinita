@@ -4,11 +4,16 @@ from __future__ import annotations
 
 import os
 import uuid
+from http import HTTPStatus
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from vecinita_internal_write_api.app import create_app
+from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
+
 from tests.helpers.json_response import (
     json_int,
     json_list,
@@ -16,7 +21,13 @@ from tests.helpers.json_response import (
     json_str,
     response_json_object,
 )
-from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from sqlalchemy.engine import Engine
+
+    from tests.helpers.fixture_types import DocumentFixtureData
 
 pytestmark = [
     pytest.mark.e2e,
@@ -24,6 +35,7 @@ pytestmark = [
 ]
 
 _API_KEY = "test-internal-key"
+_EXPECTED_MIN_VERSIONS = 2
 
 
 def _database_url() -> str:
@@ -33,16 +45,17 @@ def _database_url() -> str:
     )
 
 
-@pytest.fixture()
-def engine():
+@pytest.fixture
+def engine() -> Engine:
+    """Engine."""
     return create_engine(_database_url())
 
 
-@pytest.fixture()
-def client():
+@pytest.fixture
+def client() -> TestClient:
+    """Client."""
     os.environ["DATABASE_URL"] = _database_url()
     os.environ["VECINITA_INTERNAL_API_KEY"] = _API_KEY
-    from vecinita_internal_write_api.app import create_app
 
     app = create_app()
     return TestClient(app)
@@ -52,8 +65,8 @@ def _auth() -> dict[str, str]:
     return {"Authorization": f"Bearer {_API_KEY}"}
 
 
-@pytest.fixture()
-def doc_with_versions(client, engine):
+@pytest.fixture
+def doc_with_versions(client: TestClient, engine: Engine) -> Iterator[DocumentFixtureData]:
     """Create a document via batch_upsert (v1), then tag it (v2)."""
     url = f"https://test.example.com/uj018-{uuid.uuid4().hex[:8]}"
     resp = client.post(
@@ -73,7 +86,7 @@ def doc_with_versions(client, engine):
         },
         headers=_auth(),
     )
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
 
     with engine.connect() as conn:
         doc_id_raw = sqlalchemy_scalar_one(
@@ -91,7 +104,7 @@ def doc_with_versions(client, engine):
         },
         headers=_auth(),
     )
-    assert tag_resp.status_code == 200, tag_resp.text
+    assert tag_resp.status_code == HTTPStatus.OK, tag_resp.text
 
     yield {"doc_id": doc_id, "url": url}
 
@@ -101,32 +114,36 @@ def doc_with_versions(client, engine):
         conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
-def test_document_history_returns_versions(client, doc_with_versions) -> None:
+def test_document_history_returns_versions(
+    client: TestClient, doc_with_versions: DocumentFixtureData
+) -> None:
     """GET /documents/{id}/history returns version timeline."""
     doc_id = doc_with_versions["doc_id"]
     resp = client.get(f"/internal/v1/documents/{doc_id}/history", headers=_auth())
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
     data = response_json_object(resp)
     assert data["document_id"] == str(doc_id)
     versions = json_object_list(data, "versions")
-    assert len(versions) >= 2
+    assert len(versions) >= _EXPECTED_MIN_VERSIONS
 
     v1 = versions[0]
     assert json_int(v1, "version_number") == 1
     assert json_str(v1, "title") == "History Doc"
 
     v2 = versions[1]
-    assert json_int(v2, "version_number") == 2
+    assert json_int(v2, "version_number") == _EXPECTED_MIN_VERSIONS
     v2_tags = json_object_list(v2, "tags_snapshot")
     assert any(json_str(tag, "slug") == "housing" for tag in v2_tags)
     assert any(json_str(tag, "slug") == "legal" for tag in v2_tags)
 
 
-def test_document_history_shows_tag_changes(client, doc_with_versions) -> None:
+def test_document_history_shows_tag_changes(
+    client: TestClient, doc_with_versions: DocumentFixtureData
+) -> None:
     """Version history captures tag changes at each version point."""
     doc_id = doc_with_versions["doc_id"]
     resp = client.get(f"/internal/v1/documents/{doc_id}/history", headers=_auth())
-    assert resp.status_code == 200, resp.text
+    assert resp.status_code == HTTPStatus.OK, resp.text
     data = response_json_object(resp)
     history_versions = json_object_list(data, "versions")
     v1_tags = (
@@ -139,8 +156,8 @@ def test_document_history_shows_tag_changes(client, doc_with_versions) -> None:
     assert len(v2_tags) > len(v1_tags), "v2 should have more tags than v1"
 
 
-def test_document_history_404_for_missing(client) -> None:
+def test_document_history_404_for_missing(client: TestClient) -> None:
     """GET /documents/{id}/history returns 404 for nonexistent document."""
     fake_id = uuid.uuid4()
     resp = client.get(f"/internal/v1/documents/{fake_id}/history", headers=_auth())
-    assert resp.status_code == 404
+    assert resp.status_code == HTTPStatus.NOT_FOUND

@@ -3,13 +3,33 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from http import HTTPStatus
+from typing import (
+    TYPE_CHECKING,
+    Never,
+)
 from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Engine
+from sqlalchemy import (
+    create_engine,
+    text,
+)
+from vecinita_internal_write_api.app import (
+    _database_url,  # pyright: ignore[reportPrivateUsage]
+    _row_datetime_optional,  # pyright: ignore[reportPrivateUsage]
+)
+from vecinita_internal_write_api.audit import (
+    cleanup_audit_log,
+    emit_audit_event,
+)
+from vecinita_shared_schemas.db_mapping import (
+    scalar_int,
+    sqlalchemy_scalar_one,
+)
+
 from tests.helpers.json_response import (
     json_int,
     json_list,
@@ -22,43 +42,52 @@ from tests.unit.internal_write_api.conftest import (
     database_url,
     upsert_document_via_api,
 )
-from vecinita_internal_write_api.app import _database_url, _row_datetime_optional
-from vecinita_internal_write_api.audit import cleanup_audit_log, emit_audit_event
-from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
+
+_HTTP_ACCEPTED = HTTPStatus.ACCEPTED
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
 
 
 def test_row_datetime_optional_raises_on_wrong_type() -> None:
+    """Test row datetime optional raises on wrong type."""
     with pytest.raises(TypeError, match="Expected datetime"):
         _row_datetime_optional({"last_served_at": "bad"}, "last_served_at")
 
 
 def test_database_url_raises_when_env_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test database url raises when env missing."""
     monkeypatch.delenv("DATABASE_URL", raising=False)
     with pytest.raises(RuntimeError, match="DATABASE_URL"):
         _database_url()
 
 
 def test_get_document_tags_404(write_client: TestClient) -> None:
+    """Test get document tags 404."""
     response = write_client.get(
         f"/internal/v1/documents/{uuid4()}/tags",
         headers=auth_headers(),
     )
-    assert response.status_code == 404
+    assert response.status_code == HTTPStatus.NOT_FOUND
 
 
 def test_list_document_chunks_404(write_client: TestClient) -> None:
+    """Test list document chunks 404."""
     response = write_client.get(
         f"/internal/v1/documents/{uuid4()}/chunks",
         headers=auth_headers(),
     )
-    assert response.status_code == 404
+    assert response.status_code == HTTPStatus.NOT_FOUND
 
 
+@pytest.mark.usefixtures("internal_api_env")
 def test_retag_document_503_when_jobs_client_missing(
-    internal_api_env: None,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from vecinita_internal_write_api.app import create_app
+    """Test retag document 503 when jobs client missing."""
+    from vecinita_internal_write_api.app import (  # noqa: PLC0415
+        create_app,
+    )
 
     monkeypatch.delenv("VECINITA_MODAL_DATA_MGMT_URL", raising=False)
     monkeypatch.delenv("VECINITA_MODAL_PROXY_KEY", raising=False)
@@ -67,10 +96,11 @@ def test_retag_document_503_when_jobs_client_missing(
         f"/internal/v1/documents/{uuid4()}/retag",
         headers=auth_headers(),
     )
-    assert response.status_code == 503
+    assert response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
 
 
 def test_bulk_tag_reports_missing_document(write_client: TestClient) -> None:
+    """Test bulk tag reports missing document."""
     missing = uuid4()
     response = write_client.patch(
         "/internal/v1/documents/bulk/tags",
@@ -83,6 +113,7 @@ def test_bulk_tag_reports_missing_document(write_client: TestClient) -> None:
 
 
 def test_bulk_metadata_reports_missing_document(write_client: TestClient) -> None:
+    """Test bulk metadata reports missing document."""
     response = write_client.patch(
         "/internal/v1/documents/bulk/metadata",
         json={
@@ -96,6 +127,7 @@ def test_bulk_metadata_reports_missing_document(write_client: TestClient) -> Non
 
 
 def test_bulk_metadata_updates_title_only(write_client: TestClient) -> None:
+    """Test bulk metadata updates title only."""
     document_id = upsert_document_via_api(write_client)
     response = write_client.patch(
         "/internal/v1/documents/bulk/metadata",
@@ -106,6 +138,7 @@ def test_bulk_metadata_updates_title_only(write_client: TestClient) -> None:
 
 
 def test_bulk_metadata_updates_language_only(write_client: TestClient) -> None:
+    """Test bulk metadata updates language only."""
     document_id = upsert_document_via_api(write_client)
     response = write_client.patch(
         "/internal/v1/documents/bulk/metadata",
@@ -118,17 +151,19 @@ def test_bulk_metadata_updates_language_only(write_client: TestClient) -> None:
 def test_bulk_retag_skips_missing_documents(
     write_client_with_jobs: tuple[TestClient, object],
 ) -> None:
+    """Test bulk retag skips missing documents."""
     client, _jobs = write_client_with_jobs
     response = client.post(
         "/internal/v1/documents/bulk/retag",
         json={"document_ids": [str(uuid4())]},
         headers=auth_headers(),
     )
-    assert response.status_code == 202
+    assert response.status_code == _HTTP_ACCEPTED
     assert response_json_object(response)["job_ids"] == []
 
 
 def test_audit_log_filters_since_and_until(write_client: TestClient) -> None:
+    """Test audit log filters since and until."""
     since = (datetime.now(UTC) - timedelta(days=1)).isoformat()
     until = (datetime.now(UTC) + timedelta(minutes=1)).isoformat()
     response = write_client.get(
@@ -136,19 +171,27 @@ def test_audit_log_filters_since_and_until(write_client: TestClient) -> None:
         params={"since": since, "until": until},
         headers=auth_headers(),
     )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
+@pytest.mark.usefixtures("write_client")
 def test_stats_served_swallows_per_document_errors(
-    write_client: TestClient,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    class _BrokenEngine:
-        def begin(self):
-            raise RuntimeError("write failed")
+    """Test stats served swallows per document errors."""
 
-    monkeypatch.setattr("vecinita_internal_write_api.app._engine", lambda: _BrokenEngine())
-    from vecinita_internal_write_api.app import create_app
+    class _BrokenEngine:
+        """BrokenEngine."""
+
+        def begin(self) -> Never:
+            """Begin."""
+            msg = "write failed"
+            raise RuntimeError(msg)
+
+    monkeypatch.setattr("vecinita_internal_write_api.app._engine", _BrokenEngine)
+    from vecinita_internal_write_api.app import (  # noqa: PLC0415
+        create_app,
+    )
 
     client = TestClient(create_app())
     response = client.post(
@@ -156,17 +199,20 @@ def test_stats_served_swallows_per_document_errors(
         json={"document_ids": [str(uuid4())]},
         headers=auth_headers(),
     )
-    assert response.status_code == 202
+    assert response.status_code == HTTPStatus.ACCEPTED
 
 
 def test_health_all_swallows_dependency_exceptions(
     write_client: TestClient,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test health all swallows dependency exceptions."""
     monkeypatch.setenv("VECINITA_CHAT_RAG_URL", "http://chat-rag:8000")
 
     def _boom(_url: str, **_kwargs: object) -> None:
-        raise OSError("network down")
+        """Boom."""
+        msg = "network down"
+        raise OSError(msg)
 
     with patch("vecinita_internal_write_api.app.httpx.get", side_effect=_boom):
         response = write_client.get("/internal/v1/health/all", headers=auth_headers())
@@ -177,12 +223,14 @@ def test_health_all_swallows_dependency_exceptions(
     assert json_str(chat, "status") == "down"
 
 
-@pytest.fixture()
+@pytest.fixture
 def engine() -> Engine:
+    """Engine."""
     return create_engine(database_url())
 
 
 def test_cleanup_audit_log_deletes_old_rows(engine: Engine) -> None:
+    """Test cleanup audit log deletes old rows."""
     old_ts = datetime.now(UTC) - timedelta(days=400)
     request_id = uuid4()
     entity_id = uuid4()

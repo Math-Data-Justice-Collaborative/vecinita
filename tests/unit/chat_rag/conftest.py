@@ -4,27 +4,38 @@ from __future__ import annotations
 
 import os
 import uuid
-from collections.abc import Iterator
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
-from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Engine
+from sqlalchemy import (
+    create_engine,
+    text,
+)
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_rag.types import RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest, AskResponse, Source
-from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
+from vecinita_shared_schemas.db_mapping import (
+    sqlalchemy_scalar_one,
+)
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from sqlalchemy.engine import Engine
 
 
 def database_url() -> str:
+    """Return the configured database URL, falling back to the local default."""
     return os.environ.get(
         "DATABASE_URL",
         "postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def chat_settings(monkeypatch: pytest.MonkeyPatch) -> ChatRagSettings:
+    """Provide chat-rag settings pointing at stub services."""
     monkeypatch.setenv("DATABASE_URL", database_url())
     return ChatRagSettings(
         database_url=database_url(),
@@ -37,12 +48,13 @@ def chat_settings(monkeypatch: pytest.MonkeyPatch) -> ChatRagSettings:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def engine(chat_settings: ChatRagSettings) -> Engine:
+    """Provide a SQLAlchemy engine bound to the chat-rag database."""
     return create_engine(chat_settings.database_url)
 
 
-@pytest.fixture()
+@pytest.fixture
 def browse_document(engine: Engine) -> Iterator[tuple[UUID, str]]:
     """Insert a tagged browse document; delete after test."""
     doc_url = f"https://chat-rag-browse-{uuid.uuid4().hex[:10]}.example.com/"
@@ -110,6 +122,7 @@ class StubChatRagService:
         ask_error: Exception | None = None,
         retrieve_error: Exception | None = None,
     ) -> None:
+        """Configure canned sources, stream tokens, and optional errors."""
         if sources is None:
             self.sources = [
                 Source(
@@ -127,17 +140,20 @@ class StubChatRagService:
         self.retrieve_error = retrieve_error
 
     def ask(self, request: AskRequest) -> AskResponse:
+        """Return a canned ask response or raise the configured error."""
         _ = request
         if self.ask_error is not None:
             raise self.ask_error
         return AskResponse(answer="Stub answer", language="en", sources=self.sources)
 
     def retrieve_sources(self, request: AskRequest) -> list[Source]:
+        """Return the canned sources or raise the configured error."""
         _ = request
         if self.retrieve_error is not None:
             raise self.retrieve_error
         return list(self.sources)
 
     def ask_stream(self, request: AskRequest) -> Iterator[str]:
+        """Yield the configured stream tokens, ignoring the request."""
         _ = request
         yield from self.stream_tokens

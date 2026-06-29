@@ -29,7 +29,7 @@ def test_alembic_history_includes_tag_schema() -> None:
     """Tag migration revision is applied (present in Alembic history)."""
     env = {**os.environ, "DATABASE_URL": _database_url()}
     history = subprocess.run(
-        ["uv", "run", "alembic", "history"],
+        ["uv", "run", "alembic", "history"],  # noqa: S607  # uv resolved from PATH in CI/dev
         cwd=_DATABASE_DIR,
         env=env,
         capture_output=True,

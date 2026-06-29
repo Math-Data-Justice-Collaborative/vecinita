@@ -5,8 +5,13 @@ from __future__ import annotations
 import fcntl
 import hashlib
 import os
+import tempfile
 import threading
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Self
 
 
 class _ThreadState:
@@ -31,13 +36,14 @@ def _lock_path() -> Path:
         "postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
     )
     digest = hashlib.sha256(url.encode()).hexdigest()[:16]
-    return Path(f"/tmp/vecinita-corpus-db-{digest}.lock")
+    return Path(tempfile.gettempdir()) / f"vecinita-corpus-db-{digest}.lock"
 
 
-class corpus_db_lock:
+class corpus_db_lock:  # noqa: N801  # lowercase context-manager factory; renaming breaks importers
     """Reentrant process-wide exclusive lock for the shared corpus Postgres DB."""
 
-    def __enter__(self) -> corpus_db_lock:
+    def __enter__(self) -> Self:
+        """Acquire the exclusive corpus DB lock (reentrant within a thread)."""
         state = _state()
         if state.depth == 0:
             lock_path = _lock_path()
@@ -49,6 +55,7 @@ class corpus_db_lock:
         return self
 
     def __exit__(self, *_exc: object) -> None:
+        """Release the corpus DB lock when the outermost context exits."""
         state = _state()
         state.depth -= 1
         if state.depth == 0 and state.fd is not None:

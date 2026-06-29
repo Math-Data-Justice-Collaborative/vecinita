@@ -3,20 +3,13 @@
 from __future__ import annotations
 
 import os
-from typing import cast
-from uuid import UUID
+from http import HTTPStatus
+from typing import TYPE_CHECKING
 
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import HttpUrl
 from sqlalchemy import create_engine, text
-from tests.helpers.json_response import (
-    find_json_object_by_str,
-    json_list,
-    json_str,
-    response_json_list,
-    response_json_object,
-)
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.jobs import run_job
 from vecinita_data_management_backend.store import InMemoryJobStore
@@ -24,6 +17,7 @@ from vecinita_embedding_client import EMBEDDING_DIMENSION
 from vecinita_internal_write_api.app import create_app as create_write_app
 from vecinita_shared_schemas.internal_write import (
     BatchUpsertRequest,
+    BatchUpsertResponse,
     ChunkUpsert,
     DocumentDetail,
     DocumentUpsert,
@@ -31,6 +25,18 @@ from vecinita_shared_schemas.internal_write import (
     TagPatchResponse,
 )
 from vecinita_shared_schemas.json_types import as_json_object
+
+from tests.helpers.json_response import (
+    find_json_object_by_str,
+    json_list,
+    json_str,
+    response_json_list,
+    response_json_object,
+)
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
 
 pytestmark = pytest.mark.e2e
 
@@ -50,15 +56,19 @@ class _MockTagClient:
         vocabulary: list[str],
         max_tags: int = 10,
     ) -> list[str]:
+        """Infer document tags."""
+        _ = (title, text, language, vocabulary)
         return ["benefits"][:max_tags]
 
 
 class _MockEmbedClient:
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """Embed batch."""
         return [_EMBEDDING for _ in texts]
 
     def close(self) -> None:
-        return None
+        """Close."""
+        return
 
 
 class _TestClientWriteClient:
@@ -67,36 +77,38 @@ class _TestClientWriteClient:
     def __init__(self, client: TestClient) -> None:
         self._client = client
 
-    def upsert_batch(self, body: BatchUpsertRequest) -> object:
-        from vecinita_shared_schemas.internal_write import BatchUpsertResponse
-
+    def upsert_batch(self, body: BatchUpsertRequest) -> BatchUpsertResponse:
+        """Upsert batch."""
         response = self._client.post(
             "/internal/v1/documents/batch",
             json=body.model_dump(mode="json"),
             headers={"Authorization": f"Bearer {_WRITE_KEY}"},
         )
-        assert response.status_code == 200, response.text
+        assert response.status_code == HTTPStatus.OK, response.text
         return BatchUpsertResponse.model_validate(response.json())
 
     def get_document_detail(self, document_id: UUID) -> DocumentDetail:
+        """Get document detail."""
         response = self._client.get(
             f"/internal/v1/documents/{document_id}",
             headers={"Authorization": f"Bearer {_WRITE_KEY}"},
         )
-        assert response.status_code == 200, response.text
+        assert response.status_code == HTTPStatus.OK, response.text
         return DocumentDetail.model_validate(response.json())
 
     def patch_document_tags(self, document_id: UUID, tags: list[TagInput]) -> TagPatchResponse:
+        """Patch document tags."""
         response = self._client.patch(
             f"/internal/v1/documents/{document_id}/tags",
             json={"tags": [tag.model_dump(mode="json") for tag in tags], "source": "llm"},
             headers={"Authorization": f"Bearer {_WRITE_KEY}"},
         )
-        assert response.status_code == 200, response.text
+        assert response.status_code == HTTPStatus.OK, response.text
         return TagPatchResponse.model_validate(response.json())
 
     def close(self) -> None:
-        return None
+        """Close."""
+        return
 
 
 def _document_id_for_url(client: TestClient, url: str) -> str:
@@ -108,6 +120,7 @@ def _document_id_for_url(client: TestClient, url: str) -> str:
 def retag_clients(
     monkeypatch: pytest.MonkeyPatch,
 ) -> tuple[TestClient, TestClient, InMemoryJobStore, str]:
+    """Retag clients."""
     monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _WRITE_KEY)
     monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", _PROXY_KEY)
     monkeypatch.setenv(
@@ -143,6 +156,7 @@ def retag_clients(
     store = InMemoryJobStore()
 
     def runner(job_id: UUID) -> None:
+        """Runner."""
         run_job(
             job_id,
             store=store,
@@ -157,6 +171,7 @@ def retag_clients(
 
     class _InlineJobsClient:
         def enqueue_retag(self, document_id: UUID) -> UUID:
+            """Enqueue retag."""
             record = store.create_job(
                 urls=[],
                 options={"document_id": str(document_id)},
@@ -175,14 +190,15 @@ def retag_clients(
 def test_admin_retag_job_lifecycle(
     retag_clients: tuple[TestClient, TestClient, InMemoryJobStore, str],
 ) -> None:
+    """Admin retag job lifecycle."""
     write_client_api, dm_client, _store, document_id = retag_clients
 
     retag_resp = write_client_api.post(f"/internal/v1/documents/{document_id}/retag")
-    assert retag_resp.status_code == 200
+    assert retag_resp.status_code == HTTPStatus.OK
     job_id = json_str(response_json_object(retag_resp), "job_id")
 
     status = dm_client.get(f"/jobs/{job_id}")
-    assert status.status_code == 200
+    assert status.status_code == HTTPStatus.OK
     assert json_str(response_json_object(status), "status") == "completed"
 
     engine = create_engine(os.environ["DATABASE_URL"])
@@ -214,14 +230,14 @@ def test_admin_retag_tags_visible_via_get_endpoint(
     write_client_api, _dm_client, _store, document_id = retag_clients
 
     retag_resp = write_client_api.post(f"/internal/v1/documents/{document_id}/retag")
-    assert retag_resp.status_code == 200
+    assert retag_resp.status_code == HTTPStatus.OK
 
     tags_resp = write_client_api.get(f"/internal/v1/documents/{document_id}/tags")
-    assert tags_resp.status_code == 200, (
+    assert tags_resp.status_code == HTTPStatus.OK, (
         f"GET /documents/{{id}}/tags should return 200 after retag; got {tags_resp.status_code}"
     )
     tag_slugs = sorted(
-        json_str(as_json_object(cast(object, tag)), "slug")
+        json_str(as_json_object(tag), "slug")
         for tag in json_list(response_json_object(tags_resp), "tags")
     )
     assert tag_slugs == ["benefits"], (

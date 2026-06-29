@@ -25,6 +25,8 @@ _EXPECTED_AUDIT_LOG_COLUMNS = {
     "request_id",
     "payload",
     "created_at",
+    "actor_id",
+    "actor_role",
 }
 
 _EXPECTED_DOCUMENT_VERSIONS_COLUMNS = {
@@ -55,7 +57,7 @@ def test_alembic_head_includes_ev002_migration() -> None:
     """Alembic current revision matches head after EV-002 migration."""
     env = {**os.environ, "DATABASE_URL": _database_url()}
     current = subprocess.run(
-        ["uv", "run", "alembic", "current"],
+        ["uv", "run", "alembic", "current"],  # noqa: S607  # uv resolved from PATH in CI/dev
         cwd=_DATABASE_DIR,
         env=env,
         capture_output=True,
@@ -63,15 +65,15 @@ def test_alembic_head_includes_ev002_migration() -> None:
         check=True,
     )
     heads = subprocess.run(
-        ["uv", "run", "alembic", "heads"],
+        ["uv", "run", "alembic", "heads"],  # noqa: S607  # uv resolved from PATH in CI/dev
         cwd=_DATABASE_DIR,
         env=env,
         capture_output=True,
         text=True,
         check=True,
     )
-    assert "20260526_0003" in current.stdout
-    assert "20260526_0003" in heads.stdout
+    assert "20260628_0004" in current.stdout
+    assert "20260628_0004" in heads.stdout
 
 
 def test_audit_log_columns_match_spec() -> None:

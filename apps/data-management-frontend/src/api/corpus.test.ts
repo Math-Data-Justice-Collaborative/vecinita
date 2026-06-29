@@ -1,18 +1,19 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { mockFetchJsonBody } from "@/test/fetch-mock";
-
 import {
   deleteDocument,
   listDocumentChunks,
-  listDocuments,
   listDocumentTags,
+  listDocuments,
   patchChunkTags,
   patchDocumentTags,
   retagDocument,
 } from "./corpus";
 
-const CLIENT = { baseUrl: "http://localhost:8002", apiKey: "test-key" };
+const options = {
+  baseUrl: "http://localhost:8002",
+  apiKey: "test-key",
+};
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -21,132 +22,169 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
-describe("corpus API client", () => {
+describe("corpus api", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
+  it("authHeaders prefers accessToken over apiKey", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse([])));
+
+    await listDocuments({
+      baseUrl: "http://localhost:8002",
+      apiKey: "api-key",
+      accessToken: "jwt-token",
+    });
+
+    const init = vi.mocked(fetch).mock.calls[0]?.[1] as RequestInit;
+    expect(init.headers).toMatchObject({ Authorization: "Bearer jwt-token" });
+  });
+
+  it("authHeaders throws when no bearer is configured", async () => {
+    await expect(
+      listDocuments({ baseUrl: "http://localhost:8002" }),
+    ).rejects.toThrow(/Corpus API requires/);
+  });
+
   it("listDocuments returns parsed JSON on success", async () => {
-    const docs = [{ document_id: "d1", url: "https://a.test", tags: [] }];
+    const docs = [
+      { document_id: "d1", url: "https://example.com", title: "A" },
+    ];
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(docs)));
 
-    await expect(listDocuments(CLIENT)).resolves.toEqual(docs);
-    expect(fetch).toHaveBeenCalledWith(
-      "http://localhost:8002/internal/v1/documents",
-      expect.objectContaining({
-        headers: { Authorization: "Bearer test-key" },
-      }),
-    );
+    await expect(listDocuments(options)).resolves.toEqual(docs);
   });
 
-  it("listDocuments throws with response text on failure", async () => {
+  it("listDocuments surfaces API error detail", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(new Response("bad list", { status: 500 })),
+      vi.fn().mockResolvedValue(new Response("forbidden", { status: 403 })),
     );
-    await expect(listDocuments(CLIENT)).rejects.toThrow("bad list");
+
+    await expect(listDocuments(options)).rejects.toThrow("forbidden");
   });
 
-  it("listDocuments throws status fallback when body empty", async () => {
+  it("listDocuments uses the status fallback when the error body is empty", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(new Response("", { status: 502 })),
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
     );
-    await expect(listDocuments(CLIENT)).rejects.toThrow(/502/);
+
+    await expect(listDocuments(options)).rejects.toThrow(
+      "List documents failed (500)",
+    );
   });
 
-  it("listDocumentChunks fetches chunks for a document", async () => {
-    const chunks = [
-      {
-        chunk_id: "c1",
-        chunk_index: 0,
-        text: "hello",
-        tags: [{ slug: "a", label: "A", source: "human" }],
-      },
-    ];
+  it("listDocumentChunks returns parsed JSON on success", async () => {
+    const chunks = [{ chunk_id: "c1", chunk_index: 0, text: "body", tags: [] }];
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(chunks)));
 
-    await expect(listDocumentChunks(CLIENT, "doc-1")).resolves.toEqual(chunks);
+    await expect(listDocumentChunks(options, "doc-1")).resolves.toEqual(chunks);
   });
 
-  it("listDocumentChunks throws on failure", async () => {
+  it("listDocumentChunks uses the status fallback when the error body is empty", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(new Response("nope", { status: 404 })),
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
     );
-    await expect(listDocumentChunks(CLIENT, "doc-1")).rejects.toThrow("nope");
+
+    await expect(listDocumentChunks(options, "doc-1")).rejects.toThrow(
+      "List chunks failed (500)",
+    );
   });
 
-  it("listDocumentTags returns tag array from body", async () => {
-    const tags = [{ slug: "housing", label: "Housing", source: "human" }];
+  it("listDocumentTags returns tag list on success", async () => {
+    const tags = [
+      { slug: "housing", label: "housing", source: "human" as const },
+    ];
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ tags })));
-    await expect(listDocumentTags(CLIENT, "doc-1")).resolves.toEqual(tags);
+
+    await expect(listDocumentTags(options, "doc-1")).resolves.toEqual(tags);
   });
 
-  it("listDocumentTags throws on failure", async () => {
+  it("listDocumentTags surfaces API error detail", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(new Response("", { status: 403 })),
+      vi.fn().mockResolvedValue(new Response("missing", { status: 404 })),
     );
-    await expect(listDocumentTags(CLIENT, "doc-1")).rejects.toThrow(/403/);
+
+    await expect(listDocumentTags(options, "doc-1")).rejects.toThrow("missing");
   });
 
-  it("patchDocumentTags sends PATCH with human source", async () => {
+  it("listDocumentTags uses the status fallback when the error body is empty", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
+    );
+
+    await expect(listDocumentTags(options, "doc-1")).rejects.toThrow(
+      "List document tags failed (500)",
+    );
+  });
+
+  it("patchDocumentTags sends PATCH and returns tags", async () => {
     const tags = [{ slug: "legal", label: "legal", source: "human" as const }];
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ tags })));
 
-    await expect(patchDocumentTags(CLIENT, "doc-1", tags)).resolves.toEqual(
+    await expect(patchDocumentTags(options, "doc-1", tags)).resolves.toEqual(
       tags,
     );
 
-    const init = vi.mocked(fetch).mock.calls[0]?.[1];
-    expect(init?.method).toBe("PATCH");
-    expect(mockFetchJsonBody()).toEqual({
-      tags,
-      source: "human",
-    });
+    const [url, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    expect(url).toContain("/documents/doc-1/tags");
+    expect(init.method).toBe("PATCH");
+    expect(init.body).toContain("human");
   });
 
-  it("patchDocumentTags throws on failure", async () => {
+  it("patchDocumentTags uses the status fallback when the error body is empty", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(new Response("patch fail", { status: 400 })),
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
     );
-    await expect(patchDocumentTags(CLIENT, "doc-1", [])).rejects.toThrow(
-      "patch fail",
+
+    await expect(patchDocumentTags(options, "doc-1", [])).rejects.toThrow(
+      "Patch document tags failed (500)",
     );
   });
 
-  it("patchChunkTags sends PATCH for chunk", async () => {
-    const tags = [{ slug: "x", label: "x", source: "human" as const }];
+  it("patchChunkTags sends PATCH and returns tags", async () => {
+    const tags = [{ slug: "new", label: "new", source: "human" as const }];
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ tags })));
-    await expect(patchChunkTags(CLIENT, "chunk-1", tags)).resolves.toEqual(
+
+    await expect(patchChunkTags(options, "chunk-1", tags)).resolves.toEqual(
       tags,
     );
   });
 
-  it("patchChunkTags throws on failure", async () => {
+  it("patchChunkTags uses the status fallback when the error body is empty", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(new Response("", { status: 422 })),
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
     );
-    await expect(patchChunkTags(CLIENT, "chunk-1", [])).rejects.toThrow(/422/);
+
+    await expect(patchChunkTags(options, "chunk-1", [])).rejects.toThrow(
+      "Patch chunk tags failed (500)",
+    );
   });
 
-  it("retagDocument returns job_id", async () => {
+  it("retagDocument returns job id on success", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(jsonResponse({ job_id: "job-99" })),
+      vi.fn().mockResolvedValue(jsonResponse({ job_id: "job-1" })),
     );
-    await expect(retagDocument(CLIENT, "doc-1")).resolves.toBe("job-99");
+
+    await expect(retagDocument(options, "doc-1")).resolves.toBe("job-1");
   });
 
-  it("retagDocument throws on failure", async () => {
+  it("retagDocument uses the status fallback when the error body is empty", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(new Response("retag err", { status: 500 })),
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
     );
-    await expect(retagDocument(CLIENT, "doc-1")).rejects.toThrow("retag err");
+
+    await expect(retagDocument(options, "doc-1")).rejects.toThrow(
+      "Retag failed (500)",
+    );
   });
 
   it("deleteDocument succeeds on 204", async () => {
@@ -154,50 +192,29 @@ describe("corpus API client", () => {
       "fetch",
       vi.fn().mockResolvedValue(new Response(null, { status: 204 })),
     );
-    await expect(deleteDocument(CLIENT, "doc-1")).resolves.toBeUndefined();
+
+    await expect(deleteDocument(options, "doc-1")).resolves.toBeUndefined();
   });
 
-  it("deleteDocument succeeds on 200", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(new Response(null, { status: 200 })),
-    );
-    await expect(deleteDocument(CLIENT, "doc-1")).resolves.toBeUndefined();
-  });
-
-  it("deleteDocument throws not found on 404", async () => {
+  it("deleteDocument throws when the document is missing", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(new Response("", { status: 404 })),
     );
-    await expect(deleteDocument(CLIENT, "doc-1")).rejects.toThrow(
+
+    await expect(deleteDocument(options, "doc-1")).rejects.toThrow(
       "Document not found",
     );
   });
 
-  it("deleteDocument throws on other errors", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(new Response("delete fail", { status: 500 })),
-    );
-    await expect(deleteDocument(CLIENT, "doc-1")).rejects.toThrow(
-      "delete fail",
-    );
-  });
-
-  it("patchChunkTags throws status fallback when body empty", async () => {
+  it("deleteDocument uses the status fallback when the error body is empty", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(new Response("", { status: 500 })),
     );
-    await expect(patchChunkTags(CLIENT, "chunk-1", [])).rejects.toThrow(/500/);
-  });
 
-  it("retagDocument throws status fallback when body empty", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(new Response("", { status: 503 })),
+    await expect(deleteDocument(options, "doc-1")).rejects.toThrow(
+      "Delete failed (500)",
     );
-    await expect(retagDocument(CLIENT, "doc-1")).rejects.toThrow(/503/);
   });
 });

@@ -75,7 +75,7 @@ def _as_int(value: object, default: int = 0) -> int:
 
 def _as_mapping(value: object) -> dict[str, object]:
     if isinstance(value, dict):
-        return cast(dict[str, object], value)
+        return cast("dict[str, object]", value)
     return {}
 
 
@@ -92,14 +92,14 @@ def _load_python_rows(coverage_dir: Path) -> list[CoverageRow]:
         print(f"warning: missing {_display_path(report_path)}", file=sys.stderr)
         return []
 
-    payload = _as_mapping(cast(object, json.loads(report_path.read_text(encoding="utf-8"))))
+    payload = _as_mapping(cast("object", json.loads(report_path.read_text(encoding="utf-8"))))
     grouped: dict[str, dict[str, int]] = {}
 
     files = _as_mapping(payload.get("files"))
     for raw_path, file_data in files.items():
         rel_path = _normalize_path(raw_path)
         component = _component_from_path(rel_path)
-        summary = _as_mapping(_as_mapping(cast(object, file_data)).get("summary"))
+        summary = _as_mapping(_as_mapping(file_data).get("summary"))
         bucket = grouped.setdefault(
             component,
             {
@@ -133,18 +133,22 @@ def _metric_block(block: object) -> tuple[int, int]:
     return total, covered
 
 
-def _load_typescript_row(coverage_dir: Path, app: str) -> CoverageRow | None:
-    report_path = coverage_dir / app / "coverage-summary.json"
+def _load_typescript_row(
+    coverage_dir: Path,
+    report_dir: str,
+    component: str,
+) -> CoverageRow | None:
+    report_path = coverage_dir / report_dir / "coverage-summary.json"
     if not report_path.is_file():
         print(f"warning: missing {_display_path(report_path)}", file=sys.stderr)
         return None
 
-    payload = _as_mapping(cast(object, json.loads(report_path.read_text(encoding="utf-8"))))
+    payload = _as_mapping(cast("object", json.loads(report_path.read_text(encoding="utf-8"))))
     total = _as_mapping(payload.get("total"))
     lines_total, lines_covered = _metric_block(total.get("lines"))
     branches_total, branches_covered = _metric_block(total.get("branches"))
     return CoverageRow(
-        component=f"apps/{app}",
+        component=component,
         lines_total=lines_total,
         lines_covered=lines_covered,
         branches_total=branches_total,
@@ -175,10 +179,7 @@ def _print_section(title: str, rows: list[CoverageRow]) -> None:
             branch_label = f"{row.branches_covered}/{row.branches_total}"
         else:
             branch_label = "n/a"
-        print(
-            f"{row.component:<40} {line_label:>12} {branch_label:>12} "
-            f"{row.line_pct:>7.1f}%"
-        )
+        print(f"{row.component:<40} {line_label:>12} {branch_label:>12} {row.line_pct:>7.1f}%")
 
     total = _aggregate(rows)
     line_label = f"{total.lines_covered}/{total.lines_total}"
@@ -187,10 +188,7 @@ def _print_section(title: str, rows: list[CoverageRow]) -> None:
     else:
         branch_label = "n/a"
     print("-" * 76)
-    print(
-        f"{total.component:<40} {line_label:>12} {branch_label:>12} "
-        f"{total.line_pct:>7.1f}%"
-    )
+    print(f"{total.component:<40} {line_label:>12} {branch_label:>12} {total.line_pct:>7.1f}%")
     print()
 
 
@@ -203,13 +201,11 @@ def _below_threshold(
     failures: list[str] = []
     if row.line_pct < line_threshold:
         failures.append(
-            f"{row.component}: line coverage {row.line_pct:.1f}% "
-            f"below {line_threshold:.0f}%"
+            f"{row.component}: line coverage {row.line_pct:.1f}% below {line_threshold:.0f}%"
         )
     if row.branches_total > 0 and row.branch_pct < branch_threshold:
         failures.append(
-            f"{row.component}: branch coverage {row.branch_pct:.1f}% "
-            f"below {branch_threshold:.0f}%"
+            f"{row.component}: branch coverage {row.branch_pct:.1f}% below {branch_threshold:.0f}%"
         )
     return failures
 
@@ -242,10 +238,10 @@ def _parse_args(argv: list[str] | None = None) -> CliOptions:
         help="Minimum branch coverage percentage per component (default: 95).",
     )
     parsed = parser.parse_args(argv)
-    coverage_dir = cast(Path, parsed.coverage_dir)
-    enforce = cast(bool, parsed.enforce)
-    line_threshold = cast(float, parsed.line_threshold)
-    branch_threshold = cast(float, parsed.branch_threshold)
+    coverage_dir = cast("Path", parsed.coverage_dir)
+    enforce = cast("bool", parsed.enforce)
+    line_threshold = cast("float", parsed.line_threshold)
+    branch_threshold = cast("float", parsed.branch_threshold)
     return CliOptions(
         coverage_dir=coverage_dir,
         enforce=enforce,
@@ -259,20 +255,28 @@ def main(argv: list[str] | None = None) -> int:
     coverage_dir = options.coverage_dir
 
     python_rows = _load_python_rows(coverage_dir)
+    # (coverage report subdir, component label) for every TS workspace under
+    # apps/ and packages/ that emits a coverage-summary.json.
+    typescript_targets = (
+        ("chat-rag-frontend", "apps/chat-rag-frontend"),
+        ("data-management-frontend", "apps/data-management-frontend"),
+        ("frontend-i18n", "packages/frontend-i18n"),
+        ("frontend-ui", "packages/frontend-ui"),
+    )
     typescript_rows = [
         row
-        for app in ("chat-rag-frontend", "data-management-frontend")
-        if (row := _load_typescript_row(coverage_dir, app)) is not None
+        for report_dir, component in typescript_targets
+        if (row := _load_typescript_row(coverage_dir, report_dir, component)) is not None
     ]
 
-    print("")
+    print()
     print("Unit test coverage summary")
     print("=" * 76)
     print("HTML reports: htmlcov/ (Python), coverage/<app>/ (TypeScript)")
-    print("")
+    print()
 
     _print_section("Python (packages + backend apps)", python_rows)
-    _print_section("TypeScript (frontend apps)", typescript_rows)
+    _print_section("TypeScript (frontend apps + packages)", typescript_rows)
 
     all_rows = python_rows + typescript_rows
     if all_rows:

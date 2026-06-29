@@ -10,15 +10,19 @@ reaching a terminal state ("failed" with an error message).
 
 from __future__ import annotations
 
-from uuid import UUID
+from typing import TYPE_CHECKING
 
 import pytest
 from vecinita_data_management_backend.jobs import run_job
 from vecinita_data_management_backend.store import InMemoryJobStore
 
+if TYPE_CHECKING:
+    from uuid import UUID
+
 
 class _MockEmbedClient:
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """Return stub embeddings for each input text."""
         return [[0.01] * 384 for _ in texts]
 
     def close(self) -> None:
@@ -27,13 +31,19 @@ class _MockEmbedClient:
 
 class _MockWriteClient:
     def get_document_detail(self, document_id: UUID) -> object:
-        raise AssertionError("should not be called when tag_client is None")
+        _ = document_id
+        msg = "should not be called when tag_client is None"
+        raise AssertionError(msg)
 
-    def patch_document_tags(self, document_id: UUID, tags: list) -> object:
-        raise AssertionError("should not be called when tag_client is None")
+    def patch_document_tags(self, document_id: UUID, tags: list[object]) -> object:
+        _ = (document_id, tags)
+        msg = "should not be called when tag_client is None"
+        raise AssertionError(msg)
 
     def upsert_batch(self, body: object) -> object:
-        raise AssertionError("should not be called for retag jobs")
+        _ = body
+        msg = "should not be called for retag jobs"
+        raise AssertionError(msg)
 
     def close(self) -> None:
         return None
@@ -95,6 +105,7 @@ def test_retag_job_reaches_terminal_state_on_any_pre_execution_error(
 
     class _TagClient:
         def infer_document_tags(self, **kwargs: object) -> list[str]:
+            _ = kwargs
             return []
 
     with pytest.raises((RuntimeError, ValueError, KeyError)):
