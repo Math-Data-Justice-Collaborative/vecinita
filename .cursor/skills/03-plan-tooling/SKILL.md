@@ -18,6 +18,14 @@ subsequent stages.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 **State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
+## Planning only — plan, don't build
+
+This is a **planning stage** (see [pipeline-preamble.md](../pipeline-preamble.md) §18). It creates
+**guardrail tooling** (`.cursor/` rules, hooks, skills, agents) — it does **not** write
+product/feature source code under `src/`, `apps/`, or `packages/`. If the user asks to implement a
+feature now, route it to **07-build** (AskQuestion `[Scope Drift]`) rather than writing application
+code here.
+
 ## Connectivity (stage 03)
 
 Plan guardrails must prevent **UI-without-wiring** drift:

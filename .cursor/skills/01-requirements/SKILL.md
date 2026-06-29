@@ -18,6 +18,13 @@ template section, ask targeted questions to fill it.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 **State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
+## Planning only — plan, don't build
+
+This is a **planning stage** (see [pipeline-preamble.md](../pipeline-preamble.md) §18). It produces
+product specs in `docs/` — it does **not** write product/feature source code under `src/`, `apps/`,
+or `packages/`. If the user asks to implement a feature now, capture it as a spec/feature entry and
+route to **07-build** (AskQuestion `[Scope Drift]`) rather than writing application code here.
+
 ## Connectivity (stage 01)
 
 Product specs **must** define browser wiring before build:
@@ -30,6 +37,31 @@ Product specs **must** define browser wiring before build:
 | `docs/config-spec.md` | Env names for CORS and frontend API bases |
 
 Ask in interview if UI calls APIs on a **different origin** than the static site.
+
+## Test requirements (stage 01)
+
+The requirements interview **must** gather test requirements for every feature and every change,
+mapped to the layer where the behavior is consumed (aligns with `.cursor/rules/e2e-coverage.mdc`
+and `.cursor/rules/tdd.mdc`). This is a planning output — capture the requirements and payloads in
+`docs/user-journeys.md` and `docs/test-plan.md`; the tests themselves are written in **07-build**.
+
+| Change | Required test artifact | Captured in |
+|--------|------------------------|-------------|
+| New or changed **user journey** (user-facing flow) | **E2E journey** — a UJ-NNN + a `tests/e2e/` module + TC-NNN | `docs/user-journeys.md`, `docs/test-plan.md` §User Journeys (E2E) |
+| New or changed **contract** (endpoint, request/response schema, job payload) | **Integration test** — `tests/integration/` case driving API + DB | `docs/test-plan.md` §Test Strategy, `docs/api-contract.md` |
+| New or changed **function / module behavior** | **Unit test** + **example payloads** (sample inputs, expected outputs, edge/error cases) | `docs/test-plan.md` §Test Cases (Input + payload), §Test Data |
+
+Rules:
+
+- **E2E journeys** are mandatory for any user-facing change; Vitest/component tests alone are **not**
+  E2E (per `e2e-coverage.mdc`).
+- **Integration tests** are required whenever a **contract changes** — an added or modified endpoint,
+  request/response schema, or job payload shape.
+- **Unit tests** are required for new public functions/behaviors; record concrete **payloads**
+  (example inputs and expected outputs, including edge/error inputs) so 04-tech-plan can turn them
+  into TDD tasks.
+- In **delta mode**, gather test requirements **only** for the changed journeys/contracts/behaviors,
+  but always add at least one E2E journey when user-facing behavior changes.
 
 ## Prerequisites
 
@@ -102,6 +134,9 @@ When user adds features or `mode: delta` / active evolve cycle:
 - Support **multiple Fn** in one cycle — one interview batch per feature or grouped by domain.
 - Prefix decisions in `docs/decisions.md#requirements-decisions-01-requirements` with `EV-NNN / Fnn`.
 - Do not delete unrelated spec sections; mark deprecated Fn with status + ADR.
+- **Gather test requirements for the change** (see §Test requirements (stage 01)): add an **E2E
+  journey** for any changed user-facing flow, an **integration test** when a contract changes, and
+  **unit tests + payloads** for new/changed behavior. Update only the affected UJ/TC entries.
 
 ## Workflow
 
@@ -159,7 +194,7 @@ Always included regardless of relevance scoring:
 | **Feature List** | `templates/feature-list.md` | Defines implementation scope |
 | **Spec** | `templates/spec.md` | Component details, architecture, data flow |
 | **User Journeys** | `templates/user-journeys.md` | Caller-facing end-to-end flows (UJ-IDs); feeds test plan and E2E |
-| **Test Plan** | `templates/test-plan.md` | Test strategy, cases, metrics (references UJ-IDs from user-journeys) |
+| **Test Plan** | `templates/test-plan.md` | Test strategy, cases, metrics, and test requirements by change layer (E2E journeys, integration on contract change, unit + payloads); references UJ-IDs from user-journeys |
 
 #### Evaluating other documents
 
@@ -259,7 +294,7 @@ free-form input.
 | Feature List | Core features → Secondary features → Out of scope |
 | Spec | System architecture → Components → Data flow → Constraints |
 | User Journeys | Happy paths per feature → Edge/error journeys → E2E tiers (local vs deployed) |
-| Test Plan | User Journeys (E2E) cross-ref → Test types → Key test cases (UJ ↔ TC) → CI/CD |
+| Test Plan | User Journeys (E2E) cross-ref → Change→test-layer mapping (E2E for changed flows, integration on contract change, unit + payloads) → Key test cases (UJ ↔ TC, with example payloads) → CI/CD |
 | Config Spec | CLI flags → Environment variables → Config files → Defaults |
 | API Contract | Endpoints → Request/response schemas → Auth → Error handling |
 

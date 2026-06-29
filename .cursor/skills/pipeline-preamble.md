@@ -422,3 +422,28 @@ curl -sS -D - -o /dev/null -X OPTIONS \
   -H "Access-Control-Request-Method: DELETE" \
   -H "Access-Control-Request-Headers: authorization"
 ```
+
+---
+
+## 18. Planning-only stages (00–06) — plan, don't build
+
+Stages **00–06** are **planning stages**. When invoked — even early, out of order, or with a
+user request that sounds like "just build it" — they **produce plans, not product code**. The
+first stage that writes application/feature source code is **07-build**.
+
+| Stage | May create | Must NOT create |
+|-------|------------|-----------------|
+| 00–02, 04–05 | `docs/` specs, ADRs, audits, decision logs | Any feature code under `src/`, `apps/`, `packages/` |
+| 03-plan-tooling | `.cursor/` rules, hooks, skills, agents (guardrails) | Product/feature source code |
+| 06-tech-tooling | `.cursor/` dev hooks/rules, tool config (ruff/pytest/tsconfig), CI workflow validation | Product/feature source code |
+
+**Boundary:** "software" / "the build" = the product's feature implementation (business logic,
+API handlers, UI components, jobs that fulfil F-numbers). That is **always deferred to 07-build**
+and tracked as tasks in `docs/execution-plan.md`. Planning stages may write docs, guardrail/dev
+**tooling**, and **config** scaffolding only when a spec or the execution plan calls for it — never
+the feature implementation itself.
+
+**If the user asks to implement a feature during 00–06:** capture it as a task/spec in the plan
+and route to 07-build (via [pipeline](pipeline/SKILL.md) or [16-evolve](16-evolve/SKILL.md)) rather
+than writing the code now. If the request is ambiguous, AskQuestion `[Scope Drift]` — first option
+"plan this for 07-build (recommended)", with "switch to build now" as an alternative.

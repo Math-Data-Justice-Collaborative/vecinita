@@ -16,6 +16,14 @@ implementation.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 **State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
+## Planning only — plan, don't build
+
+This is a **planning stage** (see [pipeline-preamble.md](../pipeline-preamble.md) §18). It creates
+**dev tooling and config** (`.cursor/` hooks/rules, linter/formatter/typechecker/test-runner config,
+CI workflow validation) — it does **not** write product/feature source code under `src/`, `apps/`,
+or `packages/`. Implementation is executed in **07-build** from `docs/execution-plan.md`. If the user
+asks to implement a feature now, AskQuestion `[Scope Drift]` rather than writing application code here.
+
 ## Connectivity (stage 06)
 
 Dev tooling must catch wiring regressions **before** 13-deploy-smoke:

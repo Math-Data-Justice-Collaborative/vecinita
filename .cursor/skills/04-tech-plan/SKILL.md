@@ -17,6 +17,14 @@ inventory, ADRs, deployment plan, and data management plan.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 **State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
+## Planning only — plan, don't build
+
+This is a **planning stage** (see [pipeline-preamble.md](../pipeline-preamble.md) §18). It produces
+the execution plan and technical `docs/` — it does **not** write product/feature source code under
+`src/`, `apps/`, or `packages/`. Implementation (including any scaffold) is captured as **tasks** in
+`docs/execution-plan.md` and executed in **07-build**. If the user asks to implement now, AskQuestion
+`[Scope Drift]` rather than writing application code here.
+
 ## Connectivity (stage 04)
 
 Technical plan **must** include executable connectivity work:

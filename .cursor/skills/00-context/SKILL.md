@@ -23,6 +23,13 @@ context brief for downstream skills.
 **Cross-cutting:** [considerations.md](../considerations.md), [connectivity-gates.md](../connectivity-gates.md).
 **State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) — mandatory read/update.
 
+## Planning only — plan, don't build
+
+This is a **planning stage** (see [pipeline-preamble.md](../pipeline-preamble.md) §18). It analyzes
+artifacts and writes `docs/` context — it does **not** write product/feature source code under
+`src/`, `apps/`, or `packages/`. If the user asks to implement a feature now, capture it for
+**07-build** and AskQuestion `[Scope Drift]` rather than writing application code in this stage.
+
 ## Phase 0 — Session open (default)
 
 Run **before** context gathering when user intent implies bounded work (almost always).

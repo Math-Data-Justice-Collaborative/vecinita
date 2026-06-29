@@ -23,6 +23,44 @@ Map each journey to test modules under `tests/e2e/` and TC-IDs below.
 |---------|---------|------------------|-----------|--------------|
 | UJ-001 | F# | `test_uj001_*.py` | [optional] | TC-001 |
 
+## Test Requirements by Change
+
+Map each new or changed feature/contract/behavior to the layer where it is consumed (see
+`.cursor/rules/e2e-coverage.mdc` and `.cursor/rules/tdd.mdc`). Every change gets at least one row.
+
+| Change (feature / contract / behavior) | Layer | Test artifact | Status |
+|----------------------------------------|-------|---------------|--------|
+| [UJ-001 — new user-facing flow] | E2E | `tests/e2e/test_uj001_*.py` (TC-001) | planned |
+| [POST /jobs — request schema change] | Integration | `tests/integration/test_jobs_contract.py` | planned |
+| [normalize() — new behavior] | Unit | `tests/unit/test_normalize.py` (payloads below) | planned |
+
+Rules:
+
+- **E2E journey** required for any user-facing change (Vitest/component tests are not a substitute).
+- **Integration test** required whenever a **contract** changes (endpoint, request/response schema,
+  or job payload shape).
+- **Unit test + payloads** required for new/changed function or module behavior.
+
+### Example payloads (unit / integration)
+
+For each new or changed function/contract, record concrete example payloads so tests can be written
+TDD-first in 07-build:
+
+- **Function / endpoint**: [name]
+- **Sample input**:
+
+```json
+{ "field": "value" }
+```
+
+- **Expected output**:
+
+```json
+{ "result": "value" }
+```
+
+- **Edge / error inputs**: [empty, oversized, malformed, …] → [expected error or behavior]
+
 ## Connectivity & wiring (multi-app / UI)
 
 If static frontends call APIs on **different origins**, document tiers per
