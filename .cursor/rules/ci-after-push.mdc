@@ -22,8 +22,10 @@ That workflow runs on every `main` push (Modal import smoke + optional secrets c
 not a pre-merge check. It triggers via `workflow_run` after **CI succeeds on `main`**, then
 re-runs build-smoke + secrets and `modal deploy`s the three Modal apps (embedding,
 data-management, llm). Do not treat it as a "must pass before PR" gate; after a `main` merge,
-confirm it deployed (or was correctly skipped without Modal secrets). DigitalOcean apps
-auto-deploy separately via `deploy_on_push: true` in `infra/do/*.yaml`.
+confirm it deployed (or was correctly skipped without Modal secrets). DigitalOcean apps deploy
+the same way: `.github/workflows/deploy-digitalocean.yml` runs after **CI succeeds on `main`**
+and deploys the four DO apps via `scripts/deploy/do_apps.py`. `deploy_on_push` is **disabled** in
+`infra/do/*.yaml` so DO deploys are CI-gated (requires repo secret `DIGITALOCEAN_TOKEN`).
 
 ## After every push (required)
 
