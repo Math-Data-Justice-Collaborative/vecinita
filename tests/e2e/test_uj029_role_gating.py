@@ -11,6 +11,11 @@ import pytest
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from tests.helpers.json_response import (
+    find_json_object_by_str,
+    json_str,
+    response_json_list,
+)
 from tests.unit.shared_schemas.auth_fixtures import sign_test_jwt
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
@@ -89,7 +94,9 @@ def test_internal_write_viewer_cannot_delete_document(
         headers={"Authorization": _bearer(supabase_auth_env, role="admin", sub=admin_id)},
     )
     assert listed.status_code == 200
-    doc_id = next(row["document_id"] for row in listed.json() if row["url"] == doc_url)
+    doc_id = json_str(
+        find_json_object_by_str(response_json_list(listed), "url", doc_url), "document_id"
+    )
 
     delete = write_auth_client.delete(
         f"/internal/v1/documents/{doc_id}",
@@ -101,7 +108,11 @@ def test_internal_write_viewer_cannot_delete_document(
         "/internal/v1/documents",
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
-    assert any(row["document_id"] == doc_id for row in still_there.json())
+    still_ids = [
+        json_str(as_json_object(cast(object, row)), "document_id")
+        for row in response_json_list(still_there)
+    ]
+    assert doc_id in still_ids
 
 
 def test_admin_write_records_opaque_audit_actor(

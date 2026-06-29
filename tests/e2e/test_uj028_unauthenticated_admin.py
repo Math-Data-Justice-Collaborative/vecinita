@@ -7,6 +7,7 @@ import os
 import pytest
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from fastapi.testclient import TestClient
+from tests.helpers.json_response import response_json_object
 from tests.unit.rag.conftest import basis_vector, seed_corpus_with_embeddings
 from tests.unit.shared_schemas.auth_fixtures import sign_test_jwt
 from vecinita_chat_rag_backend.app import create_app
@@ -109,7 +110,7 @@ def test_chatrag_ask_without_auth_stays_anonymous(chat_anonymous_client: TestCli
         json={"question": "What are the food pantry hours?"},
     )
     assert response.status_code == 200
-    assert response.json().get("answer")
+    assert response_json_object(response).get("answer")
 
 
 def test_chatrag_documents_without_auth_stays_anonymous(chat_anonymous_client: TestClient) -> None:
