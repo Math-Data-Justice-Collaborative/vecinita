@@ -174,8 +174,8 @@ Same as 02-verify-plan Phase 6.
 
 Write to output directory:
 
-1. **`docs/tech-audit.md`** — Full technical audit report
-2. **`docs/tech-decisions.md`** — Technical decision log (extends from product decisions)
+1. **`docs/audits.md#technical-plan-audit-report`** — Full technical audit report
+2. **`docs/decisions.md#technical-decisions-05-verify-tech`** — Technical decision log (extends from product decisions)
 
 ### Phase 8 — Summary
 
@@ -200,8 +200,8 @@ Consistency checks:
 Source documents updated: [N] changes across [M] documents
 
 Artifacts:
-  docs/tech-audit.md      — technical audit report
-  docs/tech-decisions.md   — technical decision log
+  docs/audits.md#technical-plan-audit-report      — technical audit report
+  docs/decisions.md#technical-decisions-05-verify-tech   — technical decision log
   docs/adr/                — [N] ADRs created from tech audit verdicts
 
 Phase B gate check (partial):

@@ -41,7 +41,7 @@ Operators may ingest corpus in either language; users should receive answers in 
 
 ## References
 
-- RD-002, RD-008 (`docs/requirements-decisions.md`)
+- RD-002, RD-008 (`docs/decisions.md#requirements-decisions-01-requirements`)
 - feature-list F1 (`docs/feature-list.md`)
 - `docs/api-contract.md` §POST `/api/v1/ask`
 - ADR-004, ADR-006

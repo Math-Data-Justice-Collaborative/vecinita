@@ -262,4 +262,4 @@ Full schemas: `docs/api-contract.md` (interview pending); OpenAPI files in repo 
 - [feature-list.md](feature-list.md)
 - [context-brief.md](context-brief.md)
 - [ADR index](adr/README.md) — ADR-001 through ADR-016
-- [requirements-decisions.md](requirements-decisions.md)
+- [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)

@@ -50,7 +50,7 @@ Resolution **R6** (API gateway) remains unresolved. The deployment batch selecte
 
 ## References
 
-- RD-022, R6 (`docs/context-brief.md`, `docs/requirements-decisions.md`)
+- RD-022, R6 (`docs/context-brief.md`, `docs/decisions.md#requirements-decisions-01-requirements`)
 - `docs/deployment-integration.md` §Services, §Topology note
-- `docs/risk-register.md` R1
+- `docs/reference.md#risk-register` R1
 - ADR-001, ADR-004, ADR-007

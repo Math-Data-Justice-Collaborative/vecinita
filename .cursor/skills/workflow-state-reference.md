@@ -344,7 +344,7 @@ read/update protocol. Stage-specific **detail file** sync rules belong in each S
 `summary`, `status`, optional `resolution`, `blocking_for`, `evolve_cycle_id`.
 
 **`decisions_log`** — shorthand pointers (e.g. `R1: … — ADR-00N`). Full text lives in ADRs and
-`docs/requirements-decisions.md` / `docs/tech-decisions.md`.
+`docs/decisions.md#requirements-decisions-01-requirements` / `docs/decisions.md#technical-decisions-05-verify-tech`.
 
 ## Template block
 

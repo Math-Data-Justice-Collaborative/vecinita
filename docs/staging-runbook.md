@@ -119,7 +119,7 @@ Mark items in [execution-plan.md](execution-plan.md) Phase 4 Gate Check after ev
 |-----------|----------------|
 | CI pytest + vitest green | GitHub Actions `main` green |
 | Staging H1–H3 | `staging_smoke.sh` or smoke pytest with URLs set |
-| Cost ≤ $50 documented | [cost-monitoring.md](cost-monitoring.md) |
+| Cost ≤ $50 documented | [docs/reference.md#cost-monitoring-baseline-adr-004](reference.md#cost-monitoring-baseline-adr-004) |
 | Data assets D1–D7 | [data-staging-state.md](data-staging-state.md) — D6/D7 after first Modal deploy |
 
 ## Troubleshooting

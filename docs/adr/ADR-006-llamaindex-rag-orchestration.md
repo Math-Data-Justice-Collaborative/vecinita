@@ -42,7 +42,7 @@ LlamaIndex fits a **stateless, single-request Q&A** model (ADR-004). LangGraph e
 
 ## References
 
-- RD-005, RD-023 (`docs/requirements-decisions.md`)
+- RD-005, RD-023 (`docs/decisions.md#requirements-decisions-01-requirements`)
 - feature-list F4 (`docs/feature-list.md`)
 - `docs/dependency-inventory.md` §LlamaIndex evaluation
 - ADR-004 (stateless chat), ADR-007 (Postgres read on DO)

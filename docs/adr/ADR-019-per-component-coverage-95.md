@@ -83,6 +83,6 @@ CI: dedicated **`coverage`** job runs `make test-unit-coverage` (summary script 
 ## Related
 
 - F31 in `docs/feature-list.md`
-- RD-053–RD-060 in `docs/requirements-decisions.md`
+- RD-053–RD-060 in `docs/decisions.md#requirements-decisions-01-requirements`
 - ADR-018 (typing gate — complementary, not a substitute for coverage)
 - `scripts/test/unit_coverage.sh`, `scripts/test/print_unit_coverage_summary.py`

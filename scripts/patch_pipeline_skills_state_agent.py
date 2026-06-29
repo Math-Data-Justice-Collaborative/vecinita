@@ -43,7 +43,7 @@ When user adds features or `mode: delta` / active evolve cycle:
 
 - Update **only** Fn sections and templates listed in `affected_artifacts`.
 - Support **multiple Fn** in one cycle — one interview batch per feature or grouped by domain.
-- Prefix decisions in `requirements-decisions.md` with `EV-NNN / Fnn`.
+- Prefix decisions in `docs/decisions.md#requirements-decisions-01-requirements` with `EV-NNN / Fnn`.
 - Do not delete unrelated spec sections; mark deprecated Fn with status + ADR.""",
     "02-verify-plan": """## Delta / feature-addition mode
 

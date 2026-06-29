@@ -1,4 +1,8 @@
-# Evolve report — EV-003 strict typing
+# Evolve history
+
+Archived evolve cycle reports.
+
+## EV-003 — Strict typing (no Any/any)
 
 **Cycle:** EV-003  
 **Completed:** 2026-05-27  
@@ -15,7 +19,7 @@ Synchronized documentation, Cursor rules, skills, and CI references with the enf
 | `docs/typing-policy.md` | Canonical typing policy and commands |
 | `docs/adr/ADR-018-strict-typing-no-any.md` | Architecture decision |
 | `.cursor/rules/strict-typing.mdc` | Agent guardrail (always apply) |
-| `docs/evolve-decisions.md` | Cycle scope record |
+| `docs/decisions.md#evolve-cycle-decisions` | Cycle scope record |
 | Updated specs | `execution-plan`, `test-plan`, `dependency-inventory`, `feature-list` F30 |
 | Updated skills/rules | `09-qa`, `14-hotfix`, `06-tech-tooling`, `verify-build`, `ci-after-push` |
 

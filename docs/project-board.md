@@ -13,7 +13,7 @@ This board tracks **issues and PRs in flight**. Specs live in [`docs/`](https://
 |------|--------|
 | v1 (F1–F18) + EV-001/002/003 | Shipped |
 | Staging | Live — [deploy-state](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/deploy-state.md) |
-| Backlog | [roadmap](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/roadmap.md) Phase 6 |
+| Backlog | [roadmap](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/reference.md#roadmap) Phase 6 |
 
 ## Columns
 

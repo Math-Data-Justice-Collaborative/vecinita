@@ -100,7 +100,7 @@ When user adds features or `mode: delta` / active evolve cycle:
 
 - Update **only** Fn sections and templates listed in `affected_artifacts`.
 - Support **multiple Fn** in one cycle — one interview batch per feature or grouped by domain.
-- Prefix decisions in `requirements-decisions.md` with `EV-NNN / Fnn`.
+- Prefix decisions in `docs/decisions.md#requirements-decisions-01-requirements` with `EV-NNN / Fnn`.
 - Do not delete unrelated spec sections; mark deprecated Fn with status + ADR.
 
 ## Workflow
@@ -168,7 +168,7 @@ what the user has described so far:
 
 - **Config Spec** — if the project has user-facing configuration
   - For each parameter: **include in v1** vs **exclude/defer**, default, validation rules
-  - Cross-check upstream CLI defaults (00-context contradictions); document in requirements-decisions.md
+  - Cross-check upstream CLI defaults (00-context contradictions); document in `docs/decisions.md#requirements-decisions-01-requirements`
   - Validation rules that prevent runtime failures (e.g. `chunk_size` ≥ 15) belong here, not only in build
 - **API Contract** — if the project exposes APIs
 - **Dependency Inventory** — if the project has non-trivial dependencies
@@ -333,7 +333,7 @@ Total: [N] documents, [N] gaps needing review, [N] contradictions surfaced
 Interview decisions: [N] questions answered across [N] templates
 ADRs created: [N] in docs/adr/
 
-Decisions log: docs/requirements-decisions.md
+Decisions log: docs/decisions.md#requirements-decisions-01-requirements
 
 Next step: 02-verify-plan
 ```

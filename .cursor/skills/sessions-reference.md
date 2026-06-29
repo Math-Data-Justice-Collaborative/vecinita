@@ -14,7 +14,7 @@ under `docs/sessions/{session-id}/`.
 
 | Corpus | Location | Examples |
 |--------|----------|----------|
-| **Project (standing)** | `docs/` root | `spec.md`, `feature-list.md`, `test-plan.md`, `deploy-checklist.md`, `api-contract.md`, `product-decisions.md`, `evolve-decisions.md` |
+| **Project (standing)** | `docs/` root | `spec.md`, `feature-list.md`, `test-plan.md`, `deploy-checklist.md`, `api-contract.md`, `docs/decisions.md#product-decisions-02-verify-plan`, `docs/decisions.md#evolve-cycle-decisions` |
 | **Session (ephemeral)** | `docs/sessions/{session-id}/` | `session-brief.md`, `routing-plan.md`, `reports/*`, `checkpoints/*` |
 
 Scoped context briefs (`docs/context/<slug>.md`) remain valid; link them from

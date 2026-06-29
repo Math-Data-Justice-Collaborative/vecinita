@@ -21,7 +21,7 @@ Product decisions for corpus tagging and browse are captured in ADR-014 and RD-0
 | Ask-time tag inference | **Same Modal vLLM** (Qwen2.5-1.5B) with `VECINITA_LLM_TAG_MAX_TOKENS=128` | No new deployable; scale-to-zero already provisioned |
 | Browse UI | **`/corpus` route** in ChatRAG frontend + tag chips in chat sidebar | Clear navigation; sidebar chips for F22 |
 | EV-001 git branch | **`evolve/EV-001-corpus-tags`** from `main` | Per workflow-state evolve convention |
-| LLM cost (EV-001) | **Within existing ≤ $50/mo cap** | Extra ingest + inference calls at pilot volume; monitor via cost-monitoring.md |
+| LLM cost (EV-001) | **Within existing ≤ $50/mo cap** | Extra ingest + inference calls at pilot volume; monitor via docs/reference.md#cost-monitoring-baseline-adr-004 |
 
 ## Consequences
 
@@ -46,5 +46,5 @@ Product decisions for corpus tagging and browse are captured in ADR-014 and RD-0
 
 - ADR-014 (product tagging model)
 - ADR-009 (vLLM on Modal)
-- RD-025, RD-027, RD-032 (requirements-decisions.md)
-- TP-010–TP-017 (requirements-decisions.md §04-tech-plan EV-001)
+- RD-025, RD-027, RD-032 (`docs/decisions.md#requirements-decisions-01-requirements`)
+- TP-010–TP-017 (`docs/decisions.md#requirements-decisions-01-requirements` §04-tech-plan EV-001)

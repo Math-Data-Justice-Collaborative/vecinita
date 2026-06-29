@@ -178,8 +178,8 @@ available number. Never reuse a number.
 ### Cross-referencing
 
 When an ADR is created:
-1. Add a reference in the stage's decision log (e.g., `product-decisions.md`,
-   `tech-decisions.md`, `requirements-decisions.md`)
+1. Add a reference in the stage's decision log (e.g., `docs/decisions.md#product-decisions-02-verify-plan`,
+   `docs/decisions.md#technical-decisions-05-verify-tech`, `docs/decisions.md#requirements-decisions-01-requirements`)
 2. If the decision affects a spec document, add an inline citation:
    `<!-- ADR-{NNN} -->` next to the affected claim
 3. Add the ADR path to `workflow-state.yaml` §artifacts

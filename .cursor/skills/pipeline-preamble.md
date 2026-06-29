@@ -241,7 +241,7 @@ commits and record intent via agent when commits are deferred.
 | Mechanism | When |
 |-----------|------|
 | **ADR** | Resolved `[Decision]`, non-obvious `[Ambiguity]`, structural tech choices — `docs/adr/ADR-NNN.md` |
-| **Decision logs** | `requirements-decisions.md`, `tech-decisions.md`, `evolve-decisions.md` |
+| **Decision logs** | `docs/decisions.md#requirements-decisions-01-requirements`, `docs/decisions.md#technical-decisions-05-verify-tech`, `docs/decisions.md#evolve-cycle-decisions` |
 | **Fix in place** | Verification failure → patch code, spec, hook, or infra — **do not re-run whole phases** |
 | **Bugs** | [bug-investigation](bug-investigation/SKILL.md) + [14-hotfix](14-hotfix/SKILL.md) |
 

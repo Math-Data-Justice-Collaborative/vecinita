@@ -62,7 +62,7 @@ vecinita/
 
 ## References
 
-- RD-014 (`docs/requirements-decisions.md`)
+- RD-014 (`docs/decisions.md#requirements-decisions-01-requirements`)
 - `docs/context-brief.md` §9 Proposed Monorepo Layout
 - `docs/spec.md` §Component Overview, H9
 - ADR-001, ADR-006

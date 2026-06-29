@@ -108,6 +108,6 @@ working, persistence is silently disabled, no uncaught error (TC-073, AC-S2).
 - Journeys: `docs/user-journeys.md` UJ-024, UJ-025
 - Tests: `docs/test-plan.md` TC-072–TC-076
 - Acceptance: `docs/acceptance-criteria.md` AC-S1–AC-S7
-- Decisions: `docs/tech-decisions.md` §S003 (TP-S003-01–12, TV-S003-01); `docs/requirements-decisions.md` RD-068–RD-072
+- Decisions: `docs/decisions.md#technical-decisions-05-verify-tech` §S003 (TP-S003-01–12, TV-S003-01); `docs/decisions.md#requirements-decisions-01-requirements` RD-068–RD-072
 - Plan: `docs/execution-plan.md` §Phase 10
 - Related: ADR-004 (zero personal data / stateless chat)

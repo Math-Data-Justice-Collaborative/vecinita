@@ -2,7 +2,7 @@
 # User Journeys
 
 > **Project**: [project name]
-> **Source**: [feature-list.md], [api-contract.md], [requirements-decisions.md or research-brief.md]
+> **Source**: [feature-list.md], [api-contract.md], [decisions.md#Requirements decisions or research-brief.md]
 > **Last updated**: [YYYY-MM-DD]
 
 Product-facing journeys describe what a **caller** does — not internal module tests.

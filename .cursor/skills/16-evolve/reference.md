@@ -60,7 +60,7 @@ evolve_cycles:
     adrs:
       - docs/adr/ADR-004.md
     artifacts:
-      - path: docs/evolve-decisions.md
+      - path: docs/decisions.md#evolve-cycle-decisions
         status: in_progress
       - path: docs/sessions/S041-export-api/reports/evolve-summary.md
         status: pending
@@ -110,7 +110,7 @@ When invoking child skills during evolve:
 ### 01-requirements (delta)
 
 - Open only templates/sections listed in `affected_artifacts`.
-- Prefix new content with evolve cycle ID in `requirements-decisions.md`.
+- Prefix new content with evolve cycle ID in `docs/decisions.md#requirements-decisions-01-requirements`.
 - Do not delete unrelated sections; mark deprecated features with status + ADR if removed.
 
 ### 02-verify-plan (delta)
@@ -145,7 +145,7 @@ Run after 02-verify-plan and 05-verify-tech (and before deploy gate):
 
 On any failure: AskQuestion with category, evidence (file + section), and recommended fix.
 
-## evolve-decisions.md template
+## decisions.md evolve-cycle section template
 
 Create or append per cycle:
 
@@ -325,5 +325,5 @@ After phases A, B, C, D, and deploy — present to user before continuing:
 | `docs/dependency-inventory.md` | New packages |
 | `docs/data-management-plan.md` | Corpus/schema if ingest changes |
 
-Prefix decisions in `docs/requirements-decisions.md` / `docs/tech-decisions.md` with
+Prefix decisions in `docs/decisions.md#requirements-decisions-01-requirements` / `docs/decisions.md#technical-decisions-05-verify-tech` with
 `EV-NNN / Fnn`.

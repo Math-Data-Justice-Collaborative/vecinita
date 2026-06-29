@@ -1,7 +1,7 @@
 # User Journeys
 
 > **Project**: Vecinita  
-> **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [requirements-decisions.md](requirements-decisions.md)  
+> **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
 > **Last updated**: 2026-06-26 (S003: UJ-024/UJ-025 browser-local chat history)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  

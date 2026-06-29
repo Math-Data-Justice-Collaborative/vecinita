@@ -33,7 +33,7 @@ connectivity tiers. Record fixes in audit report before 03-plan-tooling.
 1. **01-requirements** must be `completed`. Spec documents must exist in `docs/`.
 2. At minimum: `docs/feature-list.md`, `docs/spec.md`, `docs/user-journeys.md`,
    `docs/test-plan.md`.
-3. `docs/requirements-decisions.md` — the interview decision log from 01-requirements.
+3. `docs/decisions.md#requirements-decisions-01-requirements` — the interview decision log from 01-requirements.
 
 If any prerequisite is missing, inform the user and invoke 01-requirements first.
 
@@ -106,7 +106,7 @@ Read all spec documents from the output directory. Build an ordered audit list:
 
 Audit mandatory documents first, then by priority from the manifest.
 
-Skip `requirements-decisions.md` (reference input, not a spec to audit) and
+Skip `docs/decisions.md#requirements-decisions-01-requirements` (reference input, not a spec to audit) and
 `context-brief.md` (input, not output).
 
 ### Phase 2 — Extract Provable Statements
@@ -155,7 +155,7 @@ Classify each statement's confidence level:
 
 | Confidence | Criteria | Action |
 |------------|----------|--------|
-| **High** | Derived directly from user's own interview answer. The user explicitly stated this fact. Traceable to `requirements-decisions.md`. | **Auto-approve.** Log in audit report with verdict `auto-approved (high confidence)`. |
+| **High** | Derived directly from user's own interview answer. The user explicitly stated this fact. Traceable to `docs/decisions.md#requirements-decisions-01-requirements`. | **Auto-approve.** Log in audit report with verdict `auto-approved (high confidence)`. |
 | **Medium** | Synthesized or inferred by the agent from user answers. Reasonable inference but not directly stated. | **Present to user** for review. |
 | **Low** | From context-brief, assumed by agent, or generated to fill a template gap. Marked with `⚠️ Assumed:` or `⚠️ Inferred:`. | **Present to user** for review. |
 
@@ -241,8 +241,8 @@ options:
 #### After each verdict
 
 1. Update `workflow-state.yaml` — increment counters, advance position
-2. Append to `docs/product-decisions.md`
-3. Update `docs/product-audit.md` with verdict
+2. Append to `docs/decisions.md#product-decisions-02-verify-plan`
+3. Update `docs/audits.md#product-plan-audit-report` with verdict
 4. If Deny or Modify: update the source spec document surgically
 5. If the verdict resolves a `[Decision]`, `[Contradiction]`, or `[Ambiguity]` between
    multiple valid approaches (including Deny or Modify that changes an architectural
@@ -272,10 +272,10 @@ as pending?" Process if the user chooses to review.
 
 Write to output directory:
 
-1. **`docs/product-audit.md`** — Full audit report: per-statement records with section,
+1. **`docs/audits.md#product-plan-audit-report`** — Full audit report: per-statement records with section,
    claim, source, confidence, verdict, user feedback, action taken.
 
-2. **`docs/product-decisions.md`** — Chronological decision log: timestamped table of
+2. **`docs/decisions.md#product-decisions-02-verify-plan`** — Chronological decision log: timestamped table of
    every verdict (auto-approved, user-approved, denied, modified, skipped).
 
 ### Phase 8 — Summary
@@ -299,8 +299,8 @@ Results:
 Source documents updated: [N] changes across [M] documents
 
 Artifacts:
-  docs/product-audit.md      — full audit report
-  docs/product-decisions.md  — decision log
+  docs/audits.md#product-plan-audit-report      — full audit report
+  docs/decisions.md#product-decisions-02-verify-plan  — decision log
   docs/adr/                  — [N] ADRs created from audit verdicts
 
 Next step: 03-plan-tooling

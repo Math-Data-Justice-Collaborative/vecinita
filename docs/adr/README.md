@@ -38,5 +38,5 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 ## Traceability
 
 - **Context resolutions:** `docs/context-brief.md` §3 Resolution Log
-- **Requirements decisions:** `docs/requirements-decisions.md` (RD-*)
+- **Requirements decisions:** `docs/decisions.md#requirements-decisions-01-requirements` (RD-*)
 - **Spec hard constraints:** `docs/spec.md` §Constraints & Assumptions

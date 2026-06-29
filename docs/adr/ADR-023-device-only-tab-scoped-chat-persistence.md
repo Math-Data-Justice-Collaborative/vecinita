@@ -86,5 +86,5 @@ clarifies that the "client-only" allowance includes device-only web storage, not
 - Journeys: `docs/user-journeys.md` UJ-024, UJ-025
 - Tests: `docs/test-plan.md` TC-072–TC-076
 - Acceptance: `docs/acceptance-criteria.md` AC-S1–AC-S7
-- Decisions: `docs/requirements-decisions.md` RD-068–RD-072; `docs/context-brief.md` §14 (R39–R42)
+- Decisions: `docs/decisions.md#requirements-decisions-01-requirements` RD-068–RD-072; `docs/context-brief.md` §14 (R39–R42)
 - Related: ADR-004 (zero personal data / stateless chat), F3, F15

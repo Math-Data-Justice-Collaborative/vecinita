@@ -51,7 +51,7 @@ Admin UI → Modal ASGI POST /jobs → queue worker → scrape → chunk → Fas
 
 ## References
 
-- RD-016 (`docs/requirements-decisions.md`)
+- RD-016 (`docs/decisions.md#requirements-decisions-01-requirements`)
 - `docs/spec.md` §DO internal write API, §Data Flow
 - `docs/deployment-integration.md` §Services
 - ADR-002, ADR-005, ADR-010

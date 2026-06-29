@@ -323,11 +323,11 @@ stages:
       - docs/deployment-integration.md
       - docs/acceptance-criteria.md
       - docs/dependency-inventory.md
-      - docs/roadmap.md
-      - docs/glossary.md
-      - docs/risk-register.md
+      - docs/reference.md#roadmap
+      - docs/reference.md#glossary
+      - docs/reference.md#risk-register
       - docs/data-management-plan.md
-      - docs/requirements-decisions.md
+      - docs/decisions.md#requirements-decisions-01-requirements
       - docs/adr/ADR-020-shared-frontend-ui.md
   02-verify-plan:
     status: completed
@@ -772,16 +772,16 @@ evolve_cycles:
           - docs/deployment-integration.md
           - docs/acceptance-criteria.md
           - docs/dependency-inventory.md
-          - docs/roadmap.md
-          - docs/requirements-decisions.md
-          - docs/glossary.md
-          - docs/risk-register.md
+          - docs/reference.md#roadmap
+          - docs/decisions.md#requirements-decisions-01-requirements
+          - docs/reference.md#glossary
+          - docs/reference.md#risk-register
       02-verify-plan:
         status: completed
         completed: "2026-05-24"
         artifacts_updated:
-          - docs/product-audit.md
-          - docs/product-decisions.md
+          - docs/audits.md#product-plan-audit-report
+          - docs/decisions.md#product-decisions-02-verify-plan
           - docs/test-plan.md
           - docs/acceptance-criteria.md
       04-tech-plan:
@@ -791,14 +791,14 @@ evolve_cycles:
         artifacts_updated:
           - docs/execution-plan.md
           - docs/adr/ADR-015-ev001-tagging-implementation.md
-          - docs/requirements-decisions.md
-          - docs/tech-decisions.md
+          - docs/decisions.md#requirements-decisions-01-requirements
+          - docs/decisions.md#technical-decisions-05-verify-tech
       05-verify-tech:
         status: completed
         completed: "2026-05-24"
         artifacts_updated:
-          - docs/tech-audit.md
-          - docs/tech-decisions.md
+          - docs/audits.md#technical-plan-audit-report
+          - docs/decisions.md#technical-decisions-05-verify-tech
           - docs/execution-plan.md
           - docs/test-plan.md
           - docs/spec.md
@@ -896,13 +896,13 @@ evolve_cycles:
         status: completed
       - path: docs/dependency-inventory.md
         status: completed
-      - path: docs/roadmap.md
+      - path: docs/reference.md#roadmap
         status: completed
-      - path: docs/requirements-decisions.md
+      - path: docs/decisions.md#requirements-decisions-01-requirements
         status: completed
-      - path: docs/glossary.md
+      - path: docs/reference.md#glossary
         status: completed
-      - path: docs/risk-register.md
+      - path: docs/reference.md#risk-register
         status: completed
       - path: data/fixtures/tags/seed_tags.json
         status: completed
@@ -961,14 +961,14 @@ evolve_cycles:
           - docs/config-spec.md
           - docs/api-contract.md
           - docs/acceptance-criteria.md
-          - docs/requirements-decisions.md
+          - docs/decisions.md#requirements-decisions-01-requirements
           - docs/adr/ADR-016-audit-log-no-ip.md
       02-verify-plan:
         status: completed
         completed: "2026-05-26"
         artifacts_updated:
-          - docs/product-audit.md
-          - docs/product-decisions.md
+          - docs/audits.md#product-plan-audit-report
+          - docs/decisions.md#product-decisions-02-verify-plan
           - docs/acceptance-criteria.md
           - docs/user-journeys.md
           - docs/test-plan.md
@@ -985,8 +985,8 @@ evolve_cycles:
         status: completed
         completed: "2026-05-26"
         artifacts_updated:
-          - docs/tech-audit.md
-          - docs/tech-decisions.md
+          - docs/audits.md#technical-plan-audit-report
+          - docs/decisions.md#technical-decisions-05-verify-tech
           - docs/config-spec.md
           - docs/api-contract.md
           - docs/acceptance-criteria.md
@@ -1082,19 +1082,19 @@ evolve_cycles:
           - docs/deployment-integration.md
           - docs/acceptance-criteria.md
           - docs/dependency-inventory.md
-          - docs/roadmap.md
-          - docs/glossary.md
-          - docs/risk-register.md
+          - docs/reference.md#roadmap
+          - docs/reference.md#glossary
+          - docs/reference.md#risk-register
           - docs/data-management-plan.md
-          - docs/requirements-decisions.md
+          - docs/decisions.md#requirements-decisions-01-requirements
           - docs/adr/ADR-020-shared-frontend-ui.md
       02-verify-plan:
         status: completed
         started: "2026-06-13"
         completed: "2026-06-13"
         artifacts_updated:
-          - docs/product-audit.md
-          - docs/product-decisions.md
+          - docs/audits.md#product-plan-audit-report
+          - docs/decisions.md#product-decisions-02-verify-plan
           - docs/feature-list.md
           - docs/user-journeys.md
           - docs/test-plan.md
@@ -1104,22 +1104,22 @@ evolve_cycles:
           - docs/deployment-integration.md
           - docs/adr/ADR-019-shared-frontend-i18n.md
           - docs/adr/ADR-020-shared-frontend-ui.md
-          - docs/requirements-decisions.md
+          - docs/decisions.md#requirements-decisions-01-requirements
       04-tech-plan:
         status: completed
         completed: "2026-06-13"
         artifacts_updated:
           - docs/execution-plan.md
           - docs/adr/ADR-021-ev004-implementation.md
-          - docs/tech-decisions.md
+          - docs/decisions.md#technical-decisions-05-verify-tech
           - docs/deployment-integration.md
           - docs/adr/README.md
       05-verify-tech:
         status: completed
         completed: "2026-06-13"
         artifacts_updated:
-          - docs/tech-audit.md
-          - docs/tech-decisions.md
+          - docs/audits.md#technical-plan-audit-report
+          - docs/decisions.md#technical-decisions-05-verify-tech
           - docs/execution-plan.md
           - docs/test-plan.md
           - docs/acceptance-criteria.md
@@ -1127,7 +1127,7 @@ evolve_cycles:
           - docs/staging-secrets-matrix.md
           - docs/adr/ADR-019-shared-frontend-i18n.md
           - docs/adr/ADR-020-shared-frontend-ui.md
-          - docs/product-audit.md
+          - docs/audits.md#product-plan-audit-report
       07-build:
         status: in_progress
         started: "2026-06-13"
@@ -1175,21 +1175,21 @@ evolve_cycles:
         status: completed
       - path: docs/dependency-inventory.md
         status: completed
-      - path: docs/roadmap.md
+      - path: docs/reference.md#roadmap
         status: completed
-      - path: docs/glossary.md
+      - path: docs/reference.md#glossary
         status: completed
-      - path: docs/risk-register.md
+      - path: docs/reference.md#risk-register
         status: completed
       - path: docs/data-management-plan.md
         status: completed
-      - path: docs/requirements-decisions.md
+      - path: docs/decisions.md#requirements-decisions-01-requirements
         status: completed
       - path: docs/execution-plan.md
         status: completed
       - path: docs/adr/ADR-021-ev004-implementation.md
         status: completed
-      - path: docs/tech-decisions.md
+      - path: docs/decisions.md#technical-decisions-05-verify-tech
         status: completed
       - path: docs/adr/README.md
         status: completed
@@ -1972,8 +1972,8 @@ decisions_log:
 
 artifacts:
   - docs/context-brief.md
-  - docs/product-audit.md
-  - docs/product-decisions.md
+  - docs/audits.md#product-plan-audit-report
+  - docs/decisions.md#product-decisions-02-verify-plan
   - docs/feature-list.md
   - docs/spec.md
   - docs/user-journeys.md
@@ -1984,10 +1984,10 @@ artifacts:
   - docs/deployment-integration.md
   - docs/acceptance-criteria.md
   - docs/dependency-inventory.md
-  - docs/roadmap.md
-  - docs/glossary.md
-  - docs/risk-register.md
-  - docs/requirements-decisions.md
+  - docs/reference.md#roadmap
+  - docs/reference.md#glossary
+  - docs/reference.md#risk-register
+  - docs/decisions.md#requirements-decisions-01-requirements
   - docs/adr/ADR-001-five-app-architecture.md
   - docs/adr/ADR-002-hybrid-modal-digitalocean.md
   - docs/adr/ADR-003-greenfield-sibling-apis.md
@@ -2000,8 +2000,8 @@ artifacts:
   - docs/adr/README.md
   - docs/execution-plan.md
   - docs/data-staging-state.md
-  - docs/tech-audit.md
-  - docs/tech-decisions.md
+  - docs/audits.md#technical-plan-audit-report
+  - docs/decisions.md#technical-decisions-05-verify-tech
   - pyproject.toml
   - pyrightconfig.json
   - .github/workflows/ci.yml
@@ -2014,7 +2014,7 @@ artifacts:
   - openapi/chat-rag.yaml (0.2.0)
   - openapi/internal-write.yaml (0.2.0)
   - docs/adr/ADR-019-per-component-coverage-95.md
-  - docs/evolve-decisions.md
+  - docs/decisions.md#evolve-cycle-decisions
   - docs/adr/README.md
   - docs/staging-runbook.md
   - docs/sessions/S001-modal-cold-start-snapshot/reports/p2-snapshot-deploy.md

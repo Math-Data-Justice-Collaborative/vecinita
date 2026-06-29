@@ -5,7 +5,7 @@
 > Opened: 2026-06-25
 > Branch: `feat/S001-modal-cold-start-snapshot`
 > Standing docs touched: `docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md`,
-> `docs/cost-monitoring.md` (no change expected), `infra/modal/llm_app.py`
+> `docs/reference.md#cost-monitoring-baseline-adr-004` (no change expected), `infra/modal/llm_app.py`
 
 ## Intent
 
@@ -45,4 +45,4 @@ on session open + scaledown tuning).
 - Routing: `routing-plan.md` (this folder)
 - Decision: `docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md` (Proposed)
 - Prior bug: `docs/bug-reports/BUG-2026-05-22-chat-cold-start-network-error.md`
-- Constraints: ADR-004 (cost), ADR-009 (vLLM on T4), `docs/cost-monitoring.md`
+- Constraints: ADR-004 (cost), ADR-009 (vLLM on T4), `docs/reference.md#cost-monitoring-baseline-adr-004`

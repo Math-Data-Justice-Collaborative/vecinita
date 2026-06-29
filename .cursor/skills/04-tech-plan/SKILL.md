@@ -40,7 +40,7 @@ Interview: confirm frontend↔API origin map for staging and production.
    - `docs/spec.md` — approved component architecture
    - `docs/user-journeys.md` — approved caller-facing flows (UJ-NNN)
    - `docs/test-plan.md` — approved test strategy (UJ ↔ TC mapping)
-   - `docs/product-audit.md` — audit results
+   - `docs/audits.md#product-plan-audit-report` — audit results
 3. Plan tooling must be installed (`.cursor/rules/plan-adherence.mdc` etc.)
 
 ## Uncertainty Resolution Protocol

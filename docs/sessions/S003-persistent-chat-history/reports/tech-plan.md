@@ -41,9 +41,9 @@ ADR-024 records the full persistence design.
 ## Artifacts changed
 
 - `docs/execution-plan.md` — Phase 10, Current State, PR Plan, Task Tracking, Open Questions, header
-- `docs/tech-decisions.md` — §S003 (TP-S003-01–12, TV-S003-01) + merge-coordination note
+- `docs/decisions.md#technical-decisions-05-verify-tech` — §S003 (TP-S003-01–12, TV-S003-01) + merge-coordination note
 - `docs/adr/ADR-024-chat-history-persistence-design.md` (new) + `docs/adr/README.md` index
-- `docs/requirements-decisions.md` — F33 unresolved items marked resolved
+- `docs/decisions.md#requirements-decisions-01-requirements` — F33 unresolved items marked resolved
 - `.cursor/rules/frontend-session-state-lifting.mdc` — device-only `sessionStorage` allowance + new regression-guard ref
 
 ## Open / carried forward

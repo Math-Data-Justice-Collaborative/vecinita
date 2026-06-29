@@ -46,7 +46,7 @@ Without a single machine-readable source of truth, frontends, backends, and test
 
 ## References
 
-- RD-018, RD-019, RD-020 (`docs/requirements-decisions.md`)
+- RD-018, RD-019, RD-020 (`docs/decisions.md#requirements-decisions-01-requirements`)
 - `docs/api-contract.md`
 - `docs/spec.md` §API surface
 - ADR-003, ADR-004

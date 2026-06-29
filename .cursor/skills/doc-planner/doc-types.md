@@ -23,7 +23,7 @@ checkpoints, and evolve summaries.
 ## 1. Roadmap
 
 **When relevant**: Always — every project benefits from a phased plan.
-**Path**: `docs/roadmap.md`
+**Path**: `docs/reference.md#roadmap`
 
 ```markdown
 # Roadmap
@@ -91,7 +91,7 @@ applicable); before `test-plan.md` so the test plan can reference journey IDs (U
 # User Journeys
 
 > **Project**: [name]
-> **Source**: [feature-list.md], [api-contract.md], [requirements-decisions.md or research-brief]
+> **Source**: [feature-list.md], [api-contract.md], [decisions.md#Requirements decisions or research-brief]
 > **Last updated**: [date]
 
 Product-facing journeys describe what a **caller** does — not internal module tests.
@@ -352,7 +352,7 @@ Non-numeric conditions that must be met.
 
 **When relevant**: Domain-specific terminology that could confuse contributors
 (especially common in scientific software).
-**Path**: `docs/glossary.md`
+**Path**: `docs/reference.md#glossary`
 
 ```markdown
 # Glossary
@@ -368,7 +368,7 @@ Non-numeric conditions that must be met.
 
 **When relevant**: Project has known failure modes, security concerns, or operational risks
 mentioned in the paper or visible in the codebase.
-**Path**: `docs/risk-register.md`
+**Path**: `docs/reference.md#risk-register`
 
 ```markdown
 # Risk Register

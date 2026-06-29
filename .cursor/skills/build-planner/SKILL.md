@@ -107,7 +107,7 @@ Read all doc-planner outputs from the output directory. At minimum, expect:
 | `user-journeys.md` | If exists | Caller-facing UJ-NNN flows; E2E tier; feeds test-plan and 10-e2e |
 | `test-plan.md` | If exists | Test strategy, test cases, metrics (UJ ↔ TC mapping) |
 | `dependency-inventory.md` | If exists | Runtime/build deps, hardware |
-| `roadmap.md` | If exists | Phasing and priorities |
+| `docs/reference.md#roadmap` | If exists | Phasing and priorities |
 | `acceptance-criteria.md` | If exists | Pass/fail conditions |
 
 For each document read, extract:

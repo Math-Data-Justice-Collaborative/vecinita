@@ -85,4 +85,4 @@ vLLM is explicitly flagged by Modal as needing rewrites.
 - Modal Memory Snapshots: https://modal.com/docs/guide/memory-snapshot
 - Modal cold start: https://modal.com/docs/guide/cold-start
 - ADR-004 (cost/sovereignty), ADR-009 (vLLM on T4)
-- BUG-2026-05-22 (cold-start UX), `docs/cost-monitoring.md`
+- BUG-2026-05-22 (cold-start UX), `docs/reference.md#cost-monitoring-baseline-adr-004`
