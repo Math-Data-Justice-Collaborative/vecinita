@@ -147,6 +147,10 @@ Identity for **admin surfaces only** (DM UI, DM Modal API, internal-write API). 
 |--------|----------|-------------|
 | `SUPABASE_ACCESS_TOKEN` | For cloud sync jobs | Personal access token from [Supabase dashboard account tokens](https://supabase.com/dashboard/account/tokens); enables `preview-branch` + `sync-production` in `.github/workflows/supabase.yml` |
 | `SUPABASE_DB_PASSWORD` | Optional | Database password for `supabase link` when applying SQL migrations via `db push` |
+| `SUPABASE_PROJECT_ID` | Yes (cloud sync) | Canonical project ref (`cfuvghdsuwactfeamtym`) |
+| `SUPABASE_PUBLISHABLE_KEY` | Deploy / future CI | New `sb_publishable_*` key (browser-safe; maps to `VITE_SUPABASE_PUBLISHABLE_KEY`) |
+| `SUPABASE_SECRET_KEY` | Deploy / seed CI | New `sb_secret_*` key (admin API; replaces legacy `service_role`) |
+| `SUPABASE_URL` | Deploy / CI | `https://cfuvghdsuwactfeamtym.supabase.co` |
 
 Offline **validate** job runs without these secrets. Cloud jobs skip when the token is absent.
 
