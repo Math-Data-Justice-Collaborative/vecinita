@@ -6,7 +6,7 @@ export interface CorpusClientOptions {
   accessToken?: string;
 }
 
-function authHeaders(options: CorpusClientOptions): HeadersInit {
+function authHeaders(options: CorpusClientOptions): Record<string, string> {
   const bearer = options.accessToken ?? options.apiKey;
   if (!bearer) {
     throw new Error(
@@ -80,7 +80,7 @@ export async function patchDocumentTags(
     {
       method: "PATCH",
       headers: {
-        Authorization: `Bearer ${options.apiKey}`,
+        ...authHeaders(options),
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ tags, source: "human" }),
@@ -106,7 +106,7 @@ export async function patchChunkTags(
     {
       method: "PATCH",
       headers: {
-        Authorization: `Bearer ${options.apiKey}`,
+        ...authHeaders(options),
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ tags, source: "human" }),

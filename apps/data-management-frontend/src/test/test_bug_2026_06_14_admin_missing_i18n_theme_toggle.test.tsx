@@ -2,6 +2,7 @@ import { cleanup, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderAppRoutesReady } from "./renderAppHelpers";
+import { fetchInputUrl } from "./fetch-mock";
 
 async function renderAdmin(route = "/dashboard") {
   return renderAppRoutesReady(route);
@@ -13,7 +14,7 @@ describe("BUG-2026-06-14 — Admin missing i18n toggle and inconsistent theme ch
     vi.stubGlobal(
       "fetch",
       vi.fn().mockImplementation((input: RequestInfo | URL) => {
-        const url = typeof input === "string" ? input : input.toString();
+        const url = fetchInputUrl(input);
         if (url.includes("/internal/v1/stats")) {
           return Promise.resolve({
             ok: true,

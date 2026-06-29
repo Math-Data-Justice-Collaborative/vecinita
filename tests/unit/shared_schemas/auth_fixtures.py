@@ -26,6 +26,12 @@ class StaticSigningKeyResolver:
         return _StaticSigningKey(self._public_key)
 
 
+class InvalidSigningKeyResolver:
+    def get_signing_key_from_jwt(self, token: str) -> object:
+        _ = token
+        return object()
+
+
 def generate_es256_keypair() -> ec.EllipticCurvePrivateKey:
     return ec.generate_private_key(ec.SECP256R1())
 

@@ -1,5 +1,16 @@
 import { vi } from "vitest";
 
+/** Normalize fetch mock input to a URL string. */
+export function fetchInputUrl(input: RequestInfo | URL): string {
+  if (typeof input === "string") {
+    return input;
+  }
+  if (input instanceof URL) {
+    return input.href;
+  }
+  return input.url;
+}
+
 /** Parse JSON object body from a mocked fetch call (RequestInit.body is always string here). */
 export function mockFetchJsonBody(index = 0): Record<string, unknown> {
   const raw = vi.mocked(fetch).mock.calls.at(index)?.[1]?.body;

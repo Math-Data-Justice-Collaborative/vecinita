@@ -6,7 +6,7 @@ export interface JobsClientOptions {
   accessToken?: string;
 }
 
-function jobsHeaders(options: JobsClientOptions): HeadersInit {
+function jobsHeaders(options: JobsClientOptions): Record<string, string> {
   const headers: Record<string, string> = {
     "X-Vecinita-Proxy-Key": options.modalKey,
   };

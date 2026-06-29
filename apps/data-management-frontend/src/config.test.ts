@@ -45,4 +45,49 @@ describe("config", () => {
     const { requireCorpusConfig } = await import("./config");
     expect(() => requireCorpusConfig()).toThrow(/VITE_VECINITA_CORPUS_API_URL/);
   });
+
+  it("requireCorpusConfig uses operator access token when set", async () => {
+    const { requireCorpusConfig, setOperatorAccessToken } =
+      await import("./config");
+    setOperatorAccessToken("operator-jwt");
+    expect(requireCorpusConfig()).toEqual({
+      baseUrl: "http://localhost:8002",
+      apiKey: "test-corpus-key",
+      accessToken: "operator-jwt",
+    });
+    setOperatorAccessToken(null);
+  });
+
+  it("requireCorpusConfig accepts token-only when api key unset", async () => {
+    vi.stubEnv("VITE_VECINITA_CORPUS_API_KEY", "");
+    const { requireCorpusConfig, setOperatorAccessToken } =
+      await import("./config");
+    setOperatorAccessToken("jwt-only");
+    expect(requireCorpusConfig()).toEqual({
+      baseUrl: "http://localhost:8002",
+      apiKey: "",
+      accessToken: "jwt-only",
+    });
+    setOperatorAccessToken(null);
+  });
+
+  it("requireAdminConfig includes access token when operator is signed in", async () => {
+    const { requireAdminConfig, setOperatorAccessToken } =
+      await import("./config");
+    setOperatorAccessToken("admin-jwt");
+    expect(requireAdminConfig()).toEqual({
+      baseUrl: "http://localhost:8001",
+      modalKey: "test-proxy-key",
+      accessToken: "admin-jwt",
+    });
+    setOperatorAccessToken(null);
+  });
+
+  it("requireCorpusConfig throws when neither api key nor session token", async () => {
+    vi.stubEnv("VITE_VECINITA_CORPUS_API_KEY", "");
+    const { requireCorpusConfig, setOperatorAccessToken } =
+      await import("./config");
+    setOperatorAccessToken(null);
+    expect(() => requireCorpusConfig()).toThrow(/sign in with Supabase/);
+  });
 });

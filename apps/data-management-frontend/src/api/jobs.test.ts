@@ -65,6 +65,27 @@ describe("createJob", () => {
     expect(init.body).toContain("chunk_size_tokens");
   });
 
+  it("sends Authorization when accessToken is set (F34)", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(jsonResponse({ job_id: "j1", status: "pending" }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await createJob(
+      {
+        baseUrl: OPTIONS.baseUrl,
+        modalKey: OPTIONS.modalKey,
+        accessToken: "jwt",
+      },
+      ["https://example.com"],
+    );
+
+    const headers = (fetchMock.mock.calls[0]?.[1] as RequestInit)
+      .headers as Record<string, string>;
+    expect(headers.Authorization).toBe("Bearer jwt");
+    expect(headers["X-Vecinita-Proxy-Key"]).toBe("k");
+  });
+
   it("throws a fallback message when create fails with no body", async () => {
     vi.stubGlobal(
       "fetch",

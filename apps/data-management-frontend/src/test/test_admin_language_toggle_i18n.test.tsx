@@ -7,6 +7,7 @@ import {
 } from "vecinita-frontend-i18n";
 
 import { renderAppRoutesReady } from "./renderAppHelpers";
+import { fetchInputUrl } from "./fetch-mock";
 
 async function renderAdmin(initialRoute = "/dashboard") {
   return renderAppRoutesReady(initialRoute);
@@ -26,7 +27,7 @@ describe("TC-065: Admin language toggle (UJ-022, F31)", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockImplementation((input: RequestInfo | URL) => {
-        const url = typeof input === "string" ? input : input.toString();
+        const url = fetchInputUrl(input);
         if (url.includes("/internal/v1/stats")) {
           return Promise.resolve({
             ok: true,

@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/vitest";
-import { afterEach, beforeEach, vi } from "vitest";
+import { afterEach, beforeEach } from "vitest";
 
 import { setSupabaseClientForTests } from "@/auth/supabaseClient";
 

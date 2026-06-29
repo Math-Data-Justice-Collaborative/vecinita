@@ -14,6 +14,7 @@ import App from "@/App";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 import { installAuthenticatedSupabaseMock } from "./supabaseMock";
+import { renderWithProviders } from "./renderWithProviders";
 
 const { useMediaQueryMock } = vi.hoisted(() => ({
   useMediaQueryMock: vi.fn(() => true),

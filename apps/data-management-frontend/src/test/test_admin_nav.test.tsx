@@ -2,6 +2,7 @@ import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderAppRoutesReady, useMediaQueryMock } from "./renderAppHelpers";
+import { fetchInputUrl } from "./fetch-mock";
 
 async function renderApp(initialRoute = "/dashboard") {
   return renderAppRoutesReady(initialRoute);
@@ -21,7 +22,7 @@ describe("Admin navigation", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockImplementation((input: RequestInfo | URL) => {
-        const url = typeof input === "string" ? input : input.toString();
+        const url = fetchInputUrl(input);
         if (url.includes("/internal/v1/stats")) {
           return Promise.resolve({
             ok: true,

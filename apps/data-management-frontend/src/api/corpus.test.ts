@@ -13,6 +13,10 @@ import {
 } from "./corpus";
 
 const CLIENT = { baseUrl: "http://localhost:8002", apiKey: "test-key" };
+const JWT_CLIENT = {
+  baseUrl: "http://localhost:8002",
+  accessToken: "jwt-token",
+};
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -199,5 +203,68 @@ describe("corpus API client", () => {
       vi.fn().mockResolvedValue(new Response("", { status: 503 })),
     );
     await expect(retagDocument(CLIENT, "doc-1")).rejects.toThrow(/503/);
+  });
+
+  it("uses accessToken when apiKey is absent (F34)", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse([])));
+    await listDocuments(JWT_CLIENT);
+    expect(fetch).toHaveBeenCalledWith(
+      "http://localhost:8002/internal/v1/documents",
+      expect.objectContaining({
+        headers: { Authorization: "Bearer jwt-token" },
+      }),
+    );
+  });
+
+  it("patchDocumentTags throws status fallback when body empty", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 418 })),
+    );
+    await expect(patchDocumentTags(CLIENT, "doc-1", [])).rejects.toThrow(/418/);
+  });
+
+  it("throws when no bearer token is configured", async () => {
+    await expect(listDocuments({ baseUrl: CLIENT.baseUrl })).rejects.toThrow(
+      /Supabase session/,
+    );
+  });
+
+  it("deleteDocument uses accessToken when provided", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response(null, { status: 204 })),
+    );
+    await deleteDocument(JWT_CLIENT, "doc-1");
+    expect(fetch).toHaveBeenCalledWith(
+      "http://localhost:8002/internal/v1/documents/doc-1",
+      expect.objectContaining({
+        headers: { Authorization: "Bearer jwt-token" },
+      }),
+    );
+  });
+
+  it("patchChunkTags uses accessToken when provided", async () => {
+    const tags = [{ slug: "x", label: "x", source: "human" as const }];
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ tags })));
+    await patchChunkTags(JWT_CLIENT, "chunk-1", tags);
+    const init = vi.mocked(fetch).mock.calls[0]?.[1];
+    expect(init?.headers).toEqual(
+      expect.objectContaining({
+        Authorization: "Bearer jwt-token",
+      }),
+    );
+  });
+
+  it("listDocumentTags uses accessToken when provided", async () => {
+    const tags = [{ slug: "a", label: "A", source: "human" }];
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ tags })));
+    await listDocumentTags(JWT_CLIENT, "doc-1");
+    expect(fetch).toHaveBeenCalledWith(
+      "http://localhost:8002/internal/v1/documents/doc-1/tags",
+      expect.objectContaining({
+        headers: { Authorization: "Bearer jwt-token" },
+      }),
+    );
   });
 });
