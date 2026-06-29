@@ -32,7 +32,10 @@ CI on `main`: `.github/workflows/deploy-preflight.yml` (needs GitHub `MODAL_TOKE
 apps after **CI** succeeds on `main` (re-runs build-smoke + secrets, then `scripts/deploy/modal.sh`).
 Requires repo secrets `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`
 ([Modal continuous deployment](https://modal.com/docs/guide/continuous-deployment)).
-DigitalOcean apps auto-deploy on push to `main` via `deploy_on_push: true` in `infra/do/*.yaml`.
+**DigitalOcean CD on `main`:** `.github/workflows/deploy-digitalocean.yml` deploys the four
+DO apps after **CI** succeeds on `main` (via `scripts/deploy/do_apps.py`). `deploy_on_push` is
+**disabled** in `infra/do/*.yaml` so deploys are CI-gated (push-webhook deploys would bypass CI).
+Requires repo secret `DIGITALOCEAN_TOKEN`.
 Database migrations are **not** automated — run `alembic upgrade head` per the Deploy order below.
 
 ## Deploy order

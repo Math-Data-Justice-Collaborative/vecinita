@@ -11,7 +11,9 @@ services:
     github:
       repo: Math-Data-Justice-Collaborative/vecinita
       branch: main
-      deploy_on_push: true
+      # Disabled: deploys are gated on CI via .github/workflows/deploy-digitalocean.yml
+      # (push-webhook deploys bypass CI). Re-enable only if dropping the CD workflow.
+      deploy_on_push: false
     source_dir: /
     environment_slug: python
     instance_count: 1

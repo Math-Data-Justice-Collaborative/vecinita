@@ -16,7 +16,9 @@
 
 ## Open advisories
 
-1. DO chat apps pinned to feature branch until S001 merges to `main`.
+1. ~~DO chat apps pinned to feature branch until S001 merges to `main`.~~ **Resolved
+   2026-06-28** — live specs for all four DO apps reset to `branch: main` +
+   `deploy_on_push: true`; deploy-digitalocean.yml added as a deterministic CD backstop.
 2. H4 Modal data-mgmt CORS waived (`requires_proxy_auth` at proxy).
 3. 07-build T12 (web-fn hop) pending — not blocking health.
 4. Cold ask without pre-warm still exceeds 60s — browser path uses pre-warm on mount (S001 fix).
