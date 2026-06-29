@@ -1,4 +1,5 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import type { Session } from "@supabase/supabase-js";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -6,6 +7,48 @@ import { AuthProvider } from "@/auth/AuthContext";
 import { useAuth, useIsAdmin } from "@/auth/authContext";
 
 describe("AuthContext hooks", () => {
+  it("updates the session when Supabase emits an auth state change", async () => {
+    let emit: ((event: string, session: Session | null) => void) | undefined;
+    const { setSupabaseClientForTests } = await import("@/auth/supabaseClient");
+    setSupabaseClientForTests({
+      auth: {
+        getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
+        onAuthStateChange: vi.fn(
+          (cb: (event: string, session: Session | null) => void) => {
+            emit = cb;
+            return { data: { subscription: { unsubscribe: vi.fn() } } };
+          },
+        ),
+        signInWithPassword: vi.fn(),
+        signOut: vi.fn(),
+      },
+    } as never);
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <AuthProvider>{children}</AuthProvider>
+    );
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    act(() => {
+      emit?.("SIGNED_IN", {
+        access_token: "jwt",
+        user: {
+          id: "a1",
+          email: "admin@vecinita.admin",
+          app_metadata: { role: "admin" },
+        },
+      } as Session);
+    });
+
+    await waitFor(() => {
+      expect(result.current.role).toBe("admin");
+      expect(result.current.accessToken).toBe("jwt");
+    });
+  });
+
   it("useAuth throws outside AuthProvider", () => {
     const consoleError = vi
       .spyOn(console, "error")

@@ -22,6 +22,9 @@ function readStoredTheme(): Theme | null {
 }
 
 function applyTheme(theme: Theme): void {
+  // `document` is always defined in the browser/jsdom; the guard only protects
+  // against a non-DOM (SSR) import and is not exercised under test.
+  /* v8 ignore next */
   if (typeof document !== "undefined") {
     document.documentElement.setAttribute("data-theme", theme);
   }

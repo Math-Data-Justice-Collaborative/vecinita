@@ -152,6 +152,7 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
       await patchChunkTags(
         client,
         chunkId,
+        /* v8 ignore next -- drafts are populated with every loaded chunk; missing keys are defensive */
         parseTagsInput(chunkTagDrafts[chunkId] ?? ""),
       );
       setStatus(tr("admin.documentAdmin.chunkTagsSaved"));
@@ -263,6 +264,7 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
               </Label>
               <Input
                 id={`chunk-tags-${chunk.chunk_id}`}
+                /* v8 ignore next -- drafts are populated with every loaded chunk; missing keys are defensive */
                 value={chunkTagDrafts[chunk.chunk_id] ?? ""}
                 onChange={(e) => {
                   setChunkTagDrafts((current) => ({

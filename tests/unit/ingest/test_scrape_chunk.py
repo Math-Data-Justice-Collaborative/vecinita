@@ -16,6 +16,7 @@ from vecinita_ingest import (
 )
 from vecinita_ingest.chunk import (
     MAX_CHUNK_SIZE_TOKENS,
+    _split_oversized_paragraph,  # pyright: ignore[reportPrivateUsage]
 )
 from vecinita_ingest.scrape import (
     _TextExtractor,  # pyright: ignore[reportPrivateUsage]
@@ -185,3 +186,10 @@ def test_chunk_text_advances_when_inner_window_stays_empty() -> None:
     chunks = chunk_text(paragraph, chunk_size_tokens=64)
 
     assert chunks == ["solo"]
+
+
+def test_split_oversized_paragraph_advances_on_nonpositive_budget() -> None:
+    """A non-positive token budget still forces one-word forward progress (no infinite loop)."""
+    chunks = _split_oversized_paragraph("alpha beta gamma", -1)
+
+    assert chunks == ["alpha", "beta", "gamma"]

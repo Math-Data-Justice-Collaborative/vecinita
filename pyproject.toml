@@ -211,6 +211,10 @@ omit = [
 [tool.coverage.report]
 show_missing = true
 skip_covered = false
+exclude_also = [
+    # CLI entrypoint guards are exercised by the console script, not unit tests.
+    "if __name__ == .__main__.:",
+]
 
 [tool.basedpyright]
 include = ["apps", "packages", "tests", "infra", "scripts"]

@@ -31,10 +31,35 @@ describe("useTheme", () => {
     expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe("light");
   });
 
+  it("toggles back from light to dark", () => {
+    localStorage.setItem(THEME_STORAGE_KEY, "light");
+    const { result } = renderHook(() => useTheme());
+    expect(result.current.theme).toBe("light");
+
+    act(() => {
+      result.current.toggleTheme();
+    });
+
+    expect(result.current.theme).toBe("dark");
+    expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe("dark");
+  });
+
   it("rehydrates a persisted theme on mount", () => {
     localStorage.setItem(THEME_STORAGE_KEY, "light");
     const { result } = renderHook(() => useTheme());
     expect(result.current.theme).toBe("light");
+  });
+
+  it("sets an explicit theme via setTheme", () => {
+    const { result } = renderHook(() => useTheme());
+
+    act(() => {
+      result.current.setTheme("light");
+    });
+
+    expect(result.current.theme).toBe("light");
+    expect(document.documentElement.getAttribute("data-theme")).toBe("light");
+    expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe("light");
   });
 
   it("falls back to in-memory state when localStorage write fails", () => {

@@ -22,4 +22,16 @@ describe("supabaseClient", () => {
     const second = getSupabaseClient();
     expect(second).toBe(first);
   });
+
+  it("getSupabaseClient throws when env vars are missing", async () => {
+    vi.stubEnv("VITE_SUPABASE_URL", "");
+    vi.stubEnv("VITE_SUPABASE_PUBLISHABLE_KEY", "");
+    vi.resetModules();
+
+    const { getSupabaseClient, setSupabaseClientForTests } =
+      await import("@/auth/supabaseClient");
+    setSupabaseClientForTests(null);
+
+    expect(() => getSupabaseClient()).toThrow(/VITE_SUPABASE_URL/);
+  });
 });

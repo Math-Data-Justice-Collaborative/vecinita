@@ -133,8 +133,12 @@ def _metric_block(block: object) -> tuple[int, int]:
     return total, covered
 
 
-def _load_typescript_row(coverage_dir: Path, app: str) -> CoverageRow | None:
-    report_path = coverage_dir / app / "coverage-summary.json"
+def _load_typescript_row(
+    coverage_dir: Path,
+    report_dir: str,
+    component: str,
+) -> CoverageRow | None:
+    report_path = coverage_dir / report_dir / "coverage-summary.json"
     if not report_path.is_file():
         print(f"warning: missing {_display_path(report_path)}", file=sys.stderr)
         return None
@@ -144,7 +148,7 @@ def _load_typescript_row(coverage_dir: Path, app: str) -> CoverageRow | None:
     lines_total, lines_covered = _metric_block(total.get("lines"))
     branches_total, branches_covered = _metric_block(total.get("branches"))
     return CoverageRow(
-        component=f"apps/{app}",
+        component=component,
         lines_total=lines_total,
         lines_covered=lines_covered,
         branches_total=branches_total,
@@ -251,10 +255,18 @@ def main(argv: list[str] | None = None) -> int:
     coverage_dir = options.coverage_dir
 
     python_rows = _load_python_rows(coverage_dir)
+    # (coverage report subdir, component label) for every TS workspace under
+    # apps/ and packages/ that emits a coverage-summary.json.
+    typescript_targets = (
+        ("chat-rag-frontend", "apps/chat-rag-frontend"),
+        ("data-management-frontend", "apps/data-management-frontend"),
+        ("frontend-i18n", "packages/frontend-i18n"),
+        ("frontend-ui", "packages/frontend-ui"),
+    )
     typescript_rows = [
         row
-        for app in ("chat-rag-frontend", "data-management-frontend")
-        if (row := _load_typescript_row(coverage_dir, app)) is not None
+        for report_dir, component in typescript_targets
+        if (row := _load_typescript_row(coverage_dir, report_dir, component)) is not None
     ]
 
     print()
@@ -264,7 +276,7 @@ def main(argv: list[str] | None = None) -> int:
     print()
 
     _print_section("Python (packages + backend apps)", python_rows)
-    _print_section("TypeScript (frontend apps)", typescript_rows)
+    _print_section("TypeScript (frontend apps + packages)", typescript_rows)
 
     all_rows = python_rows + typescript_rows
     if all_rows:

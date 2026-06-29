@@ -67,6 +67,7 @@ export function HealthPage() {
     );
   }
 
+  /* v8 ignore next -- defensive: the health client throws on malformed payloads, so a falsy health with no error is unreachable */
   if (!health) return null;
 
   return (

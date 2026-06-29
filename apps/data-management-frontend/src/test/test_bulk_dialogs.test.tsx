@@ -376,6 +376,76 @@ describe("Bulk dialog components", () => {
       fireEvent.click(screen.getByRole("button", { name: /update metadata/i }));
       expect(screen.getByRole("button", { name: /updating/i })).toBeDisabled();
     });
+
+    it("surfaces the Error message when the update throws an Error", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockRejectedValueOnce(new Error("metadata exploded")),
+      );
+
+      renderWithTheme(
+        <BulkMetadataDialog
+          open
+          onOpenChange={vi.fn()}
+          documentIds={["d1"]}
+          onComplete={vi.fn()}
+        />,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /update metadata/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText("metadata exploded")).toBeInTheDocument();
+      });
+    });
+
+    it("does not call onComplete when canceling without results", () => {
+      const onComplete = vi.fn();
+
+      renderWithTheme(
+        <BulkMetadataDialog
+          open
+          onOpenChange={vi.fn()}
+          documentIds={["d1"]}
+          onComplete={onComplete}
+        />,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+      expect(onComplete).not.toHaveBeenCalled();
+    });
+
+    it("does not call onComplete when canceling after only failures", async () => {
+      const onComplete = vi.fn();
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            successes: [],
+            failures: [{ document_id: "d1", error: "bad" }],
+          }),
+        }),
+      );
+
+      renderWithTheme(
+        <BulkMetadataDialog
+          open
+          onOpenChange={vi.fn()}
+          documentIds={["d1"]}
+          onComplete={onComplete}
+        />,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /update metadata/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/0 updated, 1 failed/i)).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+      expect(onComplete).not.toHaveBeenCalled();
+    });
   });
 
   describe("BulkDeleteDialog", () => {

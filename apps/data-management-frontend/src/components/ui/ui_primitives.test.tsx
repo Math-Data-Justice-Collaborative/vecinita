@@ -13,6 +13,25 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { SheetFooter, SheetHeader } from "@/components/ui/sheet";
 
 describe("UI primitives coverage", () => {
   beforeEach(() => {
@@ -102,5 +121,65 @@ describe("UI primitives coverage", () => {
       />,
     );
     expect(screen.getByRole("separator")).toBeInTheDocument();
+  });
+
+  it("renders all card subcomponents", () => {
+    render(
+      <Card>
+        <CardHeader>
+          <CardTitle>Card title</CardTitle>
+          <CardDescription>Card description</CardDescription>
+        </CardHeader>
+        <CardContent>Card content</CardContent>
+        <CardFooter>Card footer</CardFooter>
+      </Card>,
+    );
+
+    expect(screen.getByText("Card title")).toBeInTheDocument();
+    expect(screen.getByText("Card description")).toBeInTheDocument();
+    expect(screen.getByText("Card content")).toBeInTheDocument();
+    expect(screen.getByText("Card footer")).toBeInTheDocument();
+  });
+
+  it("renders a table with footer and caption", () => {
+    render(
+      <Table>
+        <TableCaption>Table caption</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Head</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell>Body cell</TableCell>
+          </TableRow>
+        </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TableCell>Footer cell</TableCell>
+          </TableRow>
+        </TableFooter>
+      </Table>,
+    );
+
+    expect(screen.getByText("Table caption")).toBeInTheDocument();
+    expect(screen.getByText("Footer cell")).toBeInTheDocument();
+  });
+
+  it("renders sheet header and footer layout containers", () => {
+    render(
+      <div>
+        <SheetHeader>
+          <span>Sheet header</span>
+        </SheetHeader>
+        <SheetFooter>
+          <span>Sheet footer</span>
+        </SheetFooter>
+      </div>,
+    );
+
+    expect(screen.getByText("Sheet header")).toBeInTheDocument();
+    expect(screen.getByText("Sheet footer")).toBeInTheDocument();
   });
 });

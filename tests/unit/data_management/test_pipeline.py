@@ -20,6 +20,7 @@ from vecinita_shared_schemas.internal_write import (
     TagInput,
     TagPatchResponse,
 )
+from vecinita_tagging.llm_client import LlmTagClientError
 from vecinita_tagging.vocabulary import SeedTag
 
 _FIXTURE_HTML = (
@@ -89,6 +90,24 @@ class _StubTagClient:
         return ["housing"] if "housing" in vocabulary else []
 
 
+class _RaisingTagClient:
+    """Tag client whose inference always fails (best-effort tagging path)."""
+
+    def infer_document_tags(
+        self,
+        *,
+        title: str,
+        text: str,
+        language: str,
+        vocabulary: list[str],
+        max_tags: int = 10,
+    ) -> list[str]:
+        """Raise to simulate an LLM tag-inference failure."""
+        _ = (title, text, language, vocabulary, max_tags)
+        msg = "tag response is not valid JSON"
+        raise LlmTagClientError(msg)
+
+
 def _fetch_fixture(url: str) -> ScrapedDocument:
     """Fetch fixture."""
     return fetch_html_fixture(url, fixture_html=_FIXTURE_HTML)
@@ -147,6 +166,29 @@ def test_run_ingest_job_applies_llm_tags_when_client_provided() -> None:
     tags = write_client.last_batch.documents[0].tags
     assert tags is not None
     assert tags[0].slug == "housing"
+
+
+def test_run_ingest_job_ingests_without_tags_when_inference_fails() -> None:
+    """Tag-inference failure is best-effort: the job still completes without LLM tags (#88)."""
+    store = InMemoryJobStore()
+    write_client = _RecordingWriteClient()
+    record = store.create_job(urls=["https://example.com/sample-page.html"])
+
+    run_ingest_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=write_client,  # type: ignore[arg-type]
+        fetch_document=_fetch_fixture,
+        tag_client=_RaisingTagClient(),  # type: ignore[arg-type]
+        tag_vocabulary=_VOCAB,
+    )
+
+    updated = store.get_job(record.job_id)
+    assert updated is not None
+    assert updated.status == "completed"
+    assert write_client.last_batch is not None
+    assert write_client.last_batch.documents[0].tags is None
 
 
 def test_run_ingest_job_raises_when_job_missing() -> None:

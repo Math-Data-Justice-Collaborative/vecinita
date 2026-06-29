@@ -244,4 +244,20 @@ describe("JobForm", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Ingest failed");
   });
+
+  it("surfaces the Error message when ingest creation throws an Error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValueOnce(new Error("create job exploded")),
+    );
+    await renderReadyJobForm();
+    fireEvent.change(screen.getByLabelText(/public urls/i), {
+      target: { value: "https://example.com/page" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit ingest/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "create job exploded",
+    );
+  });
 });

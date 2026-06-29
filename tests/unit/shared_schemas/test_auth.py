@@ -17,6 +17,7 @@ from vecinita_shared_schemas.auth import (
     AuthConfig,
     AuthContext,
     AuthPrincipal,
+    _env_bool,  # pyright: ignore[reportPrivateUsage]
     _principal_from_authorization,  # pyright: ignore[reportPrivateUsage]
     _resolve_operator_or_service,  # pyright: ignore[reportPrivateUsage]
     get_auth_config,
@@ -386,6 +387,51 @@ def test_get_principal_reads_authorization_header() -> None:
     response = client.get("/principal", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == HTTPStatus.OK
     assert response.json()["role"] == "admin"
+
+
+def test_env_bool_returns_default_when_unset(monkeypatch: pytest.MonkeyPatch) -> None:
+    """_env_bool falls back to the supplied default when the variable is unset."""
+    monkeypatch.delenv("VECINITA_TEST_FLAG", raising=False)
+    assert _env_bool("VECINITA_TEST_FLAG", default=True) is True
+    assert _env_bool("VECINITA_TEST_FLAG", default=False) is False
+
+
+def test_resolve_signing_key_uses_pyjwk_client_without_resolver(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """With no injected resolver, resolve_signing_key constructs a JWKS PyJWKClient."""
+    private_key = generate_es256_keypair()
+    cfg = make_auth_config(private_key)
+    cfg.signing_key_resolver = None
+    sentinel = object()
+
+    class _FakeJWKClient:
+        def __init__(self, url: str, *, cache_keys: bool) -> None:
+            _ = (url, cache_keys)
+
+        def get_signing_key_from_jwt(self, token: str) -> object:
+            _ = token
+            return sentinel
+
+    monkeypatch.setattr(auth_mod, "PyJWKClient", _FakeJWKClient)
+
+    assert cfg.resolve_signing_key("any-token") is sentinel
+
+
+def test_verify_rejects_non_string_sub(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A decoded payload whose 'sub' is not a string is rejected as Unauthorized."""
+    private_key = generate_es256_keypair()
+    cfg = make_auth_config(private_key)
+    token = sign_test_jwt(private_key)
+
+    def _decode_non_string_sub(*_args: object, **_kwargs: object) -> dict[str, object]:
+        return {"sub": 123, "app_metadata": {"role": "admin"}}
+
+    monkeypatch.setattr(auth_mod.jwt, "decode", _decode_non_string_sub)
+
+    with pytest.raises(HTTPException) as exc_info:
+        verify_supabase_jwt(token, config=cfg)
+    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED  # type: ignore[attr-defined]
 
 
 def test_verify_rejects_payload_without_sub() -> None:

@@ -3,15 +3,18 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from uuid import uuid4
 
 import pytest
 from vecinita_internal_write_api.app import (
     _dependency_health_url,  # pyright: ignore[reportPrivateUsage]
     _normalize_database_url,  # pyright: ignore[reportPrivateUsage]
+    _resolve_write_actor,  # pyright: ignore[reportPrivateUsage]
     _row_datetime,  # pyright: ignore[reportPrivateUsage]
     _row_datetime_optional,  # pyright: ignore[reportPrivateUsage]
     _tags_snapshot_list,  # pyright: ignore[reportPrivateUsage]
 )
+from vecinita_shared_schemas.auth import AuthContext, AuthPrincipal
 
 
 def test_dependency_health_url_appends_health() -> None:
@@ -70,3 +73,16 @@ def test_tags_snapshot_list_filters_non_dict_items() -> None:
 def test_tags_snapshot_list_returns_empty_for_non_list() -> None:
     """Test tags snapshot list returns empty for non list."""
     assert _tags_snapshot_list({"not": "a list"}) == []
+
+
+def test_resolve_write_actor_returns_principal_sub_and_role() -> None:
+    """Operator writes attribute audit rows to the principal's sub and role."""
+    sub = uuid4()
+    ctx = AuthContext(principal=AuthPrincipal(sub=sub, role="admin"), is_service=False)
+    assert _resolve_write_actor(ctx) == (sub, "admin")
+
+
+def test_resolve_write_actor_returns_none_for_service_caller() -> None:
+    """Service-key writes carry no operator attribution."""
+    ctx = AuthContext(principal=None, is_service=True)
+    assert _resolve_write_actor(ctx) == (None, None)

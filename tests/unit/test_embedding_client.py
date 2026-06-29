@@ -187,6 +187,23 @@ def test_embed_batch_raises_when_embeddings_field_missing() -> None:
     client.close()
 
 
+def test_embed_raises_on_non_numeric_value() -> None:
+    """Embed raises when a correctly-sized vector contains a non-numeric value."""
+    bad_vector: list[object] = [0.1] * (EMBEDDING_DIMENSION - 1)
+    bad_vector.append("not-a-number")
+    transport = httpx.MockTransport(
+        lambda _request: httpx.Response(200, json={"embedding": bad_vector}),
+    )
+    client = EmbeddingClient(
+        "http://embed.test",
+        http_client=httpx.Client(transport=transport, base_url="http://embed.test"),
+    )
+
+    with pytest.raises(EmbeddingClientError, match="numeric"):
+        client.embed("x")
+    client.close()
+
+
 def test_embedding_client_does_not_close_injected_http_client() -> None:
     """Closing the client must not close an externally injected HTTP client."""
     closed: list[bool] = []

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage --reporter=dot",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
@@ -27,6 +28,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^6.0.2",
+    "@vitest/coverage-v8": "^4.1.8",
     "eslint": "^9.16.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.16",

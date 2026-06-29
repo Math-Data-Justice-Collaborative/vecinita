@@ -173,6 +173,29 @@ def test_infer_document_tags_raises_when_tags_not_string_array() -> None:
     client.close()
 
 
+def test_infer_document_tags_raises_when_tags_field_not_a_list() -> None:
+    """Document tag inference raises when the 'tags' field is not a list at all."""
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        """Handler."""
+        return httpx.Response(200, json={"text": '{"tags": "housing"}'})
+
+    transport = httpx.MockTransport(handler)
+    llm = LlmClient(
+        "http://llm.test",
+        http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
+    )
+    client = LlmTagClient(llm)
+    with pytest.raises(LlmTagClientError, match="string array"):
+        client.infer_document_tags(
+            title="Test",
+            text="Body",
+            language="en",
+            vocabulary=_VOCABULARY,
+        )
+    client.close()
+
+
 def test_infer_document_tags_rejects_max_tags_below_one() -> None:
     """Document tag inference rejects a max_tags value below one."""
     transport = httpx.MockTransport(lambda _request: httpx.Response(500))

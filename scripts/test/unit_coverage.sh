@@ -20,7 +20,8 @@ echo "==> Python unit tests (tests/unit)"
 
 echo "==> TypeScript unit tests (Vitest + coverage)"
 bash scripts/npm_with_lock.sh bash scripts/npm_workspaces.sh run test:coverage \
-	vecinita-chat-rag-frontend vecinita-data-management-frontend
+	vecinita-chat-rag-frontend vecinita-data-management-frontend \
+	vecinita-frontend-i18n vecinita-frontend-ui
 
 echo ""
 "$UV" run python scripts/test/print_unit_coverage_summary.py --enforce

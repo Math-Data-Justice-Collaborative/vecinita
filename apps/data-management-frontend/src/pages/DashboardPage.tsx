@@ -74,6 +74,7 @@ export function DashboardPage() {
     );
   }
 
+  /* v8 ignore next -- defensive: the stats client throws on malformed payloads, so a falsy stats with no error is unreachable */
   if (!stats) return null;
 
   return (
