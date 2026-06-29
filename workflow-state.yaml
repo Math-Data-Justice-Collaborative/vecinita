@@ -45,7 +45,7 @@ project:
       report: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
       tiers: [H1, H2, H3, H3b, H4, H5, H0ci]
       advisories:
-        - do_branch_pin_feat_S001
+        - "do_branch_pin_feat_S001: RESOLVED 2026-06-28 — DO apps reset to branch:main + deploy_on_push; deploy-digitalocean.yml CD backstop added"
         - modal_h4_cors_waived_proxy_auth
         - s001_t12_pending
         - h0ci_blocking_after_merge
@@ -657,7 +657,7 @@ stages:
     report: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
     tiers: [H1, H2, H3, H3b, H4, H5, H0ci]
     advisories:
-      - do_branch_pin_feat_S001
+      - "do_branch_pin_feat_S001: RESOLVED 2026-06-28 — DO apps reset to branch:main + deploy_on_push; deploy-digitalocean.yml CD backstop added"
       - modal_h4_cors_waived_proxy_auth
       - s001_t12_pending
       - h0ci_blocking_after_merge

@@ -1,0 +1,63 @@
+# Continuous deployment of DigitalOcean App Platform apps.
+# Deterministic backstop so every commit on `main` is rolled out even if the
+# GitHub -> DO push webhook (`deploy_on_push: true` in infra/do/*.yaml) is dropped.
+# Triggered only after the full CI suite passes on main, then deploys the four
+# vecinita apps via the pydo helper (scripts/deploy/do_apps.py).
+name: Deploy DigitalOcean
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+# Never cancel an in-progress deploy; serialize redeploys instead.
+concurrency:
+  group: deploy-digitalocean
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # CI runs on several branches; only deploy when CI succeeded on main.
+    # workflow_dispatch is always allowed (manual redeploy).
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event.workflow_run.conclusion == 'success' &&
+           github.event.workflow_run.head_branch == 'main') }}
+    env:
+      DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Require DigitalOcean token
+        run: |
+          if [ -z "${DIGITALOCEAN_TOKEN}" ]; then
+            echo "::error::DIGITALOCEAN_TOKEN repo secret is not set." >&2
+            echo "Add it under Settings -> Secrets and variables -> Actions (Apps read/write scope)." >&2
+            exit 1
+          fi
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Deploy DigitalOcean apps (force build from main HEAD)
+        run: |
+          set -euo pipefail
+          for app in \
+            vecinita-internal-write-api \
+            vecinita-chat-rag-backend \
+            vecinita-chat-rag-frontend \
+            vecinita-admin-frontend; do
+            echo "==> Deploying ${app}"
+            uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy --name "${app}"
+          done
+
+      - name: List apps
+        run: uv run --with pydo --with pyyaml scripts/deploy/do_apps.py list
