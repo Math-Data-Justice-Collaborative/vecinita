@@ -2,9 +2,15 @@ vi.mock("@/hooks/useMediaQuery", () => ({
   useMediaQuery: () => true,
 }));
 
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { afterEach, describe, expect, it, vi, beforeEach } from "vitest";
 
 import App from "@/App";
 import { AuthProvider } from "@/auth/AuthContext";
@@ -61,6 +67,27 @@ describe("admin auth protected routes (TC-084)", () => {
     vi.stubEnv("VITE_VECINITA_CORPUS_API_URL", "http://localhost:8002");
     vi.stubEnv("VITE_VECINITA_CORPUS_API_KEY", "key");
     mockSignOut.mockResolvedValue({ error: null });
+    // The dashboard fetches stats on mount; stub fetch so the protected-route
+    // assertions do not depend on (or leak) a real network request.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          total_documents: 0,
+          total_chunks: 0,
+          tag_distribution: [],
+          language_breakdown: {},
+          recent_activity: [],
+          top_served: [],
+        }),
+      }),
+    );
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
   });
 
   it("redirects unauthenticated users to login", async () => {

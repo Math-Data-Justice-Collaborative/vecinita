@@ -64,11 +64,41 @@ project:
       started_at: "2026-06-29"
       completed_at: "2026-06-29"
       session_id: S004-supabase-auth
-      overall: pass_with_remediation
-      reconciled_at: "2026-06-29"
-      reconciliation_note: "S004 F34 — initial run FAIL (admin nav test + coverage gate) remediated per qa-report QA-S004-001/002 (resolved). Independently re-confirmed during 10-e2e: admin FE 223/223 + chat FE 134/134 Vitest PASS. Earlier FAIL vs 08-verify-build PASS inconsistency resolved."
+      overall: pass_with_advisories
+      rerun_at: "2026-06-29"
+      rerun_overall: fail
+      remediation_at: "2026-06-29"
+      remediation_overall: pass_with_advisories
       report: docs/qa-report.md
-      note: "S004 F34 delta QA FAIL — admin nav test + coverage gate regression vs 08-verify-build PASS (preserved; remediated — see reconciliation_note)"
+      reports:
+        - docs/qa-report.md
+        - docs/sessions/S004-supabase-auth/reports/qa-report.md
+      blocking: []
+      resolved:
+        - id: QA-S004-010
+          status: resolved
+          resolved_at: "2026-06-29"
+          summary: "admin FE vitest exit 1 despite 230/230 assertions; unhandled errors in DashboardPage async cleanup"
+          resolution: "Added isActive() unmount guards to DashboardPage/HealthPage/AuditPage; fixed test_auth_login_protected_routes.test.tsx (cleanup + stubbed fetch); added regression test test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx. Admin FE Vitest now exits 0 (242 passed); coverage gate PASS combined 100% (1278/1278 branches)."
+        - id: QA-S004-011
+          status: resolved
+          resolved_at: "2026-06-29"
+          summary: "Node 20 -> 24 LTS bump (TP-S004-11 / ADR-019)"
+          resolution: "ci.yml setup-node x3, .nvmrc, root engines.node>=24; docs spec.md/execution-plan.md/LOCAL_DEV.md/decisions.md (TP-S004-11/ADR-019)/dependency-inventory.md updated."
+      accepted_or_deferred:
+        - "QA-S004-003: resolved (auth hooks split; lint clean)"
+        - "QA-S004-004 / QA-S004-012: documented/accepted"
+        - "QA-S004-005/006/007/008/009: deferred (env/GPU/ops)"
+      rerun_results:
+        python: "603 passed, 33 skipped — PASS"
+        chat_fe: "142/142 — PASS"
+        coverage_gate: "PASS (100%)"
+        admin_fe: "230/230 assertions pass but vitest exit 1 (QA-S004-010) — pre-remediation"
+      remediation_results:
+        admin_fe: "242 passed, vitest exit 0 (QA-S004-010 resolved)"
+        coverage_gate: "PASS combined 100% (1278/1278 branches)"
+      prior_reconciliation_note: "Earlier in-session 09-qa was reconciled to pass_with_remediation during 10-e2e (initial FAIL on admin nav test + coverage gate remediated per qa-report QA-S004-001/002; admin FE 223/223 + chat FE 134/134 Vitest). The 2026-06-29 re-run superseded that with a FAIL on QA-S004-010; the 2026-06-29 remediation now supersedes the re-run."
+      note: "S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED (isActive() unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression test; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes the 2026-06-29 RE-RUN FAIL. Reports: docs/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md."
     13-deploy-smoke:
       status: completed
       started_at: "2026-06-26"
@@ -136,7 +166,11 @@ active_session:             # current bounded work unit; null when none in fligh
     - stage: 09-qa
       status: completed
       completed_at: "2026-06-29"
-      note: "FAIL remediated (QA-S004-001/002 resolved); re-confirmed during 10-e2e (admin 223/223 + chat 134/134 Vitest). overall: pass_with_remediation. Report: docs/sessions/S004-supabase-auth/reports/qa-report.md"
+      rerun_at: "2026-06-29"
+      rerun_overall: fail
+      remediation_at: "2026-06-29"
+      remediation_overall: pass_with_advisories
+      note: "REMEDIATION 2026-06-29 overall pass_with_advisories — blocking QA-S004-010 RESOLVED (isActive() unmount guards on DashboardPage/HealthPage/AuditPage; fixed test_auth_login_protected_routes.test.tsx; regression test test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. Supersedes the RE-RUN 2026-06-29 FAIL. Reports: docs/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md."
     - stage: 10-e2e
       status: completed
       started_at: "2026-06-29"
@@ -2347,6 +2381,8 @@ decisions_log:
     note: "S004/EV-005 08-verify-build FAIL (F34 Supabase admin auth, feat/S004-supabase-auth). Milestone-boundary verify overall_result FAIL. Blocking: cryptography CVEs (pip-audit); admin FE branch coverage 92.46% < 95%. Report: docs/verification-report.md. Updated project.stages.08-verify-build + stages.08-verify-build.s004 + EV-005.stages.08-verify-build; active_session.current_stage = 08-verify-build; routing_plan 08-verify-build status failed (not completed — remediation required before downstream stages)."
   - date: "2026-06-29"
     note: "S004/EV-005 reconciliation during 10-e2e. (1) 09-qa FAIL→pass_with_remediation: initial QA FAIL (admin nav test + coverage gate) was remediated per qa-report QA-S004-001/002 (both resolved; admin FE 223/223 + coverage gate PASS); independently re-confirmed during 10-e2e (admin FE 223/223 + chat FE 134/134 Vitest). Resolves the earlier 09-qa FAIL vs 08-verify-build PASS inconsistency. (2) 07-build in_progress→completed: F34 Phase 11 M43-M47 build reconciled to completed since 08-verify-build, 09-qa (remediated), and 10-e2e all completed downstream. Updated project.stages.07-build (promoted to S004 canonical; S003 nested as s003_baseline) + project.stages.09-qa + stages.07-build.s004 (legacy mirror) + EV-005.stages.07-build/09-qa + active_session.routing_plan 07-build/09-qa. First-start dates preserved (S003 baseline nested; started_at unchanged). Advisory: EV-005.current_stage still '08-verify-build' (stale vs active_session.current_stage '12-verify-deploy') and EV-005.stages lacks a 10-e2e node — not in this payload's scope."
+  - date: "2026-06-29"
+    note: "S004/EV-005 09-qa REMEDIATION complete — overall fail→pass_with_advisories. Blocking QA-S004-010 RESOLVED: isActive() unmount guards added to DashboardPage/HealthPage/AuditPage; test_auth_login_protected_routes.test.tsx fixed (cleanup + stubbed fetch); regression test test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx added; admin FE Vitest now exits 0 (242 passed); coverage gate PASS combined 100% (1278/1278 branches). QA-S004-011 RESOLVED: Node 20→24 LTS (TP-S004-11 / ADR-019) — ci.yml setup-node x3, .nvmrc, root engines.node>=24; docs spec.md/execution-plan.md/LOCAL_DEV.md/decisions.md/dependency-inventory.md updated. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Updated project.stages.09-qa (overall=pass_with_advisories, blocking cleared→resolved, remediation_at + remediation_results) + active_session.routing_plan 09-qa (remediation note). No commits invented. Advisory: EV-005.stages.09-qa still reads pass_with_remediation (older reconciliation label) — not in this payload's scope."
 
 artifacts:
   - docs/context-brief.md

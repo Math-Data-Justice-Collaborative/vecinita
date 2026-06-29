@@ -218,7 +218,7 @@ Admin UI → Modal ASGI (/jobs) → Modal queue worker → scrape → chunk → 
 | H7 | Cost ≤ $50/mo cap (target $25) | ADR-004, ADR-010 |
 | H8 | Only DO backends hold `DATABASE_URL` | ADR-007 |
 | H9 | `packages/` must not import `apps/` | ADR-012 |
-| H10 | Python **3.11** / Node **20 LTS** (dependency-inventory.md) | 04-tech-plan |
+| H10 | Python **3.11** / Node **24 LTS** (dependency-inventory.md; TP-S004-11) | 04-tech-plan |
 
 ### Forbidden schema (minimum deny-list)
 

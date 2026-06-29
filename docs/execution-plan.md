@@ -32,7 +32,7 @@
 | Category | Choice | Source | Spec Reference |
 |----------|--------|--------|----------------|
 | Language (Python) | **3.11** | 04-tech-plan interview | spec.md H10 |
-| Language (Node) | **20 LTS** | dependency-inventory.md | Frontends |
+| Language (Node) | **24 LTS** | dependency-inventory.md; TP-S004-11 | Frontends |
 | Linter | **Ruff** (+ `ANN401` no-Any) | hooks + ADR-018 | `docs/typing-policy.md` |
 | Formatter | **Ruff format** | hooks | test-plan.md |
 | Typechecker | **basedpyright** (`reportExplicitAny`) | ADR-018; `.cursor/hooks/typecheck.py` | `docs/typing-policy.md` (supersedes pyright/mypy) |

@@ -39,6 +39,10 @@
 
 ## Runtime dependencies (Node)
 
+> **Node runtime:** **24 LTS** (current Active LTS). Pinned via `.nvmrc`, root
+> `package.json` `engines.node>=24`, and `.github/workflows/ci.yml` (`setup-node`).
+> Bumped from 20 LTS per TP-S004-11 (09-qa remediation).
+
 | Package | Purpose | License | Notes |
 |---------|---------|---------|-------|
 | react | 18.x UI | MIT | |

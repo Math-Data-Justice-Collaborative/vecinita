@@ -33,26 +33,35 @@ export function AuditPage() {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   const load = useCallback(
-    async (params?: { event_type?: string; entity_id?: string }) => {
+    async (
+      params?: { event_type?: string; entity_id?: string },
+      isActive: () => boolean = () => true,
+    ) => {
       setLoading(true);
       setError(null);
       try {
         const client = requireCorpusConfig();
         const result = await fetchAuditLog(client, params);
+        if (!isActive()) return;
         setData(result);
       } catch (err) {
+        if (!isActive()) return;
         setError(
           err instanceof Error ? err.message : tr("admin.audit.loadFailed"),
         );
       } finally {
-        setLoading(false);
+        if (isActive()) setLoading(false);
       }
     },
     [tr],
   );
 
   useEffect(() => {
-    void load();
+    let active = true;
+    void load(undefined, () => active);
+    return () => {
+      active = false;
+    };
   }, [load]);
 
   const handleApplyFilters = () => {

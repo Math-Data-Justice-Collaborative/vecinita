@@ -58,7 +58,7 @@ Adopt **F31 — per-component unit coverage gate**:
 **Resolved (EV-004 04-tech-plan 2026-06-13):**
 
 - **TP-030:** Extend `scripts/test/print_unit_coverage_summary.py` with **`--enforce`** — exit non-zero when any component is below 95% line or branch; `scripts/test/unit_coverage.sh` passes `--enforce` by default.
-- **TP-031:** Add dedicated **`coverage`** job to `.github/workflows/ci.yml` (uv + Node 20; runs `make test-unit-coverage` after lint jobs or in parallel with full pytest).
+- **TP-031:** Add dedicated **`coverage`** job to `.github/workflows/ci.yml` (uv + Node 24; runs `make test-unit-coverage` after lint jobs or in parallel with full pytest).
 - Add Vitest `coverage.thresholds` (lines + branches **95**) per frontend app, aligned with the same target.
 - Repo-wide pytest `[tool.coverage.report] fail_under` is **not** used; per-component aggregation in the summary script is the single source of truth.
 
