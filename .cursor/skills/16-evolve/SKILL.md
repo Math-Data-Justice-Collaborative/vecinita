@@ -206,7 +206,7 @@ After **02-verify-plan** and **05-verify-tech**, run [reference.md](reference.md
 
 ## Phase 4 — Close evolve cycle
 
-1. Write `docs/evolve-report-{cycle-id}.md`.
+1. Append the cycle report as a new section to `docs/archive/evolve-history.md`.
 2. Agent `update`: cycle `status: completed`, timestamps, artifacts.
 3. Append CHANGELOG / deploy-report if deployed.
 4. AskQuestion: done / 15-service-health / 14-hotfix / 17-retrospective.

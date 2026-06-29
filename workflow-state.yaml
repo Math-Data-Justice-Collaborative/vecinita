@@ -15,6 +15,16 @@ project:
       phase: "Phase 10 (M39–M42)"
       note: "S003 F33 browser-local persistent chat history — M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green"
       reopen_note: "07-build reopened 2026-06-28 (explicit user approval) for an ADR-025 delta: chat-history storage switched sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only). Commit eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed."
+    08-verify-build:
+      status: completed
+      completed_at: "2026-06-28"
+      session_id: S003-persistent-chat-history
+      branch: main
+      overall_result: PASS
+      report: docs/verification-report.md
+      session_report: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
+      user_invoked: true
+      note: "S003 milestone-boundary verify PASS (user-invoked /08-verify-build). Frontend-only F33 chat-history delta; main@9bd7a50 with uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED (frontend-only delta)."
     13-deploy-smoke:
       status: completed
       started_at: "2026-06-26"
@@ -68,6 +78,11 @@ active_session:             # current bounded work unit; null when none in fligh
       completed_at: "2026-06-26"
       reopened_at: "2026-06-28"
       note: "M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green. Reopened 2026-06-28 (user-approved) for ADR-025 storage-mechanism reversal: sessionStorage -> localStorage (durable, cross-tab, still device-only). ADR-025 authored at this stage (supersedes-in-part ADR-023, ADR-024). Commit eacf4ad; re-verified 116 FE tests + 95% coverage + build green; frontend-only, no API/contract/CORS change (AC-S7 preserved). Status remains completed."
+    - stage: 08-verify-build
+      status: completed
+      completed_at: "2026-06-28"
+      user_amended: true
+      note: "User invoked /08-verify-build explicitly (not in original S003 routing plan). Milestone-boundary verify PASS; frontend-only F33 chat-history delta; main@9bd7a50 + uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED. Reports: docs/verification-report.md + docs/sessions/S003-persistent-chat-history/reports/verification-report.md"
     - stage: 09-qa
       status: pending
     - stage: 10-e2e
@@ -91,6 +106,10 @@ active_session:             # current bounded work unit; null when none in fligh
     - docs/sessions/S003-persistent-chat-history/session-brief.md
     - docs/sessions/S003-persistent-chat-history/routing-plan.md
     - docs/adr/ADR-025-chat-history-localstorage-persistence.md
+    - path: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
+      kind: report
+      session_id: S003-persistent-chat-history
+      stage: 08-verify-build
 sessions:                   # archived completed sessions
   - id: S002-admin-job-management
     type: feature
@@ -449,15 +468,27 @@ stages:
   08-verify-build:
     status: completed
     started_at: "2026-06-25"
-    completed_at: "2026-06-25"
-    partial_rerun_at: "2026-06-25"
-    partial_rerun_note: "S001 — milestone-boundary verify PASS (T12 still pending in 07-build; 2 uncommitted eslint/prettier auto-fixes)"
+    completed_at: "2026-06-28"
+    partial_rerun_at: "2026-06-28"
+    partial_rerun_note: "S003 — milestone-boundary verify PASS (frontend-only F33 chat-history delta; main@9bd7a50 with uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED — frontend-only delta)"
     scope: standalone
     overall: pass
     report: docs/verification-report.md
-    notes: "EV-004: 522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override bumps (aiohttp, msgpack, pypdf, starlette) | S001: milestone-boundary verify PASS; T12 still pending in 07-build; 2 uncommitted eslint/prettier auto-fixes"
+    notes: "EV-004: 522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override bumps (aiohttp, msgpack, pypdf, starlette) | S001: milestone-boundary verify PASS; T12 still pending in 07-build; 2 uncommitted eslint/prettier auto-fixes | S003: milestone-boundary verify PASS; frontend-only F33 chat-history delta; Modal smoke SKIPPED"
     substeps:
       phase: complete
+    s003:
+      session_id: S003-persistent-chat-history
+      branch: main
+      completed_at: "2026-06-28"
+      overall_result: PASS
+      report: docs/verification-report.md
+      session_report: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
+      user_invoked: true
+      notes:
+        - "Branch main@9bd7a50; uncommitted S003/chat-UI work"
+        - "2 prettier auto-fixes uncommitted in chat-rag-frontend tests"
+        - "Modal smoke SKIPPED (frontend-only delta)"
   09-qa:
     status: completed
     started_at: "2026-06-25"
@@ -1969,6 +2000,8 @@ decisions_log:
     note: "S003 07-build COMPLETE — F33 browser-local persistent chat history (Phase 10, M39–M42). 4 atomic commits on feat/S003-persistent-chat-history: 14af2a5 (T39.1-T39.5 useConversationStore sessionStorage persistence), accd98f (T40.1-T40.4 rehydrate on mount), 1bf6d17 (T41.1-T41.5 previous-chats list new-chat/select/delete/clear + i18n), d22e040 (T42.1-T42.3 AC-S6 privacy + Phase 10 gate). Phase 10 gate PASS; 115 FE tests + 95% coverage + build green. routing_plan 07-build → completed; active_session.current_stage advanced to 09-qa (next pending)."
   - date: "2026-06-28"
     note: "S003 07-build REOPENED (explicit user approval) to reverse an audited design decision: F33 chat-history storage switched sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only, never sent to server). ADR-025 authored at 07-build; supersedes-in-part ADR-023 and ADR-024. Commit eacf4ad (20 files). Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS change (AC-S7 preserved). stages.07-build.s003 + project.stages.07-build keep status completed (reopened_at recorded). active_session.current_stage unchanged (remains 09-qa)."
+  - date: "2026-06-28"
+    note: "S003 08-verify-build COMPLETE (user-invoked /08-verify-build; amended into S003 routing plan with user_amended=true — was not in original 00→01→04→07→09→10→12→13 plan). Milestone-boundary verify result PASS. Frontend-only F33 chat-history delta on main@9bd7a50 with uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED (frontend-only delta). Reports: docs/verification-report.md + docs/sessions/S003-persistent-chat-history/reports/verification-report.md. Recorded in project.stages.08-verify-build (canonical) + stages.08-verify-build.s003 (legacy mirror). active_session.current_stage unchanged (remains 09-qa — next pending)."
 
 artifacts:
   - docs/context-brief.md

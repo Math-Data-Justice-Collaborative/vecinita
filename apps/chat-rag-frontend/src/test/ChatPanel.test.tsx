@@ -4,11 +4,11 @@ import {
   fireEvent,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ChatPanel } from "../components/ChatPanel";
-import * as browse from "../api/browse";
 import { renderWithLocale } from "./renderWithLocale";
 
 function sseResponse(body: string): Response {
@@ -356,48 +356,15 @@ describe("ChatPanel", () => {
     );
   });
 
-  it("does not update tag facets after unmount", async () => {
-    let resolveTags: ((value: { tags: browse.TagFacet[] }) => void) | undefined;
-    vi.spyOn(browse, "fetchTags").mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          resolveTags = resolve;
-        }),
-    );
-
-    const { unmount } = renderWithLocale(<ChatPanel />);
-    unmount();
-    resolveTags?.({ tags: [] });
-  });
-
-  it("ignores empty submissions and shows tag filter chips", async () => {
-    vi.stubGlobal(
-      "fetch",
-      mockFetchRouter({
-        tags: new Response(
-          JSON.stringify({
-            tags: [
-              {
-                slug: "housing",
-                label: "Housing",
-                language: "en",
-                document_count: 1,
-              },
-            ],
-          }),
-          { status: 200 },
-        ),
-      }),
-    );
+  it("ignores empty submissions", () => {
+    vi.stubGlobal("fetch", mockFetchRouter({}));
 
     renderWithLocale(<ChatPanel />);
-    expect(await screen.findByTestId("tag-filter-chips")).toBeInTheDocument();
-
     fireEvent.click(screen.getByRole("button", { name: /^ask$/i }));
     expect(screen.queryAllByTestId("message")).toHaveLength(0);
   });
 
-  it("includes selected tags in the ask request and deselects chips", async () => {
+  it("includes the sidebar-selected tags in the ask request", async () => {
     const sse =
       'data: {"token":"Ok"}\n\n' +
       'data: {"sources":[]}\n\n' +
@@ -406,26 +373,11 @@ describe("ChatPanel", () => {
     vi.stubGlobal(
       "fetch",
       mockFetchRouter({
-        tags: new Response(
-          JSON.stringify({
-            tags: [
-              {
-                slug: "housing",
-                label: "Housing",
-                language: "en",
-                document_count: 1,
-              },
-            ],
-          }),
-          { status: 200 },
-        ),
         stream: sseResponse(sse),
       }),
     );
 
-    renderWithLocale(<ChatPanel />);
-    const chip = await screen.findByRole("button", { name: "Housing" });
-    fireEvent.click(chip);
+    renderWithLocale(<ChatPanel selectedTags={["housing"]} />);
     fireEvent.change(screen.getByLabelText(/your question/i), {
       target: { value: "Need housing help?" },
     });
@@ -443,9 +395,23 @@ describe("ChatPanel", () => {
         }),
       );
     });
+  });
 
-    fireEvent.click(chip);
-    expect(chip).toHaveAttribute("aria-pressed", "false");
+  it("shows the welcome heading and suggested questions on the empty state", () => {
+    vi.stubGlobal("fetch", mockFetchRouter({}));
+
+    renderWithLocale(<ChatPanel />);
+    expect(
+      screen.getByRole("heading", { name: /what can i help with/i }),
+    ).toBeInTheDocument();
+    const suggestions = screen.getByTestId("suggested-questions");
+    expect(suggestions).toBeInTheDocument();
+
+    const firstChip = within(suggestions).getAllByRole("button")[0];
+    fireEvent.click(firstChip);
+    expect(screen.getByLabelText(/your question/i)).toHaveValue(
+      firstChip.textContent,
+    );
   });
 
   it("surfaces localized errors for non-transient ask failures", async () => {
@@ -465,22 +431,5 @@ describe("ChatPanel", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       /not authorized/i,
     );
-  });
-
-  it("continues when tag facets fail to load", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn((input: RequestInfo | URL) => {
-        const url = typeof input === "string" ? input : input.toString();
-        if (url.includes("/api/v1/tags")) {
-          return Promise.reject(new Error("Tags failed (500)"));
-        }
-        return Promise.reject(new Error(`Unexpected fetch: ${url}`));
-      }),
-    );
-
-    renderWithLocale(<ChatPanel />);
-    expect(await screen.findByText(/ask a question/i)).toBeInTheDocument();
-    expect(screen.queryByTestId("tag-filter-chips")).not.toBeInTheDocument();
   });
 });

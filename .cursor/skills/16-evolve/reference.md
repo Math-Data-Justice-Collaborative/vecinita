@@ -170,10 +170,10 @@ Create or append per cycle:
 
 ## evolve-report template
 
-`docs/evolve-report-{cycle-id}.md`:
+Append a new section to `docs/archive/evolve-history.md`:
 
 ```markdown
-# Evolve report — {title}
+## {cycle-id} — {title}
 
 - **Cycle**: EV-001
 - **Status**: completed
