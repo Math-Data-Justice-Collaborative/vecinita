@@ -15,8 +15,14 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING, cast
 
 import modal
+
+if TYPE_CHECKING:
+    from collections.abc import MutableMapping
+
+    from vecinita_data_management_backend.store import JobPayload
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +111,8 @@ def fastapi_app():
     from vecinita_tagging.llm_client import LlmTagClient
 
     jobs_dict = modal.Dict.from_name("vecinita-data-management-jobs", create_if_missing=True)
-    store = DictJobStore(jobs_dict)
+    # modal.Dict is a MutableMapping at runtime but is not typed as one.
+    store = DictJobStore(cast("MutableMapping[str, JobPayload]", jobs_dict))
     embed = EmbeddingClient()
     write = InternalWriteClient()
     tag_client: LlmTagClient | None = None

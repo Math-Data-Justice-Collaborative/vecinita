@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import os
 import uuid
+from http import HTTPStatus
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from vecinita_internal_write_api.app import create_app
 from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
 
 from tests.helpers.json_response import (
@@ -19,12 +22,21 @@ from tests.helpers.json_response import (
     response_json_object,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from sqlalchemy.engine import Engine
+
+    from tests.helpers.fixture_types import DocumentFixtureData
+
 pytestmark = [
     pytest.mark.e2e,
     pytest.mark.skipif(os.environ.get("VECINITA_SKIP_E2E") == "1", reason="E2E skipped"),
 ]
 
 _API_KEY = "test-internal-key"
+_AUDIT_PAGE_SIZE = 10
+_EXPECTED_MIN_AUDIT_EVENTS = 2
 
 
 def _database_url() -> str:
@@ -35,15 +47,16 @@ def _database_url() -> str:
 
 
 @pytest.fixture
-def engine():
+def engine() -> Engine:
+    """Engine."""
     return create_engine(_database_url())
 
 
 @pytest.fixture
-def client():
+def client() -> TestClient:
+    """Client."""
     os.environ["DATABASE_URL"] = _database_url()
     os.environ["VECINITA_INTERNAL_API_KEY"] = _API_KEY
-    from vecinita_internal_write_api.app import create_app
 
     app = create_app()
     return TestClient(app)
@@ -54,7 +67,7 @@ def _auth() -> dict[str, str]:
 
 
 @pytest.fixture
-def seeded_audit_data(client, engine):
+def seeded_audit_data(client: TestClient, engine: Engine) -> Iterator[DocumentFixtureData]:
     """Create a document + trigger write ops to populate audit_log."""
     url = f"https://test.example.com/uj017-{uuid.uuid4().hex[:8]}"
     resp = client.post(
@@ -74,7 +87,7 @@ def seeded_audit_data(client, engine):
         },
         headers=_auth(),
     )
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
 
     with engine.connect() as conn:
         doc_id_raw = sqlalchemy_scalar_one(
@@ -95,50 +108,56 @@ def seeded_audit_data(client, engine):
         conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
-def test_audit_log_returns_paginated_entries(client, seeded_audit_data) -> None:
+@pytest.mark.usefixtures("seeded_audit_data")
+def test_audit_log_returns_paginated_entries(client: TestClient) -> None:
     """GET /internal/v1/audit returns paginated audit entries."""
     resp = client.get("/internal/v1/audit?page=1&page_size=10", headers=_auth())
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
     data = response_json_object(resp)
     assert "items" in data
     assert json_int(data, "page") == 1
-    assert json_int(data, "page_size") == 10
-    assert json_int(data, "total_count") >= 2
-    assert len(json_object_list(data, "items")) >= 2
+    assert json_int(data, "page_size") == _AUDIT_PAGE_SIZE
+    assert json_int(data, "total_count") >= _EXPECTED_MIN_AUDIT_EVENTS
+    assert len(json_object_list(data, "items")) >= _EXPECTED_MIN_AUDIT_EVENTS
 
 
-def test_audit_log_filter_by_event_type(client, seeded_audit_data) -> None:
+def test_audit_log_filter_by_event_type(
+    client: TestClient, seeded_audit_data: DocumentFixtureData
+) -> None:
     """GET /internal/v1/audit?event_type=document.tagged returns only tagged events."""
     doc_id = seeded_audit_data["doc_id"]
     resp = client.get(
         f"/internal/v1/audit?event_type=document.tagged&entity_id={doc_id}",
         headers=_auth(),
     )
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
     data = response_json_object(resp)
     assert json_int(data, "total_count") >= 1
     for item in json_object_list(data, "items"):
         assert json_str(item, "event_type") == "document.tagged"
 
 
-def test_audit_log_filter_by_entity_id(client, seeded_audit_data) -> None:
+def test_audit_log_filter_by_entity_id(
+    client: TestClient, seeded_audit_data: DocumentFixtureData
+) -> None:
     """GET /internal/v1/audit?entity_id=<uuid> returns only that entity's events."""
     doc_id = seeded_audit_data["doc_id"]
     resp = client.get(
         f"/internal/v1/audit?entity_id={doc_id}",
         headers=_auth(),
     )
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
     data = response_json_object(resp)
-    assert json_int(data, "total_count") >= 2
+    assert json_int(data, "total_count") >= _EXPECTED_MIN_AUDIT_EVENTS
     for item in json_object_list(data, "items"):
         assert json_str(item, "entity_id") == str(doc_id)
 
 
-def test_audit_log_no_ip_in_entries(client, seeded_audit_data) -> None:
+@pytest.mark.usefixtures("seeded_audit_data")
+def test_audit_log_no_ip_in_entries(client: TestClient) -> None:
     """Audit entries must not contain IP addresses (ADR-016)."""
     resp = client.get("/internal/v1/audit?page_size=200", headers=_auth())
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
     for item in json_object_list(response_json_object(resp), "items"):
         assert "ip_address" not in item
         assert "ip" not in item

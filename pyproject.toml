@@ -87,6 +87,80 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 # pytest's design is built on bare `assert`; rewriting asserts defeats the framework.
 "tests/**" = ["S101"]
+# Pydantic v2 evaluates field annotations at runtime, so datetime/UUID/JsonObject must be
+# real imports — flake8-type-checking (TC001/2/3) would wrongly move them into a
+# TYPE_CHECKING block and break model construction. Scoped to the schema package only.
+"packages/shared-schemas/vecinita_shared_schemas/*.py" = ["TC001", "TC002", "TC003"]
+# Data Management routes depend on closures (auth_dep/write_auth_dep) defined inside
+# create_app(). With `from __future__ import annotations`, FastAPI cannot resolve a local
+# closure referenced inside `Annotated[..., Depends(local_fn)]`, so the `= Depends(...)`
+# default form is required and FAST002 (prefer-Annotated) cannot apply here.
+"apps/data-management-backend/vecinita_data_management_backend/app.py" = ["FAST002"]
+# infra/modal: Modal app glue around GPU/ML libraries. Modal requires imports inside
+# function/enter scope (PLC0415), vLLM/NCCL teardown must swallow errors before container
+# exit (BLE001/S110, BUG-2026-05-20), asgi_app/method return types come from frameworks
+# imported inside the function (ANN2xx), and the package is a deploy entrypoint, not an
+# importable library (INP001). Annotations are evaluated at runtime by Modal/FastAPI (TC).
+"infra/**" = [
+    "PLC0415",
+    "BLE001",
+    "S110",
+    "ANN201",
+    "ANN202",
+    "INP001",
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "TC001",
+    "TC002",
+    "TC003",
+]
+# scripts/: operational and one-off maintenance CLIs. They print to stdout/stderr by design
+# (T201), are not an importable package (INP001), call known dev tools via subprocess
+# (S603/S607), and tolerate loose typing / terse error messages typical of throwaway tooling
+# (this mirrors the relaxed basedpyright executionEnvironment for `scripts`).
+"scripts/**" = [
+    "T201",
+    "INP001",
+    "EXE001",
+    "S603",
+    "S607",
+    "ANN001",
+    "ANN202",
+    "ANN401",
+    "TRY003",
+    "EM101",
+    "EM102",
+    "PLR2004",
+    "PLC0415",
+    "C901",
+    "PLR0911",
+    "PLR0912",
+    "PLR0915",
+    "PTH101",
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI dependency-injection markers are evaluated once at import time and are safe as
+# argument defaults. Listing them here is the FastAPI-recommended way to satisfy B008
+# instead of scattering per-line `# noqa: B008`.
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Header",
+    "fastapi.Query",
+    "fastapi.Path",
+    "fastapi.Cookie",
+    "fastapi.Body",
+    "fastapi.Form",
+    "fastapi.File",
+    "fastapi.Security",
+]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -139,7 +213,7 @@ show_missing = true
 skip_covered = false
 
 [tool.basedpyright]
-include = ["apps", "packages", "tests"]
+include = ["apps", "packages", "tests", "infra", "scripts"]
 exclude = ["**/__pycache__", ".venv", ".pytest_cache", "**/node_modules"]
 extraPaths = [".cursor/hooks"]
 stubPath = "stubs"
@@ -149,3 +223,33 @@ reportMissingImports = true
 reportMissingTypeStubs = false
 reportExplicitAny = "error"
 reportAny = "error"
+
+# infra/modal and scripts are deploy/ops glue around libraries that are either GPU/ML
+# runtime-only (vllm, torch, fastembed — present only inside the Modal image, not CI) or
+# ephemeral `uv run --with` deps (pydo), and are otherwise largely untyped. We still
+# type-check them so real logic bugs are caught (reportReturnType, reportArgumentType,
+# reportOptionalMemberAccess, reportCallIssue stay at error), but relax the
+# untyped-library-glue families that would otherwise drown out those signals.
+[[tool.basedpyright.executionEnvironments]]
+root = "infra"
+reportMissingImports = false
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+reportUnknownParameterType = false
+reportUnknownLambdaType = false
+reportMissingParameterType = false
+reportAny = false
+reportExplicitAny = false
+
+[[tool.basedpyright.executionEnvironments]]
+root = "scripts"
+reportMissingImports = false
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+reportUnknownParameterType = false
+reportUnknownLambdaType = false
+reportMissingParameterType = false
+reportAny = false
+reportExplicitAny = false

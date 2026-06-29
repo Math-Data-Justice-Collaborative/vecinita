@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import os
 import uuid
+from http import HTTPStatus
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from vecinita_internal_write_api.app import create_app
 from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
 
 from tests.helpers.json_response import (
@@ -17,12 +20,18 @@ from tests.helpers.json_response import (
     response_json_object,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from sqlalchemy.engine import Engine
+
 pytestmark = [
     pytest.mark.e2e,
     pytest.mark.skipif(os.environ.get("VECINITA_SKIP_E2E") == "1", reason="E2E skipped"),
 ]
 
 _API_KEY = "test-internal-key"
+_EXPECTED_MIN_DOCUMENTS = 2
 
 
 def _database_url() -> str:
@@ -33,15 +42,16 @@ def _database_url() -> str:
 
 
 @pytest.fixture
-def engine():
+def engine() -> Engine:
+    """Engine."""
     return create_engine(_database_url())
 
 
 @pytest.fixture
-def client():
+def client() -> TestClient:
+    """Client."""
     os.environ["DATABASE_URL"] = _database_url()
     os.environ["VECINITA_INTERNAL_API_KEY"] = _API_KEY
-    from vecinita_internal_write_api.app import create_app
 
     app = create_app()
     return TestClient(app)
@@ -52,7 +62,7 @@ def _auth() -> dict[str, str]:
 
 
 @pytest.fixture
-def two_docs(client, engine):
+def two_docs(client: TestClient, engine: Engine) -> Iterator[list[str]]:
     """Create two test documents with embeddings."""
     doc_ids: list[str] = []
     urls: list[str] = []
@@ -76,7 +86,7 @@ def two_docs(client, engine):
             },
             headers=_auth(),
         )
-        assert resp.status_code == 200
+        assert resp.status_code == HTTPStatus.OK
         with engine.connect() as conn:
             doc_id_raw = sqlalchemy_scalar_one(
                 conn.execute(text("SELECT id FROM documents WHERE url = :url"), {"url": url})
@@ -95,7 +105,7 @@ def two_docs(client, engine):
             conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
-def test_ev002_full_integration_flow(client, two_docs) -> None:
+def test_ev002_full_integration_flow(client: TestClient, two_docs: list[str]) -> None:
     """Ingest → stats served → audit check → bulk delete → verify history."""
     doc_a, doc_b = two_docs
 
@@ -105,21 +115,21 @@ def test_ev002_full_integration_flow(client, two_docs) -> None:
         json={"document_ids": [doc_a]},
         headers=_auth(),
     )
-    assert resp.status_code == 202
+    assert resp.status_code == HTTPStatus.ACCEPTED
     assert response_json_object(resp)["acknowledged"] is True
 
     # 2. GET /stats/summary — verify documents counted
     resp = client.get("/internal/v1/stats/summary", headers=_auth())
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
     summary = response_json_object(resp)
-    assert json_int(summary, "total_documents") >= 2
+    assert json_int(summary, "total_documents") >= _EXPECTED_MIN_DOCUMENTS
 
     # 3. GET /audit — verify audit events from batch upsert
     resp = client.get(
         f"/internal/v1/audit?entity_id={doc_a}&event_type=document.created",
         headers=_auth(),
     )
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
     audit = response_json_object(resp)
     assert json_int(audit, "total_count") >= 1
 
@@ -130,7 +140,7 @@ def test_ev002_full_integration_flow(client, two_docs) -> None:
         json={"document_ids": [doc_b]},
         headers=_auth(),
     )
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
     result = response_json_object(resp)
     assert json_int(result, "successes") == 1
     assert json_object_list(result, "failures") == []
@@ -140,7 +150,7 @@ def test_ev002_full_integration_flow(client, two_docs) -> None:
         f"/internal/v1/audit?entity_id={doc_b}&event_type=document.deleted",
         headers=_auth(),
     )
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
     assert json_int(response_json_object(resp), "total_count") >= 1
 
     # 6. GET /documents/{doc_a}/history — verify doc_a has creation event
@@ -148,7 +158,7 @@ def test_ev002_full_integration_flow(client, two_docs) -> None:
         f"/internal/v1/documents/{doc_a}/history",
         headers=_auth(),
     )
-    assert resp.status_code == 200
+    assert resp.status_code == HTTPStatus.OK
     history = response_json_object(resp)
     versions = json_object_list(history, "versions")
     assert len(versions) >= 1

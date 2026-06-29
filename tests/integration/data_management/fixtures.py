@@ -1,4 +1,4 @@
-"""Data-management integration/E2E fixtures."""
+"""Data-management integration/E2E fixtures (loaded via ``tests.conftest`` pytest_plugins)."""
 
 from __future__ import annotations
 
@@ -27,10 +27,12 @@ _EMBED_VECTOR = [0.01] * EMBEDDING_DIMENSION
 
 class _MockEmbedClient:
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """Embed batch."""
         return [_EMBED_VECTOR for _ in texts]
 
     def close(self) -> None:
-        return None
+        """Close."""
+        return
 
 
 class _MockWriteClient:
@@ -38,12 +40,14 @@ class _MockWriteClient:
         self.last_batch: object | None = None
 
     def upsert_batch(self, body: object) -> object:
+        """Upsert batch."""
         self.last_batch = body
         chunks = sum(len(doc.chunks) for doc in body.documents)  # type: ignore[attr-defined]
         return BatchUpsertResponse(upserted_chunks=chunks)
 
     def close(self) -> None:
-        return None
+        """Close."""
+        return
 
 
 @pytest.fixture
@@ -63,6 +67,7 @@ def dm_client(job_store: InMemoryJobStore, mock_write: _MockWriteClient) -> Test
     """Return a data-management TestClient with mocked embed/write pipeline."""
 
     def runner(job_id: UUID) -> None:
+        """Runner."""
         run_job(
             job_id,
             store=job_store,

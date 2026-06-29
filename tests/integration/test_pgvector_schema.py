@@ -6,6 +6,7 @@ import os
 
 import pytest
 from sqlalchemy import create_engine, text
+from vecinita_embedding_client import EMBEDDING_DIMENSION
 from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
 
 pytestmark = pytest.mark.integration
@@ -19,6 +20,7 @@ def _database_url() -> str:
 
 
 def test_pgvector_extension_enabled() -> None:
+    """Pgvector extension is installed and reports a version."""
     engine = create_engine(_database_url())
     with engine.connect() as conn:
         row = conn.execute(
@@ -29,6 +31,7 @@ def test_pgvector_extension_enabled() -> None:
 
 
 def test_embeddings_column_is_vector_384() -> None:
+    """embeddings.embedding column is typed as vector(384)."""
     engine = create_engine(_database_url())
     with engine.connect() as conn:
         dim_raw = sqlalchemy_scalar_one(
@@ -51,4 +54,4 @@ def test_embeddings_column_is_vector_384() -> None:
             )
         )
         dim = scalar_int(dim_raw)
-    assert dim == 384
+    assert dim == EMBEDDING_DIMENSION

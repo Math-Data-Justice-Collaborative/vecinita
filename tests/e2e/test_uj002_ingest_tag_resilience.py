@@ -10,7 +10,9 @@ the original regression surfaced (job `failed` in staging).
 
 from __future__ import annotations
 
+from http import HTTPStatus
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 from fastapi.testclient import TestClient
@@ -18,10 +20,14 @@ from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.pipeline import fetch_html_fixture, run_ingest_job
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_embedding_client import EMBEDDING_DIMENSION
+from vecinita_shared_schemas.internal_write import BatchUpsertRequest, BatchUpsertResponse
 from vecinita_tagging.llm_client import LlmTagClientError
 from vecinita_tagging.vocabulary import SeedTag
 
 from tests.helpers.json_response import json_object_list, json_str, response_json_object
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 pytestmark = pytest.mark.e2e
 
@@ -38,25 +44,27 @@ _VOCAB = [
 
 class _MockEmbedClient:
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """Embed batch."""
         return [_EMBED_VECTOR for _ in texts]
 
     def close(self) -> None:
-        return None
+        """Close."""
+        return
 
 
 class _RecordingWriteClient:
     def __init__(self) -> None:
-        self.last_batch: object | None = None
+        self.last_batch: BatchUpsertRequest | None = None
 
-    def upsert_batch(self, body: object) -> object:
+    def upsert_batch(self, body: BatchUpsertRequest) -> BatchUpsertResponse:
+        """Upsert batch."""
         self.last_batch = body
-        from vecinita_shared_schemas.internal_write import BatchUpsertResponse
-
-        chunks = sum(len(doc.chunks) for doc in body.documents)  # type: ignore[attr-defined]
+        chunks = sum(len(doc.chunks) for doc in body.documents)
         return BatchUpsertResponse(upserted_chunks=chunks)
 
     def close(self) -> None:
-        return None
+        """Close."""
+        return
 
 
 class _NonJsonTagClient:
@@ -71,22 +79,23 @@ class _NonJsonTagClient:
         vocabulary: list[str],
         max_tags: int = 10,
     ) -> list[str]:
+        """Infer document tags."""
         _ = (title, text, language, vocabulary, max_tags)
         msg = "tag response is not valid JSON: Expecting value: line 1 column 1 (char 0)"
-        raise LlmTagClientError(
-            msg
-        )
+        raise LlmTagClientError(msg)
 
 
 @pytest.fixture
 def resilient_dm_client(
     monkeypatch: pytest.MonkeyPatch,
 ) -> tuple[TestClient, _RecordingWriteClient]:
+    """Resilient dm client."""
     monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", _PROXY_KEY)
     store = InMemoryJobStore()
     write_client = _RecordingWriteClient()
 
-    def runner(job_id) -> None:  # type: ignore[no-untyped-def]
+    def runner(job_id: UUID) -> None:
+        """Runner."""
         run_ingest_job(
             job_id,
             store=store,
@@ -106,6 +115,7 @@ def resilient_dm_client(
 def test_ingest_completes_when_llm_tag_response_is_non_json(
     resilient_dm_client: tuple[TestClient, _RecordingWriteClient],
 ) -> None:
+    """Ingest completes when llm tag response is non json."""
     client, write_client = resilient_dm_client
 
     create = client.post(
@@ -115,11 +125,11 @@ def test_ingest_completes_when_llm_tag_response_is_non_json(
             "options": {"chunk_size_tokens": 64},
         },
     )
-    assert create.status_code == 202
+    assert create.status_code == HTTPStatus.ACCEPTED
     job_id = json_str(response_json_object(create), "job_id")
 
     status = client.get(f"/jobs/{job_id}")
-    assert status.status_code == 200
+    assert status.status_code == HTTPStatus.OK
     body = response_json_object(status)
     # Regression: a transient non-JSON tag completion previously marked the job `failed`.
     assert json_str(body, "status") == "completed"
@@ -127,7 +137,7 @@ def test_ingest_completes_when_llm_tag_response_is_non_json(
 
     # The document is still written; it just carries no LLM tags.
     assert write_client.last_batch is not None
-    document = write_client.last_batch.documents[0]  # type: ignore[attr-defined]
+    document = write_client.last_batch.documents[0]
     assert document.tags is None or document.tags == []
 
     # And the completed job is observable in the Job Management list (#89), not lost.

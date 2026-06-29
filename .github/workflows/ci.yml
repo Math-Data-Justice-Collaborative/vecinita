@@ -72,20 +72,20 @@ jobs:
         run: gitleaks detect --no-git --config .gitleaks.toml
 
       - name: Ruff lint
-        run: uv run ruff check apps packages tests
+        run: uv run ruff check apps packages tests infra scripts
 
       - name: Ruff format
-        run: uv run ruff format --check apps packages tests
+        run: uv run ruff format --check apps packages tests infra scripts
 
       - name: Basedpyright
-        run: uv run basedpyright apps packages tests
+        run: uv run basedpyright apps packages tests infra scripts
 
       - name: Apply database migrations
         working-directory: apps/database
         run: uv run alembic upgrade head
 
       - name: Pytest
-        run: uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval
+        run: uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval tests/bugs
 
       - name: pip-audit (blocking)
         run: |

@@ -12,7 +12,7 @@ After fix:
 from __future__ import annotations
 
 import os
-from typing import cast
+from http import HTTPStatus
 from uuid import UUID
 
 import pytest
@@ -41,6 +41,7 @@ _WRITE_KEY = "test-write-key"
 
 @pytest.fixture
 def write_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    """Write client."""
     monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _WRITE_KEY)
     monkeypatch.setenv(
         "DATABASE_URL",
@@ -57,6 +58,7 @@ def write_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
 
 @pytest.fixture
 def seeded_document_id(write_client: TestClient) -> UUID:
+    """Seeded document id."""
     resp = write_client.post(
         "/internal/v1/documents/batch",
         json=BatchUpsertRequest(
@@ -76,7 +78,7 @@ def seeded_document_id(write_client: TestClient) -> UUID:
             ]
         ).model_dump(mode="json"),
     )
-    assert resp.status_code == 200, resp.text
+    assert resp.status_code == HTTPStatus.OK, resp.text
 
     docs = response_json_list(write_client.get("/internal/v1/documents"))
     target = find_json_object_by_str(docs, "url", "https://example.com/retag-visible-test")
@@ -102,16 +104,16 @@ def test_document_tags_retrievable_after_patch(
             "source": "llm",
         },
     )
-    assert patch_resp.status_code == 200, patch_resp.text
+    assert patch_resp.status_code == HTTPStatus.OK, patch_resp.text
 
     tags_resp = write_client.get(
         f"/internal/v1/documents/{seeded_document_id}/tags",
     )
-    assert tags_resp.status_code == 200, (
+    assert tags_resp.status_code == HTTPStatus.OK, (
         f"GET /documents/{{id}}/tags should return 200; got {tags_resp.status_code}: {tags_resp.text}"
     )
     tags = json_list(response_json_object(tags_resp), "tags")
-    slugs = sorted(json_str(as_json_object(cast("object", tag)), "slug") for tag in tags)
+    slugs = sorted(json_str(as_json_object(tag), "slug") for tag in tags)
     assert slugs == ["benefits", "housing"], (
         f"Expected document tags ['benefits', 'housing']; got {slugs}"
     )

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from http import HTTPStatus
 from typing import TYPE_CHECKING
 
 import pytest
@@ -18,6 +19,8 @@ from tests.helpers.json_response import json_object_list, json_str, response_jso
 from tests.unit.rag.conftest import attach_embeddings, basis_vector
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from vecinita_shared_schemas.json_types import JsonObject
 
 pytestmark = pytest.mark.e2e
@@ -32,17 +35,23 @@ def _database_url() -> str:
 
 class _MockLlmClient:
     def generate(self, prompt: str, **kwargs: object) -> str:
+        """Generate."""
+        _ = (prompt, kwargs)
         return "Tenant rights information is available from community resources."
 
-    def generate_stream(self, prompt: str, **kwargs: object):
+    def generate_stream(self, prompt: str, **kwargs: object) -> Iterator[str]:
+        """Generate stream."""
+        _ = (prompt, kwargs)
         yield "Tenant rights information is available."
 
     def close(self) -> None:
-        return None
+        """Close."""
+        return
 
 
 @pytest.fixture
 def tag_ask_client() -> TestClient:
+    """Tag ask client."""
     url = _database_url()
     load_seed_tags(database_url=url)
     load_tagged_corpus(database_url=url)
@@ -81,7 +90,7 @@ def test_uj012_tag_filtered_ask_returns_matching_sources(tag_ask_client: TestCli
         "/api/v1/ask",
         json={"question": "What are my tenant rights?", "tags": ["housing"]},
     )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     sources = json_object_list(response_json_object(response), "sources")
     assert sources
 

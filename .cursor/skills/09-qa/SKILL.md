@@ -114,7 +114,7 @@ Read from disk (do not guess commands):
 uv run ruff check apps packages tests
 uv run ruff format --check apps packages tests
 uv run basedpyright apps packages tests
-uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval
+uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval tests/bugs
 uv run pip-audit  # with audit/pip-audit-ignore.txt if present
 bash scripts/check_secrets.sh
 bash scripts/check_modal_no_database_url.sh

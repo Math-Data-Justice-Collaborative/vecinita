@@ -6,14 +6,29 @@ import os
 from typing import TYPE_CHECKING
 
 import pytest
-from sqlalchemy import create_engine, text
-from vecinita_database.seeds.tags import load_seed_tags, load_tagged_corpus
+from sqlalchemy import (
+    create_engine,
+    text,
+)
+from vecinita_database.seeds.tags import (
+    load_seed_tags,
+    load_tagged_corpus,
+)
 from vecinita_rag.retriever import CorpusPgvectorRetriever
-from vecinita_rag.tag_inference import resolve_retrieval_tags
+from vecinita_rag.tag_inference import (
+    resolve_retrieval_tags,
+)
 from vecinita_shared_schemas.chat_rag import AskRequest
-from vecinita_shared_schemas.db_mapping import mapping_row, row_str
+from vecinita_shared_schemas.db_mapping import (
+    mapping_row,
+    row_str,
+)
 
-from tests.unit.rag.conftest import attach_embeddings, basis_vector, reset_corpus_tables
+from tests.unit.rag.conftest import (
+    attach_embeddings,
+    basis_vector,
+    reset_corpus_tables,
+)
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -24,6 +39,7 @@ pytestmark = pytest.mark.integration
 
 
 def _database_url() -> str:
+    """Database url."""
     return os.environ.get(
         "DATABASE_URL",
         "postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
@@ -32,6 +48,7 @@ def _database_url() -> str:
 
 @pytest.fixture
 def tagged_corpus_db() -> str:
+    """Tagged corpus db."""
     url = _database_url()
     reset_corpus_tables(database_url=url)
     load_seed_tags(database_url=url)
@@ -51,6 +68,7 @@ def tagged_corpus_db() -> str:
 
 
 def _document_tag_slugs(database_url: str, document_id: UUID) -> set[str]:
+    """Document tag slugs."""
     engine = create_engine(database_url)
     with engine.connect() as conn:
         rows = (
@@ -78,6 +96,7 @@ def _assert_chunks_match_tag(
     expected_slug: str,
     excluded_fixture_substring: str,
 ) -> None:
+    """Assert chunks match tag."""
     assert chunks
     urls = {chunk.url for chunk in chunks}
     assert not any(excluded_fixture_substring in (url or "") for url in urls)

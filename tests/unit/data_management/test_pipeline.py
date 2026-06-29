@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Never
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from vecinita_data_management_backend.pipeline import (
@@ -14,7 +14,12 @@ from vecinita_data_management_backend.pipeline import (
 )
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_ingest.models import ScrapedDocument
-from vecinita_shared_schemas.internal_write import BatchUpsertRequest, DocumentDetail, TagInput
+from vecinita_shared_schemas.internal_write import (
+    BatchUpsertRequest,
+    DocumentDetail,
+    TagInput,
+    TagPatchResponse,
+)
 from vecinita_tagging.vocabulary import SeedTag
 
 _FIXTURE_HTML = (
@@ -27,19 +32,27 @@ _VOCAB = [
 
 
 class _StubEmbedClient:
+    """StubEmbedClient."""
+
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """Embed batch."""
         return [[0.01] * 384 for _ in texts]
 
 
 class _RecordingWriteClient:
+    """RecordingWriteClient."""
+
     def __init__(self) -> None:
+        """Init  ."""
         self.last_batch: BatchUpsertRequest | None = None
         self.patched_tags: list[TagInput] | None = None
 
     def upsert_batch(self, body: BatchUpsertRequest) -> None:
+        """Upsert batch."""
         self.last_batch = body
 
-    def get_document_detail(self, document_id):  # type: ignore[no-untyped-def]
+    def get_document_detail(self, document_id: UUID) -> DocumentDetail:
+        """Get document detail."""
         return DocumentDetail(
             document_id=document_id,
             title="Tenant rights",
@@ -48,15 +61,20 @@ class _RecordingWriteClient:
             url="https://example.com/doc",
         )
 
-    def patch_document_tags(self, document_id, tags: list[TagInput]):  # type: ignore[no-untyped-def]
+    def patch_document_tags(
+        self,
+        document_id: UUID,
+        tags: list[TagInput],
+    ) -> TagPatchResponse:
+        """Patch document tags."""
         _ = document_id
         self.patched_tags = tags
-        from vecinita_shared_schemas.internal_write import TagPatchResponse
-
         return TagPatchResponse(tags=tags)
 
 
 class _StubTagClient:
+    """StubTagClient."""
+
     def infer_document_tags(
         self,
         *,
@@ -66,15 +84,18 @@ class _StubTagClient:
         vocabulary: list[str],
         max_tags: int = 10,
     ) -> list[str]:
+        """Infer document tags."""
         _ = (title, text, language, max_tags)
         return ["housing"] if "housing" in vocabulary else []
 
 
 def _fetch_fixture(url: str) -> ScrapedDocument:
+    """Fetch fixture."""
     return fetch_html_fixture(url, fixture_html=_FIXTURE_HTML)
 
 
 def test_fetch_html_fixture_parses_fixture() -> None:
+    """Test fetch html fixture parses fixture."""
     doc = fetch_html_fixture("fixture://sample", fixture_html=_FIXTURE_HTML)
 
     assert doc.title == "Sample public notice"
@@ -82,6 +103,7 @@ def test_fetch_html_fixture_parses_fixture() -> None:
 
 
 def test_run_ingest_job_completes_with_fixture_html() -> None:
+    """Test run ingest job completes with fixture html."""
     store = InMemoryJobStore()
     write_client = _RecordingWriteClient()
     record = store.create_job(
@@ -106,6 +128,7 @@ def test_run_ingest_job_completes_with_fixture_html() -> None:
 
 
 def test_run_ingest_job_applies_llm_tags_when_client_provided() -> None:
+    """Test run ingest job applies llm tags when client provided."""
     store = InMemoryJobStore()
     write_client = _RecordingWriteClient()
     record = store.create_job(urls=["https://example.com/sample-page.html"])
@@ -127,6 +150,7 @@ def test_run_ingest_job_applies_llm_tags_when_client_provided() -> None:
 
 
 def test_run_ingest_job_raises_when_job_missing() -> None:
+    """Test run ingest job raises when job missing."""
     store = InMemoryJobStore()
 
     with pytest.raises(KeyError):
@@ -140,11 +164,13 @@ def test_run_ingest_job_raises_when_job_missing() -> None:
 
 
 def test_run_ingest_job_marks_failed_when_no_chunks() -> None:
+    """Test run ingest job marks failed when no chunks."""
     store = InMemoryJobStore()
     write_client = _RecordingWriteClient()
     record = store.create_job(urls=["https://example.com/blank"])
 
     def blank(url: str) -> ScrapedDocument:
+        """Blank."""
         return ScrapedDocument(url=url, title=None, text="   ")
 
     with pytest.raises(ValueError, match="no chunks"):
@@ -162,6 +188,7 @@ def test_run_ingest_job_marks_failed_when_no_chunks() -> None:
 
 
 def test_run_retag_job_completes() -> None:
+    """Test run retag job completes."""
     store = InMemoryJobStore()
     write_client = _RecordingWriteClient()
     document_id = uuid4()
@@ -187,6 +214,7 @@ def test_run_retag_job_completes() -> None:
 
 
 def test_run_retag_job_detects_language_when_missing() -> None:
+    """Test run retag job detects language when missing."""
     store = InMemoryJobStore()
     write_client = _RecordingWriteClient()
     document_id = uuid4()
@@ -196,7 +224,8 @@ def test_run_retag_job_detects_language_when_missing() -> None:
         options={"document_id": str(document_id)},
     )
 
-    def _detail(doc_id):  # type: ignore[no-untyped-def]
+    def _detail(doc_id: UUID) -> DocumentDetail:
+        """Detail."""
         return DocumentDetail(
             document_id=doc_id,
             title="Aviso",
@@ -221,6 +250,7 @@ def test_run_retag_job_detects_language_when_missing() -> None:
 
 
 def test_run_retag_job_raises_when_job_missing() -> None:
+    """Test run retag job raises when job missing."""
     store = InMemoryJobStore()
 
     with pytest.raises(KeyError):
@@ -233,6 +263,7 @@ def test_run_retag_job_raises_when_job_missing() -> None:
 
 
 def test_run_retag_job_marks_failed_on_write_error() -> None:
+    """Test run retag job marks failed on write error."""
     store = InMemoryJobStore()
     write_client = _RecordingWriteClient()
     document_id = uuid4()
@@ -242,7 +273,8 @@ def test_run_retag_job_marks_failed_on_write_error() -> None:
         options={"document_id": str(document_id)},
     )
 
-    def _boom(_document_id, _tags) -> Never:  # type: ignore[no-untyped-def]
+    def _boom(_document_id: UUID, _tags: list[TagInput]) -> Never:
+        """Boom."""
         msg = "write unavailable"
         raise RuntimeError(msg)
 
@@ -263,6 +295,7 @@ def test_run_retag_job_marks_failed_on_write_error() -> None:
 
 
 def test_run_retag_job_rejects_non_retag_job() -> None:
+    """Test run retag job rejects non retag job."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/page"])
 
@@ -276,6 +309,7 @@ def test_run_retag_job_rejects_non_retag_job() -> None:
 
 
 def test_run_retag_job_requires_document_id_option() -> None:
+    """Test run retag job requires document id option."""
     store = InMemoryJobStore()
     record = store.create_job(urls=[], job_type="retag", options={})
 

@@ -5,13 +5,16 @@ from __future__ import annotations
 from uuid import uuid4
 
 import pytest
-from vecinita_rag.engine import answer_from_chunks
+from vecinita_rag.engine import (
+    answer_from_chunks,
+)
 from vecinita_rag.types import RetrievedChunk
 
 pytestmark = pytest.mark.unit
 
 
 def test_answer_from_chunks_uses_top_chunk_text() -> None:
+    """Test answer from chunks uses top chunk text."""
     chunk = RetrievedChunk(
         chunk_id=uuid4(),
         document_id=uuid4(),

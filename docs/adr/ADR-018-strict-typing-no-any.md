@@ -46,11 +46,18 @@ Canonical reference: [`docs/typing-policy.md`](../typing-policy.md).
 CI (`.github/workflows/ci.yml`):
 
 ```bash
-uv run ruff check apps packages tests
-uv run basedpyright apps packages tests
+uv run ruff check apps packages tests infra scripts
+uv run ruff format --check apps packages tests infra scripts
+uv run basedpyright apps packages tests infra scripts
 cd apps/chat-rag-frontend && npm run lint
 cd apps/data-management-frontend && npm run lint
 ```
+
+The lint/format/type-check scope was extended on 2026-06-29 from `apps packages tests` to
+also cover `infra` and `scripts`. Those two roots use relaxed basedpyright
+`executionEnvironments` (untyped GPU/ML and ephemeral `uv run --with` deps) and dedicated
+Ruff per-file-ignores for Modal/CLI patterns, while still catching real logic bugs. See
+[`docs/typing-policy.md`](../typing-policy.md) for the full rationale.
 
 ## Related
 

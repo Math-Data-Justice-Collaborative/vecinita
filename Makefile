@@ -7,7 +7,7 @@ SHELL := /bin/bash
 .SHELLFLAGS := --noprofile --norc -eu -o pipefail -c
 
 UV := uv
-PYTHON_DIRS := apps packages tests
+PYTHON_DIRS := apps packages tests infra scripts
 PYTEST_DEFAULT := tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval tests/bugs
 COMPOSE_FILE := infra/docker-compose.yml
 DATABASE_URL ?= postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita

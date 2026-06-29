@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import os
-from typing import cast
+from http import HTTPStatus
 from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
+from vecinita_internal_write_api.app import create_app
 from vecinita_shared_schemas.json_types import as_json_object
 
 from tests.helpers.json_response import (
@@ -33,9 +34,9 @@ def _database_url() -> str:
 
 @pytest.fixture
 def admin_write_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    """Admin write client."""
     monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _API_KEY)
     monkeypatch.setenv("DATABASE_URL", _database_url())
-    from vecinita_internal_write_api.app import create_app
 
     return TestClient(create_app())
 
@@ -58,7 +59,7 @@ def test_uj011_admin_chunks_and_tag_patch(admin_write_client: TestClient) -> Non
         },
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
-    assert upsert.status_code == 200
+    assert upsert.status_code == HTTPStatus.OK
 
     listing = admin_write_client.get(
         "/internal/v1/documents",
@@ -71,10 +72,10 @@ def test_uj011_admin_chunks_and_tag_patch(admin_write_client: TestClient) -> Non
         f"/internal/v1/documents/{document_id}/chunks",
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
-    assert chunks.status_code == 200
+    assert chunks.status_code == HTTPStatus.OK
     chunk_rows = response_json_list(chunks)
     assert len(chunk_rows) == 1
-    first_chunk = as_json_object(cast("object", chunk_rows[0]))
+    first_chunk = as_json_object(chunk_rows[0])
     assert "Chunk alpha" in str(first_chunk["text"])
 
     patched = admin_write_client.patch(
@@ -85,7 +86,7 @@ def test_uj011_admin_chunks_and_tag_patch(admin_write_client: TestClient) -> Non
         },
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
-    assert patched.status_code == 200
+    assert patched.status_code == HTTPStatus.OK
     tag_rows = json_list(response_json_object(patched), "tags")
-    first_tag = as_json_object(cast("object", tag_rows[0]))
+    first_tag = as_json_object(tag_rows[0])
     assert json_str(first_tag, "slug") == "housing"

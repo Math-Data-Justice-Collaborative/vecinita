@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from http import HTTPStatus
 
 import httpx
 
@@ -30,7 +31,7 @@ def assert_cors_preflight(  # noqa: PLR0913  # mirrors CORS preflight request fi
         headers=headers,
         timeout=timeout,
     )
-    assert response.status_code in (200, 204), (
+    assert response.status_code in (HTTPStatus.OK, HTTPStatus.NO_CONTENT), (
         f"CORS preflight {response.status_code}: {response.text[:200]}"
     )
     allow_origin = header_str(response.headers, "access-control-allow-origin")

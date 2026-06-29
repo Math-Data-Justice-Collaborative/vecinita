@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import cast
-
 import langdetect
 
 from vecinita_rag.constants import NO_CONTEXT_MESSAGE_EN, NO_CONTEXT_MESSAGE_ES
@@ -17,10 +15,7 @@ def detect_query_language(question: str) -> str:
     if not text:
         return "en"
     try:
-        code = cast(
-            "str",
-            langdetect.detect(text),  # pyright: ignore[reportUnknownMemberType]  # langdetect is untyped
-        )
+        code = langdetect.detect(text)
     except langdetect.LangDetectException:
         return "en"
     if code.startswith("es"):

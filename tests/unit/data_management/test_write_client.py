@@ -13,7 +13,9 @@ from vecinita_data_management_backend.write_client import (
     InternalWriteClient,
     InternalWriteClientError,
 )
-from vecinita_embedding_client import EMBEDDING_DIMENSION
+from vecinita_embedding_client import (
+    EMBEDDING_DIMENSION,
+)
 from vecinita_shared_schemas.internal_write import (
     BatchUpsertRequest,
     BatchUpsertResponse,
@@ -24,11 +26,13 @@ from vecinita_shared_schemas.internal_write import (
     TagPatchResponse,
 )
 
+_UPSERTED_CHUNKS = 2
 _EMBEDDING = [0.01] * EMBEDDING_DIMENSION
 _DOCUMENT_ID = uuid4()
 
 
 def test_write_client_requires_env_or_args(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test write client requires env or args."""
     monkeypatch.delenv("VECINITA_INTERNAL_WRITE_URL", raising=False)
     monkeypatch.delenv("VECINITA_INTERNAL_API_KEY", raising=False)
 
@@ -37,12 +41,14 @@ def test_write_client_requires_env_or_args(monkeypatch: pytest.MonkeyPatch) -> N
 
 
 def test_upsert_batch_posts_documents() -> None:
+    """Test upsert batch posts documents."""
     seen: list[dict[str, object]] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
+        """Handler."""
         seen.append(cast("dict[str, object]", json.loads(request.content.decode())))
         assert request.headers["Authorization"] == "Bearer test-key"
-        return httpx.Response(200, json={"upserted_chunks": 2})
+        return httpx.Response(200, json={"upserted_chunks": _UPSERTED_CHUNKS})
 
     transport = httpx.MockTransport(handler)
     client = InternalWriteClient(
@@ -64,12 +70,13 @@ def test_upsert_batch_posts_documents() -> None:
     response = client.upsert_batch(body)
 
     assert isinstance(response, BatchUpsertResponse)
-    assert response.upserted_chunks == 2
+    assert response.upserted_chunks == _UPSERTED_CHUNKS
     assert seen
     client.close()
 
 
 def test_upsert_batch_raises_on_http_error() -> None:
+    """Test upsert batch raises on http error."""
     transport = httpx.MockTransport(lambda _request: httpx.Response(500, json={}))
     client = InternalWriteClient(
         "http://write.test",
@@ -94,7 +101,10 @@ def test_upsert_batch_raises_on_http_error() -> None:
 
 
 def test_get_document_detail_returns_payload() -> None:
+    """Test get document detail returns payload."""
+
     def handler(request: httpx.Request) -> httpx.Response:
+        """Handler."""
         assert request.url.path == f"/internal/v1/documents/{_DOCUMENT_ID}"
         return httpx.Response(
             200,
@@ -122,6 +132,7 @@ def test_get_document_detail_returns_payload() -> None:
 
 
 def test_get_document_detail_raises_on_http_error() -> None:
+    """Test get document detail raises on http error."""
     transport = httpx.MockTransport(lambda _request: httpx.Response(404, json={}))
     client = InternalWriteClient(
         "http://write.test",
@@ -135,7 +146,10 @@ def test_get_document_detail_raises_on_http_error() -> None:
 
 
 def test_patch_document_tags_posts_payload() -> None:
+    """Test patch document tags posts payload."""
+
     def handler(request: httpx.Request) -> httpx.Response:
+        """Handler."""
         assert request.method == "PATCH"
         assert request.url.path == f"/internal/v1/documents/{_DOCUMENT_ID}/tags"
         return httpx.Response(
@@ -161,6 +175,7 @@ def test_patch_document_tags_posts_payload() -> None:
 
 
 def test_patch_document_tags_raises_on_http_error() -> None:
+    """Test patch document tags raises on http error."""
     transport = httpx.MockTransport(lambda _request: httpx.Response(400, json={}))
     client = InternalWriteClient(
         "http://write.test",
@@ -174,14 +189,17 @@ def test_patch_document_tags_raises_on_http_error() -> None:
 
 
 def test_write_client_closes_owned_client(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test write client closes owned client."""
     closed: list[bool] = []
 
     def handler(_request: httpx.Request) -> httpx.Response:
+        """Handler."""
         return httpx.Response(200, json={"upserted_chunks": 0})
 
     base_client = httpx.Client
 
     def client_factory(**kwargs: object) -> httpx.Client:
+        """Client factory."""
         client = base_client(
             base_url=cast("str", kwargs.get("base_url", "")),
             timeout=cast("float", kwargs.get("timeout", 60.0)),
@@ -190,6 +208,7 @@ def test_write_client_closes_owned_client(monkeypatch: pytest.MonkeyPatch) -> No
         original_close = client.close
 
         def tracked_close() -> None:
+            """Tracked close."""
             closed.append(True)
             original_close()
 
@@ -204,6 +223,7 @@ def test_write_client_closes_owned_client(monkeypatch: pytest.MonkeyPatch) -> No
 
 
 def test_write_client_does_not_close_injected_http_client() -> None:
+    """Test write client does not close injected http client."""
     closed: list[bool] = []
 
     transport = httpx.MockTransport(
@@ -213,6 +233,7 @@ def test_write_client_does_not_close_injected_http_client() -> None:
     original_close = http.close
 
     def tracked_close() -> None:
+        """Tracked close."""
         closed.append(True)
         original_close()
 

@@ -71,9 +71,7 @@ def vocabulary_slugs(vocabulary: list[SeedTag]) -> list[str]:
 def detect_document_language(text: str, *, fallback: str = "en") -> str:
     """Detect en/es for tag labels (RD-030); fallback when ambiguous."""
     try:
-        code = str(
-            langdetect.detect(text)  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
-        )
+        code = langdetect.detect(text)
     except langdetect.LangDetectException:
         return fallback
     if code.startswith("es"):

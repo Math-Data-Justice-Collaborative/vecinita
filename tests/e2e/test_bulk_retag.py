@@ -4,18 +4,27 @@ from __future__ import annotations
 
 import os
 import uuid
+from http import HTTPStatus
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from vecinita_internal_write_api.app import create_app
 from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
 
 from tests.helpers.json_response import json_list, response_json_object
 
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from sqlalchemy.engine import Engine
+
 pytestmark = pytest.mark.e2e
 
 _API_KEY = "test-internal-key"
+_EXPECTED_BULK_JOB_COUNT = 2
 
 
 def _database_url() -> str:
@@ -26,18 +35,20 @@ def _database_url() -> str:
 
 
 @pytest.fixture
-def engine():
+def engine() -> Engine:
+    """Engine."""
     return create_engine(_database_url())
 
 
 @pytest.fixture
-def client():
+def client() -> TestClient:
+    """Client."""
     os.environ["DATABASE_URL"] = _database_url()
     os.environ["VECINITA_INTERNAL_API_KEY"] = _API_KEY
-    from vecinita_internal_write_api.app import create_app
 
     class _StubJobsClient:
         def enqueue_retag(self, document_id: uuid.UUID) -> uuid.UUID:
+            """Enqueue retag."""
             _ = document_id
             return uuid.uuid4()
 
@@ -49,8 +60,9 @@ def _auth() -> dict[str, str]:
 
 
 @pytest.fixture
-def sample_docs(engine):
-    doc_ids = []
+def sample_docs(engine: Engine) -> Iterator[list[UUID]]:
+    """Sample docs."""
+    doc_ids: list[UUID] = []
     with engine.begin() as conn:
         for i in range(2):
             url = f"https://bulk-retag-{uuid.uuid4().hex[:8]}-{i}.example.com"
@@ -72,22 +84,24 @@ def sample_docs(engine):
             conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
-def test_bulk_retag_returns_job_ids(client, sample_docs) -> None:
+def test_bulk_retag_returns_job_ids(client: TestClient, sample_docs: list[UUID]) -> None:
+    """Bulk retag returns job ids."""
     resp = client.post(
         "/internal/v1/documents/bulk/retag",
         json={"document_ids": [str(d) for d in sample_docs]},
         headers=_auth(),
     )
-    assert resp.status_code == 202
+    assert resp.status_code == HTTPStatus.ACCEPTED
     data = response_json_object(resp)
-    assert len(json_list(data, "job_ids")) == 2
+    assert len(json_list(data, "job_ids")) == _EXPECTED_BULK_JOB_COUNT
 
 
-def test_bulk_retag_max_100(client) -> None:
+def test_bulk_retag_max_100(client: TestClient) -> None:
+    """Bulk retag max 100."""
     ids = [str(uuid.uuid4()) for _ in range(101)]
     resp = client.post(
         "/internal/v1/documents/bulk/retag",
         json={"document_ids": ids},
         headers=_auth(),
     )
-    assert resp.status_code == 422
+    assert resp.status_code == HTTPStatus.UNPROCESSABLE_ENTITY

@@ -7,11 +7,19 @@ from http import HTTPStatus
 
 import pytest
 from fastapi.testclient import TestClient
-from vecinita_chat_rag_backend.app import create_app as create_chat_app
-from vecinita_data_management_backend.app import create_app as create_data_mgmt_app
-from vecinita_internal_write_api.app import create_app as create_write_app
+from vecinita_chat_rag_backend.app import (
+    create_app as create_chat_app,
+)
+from vecinita_data_management_backend.app import (
+    create_app as create_data_mgmt_app,
+)
+from vecinita_internal_write_api.app import (
+    create_app as create_write_app,
+)
 
-from tests.helpers.json_response import header_str
+from tests.helpers.json_response import (
+    header_str,
+)
 
 CHAT_ORIGIN = "https://vecinita-chat-rag-frontend.example.com"
 ADMIN_ORIGIN = "https://vecinita-admin-frontend.example.com"

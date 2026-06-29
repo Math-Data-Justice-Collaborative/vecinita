@@ -1,5 +1,5 @@
 {
-  "include": ["apps", "packages", "tests"],
+  "include": ["apps", "packages", "tests", "infra", "scripts"],
   "exclude": ["**/__pycache__", ".venv", ".pytest_cache", "**/node_modules"],
   "extraPaths": [".cursor/hooks"],
   "stubPath": "stubs",
@@ -8,5 +8,31 @@
   "reportMissingImports": true,
   "reportMissingTypeStubs": false,
   "reportExplicitAny": "error",
-  "reportAny": "error"
+  "reportAny": "error",
+  "executionEnvironments": [
+    {
+      "root": "infra",
+      "reportMissingImports": false,
+      "reportUnknownMemberType": false,
+      "reportUnknownVariableType": false,
+      "reportUnknownArgumentType": false,
+      "reportUnknownParameterType": false,
+      "reportUnknownLambdaType": false,
+      "reportMissingParameterType": false,
+      "reportAny": false,
+      "reportExplicitAny": false
+    },
+    {
+      "root": "scripts",
+      "reportMissingImports": false,
+      "reportUnknownMemberType": false,
+      "reportUnknownVariableType": false,
+      "reportUnknownArgumentType": false,
+      "reportUnknownParameterType": false,
+      "reportUnknownLambdaType": false,
+      "reportMissingParameterType": false,
+      "reportAny": false,
+      "reportExplicitAny": false
+    }
+  ]
 }

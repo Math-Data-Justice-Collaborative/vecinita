@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import os
 import uuid
+from http import HTTPStatus
 from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
 from vecinita_shared_schemas.json_types import as_json_object
@@ -46,19 +48,19 @@ def _bearer(private_key: EllipticCurvePrivateKey, *, role: str, sub: UUID | None
 def test_dm_viewer_cannot_create_job(
     dm_auth_client: TestClient, supabase_auth_env: EllipticCurvePrivateKey
 ) -> None:
+    """Dm viewer cannot create job."""
     response = dm_auth_client.post(
         "/jobs",
         json={"urls": ["https://example.com/viewer-blocked"]},
         headers={"Authorization": _bearer(supabase_auth_env, role="viewer")},
     )
-    assert response.status_code == 403
+    assert response.status_code == HTTPStatus.FORBIDDEN
 
 
-def test_dm_admin_can_create_job(
-    dm_auth_client: TestClient, supabase_auth_env: EllipticCurvePrivateKey
-) -> None:
+@pytest.mark.usefixtures("dm_auth_client")
+def test_dm_admin_can_create_job(supabase_auth_env: EllipticCurvePrivateKey) -> None:
+    """Dm admin can create job."""
     store = InMemoryJobStore()
-    from vecinita_data_management_backend.app import create_app
 
     client = TestClient(create_app(store=store, require_proxy_auth=True))
     client.headers.update({"X-Vecinita-Proxy-Key": _PROXY_KEY})
@@ -67,7 +69,7 @@ def test_dm_admin_can_create_job(
         json={"urls": ["https://example.com/admin-ok"]},
         headers={"Authorization": _bearer(supabase_auth_env, role="admin")},
     )
-    assert response.status_code == 202
+    assert response.status_code == HTTPStatus.ACCEPTED
     assert len(store.list_jobs()) == 1
 
 
@@ -75,6 +77,7 @@ def test_internal_write_viewer_cannot_delete_document(
     write_auth_client: TestClient,
     supabase_auth_env: EllipticCurvePrivateKey,
 ) -> None:
+    """Internal write viewer cannot delete document."""
     admin_id = uuid.uuid4()
     doc_url = f"https://example.com/uj029/{uuid.uuid4()}"
     create = write_auth_client.post(
@@ -90,13 +93,13 @@ def test_internal_write_viewer_cannot_delete_document(
         },
         headers={"Authorization": _bearer(supabase_auth_env, role="admin", sub=admin_id)},
     )
-    assert create.status_code == 200
+    assert create.status_code == HTTPStatus.OK
 
     listed = write_auth_client.get(
         "/internal/v1/documents",
         headers={"Authorization": _bearer(supabase_auth_env, role="admin", sub=admin_id)},
     )
-    assert listed.status_code == 200
+    assert listed.status_code == HTTPStatus.OK
     doc_id = json_str(
         find_json_object_by_str(response_json_list(listed), "url", doc_url), "document_id"
     )
@@ -105,15 +108,14 @@ def test_internal_write_viewer_cannot_delete_document(
         f"/internal/v1/documents/{doc_id}",
         headers={"Authorization": _bearer(supabase_auth_env, role="viewer")},
     )
-    assert delete.status_code == 403
+    assert delete.status_code == HTTPStatus.FORBIDDEN
 
     still_there = write_auth_client.get(
         "/internal/v1/documents",
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
     still_ids = [
-        json_str(as_json_object(cast("object", row)), "document_id")
-        for row in response_json_list(still_there)
+        json_str(as_json_object(row), "document_id") for row in response_json_list(still_there)
     ]
     assert doc_id in still_ids
 
@@ -122,6 +124,7 @@ def test_admin_write_records_opaque_audit_actor(
     write_auth_client: TestClient,
     supabase_auth_env: EllipticCurvePrivateKey,
 ) -> None:
+    """Admin write records opaque audit actor."""
     admin_id = uuid.uuid4()
     doc_url = f"https://example.com/uj029-audit/{uuid.uuid4()}"
     response = write_auth_client.post(
@@ -137,7 +140,7 @@ def test_admin_write_records_opaque_audit_actor(
         },
         headers={"Authorization": _bearer(supabase_auth_env, role="admin", sub=admin_id)},
     )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
     engine = create_engine(_database_url())
     with engine.connect() as conn:

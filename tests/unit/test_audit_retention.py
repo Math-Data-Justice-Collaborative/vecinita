@@ -8,9 +8,19 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import Engine, create_engine, text
-from vecinita_internal_write_api.audit import cleanup_audit_log, emit_audit_event
-from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
+from sqlalchemy import (
+    Engine,
+    create_engine,
+    text,
+)
+from vecinita_internal_write_api.audit import (
+    cleanup_audit_log,
+    emit_audit_event,
+)
+from vecinita_shared_schemas.db_mapping import (
+    scalar_int,
+    sqlalchemy_scalar_one,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

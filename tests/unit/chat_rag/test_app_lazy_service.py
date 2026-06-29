@@ -2,16 +2,23 @@
 
 from __future__ import annotations
 
+from http import HTTPStatus
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
-from vecinita_chat_rag_backend.app import create_app
+from vecinita_chat_rag_backend.app import (
+    create_app,
+)
 from vecinita_chat_rag_backend.config import ChatRagSettings
 
-from tests.unit.chat_rag.conftest import StubChatRagService, database_url
+from tests.unit.chat_rag.conftest import (
+    StubChatRagService,
+    database_url,
+)
 
 
 def test_ask_lazy_inits_service() -> None:
+    """Test ask lazy inits service."""
     settings = ChatRagSettings(
         database_url=database_url(),
         top_k=5,
@@ -28,5 +35,5 @@ def test_ask_lazy_inits_service() -> None:
         ) as mock_factory,
     ):
         response = client.post("/api/v1/ask", json={"question": "lazy init?"})
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     mock_factory.assert_called_once()

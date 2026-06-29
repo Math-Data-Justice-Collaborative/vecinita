@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import (
+    TYPE_CHECKING,
+    cast,
+)
 from uuid import uuid4
 
 import pytest
@@ -17,8 +20,11 @@ from vecinita_data_management_backend.store import (
 if TYPE_CHECKING:
     from collections.abc import MutableMapping
 
+_CHUNK_SIZE_TOKENS = 128
+
 
 def test_job_store_base_methods_raise_not_implemented() -> None:
+    """Test job store base methods raise not implemented."""
     store = JobStore()
 
     with pytest.raises(NotImplementedError):
@@ -35,6 +41,7 @@ def test_job_store_base_methods_raise_not_implemented() -> None:
 
 
 def test_in_memory_list_jobs_sorted_newest_first() -> None:
+    """Test in memory list jobs sorted newest first."""
     store = InMemoryJobStore()
     first = store.create_job(urls=["https://example.com/1"])
     second = store.create_job(urls=["https://example.com/2"])
@@ -48,6 +55,7 @@ def test_in_memory_list_jobs_sorted_newest_first() -> None:
 
 
 def test_dict_list_jobs_sorted_newest_first() -> None:
+    """Test dict list jobs sorted newest first."""
     backing: dict[str, JobPayload] = {}
     store = DictJobStore(cast("MutableMapping[str, JobPayload]", backing))
     first = store.create_job(urls=["https://example.com/a"])
@@ -62,17 +70,18 @@ def test_dict_list_jobs_sorted_newest_first() -> None:
 
 
 def test_in_memory_job_store_lifecycle() -> None:
+    """Test in memory job store lifecycle."""
     store = InMemoryJobStore()
     record = store.create_job(
         urls=["https://example.com/a"],
-        options={"chunk_size_tokens": 128},
+        options={"chunk_size_tokens": _CHUNK_SIZE_TOKENS},
         job_type="ingest",
     )
 
     fetched = store.get_job(record.job_id)
     assert fetched is not None
     assert fetched.urls == ["https://example.com/a"]
-    assert fetched.options["chunk_size_tokens"] == 128
+    assert fetched.options["chunk_size_tokens"] == _CHUNK_SIZE_TOKENS
 
     updated = store.update_job(record.job_id, status="running", error_code="X")
     assert updated.status == "running"
@@ -80,6 +89,7 @@ def test_in_memory_job_store_lifecycle() -> None:
 
 
 def test_in_memory_update_job_raises_for_missing_id() -> None:
+    """Test in memory update job raises for missing id."""
     store = InMemoryJobStore()
 
     with pytest.raises(KeyError):
@@ -87,6 +97,7 @@ def test_in_memory_update_job_raises_for_missing_id() -> None:
 
 
 def test_dict_job_store_round_trip() -> None:
+    """Test dict job store round trip."""
     backing: dict[str, JobPayload] = {}
     store = DictJobStore(cast("MutableMapping[str, JobPayload]", backing))
     record = store.create_job(urls=["https://example.com/b"], job_type="retag")
@@ -106,6 +117,7 @@ def test_dict_job_store_round_trip() -> None:
 
 
 def test_dict_job_store_update_raises_for_missing_id() -> None:
+    """Test dict job store update raises for missing id."""
     store = DictJobStore(cast("MutableMapping[str, JobPayload]", {}))
 
     with pytest.raises(KeyError):
@@ -113,12 +125,14 @@ def test_dict_job_store_update_raises_for_missing_id() -> None:
 
 
 def test_dict_job_store_get_job_returns_none_for_missing() -> None:
+    """Test dict job store get job returns none for missing."""
     store = DictJobStore(cast("MutableMapping[str, JobPayload]", {}))
 
     assert store.get_job(uuid4()) is None
 
 
 def test_dict_job_store_update_only_error_code() -> None:
+    """Test dict job store update only error code."""
     backing: dict[str, JobPayload] = {}
     store = DictJobStore(cast("MutableMapping[str, JobPayload]", backing))
     record = store.create_job(urls=["https://example.com/f"])
@@ -130,6 +144,7 @@ def test_dict_job_store_update_only_error_code() -> None:
 
 
 def test_dict_job_store_update_only_status() -> None:
+    """Test dict job store update only status."""
     backing: dict[str, JobPayload] = {}
     store = DictJobStore(cast("MutableMapping[str, JobPayload]", backing))
     record = store.create_job(urls=["https://example.com/d"])
@@ -141,6 +156,7 @@ def test_dict_job_store_update_only_status() -> None:
 
 
 def test_in_memory_update_only_error_message() -> None:
+    """Test in memory update only error message."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/e"])
 
@@ -151,6 +167,7 @@ def test_in_memory_update_only_error_message() -> None:
 
 
 def test_job_record_to_schema_maps_fields() -> None:
+    """Test job record to schema maps fields."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/c"])
 

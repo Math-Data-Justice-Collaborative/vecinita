@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-SOURCE_ROOTS = frozenset({"apps", "packages", "tests"})
+SOURCE_ROOTS = frozenset({"apps", "packages", "tests", "infra", "scripts"})
 FRONTEND_APPS = frozenset({"chat-rag-frontend", "data-management-frontend"})
 FRONTEND_PACKAGES = frozenset({"frontend-i18n", "frontend-ui"})
 FORMATTABLE_SUFFIXES = frozenset(

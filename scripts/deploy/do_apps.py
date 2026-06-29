@@ -130,21 +130,6 @@ def cmd_deploy(client, name: str) -> int:
     return 0
 
 
-def _set_env_value(spec: dict[str, Any], key: str, value: str) -> None:
-    """Set env var on all services/static_sites in spec."""
-    for section in ("services", "static_sites", "workers", "jobs"):
-        for comp in spec.get(section) or []:
-            envs = comp.setdefault("envs", [])
-            for env in envs:
-                if env.get("key") == key:
-                    env["value"] = value
-                    env["type"] = env.get("type", "GENERAL")
-                    if env.get("type") == "SECRET":
-                        env["value"] = value
-                    return
-            envs.append({"key": key, "value": value, "scope": "RUN_TIME", "type": "SECRET"})
-
-
 def _apply_env_from_os(spec: dict[str, Any], keys: list[str], scope: str = "RUN_TIME") -> None:
     for key in keys:
         val = os.environ.get(key, "").strip()

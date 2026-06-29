@@ -525,7 +525,7 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 
 1. ruff + basedpyright (Python) — no `typing.Any` (ADR-018; supersedes pyright/mypy)
 2. eslint (frontends) — no `any` / unsafe-any flows (`docs/typing-policy.md`)
-3. `uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval` (or `bash scripts/run_tests.sh`)
+3. `uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval tests/bugs` (or `bash scripts/run_tests.sh`)
 4. Vitest (frontends)
 5. **Unit coverage gate (F31):** dedicated CI `coverage` job runs `make test-unit-coverage` (`--enforce` on summary script; ADR-019, TP-031)
 6. pip-audit (advisory or blocking per 04-tech-plan)

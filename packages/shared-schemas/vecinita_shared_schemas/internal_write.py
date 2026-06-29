@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime  # noqa: TC003 — Pydantic field type
+from datetime import datetime
 from typing import Literal
-from uuid import UUID  # noqa: TC003 — Pydantic field type
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
-from vecinita_shared_schemas.json_types import JsonObject  # noqa: TC001 — Pydantic field type
+from vecinita_shared_schemas.json_types import JsonObject
 
 
 class TagInput(BaseModel):

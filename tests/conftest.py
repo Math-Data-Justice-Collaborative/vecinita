@@ -12,8 +12,8 @@ if TYPE_CHECKING:
     from collections.abc import Generator
 
 pytest_plugins = [
-    "tests.integration.data_management.conftest",
-    "tests.integration.chat_rag.conftest",
+    "tests.integration.data_management.fixtures",
+    "tests.integration.chat_rag.fixtures",
 ]
 
 

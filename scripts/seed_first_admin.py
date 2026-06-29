@@ -106,6 +106,8 @@ def seed_first_admin(
             existing_id = _find_user_id_by_email(client, email)
             if existing_id is None:
                 _require_ok(create, context="create admin user")
+                msg = "create admin user returned 422 but no existing user was found"
+                raise RuntimeError(msg)
             _ensure_admin_role(client, existing_id)
             return f"updated_role:{existing_id}"
 
@@ -122,7 +124,9 @@ def seed_first_admin(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Seed the first Supabase admin operator.")
-    parser.add_argument("--dry-run", action="store_true", help="Print action without mutating Supabase")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Print action without mutating Supabase"
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -143,7 +147,7 @@ def main(argv: list[str] | None = None) -> int:
         secret_key=secret_key,
         email=email,
         password=password or "dry-run-placeholder",
-        dry_run=cast(bool, args.dry_run),
+        dry_run=cast("bool", args.dry_run),
     )
     print(action)
     return 0

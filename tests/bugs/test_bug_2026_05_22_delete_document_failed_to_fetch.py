@@ -7,6 +7,7 @@ access-control-allow-methods: GET, POST, OPTIONS only — browser shows Failed t
 from __future__ import annotations
 
 import os
+from http import HTTPStatus
 from uuid import uuid4
 
 import pytest
@@ -19,7 +20,7 @@ ADMIN_ORIGIN = "https://vecinita-admin-frontend.example.com"
 
 
 @pytest.fixture(autouse=True)
-def _cors_and_db_env(monkeypatch: pytest.MonkeyPatch) -> None:
+def _cors_and_db_env(monkeypatch: pytest.MonkeyPatch) -> None:  # pyright: ignore[reportUnusedFunction]
     monkeypatch.setenv(
         "VECINITA_CORS_ORIGINS",
         f"https://vecinita-chat-rag-frontend.example.com,{ADMIN_ORIGIN}",
@@ -41,7 +42,7 @@ def test_internal_write_cors_preflight_allows_delete_document() -> None:
             "Access-Control-Request-Headers": "authorization",
         },
     )
-    assert response.status_code == 200, response.text
+    assert response.status_code == HTTPStatus.OK, response.text
     assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
     allow_methods = header_str(response.headers, "access-control-allow-methods").upper()
     assert "DELETE" in allow_methods, (

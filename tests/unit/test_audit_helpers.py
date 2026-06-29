@@ -8,12 +8,26 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
-from sqlalchemy import Engine, create_engine, text
-from vecinita_internal_write_api.audit import create_document_version, emit_audit_event
-from vecinita_shared_schemas.db_mapping import mapping_row, sqlalchemy_scalar_one
-from vecinita_shared_schemas.json_types import as_json_object
+from sqlalchemy import (
+    Engine,
+    create_engine,
+    text,
+)
+from vecinita_internal_write_api.audit import (
+    create_document_version,
+    emit_audit_event,
+)
+from vecinita_shared_schemas.db_mapping import (
+    mapping_row,
+    sqlalchemy_scalar_one,
+)
+from vecinita_shared_schemas.json_types import (
+    as_json_object,
+)
 
-from tests.helpers.json_response import json_object_items
+from tests.helpers.json_response import (
+    json_object_items,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

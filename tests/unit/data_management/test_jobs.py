@@ -6,21 +6,31 @@ from typing import Never
 from uuid import UUID, uuid4
 
 import pytest
-from vecinita_data_management_backend.jobs import run_job
+from vecinita_data_management_backend.jobs import (
+    run_job,
+)
 from vecinita_data_management_backend.store import InMemoryJobStore
 
 
 class _StubEmbedClient:
+    """StubEmbedClient."""
+
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """Embed batch."""
         return [[0.0] * 384 for _ in texts]
 
 
 class _StubWriteClient:
+    """StubWriteClient."""
+
     def upsert_batch(self, body: object) -> None:
+        """Upsert batch."""
         _ = body
 
 
 class _StubTagClient:
+    """StubTagClient."""
+
     def infer_document_tags(
         self,
         *,
@@ -30,11 +40,13 @@ class _StubTagClient:
         vocabulary: list[str],
         max_tags: int = 10,
     ) -> list[str]:
+        """Infer document tags."""
         _ = (title, text, language, max_tags)
         return [vocabulary[0]] if vocabulary else []
 
 
 def test_run_job_raises_when_job_missing() -> None:
+    """Test run job raises when job missing."""
     store = InMemoryJobStore()
 
     with pytest.raises(KeyError):
@@ -47,6 +59,7 @@ def test_run_job_raises_when_job_missing() -> None:
 
 
 def test_run_job_retag_requires_tag_client() -> None:
+    """Test run job retag requires tag client."""
     store = InMemoryJobStore()
     record = store.create_job(urls=[], job_type="retag", options={"document_id": str(uuid4())})
 
@@ -63,11 +76,13 @@ def test_run_job_retag_requires_tag_client() -> None:
 def test_run_job_dispatches_retag(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test run job dispatches retag."""
     store = InMemoryJobStore()
     record = store.create_job(urls=[], job_type="retag", options={"document_id": str(uuid4())})
     called: list[UUID] = []
 
-    def _retag(job_id, **kwargs) -> None:  # type: ignore[no-untyped-def]
+    def _retag(job_id: UUID, **kwargs: object) -> None:
+        """Retag."""
         called.append(job_id)
         assert kwargs["tag_client"] is not None
 
@@ -90,11 +105,14 @@ def test_run_job_dispatches_retag(
 def test_run_job_dispatches_ingest(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test run job dispatches ingest."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/page"])
     called: list[UUID] = []
 
-    def _ingest(job_id, **kwargs) -> None:  # type: ignore[no-untyped-def]
+    def _ingest(job_id: UUID, **kwargs: object) -> None:
+        """Ingest."""
+        _ = kwargs
         called.append(job_id)
 
     monkeypatch.setattr(
@@ -115,11 +133,13 @@ def test_run_job_dispatches_ingest(
 def test_run_job_skips_failure_update_when_job_already_terminal(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test run job skips failure update when job already terminal."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/page"])
     store.update_job(record.job_id, status="completed")
 
-    def _fail(_job_id, **_kwargs) -> Never:  # type: ignore[no-untyped-def]
+    def _fail(_job_id: UUID, **_kwargs: object) -> Never:
+        """Fail."""
         msg = "late failure"
         raise ValueError(msg)
 
@@ -144,10 +164,12 @@ def test_run_job_skips_failure_update_when_job_already_terminal(
 def test_run_job_marks_failed_when_pipeline_raises(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test run job marks failed when pipeline raises."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/page"])
 
-    def _fail(_job_id, **_kwargs) -> Never:  # type: ignore[no-untyped-def]
+    def _fail(_job_id: UUID, **_kwargs: object) -> Never:
+        """Fail."""
         msg = "pipeline exploded"
         raise ValueError(msg)
 

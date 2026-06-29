@@ -230,14 +230,10 @@ class InMemoryJobStore(JobStore):
 
 
 def job_record_to_schema(record: JobRecord) -> Job:
-    """Map a store record to the public Job API model."""
-    return Job(
-        job_id=record.job_id,
-        status=record.status,  # type: ignore[arg-type]
-        job_type=record.job_type,  # type: ignore[arg-type]
-        urls=record.urls,  # type: ignore[arg-type]
-        error_code=record.error_code,
-        error_message=record.error_message,
-        created_at=record.created_at,
-        updated_at=record.updated_at,
-    )
+    """Map a store record to the public Job API model.
+
+    Round-trips through ``Job.model_validate`` so Pydantic coerces the record's
+    loose ``str`` / ``list[str]`` fields into the schema's ``Literal`` / ``HttpUrl``
+    types and validates them, instead of suppressing the type mismatch.
+    """
+    return Job.model_validate(_record_to_payload(record))

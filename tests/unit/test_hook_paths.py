@@ -16,6 +16,7 @@ from hook_paths import (  # noqa: E402
 
 
 def _repo() -> Path:
+    """Repo."""
     return Path(__file__).resolve().parents[2]
 
 

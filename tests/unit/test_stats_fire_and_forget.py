@@ -3,19 +3,29 @@
 from __future__ import annotations
 
 from http import HTTPStatus
-from typing import TYPE_CHECKING, cast
+from typing import (
+    TYPE_CHECKING,
+    cast,
+)
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
-from vecinita_chat_rag_backend.app import create_app
+from vecinita_chat_rag_backend.app import (
+    create_app,
+)
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_rag.types import RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest, AskResponse, Source
-from vecinita_shared_schemas.json_types import as_json_object
+from vecinita_shared_schemas.json_types import (
+    as_json_object,
+)
 
-from tests.helpers.json_response import json_list, response_json_object
+from tests.helpers.json_response import (
+    json_list,
+    response_json_object,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -119,6 +129,8 @@ def test_ask_fires_stats_post(client: TestClient) -> None:
         post_mock = MagicMock()
 
         class _PostResponse:
+            """PostResponse."""
+
             status_code = 202
 
         post_mock.return_value = _PostResponse()

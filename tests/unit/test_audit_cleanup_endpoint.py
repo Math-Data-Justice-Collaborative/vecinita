@@ -8,9 +8,13 @@ from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
-from vecinita_internal_write_api.app import create_app
+from vecinita_internal_write_api.app import (
+    create_app,
+)
 
-from tests.helpers.json_response import response_json_object
+from tests.helpers.json_response import (
+    response_json_object,
+)
 
 pytestmark = pytest.mark.unit
 

@@ -9,9 +9,16 @@ from unittest.mock import patch
 import httpx
 import pytest
 from fastapi.testclient import TestClient
-from vecinita_shared_schemas.json_types import as_json_object
+from vecinita_shared_schemas.auth import reset_auth_config_for_tests
+from vecinita_shared_schemas.json_types import (
+    as_json_object,
+)
 
-from tests.helpers.json_response import json_object_get, json_str, response_json_object
+from tests.helpers.json_response import (
+    json_object_get,
+    json_str,
+    response_json_object,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -31,6 +38,9 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     """Provide a TestClient for the internal write API with service URLs set."""
     monkeypatch.setenv("DATABASE_URL", _database_url())
     monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _API_KEY)
+    monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
+    monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
+    reset_auth_config_for_tests()
     monkeypatch.setenv("VECINITA_CHAT_RAG_URL", "http://chat-rag:8000")
     monkeypatch.setenv("VECINITA_ADMIN_FRONTEND_URL", "http://admin:3001")
     monkeypatch.setenv("VECINITA_CHAT_FRONTEND_URL", "http://chat-fe:3000")
@@ -38,7 +48,9 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.setenv("VECINITA_MODAL_EMBED_URL", "http://modal-embed:8002")
     monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://modal-llm:8003")
     # Import after env vars are set so app config reads them at startup.
-    from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
+    from vecinita_internal_write_api.app import (  # noqa: PLC0415
+        create_app,
+    )
 
     return TestClient(create_app())
 

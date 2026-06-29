@@ -7,7 +7,9 @@ from http import HTTPStatus
 
 import pytest
 from fastapi.testclient import TestClient
-from vecinita_internal_write_api.app import create_app as create_write_app
+from vecinita_internal_write_api.app import (
+    create_app as create_write_app,
+)
 
 pytestmark = pytest.mark.unit
 

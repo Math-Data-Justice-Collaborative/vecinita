@@ -8,13 +8,16 @@ from typing import cast
 import httpx
 import pytest
 from vecinita_llm_client import LlmClient, LlmClientError
-from vecinita_shared_schemas.json_types import as_json_object
+from vecinita_shared_schemas.json_types import (
+    as_json_object,
+)
 
 
 def test_generate_returns_text() -> None:
     """Generate posts the prompt and returns the response text."""
 
     def handler(request: httpx.Request) -> httpx.Response:
+        """Handler."""
         payload = as_json_object(cast("object", json_lib.loads(request.content.decode())))
         assert request.url.path == "/generate"
         assert payload["prompt"] == "Answer briefly: food pantry hours?"
@@ -34,6 +37,7 @@ def test_generate_stream_yields_tokens() -> None:
     """Generate-stream yields tokens parsed from the SSE stream."""
 
     def handler(request: httpx.Request) -> httpx.Response:
+        """Handler."""
         assert request.url.path == "/generate/stream"
         lines = [
             'data: {"token": "Hello "}\n\n',
@@ -56,6 +60,7 @@ def test_generate_raises_on_http_error() -> None:
     """Generate raises when the server responds with an HTTP error status."""
 
     def handler(_request: httpx.Request) -> httpx.Response:
+        """Handler."""
         return httpx.Response(503, json={"detail": "gpu unavailable"})
 
     transport = httpx.MockTransport(handler)
@@ -83,11 +88,13 @@ def test_llm_client_context_manager_closes_owned_client(
     closed: list[bool] = []
 
     def handler(_request: httpx.Request) -> httpx.Response:
+        """Handler."""
         return httpx.Response(200, json={"text": "ok"})
 
     base_client = httpx.Client
 
     def client_factory(**kwargs: object) -> httpx.Client:
+        """Client factory."""
         client = base_client(
             base_url=cast("httpx.URL | str", kwargs.get("base_url", "")),
             timeout=cast("float", kwargs.get("timeout", 120.0)),
@@ -97,6 +104,7 @@ def test_llm_client_context_manager_closes_owned_client(
         original_close = client.close
 
         def tracked_close() -> None:
+            """Tracked close."""
             closed.append(True)
             original_close()
 
@@ -143,6 +151,7 @@ def test_generate_stream_skips_blank_and_non_data_lines() -> None:
     """Generate-stream ignores blank and non-data SSE lines."""
 
     def handler(_request: httpx.Request) -> httpx.Response:
+        """Handler."""
         content = '\nnot-data\ndata: {"token": "Hi"}\ndata: {"done": true}'
         return httpx.Response(200, content=content)
 
@@ -160,6 +169,7 @@ def test_generate_stream_ignores_empty_and_non_string_tokens() -> None:
     """Generate-stream skips empty and non-string token values."""
 
     def handler(_request: httpx.Request) -> httpx.Response:
+        """Handler."""
         content = (
             'data: {"token": ""}\n'
             'data: {"token": 123}\n'
@@ -195,6 +205,7 @@ def test_llm_client_does_not_close_injected_http_client() -> None:
     closed: list[bool] = []
 
     def handler(_request: httpx.Request) -> httpx.Response:
+        """Handler."""
         return httpx.Response(200, json={"text": "ok"})
 
     transport = httpx.MockTransport(handler)
@@ -202,6 +213,7 @@ def test_llm_client_does_not_close_injected_http_client() -> None:
     original_close = http.close
 
     def tracked_close() -> None:
+        """Tracked close."""
         closed.append(True)
         original_close()
 

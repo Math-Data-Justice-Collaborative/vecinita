@@ -65,14 +65,14 @@ def create_app(  # noqa: C901  # FastAPI factory registers job routes inline
 
     def auth_dep(
         modal_key: Annotated[str | None, Header(alias=_PROXY_HEADER)] = None,
-        _principal: AuthPrincipal = Depends(get_principal),  # noqa: B008
+        _principal: AuthPrincipal = Depends(get_principal),
     ) -> AuthPrincipal:
         _check_proxy_auth(require_proxy_auth=require_proxy_auth, modal_key=modal_key)
         return _principal
 
     def write_auth_dep(
         modal_key: Annotated[str | None, Header(alias=_PROXY_HEADER)] = None,
-        principal: AuthPrincipal = Depends(require_admin),  # noqa: B008
+        principal: AuthPrincipal = Depends(require_admin),
     ) -> AuthPrincipal:
         _check_proxy_auth(require_proxy_auth=require_proxy_auth, modal_key=modal_key)
         return principal
@@ -89,7 +89,7 @@ def create_app(  # noqa: C901  # FastAPI factory registers job routes inline
     def create_job(  # pyright: ignore[reportUnusedFunction]
         body: CreateJobRequest,
         background: BackgroundTasks,
-        _auth: AuthPrincipal = Depends(write_auth_dep),  # noqa: B008, FAST002
+        _auth: AuthPrincipal = Depends(write_auth_dep),
     ) -> CreateJobResponse:
         options: dict[str, object] = {}
         job_type = "ingest"
@@ -110,7 +110,7 @@ def create_app(  # noqa: C901  # FastAPI factory registers job routes inline
 
     @app.get("/jobs", response_model=JobList)
     def list_jobs(  # pyright: ignore[reportUnusedFunction]
-        _auth: AuthPrincipal = Depends(auth_dep),  # noqa: B008, FAST002
+        _auth: AuthPrincipal = Depends(auth_dep),
         status_filter: Annotated[
             Literal["pending", "running", "completed", "failed"] | None,
             Query(alias="status"),
@@ -124,7 +124,7 @@ def create_app(  # noqa: C901  # FastAPI factory registers job routes inline
     @app.get("/jobs/{job_id}", response_model=Job)
     def get_job(  # pyright: ignore[reportUnusedFunction]
         job_id: UUID,
-        _auth: AuthPrincipal = Depends(auth_dep),  # noqa: B008, FAST002
+        _auth: AuthPrincipal = Depends(auth_dep),
     ) -> Job:
         record = job_store.get_job(job_id)
         if record is None:

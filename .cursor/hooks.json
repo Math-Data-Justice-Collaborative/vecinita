@@ -39,6 +39,11 @@
         "command": "uv run python .cursor/hooks/feature_drift.py",
         "matcher": "Write",
         "timeout": 10
+      },
+      {
+        "command": "uv run python .cursor/hooks/type_suppression_check.py",
+        "matcher": "Write",
+        "timeout": 15
       }
     ],
     "stop": [

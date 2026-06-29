@@ -34,11 +34,11 @@ def eval_db() -> str:
 
 
 def _load_pairs() -> list[JsonObject]:
-    loaded = cast("object", json.loads(_EVAL_PATH.read_text(encoding="utf-8")))
-    if not isinstance(loaded, list):
+    loaded_raw = cast("object", json.loads(_EVAL_PATH.read_text(encoding="utf-8")))
+    if not isinstance(loaded_raw, list):
         msg = f"Expected JSON array in {_EVAL_PATH}"
         raise TypeError(msg)
-    entries = cast("list[object]", loaded)
+    entries = cast("list[object]", loaded_raw)
     return [as_json_object(item) for item in entries]
 
 
@@ -48,6 +48,7 @@ def test_eval_retrieval_relevance_at_least_eighty_percent(eval_db: str) -> None:
     assert pairs, "eval fixture must contain at least one Q&A pair"
 
     def embed_fn(question: str) -> list[float]:
+        """Embed fn."""
         if "¿" in question or any(ch in question for ch in "áéíóúñ"):
             return basis_vector(2)
         if "library" in question.lower():

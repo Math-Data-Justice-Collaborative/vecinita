@@ -28,7 +28,7 @@ def _enforce_eager_from_env() -> bool:
 
 
 def _llm_engine_kwargs(*, max_model_len: int) -> dict[str, object]:
-    """vLLM init for Tesla T4 (cc 7.5): fp16 only; avoid bf16 cast warning where possible."""
+    """VLLM init for Tesla T4 (cc 7.5): fp16 only; avoid bf16 cast warning where possible."""
     return {
         "model": MODEL_ID,
         "download_dir": "/models",
@@ -110,9 +110,8 @@ with image.imports():
 )
 def stage_llm_weights() -> str:
     """One-shot: download Qwen weights into the llm-models volume (loads vLLM once)."""
-    llm: LLM | None = None
+    llm = LLM(**_llm_engine_kwargs(max_model_len=512))
     try:
-        llm = LLM(**_llm_engine_kwargs(max_model_len=512))
         params = SamplingParams(max_tokens=1)
         llm.generate(["warmup"], params)
         model_volume.commit()
@@ -166,7 +165,8 @@ class LlmService:
     @modal.enter(snap=False)
     def restore_model(self) -> None:
         """Recreate KV cache after snapshot restore (S001 T5)."""
-        self._llm.wake_up()
+        if self._llm is not None:
+            self._llm.wake_up()
 
     @modal.exit()
     def unload_model(self) -> None:
@@ -182,6 +182,9 @@ class LlmService:
             temperature=temperature,
             repetition_penalty=1.15,
         )
+        if self._llm is None:
+            msg = "LlmService model is not loaded"
+            raise RuntimeError(msg)
         outputs = self._llm.generate([prompt], params)
         return outputs[0].outputs[0].text
 
@@ -237,7 +240,7 @@ def fastapi_app():
         )
         return JSONResponse({"text": text})
 
-    async def generate_stream(request: Request) -> StreamingResponse:
+    async def generate_stream(request: Request) -> StreamingResponse | JSONResponse:
         try:
             payload = GenerateRequest.model_validate(json.loads(await request.body()))
         except (json.JSONDecodeError, ValidationError) as exc:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from http import HTTPStatus
 from typing import TYPE_CHECKING
 
 import pytest
@@ -15,11 +16,12 @@ pytestmark = pytest.mark.integration
 
 
 def test_ask_returns_answer_and_sources(chat_client: TestClient) -> None:
+    """POST /api/v1/ask returns an answer and at least one scored source."""
     response = chat_client.post(
         "/api/v1/ask",
         json={"question": "When is the food pantry open?"},
     )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     body = response_json_object(response)
     assert body["language"] == "en"
     answer = json_str(body, "answer")

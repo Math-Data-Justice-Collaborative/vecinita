@@ -14,8 +14,13 @@ The fix must ensure:
 from __future__ import annotations
 
 import logging
+import os
+from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest.mock import patch
+
+from vecinita_llm_client import LlmClient
+from vecinita_tagging.llm_client import LlmTagClient
 
 if TYPE_CHECKING:
     import pytest
@@ -27,8 +32,6 @@ def test_tag_client_init_failure_is_logged(caplog: pytest.LogCaptureFixture) -> 
     Before the fix, no log line is produced when LlmClient() raises.
     After the fix, a WARNING-level message should appear.
     """
-    from vecinita_llm_client import LlmClient
-    from vecinita_tagging.llm_client import LlmTagClient
 
     def _make_tag_client_like_modal(
         _logger: logging.Logger,
@@ -37,7 +40,7 @@ def test_tag_client_init_failure_is_logged(caplog: pytest.LogCaptureFixture) -> 
         tag_client: LlmTagClient | None = None
         try:
             tag_client = LlmTagClient(LlmClient())
-        except Exception:
+        except Exception:  # noqa: BLE001 # intentionally mirrors production broad-except under test
             _logger.warning(
                 "LlmTagClient init failed — retag jobs will fail. "
                 "Ensure VECINITA_MODAL_LLM_URL is set in Modal secret.",
@@ -53,8 +56,6 @@ def test_tag_client_init_failure_is_logged(caplog: pytest.LogCaptureFixture) -> 
         patch.dict("os.environ", {}, clear=False),
     ):
         env_key = "VECINITA_MODAL_LLM_URL"
-        import os
-
         os.environ.pop(env_key, None)
 
         result = _make_tag_client_like_modal(test_logger)
@@ -74,8 +75,6 @@ def test_tag_client_init_failure_is_logged(caplog: pytest.LogCaptureFixture) -> 
 
 def test_docstring_lists_llm_url_as_required() -> None:
     """data_management_app.py docstring must list VECINITA_MODAL_LLM_URL."""
-    from pathlib import Path
-
     app_path = Path(__file__).resolve().parents[2] / "infra" / "modal" / "data_management_app.py"
     assert app_path.exists(), f"Expected {app_path} to exist"
 

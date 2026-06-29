@@ -1,4 +1,4 @@
-"""ChatRAG integration test fixtures."""
+"""ChatRAG integration test fixtures (loaded via ``tests.conftest`` pytest_plugins)."""
 
 from __future__ import annotations
 
@@ -30,10 +30,12 @@ def _database_url() -> str:
 
 class _MockLlmClient:
     def generate(self, prompt: str, **kwargs: object) -> str:
+        """Generate."""
         _ = (prompt, kwargs)
         return "The food pantry posts hours on the city website each Monday."
 
     def generate_stream(self, prompt: str, **kwargs: object) -> Iterator[str]:
+        """Generate stream."""
         _ = (prompt, kwargs)
         yield "The "
         yield "food "
@@ -42,7 +44,8 @@ class _MockLlmClient:
         yield "hours."
 
     def close(self) -> None:
-        return None
+        """Close."""
+        return
 
 
 @pytest.fixture

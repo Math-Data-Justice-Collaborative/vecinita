@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from http import HTTPStatus
 from typing import cast
 
 import pytest
@@ -16,6 +17,9 @@ from tests.helpers.json_response import json_int, json_list, json_str, response_
 
 pytestmark = pytest.mark.integration
 
+_BROWSE_PAGE_SIZE = 20
+_MIN_TAGGED_DOCUMENTS = 2
+
 
 def _database_url() -> str:
     return os.environ.get(
@@ -26,6 +30,7 @@ def _database_url() -> str:
 
 @pytest.fixture
 def browse_client() -> TestClient:
+    """Load tagged corpus fixtures and return a browse API TestClient."""
     load_seed_tags(database_url=_database_url())
     load_tagged_corpus(database_url=_database_url())
     settings = ChatRagSettings(
@@ -34,48 +39,48 @@ def browse_client() -> TestClient:
         embed_url="http://embed.test",
         llm_url="http://llm.test",
         request_timeout_s=30.0,
-        browse_page_size=20,
+        browse_page_size=_BROWSE_PAGE_SIZE,
     )
     return TestClient(create_app(settings=settings))
 
 
 def _item_has_tags(item: JsonObject) -> bool:
-    tags_value = item.get("tags")
-    return isinstance(tags_value, list) and len(tags_value) > 0
+    tags_value: object = item.get("tags")
+    if not isinstance(tags_value, list):
+        return False
+    tags = cast("list[object]", tags_value)
+    return len(tags) > 0
 
 
 def test_tc040_browse_documents_paginated_with_tags(browse_client: TestClient) -> None:
     """GET /api/v1/documents returns tagged fixture rows with pagination."""
     response = browse_client.get("/api/v1/documents")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     payload = response_json_object(response)
     assert payload["page"] == 1
-    assert payload["page_size"] == 20
-    assert json_int(payload, "total") >= 2
+    assert payload["page_size"] == _BROWSE_PAGE_SIZE
+    assert json_int(payload, "total") >= _MIN_TAGGED_DOCUMENTS
     items = json_list(payload, "items")
-    assert len(items) >= 2
-    tagged = next(item for item in items if _item_has_tags(as_json_object(cast("object", item))))
-    tagged_obj = as_json_object(cast("object", tagged))
+    assert len(items) >= _MIN_TAGGED_DOCUMENTS
+    tagged = next(item for item in items if _item_has_tags(as_json_object(item)))
+    tagged_obj = as_json_object(tagged)
     assert "document_id" in tagged_obj
     assert "url" in tagged_obj
 
     filtered = browse_client.get("/api/v1/documents", params={"tags": ["housing"]})
-    assert filtered.status_code == 200
+    assert filtered.status_code == HTTPStatus.OK
     housing_items = json_list(response_json_object(filtered), "items")
     assert housing_items
     for raw_item in housing_items:
-        item = as_json_object(cast("object", raw_item))
+        item = as_json_object(raw_item)
         tag_entries = json_list(item, "tags")
-        assert any(
-            json_str(as_json_object(cast("object", tag)), "slug") == "housing"
-            for tag in tag_entries
-        )
+        assert any(json_str(as_json_object(tag), "slug") == "housing" for tag in tag_entries)
 
     search = browse_client.get("/api/v1/documents", params={"q": "Legal Aid"})
-    assert search.status_code == 200
+    assert search.status_code == HTTPStatus.OK
     search_items = json_list(response_json_object(search), "items")
     assert len(search_items) == 1
-    first = as_json_object(cast("object", search_items[0]))
+    first = as_json_object(search_items[0])
     title = first.get("title")
     assert title is not None
     assert "Legal Aid" in str(title)
@@ -84,17 +89,17 @@ def test_tc040_browse_documents_paginated_with_tags(browse_client: TestClient) -
 def test_tc041_tag_facets_include_seeded_tags(browse_client: TestClient) -> None:
     """GET /api/v1/tags returns facets for tagged corpus documents."""
     response = browse_client.get("/api/v1/tags")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     tags_payload = response_json_object(response)
     tags = json_list(tags_payload, "tags")
-    slugs = {json_str(as_json_object(cast("object", tag)), "slug") for tag in tags}
+    slugs = {json_str(as_json_object(tag), "slug") for tag in tags}
     assert "housing" in slugs
     assert "legal" in slugs
     housing = next(
         tag
         for tag in tags
-        if json_str(as_json_object(cast("object", tag)), "slug") == "housing"
-        and json_str(as_json_object(cast("object", tag)), "language") == "en"
+        if json_str(as_json_object(tag), "slug") == "housing"
+        and json_str(as_json_object(tag), "language") == "en"
     )
-    housing_obj = as_json_object(cast("object", housing))
+    housing_obj = as_json_object(housing)
     assert json_int(housing_obj, "document_count") >= 1

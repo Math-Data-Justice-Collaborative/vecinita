@@ -30,8 +30,8 @@ Source of truth: `docs/typing-policy.md` (ADR-018).
 ## Before claiming done
 
 ```bash
-uv run ruff check apps packages tests
-uv run basedpyright apps packages tests
+uv run ruff check apps packages tests infra scripts
+uv run basedpyright apps packages tests infra scripts
 cd apps/chat-rag-frontend && npm run lint
 cd apps/data-management-frontend && npm run lint
 ```

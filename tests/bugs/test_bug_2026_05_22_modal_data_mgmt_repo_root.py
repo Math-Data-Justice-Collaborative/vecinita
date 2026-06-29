@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
-from typing import cast
+from typing import Protocol, cast
+
+
+class _MountedDataMgmtModule(Protocol):
+    _REPO_ROOT: object
 
 
 def test_data_management_app_imports_when_modal_mounts_at_root(tmp_path: Path) -> None:
@@ -16,8 +20,9 @@ def test_data_management_app_imports_when_modal_mounts_at_root(tmp_path: Path) -
     spec = importlib.util.spec_from_file_location("data_management_app_mounted", mounted)
     assert spec
     assert spec.loader
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    raw_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(raw_module)
+    module = cast("_MountedDataMgmtModule", raw_module)
 
-    repo_root = cast("object", module._REPO_ROOT)
+    repo_root: object = module._REPO_ROOT  # noqa: SLF001 # deploy script private attr under test  # pyright: ignore[reportPrivateUsage]
     assert Path("/opt/vecinita") == Path(str(repo_root))

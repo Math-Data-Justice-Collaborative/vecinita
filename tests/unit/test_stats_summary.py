@@ -7,8 +7,11 @@ from http import HTTPStatus
 
 import pytest
 from fastapi.testclient import TestClient
+from vecinita_shared_schemas.auth import reset_auth_config_for_tests
 
-from tests.helpers.json_response import response_json_object
+from tests.helpers.json_response import (
+    response_json_object,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -24,12 +27,16 @@ def _database_url() -> str:
 
 
 @pytest.fixture
-def client() -> TestClient:
+def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     """Provide a TestClient for the internal write API with env configured."""
-    os.environ["DATABASE_URL"] = _database_url()
-    os.environ["VECINITA_INTERNAL_API_KEY"] = _API_KEY
-    # Import after env vars are set so app config reads them at startup.
-    from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
+    monkeypatch.setenv("DATABASE_URL", _database_url())
+    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _API_KEY)
+    monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
+    monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
+    reset_auth_config_for_tests()
+    from vecinita_internal_write_api.app import (  # noqa: PLC0415
+        create_app,
+    )
 
     return TestClient(create_app())
 

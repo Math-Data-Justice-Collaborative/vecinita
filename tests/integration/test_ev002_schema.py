@@ -57,7 +57,7 @@ def test_alembic_head_includes_ev002_migration() -> None:
     """Alembic current revision matches head after EV-002 migration."""
     env = {**os.environ, "DATABASE_URL": _database_url()}
     current = subprocess.run(
-        ["uv", "run", "alembic", "current"],
+        ["uv", "run", "alembic", "current"],  # noqa: S607  # uv resolved from PATH in CI/dev
         cwd=_DATABASE_DIR,
         env=env,
         capture_output=True,
@@ -65,7 +65,7 @@ def test_alembic_head_includes_ev002_migration() -> None:
         check=True,
     )
     heads = subprocess.run(
-        ["uv", "run", "alembic", "heads"],
+        ["uv", "run", "alembic", "heads"],  # noqa: S607  # uv resolved from PATH in CI/dev
         cwd=_DATABASE_DIR,
         env=env,
         capture_output=True,

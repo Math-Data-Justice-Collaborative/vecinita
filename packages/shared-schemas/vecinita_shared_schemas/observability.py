@@ -9,7 +9,7 @@ import sys
 from datetime import UTC, datetime
 from typing import Final, cast
 
-from vecinita_shared_schemas.json_types import JsonObject  # noqa: TC001 — runtime payload typing
+from vecinita_shared_schemas.json_types import JsonObject
 
 LOG_LEVEL_ENV: Final[str] = "VECINITA_LOG_LEVEL"
 REQUEST_ID_KEY: Final[str] = "request_id"

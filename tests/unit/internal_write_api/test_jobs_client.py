@@ -14,6 +14,7 @@ from vecinita_internal_write_api.jobs_client import (
 
 
 def test_jobs_client_requires_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test jobs client requires env."""
     monkeypatch.delenv("VECINITA_MODAL_DATA_MGMT_URL", raising=False)
     monkeypatch.delenv("VECINITA_MODAL_PROXY_KEY", raising=False)
 
@@ -22,10 +23,12 @@ def test_jobs_client_requires_env(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_enqueue_retag_posts_retag_job() -> None:
+    """Test enqueue retag posts retag job."""
     document_id = uuid4()
     job_id = uuid4()
 
     def handler(request: httpx.Request) -> httpx.Response:
+        """Handler."""
         assert request.method == "POST"
         assert request.url.path == "/jobs"
         assert request.headers["X-Vecinita-Proxy-Key"] == "proxy-key"
@@ -47,6 +50,7 @@ def test_enqueue_retag_posts_retag_job() -> None:
 
 
 def test_enqueue_retag_raises_on_http_error() -> None:
+    """Test enqueue retag raises on http error."""
     transport = httpx.MockTransport(lambda _request: httpx.Response(500, text="fail"))
     client = DataManagementJobsClient(
         base_url="http://data-mgmt.test",
@@ -60,14 +64,17 @@ def test_enqueue_retag_raises_on_http_error() -> None:
 
 
 def test_jobs_client_closes_owned_http_client() -> None:
+    """Test jobs client closes owned http client."""
     closed: list[bool] = []
 
     def handler(_request: httpx.Request) -> httpx.Response:
+        """Handler."""
         return httpx.Response(202, json={"job_id": str(uuid4()), "status": "pending"})
 
     base_client = httpx.Client
 
     def client_factory(**kwargs: object) -> httpx.Client:
+        """Client factory."""
         http = base_client(
             base_url=cast("str", kwargs.get("base_url", "")),
             timeout=cast("float", kwargs.get("timeout", 60.0)),
@@ -76,13 +83,14 @@ def test_jobs_client_closes_owned_http_client() -> None:
         original_close = http.close
 
         def tracked_close() -> None:
+            """Tracked close."""
             closed.append(True)
             original_close()
 
         http.close = tracked_close  # type: ignore[method-assign]
         return http
 
-    import httpx as httpx_module
+    import httpx as httpx_module  # noqa: PLC0415
 
     original = httpx_module.Client
     httpx_module.Client = client_factory  # type: ignore[misc]
@@ -99,6 +107,7 @@ def test_jobs_client_closes_owned_http_client() -> None:
 
 
 def test_jobs_client_does_not_close_injected_client() -> None:
+    """Test jobs client does not close injected client."""
     closed: list[bool] = []
     transport = httpx.MockTransport(
         lambda _request: httpx.Response(202, json={"job_id": str(uuid4()), "status": "pending"}),
@@ -107,6 +116,7 @@ def test_jobs_client_does_not_close_injected_client() -> None:
     original_close = http.close
 
     def tracked_close() -> None:
+        """Tracked close."""
         closed.append(True)
         original_close()
 
