@@ -41,6 +41,34 @@ Per ADR-027 §6 — **Supabase Pro + ephemeral preview branches**:
 Auth settings (invite-only, SMTP) are versioned in **`supabase/config.toml`** in this repo.
 Corpus schema remains on **DO Postgres** via Alembic (`apps/database/alembic/`).
 
+## CI pipeline (`.github/workflows/supabase.yml`)
+
+Per ADR-027 §6 — validates and syncs Supabase identity config independently of the main
+`ci.yml` suite (path-filtered to `supabase/**` and related scripts).
+
+| Job | Trigger | Requires secrets | Action |
+|-----|---------|------------------|--------|
+| **validate** | PR + push | No | Offline `config.toml` contract; `supabase start`; lint/reset migrations when present; optional `supabase test db` |
+| **preview-branch** | PR | `SUPABASE_ACCESS_TOKEN` (+ optional `SUPABASE_DB_PASSWORD`) | Ephemeral preview branch, apply repo state, tear down |
+| **sync-production** | push to `main` | Same | `supabase config push` (+ `db push` when migrations exist) |
+
+Cloud jobs **skip gracefully** when `SUPABASE_ACCESS_TOKEN` is not configured in GitHub
+Actions secrets — offline validation still runs on every PR.
+
+Local parity:
+
+```bash
+bash scripts/check_supabase_config.sh
+# Optional: supabase start && supabase db lint  (requires Docker)
+```
+
+Remote sync (operator / CI):
+
+```bash
+export SUPABASE_ACCESS_TOKEN=...   # never commit
+bash scripts/supabase/ci_sync.sh sync-production
+```
+
 ## Operator secrets (never commit)
 
 See `docs/staging-secrets-matrix.md` §Supabase (EV-005) and `docs/config-spec.md` §Admin auth.

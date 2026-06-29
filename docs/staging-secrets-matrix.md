@@ -141,6 +141,15 @@ Identity for **admin surfaces only** (DM UI, DM Modal API, internal-write API). 
 - **Env sync:** `supabase/README.md` — ephemeral preview branches; tear down after PR merge.
 - **JWT key rotation:** automatic via JWKS refresh (no `SUPABASE_JWT_SECRET` with ES256).
 
+### GitHub Actions (Supabase CI workflow)
+
+| Secret | Required | Description |
+|--------|----------|-------------|
+| `SUPABASE_ACCESS_TOKEN` | For cloud sync jobs | Personal access token from [Supabase dashboard account tokens](https://supabase.com/dashboard/account/tokens); enables `preview-branch` + `sync-production` in `.github/workflows/supabase.yml` |
+| `SUPABASE_DB_PASSWORD` | Optional | Database password for `supabase link` when applying SQL migrations via `db push` |
+
+Offline **validate** job runs without these secrets. Cloud jobs skip when the token is absent.
+
 **Example env files (placeholders):** `infra/do/.env.example`, `infra/modal/.env.example`  
 **Push to DO:** `scripts/deploy/do_apps.py sync-secrets` or `sync-all-secrets` (see `infra/do/README.md`).  
 **Push everywhere (Supabase check + Modal + DO):** `bash scripts/deploy/sync_env.sh --apply`  

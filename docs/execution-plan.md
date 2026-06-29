@@ -906,6 +906,7 @@ API); secrets matrix + runbook updated; AC-A10 plan in place.
 | T43.2 | Test: first-admin seed script idempotent + sets `app_metadata.role=admin` (mocked admin API) — red | Test | pending | ADR-027 §8, TP-S004-10 | — | — | S004 | F34 |
 | T43.3 | Code: `scripts/seed_first_admin.py` using `SUPABASE_SECRET_KEY` (idempotent; reads `SUPABASE_ADMIN_EMAIL/_PASSWORD`) | Code | pending | ADR-027 §8 | T43.2 | — | S004 | F34 |
 | T43.4 | Docs: `docs/staging-secrets-matrix.md` + operator runbook — `SUPABASE_JWT_SECRET`, `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `VITE_SUPABASE_*`, invite/disable/role-change, JWT-secret rotation, branch cleanup (AC-A10) | Docs | pending | config-spec §Admin auth, AC-A10 | T43.1 | — | S004 | F34 |
+| T43.5 | CI: `.github/workflows/supabase.yml` — offline validate + gated preview/sync (ADR-027 §6); `scripts/check_supabase_config.sh`; TC-087 | Config | completed | ADR-027 §6, test-plan TC-087 | T43.1 | — | S004 | F34 | 2026-06-29 |
 
 #### M44: Shared JWT verifier — `vecinita_shared_schemas.auth`
 

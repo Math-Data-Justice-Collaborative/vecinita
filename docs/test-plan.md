@@ -472,6 +472,12 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Input**: Introspect corpus DB metadata after auth migrations.
 - **Expected**: Forbidden tables (`users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`, `auth_*`) absent; `audit_log.actor_id` is a UUID with no adjacent PII column.
 
+### TC-087: Supabase CI pipeline contract (F34, ADR-027 §6)
+
+- **Objective**: Repo-managed Supabase CI validates config offline and defines gated remote sync jobs.
+- **Input**: `tests/smoke/test_supabase_ci_contract.py` asserts `.github/workflows/supabase.yml`, `scripts/check_supabase_config.sh`, and `scripts/supabase/ci_sync.sh` exist with invite-only `config.toml` contract.
+- **Expected**: Smoke tests pass in CI; `validate` job runs on PRs without cloud secrets; cloud jobs skip when `SUPABASE_ACCESS_TOKEN` is unset.
+
 ## Test Data
 
 | Asset | Location | Used by |
