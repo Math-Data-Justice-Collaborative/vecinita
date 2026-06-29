@@ -51,38 +51,31 @@ project:
         - h0ci_blocking_after_merge
 
 # Session-first work model — see .cursor/skills/sessions-reference.md
-session_counter: 3          # increment when allocating S{NNN}-{slug}
-active_session:             # current bounded work unit; null when none in flight
-  id: S003-persistent-chat-history
+session_counter: 4          # increment when allocating S{NNN}-{slug}
+active_session:             # current bounded work unit; null when none in flight (S004 opened 2026-06-28)
+  id: S004-supabase-auth
   type: feature
   status: in_progress
-  intent: "Add browser-local, ephemeral chat history to the chat-rag-frontend main page. (a) Persist the active conversation across page refresh, tab-away, and switching browser tabs using sessionStorage (device-only, never sent to server; cleared when the browser tab is closed). (b) Keep a selectable list of previous conversations so users can revisit past chats. Frontend-only delta; no backend/API/contract changes. Privacy: sessionStorage chosen over localStorage for a narrower footprint (user decision)."
-  branch: feat/S003-persistent-chat-history
+  intent: "GitHub #75 — add a Supabase Auth authentication interface for ADMIN surfaces only. Gate the Data Management UI (apps/data-management-frontend), the Data Management API (apps/data-management-backend), and the internal write API (apps/internal-write-api) behind login. ChatRAG public chat/query + corpus browse stay anonymous and stateless. Invitation-only registration (public signup disabled); admins invite by email. Two roles: admin (full) + read-only/viewer. Identity/PII lives in Supabase (Vecinita corpus DB stays PII-free); backends verify Supabase JWTs. Supabase environment-syncing via branching on the canonical project. Reverses ADR-004's auth/identity clause for admin surfaces only and revisits ADR-005 (Supabase Auth) — new superseding ADR required."
+  branch: feat/S004-supabase-auth
   orchestrator: 16-evolve
-  artifacts_dir: docs/sessions/S003-persistent-chat-history/
-  started_at: "2026-06-26"
-  current_stage: "09-qa"
-  linked_issues: []
+  artifacts_dir: docs/sessions/S004-supabase-auth/
+  started_at: "2026-06-28"
+  current_stage: "00-context"
+  linked_issues: [75]
+  evolve_cycle_id: EV-005
   routing_plan:
     - stage: 00-context
-      status: completed
-      note: "context-brief §14 added (F33); decisions R39-R42; session-brief + routing-plan written; commit a0cf185"
+      status: in_progress
+      note: "Session opened for #75 Supabase admin auth; scope + 5 gating decisions resolved (R: close S003, admin-only reversal, identity in Supabase, invite-only 2 roles, Supabase branching env sync)."
     - stage: 01-requirements
-      status: completed
-      note: "F33 docs delta written — feature-list F33, UJ-024/UJ-025, TC-072–TC-076, AC-S1–AC-S7, RD-068–RD-072, ADR-023. R43–R47 resolved."
+      status: pending
     - stage: 04-tech-plan
-      status: completed
-      note: "Phase 10 added (M39-M42, 17 tasks T39.1-T42.3); decisions TP-S003-01..12; ADR-024 authored; frontend-session-state-lifting.mdc updated for device-only sessionStorage; report at docs/sessions/S003-persistent-chat-history/reports/tech-plan.md"
+      status: pending
     - stage: 07-build
-      status: completed
-      completed_at: "2026-06-26"
-      reopened_at: "2026-06-28"
-      note: "M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green. Reopened 2026-06-28 (user-approved) for ADR-025 storage-mechanism reversal: sessionStorage -> localStorage (durable, cross-tab, still device-only). ADR-025 authored at this stage (supersedes-in-part ADR-023, ADR-024). Commit eacf4ad; re-verified 116 FE tests + 95% coverage + build green; frontend-only, no API/contract/CORS change (AC-S7 preserved). Status remains completed."
+      status: pending
     - stage: 08-verify-build
-      status: completed
-      completed_at: "2026-06-28"
-      user_amended: true
-      note: "User invoked /08-verify-build explicitly (not in original S003 routing plan). Milestone-boundary verify PASS; frontend-only F33 chat-history delta; main@9bd7a50 + uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED. Reports: docs/verification-report.md + docs/sessions/S003-persistent-chat-history/reports/verification-report.md"
+      status: pending
     - stage: 09-qa
       status: pending
     - stage: 10-e2e
@@ -93,24 +86,88 @@ active_session:             # current bounded work unit; null when none in fligh
       status: pending
   skipped_stages:
     - stage: 02-verify-plan
-      reason: "evolve-lite — small well-understood frontend delta"
+      reason: "User-approved lite path (2026-06-28)."
     - stage: 03-plan-tooling
-      reason: "no new tooling/guardrails"
+      reason: "User-approved lite path; auth guardrail rules deferred / folded into 04+07."
     - stage: 05-verify-tech
-      reason: "evolve-lite — small tech delta"
+      reason: "User-approved lite path."
     - stage: 06-tech-tooling
-      reason: "no new tooling/guardrails"
+      reason: "User-approved lite path."
     - stage: 11-verify-impl
-      reason: "evolve-lite — covered by 09-qa + 10-e2e"
-  artifacts:
-    - docs/sessions/S003-persistent-chat-history/session-brief.md
-    - docs/sessions/S003-persistent-chat-history/routing-plan.md
-    - docs/adr/ADR-025-chat-history-localstorage-persistence.md
-    - path: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
-      kind: report
-      session_id: S003-persistent-chat-history
-      stage: 08-verify-build
+      reason: "User-approved lite path; covered by 09-qa + 10-e2e."
 sessions:                   # archived completed sessions
+  - id: S003-persistent-chat-history
+    type: feature
+    status: completed
+    completed_at: "2026-06-28"
+    close_note: "Closed by user 2026-06-28 with verification/deploy stages deferred. F33 browser-local persistent chat history (localStorage — durable across tab close + shared across same-origin tabs, still device-only per ADR-025) built and merged to main via PRs #96/#97; working tree clean on main. Remaining stages 09-qa, 10-e2e, 12-verify-deploy, 13-deploy-smoke deferred (marked skipped with deferral rationale) to a later maintenance/integration session if needed."
+    intent: "Add browser-local, ephemeral chat history to the chat-rag-frontend main page. (a) Persist the active conversation across page refresh, tab-away, and switching browser tabs using sessionStorage (device-only, never sent to server; cleared when the browser tab is closed). (b) Keep a selectable list of previous conversations so users can revisit past chats. Frontend-only delta; no backend/API/contract changes. Privacy: sessionStorage chosen over localStorage for a narrower footprint (user decision)."
+    branch: feat/S003-persistent-chat-history
+    orchestrator: 16-evolve
+    artifacts_dir: docs/sessions/S003-persistent-chat-history/
+    started_at: "2026-06-26"
+    current_stage: "09-qa"
+    linked_issues: []
+    routing_plan:
+      - stage: 00-context
+        status: completed
+        note: "context-brief §14 added (F33); decisions R39-R42; session-brief + routing-plan written; commit a0cf185"
+      - stage: 01-requirements
+        status: completed
+        note: "F33 docs delta written — feature-list F33, UJ-024/UJ-025, TC-072–TC-076, AC-S1–AC-S7, RD-068–RD-072, ADR-023. R43–R47 resolved."
+      - stage: 04-tech-plan
+        status: completed
+        note: "Phase 10 added (M39-M42, 17 tasks T39.1-T42.3); decisions TP-S003-01..12; ADR-024 authored; frontend-session-state-lifting.mdc updated for device-only sessionStorage; report at docs/sessions/S003-persistent-chat-history/reports/tech-plan.md"
+      - stage: 07-build
+        status: completed
+        completed_at: "2026-06-26"
+        reopened_at: "2026-06-28"
+        note: "M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green. Reopened 2026-06-28 (user-approved) for ADR-025 storage-mechanism reversal: sessionStorage -> localStorage (durable, cross-tab, still device-only). ADR-025 authored at this stage (supersedes-in-part ADR-023, ADR-024). Commit eacf4ad; re-verified 116 FE tests + 95% coverage + build green; frontend-only, no API/contract/CORS change (AC-S7 preserved). Status remains completed."
+      - stage: 08-verify-build
+        status: completed
+        completed_at: "2026-06-28"
+        user_amended: true
+        note: "User invoked /08-verify-build explicitly (not in original S003 routing plan). Milestone-boundary verify PASS; frontend-only F33 chat-history delta; main@9bd7a50 + uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED. Reports: docs/verification-report.md + docs/sessions/S003-persistent-chat-history/reports/verification-report.md"
+      - stage: 09-qa
+        status: skipped
+        note: "Deferred by user at session close (2026-06-28). F33 merged to main (#96/#97); QA to be picked up in a later maintenance/integration session if needed."
+      - stage: 10-e2e
+        status: skipped
+        note: "Deferred by user at session close (2026-06-28)."
+      - stage: 12-verify-deploy
+        status: skipped
+        note: "Deferred by user at session close (2026-06-28)."
+      - stage: 13-deploy-smoke
+        status: skipped
+        note: "Deferred by user at session close (2026-06-28)."
+    skipped_stages:
+      - stage: 02-verify-plan
+        reason: "evolve-lite — small well-understood frontend delta"
+      - stage: 03-plan-tooling
+        reason: "no new tooling/guardrails"
+      - stage: 05-verify-tech
+        reason: "evolve-lite — small tech delta"
+      - stage: 06-tech-tooling
+        reason: "no new tooling/guardrails"
+      - stage: 11-verify-impl
+        reason: "evolve-lite — covered by 09-qa + 10-e2e"
+    deferred_to_backlog:
+      - stage: 09-qa
+        note: "Deferred at S003 close (2026-06-28) — pick up in a later maintenance/integration session if F33 needs QA before further deploy."
+      - stage: 10-e2e
+        note: "Deferred at S003 close (2026-06-28)."
+      - stage: 12-verify-deploy
+        note: "Deferred at S003 close (2026-06-28)."
+      - stage: 13-deploy-smoke
+        note: "Deferred at S003 close (2026-06-28)."
+    artifacts:
+      - docs/sessions/S003-persistent-chat-history/session-brief.md
+      - docs/sessions/S003-persistent-chat-history/routing-plan.md
+      - docs/adr/ADR-025-chat-history-localstorage-persistence.md
+      - path: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
+        kind: report
+        session_id: S003-persistent-chat-history
+        stage: 08-verify-build
   - id: S002-admin-job-management
     type: feature
     status: paused
@@ -1225,6 +1282,15 @@ evolve_cycles:
       - path: docs/adr/README.md
         status: completed
     issues: []
+  - id: EV-005
+    cycle_type: feature
+    feature_ids: [F34]
+    title: "Supabase Auth — admin-surface authentication (#75)"
+    status: in_progress
+    started: "2026-06-28"
+    session_id: S004-supabase-auth
+    current_stage: "00-context"
+    note: "Admin-only Supabase Auth; ChatRAG anonymous; invite-only; admin+viewer roles; identity in Supabase; supersedes ADR-004 auth clause + revisits ADR-005."
 retrospective_cycles: []
 pr_review_cycles:
   - id: PRR-001
@@ -2002,6 +2068,9 @@ decisions_log:
     note: "S003 07-build REOPENED (explicit user approval) to reverse an audited design decision: F33 chat-history storage switched sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only, never sent to server). ADR-025 authored at 07-build; supersedes-in-part ADR-023 and ADR-024. Commit eacf4ad (20 files). Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS change (AC-S7 preserved). stages.07-build.s003 + project.stages.07-build keep status completed (reopened_at recorded). active_session.current_stage unchanged (remains 09-qa)."
   - date: "2026-06-28"
     note: "S003 08-verify-build COMPLETE (user-invoked /08-verify-build; amended into S003 routing plan with user_amended=true — was not in original 00→01→04→07→09→10→12→13 plan). Milestone-boundary verify result PASS. Frontend-only F33 chat-history delta on main@9bd7a50 with uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED (frontend-only delta). Reports: docs/verification-report.md + docs/sessions/S003-persistent-chat-history/reports/verification-report.md. Recorded in project.stages.08-verify-build (canonical) + stages.08-verify-build.s003 (legacy mirror). active_session.current_stage unchanged (remains 09-qa — next pending)."
+  - date: "2026-06-28"
+    note: "S003 closed by user (2026-06-28) with 09-qa/10-e2e/12-verify-deploy/13-deploy-smoke deferred; F33 already merged to main via PRs #96/#97 (working tree clean on main). Closing to start auth session for GitHub #75. Session archived to sessions[] with status completed (deferred stages marked skipped + recorded in deferred_to_backlog); active_session cleared to null; session_counter remains 3 (next allocatable S004). project.stages baseline unchanged (07-build + 08-verify-build already mirrored completed for S003; deferred stages not promoted into the baseline; 13-deploy-smoke baseline stays S001 completed)."
+  - "S004/EV-005 opened (2026-06-28) for GitHub #75 Supabase admin auth. Gating decisions: (1) admin-only reversal of ADR-004 (ChatRAG stays anonymous); (2) identity/PII in Supabase, corpus DB PII-free; (3) invite-only registration, public signup disabled; (4) two roles admin+viewer; (5) Supabase branching for env sync on canonical project. New superseding ADR required (ADR-004 auth clause, ADR-005)."
 
 artifacts:
   - docs/context-brief.md
@@ -2059,12 +2128,16 @@ artifacts:
   - docs/sessions/S002-admin-job-management/reports/deploy-checklist.md
 
 git_history:
-  current_branch: feat/S003-persistent-chat-history
+  current_branch: main
   branches:
     - name: feat/S003-persistent-chat-history
       base: main
-      status: open
-      purpose: "S003 browser-local persistent chat history (sessionStorage + previous-chats list) on chat-rag-frontend"
+      status: merged
+      merged_at: "2026-06-28"
+      pr_urls:
+        - https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/96
+        - https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/97
+      purpose: "S003 browser-local persistent chat history (localStorage durable + cross-tab per ADR-025 + previous-chats list) on chat-rag-frontend"
       opened_at: "2026-06-26"
     - name: feat/S002-admin-job-management
       base: main

@@ -835,3 +835,74 @@ close, or switching browser tabs** because nothing is persisted to browser stora
 - No cross-device, cross-browser, or cross-tab(new-tab) sync.
 - No persistence surviving browser-tab close (sessionStorage by design, R41).
 - No changes to `data-management-frontend`.
+
+## 15. EV-005 delta — Supabase admin auth (#75)
+
+**Date:** 2026-06-28  
+**Session:** S004-supabase-auth (type feature, orchestrator 16-evolve)  
+**Cycle:** EV-005 · **Feature:** F34 — Supabase Auth for admin surfaces  
+**Issue:** [#75](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/75)  
+**Apps:** `data-management-frontend`, `data-management-backend`, `internal-write-api`
+(+ Supabase project). **ChatRAG stays anonymous.**
+
+### Executive summary
+
+There is no authentication on the admin-facing surfaces; admin protection today is
+infrastructure-only (platform secrets / network — F16) per ADR-004's "no identity in app"
+stance. #75 introduces a real **authentication interface** using **Supabase Auth**, gating the
+Data Management UI, the Data Management API, and the internal write API. Public ChatRAG
+(chat/query + corpus browse) **remains anonymous and stateless** (F3 preserved). Registration is
+**invitation-only** (public signup disabled); two roles — `admin` (full) and `viewer`
+(read-only). Operator **identity/PII lives in Supabase**; the Vecinita corpus DB stays PII-free
+(F15 extended, not relaxed). Environments are kept in sync via **Supabase branching** on the
+canonical project (per Supabase best practices), with secrets via Modal/DO env (never tracked).
+
+### Architectural reversal (blocking — must be recorded in 01/04)
+
+| Prior constraint | Status under EV-005 | Action |
+|------------------|---------------------|--------|
+| ADR-004 — zero personal data, **no Supabase Auth, no identity** | **Reversed for admin surfaces only** | Author superseding ADR in 01-requirements |
+| Visitor zero-PII / F3 stateless chat | **Unchanged** | ChatRAG stays anonymous |
+| F15 privacy schema guardrails | **Extended** | Corpus DB still PII-free; identity isolated in Supabase |
+| F16 infra-only admin protection | **Upgraded** | Infra creds → Supabase JWT verification |
+| feature-list out-of-scope: "Supabase Auth, OAuth, invite-by-email" | **Partially admitted** | Email invite admitted; OAuth still out (this cycle) |
+
+### Resolution log (EV-005)
+
+| ID | Category | Issue | Resolution |
+|----|----------|-------|------------|
+| R48 | Decision | Prior active session S003 | **Close** S003 (defer QA/e2e/deploy); F33 merged to main (#96/#97) |
+| R49 | Contradiction | #75 vs ADR-004 (no auth/identity) | **Admin-only reversal**; ChatRAG anonymous; new superseding ADR |
+| R50 | Decision | Identity / PII residency | Identity in **Supabase**; corpus DB stays PII-free (assumed: no mirror rows) |
+| R51 | Decision | Registration + roles | **Invite-only** (public signup off); `admin` + `viewer` |
+| R52 | Decision | Environment syncing | **Supabase branching** on canonical project; migrations in repo |
+| R53 | Ambiguity | Supabase MCP vs `prod.env` project | MCP authed to org *Cognitive Chemistry Labs* (`lrbhxyikeiwmuanqwdya`, `uysuznqtbajeejjvszxc`); `prod.env` keys → `cfuvghdsuwactfeamtym` (not MCP-accessible). **Confirm canonical project ref + grant MCP access** before branching/migrations |
+| R54 | Decision | Routing | **Lite** evolve path (skip 02/03/05/06/11) |
+
+### Stack touch points (reference)
+
+| Surface | Location | Auth change |
+|---------|----------|-------------|
+| DM UI | `apps/data-management-frontend/` (React/Vite, react-router v7, Radix) | Login screen, `@supabase/supabase-js` session, protected routes, current-user display |
+| DM API | `apps/data-management-backend/vecinita_data_management_backend/app.py` (FastAPI) | Supabase JWT verify dependency; 401 on missing/invalid |
+| Internal write API | `apps/internal-write-api/vecinita_internal_write_api/app.py` (FastAPI) | Supabase JWT verify dependency; role check for writes |
+| ChatRAG backend | `apps/chat-rag-backend/` | **No change** — stays anonymous (preserve `parse_ask_body` ADR-004 identity-reject) |
+| CORS | `packages/shared-schemas` `configure_cors()` | Add `Authorization` to allowed headers; H4 preflight |
+| Specs | `openapi/`, `internal-write-api-spec.yaml` | Document auth scheme |
+
+### Unresolved gaps (for 01-requirements)
+
+- **Canonical Supabase project + MCP access** (R53) — required before branching/migrations.
+- **No-mirror vs minimal user mirror** for audit attribution (assumed: Supabase-only).
+- **Credential type** — password / magic-link / both.
+- **Cost** — Supabase Auth + branching vs ADR-004 $25–$50/mo cap (size in 04-tech-plan).
+- **Token transport** — `Authorization: Bearer` header vs cookies; SSR vs SPA pattern.
+- **Audit attribution** — how `AuditPage` / audit log records the acting user without storing PII
+  in the corpus DB (e.g. opaque Supabase user id only).
+
+### Out of scope (EV-005)
+
+- ChatRAG visitor authentication (stays anonymous).
+- OAuth / social login providers.
+- RBAC beyond admin + viewer.
+- Any visitor PII in the Vecinita corpus DB.
