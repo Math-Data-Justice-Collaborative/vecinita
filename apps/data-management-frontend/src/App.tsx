@@ -25,8 +25,16 @@ export default function App() {
         <Route path="/jobs" element={<JobsPage />} />
         <Route path="/health" element={<HealthPage />} />
         <Route path="/audit" element={<AuditPage />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
+      {/* Top-level splat: nested `path="*"` does not match unknown absolute paths (RR6). */}
+      <Route
+        path="*"
+        element={
+          <ProtectedRoute>
+            <Navigate to="/dashboard" replace />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

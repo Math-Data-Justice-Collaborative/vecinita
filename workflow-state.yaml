@@ -28,14 +28,22 @@ project:
       note: "EV-005/F34 tech plan delta: ADR-027 (Supabase Auth verification + env sync) with TP-S004-01..12 — HS256 JWT verify (TP-S004-01), app_metadata.role claim source (TP-S004-02), shared vecinita_shared_schemas.auth, PyJWT>=2.10,<3 + @supabase/supabase-js ^2.108.2, Pro plan + ephemeral branching + CLI migrations-in-repo, inviteUserByEmail+SMTP, idempotent first-admin seed; cost cap raised to ~$75/mo (supersedes ADR-004 cap — user-approved). Phase 11 (M43-M47, T43.1-T47.6, 29 tasks) appended to execution-plan. R53 unblocked via Supabase CLI (MCP-independent). Commit DEFERRED (commit-only-when-asked override). Baseline partial_rerun info preserved in legacy stages.04-tech-plan."
     07-build:
       status: completed
-      completed_at: "2026-06-26"
-      reopened_at: "2026-06-28"
-      session_id: S003-persistent-chat-history
-      branch: feat/S003-persistent-chat-history
-      feature: F33
-      phase: "Phase 10 (M39–M42)"
-      note: "S003 F33 browser-local persistent chat history — M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green"
-      reopen_note: "07-build reopened 2026-06-28 (explicit user approval) for an ADR-025 delta: chat-history storage switched sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only). Commit eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed."
+      completed_at: "2026-06-29"
+      session_id: S004-supabase-auth
+      branch: feat/S004-supabase-auth
+      feature: F34
+      phase: "Phase 11 (M43-M47)"
+      reconciliation_note: "S004/EV-005 F34 build (Phase 11 M43-M47) reconciled to completed during 10-e2e — 08-verify-build, 09-qa (remediated), and 10-e2e all completed downstream on feat/S004-supabase-auth."
+      s003_baseline:
+        status: completed
+        completed_at: "2026-06-26"
+        reopened_at: "2026-06-28"
+        session_id: S003-persistent-chat-history
+        branch: feat/S003-persistent-chat-history
+        feature: F33
+        phase: "Phase 10 (M39–M42)"
+        note: "S003 F33 browser-local persistent chat history — M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green"
+        reopen_note: "07-build reopened 2026-06-28 (explicit user approval) for an ADR-025 delta: chat-history storage switched sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only). Commit eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed."
     08-verify-build:
       status: completed
       completed_at: "2026-06-29"
@@ -51,6 +59,16 @@ project:
         session_id: S003-persistent-chat-history
         overall_result: PASS
         session_report: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
+    09-qa:
+      status: completed
+      started_at: "2026-06-29"
+      completed_at: "2026-06-29"
+      session_id: S004-supabase-auth
+      overall: pass_with_remediation
+      reconciled_at: "2026-06-29"
+      reconciliation_note: "S004 F34 — initial run FAIL (admin nav test + coverage gate) remediated per qa-report QA-S004-001/002 (resolved). Independently re-confirmed during 10-e2e: admin FE 223/223 + chat FE 134/134 Vitest PASS. Earlier FAIL vs 08-verify-build PASS inconsistency resolved."
+      report: docs/qa-report.md
+      note: "S004 F34 delta QA FAIL — admin nav test + coverage gate regression vs 08-verify-build PASS (preserved; remediated — see reconciliation_note)"
     13-deploy-smoke:
       status: completed
       started_at: "2026-06-26"
@@ -87,7 +105,7 @@ active_session:             # current bounded work unit; null when none in fligh
   orchestrator: 16-evolve
   artifacts_dir: docs/sessions/S004-supabase-auth/
   started_at: "2026-06-28"
-  current_stage: "08-verify-build"
+  current_stage: "12-verify-deploy"
   linked_issues: [75]
   evolve_cycle_id: EV-005
   routing_plan:
@@ -106,18 +124,24 @@ active_session:             # current bounded work unit; null when none in fligh
       completed_at: "2026-06-28"
       note: "EV-005/F34 tech plan: ADR-027 (HS256 verify TP-S004-01, app_metadata.role TP-S004-02, shared vecinita_shared_schemas.auth, PyJWT>=2.10,<3 + @supabase/supabase-js ^2.108.2, Pro+ephemeral branching + CLI migrations-in-repo, cost cap raised to ~$75/mo superseding ADR-004 — user-approved, inviteUserByEmail+SMTP, idempotent first-admin seed). Phase 11 (M43-M47, T43.1-T47.6, 29 tasks) appended to execution-plan; decisions/dependency-inventory/config-spec/api-contract updated. R53 unblocked (CLI, MCP-independent). Commit DEFERRED (commit-only-when-asked). Handoff to 07-build."
     - stage: 07-build
-      status: in_progress
+      status: completed
       started_at: "2026-06-29"
-      note: "EV-005/F34 Supabase admin auth build (Phase 11, M43-M47). M47 T47.1-T47.6 completed 2026-06-29. Audit-actor fix in apps/internal-write-api: replaced ContextVar-based actor propagation with an explicit WriteActorDep dependency. Next: Phase 11 gate check + 08-verify-build."
+      completed_at: "2026-06-29"
+      note: "Reconciled to completed during 10-e2e (downstream 08/09/10 all done). Phase 11 M43-M47 build for F34 Supabase admin auth."
     - stage: 08-verify-build
       status: completed
       started_at: "2026-06-29"
       completed_at: "2026-06-29"
       note: "Milestone-boundary verify PASS (re-run after remediation). Prior blocking failures (cryptography CVEs; admin FE branch coverage 92.46% < 95%) resolved. Report: docs/verification-report.md."
     - stage: 09-qa
-      status: pending
+      status: completed
+      completed_at: "2026-06-29"
+      note: "FAIL remediated (QA-S004-001/002 resolved); re-confirmed during 10-e2e (admin 223/223 + chat 134/134 Vitest). overall: pass_with_remediation. Report: docs/sessions/S004-supabase-auth/reports/qa-report.md"
     - stage: 10-e2e
-      status: pending
+      status: completed
+      started_at: "2026-06-29"
+      completed_at: "2026-06-29"
+      note: "EV-005 F34 UJ-026-029 T0 PASS (59 e2e, 363 Vitest); T3 deferred to deploy-smoke"
     - stage: 12-verify-deploy
       status: pending
     - stage: 13-deploy-smoke
@@ -214,6 +238,22 @@ active_session:             # current bounded work unit; null when none in fligh
       kind: api-contract
       session_id: S004-supabase-auth
       stage: 04-tech-plan
+    - path: docs/sessions/S004-supabase-auth/reports/qa-report.md
+      kind: qa-report
+      session_id: S004-supabase-auth
+      stage: 09-qa
+    - path: docs/qa-report.md
+      kind: qa-report
+      session_id: S004-supabase-auth
+      stage: 09-qa
+    - path: docs/e2e-report.md
+      kind: e2e-report
+      session_id: S004-supabase-auth
+      stage: 10-e2e
+    - path: docs/sessions/S004-supabase-auth/reports/e2e-report.md
+      kind: e2e-report
+      session_id: S004-supabase-auth
+      stage: 10-e2e
 sessions:                   # archived completed sessions
   - id: S003-persistent-chat-history
     type: feature
@@ -642,15 +682,17 @@ stages:
       note: "S003 F33 browser-local persistent chat history build complete — M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green"
       reopen_note: "07-build reopened 2026-06-28 (explicit user approval) for an ADR-025 delta: chat-history storage switched sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only). Commit eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed."
     s004:
-      status: in_progress
+      status: completed
       session_id: S004-supabase-auth
       branch: feat/S004-supabase-auth
       started_at: "2026-06-29"
+      completed_at: "2026-06-29"
       feature: F34
       phase: "Phase 11 (M43-M47, T43.1-T47.6, 29 tasks)"
       milestones_completed: [M47]
       completed_tasks: [T47.1, T47.2, T47.3, T47.4, T47.5, T47.6]
       note: "S004/EV-005 F34 Supabase admin auth build. M47 T47.1-T47.6 completed 2026-06-29. Audit-actor fix in apps/internal-write-api: ContextVar-based actor propagation replaced with explicit WriteActorDep FastAPI dependency. Next: Phase 11 gate check + 08-verify-build."
+      reconciliation_note: "S004/EV-005 F34 build (Phase 11 M43-M47) reconciled to completed during 10-e2e — 08-verify-build, 09-qa (remediated), and 10-e2e all completed downstream on feat/S004-supabase-auth."
   08-verify-build:
     status: completed
     started_at: "2026-06-25"
@@ -707,20 +749,24 @@ stages:
   10-e2e:
     status: completed
     started_at: "2026-05-19"
-    completed_at: "2026-05-27"
-    partial_rerun_at: "2026-06-26"
-    partial_rerun_note: "S002 delta — F32 Job Management; T0 pass (45 tests); T3 live FAIL (GET /jobs 405)"
+    completed_at: "2026-06-29"
+    partial_rerun_at: "2026-06-29"
+    partial_rerun_note: "S004 delta EV-005 F34 — UJ-026-029 auth journeys; T0 pass (59 e2e + 35 integration + 363 Vitest); T3 not run"
     report: docs/e2e-report.md
     mechanism: api+frontend
     t0: pass
+    t0_tests: 59
     t1_integration: pass
+    t1_tests: 35
     t3_live: pending
-    journeys_passed: 21
+    journeys_passed: 29
     journeys_failed: 0
     ev001_journeys_added: 4
     ev001_tests_passed: 5
     ev002_journeys_added: 9
     ev002_tests_passed: 40
+    ev005_journeys_added: 4
+    ev005_tests_passed: 14
     s002:
       report: docs/sessions/S002-admin-job-management/reports/e2e-report.md
       branch: feat/S002-admin-job-management
@@ -729,6 +775,15 @@ stages:
       t0_tests: 45
       t3_live: fail
       t3_live_note: "GET /jobs returns 405 on production Modal data-management"
+    s004:
+      report: docs/sessions/S004-supabase-auth/reports/e2e-report.md
+      branch: feat/S004-supabase-auth
+      partial_rerun_at: "2026-06-29"
+      t0: pass
+      t0_tests: 59
+      t3_live: pending
+      ev005_journeys_added: 4
+      ev005_tests_passed: 14
   11-verify-impl:
     status: in_progress
     started_at: "2026-05-27"
@@ -1426,7 +1481,7 @@ evolve_cycles:
     status: in_progress
     started: "2026-06-28"
     session_id: S004-supabase-auth
-    current_stage: "08-verify-build"
+    current_stage: "12-verify-deploy"
     stages:
       00-context:
         status: completed
@@ -1463,13 +1518,13 @@ evolve_cycles:
           - docs/api-contract.md
         note: "TP-S004-01..12 resolved; cost cap raised to ~$75/mo (supersedes ADR-004 — user-approved); R53 unblocked via Supabase CLI (MCP-independent). Commit DEFERRED (commit-only-when-asked)."
       07-build:
-        status: in_progress
+        status: completed
         started_at: "2026-06-29"
         phase: "Phase 11 (M43-M47, T43.1-T47.6, 29 tasks)"
         milestones_completed: [M47]
         completed_tasks: [T47.1, T47.2, T47.3, T47.4, T47.5, T47.6]
         completed: "2026-06-29"
-        note: "M47 T47.1-T47.6 completed 2026-06-29. Audit-actor fix in apps/internal-write-api: ContextVar-based actor propagation replaced with an explicit WriteActorDep FastAPI dependency. Next: Phase 11 gate check + 08-verify-build."
+        note: "M47 T47.1-T47.6 completed 2026-06-29. Audit-actor fix in apps/internal-write-api: ContextVar-based actor propagation replaced with an explicit WriteActorDep FastAPI dependency. Reconciled to completed during 10-e2e (downstream 08/09/10 all done)."
       08-verify-build:
         status: completed
         completed_at: "2026-06-29"
@@ -1477,6 +1532,15 @@ evolve_cycles:
         report: docs/verification-report.md
         blocking_failures: []
         note: "Milestone-boundary verify PASS on feat/S004-supabase-auth (re-run after remediation). Prior blocking failures (cryptography CVEs; admin FE branch coverage 92.46% < 95%) resolved. Cleared for 09-qa."
+      09-qa:
+        status: completed
+        completed: "2026-06-29"
+        overall: pass_with_remediation
+        note: "FAIL (admin nav test + coverage gate) remediated per qa-report QA-S004-001/002 (resolved); re-confirmed during 10-e2e (admin FE 223/223 + chat FE 134/134 Vitest PASS)."
+      10-e2e:
+        status: completed
+        completed: "2026-06-29"
+        note: "S004 F34 UJ-026-029 T0 PASS (59 e2e + 35 integration + 363 Vitest); T3 deferred to deploy-smoke. Report: docs/sessions/S004-supabase-auth/reports/e2e-report.md"
     decisions:
       - "RD-073: auth admin-surfaces-only; ChatRAG anonymous"
       - "RD-074: email+password, invite-only (admin invites by email link)"
@@ -2281,6 +2345,8 @@ decisions_log:
     note: "S004/EV-005 07-build IN PROGRESS (F34 Supabase admin auth, Phase 11 M43-M47). M47 T47.1-T47.6 completed 2026-06-29. Audit-actor fix in apps/internal-write-api: ContextVar-based actor propagation replaced with an explicit WriteActorDep FastAPI dependency (clearer request-scoped actor wiring; avoids ContextVar leakage across requests). routing_plan 07-build pending -> in_progress; recorded in EV-005.stages.07-build + project.stages.07-build.s004 (legacy mirror). active_session.current_stage unchanged (07-build). Next: Phase 11 gate check + 08-verify-build."
   - date: "2026-06-29"
     note: "S004/EV-005 08-verify-build FAIL (F34 Supabase admin auth, feat/S004-supabase-auth). Milestone-boundary verify overall_result FAIL. Blocking: cryptography CVEs (pip-audit); admin FE branch coverage 92.46% < 95%. Report: docs/verification-report.md. Updated project.stages.08-verify-build + stages.08-verify-build.s004 + EV-005.stages.08-verify-build; active_session.current_stage = 08-verify-build; routing_plan 08-verify-build status failed (not completed — remediation required before downstream stages)."
+  - date: "2026-06-29"
+    note: "S004/EV-005 reconciliation during 10-e2e. (1) 09-qa FAIL→pass_with_remediation: initial QA FAIL (admin nav test + coverage gate) was remediated per qa-report QA-S004-001/002 (both resolved; admin FE 223/223 + coverage gate PASS); independently re-confirmed during 10-e2e (admin FE 223/223 + chat FE 134/134 Vitest). Resolves the earlier 09-qa FAIL vs 08-verify-build PASS inconsistency. (2) 07-build in_progress→completed: F34 Phase 11 M43-M47 build reconciled to completed since 08-verify-build, 09-qa (remediated), and 10-e2e all completed downstream. Updated project.stages.07-build (promoted to S004 canonical; S003 nested as s003_baseline) + project.stages.09-qa + stages.07-build.s004 (legacy mirror) + EV-005.stages.07-build/09-qa + active_session.routing_plan 07-build/09-qa. First-start dates preserved (S003 baseline nested; started_at unchanged). Advisory: EV-005.current_stage still '08-verify-build' (stale vs active_session.current_stage '12-verify-deploy') and EV-005.stages lacks a 10-e2e node — not in this payload's scope."
 
 artifacts:
   - docs/context-brief.md

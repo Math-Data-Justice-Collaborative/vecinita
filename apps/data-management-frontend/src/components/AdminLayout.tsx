@@ -10,7 +10,7 @@ import {
 import { useState } from "react";
 import { LanguageToggle, useLocale } from "vecinita-frontend-ui";
 
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/authContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {

@@ -21,9 +21,11 @@ import { BulkTagDialog } from "@/components/BulkTagDialog";
 import { BulkMetadataDialog } from "@/components/BulkMetadataDialog";
 import { Trash2, Tags, FileEdit } from "lucide-react";
 import { useAdminT } from "@/hooks/useAdminT";
+import { useIsAdmin } from "@/auth/authContext";
 
 export function CorpusList() {
   const tr = useAdminT();
+  const isAdmin = useIsAdmin();
   // Keep the load path decoupled from `tr`: its identity changes on every
   // EN/ES switch, and depending on it would refire the mount loader and clear
   // the bulk selection on a locale change (BUG-2026-06-25).
@@ -143,7 +145,7 @@ export function CorpusList() {
           />
         ) : (
           <>
-            {selectedIds.size > 0 && (
+            {selectedIds.size > 0 && isAdmin && (
               <div
                 data-testid="bulk-toolbar"
                 className="mb-4 flex items-center gap-2 rounded-md border bg-muted p-2"
@@ -206,25 +208,29 @@ export function CorpusList() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox
-                        data-testid="select-all"
-                        checked={
-                          selectedIds.size === documents.length &&
-                          documents.length > 0
-                        }
-                        onCheckedChange={toggleAll}
-                        aria-label={tr("admin.corpusList.selectAll")}
-                      />
-                    </TableHead>
+                    {isAdmin ? (
+                      <TableHead className="w-10">
+                        <Checkbox
+                          data-testid="select-all"
+                          checked={
+                            selectedIds.size === documents.length &&
+                            documents.length > 0
+                          }
+                          onCheckedChange={toggleAll}
+                          aria-label={tr("admin.corpusList.selectAll")}
+                        />
+                      </TableHead>
+                    ) : null}
                     <TableHead>{tr("admin.corpusList.columnTitle")}</TableHead>
                     <TableHead>{tr("admin.corpusList.columnUrl")}</TableHead>
                     <TableHead>
                       {tr("admin.corpusList.columnLanguage")}
                     </TableHead>
-                    <TableHead className="text-right">
-                      {tr("admin.corpusList.columnActions")}
-                    </TableHead>
+                    {isAdmin ? (
+                      <TableHead className="text-right">
+                        {tr("admin.corpusList.columnActions")}
+                      </TableHead>
+                    ) : null}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -237,17 +243,19 @@ export function CorpusList() {
                           : undefined
                       }
                     >
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedIds.has(doc.document_id)}
-                          onCheckedChange={() => {
-                            toggleId(doc.document_id);
-                          }}
-                          aria-label={tr("admin.corpusList.selectRow", {
-                            label: doc.title ?? doc.url,
-                          })}
-                        />
-                      </TableCell>
+                      {isAdmin ? (
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedIds.has(doc.document_id)}
+                            onCheckedChange={() => {
+                              toggleId(doc.document_id);
+                            }}
+                            aria-label={tr("admin.corpusList.selectRow", {
+                              label: doc.title ?? doc.url,
+                            })}
+                          />
+                        </TableCell>
+                      ) : null}
                       <TableCell>
                         <div className="font-medium">
                           {doc.title ?? tr("admin.corpusList.untitled")}
@@ -273,29 +281,31 @@ export function CorpusList() {
                       <TableCell>
                         {doc.language ?? tr("shared.emDash")}
                       </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelected(doc);
-                            }}
-                          >
-                            {tr("admin.corpusList.manageTags")}
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => void handleDelete(doc)}
-                            disabled={deletingId === doc.document_id}
-                          >
-                            {deletingId === doc.document_id
-                              ? tr("admin.actions.deleting")
-                              : tr("admin.actions.delete")}
-                          </Button>
-                        </div>
-                      </TableCell>
+                      {isAdmin ? (
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelected(doc);
+                              }}
+                            >
+                              {tr("admin.corpusList.manageTags")}
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => void handleDelete(doc)}
+                              disabled={deletingId === doc.document_id}
+                            >
+                              {deletingId === doc.document_id
+                                ? tr("admin.actions.deleting")
+                                : tr("admin.actions.delete")}
+                            </Button>
+                          </div>
+                        </TableCell>
+                      ) : null}
                     </TableRow>
                   ))}
                 </TableBody>

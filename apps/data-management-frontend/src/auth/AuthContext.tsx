@@ -1,32 +1,15 @@
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
-import type { Session, User } from "@supabase/supabase-js";
+import type { Session } from "@supabase/supabase-js";
 
-import {
-  getSupabaseClient,
-  roleFromAppMetadata,
-  type OperatorRole,
-} from "@/auth/supabaseClient";
+import { getSupabaseClient, roleFromAppMetadata } from "@/auth/supabaseClient";
+import { AuthContext, type AuthState } from "@/auth/authContext";
 import { setOperatorAccessToken } from "@/config";
-
-export interface AuthState {
-  session: Session | null;
-  user: User | null;
-  role: OperatorRole | null;
-  loading: boolean;
-  accessToken: string | null;
-  signIn: (email: string, password: string) => Promise<void>;
-  signOut: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -86,17 +69,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session, loading, signIn, signOut]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-export function useAuth(): AuthState {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
-  return ctx;
-}
-
-export function useIsAdmin(): boolean {
-  const { role } = useAuth();
-  return role === "admin";
 }

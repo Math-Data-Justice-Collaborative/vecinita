@@ -2,7 +2,8 @@ import { renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { AuthProvider, useAuth, useIsAdmin } from "@/auth/AuthContext";
+import { AuthProvider } from "@/auth/AuthContext";
+import { useAuth, useIsAdmin } from "@/auth/authContext";
 
 describe("AuthContext hooks", () => {
   it("useAuth throws outside AuthProvider", () => {

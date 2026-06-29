@@ -99,6 +99,8 @@ const enStrings = {
     "Chunk size must be at least 64 tokens.",
   "admin.ingest.failed": "Ingest failed",
   "admin.ingest.jobStatusPrefix": "Job",
+  "admin.viewer.readOnlyNotice":
+    "You have read-only access. Contact an admin to make changes.",
   "admin.corpusList.title": "Corpus Documents",
   "admin.corpusList.selectedCount": "{count} selected",
   "admin.corpusList.loadFailed": "Failed to load corpus",
@@ -266,6 +268,8 @@ const esStrings = {
     "El tamaño del fragmento debe ser al menos 64 tokens.",
   "admin.ingest.failed": "La ingesta falló",
   "admin.ingest.jobStatusPrefix": "Trabajo",
+  "admin.viewer.readOnlyNotice":
+    "Tienes acceso de solo lectura. Contacta a un administrador para hacer cambios.",
   "admin.corpusList.title": "Documentos del corpus",
   "admin.corpusList.selectedCount": "{count} seleccionados",
   "admin.corpusList.loadFailed": "No se pudo cargar el corpus",

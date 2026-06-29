@@ -90,7 +90,9 @@ describe("Admin navigation", () => {
   it("redirects unknown routes to /dashboard", async () => {
     await renderApp("/unknown-route");
 
-    expect(screen.getByText(/overview of your corpus/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/overview of your corpus/i)).toBeInTheDocument();
+    });
   });
 
   it("theme toggle button exists and is clickable", async () => {
