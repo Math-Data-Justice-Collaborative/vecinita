@@ -119,17 +119,23 @@ describe("F33 — chat history persists across refresh / tab-away (UJ-024)", () 
     // First reload: the conversation rehydrates from localStorage.
     firstRender.unmount();
     const secondRender = render(<App />);
-    expect(screen.getByText("First question after reload?")).toBeInTheDocument();
+    expect(
+      screen.getByText("First question after reload?"),
+    ).toBeInTheDocument();
 
     // Continue chatting after the reload — the appended turn must persist too.
     await ask("Second question after reload?");
-    expect(screen.getByText("Second question after reload?")).toBeInTheDocument();
+    expect(
+      screen.getByText("Second question after reload?"),
+    ).toBeInTheDocument();
 
     // Second reload: BOTH turns survive, proving the post-reload turn was
     // written through to localStorage, not just held in memory.
     secondRender.unmount();
     render(<App />);
-    expect(screen.getByText("First question after reload?")).toBeInTheDocument();
+    expect(
+      screen.getByText("First question after reload?"),
+    ).toBeInTheDocument();
     expect(
       screen.getByText("Second question after reload?"),
     ).toBeInTheDocument();

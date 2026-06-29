@@ -7,7 +7,6 @@ import {
   isTokenEvent,
   streamAsk,
 } from "../api/ask";
-import { fetchTags, type TagFacet } from "../api/browse";
 import { prewarmChatServices } from "../api/warm";
 import type { Source } from "../api/types";
 import { requireChatApiConfig } from "../config";
@@ -15,15 +14,17 @@ import { useLocale } from "../hooks/useLocale";
 import { useChatHistory, type ChatHistory } from "../hooks/useChatHistory";
 import { useConversationStore } from "../hooks/useConversationStore";
 import { t } from "../i18n/messages";
-import { PreviousChatsList } from "./PreviousChatsList";
-import { TagFilterChips } from "./TagFilterChips";
 import { SourceList } from "./SourceList";
+import { SuggestedQuestions } from "./SuggestedQuestions";
 
 type ChatPanelProps = {
   /** Conversation history (and in-flight ask state) lifted to the app shell so it
    *  survives Chat ⇄ Corpus navigation (BUG-2026-06-25, issue #53 + PR #68).
    *  When omitted, a local instance is used (standalone use / unit tests). */
   chat?: ChatHistory;
+  /** Topic tags selected in the sidebar (lifted to the shell, D3). Sent with the
+   *  ask request when non-empty. */
+  selectedTags?: string[];
 };
 
 /**
@@ -32,25 +33,29 @@ type ChatPanelProps = {
  * shell supplies one, `ChatPanelView` runs without an unused fallback hook
  * (PR #68 review), while still honoring the rules of hooks.
  */
-function ChatPanelStandalone() {
+function ChatPanelStandalone({ selectedTags }: { selectedTags: string[] }) {
   const store = useConversationStore();
   const chat = useChatHistory(store);
-  return <ChatPanelView chat={chat} />;
+  return <ChatPanelView chat={chat} selectedTags={selectedTags} />;
 }
 
-export function ChatPanel({ chat }: ChatPanelProps = {}) {
+export function ChatPanel({ chat, selectedTags = [] }: ChatPanelProps = {}) {
   if (chat) {
-    return <ChatPanelView chat={chat} />;
+    return <ChatPanelView chat={chat} selectedTags={selectedTags} />;
   }
-  return <ChatPanelStandalone />;
+  return <ChatPanelStandalone selectedTags={selectedTags} />;
 }
 
-function ChatPanelView({ chat }: { chat: ChatHistory }) {
+function ChatPanelView({
+  chat,
+  selectedTags,
+}: {
+  chat: ChatHistory;
+  selectedTags: string[];
+}) {
   const [question, setQuestion] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [tagFacets, setTagFacets] = useState<TagFacet[]>([]);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const { locale } = useLocale();
   const {
     messages,
@@ -61,11 +66,6 @@ function ChatPanelView({ chat }: { chat: ChatHistory }) {
     clearHistory,
     loading,
     setLoading,
-    previousChats,
-    newChat,
-    selectConversation,
-    deleteConversation,
-    clearAll,
   } = chat;
 
   useEffect(() => {
@@ -76,32 +76,6 @@ function ChatPanelView({ chat }: { chat: ChatHistory }) {
       // Config missing in tests or misconfigured deploy; chat still works without pre-warm.
     }
   }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    async function loadTags() {
-      try {
-        const response = await fetchTags();
-        if (!cancelled) {
-          setTagFacets(response.tags);
-        }
-      } catch {
-        // Tag chips are optional; chat still works without facets.
-      }
-    }
-    void loadTags();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  function toggleTag(slug: string) {
-    setSelectedTags((current) =>
-      current.includes(slug)
-        ? current.filter((item) => item !== slug)
-        : [...current, slug],
-    );
-  }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -149,26 +123,20 @@ function ChatPanelView({ chat }: { chat: ChatHistory }) {
     }
   }
 
+  const isEmpty = messages.length === 0;
+
   return (
-    <section className="chat-panel" aria-label={t(locale, "chatPanelLabel")}>
-      <PreviousChatsList
-        conversations={previousChats}
-        locale={locale}
-        onSelect={selectConversation}
-        onDelete={deleteConversation}
-        onClearAll={clearAll}
-      />
-      {tagFacets.length > 0 ? (
-        <TagFilterChips
-          tags={tagFacets}
-          selected={selectedTags}
-          locale={locale}
-          onToggle={toggleTag}
-        />
-      ) : null}
+    <section
+      className="chat-panel"
+      data-empty={isEmpty}
+      aria-label={t(locale, "chatPanelLabel")}
+    >
       <div className="message-list" data-testid="message-list">
-        {messages.length === 0 ? (
-          <p className="empty-hint">{t(locale, "emptyHint")}</p>
+        {isEmpty ? (
+          <div className="welcome">
+            <h2 className="welcome-heading">{t(locale, "welcomeHeading")}</h2>
+            <p className="empty-hint">{t(locale, "emptyHint")}</p>
+          </div>
         ) : (
           messages.map((msg) => (
             <article
@@ -205,38 +173,37 @@ function ChatPanelView({ chat }: { chat: ChatHistory }) {
       ) : null}
 
       <form className="chat-form" onSubmit={(e) => void handleSubmit(e)}>
-        <label htmlFor="question">{t(locale, "yourQuestion")}</label>
-        <textarea
-          id="question"
-          name="question"
-          rows={3}
-          value={question}
-          onChange={(e) => {
-            setQuestion(e.target.value);
-          }}
-          disabled={loading}
-          placeholder={t(locale, "questionPlaceholder")}
-        />
-        <div className="form-actions">
-          <button type="submit" disabled={loading || !question.trim()}>
-            {loading ? t(locale, "asking") : t(locale, "ask")}
-          </button>
-          <button
-            type="button"
-            className="secondary"
-            disabled={loading || messages.length === 0}
-            onClick={newChat}
-          >
-            {t(locale, "newChat")}
-          </button>
-          <button
-            type="button"
-            className="secondary"
-            disabled={loading || messages.length === 0}
-            onClick={clearHistory}
-          >
-            {t(locale, "clearHistory")}
-          </button>
+        {isEmpty ? (
+          <SuggestedQuestions locale={locale} onSelect={setQuestion} />
+        ) : null}
+        <label className="sr-only" htmlFor="question">
+          {t(locale, "yourQuestion")}
+        </label>
+        <div className="chat-input-row">
+          <textarea
+            id="question"
+            name="question"
+            rows={1}
+            value={question}
+            onChange={(e) => {
+              setQuestion(e.target.value);
+            }}
+            disabled={loading}
+            placeholder={t(locale, "questionPlaceholder")}
+          />
+          <div className="form-actions">
+            <button type="submit" disabled={loading || !question.trim()}>
+              {loading ? t(locale, "asking") : t(locale, "ask")}
+            </button>
+            <button
+              type="button"
+              className="secondary"
+              disabled={loading || isEmpty}
+              onClick={clearHistory}
+            >
+              {t(locale, "clearHistory")}
+            </button>
+          </div>
         </div>
       </form>
     </section>

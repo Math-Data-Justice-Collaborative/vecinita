@@ -25,12 +25,15 @@ describe("BUG-2026-06-05 — ChatRAG language toggle UI (EV-005 #57)", () => {
     vi.restoreAllMocks();
   });
 
-  it("places a single language toggle in the app header top area", () => {
+  it("places a single language toggle in the persistent sidebar chrome", () => {
+    // Post-redesign (S003 ChatGPT-style layout) the toggle lives in the always-
+    // mounted sidebar rather than the top header. The BUG-2026-06-05 invariant
+    // still holds: exactly one toggle, and never buried inside the chat panel.
     render(<App />);
 
-    const header = screen.getByRole("banner");
+    const sidebar = screen.getByTestId("sidebar");
     expect(
-      header.querySelector('[data-testid="language-toggle"]'),
+      sidebar.querySelector('[data-testid="language-toggle"]'),
     ).toBeInTheDocument();
     expect(screen.getAllByRole("group", { name: /language/i })).toHaveLength(1);
     expect(

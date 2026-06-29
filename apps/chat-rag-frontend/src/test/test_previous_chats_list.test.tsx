@@ -165,7 +165,9 @@ describe("F33 — previous-chats list (UJ-025)", () => {
     ).toContain("(10)");
     expect(within(list).getByText(/conversation 10\?/i)).toBeInTheDocument();
     // The very first conversation was evicted (FIFO).
-    expect(within(list).queryByText(/conversation 0\?/i)).not.toBeInTheDocument();
+    expect(
+      within(list).queryByText(/conversation 0\?/i),
+    ).not.toBeInTheDocument();
   });
 
   it("restores a previous conversation's sources, not just its text (TC-076, AC-S5)", async () => {
