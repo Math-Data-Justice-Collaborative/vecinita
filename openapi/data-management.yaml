@@ -82,6 +82,254 @@ paths:
           $ref: "#/components/responses/NotFound"
         "401":
           $ref: "#/components/responses/Unauthorized"
+  /admin/users:
+    get:
+      operationId: listAdminUsers
+      summary: List operators (admin only)
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+      responses:
+        "200":
+          description: Paginated operator roster
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /admin/users/invite:
+    post:
+      operationId: inviteAdminUser
+      summary: Invite a new operator by email
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InviteUserRequest"
+      responses:
+        "201":
+          description: Invited operator created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSummary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /admin/users/{user_id}/role:
+    patch:
+      operationId: changeAdminUserRole
+      summary: Change an operator role
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoleUpdateRequest"
+      responses:
+        "200":
+          description: Updated operator
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSummary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /admin/users/{user_id}/resend-invite:
+    post:
+      operationId: resendAdminUserInvite
+      summary: Re-send invite email to a pending operator
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "202":
+          description: Invite re-sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AcknowledgedResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /admin/users/{user_id}/disable:
+    post:
+      operationId: disableAdminUser
+      summary: Disable (ban) an operator
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Disabled operator
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSummary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /admin/users/{user_id}/enable:
+    post:
+      operationId: enableAdminUser
+      summary: Re-enable a disabled operator
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Enabled operator
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSummary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /admin/users/{user_id}:
+    delete:
+      operationId: deleteAdminUser
+      summary: Revoke (delete) an operator
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Operator deleted
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /admin/users/{user_id}/reset-password:
+    post:
+      operationId: resetAdminUserPassword
+      summary: Send password recovery email to an operator
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "202":
+          description: Recovery email queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AcknowledgedResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /health:
     get:
       operationId: health
@@ -199,6 +447,86 @@ components:
           type: string
           enum:
             - ok
+    UserSummary:
+      type: object
+      required:
+        - id
+        - email
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum:
+            - admin
+            - viewer
+          nullable: true
+        status:
+          type: string
+          enum:
+            - active
+            - disabled
+            - invited
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        last_sign_in_at:
+          type: string
+          format: date-time
+          nullable: true
+    UserListResponse:
+      type: object
+      required:
+        - users
+        - page
+        - page_size
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserSummary"
+        total:
+          type: integer
+          nullable: true
+        page:
+          type: integer
+        page_size:
+          type: integer
+    InviteUserRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum:
+            - admin
+            - viewer
+          default: viewer
+    RoleUpdateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - role
+      properties:
+        role:
+          type: string
+          enum:
+            - admin
+            - viewer
+    AcknowledgedResponse:
+      type: object
+      properties: {}
     ErrorBody:
       type: object
       properties:
@@ -219,6 +547,30 @@ components:
             $ref: "#/components/schemas/ErrorBody"
     NotFound:
       description: Unknown job
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
+    Forbidden:
+      description: Operator lacks required role
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
+    Conflict:
+      description: Conflicting state (e.g. duplicate email or self-action)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
+    TooManyRequests:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
+    ServiceUnavailable:
+      description: Upstream auth or configuration unavailable
       content:
         application/json:
           schema:
