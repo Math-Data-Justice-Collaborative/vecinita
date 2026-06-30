@@ -137,6 +137,31 @@ describe("auth link callback (TC-106, TC-107, UJ-031/033)", () => {
     });
   });
 
+  it("useAuthLinkCallback skips exchange when session already exists before manual exchange", async () => {
+    window.history.replaceState({}, "", "/accept-invite?code=pkce-code");
+    mockGetSession.mockResolvedValue({
+      data: { session: { access_token: "already-ready" } },
+    });
+    mockOnAuthStateChange.mockReturnValue({
+      data: { subscription: { unsubscribe: vi.fn() } },
+    });
+    setSupabaseClientForTests({
+      auth: {
+        getSession: mockGetSession,
+        onAuthStateChange: mockOnAuthStateChange,
+        exchangeCodeForSession: mockExchangeCodeForSession,
+        updateUser: mockUpdateUser,
+      },
+    } as never);
+
+    const { result } = renderHook(() => useAuthLinkCallback());
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("ready");
+    });
+    expect(mockExchangeCodeForSession).not.toHaveBeenCalled();
+  });
+
   it("useAuthLinkCallback exchanges PKCE code and becomes ready", async () => {
     window.history.replaceState({}, "", "/accept-invite?code=pkce-code");
     mockGetSession
