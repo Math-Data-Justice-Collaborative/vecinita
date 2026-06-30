@@ -5,24 +5,83 @@ const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as
   | string
   | undefined;
 
-let client: SupabaseClient | null = null;
+export const REMEMBER_STORAGE_KEY = "vecinita.auth.remember";
 
-export function getSupabaseClient(): SupabaseClient {
-  if (client) {
-    return client;
+let client: SupabaseClient | null = null;
+let testClientInjected = false;
+
+export type SupportedStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+
+/** Route Supabase auth persistence to localStorage (remember) or sessionStorage. */
+export function createRoutingStorage(remember: boolean): SupportedStorage {
+  const storage = remember ? localStorage : sessionStorage;
+  return {
+    getItem: (key: string) => storage.getItem(key),
+    setItem: (key: string, value: string) => {
+      storage.setItem(key, value);
+    },
+    removeItem: (key: string) => {
+      storage.removeItem(key);
+    },
+  };
+}
+
+export function readRememberPreference(): boolean {
+  try {
+    const raw = localStorage.getItem(REMEMBER_STORAGE_KEY);
+    if (raw === "false") {
+      return false;
+    }
+  } catch {
+    return true;
   }
+  return true;
+}
+
+export function persistRememberPreference(remember: boolean): void {
+  try {
+    localStorage.setItem(REMEMBER_STORAGE_KEY, remember ? "true" : "false");
+  } catch {
+    // Degrade silently — default routing storage still applies.
+  }
+}
+
+function buildClient(remember: boolean): SupabaseClient {
   if (!supabaseUrl || !supabasePublishableKey) {
     throw new Error(
       "Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (see .env.example)",
     );
   }
-  client ??= createClient(supabaseUrl, supabasePublishableKey);
+  return createClient(supabaseUrl, supabasePublishableKey, {
+    auth: {
+      storage: createRoutingStorage(remember),
+      persistSession: true,
+      detectSessionInUrl: true,
+    },
+  }) as SupabaseClient;
+}
+
+export function resetSupabaseClient(remember?: boolean): SupabaseClient {
+  if (testClientInjected && client !== null) {
+    return client;
+  }
+  const resolvedRemember = remember ?? readRememberPreference();
+  client = buildClient(resolvedRemember);
+  return client;
+}
+
+export function getSupabaseClient(): SupabaseClient {
+  if (client !== null) {
+    return client;
+  }
+  client = buildClient(readRememberPreference());
   return client;
 }
 
 /** Test hook — replace the singleton client. */
 export function setSupabaseClientForTests(mock: SupabaseClient | null): void {
   client = mock;
+  testClientInjected = mock !== null;
 }
 
 export type OperatorRole = "admin" | "viewer";

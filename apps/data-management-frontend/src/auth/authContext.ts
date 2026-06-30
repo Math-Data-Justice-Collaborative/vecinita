@@ -9,7 +9,7 @@ export interface AuthState {
   role: OperatorRole | null;
   loading: boolean;
   accessToken: string | null;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string, remember?: boolean) => Promise<void>;
   signOut: () => Promise<void>;
 }
 

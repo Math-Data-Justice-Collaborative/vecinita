@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 
 import { useAuth } from "@/auth/authContext";
+import { readRememberPreference } from "@/auth/supabaseClient";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAdminT } from "@/hooks/useAdminT";
@@ -13,6 +15,7 @@ export function LoginPage() {
   const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(() => readRememberPreference());
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -28,7 +31,7 @@ export function LoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await signIn(email.trim(), password);
+      await signIn(email.trim(), password, remember);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : tr("admin.auth.loginFailed"),
@@ -77,6 +80,19 @@ export function LoginPage() {
             required
           />
         </div>
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id="remember-me"
+            data-testid="remember-me"
+            checked={remember}
+            onCheckedChange={(checked) => {
+              setRemember(checked === true);
+            }}
+          />
+          <Label htmlFor="remember-me" className="text-sm font-normal">
+            {tr("admin.auth.rememberMe")}
+          </Label>
+        </div>
         {error ? (
           <p className="text-sm text-destructive" role="alert">
             {error}
@@ -85,6 +101,14 @@ export function LoginPage() {
         <Button type="submit" className="w-full" disabled={submitting}>
           {submitting ? tr("admin.auth.signingIn") : tr("admin.auth.signIn")}
         </Button>
+        <p className="text-center text-sm">
+          <Link
+            to="/forgot-password"
+            className="text-primary underline-offset-4 hover:underline"
+          >
+            {tr("admin.auth.forgotPassword")}
+          </Link>
+        </p>
       </form>
     </div>
   );
