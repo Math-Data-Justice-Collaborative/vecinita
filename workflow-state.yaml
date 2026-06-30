@@ -113,44 +113,73 @@ project:
         session_report: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
     09-qa:
       status: completed
-      started_at: "2026-06-29"
-      completed_at: "2026-06-29"
-      session_id: S004-supabase-auth
+      started_at: "2026-06-30"
+      completed_at: "2026-06-30"
+      session_id: S005-user-mgmt-auth
+      branch: feat/S005-user-mgmt-auth
       overall: pass_with_advisories
-      rerun_at: "2026-06-29"
-      rerun_overall: fail
-      remediation_at: "2026-06-29"
-      remediation_overall: pass_with_advisories
       report: docs/qa-report.md
       reports:
         - docs/qa-report.md
-        - docs/sessions/S004-supabase-auth/reports/qa-report.md
-      blocking: []
-      resolved:
-        - id: QA-S004-010
-          status: resolved
-          resolved_at: "2026-06-29"
-          summary: "admin FE vitest exit 1 despite 230/230 assertions; unhandled errors in DashboardPage async cleanup"
-          resolution: "Added isActive() unmount guards to DashboardPage/HealthPage/AuditPage; fixed test_auth_login_protected_routes.test.tsx (cleanup + stubbed fetch); added regression test test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx. Admin FE Vitest now exits 0 (242 passed); coverage gate PASS combined 100% (1278/1278 branches)."
-        - id: QA-S004-011
-          status: resolved
-          resolved_at: "2026-06-29"
-          summary: "Node 20 -> 24 LTS bump (TP-S004-11 / ADR-019)"
-          resolution: "ci.yml setup-node x3, .nvmrc, root engines.node>=24; docs spec.md/execution-plan.md/LOCAL_DEV.md/decisions.md (TP-S004-11/ADR-019)/dependency-inventory.md updated."
-      accepted_or_deferred:
-        - "QA-S004-003: resolved (auth hooks split; lint clean)"
-        - "QA-S004-004 / QA-S004-012: documented/accepted"
-        - "QA-S004-005/006/007/008/009: deferred (env/GPU/ops)"
-      rerun_results:
-        python: "603 passed, 33 skipped — PASS"
-        chat_fe: "142/142 — PASS"
-        coverage_gate: "PASS (100%)"
-        admin_fe: "230/230 assertions pass but vitest exit 1 (QA-S004-010) — pre-remediation"
-      remediation_results:
-        admin_fe: "242 passed, vitest exit 0 (QA-S004-010 resolved)"
-        coverage_gate: "PASS combined 100% (1278/1278 branches)"
-      prior_reconciliation_note: "Earlier in-session 09-qa was reconciled to pass_with_remediation during 10-e2e (initial FAIL on admin nav test + coverage gate remediated per qa-report QA-S004-001/002; admin FE 223/223 + chat FE 134/134 Vitest). The 2026-06-29 re-run superseded that with a FAIL on QA-S004-010; the 2026-06-29 remediation now supersedes the re-run."
-      note: "S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED (isActive() unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression test; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes the 2026-06-29 RE-RUN FAIL. Reports: docs/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md."
+        - docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
+      note: "S005/EV-006 F35 09-qa COMPLETE 2026-06-30 on feat/S005-user-mgmt-auth — overall pass_with_advisories. Python 703 pytest passed; all frontend Vitest suites green; coverage gate PASS. Handoff to 10-e2e. S004 baseline preserved in the s004 slice below."
+      s005:
+        status: completed
+        started_at: "2026-06-30"
+        completed_at: "2026-06-30"
+        session_id: S005-user-mgmt-auth
+        branch: feat/S005-user-mgmt-auth
+        feature: F35
+        overall: pass_with_advisories
+        report: docs/qa-report.md
+        reports:
+          - docs/qa-report.md
+          - docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
+        results:
+          python: "703 passed — PASS"
+          frontend: "all green — PASS"
+          coverage_gate: "PASS"
+        note: "S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed; all frontend Vitest suites green; coverage gate PASS. Reports: docs/qa-report.md + docs/sessions/S005-user-mgmt-auth/reports/qa-report.md. Handoff to 10-e2e."
+      s004:
+        status: completed
+        started_at: "2026-06-29"
+        completed_at: "2026-06-29"
+        session_id: S004-supabase-auth
+        overall: pass_with_advisories
+        rerun_at: "2026-06-29"
+        rerun_overall: fail
+        remediation_at: "2026-06-29"
+        remediation_overall: pass_with_advisories
+        report: docs/qa-report.md
+        reports:
+          - docs/qa-report.md
+          - docs/sessions/S004-supabase-auth/reports/qa-report.md
+        blocking: []
+        resolved:
+          - id: QA-S004-010
+            status: resolved
+            resolved_at: "2026-06-29"
+            summary: "admin FE vitest exit 1 despite 230/230 assertions; unhandled errors in DashboardPage async cleanup"
+            resolution: "Added isActive() unmount guards to DashboardPage/HealthPage/AuditPage; fixed test_auth_login_protected_routes.test.tsx (cleanup + stubbed fetch); added regression test test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx. Admin FE Vitest now exits 0 (242 passed); coverage gate PASS combined 100% (1278/1278 branches)."
+          - id: QA-S004-011
+            status: resolved
+            resolved_at: "2026-06-29"
+            summary: "Node 20 -> 24 LTS bump (TP-S004-11 / ADR-019)"
+            resolution: "ci.yml setup-node x3, .nvmrc, root engines.node>=24; docs spec.md/execution-plan.md/LOCAL_DEV.md/decisions.md (TP-S004-11/ADR-019)/dependency-inventory.md updated."
+        accepted_or_deferred:
+          - "QA-S004-003: resolved (auth hooks split; lint clean)"
+          - "QA-S004-004 / QA-S004-012: documented/accepted"
+          - "QA-S004-005/006/007/008/009: deferred (env/GPU/ops)"
+        rerun_results:
+          python: "603 passed, 33 skipped — PASS"
+          chat_fe: "142/142 — PASS"
+          coverage_gate: "PASS (100%)"
+          admin_fe: "230/230 assertions pass but vitest exit 1 (QA-S004-010) — pre-remediation"
+        remediation_results:
+          admin_fe: "242 passed, vitest exit 0 (QA-S004-010 resolved)"
+          coverage_gate: "PASS combined 100% (1278/1278 branches)"
+        prior_reconciliation_note: "Earlier in-session 09-qa was reconciled to pass_with_remediation during 10-e2e (initial FAIL on admin nav test + coverage gate remediated per qa-report QA-S004-001/002; admin FE 223/223 + chat FE 134/134 Vitest). The 2026-06-29 re-run superseded that with a FAIL on QA-S004-010; the 2026-06-29 remediation now supersedes the re-run."
+        note: "S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED (isActive() unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression test; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes the 2026-06-29 RE-RUN FAIL. Reports: docs/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md."
     13-deploy-smoke:
       status: completed
       started_at: "2026-06-26"
@@ -187,7 +216,7 @@ active_session:             # current bounded work unit; null when none in fligh
   orchestrator: 16-evolve
   artifacts_dir: docs/sessions/S005-user-mgmt-auth/
   started_at: "2026-06-29"
-  current_stage: "08-verify-build"
+  current_stage: "10-e2e"
   evolve_cycle_id: EV-006
   routing_plan:
     - stage: 00-context
@@ -215,7 +244,13 @@ active_session:             # current bounded work unit; null when none in fligh
       session_report: docs/sessions/S005-user-mgmt-auth/reports/verification-report.md
       note: "S005 interim verify on feat/S005-user-mgmt-auth — PASS after remediation. Initial FAIL (Python lint, typecheck, FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed in-session. Final: make check green, make test-unit-coverage green, 681+ pytest + 312 vitest admin. Supersedes the 2026-06-30 interim FAIL recorded earlier this stage. Cleared for the Phase 12 gate / downstream stages."
     - stage: 09-qa
-      status: pending
+      status: completed
+      started_at: "2026-06-30"
+      completed_at: "2026-06-30"
+      overall: pass_with_advisories
+      report: docs/qa-report.md
+      session_report: docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
+      note: "S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed; all frontend Vitest suites green; coverage gate PASS. Handoff to 10-e2e."
     - stage: 10-e2e
       status: pending
     - stage: 12-verify-deploy
@@ -246,6 +281,14 @@ active_session:             # current bounded work unit; null when none in fligh
       kind: stage-report
       session_id: S005-user-mgmt-auth
       stage: 01-requirements
+    - path: docs/qa-report.md
+      kind: qa-report
+      session_id: S005-user-mgmt-auth
+      stage: 09-qa
+    - path: docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
+      kind: qa-report
+      session_id: S005-user-mgmt-auth
+      stage: 09-qa
 sessions:                   # archived completed sessions
   - id: S004-supabase-auth
     type: feature
@@ -940,6 +983,21 @@ stages:
       partial_rerun_at: "2026-06-26"
       overall: fail
       note: "S002 partial rerun post-hotfix 2026-06-26 — overall FAIL: typecheck (reportAny) + live GET /jobs 405."
+    s005:
+      status: completed
+      started_at: "2026-06-30"
+      completed_at: "2026-06-30"
+      session_id: S005-user-mgmt-auth
+      branch: feat/S005-user-mgmt-auth
+      feature: F35
+      overall: pass_with_advisories
+      report: docs/qa-report.md
+      session_report: docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
+      results:
+        python: "703 passed — PASS"
+        frontend: "all green — PASS"
+        coverage_gate: "PASS"
+      note: "S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed; all frontend Vitest suites green; coverage gate PASS."
   10-e2e:
     status: completed
     started_at: "2026-05-19"
@@ -1760,7 +1818,7 @@ evolve_cycles:
     status: in_progress
     started: "2026-06-29"
     session_id: S005-user-mgmt-auth
-    current_stage: "08-verify-build"
+    current_stage: "10-e2e"
     stages:
       00-context:
         status: completed
@@ -1813,6 +1871,17 @@ evolve_cycles:
           - "DM FE branch coverage 94.18% < 95%"
         green: "make check + make test-unit-coverage; 681+ pytest + 312 vitest admin"
         note: "S005/EV-006 F35 interim milestone-boundary verify PASS after in-session remediation. Initial FAIL (Python lint, typecheck, FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed; final make check + make test-unit-coverage green, 681+ pytest + 312 vitest admin. Supersedes the earlier 2026-06-30 interim FAIL; cleared for the Phase 12 gate."
+      09-qa:
+        status: completed
+        completed: "2026-06-30"
+        overall: pass_with_advisories
+        report: docs/qa-report.md
+        session_report: docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
+        results:
+          python: "703 passed — PASS"
+          frontend: "all green — PASS"
+          coverage_gate: "PASS"
+        note: "S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed; all frontend Vitest suites green; coverage gate PASS. Handoff to 10-e2e."
     decisions:
       - "R55-R59 (2026-06-29, EV-006/S005): Resend SMTP wiring for Supabase invitation emails; admin user-management operations (invite/list/role-change/deactivate); remember-me toggle on admin login."
       - "RD-080-RD-090 (2026-06-29, EV-006/S005, 01-requirements): admin user-management /admin/users* ops; in-app self-service password reset; remember-me default-checked localStorage/sessionStorage (vecinita.auth.remember); hybrid Resend SMTP (config.toml source of truth); 6 stacked-bilingual versioned templates; supabase.yml config push + pinned CLI; audit of user-mgmt actions; operator-supplied verified Resend domain. ADR-029."
@@ -2675,6 +2744,14 @@ artifacts:
   - docs/sessions/S002-admin-job-management/reports/e2e-report.md
   - docs/sessions/S002-admin-job-management/reports/verify-impl.md
   - docs/sessions/S002-admin-job-management/reports/deploy-checklist.md
+  - path: docs/qa-report.md
+    kind: qa-report
+    session_id: S005-user-mgmt-auth
+    stage: 09-qa
+  - path: docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
+    kind: qa-report
+    session_id: S005-user-mgmt-auth
+    stage: 09-qa
 
 git_history:
   current_branch: feat/S005-user-mgmt-auth

@@ -88,7 +88,6 @@ describe("password reset flows (TC-093, UJ-033)", () => {
   });
 
   it("forgot-password falls back when reset rejects with a non-Error", async () => {
-    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- exercises non-Error catch branch
     mockResetPasswordForEmail.mockRejectedValue("network down");
 
     render(
