@@ -47,6 +47,10 @@ def _auth_off(  # pyright: ignore[reportUnusedFunction]
 ) -> Iterator[None]:
     reset_auth_config_for_tests()
     monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "false")
+    monkeypatch.setenv(
+        "VECINITA_ADMIN_FRONTEND_URL",
+        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app",
+    )
     yield
     reset_auth_config_for_tests()
 

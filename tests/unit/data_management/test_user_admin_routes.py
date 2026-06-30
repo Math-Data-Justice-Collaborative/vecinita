@@ -46,6 +46,10 @@ if TYPE_CHECKING:
 def _auth_off(monkeypatch: pytest.MonkeyPatch) -> None:  # pyright: ignore[reportUnusedFunction]
     reset_auth_config_for_tests()
     monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "false")
+    monkeypatch.setenv(
+        "VECINITA_ADMIN_FRONTEND_URL",
+        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app",
+    )
 
 
 @pytest.fixture
@@ -382,3 +386,43 @@ def test_get_user_not_found_returns_404(
     test_client, _ = client
     response = test_client.post(f"/admin/users/{UUID(int=999)}/disable")
     assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_invite_passes_redirect_to_accept_invite() -> None:
+    """TC-104: invite includes redirect_to={origin}/accept-invite on GoTrue outbound."""
+    outbound: list[dict[str, object]] = []
+    users = _seed_users()
+    app = create_app(
+        require_proxy_auth=False,
+        admin_client=_make_client(users, outbound=outbound),
+        audit_emit=lambda _event: None,
+        invite_limiter=SlidingWindowRateLimiter(max_events=_INVITE_LIMIT, window_seconds=3600),
+    )
+    with TestClient(app) as test_client:
+        response = test_client.post(
+            "/admin/users/invite",
+            json={"email": "redirect@example.org", "role": "viewer"},
+        )
+    assert response.status_code == HTTPStatus.CREATED
+    assert outbound[-1]["redirect_to"] == (
+        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app/accept-invite"
+    )
+
+
+def test_resend_invite_passes_redirect_to_accept_invite() -> None:
+    """TC-104: resend-invite includes redirect_to on GoTrue outbound."""
+    outbound: list[dict[str, object]] = []
+    users = _seed_users()
+    invited_id = str(uuid4())
+    users[invited_id] = {"id": invited_id, "email": "pending@example.org"}
+    app = create_app(
+        require_proxy_auth=False,
+        admin_client=_make_client(users, outbound=outbound),
+        audit_emit=lambda _event: None,
+    )
+    with TestClient(app) as test_client:
+        response = test_client.post(f"/admin/users/{invited_id}/resend-invite")
+    assert response.status_code == HTTPStatus.ACCEPTED
+    assert outbound[-1]["redirect_to"] == (
+        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app/accept-invite"
+    )
