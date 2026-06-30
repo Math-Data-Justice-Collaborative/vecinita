@@ -377,4 +377,15 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
       );
     });
   });
+
+  it("shows invited_at metadata and expiry hint for pending rows (RD-096)", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(MOCK_USERS)));
+
+    renderUsersPage();
+
+    const invitedId = MOCK_USERS.users[1]?.id ?? "";
+    expect(
+      await screen.findByTestId(`invite-meta-${invitedId}`),
+    ).toHaveTextContent(/expires ~1h/i);
+  });
 });
