@@ -79,7 +79,31 @@ project:
       overall_result: PASS
       report: docs/verification-report.md
       blocking_failures: []
+      last_interim: "S005/EV-006 F35 interim milestone-boundary verify PASS (2026-06-30, after in-session remediation) — see s005 slice. Baseline top-level stays S004 PASS; S005 cleared for the Phase 12 gate."
       note: "S004/EV-005 F34 milestone-boundary verify PASS (2026-06-29, re-run after remediation). Prior blocking failures (cryptography CVEs; admin FE branch coverage 92.46% < 95%) resolved."
+      s005:
+        status: completed
+        completed_at: "2026-06-30"
+        session_id: S005-user-mgmt-auth
+        branch: feat/S005-user-mgmt-auth
+        feature: F35
+        milestone: M53
+        overall_result: PASS
+        report: docs/verification-report.md
+        session_report: docs/sessions/S005-user-mgmt-auth/reports/verification-report.md
+        blocking_failures: []
+        remediated:
+          - "Python lint (11)"
+          - "Python typecheck (2 casts)"
+          - "Frontend lint (1)"
+          - "Frontend format (1)"
+          - "DM FE branch coverage 94.18% < 95%"
+        green:
+          - "make check"
+          - "make test-unit-coverage"
+          - "681+ pytest"
+          - "312 vitest admin"
+        note: "S005 interim verify on feat/S005-user-mgmt-auth — PASS after remediation. Initial FAIL (Python lint, typecheck, FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed in-session. Final: make check green, make test-unit-coverage green, 681+ pytest + 312 vitest admin. Supersedes the earlier 2026-06-30 interim FAIL; cleared for the Phase 12 gate."
       s003_baseline:
         status: completed
         completed_at: "2026-06-28"
@@ -182,7 +206,12 @@ active_session:             # current bounded work unit; null when none in fligh
       started_at: "2026-06-30"
       note: "S005/EV-006 F35 build — Phase 12 milestone M53 (auth UX hardening, T53.1-T53.22). 2026-06-30: T53.8 (Vitest force sign-out UI, red) + T53.9 (UsersPage force sign-out wired to POST /admin/users/{id}/signout, MechanismUnavailableError + disable fallback on 503) completed. M53 at 13/22 tasks; active task pointer T53.12 (Vitest 'Send test email' UI); T53.14 still in_progress. Work intentionally uncommitted (commit-only-when-asked override)."
     - stage: 08-verify-build
-      status: pending
+      status: completed
+      completed_at: "2026-06-30"
+      overall_result: PASS
+      report: docs/verification-report.md
+      session_report: docs/sessions/S005-user-mgmt-auth/reports/verification-report.md
+      note: "S005 interim verify on feat/S005-user-mgmt-auth — PASS after remediation. Initial FAIL (Python lint, typecheck, FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed in-session. Final: make check green, make test-unit-coverage green, 681+ pytest + 312 vitest admin. Supersedes the 2026-06-30 interim FAIL recorded earlier this stage. Cleared for the Phase 12 gate / downstream stages."
     - stage: 09-qa
       status: pending
     - stage: 10-e2e
@@ -796,7 +825,7 @@ stages:
     partial_rerun_at: "2026-06-25"
     partial_rerun_note: "S001 — Modal cold-start reduction (instrumentation, levers, pre-warm, GPU snapshot spike)"
     substeps:
-      current_task: S001-T9
+      current_task: "M53 complete (T53.22); next 08-verify-build + Phase 12 gate"
       milestone: M32 completed
       completed_tasks: [S001-T1, S001-T4, S001-T5, S001-T6, S001-T7, S001-T8, S001-T9, S001-T10, S001-T11]
       note: "T8 deploy done; snapshot restore confirmed; cold /generate 21.5s vs ~68s baseline"
@@ -832,12 +861,12 @@ stages:
       feature: F35
       phase: "Phase 12 (M48-M53)"
       milestone: M53
-      m53_progress: "13 of 22 tasks completed"
-      completed_tasks_recent: [T53.8, T53.9]
-      current_task: T53.12
-      in_progress_tasks: [T53.14]
-      uncommitted: true
-      note: "S005/EV-006 F35 milestone M53 (auth UX hardening). 2026-06-30: T53.8 (Vitest force sign-out UI, red) + T53.9 (UsersPage force sign-out wired to POST /admin/users/{id}/signout, MechanismUnavailableError + disable fallback on 503) completed. M53 now 13/22 (T53.1-T53.11 + T53.8, T53.9); active task pointer T53.12 (Vitest 'Send test email' UI); T53.14 still in_progress. Work intentionally uncommitted (commit-only-when-asked override). DM FE coverage gate PASS (lines 98.4%, branches 95.53%); lint + typecheck green; 291 Vitest tests pass."
+      m53_progress: "22 of 22 tasks completed"
+      completed_tasks_recent: [T53.12, T53.13, T53.14, T53.15, T53.16, T53.17, T53.18, T53.19, T53.20, T53.21, T53.22]
+      current_task: "08-verify-build"
+      in_progress_tasks: []
+      uncommitted: false
+      note: "S005/EV-006 F35 M53 (auth UX hardening) COMPLETE 2026-06-30 — T53.12-T53.22 implemented and committed as 9 atomic commits. Deliverability test-send UI + client (sendTestEmail/EmailUnconfiguredError), server-side user search (q) + shared PaginationControls, audit viewer entity_type filter + user/email event labels + per-user View activity link, privacy guard (no extra admin traffic on idle/log-out-everywhere), CORS preflight for signout + email-test, e2e UJ-036/UJ-037, OpenAPI (signout/email-test/q), runbook (force-signout RPC apply, test-send workflow, AC-U10-U16). DM FE Vitest 303/303; new Python tests pass; ESLint+tsc clean; OpenAPI parses. Next: 08-verify-build then Phase 12 gate + major PR-48."
   08-verify-build:
     status: completed
     started_at: "2026-06-25"
@@ -847,7 +876,7 @@ stages:
     scope: standalone
     overall: pass
     report: docs/verification-report.md
-    notes: "EV-004: 522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override bumps (aiohttp, msgpack, pypdf, starlette) | S001: milestone-boundary verify PASS; T12 still pending in 07-build; 2 uncommitted eslint/prettier auto-fixes | S003: milestone-boundary verify PASS; frontend-only F33 chat-history delta; Modal smoke SKIPPED"
+    notes: "EV-004: 522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override bumps (aiohttp, msgpack, pypdf, starlette) | S001: milestone-boundary verify PASS; T12 still pending in 07-build; 2 uncommitted eslint/prettier auto-fixes | S003: milestone-boundary verify PASS; frontend-only F33 chat-history delta; Modal smoke SKIPPED | S005: interim milestone-boundary verify PASS after in-session remediation — initial FAIL (Python lint, typecheck, FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed; final make check + make test-unit-coverage green, 681+ pytest + 312 vitest admin"
     substeps:
       phase: complete
     s003:
@@ -870,6 +899,24 @@ stages:
       report: docs/verification-report.md
       blocking_failures: []
       note: "S004/EV-005 F34 milestone-boundary verify PASS (re-run after remediation). Prior blocking failures (cryptography CVEs; admin FE branch coverage) resolved."
+    s005:
+      session_id: S005-user-mgmt-auth
+      branch: feat/S005-user-mgmt-auth
+      completed_at: "2026-06-30"
+      feature: F35
+      milestone: M53
+      overall_result: PASS
+      report: docs/verification-report.md
+      session_report: docs/sessions/S005-user-mgmt-auth/reports/verification-report.md
+      blocking_failures: []
+      remediated:
+        - "Python lint (11)"
+        - "Python typecheck (2 casts)"
+        - "Frontend lint (1)"
+        - "Frontend format (1)"
+        - "DM FE branch coverage 94.18% < 95%"
+      green: "make check + make test-unit-coverage; 681+ pytest + 312 vitest admin"
+      note: "S005/EV-006 F35 interim milestone-boundary verify PASS after in-session remediation. Initial FAIL (lint, typecheck, format, DM FE branch coverage) fixed; final make check + make test-unit-coverage green. Supersedes the earlier 2026-06-30 FAIL; cleared for Phase 12 gate."
   09-qa:
     status: completed
     started_at: "2026-06-25"
@@ -1742,6 +1789,21 @@ evolve_cycles:
           - "Pre-existing strict-mode lint/typecheck failures in the M53 slice fixed to keep the milestone gate green: useIdleTimeout.ts (void-on-void), IdleTimeoutGuard.tsx (floating promise + void-on-void), config.ts/vite-env.d.ts (idle env typing), authSessionHarness.ts renamed to .tsx."
           - "New unit tests added: apps/data-management-frontend/src/api/users.test.ts; expanded test_users_page.test.tsx + test_force_signout.test.tsx."
           - "DM frontend coverage gate PASS (lines 98.4%, branches 95.53%); lint + typecheck green; 291 Vitest tests pass."
+      08-verify-build:
+        status: completed
+        completed: "2026-06-30"
+        overall_result: PASS
+        report: docs/verification-report.md
+        session_report: docs/sessions/S005-user-mgmt-auth/reports/verification-report.md
+        blocking_failures: []
+        remediated:
+          - "Python lint (11)"
+          - "Python typecheck (2 casts)"
+          - "Frontend lint (1)"
+          - "Frontend format (1)"
+          - "DM FE branch coverage 94.18% < 95%"
+        green: "make check + make test-unit-coverage; 681+ pytest + 312 vitest admin"
+        note: "S005/EV-006 F35 interim milestone-boundary verify PASS after in-session remediation. Initial FAIL (Python lint, typecheck, FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed; final make check + make test-unit-coverage green, 681+ pytest + 312 vitest admin. Supersedes the earlier 2026-06-30 interim FAIL; cleared for the Phase 12 gate."
     decisions:
       - "R55-R59 (2026-06-29, EV-006/S005): Resend SMTP wiring for Supabase invitation emails; admin user-management operations (invite/list/role-change/deactivate); remember-me toggle on admin login."
       - "RD-080-RD-090 (2026-06-29, EV-006/S005, 01-requirements): admin user-management /admin/users* ops; in-app self-service password reset; remember-me default-checked localStorage/sessionStorage (vecinita.auth.remember); hybrid Resend SMTP (config.toml source of truth); 6 stacked-bilingual versioned templates; supabase.yml config push + pinned CLI; audit of user-mgmt actions; operator-supplied verified Resend domain. ADR-029."
@@ -2939,6 +3001,69 @@ git_history:
       session_id: S004-supabase-auth
       files_changed: 5
       timestamp: "2026-06-28T22:20:00Z"
+    - sha: 63baea1
+      branch: feat/S005-user-mgmt-auth
+      message: "[T53.15] feat: add shared PaginationControls component"
+      stage: "07-build"
+      session_id: S005-user-mgmt-auth
+      files_changed: 3
+      timestamp: "2026-06-30T14:05:00Z"
+    - sha: ccf6ac0
+      branch: feat/S005-user-mgmt-auth
+      message: "[M53] feat: add EV-006 auth-UX i18n keys (EN/ES)"
+      stage: "07-build"
+      session_id: S005-user-mgmt-auth
+      files_changed: 1
+      timestamp: "2026-06-30T14:05:30Z"
+    - sha: 4d6750a
+      branch: feat/S005-user-mgmt-auth
+      message: "[T53.13] feat: Users-page test-send, search and pagination"
+      stage: "07-build"
+      session_id: S005-user-mgmt-auth
+      files_changed: 6
+      timestamp: "2026-06-30T14:06:00Z"
+    - sha: da804bb
+      branch: feat/S005-user-mgmt-auth
+      message: "[T53.17] feat: audit viewer entity-type filter and user-event labels"
+      stage: "07-build"
+      session_id: S005-user-mgmt-auth
+      files_changed: 4
+      timestamp: "2026-06-30T14:06:30Z"
+    - sha: 84e71bc
+      branch: feat/S005-user-mgmt-auth
+      message: "[T53.14] test: user list pagination param forwarding"
+      stage: "07-build"
+      session_id: S005-user-mgmt-auth
+      files_changed: 1
+      timestamp: "2026-06-30T14:07:00Z"
+    - sha: 550a51b
+      branch: feat/S005-user-mgmt-auth
+      message: "[T53.19] test: CORS preflight for signout and email-test routes"
+      stage: "07-build"
+      session_id: S005-user-mgmt-auth
+      files_changed: 1
+      timestamp: "2026-06-30T14:07:30Z"
+    - sha: cf49412
+      branch: feat/S005-user-mgmt-auth
+      message: "[T53.20] test: e2e force sign-out and deliverability test-send"
+      stage: "07-build"
+      session_id: S005-user-mgmt-auth
+      files_changed: 3
+      timestamp: "2026-06-30T14:08:00Z"
+    - sha: c01cec5
+      branch: feat/S005-user-mgmt-auth
+      message: "[T53.21] docs: add signout, email/test and q param to DM OpenAPI"
+      stage: "07-build"
+      session_id: S005-user-mgmt-auth
+      files_changed: 1
+      timestamp: "2026-06-30T14:08:30Z"
+    - sha: c77a7bc
+      branch: feat/S005-user-mgmt-auth
+      message: "[T53.22] docs: staging runbook test-send + force-signout; advance M53"
+      stage: "07-build"
+      session_id: S005-user-mgmt-auth
+      files_changed: 2
+      timestamp: "2026-06-30T14:09:00Z"
 
 constraints:
   cost:
