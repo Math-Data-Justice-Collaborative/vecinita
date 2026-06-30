@@ -28,27 +28,28 @@ project:
       scope_addition_2026_06_29: "EV-006 04-tech-plan in-place re-run extended scope (user-approved 4 items; MFA/2FA + bulk CSV import deferred). ADR-031 (docs/adr/ADR-031-ev006-auth-ux-hardening.md) captures TP-S005-17 idle/session timeout (30min+60s warning, VITE_VECINITA_IDLE_TIMEOUT_MIN/_WARNING_SEC); TP-S005-18 self 'log out of all devices' (global signOut); TP-S005-19 admin force-logout POST /admin/users/{id}/signout via admin_delete_user_sessions RPC (one-time operator apply, 503 fallback->disable); TP-S005-20 user search q (>=3 chars->GoTrue filter)+pagination; TP-S005-21 audit viewer (reuse F29 AuditPage + GET /internal/v1/audit, entity_type Users filter, user.*/email.* i18n labels, per-user link); TP-S005-22 deliverability test-send POST /admin/email/test via Resend REST (RESEND_API_KEY/RESEND_SENDER_EMAIL, 5/h/admin); TP-S005-23 SPF/DKIM/DMARC operator checklist; TP-S005-24 config+secrets delta. Milestone M53 (T53.1-T53.22, all pending, TDD-ordered) appended to execution-plan Phase 12 (now M48-M53); Phase 12 gate updated to TC-088–TC-103, UJ-030–UJ-038, AC-U1–AC-U16. New artifacts: ADR-031, UJ-034-UJ-038, TC-096-TC-103, AC-U10-AC-U16, api-contract routes (/admin/users/{id}/signout, /admin/email/test, q param), Modal DM secrets RESEND_API_KEY + RESEND_SENDER_EMAIL, idle-timeout VITE envs. 04-tech-plan remains completed (in-place scope extension). Commit DEFERRED (commit-only-when-asked override) — scope-addition docs uncommitted, no new SHAs."
       note: "EV-005/F34 tech plan delta: ADR-027 (Supabase Auth verification + env sync) with TP-S004-01..12 — HS256 JWT verify (TP-S004-01), app_metadata.role claim source (TP-S004-02), shared vecinita_shared_schemas.auth, PyJWT>=2.10,<3 + @supabase/supabase-js ^2.108.2, Pro plan + ephemeral branching + CLI migrations-in-repo, inviteUserByEmail+SMTP, idempotent first-admin seed; cost cap raised to ~$75/mo (supersedes ADR-004 cap — user-approved). Phase 11 (M43-M47, T43.1-T47.6, 29 tasks) appended to execution-plan. R53 unblocked via Supabase CLI (MCP-independent). Commit DEFERRED (commit-only-when-asked override). Baseline partial_rerun info preserved in legacy stages.04-tech-plan."
     07-build:
-      status: in_progress
+      status: completed
       completed_at: "2026-06-29"
       session_id: S005-user-mgmt-auth
       branch: feat/S005-user-mgmt-auth
       feature: F35
       phase: "Phase 12 (M48-M53)"
-      reconciliation_note: "S004/EV-005 F34 build (Phase 11 M43-M47) reconciled to completed during 10-e2e — 08-verify-build, 09-qa (remediated), and 10-e2e all completed downstream on feat/S004-supabase-auth. Reopened in-progress for active S005/EV-006 F35 build (see s005)."
+      reconciliation_note: "S004/EV-005 F34 build (Phase 11 M43-M47) reconciled to completed during 10-e2e — 08-verify-build, 09-qa (remediated), and 10-e2e all completed downstream on feat/S004-supabase-auth. Reopened for active S005/EV-006 F35 build (see s005); closed out completed 2026-06-30 (M53 22/22)."
       s005:
-        status: in_progress
+        status: completed
         session_id: S005-user-mgmt-auth
         branch: feat/S005-user-mgmt-auth
         feature: F35
         phase: "Phase 12 (M48-M53)"
         milestone: M53
-        m53_progress: "13 of 22 tasks completed"
+        m53_progress: "22 of 22 tasks completed"
         completed_tasks_recent: [T53.8, T53.9]
-        current_task: T53.12
-        in_progress_tasks: [T53.14]
+        current_task: "07-build complete; 08-verify-build next"
+        in_progress_tasks: []
         started_at: "2026-06-30"
-        uncommitted: true
-        note: "S005/EV-006 F35 milestone M53 (auth UX hardening). 2026-06-30: T53.8 (Vitest force sign-out UI, red) + T53.9 (UsersPage force sign-out wired to POST /admin/users/{id}/signout, MechanismUnavailableError + disable fallback on 503) completed. M53 now 13/22 (T53.1-T53.11 + T53.8, T53.9); active task pointer T53.12 (Vitest 'Send test email' UI); T53.14 still in_progress. Work intentionally uncommitted (commit-only-when-asked override)."
+        completed_at: "2026-06-30"
+        uncommitted: false
+        note: "S005/EV-006 F35 milestone M53 (auth UX hardening) — close-out 2026-06-30. M53 22/22 (T53.1–T53.22 all committed; execution-plan and git agree). No tasks in progress; working tree clean before close-out. Close-out fixed a typecheck blocker (private-helper import in DM user-admin unit test → shared tests.helpers.user_admin_mocks). Next: 08-verify-build + Phase 12 gate."
         advisories:
           - "Pre-existing strict-mode lint/typecheck failures in the M53 slice fixed to keep the milestone gate green: useIdleTimeout.ts (void-on-void), IdleTimeoutGuard.tsx (floating promise + void-on-void), config.ts/vite-env.d.ts (idle env typing), authSessionHarness.ts renamed to .tsx."
           - "New unit tests: apps/data-management-frontend/src/api/users.test.ts; expanded test_users_page.test.tsx + test_force_signout.test.tsx."
@@ -186,7 +187,7 @@ active_session:             # current bounded work unit; null when none in fligh
   orchestrator: 16-evolve
   artifacts_dir: docs/sessions/S005-user-mgmt-auth/
   started_at: "2026-06-29"
-  current_stage: "07-build"
+  current_stage: "08-verify-build"
   evolve_cycle_id: EV-006
   routing_plan:
     - stage: 00-context
@@ -202,9 +203,10 @@ active_session:             # current bounded work unit; null when none in fligh
       completed_at: "2026-06-29"
       note: "S005/EV-006 F35 user-mgmt tech plan: ADR-030, TP-S005-01–16, Phase 12. 2026-06-29 in-place SCOPE ADDITION (user-approved 4 items; MFA/2FA + bulk CSV import deferred): ADR-031 auth UX hardening, TP-S005-17–24, milestone M53 (T53.1-T53.22) appended to Phase 12 (now M48-M53); gate -> TC-088–TC-103 / UJ-030–UJ-038 / AC-U1–AC-U16. Stage stays completed (in-place extension). Handoff to 07-build."
     - stage: 07-build
-      status: in_progress
+      status: completed
       started_at: "2026-06-30"
-      note: "S005/EV-006 F35 build — Phase 12 milestone M53 (auth UX hardening, T53.1-T53.22). 2026-06-30: T53.8 (Vitest force sign-out UI, red) + T53.9 (UsersPage force sign-out wired to POST /admin/users/{id}/signout, MechanismUnavailableError + disable fallback on 503) completed. M53 at 13/22 tasks; active task pointer T53.12 (Vitest 'Send test email' UI); T53.14 still in_progress. Work intentionally uncommitted (commit-only-when-asked override)."
+      completed_at: "2026-06-30"
+      note: "S005/EV-006 F35 build — Phase 12 milestone M53 (auth UX hardening, T53.1-T53.22) COMPLETE 2026-06-30. M53 22/22 (T53.1–T53.22 all committed; execution-plan and git agree). No tasks in progress; working tree clean before close-out. Close-out fixed a typecheck blocker (private-helper import in DM user-admin unit test → shared tests.helpers.user_admin_mocks). Phase 12 build criteria PASS (deferred live/deploy criteria → 13-deploy-smoke). Handoff to 08-verify-build."
     - stage: 08-verify-build
       status: completed
       completed_at: "2026-06-30"
@@ -819,13 +821,13 @@ stages:
       - .github/workflows/ci.yml
     verification: passed
   07-build:
-    status: in_progress
+    status: completed
     started_at: "2026-05-19"
     completed_at: "2026-05-27"
     partial_rerun_at: "2026-06-25"
     partial_rerun_note: "S001 — Modal cold-start reduction (instrumentation, levers, pre-warm, GPU snapshot spike)"
     substeps:
-      current_task: "M53 complete (T53.22); next 08-verify-build + Phase 12 gate"
+      current_task: "M53 complete; close-out done; next 08-verify-build"
       milestone: M32 completed
       completed_tasks: [S001-T1, S001-T4, S001-T5, S001-T6, S001-T7, S001-T8, S001-T9, S001-T10, S001-T11]
       note: "T8 deploy done; snapshot restore confirmed; cold /generate 21.5s vs ~68s baseline"
@@ -1758,7 +1760,7 @@ evolve_cycles:
     status: in_progress
     started: "2026-06-29"
     session_id: S005-user-mgmt-auth
-    current_stage: "07-build"
+    current_stage: "08-verify-build"
     stages:
       00-context:
         status: completed
@@ -1775,16 +1777,23 @@ evolve_cycles:
         milestones: [Phase 12 M48-M52, M53]
         note: "S005/EV-006 F35 user-mgmt tech plan: ADR-030, TP-S005-01–16, execution-plan Phase 12 (M48-M52). 2026-06-29 in-place SCOPE ADDITION (re-run; user-approved 4 items, MFA/2FA + bulk CSV import deferred): ADR-031 (docs/adr/ADR-031-ev006-auth-ux-hardening.md, auth UX hardening) capturing TP-S005-17 idle/session timeout (30min+60s warning, VITE_VECINITA_IDLE_TIMEOUT_MIN/_WARNING_SEC); TP-S005-18 self global signOut; TP-S005-19 admin force-logout POST /admin/users/{id}/signout via admin_delete_user_sessions RPC (one-time operator apply, 503 fallback->disable); TP-S005-20 user search q+pagination; TP-S005-21 audit viewer (reuse F29 AuditPage + GET /internal/v1/audit); TP-S005-22 deliverability test-send POST /admin/email/test via Resend REST (RESEND_API_KEY/RESEND_SENDER_EMAIL, 5/h/admin); TP-S005-23 SPF/DKIM/DMARC checklist; TP-S005-24 config+secrets delta. Milestone M53 (T53.1-T53.22, pending, TDD-ordered) appended to Phase 12 (now M48-M53); gate TC-088–TC-103, UJ-030–UJ-038, AC-U1–AC-U16. New artifacts: ADR-031, UJ-034-038, TC-096-103, AC-U10-U16, api-contract routes + q param, Modal DM RESEND_API_KEY/RESEND_SENDER_EMAIL, idle-timeout VITE envs. Stays completed (in-place extension). Commit DEFERRED (no new SHAs). Handoff to 07-build."
       07-build:
-        status: in_progress
+        status: completed
         started: "2026-06-30"
+        completed: "2026-06-30"
         phase: "Phase 12 (M48-M53)"
         milestone: M53
-        m53_progress: "13 of 22 tasks completed"
+        m53_progress: "22 of 22 tasks completed"
         completed_tasks_recent: [T53.8, T53.9]
-        current_task: T53.12
-        in_progress_tasks: [T53.14]
-        completed: "2026-06-30 (T53.8, T53.9)"
-        note: "S005/EV-006 F35 build — milestone M53 (auth UX hardening). 2026-06-30: T53.8 (Vitest force sign-out UI, red) + T53.9 (UsersPage force sign-out action wired to POST /admin/users/{id}/signout, with MechanismUnavailableError + disable fallback on 503) completed. M53 now 13/22 tasks done (T53.1-T53.11, plus T53.8, T53.9); active task pointer advanced to T53.12 (Vitest 'Send test email' UI); T53.14 remains in_progress. Work intentionally uncommitted (commit-only-when-asked override) — no new SHAs."
+        current_task: "07-build complete; 08-verify-build next"
+        in_progress_tasks: []
+        gate_result:
+          phase: "Phase 12"
+          scope: "07-build close-out"
+          build_criteria: PASS
+          build_evidence: "make check green (ruff/basedpyright/ESLint/Prettier); 496 pytest unit + all frontend Vitest suites green; TC-088–TC-103 covered; CORS preflight + privacy + 503 fallback covered."
+          deferred_to_13_deploy_smoke: "AC-U1–U16 live Resend, live audit_log rows, secret placement, SMTP/SPF/DKIM/DMARC."
+          close_out_fix: "Typecheck blocker fixed — private-helper import in DM user-admin unit test switched to shared tests.helpers.user_admin_mocks."
+        note: "S005/EV-006 F35 build — milestone M53 (auth UX hardening, T53.1-T53.22) COMPLETE 2026-06-30 (close-out). M53 22/22 (all committed; execution-plan and git agree). No tasks in progress; working tree clean before close-out. Phase 12 build criteria PASS; live/deploy criteria deferred to 13-deploy-smoke. Handoff to 08-verify-build."
         advisories:
           - "Pre-existing strict-mode lint/typecheck failures in the M53 slice fixed to keep the milestone gate green: useIdleTimeout.ts (void-on-void), IdleTimeoutGuard.tsx (floating promise + void-on-void), config.ts/vite-env.d.ts (idle env typing), authSessionHarness.ts renamed to .tsx."
           - "New unit tests added: apps/data-management-frontend/src/api/users.test.ts; expanded test_users_page.test.tsx + test_force_signout.test.tsx."
@@ -3064,6 +3073,20 @@ git_history:
       session_id: S005-user-mgmt-auth
       files_changed: 2
       timestamp: "2026-06-30T14:09:00Z"
+    - sha: 83cdd66
+      branch: feat/S005-user-mgmt-auth
+      message: "[M53] fix: use shared user-admin mock helpers in DM unit test"
+      stage: "07-build"
+      session_id: S005-user-mgmt-auth
+      files_changed: 1
+      timestamp: "2026-06-30T00:00:00Z"
+    - sha: 2776aab
+      branch: feat/S005-user-mgmt-auth
+      message: "docs: close out 07-build for EV-006/F35 (Phase 12 gate)"
+      stage: "07-build"
+      session_id: S005-user-mgmt-auth
+      files_changed: 1
+      timestamp: "2026-06-30T00:00:00Z"
 
 constraints:
   cost:
