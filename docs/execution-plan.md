@@ -10,8 +10,8 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 12: EV-006 — Admin user management + auth UX (F35) — **planned (04-tech-plan complete)** |
-| **Active milestone** | M50: DM backend `/admin/users*` routes — **in_progress** (M48–M49 **completed** 2026-06-29) |
-| **Active task** | T50.1 — `/admin/users*` TestClient tests (red) |
+| **Active milestone** | M51: DM frontend — Users page + remember-me + password reset flows — **in_progress** (M48–M50 **completed** 2026-06-29) |
+| **Active task** | T51.1 — Vitest: UsersPage table + invite modal (TC-088) — red |
 | **Tasks completed** | Phase 11 (S004/EV-005 F34) merged via PR #100; S005 00-context + 01-requirements + 04-tech-plan complete |
 | **Last updated** | 2026-06-29 |
 | **Evolve cycle** | EV-006 (F35) — **07-build next** |
@@ -1044,12 +1044,12 @@ invite rate limit.
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|------------|-------------|
-| T50.1 | Test (TestClient): `/admin/users*` — list, invite, role, resend, disable, enable, delete, reset; viewer → 403 (TC-088, TC-089) — red | Test | pending | test-plan TC-088/089, UJ-030 | T49.2, T49.6 | — | S005 | F35 |
-| T50.2 | Code: `/admin/users*` routes on DM backend; admin-only deps; audit emit via write API | Code | pending | api-contract §Admin user management, ADR-030 §1/3 | T50.1, T49.4 | — | S005 | F35 |
-| T50.3 | Config: Modal `SUPABASE_SECRET_KEY`; `infra/modal/` + deploy sync scripts | Config | pending | ADR-030 §1, staging-secrets-matrix | T50.2 | — | S005 | F35 |
-| T50.4 | Code+Test: CORS preflight PATCH/DELETE/POST on `/admin/users*` (TP-S005-15, cors-browser-methods.mdc) | Code | pending | test-plan, connectivity-gates | T50.2 | — | S005 | F35 |
-| T50.5 | Test: invite endpoint app-level rate limit (10/h per admin JWT) — red | Test | pending | ADR-030 §7, TP-S005-07 | T50.2 | — | S005 | F35 |
-| T50.6 | Code: sliding-window invite rate limiter on `POST /admin/users/invite` | Code | pending | ADR-030 §7 | T50.5 | — | S005 | F35 |
+| T50.1 | Test (TestClient): `/admin/users*` — list, invite, role, resend, disable, enable, delete, reset; viewer → 403 (TC-088, TC-089) — red | Test | completed | test-plan TC-088/089, UJ-030 | T49.2, T49.6 | — | S005 | F35 |
+| T50.2 | Code: `/admin/users*` routes on DM backend; admin-only deps; audit emit via write API | Code | completed | api-contract §Admin user management, ADR-030 §1/3 | T50.1, T49.4 | — | S005 | F35 |
+| T50.3 | Config: Modal `SUPABASE_SECRET_KEY`; `infra/modal/` + deploy sync scripts | Config | completed | ADR-030 §1, staging-secrets-matrix | T50.2 | — | S005 | F35 |
+| T50.4 | Code+Test: CORS preflight PATCH/DELETE/POST on `/admin/users*` (TP-S005-15, cors-browser-methods.mdc) | Code | completed | test-plan, connectivity-gates | T50.2 | — | S005 | F35 |
+| T50.5 | Test: invite endpoint app-level rate limit (10/h per admin JWT) — red | Test | completed | ADR-030 §7, TP-S005-07 | T50.2 | — | S005 | F35 |
+| T50.6 | Code: sliding-window invite rate limiter on `POST /admin/users/invite` | Code | completed | ADR-030 §7 | T50.5 | — | S005 | F35 |
 
 #### M51: DM frontend — Users page + remember-me + password reset flows
 
@@ -1528,12 +1528,12 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T49.4 | M49 | 12 | Code | completed | T49.3 | D5 | S005 | F35 |
 | T49.5 | M49 | 12 | Test | completed | T49.2 | — | S005 | F35 |
 | T49.6 | M49 | 12 | Code | completed | T49.5 | — | S005 | F35 |
-| T50.1 | M50 | 12 | Test | pending | T49.2, T49.6 | — | S005 | F35 |
-| T50.2 | M50 | 12 | Code | pending | T50.1, T49.4 | — | S005 | F35 |
-| T50.3 | M50 | 12 | Config | pending | T50.2 | — | S005 | F35 |
-| T50.4 | M50 | 12 | Code | pending | T50.2 | — | S005 | F35 |
-| T50.5 | M50 | 12 | Test | pending | T50.2 | — | S005 | F35 |
-| T50.6 | M50 | 12 | Code | pending | T50.5 | — | S005 | F35 |
+| T50.1 | M50 | 12 | Test | completed | T49.2, T49.6 | — | S005 | F35 |
+| T50.2 | M50 | 12 | Code | completed | T50.1, T49.4 | — | S005 | F35 |
+| T50.3 | M50 | 12 | Config | completed | T50.2 | — | S005 | F35 |
+| T50.4 | M50 | 12 | Code | completed | T50.2 | — | S005 | F35 |
+| T50.5 | M50 | 12 | Test | completed | T50.2 | — | S005 | F35 |
+| T50.6 | M50 | 12 | Code | completed | T50.5 | — | S005 | F35 |
 | T51.1 | M51 | 12 | Test | pending | — | — | S005 | F35 |
 | T51.2 | M51 | 12 | Test | pending | — | — | S005 | F35 |
 | T51.3 | M51 | 12 | Code | pending | T51.1, T50.2 | — | S005 | F35 |
