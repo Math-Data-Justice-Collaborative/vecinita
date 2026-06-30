@@ -29,6 +29,12 @@ from vecinita_shared_schemas.data_management import (
 from vecinita_shared_schemas.internal_write import AuditEventRequest
 from vecinita_shared_schemas.supabase_admin import SupabaseAdminError
 
+from vecinita_data_management_backend.auth_redirect import (
+    AdminRedirectConfigError,
+    AuthCallbackPath,
+    admin_frontend_origin_from_env,
+    build_auth_redirect_path,
+)
 from vecinita_data_management_backend.email_test import (
     ResendClient,
     ResendError,
@@ -78,6 +84,24 @@ def _lockout_http(err: LockoutError) -> HTTPException:
         status_code=status.HTTP_409_CONFLICT,
         detail={"code": err.code, "message": str(err)},
     )
+
+
+def _auth_redirect_unconfigured_http() -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail={
+            "code": "auth_redirect_unconfigured",
+            "message": "VECINITA_ADMIN_FRONTEND_URL is not configured",
+        },
+    )
+
+
+def _require_auth_redirect(path: AuthCallbackPath) -> str:
+    try:
+        origin = admin_frontend_origin_from_env()
+        return build_auth_redirect_path(origin, path)
+    except AdminRedirectConfigError as err:
+        raise _auth_redirect_unconfigured_http() from err
 
 
 def register_user_admin_routes(  # noqa: C901, PLR0913, PLR0915  # FastAPI registers all admin routes inline
@@ -175,7 +199,8 @@ def register_user_admin_routes(  # noqa: C901, PLR0913, PLR0915  # FastAPI regis
                 detail="Invite rate limit exceeded; try again later",
             )
         try:
-            invited = client.invite_user_by_email(body.email)
+            redirect_to = _require_auth_redirect("accept-invite")
+            invited = client.invite_user_by_email(body.email, redirect_to=redirect_to)
             user = client.update_user_by_id(invited.id, role=body.role)
         except SupabaseAdminError as err:
             raise _map_admin_error(err) from err
@@ -210,7 +235,8 @@ def register_user_admin_routes(  # noqa: C901, PLR0913, PLR0915  # FastAPI regis
         client = _require_client()
         try:
             target = client.get_user_by_id(user_id)
-            client.invite_user_by_email(target.email)
+            redirect_to = _require_auth_redirect("accept-invite")
+            client.invite_user_by_email(target.email, redirect_to=redirect_to)
         except SupabaseAdminError as err:
             raise _map_admin_error(err) from err
         _audit("user.invited", user_id, actor, {"resend": True})
@@ -270,11 +296,13 @@ def register_user_admin_routes(  # noqa: C901, PLR0913, PLR0915  # FastAPI regis
         client = _require_client()
         try:
             target = client.get_user_by_id(user_id)
-            client.send_password_recovery(target.email)
+            redirect_to = _require_auth_redirect("reset-password")
+            client.send_password_recovery(target.email, redirect_to=redirect_to)
         except SupabaseAdminError as err:
             raise _map_admin_error(err) from err
         _audit("user.reset_password", user_id, actor)
         return AcknowledgedResponse()
+
 
     @app.post(
         "/admin/users/{user_id}/signout",
