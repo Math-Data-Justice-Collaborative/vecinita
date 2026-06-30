@@ -18,6 +18,7 @@ from vecinita_shared_schemas.auth import (
     AuthContext,
     require_admin_write,
     require_authenticated,
+    require_service,
 )
 from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.db_mapping import (
@@ -32,6 +33,8 @@ from vecinita_shared_schemas.db_mapping import (
 )
 from vecinita_shared_schemas.internal_write import (
     AuditCleanupResponse,
+    AuditEventRequest,
+    AuditEventResponse,
     AuditLogEntry,
     AuditLogResponse,
     BatchUpsertRequest,
@@ -970,6 +973,27 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
             page_size=page_size,
             total_count=total,
         )
+
+    @app.post(
+        "/internal/v1/audit/event",
+        response_model=AuditEventResponse,
+        status_code=status.HTTP_202_ACCEPTED,
+        dependencies=[Depends(require_service)],
+    )
+    def ingest_audit_event(body: AuditEventRequest) -> AuditEventResponse:  # pyright: ignore[reportUnusedFunction]
+        request_id = _uuid.uuid4()
+        with engine.begin() as conn:
+            emit_audit_event(
+                conn,
+                event_type=body.event_type,
+                entity_type=body.entity_type,
+                entity_id=body.entity_id,
+                request_id=request_id,
+                payload=body.payload,
+                actor_id=body.actor_id,
+                actor_role=body.actor_role,
+            )
+        return AuditEventResponse()
 
     @app.post(
         "/internal/v1/audit/cleanup",
