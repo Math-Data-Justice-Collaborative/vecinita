@@ -2,20 +2,34 @@
 # Sync the Modal `vecinita-data-management` secret from the current shell env.
 #
 # Reads values from the environment (source prod.env first) and pushes them with
-# `modal secret create --force` (merges keys; does not drop unlisted keys).
+# `modal secret create --force`.
+#
+# IMPORTANT: `modal secret create --force` REPLACES the whole secret (it does not
+# merge). To add a key (e.g. EV-006 SUPABASE_SECRET_KEY) without dropping the
+# existing production keys, use --merge: it first exports the live secret, layers
+# the shell env on top, then re-pushes the union.
+#
 # Keys checklist: infra/modal/.env.example. Matrix: docs/staging-secrets-matrix.md.
 #
 # Usage:
 #   set -a && source prod.env && set +a
 #   bash scripts/deploy/sync_modal_secret.sh            # dry run (prints keys)
-#   bash scripts/deploy/sync_modal_secret.sh --apply    # write the secret
+#   bash scripts/deploy/sync_modal_secret.sh --apply    # REPLACE from shell env only
+#   bash scripts/deploy/sync_modal_secret.sh --merge            # dry run, union with live secret
+#   bash scripts/deploy/sync_modal_secret.sh --merge --apply    # safe add/update of keys
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
 APPLY=0
-[[ "${1:-}" == "--apply" ]] && APPLY=1
+MERGE=0
+for arg in "$@"; do
+  case "$arg" in
+    --apply) APPLY=1 ;;
+    --merge) MERGE=1 ;;
+  esac
+done
 
 # shellcheck source=../modal_ensure_workspace.sh
 source "${ROOT}/scripts/modal_ensure_workspace.sh"
@@ -36,9 +50,35 @@ REQUIRED_KEYS=(
 OPTIONAL_KEYS=(
   VECINITA_AUTH_REQUIRED
   SUPABASE_JWT_AUD
+  SUPABASE_SECRET_KEY   # EV-006 F35 — Admin API for /admin/users* (ADR-030 / TP-S005-01)
+  RESEND_API_KEY        # EV-006 F35 — Resend REST test-send (ADR-031 / TP-S005-22)
+  RESEND_SENDER_EMAIL   # verified sender (= config.toml admin_email)
   VECINITA_LLM_TAG_MAX_TOKENS
   VECINITA_TAG_SEED_PATH
 )
+
+# --merge: export the live secret and seed the shell env with any keys not already
+# set locally, so a re-push is the UNION (existing keys preserved, shell wins on conflict).
+if [[ "$MERGE" -eq 1 ]]; then
+  echo "==> --merge: reading live ${SECRET_NAME:-vecinita-data-management} secret to preserve existing keys"
+  EXPORT_FILE="${ROOT}/.tmp/modal-${SECRET_NAME:-vecinita-data-management}.env"
+  mkdir -p "${ROOT}/.tmp"
+  if uv run --with modal modal run scripts/deploy/export_modal_secret.py >/dev/null 2>&1; then
+    : # export script writes EXPORT_FILE
+  fi
+  if [[ -f "$EXPORT_FILE" ]]; then
+    # Seed only keys that are NOT already set in the shell (shell/prod.env takes precedence).
+    while IFS='=' read -r k v; do
+      [[ -z "$k" || "$k" == \#* ]] && continue
+      if [[ -z "${!k:-}" ]]; then
+        export "$k=$v"
+      fi
+    done < "$EXPORT_FILE"
+    echo "    merged live keys from ${EXPORT_FILE#"$ROOT"/}"
+  else
+    echo "WARN: could not export live secret; proceeding with shell env only." >&2
+  fi
+fi
 
 # DATABASE_URL is forbidden on Modal (ADR-007 — sole holder is the DO write API).
 if [[ -n "${DATABASE_URL:-}" ]]; then
@@ -66,6 +106,12 @@ for key in "${OPTIONAL_KEYS[@]}"; do
   val="${!key:-}"
   [[ -n "$val" ]] && PAIRS+=("$key=$val")
 done
+
+# When Resend test-send key is present, default sender to config.toml admin_email if unset.
+if [[ -n "${RESEND_API_KEY:-}" && -z "${RESEND_SENDER_EMAIL:-}" ]]; then
+  PAIRS+=("RESEND_SENDER_EMAIL=noreply@vecinita.admin")
+  echo "==> RESEND_SENDER_EMAIL unset; defaulting to 'noreply@vecinita.admin' (config.toml admin_email)"
+fi
 
 if [[ ${#MISSING[@]} -gt 0 ]]; then
   echo "ERROR: missing required env vars for ${SECRET_NAME}:" >&2

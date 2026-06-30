@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# One-shot env/secret sync across all three providers for Vecinita.
+# One-shot env/secret sync across every environment for Vecinita.
 #
+#   GitHub    — push Actions repository secrets (sync_github_secrets.sh).
 #   Supabase  — source of truth: validate SUPABASE_URL + JWKS (ES256, ADR-028);
 #               optionally bootstrap the first admin (scripts/seed_first_admin.py).
 #   Modal     — push the `vecinita-data-management` secret (sync_modal_secret.sh).
@@ -11,13 +12,15 @@
 #   export DIGITALOCEAN_TOKEN='dop_v1_...'
 #
 # Usage:
-#   bash scripts/deploy/sync_env.sh                 # dry run, all providers
-#   bash scripts/deploy/sync_env.sh --apply         # write to all providers
+#   bash scripts/deploy/sync_env.sh                 # dry run, all environments
+#   bash scripts/deploy/sync_env.sh --apply         # write to all environments
+#   bash scripts/deploy/sync_env.sh --github --apply # only GitHub Actions secrets
 #   bash scripts/deploy/sync_env.sh --modal --apply # only Modal
 #   bash scripts/deploy/sync_env.sh --do --apply    # only DigitalOcean
 #   bash scripts/deploy/sync_env.sh --supabase --seed-admin --apply
 #
-# Templates: infra/do/.env.example, infra/modal/.env.example
+# Templates: infra/github/.env.example, supabase/.env.example,
+#            infra/do/.env.example, infra/modal/.env.example
 # Matrix:    docs/staging-secrets-matrix.md
 set -euo pipefail
 
@@ -29,6 +32,7 @@ SEED_ADMIN=0
 DO_SUPABASE=0
 DO_MODAL=0
 DO_DO=0
+DO_GITHUB=0
 
 for arg in "$@"; do
   case "$arg" in
@@ -37,6 +41,7 @@ for arg in "$@"; do
     --supabase) DO_SUPABASE=1 ;;
     --modal) DO_MODAL=1 ;;
     --do) DO_DO=1 ;;
+    --github) DO_GITHUB=1 ;;
     -h|--help)
       sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//'
       exit 0
@@ -46,14 +51,14 @@ for arg in "$@"; do
 done
 
 # No provider flag => all providers.
-if [[ "$DO_SUPABASE" -eq 0 && "$DO_MODAL" -eq 0 && "$DO_DO" -eq 0 ]]; then
-  DO_SUPABASE=1; DO_MODAL=1; DO_DO=1
+if [[ "$DO_SUPABASE" -eq 0 && "$DO_MODAL" -eq 0 && "$DO_DO" -eq 0 && "$DO_GITHUB" -eq 0 ]]; then
+  DO_SUPABASE=1; DO_MODAL=1; DO_DO=1; DO_GITHUB=1
 fi
 
 MODE="DRY RUN"; [[ "$APPLY" -eq 1 ]] && MODE="APPLY"
 echo "=================================================="
 echo " Vecinita env sync — mode: ${MODE}"
-echo " providers: supabase=${DO_SUPABASE} modal=${DO_MODAL} do=${DO_DO}"
+echo " providers: github=${DO_GITHUB} supabase=${DO_SUPABASE} modal=${DO_MODAL} do=${DO_DO}"
 echo "=================================================="
 
 # ---------------------------------------------------------------------------
@@ -90,6 +95,19 @@ if [[ "$DO_SUPABASE" -eq 1 ]]; then
     else
       echo "    Dry run: would run scripts/seed_first_admin.py for ${SUPABASE_ADMIN_EMAIL}."
     fi
+  fi
+fi
+
+# ---------------------------------------------------------------------------
+# GitHub Actions — repository secrets
+# ---------------------------------------------------------------------------
+if [[ "$DO_GITHUB" -eq 1 ]]; then
+  echo
+  echo "==> [GitHub] sync Actions repository secrets"
+  if [[ "$APPLY" -eq 1 ]]; then
+    bash scripts/deploy/sync_github_secrets.sh --apply
+  else
+    bash scripts/deploy/sync_github_secrets.sh
   fi
 fi
 
