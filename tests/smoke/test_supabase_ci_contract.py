@@ -213,3 +213,15 @@ def _load_config_toml() -> dict[str, object]:
 def tc109_config_fixture() -> dict[str, object]:
     """Parsed config.toml for TC-109 assertions."""
     return _load_config_toml()
+
+
+def test_invite_email_templates_include_branding_and_expiry_notice() -> None:
+    """TC-110: invite/recovery templates include branding, bilingual sections, and 1h expiry."""
+    invite = (REPO_ROOT / "supabase/templates/invite.html").read_text(encoding="utf-8")
+    recovery = (REPO_ROOT / "supabase/templates/recovery.html").read_text(encoding="utf-8")
+    for html, name in ((invite, "invite.html"), (recovery, "recovery.html")):
+        assert "Vecinita Admin" in html, f"{name} missing branding"
+        assert "<!-- lang:en -->" in html, f"{name} missing EN section"
+        assert "<!-- lang:es -->" in html, f"{name} missing ES section"
+        assert "{{ .ConfirmationURL }}" in html, f"{name} missing confirmation URL"
+        assert "1 hour" in html or "1 hora" in html, f"{name} missing expiry notice"
