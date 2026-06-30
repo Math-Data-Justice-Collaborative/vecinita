@@ -28,10 +28,19 @@ _HTML_BODY: Final[str] = (
 class ResendError(RuntimeError):
     """Raised when a Resend REST request fails."""
 
-    def __init__(self, message: str, *, status_code: int = 0) -> None:
+    def __init__(
+        self,
+        message: str,
+        *,
+        status_code: int = 0,
+        provider_name: str = "",
+        provider_message: str = "",
+    ) -> None:
         """Capture the failing HTTP status code (0 for transport/config errors)."""
         super().__init__(message)
         self.status_code = status_code
+        self.provider_name = provider_name
+        self.provider_message = provider_message
 
 
 class ResendClient:
@@ -78,7 +87,37 @@ class ResendClient:
             },
         )
         if response.status_code >= HTTPStatus.BAD_REQUEST:
+            provider_name = ""
+            provider_message = ""
+            try:
+                body = as_json_object(cast("object", response.json()))
+                name = body.get("name")
+                message = body.get("message")
+                if isinstance(name, str):
+                    provider_name = name
+                if isinstance(message, str):
+                    provider_message = message
+            except (ValueError, TypeError):
+                pass
             msg = f"Resend send failed: {response.status_code} {response.text}"
-            raise ResendError(msg, status_code=response.status_code)
+            raise ResendError(
+                msg,
+                status_code=response.status_code,
+                provider_name=provider_name,
+                provider_message=provider_message,
+            ) from None
         message_id = as_json_object(cast("object", response.json())).get("id")
         return message_id if isinstance(message_id, str) else ""
+
+
+def resend_error_http_detail(err: ResendError) -> tuple[int, dict[str, str]] | None:
+    """Map known operator-fixable Resend failures to structured HTTP error bodies."""
+    if err.status_code == HTTPStatus.FORBIDDEN and "not verified" in err.provider_message.lower():
+        return (
+            HTTPStatus.SERVICE_UNAVAILABLE,
+            {
+                "code": "domain_unverified",
+                "message": err.provider_message or "Sending domain is not verified in Resend",
+            },
+        )
+    return None

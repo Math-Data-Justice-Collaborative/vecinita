@@ -37,6 +37,30 @@ def test_resend_client_raises_on_http_error() -> None:
     assert excinfo.value.status_code == HTTPStatus.BAD_REQUEST
 
 
+def test_resend_client_parses_provider_error_body() -> None:
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            HTTPStatus.FORBIDDEN,
+            json={
+                "statusCode": 403,
+                "message": "The vecinita.admin domain is not verified.",
+                "name": "validation_error",
+            },
+        )
+
+    client = ResendClient(
+        api_key="re_test",
+        sender="noreply@vecinita.admin",
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+    with pytest.raises(ResendError) as excinfo:
+        client.send_test_email("ops@example.org")
+    err = excinfo.value
+    assert err.status_code == HTTPStatus.FORBIDDEN
+    assert err.provider_name == "validation_error"
+    assert "not verified" in err.provider_message.lower()
+
+
 def test_resend_client_from_env_returns_none_when_unset(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

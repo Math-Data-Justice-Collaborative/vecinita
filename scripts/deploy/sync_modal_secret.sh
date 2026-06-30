@@ -109,8 +109,8 @@ done
 
 # When Resend test-send key is present, default sender to config.toml admin_email if unset.
 if [[ -n "${RESEND_API_KEY:-}" && -z "${RESEND_SENDER_EMAIL:-}" ]]; then
-  PAIRS+=("RESEND_SENDER_EMAIL=noreply@vecinita.admin")
-  echo "==> RESEND_SENDER_EMAIL unset; defaulting to 'noreply@vecinita.admin' (config.toml admin_email)"
+  PAIRS+=("RESEND_SENDER_EMAIL=noreply@josephcmcg.com")
+  echo "==> RESEND_SENDER_EMAIL unset; defaulting to 'noreply@josephcmcg.com' (config.toml admin_email)"
 fi
 
 if [[ ${#MISSING[@]} -gt 0 ]]; then

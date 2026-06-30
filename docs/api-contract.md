@@ -85,7 +85,7 @@ host backend is the **Data Management Modal ASGI**; audit rows are written via s
 - **Request**: `{"to": "operator@example.org"}`.
 - **Mechanism**: backend calls the **Resend REST API** (`POST https://api.resend.com/emails`, bearer `RESEND_API_KEY`) from `RESEND_SENDER_EMAIL`. Rate-limited **5/hour per admin JWT**.
 - **Response** `202`: `{"message_id": "<resend-id>"}`. Emits `email.test_sent` (audit payload: recipient **domain** only — no full address).
-- **Errors**: `400` invalid email; `503 email_unconfigured` if `RESEND_API_KEY`/`RESEND_SENDER_EMAIL` are unset; `429` rate limit.
+- **Errors**: `400` invalid email; `503 email_unconfigured` if `RESEND_API_KEY`/`RESEND_SENDER_EMAIL` are unset; `503 domain_unverified` when Resend rejects the send because the sending domain is not verified (operator must complete DNS in Resend); `429` rate limit.
 
 > **Self-service** password reset (UJ-033), **remember-me** (UJ-032), **idle timeout** (UJ-034), and
 > **"log out of all devices"** (UJ-035) are **frontend + Supabase only** (supabase-js

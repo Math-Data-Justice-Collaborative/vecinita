@@ -29,7 +29,11 @@ from vecinita_shared_schemas.data_management import (
 from vecinita_shared_schemas.internal_write import AuditEventRequest
 from vecinita_shared_schemas.supabase_admin import SupabaseAdminError
 
-from vecinita_data_management_backend.email_test import ResendClient, ResendError
+from vecinita_data_management_backend.email_test import (
+    ResendClient,
+    ResendError,
+    resend_error_http_detail,
+)
 from vecinita_data_management_backend.user_admin import LockoutError, UserAdminService
 
 if TYPE_CHECKING:
@@ -322,6 +326,13 @@ def register_user_admin_routes(  # noqa: C901, PLR0913, PLR0915  # FastAPI regis
         try:
             message_id = resend_client.send_test_email(body.to)
         except ResendError as err:
+            mapped = resend_error_http_detail(err)
+            if mapped is not None:
+                mapped_status, mapped_detail = mapped
+                raise HTTPException(
+                    status_code=mapped_status,
+                    detail=mapped_detail,
+                ) from err
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail="Email provider error",

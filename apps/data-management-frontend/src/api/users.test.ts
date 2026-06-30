@@ -13,6 +13,7 @@ import {
   resetUserPassword,
   sendTestEmail,
   EmailUnconfiguredError,
+  EmailDomainUnverifiedError,
 } from "./users";
 
 const CLIENT = {
@@ -282,6 +283,28 @@ describe("users API client", () => {
     await expect(
       sendTestEmail(CLIENT, "ops@example.org"),
     ).rejects.toBeInstanceOf(EmailUnconfiguredError);
+  });
+
+  it("sendTestEmail throws EmailDomainUnverifiedError on 503 domain_unverified", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse(
+            {
+              detail: {
+                code: "domain_unverified",
+                message: "The vecinita.admin domain is not verified.",
+              },
+            },
+            503,
+          ),
+        ),
+    );
+    await expect(
+      sendTestEmail(CLIENT, "ops@example.org"),
+    ).rejects.toBeInstanceOf(EmailDomainUnverifiedError);
   });
 
   it("forceSignout posts to the signout endpoint on success", async () => {

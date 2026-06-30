@@ -43,6 +43,16 @@ export class EmailUnconfiguredError extends Error {
   }
 }
 
+/**
+ * Raised when the Resend sending domain is not verified (`503 domain_unverified`).
+ */
+export class EmailDomainUnverifiedError extends Error {
+  constructor(message = "Sending domain is not verified in Resend") {
+    super(message);
+    this.name = "EmailDomainUnverifiedError";
+  }
+}
+
 function isMechanismUnavailable(status: number, body: string): boolean {
   if (status !== 503) return false;
   try {
@@ -60,6 +70,16 @@ function isEmailUnconfigured(status: number, body: string): boolean {
     return parsed.detail?.code === "email_unconfigured";
   } catch {
     return body.includes("email_unconfigured");
+  }
+}
+
+function isDomainUnverified(status: number, body: string): boolean {
+  if (status !== 503) return false;
+  try {
+    const parsed = JSON.parse(body) as { detail?: { code?: unknown } };
+    return parsed.detail?.code === "domain_unverified";
+  } catch {
+    return body.includes("domain_unverified");
   }
 }
 
@@ -248,6 +268,20 @@ export async function sendTestEmail(
     const body = await response.text();
     if (isEmailUnconfigured(response.status, body)) {
       throw new EmailUnconfiguredError();
+    }
+    if (isDomainUnverified(response.status, body)) {
+      let message = "Sending domain is not verified in Resend";
+      try {
+        const parsed = JSON.parse(body) as {
+          detail?: { message?: unknown };
+        };
+        if (typeof parsed.detail?.message === "string") {
+          message = parsed.detail.message;
+        }
+      } catch {
+        // keep default message
+      }
+      throw new EmailDomainUnverifiedError(message);
     }
     throw new Error(
       body || `Send test email failed (${String(response.status)})`,

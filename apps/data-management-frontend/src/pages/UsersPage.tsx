@@ -8,6 +8,7 @@ import {
   deleteUser,
   disableUser,
   EmailUnconfiguredError,
+  EmailDomainUnverifiedError,
   enableUser,
   forceSignout,
   inviteUser,
@@ -96,6 +97,7 @@ export function UsersPage() {
   const [testEmailBusy, setTestEmailBusy] = useState(false);
   const [testEmailSuccess, setTestEmailSuccess] = useState<string | null>(null);
   const [testEmailUnconfigured, setTestEmailUnconfigured] = useState(false);
+  const [testEmailDomainUnverified, setTestEmailDomainUnverified] = useState(false);
 
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil(total / pageSize)),
@@ -220,6 +222,7 @@ export function UsersPage() {
     setError(null);
     setTestEmailSuccess(null);
     setTestEmailUnconfigured(false);
+    setTestEmailDomainUnverified(false);
     try {
       const client = requireAdminConfig();
       const result = await sendTestEmail(client, testEmail.trim());
@@ -229,6 +232,8 @@ export function UsersPage() {
     } catch (err) {
       if (err instanceof EmailUnconfiguredError) {
         setTestEmailUnconfigured(true);
+      } else if (err instanceof EmailDomainUnverifiedError) {
+        setTestEmailDomainUnverified(true);
       } else {
         setError(
           err instanceof Error ? err.message : tr("admin.users.loadFailed"),
@@ -317,6 +322,22 @@ export function UsersPage() {
               data-testid="email-test-success"
             >
               {testEmailSuccess}
+            </p>
+          ) : null}
+          {testEmailDomainUnverified ? (
+            <p
+              role="alert"
+              className="text-sm text-destructive"
+              data-testid="email-test-domain-unverified"
+            >
+              {tr("admin.users.testEmailDomainUnverified")}{" "}
+              <a
+                href="https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/staging-runbook.md#resend-domain-verification-prerequisite"
+                className="underline"
+                data-testid="email-test-checklist-link"
+              >
+                {tr("admin.users.deliverabilityTitle")}
+              </a>
             </p>
           ) : null}
           {testEmailUnconfigured ? (

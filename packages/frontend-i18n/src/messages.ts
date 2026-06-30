@@ -83,6 +83,8 @@ const enStrings = {
   "admin.users.testEmailSuccess": "Test email sent (message ID: {messageId})",
   "admin.users.testEmailUnconfigured":
     "Email deliverability is not configured. Complete the SPF/DKIM/DMARC checklist in the staging runbook.",
+  "admin.users.testEmailDomainUnverified":
+    "The Resend sending domain is not verified. Add DNS records and verify the domain in Resend, then retry.",
   "admin.users.deliverabilityTitle": "Email deliverability",
   "admin.users.deliverabilitySubtitle":
     "Send a test message to verify Resend domain and DNS settings.",
@@ -338,6 +340,8 @@ const esStrings = {
   "admin.users.testEmailSuccess": "Correo de prueba enviado (ID: {messageId})",
   "admin.users.testEmailUnconfigured":
     "La entrega de correo no está configurada. Completa la lista SPF/DKIM/DMARC en el manual de staging.",
+  "admin.users.testEmailDomainUnverified":
+    "El dominio de envío de Resend no está verificado. Añade los registros DNS y verifica el dominio en Resend antes de reintentar.",
   "admin.users.deliverabilityTitle": "Entrega de correo",
   "admin.users.deliverabilitySubtitle":
     "Envía un mensaje de prueba para verificar el dominio Resend y la configuración DNS.",

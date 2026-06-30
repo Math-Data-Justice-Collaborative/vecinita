@@ -403,7 +403,7 @@ paths:
         "429":
           $ref: "#/components/responses/TooManyRequests"
         "503":
-          description: Resend secrets unset
+          description: Resend secrets unset or sending domain unverified
           content:
             application/json:
               schema:

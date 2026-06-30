@@ -120,4 +120,41 @@ describe("UsersPage send test email (TC-099, UJ-037)", () => {
       expect.stringContaining("staging-runbook"),
     );
   });
+
+  it("shows the deliverability checklist link when the Resend domain is unverified (503)", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(MOCK_USERS))
+      .mockResolvedValueOnce(
+        jsonResponse(
+          {
+            detail: {
+              code: "domain_unverified",
+              message:
+                "The vecinita.admin domain is not verified. Please, add and verify your domain on https://resend.com/domains",
+            },
+          },
+          503,
+        ),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderUsersPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("users-send-test-email")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId("users-test-email-input"), {
+      target: { value: "ops@partner.example.org" },
+    });
+    fireEvent.click(screen.getByTestId("users-send-test-email"));
+
+    const alert = await screen.findByTestId("email-test-domain-unverified");
+    expect(alert).toBeInTheDocument();
+    expect(screen.getByTestId("email-test-checklist-link")).toHaveAttribute(
+      "href",
+      expect.stringContaining("staging-runbook"),
+    );
+  });
 });
