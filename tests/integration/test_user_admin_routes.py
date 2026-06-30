@@ -9,17 +9,14 @@ from __future__ import annotations
 
 import json
 from http import HTTPStatus
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-import httpx
 import pytest
 from fastapi.testclient import TestClient
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.rate_limit import SlidingWindowRateLimiter
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_config_for_tests
-from vecinita_shared_schemas.json_types import as_json_object
-from vecinita_shared_schemas.supabase_admin import SupabaseAdminClient
 
 from tests.helpers.json_response import (
     json_list,
@@ -27,6 +24,11 @@ from tests.helpers.json_response import (
     json_str,
     response_json_object,
 )
+from tests.helpers.user_admin_mocks import DEV_BYPASS_SUB as _DEV_BYPASS_SUB
+from tests.helpers.user_admin_mocks import INVITE_LIMIT as _INVITE_LIMIT
+from tests.helpers.user_admin_mocks import VIEWER_ID as _VIEWER_ID
+from tests.helpers.user_admin_mocks import make_client as _make_client
+from tests.helpers.user_admin_mocks import seed_users as _seed_users
 from tests.unit.shared_schemas.auth_fixtures import (
     generate_es256_keypair,
     make_auth_config,
@@ -37,102 +39,6 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from vecinita_shared_schemas.internal_write import AuditEventRequest
-
-_DEV_BYPASS_SUB = "00000000-0000-0000-0000-000000000000"
-_VIEWER_ID = "11111111-1111-1111-1111-111111111111"
-_SECOND_ADMIN_ID = "22222222-2222-2222-2222-222222222222"
-_BANNED_UNTIL = "2125-01-01T00:00:00Z"
-_INVITE_LIMIT = 2
-
-
-def _seed_users() -> dict[str, dict[str, object]]:
-    """Two admins (dev-bypass actor + spare) and one active viewer."""
-    return {
-        _DEV_BYPASS_SUB: {
-            "id": _DEV_BYPASS_SUB,
-            "email": "actor@example.org",
-            "app_metadata": {"role": "admin"},
-            "last_sign_in_at": "2026-06-01T00:00:00Z",
-        },
-        _SECOND_ADMIN_ID: {
-            "id": _SECOND_ADMIN_ID,
-            "email": "spare-admin@example.org",
-            "app_metadata": {"role": "admin"},
-            "last_sign_in_at": "2026-06-02T00:00:00Z",
-        },
-        _VIEWER_ID: {
-            "id": _VIEWER_ID,
-            "email": "viewer@example.org",
-            "app_metadata": {"role": "viewer"},
-            "last_sign_in_at": "2026-06-03T00:00:00Z",
-        },
-    }
-
-
-def _is_active(user: dict[str, object]) -> bool:
-    return bool(user.get("email_confirmed_at") or user.get("last_sign_in_at"))
-
-
-def _make_handler(users: dict[str, dict[str, object]]) -> httpx.MockTransport:  # noqa: C901
-    def handler(request: httpx.Request) -> httpx.Response:  # noqa: C901, PLR0911, PLR0912
-        path = request.url.path
-        method = request.method
-        if path == "/auth/v1/admin/users" and method == "GET":
-            items = list(users.values())
-            return httpx.Response(
-                HTTPStatus.OK,
-                json={"users": items},
-                headers={"x-total-count": str(len(items))},
-            )
-        if path.startswith("/auth/v1/admin/users/") and method == "GET":
-            uid = path.rsplit("/", 1)[-1]
-            user = users.get(uid)
-            if user is None:
-                return httpx.Response(HTTPStatus.NOT_FOUND, json={"msg": "not found"})
-            return httpx.Response(HTTPStatus.OK, json=user)
-        if path == "/auth/v1/invite" and method == "POST":
-            email = json_str(as_json_object(cast("object", json.loads(request.content))), "email")
-            existing = next((u for u in users.values() if u["email"] == email), None)
-            if existing is not None:
-                if _is_active(existing):
-                    return httpx.Response(HTTPStatus.UNPROCESSABLE_ENTITY, json={"msg": "exists"})
-                return httpx.Response(HTTPStatus.OK, json=existing)
-            new_id = str(uuid4())
-            new_user: dict[str, object] = {"id": new_id, "email": email}
-            users[new_id] = new_user
-            return httpx.Response(HTTPStatus.OK, json=new_user)
-        if path.startswith("/auth/v1/admin/users/") and method == "PUT":
-            uid = path.rsplit("/", 1)[-1]
-            body = as_json_object(cast("object", json.loads(request.content)))
-            user = users[uid]
-            if "app_metadata" in body:
-                user["app_metadata"] = body["app_metadata"]
-            if "ban_duration" in body:
-                if body["ban_duration"] == "none":
-                    user.pop("banned_until", None)
-                else:
-                    user["banned_until"] = _BANNED_UNTIL
-            return httpx.Response(HTTPStatus.OK, json=user)
-        if path.startswith("/auth/v1/admin/users/") and method == "DELETE":
-            users.pop(path.rsplit("/", 1)[-1], None)
-            return httpx.Response(HTTPStatus.OK, json={})
-        if path == "/auth/v1/recover" and method == "POST":
-            return httpx.Response(HTTPStatus.OK, json={})
-        return httpx.Response(HTTPStatus.NOT_FOUND, json={"msg": "unhandled"})
-
-    return httpx.MockTransport(handler)
-
-
-def _make_client(users: dict[str, dict[str, object]]) -> SupabaseAdminClient:
-    http_client = httpx.Client(
-        base_url="https://test.supabase.co",
-        transport=_make_handler(users),
-    )
-    return SupabaseAdminClient(
-        base_url="https://test.supabase.co",
-        secret_key="test-secret",  # noqa: S106  # test fixture, not a real secret
-        http_client=http_client,
-    )
 
 
 @pytest.fixture(autouse=True)

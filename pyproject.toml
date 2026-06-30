@@ -87,6 +87,9 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 # pytest's design is built on bare `assert`; rewriting asserts defeats the framework.
 "tests/**" = ["S101"]
+"tests/unit/data_management/test_email_test.py" = ["D103"]
+"tests/unit/data_management/test_user_admin_routes.py" = ["D103"]
+"tests/unit/shared_schemas/test_data_management_validators.py" = ["D103"]
 # Pydantic v2 evaluates field annotations at runtime, so datetime/UUID/JsonObject must be
 # real imports — flake8-type-checking (TC001/2/3) would wrongly move them into a
 # TYPE_CHECKING block and break model construction. Scoped to the schema package only.

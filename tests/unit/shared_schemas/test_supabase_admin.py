@@ -202,3 +202,46 @@ def test_non_2xx_raises_with_status_code() -> None:
     with pytest.raises(SupabaseAdminError) as excinfo:
         _client(handler).invite_user_by_email("dup@example.org")
     assert excinfo.value.status_code == _HTTP_CONFLICT
+
+
+def test_delete_user_sessions_posts_rpc() -> None:
+    """delete_user_sessions issues POST to the admin_delete_user_sessions RPC."""
+    captured: dict[str, object] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["path"] = request.url.path
+        captured["method"] = request.method
+        return httpx.Response(204)
+
+    _client(handler).delete_user_sessions(UUID(_UID))
+    assert captured["method"] == "POST"
+    assert captured["path"] == "/rest/v1/rpc/admin_delete_user_sessions"
+
+
+def test_invited_status_without_confirmation() -> None:
+    """Users without confirmation timestamps are parsed as invited."""
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json=_gotrue_user(confirmed=False, role="viewer"),
+        )
+
+    user = _client(handler).get_user_by_id(UUID(_UID))
+    assert user.status == "invited"
+
+
+def test_malformed_gotrue_payload_raises() -> None:
+    """Malformed GoTrue payloads raise SupabaseAdminError during parsing."""
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"id": 123, "email": "op@example.org"})
+
+    with pytest.raises(SupabaseAdminError):
+        _client(handler).get_user_by_id(UUID(_UID))
+
+
+def test_client_close_owned_http_client() -> None:
+    """close() is safe when the client owns its httpx session."""
+    client = SupabaseAdminClient(base_url=_BASE, secret_key=_SECRET)
+    client.close()
