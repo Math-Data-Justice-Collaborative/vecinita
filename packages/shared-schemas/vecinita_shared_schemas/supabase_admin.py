@@ -220,6 +220,11 @@ class SupabaseAdminClient:
         """Permanently delete an operator."""
         self._request("DELETE", f"/auth/v1/admin/users/{user_id}")
 
+    def send_password_recovery(self, email: str, *, redirect_to: str | None = None) -> None:
+        """Trigger a recovery email (sends via the configured SMTP + recovery template)."""
+        params = {"redirect_to": redirect_to} if redirect_to else None
+        self._request("POST", "/auth/v1/recover", params=params, body={"email": email})
+
     def generate_link(
         self,
         link_type: LinkType,

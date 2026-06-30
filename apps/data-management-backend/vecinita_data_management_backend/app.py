@@ -16,11 +16,45 @@ from vecinita_shared_schemas.data_management import (
     Job,
     JobList,
 )
+from vecinita_shared_schemas.supabase_admin import SupabaseAdminClient, SupabaseAdminError
 
+from vecinita_data_management_backend.rate_limit import SlidingWindowRateLimiter
 from vecinita_data_management_backend.store import InMemoryJobStore, JobStore, job_record_to_schema
+from vecinita_data_management_backend.user_admin_routes import register_user_admin_routes
+from vecinita_data_management_backend.write_client import (
+    InternalWriteClient,
+    InternalWriteClientError,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+    from vecinita_shared_schemas.internal_write import AuditEventRequest
+
+_INVITE_MAX_PER_HOUR = 10
+_INVITE_WINDOW_SECONDS = 3600.0
+
+
+def _default_admin_client() -> SupabaseAdminClient | None:
+    """Build a Supabase Admin client from env, or None when credentials are absent."""
+    try:
+        return SupabaseAdminClient()
+    except SupabaseAdminError:
+        return None
+
+
+def _default_audit_emit() -> Callable[[AuditEventRequest], None]:
+    """Return an audit poster backed by the internal write API, or a no-op when unconfigured."""
+    try:
+        write_client = InternalWriteClient()
+    except InternalWriteClientError:
+
+        def _noop(_event: AuditEventRequest) -> None:
+            return None
+
+        return _noop
+    return write_client.post_audit_event
+
 
 # Modal reserves Modal-Key / Modal-Secret for workspace proxy auth tokens — do not use for app secrets.
 _PROXY_HEADER = "X-Vecinita-Proxy-Key"
@@ -46,12 +80,15 @@ def _check_proxy_auth(
 _STAGING_CORS_ORIGINS = "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app,https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app"
 
 
-def create_app(  # noqa: C901  # FastAPI factory registers job routes inline
+def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectable admin deps
     *,
     store: JobStore | None = None,
     require_proxy_auth: bool = True,
     pipeline_runner: Callable[[UUID], None] | None = None,
     cors_env_value: str | None = None,
+    admin_client: SupabaseAdminClient | None = None,
+    audit_emit: Callable[[AuditEventRequest], None] | None = None,
+    invite_limiter: SlidingWindowRateLimiter | None = None,
 ) -> FastAPI:
     """Build the Data Management ASGI app with job routes and optional pipeline runner."""
     app = FastAPI(title="Vecinita Data Management", version="0.1.0")
@@ -130,5 +167,17 @@ def create_app(  # noqa: C901  # FastAPI factory registers job routes inline
         if record is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
         return job_record_to_schema(record)
+
+    register_user_admin_routes(
+        app,
+        admin_client=admin_client if admin_client is not None else _default_admin_client(),
+        audit_emit=audit_emit if audit_emit is not None else _default_audit_emit(),
+        invite_limiter=invite_limiter
+        or SlidingWindowRateLimiter(
+            max_events=_INVITE_MAX_PER_HOUR,
+            window_seconds=_INVITE_WINDOW_SECONDS,
+        ),
+        write_auth_dep=write_auth_dep,
+    )
 
     return app

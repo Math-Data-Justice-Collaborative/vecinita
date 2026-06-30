@@ -96,6 +96,11 @@ ignore = [
 # closure referenced inside `Annotated[..., Depends(local_fn)]`, so the `= Depends(...)`
 # default form is required and FAST002 (prefer-Annotated) cannot apply here.
 "apps/data-management-backend/vecinita_data_management_backend/app.py" = ["FAST002"]
+# Same closure-dependency constraint applies to the /admin/users* route module, whose
+# handlers depend on the write_auth_dep closure passed in from create_app (EV-006 F35).
+"apps/data-management-backend/vecinita_data_management_backend/user_admin_routes.py" = [
+    "FAST002",
+]
 # infra/modal: Modal app glue around GPU/ML libraries. Modal requires imports inside
 # function/enter scope (PLC0415), vLLM/NCCL teardown must swallow errors before container
 # exit (BLE001/S110, BUG-2026-05-20), asgi_app/method return types come from frameworks

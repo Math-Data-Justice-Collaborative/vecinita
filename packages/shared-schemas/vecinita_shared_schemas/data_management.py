@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator, model_validator
+
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+Role = Literal["admin", "viewer"]
+UserStatus = Literal["active", "invited", "disabled"]
 
 
 class JobOptions(BaseModel):
@@ -70,3 +75,57 @@ class HealthResponse(BaseModel):
     """GET /health liveness response."""
 
     status: Literal["ok"]
+
+
+# --- Admin user management (EV-006 F35, /admin/users*) ---
+
+
+class UserSummary(BaseModel):
+    """Operator row returned by the user-management API (no PII beyond email)."""
+
+    id: UUID
+    email: str
+    role: Role | None = None
+    status: UserStatus
+    created_at: datetime | None = None
+    last_sign_in_at: datetime | None = None
+
+
+class UserListResponse(BaseModel):
+    """GET /admin/users paginated response."""
+
+    users: list[UserSummary]
+    total: int | None = None
+    page: int
+    page_size: int
+
+
+class InviteUserRequest(BaseModel):
+    """POST /admin/users/invite request body."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    email: str
+    role: Role = "viewer"
+
+    @field_validator("email")
+    @classmethod
+    def _valid_email(cls, value: str) -> str:
+        if not _EMAIL_RE.match(value):
+            msg = "invalid email address"
+            raise ValueError(msg)
+        return value
+
+
+class RoleUpdateRequest(BaseModel):
+    """PATCH /admin/users/{id}/role request body."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    role: Role
+
+
+class AcknowledgedResponse(BaseModel):
+    """Generic 202 acknowledgement for fire-and-forget admin actions."""
+
+    acknowledged: bool = True
