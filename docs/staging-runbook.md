@@ -177,6 +177,40 @@ Secrets matrix: [staging-secrets-matrix.md](staging-secrets-matrix.md) §EV-006.
 6. **Password recovery (admin-triggered):** Row action **Reset password** sends recovery email.
 7. **Disable / revoke:** Use **Disable** to ban; **Delete** to remove the identity (confirmation).
 
+### Force sign-out RPC (one-time operator apply)
+
+The admin **Force sign-out** row action calls `POST /admin/users/{id}/signout`, which invokes the
+`admin_delete_user_sessions` RPC on the Supabase project database. Apply the committed migration
+once before relying on force sign-out in production:
+
+```bash
+# From repo root — review supabase/migrations/*admin_delete_user_sessions*.sql first
+supabase db push   # or apply via Supabase SQL editor per operator policy
+```
+
+Until the RPC exists, the route returns `503 mechanism_unavailable` and the UI advises using
+**Disable** as the guaranteed lockout. Verify with an admin test on `/users` (UJ-036).
+
+### Deliverability test-send workflow (UJ-037)
+
+1. Set `RESEND_API_KEY` and `RESEND_SENDER_EMAIL` on the Modal data-management secret
+   (`bash scripts/deploy/sync_modal_secret.sh --merge --apply`).
+2. Complete SPF/DKIM/DMARC on the Resend-verified domain (secrets matrix §Deliverability DNS).
+3. On `/users`, use **Send test email** → confirm `message_id` in the UI and receipt in the inbox.
+4. If secrets are unset, the UI links to this runbook and the API returns `503 email_unconfigured`.
+
+### AC-U10–U16 checklist (S005 / M53)
+
+| Criterion | Verify |
+|-----------|--------|
+| AC-U10 Idle timeout | Vitest TC-096; warning at 60s, local sign-out at 30min |
+| AC-U11 Log out everywhere | Vitest TC-097; global vs local `signOut` scopes |
+| AC-U12 Force sign-out | Integration TC-098 + e2e UJ-036; audit `user.signed_out` |
+| AC-U13 Test-send | Integration TC-099 + e2e UJ-037; Resend mocked |
+| AC-U14 User search + pagination | Integration TC-100 + Vitest search/pagination |
+| AC-U15 Audit viewer | Vitest TC-101; entity_type filter + view-activity link |
+| AC-U16 Privacy + CORS | Vitest TC-102; CORS preflight TC-103 on new POST routes |
+
 Public self-signup remains disabled (`enable_signup = false` in `config.toml`); offline guard:
 `bash scripts/check_supabase_config.sh`.
 

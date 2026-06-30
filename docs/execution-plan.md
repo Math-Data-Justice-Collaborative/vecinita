@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 12: EV-006 — Admin user management + auth UX (F35) — **planned (04-tech-plan complete)** |
-| **Active milestone** | M53: Auth UX hardening — idle timeout, log-out-everywhere, force sign-out, deliverability test-send, audit viewer — **in_progress** (M52 **completed** 2026-06-30) |
-| **Active task** | T53.12 — Vitest "Send test email" UI (TC-099) |
-| **Tasks completed** | Phase 11 (S004/EV-005 F34) merged via PR #100; S005 00-context + 01-requirements + 04-tech-plan complete; M53 T53.1–T53.11 (incl. T53.8–T53.9 force sign-out UI) |
+| **Active milestone** | M53: Auth UX hardening — idle timeout, log-out-everywhere, force sign-out, deliverability test-send, audit viewer — **completed** |
+| **Active task** | Phase 12 gate check → **08-verify-build** |
+| **Tasks completed** | Phase 11 (S004/EV-005 F34) merged via PR #100; S005 M48–M53 T48.1–T53.22 complete |
 | **Last updated** | 2026-06-30 |
 | **Evolve cycle** | EV-006 (F35) — **07-build next** |
 | **Git branch** | `feat/S005-user-mgmt-auth` |
@@ -1098,21 +1098,21 @@ invite rate limit.
 | T53.9 | Code: Users-page "Force sign-out" action wired to endpoint | Code | completed | UJ-036, ADR-031 §19 | T53.8, T53.7 | 2026-06-30 | S005 | F35 |
 | T53.10 | Test (TestClient): `POST /admin/email/test` — admin 202 + `message_id`; viewer 403; 429; 503 unconfigured; audit domain-only (TC-099) — red | Test | completed | test-plan TC-099, UJ-037 | T50.2 | — | S005 | F35 |
 | T53.11 | Code: test-send route via Resend REST (`RESEND_API_KEY`/`RESEND_SENDER_EMAIL`) + 5/h rate limit + audit | Code | completed | ADR-031 §22, api-contract | T53.10 | — | S005 | F35 |
-| T53.12 | Test (Vitest): "Send test email" UI → endpoint; success/`503` checklist link (TC-099) — red | Test | pending | test-plan TC-099, UJ-037 | — | — | S005 | F35 |
-| T53.13 | Code: "Send test email" UI control | Code | pending | UJ-037, ADR-031 §22 | T53.12, T53.11 | — | S005 | F35 |
-| T53.14 | Test (backend + Vitest): `GET /admin/users?q=` ≥3-char guard → GoTrue `filter`; pagination (TC-100) — red | Test | in_progress | test-plan TC-100, UJ-030, ADR-031 §20 | T49.2 | — | S005 | F35 |
-| T53.15 | Code: `q` param on `/admin/users` + search box + shared `PaginationControls` on Users page | Code | pending | ADR-031 §20, api-contract | T53.14, T50.2, T51.3 | — | S005 | F35 |
-| T53.16 | Test (Vitest): AuditPage `entity_type` "Users" filter + `user.*`/`email.*` labels + per-user link (TC-101) — red | Test | pending | test-plan TC-101, UJ-038, ADR-031 §21 | — | — | S005 | F35 |
-| T53.17 | Code: AuditPage entity-type filter + i18n labels (EN/ES) + Users-row "View activity" link; ensure events emit `entity_type="user"` | Code | pending | ADR-031 §21, F29 AuditPage | T53.16, T50.2 | — | S005 | F35 |
-| T53.18 | Test: privacy — idle/remember/log-out-everywhere send nothing extra to server (TC-102); CORS+audit parity for new routes (TC-103) — red | Test | pending | test-plan TC-102/103, ADR-026 | T53.7, T53.11 | — | S005 | F35 |
-| T53.19 | Code+Test: CORS preflight POST on `/admin/users/{id}/signout` + `/admin/email/test` (cors-browser-methods.mdc) | Code | pending | test-plan TC-103, connectivity-gates | T53.7, T53.11 | — | S005 | F35 |
-| T53.20 | Test (e2e): `tests/e2e/test_uj036_force_signout.py`, `tests/e2e/test_uj037_email_test_send.py` | Test | pending | test-plan TC-098/099 | T53.7, T53.11 | — | S005 | F35 |
-| T53.21 | Config: OpenAPI `openapi/data-management.yaml` — `/signout`, `/admin/email/test`, `q` param | Config | pending | api-contract, ADR-011 | T53.7, T53.11, T53.15 | — | S005 | F35 |
-| T53.22 | Docs: staging runbook — SPF/DKIM/DMARC checklist, force-signout RPC apply, test-send workflow; AC-U10–U16 checklist | Docs | pending | staging-runbook, TP-S005-23, ADR-031 | T53.5 | — | S005 | F35 |
+| T53.12 | Test (Vitest): "Send test email" UI → endpoint; success/`503` checklist link (TC-099) — red | Test | completed | test-plan TC-099, UJ-037 | — | 2026-06-30 | S005 | F35 |
+| T53.13 | Code: "Send test email" UI control | Code | completed | UJ-037, ADR-031 §22 | T53.12, T53.11 | 2026-06-30 | S005 | F35 |
+| T53.14 | Test (backend + Vitest): `GET /admin/users?q=` ≥3-char guard → GoTrue `filter`; pagination (TC-100) — red | Test | completed | test-plan TC-100, UJ-030, ADR-031 §20 | T49.2 | 2026-06-30 | S005 | F35 |
+| T53.15 | Code: `q` param on `/admin/users` + search box + shared `PaginationControls` on Users page | Code | completed | ADR-031 §20, api-contract | T53.14, T50.2, T51.3 | 2026-06-30 | S005 | F35 |
+| T53.16 | Test (Vitest): AuditPage `entity_type` "Users" filter + `user.*`/`email.*` labels + per-user link (TC-101) — red | Test | completed | test-plan TC-101, UJ-038, ADR-031 §21 | — | 2026-06-30 | S005 | F35 |
+| T53.17 | Code: AuditPage entity-type filter + i18n labels (EN/ES) + Users-row "View activity" link; ensure events emit `entity_type="user"` | Code | completed | ADR-031 §21, F29 AuditPage | T53.16, T50.2 | 2026-06-30 | S005 | F35 |
+| T53.18 | Test: privacy — idle/remember/log-out-everywhere send nothing extra to server (TC-102); CORS+audit parity for new routes (TC-103) — red | Test | completed | test-plan TC-102/103, ADR-026 | T53.7, T53.11 | 2026-06-30 | S005 | F35 |
+| T53.19 | Code+Test: CORS preflight POST on `/admin/users/{id}/signout` + `/admin/email/test` (cors-browser-methods.mdc) | Code | completed | test-plan TC-103, connectivity-gates | T53.7, T53.11 | 2026-06-30 | S005 | F35 |
+| T53.20 | Test (e2e): `tests/e2e/test_uj036_force_signout.py`, `tests/e2e/test_uj037_email_test_send.py` | Test | completed | test-plan TC-098/099 | T53.7, T53.11 | 2026-06-30 | S005 | F35 |
+| T53.21 | Config: OpenAPI `openapi/data-management.yaml` — `/signout`, `/admin/email/test`, `q` param | Config | completed | api-contract, ADR-011 | T53.7, T53.11, T53.15 | 2026-06-30 | S005 | F35 |
+| T53.22 | Docs: staging runbook — SPF/DKIM/DMARC checklist, force-signout RPC apply, test-send workflow; AC-U10–U16 checklist | Docs | completed | staging-runbook, TP-S005-23, ADR-031 | T53.5 | 2026-06-30 | S005 | F35 |
 
 #### Phase 12 Gate Check
 
-- [ ] All M48–M53 tasks completed (T48.1–T53.22)
+- [x] All M48–M53 tasks completed (T48.1–T53.22)
 - [ ] TC-088–TC-103 green; UJ-030–UJ-038 covered
 - [ ] AC-U1–AC-U16 satisfied (live Resend delivery + test-send verified at 13-deploy-smoke)
 - [ ] User-mgmt audit rows in corpus `audit_log` with UUID `actor_id` only, `entity_type="user"` (TC-092, TC-101)
@@ -1558,17 +1558,17 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T53.9 | M53 | 12 | Code | completed | T53.8, T53.7 | 2026-06-30 | S005 | F35 |
 | T53.10 | M53 | 12 | Test | completed | T50.2 | — | S005 | F35 |
 | T53.11 | M53 | 12 | Code | completed | T53.10 | — | S005 | F35 |
-| T53.12 | M53 | 12 | Test | pending | — | — | S005 | F35 |
-| T53.13 | M53 | 12 | Code | pending | T53.12, T53.11 | — | S005 | F35 |
-| T53.14 | M53 | 12 | Test | in_progress | T49.2 | — | S005 | F35 |
-| T53.15 | M53 | 12 | Code | pending | T53.14, T50.2, T51.3 | — | S005 | F35 |
-| T53.16 | M53 | 12 | Test | pending | — | — | S005 | F35 |
-| T53.17 | M53 | 12 | Code | pending | T53.16, T50.2 | — | S005 | F35 |
-| T53.18 | M53 | 12 | Test | pending | T53.7, T53.11 | — | S005 | F35 |
-| T53.19 | M53 | 12 | Code | pending | T53.7, T53.11 | — | S005 | F35 |
-| T53.20 | M53 | 12 | Test | pending | T53.7, T53.11 | — | S005 | F35 |
-| T53.21 | M53 | 12 | Config | pending | T53.7, T53.11, T53.15 | — | S005 | F35 |
-| T53.22 | M53 | 12 | Docs | pending | T53.5 | — | S005 | F35 |
+| T53.12 | M53 | 12 | Test | completed | — | 2026-06-30 | S005 | F35 |
+| T53.13 | M53 | 12 | Code | completed | T53.12, T53.11 | 2026-06-30 | S005 | F35 |
+| T53.14 | M53 | 12 | Test | completed | T49.2 | 2026-06-30 | S005 | F35 |
+| T53.15 | M53 | 12 | Code | completed | T53.14, T50.2, T51.3 | 2026-06-30 | S005 | F35 |
+| T53.16 | M53 | 12 | Test | completed | — | 2026-06-30 | S005 | F35 |
+| T53.17 | M53 | 12 | Code | completed | T53.16, T50.2 | 2026-06-30 | S005 | F35 |
+| T53.18 | M53 | 12 | Test | completed | T53.7, T53.11 | 2026-06-30 | S005 | F35 |
+| T53.19 | M53 | 12 | Code | completed | T53.7, T53.11 | 2026-06-30 | S005 | F35 |
+| T53.20 | M53 | 12 | Test | completed | T53.7, T53.11 | 2026-06-30 | S005 | F35 |
+| T53.21 | M53 | 12 | Config | completed | T53.7, T53.11, T53.15 | 2026-06-30 | S005 | F35 |
+| T53.22 | M53 | 12 | Docs | completed | T53.5 | 2026-06-30 | S005 | F35 |
 
 ## Phase Gate Log
 
