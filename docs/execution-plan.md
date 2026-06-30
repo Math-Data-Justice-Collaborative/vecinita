@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 13: EV-007 — Invite acceptance flow (F35 ext, #109) — **04-tech-plan complete; 07-build next** |
-| **Active milestone** | M54: Supabase redirect config + admin frontend URL env — **pending** |
-| **Active task** | **T54.1** (TC-109 config contract test) |
-| **Tasks completed** | Phase 12 (S005/EV-006) M48–M53 T48.1–T53.22 complete; Phase 13 planning complete (ADR-032, TP-S006-01–16) |
+| **Active milestone** | M58: Templates, e2e, runbook + Phase 13 gate — **complete (07-build)** |
+| **Active task** | **08-verify-build** next |
+| **Tasks completed** | Phase 13 M54–M58 T54.1–T54.24 complete (2026-06-30) |
 | **Last updated** | 2026-06-30 |
 | **Evolve cycle** | EV-007 (F35 ext, #109) — **04-tech-plan complete; 07-build next** |
 | **Git branch** | `feat/S006-invite-acceptance` |

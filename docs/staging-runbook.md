@@ -177,6 +177,33 @@ Secrets matrix: [staging-secrets-matrix.md](staging-secrets-matrix.md) §EV-006.
 6. **Password recovery (admin-triggered):** Row action **Reset password** sends recovery email.
 7. **Disable / revoke:** Use **Disable** to ban; **Delete** to remove the identity (confirmation).
 
+## EV-007 (F35 ext) — Invite acceptance redirect chain (#109)
+
+Closes the production onboarding gap: email links must land on the deployed admin frontend
+`/accept-invite`, not `localhost:3000`. Secrets matrix:
+[staging-secrets-matrix.md](staging-secrets-matrix.md) §EV-007.
+
+### Redeploy order (critical)
+
+1. **Supabase `config push`** — merge to `main` runs `.github/workflows/supabase.yml`, or run
+   `bash scripts/supabase/ci_sync.sh sync-production` manually. Updates `site_url` (staging-first)
+   and `additional_redirect_urls` with `/accept-invite` and `/reset-password` full paths.
+2. **Operator verification** — Supabase Dashboard → **Authentication** → **URL Configuration**
+   must match `supabase/config.toml` (TC-109). Confirm `site_url` is the staging admin frontend,
+   not `http://localhost:3000`.
+3. **Modal DM secret** — set `VECINITA_ADMIN_FRONTEND_URL` (origin only, no trailing slash):
+   `bash scripts/deploy/sync_modal_secret.sh --merge --apply`
+4. **Modal deploy** — `bash scripts/deploy/modal.sh` (backend passes `redirect_to` on invite/resend/recovery).
+5. **Admin frontend redeploy** — callback handling on `/accept-invite` and `/reset-password` (no new `VITE_*`).
+6. **Live invite smoke (T3)** — fresh invite link opens staging `/accept-invite`; password set + login (13-deploy-smoke).
+
+### Invitation lifecycle (EV-007)
+
+- **Retract invitation** — row action for `status=invited` only → `POST /admin/users/{id}/revoke-invite`
+  (distinct from **Delete user**).
+- **Resend invite** — re-issues OTP with `redirect_to={VECINITA_ADMIN_FRONTEND_URL}/accept-invite`.
+- **Expired link UX** — invitee sees bilingual in-app error on `/accept-invite` when `#error=otp_expired`.
+
 ### Force sign-out RPC (one-time operator apply)
 
 The admin **Force sign-out** row action calls `POST /admin/users/{id}/signout`, which invokes the
