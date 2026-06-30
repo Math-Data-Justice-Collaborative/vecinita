@@ -57,8 +57,18 @@ class UserAdminService:
 
     def count_active_admins(self) -> int:
         """Count operators with role admin that are not disabled."""
-        result = self._client.list_users(per_page=200)
-        return sum(1 for u in result.users if u.role == "admin" and u.status != "disabled")
+        per_page = 200
+        page = 1
+        total = 0
+        while True:
+            result = self._client.list_users(page=page, per_page=per_page)
+            total += sum(
+                1 for u in result.users if u.role == "admin" and u.status != "disabled"
+            )
+            if len(result.users) < per_page:
+                break
+            page += 1
+        return total
 
     def _ensure_not_self(self, actor_id: UUID | None, target_id: UUID, action: str) -> None:
         if actor_id is not None and actor_id == target_id:
