@@ -5,6 +5,7 @@ Validates repo-managed Supabase CI artifacts without requiring Docker or cloud c
 
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -151,3 +152,15 @@ def test_config_check_script_enforces_smtp_and_template_contract() -> None:
     assert "SUPABASE_SMTP_PASS" in script
     assert "supabase/templates/" in script
     assert "templates/password-changed.html" in script
+
+
+def test_check_supabase_config_script_passes_offline() -> None:
+    """CI validate job script exits 0 without cloud secrets (TC-094/095 integration)."""
+    result = subprocess.run(  # noqa: S603  # trusted repo script
+        ["/bin/bash", str(CONFIG_CHECK)],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
