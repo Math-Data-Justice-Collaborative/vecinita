@@ -6,7 +6,7 @@ Run Vecinita on your machine with Docker Postgres, uv Python workspace, and opti
 
 - Docker (for Postgres + pgvector)
 - [uv](https://docs.astral.sh/uv/) (Python 3.11 workspace)
-- Node.js 24+ (frontends) — see `.nvmrc` (`nvm use` or [fnm](https://github.com/Schniz/fnm): `fnm install && fnm use`)
+- Node.js 24+ (frontends) — see `.nvmrc` (`nvm use` or [fnm](https://github.com/Schniz/fnm): `fnm install && fnm use`). **`make lint-fe` / `make test-fe`** auto-activate Node 24 via `scripts/ensure_node24.sh` when fnm is installed.
 - [Modal CLI](https://modal.com/docs/guide) (optional — only for live embed/LLM/data-mgmt; tests mock HTTP)
 
 ## 1. Postgres
