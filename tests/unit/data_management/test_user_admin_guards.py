@@ -67,11 +67,13 @@ def test_count_active_admins_paginates_beyond_first_page() -> None:
         _user_json(UUID(f"{i:032x}"), "viewer") for i in range(page_size - 1)
     ]
     page2 = [_user_json(_OTHER_ADMIN, "admin")]
+    list_calls = {"count": 0}
 
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.path == "/auth/v1/admin/users":
-            page = int(request.url.params.get("page", "1"))
-            users = page1 if page == 1 else page2
+            call_index = list_calls["count"]
+            list_calls["count"] = call_index + 1
+            users = page1 if call_index == 0 else page2
             return httpx.Response(200, json={"users": users})
         return httpx.Response(404, json={})
 
