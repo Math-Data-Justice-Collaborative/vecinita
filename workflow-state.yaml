@@ -278,6 +278,11 @@ active_session:             # current bounded work unit; null when none in fligh
       status: pending
     - stage: 13-deploy-smoke
       status: pending
+    - stage: 19-address-pr-review
+      status: completed
+      started_at: "2026-06-30"
+      completed_at: "2026-06-30"
+      note: "PR #108 hotfix remediation (PRM-009 / linked PRR-011)"
   skipped_stages:
     - stage: 02-verify-plan
       reason: "User-approved evolve-lite path (2026-06-29)."
@@ -1237,12 +1242,12 @@ stages:
     status: completed
     started: "2026-06-12"
     completed: "2026-06-30"
-    last_cycle: PRR-102
+    last_cycle: PRR-011
   19-address-pr-review:
-    status: in_progress
+    status: completed
     started: "2026-06-25"
-    completed: null
-    last_cycle: PRM-008
+    completed: "2026-06-30"
+    last_cycle: PRM-009
     history_note: "PRM-005 closed PR #62 ([M32] Workspace scaffold) on 2026-06-13"
   gather-context:
     status: skipped
@@ -2188,6 +2193,31 @@ pr_review_cycles:
         note: session PR review report
     gh_review_url: null
     linked_remediation_cycle_id: PRM-008
+  - id: PRR-011
+    pr_number: 108
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/108
+    title: "fix(admin): avoid duplicate GoTrueClient on login submit"
+    status: completed
+    started: "2026-06-30"
+    completed: "2026-06-30"
+    head_ref: fix/BUG-2026-06-30-gotrue-multiple-instances-login
+    base_ref: main
+    head_sha: 53131f38d5de7f9ed9f77c098ee6a78e4b98944b
+    verdict: APPROVE
+    blockers: 0
+    advisories: 2
+    praise: 3
+    ci_status: success
+    session_id: S005-user-mgmt-auth
+    subagents:
+      bugbot: completed
+      security_review: completed
+    artifacts:
+      - path: docs/sessions/S005-user-mgmt-auth/reports/pr-review-108.md
+        note: session report for PR 108
+      - path: .cursor/skills/18-pr-review/checklist.md
+        note: checklist source
+    gh_review_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/108#pullrequestreview-4603889447
 
 pr_remediation_cycles:
   - id: PRM-001
@@ -2647,6 +2677,49 @@ pr_remediation_cycles:
         note: session PR remediation report (PRM-008)
     follow_up:
       pr_review_rerun: offered
+  - id: PRM-009
+    pr_number: 108
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/108
+    linked_review_cycle_id: PRR-011
+    title: "fix(admin): avoid duplicate GoTrueClient on login submit"
+    status: completed
+    started: "2026-06-30"
+    completed: "2026-06-30"
+    head_ref: fix/BUG-2026-06-30-gotrue-multiple-instances-login
+    base_ref: main
+    session_id: S005-user-mgmt-auth
+    ci_status: success
+    head_sha: 30cb9bfdd487f16d22a5c32d420db8b026bd2ef5
+    counts:
+      fixed: 1
+      deferred: 1
+      wont_fix: 0
+    findings:
+      - id: F-001
+        source: inline
+        severity: advisory
+        path: apps/data-management-frontend/src/test/test_bug_2026_06_30_gotrue_multiple_instances_login.test.tsx
+        line: null
+        thread_id: "PRRT_kwDORy2YAM6NZimX"
+        status: fixed
+        commit: 30cb9bf
+        note: "Regression test covers module singleton, not full AuthProvider→LoginPage submit path"
+      - id: F-002
+        source: review_body
+        severity: advisory
+        path: null
+        line: null
+        thread_id: null
+        status: deferred
+        commit: null
+        note: "post-merge staging spot-check"
+    commits:
+      - 30cb9bf
+    artifacts:
+      - path: docs/sessions/S005-user-mgmt-auth/reports/pr-remediation-108.md
+        note: session PR remediation report (PRM-009)
+    follow_up:
+      pr_review_rerun: offered
 
 agents:
   repo_researcher:
@@ -2817,6 +2890,8 @@ decisions_log:
     note: "S005/EV-006 04-tech-plan SCOPE ADDITION (in-place re-run; 04-tech-plan remains completed). User approved adding 4 items; MFA/2FA + bulk CSV import remain deferred. ADR-031 (docs/adr/ADR-031-ev006-auth-ux-hardening.md) captures TP-S005-17 idle/session timeout (30min+60s warning, frontend VITE_VECINITA_IDLE_TIMEOUT_MIN/_WARNING_SEC); TP-S005-18 self 'log out of all devices' (global signOut); TP-S005-19 admin force-logout POST /admin/users/{id}/signout via admin_delete_user_sessions RPC (one-time operator apply, 503 fallback->disable); TP-S005-20 user search q (>=3 chars->GoTrue filter)+pagination; TP-S005-21 audit viewer (reuse F29 AuditPage + GET /internal/v1/audit, entity_type Users filter, user.*/email.* i18n labels, per-user link); TP-S005-22 deliverability test-send POST /admin/email/test via Resend REST (RESEND_API_KEY/RESEND_SENDER_EMAIL, 5/h/admin); TP-S005-23 SPF/DKIM/DMARC operator checklist; TP-S005-24 config+secrets delta. Milestone M53 (T53.1-T53.22, all pending, TDD-ordered) appended to execution-plan Phase 12 (now M48-M53); Phase 12 gate updated to TC-088–TC-103, UJ-030–UJ-038, AC-U1–AC-U16. New artifacts: ADR-031, UJ-034-UJ-038, TC-096-TC-103, AC-U10-AC-U16, api-contract new routes (/admin/users/{id}/signout, /admin/email/test, q param), Modal DM secrets RESEND_API_KEY + RESEND_SENDER_EMAIL, idle-timeout VITE envs. Synced stale pointer: EV-006.current_stage 01-requirements->07-build (00/01/04 complete, 07-build next) + added EV-006.stages.04-tech-plan node (ADR-030/031, M48-M53). Commits DEFERRED (commit-only-when-asked override) — scope-addition docs uncommitted, no new SHAs. active_session.current_stage unchanged (07-build)."
   - "User invoked 11-verify-impl despite evolve-lite skip; 10-e2e still pending in routing_plan but T0 e2e suite run inline during 11 (68 tests pass)"
   - "11-verify-impl F35 journeys UJ-030–UJ-038 + feature F35 approved by user; formal 10-e2e required before 11 completion"
+  - date: "2026-06-30"
+    note: "S005 routing plan amended for PR #108 hotfix remediation (PRM-009); user approved blockers+advisories scope"
 
 artifacts:
   - docs/context-brief.md
@@ -2882,6 +2957,10 @@ artifacts:
     session_id: S005-user-mgmt-auth
     stage: 09-qa
   - path: docs/sessions/S005-user-mgmt-auth/reports/pr-remediation.md
+    kind: pr-remediation-report
+    session_id: S005-user-mgmt-auth
+    stage: 19-address-pr-review
+  - path: docs/sessions/S005-user-mgmt-auth/reports/pr-remediation-108.md
     kind: pr-remediation-report
     session_id: S005-user-mgmt-auth
     stage: 19-address-pr-review
@@ -3325,6 +3404,12 @@ git_history:
       session_id: S005-user-mgmt-auth
       files_changed: 1
       timestamp: "2026-06-30T17:34:39Z"
+    - sha: 30cb9bf
+      branch: fix/BUG-2026-06-30-gotrue-multiple-instances-login
+      message: "fix(review): add AuthProvider.signIn integration test for GoTrue singleton"
+      stage: "19-address-pr-review"
+      session_id: S005-user-mgmt-auth
+      timestamp: "2026-06-30"
 
 constraints:
   cost:
