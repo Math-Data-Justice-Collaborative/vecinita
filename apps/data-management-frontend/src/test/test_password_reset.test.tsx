@@ -14,6 +14,10 @@ import { setSupabaseClientForTests } from "@/auth/supabaseClient";
 import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
 import { SetPasswordPage } from "@/pages/SetPasswordPage";
 
+vi.mock("@/auth/useAuthLinkCallback", () => ({
+  useAuthLinkCallback: () => ({ status: "ready" as const }),
+}));
+
 const mockResetPasswordForEmail = vi.fn();
 const mockUpdateUser = vi.fn();
 
