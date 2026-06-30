@@ -303,6 +303,31 @@ def register_user_admin_routes(  # noqa: C901, PLR0913, PLR0915  # FastAPI regis
         _audit("user.reset_password", user_id, actor)
         return AcknowledgedResponse()
 
+    @app.post(
+        "/admin/users/{user_id}/revoke-invite",
+        status_code=status.HTTP_202_ACCEPTED,
+        response_model=AcknowledgedResponse,
+    )
+    def revoke_invite(  # pyright: ignore[reportUnusedFunction]
+        user_id: UUID,
+        actor: AuthPrincipal = Depends(write_auth_dep),
+    ) -> AcknowledgedResponse:
+        client = _require_client()
+        try:
+            target = client.get_user_by_id(user_id)
+            if target.status != "invited":
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail={
+                        "code": "cannot_revoke_active_user",
+                        "message": "Only pending invitations can be retracted",
+                    },
+                )
+            client.delete_user(user_id)
+        except SupabaseAdminError as err:
+            raise _map_admin_error(err) from err
+        _audit("user.invite_revoked", user_id, actor)
+        return AcknowledgedResponse()
 
     @app.post(
         "/admin/users/{user_id}/signout",
