@@ -333,4 +333,48 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
       );
     });
   });
+
+  it("shows retract invitation only for invited rows (TC-108)", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(MOCK_USERS)));
+
+    renderUsersPage();
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId("user-row")).toHaveLength(2);
+    });
+
+    const invitedId = MOCK_USERS.users[1]?.id ?? "";
+    expect(
+      screen.getByTestId(`revoke-invite-${invitedId}`),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(`revoke-invite-${MOCK_USERS.users[0]?.id ?? ""}`),
+    ).not.toBeInTheDocument();
+  });
+
+  it("calls revoke-invite endpoint when retract is clicked (TC-108)", async () => {
+    const invitedId = MOCK_USERS.users[1]?.id ?? "";
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(MOCK_USERS))
+      .mockResolvedValueOnce(jsonResponse({}, 202))
+      .mockResolvedValueOnce(jsonResponse(MOCK_USERS));
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderUsersPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId(`revoke-invite-${invitedId}`)).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId(`revoke-invite-${invitedId}`));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        `http://localhost:8001/admin/users/${invitedId}/revoke-invite`,
+        expect.objectContaining({ method: "POST" }),
+      );
+    });
+  });
 });
