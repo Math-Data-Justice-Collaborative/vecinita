@@ -272,6 +272,23 @@ def test_data_management_cors_preflight_on_admin_users_signout() -> None:
     assert "POST" in allow_methods
 
 
+def test_data_management_cors_preflight_on_admin_users_revoke_invite() -> None:
+    """TC-103/108: DM CORS preflight allows POST on /admin/users/{id}/revoke-invite."""
+    client = TestClient(create_data_mgmt_app(require_proxy_auth=False))
+    response = client.options(
+        "/admin/users/00000000-0000-0000-0000-000000000001/revoke-invite",
+        headers={
+            "Origin": ADMIN_ORIGIN,
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "authorization",
+        },
+    )
+    assert response.status_code == HTTPStatus.OK
+    assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
+    allow_methods = header_str(response.headers, "access-control-allow-methods").upper()
+    assert "POST" in allow_methods
+
+
 def test_data_management_cors_preflight_on_admin_email_test() -> None:
     """TC-103: DM CORS preflight allows POST on /admin/email/test."""
     client = TestClient(create_data_mgmt_app(require_proxy_auth=False))
