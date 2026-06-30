@@ -324,6 +324,10 @@ active_session:             # current bounded work unit; null when none in fligh
       kind: verify-impl-report
       session_id: S005-user-mgmt-auth
       stage: 11-verify-impl
+    - path: docs/sessions/S005-user-mgmt-auth/reports/pr-remediation.md
+      kind: pr-remediation-report
+      session_id: S005-user-mgmt-auth
+      stage: 19-address-pr-review
 sessions:                   # archived completed sessions
   - id: S004-supabase-auth
     type: feature
@@ -1232,13 +1236,13 @@ stages:
   18-pr-review:
     status: completed
     started: "2026-06-12"
-    completed: "2026-06-25"
-    last_cycle: PRR-010
+    completed: "2026-06-30"
+    last_cycle: PRR-102
   19-address-pr-review:
     status: in_progress
     started: "2026-06-25"
     completed: null
-    last_cycle: PRM-007
+    last_cycle: PRM-008
     history_note: "PRM-005 closed PR #62 ([M32] Workspace scaffold) on 2026-06-13"
   gather-context:
     status: skipped
@@ -2160,6 +2164,30 @@ pr_review_cycles:
       security_review: completed
     session_note: "Session orchestration waived — review-followup on existing open PR; not in S001 routing plan (precedent: 2026-06-25 PR #66 review waiver)."
     note: "Hotfix lifts useChatHistory to AppContent shell; #53 fix correct, CI green, security clean. Bugbot 1 medium (partial state lift: loading/in-flight stream not lifted → mid-stream tab switch can spawn concurrent stream) triaged 🟡 non-blocking; inline on ChatPanel.tsx:43. 2nd 🟡: unused fallback hook when prop supplied (cosmetic)."
+  - id: PRR-102
+    pr_number: 102
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/102
+    title: "Phase 12: EV-006 — Admin user management + auth UX (F35)"
+    status: completed
+    started: "2026-06-30"
+    completed: "2026-06-30"
+    head_ref: feat/S005-user-mgmt-auth
+    base_ref: main
+    verdict: REQUEST_CHANGES
+    blockers: 1
+    advisories: 4
+    praise: 3
+    ci_status: partial
+    ci_note: "ci.yml green; supabase validate red"
+    subagents:
+      bugbot: skipped
+      security_review: skipped
+    subagents_note: "Diff unavailable — bugbot and security_review skipped"
+    artifacts:
+      - path: docs/sessions/S005-user-mgmt-auth/reports/pr-review.md
+        note: session PR review report
+    gh_review_url: null
+    linked_remediation_cycle_id: PRM-008
 
 pr_remediation_cycles:
   - id: PRM-001
@@ -2575,6 +2603,50 @@ pr_remediation_cycles:
         note: "F-001 red->green regression test"
     follow_up:
       pr_review_rerun: offered
+  - id: PRM-008
+    pr_number: 102
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/102
+    linked_review_cycle_id: PRR-102
+    title: "Phase 12: EV-006 — Admin user management + auth UX (F35)"
+    status: completed
+    started: "2026-06-30"
+    completed: "2026-06-30"
+    head_ref: feat/S005-user-mgmt-auth
+    base_ref: main
+    session_id: S005-user-mgmt-auth
+    ci_status: success
+    counts:
+      fixed: 2
+      deferred: 0
+      wont_fix: 0
+    findings:
+      - id: F-001
+        source: inline
+        severity: blocker
+        path: .github/workflows/supabase.yml
+        thread_id: "PRRT_kwDORy2YAM6NWv0g"
+        status: fixed
+        commit: 1b86353
+        note: "Mailpit smoke — validate job curls /api/v1/messages (Supabase CLI 2.84.2); step renamed; ADR-030, decisions.md, supabase/README.md updated"
+      - id: F-002
+        source: inline
+        severity: advisory
+        path: apps/data-management-backend/vecinita_data_management_backend/user_admin.py
+        thread_id: "PRRT_kwDORy2YAM6NWv2Y"
+        status: fixed
+        commit: fb195cf
+        note: "Paginate count_active_admins (per_page=200) until short page; test_count_active_admins_paginates_beyond_first_page added"
+    commits:
+      - 1b86353
+      - fb195cf
+      - 7619baf
+      - 54b8fa5
+    head_sha: 54b8fa5
+    artifacts:
+      - path: docs/sessions/S005-user-mgmt-auth/reports/pr-remediation.md
+        note: session PR remediation report (PRM-008)
+    follow_up:
+      pr_review_rerun: offered
 
 agents:
   repo_researcher:
@@ -2809,6 +2881,10 @@ artifacts:
     kind: qa-report
     session_id: S005-user-mgmt-auth
     stage: 09-qa
+  - path: docs/sessions/S005-user-mgmt-auth/reports/pr-remediation.md
+    kind: pr-remediation-report
+    session_id: S005-user-mgmt-auth
+    stage: 19-address-pr-review
 
 git_history:
   current_branch: feat/S005-user-mgmt-auth
@@ -3221,6 +3297,34 @@ git_history:
       session_id: S005-user-mgmt-auth
       files_changed: 1
       timestamp: "2026-06-30T00:00:00Z"
+    - sha: 1b86353
+      branch: feat/S005-user-mgmt-auth
+      message: "fix(review): Mailpit smoke in supabase.yml validate (PR #102)"
+      stage: "19-address-pr-review"
+      session_id: S005-user-mgmt-auth
+      files_changed: 4
+      timestamp: "2026-06-30T17:28:35Z"
+    - sha: fb195cf
+      branch: feat/S005-user-mgmt-auth
+      message: "fix(review): paginate count_active_admins for last-admin lockout (PR #102)"
+      stage: "19-address-pr-review"
+      session_id: S005-user-mgmt-auth
+      files_changed: 2
+      timestamp: "2026-06-30T17:28:43Z"
+    - sha: 7619baf
+      branch: feat/S005-user-mgmt-auth
+      message: "fix(review): ruff format user_admin.py (PR #102 CI)"
+      stage: "19-address-pr-review"
+      session_id: S005-user-mgmt-auth
+      files_changed: 1
+      timestamp: "2026-06-30T17:31:24Z"
+    - sha: 54b8fa5
+      branch: feat/S005-user-mgmt-auth
+      message: "fix(review): typecheck pagination test handler (PR #102 CI)"
+      stage: "19-address-pr-review"
+      session_id: S005-user-mgmt-auth
+      files_changed: 1
+      timestamp: "2026-06-30T17:34:39Z"
 
 constraints:
   cost:
