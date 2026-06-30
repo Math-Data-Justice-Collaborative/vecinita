@@ -288,6 +288,49 @@ one template per type):
 | RD-089 | Audit of user-mgmt | invite/role-change/disable/delete/reset recorded in `audit_log` with `actor_id` (UUID) + `actor_role` — no PII (extends ADR-016) | ADR-029, ADR-016 | F35 interview Q `forgetting` (`audit`) |
 | RD-090 | Sender identity | Operator supplies a **verified Resend sending domain + sender address**; captured as an operator prerequisite/secret in `staging-secrets-matrix.md` | ADR-029 | F35 interview Q `sender_identity` (`have_domain`) |
 
+### EV-007 01-requirements decisions (2026-06-30) — F35 invite acceptance (#109)
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-091 | Invite mail channel | **Keep Supabase-managed invite/recovery mail via Resend SMTP** — not Resend REST API (same as R60) | EV-007 interview; context brief R60 |
+| RD-092 | Retract invitation | New **`POST /admin/users/{id}/revoke-invite`** for `status=invited` only; distinct UI label; audit `user.invite_revoked` (same as R61) | EV-007 interview; #109 |
+| RD-093 | Backend redirect_to | Pass `redirect_to={VECINITA_ADMIN_FRONTEND_URL}/accept-invite` on invite/resend and `…/reset-password` on admin recovery; env required on Modal DM backend | EV-007 interview; #109 |
+| RD-094 | Supabase site_url strategy | **Staging-first** — `site_url` = staging admin frontend URL in `config.toml`; prod URL in `additional_redirect_urls` until prod cutover | EV-007 interview Q `site_url_strategy` |
+| RD-095 | Auth callback pages | `/accept-invite` and `/reset-password` must parse hash/query, wait for session before password form, show bilingual `#error=otp_expired` UX — **`detectSessionInUrl` alone insufficient** (invalidates ADR-030 §5 assumption) | EV-007 interview; #109 |
+| RD-096 | Invite metadata UI | Show **`invited_at`** + **"expires ~1h"** hint on pending invite rows | EV-007 interview Q `invite_metadata_ui` |
+| RD-097 | Email template scope | **Include template copy/branding polish** in this cycle (CTA, expiry notice aligned with `otp_expiry`) | EV-007 interview Q `email_template_scope` |
+| RD-098 | E2E tier | **T2** mocked Supabase callback (Vitest + backend integration) + **T3** live invite at 13-deploy-smoke (not blocking merge, required before deploy sign-off) | EV-007 interview Q `e2e_tier_invite` |
+
+EV-007 artifacts: feature-list F35.12–F35.15; user-journeys UJ-030/031/033 deltas; test-plan TC-104–TC-110;
+acceptance-criteria AC-U3/U5 revised + AC-U17–AC-U21; api-contract `redirect_to` + `revoke-invite`;
+config-spec `VECINITA_ADMIN_FRONTEND_URL` on Modal DM; deployment-integration §EV-007; **ADR-032**.
+
+### EV-007 04-tech-plan decisions (2026-06-30) — TP-S006-01–16
+
+Requirements locked RD-091–RD-098 in 01-requirements; **recommended defaults applied** for
+implementation details per gap analysis + #109.
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| TP-S006-01 | ADR placement | New **ADR-032**; ADR-030 §5 superseded for auth callback | EV-007 04-tech-plan |
+| TP-S006-02 | Admin frontend URL env | `VECINITA_ADMIN_FRONTEND_URL` on **Modal DM only**; 503 when unset | ADR-032 §2, config-spec |
+| TP-S006-03 | Redirect builder | Shared `build_auth_redirect_path` for invite/resend/recovery | ADR-032 §3 |
+| TP-S006-04 | Supabase site_url | **Staging-first** in `config.toml`; prod in `additional_redirect_urls` | RD-094, ADR-032 §4 |
+| TP-S006-05 | Auth callback | **`useAuthLinkCallback` hook** — hash/code/error parse + session gate | RD-095, ADR-032 §5 |
+| TP-S006-06 | Expired link UX | Bilingual error panel for `#error=otp_expired` / invalid link | ADR-032 §6, AC-U20 |
+| TP-S006-07 | Retract invite | `POST /admin/users/{id}/revoke-invite` → delete invited-only | RD-092, ADR-032 §7 |
+| TP-S006-08 | Resend OTP | `invite_user_by_email` + `redirect_to` (no `generate_link` v1) | ADR-032 §8 |
+| TP-S006-09 | Invite metadata | `invited_at` from `created_at` + client "~1h" hint | RD-096, ADR-032 §9 |
+| TP-S006-10 | Mail channel | Keep Supabase SMTP (not Resend REST) for invite/recovery | RD-091, ADR-032 §10 |
+| TP-S006-11 | CORS + OpenAPI | POST `/revoke-invite` in CORS + OpenAPI | ADR-032 §11 |
+| TP-S006-12 | Git | Branch `feat/S006-invite-acceptance`, **PR-49** | ADR-032 §12 |
+| TP-S006-13 | Redeploy order | config push → Modal secret → modal deploy → FE → smoke | ADR-032 §13 |
+| TP-S006-14 | Templates | Minor invite/recovery HTML polish (TC-110) | RD-097, ADR-032 §14 |
+| TP-S006-15 | E2E tier | T2 merge-blocking; T3 live smoke at 13-deploy-smoke | RD-098, ADR-032 §15 |
+| TP-S006-16 | Dependencies | **No new deps** | ADR-032 §16 |
+
+EV-007 execution plan: **Phase 13** M54–M58 (T54.1–T54.24).
+
 EV-006 artifacts: feature-list F35; user-journeys UJ-030–UJ-033; test-plan TC-088–TC-095;
 acceptance-criteria AC-U1–AC-U9; ADR-029; config-spec §Admin user management + email; api-contract
 §Admin user management; staging-secrets-matrix §EV-006.

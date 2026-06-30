@@ -83,6 +83,12 @@ Returns `409 Conflict` with a clear error code. Counts admins via Supabase Admin
 All three are **public** (outside `ProtectedRoute`) but require a valid Supabase session/hash
 from the email link (`detectSessionInUrl`).
 
+> **Superseded in part by [ADR-032](ADR-032-ev007-invite-acceptance-implementation.md) (EV-007):**
+> `detectSessionInUrl` alone is **insufficient** when redirect host is wrong or session detection
+> is async. `/accept-invite` and `/reset-password` must use the explicit `useAuthLinkCallback`
+> hook (hash/code/error parsing + session gate before password form). Backend must pass
+> `redirect_to` via `VECINITA_ADMIN_FRONTEND_URL` on Modal DM.
+
 ### 6. Remember-me: preference at login, client rebuild before sign-in (TP-S005-06)
 
 1. Login form includes **"Remember me"** checkbox (default **checked** per RD-084).

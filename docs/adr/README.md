@@ -32,6 +32,7 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 | [ADR-029](ADR-029-admin-user-management-and-auth-ux.md) | Admin user management, remember-me, Resend SMTP + repo templates (F35 product) | Accepted | 01-requirements (S005/EV-006) |
 | [ADR-030](ADR-030-ev006-user-mgmt-implementation.md) | EV-006 implementation — backend host, httpx Admin API, audit ingest, guards (F35 tech) | Accepted | 04-tech-plan (S005/EV-006) |
 | [ADR-031](ADR-031-ev006-auth-ux-hardening.md) | EV-006 auth UX hardening — idle timeout, log-out-everywhere, deliverability test-send, audit viewer (F35 scope addition, TP-S005-17–24) | Accepted | 04-tech-plan (S005/EV-006) |
+| [ADR-032](ADR-032-ev007-invite-acceptance-implementation.md) | EV-007 invite acceptance — redirect URLs, auth callback hook, retract invitation (F35 ext, #109, TP-S006-01–16) | Accepted | 04-tech-plan (S006/EV-007) |
 
 > **ADR-004 note:** ADR-026 supersedes the *no Supabase Auth / no identity* clause of ADR-004
 > **for admin surfaces only**. ADR-004's visitor zero-PII, stateless-chat, sovereignty, and cost
