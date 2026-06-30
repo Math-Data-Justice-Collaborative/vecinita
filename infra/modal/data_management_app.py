@@ -7,7 +7,8 @@ Requires Modal secret `vecinita-data-management` with:
 VECINITA_MODAL_EMBED_URL, VECINITA_INTERNAL_WRITE_URL, VECINITA_INTERNAL_API_KEY,
 VECINITA_MODAL_PROXY_KEY, VECINITA_CORS_ORIGINS (admin frontend origin),
 VECINITA_MODAL_LLM_URL (required for retag and LLM tagging at ingest),
-SUPABASE_URL, VECINITA_AUTH_REQUIRED (EV-005 F34 admin JWT on /jobs*).
+SUPABASE_URL, VECINITA_AUTH_REQUIRED (EV-005 F34 admin JWT on /jobs*),
+SUPABASE_SECRET_KEY (EV-006 F35 — Admin API for /admin/users*; ADR-030 / TP-S005-01).
 See infra/modal/.env.example and docs/staging-secrets-matrix.md.
 """
 
