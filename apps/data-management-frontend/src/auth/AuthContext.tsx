@@ -3,15 +3,18 @@ import {
   useEffect,
   useMemo,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 
 import {
   getSupabaseClient,
+  getSupabaseClientVersion,
   persistRememberPreference,
   resetSupabaseClient,
   roleFromAppMetadata,
+  subscribeSupabaseClientVersion,
 } from "@/auth/supabaseClient";
 import { AuthContext, type AuthState } from "@/auth/authContext";
 import { setOperatorAccessToken } from "@/config";
@@ -19,6 +22,10 @@ import { setOperatorAccessToken } from "@/config";
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const clientVersion = useSyncExternalStore(
+    subscribeSupabaseClientVersion,
+    getSupabaseClientVersion,
+  );
 
   useEffect(() => {
     setOperatorAccessToken(session?.access_token ?? null);
@@ -39,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription.subscription.unsubscribe();
     };
-  }, []);
+  }, [clientVersion]);
 
   const signIn = useCallback(
     async (email: string, password: string, remember = true) => {

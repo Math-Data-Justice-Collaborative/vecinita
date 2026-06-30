@@ -8,7 +8,29 @@ const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as
 export const REMEMBER_STORAGE_KEY = "vecinita.auth.remember";
 
 let client: SupabaseClient | null = null;
+let clientRemember: boolean | null = null;
+let clientVersion = 0;
+const clientVersionListeners = new Set<() => void>();
 let testClientInjected = false;
+
+function notifyClientVersionChange(): void {
+  clientVersion += 1;
+  for (const listener of clientVersionListeners) {
+    listener();
+  }
+}
+
+/** Subscribe when the singleton is rebuilt (e.g. remember-me storage routing). */
+export function subscribeSupabaseClientVersion(onChange: () => void): () => void {
+  clientVersionListeners.add(onChange);
+  return () => {
+    clientVersionListeners.delete(onChange);
+  };
+}
+
+export function getSupabaseClientVersion(): number {
+  return clientVersion;
+}
 
 export type SupportedStorage = Pick<
   Storage,
@@ -69,7 +91,15 @@ export function resetSupabaseClient(remember?: boolean): SupabaseClient {
     return client;
   }
   const resolvedRemember = remember ?? readRememberPreference();
+  if (client !== null && clientRemember === resolvedRemember) {
+    return client;
+  }
+  const hadClient = client !== null;
   client = buildClient(resolvedRemember);
+  clientRemember = resolvedRemember;
+  if (hadClient) {
+    notifyClientVersionChange();
+  }
   return client;
 }
 
@@ -77,13 +107,16 @@ export function getSupabaseClient(): SupabaseClient {
   if (client !== null) {
     return client;
   }
-  client = buildClient(readRememberPreference());
+  const remember = readRememberPreference();
+  client = buildClient(remember);
+  clientRemember = remember;
   return client;
 }
 
 /** Test hook — replace the singleton client. */
 export function setSupabaseClientForTests(mock: SupabaseClient | null): void {
   client = mock;
+  clientRemember = null;
   testClientInjected = mock !== null;
 }
 
