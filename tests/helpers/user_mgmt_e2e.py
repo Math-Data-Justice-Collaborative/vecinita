@@ -9,14 +9,16 @@ from typing import TYPE_CHECKING, TypedDict, cast
 from uuid import UUID, uuid4
 
 import httpx
-import pytest
+import pytest  # noqa: TC002 — runtime fixture typing
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_internal_write_api.app import create_app as create_write_app
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_config_for_tests
-from vecinita_shared_schemas.internal_write import AuditEventRequest
+from vecinita_shared_schemas.internal_write import (
+    AuditEventRequest,  # noqa: TC002 — runtime audit_emit
+)
 from vecinita_shared_schemas.json_types import as_json_object
 from vecinita_shared_schemas.supabase_admin import SupabaseAdminClient
 
@@ -42,6 +44,8 @@ _BANNED_UNTIL = "2125-01-01T00:00:00Z"
 
 
 class UserMgmtStack(TypedDict):
+    """DM + write API clients, DB engine, and mocked GoTrue user store."""
+
     dm: TestClient
     write: TestClient
     engine: Engine
@@ -51,6 +55,7 @@ class UserMgmtStack(TypedDict):
 
 
 def database_url() -> str:
+    """Return the integration-test database URL (defaults to local docker-compose)."""
     return os.environ.get(
         "DATABASE_URL",
         "postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
@@ -58,6 +63,7 @@ def database_url() -> str:
 
 
 def seed_users() -> dict[str, dict[str, object]]:
+    """Seed admin, spare admin, and viewer records for mocked GoTrue."""
     return {
         str(ADMIN_ID): {
             "id": str(ADMIN_ID),
@@ -85,6 +91,8 @@ def _is_active(user: dict[str, object]) -> bool:
 
 
 def make_gotrue_handler(users: dict[str, dict[str, object]]) -> httpx.MockTransport:  # noqa: C901
+    """Build a mock GoTrue Admin API transport backed by an in-memory user map."""
+
     def handler(request: httpx.Request) -> httpx.Response:  # noqa: C901, PLR0911, PLR0912
         path = request.url.path
         method = request.method
@@ -137,6 +145,7 @@ def make_gotrue_handler(users: dict[str, dict[str, object]]) -> httpx.MockTransp
 
 
 def make_admin_client(users: dict[str, dict[str, object]]) -> SupabaseAdminClient:
+    """Wrap the mock transport in a SupabaseAdminClient for DM backend injection."""
     http_client = httpx.Client(
         base_url="https://test.supabase.co",
         transport=make_gotrue_handler(users),
@@ -149,11 +158,13 @@ def make_admin_client(users: dict[str, dict[str, object]]) -> SupabaseAdminClien
 
 
 def admin_bearer(stack: UserMgmtStack) -> str:
+    """Return an Authorization header for the seeded admin operator."""
     token = sign_test_jwt(stack["private_key"], sub=ADMIN_ID, role="admin")
     return f"Bearer {token}"
 
 
 def viewer_bearer(stack: UserMgmtStack) -> str:
+    """Return an Authorization header for the seeded viewer operator."""
     token = sign_test_jwt(stack["private_key"], sub=VIEWER_ID, role="viewer")
     return f"Bearer {token}"
 

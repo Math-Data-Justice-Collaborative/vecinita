@@ -7,7 +7,7 @@ import os
 import tomllib
 from http import HTTPStatus
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import cast
 from uuid import UUID
 
 import pytest
@@ -16,9 +16,6 @@ from vecinita_shared_schemas.json_types import as_json_object
 
 from tests.helpers.json_response import json_str, response_json_object
 from tests.helpers.user_mgmt_e2e import ADMIN_ID, UserMgmtStack, admin_bearer
-
-if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine
 
 pytestmark = [
     pytest.mark.e2e,

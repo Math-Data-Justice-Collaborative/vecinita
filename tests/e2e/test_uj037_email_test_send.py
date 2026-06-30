@@ -53,6 +53,8 @@ def _resend_client() -> ResendClient:
 
 @dataclass
 class EmailDmHarness:
+    """DM TestClient plus captured audit events for deliverability E2E."""
+
     client: TestClient
     private_key: EllipticCurvePrivateKey
     captured_audit: list[AuditEventRequest]

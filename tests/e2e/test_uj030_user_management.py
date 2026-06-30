@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import os
 from http import HTTPStatus
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
@@ -24,6 +24,8 @@ from tests.helpers.user_mgmt_e2e import (
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
+
+_MIN_SEEDED_OPERATORS = 2
 
 pytestmark = [
     pytest.mark.e2e,
@@ -47,7 +49,7 @@ def test_admin_lists_operators_and_mutates_lifecycle(user_mgmt_stack: UserMgmtSt
     listed = dm.get("/admin/users", headers=headers)
     assert listed.status_code == HTTPStatus.OK
     body = response_json_object(listed)
-    assert len(json_list(body, "users")) >= 2
+    assert len(json_list(body, "users")) >= _MIN_SEEDED_OPERATORS
 
     invited = dm.post(
         "/admin/users/invite",
@@ -98,15 +100,23 @@ def test_viewer_forbidden_on_admin_users_namespace(user_mgmt_stack: UserMgmtStac
         == HTTPStatus.FORBIDDEN
     )
     assert (
-        dm.patch(f"/admin/users/{target}/role", json={"role": "viewer"}, headers=headers).status_code
+        dm.patch(
+            f"/admin/users/{target}/role", json={"role": "viewer"}, headers=headers
+        ).status_code
         == HTTPStatus.FORBIDDEN
     )
     assert (
         dm.post(f"/admin/users/{target}/resend-invite", headers=headers).status_code
         == HTTPStatus.FORBIDDEN
     )
-    assert dm.post(f"/admin/users/{target}/disable", headers=headers).status_code == HTTPStatus.FORBIDDEN
-    assert dm.post(f"/admin/users/{target}/enable", headers=headers).status_code == HTTPStatus.FORBIDDEN
+    assert (
+        dm.post(f"/admin/users/{target}/disable", headers=headers).status_code
+        == HTTPStatus.FORBIDDEN
+    )
+    assert (
+        dm.post(f"/admin/users/{target}/enable", headers=headers).status_code
+        == HTTPStatus.FORBIDDEN
+    )
     assert dm.delete(f"/admin/users/{target}", headers=headers).status_code == HTTPStatus.FORBIDDEN
     assert (
         dm.post(f"/admin/users/{target}/reset-password", headers=headers).status_code
@@ -152,7 +162,7 @@ def test_user_management_mutations_audited_without_pii(user_mgmt_stack: UserMgmt
     assert row["entity_type"] == "user"
     assert row["actor_id"] == ADMIN_ID
     assert row["actor_role"] == "admin"
-    payload = as_json_object(cast("object", row["payload"]))
+    payload = as_json_object(row["payload"])
     assert "email" not in payload
     assert "name" not in payload
     assert "audit-target@example.org" not in json.dumps(payload)
@@ -161,7 +171,7 @@ def test_user_management_mutations_audited_without_pii(user_mgmt_stack: UserMgmt
     role_row = _audit_row(engine, entity_id)
     assert role_row is not None
     assert role_row["event_type"] == "user.role_changed"
-    role_payload = as_json_object(cast("object", role_row["payload"]))
+    role_payload = as_json_object(role_row["payload"])
     assert "email" not in role_payload
 
     dm.delete(f"/admin/users/{entity_id}", headers=headers)
