@@ -180,6 +180,16 @@ project:
           coverage_gate: "PASS combined 100% (1278/1278 branches)"
         prior_reconciliation_note: "Earlier in-session 09-qa was reconciled to pass_with_remediation during 10-e2e (initial FAIL on admin nav test + coverage gate remediated per qa-report QA-S004-001/002; admin FE 223/223 + chat FE 134/134 Vitest). The 2026-06-29 re-run superseded that with a FAIL on QA-S004-010; the 2026-06-29 remediation now supersedes the re-run."
         note: "S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED (isActive() unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression test; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes the 2026-06-29 RE-RUN FAIL. Reports: docs/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md."
+    10-e2e:
+      status: completed
+      completed_at: "2026-06-30"
+      report: docs/e2e-report.md
+      session_id: S005-user-mgmt-auth
+    11-verify-impl:
+      status: completed
+      completed_at: "2026-06-30"
+      report: docs/implementation-verification.md
+      session_id: S005-user-mgmt-auth
     13-deploy-smoke:
       status: completed
       started_at: "2026-06-26"
@@ -216,7 +226,7 @@ active_session:             # current bounded work unit; null when none in fligh
   orchestrator: 16-evolve
   artifacts_dir: docs/sessions/S005-user-mgmt-auth/
   started_at: "2026-06-29"
-  current_stage: "10-e2e"
+  current_stage: "12-verify-deploy"
   evolve_cycle_id: EV-006
   routing_plan:
     - stage: 00-context
@@ -252,7 +262,18 @@ active_session:             # current bounded work unit; null when none in fligh
       session_report: docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
       note: "S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed; all frontend Vitest suites green; coverage gate PASS. Handoff to 10-e2e."
     - stage: 10-e2e
-      status: pending
+      status: completed
+      started_at: "2026-06-30"
+      completed_at: "2026-06-30"
+      report: docs/sessions/S005-user-mgmt-auth/reports/e2e-report.md
+      note: "S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract; T3 deferred"
+    - stage: 11-verify-impl
+      status: completed
+      started_at: "2026-06-30"
+      completed_at: "2026-06-30"
+      user_amended: true
+      report: docs/sessions/S005-user-mgmt-auth/reports/verify-impl.md
+      note: "F35 approved — UJ-030–UJ-038 + feature signoff; 0 flags; T3 deferred to 13"
     - stage: 12-verify-deploy
       status: pending
     - stage: 13-deploy-smoke
@@ -266,8 +287,6 @@ active_session:             # current bounded work unit; null when none in fligh
       reason: "User-approved evolve-lite path."
     - stage: 06-tech-tooling
       reason: "User-approved evolve-lite path; no new tooling/guardrails."
-    - stage: 11-verify-impl
-      reason: "User-approved evolve-lite path; covered by 09-qa + 10-e2e."
   artifacts:
     - path: docs/sessions/S005-user-mgmt-auth/session-brief.md
       kind: session-brief
@@ -289,6 +308,22 @@ active_session:             # current bounded work unit; null when none in fligh
       kind: qa-report
       session_id: S005-user-mgmt-auth
       stage: 09-qa
+    - path: docs/e2e-report.md
+      kind: e2e-report
+      session_id: S005-user-mgmt-auth
+      stage: 10-e2e
+    - path: docs/sessions/S005-user-mgmt-auth/reports/e2e-report.md
+      kind: e2e-report
+      session_id: S005-user-mgmt-auth
+      stage: 10-e2e
+    - path: docs/implementation-verification.md
+      kind: verify-impl-report
+      session_id: S005-user-mgmt-auth
+      stage: 11-verify-impl
+    - path: docs/sessions/S005-user-mgmt-auth/reports/verify-impl.md
+      kind: verify-impl-report
+      session_id: S005-user-mgmt-auth
+      stage: 11-verify-impl
 sessions:                   # archived completed sessions
   - id: S004-supabase-auth
     type: feature
@@ -1001,10 +1036,11 @@ stages:
   10-e2e:
     status: completed
     started_at: "2026-05-19"
-    completed_at: "2026-06-29"
-    partial_rerun_at: "2026-06-29"
-    partial_rerun_note: "S004 delta EV-005 F34 — UJ-026-029 auth journeys; T0 pass (59 e2e + 35 integration + 363 Vitest); T3 not run"
+    completed_at: "2026-06-30"
+    partial_rerun_at: "2026-06-30"
+    partial_rerun_note: "S005/EV-006 F35 — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract; T3 deferred"
     report: docs/e2e-report.md
+    session_id: S005-user-mgmt-auth
     mechanism: api+frontend
     t0: pass
     t0_tests: 59
@@ -1036,13 +1072,28 @@ stages:
       t3_live: pending
       ev005_journeys_added: 4
       ev005_tests_passed: 14
+    s005:
+      report: docs/sessions/S005-user-mgmt-auth/reports/e2e-report.md
+      branch: feat/S005-user-mgmt-auth
+      session_id: S005-user-mgmt-auth
+      partial_rerun_at: "2026-06-30"
+      t0: pass
+      t0_tests: 68
+      t1_integration: pass
+      t1_tests: 62
+      vitest: 483
+      supabase_contract: 14
+      t3_live: deferred
+      note: "S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract; T3 deferred"
   11-verify-impl:
-    status: in_progress
+    status: completed
     started_at: "2026-05-27"
-    completed_at: "2026-05-27"
-    partial_rerun_at: "2026-06-26"
-    partial_rerun_note: "S002 delta F32 — implementation verification in progress, pending user AskQuestion responses"
-    report: docs/sessions/S002-admin-job-management/reports/verify-impl.md
+    completed_at: "2026-06-30"
+    partial_rerun_at: "2026-06-30"
+    partial_rerun_note: "S005/EV-006 F35 — UJ-030–UJ-038 + feature signoff; 0 flags; T3 deferred to 13"
+    report: docs/implementation-verification.md
+    session_id: S005-user-mgmt-auth
+    session_report: docs/sessions/S005-user-mgmt-auth/reports/verify-impl.md
     substeps:
       current: phase6_report
       phase1_collect: completed
@@ -1051,7 +1102,11 @@ stages:
       phase3_feature_approval: completed
       phase5_scope: completed
       phase6_report: completed
-    note: "S002 partial rerun — user-amended into routing plan; in_progress pending user AskQuestion responses. (EV-002 prior run: F23-F29 all journeys and features user-approved.)"
+    note: "S005/EV-006 F35 — F35 approved UJ-030–UJ-038 + feature signoff; 0 flags; T3 deferred to 13"
+    s002:
+      report: docs/sessions/S002-admin-job-management/reports/verify-impl.md
+      partial_rerun_at: "2026-06-26"
+      note: "S002 partial rerun — user-amended into routing plan; in_progress pending user AskQuestion responses at S002 park. (EV-002 prior run: F23-F29 all journeys and features user-approved.)"
   12-verify-deploy:
     status: completed
     started_at: "2026-05-27"
@@ -2688,6 +2743,8 @@ decisions_log:
     note: "S005/EV-006 01-requirements COMPLETE (F35 admin user management + auth UX, evolve-lite delta). ADR-029 authored; decisions RD-080-RD-090 resolved (admin /admin/users* ops; in-app self-service password reset; remember-me default-checked localStorage/sessionStorage key vecinita.auth.remember; hybrid Resend SMTP with config.toml as source of truth, resolving the SMTP Dashboard-vs-CI contradiction; 6 stacked-bilingual versioned email templates resolving the bilingual-email ambiguity; supabase.yml config push + pinned CLI; audit of user-mgmt actions; operator-supplied verified Resend domain). Artifacts: feature-list F35, user-journeys UJ-030-UJ-033, test-plan TC-088-TC-095, acceptance-criteria AC-U1-AC-U9, api-contract /admin/users*, config-spec SMTP/template/remember-me env, staging-secrets-matrix EV-006; stage report docs/sessions/S005-user-mgmt-auth/reports/01-requirements.md. Commit DEFERRED (commit-only-when-asked override); open items handed to 04-tech-plan. active_session + EV-006 current_stage = 01-requirements; routing_plan + EV-006.stages 01-requirements completed; project.stages.01-requirements mirrored (last_delta S005/EV-006). ADVISORY (non-blocking): docs/execution-plan.md §Current State remains stale (still S004/Phase 11) and should be advanced for S005/EV-006."
   - date: "2026-06-29"
     note: "S005/EV-006 04-tech-plan SCOPE ADDITION (in-place re-run; 04-tech-plan remains completed). User approved adding 4 items; MFA/2FA + bulk CSV import remain deferred. ADR-031 (docs/adr/ADR-031-ev006-auth-ux-hardening.md) captures TP-S005-17 idle/session timeout (30min+60s warning, frontend VITE_VECINITA_IDLE_TIMEOUT_MIN/_WARNING_SEC); TP-S005-18 self 'log out of all devices' (global signOut); TP-S005-19 admin force-logout POST /admin/users/{id}/signout via admin_delete_user_sessions RPC (one-time operator apply, 503 fallback->disable); TP-S005-20 user search q (>=3 chars->GoTrue filter)+pagination; TP-S005-21 audit viewer (reuse F29 AuditPage + GET /internal/v1/audit, entity_type Users filter, user.*/email.* i18n labels, per-user link); TP-S005-22 deliverability test-send POST /admin/email/test via Resend REST (RESEND_API_KEY/RESEND_SENDER_EMAIL, 5/h/admin); TP-S005-23 SPF/DKIM/DMARC operator checklist; TP-S005-24 config+secrets delta. Milestone M53 (T53.1-T53.22, all pending, TDD-ordered) appended to execution-plan Phase 12 (now M48-M53); Phase 12 gate updated to TC-088–TC-103, UJ-030–UJ-038, AC-U1–AC-U16. New artifacts: ADR-031, UJ-034-UJ-038, TC-096-TC-103, AC-U10-AC-U16, api-contract new routes (/admin/users/{id}/signout, /admin/email/test, q param), Modal DM secrets RESEND_API_KEY + RESEND_SENDER_EMAIL, idle-timeout VITE envs. Synced stale pointer: EV-006.current_stage 01-requirements->07-build (00/01/04 complete, 07-build next) + added EV-006.stages.04-tech-plan node (ADR-030/031, M48-M53). Commits DEFERRED (commit-only-when-asked override) — scope-addition docs uncommitted, no new SHAs. active_session.current_stage unchanged (07-build)."
+  - "User invoked 11-verify-impl despite evolve-lite skip; 10-e2e still pending in routing_plan but T0 e2e suite run inline during 11 (68 tests pass)"
+  - "11-verify-impl F35 journeys UJ-030–UJ-038 + feature F35 approved by user; formal 10-e2e required before 11 completion"
 
 artifacts:
   - docs/context-brief.md
