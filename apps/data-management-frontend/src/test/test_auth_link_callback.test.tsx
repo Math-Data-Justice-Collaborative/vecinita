@@ -139,9 +139,11 @@ describe("auth link callback (TC-106, TC-107, UJ-031/033)", () => {
 
   it("useAuthLinkCallback exchanges PKCE code and becomes ready", async () => {
     window.history.replaceState({}, "", "/accept-invite?code=pkce-code");
-    mockGetSession.mockResolvedValue({
-      data: { session: { access_token: "from-code" } },
-    });
+    mockGetSession
+      .mockResolvedValueOnce({ data: { session: null } })
+      .mockResolvedValue({
+        data: { session: { access_token: "from-code" } },
+      });
     mockExchangeCodeForSession.mockResolvedValue({ error: null });
     mockOnAuthStateChange.mockReturnValue({
       data: { subscription: { unsubscribe: vi.fn() } },

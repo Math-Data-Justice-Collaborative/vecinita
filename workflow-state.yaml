@@ -11,7 +11,9 @@ project:
       session_id: S006-invite-acceptance
       branch: feat/S006-invite-acceptance
       evolve_cycle_id: EV-007
-      note: 'S006/EV-007 scoped delta for GitHub #109 — invite acceptance flow (redirect URLs, auth callback, password setup, invitation admin). 00-context completed 2026-06-30; session-brief, routing-plan, invite-acceptance-flow context brief produced. Decisions R60-R62. User-approved evolve-lite routing.'
+      note: 'S006/EV-007 scoped delta for GitHub #109 — invite acceptance flow (redirect URLs, auth callback, password setup,
+        invitation admin). 00-context completed 2026-06-30; session-brief, routing-plan, invite-acceptance-flow context brief
+        produced. Decisions R60-R62. User-approved evolve-lite routing.'
       s005_baseline:
         status: completed
         completed_at: '2026-06-29'
@@ -23,7 +25,8 @@ project:
       completed_at: '2026-06-30'
       session_id: S006-invite-acceptance
       last_delta: S005/EV-006 F35 admin user management + auth UX (2026-06-29)
-      note: 'EV-007/S006 01-requirements complete — RD-091–RD-098; AC-U3 revised; F35.12–F35.15. Prior EV-006/F35 delta (S005): ADR-029, feature-list F35, UJ-030-UJ-033, TC-088-TC-095, AC-U1-AC-U9, RD-080-RD-090.'
+      note: 'EV-007/S006 01-requirements complete — RD-091–RD-098; AC-U3 revised; F35.12–F35.15. Prior EV-006/F35 delta (S005):
+        ADR-029, feature-list F35, UJ-030-UJ-033, TC-088-TC-095, AC-U1-AC-U9, RD-080-RD-090.'
       evolve_cycle_id: EV-007
       report: docs/sessions/S006-invite-acceptance/reports/01-requirements.md
     04-tech-plan:
@@ -36,10 +39,27 @@ project:
       baseline_completed_at: '2026-05-24'
       baseline_partial_rerun_at: '2026-06-13'
       baseline_partial_rerun_note: EV-004 delta F31 — 10 TP decisions, Phase 9 (36 tasks), ADR-021 (preserved in legacy stages.04-tech-plan)
-      last_delta: 'S005/EV-006 F35 user-mgmt tech plan (ADR-030, TP-S005-01–16, Phase 12) + 2026-06-29 SCOPE ADDITION (in-place re-run: ADR-031, TP-S005-17–24, M53)'
-      scope_addition_2026_06_29: 'EV-006 04-tech-plan in-place re-run extended scope (user-approved 4 items; MFA/2FA + bulk CSV import deferred). ADR-031 (docs/adr/ADR-031-ev006-auth-ux-hardening.md) captures TP-S005-17 idle/session timeout (30min+60s warning, VITE_VECINITA_IDLE_TIMEOUT_MIN/_WARNING_SEC); TP-S005-18 self ''log out of all devices'' (global signOut); TP-S005-19 admin force-logout POST /admin/users/{id}/signout via admin_delete_user_sessions RPC (one-time operator apply, 503 fallback->disable); TP-S005-20 user search q (>=3 chars->GoTrue filter)+pagination; TP-S005-21 audit viewer (reuse F29 AuditPage + GET /internal/v1/audit, entity_type Users filter, user.*/email.* i18n labels, per-user link); TP-S005-22 deliverability test-send POST /admin/email/test via Resend REST (RESEND_API_KEY/RESEND_SENDER_EMAIL, 5/h/admin); TP-S005-23 SPF/DKIM/DMARC operator checklist; TP-S005-24 config+secrets delta. Milestone M53 (T53.1-T53.22, all pending, TDD-ordered) appended to execution-plan
-        Phase 12 (now M48-M53); Phase 12 gate updated to TC-088–TC-103, UJ-030–UJ-038, AC-U1–AC-U16. New artifacts: ADR-031, UJ-034-UJ-038, TC-096-TC-103, AC-U10-AC-U16, api-contract routes (/admin/users/{id}/signout, /admin/email/test, q param), Modal DM secrets RESEND_API_KEY + RESEND_SENDER_EMAIL, idle-timeout VITE envs. 04-tech-plan remains completed (in-place scope extension). Commit DEFERRED (commit-only-when-asked override) — scope-addition docs uncommitted, no new SHAs.'
-      s004_baseline_note: 'EV-005/F34 tech plan delta: ADR-027 (Supabase Auth verification + env sync) with TP-S004-01..12 — HS256 JWT verify (TP-S004-01), app_metadata.role claim source (TP-S004-02), shared vecinita_shared_schemas.auth, PyJWT>=2.10,<3 + @supabase/supabase-js ^2.108.2, Pro plan + ephemeral branching + CLI migrations-in-repo, inviteUserByEmail+SMTP, idempotent first-admin seed; cost cap raised to ~$75/mo (supersedes ADR-004 cap — user-approved). Phase 11 (M43-M47, T43.1-T47.6, 29 tasks) appended to execution-plan. R53 unblocked via Supabase CLI (MCP-independent). Commit DEFERRED (commit-only-when-asked override). Baseline partial_rerun info preserved in legacy stages.04-tech-plan.'
+      last_delta: 'S005/EV-006 F35 user-mgmt tech plan (ADR-030, TP-S005-01–16, Phase 12) + 2026-06-29 SCOPE ADDITION (in-place
+        re-run: ADR-031, TP-S005-17–24, M53)'
+      scope_addition_2026_06_29: 'EV-006 04-tech-plan in-place re-run extended scope (user-approved 4 items; MFA/2FA + bulk
+        CSV import deferred). ADR-031 (docs/adr/ADR-031-ev006-auth-ux-hardening.md) captures TP-S005-17 idle/session timeout
+        (30min+60s warning, VITE_VECINITA_IDLE_TIMEOUT_MIN/_WARNING_SEC); TP-S005-18 self ''log out of all devices'' (global
+        signOut); TP-S005-19 admin force-logout POST /admin/users/{id}/signout via admin_delete_user_sessions RPC (one-time
+        operator apply, 503 fallback->disable); TP-S005-20 user search q (>=3 chars->GoTrue filter)+pagination; TP-S005-21
+        audit viewer (reuse F29 AuditPage + GET /internal/v1/audit, entity_type Users filter, user.*/email.* i18n labels,
+        per-user link); TP-S005-22 deliverability test-send POST /admin/email/test via Resend REST (RESEND_API_KEY/RESEND_SENDER_EMAIL,
+        5/h/admin); TP-S005-23 SPF/DKIM/DMARC operator checklist; TP-S005-24 config+secrets delta. Milestone M53 (T53.1-T53.22,
+        all pending, TDD-ordered) appended to execution-plan Phase 12 (now M48-M53); Phase 12 gate updated to TC-088–TC-103,
+        UJ-030–UJ-038, AC-U1–AC-U16. New artifacts: ADR-031, UJ-034-UJ-038, TC-096-TC-103, AC-U10-AC-U16, api-contract routes
+        (/admin/users/{id}/signout, /admin/email/test, q param), Modal DM secrets RESEND_API_KEY + RESEND_SENDER_EMAIL, idle-timeout
+        VITE envs. 04-tech-plan remains completed (in-place scope extension). Commit DEFERRED (commit-only-when-asked override)
+        — scope-addition docs uncommitted, no new SHAs.'
+      s004_baseline_note: 'EV-005/F34 tech plan delta: ADR-027 (Supabase Auth verification + env sync) with TP-S004-01..12
+        — HS256 JWT verify (TP-S004-01), app_metadata.role claim source (TP-S004-02), shared vecinita_shared_schemas.auth,
+        PyJWT>=2.10,<3 + @supabase/supabase-js ^2.108.2, Pro plan + ephemeral branching + CLI migrations-in-repo, inviteUserByEmail+SMTP,
+        idempotent first-admin seed; cost cap raised to ~$75/mo (supersedes ADR-004 cap — user-approved). Phase 11 (M43-M47,
+        T43.1-T47.6, 29 tasks) appended to execution-plan. R53 unblocked via Supabase CLI (MCP-independent). Commit DEFERRED
+        (commit-only-when-asked override). Baseline partial_rerun info preserved in legacy stages.04-tech-plan.'
     07-build:
       status: completed
       completed_at: '2026-06-29'
@@ -47,7 +67,9 @@ project:
       branch: feat/S005-user-mgmt-auth
       feature: F35
       phase: Phase 12 (M48-M53)
-      reconciliation_note: S004/EV-005 F34 build (Phase 11 M43-M47) reconciled to completed during 10-e2e — 08-verify-build, 09-qa (remediated), and 10-e2e all completed downstream on feat/S004-supabase-auth. Reopened for active S005/EV-006 F35 build (see s005); closed out completed 2026-06-30 (M53 22/22).
+      reconciliation_note: S004/EV-005 F34 build (Phase 11 M43-M47) reconciled to completed during 10-e2e — 08-verify-build,
+        09-qa (remediated), and 10-e2e all completed downstream on feat/S004-supabase-auth. Reopened for active S005/EV-006
+        F35 build (see s005); closed out completed 2026-06-30 (M53 22/22).
       s005:
         status: completed
         session_id: S005-user-mgmt-auth
@@ -64,9 +86,14 @@ project:
         started_at: '2026-06-30'
         completed_at: '2026-06-30'
         uncommitted: false
-        note: 'S005/EV-006 F35 milestone M53 (auth UX hardening) — close-out 2026-06-30. M53 22/22 (T53.1–T53.22 all committed; execution-plan and git agree). No tasks in progress; working tree clean before close-out. Close-out fixed a typecheck blocker (private-helper import in DM user-admin unit test → shared tests.helpers.user_admin_mocks). Next: 08-verify-build + Phase 12 gate.'
+        note: 'S005/EV-006 F35 milestone M53 (auth UX hardening) — close-out 2026-06-30. M53 22/22 (T53.1–T53.22 all committed;
+          execution-plan and git agree). No tasks in progress; working tree clean before close-out. Close-out fixed a typecheck
+          blocker (private-helper import in DM user-admin unit test → shared tests.helpers.user_admin_mocks). Next: 08-verify-build
+          + Phase 12 gate.'
         advisories:
-        - 'Pre-existing strict-mode lint/typecheck failures in the M53 slice fixed to keep the milestone gate green: useIdleTimeout.ts (void-on-void), IdleTimeoutGuard.tsx (floating promise + void-on-void), config.ts/vite-env.d.ts (idle env typing), authSessionHarness.ts renamed to .tsx.'
+        - 'Pre-existing strict-mode lint/typecheck failures in the M53 slice fixed to keep the milestone gate green: useIdleTimeout.ts
+          (void-on-void), IdleTimeoutGuard.tsx (floating promise + void-on-void), config.ts/vite-env.d.ts (idle env typing),
+          authSessionHarness.ts renamed to .tsx.'
         - 'New unit tests: apps/data-management-frontend/src/api/users.test.ts; expanded test_users_page.test.tsx + test_force_signout.test.tsx.'
         - DM frontend coverage gate PASS (lines 98.4%, branches 95.53%); lint + typecheck green; 291 Vitest tests pass.
       s004_baseline:
@@ -85,8 +112,12 @@ project:
         branch: feat/S003-persistent-chat-history
         feature: F33
         phase: Phase 10 (M39–M42)
-        note: S003 F33 browser-local persistent chat history — M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green
-        reopen_note: '07-build reopened 2026-06-28 (explicit user approval) for an ADR-025 delta: chat-history storage switched sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only). Commit eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed.'
+        note: S003 F33 browser-local persistent chat history — M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage
+          + build green
+        reopen_note: '07-build reopened 2026-06-28 (explicit user approval) for an ADR-025 delta: chat-history storage switched
+          sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only). Commit
+          eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS
+          change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed.'
     08-verify-build:
       status: completed
       completed_at: '2026-06-29'
@@ -95,8 +126,10 @@ project:
       overall_result: PASS
       report: docs/verification-report.md
       blocking_failures: []
-      last_interim: S005/EV-006 F35 interim milestone-boundary verify PASS (2026-06-30, after in-session remediation) — see s005 slice. Baseline top-level stays S004 PASS; S005 cleared for the Phase 12 gate.
-      note: S004/EV-005 F34 milestone-boundary verify PASS (2026-06-29, re-run after remediation). Prior blocking failures (cryptography CVEs; admin FE branch coverage 92.46% < 95%) resolved.
+      last_interim: S005/EV-006 F35 interim milestone-boundary verify PASS (2026-06-30, after in-session remediation) — see
+        s005 slice. Baseline top-level stays S004 PASS; S005 cleared for the Phase 12 gate.
+      note: S004/EV-005 F34 milestone-boundary verify PASS (2026-06-29, re-run after remediation). Prior blocking failures
+        (cryptography CVEs; admin FE branch coverage 92.46% < 95%) resolved.
       s005:
         status: completed
         completed_at: '2026-06-30'
@@ -119,7 +152,10 @@ project:
         - make test-unit-coverage
         - 681+ pytest
         - 312 vitest admin
-        note: 'S005 interim verify on feat/S005-user-mgmt-auth — PASS after remediation. Initial FAIL (Python lint, typecheck, FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed in-session. Final: make check green, make test-unit-coverage green, 681+ pytest + 312 vitest admin. Supersedes the earlier 2026-06-30 interim FAIL; cleared for the Phase 12 gate.'
+        note: 'S005 interim verify on feat/S005-user-mgmt-auth — PASS after remediation. Initial FAIL (Python lint, typecheck,
+          FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed in-session. Final: make check green, make test-unit-coverage
+          green, 681+ pytest + 312 vitest admin. Supersedes the earlier 2026-06-30 interim FAIL; cleared for the Phase 12
+          gate.'
       s003_baseline:
         status: completed
         completed_at: '2026-06-28'
@@ -137,7 +173,9 @@ project:
       reports:
       - docs/qa-report.md
       - docs/sessions/S006-invite-acceptance/reports/qa-report.md
-      note: S006/EV-007 F35 ext 09-qa COMPLETE 2026-06-30 on feat/S006-invite-acceptance — overall pass_with_advisories. Python 729 passed; all frontend Vitest suites green; coverage gate PASS. Handoff to 10-e2e. S005 baseline preserved in the s005 slice below.
+      note: S006/EV-007 F35 ext 09-qa COMPLETE 2026-06-30 on feat/S006-invite-acceptance — overall pass_with_advisories. Python
+        729 passed; all frontend Vitest suites green; coverage gate PASS. Handoff to 10-e2e. S005 baseline preserved in the
+        s005 slice below.
       s006:
         status: completed
         started_at: '2026-06-30'
@@ -154,7 +192,9 @@ project:
           python: 729 passed — PASS
           frontend: all green — PASS
           coverage_gate: PASS
-        note: 'S006/EV-007 F35 ext full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 729 passed; all frontend Vitest suites green; coverage gate PASS. Reports: docs/qa-report.md + docs/sessions/S006-invite-acceptance/reports/qa-report.md. Handoff to 10-e2e.'
+        note: 'S006/EV-007 F35 ext full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 729 passed; all
+          frontend Vitest suites green; coverage gate PASS. Reports: docs/qa-report.md + docs/sessions/S006-invite-acceptance/reports/qa-report.md.
+          Handoff to 10-e2e.'
       s005:
         status: completed
         started_at: '2026-06-30'
@@ -171,7 +211,9 @@ project:
           python: 703 passed — PASS
           frontend: all green — PASS
           coverage_gate: PASS
-        note: 'S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed; all frontend Vitest suites green; coverage gate PASS. Reports: docs/qa-report.md + docs/sessions/S005-user-mgmt-auth/reports/qa-report.md. Handoff to 10-e2e.'
+        note: 'S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed;
+          all frontend Vitest suites green; coverage gate PASS. Reports: docs/qa-report.md + docs/sessions/S005-user-mgmt-auth/reports/qa-report.md.
+          Handoff to 10-e2e.'
       s004:
         status: completed
         started_at: '2026-06-29'
@@ -192,12 +234,15 @@ project:
           status: resolved
           resolved_at: '2026-06-29'
           summary: admin FE vitest exit 1 despite 230/230 assertions; unhandled errors in DashboardPage async cleanup
-          resolution: Added isActive() unmount guards to DashboardPage/HealthPage/AuditPage; fixed test_auth_login_protected_routes.test.tsx (cleanup + stubbed fetch); added regression test test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx. Admin FE Vitest now exits 0 (242 passed); coverage gate PASS combined 100% (1278/1278 branches).
+          resolution: Added isActive() unmount guards to DashboardPage/HealthPage/AuditPage; fixed test_auth_login_protected_routes.test.tsx
+            (cleanup + stubbed fetch); added regression test test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx.
+            Admin FE Vitest now exits 0 (242 passed); coverage gate PASS combined 100% (1278/1278 branches).
         - id: QA-S004-011
           status: resolved
           resolved_at: '2026-06-29'
           summary: Node 20 -> 24 LTS bump (TP-S004-11 / ADR-019)
-          resolution: ci.yml setup-node x3, .nvmrc, root engines.node>=24; docs spec.md/execution-plan.md/LOCAL_DEV.md/decisions.md (TP-S004-11/ADR-019)/dependency-inventory.md updated.
+          resolution: ci.yml setup-node x3, .nvmrc, root engines.node>=24; docs spec.md/execution-plan.md/LOCAL_DEV.md/decisions.md
+            (TP-S004-11/ADR-019)/dependency-inventory.md updated.
         accepted_or_deferred:
         - 'QA-S004-003: resolved (auth hooks split; lint clean)'
         - 'QA-S004-004 / QA-S004-012: documented/accepted'
@@ -210,8 +255,16 @@ project:
         remediation_results:
           admin_fe: 242 passed, vitest exit 0 (QA-S004-010 resolved)
           coverage_gate: PASS combined 100% (1278/1278 branches)
-        prior_reconciliation_note: Earlier in-session 09-qa was reconciled to pass_with_remediation during 10-e2e (initial FAIL on admin nav test + coverage gate remediated per qa-report QA-S004-001/002; admin FE 223/223 + chat FE 134/134 Vitest). The 2026-06-29 re-run superseded that with a FAIL on QA-S004-010; the 2026-06-29 remediation now supersedes the re-run.
-        note: 'S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED (isActive() unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression test; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes the 2026-06-29 RE-RUN FAIL. Reports: docs/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
+        prior_reconciliation_note: Earlier in-session 09-qa was reconciled to pass_with_remediation during 10-e2e (initial
+          FAIL on admin nav test + coverage gate remediated per qa-report QA-S004-001/002; admin FE 223/223 + chat FE 134/134
+          Vitest). The 2026-06-29 re-run superseded that with a FAIL on QA-S004-010; the 2026-06-29 remediation now supersedes
+          the re-run.
+        note: 'S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED (isActive()
+          unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression test; admin FE Vitest
+          now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage gate PASS combined
+          100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. QA-S004-003 resolved; QA-S004-004/012
+          accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes the 2026-06-29 RE-RUN FAIL. Reports: docs/qa-report.md
+          + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
     10-e2e:
       status: completed
       started_at: '2026-06-30'
@@ -220,7 +273,8 @@ project:
       branch: feat/S006-invite-acceptance
       evolve_cycle_id: EV-007
       report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
-      note: S006/EV-007 F35 ext 10-e2e COMPLETE 2026-06-30 on feat/S006-invite-acceptance. S005 baseline preserved in s005 slice below.
+      note: S006/EV-007 F35 ext 10-e2e COMPLETE 2026-06-30 on feat/S006-invite-acceptance. S005 baseline preserved in s005
+        slice below.
       s006:
         status: completed
         started_at: '2026-06-30'
@@ -230,14 +284,16 @@ project:
         feature: F35
         evolve_cycle_id: EV-007
         report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
-        note: S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract; T3 deferred
+        note: S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract;
+          T3 deferred
       s005:
         status: completed
         completed_at: '2026-06-30'
         session_id: S005-user-mgmt-auth
         branch: feat/S005-user-mgmt-auth
         report: docs/e2e-report.md
-        note: S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract; T3 deferred
+        note: S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract;
+          T3 deferred
     11-verify-impl:
       status: completed
       completed_at: '2026-06-30'
@@ -270,7 +326,8 @@ project:
       - H5
       - H0ci
       advisories:
-      - 'do_branch_pin_feat_S001: RESOLVED 2026-06-28 — DO apps reset to branch:main + deploy_on_push; deploy-digitalocean.yml CD backstop added'
+      - 'do_branch_pin_feat_S001: RESOLVED 2026-06-28 — DO apps reset to branch:main + deploy_on_push; deploy-digitalocean.yml
+        CD backstop added'
       - modal_h4_cors_waived_proxy_auth
       - s001_t12_pending
       - h0ci_blocking_after_merge
@@ -279,7 +336,8 @@ active_session:
   id: S006-invite-acceptance
   type: feature
   status: in_progress
-  intent: 'GitHub #109 — complete invite acceptance flow (redirect URLs, auth callback, password setup, invitation admin). F35 gap from S005/EV-006.'
+  intent: 'GitHub #109 — complete invite acceptance flow (redirect URLs, auth callback, password setup, invitation admin).
+    F35 gap from S005/EV-006.'
   branch: feat/S006-invite-acceptance
   orchestrator: 16-evolve
   evolve_cycle_id: EV-007
@@ -315,6 +373,12 @@ active_session:
     status: pending
   - stage: 13-deploy-smoke
     status: pending
+  - stage: 18-pr-review
+    status: completed
+    completed_at: '2026-06-30'
+  - stage: 19-address-pr-review
+    status: in_progress
+    started_at: '2026-06-30'
   skipped_stages:
   - stage: 02-verify-plan
     reason: evolve-lite — user approved (2026-06-30).
@@ -391,11 +455,17 @@ active_session:
     kind: e2e-report
     session_id: S006-invite-acceptance
     stage: 10-e2e
+  - path: docs/sessions/S006-invite-acceptance/reports/pr-review.md
+    kind: pr-review-report
+    session_id: S006-invite-acceptance
+    stage: 18-pr-review
 sessions:
 - id: S005-user-mgmt-auth
   type: feature
   status: paused
-  intent: EV-006 / F35 — admin user management built on the S004/EV-005 Supabase Auth foundation. Admin user-management operations (invite/list/role-change/deactivate), a remember-me toggle on admin login, and Resend SMTP wiring for Supabase invitation emails.
+  intent: EV-006 / F35 — admin user management built on the S004/EV-005 Supabase Auth foundation. Admin user-management operations
+    (invite/list/role-change/deactivate), a remember-me toggle on admin login, and Resend SMTP wiring for Supabase invitation
+    emails.
   branch: feat/S005-user-mgmt-auth
   orchestrator: 16-evolve
   artifacts_dir: docs/sessions/S005-user-mgmt-auth/
@@ -406,27 +476,41 @@ sessions:
   - stage: 00-context
     status: completed
     completed_at: '2026-06-29'
-    note: Session opened for EV-006/F35 admin user management — delta on the S004 Supabase Auth foundation. Decisions R55-R59 (Resend SMTP for Supabase invitation emails; admin user-management operations invite/list/role-change/deactivate; remember-me toggle on admin login). User-approved evolve-lite routing. Handoff to 01-requirements.
+    note: Session opened for EV-006/F35 admin user management — delta on the S004 Supabase Auth foundation. Decisions R55-R59
+      (Resend SMTP for Supabase invitation emails; admin user-management operations invite/list/role-change/deactivate; remember-me
+      toggle on admin login). User-approved evolve-lite routing. Handoff to 01-requirements.
   - stage: 01-requirements
     status: completed
     completed_at: '2026-06-29'
-    note: 'EV-006/F35 delta requirements: ADR-029; feature-list F35; decisions RD-080-RD-090 (resolved SMTP Dashboard-vs-CI contradiction via hybrid sourcing + bilingual-email ambiguity via stacked templates); user-journeys UJ-030-UJ-033; test-plan TC-088-TC-095; acceptance-criteria AC-U1-AC-U9; api-contract /admin/users*; config-spec SMTP/template/remember-me env; staging-secrets-matrix EV-006. Commit deferred (commit-only-when-asked override). Open items handed to 04-tech-plan.'
+    note: 'EV-006/F35 delta requirements: ADR-029; feature-list F35; decisions RD-080-RD-090 (resolved SMTP Dashboard-vs-CI
+      contradiction via hybrid sourcing + bilingual-email ambiguity via stacked templates); user-journeys UJ-030-UJ-033; test-plan
+      TC-088-TC-095; acceptance-criteria AC-U1-AC-U9; api-contract /admin/users*; config-spec SMTP/template/remember-me env;
+      staging-secrets-matrix EV-006. Commit deferred (commit-only-when-asked override). Open items handed to 04-tech-plan.'
   - stage: 04-tech-plan
     status: completed
     completed_at: '2026-06-29'
-    note: 'S005/EV-006 F35 user-mgmt tech plan: ADR-030, TP-S005-01–16, Phase 12. 2026-06-29 in-place SCOPE ADDITION (user-approved 4 items; MFA/2FA + bulk CSV import deferred): ADR-031 auth UX hardening, TP-S005-17–24, milestone M53 (T53.1-T53.22) appended to Phase 12 (now M48-M53); gate -> TC-088–TC-103 / UJ-030–UJ-038 / AC-U1–AC-U16. Stage stays completed (in-place extension). Handoff to 07-build.'
+    note: 'S005/EV-006 F35 user-mgmt tech plan: ADR-030, TP-S005-01–16, Phase 12. 2026-06-29 in-place SCOPE ADDITION (user-approved
+      4 items; MFA/2FA + bulk CSV import deferred): ADR-031 auth UX hardening, TP-S005-17–24, milestone M53 (T53.1-T53.22)
+      appended to Phase 12 (now M48-M53); gate -> TC-088–TC-103 / UJ-030–UJ-038 / AC-U1–AC-U16. Stage stays completed (in-place
+      extension). Handoff to 07-build.'
   - stage: 07-build
     status: completed
     started_at: '2026-06-30'
     completed_at: '2026-06-30'
-    note: S005/EV-006 F35 build — Phase 12 milestone M53 (auth UX hardening, T53.1-T53.22) COMPLETE 2026-06-30. M53 22/22 (T53.1–T53.22 all committed; execution-plan and git agree). No tasks in progress; working tree clean before close-out. Close-out fixed a typecheck blocker (private-helper import in DM user-admin unit test → shared tests.helpers.user_admin_mocks). Phase 12 build criteria PASS (deferred live/deploy criteria → 13-deploy-smoke). Handoff to 08-verify-build.
+    note: S005/EV-006 F35 build — Phase 12 milestone M53 (auth UX hardening, T53.1-T53.22) COMPLETE 2026-06-30. M53 22/22
+      (T53.1–T53.22 all committed; execution-plan and git agree). No tasks in progress; working tree clean before close-out.
+      Close-out fixed a typecheck blocker (private-helper import in DM user-admin unit test → shared tests.helpers.user_admin_mocks).
+      Phase 12 build criteria PASS (deferred live/deploy criteria → 13-deploy-smoke). Handoff to 08-verify-build.
   - stage: 08-verify-build
     status: completed
     completed_at: '2026-06-30'
     overall_result: PASS
     report: docs/verification-report.md
     session_report: docs/sessions/S005-user-mgmt-auth/reports/verification-report.md
-    note: 'S005 interim verify on feat/S005-user-mgmt-auth — PASS after remediation. Initial FAIL (Python lint, typecheck, FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed in-session. Final: make check green, make test-unit-coverage green, 681+ pytest + 312 vitest admin. Supersedes the 2026-06-30 interim FAIL recorded earlier this stage. Cleared for the Phase 12 gate / downstream stages.'
+    note: 'S005 interim verify on feat/S005-user-mgmt-auth — PASS after remediation. Initial FAIL (Python lint, typecheck,
+      FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed in-session. Final: make check green, make test-unit-coverage
+      green, 681+ pytest + 312 vitest admin. Supersedes the 2026-06-30 interim FAIL recorded earlier this stage. Cleared for
+      the Phase 12 gate / downstream stages.'
   - stage: 09-qa
     status: completed
     started_at: '2026-06-30'
@@ -434,13 +518,15 @@ sessions:
     overall: pass_with_advisories
     report: docs/qa-report.md
     session_report: docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
-    note: S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed; all frontend Vitest suites green; coverage gate PASS. Handoff to 10-e2e.
+    note: S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed; all frontend
+      Vitest suites green; coverage gate PASS. Handoff to 10-e2e.
   - stage: 10-e2e
     status: completed
     started_at: '2026-06-30'
     completed_at: '2026-06-30'
     report: docs/sessions/S005-user-mgmt-auth/reports/e2e-report.md
-    note: S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract; T3 deferred
+    note: S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract; T3
+      deferred
   - stage: 11-verify-impl
     status: completed
     started_at: '2026-06-30'
@@ -508,7 +594,8 @@ sessions:
     session_id: S005-user-mgmt-auth
     stage: 19-address-pr-review
   paused_at: '2026-06-30'
-  pause_note: 'Paused 2026-06-30 — F35 scaffold merged; GitHub #109 tracks live invite-acceptance gap discovered in staging. Stages 12-verify-deploy and 13-deploy-smoke deferred to resume after S006 or backlog.'
+  pause_note: 'Paused 2026-06-30 — F35 scaffold merged; GitHub #109 tracks live invite-acceptance gap discovered in staging.
+    Stages 12-verify-deploy and 13-deploy-smoke deferred to resume after S006 or backlog.'
   linked_issues:
   - 109
   deferred_stages:
@@ -520,8 +607,15 @@ sessions:
   type: feature
   status: completed
   completed_at: '2026-06-29'
-  close_note: 'Closed 2026-06-29 — F34 merged to main via PR #100. Stages 12-verify-deploy and 13-deploy-smoke deferred (same pattern as S003). EV-006 user-mgmt work continues in S005.'
-  intent: 'GitHub #75 — add a Supabase Auth authentication interface for ADMIN surfaces only. Gate the Data Management UI (apps/data-management-frontend), the Data Management API (apps/data-management-backend), and the internal write API (apps/internal-write-api) behind login. ChatRAG public chat/query + corpus browse stay anonymous and stateless. Invitation-only registration (public signup disabled); admins invite by email. Two roles: admin (full) + read-only/viewer. Identity/PII lives in Supabase (Vecinita corpus DB stays PII-free); backends verify Supabase JWTs. Supabase environment-syncing via branching on the canonical project. Reverses ADR-004''s auth/identity clause for admin surfaces only and revisits ADR-005 (Supabase Auth) — new superseding ADR required.'
+  close_note: 'Closed 2026-06-29 — F34 merged to main via PR #100. Stages 12-verify-deploy and 13-deploy-smoke deferred (same
+    pattern as S003). EV-006 user-mgmt work continues in S005.'
+  intent: 'GitHub #75 — add a Supabase Auth authentication interface for ADMIN surfaces only. Gate the Data Management UI
+    (apps/data-management-frontend), the Data Management API (apps/data-management-backend), and the internal write API (apps/internal-write-api)
+    behind login. ChatRAG public chat/query + corpus browse stay anonymous and stateless. Invitation-only registration (public
+    signup disabled); admins invite by email. Two roles: admin (full) + read-only/viewer. Identity/PII lives in Supabase (Vecinita
+    corpus DB stays PII-free); backends verify Supabase JWTs. Supabase environment-syncing via branching on the canonical
+    project. Reverses ADR-004''s auth/identity clause for admin surfaces only and revisits ADR-005 (Supabase Auth) — new superseding
+    ADR required.'
   branch: feat/S004-supabase-auth
   orchestrator: 16-evolve
   artifacts_dir: docs/sessions/S004-supabase-auth/
@@ -534,27 +628,37 @@ sessions:
   - stage: 00-context
     status: completed
     completed_at: '2026-06-28'
-    note: 'Session opened for #75; 5 gating decisions (R48-R54); context-brief §15 EV-005 delta; session-brief + routing-plan written; S003 closed; commit 9123b96. Handoff to 01-requirements.'
+    note: 'Session opened for #75; 5 gating decisions (R48-R54); context-brief §15 EV-005 delta; session-brief + routing-plan
+      written; S003 closed; commit 9123b96. Handoff to 01-requirements.'
   - stage: 01-requirements
     status: completed
     started_at: '2026-06-28'
     completed_at: '2026-06-28'
-    note: 'EV-005/F34 Supabase admin auth requirements delta: ADR-026 (supersedes ADR-004 auth/identity clause for admin surfaces only), feature-list F34, UJ-026-UJ-029, TC-077-TC-086, AC-A1-AC-A10, RD-073-RD-079, config-spec Supabase env+CORS, api-contract Authentication, dependency-inventory EV-005 deps + Excluded reconciliation (pins deferred to 04-tech-plan). Commit DEFERRED (commit-only-when-asked override). Open items handed to 04-tech-plan.'
+    note: 'EV-005/F34 Supabase admin auth requirements delta: ADR-026 (supersedes ADR-004 auth/identity clause for admin surfaces
+      only), feature-list F34, UJ-026-UJ-029, TC-077-TC-086, AC-A1-AC-A10, RD-073-RD-079, config-spec Supabase env+CORS, api-contract
+      Authentication, dependency-inventory EV-005 deps + Excluded reconciliation (pins deferred to 04-tech-plan). Commit DEFERRED
+      (commit-only-when-asked override). Open items handed to 04-tech-plan.'
   - stage: 04-tech-plan
     status: completed
     started_at: '2026-06-28'
     completed_at: '2026-06-28'
-    note: 'EV-005/F34 tech plan: ADR-027 (HS256 verify TP-S004-01, app_metadata.role TP-S004-02, shared vecinita_shared_schemas.auth, PyJWT>=2.10,<3 + @supabase/supabase-js ^2.108.2, Pro+ephemeral branching + CLI migrations-in-repo, cost cap raised to ~$75/mo superseding ADR-004 — user-approved, inviteUserByEmail+SMTP, idempotent first-admin seed). Phase 11 (M43-M47, T43.1-T47.6, 29 tasks) appended to execution-plan; decisions/dependency-inventory/config-spec/api-contract updated. R53 unblocked (CLI, MCP-independent). Commit DEFERRED (commit-only-when-asked). Handoff to 07-build.'
+    note: 'EV-005/F34 tech plan: ADR-027 (HS256 verify TP-S004-01, app_metadata.role TP-S004-02, shared vecinita_shared_schemas.auth,
+      PyJWT>=2.10,<3 + @supabase/supabase-js ^2.108.2, Pro+ephemeral branching + CLI migrations-in-repo, cost cap raised to
+      ~$75/mo superseding ADR-004 — user-approved, inviteUserByEmail+SMTP, idempotent first-admin seed). Phase 11 (M43-M47,
+      T43.1-T47.6, 29 tasks) appended to execution-plan; decisions/dependency-inventory/config-spec/api-contract updated.
+      R53 unblocked (CLI, MCP-independent). Commit DEFERRED (commit-only-when-asked). Handoff to 07-build.'
   - stage: 07-build
     status: completed
     started_at: '2026-06-29'
     completed_at: '2026-06-29'
-    note: Reconciled to completed during 10-e2e (downstream 08/09/10 all done). Phase 11 M43-M47 build for F34 Supabase admin auth.
+    note: Reconciled to completed during 10-e2e (downstream 08/09/10 all done). Phase 11 M43-M47 build for F34 Supabase admin
+      auth.
   - stage: 08-verify-build
     status: completed
     started_at: '2026-06-29'
     completed_at: '2026-06-29'
-    note: 'Milestone-boundary verify PASS (re-run after remediation). Prior blocking failures (cryptography CVEs; admin FE branch coverage 92.46% < 95%) resolved. Report: docs/verification-report.md.'
+    note: 'Milestone-boundary verify PASS (re-run after remediation). Prior blocking failures (cryptography CVEs; admin FE
+      branch coverage 92.46% < 95%) resolved. Report: docs/verification-report.md.'
   - stage: 09-qa
     status: completed
     completed_at: '2026-06-29'
@@ -562,7 +666,11 @@ sessions:
     rerun_overall: fail
     remediation_at: '2026-06-29'
     remediation_overall: pass_with_advisories
-    note: 'REMEDIATION 2026-06-29 overall pass_with_advisories — blocking QA-S004-010 RESOLVED (isActive() unmount guards on DashboardPage/HealthPage/AuditPage; fixed test_auth_login_protected_routes.test.tsx; regression test test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. Supersedes the RE-RUN 2026-06-29 FAIL. Reports: docs/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
+    note: 'REMEDIATION 2026-06-29 overall pass_with_advisories — blocking QA-S004-010 RESOLVED (isActive() unmount guards
+      on DashboardPage/HealthPage/AuditPage; fixed test_auth_login_protected_routes.test.tsx; regression test test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx;
+      admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage gate
+      PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. Supersedes the RE-RUN
+      2026-06-29 FAIL. Reports: docs/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
   - stage: 10-e2e
     status: completed
     started_at: '2026-06-29'
@@ -570,7 +678,8 @@ sessions:
     note: EV-005 F34 UJ-026-029 T0 PASS (59 e2e, 363 Vitest); T3 deferred to deploy-smoke
   - stage: 12-verify-deploy
     status: skipped
-    note: 'Deferred at S004 close (2026-06-29) — F34 merged to main via PR #100; deploy/health to be picked up in a later maintenance/integration session if needed (same deferral pattern as S003).'
+    note: 'Deferred at S004 close (2026-06-29) — F34 merged to main via PR #100; deploy/health to be picked up in a later
+      maintenance/integration session if needed (same deferral pattern as S003).'
   - stage: 13-deploy-smoke
     status: skipped
     note: Deferred at S004 close (2026-06-29) — same deferral pattern as S003.
@@ -587,7 +696,8 @@ sessions:
     reason: User-approved lite path; covered by 09-qa + 10-e2e.
   deferred_to_backlog:
   - stage: 12-verify-deploy
-    note: 'Deferred at S004 close (2026-06-29) — F34 merged to main via PR #100; pick up in a later maintenance/integration session if needed.'
+    note: 'Deferred at S004 close (2026-06-29) — F34 merged to main via PR #100; pick up in a later maintenance/integration
+      session if needed.'
   - stage: 13-deploy-smoke
     note: Deferred at S004 close (2026-06-29).
   artifacts:
@@ -691,8 +801,15 @@ sessions:
   type: feature
   status: completed
   completed_at: '2026-06-28'
-  close_note: 'Closed by user 2026-06-28 with verification/deploy stages deferred. F33 browser-local persistent chat history (localStorage — durable across tab close + shared across same-origin tabs, still device-only per ADR-025) built and merged to main via PRs #96/#97; working tree clean on main. Remaining stages 09-qa, 10-e2e, 12-verify-deploy, 13-deploy-smoke deferred (marked skipped with deferral rationale) to a later maintenance/integration session if needed.'
-  intent: 'Add browser-local, ephemeral chat history to the chat-rag-frontend main page. (a) Persist the active conversation across page refresh, tab-away, and switching browser tabs using sessionStorage (device-only, never sent to server; cleared when the browser tab is closed). (b) Keep a selectable list of previous conversations so users can revisit past chats. Frontend-only delta; no backend/API/contract changes. Privacy: sessionStorage chosen over localStorage for a narrower footprint (user decision).'
+  close_note: 'Closed by user 2026-06-28 with verification/deploy stages deferred. F33 browser-local persistent chat history
+    (localStorage — durable across tab close + shared across same-origin tabs, still device-only per ADR-025) built and merged
+    to main via PRs #96/#97; working tree clean on main. Remaining stages 09-qa, 10-e2e, 12-verify-deploy, 13-deploy-smoke
+    deferred (marked skipped with deferral rationale) to a later maintenance/integration session if needed.'
+  intent: 'Add browser-local, ephemeral chat history to the chat-rag-frontend main page. (a) Persist the active conversation
+    across page refresh, tab-away, and switching browser tabs using sessionStorage (device-only, never sent to server; cleared
+    when the browser tab is closed). (b) Keep a selectable list of previous conversations so users can revisit past chats.
+    Frontend-only delta; no backend/API/contract changes. Privacy: sessionStorage chosen over localStorage for a narrower
+    footprint (user decision).'
   branch: feat/S003-persistent-chat-history
   orchestrator: 16-evolve
   artifacts_dir: docs/sessions/S003-persistent-chat-history/
@@ -705,23 +822,31 @@ sessions:
     note: context-brief §14 added (F33); decisions R39-R42; session-brief + routing-plan written; commit a0cf185
   - stage: 01-requirements
     status: completed
-    note: F33 docs delta written — feature-list F33, UJ-024/UJ-025, TC-072–TC-076, AC-S1–AC-S7, RD-068–RD-072, ADR-023. R43–R47 resolved.
+    note: F33 docs delta written — feature-list F33, UJ-024/UJ-025, TC-072–TC-076, AC-S1–AC-S7, RD-068–RD-072, ADR-023. R43–R47
+      resolved.
   - stage: 04-tech-plan
     status: completed
-    note: Phase 10 added (M39-M42, 17 tasks T39.1-T42.3); decisions TP-S003-01..12; ADR-024 authored; frontend-session-state-lifting.mdc updated for device-only sessionStorage; report at docs/sessions/S003-persistent-chat-history/reports/tech-plan.md
+    note: Phase 10 added (M39-M42, 17 tasks T39.1-T42.3); decisions TP-S003-01..12; ADR-024 authored; frontend-session-state-lifting.mdc
+      updated for device-only sessionStorage; report at docs/sessions/S003-persistent-chat-history/reports/tech-plan.md
   - stage: 07-build
     status: completed
     completed_at: '2026-06-26'
     reopened_at: '2026-06-28'
-    note: 'M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green. Reopened 2026-06-28 (user-approved) for ADR-025 storage-mechanism reversal: sessionStorage -> localStorage (durable, cross-tab, still device-only). ADR-025 authored at this stage (supersedes-in-part ADR-023, ADR-024). Commit eacf4ad; re-verified 116 FE tests + 95% coverage + build green; frontend-only, no API/contract/CORS change (AC-S7 preserved). Status remains completed.'
+    note: 'M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green. Reopened 2026-06-28 (user-approved)
+      for ADR-025 storage-mechanism reversal: sessionStorage -> localStorage (durable, cross-tab, still device-only). ADR-025
+      authored at this stage (supersedes-in-part ADR-023, ADR-024). Commit eacf4ad; re-verified 116 FE tests + 95% coverage
+      + build green; frontend-only, no API/contract/CORS change (AC-S7 preserved). Status remains completed.'
   - stage: 08-verify-build
     status: completed
     completed_at: '2026-06-28'
     user_amended: true
-    note: 'User invoked /08-verify-build explicitly (not in original S003 routing plan). Milestone-boundary verify PASS; frontend-only F33 chat-history delta; main@9bd7a50 + uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED. Reports: docs/verification-report.md + docs/sessions/S003-persistent-chat-history/reports/verification-report.md'
+    note: 'User invoked /08-verify-build explicitly (not in original S003 routing plan). Milestone-boundary verify PASS; frontend-only
+      F33 chat-history delta; main@9bd7a50 + uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend
+      tests; Modal smoke SKIPPED. Reports: docs/verification-report.md + docs/sessions/S003-persistent-chat-history/reports/verification-report.md'
   - stage: 09-qa
     status: skipped
-    note: Deferred by user at session close (2026-06-28). F33 merged to main (#96/#97); QA to be picked up in a later maintenance/integration session if needed.
+    note: Deferred by user at session close (2026-06-28). F33 merged to main (#96/#97); QA to be picked up in a later maintenance/integration
+      session if needed.
   - stage: 10-e2e
     status: skipped
     note: Deferred by user at session close (2026-06-28).
@@ -744,7 +869,8 @@ sessions:
     reason: evolve-lite — covered by 09-qa + 10-e2e
   deferred_to_backlog:
   - stage: 09-qa
-    note: Deferred at S003 close (2026-06-28) — pick up in a later maintenance/integration session if F33 needs QA before further deploy.
+    note: Deferred at S003 close (2026-06-28) — pick up in a later maintenance/integration session if F33 needs QA before
+      further deploy.
   - stage: 10-e2e
     note: Deferred at S003 close (2026-06-28).
   - stage: 12-verify-deploy
@@ -763,8 +889,15 @@ sessions:
   type: feature
   status: paused
   paused_at: '2026-06-26'
-  pause_note: 'Parked mid-flight at 11-verify-impl to start S003 (browser-local persistent chat history feature, user request). Open blockers carried forward: Modal GET /jobs 405 (BUG-2026-06-26-get-jobs-405-modal-production), typecheck reportAny, jobs dialog aria warning (BUG-2026-06-26-jobs-dialog-aria-warning), 12-verify-deploy deploy_ready=false, 13-deploy-smoke pending. Branch feat/S002-admin-job-management preserved.'
-  intent: 'Combined session for GitHub issues #88 + #89. #88 (bug/hotfix): ingest/retag jobs fail entirely when vecinita-llm tag completion is empty/non-JSON (LlmTagClientError) — make tagging best-effort so a tag failure degrades to no LLM tags instead of failing the job. #89 (feature/evolve): add a Job Management tab to the admin dashboard backed by a new GET /jobs list API + list_jobs store method, so running/completed/failed jobs are visible and survive in-app navigation (today JobForm local state is dropped on tab change, like #53).'
+  pause_note: 'Parked mid-flight at 11-verify-impl to start S003 (browser-local persistent chat history feature, user request).
+    Open blockers carried forward: Modal GET /jobs 405 (BUG-2026-06-26-get-jobs-405-modal-production), typecheck reportAny,
+    jobs dialog aria warning (BUG-2026-06-26-jobs-dialog-aria-warning), 12-verify-deploy deploy_ready=false, 13-deploy-smoke
+    pending. Branch feat/S002-admin-job-management preserved.'
+  intent: 'Combined session for GitHub issues #88 + #89. #88 (bug/hotfix): ingest/retag jobs fail entirely when vecinita-llm
+    tag completion is empty/non-JSON (LlmTagClientError) — make tagging best-effort so a tag failure degrades to no LLM tags
+    instead of failing the job. #89 (feature/evolve): add a Job Management tab to the admin dashboard backed by a new GET
+    /jobs list API + list_jobs store method, so running/completed/failed jobs are visible and survive in-app navigation (today
+    JobForm local state is dropped on tab change, like #53).'
   branch: feat/S002-admin-job-management
   orchestrator: 16-evolve
   artifacts_dir: docs/sessions/S002-admin-job-management/
@@ -785,15 +918,20 @@ sessions:
     note: ADR-023 best-effort ingest tagging + server-backed Job Management tab
   - stage: 07-build
     status: completed
-    note: '#88 graceful ingest tagging fix (TDD) + #89 GET /jobs API/store + JobsPage/nav/i18n; all unit/integration/bugs/non-live-e2e + 186 data-mgmt FE tests green'
+    note: '#88 graceful ingest tagging fix (TDD) + #89 GET /jobs API/store + JobsPage/nav/i18n; all unit/integration/bugs/non-live-e2e
+      + 186 data-mgmt FE tests green'
   - stage: 09-qa
     status: completed
     partial_rerun_at: '2026-06-26'
-    note: 'Initial run: ruff + basedpyright clean; Python unit/integration/bugs + non-live e2e pass; data-management-frontend lint/typecheck/186 tests pass; frontend-i18n key parity pass. Partial rerun 2026-06-26 post-hotfix — overall FAIL: typecheck (reportAny) + live GET /jobs 405. Report: docs/sessions/S002-admin-job-management/reports/qa-report.md'
+    note: 'Initial run: ruff + basedpyright clean; Python unit/integration/bugs + non-live e2e pass; data-management-frontend
+      lint/typecheck/186 tests pass; frontend-i18n key parity pass. Partial rerun 2026-06-26 post-hotfix — overall FAIL: typecheck
+      (reportAny) + live GET /jobs 405. Report: docs/sessions/S002-admin-job-management/reports/qa-report.md'
   - stage: 14-hotfix
     status: in_progress
     user_amended: true
-    note: 'User-amended into S002 routing plan 2026-06-26 (after 09-qa, before 10-e2e). In-session bug fixes for F32 surface: (1) jobs dialog/sheet aria-describedby warning (FE) — local fix uncommitted; (2) GET /jobs 405 on production Modal data-management — deploy gap. Two separate bug reports + repro tests per bug-investigation. Bugs remain open.'
+    note: 'User-amended into S002 routing plan 2026-06-26 (after 09-qa, before 10-e2e). In-session bug fixes for F32 surface:
+      (1) jobs dialog/sheet aria-describedby warning (FE) — local fix uncommitted; (2) GET /jobs 405 on production Modal data-management
+      — deploy gap. Two separate bug reports + repro tests per bug-investigation. Bugs remain open.'
   - stage: 10-e2e
     status: completed
     partial_rerun_at: '2026-06-26'
@@ -801,10 +939,12 @@ sessions:
   - stage: 11-verify-impl
     status: in_progress
     user_amended: true
-    note: 'User-amended into S002 routing plan 2026-06-26 (was skipped). In_progress pending user AskQuestion responses. Report: docs/sessions/S002-admin-job-management/reports/verify-impl.md'
+    note: 'User-amended into S002 routing plan 2026-06-26 (was skipped). In_progress pending user AskQuestion responses. Report:
+      docs/sessions/S002-admin-job-management/reports/verify-impl.md'
   - stage: 12-verify-deploy
     status: completed
-    note: 'deploy_ready: false; checklist written. Blockers: Modal redeploy (GET /jobs 405) + typecheck (reportAny) fix. Report: docs/sessions/S002-admin-job-management/reports/deploy-checklist.md'
+    note: 'deploy_ready: false; checklist written. Blockers: Modal redeploy (GET /jobs 405) + typecheck (reportAny) fix. Report:
+      docs/sessions/S002-admin-job-management/reports/deploy-checklist.md'
   - stage: 13-deploy-smoke
     status: pending
   skipped_stages:
@@ -841,13 +981,16 @@ sessions:
 - id: S001-modal-cold-start-snapshot
   type: ops
   status: completed_with_deferrals
-  intent: 'Reduce vecinita-llm (and secondarily vecinita-embedding) Modal cold-start latency so the first cold chat ask stops exceeding DigitalOcean''s ~60s gateway timeout, while preserving scale-to-zero per ADR-004. Mechanism under test: Modal GPU Memory Snapshots (gated on instrumentation).'
+  intent: 'Reduce vecinita-llm (and secondarily vecinita-embedding) Modal cold-start latency so the first cold chat ask stops
+    exceeding DigitalOcean''s ~60s gateway timeout, while preserving scale-to-zero per ADR-004. Mechanism under test: Modal
+    GPU Memory Snapshots (gated on instrumentation).'
   branch: feat/S001-modal-cold-start-snapshot
   orchestrator: pipeline
   artifacts_dir: docs/sessions/S001-modal-cold-start-snapshot/
   started_at: '2026-06-25'
   completed_at: '2026-06-26'
-  close_note: Deploy (13-deploy-smoke) and health (15-service-health) complete and live; H1-H5 pass; cold+prewarm ask 14.3s. Closed with deferrals (see deferred_to_backlog).
+  close_note: Deploy (13-deploy-smoke) and health (15-service-health) complete and live; H1-H5 pass; cold+prewarm ask 14.3s.
+    Closed with deferrals (see deferred_to_backlog).
   deferred_to_backlog:
   - stage: 07-build
     item: T12
@@ -873,7 +1016,8 @@ sessions:
     status: completed
     completed_at: '2026-06-25'
     user_amended: true
-    note: User-invoked (not in original S001 routing plan); pre-deploy agents all PASS; checklist written @ f766233; user signed off on all 7 failure mitigations + rollback plan 2026-06-25
+    note: User-invoked (not in original S001 routing plan); pre-deploy agents all PASS; checklist written @ f766233; user
+      signed off on all 7 failure mitigations + rollback plan 2026-06-25
   - stage: 13-deploy-smoke
     status: completed
     completed_at: '2026-06-26'
@@ -883,7 +1027,8 @@ sessions:
   - stage: 19-address-pr-review
     status: in_progress
     user_amended: true
-    note: 'User adopted PR #68 review remediation (PRM-007 / linked PRR-010) into S001 routing plan 2026-06-25; 2 advisories from the chat corpus-tab hotfix. Deferred to backlog at S001 close.'
+    note: 'User adopted PR #68 review remediation (PRM-007 / linked PRR-010) into S001 routing plan 2026-06-25; 2 advisories
+      from the chat corpus-tab hotfix. Deferred to backlog at S001 close.'
   skipped_stages:
   - stage: 01-requirements
     reason: perf change to already-specced service under ADR-009
@@ -927,7 +1072,8 @@ stages:
     started_at: '2026-05-19'
     completed_at: '2026-06-13'
     partial_rerun_at: '2026-06-13'
-    partial_rerun_note: EV-004 delta — admin dashboard en/es i18n (mirror ChatRAG) + shared component library (packages/frontend-ui + packages/frontend-i18n)
+    partial_rerun_note: EV-004 delta — admin dashboard en/es i18n (mirror ChatRAG) + shared component library (packages/frontend-ui
+      + packages/frontend-i18n)
     phases:
       phase1a_agents:
         status: completed
@@ -1132,8 +1278,12 @@ stages:
       - M40
       - M41
       - M42
-      note: S003 F33 browser-local persistent chat history build complete — M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% coverage + build green
-      reopen_note: '07-build reopened 2026-06-28 (explicit user approval) for an ADR-025 delta: chat-history storage switched sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only). Commit eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed.'
+      note: S003 F33 browser-local persistent chat history build complete — M39–M42 done; Phase 10 gate PASS; 115 FE tests
+        + 95% coverage + build green
+      reopen_note: '07-build reopened 2026-06-28 (explicit user approval) for an ADR-025 delta: chat-history storage switched
+        sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only). Commit
+        eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS
+        change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed.'
     s004:
       status: completed
       session_id: S004-supabase-auth
@@ -1151,8 +1301,11 @@ stages:
       - T47.4
       - T47.5
       - T47.6
-      note: 'S004/EV-005 F34 Supabase admin auth build. M47 T47.1-T47.6 completed 2026-06-29. Audit-actor fix in apps/internal-write-api: ContextVar-based actor propagation replaced with explicit WriteActorDep FastAPI dependency. Next: Phase 11 gate check + 08-verify-build.'
-      reconciliation_note: S004/EV-005 F34 build (Phase 11 M43-M47) reconciled to completed during 10-e2e — 08-verify-build, 09-qa (remediated), and 10-e2e all completed downstream on feat/S004-supabase-auth.
+      note: 'S004/EV-005 F34 Supabase admin auth build. M47 T47.1-T47.6 completed 2026-06-29. Audit-actor fix in apps/internal-write-api:
+        ContextVar-based actor propagation replaced with explicit WriteActorDep FastAPI dependency. Next: Phase 11 gate check
+        + 08-verify-build.'
+      reconciliation_note: S004/EV-005 F34 build (Phase 11 M43-M47) reconciled to completed during 10-e2e — 08-verify-build,
+        09-qa (remediated), and 10-e2e all completed downstream on feat/S004-supabase-auth.
     s005:
       status: in_progress
       session_id: S005-user-mgmt-auth
@@ -1177,17 +1330,29 @@ stages:
       current_task: 08-verify-build
       in_progress_tasks: []
       uncommitted: false
-      note: 'S005/EV-006 F35 M53 (auth UX hardening) COMPLETE 2026-06-30 — T53.12-T53.22 implemented and committed as 9 atomic commits. Deliverability test-send UI + client (sendTestEmail/EmailUnconfiguredError), server-side user search (q) + shared PaginationControls, audit viewer entity_type filter + user/email event labels + per-user View activity link, privacy guard (no extra admin traffic on idle/log-out-everywhere), CORS preflight for signout + email-test, e2e UJ-036/UJ-037, OpenAPI (signout/email-test/q), runbook (force-signout RPC apply, test-send workflow, AC-U10-U16). DM FE Vitest 303/303; new Python tests pass; ESLint+tsc clean; OpenAPI parses. Next: 08-verify-build then Phase 12 gate + major PR-48.'
+      note: 'S005/EV-006 F35 M53 (auth UX hardening) COMPLETE 2026-06-30 — T53.12-T53.22 implemented and committed as 9 atomic
+        commits. Deliverability test-send UI + client (sendTestEmail/EmailUnconfiguredError), server-side user search (q)
+        + shared PaginationControls, audit viewer entity_type filter + user/email event labels + per-user View activity link,
+        privacy guard (no extra admin traffic on idle/log-out-everywhere), CORS preflight for signout + email-test, e2e UJ-036/UJ-037,
+        OpenAPI (signout/email-test/q), runbook (force-signout RPC apply, test-send workflow, AC-U10-U16). DM FE Vitest 303/303;
+        new Python tests pass; ESLint+tsc clean; OpenAPI parses. Next: 08-verify-build then Phase 12 gate + major PR-48.'
   08-verify-build:
     status: completed
     started_at: '2026-06-25'
     completed_at: '2026-06-28'
     partial_rerun_at: '2026-06-28'
-    partial_rerun_note: S003 — milestone-boundary verify PASS (frontend-only F33 chat-history delta; main@9bd7a50 with uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED — frontend-only delta)
+    partial_rerun_note: S003 — milestone-boundary verify PASS (frontend-only F33 chat-history delta; main@9bd7a50 with uncommitted
+      S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED — frontend-only
+      delta)
     scope: standalone
     overall: pass
     report: docs/verification-report.md
-    notes: 'EV-004: 522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override bumps (aiohttp, msgpack, pypdf, starlette) | S001: milestone-boundary verify PASS; T12 still pending in 07-build; 2 uncommitted eslint/prettier auto-fixes | S003: milestone-boundary verify PASS; frontend-only F33 chat-history delta; Modal smoke SKIPPED | S005: interim milestone-boundary verify PASS after in-session remediation — initial FAIL (Python lint, typecheck, FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed; final make check + make test-unit-coverage green, 681+ pytest + 312 vitest admin'
+    notes: 'EV-004: 522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override
+      bumps (aiohttp, msgpack, pypdf, starlette) | S001: milestone-boundary verify PASS; T12 still pending in 07-build; 2
+      uncommitted eslint/prettier auto-fixes | S003: milestone-boundary verify PASS; frontend-only F33 chat-history delta;
+      Modal smoke SKIPPED | S005: interim milestone-boundary verify PASS after in-session remediation — initial FAIL (Python
+      lint, typecheck, FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed; final make check + make test-unit-coverage
+      green, 681+ pytest + 312 vitest admin'
     substeps:
       phase: complete
     s003:
@@ -1209,7 +1374,8 @@ stages:
       overall_result: PASS
       report: docs/verification-report.md
       blocking_failures: []
-      note: S004/EV-005 F34 milestone-boundary verify PASS (re-run after remediation). Prior blocking failures (cryptography CVEs; admin FE branch coverage) resolved.
+      note: S004/EV-005 F34 milestone-boundary verify PASS (re-run after remediation). Prior blocking failures (cryptography
+        CVEs; admin FE branch coverage) resolved.
     s005:
       session_id: S005-user-mgmt-auth
       branch: feat/S005-user-mgmt-auth
@@ -1227,13 +1393,16 @@ stages:
       - Frontend format (1)
       - DM FE branch coverage 94.18% < 95%
       green: make check + make test-unit-coverage; 681+ pytest + 312 vitest admin
-      note: S005/EV-006 F35 interim milestone-boundary verify PASS after in-session remediation. Initial FAIL (lint, typecheck, format, DM FE branch coverage) fixed; final make check + make test-unit-coverage green. Supersedes the earlier 2026-06-30 FAIL; cleared for Phase 12 gate.
+      note: S005/EV-006 F35 interim milestone-boundary verify PASS after in-session remediation. Initial FAIL (lint, typecheck,
+        format, DM FE branch coverage) fixed; final make check + make test-unit-coverage green. Supersedes the earlier 2026-06-30
+        FAIL; cleared for Phase 12 gate.
   09-qa:
     status: completed
     started_at: '2026-06-25'
     completed_at: '2026-06-25'
     partial_rerun_at: '2026-06-25'
-    partial_rerun_note: S001 branch full-repo QA @ 4f3f741; 500 passed 38 skipped Python; 271 FE tests; advisories QA-001–011 (QA-010 resolved in CI)
+    partial_rerun_note: S001 branch full-repo QA @ 4f3f741; 500 passed 38 skipped Python; 271 FE tests; advisories QA-001–011
+      (QA-010 resolved in CI)
     report: docs/qa-report.md
     overall: pass_with_advisories
     note: EV-004/F31 post-M32 full-repo QA; 479 passed 38 skipped Python; 267 FE tests; advisories QA-001–010
@@ -1242,7 +1411,8 @@ stages:
       branch: feat/S001-modal-cold-start-snapshot
       commit: 4f3f741
       overall: pass_with_advisories
-      note: S001 branch full-repo QA @ 4f3f741; 500 passed 38 skipped Python; 271 FE tests; advisories QA-001–011 (QA-010 resolved in CI)
+      note: S001 branch full-repo QA @ 4f3f741; 500 passed 38 skipped Python; 271 FE tests; advisories QA-001–011 (QA-010
+        resolved in CI)
     s002:
       report: docs/sessions/S002-admin-job-management/reports/qa-report.md
       branch: feat/S002-admin-job-management
@@ -1263,7 +1433,8 @@ stages:
         python: 703 passed — PASS
         frontend: all green — PASS
         coverage_gate: PASS
-      note: S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed; all frontend Vitest suites green; coverage gate PASS.
+      note: S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed; all
+        frontend Vitest suites green; coverage gate PASS.
     s006:
       status: completed
       started_at: '2026-06-30'
@@ -1278,7 +1449,8 @@ stages:
         python: 729 passed — PASS
         frontend: all green — PASS
         coverage_gate: PASS
-      note: S006/EV-007 F35 ext full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 729 passed; all frontend Vitest suites green; coverage gate PASS. Handoff to 10-e2e.
+      note: S006/EV-007 F35 ext full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 729 passed; all frontend
+        Vitest suites green; coverage gate PASS. Handoff to 10-e2e.
   10-e2e:
     status: completed
     started_at: '2026-06-30'
@@ -1287,7 +1459,8 @@ stages:
     branch: feat/S006-invite-acceptance
     evolve_cycle_id: EV-007
     report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
-    note: S006/EV-007 F35 ext 10-e2e COMPLETE 2026-06-30 on feat/S006-invite-acceptance. S005 baseline preserved in s005 slice below.
+    note: S006/EV-007 F35 ext 10-e2e COMPLETE 2026-06-30 on feat/S006-invite-acceptance. S005 baseline preserved in s005 slice
+      below.
     s006:
       status: completed
       started_at: '2026-06-30'
@@ -1297,7 +1470,8 @@ stages:
       feature: F35
       evolve_cycle_id: EV-007
       report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
-      note: S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract; T3 deferred
+      note: S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract;
+        T3 deferred
       t0: pass
       t0_tests: 69
       t1_integration: pass
@@ -1348,7 +1522,8 @@ stages:
       vitest: 483
       supabase_contract: 14
       t3_live: deferred
-      note: S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract; T3 deferred
+      note: S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract;
+        T3 deferred
   11-verify-impl:
     status: completed
     started_at: '2026-05-27'
@@ -1370,13 +1545,15 @@ stages:
     s002:
       report: docs/sessions/S002-admin-job-management/reports/verify-impl.md
       partial_rerun_at: '2026-06-26'
-      note: 'S002 partial rerun — user-amended into routing plan; in_progress pending user AskQuestion responses at S002 park. (EV-002 prior run: F23-F29 all journeys and features user-approved.)'
+      note: 'S002 partial rerun — user-amended into routing plan; in_progress pending user AskQuestion responses at S002 park.
+        (EV-002 prior run: F23-F29 all journeys and features user-approved.)'
   12-verify-deploy:
     status: completed
     started_at: '2026-05-27'
     completed_at: '2026-06-26'
     partial_rerun_at: '2026-06-26'
-    partial_rerun_note: 'S002 — F32 Job Management pre-deploy checklist; deploy_ready=false; blockers: Modal redeploy (GET /jobs 405) + typecheck (reportAny) fix'
+    partial_rerun_note: 'S002 — F32 Job Management pre-deploy checklist; deploy_ready=false; blockers: Modal redeploy (GET
+      /jobs 405) + typecheck (reportAny) fix'
     report: docs/sessions/S002-admin-job-management/reports/deploy-checklist.md
     deploy_ready: false
     blockers:
@@ -1450,7 +1627,8 @@ stages:
       bug_report: docs/bug-reports/BUG-2026-06-26-get-jobs-405-modal-production.md
       repro_test: tests/e2e/test_bug_2026_06_26_get_jobs_405.py
       status: open
-    note: 'Two distinct F32 (#89) bugs surfaced post-build; fixing in-session on feat/S002 before deploy (12/13 still pending). Follows bug-investigation: one report + one repro test per bug.'
+    note: 'Two distinct F32 (#89) bugs surfaced post-build; fixing in-session on feat/S002 before deploy (12/13 still pending).
+      Follows bug-investigation: one report + one repro test per bug.'
     history:
     - status: completed
       completed_at: '2026-06-25'
@@ -1484,7 +1662,8 @@ stages:
     - H5
     - H0ci
     advisories:
-    - 'do_branch_pin_feat_S001: RESOLVED 2026-06-28 — DO apps reset to branch:main + deploy_on_push; deploy-digitalocean.yml CD backstop added'
+    - 'do_branch_pin_feat_S001: RESOLVED 2026-06-28 — DO apps reset to branch:main + deploy_on_push; deploy-digitalocean.yml
+      CD backstop added'
     - modal_h4_cors_waived_proxy_auth
     - s001_t12_pending
     - h0ci_blocking_after_merge
@@ -1509,14 +1688,13 @@ stages:
     status: pending
   18-pr-review:
     status: completed
-    started: '2026-06-12'
+    started: '2026-06-30'
     completed: '2026-06-30'
-    last_cycle: PRR-011
+    last_cycle: PRR-012
   19-address-pr-review:
-    status: completed
+    status: in_progress
     started: '2026-06-25'
-    completed: '2026-06-30'
-    last_cycle: PRM-009
+    last_cycle: PRM-010
     history_note: 'PRM-005 closed PR #62 ([M32] Workspace scaffold) on 2026-06-13'
   gather-context:
     status: skipped
@@ -2094,7 +2272,8 @@ evolve_cycles:
   completed: '2026-06-29'
   session_id: S004-supabase-auth
   current_stage: 13-deploy-smoke
-  close_note: 'F34 Supabase admin auth merged to main via PR #100 (2026-06-29). 12-verify-deploy + 13-deploy-smoke deferred at S004 close (same pattern as S003). Follow-on admin user management continues as EV-006/S005.'
+  close_note: 'F34 Supabase admin auth merged to main via PR #100 (2026-06-29). 12-verify-deploy + 13-deploy-smoke deferred
+    at S004 close (same pattern as S003). Follow-on admin user management continues as EV-006/S005.'
   stages:
     00-context:
       status: completed
@@ -2141,7 +2320,8 @@ evolve_cycles:
       - docs/dependency-inventory.md
       - docs/config-spec.md
       - docs/api-contract.md
-      note: TP-S004-01..12 resolved; cost cap raised to ~$75/mo (supersedes ADR-004 — user-approved); R53 unblocked via Supabase CLI (MCP-independent). Commit DEFERRED (commit-only-when-asked).
+      note: TP-S004-01..12 resolved; cost cap raised to ~$75/mo (supersedes ADR-004 — user-approved); R53 unblocked via Supabase
+        CLI (MCP-independent). Commit DEFERRED (commit-only-when-asked).
     07-build:
       status: completed
       started_at: '2026-06-29'
@@ -2156,19 +2336,23 @@ evolve_cycles:
       - T47.5
       - T47.6
       completed: '2026-06-29'
-      note: 'M47 T47.1-T47.6 completed 2026-06-29. Audit-actor fix in apps/internal-write-api: ContextVar-based actor propagation replaced with an explicit WriteActorDep FastAPI dependency. Reconciled to completed during 10-e2e (downstream 08/09/10 all done).'
+      note: 'M47 T47.1-T47.6 completed 2026-06-29. Audit-actor fix in apps/internal-write-api: ContextVar-based actor propagation
+        replaced with an explicit WriteActorDep FastAPI dependency. Reconciled to completed during 10-e2e (downstream 08/09/10
+        all done).'
     08-verify-build:
       status: completed
       completed_at: '2026-06-29'
       overall_result: PASS
       report: docs/verification-report.md
       blocking_failures: []
-      note: Milestone-boundary verify PASS on feat/S004-supabase-auth (re-run after remediation). Prior blocking failures (cryptography CVEs; admin FE branch coverage 92.46% < 95%) resolved. Cleared for 09-qa.
+      note: Milestone-boundary verify PASS on feat/S004-supabase-auth (re-run after remediation). Prior blocking failures
+        (cryptography CVEs; admin FE branch coverage 92.46% < 95%) resolved. Cleared for 09-qa.
     09-qa:
       status: completed
       completed: '2026-06-29'
       overall: pass_with_remediation
-      note: FAIL (admin nav test + coverage gate) remediated per qa-report QA-S004-001/002 (resolved); re-confirmed during 10-e2e (admin FE 223/223 + chat FE 134/134 Vitest PASS).
+      note: FAIL (admin nav test + coverage gate) remediated per qa-report QA-S004-001/002 (resolved); re-confirmed during
+        10-e2e (admin FE 223/223 + chat FE 134/134 Vitest PASS).
     10-e2e:
       status: completed
       completed: '2026-06-29'
@@ -2179,16 +2363,22 @@ evolve_cycles:
   - 'RD-075: roles admin (full) + viewer (read-only); writes require admin (403 for viewer)'
   - 'RD-076: SPA supabase-js session -> Authorization Bearer JWT; FastAPI verifies'
   - 'RD-077: identity in Supabase only; corpus DB audit actor = opaque Supabase UUID + role (no PII)'
-  - 'RD-078: Supabase branching on canonical project cfuvghdsuwactfeamtym (grant MCP access); migrations in repo; secrets via Modal/DO env'
+  - 'RD-078: Supabase branching on canonical project cfuvghdsuwactfeamtym (grant MCP access); migrations in repo; secrets
+    via Modal/DO env'
   - 'RD-079: strict ChatRAG CORS limited to ChatRAG frontend origin; admin APIs allow Authorization header'
-  - 'TP-S004-01..12 (2026-06-28, ADR-027): HS256 JWT verify (TP-S004-01); role from app_metadata.role (TP-S004-02); shared vecinita_shared_schemas.auth; PyJWT>=2.10,<3 + @supabase/supabase-js ^2.108.2; Supabase Pro + ephemeral branching + CLI migrations-in-repo; inviteUserByEmail+SMTP; idempotent first-admin seed. Cost cap raised to ~$75/mo (supersedes ADR-004 cap — user-approved). R53 unblocked via Supabase CLI (MCP-independent). Phase 11 (M43-M47, 29 tasks) appended to execution-plan.'
+  - 'TP-S004-01..12 (2026-06-28, ADR-027): HS256 JWT verify (TP-S004-01); role from app_metadata.role (TP-S004-02); shared
+    vecinita_shared_schemas.auth; PyJWT>=2.10,<3 + @supabase/supabase-js ^2.108.2; Supabase Pro + ephemeral branching + CLI
+    migrations-in-repo; inviteUserByEmail+SMTP; idempotent first-admin seed. Cost cap raised to ~$75/mo (supersedes ADR-004
+    cap — user-approved). R53 unblocked via Supabase CLI (MCP-independent). Phase 11 (M43-M47, 29 tasks) appended to execution-plan.'
   open_items_for_04_tech_plan:
   - JWT verify mechanism (JWKS vs shared secret)
   - role-claim source
   - dependency pins (supabase-js + Python JWT verify)
   - cost vs ADR-004 cap
   - grant MCP access to canonical project cfuvghdsuwactfeamtym (R53)
-  note: Admin-only Supabase Auth; ChatRAG anonymous; invite-only; admin+viewer roles; identity in Supabase; supersedes ADR-004 auth clause + revisits ADR-005. 01-requirements completed 2026-06-28 (RD-073-RD-079); commit DEFERRED per commit-only-when-asked override.
+  note: Admin-only Supabase Auth; ChatRAG anonymous; invite-only; admin+viewer roles; identity in Supabase; supersedes ADR-004
+    auth clause + revisits ADR-005. 01-requirements completed 2026-06-28 (RD-073-RD-079); commit DEFERRED per commit-only-when-asked
+    override.
 - id: EV-006
   cycle_type: feature
   feature_ids:
@@ -2202,11 +2392,15 @@ evolve_cycles:
     00-context:
       status: completed
       completed: '2026-06-29'
-      note: EV-006/F35 delta opened on the S004/EV-005 Supabase Auth foundation; decisions R55-R59; evolve-lite routing approved. Handoff to 01-requirements.
+      note: EV-006/F35 delta opened on the S004/EV-005 Supabase Auth foundation; decisions R55-R59; evolve-lite routing approved.
+        Handoff to 01-requirements.
     01-requirements:
       status: completed
       completed: '2026-06-29'
-      note: 'EV-006/F35 delta requirements: ADR-029; feature-list F35; decisions RD-080-RD-090 (resolved SMTP Dashboard-vs-CI contradiction via hybrid sourcing + bilingual-email ambiguity via stacked templates); user-journeys UJ-030-UJ-033; test-plan TC-088-TC-095; acceptance-criteria AC-U1-AC-U9; api-contract /admin/users*; config-spec SMTP/template/remember-me env; staging-secrets-matrix EV-006. Commit deferred (commit-only-when-asked override). Open items handed to 04-tech-plan.'
+      note: 'EV-006/F35 delta requirements: ADR-029; feature-list F35; decisions RD-080-RD-090 (resolved SMTP Dashboard-vs-CI
+        contradiction via hybrid sourcing + bilingual-email ambiguity via stacked templates); user-journeys UJ-030-UJ-033;
+        test-plan TC-088-TC-095; acceptance-criteria AC-U1-AC-U9; api-contract /admin/users*; config-spec SMTP/template/remember-me
+        env; staging-secrets-matrix EV-006. Commit deferred (commit-only-when-asked override). Open items handed to 04-tech-plan.'
     04-tech-plan:
       status: completed
       completed: '2026-06-29'
@@ -2216,8 +2410,17 @@ evolve_cycles:
       milestones:
       - Phase 12 M48-M52
       - M53
-      note: 'S005/EV-006 F35 user-mgmt tech plan: ADR-030, TP-S005-01–16, execution-plan Phase 12 (M48-M52). 2026-06-29 in-place SCOPE ADDITION (re-run; user-approved 4 items, MFA/2FA + bulk CSV import deferred): ADR-031 (docs/adr/ADR-031-ev006-auth-ux-hardening.md, auth UX hardening) capturing TP-S005-17 idle/session timeout (30min+60s warning, VITE_VECINITA_IDLE_TIMEOUT_MIN/_WARNING_SEC); TP-S005-18 self global signOut; TP-S005-19 admin force-logout POST /admin/users/{id}/signout via admin_delete_user_sessions RPC (one-time operator apply, 503 fallback->disable); TP-S005-20 user search q+pagination; TP-S005-21 audit viewer (reuse F29 AuditPage + GET /internal/v1/audit); TP-S005-22 deliverability test-send POST /admin/email/test via Resend REST (RESEND_API_KEY/RESEND_SENDER_EMAIL, 5/h/admin); TP-S005-23 SPF/DKIM/DMARC checklist; TP-S005-24 config+secrets delta. Milestone M53 (T53.1-T53.22, pending, TDD-ordered) appended to Phase 12 (now M48-M53); gate TC-088–TC-103, UJ-030–UJ-038, AC-U1–AC-U16.
-        New artifacts: ADR-031, UJ-034-038, TC-096-103, AC-U10-U16, api-contract routes + q param, Modal DM RESEND_API_KEY/RESEND_SENDER_EMAIL, idle-timeout VITE envs. Stays completed (in-place extension). Commit DEFERRED (no new SHAs). Handoff to 07-build.'
+      note: 'S005/EV-006 F35 user-mgmt tech plan: ADR-030, TP-S005-01–16, execution-plan Phase 12 (M48-M52). 2026-06-29 in-place
+        SCOPE ADDITION (re-run; user-approved 4 items, MFA/2FA + bulk CSV import deferred): ADR-031 (docs/adr/ADR-031-ev006-auth-ux-hardening.md,
+        auth UX hardening) capturing TP-S005-17 idle/session timeout (30min+60s warning, VITE_VECINITA_IDLE_TIMEOUT_MIN/_WARNING_SEC);
+        TP-S005-18 self global signOut; TP-S005-19 admin force-logout POST /admin/users/{id}/signout via admin_delete_user_sessions
+        RPC (one-time operator apply, 503 fallback->disable); TP-S005-20 user search q+pagination; TP-S005-21 audit viewer
+        (reuse F29 AuditPage + GET /internal/v1/audit); TP-S005-22 deliverability test-send POST /admin/email/test via Resend
+        REST (RESEND_API_KEY/RESEND_SENDER_EMAIL, 5/h/admin); TP-S005-23 SPF/DKIM/DMARC checklist; TP-S005-24 config+secrets
+        delta. Milestone M53 (T53.1-T53.22, pending, TDD-ordered) appended to Phase 12 (now M48-M53); gate TC-088–TC-103,
+        UJ-030–UJ-038, AC-U1–AC-U16. New artifacts: ADR-031, UJ-034-038, TC-096-103, AC-U10-U16, api-contract routes + q param,
+        Modal DM RESEND_API_KEY/RESEND_SENDER_EMAIL, idle-timeout VITE envs. Stays completed (in-place extension). Commit
+        DEFERRED (no new SHAs). Handoff to 07-build.'
     07-build:
       status: completed
       started: '2026-06-30'
@@ -2234,12 +2437,17 @@ evolve_cycles:
         phase: Phase 12
         scope: 07-build close-out
         build_criteria: PASS
-        build_evidence: make check green (ruff/basedpyright/ESLint/Prettier); 496 pytest unit + all frontend Vitest suites green; TC-088–TC-103 covered; CORS preflight + privacy + 503 fallback covered.
+        build_evidence: make check green (ruff/basedpyright/ESLint/Prettier); 496 pytest unit + all frontend Vitest suites
+          green; TC-088–TC-103 covered; CORS preflight + privacy + 503 fallback covered.
         deferred_to_13_deploy_smoke: AC-U1–U16 live Resend, live audit_log rows, secret placement, SMTP/SPF/DKIM/DMARC.
         close_out_fix: Typecheck blocker fixed — private-helper import in DM user-admin unit test switched to shared tests.helpers.user_admin_mocks.
-      note: S005/EV-006 F35 build — milestone M53 (auth UX hardening, T53.1-T53.22) COMPLETE 2026-06-30 (close-out). M53 22/22 (all committed; execution-plan and git agree). No tasks in progress; working tree clean before close-out. Phase 12 build criteria PASS; live/deploy criteria deferred to 13-deploy-smoke. Handoff to 08-verify-build.
+      note: S005/EV-006 F35 build — milestone M53 (auth UX hardening, T53.1-T53.22) COMPLETE 2026-06-30 (close-out). M53 22/22
+        (all committed; execution-plan and git agree). No tasks in progress; working tree clean before close-out. Phase 12
+        build criteria PASS; live/deploy criteria deferred to 13-deploy-smoke. Handoff to 08-verify-build.
       advisories:
-      - 'Pre-existing strict-mode lint/typecheck failures in the M53 slice fixed to keep the milestone gate green: useIdleTimeout.ts (void-on-void), IdleTimeoutGuard.tsx (floating promise + void-on-void), config.ts/vite-env.d.ts (idle env typing), authSessionHarness.ts renamed to .tsx.'
+      - 'Pre-existing strict-mode lint/typecheck failures in the M53 slice fixed to keep the milestone gate green: useIdleTimeout.ts
+        (void-on-void), IdleTimeoutGuard.tsx (floating promise + void-on-void), config.ts/vite-env.d.ts (idle env typing),
+        authSessionHarness.ts renamed to .tsx.'
       - 'New unit tests added: apps/data-management-frontend/src/api/users.test.ts; expanded test_users_page.test.tsx + test_force_signout.test.tsx.'
       - DM frontend coverage gate PASS (lines 98.4%, branches 95.53%); lint + typecheck green; 291 Vitest tests pass.
     08-verify-build:
@@ -2256,7 +2464,9 @@ evolve_cycles:
       - Frontend format (1)
       - DM FE branch coverage 94.18% < 95%
       green: make check + make test-unit-coverage; 681+ pytest + 312 vitest admin
-      note: S005/EV-006 F35 interim milestone-boundary verify PASS after in-session remediation. Initial FAIL (Python lint, typecheck, FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed; final make check + make test-unit-coverage green, 681+ pytest + 312 vitest admin. Supersedes the earlier 2026-06-30 interim FAIL; cleared for the Phase 12 gate.
+      note: S005/EV-006 F35 interim milestone-boundary verify PASS after in-session remediation. Initial FAIL (Python lint,
+        typecheck, FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed; final make check + make test-unit-coverage
+        green, 681+ pytest + 312 vitest admin. Supersedes the earlier 2026-06-30 interim FAIL; cleared for the Phase 12 gate.
     09-qa:
       status: completed
       completed: '2026-06-30'
@@ -2267,15 +2477,25 @@ evolve_cycles:
         python: 703 passed — PASS
         frontend: all green — PASS
         coverage_gate: PASS
-      note: S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed; all frontend Vitest suites green; coverage gate PASS. Handoff to 10-e2e.
+      note: S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed; all
+        frontend Vitest suites green; coverage gate PASS. Handoff to 10-e2e.
   decisions:
-  - 'R55-R59 (2026-06-29, EV-006/S005): Resend SMTP wiring for Supabase invitation emails; admin user-management operations (invite/list/role-change/deactivate); remember-me toggle on admin login.'
-  - 'RD-080-RD-090 (2026-06-29, EV-006/S005, 01-requirements): admin user-management /admin/users* ops; in-app self-service password reset; remember-me default-checked localStorage/sessionStorage (vecinita.auth.remember); hybrid Resend SMTP (config.toml source of truth); 6 stacked-bilingual versioned templates; supabase.yml config push + pinned CLI; audit of user-mgmt actions; operator-supplied verified Resend domain. ADR-029.'
+  - 'R55-R59 (2026-06-29, EV-006/S005): Resend SMTP wiring for Supabase invitation emails; admin user-management operations
+    (invite/list/role-change/deactivate); remember-me toggle on admin login.'
+  - 'RD-080-RD-090 (2026-06-29, EV-006/S005, 01-requirements): admin user-management /admin/users* ops; in-app self-service
+    password reset; remember-me default-checked localStorage/sessionStorage (vecinita.auth.remember); hybrid Resend SMTP (config.toml
+    source of truth); 6 stacked-bilingual versioned templates; supabase.yml config push + pinned CLI; audit of user-mgmt actions;
+    operator-supplied verified Resend domain. ADR-029.'
   - 'TP-S005-01–16 (2026-06-29, EV-006/S005, 04-tech-plan): F35 user-mgmt tech plan — ADR-030; execution-plan Phase 12 (M48-M52).'
-  - 'TP-S005-17–24 (2026-06-29, EV-006/S005, 04-tech-plan SCOPE ADDITION): auth UX hardening — ADR-031; idle/session timeout, self global signOut, admin force-logout, user search+pagination, audit viewer, deliverability test-send, SPF/DKIM/DMARC checklist, config+secrets delta; milestone M53 (T53.1-T53.22). MFA/2FA + bulk CSV import deferred.'
-  note: Delta on the S004/EV-005 Supabase Auth foundation. F35 admin user management (invite/list/role-change/deactivate) + remember-me login toggle + Resend SMTP for invitation emails. User-approved evolve-lite routing 00→01→04→07→08→09→10→12→13 (skip 02,03,05,06,11).
+  - 'TP-S005-17–24 (2026-06-29, EV-006/S005, 04-tech-plan SCOPE ADDITION): auth UX hardening — ADR-031; idle/session timeout,
+    self global signOut, admin force-logout, user search+pagination, audit viewer, deliverability test-send, SPF/DKIM/DMARC
+    checklist, config+secrets delta; milestone M53 (T53.1-T53.22). MFA/2FA + bulk CSV import deferred.'
+  note: Delta on the S004/EV-005 Supabase Auth foundation. F35 admin user management (invite/list/role-change/deactivate)
+    + remember-me login toggle + Resend SMTP for invitation emails. User-approved evolve-lite routing 00→01→04→07→08→09→10→12→13
+    (skip 02,03,05,06,11).
   paused_at: '2026-06-30'
-  pause_note: 'EV-006 paused 2026-06-30 — S005 archived paused; F35 scaffold merged; #109 invite-acceptance gap continues in EV-007/S006. Deploy stages 12-verify-deploy + 13-deploy-smoke deferred.'
+  pause_note: 'EV-006 paused 2026-06-30 — S005 archived paused; F35 scaffold merged; #109 invite-acceptance gap continues
+    in EV-007/S006. Deploy stages 12-verify-deploy + 13-deploy-smoke deferred.'
   deferred_stages:
   - 12-verify-deploy
   - 13-deploy-smoke
@@ -2319,7 +2539,8 @@ evolve_cycles:
   - 'R60 (2026-06-30, EV-007/S006): Keep Supabase-managed invite/recovery mail via Resend SMTP (not Resend REST API).'
   - 'R61 (2026-06-30, EV-007/S006): New POST /admin/users/{id}/revoke-invite endpoint + distinct UI + audit user.invite_revoked.'
   - 'R62 (2026-06-30, EV-007/S006): Scoped context brief at docs/context/invite-acceptance-flow.md.'
-  note: 'F35 extension from S005/EV-006 — completes invite acceptance flow (redirect URLs, auth callback, password setup, invitation admin) for GitHub #109. EV-006 paused with deploy stages deferred.'
+  note: 'F35 extension from S005/EV-006 — completes invite acceptance flow (redirect URLs, auth callback, password setup,
+    invitation admin) for GitHub #109. EV-006 paused with deploy stages deferred.'
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -2502,7 +2723,8 @@ pr_review_cycles:
   head_ref: fix/admin-ui-es-en-toggle
   base_ref: main
   verdict: REQUEST_CHANGES
-  verdict_note: Posted as --comment review (GitHub blocks request-changes on own PR; reviewer == author joseph-c-mcguire). Inline comment on CorpusList.tsx:64.
+  verdict_note: Posted as --comment review (GitHub blocks request-changes on own PR; reviewer == author joseph-c-mcguire).
+    Inline comment on CorpusList.tsx:64.
   blockers: 1
   advisories: 6
   praise: 4
@@ -2513,7 +2735,8 @@ pr_review_cycles:
   subagents:
     bugbot: completed
     security_review: completed
-  note: Draft PR; CI ci.yml green on head (python/coverage/frontend all success). 1 confirmed product regression (CorpusList locale toggle clears bulk selection), 2 session-doc logic inconsistencies, scope-mixing advisory.
+  note: Draft PR; CI ci.yml green on head (python/coverage/frontend all success). 1 confirmed product regression (CorpusList
+    locale toggle clears bulk selection), 2 session-doc logic inconsistencies, scope-mixing advisory.
 - id: PRR-010
   pr_number: 68
   pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/68
@@ -2530,13 +2753,17 @@ pr_review_cycles:
   advisories: 2
   praise: 4
   ci_status: success
-  ci_note: 'ci.yml green @ 552d996 — python, coverage, both frontends, packages matrix (run 28213921192). Base main: deploy-preflight runs post-merge.'
+  ci_note: 'ci.yml green @ 552d996 — python, coverage, both frontends, packages matrix (run 28213921192). Base main: deploy-preflight
+    runs post-merge.'
   gh_review_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/68
   subagents:
     bugbot: completed
     security_review: completed
-  session_note: 'Session orchestration waived — review-followup on existing open PR; not in S001 routing plan (precedent: 2026-06-25 PR #66 review waiver).'
-  note: 'Hotfix lifts useChatHistory to AppContent shell; #53 fix correct, CI green, security clean. Bugbot 1 medium (partial state lift: loading/in-flight stream not lifted → mid-stream tab switch can spawn concurrent stream) triaged 🟡 non-blocking; inline on ChatPanel.tsx:43. 2nd 🟡: unused fallback hook when prop supplied (cosmetic).'
+  session_note: 'Session orchestration waived — review-followup on existing open PR; not in S001 routing plan (precedent:
+    2026-06-25 PR #66 review waiver).'
+  note: 'Hotfix lifts useChatHistory to AppContent shell; #53 fix correct, CI green, security clean. Bugbot 1 medium (partial
+    state lift: loading/in-flight stream not lifted → mid-stream tab switch can spawn concurrent stream) triaged 🟡 non-blocking;
+    inline on ChatPanel.tsx:43. 2nd 🟡: unused fallback hook when prop supplied (cosmetic).'
 - id: PRR-102
   pr_number: 102
   pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/102
@@ -2586,6 +2813,31 @@ pr_review_cycles:
   - path: .cursor/skills/18-pr-review/checklist.md
     note: checklist source
   gh_review_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/108#pullrequestreview-4603889447
+- id: PRR-012
+  pr_number: 110
+  pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/110
+  title: 'Phase 13: EV-007 — Invite acceptance flow (closes #109)'
+  status: completed
+  started: '2026-06-30'
+  completed: '2026-06-30'
+  head_ref: feat/S006-invite-acceptance
+  base_ref: main
+  verdict: REQUEST_CHANGES
+  blockers: 1
+  advisories: 3
+  praise: 4
+  ci_status: success
+  session_id: S006-invite-acceptance
+  subagents:
+    bugbot: completed
+    security_review: completed
+  artifacts:
+  - path: docs/sessions/S006-invite-acceptance/reports/pr-review.md
+    note: 'S006 PR #110 review report'
+  - path: .cursor/skills/18-pr-review/checklist.md
+    note: checklist source
+  gh_review_url: null
+  note: 'Allocated PRR-012 — payload id PRR-011 rejected (PRR-011 already records PR #108 / PRM-009).'
 pr_remediation_cycles:
 - id: PRM-001
   pr_number: 60
@@ -2909,9 +3161,11 @@ pr_remediation_cycles:
   head_ref: fix/admin-ui-es-en-toggle
   base_ref: main
   ci_status: success
-  ci_note: 'ci.yml green on fix/admin-ui-es-en-toggle @ 9c573ea: python, coverage, both frontend, and new packages matrix (frontend-i18n/frontend-ui) all success. Run 28206732867.'
+  ci_note: 'ci.yml green on fix/admin-ui-es-en-toggle @ 9c573ea: python, coverage, both frontend, and new packages matrix
+    (frontend-i18n/frontend-ui) all success. Run 28206732867.'
   scope_note: User scoped ALL findings (1 blocker + 6 advisories). Session orchestration waived.
-  resolution_note: F-001 inline thread (PRRT_kwDORy2YAM6MYKzz) replied (comment 3478243851) and resolved. Advisories answered in PR issue comment 4805017576. F-002 won't-split acknowledged. PR not merged (user merges manually).
+  resolution_note: F-001 inline thread (PRRT_kwDORy2YAM6MYKzz) replied (comment 3478243851) and resolved. Advisories answered
+    in PR issue comment 4805017576. F-002 won't-split acknowledged. PR not merged (user merges manually).
   counts:
     fixed: 5
     deferred: 0
@@ -2928,14 +3182,16 @@ pr_remediation_cycles:
     comment_id: 3478151516
     status: fixed
     commit: a223190
-    note: Decoupled load path from tr via trRef; mount effect stable so locale toggle no longer refetches/clears bulk selection. TDD repro test added (red->green). BUG-2026-06-25 report added.
+    note: Decoupled load path from tr via trRef; mount effect stable so locale toggle no longer refetches/clears bulk selection.
+      TDD repro test added (red->green). BUG-2026-06-25 report added.
   - id: F-003
     source: review_body
     severity: advisory
     path: .cursor/agents/workflow-state-manager.md, .cursor/skills/00-context/SKILL.md, .cursor/skills/01-requirements/SKILL.md
     status: fixed
     commit: 4296a41
-    note: 'Fixed 3 session-model logic gaps: orchestrator routing exemption, open_session ordering, project.stages.{key} canonical vs legacy mirror.'
+    note: 'Fixed 3 session-model logic gaps: orchestrator routing exemption, open_session ordering, project.stages.{key} canonical
+      vs legacy mirror.'
   - id: F-004
     source: review_body
     severity: advisory
@@ -2954,7 +3210,8 @@ pr_remediation_cycles:
     source: review_body
     severity: advisory
     status: wont_fix
-    note: Scope-mixing (session-model + dep bumps bundled with F31). User chose not to split the PR; will reply on GitHub acknowledging the trade-off and keeping one PR. Session-model doc gaps were fixed in-place (F-003).
+    note: Scope-mixing (session-model + dep bumps bundled with F31). User chose not to split the PR; will reply on GitHub
+      acknowledging the trade-off and keeping one PR. Session-model doc gaps were fixed in-place (F-003).
   - id: F-006
     source: review_body
     severity: advisory
@@ -2984,13 +3241,16 @@ pr_remediation_cycles:
     line: 43
     thread_id: PRRT_kwDORy2YAM6MaHMh
     status: fixed
-    note: 'Partial state lift (concurrency defect): lifted loading+setLoading into useChatHistory so in-flight ask state survives the Corpus round-trip and blocks a concurrent stream. Full bug-investigation: BUG-2026-06-25-chat-mid-stream-corpus-concurrent-ask. AbortController deliberately deferred (would change ask.ts API surface).'
+    note: 'Partial state lift (concurrency defect): lifted loading+setLoading into useChatHistory so in-flight ask state survives
+      the Corpus round-trip and blocks a concurrent stream. Full bug-investigation: BUG-2026-06-25-chat-mid-stream-corpus-concurrent-ask.
+      AbortController deliberately deferred (would change ask.ts API surface).'
   - id: F-002
     source: review_body
     severity: advisory
     path: apps/chat-rag-frontend/src/components/ChatPanel.tsx
     status: fixed
-    note: 'Unused fallback hook when prop supplied: split ChatPanel into ChatPanelView (requires chat) + ChatPanelStandalone (calls useChatHistory). Hook now only runs when no chat is injected, eliminating the wasted hook while honoring rules-of-hooks.'
+    note: 'Unused fallback hook when prop supplied: split ChatPanel into ChatPanelView (requires chat) + ChatPanelStandalone
+      (calls useChatHistory). Hook now only runs when no chat is injected, eliminating the wasted hook while honoring rules-of-hooks.'
   artifacts:
   - path: docs/bug-reports/BUG-2026-06-25-chat-mid-stream-corpus-concurrent-ask.md
     note: F-001 bug report (full bug-investigation)
@@ -3022,7 +3282,8 @@ pr_remediation_cycles:
     thread_id: PRRT_kwDORy2YAM6NWv0g
     status: fixed
     commit: 1b86353
-    note: Mailpit smoke — validate job curls /api/v1/messages (Supabase CLI 2.84.2); step renamed; ADR-030, decisions.md, supabase/README.md updated
+    note: Mailpit smoke — validate job curls /api/v1/messages (Supabase CLI 2.84.2); step renamed; ADR-030, decisions.md,
+      supabase/README.md updated
   - id: F-002
     source: inline
     severity: advisory
@@ -3030,7 +3291,8 @@ pr_remediation_cycles:
     thread_id: PRRT_kwDORy2YAM6NWv2Y
     status: fixed
     commit: fb195cf
-    note: Paginate count_active_admins (per_page=200) until short page; test_count_active_admins_paginates_beyond_first_page added
+    note: Paginate count_active_admins (per_page=200) until short page; test_count_active_admins_paginates_beyond_first_page
+      added
   commits:
   - 1b86353
   - fb195cf
@@ -3085,6 +3347,21 @@ pr_remediation_cycles:
     note: session PR remediation report (PRM-009)
   follow_up:
     pr_review_rerun: offered
+- id: PRM-010
+  pr_number: 110
+  pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/110
+  linked_review_cycle_id: PRR-012
+  title: 'Phase 13: EV-007 — Invite acceptance flow (closes #109)'
+  status: in_progress
+  started: '2026-06-30'
+  head_ref: feat/S006-invite-acceptance
+  base_ref: main
+  session_id: S006-invite-acceptance
+  counts:
+    fixed: 0
+    deferred: 0
+    wont_fix: 0
+  findings: []
 agents:
   repo_researcher:
     status: completed
@@ -3194,82 +3471,205 @@ decisions_log:
 - R28-R33 resolved — shared vecinita.locale, packages/frontend-i18n, UI chrome only, sidebar toggle
 - date: '2026-06-13'
   note: 01-requirements EV-004 delta started — F31 admin i18n interview
-- R34-R38 assumed — two packages frontend-i18n + frontend-ui, Tailwind shared UI, component extraction scope, npm workspaces — 2026-06-13
+- R34-R38 assumed — two packages frontend-i18n + frontend-ui, Tailwind shared UI, component extraction scope, npm workspaces
+  — 2026-06-13
 - EV-004 02-verify-plan delta complete — 21 statements, ThemeToggle to frontend-ui (RD-067), AC-F7 H5 — 2026-06-13
 - EV-004 04-tech-plan delta — TP-030–TP-039 — ADR-021 — Phase 9 (36 tasks) — 2026-06-13
 - EV-004 05-verify-tech delta — TV-041–TV-052 — 12 consistency fixes — 2026-06-13
 - date: '2026-06-25'
-  note: 'Session orchestration waived (active_session not required) for 19-address-pr-review remediation of PR #66 (PRM-006 / PRR-009 findings). Rationale: process/review-followup work on an existing open PR; user approved proceeding directly without opening a formal session.'
+  note: 'Session orchestration waived (active_session not required) for 19-address-pr-review remediation of PR #66 (PRM-006
+    / PRR-009 findings). Rationale: process/review-followup work on an existing open PR; user approved proceeding directly
+    without opening a formal session.'
 - date: '2026-06-25'
-  note: S001-modal-cold-start-snapshot opened — user selected GPU memory snapshot spike to reduce Modal cold-start latency + formalize session (first session, allocated S001; type ops; routing 00→07→08→13→15, skipped 01-06 + 10-e2e per ADR-009).
+  note: S001-modal-cold-start-snapshot opened — user selected GPU memory snapshot spike to reduce Modal cold-start latency
+    + formalize session (first session, allocated S001; type ops; routing 00→07→08→13→15, skipped 01-06 + 10-e2e per ADR-009).
 - date: '2026-06-25'
-  note: S001 12-verify-deploy user-invoked — stage amended into S001 routing plan (was 00→07→08→13→15). Pre-deploy agents all PASS (configuration, secrets, data/volumes, resources, template, connectivity); checklist @ docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-checklist.md (f766233). deploy_ready=true pending user sign-off on failure modes + rollback — stage held in_progress until sign-off, then advance to 13-deploy-smoke.
+  note: S001 12-verify-deploy user-invoked — stage amended into S001 routing plan (was 00→07→08→13→15). Pre-deploy agents
+    all PASS (configuration, secrets, data/volumes, resources, template, connectivity); checklist @ docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-checklist.md
+    (f766233). deploy_ready=true pending user sign-off on failure modes + rollback — stage held in_progress until sign-off,
+    then advance to 13-deploy-smoke.
 - date: '2026-06-25'
-  note: S001 12-verify-deploy COMPLETE — user signed off on all 7 failure mitigations (approve_all) and the rollback plan (approve_rollback). Stage marked completed (phases 2/3/5 done); deploy_ready=true. active_session.current_stage advanced to 13-deploy-smoke.
+  note: S001 12-verify-deploy COMPLETE — user signed off on all 7 failure mitigations (approve_all) and the rollback plan
+    (approve_rollback). Stage marked completed (phases 2/3/5 done); deploy_ready=true. active_session.current_stage advanced
+    to 13-deploy-smoke.
 - date: '2026-06-25'
-  note: 'S001 09-qa user-invoked (not in original S001 routing plan; stage amended into routing_plan with user_amended=true). Full-repo QA on feat/S001-modal-cold-start-snapshot @ 4f3f741 — overall pass_with_advisories, all blocking checks green (500 passed/38 skipped Python; 271 FE tests). Advisories QA-001–011 (QA-010 resolved in CI). Reports: docs/qa-report.md + docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md.'
+  note: 'S001 09-qa user-invoked (not in original S001 routing plan; stage amended into routing_plan with user_amended=true).
+    Full-repo QA on feat/S001-modal-cold-start-snapshot @ 4f3f741 — overall pass_with_advisories, all blocking checks green
+    (500 passed/38 skipped Python; 271 FE tests). Advisories QA-001–011 (QA-010 resolved in CI). Reports: docs/qa-report.md
+    + docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md.'
 - S001 13-deploy-smoke COMPLETE 2026-06-26 — H1-H5 pass; cold+prewarm ask 14.3s; DO chat on feat branch
 - date: '2026-06-25'
   note: S001 15-service-health COMPLETE — H1-H5 pass; warm ask 2.9s; H0ci main green (advisory); report docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
 - date: '2026-06-26'
-  note: 'S001-modal-cold-start-snapshot CLOSED (status completed_with_deferrals) — deploy (13-deploy-smoke) + health (15-service-health) complete and live. Leftover work deferred to backlog: 07-build T12 (CPU-snapshot / collapse web-fn hop) and 19-address-pr-review PRM-007 (PR #68 advisories, linked PRR-010) remain open. Archived to sessions[]; active_session cleared then reused by S002.'
+  note: 'S001-modal-cold-start-snapshot CLOSED (status completed_with_deferrals) — deploy (13-deploy-smoke) + health (15-service-health)
+    complete and live. Leftover work deferred to backlog: 07-build T12 (CPU-snapshot / collapse web-fn hop) and 19-address-pr-review
+    PRM-007 (PR #68 advisories, linked PRR-010) remain open. Archived to sessions[]; active_session cleared then reused by
+    S002.'
 - date: '2026-06-26'
-  note: 'S002-admin-job-management OPENED (session_counter=2; type feature; orchestrator 16-evolve) — combined #88 hotfix (best-effort LLM tagging so a tag failure degrades to no LLM tags instead of failing ingest/retag jobs) + #89 evolve feature (admin Job Management tab + GET /jobs list API + list_jobs store method). User-approved evolve-lite routing 00→01→04→07→09→10→12→13 (skipped 02,03,05,06,11); full scope. Branch feat/S002-admin-job-management.'
+  note: 'S002-admin-job-management OPENED (session_counter=2; type feature; orchestrator 16-evolve) — combined #88 hotfix
+    (best-effort LLM tagging so a tag failure degrades to no LLM tags instead of failing ingest/retag jobs) + #89 evolve feature
+    (admin Job Management tab + GET /jobs list API + list_jobs store method). User-approved evolve-lite routing 00→01→04→07→09→10→12→13
+    (skipped 02,03,05,06,11); full scope. Branch feat/S002-admin-job-management.'
 - date: '2026-06-26'
-  note: 'S002 07-build complete — #88 ingest tagging now best-effort (graceful degradation, repro test BUG-2026-06-26); #89 GET /jobs list API + list_jobs store + server-backed admin Job Management tab (F32, ADR-023). 09-qa green. Awaiting user decision on push/PR/deploy (DO chat apps currently pinned to feat/S001 branch; staging DB migration blocker noted in 12-verify-deploy).'
+  note: 'S002 07-build complete — #88 ingest tagging now best-effort (graceful degradation, repro test BUG-2026-06-26); #89
+    GET /jobs list API + list_jobs store + server-backed admin Job Management tab (F32, ADR-023). 09-qa green. Awaiting user
+    decision on push/PR/deploy (DO chat apps currently pinned to feat/S001 branch; staging DB migration blocker noted in 12-verify-deploy).'
 - date: '2026-06-26'
-  note: 'S002 14-hotfix user-amended into routing plan (after 09-qa, before 10-e2e; user_amended=true). Two in-session F32 (#89) bug fixes on feat/S002-admin-job-management: (1) BUG-2026-06-26-jobs-dialog-aria-warning (FE DialogContent aria-describedby), (2) BUG-2026-06-26-get-jobs-405-modal-production (GET /jobs 405 on production Modal data-management). stages.14-hotfix set in_progress (partial rerun; prior #53 PR #68 record preserved under history). Per bug-investigation: one report + one repro test per bug. NOTE: GET /jobs is not yet deployed from S002 — confirm which branch/env serves the Jobs tab before assuming a pure code defect (possible deploy/branch-pin cause).'
+  note: 'S002 14-hotfix user-amended into routing plan (after 09-qa, before 10-e2e; user_amended=true). Two in-session F32
+    (#89) bug fixes on feat/S002-admin-job-management: (1) BUG-2026-06-26-jobs-dialog-aria-warning (FE DialogContent aria-describedby),
+    (2) BUG-2026-06-26-get-jobs-405-modal-production (GET /jobs 405 on production Modal data-management). stages.14-hotfix
+    set in_progress (partial rerun; prior #53 PR #68 record preserved under history). Per bug-investigation: one report +
+    one repro test per bug. NOTE: GET /jobs is not yet deployed from S002 — confirm which branch/env serves the Jobs tab before
+    assuming a pure code defect (possible deploy/branch-pin cause).'
 - date: '2026-06-26'
-  note: S002 stages 09-12 run 2026-06-26 — QA fail (typecheck reportAny + live GET /jobs 405); T0 e2e pass; 11-verify-impl user-amended; 12 deploy not ready
+  note: S002 stages 09-12 run 2026-06-26 — QA fail (typecheck reportAny + live GET /jobs 405); T0 e2e pass; 11-verify-impl
+    user-amended; 12 deploy not ready
 - date: '2026-06-26'
-  note: 'S002-admin-job-management PARKED (status paused) to open S003-persistent-chat-history (session_counter=3; type feature; orchestrator 16-evolve). New feature: browser-local ephemeral chat history on chat-rag-frontend — persist active conversation across refresh/tab-away (sessionStorage, device-only) + list of previous conversations. User decisions: pause S002 + open new; scope=both (persist + previous-chats list); privacy=sessionStorage (narrower footprint than localStorage); routing=evolve-lite 00→01→04→07→09→10→12→13 (skip 02,03,05,06,11). Branch feat/S003-persistent-chat-history off main.'
+  note: 'S002-admin-job-management PARKED (status paused) to open S003-persistent-chat-history (session_counter=3; type feature;
+    orchestrator 16-evolve). New feature: browser-local ephemeral chat history on chat-rag-frontend — persist active conversation
+    across refresh/tab-away (sessionStorage, device-only) + list of previous conversations. User decisions: pause S002 + open
+    new; scope=both (persist + previous-chats list); privacy=sessionStorage (narrower footprint than localStorage); routing=evolve-lite
+    00→01→04→07→09→10→12→13 (skip 02,03,05,06,11). Branch feat/S003-persistent-chat-history off main.'
 - date: '2026-06-26'
-  note: 'S003 01-requirements F33 delta interview complete — 5 decisions R43-R47. R43: sessionStorage confirmed (per-tab acceptable; covers refresh + tab-away/return; brand-new tab empty is OK) — keeps R41. R44: conversation boundary = explicit ''New chat'' button archives current + starts fresh. R45: previous-chats cap = keep last 10, FIFO eviction. R46: previous-chat label = first user message + relative timestamp. R47: clear semantics = ''Clear'' resets active conversation; per-item delete + ''Clear all history'' for the list; storage updated accordingly. stages.01-requirements (active_session) set in_progress; docs to be authored by user.'
-- 'S003 04-tech-plan: F33 tech decisions TP-S003-01..12 resolved (sessionStorage key vecinita.chat.history.v1, useConversationStore architecture, previous-chats panel in ChatPanel, app-local i18n with EV-004 merge-coordination caveat, ADR-024). Execution-plan Phase 10 added: 17 tasks, total 239. 2026-06-26.'
+  note: 'S003 01-requirements F33 delta interview complete — 5 decisions R43-R47. R43: sessionStorage confirmed (per-tab acceptable;
+    covers refresh + tab-away/return; brand-new tab empty is OK) — keeps R41. R44: conversation boundary = explicit ''New
+    chat'' button archives current + starts fresh. R45: previous-chats cap = keep last 10, FIFO eviction. R46: previous-chat
+    label = first user message + relative timestamp. R47: clear semantics = ''Clear'' resets active conversation; per-item
+    delete + ''Clear all history'' for the list; storage updated accordingly. stages.01-requirements (active_session) set
+    in_progress; docs to be authored by user.'
+- 'S003 04-tech-plan: F33 tech decisions TP-S003-01..12 resolved (sessionStorage key vecinita.chat.history.v1, useConversationStore
+  architecture, previous-chats panel in ChatPanel, app-local i18n with EV-004 merge-coordination caveat, ADR-024). Execution-plan
+  Phase 10 added: 17 tasks, total 239. 2026-06-26.'
 - date: '2026-06-26'
-  note: 'S003 07-build COMPLETE — F33 browser-local persistent chat history (Phase 10, M39–M42). 4 atomic commits on feat/S003-persistent-chat-history: 14af2a5 (T39.1-T39.5 useConversationStore sessionStorage persistence), accd98f (T40.1-T40.4 rehydrate on mount), 1bf6d17 (T41.1-T41.5 previous-chats list new-chat/select/delete/clear + i18n), d22e040 (T42.1-T42.3 AC-S6 privacy + Phase 10 gate). Phase 10 gate PASS; 115 FE tests + 95% coverage + build green. routing_plan 07-build → completed; active_session.current_stage advanced to 09-qa (next pending).'
+  note: 'S003 07-build COMPLETE — F33 browser-local persistent chat history (Phase 10, M39–M42). 4 atomic commits on feat/S003-persistent-chat-history:
+    14af2a5 (T39.1-T39.5 useConversationStore sessionStorage persistence), accd98f (T40.1-T40.4 rehydrate on mount), 1bf6d17
+    (T41.1-T41.5 previous-chats list new-chat/select/delete/clear + i18n), d22e040 (T42.1-T42.3 AC-S6 privacy + Phase 10 gate).
+    Phase 10 gate PASS; 115 FE tests + 95% coverage + build green. routing_plan 07-build → completed; active_session.current_stage
+    advanced to 09-qa (next pending).'
 - date: '2026-06-28'
-  note: 'S003 07-build REOPENED (explicit user approval) to reverse an audited design decision: F33 chat-history storage switched sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only, never sent to server). ADR-025 authored at 07-build; supersedes-in-part ADR-023 and ADR-024. Commit eacf4ad (20 files). Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS change (AC-S7 preserved). stages.07-build.s003 + project.stages.07-build keep status completed (reopened_at recorded). active_session.current_stage unchanged (remains 09-qa).'
+  note: 'S003 07-build REOPENED (explicit user approval) to reverse an audited design decision: F33 chat-history storage switched
+    sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only, never sent
+    to server). ADR-025 authored at 07-build; supersedes-in-part ADR-023 and ADR-024. Commit eacf4ad (20 files). Re-verified:
+    116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS change (AC-S7 preserved).
+    stages.07-build.s003 + project.stages.07-build keep status completed (reopened_at recorded). active_session.current_stage
+    unchanged (remains 09-qa).'
 - date: '2026-06-28'
-  note: 'S003 08-verify-build COMPLETE (user-invoked /08-verify-build; amended into S003 routing plan with user_amended=true — was not in original 00→01→04→07→09→10→12→13 plan). Milestone-boundary verify result PASS. Frontend-only F33 chat-history delta on main@9bd7a50 with uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED (frontend-only delta). Reports: docs/verification-report.md + docs/sessions/S003-persistent-chat-history/reports/verification-report.md. Recorded in project.stages.08-verify-build (canonical) + stages.08-verify-build.s003 (legacy mirror). active_session.current_stage unchanged (remains 09-qa — next pending).'
+  note: 'S003 08-verify-build COMPLETE (user-invoked /08-verify-build; amended into S003 routing plan with user_amended=true
+    — was not in original 00→01→04→07→09→10→12→13 plan). Milestone-boundary verify result PASS. Frontend-only F33 chat-history
+    delta on main@9bd7a50 with uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests;
+    Modal smoke SKIPPED (frontend-only delta). Reports: docs/verification-report.md + docs/sessions/S003-persistent-chat-history/reports/verification-report.md.
+    Recorded in project.stages.08-verify-build (canonical) + stages.08-verify-build.s003 (legacy mirror). active_session.current_stage
+    unchanged (remains 09-qa — next pending).'
 - date: '2026-06-28'
-  note: 'S003 closed by user (2026-06-28) with 09-qa/10-e2e/12-verify-deploy/13-deploy-smoke deferred; F33 already merged to main via PRs #96/#97 (working tree clean on main). Closing to start auth session for GitHub #75. Session archived to sessions[] with status completed (deferred stages marked skipped + recorded in deferred_to_backlog); active_session cleared to null; session_counter remains 3 (next allocatable S004). project.stages baseline unchanged (07-build + 08-verify-build already mirrored completed for S003; deferred stages not promoted into the baseline; 13-deploy-smoke baseline stays S001 completed).'
-- 'S004/EV-005 opened (2026-06-28) for GitHub #75 Supabase admin auth. Gating decisions: (1) admin-only reversal of ADR-004 (ChatRAG stays anonymous); (2) identity/PII in Supabase, corpus DB PII-free; (3) invite-only registration, public signup disabled; (4) two roles admin+viewer; (5) Supabase branching for env sync on canonical project. New superseding ADR required (ADR-004 auth clause, ADR-005).'
+  note: 'S003 closed by user (2026-06-28) with 09-qa/10-e2e/12-verify-deploy/13-deploy-smoke deferred; F33 already merged
+    to main via PRs #96/#97 (working tree clean on main). Closing to start auth session for GitHub #75. Session archived to
+    sessions[] with status completed (deferred stages marked skipped + recorded in deferred_to_backlog); active_session cleared
+    to null; session_counter remains 3 (next allocatable S004). project.stages baseline unchanged (07-build + 08-verify-build
+    already mirrored completed for S003; deferred stages not promoted into the baseline; 13-deploy-smoke baseline stays S001
+    completed).'
+- 'S004/EV-005 opened (2026-06-28) for GitHub #75 Supabase admin auth. Gating decisions: (1) admin-only reversal of ADR-004
+  (ChatRAG stays anonymous); (2) identity/PII in Supabase, corpus DB PII-free; (3) invite-only registration, public signup
+  disabled; (4) two roles admin+viewer; (5) Supabase branching for env sync on canonical project. New superseding ADR required
+  (ADR-004 auth clause, ADR-005).'
 - date: '2026-06-28'
-  note: Started 01-requirements F34 delta interview (EV-005/S004). Confirmed via Supabase MCP list_projects that MCP is scoped to org Cognitive Chemistry Labs (projects lrbhxyikeiwmuanqwdya, uysuznqtbajeejjvszxc) and CANNOT access prod.env canonical project cfuvghdsuwactfeamtym — R53 still open. prod.env now contains SUPABASE_URL/PUBLISHABLE_KEY/SECRET_KEY/URI/DATABASE_PASSWORD for cfuvghdsuwactfeamtym plus SUPABASE_ADMIN_EMAIL=admin@vecinita.admin (SUPABASE_ADMIN_PASSWORD empty).
+  note: Started 01-requirements F34 delta interview (EV-005/S004). Confirmed via Supabase MCP list_projects that MCP is scoped
+    to org Cognitive Chemistry Labs (projects lrbhxyikeiwmuanqwdya, uysuznqtbajeejjvszxc) and CANNOT access prod.env canonical
+    project cfuvghdsuwactfeamtym — R53 still open. prod.env now contains SUPABASE_URL/PUBLISHABLE_KEY/SECRET_KEY/URI/DATABASE_PASSWORD
+    for cfuvghdsuwactfeamtym plus SUPABASE_ADMIN_EMAIL=admin@vecinita.admin (SUPABASE_ADMIN_PASSWORD empty).
 - date: '2026-06-28'
-  note: 'S004/EV-005 04-tech-plan COMPLETE (F34 Supabase admin auth, evolve-lite). ADR-027 authored (Supabase Auth verification + env sync) resolving TP-S004-01..12: TP-S004-01 HS256 JWT verification; TP-S004-02 role claim from app_metadata.role; shared vecinita_shared_schemas.auth module; dependency pins PyJWT>=2.10,<3 (Python verify) + @supabase/supabase-js ^2.108.2 (SPA); Supabase Pro plan + ephemeral branching for env sync + CLI migrations-in-repo; admin onboarding via inviteUserByEmail + SMTP; idempotent first-admin seed. Cost cap raised from ADR-004''s $25/$50 to ~$75/mo — supersedes ADR-004 cost cap, user-approved. R53 unblocked: Supabase CLI path is MCP-independent (no canonical-project MCP grant required). Phase 11 (M43-M47, T43.1-T47.6, 29 tasks) appended to execution-plan; docs/decisions.md, docs/dependency-inventory.md, docs/config-spec.md, docs/api-contract.md updated; tech-plan report at docs/sessions/S004-supabase-auth/reports/tech-plan.md. Commit DEFERRED per commit-only-when-asked
-    override (no SHAs yet). active_session + EV-005 current_stage advanced to 07-build.'
+  note: 'S004/EV-005 04-tech-plan COMPLETE (F34 Supabase admin auth, evolve-lite). ADR-027 authored (Supabase Auth verification
+    + env sync) resolving TP-S004-01..12: TP-S004-01 HS256 JWT verification; TP-S004-02 role claim from app_metadata.role;
+    shared vecinita_shared_schemas.auth module; dependency pins PyJWT>=2.10,<3 (Python verify) + @supabase/supabase-js ^2.108.2
+    (SPA); Supabase Pro plan + ephemeral branching for env sync + CLI migrations-in-repo; admin onboarding via inviteUserByEmail
+    + SMTP; idempotent first-admin seed. Cost cap raised from ADR-004''s $25/$50 to ~$75/mo — supersedes ADR-004 cost cap,
+    user-approved. R53 unblocked: Supabase CLI path is MCP-independent (no canonical-project MCP grant required). Phase 11
+    (M43-M47, T43.1-T47.6, 29 tasks) appended to execution-plan; docs/decisions.md, docs/dependency-inventory.md, docs/config-spec.md,
+    docs/api-contract.md updated; tech-plan report at docs/sessions/S004-supabase-auth/reports/tech-plan.md. Commit DEFERRED
+    per commit-only-when-asked override (no SHAs yet). active_session + EV-005 current_stage advanced to 07-build.'
 - date: '2026-06-29'
-  note: 'S004/EV-005 07-build IN PROGRESS (F34 Supabase admin auth, Phase 11 M43-M47). M47 T47.1-T47.6 completed 2026-06-29. Audit-actor fix in apps/internal-write-api: ContextVar-based actor propagation replaced with an explicit WriteActorDep FastAPI dependency (clearer request-scoped actor wiring; avoids ContextVar leakage across requests). routing_plan 07-build pending -> in_progress; recorded in EV-005.stages.07-build + project.stages.07-build.s004 (legacy mirror). active_session.current_stage unchanged (07-build). Next: Phase 11 gate check + 08-verify-build.'
+  note: 'S004/EV-005 07-build IN PROGRESS (F34 Supabase admin auth, Phase 11 M43-M47). M47 T47.1-T47.6 completed 2026-06-29.
+    Audit-actor fix in apps/internal-write-api: ContextVar-based actor propagation replaced with an explicit WriteActorDep
+    FastAPI dependency (clearer request-scoped actor wiring; avoids ContextVar leakage across requests). routing_plan 07-build
+    pending -> in_progress; recorded in EV-005.stages.07-build + project.stages.07-build.s004 (legacy mirror). active_session.current_stage
+    unchanged (07-build). Next: Phase 11 gate check + 08-verify-build.'
 - date: '2026-06-29'
-  note: 'S004/EV-005 08-verify-build FAIL (F34 Supabase admin auth, feat/S004-supabase-auth). Milestone-boundary verify overall_result FAIL. Blocking: cryptography CVEs (pip-audit); admin FE branch coverage 92.46% < 95%. Report: docs/verification-report.md. Updated project.stages.08-verify-build + stages.08-verify-build.s004 + EV-005.stages.08-verify-build; active_session.current_stage = 08-verify-build; routing_plan 08-verify-build status failed (not completed — remediation required before downstream stages).'
+  note: 'S004/EV-005 08-verify-build FAIL (F34 Supabase admin auth, feat/S004-supabase-auth). Milestone-boundary verify overall_result
+    FAIL. Blocking: cryptography CVEs (pip-audit); admin FE branch coverage 92.46% < 95%. Report: docs/verification-report.md.
+    Updated project.stages.08-verify-build + stages.08-verify-build.s004 + EV-005.stages.08-verify-build; active_session.current_stage
+    = 08-verify-build; routing_plan 08-verify-build status failed (not completed — remediation required before downstream
+    stages).'
 - date: '2026-06-29'
-  note: 'S004/EV-005 reconciliation during 10-e2e. (1) 09-qa FAIL→pass_with_remediation: initial QA FAIL (admin nav test + coverage gate) was remediated per qa-report QA-S004-001/002 (both resolved; admin FE 223/223 + coverage gate PASS); independently re-confirmed during 10-e2e (admin FE 223/223 + chat FE 134/134 Vitest). Resolves the earlier 09-qa FAIL vs 08-verify-build PASS inconsistency. (2) 07-build in_progress→completed: F34 Phase 11 M43-M47 build reconciled to completed since 08-verify-build, 09-qa (remediated), and 10-e2e all completed downstream. Updated project.stages.07-build (promoted to S004 canonical; S003 nested as s003_baseline) + project.stages.09-qa + stages.07-build.s004 (legacy mirror) + EV-005.stages.07-build/09-qa + active_session.routing_plan 07-build/09-qa. First-start dates preserved (S003 baseline nested; started_at unchanged). Advisory: EV-005.current_stage still ''08-verify-build'' (stale vs active_session.current_stage ''12-verify-deploy'') and EV-005.stages
-    lacks a 10-e2e node — not in this payload''s scope.'
+  note: 'S004/EV-005 reconciliation during 10-e2e. (1) 09-qa FAIL→pass_with_remediation: initial QA FAIL (admin nav test +
+    coverage gate) was remediated per qa-report QA-S004-001/002 (both resolved; admin FE 223/223 + coverage gate PASS); independently
+    re-confirmed during 10-e2e (admin FE 223/223 + chat FE 134/134 Vitest). Resolves the earlier 09-qa FAIL vs 08-verify-build
+    PASS inconsistency. (2) 07-build in_progress→completed: F34 Phase 11 M43-M47 build reconciled to completed since 08-verify-build,
+    09-qa (remediated), and 10-e2e all completed downstream. Updated project.stages.07-build (promoted to S004 canonical;
+    S003 nested as s003_baseline) + project.stages.09-qa + stages.07-build.s004 (legacy mirror) + EV-005.stages.07-build/09-qa
+    + active_session.routing_plan 07-build/09-qa. First-start dates preserved (S003 baseline nested; started_at unchanged).
+    Advisory: EV-005.current_stage still ''08-verify-build'' (stale vs active_session.current_stage ''12-verify-deploy'')
+    and EV-005.stages lacks a 10-e2e node — not in this payload''s scope.'
 - date: '2026-06-29'
-  note: 'S004/EV-005 09-qa REMEDIATION complete — overall fail→pass_with_advisories. Blocking QA-S004-010 RESOLVED: isActive() unmount guards added to DashboardPage/HealthPage/AuditPage; test_auth_login_protected_routes.test.tsx fixed (cleanup + stubbed fetch); regression test test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx added; admin FE Vitest now exits 0 (242 passed); coverage gate PASS combined 100% (1278/1278 branches). QA-S004-011 RESOLVED: Node 20→24 LTS (TP-S004-11 / ADR-019) — ci.yml setup-node x3, .nvmrc, root engines.node>=24; docs spec.md/execution-plan.md/LOCAL_DEV.md/decisions.md/dependency-inventory.md updated. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Updated project.stages.09-qa (overall=pass_with_advisories, blocking cleared→resolved, remediation_at + remediation_results) + active_session.routing_plan 09-qa (remediation note). No commits invented. Advisory: EV-005.stages.09-qa still reads pass_with_remediation (older
+  note: 'S004/EV-005 09-qa REMEDIATION complete — overall fail→pass_with_advisories. Blocking QA-S004-010 RESOLVED: isActive()
+    unmount guards added to DashboardPage/HealthPage/AuditPage; test_auth_login_protected_routes.test.tsx fixed (cleanup +
+    stubbed fetch); regression test test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx added; admin FE Vitest now
+    exits 0 (242 passed); coverage gate PASS combined 100% (1278/1278 branches). QA-S004-011 RESOLVED: Node 20→24 LTS (TP-S004-11
+    / ADR-019) — ci.yml setup-node x3, .nvmrc, root engines.node>=24; docs spec.md/execution-plan.md/LOCAL_DEV.md/decisions.md/dependency-inventory.md
+    updated. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Updated project.stages.09-qa
+    (overall=pass_with_advisories, blocking cleared→resolved, remediation_at + remediation_results) + active_session.routing_plan
+    09-qa (remediation note). No commits invented. Advisory: EV-005.stages.09-qa still reads pass_with_remediation (older
     reconciliation label) — not in this payload''s scope.'
 - date: '2026-06-29'
-  note: 'S004-supabase-auth CLOSED (status completed) — F34 Supabase admin auth merged to main via PR #100. Stages 12-verify-deploy + 13-deploy-smoke deferred (marked skipped + deferred_to_backlog; same deferral pattern as S003). Session archived to sessions[]; active_session cleared then reused by S005. EV-005 marked completed_with_deferrals; follow-on admin user management continues as EV-006/S005.'
+  note: 'S004-supabase-auth CLOSED (status completed) — F34 Supabase admin auth merged to main via PR #100. Stages 12-verify-deploy
+    + 13-deploy-smoke deferred (marked skipped + deferred_to_backlog; same deferral pattern as S003). Session archived to
+    sessions[]; active_session cleared then reused by S005. EV-005 marked completed_with_deferrals; follow-on admin user management
+    continues as EV-006/S005.'
 - date: '2026-06-29'
-  note: 'S005-user-mgmt-auth OPENED (session_counter=5; type feature; orchestrator 16-evolve; branch feat/S005-user-mgmt-auth; evolve_cycle_id EV-006). EV-006/F35 admin user management — delta on the S004/EV-005 Supabase Auth foundation. Decisions R55-R59: Resend SMTP wiring for Supabase invitation emails; admin user-management operations (invite/list/role-change/deactivate); remember-me toggle on admin login. User-approved evolve-lite routing 00→01→04→07→08→09→10→12→13 (skip 02,03,05,06,11). 00-context completed; handoff to 01-requirements.'
+  note: 'S005-user-mgmt-auth OPENED (session_counter=5; type feature; orchestrator 16-evolve; branch feat/S005-user-mgmt-auth;
+    evolve_cycle_id EV-006). EV-006/F35 admin user management — delta on the S004/EV-005 Supabase Auth foundation. Decisions
+    R55-R59: Resend SMTP wiring for Supabase invitation emails; admin user-management operations (invite/list/role-change/deactivate);
+    remember-me toggle on admin login. User-approved evolve-lite routing 00→01→04→07→08→09→10→12→13 (skip 02,03,05,06,11).
+    00-context completed; handoff to 01-requirements.'
 - date: '2026-06-29'
-  note: 'S005/EV-006 01-requirements COMPLETE (F35 admin user management + auth UX, evolve-lite delta). ADR-029 authored; decisions RD-080-RD-090 resolved (admin /admin/users* ops; in-app self-service password reset; remember-me default-checked localStorage/sessionStorage key vecinita.auth.remember; hybrid Resend SMTP with config.toml as source of truth, resolving the SMTP Dashboard-vs-CI contradiction; 6 stacked-bilingual versioned email templates resolving the bilingual-email ambiguity; supabase.yml config push + pinned CLI; audit of user-mgmt actions; operator-supplied verified Resend domain). Artifacts: feature-list F35, user-journeys UJ-030-UJ-033, test-plan TC-088-TC-095, acceptance-criteria AC-U1-AC-U9, api-contract /admin/users*, config-spec SMTP/template/remember-me env, staging-secrets-matrix EV-006; stage report docs/sessions/S005-user-mgmt-auth/reports/01-requirements.md. Commit DEFERRED (commit-only-when-asked override); open items handed to 04-tech-plan. active_session + EV-006
-    current_stage = 01-requirements; routing_plan + EV-006.stages 01-requirements completed; project.stages.01-requirements mirrored (last_delta S005/EV-006). ADVISORY (non-blocking): docs/execution-plan.md §Current State remains stale (still S004/Phase 11) and should be advanced for S005/EV-006.'
+  note: 'S005/EV-006 01-requirements COMPLETE (F35 admin user management + auth UX, evolve-lite delta). ADR-029 authored;
+    decisions RD-080-RD-090 resolved (admin /admin/users* ops; in-app self-service password reset; remember-me default-checked
+    localStorage/sessionStorage key vecinita.auth.remember; hybrid Resend SMTP with config.toml as source of truth, resolving
+    the SMTP Dashboard-vs-CI contradiction; 6 stacked-bilingual versioned email templates resolving the bilingual-email ambiguity;
+    supabase.yml config push + pinned CLI; audit of user-mgmt actions; operator-supplied verified Resend domain). Artifacts:
+    feature-list F35, user-journeys UJ-030-UJ-033, test-plan TC-088-TC-095, acceptance-criteria AC-U1-AC-U9, api-contract
+    /admin/users*, config-spec SMTP/template/remember-me env, staging-secrets-matrix EV-006; stage report docs/sessions/S005-user-mgmt-auth/reports/01-requirements.md.
+    Commit DEFERRED (commit-only-when-asked override); open items handed to 04-tech-plan. active_session + EV-006 current_stage
+    = 01-requirements; routing_plan + EV-006.stages 01-requirements completed; project.stages.01-requirements mirrored (last_delta
+    S005/EV-006). ADVISORY (non-blocking): docs/execution-plan.md §Current State remains stale (still S004/Phase 11) and should
+    be advanced for S005/EV-006.'
 - date: '2026-06-29'
-  note: 'S005/EV-006 04-tech-plan SCOPE ADDITION (in-place re-run; 04-tech-plan remains completed). User approved adding 4 items; MFA/2FA + bulk CSV import remain deferred. ADR-031 (docs/adr/ADR-031-ev006-auth-ux-hardening.md) captures TP-S005-17 idle/session timeout (30min+60s warning, frontend VITE_VECINITA_IDLE_TIMEOUT_MIN/_WARNING_SEC); TP-S005-18 self ''log out of all devices'' (global signOut); TP-S005-19 admin force-logout POST /admin/users/{id}/signout via admin_delete_user_sessions RPC (one-time operator apply, 503 fallback->disable); TP-S005-20 user search q (>=3 chars->GoTrue filter)+pagination; TP-S005-21 audit viewer (reuse F29 AuditPage + GET /internal/v1/audit, entity_type Users filter, user.*/email.* i18n labels, per-user link); TP-S005-22 deliverability test-send POST /admin/email/test via Resend REST (RESEND_API_KEY/RESEND_SENDER_EMAIL, 5/h/admin); TP-S005-23 SPF/DKIM/DMARC operator checklist; TP-S005-24 config+secrets delta. Milestone M53 (T53.1-T53.22, all pending, TDD-ordered)
-    appended to execution-plan Phase 12 (now M48-M53); Phase 12 gate updated to TC-088–TC-103, UJ-030–UJ-038, AC-U1–AC-U16. New artifacts: ADR-031, UJ-034-UJ-038, TC-096-TC-103, AC-U10-AC-U16, api-contract new routes (/admin/users/{id}/signout, /admin/email/test, q param), Modal DM secrets RESEND_API_KEY + RESEND_SENDER_EMAIL, idle-timeout VITE envs. Synced stale pointer: EV-006.current_stage 01-requirements->07-build (00/01/04 complete, 07-build next) + added EV-006.stages.04-tech-plan node (ADR-030/031, M48-M53). Commits DEFERRED (commit-only-when-asked override) — scope-addition docs uncommitted, no new SHAs. active_session.current_stage unchanged (07-build).'
-- User invoked 11-verify-impl despite evolve-lite skip; 10-e2e still pending in routing_plan but T0 e2e suite run inline during 11 (68 tests pass)
+  note: 'S005/EV-006 04-tech-plan SCOPE ADDITION (in-place re-run; 04-tech-plan remains completed). User approved adding 4
+    items; MFA/2FA + bulk CSV import remain deferred. ADR-031 (docs/adr/ADR-031-ev006-auth-ux-hardening.md) captures TP-S005-17
+    idle/session timeout (30min+60s warning, frontend VITE_VECINITA_IDLE_TIMEOUT_MIN/_WARNING_SEC); TP-S005-18 self ''log
+    out of all devices'' (global signOut); TP-S005-19 admin force-logout POST /admin/users/{id}/signout via admin_delete_user_sessions
+    RPC (one-time operator apply, 503 fallback->disable); TP-S005-20 user search q (>=3 chars->GoTrue filter)+pagination;
+    TP-S005-21 audit viewer (reuse F29 AuditPage + GET /internal/v1/audit, entity_type Users filter, user.*/email.* i18n labels,
+    per-user link); TP-S005-22 deliverability test-send POST /admin/email/test via Resend REST (RESEND_API_KEY/RESEND_SENDER_EMAIL,
+    5/h/admin); TP-S005-23 SPF/DKIM/DMARC operator checklist; TP-S005-24 config+secrets delta. Milestone M53 (T53.1-T53.22,
+    all pending, TDD-ordered) appended to execution-plan Phase 12 (now M48-M53); Phase 12 gate updated to TC-088–TC-103, UJ-030–UJ-038,
+    AC-U1–AC-U16. New artifacts: ADR-031, UJ-034-UJ-038, TC-096-TC-103, AC-U10-AC-U16, api-contract new routes (/admin/users/{id}/signout,
+    /admin/email/test, q param), Modal DM secrets RESEND_API_KEY + RESEND_SENDER_EMAIL, idle-timeout VITE envs. Synced stale
+    pointer: EV-006.current_stage 01-requirements->07-build (00/01/04 complete, 07-build next) + added EV-006.stages.04-tech-plan
+    node (ADR-030/031, M48-M53). Commits DEFERRED (commit-only-when-asked override) — scope-addition docs uncommitted, no
+    new SHAs. active_session.current_stage unchanged (07-build).'
+- User invoked 11-verify-impl despite evolve-lite skip; 10-e2e still pending in routing_plan but T0 e2e suite run inline during
+  11 (68 tests pass)
 - 11-verify-impl F35 journeys UJ-030–UJ-038 + feature F35 approved by user; formal 10-e2e required before 11 completion
 - date: '2026-06-30'
   note: 'S005 routing plan amended for PR #108 hotfix remediation (PRM-009); user approved blockers+advisories scope'
-- 'S005 paused 2026-06-30 — user opened S006 for GitHub #109 invite acceptance flow; stages 12-verify-deploy + 13-deploy-smoke deferred'
+- 'S005 paused 2026-06-30 — user opened S006 for GitHub #109 invite acceptance flow; stages 12-verify-deploy + 13-deploy-smoke
+  deferred'
 - 'R60: Keep Supabase-managed invite/recovery mail via Resend SMTP (not Resend REST API)'
 - 'R61: New POST /admin/users/{id}/revoke-invite endpoint + distinct UI + audit user.invite_revoked'
 - 'R62: Scoped context brief at docs/context/invite-acceptance-flow.md'
 - date: '2026-06-30'
-  note: 'S006-invite-acceptance OPENED (session_counter=6; type feature; orchestrator 16-evolve; branch feat/S006-invite-acceptance; evolve_cycle_id EV-007). GitHub #109 — invite acceptance flow F35 extension from S005/EV-006. Decisions R60-R62. User-approved evolve-lite routing 00→01→04→07→08→09→10→12→13 (skip 02,03,05,06,11). S005 archived paused; EV-006 paused.'
+  note: 'S006-invite-acceptance OPENED (session_counter=6; type feature; orchestrator 16-evolve; branch feat/S006-invite-acceptance;
+    evolve_cycle_id EV-007). GitHub #109 — invite acceptance flow F35 extension from S005/EV-006. Decisions R60-R62. User-approved
+    evolve-lite routing 00→01→04→07→08→09→10→12→13 (skip 02,03,05,06,11). S005 archived paused; EV-006 paused.'
 - EV-007/S006 01-requirements complete — RD-091–RD-098; AC-U3 revised; F35.12–F35.15
 artifacts:
 - docs/context-brief.md
@@ -3385,6 +3785,10 @@ artifacts:
   kind: e2e-report
   session_id: S006-invite-acceptance
   stage: 10-e2e
+- path: docs/sessions/S006-invite-acceptance/reports/pr-review.md
+  kind: pr-review-report
+  session_id: S006-invite-acceptance
+  stage: 18-pr-review
 git_history:
   current_branch: feat/S006-invite-acceptance
   branches:
@@ -3411,7 +3815,8 @@ git_history:
     pr_urls:
     - https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/96
     - https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/97
-    purpose: S003 browser-local persistent chat history (localStorage durable + cross-tab per ADR-025 + previous-chats list) on chat-rag-frontend
+    purpose: S003 browser-local persistent chat history (localStorage durable + cross-tab per ADR-025 + previous-chats list)
+      on chat-rag-frontend
     opened_at: '2026-06-26'
   - name: feat/S002-admin-job-management
     base: main

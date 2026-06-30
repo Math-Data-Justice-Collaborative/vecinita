@@ -66,9 +66,20 @@ export function useAuthLinkCallback(): {
 
     void (async () => {
       if (code !== null) {
+        const { data: existingSession } = await supabase.auth.getSession();
+        if (existingSession.session !== null && activeRef.current) {
+          setStatus("ready");
+          return;
+        }
+
         const { error: exchangeError } =
           await supabase.auth.exchangeCodeForSession(code);
         if (exchangeError !== null) {
+          const { data: postExchangeSession } = await supabase.auth.getSession();
+          if (postExchangeSession.session !== null && activeRef.current) {
+            setStatus("ready");
+            return;
+          }
           if (activeRef.current) {
             setStatus("invalid");
           }
