@@ -105,6 +105,13 @@ paths:
             minimum: 1
             maximum: 200
             default: 50
+        - name: q
+          in: query
+          required: false
+          description: Email search filter (minimum 3 characters when non-empty)
+          schema:
+            type: string
+            minLength: 3
       responses:
         "200":
           description: Paginated operator roster
@@ -112,6 +119,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserListResponse"
+        "400":
+          description: Invalid search query (q shorter than 3 characters)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":
@@ -330,6 +343,71 @@ paths:
           $ref: "#/components/responses/NotFound"
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
+  /admin/users/{user_id}/signout:
+    post:
+      operationId: forceAdminUserSignout
+      summary: Revoke all sessions for a target operator (admin only)
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "202":
+          description: Sessions revoked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AcknowledgedResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          description: Session-revoke RPC not applied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+  /admin/email/test:
+    post:
+      operationId: sendAdminTestEmail
+      summary: Send a deliverability test email via Resend REST
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailTestRequest"
+      responses:
+        "202":
+          description: Test email accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailTestResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          description: Resend secrets unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
   /health:
     get:
       operationId: health
@@ -527,6 +605,22 @@ components:
     AcknowledgedResponse:
       type: object
       properties: {}
+    EmailTestRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - to
+      properties:
+        to:
+          type: string
+          format: email
+    EmailTestResponse:
+      type: object
+      required:
+        - message_id
+      properties:
+        message_id:
+          type: string
     ErrorBody:
       type: object
       properties:
