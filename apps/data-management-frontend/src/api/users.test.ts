@@ -69,9 +69,11 @@ describe("users API client", () => {
   it("listUsers builds pagination params and sends the proxy header", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        jsonResponse({ users: [SUMMARY], total: 1, page: 2, page_size: 25 }),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse({ users: [SUMMARY], total: 1, page: 2, page_size: 25 }),
+        ),
     );
     const result = await listUsers(CLIENT, 2, 25);
     expect(result.users).toHaveLength(1);
@@ -83,9 +85,11 @@ describe("users API client", () => {
   it("listUsers uses default pagination when omitted", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        jsonResponse({ users: [], total: 0, page: 1, page_size: 50 }),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse({ users: [], total: 0, page: 1, page_size: 50 }),
+        ),
     );
     await listUsers(CLIENT);
     expect(lastUrl()).toContain("page=1");
@@ -128,9 +132,9 @@ describe("users API client", () => {
       "fetch",
       vi.fn().mockResolvedValue(new Response("bad", { status: 422 })),
     );
-    await expect(
-      inviteUser(CLIENT, "x@example.org", "admin"),
-    ).rejects.toThrow(/bad/);
+    await expect(inviteUser(CLIENT, "x@example.org", "admin")).rejects.toThrow(
+      /bad/,
+    );
   });
 
   it("changeUserRole patches the role", async () => {
@@ -147,9 +151,9 @@ describe("users API client", () => {
       "fetch",
       vi.fn().mockResolvedValue(new Response("err", { status: 400 })),
     );
-    await expect(
-      changeUserRole(CLIENT, USER_ID, "admin"),
-    ).rejects.toThrow(/err/);
+    await expect(changeUserRole(CLIENT, USER_ID, "admin")).rejects.toThrow(
+      /err/,
+    );
   });
 
   it("resendInvite posts to the resend endpoint", async () => {
@@ -242,9 +246,11 @@ describe("users API client", () => {
   it("listUsers forwards a search query when provided", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        jsonResponse({ users: [], total: 0, page: 1, page_size: 50 }),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse({ users: [], total: 0, page: 1, page_size: 50 }),
+        ),
     );
     await listUsers(CLIENT, 1, 50, "alice");
     expect(lastUrl()).toContain("q=alice");
@@ -253,9 +259,7 @@ describe("users API client", () => {
   it("sendTestEmail posts to the test endpoint", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        jsonResponse({ message_id: "re_test_1" }, 202),
-      ),
+      vi.fn().mockResolvedValue(jsonResponse({ message_id: "re_test_1" }, 202)),
     );
     const result = await sendTestEmail(JWT_CLIENT, "ops@example.org");
     expect(result.message_id).toBe("re_test_1");
@@ -266,16 +270,18 @@ describe("users API client", () => {
   it("sendTestEmail throws EmailUnconfiguredError on 503", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        jsonResponse(
-          { detail: { code: "email_unconfigured", message: "unset" } },
-          503,
+      vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse(
+            { detail: { code: "email_unconfigured", message: "unset" } },
+            503,
+          ),
         ),
-      ),
     );
-    await expect(sendTestEmail(CLIENT, "ops@example.org")).rejects.toBeInstanceOf(
-      EmailUnconfiguredError,
-    );
+    await expect(
+      sendTestEmail(CLIENT, "ops@example.org"),
+    ).rejects.toBeInstanceOf(EmailUnconfiguredError);
   });
 
   it("forceSignout posts to the signout endpoint on success", async () => {
@@ -291,12 +297,14 @@ describe("users API client", () => {
   it("forceSignout throws MechanismUnavailableError on 503 mechanism_unavailable", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        jsonResponse(
-          { detail: { code: "mechanism_unavailable", message: "no rpc" } },
-          503,
+      vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse(
+            { detail: { code: "mechanism_unavailable", message: "no rpc" } },
+            503,
+          ),
         ),
-      ),
     );
     await expect(forceSignout(CLIENT, USER_ID)).rejects.toBeInstanceOf(
       MechanismUnavailableError,
@@ -306,9 +314,11 @@ describe("users API client", () => {
   it("forceSignout maps a non-JSON 503 body containing the code to the fallback", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        new Response("mechanism_unavailable", { status: 503 }),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response("mechanism_unavailable", { status: 503 }),
+        ),
     );
     await expect(forceSignout(CLIENT, USER_ID)).rejects.toBeInstanceOf(
       MechanismUnavailableError,
@@ -318,9 +328,9 @@ describe("users API client", () => {
   it("forceSignout throws a generic error for a 503 without the code", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        jsonResponse({ detail: { code: "other" } }, 503),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(jsonResponse({ detail: { code: "other" } }, 503)),
     );
     const err = await forceSignout(CLIENT, USER_ID).catch((e: unknown) => e);
     expect(err).toBeInstanceOf(Error);

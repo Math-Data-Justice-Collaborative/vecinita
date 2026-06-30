@@ -60,10 +60,7 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
   });
 
   it("lists operators and shows invite + row actions", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(jsonResponse(MOCK_USERS)),
-    );
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(MOCK_USERS)));
 
     renderUsersPage();
 
@@ -73,9 +70,7 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
     expect(screen.getByText("admin@example.org")).toBeInTheDocument();
     expect(screen.getByTestId("users-invite-open")).toBeInTheDocument();
     expect(
-      screen.getByTestId(
-        `resend-invite-${MOCK_USERS.users[1]?.id ?? ""}`,
-      ),
+      screen.getByTestId(`resend-invite-${MOCK_USERS.users[1]?.id ?? ""}`),
     ).toBeInTheDocument();
     expect(
       screen.getByTestId(`delete-user-${MOCK_USERS.users[0]?.id ?? ""}`),
@@ -128,7 +123,10 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
   const INVITED_ID = MIXED_USERS.users[3]?.id ?? "";
 
   it("renders status-specific row actions for each operator", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(MIXED_USERS)));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(jsonResponse(MIXED_USERS)),
+    );
     renderUsersPage();
 
     await waitFor(() => {
@@ -138,20 +136,26 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
     expect(screen.getByTestId(`demote-user-${ADMIN_ID}`)).toBeInTheDocument();
     expect(screen.getByTestId(`force-signout-${ADMIN_ID}`)).toBeInTheDocument();
     expect(screen.getByTestId(`promote-user-${VIEWER_ID}`)).toBeInTheDocument();
-    expect(screen.getByTestId(`enable-user-${DISABLED_ID}`)).toBeInTheDocument();
-    expect(screen.getByTestId(`resend-invite-${INVITED_ID}`)).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`enable-user-${DISABLED_ID}`),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`resend-invite-${INVITED_ID}`),
+    ).toBeInTheDocument();
     expect(
       screen.queryByTestId(`force-signout-${DISABLED_ID}`),
     ).not.toBeInTheDocument();
   });
 
   it("runs each row action against its endpoint", async () => {
-    const fetchMock = vi.fn().mockImplementation((url: string, init?: RequestInit) => {
-      if (!init || init.method === undefined || init.method === "GET") {
-        return Promise.resolve(jsonResponse(MIXED_USERS));
-      }
-      return Promise.resolve(jsonResponse({ acknowledged: true }, 202));
-    });
+    const fetchMock = vi
+      .fn()
+      .mockImplementation((url: string, init?: RequestInit) => {
+        if (!init || init.method === undefined || init.method === "GET") {
+          return Promise.resolve(jsonResponse(MIXED_USERS));
+        }
+        return Promise.resolve(jsonResponse({ acknowledged: true }, 202));
+      });
     vi.stubGlobal("fetch", fetchMock);
     renderUsersPage();
 
@@ -162,10 +166,22 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
     const cases: [string, string, string][] = [
       [`demote-user-${ADMIN_ID}`, `/admin/users/${ADMIN_ID}/role`, "PATCH"],
       [`disable-user-${ADMIN_ID}`, `/admin/users/${ADMIN_ID}/disable`, "POST"],
-      [`reset-password-${VIEWER_ID}`, `/admin/users/${VIEWER_ID}/reset-password`, "POST"],
+      [
+        `reset-password-${VIEWER_ID}`,
+        `/admin/users/${VIEWER_ID}/reset-password`,
+        "POST",
+      ],
       [`promote-user-${VIEWER_ID}`, `/admin/users/${VIEWER_ID}/role`, "PATCH"],
-      [`enable-user-${DISABLED_ID}`, `/admin/users/${DISABLED_ID}/enable`, "POST"],
-      [`resend-invite-${INVITED_ID}`, `/admin/users/${INVITED_ID}/resend-invite`, "POST"],
+      [
+        `enable-user-${DISABLED_ID}`,
+        `/admin/users/${DISABLED_ID}/enable`,
+        "POST",
+      ],
+      [
+        `resend-invite-${INVITED_ID}`,
+        `/admin/users/${INVITED_ID}/resend-invite`,
+        "POST",
+      ],
       [`delete-user-${INVITED_ID}`, `/admin/users/${INVITED_ID}`, "DELETE"],
     ];
 
@@ -182,17 +198,21 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
   });
 
   it("surfaces an error when a row action fails", async () => {
-    const fetchMock = vi.fn().mockImplementation((_url: string, init?: RequestInit) => {
-      if (!init || init.method === undefined || init.method === "GET") {
-        return Promise.resolve(jsonResponse(MIXED_USERS));
-      }
-      return Promise.resolve(new Response("disable boom", { status: 500 }));
-    });
+    const fetchMock = vi
+      .fn()
+      .mockImplementation((_url: string, init?: RequestInit) => {
+        if (!init || init.method === undefined || init.method === "GET") {
+          return Promise.resolve(jsonResponse(MIXED_USERS));
+        }
+        return Promise.resolve(new Response("disable boom", { status: 500 }));
+      });
     vi.stubGlobal("fetch", fetchMock);
     renderUsersPage();
 
     await waitFor(() => {
-      expect(screen.getByTestId(`disable-user-${ADMIN_ID}`)).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`disable-user-${ADMIN_ID}`),
+      ).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByTestId(`disable-user-${ADMIN_ID}`));
@@ -201,18 +221,22 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
   });
 
   it("falls back to the generic message when an action rejects with a non-Error", async () => {
-    const fetchMock = vi.fn().mockImplementation((_url: string, init?: RequestInit) => {
-      if (!init || init.method === undefined || init.method === "GET") {
-        return Promise.resolve(jsonResponse(MIXED_USERS));
-      }
-      // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- exercises the non-Error catch fallback branch
-      return Promise.reject("string failure");
-    });
+    const fetchMock = vi
+      .fn()
+      .mockImplementation((_url: string, init?: RequestInit) => {
+        if (!init || init.method === undefined || init.method === "GET") {
+          return Promise.resolve(jsonResponse(MIXED_USERS));
+        }
+        // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- exercises the non-Error catch fallback branch
+        return Promise.reject("string failure");
+      });
     vi.stubGlobal("fetch", fetchMock);
     renderUsersPage();
 
     await waitFor(() => {
-      expect(screen.getByTestId(`disable-user-${ADMIN_ID}`)).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`disable-user-${ADMIN_ID}`),
+      ).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByTestId(`disable-user-${ADMIN_ID}`));
@@ -241,6 +265,32 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
     fireEvent.click(screen.getByTestId("users-invite-submit"));
 
     expect(await screen.findByText("invite boom")).toBeInTheDocument();
+  });
+
+  it("shows empty state when no operators match", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse({ users: [], total: 0, page: 1, page_size: 50 }),
+        ),
+    );
+
+    renderUsersPage();
+
+    expect(await screen.findByText(/no operators/i)).toBeInTheDocument();
+  });
+
+  it("surfaces load errors from the list endpoint", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("list failed", { status: 500 })),
+    );
+
+    renderUsersPage();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("list failed");
   });
 
   it("opens invite dialog and submits invite", async () => {

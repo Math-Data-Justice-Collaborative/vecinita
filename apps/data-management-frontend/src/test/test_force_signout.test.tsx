@@ -88,7 +88,8 @@ describe("UsersPage force sign-out (TC-098, UJ-036)", () => {
           {
             detail: {
               code: "mechanism_unavailable",
-              message: "Session-revoke RPC is not applied to the Supabase project",
+              message:
+                "Session-revoke RPC is not applied to the Supabase project",
             },
           },
           503,

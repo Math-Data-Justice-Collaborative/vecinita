@@ -2,7 +2,13 @@ vi.mock("@/hooks/useMediaQuery", () => ({
   useMediaQuery: () => true,
 }));
 
-import { cleanup, fireEvent, screen, waitFor, act } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  screen,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -44,6 +50,20 @@ describe("idle timeout (UJ-034, TC-096)", () => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(10_000);
     });
+    await waitFor(() => {
+      expect(mockSignOut).toHaveBeenCalledWith({ scope: "local" });
+    });
+  });
+
+  it("signs out immediately when the operator chooses sign out now", async () => {
+    renderSignedInApp("/dashboard");
+    await waitForAdminNav();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(50_000);
+    });
+    fireEvent.click(screen.getByTestId("idle-timeout-sign-out-now"));
+
     await waitFor(() => {
       expect(mockSignOut).toHaveBeenCalledWith({ scope: "local" });
     });

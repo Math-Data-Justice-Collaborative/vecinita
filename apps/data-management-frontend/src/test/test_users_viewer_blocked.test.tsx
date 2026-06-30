@@ -58,8 +58,12 @@ describe("Users nav viewer blocked (TC-089)", () => {
     await waitFor(() => {
       expect(screen.getByTestId("admin-nav")).toBeInTheDocument();
     });
-    expect(screen.queryByRole("link", { name: /users/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /usuarios/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /users/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /usuarios/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("redirects viewer away from /users", async () => {

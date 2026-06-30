@@ -160,7 +160,9 @@ describe("AuditPage user events (TC-101, UJ-038)", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId(`view-activity-${USER_ID}`)).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`view-activity-${USER_ID}`),
+      ).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByTestId(`view-activity-${USER_ID}`));

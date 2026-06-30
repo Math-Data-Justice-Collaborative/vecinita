@@ -104,10 +104,7 @@ describe("UsersPage search + pagination (TC-100, UJ-030)", () => {
   });
 
   it("shows a validation message when the search query is too short", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(jsonResponse(PAGE_ONE)),
-    );
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(PAGE_ONE)));
 
     renderUsersPage();
 

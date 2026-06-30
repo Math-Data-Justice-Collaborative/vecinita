@@ -2,7 +2,13 @@ vi.mock("@/hooks/useMediaQuery", () => ({
   useMediaQuery: () => true,
 }));
 
-import { cleanup, fireEvent, screen, waitFor, act } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  screen,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
