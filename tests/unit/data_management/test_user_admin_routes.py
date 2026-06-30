@@ -461,3 +461,26 @@ def test_invite_returns_503_when_admin_frontend_url_unset(
         )
     assert response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
 
+def test_revoke_invite_deletes_pending_user_and_audits(
+    client: tuple[TestClient, dict[str, dict[str, object]]],
+    captured: list[AuditEventRequest],
+) -> None:
+    """TC-108: revoke-invite accepts invited-only users and emits user.invite_revoked."""
+    test_client, users = client
+    invited_id = str(uuid4())
+    users[invited_id] = {"id": invited_id, "email": "pending@example.org"}
+    response = test_client.post(f"/admin/users/{invited_id}/revoke-invite")
+    assert response.status_code == HTTPStatus.ACCEPTED
+    assert invited_id not in users
+    assert captured[-1].event_type == "user.invite_revoked"
+
+
+def test_revoke_invite_active_user_returns_409(
+    client: tuple[TestClient, dict[str, dict[str, object]]],
+) -> None:
+    """TC-108: active users cannot be retracted."""
+    test_client, _ = client
+    response = test_client.post(f"/admin/users/{_VIEWER_ID}/revoke-invite")
+    assert response.status_code == HTTPStatus.CONFLICT
+    detail = json_object_get(response_json_object(response), "detail")
+    assert json_str(detail, "code") == "cannot_revoke_active_user"
