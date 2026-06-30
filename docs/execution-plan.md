@@ -9,14 +9,14 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 13: EV-007 — Invite acceptance flow (F35 ext, #109) — **04-tech-plan complete; 07-build next** |
+| **Active phase** | Phase 13: EV-007 — Invite acceptance flow (F35 ext, #109) — **07-build complete; 08-verify-build complete** |
 | **Active milestone** | M58: Templates, e2e, runbook + Phase 13 gate — **complete (07-build)** |
-| **Active task** | **08-verify-build** next |
+| **Active task** | **09-qa** / **12-verify-deploy** next (live AC-U17–U21 at 13-deploy-smoke) |
 | **Tasks completed** | Phase 13 M54–M58 T54.1–T54.24 complete (2026-06-30) |
 | **Last updated** | 2026-06-30 |
-| **Evolve cycle** | EV-007 (F35 ext, #109) — **04-tech-plan complete; 07-build next** |
+| **Evolve cycle** | EV-007 (F35 ext, #109) — **07-build complete; 08-verify-build complete** |
 | **Git branch** | `feat/S006-invite-acceptance` |
-| **Active session** | S006-invite-acceptance — evolve-lite. 01-requirements + 04-tech-plan **complete** (RD-091–RD-098, **ADR-032**, TP-S006-01–**16**). Next: **07-build** (M54–**M58**). Lite path skips 02/03/05/06/11 |
+| **Active session** | S006-invite-acceptance — evolve-lite. 01-requirements + 04-tech-plan **complete** (RD-091–RD-098, **ADR-032**, TP-S006-01–**16**). 07-build + 08-verify-build **complete** (M54–M58). Next: 09-qa → 12-verify-deploy → 13-deploy-smoke. Lite path skips 02/03/05/06/11 |
 | **Scope addition** | 2026-06-30 — EV-007 closes invite acceptance gap from #109 (redirect URLs, auth callback, retract invite, template polish). S005 deploy stages 12/13 remain deferred on paused session. |
 
 ## Template
@@ -981,7 +981,7 @@ full-suite + config validation.
 - [ ] ChatRAG remains anonymous; strict CORS to frontend origin only (TC-082/083; H0c, H4 live)
 - [ ] OpenAPI `securitySchemes` updated; no request/response schema changes (AC-A9)
 - [ ] All Supabase secrets via Modal/DO env, never committed; first-admin seed idempotent
-- [ ] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green
+- [x] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green
 
 ---
 
@@ -1135,58 +1135,58 @@ frontend auth callback, retract invitation, template polish, live invite smoke (
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T54.1 | Test (smoke): TC-109 — `config.toml` staging-first `site_url` + full-path `additional_redirect_urls` — red | Test | pending | test-plan TC-109, ADR-032 §4 | — | — | S006 | F35 |
-| T54.2 | Config: Update `supabase/config.toml` — staging admin `site_url`, redirect allowlist with `/accept-invite` + `/reset-password` paths + local dev origins | Config | pending | ADR-032 §4, deployment-integration §EV-007 | T54.1 | — | S006 | F35 |
-| T54.3 | Test (unit): `AdminRedirectConfig` / redirect URL builder — env unset → error; valid origin → correct paths — red | Test | pending | ADR-032 §2–3, config-spec | — | — | S006 | F35 |
-| T54.4 | Config: Wire `VECINITA_ADMIN_FRONTEND_URL` on Modal DM backend + extend `scripts/check_secrets.sh` / staging-secrets-matrix | Config | pending | ADR-032 §2, staging-secrets-matrix §EV-007 | T54.3 | — | S006 | F35 |
+| T54.1 | Test (smoke): TC-109 — `config.toml` staging-first `site_url` + full-path `additional_redirect_urls` — red | Test | completed | test-plan TC-109, ADR-032 §4 | — | 2026-06-30 | S006 | F35 |
+| T54.2 | Config: Update `supabase/config.toml` — staging admin `site_url`, redirect allowlist with `/accept-invite` + `/reset-password` paths + local dev origins | Config | completed | ADR-032 §4, deployment-integration §EV-007 | T54.1 | 2026-06-30 | S006 | F35 |
+| T54.3 | Test (unit): `AdminRedirectConfig` / redirect URL builder — env unset → error; valid origin → correct paths — red | Test | completed | ADR-032 §2–3, config-spec | — | 2026-06-30 | S006 | F35 |
+| T54.4 | Config: Wire `VECINITA_ADMIN_FRONTEND_URL` on Modal DM backend + extend `scripts/check_secrets.sh` / staging-secrets-matrix | Config | completed | ADR-032 §2, staging-secrets-matrix §EV-007 | T54.3 | 2026-06-30 | S006 | F35 |
 
 #### M55: Backend redirect_to + revoke-invite
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T54.5 | Test (TestClient): TC-104 — invite + resend include `redirect_to={origin}/accept-invite` on GoTrue outbound — red | Test | pending | test-plan TC-104, UJ-031, ADR-032 §3 | T54.4 | — | S006 | F35 |
-| T54.6 | Test (TestClient): TC-105 — admin recovery includes `redirect_to={origin}/reset-password` — red | Test | pending | test-plan TC-105, UJ-033, ADR-032 §3 | T54.4 | — | S006 | F35 |
-| T54.7 | Test (TestClient): TC-108 — `POST /admin/users/{id}/revoke-invite` invited-only + `user.invite_revoked` audit; active → 409 — red | Test | pending | test-plan TC-108, UJ-030, ADR-032 §7 | T49.2 | — | S006 | F35 |
-| T54.8 | Code: `build_auth_redirect_path` helper + wire invite/resend/recovery routes with `redirect_to` | Code | pending | ADR-032 §3, api-contract | T54.5, T54.6 | — | S006 | F35 |
-| T54.9 | Code: `POST /admin/users/{id}/revoke-invite` route + invited-only guard + audit emit | Code | pending | ADR-032 §7, api-contract | T54.7 | — | S006 | F35 |
-| T54.10 | Test (unit): `supabase_admin` asserts `redirect_to` query param on httpx outbound invite/recovery — red | Test | pending | test-plan TC-104/105, ADR-032 §3 | — | — | S006 | F35 |
-| T54.11 | Code: Implement `redirect_to` passthrough in `supabase_admin` call sites (if test-only gap) | Code | pending | ADR-032 §3 | T54.10, T54.8 | — | S006 | F35 |
+| T54.5 | Test (TestClient): TC-104 — invite + resend include `redirect_to={origin}/accept-invite` on GoTrue outbound — red | Test | completed | test-plan TC-104, UJ-031, ADR-032 §3 | T54.4 | 2026-06-30 | S006 | F35 |
+| T54.6 | Test (TestClient): TC-105 — admin recovery includes `redirect_to={origin}/reset-password` — red | Test | completed | test-plan TC-105, UJ-033, ADR-032 §3 | T54.4 | 2026-06-30 | S006 | F35 |
+| T54.7 | Test (TestClient): TC-108 — `POST /admin/users/{id}/revoke-invite` invited-only + `user.invite_revoked` audit; active → 409 — red | Test | completed | test-plan TC-108, UJ-030, ADR-032 §7 | T49.2 | 2026-06-30 | S006 | F35 |
+| T54.8 | Code: `build_auth_redirect_path` helper + wire invite/resend/recovery routes with `redirect_to` | Code | completed | ADR-032 §3, api-contract | T54.5, T54.6 | 2026-06-30 | S006 | F35 |
+| T54.9 | Code: `POST /admin/users/{id}/revoke-invite` route + invited-only guard + audit emit | Code | completed | ADR-032 §7, api-contract | T54.7 | 2026-06-30 | S006 | F35 |
+| T54.10 | Test (unit): `supabase_admin` asserts `redirect_to` query param on httpx outbound invite/recovery — red | Test | completed | test-plan TC-104/105, ADR-032 §3 | — | 2026-06-30 | S006 | F35 |
+| T54.11 | Code: Implement `redirect_to` passthrough in `supabase_admin` call sites (if test-only gap) | Code | completed | ADR-032 §3 | T54.10, T54.8 | 2026-06-30 | S006 | F35 |
 
 #### M56: Frontend auth callback pages
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T54.12 | Test (Vitest): TC-106 — accept-invite hash/code session bootstrap, `#error=otp_expired` UX, form gated on session — red | Test | pending | test-plan TC-106, UJ-031, ADR-032 §5 | — | — | S006 | F35 |
-| T54.13 | Test (Vitest): TC-107 — reset-password callback + expired link UX — red | Test | pending | test-plan TC-107, UJ-033, ADR-032 §5 | — | — | S006 | F35 |
-| T54.14 | Code: `useAuthLinkCallback` hook — hash/query parse, `exchangeCodeForSession`, session wait, error states | Code | pending | ADR-032 §5–6 | T54.12, T54.13 | — | S006 | F35 |
-| T54.15 | Code: Integrate hook into `SetPasswordPage` (invite + reset variants); loading + error panels | Code | pending | ADR-032 §5–6, UJ-031/033 | T54.14 | — | S006 | F35 |
-| T54.16 | Code: Bilingual i18n keys for expired/invalid link states (EN/ES) | Code | pending | ADR-032 §6, AC-U20 | T54.14 | — | S006 | F35 |
+| T54.12 | Test (Vitest): TC-106 — accept-invite hash/code session bootstrap, `#error=otp_expired` UX, form gated on session — red | Test | completed | test-plan TC-106, UJ-031, ADR-032 §5 | — | 2026-06-30 | S006 | F35 |
+| T54.13 | Test (Vitest): TC-107 — reset-password callback + expired link UX — red | Test | completed | test-plan TC-107, UJ-033, ADR-032 §5 | — | 2026-06-30 | S006 | F35 |
+| T54.14 | Code: `useAuthLinkCallback` hook — hash/query parse, `exchangeCodeForSession`, session wait, error states | Code | completed | ADR-032 §5–6 | T54.12, T54.13 | 2026-06-30 | S006 | F35 |
+| T54.15 | Code: Integrate hook into `SetPasswordPage` (invite + reset variants); loading + error panels | Code | completed | ADR-032 §5–6, UJ-031/033 | T54.14 | 2026-06-30 | S006 | F35 |
+| T54.16 | Code: Bilingual i18n keys for expired/invalid link states (EN/ES) | Code | completed | ADR-032 §6, AC-U20 | T54.14 | 2026-06-30 | S006 | F35 |
 
 #### M57: Admin UI invitation lifecycle
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T54.17 | Test (Vitest): Users page "Retract invitation" visible only for `status=invited`; calls revoke endpoint (TC-108 UI) — red | Test | pending | test-plan TC-108, UJ-030 | — | — | S006 | F35 |
-| T54.18 | Test (Vitest): pending rows show `invited_at` + "~1h expiry" hint (RD-096) — red | Test | pending | test-plan TC-106, ADR-032 §9 | — | — | S006 | F35 |
-| T54.19 | Code: UsersPage retract action + invite metadata columns + distinct label from delete | Code | pending | ADR-032 §7/§9, UJ-030 | T54.17, T54.18, T54.9 | — | S006 | F35 |
-| T54.20 | Code+Test: CORS preflight POST on `/admin/users/{id}/revoke-invite` (TC-103 extend) | Code | pending | test-plan TC-103, ADR-032 §11 | T54.9 | — | S006 | F35 |
-| T54.21 | Config: OpenAPI `openapi/data-management.yaml` — `/revoke-invite`, redirect_to docs | Config | pending | api-contract, ADR-011 | T54.9, T54.8 | — | S006 | F35 |
+| T54.17 | Test (Vitest): Users page "Retract invitation" visible only for `status=invited`; calls revoke endpoint (TC-108 UI) — red | Test | completed | test-plan TC-108, UJ-030 | — | 2026-06-30 | S006 | F35 |
+| T54.18 | Test (Vitest): pending rows show `invited_at` + "~1h expiry" hint (RD-096) — red | Test | completed | test-plan TC-106, ADR-032 §9 | — | 2026-06-30 | S006 | F35 |
+| T54.19 | Code: UsersPage retract action + invite metadata columns + distinct label from delete | Code | completed | ADR-032 §7/§9, UJ-030 | T54.17, T54.18, T54.9 | 2026-06-30 | S006 | F35 |
+| T54.20 | Code+Test: CORS preflight POST on `/admin/users/{id}/revoke-invite` (TC-103 extend) | Code | completed | test-plan TC-103, ADR-032 §11 | T54.9 | 2026-06-30 | S006 | F35 |
+| T54.21 | Config: OpenAPI `openapi/data-management.yaml` — `/revoke-invite`, redirect_to docs | Config | completed | api-contract, ADR-011 | T54.9, T54.8 | 2026-06-30 | S006 | F35 |
 
 #### M58: Templates, e2e, runbook + Phase 13 gate
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T54.22 | Config: Polish `supabase/templates/invite.html` + `recovery.html` — CTA, expiry copy, branding (TC-110) | Config | pending | test-plan TC-110, ADR-032 §14 | T54.2 | — | S006 | F35 |
-| T54.23 | Test (e2e): Extend `test_uj031_invite_from_page.py` — assert `redirect_to` query param (TC-104) | Test | pending | test-plan TC-104, UJ-031 | T54.8 | — | S006 | F35 |
-| T54.24 | Docs: staging runbook — Dashboard Auth URL verification step; EV-007 redeploy order; AC-U17–U21 checklist | Docs | pending | deployment-integration §EV-007, ADR-032 §13 | T54.2, T54.4 | — | S006 | F35 |
+| T54.22 | Config: Polish `supabase/templates/invite.html` + `recovery.html` — CTA, expiry copy, branding (TC-110) | Config | completed | test-plan TC-110, ADR-032 §14 | T54.2 | 2026-06-30 | S006 | F35 |
+| T54.23 | Test (e2e): Extend `test_uj031_invite_from_page.py` — assert `redirect_to` query param (TC-104) | Test | completed | test-plan TC-104, UJ-031 | T54.8 | 2026-06-30 | S006 | F35 |
+| T54.24 | Docs: staging runbook — Dashboard Auth URL verification step; EV-007 redeploy order; AC-U17–U21 checklist | Docs | completed | deployment-integration §EV-007, ADR-032 §13 | T54.2, T54.4 | 2026-06-30 | S006 | F35 |
 
 #### Phase 13 Gate Check
 
-- [ ] All M54–M58 tasks completed (T54.1–T54.24)
-- [ ] TC-104–TC-110 green; UJ-031/033 callback + retract covered (T2)
+- [x] All M54–M58 tasks completed (T54.1–T54.24)
+- [x] TC-104–TC-110 green; UJ-031/033 callback + retract covered (T2)
 - [ ] AC-U3/U5 revised criteria satisfied at T2; AC-U17–U21 pending live verify at 13-deploy-smoke (T3)
-- [ ] `VECINITA_ADMIN_FRONTEND_URL` on Modal DM; Supabase `site_url` + redirect allowlist synced
-- [ ] CORS preflight covers POST on `/admin/users/{id}/revoke-invite`
+- [x] `VECINITA_ADMIN_FRONTEND_URL` on Modal DM; Supabase `site_url` + redirect allowlist synced
+- [x] CORS preflight covers POST on `/admin/users/{id}/revoke-invite`
 - [ ] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green
 
 ---
@@ -1639,30 +1639,30 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T53.20 | M53 | 12 | Test | completed | T53.7, T53.11 | 2026-06-30 | S005 | F35 |
 | T53.21 | M53 | 12 | Config | completed | T53.7, T53.11, T53.15 | 2026-06-30 | S005 | F35 |
 | T53.22 | M53 | 12 | Docs | completed | T53.5 | 2026-06-30 | S005 | F35 |
-| T54.1 | M54 | 13 | Test | pending | — | — | S006 | F35 |
-| T54.2 | M54 | 13 | Config | pending | T54.1 | — | S006 | F35 |
-| T54.3 | M54 | 13 | Test | pending | — | — | S006 | F35 |
-| T54.4 | M54 | 13 | Config | pending | T54.3 | — | S006 | F35 |
-| T54.5 | M55 | 13 | Test | pending | T54.4 | — | S006 | F35 |
-| T54.6 | M55 | 13 | Test | pending | T54.4 | — | S006 | F35 |
-| T54.7 | M55 | 13 | Test | pending | T49.2 | — | S006 | F35 |
-| T54.8 | M55 | 13 | Code | pending | T54.5, T54.6 | — | S006 | F35 |
-| T54.9 | M55 | 13 | Code | pending | T54.7 | — | S006 | F35 |
-| T54.10 | M55 | 13 | Test | pending | — | — | S006 | F35 |
-| T54.11 | M55 | 13 | Code | pending | T54.10, T54.8 | — | S006 | F35 |
-| T54.12 | M56 | 13 | Test | pending | — | — | S006 | F35 |
-| T54.13 | M56 | 13 | Test | pending | — | — | S006 | F35 |
-| T54.14 | M56 | 13 | Code | pending | T54.12, T54.13 | — | S006 | F35 |
-| T54.15 | M56 | 13 | Code | pending | T54.14 | — | S006 | F35 |
-| T54.16 | M56 | 13 | Code | pending | T54.14 | — | S006 | F35 |
-| T54.17 | M57 | 13 | Test | pending | — | — | S006 | F35 |
-| T54.18 | M57 | 13 | Test | pending | — | — | S006 | F35 |
-| T54.19 | M57 | 13 | Code | pending | T54.17, T54.18, T54.9 | — | S006 | F35 |
-| T54.20 | M57 | 13 | Code | pending | T54.9 | — | S006 | F35 |
-| T54.21 | M57 | 13 | Config | pending | T54.9, T54.8 | — | S006 | F35 |
-| T54.22 | M58 | 13 | Config | pending | T54.2 | — | S006 | F35 |
-| T54.23 | M58 | 13 | Test | pending | T54.8 | — | S006 | F35 |
-| T54.24 | M58 | 13 | Docs | pending | T54.2, T54.4 | — | S006 | F35 |
+| T54.1 | M54 | 13 | Test | completed | — | 2026-06-30 | S006 | F35 |
+| T54.2 | M54 | 13 | Config | completed | T54.1 | 2026-06-30 | S006 | F35 |
+| T54.3 | M54 | 13 | Test | completed | — | 2026-06-30 | S006 | F35 |
+| T54.4 | M54 | 13 | Config | completed | T54.3 | 2026-06-30 | S006 | F35 |
+| T54.5 | M55 | 13 | Test | completed | T54.4 | 2026-06-30 | S006 | F35 |
+| T54.6 | M55 | 13 | Test | completed | T54.4 | 2026-06-30 | S006 | F35 |
+| T54.7 | M55 | 13 | Test | completed | T49.2 | 2026-06-30 | S006 | F35 |
+| T54.8 | M55 | 13 | Code | completed | T54.5, T54.6 | 2026-06-30 | S006 | F35 |
+| T54.9 | M55 | 13 | Code | completed | T54.7 | 2026-06-30 | S006 | F35 |
+| T54.10 | M55 | 13 | Test | completed | — | 2026-06-30 | S006 | F35 |
+| T54.11 | M55 | 13 | Code | completed | T54.10, T54.8 | 2026-06-30 | S006 | F35 |
+| T54.12 | M56 | 13 | Test | completed | — | 2026-06-30 | S006 | F35 |
+| T54.13 | M56 | 13 | Test | completed | — | 2026-06-30 | S006 | F35 |
+| T54.14 | M56 | 13 | Code | completed | T54.12, T54.13 | 2026-06-30 | S006 | F35 |
+| T54.15 | M56 | 13 | Code | completed | T54.14 | 2026-06-30 | S006 | F35 |
+| T54.16 | M56 | 13 | Code | completed | T54.14 | 2026-06-30 | S006 | F35 |
+| T54.17 | M57 | 13 | Test | completed | — | 2026-06-30 | S006 | F35 |
+| T54.18 | M57 | 13 | Test | completed | — | 2026-06-30 | S006 | F35 |
+| T54.19 | M57 | 13 | Code | completed | T54.17, T54.18, T54.9 | 2026-06-30 | S006 | F35 |
+| T54.20 | M57 | 13 | Code | completed | T54.9 | 2026-06-30 | S006 | F35 |
+| T54.21 | M57 | 13 | Config | completed | T54.9, T54.8 | 2026-06-30 | S006 | F35 |
+| T54.22 | M58 | 13 | Config | completed | T54.2 | 2026-06-30 | S006 | F35 |
+| T54.23 | M58 | 13 | Test | completed | T54.8 | 2026-06-30 | S006 | F35 |
+| T54.24 | M58 | 13 | Docs | completed | T54.2, T54.4 | 2026-06-30 | S006 | F35 |
 
 ## Phase Gate Log
 
