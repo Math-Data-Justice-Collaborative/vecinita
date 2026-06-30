@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>You're invited to Vecinita Admin</title>
+  </head>
+  <body style="margin:0;padding:0;background:#f4f5f7;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:24px 0;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:12px;padding:32px;">
+            <tr>
+              <td>
+                <h1 style="margin:0 0 8px;font-size:20px;color:#111827;">Vecinita Admin</h1>
+
+                <!-- lang:en -->
+                <div lang="en">
+                  <h2 style="font-size:18px;margin:16px 0 8px;">You're invited</h2>
+                  <p style="line-height:1.5;">
+                    You've been invited to the Vecinita admin dashboard. Click the button below to
+                    set your password and finish creating your account.
+                  </p>
+                  <p style="margin:24px 0;">
+                    <a href="{{ .ConfirmationURL }}" style="background:#2563eb;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;display:inline-block;">Accept invitation</a>
+                  </p>
+                  <p style="font-size:13px;color:#6b7280;">This link expires in 1 hour. If you weren't expecting this invitation, you can ignore this email.</p>
+                </div>
+
+                <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;" />
+
+                <!-- lang:es -->
+                <div lang="es">
+                  <h2 style="font-size:18px;margin:16px 0 8px;">Te han invitado</h2>
+                  <p style="line-height:1.5;">
+                    Te han invitado al panel de administración de Vecinita. Haz clic en el botón de
+                    abajo para establecer tu contraseña y terminar de crear tu cuenta.
+                  </p>
+                  <p style="margin:24px 0;">
+                    <a href="{{ .ConfirmationURL }}" style="background:#2563eb;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;display:inline-block;">Aceptar invitación</a>
+                  </p>
+                  <p style="font-size:13px;color:#6b7280;">Este enlace caduca en 1 hora. Si no esperabas esta invitación, puedes ignorar este correo.</p>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
