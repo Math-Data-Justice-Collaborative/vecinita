@@ -51,17 +51,17 @@ jobs:
       - name: Start local Supabase stack
         run: supabase start
 
-      - name: Email template + Inbucket smoke (TP-S005-13)
+      - name: Email template + Mailpit smoke (TP-S005-13)
         run: |
           set -euo pipefail
           # Every templated HTML referenced by config.toml must be non-empty.
           for f in supabase/templates/*.html; do
             [[ -s "$f" ]] || { echo "empty template: $f" >&2; exit 1; }
           done
-          # Inbucket (local mail sink, port 54324) must be reachable so template
-          # delivery can be smoke-tested locally before the cloud config push.
-          curl -fsS "http://127.0.0.1:54324/api/v1/mailboxes" > /dev/null
-          echo "OK: email templates present; Inbucket reachable."
+          # Mailpit (local mail sink on port 54324; config.toml [inbucket] section) must be
+          # reachable so template delivery can be smoke-tested locally before cloud push.
+          curl -fsS "http://127.0.0.1:54324/api/v1/messages" > /dev/null
+          echo "OK: email templates present; Mailpit reachable."
 
       - name: Lint and apply migrations locally (when present)
         run: |

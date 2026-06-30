@@ -140,7 +140,7 @@ after domain verification.
 |----|------|----------|
 | TP-S005-11 | Password policy | `[auth] minimum_password_length = 8` in `config.toml` |
 | TP-S005-12 | MFA/2FA | Explicitly **deferred** (ADR-029 scope out) |
-| TP-S005-13 | Local email E2E | `supabase start` + Inbucket smoke in `supabase.yml` validate job when templates change |
+| TP-S005-13 | Local email E2E | `supabase start` + Mailpit smoke in `supabase.yml` validate job when templates change |
 | TP-S005-14 | Git | Single branch `feat/S005-user-mgmt-auth`; one PR to `main` (PR-48) |
 | TP-S005-15 | CORS | Extend `configure_cors` + H0c tests for `PATCH`, `DELETE` on `/admin/users*` |
 | TP-S005-16 | Secret rotation | Document `SUPABASE_SECRET_KEY` + `SUPABASE_SMTP_PASS` rotation in staging runbook |

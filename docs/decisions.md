@@ -310,7 +310,7 @@ Interview skipped; **recommended defaults applied** per research + ADR-029 align
 | TP-S005-10 | Resend + templates | Operator prerequisite; text-forward stacked-bilingual HTML v1 | ADR-030 | RD-090 |
 | TP-S005-11 | Password policy | `minimum_password_length = 8` in `config.toml` | ADR-030 | security baseline |
 | TP-S005-12 | MFA | **Deferred** (out of scope EV-006) | ADR-029 | scope boundary |
-| TP-S005-13 | Local email E2E | Inbucket smoke in `supabase.yml` validate when templates change | ADR-030 | local dev confidence |
+| TP-S005-13 | Local email E2E | Mailpit smoke in `supabase.yml` validate when templates change | ADR-030 | local dev confidence |
 | TP-S005-14 | Git | Single branch `feat/S005-user-mgmt-auth`; PR-48 to `main` | ADR-030 | evolve-lite pattern |
 | TP-S005-15 | CORS | H0c tests for PATCH/DELETE/POST on `/admin/users*` | ADR-030 | cors-browser-methods.mdc |
 | TP-S005-16 | Secret rotation | Runbook for `SUPABASE_SECRET_KEY` + `SUPABASE_SMTP_PASS` rotation | ADR-030 | operator ops |
