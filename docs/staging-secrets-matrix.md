@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita staging  
 > **Source**: `docs/deployment-integration.md` §Secrets, ADR-007, ADR-010  
-> **Last updated**: 2026-06-13 (EV-004 — no new secrets; existing VITE/CORS rows sufficient per AC-F6)
+> **Last updated**: 2026-06-29 (S005/EV-006 F35 — SUPABASE_SECRET_KEY on backend, Resend SMTP + REST test-send secrets, idle-timeout env)
 
 Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — never commit to git.
 
@@ -131,6 +131,7 @@ Identity for **admin surfaces only** (DM UI, DM Modal API, internal-write API). 
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `SUPABASE_URL` | Yes (F34) | JWT verification (with existing `X-Vecinita-Proxy-Key`) |
+| `SUPABASE_SECRET_KEY` | Yes (F35) | Admin API for `/admin/users*` (TP-S005-01) |
 
 ### Operator runbook (AC-A10)
 
@@ -151,13 +152,99 @@ Identity for **admin surfaces only** (DM UI, DM Modal API, internal-write API). 
 | `SUPABASE_PUBLISHABLE_KEY` | Deploy / future CI | New `sb_publishable_*` key (browser-safe; maps to `VITE_SUPABASE_PUBLISHABLE_KEY`) |
 | `SUPABASE_SECRET_KEY` | Deploy / seed CI | New `sb_secret_*` key (admin API; replaces legacy `service_role`) |
 | `SUPABASE_URL` | Deploy / CI | `https://cfuvghdsuwactfeamtym.supabase.co` |
+| `SUPABASE_SMTP_PASS` | **EV-006 sync-production** | Resend API key (`re_...`); resolves `[auth.email.smtp] pass = env(SUPABASE_SMTP_PASS)` at `config push`. **Operator prerequisite: verified Resend domain** before setting. |
 
 Offline **validate** job runs without these secrets. Cloud jobs skip when the token is absent.
+
+**Push from `prod.env`:** `bash scripts/deploy/sync_github_secrets.sh --apply`
+(dry run without `--apply`). Template: `infra/github/.env.example`. Supabase-CLI env
+template: `supabase/.env.example`. Note: `prod.env` stores the DB password as
+`SUPABASE_DATABASE_PASSWORD`; the sync script and CLI map it to `SUPABASE_DB_PASSWORD`.
 
 **Example env files (placeholders):** `infra/do/.env.example`, `infra/modal/.env.example`  
 **Push to DO:** `scripts/deploy/do_apps.py sync-secrets` or `sync-all-secrets` (see `infra/do/README.md`).  
 **Push everywhere (Supabase check + Modal + DO):** `bash scripts/deploy/sync_env.sh --apply`  
 **Push to Modal only:** `bash scripts/deploy/sync_modal_secret.sh --apply`
+
+## EV-006 (F35) — Admin user management + Resend SMTP (#75)
+
+Builds on EV-005. Adds the live admin user-management surface and production email delivery.
+
+### Backend hosting `/admin/users*` (ADR-030 / TP-S005-01)
+
+| Variable | Where | Required | Description |
+|----------|-------|----------|-------------|
+| `SUPABASE_SECRET_KEY` | **Modal data-management ASGI only** | Yes (F35) | Supabase Admin API key for `/admin/users*`. **Server-side only** — never in internal-write-api or any `VITE_*` build. |
+| `VECINITA_INTERNAL_WRITE_URL` | Modal data-management ASGI | Yes (F35) | Base URL for audit ingest (`POST /internal/v1/audit/event`) |
+| `VECINITA_INTERNAL_API_KEY` | Modal data-management ASGI | Yes (F35) | Service key for audit ingest calls |
+| `RESEND_API_KEY` | **Modal data-management ASGI only** | Yes (F35 test-send) | Resend API key (same value as `SUPABASE_SMTP_PASS`) for `POST /admin/email/test` (Resend REST). Server-side only. (TP-S005-22) |
+| `RESEND_SENDER_EMAIL` | Modal data-management ASGI | Yes (F35 test-send) | Verified Resend sender (= `[auth.email.smtp] admin_email`) used as test-send `from`. (TP-S005-22) |
+| `VITE_VECINITA_IDLE_TIMEOUT_MIN` | DM frontend build (`VITE_*`) | No (default 30) | Idle auto-logout minutes (TP-S005-17) |
+| `VITE_VECINITA_IDLE_WARNING_SEC` | DM frontend build (`VITE_*`) | No (default 60) | Idle warning countdown seconds (TP-S005-17) |
+
+### Supabase project — email delivery (used by Supabase/CLI, not Vecinita backends)
+
+| Variable / item | Where | Required | Description |
+|-----------------|-------|----------|-------------|
+| `SUPABASE_SMTP_PASS` | GitHub Actions secret + Supabase project env | Yes (prod) | Resend API key; referenced by `[auth.email.smtp] pass = env(SUPABASE_SMTP_PASS)` |
+| Verified Resend sending domain | Resend dashboard (operator) | Yes (prod) | SPF/DKIM-verified domain for `admin_email`/sender (RD-090) |
+| Sender address + name | `config.toml` `[auth.email.smtp]` | Yes (prod) | e.g. `noreply@<verified-domain>`, "Vecinita Admin" |
+
+### Per-environment .env files (master = repo-root `prod.env`, gitignored)
+
+| Environment | Template | Push command |
+|-------------|----------|--------------|
+| **GitHub Actions** | `infra/github/.env.example` | `bash scripts/deploy/sync_github_secrets.sh --apply` |
+| **Supabase** (CLI / config push) | `supabase/.env.example` | `bash scripts/supabase/ci_sync.sh sync-production` (CI) |
+| **Modal** (`vecinita-data-management`) | `infra/modal/.env.example` | `bash scripts/deploy/sync_modal_secret.sh --merge --apply` |
+| **DigitalOcean** (4 apps) | `infra/do/.env.example` | `uv run --with pydo --with pyyaml scripts/deploy/do_apps.py sync-all-secrets` |
+
+One-shot across every environment (dry run without `--apply`):
+
+```bash
+set -a && source prod.env && set +a
+bash scripts/deploy/sync_env.sh --apply          # github + supabase + modal + do
+bash scripts/deploy/sync_env.sh --github --apply # single environment
+```
+
+> **`--merge` for Modal:** `modal secret create --force` *replaces* the whole secret. The
+> `--merge` flag exports the live secret first (via `scripts/deploy/export_modal_secret.py`),
+> layers `prod.env` on top, then re-pushes the union — so adding `SUPABASE_SECRET_KEY` (F35)
+> does not drop the existing keys.
+
+### Operator prerequisites (F35)
+
+1. Connect **Resend** (provision API key) and **verify the sending domain** (SPF/DKIM).
+2. Set the Resend API key — in `prod.env` as `RESEND_API_KEY` (or `SUPABASE_SMTP_PASS`), then
+   `bash scripts/deploy/sync_github_secrets.sh --apply` (maps `RESEND_API_KEY` → `SUPABASE_SMTP_PASS` on GitHub).
+3. Set `SUPABASE_SECRET_KEY` on the **Modal data-management** backend
+   (`bash scripts/deploy/sync_modal_secret.sh --merge --apply`) — host of `/admin/users*` (ADR-030).
+4. Update `[auth.email.smtp] admin_email`/`sender_name` in `config.toml` to the verified sender.
+5. `supabase config push` (via `supabase.yml` on merge to `main`) syncs SMTP + templates.
+6. Set `RESEND_API_KEY` (same Resend key) + `RESEND_SENDER_EMAIL` on the Modal DM secret for the
+   in-app **test-send** button (TP-S005-22).
+7. **One-time:** apply the `admin_delete_user_sessions` RPC to the Supabase project (committed under
+   `supabase/migrations/`) to enable admin **force sign-out** (TP-S005-19); until applied,
+   `POST /admin/users/{id}/signout` returns `503` and **Disable** is the lockout fallback.
+
+#### Deliverability DNS checklist (Resend domain — operator, TP-S005-23)
+
+Add at the DNS provider for the verified sending domain (values from the Resend dashboard):
+
+| Record | Type | Purpose |
+|--------|------|---------|
+| SPF | `TXT` | Authorize Resend to send for the domain (`v=spf1 include:...`) |
+| DKIM | `CNAME`/`TXT` | Resend-provided signing keys |
+| DMARC | `TXT` | `_dmarc` policy (start `p=none`, tighten to `quarantine`/`reject`) |
+
+Verify end-to-end with the in-app **Send test email** (`POST /admin/email/test`).
+
+### Operator runbook delta (supersedes parts of AC-A10)
+
+- **Invite / disable / role change / revoke / reset:** now done in-app on the **`/users`** page
+  (admin-only) — Supabase Dashboard no longer required for routine user management.
+- **Emails:** delivered via **Resend**; templates are versioned in `supabase/templates/` and synced
+  by `supabase config push` (never hand-edited in the Dashboard, which `config push` would overwrite).
 
 ## EV-004 (F31) — no new secrets
 

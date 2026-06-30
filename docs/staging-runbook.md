@@ -150,6 +150,45 @@ Mark items in [execution-plan.md](execution-plan.md) Phase 4 Gate Check after ev
 
 If the `coverage` job fails while `python` / `frontend` jobs pass, inspect `scripts/test/print_unit_coverage_summary.py` output for the failing component row.
 
+## EV-006 (F35) — Admin user management + Resend email (S005)
+
+Operator checklist for live invite delivery and `/admin/users*` on the Modal DM backend.
+Secrets matrix: [staging-secrets-matrix.md](staging-secrets-matrix.md) §EV-006.
+
+### Resend domain verification (prerequisite)
+
+1. In the [Resend dashboard](https://resend.com/domains), add the sending domain and complete
+   **SPF**, **DKIM**, and **DMARC** records (see secrets matrix §Deliverability DNS checklist).
+2. Set `[auth.email.smtp] admin_email` / `sender_name` in `supabase/config.toml` to the verified
+   address (e.g. `noreply@<domain>`).
+3. After deploy, use **Send test email** on the DM `/users` page (UJ-037) or Resend dashboard
+   to confirm inbox delivery before inviting operators.
+
+### Invite / resend workflow
+
+1. Ensure `SUPABASE_SECRET_KEY` is on the **Modal data-management** secret
+   (`bash scripts/deploy/sync_modal_secret.sh --merge --apply`).
+2. Ensure `SUPABASE_SMTP_PASS` (Resend API key) is in GitHub secrets and pushed to Supabase via
+   `bash scripts/supabase/ci_sync.sh sync-production` on `main` (or manual `supabase config push`).
+3. **First operator:** `uv run python scripts/seed_first_admin.py` (idempotent).
+4. **Additional operators:** Admin signs in → `/users` → **Invite** → enter email + role → submit.
+   Supabase sends the repo-versioned bilingual invite template via Resend SMTP.
+5. **Pending invitee:** Admin → row action **Resend invite** → `POST /admin/users/{id}/resend-invite`.
+6. **Password recovery (admin-triggered):** Row action **Reset password** sends recovery email.
+7. **Disable / revoke:** Use **Disable** to ban; **Delete** to remove the identity (confirmation).
+
+Public self-signup remains disabled (`enable_signup = false` in `config.toml`); offline guard:
+`bash scripts/check_supabase_config.sh`.
+
+### Secret rotation (TP-S005-16)
+
+| Secret | Where | Rotation steps |
+|--------|-------|----------------|
+| `SUPABASE_SMTP_PASS` / `RESEND_API_KEY` | GitHub Actions + Supabase project env + Modal DM | 1) Create new Resend API key. 2) Update `prod.env`. 3) `bash scripts/deploy/sync_github_secrets.sh --apply`. 4) `supabase config push` (or CI sync-production on `main`). 5) `bash scripts/deploy/sync_modal_secret.sh --merge --apply`. 6) Revoke old Resend key. |
+| `SUPABASE_SECRET_KEY` | Modal data-management only | 1) Rotate in Supabase dashboard (Settings → API). 2) Update `prod.env`. 3) `bash scripts/deploy/sync_modal_secret.sh --merge --apply`. 4) Smoke `GET /admin/users` as admin. 5) Revoke old secret key. |
+
+Never commit secret values. Use `--merge` on Modal pushes so rotation does not drop unrelated keys.
+
 ## Related
 
 - `scripts/deploy/staging_smoke.sh` — shell H1–H3  
