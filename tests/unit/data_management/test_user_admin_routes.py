@@ -19,7 +19,7 @@ from vecinita_data_management_backend.rate_limit import SlidingWindowRateLimiter
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests
 from vecinita_shared_schemas.supabase_admin import SupabaseAdminClient
 
-from tests.helpers.json_response import json_list, json_str, response_json_object
+from tests.helpers.json_response import json_list, json_object_get, json_str, response_json_object
 from tests.helpers.user_admin_mocks import (
     DEV_BYPASS_SUB as _DEV_BYPASS_SUB,
 )
@@ -251,6 +251,37 @@ def test_send_test_email_maps_resend_errors(
     with TestClient(app) as test_client:
         response = test_client.post("/admin/email/test", json={"to": "ops@example.org"})
     assert response.status_code == HTTPStatus.BAD_GATEWAY
+
+
+def test_send_test_email_maps_unverified_domain_to_domain_unverified(
+    captured: list[AuditEventRequest],
+) -> None:
+    users = _seed_users()
+
+    class UnverifiedDomainResend(ResendClient):
+        def send_test_email(self, to: str) -> str:  # noqa: ARG002
+            msg = "domain not verified"
+            raise ResendError(
+                msg,
+                status_code=HTTPStatus.FORBIDDEN,
+                provider_message="The example.org domain is not verified.",
+            )
+
+    app = create_app(
+        require_proxy_auth=False,
+        admin_client=_make_client(users),
+        audit_emit=captured.append,
+        resend_client=UnverifiedDomainResend(
+            api_key="re_test",
+            sender="noreply@example.org",
+        ),
+    )
+    with TestClient(app) as test_client:
+        response = test_client.post("/admin/email/test", json={"to": "ops@example.org"})
+    assert response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
+    detail = json_object_get(response_json_object(response), "detail")
+    assert json_str(detail, "code") == "domain_unverified"
+    assert "not verified" in json_str(detail, "message").lower()
 
 
 def test_audit_emit_failure_does_not_fail_mutation() -> None:
