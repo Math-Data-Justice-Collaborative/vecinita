@@ -6,11 +6,12 @@ import {
   ListChecks,
   ScrollText,
   Menu,
+  Users,
 } from "lucide-react";
 import { useState } from "react";
 import { LanguageToggle, useLocale } from "vecinita-frontend-ui";
 
-import { useAuth } from "@/auth/authContext";
+import { useAuth, useIsAdmin } from "@/auth/authContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -69,6 +70,7 @@ function ChromeControls() {
 
 function NavItems({ onClick }: { onClick?: () => void }) {
   const tr = useAdminT();
+  const isAdmin = useIsAdmin();
 
   const navItems = [
     {
@@ -84,7 +86,10 @@ function NavItems({ onClick }: { onClick?: () => void }) {
       label: tr("admin.nav.auditLog"),
       icon: ScrollText,
     },
-  ] as const;
+    ...(isAdmin
+      ? [{ to: "/users", label: tr("admin.nav.users"), icon: Users } as const]
+      : []),
+  ];
 
   return (
     <nav className="flex flex-col gap-1" data-testid="admin-nav">
