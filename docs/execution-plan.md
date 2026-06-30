@@ -9,14 +9,15 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 11: EV-005 — Supabase admin auth (F34) — **planned (04-tech-plan complete)** |
-| **Active milestone** | M47: Integration, privacy, OpenAPI & gate — **complete** |
-| **Active task** | Phase 11 gate check → **08-verify-build** |
-| **Tasks completed** | M47 T47.1–T47.6 completed (2026-06-29); M43–M46 on branch (uncommitted) |
+| **Active phase** | Phase 12: EV-006 — Admin user management + auth UX (F35) — **planned (04-tech-plan complete)** |
+| **Active milestone** | M49: Shared Supabase Admin client + audit ingest + lockout guards — **in_progress** (M48 **completed** 2026-06-29) |
+| **Active task** | T49.1 — `supabase_admin` httpx client tests (red) |
+| **Tasks completed** | Phase 11 (S004/EV-005 F34) merged via PR #100; S005 00-context + 01-requirements + 04-tech-plan complete |
 | **Last updated** | 2026-06-29 |
-| **Evolve cycle** | EV-005 (F34) — **07-build in progress** |
-| **Git branch** | `feat/S004-supabase-auth` |
-| **Active session** | S004-supabase-auth (Phase 11, F34) — evolve-lite. 01-requirements + 04-tech-plan **complete** (ADR-026, ADR-027, TP-S004-01–12). Next: 07-build (M43–M47). Lite path skips 02/03/05/06/11 |
+| **Evolve cycle** | EV-006 (F35) — **07-build next** |
+| **Git branch** | `feat/S005-user-mgmt-auth` |
+| **Active session** | S005-user-mgmt-auth (Phase 12, F35) — evolve-lite. 01-requirements + 04-tech-plan **complete** (ADR-029, ADR-030, **ADR-031**, TP-S005-01–**24**). Next: **07-build** (M48–**M53**). Lite path skips 02/03/05/06/11 |
+| **Scope addition** | 2026-06-29 — user added idle timeout, log-out-everywhere (self+admin), deliverability test-send, audit viewer (ADR-031, **M53**, T53.1–T53.22). MFA + CSV import still deferred. |
 
 ## Template
 
@@ -984,6 +985,146 @@ full-suite + config validation.
 
 ---
 
+### Phase 12: EV-006 — Admin user management + auth UX (F35)
+
+**Objective**: Extend F34 admin auth with operator-facing user lifecycle management (invite/list/role/
+resend/disable/revoke/reset), remember-me login control, and production email via **Resend SMTP** +
+repo-versioned stacked-bilingual templates synced by `supabase config push`. Builds on ADR-029
+(product) and ADR-030 (implementation: DM Modal backend, httpx Admin API, audit ingest, lockout
+guards).
+**Entry gate**: S005 01-requirements complete (F35, ADR-029, RD-080–RD-090); 04-tech-plan approved
+(ADR-030, TP-S005-01–16). evolve-lite (02/03/05/06/11 skipped).
+**Exit gate**: AC-U1–AC-U9 met; TC-088–TC-095 green; UJ-030–UJ-033 covered; user-mgmt audit rows
+in corpus `audit_log` (no PII); Resend SMTP + templates synced on `main`; full backend +
+DM-frontend suites green; OpenAPI updated.
+
+**Session:** S005 (evolve-lite) | **Feature IDs:** F35 | **Branch:** `feat/S005-user-mgmt-auth` (TP-S005-14, off `main`)
+
+> Mechanism (TP-S005): `/admin/users*` on **DM Modal ASGI**; **httpx** GoTrue Admin REST;
+> `SUPABASE_SECRET_KEY` Modal-only; audit via **POST `/internal/v1/audit/event`**; remember-me via
+> `auth.storage` adapter; CLI pin **`>=2.70,<3`**; template paths per #5124.
+
+#### M48: Supabase Resend SMTP + versioned email templates + CI sync
+
+**Goal**: Enable custom SMTP (Resend) in `config.toml`; add six stacked-bilingual HTML templates;
+extend offline config contract + pin Supabase CLI; update secrets matrix.
+**Acceptance**: TC-094/TC-095 green; `check_supabase_config.sh` validates paths + SMTP contract;
+`supabase.yml` uses pinned CLI.
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|------------|-------------|
+| T48.1 | Test: `scripts/check_supabase_config.sh` asserts Resend SMTP enabled, `env(SUPABASE_SMTP_PASS)`, template `content_path` existence + #5124 convention (TC-094, TC-095) — red | Test | pending | test-plan TC-094/095, ADR-030 §8 | — | — | S005 | F35 |
+| T48.2 | Config: `supabase/config.toml` — Resend SMTP (`smtp.resend.com:465`), `[auth.rate_limit] email_sent=30`, `otp_expiry=3600`, `minimum_password_length=8`, template blocks | Config | pending | ADR-029/030, config-spec §EV-006, TP-S005-07/08/11 | T48.1 | — | S005 | F35 |
+| T48.3 | Config: `supabase/templates/*.html` — six stacked-bilingual templates (invite, recovery, confirmation, magic_link, email_change, notifications) | Config | pending | ADR-029 RD-086, TP-S005-10 | T48.2 | — | S005 | F35 |
+| T48.4 | Config: extend `scripts/check_supabase_config.sh` — path lint per TP-S005-08 | Config | pending | ADR-030 §8, TC-095 | T48.1 | — | S005 | F35 |
+| T48.5 | CI: pin Supabase CLI `>=2.70,<3` in `supabase.yml`; extend validate job template checks (TP-S005-09, RD-088) | Config | pending | ADR-027/030, dependency-inventory | T48.4 | — | S005 | F35 |
+| T48.6 | Docs: `staging-secrets-matrix.md` EV-006 — `SUPABASE_SMTP_PASS`, Modal `SUPABASE_SECRET_KEY`, Resend operator prerequisites + rotation (TP-S005-16) | Docs | pending | staging-secrets-matrix §EV-006, AC-U9 | T48.2 | — | S005 | F35 |
+
+#### M49: Shared Supabase Admin client + audit ingest + lockout guards
+
+**Goal**: Typed httpx GoTrue Admin client; service-to-service audit ingest on internal-write-api;
+last-admin + self-action guards.
+**Acceptance**: Admin client unit-tested (mocked httpx); audit ingest route accepts service key;
+lockout guards return 409.
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|------------|-------------|
+| T49.1 | Test: `vecinita_shared_schemas.supabase_admin` — invite/list/update/delete/generate_link (mocked httpx) — red | Test | pending | ADR-030 §2, api-contract §Admin user management | — | — | S005 | F35 |
+| T49.2 | Code: `vecinita_shared_schemas.supabase_admin` — httpx GoTrue Admin REST + Pydantic models | Code | pending | ADR-030 §2, TP-S005-02 | T49.1 | — | S005 | F35 |
+| T49.3 | Test: `POST /internal/v1/audit/event` — service API key only; writes `audit_log` row (TC-092 partial) — red | Test | pending | ADR-030 §3, RD-089 | — | D5 | S005 | F35 |
+| T49.4 | Code: audit ingest route on internal-write-api + `emit_audit_event` reuse | Code | pending | ADR-030 §3, ADR-007 | T49.3 | D5 | S005 | F35 |
+| T49.5 | Test: lockout guards — self-delete/disable/demote + last-admin → 409 — red | Test | pending | ADR-030 §4 | T49.2 | — | S005 | F35 |
+| T49.6 | Code: `UserAdminService` lockout guard helpers | Code | pending | ADR-030 §4, TP-S005-04 | T49.5 | — | S005 | F35 |
+
+#### M50: DM backend `/admin/users*` routes
+
+**Goal**: Mount admin user-management API on DM Modal ASGI; wire `SUPABASE_SECRET_KEY`; CORS +
+invite rate limit.
+**Acceptance**: TC-088/089 green (TestClient); CORS H0c for PATCH/DELETE; Modal secret documented.
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|------------|-------------|
+| T50.1 | Test (TestClient): `/admin/users*` — list, invite, role, resend, disable, enable, delete, reset; viewer → 403 (TC-088, TC-089) — red | Test | pending | test-plan TC-088/089, UJ-030 | T49.2, T49.6 | — | S005 | F35 |
+| T50.2 | Code: `/admin/users*` routes on DM backend; admin-only deps; audit emit via write API | Code | pending | api-contract §Admin user management, ADR-030 §1/3 | T50.1, T49.4 | — | S005 | F35 |
+| T50.3 | Config: Modal `SUPABASE_SECRET_KEY`; `infra/modal/` + deploy sync scripts | Config | pending | ADR-030 §1, staging-secrets-matrix | T50.2 | — | S005 | F35 |
+| T50.4 | Code+Test: CORS preflight PATCH/DELETE/POST on `/admin/users*` (TP-S005-15, cors-browser-methods.mdc) | Code | pending | test-plan, connectivity-gates | T50.2 | — | S005 | F35 |
+| T50.5 | Test: invite endpoint app-level rate limit (10/h per admin JWT) — red | Test | pending | ADR-030 §7, TP-S005-07 | T50.2 | — | S005 | F35 |
+| T50.6 | Code: sliding-window invite rate limiter on `POST /admin/users/invite` | Code | pending | ADR-030 §7 | T50.5 | — | S005 | F35 |
+
+#### M51: DM frontend — Users page + remember-me + password reset flows
+
+**Goal**: `/users` admin page; remember-me checkbox; forgot/reset/accept-invite routes.
+**Acceptance**: TC-091/093 Vitest green; viewer cannot access user mgmt UI (TC-089).
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|------------|-------------|
+| T51.1 | Test (Vitest): UsersPage — list users, invite form, action buttons (TC-088) — red | Test | pending | test-plan TC-088, UJ-030/031 | — | — | S005 | F35 |
+| T51.2 | Test (Vitest): viewer blocked from `/users` nav + API calls (TC-089) — red | Test | pending | test-plan TC-089 | — | — | S005 | F35 |
+| T51.3 | Code: `/users` route, sidebar nav, UsersPage (table + invite modal + actions) | Code | pending | ADR-029, user-journeys UJ-030/031 | T51.1, T50.2 | — | S005 | F35 |
+| T51.4 | Test (Vitest): remember-me routes session to localStorage vs sessionStorage (TC-091) — red | Test | pending | test-plan TC-091, UJ-032, RD-084 | — | — | S005 | F35 |
+| T51.5 | Code: remember-me checkbox; `createRoutingStorage`; `resetSupabaseClient` before sign-in (TP-S005-06) | Code | pending | ADR-029/030 §6 | T51.4 | — | S005 | F35 |
+| T51.6 | Test (Vitest): forgot-password + reset-password + accept-invite flows (TC-093) — red | Test | pending | test-plan TC-093, UJ-033, RD-083 | — | — | S005 | F35 |
+| T51.7 | Code: `/forgot-password`, `/reset-password`, `/accept-invite` routes + login link | Code | pending | ADR-030 §5, UJ-033 | T51.6 | — | S005 | F35 |
+
+#### M52: Integration, OpenAPI, privacy & gate
+
+**Goal**: E2E journeys, OpenAPI update, full-suite green, operator runbook.
+**Acceptance**: TC-088–TC-095 green; UJ-030–033 covered; AC-U1–AC-U9; OpenAPI `data-management.yaml` updated.
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|------------|-------------|
+| T52.1 | Test (e2e): `tests/e2e/test_uj030_user_management.py` (TC-088, TC-089, TC-092) | Test | pending | test-plan TC-088/089/092, UJ-030 | T50.2, T51.3 | — | S005 | F35 |
+| T52.2 | Test (e2e): `tests/e2e/test_uj031_invite_from_page.py` (TC-090) | Test | pending | test-plan TC-090, UJ-031 | T50.2, T51.3 | — | S005 | F35 |
+| T52.3 | Test: `tests/smoke/test_supabase_ci_contract.py` extended for TC-094/095 | Test | pending | test-plan TC-094/095 | T48.4 | — | S005 | F35 |
+| T52.4 | Config: OpenAPI `openapi/data-management.yaml` — `/admin/users*` paths + schemas | Config | pending | api-contract §Admin user management, ADR-011 | T50.2 | — | S005 | F35 |
+| T52.5 | Test: full backend pytest + DM Vitest green; AC-U1–AC-U9 checklist | Test | pending | acceptance-criteria AC-U1–U9 | T52.1–T52.4, T51.5, T51.7 | — | S005 | F35 |
+| T52.6 | Docs: operator runbook delta — Resend domain verify, invite/resend workflow, secret rotation | Docs | pending | staging-runbook, TP-S005-16 | T48.6 | — | S005 | F35 |
+
+#### M53: Auth UX hardening — idle timeout, log-out-everywhere, force sign-out, deliverability test-send, audit viewer
+
+**Goal**: The four scope additions (ADR-031, TP-S005-17–24). Builds on M48–M52.
+**Acceptance**: TC-096–TC-103 green; UJ-034–UJ-038 covered; AC-U10–AC-U16; OpenAPI updated for the two new routes + `q`.
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
+|---|------|------|--------|-------------|------------|-----------|------------|-------------|
+| T53.1 | Test (Vitest): idle timeout warns + signs out locally; activity resets (TC-096) — red | Test | pending | test-plan TC-096, UJ-034, ADR-031 §17 | — | — | S005 | F35 |
+| T53.2 | Code: `useIdleTimeout` + warning modal in always-mounted shell; `VITE_VECINITA_IDLE_TIMEOUT_MIN/_WARNING_SEC` | Code | pending | ADR-031 §17, frontend-session-state-lifting.mdc | T53.1 | — | S005 | F35 |
+| T53.3 | Test (Vitest): "log out of all devices" → global `signOut()`; standard logout → local (TC-097) — red | Test | pending | test-plan TC-097, UJ-035 | — | — | S005 | F35 |
+| T53.4 | Code: account-menu "Log out of all devices" action (global scope) | Code | pending | ADR-031 §18, UJ-035 | T53.3 | — | S005 | F35 |
+| T53.5 | Config: `admin_delete_user_sessions` RPC migration under `supabase/migrations/` + runbook one-time-apply note | Config | pending | ADR-031 §19, staging-secrets-matrix | — | — | S005 | F35 |
+| T53.6 | Test (TestClient): `POST /admin/users/{id}/signout` — admin 202 + `user.signed_out` audit; viewer 403; RPC-absent 503 (TC-098) — red | Test | pending | test-plan TC-098, UJ-036 | T49.2, T49.4 | — | S005 | F35 |
+| T53.7 | Code: force-signout route (RPC call via service key) + audit emit + lockout-guard parity | Code | pending | ADR-031 §19, api-contract | T53.6, T53.5 | — | S005 | F35 |
+| T53.8 | Test (Vitest): Users-page "Force sign-out" row action + 503 disable-fallback (TC-098) — red | Test | pending | test-plan TC-098, UJ-036 | — | — | S005 | F35 |
+| T53.9 | Code: Users-page "Force sign-out" action wired to endpoint | Code | pending | UJ-036, ADR-031 §19 | T53.8, T53.7 | — | S005 | F35 |
+| T53.10 | Test (TestClient): `POST /admin/email/test` — admin 202 + `message_id`; viewer 403; 429; 503 unconfigured; audit domain-only (TC-099) — red | Test | pending | test-plan TC-099, UJ-037 | T50.2 | — | S005 | F35 |
+| T53.11 | Code: test-send route via Resend REST (`RESEND_API_KEY`/`RESEND_SENDER_EMAIL`) + 5/h rate limit + audit | Code | pending | ADR-031 §22, api-contract | T53.10 | — | S005 | F35 |
+| T53.12 | Test (Vitest): "Send test email" UI → endpoint; success/`503` checklist link (TC-099) — red | Test | pending | test-plan TC-099, UJ-037 | — | — | S005 | F35 |
+| T53.13 | Code: "Send test email" UI control | Code | pending | UJ-037, ADR-031 §22 | T53.12, T53.11 | — | S005 | F35 |
+| T53.14 | Test (backend + Vitest): `GET /admin/users?q=` ≥3-char guard → GoTrue `filter`; pagination (TC-100) — red | Test | pending | test-plan TC-100, UJ-030, ADR-031 §20 | T49.2 | — | S005 | F35 |
+| T53.15 | Code: `q` param on `/admin/users` + search box + shared `PaginationControls` on Users page | Code | pending | ADR-031 §20, api-contract | T53.14, T50.2, T51.3 | — | S005 | F35 |
+| T53.16 | Test (Vitest): AuditPage `entity_type` "Users" filter + `user.*`/`email.*` labels + per-user link (TC-101) — red | Test | pending | test-plan TC-101, UJ-038, ADR-031 §21 | — | — | S005 | F35 |
+| T53.17 | Code: AuditPage entity-type filter + i18n labels (EN/ES) + Users-row "View activity" link; ensure events emit `entity_type="user"` | Code | pending | ADR-031 §21, F29 AuditPage | T53.16, T50.2 | — | S005 | F35 |
+| T53.18 | Test: privacy — idle/remember/log-out-everywhere send nothing extra to server (TC-102); CORS+audit parity for new routes (TC-103) — red | Test | pending | test-plan TC-102/103, ADR-026 | T53.7, T53.11 | — | S005 | F35 |
+| T53.19 | Code+Test: CORS preflight POST on `/admin/users/{id}/signout` + `/admin/email/test` (cors-browser-methods.mdc) | Code | pending | test-plan TC-103, connectivity-gates | T53.7, T53.11 | — | S005 | F35 |
+| T53.20 | Test (e2e): `tests/e2e/test_uj036_force_signout.py`, `tests/e2e/test_uj037_email_test_send.py` | Test | pending | test-plan TC-098/099 | T53.7, T53.11 | — | S005 | F35 |
+| T53.21 | Config: OpenAPI `openapi/data-management.yaml` — `/signout`, `/admin/email/test`, `q` param | Config | pending | api-contract, ADR-011 | T53.7, T53.11, T53.15 | — | S005 | F35 |
+| T53.22 | Docs: staging runbook — SPF/DKIM/DMARC checklist, force-signout RPC apply, test-send workflow; AC-U10–U16 checklist | Docs | pending | staging-runbook, TP-S005-23, ADR-031 | T53.5 | — | S005 | F35 |
+
+#### Phase 12 Gate Check
+
+- [ ] All M48–M53 tasks completed (T48.1–T53.22)
+- [ ] TC-088–TC-103 green; UJ-030–UJ-038 covered
+- [ ] AC-U1–AC-U16 satisfied (live Resend delivery + test-send verified at 13-deploy-smoke)
+- [ ] User-mgmt audit rows in corpus `audit_log` with UUID `actor_id` only, `entity_type="user"` (TC-092, TC-101)
+- [ ] `SUPABASE_SECRET_KEY` + `RESEND_API_KEY`/`RESEND_SENDER_EMAIL` on Modal DM only; never in browser or internal-write-api
+- [ ] Resend SMTP + templates synced via `supabase config push` on `main`; SPF/DKIM/DMARC documented
+- [ ] CORS preflight covers PATCH/DELETE/POST on `/admin/users*`, `/admin/users/{id}/signout`, `/admin/email/test`
+- [ ] Idle timeout / remember-me / log-out-everywhere send nothing extra to the server (TC-102)
+- [ ] `admin_delete_user_sessions` RPC apply documented; `503` fallback path covered (TC-098)
+- [ ] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -1091,13 +1232,18 @@ main
 | PR-44 | Minor | M38 | feat/M38-ev004-deploy | fix/es-en-full-ui | pending |
 | PR-45 | Major | Phase 9 / EV-004 | fix/es-en-full-ui | main | pending |
 | PR-46 | Major | Phase 10 / S003 | feat/S003-persistent-chat-history | main | open ([#96](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/96)) |
-| PR-47 | Major | Phase 11 / S004 (EV-005) | feat/S004-supabase-auth | main | pending ([#75](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/75)) |
+| PR-47 | Major | Phase 11 / S004 (EV-005) | feat/S004-supabase-auth | main | merged ([#100](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/100)) |
+| PR-48 | Major | Phase 12 / S005 (EV-006) | feat/S005-user-mgmt-auth | main | pending ([#75](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/75)) |
 
 S003 is evolve-lite + frontend-only: M39–M42 land as atomic commits on the single
 `feat/S003-persistent-chat-history` branch (one PR to `main`, PR-46), matching the S002 pattern.
 
 S004 (EV-005) is evolve-lite: M43–M47 land as atomic commits on the single
 `feat/S004-supabase-auth` branch (one PR to `main`, PR-47), matching the S002/S003 pattern.
+
+S005 (EV-006) is evolve-lite: M48–M53 land as atomic commits on the single
+`feat/S005-user-mgmt-auth` branch (one PR to `main`, PR-48), matching the S002/S003/S004 pattern.
+M53 (auth UX hardening, ADR-031) was appended after the user extended scope on 2026-06-29.
 
 ## Task Tracking
 
@@ -1370,6 +1516,59 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T47.4 | M47 | 11 | Test | completed | T45.6 | — | S004 | F34 |
 | T47.5 | M47 | 11 | Config | completed | T45.2 | — | S004 | F34 |
 | T47.6 | M47 | 11 | Test | completed | T47.1, T47.2, T47.3, T47.4, T47.5, T46.5 | — | S004 | F34 |
+| T48.1 | M48 | 12 | Test | completed | — | — | S005 | F35 |
+| T48.2 | M48 | 12 | Config | completed | T48.1 | — | S005 | F35 |
+| T48.3 | M48 | 12 | Config | completed | T48.2 | — | S005 | F35 |
+| T48.4 | M48 | 12 | Config | completed | T48.1 | — | S005 | F35 |
+| T48.5 | M48 | 12 | Config | completed | T48.4 | — | S005 | F35 |
+| T48.6 | M48 | 12 | Docs | completed | T48.2 | — | S005 | F35 |
+| T49.1 | M49 | 12 | Test | pending | — | — | S005 | F35 |
+| T49.2 | M49 | 12 | Code | pending | T49.1 | — | S005 | F35 |
+| T49.3 | M49 | 12 | Test | pending | — | D5 | S005 | F35 |
+| T49.4 | M49 | 12 | Code | pending | T49.3 | D5 | S005 | F35 |
+| T49.5 | M49 | 12 | Test | pending | T49.2 | — | S005 | F35 |
+| T49.6 | M49 | 12 | Code | pending | T49.5 | — | S005 | F35 |
+| T50.1 | M50 | 12 | Test | pending | T49.2, T49.6 | — | S005 | F35 |
+| T50.2 | M50 | 12 | Code | pending | T50.1, T49.4 | — | S005 | F35 |
+| T50.3 | M50 | 12 | Config | pending | T50.2 | — | S005 | F35 |
+| T50.4 | M50 | 12 | Code | pending | T50.2 | — | S005 | F35 |
+| T50.5 | M50 | 12 | Test | pending | T50.2 | — | S005 | F35 |
+| T50.6 | M50 | 12 | Code | pending | T50.5 | — | S005 | F35 |
+| T51.1 | M51 | 12 | Test | pending | — | — | S005 | F35 |
+| T51.2 | M51 | 12 | Test | pending | — | — | S005 | F35 |
+| T51.3 | M51 | 12 | Code | pending | T51.1, T50.2 | — | S005 | F35 |
+| T51.4 | M51 | 12 | Test | pending | — | — | S005 | F35 |
+| T51.5 | M51 | 12 | Code | pending | T51.4 | — | S005 | F35 |
+| T51.6 | M51 | 12 | Test | pending | — | — | S005 | F35 |
+| T51.7 | M51 | 12 | Code | pending | T51.6 | — | S005 | F35 |
+| T52.1 | M52 | 12 | Test | pending | T50.2, T51.3 | — | S005 | F35 |
+| T52.2 | M52 | 12 | Test | pending | T50.2, T51.3 | — | S005 | F35 |
+| T52.3 | M52 | 12 | Test | pending | T48.4 | — | S005 | F35 |
+| T52.4 | M52 | 12 | Config | pending | T50.2 | — | S005 | F35 |
+| T52.5 | M52 | 12 | Test | pending | T52.1–T52.4, T51.5, T51.7 | — | S005 | F35 |
+| T52.6 | M52 | 12 | Docs | pending | T48.6 | — | S005 | F35 |
+| T53.1 | M53 | 12 | Test | pending | — | — | S005 | F35 |
+| T53.2 | M53 | 12 | Code | pending | T53.1 | — | S005 | F35 |
+| T53.3 | M53 | 12 | Test | pending | — | — | S005 | F35 |
+| T53.4 | M53 | 12 | Code | pending | T53.3 | — | S005 | F35 |
+| T53.5 | M53 | 12 | Config | pending | — | — | S005 | F35 |
+| T53.6 | M53 | 12 | Test | pending | T49.2, T49.4 | — | S005 | F35 |
+| T53.7 | M53 | 12 | Code | pending | T53.6, T53.5 | — | S005 | F35 |
+| T53.8 | M53 | 12 | Test | pending | — | — | S005 | F35 |
+| T53.9 | M53 | 12 | Code | pending | T53.8, T53.7 | — | S005 | F35 |
+| T53.10 | M53 | 12 | Test | pending | T50.2 | — | S005 | F35 |
+| T53.11 | M53 | 12 | Code | pending | T53.10 | — | S005 | F35 |
+| T53.12 | M53 | 12 | Test | pending | — | — | S005 | F35 |
+| T53.13 | M53 | 12 | Code | pending | T53.12, T53.11 | — | S005 | F35 |
+| T53.14 | M53 | 12 | Test | pending | T49.2 | — | S005 | F35 |
+| T53.15 | M53 | 12 | Code | pending | T53.14, T50.2, T51.3 | — | S005 | F35 |
+| T53.16 | M53 | 12 | Test | pending | — | — | S005 | F35 |
+| T53.17 | M53 | 12 | Code | pending | T53.16, T50.2 | — | S005 | F35 |
+| T53.18 | M53 | 12 | Test | pending | T53.7, T53.11 | — | S005 | F35 |
+| T53.19 | M53 | 12 | Code | pending | T53.7, T53.11 | — | S005 | F35 |
+| T53.20 | M53 | 12 | Test | pending | T53.7, T53.11 | — | S005 | F35 |
+| T53.21 | M53 | 12 | Config | pending | T53.7, T53.11, T53.15 | — | S005 | F35 |
+| T53.22 | M53 | 12 | Docs | pending | T53.5 | — | S005 | F35 |
 
 ## Phase Gate Log
 
