@@ -227,6 +227,44 @@ paths:
           $ref: "#/components/responses/NotFound"
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
+  /admin/users/{user_id}/revoke-invite:
+    post:
+      operationId: revokeAdminUserInvite
+      summary: Retract a pending invitation (invited-only)
+      description: >
+        Deletes a pending operator identity that has not yet accepted the invite.
+        Emits audit event `user.invite_revoked`. Active or disabled users return 409.
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "202":
+          description: Invitation retracted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AcknowledgedResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Target is not a pending invitation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /admin/users/{user_id}/disable:
     post:
       operationId: disableAdminUser
