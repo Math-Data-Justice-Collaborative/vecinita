@@ -21,6 +21,25 @@ export interface CreateJobResponse {
   status: JobStatus;
 }
 
+export type UserRole = "admin" | "viewer";
+export type UserStatus = "active" | "invited" | "disabled";
+
+export interface UserSummary {
+  id: string;
+  email: string;
+  role: UserRole | null;
+  status: UserStatus;
+  created_at: string | null;
+  last_sign_in_at: string | null;
+}
+
+export interface UserListResponse {
+  users: UserSummary[];
+  total: number | null;
+  page: number;
+  page_size: number;
+}
+
 export interface DocumentSummary {
   document_id: string;
   url: string;

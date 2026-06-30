@@ -8,11 +8,23 @@ import { JobsPage } from "@/pages/JobsPage";
 import { HealthPage } from "@/pages/HealthPage";
 import { AuditPage } from "@/pages/AuditPage";
 import { LoginPage } from "@/pages/LoginPage";
+import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
+import { SetPasswordPage } from "@/pages/SetPasswordPage";
+import { UsersPage } from "@/pages/UsersPage";
 
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route
+        path="/reset-password"
+        element={<SetPasswordPage variant="reset" />}
+      />
+      <Route
+        path="/accept-invite"
+        element={<SetPasswordPage variant="invite" />}
+      />
       <Route
         element={
           <ProtectedRoute>
@@ -25,6 +37,7 @@ export default function App() {
         <Route path="/jobs" element={<JobsPage />} />
         <Route path="/health" element={<HealthPage />} />
         <Route path="/audit" element={<AuditPage />} />
+        <Route path="/users" element={<UsersPage />} />
       </Route>
       {/* Top-level splat: nested `path="*"` does not match unknown absolute paths (RR6). */}
       <Route

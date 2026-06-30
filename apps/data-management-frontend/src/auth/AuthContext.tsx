@@ -7,7 +7,12 @@ import {
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 
-import { getSupabaseClient, roleFromAppMetadata } from "@/auth/supabaseClient";
+import {
+  getSupabaseClient,
+  persistRememberPreference,
+  resetSupabaseClient,
+  roleFromAppMetadata,
+} from "@/auth/supabaseClient";
 import { AuthContext, type AuthState } from "@/auth/authContext";
 import { setOperatorAccessToken } from "@/config";
 
@@ -36,18 +41,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signIn = useCallback(async (email: string, password: string) => {
+  const signIn = useCallback(
+    async (email: string, password: string, remember = true) => {
+      persistRememberPreference(remember);
+      const supabase = resetSupabaseClient(remember);
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        throw error;
+      }
+    },
+    [],
+  );
+
+  const signOut = useCallback(async () => {
     const supabase = getSupabaseClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error } = await supabase.auth.signOut({ scope: "local" });
     if (error) {
       throw error;
     }
   }, []);
 
-  const signOut = useCallback(async () => {
+  const signOutAllDevices = useCallback(async () => {
     const supabase = getSupabaseClient();
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -65,8 +82,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       accessToken: session?.access_token ?? null,
       signIn,
       signOut,
+      signOutAllDevices,
     };
-  }, [session, loading, signIn, signOut]);
+  }, [session, loading, signIn, signOut, signOutAllDevices]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

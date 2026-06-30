@@ -27,6 +27,11 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 | [ADR-024](ADR-024-chat-history-persistence-design.md) | ChatRAG chat-history persistence design (`useConversationStore` + sessionStorage) | Superseded in part by ADR-025 | 04-tech-plan (S003) |
 | [ADR-025](ADR-025-chat-history-localstorage-persistence.md) | Chat history persists via `localStorage` (durable, cross-tab) | Accepted | 07-build (S003) |
 | [ADR-026](ADR-026-supabase-admin-auth.md) | Supabase Auth for admin surfaces (invite-only, admin+viewer); supersedes ADR-004 auth clause for admin | Accepted | 01-requirements (S004/EV-005) |
+| [ADR-027](ADR-027-supabase-auth-verification-and-env-sync.md) | Supabase Auth verification + env sync (CLI migrations, branching) | Accepted | 04-tech-plan (S004/EV-005) |
+| [ADR-028](ADR-028-supabase-jwt-es256-jwks.md) | ES256 JWT verification via JWKS | Accepted | 07-build (S004) |
+| [ADR-029](ADR-029-admin-user-management-and-auth-ux.md) | Admin user management, remember-me, Resend SMTP + repo templates (F35 product) | Accepted | 01-requirements (S005/EV-006) |
+| [ADR-030](ADR-030-ev006-user-mgmt-implementation.md) | EV-006 implementation — backend host, httpx Admin API, audit ingest, guards (F35 tech) | Accepted | 04-tech-plan (S005/EV-006) |
+| [ADR-031](ADR-031-ev006-auth-ux-hardening.md) | EV-006 auth UX hardening — idle timeout, log-out-everywhere, deliverability test-send, audit viewer (F35 scope addition, TP-S005-17–24) | Accepted | 04-tech-plan (S005/EV-006) |
 
 > **ADR-004 note:** ADR-026 supersedes the *no Supabase Auth / no identity* clause of ADR-004
 > **for admin surfaces only**. ADR-004's visitor zero-PII, stateless-chat, sovereignty, and cost

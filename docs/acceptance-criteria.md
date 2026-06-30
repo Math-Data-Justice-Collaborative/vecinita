@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-06-26 (S003 F33)
+> **Last updated**: 2026-06-29 (S005/EV-006 F35 — admin user management + auth UX; AC-U1–AC-U16)
 
 ## Per-feature criteria
 
@@ -89,6 +89,25 @@
 - [ ] **AC-A8**: ChatRAG API enforces strict CORS limited to the ChatRAG frontend origin (TC-082, H4); admin APIs allow `Authorization` in preflight (TC-082, H4). — pending 13-deploy-smoke
 - [ ] **AC-A9**: No request/response schema changes to existing ChatRAG or admin endpoints — only auth (header) + 401/403 added on admin routes (api-contract §Authentication). — spec confirmed
 - [ ] **AC-A10**: Supabase environments are kept in sync via **branching** with migrations in the repo; all Supabase secrets are delivered via Modal/DO env and never committed (RD-078, no-operator-spec-commits). — verify at 12/13
+
+### EV-006 — Admin user management + auth UX (F35)
+
+- [x] **AC-U1**: An `admin` can list operators and perform invite, change-role, resend-invite, disable/enable, revoke, and trigger-password-reset from the `/users` page; each maps to the Supabase Admin API (UJ-030, TC-088). — verified: `tests/integration/test_user_admin_routes.py`, `tests/e2e/test_uj030_user_management.py`, Vitest `test_users_page.test.tsx`
+- [x] **AC-U2**: A `viewer` receives `403` on every `/admin/users*` write and the `/users` nav item + controls are hidden/disabled in the UI (UJ-030, TC-089). — verified: integration + e2e + `test_users_viewer_blocked.test.tsx`
+- [x] **AC-U3**: Inviting from the page creates an `invited` identity with the assigned role and sends the repo-versioned invite email via Resend; public self-signup remains disabled (UJ-031, TC-090). — verified: `tests/e2e/test_uj031_invite_from_page.py`, `test_uj027_invite_only_registration.py`
+- [x] **AC-U4**: "Remember me" is **checked by default**; checked → session in `localStorage` (survives restart), unchecked → `sessionStorage` (cleared on close); preference persisted in `vecinita.auth.remember`; logout clears the active storage (UJ-032, TC-091). — verified: `test_remember_me.test.tsx`
+- [x] **AC-U5**: Self-service "Forgot password?" triggers a Supabase recovery email (Resend) and an in-app reset page completes the change; the response does not disclose whether an email is registered (UJ-033, TC-093). — verified: `test_password_reset.test.tsx`
+- [x] **AC-U6**: User-management actions (invite/role-change/disable/delete/reset) are recorded in `audit_log` with `actor_id` (UUID) + `actor_role`; operator email/role/status are never written to the corpus DB (UJ-030, TC-092). — verified: `tests/e2e/test_uj030_user_management.py`, `test_uj031_invite_from_page.py`
+- [x] **AC-U7**: Six auth email templates (invite, recovery, confirmation, magic_link, email_change, security notifications) are versioned under `supabase/templates/` as **stacked-bilingual** HTML and referenced by `content_path`; the offline Supabase config contract passes (TC-094). — verified: `tests/smoke/test_supabase_ci_contract.py`
+- [x] **AC-U8**: `[auth.email.smtp]` is configured for Resend in `config.toml` with `pass = env(SUPABASE_SMTP_PASS)`; `supabase config push` is the single source of truth; template paths follow the #5124 root/`supabase/` convention; the Supabase CLI is pinned in `supabase.yml` (TC-094, TC-095). — verified: `tests/smoke/test_supabase_ci_contract.py`, `scripts/check_supabase_config.sh`
+- [ ] **AC-U9**: A verified Resend sending domain + sender address and `SUPABASE_SMTP_PASS` are documented operator prerequisites in `staging-secrets-matrix.md`; no secret value is committed (RD-090, no-operator-spec-commits). — verify at 12/13
+- [ ] **AC-U10**: After `VITE_VECINITA_IDLE_TIMEOUT_MIN` of inactivity the SPA shows a warning then signs out the current device (`signOut({scope:"local"})`) and redirects to login; tracked activity resets the timer; timer lives in the always-mounted shell (UJ-034, TC-096). — pending build
+- [ ] **AC-U11**: "Log out of all devices" calls global `signOut()` (revokes all refresh tokens) while ordinary logout uses `{scope:"local"}` (UJ-035, TC-097). — pending build
+- [ ] **AC-U12**: `POST /admin/users/{id}/signout` is admin-only, revokes the target's sessions via the `admin_delete_user_sessions` RPC, emits `user.signed_out` (no PII), and returns `503 mechanism_unavailable` with a disable fallback when the RPC is absent (UJ-036, TC-098). — pending build
+- [ ] **AC-U13**: `POST /admin/email/test` sends via Resend REST from `RESEND_SENDER_EMAIL`, is admin-only, rate-limited 5/h/admin (`429`), returns `503 email_unconfigured` when unset, and audits recipient **domain** only (UJ-037, TC-099). — pending build
+- [ ] **AC-U14**: `GET /admin/users` accepts `q` (≥3 chars → GoTrue `filter`, else `400 invalid_search`) with `page`/`page_size`; the `/users` page renders search + shared `PaginationControls` (UJ-030, TC-100). — pending build
+- [ ] **AC-U15**: User-management events appear on the admin Audit page with `entity_type="user"`, friendly EN/ES labels, an entity-type "Users" filter, and a per-user "View activity" link; payloads contain no email/name (UJ-038, TC-101). — pending build
+- [ ] **AC-U16**: Idle timeout, remember-me, and "log out everywhere" send nothing extra to the server beyond Supabase auth calls; identity residency (ADR-026) preserved (TC-102). — pending build
 
 ## Quantitative benchmarks
 

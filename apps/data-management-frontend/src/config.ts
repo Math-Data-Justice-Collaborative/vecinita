@@ -8,6 +8,21 @@ export const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 export const supabasePublishableKey = import.meta.env
   .VITE_SUPABASE_PUBLISHABLE_KEY;
 
+function parsePositiveInt(raw: string | undefined, fallback: number): number {
+  const parsed = Number(raw ?? fallback);
+  return Number.isFinite(parsed) && parsed >= 1 ? Math.floor(parsed) : fallback;
+}
+
+/** Idle auto-logout minutes (UJ-034, TP-S005-17). */
+export function idleTimeoutMinutes(): number {
+  return parsePositiveInt(import.meta.env.VITE_VECINITA_IDLE_TIMEOUT_MIN, 30);
+}
+
+/** Idle warning countdown seconds before local sign-out (TP-S005-17). */
+export function idleWarningSeconds(): number {
+  return parsePositiveInt(import.meta.env.VITE_VECINITA_IDLE_WARNING_SEC, 60);
+}
+
 let operatorAccessToken: string | null = null;
 
 /** Set by AuthProvider when the Supabase session changes (F34). */

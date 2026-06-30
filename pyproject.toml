@@ -11,12 +11,12 @@ dev = [
     "modal>=1.2.6,<2",
     "httpx>=0.27,<1",
     "httpx2>=2.5.0",
-    "pip-audit>=2.7",
-    "basedpyright>=1.39.6",
-    "pytest-asyncio>=0.24",
+    "pip-audit>=2.10.1",
+    "basedpyright>=1.39.9",
+    "pytest-asyncio>=1.4.0",
     "pytest-cov>=6.0",
-    "pytest>=8.3",
-    "ruff>=0.8",
+    "pytest>=9.1.1",
+    "ruff>=0.15.20",
     "vecinita-chat-rag-backend",
     "vecinita-data-management-backend",
     "vecinita-database",
@@ -87,6 +87,9 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 # pytest's design is built on bare `assert`; rewriting asserts defeats the framework.
 "tests/**" = ["S101"]
+"tests/unit/data_management/test_email_test.py" = ["D103"]
+"tests/unit/data_management/test_user_admin_routes.py" = ["D103"]
+"tests/unit/shared_schemas/test_data_management_validators.py" = ["D103"]
 # Pydantic v2 evaluates field annotations at runtime, so datetime/UUID/JsonObject must be
 # real imports — flake8-type-checking (TC001/2/3) would wrongly move them into a
 # TYPE_CHECKING block and break model construction. Scoped to the schema package only.
@@ -96,6 +99,11 @@ ignore = [
 # closure referenced inside `Annotated[..., Depends(local_fn)]`, so the `= Depends(...)`
 # default form is required and FAST002 (prefer-Annotated) cannot apply here.
 "apps/data-management-backend/vecinita_data_management_backend/app.py" = ["FAST002"]
+# Same closure-dependency constraint applies to the /admin/users* route module, whose
+# handlers depend on the write_auth_dep closure passed in from create_app (EV-006 F35).
+"apps/data-management-backend/vecinita_data_management_backend/user_admin_routes.py" = [
+    "FAST002",
+]
 # infra/modal: Modal app glue around GPU/ML libraries. Modal requires imports inside
 # function/enter scope (PLC0415), vLLM/NCCL teardown must swallow errors before container
 # exit (BLE001/S110, BUG-2026-05-20), asgi_app/method return types come from frameworks

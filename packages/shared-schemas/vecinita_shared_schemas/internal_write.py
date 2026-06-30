@@ -136,6 +136,28 @@ class AuditCleanupResponse(BaseModel):
     retention_days: int
 
 
+class AuditEventRequest(BaseModel):
+    """Service-to-service audit ingest body (EV-006 F35, ADR-030 §3).
+
+    Payload must never contain PII (no email/full name) — actor is an opaque Supabase UUID.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    event_type: str
+    entity_type: str
+    entity_id: UUID
+    payload: JsonObject = Field(default_factory=dict)
+    actor_id: UUID | None = None
+    actor_role: str | None = None
+
+
+class AuditEventResponse(BaseModel):
+    """Acknowledged audit ingest response."""
+
+    acknowledged: bool = True
+
+
 class DocumentVersionEntry(BaseModel):
     """Single version snapshot for GET /internal/v1/documents/{id}/history."""
 

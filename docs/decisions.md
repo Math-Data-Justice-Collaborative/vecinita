@@ -266,6 +266,85 @@ Unresolved (for 04-tech-plan) — **all resolved 2026-06-28, see §EV-005 04-tec
 - ~~Grant Supabase MCP access to `cfuvghdsuwactfeamtym` (R53)~~ → **unblocked**: env-sync via **Supabase CLI + migrations-in-repo**, MCP-independent; MCP access optional (TP-S004-07, ADR-027).
 - ~~First-admin bootstrap~~ → **idempotent seed script** using `SUPABASE_SECRET_KEY`, sets `app_metadata.role=admin` (TP-S004-10, ADR-027).
 
+## EV-006 resolutions (2026-06-29) — F35 admin user management + auth UX (#75)
+
+Context decisions R55–R59 set in 00-context (session-brief S005): R55 Resend SMTP; R56 user-mgmt
+ops; R57 versioned templates; R58 remember-me toggle; R59 evolve-lite routing. The 01-requirements
+interview (2026-06-29) resolved the remaining product gaps and one surfaced **[Contradiction]**
+(Dashboard SMTP vs. versioned+CI-synced templates) and one **[Ambiguity]** (bilingual emails with
+one template per type):
+
+| ID | Topic | Decision | ADR | Source |
+|----|-------|----------|-----|--------|
+| RD-080 | User-mgmt API surface | New **admin-only `/admin/users*`** endpoints wrap the Supabase **Admin API**; `SUPABASE_SECRET_KEY` server-side only, never in the browser; `admin` required (`viewer` → `403`) | ADR-029 | F35 interview Q `user_ops` + research |
+| RD-081 | User-mgmt operations | **invite, list, change role, resend invite, disable/enable, revoke (delete)** | ADR-029 | F35 interview Q `user_ops` |
+| RD-082 | Admin password reset | Admins can **trigger a password reset** for any user from the User Management page (recovery email) | ADR-029 | F35 interview Q `user_ops` (`admin_reset`) |
+| RD-083 | Self-service reset | Login screen gains **"Forgot password?"** → recovery email → **in-app reset page** (`updateUser`) | ADR-029 | F35 interview Q `password_reset_ui` (`yes_link`) |
+| RD-084 | Remember-me | **Default checked** → `localStorage` (persist across restart); unchecked → `sessionStorage`; preference in `localStorage` key **`vecinita.auth.remember`**; storage adapter chosen before `createClient` (no native supabase-js flag) | ADR-029 | F35 interview Q `remember_default` + research (auth-elements #7) |
+| RD-085 | SMTP sourcing **[Contradiction resolved]** | **Hybrid** — Resend provisions API key + verified domain, but SMTP is encoded in `config.toml` (`pass = env(SUPABASE_SMTP_PASS)`) so **`config push` is the single source of truth**; `smtp.resend.com:465`, user `resend` | ADR-029 | F35 interview Q `smtp_resolution` (`hybrid`) |
+| RD-086 | Templates + language **[Ambiguity resolved]** | Version **6 templates** (invite, recovery, confirmation, magic_link, email_change, security notifications) under `supabase/templates/`; **stacked bilingual** (EN section + ES section) since Supabase serves one template per type with no locale switching | ADR-029 | F35 interview Q `templates_set` + `bilingual_approach` (`stacked`) |
+| RD-087 | CI/CD sync | Extend **`.github/workflows/supabase.yml`**: `validate` lints template paths offline; `sync-production` runs `supabase config push` (template HTML per CLI #5686). Mind path-resolution gotcha #5124 (`template.*` from root, `notification.*` from `supabase/`) | ADR-029 | F35 interview + research (#5686, #5124) |
+| RD-088 | CLI pin | **Pin the Supabase CLI version** in `supabase.yml` so template-HTML push (#5686) is guaranteed | ADR-029 | F35 interview Q `forgetting` (`cli_pin`) |
+| RD-089 | Audit of user-mgmt | invite/role-change/disable/delete/reset recorded in `audit_log` with `actor_id` (UUID) + `actor_role` — no PII (extends ADR-016) | ADR-029, ADR-016 | F35 interview Q `forgetting` (`audit`) |
+| RD-090 | Sender identity | Operator supplies a **verified Resend sending domain + sender address**; captured as an operator prerequisite/secret in `staging-secrets-matrix.md` | ADR-029 | F35 interview Q `sender_identity` (`have_domain`) |
+
+EV-006 artifacts: feature-list F35; user-journeys UJ-030–UJ-033; test-plan TC-088–TC-095;
+acceptance-criteria AC-U1–AC-U9; ADR-029; config-spec §Admin user management + email; api-contract
+§Admin user management; staging-secrets-matrix §EV-006.
+
+### EV-006 04-tech-plan decisions (2026-06-29) — TP-S005-01–16
+
+Interview skipped; **recommended defaults applied** per research + ADR-029 alignment.
+
+| ID | Topic | Decision | ADR | Source |
+|----|-------|----------|-----|--------|
+| TP-S005-01 | Backend host | `/admin/users*` on **DM Modal ASGI**; `SUPABASE_SECRET_KEY` in Modal secrets only | ADR-030 | 04-tech-plan research (least-privilege vs ADR-007) |
+| TP-S005-02 | Admin API client | **httpx** GoTrue Admin REST + `vecinita_shared_schemas.supabase_admin` | ADR-030 | vs supabase-py (ADR-018 typing) |
+| TP-S005-03 | Audit wiring | **POST `/internal/v1/audit/event`** on internal-write-api (service API key) | ADR-030 | ADR-007 write boundary + RD-089 |
+| TP-S005-04 | Lockout guards | Block self-delete/disable/demote + last-admin mutations → `409` | ADR-030 | operator safety |
+| TP-S005-05 | Invite accept UX | **`/accept-invite`** + **`/reset-password`** + **`/forgot-password`** routes | ADR-030 | UJ-031/033 |
+| TP-S005-06 | Remember-me behavior | Read checkbox at login; `resetSupabaseClient()` before `signIn`; no mid-session migration v1 | ADR-030 | supabase-js `auth.storage` |
+| TP-S005-07 | Email limits | `email_sent=30/h`, `otp_expiry=3600`, `max_frequency=60s`; app invite limit 10/h/admin | ADR-030 | config.toml single `otp_expiry` knob |
+| TP-S005-08 | Template paths | `supabase/templates/*.html` (template.*) vs `templates/*.html` (notification.*) per #5124 | ADR-030 | CLI path gotcha |
+| TP-S005-09 | CLI pin | **`>=2.70,<3`** in `supabase.yml` (#5686 template HTML push) | ADR-030 | RD-088 resolved |
+| TP-S005-10 | Resend + templates | Operator prerequisite; text-forward stacked-bilingual HTML v1 | ADR-030 | RD-090 |
+| TP-S005-11 | Password policy | `minimum_password_length = 8` in `config.toml` | ADR-030 | security baseline |
+| TP-S005-12 | MFA | **Deferred** (out of scope EV-006) | ADR-029 | scope boundary |
+| TP-S005-13 | Local email E2E | Mailpit smoke in `supabase.yml` validate when templates change | ADR-030 | local dev confidence |
+| TP-S005-14 | Git | Single branch `feat/S005-user-mgmt-auth`; PR-48 to `main` | ADR-030 | evolve-lite pattern |
+| TP-S005-15 | CORS | H0c tests for PATCH/DELETE/POST on `/admin/users*` | ADR-030 | cors-browser-methods.mdc |
+| TP-S005-16 | Secret rotation | Runbook for `SUPABASE_SECRET_KEY` + `SUPABASE_SMTP_PASS` rotation | ADR-030 | operator ops |
+
+EV-006 tech-plan artifacts: ADR-030; execution-plan Phase 12 (M48–M52); dependency-inventory CLI pin;
+config-spec rate limits + paths resolved; staging-secrets-matrix Modal `SUPABASE_SECRET_KEY` placement.
+Unresolved (for 04-tech-plan):
+
+- Which backend hosts `/admin/users*` (DM Modal ASGI vs internal-write DO) and least-privilege
+  placement/scope of `SUPABASE_SECRET_KEY` in a running service.
+- Exact `content_path` strings (root vs `supabase/` per #5124) and the pinned Supabase CLI version.
+- `@supabase/supabase-js` storage-adapter implementation pattern for remember-me re-init on toggle.
+- Supabase email **rate-limit** (`auth.rate_limit.email_sent`) and **invite link expiry** values.
+
+### EV-006 04-tech-plan scope addition (2026-06-29) — TP-S005-17–24 (auth UX hardening)
+
+User reviewed the F35 tech plan and **added four items** (interview 2026-06-29); MFA/2FA and bulk CSV
+import remain deferred. Decisions in **ADR-031**.
+
+| ID | Topic | Decision | Source | Notes |
+|----|-------|----------|--------|-------|
+| TP-S005-17 | Idle timeout | Client-side inactivity timer **30 min** + **60s** warning modal → `signOut({scope:"local"})`; in always-mounted shell; `VITE_VECINITA_IDLE_TIMEOUT_MIN`/`_WARNING_SEC` | ADR-031 | interview `idle_timeout` (30_warn) |
+| TP-S005-18 | Log out all devices (self) | Account action → global `signOut()`; ordinary logout `{scope:"local"}` | ADR-031 | interview `logout_everywhere` (self_plus_admin) |
+| TP-S005-19 | Admin force-logout | `POST /admin/users/{id}/signout` → `admin_delete_user_sessions` RPC (one-time operator apply); `503` fallback → disable; access token valid ≤ exp | ADR-031 | interview `logout_everywhere` (self_plus_admin) |
+| TP-S005-20 | User search + pagination | `q` (≥3 chars → GoTrue `filter`, else `400`) + `page`/`page_size` + shared `PaginationControls` | ADR-031 | interview `search_pagination` (server_filter); PR #1741 |
+| TP-S005-21 | Audit viewer | Reuse F29 AuditPage + `GET /internal/v1/audit`; add `entity_type` "Users" filter, `user.*`/`email.*` i18n labels, per-user "View activity" link; events emit `entity_type="user"` | ADR-031 | interview `audit_viewer` (enhance_existing) |
+| TP-S005-22 | Deliverability test-send | `POST /admin/email/test` via **Resend REST** (`RESEND_API_KEY`/`RESEND_SENDER_EMAIL`); 5/h/admin; audit domain-only; `503 email_unconfigured` | ADR-031 | interview `test_send` (resend_rest) |
+| TP-S005-23 | SPF/DKIM/DMARC | Operator DNS checklist in staging runbook + secrets matrix; verified via test-send | ADR-031 | interview `test_send` (resend_rest) |
+| TP-S005-24 | Config + secrets | `VITE_VECINITA_IDLE_TIMEOUT_MIN/_WARNING_SEC`; `RESEND_API_KEY`/`RESEND_SENDER_EMAIL` on Modal DM; test-send rate limit | ADR-031 | derived |
+
+Scope-addition artifacts: ADR-031; execution-plan Phase 12 **M53**; api-contract `q`/`/signout`/`/admin/email/test`;
+config-spec idle/test-send/search rows; user-journeys UJ-034–UJ-038; test-plan TC-096–TC-103;
+acceptance-criteria AC-U10–AC-U16; staging-secrets-matrix `RESEND_API_KEY`/`RESEND_SENDER_EMAIL`.
+
 ## EV-005 04-tech-plan decisions (2026-06-28) — F34 Supabase admin auth (#75)
 
 > **Stage**: 04-tech-plan (S004, evolve-lite) | **Session**: S004-supabase-auth | **ADR**: ADR-027

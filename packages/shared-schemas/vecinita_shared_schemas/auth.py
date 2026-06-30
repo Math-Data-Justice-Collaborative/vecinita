@@ -100,6 +100,12 @@ def reset_auth_config_for_tests() -> None:
     _default_config = None
 
 
+def set_auth_config_for_tests(config: AuthConfig) -> None:
+    """Install an explicit auth config (e.g. with an injected signing resolver) for tests."""
+    global _default_config  # noqa: PLW0603 — module-level config cache
+    _default_config = config
+
+
 def _extract_bearer(authorization: str | None) -> str | None:
     if not authorization or not authorization.startswith("Bearer "):
         return None
@@ -248,4 +254,13 @@ def require_authenticated(
         return ctx
     if ctx.principal is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
+    return ctx
+
+
+def require_service(
+    ctx: Annotated[AuthContext, Depends(resolve_operator_or_service)],
+) -> AuthContext:
+    """Service-to-service only: requires `VECINITA_INTERNAL_API_KEY`; operator JWTs are 403."""
+    if not ctx.is_service:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     return ctx

@@ -1,15 +1,20 @@
 # Implementation Verification
 
-> **Generated**: 2026-06-26 (S002 delta)  
-> **Session**: S002-admin-job-management
+> **Generated**: 2026-06-30  
+> **Session**: S005-user-mgmt-auth (EV-006 / F35)  
+> **Branch**: `feat/S005-user-mgmt-auth`
 
-## Status
+Full detail: [sessions/S005-user-mgmt-auth/reports/verify-impl.md](sessions/S005-user-mgmt-auth/reports/verify-impl.md)
 
-| Area | Result |
+## Summary
+
+| Area | Status |
 |------|--------|
-| F32 Job Management | Implemented; T0 PASS; T3 blocked (Modal 405) |
-| #88 ingest tag resilience | Implemented; T0 PASS |
-| QA | FAIL — typecheck on uncommitted bug test |
-| User sign-off | **PENDING** |
+| Feature F35 | Implemented + T0 tested |
+| QA | pass_with_advisories |
+| T0 E2E | **68/68 pass** (inline during 11-verify-impl) |
+| Admin Vitest | **312/312 pass** |
+| User signoff | **approved** (UJ-030–UJ-038 + F35) |
+| T3 live | NOT RUN — F35 not deployed to staging |
 
-Full report: [sessions/S002-admin-job-management/reports/verify-impl.md](sessions/S002-admin-job-management/reports/verify-impl.md)
+**Status**: 11-verify-impl **completed** 2026-06-30. Next: 12-verify-deploy.

@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Final
 
 import httpx
 from vecinita_shared_schemas.internal_write import (
+    AuditEventRequest,
     BatchUpsertRequest,
     BatchUpsertResponse,
     DocumentDetail,
@@ -92,3 +93,14 @@ class InternalWriteClient:
             msg = f"patch_document_tags failed: {response.status_code} {response.text}"
             raise InternalWriteClientError(msg)
         return TagPatchResponse.model_validate(response.json())
+
+    def post_audit_event(self, event: AuditEventRequest) -> None:
+        """Emit a PII-free audit event to the internal write API (ADR-030 §3)."""
+        response = self._client.post(
+            "/internal/v1/audit/event",
+            json=event.model_dump(mode="json"),
+            headers=self._headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"post_audit_event failed: {response.status_code} {response.text}"
+            raise InternalWriteClientError(msg)

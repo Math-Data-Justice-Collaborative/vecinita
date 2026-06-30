@@ -29,6 +29,9 @@ permissions:
 
 env:
   SUPABASE_PROJECT_REF: cfuvghdsuwactfeamtym
+  # Pinned Supabase CLI. Constraint per ADR-030 §8 (TP-S005-09): >=2.70,<3 guarantees email
+  # template HTML upload via `supabase config push` (CLI PR #5686, merged 2026-06-25).
+  SUPABASE_CLI_VERSION: "2.84.2"
 
 jobs:
   validate:
@@ -40,13 +43,25 @@ jobs:
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: ${{ env.SUPABASE_CLI_VERSION }}
 
       - name: Offline config contract
         run: bash scripts/check_supabase_config.sh
 
       - name: Start local Supabase stack
         run: supabase start
+
+      - name: Email template + Mailpit smoke (TP-S005-13)
+        run: |
+          set -euo pipefail
+          # Every templated HTML referenced by config.toml must be non-empty.
+          for f in supabase/templates/*.html; do
+            [[ -s "$f" ]] || { echo "empty template: $f" >&2; exit 1; }
+          done
+          # Mailpit (local mail sink on port 54324; config.toml [inbucket] section) must be
+          # reachable so template delivery can be smoke-tested locally before cloud push.
+          curl -fsS "http://127.0.0.1:54324/api/v1/messages" > /dev/null
+          echo "OK: email templates present; Mailpit reachable."
 
       - name: Lint and apply migrations locally (when present)
         run: |
@@ -94,7 +109,7 @@ jobs:
         if: steps.supabase_token.outputs.skip != 'true'
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: ${{ env.SUPABASE_CLI_VERSION }}
 
       - name: Create preview branch and apply repo state
         if: steps.supabase_token.outputs.skip != 'true'
@@ -131,7 +146,7 @@ jobs:
         if: steps.supabase_token.outputs.skip != 'true'
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: ${{ env.SUPABASE_CLI_VERSION }}
 
       - name: Push config and migrations to canonical project
         if: steps.supabase_token.outputs.skip != 'true'

@@ -1,10 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { type StringMessageKey } from "vecinita-frontend-i18n";
 import { useLocale } from "vecinita-frontend-ui";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -20,21 +29,42 @@ import {
 } from "@/api/admin";
 import { requireCorpusConfig } from "@/config";
 import { useAdminT } from "@/hooks/useAdminT";
+import { auditEventLabelKey } from "@/lib/auditEventLabel";
 import { formatLocaleDateTime } from "@/lib/formatLocaleDateTime";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
+type EntityTypeFilter = "all" | "user" | "document" | "email";
+
+const ENTITY_TYPE_FILTER_KEY: Record<
+  Exclude<EntityTypeFilter, "all">,
+  StringMessageKey
+> = {
+  user: "admin.audit.filters.entityTypeUsers",
+  document: "admin.audit.filters.entityTypeDocuments",
+  email: "admin.audit.filters.entityTypeEmail",
+};
+
 export function AuditPage() {
   const tr = useAdminT();
+  const [searchParams] = useSearchParams();
   const [data, setData] = useState<AuditPageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [eventTypeFilter, setEventTypeFilter] = useState("");
-  const [entityIdFilter, setEntityIdFilter] = useState("");
+  const [entityIdFilter, setEntityIdFilter] = useState(
+    () => searchParams.get("entity_id") ?? "",
+  );
+  const [entityTypeFilter, setEntityTypeFilter] =
+    useState<EntityTypeFilter>("all");
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   const load = useCallback(
     async (
-      params?: { event_type?: string; entity_id?: string },
+      params?: {
+        event_type?: string;
+        entity_id?: string;
+        entity_type?: string;
+      },
       isActive: () => boolean = () => true,
     ) => {
       setLoading(true);
@@ -58,16 +88,27 @@ export function AuditPage() {
 
   useEffect(() => {
     let active = true;
-    void load(undefined, () => active);
+    const entityId = searchParams.get("entity_id");
+    if (entityId) {
+      setEntityIdFilter(entityId);
+      void load({ entity_id: entityId }, () => active);
+    } else {
+      void load(undefined, () => active);
+    }
     return () => {
       active = false;
     };
-  }, [load]);
+  }, [load, searchParams]);
 
   const handleApplyFilters = () => {
-    const params: { event_type?: string; entity_id?: string } = {};
+    const params: {
+      event_type?: string;
+      entity_id?: string;
+      entity_type?: string;
+    } = {};
     if (eventTypeFilter.trim()) params.event_type = eventTypeFilter.trim();
     if (entityIdFilter.trim()) params.entity_id = entityIdFilter.trim();
+    if (entityTypeFilter !== "all") params.entity_type = entityTypeFilter;
     void load(params);
   };
 
@@ -110,7 +151,7 @@ export function AuditPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="audit-page">
       <div>
         <h2 className="text-3xl font-bold tracking-tight">
           {tr("admin.audit.title")}
@@ -126,6 +167,42 @@ export function AuditPage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap items-end gap-3">
+            <div className="space-y-1">
+              <label
+                className="text-sm font-medium"
+                htmlFor="filter-entity-type"
+              >
+                {tr("admin.audit.filters.entityTypeLabel")}
+              </label>
+              <Select
+                value={entityTypeFilter}
+                onValueChange={(value: string) => {
+                  setEntityTypeFilter(value as EntityTypeFilter);
+                }}
+              >
+                <SelectTrigger
+                  id="filter-entity-type"
+                  data-testid="filter-entity-type"
+                  className="w-48"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    {tr("admin.audit.filters.entityTypeAll")}
+                  </SelectItem>
+                  <SelectItem value="user">
+                    {tr("admin.audit.filters.entityTypeUsers")}
+                  </SelectItem>
+                  <SelectItem value="document">
+                    {tr("admin.audit.filters.entityTypeDocuments")}
+                  </SelectItem>
+                  <SelectItem value="email">
+                    {tr("admin.audit.filters.entityTypeEmail")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-1">
               <label
                 className="text-sm font-medium"
@@ -225,10 +302,20 @@ function AuditRow({
 }) {
   const tr = useAdminT();
   const { locale } = useLocale();
+  const labelKey = auditEventLabelKey(event.event_type);
+  const eventLabel = labelKey ? tr(labelKey) : event.event_type;
+  const entityLabel =
+    event.entity_type in ENTITY_TYPE_FILTER_KEY
+      ? tr(
+          ENTITY_TYPE_FILTER_KEY[
+            event.entity_type as keyof typeof ENTITY_TYPE_FILTER_KEY
+          ],
+        )
+      : event.entity_type;
 
   return (
     <>
-      <TableRow>
+      <TableRow data-testid="audit-row">
         <TableCell>
           <button
             type="button"
@@ -249,9 +336,11 @@ function AuditRow({
           </button>
         </TableCell>
         <TableCell>
-          <Badge variant="outline">{event.event_type}</Badge>
+          <Badge variant="outline" data-testid="audit-event-label">
+            {eventLabel}
+          </Badge>
         </TableCell>
-        <TableCell>{event.entity_type}</TableCell>
+        <TableCell>{entityLabel}</TableCell>
         <TableCell className="font-mono text-xs">{event.entity_id}</TableCell>
         <TableCell className="text-xs text-muted-foreground">
           {formatLocaleDateTime(locale, event.timestamp)}

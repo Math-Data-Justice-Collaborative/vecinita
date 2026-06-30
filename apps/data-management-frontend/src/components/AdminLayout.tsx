@@ -6,11 +6,12 @@ import {
   ListChecks,
   ScrollText,
   Menu,
+  Users,
 } from "lucide-react";
 import { useState } from "react";
 import { LanguageToggle, useLocale } from "vecinita-frontend-ui";
 
-import { useAuth } from "@/auth/authContext";
+import { useAuth, useIsAdmin } from "@/auth/authContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,12 +23,13 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { IdleTimeoutGuard } from "@/components/IdleTimeoutGuard";
 import { useAdminT } from "@/hooks/useAdminT";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 function UserMenu() {
   const tr = useAdminT();
-  const { user, signOut } = useAuth();
+  const { user, signOut, signOutAllDevices } = useAuth();
 
   if (!user?.email) {
     return null;
@@ -38,6 +40,17 @@ function UserMenu() {
       <p className="text-xs text-muted-foreground">
         {tr("admin.auth.currentUser", { email: user.email })}
       </p>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        data-testid="admin-sign-out-all-devices"
+        onClick={() => {
+          void signOutAllDevices();
+        }}
+      >
+        {tr("admin.auth.signOutAllDevices")}
+      </Button>
       <Button
         type="button"
         variant="outline"
@@ -69,6 +82,7 @@ function ChromeControls() {
 
 function NavItems({ onClick }: { onClick?: () => void }) {
   const tr = useAdminT();
+  const isAdmin = useIsAdmin();
 
   const navItems = [
     {
@@ -84,7 +98,10 @@ function NavItems({ onClick }: { onClick?: () => void }) {
       label: tr("admin.nav.auditLog"),
       icon: ScrollText,
     },
-  ] as const;
+    ...(isAdmin
+      ? [{ to: "/users", label: tr("admin.nav.users"), icon: Users } as const]
+      : []),
+  ];
 
   return (
     <nav className="flex flex-col gap-1" data-testid="admin-nav">
@@ -178,6 +195,7 @@ export function AdminLayout() {
 
   return (
     <div className="flex min-h-screen">
+      <IdleTimeoutGuard />
       <DesktopSidebar showChrome={isDesktop} />
       <div className="flex flex-1 flex-col">
         <MobileHeader showChrome={!isDesktop} />

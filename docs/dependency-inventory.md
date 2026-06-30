@@ -78,7 +78,7 @@
 | `@supabase/supabase-js` | Node (DM frontend) | `^2.108.2` | SPA auth session + login/invite-accept/logout flows | MIT | Admin frontend only (TP-S004-04) |
 | **PyJWT** | Python (`vecinita_shared_schemas.auth`) | `>=2.10,<3` | Verify Supabase JWT **ES256** via JWKS + `exp` + `aud`; read `app_metadata.role` | MIT | Requires **`cryptography`** for ES256 (ADR-028; supersedes ADR-027 HS256) |
 | **cryptography** | Python (`vecinita_shared_schemas.auth`) | `>=42,<45` | ES256 public-key verify for Supabase JWKS (ADR-028) | Apache-2.0 / BSD | Backend only; not needed on frontend |
-| **Supabase CLI** | dev/ops + CI | `>=2,<3` | Migrations-in-repo, branching, `supabase link`/`db push` | MIT | MCP-independent env sync (TP-S004-07); not a runtime dep |
+| **Supabase CLI** | dev/ops + CI | `>=2.70,<3` | Migrations, branching, `config push` + **template HTML upload** (#5686) | MIT | Pin guarantees RD-088/TP-S005-09; not a runtime dep |
 
 **Resolved in 04-tech-plan (ADR-027):** mechanism = **HS256 shared secret** (`SUPABASE_JWT_SECRET`),
 not JWKS; role source = **`app_metadata.role`** (not a `user_roles` table); shared verifier module
@@ -127,3 +127,9 @@ not JWKS; role source = **`app_metadata.role`** (not a `user_roles` table); shar
 - vLLM package pin at T9.2
 - License audit before copying sibling code (`audit-licenses` skill)
 - ~~**EV-005 F34:** `@supabase/supabase-js` pin; Python JWT-verify library + pin; JWKS vs shared-secret; role-claim source~~ — **resolved 04-tech-plan + 07-build (ADR-027/028):** `@supabase/supabase-js ^2.108.2`; PyJWT `>=2.10,<3` + `cryptography`; **ES256/JWKS**; `app_metadata.role`
+- **EV-006 F35 scope addition (ADR-031, TP-S005-17–24): no new dependencies.** Resend REST test-send
+  uses the existing **`httpx`** client (Bearer `RESEND_API_KEY`); idle timeout, "log out everywhere",
+  and remember-me use the already-pinned **`@supabase/supabase-js ^2.108.2`** (`signOut` scopes +
+  storage adapter); user-search `filter` is a query param on the existing GoTrue Admin REST call. The
+  `admin_delete_user_sessions` RPC (force sign-out) is committed SQL under `supabase/migrations/`, not
+  a package.

@@ -40,24 +40,61 @@ enable_refresh_token_rotation = true
 refresh_token_reuse_interval = 10
 enable_signup = false
 enable_anonymous_sign_ins = false
+# Minimum operator password length (TP-S005-11, EV-006 F35).
+minimum_password_length = 8
 
 [auth.email]
 enable_signup = false
 double_confirm_changes = true
 enable_confirmations = true
 secure_password_change = true
-max_frequency = "1s"
+# Per-user resend cooldown between auth emails (TP-S005-07).
+max_frequency = "60s"
+# OTP / recovery / invite-acceptance token expiry, seconds (TP-S005-07).
+otp_expiry = 3600
 
-# Custom SMTP — configure in Supabase Dashboard for production invite delivery (TP-S004-08).
-# Placeholders document the operator contract; live values are never committed.
+# Auth email rate limit — requires custom SMTP (Resend). TP-S005-07, EV-006 F35.
+[auth.rate_limit]
+email_sent = 30
+
+# Production email delivery via Resend SMTP (EV-006 F35, ADR-029/030 §9).
+# The password references env(SUPABASE_SMTP_PASS) (a Resend API key); admin_email/sender_name
+# are operator-supplied after Resend domain verification (RD-090). No literal secret is committed.
 [auth.email.smtp]
-enabled = false
-host = "smtp.example.com"
-port = 587
-user = "smtp-user"
+enabled = true
+host = "smtp.resend.com"
+port = 465
+user = "resend"
 pass = "env(SUPABASE_SMTP_PASS)"
 admin_email = "noreply@vecinita.admin"
 sender_name = "Vecinita Admin"
+
+# Versioned stacked-bilingual (EN/ES) email templates (RD-086, TP-S005-08/10).
+# auth.email.template.* content_path resolves from the PROJECT ROOT (CLI #5124).
+[auth.email.template.invite]
+subject = "You're invited to Vecinita Admin · Te han invitado a Vecinita Admin"
+content_path = "supabase/templates/invite.html"
+
+[auth.email.template.recovery]
+subject = "Reset your Vecinita password · Restablece tu contraseña de Vecinita"
+content_path = "supabase/templates/recovery.html"
+
+[auth.email.template.confirmation]
+subject = "Confirm your Vecinita email · Confirma tu correo de Vecinita"
+content_path = "supabase/templates/confirmation.html"
+
+[auth.email.template.magic_link]
+subject = "Your Vecinita sign-in link · Tu enlace de acceso a Vecinita"
+content_path = "supabase/templates/magic_link.html"
+
+[auth.email.template.email_change]
+subject = "Confirm your new Vecinita email · Confirma tu nuevo correo de Vecinita"
+content_path = "supabase/templates/email_change.html"
+
+# auth.email.notification.* content_path resolves from the supabase/ directory (CLI #5124).
+[auth.email.notification.password_changed]
+subject = "Your Vecinita password was changed · Se cambió tu contraseña de Vecinita"
+content_path = "templates/password-changed.html"
 
 [auth.sms]
 enable_signup = false

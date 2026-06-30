@@ -85,4 +85,5 @@ Requires `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SUPABASE_ADMIN_EMAIL`, `SUPABAS
 ## Custom SMTP (production invites)
 
 Enable and configure SMTP in the Supabase Dashboard (or `auth.email.smtp` via config push) before
-live invite delivery. Staging may use Inbucket locally (`supabase start`).
+live invite delivery. Local dev uses Mailpit on port 54324 (`supabase start`; configured via
+`[inbucket]` in `config.toml`).

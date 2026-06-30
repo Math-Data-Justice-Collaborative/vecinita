@@ -150,6 +150,79 @@ Mark items in [execution-plan.md](execution-plan.md) Phase 4 Gate Check after ev
 
 If the `coverage` job fails while `python` / `frontend` jobs pass, inspect `scripts/test/print_unit_coverage_summary.py` output for the failing component row.
 
+## EV-006 (F35) — Admin user management + Resend email (S005)
+
+Operator checklist for live invite delivery and `/admin/users*` on the Modal DM backend.
+Secrets matrix: [staging-secrets-matrix.md](staging-secrets-matrix.md) §EV-006.
+
+### Resend domain verification (prerequisite)
+
+1. In the [Resend dashboard](https://resend.com/domains), add the sending domain and complete
+   **SPF**, **DKIM**, and **DMARC** records (see secrets matrix §Deliverability DNS checklist).
+2. Set `[auth.email.smtp] admin_email` / `sender_name` in `supabase/config.toml` to the verified
+   address (e.g. `noreply@<domain>`).
+3. After deploy, use **Send test email** on the DM `/users` page (UJ-037) or Resend dashboard
+   to confirm inbox delivery before inviting operators.
+
+### Invite / resend workflow
+
+1. Ensure `SUPABASE_SECRET_KEY` is on the **Modal data-management** secret
+   (`bash scripts/deploy/sync_modal_secret.sh --merge --apply`).
+2. Ensure `SUPABASE_SMTP_PASS` (Resend API key) is in GitHub secrets and pushed to Supabase via
+   `bash scripts/supabase/ci_sync.sh sync-production` on `main` (or manual `supabase config push`).
+3. **First operator:** `uv run python scripts/seed_first_admin.py` (idempotent).
+4. **Additional operators:** Admin signs in → `/users` → **Invite** → enter email + role → submit.
+   Supabase sends the repo-versioned bilingual invite template via Resend SMTP.
+5. **Pending invitee:** Admin → row action **Resend invite** → `POST /admin/users/{id}/resend-invite`.
+6. **Password recovery (admin-triggered):** Row action **Reset password** sends recovery email.
+7. **Disable / revoke:** Use **Disable** to ban; **Delete** to remove the identity (confirmation).
+
+### Force sign-out RPC (one-time operator apply)
+
+The admin **Force sign-out** row action calls `POST /admin/users/{id}/signout`, which invokes the
+`admin_delete_user_sessions` RPC on the Supabase project database. Apply the committed migration
+once before relying on force sign-out in production:
+
+```bash
+# From repo root — review supabase/migrations/*admin_delete_user_sessions*.sql first
+supabase db push   # or apply via Supabase SQL editor per operator policy
+```
+
+Until the RPC exists, the route returns `503 mechanism_unavailable` and the UI advises using
+**Disable** as the guaranteed lockout. Verify with an admin test on `/users` (UJ-036).
+
+### Deliverability test-send workflow (UJ-037)
+
+1. Set `RESEND_API_KEY` and `RESEND_SENDER_EMAIL` on the Modal data-management secret
+   (`bash scripts/deploy/sync_modal_secret.sh --merge --apply`).
+2. Complete SPF/DKIM/DMARC on the Resend-verified domain (secrets matrix §Deliverability DNS).
+3. On `/users`, use **Send test email** → confirm `message_id` in the UI and receipt in the inbox.
+4. If secrets are unset, the UI links to this runbook and the API returns `503 email_unconfigured`.
+
+### AC-U10–U16 checklist (S005 / M53)
+
+| Criterion | Verify |
+|-----------|--------|
+| AC-U10 Idle timeout | Vitest TC-096; warning at 60s, local sign-out at 30min |
+| AC-U11 Log out everywhere | Vitest TC-097; global vs local `signOut` scopes |
+| AC-U12 Force sign-out | Integration TC-098 + e2e UJ-036; audit `user.signed_out` |
+| AC-U13 Test-send | Integration TC-099 + e2e UJ-037; Resend mocked |
+| AC-U14 User search + pagination | Integration TC-100 + Vitest search/pagination |
+| AC-U15 Audit viewer | Vitest TC-101; entity_type filter + view-activity link |
+| AC-U16 Privacy + CORS | Vitest TC-102; CORS preflight TC-103 on new POST routes |
+
+Public self-signup remains disabled (`enable_signup = false` in `config.toml`); offline guard:
+`bash scripts/check_supabase_config.sh`.
+
+### Secret rotation (TP-S005-16)
+
+| Secret | Where | Rotation steps |
+|--------|-------|----------------|
+| `SUPABASE_SMTP_PASS` / `RESEND_API_KEY` | GitHub Actions + Supabase project env + Modal DM | 1) Create new Resend API key. 2) Update `prod.env`. 3) `bash scripts/deploy/sync_github_secrets.sh --apply`. 4) `supabase config push` (or CI sync-production on `main`). 5) `bash scripts/deploy/sync_modal_secret.sh --merge --apply`. 6) Revoke old Resend key. |
+| `SUPABASE_SECRET_KEY` | Modal data-management only | 1) Rotate in Supabase dashboard (Settings → API). 2) Update `prod.env`. 3) `bash scripts/deploy/sync_modal_secret.sh --merge --apply`. 4) Smoke `GET /admin/users` as admin. 5) Revoke old secret key. |
+
+Never commit secret values. Use `--merge` on Modal pushes so rotation does not drop unrelated keys.
+
 ## Related
 
 - `scripts/deploy/staging_smoke.sh` — shell H1–H3  

@@ -12,9 +12,12 @@ from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_internal_write_api.app import create_app as create_write_app
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests
 
+from tests.helpers.user_mgmt_e2e import UserMgmtStack, build_user_mgmt_stack
 from tests.unit.shared_schemas.auth_fixtures import generate_es256_keypair, make_auth_config
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 
 _API_KEY = "test-internal-key"
@@ -70,3 +73,9 @@ def write_auth_client(supabase_auth_env: EllipticCurvePrivateKey) -> TestClient:
     """Internal-write API with Supabase JWT required."""
     _ = supabase_auth_env
     return TestClient(create_write_app())
+
+
+@pytest.fixture
+def user_mgmt_stack(monkeypatch: pytest.MonkeyPatch) -> Iterator[UserMgmtStack]:
+    """DM + write API with mocked GoTrue Admin API and persisted audit rows."""
+    yield from build_user_mgmt_stack(monkeypatch)
