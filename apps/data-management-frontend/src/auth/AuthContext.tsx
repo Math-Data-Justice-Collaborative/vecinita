@@ -53,6 +53,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     const supabase = getSupabaseClient();
+    const { error } = await supabase.auth.signOut({ scope: "local" });
+    if (error) {
+      throw error;
+    }
+  }, []);
+
+  const signOutAllDevices = useCallback(async () => {
+    const supabase = getSupabaseClient();
     const { error } = await supabase.auth.signOut();
     if (error) {
       throw error;
@@ -69,8 +77,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       accessToken: session?.access_token ?? null,
       signIn,
       signOut,
+      signOutAllDevices,
     };
-  }, [session, loading, signIn, signOut]);
+  }, [session, loading, signIn, signOut, signOutAllDevices]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

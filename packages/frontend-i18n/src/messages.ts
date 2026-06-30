@@ -69,6 +69,9 @@ const enStrings = {
   "admin.users.action.resetPassword": "Reset password",
   "admin.users.action.makeAdmin": "Make admin",
   "admin.users.action.makeViewer": "Make viewer",
+  "admin.users.action.forceSignout": "Force sign-out",
+  "admin.users.forceSignoutFallback":
+    "Force sign-out is unavailable. Use Disable to lock out this operator.",
   "admin.users.viewerBlocked": "User management requires an admin account.",
   "admin.auth.loginTitle": "Sign in",
   "admin.auth.loginSubtitle": "Invitation-only access for corpus operators.",
@@ -78,6 +81,12 @@ const enStrings = {
   "admin.auth.signingIn": "Signing in…",
   "admin.auth.loginFailed": "Sign in failed",
   "admin.auth.signOut": "Sign out",
+  "admin.auth.signOutAllDevices": "Log out of all devices",
+  "admin.auth.idleWarningTitle": "Still there?",
+  "admin.auth.idleWarningBody":
+    "You will be signed out on this device in {seconds} seconds due to inactivity.",
+  "admin.auth.idleStaySignedIn": "Stay signed in",
+  "admin.auth.idleSignOutNow": "Log out now",
   "admin.auth.currentUser": "Signed in as {email}",
   "admin.nav.openMobile": "Open navigation",
   "admin.nav.mobileMenuDescription": "Main navigation menu",
@@ -286,6 +295,9 @@ const esStrings = {
   "admin.users.action.resetPassword": "Restablecer contraseña",
   "admin.users.action.makeAdmin": "Hacer administrador",
   "admin.users.action.makeViewer": "Hacer lector",
+  "admin.users.action.forceSignout": "Forzar cierre de sesión",
+  "admin.users.forceSignoutFallback":
+    "El cierre de sesión forzado no está disponible. Usa Deshabilitar para bloquear a este operador.",
   "admin.users.viewerBlocked": "La gestión de usuarios requiere una cuenta de administrador.",
   "admin.auth.loginTitle": "Iniciar sesión",
   "admin.auth.loginSubtitle":
@@ -296,6 +308,12 @@ const esStrings = {
   "admin.auth.signingIn": "Iniciando sesión…",
   "admin.auth.loginFailed": "Error al iniciar sesión",
   "admin.auth.signOut": "Cerrar sesión",
+  "admin.auth.signOutAllDevices": "Cerrar sesión en todos los dispositivos",
+  "admin.auth.idleWarningTitle": "¿Sigues ahí?",
+  "admin.auth.idleWarningBody":
+    "Se cerrará la sesión en este dispositivo en {seconds} segundos por inactividad.",
+  "admin.auth.idleStaySignedIn": "Seguir conectado",
+  "admin.auth.idleSignOutNow": "Cerrar sesión ahora",
   "admin.auth.currentUser": "Sesión: {email}",
   "admin.nav.openMobile": "Abrir navegación",
   "admin.nav.mobileMenuDescription": "Menú de navegación principal",

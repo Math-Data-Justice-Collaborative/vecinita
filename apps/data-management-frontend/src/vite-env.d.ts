@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly VITE_VECINITA_CORPUS_API_KEY: string;
   readonly VITE_SUPABASE_URL: string;
   readonly VITE_SUPABASE_PUBLISHABLE_KEY: string;
+  readonly VITE_VECINITA_IDLE_TIMEOUT_MIN?: string;
+  readonly VITE_VECINITA_IDLE_WARNING_SEC?: string;
 }
 
 interface ImportMeta {

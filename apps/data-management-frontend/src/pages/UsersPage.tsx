@@ -8,8 +8,10 @@ import {
   deleteUser,
   disableUser,
   enableUser,
+  forceSignout,
   inviteUser,
   listUsers,
+  MechanismUnavailableError,
   resendInvite,
   resetUserPassword,
 } from "@/api/users";
@@ -79,6 +81,7 @@ export function UsersPage() {
   const [inviteRole, setInviteRole] = useState<UserRole>("viewer");
   const [inviteBusy, setInviteBusy] = useState(false);
   const [actionBusy, setActionBusy] = useState<string | null>(null);
+  const [signoutFallback, setSignoutFallback] = useState<string | null>(null);
 
   const load = useCallback(async (isActive: () => boolean = () => true) => {
     setLoading(true);
@@ -148,6 +151,27 @@ export function UsersPage() {
     }
   }
 
+  async function handleForceSignout(userId: string) {
+    setActionBusy(userId);
+    setError(null);
+    setSignoutFallback(null);
+    try {
+      const client = requireAdminConfig();
+      await forceSignout(client, userId);
+      await load();
+    } catch (err) {
+      if (err instanceof MechanismUnavailableError) {
+        setSignoutFallback(tr("admin.users.forceSignoutFallback"));
+      } else {
+        setError(
+          err instanceof Error ? err.message : tr("admin.users.loadFailed"),
+        );
+      }
+    } finally {
+      setActionBusy(null);
+    }
+  }
+
   return (
     <div className="space-y-6" data-testid="users-page">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -171,6 +195,16 @@ export function UsersPage() {
       {error ? (
         <p role="alert" className="text-sm text-destructive">
           {error}
+        </p>
+      ) : null}
+
+      {signoutFallback ? (
+        <p
+          role="alert"
+          data-testid="force-signout-fallback"
+          className="text-sm text-destructive"
+        >
+          {signoutFallback}
         </p>
       ) : null}
 
@@ -295,6 +329,20 @@ export function UsersPage() {
                           {tr("admin.users.action.makeViewer")}
                         </Button>
                       )}
+                      {user.status === "active" ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={actionBusy === user.id}
+                          data-testid={`force-signout-${user.id}`}
+                          onClick={() => {
+                            void handleForceSignout(user.id);
+                          }}
+                        >
+                          {tr("admin.users.action.forceSignout")}
+                        </Button>
+                      ) : null}
                       <Button
                         type="button"
                         size="sm"

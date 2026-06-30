@@ -21,6 +21,28 @@ async function parseError(response: Response, label: string): Promise<never> {
   throw new Error(detail || `${label} failed (${String(response.status)})`);
 }
 
+/**
+ * Raised when the `admin_delete_user_sessions` RPC is not applied to the Supabase
+ * project, so force sign-out is unavailable (backend `503 mechanism_unavailable`).
+ * Callers should advise the admin to use Disable (ban) as the guaranteed lockout (UJ-036).
+ */
+export class MechanismUnavailableError extends Error {
+  constructor(message = "Session-revoke mechanism is unavailable") {
+    super(message);
+    this.name = "MechanismUnavailableError";
+  }
+}
+
+function isMechanismUnavailable(status: number, body: string): boolean {
+  if (status !== 503) return false;
+  try {
+    const parsed = JSON.parse(body) as { detail?: { code?: unknown } };
+    return parsed.detail?.code === "mechanism_unavailable";
+  } catch {
+    return body.includes("mechanism_unavailable");
+  }
+}
+
 export async function listUsers(
   options: UsersClientOptions,
   page = 1,
@@ -153,5 +175,27 @@ export async function resetUserPassword(
   );
   if (!response.ok) {
     return parseError(response, "Reset password");
+  }
+}
+
+export async function forceSignout(
+  options: UsersClientOptions,
+  userId: string,
+): Promise<void> {
+  const response = await fetch(
+    `${options.baseUrl}/admin/users/${userId}/signout`,
+    {
+      method: "POST",
+      headers: usersHeaders(options),
+    },
+  );
+  if (!response.ok) {
+    const body = await response.text();
+    if (isMechanismUnavailable(response.status, body)) {
+      throw new MechanismUnavailableError();
+    }
+    throw new Error(
+      body || `Force sign-out failed (${String(response.status)})`,
+    );
   }
 }

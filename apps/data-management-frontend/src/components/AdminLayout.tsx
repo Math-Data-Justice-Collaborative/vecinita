@@ -23,12 +23,13 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { IdleTimeoutGuard } from "@/components/IdleTimeoutGuard";
 import { useAdminT } from "@/hooks/useAdminT";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 function UserMenu() {
   const tr = useAdminT();
-  const { user, signOut } = useAuth();
+  const { user, signOut, signOutAllDevices } = useAuth();
 
   if (!user?.email) {
     return null;
@@ -39,6 +40,17 @@ function UserMenu() {
       <p className="text-xs text-muted-foreground">
         {tr("admin.auth.currentUser", { email: user.email })}
       </p>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        data-testid="admin-sign-out-all-devices"
+        onClick={() => {
+          void signOutAllDevices();
+        }}
+      >
+        {tr("admin.auth.signOutAllDevices")}
+      </Button>
       <Button
         type="button"
         variant="outline"
@@ -183,6 +195,7 @@ export function AdminLayout() {
 
   return (
     <div className="flex min-h-screen">
+      <IdleTimeoutGuard />
       <DesktopSidebar showChrome={isDesktop} />
       <div className="flex flex-1 flex-col">
         <MobileHeader showChrome={!isDesktop} />
