@@ -1,7 +1,9 @@
 import {
+  act,
   cleanup,
   fireEvent,
   render,
+  renderHook,
   screen,
   waitFor,
   within,
@@ -10,6 +12,7 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LocaleProvider } from "vecinita-frontend-ui";
 
+import { useAuthLinkCallback } from "@/auth/useAuthLinkCallback";
 import { setSupabaseClientForTests } from "@/auth/supabaseClient";
 import { SetPasswordPage } from "@/pages/SetPasswordPage";
 
@@ -122,6 +125,114 @@ describe("auth link callback (TC-106, TC-107, UJ-031/033)", () => {
     await vi.advanceTimersByTimeAsync(10_000);
     expect(await screen.findByTestId("invite-link-invalid")).toBeInTheDocument();
   }, 15_000);
+
+  it("useAuthLinkCallback returns denied for access_denied without otp_expired", async () => {
+    window.location.hash = "#error=access_denied&error_description=denied";
+    installSupabaseMock(null);
+
+    const { result } = renderHook(() => useAuthLinkCallback());
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("denied");
+    });
+  });
+
+  it("useAuthLinkCallback exchanges PKCE code and becomes ready", async () => {
+    window.history.replaceState({}, "", "/accept-invite?code=pkce-code");
+    mockGetSession.mockResolvedValue({
+      data: { session: { access_token: "from-code" } },
+    });
+    mockExchangeCodeForSession.mockResolvedValue({ error: null });
+    mockOnAuthStateChange.mockReturnValue({
+      data: { subscription: { unsubscribe: vi.fn() } },
+    });
+    setSupabaseClientForTests({
+      auth: {
+        getSession: mockGetSession,
+        onAuthStateChange: mockOnAuthStateChange,
+        exchangeCodeForSession: mockExchangeCodeForSession,
+        updateUser: mockUpdateUser,
+      },
+    } as never);
+
+    const { result } = renderHook(() => useAuthLinkCallback());
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("ready");
+    });
+    expect(mockExchangeCodeForSession).toHaveBeenCalledWith("pkce-code");
+  });
+
+  it("useAuthLinkCallback marks invalid when code exchange fails", async () => {
+    window.history.replaceState({}, "", "/accept-invite?code=bad-code");
+    mockGetSession.mockResolvedValue({ data: { session: null } });
+    mockExchangeCodeForSession.mockResolvedValue({
+      error: new Error("invalid code"),
+    });
+    mockOnAuthStateChange.mockReturnValue({
+      data: { subscription: { unsubscribe: vi.fn() } },
+    });
+    setSupabaseClientForTests({
+      auth: {
+        getSession: mockGetSession,
+        onAuthStateChange: mockOnAuthStateChange,
+        exchangeCodeForSession: mockExchangeCodeForSession,
+        updateUser: mockUpdateUser,
+      },
+    } as never);
+
+    const { result } = renderHook(() => useAuthLinkCallback());
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("invalid");
+    });
+  });
+
+  it("useAuthLinkCallback becomes ready when onAuthStateChange fires", async () => {
+    let authCallback: ((event: string, session: object | null) => void) | null =
+      null;
+    mockGetSession.mockResolvedValue({ data: { session: null } });
+    mockOnAuthStateChange.mockImplementation(
+      (callback: (event: string, session: object | null) => void) => {
+        authCallback = callback;
+        return { data: { subscription: { unsubscribe: vi.fn() } } };
+      },
+    );
+    setSupabaseClientForTests({
+      auth: {
+        getSession: mockGetSession,
+        onAuthStateChange: mockOnAuthStateChange,
+        exchangeCodeForSession: mockExchangeCodeForSession,
+        updateUser: mockUpdateUser,
+      },
+    } as never);
+
+    const { result } = renderHook(() => useAuthLinkCallback());
+
+    await act(async () => {
+      authCallback?.("SIGNED_IN", { access_token: "late" });
+    });
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("ready");
+    });
+  });
+
+  it("accept-invite shows denied link panel for access_denied hash", async () => {
+    window.location.hash = "#error=access_denied&error_description=denied";
+    installSupabaseMock(null);
+
+    render(
+      <LocaleProvider>
+        <MemoryRouter>
+          <SetPasswordPage variant="invite" />
+        </MemoryRouter>
+      </LocaleProvider>,
+    );
+
+    expect(await screen.findByTestId("invite-link-invalid")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(/invalid or has already been used/i);
+  });
 
   it("accept-invite calls updateUser after session is ready", async () => {
     installSupabaseMock({ access_token: "token" });
