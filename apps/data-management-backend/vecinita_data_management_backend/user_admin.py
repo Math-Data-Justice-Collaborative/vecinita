@@ -62,9 +62,7 @@ class UserAdminService:
         total = 0
         while True:
             result = self._client.list_users(page=page, per_page=per_page)
-            total += sum(
-                1 for u in result.users if u.role == "admin" and u.status != "disabled"
-            )
+            total += sum(1 for u in result.users if u.role == "admin" and u.status != "disabled")
             if len(result.users) < per_page:
                 break
             page += 1
