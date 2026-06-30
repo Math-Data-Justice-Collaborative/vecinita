@@ -214,9 +214,30 @@ project:
         note: 'S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED (isActive() unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression test; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes the 2026-06-29 RE-RUN FAIL. Reports: docs/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
     10-e2e:
       status: completed
+      started_at: '2026-06-30'
       completed_at: '2026-06-30'
-      report: docs/e2e-report.md
-      session_id: S005-user-mgmt-auth
+      session_id: S006-invite-acceptance
+      branch: feat/S006-invite-acceptance
+      evolve_cycle_id: EV-007
+      report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
+      note: S006/EV-007 F35 ext 10-e2e COMPLETE 2026-06-30 on feat/S006-invite-acceptance. S005 baseline preserved in s005 slice below.
+      s006:
+        status: completed
+        started_at: '2026-06-30'
+        completed_at: '2026-06-30'
+        session_id: S006-invite-acceptance
+        branch: feat/S006-invite-acceptance
+        feature: F35
+        evolve_cycle_id: EV-007
+        report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
+        note: S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract; T3 deferred
+      s005:
+        status: completed
+        completed_at: '2026-06-30'
+        session_id: S005-user-mgmt-auth
+        branch: feat/S005-user-mgmt-auth
+        report: docs/e2e-report.md
+        note: S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract; T3 deferred
     11-verify-impl:
       status: completed
       completed_at: '2026-06-30'
@@ -264,7 +285,7 @@ active_session:
   evolve_cycle_id: EV-007
   artifacts_dir: docs/sessions/S006-invite-acceptance/
   started_at: '2026-06-30'
-  current_stage: 10-e2e
+  current_stage: 12-verify-deploy
   linked_issues:
   - 109
   routing_plan:
@@ -287,7 +308,9 @@ active_session:
     status: completed
     completed_at: '2026-06-30'
   - stage: 10-e2e
-    status: pending
+    status: completed
+    started_at: '2026-06-30'
+    completed_at: '2026-06-30'
   - stage: 12-verify-deploy
     status: pending
   - stage: 13-deploy-smoke
@@ -364,6 +387,10 @@ active_session:
     kind: qa-report
     session_id: S006-invite-acceptance
     stage: 09-qa
+  - path: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
+    kind: e2e-report
+    session_id: S006-invite-acceptance
+    stage: 10-e2e
 sessions:
 - id: S005-user-mgmt-auth
   type: feature
@@ -1254,12 +1281,30 @@ stages:
       note: S006/EV-007 F35 ext full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 729 passed; all frontend Vitest suites green; coverage gate PASS. Handoff to 10-e2e.
   10-e2e:
     status: completed
-    started_at: '2026-05-19'
+    started_at: '2026-06-30'
     completed_at: '2026-06-30'
-    partial_rerun_at: '2026-06-30'
-    partial_rerun_note: S005/EV-006 F35 — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract; T3 deferred
-    report: docs/e2e-report.md
-    session_id: S005-user-mgmt-auth
+    session_id: S006-invite-acceptance
+    branch: feat/S006-invite-acceptance
+    evolve_cycle_id: EV-007
+    report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
+    note: S006/EV-007 F35 ext 10-e2e COMPLETE 2026-06-30 on feat/S006-invite-acceptance. S005 baseline preserved in s005 slice below.
+    s006:
+      status: completed
+      started_at: '2026-06-30'
+      completed_at: '2026-06-30'
+      session_id: S006-invite-acceptance
+      branch: feat/S006-invite-acceptance
+      feature: F35
+      evolve_cycle_id: EV-007
+      report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
+      note: S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract; T3 deferred
+      t0: pass
+      t0_tests: 69
+      t1_integration: pass
+      t1_tests: 62
+      vitest: 500
+      supabase_contract: 17
+      t3_live: deferred
     mechanism: api+frontend
     t0: pass
     t0_tests: 59
@@ -2242,7 +2287,7 @@ evolve_cycles:
   status: in_progress
   started: '2026-06-30'
   session_id: S006-invite-acceptance
-  current_stage: 10-e2e
+  current_stage: 12-verify-deploy
   parent_cycle: EV-006
   linked_issues:
   - 109
@@ -2257,6 +2302,10 @@ evolve_cycles:
       started: '2026-06-30'
       completed: '2026-06-30'
     04-tech-plan:
+      status: completed
+      started: '2026-06-30'
+      completed: '2026-06-30'
+    10-e2e:
       status: completed
       started: '2026-06-30'
       completed: '2026-06-30'
@@ -3332,6 +3381,10 @@ artifacts:
   kind: qa-report
   session_id: S006-invite-acceptance
   stage: 09-qa
+- path: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
+  kind: e2e-report
+  session_id: S006-invite-acceptance
+  stage: 10-e2e
 git_history:
   current_branch: feat/S006-invite-acceptance
   branches:
