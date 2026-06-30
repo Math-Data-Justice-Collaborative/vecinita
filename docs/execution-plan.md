@@ -10,10 +10,10 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 12: EV-006 — Admin user management + auth UX (F35) — **planned (04-tech-plan complete)** |
-| **Active milestone** | M52: Integration, OpenAPI, privacy & gate — **in_progress** (M48–M51 **completed** 2026-06-29) |
-| **Active task** | T52.1 — e2e `test_uj030_user_management.py` (TC-088/089/092) |
-| **Tasks completed** | Phase 11 (S004/EV-005 F34) merged via PR #100; S005 00-context + 01-requirements + 04-tech-plan complete |
-| **Last updated** | 2026-06-29 |
+| **Active milestone** | M53: Auth UX hardening — idle timeout, log-out-everywhere, force sign-out, deliverability test-send, audit viewer — **in_progress** (M52 **completed** 2026-06-30) |
+| **Active task** | T53.12 — Vitest "Send test email" UI (TC-099) |
+| **Tasks completed** | Phase 11 (S004/EV-005 F34) merged via PR #100; S005 00-context + 01-requirements + 04-tech-plan complete; M53 T53.1–T53.11 (incl. T53.8–T53.9 force sign-out UI) |
+| **Last updated** | 2026-06-30 |
 | **Evolve cycle** | EV-006 (F35) — **07-build next** |
 | **Git branch** | `feat/S005-user-mgmt-auth` |
 | **Active session** | S005-user-mgmt-auth (Phase 12, F35) — evolve-lite. 01-requirements + 04-tech-plan **complete** (ADR-029, ADR-030, **ADR-031**, TP-S005-01–**24**). Next: **07-build** (M48–**M53**). Lite path skips 02/03/05/06/11 |
@@ -1073,12 +1073,12 @@ invite rate limit.
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|------------|-------------|
-| T52.1 | Test (e2e): `tests/e2e/test_uj030_user_management.py` (TC-088, TC-089, TC-092) | Test | pending | test-plan TC-088/089/092, UJ-030 | T50.2, T51.3 | — | S005 | F35 |
-| T52.2 | Test (e2e): `tests/e2e/test_uj031_invite_from_page.py` (TC-090) | Test | pending | test-plan TC-090, UJ-031 | T50.2, T51.3 | — | S005 | F35 |
-| T52.3 | Test: `tests/smoke/test_supabase_ci_contract.py` extended for TC-094/095 | Test | pending | test-plan TC-094/095 | T48.4 | — | S005 | F35 |
-| T52.4 | Config: OpenAPI `openapi/data-management.yaml` — `/admin/users*` paths + schemas | Config | pending | api-contract §Admin user management, ADR-011 | T50.2 | — | S005 | F35 |
-| T52.5 | Test: full backend pytest + DM Vitest green; AC-U1–AC-U9 checklist | Test | pending | acceptance-criteria AC-U1–U9 | T52.1–T52.4, T51.5, T51.7 | — | S005 | F35 |
-| T52.6 | Docs: operator runbook delta — Resend domain verify, invite/resend workflow, secret rotation | Docs | pending | staging-runbook, TP-S005-16 | T48.6 | — | S005 | F35 |
+| T52.1 | Test (e2e): `tests/e2e/test_uj030_user_management.py` (TC-088, TC-089, TC-092) | Test | completed | test-plan TC-088/089/092, UJ-030 | T50.2, T51.3 | — | S005 | F35 |
+| T52.2 | Test (e2e): `tests/e2e/test_uj031_invite_from_page.py` (TC-090) | Test | completed | test-plan TC-090, UJ-031 | T50.2, T51.3 | — | S005 | F35 |
+| T52.3 | Test: `tests/smoke/test_supabase_ci_contract.py` extended for TC-094/095 | Test | completed | test-plan TC-094/095 | T48.4 | — | S005 | F35 |
+| T52.4 | Config: OpenAPI `openapi/data-management.yaml` — `/admin/users*` paths + schemas | Config | completed | api-contract §Admin user management, ADR-011 | T50.2 | — | S005 | F35 |
+| T52.5 | Test: full backend pytest + DM Vitest green; AC-U1–AC-U9 checklist | Test | completed | acceptance-criteria AC-U1–U9 | T52.1–T52.4, T51.5, T51.7 | — | S005 | F35 |
+| T52.6 | Docs: operator runbook delta — Resend domain verify, invite/resend workflow, secret rotation | Docs | completed | staging-runbook, TP-S005-16 | T48.6 | — | S005 | F35 |
 
 #### M53: Auth UX hardening — idle timeout, log-out-everywhere, force sign-out, deliverability test-send, audit viewer
 
@@ -1087,20 +1087,20 @@ invite rate limit.
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|------------|-------------|
-| T53.1 | Test (Vitest): idle timeout warns + signs out locally; activity resets (TC-096) — red | Test | pending | test-plan TC-096, UJ-034, ADR-031 §17 | — | — | S005 | F35 |
-| T53.2 | Code: `useIdleTimeout` + warning modal in always-mounted shell; `VITE_VECINITA_IDLE_TIMEOUT_MIN/_WARNING_SEC` | Code | pending | ADR-031 §17, frontend-session-state-lifting.mdc | T53.1 | — | S005 | F35 |
-| T53.3 | Test (Vitest): "log out of all devices" → global `signOut()`; standard logout → local (TC-097) — red | Test | pending | test-plan TC-097, UJ-035 | — | — | S005 | F35 |
-| T53.4 | Code: account-menu "Log out of all devices" action (global scope) | Code | pending | ADR-031 §18, UJ-035 | T53.3 | — | S005 | F35 |
-| T53.5 | Config: `admin_delete_user_sessions` RPC migration under `supabase/migrations/` + runbook one-time-apply note | Config | pending | ADR-031 §19, staging-secrets-matrix | — | — | S005 | F35 |
-| T53.6 | Test (TestClient): `POST /admin/users/{id}/signout` — admin 202 + `user.signed_out` audit; viewer 403; RPC-absent 503 (TC-098) — red | Test | pending | test-plan TC-098, UJ-036 | T49.2, T49.4 | — | S005 | F35 |
-| T53.7 | Code: force-signout route (RPC call via service key) + audit emit + lockout-guard parity | Code | pending | ADR-031 §19, api-contract | T53.6, T53.5 | — | S005 | F35 |
-| T53.8 | Test (Vitest): Users-page "Force sign-out" row action + 503 disable-fallback (TC-098) — red | Test | pending | test-plan TC-098, UJ-036 | — | — | S005 | F35 |
-| T53.9 | Code: Users-page "Force sign-out" action wired to endpoint | Code | pending | UJ-036, ADR-031 §19 | T53.8, T53.7 | — | S005 | F35 |
-| T53.10 | Test (TestClient): `POST /admin/email/test` — admin 202 + `message_id`; viewer 403; 429; 503 unconfigured; audit domain-only (TC-099) — red | Test | pending | test-plan TC-099, UJ-037 | T50.2 | — | S005 | F35 |
-| T53.11 | Code: test-send route via Resend REST (`RESEND_API_KEY`/`RESEND_SENDER_EMAIL`) + 5/h rate limit + audit | Code | pending | ADR-031 §22, api-contract | T53.10 | — | S005 | F35 |
+| T53.1 | Test (Vitest): idle timeout warns + signs out locally; activity resets (TC-096) — red | Test | completed | test-plan TC-096, UJ-034, ADR-031 §17 | — | — | S005 | F35 |
+| T53.2 | Code: `useIdleTimeout` + warning modal in always-mounted shell; `VITE_VECINITA_IDLE_TIMEOUT_MIN/_WARNING_SEC` | Code | completed | ADR-031 §17, frontend-session-state-lifting.mdc | T53.1 | — | S005 | F35 |
+| T53.3 | Test (Vitest): "log out of all devices" → global `signOut()`; standard logout → local (TC-097) — red | Test | completed | test-plan TC-097, UJ-035 | — | — | S005 | F35 |
+| T53.4 | Code: account-menu "Log out of all devices" action (global scope) | Code | completed | ADR-031 §18, UJ-035 | T53.3 | — | S005 | F35 |
+| T53.5 | Config: `admin_delete_user_sessions` RPC migration under `supabase/migrations/` + runbook one-time-apply note | Config | completed | ADR-031 §19, staging-secrets-matrix | — | — | S005 | F35 |
+| T53.6 | Test (TestClient): `POST /admin/users/{id}/signout` — admin 202 + `user.signed_out` audit; viewer 403; RPC-absent 503 (TC-098) — red | Test | completed | test-plan TC-098, UJ-036 | T49.2, T49.4 | — | S005 | F35 |
+| T53.7 | Code: force-signout route (RPC call via service key) + audit emit + lockout-guard parity | Code | completed | ADR-031 §19, api-contract | T53.6, T53.5 | — | S005 | F35 |
+| T53.8 | Test (Vitest): Users-page "Force sign-out" row action + 503 disable-fallback (TC-098) — red | Test | completed | test-plan TC-098, UJ-036 | — | 2026-06-30 | S005 | F35 |
+| T53.9 | Code: Users-page "Force sign-out" action wired to endpoint | Code | completed | UJ-036, ADR-031 §19 | T53.8, T53.7 | 2026-06-30 | S005 | F35 |
+| T53.10 | Test (TestClient): `POST /admin/email/test` — admin 202 + `message_id`; viewer 403; 429; 503 unconfigured; audit domain-only (TC-099) — red | Test | completed | test-plan TC-099, UJ-037 | T50.2 | — | S005 | F35 |
+| T53.11 | Code: test-send route via Resend REST (`RESEND_API_KEY`/`RESEND_SENDER_EMAIL`) + 5/h rate limit + audit | Code | completed | ADR-031 §22, api-contract | T53.10 | — | S005 | F35 |
 | T53.12 | Test (Vitest): "Send test email" UI → endpoint; success/`503` checklist link (TC-099) — red | Test | pending | test-plan TC-099, UJ-037 | — | — | S005 | F35 |
 | T53.13 | Code: "Send test email" UI control | Code | pending | UJ-037, ADR-031 §22 | T53.12, T53.11 | — | S005 | F35 |
-| T53.14 | Test (backend + Vitest): `GET /admin/users?q=` ≥3-char guard → GoTrue `filter`; pagination (TC-100) — red | Test | pending | test-plan TC-100, UJ-030, ADR-031 §20 | T49.2 | — | S005 | F35 |
+| T53.14 | Test (backend + Vitest): `GET /admin/users?q=` ≥3-char guard → GoTrue `filter`; pagination (TC-100) — red | Test | in_progress | test-plan TC-100, UJ-030, ADR-031 §20 | T49.2 | — | S005 | F35 |
 | T53.15 | Code: `q` param on `/admin/users` + search box + shared `PaginationControls` on Users page | Code | pending | ADR-031 §20, api-contract | T53.14, T50.2, T51.3 | — | S005 | F35 |
 | T53.16 | Test (Vitest): AuditPage `entity_type` "Users" filter + `user.*`/`email.*` labels + per-user link (TC-101) — red | Test | pending | test-plan TC-101, UJ-038, ADR-031 §21 | — | — | S005 | F35 |
 | T53.17 | Code: AuditPage entity-type filter + i18n labels (EN/ES) + Users-row "View activity" link; ensure events emit `entity_type="user"` | Code | pending | ADR-031 §21, F29 AuditPage | T53.16, T50.2 | — | S005 | F35 |
@@ -1534,33 +1534,33 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T50.4 | M50 | 12 | Code | completed | T50.2 | — | S005 | F35 |
 | T50.5 | M50 | 12 | Test | completed | T50.2 | — | S005 | F35 |
 | T50.6 | M50 | 12 | Code | completed | T50.5 | — | S005 | F35 |
-| T51.1 | M51 | 12 | Test | pending | — | — | S005 | F35 |
-| T51.2 | M51 | 12 | Test | pending | — | — | S005 | F35 |
-| T51.3 | M51 | 12 | Code | pending | T51.1, T50.2 | — | S005 | F35 |
-| T51.4 | M51 | 12 | Test | pending | — | — | S005 | F35 |
-| T51.5 | M51 | 12 | Code | pending | T51.4 | — | S005 | F35 |
-| T51.6 | M51 | 12 | Test | pending | — | — | S005 | F35 |
-| T51.7 | M51 | 12 | Code | pending | T51.6 | — | S005 | F35 |
-| T52.1 | M52 | 12 | Test | pending | T50.2, T51.3 | — | S005 | F35 |
-| T52.2 | M52 | 12 | Test | pending | T50.2, T51.3 | — | S005 | F35 |
-| T52.3 | M52 | 12 | Test | pending | T48.4 | — | S005 | F35 |
-| T52.4 | M52 | 12 | Config | pending | T50.2 | — | S005 | F35 |
-| T52.5 | M52 | 12 | Test | pending | T52.1–T52.4, T51.5, T51.7 | — | S005 | F35 |
-| T52.6 | M52 | 12 | Docs | pending | T48.6 | — | S005 | F35 |
-| T53.1 | M53 | 12 | Test | pending | — | — | S005 | F35 |
-| T53.2 | M53 | 12 | Code | pending | T53.1 | — | S005 | F35 |
-| T53.3 | M53 | 12 | Test | pending | — | — | S005 | F35 |
-| T53.4 | M53 | 12 | Code | pending | T53.3 | — | S005 | F35 |
-| T53.5 | M53 | 12 | Config | pending | — | — | S005 | F35 |
-| T53.6 | M53 | 12 | Test | pending | T49.2, T49.4 | — | S005 | F35 |
-| T53.7 | M53 | 12 | Code | pending | T53.6, T53.5 | — | S005 | F35 |
-| T53.8 | M53 | 12 | Test | pending | — | — | S005 | F35 |
-| T53.9 | M53 | 12 | Code | pending | T53.8, T53.7 | — | S005 | F35 |
-| T53.10 | M53 | 12 | Test | pending | T50.2 | — | S005 | F35 |
-| T53.11 | M53 | 12 | Code | pending | T53.10 | — | S005 | F35 |
+| T51.1 | M51 | 12 | Test | completed | — | — | S005 | F35 |
+| T51.2 | M51 | 12 | Test | completed | — | — | S005 | F35 |
+| T51.3 | M51 | 12 | Code | completed | T51.1, T50.2 | — | S005 | F35 |
+| T51.4 | M51 | 12 | Test | completed | — | — | S005 | F35 |
+| T51.5 | M51 | 12 | Code | completed | T51.4 | — | S005 | F35 |
+| T51.6 | M51 | 12 | Test | completed | — | — | S005 | F35 |
+| T51.7 | M51 | 12 | Code | completed | T51.6 | — | S005 | F35 |
+| T52.1 | M52 | 12 | Test | completed | T50.2, T51.3 | — | S005 | F35 |
+| T52.2 | M52 | 12 | Test | completed | T50.2, T51.3 | — | S005 | F35 |
+| T52.3 | M52 | 12 | Test | completed | T48.4 | — | S005 | F35 |
+| T52.4 | M52 | 12 | Config | completed | T50.2 | — | S005 | F35 |
+| T52.5 | M52 | 12 | Test | completed | T52.1–T52.4, T51.5, T51.7 | — | S005 | F35 |
+| T52.6 | M52 | 12 | Docs | completed | T48.6 | — | S005 | F35 |
+| T53.1 | M53 | 12 | Test | completed | — | — | S005 | F35 |
+| T53.2 | M53 | 12 | Code | completed | T53.1 | — | S005 | F35 |
+| T53.3 | M53 | 12 | Test | completed | — | — | S005 | F35 |
+| T53.4 | M53 | 12 | Code | completed | T53.3 | — | S005 | F35 |
+| T53.5 | M53 | 12 | Config | completed | — | — | S005 | F35 |
+| T53.6 | M53 | 12 | Test | completed | T49.2, T49.4 | — | S005 | F35 |
+| T53.7 | M53 | 12 | Code | completed | T53.6, T53.5 | — | S005 | F35 |
+| T53.8 | M53 | 12 | Test | completed | — | 2026-06-30 | S005 | F35 |
+| T53.9 | M53 | 12 | Code | completed | T53.8, T53.7 | 2026-06-30 | S005 | F35 |
+| T53.10 | M53 | 12 | Test | completed | T50.2 | — | S005 | F35 |
+| T53.11 | M53 | 12 | Code | completed | T53.10 | — | S005 | F35 |
 | T53.12 | M53 | 12 | Test | pending | — | — | S005 | F35 |
 | T53.13 | M53 | 12 | Code | pending | T53.12, T53.11 | — | S005 | F35 |
-| T53.14 | M53 | 12 | Test | pending | T49.2 | — | S005 | F35 |
+| T53.14 | M53 | 12 | Test | in_progress | T49.2 | — | S005 | F35 |
 | T53.15 | M53 | 12 | Code | pending | T53.14, T50.2, T51.3 | — | S005 | F35 |
 | T53.16 | M53 | 12 | Test | pending | — | — | S005 | F35 |
 | T53.17 | M53 | 12 | Code | pending | T53.16, T50.2 | — | S005 | F35 |

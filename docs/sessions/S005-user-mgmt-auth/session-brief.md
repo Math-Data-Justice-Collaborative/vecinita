@@ -75,7 +75,11 @@ enhancements requested 2026-06-29:
 
 ## Routing plan
 
-See [routing-plan.md](./routing-plan.md). Lite evolve path; handoff to **01-requirements** next.
+See [routing-plan.md](./routing-plan.md). Lite evolve path. **01-requirements complete**
+(2026-06-29, RD-080–RD-090; ADR-029; F35; UJ-030–UJ-033; TC-088–TC-095; AC-U1–AC-U9 —
+[report](./reports/01-requirements.md)). **04-tech-plan complete**
+(2026-06-29, ADR-030, TP-S005-01–16; Phase 12 M48–M52 —
+[report](./reports/04-tech-plan.md)); handoff to **07-build** next.
 
 ## Links
 

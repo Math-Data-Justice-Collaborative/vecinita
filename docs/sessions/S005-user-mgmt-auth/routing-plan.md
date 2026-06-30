@@ -8,9 +8,9 @@ Cycle **EV-006** · Feature **F35** (admin user management + auth UX) · Extends
 | Stage | Status | Note |
 |-------|--------|------|
 | 00-context | completed | Session opener; research + 5 decisions (R55–R59); context-brief §16 |
-| 01-requirements | pending | F35 spec, UJ-030+, AC + TC deltas, ADR if Resend/SMTP needs new decision record |
-| 04-tech-plan | pending | Admin API routes, Supabase Admin SDK usage, remember-me storage init, Resend SMTP env matrix, template HTML layout, CI template validation |
-| 07-build | pending | Users page, backend admin routes, login remember-me, `supabase/templates/`, config.toml SMTP + templates |
+| 01-requirements | completed | F35 spec; RD-080–RD-090; ADR-029; UJ-030–UJ-033; TC-088–TC-095; AC-U1–AC-U9; config/api/secrets deltas ([report](./reports/01-requirements.md)) |
+| 04-tech-plan | completed | ADR-030; TP-S005-01–16; Phase 12 M48–M52; httpx Admin API; DM Modal host; audit ingest ([report](./reports/04-tech-plan.md)) |
+| 07-build | pending | Users page, `/admin/users*` on DM Modal, remember-me, `supabase/templates/`, Resend SMTP config |
 | 08-verify-build | pending | Milestone verify (lint/type/test/coverage) |
 | 09-qa | pending | Authz tests (admin-only user mgmt); privacy (no PII in corpus DB); template contract smoke |
 | 10-e2e | pending | E2E: invite flow, user list, role change, remember-me storage, template CI contract |
