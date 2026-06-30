@@ -9,12 +9,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 12: EV-006 — Admin user management + auth UX (F35) — **planned (04-tech-plan complete)** |
+| **Active phase** | Phase 12: EV-006 — Admin user management + auth UX (F35) — **07-build complete; Phase 12 gate: build criteria PASS, deploy criteria deferred to 13** |
 | **Active milestone** | M53: Auth UX hardening — idle timeout, log-out-everywhere, force sign-out, deliverability test-send, audit viewer — **completed** |
-| **Active task** | Phase 12 gate check → **08-verify-build** |
-| **Tasks completed** | Phase 11 (S004/EV-005 F34) merged via PR #100; S005 M48–M53 T48.1–T53.22 complete |
+| **Active task** | **08-verify-build** (final milestone verify) → 09-qa |
+| **Tasks completed** | Phase 11 (S004/EV-005 F34) merged via PR #100; S005 M48–M53 T48.1–T53.22 complete; 07-build closed out (make check green, 496 unit + frontend suites green) |
 | **Last updated** | 2026-06-30 |
-| **Evolve cycle** | EV-006 (F35) — **07-build next** |
+| **Evolve cycle** | EV-006 (F35) — **07-build complete; 08-verify-build next** |
 | **Git branch** | `feat/S005-user-mgmt-auth` |
 | **Active session** | S005-user-mgmt-auth (Phase 12, F35) — evolve-lite. 01-requirements + 04-tech-plan **complete** (ADR-029, ADR-030, **ADR-031**, TP-S005-01–**24**). Next: **07-build** (M48–**M53**). Lite path skips 02/03/05/06/11 |
 | **Scope addition** | 2026-06-29 — user added idle timeout, log-out-everywhere (self+admin), deliverability test-send, audit viewer (ADR-031, **M53**, T53.1–T53.22). MFA + CSV import still deferred. |
@@ -1113,15 +1113,15 @@ invite rate limit.
 #### Phase 12 Gate Check
 
 - [x] All M48–M53 tasks completed (T48.1–T53.22)
-- [ ] TC-088–TC-103 green; UJ-030–UJ-038 covered
-- [ ] AC-U1–AC-U16 satisfied (live Resend delivery + test-send verified at 13-deploy-smoke)
-- [ ] User-mgmt audit rows in corpus `audit_log` with UUID `actor_id` only, `entity_type="user"` (TC-092, TC-101)
-- [ ] `SUPABASE_SECRET_KEY` + `RESEND_API_KEY`/`RESEND_SENDER_EMAIL` on Modal DM only; never in browser or internal-write-api
-- [ ] Resend SMTP + templates synced via `supabase config push` on `main`; SPF/DKIM/DMARC documented
-- [ ] CORS preflight covers PATCH/DELETE/POST on `/admin/users*`, `/admin/users/{id}/signout`, `/admin/email/test`
-- [ ] Idle timeout / remember-me / log-out-everywhere send nothing extra to the server (TC-102)
-- [ ] `admin_delete_user_sessions` RPC apply documented; `503` fallback path covered (TC-098)
-- [ ] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green
+- [x] TC-088–TC-103 green; UJ-030–UJ-038 covered (unit + frontend suites green at close-out; integration/e2e green at 08-verify-build interim)
+- [ ] AC-U1–AC-U16 satisfied (live Resend delivery + test-send verified at 13-deploy-smoke) — **deferred to 13**
+- [ ] User-mgmt audit rows in corpus `audit_log` with UUID `actor_id` only, `entity_type="user"` (TC-092, TC-101) — **live-verified at 13**; covered by tests at build
+- [ ] `SUPABASE_SECRET_KEY` + `RESEND_API_KEY`/`RESEND_SENDER_EMAIL` on Modal DM only; never in browser or internal-write-api — **deploy-config, verified at 12/13**
+- [ ] Resend SMTP + templates synced via `supabase config push` on `main`; SPF/DKIM/DMARC documented — **deploy-time at 13** (checklist in staging runbook, T53.22)
+- [x] CORS preflight covers PATCH/DELETE/POST on `/admin/users*`, `/admin/users/{id}/signout`, `/admin/email/test` (T53.19, TC-103)
+- [x] Idle timeout / remember-me / log-out-everywhere send nothing extra to the server (TC-102)
+- [x] `admin_delete_user_sessions` RPC apply documented; `503` fallback path covered (TC-098, T53.22)
+- [x] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green (`make check` PASS; 496 unit + frontend suites green 2026-06-30)
 
 ---
 
@@ -1579,6 +1579,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | 3 | — | — | — |
 | 4 | 2026-05-19 | **partial** | Automation PASS (CI main green, ruff/pyright/pytest/vitest, UJ-004 bootstrap, eval ≥80%). **Deferred:** live staging H1–H3 (no deploy URLs); D6/D7 Modal weights until first `modal deploy`. |
 | 5 | 2026-05-24 | **pass** | EV-001 merged PR-24; CI main green (run 26373983464); UJ-009/011/012 E2E; TC-046/049 H0c; TC-048 Vitest; D8/D9 verified. **Deferred:** live staging H3b/H4/H5 — operator post-deploy per staging-runbook. |
+| 12 | 2026-06-30 | **partial (build PASS)** | EV-006/F35 07-build close-out. Build criteria PASS: M48–M53 (T48.1–T53.22) complete; `make check` green (ruff/basedpyright/ESLint + Prettier); 496 pytest unit + all frontend Vitest suites green; TC-088–TC-103 covered; CORS preflight (T53.19) + privacy (TC-102) + 503 fallback (TC-098) covered. **Deferred to 13-deploy-smoke:** AC-U1–U16 live Resend delivery, live audit_log rows, secret placement on Modal DM, SMTP/SPF/DKIM/DMARC sync. Fixed typecheck blocker in DM user-admin unit test (private-helper import → shared `tests.helpers.user_admin_mocks`). |
 
 ## Hook Configuration
 
