@@ -426,3 +426,38 @@ def test_resend_invite_passes_redirect_to_accept_invite() -> None:
     assert outbound[-1]["redirect_to"] == (
         "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app/accept-invite"
     )
+def test_reset_password_passes_redirect_to_reset_password() -> None:
+    """TC-105: admin recovery includes redirect_to={origin}/reset-password."""
+    outbound: list[dict[str, object]] = []
+    users = _seed_users()
+    app = create_app(
+        require_proxy_auth=False,
+        admin_client=_make_client(users, outbound=outbound),
+        audit_emit=lambda _event: None,
+    )
+    with TestClient(app) as test_client:
+        response = test_client.post(f"/admin/users/{_VIEWER_ID}/reset-password")
+    assert response.status_code == HTTPStatus.ACCEPTED
+    assert outbound[-1]["redirect_to"] == (
+        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app/reset-password"
+    )
+
+
+def test_invite_returns_503_when_admin_frontend_url_unset(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-104: missing VECINITA_ADMIN_FRONTEND_URL yields 503 on invite."""
+    monkeypatch.delenv("VECINITA_ADMIN_FRONTEND_URL", raising=False)
+    users = _seed_users()
+    app = create_app(
+        require_proxy_auth=False,
+        admin_client=_make_client(users),
+        audit_emit=lambda _event: None,
+    )
+    with TestClient(app) as test_client:
+        response = test_client.post(
+            "/admin/users/invite",
+            json={"email": "missing-env@example.org", "role": "viewer"},
+        )
+    assert response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
+
