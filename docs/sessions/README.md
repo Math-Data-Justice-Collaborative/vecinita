@@ -27,11 +27,12 @@ Then invoke stages from the approved plan (e.g. `@10-e2e`, `@16-evolve`).
 | S001 | ops | in_progress | Modal LLM cold-start reduction via GPU memory snapshots | `feat/S001-modal-cold-start-snapshot` | 2026-06-25 | — |
 | S002 | feature | paused | Admin job management + ingest tag resilience (#88/#89) | `feat/S002-admin-job-management` | 2026-06-26 | — |
 | S003 | feature | completed | Browser-local persistent chat history (F33) | `feat/S003-persistent-chat-history` | 2026-06-26 | 2026-06-28 (QA/e2e/deploy deferred) |
-| S004 | feature | in_progress | Supabase Auth for admin surfaces (#75) — invite-only, admin+viewer | `feat/S004-supabase-auth` | 2026-06-28 | — |
+| S004 | feature | completed | Supabase Auth for admin surfaces (#75) — invite-only, admin+viewer; merged PR #100; deploy-verify deferred | `feat/S004-supabase-auth` | 2026-06-28 | 2026-06-29 (deploy 12/13 deferred) |
+| S005 | feature | in_progress | Admin user mgmt + remember-me + Resend SMTP + email templates (EV-006 / F35) | `feat/S005-user-mgmt-auth` | 2026-06-29 | — |
 
 ## Active session
 
-**S004-supabase-auth** — see `docs/sessions/S004-supabase-auth/` and
+**S005-user-mgmt-auth** — see `docs/sessions/S005-user-mgmt-auth/` and
 `workflow-state.yaml` §`active_session`.
 
 ## Folder layout

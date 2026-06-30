@@ -906,3 +906,73 @@ canonical project (per Supabase best practices), with secrets via Modal/DO env (
 - OAuth / social login providers.
 - RBAC beyond admin + viewer.
 - Any visitor PII in the Vecinita corpus DB.
+
+## 16. EV-006 delta — Admin user management + auth UX (F35)
+
+**Date:** 2026-06-29  
+**Session:** S005-user-mgmt-auth (type feature, orchestrator 16-evolve)  
+**Cycle:** EV-006 · **Feature:** F35 — extends F34 (Supabase admin auth, merged PR #100)  
+**Issue:** [#75](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/75) (auth umbrella)  
+**Apps:** `data-management-frontend`, `data-management-backend`, `supabase/` (config + templates).
+**ChatRAG stays anonymous.**
+
+### Executive summary
+
+F34 delivered login, JWT verification, invite-only registration, and `admin`/`viewer` roles — but
+operators still manage users via Supabase Dashboard or CLI scripts, login always persists to
+`localStorage` with no "remember me" choice, and production invite emails require custom SMTP +
+versioned templates not yet in repo. EV-006 adds an **admin user management page**, a **remember-me
+toggle** on login, **Resend SMTP**, and **HTML email templates** synced through the existing
+Supabase CI workflow.
+
+### Resolution log (EV-006)
+
+| ID | Category | Issue | Resolution |
+|----|----------|-------|------------|
+| R55 | Decision | Active session S004 at deploy-verify | **Close S004** (defer 12/13); **open S005** for EV-006 |
+| R56 | Decision | SMTP provider for production auth emails | **Resend** via `[auth.email.smtp]` in `config.toml` |
+| R57 | Decision | User management operations | **invite, list, change_role, resend, revoke, disable** — admin-only |
+| R58 | Decision | Versioned email templates | **All auth templates** — invite, recovery, confirmation, magic_link, email_change + security notifications |
+| R59 | Decision | Remember-me semantics | **Toggle** — checked → `localStorage`; unchecked → `sessionStorage` (tab-scoped) |
+
+### Pre-built solutions (research summary)
+
+| Capability | Native / pre-built | Custom work required |
+|------------|-------------------|----------------------|
+| Invite users | Supabase `auth.admin.inviteUserByEmail()` | Admin-only backend route + UI form |
+| List / role / ban / delete | Supabase Admin API (`listUsers`, `updateUserById`, `deleteUser`, ban flag) | Backend routes + users table UI |
+| Remember me | `createClient({ auth: { storage } })` — no native checkbox API ([auth-js #571](https://github.com/supabase/auth-js/issues/571)) | Storage adapter + preference key before client init |
+| Email templates | `[auth.email.template.*]` + `content_path` in `config.toml` | HTML files under `supabase/templates/`; branded formatting |
+| Template CI sync | `supabase config push` uploads HTML ([CLI PR #5686](https://github.com/supabase/cli/pull/5686)) | Extend validate job; pin CLI; watch `content_path` resolution quirks |
+| SMTP | `[auth.email.smtp]` in `config.toml` | Resend credentials in secrets (`SUPABASE_SMTP_*` / Dashboard) |
+
+**Not recommended:** third-party auth UI kits (Clerk, Auth0) — would conflict with F34 Supabase
+investment; Supabase Auth UI components — no official user-management table for custom admin apps.
+
+### Stack touch points
+
+| Surface | Change |
+|---------|--------|
+| DM UI | New `/users` page; remember-me on `LoginPage`; sidebar nav item |
+| DM API | New `/admin/v1/users/*` routes (service-role Supabase client, admin JWT gate) |
+| Internal write API | No change (already JWT + role gated) |
+| `supabase/config.toml` | Enable SMTP (Resend); add template + notification `content_path` entries |
+| `supabase/templates/` | New HTML templates (invite, recovery, confirmation, magic_link, email_change, notifications) |
+| `.github/workflows/supabase.yml` | Validate template files exist; sync on main |
+| Secrets | Resend API key / SMTP creds → Supabase Dashboard + `staging-secrets-matrix.md` |
+
+### Unresolved gaps (for 01-requirements)
+
+- Resend domain verification + sender address (`noreply@…`) — operator action.
+- Exact backend route shape and OpenAPI auth scheme for user-mgmt endpoints.
+- Ban vs delete semantics in UI copy (disable = `ban_duration`; revoke = hard delete).
+- Whether viewers can see the users page read-only or it is admin-only entirely.
+- Minimum Supabase CLI version pin for template HTML push.
+- i18n for new admin strings (en/es per F31 pattern).
+
+### Out of scope (EV-006)
+
+- ChatRAG visitor auth.
+- OAuth / social providers.
+- Bulk CSV user import.
+- Operator PII in corpus DB.
