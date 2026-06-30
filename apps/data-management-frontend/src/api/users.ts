@@ -210,6 +210,22 @@ export async function deleteUser(
   }
 }
 
+export async function revokeInvite(
+  options: UsersClientOptions,
+  userId: string,
+): Promise<void> {
+  const response = await fetch(
+    `${options.baseUrl}/admin/users/${userId}/revoke-invite`,
+    {
+      method: "POST",
+      headers: usersHeaders(options),
+    },
+  );
+  if (!response.ok) {
+    return parseError(response, "Retract invitation");
+  }
+}
+
 export async function resetUserPassword(
   options: UsersClientOptions,
   userId: string,

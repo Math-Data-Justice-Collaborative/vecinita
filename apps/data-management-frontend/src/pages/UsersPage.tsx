@@ -15,6 +15,7 @@ import {
   listUsers,
   MechanismUnavailableError,
   resendInvite,
+  revokeInvite,
   resetUserPassword,
   sendTestEmail,
 } from "@/api/users";
@@ -402,6 +403,7 @@ export function UsersPage() {
                   <TableHead>{tr("admin.users.columnEmail")}</TableHead>
                   <TableHead>{tr("admin.users.columnRole")}</TableHead>
                   <TableHead>{tr("admin.users.columnStatus")}</TableHead>
+                  <TableHead>{tr("admin.users.columnInvitedAt")}</TableHead>
                   <TableHead>{tr("admin.users.columnLastSignIn")}</TableHead>
                   <TableHead>{tr("admin.users.columnActions")}</TableHead>
                 </TableRow>
@@ -417,6 +419,19 @@ export function UsersPage() {
                       <Badge variant={STATUS_VARIANT[user.status]}>
                         {tr(STATUS_KEY[user.status])}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {user.status === "invited" ? (
+                        <span data-testid={`invite-meta-${user.id}`}>
+                          {user.created_at
+                            ? formatLocaleDateTime(locale, user.created_at)
+                            : "—"}
+                          {" · "}
+                          {tr("admin.users.inviteExpiresHint")}
+                        </span>
+                      ) : (
+                        "—"
+                      )}
                     </TableCell>
                     <TableCell>
                       {user.last_sign_in_at
@@ -436,21 +451,38 @@ export function UsersPage() {
                         </Link>
                       </Button>
                       {user.status === "invited" ? (
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          disabled={actionBusy === user.id}
-                          data-testid={`resend-invite-${user.id}`}
-                          onClick={() => {
-                            void runAction(user.id, async () => {
-                              const client = requireAdminConfig();
-                              await resendInvite(client, user.id);
-                            });
-                          }}
-                        >
-                          {tr("admin.users.action.resendInvite")}
-                        </Button>
+                        <>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            disabled={actionBusy === user.id}
+                            data-testid={`resend-invite-${user.id}`}
+                            onClick={() => {
+                              void runAction(user.id, async () => {
+                                const client = requireAdminConfig();
+                                await resendInvite(client, user.id);
+                              });
+                            }}
+                          >
+                            {tr("admin.users.action.resendInvite")}
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="destructive"
+                            disabled={actionBusy === user.id}
+                            data-testid={`revoke-invite-${user.id}`}
+                            onClick={() => {
+                              void runAction(user.id, async () => {
+                                const client = requireAdminConfig();
+                                await revokeInvite(client, user.id);
+                              });
+                            }}
+                          >
+                            {tr("admin.users.action.retractInvite")}
+                          </Button>
+                        </>
                       ) : null}
                       {user.status === "disabled" ? (
                         <Button
