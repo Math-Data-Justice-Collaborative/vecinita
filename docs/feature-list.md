@@ -44,6 +44,7 @@
 | F32 | Admin Job Management tab (list jobs) | Implemented | Data Management | data-management-backend, data-management-frontend | S002 2026-06-26 (#89) |
 | F33 | Browser-local persistent chat history (localStorage + previous-chats list) | Planned | ChatRAG | chat-rag-frontend | S003 2026-06-26; ADR-025 2026-06-28 |
 | F34 | Supabase Auth for admin surfaces (invite-only, admin+viewer) | Planned | Cross-cutting (admin) | data-management-frontend, data-management-backend, internal-write-api | S004/EV-005 2026-06-28; ADR-026 (#75) |
+| F35 | Admin user management + remember-me + Resend SMTP/templates | Planned | Cross-cutting (admin) | data-management-frontend, data-management-backend, supabase config + CI | S005/EV-006 2026-06-29; ADR-029 (#75) |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -234,12 +235,13 @@
 | F32 Admin Job Management tab | No | Yes | No | No |
 | F33 Persistent chat history (browser-local) | Yes | No | No | No |
 | F34 Supabase admin auth | No | Yes | No | No |
+| F35 Admin user management + auth UX | No | Yes | No | No |
 
 ## Out of Scope (v1)
 
 | Item | Rationale | Source |
 |------|-----------|--------|
-| ~~User/admin accounts, Supabase Auth, OAuth, invite-by-email~~ → **partially admitted in EV-005 (F34)** for **admin surfaces only**: Supabase Auth + email invite + password login + `admin`/`viewer` roles. **OAuth/social login remains out of scope.** Visitor (ChatRAG) auth still excluded. | Admin-surface auth required by #75; ADR-026 supersedes ADR-004 auth clause for admin only | User interview; #75; ADR-026 |
+| ~~User/admin accounts, Supabase Auth, OAuth, invite-by-email~~ → **partially admitted in EV-005 (F34)** for **admin surfaces only**: Supabase Auth + email invite + password login + `admin`/`viewer` roles. EV-006 (F35) further admits **in-app operator lifecycle management** (invite/list/role/resend/disable/revoke/admin-reset), **remember-me**, **self-service password reset**, and **repo-versioned Resend SMTP emails**. **OAuth/social login, MFA/2FA, and bulk CSV user import remain out of scope.** Visitor (ChatRAG) auth still excluded. | Admin-surface auth + operator management required by #75; ADR-026/ADR-029 supersede ADR-004 auth clause for admin only | User interview; #75; ADR-026; ADR-029 |
 | Paid third-party LLM/embed APIs as default | Cost + sovereignty (ADR-004) | User interview |
 | RFantibody / PyRosetta / protein design | Wrong product domain; stale rules only | User interview |
 | Multi-region / non-US deployment | Data sovereignty R10a | User interview |
@@ -500,6 +502,58 @@
 - **Privacy (F15 extended, not relaxed)**: corpus DB keeps the forbidden-table deny-list (`users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`, `auth_*`); Supabase manages its own `auth.*` schema in a separate database; `audit_log` may add only `actor_id` (UUID) + `actor_role`.
 - **Priority**: High — direct user request (#75); unblocks per-user dashboards and audit attribution.
 - **Source**: S004 / EV-005 interview 2026-06-28 (RD-073–RD-079); context-brief §15; ADR-026; #75.
+
+### F35: Admin user management + remember-me + Resend SMTP/templates
+
+- **What it does**: Builds operator-facing auth tooling on top of F34 so the team manages users
+  **in-app** (no Supabase Dashboard dependency), stays signed in across browser restarts, recovers
+  forgotten passwords, and ships **versioned bilingual auth emails** through **Resend**, synced to
+  Supabase via CI/CD.
+- **Protected surfaces**:
+  | Surface | Path | Change |
+  |---------|------|--------|
+  | Data Management UI | `apps/data-management-frontend/` | New `/users` page + sidebar nav (admin-only); remember-me checkbox + "Forgot password?" link on login; in-app reset page |
+  | Data Management API | `apps/data-management-backend/` (host TBD 04-tech-plan) | New admin-only `/admin/users*` endpoints wrapping the Supabase **Admin API** (service key server-side only) |
+  | Supabase config | `supabase/config.toml`, `supabase/templates/` | `[auth.email.smtp]` (Resend), 6 versioned bilingual templates, rate-limit/expiry settings |
+  | CI/CD | `.github/workflows/supabase.yml` | Validate template paths offline; `config push` templates on merge to `main`; pinned Supabase CLI |
+- **Sub-features**:
+  | # | Capability | Detail |
+  |---|-----------|--------|
+  | F35.1 | User management page | List operators (email, role, status, last sign-in); invite (email + role); change role; resend invite; disable/enable (ban/unban); revoke (delete); admin-triggered password reset. Admin-only; `viewer` → `403` and controls hidden. |
+  | F35.2 | Remember-me | Login checkbox (**default checked**). Checked → session in `localStorage` (survives restart); unchecked → `sessionStorage` (clears on tab close). Preference persisted in `localStorage` key `vecinita.auth.remember`; storage adapter chosen before `createClient` (supabase-js has no native flag). |
+  | F35.3 | Self-service password reset | "Forgot password?" link → Supabase recovery email → in-app reset page completes via `updateUser`. |
+  | F35.4 | Resend SMTP (hybrid) | Resend provisions API key + verified domain; SMTP encoded in `config.toml` (`pass = env(SUPABASE_SMTP_PASS)`) so `config push` is the single source of truth. `smtp.resend.com:465`, user `resend`. |
+  | F35.5 | Versioned bilingual templates | Six surfaces (invite, recovery, confirmation, magic_link, email_change, security notifications) as HTML in `supabase/templates/`, **stacked bilingual** (EN section + ES section). |
+  | F35.6 | CI/CD sync | `supabase.yml` validate (offline path lint) + `sync-production` (`config push` with template HTML, CLI ≥ #5686, pinned). |
+  | F35.7 | Idle/session timeout | Client-side inactivity timer (default **30 min**) with a **1-min warning modal**; signs out the current device (`signOut({scope:"local"})`) → login. Config `VITE_VECINITA_IDLE_TIMEOUT_MIN`/`_WARNING_SEC`. Frontend-only. (ADR-031 TP-S005-17) |
+  | F35.8 | Log out of all devices | Self-service account action calling global `signOut()` (revokes all refresh tokens) **and** an admin **force-logout** of another operator via `POST /admin/users/{id}/signout`. (ADR-031 TP-S005-18/19) |
+  | F35.9 | User search + pagination | Server-side email search (`q` ≥ 3 chars → GoTrue `filter`) + `page`/`page_size` with shared `PaginationControls`. (ADR-031 TP-S005-20) |
+  | F35.10 | Audit viewer for user events | Reuse F29 AuditPage + `GET /internal/v1/audit`; add `entity_type` "Users" filter, i18n labels for `user.*`/`email.*` events, and a per-row "View activity" link. (ADR-031 TP-S005-21) |
+  | F35.11 | Deliverability test-send | Admin "Send test email" → `POST /admin/email/test` via Resend REST (proves domain + SPF/DKIM/DMARC); + operator DNS checklist in the runbook. (ADR-031 TP-S005-22/23) |
+- **Key parameters / decisions**:
+  | Item | Value | Source |
+  |------|-------|--------|
+  | Remember-me default | **Checked** (persist) | RD-084 |
+  | Remember-me key | `vecinita.auth.remember` (`localStorage`) | RD-084 |
+  | SMTP sourcing | **Hybrid** — Resend creds, config.toml is source of truth | RD-085 |
+  | SMTP transport | `smtp.resend.com`, port `465`, user `resend`, pass `env(SUPABASE_SMTP_PASS)` | RD-085 |
+  | Email language | **Stacked bilingual** (EN+ES per template) | RD-086 |
+  | Templates versioned | invite, recovery, confirmation, magic_link, email_change, security notifications | RD-086 |
+  | User ops | invite, list, change_role, resend, disable, revoke, admin_reset | RD-081, RD-082 |
+  | Audit | user-mgmt actions → `audit_log` (`actor_id` UUID + `actor_role`, no PII) | RD-089 |
+  | CLI pin | Supabase CLI version pinned in `supabase.yml` (template-HTML push, #5686) | RD-088 |
+- **Privacy (F15/ADR-026 preserved)**: operator email/role/status are read from Supabase and shown
+  in the admin UI **in transit only** — never written to the Vecinita corpus DB. `audit_log` keeps
+  only the opaque Supabase UUID + role. Forbidden-table deny-list unchanged.
+- **Limitations / scope**: No OAuth/social login; no RBAC beyond `admin`+`viewer`; no MFA/2FA (may be
+  a later cycle); no bulk CSV user import; no failed-login lockout beyond Supabase's built-in email
+  rate limits; ChatRAG stays anonymous. Supabase serves one template per type (no per-recipient
+  locale switching) — hence stacked-bilingual templates.
+- **Priority**: High — direct user request (#75 follow-on).
+- **Source**: S005 / EV-006 interview 2026-06-29 (RD-080–RD-089; scope addition TP-S005-17–24);
+  session-brief S005; ADR-029, ADR-031; #75; research (Supabase Admin API + `listUsers` `filter`,
+  supabase-js `signOut` scopes, `auth.sessions` revoke, Resend SMTP + REST, supabase-js storage
+  adapter, CLI PR #5686 / issue #5124).
 
 ## Planned / Deferred (post-v1)
 

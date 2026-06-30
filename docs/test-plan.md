@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-28 (S004/EV-005 F34 — Supabase admin auth)  
+> **Last updated**: 2026-06-29 (S005/EV-006 F35 — admin user management + auth UX; TC-088–TC-103)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -52,6 +52,15 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-027 Invite-only registration | `tests/e2e/test_uj027_invite_only_registration.py` | TC-080 |
 | UJ-028 Unauthenticated admin rejected | `tests/e2e/test_uj028_unauthenticated_admin.py` | TC-078, TC-083 |
 | UJ-029 Viewer blocked from writes | `tests/e2e/test_uj029_role_gating.py` + Vitest in `data-management-frontend` | TC-079, TC-081, TC-085 |
+| UJ-030 Admin user management | `tests/e2e/test_uj030_user_management.py` + Vitest in `data-management-frontend` | TC-088, TC-089, TC-092 |
+| UJ-031 Invite from page | `tests/e2e/test_uj031_invite_from_page.py` | TC-090, TC-092 |
+| UJ-032 Remember-me | Vitest in `data-management-frontend` | TC-091 |
+| UJ-033 Password reset | Vitest in `data-management-frontend` | TC-093 |
+| UJ-034 Idle timeout | Vitest in `data-management-frontend` | TC-096, TC-102 |
+| UJ-035 Log out of all devices | Vitest in `data-management-frontend` | TC-097, TC-102 |
+| UJ-036 Admin force sign-out | `tests/e2e/test_uj036_force_signout.py` + Vitest | TC-098, TC-103 |
+| UJ-037 Deliverability test-send | `tests/e2e/test_uj037_email_test_send.py` | TC-099, TC-103 |
+| UJ-038 Audit viewer for user events | Vitest in `data-management-frontend` | TC-101 |
 
 **E2E tier (v1):** `local` — TestClient, test Postgres (Docker/testcontainers), **mocked Modal** HTTP.
 
@@ -477,6 +486,109 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Objective**: Repo-managed Supabase CI validates config offline and defines gated remote sync jobs.
 - **Input**: `tests/smoke/test_supabase_ci_contract.py` asserts `.github/workflows/supabase.yml`, `scripts/check_supabase_config.sh`, and `scripts/supabase/ci_sync.sh` exist with invite-only `config.toml` contract.
 - **Expected**: Smoke tests pass in CI; `validate` job runs on PRs without cloud secrets; cloud jobs skip when `SUPABASE_ACCESS_TOKEN` is unset.
+
+### EV-006 — Admin user management + auth UX (F35)
+
+> Admin-API tests run against a Supabase test/branch project or a mocked Admin API — **no real
+> mailboxes are created in CI**. Email delivery (Resend SMTP + template rendering) is verified by
+> the Supabase CI config contract (TC-094) and live at 13-deploy-smoke.
+
+### TC-088: Admin lists and mutates operators (UJ-030, F35)
+
+- **Objective**: `/admin/users*` admin routes wrap the Supabase Admin API for the full lifecycle.
+- **Input**: As `admin`: `GET /admin/users`; then `PATCH /admin/users/{id}/role`, `POST .../resend-invite`, `POST .../disable`, `POST .../enable`, `DELETE /admin/users/{id}`, `POST .../reset-password`.
+- **Expected**: `200`/`204` per op mapping to the correct Supabase Admin call; list returns email, role, status, last sign-in; each mutation emits an `audit_log` row with `actor_id` (UUID) + `actor_role`.
+- **Payloads**: invite `{"email":"op@example.org","role":"viewer"}`; role `{"role":"admin"}`.
+
+### TC-089: Viewer blocked from user management (UJ-030, F35)
+
+- **Objective**: `/admin/users*` writes (and the page) require `admin`.
+- **Input**: Each `/admin/users*` route with a valid `viewer` JWT; render `/users` with a `viewer` session.
+- **Expected**: API → `403`, no side effect; UI → `/users` nav item and controls hidden/disabled.
+
+### TC-090: Invite from the User Management page (UJ-031, F35)
+
+- **Objective**: `POST /admin/users/invite` creates an invited identity with the assigned role.
+- **Input**: `admin` posts `{"email":"new@example.org","role":"viewer"}`.
+- **Expected**: Supabase `inviteUserByEmail` called; identity created as `invited` with `app_metadata.role=viewer`; audited; public self-signup still rejected (regression of TC-080).
+
+### TC-091: Remember-me storage routing (UJ-032, F35)
+
+- **Objective**: Checkbox default + storage routing + persistence of the preference.
+- **Input**: Render the login form (Vitest/jsdom); assert default checked; sign in with checked vs unchecked; inspect storage; toggle and re-login; logout.
+- **Expected**: Default checked; checked → session in `localStorage`, unchecked → `sessionStorage`; `vecinita.auth.remember` persisted/read; storage chosen before `createClient`; logout clears the active storage.
+
+### TC-092: User-management actions audited without PII (UJ-030/UJ-031, F35, extends TC-081)
+
+- **Objective**: invite/role-change/disable/delete/reset are attributed to a non-PII actor.
+- **Input**: Perform each mutation as `admin`; introspect `audit_log`.
+- **Expected**: Each emits a row with `actor_id` (UUID) + `actor_role`; no email/name/PII column populated; operator email/role/status are never written to the corpus DB (returned in transit only).
+
+### TC-093: Self-service password reset flow (UJ-033, F35)
+
+- **Objective**: Forgot-password + in-app reset use Supabase recovery without leaking account existence.
+- **Input**: Submit "Forgot password?" with a registered and an unregistered email (Vitest mocks `resetPasswordForEmail`); render the reset page and submit a new password (`updateUser`).
+- **Expected**: `resetPasswordForEmail` called; **generic** confirmation regardless of account existence; reset page calls `updateUser`; success routes to login.
+
+### TC-094: Supabase email config + template contract (F35, ADR-029)
+
+- **Objective**: `config.toml` + templates form a valid, syncable contract (offline).
+- **Input**: Extend `tests/smoke/test_supabase_ci_contract.py` / `scripts/check_supabase_config.sh` to assert: `[auth.email.smtp]` enabled with Resend host/port/user and `pass = env(SUPABASE_SMTP_PASS)`; six `[auth.email.template.*]`/`[auth.email.notification.*]` blocks with `content_path`; each referenced HTML file exists and contains both EN and ES sections (stacked bilingual); `supabase.yml` pins a CLI version supporting #5686.
+- **Expected**: Offline contract passes in CI without cloud secrets; cloud `sync-production` (`config push`) gated on `SUPABASE_ACCESS_TOKEN`.
+
+### TC-095: Email template path-resolution convention (F35, #5124)
+
+- **Objective**: Guard the CLI path-resolution gotcha so `config push` finds every template.
+- **Input**: Assert `auth.email.template.*` `content_path` values resolve from the **project root** and `auth.email.notification.*` from the **`supabase/`** directory (per issue #5124), and that all paths exist relative to those bases.
+- **Expected**: All template/notification paths resolve under their respective base; CI fails if a path is mis-rooted.
+
+### TC-096: Idle timeout warns then signs out (UJ-034, F35, ADR-031)
+
+- **Objective**: Inactivity triggers a warning then a local sign-out; activity resets the timer.
+- **Input**: `test_idle_timeout.test.tsx` (Vitest fake timers) — advance to threshold; assert warning modal; dispatch activity → timer resets; advance past warning → `signOut({scope:"local"})` + redirect to `/login`.
+- **Expected**: Warning shows at `VITE_VECINITA_IDLE_TIMEOUT_MIN`; activity resets; timeout calls local sign-out and redirects; values read from build env.
+
+### TC-097: Log out of all devices uses global scope (UJ-035, F35, ADR-031)
+
+- **Objective**: Self global sign-out vs ordinary local sign-out.
+- **Input**: `test_logout_all_devices.test.tsx` — click "Log out of all devices" and standard logout (Vitest mocks `signOut`).
+- **Expected**: "All devices" → `signOut()` (default global); standard logout → `signOut({scope:"local"})`; both redirect to login.
+
+### TC-098: Admin force-signs-out another operator (UJ-036, F35, ADR-031)
+
+- **Objective**: `POST /admin/users/{id}/signout` revokes the target's sessions, is admin-gated and audited; RPC-absent path degrades.
+- **Input**: `tests/e2e/test_uj036_force_signout.py` (TestClient; Supabase RPC mocked) — admin call; viewer call; RPC-unavailable.
+- **Expected**: admin → `202` + `user.signed_out` audit (target `entity_id`, no PII); viewer → `403`; RPC absent → `503 mechanism_unavailable`.
+
+### TC-099: Deliverability test-send (UJ-037, F35, ADR-031)
+
+- **Objective**: `POST /admin/email/test` sends via Resend REST, is admin-gated, rate-limited, audited domain-only, and handles unconfigured state.
+- **Input**: `tests/e2e/test_uj037_email_test_send.py` (TestClient; Resend REST `httpx` mocked) — admin valid; viewer; 6th call within an hour; secrets unset.
+- **Expected**: admin → `202` + `message_id`; viewer → `403`; >5/h → `429`; unset secrets → `503 email_unconfigured`; audit payload contains recipient **domain** only.
+
+### TC-100: User list search + pagination (UJ-030, F35, ADR-031)
+
+- **Objective**: `q` forwards to the GoTrue `filter` param with the ≥3-char guard; pagination works.
+- **Input**: Backend test (Admin API mocked) — `q="ab"` (too short), `q="alice"`, `page`/`page_size`; Vitest `UsersPage` search box + `PaginationControls`.
+- **Expected**: `q` < 3 non-empty → `400 invalid_search`; valid `q` forwarded as `filter`; page/page_size respected; UI renders pagination and search.
+
+### TC-101: Audit viewer surfaces user events with labels + filter (UJ-038, F35, ADR-031)
+
+- **Objective**: AuditPage shows `user.*`/`email.*` events with EN/ES labels, an `entity_type` "Users" filter, and a per-user link.
+- **Input**: `test_audit_user_events.test.tsx` (Vitest; `GET /internal/v1/audit` mocked) — render with mixed events; apply entity-type filter; click a Users-page "View activity" link.
+- **Expected**: user/email events render with friendly bilingual labels; entity-type filter narrows results; per-user link sets the `entity_id` filter; no PII shown.
+
+### TC-102: Idle/auth-UX no extra server traffic (privacy, F35/ADR-026)
+
+- **Objective**: Idle timeout, remember-me, and "log out everywhere" send nothing extra to the server (browser-local only).
+- **Input**: Vitest — assert no network calls beyond Supabase auth (`signOut`); no payload includes operator PII.
+- **Expected**: Only Supabase auth calls fire; no Vecinita-corpus writes; identity residency preserved (ADR-026).
+
+### TC-103: Force-logout & test-send lockout/guard parity (F35, ADR-031)
+
+- **Objective**: New endpoints honor CORS (PATCH/POST/DELETE) and audit-no-PII guards consistent with TP-S005-04/15.
+- **Input**: Backend tests — CORS preflight on `/admin/users/{id}/signout` and `/admin/email/test`; audit payload assertions.
+- **Expected**: Preflight allows the methods + `Authorization`; audit rows carry UUIDs/role/domain only.
 
 ## Test Data
 

@@ -1,7 +1,7 @@
 # Configuration Specification
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-28 (S004/EV-005 F34 — Supabase admin auth)
+> **Last updated**: 2026-06-29 (S005/EV-006 F35 — admin user management + Resend SMTP/templates + remember-me)
 
 ## Precedence
 
@@ -86,6 +86,55 @@ from the verified JWT (no `user_roles` table).
 | `VITE_SUPABASE_URL` | string | — | Yes (admin build) | Supabase project URL for `@supabase/supabase-js` |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | string | — | Yes (admin build) | Supabase **publishable** key (browser-safe; new key scheme, formerly anon) |
 
+### Admin user management + email (EV-006 F35)
+
+User-management endpoints (`/admin/users*`) wrap the Supabase **Admin API**; the secret key is used
+**server-side only**. Email delivery uses **Resend** SMTP, encoded in `supabase/config.toml` so
+`supabase config push` is the single source of truth (ADR-029). Identity stays in Supabase; the
+corpus DB stays PII-free.
+
+**Backend hosting `/admin/users*` (host resolved in 04-tech-plan):**
+
+| Variable | Type | Default | Required | Description |
+|----------|------|---------|----------|-------------|
+| `SUPABASE_SECRET_KEY` | string (secret) | — | Yes (F35) | Supabase Admin API key for `/admin/users*` (invite/list/role/disable/delete/reset). **Server-side only**; never in browser builds. Previously seed/operator-shell only (F34). |
+| `SUPABASE_SMTP_PASS` | string (secret) | — | Yes (F35 prod) | Resend API key; referenced by `[auth.email.smtp] pass = "env(SUPABASE_SMTP_PASS)"` in `config.toml`. Read by Supabase/CLI, **not** by Vecinita backends. |
+| `RESEND_API_KEY` | string (secret) | — | Yes (F35 test-send) | Resend API key (same value as `SUPABASE_SMTP_PASS`) read by the **DM backend** for `POST /admin/email/test` (Resend REST). Modal DM secret only. (ADR-031 TP-S005-22) |
+| `RESEND_SENDER_EMAIL` | string | — | Yes (F35 test-send) | Verified Resend sender address (= `[auth.email.smtp] admin_email`) used as the `from` for test sends. Modal DM secret. (ADR-031 TP-S005-22) |
+
+**Supabase `config.toml` (versioned; synced via `config push`):**
+
+| Block / key | Value | Notes |
+|-------------|-------|-------|
+| `[auth.email.smtp] enabled` | `true` (prod) | Custom SMTP via Resend |
+| `[auth.email.smtp] host` | `smtp.resend.com` | Resend SMTP host |
+| `[auth.email.smtp] port` | `465` | Resend SMTP port |
+| `[auth.email.smtp] user` | `resend` | Resend SMTP username |
+| `[auth.email.smtp] pass` | `env(SUPABASE_SMTP_PASS)` | Resend API key (secret) |
+| `[auth.email.smtp] admin_email` / `sender_name` | operator-supplied verified sender (RD-090) | Verified Resend domain |
+| `[auth.email.template.{invite,recovery,confirmation,magic_link,email_change}]` | `content_path` → `supabase/templates/*.html` | Path resolves from **project root** (#5124); stacked-bilingual HTML |
+| `[auth.email.notification.{password_changed,email_changed,mfa_*}]` | `content_path` → `templates/*.html` | Path resolves from **`supabase/`** (#5124) |
+| `[auth.rate_limit] email_sent` | `30` | Max auth emails/hour (custom SMTP required); TP-S005-07 |
+| `[auth.email] otp_expiry` | `3600` | OTP/recovery/invite acceptance token expiry (seconds); TP-S005-07 |
+| `[auth.email] max_frequency` | `60s` | Per-user resend cooldown between auth emails |
+| `[auth] minimum_password_length` | `8` | Minimum operator password length; TP-S005-11 |
+| App invite rate limit | `10/hour/admin JWT` | DM backend sliding window on `POST /admin/users/invite`; TP-S005-07 |
+| App test-send rate limit | `5/hour/admin JWT` | DM backend sliding window on `POST /admin/email/test`; TP-S005-22 |
+| User search `q` | `≥ 3 chars` → GoTrue `filter` | `GET /admin/users`; `< 3` non-empty → `400 invalid_search`; TP-S005-20 |
+
+**DM frontend — auth UX browser config (build-time, not server secrets):**
+
+| Key | Source | Default | Valid | Description |
+|-----|--------|---------|-------|-------------|
+| `VITE_VECINITA_IDLE_TIMEOUT_MIN` | build env | `30` | int ≥ 1 | Minutes of inactivity before auto sign-out of the current device (UJ-034). TP-S005-17 |
+| `VITE_VECINITA_IDLE_WARNING_SEC` | build env | `60` | int ≥ 5 | Seconds the "Stay signed in?" warning shows before timeout. TP-S005-17 |
+
+**DM frontend — remember-me (browser state, not server env):**
+
+| Key | Storage | Default | Values | Description |
+|-----|---------|---------|--------|-------------|
+| `vecinita.auth.remember` | `localStorage` | `true` (checked) | `true` \| `false` | Remember-me preference (UJ-032). `true` → Supabase session in `localStorage`; `false` → `sessionStorage`. Read **before** `createClient` to select the `storage` adapter. |
+
 ### Data Management (Modal)
 
 | Variable | Type | Default | Required | Description |
@@ -157,6 +206,12 @@ from the verified JWT (no `user_roles` table).
 | `VECINITA_AUTH_REQUIRED` in `true`, `false` | Config module (admin backends, F34) |
 | `SUPABASE_URL` set when `VECINITA_AUTH_REQUIRED=true` | Admin backend startup (F34; JWKS from URL) |
 | ChatRAG `VECINITA_CORS_ORIGINS` is non-wildcard, frontend origin only | Config / deploy review (F34, RD-079) |
+| `SUPABASE_SECRET_KEY` set on the backend hosting `/admin/users*` | Admin user-mgmt startup (F35); server-side only |
+| `[auth.email.template.*]` `content_path` resolves from project root; `[auth.email.notification.*]` from `supabase/` | `scripts/check_supabase_config.sh` / TC-095 (#5124) |
+| `[auth.email.smtp] pass` references `env(SUPABASE_SMTP_PASS)` (no literal secret) | Supabase config contract (F35, TC-094) |
+| `vecinita.auth.remember` in `true`, `false` | DM frontend (F35; default `true`) |
+| `RESEND_API_KEY` + `RESEND_SENDER_EMAIL` set on DM backend hosting `/admin/email/test` | Test-send startup (F35); `503 email_unconfigured` if unset (TP-S005-22) |
+| `q` on `GET /admin/users` is empty or ≥ 3 chars | DM backend (F35; `400 invalid_search` otherwise, TP-S005-20) |
 
 ## Configuration files
 

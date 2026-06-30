@@ -1,7 +1,7 @@
 # API Contract
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-28 (S004/EV-005 F34 — Supabase admin auth)  
+> **Last updated**: 2026-06-29 (S005/EV-006 F35 — admin user management `/admin/users*`)  
 > **OpenAPI**: Source of truth in repo — `openapi/chat-rag.yaml`, `openapi/data-management.yaml`, `openapi/internal-write.yaml`
 
 Contracts are **greenfield** (ADR-003). Public routes must not accept identity fields (`email`, `user_id`, `name`, etc.).
@@ -15,6 +15,7 @@ Contracts are **greenfield** (ADR-003). Public routes must not accept identity f
 | **ChatRAG Backend** (`/api/v1/*`, `/health`) | **None (anonymous)** | Stateless; CORS restricted to the ChatRAG frontend origin only (RD-079). Identity fields still rejected (`400`). |
 | **Data Management — Modal** (`/jobs*`) | **Supabase JWT** (operator) | `Authorization: Bearer <supabase_jwt>`; `401` missing/invalid. |
 | **Internal Write API** (`/internal/v1/*`) | **Supabase JWT** (operator) **or** `VECINITA_INTERNAL_API_KEY` (service-to-service) | Operator requests use the bearer JWT; Modal→write service calls keep the machine API key. Write routes require role `admin` (`403` for `viewer`). |
+| **Admin user management** (`/admin/users*`, EV-006 F35) | **Supabase JWT**, role `admin` only | Wraps the Supabase **Admin API** server-side (`SUPABASE_SECRET_KEY` never in browser). Hosted on **DM Modal ASGI** (ADR-030). `viewer` → `403`. |
 
 - **Scheme**: OpenAPI `securitySchemes` — `bearerAuth` (`type: http`, `scheme: bearer`, `bearerFormat: JWT`) on admin routes; the internal-write API also documents the existing `apiKeyAuth` for service calls.
 - **Token**: Supabase-issued JWT obtained by the DM frontend via `@supabase/supabase-js`. Backends verify the **HS256** signature (`SUPABASE_JWT_SECRET`), `exp`, and `aud`; role read from the **`app_metadata.role`** claim (resolved 04-tech-plan, TP-S004-01/02, ADR-027).
@@ -22,6 +23,80 @@ Contracts are **greenfield** (ADR-003). Public routes must not accept identity f
 - **Attribution**: write handlers record `actor_id` (opaque Supabase user UUID) + `actor_role` on `audit_log` — no email/name/PII (extends ADR-016).
 - **Errors**: `401` (missing/invalid/expired token), `403` (authenticated but insufficient role).
 - **No request/response schema changes** to existing ChatRAG or admin endpoints — only the auth requirement (header) and `401`/`403` responses are added on admin routes.
+
+---
+
+## Admin user management (EV-006 F35, ADR-029)
+
+New **admin-only** namespace that wraps the Supabase **Admin API** server-side. All routes require a
+Supabase JWT with role `admin`; `viewer` → `403`; missing/invalid → `401`. The `SUPABASE_SECRET_KEY`
+is used **server-side only** and never exposed to the browser. Operator email/role/status are
+returned to the admin UI **in transit only** — never persisted to the Vecinita corpus DB (ADR-026).
+Every mutating route emits an `audit_log` row with `actor_id` (UUID) + `actor_role` (no PII). The
+host backend is the **Data Management Modal ASGI**; audit rows are written via service-to-service
+**POST `/internal/v1/audit/event`** on internal-write-api (ADR-030).
+
+**Auth:** `Authorization: Bearer <supabase_jwt>` (role `admin`).
+
+### GET `/admin/users`
+
+- **Purpose**: List operators for the User Management page (UJ-030).
+- **Query**: `page` (default 1), `page_size` (default 50), `q` (optional email search, **≥ 3 chars** — forwarded to the GoTrue Admin `filter` param; TP-S005-20).
+- **Response** `200`: `{"users": [{"id": "<uuid>", "email": "...", "role": "admin|viewer", "status": "active|disabled|invited", "last_sign_in_at": "<iso8601|null>", "created_at": "<iso8601>"}], "page": 1, "page_size": 50, "total": N}`.
+- **Errors**: `400 invalid_search` if `q` is non-empty and shorter than 3 chars.
+
+### POST `/admin/users/invite`
+
+- **Purpose**: Invite a new operator by email (UJ-031); wraps `inviteUserByEmail`; sends the repo-versioned invite template via Resend.
+- **Request**: `{"email": "new@example.org", "role": "admin|viewer"}`.
+- **Response** `201`: `{"id": "<uuid>", "email": "...", "role": "viewer", "status": "invited"}`. Errors: `409` if the email already exists.
+
+### PATCH `/admin/users/{user_id}/role`
+
+- **Purpose**: Change an operator's role (sets `app_metadata.role`).
+- **Request**: `{"role": "admin|viewer"}`. **Response** `200`: updated user.
+
+### POST `/admin/users/{user_id}/resend-invite`
+
+- **Purpose**: Re-send the invite email to a pending invitee. **Response** `202`.
+
+### POST `/admin/users/{user_id}/disable` · POST `/admin/users/{user_id}/enable`
+
+- **Purpose**: Ban / un-ban an operator (`updateUserById({ ban_duration })`). **Response** `200`: updated user with `status`.
+
+### DELETE `/admin/users/{user_id}`
+
+- **Purpose**: Revoke (delete) an operator (`deleteUser`). **Response** `204`.
+
+### POST `/admin/users/{user_id}/reset-password`
+
+- **Purpose**: Admin-triggered password reset — sends a recovery email (UJ-030 step 7). **Response** `202`.
+
+### POST `/admin/users/{user_id}/signout` (EV-006 F35 addition, ADR-031 TP-S005-19)
+
+- **Purpose**: Admin force-logout of a **target** operator — revokes their refresh tokens / sessions while keeping the account enabled (UJ-036).
+- **Mechanism**: backend invokes the `admin_delete_user_sessions(uid)` Supabase RPC (service key); see ADR-031 §TP-S005-19.
+- **Response** `202`: `{"acknowledged": true}`. Emits `user.signed_out` audit event.
+- **Errors**: `503 mechanism_unavailable` if the session-revoke RPC is not yet applied to the Supabase project (operator runbook step). **Note**: the target's current access token stays valid until `exp` (≤ 1h).
+
+### POST `/admin/email/test` (EV-006 F35 addition, ADR-031 TP-S005-22)
+
+- **Purpose**: Send a branded test email to verify Resend domain + DNS (SPF/DKIM/DMARC) deliverability (UJ-037).
+- **Request**: `{"to": "operator@example.org"}`.
+- **Mechanism**: backend calls the **Resend REST API** (`POST https://api.resend.com/emails`, bearer `RESEND_API_KEY`) from `RESEND_SENDER_EMAIL`. Rate-limited **5/hour per admin JWT**.
+- **Response** `202`: `{"message_id": "<resend-id>"}`. Emits `email.test_sent` (audit payload: recipient **domain** only — no full address).
+- **Errors**: `400` invalid email; `503 email_unconfigured` if `RESEND_API_KEY`/`RESEND_SENDER_EMAIL` are unset; `429` rate limit.
+
+> **Self-service** password reset (UJ-033), **remember-me** (UJ-032), **idle timeout** (UJ-034), and
+> **"log out of all devices"** (UJ-035) are **frontend + Supabase only** (supabase-js
+> `resetPasswordForEmail` / `updateUser`; client `storage` adapter; `signOut({scope})`) — **no new
+> backend endpoints**.
+
+> **Audit surfacing (TP-S005-21)**: every `/admin/users*` mutation emits an audit event via
+> `POST /internal/v1/audit/event` with `entity_type = "user"` and `entity_id = <target uuid>`
+> (`user.invited|role_changed|disabled|enabled|deleted|reset_password|signed_out`; `email.test_sent`
+> uses `entity_type = "email"`). These are read back through the existing
+> `GET /internal/v1/audit` (filterable by `entity_type`/`entity_id`) and shown on the admin Audit page.
 
 ---
 

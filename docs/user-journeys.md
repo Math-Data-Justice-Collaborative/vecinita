@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-06-28 (S004/EV-005: UJ-026–UJ-029 Supabase admin auth, #75)
+> **Last updated**: 2026-06-29 (S005/EV-006: UJ-030–UJ-033 admin user management + auth UX, F35, #75)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI steps** are waived at T0 — see `tests/e2e/README.md` (Vitest component smoke only).
@@ -40,6 +40,10 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-027 | Admin invites an operator; invitee accepts | Admin operator | Supabase invite (email) → invitee sets password → login | F34 | local |
 | UJ-028 | Unauthenticated admin request rejected | Anonymous / expired-session client | DM API / internal-write API without valid JWT | F34 | local |
 | UJ-029 | Viewer is blocked from write actions | Viewer operator | DM UI / internal-write API write route | F34 | local |
+| UJ-030 | Admin manages operators from the User Management page | Admin operator | DM UI `/users` → `/admin/users*` (Supabase Admin API) | F35 | local |
+| UJ-031 | Admin invites an operator from the User Management page; invitee accepts | Admin operator + invitee | DM UI `/users` invite → Resend email → set password → login | F35 | local |
+| UJ-032 | Stay signed in across browser restart with "Remember me" | Operator | DM login → `vecinita.auth.remember` → `localStorage`/`sessionStorage` | F35 | local |
+| UJ-033 | Operator resets a forgotten password | Operator | DM login "Forgot password?" → recovery email → in-app reset | F35 | local |
 
 ## Journey Details
 
@@ -634,3 +638,200 @@ Product-facing journeys describe what a **caller** does — not internal module 
 **Automated tests**: `tests/e2e/test_uj029_role_gating.py` (viewer 403 on writes, admin 200; audit actor is opaque UUID + role, no PII); UI gating covered by `apps/data-management-frontend/src/test/test_role_gated_controls.test.tsx`.
 
 **E2E tier**: local (API TestClient + Vitest). Live verified at 13-deploy-smoke.
+
+---
+
+### UJ-030: Admin manages operators from the User Management page
+
+**Actor**: Admin operator
+
+**Goal**: Manage the operator roster entirely in-app — without opening the Supabase Dashboard.
+
+**Steps**:
+
+1. Open the DM UI; navigate to **User Management** (`/users`, admin-only sidebar item).
+2. The page lists operators from `GET /admin/users` (email, role, status `active`/`disabled`/`invited`, last sign-in).
+3. **Change a role** (`admin`↔`viewer`) → `PATCH /admin/users/{id}/role`.
+4. **Resend an invite** to a pending invitee → `POST /admin/users/{id}/resend-invite`.
+5. **Disable** (ban) an operator → `POST /admin/users/{id}/disable`; **enable** to restore.
+6. **Revoke** (delete) an operator → `DELETE /admin/users/{id}` (confirmation dialog).
+7. **Reset a password** for an operator → `POST /admin/users/{id}/reset-password` (sends recovery email).
+8. Each mutating action is recorded in `audit_log` with `actor_id` (UUID) + `actor_role`.
+
+**Acceptance**: Admin can list/role/resend/disable/enable/revoke/reset; a `viewer` is `403` on all `/admin/users*` writes and the page/controls are hidden in the UI; operator email/role/status are shown **in transit only** and never written to the corpus DB; user-mgmt actions appear in the audit log with no PII.
+
+**Automated tests**: `tests/e2e/test_uj030_user_management.py` (admin list + each mutation maps to Supabase Admin API; viewer `403`; audit attribution non-PII — verified against a Supabase test/branch project or mocked Admin API, no real mailboxes in CI); UI in `apps/data-management-frontend/src/test/test_user_management_page.test.tsx`.
+
+**Browser / connectivity**: DM frontend origin → `/admin/users*` with `Authorization: Bearer` (H4 CORS includes `Authorization`).
+
+**E2E tier**: local (API TestClient + Vitest). Live verified at 10-e2e / 13-deploy-smoke.
+
+---
+
+### UJ-031: Admin invites an operator from the User Management page; invitee accepts
+
+**Actor**: Admin operator (inviter) + invited operator (invitee)
+
+**Goal**: Onboard a new operator from the in-app page, with the invite email delivered via Resend. (Extends UJ-027, which covered the underlying invite-only model.)
+
+**Steps**:
+
+1. On `/users`, the admin clicks **Invite**, enters an **email + role**, and submits → `POST /admin/users/invite`.
+2. Supabase issues the invite; the **invite email** (repo-versioned, bilingual template) is delivered via **Resend SMTP**.
+3. The invitee opens the link, **sets a password**, and logs in (UJ-026) with the assigned role.
+4. The new operator appears in the list as `invited` then `active` after first sign-in.
+5. Public self-registration without an invite remains rejected (F34).
+
+**Acceptance**: Only invited emails can create accounts; the invite uses the repo-versioned bilingual template via Resend; the invitee can log in after setting a password; role is assigned at invite time; the action is audited (`actor_id`+`actor_role`).
+
+**Automated tests**: `tests/e2e/test_uj031_invite_from_page.py` (invite endpoint → Supabase Admin API; role assignment; audited). Email delivery (Resend SMTP + template rendering) verified by the Supabase CI config contract (TC-094) and at 13-deploy-smoke — not by sending real mail in unit CI.
+
+**E2E tier**: local (integration against Supabase test/branch or mocked Admin API). Live invite + Resend delivery verified at 13-deploy-smoke.
+
+---
+
+### UJ-032: Stay signed in across browser restart with "Remember me"
+
+**Actor**: Operator
+
+**Goal**: Choose whether the session persists after closing the browser.
+
+**Steps**:
+
+1. Open the DM login screen — a **"Remember me"** checkbox is shown, **checked by default**.
+2. **Checked**: after login, the Supabase session is stored in **`localStorage`**; closing and reopening the browser keeps the operator signed in.
+3. **Unchecked**: the session is stored in **`sessionStorage`**; closing the tab/browser clears it and the operator must sign in again.
+4. The choice is remembered in `localStorage` key **`vecinita.auth.remember`**; the storage adapter is selected **before** `createClient` so the correct backend is used from the first request.
+5. Toggling the checkbox on a later login updates the preference and the session storage location.
+
+**Acceptance**: Default checked → session survives a browser restart (rehydrated from `localStorage`); unchecked → session is gone after the tab/browser closes; `vecinita.auth.remember` reflects the choice; no extra data is sent to the server (browser-local only); logout clears whichever storage is in use.
+
+**Automated tests**: `apps/data-management-frontend/src/test/test_remember_me.test.tsx` (Vitest + jsdom): checkbox default checked; checked routes session writes to `localStorage`, unchecked to `sessionStorage`; preference persisted/read from `vecinita.auth.remember`; logout clears the active storage.
+
+**E2E tier**: local (Vitest component/app smoke). Live browser-restart check waived at T0 (consistent with other admin UI journeys).
+
+---
+
+### UJ-033: Operator resets a forgotten password
+
+**Actor**: Operator (locked out)
+
+**Goal**: Recover access without an admin, via email.
+
+**Steps**:
+
+1. On the login screen, click **"Forgot password?"** and enter the account email.
+2. The SPA calls Supabase `resetPasswordForEmail`; a **recovery email** (repo-versioned, bilingual template, Resend SMTP) is sent.
+3. The operator opens the link and lands on an **in-app reset page**; they set a new password (`updateUser`).
+4. The operator logs in with the new password (UJ-026).
+5. Non-existent emails do not reveal account existence (generic confirmation message).
+
+**Acceptance**: "Forgot password?" triggers a recovery email via Resend using the versioned template; the in-app reset page completes the change; the operator can log in with the new password; the response does not disclose whether an email is registered.
+
+**Automated tests**: `apps/data-management-frontend/src/test/test_password_reset.test.tsx` (Vitest): forgot-password form calls `resetPasswordForEmail`; reset page calls `updateUser`; generic confirmation regardless of account existence. Email/template delivery verified via Supabase CI config contract (TC-094) + 13-deploy-smoke.
+
+**E2E tier**: local (Vitest component smoke; recovery email delivery verified live at 13-deploy-smoke).
+
+---
+
+### UJ-034: Operator is auto-signed-out after inactivity (idle timeout)
+
+**Actor**: Operator (idle)
+
+**Goal**: Reduce risk of an unattended, signed-in admin session.
+
+**Steps**:
+
+1. After **30 minutes** (default `VITE_VECINITA_IDLE_TIMEOUT_MIN`) with no activity, a **warning modal** appears ("Stay signed in?" with a countdown of `VITE_VECINITA_IDLE_WARNING_SEC`, default 60s).
+2. If the operator interacts (mousemove/keydown/click/scroll) or clicks **Stay signed in**, the timer resets.
+3. If the countdown elapses, the SPA calls `signOut({scope:"local"})` and redirects to `/login` with an "signed out due to inactivity" notice.
+4. Activity in any tab of the same origin resets the timer; the timer lives in the always-mounted admin shell so route changes never reset/lose it.
+
+**Acceptance**: idle past the threshold shows the warning, then signs out the current device and redirects to login; any tracked activity resets the timer; the timeout/warning values come from build env; nothing extra is sent to the server (browser-local only). (ADR-031 TP-S005-17)
+
+**Automated tests**: `apps/data-management-frontend/src/test/test_idle_timeout.test.tsx` (Vitest + fake timers): warning appears at threshold; activity resets; timeout triggers `signOut({scope:"local"})` + redirect.
+
+**E2E tier**: local (Vitest component smoke).
+
+---
+
+### UJ-035: Operator logs out of all devices
+
+**Actor**: Operator
+
+**Goal**: Revoke every active session (e.g. after losing a device or changing password).
+
+**Steps**:
+
+1. From the account menu, the operator clicks **"Log out of all devices"**.
+2. The SPA calls `supabase.auth.signOut()` with the default **`global`** scope → all refresh tokens revoked across devices.
+3. The operator is redirected to `/login`; other devices lose access on their next token refresh.
+
+**Acceptance**: the action revokes all refresh tokens (global scope); ordinary logout uses `{scope:"local"}`; the current device is redirected to login. Documented caveat: already-issued access tokens remain valid until `exp` (≤ 1h). (ADR-031 TP-S005-18)
+
+**Automated tests**: `apps/data-management-frontend/src/test/test_logout_all_devices.test.tsx` (Vitest): "log out of all devices" calls `signOut()` (global); standard logout calls `signOut({scope:"local"})`.
+
+**E2E tier**: local (Vitest component smoke).
+
+---
+
+### UJ-036: Admin force-signs-out another operator
+
+**Actor**: Admin operator
+
+**Goal**: Immediately revoke a compromised/departing operator's sessions without deleting their account.
+
+**Steps**:
+
+1. On `/users`, the admin opens a row's actions and clicks **"Force sign-out"**.
+2. The SPA calls `POST /admin/users/{user_id}/signout`; the backend invokes the `admin_delete_user_sessions` RPC (service key) to delete the target's `auth.sessions` rows.
+3. The action is audited (`user.signed_out`, `actor_id`+`actor_role`, target `entity_id`).
+4. If the session-revoke RPC is not yet applied to the Supabase project, the endpoint returns `503 mechanism_unavailable` and the UI advises using **Disable** (ban) as the guaranteed lockout.
+
+**Acceptance**: force sign-out revokes the target's refresh tokens (sessions deleted); the action is audited; `503` is surfaced with the disable fallback when the RPC is absent. Documented caveat: the target's current access token stays valid until `exp` (≤ 1h). (ADR-031 TP-S005-19)
+
+**Automated tests**: `tests/e2e/test_uj036_force_signout.py` (TestClient): admin → `202` + audit emitted; viewer → `403`; RPC-absent path → `503`. `apps/data-management-frontend/src/test/test_force_signout.test.tsx`: row action calls the endpoint + shows fallback on `503`.
+
+**E2E tier**: local (API TestClient + Vitest). Live verified at 13-deploy-smoke.
+
+---
+
+### UJ-037: Admin sends a test email to verify deliverability
+
+**Actor**: Admin operator
+
+**Goal**: Confirm the Resend sending domain + DNS (SPF/DKIM/DMARC) deliver mail before relying on invites.
+
+**Steps**:
+
+1. On `/users` (or an email-settings panel), the admin clicks **"Send test email"** and enters a recipient address.
+2. The SPA calls `POST /admin/email/test`; the backend sends via the **Resend REST API** from `RESEND_SENDER_EMAIL`.
+3. On success the UI shows the Resend `message_id`; the admin confirms receipt in the inbox.
+4. The action is audited (`email.test_sent`, recipient **domain** only) and rate-limited (5/h/admin).
+5. If `RESEND_API_KEY`/`RESEND_SENDER_EMAIL` are unset, the endpoint returns `503 email_unconfigured` and the UI links to the deliverability checklist.
+
+**Acceptance**: a valid request sends a test email and returns a `message_id`; rate limit enforced (`429`); unconfigured → `503`; audited with domain only (no full address). (ADR-031 TP-S005-22)
+
+**Automated tests**: `tests/e2e/test_uj037_email_test_send.py` (TestClient, Resend REST mocked): admin → `202` + `message_id`; viewer → `403`; unconfigured → `503`; rate limit → `429`; audit payload has no full email.
+
+**E2E tier**: local (API TestClient, Resend mocked). Live send verified manually at 13-deploy-smoke.
+
+---
+
+### UJ-038: Admin reviews a user's activity in the audit log
+
+**Actor**: Admin operator
+
+**Goal**: See the history of management actions on a given operator.
+
+**Steps**:
+
+1. On `/users`, the admin clicks a row's **"View activity"** link → opens the Audit page pre-filtered by that user's `entity_id`.
+2. The Audit page (F29) lists `user.*` events with friendly bilingual labels; an **`entity_type` "Users"** quick-filter narrows to user-management events.
+3. The admin expands a row to see the (PII-free) payload.
+
+**Acceptance**: user-management events appear on the Audit page with `entity_type="user"` and friendly EN/ES labels; the entity-type filter and per-user link work; payloads contain no email/name (UUIDs + role only). (ADR-031 TP-S005-21)
+
+**Automated tests**: `apps/data-management-frontend/src/test/test_audit_user_events.test.tsx` (Vitest): `entity_type` filter incl. "Users"; `user.*` labels rendered; per-user link sets the `entity_id` filter. Backend emission covered by TC-092 + UJ-030/036/037 e2e.
+
+**E2E tier**: local (Vitest + existing audit API).
