@@ -7,6 +7,7 @@ import subprocess
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+_MIN_TOKEN_INFO_CALLS = 2
 
 
 def test_modal_ensure_workspace_retries_transient_token_info_failure(
@@ -48,8 +49,8 @@ exit 1
     env["HOME"] = str(tmp_path / "home")
     env["MODAL_TOKEN_ID"] = "ak-test"  # noqa: S105 # test fixture value, not a real secret
     env["MODAL_TOKEN_SECRET"] = "as-test"  # noqa: S105 # test fixture value, not a real secret
-    env["MODAL_TOKEN_INFO_RETRIES"] = "3"
-    env["MODAL_TOKEN_INFO_RETRY_DELAY"] = "0"
+    env["MODAL_TOKEN_INFO_RETRIES"] = "3"  # noqa: S105 # retry count, not a secret
+    env["MODAL_TOKEN_INFO_RETRY_DELAY"] = "0"  # noqa: S105 # delay seconds, not a secret
 
     result = subprocess.run(
         ["bash", "-c", "source scripts/modal_ensure_workspace.sh"],  # noqa: S607
@@ -62,4 +63,4 @@ exit 1
 
     assert result.returncode == 0, result.stderr
     assert "token auth" in result.stdout
-    assert int(counter.read_text(encoding="utf-8")) >= 2
+    assert int(counter.read_text(encoding="utf-8")) >= _MIN_TOKEN_INFO_CALLS

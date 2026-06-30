@@ -188,7 +188,7 @@ Builds on EV-005. Adds the live admin user-management surface and production ema
 |-----------------|-------|----------|-------------|
 | `SUPABASE_SMTP_PASS` | GitHub Actions secret + Supabase project env | Yes (prod) | Resend API key; referenced by `[auth.email.smtp] pass = env(SUPABASE_SMTP_PASS)` |
 | Verified Resend sending domain | Resend dashboard (operator) | Yes (prod) | SPF/DKIM-verified domain for `admin_email`/sender (RD-090) |
-| Sender address + name | `config.toml` `[auth.email.smtp]` | Yes (prod) | e.g. `noreply@<verified-domain>`, "Vecinita Admin" |
+| Sender address + name | `config.toml` `[auth.email.smtp]` | Yes (prod) | e.g. `noreply@josephcmcg.com` (verified Resend domain), "Vecinita Admin" |
 
 ### Per-environment .env files (master = repo-root `prod.env`, gitignored)
 
