@@ -129,6 +129,8 @@ def make_gotrue_handler(users: dict[str, dict[str, object]]) -> httpx.MockTransp
             return httpx.Response(HTTPStatus.OK, json={})
         if path == "/auth/v1/recover" and method == "POST":
             return httpx.Response(HTTPStatus.OK, json={})
+        if path == "/rest/v1/rpc/admin_delete_user_sessions" and method == "POST":
+            return httpx.Response(HTTPStatus.NO_CONTENT)
         return httpx.Response(HTTPStatus.NOT_FOUND, json={"msg": "unhandled"})
 
     return httpx.MockTransport(handler)
