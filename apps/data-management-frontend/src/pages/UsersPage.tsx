@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, Navigate } from "react-router-dom";
 import { type StringMessageKey } from "vecinita-frontend-i18n";
-import { useLocale } from "vecinita-frontend-ui";
+import { PaginationControls, useLocale } from "vecinita-frontend-ui";
 
 import {
   changeUserRole,
   deleteUser,
   disableUser,
+  EmailUnconfiguredError,
   enableUser,
   forceSignout,
   inviteUser,
@@ -14,6 +15,7 @@ import {
   MechanismUnavailableError,
   resendInvite,
   resetUserPassword,
+  sendTestEmail,
 } from "@/api/users";
 import type { UserRole, UserStatus, UserSummary } from "@/api/types";
 import { useAuth, useIsAdmin } from "@/auth/authContext";
@@ -68,12 +70,20 @@ const ROLE_KEY: Record<UserRole, StringMessageKey> = {
   viewer: "admin.users.roleViewer",
 };
 
+const MIN_SEARCH_CHARS = 3;
+const DEFAULT_PAGE_SIZE = 50;
+
 export function UsersPage() {
   const tr = useAdminT();
   const { locale } = useLocale();
   const { loading: authLoading } = useAuth();
   const isAdmin = useIsAdmin();
   const [users, setUsers] = useState<UserSummary[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [searchInput, setSearchInput] = useState("");
+  const [activeQuery, setActiveQuery] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -82,32 +92,50 @@ export function UsersPage() {
   const [inviteBusy, setInviteBusy] = useState(false);
   const [actionBusy, setActionBusy] = useState<string | null>(null);
   const [signoutFallback, setSignoutFallback] = useState<string | null>(null);
+  const [testEmail, setTestEmail] = useState("");
+  const [testEmailBusy, setTestEmailBusy] = useState(false);
+  const [testEmailSuccess, setTestEmailSuccess] = useState<string | null>(null);
+  const [testEmailUnconfigured, setTestEmailUnconfigured] = useState(false);
 
-  const load = useCallback(async (isActive: () => boolean = () => true) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const client = requireAdminConfig();
-      const result = await listUsers(client);
-      if (!isActive()) return;
-      setUsers(result.users);
-    } catch (err) {
-      if (!isActive()) return;
-      setError(
-        err instanceof Error ? err.message : tr("admin.users.loadFailed"),
-      );
-    } finally {
-      if (isActive()) setLoading(false);
-    }
-  }, [tr]);
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil(total / pageSize)),
+    [total, pageSize],
+  );
+
+  const load = useCallback(
+    async (
+      nextPage: number,
+      query: string | undefined,
+      isActive: () => boolean = () => true,
+    ) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const client = requireAdminConfig();
+        const result = await listUsers(client, nextPage, pageSize, query);
+        if (!isActive()) return;
+        setUsers(result.users);
+        setTotal(result.total ?? result.users.length);
+        setPage(result.page);
+      } catch (err) {
+        if (!isActive()) return;
+        setError(
+          err instanceof Error ? err.message : tr("admin.users.loadFailed"),
+        );
+      } finally {
+        if (isActive()) setLoading(false);
+      }
+    },
+    [pageSize, tr],
+  );
 
   useEffect(() => {
     let active = true;
-    void load(() => active);
+    void load(page, activeQuery, () => active);
     return () => {
       active = false;
     };
-  }, [load]);
+  }, [load, page, activeQuery]);
 
   if (authLoading) {
     return (
@@ -130,7 +158,7 @@ export function UsersPage() {
       setInviteOpen(false);
       setInviteEmail("");
       setInviteRole("viewer");
-      await load();
+      await load(page, activeQuery);
     } catch (err) {
       setError(err instanceof Error ? err.message : tr("admin.users.loadFailed"));
     } finally {
@@ -143,7 +171,7 @@ export function UsersPage() {
     setError(null);
     try {
       await action();
-      await load();
+      await load(page, activeQuery);
     } catch (err) {
       setError(err instanceof Error ? err.message : tr("admin.users.loadFailed"));
     } finally {
@@ -158,7 +186,7 @@ export function UsersPage() {
     try {
       const client = requireAdminConfig();
       await forceSignout(client, userId);
-      await load();
+      await load(page, activeQuery);
     } catch (err) {
       if (err instanceof MechanismUnavailableError) {
         setSignoutFallback(tr("admin.users.forceSignoutFallback"));
@@ -169,6 +197,41 @@ export function UsersPage() {
       }
     } finally {
       setActionBusy(null);
+    }
+  }
+
+  function handleSearch() {
+    const trimmed = searchInput.trim();
+    if (trimmed && trimmed.length < MIN_SEARCH_CHARS) {
+      setError(tr("admin.users.searchMinChars"));
+      return;
+    }
+    setError(null);
+    setPage(1);
+    setActiveQuery(trimmed || undefined);
+  }
+
+  async function handleSendTestEmail() {
+    setTestEmailBusy(true);
+    setError(null);
+    setTestEmailSuccess(null);
+    setTestEmailUnconfigured(false);
+    try {
+      const client = requireAdminConfig();
+      const result = await sendTestEmail(client, testEmail.trim());
+      setTestEmailSuccess(
+        tr("admin.users.testEmailSuccess", { messageId: result.message_id }),
+      );
+    } catch (err) {
+      if (err instanceof EmailUnconfiguredError) {
+        setTestEmailUnconfigured(true);
+      } else {
+        setError(
+          err instanceof Error ? err.message : tr("admin.users.loadFailed"),
+        );
+      }
+    } finally {
+      setTestEmailBusy(false);
     }
   }
 
@@ -210,9 +273,99 @@ export function UsersPage() {
 
       <Card>
         <CardHeader>
+          <CardTitle>{tr("admin.users.deliverabilityTitle")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {tr("admin.users.deliverabilitySubtitle")}
+          </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="grow space-y-2">
+              <Label htmlFor="test-email-recipient">
+                {tr("admin.users.testEmailRecipient")}
+              </Label>
+              <Input
+                id="test-email-recipient"
+                type="email"
+                value={testEmail}
+                data-testid="users-test-email-input"
+                onChange={(e) => {
+                  setTestEmail(e.target.value);
+                }}
+              />
+            </div>
+            <Button
+              type="button"
+              data-testid="users-send-test-email"
+              disabled={testEmailBusy || !testEmail.trim()}
+              onClick={() => {
+                void handleSendTestEmail();
+              }}
+            >
+              {testEmailBusy
+                ? tr("admin.users.testEmailSending")
+                : tr("admin.users.sendTestEmail")}
+            </Button>
+          </div>
+          {testEmailSuccess ? (
+            <p
+              className="text-sm text-muted-foreground"
+              data-testid="email-test-success"
+            >
+              {testEmailSuccess}
+            </p>
+          ) : null}
+          {testEmailUnconfigured ? (
+            <p
+              role="alert"
+              className="text-sm text-destructive"
+              data-testid="email-test-unconfigured"
+            >
+              {tr("admin.users.testEmailUnconfigured")}{" "}
+              <a
+                href="https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/staging-runbook.md#resend-domain-verification-prerequisite"
+                className="underline"
+                data-testid="email-test-checklist-link"
+              >
+                {tr("admin.users.deliverabilityTitle")}
+              </a>
+            </p>
+          ) : null}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>{tr("admin.users.title")}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="grow space-y-2">
+              <Label htmlFor="users-search">
+                {tr("admin.users.searchLabel")}
+              </Label>
+              <Input
+                id="users-search"
+                value={searchInput}
+                data-testid="users-search-input"
+                placeholder={tr("admin.users.searchPlaceholder")}
+                onChange={(e) => {
+                  setSearchInput(e.target.value);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSearch();
+                }}
+              />
+            </div>
+            <Button
+              type="button"
+              data-testid="users-search-apply"
+              onClick={handleSearch}
+            >
+              {tr("admin.users.searchApply")}
+            </Button>
+          </div>
+
           {loading ? (
             <p className="text-muted-foreground">{tr("shared.loading")}</p>
           ) : users.length === 0 ? (
@@ -246,6 +399,19 @@ export function UsersPage() {
                         : "—"}
                     </TableCell>
                     <TableCell className="space-x-1">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        data-testid={`view-activity-${user.id}`}
+                        asChild
+                      >
+                        <Link
+                          to={`/audit?entity_id=${user.id}`}
+                        >
+                          {tr("admin.users.action.viewActivity")}
+                        </Link>
+                      </Button>
                       {user.status === "invited" ? (
                         <Button
                           type="button"
@@ -379,6 +545,22 @@ export function UsersPage() {
               </TableBody>
             </Table>
           )}
+
+          {!loading && total > 0 ? (
+            <PaginationControls
+              page={page}
+              totalPages={totalPages}
+              total={total}
+              previousDisabled={page <= 1}
+              nextDisabled={page >= totalPages}
+              onPrevious={() => {
+                setPage((current) => Math.max(1, current - 1));
+              }}
+              onNext={() => {
+                setPage((current) => Math.min(totalPages, current + 1));
+              }}
+            />
+          ) : null}
         </CardContent>
       </Card>
 

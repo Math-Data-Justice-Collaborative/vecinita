@@ -11,6 +11,8 @@ import {
   MechanismUnavailableError,
   resendInvite,
   resetUserPassword,
+  sendTestEmail,
+  EmailUnconfiguredError,
 } from "./users";
 
 const CLIENT = {
@@ -235,6 +237,45 @@ describe("users API client", () => {
       vi.fn().mockResolvedValue(new Response("rp", { status: 500 })),
     );
     await expect(resetUserPassword(CLIENT, USER_ID)).rejects.toThrow(/rp/);
+  });
+
+  it("listUsers forwards a search query when provided", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({ users: [], total: 0, page: 1, page_size: 50 }),
+      ),
+    );
+    await listUsers(CLIENT, 1, 50, "alice");
+    expect(lastUrl()).toContain("q=alice");
+  });
+
+  it("sendTestEmail posts to the test endpoint", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({ message_id: "re_test_1" }, 202),
+      ),
+    );
+    const result = await sendTestEmail(JWT_CLIENT, "ops@example.org");
+    expect(result.message_id).toBe("re_test_1");
+    expect(lastUrl()).toBe(`${CLIENT.baseUrl}/admin/email/test`);
+    expect(bodyOf(lastInit())).toEqual({ to: "ops@example.org" });
+  });
+
+  it("sendTestEmail throws EmailUnconfiguredError on 503", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse(
+          { detail: { code: "email_unconfigured", message: "unset" } },
+          503,
+        ),
+      ),
+    );
+    await expect(sendTestEmail(CLIENT, "ops@example.org")).rejects.toBeInstanceOf(
+      EmailUnconfiguredError,
+    );
   });
 
   it("forceSignout posts to the signout endpoint on success", async () => {

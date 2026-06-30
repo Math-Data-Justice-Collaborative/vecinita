@@ -33,6 +33,16 @@ export class MechanismUnavailableError extends Error {
   }
 }
 
+/**
+ * Raised when Resend test-send secrets are unset on the backend (`503 email_unconfigured`).
+ */
+export class EmailUnconfiguredError extends Error {
+  constructor(message = "Email deliverability test-send is not configured") {
+    super(message);
+    this.name = "EmailUnconfiguredError";
+  }
+}
+
 function isMechanismUnavailable(status: number, body: string): boolean {
   if (status !== 503) return false;
   try {
@@ -43,15 +53,30 @@ function isMechanismUnavailable(status: number, body: string): boolean {
   }
 }
 
+function isEmailUnconfigured(status: number, body: string): boolean {
+  if (status !== 503) return false;
+  try {
+    const parsed = JSON.parse(body) as { detail?: { code?: unknown } };
+    return parsed.detail?.code === "email_unconfigured";
+  } catch {
+    return body.includes("email_unconfigured");
+  }
+}
+
 export async function listUsers(
   options: UsersClientOptions,
   page = 1,
   pageSize = 50,
+  q?: string,
 ): Promise<UserListResponse> {
   const params = new URLSearchParams({
     page: String(page),
     page_size: String(pageSize),
   });
+  const trimmed = q?.trim();
+  if (trimmed) {
+    params.set("q", trimmed);
+  }
   const response = await fetch(`${options.baseUrl}/admin/users?${params}`, {
     headers: usersHeaders(options),
   });
@@ -198,4 +223,32 @@ export async function forceSignout(
       body || `Force sign-out failed (${String(response.status)})`,
     );
   }
+}
+
+export interface EmailTestResult {
+  message_id: string;
+}
+
+export async function sendTestEmail(
+  options: UsersClientOptions,
+  to: string,
+): Promise<EmailTestResult> {
+  const response = await fetch(`${options.baseUrl}/admin/email/test`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...usersHeaders(options),
+    },
+    body: JSON.stringify({ to: to.trim() }),
+  });
+  if (!response.ok) {
+    const body = await response.text();
+    if (isEmailUnconfigured(response.status, body)) {
+      throw new EmailUnconfiguredError();
+    }
+    throw new Error(
+      body || `Send test email failed (${String(response.status)})`,
+    );
+  }
+  return response.json() as Promise<EmailTestResult>;
 }
