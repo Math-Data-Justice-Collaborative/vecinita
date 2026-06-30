@@ -23,6 +23,9 @@ from tests.helpers.json_response import json_object_get, json_str, response_json
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
+_PAGE_TWO = 2
+_PAGE_SIZE_TEN = 10
+
 _SEED_USERS: list[dict[str, object]] = [
     {
         "id": "11111111-1111-1111-1111-111111111111",
@@ -110,3 +113,15 @@ def test_empty_query_lists_unfiltered(client: TestClient, seen: list[str | None]
     response = client.get("/admin/users")
     assert response.status_code == HTTPStatus.OK
     assert seen[-1] is None
+
+
+def test_pagination_params_are_forwarded(client: TestClient) -> None:
+    """Page and page_size are passed through to the list response."""
+    response = client.get(
+        "/admin/users",
+        params={"page": _PAGE_TWO, "page_size": _PAGE_SIZE_TEN},
+    )
+    assert response.status_code == HTTPStatus.OK
+    body = response_json_object(response)
+    assert body["page"] == _PAGE_TWO
+    assert body["page_size"] == _PAGE_SIZE_TEN
