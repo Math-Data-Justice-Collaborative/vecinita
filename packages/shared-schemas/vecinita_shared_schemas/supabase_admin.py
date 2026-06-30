@@ -220,6 +220,20 @@ class SupabaseAdminClient:
         """Permanently delete an operator."""
         self._request("DELETE", f"/auth/v1/admin/users/{user_id}")
 
+    def delete_user_sessions(self, user_id: UUID) -> None:
+        """Revoke a target operator's sessions via the ``admin_delete_user_sessions`` RPC.
+
+        Calls the SECURITY DEFINER Postgres function over PostgREST with the service key
+        (EV-006 F35, ADR-031 §TP-S005-19). A 404 ``status_code`` on the raised
+        :class:`SupabaseAdminError` signals the RPC has not been applied to the project yet,
+        which the route layer maps to ``503 mechanism_unavailable``.
+        """
+        self._request(
+            "POST",
+            "/rest/v1/rpc/admin_delete_user_sessions",
+            body={"uid": str(user_id)},
+        )
+
     def send_password_recovery(self, email: str, *, redirect_to: str | None = None) -> None:
         """Trigger a recovery email (sends via the configured SMTP + recovery template)."""
         params = {"redirect_to": redirect_to} if redirect_to else None

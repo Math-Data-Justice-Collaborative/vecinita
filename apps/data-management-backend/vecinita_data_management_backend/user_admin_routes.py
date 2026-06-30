@@ -9,12 +9,18 @@ from __future__ import annotations
 
 import logging
 from http import HTTPStatus
-from typing import TYPE_CHECKING
-from uuid import UUID  # noqa: TC003  # FastAPI path params require UUID at runtime
+from typing import TYPE_CHECKING, Annotated
+from uuid import (  # FastAPI path params require UUID at runtime
+    NAMESPACE_DNS,
+    UUID,
+    uuid5,
+)
 
 from fastapi import Depends, HTTPException, Query, status
 from vecinita_shared_schemas.data_management import (
     AcknowledgedResponse,
+    EmailTestRequest,
+    EmailTestResponse,
     InviteUserRequest,
     RoleUpdateRequest,
     UserListResponse,
@@ -23,6 +29,7 @@ from vecinita_shared_schemas.data_management import (
 from vecinita_shared_schemas.internal_write import AuditEventRequest
 from vecinita_shared_schemas.supabase_admin import SupabaseAdminError
 
+from vecinita_data_management_backend.email_test import ResendClient, ResendError
 from vecinita_data_management_backend.user_admin import LockoutError, UserAdminService
 
 if TYPE_CHECKING:
@@ -37,6 +44,7 @@ if TYPE_CHECKING:
 _logger = logging.getLogger(__name__)
 _DEFAULT_PAGE_SIZE = 50
 _MAX_PAGE_SIZE = 200
+_MIN_SEARCH_CHARS = 3
 
 
 def _to_summary(user: AdminUser) -> UserSummary:
@@ -68,13 +76,15 @@ def _lockout_http(err: LockoutError) -> HTTPException:
     )
 
 
-def register_user_admin_routes(  # noqa: C901, PLR0915  # FastAPI registers all admin routes inline
+def register_user_admin_routes(  # noqa: C901, PLR0913, PLR0915  # FastAPI registers all admin routes inline
     app: FastAPI,
     *,
     admin_client: SupabaseAdminClient | None,
     audit_emit: Callable[[AuditEventRequest], None],
     invite_limiter: SlidingWindowRateLimiter,
     write_auth_dep: Callable[..., AuthPrincipal],
+    resend_client: ResendClient | None = None,
+    email_test_limiter: SlidingWindowRateLimiter | None = None,
 ) -> None:
     """Mount the admin user-management routes; a missing client yields 503 per route."""
     service = UserAdminService(admin_client) if admin_client is not None else None
@@ -100,12 +110,14 @@ def register_user_admin_routes(  # noqa: C901, PLR0915  # FastAPI registers all 
         entity_id: UUID,
         actor: AuthPrincipal,
         payload: dict[str, object] | None = None,
+        *,
+        entity_type: str = "user",
     ) -> None:
         try:
             audit_emit(
                 AuditEventRequest(
                     event_type=event_type,
-                    entity_type="user",
+                    entity_type=entity_type,
                     entity_id=entity_id,
                     payload=payload or {},
                     actor_id=actor.sub,
@@ -119,11 +131,21 @@ def register_user_admin_routes(  # noqa: C901, PLR0915  # FastAPI registers all 
     def list_users(  # pyright: ignore[reportUnusedFunction]
         page: int = Query(default=1, ge=1),
         page_size: int = Query(default=_DEFAULT_PAGE_SIZE, ge=1, le=_MAX_PAGE_SIZE),
+        q: Annotated[str | None, Query()] = None,
         _auth: AuthPrincipal = Depends(write_auth_dep),
     ) -> UserListResponse:
         svc = _require_service()
+        user_filter = q.strip() if q else None
+        if user_filter and len(user_filter) < _MIN_SEARCH_CHARS:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "code": "invalid_search",
+                    "message": f"Search query must be at least {_MIN_SEARCH_CHARS} characters",
+                },
+            )
         try:
-            result = svc.list_users(page=page, per_page=page_size)
+            result = svc.list_users(page=page, per_page=page_size, user_filter=user_filter)
         except SupabaseAdminError as err:
             raise _map_admin_error(err) from err
         return UserListResponse(
@@ -249,3 +271,67 @@ def register_user_admin_routes(  # noqa: C901, PLR0915  # FastAPI registers all 
             raise _map_admin_error(err) from err
         _audit("user.reset_password", user_id, actor)
         return AcknowledgedResponse()
+
+    @app.post(
+        "/admin/users/{user_id}/signout",
+        status_code=status.HTTP_202_ACCEPTED,
+        response_model=AcknowledgedResponse,
+    )
+    def force_signout(  # pyright: ignore[reportUnusedFunction]
+        user_id: UUID,
+        actor: AuthPrincipal = Depends(write_auth_dep),
+    ) -> AcknowledgedResponse:
+        client = _require_client()
+        try:
+            client.delete_user_sessions(user_id)
+        except SupabaseAdminError as err:
+            if err.status_code == HTTPStatus.NOT_FOUND:
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail={
+                        "code": "mechanism_unavailable",
+                        "message": "Session-revoke RPC is not applied to the Supabase project",
+                    },
+                ) from err
+            raise _map_admin_error(err) from err
+        _audit("user.signed_out", user_id, actor)
+        return AcknowledgedResponse()
+
+    @app.post(
+        "/admin/email/test",
+        status_code=status.HTTP_202_ACCEPTED,
+        response_model=EmailTestResponse,
+    )
+    def send_test_email(  # pyright: ignore[reportUnusedFunction]
+        body: EmailTestRequest,
+        actor: AuthPrincipal = Depends(write_auth_dep),
+    ) -> EmailTestResponse:
+        if resend_client is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={
+                    "code": "email_unconfigured",
+                    "message": "Deliverability test-send is not configured",
+                },
+            )
+        if email_test_limiter is not None and not email_test_limiter.allow(str(actor.sub)):
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Test-send rate limit exceeded; try again later",
+            )
+        try:
+            message_id = resend_client.send_test_email(body.to)
+        except ResendError as err:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Email provider error",
+            ) from err
+        domain = body.to.rsplit("@", 1)[-1]
+        _audit(
+            "email.test_sent",
+            uuid5(NAMESPACE_DNS, domain),
+            actor,
+            {"domain": domain, "success": True},
+            entity_type="email",
+        )
+        return EmailTestResponse(message_id=message_id)

@@ -129,3 +129,25 @@ class AcknowledgedResponse(BaseModel):
     """Generic 202 acknowledgement for fire-and-forget admin actions."""
 
     acknowledged: bool = True
+
+
+class EmailTestRequest(BaseModel):
+    """POST /admin/email/test request body (EV-006 F35, ADR-031 §TP-S005-22)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    to: str
+
+    @field_validator("to")
+    @classmethod
+    def _valid_email(cls, value: str) -> str:
+        if not _EMAIL_RE.match(value):
+            msg = "invalid email address"
+            raise ValueError(msg)
+        return value
+
+
+class EmailTestResponse(BaseModel):
+    """POST /admin/email/test 202 response carrying the Resend message id."""
+
+    message_id: str

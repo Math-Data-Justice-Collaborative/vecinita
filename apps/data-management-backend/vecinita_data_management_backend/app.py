@@ -18,6 +18,7 @@ from vecinita_shared_schemas.data_management import (
 )
 from vecinita_shared_schemas.supabase_admin import SupabaseAdminClient, SupabaseAdminError
 
+from vecinita_data_management_backend.email_test import ResendClient
 from vecinita_data_management_backend.rate_limit import SlidingWindowRateLimiter
 from vecinita_data_management_backend.store import InMemoryJobStore, JobStore, job_record_to_schema
 from vecinita_data_management_backend.user_admin_routes import register_user_admin_routes
@@ -33,6 +34,7 @@ if TYPE_CHECKING:
 
 _INVITE_MAX_PER_HOUR = 10
 _INVITE_WINDOW_SECONDS = 3600.0
+_EMAIL_TEST_MAX_PER_HOUR = 5
 
 
 def _default_admin_client() -> SupabaseAdminClient | None:
@@ -41,6 +43,11 @@ def _default_admin_client() -> SupabaseAdminClient | None:
         return SupabaseAdminClient()
     except SupabaseAdminError:
         return None
+
+
+def _default_resend_client() -> ResendClient | None:
+    """Build a Resend client from env, or None when RESEND_API_KEY/RESEND_SENDER_EMAIL are absent."""
+    return ResendClient.from_env()
 
 
 def _default_audit_emit() -> Callable[[AuditEventRequest], None]:
@@ -89,6 +96,8 @@ def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectab
     admin_client: SupabaseAdminClient | None = None,
     audit_emit: Callable[[AuditEventRequest], None] | None = None,
     invite_limiter: SlidingWindowRateLimiter | None = None,
+    resend_client: ResendClient | None = None,
+    email_test_limiter: SlidingWindowRateLimiter | None = None,
 ) -> FastAPI:
     """Build the Data Management ASGI app with job routes and optional pipeline runner."""
     app = FastAPI(title="Vecinita Data Management", version="0.1.0")
@@ -178,6 +187,12 @@ def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectab
             window_seconds=_INVITE_WINDOW_SECONDS,
         ),
         write_auth_dep=write_auth_dep,
+        resend_client=resend_client if resend_client is not None else _default_resend_client(),
+        email_test_limiter=email_test_limiter
+        or SlidingWindowRateLimiter(
+            max_events=_EMAIL_TEST_MAX_PER_HOUR,
+            window_seconds=_INVITE_WINDOW_SECONDS,
+        ),
     )
 
     return app
