@@ -426,6 +426,8 @@ def test_resend_invite_passes_redirect_to_accept_invite() -> None:
     assert outbound[-1]["redirect_to"] == (
         "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app/accept-invite"
     )
+
+
 def test_reset_password_passes_redirect_to_reset_password() -> None:
     """TC-105: admin recovery includes redirect_to={origin}/reset-password."""
     outbound: list[dict[str, object]] = []
@@ -460,6 +462,7 @@ def test_invite_returns_503_when_admin_frontend_url_unset(
             json={"email": "missing-env@example.org", "role": "viewer"},
         )
     assert response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
+
 
 def test_revoke_invite_deletes_pending_user_and_audits(
     client: tuple[TestClient, dict[str, dict[str, object]]],
