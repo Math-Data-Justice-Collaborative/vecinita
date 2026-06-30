@@ -1300,7 +1300,7 @@ main
 | PR-46 | Major | Phase 10 / S003 | feat/S003-persistent-chat-history | main | open ([#96](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/96)) |
 | PR-47 | Major | Phase 11 / S004 (EV-005) | feat/S004-supabase-auth | main | merged ([#100](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/100)) |
 | PR-48 | Major | Phase 12 / S005 (EV-006) | feat/S005-user-mgmt-auth | main | pending ([#75](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/75)) |
-| PR-49 | Major | Phase 13 / S006 (EV-007) | feat/S006-invite-acceptance | main | pending ([#109](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/109)) |
+| PR-49 | Major | Phase 13 / S006 (EV-007) | feat/S006-invite-acceptance | main | open ([#109](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/109), [PR #110](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/110)) |
 
 S003 is evolve-lite + frontend-only: M39–M42 land as atomic commits on the single
 `feat/S003-persistent-chat-history` branch (one PR to `main`, PR-46), matching the S002 pattern.
