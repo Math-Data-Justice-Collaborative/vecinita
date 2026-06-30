@@ -10,8 +10,8 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 12: EV-006 — Admin user management + auth UX (F35) — **planned (04-tech-plan complete)** |
-| **Active milestone** | M49: Shared Supabase Admin client + audit ingest + lockout guards — **in_progress** (M48 **completed** 2026-06-29) |
-| **Active task** | T49.1 — `supabase_admin` httpx client tests (red) |
+| **Active milestone** | M50: DM backend `/admin/users*` routes — **in_progress** (M48–M49 **completed** 2026-06-29) |
+| **Active task** | T50.1 — `/admin/users*` TestClient tests (red) |
 | **Tasks completed** | Phase 11 (S004/EV-005 F34) merged via PR #100; S005 00-context + 01-requirements + 04-tech-plan complete |
 | **Last updated** | 2026-06-29 |
 | **Evolve cycle** | EV-006 (F35) — **07-build next** |
@@ -1522,12 +1522,12 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T48.4 | M48 | 12 | Config | completed | T48.1 | — | S005 | F35 |
 | T48.5 | M48 | 12 | Config | completed | T48.4 | — | S005 | F35 |
 | T48.6 | M48 | 12 | Docs | completed | T48.2 | — | S005 | F35 |
-| T49.1 | M49 | 12 | Test | pending | — | — | S005 | F35 |
-| T49.2 | M49 | 12 | Code | pending | T49.1 | — | S005 | F35 |
-| T49.3 | M49 | 12 | Test | pending | — | D5 | S005 | F35 |
-| T49.4 | M49 | 12 | Code | pending | T49.3 | D5 | S005 | F35 |
-| T49.5 | M49 | 12 | Test | pending | T49.2 | — | S005 | F35 |
-| T49.6 | M49 | 12 | Code | pending | T49.5 | — | S005 | F35 |
+| T49.1 | M49 | 12 | Test | completed | — | — | S005 | F35 |
+| T49.2 | M49 | 12 | Code | completed | T49.1 | — | S005 | F35 |
+| T49.3 | M49 | 12 | Test | completed | — | D5 | S005 | F35 |
+| T49.4 | M49 | 12 | Code | completed | T49.3 | D5 | S005 | F35 |
+| T49.5 | M49 | 12 | Test | completed | T49.2 | — | S005 | F35 |
+| T49.6 | M49 | 12 | Code | completed | T49.5 | — | S005 | F35 |
 | T50.1 | M50 | 12 | Test | pending | T49.2, T49.6 | — | S005 | F35 |
 | T50.2 | M50 | 12 | Code | pending | T50.1, T49.4 | — | S005 | F35 |
 | T50.3 | M50 | 12 | Config | pending | T50.2 | — | S005 | F35 |
