@@ -289,7 +289,8 @@ const esStrings = {
   "admin.auth.passwordMismatch": "Las contraseñas no coinciden",
   "admin.auth.updatePassword": "Actualizar contraseña",
   "admin.auth.updatingPassword": "Actualizando…",
-  "admin.auth.passwordUpdated": "Contraseña actualizada. Ya puedes iniciar sesión.",
+  "admin.auth.passwordUpdated":
+    "Contraseña actualizada. Ya puedes iniciar sesión.",
   "admin.auth.acceptInviteTitle": "Aceptar invitación",
   "admin.auth.acceptInviteSubtitle":
     "Establece una contraseña para activar tu cuenta.",
@@ -325,7 +326,8 @@ const esStrings = {
   "admin.users.action.forceSignout": "Forzar cierre de sesión",
   "admin.users.forceSignoutFallback":
     "El cierre de sesión forzado no está disponible. Usa Deshabilitar para bloquear a este operador.",
-  "admin.users.viewerBlocked": "La gestión de usuarios requiere una cuenta de administrador.",
+  "admin.users.viewerBlocked":
+    "La gestión de usuarios requiere una cuenta de administrador.",
   "admin.users.searchLabel": "Buscar operadores",
   "admin.users.searchPlaceholder": "Correo (mín. 3 caracteres)",
   "admin.users.searchMinChars": "Introduce al menos 3 caracteres para buscar.",
@@ -407,7 +409,8 @@ const esStrings = {
   "admin.audit.event.user.disabled": "Usuario deshabilitado",
   "admin.audit.event.user.enabled": "Usuario habilitado",
   "admin.audit.event.user.deleted": "Usuario eliminado",
-  "admin.audit.event.user.reset_password": "Restablecimiento de contraseña enviado",
+  "admin.audit.event.user.reset_password":
+    "Restablecimiento de contraseña enviado",
   "admin.audit.event.user.signed_out": "Usuario desconectado",
   "admin.audit.event.email.test_sent": "Correo de prueba enviado",
   "admin.jobs.title": "Gestión de trabajos",

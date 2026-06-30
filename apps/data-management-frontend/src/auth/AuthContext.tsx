@@ -7,7 +7,12 @@ import {
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 
-import { getSupabaseClient, persistRememberPreference, resetSupabaseClient, roleFromAppMetadata } from "@/auth/supabaseClient";
+import {
+  getSupabaseClient,
+  persistRememberPreference,
+  resetSupabaseClient,
+  roleFromAppMetadata,
+} from "@/auth/supabaseClient";
 import { AuthContext, type AuthState } from "@/auth/authContext";
 import { setOperatorAccessToken } from "@/config";
 

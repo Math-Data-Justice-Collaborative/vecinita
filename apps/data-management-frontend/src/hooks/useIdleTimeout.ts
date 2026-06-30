@@ -1,16 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import {
-  idleTimeoutMinutes,
-  idleWarningSeconds,
-} from "@/config";
+import { idleTimeoutMinutes, idleWarningSeconds } from "@/config";
 
-const ACTIVITY_EVENTS = [
-  "mousemove",
-  "keydown",
-  "click",
-  "scroll",
-] as const;
+const ACTIVITY_EVENTS = ["mousemove", "keydown", "click", "scroll"] as const;
 
 const THROTTLE_MS = 1000;
 
@@ -30,7 +22,8 @@ export function useIdleTimeout(
   const idleBeforeWarningMs = Math.max(timeoutMs - warningMs, 0);
 
   const [showWarning, setShowWarning] = useState(false);
-  const [secondsRemaining, setSecondsRemaining] = useState(idleWarningSeconds());
+  const [secondsRemaining, setSecondsRemaining] =
+    useState(idleWarningSeconds());
 
   const warningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const logoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

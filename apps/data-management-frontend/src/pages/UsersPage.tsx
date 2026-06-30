@@ -160,7 +160,9 @@ export function UsersPage() {
       setInviteRole("viewer");
       await load(page, activeQuery);
     } catch (err) {
-      setError(err instanceof Error ? err.message : tr("admin.users.loadFailed"));
+      setError(
+        err instanceof Error ? err.message : tr("admin.users.loadFailed"),
+      );
     } finally {
       setInviteBusy(false);
     }
@@ -173,7 +175,9 @@ export function UsersPage() {
       await action();
       await load(page, activeQuery);
     } catch (err) {
-      setError(err instanceof Error ? err.message : tr("admin.users.loadFailed"));
+      setError(
+        err instanceof Error ? err.message : tr("admin.users.loadFailed"),
+      );
     } finally {
       setActionBusy(null);
     }
@@ -406,9 +410,7 @@ export function UsersPage() {
                         data-testid={`view-activity-${user.id}`}
                         asChild
                       >
-                        <Link
-                          to={`/audit?entity_id=${user.id}`}
-                        >
+                        <Link to={`/audit?entity_id=${user.id}`}>
                           {tr("admin.users.action.viewActivity")}
                         </Link>
                       </Button>
@@ -574,7 +576,9 @@ export function UsersPage() {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="invite-email">{tr("admin.users.inviteEmail")}</Label>
+              <Label htmlFor="invite-email">
+                {tr("admin.users.inviteEmail")}
+              </Label>
               <Input
                 id="invite-email"
                 type="email"
@@ -586,7 +590,9 @@ export function UsersPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="invite-role">{tr("admin.users.inviteRole")}</Label>
+              <Label htmlFor="invite-role">
+                {tr("admin.users.inviteRole")}
+              </Label>
               <Select
                 value={inviteRole}
                 onValueChange={(value: string) => {

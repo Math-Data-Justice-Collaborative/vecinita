@@ -10,7 +10,10 @@ export const REMEMBER_STORAGE_KEY = "vecinita.auth.remember";
 let client: SupabaseClient | null = null;
 let testClientInjected = false;
 
-export type SupportedStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+export type SupportedStorage = Pick<
+  Storage,
+  "getItem" | "setItem" | "removeItem"
+>;
 
 /** Route Supabase auth persistence to localStorage (remember) or sessionStorage. */
 export function createRoutingStorage(remember: boolean): SupportedStorage {

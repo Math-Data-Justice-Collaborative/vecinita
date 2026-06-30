@@ -17,8 +17,14 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/reset-password" element={<SetPasswordPage variant="reset" />} />
-      <Route path="/accept-invite" element={<SetPasswordPage variant="invite" />} />
+      <Route
+        path="/reset-password"
+        element={<SetPasswordPage variant="reset" />}
+      />
+      <Route
+        path="/accept-invite"
+        element={<SetPasswordPage variant="invite" />}
+      />
       <Route
         element={
           <ProtectedRoute>

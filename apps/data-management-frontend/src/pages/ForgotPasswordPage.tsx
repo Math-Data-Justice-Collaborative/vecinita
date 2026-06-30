@@ -85,7 +85,10 @@ export function ForgotPasswordPage() {
           </Button>
         ) : null}
         <p className="text-center text-sm">
-          <Link to="/login" className="text-primary underline-offset-4 hover:underline">
+          <Link
+            to="/login"
+            className="text-primary underline-offset-4 hover:underline"
+          >
             {tr("admin.auth.backToLogin")}
           </Link>
         </p>

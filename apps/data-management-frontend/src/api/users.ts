@@ -110,14 +110,17 @@ export async function changeUserRole(
   userId: string,
   role: UserRole,
 ): Promise<UserSummary> {
-  const response = await fetch(`${options.baseUrl}/admin/users/${userId}/role`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      ...usersHeaders(options),
+  const response = await fetch(
+    `${options.baseUrl}/admin/users/${userId}/role`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        ...usersHeaders(options),
+      },
+      body: JSON.stringify({ role }),
     },
-    body: JSON.stringify({ role }),
-  });
+  );
   if (!response.ok) {
     return parseError(response, "Change role");
   }
