@@ -10,8 +10,8 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 12: EV-006 — Admin user management + auth UX (F35) — **planned (04-tech-plan complete)** |
-| **Active milestone** | M51: DM frontend — Users page + remember-me + password reset flows — **in_progress** (M48–M50 **completed** 2026-06-29) |
-| **Active task** | T51.1 — Vitest: UsersPage table + invite modal (TC-088) — red |
+| **Active milestone** | M52: Integration, OpenAPI, privacy & gate — **in_progress** (M48–M51 **completed** 2026-06-29) |
+| **Active task** | T52.1 — e2e `test_uj030_user_management.py` (TC-088/089/092) |
 | **Tasks completed** | Phase 11 (S004/EV-005 F34) merged via PR #100; S005 00-context + 01-requirements + 04-tech-plan complete |
 | **Last updated** | 2026-06-29 |
 | **Evolve cycle** | EV-006 (F35) — **07-build next** |
@@ -1058,13 +1058,13 @@ invite rate limit.
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | session_id | feature_ids |
 |---|------|------|--------|-------------|------------|-----------|------------|-------------|
-| T51.1 | Test (Vitest): UsersPage — list users, invite form, action buttons (TC-088) — red | Test | pending | test-plan TC-088, UJ-030/031 | — | — | S005 | F35 |
-| T51.2 | Test (Vitest): viewer blocked from `/users` nav + API calls (TC-089) — red | Test | pending | test-plan TC-089 | — | — | S005 | F35 |
-| T51.3 | Code: `/users` route, sidebar nav, UsersPage (table + invite modal + actions) | Code | pending | ADR-029, user-journeys UJ-030/031 | T51.1, T50.2 | — | S005 | F35 |
-| T51.4 | Test (Vitest): remember-me routes session to localStorage vs sessionStorage (TC-091) — red | Test | pending | test-plan TC-091, UJ-032, RD-084 | — | — | S005 | F35 |
-| T51.5 | Code: remember-me checkbox; `createRoutingStorage`; `resetSupabaseClient` before sign-in (TP-S005-06) | Code | pending | ADR-029/030 §6 | T51.4 | — | S005 | F35 |
-| T51.6 | Test (Vitest): forgot-password + reset-password + accept-invite flows (TC-093) — red | Test | pending | test-plan TC-093, UJ-033, RD-083 | — | — | S005 | F35 |
-| T51.7 | Code: `/forgot-password`, `/reset-password`, `/accept-invite` routes + login link | Code | pending | ADR-030 §5, UJ-033 | T51.6 | — | S005 | F35 |
+| T51.1 | Test (Vitest): UsersPage — list users, invite form, action buttons (TC-088) — red | Test | completed | test-plan TC-088, UJ-030/031 | — | — | S005 | F35 |
+| T51.2 | Test (Vitest): viewer blocked from `/users` nav + API calls (TC-089) — red | Test | completed | test-plan TC-089 | — | — | S005 | F35 |
+| T51.3 | Code: `/users` route, sidebar nav, UsersPage (table + invite modal + actions) | Code | completed | ADR-029, user-journeys UJ-030/031 | T51.1, T50.2 | — | S005 | F35 |
+| T51.4 | Test (Vitest): remember-me routes session to localStorage vs sessionStorage (TC-091) — red | Test | completed | test-plan TC-091, UJ-032, RD-084 | — | — | S005 | F35 |
+| T51.5 | Code: remember-me checkbox; `createRoutingStorage`; `resetSupabaseClient` before sign-in (TP-S005-06) | Code | completed | ADR-029/030 §6 | T51.4 | — | S005 | F35 |
+| T51.6 | Test (Vitest): forgot-password + reset-password + accept-invite flows (TC-093) — red | Test | completed | test-plan TC-093, UJ-033, RD-083 | — | — | S005 | F35 |
+| T51.7 | Code: `/forgot-password`, `/reset-password`, `/accept-invite` routes + login link | Code | completed | ADR-030 §5, UJ-033 | T51.6 | — | S005 | F35 |
 
 #### M52: Integration, OpenAPI, privacy & gate
 
