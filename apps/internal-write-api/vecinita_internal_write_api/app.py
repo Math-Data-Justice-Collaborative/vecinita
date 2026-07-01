@@ -55,6 +55,11 @@ from vecinita_shared_schemas.internal_write import (
     EvalRunCreateResponse,
     EvalRunDetailResponse,
     EvalRunListResponse,
+    EvalTimeseriesResponse,
+    EvalCriterionCreateRequest,
+    EvalCriterionListResponse,
+    EvalCriterionResponse,
+    EvalCriterionUpdateRequest,
     HealthAggregateResponse,
     HealthResponse,
     RecentActivity,
@@ -81,7 +86,13 @@ from vecinita_internal_write_api.eval_service import (
     create_eval_run,
     execute_eval_run,
     get_eval_run,
+    get_eval_timeseries,
     list_eval_runs,
+)
+from vecinita_internal_write_api.eval_criteria_service import (
+    create_eval_criterion,
+    list_eval_criteria,
+    update_eval_criterion,
 )
 from vecinita_internal_write_api.jobs_client import (
     DataManagementJobsClient,
@@ -1312,6 +1323,51 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         page = max(1, page)
         page_size = min(max(1, page_size), 100)
         return list_eval_runs(engine, page=page, page_size=page_size)
+
+    @app.get(
+        "/internal/v1/eval/runs/timeseries",
+        response_model=EvalTimeseriesResponse,
+    )
+    def get_eval_timeseries_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+        limit: int = 100,
+    ) -> EvalTimeseriesResponse:
+        limit = min(max(1, limit), 500)
+        return get_eval_timeseries(engine, limit=limit)
+
+    @app.get(
+        "/internal/v1/eval/criteria",
+        response_model=EvalCriterionListResponse,
+    )
+    def list_eval_criteria_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+    ) -> EvalCriterionListResponse:
+        return list_eval_criteria(engine)
+
+    @app.post(
+        "/internal/v1/eval/criteria",
+        response_model=EvalCriterionResponse,
+        status_code=status.HTTP_201_CREATED,
+    )
+    def create_eval_criterion_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+        body: EvalCriterionCreateRequest,
+    ) -> EvalCriterionResponse:
+        return create_eval_criterion(engine, body=body)
+
+    @app.patch(
+        "/internal/v1/eval/criteria/{criterion_id}",
+        response_model=EvalCriterionResponse,
+    )
+    def update_eval_criterion_route(  # pyright: ignore[reportUnusedFunction]
+        criterion_id: UUID,
+        _actor: WriteActorDep,
+        body: EvalCriterionUpdateRequest,
+    ) -> EvalCriterionResponse:
+        updated = update_eval_criterion(engine, criterion_id=criterion_id, body=body)
+        if updated is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        return updated
 
     @app.get(
         "/internal/v1/eval/runs/{run_id}",

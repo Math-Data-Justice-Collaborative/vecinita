@@ -346,6 +346,69 @@ class EvalMetricsSummary(BaseModel):
     faithfulness: float | None = None
     answer_relevancy: float | None = None
     latency_p95_ms: int | None = None
+    custom_scores: dict[str, float] | None = None
+
+
+class EvalTimeseriesPoint(BaseModel):
+    """One completed run on the eval timeseries chart."""
+
+    run_id: UUID
+    completed_at: datetime
+    metrics_summary: EvalMetricsSummary
+
+
+class EvalTimeseriesResponse(BaseModel):
+    """GET /internal/v1/eval/runs/timeseries response."""
+
+    points: list[EvalTimeseriesPoint]
+    available_metrics: list[str]
+
+
+EvalCriterionScorerType = Literal["llm_rubric"]
+
+
+class EvalCriterionCreateRequest(BaseModel):
+    """POST /internal/v1/eval/criteria body."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    slug: str = Field(min_length=1, max_length=64)
+    label: str = Field(min_length=1, max_length=128)
+    description: str | None = None
+    scorer_type: EvalCriterionScorerType = "llm_rubric"
+    rubric: str = Field(min_length=1)
+    enabled: bool = True
+
+
+class EvalCriterionUpdateRequest(BaseModel):
+    """PATCH /internal/v1/eval/criteria/{criterion_id} body."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    label: str | None = Field(default=None, min_length=1, max_length=128)
+    description: str | None = None
+    rubric: str | None = Field(default=None, min_length=1)
+    enabled: bool | None = None
+
+
+class EvalCriterionResponse(BaseModel):
+    """One admin-defined eval criterion."""
+
+    criterion_id: UUID
+    slug: str
+    label: str
+    description: str | None = None
+    scorer_type: EvalCriterionScorerType
+    rubric: str
+    enabled: bool
+    created_at: datetime
+    updated_at: datetime
+
+
+class EvalCriterionListResponse(BaseModel):
+    """GET /internal/v1/eval/criteria response."""
+
+    items: list[EvalCriterionResponse]
 
 
 class EvalRunListItem(BaseModel):
@@ -374,6 +437,7 @@ class EvalRunItemMetrics(BaseModel):
     faithfulness: float | None = None
     answer_relevancy: float | None = None
     latency_ms: int
+    custom_scores: dict[str, float] | None = None
 
 
 class EvalRunItemDetail(BaseModel):

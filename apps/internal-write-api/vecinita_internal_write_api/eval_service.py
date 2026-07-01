@@ -11,6 +11,7 @@ from uuid import UUID, uuid4
 
 from sqlalchemy import text
 from vecinita_embedding_client.client import EmbeddingClient
+from vecinita_eval.criteria import EvalCriterionDef
 from vecinita_eval.runner import EvalSummary, RowResult, run_golden_eval
 from vecinita_shared_schemas.db_mapping import (
     mapping_row,
@@ -29,6 +30,8 @@ from vecinita_shared_schemas.internal_write import (
     EvalRunListItem,
     EvalRunListResponse,
     EvalRunStatus,
+    EvalTimeseriesPoint,
+    EvalTimeseriesResponse,
 )
 
 if TYPE_CHECKING:
@@ -64,13 +67,16 @@ def _fixture_path() -> Path:
     return repo_root / configured
 
 
-def _summary_to_json(summary: EvalSummary) -> dict[str, float | int | None]:
-    return {
+def _summary_to_json(summary: EvalSummary) -> dict[str, float | int | None | dict[str, float]]:
+    payload: dict[str, float | int | None | dict[str, float]] = {
         "retrieval_relevance": summary.retrieval_relevance,
         "faithfulness": summary.faithfulness,
         "answer_relevancy": summary.answer_relevancy,
         "latency_p95_ms": summary.latency_p95_ms,
     }
+    if summary.custom_scores:
+        payload["custom_scores"] = summary.custom_scores
+    return payload
 
 
 def _summary_from_json(payload: object) -> EvalMetricsSummary:
@@ -82,7 +88,20 @@ def _summary_from_json(payload: object) -> EvalMetricsSummary:
         faithfulness=_optional_float(data.get("faithfulness")),
         answer_relevancy=_optional_float(data.get("answer_relevancy")),
         latency_p95_ms=_optional_int(data.get("latency_p95_ms")),
+        custom_scores=_custom_scores_from_json(data.get("custom_scores")),
     )
+
+
+def _custom_scores_from_json(value: object) -> dict[str, float] | None:
+    if not isinstance(value, dict):
+        return None
+    raw = cast("dict[str, object]", value)
+    scores: dict[str, float] = {}
+    for key, entry in raw.items():
+        score = _optional_float(entry)
+        if score is not None:
+            scores[key] = score
+    return scores or None
 
 
 def _optional_float(value: object) -> float | None:
@@ -166,12 +185,19 @@ def execute_eval_run(
                 {"id": run_id},
             )
         fixture_path = _fixture_path() if corpus_profile == "fixture" else None
+        from vecinita_internal_write_api.eval_criteria_service import list_enabled_criteria
+
+        enabled = list_enabled_criteria(engine)
+        criteria = [
+            EvalCriterionDef(slug=item.slug, rubric=item.rubric) for item in enabled
+        ]
         results, summary = run_golden_eval(
             embed_fn=embed,
             database_url=database_url,
             judge=judge,
             llm=None,
             fixture_path=fixture_path,
+            criteria=criteria,
         )
         _persist_results(engine, run_id=run_id, results=results, summary=summary)
         with engine.begin() as conn:
@@ -242,6 +268,11 @@ def _persist_results(
                             "faithfulness": result.metrics.faithfulness,
                             "answer_relevancy": result.metrics.answer_relevancy,
                             "latency_ms": result.metrics.latency_ms,
+                            **(
+                                {"custom_scores": result.metrics.custom_scores}
+                                if result.metrics.custom_scores
+                                else {}
+                            ),
                         }
                     ),
                     "latency_ms": result.metrics.latency_ms,
@@ -348,6 +379,7 @@ def get_eval_run(engine: Engine, *, run_id: UUID) -> EvalRunDetailResponse | Non
                     faithfulness=_optional_float(metrics_obj.get("faithfulness")),
                     answer_relevancy=_optional_float(metrics_obj.get("answer_relevancy")),
                     latency_ms=_latency_ms(dict(item), metrics_obj),
+                    custom_scores=_custom_scores_from_json(metrics_obj.get("custom_scores")),
                 ),
             )
         )
@@ -386,3 +418,51 @@ def _latency_ms(
     if isinstance(raw, int):
         return raw
     return 0
+
+
+_BUILTIN_METRICS: tuple[str, ...] = (
+    "retrieval_relevance",
+    "faithfulness",
+    "answer_relevancy",
+    "latency_p95_ms",
+)
+
+
+def get_eval_timeseries(engine: Engine, *, limit: int = 100) -> EvalTimeseriesResponse:
+    """Return completed eval runs for dashboard time-series charts."""
+    with engine.connect() as conn:
+        rows = (
+            conn.execute(
+                text(
+                    """
+                    SELECT id, completed_at, metrics_summary
+                    FROM eval_runs
+                    WHERE status = 'completed' AND completed_at IS NOT NULL
+                    ORDER BY completed_at ASC
+                    LIMIT :limit
+                    """
+                ),
+                {"limit": limit},
+            )
+            .mappings()
+            .all()
+        )
+    points: list[EvalTimeseriesPoint] = []
+    custom_slugs: set[str] = set()
+    for raw in rows:
+        row = mapping_row(raw)
+        completed = row.get("completed_at")
+        if not isinstance(completed, datetime):
+            continue
+        summary = _summary_from_json(row.get("metrics_summary"))
+        if summary.custom_scores:
+            custom_slugs.update(summary.custom_scores)
+        points.append(
+            EvalTimeseriesPoint(
+                run_id=row_uuid(row, "id"),
+                completed_at=completed,
+                metrics_summary=summary,
+            )
+        )
+    available = list(_BUILTIN_METRICS) + sorted(custom_slugs)
+    return EvalTimeseriesResponse(points=points, available_metrics=available)

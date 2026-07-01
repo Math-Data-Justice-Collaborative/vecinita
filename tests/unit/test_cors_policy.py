@@ -266,6 +266,28 @@ def test_internal_write_cors_preflight_on_eval_runs_post(
     assert "POST" in allow_methods
 
 
+def test_internal_write_cors_preflight_on_eval_criteria_post(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Internal write API CORS preflight allows POST on eval criteria (M64)."""
+    if not os.environ.get("DATABASE_URL"):
+        pytest.skip("DATABASE_URL required for internal write app import")
+    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", "test-key")
+    client = TestClient(create_write_app())
+    response = client.options(
+        "/internal/v1/eval/criteria",
+        headers={
+            "Origin": ADMIN_ORIGIN,
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "authorization, content-type",
+        },
+    )
+    assert response.status_code == HTTPStatus.OK
+    assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
+    allow_methods = header_str(response.headers, "access-control-allow-methods").upper()
+    assert "POST" in allow_methods
+
+
 def test_no_cors_middleware_when_origins_unset(monkeypatch: pytest.MonkeyPatch) -> None:
     """No CORS headers are returned when no allowed origins are configured."""
     monkeypatch.delenv("VECINITA_CORS_ORIGINS", raising=False)
