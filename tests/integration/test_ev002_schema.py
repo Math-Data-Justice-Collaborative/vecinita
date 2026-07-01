@@ -80,9 +80,10 @@ def test_alembic_head_includes_ev002_migration() -> None:
         text=True,
         check=True,
     )
-    assert "20260701_0005" in current.stdout
-    assert "20260701_0005" in heads.stdout
+    assert "20260701_0006" in current.stdout
+    assert "20260701_0006" in heads.stdout
     assert "20260628_0004" in history.stdout
+    assert "20260701_0005" in history.stdout
 
 
 def test_audit_log_columns_match_spec() -> None:

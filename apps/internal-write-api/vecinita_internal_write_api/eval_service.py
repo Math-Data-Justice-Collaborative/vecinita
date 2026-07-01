@@ -34,6 +34,8 @@ from vecinita_shared_schemas.internal_write import (
     EvalTimeseriesResponse,
 )
 
+from vecinita_internal_write_api.eval_criteria_service import list_enabled_criteria
+
 if TYPE_CHECKING:
     from collections.abc import Callable
 
@@ -185,12 +187,9 @@ def execute_eval_run(
                 {"id": run_id},
             )
         fixture_path = _fixture_path() if corpus_profile == "fixture" else None
-        from vecinita_internal_write_api.eval_criteria_service import list_enabled_criteria
 
         enabled = list_enabled_criteria(engine)
-        criteria = [
-            EvalCriterionDef(slug=item.slug, rubric=item.rubric) for item in enabled
-        ]
+        criteria = [EvalCriterionDef(slug=item.slug, rubric=item.rubric) for item in enabled]
         results, summary = run_golden_eval(
             embed_fn=embed,
             database_url=database_url,
