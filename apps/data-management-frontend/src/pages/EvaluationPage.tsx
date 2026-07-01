@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { FlaskConical, RefreshCw } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   type EvalRunDetailApi,
   type EvalRunListItemApi,
@@ -14,6 +16,9 @@ import {
 import { requireCorpusConfig } from "@/config";
 import { useAdminT } from "@/hooks/useAdminT";
 import { cn } from "@/lib/utils";
+import { EvaluationCriteriaTab } from "@/evaluation/EvaluationCriteriaTab";
+import { EvaluationDashboardTab } from "@/evaluation/EvaluationDashboardTab";
+import { EvaluationExploreTab } from "@/evaluation/EvaluationExploreTab";
 
 const DISPLAY_MIN = 0.7;
 
@@ -43,6 +48,8 @@ function statusLabelKey(
 
 export function EvaluationPage() {
   const tr = useAdminT();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") ?? "runs";
   const [runs, setRuns] = useState<EvalRunListItemApi[]>([]);
   const [selectedRun, setSelectedRun] = useState<EvalRunDetailApi | null>(null);
   const [loading, setLoading] = useState(true);
@@ -167,6 +174,29 @@ export function EvaluationPage() {
         </p>
       ) : null}
 
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => {
+          setSearchParams({ tab: value });
+        }}
+        data-testid="evaluation-tabs"
+      >
+        <TabsList>
+          <TabsTrigger value="runs" data-testid="eval-tab-runs">
+            {tr("admin.evaluation.tab.runs")}
+          </TabsTrigger>
+          <TabsTrigger value="dashboard" data-testid="eval-tab-dashboard">
+            {tr("admin.evaluation.tab.dashboard")}
+          </TabsTrigger>
+          <TabsTrigger value="explore" data-testid="eval-tab-explore">
+            {tr("admin.evaluation.tab.explore")}
+          </TabsTrigger>
+          <TabsTrigger value="criteria" data-testid="eval-tab-criteria">
+            {tr("admin.evaluation.tab.criteria")}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="runs" className="space-y-6">
       {summary ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
@@ -298,6 +328,20 @@ export function EvaluationPage() {
           </CardContent>
         </Card>
       ) : null}
+        </TabsContent>
+
+        <TabsContent value="dashboard">
+          <EvaluationDashboardTab />
+        </TabsContent>
+
+        <TabsContent value="explore">
+          <EvaluationExploreTab />
+        </TabsContent>
+
+        <TabsContent value="criteria">
+          <EvaluationCriteriaTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
