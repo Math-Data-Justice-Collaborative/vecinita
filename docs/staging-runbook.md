@@ -28,14 +28,25 @@ bash scripts/deploy/verify_secrets.sh   # requires Modal auth + vecinita-data-ma
 
 CI on `main`: `.github/workflows/deploy-preflight.yml` (needs GitHub `MODAL_TOKEN_*` for secrets job).
 
-**Modal CD on `main`:** `.github/workflows/deploy-modal.yml` auto-deploys the three Modal
-apps after **CI** succeeds on `main` (re-runs build-smoke + secrets, then `scripts/deploy/modal.sh`).
-Requires repo secrets `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`
+**Modal CD on `main`:** `.github/workflows/deploy-modal.yml` runs after **CI** succeeds on
+`main`. Job order inside that workflow: **Supabase sync** (`config push` + migrations, including
+Resend SMTP via `SUPABASE_SMTP_PASS`) → **Modal deploy** (embedding, data-management, llm).
+Requires repo secrets `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` and `SUPABASE_ACCESS_TOKEN`
 ([Modal continuous deployment](https://modal.com/docs/guide/continuous-deployment)).
+
 **DigitalOcean CD on `main`:** `.github/workflows/deploy-digitalocean.yml` deploys the four
-DO apps after **CI** succeeds on `main` (via `scripts/deploy/do_apps.py`). `deploy_on_push` is
-**disabled** in `infra/do/*.yaml` so deploys are CI-gated (push-webhook deploys would bypass CI).
-Requires repo secret `DIGITALOCEAN_TOKEN`.
+DO apps after **Deploy Modal** succeeds on `main` (EV-007 order: Supabase → Modal → DO).
+`deploy_on_push` is **disabled** in `infra/do/*.yaml` so deploys are CI-gated. Requires repo
+secret `DIGITALOCEAN_TOKEN`.
+
+**Supabase on `main`:** `.github/workflows/supabase.yml` also path-filters on `supabase/**`
+for offline validate + optional duplicate `sync-production` on direct pushes. Production auth
+config, email templates, and migrations are pushed on every main deploy via the Modal workflow's
+`supabase-sync` job (idempotent).
+
+**Resend:** No standalone deploy workflow. SMTP delivery is configured through Supabase
+`config push` (`SUPABASE_SMTP_PASS` GitHub secret). In-app test-send uses `RESEND_API_KEY` on
+the Modal DM secret — operator sync via `bash scripts/deploy/sync_modal_secret.sh --merge --apply`.
 Database migrations are **not** automated — run `alembic upgrade head` per the Deploy order below.
 
 ## Deploy order

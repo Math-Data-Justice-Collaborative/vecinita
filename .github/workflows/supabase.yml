@@ -92,6 +92,7 @@ jobs:
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_SMTP_PASS: ${{ secrets.SUPABASE_SMTP_PASS }}
     steps:
       - uses: actions/checkout@v4
 
@@ -129,6 +130,7 @@ jobs:
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_SMTP_PASS: ${{ secrets.SUPABASE_SMTP_PASS }}
     steps:
       - uses: actions/checkout@v4
 

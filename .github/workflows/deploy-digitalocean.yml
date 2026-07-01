@@ -1,13 +1,13 @@
 # Continuous deployment of DigitalOcean App Platform apps.
 # Deterministic backstop so every commit on `main` is rolled out even if the
 # GitHub -> DO push webhook (`deploy_on_push: true` in infra/do/*.yaml) is dropped.
-# Triggered only after the full CI suite passes on main, then deploys the four
-# vecinita apps via the pydo helper (scripts/deploy/do_apps.py).
+# Triggered after Deploy Modal succeeds on main (EV-007 order: Supabase → Modal → DO),
+# then deploys the four vecinita apps via the pydo helper (scripts/deploy/do_apps.py).
 name: Deploy DigitalOcean
 
 on:
   workflow_run:
-    workflows: ["CI"]
+    workflows: ["Deploy Modal"]
     types: [completed]
     branches: [main]
   workflow_dispatch:
@@ -23,7 +23,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # CI runs on several branches; only deploy when CI succeeded on main.
+    # Deploy Modal runs on several branches; only deploy when Modal deploy succeeded on main.
     # workflow_dispatch is always allowed (manual redeploy).
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
