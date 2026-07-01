@@ -15,7 +15,7 @@ from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_c
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
-from tests.helpers.json_response import json_list, json_str, response_json_object
+from tests.helpers.json_response import json_object_list, json_str, response_json_object
 from tests.unit.rag.conftest import seed_eval_corpus
 from tests.unit.shared_schemas.auth_fixtures import (
     generate_es256_keypair,
@@ -93,5 +93,5 @@ def test_uj039_admin_triggers_eval_run_and_polls_until_complete(
     )
     assert history.status_code == HTTPStatus.OK
     history_body = response_json_object(history)
-    history_items = json_list(history_body, "items")
+    history_items = json_object_list(history_body, "items")
     assert any(json_str(item, "run_id") == str(run_id) for item in history_items)

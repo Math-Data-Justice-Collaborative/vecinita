@@ -19,7 +19,7 @@ const DISPLAY_MIN = 0.7;
 
 function formatPercent(value: number | null | undefined): string {
   if (value === null || value === undefined) return "—";
-  return `${Math.round(value * 100)}%`;
+  return `${String(Math.round(value * 100))}%`;
 }
 
 function formatScore(value: number | null | undefined): string {

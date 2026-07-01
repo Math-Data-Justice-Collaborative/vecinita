@@ -132,11 +132,14 @@ describe("EvaluationPage", () => {
       expect(globalThis.fetch).toHaveBeenCalled();
     });
     const calls = vi.mocked(globalThis.fetch).mock.calls;
-    const postCall = calls.find(
-      (call) =>
+    const postCall = calls.find((call) => {
+      const init = call[1];
+      const method = (init?.method ?? "GET").toUpperCase();
+      return (
         fetchInputUrl(call[0]).includes("/internal/v1/eval/runs") &&
-        (call[1] as RequestInit | undefined)?.method === "POST",
-    );
+        method === "POST"
+      );
+    });
     expect(postCall).toBeDefined();
   });
 });

@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
+from collections.abc import Mapping
+
 from sqlalchemy import text
 from vecinita_embedding_client.client import EmbeddingClient
 from vecinita_eval.runner import EvalSummary, RowResult, run_golden_eval
@@ -76,7 +78,7 @@ def _summary_to_json(summary: EvalSummary) -> dict[str, float | int | None]:
 def _summary_from_json(payload: object) -> EvalMetricsSummary:
     if not isinstance(payload, dict):
         return EvalMetricsSummary()
-    data = payload
+    data = cast("dict[str, object]", payload)
     return EvalMetricsSummary(
         retrieval_relevance=_optional_float(data.get("retrieval_relevance")),
         faithfulness=_optional_float(data.get("faithfulness")),
@@ -133,7 +135,13 @@ def create_eval_run(
 
 def _default_embed_fn(question: str) -> list[float]:
     client = EmbeddingClient()
-    return client.embed_query(question)
+    return client.embed(question)
+
+
+def _optional_datetime(value: object) -> datetime | None:
+    if isinstance(value, datetime):
+        return value
+    return None
 
 
 def execute_eval_run(
@@ -275,8 +283,8 @@ def list_eval_runs(
             EvalRunListItem(
                 run_id=row_uuid(mapping_row(row), "id"),
                 status=_status(row_str(mapping_row(row), "status")),
-                started_at=mapping_row(row).get("started_at"),
-                completed_at=mapping_row(row).get("completed_at"),
+                started_at=_optional_datetime(mapping_row(row).get("started_at")),
+                completed_at=_optional_datetime(mapping_row(row).get("completed_at")),
                 metrics_summary=_summary_from_json(mapping_row(row).get("metrics_summary")),
             )
             for row in rows
@@ -326,7 +334,11 @@ def get_eval_run(engine: Engine, *, run_id: UUID) -> EvalRunDetailResponse | Non
     for raw_item in item_rows:
         item = mapping_row(raw_item)
         metrics_raw = item.get("metrics")
-        metrics_obj = metrics_raw if isinstance(metrics_raw, dict) else {}
+        metrics_obj: dict[str, object] = (
+            cast("dict[str, object]", metrics_raw)
+            if isinstance(metrics_raw, dict)
+            else {}
+        )
         items.append(
             EvalRunItemDetail(
                 case_id=row_str(item, "case_id"),
@@ -365,7 +377,10 @@ def _url_list(value: object) -> list[str]:
     return [str(item) for item in entries]
 
 
-def _latency_ms(item: dict[str, object], metrics_obj: dict[str, object]) -> int:
+def _latency_ms(
+    item: Mapping[str, object],
+    metrics_obj: dict[str, object],
+) -> int:
     latency = metrics_obj.get("latency_ms")
     if isinstance(latency, int):
         return latency

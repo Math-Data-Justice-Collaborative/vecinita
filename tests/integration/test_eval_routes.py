@@ -15,7 +15,7 @@ from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_c
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
-from tests.helpers.json_response import json_str, response_json_object
+from tests.helpers.json_response import json_object_get, json_str, response_json_object
 from tests.helpers.user_mgmt_e2e import VIEWER_ID
 from tests.unit.rag.conftest import seed_eval_corpus
 from tests.unit.shared_schemas.auth_fixtures import (
@@ -85,8 +85,7 @@ def test_admin_triggers_eval_run_and_persists_results(
     run_id = UUID(json_str(created, "run_id"))
     detail_obj = _poll_run(client, token, run_id)
     assert json_str(detail_obj, "status") == "completed"
-    summary = detail_obj.get("metrics_summary")
-    assert isinstance(summary, dict)
+    summary = json_object_get(detail_obj, "metrics_summary")
     assert summary.get("retrieval_relevance") is not None
 
 
