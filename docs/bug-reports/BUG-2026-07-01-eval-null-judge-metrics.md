@@ -14,27 +14,41 @@ Admin evaluation run `9c9980f8-0af0-43de-ad04-6c45a7409581` completed but
 
 ## Root cause
 
-`execute_eval_run()` in the internal-write-api factory path passed `judge=None`
-and `llm=None` to `run_golden_eval()` even when `VECINITA_MODAL_LLM_URL` was
-configured on the DO app.
+Two compounding issues:
 
-Per `packages/eval/vecinita_eval/runner.py`, faithfulness and answer relevancy
-are only scored when a judge client is present. With `llm=None`, every row
-returned the abstention copy ("I don't have enough community corpus context…")
-even when retrieval returned URLs.
+1. **Empty retrieval (primary for run `51b99266…`):** Every row returned
+   `retrieved_urls: []` and `retrieval_relevance: 0.0`. The eval runner queries
+   the staging `DATABASE_URL` pgvector corpus; fixture golden rows do not embed
+   documents by themselves. Without seeded eval corpus chunks, retrieval fails and
+   the RAG path returns abstention copy.
+
+2. **Judge gating (code, fixed locally):** `run_golden_eval()` only scored
+   faithfulness and answer relevancy when `chunks` was non-empty. Even with
+   `VECINITA_MODAL_LLM_URL` wired via `default_eval_runtime()`, LlamaIndex
+   **AnswerRelevancyEvaluator** never ran on zero-chunk rows. Faithfulness
+   correctly requires retrieved context.
+
+3. **Prior factory wiring gap (fixed, may need deploy):** `execute_eval_run()`
+   previously passed `judge=None` / `llm=None` when not injected, even if
+   `VECINITA_MODAL_LLM_URL` was set on internal-write-api.
 
 ## Fix
 
-- Added `packages/eval/vecinita_eval/modal_llm.py`:
-  - `ModalHttpLLM` — LlamaIndex adapter over `vecinita-llm` HTTP client
-  - `default_eval_runtime()` — builds shared judge + LLM from
-    `VECINITA_MODAL_LLM_URL`
-- Updated `execute_eval_run()` to resolve default judge/LLM when not injected
-  (mirrors `_default_embed_fn` pattern; per ADR-033 and factory-app-env-deps)
+- `packages/eval/vecinita_eval/modal_llm.py` — `default_eval_runtime()` wires judge + LLM
+- `execute_eval_run()` — resolves default judge/LLM when not injected
+- `run_golden_eval()` — score **answer relevancy** whenever judge is wired and
+  answer text exists; keep **faithfulness** gated on non-empty chunks
+- Admin UI — drill-down shows model answer column, wrap toggle, column picker
+  (persisted in `localStorage`); hint when judge metrics absent with 0% retrieval
 
 ## Repro test
 
-`tests/bugs/test_bug_2026_07_01_eval_null_judge_metrics.py`
+- `tests/bugs/test_bug_2026_07_01_eval_null_judge_metrics.py`
+- `tests/unit/eval/test_runner_judge_contract.py` — CI contract (judge wiring, zero-chunk answer relevancy)
+- `tests/unit/internal_write_api/test_eval_service.py` — default judge resolution + persisted judge metrics
+- `tests/unit/internal_write_api/test_app_eval_routes.py` — factory `create_app()` judge wiring
+- `tests/e2e/test_uj039_eval_run_trigger.py` — completed run must expose non-null judge metrics
+- Vitest `test_evaluation_page.test.tsx` — drill-down renders scores + model answer
 
 ## Verification
 

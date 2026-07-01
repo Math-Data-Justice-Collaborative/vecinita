@@ -3,16 +3,19 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest.mock import patch
 
 import pytest
 from sqlalchemy import create_engine, text
 from vecinita_eval.modal_llm import default_eval_runtime
-from vecinita_eval.runner import EvalSummary
+from vecinita_eval.runner import EvalSummary, run_golden_eval
 from vecinita_internal_write_api.eval_service import create_eval_run, execute_eval_run
+from vecinita_rag.retriever import CorpusPgvectorRetriever
 
 from tests.eval.conftest import eval_embed_fn
+from tests.helpers.eval_judge import MockEvalJudge
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -84,3 +87,23 @@ def test_default_eval_runtime_returns_none_without_modal_url(
     judge, llm = default_eval_runtime()
     assert judge is None
     assert llm is None
+
+
+def test_answer_relevancy_scored_when_judge_wired_but_retrieval_empty() -> None:
+    """Judge must score answer relevancy even when pgvector returns no chunks."""
+    repo_root = Path(__file__).resolve().parents[2]
+    fixture_path = repo_root / "data/fixtures/eval/qa_pairs.json"
+    judge = MockEvalJudge(answer_relevancy_score=0.68)
+    with patch.object(CorpusPgvectorRetriever, "retrieve_chunks", return_value=[]):
+        results, summary = run_golden_eval(
+            embed_fn=lambda _question: [0.0] * 384,
+            database_url="postgresql+psycopg://unused",
+            judge=judge,
+            llm=None,
+            fixture_path=fixture_path,
+        )
+    assert results, "golden fixture must yield rows"
+    assert all(result.metrics.answer_relevancy == 0.68 for result in results)
+    assert all(result.metrics.faithfulness is None for result in results)
+    assert summary.answer_relevancy == pytest.approx(0.68)
+    assert summary.faithfulness is None

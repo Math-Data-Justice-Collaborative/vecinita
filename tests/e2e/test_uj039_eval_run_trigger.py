@@ -87,6 +87,29 @@ def test_uj039_admin_triggers_eval_run_and_polls_until_complete(
     assert isinstance(items, list)
     assert items
 
+    summary = detail.get("metrics_summary")
+    assert isinstance(summary, dict)
+    assert summary.get("faithfulness") is not None
+    assert summary.get("answer_relevancy") is not None
+
+    scored_items = [
+        item
+        for item in json_object_list(detail, "items")
+        if item.get("metrics") is not None
+        and isinstance(item["metrics"], dict)
+        and item["metrics"].get("answer_relevancy") is not None
+    ]
+    assert scored_items, "TC-112: completed eval must persist answer relevancy per row"
+
+    faithfulness_rows = [
+        item
+        for item in json_object_list(detail, "items")
+        if item.get("metrics") is not None
+        and isinstance(item["metrics"], dict)
+        and item["metrics"].get("faithfulness") is not None
+    ]
+    assert faithfulness_rows, "TC-112: seeded corpus run must persist faithfulness for hit rows"
+
     history = client.get(
         "/internal/v1/eval/runs",
         headers={"Authorization": f"Bearer {token}"},

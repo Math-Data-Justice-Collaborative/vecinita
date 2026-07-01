@@ -10,6 +10,7 @@ from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import text
+from vecinita_eval.runner import EvalSummary
 from vecinita_internal_write_api.eval_service import create_eval_run
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_config_for_tests
 
@@ -50,6 +51,39 @@ def test_create_eval_run_route_accepts_empty_body(eval_write_client: TestClient)
     assert response.status_code == HTTPStatus.ACCEPTED
     body = response_json_object(response)
     assert json_str(body, "status") == "pending"
+
+
+def test_factory_create_app_wires_default_eval_judge_from_env(
+    internal_api_env: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """create_app() without eval_judge must still pass a judge when Modal LLM URL is set."""
+    _ = internal_api_env
+    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://llm.test")
+    from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
+
+    client = TestClient(create_app(eval_embed_fn=eval_embed_fn))
+    with patch(
+        "vecinita_internal_write_api.eval_service.run_golden_eval",
+        return_value=(
+            [],
+            EvalSummary(
+                retrieval_relevance=0.0,
+                faithfulness=None,
+                answer_relevancy=None,
+                latency_p95_ms=1,
+            ),
+        ),
+    ) as mock_run:
+        response = client.post(
+            "/internal/v1/eval/runs",
+            json={"corpus_profile": "fixture"},
+            headers=auth_headers(),
+        )
+    assert response.status_code == HTTPStatus.ACCEPTED
+    mock_run.assert_called_once()
+    assert mock_run.call_args.kwargs["judge"] is not None
+    assert mock_run.call_args.kwargs["llm"] is not None
 
 
 def test_list_eval_runs_clamps_pagination(eval_write_client: TestClient) -> None:

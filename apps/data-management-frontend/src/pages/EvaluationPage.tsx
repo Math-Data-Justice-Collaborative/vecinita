@@ -18,6 +18,7 @@ import { useAdminT } from "@/hooks/useAdminT";
 import { cn } from "@/lib/utils";
 import { EvaluationCriteriaTab } from "@/evaluation/EvaluationCriteriaTab";
 import { EvaluationDashboardTab } from "@/evaluation/EvaluationDashboardTab";
+import { EvaluationDrilldownTable } from "@/evaluation/EvaluationDrilldownTable";
 import { EvaluationExploreTab } from "@/evaluation/EvaluationExploreTab";
 
 const DISPLAY_MIN = 0.7;
@@ -130,6 +131,10 @@ export function EvaluationPage() {
   }, []);
 
   const summary = selectedRun?.metrics_summary;
+  const judgesLikelySkipped =
+    selectedRun?.status === "completed" &&
+    summary?.faithfulness === null &&
+    (summary.retrieval_relevance ?? 0) === 0;
 
   return (
     <div className="space-y-6" data-testid="evaluation-page">
@@ -296,45 +301,16 @@ export function EvaluationPage() {
           <CardHeader>
             <CardTitle>{tr("admin.evaluation.drilldown")}</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table
-                className="w-full text-sm"
-                data-testid="evaluation-drilldown"
+          <CardContent className="space-y-4">
+            {judgesLikelySkipped ? (
+              <p
+                className="text-sm text-muted-foreground"
+                data-testid="evaluation-judges-skipped-hint"
               >
-                <thead>
-                  <tr className="border-b text-left text-muted-foreground">
-                    <th className="py-2 pr-4">{tr("admin.evaluation.col.question")}</th>
-                    <th className="py-2 pr-4">{tr("admin.evaluation.col.retrieval")}</th>
-                    <th className="py-2 pr-4">
-                      {tr("admin.evaluation.col.faithfulness")}
-                    </th>
-                    <th className="py-2">{tr("admin.evaluation.col.answerRelevancy")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedRun.items.map((item) => (
-                    <tr
-                      key={`${item.case_id}-${item.locale}`}
-                      className="border-b align-top"
-                    >
-                      <td className="py-2 pr-4">{item.question}</td>
-                      <td className="py-2 pr-4">
-                        {item.metrics.retrieval_pass
-                          ? tr("admin.evaluation.pass")
-                          : tr("admin.evaluation.fail")}
-                      </td>
-                      <td className="py-2 pr-4">
-                        {formatScore(item.metrics.faithfulness ?? null)}
-                      </td>
-                      <td className="py-2">
-                        {formatScore(item.metrics.answer_relevancy ?? null)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                {tr("admin.evaluation.drilldown.judgesSkipped")}
+              </p>
+            ) : null}
+            <EvaluationDrilldownTable items={selectedRun.items} />
           </CardContent>
         </Card>
       ) : null}
