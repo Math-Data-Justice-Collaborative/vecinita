@@ -13,6 +13,10 @@ if [[ "$(_node_major)" -ge "$_need_major" ]]; then
   exit 0
 fi
 
+if ! command -v fnm >/dev/null 2>&1; then
+  export PATH="${HOME}/.local/share/fnm:${PATH}"
+fi
+
 if command -v fnm >/dev/null 2>&1; then
   # shellcheck disable=SC1090
   eval "$(fnm env)"

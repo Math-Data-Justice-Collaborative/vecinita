@@ -1,7 +1,7 @@
 # Deployment Integration Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-30 (EV-007 F35 ext — invite redirect chain)
+> **Last updated**: 2026-07-01 (EV-008 F36 eval runner wiring)
 
 ## Overview
 
@@ -126,6 +126,28 @@ No redeploy required: chat-rag-backend, internal-write-api, Modal apps, Postgres
 5. **13-deploy-smoke** — T3 live invite: fresh invite link opens staging `/accept-invite`, password set, login succeeds (H6 browser UJ)
 
 **Connectivity gates:** H4/H5 (API) insufficient alone; **H6** required for invite accept browser journey (T3 deferred from S005).
+
+### EV-008 — Admin RAG evaluation (F36, #99)
+
+**Browser flow:** Admin SPA `/evaluation` → internal-write-api eval routes (same-origin + JWT pattern as jobs/health/audit). No new public routes.
+
+| Variable | App | Purpose |
+|----------|-----|---------|
+| `VECINITA_EVAL_*` | internal-write-api + eval runner | Thresholds + fixture path (see `config-spec.md`) |
+| `VECINITA_MODAL_LLM_URL` | eval runner (Modal or DO worker) | LlamaIndex judge LLM — same self-hosted endpoint as ChatRAG |
+| `DATABASE_URL` | internal-write-api | Persist `eval_runs` / `eval_run_items` |
+
+**Redeploy order (EV-008):**
+
+1. **Postgres migration** — `eval_runs`, `eval_run_items` tables (Alembic)
+2. **internal-write-api** — eval routes + runner trigger
+3. **Modal** (if runner on Modal) — eval job function with LLM access
+4. **data-management-frontend** — `/evaluation` tab + i18n
+5. **CI** — extended `tests/eval/` (TC-111–TC-113) + admin e2e (TC-114–TC-116)
+
+**CORS:** No change — admin frontend already authorized for internal-write-api with `Authorization` header (F34). Eval routes follow same admin JWT policy.
+
+**Post-deploy validation:** Admin triggers golden run on staging; verify history + drill-down; harness green in CI.
 
 ## Entrypoints & triggers
 

@@ -35,6 +35,11 @@ dist/
 .idea/
 .vscode/
 
+# Playwright
+playwright-report/
+test-results/
+blob-report/
+
 # Build / caches
 *.log
 .coverage

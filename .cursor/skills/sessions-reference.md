@@ -175,8 +175,8 @@ When a session updates standing docs, append (do not replace prior entries):
 
 ## 9. Per-stage session report paths
 
-Write session reports here (legacy root paths remain valid for **pre-session** artifacts only;
-new work uses session paths):
+Write session reports under `docs/sessions/{id}/reports/` (not project root).
+Legacy root paths (`docs/qa-report.md`, etc.) are historical read-only.
 
 | Stage | Session report path |
 |-------|---------------------|

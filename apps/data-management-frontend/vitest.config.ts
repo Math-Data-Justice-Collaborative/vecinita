@@ -1,5 +1,6 @@
 import path from "node:path";
 import react from "@vitejs/plugin-react";
+import { filterExpectedVitestConsoleLog } from "../../packages/frontend-ui/src/test/vitestConsoleFilter";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -19,6 +20,8 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    onConsoleLog: filterExpectedVitestConsoleLog,
+    silent: "passed-only",
     setupFiles: ["./src/test/setup.ts"],
     css: true,
     env: {
@@ -36,8 +39,8 @@ export default defineConfig({
       reporter: ["json-summary", "html"],
       reportsDirectory: "../../coverage/data-management-frontend",
       thresholds: {
-        lines: 95,
-        branches: 95,
+        lines: 100,
+        branches: 98,
       },
     },
   },

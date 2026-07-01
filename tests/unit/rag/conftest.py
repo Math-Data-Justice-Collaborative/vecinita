@@ -7,6 +7,7 @@ import os
 import pytest
 from sqlalchemy import create_engine, text
 from vecinita_database.seeds.load import load_corpus
+from vecinita_database.seeds.tags import load_tagged_corpus
 from vecinita_rag.retriever import EmbedFn  # noqa: TC002
 from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
 
@@ -122,6 +123,11 @@ _EVAL_MATCH_SUBSTRINGS: dict[str, int] = {
     "story time": 0,
     "library": 1,
     "Wi-Fi": 1,
+    "written notice": 4,
+    "eviction": 4,
+    "legal aid": 5,
+    "benefits appeals": 5,
+    "housing disputes": 5,
 }
 
 
@@ -153,10 +159,15 @@ def reset_corpus_tables(*, database_url: str) -> None:
 
 
 def seed_eval_corpus(*, database_url: str) -> dict[str, int]:
-    """Load fixture corpus + deterministic embeddings for eval benchmarks."""
+    """Load fixture corpus + tagged docs + deterministic embeddings for eval benchmarks."""
     with corpus_db_lock():
         _reset_corpus_tables_impl(database_url=database_url)
         counts = load_corpus(database_url=database_url)
+        tagged_counts = load_tagged_corpus(database_url=database_url)
+        counts = {
+            "documents": counts["documents"] + tagged_counts["documents"],
+            "chunks": counts["chunks"] + tagged_counts["chunks"],
+        }
         if counts["documents"] < _MIN_CORPUS_ROWS or counts["chunks"] < _MIN_CORPUS_ROWS:
             msg = f"eval corpus seed incomplete: {counts}"
             raise RuntimeError(msg)

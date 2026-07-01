@@ -1,7 +1,7 @@
 ---
 session_id: S006-invite-acceptance
 type: feature
-status: in_progress
+status: paused
 branch: feat/S006-invite-acceptance
 started_at: 2026-06-30
 intent: "GitHub #109 — complete invite acceptance flow (redirect URLs, auth callback, password setup, invitation admin). F35 gap from S005/EV-006."

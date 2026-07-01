@@ -312,3 +312,213 @@ export async function bulkUpdateMetadata(
     throw new Error(`Bulk metadata update failed (${String(response.status)})`);
   return response.json() as Promise<BulkResult>;
 }
+
+export interface EvalMetricsSummaryApi {
+  retrieval_relevance?: number | null;
+  faithfulness?: number | null;
+  answer_relevancy?: number | null;
+  latency_p95_ms?: number | null;
+  custom_scores?: Record<string, number> | null;
+}
+
+export interface EvalRunListItemApi {
+  run_id: string;
+  status: "pending" | "running" | "completed" | "failed";
+  started_at?: string | null;
+  completed_at?: string | null;
+  metrics_summary: EvalMetricsSummaryApi;
+}
+
+export interface EvalRunListResponseApi {
+  items: EvalRunListItemApi[];
+  page: number;
+  page_size: number;
+  total_count: number;
+}
+
+export interface EvalRunItemApi {
+  case_id: string;
+  locale: string;
+  question: string;
+  expected_doc_url?: string | null;
+  retrieved_urls: string[];
+  answer?: string | null;
+  metrics: {
+    retrieval_pass: boolean;
+    faithfulness?: number | null;
+    answer_relevancy?: number | null;
+    latency_ms: number;
+    custom_scores?: Record<string, number> | null;
+  };
+}
+
+export interface EvalRunDetailApi {
+  run_id: string;
+  status: "pending" | "running" | "completed" | "failed";
+  metrics_summary: EvalMetricsSummaryApi;
+  items: EvalRunItemApi[];
+}
+
+export async function fetchEvalRuns(
+  options: CorpusClientOptions,
+): Promise<EvalRunListResponseApi> {
+  const response = await fetch(`${options.baseUrl}/internal/v1/eval/runs`, {
+    headers: {
+      Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Eval runs list failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<EvalRunListResponseApi>;
+}
+
+export async function fetchEvalRunDetail(
+  options: CorpusClientOptions,
+  runId: string,
+): Promise<EvalRunDetailApi> {
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/eval/runs/${runId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+      },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Eval run detail failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<EvalRunDetailApi>;
+}
+
+export async function triggerEvalRun(
+  options: CorpusClientOptions,
+  corpusProfile: "fixture" | "staging" = "fixture",
+): Promise<{ run_id: string; status: string; created_at: string }> {
+  const response = await fetch(`${options.baseUrl}/internal/v1/eval/runs`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ corpus_profile: corpusProfile }),
+  });
+  if (!response.ok) {
+    throw new Error(`Eval run trigger failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<{
+    run_id: string;
+    status: string;
+    created_at: string;
+  }>;
+}
+
+export interface EvalTimeseriesPointApi {
+  run_id: string;
+  completed_at: string;
+  metrics_summary: EvalMetricsSummaryApi;
+}
+
+export interface EvalTimeseriesResponseApi {
+  points: EvalTimeseriesPointApi[];
+  available_metrics: string[];
+}
+
+export async function fetchEvalTimeseries(
+  options: CorpusClientOptions,
+  limit = 100,
+): Promise<EvalTimeseriesResponseApi> {
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/eval/runs/timeseries?limit=${String(limit)}`,
+    {
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+      },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Eval timeseries failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<EvalTimeseriesResponseApi>;
+}
+
+export interface EvalCriterionApi {
+  criterion_id: string;
+  slug: string;
+  label: string;
+  description?: string | null;
+  scorer_type: "llm_rubric";
+  rubric: string;
+  enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function fetchEvalCriteria(
+  options: CorpusClientOptions,
+): Promise<{ items: EvalCriterionApi[] }> {
+  const response = await fetch(`${options.baseUrl}/internal/v1/eval/criteria`, {
+    headers: {
+      Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Eval criteria list failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<{ items: EvalCriterionApi[] }>;
+}
+
+export async function createEvalCriterion(
+  options: CorpusClientOptions,
+  body: {
+    slug: string;
+    label: string;
+    description?: string | null;
+    rubric: string;
+    enabled?: boolean;
+  },
+): Promise<EvalCriterionApi> {
+  const response = await fetch(`${options.baseUrl}/internal/v1/eval/criteria`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      scorer_type: "llm_rubric",
+      enabled: body.enabled ?? true,
+      ...body,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Eval criterion create failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<EvalCriterionApi>;
+}
+
+export async function updateEvalCriterion(
+  options: CorpusClientOptions,
+  criterionId: string,
+  body: {
+    label?: string;
+    description?: string | null;
+    rubric?: string;
+    enabled?: boolean;
+  },
+): Promise<EvalCriterionApi> {
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/eval/criteria/${criterionId}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Eval criterion update failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<EvalCriterionApi>;
+}

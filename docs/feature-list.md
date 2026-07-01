@@ -560,6 +560,55 @@
   supabase-js `signOut` scopes, `auth.sessions` revoke, Resend SMTP + REST, supabase-js storage
   adapter, CLI PR #5686 / issue #5124).
 
+### F36: Admin RAG evaluation tab + golden eval set
+
+- **What it does**: Adds an admin-only **Model / RAG Evaluation** tab to the data-management
+  frontend so operators run the golden eval set through the production RAG path, view per-metric
+  scores (retrieval relevance, faithfulness/groundedness, answer relevancy, latency), drill into
+  per-question results, and review run history/trends. Expands the smoke fixture into a maintained
+  bilingual golden set with documented curation.
+- **Inputs**: Admin operator (`role=admin`); golden fixture `data/fixtures/eval/qa_pairs.json`;
+  seeded or staging corpus; Modal self-hosted LLM for LLM-as-judge metrics.
+- **Outputs**: Eval run record in Postgres (`eval_runs`, `eval_run_items`); admin UI summary +
+  drill-down; CI harness metrics via extended `tests/eval/`.
+- **Tooling (R63)**: **LlamaIndex native evaluators** (`FaithfulnessEvaluator`,
+  `AnswerRelevancyEvaluator`, optional `ContextRelevancyEvaluator`) + **custom harness**
+  (retrieval URL match, latency, Postgres persistence, admin tab). No Langfuse / Ragas / DeepEval
+  in v1.
+- **Golden set (R67 / RD-099–RD-110)**:
+  | Topic | v1 decision |
+  |-------|-------------|
+  | Domains | Community + housing + legal aid + edge cases |
+  | Size | 10 cases, 14 locale rows |
+  | es housing/legal | Deferred until #94 adds es corpus docs |
+  | Retrieval pass | Expected doc URL in top-k (`retrieval_expectation: hit` / `any_of`) |
+  | Answer rubric | `required_facts[]` per row |
+  | Edge cases | Abstain, ambiguous query, empty retrieval |
+- **Thresholds**:
+  | Metric | CI gate | Admin display |
+  |--------|---------|---------------|
+  | Retrieval relevance | ≥80% on `hit` + `any_of` rows | Same |
+  | Faithfulness | ≥0.60 aggregate | Highlight &lt;0.70 |
+  | Answer relevancy | ≥0.60 aggregate | Highlight &lt;0.70 |
+  | Latency | Informational | p95 per question (30s reference) |
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `data-management-frontend` | `/evaluation` route + nav (`admin.nav.evaluation`, en/es) |
+  | `internal-write-api` | `POST/GET /internal/v1/eval/runs`, `GET …/{run_id}` |
+  | `packages/rag` + Modal | Eval runner job through same RAG path as ChatRAG |
+  | `data/fixtures/eval/` | Expanded `qa_pairs.json` + `docs/eval-golden-set.md` runbook |
+- **Auth**: **Admin-only** — trigger runs and view results; `viewer` → `403` (RD-110).
+- **Privacy**: Fixture-only questions; no visitor PII in eval tables (ADR-004). Judge evaluates
+  in query language (RD-109).
+- **Coordination**: Align groundedness with #84 when available; primary regression consumer for
+  #83 reranking.
+- **Limitations / scope**: No public eval UI; no auto prompt tuning; no Langfuse/Phoenix v1; housing/legal
+  golden rows en-only until bilingual corpus expands.
+- **Priority**: High — GitHub #99 (unblocks tooling decision R63).
+- **Source**: S007 / EV-008 interview 2026-07-01 (RD-099–RD-110); context `docs/context/rag-eval.md`;
+  R63, R64, R67; #99, #83, #84, #94.
+
 ## Planned / Deferred (post-v1)
 
 | # | Feature | Priority | Complexity | Notes |

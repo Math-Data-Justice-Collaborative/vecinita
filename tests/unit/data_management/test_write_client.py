@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from http import HTTPStatus
 from typing import cast
 from uuid import uuid4
 
@@ -17,6 +18,7 @@ from vecinita_embedding_client import (
     EMBEDDING_DIMENSION,
 )
 from vecinita_shared_schemas.internal_write import (
+    AuditEventRequest,
     BatchUpsertRequest,
     BatchUpsertResponse,
     ChunkUpsert,
@@ -242,3 +244,49 @@ def test_write_client_does_not_close_injected_http_client() -> None:
     client.close()
 
     assert closed == []
+
+
+def test_post_audit_event_posts_payload() -> None:
+    """post_audit_event serializes the request body to the ingest route."""
+    seen: list[dict[str, object]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(cast("dict[str, object]", json.loads(request.content.decode())))
+        assert request.url.path == "/internal/v1/audit/event"
+        return httpx.Response(HTTPStatus.ACCEPTED, json={})
+
+    transport = httpx.MockTransport(handler)
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    event = AuditEventRequest(
+        event_type="user.invited",
+        entity_type="user",
+        entity_id=uuid4(),
+        payload={"role": "viewer"},
+    )
+    client.post_audit_event(event)
+    assert seen
+    client.close()
+
+
+def test_post_audit_event_raises_on_http_error() -> None:
+    """post_audit_event surfaces non-success HTTP status codes."""
+    transport = httpx.MockTransport(lambda _request: httpx.Response(500, json={}))
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    with pytest.raises(InternalWriteClientError, match="post_audit_event failed"):
+        client.post_audit_event(
+            AuditEventRequest(
+                event_type="user.invited",
+                entity_type="user",
+                entity_id=uuid4(),
+                payload={},
+            ),
+        )
+    client.close()

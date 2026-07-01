@@ -17,6 +17,9 @@
 
 Unset env vars **skip** that tier (exit 0). Set vars only for tiers you can reach from your shell.
 
+Copy `infra/staging/.env.example` into `prod.env` (gitignored) or export vars before running
+`make verify-connectivity` / `bash scripts/deploy/verify_connectivity.sh`.
+
 **H4–H5 are required for UI sign-off** — see `.cursor/skills/connectivity-gates.md`.
 
 ## Pre-flight (before deploy)

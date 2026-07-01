@@ -91,10 +91,10 @@ each feature/journey approval substep.
 
 ### Phase 1 — Collect Verification Results
 
-Read and merge:
-- `docs/qa-report.md` from 09-qa
-- `docs/e2e-report.md` from 10-e2e
-- `docs/verification-report.md` from 08-verify-build (latest)
+Read and merge (from `active_session.artifacts_dir/reports/`):
+- `qa-report.md` from 09-qa
+- `e2e-report.md` from 10-e2e
+- `verification-report.md` from 08-verify-build (latest)
 - `docs/feature-list.md` for scope reference
 - `docs/user-journeys.md` for per-journey interview questions
 - `docs/acceptance-criteria.md` for pass/fail criteria
@@ -124,7 +124,7 @@ Before feature-by-feature approval, walk **each journey** in `docs/user-journeys
 
 | Check | Source |
 |-------|--------|
-| T0 test exists and passed | `docs/e2e-report.md` + pytest module |
+| T0 test exists and passed | session `reports/e2e-report.md` + pytest module |
 | T3 status (if live tier) | e2e-report or 15-service-health / `LIVE_E2E=1` |
 | User intent | AskQuestion per UJ-NNN |
 
@@ -235,9 +235,9 @@ Scope:
   Gaps:   [N] items (resolved)
 
 Artifacts:
-  docs/implementation-verification.md — full report
-  docs/qa-report.md — QA results
-  docs/e2e-report.md — E2E results
+  docs/sessions/{id}/reports/verify-impl.md — full report
+  docs/sessions/{id}/reports/qa-report.md — QA results
+  docs/sessions/{id}/reports/e2e-report.md — E2E results
   docs/adr/                           — [N] ADRs from scope/fix decisions
 
 Deploy gate (partial):
@@ -249,7 +249,7 @@ Deploy gate (partial):
 Next step: 12-verify-deploy
 ```
 
-Write `docs/implementation-verification.md`.
+Write `{active_session.artifacts_dir}/reports/verify-impl.md`.
 **State**: Set status to `completed`.
 
 ## Output Rules

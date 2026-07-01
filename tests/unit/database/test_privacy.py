@@ -9,8 +9,10 @@ from vecinita_database.privacy import (
     _normalize_database_url,  # pyright: ignore[reportPrivateUsage]
     find_forbidden_tables,
     find_identity_columns_on_ev002_tables,
+    find_identity_columns_on_eval_tables,
     find_identity_columns_on_tag_tables,
     find_missing_ev002_tables,
+    find_missing_eval_tables,
     find_missing_tag_tables,
 )
 
@@ -165,5 +167,63 @@ def test_find_identity_columns_on_ev002_tables_returns_empty_when_compliant() ->
         ),
     ):
         violations = find_identity_columns_on_ev002_tables("postgresql+psycopg://localhost/db")
+
+    assert violations == {}
+
+
+def test_find_missing_eval_tables_reports_absent_tables() -> None:
+    """Test find missing eval tables reports absent tables."""
+    inspector = FakeInspector(tables=["documents"])
+
+    with (
+        patch("vecinita_database.privacy.create_engine"),
+        patch(
+            "vecinita_database.privacy.inspect",
+            return_value=inspector,
+        ),
+    ):
+        missing = find_missing_eval_tables("postgresql+psycopg://localhost/db")
+
+    assert missing == {"eval_criteria", "eval_run_items", "eval_runs"}
+
+
+def test_find_identity_columns_on_eval_tables_reports_violations() -> None:
+    """Test find identity columns on eval tables reports violations."""
+    inspector = FakeInspector(
+        tables=["eval_runs", "eval_run_items"],
+        columns={
+            "eval_runs": [{"name": "id"}, {"name": "user_id"}],
+            "eval_run_items": [{"name": "case_id"}, {"name": "auth_subject"}],
+        },
+    )
+
+    with (
+        patch("vecinita_database.privacy.create_engine"),
+        patch(
+            "vecinita_database.privacy.inspect",
+            return_value=inspector,
+        ),
+    ):
+        violations = find_identity_columns_on_eval_tables("postgresql+psycopg://localhost/db")
+
+    assert violations["eval_runs"] == ["user_id"]
+    assert violations["eval_run_items"] == ["auth_subject"]
+
+
+def test_find_identity_columns_on_eval_tables_returns_empty_when_compliant() -> None:
+    """Test find identity columns on eval tables returns empty when compliant."""
+    inspector = FakeInspector(
+        tables=["eval_runs"],
+        columns={"eval_runs": [{"name": "id"}, {"name": "status"}]},
+    )
+
+    with (
+        patch("vecinita_database.privacy.create_engine"),
+        patch(
+            "vecinita_database.privacy.inspect",
+            return_value=inspector,
+        ),
+    ):
+        violations = find_identity_columns_on_eval_tables("postgresql+psycopg://localhost/db")
 
     assert violations == {}

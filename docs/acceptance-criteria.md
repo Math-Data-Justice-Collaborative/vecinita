@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-06-30 (S006/EV-007 F35 ext — TC-104–TC-110 invite acceptance, #109)
+> **Last updated**: 2026-07-01 (S007/EV-008 F36 — AC-E12–AC-E16 RAG evaluation, #99)
 
 ## Per-feature criteria
 
@@ -114,11 +114,22 @@
 - [ ] **AC-U20**: Expired or invalid invite/recovery links show a **bilingual in-app error** on `/accept-invite` and `/reset-password` with guidance to contact an admin or request resend — not a redirect to wrong host or blank page (UJ-031/033, TC-106, TC-107). — pending EV-007
 - [ ] **AC-U21**: Invite and recovery email templates include polished Vecinita branding, clear CTA copy, and expiry notice aligned with `otp_expiry` (3600s); `{{ .ConfirmationURL }}` resolves correctly after redirect wiring (TC-110, TC-094). — pending EV-007
 
+### EV-008 — Admin RAG evaluation (F36)
+
+- [x] **AC-E12**: Golden eval fixture has 10 cases (14 locale rows) covering community, housing, legal, and edge scenarios with `required_facts[]` and documented curation (`docs/eval-golden-set.md`, UJ-039). — build complete (S007)
+- [x] **AC-E13**: Eval harness reports ≥80% retrieval relevance on `hit` + `any_of` golden rows (TC-111). — build complete (S007)
+- [x] **AC-E14**: Faithfulness ≥0.60 and answer relevancy ≥0.60 on golden set aggregate in CI; admin highlights rows &lt;0.70 (TC-112, UJ-040). — build complete (S007)
+- [x] **AC-E15**: Admin Evaluation tab triggers runs, shows per-metric summary + per-question drill-down + history; en/es UI chrome (UJ-039, UJ-040, TC-114, TC-116). — build complete (S007)
+- [x] **AC-E16**: Eval routes are admin-only (`viewer` → 403); no visitor PII in eval persistence (TC-115, ADR-004). — build complete (S007)
+
 ## Quantitative benchmarks
 
 | Benchmark | Metric | Target | Dataset | Spec reference |
 |-----------|--------|--------|---------|----------------|
-| Retrieval quality | Manual review | ≥80% "relevant" on eval fixture | `data/fixtures/eval/` | test-plan |
+| Retrieval quality | Manual review | ≥80% "relevant" on eval fixture (`hit` + `any_of` rows) | `data/fixtures/eval/` | test-plan TC-111 |
+| Eval faithfulness | LlamaIndex judge | ≥0.60 aggregate (CI); display highlight &lt;0.70 | `data/fixtures/eval/` | test-plan TC-112 |
+| Eval answer relevancy | LlamaIndex judge | ≥0.60 aggregate (CI); display highlight &lt;0.70 | `data/fixtures/eval/` | test-plan TC-112 |
+| Eval latency p95 | Wall-clock per question | Informational (30s reference) | Golden run | test-plan TC-116 |
 | Coverage (unit, per component) | Line + branch | ≥95% each on 12 components | CI (`make test-unit-coverage`) | test-plan, ADR-019 |
 | Cost | Monthly infra | ≤ $50 cap; $25 target documented | Deploy estimate | ADR-004 |
 | Latency | p95 ask | < 15s | Staging smoke | spec |

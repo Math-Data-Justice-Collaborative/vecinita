@@ -9,6 +9,7 @@ members = [
     "vecinita-data-management-backend",
     "vecinita-database",
     "vecinita-embedding-client",
+    "vecinita-eval",
     "vecinita-ingest",
     "vecinita-internal-write-api",
     "vecinita-llm-client",
@@ -2039,6 +2040,7 @@ dev = [
     { name = "vecinita-data-management-backend" },
     { name = "vecinita-database" },
     { name = "vecinita-embedding-client" },
+    { name = "vecinita-eval" },
     { name = "vecinita-ingest" },
     { name = "vecinita-internal-write-api" },
     { name = "vecinita-llm-client" },
@@ -2064,6 +2066,7 @@ dev = [
     { name = "vecinita-data-management-backend", editable = "apps/data-management-backend" },
     { name = "vecinita-database", editable = "apps/database" },
     { name = "vecinita-embedding-client", editable = "packages/embedding-client" },
+    { name = "vecinita-eval", editable = "packages/eval" },
     { name = "vecinita-ingest", editable = "packages/ingest" },
     { name = "vecinita-internal-write-api", editable = "apps/internal-write-api" },
     { name = "vecinita-llm-client", editable = "packages/llm-client" },
@@ -2153,6 +2156,23 @@ dependencies = [
 requires-dist = [{ name = "httpx", specifier = ">=0.27,<1" }]
 
 [[package]]
+name = "vecinita-eval"
+version = "0.1.0"
+source = { editable = "packages/eval" }
+dependencies = [
+    { name = "llama-index" },
+    { name = "vecinita-rag" },
+    { name = "vecinita-shared-schemas" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "llama-index", specifier = ">=0.13.0,<0.14" },
+    { name = "vecinita-rag", editable = "packages/rag" },
+    { name = "vecinita-shared-schemas", editable = "packages/shared-schemas" },
+]
+
+[[package]]
 name = "vecinita-ingest"
 version = "0.1.0"
 source = { editable = "packages/ingest" }
@@ -2173,6 +2193,8 @@ dependencies = [
     { name = "sqlalchemy" },
     { name = "uvicorn" },
     { name = "vecinita-database" },
+    { name = "vecinita-embedding-client" },
+    { name = "vecinita-eval" },
     { name = "vecinita-shared-schemas" },
 ]
 
@@ -2183,6 +2205,8 @@ requires-dist = [
     { name = "sqlalchemy", specifier = ">=2.0,<3" },
     { name = "uvicorn", specifier = ">=0.30,<1" },
     { name = "vecinita-database", editable = "apps/database" },
+    { name = "vecinita-embedding-client", editable = "packages/embedding-client" },
+    { name = "vecinita-eval", editable = "packages/eval" },
     { name = "vecinita-shared-schemas", editable = "packages/shared-schemas" },
 ]
 

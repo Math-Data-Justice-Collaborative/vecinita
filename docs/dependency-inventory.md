@@ -1,7 +1,7 @@
 # Dependency Inventory
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-28 (S004/EV-005 F34 — Supabase admin auth)
+> **Last updated**: 2026-07-01 (S007/EV-008 F36 — LlamaIndex eval harness, no new deps)
 
 ## Runtime dependencies (Python — planned)
 
@@ -31,6 +31,20 @@
 - **Not using:** LangGraph (explicitly rejected for v1).
 - **Risk:** Dependency weight and version lockstep with pgvector adapter — pin in `pyproject.toml` during 06-tech-tooling.
 
+### EV-008 — RAG evaluation harness (F36, ADR-033)
+
+| Component | Package | New dep? | Notes |
+|-----------|---------|----------|-------|
+| Retrieval scoring | `vecinita-eval` (`packages/eval`) | No | URL-in-top-k + `retrieval_expectation` |
+| Faithfulness / answer relevancy | LlamaIndex evaluators in `llama-index` | **No** | `FaithfulnessEvaluator`, `AnswerRelevancyEvaluator` |
+| Judge LLM | Modal vLLM via `vecinita-llm-client` | No | Same Qwen2.5-1.5B endpoint as ChatRAG |
+| Run persistence | Postgres via internal-write-api | No | `eval_runs`, `eval_run_items` |
+| Admin UI | `data-management-frontend` | No | `/evaluation` tab |
+
+**Explicitly not added v1:** `ragas`, `deepeval`, `langfuse`, `arize-phoenix`.
+
+**Revisit:** Ragas if LlamaIndex judge scores unstable after golden-set tuning (ADR-033 §1).
+
 ### vLLM evaluation (RD-021)
 
 - **Role:** **Primary** LLM server on Modal (user selection); higher throughput than Ollama; **higher GPU cost**.
@@ -48,6 +62,7 @@
 | react | 18.x UI | MIT | |
 | vite | Build | MIT | |
 | vitest | Frontend smoke tests | MIT | |
+| **@playwright/test** | **Browser UI E2E (T0-ui / T3-ui)** | **Apache-2.0** | **QA stage 09; `tests/ui/`** |
 | **tailwindcss** | ^3.4 Utility-first CSS | MIT | EV-002 F23 (admin UI); TP-018 |
 | **postcss** | CSS processing | MIT | Required by Tailwind v3 |
 | **autoprefixer** | Vendor prefixes | MIT | Required by Tailwind v3 |
@@ -56,6 +71,7 @@
 | **clsx** | Conditional classnames | MIT | shadcn/ui utility |
 | **tailwind-merge** | Tailwind class dedup | MIT | shadcn/ui utility |
 | **lucide-react** | Icons | ISC | shadcn/ui icons |
+| **recharts** | ^2.15.x Eval dashboard charts (`data-management-frontend`) | MIT | ADR-034 / EV-008 M64 |
 | **react-router** | ^7.x Admin routing | MIT | EV-002 F23; TP-021 |
 | **react-router-dom** | ^7.x DOM bindings | MIT | EV-002 F23; TP-021 |
 | **vecinita-frontend-i18n** | workspace | Locale utils + EN/ES messages | — | EV-004 F31; `packages/frontend-i18n` |
@@ -133,3 +149,21 @@ not JWKS; role source = **`app_metadata.role`** (not a `user_roles` table); shar
   storage adapter); user-search `filter` is a query param on the existing GoTrue Admin REST call. The
   `admin_delete_user_sessions` RPC (force sign-out) is committed SQL under `supabase/migrations/`, not
   a package.
+
+## PyPI packages intentionally not upgraded (QA-S007-003)
+
+**Last reviewed:** 2026-07-01 (09-qa advisory remediation)
+
+These packages report newer versions on PyPI but remain pinned per ADR-006 (LlamaIndex lockstep),
+Modal/vLLM compatibility, or prior pip-audit remediation. Do **not** bump without ADR + full CI.
+
+| Package | Pinned (approx.) | Latest (2026-07-01) | Rationale |
+|---------|------------------|---------------------|-----------|
+| llama-index (+ core, cli, workflows) | 0.13.x | 0.14.x | ADR-006; pgvector adapter lockstep |
+| llama-cloud / llama-parse | 1.6.x / 0.5.x | 2.x / 0.6.x | Transitive LlamaIndex stack |
+| openai | 1.109.x | 2.x | LlamaIndex evaluator compatibility |
+| pandas | 2.3.x | 3.x | Major bump — out of EV-008 scope |
+| marshmallow | 3.x | 4.x | Transitive; no direct use |
+| protobuf / pydantic-core / pillow / striprtf | patch pins | newer patch | Low risk; batch with stack bump |
+
+Workspace packages (`vecinita-*`) are skipped by pip-audit (not on PyPI) — expected.

@@ -21,7 +21,7 @@ failures to the user.
 
 **Blocking:** `tests/unit/test_cors_policy.py` and `tests/integration` must pass.
 Report connectivity artifact presence (`test_staging_connectivity.py`, `verify_connectivity.sh`)
-in `docs/verification-report.md`. See connectivity-gates §Stage 08.
+in `{active_session.artifacts_dir}/reports/verification-report.md`. See connectivity-gates §Stage 08.
 
 ## When to Use
 
@@ -69,7 +69,7 @@ Invoke **workflow-state-manager** `read_context` before any other action; `updat
 substep. **Do not** edit `workflow-state.yaml` directly.
 
 
-**Detail:** `docs/verification-report.md` — overwrite each run; set `report` on the stage block.
+**Detail:** `{active_session.artifacts_dir}/reports/verification-report.md` — overwrite each run; set `report` on the stage block.
 
 ## Delta / feature-addition mode
 
@@ -154,7 +154,7 @@ For issues requiring user decisions, present via AskQuestion:
 
 ### Phase 5 — Compile Report
 
-Write `docs/verification-report.md`:
+Write `{active_session.artifacts_dir}/reports/verification-report.md`:
 
 ```markdown
 # Verification Report

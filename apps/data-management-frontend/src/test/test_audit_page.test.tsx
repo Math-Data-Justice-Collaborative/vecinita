@@ -227,4 +227,35 @@ describe("Audit log page", () => {
       );
     });
   });
+
+  it("renders unknown entity types verbatim", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          items: [
+            {
+              id: "evt-custom",
+              event_type: "custom.event",
+              entity_type: "custom_entity",
+              entity_id: "ent-1",
+              request_id: "req-1",
+              created_at: "2026-05-26T10:00:00Z",
+              payload: {},
+            },
+          ],
+          total_count: 1,
+          page: 1,
+          page_size: 50,
+        }),
+      }),
+    );
+
+    renderAudit();
+
+    await waitFor(() => {
+      expect(screen.getByText("custom_entity")).toBeInTheDocument();
+    });
+  });
 });

@@ -1,23 +1,23 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, ADR-001–021
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–033
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 13: EV-007 — Invite acceptance flow (F35 ext, #109) — **07-build complete; 08-verify-build complete** |
-| **Active milestone** | M58: Templates, e2e, runbook + Phase 13 gate — **complete (07-build)** |
-| **Active task** | **09-qa** / **12-verify-deploy** next (live AC-U17–U21 at 13-deploy-smoke) |
-| **Tasks completed** | Phase 13 M54–M58 T54.1–T54.24 complete (2026-06-30) |
-| **Last updated** | 2026-06-30 |
-| **Evolve cycle** | EV-007 (F35 ext, #109) — **07-build complete; 08-verify-build complete** |
-| **Git branch** | `feat/S006-invite-acceptance` |
-| **Active session** | S006-invite-acceptance — evolve-lite. 01-requirements + 04-tech-plan **complete** (RD-091–RD-098, **ADR-032**, TP-S006-01–**16**). 07-build + 08-verify-build **complete** (M54–M58). Next: 09-qa → 12-verify-deploy → 13-deploy-smoke. Lite path skips 02/03/05/06/11 |
-| **Scope addition** | 2026-06-30 — EV-007 closes invite acceptance gap from #109 (redirect URLs, auth callback, retract invite, template polish). S005 deploy stages 12/13 remain deferred on paused session. |
+| **Active phase** | Phase 14: EV-008 — Admin RAG evaluation (F36, #99) — **M64 complete** |
+| **Active milestone** | M64: Interactive eval dashboard — **completed** |
+| **Active task** | **—** (M59–M64 complete; next: 08-verify-build) |
+| **Tasks completed** | Phase 14 M59–M64 complete (S007) |
+| **Last updated** | 2026-07-01 |
+| **Evolve cycle** | EV-008 (F36, #99) — **07-build complete (M64)** |
+| **Git branch** | `feat/S007-rag-eval` |
+| **Active session** | S007-rag-eval — evolve-lite. M59–M63 complete. **M64 dashboard** (R68): time-series, pivot explore, criteria CRUD, collapsible panels |
+| **Scope addition** | 2026-07-01 — R68 extends F36 with interactive eval dashboard (ADR-034, UJ-041–043, TC-117–122, AC-E17–E21). Baseline M59–M63 delivered in same PR ([#113](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/113)). |
 
 ## Template
 
@@ -1191,6 +1191,125 @@ frontend auth callback, retract invitation, template polish, live invite smoke (
 
 ---
 
+### Phase 14: EV-008 — Admin RAG evaluation (F36, #99)
+
+> **Session:** S007-rag-eval · **Evolve cycle:** EV-008 · **Feature IDs:** F36  
+> **Branch:** `feat/S007-rag-eval` → `main` (PR-50) · **ADR:** ADR-033 · **Tooling:** LlamaIndex evaluators + custom harness (no new deps)
+
+**Objective:** Golden-set eval harness, Postgres run persistence, internal-write-api routes, admin `/evaluation` tab.  
+**Entry gate:** 04-tech-plan approved (ADR-033, TP-S007-01–16).  
+**Exit gate:** TC-111–TC-116 green; AC-E12–AC-E16 satisfied at T2; live staging eval run informational at T3.
+
+#### M59: Eval schema + `packages/eval` scaffold
+
+**Goal:** Alembic tables, privacy guardrails, golden-set loader, retrieval scorer foundation.  
+**Branch:** `feat/S007-rag-eval`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
+|---|------|------|--------|-------------|------------|-----------|---------|---------|
+| T59.1 | Test: `tests/privacy/test_eval_tables.py` — eval tables have no PII columns — red | Test | completed | ADR-004, ADR-033 §3 | — | — | S007 | F36 |
+| T59.2 | Test: `tests/eval/test_eval_edge_cases.py` — TC-113 abstain/ambiguous/empty — red | Test | completed | test-plan TC-113, eval-golden-set.md | — | D3 | S007 | F36 |
+| T59.3 | Code: Alembic migration `eval_runs` + `eval_run_items` | Code | completed | ADR-033 §3, api-contract §EV-008 | T59.1 | — | S007 | F36 |
+| T59.4 | Config: Scaffold `packages/eval` (`vecinita-eval`) — golden loader + `retrieval_expectation` scorer | Code | completed | ADR-033 §2, feature-list F36 | T59.3 | D3 | S007 | F36 |
+| T59.5 | Test: Extend `tests/eval/test_eval_retrieval_relevance.py` — TC-111 `hit`/`any_of` aggregate ≥80% — red | Test | completed | test-plan TC-111, RD-106 | T59.4 | D3 | S007 | F36 |
+
+#### M60: Eval harness — LlamaIndex judges + runner
+
+**Goal:** Full RAG path per golden row; faithfulness + answer relevancy; #84 adapter stub.  
+**Branch:** `feat/S007-rag-eval`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
+|---|------|------|--------|-------------|------------|-----------|---------|---------|
+| T60.1 | Test: `tests/eval/test_eval_answer_quality.py` — TC-112 faithfulness + answer relevancy (mocked judge) — red | Test | completed | test-plan TC-112, RD-107/108 | T59.4 | D3 | S007 | F36 |
+| T60.2 | Code: `packages/eval/runner.py` — orchestrate RAG + per-row metrics + aggregates | Code | completed | ADR-033 §2/§4, feature-list F36 | T59.4 | D3 | S007 | F36 |
+| T60.3 | Code: `packages/eval/judges.py` — LlamaIndex `FaithfulnessEvaluator` + `AnswerRelevancyEvaluator` via Modal LLM HTTP | Code | completed | ADR-033 §1, RD-109 | T60.2 | D3, D7 | S007 | F36 |
+| T60.4 | Code: `packages/eval/groundedness.py` — `GroundednessScorer` protocol + LlamaIndex default (#84 swap stub) | Code | completed | ADR-033 §9, #84 | T60.3 | — | S007 | F36 |
+| T60.5 | Code: Implement TC-111 retrieval + TC-113 edge + TC-112 answer quality — green | Code | completed | test-plan TC-111–TC-113 | T59.5, T59.2, T60.1, T60.3, T60.4 | D3 | S007 | F36 |
+
+#### M61: internal-write-api eval routes
+
+**Goal:** Admin-triggered async runs; history + drill-down API; viewer denied.  
+**Branch:** `feat/S007-rag-eval`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
+|---|------|------|--------|-------------|------------|-----------|---------|---------|
+| T61.1 | Code: Pydantic models `EvalRun*` in `vecinita_shared_schemas` | Code | completed | api-contract §EV-008, ADR-011 | T59.3 | — | S007 | F36 |
+| T61.2 | Test: TC-115 — viewer JWT → 403 on `POST` + `GET /internal/v1/eval/runs` — red | Test | completed | test-plan TC-115, RD-110 | — | — | S007 | F36 |
+| T61.3 | Test: `tests/e2e/test_uj039_eval_run_trigger.py` — TC-114 admin trigger + poll — red | Test | completed | test-plan TC-114, UJ-039 | T60.5 | D3 | S007 | F36 |
+| T61.4 | Code: Eval routes on internal-write-api + `BackgroundTasks` runner wiring | Code | completed | ADR-033 §4/§7, api-contract §EV-008 | T61.1, T60.5 | D3 | S007 | F36 |
+| T61.5 | Config: OpenAPI `openapi/internal-write.yaml` — eval routes | Config | completed | ADR-011, api-contract §EV-008 | T61.4 | — | S007 | F36 |
+| T61.6 | Test: Extend `tests/unit/test_cors_policy.py` — OPTIONS preflight on `POST /internal/v1/eval/runs` | Test | completed | ADR-033 §11, connectivity-gates | T61.4 | — | S007 | F36 |
+| T61.7 | Code: TC-114/TC-115 green | Code | completed | test-plan TC-114/115 | T61.2, T61.3, T61.4 | D3 | S007 | F36 |
+
+#### M62: Admin Evaluation tab
+
+**Goal:** `/evaluation` route, run trigger UI, history + drill-down, bilingual chrome.  
+**Branch:** `feat/S007-rag-eval`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
+|---|------|------|--------|-------------|------------|-----------|---------|---------|
+| T62.1 | Test (Vitest): `test_evaluation_page.test.tsx` — TC-116 history + drill-down — red | Test | completed | test-plan TC-116, UJ-040 | — | — | S007 | F36 |
+| T62.2 | Code: `EvaluationPage` — summary, run button, polling, per-metric thresholds | Code | completed | user-journeys UJ-039/040, ADR-033 §8 | T61.7 | — | S007 | F36 |
+| T62.3 | Code: `AdminLayout` nav + `App.tsx` route `/evaluation` + i18n `admin.nav.evaluation` (en/es) | Code | completed | feature-list F36, ADR-019 | T62.2 | D10 | S007 | F36 |
+| T62.4 | Code: TC-116 Vitest green | Code | completed | test-plan TC-116 | T62.1, T62.2, T62.3 | — | S007 | F36 |
+
+#### M63: Deploy docs + Phase 14 gate
+
+**Goal:** Secrets matrix, redeploy checklist, acceptance criteria wiring.  
+**Branch:** `feat/S007-rag-eval`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
+|---|------|------|--------|-------------|------------|-----------|---------|---------|
+| T63.1 | Config: `docs/staging-secrets-matrix.md` — `VECINITA_EVAL_*` on internal-write-api | Config | completed | config-spec §RAG evaluation, ADR-033 §13 | T61.4 | — | S007 | F36 |
+| T63.2 | Docs: `docs/eval-golden-set.md` — link ADR-033; baseline run instructions | Docs | completed | eval-golden-set.md, ADR-033 | T60.5 | — | S007 | F36 |
+| T63.3 | Docs: Mark AC-E12–AC-E16 build-complete in acceptance-criteria when green | Docs | completed | acceptance-criteria AC-E12–E16 | T62.4, T61.7, T60.5 | — | S007 | F36 |
+| T63.4 | Docs: Session report + Phase 14 gate checklist | Docs | completed | 08-verify-build | T63.1–T63.3 | — | S007 | F36 |
+
+#### M64: Interactive eval dashboard
+
+**Goal:** Time-series charts, pivot explore, collapsible panels, custom criteria (ADR-034).  
+**Branch:** `feat/S007-rag-eval`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
+|---|------|------|--------|-------------|------------|-----------|---------|---------|
+| T64.1 | Test: `tests/integration/test_eval_dashboard_routes.py` — TC-120/122 — red | Test | completed | ADR-034, test-plan TC-120/122 | T61.7 | — | S007 | F36 |
+| T64.2 | Code: Alembic `eval_criteria` + privacy guardrails | Code | completed | ADR-034 §Schema | T64.1 | — | S007 | F36 |
+| T64.3 | Code: Timeseries + criteria API on internal-write-api | Code | completed | ADR-034 §API | T64.2 | — | S007 | F36 |
+| T64.4 | Code: `packages/eval` custom criteria scorer hook | Code | completed | ADR-034 | T64.3 | — | S007 | F36 |
+| T64.5 | Test (Vitest): `test_evaluation_dashboard.test.tsx` — TC-117–119/121 — red | Test | completed | UJ-041–043, TC-117–121 | — | — | S007 | F36 |
+| T64.6 | Code: Dashboard + Explore + Criteria tabs (`recharts`) | Code | completed | ADR-034 §UI, UJ-041–043 | T64.3 | D10 | S007 | F36 |
+| T64.7 | Code: TC-117–121 Vitest + TC-120/122 integration green | Code | completed | test-plan | T64.4–T64.6 | — | S007 | F36 |
+| T64.8 | Docs: ADR-034, scope-addition report, feature-list F36 extension | Docs | completed | ADR-034 | T64.7 | — | S007 | F36 |
+
+#### Phase 14 Gate Check (updated)
+
+- [x] All M59–M63 tasks completed (T59.1–T63.4)
+- [x] All M64 tasks completed (T64.1–T64.8)
+- [x] TC-111–TC-116 green; UJ-039/040 covered (T2)
+- [x] TC-117–TC-122 green; UJ-041–043 covered
+- [x] AC-E12–AC-E16 satisfied at T2; live staging eval run informational at 13-deploy-smoke (T3)
+- [ ] AC-E17–AC-E21 satisfied (dashboard scope)
+- [x] `eval_runs` / `eval_run_items` migration applied; privacy test green
+- [x] `eval_criteria` migration applied; privacy test green
+- [x] No new Python runtime dependencies (ADR-033 §15); **recharts** FE dep per ADR-034
+- [x] CORS preflight covers `POST /internal/v1/eval/runs`
+- [x] CORS preflight covers eval criteria routes
+- [ ] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green
+
+---
+
+#### Phase 14 Gate Check (baseline — superseded by M64 update above)
+
+- [x] All M59–M63 tasks completed (T59.1–T63.4)
+- [x] TC-111–TC-116 green; UJ-039/040 covered (T2)
+- [x] AC-E12–AC-E16 satisfied at T2; live staging eval run informational at 13-deploy-smoke (T3)
+- [x] `eval_runs` / `eval_run_items` migration applied; privacy test green
+- [x] No new runtime dependencies (ADR-033 §15)
+- [x] CORS preflight covers `POST /internal/v1/eval/runs`
+- [x] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -1301,6 +1420,7 @@ main
 | PR-47 | Major | Phase 11 / S004 (EV-005) | feat/S004-supabase-auth | main | merged ([#100](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/100)) |
 | PR-48 | Major | Phase 12 / S005 (EV-006) | feat/S005-user-mgmt-auth | main | pending ([#75](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/75)) |
 | PR-49 | Major | Phase 13 / S006 (EV-007) | feat/S006-invite-acceptance | main | open ([#109](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/109), [PR #110](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/110)) |
+| PR-50 | Major | Phase 14 / S007 (EV-008) | feat/S007-rag-eval | main | pending ([#99](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/99)) |
 
 S003 is evolve-lite + frontend-only: M39–M42 land as atomic commits on the single
 `feat/S003-persistent-chat-history` branch (one PR to `main`, PR-46), matching the S002 pattern.
@@ -1314,6 +1434,9 @@ M53 (auth UX hardening, ADR-031) was appended after the user extended scope on 2
 
 S006 (EV-007) is evolve-lite: M54–M58 land as atomic commits on the single
 `feat/S006-invite-acceptance` branch (one PR to `main`, PR-49), closing #109 invite acceptance gap.
+
+S007 (EV-008) is evolve-lite: M59–M63 land as atomic commits on the single
+`feat/S007-rag-eval` branch (one PR to `main`, PR-50), closing #99 RAG evaluation tab + golden harness.
 
 ## Task Tracking
 
@@ -1663,6 +1786,31 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T54.22 | M58 | 13 | Config | completed | T54.2 | 2026-06-30 | S006 | F35 |
 | T54.23 | M58 | 13 | Test | completed | T54.8 | 2026-06-30 | S006 | F35 |
 | T54.24 | M58 | 13 | Docs | completed | T54.2, T54.4 | 2026-06-30 | S006 | F35 |
+| T59.1 | M59 | 14 | Test | completed | — | — | S007 | F36 |
+| T59.2 | M59 | 14 | Test | completed | — | D3 | S007 | F36 |
+| T59.3 | M59 | 14 | Code | completed | T59.1 | — | S007 | F36 |
+| T59.4 | M59 | 14 | Code | completed | T59.3 | D3 | S007 | F36 |
+| T59.5 | M59 | 14 | Test | completed | T59.4 | D3 | S007 | F36 |
+| T60.1 | M60 | 14 | Test | completed | T59.4 | D3 | S007 | F36 |
+| T60.2 | M60 | 14 | Code | completed | T59.4 | D3 | S007 | F36 |
+| T60.3 | M60 | 14 | Code | completed | T60.2 | D3, D7 | S007 | F36 |
+| T60.4 | M60 | 14 | Code | completed | T60.3 | — | S007 | F36 |
+| T60.5 | M60 | 14 | Code | completed | T59.5, T59.2, T60.1, T60.3, T60.4 | D3 | S007 | F36 |
+| T61.1 | M61 | 14 | Code | completed | T59.3 | — | S007 | F36 |
+| T61.2 | M61 | 14 | Test | completed | — | — | S007 | F36 |
+| T61.3 | M61 | 14 | Test | completed | T60.5 | D3 | S007 | F36 |
+| T61.4 | M61 | 14 | Code | completed | T61.1, T60.5 | D3 | S007 | F36 |
+| T61.5 | M61 | 14 | Config | completed | T61.4 | — | S007 | F36 |
+| T61.6 | M61 | 14 | Test | completed | T61.4 | — | S007 | F36 |
+| T61.7 | M61 | 14 | Code | completed | T61.2, T61.3, T61.4 | D3 | S007 | F36 |
+| T62.1 | M62 | 14 | Test | completed | — | — | S007 | F36 |
+| T62.2 | M62 | 14 | Code | completed | T61.7 | — | S007 | F36 |
+| T62.3 | M62 | 14 | Code | completed | T62.2 | D10 | S007 | F36 |
+| T62.4 | M62 | 14 | Code | completed | T62.1, T62.2, T62.3 | — | S007 | F36 |
+| T63.1 | M63 | 14 | Config | completed | T61.4 | — | S007 | F36 |
+| T63.2 | M63 | 14 | Docs | completed | T60.5 | — | S007 | F36 |
+| T63.3 | M63 | 14 | Docs | completed | T62.4, T61.7, T60.5 | — | S007 | F36 |
+| T63.4 | M63 | 14 | Docs | completed | T63.1–T63.3 | — | S007 | F36 |
 
 ## Phase Gate Log
 
@@ -1739,3 +1887,7 @@ CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, ba
 - [x] S003 label — first user msg ≤60 chars + `Intl.RelativeTimeFormat` (TP-S003-05)
 - [x] S003 failure mode — degrade silently to in-memory (TP-S003-09, TC-073)
 - [ ] **S003/EV-004 i18n merge coordination** — new chat-history keys added app-local; port to `packages/frontend-i18n` on second merge (TP-S003-04)
+- [x] EV-008 eval tooling — LlamaIndex evaluators + custom harness; no Langfuse/Ragas/DeepEval v1 (TP-S007-01, ADR-033)
+- [x] EV-008 runner placement — DO BackgroundTasks on internal-write-api; not new Modal app v1 (TP-S007-04)
+- [x] EV-008 viewer policy — admin-only eval routes; viewer → 403 (TP-S007-06, RD-110)
+- [x] EV-008 #84 coordination — `GroundednessScorer` adapter stub; FaithfulnessEvaluator default (TP-S007-09)

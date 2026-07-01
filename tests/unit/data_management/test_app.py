@@ -5,12 +5,14 @@ from __future__ import annotations
 from http import HTTPStatus
 from uuid import UUID, uuid4
 
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 from vecinita_data_management_backend.app import (
     create_app,
 )
 from vecinita_data_management_backend.store import InMemoryJobStore
+from vecinita_data_management_backend.write_client import InternalWriteClient
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests
 from vecinita_shared_schemas.json_types import as_json_object
 
@@ -19,6 +21,7 @@ from tests.helpers.json_response import (
     json_str,
     response_json_object,
 )
+from tests.helpers.user_admin_mocks import make_client, seed_users
 
 _PROXY_KEY = "unit-test-proxy-key"
 _CHUNK_SIZE_TOKENS = 128
@@ -250,3 +253,69 @@ def test_create_app_uses_staging_cors_when_env_empty(
     app = create_app(require_proxy_auth=False, cors_env_value=None)
 
     assert app.user_middleware
+
+
+def test_default_audit_emit_noops_when_write_api_unconfigured(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Factory audit emit falls back to a no-op when InternalWriteClient cannot be built."""
+    monkeypatch.delenv("VECINITA_INTERNAL_WRITE_URL", raising=False)
+    monkeypatch.delenv("VECINITA_INTERNAL_API_KEY", raising=False)
+    monkeypatch.setenv(
+        "VECINITA_ADMIN_FRONTEND_URL",
+        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app",
+    )
+    app = create_app(
+        require_proxy_auth=False,
+        admin_client=make_client(seed_users()),
+        audit_emit=None,
+    )
+    with TestClient(app) as client:
+        response = client.post(
+            "/admin/users/invite",
+            json={"email": "noop-audit@example.org", "role": "viewer"},
+        )
+    assert response.status_code == HTTPStatus.CREATED
+
+
+def test_default_audit_emit_posts_to_write_api(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Factory audit emit delegates to InternalWriteClient.post_audit_event when configured."""
+    monkeypatch.setenv("VECINITA_INTERNAL_WRITE_URL", "http://write.test")
+    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", "test-key")
+    monkeypatch.setenv(
+        "VECINITA_ADMIN_FRONTEND_URL",
+        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app",
+    )
+    posted: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/internal/v1/audit/event":
+            posted.append(request.url.path)
+            return httpx.Response(HTTPStatus.ACCEPTED, json={})
+        return httpx.Response(HTTPStatus.NOT_FOUND, json={})
+
+    transport = httpx.MockTransport(handler)
+    write = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    monkeypatch.setattr(
+        "vecinita_data_management_backend.app.InternalWriteClient",
+        lambda: write,
+    )
+    app = create_app(
+        require_proxy_auth=False,
+        admin_client=make_client(seed_users()),
+        audit_emit=None,
+    )
+    with TestClient(app) as client:
+        response = client.post(
+            "/admin/users/invite",
+            json={"email": "audit-post@example.org", "role": "viewer"},
+        )
+    assert response.status_code == HTTPStatus.CREATED
+    assert posted == ["/internal/v1/audit/event"]
+    write.close()

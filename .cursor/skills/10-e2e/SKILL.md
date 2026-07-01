@@ -24,7 +24,7 @@ Verify that user journeys described in product requirements actually work end-to
 | T2 | 13-deploy-smoke H1–**H5** | — |
 | T3 | Live UJ + optional browser MCP | — |
 
-Record in `docs/e2e-report.md`: separate columns for **T0**, **T2 connectivity**, **T3 browser**.
+Record in `{active_session.artifacts_dir}/reports/e2e-report.md`: separate columns for **T0**, **T2 connectivity**, **T3 browser**.
 Mocks passing T0 ≠ production UI connected. See connectivity-gates §Stage 10.
 
 ## When to Use
@@ -223,7 +223,7 @@ Produce an E2E report:
      Actual: role field missing from response
 ```
 
-Write to `docs/e2e-report.md`.
+Write to `{active_session.artifacts_dir}/reports/e2e-report.md`.
 
 **State**: Set status to `completed`.
 

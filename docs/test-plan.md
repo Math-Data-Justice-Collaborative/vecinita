@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-30 (S006/EV-007 F35 ext — invite acceptance TC-104–TC-110, #109)  
+> **Last updated**: 2026-07-01 (S007/EV-008 F36 — eval harness TC-111–TC-122, dashboard UJ-041–043, #99)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -16,15 +16,17 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 
 **S003 (planned):** Browser-local persistent chat history (F33) — `localStorage` rehydration of the active conversation across refresh/tab-away/tab-close/new-tab (UJ-024, ADR-025) and a previous-chats list with new-chat archival, cap/eviction, label derivation, select-to-restore, and clear/delete semantics (UJ-025). Frontend-only (Vitest + jsdom `localStorage`); no API/CORS changes.
 
-**Excludes (v1):**** Playwright full UI E2E (see `tests/e2e/README.md` waiver; Vitest component smoke only), real Modal invocations in CI, multimodal ingest, fine-tuning.
+**Excludes (v1):** Real Modal invocations in CI, multimodal ingest, fine-tuning.
+
+**UI E2E (T0-ui, Playwright):** Browser smoke against `vite preview` with route mocks — `tests/ui/`, `make test-ui`. Complements Vitest (jsdom) and pytest API E2E. Live browser UJ on staging (T3-ui) remains env-gated per `connectivity-gates.md` H6.
 
 **Live staging (post-deploy):** `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (`@pytest.mark.live`); skipped in CI until `VECINITA_STAGING_CHAT_URL` is set.
 
 ## User Journeys (E2E)
 
-| Journey | Test module (planned) | TC-IDs |
-|---------|----------------------|--------|
-| UJ-001 Ask (stream) | `tests/e2e/test_uj001_ask_stream.py` | TC-001, TC-002 |
+| Journey | Test module (planned) | TC-IDs | UI E2E (T0-ui) |
+|---------|----------------------|--------|----------------|
+| UJ-001 Ask (stream) | `tests/e2e/test_uj001_ask_stream.py` | TC-001, TC-002 | `tests/ui/chat/uj001-ask-interaction.spec.ts` |
 | UJ-002 Ingest URLs | `tests/e2e/test_uj002_ingest_job.py` | TC-010, TC-047 |
 | UJ-003 Delete document | `tests/e2e/test_uj003_corpus_delete.py` | TC-012 |
 | UJ-004 Local bootstrap | `tests/e2e/test_uj004_local_bootstrap.py` | TC-020 |
@@ -32,7 +34,7 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-006 Job failure | `tests/e2e/test_uj006_job_failure.py` | TC-013 |
 | UJ-007 Reject identity | `tests/e2e/test_uj007_reject_identity.py` | TC-030, TC-031 |
 | UJ-008 Unauthorized admin | `tests/e2e/test_uj008_unauthorized_admin.py` | TC-014 |
-| UJ-009 Corpus browse | `tests/e2e/test_uj009_corpus_browse.py` | TC-040, TC-041 |
+| UJ-009 Corpus browse | `tests/e2e/test_uj009_corpus_browse.py` | TC-040, TC-041 | `tests/ui/chat/uj009-corpus-navigation.spec.ts` |
 | UJ-010 Open source URL | Vitest in `chat-rag-frontend` | TC-048 |
 | UJ-011 Admin tags/chunks | `tests/e2e/test_uj011_admin_tags.py` | TC-042, TC-043, TC-049 |
 | UJ-012 Tag-filtered ask | `tests/e2e/test_uj012_tag_filtered_ask.py` | TC-044, TC-045 |
@@ -61,6 +63,11 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-036 Admin force sign-out | `tests/e2e/test_uj036_force_signout.py` + Vitest | TC-098, TC-103 |
 | UJ-037 Deliverability test-send | `tests/e2e/test_uj037_email_test_send.py` | TC-099, TC-103 |
 | UJ-038 Audit viewer for user events | Vitest in `data-management-frontend` | TC-101 |
+| UJ-039 Admin runs RAG evaluation | `tests/e2e/test_uj039_eval_run_trigger.py` + Vitest `test_evaluation_page.test.tsx` | TC-114, TC-115 | `tests/ui/admin/uj039-eval-run.spec.ts` |
+| UJ-040 Admin eval drill-down + history | Vitest in `data-management-frontend` | TC-116 | `tests/ui/admin/uj039-eval-run.spec.ts` |
+| UJ-041 Admin eval dashboard charts | Vitest in `data-management-frontend` | TC-117, TC-119 | `tests/ui/admin/uj041-eval-dashboard-tabs.spec.ts` |
+| UJ-042 Admin eval pivot explore | Vitest in `data-management-frontend` | TC-118 | `tests/ui/admin/uj041-eval-dashboard-tabs.spec.ts` |
+| UJ-043 Admin eval criteria CRUD | `tests/integration/test_eval_dashboard_routes.py` | TC-120, TC-121 | `tests/ui/admin/uj041-eval-dashboard-tabs.spec.ts` |
 
 **E2E tier (v1):** `local` — TestClient, test Postgres (Docker/testcontainers), **mocked Modal** HTTP.
 
@@ -74,6 +81,8 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | E2E (local) | pytest | UJ-001–012 | `uv run pytest tests/e2e -m "e2e and not live" -q` |
 | E2E (live) | pytest | Staging H1–H3 + AC-C6 p95 | `uv run pytest tests/smoke -m live` (needs `VECINITA_STAGING_*`) |
 | Privacy | pytest | Schema deny-list, API rejection | `uv run pytest tests/privacy -q` |
+| **UI E2E (T0-ui)** | **Playwright** | Browser shell/navigation (preview + mocks) | `make test-ui` or `bash scripts/ui/run_playwright.sh` |
+| **UI E2E (T3-ui)** | **Playwright** | Staging browser UJ (H6) | Env: `VECINITA_STAGING_*_FRONTEND_URL` (advisory until scripted) |
 
 **Runner:** Always use `uv run pytest` or `bash scripts/run_tests.sh` — bare `pytest` fails without workspace packages.
 
@@ -636,12 +645,84 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Input**: Backend tests — CORS preflight on `/admin/users/{id}/signout` and `/admin/email/test`; audit payload assertions.
 - **Expected**: Preflight allows the methods + `Authorization`; audit rows carry UUIDs/role/domain only.
 
+### TC-111: Golden-set retrieval relevance ≥80% (F36, EV-008)
+
+- **Objective**: Harness scores retrieval on `hit` + `any_of` rows in `data/fixtures/eval/qa_pairs.json`.
+- **Input**: `tests/eval/test_eval_retrieval_relevance.py` (extend) — 11 scored rows; Postgres + eval corpus seed; top-k=5.
+- **Expected**: Aggregate ≥80%; `any_of` passes when any listed URL in top-k; `abstain`/`empty` rows excluded from aggregate (TC-113).
+
+### TC-112: Faithfulness and answer relevancy on golden set (F36, EV-008)
+
+- **Objective**: LlamaIndex evaluators score answer quality using `required_facts[]` and Modal LLM judge (mocked in CI).
+- **Input**: `tests/eval/test_eval_answer_quality.py` — full RAG pipeline per golden row; mocked judge returning deterministic scores.
+- **Expected**: CI aggregate faithfulness ≥0.60; answer relevancy ≥0.60; judge uses query language (RD-109).
+
+### TC-113: Golden-set edge cases — abstain, ambiguous, empty (F36)
+
+- **Objective**: Edge rows assert correct behavior beyond URL match.
+- **Input**: Rows `edge-abstain-mayor-phone`, `edge-ambiguous-housing`, `edge-empty-quantum`.
+- **Expected**: Abstain — no fabricated PII; empty — explicit no-context path; ambiguous — retrieval `any_of` or answer addresses housing topic.
+
+### TC-114: Admin triggers eval run (UJ-039, F36)
+
+- **Objective**: Admin can start an eval run via internal-write-api.
+- **Input**: `tests/e2e/test_uj039_eval_run_trigger.py` — admin JWT → `POST /internal/v1/eval/runs` → poll until `completed`.
+- **Expected**: `201`/`202` with `run_id`; run record persisted; summary metrics populated.
+
+### TC-115: Viewer denied eval routes (UJ-039, F36, RD-110)
+
+- **Objective**: `viewer` cannot trigger or list eval runs.
+- **Input**: TestClient with viewer JWT — `POST` and `GET /internal/v1/eval/runs`.
+- **Expected**: `403`; Vitest hides/disables Evaluation nav for viewer.
+
+### TC-116: Eval history and per-question drill-down (UJ-040, F36)
+
+- **Objective**: Admin UI loads run history and question-level detail.
+- **Input**: Vitest `test_evaluation_page.test.tsx` — mock `GET /internal/v1/eval/runs` + `GET …/{run_id}` with fixture payloads.
+- **Expected**: History list newest-first; drill-down shows question, sources, answer, per-metric pass/fail; en/es UI chrome.
+
+### TC-117: Eval dashboard time-series charts (UJ-041, F36, ADR-034)
+
+- **Objective**: Dashboard tab renders metric charts from timeseries API.
+- **Input**: Vitest `test_evaluation_dashboard.test.tsx`; Playwright `uj041-eval-dashboard-tabs.spec.ts` — mock `GET /internal/v1/eval/runs/timeseries`.
+- **Expected**: Charts for `retrieval_relevance` (and siblings) visible; tab click updates `?tab=dashboard` URL.
+
+### TC-118: Eval pivot explore table (UJ-042, F36, ADR-034)
+
+- **Objective**: Explore tab aggregates run items with configurable row/column/value axes.
+- **Input**: Vitest `test_evaluation_dashboard.test.tsx`; Playwright `uj041-eval-dashboard-tabs.spec.ts` — `?tab=explore`.
+- **Expected**: Pivot table visible; row-axis change persists to `localStorage` key `vecinita.eval.explore.v1`.
+
+### TC-119: Eval dashboard panel layout prefs (F36, ADR-034)
+
+- **Objective**: Collapsible chart panels persist layout to device-local storage.
+- **Input**: Vitest `test_evaluation_dashboard.test.tsx` — toggle `eval-panel-toggle-faithfulness`.
+- **Expected**: `localStorage` key `vecinita.eval.dashboard.v1` records collapsed state.
+
+### TC-120: Eval criteria CRUD API (UJ-043, F36, ADR-034)
+
+- **Objective**: Admin can create/list/update criteria; viewer denied.
+- **Input**: `tests/integration/test_eval_dashboard_routes.py` — `POST/GET/PATCH /internal/v1/eval/criteria`.
+- **Expected**: `201` on create; list includes slug; viewer `POST` → `403`.
+
+### TC-121: Eval criteria manager UI (UJ-043, F36, ADR-034)
+
+- **Objective**: Criteria tab lists rubrics and accepts new criterion form.
+- **Input**: Vitest `test_evaluation_dashboard.test.tsx`; Playwright `uj041-eval-dashboard-tabs.spec.ts` — `?tab=criteria`.
+- **Expected**: Existing criterion row visible; filled slug/label/rubric enables create button.
+
+### TC-122: Eval timeseries API (F36, ADR-034)
+
+- **Objective**: Timeseries endpoint returns completed runs ordered by `completed_at`.
+- **Input**: `tests/integration/test_eval_dashboard_routes.py` — `GET /internal/v1/eval/runs/timeseries`.
+- **Expected**: `points` and `available_metrics` arrays present; admin JWT required.
+
 ## Test Data
 
 | Asset | Location | Used by |
 |-------|----------|---------|
 | Seed corpus (EN/ES) | `data/fixtures/corpus/` | TC-001, TC-011 |
-| Eval Q&A pairs | `data/fixtures/eval/` | Integration benchmarks |
+| Eval Q&A pairs | `data/fixtures/eval/` | TC-111–TC-113, F36 harness |
 | URL ingest fixture | `data/fixtures/ingest/` | TC-010 |
 | Seed tag vocabulary | `data/fixtures/tags/seed_tags.json` | TC-041, TC-044 |
 | Tagged corpus fixtures | `data/fixtures/corpus/tagged/` | TC-040, TC-044 |
@@ -657,6 +738,10 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 | Coverage (per component, unit) | ≥ 95% **line** and ≥ 95% **branch** | Twelve components; CI blocking; ADR-019 |
 | Privacy tests | 100% pass | Blocking |
 | Ingest job success (fixture URLs) | 100% in CI | Mocked worker |
+| Eval retrieval relevance (golden) | ≥ 80% on `hit` + `any_of` rows | `tests/eval/`; F36 |
+| Eval faithfulness (golden) | ≥ 0.60 aggregate (CI) | LlamaIndex + Modal LLM judge |
+| Eval answer relevancy (golden) | ≥ 0.60 aggregate (CI) | LlamaIndex + Modal LLM judge |
+| Eval latency p95 (golden) | Informational (30s ref) | Admin display only |
 
 ### F31 coverage gate — gated components
 

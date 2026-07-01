@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Annotated, cast
 from uuid import UUID
 
 import httpx
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, status
 from sqlalchemy import create_engine, text
 from vecinita_shared_schemas.auth import (
     AuthContext,
@@ -51,6 +51,15 @@ from vecinita_shared_schemas.internal_write import (
     DocumentHistoryResponse,
     DocumentSummary,
     DocumentVersionEntry,
+    EvalCriterionCreateRequest,
+    EvalCriterionListResponse,
+    EvalCriterionResponse,
+    EvalCriterionUpdateRequest,
+    EvalRunCreateRequest,
+    EvalRunCreateResponse,
+    EvalRunDetailResponse,
+    EvalRunListResponse,
+    EvalTimeseriesResponse,
     HealthAggregateResponse,
     HealthResponse,
     RecentActivity,
@@ -73,6 +82,18 @@ from vecinita_internal_write_api.audit import (
     create_document_version,
     emit_audit_event,
 )
+from vecinita_internal_write_api.eval_criteria_service import (
+    create_eval_criterion,
+    list_eval_criteria,
+    update_eval_criterion,
+)
+from vecinita_internal_write_api.eval_service import (
+    create_eval_run,
+    execute_eval_run,
+    get_eval_run,
+    get_eval_timeseries,
+    list_eval_runs,
+)
 from vecinita_internal_write_api.jobs_client import (
     DataManagementJobsClient,
     DataManagementJobsClientError,
@@ -85,9 +106,10 @@ from vecinita_internal_write_api.tags import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Callable, Mapping
 
     from sqlalchemy.engine import Engine
+    from vecinita_eval.judges import JudgeClient
 
 _MAX_DOCUMENT_TAGS = 10
 
@@ -178,7 +200,10 @@ def _default_jobs_client() -> DataManagementJobsClient | None:
 
 
 def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route handlers inline
-    *, jobs_client: DataManagementJobsClient | None = None
+    *,
+    jobs_client: DataManagementJobsClient | None = None,
+    eval_embed_fn: Callable[[str], list[float]] | None = None,
+    eval_judge: JudgeClient | None = None,
 ) -> FastAPI:
     """Build the internal write API (sole holder of DATABASE_URL)."""
     app = FastAPI(title="Vecinita Internal Write API", version="0.1.0")
@@ -1260,5 +1285,101 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                 for row in rows
             ]
         )
+
+    @app.post(
+        "/internal/v1/eval/runs",
+        response_model=EvalRunCreateResponse,
+        status_code=status.HTTP_202_ACCEPTED,
+    )
+    def create_eval_run_route(  # pyright: ignore[reportUnusedFunction]
+        background_tasks: BackgroundTasks,
+        _actor: WriteActorDep,
+        body: EvalRunCreateRequest | None = None,
+    ) -> EvalRunCreateResponse:
+        request = body or EvalRunCreateRequest()
+        created = create_eval_run(engine, corpus_profile=request.corpus_profile)
+
+        def _run() -> None:
+            execute_eval_run(
+                engine,
+                run_id=created.run_id,
+                corpus_profile=request.corpus_profile,
+                embed_fn=eval_embed_fn,
+                judge=eval_judge,
+            )
+
+        background_tasks.add_task(_run)
+        return created
+
+    @app.get(
+        "/internal/v1/eval/runs",
+        response_model=EvalRunListResponse,
+    )
+    def list_eval_runs_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+        page: int = 1,
+        page_size: int = 20,
+    ) -> EvalRunListResponse:
+        page = max(1, page)
+        page_size = min(max(1, page_size), 100)
+        return list_eval_runs(engine, page=page, page_size=page_size)
+
+    @app.get(
+        "/internal/v1/eval/runs/timeseries",
+        response_model=EvalTimeseriesResponse,
+    )
+    def get_eval_timeseries_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+        limit: int = 100,
+    ) -> EvalTimeseriesResponse:
+        limit = min(max(1, limit), 500)
+        return get_eval_timeseries(engine, limit=limit)
+
+    @app.get(
+        "/internal/v1/eval/criteria",
+        response_model=EvalCriterionListResponse,
+    )
+    def list_eval_criteria_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+    ) -> EvalCriterionListResponse:
+        return list_eval_criteria(engine)
+
+    @app.post(
+        "/internal/v1/eval/criteria",
+        response_model=EvalCriterionResponse,
+        status_code=status.HTTP_201_CREATED,
+    )
+    def create_eval_criterion_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+        body: EvalCriterionCreateRequest,
+    ) -> EvalCriterionResponse:
+        return create_eval_criterion(engine, body=body)
+
+    @app.patch(
+        "/internal/v1/eval/criteria/{criterion_id}",
+        response_model=EvalCriterionResponse,
+    )
+    def update_eval_criterion_route(  # pyright: ignore[reportUnusedFunction]
+        criterion_id: UUID,
+        _actor: WriteActorDep,
+        body: EvalCriterionUpdateRequest,
+    ) -> EvalCriterionResponse:
+        updated = update_eval_criterion(engine, criterion_id=criterion_id, body=body)
+        if updated is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        return updated
+
+    @app.get(
+        "/internal/v1/eval/runs/{run_id}",
+        response_model=EvalRunDetailResponse,
+    )
+    def get_eval_run_route(  # pyright: ignore[reportUnusedFunction]
+        run_id: UUID,
+        _actor: WriteActorDep,
+    ) -> EvalRunDetailResponse:
+        detail = get_eval_run(engine, run_id=run_id)
+        if detail is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        return detail
 
     return app

@@ -119,4 +119,73 @@ describe("UsersPage search + pagination (TC-100, UJ-030)", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent(/3 character/i);
   });
+
+  it("applies search on Enter and clears q when search is emptied", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(jsonResponse(PAGE_ONE));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderUsersPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("users-search-input")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId("users-search-input"), {
+      target: { value: "alice" },
+    });
+    fireEvent.keyDown(screen.getByTestId("users-search-input"), {
+      key: "Enter",
+      code: "Enter",
+    });
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("q=alice"),
+        expect.anything(),
+      );
+    });
+
+    fireEvent.change(screen.getByTestId("users-search-input"), {
+      target: { value: "" },
+    });
+    fireEvent.click(screen.getByTestId("users-search-apply"));
+
+    await waitFor(() => {
+      const lastUrl = fetchMock.mock.calls.at(-1)?.[0] as string;
+      expect(lastUrl).not.toContain("q=");
+    });
+  });
+
+  it("pagination previous requests page 1 after advancing", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(PAGE_ONE))
+      .mockResolvedValueOnce(jsonResponse(PAGE_TWO))
+      .mockResolvedValueOnce(jsonResponse(PAGE_ONE));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderUsersPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("pagination-next")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("pagination-next"));
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("page=2"),
+        expect.anything(),
+      );
+    });
+
+    fireEvent.click(screen.getByTestId("pagination-previous"));
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("page=1"),
+        expect.anything(),
+      );
+    });
+  });
 });

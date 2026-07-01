@@ -5,6 +5,7 @@ import { MemoryRouter } from "react-router-dom";
 import { UsersPage } from "@/pages/UsersPage";
 
 import { renderWithProviders } from "./renderWithProviders";
+import { fetchInputUrl } from "./fetch-mock";
 import { installAuthenticatedSupabaseMock } from "./supabaseMock";
 
 function renderUsersPage() {
@@ -267,6 +268,93 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
     expect(await screen.findByText("invite boom")).toBeInTheDocument();
   });
 
+  it("falls back to generic invite failure for non-Error rejections", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockImplementation((_url: string, init?: RequestInit) => {
+        if (!init || init.method === undefined || init.method === "GET") {
+          return Promise.resolve(jsonResponse(MIXED_USERS));
+        }
+        // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- non-Error catch branch
+        return Promise.reject("invite failed");
+      });
+    vi.stubGlobal("fetch", fetchMock);
+    renderUsersPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("users-invite-open")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("users-invite-open"));
+    fireEvent.change(screen.getByTestId("users-invite-email"), {
+      target: { value: "new@example.org" },
+    });
+    fireEvent.click(screen.getByTestId("users-invite-submit"));
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert", { hidden: true })).toHaveTextContent(
+        /failed to load users/i,
+      );
+    });
+  });
+
+  it("falls back to generic force signout failure for non-Error rejections", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockImplementation((url: string, init?: RequestInit) => {
+        if (!init || init.method === undefined || init.method === "GET") {
+          return Promise.resolve(jsonResponse(MIXED_USERS));
+        }
+        if (url.includes("/signout")) {
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- non-Error catch branch
+          return Promise.reject("signout failed");
+        }
+        return Promise.resolve(jsonResponse({}));
+      });
+    vi.stubGlobal("fetch", fetchMock);
+    renderUsersPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId(`force-signout-${ADMIN_ID}`)).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId(`force-signout-${ADMIN_ID}`));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /failed to load users/i,
+    );
+  });
+
+  it("falls back to generic test email failure for non-Error rejections", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockImplementation((url: string, init?: RequestInit) => {
+        if (!init || init.method === undefined || init.method === "GET") {
+          return Promise.resolve(jsonResponse(MIXED_USERS));
+        }
+        if (url.includes("/admin/email/test")) {
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- non-Error catch branch
+          return Promise.reject("email failed");
+        }
+        return Promise.resolve(jsonResponse({}));
+      });
+    vi.stubGlobal("fetch", fetchMock);
+    renderUsersPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("users-send-test-email")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId("users-test-email-input"), {
+      target: { value: "ops@example.org" },
+    });
+    fireEvent.click(screen.getByTestId("users-send-test-email"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /failed to load users/i,
+    );
+  });
+
   it("shows empty state when no operators match", async () => {
     vi.stubGlobal(
       "fetch",
@@ -387,5 +475,80 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
     expect(
       await screen.findByTestId(`invite-meta-${invitedId}`),
     ).toHaveTextContent(/expires ~1h/i);
+  });
+
+  it("surfaces generic load failure when listUsers rejects a non-Error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(() =>
+        // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- non-Error catch branch
+        Promise.reject("list failed"),
+      ),
+    );
+    renderUsersPage();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /failed to load users/i,
+    );
+  });
+
+  it("renders em dash for missing role and invited created_at", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          users: [
+            {
+              id: "33333333-3333-3333-3333-333333333333",
+              email: "norole@example.org",
+              role: null,
+              status: "invited",
+              created_at: null,
+              last_sign_in_at: null,
+            },
+          ],
+          total: 1,
+          page: 1,
+          page_size: 50,
+        }),
+      ),
+    );
+    renderUsersPage();
+    const row = await screen.findByTestId("user-row");
+    expect(row.textContent).toContain("—");
+  });
+
+  it("changes invite role via the role select", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(MOCK_USERS)));
+    renderUsersPage();
+    await waitFor(() => {
+      expect(screen.getAllByTestId("user-row")).toHaveLength(2);
+    });
+    fireEvent.click(screen.getByTestId("users-invite-open"));
+    fireEvent.click(screen.getByTestId("users-invite-role"));
+    fireEvent.click(screen.getByRole("option", { name: /admin/i }));
+    expect(screen.getByTestId("users-invite-role")).toHaveTextContent(/admin/i);
+  });
+
+  it("ignores in-flight user list updates after unmount", async () => {
+    let releaseList: (() => void) | undefined;
+    const listGate = new Promise<void>((resolve) => {
+      releaseList = resolve;
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/admin/users") && !url.includes("/admin/users/")) {
+          return listGate.then(() =>
+            Promise.resolve(jsonResponse(MOCK_USERS)),
+          );
+        }
+        return Promise.resolve(jsonResponse(MOCK_USERS));
+      }),
+    );
+    const view = renderUsersPage();
+    view.unmount();
+    releaseList?.();
+    await Promise.resolve();
   });
 });

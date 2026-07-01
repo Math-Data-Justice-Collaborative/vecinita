@@ -1,14 +1,160 @@
 [
   {
+    "id": "community-food-pantry",
+    "locale": "en",
+    "domain": "community",
     "question": "When are food pantry hours updated?",
-    "expected_doc_url": "fixture://corpus/en/community-resources.md"
+    "expected_doc_url": "fixture://corpus/en/community-resources.md",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Food pantry hours are posted on the city website each Monday"
+    ]
   },
   {
+    "id": "community-food-pantry",
+    "locale": "es",
+    "domain": "community",
     "question": "¿Cuándo se actualizan los horarios del banco de alimentos?",
-    "expected_doc_url": "fixture://corpus/es/recursos-comunitarios.md"
+    "expected_doc_url": "fixture://corpus/es/recursos-comunitarios.md",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "El banco de alimentos publica horarios en el sitio de la ciudad cada lunes"
+    ]
   },
   {
+    "id": "community-library-wifi",
+    "locale": "en",
+    "domain": "community",
     "question": "Does the library offer free Wi-Fi?",
-    "expected_doc_url": "fixture://corpus/en/community-resources.md"
+    "expected_doc_url": "fixture://corpus/en/community-resources.md",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "The library offers free Wi-Fi"
+    ]
+  },
+  {
+    "id": "community-library-wifi",
+    "locale": "es",
+    "domain": "community",
+    "question": "¿La biblioteca ofrece Wi-Fi gratuito?",
+    "expected_doc_url": "fixture://corpus/es/recursos-comunitarios.md",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "La biblioteca ofrece Wi-Fi gratuito"
+    ]
+  },
+  {
+    "id": "community-story-time",
+    "locale": "en",
+    "domain": "community",
+    "question": "When does the library have bilingual story time?",
+    "expected_doc_url": "fixture://corpus/en/community-resources.md",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Bilingual story time on weekends"
+    ]
+  },
+  {
+    "id": "community-story-time",
+    "locale": "es",
+    "domain": "community",
+    "question": "¿Cuándo hay cuentacuentos bilingüe en la biblioteca?",
+    "expected_doc_url": "fixture://corpus/es/recursos-comunitarios.md",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Cuentacuentos bilingüe los fines de semana"
+    ]
+  },
+  {
+    "id": "housing-eviction-notice",
+    "locale": "en",
+    "domain": "housing",
+    "question": "Do landlords have to give written notice before eviction?",
+    "expected_doc_url": "fixture://corpus/tagged/en/housing-rights.md",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Landlords must provide written notice before eviction proceedings begin"
+    ]
+  },
+  {
+    "id": "legal-aid-housing",
+    "locale": "en",
+    "domain": "legal",
+    "question": "Can I get free legal help with a housing dispute?",
+    "expected_doc_url": "fixture://corpus/tagged/en/legal-aid-overview.md",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Community legal aid clinics offer free consultations",
+      "Help with housing disputes"
+    ]
+  },
+  {
+    "id": "legal-aid-benefits",
+    "locale": "en",
+    "domain": "legal",
+    "question": "Can eligible residents get help with benefits appeals?",
+    "expected_doc_url": "fixture://corpus/tagged/en/legal-aid-overview.md",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Eligible residents can request help with benefits appeals"
+    ]
+  },
+  {
+    "id": "community-vecinita-intro",
+    "locale": "en",
+    "domain": "community",
+    "question": "What does Vecinita help neighbors find?",
+    "expected_doc_url": "fixture://corpus/en/community-resources.md",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Public information about local services"
+    ]
+  },
+  {
+    "id": "community-vecinita-intro",
+    "locale": "es",
+    "domain": "community",
+    "question": "¿Qué ayuda Vecinita a los vecinos a encontrar?",
+    "expected_doc_url": "fixture://corpus/es/recursos-comunitarios.md",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Información pública sobre servicios locales"
+    ]
+  },
+  {
+    "id": "edge-abstain-mayor-phone",
+    "locale": "en",
+    "domain": "edge",
+    "question": "What is the mayor's personal phone number?",
+    "retrieval_expectation": "abstain",
+    "required_facts": [
+      "Must not invent a personal phone number",
+      "Should indicate the information is not available from the corpus"
+    ]
+  },
+  {
+    "id": "edge-ambiguous-housing",
+    "locale": "en",
+    "domain": "edge",
+    "question": "housing",
+    "expected_doc_urls": [
+      "fixture://corpus/tagged/en/housing-rights.md",
+      "fixture://corpus/tagged/en/legal-aid-overview.md"
+    ],
+    "retrieval_expectation": "any_of",
+    "required_facts": [
+      "Answer addresses housing-related public information from retrieved sources"
+    ]
+  },
+  {
+    "id": "edge-empty-quantum",
+    "locale": "en",
+    "domain": "edge",
+    "question": "Where can I get quantum physics tutoring?",
+    "retrieval_expectation": "empty",
+    "required_facts": [
+      "Should not fabricate tutoring resources",
+      "Should indicate no relevant corpus context when retrieval is empty"
+    ]
   }
 ]

@@ -317,3 +317,145 @@ class HealthResponse(BaseModel):
     """GET /health liveness response."""
 
     status: Literal["ok"]
+
+
+EvalRunStatus = Literal["pending", "running", "completed", "failed"]
+EvalCorpusProfile = Literal["fixture", "staging"]
+
+
+class EvalRunCreateRequest(BaseModel):
+    """POST /internal/v1/eval/runs optional body."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    corpus_profile: EvalCorpusProfile = "fixture"
+
+
+class EvalRunCreateResponse(BaseModel):
+    """POST /internal/v1/eval/runs response."""
+
+    run_id: UUID
+    status: EvalRunStatus
+    created_at: datetime
+
+
+class EvalMetricsSummary(BaseModel):
+    """Aggregate eval metrics for a run."""
+
+    retrieval_relevance: float | None = None
+    faithfulness: float | None = None
+    answer_relevancy: float | None = None
+    latency_p95_ms: int | None = None
+    custom_scores: dict[str, float] | None = None
+
+
+class EvalTimeseriesPoint(BaseModel):
+    """One completed run on the eval timeseries chart."""
+
+    run_id: UUID
+    completed_at: datetime
+    metrics_summary: EvalMetricsSummary
+
+
+class EvalTimeseriesResponse(BaseModel):
+    """GET /internal/v1/eval/runs/timeseries response."""
+
+    points: list[EvalTimeseriesPoint]
+    available_metrics: list[str]
+
+
+EvalCriterionScorerType = Literal["llm_rubric"]
+
+
+class EvalCriterionCreateRequest(BaseModel):
+    """POST /internal/v1/eval/criteria body."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    slug: str = Field(min_length=1, max_length=64)
+    label: str = Field(min_length=1, max_length=128)
+    description: str | None = None
+    scorer_type: EvalCriterionScorerType = "llm_rubric"
+    rubric: str = Field(min_length=1)
+    enabled: bool = True
+
+
+class EvalCriterionUpdateRequest(BaseModel):
+    """PATCH /internal/v1/eval/criteria/{criterion_id} body."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    label: str | None = Field(default=None, min_length=1, max_length=128)
+    description: str | None = None
+    rubric: str | None = Field(default=None, min_length=1)
+    enabled: bool | None = None
+
+
+class EvalCriterionResponse(BaseModel):
+    """One admin-defined eval criterion."""
+
+    criterion_id: UUID
+    slug: str
+    label: str
+    description: str | None = None
+    scorer_type: EvalCriterionScorerType
+    rubric: str
+    enabled: bool
+    created_at: datetime
+    updated_at: datetime
+
+
+class EvalCriterionListResponse(BaseModel):
+    """GET /internal/v1/eval/criteria response."""
+
+    items: list[EvalCriterionResponse]
+
+
+class EvalRunListItem(BaseModel):
+    """One row in eval run history."""
+
+    run_id: UUID
+    status: EvalRunStatus
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    metrics_summary: EvalMetricsSummary
+
+
+class EvalRunListResponse(BaseModel):
+    """GET /internal/v1/eval/runs response."""
+
+    items: list[EvalRunListItem]
+    page: int
+    page_size: int
+    total_count: int
+
+
+class EvalRunItemMetrics(BaseModel):
+    """Per-question eval metrics."""
+
+    retrieval_pass: bool
+    faithfulness: float | None = None
+    answer_relevancy: float | None = None
+    latency_ms: int
+    custom_scores: dict[str, float] | None = None
+
+
+class EvalRunItemDetail(BaseModel):
+    """Per-question drill-down row."""
+
+    case_id: str
+    locale: str
+    question: str
+    expected_doc_url: str | None = None
+    retrieved_urls: list[str]
+    answer: str | None = None
+    metrics: EvalRunItemMetrics
+
+
+class EvalRunDetailResponse(BaseModel):
+    """GET /internal/v1/eval/runs/{run_id} response."""
+
+    run_id: UUID
+    status: EvalRunStatus
+    metrics_summary: EvalMetricsSummary
+    items: list[EvalRunItemDetail]

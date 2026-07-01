@@ -33,4 +33,16 @@ paths = [
   '''(?:^|/)docs/reports(?:/.*)?$''',
   # Render LLM context files removed from .github/
   '''(?:^|/)\.github/(?:llm-txt/)?render-llm\.txt$''',
+  # Frontend build output (gitignored; may exist locally for Playwright preview)
+  '''(?:^|/)apps/[^/]+-frontend/dist(?:/.*)?$''',
+  # Playwright build script embeds the public Supabase demo anon JWT (not a production secret)
+  '''(?:^|/)scripts/ui/build_for_playwright\.sh$''',
+  # Session QA reports may quote allowlisted localStorage key names for traceability
+  '''(?:^|/)docs/sessions/[^/]+/reports/qa-report\.md$''',
+]
+
+# Non-secret identifiers and well-known demo tokens (QA-S007-001)
+regexes = [
+  '''vecinita\.eval\.explore\.v1''',
+  '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJpc3MiOiJzdXBhYmFzZS1kZW1v''',
 ]

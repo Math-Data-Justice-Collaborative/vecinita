@@ -6,7 +6,7 @@ All requests are mocked via httpx.MockTransport — no network and no real Supab
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
 import httpx
@@ -264,3 +264,79 @@ def test_client_close_owned_http_client() -> None:
     """close() is safe when the client owns its httpx session."""
     client = SupabaseAdminClient(base_url=_BASE, secret_key=_SECRET)
     client.close()
+
+
+def test_client_close_skips_injected_http_client() -> None:
+    """close() does not close an injected httpx session."""
+    closed: list[bool] = []
+    http = httpx.Client(transport=httpx.MockTransport(lambda _r: httpx.Response(200, json={})))
+    original_close = http.close
+
+    def tracked_close() -> None:
+        closed.append(True)
+        original_close()
+
+    http.close = tracked_close  # type: ignore[method-assign]
+    client = SupabaseAdminClient(base_url=_BASE, secret_key=_SECRET, http_client=http)
+    client.close()
+    assert closed == []
+
+
+def test_list_users_tolerates_non_list_users_payload() -> None:
+    """list_users returns an empty list when GoTrue users is not an array."""
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"users": "bad"})
+
+    result = _client(handler).list_users()
+    assert result.users == []
+
+
+def test_from_gotrue_ignores_invalid_datetime_fields() -> None:
+    """Invalid ISO timestamps in GoTrue payloads are parsed as None."""
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "id": _UID,
+                "email": "op@example.org",
+                "created_at": "not-a-date",
+                "last_sign_in_at": "also-bad",
+                "app_metadata": {"role": "viewer"},
+                "email_confirmed_at": "2026-06-29T00:30:00Z",
+            },
+        )
+
+    user = _client(handler).get_user_by_id(UUID(_UID))
+    assert user.created_at is None
+    assert user.last_sign_in_at is None
+
+
+def test_from_gotrue_unknown_role_is_none() -> None:
+    """Unknown app_metadata.role values map to None."""
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json=_gotrue_user(role="superuser"),
+        )
+
+    user = _client(handler).get_user_by_id(UUID(_UID))
+    assert user.role is None
+
+
+def test_generate_link_includes_redirect_to() -> None:
+    """generate_link forwards redirect_to in the POST body."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        body = cast("dict[str, object]", json.loads(request.content))
+        assert body["redirect_to"] == "https://app/reset-password"
+        return httpx.Response(200, json={"action_link": "https://app/recover#token"})
+
+    link = _client(handler).generate_link(
+        "recovery",
+        "op@example.org",
+        redirect_to="https://app/reset-password",
+    )
+    assert link == "https://app/recover#token"

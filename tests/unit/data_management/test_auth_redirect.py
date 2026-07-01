@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import pytest
 from vecinita_data_management_backend.auth_redirect import (
     AdminRedirectConfigError,
+    AuthCallbackPath,
     admin_frontend_origin_from_env,
     build_auth_redirect_path,
 )
@@ -19,6 +22,13 @@ def test_build_auth_redirect_path_strips_trailing_slash() -> None:
     assert build_auth_redirect_path(origin.rstrip("/"), "reset-password") == (
         "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app/reset-password"
     )
+
+
+def test_build_auth_redirect_path_rejects_invalid_path() -> None:
+    """Invalid callback path names raise AdminRedirectConfigError."""
+    origin = "https://admin.example.com"
+    with pytest.raises(AdminRedirectConfigError, match="Invalid auth callback path"):
+        build_auth_redirect_path(origin, cast("AuthCallbackPath", "login"))
 
 
 def test_build_auth_redirect_path_rejects_invalid_origin() -> None:

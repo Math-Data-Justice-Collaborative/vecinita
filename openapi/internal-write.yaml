@@ -439,6 +439,88 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthResponse"
+  /eval/runs:
+    post:
+      operationId: createEvalRun
+      summary: Trigger golden-set RAG evaluation run (EV-008 F36)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvalRunCreateRequest"
+      responses:
+        "202":
+          description: Eval run accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvalRunCreateResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+    get:
+      operationId: listEvalRuns
+      summary: List eval run history (EV-008 F36)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Eval run history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvalRunListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+  /eval/runs/{run_id}:
+    get:
+      operationId: getEvalRun
+      summary: Eval run detail with per-question drill-down (EV-008 F36)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Eval run detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvalRunDetailResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
 components:
   securitySchemes:
     bearerAuth:
@@ -870,6 +952,162 @@ components:
           type: string
           enum:
             - ok
+    EvalRunCreateRequest:
+      type: object
+      properties:
+        corpus_profile:
+          type: string
+          enum:
+            - fixture
+            - staging
+          default: fixture
+    EvalRunCreateResponse:
+      type: object
+      required:
+        - run_id
+        - status
+        - created_at
+      properties:
+        run_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - pending
+            - running
+            - completed
+            - failed
+        created_at:
+          type: string
+          format: date-time
+    EvalMetricsSummary:
+      type: object
+      properties:
+        retrieval_relevance:
+          type: number
+          nullable: true
+        faithfulness:
+          type: number
+          nullable: true
+        answer_relevancy:
+          type: number
+          nullable: true
+        latency_p95_ms:
+          type: integer
+          nullable: true
+    EvalRunListItem:
+      type: object
+      required:
+        - run_id
+        - status
+        - metrics_summary
+      properties:
+        run_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - pending
+            - running
+            - completed
+            - failed
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        metrics_summary:
+          $ref: "#/components/schemas/EvalMetricsSummary"
+    EvalRunListResponse:
+      type: object
+      required:
+        - items
+        - page
+        - page_size
+        - total_count
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EvalRunListItem"
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_count:
+          type: integer
+    EvalRunItemMetrics:
+      type: object
+      required:
+        - retrieval_pass
+        - latency_ms
+      properties:
+        retrieval_pass:
+          type: boolean
+        faithfulness:
+          type: number
+          nullable: true
+        answer_relevancy:
+          type: number
+          nullable: true
+        latency_ms:
+          type: integer
+    EvalRunItemDetail:
+      type: object
+      required:
+        - case_id
+        - locale
+        - question
+        - retrieved_urls
+        - metrics
+      properties:
+        case_id:
+          type: string
+        locale:
+          type: string
+        question:
+          type: string
+        expected_doc_url:
+          type: string
+          nullable: true
+        retrieved_urls:
+          type: array
+          items:
+            type: string
+        answer:
+          type: string
+          nullable: true
+        metrics:
+          $ref: "#/components/schemas/EvalRunItemMetrics"
+    EvalRunDetailResponse:
+      type: object
+      required:
+        - run_id
+        - status
+        - metrics_summary
+        - items
+      properties:
+        run_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - pending
+            - running
+            - completed
+            - failed
+        metrics_summary:
+          $ref: "#/components/schemas/EvalMetricsSummary"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EvalRunItemDetail"
     ErrorBody:
       type: object
       properties:

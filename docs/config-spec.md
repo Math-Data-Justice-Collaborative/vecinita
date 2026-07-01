@@ -54,6 +54,23 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_CHAT_FRONTEND_URL` | string | — | Yes (EV-002) | Chat static site URL for health aggregator |
 | `VECINITA_ADMIN_FRONTEND_URL` | string | — | Yes (EV-002) | Admin static site URL for health aggregator |
 
+### RAG evaluation (EV-008 F36)
+
+Eval runner and thresholds for golden-set harness + admin tab. Judge LLM reuses Modal LLM URL
+(same as ChatRAG). Fixture path is repo-relative in CI; staging runs use seeded corpus.
+
+| Variable | Type | Default | Required | Description |
+|----------|------|---------|----------|-------------|
+| `VECINITA_EVAL_FIXTURE_PATH` | string | `data/fixtures/eval/qa_pairs.json` | No | Golden set JSON path |
+| `VECINITA_EVAL_RETRIEVAL_THRESHOLD` | float | `0.80` | No | Minimum aggregate retrieval relevance (`hit` + `any_of` rows) |
+| `VECINITA_EVAL_FAITHFULNESS_CI_MIN` | float | `0.60` | No | CI gate — minimum aggregate faithfulness |
+| `VECINITA_EVAL_FAITHFULNESS_DISPLAY_MIN` | float | `0.70` | No | Admin UI highlight threshold |
+| `VECINITA_EVAL_ANSWER_RELEVANCY_CI_MIN` | float | `0.60` | No | CI gate — minimum aggregate answer relevancy |
+| `VECINITA_EVAL_ANSWER_RELEVANCY_DISPLAY_MIN` | float | `0.70` | No | Admin UI highlight threshold |
+| `VECINITA_EVAL_LATENCY_P95_DISPLAY_MS` | int | `30000` | No | Informational p95 reference (not a CI gate) |
+| `VECINITA_EVAL_JUDGE_QUERY_LANGUAGE` | string | `true` | No | When `true`, LlamaIndex judge rubric follows question locale (RD-109) |
+| `VECINITA_EVAL_CORPUS_PROFILE` | string | `fixture` | No | `fixture` \| `staging` — which corpus to run against (04-tech-plan) |
+
 ### Admin auth — Supabase (EV-005 F34)
 
 Used by the **Data Management API** and the **Internal Write API** to verify operator Supabase

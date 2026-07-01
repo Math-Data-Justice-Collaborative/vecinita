@@ -178,4 +178,32 @@ describe("AuthContext hooks", () => {
       "bad password",
     );
   });
+
+  it("signOutAllDevices propagates Supabase errors", async () => {
+    const signOut = vi.fn().mockResolvedValue({
+      error: new Error("global sign-out failed"),
+    });
+    const { setSupabaseClientForTests } = await import("@/auth/supabaseClient");
+    setSupabaseClientForTests({
+      auth: {
+        getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
+        onAuthStateChange: vi.fn().mockReturnValue({
+          data: { subscription: { unsubscribe: vi.fn() } },
+        }),
+        signInWithPassword: vi.fn(),
+        signOut,
+      },
+    } as never);
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <AuthProvider>{children}</AuthProvider>
+    );
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+    await expect(result.current.signOutAllDevices()).rejects.toThrow(
+      "global sign-out failed",
+    );
+  });
 });

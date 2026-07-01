@@ -9,6 +9,8 @@ dependencies = [
     "psycopg[binary]>=3.1,<4",
     "uvicorn>=0.30,<1",
     "vecinita-database",
+    "vecinita-embedding-client",
+    "vecinita-eval",
     "vecinita-shared-schemas",
 ]
 
@@ -22,3 +24,5 @@ packages = ["vecinita_internal_write_api"]
 [tool.uv.sources]
 vecinita-shared-schemas = { workspace = true }
 vecinita-database = { workspace = true }
+vecinita-eval = { workspace = true }
+vecinita-embedding-client = { workspace = true }
