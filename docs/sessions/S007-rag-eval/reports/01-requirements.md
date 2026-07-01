@@ -69,16 +69,3 @@ Skipped: spec.md (no architecture doc delta beyond F36 row), dependency-inventor
 ## Handoff
 
 **Next stage:** 04-tech-plan (evolve-lite — 02/03/05/06 skipped per routing plan).
-
-### Dashboard scope delta (2026-07-01, R68)
-
-In-place **01-requirements delta** for interactive eval dashboard (M64). See
-[01-requirements-dashboard-delta.md](./01-requirements-dashboard-delta.md).
-
-| Artifact | Added |
-|----------|-------|
-| user-journeys | UJ-041–UJ-043 |
-| test-plan | TC-117–TC-122 |
-| acceptance-criteria | AC-E17–AC-E21 |
-| api-contract | timeseries + criteria CRUD |
-| decisions | RD-114–RD-122 |

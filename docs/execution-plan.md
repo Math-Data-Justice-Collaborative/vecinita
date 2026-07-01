@@ -3,21 +3,21 @@
 > **Project**: Vecinita  
 > **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–034
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–033
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 14: EV-008 — Admin RAG evaluation (F36, #99) — **M59–M63 complete; M64 dashboard scope added** |
-| **Active milestone** | M64: Eval interactive dashboard — **pending** (scope addition R68) |
-| **Active task** | **T64.1** — Vitest TC-117 time-series chart (red) |
-| **Tasks completed** | Phase 14 M59–M63 complete (S007); M64 pending; Phase 13 M54–M58 complete (S006) |
+| **Active phase** | Phase 14: EV-008 — Admin RAG evaluation (F36, #99) — **07-build complete** |
+| **Active milestone** | M63: Deploy docs + Phase 14 gate — **completed** |
+| **Active task** | **—** (M59–M63 complete; next: 08-verify-build) |
+| **Tasks completed** | Phase 14 M59–M63 complete (S007); Phase 13 M54–M58 complete (S006) |
 | **Last updated** | 2026-07-01 |
-| **Evolve cycle** | EV-008 (F36, #99) — **07-build reopened for M64** |
+| **Evolve cycle** | EV-008 (F36, #99) — **07-build complete** |
 | **Git branch** | `feat/S007-rag-eval` |
-| **Active session** | S007-rag-eval — evolve-lite. 01-requirements **complete** (RD-099–RD-113 + RD-114–RD-122 dashboard delta). 04-tech-plan **complete** (**ADR-033** + **ADR-034**, TP-S007-01–**25**). Next: **07-build** M64 (T64.1–T64.10) |
-| **Scope addition** | 2026-07-01 — EV-008 adds admin RAG evaluation tab, golden eval set harness, Postgres run history ([#99](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/99)). **2026-07-01 (R68):** M64 interactive eval dashboard — time-series charts, customizable plots, pivot explore table, extensible criteria (same session). S006 (EV-007) deploy stages remain deferred on paused session. |
+| **Active session** | S007-rag-eval — evolve-lite. 01-requirements **complete** (RD-099–RD-113). 04-tech-plan **complete** (**ADR-033**, TP-S007-01–**16**). Next: **07-build** (M59–M63). Lite path skips 02/03/05/06/11 |
+| **Scope addition** | 2026-07-01 — EV-008 adds admin RAG evaluation tab, golden eval set harness, Postgres run history ([#99](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/99)). S006 (EV-007) deploy stages remain deferred on paused session. |
 
 ## Template
 
@@ -1194,11 +1194,11 @@ frontend auth callback, retract invitation, template polish, live invite smoke (
 ### Phase 14: EV-008 — Admin RAG evaluation (F36, #99)
 
 > **Session:** S007-rag-eval · **Evolve cycle:** EV-008 · **Feature IDs:** F36  
-> **Branch:** `feat/S007-rag-eval` → `main` (PR-113) · **ADR:** ADR-033, ADR-034 · **Tooling:** LlamaIndex evaluators + custom harness (no new Python deps; **recharts** FE dep for M64)
+> **Branch:** `feat/S007-rag-eval` → `main` (PR-50) · **ADR:** ADR-033 · **Tooling:** LlamaIndex evaluators + custom harness (no new deps)
 
-**Objective:** Golden-set eval harness, Postgres run persistence, internal-write-api routes, admin `/evaluation` tab, **interactive eval dashboard (M64)**.  
-**Entry gate:** 04-tech-plan approved (ADR-033, TP-S007-01–16; **M64 delta ADR-034, TP-S007-17–25**).  
-**Exit gate:** TC-111–TC-116 green; **TC-117+** for dashboard; AC-E12–AC-E16 satisfied at T2; **AC-E17+** for dashboard; live staging eval run informational at T3.
+**Objective:** Golden-set eval harness, Postgres run persistence, internal-write-api routes, admin `/evaluation` tab.  
+**Entry gate:** 04-tech-plan approved (ADR-033, TP-S007-01–16).  
+**Exit gate:** TC-111–TC-116 green; AC-E12–AC-E16 satisfied at T2; live staging eval run informational at T3.
 
 #### M59: Eval schema + `packages/eval` scaffold
 
@@ -1265,35 +1265,13 @@ frontend auth callback, retract invitation, template polish, live invite smoke (
 | T63.3 | Docs: Mark AC-E12–AC-E16 build-complete in acceptance-criteria when green | Docs | completed | acceptance-criteria AC-E12–E16 | T62.4, T61.7, T60.5 | — | S007 | F36 |
 | T63.4 | Docs: Session report + Phase 14 gate checklist | Docs | completed | 08-verify-build | T63.1–T63.3 | — | S007 | F36 |
 
-#### M64: Eval interactive dashboard (scope addition R68)
-
-**Goal:** Time-series metric charts, customizable/minimizable plot panels, pivot explore table, extensible eval criteria, layout prefs.  
-**Branch:** `feat/S007-rag-eval`  
-**Scope doc:** `docs/sessions/S007-rag-eval/reports/scope-addition-dashboard.md`
-
-| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
-|---|------|------|--------|-------------|------------|-----------|---------|---------|
-| T64.1 | Test (Vitest): TC-117 — time-series chart renders from mock run history — red | Test | pending | test-plan TC-117, UJ-041 | T62.4 | — | S007 | F36 |
-| T64.2 | Test (Vitest): TC-118 — pivot explore table axis customization — red | Test | pending | test-plan TC-118, UJ-042 | T62.4 | — | S007 | F36 |
-| T64.3 | Test (Vitest): TC-119 — collapsible chart panels persist layout — red | Test | pending | test-plan TC-119 | T64.1 | — | S007 | F36 |
-| T64.4 | Config: Add `recharts` + shadcn Chart components; back-add `dependency-inventory.md` | Config | pending | R69, scope-addition-dashboard | — | — | S007 | F36 |
-| T64.5 | Code: `EvalTrendCharts` — time-series over `eval_runs` (metric + date filters) | Code | pending | ADR-034 §2, UJ-041 | T64.4, T64.8 | — | S007 | F36 |
-| T64.6 | Code: `EvalExploreTable` — pivot-style row/column/value axes | Code | pending | UJ-042, scope-addition-dashboard | T64.4 | — | S007 | F36 |
-| T64.7 | Code: `eval_criteria` migration + criteria CRUD API + runner hook | Code | pending | TP-S007-17+, api-contract | T60.5 | — | S007 | F36 |
-| T64.8 | Code: `GET /internal/v1/eval/runs/timeseries` (or aggregates on list) | Code | pending | api-contract §EV-008 dashboard | T61.7 | — | S007 | F36 |
-| T64.9 | Code: Criteria manager UI + dashboard layout integration on `EvaluationPage` | Code | pending | feature-list F36, UJ-041–043 | T64.5, T64.6, T64.7 | D10 | S007 | F36 |
-| T64.10 | Test: TC-117–TC-122 + criteria/timeseries API tests green; i18n en/es | Test | pending | test-plan, AC-E17–AC-E21 | T64.1–T64.9 | — | S007 | F36 |
-
 #### Phase 14 Gate Check
 
 - [x] All M59–M63 tasks completed (T59.1–T63.4)
-- [ ] All M64 tasks completed (T64.1–T64.10) — **scope addition R68**
 - [x] TC-111–TC-116 green; UJ-039/040 covered (T2)
-- [ ] TC-117–TC-122 green; UJ-041–043 covered (dashboard)
 - [x] AC-E12–AC-E16 satisfied at T2; live staging eval run informational at 13-deploy-smoke (T3)
-- [ ] AC-E17–AC-E21 satisfied (dashboard)
 - [x] `eval_runs` / `eval_run_items` migration applied; privacy test green
-- [x] No new **Python** runtime dependencies (ADR-033 §15); **recharts** FE dep for M64 (R69)
+- [x] No new runtime dependencies (ADR-033 §15)
 - [x] CORS preflight covers `POST /internal/v1/eval/runs`
 - [x] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green
 

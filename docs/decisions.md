@@ -325,25 +325,9 @@ config-spec `VECINITA_ADMIN_FRONTEND_URL` on Modal DM; deployment-integration §
 | RD-112 | Tooling (from 00-context) | **LlamaIndex evaluators + custom harness** — no Langfuse/Ragas/DeepEval v1 (R63) | EV-008 / R63 |
 | RD-113 | Feature ID (from 00-context) | **F36** (not F34 — already Supabase auth) (R64) | EV-008 / R64 |
 
-EV-008 artifacts: feature-list F36; user-journeys UJ-039–UJ-043; test-plan TC-111–TC-122;
-acceptance-criteria AC-E12–AC-E21; api-contract §EV-008 eval routes; config-spec §RAG evaluation;
+EV-008 artifacts: feature-list F36; user-journeys UJ-039–UJ-040; test-plan TC-111–TC-116;
+acceptance-criteria AC-E12–AC-E16; api-contract §EV-008 eval routes; config-spec §RAG evaluation;
 `docs/eval-golden-set.md`; expanded `data/fixtures/eval/qa_pairs.json`; deployment-integration §EV-008.
-
-### EV-008 01-requirements delta — eval dashboard (2026-07-01, R68)
-
-Scope addition in **same session** S007 / Phase 14 / M64. Baseline UJ-039–040 / TC-111–116 / AC-E12–16 delivered; dashboard delta below.
-
-| ID | Decision |
-|----|----------|
-| RD-114 | Dashboard scope | **Same session** (S007 / EV-008 / M64) — interactive dashboards, not a new feature ID |
-| RD-115 | Dashboard views | **Dashboard** (trends), **Explore** (pivot table), **Criteria** (manager) tabs on `/evaluation` |
-| RD-116 | Time-series | `GET /internal/v1/eval/runs/timeseries`; x=run time, y=user-selected metrics; line/area v1 |
-| RD-117 | Pivot table | Client-side aggregation from run detail for v1 (&lt;500 rows); row/column/value axes user-selected |
-| RD-118 | Layout prefs | Collapsible/minimizable chart panels; prefs in **device-local `localStorage`** only (ADR-004) |
-| RD-119 | Custom criteria | Postgres `eval_criteria` + admin CRUD; runner hook; results in `eval_run_items.metrics` JSON |
-| RD-120 | Charting library | **shadcn/ui Chart + recharts** — new FE dependency (back-add inventory) |
-| RD-121 | Stretch items | Run overlay compare + CSV export from explore table — implement if M64 time permits |
-| RD-122 | UX extras | Threshold reference lines on charts; pass/fail cell coloring in pivot; date range + run filters |
 Tooling ADR deferred to **04-tech-plan** (record R63).
 
 ### EV-007 04-tech-plan decisions (2026-06-30) — TP-S006-01–16
@@ -393,18 +377,9 @@ Resolves GitHub #99 tooling blocker. Builds on RD-099–RD-113 (01-requirements)
 | TP-S007-13 | Redeploy order | migration → internal-write-api → admin FE → CI | ADR-033 §13 | deployment-integration §EV-008 |
 | TP-S007-14 | Test tiers | T0–T2 merge-blocking; T3 live eval at 13-deploy-smoke | ADR-033 §14 | test-plan |
 | TP-S007-15 | Golden fixture | D3 expanded — 10 cases, 14 locale rows in repo | ADR-033 | RD-100, eval-golden-set.md |
-| TP-S007-16 | Dependencies | **No new Python deps** (baseline) | ADR-033 §15 | dependency-inventory |
-| TP-S007-17 | Dashboard UI layout | Tabbed **Dashboard / Explore / Criteria** on `/evaluation`; Run/History unchanged | ADR-034 §1 | RD-115, UJ-041–043 |
-| TP-S007-18 | Charting | **shadcn/ui Chart + recharts** — `EvalTrendCharts` line/area + threshold lines | ADR-034 §2 | RD-120, R69 |
-| TP-S007-19 | Timeseries API | `GET /internal/v1/eval/runs/timeseries` from `metrics_summary` | ADR-034 §3 | RD-116, api-contract |
-| TP-S007-20 | Extensible criteria | `eval_criteria` table + CRUD + runner `llm_rubric` hook | ADR-034 §4 | RD-119 |
-| TP-S007-21 | Pivot explore | **Client-side** aggregation &lt;500 rows; `@tanstack/react-table` | ADR-034 §5 | RD-117 |
-| TP-S007-22 | Layout prefs | Device-local `localStorage` only (panels, metrics, axes) | ADR-034 §6 | RD-118, ADR-004 |
-| TP-S007-23 | CORS | Preflight tests for timeseries + criteria routes | ADR-034 §7 | connectivity-gates |
-| TP-S007-24 | Git / redeploy | Same branch `feat/S007-rag-eval`, **PR-113**; migration → API → FE | ADR-034 §8 | R68 |
-| TP-S007-25 | Dependencies (M64) | **`recharts`** new FE dep; Python unchanged | ADR-034 §10 | dependency-inventory |
+| TP-S007-16 | Dependencies | **No new deps** | ADR-033 §15 | dependency-inventory |
 
-EV-008 execution plan: **Phase 14** M59–M63 (T59.1–T63.4) + **M64** dashboard (T64.1–T64.10).
+EV-008 execution plan: **Phase 14** M59–M63 (T59.1–T63.4).
 
 EV-006 artifacts: feature-list F35; user-journeys UJ-030–UJ-033; test-plan TC-088–TC-095;
 acceptance-criteria AC-U1–AC-U9; ADR-029; config-spec §Admin user management + email; api-contract

@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-07-01 (S007/EV-008 F36 — AC-E12–AC-E21 RAG evaluation + dashboard, #99)
+> **Last updated**: 2026-07-01 (S007/EV-008 F36 — AC-E12–AC-E16 RAG evaluation, #99)
 
 ## Per-feature criteria
 
@@ -121,11 +121,6 @@
 - [x] **AC-E14**: Faithfulness ≥0.60 and answer relevancy ≥0.60 on golden set aggregate in CI; admin highlights rows &lt;0.70 (TC-112, UJ-040). — build complete (S007)
 - [x] **AC-E15**: Admin Evaluation tab triggers runs, shows per-metric summary + per-question drill-down + history; en/es UI chrome (UJ-039, UJ-040, TC-114, TC-116). — build complete (S007)
 - [x] **AC-E16**: Eval routes are admin-only (`viewer` → 403); no visitor PII in eval persistence (TC-115, ADR-004). — build complete (S007)
-- [ ] **AC-E17**: Eval dashboard displays time-series charts of aggregate metrics across runs with user-selectable metrics, date/run filters, and threshold reference lines (UJ-041, TC-117). — pending M64
-- [ ] **AC-E18**: Eval explore view supports pivot-style table with user-selected row/column/value axes and correct aggregation on fixture-scale data (UJ-042, TC-118). — pending M64
-- [ ] **AC-E19**: Dashboard chart panels are minimizable/collapsible; layout prefs (panels, metrics, axes) persist in device-local `localStorage` only (UJ-041, TC-119, ADR-004). — pending M64
-- [ ] **AC-E20**: Admin can add, edit, enable/disable custom evaluation criteria; results appear in subsequent runs and dashboard views (UJ-043, TC-120, TC-121). — pending M64
-- [ ] **AC-E21**: Criteria and timeseries routes are admin-only; criteria definitions contain no PII (TC-120, TC-122). — pending M64
 
 ## Quantitative benchmarks
 

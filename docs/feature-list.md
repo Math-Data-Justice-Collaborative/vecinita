@@ -565,14 +565,12 @@
 - **What it does**: Adds an admin-only **Model / RAG Evaluation** tab to the data-management
   frontend so operators run the golden eval set through the production RAG path, view per-metric
   scores (retrieval relevance, faithfulness/groundedness, answer relevancy, latency), drill into
-  per-question results, review run history/trends, and explore results via **interactive
-  dashboards** (time-series charts, customizable/minimizable plot panels, pivot-style explore
-  table, user-selected axes, and admin-defined evaluation criteria).
+  per-question results, and review run history/trends. Expands the smoke fixture into a maintained
+  bilingual golden set with documented curation.
 - **Inputs**: Admin operator (`role=admin`); golden fixture `data/fixtures/eval/qa_pairs.json`;
   seeded or staging corpus; Modal self-hosted LLM for LLM-as-judge metrics.
 - **Outputs**: Eval run record in Postgres (`eval_runs`, `eval_run_items`); admin UI summary +
-  drill-down + **dashboard views** (trend charts, explore/pivot table, custom criteria); CI harness
-  metrics via extended `tests/eval/`.
+  drill-down; CI harness metrics via extended `tests/eval/`.
 - **Tooling (R63)**: **LlamaIndex native evaluators** (`FaithfulnessEvaluator`,
   `AnswerRelevancyEvaluator`, optional `ContextRelevancyEvaluator`) + **custom harness**
   (retrieval URL match, latency, Postgres persistence, admin tab). No Langfuse / Ragas / DeepEval
@@ -596,8 +594,8 @@
 - **Protected surfaces**:
   | Surface | Change |
   |---------|--------|
-  | `data-management-frontend` | `/evaluation` route + nav; **dashboard** charts, explore table, criteria manager (`admin.nav.evaluation`, en/es) |
-  | `internal-write-api` | `POST/GET /internal/v1/eval/runs`, `GET …/{run_id}`; **timeseries/aggregates**; **criteria CRUD** |
+  | `data-management-frontend` | `/evaluation` route + nav (`admin.nav.evaluation`, en/es) |
+  | `internal-write-api` | `POST/GET /internal/v1/eval/runs`, `GET …/{run_id}` |
   | `packages/rag` + Modal | Eval runner job through same RAG path as ChatRAG |
   | `data/fixtures/eval/` | Expanded `qa_pairs.json` + `docs/eval-golden-set.md` runbook |
 - **Auth**: **Admin-only** — trigger runs and view results; `viewer` → `403` (RD-110).
@@ -606,13 +604,7 @@
 - **Coordination**: Align groundedness with #84 when available; primary regression consumer for
   #83 reranking.
 - **Limitations / scope**: No public eval UI; no auto prompt tuning; no Langfuse/Phoenix v1; housing/legal
-  golden rows en-only until bilingual corpus expands. Dashboard layout prefs are device-local only (ADR-004).
-- **Dashboard (R68 / M64)**: Time-series plots over eval runs; minimizable/customizable chart panels;
-  pivot-style explore table (user-selected row/column/value axes); admin-defined eval criteria
-  (`eval_criteria` + runner); charting via shadcn/ui + recharts; threshold reference lines;
-  date/run filters; optional run overlay compare and CSV export (stretch).
-- **Dashboard views**: **Dashboard** (trend charts), **Explore** (pivot table), **Criteria** (manager)
-  alongside existing Run trigger + History drill-down (UJ-039/040).
+  golden rows en-only until bilingual corpus expands.
 - **Priority**: High — GitHub #99 (unblocks tooling decision R63).
 - **Source**: S007 / EV-008 interview 2026-07-01 (RD-099–RD-110); context `docs/context/rag-eval.md`;
   R63, R64, R67; #99, #83, #84, #94.

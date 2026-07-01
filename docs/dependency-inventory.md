@@ -1,7 +1,7 @@
 # Dependency Inventory
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-01 (S007/EV-008 F36 — LlamaIndex eval harness; M64 adds **recharts** FE dep)
+> **Last updated**: 2026-07-01 (S007/EV-008 F36 — LlamaIndex eval harness, no new deps)
 
 ## Runtime dependencies (Python — planned)
 
@@ -40,9 +40,6 @@
 | Judge LLM | Modal vLLM via `vecinita-llm-client` | No | Same Qwen2.5-1.5B endpoint as ChatRAG |
 | Run persistence | Postgres via internal-write-api | No | `eval_runs`, `eval_run_items` |
 | Admin UI | `data-management-frontend` | No | `/evaluation` tab |
-| Dashboard charts (M64) | **recharts** + shadcn Chart | **Yes (FE)** | Time-series + threshold lines (ADR-034) |
-| Pivot explore (M64) | `@tanstack/react-table` | No | Already in admin FE |
-| Custom criteria (M64) | Postgres `eval_criteria` + `packages/eval` hook | No | `llm_rubric` uses existing Modal LLM |
 
 **Explicitly not added v1:** `ragas`, `deepeval`, `langfuse`, `arize-phoenix`.
 
@@ -78,7 +75,6 @@
 | **vecinita-frontend-i18n** | workspace | Locale utils + EN/ES messages | — | EV-004 F31; `packages/frontend-i18n` |
 | **vecinita-frontend-ui** | workspace | Shared React locale/tag/pagination UI | — | EV-004 F31; depends on frontend-i18n |
 | **@supabase/supabase-js** | `^2.108.2` Supabase Auth browser session (DM frontend SPA) | MIT | **EV-005 F34** (ADR-026/027); admin frontend only; pinned 04-tech-plan (TP-S004-04) |
-| **recharts** | ^2.x Chart rendering (DM frontend) | MIT | **EV-008 M64** (ADR-034); shadcn/ui Chart pattern; admin `/evaluation` dashboard only |
 
 ### EV-004 workspace packages (F31)
 

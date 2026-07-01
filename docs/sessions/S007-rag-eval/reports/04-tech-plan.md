@@ -3,14 +3,12 @@
 **Session:** S007-rag-eval  
 **Evolve cycle:** EV-008 (F36)  
 **Date:** 2026-07-01  
-**Status:** Complete (baseline + dashboard delta 2026-07-01)
+**Status:** Complete (pending user approval)
 
 ## Intent
 
 Technical planning for GitHub [#99](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/99) —
 resolve the tooling blocker, produce ADR + execution-plan Phase 14 tasks for admin RAG evaluation.
-
-**Dashboard scope addition (R68):** See [04-tech-plan-dashboard-delta.md](./04-tech-plan-dashboard-delta.md).
 
 ## Tooling decision (unblocks #99)
 
@@ -69,9 +67,6 @@ resolve the tooling blocker, produce ADR + execution-plan Phase 14 tasks for adm
 
 ## Handoff
 
-**Baseline (M59–M63):** Delivered on `feat/S007-rag-eval` / PR-113.
-
-**Dashboard delta (M64):** 04-tech-plan complete — **ADR-034**, TP-S007-17–25.  
-**Next stage:** 07-build — start **T64.1** (Vitest TC-117 red).
+**Next stage:** 07-build — start **T59.1** (privacy test red).
 
 **Coordinate:** #84 groundedness adapter when verifier lands; #83/#94 improve golden-set meaningfulness post-v1.

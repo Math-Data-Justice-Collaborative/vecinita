@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-07-01 (S007/EV-008: UJ-039–UJ-043 admin RAG evaluation + dashboard; F36, #99)
+> **Last updated**: 2026-07-01 (S007/EV-008: UJ-039–UJ-040 admin RAG evaluation; F36, #99)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI steps** are waived at T0 — see `tests/e2e/README.md` (Vitest component smoke only).
@@ -46,9 +46,6 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-033 | Operator resets a forgotten password | Operator | DM login "Forgot password?" → recovery email → `/reset-password` callback → in-app reset | F35 | local + live (T3) |
 | UJ-039 | Admin runs golden-set RAG evaluation | Admin operator | DM UI `/evaluation` → `POST /internal/v1/eval/runs` | F36 (#99) | local |
 | UJ-040 | Admin reviews eval scores, drill-down, and history | Admin operator | DM UI `/evaluation` → `GET /internal/v1/eval/runs*` | F36 (#99) | local |
-| UJ-041 | Admin explores eval trends via interactive dashboard | Admin operator | DM UI `/evaluation` (Dashboard tab) → `GET /internal/v1/eval/runs/timeseries` | F36 (#99) | local |
-| UJ-042 | Admin pivots eval results with custom axes | Admin operator | DM UI `/evaluation` (Explore tab) → run detail + client pivot | F36 (#99) | local |
-| UJ-043 | Admin defines custom evaluation criteria | Admin operator | DM UI `/evaluation` (Criteria tab) → criteria CRUD API | F36 (#99) | local |
 
 ## Journey Details
 
@@ -903,74 +900,5 @@ Product-facing journeys describe what a **caller** does — not internal module 
 **Acceptance**: Drill-down shows all golden rows including edge cases (`abstain`, `empty`, `any_of`); history lists prior runs newest-first; bilingual UI strings for chrome only (questions shown as stored in fixture).
 
 **Automated tests**: Vitest `test_evaluation_page.test.tsx` (TC-116); harness integration TC-111–TC-113.
-
-**E2E tier**: local.
-
----
-
-### UJ-041: Admin explores eval trends via interactive dashboard
-
-**Actor**: Admin operator (`role=admin`)
-
-**Goal**: Visualize evaluation metric trends over time, customize chart panels, and spot regressions across runs.
-
-**Steps**:
-
-1. On `/evaluation`, open the **Dashboard** view (alongside existing Run / History views from UJ-039/040).
-2. Review **time-series charts** plotting aggregate metrics across completed `eval_runs` (x-axis: run time or run id; y-axis: selected metrics — retrieval relevance, faithfulness, answer relevancy, latency p95, custom criteria).
-3. **Customize charts**: select which metrics to display; filter by date range and/or specific runs; choose chart type (line or area v1); toggle threshold reference lines at configured gates (≥80% retrieval, ≥0.60 judge metrics).
-4. **Minimize/collapse** individual chart panels; layout preferences (visible panels, metric selections, axis choices) persist in device-local `localStorage` (ADR-004 — no PII).
-5. Optional: overlay or compare two selected runs on the same chart (stretch — implement if time permits in M64).
-
-**Acceptance**: At least one time-series chart renders from mock/history data; metric and date filters update the series; collapsed panels stay collapsed after reload; en/es UI chrome.
-
-**Automated tests**: Vitest `test_evaluation_dashboard.test.tsx` (TC-117, TC-119); integration `tests/integration/test_eval_timeseries.py` (TC-122).
-
-**E2E tier**: local.
-
----
-
-### UJ-042: Admin pivots eval results with custom axes
-
-**Actor**: Admin operator (`role=admin`)
-
-**Goal**: Explore per-question eval results in a pivot-style table with user-selected row, column, and value axes.
-
-**Steps**:
-
-1. On `/evaluation`, open the **Explore** view.
-2. Select a completed run (or "all recent runs" when row count permits).
-3. Configure **pivot axes**:
-   - **Row axis** (e.g. locale, domain, case_id, pass/fail)
-   - **Column axis** (e.g. metric name, run date bucket)
-   - **Value** (e.g. mean score, pass rate, count)
-4. Table updates interactively; cells show aggregated values with pass/fail coloring against thresholds.
-5. Optional: export visible pivot grid to CSV (stretch).
-
-**Acceptance**: User can change row/column/value axes and see updated grid; aggregation correct for fixture-sized data (&lt;500 rows client-side v1); en/es UI chrome.
-
-**Automated tests**: Vitest `test_evaluation_explore_table.test.tsx` (TC-118).
-
-**E2E tier**: local.
-
----
-
-### UJ-043: Admin defines custom evaluation criteria
-
-**Actor**: Admin operator (`role=admin`)
-
-**Goal**: Add, edit, enable/disable, and threshold custom evaluation criteria beyond the built-in retrieval/faithfulness/answer-relevancy metrics.
-
-**Steps**:
-
-1. On `/evaluation`, open the **Criteria** manager.
-2. View list of built-in + custom criteria (name, scorer type, threshold, enabled).
-3. **Add criterion**: name, description, scorer type (`builtin_extension` \| `llm_rubric` v1), threshold, enabled flag → `POST /internal/v1/eval/criteria`.
-4. Edit or disable existing custom criteria → `PATCH /internal/v1/eval/criteria/{id}`.
-5. Next eval run computes enabled custom criteria; results appear in `eval_run_items.metrics` JSON and flow into dashboard charts + explore table.
-
-**Acceptance**: Admin can CRUD custom criteria; disabled criteria skipped on next run; `viewer` → 403 on criteria routes; no PII in criteria definitions.
-
-**Automated tests**: `tests/integration/test_eval_criteria_routes.py` (TC-120); Vitest criteria manager (TC-121).
 
 **E2E tier**: local.
