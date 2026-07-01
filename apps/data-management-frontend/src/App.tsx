@@ -11,6 +11,7 @@ import { LoginPage } from "@/pages/LoginPage";
 import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
 import { SetPasswordPage } from "@/pages/SetPasswordPage";
 import { UsersPage } from "@/pages/UsersPage";
+import { EvaluationPage } from "@/pages/EvaluationPage";
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/health" element={<HealthPage />} />
         <Route path="/audit" element={<AuditPage />} />
         <Route path="/users" element={<UsersPage />} />
+        <Route path="/evaluation" element={<EvaluationPage />} />
       </Route>
       {/* Top-level splat: nested `path="*"` does not match unknown absolute paths (RR6). */}
       <Route

@@ -312,3 +312,101 @@ export async function bulkUpdateMetadata(
     throw new Error(`Bulk metadata update failed (${String(response.status)})`);
   return response.json() as Promise<BulkResult>;
 }
+
+export interface EvalMetricsSummaryApi {
+  retrieval_relevance?: number | null;
+  faithfulness?: number | null;
+  answer_relevancy?: number | null;
+  latency_p95_ms?: number | null;
+}
+
+export interface EvalRunListItemApi {
+  run_id: string;
+  status: "pending" | "running" | "completed" | "failed";
+  started_at?: string | null;
+  completed_at?: string | null;
+  metrics_summary: EvalMetricsSummaryApi;
+}
+
+export interface EvalRunListResponseApi {
+  items: EvalRunListItemApi[];
+  page: number;
+  page_size: number;
+  total_count: number;
+}
+
+export interface EvalRunItemApi {
+  case_id: string;
+  locale: string;
+  question: string;
+  expected_doc_url?: string | null;
+  retrieved_urls: string[];
+  answer?: string | null;
+  metrics: {
+    retrieval_pass: boolean;
+    faithfulness?: number | null;
+    answer_relevancy?: number | null;
+    latency_ms: number;
+  };
+}
+
+export interface EvalRunDetailApi {
+  run_id: string;
+  status: "pending" | "running" | "completed" | "failed";
+  metrics_summary: EvalMetricsSummaryApi;
+  items: EvalRunItemApi[];
+}
+
+export async function fetchEvalRuns(
+  options: CorpusClientOptions,
+): Promise<EvalRunListResponseApi> {
+  const response = await fetch(`${options.baseUrl}/internal/v1/eval/runs`, {
+    headers: {
+      Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Eval runs list failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<EvalRunListResponseApi>;
+}
+
+export async function fetchEvalRunDetail(
+  options: CorpusClientOptions,
+  runId: string,
+): Promise<EvalRunDetailApi> {
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/eval/runs/${runId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+      },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Eval run detail failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<EvalRunDetailApi>;
+}
+
+export async function triggerEvalRun(
+  options: CorpusClientOptions,
+  corpusProfile: "fixture" | "staging" = "fixture",
+): Promise<{ run_id: string; status: string; created_at: string }> {
+  const response = await fetch(`${options.baseUrl}/internal/v1/eval/runs`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ corpus_profile: corpusProfile }),
+  });
+  if (!response.ok) {
+    throw new Error(`Eval run trigger failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<{
+    run_id: string;
+    status: string;
+    created_at: string;
+  }>;
+}

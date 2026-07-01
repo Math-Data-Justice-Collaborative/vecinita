@@ -2,6 +2,7 @@ import { NavLink, Outlet } from "react-router-dom";
 import {
   BarChart3,
   FileText,
+  FlaskConical,
   Heart,
   ListChecks,
   ScrollText,
@@ -99,7 +100,14 @@ function NavItems({ onClick }: { onClick?: () => void }) {
       icon: ScrollText,
     },
     ...(isAdmin
-      ? [{ to: "/users", label: tr("admin.nav.users"), icon: Users } as const]
+      ? [
+          { to: "/users", label: tr("admin.nav.users"), icon: Users } as const,
+          {
+            to: "/evaluation",
+            label: tr("admin.nav.evaluation"),
+            icon: FlaskConical,
+          } as const,
+        ]
       : []),
   ];
 
