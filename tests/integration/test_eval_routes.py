@@ -89,10 +89,10 @@ def test_admin_triggers_eval_run_and_persists_results(
     assert summary.get("retrieval_relevance") is not None
 
 
-def test_viewer_denied_eval_routes(
+def test_viewer_read_only_eval_routes(
     eval_write_client: tuple[TestClient, EllipticCurvePrivateKey],
 ) -> None:
-    """TC-115: viewer JWT receives 403 on POST and GET eval routes."""
+    """TC-115: viewer JWT can GET eval dashboards but receives 403 on POST."""
     client, private_key = eval_write_client
     token = sign_test_jwt(private_key, sub=VIEWER_ID, role="viewer")
     post = client.post(
@@ -105,4 +105,4 @@ def test_viewer_denied_eval_routes(
         "/internal/v1/eval/runs",
         headers={"Authorization": f"Bearer {token}"},
     )
-    assert listing.status_code == HTTPStatus.FORBIDDEN
+    assert listing.status_code == HTTPStatus.OK

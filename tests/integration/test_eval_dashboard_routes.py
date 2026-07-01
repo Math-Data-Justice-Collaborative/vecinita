@@ -72,7 +72,7 @@ def test_eval_timeseries_returns_completed_runs(
 def test_eval_criteria_crud_admin_only(
     eval_write_client: tuple[TestClient, EllipticCurvePrivateKey],
 ) -> None:
-    """TC-120: admin can create/list/update criteria; viewer denied."""
+    """TC-120: admin can create/list/update criteria; viewer read-only."""
     client, private_key = eval_write_client
     admin_token = sign_test_jwt(private_key, role="admin")
     viewer_token = sign_test_jwt(private_key, sub=VIEWER_ID, role="viewer")
@@ -111,8 +111,21 @@ def test_eval_criteria_crud_admin_only(
     patched = response_json_object(patch)
     assert patched.get("enabled") is False
 
-    denied = client.get(
+    viewer_list = client.get(
         "/internal/v1/eval/criteria",
+        headers={"Authorization": f"Bearer {viewer_token}"},
+    )
+    assert viewer_list.status_code == HTTPStatus.OK
+
+    denied = client.post(
+        "/internal/v1/eval/criteria",
+        json={
+            "slug": f"viewer-denied-{uuid4().hex[:8]}",
+            "label": "Should fail",
+            "rubric": "Viewer cannot create criteria.",
+            "scorer_type": "llm_rubric",
+            "enabled": True,
+        },
         headers={"Authorization": f"Bearer {viewer_token}"},
     )
     assert denied.status_code == HTTPStatus.FORBIDDEN
