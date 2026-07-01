@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 import json
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 from unittest.mock import patch
 from uuid import UUID, uuid4
 
@@ -32,6 +32,7 @@ if TYPE_CHECKING:
 
 _EXPECTED_ROW_LATENCY_MS = 1500
 _EXPECTED_METRIC_LATENCY_MS = 99
+_EXPECTED_LATENCY_P95_MS = 12
 
 
 def _sample_row_result() -> RowResult:
@@ -544,7 +545,7 @@ def test_get_eval_run_parses_custom_scores_and_skips_invalid_entries(
     detail = get_eval_run(engine, run_id=eval_run_id)
     assert detail is not None
     assert detail.metrics_summary.custom_scores == {"good": 0.8}
-    assert detail.metrics_summary.latency_p95_ms == 12
+    assert detail.metrics_summary.latency_p95_ms == _EXPECTED_LATENCY_P95_MS
 
 
 def test_execute_eval_run_omits_custom_scores_when_empty(
@@ -589,7 +590,7 @@ def test_optional_int_returns_none_for_bool() -> None:
         _optional_int,  # pyright: ignore[reportPrivateUsage]
     )
 
-    assert _optional_int(True) is None
+    assert _optional_int(value=True) is None
 
 
 def test_create_eval_run_fallback_created_at(
@@ -660,9 +661,7 @@ def test_latency_ms_defaults_when_item_latency_is_float(
     assert _latency_ms(item, {}) == 0
 
 
-def test_get_eval_timeseries_skips_non_datetime_completed_at(
-    engine: Engine,
-) -> None:
+def test_get_eval_timeseries_skips_non_datetime_completed_at() -> None:
     """get_eval_timeseries ignores rows whose completed_at is not a datetime."""
     fake_row = {
         "id": uuid4(),
@@ -681,7 +680,7 @@ def test_get_eval_timeseries_skips_non_datetime_completed_at(
         def execute(self, *_args: object, **_kwargs: object) -> FakeResult:
             return FakeResult()
 
-        def __enter__(self) -> FakeConn:
+        def __enter__(self) -> Self:
             return self
 
         def __exit__(self, *_args: object) -> None:

@@ -18,6 +18,7 @@ from vecinita_embedding_client import (
     EMBEDDING_DIMENSION,
 )
 from vecinita_shared_schemas.internal_write import (
+    AuditEventRequest,
     BatchUpsertRequest,
     BatchUpsertResponse,
     ChunkUpsert,
@@ -260,8 +261,6 @@ def test_post_audit_event_posts_payload() -> None:
         api_key="test-key",
         http_client=httpx.Client(transport=transport, base_url="http://write.test"),
     )
-    from vecinita_shared_schemas.internal_write import AuditEventRequest
-
     event = AuditEventRequest(
         event_type="user.invited",
         entity_type="user",
@@ -281,8 +280,6 @@ def test_post_audit_event_raises_on_http_error() -> None:
         api_key="test-key",
         http_client=httpx.Client(transport=transport, base_url="http://write.test"),
     )
-    from vecinita_shared_schemas.internal_write import AuditEventRequest
-
     with pytest.raises(InternalWriteClientError, match="post_audit_event failed"):
         client.post_audit_event(
             AuditEventRequest(
@@ -290,6 +287,6 @@ def test_post_audit_event_raises_on_http_error() -> None:
                 entity_type="user",
                 entity_id=uuid4(),
                 payload={},
-            )
+            ),
         )
     client.close()

@@ -9,6 +9,8 @@ from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import text
+from vecinita_internal_write_api.eval_service import create_eval_run
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_config_for_tests
 
 from tests.eval.conftest import eval_embed_fn
@@ -18,10 +20,12 @@ from tests.unit.internal_write_api.conftest import auth_headers, database_url
 from tests.unit.shared_schemas.auth_fixtures import (
     generate_es256_keypair,
     make_auth_config,
+    sign_test_jwt,
 )
 
+_MAX_EVAL_PAGE_SIZE = 100
+
 if TYPE_CHECKING:
-    from collections.abc import Iterator
 
     from sqlalchemy.engine import Engine
 
@@ -59,7 +63,7 @@ def test_list_eval_runs_clamps_pagination(eval_write_client: TestClient) -> None
     assert response.status_code == HTTPStatus.OK
     body = response_json_object(response)
     assert json_int(body, "page") == 1
-    assert json_int(body, "page_size") == 100
+    assert json_int(body, "page_size") == _MAX_EVAL_PAGE_SIZE
 
 
 def test_get_eval_timeseries_clamps_limit(eval_write_client: TestClient) -> None:
@@ -130,9 +134,6 @@ def test_get_eval_run_route_returns_detail(
     eval_write_client: TestClient,
 ) -> None:
     """GET /eval/runs/{id} returns persisted run detail."""
-    from sqlalchemy import text
-    from vecinita_internal_write_api.eval_service import create_eval_run
-
     created = create_eval_run(engine, corpus_profile="fixture")
     try:
         response = eval_write_client.get(
@@ -164,7 +165,6 @@ def test_ingest_audit_event_rejects_operator_jwt(
     set_auth_config_for_tests(make_auth_config(private_key, internal_api_key="test-internal-key"))
 
     from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
-    from tests.unit.shared_schemas.auth_fixtures import sign_test_jwt
 
     client = TestClient(create_app())
     token = sign_test_jwt(private_key, role="admin")
@@ -213,8 +213,6 @@ def test_ingest_audit_event_service_key(engine: Engine, monkeypatch: pytest.Monk
     finally:
         reset_auth_config_for_tests()
         with engine.begin() as conn:
-            from sqlalchemy import text
-
             conn.execute(
                 text("DELETE FROM audit_log WHERE entity_id = :id"),
                 {"id": entity_id},

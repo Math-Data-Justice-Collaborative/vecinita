@@ -105,7 +105,7 @@ describe("useIdleTimeout", () => {
     const setTimeoutSpy = vi.spyOn(global, "setTimeout").mockImplementation((handler, timeout) => {
       if (timeout === 110_000) {
         warningCallback = handler as () => void;
-        return 1 as ReturnType<typeof setTimeout>;
+        return 1 as unknown as ReturnType<typeof setTimeout>;
       }
       return originalSetTimeout(handler, timeout);
     });

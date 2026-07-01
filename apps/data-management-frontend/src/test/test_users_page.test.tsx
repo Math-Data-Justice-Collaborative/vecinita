@@ -5,6 +5,7 @@ import { MemoryRouter } from "react-router-dom";
 import { UsersPage } from "@/pages/UsersPage";
 
 import { renderWithProviders } from "./renderWithProviders";
+import { fetchInputUrl } from "./fetch-mock";
 import { installAuthenticatedSupabaseMock } from "./supabaseMock";
 
 function renderUsersPage() {
@@ -479,7 +480,10 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
   it("surfaces generic load failure when listUsers rejects a non-Error", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation(() => Promise.reject("list failed")),
+      vi.fn().mockImplementation(() =>
+        // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- non-Error catch branch
+        Promise.reject("list failed"),
+      ),
     );
     renderUsersPage();
     expect(await screen.findByRole("alert")).toHaveTextContent(
@@ -533,7 +537,7 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockImplementation((input: RequestInfo | URL) => {
-        const url = typeof input === "string" ? input : input.toString();
+        const url = fetchInputUrl(input);
         if (url.includes("/admin/users") && !url.includes("/admin/users/")) {
           return listGate.then(() =>
             Promise.resolve(jsonResponse(MOCK_USERS)),

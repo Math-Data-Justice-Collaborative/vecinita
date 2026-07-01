@@ -584,7 +584,7 @@ def test_revoke_invite_maps_supabase_admin_error() -> None:
 
 
 def test_force_signout_maps_generic_supabase_admin_error() -> None:
-    """force signout maps non-404 Supabase errors to HTTP errors."""
+    """Force signout maps non-404 Supabase errors to HTTP errors."""
     users = _seed_users()
 
     def handler(request: httpx.Request) -> httpx.Response:
