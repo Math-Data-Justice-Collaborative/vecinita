@@ -327,6 +327,7 @@ export interface EvalRunListItemApi {
   started_at?: string | null;
   completed_at?: string | null;
   metrics_summary: EvalMetricsSummaryApi;
+  error_message?: string | null;
 }
 
 export interface EvalRunListResponseApi {
@@ -357,6 +358,7 @@ export interface EvalRunDetailApi {
   status: "pending" | "running" | "completed" | "failed";
   metrics_summary: EvalMetricsSummaryApi;
   items: EvalRunItemApi[];
+  error_message?: string | null;
 }
 
 export async function fetchEvalRuns(

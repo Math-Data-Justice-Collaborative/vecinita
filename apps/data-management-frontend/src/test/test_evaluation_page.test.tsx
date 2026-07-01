@@ -499,7 +499,12 @@ describe("EvaluationPage", () => {
           detailCalls += 1;
           return Promise.resolve({
             ok: true,
-            json: async () => ({ ...DETAIL_BODY, status: "failed", items: [] }),
+            json: async () => ({
+              ...DETAIL_BODY,
+              status: "failed",
+              items: [],
+              error_message: "embed failed with status 404: modal-http: invalid function call",
+            }),
           });
         }
         if (url.includes("/internal/v1/eval/runs")) {
@@ -519,6 +524,9 @@ describe("EvaluationPage", () => {
     await waitFor(() => {
       expect(detailCalls).toBeGreaterThanOrEqual(1);
       expect(screen.getByTestId("evaluation-run-button")).not.toBeDisabled();
+      expect(screen.getByTestId("evaluation-run-error")).toHaveTextContent(
+        "modal-http: invalid function call",
+      );
     });
   });
 
