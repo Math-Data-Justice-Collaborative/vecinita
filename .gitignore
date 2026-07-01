@@ -11,6 +11,10 @@ prod.env
 /chat-rag-spec.yaml
 .tmp/
 
+# Supabase CLI local state (`supabase link`, config push) — never commit
+supabase/.temp/
+supabase/.env
+
 # Python
 __pycache__/
 *.py[cod]
