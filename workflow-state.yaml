@@ -6,14 +6,20 @@ project:
   stages:
     00-context:
       status: completed
-      started_at: '2026-06-30'
-      completed_at: '2026-06-30'
-      session_id: S006-invite-acceptance
-      branch: feat/S006-invite-acceptance
-      evolve_cycle_id: EV-007
-      note: 'S006/EV-007 scoped delta for GitHub #109 — invite acceptance flow (redirect URLs, auth callback, password setup,
-        invitation admin). 00-context completed 2026-06-30; session-brief, routing-plan, invite-acceptance-flow context brief
-        produced. Decisions R60-R62. User-approved evolve-lite routing.'
+      started_at: '2026-07-01'
+      completed_at: '2026-07-01'
+      session_id: S007-rag-eval
+      branch: feat/S007-rag-eval
+      evolve_cycle_id: EV-008
+      note: 'S007/EV-008 scoped delta for GitHub #99 — admin RAG evaluation tab, golden eval set, LlamaIndex evaluators +
+        custom harness (F36). 00-context completed 2026-07-01; context brief docs/context/rag-eval.md. Decisions R63-R64.
+        User-approved evolve-lite routing.'
+      s006_baseline:
+        status: paused
+        paused_at: '2026-07-01'
+        session_id: S006-invite-acceptance
+        branch: feat/S006-invite-acceptance
+        note: S006/EV-007 parked 2026-07-01 before deploy stages; resume after S007 or backlog.
       s005_baseline:
         status: completed
         completed_at: '2026-06-29'
@@ -22,44 +28,63 @@ project:
         note: S005/EV-006 F35 00-context completed 2026-06-29; session paused 2026-06-30 before deploy stages.
     01-requirements:
       status: completed
-      completed_at: '2026-06-30'
-      session_id: S006-invite-acceptance
-      last_delta: S005/EV-006 F35 admin user management + auth UX (2026-06-29)
-      note: 'EV-007/S006 01-requirements complete — RD-091–RD-098; AC-U3 revised; F35.12–F35.15. Prior EV-006/F35 delta (S005):
-        ADR-029, feature-list F35, UJ-030-UJ-033, TC-088-TC-095, AC-U1-AC-U9, RD-080-RD-090.'
-      evolve_cycle_id: EV-007
-      report: docs/sessions/S006-invite-acceptance/reports/01-requirements.md
+      started_at: '2026-07-01'
+      completed_at: '2026-07-01'
+      session_id: S007-rag-eval
+      branch: feat/S007-rag-eval
+      evolve_cycle_id: EV-008
+      note: 'EV-008/S007 F36 delta — 01-requirements complete 2026-07-01 (RD-099–RD-113; R67 golden eval curation).'
+      report: docs/sessions/S007-rag-eval/reports/01-requirements.md
+      s006_baseline:
+        status: completed
+        completed_at: '2026-06-30'
+        session_id: S006-invite-acceptance
+        evolve_cycle_id: EV-007
+        last_delta: S005/EV-006 F35 admin user management + auth UX (2026-06-29)
+        note: 'EV-007/S006 01-requirements complete — RD-091–RD-098; AC-U3 revised; F35.12–F35.15. Prior EV-006/F35 delta (S005):
+          ADR-029, feature-list F35, UJ-030-UJ-033, TC-088-TC-095, AC-U1-AC-U9, RD-080-RD-090.'
+        report: docs/sessions/S006-invite-acceptance/reports/01-requirements.md
     04-tech-plan:
       status: completed
-      completed_at: '2026-06-30'
-      session_id: S006-invite-acceptance
-      evolve_cycle_id: EV-007
-      report: docs/sessions/S006-invite-acceptance/reports/04-tech-plan.md
-      note: EV-007 delta S006
-      baseline_completed_at: '2026-05-24'
-      baseline_partial_rerun_at: '2026-06-13'
-      baseline_partial_rerun_note: EV-004 delta F31 — 10 TP decisions, Phase 9 (36 tasks), ADR-021 (preserved in legacy stages.04-tech-plan)
-      last_delta: 'S005/EV-006 F35 user-mgmt tech plan (ADR-030, TP-S005-01–16, Phase 12) + 2026-06-29 SCOPE ADDITION (in-place
-        re-run: ADR-031, TP-S005-17–24, M53)'
-      scope_addition_2026_06_29: 'EV-006 04-tech-plan in-place re-run extended scope (user-approved 4 items; MFA/2FA + bulk
-        CSV import deferred). ADR-031 (docs/adr/ADR-031-ev006-auth-ux-hardening.md) captures TP-S005-17 idle/session timeout
-        (30min+60s warning, VITE_VECINITA_IDLE_TIMEOUT_MIN/_WARNING_SEC); TP-S005-18 self ''log out of all devices'' (global
-        signOut); TP-S005-19 admin force-logout POST /admin/users/{id}/signout via admin_delete_user_sessions RPC (one-time
-        operator apply, 503 fallback->disable); TP-S005-20 user search q (>=3 chars->GoTrue filter)+pagination; TP-S005-21
-        audit viewer (reuse F29 AuditPage + GET /internal/v1/audit, entity_type Users filter, user.*/email.* i18n labels,
-        per-user link); TP-S005-22 deliverability test-send POST /admin/email/test via Resend REST (RESEND_API_KEY/RESEND_SENDER_EMAIL,
-        5/h/admin); TP-S005-23 SPF/DKIM/DMARC operator checklist; TP-S005-24 config+secrets delta. Milestone M53 (T53.1-T53.22,
-        all pending, TDD-ordered) appended to execution-plan Phase 12 (now M48-M53); Phase 12 gate updated to TC-088–TC-103,
-        UJ-030–UJ-038, AC-U1–AC-U16. New artifacts: ADR-031, UJ-034-UJ-038, TC-096-TC-103, AC-U10-AC-U16, api-contract routes
-        (/admin/users/{id}/signout, /admin/email/test, q param), Modal DM secrets RESEND_API_KEY + RESEND_SENDER_EMAIL, idle-timeout
-        VITE envs. 04-tech-plan remains completed (in-place scope extension). Commit DEFERRED (commit-only-when-asked override)
-        — scope-addition docs uncommitted, no new SHAs.'
-      s004_baseline_note: 'EV-005/F34 tech plan delta: ADR-027 (Supabase Auth verification + env sync) with TP-S004-01..12
-        — HS256 JWT verify (TP-S004-01), app_metadata.role claim source (TP-S004-02), shared vecinita_shared_schemas.auth,
-        PyJWT>=2.10,<3 + @supabase/supabase-js ^2.108.2, Pro plan + ephemeral branching + CLI migrations-in-repo, inviteUserByEmail+SMTP,
-        idempotent first-admin seed; cost cap raised to ~$75/mo (supersedes ADR-004 cap — user-approved). Phase 11 (M43-M47,
-        T43.1-T47.6, 29 tasks) appended to execution-plan. R53 unblocked via Supabase CLI (MCP-independent). Commit DEFERRED
-        (commit-only-when-asked override). Baseline partial_rerun info preserved in legacy stages.04-tech-plan.'
+      started_at: '2026-07-01'
+      completed_at: '2026-07-01'
+      session_id: S007-rag-eval
+      branch: feat/S007-rag-eval
+      evolve_cycle_id: EV-008
+      note: 'EV-008/S007 F36 delta — 04-tech-plan complete 2026-07-01 (ADR-033, TP-S007-01–16; execution-plan Phase EV-008
+        M59–M63).'
+      report: docs/sessions/S007-rag-eval/reports/04-tech-plan.md
+      s006_baseline:
+        status: completed
+        completed_at: '2026-06-30'
+        session_id: S006-invite-acceptance
+        evolve_cycle_id: EV-007
+        report: docs/sessions/S006-invite-acceptance/reports/04-tech-plan.md
+        note: EV-007 delta S006
+        baseline_completed_at: '2026-05-24'
+        baseline_partial_rerun_at: '2026-06-13'
+        baseline_partial_rerun_note: EV-004 delta F31 — 10 TP decisions, Phase 9 (36 tasks), ADR-021 (preserved in legacy stages.04-tech-plan)
+        last_delta: 'S005/EV-006 F35 user-mgmt tech plan (ADR-030, TP-S005-01–16, Phase 12) + 2026-06-29 SCOPE ADDITION (in-place
+          re-run: ADR-031, TP-S005-17–24, M53)'
+        scope_addition_2026_06_29: 'EV-006 04-tech-plan in-place re-run extended scope (user-approved 4 items; MFA/2FA + bulk
+          CSV import deferred). ADR-031 (docs/adr/ADR-031-ev006-auth-ux-hardening.md) captures TP-S005-17 idle/session timeout
+          (30min+60s warning, VITE_VECINITA_IDLE_TIMEOUT_MIN/_WARNING_SEC); TP-S005-18 self ''log out of all devices'' (global
+          signOut); TP-S005-19 admin force-logout POST /admin/users/{id}/signout via admin_delete_user_sessions RPC (one-time
+          operator apply, 503 fallback->disable); TP-S005-20 user search q (>=3 chars->GoTrue filter)+pagination; TP-S005-21
+          audit viewer (reuse F29 AuditPage + GET /internal/v1/audit, entity_type Users filter, user.*/email.* i18n labels,
+          per-user link); TP-S005-22 deliverability test-send POST /admin/email/test via Resend REST (RESEND_API_KEY/RESEND_SENDER_EMAIL,
+          5/h/admin); TP-S005-23 SPF/DKIM/DMARC operator checklist; TP-S005-24 config+secrets delta. Milestone M53 (T53.1-T53.22,
+          all pending, TDD-ordered) appended to execution-plan Phase 12 (now M48-M53); Phase 12 gate updated to TC-088–TC-103,
+          UJ-030–UJ-038, AC-U1–AC-U16. New artifacts: ADR-031, UJ-034-UJ-038, TC-096-TC-103, AC-U10-AC-U16, api-contract routes
+          (/admin/users/{id}/signout, /admin/email/test, q param), Modal DM secrets RESEND_API_KEY + RESEND_SENDER_EMAIL, idle-timeout
+          VITE envs. 04-tech-plan remains completed (in-place scope extension). Commit DEFERRED (commit-only-when-asked override)
+          — scope-addition docs uncommitted, no new SHAs.'
+        s004_baseline_note: 'EV-005/F34 tech plan delta: ADR-027 (Supabase Auth verification + env sync) with TP-S004-01..12
+          — HS256 JWT verify (TP-S004-01), app_metadata.role claim source (TP-S004-02), shared vecinita_shared_schemas.auth,
+          PyJWT>=2.10,<3 + @supabase/supabase-js ^2.108.2, Pro plan + ephemeral branching + CLI migrations-in-repo, inviteUserByEmail+SMTP,
+          idempotent first-admin seed; cost cap raised to ~$75/mo (supersedes ADR-004 cap — user-approved). Phase 11 (M43-M47,
+          T43.1-T47.6, 29 tasks) appended to execution-plan. R53 unblocked via Supabase CLI (MCP-independent). Commit DEFERRED
+          (commit-only-when-asked override). Baseline partial_rerun info preserved in legacy stages.04-tech-plan.'
     07-build:
       status: completed
       completed_at: '2026-06-29'
@@ -331,11 +356,126 @@ project:
       - modal_h4_cors_waived_proxy_auth
       - s001_t12_pending
       - h0ci_blocking_after_merge
-session_counter: 6
+session_counter: 7
 active_session:
-  id: S006-invite-acceptance
+  id: S007-rag-eval
   type: feature
   status: in_progress
+  intent: 'GitHub #99 — admin RAG evaluation tab, golden eval set, LlamaIndex evaluators + custom harness (R63). R67 — golden
+    eval prompts, expected results, and judge guidelines from 01-requirements interview (not assumed in 00-context).'
+  branch: feat/S007-rag-eval
+  orchestrator: 16-evolve
+  evolve_cycle_id: EV-008
+  artifacts_dir: docs/sessions/S007-rag-eval/
+  started_at: '2026-07-01'
+  current_stage: 07-build
+  standing_docs_touched:
+  - docs/feature-list.md
+  - docs/user-journeys.md
+  - docs/test-plan.md
+  - docs/acceptance-criteria.md
+  - docs/api-contract.md
+  - docs/config-spec.md
+  - docs/eval-golden-set.md
+  - docs/deployment-integration.md
+  - docs/decisions.md
+  - data/fixtures/eval/qa_pairs.json
+  linked_issues:
+  - 99
+  routing_plan:
+  - stage: 00-context
+    status: completed
+    completed_at: '2026-07-01'
+  - stage: 01-requirements
+    status: completed
+    started_at: '2026-07-01'
+    completed_at: '2026-07-01'
+    note: EV-008/S007 F36 delta — 01-requirements complete 2026-07-01 (RD-099–RD-113; R67 golden eval curation).
+  - stage: 04-tech-plan
+    status: completed
+    started_at: '2026-07-01'
+    completed_at: '2026-07-01'
+    note: EV-008/S007 F36 delta — 04-tech-plan complete 2026-07-01 (ADR-033, TP-S007-01–16).
+  - stage: 07-build
+    status: pending
+  - stage: 08-verify-build
+    status: pending
+  - stage: 09-qa
+    status: pending
+  - stage: 10-e2e
+    status: pending
+  - stage: 12-verify-deploy
+    status: pending
+  - stage: 13-deploy-smoke
+    status: pending
+  skipped_stages:
+  - stage: 02-verify-plan
+    reason: evolve-lite — user approved (2026-07-01).
+  - stage: 03-plan-tooling
+    reason: evolve-lite — no new tooling/guardrails (2026-07-01).
+  - stage: 05-verify-tech
+    reason: evolve-lite — user approved (2026-07-01).
+  - stage: 06-tech-tooling
+    reason: evolve-lite — no new tooling/guardrails (2026-07-01).
+  - stage: 11-verify-impl
+    reason: evolve-lite — covered by 09-qa + 10-e2e (2026-07-01).
+  artifacts:
+  - path: docs/context/rag-eval.md
+    kind: context-brief
+    session_id: S007-rag-eval
+    stage: 00-context
+    note: 'Amended 2026-07-01 — §Interview-driven eval curation; R67.'
+  - path: docs/sessions/S007-rag-eval/reports/eval-curation-plan.md
+    kind: stage-report
+    session_id: S007-rag-eval
+    stage: 00-context
+  - path: docs/sessions/S007-rag-eval/reports/01-requirements.md
+    kind: stage-report
+    session_id: S007-rag-eval
+    stage: 01-requirements
+  - path: docs/feature-list.md
+    session_id: S007-rag-eval
+    stage: 01-requirements
+  - path: docs/user-journeys.md
+    session_id: S007-rag-eval
+    stage: 01-requirements
+  - path: docs/test-plan.md
+    session_id: S007-rag-eval
+    stage: 01-requirements
+  - path: docs/acceptance-criteria.md
+    session_id: S007-rag-eval
+    stage: 01-requirements
+  - path: docs/api-contract.md
+    session_id: S007-rag-eval
+    stage: 01-requirements
+  - path: docs/config-spec.md
+    session_id: S007-rag-eval
+    stage: 01-requirements
+  - path: docs/eval-golden-set.md
+    kind: eval-golden-set
+    session_id: S007-rag-eval
+    stage: 01-requirements
+  - path: docs/deployment-integration.md
+    session_id: S007-rag-eval
+    stage: 01-requirements
+  - path: docs/decisions.md
+    session_id: S007-rag-eval
+    stage: 01-requirements
+  - path: data/fixtures/eval/qa_pairs.json
+    session_id: S007-rag-eval
+    stage: 01-requirements
+  - path: docs/sessions/S007-rag-eval/reports/04-tech-plan.md
+    kind: stage-report
+    session_id: S007-rag-eval
+    stage: 04-tech-plan
+  - path: docs/adr/ADR-033-ev008-rag-evaluation-implementation.md
+    kind: adr
+    session_id: S007-rag-eval
+    stage: 04-tech-plan
+sessions:
+- id: S006-invite-acceptance
+  type: feature
+  status: paused
   intent: 'GitHub #109 — complete invite acceptance flow (redirect URLs, auth callback, password setup, invitation admin).
     F35 gap from S005/EV-006.'
   branch: feat/S006-invite-acceptance
@@ -464,7 +604,14 @@ active_session:
     kind: pr-remediation-report
     session_id: S006-invite-acceptance
     stage: 19-address-pr-review
-sessions:
+  paused_at: '2026-07-01'
+  pause_note: 'Parked 2026-07-01 — user opened S007-rag-eval for GitHub #99 (F36 RAG evaluation). Stages 12-verify-deploy
+    and 13-deploy-smoke deferred; EV-007 paused.'
+  deferred_stages:
+  - stage: 12-verify-deploy
+    note: Deferred at S006 park (2026-07-01) — resume after S007 or backlog.
+  - stage: 13-deploy-smoke
+    note: Deferred at S006 park (2026-07-01) — resume after S007 or backlog.
 - id: S005-user-mgmt-auth
   type: feature
   status: paused
@@ -1075,10 +1222,15 @@ stages:
   00-context:
     status: completed
     started_at: '2026-05-19'
-    completed_at: '2026-06-13'
-    partial_rerun_at: '2026-06-13'
-    partial_rerun_note: EV-004 delta — admin dashboard en/es i18n (mirror ChatRAG) + shared component library (packages/frontend-ui
-      + packages/frontend-i18n)
+    completed_at: '2026-07-01'
+    partial_rerun_at: '2026-07-01'
+    partial_rerun_note: 'EV-008/S007 delta — F36 admin RAG evaluation tab (#99); context brief docs/context/rag-eval.md; LlamaIndex
+      evaluators + custom harness (R63); feature F36 not F34 (R64).'
+    session_id: S007-rag-eval
+    branch: feat/S007-rag-eval
+    evolve_cycle_id: EV-008
+    artifacts:
+    - docs/context/rag-eval.md
     phases:
       phase1a_agents:
         status: completed
@@ -1102,53 +1254,47 @@ stages:
         - docs/adr/ADR-020-shared-frontend-ui.md
   01-requirements:
     status: completed
-    started_at: '2026-06-30'
-    completed_at: '2026-06-30'
-    partial_rerun_at: '2026-05-24'
-    partial_rerun_note: EV-004 delta F31 — admin dashboard en/es i18n
+    started_at: '2026-07-01'
+    completed_at: '2026-07-01'
+    partial_rerun_at: '2026-07-01'
+    partial_rerun_note: 'EV-008/S007 delta — F36 admin RAG evaluation (#99); 01-requirements complete 2026-07-01 (RD-099–RD-113;
+      R67 golden eval curation).'
+    session_id: S007-rag-eval
+    branch: feat/S007-rag-eval
+    evolve_cycle_id: EV-008
     substeps:
       interviews:
-        completed: 13
-        total: 13
+        completed: 6
+        total: 6
         current_template: null
         current_section: null
       manifest_approved: true
       approved_documents:
       - feature-list
-      - spec
       - user-journeys
       - test-plan
-      - config-spec
-      - api-contract
-      - data-management-plan
-      - deployment-integration
       - acceptance-criteria
-      - dependency-inventory
-      - roadmap
-      - glossary
-      - risk-register
+      - api-contract
+      - config-spec
+      - eval-golden-set
+      - deployment-integration
       skipped_documents:
-      - migration-plan
+      - spec
+      - dependency-inventory
       notes:
-        dependency_inventory: User wants vLLM and LlamaIndex evaluated in interview
-        session: EV-004 F31 delta interview complete — 3 batches; UJ-022 assigned (UJ-019 taken)
+        session: EV-008/S007 F36 delta — golden eval curation Blocks A–F complete 2026-07-01
     artifacts_updated:
     - docs/feature-list.md
-    - docs/spec.md
     - docs/user-journeys.md
     - docs/test-plan.md
-    - docs/config-spec.md
-    - docs/api-contract.md
-    - docs/deployment-integration.md
     - docs/acceptance-criteria.md
-    - docs/dependency-inventory.md
-    - docs/reference.md#roadmap
-    - docs/reference.md#glossary
-    - docs/reference.md#risk-register
-    - docs/data-management-plan.md
-    - docs/decisions.md#requirements-decisions-01-requirements
-    - docs/adr/ADR-020-shared-frontend-ui.md
-    report: docs/sessions/S006-invite-acceptance/reports/01-requirements.md
+    - docs/api-contract.md
+    - docs/config-spec.md
+    - docs/eval-golden-set.md
+    - docs/deployment-integration.md
+    - docs/decisions.md
+    - data/fixtures/eval/qa_pairs.json
+    report: docs/sessions/S007-rag-eval/reports/01-requirements.md
   02-verify-plan:
     status: completed
     started_at: '2026-05-24'
@@ -1192,10 +1338,13 @@ stages:
   04-tech-plan:
     status: completed
     started_at: '2026-05-19'
-    completed_at: '2026-06-30'
-    report: docs/sessions/S006-invite-acceptance/reports/04-tech-plan.md
-    partial_rerun_at: '2026-06-13'
-    partial_rerun_note: EV-004 delta F31 — 10 TP decisions, Phase 9 (36 tasks), ADR-021
+    completed_at: '2026-07-01'
+    report: docs/sessions/S007-rag-eval/reports/04-tech-plan.md
+    partial_rerun_at: '2026-07-01'
+    partial_rerun_note: 'EV-008/S007 delta — F36 admin RAG evaluation (#99); 04-tech-plan complete 2026-07-01 (ADR-033, TP-S007-01–16).'
+    session_id: S007-rag-eval
+    branch: feat/S007-rag-eval
+    evolve_cycle_id: EV-008
     substeps:
       phase1_toolchain: completed
       phase2_interview: completed
@@ -2510,8 +2659,11 @@ evolve_cycles:
   feature_ids:
   - F35
   title: Invite acceptance flow — redirect URLs, auth callback, password setup (#109)
-  status: in_progress
+  status: paused
   started: '2026-06-30'
+  paused_at: '2026-07-01'
+  pause_note: 'EV-007 paused 2026-07-01 — S006 archived paused; user opened S007/EV-008 for GitHub #99 (F36 RAG evaluation).
+    Deploy stages 12-verify-deploy + 13-deploy-smoke deferred.'
   session_id: S006-invite-acceptance
   current_stage: 12-verify-deploy
   parent_cycle: EV-006
@@ -2546,7 +2698,47 @@ evolve_cycles:
   - 'R61 (2026-06-30, EV-007/S006): New POST /admin/users/{id}/revoke-invite endpoint + distinct UI + audit user.invite_revoked.'
   - 'R62 (2026-06-30, EV-007/S006): Scoped context brief at docs/context/invite-acceptance-flow.md.'
   note: 'F35 extension from S005/EV-006 — completes invite acceptance flow (redirect URLs, auth callback, password setup,
-    invitation admin) for GitHub #109. EV-006 paused with deploy stages deferred.'
+    invitation admin) for GitHub #109. EV-006 paused with deploy stages deferred. EV-007 paused 2026-07-01 for S007/EV-008.'
+- id: EV-008
+  cycle_type: feature
+  feature_ids:
+  - F36
+  title: Admin RAG evaluation tab — golden eval set, LlamaIndex evaluators + custom harness (#99)
+  status: in_progress
+  started: '2026-07-01'
+  session_id: S007-rag-eval
+  current_stage: 07-build
+  linked_issues:
+  - 99
+  stages:
+    00-context:
+      status: completed
+      started: '2026-07-01'
+      completed: '2026-07-01'
+      note: 'EV-008 opened — GitHub #99 admin RAG evaluation tab; F36 (not F34). Context brief docs/context/rag-eval.md.'
+    01-requirements:
+      status: completed
+      started: '2026-07-01'
+      completed: '2026-07-01'
+      note: EV-008/S007 F36 delta — 01-requirements complete 2026-07-01 (RD-099–RD-113; R67 golden eval curation).
+    04-tech-plan:
+      status: completed
+      started: '2026-07-01'
+      completed: '2026-07-01'
+      note: EV-008/S007 F36 delta — 04-tech-plan complete 2026-07-01 (ADR-033, TP-S007-01–16).
+  checkpoints:
+    phase_a: passed
+    phase_b: passed
+    phase_c: pending
+    phase_d: pending
+    deploy: pending
+  decisions:
+  - 'R63 (2026-07-01, EV-008/S007): LlamaIndex evaluators + custom harness for admin RAG evaluation.'
+  - 'R64 (2026-07-01, EV-008/S007): Feature is F36 (admin RAG eval tab), not F34.'
+  - 'TP-S007-01–16 (2026-07-01, EV-008/S007, 04-tech-plan): F36 RAG evaluation tech plan — ADR-033; execution-plan Phase EV-008
+    (M59–M63). LlamaIndex evaluators + custom harness; packages/eval; DO BackgroundTasks runner; admin-only access.'
+  note: 'F36 — admin RAG evaluation tab with golden eval set; LlamaIndex evaluators + custom harness. GitHub #99. Evolve-lite
+    routing 00→01→04→07→08→09→10→12→13 (skip 02,03,05,06,11). 04-tech-plan complete 2026-07-01; next 07-build.'
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -3724,6 +3916,42 @@ decisions_log:
     evolve_cycle_id EV-007). GitHub #109 — invite acceptance flow F35 extension from S005/EV-006. Decisions R60-R62. User-approved
     evolve-lite routing 00→01→04→07→08→09→10→12→13 (skip 02,03,05,06,11). S005 archived paused; EV-006 paused.'
 - EV-007/S006 01-requirements complete — RD-091–RD-098; AC-U3 revised; F35.12–F35.15
+- date: '2026-07-01'
+  note: 'S007-rag-eval OPENED (session_counter=7; type feature; orchestrator 16-evolve; branch feat/S007-rag-eval; evolve_cycle_id
+    EV-008). GitHub #99 — admin RAG evaluation tab F36. Decisions R63-R64. User-approved evolve-lite routing 00→01→04→07→08→09→10→12→13
+    (skip 02,03,05,06,11). S006 archived paused; EV-007 paused.'
+- 'S006 parked 2026-07-01 — user opened S007 for GitHub #99 RAG evaluation; stages 12-verify-deploy + 13-deploy-smoke deferred'
+- 'R63 (2026-07-01, EV-008/S007): LlamaIndex evaluators + custom harness for admin RAG evaluation.'
+- 'R64 (2026-07-01, EV-008/S007): Feature is F36 (admin RAG eval tab), not F34.'
+- 'R67 (2026-07-01, EV-008/S007): Golden eval prompts, expected results, and judge guidelines created via 01-requirements
+  user interview — not assumed in 00-context.'
+- 'EV-008/S007 01-requirements delta interview started 2026-07-01 — F36 golden eval curation (R67).'
+- 'EV-008/S007 01-requirements complete — RD-099–RD-113; F36 golden eval; AC-E12–AC-E16; UJ-039/UJ-040; TC-111–TC-116;
+  eval-golden-set.md new — 2026-07-01'
+- 'RD-099 (2026-07-01, EV-008/S007): Golden domains — community + housing + legal aid + edge cases.'
+- 'RD-100 (2026-07-01, EV-008/S007): Golden size — 10 cases, 14 locale rows.'
+- 'RD-101 (2026-07-01, EV-008/S007): Edge cases — abstain, ambiguous query, empty retrieval rows.'
+- 'RD-102 (2026-07-01, EV-008/S007): Golden questions Q1–Q10 approved.'
+- 'RD-103 (2026-07-01, EV-008/S007): Housing/legal ES deferred until #94 corpus lands.'
+- 'RD-104 (2026-07-01, EV-008/S007): Retrieval assertion — expected doc URL in top-k.'
+- 'RD-105 (2026-07-01, EV-008/S007): Answer rubric — required_facts[] bullets per row.'
+- 'RD-106 (2026-07-01, EV-008/S007): Retrieval threshold — retain ≥80% on hit + any_of rows.'
+- 'RD-107 (2026-07-01, EV-008/S007): Faithfulness — CI ≥0.60 aggregate; display highlight <0.70.'
+- 'RD-108 (2026-07-01, EV-008/S007): Answer relevancy — CI ≥0.60 aggregate; display highlight <0.70.'
+- 'RD-109 (2026-07-01, EV-008/S007): Judge language — query language (en/es rubric follows question).'
+- 'RD-110 (2026-07-01, EV-008/S007): Eval access — admin-only; viewer → 403.'
+- 'RD-111 (2026-07-01, EV-008/S007): Latency — p95 informational (30s reference); no CI gate v1.'
+- 'RD-112 (2026-07-01, EV-008/S007): Tooling — LlamaIndex evaluators + custom harness (R63).'
+- 'RD-113 (2026-07-01, EV-008/S007): Feature ID — F36 (not F34) (R64).'
+- 'TP-S007-01–16 (2026-07-01, EV-008/S007, 04-tech-plan): F36 RAG evaluation tech plan — ADR-033; execution-plan Phase EV-008
+  (M59–M63). LlamaIndex evaluators + custom harness; packages/eval; DO BackgroundTasks runner; admin-only access; no new deps.'
+- date: '2026-07-01'
+  note: 'S007/EV-008 04-tech-plan COMPLETE (F36 admin RAG evaluation, evolve-lite delta). ADR-033 authored (TP-S007-01–16):
+    LlamaIndex FaithfulnessEvaluator + AnswerRelevancyEvaluator + custom retrieval/latency harness; packages/eval (vecinita-eval);
+    Postgres eval_runs + eval_run_items; DO internal-write-api BackgroundTasks runner; admin-only eval routes; /evaluation
+    admin UI; execution-plan Phase EV-008 M59–M63. Artifacts: docs/sessions/S007-rag-eval/reports/04-tech-plan.md, docs/adr/ADR-033-ev008-rag-evaluation-implementation.md.
+    Commit DEFERRED (commit-only-when-asked override). active_session + EV-008 current_stage advanced to 07-build; checkpoints.phase_b
+    passed.'
 artifacts:
 - docs/context-brief.md
 - docs/audits.md#product-plan-audit-report
@@ -3846,14 +4074,72 @@ artifacts:
   kind: pr-remediation-report
   session_id: S006-invite-acceptance
   stage: 19-address-pr-review
+- path: docs/context/rag-eval.md
+  kind: context-brief
+  session_id: S007-rag-eval
+  stage: 00-context
+  note: 'Amended 2026-07-01 — §Interview-driven eval curation; R67.'
+- path: docs/sessions/S007-rag-eval/reports/eval-curation-plan.md
+  kind: stage-report
+  session_id: S007-rag-eval
+  stage: 00-context
+- path: docs/sessions/S007-rag-eval/reports/01-requirements.md
+  kind: stage-report
+  session_id: S007-rag-eval
+  stage: 01-requirements
+- path: docs/feature-list.md
+  session_id: S007-rag-eval
+  stage: 01-requirements
+- path: docs/user-journeys.md
+  session_id: S007-rag-eval
+  stage: 01-requirements
+- path: docs/test-plan.md
+  session_id: S007-rag-eval
+  stage: 01-requirements
+- path: docs/acceptance-criteria.md
+  session_id: S007-rag-eval
+  stage: 01-requirements
+- path: docs/api-contract.md
+  session_id: S007-rag-eval
+  stage: 01-requirements
+- path: docs/config-spec.md
+  session_id: S007-rag-eval
+  stage: 01-requirements
+- path: docs/eval-golden-set.md
+  kind: eval-golden-set
+  session_id: S007-rag-eval
+  stage: 01-requirements
+- path: docs/deployment-integration.md
+  session_id: S007-rag-eval
+  stage: 01-requirements
+- path: docs/decisions.md
+  session_id: S007-rag-eval
+  stage: 01-requirements
+- path: data/fixtures/eval/qa_pairs.json
+  session_id: S007-rag-eval
+  stage: 01-requirements
+- path: docs/sessions/S007-rag-eval/reports/04-tech-plan.md
+  kind: stage-report
+  session_id: S007-rag-eval
+  stage: 04-tech-plan
+- path: docs/adr/ADR-033-ev008-rag-evaluation-implementation.md
+  kind: adr
+  session_id: S007-rag-eval
+  stage: 04-tech-plan
 git_history:
-  current_branch: feat/S006-invite-acceptance
+  current_branch: feat/S007-rag-eval
   branches:
+  - name: feat/S007-rag-eval
+    purpose: 'EV-008 / GitHub #99 admin RAG evaluation tab — F36 golden eval set, LlamaIndex evaluators + custom harness'
+    base: main
+    status: open
+    created_at: '2026-07-01'
   - name: feat/S006-invite-acceptance
     purpose: 'EV-007 / GitHub #109 invite acceptance flow — F35 extension from S005/EV-006'
     base: main
-    status: open
+    status: paused
     created_at: '2026-06-30'
+    pause_note: S006 parked 2026-07-01 — deploy stages deferred; resume after S007 or backlog.
   - name: feat/S005-user-mgmt-auth
     purpose: EV-006 / F35 admin user management + auth UX (#75 follow-on)
     base: main
