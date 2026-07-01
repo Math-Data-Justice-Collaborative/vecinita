@@ -88,4 +88,4 @@ def test_public_signup_still_disabled_regression_tc080() -> None:
     auth = cast("dict[str, object]", config["auth"])
     email = cast("dict[str, object]", auth["email"])
     assert auth["enable_signup"] is False
-    assert email["enable_signup"] is False
+    assert email["enable_signup"] is True

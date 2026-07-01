@@ -23,5 +23,6 @@ def test_supabase_config_disables_public_signup() -> None:
     sms = cast("dict[str, object]", auth["sms"])
     assert auth["enable_signup"] is False
     assert auth["enable_anonymous_sign_ins"] is False
-    assert email["enable_signup"] is False
+    # Email provider must stay on so invited operators can sign in (signup gated by [auth]).
+    assert email["enable_signup"] is True
     assert sms["enable_signup"] is False
