@@ -125,7 +125,7 @@ def test_execute_eval_run_persists_completed_results(
     assert detail.items[0].metrics.retrieval_pass is True
     with engine.connect() as conn:
         row = cast(
-            dict[str, object],
+            "dict[str, object]",
             conn.execute(
                 text("SELECT metrics_summary FROM eval_runs WHERE id = :id"),
                 {"id": run_id},
@@ -579,7 +579,7 @@ def test_execute_eval_run_omits_custom_scores_when_empty(
         )
     with engine.connect() as conn:
         row = cast(
-            dict[str, object],
+            "dict[str, object]",
             conn.execute(
                 text("SELECT metrics_summary FROM eval_runs WHERE id = :id"),
                 {"id": eval_run_id},
