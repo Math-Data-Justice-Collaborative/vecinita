@@ -32,4 +32,4 @@
 
 ## CI
 
-Pending push.
+- `ci.yml` @ `b334f77`: success (python, frontend×2, packages×2, coverage)

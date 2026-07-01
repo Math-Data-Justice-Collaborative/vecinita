@@ -377,8 +377,9 @@ active_session:
     status: completed
     completed_at: '2026-06-30'
   - stage: 19-address-pr-review
-    status: in_progress
+    status: completed
     started_at: '2026-06-30'
+    completed_at: '2026-06-30'
   skipped_stages:
   - stage: 02-verify-plan
     reason: evolve-lite — user approved (2026-06-30).
@@ -459,6 +460,10 @@ active_session:
     kind: pr-review-report
     session_id: S006-invite-acceptance
     stage: 18-pr-review
+  - path: docs/sessions/S006-invite-acceptance/reports/pr-remediation.md
+    kind: pr-remediation-report
+    session_id: S006-invite-acceptance
+    stage: 19-address-pr-review
 sessions:
 - id: S005-user-mgmt-auth
   type: feature
@@ -1692,8 +1697,9 @@ stages:
     completed: '2026-06-30'
     last_cycle: PRR-012
   19-address-pr-review:
-    status: in_progress
+    status: completed
     started: '2026-06-25'
+    completed: '2026-06-30'
     last_cycle: PRM-010
     history_note: 'PRM-005 closed PR #62 ([M32] Workspace scaffold) on 2026-06-13'
   gather-context:
@@ -3352,16 +3358,63 @@ pr_remediation_cycles:
   pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/110
   linked_review_cycle_id: PRR-012
   title: 'Phase 13: EV-007 — Invite acceptance flow (closes #109)'
-  status: in_progress
+  status: completed
   started: '2026-06-30'
+  completed: '2026-06-30'
   head_ref: feat/S006-invite-acceptance
   base_ref: main
   session_id: S006-invite-acceptance
+  ci_status: pending
+  head_sha: b334f77
   counts:
-    fixed: 0
-    deferred: 0
+    fixed: 2
+    deferred: 2
     wont_fix: 0
-  findings: []
+  findings:
+  - id: F-001
+    source: inline
+    severity: blocker
+    path: apps/data-management-frontend/src/auth/useAuthLinkCallback.ts
+    line: 67
+    thread_id: null
+    status: fixed
+    commit: 468d865
+    note: PKCE double-exchange race — session re-check before manual exchange; getSession() fallback on exchange error
+  - id: F-002
+    source: inline
+    severity: advisory
+    path: apps/data-management-frontend/src/test/test_bug_2026_06_30_pkce_double_exchange_race.test.tsx
+    line: null
+    thread_id: null
+    status: fixed
+    commit: 468d865
+    note: AuthProvider + useAuthLinkCallback integration coverage for PKCE race (bug repro file)
+  - id: F-003
+    source: review_body
+    severity: advisory
+    path: null
+    line: null
+    thread_id: null
+    status: deferred
+    commit: null
+    note: AC-U17–U21 staging checks deferred to 13-deploy-smoke
+  - id: F-004
+    source: review_body
+    severity: advisory
+    path: workflow-state.yaml
+    line: null
+    thread_id: null
+    status: deferred
+    commit: null
+    note: Large workflow-state.yaml churn — separate session bookkeeping from feature commits in future (process note)
+  commits:
+  - 468d865
+  - b334f77
+  artifacts:
+  - path: docs/sessions/S006-invite-acceptance/reports/pr-remediation.md
+    note: session PR remediation report (PRM-010)
+  follow_up:
+    pr_review_rerun: offered
 agents:
   repo_researcher:
     status: completed
@@ -3789,6 +3842,10 @@ artifacts:
   kind: pr-review-report
   session_id: S006-invite-acceptance
   stage: 18-pr-review
+- path: docs/sessions/S006-invite-acceptance/reports/pr-remediation.md
+  kind: pr-remediation-report
+  session_id: S006-invite-acceptance
+  stage: 19-address-pr-review
 git_history:
   current_branch: feat/S006-invite-acceptance
   branches:
@@ -4241,6 +4298,20 @@ git_history:
     stage: 19-address-pr-review
     session_id: S005-user-mgmt-auth
     timestamp: '2026-06-30'
+  - sha: 468d865
+    branch: feat/S006-invite-acceptance
+    message: 'fix(review): PKCE double-exchange race in useAuthLinkCallback'
+    stage: 19-address-pr-review
+    session_id: S006-invite-acceptance
+    files_changed: 7
+    timestamp: '2026-06-30T23:45:24Z'
+  - sha: b334f77
+    branch: feat/S006-invite-acceptance
+    message: 'test(review): cover early-session PKCE path for branch coverage'
+    stage: 19-address-pr-review
+    session_id: S006-invite-acceptance
+    files_changed: 1
+    timestamp: '2026-06-30T23:53:58Z'
 constraints:
   cost:
     target_usd_per_month: 25
