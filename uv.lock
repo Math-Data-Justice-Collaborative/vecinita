@@ -2161,6 +2161,7 @@ version = "0.1.0"
 source = { editable = "packages/eval" }
 dependencies = [
     { name = "llama-index" },
+    { name = "vecinita-llm-client" },
     { name = "vecinita-rag" },
     { name = "vecinita-shared-schemas" },
 ]
@@ -2168,6 +2169,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "llama-index", specifier = ">=0.13.0,<0.14" },
+    { name = "vecinita-llm-client", editable = "packages/llm-client" },
     { name = "vecinita-rag", editable = "packages/rag" },
     { name = "vecinita-shared-schemas", editable = "packages/shared-schemas" },
 ]

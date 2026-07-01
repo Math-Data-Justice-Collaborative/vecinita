@@ -1,0 +1,80 @@
+"""LlamaIndex LLM adapter for vecinita-llm HTTP client."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from llama_index.core.base.llms.types import CompletionResponse, LLMMetadata
+from llama_index.core.llms.custom import CustomLLM
+from pydantic import ConfigDict
+from vecinita_llm_client import LlmClient, LlmClientError
+
+from vecinita_eval.judges import LlamaIndexJudgeClient
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
+    from vecinita_eval.judges import JudgeClient
+
+
+class ModalHttpLLM(CustomLLM):
+    """Bridge vecinita-llm HTTP `/generate` to LlamaIndex evaluators and synthesis."""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    client: LlmClient
+    max_tokens: int = 512
+    temperature: float = 0.2
+
+    @property
+    def metadata(self) -> LLMMetadata:
+        """Return static metadata for LlamaIndex evaluators."""
+        return LLMMetadata(
+            context_window=8192,
+            num_output=self.max_tokens,
+            model_name="vecinita-llm",
+        )
+
+    def complete(
+        self,
+        prompt: str,
+        formatted: bool = False,  # noqa: FBT001, FBT002
+        **kwargs: object,
+    ) -> CompletionResponse:
+        """Complete a prompt via vecinita-llm HTTP `/generate`."""
+        _ = (formatted, kwargs)
+        text = self.client.generate(
+            prompt,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+        )
+        return CompletionResponse(text=text)
+
+    def stream_complete(
+        self,
+        prompt: str,
+        formatted: bool = False,  # noqa: FBT001, FBT002
+        **kwargs: object,
+    ) -> Generator[CompletionResponse, None, None]:
+        """Stream completion tokens from vecinita-llm HTTP `/generate/stream`."""
+        _ = (formatted, kwargs)
+        parts: list[str] = []
+        for token in self.client.generate_stream(
+            prompt,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+        ):
+            parts.append(token)
+            yield CompletionResponse(text=token, delta=token)
+        if not parts:
+            yield CompletionResponse(text="")
+
+
+def default_eval_runtime() -> tuple[JudgeClient | None, ModalHttpLLM | None]:
+    """Create shared judge + LLM from ``VECINITA_MODAL_LLM_URL`` when configured."""
+    try:
+        client = LlmClient()
+    except LlmClientError:
+        return None, None
+    llm = ModalHttpLLM(client=client)
+    return LlamaIndexJudgeClient(llm=llm), llm

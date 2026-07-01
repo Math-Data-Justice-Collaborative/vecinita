@@ -12,6 +12,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import text
 from vecinita_embedding_client.client import EmbeddingClient
 from vecinita_eval.criteria import EvalCriterionDef
+from vecinita_eval.modal_llm import default_eval_runtime
 from vecinita_eval.runner import EvalSummary, RowResult, run_golden_eval
 from vecinita_shared_schemas.db_mapping import (
     mapping_row,
@@ -39,6 +40,7 @@ from vecinita_internal_write_api.eval_criteria_service import list_enabled_crite
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from llama_index.core.llms import LLM
     from sqlalchemy.engine import Engine
     from vecinita_eval.judges import JudgeClient
 
@@ -163,16 +165,25 @@ def _optional_datetime(value: object) -> datetime | None:
     return None
 
 
-def execute_eval_run(
+def execute_eval_run(  # noqa: PLR0913
     engine: Engine,
     *,
     run_id: UUID,
     corpus_profile: str,
     embed_fn: Callable[[str], list[float]] | None = None,
     judge: JudgeClient | None = None,
+    llm: LLM | None = None,
 ) -> None:
     """Run golden eval and persist per-row results."""
     embed = embed_fn or _default_embed_fn
+    resolved_judge = judge
+    resolved_llm = llm
+    if resolved_judge is None or resolved_llm is None:
+        default_judge, default_llm = default_eval_runtime()
+        if resolved_judge is None:
+            resolved_judge = default_judge
+        if resolved_llm is None:
+            resolved_llm = default_llm
     database_url = _database_url()
     try:
         with engine.begin() as conn:
@@ -193,8 +204,8 @@ def execute_eval_run(
         results, summary = run_golden_eval(
             embed_fn=embed,
             database_url=database_url,
-            judge=judge,
-            llm=None,
+            judge=resolved_judge,
+            llm=resolved_llm,
             fixture_path=fixture_path,
             criteria=criteria,
         )
