@@ -32,7 +32,7 @@ from vecinita_shared_schemas.internal_write import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping
+    from collections.abc import Callable
 
     from sqlalchemy.engine import Engine
     from vecinita_eval.judges import JudgeClient
