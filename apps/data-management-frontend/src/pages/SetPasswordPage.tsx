@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { type StringMessageKey } from "vecinita-frontend-i18n";
 
+import { useAuthLinkCallback } from "@/auth/useAuthLinkCallback";
 import { getSupabaseClient } from "@/auth/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,7 @@ const SUBTITLE_KEY: Record<PasswordFlowVariant, StringMessageKey> = {
 
 export function SetPasswordPage({ variant }: { variant: PasswordFlowVariant }) {
   const tr = useAdminT();
+  const { status: linkStatus } = useAuthLinkCallback();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +54,66 @@ export function SetPasswordPage({ variant }: { variant: PasswordFlowVariant }) {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (linkStatus === "loading") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <p className="text-sm text-muted-foreground" role="status">
+          {tr("admin.auth.verifyingLink")}
+        </p>
+      </div>
+    );
+  }
+
+  if (linkStatus === "expired") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <div
+          className="w-full max-w-sm space-y-4 rounded-lg border bg-card p-6 shadow-sm"
+          data-testid={`${variant}-link-expired`}
+        >
+          <p className="text-sm text-destructive" role="alert">
+            {tr("admin.auth.inviteLinkExpired")}
+          </p>
+          <p className="text-center text-sm">
+            <Link
+              to="/login"
+              className="text-primary underline-offset-4 hover:underline"
+            >
+              {tr("admin.auth.backToLogin")}
+            </Link>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (linkStatus === "denied" || linkStatus === "invalid") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <div
+          className="w-full max-w-sm space-y-4 rounded-lg border bg-card p-6 shadow-sm"
+          data-testid={`${variant}-link-invalid`}
+        >
+          <p className="text-sm text-destructive" role="alert">
+            {tr(
+              linkStatus === "denied"
+                ? "admin.auth.inviteLinkDenied"
+                : "admin.auth.inviteLinkInvalid",
+            )}
+          </p>
+          <p className="text-center text-sm">
+            <Link
+              to="/login"
+              className="text-primary underline-offset-4 hover:underline"
+            >
+              {tr("admin.auth.backToLogin")}
+            </Link>
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

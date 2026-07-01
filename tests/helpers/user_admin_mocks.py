@@ -54,7 +54,11 @@ def is_active(user: dict[str, object]) -> bool:
     return bool(user.get("email_confirmed_at") or user.get("last_sign_in_at"))
 
 
-def make_handler(users: dict[str, dict[str, object]]) -> httpx.MockTransport:  # noqa: C901
+def make_handler(  # noqa: C901
+    users: dict[str, dict[str, object]],
+    *,
+    outbound: list[dict[str, object]] | None = None,
+) -> httpx.MockTransport:
     """Return a MockTransport simulating the GoTrue admin endpoints over ``users``."""
 
     def handler(request: httpx.Request) -> httpx.Response:  # noqa: C901, PLR0911, PLR0912
@@ -74,6 +78,14 @@ def make_handler(users: dict[str, dict[str, object]]) -> httpx.MockTransport:  #
                 return httpx.Response(HTTPStatus.NOT_FOUND, json={"msg": "not found"})
             return httpx.Response(HTTPStatus.OK, json=user)
         if path == "/auth/v1/invite" and method == "POST":
+            if outbound is not None:
+                outbound.append(
+                    {
+                        "path": path,
+                        "method": method,
+                        "redirect_to": request.url.params.get("redirect_to"),
+                    },
+                )
             email = json_str(as_json_object(cast("object", json.loads(request.content))), "email")
             existing = next((u for u in users.values() if u["email"] == email), None)
             if existing is not None:
@@ -100,17 +112,29 @@ def make_handler(users: dict[str, dict[str, object]]) -> httpx.MockTransport:  #
             users.pop(path.rsplit("/", 1)[-1], None)
             return httpx.Response(HTTPStatus.OK, json={})
         if path == "/auth/v1/recover" and method == "POST":
+            if outbound is not None:
+                outbound.append(
+                    {
+                        "path": path,
+                        "method": method,
+                        "redirect_to": request.url.params.get("redirect_to"),
+                    },
+                )
             return httpx.Response(HTTPStatus.OK, json={})
         return httpx.Response(HTTPStatus.NOT_FOUND, json={"msg": "unhandled"})
 
     return httpx.MockTransport(handler)
 
 
-def make_client(users: dict[str, dict[str, object]]) -> SupabaseAdminClient:
+def make_client(
+    users: dict[str, dict[str, object]],
+    *,
+    outbound: list[dict[str, object]] | None = None,
+) -> SupabaseAdminClient:
     """Build a SupabaseAdminClient wired to the GoTrue mock transport over ``users``."""
     http_client = httpx.Client(
         base_url="https://test.supabase.co",
-        transport=make_handler(users),
+        transport=make_handler(users, outbound=outbound),
     )
     return SupabaseAdminClient(
         base_url="https://test.supabase.co",

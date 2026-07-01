@@ -46,6 +46,10 @@ if TYPE_CHECKING:
 def _auth_off(monkeypatch: pytest.MonkeyPatch) -> None:  # pyright: ignore[reportUnusedFunction]
     reset_auth_config_for_tests()
     monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "false")
+    monkeypatch.setenv(
+        "VECINITA_ADMIN_FRONTEND_URL",
+        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app",
+    )
 
 
 @pytest.fixture
@@ -382,3 +386,104 @@ def test_get_user_not_found_returns_404(
     test_client, _ = client
     response = test_client.post(f"/admin/users/{UUID(int=999)}/disable")
     assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_invite_passes_redirect_to_accept_invite() -> None:
+    """TC-104: invite includes redirect_to={origin}/accept-invite on GoTrue outbound."""
+    outbound: list[dict[str, object]] = []
+    users = _seed_users()
+    app = create_app(
+        require_proxy_auth=False,
+        admin_client=_make_client(users, outbound=outbound),
+        audit_emit=lambda _event: None,
+        invite_limiter=SlidingWindowRateLimiter(max_events=_INVITE_LIMIT, window_seconds=3600),
+    )
+    with TestClient(app) as test_client:
+        response = test_client.post(
+            "/admin/users/invite",
+            json={"email": "redirect@example.org", "role": "viewer"},
+        )
+    assert response.status_code == HTTPStatus.CREATED
+    assert outbound[-1]["redirect_to"] == (
+        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app/accept-invite"
+    )
+
+
+def test_resend_invite_passes_redirect_to_accept_invite() -> None:
+    """TC-104: resend-invite includes redirect_to on GoTrue outbound."""
+    outbound: list[dict[str, object]] = []
+    users = _seed_users()
+    invited_id = str(uuid4())
+    users[invited_id] = {"id": invited_id, "email": "pending@example.org"}
+    app = create_app(
+        require_proxy_auth=False,
+        admin_client=_make_client(users, outbound=outbound),
+        audit_emit=lambda _event: None,
+    )
+    with TestClient(app) as test_client:
+        response = test_client.post(f"/admin/users/{invited_id}/resend-invite")
+    assert response.status_code == HTTPStatus.ACCEPTED
+    assert outbound[-1]["redirect_to"] == (
+        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app/accept-invite"
+    )
+
+
+def test_reset_password_passes_redirect_to_reset_password() -> None:
+    """TC-105: admin recovery includes redirect_to={origin}/reset-password."""
+    outbound: list[dict[str, object]] = []
+    users = _seed_users()
+    app = create_app(
+        require_proxy_auth=False,
+        admin_client=_make_client(users, outbound=outbound),
+        audit_emit=lambda _event: None,
+    )
+    with TestClient(app) as test_client:
+        response = test_client.post(f"/admin/users/{_VIEWER_ID}/reset-password")
+    assert response.status_code == HTTPStatus.ACCEPTED
+    assert outbound[-1]["redirect_to"] == (
+        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app/reset-password"
+    )
+
+
+def test_invite_returns_503_when_admin_frontend_url_unset(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-104: missing VECINITA_ADMIN_FRONTEND_URL yields 503 on invite."""
+    monkeypatch.delenv("VECINITA_ADMIN_FRONTEND_URL", raising=False)
+    users = _seed_users()
+    app = create_app(
+        require_proxy_auth=False,
+        admin_client=_make_client(users),
+        audit_emit=lambda _event: None,
+    )
+    with TestClient(app) as test_client:
+        response = test_client.post(
+            "/admin/users/invite",
+            json={"email": "missing-env@example.org", "role": "viewer"},
+        )
+    assert response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
+
+
+def test_revoke_invite_deletes_pending_user_and_audits(
+    client: tuple[TestClient, dict[str, dict[str, object]]],
+    captured: list[AuditEventRequest],
+) -> None:
+    """TC-108: revoke-invite accepts invited-only users and emits user.invite_revoked."""
+    test_client, users = client
+    invited_id = str(uuid4())
+    users[invited_id] = {"id": invited_id, "email": "pending@example.org"}
+    response = test_client.post(f"/admin/users/{invited_id}/revoke-invite")
+    assert response.status_code == HTTPStatus.ACCEPTED
+    assert invited_id not in users
+    assert captured[-1].event_type == "user.invite_revoked"
+
+
+def test_revoke_invite_active_user_returns_409(
+    client: tuple[TestClient, dict[str, dict[str, object]]],
+) -> None:
+    """TC-108: active users cannot be retracted."""
+    test_client, _ = client
+    response = test_client.post(f"/admin/users/{_VIEWER_ID}/revoke-invite")
+    assert response.status_code == HTTPStatus.CONFLICT
+    detail = json_object_get(response_json_object(response), "detail")
+    assert json_str(detail, "code") == "cannot_revoke_active_user"

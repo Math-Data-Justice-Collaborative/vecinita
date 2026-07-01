@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-29 (S005/EV-006 F35 — admin user management + auth UX; TC-088–TC-103)  
+> **Last updated**: 2026-06-30 (S006/EV-007 F35 ext — invite acceptance TC-104–TC-110, #109)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -52,10 +52,10 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-027 Invite-only registration | `tests/e2e/test_uj027_invite_only_registration.py` | TC-080 |
 | UJ-028 Unauthenticated admin rejected | `tests/e2e/test_uj028_unauthenticated_admin.py` | TC-078, TC-083 |
 | UJ-029 Viewer blocked from writes | `tests/e2e/test_uj029_role_gating.py` + Vitest in `data-management-frontend` | TC-079, TC-081, TC-085 |
-| UJ-030 Admin user management | `tests/e2e/test_uj030_user_management.py` + Vitest in `data-management-frontend` | TC-088, TC-089, TC-092 |
-| UJ-031 Invite from page | `tests/e2e/test_uj031_invite_from_page.py` | TC-090, TC-092 |
+| UJ-030 Admin user management | `tests/e2e/test_uj030_user_management.py` + Vitest in `data-management-frontend` | TC-088, TC-089, TC-092, TC-108 |
+| UJ-031 Invite from page | `tests/e2e/test_uj031_invite_from_page.py` + Vitest `test_accept_invite_callback.test.tsx` | TC-090, TC-092, TC-104, TC-106 |
 | UJ-032 Remember-me | Vitest in `data-management-frontend` | TC-091 |
-| UJ-033 Password reset | Vitest in `data-management-frontend` | TC-093 |
+| UJ-033 Password reset | Vitest in `data-management-frontend` (`test_password_reset.test.tsx`) | TC-093, TC-105, TC-107 |
 | UJ-034 Idle timeout | Vitest in `data-management-frontend` | TC-096, TC-102 |
 | UJ-035 Log out of all devices | Vitest in `data-management-frontend` | TC-097, TC-102 |
 | UJ-036 Admin force sign-out | `tests/e2e/test_uj036_force_signout.py` + Vitest | TC-098, TC-103 |
@@ -541,6 +541,52 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Objective**: Guard the CLI path-resolution gotcha so `config push` finds every template.
 - **Input**: Assert `auth.email.template.*` `content_path` values resolve from the **project root** and `auth.email.notification.*` from the **`supabase/`** directory (per issue #5124), and that all paths exist relative to those bases.
 - **Expected**: All template/notification paths resolve under their respective base; CI fails if a path is mis-rooted.
+
+### TC-104: Backend redirect_to on invite and resend (UJ-031, EV-007 F35.12)
+
+- **Objective**: Admin invite/resend passes the deployed admin frontend accept URL to GoTrue.
+- **Input**: As `admin`: `POST /admin/users/invite` with `{"email":"new@example.org","role":"viewer"}`; `POST /admin/users/{id}/resend-invite` for an invited user. Mock or capture GoTrue Admin API outbound request.
+- **Expected**: `inviteUserByEmail` called with query param `redirect_to={VECINITA_ADMIN_FRONTEND_URL}/accept-invite` (URL-encoded); env unset → `503` or startup validation error per config-spec.
+- **Payloads**: `VECINITA_ADMIN_FRONTEND_URL=https://vecinita-admin-frontend-staging.ondigitalocean.app` → redirect ends with `/accept-invite`.
+
+### TC-105: Backend redirect_to on admin-triggered recovery (UJ-033, EV-007 F35.12)
+
+- **Objective**: Admin password reset sends recovery email with correct landing page.
+- **Input**: As `admin`: `POST /admin/users/{id}/reset-password`.
+- **Expected**: GoTrue recovery call includes `redirect_to={VECINITA_ADMIN_FRONTEND_URL}/reset-password`.
+
+### TC-106: Accept-invite callback session bootstrap + expired link UX (UJ-031, EV-007 F35.13)
+
+- **Objective**: `/accept-invite` establishes session from email link before password form; expired links show bilingual error.
+- **Input**: Vitest/jsdom — render accept page with:
+  - Hash `#access_token=…&refresh_token=…` → wait for session → show password form → `updateUser`.
+  - Hash `#error=access_denied&error_code=otp_expired&error_description=…` → show bilingual error + admin/resend guidance; **no** password form.
+  - No hash and no session → loading/error state (not immediate password form).
+- **Expected**: Password form gated on session; expired hash shows actionable i18n error; success redirects to login or auto-sign-in.
+
+### TC-107: Reset-password callback (UJ-033, EV-007 F35.13)
+
+- **Objective**: `/reset-password` uses same callback pattern as accept-invite.
+- **Input**: Extend `test_password_reset.test.tsx` — hash with valid tokens vs `#error=otp_expired`.
+- **Expected**: Session required before `updateUser`; expired link shows bilingual error; forgot-password passes `redirectTo: window.location.origin + '/reset-password'`.
+
+### TC-108: Retract pending invitation (UJ-030, EV-007 F35.14)
+
+- **Objective**: Distinct revoke for invited-only users.
+- **Input**: As `admin`: `POST /admin/users/{id}/revoke-invite` for `status=invited`; same for `status=active` → `409`; Vitest UsersPage shows "Retract invitation" only for invited rows.
+- **Expected**: `202`; GoTrue user deleted or invite revoked; audit `user.invite_revoked`; active user → `409 cannot_revoke_active_user`.
+
+### TC-109: Supabase site_url + redirect allowlist contract (EV-007 F35.12)
+
+- **Objective**: Offline guard that auth URL config matches staging-first deployment strategy.
+- **Input**: Extend `tests/smoke/test_supabase_ci_contract.py` — assert `site_url` equals staging admin URL placeholder or documented pattern; `additional_redirect_urls` includes `/accept-invite`, `/reset-password` full paths for staging + prod + local dev origins.
+- **Expected**: Contract passes in CI; operator runbook step documents Dashboard verification after push.
+
+### TC-110: Invite/recovery template polish (EV-007 F35.15)
+
+- **Objective**: Template HTML includes branding, clear CTA, expiry copy aligned with `otp_expiry=3600`.
+- **Input**: Assert `supabase/templates/invite.html` and `recovery.html` contain Vecinita branding markers, bilingual sections, and "1 hour" (or equivalent) expiry notice; `{{ .ConfirmationURL }}` placeholder present.
+- **Expected**: Offline lint passes; templates sync via `supabase.yml` config push (extends TC-094).
 
 ### TC-096: Idle timeout warns then signs out (UJ-034, F35, ADR-031)
 

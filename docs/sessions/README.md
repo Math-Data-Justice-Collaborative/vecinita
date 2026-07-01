@@ -28,11 +28,12 @@ Then invoke stages from the approved plan (e.g. `@10-e2e`, `@16-evolve`).
 | S002 | feature | paused | Admin job management + ingest tag resilience (#88/#89) | `feat/S002-admin-job-management` | 2026-06-26 | — |
 | S003 | feature | completed | Browser-local persistent chat history (F33) | `feat/S003-persistent-chat-history` | 2026-06-26 | 2026-06-28 (QA/e2e/deploy deferred) |
 | S004 | feature | completed | Supabase Auth for admin surfaces (#75) — invite-only, admin+viewer; merged PR #100; deploy-verify deferred | `feat/S004-supabase-auth` | 2026-06-28 | 2026-06-29 (deploy 12/13 deferred) |
-| S005 | feature | in_progress | Admin user mgmt + remember-me + Resend SMTP + email templates (EV-006 / F35) | `feat/S005-user-mgmt-auth` | 2026-06-29 | — |
+| S005 | feature | paused | Admin user mgmt + remember-me + Resend SMTP + email templates (EV-006 / F35); deploy 12/13 deferred | `feat/S005-user-mgmt-auth` | 2026-06-29 | — |
+| S006 | feature | in_progress | Complete invite acceptance flow — #109 (EV-007 / F35 gap) | `feat/S006-invite-acceptance` | 2026-06-30 | — |
 
 ## Active session
 
-**S005-user-mgmt-auth** — see `docs/sessions/S005-user-mgmt-auth/` and
+**S006-invite-acceptance** — see `docs/sessions/S006-invite-acceptance/` and
 `workflow-state.yaml` §`active_session`.
 
 ## Folder layout

@@ -52,6 +52,7 @@ class UserMgmtStack(TypedDict):
     private_key: EllipticCurvePrivateKey
     users: dict[str, dict[str, object]]
     audited_entity_ids: list[UUID]
+    outbound: list[dict[str, object]]
 
 
 def database_url() -> str:
@@ -90,7 +91,11 @@ def _is_active(user: dict[str, object]) -> bool:
     return bool(user.get("email_confirmed_at") or user.get("last_sign_in_at"))
 
 
-def make_gotrue_handler(users: dict[str, dict[str, object]]) -> httpx.MockTransport:  # noqa: C901
+def make_gotrue_handler(  # noqa: C901
+    users: dict[str, dict[str, object]],
+    *,
+    outbound: list[dict[str, object]] | None = None,
+) -> httpx.MockTransport:
     """Build a mock GoTrue Admin API transport backed by an in-memory user map."""
 
     def handler(request: httpx.Request) -> httpx.Response:  # noqa: C901, PLR0911, PLR0912
@@ -110,6 +115,13 @@ def make_gotrue_handler(users: dict[str, dict[str, object]]) -> httpx.MockTransp
                 return httpx.Response(HTTPStatus.NOT_FOUND, json={"msg": "not found"})
             return httpx.Response(HTTPStatus.OK, json=user)
         if path == "/auth/v1/invite" and method == "POST":
+            if outbound is not None:
+                outbound.append(
+                    {
+                        "path": path,
+                        "redirect_to": request.url.params.get("redirect_to"),
+                    },
+                )
             email = json_str(as_json_object(cast("object", json.loads(request.content))), "email")
             existing = next((u for u in users.values() if u["email"] == email), None)
             if existing is not None:
@@ -144,11 +156,15 @@ def make_gotrue_handler(users: dict[str, dict[str, object]]) -> httpx.MockTransp
     return httpx.MockTransport(handler)
 
 
-def make_admin_client(users: dict[str, dict[str, object]]) -> SupabaseAdminClient:
+def make_admin_client(
+    users: dict[str, dict[str, object]],
+    *,
+    outbound: list[dict[str, object]] | None = None,
+) -> SupabaseAdminClient:
     """Wrap the mock transport in a SupabaseAdminClient for DM backend injection."""
     http_client = httpx.Client(
         base_url="https://test.supabase.co",
-        transport=make_gotrue_handler(users),
+        transport=make_gotrue_handler(users, outbound=outbound),
     )
     return SupabaseAdminClient(
         base_url="https://test.supabase.co",
@@ -179,11 +195,16 @@ def build_user_mgmt_stack(monkeypatch: pytest.MonkeyPatch) -> Iterator[UserMgmtS
     monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
     monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
     monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", PROXY_KEY)
+    monkeypatch.setenv(
+        "VECINITA_ADMIN_FRONTEND_URL",
+        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app",
+    )
     set_auth_config_for_tests(make_auth_config(private_key, internal_api_key=API_KEY))
 
     write_api = TestClient(create_write_app())
     users = seed_users()
     audited_entity_ids: list[UUID] = []
+    outbound: list[dict[str, object]] = []
 
     def audit_emit(event: AuditEventRequest) -> None:
         audited_entity_ids.append(event.entity_id)
@@ -197,7 +218,7 @@ def build_user_mgmt_stack(monkeypatch: pytest.MonkeyPatch) -> Iterator[UserMgmtS
     dm_app = create_app(
         store=InMemoryJobStore(),
         require_proxy_auth=True,
-        admin_client=make_admin_client(users),
+        admin_client=make_admin_client(users, outbound=outbound),
         audit_emit=audit_emit,
     )
     dm_client = TestClient(dm_app)
@@ -211,6 +232,7 @@ def build_user_mgmt_stack(monkeypatch: pytest.MonkeyPatch) -> Iterator[UserMgmtS
         "private_key": private_key,
         "users": users,
         "audited_entity_ids": audited_entity_ids,
+        "outbound": outbound,
     }
     yield stack
 

@@ -41,6 +41,13 @@ const enStrings = {
   "admin.auth.passwordUpdated": "Password updated. You can sign in now.",
   "admin.auth.acceptInviteTitle": "Accept invitation",
   "admin.auth.acceptInviteSubtitle": "Set a password to activate your account.",
+  "admin.auth.verifyingLink": "Verifying your link…",
+  "admin.auth.inviteLinkExpired":
+    "This invitation link has expired. Ask your administrator to resend the invite.",
+  "admin.auth.inviteLinkDenied":
+    "This link is invalid or has already been used. Contact your administrator if you need access.",
+  "admin.auth.inviteLinkInvalid":
+    "We could not verify this link. Try again or contact your administrator.",
   "admin.users.title": "User management",
   "admin.users.subtitle": "Invite operators and manage roles.",
   "admin.users.loadFailed": "Failed to load users",
@@ -58,11 +65,14 @@ const enStrings = {
   "admin.users.columnRole": "Role",
   "admin.users.columnStatus": "Status",
   "admin.users.columnLastSignIn": "Last sign-in",
+  "admin.users.columnInvitedAt": "Invited",
+  "admin.users.inviteExpiresHint": "Expires ~1h",
   "admin.users.columnActions": "Actions",
   "admin.users.status.active": "Active",
   "admin.users.status.invited": "Invited",
   "admin.users.status.disabled": "Disabled",
   "admin.users.action.resendInvite": "Resend invite",
+  "admin.users.action.retractInvite": "Retract invitation",
   "admin.users.action.disable": "Disable",
   "admin.users.action.enable": "Enable",
   "admin.users.action.delete": "Delete",
@@ -296,6 +306,13 @@ const esStrings = {
   "admin.auth.acceptInviteTitle": "Aceptar invitación",
   "admin.auth.acceptInviteSubtitle":
     "Establece una contraseña para activar tu cuenta.",
+  "admin.auth.verifyingLink": "Verificando tu enlace…",
+  "admin.auth.inviteLinkExpired":
+    "Este enlace de invitación ha caducado. Pide a tu administrador que reenvíe la invitación.",
+  "admin.auth.inviteLinkDenied":
+    "Este enlace no es válido o ya se utilizó. Contacta a tu administrador si necesitas acceso.",
+  "admin.auth.inviteLinkInvalid":
+    "No pudimos verificar este enlace. Inténtalo de nuevo o contacta a tu administrador.",
   "admin.users.title": "Gestión de usuarios",
   "admin.users.subtitle": "Invita operadores y administra roles.",
   "admin.users.loadFailed": "No se pudieron cargar los usuarios",
@@ -314,11 +331,14 @@ const esStrings = {
   "admin.users.columnRole": "Rol",
   "admin.users.columnStatus": "Estado",
   "admin.users.columnLastSignIn": "Último acceso",
+  "admin.users.columnInvitedAt": "Invitado",
+  "admin.users.inviteExpiresHint": "Caduca ~1 h",
   "admin.users.columnActions": "Acciones",
   "admin.users.status.active": "Activo",
   "admin.users.status.invited": "Invitado",
   "admin.users.status.disabled": "Deshabilitado",
   "admin.users.action.resendInvite": "Reenviar invitación",
+  "admin.users.action.retractInvite": "Retirar invitación",
   "admin.users.action.disable": "Deshabilitar",
   "admin.users.action.enable": "Habilitar",
   "admin.users.action.delete": "Eliminar",

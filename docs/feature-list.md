@@ -530,6 +530,10 @@
   | F35.9 | User search + pagination | Server-side email search (`q` ≥ 3 chars → GoTrue `filter`) + `page`/`page_size` with shared `PaginationControls`. (ADR-031 TP-S005-20) |
   | F35.10 | Audit viewer for user events | Reuse F29 AuditPage + `GET /internal/v1/audit`; add `entity_type` "Users" filter, i18n labels for `user.*`/`email.*` events, and a per-row "View activity" link. (ADR-031 TP-S005-21) |
   | F35.11 | Deliverability test-send | Admin "Send test email" → `POST /admin/email/test` via Resend REST (proves domain + SPF/DKIM/DMARC); + operator DNS checklist in the runbook. (ADR-031 TP-S005-22/23) |
+  | F35.12 | Redirect URL wiring (EV-007) | Backend passes `redirect_to={VECINITA_ADMIN_FRONTEND_URL}/accept-invite` on invite/resend and `…/reset-password` on admin-triggered recovery; Supabase `site_url` + `additional_redirect_urls` synced via `config push` (staging-first). |
+  | F35.13 | Auth callback pages (EV-007) | `/accept-invite` and `/reset-password` parse hash/query (`access_token`, `code`, `#error=…`); wait for session before password form; bilingual expired-link UX with admin-resend guidance. |
+  | F35.14 | Retract invitation (EV-007) | `POST /admin/users/{id}/revoke-invite` for `status=invited` only; distinct UI label from "Delete user"; audit `user.invite_revoked`. |
+  | F35.15 | Invite lifecycle UI + template polish (EV-007) | Users list shows `invited_at` + "~1h expiry" hint for pending invites; invite/recovery template copy/branding polish aligned with `otp_expiry`. |
 - **Key parameters / decisions**:
   | Item | Value | Source |
   |------|-------|--------|
@@ -551,7 +555,8 @@
   locale switching) — hence stacked-bilingual templates.
 - **Priority**: High — direct user request (#75 follow-on).
 - **Source**: S005 / EV-006 interview 2026-06-29 (RD-080–RD-089; scope addition TP-S005-17–24);
-  session-brief S005; ADR-029, ADR-031; #75; research (Supabase Admin API + `listUsers` `filter`,
+  **S006 / EV-007 delta 2026-06-30** (RD-091–RD-098; F35.12–F35.15; GitHub #109);
+  session-brief S005/S006; ADR-029, ADR-031; #75, #109; research (Supabase Admin API + `listUsers` `filter`,
   supabase-js `signOut` scopes, `auth.sessions` revoke, Resend SMTP + REST, supabase-js storage
   adapter, CLI PR #5686 / issue #5124).
 

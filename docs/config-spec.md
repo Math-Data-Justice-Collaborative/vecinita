@@ -97,7 +97,8 @@ corpus DB stays PII-free.
 
 | Variable | Type | Default | Required | Description |
 |----------|------|---------|----------|-------------|
-| `SUPABASE_SECRET_KEY` | string (secret) | — | Yes (F35) | Supabase Admin API key for `/admin/users*` (invite/list/role/disable/delete/reset). **Server-side only**; never in browser builds. Previously seed/operator-shell only (F34). |
+| `SUPABASE_SECRET_KEY` | string (secret) | — | Yes (F35) | Supabase Admin API key for `/admin/users*` (invite/list/role/disable/delete/reset/revoke-invite). **Server-side only**; never in browser builds. Previously seed/operator-shell only (F34). |
+| `VECINITA_ADMIN_FRONTEND_URL` | string (URL) | — | Yes (F35 EV-007) | Deployed admin SPA origin **without trailing slash** — used to build `redirect_to` for GoTrue invite/resend/recovery (`{url}/accept-invite`, `{url}/reset-password`). Modal DM backend secret (also used by internal-write-api health aggregator). |
 | `SUPABASE_SMTP_PASS` | string (secret) | — | Yes (F35 prod) | Resend API key; referenced by `[auth.email.smtp] pass = "env(SUPABASE_SMTP_PASS)"` in `config.toml`. Read by Supabase/CLI, **not** by Vecinita backends. |
 | `RESEND_API_KEY` | string (secret) | — | Yes (F35 test-send) | Resend API key (same value as `SUPABASE_SMTP_PASS`) read by the **DM backend** for `POST /admin/email/test` (Resend REST). Modal DM secret only. (ADR-031 TP-S005-22) |
 | `RESEND_SENDER_EMAIL` | string | — | Yes (F35 test-send) | Verified Resend sender address (= `[auth.email.smtp] admin_email`) used as the `from` for test sends. Modal DM secret. (ADR-031 TP-S005-22) |
@@ -106,6 +107,8 @@ corpus DB stays PII-free.
 
 | Block / key | Value | Notes |
 |-------------|-------|-------|
+| `[auth] site_url` | Staging admin frontend URL (EV-007 staging-first) | GoTrue default redirect base; **not** `localhost:3000` in production projects |
+| `[auth] additional_redirect_urls` | Staging + prod admin origins with `/accept-invite`, `/reset-password`; local dev origins | Full path URLs required; verify Dashboard after `config push` |
 | `[auth.email.smtp] enabled` | `true` (prod) | Custom SMTP via Resend |
 | `[auth.email.smtp] host` | `smtp.resend.com` | Resend SMTP host |
 | `[auth.email.smtp] port` | `465` | Resend SMTP port |

@@ -1,7 +1,7 @@
 # Data Staging State
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-05-19  
+> **Last updated**: 2026-06-30  
 > **Source**: `docs/data-management-plan.md`, `docs/execution-plan.md`
 
 Track asset staging before build tasks with Data Deps run.
@@ -15,8 +15,8 @@ Track asset staging before build tasks with Data Deps run.
 | Alembic migrations | D5 | verified | 2026-05-24 | `apps/database/alembic/versions/` incl. `20260524_0002` |
 | Seed tag vocabulary | D8 | verified | 2026-05-24 | `data/fixtures/tags/seed_tags.json` |
 | Tagged corpus fixtures | D9 | verified | 2026-05-24 | `data/fixtures/corpus/tagged/` |
-| FastEmbed weights | D6 | verified | 2026-05-19 | **`vecinita`** workspace; volume `embedding-models`; URL `https://vecinita--vecinita-embedding-embedding-api.modal.run` |
-| Qwen2.5-1.5B-Instruct | D7 | staged_procedure | — | **`vecinita`** workspace; deployed `vecinita-llm`; run `stage_llm_weights` to verify volume |
+| FastEmbed weights | D6 | verified | 2026-06-30 | **`vecinita`** workspace; volume `embedding-models`; URL `https://vecinita--vecinita-embedding-embedding-api.modal.run`; smoke 384-dim PASS (QA-S006-002 remediation) |
+| Qwen2.5-1.5B-Instruct | D7 | verified | 2026-06-30 | **`vecinita`** workspace; deployed `vecinita-llm`; `/health` OK + `test_modal_weights_staged.py` PASS (QA-S006-002 remediation) |
 
 **Gate:** Status must be `verified` before tasks listing the asset in Data Deps column start.
 

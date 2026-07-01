@@ -114,13 +114,15 @@ def test_invite_user_posts_to_invite_endpoint() -> None:
         captured["method"] = request.method
         captured["path"] = request.url.path
         captured["body"] = json.loads(request.content)
+        captured["redirect_to"] = request.url.params.get("redirect_to")
         return httpx.Response(200, json=_gotrue_user(email="new@example.org", confirmed=False))
 
     user = _client(handler).invite_user_by_email(
-        "new@example.org", redirect_to="https://app/accept"
+        "new@example.org", redirect_to="https://app/accept-invite"
     )
     assert captured["method"] == "POST"
     assert captured["path"] == "/auth/v1/invite"
+    assert captured["redirect_to"] == "https://app/accept-invite"
     body = captured["body"]
     assert isinstance(body, dict)
     assert body["email"] == "new@example.org"
@@ -174,6 +176,23 @@ def test_delete_user_calls_delete() -> None:
     _client(handler).delete_user(UUID(_UID))
     assert captured["method"] == "DELETE"
     assert captured["path"] == f"/auth/v1/admin/users/{_UID}"
+
+
+def test_send_password_recovery_passes_redirect_to() -> None:
+    """send_password_recovery forwards redirect_to as a query param (TC-105)."""
+    captured: dict[str, object] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["path"] = request.url.path
+        captured["redirect_to"] = request.url.params.get("redirect_to")
+        return httpx.Response(200, json={})
+
+    _client(handler).send_password_recovery(
+        "op@example.org",
+        redirect_to="https://app/reset-password",
+    )
+    assert captured["path"] == "/auth/v1/recover"
+    assert captured["redirect_to"] == "https://app/reset-password"
 
 
 def test_generate_link_recovery() -> None:

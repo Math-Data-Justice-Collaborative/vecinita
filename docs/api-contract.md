@@ -1,7 +1,7 @@
 # API Contract
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-29 (S005/EV-006 F35 — admin user management `/admin/users*`)  
+> **Last updated**: 2026-06-30 (S006/EV-007 F35 ext — redirect_to, revoke-invite, #109)  
 > **OpenAPI**: Source of truth in repo — `openapi/chat-rag.yaml`, `openapi/data-management.yaml`, `openapi/internal-write.yaml`
 
 Contracts are **greenfield** (ADR-003). Public routes must not accept identity fields (`email`, `user_id`, `name`, etc.).
@@ -49,7 +49,8 @@ host backend is the **Data Management Modal ASGI**; audit rows are written via s
 
 - **Purpose**: Invite a new operator by email (UJ-031); wraps `inviteUserByEmail`; sends the repo-versioned invite template via Resend.
 - **Request**: `{"email": "new@example.org", "role": "admin|viewer"}`.
-- **Response** `201`: `{"id": "<uuid>", "email": "...", "role": "viewer", "status": "invited"}`. Errors: `409` if the email already exists.
+- **Redirect**: Backend passes `redirect_to={VECINITA_ADMIN_FRONTEND_URL}/accept-invite` to GoTrue (EV-007 F35.12). Env required at runtime on DM Modal backend.
+- **Response** `201`: `{"id": "<uuid>", "email": "...", "role": "viewer", "status": "invited"}`. Errors: `409` if the email already exists; `503` if `VECINITA_ADMIN_FRONTEND_URL` unset.
 
 ### PATCH `/admin/users/{user_id}/role`
 
@@ -58,7 +59,14 @@ host backend is the **Data Management Modal ASGI**; audit rows are written via s
 
 ### POST `/admin/users/{user_id}/resend-invite`
 
-- **Purpose**: Re-send the invite email to a pending invitee. **Response** `202`.
+- **Purpose**: Re-send the invite email to a pending invitee. Passes `redirect_to={VECINITA_ADMIN_FRONTEND_URL}/accept-invite` (EV-007). **Response** `202`.
+
+### POST `/admin/users/{user_id}/revoke-invite` (EV-007 F35.14)
+
+- **Purpose**: Retract a **pending** invitation for `status=invited` users only (UJ-030). Distinct from `DELETE` (active/disabled account removal).
+- **Mechanism**: Deletes the invited GoTrue user via Admin API; emits audit `user.invite_revoked`.
+- **Response** `202`: `{"acknowledged": true}`.
+- **Errors**: `409 cannot_revoke_active_user` if target is not `invited`; `404` if user missing.
 
 ### POST `/admin/users/{user_id}/disable` · POST `/admin/users/{user_id}/enable`
 
@@ -70,7 +78,7 @@ host backend is the **Data Management Modal ASGI**; audit rows are written via s
 
 ### POST `/admin/users/{user_id}/reset-password`
 
-- **Purpose**: Admin-triggered password reset — sends a recovery email (UJ-030 step 7). **Response** `202`.
+- **Purpose**: Admin-triggered password reset — sends a recovery email (UJ-030). Passes `redirect_to={VECINITA_ADMIN_FRONTEND_URL}/reset-password` (EV-007). **Response** `202`.
 
 ### POST `/admin/users/{user_id}/signout` (EV-006 F35 addition, ADR-031 TP-S005-19)
 
@@ -94,7 +102,7 @@ host backend is the **Data Management Modal ASGI**; audit rows are written via s
 
 > **Audit surfacing (TP-S005-21)**: every `/admin/users*` mutation emits an audit event via
 > `POST /internal/v1/audit/event` with `entity_type = "user"` and `entity_id = <target uuid>`
-> (`user.invited|role_changed|disabled|enabled|deleted|reset_password|signed_out`; `email.test_sent`
+> (`user.invited|invite_revoked|role_changed|disabled|enabled|deleted|reset_password|signed_out`; `email.test_sent`
 > uses `entity_type = "email"`). These are read back through the existing
 > `GET /internal/v1/audit` (filterable by `entity_type`/`entity_id`) and shown on the admin Audit page.
 

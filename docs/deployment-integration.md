@@ -1,7 +1,7 @@
 # Deployment Integration Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-13 (EV-004 F31 delta)
+> **Last updated**: 2026-06-30 (EV-007 F35 ext — invite redirect chain)
 
 ## Overview
 
@@ -105,6 +105,27 @@ Modal apps **do not** require redeploy for EV-002 (health aggregator on DO write
 No redeploy required: chat-rag-backend, internal-write-api, Modal apps, Postgres.
 
 **Post-deploy validation (EV-004):** Run H4/H5 connectivity regression on both frontend URLs (AC-F7) — no new API routes, but bundle wiring must include shared workspace packages.
+
+### EV-007 — Invite acceptance redirect chain (F35 ext, #109)
+
+**Browser flow:** GoTrue email link → admin frontend `/accept-invite` or `/reset-password` with hash fragment (`#access_token=…` or `#error=otp_expired`). This is **not** API CORS — it depends on Supabase Auth URL configuration + backend `redirect_to`.
+
+| Variable | App | Purpose |
+|----------|-----|---------|
+| `VECINITA_ADMIN_FRONTEND_URL` | data-management-modal (DM ASGI) | Build `redirect_to` for invite/resend/recovery GoTrue calls |
+| `site_url` | Supabase project (`config.toml` → `config push`) | **Staging-first:** set to staging admin frontend URL (not `localhost:3000`) |
+| `additional_redirect_urls` | Supabase project | Full paths: `{staging}/accept-invite`, `{staging}/reset-password`, prod admin URLs, local dev (`127.0.0.1:5173`, etc.) |
+| `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` | data-management-frontend (build) | Unchanged — SPA auth client |
+
+**Redeploy order (EV-007, critical):**
+
+1. **Supabase `config push`** — update `site_url` + `additional_redirect_urls` + template polish (`supabase.yml` on merge to `main`)
+2. **Operator verification** — Dashboard → Auth → URL Configuration matches repo (runbook step)
+3. **Modal DM backend** — deploy with `VECINITA_ADMIN_FRONTEND_URL` secret
+4. **data-management-frontend** — deploy callback handling on `/accept-invite` and `/reset-password`
+5. **13-deploy-smoke** — T3 live invite: fresh invite link opens staging `/accept-invite`, password set, login succeeds (H6 browser UJ)
+
+**Connectivity gates:** H4/H5 (API) insufficient alone; **H6** required for invite accept browser journey (T3 deferred from S005).
 
 ## Entrypoints & triggers
 

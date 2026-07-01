@@ -79,4 +79,24 @@ for tpl in "${NOTIFICATION_TEMPLATES[@]}"; do
   [[ -f "$ROOT/supabase/$tpl" ]] || fail "template file missing (supabase-relative): ${tpl}"
 done
 
+# --- EV-007 F35: staging-first auth redirect URLs (TC-109, ADR-032 §4) ---
+
+STAGING_ADMIN_ORIGIN="https://vecinita-admin-frontend-ef4ob.ondigitalocean.app"
+
+grep -q "site_url = \"${STAGING_ADMIN_ORIGIN}\"" "$CONFIG" \
+  || fail "[auth] site_url must be staging admin frontend (${STAGING_ADMIN_ORIGIN})"
+
+grep -q "${STAGING_ADMIN_ORIGIN}/accept-invite" "$CONFIG" \
+  || fail "additional_redirect_urls must include staging /accept-invite full path"
+grep -q "${STAGING_ADMIN_ORIGIN}/reset-password" "$CONFIG" \
+  || fail "additional_redirect_urls must include staging /reset-password full path"
+grep -q "http://127.0.0.1:5173/accept-invite" "$CONFIG" \
+  || fail "additional_redirect_urls must include local dev /accept-invite path"
+grep -q "http://127.0.0.1:5173/reset-password" "$CONFIG" \
+  || fail "additional_redirect_urls must include local dev /reset-password path"
+
+if grep -q 'localhost:3000' "$CONFIG"; then
+  fail "config.toml must not reference localhost:3000 in auth URL settings"
+fi
+
 echo "OK: supabase/config.toml passes offline contract checks."

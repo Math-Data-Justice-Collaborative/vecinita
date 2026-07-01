@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-06-29 (S005/EV-006 F35 — admin user management + auth UX; AC-U1–AC-U16)
+> **Last updated**: 2026-06-30 (S006/EV-007 F35 ext — TC-104–TC-110 invite acceptance, #109)
 
 ## Per-feature criteria
 
@@ -94,9 +94,9 @@
 
 - [x] **AC-U1**: An `admin` can list operators and perform invite, change-role, resend-invite, disable/enable, revoke, and trigger-password-reset from the `/users` page; each maps to the Supabase Admin API (UJ-030, TC-088). — verified: `tests/integration/test_user_admin_routes.py`, `tests/e2e/test_uj030_user_management.py`, Vitest `test_users_page.test.tsx`
 - [x] **AC-U2**: A `viewer` receives `403` on every `/admin/users*` write and the `/users` nav item + controls are hidden/disabled in the UI (UJ-030, TC-089). — verified: integration + e2e + `test_users_viewer_blocked.test.tsx`
-- [x] **AC-U3**: Inviting from the page creates an `invited` identity with the assigned role and sends the repo-versioned invite email via Resend; public self-signup remains disabled (UJ-031, TC-090). — verified: `tests/e2e/test_uj031_invite_from_page.py`, `test_uj027_invite_only_registration.py`
+- [ ] **AC-U3**: Inviting from the page creates an `invited` identity with the assigned role, sends the repo-versioned invite email via Resend with **`redirect_to` landing on `/accept-invite`**, and the invitee can **establish a session from the email link**, set a password, and log in with the assigned role; public self-signup remains disabled (UJ-031, TC-090, TC-104, TC-106). — **revised EV-007**: prior API-only verification insufficient; requires T2 callback tests + T3 live smoke.
 - [x] **AC-U4**: "Remember me" is **checked by default**; checked → session in `localStorage` (survives restart), unchecked → `sessionStorage` (cleared on close); preference persisted in `vecinita.auth.remember`; logout clears the active storage (UJ-032, TC-091). — verified: `test_remember_me.test.tsx`
-- [x] **AC-U5**: Self-service "Forgot password?" triggers a Supabase recovery email (Resend) and an in-app reset page completes the change; the response does not disclose whether an email is registered (UJ-033, TC-093). — verified: `test_password_reset.test.tsx`
+- [ ] **AC-U5**: Self-service "Forgot password?" triggers a Supabase recovery email (Resend) with **`redirectTo` to `/reset-password`**; the callback page **establishes a session from the link** before `updateUser` completes the change; expired links show bilingual actionable error; response does not disclose whether an email is registered (UJ-033, TC-093, TC-107). — **revised EV-007**: callback handling added to prior Vitest-only scope.
 - [x] **AC-U6**: User-management actions (invite/role-change/disable/delete/reset) are recorded in `audit_log` with `actor_id` (UUID) + `actor_role`; operator email/role/status are never written to the corpus DB (UJ-030, TC-092). — verified: `tests/e2e/test_uj030_user_management.py`, `test_uj031_invite_from_page.py`
 - [x] **AC-U7**: Six auth email templates (invite, recovery, confirmation, magic_link, email_change, security notifications) are versioned under `supabase/templates/` as **stacked-bilingual** HTML and referenced by `content_path`; the offline Supabase config contract passes (TC-094). — verified: `tests/smoke/test_supabase_ci_contract.py`
 - [x] **AC-U8**: `[auth.email.smtp]` is configured for Resend in `config.toml` with `pass = env(SUPABASE_SMTP_PASS)`; `supabase config push` is the single source of truth; template paths follow the #5124 root/`supabase/` convention; the Supabase CLI is pinned in `supabase.yml` (TC-094, TC-095). — verified: `tests/smoke/test_supabase_ci_contract.py`, `scripts/check_supabase_config.sh`
@@ -108,6 +108,11 @@
 - [ ] **AC-U14**: `GET /admin/users` accepts `q` (≥3 chars → GoTrue `filter`, else `400 invalid_search`) with `page`/`page_size`; the `/users` page renders search + shared `PaginationControls` (UJ-030, TC-100). — pending build
 - [ ] **AC-U15**: User-management events appear on the admin Audit page with `entity_type="user"`, friendly EN/ES labels, an entity-type "Users" filter, and a per-user "View activity" link; payloads contain no email/name (UJ-038, TC-101). — pending build
 - [ ] **AC-U16**: Idle timeout, remember-me, and "log out everywhere" send nothing extra to the server beyond Supabase auth calls; identity residency (ADR-026) preserved (TC-102). — pending build
+- [ ] **AC-U17**: Backend passes `redirect_to={VECINITA_ADMIN_FRONTEND_URL}/accept-invite` on invite and resend-invite, and `…/reset-password` on admin-triggered recovery; GoTrue outbound requests include the query param (UJ-031/033, TC-104, TC-105). — pending EV-007
+- [ ] **AC-U18**: Supabase `site_url` is set to the **staging admin frontend URL** (staging-first); `additional_redirect_urls` includes staging + prod admin origins with `/accept-invite` and `/reset-password` paths plus local dev origins; verified after `config push` + Dashboard check (TC-109, deployment-integration §EV-007). — pending EV-007
+- [ ] **AC-U19**: Admin can **retract** a pending invitation via `POST /admin/users/{id}/revoke-invite` (invited-only); UI label distinct from "Delete user"; audit event `user.invite_revoked` (UJ-030, TC-108). — pending EV-007
+- [ ] **AC-U20**: Expired or invalid invite/recovery links show a **bilingual in-app error** on `/accept-invite` and `/reset-password` with guidance to contact an admin or request resend — not a redirect to wrong host or blank page (UJ-031/033, TC-106, TC-107). — pending EV-007
+- [ ] **AC-U21**: Invite and recovery email templates include polished Vecinita branding, clear CTA copy, and expiry notice aligned with `otp_expiry` (3600s); `{{ .ConfirmationURL }}` resolves correctly after redirect wiring (TC-110, TC-094). — pending EV-007
 
 ## Quantitative benchmarks
 

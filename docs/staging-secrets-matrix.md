@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita staging  
 > **Source**: `docs/deployment-integration.md` §Secrets, ADR-007, ADR-010  
-> **Last updated**: 2026-06-29 (S005/EV-006 F35 — SUPABASE_SECRET_KEY on backend, Resend SMTP + REST test-send secrets, idle-timeout env)
+> **Last updated**: 2026-06-30 (S006/EV-007 F35 ext — VECINITA_ADMIN_FRONTEND_URL on Modal DM, Supabase redirect config)
 
 Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — never commit to git.
 
@@ -245,6 +245,36 @@ Verify end-to-end with the in-app **Send test email** (`POST /admin/email/test`)
   (admin-only) — Supabase Dashboard no longer required for routine user management.
 - **Emails:** delivered via **Resend**; templates are versioned in `supabase/templates/` and synced
   by `supabase config push` (never hand-edited in the Dashboard, which `config push` would overwrite).
+
+## EV-007 (F35 ext) — Invite acceptance redirect chain (#109)
+
+Builds on EV-006. Closes the production onboarding gap: email links must land on the deployed
+admin frontend `/accept-invite`, not `localhost:3000`.
+
+### Modal — Data management ASGI (add)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VECINITA_ADMIN_FRONTEND_URL` | Yes (F35 EV-007) | Deployed admin SPA origin **without trailing slash** — builds GoTrue `redirect_to` for invite/resend (`…/accept-invite`) and admin recovery (`…/reset-password`). **Server-side only** — not a `VITE_*` build var. Returns `503` on invite/resend/recovery routes when unset. (TP-S006-02, ADR-032 §2) |
+
+Also used by internal-write-api health aggregator (EV-002) — same staging URL value.
+
+### Supabase project — redirect configuration (not env vars on Vecinita backends)
+
+| Setting | Where | Required | Description |
+|---------|-------|----------|-------------|
+| `[auth] site_url` | `supabase/config.toml` → `config push` | Yes (EV-007) | **Staging-first:** staging admin frontend URL (not `localhost:3000`) |
+| `[auth] additional_redirect_urls` | `supabase/config.toml` → `config push` | Yes (EV-007) | Full paths: `{staging}/accept-invite`, `{staging}/reset-password`, prod admin URLs, local dev (`127.0.0.1:5173`) |
+
+Verify Dashboard → Authentication → URL Configuration after every `config push` (TC-109).
+
+### Operator prerequisites (EV-007)
+
+1. Complete EV-006 prerequisites (Resend domain, `SUPABASE_SECRET_KEY` on Modal DM, SMTP sync).
+2. Set `VECINITA_ADMIN_FRONTEND_URL` on Modal DM secret
+   (`bash scripts/deploy/sync_modal_secret.sh --merge --apply`).
+3. Merge to `main` triggers `supabase config push` (or run manually with `SUPABASE_ACCESS_TOKEN`).
+4. **Redeploy order:** config push → Modal secret → `modal deploy` DM ASGI → redeploy admin FE → live invite smoke (13-deploy-smoke T3).
 
 ## EV-004 (F31) — no new secrets
 

@@ -3,6 +3,8 @@
 set -eo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+bash "${ROOT}/scripts/ensure_node24.sh"
 DIGEST="$(printf '%s' "$ROOT" | sha256sum | awk '{print substr($1,1,16)}')"
 LOCK="/tmp/vecinita-make-hooks-${DIGEST}.lock"
 

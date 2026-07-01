@@ -53,6 +53,7 @@ OPTIONAL_KEYS=(
   SUPABASE_SECRET_KEY   # EV-006 F35 — Admin API for /admin/users* (ADR-030 / TP-S005-01)
   RESEND_API_KEY        # EV-006 F35 — Resend REST test-send (ADR-031 / TP-S005-22)
   RESEND_SENDER_EMAIL   # verified sender (= config.toml admin_email)
+  VECINITA_ADMIN_FRONTEND_URL  # EV-007 F35 — GoTrue redirect_to builder (ADR-032 §2)
   VECINITA_LLM_TAG_MAX_TOKENS
   VECINITA_TAG_SEED_PATH
 )

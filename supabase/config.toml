@@ -30,10 +30,17 @@ file_size_limit = "50MiB"
 
 [auth]
 enabled = true
-site_url = "http://127.0.0.1:5173"
+site_url = "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app"
 additional_redirect_urls = [
   "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app",
+  "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app/accept-invite",
+  "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app/reset-password",
   "http://127.0.0.1:5173",
+  "http://127.0.0.1:5173/accept-invite",
+  "http://127.0.0.1:5173/reset-password",
+  "http://localhost:5173",
+  "http://localhost:5173/accept-invite",
+  "http://localhost:5173/reset-password",
 ]
 jwt_expiry = 3600
 enable_refresh_token_rotation = true

@@ -6,7 +6,11 @@ Validates repo-managed Supabase CI artifacts without requiring Docker or cloud c
 from __future__ import annotations
 
 import subprocess
+import tomllib
 from pathlib import Path
+from typing import cast
+
+import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW_PATH = REPO_ROOT / ".github" / "workflows" / "supabase.yml"
@@ -15,6 +19,9 @@ CI_SYNC = REPO_ROOT / "scripts" / "supabase" / "ci_sync.sh"
 CONFIG_TOML = REPO_ROOT / "supabase" / "config.toml"
 SUPABASE_DIR = REPO_ROOT / "supabase"
 CANONICAL_PROJECT_REF = "cfuvghdsuwactfeamtym"
+STAGING_ADMIN_ORIGIN = "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app"
+LOCAL_DEV_ORIGINS = ("http://127.0.0.1:5173", "http://localhost:5173")
+AUTH_CALLBACK_PATHS = ("accept-invite", "reset-password")
 
 # EV-006 F35 — email template blocks (TP-S005-08, #5124).
 # auth.email.template.* content_path resolves from the **project root**.
@@ -164,3 +171,57 @@ def test_check_supabase_config_script_passes_offline() -> None:
         text=True,
     )
     assert result.returncode == 0, result.stderr or result.stdout
+
+
+def test_supabase_auth_redirect_urls_staging_first(tc109_config: dict[str, object]) -> None:
+    """TC-109: site_url is staging admin origin; allowlist includes callback full paths."""
+    auth = cast("dict[str, object]", tc109_config["auth"])
+    assert auth["site_url"] == STAGING_ADMIN_ORIGIN
+
+    raw_redirects = auth.get("additional_redirect_urls")
+    assert isinstance(raw_redirects, list)
+    redirects = {str(item) for item in cast("list[object]", raw_redirects)}
+
+    required: set[str] = set()
+    for origin in (STAGING_ADMIN_ORIGIN, *LOCAL_DEV_ORIGINS):
+        required.add(origin)
+        for path in AUTH_CALLBACK_PATHS:
+            required.add(f"{origin}/{path}")
+
+    missing = required - redirects
+    assert not missing, f"missing additional_redirect_urls entries: {sorted(missing)}"
+
+
+def test_supabase_auth_redirect_urls_no_localhost_3000(tc109_config: dict[str, object]) -> None:
+    """TC-109: localhost:3000 must not appear in auth URL config."""
+    auth = cast("dict[str, object]", tc109_config["auth"])
+    site_url = str(auth["site_url"])
+    assert "localhost:3000" not in site_url
+
+    raw_redirects = auth.get("additional_redirect_urls")
+    assert isinstance(raw_redirects, list)
+    for entry in cast("list[object]", raw_redirects):
+        assert "localhost:3000" not in str(entry)
+
+
+def _load_config_toml() -> dict[str, object]:
+    with CONFIG_TOML.open("rb") as handle:
+        return tomllib.load(handle)
+
+
+@pytest.fixture(name="tc109_config")
+def tc109_config_fixture() -> dict[str, object]:
+    """Parsed config.toml for TC-109 assertions."""
+    return _load_config_toml()
+
+
+def test_invite_email_templates_include_branding_and_expiry_notice() -> None:
+    """TC-110: invite/recovery templates include branding, bilingual sections, and 1h expiry."""
+    invite = (REPO_ROOT / "supabase/templates/invite.html").read_text(encoding="utf-8")
+    recovery = (REPO_ROOT / "supabase/templates/recovery.html").read_text(encoding="utf-8")
+    for html, name in ((invite, "invite.html"), (recovery, "recovery.html")):
+        assert "Vecinita Admin" in html, f"{name} missing branding"
+        assert "<!-- lang:en -->" in html, f"{name} missing EN section"
+        assert "<!-- lang:es -->" in html, f"{name} missing ES section"
+        assert "{{ .ConfirmationURL }}" in html, f"{name} missing confirmation URL"
+        assert "1 hour" in html or "1 hora" in html, f"{name} missing expiry notice"

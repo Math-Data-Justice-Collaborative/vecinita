@@ -64,6 +64,22 @@ def test_invite_creates_invited_viewer_with_audit(user_mgmt_stack: UserMgmtStack
     assert "new@example.org" not in json.dumps(payload)
 
 
+def test_invite_passes_redirect_to_accept_invite(user_mgmt_stack: UserMgmtStack) -> None:
+    """TC-104: invite outbound GoTrue call includes redirect_to=/accept-invite."""
+    dm = user_mgmt_stack["dm"]
+    headers = {"Authorization": admin_bearer(user_mgmt_stack)}
+
+    response = dm.post(
+        "/admin/users/invite",
+        json={"email": "redirect@example.org", "role": "viewer"},
+        headers=headers,
+    )
+    assert response.status_code == HTTPStatus.CREATED
+    assert user_mgmt_stack["outbound"][-1]["redirect_to"] == (
+        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app/accept-invite"
+    )
+
+
 def test_public_signup_still_disabled_regression_tc080() -> None:
     """TC-090 regression: invite-only registration remains enforced (TC-080 / UJ-027)."""
     with _CONFIG_PATH.open("rb") as handle:

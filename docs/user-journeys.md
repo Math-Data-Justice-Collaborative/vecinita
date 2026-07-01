@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-06-29 (S005/EV-006: UJ-030–UJ-033 admin user management + auth UX, F35, #75)
+> **Last updated**: 2026-06-30 (S006/EV-007: UJ-031/033 invite-acceptance callback + retract; F35 ext, #109)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI steps** are waived at T0 — see `tests/e2e/README.md` (Vitest component smoke only).
@@ -41,9 +41,9 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-028 | Unauthenticated admin request rejected | Anonymous / expired-session client | DM API / internal-write API without valid JWT | F34 | local |
 | UJ-029 | Viewer is blocked from write actions | Viewer operator | DM UI / internal-write API write route | F34 | local |
 | UJ-030 | Admin manages operators from the User Management page | Admin operator | DM UI `/users` → `/admin/users*` (Supabase Admin API) | F35 | local |
-| UJ-031 | Admin invites an operator from the User Management page; invitee accepts | Admin operator + invitee | DM UI `/users` invite → Resend email → set password → login | F35 | local |
+| UJ-031 | Admin invites an operator from the User Management page; invitee accepts | Admin operator + invitee | DM UI `/users` invite → Resend email → `/accept-invite` callback → set password → login | F35 | local + live (T3) |
 | UJ-032 | Stay signed in across browser restart with "Remember me" | Operator | DM login → `vecinita.auth.remember` → `localStorage`/`sessionStorage` | F35 | local |
-| UJ-033 | Operator resets a forgotten password | Operator | DM login "Forgot password?" → recovery email → in-app reset | F35 | local |
+| UJ-033 | Operator resets a forgotten password | Operator | DM login "Forgot password?" → recovery email → `/reset-password` callback → in-app reset | F35 | local + live (T3) |
 
 ## Journey Details
 
@@ -650,15 +650,16 @@ Product-facing journeys describe what a **caller** does — not internal module 
 **Steps**:
 
 1. Open the DM UI; navigate to **User Management** (`/users`, admin-only sidebar item).
-2. The page lists operators from `GET /admin/users` (email, role, status `active`/`disabled`/`invited`, last sign-in).
+2. The page lists operators from `GET /admin/users` (email, role, status `active`/`disabled`/`invited`, last sign-in, **`invited_at`** for pending rows with **"expires ~1h"** hint).
 3. **Change a role** (`admin`↔`viewer`) → `PATCH /admin/users/{id}/role`.
-4. **Resend an invite** to a pending invitee → `POST /admin/users/{id}/resend-invite`.
-5. **Disable** (ban) an operator → `POST /admin/users/{id}/disable`; **enable** to restore.
-6. **Revoke** (delete) an operator → `DELETE /admin/users/{id}` (confirmation dialog).
-7. **Reset a password** for an operator → `POST /admin/users/{id}/reset-password` (sends recovery email).
-8. Each mutating action is recorded in `audit_log` with `actor_id` (UUID) + `actor_role`.
+4. **Resend an invite** to a pending invitee → `POST /admin/users/{id}/resend-invite` (passes `redirect_to` to `/accept-invite`).
+5. **Retract invitation** for `status=invited` only → `POST /admin/users/{id}/revoke-invite` (distinct label from delete; audit `user.invite_revoked`).
+6. **Disable** (ban) an operator → `POST /admin/users/{id}/disable`; **enable** to restore.
+7. **Delete user** (revoke active/disabled account) → `DELETE /admin/users/{id}` (confirmation dialog).
+8. **Reset a password** for an operator → `POST /admin/users/{id}/reset-password` (sends recovery email with `redirect_to` to `/reset-password`).
+9. Each mutating action is recorded in `audit_log` with `actor_id` (UUID) + `actor_role`.
 
-**Acceptance**: Admin can list/role/resend/disable/enable/revoke/reset; a `viewer` is `403` on all `/admin/users*` writes and the page/controls are hidden in the UI; operator email/role/status are shown **in transit only** and never written to the corpus DB; user-mgmt actions appear in the audit log with no PII.
+**Acceptance**: Admin can list/role/resend/retract-invite/disable/enable/delete/reset; retract is only offered for pending invites; a `viewer` is `403` on all `/admin/users*` writes and the page/controls are hidden in the UI; operator email/role/status are shown **in transit only** and never written to the corpus DB; user-mgmt actions appear in the audit log with no PII.
 
 **Automated tests**: `tests/e2e/test_uj030_user_management.py` (admin list + each mutation maps to Supabase Admin API; viewer `403`; audit attribution non-PII — verified against a Supabase test/branch project or mocked Admin API, no real mailboxes in CI); UI in `apps/data-management-frontend/src/test/test_user_management_page.test.tsx`.
 
@@ -672,21 +673,34 @@ Product-facing journeys describe what a **caller** does — not internal module 
 
 **Actor**: Admin operator (inviter) + invited operator (invitee)
 
-**Goal**: Onboard a new operator from the in-app page, with the invite email delivered via Resend. (Extends UJ-027, which covered the underlying invite-only model.)
+**Goal**: Onboard a new operator from the in-app page, with the invite email delivered via Resend and a working accept flow in staging/production. (Extends UJ-027, which covered the underlying invite-only model.)
 
 **Steps**:
 
 1. On `/users`, the admin clicks **Invite**, enters an **email + role**, and submits → `POST /admin/users/invite`.
+   Backend passes `redirect_to={VECINITA_ADMIN_FRONTEND_URL}/accept-invite` to GoTrue.
 2. Supabase issues the invite; the **invite email** (repo-versioned, bilingual template) is delivered via **Resend SMTP**.
-3. The invitee opens the link, **sets a password**, and logs in (UJ-026) with the assigned role.
-4. The new operator appears in the list as `invited` then `active` after first sign-in.
-5. Public self-registration without an invite remains rejected (F34).
+   The `ConfirmationURL` in the email must land on the **deployed admin frontend** `/accept-invite` route (not `localhost:3000`).
+3. The invitee opens the link. The SPA:
+   - Parses hash/query for Supabase auth params (`access_token`, `refresh_token`, `code`, or `#error=…`).
+   - Waits for `detectSessionInUrl` / code exchange to establish a session **before** showing the password form.
+   - On `#error=otp_expired` or `access_denied`: shows a **bilingual** error with guidance to contact an admin or request a resend (not a blank page).
+4. With a valid session, the invitee **sets a password** (`updateUser({ password })`), email is confirmed per GoTrue invite flow (`enable_confirmations = true`), and they log in (UJ-026) with the assigned role.
+5. The new operator appears in the list as `invited` then `active` after first sign-in. Pending rows show **`invited_at`** and an **"expires ~1h"** hint (from `created_at` + global `otp_expiry`).
+6. Public self-registration without an invite remains rejected (F34).
+7. Admin may **Retract invitation** on pending rows (`POST /admin/users/{id}/revoke-invite`) or **Resend invite** (refreshes OTP with correct `redirect_to`).
 
-**Acceptance**: Only invited emails can create accounts; the invite uses the repo-versioned bilingual template via Resend; the invitee can log in after setting a password; role is assigned at invite time; the action is audited (`actor_id`+`actor_role`).
+**Acceptance**: Only invited emails can create accounts; invite email link opens the configured admin frontend `/accept-invite`; invitee establishes a session from the link and can set a password and log in; role assigned at invite time; expired links show actionable in-app error; retract/resend available for pending invites; action audited (`actor_id`+`actor_role`).
 
-**Automated tests**: `tests/e2e/test_uj031_invite_from_page.py` (invite endpoint → Supabase Admin API; role assignment; audited). Email delivery (Resend SMTP + template rendering) verified by the Supabase CI config contract (TC-094) and at 13-deploy-smoke — not by sending real mail in unit CI.
+**Automated tests**:
 
-**E2E tier**: local (integration against Supabase test/branch or mocked Admin API). Live invite + Resend delivery verified at 13-deploy-smoke.
+- `tests/e2e/test_uj031_invite_from_page.py` — invite endpoint → Supabase Admin API; role assignment; audited; **`redirect_to` query param asserted** (TC-104).
+- `apps/data-management-frontend/src/test/test_accept_invite_callback.test.tsx` (Vitest) — hash/code session bootstrap, `#error=otp_expired` UX, password form gated on session (TC-106).
+- Email delivery + live redirect verified at **13-deploy-smoke** (T3, TC-104 live).
+
+**E2E tier**: **local** (T2 — mocked Supabase callback in Vitest + backend integration). **live** (T3 — full invite link in staging at 13-deploy-smoke; deferred from S005).
+
+**Browser integration**: Cross-origin redirect chain GoTrue → admin frontend hash fragment. Requires correct Supabase `site_url` + redirect allowlist and backend `redirect_to` (see `docs/deployment-integration.md` §EV-007).
 
 ---
 
@@ -716,21 +730,29 @@ Product-facing journeys describe what a **caller** does — not internal module 
 
 **Actor**: Operator (locked out)
 
-**Goal**: Recover access without an admin, via email.
+**Goal**: Recover access without an admin, via email, with a working recovery callback in staging/production.
 
 **Steps**:
 
 1. On the login screen, click **"Forgot password?"** and enter the account email.
-2. The SPA calls Supabase `resetPasswordForEmail`; a **recovery email** (repo-versioned, bilingual template, Resend SMTP) is sent.
-3. The operator opens the link and lands on an **in-app reset page**; they set a new password (`updateUser`).
-4. The operator logs in with the new password (UJ-026).
-5. Non-existent emails do not reveal account existence (generic confirmation message).
+2. The SPA calls Supabase `resetPasswordForEmail` with `redirectTo={origin}/reset-password`.
+3. A **recovery email** (repo-versioned, bilingual template, Resend SMTP) is sent.
+4. The operator opens the link and lands on **`/reset-password`**. The SPA:
+   - Parses hash/query for auth params or `#error=…` (same callback pattern as UJ-031 `/accept-invite`).
+   - Waits for session before showing the password form.
+   - On expired/invalid link: bilingual error with guidance (contact admin or retry forgot-password).
+5. With a valid session, they set a new password (`updateUser`) and log in (UJ-026).
+6. Non-existent emails do not reveal account existence (generic confirmation message).
 
-**Acceptance**: "Forgot password?" triggers a recovery email via Resend using the versioned template; the in-app reset page completes the change; the operator can log in with the new password; the response does not disclose whether an email is registered.
+**Acceptance**: "Forgot password?" triggers a recovery email via Resend using the versioned template; recovery link opens `/reset-password` on the deployed admin frontend; session established from link before password change; operator can log in with the new password; expired links show actionable error; response does not disclose whether an email is registered.
 
-**Automated tests**: `apps/data-management-frontend/src/test/test_password_reset.test.tsx` (Vitest): forgot-password form calls `resetPasswordForEmail`; reset page calls `updateUser`; generic confirmation regardless of account existence. Email/template delivery verified via Supabase CI config contract (TC-094) + 13-deploy-smoke.
+**Automated tests**:
 
-**E2E tier**: local (Vitest component smoke; recovery email delivery verified live at 13-deploy-smoke).
+- `apps/data-management-frontend/src/test/test_password_reset.test.tsx` (Vitest): forgot-password form calls `resetPasswordForEmail` with correct `redirectTo`; reset page callback + `updateUser` (TC-107).
+- Admin-triggered recovery: backend passes `redirect_to={VECINITA_ADMIN_FRONTEND_URL}/reset-password` on `POST /admin/users/{id}/reset-password` (TC-105).
+- Live recovery link verified at 13-deploy-smoke (T3).
+
+**E2E tier**: local (T2 Vitest callback mocks). Live delivery at 13-deploy-smoke (T3).
 
 ---
 
