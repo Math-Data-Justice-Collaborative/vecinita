@@ -28,8 +28,10 @@ grep -q "enable_anonymous_sign_ins = false" "$CONFIG" \
 
 grep -q '\[auth.email\]' "$CONFIG" || fail "missing [auth.email] section"
 
-grep -A20 '\[auth.email\]' "$CONFIG" | grep -q "enable_signup = false" \
-  || fail "[auth.email] enable_signup must be false"
+# [auth.email].enable_signup controls the email *provider*, not signup permission.
+# false disables all email logins (email_provider_disabled); invite-only uses [auth].enable_signup.
+grep -A20 '\[auth.email\]' "$CONFIG" | grep -q "enable_signup = true" \
+  || fail "[auth.email] enable_signup must be true (provider enabled; signup gated by [auth])"
 
 # --- EV-006 F35: Resend SMTP + versioned email templates (TC-094, TC-095) ---
 

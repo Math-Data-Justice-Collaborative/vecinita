@@ -13,7 +13,9 @@ PII lives in Supabase; the Vecinita corpus DB stays PII-free (ADR-026).
 
 ## Registration model
 
-- **Public sign-up disabled** (`enable_signup = false` in `config.toml`).
+- **Public sign-up disabled** (`[auth].enable_signup = false` in `config.toml`).
+- **Email provider enabled** (`[auth.email].enable_signup = true`) — required for invited
+  operators to sign in; setting it `false` disables all email logins (`email_provider_disabled`).
 - Operators are onboarded via **`inviteUserByEmail`** (admin API) or the first-admin seed script.
 - Invitee accepts the email link and sets a password (UJ-027).
 

@@ -107,7 +107,8 @@ corpus DB stays PII-free.
 
 | Block / key | Value | Notes |
 |-------------|-------|-------|
-| `[auth] site_url` | Staging admin frontend URL (EV-007 staging-first) | GoTrue default redirect base; **not** `localhost:3000` in production projects |
+| `[auth] enable_signup` | `false` | Blocks public self-registration (invite-only) |
+| `[auth.email] enable_signup` | `true` | Keeps the email **provider** enabled for operator login; must not be `false` or GoTrue returns `email_provider_disabled` even for invited users |
 | `[auth] additional_redirect_urls` | Staging + prod admin origins with `/accept-invite`, `/reset-password`; local dev origins | Full path URLs required; verify Dashboard after `config push` |
 | `[auth.email.smtp] enabled` | `true` (prod) | Custom SMTP via Resend |
 | `[auth.email.smtp] host` | `smtp.resend.com` | Resend SMTP host |

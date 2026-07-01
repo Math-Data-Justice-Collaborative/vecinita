@@ -73,7 +73,11 @@ def test_supabase_config_toml_invite_only_and_canonical_project() -> None:
     """config.toml disables public signup and pins the canonical project ref."""
     text = CONFIG_TOML.read_text(encoding="utf-8")
     assert f'project_id = "{CANONICAL_PROJECT_REF}"' in text
-    assert "enable_signup = false" in text
+    # Global signup off (invite-only); email provider must stay on for operator login.
+    assert "[auth]" in text
+    auth_section, _, rest = text.partition("[auth.email]")
+    assert "enable_signup = false" in auth_section
+    assert "enable_signup = true" in rest
 
 
 def test_sync_production_job_gated_on_main_and_secrets() -> None:
@@ -202,6 +206,15 @@ def test_supabase_auth_redirect_urls_no_localhost_3000(tc109_config: dict[str, o
     assert isinstance(raw_redirects, list)
     for entry in cast("list[object]", raw_redirects):
         assert "localhost:3000" not in str(entry)
+
+
+def test_supabase_email_provider_enabled_for_invite_only_login() -> None:
+    """Email provider must stay on when [auth].enable_signup is false (BUG email_provider_disabled)."""
+    config = _load_config_toml()
+    auth = cast("dict[str, object]", config["auth"])
+    email = cast("dict[str, object]", auth["email"])
+    assert auth["enable_signup"] is False
+    assert email["enable_signup"] is True
 
 
 def _load_config_toml() -> dict[str, object]:
