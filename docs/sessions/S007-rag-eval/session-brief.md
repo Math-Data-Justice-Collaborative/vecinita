@@ -4,7 +4,7 @@ type: feature
 status: in_progress
 branch: feat/S007-rag-eval
 started_at: 2026-07-01
-intent: "GitHub #99 — admin RAG evaluation tab, expanded bilingual golden set, eval runner with metrics + history. Tooling: LlamaIndex evaluators + custom harness (R63). Golden prompts/results via 01-requirements interview (R67)."
+intent: "GitHub #99 — admin RAG evaluation tab, expanded bilingual golden set, eval runner with metrics + history. Tooling: LlamaIndex evaluators + custom harness (R63). Golden prompts/results via 01-requirements interview (R67). Scope addition R68 (2026-07-01): interactive eval dashboard — time-series charts, customizable/minimizable plots, pivot explore table, extensible criteria."
 orchestrator: 16-evolve
 evolve_cycle_id: EV-008
 context_briefs:
@@ -49,6 +49,7 @@ Tracked in [GitHub #99](https://github.com/Math-Data-Justice-Collaborative/vecin
 - Postgres persistence + `internal-write-api` endpoints
 - Admin `/evaluation` tab (en/es i18n)
 - Harness tests + admin UI e2e
+- **Interactive eval dashboard (R68 / M64):** time-series metric charts, customizable/minimizable plot panels, pivot-style explore table with user-selected axes, admin-defined evaluation criteria, layout prefs in `localStorage`
 
 **Out of scope (v1)**
 
@@ -70,10 +71,15 @@ See [routing-plan.md](./routing-plan.md).
 | R65 | Park S006; open S007 |
 | R66 | evolve-lite routing (skip 02,03,05,06,11) |
 | R67 | Golden prompts + expected results + judge guidelines via **01-requirements interview** |
+| R68 | Interactive eval dashboard — same session/Phase 14 (M64) |
+| R69 | Charting: shadcn/ui Chart + recharts |
+| R70 | Custom criteria: `eval_criteria` table + admin CRUD |
+| R71 | Pivot explore: client-side v1; layout in `localStorage` |
 
 ## Links
 
 - Context: [rag-eval.md](../../context/rag-eval.md)
 - Eval interview plan: [eval-curation-plan.md](./reports/eval-curation-plan.md)
+- Dashboard scope: [scope-addition-dashboard.md](./reports/scope-addition-dashboard.md)
 - Paused: [S006-invite-acceptance](../S006-invite-acceptance/session-brief.md) (#109)
 - Related issues: #83 (reranking), #84 (groundedness), #94 (corpus)

@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-01 (S007/EV-008 F36 — eval harness TC-111–TC-116, #99)  
+> **Last updated**: 2026-07-01 (S007/EV-008 F36 — eval harness TC-111–TC-122 + dashboard, #99)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -63,6 +63,9 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-038 Audit viewer for user events | Vitest in `data-management-frontend` | TC-101 |
 | UJ-039 Admin runs RAG evaluation | `tests/e2e/test_uj039_eval_run_trigger.py` + Vitest `test_evaluation_page.test.tsx` | TC-114, TC-115 |
 | UJ-040 Admin eval drill-down + history | Vitest in `data-management-frontend` | TC-116 |
+| UJ-041 Admin eval trend dashboard | Vitest in `data-management-frontend` | TC-117, TC-119 |
+| UJ-042 Admin eval pivot explore table | Vitest in `data-management-frontend` | TC-118 |
+| UJ-043 Admin eval criteria manager | Vitest + integration | TC-120, TC-121 |
 
 **E2E tier (v1):** `local` — TestClient, test Postgres (Docker/testcontainers), **mocked Modal** HTTP.
 
@@ -674,12 +677,49 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Input**: Vitest `test_evaluation_page.test.tsx` — mock `GET /internal/v1/eval/runs` + `GET …/{run_id}` with fixture payloads.
 - **Expected**: History list newest-first; drill-down shows question, sources, answer, per-metric pass/fail; en/es UI chrome.
 
+### TC-117: Eval time-series dashboard charts (UJ-041, F36, M64)
+
+- **Objective**: Dashboard renders metric trends across eval runs.
+- **Input**: Vitest `test_evaluation_dashboard.test.tsx` — mock `GET /internal/v1/eval/runs/timeseries` with 3+ completed runs; user selects faithfulness + retrieval metrics and a date filter.
+- **Expected**: Line/area chart displays series per metric; axis labels match selected metrics; threshold reference lines at configured gates; en/es chart chrome.
+
+### TC-118: Eval pivot explore table (UJ-042, F36, M64)
+
+- **Objective**: Explore view supports user-selected pivot axes.
+- **Input**: Vitest `test_evaluation_explore_table.test.tsx` — mock run detail with mixed locales/domains/metrics; user sets row=locale, column=metric, value=mean.
+- **Expected**: Grid cells show correct aggregates; changing row axis to `domain` recomputes grid; pass/fail coloring applied.
+
+### TC-119: Eval dashboard panel layout persistence (UJ-041, F36, M64)
+
+- **Objective**: Collapsible chart panels and layout prefs survive reload.
+- **Input**: Vitest — collapse two of three chart panels; change selected metrics; reload component (simulate `localStorage` round-trip).
+- **Expected**: Collapsed state and metric selections restored from `localStorage` key scoped to eval dashboard; no server persistence.
+
+### TC-120: Eval criteria CRUD API (UJ-043, F36, M64)
+
+- **Objective**: Admin can manage custom eval criteria; viewer denied.
+- **Input**: `tests/integration/test_eval_criteria_routes.py` — admin JWT `POST/GET/PATCH /internal/v1/eval/criteria`; viewer JWT → `403`.
+- **Expected**: Created criterion persisted in `eval_criteria`; PATCH toggles `enabled`; list returns built-in + custom rows.
+
+### TC-121: Eval criteria manager UI (UJ-043, F36, M64)
+
+- **Objective**: Criteria tab renders list and add/edit form.
+- **Input**: Vitest criteria manager — mock criteria list; submit new criterion form.
+- **Expected**: New row appears in list; validation on required fields; en/es labels.
+
+### TC-122: Eval timeseries API (UJ-041, F36, M64)
+
+- **Objective**: Timeseries endpoint returns compact series for charts.
+- **Input**: `tests/integration/test_eval_timeseries.py` — seed 3 `eval_runs` with `metrics_summary`; `GET /internal/v1/eval/runs/timeseries?metrics=faithfulness,retrieval_relevance&since=…`.
+- **Expected**: `200` with ordered points `{run_id, started_at, metrics}`; viewer → `403`; empty history → `200` with `items: []`.
+
 ## Test Data
 
 | Asset | Location | Used by |
 |-------|----------|---------|
 | Seed corpus (EN/ES) | `data/fixtures/corpus/` | TC-001, TC-011 |
 | Eval Q&A pairs | `data/fixtures/eval/` | TC-111–TC-113, F36 harness |
+| Eval run history fixtures | Vitest mocks / integration seeds | TC-117–TC-122, UJ-041–043 |
 | URL ingest fixture | `data/fixtures/ingest/` | TC-010 |
 | Seed tag vocabulary | `data/fixtures/tags/seed_tags.json` | TC-041, TC-044 |
 | Tagged corpus fixtures | `data/fixtures/corpus/tagged/` | TC-040, TC-044 |

@@ -333,9 +333,7 @@ def get_eval_run(engine: Engine, *, run_id: UUID) -> EvalRunDetailResponse | Non
         item = mapping_row(raw_item)
         metrics_raw = item.get("metrics")
         metrics_obj: dict[str, object] = (
-            cast("dict[str, object]", metrics_raw)
-            if isinstance(metrics_raw, dict)
-            else {}
+            cast("dict[str, object]", metrics_raw) if isinstance(metrics_raw, dict) else {}
         )
         items.append(
             EvalRunItemDetail(

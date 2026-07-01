@@ -149,6 +149,32 @@ See session plan: `docs/sessions/S007-rag-eval/reports/eval-curation-plan.md`.
 | R65 | Decision | **Session:** Park S006; open S007-rag-eval on `feat/S007-rag-eval` |
 | R66 | Decision | **Routing:** evolve-lite — 00→01→04→07→08→09→10→12→13 (skip 02,03,05,06,11) |
 | R67 | Decision | **Golden eval content:** prompts, expected results, and judge guidelines created via **01-requirements user interview** — not assumed in 00-context |
+| R68 | Decision | **Dashboard scope (2026-07-01):** Extend F36 in S007/Phase 14 — interactive eval dashboard (time-series, customizable/minimizable plots, pivot explore table, user-selected axes, extensible criteria) |
+| R69 | Decision | **Charting:** shadcn/ui Chart + **recharts** (new `data-management-frontend` dependency; back-add to dependency-inventory) |
+| R70 | Decision | **Custom criteria:** Postgres `eval_criteria` + admin CRUD; runner computes at eval time; results in `eval_run_items.metrics` JSON |
+| R71 | Decision | **Pivot/explore v1:** client-side aggregation from run-detail API; layout prefs in device-local `localStorage` (no PII) |
+
+---
+
+## Dashboard scope addition (R68 — 2026-07-01)
+
+M59–M63 delivered the **baseline** admin `/evaluation` tab: run trigger, aggregate summary,
+history list, and per-question drill-down. The following **M64** capabilities extend F36 in the
+same session (EV-008 / Phase 14):
+
+| Capability | v1 approach |
+|------------|-------------|
+| Time-series metrics | Line/area charts over `eval_runs` (faithfulness, answer relevancy, retrieval %, latency p95) |
+| Customizable plots | User selects metrics, run date range, chart type; multiple chart panels |
+| Minimizable panels | Collapsible chart widgets; visibility persisted in `localStorage` |
+| Pivot explore table | Row/column/value axes (locale, domain, metric, pass/fail); `@tanstack/react-table` |
+| New eval criteria | Admin-defined criteria (name, scorer, threshold); `eval_criteria` table + runner hook |
+| API support | Timeseries/aggregates endpoint; criteria CRUD (`admin`-only) |
+
+Full task breakdown: [scope-addition-dashboard.md](../sessions/S007-rag-eval/reports/scope-addition-dashboard.md).
+
+**Downstream:** 01-requirements delta **complete** (UJ-041+, TC-117+, AC-E17+); 04-tech-plan delta
+**complete** (ADR-034, TP-S007-17–25); **07-build M64** (T64.1–T64.10) in progress.
 
 ---
 
@@ -156,12 +182,12 @@ See session plan: `docs/sessions/S007-rag-eval/reports/eval-curation-plan.md`.
 
 | Item | Status | Notes |
 |------|--------|-------|
-| Tooling ADR | Pending | Record R63 in `docs/adr/` during 04-tech-plan |
+| Tooling ADR | **Complete** | ADR-033 (baseline) + ADR-034 (dashboard) |
 | #84 groundedness | Open | Coordinate metric; don't duplicate verifier |
 | #83 reranking | Open | Primary consumer of golden eval regressions |
 | #94 corpus curation | Open | Richer corpus → more meaningful golden set |
 | Modal LLM | Available | Required for LLM-as-judge metrics |
-| F35/F36 feature-list | Pending | 01-requirements delta |
+| F35/F36 feature-list | **Complete** | F36 extended for M64 dashboard (R68) |
 
 ---
 

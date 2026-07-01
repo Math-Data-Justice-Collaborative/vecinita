@@ -12,8 +12,9 @@ project:
       branch: feat/S007-rag-eval
       evolve_cycle_id: EV-008
       note: 'S007/EV-008 scoped delta for GitHub #99 — admin RAG evaluation tab, golden eval set, LlamaIndex evaluators +
-        custom harness (F36). 00-context completed 2026-07-01; context brief docs/context/rag-eval.md. Decisions R63-R64.
-        User-approved evolve-lite routing.'
+        custom harness (F36). 00-context completed 2026-07-01; partial_rerun 2026-07-01 — dashboard scope delta (R68):
+        interactive eval dashboards (time-series, customizable plots/pivot views, extensible criteria). Context brief docs/context/rag-eval.md.
+        Decisions R63-R64, R68. User-approved evolve-lite routing.'
       s006_baseline:
         status: paused
         paused_at: '2026-07-01'
@@ -52,8 +53,10 @@ project:
       branch: feat/S007-rag-eval
       evolve_cycle_id: EV-008
       note: 'EV-008/S007 F36 delta — 04-tech-plan complete 2026-07-01 (ADR-033, TP-S007-01–16; execution-plan Phase EV-008
-        M59–M63).'
+        M59–M63). Dashboard delta complete 2026-07-01 (R68; ADR-034, TP-S007-17–25; M64 T64.1–T64.10).'
       report: docs/sessions/S007-rag-eval/reports/04-tech-plan.md
+      dashboard_delta_report: docs/sessions/S007-rag-eval/reports/04-tech-plan-dashboard-delta.md
+      dashboard_delta_completed_at: '2026-07-01'
       s006_baseline:
         status: completed
         completed_at: '2026-06-30'
@@ -86,15 +89,28 @@ project:
           T43.1-T47.6, 29 tasks) appended to execution-plan. R53 unblocked via Supabase CLI (MCP-independent). Commit DEFERRED
           (commit-only-when-asked override). Baseline partial_rerun info preserved in legacy stages.04-tech-plan.'
     07-build:
-      status: completed
-      completed_at: '2026-06-29'
-      session_id: S005-user-mgmt-auth
-      branch: feat/S005-user-mgmt-auth
-      feature: F35
-      phase: Phase 12 (M48-M53)
+      status: in_progress
+      started_at: '2026-07-01'
+      session_id: S007-rag-eval
+      branch: feat/S007-rag-eval
+      feature: F36
+      evolve_cycle_id: EV-008
+      phase: Phase EV-008 (M59–M64)
       reconciliation_note: S004/EV-005 F34 build (Phase 11 M43-M47) reconciled to completed during 10-e2e — 08-verify-build,
         09-qa (remediated), and 10-e2e all completed downstream on feat/S004-supabase-auth. Reopened for active S005/EV-006
-        F35 build (see s005); closed out completed 2026-06-30 (M53 22/22).
+        F35 build (see s005); closed out completed 2026-06-30 (M53 22/22). Reopened 2026-07-01 for S007/EV-008 F36 build
+        (M64 interactive eval dashboard; ADR-034).
+      s007:
+        status: in_progress
+        session_id: S007-rag-eval
+        branch: feat/S007-rag-eval
+        feature: F36
+        evolve_cycle_id: EV-008
+        phase: Phase 14 (M64)
+        milestone: M64
+        current_task: T64.1
+        started_at: '2026-07-01'
+        note: 'S007/EV-008 F36 build in progress — M64 interactive eval dashboard (ADR-034; TP-S007-17–25; T64.1–T64.10 pending).'
       s005:
         status: completed
         session_id: S005-user-mgmt-auth
@@ -362,7 +378,9 @@ active_session:
   type: feature
   status: in_progress
   intent: 'GitHub #99 — admin RAG evaluation tab, golden eval set, LlamaIndex evaluators + custom harness (R63). R67 — golden
-    eval prompts, expected results, and judge guidelines from 01-requirements interview (not assumed in 00-context).'
+    eval prompts, expected results, and judge guidelines from 01-requirements interview (not assumed in 00-context). R68 —
+    interactive eval dashboard scope (same session, Phase 14): time-series plots, minimizable/customizable plots, pivot-table-like
+    views, user-selected axes, extensible evaluation criteria, and visual improvements.'
   branch: feat/S007-rag-eval
   orchestrator: 16-evolve
   evolve_cycle_id: EV-008
@@ -395,9 +413,12 @@ active_session:
     status: completed
     started_at: '2026-07-01'
     completed_at: '2026-07-01'
-    note: EV-008/S007 F36 delta — 04-tech-plan complete 2026-07-01 (ADR-033, TP-S007-01–16).
+    note: 'EV-008/S007 F36 delta — 04-tech-plan complete 2026-07-01 (ADR-033, TP-S007-01–16; M59–M63). Dashboard delta complete
+      2026-07-01 (ADR-034, TP-S007-17–25; M64).'
   - stage: 07-build
-    status: pending
+    status: in_progress
+    started_at: '2026-07-01'
+    note: 'M64 interactive eval dashboard build pending (ADR-034; T64.1–T64.10). 04-tech-plan dashboard delta complete 2026-07-01.'
   - stage: 08-verify-build
     status: pending
   - stage: 09-qa
@@ -469,6 +490,20 @@ active_session:
     session_id: S007-rag-eval
     stage: 04-tech-plan
   - path: docs/adr/ADR-033-ev008-rag-evaluation-implementation.md
+    kind: adr
+    session_id: S007-rag-eval
+    stage: 04-tech-plan
+  - path: docs/sessions/S007-rag-eval/reports/scope-addition-dashboard.md
+    kind: scope-report
+    session_id: S007-rag-eval
+    stage: 00-context
+    note: 'R68 (2026-07-01) — F36 interactive eval dashboard scope expansion (#99).'
+  - path: docs/sessions/S007-rag-eval/reports/04-tech-plan-dashboard-delta.md
+    kind: stage-report
+    session_id: S007-rag-eval
+    stage: 04-tech-plan
+    note: 'Dashboard delta complete 2026-07-01 — ADR-034, TP-S007-17–25, M64.'
+  - path: docs/adr/ADR-034-ev008-eval-interactive-dashboard.md
     kind: adr
     session_id: S007-rag-eval
     stage: 04-tech-plan
@@ -1341,10 +1376,12 @@ stages:
     completed_at: '2026-07-01'
     report: docs/sessions/S007-rag-eval/reports/04-tech-plan.md
     partial_rerun_at: '2026-07-01'
-    partial_rerun_note: 'EV-008/S007 delta — F36 admin RAG evaluation (#99); 04-tech-plan complete 2026-07-01 (ADR-033, TP-S007-01–16).'
+    partial_rerun_note: 'EV-008/S007 delta — F36 admin RAG evaluation (#99); 04-tech-plan complete 2026-07-01 (ADR-033, TP-S007-01–16;
+      M59–M63). Dashboard delta complete 2026-07-01 (R68; ADR-034, TP-S007-17–25; M64).'
     session_id: S007-rag-eval
     branch: feat/S007-rag-eval
     evolve_cycle_id: EV-008
+    dashboard_delta_report: docs/sessions/S007-rag-eval/reports/04-tech-plan-dashboard-delta.md
     substeps:
       phase1_toolchain: completed
       phase2_interview: completed
@@ -1399,26 +1436,42 @@ stages:
     - .github/workflows/ci.yml
     verification: passed
   07-build:
-    status: completed
+    status: in_progress
     started_at: '2026-05-19'
     completed_at: '2026-05-27'
-    partial_rerun_at: '2026-06-25'
-    partial_rerun_note: S001 — Modal cold-start reduction (instrumentation, levers, pre-warm, GPU snapshot spike)
+    partial_rerun_at: '2026-07-01'
+    partial_rerun_note: 'S007/EV-008 F36 — 07-build reopened for M64 interactive eval dashboard (ADR-034; T64.1–T64.10 pending).'
+    session_id: S007-rag-eval
+    branch: feat/S007-rag-eval
+    evolve_cycle_id: EV-008
     substeps:
-      current_task: M53 complete; close-out done; next 08-verify-build
-      milestone: M32 completed
-      completed_tasks:
-      - S001-T1
-      - S001-T4
-      - S001-T5
-      - S001-T6
-      - S001-T7
-      - S001-T8
-      - S001-T9
-      - S001-T10
-      - S001-T11
-      note: T8 deploy done; snapshot restore confirmed; cold /generate 21.5s vs ~68s baseline
+      current_task: T64.1
+      milestone: M64
+      s001_baseline:
+        milestone: M32 completed
+        completed_tasks:
+        - S001-T1
+        - S001-T4
+        - S001-T5
+        - S001-T6
+        - S001-T7
+        - S001-T8
+        - S001-T9
+        - S001-T10
+        - S001-T11
+        note: T8 deploy done; snapshot restore confirmed; cold /generate 21.5s vs ~68s baseline
     note: S001 07-build — T1-T9,T10,T11 shipped; T12 CPU-snapshot/collapse web-fn hop next
+    s007:
+      status: in_progress
+      session_id: S007-rag-eval
+      branch: feat/S007-rag-eval
+      feature: F36
+      evolve_cycle_id: EV-008
+      phase: Phase 14 (M64)
+      milestone: M64
+      current_task: T64.1
+      started_at: '2026-07-01'
+      note: 'S007/EV-008 F36 M64 interactive eval dashboard build (ADR-034; TP-S007-17–25; T64.1–T64.10 pending).'
     s003:
       status: completed
       session_id: S003-persistent-chat-history
@@ -2725,7 +2778,15 @@ evolve_cycles:
       status: completed
       started: '2026-07-01'
       completed: '2026-07-01'
-      note: EV-008/S007 F36 delta — 04-tech-plan complete 2026-07-01 (ADR-033, TP-S007-01–16).
+      note: 'EV-008/S007 F36 delta — 04-tech-plan complete 2026-07-01 (ADR-033, TP-S007-01–16; M59–M63). Dashboard delta complete
+        2026-07-01 (ADR-034, TP-S007-17–25; M64).'
+      dashboard_delta_report: docs/sessions/S007-rag-eval/reports/04-tech-plan-dashboard-delta.md
+    07-build:
+      status: in_progress
+      started: '2026-07-01'
+      note: 'M64 interactive eval dashboard build pending (ADR-034; TP-S007-17–25; T64.1–T64.10).'
+      milestone: M64
+      current_task: T64.1
   checkpoints:
     phase_a: passed
     phase_b: passed
@@ -2737,8 +2798,13 @@ evolve_cycles:
   - 'R64 (2026-07-01, EV-008/S007): Feature is F36 (admin RAG eval tab), not F34.'
   - 'TP-S007-01–16 (2026-07-01, EV-008/S007, 04-tech-plan): F36 RAG evaluation tech plan — ADR-033; execution-plan Phase EV-008
     (M59–M63). LlamaIndex evaluators + custom harness; packages/eval; DO BackgroundTasks runner; admin-only access.'
-  note: 'F36 — admin RAG evaluation tab with golden eval set; LlamaIndex evaluators + custom harness. GitHub #99. Evolve-lite
-    routing 00→01→04→07→08→09→10→12→13 (skip 02,03,05,06,11). 04-tech-plan complete 2026-07-01; next 07-build.'
+  - 'R68 (2026-07-01, EV-008/S007): F36 scope expanded — interactive eval dashboard (time-series, customizable plots/pivot views,
+    extensible criteria) in same session/Phase 14.'
+  - 'TP-S007-17–25 (2026-07-01, EV-008/S007, 04-tech-plan DASHBOARD DELTA): F36 interactive eval dashboard — ADR-034; execution-plan
+    Phase 14 M64 (T64.1–T64.10). shadcn Chart + recharts; timeseries API; eval_criteria CRUD; pivot explore; layout localStorage.'
+  note: 'F36 — admin RAG evaluation tab with golden eval set; LlamaIndex evaluators + custom harness. GitHub #99. R68 dashboard
+    scope expansion (M64) added 2026-07-01. Evolve-lite routing 00→01→04→07→08→09→10→12→13 (skip 02,03,05,06,11). 04-tech-plan
+    complete 2026-07-01 (base M59–M63 + dashboard delta M64); 07-build in_progress (M64 T64.1–T64.10 pending).'
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -3661,6 +3727,18 @@ applications:
   platform: digitalocean
   note: sixth deployable per ADR-010; sole Modal write path to Postgres
 issue_log:
+- id: ISS-004
+  category: scope_expansion
+  summary: 'EV-008/S007 F36 scope expanded (R68) — interactive eval dashboards for GitHub #99: time-series plots, customizable/minimizable
+    plots, pivot-table-like views, user-selected axes, extensible evaluation criteria, visual improvements (Phase 14 / M64).'
+  status: open
+  linked_issues:
+  - 99
+  evolve_cycle_id: EV-008
+  session_id: S007-rag-eval
+  blocking_for:
+  - 07-build
+  opened_at: '2026-07-01'
 - id: ISS-001
   category: contradiction
   summary: .cursor/rules describe RFantibody/Modal job; project is Vecinita RAG 5-app
@@ -3952,6 +4030,14 @@ decisions_log:
     admin UI; execution-plan Phase EV-008 M59–M63. Artifacts: docs/sessions/S007-rag-eval/reports/04-tech-plan.md, docs/adr/ADR-033-ev008-rag-evaluation-implementation.md.
     Commit DEFERRED (commit-only-when-asked override). active_session + EV-008 current_stage advanced to 07-build; checkpoints.phase_b
     passed.'
+- 'R68 (2026-07-01, EV-008/S007): F36 scope expanded — interactive eval dashboard (time-series, customizable plots/pivot views,
+  extensible criteria) in same session/Phase 14.'
+- date: '2026-07-01'
+  note: 'S007/EV-008 04-tech-plan DASHBOARD DELTA COMPLETE (R68 / M64). ADR-034 authored (TP-S007-17–25): tabbed Dashboard/Explore/Criteria;
+    shadcn Chart + recharts; GET /internal/v1/eval/runs/timeseries; eval_criteria migration + CRUD; client pivot; layout
+    localStorage. execution-plan Phase 14 M64 (T64.1–T64.10). Artifacts: docs/sessions/S007-rag-eval/reports/04-tech-plan-dashboard-delta.md,
+    docs/adr/ADR-034-ev008-eval-interactive-dashboard.md. Commit DEFERRED (commit-only-when-asked override). active_session
+    + EV-008 current_stage remains 07-build (M64 build next).'
 artifacts:
 - docs/context-brief.md
 - docs/audits.md#product-plan-audit-report
@@ -4123,6 +4209,20 @@ artifacts:
   session_id: S007-rag-eval
   stage: 04-tech-plan
 - path: docs/adr/ADR-033-ev008-rag-evaluation-implementation.md
+  kind: adr
+  session_id: S007-rag-eval
+  stage: 04-tech-plan
+- path: docs/sessions/S007-rag-eval/reports/scope-addition-dashboard.md
+  kind: scope-report
+  session_id: S007-rag-eval
+  stage: 00-context
+  note: 'R68 (2026-07-01) — F36 interactive eval dashboard scope expansion (#99).'
+- path: docs/sessions/S007-rag-eval/reports/04-tech-plan-dashboard-delta.md
+  kind: stage-report
+  session_id: S007-rag-eval
+  stage: 04-tech-plan
+  note: 'Dashboard delta complete 2026-07-01 — ADR-034, TP-S007-17–25, M64.'
+- path: docs/adr/ADR-034-ev008-eval-interactive-dashboard.md
   kind: adr
   session_id: S007-rag-eval
   stage: 04-tech-plan
