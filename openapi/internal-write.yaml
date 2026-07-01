@@ -1023,6 +1023,9 @@ components:
           nullable: true
         metrics_summary:
           $ref: "#/components/schemas/EvalMetricsSummary"
+        error_message:
+          type: string
+          nullable: true
     EvalRunListResponse:
       type: object
       required:
@@ -1104,6 +1107,9 @@ components:
             - failed
         metrics_summary:
           $ref: "#/components/schemas/EvalMetricsSummary"
+        error_message:
+          type: string
+          nullable: true
         items:
           type: array
           items:

@@ -419,6 +419,7 @@ class EvalRunListItem(BaseModel):
     started_at: datetime | None = None
     completed_at: datetime | None = None
     metrics_summary: EvalMetricsSummary
+    error_message: str | None = None
 
 
 class EvalRunListResponse(BaseModel):
@@ -459,3 +460,4 @@ class EvalRunDetailResponse(BaseModel):
     status: EvalRunStatus
     metrics_summary: EvalMetricsSummary
     items: list[EvalRunItemDetail]
+    error_message: str | None = None

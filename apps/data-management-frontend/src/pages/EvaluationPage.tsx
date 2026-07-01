@@ -174,6 +174,16 @@ export function EvaluationPage() {
         </p>
       ) : null}
 
+      {selectedRun?.status === "failed" && selectedRun.error_message ? (
+        <p
+          role="alert"
+          className="text-sm text-destructive"
+          data-testid="evaluation-run-error"
+        >
+          {tr("admin.evaluation.runFailed")}: {selectedRun.error_message}
+        </p>
+      ) : null}
+
       <Tabs
         value={activeTab}
         onValueChange={(value) => {

@@ -295,7 +295,7 @@ def list_eval_runs(
             conn.execute(
                 text(
                     """
-                    SELECT id, status, started_at, completed_at, metrics_summary
+                    SELECT id, status, started_at, completed_at, metrics_summary, error_message
                     FROM eval_runs
                     ORDER BY created_at DESC
                     LIMIT :limit OFFSET :offset
@@ -314,6 +314,7 @@ def list_eval_runs(
                 started_at=_optional_datetime(mapping_row(row).get("started_at")),
                 completed_at=_optional_datetime(mapping_row(row).get("completed_at")),
                 metrics_summary=_summary_from_json(mapping_row(row).get("metrics_summary")),
+                error_message=row_str_optional(mapping_row(row), "error_message"),
             )
             for row in rows
         ],
@@ -330,7 +331,7 @@ def get_eval_run(engine: Engine, *, run_id: UUID) -> EvalRunDetailResponse | Non
             conn.execute(
                 text(
                     """
-                    SELECT id, status, metrics_summary
+                    SELECT id, status, metrics_summary, error_message
                     FROM eval_runs WHERE id = :id
                     """
                 ),
@@ -387,6 +388,7 @@ def get_eval_run(engine: Engine, *, run_id: UUID) -> EvalRunDetailResponse | Non
         status=_status(row_str(run, "status")),
         metrics_summary=_summary_from_json(run.get("metrics_summary")),
         items=items,
+        error_message=row_str_optional(run, "error_message"),
     )
 
 
