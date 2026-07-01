@@ -9,8 +9,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
-from collections.abc import Mapping
-
 from sqlalchemy import text
 from vecinita_embedding_client.client import EmbeddingClient
 from vecinita_eval.runner import EvalSummary, RowResult, run_golden_eval
@@ -34,7 +32,7 @@ from vecinita_shared_schemas.internal_write import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Mapping
 
     from sqlalchemy.engine import Engine
     from vecinita_eval.judges import JudgeClient
@@ -351,7 +349,7 @@ def get_eval_run(engine: Engine, *, run_id: UUID) -> EvalRunDetailResponse | Non
                     retrieval_pass=bool(metrics_obj.get("retrieval_pass")),
                     faithfulness=_optional_float(metrics_obj.get("faithfulness")),
                     answer_relevancy=_optional_float(metrics_obj.get("answer_relevancy")),
-                    latency_ms=_latency_ms(item, metrics_obj),
+                    latency_ms=_latency_ms(dict(item), metrics_obj),
                 ),
             )
         )
@@ -378,7 +376,7 @@ def _url_list(value: object) -> list[str]:
 
 
 def _latency_ms(
-    item: Mapping[str, object],
+    item: dict[str, object],
     metrics_obj: dict[str, object],
 ) -> int:
     latency = metrics_obj.get("latency_ms")
