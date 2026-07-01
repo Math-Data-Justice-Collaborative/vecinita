@@ -54,7 +54,7 @@ def _database_url() -> str:
 
 
 def test_alembic_head_includes_ev002_migration() -> None:
-    """Alembic current revision matches head after EV-002 migration."""
+    """Alembic current revision is head; EV-002 revision remains in migration history."""
     env = {**os.environ, "DATABASE_URL": _database_url()}
     current = subprocess.run(
         ["uv", "run", "alembic", "current"],  # noqa: S607  # uv resolved from PATH in CI/dev
@@ -72,8 +72,17 @@ def test_alembic_head_includes_ev002_migration() -> None:
         text=True,
         check=True,
     )
-    assert "20260628_0004" in current.stdout
-    assert "20260628_0004" in heads.stdout
+    history = subprocess.run(
+        ["uv", "run", "alembic", "history"],  # noqa: S607  # uv resolved from PATH in CI/dev
+        cwd=_DATABASE_DIR,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert "20260701_0005" in current.stdout
+    assert "20260701_0005" in heads.stdout
+    assert "20260628_0004" in history.stdout
 
 
 def test_audit_log_columns_match_spec() -> None:
