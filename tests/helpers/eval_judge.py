@@ -11,6 +11,7 @@ class MockEvalJudge:
 
     faithfulness_score: float = 0.75
     answer_relevancy_score: float = 0.72
+    rubric_score_value: float = 0.8
 
     def faithfulness(self, *, question: str, answer: str, context: str) -> float:
         """Return a fixed faithfulness score."""
@@ -21,3 +22,15 @@ class MockEvalJudge:
         """Return a fixed answer relevancy score."""
         _ = (question, answer, context)
         return self.answer_relevancy_score
+
+    def rubric_score(
+        self,
+        *,
+        question: str,
+        answer: str,
+        context: str,
+        rubric: str,
+    ) -> float:
+        """Return a fixed rubric score."""
+        _ = (question, answer, context, rubric)
+        return self.rubric_score_value

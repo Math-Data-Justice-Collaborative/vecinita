@@ -12,6 +12,11 @@ from vecinita_rag.engine import answer_without_context, synthesize_with_llm
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_rag.types import RagAnswer, RetrievedChunk
 
+from vecinita_eval.criteria import (
+    EvalCriterionDef,
+    aggregate_custom_scores,
+    score_custom_criteria,
+)
 from vecinita_eval.golden import GoldenRow, load_golden_rows
 from vecinita_eval.groundedness import GroundednessScorer, LlamaIndexFaithfulnessScorer
 from vecinita_eval.retrieval import (
@@ -36,6 +41,7 @@ class RowMetrics:
     faithfulness: float | None
     answer_relevancy: float | None
     latency_ms: int
+    custom_scores: dict[str, float] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,6 +62,7 @@ class EvalSummary:
     faithfulness: float | None
     answer_relevancy: float | None
     latency_p95_ms: int
+    custom_scores: dict[str, float] | None = None
 
 
 def _percentile(values: list[int], pct: float) -> int:
@@ -116,6 +123,7 @@ def run_golden_eval(  # noqa: PLR0913
     llm: LLM | None = None,
     fixture_path: str | Path | None = None,
     top_k: int = 5,
+    criteria: list[EvalCriterionDef] | None = None,
 ) -> tuple[list[RowResult], EvalSummary]:
     """Execute the golden set and return per-row results + aggregates."""
     path = Path(fixture_path) if fixture_path is not None else None
@@ -133,6 +141,8 @@ def run_golden_eval(  # noqa: PLR0913
     results: list[RowResult] = []
     retrieval_passes: dict[tuple[str, str], bool] = {}
     latencies: list[int] = []
+    custom_per_row: list[dict[str, float]] = []
+    criterion_defs = criteria or []
 
     for row in rows:
         start = time.monotonic()
@@ -170,6 +180,16 @@ def run_golden_eval(  # noqa: PLR0913
                 context=context,
             )
 
+        custom_scores = score_custom_criteria(
+            judge=judge,
+            question=row.question,
+            answer=answer,
+            context=context,
+            criteria=criterion_defs,
+        )
+        if custom_scores:
+            custom_per_row.append(custom_scores)
+
         latency_ms = int((time.monotonic() - start) * 1000)
         latencies.append(latency_ms)
         results.append(
@@ -182,6 +202,7 @@ def run_golden_eval(  # noqa: PLR0913
                     faithfulness=faithfulness,
                     answer_relevancy=answer_relevancy,
                     latency_ms=latency_ms,
+                    custom_scores=custom_scores or None,
                 ),
             )
         )
@@ -191,6 +212,7 @@ def run_golden_eval(  # noqa: PLR0913
         faithfulness=_aggregate_optional([r.metrics.faithfulness for r in results]),
         answer_relevancy=_aggregate_optional([r.metrics.answer_relevancy for r in results]),
         latency_p95_ms=_percentile(latencies, 95.0),
+        custom_scores=aggregate_custom_scores(custom_per_row) or None,
     )
     return results, summary
 

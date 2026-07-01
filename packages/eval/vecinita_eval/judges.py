@@ -22,6 +22,17 @@ class JudgeClient(Protocol):
         """Return answer relevancy score in [0, 1]."""
         ...
 
+    def rubric_score(
+        self,
+        *,
+        question: str,
+        answer: str,
+        context: str,
+        rubric: str,
+    ) -> float:
+        """Return custom rubric score in [0, 1]."""
+        ...
+
 
 @dataclass(frozen=True, slots=True)
 class LlamaIndexJudgeClient:
@@ -45,6 +56,22 @@ class LlamaIndexJudgeClient:
             question=question,
             answer=answer,
             context=context,
+        )
+
+    def rubric_score(
+        self,
+        *,
+        question: str,
+        answer: str,
+        context: str,
+        rubric: str,
+    ) -> float:
+        """Score a custom rubric via faithfulness evaluator with rubric context."""
+        return score_faithfulness(
+            judge=FaithfulnessEvaluator(llm=self.llm),
+            question=question,
+            answer=answer,
+            context=f"Rubric:\n{rubric}\n\nContext:\n{context}",
         )
 
 
