@@ -30,9 +30,7 @@ if TYPE_CHECKING:
 
 pytestmark = pytest.mark.unit
 
-_EMBED_404_MESSAGE = (
-    "embed failed with status 404: modal-http: invalid function call"
-)
+_EMBED_404_MESSAGE = "embed failed with status 404: modal-http: invalid function call"
 
 
 def _database_url() -> str:
