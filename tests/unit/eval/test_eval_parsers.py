@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 from vecinita_eval.eval_parsers import parse_answer_relevancy_output
-from vecinita_eval.judges import _normalize_eval_score
+from vecinita_eval.judges import normalize_eval_score
 
 pytestmark = pytest.mark.unit
 
@@ -27,4 +27,4 @@ def test_parse_answer_relevancy_output_accepts_qwen_score_format() -> None:
 
 def test_normalize_eval_score_treats_none_as_zero() -> None:
     """Invalid evaluator scores must not crash the eval runner."""
-    assert _normalize_eval_score(None) == pytest.approx(0.0)
+    assert normalize_eval_score(None) == pytest.approx(0.0)

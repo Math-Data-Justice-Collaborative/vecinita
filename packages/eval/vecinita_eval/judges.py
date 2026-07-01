@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from llama_index.core.llms import LLM
 
 
-def _normalize_eval_score(raw: object, *, threshold: float = 1.0) -> float:
+def normalize_eval_score(raw: object, *, threshold: float = 1.0) -> float:
     """Coerce evaluator score to [0, 1]; treat missing/invalid as 0.0."""
     if isinstance(raw, bool) or raw is None:
         return 0.0
@@ -111,7 +111,7 @@ def score_faithfulness(
         response=answer,
         contexts=[context],
     )
-    return _normalize_eval_score(result.score)  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+    return normalize_eval_score(result.score)  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
 
 
 def score_answer_relevancy(
@@ -129,7 +129,7 @@ def score_answer_relevancy(
         response=answer,
         contexts=[context],
     )
-    return _normalize_eval_score(
+    return normalize_eval_score(
         result.score,  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
         threshold=1.0,
     )
