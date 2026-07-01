@@ -26,6 +26,9 @@ from tests.helpers.eval_judge import MockEvalJudge
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
 
+_EXPECTED_ROW_LATENCY_MS = 1500
+_EXPECTED_METRIC_LATENCY_MS = 99
+
 
 def _sample_row_result() -> RowResult:
     row = GoldenRow(
@@ -147,13 +150,15 @@ def test_get_eval_run_returns_none_for_missing_id(engine: Engine) -> None:
 def test_list_eval_runs_paginates(engine: Engine) -> None:
     """list_eval_runs returns page metadata and ordered items."""
     created_ids: list[object] = []
+    min_total_runs = 2
     try:
-        for _ in range(2):
-            created_ids.append(create_eval_run(engine, corpus_profile="fixture").run_id)
+        created_ids.extend(
+            create_eval_run(engine, corpus_profile="fixture").run_id for _ in range(min_total_runs)
+        )
         page = list_eval_runs(engine, page=1, page_size=1)
         assert page.page == 1
         assert page.page_size == 1
-        assert page.total_count >= 2
+        assert page.total_count >= min_total_runs
         assert len(page.items) == 1
     finally:
         with engine.begin() as conn:
@@ -167,7 +172,7 @@ def test_list_eval_runs_paginates(engine: Engine) -> None:
 
 def test_get_eval_run_parses_non_dict_metrics_and_latency_fallback(
     engine: Engine,
-    eval_run_id: str,
+    eval_run_id: UUID,
 ) -> None:
     """get_eval_run tolerates malformed metrics JSON and row-level latency."""
     run_id = eval_run_id
@@ -181,11 +186,11 @@ def test_get_eval_run_parses_non_dict_metrics_and_latency_fallback(
                 )
                 VALUES (
                     :run_id, 'edge-case', 'en', 'Q?', NULL,
-                    '[]'::jsonb, NULL, '1'::jsonb, 1500
+                    '[]'::jsonb, NULL, '1'::jsonb, :latency_ms
                 )
                 """
             ),
-            {"run_id": run_id},
+            {"run_id": run_id, "latency_ms": _EXPECTED_ROW_LATENCY_MS},
         )
         conn.execute(
             text(
@@ -216,12 +221,12 @@ def test_get_eval_run_parses_non_dict_metrics_and_latency_fallback(
         answer_relevancy=0.5,
         latency_p95_ms=12,
     )
-    assert detail.items[0].metrics.latency_ms == 1500
+    assert detail.items[0].metrics.latency_ms == _EXPECTED_ROW_LATENCY_MS
 
 
 def test_execute_eval_run_requires_database_url(
     engine: Engine,
-    eval_run_id: str,
+    eval_run_id: UUID,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """execute_eval_run raises when DATABASE_URL is unset."""
@@ -333,7 +338,7 @@ def test_get_eval_run_parses_retrieved_urls_and_metric_latency(
                         "retrieval_pass": False,
                         "faithfulness": 0.25,
                         "answer_relevancy": 0.25,
-                        "latency_ms": 99.5,
+                        "latency_ms": float(_EXPECTED_METRIC_LATENCY_MS) + 0.5,
                     }
                 ),
             },
@@ -342,7 +347,7 @@ def test_get_eval_run_parses_retrieved_urls_and_metric_latency(
     assert detail is not None
     assert detail.items[0].retrieved_urls == ["https://example.com/doc"]
     assert detail.items[0].metrics.retrieval_pass is False
-    assert detail.items[0].metrics.latency_ms == 99
+    assert detail.items[0].metrics.latency_ms == _EXPECTED_METRIC_LATENCY_MS
 
 
 def test_get_eval_run_defaults_latency_when_missing(
@@ -377,7 +382,7 @@ def test_execute_eval_run_staging_profile_omits_fixture_path(
     eval_run_id: UUID,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """staging corpus_profile does not pass a golden fixture path to the harness."""
+    """Staging corpus_profile does not pass a golden fixture path to the harness."""
     monkeypatch.setenv(
         "DATABASE_URL",
         "postgresql://vecinita:vecinita@localhost:5432/vecinita",

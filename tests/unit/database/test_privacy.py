@@ -8,11 +8,11 @@ from unittest.mock import patch
 from vecinita_database.privacy import (
     _normalize_database_url,  # pyright: ignore[reportPrivateUsage]
     find_forbidden_tables,
-    find_identity_columns_on_eval_tables,
     find_identity_columns_on_ev002_tables,
+    find_identity_columns_on_eval_tables,
     find_identity_columns_on_tag_tables,
-    find_missing_eval_tables,
     find_missing_ev002_tables,
+    find_missing_eval_tables,
     find_missing_tag_tables,
 )
 

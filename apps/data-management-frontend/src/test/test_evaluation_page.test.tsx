@@ -452,6 +452,7 @@ describe("EvaluationPage", () => {
       vi.fn().mockImplementation((input: RequestInfo | URL) => {
         const url = fetchInputUrl(input);
         if (url.includes("/internal/v1/eval/runs")) {
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
           return Promise.reject("offline");
         }
         return Promise.resolve(defaultEvalFetch(url));
@@ -580,6 +581,7 @@ describe("EvaluationPage", () => {
         const url = fetchInputUrl(input);
         const method = (init?.method ?? "GET").toUpperCase();
         if (url.includes("/internal/v1/eval/runs") && method === "POST") {
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
           return Promise.reject("offline");
         }
         return Promise.resolve(defaultEvalFetch(url));
