@@ -51,15 +51,15 @@ from vecinita_shared_schemas.internal_write import (
     DocumentHistoryResponse,
     DocumentSummary,
     DocumentVersionEntry,
+    EvalCriterionCreateRequest,
+    EvalCriterionListResponse,
+    EvalCriterionResponse,
+    EvalCriterionUpdateRequest,
     EvalRunCreateRequest,
     EvalRunCreateResponse,
     EvalRunDetailResponse,
     EvalRunListResponse,
     EvalTimeseriesResponse,
-    EvalCriterionCreateRequest,
-    EvalCriterionListResponse,
-    EvalCriterionResponse,
-    EvalCriterionUpdateRequest,
     HealthAggregateResponse,
     HealthResponse,
     RecentActivity,
@@ -82,17 +82,17 @@ from vecinita_internal_write_api.audit import (
     create_document_version,
     emit_audit_event,
 )
+from vecinita_internal_write_api.eval_criteria_service import (
+    create_eval_criterion,
+    list_eval_criteria,
+    update_eval_criterion,
+)
 from vecinita_internal_write_api.eval_service import (
     create_eval_run,
     execute_eval_run,
     get_eval_run,
     get_eval_timeseries,
     list_eval_runs,
-)
-from vecinita_internal_write_api.eval_criteria_service import (
-    create_eval_criterion,
-    list_eval_criteria,
-    update_eval_criterion,
 )
 from vecinita_internal_write_api.jobs_client import (
     DataManagementJobsClient,

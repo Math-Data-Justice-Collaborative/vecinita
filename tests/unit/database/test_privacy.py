@@ -184,7 +184,7 @@ def test_find_missing_eval_tables_reports_absent_tables() -> None:
     ):
         missing = find_missing_eval_tables("postgresql+psycopg://localhost/db")
 
-    assert missing == {"eval_runs", "eval_run_items"}
+    assert missing == {"eval_criteria", "eval_run_items", "eval_runs"}
 
 
 def test_find_identity_columns_on_eval_tables_reports_violations() -> None:

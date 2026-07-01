@@ -43,9 +43,7 @@ def list_eval_criteria(engine: Engine) -> EvalCriterionListResponse:
             .mappings()
             .all()
         )
-    return EvalCriterionListResponse(
-        items=[_criterion_from_row(mapping_row(row)) for row in rows]
-    )
+    return EvalCriterionListResponse(items=[_criterion_from_row(mapping_row(row)) for row in rows])
 
 
 def create_eval_criterion(

@@ -30,6 +30,8 @@ When auditing product specs, include **falsifiable statements** such as:
 
 - “Staging smoke is only `GET /health`” → **deny** for UI products; require H4–H5 in test-plan
 - “E2E is covered by Vitest component tests” → **deny** as sole live proof; mocks ≠ CORS
+- “UI journeys have no Playwright spec” → **deny** when UJ describes cross-component browser
+  interaction; require `tests/ui/**/*.spec.ts` mapping in test-plan
 - “Frontends and APIs share one origin” → verify against deployment-integration topology
 
 Flag contradictions where `user-journeys.md` describes browser flows but `test-plan.md` has no
@@ -178,8 +180,9 @@ Before presenting statements to the user, run cross-document consistency checks:
 1. **Feature ↔ Spec**: Every feature in feature-list.md maps to at least one component
    in spec.md
 2. **Feature ↔ Journey**: Every in-scope feature has at least one UJ-NNN in user-journeys.md
-3. **Journey ↔ Test**: Every UJ-NNN in user-journeys.md appears in test-plan.md (E2E section
-   or TC table); journey IDs are consistent (UJ-001, not "journey 1")
+3. **Journey ↔ Test**: Every UJ-NNN in user-journeys.md appears in test-plan.md (API E2E, **UI
+   E2E Playwright**, and/or Vitest columns); browser interaction journeys must map to
+   `tests/ui/**/*.spec.ts`; journey IDs are consistent (UJ-001, not "journey 1")
 4. **Feature ↔ Test**: Every feature has at least one test case in test-plan.md
 5. **Spec ↔ Config**: Config defaults in config-spec.md match descriptions in spec.md
 6. **Test ↔ Acceptance**: Test cases cover all acceptance criteria

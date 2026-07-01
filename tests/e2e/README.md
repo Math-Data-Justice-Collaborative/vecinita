@@ -29,18 +29,17 @@ bash scripts/run_tests.sh
 | T0 local | `e2e` and not `live` | TestClient + test DB; CI |
 | T3 live | `e2e` and `live` | `VECINITA_STAGING_CHAT_URL` set; see `tests/smoke/test_staging_*.py` |
 
-## UI journeys (v1 waiver)
+## UI journeys
 
-UJ-001, UJ-002, and UJ-003 include browser UI steps in `docs/user-journeys.md`.
-**v1 does not run Playwright/full UI E2E** (per `docs/test-plan.md`).
+| Journey | API E2E module | Vitest (component) | Playwright (T0-ui) |
+|---------|----------------|--------------------|--------------------|
+| UJ-001 ChatRAG | `test_uj001_ask_stream.py` | `ChatPanel.test.tsx` | `tests/ui/chat/uj001-chat-shell.spec.ts` |
+| UJ-002 Ingest | `test_uj002_ingest_job.py` | `JobForm.test.tsx` | — (post-v1) |
+| UJ-003 Delete | `test_uj003_corpus_delete.py` | API-only | — |
+| UJ-009 Browse corpus | `test_uj009_corpus_browse.py` | Corpus tests | `tests/ui/chat/uj009-corpus-navigation.spec.ts` |
+| UJ-026 Admin login | `test_uj028_unauthenticated_admin.py` | login tests | `tests/ui/admin/uj026-login-page.spec.ts` |
 
-| Journey | API E2E module | UI coverage (v1) |
-|---------|----------------|------------------|
-| UJ-001 ChatRAG | `test_uj001_ask_stream.py` | Vitest: `apps/chat-rag-frontend/src/test/ChatPanel.test.tsx` |
-| UJ-002 Ingest | `test_uj002_ingest_job.py` | Vitest: `apps/data-management-frontend/src/test/JobForm.test.tsx` |
-| UJ-003 Delete | `test_uj003_corpus_delete.py` | API-only (admin list UI post-v1) |
-
-Post-deploy browser E2E is tracked for a future milestone (roadmap / test-plan).
+**T0-ui** runs in CI (`ui-e2e` job). **T3-ui** (live staging browser) is tracked for 13-deploy-smoke / H6.
 
 ## AC-C6 latency
 

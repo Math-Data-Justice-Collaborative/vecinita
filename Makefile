@@ -24,7 +24,7 @@ NPM_WS := bash scripts/npm_workspaces.sh
 	lint lint-py lint-fe lint-fix lint-fix-py lint-fix-fe \
 	format format-py format-fe format-check format-check-py format-fe-check \
 	typecheck typecheck-py typecheck-fe \
-	test test-py test-fe test-unit test-unit-coverage test-integration test-e2e test-smoke test-privacy test-live \
+	test test-py test-fe test-ui test-unit test-unit-coverage test-integration test-e2e test-smoke test-privacy test-live \
 	build-frontend ci ci-guards audit audit-fe audit-fix check
 
 help: ## Show available targets
@@ -125,6 +125,9 @@ test-py: migrate ## Full Python test suite (matches CI pytest paths)
 
 test-fe: ## Vitest (both frontends)
 	@$(NPM_LOCK) $(NPM_WS) run test
+
+test-ui: ## Playwright UI E2E (T0-ui — preview bundles + route mocks)
+	bash scripts/ui/run_playwright.sh
 
 test: test-py test-fe ## Full test suite: Python + frontends (fail fast)
 

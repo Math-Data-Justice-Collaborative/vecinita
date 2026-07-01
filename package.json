@@ -10,9 +10,14 @@
   },
   "scripts": {
     "test:frontend-i18n": "npm test -w vecinita-frontend-i18n",
-    "test:frontend-ui": "npm test -w vecinita-frontend-ui"
+    "test:frontend-ui": "npm test -w vecinita-frontend-ui",
+    "build:ui-e2e": "bash scripts/ui/build_for_playwright.sh",
+    "test:ui": "playwright test",
+    "test:ui:staging": "playwright test --project=staging",
+    "test:ui:headed": "playwright test --headed"
   },
   "devDependencies": {
+    "@playwright/test": "^1.52.0",
     "@vitest/coverage-v8": "^4.1.8"
   }
 }

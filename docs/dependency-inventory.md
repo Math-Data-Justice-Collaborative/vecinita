@@ -62,6 +62,7 @@
 | react | 18.x UI | MIT | |
 | vite | Build | MIT | |
 | vitest | Frontend smoke tests | MIT | |
+| **@playwright/test** | **Browser UI E2E (T0-ui / T3-ui)** | **Apache-2.0** | **QA stage 09; `tests/ui/`** |
 | **tailwindcss** | ^3.4 Utility-first CSS | MIT | EV-002 F23 (admin UI); TP-018 |
 | **postcss** | CSS processing | MIT | Required by Tailwind v3 |
 | **autoprefixer** | Vendor prefixes | MIT | Required by Tailwind v3 |

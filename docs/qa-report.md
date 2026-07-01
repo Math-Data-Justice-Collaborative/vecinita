@@ -1,29 +1,29 @@
 # QA Report
 
 > **Project**: Vecinita  
-> **Date**: 2026-06-30 (remediated)  
-> **Skill**: 09-qa — S006 / EV-007 / F35 ext (#109)  
-> **Branch**: `feat/S006-invite-acceptance`  
-> **Session**: [S006-invite-acceptance](sessions/S006-invite-acceptance/reports/qa-report.md)
+> **Date**: 2026-07-01  
+> **Skill**: 09-qa — S007 / EV-008 / F36 (#99)  
+> **Branch**: `feat/S007-rag-eval`  
+> **Session**: [S007-rag-eval](sessions/S007-rag-eval/reports/qa-report.md)
 
 ```text
-QA Results (after 2026-06-30 remediation):
-  Lint:           PASS
-  Format:         PASS
-  Typecheck:      PASS
-  Tests (Python): PASS — 729 passed, 39 skipped
-  Tests (FE):     PASS — chat 142/142; admin 329/329 (Node 24 auto)
-  Coverage gate:  PASS — FE branches 96.6% (≥95% gate)
-  Security:       PASS
+QA Results:
+  Lint:           FAIL — 1 issue
+  Format:         FAIL — 1 file
+  Typecheck:      FAIL — 3 errors
+  Tests (Python): FAIL — 768 passed, 41 skipped, 1 failed
+  Tests (FE):     PASS — chat 142/142; admin 360/360; i18n 17/17; ui 12/12
+  Coverage gate:  FAIL — privacy unit test
+  Security:       PASS (1 gitleaks false positive — advisory)
   Cross-file:     PASS
   Template:       PASS
   Data / Modal:   D6 verified; D7 verified; workspace vecinita
   H0c CORS:       PASS
-  H4/H5 live:     PASS — 19 connectivity tests
-  Node runtime:   ensure_node24.sh (fnm → 24.18.0)
-  Outdated PyPI:  16 accepted (intentional pins)
+  H4/H5 live:     SKIPPED — no staging env
 ```
 
-**Overall: pass** — 6/7 advisories resolved or accepted; QA-S006-004 partial (live invite T3 → 13-deploy-smoke).
+**Overall: fail** — four blocking Python issues (lint, format, typecheck, stale privacy test). Frontends pass.
 
-Full report: [docs/sessions/S006-invite-acceptance/reports/qa-report.md](sessions/S006-invite-acceptance/reports/qa-report.md)
+Full report: [docs/sessions/S007-rag-eval/reports/qa-report.md](sessions/S007-rag-eval/reports/qa-report.md)
+
+Previous pass: [S006 / EV-007](sessions/S006-invite-acceptance/reports/qa-report.md) (2026-06-30).

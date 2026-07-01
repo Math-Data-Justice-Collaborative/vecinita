@@ -31,9 +31,9 @@ Product specs **must** define browser wiring before build:
 
 | Document | Required content |
 |----------|------------------|
-| `docs/test-plan.md` | Tiers H0c (CORS unit), H0i (integration), H4–H5 (live connectivity); UJ ↔ test mapping |
+| `docs/test-plan.md` | Tiers H0c (CORS unit), H0i (integration), H4–H5 (live connectivity), **T0-ui (Playwright)**, **T3-ui (staging browser)**; UJ ↔ test mapping across **API E2E**, **UI E2E**, and **Vitest** |
 | `docs/deployment-integration.md` | `VITE_*` build-time URLs; `VECINITA_CORS_ORIGINS`; redeploy order (API CORS before UI sign-off) |
-| `docs/user-journeys.md` | Browser steps for UI journeys; E2E tier (T0 vs T2 vs T3) — Vitest alone is not T3 |
+| `docs/user-journeys.md` | Browser steps for UI journeys; E2E tier (T0 API vs **T0-ui** vs T2 vs T3) — Vitest alone is not T3; **cross-component interactions** (shell ↔ panel ↔ sidebar) called out |
 | `docs/config-spec.md` | Env names for CORS and frontend API bases |
 
 Ask in interview if UI calls APIs on a **different origin** than the static site.
@@ -47,21 +47,27 @@ and `.cursor/rules/tdd.mdc`). This is a planning output — capture the requirem
 
 | Change | Required test artifact | Captured in |
 |--------|------------------------|-------------|
-| New or changed **user journey** (user-facing flow) | **E2E journey** — a UJ-NNN + a `tests/e2e/` module + TC-NNN | `docs/user-journeys.md`, `docs/test-plan.md` §User Journeys (E2E) |
+| New or changed **user journey** (user-facing flow) | **API E2E** — UJ-NNN + `tests/e2e/` module + TC-NNN | `docs/user-journeys.md`, `docs/test-plan.md` §User Journeys (E2E) |
+| New or changed **UI journey** with **cross-component interaction** (navigation, tabs, shell state, form ↔ panel) | **UI E2E (Playwright T0-ui)** — `tests/ui/**/*.spec.ts` mapped to UJ-NNN + TC-NNN; document **which components interact** | `docs/user-journeys.md` (browser steps), `docs/test-plan.md` §UI E2E |
+| New or changed **UI component logic** (isolated hook/form behavior) | **Vitest** — `apps/*/src/**/*.test.{ts,tsx}` | `docs/test-plan.md` §Test Strategy |
 | New or changed **contract** (endpoint, request/response schema, job payload) | **Integration test** — `tests/integration/` case driving API + DB | `docs/test-plan.md` §Test Strategy, `docs/api-contract.md` |
 | New or changed **function / module behavior** | **Unit test** + **example payloads** (sample inputs, expected outputs, edge/error cases) | `docs/test-plan.md` §Test Cases (Input + payload), §Test Data |
 
 Rules:
 
-- **E2E journeys** are mandatory for any user-facing change; Vitest/component tests alone are **not**
-  E2E (per `e2e-coverage.mdc`).
+- **API E2E** (`tests/e2e/`) is mandatory for caller-facing backend journeys (TestClient + DB).
+- **UI E2E (Playwright)** is mandatory when a journey involves **browser interaction between
+  components** (e.g. sidebar nav ↔ outlet, tab bar ↔ URL, chat shell ↔ panel state). Record the
+  interaction under test in the UJ and map to `tests/ui/<app>/uj*.spec.ts`.
+- **Vitest** covers isolated component logic; it is **not** a substitute for Playwright when the
+  behavior depends on real browser routing, layout, or cross-panel state (per `e2e-coverage.mdc`).
 - **Integration tests** are required whenever a **contract changes** — an added or modified endpoint,
   request/response schema, or job payload shape.
 - **Unit tests** are required for new public functions/behaviors; record concrete **payloads**
   (example inputs and expected outputs, including edge/error inputs) so 04-tech-plan can turn them
   into TDD tasks.
 - In **delta mode**, gather test requirements **only** for the changed journeys/contracts/behaviors,
-  but always add at least one E2E journey when user-facing behavior changes.
+  but always add **API E2E + UI E2E (when UI changes)** when user-facing behavior changes.
 
 ## Prerequisites
 
@@ -134,9 +140,10 @@ When user adds features or `mode: delta` / active evolve cycle:
 - Support **multiple Fn** in one cycle — one interview batch per feature or grouped by domain.
 - Prefix decisions in `docs/decisions.md#requirements-decisions-01-requirements` with `EV-NNN / Fnn`.
 - Do not delete unrelated spec sections; mark deprecated Fn with status + ADR.
-- **Gather test requirements for the change** (see §Test requirements (stage 01)): add an **E2E
-  journey** for any changed user-facing flow, an **integration test** when a contract changes, and
-  **unit tests + payloads** for new/changed behavior. Update only the affected UJ/TC entries.
+- **Gather test requirements for the change** (see §Test requirements (stage 01)): add **API E2E**
+  for changed backend journeys, **Playwright UI E2E** when cross-component browser interaction
+  changes, **integration** when a contract changes, and **unit tests + payloads** for new/changed
+  behavior. Update only the affected UJ/TC entries.
 
 ## Workflow
 
@@ -293,8 +300,8 @@ free-form input.
 |----------|-------------|
 | Feature List | Core features → Secondary features → Out of scope |
 | Spec | System architecture → Components → Data flow → Constraints |
-| User Journeys | Happy paths per feature → Edge/error journeys → E2E tiers (local vs deployed) |
-| Test Plan | User Journeys (E2E) cross-ref → Change→test-layer mapping (E2E for changed flows, integration on contract change, unit + payloads) → Key test cases (UJ ↔ TC, with example payloads) → CI/CD |
+| User Journeys | Happy paths per feature → Edge/error journeys → E2E tiers (API T0 vs **UI T0-ui** vs T2 vs T3) → **component interaction notes** (which panels/shells must cooperate) |
+| Test Plan | User Journeys (E2E) cross-ref → **UI E2E (Playwright)** mapping → Change→test-layer table (API E2E, UI E2E, integration, Vitest, unit + payloads) → Key test cases (UJ ↔ TC) → CI/CD (`ui-e2e` job) |
 | Config Spec | CLI flags → Environment variables → Config files → Defaults |
 | API Contract | Endpoints → Request/response schemas → Auth → Error handling |
 

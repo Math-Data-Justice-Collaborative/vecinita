@@ -2,10 +2,10 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-07-01 (S007/EV-008: UJ-039–UJ-040 admin RAG evaluation; F36, #99)
+> **Last updated**: 2026-07-01 (S007/EV-008: UJ-039–UJ-043 admin RAG evaluation + dashboard; F36, #99)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
-**E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI steps** are waived at T0 — see `tests/e2e/README.md` (Vitest component smoke only).
+**E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
 
 ## Journey Index
 
@@ -46,6 +46,9 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-033 | Operator resets a forgotten password | Operator | DM login "Forgot password?" → recovery email → `/reset-password` callback → in-app reset | F35 | local + live (T3) |
 | UJ-039 | Admin runs golden-set RAG evaluation | Admin operator | DM UI `/evaluation` → `POST /internal/v1/eval/runs` | F36 (#99) | local |
 | UJ-040 | Admin reviews eval scores, drill-down, and history | Admin operator | DM UI `/evaluation` → `GET /internal/v1/eval/runs*` | F36 (#99) | local |
+| UJ-041 | Admin views eval metric trends (dashboard) | Admin operator | DM UI `/evaluation?tab=dashboard` → timeseries API | F36 (#99) | local |
+| UJ-042 | Admin explores eval runs via pivot table | Admin operator | DM UI `/evaluation?tab=explore` | F36 (#99) | local |
+| UJ-043 | Admin manages custom eval criteria | Admin operator | DM UI `/evaluation?tab=criteria` → criteria CRUD API | F36 (#99) | local |
 
 ## Journey Details
 
@@ -899,6 +902,67 @@ Product-facing journeys describe what a **caller** does — not internal module 
 
 **Acceptance**: Drill-down shows all golden rows including edge cases (`abstain`, `empty`, `any_of`); history lists prior runs newest-first; bilingual UI strings for chrome only (questions shown as stored in fixture).
 
-**Automated tests**: Vitest `test_evaluation_page.test.tsx` (TC-116); harness integration TC-111–TC-113.
+**Automated tests**: Vitest `test_evaluation_page.test.tsx` (TC-116); Playwright `tests/ui/admin/uj039-eval-run.spec.ts`; harness integration TC-111–TC-113.
+
+**E2E tier**: local.
+
+---
+
+### UJ-041: Admin views eval metric trends (dashboard)
+
+**Actor**: Admin operator (`role=admin`)
+
+**Goal**: See how retrieval, faithfulness, answer relevancy, and latency trend across completed eval runs.
+
+**Steps**:
+
+1. Open `/evaluation` and select the **Dashboard** tab (or navigate to `?tab=dashboard`).
+2. UI loads `GET /internal/v1/eval/runs/timeseries` and renders line/area charts per metric.
+3. Optionally collapse a chart panel; layout preference persists in browser `localStorage`.
+
+**Acceptance**: Charts render for available metrics; tab state reflected in URL; panel collapse survives refresh (device-local only).
+
+**Automated tests**: Vitest `test_evaluation_dashboard.test.tsx` (TC-117, TC-119); Playwright `tests/ui/admin/uj041-eval-dashboard-tabs.spec.ts`.
+
+**E2E tier**: local.
+
+---
+
+### UJ-042: Admin explores eval runs via pivot table
+
+**Actor**: Admin operator (`role=admin`)
+
+**Goal**: Slice per-question eval results by case, locale, or metric without exporting data.
+
+**Steps**:
+
+1. Open `/evaluation?tab=explore`.
+2. Choose row, column, and value axes from selectors.
+3. Pivot table aggregates fetched run items client-side; axis choices persist in `localStorage`.
+
+**Acceptance**: Table updates when axes change; preferences survive refresh.
+
+**Automated tests**: Vitest `test_evaluation_dashboard.test.tsx` (TC-118); Playwright `tests/ui/admin/uj041-eval-dashboard-tabs.spec.ts`.
+
+**E2E tier**: local.
+
+---
+
+### UJ-043: Admin manages custom eval criteria
+
+**Actor**: Admin operator (`role=admin`)
+
+**Goal**: Define LLM rubric criteria that flow into future eval runs and dashboards.
+
+**Steps**:
+
+1. Open `/evaluation?tab=criteria`.
+2. Review existing criteria from `GET /internal/v1/eval/criteria`.
+3. Enter slug, label, and rubric; submit to `POST /internal/v1/eval/criteria`.
+4. Edit or disable criteria via `PATCH /internal/v1/eval/criteria/{id}` (API); viewer cannot create (403).
+
+**Acceptance**: New criterion appears in list; form validation blocks empty slug; viewer denied at API.
+
+**Automated tests**: `tests/integration/test_eval_dashboard_routes.py` (TC-120); Vitest + Playwright `uj041-eval-dashboard-tabs.spec.ts` (TC-121).
 
 **E2E tier**: local.

@@ -134,6 +134,16 @@ cd apps/data-management-frontend && npm ci && npm run lint && npm test -- --run
 enforce coverage, so QA must run this to match CI's `coverage` job — a **separate required CI
 job** distinct from the `frontend` matrix.
 
+**Playwright UI E2E (T0-ui — blocking in CI `ui-e2e` job):**
+
+```bash
+make test-ui
+# or: bash scripts/ui/run_playwright.sh
+```
+
+Runs against `vite preview` with route mocks (`tests/ui/`). Does not replace H4–H5 live
+connectivity on staging.
+
 ---
 
 ### Phase 2 — Run QA Checks
@@ -157,11 +167,13 @@ checks. Do not block the whole QA on optional live Modal/staging unless env vars
 - `uv run basedpyright apps packages tests`
 - Return: error/warning count; **PASS** if zero errors
 
-#### Agent 4 — Test suite (Python + frontend)
+#### Agent 4 — Test suite (Python + frontend + Playwright UI)
 
 **Python:** same pytest paths as CI (see Phase 1).
 
 **Frontend:** Vitest + ESLint per app in CI matrix.
+
+**Playwright (T0-ui):** `make test-ui` — blocking when CI `ui-e2e` job is enabled.
 
 Return:
 
@@ -259,6 +271,7 @@ QA Results:
   Typecheck:      [PASS/FAIL] — [N] errors
   Tests (Python): [PASS/FAIL] — [N] passed, [N] skipped, [N] failed
   Tests (FE):     [PASS/FAIL] — [N] passed per app
+  Tests (UI):     [PASS/FAIL] — Playwright T0-ui (`make test-ui`)
   Coverage gate:  [PASS/FAIL] — FE branch ≥95% (make test-unit-coverage)
   Security:       [PASS/FAIL] — [N] CVEs; [N] secrets (tree); [N] history (advisory)
   Cross-file:     [N] unused imports; [N] cycles; [N] docstrings missing (advisory)

@@ -102,6 +102,17 @@ curl -s -X POST http://localhost:8000/api/v1/ask \
 
 Automated UJ-004: `uv run pytest tests/e2e/test_uj004_local_bootstrap.py -q`
 
+## Playwright UI E2E (T0-ui)
+
+Browser smoke tests against production bundles (`vite preview`) with mocked APIs. See `tests/ui/README.md`.
+
+```bash
+make test-ui
+# or: bash scripts/ui/run_playwright.sh
+```
+
+Requires Node 24 and a one-time Chromium install (`npx playwright install chromium`, included in `run_playwright.sh`).
+
 ## Unit coverage gate (F31 / ADR-019)
 
 Per-component **≥95% line and branch** coverage on all twelve `packages/*` and `apps/*` components. Enforced locally and in CI via `scripts/test/print_unit_coverage_summary.py --enforce`.

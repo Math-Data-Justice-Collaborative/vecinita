@@ -11,10 +11,11 @@ import pytest
 from fastapi.testclient import TestClient
 from vecinita_internal_write_api.app import create_app
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_config_for_tests
+from vecinita_shared_schemas.json_types import as_json_object
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
-from tests.helpers.json_response import json_str, response_json_object
+from tests.helpers.json_response import json_list, json_str, response_json_object
 from tests.helpers.user_mgmt_e2e import VIEWER_ID
 from tests.unit.rag.conftest import seed_eval_corpus
 from tests.unit.shared_schemas.auth_fixtures import (
@@ -98,9 +99,8 @@ def test_eval_criteria_crud_admin_only(
     )
     assert listing.status_code == HTTPStatus.OK
     listed = response_json_object(listing)
-    items = listed.get("items")
-    assert isinstance(items, list)
-    assert any(isinstance(item, dict) and item.get("slug") == slug for item in items)
+    items = json_list(listed, "items")
+    assert any(json_str(as_json_object(item), "slug") == slug for item in items)
 
     patch = client.patch(
         f"/internal/v1/eval/criteria/{criterion_id}",

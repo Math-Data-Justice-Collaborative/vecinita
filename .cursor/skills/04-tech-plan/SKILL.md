@@ -27,15 +27,18 @@ the execution plan and technical `docs/` — it does **not** write product/featu
 
 ## Connectivity (stage 04)
 
-Technical plan **must** include executable connectivity work:
+Technical plan **must** include executable connectivity work **and UI test infrastructure**:
 
 | Deliverable | Content |
 |-------------|---------|
-| `docs/execution-plan.md` | Tasks: `configure_cors` on each browser-facing FastAPI app; `tests/unit/test_cors_policy.py`; `tests/smoke/test_staging_connectivity.py`; `scripts/deploy/verify_connectivity.sh` |
-| `docs/staging-secrets-matrix.md` | `VECINITA_CORS_ORIGINS`, all `VITE_*`, staging `VECINITA_STAGING_*_FRONTEND_URL` |
+| `docs/execution-plan.md` | Tasks: `configure_cors` on each browser-facing FastAPI app; `tests/unit/test_cors_policy.py`; `tests/smoke/test_staging_connectivity.py`; `scripts/deploy/verify_connectivity.sh`; **`tests/ui/` Playwright specs** per UJ with browser steps; **`ui-e2e` CI job**; `make test-ui` |
+| `docs/staging-secrets-matrix.md` | `VECINITA_CORS_ORIGINS`, all `VITE_*`, staging `VECINITA_STAGING_*_FRONTEND_URL` (for **T3-ui**) |
+| `docs/test-plan.md` | **Test strategy table** includes Vitest, Playwright T0-ui, pytest API E2E; **hybrid mock strategy** (route mocks in CI; optional local-stack / staging tiers) |
+| `docs/dependency-inventory.md` | `@playwright/test` (Node devDependency) when frontends exist |
 | ADR (if needed) | Defer BFF/gateway (TP-001) → explicit CORS strategy |
 
-Interview: confirm frontend↔API origin map for staging and production.
+Interview: confirm frontend↔API origin map for staging and production; confirm which UJs need
+**Playwright interaction tests** (not only Vitest).
 
 ## Prerequisites
 
@@ -120,6 +123,8 @@ Analyze the repository and specs for existing technical choices:
 | Entry | `src/app.py` (HTTP) | `src/worker.py` | both |
 | DB | Postgres + pgvector | shared schema | shared |
 | CI/CD | GitHub Actions | GitHub Actions | GitHub Actions |
+| Frontend unit | Vitest | Vitest | Vitest |
+| **UI E2E** | **Playwright (`tests/ui/`)** | N/A (if no UI) | **Playwright** |
 | Layout | `api/` + `rag/` + `db/` | `jobs/` + `rag/` + `db/` | combined |
 
 These choices are pre-filled. Interview questions focus on domain-specific decisions not
@@ -187,11 +192,19 @@ Questions about target deployment:
 
 Drill deeper into test-plan.md:
 
-- Test types to implement (unit, integration, e2e, performance, security)
-- Coverage targets per component
-- CI/CD test integration
+- Test types to implement (unit, integration, **API e2e**, **UI e2e (Playwright)**, Vitest, performance, security)
+- **UI test strategy (three layers)**:
+  - **Vitest** — component/hook logic in `apps/*/src/**/*.test.{ts,tsx}`
+  - **Playwright T0-ui** — cross-component browser interactions in `tests/ui/**/*.spec.ts`
+    (`vite preview` + route mocks; `make test-ui`; CI `ui-e2e` job)
+  - **Playwright T3-ui** — optional staging smoke when `VECINITA_STAGING_*_FRONTEND_URL` set
+- For each UI journey: document **which components interact** (e.g. shell ↔ panel, tabs ↔ URL,
+  sidebar ↔ outlet) and the Playwright spec path
+- Coverage targets per component (Vitest branch gate ≥95% where enforced)
+- CI/CD test integration (`ci.yml`: python, frontend matrix, **ui-e2e**, coverage)
 - Test data strategy
-- Mock/stub strategy for external services
+- Mock/stub strategy: **hybrid** — Playwright `page.route` for T0-ui CI; pytest mocks for API E2E;
+  live staging for T3-ui (no mocks)
 - Performance benchmarks and thresholds
 
 #### 2.4 — Integration Points
@@ -269,6 +282,8 @@ Each task must:
 - Note data dependencies (Data Deps column)
 - Be one of: Test, Code, Config, Docs
 - Follow TDD ordering within milestones
+- **UI-facing milestones**: include **Vitest** tasks for component logic **and** **Playwright** tasks
+  for cross-component interaction (write failing `tests/ui/**/*.spec.ts` before or with the UI change)
 
 ### Phase 4 — User Review
 
@@ -364,6 +379,9 @@ Before marking 04-tech-plan `completed`, verify these items are **tasks or ADRs*
 - [ ] Every config parameter in config-spec marked **include** vs **exclude** for v1
 - [ ] Validation rules aligned with upstream CLI (cross-check 00-context contradictions)
 - [ ] User journeys in `docs/user-journeys.md` with E2E tier and planned test modules
+- [ ] **UI journeys** with browser steps map to **`tests/ui/**/*.spec.ts`** (Playwright T0-ui) in
+  `docs/test-plan.md`; Vitest paths recorded separately
+- [ ] **CI `ui-e2e` job** and `make test-ui` documented in execution plan when frontends exist
 - [ ] Modal testing tiers per [ADR-004](../../docs/adr/ADR-004.md) (T0–T3) assigned to stages
 - [ ] deploy targets in plan match [deployment-catalog.md](../deployment-catalog.md) and
   `workflow-state.yaml` §template.gpu_tiers (or all ten if unset); drift documented if deferred

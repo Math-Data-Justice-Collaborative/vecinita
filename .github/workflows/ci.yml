@@ -203,3 +203,17 @@ jobs:
           npm run lint -w ${{ matrix.package }}
           npm run typecheck -w ${{ matrix.package }}
           npm test -w ${{ matrix.package }}
+
+  ui-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Playwright UI E2E (T0-ui)
+        run: bash scripts/ui/run_playwright.sh
