@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from http import HTTPStatus
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
@@ -74,11 +75,12 @@ def test_eval_criteria_crud_admin_only(
     client, private_key = eval_write_client
     admin_token = sign_test_jwt(private_key, role="admin")
     viewer_token = sign_test_jwt(private_key, sub=VIEWER_ID, role="viewer")
+    slug = f"tone-friendly-{uuid4().hex[:8]}"
 
     create = client.post(
         "/internal/v1/eval/criteria",
         json={
-            "slug": "tone-friendly",
+            "slug": slug,
             "label": "Friendly tone",
             "rubric": "Answer uses a supportive community tone.",
             "scorer_type": "llm_rubric",
@@ -98,9 +100,7 @@ def test_eval_criteria_crud_admin_only(
     listed = response_json_object(listing)
     items = listed.get("items")
     assert isinstance(items, list)
-    assert any(
-        isinstance(item, dict) and item.get("slug") == "tone-friendly" for item in items
-    )
+    assert any(isinstance(item, dict) and item.get("slug") == slug for item in items)
 
     patch = client.patch(
         f"/internal/v1/eval/criteria/{criterion_id}",
