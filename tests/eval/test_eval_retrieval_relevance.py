@@ -1,77 +1,52 @@
-"""T14.5 / AC benchmarks: ≥80% retrieval relevance on eval fixture (D3)."""
+"""T59.5 / TC-111: ≥80% retrieval relevance on hit + any_of golden rows (F36)."""
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-from typing import cast
-
 import pytest
-from vecinita_database.seeds.load import (
-    _database_url,  # pyright: ignore[reportPrivateUsage]  # reuse canonical seed DB URL resolver
-)
+from vecinita_eval.golden import load_golden_rows
+from vecinita_eval.retrieval import retrieval_rows, score_retrieval_row
+from vecinita_eval.runner import run_golden_eval
 from vecinita_rag.retriever import CorpusPgvectorRetriever
-from vecinita_shared_schemas.json_types import JsonObject, as_json_object
 
-from tests.e2e.local_bootstrap import postgres_is_ready
-from tests.helpers.json_response import json_str
-from tests.unit.rag.conftest import basis_vector, seed_eval_corpus
+from tests.eval.conftest import eval_embed_fn
 
 pytestmark = pytest.mark.integration
 
-_EVAL_PATH = Path(__file__).resolve().parents[2] / "data" / "fixtures" / "eval" / "qa_pairs.json"
 _RELEVANCE_THRESHOLD = 0.8
 
 
-@pytest.fixture
-def eval_db() -> str:
-    """Seed the eval corpus and return the database URL, skipping without Postgres."""
-    if not postgres_is_ready():
-        pytest.skip("Postgres not available for eval benchmark")
-    url = _database_url()
-    seed_eval_corpus(database_url=url)
-    return url
-
-
-def _load_pairs() -> list[JsonObject]:
-    loaded_raw = cast("object", json.loads(_EVAL_PATH.read_text(encoding="utf-8")))
-    if not isinstance(loaded_raw, list):
-        msg = f"Expected JSON array in {_EVAL_PATH}"
-        raise TypeError(msg)
-    entries = cast("list[object]", loaded_raw)
-    return [as_json_object(item) for item in entries]
-
-
 def test_eval_retrieval_relevance_at_least_eighty_percent(eval_db: str) -> None:
-    """Retrieval relevance over the eval Q&A fixture meets the 80% threshold."""
-    pairs = _load_pairs()
-    assert pairs, "eval fixture must contain at least one Q&A pair"
-
-    def embed_fn(question: str) -> list[float]:
-        """Embed fn."""
-        if "¿" in question or any(ch in question for ch in "áéíóúñ"):
-            return basis_vector(2)
-        if "library" in question.lower():
-            return basis_vector(1)
-        return basis_vector(0)
+    """TC-111: retrieval relevance over hit + any_of rows meets the 80% threshold."""
+    rows = load_golden_rows()
+    scored_rows = retrieval_rows(rows)
+    assert scored_rows, "golden fixture must contain hit/any_of rows"
 
     retriever = CorpusPgvectorRetriever(
-        embed_fn=embed_fn,
+        embed_fn=eval_embed_fn,
         database_url=eval_db,
         top_k=5,
     )
 
     hits = 0
-    for pair in pairs:
-        question = json_str(pair, "question")
-        expected_url = json_str(pair, "expected_doc_url")
-        chunks = retriever.retrieve_chunks(question)
-        urls = {chunk.url for chunk in chunks if chunk.url}
-        if expected_url in urls:
+    for row in scored_rows:
+        chunks = retriever.retrieve_chunks(row.question)
+        urls = [chunk.url for chunk in chunks if chunk.url]
+        if score_retrieval_row(row, urls):
             hits += 1
 
-    rate = hits / len(pairs)
+    rate = hits / len(scored_rows)
     assert rate >= _RELEVANCE_THRESHOLD, (
         f"retrieval relevance {rate:.0%} below {_RELEVANCE_THRESHOLD:.0%} "
-        f"({hits}/{len(pairs)} expected URLs in top-k)"
+        f"({hits}/{len(scored_rows)} scored rows passed)"
     )
+
+
+def test_eval_runner_aggregate_matches_retrieval_scorer(eval_db: str) -> None:
+    """Runner aggregate retrieval relevance aligns with per-row scoring."""
+    _results, summary = run_golden_eval(
+        embed_fn=eval_embed_fn,
+        database_url=eval_db,
+        judge=None,
+        llm=None,
+    )
+    assert summary.retrieval_relevance >= _RELEVANCE_THRESHOLD

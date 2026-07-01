@@ -33,6 +33,13 @@ EV002_TABLES: Final[frozenset[str]] = frozenset(
     }
 )
 
+EVAL_TABLES: Final[frozenset[str]] = frozenset(
+    {
+        "eval_runs",
+        "eval_run_items",
+    }
+)
+
 FORBIDDEN_EV002_IDENTITY_COLUMNS: Final[frozenset[str]] = frozenset(
     {
         "created_by",
@@ -73,6 +80,8 @@ FORBIDDEN_TAG_IDENTITY_COLUMNS: Final[frozenset[str]] = frozenset(
         "session_id",
     }
 )
+
+FORBIDDEN_EVAL_IDENTITY_COLUMNS: Final[frozenset[str]] = FORBIDDEN_EV002_IDENTITY_COLUMNS
 
 
 def _normalize_database_url(url: str) -> str:
@@ -137,6 +146,32 @@ def find_identity_columns_on_ev002_tables(database_url: str) -> dict[str, list[s
             col
             for col in columns
             if col in FORBIDDEN_EV002_IDENTITY_COLUMNS or col.startswith("auth_")
+        )
+        if forbidden:
+            violations[table] = forbidden
+    return violations
+
+
+def find_missing_eval_tables(database_url: str) -> set[str]:
+    """Return EV-008 eval table names absent from the public schema."""
+    engine = create_engine(_normalize_database_url(database_url))
+    inspector = inspect(engine)
+    present = set(inspector.get_table_names(schema="public"))
+    return set(EVAL_TABLES - present)
+
+
+def find_identity_columns_on_eval_tables(database_url: str) -> dict[str, list[str]]:
+    """Return forbidden identity column names per eval table (ADR-033 §3)."""
+    engine = create_engine(_normalize_database_url(database_url))
+    inspector = inspect(engine)
+    present = set(inspector.get_table_names(schema="public"))
+    violations: dict[str, list[str]] = {}
+    for table in sorted(EVAL_TABLES & present):
+        columns = {col["name"] for col in inspector.get_columns(table, schema="public")}
+        forbidden = sorted(
+            col
+            for col in columns
+            if col in FORBIDDEN_EVAL_IDENTITY_COLUMNS or col.startswith("auth_")
         )
         if forbidden:
             violations[table] = forbidden

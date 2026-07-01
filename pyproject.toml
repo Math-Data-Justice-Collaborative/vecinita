@@ -21,6 +21,7 @@ dev = [
     "vecinita-data-management-backend",
     "vecinita-database",
     "vecinita-embedding-client",
+    "vecinita-eval",
     "vecinita-ingest",
     "vecinita-internal-write-api",
     "vecinita-llm-client",
@@ -43,6 +44,7 @@ override-dependencies = [
 [tool.uv.workspace]
 members = [
     "packages/rag",
+    "packages/eval",
     "packages/ingest",
     "packages/embedding-client",
     "packages/llm-client",
@@ -56,6 +58,7 @@ members = [
 
 [tool.uv.sources]
 vecinita-rag = { workspace = true }
+vecinita-eval = { workspace = true }
 vecinita-ingest = { workspace = true }
 vecinita-embedding-client = { workspace = true }
 vecinita-shared-schemas = { workspace = true }
@@ -94,6 +97,7 @@ ignore = [
 # real imports — flake8-type-checking (TC001/2/3) would wrongly move them into a
 # TYPE_CHECKING block and break model construction. Scoped to the schema package only.
 "packages/shared-schemas/vecinita_shared_schemas/*.py" = ["TC001", "TC002", "TC003"]
+"packages/eval/vecinita_eval/*.py" = ["TC001", "TC002"]
 # Data Management routes depend on closures (auth_dep/write_auth_dep) defined inside
 # create_app(). With `from __future__ import annotations`, FastAPI cannot resolve a local
 # closure referenced inside `Annotated[..., Depends(local_fn)]`, so the `= Depends(...)`
