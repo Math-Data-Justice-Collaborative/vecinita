@@ -26,7 +26,6 @@ from tests.unit.shared_schemas.auth_fixtures import (
 _MAX_EVAL_PAGE_SIZE = 100
 
 if TYPE_CHECKING:
-
     from sqlalchemy.engine import Engine
 
 
