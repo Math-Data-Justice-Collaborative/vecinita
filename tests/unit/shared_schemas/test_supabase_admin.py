@@ -6,7 +6,7 @@ All requests are mocked via httpx.MockTransport — no network and no real Supab
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
 import httpx
@@ -330,8 +330,7 @@ def test_generate_link_includes_redirect_to() -> None:
     """generate_link forwards redirect_to in the POST body."""
 
     def handler(request: httpx.Request) -> httpx.Response:
-        body = json.loads(request.content)
-        assert isinstance(body, dict)
+        body = cast(dict[str, object], json.loads(request.content))
         assert body["redirect_to"] == "https://app/reset-password"
         return httpx.Response(200, json={"action_link": "https://app/recover#token"})
 

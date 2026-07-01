@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Self, cast
 from unittest.mock import patch
 from uuid import UUID, uuid4
 
@@ -124,11 +124,13 @@ def test_execute_eval_run_persists_completed_results(
     assert len(detail.items) == 1
     assert detail.items[0].metrics.retrieval_pass is True
     with engine.connect() as conn:
-        row = conn.execute(
-            text("SELECT metrics_summary FROM eval_runs WHERE id = :id"),
-            {"id": run_id},
-        ).scalar_one()
-    assert isinstance(row, dict)
+        row = cast(
+            dict[str, object],
+            conn.execute(
+                text("SELECT metrics_summary FROM eval_runs WHERE id = :id"),
+                {"id": run_id},
+            ).scalar_one(),
+        )
     assert row.get("custom_scores") == {"tone-friendly": 0.88}
 
 
@@ -576,11 +578,13 @@ def test_execute_eval_run_omits_custom_scores_when_empty(
             embed_fn=eval_embed_fn,
         )
     with engine.connect() as conn:
-        row = conn.execute(
-            text("SELECT metrics_summary FROM eval_runs WHERE id = :id"),
-            {"id": eval_run_id},
-        ).scalar_one()
-    assert isinstance(row, dict)
+        row = cast(
+            dict[str, object],
+            conn.execute(
+                text("SELECT metrics_summary FROM eval_runs WHERE id = :id"),
+                {"id": eval_run_id},
+            ).scalar_one(),
+        )
     assert "custom_scores" not in row
 
 
@@ -663,7 +667,7 @@ def test_latency_ms_defaults_when_item_latency_is_float(
 
 def test_get_eval_timeseries_skips_non_datetime_completed_at() -> None:
     """get_eval_timeseries ignores rows whose completed_at is not a datetime."""
-    fake_row = {
+    fake_row: dict[str, object] = {
         "id": uuid4(),
         "completed_at": "2026-01-01T00:00:00Z",
         "metrics_summary": {},

@@ -9,7 +9,7 @@ from uuid import uuid4
 import pytest
 from sqlalchemy import text
 from vecinita_internal_write_api.eval_criteria_service import (
-    _criterion_from_row,
+    _criterion_from_row,  # pyright: ignore[reportPrivateUsage]
     create_eval_criterion,
     get_eval_criterion,
     list_enabled_criteria,
