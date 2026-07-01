@@ -5,7 +5,8 @@
 # EV-007 redeploy order: Supabase config/migrations push runs in the `supabase-sync` job
 # before Modal deploy. DigitalOcean deploy chains after this workflow completes.
 # Resend SMTP is applied via Supabase `config push` (SUPABASE_SMTP_PASS); Resend REST
-# test-send uses Modal operator secrets (RESEND_API_KEY) — not pushed by CI.
+# test-send uses Modal operator secrets (RESEND_API_KEY) — synced in the deploy job when
+# GitHub secrets are configured via sync_github_secrets.sh.
 #
 # Pattern: https://modal.com/docs/guide/continuous-deployment
 name: Deploy Modal
@@ -78,6 +79,20 @@ jobs:
     env:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
       MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      RESEND_SENDER_EMAIL: ${{ secrets.RESEND_SENDER_EMAIL }}
+      VECINITA_INTERNAL_API_KEY: ${{ secrets.VECINITA_INTERNAL_API_KEY }}
+      VECINITA_MODAL_PROXY_KEY: ${{ secrets.VECINITA_MODAL_PROXY_KEY }}
+      VECINITA_MODAL_EMBED_URL: ${{ secrets.VECINITA_MODAL_EMBED_URL }}
+      VECINITA_MODAL_LLM_URL: ${{ secrets.VECINITA_MODAL_LLM_URL }}
+      VECINITA_MODAL_DATA_MGMT_URL: ${{ secrets.VECINITA_MODAL_DATA_MGMT_URL }}
+      VECINITA_INTERNAL_WRITE_URL: ${{ secrets.VECINITA_INTERNAL_WRITE_URL }}
+      VECINITA_ADMIN_FRONTEND_URL: ${{ secrets.VECINITA_ADMIN_FRONTEND_URL }}
+      VECINITA_CHAT_FRONTEND_URL: ${{ secrets.VECINITA_CHAT_FRONTEND_URL }}
+      VECINITA_CORS_ORIGINS: ${{ secrets.VECINITA_CORS_ORIGINS }}
     steps:
       - uses: actions/checkout@v4
 
@@ -108,6 +123,18 @@ jobs:
 
       - name: Verify Modal secrets and volumes
         run: bash scripts/deploy/verify_secrets.sh
+
+      - name: Materialize deploy env from GitHub secrets
+        run: bash scripts/deploy/ci_materialize_env.sh
+
+      - name: Sync Modal vecinita-data-management secret
+        run: |
+          set -euo pipefail
+          if bash scripts/deploy/ci_materialize_env.sh --check modal; then
+            bash scripts/deploy/sync_modal_secret.sh --merge --apply
+          else
+            echo "::warning::Modal deploy env incomplete — skipping secret sync. Push secrets via sync_github_secrets.sh --apply"
+          fi
 
       - name: Deploy Modal apps (embedding, data-management, llm)
         run: bash scripts/deploy/modal.sh

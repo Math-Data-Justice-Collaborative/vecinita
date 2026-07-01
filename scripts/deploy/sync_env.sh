@@ -19,8 +19,8 @@
 #   bash scripts/deploy/sync_env.sh --do --apply    # only DigitalOcean
 #   bash scripts/deploy/sync_env.sh --supabase --seed-admin --apply
 #
-# Templates: infra/github/.env.example, supabase/.env.example,
-#            infra/do/.env.example, infra/modal/.env.example
+# Templates: infra/github/.env.example, infra/resend/.env.example, supabase/.env.example,
+#            infra/do/.env.example, infra/modal/.env.example, prod.env.example
 # Matrix:    docs/staging-secrets-matrix.md
 set -euo pipefail
 

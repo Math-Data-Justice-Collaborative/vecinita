@@ -188,7 +188,17 @@ def _resolve_write_actor(
     return (ctx.principal.sub, ctx.principal.role)
 
 
+def _resolve_read_actor(
+    ctx: Annotated[AuthContext, Depends(require_authenticated)],
+) -> tuple[UUID | None, str | None]:
+    """Resolved operator actor for authenticated read routes (admin or viewer)."""
+    if ctx.is_service or ctx.principal is None:
+        return (None, None)
+    return (ctx.principal.sub, ctx.principal.role)
+
+
 WriteActorDep = Annotated[tuple[UUID | None, str | None], Depends(_resolve_write_actor)]
+ReadActorDep = Annotated[tuple[UUID | None, str | None], Depends(_resolve_read_actor)]
 
 
 def _default_jobs_client() -> DataManagementJobsClient | None:
@@ -1316,7 +1326,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         response_model=EvalRunListResponse,
     )
     def list_eval_runs_route(  # pyright: ignore[reportUnusedFunction]
-        _actor: WriteActorDep,
+        _actor: ReadActorDep,
         page: int = 1,
         page_size: int = 20,
     ) -> EvalRunListResponse:
@@ -1329,7 +1339,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         response_model=EvalTimeseriesResponse,
     )
     def get_eval_timeseries_route(  # pyright: ignore[reportUnusedFunction]
-        _actor: WriteActorDep,
+        _actor: ReadActorDep,
         limit: int = 100,
     ) -> EvalTimeseriesResponse:
         limit = min(max(1, limit), 500)
@@ -1340,7 +1350,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         response_model=EvalCriterionListResponse,
     )
     def list_eval_criteria_route(  # pyright: ignore[reportUnusedFunction]
-        _actor: WriteActorDep,
+        _actor: ReadActorDep,
     ) -> EvalCriterionListResponse:
         return list_eval_criteria(engine)
 
@@ -1375,7 +1385,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
     )
     def get_eval_run_route(  # pyright: ignore[reportUnusedFunction]
         run_id: UUID,
-        _actor: WriteActorDep,
+        _actor: ReadActorDep,
     ) -> EvalRunDetailResponse:
         detail = get_eval_run(engine, run_id=run_id)
         if detail is None:

@@ -170,7 +170,7 @@ Offline **validate** job runs without these secrets. Cloud jobs skip when the to
 template: `supabase/.env.example`. Note: `prod.env` stores the DB password as
 `SUPABASE_DATABASE_PASSWORD`; the sync script and CLI map it to `SUPABASE_DB_PASSWORD`.
 
-**Example env files (placeholders):** `infra/do/.env.example`, `infra/modal/.env.example`  
+**Example env files (placeholders):** `prod.env.example`, `infra/github/.env.example`, `infra/do/.env.example`, `infra/modal/.env.example`, `infra/resend/.env.example`, `supabase/.env.example`  
 **Push to DO:** `scripts/deploy/do_apps.py sync-secrets` or `sync-all-secrets` (see `infra/do/README.md`).  
 **Push everywhere (Supabase check + Modal + DO):** `bash scripts/deploy/sync_env.sh --apply`  
 **Push to Modal only:** `bash scripts/deploy/sync_modal_secret.sh --apply`
@@ -207,6 +207,9 @@ Builds on EV-005. Adds the live admin user-management surface and production ema
 | **Supabase** (CLI / config push) | `supabase/.env.example` | `bash scripts/supabase/ci_sync.sh sync-production` (CI) |
 | **Modal** (`vecinita-data-management`) | `infra/modal/.env.example` | `bash scripts/deploy/sync_modal_secret.sh --merge --apply` |
 | **DigitalOcean** (4 apps) | `infra/do/.env.example` | `uv run --with pydo --with pyyaml scripts/deploy/do_apps.py sync-all-secrets` |
+| **Resend** (SMTP + REST) | `infra/resend/.env.example` | `sync_github_secrets.sh` + `ci_sync.sh` + `sync_modal_secret.sh` |
+| **Operator master** | `prod.env.example` → `prod.env` | `bash scripts/deploy/sync_env.sh --apply` |
+| **Staging smokes** | `infra/staging/.env.example` | `bash scripts/deploy/verify_connectivity.sh` |
 
 One-shot across every environment (dry run without `--apply`):
 

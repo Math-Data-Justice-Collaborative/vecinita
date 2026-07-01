@@ -1,8 +1,9 @@
 # Continuous deployment of DigitalOcean App Platform apps.
 # Deterministic backstop so every commit on `main` is rolled out even if the
 # GitHub -> DO push webhook (`deploy_on_push: true` in infra/do/*.yaml) is dropped.
-# Triggered after Deploy Modal succeeds on main (EV-007 order: Supabase → Modal → DO),
-# then deploys the four vecinita apps via the pydo helper (scripts/deploy/do_apps.py).
+# Triggered after Deploy Modal succeeds on main (EV-007 order: Supabase → Modal → DO).
+# Before redeploy: Alembic upgrade (when DATABASE_URL secret is set) + DO secret sync
+# from GitHub Actions secrets (sync_github_secrets.sh --apply from prod.env).
 name: Deploy DigitalOcean
 
 on:
@@ -31,6 +32,27 @@ jobs:
            github.event.workflow_run.head_branch == 'main') }}
     env:
       DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+      VECINITA_INTERNAL_API_KEY: ${{ secrets.VECINITA_INTERNAL_API_KEY }}
+      VECINITA_MODAL_PROXY_KEY: ${{ secrets.VECINITA_MODAL_PROXY_KEY }}
+      VECINITA_MODAL_EMBED_URL: ${{ secrets.VECINITA_MODAL_EMBED_URL }}
+      VECINITA_MODAL_LLM_URL: ${{ secrets.VECINITA_MODAL_LLM_URL }}
+      VECINITA_MODAL_DATA_MGMT_URL: ${{ secrets.VECINITA_MODAL_DATA_MGMT_URL }}
+      VECINITA_INTERNAL_WRITE_URL: ${{ secrets.VECINITA_INTERNAL_WRITE_URL }}
+      VECINITA_CHAT_RAG_URL: ${{ secrets.VECINITA_CHAT_RAG_URL }}
+      VECINITA_CHAT_FRONTEND_URL: ${{ secrets.VECINITA_CHAT_FRONTEND_URL }}
+      VECINITA_ADMIN_FRONTEND_URL: ${{ secrets.VECINITA_ADMIN_FRONTEND_URL }}
+      VECINITA_CORS_ORIGINS: ${{ secrets.VECINITA_CORS_ORIGINS }}
+      VECINITA_STATS_ENABLED: ${{ secrets.VECINITA_STATS_ENABLED }}
+      VITE_VECINITA_ADMIN_API_URL: ${{ secrets.VITE_VECINITA_ADMIN_API_URL }}
+      VITE_VECINITA_MODAL_PROXY_KEY: ${{ secrets.VITE_VECINITA_MODAL_PROXY_KEY }}
+      VITE_VECINITA_CORPUS_API_URL: ${{ secrets.VITE_VECINITA_CORPUS_API_URL }}
+      VITE_VECINITA_CORPUS_API_KEY: ${{ secrets.VITE_VECINITA_CORPUS_API_KEY }}
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_VECINITA_CHAT_API_URL: ${{ secrets.VITE_VECINITA_CHAT_API_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -46,6 +68,27 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+
+      - name: Materialize deploy env from GitHub secrets
+        run: bash scripts/deploy/ci_materialize_env.sh
+
+      - name: Alembic upgrade head (EV-008 eval tables)
+        run: |
+          set -euo pipefail
+          if bash scripts/deploy/ci_materialize_env.sh --check alembic; then
+            bash scripts/deploy/ci_alembic_upgrade.sh
+          else
+            echo "::warning::DATABASE_URL not configured — skipping Alembic. Eval routes will 500 until migrations run."
+          fi
+
+      - name: Sync DigitalOcean app secrets
+        run: |
+          set -euo pipefail
+          if bash scripts/deploy/ci_materialize_env.sh --check do; then
+            uv run --with pydo --with pyyaml scripts/deploy/do_apps.py sync-all-secrets
+          else
+            echo "::warning::DO deploy env incomplete — skipping secret sync. Push secrets via sync_github_secrets.sh --apply"
+          fi
 
       - name: Deploy DigitalOcean apps (force build from main HEAD)
         run: |
