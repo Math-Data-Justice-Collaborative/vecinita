@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-30 (S006/EV-007 F35 ext — invite acceptance TC-104–TC-110, #109)  
+> **Last updated**: 2026-07-01 (S007/EV-008 F36 — eval harness TC-111–TC-116, #99)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -61,6 +61,8 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-036 Admin force sign-out | `tests/e2e/test_uj036_force_signout.py` + Vitest | TC-098, TC-103 |
 | UJ-037 Deliverability test-send | `tests/e2e/test_uj037_email_test_send.py` | TC-099, TC-103 |
 | UJ-038 Audit viewer for user events | Vitest in `data-management-frontend` | TC-101 |
+| UJ-039 Admin runs RAG evaluation | `tests/e2e/test_uj039_eval_run_trigger.py` + Vitest `test_evaluation_page.test.tsx` | TC-114, TC-115 |
+| UJ-040 Admin eval drill-down + history | Vitest in `data-management-frontend` | TC-116 |
 
 **E2E tier (v1):** `local` — TestClient, test Postgres (Docker/testcontainers), **mocked Modal** HTTP.
 
@@ -636,12 +638,48 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Input**: Backend tests — CORS preflight on `/admin/users/{id}/signout` and `/admin/email/test`; audit payload assertions.
 - **Expected**: Preflight allows the methods + `Authorization`; audit rows carry UUIDs/role/domain only.
 
+### TC-111: Golden-set retrieval relevance ≥80% (F36, EV-008)
+
+- **Objective**: Harness scores retrieval on `hit` + `any_of` rows in `data/fixtures/eval/qa_pairs.json`.
+- **Input**: `tests/eval/test_eval_retrieval_relevance.py` (extend) — 11 scored rows; Postgres + eval corpus seed; top-k=5.
+- **Expected**: Aggregate ≥80%; `any_of` passes when any listed URL in top-k; `abstain`/`empty` rows excluded from aggregate (TC-113).
+
+### TC-112: Faithfulness and answer relevancy on golden set (F36, EV-008)
+
+- **Objective**: LlamaIndex evaluators score answer quality using `required_facts[]` and Modal LLM judge (mocked in CI).
+- **Input**: `tests/eval/test_eval_answer_quality.py` — full RAG pipeline per golden row; mocked judge returning deterministic scores.
+- **Expected**: CI aggregate faithfulness ≥0.60; answer relevancy ≥0.60; judge uses query language (RD-109).
+
+### TC-113: Golden-set edge cases — abstain, ambiguous, empty (F36)
+
+- **Objective**: Edge rows assert correct behavior beyond URL match.
+- **Input**: Rows `edge-abstain-mayor-phone`, `edge-ambiguous-housing`, `edge-empty-quantum`.
+- **Expected**: Abstain — no fabricated PII; empty — explicit no-context path; ambiguous — retrieval `any_of` or answer addresses housing topic.
+
+### TC-114: Admin triggers eval run (UJ-039, F36)
+
+- **Objective**: Admin can start an eval run via internal-write-api.
+- **Input**: `tests/e2e/test_uj039_eval_run_trigger.py` — admin JWT → `POST /internal/v1/eval/runs` → poll until `completed`.
+- **Expected**: `201`/`202` with `run_id`; run record persisted; summary metrics populated.
+
+### TC-115: Viewer denied eval routes (UJ-039, F36, RD-110)
+
+- **Objective**: `viewer` cannot trigger or list eval runs.
+- **Input**: TestClient with viewer JWT — `POST` and `GET /internal/v1/eval/runs`.
+- **Expected**: `403`; Vitest hides/disables Evaluation nav for viewer.
+
+### TC-116: Eval history and per-question drill-down (UJ-040, F36)
+
+- **Objective**: Admin UI loads run history and question-level detail.
+- **Input**: Vitest `test_evaluation_page.test.tsx` — mock `GET /internal/v1/eval/runs` + `GET …/{run_id}` with fixture payloads.
+- **Expected**: History list newest-first; drill-down shows question, sources, answer, per-metric pass/fail; en/es UI chrome.
+
 ## Test Data
 
 | Asset | Location | Used by |
 |-------|----------|---------|
 | Seed corpus (EN/ES) | `data/fixtures/corpus/` | TC-001, TC-011 |
-| Eval Q&A pairs | `data/fixtures/eval/` | Integration benchmarks |
+| Eval Q&A pairs | `data/fixtures/eval/` | TC-111–TC-113, F36 harness |
 | URL ingest fixture | `data/fixtures/ingest/` | TC-010 |
 | Seed tag vocabulary | `data/fixtures/tags/seed_tags.json` | TC-041, TC-044 |
 | Tagged corpus fixtures | `data/fixtures/corpus/tagged/` | TC-040, TC-044 |
@@ -657,6 +695,10 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 | Coverage (per component, unit) | ≥ 95% **line** and ≥ 95% **branch** | Twelve components; CI blocking; ADR-019 |
 | Privacy tests | 100% pass | Blocking |
 | Ingest job success (fixture URLs) | 100% in CI | Mocked worker |
+| Eval retrieval relevance (golden) | ≥ 80% on `hit` + `any_of` rows | `tests/eval/`; F36 |
+| Eval faithfulness (golden) | ≥ 0.60 aggregate (CI) | LlamaIndex + Modal LLM judge |
+| Eval answer relevancy (golden) | ≥ 0.60 aggregate (CI) | LlamaIndex + Modal LLM judge |
+| Eval latency p95 (golden) | Informational (30s ref) | Admin display only |
 
 ### F31 coverage gate — gated components
 

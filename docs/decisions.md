@@ -305,6 +305,31 @@ EV-007 artifacts: feature-list F35.12–F35.15; user-journeys UJ-030/031/033 del
 acceptance-criteria AC-U3/U5 revised + AC-U17–AC-U21; api-contract `redirect_to` + `revoke-invite`;
 config-spec `VECINITA_ADMIN_FRONTEND_URL` on Modal DM; deployment-integration §EV-007; **ADR-032**.
 
+### EV-008 01-requirements decisions (2026-07-01) — F36 admin RAG evaluation (#99)
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-099 | Golden domains | **Community + housing + legal aid + edge cases** | EV-008 interview A1 |
+| RD-100 | Golden size | **10 cases, 14 locale rows** (moderate expansion) | EV-008 interview A2 |
+| RD-101 | Edge cases | Include **abstain**, **ambiguous query**, and **empty retrieval** rows | EV-008 interview A3 |
+| RD-102 | Golden questions | Approved set Q1–Q10 (see `qa_pairs.json` + eval-golden-set.md) | EV-008 interview B1 |
+| RD-103 | es housing/legal | **EN-only** for housing/legal v1; add ES when #94 corpus lands | EV-008 interview B2 |
+| RD-104 | Retrieval assertion | **Expected doc URL in top-k** (existing harness pattern) | EV-008 interview C1 |
+| RD-105 | Answer rubric | **`required_facts[]`** bullets per row (no full reference_answer v1) | EV-008 interview D1 |
+| RD-106 | Retrieval threshold | **Retain ≥80%** on `hit` + `any_of` rows | EV-008 interview E1 |
+| RD-107 | Faithfulness threshold | **CI ≥0.60** aggregate; **display highlight &lt;0.70** | EV-008 interview E2 |
+| RD-108 | Answer relevancy threshold | **CI ≥0.60** aggregate; **display highlight &lt;0.70** | EV-008 interview E3 |
+| RD-109 | Judge language | **Query language** (en/es rubric follows question) | EV-008 interview E5 |
+| RD-110 | Eval access | **Admin-only** — trigger + view; `viewer` → `403` | EV-008 interview F2 |
+| RD-111 | Latency | **p95 informational** (30s reference); no CI gate v1 | EV-008 interview E4 |
+| RD-112 | Tooling (from 00-context) | **LlamaIndex evaluators + custom harness** — no Langfuse/Ragas/DeepEval v1 (R63) | EV-008 / R63 |
+| RD-113 | Feature ID (from 00-context) | **F36** (not F34 — already Supabase auth) (R64) | EV-008 / R64 |
+
+EV-008 artifacts: feature-list F36; user-journeys UJ-039–UJ-040; test-plan TC-111–TC-116;
+acceptance-criteria AC-E12–AC-E16; api-contract §EV-008 eval routes; config-spec §RAG evaluation;
+`docs/eval-golden-set.md`; expanded `data/fixtures/eval/qa_pairs.json`; deployment-integration §EV-008.
+Tooling ADR deferred to **04-tech-plan** (record R63).
+
 ### EV-007 04-tech-plan decisions (2026-06-30) — TP-S006-01–16
 
 Requirements locked RD-091–RD-098 in 01-requirements; **recommended defaults applied** for
@@ -330,6 +355,31 @@ implementation details per gap analysis + #109.
 | TP-S006-16 | Dependencies | **No new deps** | ADR-032 §16 |
 
 EV-007 execution plan: **Phase 13** M54–M58 (T54.1–T54.24).
+
+### EV-008 04-tech-plan decisions (2026-07-01) — TP-S007-01–16
+
+Resolves GitHub #99 tooling blocker. Builds on RD-099–RD-113 (01-requirements) and R63 (00-context).
+
+| ID | Topic | Decision | ADR | Source |
+|----|-------|----------|-----|--------|
+| TP-S007-01 | Eval tooling | **LlamaIndex evaluators + custom harness**; reject Langfuse/Ragas/DeepEval v1 | ADR-033 §1 | RD-112, R63, #99 |
+| TP-S007-02 | Package layout | New **`packages/eval`** (`vecinita-eval`) — shared CI + API runner | ADR-033 §2 | feature-list F36 |
+| TP-S007-03 | Postgres schema | `eval_runs` + `eval_run_items`; no PII columns | ADR-033 §3 | ADR-004 |
+| TP-S007-04 | Runner host | **DO internal-write-api** `BackgroundTasks`; HTTP Modal embed/LLM | ADR-033 §4 | ADR-007 |
+| TP-S007-05 | Corpus profile | `fixture` default; optional `staging` in POST body | ADR-033 §5 | config-spec |
+| TP-S007-06 | Access control | **Admin-only**; viewer → 403 all eval routes | ADR-033 §6 | RD-110 |
+| TP-S007-07 | API + OpenAPI | `POST/GET /internal/v1/eval/runs*` per api-contract §EV-008 | ADR-033 §7 | ADR-011 |
+| TP-S007-08 | Admin UI | `/evaluation` route + `admin.nav.evaluation` i18n | ADR-033 §8 | UJ-039/040 |
+| TP-S007-09 | #84 coordination | `GroundednessScorer` protocol; FaithfulnessEvaluator default | ADR-033 §9 | #84 |
+| TP-S007-10 | Judge cost | ~42 LLM calls/run; CI mocks; &lt;$0.50/run pilot | ADR-033 §10 | ADR-027 |
+| TP-S007-11 | CORS | Extend preflight test for `POST /internal/v1/eval/runs` | ADR-033 §11 | connectivity-gates |
+| TP-S007-12 | Git | Branch `feat/S007-rag-eval`, **PR-50** | ADR-033 §12 | S007 |
+| TP-S007-13 | Redeploy order | migration → internal-write-api → admin FE → CI | ADR-033 §13 | deployment-integration §EV-008 |
+| TP-S007-14 | Test tiers | T0–T2 merge-blocking; T3 live eval at 13-deploy-smoke | ADR-033 §14 | test-plan |
+| TP-S007-15 | Golden fixture | D3 expanded — 10 cases, 14 locale rows in repo | ADR-033 | RD-100, eval-golden-set.md |
+| TP-S007-16 | Dependencies | **No new deps** | ADR-033 §15 | dependency-inventory |
+
+EV-008 execution plan: **Phase 14** M59–M63 (T59.1–T63.4).
 
 EV-006 artifacts: feature-list F35; user-journeys UJ-030–UJ-033; test-plan TC-088–TC-095;
 acceptance-criteria AC-U1–AC-U9; ADR-029; config-spec §Admin user management + email; api-contract

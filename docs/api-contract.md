@@ -580,6 +580,100 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
 
 ---
 
+## EV-008 — Admin RAG evaluation (F36)
+
+Base path: `/internal/v1/eval` (admin JWT + `role=admin` only; `viewer` → `403`).
+
+### POST `/internal/v1/eval/runs`
+
+- **Purpose**: Trigger a golden-set eval run through the RAG pipeline.
+- **Auth**: Admin JWT required.
+- **Request** `202`:
+
+```json
+{}
+```
+
+Optional body fields (04-tech-plan): `corpus_profile` (`fixture` \| `staging`), `metrics` override list.
+
+- **Response** `202`:
+
+```json
+{
+  "run_id": "uuid",
+  "status": "pending",
+  "created_at": "ISO8601"
+}
+```
+
+- **Side effects**: Creates `eval_runs` row; runner processes `data/fixtures/eval/qa_pairs.json` (or synced staging corpus).
+
+### GET `/internal/v1/eval/runs`
+
+- **Purpose**: List eval run history (newest first).
+- **Query**: `page` (default 1), `page_size` (default 20, max 100).
+- **Response** `200`:
+
+```json
+{
+  "items": [
+    {
+      "run_id": "uuid",
+      "status": "completed",
+      "started_at": "ISO8601",
+      "completed_at": "ISO8601",
+      "metrics_summary": {
+        "retrieval_relevance": 0.91,
+        "faithfulness": 0.72,
+        "answer_relevancy": 0.68,
+        "latency_p95_ms": 4200
+      }
+    }
+  ],
+  "page": 1,
+  "page_size": 20,
+  "total_count": 5
+}
+```
+
+### GET `/internal/v1/eval/runs/{run_id}`
+
+- **Purpose**: Per-run detail with per-question drill-down.
+- **Response** `200`:
+
+```json
+{
+  "run_id": "uuid",
+  "status": "completed",
+  "metrics_summary": {
+    "retrieval_relevance": 0.91,
+    "faithfulness": 0.72,
+    "answer_relevancy": 0.68,
+    "latency_p95_ms": 4200
+  },
+  "items": [
+    {
+      "case_id": "community-food-pantry",
+      "locale": "en",
+      "question": "When are food pantry hours updated?",
+      "expected_doc_url": "fixture://corpus/en/community-resources.md",
+      "retrieved_urls": ["fixture://corpus/en/community-resources.md"],
+      "answer": "...",
+      "metrics": {
+        "retrieval_pass": true,
+        "faithfulness": 0.85,
+        "answer_relevancy": 0.80,
+        "latency_ms": 3100
+      }
+    }
+  ]
+}
+```
+
+- **Errors**: `404` unknown run; `403` viewer.
+
+---
+
 ## EV-004 — Client-only i18n (F31)
 
 **No new HTTP endpoints.** Bilingual admin UI and shared frontend packages do not change request/response schemas, auth, or error codes.

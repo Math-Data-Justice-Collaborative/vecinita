@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-06-30 (S006/EV-007: UJ-031/033 invite-acceptance callback + retract; F35 ext, #109)
+> **Last updated**: 2026-07-01 (S007/EV-008: UJ-039–UJ-040 admin RAG evaluation; F36, #99)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI steps** are waived at T0 — see `tests/e2e/README.md` (Vitest component smoke only).
@@ -44,6 +44,8 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-031 | Admin invites an operator from the User Management page; invitee accepts | Admin operator + invitee | DM UI `/users` invite → Resend email → `/accept-invite` callback → set password → login | F35 | local + live (T3) |
 | UJ-032 | Stay signed in across browser restart with "Remember me" | Operator | DM login → `vecinita.auth.remember` → `localStorage`/`sessionStorage` | F35 | local |
 | UJ-033 | Operator resets a forgotten password | Operator | DM login "Forgot password?" → recovery email → `/reset-password` callback → in-app reset | F35 | local + live (T3) |
+| UJ-039 | Admin runs golden-set RAG evaluation | Admin operator | DM UI `/evaluation` → `POST /internal/v1/eval/runs` | F36 (#99) | local |
+| UJ-040 | Admin reviews eval scores, drill-down, and history | Admin operator | DM UI `/evaluation` → `GET /internal/v1/eval/runs*` | F36 (#99) | local |
 
 ## Journey Details
 
@@ -857,3 +859,46 @@ Product-facing journeys describe what a **caller** does — not internal module 
 **Automated tests**: `apps/data-management-frontend/src/test/test_audit_user_events.test.tsx` (Vitest): `entity_type` filter incl. "Users"; `user.*` labels rendered; per-user link sets the `entity_id` filter. Backend emission covered by TC-092 + UJ-030/036/037 e2e.
 
 **E2E tier**: local (Vitest + existing audit API).
+
+---
+
+### UJ-039: Admin runs golden-set RAG evaluation
+
+**Actor**: Admin operator (`role=admin`)
+
+**Goal**: Measure current RAG quality against the maintained golden eval set and persist a run for regression tracking.
+
+**Steps**:
+
+1. Open Data Management admin UI → **Evaluation** (`/evaluation`) in the sidebar (en/es label `admin.nav.evaluation`).
+2. Review the golden set summary (case count, last run, aggregate scores if any).
+3. Click **Run evaluation** → UI calls `POST /internal/v1/eval/runs` on internal-write-api with JWT.
+4. Backend enqueues or executes the eval runner: each golden row through `packages/rag` (same path as ChatRAG) with Modal LLM for judge metrics.
+5. UI polls until run status is `completed` or `failed`; summary shows retrieval %, faithfulness, answer relevancy, latency p95.
+
+**Acceptance**: Admin can trigger a run; run completes with per-metric aggregates; no PII from live visitors stored (fixture questions only). `viewer` cannot trigger (403).
+
+**Automated tests**: `tests/e2e/test_uj039_eval_run_trigger.py` (TC-114, TC-115); Vitest `test_evaluation_page.test.tsx`.
+
+**E2E tier**: local (mocked Modal LLM + test Postgres).
+
+---
+
+### UJ-040: Admin reviews eval scores, drill-down, and history
+
+**Actor**: Admin operator (`role=admin`)
+
+**Goal**: Inspect per-question pass/fail, retrieved sources, generated answer, and compare runs over time.
+
+**Steps**:
+
+1. On `/evaluation`, select a completed run from history (`GET /internal/v1/eval/runs`).
+2. View per-metric scores with thresholds (retrieval ≥80%, faithfulness/answer relevancy CI gates ≥0.60, display highlight &lt;0.70).
+3. Expand a question row: question → retrieved sources → answer → per-metric pass/fail.
+4. Compare trend across prior runs (same page or history list).
+
+**Acceptance**: Drill-down shows all golden rows including edge cases (`abstain`, `empty`, `any_of`); history lists prior runs newest-first; bilingual UI strings for chrome only (questions shown as stored in fixture).
+
+**Automated tests**: Vitest `test_evaluation_page.test.tsx` (TC-116); harness integration TC-111–TC-113.
+
+**E2E tier**: local.

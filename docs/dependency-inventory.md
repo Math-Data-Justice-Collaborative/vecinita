@@ -1,7 +1,7 @@
 # Dependency Inventory
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-28 (S004/EV-005 F34 — Supabase admin auth)
+> **Last updated**: 2026-07-01 (S007/EV-008 F36 — LlamaIndex eval harness, no new deps)
 
 ## Runtime dependencies (Python — planned)
 
@@ -30,6 +30,20 @@
 - **Role:** Core orchestration — pgvector retriever integration, response synthesis, optional observability callbacks.
 - **Not using:** LangGraph (explicitly rejected for v1).
 - **Risk:** Dependency weight and version lockstep with pgvector adapter — pin in `pyproject.toml` during 06-tech-tooling.
+
+### EV-008 — RAG evaluation harness (F36, ADR-033)
+
+| Component | Package | New dep? | Notes |
+|-----------|---------|----------|-------|
+| Retrieval scoring | `vecinita-eval` (`packages/eval`) | No | URL-in-top-k + `retrieval_expectation` |
+| Faithfulness / answer relevancy | LlamaIndex evaluators in `llama-index` | **No** | `FaithfulnessEvaluator`, `AnswerRelevancyEvaluator` |
+| Judge LLM | Modal vLLM via `vecinita-llm-client` | No | Same Qwen2.5-1.5B endpoint as ChatRAG |
+| Run persistence | Postgres via internal-write-api | No | `eval_runs`, `eval_run_items` |
+| Admin UI | `data-management-frontend` | No | `/evaluation` tab |
+
+**Explicitly not added v1:** `ragas`, `deepeval`, `langfuse`, `arize-phoenix`.
+
+**Revisit:** Ragas if LlamaIndex judge scores unstable after golden-set tuning (ADR-033 §1).
 
 ### vLLM evaluation (RD-021)
 

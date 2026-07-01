@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita staging  
 > **Source**: `docs/deployment-integration.md` §Secrets, ADR-007, ADR-010  
-> **Last updated**: 2026-06-30 (S006/EV-007 F35 ext — VECINITA_ADMIN_FRONTEND_URL on Modal DM, Supabase redirect config)
+> **Last updated**: 2026-07-01 (S007/EV-008 F36 — VECINITA_EVAL_* on internal-write-api)
 
 Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — never commit to git.
 
@@ -43,6 +43,15 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 | `VECINITA_ADMIN_FRONTEND_URL` | Yes (EV-002) | Admin static site URL for health aggregator HTTP check |
 | `VECINITA_ENV` | No | `staging` |
 | `VECINITA_CORS_ORIGINS` | Yes (browser UI) | Must include admin frontend origin |
+| `VECINITA_EVAL_FIXTURE_PATH` | No | Default `data/fixtures/eval/qa_pairs.json` — golden set (EV-008 F36) |
+| `VECINITA_EVAL_RETRIEVAL_THRESHOLD` | No | Default `0.80` — aggregate retrieval gate |
+| `VECINITA_EVAL_FAITHFULNESS_CI_MIN` | No | Default `0.60` |
+| `VECINITA_EVAL_FAITHFULNESS_DISPLAY_MIN` | No | Default `0.70` — admin UI highlight |
+| `VECINITA_EVAL_ANSWER_RELEVANCY_CI_MIN` | No | Default `0.60` |
+| `VECINITA_EVAL_ANSWER_RELEVANCY_DISPLAY_MIN` | No | Default `0.70` |
+| `VECINITA_EVAL_LATENCY_P95_DISPLAY_MS` | No | Default `30000` — informational only |
+| `VECINITA_EVAL_JUDGE_QUERY_LANGUAGE` | No | Default `true` — judge rubric follows question locale |
+| `VECINITA_EVAL_CORPUS_PROFILE` | No | Default `fixture`; set `staging` for live-corpus eval runs |
 
 ## DigitalOcean — Static frontends (build time)
 

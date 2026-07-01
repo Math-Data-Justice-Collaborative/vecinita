@@ -29,11 +29,12 @@ Then invoke stages from the approved plan (e.g. `@10-e2e`, `@16-evolve`).
 | S003 | feature | completed | Browser-local persistent chat history (F33) | `feat/S003-persistent-chat-history` | 2026-06-26 | 2026-06-28 (QA/e2e/deploy deferred) |
 | S004 | feature | completed | Supabase Auth for admin surfaces (#75) — invite-only, admin+viewer; merged PR #100; deploy-verify deferred | `feat/S004-supabase-auth` | 2026-06-28 | 2026-06-29 (deploy 12/13 deferred) |
 | S005 | feature | paused | Admin user mgmt + remember-me + Resend SMTP + email templates (EV-006 / F35); deploy 12/13 deferred | `feat/S005-user-mgmt-auth` | 2026-06-29 | — |
-| S006 | feature | in_progress | Complete invite acceptance flow — #109 (EV-007 / F35 gap) | `feat/S006-invite-acceptance` | 2026-06-30 | — |
+| S006 | feature | paused | Complete invite acceptance flow — #109 (EV-007 / F35 gap); parked for S007 | `feat/S006-invite-acceptance` | 2026-06-30 | — |
+| S007 | feature | in_progress | Admin RAG evaluation tab + golden set — #99 (EV-008 / F36) | `feat/S007-rag-eval` | 2026-07-01 | — |
 
 ## Active session
 
-**S006-invite-acceptance** — see `docs/sessions/S006-invite-acceptance/` and
+**S007-rag-eval** — see `docs/sessions/S007-rag-eval/` and
 `workflow-state.yaml` §`active_session`.
 
 ## Folder layout
