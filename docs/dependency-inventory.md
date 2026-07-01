@@ -149,3 +149,21 @@ not JWKS; role source = **`app_metadata.role`** (not a `user_roles` table); shar
   storage adapter); user-search `filter` is a query param on the existing GoTrue Admin REST call. The
   `admin_delete_user_sessions` RPC (force sign-out) is committed SQL under `supabase/migrations/`, not
   a package.
+
+## PyPI packages intentionally not upgraded (QA-S007-003)
+
+**Last reviewed:** 2026-07-01 (09-qa advisory remediation)
+
+These packages report newer versions on PyPI but remain pinned per ADR-006 (LlamaIndex lockstep),
+Modal/vLLM compatibility, or prior pip-audit remediation. Do **not** bump without ADR + full CI.
+
+| Package | Pinned (approx.) | Latest (2026-07-01) | Rationale |
+|---------|------------------|---------------------|-----------|
+| llama-index (+ core, cli, workflows) | 0.13.x | 0.14.x | ADR-006; pgvector adapter lockstep |
+| llama-cloud / llama-parse | 1.6.x / 0.5.x | 2.x / 0.6.x | Transitive LlamaIndex stack |
+| openai | 1.109.x | 2.x | LlamaIndex evaluator compatibility |
+| pandas | 2.3.x | 3.x | Major bump — out of EV-008 scope |
+| marshmallow | 3.x | 4.x | Transitive; no direct use |
+| protobuf / pydantic-core / pillow / striprtf | patch pins | newer patch | Low risk; batch with stack bump |
+
+Workspace packages (`vecinita-*`) are skipped by pip-audit (not on PyPI) — expected.

@@ -91,6 +91,17 @@ These paths are allowlisted in `.gitleaks.toml` so `gitleaks detect --no-git` pa
 while CI still scans all **tracked** paths. Blocking gate remains `scripts/check_secrets.sh`
 under `apps/`, `packages/`, `tests/`, `infra/`, `openapi/`.
 
+## QA-S007-001 (2026-07-01) — false positives in working tree
+
+| Finding | Resolution |
+|---------|------------|
+| `vecinita.eval.explore.v1` localStorage key in `evalDashboardStorage.ts` | Regex allowlist — public storage key name, not a credential |
+| Supabase demo anon JWT in `scripts/ui/build_for_playwright.sh` | Path allowlist + regex for `iss":"supabase-demo"` prefix |
+| Bundled JWT in `apps/*/dist/` after Playwright build | Path allowlist for `dist/` (gitignored build output) |
+| QA reports quoting the above for traceability | Path allowlist for `docs/sessions/*/reports/qa-report.md` |
+
+Re-verify: `gitleaks detect --no-git --config .gitleaks.toml` → **0 leaks**.
+
 ## Test fixtures
 
 Integration tests use synthetic values such as `test-internal-key` for `VECINITA_INTERNAL_API_KEY`. These are not production secrets and are outside the high-confidence pattern set in `check_secrets.sh`.

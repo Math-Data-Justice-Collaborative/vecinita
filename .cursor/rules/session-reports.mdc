@@ -1,0 +1,55 @@
+---
+description: Session report paths — QA, verification, and E2E outputs belong under docs/sessions/{id}/reports/, not docs/ root
+alwaysApply: true
+---
+
+# Session reports (not docs root)
+
+QA, verification, E2E, and implementation-signoff reports are **session artifacts**. Write them
+only under the active session folder.
+
+## Required path
+
+```
+docs/sessions/{active_session.id}/reports/{report-name}.md
+```
+
+Equivalent: `{active_session.artifacts_dir}/reports/{report-name}.md`.
+
+Resolve `active_session` via workflow-state-manager `read_context` before writing. If
+`active_session` is null, **block** and route to **00-context** — do not fall back to `docs/`
+root report paths.
+
+## Report names by stage
+
+| Stage | Report file |
+|-------|-------------|
+| 08-verify-build | `verification-report.md` |
+| 09-qa | `qa-report.md` |
+| 10-e2e | `e2e-report.md` |
+| 11-verify-impl | `verify-impl.md` |
+
+## Do not write (new work)
+
+| Blocked path | Use instead |
+|--------------|-------------|
+| `docs/qa-report.md` | `docs/sessions/{id}/reports/qa-report.md` |
+| `docs/verification-report.md` | `docs/sessions/{id}/reports/verification-report.md` |
+| `docs/e2e-report.md` | `docs/sessions/{id}/reports/e2e-report.md` |
+| `docs/implementation-verification.md` | `docs/sessions/{id}/reports/verify-impl.md` |
+
+Pre-session files at `docs/` root are **historical read-only**; overwrite or create new reports
+there only when explicitly migrating an archive.
+
+## Standing docs (still at docs root)
+
+Long-lived specs remain at `docs/` root: `spec.md`, `feature-list.md`, `test-plan.md`,
+`deploy-checklist.md` (template), `execution-plan.md`, `deploy-state.md`, `service-health-state.md`,
+bug reports under `docs/bug-reports/`, etc.
+
+## State sync
+
+On report write, workflow-state-manager `update` must set `stages.{key}.report` to the full
+session path and append the same path to `artifacts[]` with `session_id`.
+
+Reference: [sessions-reference.md](../skills/sessions-reference.md) §9–10.

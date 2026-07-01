@@ -138,7 +138,7 @@ connectivity-gates — hybrid deploys (static UI + separate API) are never “AP
 5. If **`pending`** or **`skipped`**: Start or remain skipped per stage rules.
 6. After work begins, invoke agent `update` to set `in_progress` + `started_at`.
 
-Detail state may also live in stage reports (`docs/execution-plan.md`, `docs/qa-report.md`, etc.);
+Detail state may also live in stage reports (`docs/execution-plan.md`, session `reports/*.md`, etc.);
 **stage completion** must still be mirrored via agent `update`.
 
 Schema detail: [workflow-state-reference.md](workflow-state-reference.md).
@@ -293,10 +293,10 @@ user to paste tokens when `prod.env` exists.
 | **05-verify-tech** | Tech audit | Yes |
 | **06-tech-tooling** | Hooks, CI, formatters, smoke layout | Yes |
 | **07-build** | Code, tests, PRs | Yes (start of C) |
-| **08-verify-build** | `docs/verification-report.md` | Milestone gate |
-| **09-qa** | `docs/qa-report.md` | Parallel with 10 |
-| **10-e2e** | `docs/e2e-report.md` | Parallel with 09 |
-| **11-verify-impl** | User feature/journey approval | Yes |
+| **08-verify-build** | `docs/sessions/{id}/reports/verification-report.md` | Milestone gate |
+| **09-qa** | `docs/sessions/{id}/reports/qa-report.md` | Parallel with 10 |
+| **10-e2e** | `docs/sessions/{id}/reports/e2e-report.md` | Parallel with 09 |
+| **11-verify-impl** | `docs/sessions/{id}/reports/verify-impl.md` | Yes |
 | **12-verify-deploy** | `docs/deploy-checklist.md` | Yes |
 | **13-deploy-smoke** | Deploy, smokes, CHANGELOG | Yes (end of D) |
 | **14-hotfix** | BUG report + fix + optional redeploy | On-demand |

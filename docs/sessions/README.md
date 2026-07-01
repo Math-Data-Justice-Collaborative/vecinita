@@ -55,5 +55,6 @@ docs/sessions/SNNN-slug/
 | Session outputs | `docs/sessions/{id}/reports/*.md` |
 | Scoped discovery | `docs/context/{slug}.md` |
 
-Pre-session reports at `docs/` root (e.g. `docs/qa-report.md`) are historical; new work uses
-session report paths.
+Pre-session reports at `docs/` root (e.g. `docs/qa-report.md`) are **historical read-only**.
+New QA, verification, E2E, and verify-impl reports **must** use `docs/sessions/{id}/reports/`.
+See `.cursor/rules/session-reports.mdc`.

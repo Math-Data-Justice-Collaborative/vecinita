@@ -152,7 +152,7 @@ stages:
   07-build:
     status: in_progress
     started_at: "2026-05-24"
-    report: docs/verification-report.md
+    report: docs/sessions/{session_id}/reports/verification-report.md
     substeps:
       current_task: T3.2
 evolve_cycles:

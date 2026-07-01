@@ -25,6 +25,7 @@ NPM_WS := bash scripts/npm_workspaces.sh
 	format format-py format-fe format-check format-check-py format-fe-check \
 	typecheck typecheck-py typecheck-fe \
 	test test-py test-fe test-ui test-unit test-unit-coverage test-integration test-e2e test-smoke test-privacy test-live \
+	verify-connectivity \
 	build-frontend ci ci-guards audit audit-fe audit-fix check
 
 help: ## Show available targets
@@ -133,6 +134,9 @@ test: test-py test-fe ## Full test suite: Python + frontends (fail fast)
 
 test-live: ## Live staging smokes (requires VECINITA_STAGING_* env vars)
 	$(UV) run pytest tests/smoke -m live -v
+
+verify-connectivity: ## H0c + optional H4/H5 live (see infra/staging/.env.example)
+	bash scripts/deploy/verify_connectivity.sh
 
 build-frontend: ## Production build (both frontends)
 	@$(NPM_LOCK) $(NPM_WS) run build
