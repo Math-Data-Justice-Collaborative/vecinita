@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from uuid import UUID, uuid4
 
 import pytest
@@ -24,6 +24,8 @@ from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from sqlalchemy.engine import Engine
 
 _EXPECTED_ROW_LATENCY_MS = 1500
@@ -63,7 +65,7 @@ def _sample_summary() -> EvalSummary:
 
 
 @pytest.fixture
-def eval_run_id(engine: Engine) -> UUID:
+def eval_run_id(engine: Engine) -> Iterator[UUID]:
     """Create a pending eval run and delete it after the test."""
     created = create_eval_run(engine, corpus_profile="fixture")
     yield created.run_id
@@ -93,7 +95,7 @@ def test_create_eval_run_inserts_pending_row(engine: Engine) -> None:
 
 def test_execute_eval_run_persists_completed_results(
     engine: Engine,
-    eval_run_id: str,
+    eval_run_id: UUID,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """execute_eval_run stores per-row metrics and marks the run completed."""
@@ -121,7 +123,7 @@ def test_execute_eval_run_persists_completed_results(
 
 def test_execute_eval_run_marks_failed_on_exception(
     engine: Engine,
-    eval_run_id: str,
+    eval_run_id: UUID,
 ) -> None:
     """execute_eval_run sets status failed and re-raises on harness errors."""
     with (
@@ -249,11 +251,19 @@ def test_execute_eval_run_requires_database_url(
 def test_default_embed_fn_uses_embedding_client(monkeypatch: pytest.MonkeyPatch) -> None:
     """Default embed path delegates to EmbeddingClient.embed."""
     monkeypatch.setenv("VECINITA_MODAL_EMBED_URL", "http://embed.test")
-    client = MagicMock()
-    client.embed.return_value = [0.1, 0.2]
+
+    class StubEmbeddingClient:
+        def __init__(self) -> None:
+            self.calls: list[str] = []
+
+        def embed(self, text: str) -> list[float]:
+            self.calls.append(text)
+            return [0.1, 0.2]
+
+    stub = StubEmbeddingClient()
     with patch(
         "vecinita_internal_write_api.eval_service.EmbeddingClient",
-        return_value=client,
+        return_value=stub,
     ):
         from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
             _default_embed_fn,  # pyright: ignore[reportPrivateUsage]
@@ -261,7 +271,7 @@ def test_default_embed_fn_uses_embedding_client(monkeypatch: pytest.MonkeyPatch)
 
         vector = _default_embed_fn("hello")
     assert vector == [0.1, 0.2]
-    client.embed.assert_called_once_with("hello")
+    assert stub.calls == ["hello"]
 
 
 def test_fixture_path_honors_env_override(
