@@ -317,3 +317,81 @@ class HealthResponse(BaseModel):
     """GET /health liveness response."""
 
     status: Literal["ok"]
+
+
+EvalRunStatus = Literal["pending", "running", "completed", "failed"]
+EvalCorpusProfile = Literal["fixture", "staging"]
+
+
+class EvalRunCreateRequest(BaseModel):
+    """POST /internal/v1/eval/runs optional body."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    corpus_profile: EvalCorpusProfile = "fixture"
+
+
+class EvalRunCreateResponse(BaseModel):
+    """POST /internal/v1/eval/runs response."""
+
+    run_id: UUID
+    status: EvalRunStatus
+    created_at: datetime
+
+
+class EvalMetricsSummary(BaseModel):
+    """Aggregate eval metrics for a run."""
+
+    retrieval_relevance: float | None = None
+    faithfulness: float | None = None
+    answer_relevancy: float | None = None
+    latency_p95_ms: int | None = None
+
+
+class EvalRunListItem(BaseModel):
+    """One row in eval run history."""
+
+    run_id: UUID
+    status: EvalRunStatus
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    metrics_summary: EvalMetricsSummary
+
+
+class EvalRunListResponse(BaseModel):
+    """GET /internal/v1/eval/runs response."""
+
+    items: list[EvalRunListItem]
+    page: int
+    page_size: int
+    total_count: int
+
+
+class EvalRunItemMetrics(BaseModel):
+    """Per-question eval metrics."""
+
+    retrieval_pass: bool
+    faithfulness: float | None = None
+    answer_relevancy: float | None = None
+    latency_ms: int
+
+
+class EvalRunItemDetail(BaseModel):
+    """Per-question drill-down row."""
+
+    case_id: str
+    locale: str
+    question: str
+    expected_doc_url: str | None = None
+    retrieved_urls: list[str]
+    answer: str | None = None
+    metrics: EvalRunItemMetrics
+
+
+class EvalRunDetailResponse(BaseModel):
+    """GET /internal/v1/eval/runs/{run_id} response."""
+
+    run_id: UUID
+    status: EvalRunStatus
+    metrics_summary: EvalMetricsSummary
+    items: list[EvalRunItemDetail]

@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Annotated, cast
 from uuid import UUID
 
 import httpx
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, status
 from sqlalchemy import create_engine, text
 from vecinita_shared_schemas.auth import (
     AuthContext,
@@ -51,6 +51,10 @@ from vecinita_shared_schemas.internal_write import (
     DocumentHistoryResponse,
     DocumentSummary,
     DocumentVersionEntry,
+    EvalRunCreateRequest,
+    EvalRunCreateResponse,
+    EvalRunDetailResponse,
+    EvalRunListResponse,
     HealthAggregateResponse,
     HealthResponse,
     RecentActivity,
@@ -72,6 +76,12 @@ from vecinita_internal_write_api.audit import (
     cleanup_audit_log,
     create_document_version,
     emit_audit_event,
+)
+from vecinita_internal_write_api.eval_service import (
+    create_eval_run,
+    execute_eval_run,
+    get_eval_run,
+    list_eval_runs,
 )
 from vecinita_internal_write_api.jobs_client import (
     DataManagementJobsClient,
@@ -178,7 +188,10 @@ def _default_jobs_client() -> DataManagementJobsClient | None:
 
 
 def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route handlers inline
-    *, jobs_client: DataManagementJobsClient | None = None
+    *,
+    jobs_client: DataManagementJobsClient | None = None,
+    eval_embed_fn: object | None = None,
+    eval_judge: object | None = None,
 ) -> FastAPI:
     """Build the internal write API (sole holder of DATABASE_URL)."""
     app = FastAPI(title="Vecinita Internal Write API", version="0.1.0")
@@ -1260,5 +1273,56 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                 for row in rows
             ]
         )
+
+    @app.post(
+        "/internal/v1/eval/runs",
+        response_model=EvalRunCreateResponse,
+        status_code=status.HTTP_202_ACCEPTED,
+    )
+    def create_eval_run_route(
+        background_tasks: BackgroundTasks,
+        _actor: WriteActorDep,
+        body: EvalRunCreateRequest | None = None,
+    ) -> EvalRunCreateResponse:  # pyright: ignore[reportUnusedFunction]
+        request = body or EvalRunCreateRequest()
+        created = create_eval_run(engine, corpus_profile=request.corpus_profile)
+
+        def _run() -> None:
+            execute_eval_run(
+                engine,
+                run_id=created.run_id,
+                corpus_profile=request.corpus_profile,
+                embed_fn=eval_embed_fn,
+                judge=eval_judge,
+            )
+
+        background_tasks.add_task(_run)
+        return created
+
+    @app.get(
+        "/internal/v1/eval/runs",
+        response_model=EvalRunListResponse,
+    )
+    def list_eval_runs_route(
+        _actor: WriteActorDep,
+        page: int = 1,
+        page_size: int = 20,
+    ) -> EvalRunListResponse:  # pyright: ignore[reportUnusedFunction]
+        page = max(1, page)
+        page_size = min(max(1, page_size), 100)
+        return list_eval_runs(engine, page=page, page_size=page_size)
+
+    @app.get(
+        "/internal/v1/eval/runs/{run_id}",
+        response_model=EvalRunDetailResponse,
+    )
+    def get_eval_run_route(
+        run_id: UUID,
+        _actor: WriteActorDep,
+    ) -> EvalRunDetailResponse:  # pyright: ignore[reportUnusedFunction]
+        detail = get_eval_run(engine, run_id=run_id)
+        if detail is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        return detail
 
     return app
