@@ -39,8 +39,8 @@ export default defineConfig({
       reporter: ["json-summary", "html"],
       reportsDirectory: "../../coverage/data-management-frontend",
       thresholds: {
-        lines: 95,
-        branches: 95,
+        lines: 100,
+        branches: 98,
       },
     },
   },

@@ -487,3 +487,167 @@ def test_revoke_invite_active_user_returns_409(
     assert response.status_code == HTTPStatus.CONFLICT
     detail = json_object_get(response_json_object(response), "detail")
     assert json_str(detail, "code") == "cannot_revoke_active_user"
+
+
+def test_resend_invite_returns_503_when_admin_client_unconfigured(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Routes that call _require_client return 503 when Supabase admin is absent."""
+    monkeypatch.delenv("SUPABASE_URL", raising=False)
+    monkeypatch.delenv("SUPABASE_SECRET_KEY", raising=False)
+    app = create_app(require_proxy_auth=False, admin_client=None)
+    with TestClient(app) as test_client:
+        response = test_client.post(f"/admin/users/{_VIEWER_ID}/resend-invite")
+    assert response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
+
+
+def _admin_error_client(users: dict[str, dict[str, object]]) -> SupabaseAdminClient:
+    """Supabase client whose mutating calls always fail upstream."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/auth/v1/admin/users" and request.method == "GET":
+            return httpx.Response(HTTPStatus.OK, json={"users": list(users.values())})
+        if request.url.path.startswith("/auth/v1/admin/users/") and request.method == "GET":
+            uid = request.url.path.rsplit("/", 1)[-1]
+            user = users.get(uid)
+            if user is None:
+                return httpx.Response(HTTPStatus.NOT_FOUND, json={"msg": "not found"})
+            return httpx.Response(HTTPStatus.OK, json=user)
+        return httpx.Response(HTTPStatus.BAD_GATEWAY, json={"msg": "upstream"})
+
+    http = httpx.Client(
+        base_url="https://test.supabase.co",
+        transport=httpx.MockTransport(handler),
+    )
+    return SupabaseAdminClient(
+        base_url="https://test.supabase.co",
+        secret_key="test-secret",  # noqa: S106
+        http_client=http,
+    )
+
+
+@pytest.mark.parametrize(
+    ("method", "path", "json_body"),
+    [
+        ("PATCH", f"/admin/users/{_VIEWER_ID}/role", {"role": "admin"}),
+        ("POST", f"/admin/users/{_VIEWER_ID}/disable", None),
+        ("POST", f"/admin/users/{_VIEWER_ID}/enable", None),
+        ("DELETE", f"/admin/users/{_VIEWER_ID}", None),
+        ("POST", f"/admin/users/{_VIEWER_ID}/reset-password", None),
+    ],
+)
+def test_user_admin_routes_map_supabase_admin_errors(
+    method: str,
+    path: str,
+    json_body: dict[str, object] | None,
+) -> None:
+    """SupabaseAdminError from GoTrue is mapped to HTTP errors on admin routes."""
+    users = _seed_users()
+    app = create_app(
+        require_proxy_auth=False,
+        admin_client=_admin_error_client(users),
+        audit_emit=lambda _event: None,
+    )
+    with TestClient(app) as test_client:
+        response = test_client.request(method, path, json=json_body)
+    assert response.status_code == HTTPStatus.BAD_GATEWAY
+
+
+def test_resend_invite_maps_supabase_admin_error() -> None:
+    """resend-invite maps invite failures to HTTP errors."""
+    users = _seed_users()
+    invited_id = str(uuid4())
+    users[invited_id] = {"id": invited_id, "email": "pending@example.org"}
+    app = create_app(
+        require_proxy_auth=False,
+        admin_client=_admin_error_client(users),
+        audit_emit=lambda _event: None,
+    )
+    with TestClient(app) as test_client:
+        response = test_client.post(f"/admin/users/{invited_id}/resend-invite")
+    assert response.status_code == HTTPStatus.BAD_GATEWAY
+
+
+def test_revoke_invite_maps_supabase_admin_error() -> None:
+    """revoke-invite maps delete failures to HTTP errors."""
+    users = _seed_users()
+    invited_id = str(uuid4())
+    users[invited_id] = {"id": invited_id, "email": "pending@example.org"}
+    app = create_app(
+        require_proxy_auth=False,
+        admin_client=_admin_error_client(users),
+        audit_emit=lambda _event: None,
+    )
+    with TestClient(app) as test_client:
+        response = test_client.post(f"/admin/users/{invited_id}/revoke-invite")
+    assert response.status_code == HTTPStatus.BAD_GATEWAY
+
+
+def test_force_signout_maps_generic_supabase_admin_error() -> None:
+    """force signout maps non-404 Supabase errors to HTTP errors."""
+    users = _seed_users()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path.endswith("/signout") or "rpc" in request.url.path:
+            return httpx.Response(HTTPStatus.BAD_GATEWAY, json={"msg": "upstream"})
+        return httpx.Response(HTTPStatus.OK, json=users[_VIEWER_ID])
+
+    http = httpx.Client(
+        base_url="https://test.supabase.co",
+        transport=httpx.MockTransport(handler),
+    )
+    admin = SupabaseAdminClient(
+        base_url="https://test.supabase.co",
+        secret_key="test-secret",  # noqa: S106
+        http_client=http,
+    )
+    app = create_app(
+        require_proxy_auth=False,
+        admin_client=admin,
+        audit_emit=lambda _event: None,
+    )
+    with TestClient(app) as test_client:
+        response = test_client.post(f"/admin/users/{_VIEWER_ID}/signout")
+    assert response.status_code == HTTPStatus.BAD_GATEWAY
+
+
+def test_disable_self_returns_lockout_conflict(
+    client: tuple[TestClient, dict[str, dict[str, object]]],
+) -> None:
+    """Disabling your own account maps LockoutError to HTTP 409."""
+    test_client, _ = client
+    response = test_client.post(f"/admin/users/{_DEV_BYPASS_SUB}/disable")
+    assert response.status_code == HTTPStatus.CONFLICT
+
+
+def test_force_signout_returns_202_and_audits(
+    captured: list[AuditEventRequest],
+) -> None:
+    """Successful force signout emits user.signed_out audit."""
+    users = _seed_users()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if "rpc" in request.url.path:
+            return httpx.Response(HTTPStatus.NO_CONTENT)
+        if request.url.path.startswith("/auth/v1/admin/users/") and request.method == "GET":
+            return httpx.Response(HTTPStatus.OK, json=users[_VIEWER_ID])
+        return httpx.Response(HTTPStatus.NOT_FOUND, json={"msg": "unhandled"})
+
+    http = httpx.Client(
+        base_url="https://test.supabase.co",
+        transport=httpx.MockTransport(handler),
+    )
+    admin = SupabaseAdminClient(
+        base_url="https://test.supabase.co",
+        secret_key="test-secret",  # noqa: S106
+        http_client=http,
+    )
+    app = create_app(
+        require_proxy_auth=False,
+        admin_client=admin,
+        audit_emit=captured.append,
+    )
+    with TestClient(app) as test_client:
+        response = test_client.post(f"/admin/users/{_VIEWER_ID}/signout")
+    assert response.status_code == HTTPStatus.ACCEPTED
+    assert captured[-1].event_type == "user.signed_out"

@@ -193,6 +193,31 @@ describe("password reset flows (TC-093, UJ-033)", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("weak password");
   });
 
+  it("reset-password falls back when updateUser rejects a non-Error", async () => {
+    mockUpdateUser.mockRejectedValue("broken");
+
+    render(
+      <LocaleProvider>
+        <MemoryRouter>
+          <SetPasswordPage variant="reset" />
+        </MemoryRouter>
+      </LocaleProvider>,
+    );
+
+    const form = await screen.findByTestId("reset-password-form");
+    fireEvent.change(within(form).getByLabelText(/^password$/i), {
+      target: { value: "newpass123" },
+    });
+    fireEvent.change(within(form).getByLabelText(/confirm password/i), {
+      target: { value: "newpass123" },
+    });
+    fireEvent.click(
+      within(form).getByRole("button", { name: /update password/i }),
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(/sign in failed/i);
+  });
+
   it("reset-password shows success state after update", async () => {
     render(
       <LocaleProvider>

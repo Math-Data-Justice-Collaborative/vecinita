@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 import json
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -16,6 +17,7 @@ from vecinita_internal_write_api.eval_service import (
     create_eval_run,
     execute_eval_run,
     get_eval_run,
+    get_eval_timeseries,
     list_eval_runs,
 )
 from vecinita_shared_schemas.internal_write import EvalMetricsSummary
@@ -61,6 +63,7 @@ def _sample_summary() -> EvalSummary:
         faithfulness=0.72,
         answer_relevancy=0.68,
         latency_p95_ms=4200,
+        custom_scores={"tone-friendly": 0.88},
     )
 
 
@@ -119,6 +122,13 @@ def test_execute_eval_run_persists_completed_results(
     assert detail.metrics_summary.retrieval_relevance == pytest.approx(0.91)
     assert len(detail.items) == 1
     assert detail.items[0].metrics.retrieval_pass is True
+    with engine.connect() as conn:
+        row = conn.execute(
+            text("SELECT metrics_summary FROM eval_runs WHERE id = :id"),
+            {"id": run_id},
+        ).scalar_one()
+    assert isinstance(row, dict)
+    assert row.get("custom_scores") == {"tone-friendly": 0.88}
 
 
 def test_execute_eval_run_marks_failed_on_exception(
@@ -289,6 +299,19 @@ def test_fixture_path_honors_env_override(
     assert _fixture_path() == fixture
 
 
+def test_fixture_path_falls_back_to_repo_root_when_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Relative fixture paths resolve under the repository root when not absolute files."""
+    monkeypatch.setenv("VECINITA_EVAL_FIXTURE_PATH", "data/fixtures/eval/missing.json")
+    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
+        _fixture_path,  # pyright: ignore[reportPrivateUsage]
+    )
+
+    path = _fixture_path()
+    assert path.as_posix().endswith("data/fixtures/eval/missing.json")
+
+
 def test_get_eval_run_invalid_status_raises(engine: Engine, eval_run_id: UUID) -> None:
     """Invalid status values in the database are rejected when loading detail."""
     with engine.begin() as conn:
@@ -430,3 +453,268 @@ def test_list_eval_runs_parses_optional_timestamps(engine: Engine, eval_run_id: 
     item = next(row for row in listed.items if row.run_id == eval_run_id)
     assert item.started_at is not None
     assert item.completed_at is not None
+
+
+def test_get_eval_timeseries_returns_completed_points(engine: Engine, eval_run_id: UUID) -> None:
+    """get_eval_timeseries lists completed runs with builtin and custom metrics."""
+    completed_at = datetime.now(UTC)
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                """
+                UPDATE eval_runs
+                SET status = 'completed',
+                    started_at = :completed_at,
+                    completed_at = :completed_at,
+                    metrics_summary = CAST(:metrics AS jsonb)
+                WHERE id = :id
+                """
+            ),
+            {
+                "id": eval_run_id,
+                "completed_at": completed_at,
+                "metrics": json.dumps(
+                    {
+                        "retrieval_relevance": 0.9,
+                        "faithfulness": 0.8,
+                        "answer_relevancy": 0.7,
+                        "latency_p95_ms": 1000,
+                        "custom_scores": {"tone-friendly": 0.85},
+                    }
+                ),
+            },
+        )
+    series = get_eval_timeseries(engine, limit=100)
+    matching = [point for point in series.points if point.run_id == eval_run_id]
+    assert len(matching) == 1
+    assert matching[0].metrics_summary.custom_scores == {"tone-friendly": 0.85}
+    assert "tone-friendly" in series.available_metrics
+
+
+def test_get_eval_timeseries_skips_rows_without_completed_at(
+    engine: Engine,
+    eval_run_id: UUID,
+) -> None:
+    """get_eval_timeseries ignores completed runs missing completed_at."""
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                """
+                UPDATE eval_runs
+                SET status = 'completed',
+                    completed_at = NULL,
+                    metrics_summary = '{}'::jsonb
+                WHERE id = :id
+                """
+            ),
+            {"id": eval_run_id},
+        )
+    series = get_eval_timeseries(engine, limit=10)
+    assert all(point.run_id != eval_run_id for point in series.points)
+
+
+def test_get_eval_run_parses_custom_scores_and_skips_invalid_entries(
+    engine: Engine,
+    eval_run_id: UUID,
+) -> None:
+    """get_eval_run keeps valid custom score entries and drops invalid values."""
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                """
+                UPDATE eval_runs
+                SET status = 'completed',
+                    metrics_summary = CAST(:metrics AS jsonb)
+                WHERE id = :id
+                """
+            ),
+            {
+                "id": eval_run_id,
+                "metrics": json.dumps(
+                    {
+                        "custom_scores": {
+                            "good": 0.8,
+                            "bad": True,
+                        },
+                        "latency_p95_ms": 12.5,
+                    }
+                ),
+            },
+        )
+    detail = get_eval_run(engine, run_id=eval_run_id)
+    assert detail is not None
+    assert detail.metrics_summary.custom_scores == {"good": 0.8}
+    assert detail.metrics_summary.latency_p95_ms == 12
+
+
+def test_execute_eval_run_omits_custom_scores_when_empty(
+    engine: Engine,
+    eval_run_id: UUID,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """_summary_to_json skips custom_scores when the harness returns none."""
+    monkeypatch.setenv(
+        "DATABASE_URL",
+        "postgresql://vecinita:vecinita@localhost:5432/vecinita",
+    )
+    summary = EvalSummary(
+        retrieval_relevance=0.5,
+        faithfulness=0.5,
+        answer_relevancy=0.5,
+        latency_p95_ms=100,
+        custom_scores=None,
+    )
+    with patch(
+        "vecinita_internal_write_api.eval_service.run_golden_eval",
+        return_value=([_sample_row_result()], summary),
+    ):
+        execute_eval_run(
+            engine,
+            run_id=eval_run_id,
+            corpus_profile="fixture",
+            embed_fn=eval_embed_fn,
+        )
+    with engine.connect() as conn:
+        row = conn.execute(
+            text("SELECT metrics_summary FROM eval_runs WHERE id = :id"),
+            {"id": eval_run_id},
+        ).scalar_one()
+    assert isinstance(row, dict)
+    assert "custom_scores" not in row
+
+
+def test_optional_int_returns_none_for_bool() -> None:
+    """_optional_int rejects boolean values."""
+    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
+        _optional_int,  # pyright: ignore[reportPrivateUsage]
+    )
+
+    assert _optional_int(True) is None
+
+
+def test_create_eval_run_fallback_created_at(
+    engine: Engine,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """create_eval_run uses UTC now when created_at is not a datetime."""
+    monkeypatch.setenv(
+        "DATABASE_URL",
+        "postgresql://vecinita:vecinita@localhost:5432/vecinita",
+    )
+    with patch(
+        "vecinita_internal_write_api.eval_service.sqlalchemy_scalar_one",
+        return_value="not-a-datetime",
+    ):
+        created = create_eval_run(engine, corpus_profile="fixture")
+    try:
+        assert created.created_at.tzinfo is UTC
+    finally:
+        with engine.begin() as conn:
+            conn.execute(
+                text("DELETE FROM eval_run_items WHERE run_id = :id"),
+                {"id": created.run_id},
+            )
+            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": created.run_id})
+
+
+def test_latency_ms_defaults_when_item_latency_is_float(
+    engine: Engine,
+    eval_run_id: UUID,
+) -> None:
+    """_latency_ms returns zero when only a float row latency is present."""
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                """
+                INSERT INTO eval_run_items (
+                    run_id, case_id, locale, question, expected_doc_url,
+                    retrieved_urls, answer, metrics, latency_ms
+                )
+                VALUES (
+                    :run_id, 'float-latency', 'en', 'Q?', NULL,
+                    '[]'::jsonb, 'A', '{}'::jsonb, 0
+                )
+                """
+            ),
+            {"run_id": eval_run_id},
+        )
+        conn.execute(
+            text(
+                """
+                UPDATE eval_run_items
+                SET metrics = CAST(:metrics AS jsonb),
+                    latency_ms = 0
+                WHERE run_id = :run_id AND case_id = 'float-latency'
+                """
+            ),
+            {
+                "run_id": eval_run_id,
+                "metrics": json.dumps({}),
+            },
+        )
+    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
+        _latency_ms,  # pyright: ignore[reportPrivateUsage]
+    )
+
+    item: dict[str, object] = {"latency_ms": 12.5}
+    assert _latency_ms(item, {}) == 0
+
+
+def test_get_eval_timeseries_skips_non_datetime_completed_at(
+    engine: Engine,
+) -> None:
+    """get_eval_timeseries ignores rows whose completed_at is not a datetime."""
+    fake_row = {
+        "id": uuid4(),
+        "completed_at": "2026-01-01T00:00:00Z",
+        "metrics_summary": {},
+    }
+
+    class FakeResult:
+        def mappings(self) -> FakeResult:
+            return self
+
+        def all(self) -> list[dict[str, object]]:
+            return [fake_row]
+
+    class FakeConn:
+        def execute(self, *_args: object, **_kwargs: object) -> FakeResult:
+            return FakeResult()
+
+        def __enter__(self) -> FakeConn:
+            return self
+
+        def __exit__(self, *_args: object) -> None:
+            return None
+
+    class FakeEngine:
+        def connect(self) -> FakeConn:
+            return FakeConn()
+
+    series = get_eval_timeseries(FakeEngine(), limit=10)  # type: ignore[arg-type]
+    assert series.points == []
+
+
+def test_get_eval_run_optional_int_bool_latency_p95(
+    engine: Engine,
+    eval_run_id: UUID,
+) -> None:
+    """get_eval_run drops boolean latency_p95_ms values."""
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                """
+                UPDATE eval_runs
+                SET status = 'completed',
+                    metrics_summary = CAST(:metrics AS jsonb)
+                WHERE id = :id
+                """
+            ),
+            {
+                "id": eval_run_id,
+                "metrics": json.dumps({"latency_p95_ms": True}),
+            },
+        )
+    detail = get_eval_run(engine, run_id=eval_run_id)
+    assert detail is not None
+    assert detail.metrics_summary.latency_p95_ms is None

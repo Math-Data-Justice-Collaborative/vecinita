@@ -223,4 +223,139 @@ describe("Evaluation dashboard tabs", () => {
       expect(globalThis.fetch).toHaveBeenCalled();
     });
   });
+
+  it("toggles dashboard chart type, thresholds, and metric selection", async () => {
+    await renderAppRoutesReady("/evaluation?tab=dashboard");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-chart-type-toggle")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("eval-chart-type-toggle"));
+    fireEvent.click(screen.getByText(/threshold/i));
+    fireEvent.click(screen.getByTestId("eval-metric-toggle-faithfulness"));
+    fireEvent.click(screen.getByTestId("eval-metric-toggle-faithfulness"));
+    fireEvent.click(screen.getByTestId("eval-panel-toggle-faithfulness"));
+    fireEvent.click(screen.getByTestId("eval-panel-toggle-faithfulness"));
+    expect(screen.getByTestId("eval-panel-faithfulness")).toBeInTheDocument();
+  });
+
+  it("exports explore pivot CSV and changes column/value axes", async () => {
+    const createObjectURL = vi.fn(() => "blob:eval");
+    const revokeObjectURL = vi.fn();
+    vi.stubGlobal("URL", {
+      createObjectURL,
+      revokeObjectURL,
+    });
+    const click = vi.fn();
+    vi.spyOn(document, "createElement").mockImplementation((tag: string) => {
+      const element = document.createElementNS(
+        "http://www.w3.org/1999/xhtml",
+        tag,
+      ) as HTMLAnchorElement;
+      if (tag === "a") {
+        element.click = click;
+      }
+      return element;
+    });
+
+    await renderAppRoutesReady("/evaluation?tab=explore");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-pivot-col-axis")).toBeInTheDocument();
+    });
+    fireEvent.change(screen.getByTestId("eval-pivot-col-axis"), {
+      target: { value: "pass_fail" },
+    });
+    fireEvent.change(screen.getByTestId("eval-pivot-value-axis"), {
+      target: { value: "pass_rate" },
+    });
+    fireEvent.click(screen.getByTestId("eval-explore-export"));
+    expect(createObjectURL).toHaveBeenCalled();
+    expect(click).toHaveBeenCalled();
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:eval");
+
+    fireEvent.click(screen.getByText(/reset/i));
+    expect(localStorage.getItem("vecinita.eval.explore.v1")).toContain("locale");
+  });
+
+  it("toggles criterion enabled state", async () => {
+    const fetchMock = vi.mocked(globalThis.fetch);
+    await renderAppRoutesReady("/evaluation?tab=criteria");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-criterion-tone-friendly")).toBeInTheDocument();
+    });
+    const callsBefore = fetchMock.mock.calls.length;
+    fireEvent.click(screen.getByText(/disable/i));
+    await waitFor(() => {
+      expect(fetchMock.mock.calls.length).toBeGreaterThan(callsBefore);
+    });
+  });
+
+  it("shows dashboard error when timeseries fetch fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/eval/runs/timeseries")) {
+          return Promise.resolve({ ok: false, status: 503 });
+        }
+        return Promise.resolve(dashboardEvalFetch(url, init));
+      }),
+    );
+    await renderAppRoutesReady("/evaluation?tab=dashboard");
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(/503|failed/i);
+    });
+  });
+
+  it("shows explore error when run list fetch fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/eval/runs") && !url.includes("timeseries")) {
+          return Promise.resolve({ ok: false, status: 500 });
+        }
+        return Promise.resolve(dashboardEvalFetch(url, init));
+      }),
+    );
+    await renderAppRoutesReady("/evaluation?tab=explore");
+    await waitFor(() => {
+      expect(screen.getAllByRole("alert")[0]).toHaveTextContent(
+        /Eval runs list failed \(500\)/,
+      );
+    });
+  });
+
+  it("shows criteria error when list fetch fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/eval/criteria") && (init?.method ?? "GET") === "GET") {
+          return Promise.resolve({ ok: false, status: 502 });
+        }
+        return Promise.resolve(dashboardEvalFetch(url, init));
+      }),
+    );
+    await renderAppRoutesReady("/evaluation?tab=criteria");
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(/502|failed/i);
+    });
+  });
+
+  it("shows empty criteria list when no items returned", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/eval/criteria") && (init?.method ?? "GET") === "GET") {
+          return Promise.resolve({ ok: true, json: async () => ({ items: [] }) });
+        }
+        return Promise.resolve(dashboardEvalFetch(url, init));
+      }),
+    );
+    await renderAppRoutesReady("/evaluation?tab=criteria");
+    await waitFor(() => {
+      expect(screen.getByText(/No custom criteria yet/i)).toBeInTheDocument();
+    });
+  });
 });

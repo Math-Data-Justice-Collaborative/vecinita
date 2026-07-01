@@ -49,6 +49,10 @@ describe("auth link callback (TC-106, TC-107, UJ-031/033)", () => {
   beforeEach(() => {
     window.history.replaceState({}, "", "/accept-invite");
     window.location.hash = "";
+    mockGetSession.mockReset();
+    mockOnAuthStateChange.mockReset();
+    mockExchangeCodeForSession.mockReset();
+    mockUpdateUser.mockReset();
   });
 
   afterEach(() => {
@@ -286,5 +290,68 @@ describe("auth link callback (TC-106, TC-107, UJ-031/033)", () => {
     await waitFor(() => {
       expect(mockUpdateUser).toHaveBeenCalledWith({ password: "invitepass" });
     });
+  });
+
+  it("useAuthLinkCallback parses hash params without a leading hash mark", async () => {
+    window.location.hash = "error=access_denied&error_description=denied";
+    installSupabaseMock(null);
+
+    const { result } = renderHook(() => useAuthLinkCallback());
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("denied");
+    });
+  });
+
+  it("useAuthLinkCallback becomes ready when exchange fails but session appears", async () => {
+    window.history.replaceState({}, "", "/accept-invite?code=pkce-code");
+    mockGetSession
+      .mockResolvedValueOnce({ data: { session: null } })
+      .mockResolvedValueOnce({ data: { session: { access_token: "recovered" } } });
+    mockExchangeCodeForSession.mockResolvedValue({
+      error: new Error("exchange failed"),
+    });
+    mockOnAuthStateChange.mockReturnValue({
+      data: { subscription: { unsubscribe: vi.fn() } },
+    });
+    setSupabaseClientForTests({
+      auth: {
+        getSession: mockGetSession,
+        onAuthStateChange: mockOnAuthStateChange,
+        exchangeCodeForSession: mockExchangeCodeForSession,
+        updateUser: mockUpdateUser,
+      },
+    } as never);
+
+    const { result } = renderHook(() => useAuthLinkCallback());
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("ready");
+    });
+  });
+
+  it("useAuthLinkCallback becomes ready from an existing session without PKCE code", async () => {
+    window.history.replaceState({}, "", "/accept-invite");
+    mockGetSession.mockResolvedValue({
+      data: { session: { access_token: "already-ready" } },
+    });
+    mockOnAuthStateChange.mockReturnValue({
+      data: { subscription: { unsubscribe: vi.fn() } },
+    });
+    setSupabaseClientForTests({
+      auth: {
+        getSession: mockGetSession,
+        onAuthStateChange: mockOnAuthStateChange,
+        exchangeCodeForSession: mockExchangeCodeForSession,
+        updateUser: mockUpdateUser,
+      },
+    } as never);
+
+    const { result } = renderHook(() => useAuthLinkCallback());
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("ready");
+    });
+    expect(mockExchangeCodeForSession).not.toHaveBeenCalled();
   });
 });

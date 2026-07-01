@@ -401,8 +401,8 @@ describe("EvaluationPage", () => {
   });
 
   it("polls a pending run until it completes", async () => {
-    vi.useFakeTimers({ shouldAdvanceTime: true });
-    let detailCalls = 0;
+    const POLL_RUN_ID = "00000000-0000-0000-0000-0000000000aa";
+    let pollDetailCalls = 0;
     vi.stubGlobal(
       "fetch",
       vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
@@ -412,18 +412,28 @@ describe("EvaluationPage", () => {
           return Promise.resolve({
             ok: true,
             json: async () => ({
-              run_id: RUN_ID,
+              run_id: POLL_RUN_ID,
               status: "pending",
               created_at: "2026-07-01T12:00:00Z",
             }),
           });
         }
-        if (url.includes("/internal/v1/eval/runs/")) {
-          detailCalls += 1;
-          const status = detailCalls < 2 ? "running" : "completed";
+        if (url.includes(`/internal/v1/eval/runs/${POLL_RUN_ID}`)) {
+          pollDetailCalls += 1;
+          const status = pollDetailCalls < 2 ? "running" : "completed";
           return Promise.resolve({
             ok: true,
-            json: async () => ({ ...DETAIL_BODY, status }),
+            json: async () => ({
+              ...DETAIL_BODY,
+              run_id: POLL_RUN_ID,
+              status,
+            }),
+          });
+        }
+        if (url.includes("/internal/v1/eval/runs/")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => DETAIL_BODY,
           });
         }
         if (url.includes("/internal/v1/eval/runs")) {
@@ -440,10 +450,12 @@ describe("EvaluationPage", () => {
       expect(screen.getByTestId("evaluation-run-button")).toBeInTheDocument();
     });
     fireEvent.click(screen.getByTestId("evaluation-run-button"));
-    await waitFor(() => {
-      expect(detailCalls).toBeGreaterThanOrEqual(2);
-    });
-    vi.useRealTimers();
+    await waitFor(
+      () => {
+        expect(pollDetailCalls).toBeGreaterThanOrEqual(2);
+      },
+      { timeout: 3000 },
+    );
   });
 
   it("falls back to translated load error for non-Error rejections", async () => {
@@ -623,6 +635,60 @@ describe("EvaluationPage", () => {
     const view = await renderAppRoutesReady("/evaluation");
     view.unmount();
     releaseList?.();
+    await Promise.resolve();
+  });
+
+  it("ignores in-flight history updates after unmount", async () => {
+    let releaseDetail: (() => void) | undefined;
+    const detailGate = new Promise<void>((resolve) => {
+      releaseDetail = resolve;
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes(`/internal/v1/eval/runs/${RUN_ID}`)) {
+          return detailGate.then(() => ({
+            ok: true,
+            json: async () => DETAIL_BODY,
+          }));
+        }
+        if (url.includes("/internal/v1/eval/runs")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => LIST_BODY,
+          });
+        }
+        return Promise.resolve(defaultEvalFetch(url));
+      }),
+    );
+    const view = await renderAppRoutesReady("/evaluation");
+    view.unmount();
+    releaseDetail?.();
+    await Promise.resolve();
+  });
+
+  it("ignores load errors after unmount", async () => {
+    let rejectList: ((reason?: unknown) => void) | undefined;
+    const listGate = new Promise<Response>((_resolve, reject) => {
+      rejectList = reject;
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (
+          url.includes("/internal/v1/eval/runs") &&
+          !url.includes("/internal/v1/eval/runs/")
+        ) {
+          return listGate;
+        }
+        return Promise.resolve(defaultEvalFetch(url));
+      }),
+    );
+    const view = await renderAppRoutesReady("/evaluation");
+    view.unmount();
+    rejectList?.(new Error("load failed after unmount"));
     await Promise.resolve();
   });
 });

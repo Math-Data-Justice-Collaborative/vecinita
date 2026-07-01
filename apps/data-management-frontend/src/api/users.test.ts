@@ -11,6 +11,7 @@ import {
   MechanismUnavailableError,
   resendInvite,
   resetUserPassword,
+  revokeInvite,
   sendTestEmail,
   EmailUnconfiguredError,
   EmailDomainUnverifiedError,
@@ -368,11 +369,75 @@ describe("users API client", () => {
     await expect(forceSignout(CLIENT, USER_ID)).rejects.toThrow(/forbidden/);
   });
 
-  it("forceSignout uses the status fallback for an empty non-503 body", async () => {
+  it("sendTestEmail maps plain-text email_unconfigured bodies", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(new Response("email_unconfigured", { status: 503 })),
+    );
+    await expect(
+      sendTestEmail(CLIENT, "ops@example.org"),
+    ).rejects.toBeInstanceOf(EmailUnconfiguredError);
+  });
+
+  it("sendTestEmail maps plain-text domain_unverified bodies", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(new Response("domain_unverified", { status: 503 })),
+    );
+    await expect(
+      sendTestEmail(CLIENT, "ops@example.org"),
+    ).rejects.toBeInstanceOf(EmailDomainUnverifiedError);
+  });
+
+  it("sendTestEmail throws generic error for other failures", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("nope", { status: 500 })),
+    );
+    await expect(sendTestEmail(CLIENT, "ops@example.org")).rejects.toThrow(
+      /nope/,
+    );
+  });
+
+  it("inviteUser throws when response is not ok", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("bad invite", { status: 400 })),
+    );
+    await expect(
+      inviteUser(CLIENT, "a@b.com", "admin"),
+    ).rejects.toThrow(/bad invite/);
+  });
+
+  it("revokeInvite throws when response is not ok", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("revoke failed", { status: 409 })),
+    );
+    await expect(revokeInvite(CLIENT, USER_ID)).rejects.toThrow(/revoke failed/);
+  });
+
+  it("forceSignout uses status fallback when the error body is empty", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 403 })),
+    );
+    await expect(forceSignout(CLIENT, USER_ID)).rejects.toThrow(
+      "Force sign-out failed (403)",
+    );
+  });
+
+  it("sendTestEmail uses status fallback when the error body is empty", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(new Response("", { status: 500 })),
     );
-    await expect(forceSignout(CLIENT, USER_ID)).rejects.toThrow(/500/);
+    await expect(sendTestEmail(CLIENT, "ops@example.org")).rejects.toThrow(
+      "Send test email failed (500)",
+    );
   });
 });

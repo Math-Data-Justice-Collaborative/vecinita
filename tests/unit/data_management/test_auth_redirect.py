@@ -21,6 +21,13 @@ def test_build_auth_redirect_path_strips_trailing_slash() -> None:
     )
 
 
+def test_build_auth_redirect_path_rejects_invalid_path() -> None:
+    """Invalid callback path names raise AdminRedirectConfigError."""
+    origin = "https://admin.example.com"
+    with pytest.raises(AdminRedirectConfigError, match="Invalid auth callback path"):
+        build_auth_redirect_path(origin, "login")
+
+
 def test_build_auth_redirect_path_rejects_invalid_origin() -> None:
     """Malformed origins raise AdminRedirectConfigError."""
     with pytest.raises(AdminRedirectConfigError, match="Invalid admin frontend origin"):

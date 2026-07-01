@@ -157,4 +157,29 @@ describe("UsersPage send test email (TC-099, UJ-037)", () => {
       expect.stringContaining("staging-runbook"),
     );
   });
+
+  it("surfaces generic test-email failures", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(MOCK_USERS))
+      .mockResolvedValueOnce(new Response("smtp down", { status: 500 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderUsersPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("users-send-test-email")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId("users-test-email-input"), {
+      target: { value: "ops@partner.example.org" },
+    });
+    fireEvent.click(screen.getByTestId("users-send-test-email"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(/smtp down/i);
+    expect(screen.queryByTestId("email-test-unconfigured")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("email-test-domain-unverified"),
+    ).not.toBeInTheDocument();
+  });
 });

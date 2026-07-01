@@ -111,4 +111,25 @@ describe("UsersPage force sign-out (TC-098, UJ-036)", () => {
     expect(fallback).toBeInTheDocument();
     expect(fallback.textContent ?? "").toMatch(/disable/i);
   });
+
+  it("surfaces generic force-signout errors", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(MOCK_USERS))
+      .mockResolvedValueOnce(new Response("signout failed", { status: 500 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderUsersPage();
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(`force-signout-${ACTIVE_USER_ID}`),
+      ).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId(`force-signout-${ACTIVE_USER_ID}`));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(/signout failed/i);
+    expect(screen.queryByTestId("force-signout-fallback")).not.toBeInTheDocument();
+  });
 });

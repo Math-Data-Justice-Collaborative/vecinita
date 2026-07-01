@@ -83,11 +83,19 @@ describe("config", () => {
     setOperatorAccessToken(null);
   });
 
-  it("requireCorpusConfig throws when neither api key nor session token", async () => {
+  it("idleTimeoutMinutes and idleWarningSeconds fall back for invalid env", async () => {
+    vi.stubEnv("VITE_VECINITA_IDLE_TIMEOUT_MIN", "0");
+    vi.stubEnv("VITE_VECINITA_IDLE_WARNING_SEC", "-1");
+    const { idleTimeoutMinutes, idleWarningSeconds } = await import("./config");
+    expect(idleTimeoutMinutes()).toBe(30);
+    expect(idleWarningSeconds()).toBe(60);
+  });
+
+  it("requireCorpusConfig throws when neither api key nor operator token is set", async () => {
     vi.stubEnv("VITE_VECINITA_CORPUS_API_KEY", "");
     const { requireCorpusConfig, setOperatorAccessToken } =
       await import("./config");
     setOperatorAccessToken(null);
-    expect(() => requireCorpusConfig()).toThrow(/sign in with Supabase/);
+    expect(() => requireCorpusConfig()).toThrow(/CORPUS_API_KEY or sign in/);
   });
 });

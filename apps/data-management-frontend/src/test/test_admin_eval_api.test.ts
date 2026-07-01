@@ -1,9 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+  createEvalCriterion,
+  fetchEvalCriteria,
   fetchEvalRunDetail,
   fetchEvalRuns,
+  fetchEvalTimeseries,
   triggerEvalRun,
+  updateEvalCriterion,
 } from "@/api/admin";
 
 const OPTIONS = {
@@ -125,5 +129,153 @@ describe("eval admin API helpers", () => {
     await expect(triggerEvalRun(OPTIONS)).rejects.toThrow(
       "Eval run trigger failed (500)",
     );
+  });
+
+  it("fetchEvalTimeseries returns parsed series on success", async () => {
+    const body = { points: [], available_metrics: ["faithfulness"] };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => body,
+      }),
+    );
+    await expect(fetchEvalTimeseries(OPTIONS, 50)).resolves.toEqual(body);
+    expect(vi.mocked(fetch).mock.calls[0]?.[0]).toContain("limit=50");
+  });
+
+  it("fetchEvalTimeseries throws when response is not ok", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: false, status: 502 }),
+    );
+    await expect(fetchEvalTimeseries(OPTIONS)).rejects.toThrow(
+      "Eval timeseries failed (502)",
+    );
+  });
+
+  it("fetchEvalCriteria returns parsed list on success", async () => {
+    const body = { items: [] };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => body,
+      }),
+    );
+    await expect(fetchEvalCriteria(OPTIONS)).resolves.toEqual(body);
+  });
+
+  it("fetchEvalCriteria throws when response is not ok", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: false, status: 403 }),
+    );
+    await expect(fetchEvalCriteria(OPTIONS)).rejects.toThrow(
+      "Eval criteria list failed (403)",
+    );
+  });
+
+  it("createEvalCriterion posts rubric body on success", async () => {
+    const created = {
+      criterion_id: "00000000-0000-0000-0000-000000000055",
+      slug: "tone",
+      label: "Tone",
+      rubric: "Friendly",
+      scorer_type: "llm_rubric" as const,
+      enabled: true,
+      created_at: "2026-07-01T12:00:00Z",
+      updated_at: "2026-07-01T12:00:00Z",
+    };
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => created,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(
+      createEvalCriterion(OPTIONS, {
+        slug: "tone",
+        label: "Tone",
+        rubric: "Friendly",
+        enabled: false,
+      }),
+    ).resolves.toEqual(created);
+    const init = fetchMock.mock.calls[0]?.[1] as RequestInit | undefined;
+    expect(init?.body).toContain('"enabled":false');
+  });
+
+  it("createEvalCriterion throws when response is not ok", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: false, status: 400 }),
+    );
+    await expect(
+      createEvalCriterion(OPTIONS, {
+        slug: "tone",
+        label: "Tone",
+        rubric: "Friendly",
+      }),
+    ).rejects.toThrow("Eval criterion create failed (400)");
+  });
+
+  it("updateEvalCriterion patches criterion on success", async () => {
+    const updated = {
+      criterion_id: "00000000-0000-0000-0000-000000000055",
+      slug: "tone",
+      label: "Tone",
+      rubric: "Friendly",
+      scorer_type: "llm_rubric" as const,
+      enabled: false,
+      created_at: "2026-07-01T12:00:00Z",
+      updated_at: "2026-07-01T12:01:00Z",
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => updated,
+      }),
+    );
+    await expect(
+      updateEvalCriterion(OPTIONS, updated.criterion_id, { enabled: false }),
+    ).resolves.toEqual(updated);
+  });
+
+  it("updateEvalCriterion throws when response is not ok", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: false, status: 409 }),
+    );
+    await expect(
+      updateEvalCriterion(OPTIONS, "missing", { enabled: true }),
+    ).rejects.toThrow("Eval criterion update failed (409)");
+  });
+
+  it("eval API helpers send an empty bearer when no token or apiKey is set", async () => {
+    const noAuth = { baseUrl: "http://localhost:8002" };
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await fetchEvalRuns(noAuth);
+    await fetchEvalRunDetail(noAuth, "run-1");
+    await triggerEvalRun(noAuth);
+    await fetchEvalTimeseries(noAuth);
+    await fetchEvalCriteria(noAuth);
+    await createEvalCriterion(noAuth, {
+      slug: "tone",
+      label: "Tone",
+      rubric: "Friendly",
+    });
+    await updateEvalCriterion(noAuth, "crit-1", { enabled: true });
+
+    for (const call of fetchMock.mock.calls) {
+      const init = call[1] as RequestInit | undefined;
+      const headers = init?.headers as Record<string, string> | undefined;
+      expect(headers?.Authorization).toBe("Bearer ");
+    }
+    expect(String(fetchMock.mock.calls[3]?.[0])).toContain("limit=100");
   });
 });
