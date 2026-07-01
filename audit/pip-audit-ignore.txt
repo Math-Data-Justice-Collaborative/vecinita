@@ -22,3 +22,5 @@ CVE-2026-41168
 CVE-2026-41313
 CVE-2026-41312
 CVE-2026-41314
+# Transitive nltk 3.9.4 from llama-index; no PyPI fix yet (track nltk>=3.10).
+PYSEC-2026-597
