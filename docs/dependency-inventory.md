@@ -70,6 +70,7 @@
 | **clsx** | Conditional classnames | MIT | shadcn/ui utility |
 | **tailwind-merge** | Tailwind class dedup | MIT | shadcn/ui utility |
 | **lucide-react** | Icons | ISC | shadcn/ui icons |
+| **recharts** | ^2.15.x Eval dashboard charts (`data-management-frontend`) | MIT | ADR-034 / EV-008 M64 |
 | **react-router** | ^7.x Admin routing | MIT | EV-002 F23; TP-021 |
 | **react-router-dom** | ^7.x DOM bindings | MIT | EV-002 F23; TP-021 |
 | **vecinita-frontend-i18n** | workspace | Locale utils + EN/ES messages | — | EV-004 F31; `packages/frontend-i18n` |

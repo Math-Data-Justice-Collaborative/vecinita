@@ -9,15 +9,15 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 14: EV-008 — Admin RAG evaluation (F36, #99) — **07-build complete** |
-| **Active milestone** | M63: Deploy docs + Phase 14 gate — **completed** |
-| **Active task** | **—** (M59–M63 complete; next: 08-verify-build) |
-| **Tasks completed** | Phase 14 M59–M63 complete (S007); Phase 13 M54–M58 complete (S006) |
+| **Active phase** | Phase 14: EV-008 — Admin RAG evaluation (F36, #99) — **M64 dashboard in progress** |
+| **Active milestone** | M64: Interactive eval dashboard — **in_progress** |
+| **Active task** | T64.1–T64.8 — dashboard scope (ADR-034) |
+| **Tasks completed** | Phase 14 M59–M63 complete; M64 in progress (S007) |
 | **Last updated** | 2026-07-01 |
-| **Evolve cycle** | EV-008 (F36, #99) — **07-build complete** |
+| **Evolve cycle** | EV-008 (F36, #99) — **07-build in progress (M64)** |
 | **Git branch** | `feat/S007-rag-eval` |
-| **Active session** | S007-rag-eval — evolve-lite. 01-requirements **complete** (RD-099–RD-113). 04-tech-plan **complete** (**ADR-033**, TP-S007-01–**16**). Next: **07-build** (M59–M63). Lite path skips 02/03/05/06/11 |
-| **Scope addition** | 2026-07-01 — EV-008 adds admin RAG evaluation tab, golden eval set harness, Postgres run history ([#99](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/99)). S006 (EV-007) deploy stages remain deferred on paused session. |
+| **Active session** | S007-rag-eval — evolve-lite. M59–M63 complete. **M64 dashboard** (R68): time-series, pivot explore, criteria CRUD, collapsible panels |
+| **Scope addition** | 2026-07-01 — R68 extends F36 with interactive eval dashboard (ADR-034, UJ-041–043, TC-117–122, AC-E17–E21). Baseline M59–M63 delivered in same PR ([#113](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/113)). |
 
 ## Template
 
@@ -1265,7 +1265,40 @@ frontend auth callback, retract invitation, template polish, live invite smoke (
 | T63.3 | Docs: Mark AC-E12–AC-E16 build-complete in acceptance-criteria when green | Docs | completed | acceptance-criteria AC-E12–E16 | T62.4, T61.7, T60.5 | — | S007 | F36 |
 | T63.4 | Docs: Session report + Phase 14 gate checklist | Docs | completed | 08-verify-build | T63.1–T63.3 | — | S007 | F36 |
 
-#### Phase 14 Gate Check
+#### M64: Interactive eval dashboard
+
+**Goal:** Time-series charts, pivot explore, collapsible panels, custom criteria (ADR-034).  
+**Branch:** `feat/S007-rag-eval`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
+|---|------|------|--------|-------------|------------|-----------|---------|---------|
+| T64.1 | Test: `tests/integration/test_eval_dashboard_routes.py` — TC-120/122 — red | Test | in_progress | ADR-034, test-plan TC-120/122 | T61.7 | — | S007 | F36 |
+| T64.2 | Code: Alembic `eval_criteria` + privacy guardrails | Code | in_progress | ADR-034 §Schema | T64.1 | — | S007 | F36 |
+| T64.3 | Code: Timeseries + criteria API on internal-write-api | Code | in_progress | ADR-034 §API | T64.2 | — | S007 | F36 |
+| T64.4 | Code: `packages/eval` custom criteria scorer hook | Code | in_progress | ADR-034 | T64.3 | — | S007 | F36 |
+| T64.5 | Test (Vitest): `test_evaluation_dashboard.test.tsx` — TC-117–119/121 — red | Test | in_progress | UJ-041–043, TC-117–121 | — | — | S007 | F36 |
+| T64.6 | Code: Dashboard + Explore + Criteria tabs (`recharts`) | Code | in_progress | ADR-034 §UI, UJ-041–043 | T64.3 | D10 | S007 | F36 |
+| T64.7 | Code: TC-117–121 Vitest + TC-120/122 integration green | Code | in_progress | test-plan | T64.4–T64.6 | — | S007 | F36 |
+| T64.8 | Docs: ADR-034, scope-addition report, feature-list F36 extension | Docs | in_progress | ADR-034 | T64.7 | — | S007 | F36 |
+
+#### Phase 14 Gate Check (updated)
+
+- [x] All M59–M63 tasks completed (T59.1–T63.4)
+- [ ] All M64 tasks completed (T64.1–T64.8)
+- [x] TC-111–TC-116 green; UJ-039/040 covered (T2)
+- [ ] TC-117–TC-122 green; UJ-041–043 covered
+- [x] AC-E12–AC-E16 satisfied at T2; live staging eval run informational at 13-deploy-smoke (T3)
+- [ ] AC-E17–AC-E21 satisfied (dashboard scope)
+- [x] `eval_runs` / `eval_run_items` migration applied; privacy test green
+- [ ] `eval_criteria` migration applied; privacy test green
+- [x] No new Python runtime dependencies (ADR-033 §15); **recharts** FE dep per ADR-034
+- [x] CORS preflight covers `POST /internal/v1/eval/runs`
+- [ ] CORS preflight covers eval criteria routes
+- [ ] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green
+
+---
+
+#### Phase 14 Gate Check (baseline — superseded by M64 update above)
 
 - [x] All M59–M63 tasks completed (T59.1–T63.4)
 - [x] TC-111–TC-116 green; UJ-039/040 covered (T2)
