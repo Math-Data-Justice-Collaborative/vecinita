@@ -24,9 +24,7 @@ exit 1
 def test_verify_connectivity_skips_live_when_staging_urls_unset() -> None:
     """H4/H5 skip guard must exit 0 when no staging URLs are configured (QA-S007-002)."""
     env = {
-        key: value
-        for key, value in os.environ.items()
-        if not key.startswith("VECINITA_STAGING_")
+        key: value for key, value in os.environ.items() if not key.startswith("VECINITA_STAGING_")
     }
     result = subprocess.run(  # noqa: S603
         ["/bin/bash", "-c", _SKIP_GUARD],

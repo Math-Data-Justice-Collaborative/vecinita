@@ -2,9 +2,9 @@
 export function filterExpectedVitestConsoleLog(
   log: string,
   type: "stdout" | "stderr",
-): boolean | void {
+): boolean | undefined {
   if (type !== "stderr") {
-    return;
+    return undefined;
   }
   if (/must be used within/i.test(log)) {
     return false;
@@ -21,4 +21,5 @@ export function filterExpectedVitestConsoleLog(
   ) {
     return false;
   }
+  return undefined;
 }
