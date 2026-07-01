@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 from typing import TYPE_CHECKING
 
 from llama_index.core.base.llms.types import CompletionResponse, LLMMetadata
@@ -15,6 +16,23 @@ if TYPE_CHECKING:
     from collections.abc import Generator
 
     from vecinita_eval.judges import JudgeClient
+
+
+def _qwen_instruct_prompt(prompt: str) -> str:
+    """Wrap a plain prompt in Qwen2.5-Instruct chat format."""
+    return (
+        "<|im_start|>system\n"
+        "Follow the instructions precisely. Be concise.\n"
+        "<|im_start|>user\n"
+        f"{prompt}\n"
+        "<|im_start|>assistant\n"
+    )
+
+
+def warm_modal_llm(client: LlmClient) -> None:
+    """Best-effort cold-start warm for vecinita-llm before eval batches."""
+    with contextlib.suppress(Exception):
+        client.warm()
 
 
 class ModalHttpLLM(CustomLLM):
@@ -44,7 +62,7 @@ class ModalHttpLLM(CustomLLM):
         """Complete a prompt via vecinita-llm HTTP `/generate`."""
         _ = (formatted, kwargs)
         text = self.client.generate(
-            prompt,
+            _qwen_instruct_prompt(prompt),
             max_tokens=self.max_tokens,
             temperature=self.temperature,
         )
@@ -60,7 +78,7 @@ class ModalHttpLLM(CustomLLM):
         _ = (formatted, kwargs)
         parts: list[str] = []
         for token in self.client.generate_stream(
-            prompt,
+            _qwen_instruct_prompt(prompt),
             max_tokens=self.max_tokens,
             temperature=self.temperature,
         ):
@@ -76,5 +94,6 @@ def default_eval_runtime() -> tuple[JudgeClient | None, ModalHttpLLM | None]:
         client = LlmClient()
     except LlmClientError:
         return None, None
+    warm_modal_llm(client)
     llm = ModalHttpLLM(client=client)
     return LlamaIndexJudgeClient(llm=llm), llm

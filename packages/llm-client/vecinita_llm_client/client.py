@@ -82,6 +82,10 @@ class LlmClient:
             raise LlmClientError(msg)
         return text
 
+    def warm(self) -> None:
+        """Best-effort POST ``/warm`` to reduce cold-start latency."""
+        self._client.post("/warm", timeout=120.0)
+
     def generate_stream(
         self,
         prompt: str,
