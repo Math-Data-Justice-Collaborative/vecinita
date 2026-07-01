@@ -37,6 +37,7 @@ EVAL_TABLES: Final[frozenset[str]] = frozenset(
     {
         "eval_runs",
         "eval_run_items",
+        "eval_criteria",
     }
 )
 
