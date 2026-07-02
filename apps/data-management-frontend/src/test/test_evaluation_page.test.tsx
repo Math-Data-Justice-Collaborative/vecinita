@@ -128,14 +128,98 @@ describe("EvaluationPage", () => {
 
     expect(screen.getByTestId("evaluation-page")).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByTestId("evaluation-history")).toBeInTheDocument();
+      expect(screen.getByTestId("evaluation-drilldown")).toBeInTheDocument();
     });
     expect(screen.getByText(/91%/)).toBeInTheDocument();
-    expect(screen.getByTestId("evaluation-drilldown")).toBeInTheDocument();
     expect(
       screen.getByText(/When are food pantry hours updated\?/),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Food pantry hours are posted weekly\./),
+    ).toBeInTheDocument();
     expect(screen.getAllByText(/Pass/i).length).toBeGreaterThan(0);
+  });
+
+  it("renders faithfulness and answer relevancy scores from API (TC-116)", async () => {
+    await renderAppRoutesReady("/evaluation");
+    await waitFor(() => {
+      expect(screen.getByTestId("evaluation-drilldown")).toBeInTheDocument();
+    });
+    expect(screen.getByText("0.85")).toBeInTheDocument();
+    expect(screen.getByText("0.80")).toBeInTheDocument();
+    expect(screen.getByText("0.72")).toBeInTheDocument();
+    expect(screen.getByText("0.68")).toBeInTheDocument();
+  });
+
+  it("shows model answers and column controls in drill-down", async () => {
+    await renderAppRoutesReady("/evaluation");
+    await waitFor(() => {
+      expect(screen.getByTestId("evaluation-drilldown")).toBeInTheDocument();
+    });
+    expect(screen.getByTestId("eval-drilldown-columns-toggle")).toBeInTheDocument();
+    expect(screen.getByTestId("eval-drilldown-wrap-toggle")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("eval-answer-community-food-pantry-en"),
+    ).toHaveTextContent(/Food pantry hours are posted weekly\./);
+  });
+
+  it("shows hint when judge metrics are null with zero retrieval", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/eval/runs/")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              ...DETAIL_BODY,
+              metrics_summary: {
+                retrieval_relevance: 0,
+                faithfulness: null,
+                answer_relevancy: null,
+                latency_p95_ms: 1599,
+              },
+              items: DETAIL_BODY.items.map((item) => ({
+                ...item,
+                retrieved_urls: [],
+                answer:
+                  "I don't have enough community corpus context to answer that question.",
+                metrics: {
+                  ...item.metrics,
+                  retrieval_pass: false,
+                  faithfulness: null,
+                  answer_relevancy: null,
+                },
+              })),
+            }),
+          });
+        }
+        if (url.includes("/internal/v1/eval/runs")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              ...LIST_BODY,
+              items: [
+                {
+                  ...LIST_BODY.items[0],
+                  metrics_summary: {
+                    retrieval_relevance: 0,
+                    faithfulness: null,
+                    answer_relevancy: null,
+                    latency_p95_ms: 1599,
+                  },
+                },
+              ],
+            }),
+          });
+        }
+        return Promise.resolve(defaultEvalFetch(url));
+      }),
+    );
+    await renderAppRoutesReady("/evaluation");
+    await waitFor(() => {
+      expect(screen.getByTestId("evaluation-judges-skipped-hint")).toBeInTheDocument();
+    });
   });
 
   it("triggers a new eval run and refreshes detail", async () => {

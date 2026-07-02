@@ -165,15 +165,17 @@ def run_golden_eval(  # noqa: PLR0913
             retrieval_pass = len(retrieved_urls) == 0 and _abstain_answer_ok(answer)
             retrieval_passes[(row.id, row.locale)] = retrieval_pass
 
-        if judge is not None and chunks and row.retrieval_expectation not in {"abstain", "empty"}:
-            if scorer is not None:
-                faithfulness = scorer.score(row=row, answer=answer, context=context)
-            elif hasattr(judge, "faithfulness"):
-                faithfulness = judge.faithfulness(  # pyright: ignore[reportUnknownMemberType]
-                    question=row.question,
-                    answer=answer,
-                    context=context,
-                )
+        if judge is not None and answer.strip():
+            if chunks and row.retrieval_expectation not in {"abstain", "empty"}:
+                if scorer is not None:
+                    faithfulness = scorer.score(row=row, answer=answer, context=context)
+                elif hasattr(judge, "faithfulness"):
+                    faithfulness = judge.faithfulness(  # pyright: ignore[reportUnknownMemberType]
+                        question=row.question,
+                        answer=answer,
+                        context=context,
+                    )
+            # LlamaIndex AnswerRelevancyEvaluator scores Q↔A without retrieved context.
             answer_relevancy = judge.answer_relevancy(  # pyright: ignore[reportUnknownMemberType]
                 question=row.question,
                 answer=answer,

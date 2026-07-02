@@ -656,6 +656,7 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Objective**: LlamaIndex evaluators score answer quality using `required_facts[]` and Modal LLM judge (mocked in CI).
 - **Input**: `tests/eval/test_eval_answer_quality.py` — full RAG pipeline per golden row; mocked judge returning deterministic scores.
 - **Expected**: CI aggregate faithfulness ≥0.60; answer relevancy ≥0.60; judge uses query language (RD-109).
+- **Regression guards**: `tests/unit/eval/test_runner_judge_contract.py` (judge wired / zero-chunk answer relevancy / faithfulness requires context); `tests/bugs/test_bug_2026_07_01_eval_null_judge_metrics.py`; `tests/unit/internal_write_api/test_eval_service.py::test_execute_eval_run_resolves_default_judge_when_not_injected`; `tests/unit/internal_write_api/test_app_eval_routes.py::test_factory_create_app_wires_default_eval_judge_from_env`; UJ-039 e2e asserts non-null summary + per-row judge metrics.
 
 ### TC-113: Golden-set edge cases — abstain, ambiguous, empty (F36)
 
@@ -680,6 +681,7 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Objective**: Admin UI loads run history and question-level detail.
 - **Input**: Vitest `test_evaluation_page.test.tsx` — mock `GET /internal/v1/eval/runs` + `GET …/{run_id}` with fixture payloads.
 - **Expected**: History list newest-first; drill-down shows question, sources, answer, per-metric pass/fail; en/es UI chrome.
+- **Regression guards**: Vitest `test_evaluation_page.test.tsx` — renders model answer column, faithfulness/answer relevancy scores (not em-dash when API returns values), column picker + wrap toggle; hint when faithfulness null with 0% retrieval.
 
 ### TC-117: Eval dashboard time-series charts (UJ-041, F36, ADR-034)
 

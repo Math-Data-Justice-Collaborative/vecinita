@@ -15,7 +15,12 @@ from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_c
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
-from tests.helpers.json_response import json_object_list, json_str, response_json_object
+from tests.helpers.json_response import (
+    json_object_get,
+    json_object_list,
+    json_str,
+    response_json_object,
+)
 from tests.unit.rag.conftest import seed_eval_corpus
 from tests.unit.shared_schemas.auth_fixtures import (
     generate_es256_keypair,
@@ -83,9 +88,28 @@ def test_uj039_admin_triggers_eval_run_and_polls_until_complete(
 
     assert detail is not None
     assert json_str(detail, "status") == "completed"
-    items = detail.get("items")
-    assert isinstance(items, list)
+    items = json_object_list(detail, "items")
     assert items
+
+    summary = json_object_get(detail, "metrics_summary")
+    assert summary["faithfulness"] is not None
+    assert summary["answer_relevancy"] is not None
+
+    scored_items = [
+        item
+        for item in items
+        if "answer_relevancy" in (metrics := json_object_get(item, "metrics"))
+        and metrics["answer_relevancy"] is not None
+    ]
+    assert scored_items, "TC-112: completed eval must persist answer relevancy per row"
+
+    faithfulness_rows = [
+        item
+        for item in items
+        if "faithfulness" in (metrics := json_object_get(item, "metrics"))
+        and metrics["faithfulness"] is not None
+    ]
+    assert faithfulness_rows, "TC-112: seeded corpus run must persist faithfulness for hit rows"
 
     history = client.get(
         "/internal/v1/eval/runs",

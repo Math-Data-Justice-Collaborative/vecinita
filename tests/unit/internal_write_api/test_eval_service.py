@@ -121,8 +121,14 @@ def test_execute_eval_run_persists_completed_results(
     assert detail is not None
     assert detail.status == "completed"
     assert detail.metrics_summary.retrieval_relevance == pytest.approx(0.91)
+    assert detail.metrics_summary.faithfulness == pytest.approx(0.72)
+    assert detail.metrics_summary.answer_relevancy == pytest.approx(0.68)
     assert len(detail.items) == 1
-    assert detail.items[0].metrics.retrieval_pass is True
+    item = detail.items[0]
+    assert item.answer == "Food pantry hours are posted weekly."
+    assert item.metrics.retrieval_pass is True
+    assert item.metrics.faithfulness == pytest.approx(0.85)
+    assert item.metrics.answer_relevancy == pytest.approx(0.8)
     with engine.connect() as conn:
         row = cast(
             "dict[str, object]",
@@ -132,6 +138,29 @@ def test_execute_eval_run_persists_completed_results(
             ).scalar_one(),
         )
     assert row.get("custom_scores") == {"tone-friendly": 0.88}
+
+
+def test_execute_eval_run_resolves_default_judge_when_not_injected(
+    engine: Engine,
+    eval_run_id: UUID,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Factory path: execute_eval_run must wire judge/LLM from VECINITA_MODAL_LLM_URL."""
+    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://llm.test")
+    run_id = eval_run_id
+    with patch(
+        "vecinita_internal_write_api.eval_service.run_golden_eval",
+        return_value=([_sample_row_result()], _sample_summary()),
+    ) as mock_run:
+        execute_eval_run(
+            engine,
+            run_id=run_id,
+            corpus_profile="fixture",
+            embed_fn=eval_embed_fn,
+        )
+    kwargs = mock_run.call_args.kwargs
+    assert kwargs["judge"] is not None
+    assert kwargs["llm"] is not None
 
 
 def test_execute_eval_run_marks_failed_on_exception(
