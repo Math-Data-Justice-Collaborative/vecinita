@@ -128,7 +128,7 @@ export function EvaluationPage() {
                   ...run,
                   status: detail.status,
                   metrics_summary: detail.metrics_summary,
-                  error_message: detail.error_message,
+                  error_message: detail.error_message ?? null,
                 }
               : run,
           ),

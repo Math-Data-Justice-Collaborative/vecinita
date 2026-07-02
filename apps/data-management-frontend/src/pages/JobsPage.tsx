@@ -150,7 +150,7 @@ export function JobsPage() {
                       className={isEval ? "cursor-pointer hover:bg-muted/50" : undefined}
                       onClick={() => {
                         if (isEval) {
-                          navigate(
+                          void navigate(
                             `/evaluation?run=${encodeURIComponent(job.job_id)}&tab=runs`,
                           );
                         }
