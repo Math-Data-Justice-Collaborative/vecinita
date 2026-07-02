@@ -332,7 +332,7 @@ def ollama_api():
             return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.BAD_GATEWAY)
         return JSONResponse({"text": text})
 
-    async def generate_stream(request: Request):  # noqa: ANN202
+    async def generate_stream(request: Request):
         from starlette.responses import StreamingResponse
 
         if not _authorized(request):

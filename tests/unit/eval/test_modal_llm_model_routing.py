@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 import json as json_lib
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import httpx
-import pytest
 from vecinita_eval.modal_llm import eval_runtime_for_config
 from vecinita_llm_client import LlmClient
 from vecinita_shared_schemas.eval_config import DEFAULT_EVAL_MODEL_ID, EvalConfig
 from vecinita_shared_schemas.json_types import as_json_object
+
+if TYPE_CHECKING:
+    from _pytest.monkeypatch import MonkeyPatch
 
 
 def _ollama_client_factory(
@@ -27,7 +29,7 @@ def _ollama_client_factory(
 
 
 def test_eval_runtime_for_config_sends_model_id_to_ollama(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: MonkeyPatch,
 ) -> None:
     """Sandbox eval uses Ollama URL and config.model_id on /generate."""
     captured: dict[str, object] = {}
@@ -58,7 +60,7 @@ def test_eval_runtime_for_config_sends_model_id_to_ollama(
 
 
 def test_eval_runtime_for_config_defaults_model_id(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: MonkeyPatch,
 ) -> None:
     """Default EvalConfig.model_id is forwarded when not overridden."""
     captured: dict[str, object] = {}
