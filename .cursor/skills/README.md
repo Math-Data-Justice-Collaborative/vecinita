@@ -40,6 +40,7 @@ Every bounded unit of work runs inside a **session** (`S{NNN}-slug`) opened by
 | DO / GitHub Modal URL sync | [do-secrets-sync](do-secrets-sync/SKILL.md) |
 | Staging corpus safety (pytest + prod.env) | [corpus-db-safety](corpus-db-safety/SKILL.md) |
 | Bug fix after deploy | [14-hotfix](14-hotfix/SKILL.md) |
+| Export toolkit to another repo | [export-cursor-toolkit](export-cursor-toolkit/SKILL.md) |
 | GitHub Projects board setup | [github-projects](github-projects/SKILL.md) |
 | CORS / UI wiring gates (all stages) | [connectivity-gates](connectivity-gates.md) |
 
