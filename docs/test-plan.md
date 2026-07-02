@@ -789,6 +789,12 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Input**: `tests/integration/test_rag_production_config.py` — promote then `POST /api/v1/ask` (mocked LLM captures prompt).
 - **Expected**: Prompt/context assembly reflects promoted `system_prompt` and `top_k`.
 
+### TC-134: Ollama model list + pull API (UJ-045, F37, EV-009)
+
+- **Objective**: Playground model picker lists stashed Modal Ollama models and can trigger a background pull.
+- **Input**: `tests/integration/test_ollama_models_list.py` — `GET/POST /internal/v1/models/ollama`.
+- **Expected**: Admin receives model list with `model_id` + `available`; pull returns `202` with `job_id`; viewer → `403`.
+
 ## Test Data
 
 | Asset | Location | Used by |
