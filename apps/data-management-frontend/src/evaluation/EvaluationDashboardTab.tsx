@@ -13,10 +13,41 @@ import { cn } from "@/lib/utils";
 
 import { EvalMetricChart } from "./EvalMetricChart";
 import {
+  filterEvalTimeseriesPoints,
+  xAxisGranularity,
+  type EvalTimeRangePreset,
+} from "./evalTimeRange";
+import {
   type EvalDashboardLayout,
   loadEvalDashboardLayout,
   saveEvalDashboardLayout,
 } from "./evalDashboardStorage";
+
+const TIME_RANGE_PRESETS: EvalTimeRangePreset[] = [
+  "1D",
+  "7D",
+  "10D",
+  "1M",
+  "1Y",
+  "custom",
+];
+
+function nextChartType(current: EvalDashboardLayout["chartType"]) {
+  if (current === "line") return "area";
+  if (current === "area") return "scatter";
+  return "line";
+}
+
+function chartTypeLabelKey(
+  chartType: EvalDashboardLayout["chartType"],
+):
+  | "admin.evaluation.dashboard.chartLine"
+  | "admin.evaluation.dashboard.chartArea"
+  | "admin.evaluation.dashboard.chartScatter" {
+  if (chartType === "area") return "admin.evaluation.dashboard.chartArea";
+  if (chartType === "scatter") return "admin.evaluation.dashboard.chartScatter";
+  return "admin.evaluation.dashboard.chartLine";
+}
 
 function metricLabel(
   metricId: string,
@@ -115,10 +146,75 @@ export function EvaluationDashboardTab() {
   }
 
   const available = data?.available_metrics ?? [];
-  const points = data?.points ?? [];
+  const allPoints = data?.points ?? [];
+  const filteredPoints = filterEvalTimeseriesPoints(
+    allPoints,
+    layout.timeRangePreset,
+    layout.customRangeStart,
+    layout.customRangeEnd,
+  );
+  const granularity = xAxisGranularity(layout.timeRangePreset);
+  const customRangeEmpty =
+    layout.timeRangePreset === "custom" &&
+    layout.customRangeStart &&
+    layout.customRangeEnd &&
+    filteredPoints.length === 0 &&
+    allPoints.length > 0;
 
   return (
     <div className="space-y-4" data-testid="evaluation-dashboard-tab">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm text-muted-foreground">
+          {tr("admin.evaluation.dashboard.timeRange")}
+        </span>
+        {TIME_RANGE_PRESETS.map((preset) => (
+          <Button
+            key={preset}
+            type="button"
+            size="sm"
+            variant={
+              layout.timeRangePreset === preset ? "default" : "outline"
+            }
+            onClick={() => {
+              updateLayout({ ...layout, timeRangePreset: preset });
+            }}
+            data-testid={`eval-time-preset-${preset}`}
+          >
+            {preset === "custom"
+              ? tr("admin.evaluation.dashboard.timeCustom")
+              : preset}
+          </Button>
+        ))}
+        {layout.timeRangePreset === "custom" ? (
+          <>
+            <input
+              type="date"
+              className="rounded-md border px-2 py-1 text-sm"
+              value={layout.customRangeStart ?? ""}
+              onChange={(event) => {
+                updateLayout({
+                  ...layout,
+                  customRangeStart: event.target.value || null,
+                });
+              }}
+              data-testid="eval-custom-range-start"
+            />
+            <input
+              type="date"
+              className="rounded-md border px-2 py-1 text-sm"
+              value={layout.customRangeEnd ?? ""}
+              onChange={(event) => {
+                updateLayout({
+                  ...layout,
+                  customRangeEnd: event.target.value || null,
+                });
+              }}
+              data-testid="eval-custom-range-end"
+            />
+          </>
+        ) : null}
+      </div>
+
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm text-muted-foreground">
           {tr("admin.evaluation.dashboard.metrics")}
@@ -146,14 +242,12 @@ export function EvaluationDashboardTab() {
           onClick={() => {
             updateLayout({
               ...layout,
-              chartType: layout.chartType === "line" ? "area" : "line",
+              chartType: nextChartType(layout.chartType),
             });
           }}
           data-testid="eval-chart-type-toggle"
         >
-          {layout.chartType === "line"
-            ? tr("admin.evaluation.dashboard.chartLine")
-            : tr("admin.evaluation.dashboard.chartArea")}
+          {tr(chartTypeLabelKey(layout.chartType))}
         </Button>
         <Button
           type="button"
@@ -170,13 +264,23 @@ export function EvaluationDashboardTab() {
         </Button>
       </div>
 
-      {points.length === 0 ? (
+      {customRangeEmpty ? (
+        <p
+          className="text-muted-foreground"
+          data-testid="eval-custom-range-empty"
+        >
+          {tr("admin.evaluation.dashboard.customRangeEmpty")}
+        </p>
+      ) : null}
+
+      {!customRangeEmpty && filteredPoints.length === 0 ? (
         <p className="text-muted-foreground">
           {tr("admin.evaluation.dashboard.noData")}
         </p>
       ) : null}
 
-      {layout.selectedMetrics.map((metricId) => {
+      {!customRangeEmpty &&
+        layout.selectedMetrics.map((metricId) => {
         const collapsed = layout.collapsedPanels[metricId] ?? false;
         return (
           <Card key={metricId} data-testid={`eval-panel-${metricId}`}>
@@ -203,11 +307,12 @@ export function EvaluationDashboardTab() {
             </CardHeader>
             <CardContent className={cn(collapsed && "hidden")}>
               <EvalMetricChart
-                points={points}
+                points={filteredPoints}
                 metricId={metricId}
                 metricLabel={metricLabel(metricId, tr)}
                 chartType={layout.chartType}
                 showThreshold={layout.showThresholds}
+                xAxisGranularity={granularity}
               />
             </CardContent>
           </Card>

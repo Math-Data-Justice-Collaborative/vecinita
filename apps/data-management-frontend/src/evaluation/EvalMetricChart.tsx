@@ -6,6 +6,8 @@ import {
   LineChart,
   ReferenceLine,
   ResponsiveContainer,
+  Scatter,
+  ScatterChart,
   Tooltip,
   XAxis,
   YAxis,
@@ -13,6 +15,10 @@ import {
 
 import type { EvalTimeseriesPointApi } from "@/api/admin";
 import type { EvalChartType } from "./evalDashboardStorage";
+import {
+  formatEvalChartLabel,
+  type EvalXAxisGranularity,
+} from "./evalTimeRange";
 
 const THRESHOLD = 0.7;
 
@@ -42,6 +48,7 @@ export interface EvalMetricChartProps {
   metricLabel: string;
   chartType: EvalChartType;
   showThreshold: boolean;
+  xAxisGranularity: EvalXAxisGranularity;
 }
 
 function ChartTooltipValue({
@@ -66,11 +73,13 @@ export function EvalMetricChart({
   metricLabel,
   chartType,
   showThreshold,
+  xAxisGranularity,
 }: EvalMetricChartProps) {
   const data = points.map((point) => ({
-    label: new Date(point.completed_at).toLocaleDateString(),
+    label: formatEvalChartLabel(point.completed_at, xAxisGranularity),
     value: metricValue(point, metricId),
     run_id: point.run_id,
+    completed_at: new Date(point.completed_at).getTime(),
   }));
 
   const thresholdLine =
@@ -82,6 +91,51 @@ export function EvalMetricChart({
         label={{ value: "0.70", position: "insideTopRight", fontSize: 10 }}
       />
     ) : null;
+
+  if (chartType === "scatter") {
+    return (
+      <div className="h-64 w-full" data-testid={`eval-chart-${metricId}`}>
+        <ResponsiveContainer width="100%" height="100%">
+          <ScatterChart
+            data={data}
+            margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+            <XAxis
+              dataKey="completed_at"
+              type="number"
+              domain={["dataMin", "dataMax"]}
+              tickFormatter={(value: number) =>
+                formatEvalChartLabel(new Date(value).toISOString(), xAxisGranularity)
+              }
+              tick={{ fontSize: 11 }}
+            />
+            <YAxis
+              tick={{ fontSize: 11 }}
+              domain={metricId === "latency_p95_ms" ? ["auto", "auto"] : [0, 1]}
+            />
+            <Tooltip
+              formatter={(value: number) =>
+                ChartTooltipValue({ value, metricId })
+              }
+              labelFormatter={(_, payload) => {
+                const entry = payload[0]?.payload as
+                  | { run_id?: string }
+                  | undefined;
+                return entry?.run_id ?? metricLabel;
+              }}
+            />
+            {thresholdLine}
+            <Scatter
+              name={metricLabel}
+              dataKey="value"
+              fill="hsl(var(--primary))"
+            />
+          </ScatterChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  }
 
   if (chartType === "area") {
     return (
