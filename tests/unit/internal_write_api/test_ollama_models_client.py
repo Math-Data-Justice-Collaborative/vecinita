@@ -120,7 +120,9 @@ def test_close_closes_owned_http_client() -> None:
 
     def tracking_client_factory(**kwargs: object) -> TrackingClient:
         base_url = kwargs.get("base_url")
-        return TrackingClient(base_url=str(base_url) if base_url is not None else "http://ollama.test")
+        return TrackingClient(
+            base_url=str(base_url) if base_url is not None else "http://ollama.test"
+        )
 
     with patch(
         "vecinita_internal_write_api.ollama_models_client.httpx.Client",

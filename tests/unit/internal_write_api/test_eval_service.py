@@ -212,9 +212,7 @@ def test_execute_eval_run_passes_config_snapshot_to_runner(
             mock_run.call_args.kwargs["config"],
         )
         assert config.top_k == _EXPECTED_CONFIG_TOP_K
-        assert config.min_retrieval_score == pytest.approx(
-            _EXPECTED_CONFIG_MIN_SCORE
-        )
+        assert config.min_retrieval_score == pytest.approx(_EXPECTED_CONFIG_MIN_SCORE)
     finally:
         with engine.begin() as conn:
             conn.execute(
