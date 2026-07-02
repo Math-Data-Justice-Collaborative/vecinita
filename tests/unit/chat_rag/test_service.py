@@ -64,16 +64,30 @@ class StubLlm:
         """Init  ."""
         self.answer = answer
         self.prompts: list[str] = []
+        self.model_ids: list[str | None] = []
 
-    def generate(self, prompt: str, *, max_tokens: int = 256) -> str:
+    def generate(
+        self,
+        prompt: str,
+        *,
+        max_tokens: int = 256,
+        model_id: str | None = None,
+    ) -> str:
         """Generate."""
         _ = max_tokens
         self.prompts.append(prompt)
+        self.model_ids.append(model_id)
         return self.answer
 
-    def generate_stream(self, prompt: str, *, max_tokens: int = 256) -> Iterator[str]:
+    def generate_stream(
+        self,
+        prompt: str,
+        *,
+        max_tokens: int = 256,
+        model_id: str | None = None,
+    ) -> Iterator[str]:
         """Generate stream."""
-        _ = max_tokens
+        _ = (max_tokens, model_id)
         self.prompts.append(prompt)
         yield "Stream"
         yield "ed"
@@ -83,6 +97,7 @@ def _service(
     *,
     chunks: list[RetrievedChunk],
     tag_infer: list[str] | None = None,
+    llm_model_id: str | None = "qwen2.5:1.5b-instruct",
 ) -> ChatRagService:
     """Service."""
     tag_infer_fn: Callable[[str], list[str]] | None = None
@@ -98,6 +113,7 @@ def _service(
         llm_client=StubLlm(),  # type: ignore[arg-type]
         chat_max_tokens=64,
         tag_infer_fn=tag_infer_fn,
+        llm_model_id=llm_model_id,
     )
 
 
@@ -128,11 +144,18 @@ def test_ask_returns_no_context_message_when_empty() -> None:
 
 
 def test_ask_generates_answer_from_retrieved_chunks() -> None:
-    """Test ask generates answer from retrieved chunks."""
-    service = _service(chunks=[_chunk()])
+    """Test ask generates answer from retrieved chunks and forwards model_id."""
+    llm = StubLlm()
+    service = ChatRagService(
+        retriever=StubRetriever([_chunk()]),  # type: ignore[arg-type]
+        llm_client=llm,  # type: ignore[arg-type]
+        chat_max_tokens=64,
+        llm_model_id="llama3.2:3b",
+    )
     response = service.ask(AskRequest(question="clinic hours"))
     assert response.answer
     assert len(response.sources) == 1
+    assert llm.model_ids == ["llama3.2:3b"]
 
 
 def test_ask_uses_explicit_language() -> None:
@@ -216,19 +239,37 @@ def test_from_settings_embed_and_tag_infer_fns() -> None:
     class _LlmClient:
         """LlmClient."""
 
-        def __init__(self, url: str | None, *, timeout: float) -> None:
+        def __init__(
+            self,
+            url: str | None,
+            *,
+            timeout: float,
+            model_id: str | None = None,
+        ) -> None:
             """Init  ."""
-            _ = timeout
+            _ = (timeout, model_id)
             captured["llm_url"] = url
 
-        def generate(self, prompt: str, *, max_tokens: int = 256) -> str:
+        def generate(
+            self,
+            prompt: str,
+            *,
+            max_tokens: int = 256,
+            model_id: str | None = None,
+        ) -> str:
             """Generate."""
-            _ = (prompt, max_tokens)
+            _ = (prompt, max_tokens, model_id)
             return "Generated"
 
-        def generate_stream(self, prompt: str, *, max_tokens: int = 256) -> Iterator[str]:
+        def generate_stream(
+            self,
+            prompt: str,
+            *,
+            max_tokens: int = 256,
+            model_id: str | None = None,
+        ) -> Iterator[str]:
             """Generate stream."""
-            _ = (prompt, max_tokens)
+            _ = (prompt, max_tokens, model_id)
             yield "Generated"
 
     class _TagClient:

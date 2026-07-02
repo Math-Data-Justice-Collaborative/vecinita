@@ -89,7 +89,7 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 # pytest's design is built on bare `assert`; rewriting asserts defeats the framework.
-"tests/**" = ["S101"]
+"tests/**" = ["S101", "TC002"]
 "tests/unit/data_management/test_email_test.py" = ["D103"]
 "tests/unit/data_management/test_user_admin_routes.py" = ["D103"]
 "tests/unit/test_corpus_db_guard.py" = ["D103"]
@@ -119,6 +119,8 @@ ignore = [
     "PLC0415",
     "BLE001",
     "S110",
+    "S310",
+    "C901",
     "ANN201",
     "ANN202",
     "INP001",

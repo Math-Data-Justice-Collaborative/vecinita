@@ -1,4 +1,4 @@
-"""HTTP client for Modal vLLM (ADR-009)."""
+"""HTTP client for Modal vLLM and vecinita-ollama (ADR-009, ADR-035)."""
 
 from vecinita_llm_client.client import LlmClient, LlmClientError
 

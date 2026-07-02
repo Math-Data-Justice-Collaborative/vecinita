@@ -63,12 +63,14 @@ class ChatRagService:
         llm_client: LlmClient,
         chat_max_tokens: int = 256,
         tag_infer_fn: TagInferFn | None = None,
+        llm_model_id: str | None = None,
     ) -> None:
         """Wire retrieval, LLM, and optional tag inference for ask flows."""
         self._retriever = retriever
         self._llm = llm_client
         self._chat_max_tokens = chat_max_tokens
         self._tag_infer_fn = tag_infer_fn
+        self._llm_model_id = llm_model_id
 
     @classmethod
     def from_settings(cls, settings: ChatRagSettings) -> ChatRagService:
@@ -77,7 +79,11 @@ class ChatRagService:
             settings.embed_url,
             timeout=settings.request_timeout_s,
         )
-        llm_client = LlmClient(settings.llm_url, timeout=settings.request_timeout_s)
+        llm_client = LlmClient(
+            settings.llm_url,
+            timeout=settings.request_timeout_s,
+            model_id=settings.llm_model_id,
+        )
         tag_client = LlmTagClient(llm_client)
         vocabulary = vocabulary_slugs(load_seed_vocabulary())
 
@@ -98,6 +104,7 @@ class ChatRagService:
             llm_client=llm_client,
             chat_max_tokens=settings.chat_max_tokens,
             tag_infer_fn=tag_infer_fn,
+            llm_model_id=settings.llm_model_id,
         )
 
     def _effective_language(self, request: AskRequest) -> str:
@@ -141,7 +148,11 @@ class ChatRagService:
                 )
             )
         prompt = _build_prompt(request.question, chunks)
-        answer_text = self._llm.generate(prompt, max_tokens=self._chat_max_tokens)
+        answer_text = self._llm.generate(
+            prompt,
+            max_tokens=self._chat_max_tokens,
+            model_id=self._llm_model_id,
+        )
         result = answer_from_chunks(request.question, chunks, answer_text=answer_text)
         result = RagAnswer(
             answer=result.answer,
@@ -158,7 +169,11 @@ class ChatRagService:
             yield no_context_message(language)
             return
         prompt = _build_prompt(request.question, chunks)
-        yield from self._llm.generate_stream(prompt, max_tokens=self._chat_max_tokens)
+        yield from self._llm.generate_stream(
+            prompt,
+            max_tokens=self._chat_max_tokens,
+            model_id=self._llm_model_id,
+        )
 
     def retrieve_sources(self, request: AskRequest) -> list[Source]:
         """Return ranked source chunks without invoking the LLM."""

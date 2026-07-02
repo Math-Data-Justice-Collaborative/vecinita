@@ -5,6 +5,8 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
+from vecinita_shared_schemas.eval_config import DEFAULT_EVAL_MODEL_ID
+
 
 def _int_env(name: str, default: int) -> int:
     raw = os.environ.get(name)
@@ -48,6 +50,7 @@ class ChatRagSettings:
     internal_write_url: str | None = None
     internal_api_key: str | None = None
     stats_enabled: bool = True
+    llm_model_id: str | None = None
 
     @classmethod
     def from_env(cls) -> ChatRagSettings:
@@ -63,9 +66,13 @@ class ChatRagSettings:
             chat_max_tokens=_int_env("VECINITA_CHAT_MAX_TOKENS", 256),
             browse_page_size=_int_env("VECINITA_BROWSE_PAGE_SIZE", 20),
             embed_url=os.environ.get("VECINITA_MODAL_EMBED_URL"),
-            llm_url=os.environ.get("VECINITA_MODAL_LLM_URL"),
+            llm_url=os.environ.get("VECINITA_MODAL_OLLAMA_URL")
+            or os.environ.get("VECINITA_MODAL_LLM_URL"),
             request_timeout_s=float(os.environ.get("VECINITA_REQUEST_TIMEOUT_S", "120")),
             internal_write_url=os.environ.get("VECINITA_INTERNAL_WRITE_URL"),
             internal_api_key=os.environ.get("VECINITA_INTERNAL_API_KEY"),
             stats_enabled=_bool_env("VECINITA_STATS_ENABLED", default=True),
+            llm_model_id=os.environ.get("VECINITA_OLLAMA_MODEL_ID", DEFAULT_EVAL_MODEL_ID)
+            if os.environ.get("VECINITA_MODAL_OLLAMA_URL")
+            else None,
         )
