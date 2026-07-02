@@ -89,7 +89,9 @@ describe("BUG-2026-06-30 PKCE double-exchange race (PR #110)", () => {
       </LocaleProvider>,
     );
 
-    expect(await screen.findByTestId("invite-password-form")).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("invite-password-form"),
+    ).toBeInTheDocument();
     expect(screen.queryByTestId("invite-link-invalid")).not.toBeInTheDocument();
   });
 });

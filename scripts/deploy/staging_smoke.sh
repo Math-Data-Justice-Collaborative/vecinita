@@ -17,7 +17,14 @@ run_h1() {
   RAN=$((RAN + 1))
   echo "H1: ChatRAG liveness"
   curl -fsS "${chat_url%/}/health" | tee /tmp/vecinita-health.json
-  python3 -c "import json; d=json.load(open('/tmp/vecinita-health.json')); assert d.get('status')=='ok', d"
+  python3 -c "
+import json
+body = json.load(open('/tmp/vecinita-health.json'))
+assert body.get('status') == 'ok', body
+deps = body.get('dependencies') or {}
+for key in ('postgres', 'modal_embed', 'modal_llm'):
+    assert deps.get(key) == 'ok', f'dependency {key}={deps.get(key)!r} (full={deps})'
+"
 
   local write_url="${VECINITA_STAGING_WRITE_URL:-}"
   if [[ -n "$write_url" ]]; then

@@ -289,19 +289,17 @@ describe("users API client", () => {
   it("sendTestEmail throws EmailDomainUnverifiedError on 503 domain_unverified", async () => {
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(
-          jsonResponse(
-            {
-              detail: {
-                code: "domain_unverified",
-                message: "The vecinita.admin domain is not verified.",
-              },
+      vi.fn().mockResolvedValue(
+        jsonResponse(
+          {
+            detail: {
+              code: "domain_unverified",
+              message: "The vecinita.admin domain is not verified.",
             },
-            503,
-          ),
+          },
+          503,
         ),
+      ),
     );
     await expect(
       sendTestEmail(CLIENT, "ops@example.org"),
@@ -408,9 +406,9 @@ describe("users API client", () => {
       "fetch",
       vi.fn().mockResolvedValue(new Response("bad invite", { status: 400 })),
     );
-    await expect(
-      inviteUser(CLIENT, "a@b.com", "admin"),
-    ).rejects.toThrow(/bad invite/);
+    await expect(inviteUser(CLIENT, "a@b.com", "admin")).rejects.toThrow(
+      /bad invite/,
+    );
   });
 
   it("revokeInvite throws when response is not ok", async () => {
@@ -418,7 +416,9 @@ describe("users API client", () => {
       "fetch",
       vi.fn().mockResolvedValue(new Response("revoke failed", { status: 409 })),
     );
-    await expect(revokeInvite(CLIENT, USER_ID)).rejects.toThrow(/revoke failed/);
+    await expect(revokeInvite(CLIENT, USER_ID)).rejects.toThrow(
+      /revoke failed/,
+    );
   });
 
   it("forceSignout uses status fallback when the error body is empty", async () => {

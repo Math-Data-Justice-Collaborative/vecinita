@@ -17,6 +17,11 @@
         "command": "uv run python .cursor/hooks/pr_checklist.py",
         "matcher": "Shell",
         "timeout": 10
+      },
+      {
+        "command": "uv run python .cursor/hooks/shell_deploy_guard.py",
+        "matcher": "Shell",
+        "timeout": 10
       }
     ],
     "afterFileEdit": [

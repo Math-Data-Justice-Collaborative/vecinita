@@ -87,14 +87,21 @@ export function EvalMetricChart({
     return (
       <div className="h-64 w-full" data-testid={`eval-chart-${metricId}`}>
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <AreaChart
+            data={data}
+            margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+          >
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis dataKey="label" tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 11 }} domain={[0, 1]} />
             <Tooltip
-              formatter={(value: number) => ChartTooltipValue({ value, metricId })}
+              formatter={(value: number) =>
+                ChartTooltipValue({ value, metricId })
+              }
               labelFormatter={(_, payload) => {
-                const entry = payload[0]?.payload as { run_id?: string } | undefined;
+                const entry = payload[0]?.payload as
+                  | { run_id?: string }
+                  | undefined;
                 return entry?.run_id ?? metricLabel;
               }}
             />
@@ -119,7 +126,10 @@ export function EvalMetricChart({
   return (
     <div className="h-64 w-full" data-testid={`eval-chart-${metricId}`}>
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+        <LineChart
+          data={data}
+          margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+        >
           <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
           <XAxis dataKey="label" tick={{ fontSize: 11 }} />
           <YAxis
@@ -127,9 +137,13 @@ export function EvalMetricChart({
             domain={metricId === "latency_p95_ms" ? ["auto", "auto"] : [0, 1]}
           />
           <Tooltip
-            formatter={(value: number) => ChartTooltipValue({ value, metricId })}
+            formatter={(value: number) =>
+              ChartTooltipValue({ value, metricId })
+            }
             labelFormatter={(_, payload) => {
-              const entry = payload[0]?.payload as { run_id?: string } | undefined;
+              const entry = payload[0]?.payload as
+                | { run_id?: string }
+                | undefined;
               return entry?.run_id ?? metricLabel;
             }}
           />

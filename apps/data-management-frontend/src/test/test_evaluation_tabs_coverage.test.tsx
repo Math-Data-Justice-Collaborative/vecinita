@@ -1,4 +1,10 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import type { ReactElement } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -30,9 +36,17 @@ vi.mock("recharts", async () => {
     ResponsiveContainer: ({ children }: { children: React.ReactNode }) =>
       React.createElement("div", null, children),
     LineChart: ({ children }: { children: React.ReactNode }) =>
-      React.createElement("div", { "data-testid": "mock-line-chart" }, children),
+      React.createElement(
+        "div",
+        { "data-testid": "mock-line-chart" },
+        children,
+      ),
     AreaChart: ({ children }: { children: React.ReactNode }) =>
-      React.createElement("div", { "data-testid": "mock-area-chart" }, children),
+      React.createElement(
+        "div",
+        { "data-testid": "mock-area-chart" },
+        children,
+      ),
     Line: () => null,
     Area: () => null,
     CartesianGrid: () => null,
@@ -98,8 +112,9 @@ describe("evaluation tab branch coverage", () => {
   });
 
   it("EvaluationDashboardTab shows loading, empty data, and custom metric labels", async () => {
-    let resolveTimeseries: (value: Awaited<ReturnType<typeof fetchEvalTimeseries>>) => void =
-      () => undefined;
+    let resolveTimeseries: (
+      value: Awaited<ReturnType<typeof fetchEvalTimeseries>>,
+    ) => void = () => undefined;
     vi.mocked(fetchEvalTimeseries).mockImplementation(
       () =>
         new Promise((resolve) => {
@@ -115,9 +130,13 @@ describe("evaluation tab branch coverage", () => {
       available_metrics: ["custom-metric"],
     });
     await waitFor(() => {
-      expect(screen.getByText(/No completed runs yet for charts/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/No completed runs yet for charts/i),
+      ).toBeInTheDocument();
     });
-    expect(screen.getByRole("button", { name: "custom-metric" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "custom-metric" }),
+    ).toBeInTheDocument();
   });
 
   it("EvaluationDashboardTab surfaces non-Error fetch failures", async () => {
@@ -185,7 +204,9 @@ describe("evaluation tab branch coverage", () => {
     cleanup();
     renderTab(<EvaluationExploreTab />);
     await waitFor(() => {
-      expect(screen.getByText(/No completed runs to explore/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/No completed runs to explore/i),
+      ).toBeInTheDocument();
     });
   });
 
@@ -198,8 +219,9 @@ describe("evaluation tab branch coverage", () => {
   });
 
   it("EvaluationExploreTab shows loading state before pivot data renders", async () => {
-    let resolveRuns: (value: Awaited<ReturnType<typeof fetchEvalRuns>>) => void =
-      () => undefined;
+    let resolveRuns: (
+      value: Awaited<ReturnType<typeof fetchEvalRuns>>,
+    ) => void = () => undefined;
     vi.mocked(fetchEvalRuns).mockImplementation(
       () =>
         new Promise((resolve) => {
@@ -248,8 +270,9 @@ describe("evaluation tab branch coverage", () => {
   });
 
   it("EvaluationCriteriaTab shows loading state", async () => {
-    let resolveCriteria: (value: Awaited<ReturnType<typeof fetchEvalCriteria>>) => void =
-      () => undefined;
+    let resolveCriteria: (
+      value: Awaited<ReturnType<typeof fetchEvalCriteria>>,
+    ) => void = () => undefined;
     vi.mocked(fetchEvalCriteria).mockImplementation(
       () =>
         new Promise((resolve) => {
@@ -267,12 +290,16 @@ describe("evaluation tab branch coverage", () => {
   it("EvaluationCriteriaTab handles create validation and create errors", async () => {
     renderTab(<EvaluationCriteriaTab />);
     await waitFor(() => {
-      expect(screen.getByTestId("eval-criterion-tone-friendly")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-criterion-tone-friendly"),
+      ).toBeInTheDocument();
     });
 
     expect(screen.getByTestId("eval-criterion-create")).toBeDisabled();
 
-    vi.mocked(createEvalCriterion).mockRejectedValue(new Error("create failed"));
+    vi.mocked(createEvalCriterion).mockRejectedValue(
+      new Error("create failed"),
+    );
     fireEvent.change(screen.getByTestId("eval-criterion-slug"), {
       target: { value: "new-one" },
     });
@@ -294,10 +321,14 @@ describe("evaluation tab branch coverage", () => {
     });
     renderTab(<EvaluationCriteriaTab />);
     await waitFor(() => {
-      expect(screen.getByTestId("eval-criterion-tone-friendly")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-criterion-tone-friendly"),
+      ).toBeInTheDocument();
     });
 
-    vi.mocked(updateEvalCriterion).mockRejectedValue(new Error("toggle failed"));
+    vi.mocked(updateEvalCriterion).mockRejectedValue(
+      new Error("toggle failed"),
+    );
     fireEvent.click(screen.getByRole("button", { name: /^disable$/i }));
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent("toggle failed");
@@ -307,7 +338,9 @@ describe("evaluation tab branch coverage", () => {
   it("EvaluationCriteriaTab enables a disabled criterion", async () => {
     renderTab(<EvaluationCriteriaTab />);
     await waitFor(() => {
-      expect(screen.getByTestId("eval-criterion-tone-friendly")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-criterion-tone-friendly"),
+      ).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole("button", { name: /^enable$/i }));
@@ -333,7 +366,9 @@ describe("evaluation tab branch coverage", () => {
     });
     fireEvent.click(screen.getByTestId("eval-criterion-create"));
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent(/Failed to save criterion/i);
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /Failed to save criterion/i,
+      );
     });
   });
 
@@ -348,12 +383,16 @@ describe("evaluation tab branch coverage", () => {
   it("EvaluationCriteriaTab surfaces non-Error toggle failures", async () => {
     renderTab(<EvaluationCriteriaTab />);
     await waitFor(() => {
-      expect(screen.getByTestId("eval-criterion-tone-friendly")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-criterion-tone-friendly"),
+      ).toBeInTheDocument();
     });
     vi.mocked(updateEvalCriterion).mockRejectedValue("toggle failed");
     fireEvent.click(screen.getByRole("button", { name: /^enable$/i }));
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent(/Failed to save criterion/i);
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /Failed to save criterion/i,
+      );
     });
   });
 

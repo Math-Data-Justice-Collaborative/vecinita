@@ -27,9 +27,9 @@ vi.mock("recharts", async () => {
       }
     }
     if (props.labelFormatter) {
-      expect(
-        props.labelFormatter("", [{ payload: { run_id: "run-1" } }]),
-      ).toBe("run-1");
+      expect(props.labelFormatter("", [{ payload: { run_id: "run-1" } }])).toBe(
+        "run-1",
+      );
       expect(props.labelFormatter("", [])).toBe(metricLabel);
     }
   }
@@ -63,11 +63,7 @@ vi.mock("recharts", async () => {
         payload: { payload?: { run_id?: string } }[],
       ) => string;
     }) => {
-      invokeTooltip(
-        props,
-        tooltipMetricId,
-        tooltipMetricLabel,
-      );
+      invokeTooltip(props, tooltipMetricId, tooltipMetricLabel);
       return null;
     },
   };
@@ -161,7 +157,9 @@ describe("EvalMetricChart", () => {
         showThreshold
       />,
     );
-    expect(screen.getByTestId("eval-chart-answer_relevancy")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("eval-chart-answer_relevancy"),
+    ).toBeInTheDocument();
   });
 
   it("reads retrieval and custom score values from points", () => {
@@ -176,7 +174,9 @@ describe("EvalMetricChart", () => {
         showThreshold
       />,
     );
-    expect(screen.getByTestId("eval-chart-retrieval_relevance")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("eval-chart-retrieval_relevance"),
+    ).toBeInTheDocument();
 
     cleanup();
     tooltipMetricId = "tone-friendly";

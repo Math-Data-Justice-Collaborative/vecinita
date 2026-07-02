@@ -109,6 +109,7 @@ Record **Infra overall**, **E2E overall**, and **Overall** separately in the rep
 | Post-deploy / post-hotfix | H1–H2 + deploy metadata + **H0ci (blocking)** | H3 + **H4–H5** |
 | User-reported CI failure on `main` | **H0ci first** | H3 only if CI green |
 | User-reported “UI broken / Failed to fetch” | H4–H5 first | H3 |
+| Eval/embed 404, empty eval items | [do-secrets-sync](../do-secrets-sync/SKILL.md) + H1 `modal_embed` | H3 after URL fix |
 | User-reported bad answers | H2 + logs | H3 + eval_set case |
 | Weekly deep | H1–H2 + backlog metrics | H6 (explicit approval) |
 

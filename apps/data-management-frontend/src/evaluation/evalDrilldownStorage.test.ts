@@ -80,9 +80,9 @@ describe("evalDrilldownStorage", () => {
       visibleColumns: ["question"],
       wrapCells: true,
     };
-    expect(toggleDrilldownColumn(onlyQuestion, "question").visibleColumns).toEqual(
-      ["question"],
-    );
+    expect(
+      toggleDrilldownColumn(onlyQuestion, "question").visibleColumns,
+    ).toEqual(["question"]);
   });
 
   it("saveEvalDrilldownLayout persists layout and degrades on quota errors", () => {
@@ -91,7 +91,9 @@ describe("evalDrilldownStorage", () => {
       wrapCells: false,
     };
     saveEvalDrilldownLayout(layout);
-    expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}")).toEqual(layout);
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}")).toEqual(
+      layout,
+    );
 
     vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new Error("quota");

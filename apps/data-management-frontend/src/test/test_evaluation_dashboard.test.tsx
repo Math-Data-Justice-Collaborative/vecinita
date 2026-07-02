@@ -10,9 +10,17 @@ vi.mock("recharts", async () => {
     ResponsiveContainer: ({ children }: { children: React.ReactNode }) =>
       React.createElement("div", { "data-testid": "mock-recharts" }, children),
     LineChart: ({ children }: { children: React.ReactNode }) =>
-      React.createElement("div", { "data-testid": "mock-line-chart" }, children),
+      React.createElement(
+        "div",
+        { "data-testid": "mock-line-chart" },
+        children,
+      ),
     AreaChart: ({ children }: { children: React.ReactNode }) =>
-      React.createElement("div", { "data-testid": "mock-area-chart" }, children),
+      React.createElement(
+        "div",
+        { "data-testid": "mock-area-chart" },
+        children,
+      ),
     Line: () => null,
     Area: () => null,
     CartesianGrid: () => null,
@@ -158,10 +166,12 @@ describe("Evaluation dashboard tabs", () => {
   beforeEach(() => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
-        const url = fetchInputUrl(input);
-        return Promise.resolve(dashboardEvalFetch(url, init));
-      }),
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          return Promise.resolve(dashboardEvalFetch(url, init));
+        }),
     );
     localStorage.clear();
   });
@@ -175,15 +185,21 @@ describe("Evaluation dashboard tabs", () => {
   it("renders time-series dashboard charts (TC-117, UJ-041)", async () => {
     await renderAppRoutesReady("/evaluation?tab=dashboard");
     await waitFor(() => {
-      expect(screen.getByTestId("evaluation-dashboard-tab")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("evaluation-dashboard-tab"),
+      ).toBeInTheDocument();
     });
-    expect(screen.getByTestId("eval-chart-retrieval_relevance")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("eval-chart-retrieval_relevance"),
+    ).toBeInTheDocument();
   });
 
   it("persists collapsible panel layout (TC-119)", async () => {
     await renderAppRoutesReady("/evaluation?tab=dashboard");
     await waitFor(() => {
-      expect(screen.getByTestId("eval-panel-toggle-faithfulness")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-panel-toggle-faithfulness"),
+      ).toBeInTheDocument();
     });
     fireEvent.click(screen.getByTestId("eval-panel-toggle-faithfulness"));
     const stored = localStorage.getItem("vecinita.eval.dashboard.v1");
@@ -208,7 +224,9 @@ describe("Evaluation dashboard tabs", () => {
     await waitFor(() => {
       expect(screen.getByTestId("evaluation-criteria-tab")).toBeInTheDocument();
     });
-    expect(screen.getByTestId("eval-criterion-tone-friendly")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("eval-criterion-tone-friendly"),
+    ).toBeInTheDocument();
     fireEvent.change(screen.getByTestId("eval-criterion-slug"), {
       target: { value: "new-criterion" },
     });
@@ -273,14 +291,18 @@ describe("Evaluation dashboard tabs", () => {
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:eval");
 
     fireEvent.click(screen.getByText(/reset/i));
-    expect(localStorage.getItem("vecinita.eval.explore.v1")).toContain("locale");
+    expect(localStorage.getItem("vecinita.eval.explore.v1")).toContain(
+      "locale",
+    );
   });
 
   it("toggles criterion enabled state", async () => {
     const fetchMock = vi.mocked(globalThis.fetch);
     await renderAppRoutesReady("/evaluation?tab=criteria");
     await waitFor(() => {
-      expect(screen.getByTestId("eval-criterion-tone-friendly")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-criterion-tone-friendly"),
+      ).toBeInTheDocument();
     });
     const callsBefore = fetchMock.mock.calls.length;
     fireEvent.click(screen.getByText(/disable/i));
@@ -292,13 +314,15 @@ describe("Evaluation dashboard tabs", () => {
   it("shows dashboard error when timeseries fetch fails", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
-        const url = fetchInputUrl(input);
-        if (url.includes("/internal/v1/eval/runs/timeseries")) {
-          return Promise.resolve({ ok: false, status: 503 });
-        }
-        return Promise.resolve(dashboardEvalFetch(url, init));
-      }),
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          if (url.includes("/internal/v1/eval/runs/timeseries")) {
+            return Promise.resolve({ ok: false, status: 503 });
+          }
+          return Promise.resolve(dashboardEvalFetch(url, init));
+        }),
     );
     await renderAppRoutesReady("/evaluation?tab=dashboard");
     await waitFor(() => {
@@ -309,13 +333,18 @@ describe("Evaluation dashboard tabs", () => {
   it("shows explore error when run list fetch fails", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
-        const url = fetchInputUrl(input);
-        if (url.includes("/internal/v1/eval/runs") && !url.includes("timeseries")) {
-          return Promise.resolve({ ok: false, status: 500 });
-        }
-        return Promise.resolve(dashboardEvalFetch(url, init));
-      }),
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          if (
+            url.includes("/internal/v1/eval/runs") &&
+            !url.includes("timeseries")
+          ) {
+            return Promise.resolve({ ok: false, status: 500 });
+          }
+          return Promise.resolve(dashboardEvalFetch(url, init));
+        }),
     );
     await renderAppRoutesReady("/evaluation?tab=explore");
     await waitFor(() => {
@@ -328,13 +357,18 @@ describe("Evaluation dashboard tabs", () => {
   it("shows criteria error when list fetch fails", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
-        const url = fetchInputUrl(input);
-        if (url.includes("/internal/v1/eval/criteria") && (init?.method ?? "GET") === "GET") {
-          return Promise.resolve({ ok: false, status: 502 });
-        }
-        return Promise.resolve(dashboardEvalFetch(url, init));
-      }),
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          if (
+            url.includes("/internal/v1/eval/criteria") &&
+            (init?.method ?? "GET") === "GET"
+          ) {
+            return Promise.resolve({ ok: false, status: 502 });
+          }
+          return Promise.resolve(dashboardEvalFetch(url, init));
+        }),
     );
     await renderAppRoutesReady("/evaluation?tab=criteria");
     await waitFor(() => {
@@ -345,13 +379,21 @@ describe("Evaluation dashboard tabs", () => {
   it("shows empty criteria list when no items returned", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
-        const url = fetchInputUrl(input);
-        if (url.includes("/internal/v1/eval/criteria") && (init?.method ?? "GET") === "GET") {
-          return Promise.resolve({ ok: true, json: async () => ({ items: [] }) });
-        }
-        return Promise.resolve(dashboardEvalFetch(url, init));
-      }),
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          if (
+            url.includes("/internal/v1/eval/criteria") &&
+            (init?.method ?? "GET") === "GET"
+          ) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({ items: [] }),
+            });
+          }
+          return Promise.resolve(dashboardEvalFetch(url, init));
+        }),
     );
     await renderAppRoutesReady("/evaluation?tab=criteria");
     await waitFor(() => {

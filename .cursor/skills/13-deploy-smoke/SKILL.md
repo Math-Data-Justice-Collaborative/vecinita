@@ -168,7 +168,8 @@ export VECINITA_STAGING_ADMIN_API_URL=https://vecinita--vecinita-data-management
 
 **Agent 1 — API connectivity (H1)**:
 - `bash scripts/deploy/staging_smoke.sh` or `tests/smoke/test_staging_health.py -m live`
-- Verify TLS, `/health` 200 on ChatRAG + write API
+- Verify TLS, `/health` 200 on ChatRAG + write API; ChatRAG `dependencies.modal_embed` and `modal_llm` are `ok`
+- `bash scripts/infra/do_verify_required_secrets.sh` when Modal URLs changed (see [do-secrets-sync](../do-secrets-sync/SKILL.md))
 - Return: pass/fail, response times
 
 **Agent 2 — Functional smoke (H2–H3)**:

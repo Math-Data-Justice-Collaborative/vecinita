@@ -493,7 +493,9 @@ export async function createEvalCriterion(
     }),
   });
   if (!response.ok) {
-    throw new Error(`Eval criterion create failed (${String(response.status)})`);
+    throw new Error(
+      `Eval criterion create failed (${String(response.status)})`,
+    );
   }
   return response.json() as Promise<EvalCriterionApi>;
 }
@@ -520,7 +522,9 @@ export async function updateEvalCriterion(
     },
   );
   if (!response.ok) {
-    throw new Error(`Eval criterion update failed (${String(response.status)})`);
+    throw new Error(
+      `Eval criterion update failed (${String(response.status)})`,
+    );
   }
   return response.json() as Promise<EvalCriterionApi>;
 }

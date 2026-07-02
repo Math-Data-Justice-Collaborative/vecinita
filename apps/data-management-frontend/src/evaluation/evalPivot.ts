@@ -73,8 +73,7 @@ export function flattenRunsForExplore(
         case_id: item.case_id,
         locale: item.locale,
         metric: "latency_ms",
-        pass_fail:
-          item.metrics.latency_ms <= 30_000 ? "pass" : "fail",
+        pass_fail: item.metrics.latency_ms <= 30_000 ? "pass" : "fail",
         score: item.metrics.latency_ms,
       });
       const custom = item.metrics.custom_scores;
@@ -113,8 +112,12 @@ export function buildPivotTable(
   rows: EvalExploreRow[],
   layout: EvalExploreLayout,
 ): { rowKeys: string[]; colKeys: string[]; cells: Map<string, PivotCell> } {
-  const rowKeys = [...new Set(rows.map((r) => axisValue(r, layout.rowAxis)))].sort();
-  const colKeys = [...new Set(rows.map((r) => axisValue(r, layout.columnAxis)))].sort();
+  const rowKeys = [
+    ...new Set(rows.map((r) => axisValue(r, layout.rowAxis))),
+  ].sort();
+  const colKeys = [
+    ...new Set(rows.map((r) => axisValue(r, layout.columnAxis))),
+  ].sort();
   const cells = new Map<string, PivotCell>();
 
   for (const rowKey of rowKeys) {

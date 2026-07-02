@@ -30,7 +30,7 @@ Without `CORSMiddleware` (or a same-origin BFF per TP-001), browsers block reque
 | **H0c** | **CORS policy (in-process)** | CI, 07 | `pytest tests/unit/test_cors_policy.py` | **CI** |
 | **H0i** | **Integration wiring** | CI, 07, 10 | `pytest tests/integration` | **CI** |
 | **H0ci** | **GitHub main CI** | 14, 15 | `gh run list --branch main --workflow ci.yml` | **15 post-hotfix**; **14 after merge** |
-| H1 | API liveness | 13, 15 | `GET {API}/health` | 13 |
+| H1 | API liveness | 13, 15 | `GET {API}/health` (+ `dependencies.modal_embed/modal_llm` on ChatRAG) | 13 |
 | H2 | DB ready | 13, 15 | `staging_h2.py` / Alembic | 13 |
 | H3 | API RAG smoke | 13, 15 | `POST {CHAT}/api/v1/ask` | 13 |
 | **H4** | **CORS preflight (live)** | 12, **13**, 15 | `tests/smoke/test_staging_connectivity.py -m live` | **13** (when URLs set) |
@@ -56,8 +56,8 @@ Without `CORSMiddleware` (or a same-origin BFF per TP-001), browsers block reque
 | **09-qa** | Report H0c pass/fail; H4–H5 advisory or blocking if staging URLs in env |
 | **10-e2e** | T0 = in-process e2e; T2 = 13’s H1–H5; record T3/browser separately; mocks ≠ connectivity |
 | **11-verify-impl** | UI features (F11/F12): require connectivity plan or H4/H5 waiver before approve |
-| **12-verify-deploy** | Agent 6 + checklist: CORS origins, `VITE_*` matrix, scripts exist |
-| **13-deploy-smoke** | Pre: H0c; post: `verify_connectivity.sh` (H4–H5 blocking) |
+| **12-verify-deploy** | Agent 6 + checklist: CORS origins, `VITE_*` matrix, scripts exist; **Agent 7:** Modal embed/LLM URLs validated + DO/GitHub sync plan |
+| **13-deploy-smoke** | Pre: H0c; post: `do_verify_required_secrets.sh` + `verify_connectivity.sh` (H4–H5 blocking) |
 | **14-hotfix** | Classify “Failed to fetch” as connectivity first; repro may use H4 assertion; **CI parity (local) before PR**; **`gh run` on `main` after merge** (§Main CI in 14-hotfix) |
 | **15-service-health** | Post-deploy: H4–H5 on UI complaints; H0i on integration regressions; **H0ci** — GitHub `ci.yml` on `main` green (blocking post-hotfix) |
 
@@ -151,6 +151,8 @@ uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend
 | Bundle has `localhost` | Wrong `VITE_*` at build | `sync-secrets` + `force_build` |
 | H3 pass, H4 fail | Backend-only validation | `verify_connectivity.sh` |
 | H3 pass after warm, first ask fails / “Network Error” | Modal LLM cold start > gateway timeout | Frontend auto-retry (`streamAsk`); raise `VECINITA_REQUEST_TIMEOUT_S`; warm LLM before demos |
+| H1 ok but `modal_embed` / `modal_llm` error | Wrong or missing `VECINITA_MODAL_*_URL` on DO (e.g. `fontface--` prefix) | [do-secrets-sync](do-secrets-sync/SKILL.md): validate → `sync-all-secrets` → redeploy → `do_verify_required_secrets.sh` |
+| Eval/embed 404 `invalid function call` | Stale Modal workspace URL on internal-write-api | Same as above; also `sync_github_secrets.sh --apply` for CD parity |
 | Integration pass, UI fail | No H4/H5 run | Run live connectivity tier |
 
 ## Artifact checklist (must exist before 13)
@@ -162,5 +164,6 @@ uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend
 | H0i tests | `tests/integration/**` |
 | H4–H5 tests | `tests/smoke/test_staging_connectivity.py` |
 | Operator script | `scripts/deploy/verify_connectivity.sh` |
+| DO Modal URL verify | `scripts/infra/do_verify_required_secrets.sh` |
 | Secrets matrix | `docs/staging-secrets-matrix.md` (CORS + VITE rows) |
 | Runbook | `docs/staging-runbook.md` (H4–H5) |

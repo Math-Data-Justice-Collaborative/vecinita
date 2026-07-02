@@ -45,11 +45,15 @@ function formatCellValue(
   return String(Math.round(value));
 }
 
-function axisLabel(axis: EvalPivotAxis, tr: ReturnType<typeof useAdminT>): string {
+function axisLabel(
+  axis: EvalPivotAxis,
+  tr: ReturnType<typeof useAdminT>,
+): string {
   if (axis === "locale") return tr("admin.evaluation.explore.axis.locale");
   if (axis === "case_id") return tr("admin.evaluation.explore.axis.case_id");
   if (axis === "metric") return tr("admin.evaluation.explore.axis.metric");
-  if (axis === "pass_fail") return tr("admin.evaluation.explore.axis.pass_fail");
+  if (axis === "pass_fail")
+    return tr("admin.evaluation.explore.axis.pass_fail");
   return tr("admin.evaluation.explore.axis.run_date");
 }
 
@@ -57,7 +61,8 @@ function valueLabel(
   measure: EvalPivotValue,
   tr: ReturnType<typeof useAdminT>,
 ): string {
-  if (measure === "avg_score") return tr("admin.evaluation.explore.value.avg_score");
+  if (measure === "avg_score")
+    return tr("admin.evaluation.explore.value.avg_score");
   if (measure === "count") return tr("admin.evaluation.explore.value.count");
   return tr("admin.evaluation.explore.value.pass_rate");
 }
@@ -81,14 +86,16 @@ export function EvaluationExploreTab() {
         (item: EvalRunListItemApi) => item.status === "completed",
       );
       const loaded = await Promise.all(
-        completed.slice(0, 20).map((item) =>
-          fetchEvalRunDetail(client, item.run_id),
-        ),
+        completed
+          .slice(0, 20)
+          .map((item) => fetchEvalRunDetail(client, item.run_id)),
       );
       setDetails(loaded);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : tr("admin.evaluation.explore.loadFailed"),
+        err instanceof Error
+          ? err.message
+          : tr("admin.evaluation.explore.loadFailed"),
       );
     } finally {
       setLoading(false);

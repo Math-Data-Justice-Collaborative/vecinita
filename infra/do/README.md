@@ -87,3 +87,16 @@ export DATABASE_URL='postgresql://...'
 cd apps/database && uv run alembic upgrade head
 uv run python -c "from vecinita_database.seeds.load import load_corpus; load_corpus()"
 ```
+
+## Corpus protection
+
+Staging corpus is on **DO Managed Postgres** (`DATABASE_URL` on chat-rag-backend and
+internal-write-api). Test helpers refuse `TRUNCATE` on `.ondigitalocean.com` hosts — see
+[docs/staging-runbook.md](../../docs/staging-runbook.md) §Corpus protection.
+
+Verify daily backups (recovery after accidental wipe):
+
+```bash
+set -a && source prod.env && set +a
+bash scripts/infra/do_verify_staging_backups.sh
+```

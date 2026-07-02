@@ -37,6 +37,8 @@ Every bounded unit of work runs inside a **session** (`S{NNN}-slug`) opened by
 | Implement tasks | [07-build](07-build/SKILL.md) |
 | Corpus + DB setup | [data-management](data-management/SKILL.md) |
 | Production health | [15-service-health](15-service-health/SKILL.md) |
+| DO / GitHub Modal URL sync | [do-secrets-sync](do-secrets-sync/SKILL.md) |
+| Staging corpus safety (pytest + prod.env) | [corpus-db-safety](corpus-db-safety/SKILL.md) |
 | Bug fix after deploy | [14-hotfix](14-hotfix/SKILL.md) |
 | GitHub Projects board setup | [github-projects](github-projects/SKILL.md) |
 | CORS / UI wiring gates (all stages) | [connectivity-gates](connectivity-gates.md) |
@@ -55,6 +57,8 @@ session-first model in [sessions-reference.md](sessions-reference.md).
 - [template-registry.md](template-registry.md) — `api` / `worker` / `monolith`
 - [deployment-catalog.md](deployment-catalog.md) — Postgres, pgvector, deploy targets
 - [connectivity-gates.md](connectivity-gates.md) — CORS + `VITE_*` gates (H4–H5) before UI deploy sign-off
+- [do-secrets-sync/SKILL.md](do-secrets-sync/SKILL.md) — Modal embed/LLM URL sync to DO + GitHub
+- [corpus-db-safety/SKILL.md](corpus-db-safety/SKILL.md) — prevent staging corpus wipes during tests
 
 ## Legacy note
 

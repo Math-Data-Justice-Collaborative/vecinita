@@ -55,8 +55,10 @@ function columnLabelKey(
   if (columnId === "answer_relevancy") {
     return "admin.evaluation.col.answerRelevancy";
   }
-  if (columnId === "retrieved_urls") return "admin.evaluation.col.retrievedUrls";
-  if (columnId === "expected_doc_url") return "admin.evaluation.col.expectedDoc";
+  if (columnId === "retrieved_urls")
+    return "admin.evaluation.col.retrievedUrls";
+  if (columnId === "expected_doc_url")
+    return "admin.evaluation.col.expectedDoc";
   if (columnId === "latency_ms") return "admin.evaluation.col.latencyMs";
   return "admin.evaluation.col.question";
 }
@@ -163,10 +165,7 @@ export function EvaluationDrilldownTable({
           data-testid="eval-drilldown-column-picker"
         >
           {DRILLDOWN_COLUMNS.map((columnId) => (
-            <label
-              key={columnId}
-              className="flex items-center gap-2 text-sm"
-            >
+            <label key={columnId} className="flex items-center gap-2 text-sm">
               <Checkbox
                 checked={layout.visibleColumns.includes(columnId)}
                 onCheckedChange={() => {

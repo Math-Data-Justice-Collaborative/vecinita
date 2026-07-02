@@ -21,7 +21,9 @@ function notifyClientVersionChange(): void {
 }
 
 /** Subscribe when the singleton is rebuilt (e.g. remember-me storage routing). */
-export function subscribeSupabaseClientVersion(onChange: () => void): () => void {
+export function subscribeSupabaseClientVersion(
+  onChange: () => void,
+): () => void {
   clientVersionListeners.add(onChange);
   return () => {
     clientVersionListeners.delete(onChange);

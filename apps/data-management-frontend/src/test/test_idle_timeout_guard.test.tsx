@@ -20,9 +20,10 @@ vi.mock("@/hooks/useIdleTimeout", () => ({
 }));
 
 vi.mock("@/auth/authContext", async () => {
-  const actual = await vi.importActual<typeof import("@/auth/authContext")>(
-    "@/auth/authContext",
-  );
+  const actual =
+    await vi.importActual<typeof import("@/auth/authContext")>(
+      "@/auth/authContext",
+    );
   return {
     ...actual,
     useAuth: () => ({
@@ -36,9 +37,10 @@ vi.mock("@/auth/authContext", async () => {
 
 const navigateMock = vi.fn();
 vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>(
-    "react-router-dom",
-  );
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
   return {
     ...actual,
     useNavigate: () => navigateMock,

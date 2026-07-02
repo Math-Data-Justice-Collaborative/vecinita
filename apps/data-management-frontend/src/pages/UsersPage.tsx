@@ -98,7 +98,8 @@ export function UsersPage() {
   const [testEmailBusy, setTestEmailBusy] = useState(false);
   const [testEmailSuccess, setTestEmailSuccess] = useState<string | null>(null);
   const [testEmailUnconfigured, setTestEmailUnconfigured] = useState(false);
-  const [testEmailDomainUnverified, setTestEmailDomainUnverified] = useState(false);
+  const [testEmailDomainUnverified, setTestEmailDomainUnverified] =
+    useState(false);
 
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil(total / pageSize)),

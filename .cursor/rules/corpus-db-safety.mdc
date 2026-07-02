@@ -1,0 +1,28 @@
+---
+description: Block corpus TRUNCATE against DO Managed Postgres during tests/seeds
+globs:
+  - tests/**
+  - apps/database/**
+  - scripts/**/seed*
+alwaysApply: false
+---
+# Corpus DB safety (staging)
+
+The corpus lives on **DO Managed Postgres** (`DATABASE_URL` host `*.ondigitalocean.com`).
+Supabase is auth-only — do not assume corpus is there.
+
+## Hard rules
+
+- **Never** run `pytest`, `make test-py`, `seed_eval_corpus()`, or `reset_corpus_tables()`
+  with `DATABASE_URL` pointing at `.ondigitalocean.com` unless the operator set both:
+  `VECINITA_ALLOW_CORPUS_RESET=1` and `VECINITA_CORPUS_RESET_ACK=staging-wipe-confirmed`.
+- **Never** source `prod.env` in the same shell session before running tests that reset corpus.
+- New corpus-reset helpers must call `tests.helpers.corpus_db_guard.assert_corpus_reset_allowed()`.
+
+## CI
+
+`scripts/check_corpus_reset_guard.sh` is in `make ci-guards` — keep it wired when adding reset paths.
+
+Skill: `.cursor/skills/corpus-db-safety/SKILL.md`.
+
+Evidence: BUG-2026-07-02 — eval seed TRUNCATE wiped staging corpus when `prod.env` was sourced.

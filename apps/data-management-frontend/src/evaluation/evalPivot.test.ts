@@ -63,9 +63,7 @@ describe("flattenRunsForExplore", () => {
     expect(rows.find((r) => r.metric === "answer_relevancy")?.pass_fail).toBe(
       "fail",
     );
-    expect(rows.find((r) => r.metric === "latency_ms")?.pass_fail).toBe(
-      "fail",
-    );
+    expect(rows.find((r) => r.metric === "latency_ms")?.pass_fail).toBe("fail");
     expect(rows.find((r) => r.metric === "tone-friendly")).toEqual(
       expect.objectContaining({ pass_fail: "pass", score: 0.9 }),
     );

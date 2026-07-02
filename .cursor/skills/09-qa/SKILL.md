@@ -236,7 +236,9 @@ Read [template-registry.md](../template-registry.md) and verify:
 
 **Modal live checks (advisory unless env set):**
 
-- If `VECINITA_MODAL_EMBED_URL` / `VECINITA_MODAL_LLM_URL` set: `GET /health`, embed dim 384
+- If `VECINITA_MODAL_EMBED_URL` / `VECINITA_MODAL_LLM_URL` set: run `modal_url_validate.py`, then
+  `bash scripts/infra/do_verify_required_secrets.sh` (see [do-secrets-sync](../do-secrets-sync/SKILL.md))
+- ChatRAG `/health`: `dependencies.modal_embed` and `modal_llm` must be `ok`
 - Else: read `docs/data-staging-state.md` for D6/D7 status
 
 #### Agent 9 — Data staging & deploy readiness (Vecinita)

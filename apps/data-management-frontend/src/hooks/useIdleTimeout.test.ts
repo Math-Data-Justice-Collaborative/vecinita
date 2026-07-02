@@ -102,13 +102,15 @@ describe("useIdleTimeout", () => {
     let warningCallback: (() => void) | undefined;
     const originalSetTimeout = global.setTimeout;
     const clearIntervalSpy = vi.spyOn(global, "clearInterval");
-    const setTimeoutSpy = vi.spyOn(global, "setTimeout").mockImplementation((handler, timeout) => {
-      if (timeout === 110_000) {
-        warningCallback = handler as () => void;
-        return 1 as unknown as ReturnType<typeof setTimeout>;
-      }
-      return originalSetTimeout(handler, timeout);
-    });
+    const setTimeoutSpy = vi
+      .spyOn(global, "setTimeout")
+      .mockImplementation((handler, timeout) => {
+        if (timeout === 110_000) {
+          warningCallback = handler as () => void;
+          return 1 as unknown as ReturnType<typeof setTimeout>;
+        }
+        return originalSetTimeout(handler, timeout);
+      });
 
     renderHook(() => useIdleTimeout(true, onTimeout));
 

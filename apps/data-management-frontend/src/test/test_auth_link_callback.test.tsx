@@ -76,7 +76,9 @@ describe("auth link callback (TC-106, TC-107, UJ-031/033)", () => {
       </LocaleProvider>,
     );
 
-    expect(await screen.findByTestId("invite-password-form")).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("invite-password-form"),
+    ).toBeInTheDocument();
   });
 
   it("accept-invite shows bilingual expired link error for otp_expired hash", async () => {
@@ -92,8 +94,12 @@ describe("auth link callback (TC-106, TC-107, UJ-031/033)", () => {
       </LocaleProvider>,
     );
 
-    expect(await screen.findByTestId("invite-link-expired")).toBeInTheDocument();
-    expect(screen.queryByTestId("invite-password-form")).not.toBeInTheDocument();
+    expect(
+      await screen.findByTestId("invite-link-expired"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("invite-password-form"),
+    ).not.toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent(/expired/i);
   });
 
@@ -127,7 +133,9 @@ describe("auth link callback (TC-106, TC-107, UJ-031/033)", () => {
 
     expect(screen.getByRole("status")).toHaveTextContent(/verifying/i);
     await vi.advanceTimersByTimeAsync(10_000);
-    expect(await screen.findByTestId("invite-link-invalid")).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("invite-link-invalid"),
+    ).toBeInTheDocument();
   }, 15_000);
 
   it("useAuthLinkCallback returns denied for access_denied without otp_expired", async () => {
@@ -261,8 +269,12 @@ describe("auth link callback (TC-106, TC-107, UJ-031/033)", () => {
       </LocaleProvider>,
     );
 
-    expect(await screen.findByTestId("invite-link-invalid")).toBeInTheDocument();
-    expect(screen.getByRole("alert")).toHaveTextContent(/invalid or has already been used/i);
+    expect(
+      await screen.findByTestId("invite-link-invalid"),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      /invalid or has already been used/i,
+    );
   });
 
   it("accept-invite calls updateUser after session is ready", async () => {
@@ -307,7 +319,9 @@ describe("auth link callback (TC-106, TC-107, UJ-031/033)", () => {
     window.history.replaceState({}, "", "/accept-invite?code=pkce-code");
     mockGetSession
       .mockResolvedValueOnce({ data: { session: null } })
-      .mockResolvedValueOnce({ data: { session: { access_token: "recovered" } } });
+      .mockResolvedValueOnce({
+        data: { session: { access_token: "recovered" } },
+      });
     mockExchangeCodeForSession.mockResolvedValue({
       error: new Error("exchange failed"),
     });

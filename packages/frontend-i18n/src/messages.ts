@@ -486,7 +486,8 @@ const esStrings = {
     "Ejecuta comprobaciones del conjunto dorado y revisa métricas de recuperación y calidad de respuesta.",
   "admin.evaluation.run": "Ejecutar evaluación",
   "admin.evaluation.running": "Ejecutando…",
-  "admin.evaluation.loadFailed": "No se pudieron cargar las ejecuciones de evaluación",
+  "admin.evaluation.loadFailed":
+    "No se pudieron cargar las ejecuciones de evaluación",
   "admin.evaluation.history": "Historial de ejecuciones",
   "admin.evaluation.noRuns": "Aún no hay ejecuciones de evaluación.",
   "admin.evaluation.metric.retrieval": "Relevancia de recuperación",
@@ -523,16 +524,20 @@ const esStrings = {
   "admin.evaluation.dashboard.chartLine": "Gráfico de líneas",
   "admin.evaluation.dashboard.chartArea": "Gráfico de área",
   "admin.evaluation.dashboard.thresholds": "Umbrales",
-  "admin.evaluation.dashboard.noData": "Aún no hay ejecuciones completadas para gráficos.",
-  "admin.evaluation.dashboard.loadFailed": "No se pudo cargar la serie temporal",
+  "admin.evaluation.dashboard.noData":
+    "Aún no hay ejecuciones completadas para gráficos.",
+  "admin.evaluation.dashboard.loadFailed":
+    "No se pudo cargar la serie temporal",
   "admin.evaluation.explore.title": "Tabla dinámica",
   "admin.evaluation.explore.rowAxis": "Eje de filas",
   "admin.evaluation.explore.colAxis": "Eje de columnas",
   "admin.evaluation.explore.valueAxis": "Valor",
   "admin.evaluation.explore.exportCsv": "Exportar CSV",
   "admin.evaluation.explore.reset": "Restablecer ejes",
-  "admin.evaluation.explore.noData": "No hay ejecuciones completadas para explorar.",
-  "admin.evaluation.explore.loadFailed": "No se pudieron cargar los datos de exploración",
+  "admin.evaluation.explore.noData":
+    "No hay ejecuciones completadas para explorar.",
+  "admin.evaluation.explore.loadFailed":
+    "No se pudieron cargar los datos de exploración",
   "admin.evaluation.explore.axis.locale": "Idioma",
   "admin.evaluation.explore.axis.case_id": "Caso",
   "admin.evaluation.explore.axis.metric": "Métrica",

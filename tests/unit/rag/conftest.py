@@ -12,6 +12,7 @@ from vecinita_rag.retriever import EmbedFn  # noqa: TC002
 from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
 
 from tests.corpus_db_lock import corpus_db_lock
+from tests.helpers.corpus_db_guard import assert_corpus_reset_allowed
 
 _MIN_CORPUS_ROWS = 2
 
@@ -132,6 +133,7 @@ _EVAL_MATCH_SUBSTRINGS: dict[str, int] = {
 
 
 def _reset_corpus_tables_impl(*, database_url: str) -> None:
+    assert_corpus_reset_allowed(database_url)
     engine = create_engine(database_url)
     try:
         with engine.begin() as conn:

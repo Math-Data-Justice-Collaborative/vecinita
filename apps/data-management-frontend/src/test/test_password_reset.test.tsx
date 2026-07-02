@@ -215,7 +215,9 @@ describe("password reset flows (TC-093, UJ-033)", () => {
       within(form).getByRole("button", { name: /update password/i }),
     );
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(/sign in failed/i);
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /sign in failed/i,
+    );
   });
 
   it("reset-password shows success state after update", async () => {

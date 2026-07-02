@@ -348,6 +348,7 @@ Repo-root **`prod.env`** is the canonical **local operator secrets file** (gitig
 |------|--------|
 | **Read first** | If `prod.env` exists at repo root, `source` it — do not prompt for tokens already in that file |
 | **Never commit** | Do not add `prod.env` to git; do not echo secret values in chat, logs, or bug reports |
+| **Corpus safety** | If `DATABASE_URL` host is `.ondigitalocean.com`, do **not** run `pytest` / corpus seeds in the same shell — see [corpus-db-safety](corpus-db-safety/SKILL.md) |
 | **Missing file** | AskQuestion: user provides path, creates `prod.env`, or pastes vars for one-off use |
 | **Staging URLs** | Not stored in `prod.env` by default — derive via `do_apps.py urls` (below) or `docs/deploy-state.md` |
 
@@ -375,6 +376,8 @@ set -a && source prod.env && set +a && <command>
 | `MODAL_TOKEN_ID` | `modal deploy`, `modal app list`, Modal smokes |
 | `MODAL_TOKEN_SECRET` | Paired with `MODAL_TOKEN_ID` |
 | `DATABASE_URL` | H2 (`staging_h2.py`, Alembic), live DB checks; falls back as `VECINITA_STAGING_DATABASE_URL` when unset |
+| `VECINITA_MODAL_EMBED_URL` | Modal embedding ASGI base (no `/health`); DO backends + GitHub CD — see [do-secrets-sync](do-secrets-sync/SKILL.md) |
+| `VECINITA_MODAL_LLM_URL` | Modal LLM ASGI base; same sync path as embed URL |
 
 Add other operator-only keys to `prod.env` locally as needed (e.g. `VECINITA_INTERNAL_API_KEY`
 for authenticated curl smokes). Keep names aligned with `docs/staging-secrets-matrix.md`.
@@ -404,6 +407,19 @@ bash scripts/deploy/verify_connectivity.sh
 Canonical live URL table: `docs/deploy-state.md` §Live URLs.
 
 ### Example: DO hotfix redeploy
+
+```bash
+cd /path/to/vecinita
+set -a && source prod.env && set +a
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py sync-all-secrets
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy --name vecinita-internal-write-api
+bash scripts/infra/do_verify_required_secrets.sh
+```
+
+After Modal URL rotation, also run `bash scripts/deploy/sync_github_secrets.sh --apply`.
+Full checklist: [do-secrets-sync](do-secrets-sync/SKILL.md).
+
+### Example: DO deploy only (no secret change)
 
 ```bash
 cd /path/to/vecinita

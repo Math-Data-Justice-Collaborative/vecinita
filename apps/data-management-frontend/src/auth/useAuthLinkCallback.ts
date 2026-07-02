@@ -75,7 +75,8 @@ export function useAuthLinkCallback(): {
         const { error: exchangeError } =
           await supabase.auth.exchangeCodeForSession(code);
         if (exchangeError !== null) {
-          const { data: postExchangeSession } = await supabase.auth.getSession();
+          const { data: postExchangeSession } =
+            await supabase.auth.getSession();
           if (postExchangeSession.session !== null && activeRef.current) {
             setStatus("ready");
             return;

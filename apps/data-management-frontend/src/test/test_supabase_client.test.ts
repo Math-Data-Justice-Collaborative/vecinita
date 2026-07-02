@@ -44,21 +44,27 @@ describe("supabaseClient", () => {
   });
 
   it("readRememberPreference returns true when localStorage throws", async () => {
-    const getItem = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
-      throw new Error("storage blocked");
-    });
+    const getItem = vi
+      .spyOn(Storage.prototype, "getItem")
+      .mockImplementation(() => {
+        throw new Error("storage blocked");
+      });
     const { readRememberPreference } = await import("@/auth/supabaseClient");
     expect(readRememberPreference()).toBe(true);
     getItem.mockRestore();
   });
 
   it("resetSupabaseClient notifies version subscribers when rebuilding", async () => {
-    const { getSupabaseClient, resetSupabaseClient, setSupabaseClientForTests } =
-      await import("@/auth/supabaseClient");
+    const {
+      getSupabaseClient,
+      resetSupabaseClient,
+      setSupabaseClientForTests,
+    } = await import("@/auth/supabaseClient");
     setSupabaseClientForTests(null);
     getSupabaseClient();
     let version = 0;
-    const { subscribeSupabaseClientVersion } = await import("@/auth/supabaseClient");
+    const { subscribeSupabaseClientVersion } =
+      await import("@/auth/supabaseClient");
     subscribeSupabaseClientVersion(() => {
       version += 1;
     });

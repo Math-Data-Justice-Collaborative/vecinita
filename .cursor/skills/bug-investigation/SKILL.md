@@ -23,6 +23,7 @@ During intake (Phase 0), ask whether the failure is **browser connectivity** vs 
 | Class | Examples | Repro focus |
 |-------|----------|-------------|
 | **connectivity** | Failed to fetch, CORS error, empty `VITE_*` | H4/H5 assertions; OPTIONS + bundle hosts |
+| **infra-secrets** | Modal embed 404, `modal_embed` health error, `fontface--` URL | [do-secrets-sync](../do-secrets-sync/SKILL.md); validator + live verify |
 | **integration** | Write API 401, Modal key mismatch | H0i or live API with correct headers |
 | **domain** | Wrong answer, bad retrieval | H3 / unit tests |
 

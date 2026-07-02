@@ -1,4 +1,10 @@
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LocaleProvider } from "vecinita-frontend-ui";
 
@@ -62,7 +68,9 @@ describe("EvaluationDrilldownTable", () => {
 
   it("renders default columns and row content", () => {
     renderTable();
-    expect(drilldownRoot().getByText("When are food pantry hours updated?")).toBeInTheDocument();
+    expect(
+      drilldownRoot().getByText("When are food pantry hours updated?"),
+    ).toBeInTheDocument();
     expect(drilldownRoot().getByText("0.85")).toBeInTheDocument();
     expect(drilldownRoot().getByText("Fail")).toBeInTheDocument();
   });
@@ -71,7 +79,9 @@ describe("EvaluationDrilldownTable", () => {
     renderTable();
     const root = drilldownRoot();
     fireEvent.click(root.getByTestId("eval-drilldown-columns-toggle"));
-    expect(root.getByTestId("eval-drilldown-column-picker")).toBeInTheDocument();
+    expect(
+      root.getByTestId("eval-drilldown-column-picker"),
+    ).toBeInTheDocument();
 
     fireEvent.click(root.getByTestId("eval-drilldown-col-locale"));
     expect(root.getByText("es")).toBeInTheDocument();
@@ -80,16 +90,14 @@ describe("EvaluationDrilldownTable", () => {
     expect(root.getByText("retrieval-miss")).toBeInTheDocument();
 
     fireEvent.click(root.getByTestId("eval-drilldown-col-retrieved_urls"));
-    expect(root.getByTestId("eval-drilldown-col-retrieved_urls")).toHaveAttribute(
-      "aria-checked",
-      "true",
-    );
+    expect(
+      root.getByTestId("eval-drilldown-col-retrieved_urls"),
+    ).toHaveAttribute("aria-checked", "true");
 
     fireEvent.click(root.getByTestId("eval-drilldown-col-expected_doc_url"));
-    expect(root.getByTestId("eval-drilldown-col-expected_doc_url")).toHaveAttribute(
-      "aria-checked",
-      "true",
-    );
+    expect(
+      root.getByTestId("eval-drilldown-col-expected_doc_url"),
+    ).toHaveAttribute("aria-checked", "true");
 
     fireEvent.click(root.getByTestId("eval-drilldown-col-latency_ms"));
     expect(root.getByText("3100 ms")).toBeInTheDocument();
@@ -97,7 +105,9 @@ describe("EvaluationDrilldownTable", () => {
 
   it("toggles wrap cells off", () => {
     renderTable();
-    const wrapToggle = drilldownRoot().getByTestId("eval-drilldown-wrap-toggle");
+    const wrapToggle = drilldownRoot().getByTestId(
+      "eval-drilldown-wrap-toggle",
+    );
     expect(wrapToggle).toBeChecked();
     fireEvent.click(wrapToggle);
     expect(wrapToggle).not.toBeChecked();

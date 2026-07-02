@@ -80,6 +80,8 @@ Launch parallel agents:
 **Agent 2 — Secrets Check**:
 - Cross-reference deployment plan §Secrets with actual secret configuration
 - For Modal: `modal secret list`
+- For DO backends: confirm `VECINITA_MODAL_EMBED_URL` / `VECINITA_MODAL_LLM_URL` pass
+  `scripts/deploy/modal_url_validate.py`; plan [do-secrets-sync](../do-secrets-sync/SKILL.md) sync
 - For other platforms: check environment or secret manager
 - Return: pass/fail per secret
 
@@ -113,6 +115,15 @@ Launch parallel agents:
 - Confirm `scripts/deploy/verify_connectivity.sh` and `tests/smoke/test_staging_connectivity.py` are present
 - Return: pass/fail + missing wiring items (do **not** assume H1–H3 alone is enough)
 
+**Agent 7 — Modal / DO secret parity** (required when DO backends deploy):
+- Read [do-secrets-sync](../do-secrets-sync/SKILL.md)
+- Verify `scripts/deploy/modal_url_validate.py`, `scripts/check_do_required_secrets.sh`, and
+  `scripts/infra/do_verify_required_secrets.sh` exist
+- Confirm `infra/do/chat-rag-backend.yaml` and `internal-write-api.yaml` declare
+  `VECINITA_MODAL_EMBED_URL` + `VECINITA_MODAL_LLM_URL`
+- Plan: `sync-all-secrets` → redeploy both backends → `sync_github_secrets.sh --apply` → live verify
+- Return: pass/fail + stale URL risk (e.g. `fontface--` prefix documented in bug reports)
+
 ### Phase 2 — Failure Mode Analysis
 
 Walk through potential deployment failure modes with the user:
@@ -144,6 +155,7 @@ Common failure modes to check:
 - Cold start timeout
 - Memory exhaustion
 - **Auth/CORS / browser connectivity** — static frontend on different origin than API; mitigated by `VECINITA_CORS_ORIGINS` + H4/H5 gates (see connectivity-gates)
+- **Wrong Modal embed/LLM URL** — eval 404, `modal_embed` health error; mitigated by `modal_url_validate` + do-secrets-sync workflow
 
 ### Phase 3 — Rollback Plan Review
 

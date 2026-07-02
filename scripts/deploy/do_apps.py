@@ -21,6 +21,12 @@ from urllib.parse import parse_qs, urlparse
 
 import yaml
 
+_DEPLOY_DIR = Path(__file__).resolve().parent
+if str(_DEPLOY_DIR) not in sys.path:
+    sys.path.insert(0, str(_DEPLOY_DIR))
+
+from modal_url_validate import validate_modal_service_url  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SPECS = [
     ROOT / "infra/do/internal-write-api.yaml",
@@ -135,6 +141,10 @@ def _apply_env_from_os(spec: dict[str, Any], keys: list[str], scope: str = "RUN_
         val = os.environ.get(key, "").strip()
         if not val:
             continue
+        try:
+            validate_modal_service_url(key, val)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
         for section in ("services", "static_sites", "workers", "jobs"):
             for comp in spec.get(section) or []:
                 envs = comp.setdefault("envs", [])

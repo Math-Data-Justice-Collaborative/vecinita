@@ -315,7 +315,9 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
     renderUsersPage();
 
     await waitFor(() => {
-      expect(screen.getByTestId(`force-signout-${ADMIN_ID}`)).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`force-signout-${ADMIN_ID}`),
+      ).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByTestId(`force-signout-${ADMIN_ID}`));
@@ -453,7 +455,9 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
     renderUsersPage();
 
     await waitFor(() => {
-      expect(screen.getByTestId(`revoke-invite-${invitedId}`)).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`revoke-invite-${invitedId}`),
+      ).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByTestId(`revoke-invite-${invitedId}`));
@@ -539,9 +543,7 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
       vi.fn().mockImplementation((input: RequestInfo | URL) => {
         const url = fetchInputUrl(input);
         if (url.includes("/admin/users") && !url.includes("/admin/users/")) {
-          return listGate.then(() =>
-            Promise.resolve(jsonResponse(MOCK_USERS)),
-          );
+          return listGate.then(() => Promise.resolve(jsonResponse(MOCK_USERS)));
         }
         return Promise.resolve(jsonResponse(MOCK_USERS));
       }),

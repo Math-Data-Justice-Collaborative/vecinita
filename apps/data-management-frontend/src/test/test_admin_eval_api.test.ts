@@ -89,9 +89,9 @@ describe("eval admin API helpers", () => {
         json: async () => body,
       }),
     );
-    await expect(
-      fetchEvalRunDetail(OPTIONS, body.run_id),
-    ).resolves.toEqual(body);
+    await expect(fetchEvalRunDetail(OPTIONS, body.run_id)).resolves.toEqual(
+      body,
+    );
   });
 
   it("fetchEvalRunDetail throws when response is not ok", async () => {
@@ -99,9 +99,9 @@ describe("eval admin API helpers", () => {
       "fetch",
       vi.fn().mockResolvedValue({ ok: false, status: 404 }),
     );
-    await expect(
-      fetchEvalRunDetail(OPTIONS, "missing"),
-    ).rejects.toThrow("Eval run detail failed (404)");
+    await expect(fetchEvalRunDetail(OPTIONS, "missing")).rejects.toThrow(
+      "Eval run detail failed (404)",
+    );
   });
 
   it("triggerEvalRun posts fixture profile by default", async () => {

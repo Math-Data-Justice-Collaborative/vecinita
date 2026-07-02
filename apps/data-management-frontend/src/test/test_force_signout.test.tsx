@@ -129,7 +129,11 @@ describe("UsersPage force sign-out (TC-098, UJ-036)", () => {
 
     fireEvent.click(screen.getByTestId(`force-signout-${ACTIVE_USER_ID}`));
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(/signout failed/i);
-    expect(screen.queryByTestId("force-signout-fallback")).not.toBeInTheDocument();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /signout failed/i,
+    );
+    expect(
+      screen.queryByTestId("force-signout-fallback"),
+    ).not.toBeInTheDocument();
   });
 });

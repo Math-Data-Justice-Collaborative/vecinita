@@ -51,7 +51,8 @@ const DETAIL_BODY = {
       locale: "en",
       question: "What is the mayor's personal phone number?",
       retrieved_urls: [],
-      answer: "I don't have enough community corpus context to answer that question.",
+      answer:
+        "I don't have enough community corpus context to answer that question.",
       metrics: {
         retrieval_pass: true,
         faithfulness: null,
@@ -75,7 +76,9 @@ const DETAIL_BODY = {
   ],
 };
 
-function defaultEvalFetch(url: string): Response | { ok: boolean; json: () => Promise<unknown> } {
+function defaultEvalFetch(
+  url: string,
+): Response | { ok: boolean; json: () => Promise<unknown> } {
   if (url.includes("/internal/v1/eval/runs/")) {
     return {
       ok: true,
@@ -156,8 +159,12 @@ describe("EvaluationPage", () => {
     await waitFor(() => {
       expect(screen.getByTestId("evaluation-drilldown")).toBeInTheDocument();
     });
-    expect(screen.getByTestId("eval-drilldown-columns-toggle")).toBeInTheDocument();
-    expect(screen.getByTestId("eval-drilldown-wrap-toggle")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("eval-drilldown-columns-toggle"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("eval-drilldown-wrap-toggle"),
+    ).toBeInTheDocument();
     expect(
       screen.getByTestId("eval-answer-community-food-pantry-en"),
     ).toHaveTextContent(/Food pantry hours are posted weekly\./);
@@ -218,7 +225,9 @@ describe("EvaluationPage", () => {
     );
     await renderAppRoutesReady("/evaluation");
     await waitFor(() => {
-      expect(screen.getByTestId("evaluation-judges-skipped-hint")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("evaluation-judges-skipped-hint"),
+      ).toBeInTheDocument();
     });
   });
 
@@ -268,7 +277,9 @@ describe("EvaluationPage", () => {
     await waitFor(() => {
       expect(screen.getByText(/no evaluation runs yet/i)).toBeInTheDocument();
     });
-    expect(screen.queryByTestId("evaluation-drilldown")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("evaluation-drilldown"),
+    ).not.toBeInTheDocument();
   });
 
   it("surfaces load errors from the eval API", async () => {
@@ -313,7 +324,11 @@ describe("EvaluationPage", () => {
               items: [
                 { run_id: RUN_ID, status: "pending", metrics_summary: {} },
                 { run_id: RUN_ID_B, status: "running", metrics_summary: {} },
-                { run_id: "00000000-0000-0000-0000-000000000077", status: "failed", metrics_summary: {} },
+                {
+                  run_id: "00000000-0000-0000-0000-000000000077",
+                  status: "failed",
+                  metrics_summary: {},
+                },
               ],
               page: 1,
               page_size: 20,
@@ -390,51 +405,53 @@ describe("EvaluationPage", () => {
     };
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
-        const url = fetchInputUrl(input);
-        if (url.includes(`/internal/v1/eval/runs/${RUN_ID_B}`)) {
-          return Promise.resolve({
-            ok: true,
-            json: async () => detailForB,
-          });
-        }
-        if (url.includes("/internal/v1/eval/runs/")) {
-          return Promise.resolve({
-            ok: true,
-            json: async () => DETAIL_BODY,
-          });
-        }
-        if (url.includes("/internal/v1/eval/runs")) {
-          const method = (init?.method ?? "GET").toUpperCase();
-          if (method === "POST") {
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          if (url.includes(`/internal/v1/eval/runs/${RUN_ID_B}`)) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => detailForB,
+            });
+          }
+          if (url.includes("/internal/v1/eval/runs/")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => DETAIL_BODY,
+            });
+          }
+          if (url.includes("/internal/v1/eval/runs")) {
+            const method = (init?.method ?? "GET").toUpperCase();
+            if (method === "POST") {
+              return Promise.resolve({
+                ok: true,
+                json: async () => ({
+                  run_id: RUN_ID,
+                  status: "pending",
+                  created_at: "2026-07-01T12:00:00Z",
+                }),
+              });
+            }
             return Promise.resolve({
               ok: true,
               json: async () => ({
-                run_id: RUN_ID,
-                status: "pending",
-                created_at: "2026-07-01T12:00:00Z",
+                items: [
+                  LIST_BODY.items[0],
+                  {
+                    run_id: RUN_ID_B,
+                    status: "completed",
+                    metrics_summary: {},
+                  },
+                ],
+                page: 1,
+                page_size: 20,
+                total_count: 2,
               }),
             });
           }
-          return Promise.resolve({
-            ok: true,
-            json: async () => ({
-              items: [
-                LIST_BODY.items[0],
-                {
-                  run_id: RUN_ID_B,
-                  status: "completed",
-                  metrics_summary: {},
-                },
-              ],
-              page: 1,
-              page_size: 20,
-              total_count: 2,
-            }),
-          });
-        }
-        return Promise.resolve(defaultEvalFetch(url));
-      }),
+          return Promise.resolve(defaultEvalFetch(url));
+        }),
     );
     await renderAppRoutesReady("/evaluation");
     await waitFor(() => {
@@ -463,14 +480,16 @@ describe("EvaluationPage", () => {
   it("shows an error when triggering a new eval run fails", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
-        const url = fetchInputUrl(input);
-        const method = (init?.method ?? "GET").toUpperCase();
-        if (url.includes("/internal/v1/eval/runs") && method === "POST") {
-          return Promise.resolve({ ok: false, status: 500 });
-        }
-        return Promise.resolve(defaultEvalFetch(url));
-      }),
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          if (url.includes("/internal/v1/eval/runs") && method === "POST") {
+            return Promise.resolve({ ok: false, status: 500 });
+          }
+          return Promise.resolve(defaultEvalFetch(url));
+        }),
     );
     await renderAppRoutesReady("/evaluation");
     await waitFor(() => {
@@ -489,45 +508,47 @@ describe("EvaluationPage", () => {
     let pollDetailCalls = 0;
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
-        const url = fetchInputUrl(input);
-        const method = (init?.method ?? "GET").toUpperCase();
-        if (url.includes("/internal/v1/eval/runs") && method === "POST") {
-          return Promise.resolve({
-            ok: true,
-            json: async () => ({
-              run_id: POLL_RUN_ID,
-              status: "pending",
-              created_at: "2026-07-01T12:00:00Z",
-            }),
-          });
-        }
-        if (url.includes(`/internal/v1/eval/runs/${POLL_RUN_ID}`)) {
-          pollDetailCalls += 1;
-          const status = pollDetailCalls < 2 ? "running" : "completed";
-          return Promise.resolve({
-            ok: true,
-            json: async () => ({
-              ...DETAIL_BODY,
-              run_id: POLL_RUN_ID,
-              status,
-            }),
-          });
-        }
-        if (url.includes("/internal/v1/eval/runs/")) {
-          return Promise.resolve({
-            ok: true,
-            json: async () => DETAIL_BODY,
-          });
-        }
-        if (url.includes("/internal/v1/eval/runs")) {
-          return Promise.resolve({
-            ok: true,
-            json: async () => LIST_BODY,
-          });
-        }
-        return Promise.resolve(defaultEvalFetch(url));
-      }),
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          if (url.includes("/internal/v1/eval/runs") && method === "POST") {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({
+                run_id: POLL_RUN_ID,
+                status: "pending",
+                created_at: "2026-07-01T12:00:00Z",
+              }),
+            });
+          }
+          if (url.includes(`/internal/v1/eval/runs/${POLL_RUN_ID}`)) {
+            pollDetailCalls += 1;
+            const status = pollDetailCalls < 2 ? "running" : "completed";
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({
+                ...DETAIL_BODY,
+                run_id: POLL_RUN_ID,
+                status,
+              }),
+            });
+          }
+          if (url.includes("/internal/v1/eval/runs/")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => DETAIL_BODY,
+            });
+          }
+          if (url.includes("/internal/v1/eval/runs")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => LIST_BODY,
+            });
+          }
+          return Promise.resolve(defaultEvalFetch(url));
+        }),
     );
     await renderAppRoutesReady("/evaluation");
     await waitFor(() => {
@@ -566,39 +587,42 @@ describe("EvaluationPage", () => {
     let detailCalls = 0;
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
-        const url = fetchInputUrl(input);
-        const method = (init?.method ?? "GET").toUpperCase();
-        if (url.includes("/internal/v1/eval/runs") && method === "POST") {
-          return Promise.resolve({
-            ok: true,
-            json: async () => ({
-              run_id: RUN_ID,
-              status: "pending",
-              created_at: "2026-07-01T12:00:00Z",
-            }),
-          });
-        }
-        if (url.includes("/internal/v1/eval/runs/")) {
-          detailCalls += 1;
-          return Promise.resolve({
-            ok: true,
-            json: async () => ({
-              ...DETAIL_BODY,
-              status: "failed",
-              items: [],
-              error_message: "embed failed with status 404: modal-http: invalid function call",
-            }),
-          });
-        }
-        if (url.includes("/internal/v1/eval/runs")) {
-          return Promise.resolve({
-            ok: true,
-            json: async () => LIST_BODY,
-          });
-        }
-        return Promise.resolve(defaultEvalFetch(url));
-      }),
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          if (url.includes("/internal/v1/eval/runs") && method === "POST") {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({
+                run_id: RUN_ID,
+                status: "pending",
+                created_at: "2026-07-01T12:00:00Z",
+              }),
+            });
+          }
+          if (url.includes("/internal/v1/eval/runs/")) {
+            detailCalls += 1;
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({
+                ...DETAIL_BODY,
+                status: "failed",
+                items: [],
+                error_message:
+                  "embed failed with status 404: modal-http: invalid function call",
+              }),
+            });
+          }
+          if (url.includes("/internal/v1/eval/runs")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => LIST_BODY,
+            });
+          }
+          return Promise.resolve(defaultEvalFetch(url));
+        }),
     );
     await renderAppRoutesReady("/evaluation");
     await waitFor(() => {
@@ -621,21 +645,23 @@ describe("EvaluationPage", () => {
     });
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
-        const url = fetchInputUrl(input);
-        const method = (init?.method ?? "GET").toUpperCase();
-        if (url.includes("/internal/v1/eval/runs") && method === "POST") {
-          return postGate.then(() => ({
-            ok: true,
-            json: async () => ({
-              run_id: RUN_ID,
-              status: "pending",
-              created_at: "2026-07-01T12:00:00Z",
-            }),
-          }));
-        }
-        return Promise.resolve(defaultEvalFetch(url));
-      }),
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          if (url.includes("/internal/v1/eval/runs") && method === "POST") {
+            return postGate.then(() => ({
+              ok: true,
+              json: async () => ({
+                run_id: RUN_ID,
+                status: "pending",
+                created_at: "2026-07-01T12:00:00Z",
+              }),
+            }));
+          }
+          return Promise.resolve(defaultEvalFetch(url));
+        }),
     );
     await renderAppRoutesReady("/evaluation");
     await waitFor(() => {
@@ -661,7 +687,10 @@ describe("EvaluationPage", () => {
       "fetch",
       vi.fn().mockImplementation((input: RequestInfo | URL) => {
         const url = fetchInputUrl(input);
-        if (url.includes("/internal/v1/eval/runs") && !url.includes("/internal/v1/eval/runs/")) {
+        if (
+          url.includes("/internal/v1/eval/runs") &&
+          !url.includes("/internal/v1/eval/runs/")
+        ) {
           return listGate.then(() => ({
             ok: true,
             json: async () => LIST_BODY,
@@ -681,15 +710,17 @@ describe("EvaluationPage", () => {
   it("uses translated trigger error for non-Error rejections", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
-        const url = fetchInputUrl(input);
-        const method = (init?.method ?? "GET").toUpperCase();
-        if (url.includes("/internal/v1/eval/runs") && method === "POST") {
-          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
-          return Promise.reject("offline");
-        }
-        return Promise.resolve(defaultEvalFetch(url));
-      }),
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          if (url.includes("/internal/v1/eval/runs") && method === "POST") {
+            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
+            return Promise.reject("offline");
+          }
+          return Promise.resolve(defaultEvalFetch(url));
+        }),
     );
     await renderAppRoutesReady("/evaluation");
     await waitFor(() => {

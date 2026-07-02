@@ -92,6 +92,8 @@ ignore = [
 "tests/**" = ["S101"]
 "tests/unit/data_management/test_email_test.py" = ["D103"]
 "tests/unit/data_management/test_user_admin_routes.py" = ["D103"]
+"tests/unit/test_corpus_db_guard.py" = ["D103"]
+"tests/unit/scripts/test_modal_url_validate.py" = ["D103"]
 "tests/unit/shared_schemas/test_data_management_validators.py" = ["D103"]
 # Pydantic v2 evaluates field annotations at runtime, so datetime/UUID/JsonObject must be
 # real imports — flake8-type-checking (TC001/2/3) would wrongly move them into a
@@ -183,7 +185,7 @@ indent-style = "space"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["."]
+pythonpath = [".", "scripts/deploy"]
 addopts = "-q --tb=short"
 markers = [
     "integration: integration tests (may need docker-compose DB)",
@@ -231,7 +233,7 @@ exclude_also = [
 [tool.basedpyright]
 include = ["apps", "packages", "tests", "infra", "scripts"]
 exclude = ["**/__pycache__", ".venv", ".pytest_cache", "**/node_modules"]
-extraPaths = [".cursor/hooks"]
+extraPaths = [".cursor/hooks", "scripts/deploy"]
 stubPath = "stubs"
 pythonVersion = "3.11"
 typeCheckingMode = "strict"
@@ -246,6 +248,10 @@ reportAny = "error"
 # type-check them so real logic bugs are caught (reportReturnType, reportArgumentType,
 # reportOptionalMemberAccess, reportCallIssue stay at error), but relax the
 # untyped-library-glue families that would otherwise drown out those signals.
+[[tool.basedpyright.executionEnvironments]]
+root = "tests"
+extraPaths = [".cursor/hooks", "scripts/deploy"]
+
 [[tool.basedpyright.executionEnvironments]]
 root = "infra"
 reportMissingImports = false

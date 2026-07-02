@@ -144,6 +144,7 @@ Mark items in [execution-plan.md](execution-plan.md) Phase 4 Gate Check after ev
 | Symptom | Likely fix |
 |---------|------------|
 | H1 502/timeout | DO app not deployed; missing Modal URLs in ChatRAG secrets |
+| H1 `modal_embed` not ok | Wrong `VECINITA_MODAL_EMBED_URL` (e.g. `fontface--` prefix or `/health` suffix) — see §Modal embed URL |
 | H2 `no alembic revision` | Run `alembic upgrade head` against staging DB |
 | H2 revision != head | Deploy newer code; re-run migrations |
 | H3 empty answer | Corpus not seeded; embed/LLM Modal URLs wrong |
@@ -263,6 +264,89 @@ Public self-signup remains disabled (`enable_signup = false` in `config.toml`); 
 | `SUPABASE_SECRET_KEY` | Modal data-management only | 1) Rotate in Supabase dashboard (Settings → API). 2) Update `prod.env`. 3) `bash scripts/deploy/sync_modal_secret.sh --merge --apply`. 4) Smoke `GET /admin/users` as admin. 5) Revoke old secret key. |
 
 Never commit secret values. Use `--merge` on Modal pushes so rotation does not drop unrelated keys.
+
+## Corpus protection (DO Managed Postgres)
+
+The **corpus lives only on DO Managed Postgres** (`vecinita-staging` via `DATABASE_URL`).
+Supabase holds auth identity only — corpus documents were never stored there.
+
+### Prevent accidental wipes
+
+Test helpers that `TRUNCATE` corpus tables (`seed_eval_corpus`, `reset_corpus_tables`) **refuse
+any `DATABASE_URL` whose host ends in `.ondigitalocean.com`**. They only run against
+local/CI Postgres (`localhost`, `127.0.0.1`, `postgres`).
+
+**Do not** run `pytest`, `seed_eval_corpus()`, or `make test-py` with `prod.env` sourced unless
+`DATABASE_URL` points at localhost. A July 2026 incident wiped ~40 ingested staging documents
+when eval seed ran against staging.
+
+Operator override (intentional staging reset only — destroys live corpus):
+
+```bash
+export VECINITA_ALLOW_CORPUS_RESET=1
+export VECINITA_CORPUS_RESET_ACK=staging-wipe-confirmed
+# then run the maintenance command
+```
+
+CI guard: `bash scripts/check_corpus_reset_guard.sh` (also in `make ci-guards`).
+
+### Recovery via DigitalOcean backups
+
+DO Managed Postgres includes **daily backups** for `vecinita-staging`. Verify:
+
+```bash
+set -a && source prod.env && set +a
+bash scripts/infra/do_verify_staging_backups.sh
+```
+
+To restore corpus after accidental data loss:
+
+1. DO control panel → **Databases** → `vecinita-staging` → **Backups** → **Restore** / **Fork**
+   (pick a timestamp **before** the wipe — e.g. daily backup at 16:41 UTC).
+2. Confirm `SELECT COUNT(*) FROM documents` on the forked cluster.
+3. Update `DATABASE_URL` on `vecinita-chat-rag-backend` and `vecinita-internal-write-api`
+   (DO dashboard or `scripts/deploy/do_apps.py sync-secrets`).
+4. Re-run H2/H3 smoke.
+
+Reference: [DO PostgreSQL restore from backups](https://docs.digitalocean.com/products/databases/postgresql/how-to/restore-from-backups/).
+
+## Modal embed / LLM URLs (DO + GitHub)
+
+Both backend DO apps require **`VECINITA_MODAL_EMBED_URL`** and **`VECINITA_MODAL_LLM_URL`**
+(base Modal ASGI URLs — no `/health` suffix). Wrong values (e.g. legacy `fontface--` workspace
+prefix) cause eval ingest/embed 404s and `dependencies.modal_embed != ok` on ChatRAG `/health`.
+
+### Sync to DigitalOcean
+
+```bash
+set -a && source prod.env && set +a
+# prod.env must include:
+#   VECINITA_MODAL_EMBED_URL=https://vecinita--vecinita-embedding-embedding-api.modal.run
+#   VECINITA_MODAL_LLM_URL=https://vecinita--vecinita-llm-fastapi-app.modal.run
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py sync-all-secrets
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy --name vecinita-internal-write-api
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy --name vecinita-chat-rag-backend
+```
+
+`do_apps.py` validates URL shape before push (rejects `fontface--`, `/health`, wrong app host).
+
+### Sync to GitHub (CD parity)
+
+```bash
+bash scripts/deploy/sync_github_secrets.sh --apply
+```
+
+Ensures `deploy-digitalocean.yml` materializes the same URLs on every `main` deploy.
+
+### Verify live
+
+```bash
+bash scripts/infra/do_verify_required_secrets.sh
+bash scripts/deploy/staging_smoke.sh   # H1 asserts modal_embed/modal_llm ok
+```
+
+CI guards: `bash scripts/check_do_required_secrets.sh` (YAML + sync helper parity),
+`scripts/deploy/ci_materialize_env.sh` (DO deploy job — required keys + validator).
 
 ## Related
 

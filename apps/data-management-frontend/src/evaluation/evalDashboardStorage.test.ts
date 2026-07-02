@@ -141,9 +141,9 @@ describe("evalDashboardStorage", () => {
       valueMeasure: "pass_rate",
     };
     saveEvalExploreLayout(layout);
-    expect(JSON.parse(localStorage.getItem(EXPLORE_STORAGE_KEY) ?? "{}")).toEqual(
-      layout,
-    );
+    expect(
+      JSON.parse(localStorage.getItem(EXPLORE_STORAGE_KEY) ?? "{}"),
+    ).toEqual(layout);
 
     vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new Error("quota");

@@ -18,7 +18,8 @@ When adding a new external dependency to `create_app()`:
 2. Use it as a fallback: `client = explicit_arg if explicit_arg is not None else _default_<client>()`
 3. Add the env vars to the DO app spec in `infra/do/`
 4. Add the env vars to `do_apps.py` `cmd_sync_secrets`
-5. Write a test that calls `create_app()` without args and verifies the endpoint works
+5. If Modal URL-shaped, add validation in `modal_url_validate.py` and run [do-secrets-sync](../skills/do-secrets-sync/SKILL.md) after first sync
+6. Write a test that calls `create_app()` without args and verifies the endpoint works
 
 Evidence: BUG-2026-05-25 — retag returned 503 because `DataManagementJobsClient` was
 not created from env vars in the factory path.

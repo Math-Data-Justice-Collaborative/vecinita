@@ -73,12 +73,16 @@ vi.mock("@/components/ui/tabs", () => {
 });
 
 vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>(
-    "react-router-dom",
-  );
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
   return {
     ...actual,
-    useSearchParams: () => [new URLSearchParams({ tab: "runs" }), setSearchParams],
+    useSearchParams: () => [
+      new URLSearchParams({ tab: "runs" }),
+      setSearchParams,
+    ],
   };
 });
 

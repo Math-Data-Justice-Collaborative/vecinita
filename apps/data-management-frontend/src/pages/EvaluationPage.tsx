@@ -40,7 +40,11 @@ function metricClass(value: number | null | undefined): string {
 
 function statusLabelKey(
   status: EvalRunListItemApi["status"],
-): "admin.evaluation.status.pending" | "admin.evaluation.status.running" | "admin.evaluation.status.completed" | "admin.evaluation.status.failed" {
+):
+  | "admin.evaluation.status.pending"
+  | "admin.evaluation.status.running"
+  | "admin.evaluation.status.completed"
+  | "admin.evaluation.status.failed" {
   if (status === "pending") return "admin.evaluation.status.pending";
   if (status === "running") return "admin.evaluation.status.running";
   if (status === "failed") return "admin.evaluation.status.failed";
@@ -57,30 +61,35 @@ export function EvaluationPage() {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadHistory = useCallback(async (isActive: () => boolean) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const client = requireCorpusConfig();
-      const data = await fetchEvalRuns(client);
-      if (!isActive()) return;
-      setRuns(data.items);
-      if (data.items[0]) {
-        const detail = await fetchEvalRunDetail(client, data.items[0].run_id);
+  const loadHistory = useCallback(
+    async (isActive: () => boolean) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const client = requireCorpusConfig();
+        const data = await fetchEvalRuns(client);
         if (!isActive()) return;
-        setSelectedRun(detail);
-      } else {
-        setSelectedRun(null);
+        setRuns(data.items);
+        if (data.items[0]) {
+          const detail = await fetchEvalRunDetail(client, data.items[0].run_id);
+          if (!isActive()) return;
+          setSelectedRun(detail);
+        } else {
+          setSelectedRun(null);
+        }
+      } catch (err) {
+        if (!isActive()) return;
+        setError(
+          err instanceof Error
+            ? err.message
+            : tr("admin.evaluation.loadFailed"),
+        );
+      } finally {
+        if (isActive()) setLoading(false);
       }
-    } catch (err) {
-      if (!isActive()) return;
-      setError(
-        err instanceof Error ? err.message : tr("admin.evaluation.loadFailed"),
-      );
-    } finally {
-      if (isActive()) setLoading(false);
-    }
-  }, [tr]);
+    },
+    [tr],
+  );
 
   useEffect(() => {
     let active = true;
@@ -168,7 +177,9 @@ export function EvaluationPage() {
             data-testid="evaluation-run-button"
           >
             <FlaskConical className="mr-2 h-4 w-4" />
-            {running ? tr("admin.evaluation.running") : tr("admin.evaluation.run")}
+            {running
+              ? tr("admin.evaluation.running")
+              : tr("admin.evaluation.run")}
           </Button>
         </div>
       </div>
@@ -212,108 +223,112 @@ export function EvaluationPage() {
         </TabsList>
 
         <TabsContent value="runs" className="space-y-6">
-      {summary ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {summary ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    {tr("admin.evaluation.metric.retrieval")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent
+                  className={cn(
+                    metricClass(summary.retrieval_relevance ?? null),
+                  )}
+                >
+                  {formatPercent(summary.retrieval_relevance)}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    {tr("admin.evaluation.metric.faithfulness")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent
+                  className={cn(metricClass(summary.faithfulness ?? null))}
+                >
+                  {formatScore(summary.faithfulness)}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    {tr("admin.evaluation.metric.answerRelevancy")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent
+                  className={cn(metricClass(summary.answer_relevancy ?? null))}
+                >
+                  {formatScore(summary.answer_relevancy)}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    {tr("admin.evaluation.metric.latencyP95")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>{summary.latency_p95_ms ?? "—"} ms</CardContent>
+              </Card>
+            </div>
+          ) : null}
+
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                {tr("admin.evaluation.metric.retrieval")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent
-              className={cn(metricClass(summary.retrieval_relevance ?? null))}
-            >
-              {formatPercent(summary.retrieval_relevance)}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                {tr("admin.evaluation.metric.faithfulness")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className={cn(metricClass(summary.faithfulness ?? null))}>
-              {formatScore(summary.faithfulness)}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                {tr("admin.evaluation.metric.answerRelevancy")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent
-              className={cn(metricClass(summary.answer_relevancy ?? null))}
-            >
-              {formatScore(summary.answer_relevancy)}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                {tr("admin.evaluation.metric.latencyP95")}
-              </CardTitle>
+            <CardHeader>
+              <CardTitle>{tr("admin.evaluation.history")}</CardTitle>
             </CardHeader>
             <CardContent>
-              {summary.latency_p95_ms ?? "—"} ms
+              {loading && runs.length === 0 ? (
+                <p className="text-muted-foreground">{tr("shared.loading")}</p>
+              ) : null}
+              {!loading && runs.length === 0 ? (
+                <p className="text-muted-foreground">
+                  {tr("admin.evaluation.noRuns")}
+                </p>
+              ) : null}
+              <ul className="space-y-2" data-testid="evaluation-history">
+                {runs.map((run) => (
+                  <li key={run.run_id}>
+                    <button
+                      type="button"
+                      className={cn(
+                        "flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm hover:bg-accent",
+                        selectedRun?.run_id === run.run_id && "bg-accent",
+                      )}
+                      onClick={() => {
+                        void handleSelectRun(run.run_id);
+                      }}
+                    >
+                      <span className="font-mono text-xs">{run.run_id}</span>
+                      <Badge variant="outline">
+                        {tr(statusLabelKey(run.status))}
+                      </Badge>
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
-        </div>
-      ) : null}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{tr("admin.evaluation.history")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading && runs.length === 0 ? (
-            <p className="text-muted-foreground">{tr("shared.loading")}</p>
+          {selectedRun ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>{tr("admin.evaluation.drilldown")}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {judgesLikelySkipped ? (
+                  <p
+                    className="text-sm text-muted-foreground"
+                    data-testid="evaluation-judges-skipped-hint"
+                  >
+                    {tr("admin.evaluation.drilldown.judgesSkipped")}
+                  </p>
+                ) : null}
+                <EvaluationDrilldownTable items={selectedRun.items} />
+              </CardContent>
+            </Card>
           ) : null}
-          {!loading && runs.length === 0 ? (
-            <p className="text-muted-foreground">
-              {tr("admin.evaluation.noRuns")}
-            </p>
-          ) : null}
-          <ul className="space-y-2" data-testid="evaluation-history">
-            {runs.map((run) => (
-              <li key={run.run_id}>
-                <button
-                  type="button"
-                  className={cn(
-                    "flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm hover:bg-accent",
-                    selectedRun?.run_id === run.run_id && "bg-accent",
-                  )}
-                  onClick={() => {
-                    void handleSelectRun(run.run_id);
-                  }}
-                >
-                  <span className="font-mono text-xs">{run.run_id}</span>
-                  <Badge variant="outline">{tr(statusLabelKey(run.status))}</Badge>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-
-      {selectedRun ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>{tr("admin.evaluation.drilldown")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {judgesLikelySkipped ? (
-              <p
-                className="text-sm text-muted-foreground"
-                data-testid="evaluation-judges-skipped-hint"
-              >
-                {tr("admin.evaluation.drilldown.judgesSkipped")}
-              </p>
-            ) : null}
-            <EvaluationDrilldownTable items={selectedRun.items} />
-          </CardContent>
-        </Card>
-      ) : null}
         </TabsContent>
 
         <TabsContent value="dashboard">

@@ -177,7 +177,9 @@ describe("UsersPage send test email (TC-099, UJ-037)", () => {
     fireEvent.click(screen.getByTestId("users-send-test-email"));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(/smtp down/i);
-    expect(screen.queryByTestId("email-test-unconfigured")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("email-test-unconfigured"),
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByTestId("email-test-domain-unverified"),
     ).not.toBeInTheDocument();

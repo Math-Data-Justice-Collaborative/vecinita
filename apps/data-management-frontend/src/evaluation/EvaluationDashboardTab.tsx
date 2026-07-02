@@ -55,7 +55,9 @@ export function EvaluationDashboardTab() {
       setData(series);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : tr("admin.evaluation.dashboard.loadFailed"),
+        err instanceof Error
+          ? err.message
+          : tr("admin.evaluation.dashboard.loadFailed"),
       );
     } finally {
       setLoading(false);

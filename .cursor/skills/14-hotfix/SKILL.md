@@ -33,6 +33,8 @@ Classify failures before coding:
 |---------------|--------------|
 | “Failed to fetch”, CORS in DevTools | H4 (`test_staging_connectivity` or curl OPTIONS) |
 | Wrong API host in UI | H5 bundle grep |
+| Eval/embed 404, `invalid function call` | [do-secrets-sync](../do-secrets-sync/SKILL.md) — `modal_url_validate`, DO + GitHub sync |
+| `/health` → `modal_embed` error | Same; then redeploy chat-rag-backend |
 | Bad RAG answer, API 200 | H3 — not connectivity |
 
 Repro tests in `tests/bugs/` may import `tests.helpers.connectivity`. After fix, run
@@ -57,6 +59,8 @@ uv sync --group dev
 bash scripts/check_modal_no_database_url.sh
 bash scripts/check_openapi_specs.sh
 bash scripts/check_secrets.sh
+bash scripts/check_do_required_secrets.sh
+bash scripts/check_corpus_reset_guard.sh
 uv run ruff check apps packages tests
 uv run ruff format --check apps packages tests
 uv run basedpyright apps packages tests

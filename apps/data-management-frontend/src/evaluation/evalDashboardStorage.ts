@@ -11,11 +11,7 @@ export interface EvalDashboardLayout {
 
 const DEFAULT_LAYOUT: EvalDashboardLayout = {
   collapsedPanels: {},
-  selectedMetrics: [
-    "retrieval_relevance",
-    "faithfulness",
-    "answer_relevancy",
-  ],
+  selectedMetrics: ["retrieval_relevance", "faithfulness", "answer_relevancy"],
   chartType: "line",
   showThresholds: true,
 };

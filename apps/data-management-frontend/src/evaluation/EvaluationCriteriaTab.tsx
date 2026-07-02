@@ -32,7 +32,9 @@ export function EvaluationCriteriaTab() {
       setItems(data.items);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : tr("admin.evaluation.criteria.loadFailed"),
+        err instanceof Error
+          ? err.message
+          : tr("admin.evaluation.criteria.loadFailed"),
       );
     } finally {
       setLoading(false);
@@ -60,7 +62,9 @@ export function EvaluationCriteriaTab() {
       await load();
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : tr("admin.evaluation.criteria.saveFailed"),
+        err instanceof Error
+          ? err.message
+          : tr("admin.evaluation.criteria.saveFailed"),
       );
     } finally {
       setSaving(false);
@@ -77,7 +81,9 @@ export function EvaluationCriteriaTab() {
         await load();
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : tr("admin.evaluation.criteria.saveFailed"),
+          err instanceof Error
+            ? err.message
+            : tr("admin.evaluation.criteria.saveFailed"),
         );
       }
     },
@@ -198,7 +204,9 @@ export function EvaluationCriteriaTab() {
                       </Button>
                     </div>
                   </div>
-                  <p className="mt-2 text-sm text-muted-foreground">{item.rubric}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {item.rubric}
+                  </p>
                 </li>
               ))}
             </ul>

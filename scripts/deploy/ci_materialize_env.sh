@@ -70,7 +70,16 @@ case "$CHECK_TARGET" in
         ;;
       do)
         _missing "DO sync" \
-          DATABASE_URL VECINITA_INTERNAL_API_KEY VECINITA_CORS_ORIGINS SUPABASE_URL
+          DATABASE_URL VECINITA_INTERNAL_API_KEY VECINITA_CORS_ORIGINS SUPABASE_URL \
+          VECINITA_MODAL_EMBED_URL VECINITA_MODAL_LLM_URL VECINITA_MODAL_DATA_MGMT_URL
+        if [[ -n "${VECINITA_MODAL_EMBED_URL:-}" ]]; then
+          uv run python scripts/deploy/modal_url_validate.py \
+            VECINITA_MODAL_EMBED_URL "${VECINITA_MODAL_EMBED_URL}"
+        fi
+        if [[ -n "${VECINITA_MODAL_LLM_URL:-}" ]]; then
+          uv run python scripts/deploy/modal_url_validate.py \
+            VECINITA_MODAL_LLM_URL "${VECINITA_MODAL_LLM_URL}"
+        fi
         ;;
       alembic)
         _missing "Alembic upgrade" DATABASE_URL

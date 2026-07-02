@@ -45,7 +45,8 @@ Run **migrations** on target before traffic.
 
 ### Phase 3 — Post-deploy validation
 
-- `GET /health` → 200
+- `GET /health` → 200; ChatRAG `dependencies.modal_embed` and `modal_llm` are `ok`
+- `bash scripts/infra/do_verify_required_secrets.sh` when DO backends deploy (see [do-secrets-sync](../do-secrets-sync/SKILL.md))
 - H3 smoke: ingest fixture doc → query returns expected source id
 - **H4–H5:** `bash scripts/deploy/verify_connectivity.sh` (CORS + frontend bundle)
 - Worker: one job completes if separate service

@@ -121,9 +121,7 @@ describe("UsersPage search + pagination (TC-100, UJ-030)", () => {
   });
 
   it("applies search on Enter and clears q when search is emptied", async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue(jsonResponse(PAGE_ONE));
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(PAGE_ONE));
     vi.stubGlobal("fetch", fetchMock);
 
     renderUsersPage();
