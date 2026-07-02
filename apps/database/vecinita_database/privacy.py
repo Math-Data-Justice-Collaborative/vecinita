@@ -41,6 +41,13 @@ EVAL_TABLES: Final[frozenset[str]] = frozenset(
     }
 )
 
+EVAL_CONFIG_TABLES: Final[frozenset[str]] = frozenset(
+    {
+        "eval_config_presets",
+        "rag_production_config",
+    }
+)
+
 FORBIDDEN_EV002_IDENTITY_COLUMNS: Final[frozenset[str]] = frozenset(
     {
         "created_by",
@@ -83,6 +90,8 @@ FORBIDDEN_TAG_IDENTITY_COLUMNS: Final[frozenset[str]] = frozenset(
 )
 
 FORBIDDEN_EVAL_IDENTITY_COLUMNS: Final[frozenset[str]] = FORBIDDEN_EV002_IDENTITY_COLUMNS
+
+FORBIDDEN_EVAL_CONFIG_IDENTITY_COLUMNS: Final[frozenset[str]] = FORBIDDEN_EV002_IDENTITY_COLUMNS
 
 
 def _normalize_database_url(url: str) -> str:
@@ -173,6 +182,32 @@ def find_identity_columns_on_eval_tables(database_url: str) -> dict[str, list[st
             col
             for col in columns
             if col in FORBIDDEN_EVAL_IDENTITY_COLUMNS or col.startswith("auth_")
+        )
+        if forbidden:
+            violations[table] = forbidden
+    return violations
+
+
+def find_missing_eval_config_tables(database_url: str) -> set[str]:
+    """Return EV-009 eval config table names absent from the public schema."""
+    engine = create_engine(_normalize_database_url(database_url))
+    inspector = inspect(engine)
+    present = set(inspector.get_table_names(schema="public"))
+    return set(EVAL_CONFIG_TABLES - present)
+
+
+def find_identity_columns_on_eval_config_tables(database_url: str) -> dict[str, list[str]]:
+    """Return forbidden identity column names per eval config table (ADR-035 §5)."""
+    engine = create_engine(_normalize_database_url(database_url))
+    inspector = inspect(engine)
+    present = set(inspector.get_table_names(schema="public"))
+    violations: dict[str, list[str]] = {}
+    for table in sorted(EVAL_CONFIG_TABLES & present):
+        columns = {col["name"] for col in inspector.get_columns(table, schema="public")}
+        forbidden = sorted(
+            col
+            for col in columns
+            if col in FORBIDDEN_EVAL_CONFIG_IDENTITY_COLUMNS or col.startswith("auth_")
         )
         if forbidden:
             violations[table] = forbidden
