@@ -89,7 +89,7 @@ function renderCell(
   if (columnId === "expected_doc_url") {
     return item.expected_doc_url ?? "—";
   }
-  return `${String(item.metrics.latency_ms ?? 0)} ms`;
+  return `${String(item.metrics.latency_ms)} ms`;
 }
 
 function cellClassName(
