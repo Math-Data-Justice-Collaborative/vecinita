@@ -42,6 +42,10 @@ Fork `vecinita-staging` from a DO daily backup **before 2026-07-01 23:31 UTC** (
 2026-07-01 16:41 UTC backup still contains June 27 corpus). See staging runbook §Corpus
 protection.
 
+**2026-07-02:** Restored via `scripts/infra/do_restore_staging_corpus.sh` — fork
+`vecinita-staging-restored-20260701` (42 real documents); `DATABASE_URL` swapped on DO
+backends + `prod.env`; Alembic upgraded to head.
+
 Re-ingest alternative: ~40 URLs remain in `audit_log` where `event_type = 'document.created'`
 and URL not like `fixture://%`.
 
