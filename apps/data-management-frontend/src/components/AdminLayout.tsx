@@ -139,7 +139,10 @@ function DesktopSidebar({ showChrome }: { showChrome: boolean }) {
   const tr = useAdminT();
 
   return (
-    <aside className="hidden md:flex md:h-screen md:w-60 md:flex-col md:border-r md:bg-card">
+    <aside
+      className="hidden md:flex md:h-screen md:w-60 md:shrink-0 md:flex-col md:border-r md:bg-card"
+      data-testid="admin-sidebar"
+    >
       <div className="flex h-14 items-center border-b px-4">
         <h1 className="text-lg font-semibold">{tr("admin.appTitle")}</h1>
       </div>
@@ -202,12 +205,15 @@ export function AdminLayout() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden" data-testid="admin-layout">
       <IdleTimeoutGuard />
       <DesktopSidebar showChrome={isDesktop} />
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <MobileHeader showChrome={!isDesktop} />
-        <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
+        <main
+          className="min-h-0 flex-1 overflow-auto p-4 md:p-6 lg:p-8"
+          data-testid="admin-main"
+        >
           <Outlet />
         </main>
       </div>
