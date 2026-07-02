@@ -127,6 +127,12 @@ describe("EvaluationPage search params", () => {
             json: async () => ({ items: [] }),
           });
         }
+        if (url.includes("/internal/v1/eval/config-presets")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ items: [] }),
+          });
+        }
         if (url.includes("/internal/v1/eval/runs")) {
           return Promise.resolve({
             ok: true,

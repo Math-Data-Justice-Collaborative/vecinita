@@ -55,6 +55,32 @@ const OLLAMA_MODELS_BODY = {
   ],
 };
 
+const ADMIN_USER_ID = "11111111-1111-1111-1111-111111111111";
+const OTHER_ADMIN_ID = "33333333-3333-3333-3333-333333333333";
+const PRESET_ID = "00000000-0000-0000-0000-0000000000aa";
+const CLONED_PRESET_ID = "00000000-0000-0000-0000-0000000000bb";
+
+const SAVED_PRESET_BODY = {
+  preset_id: PRESET_ID,
+  version: 1,
+  name: "baseline",
+  config: {
+    top_k: 9,
+    min_retrieval_score: 0.2,
+    system_prompt: "Preset sandbox prompt.",
+    max_tokens: 256,
+    temperature: 0.2,
+    corpus_profile: "fixture",
+    criteria_ids: [],
+    judge_temperature: 0.2,
+    model_id: "qwen2.5:1.5b-instruct",
+  },
+  shared: true,
+  owner_id: OTHER_ADMIN_ID,
+  created_at: "2026-07-01T10:00:00Z",
+  updated_at: "2026-07-01T10:00:00Z",
+};
+
 function defaultPlaygroundFetch(
   url: string,
 ): Response | { ok: boolean; json: () => Promise<unknown> } {
@@ -63,6 +89,9 @@ function defaultPlaygroundFetch(
   }
   if (url.includes("/internal/v1/models/ollama")) {
     return { ok: true, json: async () => OLLAMA_MODELS_BODY };
+  }
+  if (url.includes("/internal/v1/eval/config-presets")) {
+    return { ok: true, json: async () => ({ items: [] }) };
   }
   if (url.includes("/internal/v1/eval/runs/")) {
     return {
@@ -263,5 +292,227 @@ describe("EvaluationPlayground (UJ-045)", () => {
       target: { value: "Is the community center open on Sundays?" },
     });
     expect(screen.getByTestId("eval-playground-run-button")).not.toBeDisabled();
+  });
+
+  it("loads a preset into the config form (TC-127 UI)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/eval/config-presets")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ items: [SAVED_PRESET_BODY] }),
+          });
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
+      target: { value: PRESET_ID },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-top-k")).toHaveValue(9);
+      expect(screen.getByTestId("eval-playground-system-prompt")).toHaveValue(
+        "Preset sandbox prompt.",
+      );
+      expect(screen.getByTestId("eval-playground-preset-version")).toHaveTextContent(
+        "Version 1",
+      );
+    });
+  });
+
+  it("creates a new preset from current config (TC-127 UI)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          if (url.includes("/internal/v1/eval/config-presets") && method === "POST") {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({
+                ...SAVED_PRESET_BODY,
+                preset_id: CLONED_PRESET_ID,
+                name: "my preset",
+                owner_id: ADMIN_USER_ID,
+                shared: false,
+              }),
+            });
+          }
+          if (url.includes("/internal/v1/eval/config-presets")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({ items: [] }),
+            });
+          }
+          return Promise.resolve(defaultPlaygroundFetch(url));
+        }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-preset-save")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("eval-playground-preset-save"));
+    fireEvent.change(screen.getByTestId("eval-playground-preset-name"), {
+      target: { value: "my preset" },
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-preset-confirm"));
+
+    await waitFor(() => {
+      const postCall = vi
+        .mocked(globalThis.fetch)
+        .mock.calls.find((call) => {
+          const init = call[1];
+          const method = (init?.method ?? "GET").toUpperCase();
+          return (
+            fetchInputUrl(call[0]).includes("/internal/v1/eval/config-presets") &&
+            method === "POST"
+          );
+        });
+      expect(postCall).toBeDefined();
+      const body = parsePostBody(postCall?.[1]);
+      expect(body?.["name"]).toBe("my preset");
+      expect(body?.["shared"]).toBe(false);
+    });
+  });
+
+  it("updates an owned preset and bumps version (TC-127 UI)", async () => {
+    const ownedPreset = {
+      ...SAVED_PRESET_BODY,
+      owner_id: ADMIN_USER_ID,
+      shared: false,
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          if (
+            url.includes(`/internal/v1/eval/config-presets/${PRESET_ID}`) &&
+            method === "PATCH"
+          ) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({
+                ...ownedPreset,
+                version: 2,
+                name: "baseline-v2",
+              }),
+            });
+          }
+          if (url.includes("/internal/v1/eval/config-presets")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({ items: [ownedPreset] }),
+            });
+          }
+          return Promise.resolve(defaultPlaygroundFetch(url));
+        }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
+      target: { value: PRESET_ID },
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-preset-update"));
+    fireEvent.change(screen.getByTestId("eval-playground-preset-name"), {
+      target: { value: "baseline-v2" },
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-preset-confirm"));
+
+    await waitFor(() => {
+      const patchCall = vi
+        .mocked(globalThis.fetch)
+        .mock.calls.find((call) => {
+          const init = call[1];
+          const method = (init?.method ?? "GET").toUpperCase();
+          return (
+            fetchInputUrl(call[0]).includes(
+              `/internal/v1/eval/config-presets/${PRESET_ID}`,
+            ) && method === "PATCH"
+          );
+        });
+      expect(patchCall).toBeDefined();
+      const body = parsePostBody(patchCall?.[1]);
+      expect(body?.["name"]).toBe("baseline-v2");
+    });
+  });
+
+  it("clones a shared preset from another admin (TC-127 UI)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          if (
+            url.includes(`/internal/v1/eval/config-presets/${PRESET_ID}/clone`) &&
+            method === "POST"
+          ) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({
+                ...SAVED_PRESET_BODY,
+                preset_id: CLONED_PRESET_ID,
+                name: "baseline (copy)",
+                owner_id: ADMIN_USER_ID,
+                shared: false,
+                version: 1,
+              }),
+            });
+          }
+          if (url.includes("/internal/v1/eval/config-presets")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({ items: [SAVED_PRESET_BODY] }),
+            });
+          }
+          return Promise.resolve(defaultPlaygroundFetch(url));
+        }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
+      target: { value: PRESET_ID },
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-preset-clone"));
+
+    await waitFor(() => {
+      const cloneCall = vi
+        .mocked(globalThis.fetch)
+        .mock.calls.find((call) => {
+          const init = call[1];
+          const method = (init?.method ?? "GET").toUpperCase();
+          return (
+            fetchInputUrl(call[0]).includes(
+              `/internal/v1/eval/config-presets/${PRESET_ID}/clone`,
+            ) && method === "POST"
+          );
+        });
+      expect(cloneCall).toBeDefined();
+    });
   });
 });

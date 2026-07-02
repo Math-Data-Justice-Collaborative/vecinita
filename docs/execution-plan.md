@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 15: EV-009 — Eval UX polish + playground (F36 follow-ons + F37) |
 | **Active milestone** | M69: Playground UI (golden + ad-hoc + compare) |
-| **Active task** | **T69.4** — Preset save/load/version UI *(next)* |
-| **Tasks completed** | Phase 14 M59–M64 complete (S007); Phase 15 M65–M67 complete (S008); M68 complete (S008) |
+| **Active task** | **T69.5** — Compare runs view *(next)* |
+| **Tasks completed** | Phase 14 M59–M64 complete (S007); Phase 15 M65–M67 complete (S008); M68 complete (S008); T69.4 complete (S008) |
 | **Last updated** | 2026-07-02 |
 | **Evolve cycle** | EV-009 (F36 follow-ons + F37) — **04-tech-plan complete** |
 | **Git branch** | `feat/S008-eval-ux-playground` |
@@ -1389,7 +1389,7 @@ Playground with versioned presets and super-admin runtime promote to ChatRAG.
 | T69.1 | Test (Vitest): `test_evaluation_playground.test.tsx` — TC-128/129 — red | Test | completed | test-plan TC-128/129, UJ-045 | — | — | S008 | F37 | 2026-07-02 |
 | T69.2 | Test (Vitest): `test_evaluation_compare.test.tsx` — TC-130 — red | Test | completed | test-plan TC-130, UJ-046 | — | — | S008 | F37 | 2026-07-02 |
 | T69.3 | Code: `EvaluationPlaygroundTab` — two-column layout, defaults + Ollama model picker (RD-137, RD-139) | Code | completed | ADR-035 §8, UJ-045, RD-136 | T68.13 | D10 | S008 | F37 | 2026-07-02 |
-| T69.4 | Code: Preset save/load/version UI + share-read clone | Code | pending | ADR-035 §8, RD-121 | T69.3, T68.5 | — | S008 | F37 |
+| T69.4 | Code: Preset save/load/version UI + share-read clone | Code | completed | ADR-035 §8, RD-121 | T69.3, T68.5 | — | S008 | F37 | 2026-07-02 |
 | T69.5 | Code: Compare runs view — side-by-side metrics + per-question diff | Code | pending | UJ-046, RD-130 | T69.3 | — | S008 | F37 |
 | T69.6 | Code: Runs tab **Run evaluation** → Playground with last preset (RD-129) | Code | pending | UJ-039, RD-129 | T69.3 | — | S008 | F37 |
 | T69.7 | Test: `tests/e2e/test_uj045_eval_playground.py` — TC-128/129 — red | Test | pending | test-plan, UJ-045 | T68.7 | D3 | S008 | F37 |

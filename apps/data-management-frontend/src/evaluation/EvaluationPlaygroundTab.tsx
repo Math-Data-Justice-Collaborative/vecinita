@@ -1,14 +1,30 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { FlaskConical } from "lucide-react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { Copy, FlaskConical, Save } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { AuthContext } from "@/auth/authContext";
+import {
+  type EvalConfigApi,
+  type EvalConfigPresetApi,
   type EvalRunModeApi,
   type OllamaModelSummaryApi,
+  cloneEvalConfigPreset,
+  createEvalConfigPreset,
+  fetchEvalConfigPresets,
   fetchOllamaModels,
   triggerPlaygroundEvalRun,
+  updateEvalConfigPreset,
 } from "@/api/admin";
 import { requireCorpusConfig } from "@/config";
 import { useAdminT } from "@/hooks/useAdminT";
@@ -23,8 +39,56 @@ const DEFAULT_TEMPERATURE = 0.2;
 const DEFAULT_JUDGE_TEMPERATURE = 0.2;
 const DEFAULT_MODEL_ID = "qwen2.5:1.5b-instruct";
 
+function buildFullConfig(input: {
+  topK: number;
+  minRetrievalScore: number;
+  systemPrompt: string;
+  maxTokens: number;
+  temperature: number;
+  judgeTemperature: number;
+  corpusProfile: "fixture" | "staging";
+  modelId: string;
+}): EvalConfigApi {
+  return {
+    top_k: input.topK,
+    min_retrieval_score: input.minRetrievalScore,
+    system_prompt: input.systemPrompt,
+    max_tokens: input.maxTokens,
+    temperature: input.temperature,
+    judge_temperature: input.judgeTemperature,
+    corpus_profile: input.corpusProfile,
+    model_id: input.modelId,
+    criteria_ids: [],
+  };
+}
+
+function applyConfigToForm(
+  config: EvalConfigApi,
+  setters: {
+    setTopK: (value: number) => void;
+    setMinRetrievalScore: (value: number) => void;
+    setSystemPrompt: (value: string) => void;
+    setMaxTokens: (value: number) => void;
+    setTemperature: (value: number) => void;
+    setJudgeTemperature: (value: number) => void;
+    setCorpusProfile: (value: "fixture" | "staging") => void;
+    setModelId: (value: string) => void;
+  },
+): void {
+  setters.setTopK(config.top_k);
+  setters.setMinRetrievalScore(config.min_retrieval_score);
+  setters.setSystemPrompt(config.system_prompt);
+  setters.setMaxTokens(config.max_tokens);
+  setters.setTemperature(config.temperature);
+  setters.setJudgeTemperature(config.judge_temperature);
+  setters.setCorpusProfile(config.corpus_profile);
+  setters.setModelId(config.model_id);
+}
+
 export function EvaluationPlaygroundTab() {
   const tr = useAdminT();
+  const authCtx = useContext(AuthContext);
+  const user = authCtx?.user ?? null;
   const [mode, setMode] = useState<EvalRunModeApi>("golden");
   const [topK, setTopK] = useState(DEFAULT_TOP_K);
   const [minRetrievalScore, setMinRetrievalScore] = useState(
@@ -43,9 +107,89 @@ export function EvaluationPlaygroundTab() {
   const [adhocQuestion, setAdhocQuestion] = useState("");
   const [models, setModels] = useState<OllamaModelSummaryApi[]>([]);
   const [modelsLoading, setModelsLoading] = useState(true);
+  const [presets, setPresets] = useState<EvalConfigPresetApi[]>([]);
+  const [presetsLoading, setPresetsLoading] = useState(true);
+  const [selectedPresetId, setSelectedPresetId] = useState<string>("");
+  const [presetDialogOpen, setPresetDialogOpen] = useState(false);
+  const [presetDialogMode, setPresetDialogMode] = useState<"create" | "update">(
+    "create",
+  );
+  const [presetName, setPresetName] = useState("");
+  const [presetShared, setPresetShared] = useState(false);
+  const [presetSaving, setPresetSaving] = useState(false);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastRunId, setLastRunId] = useState<string | null>(null);
+
+  const selectedPreset = useMemo(
+    () => presets.find((preset) => preset.preset_id === selectedPresetId) ?? null,
+    [presets, selectedPresetId],
+  );
+
+  const isPresetOwner = useMemo(() => {
+    if (!selectedPreset || !user?.id) return false;
+    return selectedPreset.owner_id === user.id;
+  }, [selectedPreset, user?.id]);
+
+  const canClonePreset = useMemo(() => {
+    if (!selectedPreset || !user?.id) return false;
+    return selectedPreset.owner_id !== user.id && selectedPreset.shared;
+  }, [selectedPreset, user?.id]);
+
+  const formSetters = useMemo(
+    () => ({
+      setTopK,
+      setMinRetrievalScore,
+      setSystemPrompt,
+      setMaxTokens,
+      setTemperature,
+      setJudgeTemperature,
+      setCorpusProfile,
+      setModelId,
+    }),
+    [],
+  );
+
+  const currentConfig = useMemo(
+    () =>
+      buildFullConfig({
+        topK,
+        minRetrievalScore,
+        systemPrompt,
+        maxTokens,
+        temperature,
+        judgeTemperature,
+        corpusProfile,
+        modelId,
+      }),
+    [
+      corpusProfile,
+      judgeTemperature,
+      maxTokens,
+      minRetrievalScore,
+      modelId,
+      systemPrompt,
+      temperature,
+      topK,
+    ],
+  );
+
+  const loadPresets = useCallback(async () => {
+    setPresetsLoading(true);
+    try {
+      const client = requireCorpusConfig();
+      const data = await fetchEvalConfigPresets(client);
+      setPresets(data.items ?? []);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : tr("admin.evaluation.playground.presetsLoadFailed"),
+      );
+    } finally {
+      setPresetsLoading(false);
+    }
+  }, [tr]);
 
   useEffect(() => {
     let active = true;
@@ -75,10 +219,112 @@ export function EvaluationPlaygroundTab() {
       }
     };
     void loadModels();
+    void loadPresets();
     return () => {
       active = false;
     };
-  }, [tr]);
+  }, [loadPresets, tr]);
+
+  const handlePresetSelect = useCallback(
+    (presetId: string) => {
+      setSelectedPresetId(presetId);
+      if (!presetId) return;
+      const preset = presets.find((item) => item.preset_id === presetId);
+      if (!preset) return;
+      applyConfigToForm(preset.config, formSetters);
+    },
+    [formSetters, presets],
+  );
+
+  const openCreatePresetDialog = useCallback(() => {
+    setPresetDialogMode("create");
+    setPresetName("");
+    setPresetShared(false);
+    setPresetDialogOpen(true);
+  }, []);
+
+  const openUpdatePresetDialog = useCallback(() => {
+    if (!selectedPreset) return;
+    setPresetDialogMode("update");
+    setPresetName(selectedPreset.name);
+    setPresetShared(selectedPreset.shared);
+    setPresetDialogOpen(true);
+  }, [selectedPreset]);
+
+  const handleSavePreset = useCallback(async () => {
+    if (!presetName.trim()) return;
+    setPresetSaving(true);
+    setError(null);
+    try {
+      const client = requireCorpusConfig();
+      if (presetDialogMode === "update" && selectedPreset) {
+        const updated = await updateEvalConfigPreset(
+          client,
+          selectedPreset.preset_id,
+          {
+            name: presetName.trim(),
+            config: currentConfig,
+            shared: presetShared,
+          },
+        );
+        setPresets((current) =>
+          current.map((item) =>
+            item.preset_id === updated.preset_id ? updated : item,
+          ),
+        );
+        setSelectedPresetId(updated.preset_id);
+      } else {
+        const created = await createEvalConfigPreset(client, {
+          name: presetName.trim(),
+          config: currentConfig,
+          shared: presetShared,
+        });
+        setPresets((current) => [created, ...current]);
+        setSelectedPresetId(created.preset_id);
+      }
+      setPresetDialogOpen(false);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : tr("admin.evaluation.playground.presetsSaveFailed"),
+      );
+    } finally {
+      setPresetSaving(false);
+    }
+  }, [
+    currentConfig,
+    presetDialogMode,
+    presetName,
+    presetShared,
+    selectedPreset,
+    tr,
+  ]);
+
+  const handleClonePreset = useCallback(async () => {
+    if (!selectedPreset) return;
+    setPresetSaving(true);
+    setError(null);
+    try {
+      const client = requireCorpusConfig();
+      const cloned = await cloneEvalConfigPreset(
+        client,
+        selectedPreset.preset_id,
+        `${selectedPreset.name} (copy)`,
+      );
+      setPresets((current) => [cloned, ...current]);
+      setSelectedPresetId(cloned.preset_id);
+      applyConfigToForm(cloned.config, formSetters);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : tr("admin.evaluation.playground.presetsCloneFailed"),
+      );
+    } finally {
+      setPresetSaving(false);
+    }
+  }, [formSetters, selectedPreset, tr]);
 
   const runDisabled = useMemo(() => {
     if (running) return true;
@@ -104,6 +350,7 @@ export function EvaluationPlaygroundTab() {
       const created = await triggerPlaygroundEvalRun(client, {
         mode,
         config,
+        ...(selectedPresetId ? { preset_id: selectedPresetId } : {}),
         ...(mode === "adhoc" ? { question: adhocQuestion.trim() } : {}),
       });
       setLastRunId(created.run_id);
@@ -124,6 +371,7 @@ export function EvaluationPlaygroundTab() {
     minRetrievalScore,
     mode,
     modelId,
+    selectedPresetId,
     systemPrompt,
     temperature,
     topK,
@@ -153,6 +401,97 @@ export function EvaluationPlaygroundTab() {
             <CardTitle>{tr("admin.evaluation.playground.title")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <fieldset
+              className="space-y-3 rounded-md border p-3"
+              data-testid="eval-playground-presets"
+            >
+              <legend className="px-1 text-sm font-medium">
+                {tr("admin.evaluation.playground.presetsTitle")}
+              </legend>
+              <div className="space-y-2">
+                <Label htmlFor="eval-playground-preset-select">
+                  {tr("admin.evaluation.playground.presetsLoad")}
+                </Label>
+                <select
+                  id="eval-playground-preset-select"
+                  data-testid="eval-playground-preset-select"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={selectedPresetId}
+                  disabled={presetsLoading}
+                  onChange={(event) => {
+                    handlePresetSelect(event.target.value);
+                  }}
+                >
+                  <option value="">
+                    {tr("admin.evaluation.playground.presetsNone")}
+                  </option>
+                  {presets.map((preset) => (
+                    <option key={preset.preset_id} value={preset.preset_id}>
+                      {preset.name} (v{preset.version}
+                      {preset.shared ? ", shared" : ""})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {selectedPreset ? (
+                <div className="flex flex-wrap items-center gap-2 text-sm">
+                  <Badge
+                    variant="secondary"
+                    data-testid="eval-playground-preset-version"
+                  >
+                    {tr("admin.evaluation.playground.presetsVersion", {
+                      version: String(selectedPreset.version),
+                    })}
+                  </Badge>
+                  {selectedPreset.shared ? (
+                    <Badge variant="outline">
+                      {isPresetOwner
+                        ? tr("admin.evaluation.playground.presetsShared")
+                        : tr("admin.evaluation.playground.presetsSharedByOther")}
+                    </Badge>
+                  ) : null}
+                </div>
+              ) : null}
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  data-testid="eval-playground-preset-save"
+                  onClick={openCreatePresetDialog}
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  {tr("admin.evaluation.playground.presetsSave")}
+                </Button>
+                {isPresetOwner ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    data-testid="eval-playground-preset-update"
+                    onClick={openUpdatePresetDialog}
+                  >
+                    {tr("admin.evaluation.playground.presetsUpdate")}
+                  </Button>
+                ) : null}
+                {canClonePreset ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    disabled={presetSaving}
+                    data-testid="eval-playground-preset-clone"
+                    onClick={() => {
+                      void handleClonePreset();
+                    }}
+                  >
+                    <Copy className="mr-2 h-4 w-4" />
+                    {tr("admin.evaluation.playground.presetsClone")}
+                  </Button>
+                ) : null}
+              </div>
+            </fieldset>
+
             <fieldset className="space-y-2">
               <legend className="text-sm font-medium">
                 {tr("admin.evaluation.playground.modeGolden")}
@@ -370,6 +709,70 @@ export function EvaluationPlaygroundTab() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={presetDialogOpen} onOpenChange={setPresetDialogOpen}>
+        <DialogContent data-testid="eval-playground-preset-dialog">
+          <DialogHeader>
+            <DialogTitle>
+              {presetDialogMode === "update"
+                ? tr("admin.evaluation.playground.presetsUpdateDialogTitle")
+                : tr("admin.evaluation.playground.presetsSaveDialogTitle")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="eval-playground-preset-name">
+                {tr("admin.evaluation.playground.presetsName")}
+              </Label>
+              <input
+                id="eval-playground-preset-name"
+                data-testid="eval-playground-preset-name"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={presetName}
+                onChange={(event) => {
+                  setPresetName(event.target.value);
+                }}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="eval-playground-preset-shared"
+                data-testid="eval-playground-preset-shared"
+                checked={presetShared}
+                onCheckedChange={(checked) => {
+                  setPresetShared(checked === true);
+                }}
+              />
+              <Label htmlFor="eval-playground-preset-shared">
+                {tr("admin.evaluation.playground.presetsShareRead")}
+              </Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setPresetDialogOpen(false);
+              }}
+            >
+              {tr("shared.cancel")}
+            </Button>
+            <Button
+              type="button"
+              disabled={presetSaving || !presetName.trim()}
+              data-testid="eval-playground-preset-confirm"
+              onClick={() => {
+                void handleSavePreset();
+              }}
+            >
+              {presetDialogMode === "update"
+                ? tr("admin.evaluation.playground.presetsUpdate")
+                : tr("admin.evaluation.playground.presetsSave")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -428,6 +428,123 @@ export interface EvalConfigPartialApi {
   model_id?: string;
 }
 
+export interface EvalConfigApi {
+  top_k: number;
+  min_retrieval_score: number;
+  system_prompt: string;
+  max_tokens: number;
+  temperature: number;
+  corpus_profile: "fixture" | "staging";
+  criteria_ids: string[];
+  judge_temperature: number;
+  model_id: string;
+}
+
+export interface EvalConfigPresetApi {
+  preset_id: string;
+  version: number;
+  name: string;
+  config: EvalConfigApi;
+  shared: boolean;
+  owner_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EvalConfigPresetCreateRequestApi {
+  name: string;
+  config: EvalConfigApi;
+  shared?: boolean;
+}
+
+export interface EvalConfigPresetUpdateRequestApi {
+  name?: string;
+  config?: EvalConfigApi;
+  shared?: boolean;
+}
+
+export async function fetchEvalConfigPresets(
+  options: CorpusClientOptions,
+): Promise<{ items: EvalConfigPresetApi[] }> {
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/eval/config-presets`,
+    {
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+      },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Eval config presets list failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<{ items: EvalConfigPresetApi[] }>;
+}
+
+export async function createEvalConfigPreset(
+  options: CorpusClientOptions,
+  body: EvalConfigPresetCreateRequestApi,
+): Promise<EvalConfigPresetApi> {
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/eval/config-presets`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Eval config preset create failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<EvalConfigPresetApi>;
+}
+
+export async function updateEvalConfigPreset(
+  options: CorpusClientOptions,
+  presetId: string,
+  body: EvalConfigPresetUpdateRequestApi,
+): Promise<EvalConfigPresetApi> {
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/eval/config-presets/${presetId}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Eval config preset update failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<EvalConfigPresetApi>;
+}
+
+export async function cloneEvalConfigPreset(
+  options: CorpusClientOptions,
+  presetId: string,
+  name?: string,
+): Promise<EvalConfigPresetApi> {
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/eval/config-presets/${presetId}/clone`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(name ? { name } : {}),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Eval config preset clone failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<EvalConfigPresetApi>;
+}
+
 export interface PlaygroundEvalRunRequestApi {
   mode: EvalRunModeApi;
   question?: string;
