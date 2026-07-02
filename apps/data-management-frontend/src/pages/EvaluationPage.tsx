@@ -20,6 +20,7 @@ import { EvaluationCriteriaTab } from "@/evaluation/EvaluationCriteriaTab";
 import { EvaluationDashboardTab } from "@/evaluation/EvaluationDashboardTab";
 import { EvaluationDrilldownTable } from "@/evaluation/EvaluationDrilldownTable";
 import { EvaluationExploreTab } from "@/evaluation/EvaluationExploreTab";
+import { EvaluationPlaygroundTab } from "@/evaluation/EvaluationPlaygroundTab";
 
 const DISPLAY_MIN = 0.7;
 
@@ -257,6 +258,9 @@ export function EvaluationPage() {
           <TabsTrigger value="criteria" data-testid="eval-tab-criteria">
             {tr("admin.evaluation.tab.criteria")}
           </TabsTrigger>
+          <TabsTrigger value="playground" data-testid="eval-tab-playground">
+            {tr("admin.evaluation.tab.playground")}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="runs" className="space-y-6">
@@ -378,6 +382,10 @@ export function EvaluationPage() {
 
         <TabsContent value="criteria">
           <EvaluationCriteriaTab />
+        </TabsContent>
+
+        <TabsContent value="playground">
+          <EvaluationPlaygroundTab />
         </TabsContent>
       </Tabs>
     </div>

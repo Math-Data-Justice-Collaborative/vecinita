@@ -79,6 +79,17 @@ const DETAIL_BODY = {
 function defaultEvalFetch(
   url: string,
 ): Response | { ok: boolean; json: () => Promise<unknown> } {
+  if (url.includes("/internal/v1/eval/criteria")) {
+    return { ok: true, json: async () => ({ items: [] }) };
+  }
+  if (url.includes("/internal/v1/models/ollama")) {
+    return {
+      ok: true,
+      json: async () => ({
+        items: [{ model_id: "qwen2.5:1.5b-instruct", available: true }],
+      }),
+    };
+  }
   if (url.includes("/internal/v1/eval/runs/")) {
     return {
       ok: true,

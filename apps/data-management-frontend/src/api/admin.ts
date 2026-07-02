@@ -415,6 +415,70 @@ export async function triggerEvalRun(
   }>;
 }
 
+export type EvalRunModeApi = "golden" | "adhoc";
+
+export interface EvalConfigPartialApi {
+  top_k?: number;
+  min_retrieval_score?: number;
+  system_prompt?: string;
+  max_tokens?: number;
+  temperature?: number;
+  corpus_profile?: "fixture" | "staging";
+  judge_temperature?: number;
+  model_id?: string;
+}
+
+export interface PlaygroundEvalRunRequestApi {
+  mode: EvalRunModeApi;
+  question?: string;
+  config?: EvalConfigPartialApi;
+  preset_id?: string | null;
+}
+
+export async function triggerPlaygroundEvalRun(
+  options: CorpusClientOptions,
+  body: PlaygroundEvalRunRequestApi,
+): Promise<{ run_id: string; status: string; created_at: string }> {
+  const response = await fetch(`${options.baseUrl}/internal/v1/eval/runs`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    throw new Error(`Eval run trigger failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<{
+    run_id: string;
+    status: string;
+    created_at: string;
+  }>;
+}
+
+export interface OllamaModelSummaryApi {
+  model_id: string;
+  available: boolean;
+}
+
+export async function fetchOllamaModels(
+  options: CorpusClientOptions,
+): Promise<{ items: OllamaModelSummaryApi[] }> {
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/models/ollama`,
+    {
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+      },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Ollama models list failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<{ items: OllamaModelSummaryApi[] }>;
+}
+
 export interface EvalTimeseriesPointApi {
   run_id: string;
   completed_at: string;

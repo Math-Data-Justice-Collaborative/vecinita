@@ -121,6 +121,12 @@ describe("EvaluationPage search params", () => {
             json: async () => ({ points: [], available_metrics: [] }),
           });
         }
+        if (url.includes("/internal/v1/models/ollama")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ items: [] }),
+          });
+        }
         if (url.includes("/internal/v1/eval/runs")) {
           return Promise.resolve({
             ok: true,

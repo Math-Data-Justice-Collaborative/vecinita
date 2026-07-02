@@ -43,16 +43,14 @@ const CRITERIA_BODY = {
 };
 
 const OLLAMA_MODELS_BODY = {
-  models: [
+  items: [
     {
       model_id: "qwen2.5:1.5b-instruct",
-      size_bytes: 986_000_000,
-      modified_at: "2026-07-01T08:00:00Z",
+      available: true,
     },
     {
       model_id: "llama3.2:3b",
-      size_bytes: 2_000_000_000,
-      modified_at: "2026-07-01T09:00:00Z",
+      available: true,
     },
   ],
 };
