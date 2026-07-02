@@ -13,6 +13,7 @@ from sqlalchemy import text
 from vecinita_eval.runner import EvalSummary
 from vecinita_internal_write_api.eval_service import create_eval_run
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_config_for_tests
+from vecinita_shared_schemas.internal_write import EvalRunCreateRequest
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
@@ -167,10 +168,14 @@ def test_get_eval_run_route_returns_detail(
     eval_write_client: TestClient,
 ) -> None:
     """GET /eval/runs/{id} returns persisted run detail."""
-    created = create_eval_run(engine, corpus_profile="fixture")
+    created = create_eval_run(
+        engine,
+        body=EvalRunCreateRequest(corpus_profile="fixture"),
+        requester_id=uuid4(),
+    )
     try:
         response = eval_write_client.get(
-            f"/internal/v1/eval/runs/{created.run_id}",
+            f"/internal/v1/eval/runs/{created.response.run_id}",
             headers=auth_headers(),
         )
         assert response.status_code == HTTPStatus.OK
@@ -180,9 +185,12 @@ def test_get_eval_run_route_returns_detail(
         with engine.begin() as conn:
             conn.execute(
                 text("DELETE FROM eval_run_items WHERE run_id = :id"),
-                {"id": created.run_id},
+                {"id": created.response.run_id},
             )
-            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": created.run_id})
+            conn.execute(
+                text("DELETE FROM eval_runs WHERE id = :id"),
+                {"id": created.response.run_id},
+            )
 
 
 def test_ingest_audit_event_rejects_operator_jwt(

@@ -1,9 +1,10 @@
-"""Eval run persistence and background execution (F36, ADR-033)."""
+"""Eval run persistence and background execution (F36, ADR-033; EV-009 T68.6)."""
 
 from __future__ import annotations
 
 import json
 import os
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
@@ -22,8 +23,10 @@ from vecinita_shared_schemas.db_mapping import (
     scalar_int,
     sqlalchemy_scalar_one,
 )
+from vecinita_shared_schemas.eval_config import EvalConfig, EvalRunMode, merge_eval_config
 from vecinita_shared_schemas.internal_write import (
     EvalMetricsSummary,
+    EvalRunCreateRequest,
     EvalRunCreateResponse,
     EvalRunDetailResponse,
     EvalRunItemDetail,
@@ -35,6 +38,10 @@ from vecinita_shared_schemas.internal_write import (
     EvalTimeseriesResponse,
 )
 
+from vecinita_internal_write_api.eval_config_presets_service import (
+    EvalConfigPresetAccessError,
+    get_eval_config_preset,
+)
 from vecinita_internal_write_api.eval_criteria_service import list_enabled_criteria
 
 if TYPE_CHECKING:
@@ -43,6 +50,25 @@ if TYPE_CHECKING:
     from llama_index.core.llms import LLM
     from sqlalchemy.engine import Engine
     from vecinita_eval.judges import JudgeClient
+
+
+class EvalRunPresetNotFoundError(LookupError):
+    """Referenced preset_id does not exist."""
+
+
+class EvalRunPresetAccessError(PermissionError):
+    """Caller cannot read the referenced preset."""
+
+
+@dataclass(frozen=True)
+class CreatedEvalRun:
+    """Persisted eval run metadata for scheduling and API responses."""
+
+    response: EvalRunCreateResponse
+    corpus_profile: str
+    mode: EvalRunMode
+    question: str | None
+    config_snapshot: EvalConfig
 
 
 def _normalize_database_url(url: str) -> str:
@@ -126,22 +152,61 @@ def _optional_int(value: object) -> int | None:
     return None
 
 
+def resolve_eval_run_config(
+    engine: Engine,
+    *,
+    requester_id: UUID,
+    body: EvalRunCreateRequest,
+) -> EvalConfig:
+    """Merge defaults, optional preset, and request overrides into one snapshot."""
+    base = EvalConfig()
+    if body.preset_id is not None:
+        try:
+            preset = get_eval_config_preset(
+                engine,
+                preset_id=body.preset_id,
+                requester_id=requester_id,
+            )
+        except EvalConfigPresetAccessError as exc:
+            raise EvalRunPresetAccessError(str(exc)) from exc
+        if preset is None:
+            msg = "preset not found"
+            raise EvalRunPresetNotFoundError(msg)
+        base = preset.config
+    resolved = merge_eval_config(base, body.config)
+    return resolved.model_copy(update={"corpus_profile": body.corpus_profile})
+
+
 def create_eval_run(
     engine: Engine,
     *,
-    corpus_profile: str,
-) -> EvalRunCreateResponse:
-    """Insert a pending eval run row."""
+    body: EvalRunCreateRequest,
+    requester_id: UUID,
+) -> CreatedEvalRun:
+    """Insert a pending eval run row with resolved sandbox config snapshot."""
+    config_snapshot = resolve_eval_run_config(engine, requester_id=requester_id, body=body)
     run_id = uuid4()
     with engine.begin() as conn:
         conn.execute(
             text(
                 """
-                INSERT INTO eval_runs (id, status, corpus_profile, metrics_summary)
-                VALUES (:id, 'pending', :corpus_profile, '{}'::jsonb)
+                INSERT INTO eval_runs (
+                    id, status, corpus_profile, metrics_summary,
+                    config_snapshot, mode, preset_id
+                )
+                VALUES (
+                    :id, 'pending', :corpus_profile, '{}'::jsonb,
+                    CAST(:config_snapshot AS jsonb), :mode, :preset_id
+                )
                 """
             ),
-            {"id": run_id, "corpus_profile": corpus_profile},
+            {
+                "id": run_id,
+                "corpus_profile": config_snapshot.corpus_profile,
+                "config_snapshot": json.dumps(config_snapshot.model_dump(mode="json")),
+                "mode": body.mode,
+                "preset_id": body.preset_id,
+            },
         )
         created_at = sqlalchemy_scalar_one(
             conn.execute(
@@ -151,12 +216,33 @@ def create_eval_run(
         )
     if not isinstance(created_at, datetime):
         created_at = datetime.now(UTC)
-    return EvalRunCreateResponse(run_id=run_id, status="pending", created_at=created_at)
+    response = EvalRunCreateResponse(run_id=run_id, status="pending", created_at=created_at)
+    return CreatedEvalRun(
+        response=response,
+        corpus_profile=config_snapshot.corpus_profile,
+        mode=body.mode,
+        question=body.question,
+        config_snapshot=config_snapshot,
+    )
 
 
 def _default_embed_fn(question: str) -> list[float]:
     client = EmbeddingClient()
     return client.embed(question)
+
+
+def _config_from_json(value: object) -> EvalConfig:
+    if isinstance(value, str):
+        return EvalConfig.model_validate_json(value)
+    if isinstance(value, dict):
+        return EvalConfig.model_validate(value)
+    return EvalConfig()
+
+
+def _run_mode(value: object) -> EvalRunMode:
+    if value in {"golden", "adhoc"}:
+        return cast("EvalRunMode", value)
+    return "golden"
 
 
 def _optional_datetime(value: object) -> datetime | None:
@@ -335,6 +421,14 @@ def list_eval_runs(
     )
 
 
+def _optional_uuid(value: object) -> UUID | None:
+    if isinstance(value, UUID):
+        return value
+    if isinstance(value, str):
+        return UUID(value)
+    return None
+
+
 def get_eval_run(engine: Engine, *, run_id: UUID) -> EvalRunDetailResponse | None:
     """Return one eval run with per-question drill-down."""
     with engine.connect() as conn:
@@ -342,7 +436,8 @@ def get_eval_run(engine: Engine, *, run_id: UUID) -> EvalRunDetailResponse | Non
             conn.execute(
                 text(
                     """
-                    SELECT id, status, metrics_summary, error_message
+                    SELECT id, status, metrics_summary, error_message,
+                           config_snapshot, mode, preset_id
                     FROM eval_runs WHERE id = :id
                     """
                 ),
@@ -397,6 +492,9 @@ def get_eval_run(engine: Engine, *, run_id: UUID) -> EvalRunDetailResponse | Non
     return EvalRunDetailResponse(
         run_id=row_uuid(run, "id"),
         status=_status(row_str(run, "status")),
+        mode=_run_mode(run.get("mode")),
+        preset_id=_optional_uuid(run.get("preset_id")),
+        config_snapshot=_config_from_json(run.get("config_snapshot")),
         metrics_summary=_summary_from_json(run.get("metrics_summary")),
         items=items,
         error_message=row_str_optional(run, "error_message"),

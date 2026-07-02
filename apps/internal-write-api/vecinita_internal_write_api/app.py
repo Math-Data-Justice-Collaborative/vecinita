@@ -9,7 +9,7 @@ import uuid as _uuid
 from datetime import UTC, datetime
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Annotated, cast
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import httpx
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, status
@@ -103,6 +103,8 @@ from vecinita_internal_write_api.eval_criteria_service import (
     update_eval_criterion,
 )
 from vecinita_internal_write_api.eval_service import (
+    EvalRunPresetAccessError,
+    EvalRunPresetNotFoundError,
     create_eval_run,
     execute_eval_run,
     get_eval_run,
@@ -1318,23 +1320,35 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
     )
     def create_eval_run_route(  # pyright: ignore[reportUnusedFunction]
         background_tasks: BackgroundTasks,
-        _actor: WriteActorDep,
+        actor: WriteActorDep,
         body: EvalRunCreateRequest | None = None,
     ) -> EvalRunCreateResponse:
         request = body or EvalRunCreateRequest()
-        created = create_eval_run(engine, corpus_profile=request.corpus_profile)
+        owner_id, _role = actor
+        if request.preset_id is not None and owner_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="authenticated user id required",
+            )
+        requester_id = owner_id if owner_id is not None else uuid4()
+        try:
+            created = create_eval_run(engine, body=request, requester_id=requester_id)
+        except EvalRunPresetNotFoundError as exc:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        except EvalRunPresetAccessError as exc:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
 
         def _run() -> None:
             execute_eval_run(
                 engine,
-                run_id=created.run_id,
-                corpus_profile=request.corpus_profile,
+                run_id=created.response.run_id,
+                corpus_profile=created.corpus_profile,
                 embed_fn=eval_embed_fn,
                 judge=eval_judge,
             )
 
         background_tasks.add_task(_run)
-        return created
+        return created.response
 
     @app.get(
         "/internal/v1/eval/runs",

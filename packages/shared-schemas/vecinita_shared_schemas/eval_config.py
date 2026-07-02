@@ -34,6 +34,38 @@ DEFAULT_EVAL_SYSTEM_PROMPT = (
 )
 
 
+class EvalConfigPartial(BaseModel):
+    """Optional sandbox overrides for merge onto a base EvalConfig."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    top_k: int | None = Field(default=None, ge=MIN_EVAL_TOP_K, le=MAX_EVAL_TOP_K)
+    min_retrieval_score: float | None = Field(default=None, ge=0.0, le=1.0)
+    system_prompt: str | None = Field(
+        default=None,
+        min_length=MIN_EVAL_SYSTEM_PROMPT_LEN,
+        max_length=MAX_EVAL_SYSTEM_PROMPT_LEN,
+    )
+    max_tokens: int | None = Field(
+        default=None,
+        ge=MIN_EVAL_MAX_TOKENS,
+        le=MAX_EVAL_MAX_TOKENS,
+    )
+    temperature: float | None = Field(
+        default=None,
+        ge=MIN_EVAL_TEMPERATURE,
+        le=MAX_EVAL_TEMPERATURE,
+    )
+    corpus_profile: EvalCorpusProfile | None = None
+    criteria_ids: list[UUID] | None = None
+    judge_temperature: float | None = Field(
+        default=None,
+        ge=MIN_EVAL_TEMPERATURE,
+        le=MAX_EVAL_TEMPERATURE,
+    )
+    model_id: str | None = Field(default=None, min_length=1, max_length=128)
+
+
 class EvalConfig(BaseModel):
     """Sandbox RAG + judge overrides for eval runs and production promote."""
 
@@ -68,6 +100,14 @@ class EvalConfig(BaseModel):
         le=MAX_EVAL_TEMPERATURE,
     )
     model_id: str = Field(default=DEFAULT_EVAL_MODEL_ID, min_length=1, max_length=128)
+
+
+def merge_eval_config(base: EvalConfig, partial: EvalConfigPartial | None) -> EvalConfig:
+    """Apply only explicitly provided partial fields onto a base config."""
+    if partial is None:
+        return base
+    updates = partial.model_dump(exclude_unset=True)
+    return base.model_copy(update=updates)
 
 
 class EvalConfigPresetCreateRequest(BaseModel):

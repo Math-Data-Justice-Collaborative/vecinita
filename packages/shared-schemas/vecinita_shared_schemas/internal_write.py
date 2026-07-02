@@ -6,8 +6,9 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 
+from vecinita_shared_schemas.eval_config import EvalConfig, EvalConfigPartial, EvalRunMode
 from vecinita_shared_schemas.json_types import JsonObject
 
 
@@ -329,6 +330,17 @@ class EvalRunCreateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     corpus_profile: EvalCorpusProfile = "fixture"
+    mode: EvalRunMode = "golden"
+    question: str | None = Field(default=None, min_length=1, max_length=2000)
+    config: EvalConfigPartial | None = None
+    preset_id: UUID | None = None
+
+    @model_validator(mode="after")
+    def _require_question_for_adhoc(self) -> EvalRunCreateRequest:
+        if self.mode == "adhoc" and not self.question:
+            msg = "question is required when mode is adhoc"
+            raise ValueError(msg)
+        return self
 
 
 class EvalRunCreateResponse(BaseModel):
@@ -458,6 +470,9 @@ class EvalRunDetailResponse(BaseModel):
 
     run_id: UUID
     status: EvalRunStatus
+    mode: EvalRunMode = "golden"
+    preset_id: UUID | None = None
+    config_snapshot: EvalConfig = Field(default_factory=EvalConfig)
     metrics_summary: EvalMetricsSummary
     items: list[EvalRunItemDetail]
     error_message: str | None = None
