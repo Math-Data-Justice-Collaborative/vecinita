@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 15: EV-009 — Eval UX polish + playground (F36 follow-ons + F37) |
 | **Active milestone** | M68: Config schema + preset API + DB (+ Ollama model picker) |
-| **Active task** | **T68.7** — eval runner sandbox config overrides |
+| **Active task** | **T68.8** — OpenAPI `internal-write.yaml` EV-009 routes *(next)* |
 | **Tasks completed** | Phase 14 M59–M64 complete (S007); Phase 15 M65–M67 complete (S008) |
 | **Last updated** | 2026-07-02 |
 | **Evolve cycle** | EV-009 (F36 follow-ons + F37) — **04-tech-plan complete** |
@@ -1371,7 +1371,7 @@ Playground with versioned presets and super-admin runtime promote to ChatRAG.
 | T68.4 | Test: `tests/integration/test_eval_config_presets.py` — TC-127 — red | Test | completed | test-plan TC-127, UJ-045 | T68.3 | — | S008 | F37 |
 | T68.5 | Code: Preset CRUD routes on internal-write-api | Code | completed | api-contract §EV-009 | T68.3 | — | S008 | F37 |
 | T68.6 | Code: Extend `POST /eval/runs` — `mode`, `config`, `preset_id`; `config_snapshot` persist | Code | completed | api-contract §EV-009, ADR-035 §6 | T68.3, T61.4 | D3 | S008 | F37 | 2026-07-02 |
-| T68.7 | Code: `packages/eval` runner — accept per-run config overrides (sandbox) | Code | pending | ADR-035 §6, feature-list F37 | T68.6, T60.5 | D3 | S008 | F37 |
+| T68.7 | Code: `packages/eval` runner — accept per-run config overrides (sandbox) | Code | completed | ADR-035 §6, feature-list F37 | T68.6, T60.5 | D3 | S008 | F37 | 2026-07-02 |
 | T68.8 | Config: OpenAPI `internal-write.yaml` — EV-009 routes | Config | pending | ADR-011, api-contract §EV-009 | T68.5, T68.6 | — | S008 | F37 |
 | T68.9 | Code: TC-127 integration green | Code | pending | test-plan TC-127 | T68.4, T68.5, T68.7 | — | S008 | F37 |
 | T68.10 | Test: `tests/integration/test_ollama_models_list.py` — TC-134 — red | Test | pending | test-plan TC-134, RD-139–141 | T68.3 | — | S008 | F37 |
@@ -1957,7 +1957,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T68.4 | M68 | 15 | Test | pending | T68.3 | — | S008 | F37 |
 | T68.5 | M68 | 15 | Code | pending | T68.3 | — | S008 | F37 |
 | T68.6 | M68 | 15 | Code | completed | T68.3, T61.4 | D3 | S008 | F37 |
-| T68.7 | M68 | 15 | Code | pending | T68.6, T60.5 | D3 | S008 | F37 |
+| T68.7 | M68 | 15 | Code | completed | T68.6, T60.5 | D3 | S008 | F37 | 2026-07-02 |
 | T68.8 | M68 | 15 | Config | pending | T68.5, T68.6 | — | S008 | F37 |
 | T68.9 | M68 | 15 | Code | pending | T68.4, T68.5, T68.7 | — | S008 | F37 |
 | T69.1 | M69 | 15 | Test | pending | — | — | S008 | F37 |

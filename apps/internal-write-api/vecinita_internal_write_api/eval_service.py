@@ -13,8 +13,14 @@ from uuid import UUID, uuid4
 from sqlalchemy import text
 from vecinita_embedding_client.client import EmbeddingClient
 from vecinita_eval.criteria import EvalCriterionDef
-from vecinita_eval.modal_llm import default_eval_runtime
-from vecinita_eval.runner import EvalSummary, RowResult, run_golden_eval
+from vecinita_eval.judges import LlamaIndexJudgeClient
+from vecinita_eval.modal_llm import (
+    ModalHttpLLM,
+    eval_runtime_for_config,
+    judge_llm_from_config,
+    synthesis_llm_from_config,
+)
+from vecinita_eval.runner import EvalSummary, RowResult, run_adhoc_eval, run_golden_eval
 from vecinita_shared_schemas.db_mapping import (
     mapping_row,
     row_str,
@@ -50,6 +56,19 @@ if TYPE_CHECKING:
     from llama_index.core.llms import LLM
     from sqlalchemy.engine import Engine
     from vecinita_eval.judges import JudgeClient
+
+
+class EvalRunNotFoundError(LookupError):
+    """Eval run id does not exist."""
+
+
+@dataclass(frozen=True)
+class LoadedEvalRun:
+    """Eval run row fields needed by the background runner."""
+
+    config_snapshot: EvalConfig
+    mode: EvalRunMode
+    corpus_profile: str
 
 
 class EvalRunPresetNotFoundError(LookupError):
@@ -251,26 +270,85 @@ def _optional_datetime(value: object) -> datetime | None:
     return None
 
 
+def _load_eval_run(engine: Engine, *, run_id: UUID) -> LoadedEvalRun:
+    with engine.connect() as conn:
+        row = (
+            conn.execute(
+                text(
+                    """
+                    SELECT config_snapshot, mode, corpus_profile
+                    FROM eval_runs
+                    WHERE id = :id
+                    """
+                ),
+                {"id": run_id},
+            )
+            .mappings()
+            .first()
+        )
+    if row is None:
+        msg = f"eval run not found: {run_id}"
+        raise EvalRunNotFoundError(msg)
+    loaded = mapping_row(row)
+    return LoadedEvalRun(
+        config_snapshot=_config_from_json(loaded.get("config_snapshot")),
+        mode=_run_mode(loaded.get("mode")),
+        corpus_profile=row_str(loaded, "corpus_profile"),
+    )
+
+
+def _criteria_for_config(
+    engine: Engine,
+    config: EvalConfig,
+) -> list[EvalCriterionDef]:
+    enabled = list_enabled_criteria(engine)
+    if config.criteria_ids:
+        allowed = set(config.criteria_ids)
+        selected = [item for item in enabled if item.criterion_id in allowed]
+    else:
+        selected = enabled
+    return [EvalCriterionDef(slug=item.slug, rubric=item.rubric) for item in selected]
+
+
+def _resolve_eval_runtime(
+    config: EvalConfig,
+    judge: JudgeClient | None,
+    llm: LLM | None,
+) -> tuple[JudgeClient | None, LLM | None]:
+    if llm is not None and isinstance(llm, ModalHttpLLM):
+        synthesis = synthesis_llm_from_config(llm, config)
+        if judge is not None and isinstance(judge, LlamaIndexJudgeClient):
+            judge_llm = judge_llm_from_config(llm, config)
+            return LlamaIndexJudgeClient(llm=judge_llm), synthesis
+        return judge, synthesis
+    if judge is None or llm is None:
+        return eval_runtime_for_config(config)
+    return judge, llm
+
+
+def _require_adhoc_question(question: str | None) -> str:
+    if not question:
+        msg = "question is required for adhoc eval runs"
+        raise ValueError(msg)
+    return question
+
+
 def execute_eval_run(  # noqa: PLR0913
     engine: Engine,
     *,
     run_id: UUID,
-    corpus_profile: str,
+    question: str | None = None,
     embed_fn: Callable[[str], list[float]] | None = None,
     judge: JudgeClient | None = None,
     llm: LLM | None = None,
 ) -> None:
-    """Run golden eval and persist per-row results."""
+    """Run golden or ad-hoc eval using persisted sandbox config snapshot."""
+    loaded = _load_eval_run(engine, run_id=run_id)
+    config = loaded.config_snapshot
     embed = embed_fn or _default_embed_fn
-    resolved_judge = judge
-    resolved_llm = llm
-    if resolved_judge is None or resolved_llm is None:
-        default_judge, default_llm = default_eval_runtime()
-        if resolved_judge is None:
-            resolved_judge = default_judge
-        if resolved_llm is None:
-            resolved_llm = default_llm
+    resolved_judge, resolved_llm = _resolve_eval_runtime(config, judge, llm)
     database_url = _database_url()
+    criteria = _criteria_for_config(engine, config)
     try:
         with engine.begin() as conn:
             conn.execute(
@@ -283,18 +361,28 @@ def execute_eval_run(  # noqa: PLR0913
                 ),
                 {"id": run_id},
             )
-        fixture_path = _fixture_path() if corpus_profile == "fixture" else None
-
-        enabled = list_enabled_criteria(engine)
-        criteria = [EvalCriterionDef(slug=item.slug, rubric=item.rubric) for item in enabled]
-        results, summary = run_golden_eval(
-            embed_fn=embed,
-            database_url=database_url,
-            judge=resolved_judge,
-            llm=resolved_llm,
-            fixture_path=fixture_path,
-            criteria=criteria,
-        )
+        if loaded.mode == "adhoc":
+            adhoc_question = _require_adhoc_question(question)
+            results, summary = run_adhoc_eval(
+                embed_fn=embed,
+                database_url=database_url,
+                question=adhoc_question,
+                judge=resolved_judge,
+                llm=resolved_llm,
+                criteria=criteria,
+                config=config,
+            )
+        else:
+            fixture_path = _fixture_path() if loaded.corpus_profile == "fixture" else None
+            results, summary = run_golden_eval(
+                embed_fn=embed,
+                database_url=database_url,
+                judge=resolved_judge,
+                llm=resolved_llm,
+                fixture_path=fixture_path,
+                criteria=criteria,
+                config=config,
+            )
         _persist_results(engine, run_id=run_id, results=results, summary=summary)
         with engine.begin() as conn:
             conn.execute(

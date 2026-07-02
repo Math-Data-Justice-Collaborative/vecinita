@@ -11,10 +11,11 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from vecinita_internal_write_api.app import create_app
-from vecinita_internal_write_api.eval_service import create_eval_run, execute_eval_run
+from vecinita_internal_write_api.eval_service import execute_eval_run
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_config_for_tests
 
 from tests.eval.conftest import eval_embed_fn
+from tests.helpers.eval_runs import create_test_eval_run
 from tests.helpers.json_response import json_str, response_json_object
 from tests.unit.shared_schemas.auth_fixtures import (
     generate_es256_keypair,
@@ -77,8 +78,8 @@ def test_get_eval_run_detail_includes_error_message_when_failed(
 ) -> None:
     """GET /eval/runs/{id} returns stored error_message for failed runs."""
     client, private_key = eval_bug_client
-    created = create_eval_run(engine, corpus_profile="fixture")
-    run_id = created.run_id
+    created = create_test_eval_run(engine, corpus_profile="fixture")
+    run_id = created.response.run_id
     try:
         with engine.begin() as conn:
             conn.execute(
@@ -119,8 +120,8 @@ def test_execute_eval_run_persists_embed_client_error_for_api(
 ) -> None:
     """Background eval failure from embed 404 is readable via GET detail error_message."""
     client, private_key = eval_bug_client
-    created = create_eval_run(engine, corpus_profile="fixture")
-    run_id = created.run_id
+    created = create_test_eval_run(engine, corpus_profile="fixture")
+    run_id = created.response.run_id
     try:
         with (
             patch(
@@ -132,7 +133,6 @@ def test_execute_eval_run_persists_embed_client_error_for_api(
             execute_eval_run(
                 engine,
                 run_id=run_id,
-                corpus_profile="fixture",
                 embed_fn=eval_embed_fn,
             )
 
@@ -160,8 +160,8 @@ def test_get_eval_run_detail_error_message_null_when_completed(
 ) -> None:
     """Completed runs omit error_message (null)."""
     client, private_key = eval_bug_client
-    created = create_eval_run(engine, corpus_profile="fixture")
-    run_id = created.run_id
+    created = create_test_eval_run(engine, corpus_profile="fixture")
+    run_id = created.response.run_id
     try:
         with engine.begin() as conn:
             conn.execute(

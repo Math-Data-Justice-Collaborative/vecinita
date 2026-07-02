@@ -1342,7 +1342,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
             execute_eval_run(
                 engine,
                 run_id=created.response.run_id,
-                corpus_profile=created.corpus_profile,
+                question=created.question,
                 embed_fn=eval_embed_fn,
                 judge=eval_judge,
             )

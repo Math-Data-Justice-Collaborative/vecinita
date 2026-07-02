@@ -9,6 +9,7 @@ from llama_index.core.base.llms.types import CompletionResponse, LLMMetadata
 from llama_index.core.llms.custom import CustomLLM
 from pydantic import ConfigDict
 from vecinita_llm_client import LlmClient, LlmClientError
+from vecinita_shared_schemas.eval_config import EvalConfig
 
 from vecinita_eval.judges import LlamaIndexJudgeClient
 
@@ -88,6 +89,21 @@ class ModalHttpLLM(CustomLLM):
             yield CompletionResponse(text="")
 
 
+def synthesis_llm_from_config(llm: ModalHttpLLM, config: EvalConfig) -> ModalHttpLLM:
+    """Return an LLM copy with sandbox synthesis hyper-parameters."""
+    return llm.model_copy(
+        update={
+            "max_tokens": config.max_tokens,
+            "temperature": config.temperature,
+        }
+    )
+
+
+def judge_llm_from_config(llm: ModalHttpLLM, config: EvalConfig) -> ModalHttpLLM:
+    """Return an LLM copy with sandbox judge temperature."""
+    return llm.model_copy(update={"temperature": config.judge_temperature})
+
+
 def default_eval_runtime() -> tuple[JudgeClient | None, ModalHttpLLM | None]:
     """Create shared judge + LLM from ``VECINITA_MODAL_LLM_URL`` when configured."""
     try:
@@ -97,3 +113,17 @@ def default_eval_runtime() -> tuple[JudgeClient | None, ModalHttpLLM | None]:
     warm_modal_llm(client)
     llm = ModalHttpLLM(client=client)
     return LlamaIndexJudgeClient(llm=llm), llm
+
+
+def eval_runtime_for_config(
+    config: EvalConfig,
+) -> tuple[JudgeClient | None, ModalHttpLLM | None]:
+    """Create judge + synthesis LLM with sandbox hyper-parameters applied."""
+    judge, synthesis_llm = default_eval_runtime()
+    if synthesis_llm is None:
+        return judge, None
+    configured_synthesis = synthesis_llm_from_config(synthesis_llm, config)
+    if judge is None:
+        return None, configured_synthesis
+    judge_llm = judge_llm_from_config(synthesis_llm, config)
+    return LlamaIndexJudgeClient(llm=judge_llm), configured_synthesis

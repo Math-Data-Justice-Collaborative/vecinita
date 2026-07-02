@@ -14,16 +14,17 @@ from sqlalchemy import text
 from vecinita_eval.golden import GoldenRow
 from vecinita_eval.runner import EvalSummary, RowMetrics, RowResult
 from vecinita_internal_write_api.eval_service import (
-    create_eval_run,
     execute_eval_run,
     get_eval_run,
     get_eval_timeseries,
     list_eval_runs,
 )
+from vecinita_shared_schemas.eval_config import EvalConfigPartial
 from vecinita_shared_schemas.internal_write import EvalMetricsSummary
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
+from tests.helpers.eval_runs import create_test_eval_run
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -31,6 +32,8 @@ if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
 
 _EXPECTED_ROW_LATENCY_MS = 1500
+_EXPECTED_CONFIG_TOP_K = 7
+_EXPECTED_CONFIG_MIN_SCORE = 0.55
 _EXPECTED_METRIC_LATENCY_MS = 99
 _EXPECTED_LATENCY_P95_MS = 12
 
@@ -71,30 +74,32 @@ def _sample_summary() -> EvalSummary:
 @pytest.fixture
 def eval_run_id(engine: Engine) -> Iterator[UUID]:
     """Create a pending eval run and delete it after the test."""
-    created = create_eval_run(engine, corpus_profile="fixture")
-    yield created.run_id
+    created = create_test_eval_run(engine, corpus_profile="fixture")
+    yield created.response.run_id
     with engine.begin() as conn:
         conn.execute(
             text("DELETE FROM eval_run_items WHERE run_id = :id"),
-            {"id": created.run_id},
+            {"id": created.response.run_id},
         )
-        conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": created.run_id})
+        conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": created.response.run_id})
 
 
 def test_create_eval_run_inserts_pending_row(engine: Engine) -> None:
     """create_eval_run returns pending status and persists the row."""
-    created = create_eval_run(engine, corpus_profile="fixture")
+    created = create_test_eval_run(engine, corpus_profile="fixture")
     try:
-        assert created.status == "pending"
+        assert created.response.status == "pending"
         listed = list_eval_runs(engine, page=1, page_size=20)
-        assert any(item.run_id == created.run_id for item in listed.items)
+        assert any(item.run_id == created.response.run_id for item in listed.items)
     finally:
         with engine.begin() as conn:
             conn.execute(
                 text("DELETE FROM eval_run_items WHERE run_id = :id"),
-                {"id": created.run_id},
+                {"id": created.response.run_id},
             )
-            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": created.run_id})
+            conn.execute(
+                text("DELETE FROM eval_runs WHERE id = :id"), {"id": created.response.run_id}
+            )
 
 
 def test_execute_eval_run_persists_completed_results(
@@ -113,7 +118,6 @@ def test_execute_eval_run_persists_completed_results(
         execute_eval_run(
             engine,
             run_id=run_id,
-            corpus_profile="fixture",
             embed_fn=eval_embed_fn,
             judge=MockEvalJudge(),
         )
@@ -155,12 +159,92 @@ def test_execute_eval_run_resolves_default_judge_when_not_injected(
         execute_eval_run(
             engine,
             run_id=run_id,
-            corpus_profile="fixture",
             embed_fn=eval_embed_fn,
         )
     kwargs = mock_run.call_args.kwargs
     assert kwargs["judge"] is not None
     assert kwargs["llm"] is not None
+    assert kwargs["config"] is not None
+
+
+def test_execute_eval_run_passes_config_snapshot_to_runner(
+    engine: Engine,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Persisted config_snapshot overrides are forwarded to run_golden_eval."""
+    monkeypatch.setenv(
+        "DATABASE_URL",
+        "postgresql://vecinita:vecinita@localhost:5432/vecinita",
+    )
+    created = create_test_eval_run(
+        engine,
+        corpus_profile="fixture",
+        config=EvalConfigPartial(
+            top_k=_EXPECTED_CONFIG_TOP_K, min_retrieval_score=_EXPECTED_CONFIG_MIN_SCORE
+        ),
+    )
+    run_id = created.response.run_id
+    try:
+        with patch(
+            "vecinita_internal_write_api.eval_service.run_golden_eval",
+            return_value=([_sample_row_result()], _sample_summary()),
+        ) as mock_run:
+            execute_eval_run(
+                engine,
+                run_id=run_id,
+                embed_fn=eval_embed_fn,
+                judge=MockEvalJudge(),
+            )
+        config = mock_run.call_args.kwargs["config"]
+        assert config.top_k == _EXPECTED_CONFIG_TOP_K
+        assert config.min_retrieval_score == pytest.approx(_EXPECTED_CONFIG_MIN_SCORE)
+    finally:
+        with engine.begin() as conn:
+            conn.execute(
+                text("DELETE FROM eval_run_items WHERE run_id = :id"),
+                {"id": run_id},
+            )
+            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
+
+
+def test_execute_eval_run_adhoc_dispatches_single_question(
+    engine: Engine,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Ad-hoc mode routes to run_adhoc_eval with the operator question."""
+    monkeypatch.setenv(
+        "DATABASE_URL",
+        "postgresql://vecinita:vecinita@localhost:5432/vecinita",
+    )
+    question = "What are food pantry hours?"
+    created = create_test_eval_run(
+        engine,
+        corpus_profile="fixture",
+        mode="adhoc",
+        question=question,
+    )
+    run_id = created.response.run_id
+    try:
+        with patch(
+            "vecinita_internal_write_api.eval_service.run_adhoc_eval",
+            return_value=([_sample_row_result()], _sample_summary()),
+        ) as mock_run:
+            execute_eval_run(
+                engine,
+                run_id=run_id,
+                question=question,
+                embed_fn=eval_embed_fn,
+                judge=MockEvalJudge(),
+            )
+        assert mock_run.call_args.kwargs["question"] == question
+        assert mock_run.call_args.kwargs["config"] is not None
+    finally:
+        with engine.begin() as conn:
+            conn.execute(
+                text("DELETE FROM eval_run_items WHERE run_id = :id"),
+                {"id": run_id},
+            )
+            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
 
 
 def test_execute_eval_run_marks_failed_on_exception(
@@ -178,7 +262,6 @@ def test_execute_eval_run_marks_failed_on_exception(
         execute_eval_run(
             engine,
             run_id=eval_run_id,
-            corpus_profile="fixture",
             embed_fn=eval_embed_fn,
         )
     detail = get_eval_run(engine, run_id=eval_run_id)
@@ -197,7 +280,8 @@ def test_list_eval_runs_paginates(engine: Engine) -> None:
     min_total_runs = 2
     try:
         created_ids.extend(
-            create_eval_run(engine, corpus_profile="fixture").run_id for _ in range(min_total_runs)
+            create_test_eval_run(engine, corpus_profile="fixture").response.run_id
+            for _ in range(min_total_runs)
         )
         page = list_eval_runs(engine, page=1, page_size=1)
         assert page.page == 1
@@ -285,7 +369,6 @@ def test_execute_eval_run_requires_database_url(
         execute_eval_run(
             engine,
             run_id=eval_run_id,
-            corpus_profile="staging",
             embed_fn=eval_embed_fn,
         )
 
@@ -452,6 +535,11 @@ def test_execute_eval_run_staging_profile_omits_fixture_path(
         "DATABASE_URL",
         "postgresql://vecinita:vecinita@localhost:5432/vecinita",
     )
+    with engine.begin() as conn:
+        conn.execute(
+            text("UPDATE eval_runs SET corpus_profile = 'staging' WHERE id = :id"),
+            {"id": eval_run_id},
+        )
     with patch(
         "vecinita_internal_write_api.eval_service.run_golden_eval",
         return_value=([_sample_row_result()], _sample_summary()),
@@ -459,10 +547,10 @@ def test_execute_eval_run_staging_profile_omits_fixture_path(
         execute_eval_run(
             engine,
             run_id=eval_run_id,
-            corpus_profile="staging",
             embed_fn=eval_embed_fn,
         )
     assert mock_run.call_args.kwargs["fixture_path"] is None
+    assert mock_run.call_args.kwargs["config"] is not None
 
 
 def test_list_eval_runs_parses_optional_timestamps(engine: Engine, eval_run_id: UUID) -> None:
@@ -603,7 +691,6 @@ def test_execute_eval_run_omits_custom_scores_when_empty(
         execute_eval_run(
             engine,
             run_id=eval_run_id,
-            corpus_profile="fixture",
             embed_fn=eval_embed_fn,
         )
     with engine.connect() as conn:
@@ -639,16 +726,19 @@ def test_create_eval_run_fallback_created_at(
         "vecinita_internal_write_api.eval_service.sqlalchemy_scalar_one",
         return_value="not-a-datetime",
     ):
-        created = create_eval_run(engine, corpus_profile="fixture")
+        created = create_test_eval_run(engine, corpus_profile="fixture")
     try:
-        assert created.created_at.tzinfo is UTC
+        assert created.response.created_at.tzinfo is UTC
     finally:
         with engine.begin() as conn:
             conn.execute(
                 text("DELETE FROM eval_run_items WHERE run_id = :id"),
-                {"id": created.run_id},
+                {"id": created.response.run_id},
             )
-            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": created.run_id})
+            conn.execute(
+                text("DELETE FROM eval_runs WHERE id = :id"),
+                {"id": created.response.run_id},
+            )
 
 
 def test_latency_ms_defaults_when_item_latency_is_float(
