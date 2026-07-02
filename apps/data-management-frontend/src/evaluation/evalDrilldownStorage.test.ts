@@ -103,6 +103,28 @@ describe("evalDrilldownStorage", () => {
     }).not.toThrow();
   });
 
+  it("loads persisted layout with default wrapCells when omitted", () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ visibleColumns: ["question", "answer"] }),
+    );
+    expect(loadEvalDrilldownLayout().wrapCells).toBe(true);
+  });
+
+  it("loadEvalDrilldownLayout uses defaults when visibleColumns is omitted", () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ wrapCells: false }),
+    );
+    expect(loadEvalDrilldownLayout().visibleColumns).toEqual([
+      "question",
+      "answer",
+      "retrieval",
+      "faithfulness",
+      "answer_relevancy",
+    ]);
+  });
+
   it("lists all supported drilldown columns", () => {
     expect(DRILLDOWN_COLUMNS).toContain("answer");
     expect(DRILLDOWN_COLUMNS).toContain("retrieved_urls");

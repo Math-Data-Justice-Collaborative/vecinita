@@ -55,7 +55,15 @@ vi.mock("recharts", async () => {
     Area: () => null,
     Scatter: () => null,
     CartesianGrid: () => null,
-    XAxis: () => null,
+    XAxis: (props: {
+      tickFormatter?: (value: number) => string;
+      dataKey?: string;
+    }) => {
+      if (props.tickFormatter) {
+        props.tickFormatter(1_719_840_000_000);
+      }
+      return null;
+    },
     YAxis: () => null,
     ReferenceLine: () =>
       React.createElement("div", { "data-testid": "reference-line" }),
@@ -256,5 +264,39 @@ describe("EvalMetricChart", () => {
       />,
     );
     expect(screen.getByTestId("eval-chart-missing-custom")).toBeInTheDocument();
+  });
+
+  it("renders scatter chart without threshold for latency metrics", () => {
+    tooltipMetricId = "latency_p95_ms";
+    tooltipMetricLabel = "Latency";
+    render(
+      <EvalMetricChart
+        points={POINTS}
+        metricId="latency_p95_ms"
+        metricLabel="Latency"
+        chartType="scatter"
+        showThreshold
+        xAxisGranularity="day"
+      />,
+    );
+    expect(screen.getByTestId("scatter-chart")).toBeInTheDocument();
+    expect(screen.queryByTestId("reference-line")).not.toBeInTheDocument();
+  });
+
+  it("renders scatter chart with threshold for score metrics", () => {
+    tooltipMetricId = "faithfulness";
+    tooltipMetricLabel = "Faithfulness";
+    render(
+      <EvalMetricChart
+        points={POINTS}
+        metricId="faithfulness"
+        metricLabel="Faithfulness"
+        chartType="scatter"
+        showThreshold
+        xAxisGranularity="day"
+      />,
+    );
+    expect(screen.getByTestId("scatter-chart")).toBeInTheDocument();
+    expect(screen.getByTestId("reference-line")).toBeInTheDocument();
   });
 });

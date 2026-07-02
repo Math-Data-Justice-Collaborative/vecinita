@@ -5,7 +5,7 @@ from __future__ import annotations
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import patch
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from fastapi.testclient import TestClient
@@ -18,11 +18,17 @@ from vecinita_shared_schemas.internal_write import EvalRunCreateRequest
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
 from tests.helpers.json_response import json_int, json_str, response_json_object
+from tests.helpers.ollama_models_mock import MockOllamaModelsClient
 from tests.unit.internal_write_api.conftest import auth_headers, database_url
 from tests.unit.shared_schemas.auth_fixtures import (
     generate_es256_keypair,
     make_auth_config,
     sign_test_jwt,
+)
+from vecinita_internal_write_api.ollama_models_client import OllamaModelsClientError
+from vecinita_shared_schemas.ollama_models import (
+    OllamaModelListResponse,
+    OllamaModelPullResponse,
 )
 
 _MAX_EVAL_PAGE_SIZE = 100
@@ -223,6 +229,254 @@ def test_ingest_audit_event_rejects_operator_jwt(
         assert response.status_code == HTTPStatus.FORBIDDEN
     finally:
         reset_auth_config_for_tests()
+
+
+def test_eval_config_preset_routes_require_operator_jwt(
+    eval_write_client: TestClient,
+) -> None:
+    """Preset routes reject the service key because owner_id is required."""
+    preset_id = uuid4()
+    assert (
+        eval_write_client.get(
+            "/internal/v1/eval/config-presets",
+            headers=auth_headers(),
+        ).status_code
+        == HTTPStatus.FORBIDDEN
+    )
+    assert (
+        eval_write_client.post(
+            "/internal/v1/eval/config-presets",
+            json={"name": "x", "config": {}},
+            headers=auth_headers(),
+        ).status_code
+        == HTTPStatus.FORBIDDEN
+    )
+    assert (
+        eval_write_client.get(
+            f"/internal/v1/eval/config-presets/{preset_id}",
+            headers=auth_headers(),
+        ).status_code
+        == HTTPStatus.FORBIDDEN
+    )
+    assert (
+        eval_write_client.patch(
+            f"/internal/v1/eval/config-presets/{preset_id}",
+            json={"name": "y"},
+            headers=auth_headers(),
+        ).status_code
+        == HTTPStatus.FORBIDDEN
+    )
+    assert (
+        eval_write_client.post(
+            f"/internal/v1/eval/config-presets/{preset_id}/clone",
+            headers=auth_headers(),
+        ).status_code
+        == HTTPStatus.FORBIDDEN
+    )
+
+
+def test_eval_config_preset_routes_return_404_for_missing_ids(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Preset GET/PATCH/clone return 404 when the preset id does not exist."""
+    reset_auth_config_for_tests()
+    private_key = generate_es256_keypair()
+    monkeypatch.setenv("DATABASE_URL", database_url())
+    monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
+    set_auth_config_for_tests(make_auth_config(private_key))
+    from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
+
+    client = TestClient(create_app(eval_embed_fn=eval_embed_fn, eval_judge=MockEvalJudge()))
+    token = sign_test_jwt(private_key, role="admin")
+    missing = uuid4()
+    headers = {"Authorization": f"Bearer {token}"}
+    try:
+        assert (
+            client.get(
+                f"/internal/v1/eval/config-presets/{missing}",
+                headers=headers,
+            ).status_code
+            == HTTPStatus.NOT_FOUND
+        )
+        assert (
+            client.patch(
+                f"/internal/v1/eval/config-presets/{missing}",
+                json={"name": "missing"},
+                headers=headers,
+            ).status_code
+            == HTTPStatus.NOT_FOUND
+        )
+        assert (
+            client.post(
+                f"/internal/v1/eval/config-presets/{missing}/clone",
+                headers=headers,
+            ).status_code
+            == HTTPStatus.NOT_FOUND
+        )
+    finally:
+        reset_auth_config_for_tests()
+
+
+def test_ollama_model_routes_require_configured_client(
+    eval_write_client: TestClient,
+) -> None:
+    """Ollama list/pull return 503 when no client is wired."""
+    assert (
+        eval_write_client.get(
+            "/internal/v1/models/ollama",
+            headers=auth_headers(),
+        ).status_code
+        == HTTPStatus.SERVICE_UNAVAILABLE
+    )
+    assert (
+        eval_write_client.post(
+            "/internal/v1/models/ollama/pull",
+            json={"model_id": "qwen2.5:1.5b-instruct"},
+            headers=auth_headers(),
+        ).status_code
+        == HTTPStatus.SERVICE_UNAVAILABLE
+    )
+
+
+class _FailingOllamaClient:
+    def list_models(self) -> OllamaModelListResponse:
+        msg = "upstream down"
+        raise OllamaModelsClientError(msg)
+
+    def start_pull(self, model_id: str) -> OllamaModelPullResponse:
+        msg = "pull upstream down"
+        raise OllamaModelsClientError(msg)
+
+    def close(self) -> None:
+        return None
+
+
+def test_ollama_model_routes_map_client_errors_to_502(
+    internal_api_env: None,
+) -> None:
+    """Ollama routes translate OllamaModelsClientError to 502."""
+    _ = internal_api_env
+    from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
+
+    client = TestClient(
+        create_app(
+            eval_embed_fn=eval_embed_fn,
+            eval_judge=MockEvalJudge(),
+            ollama_models_client=_FailingOllamaClient(),
+        )
+    )
+    assert (
+        client.get(
+            "/internal/v1/models/ollama",
+            headers=auth_headers(),
+        ).status_code
+        == HTTPStatus.BAD_GATEWAY
+    )
+    assert (
+        client.post(
+            "/internal/v1/models/ollama/pull",
+            json={"model_id": "qwen2.5:1.5b-instruct"},
+            headers=auth_headers(),
+        ).status_code
+        == HTTPStatus.BAD_GATEWAY
+    )
+
+
+def test_ollama_model_routes_delegate_to_injected_client(
+    internal_api_env: None,
+) -> None:
+    """Ollama list/pull succeed when a mock client is injected."""
+    _ = internal_api_env
+    from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
+
+    mock_client = MockOllamaModelsClient()
+    client = TestClient(
+        create_app(
+            eval_embed_fn=eval_embed_fn,
+            eval_judge=MockEvalJudge(),
+            ollama_models_client=mock_client,
+        )
+    )
+    listing = client.get(
+        "/internal/v1/models/ollama",
+        headers=auth_headers(),
+    )
+    assert listing.status_code == HTTPStatus.OK
+    pull = client.post(
+        "/internal/v1/models/ollama/pull",
+        json={"model_id": "llama3.2:3b"},
+        headers=auth_headers(),
+    )
+    assert pull.status_code == HTTPStatus.ACCEPTED
+    assert mock_client.pull_requests == ["llama3.2:3b"]
+
+
+def test_eval_config_preset_routes_with_admin_jwt(
+    monkeypatch: pytest.MonkeyPatch,
+    engine: Engine,
+) -> None:
+    """Preset CRUD routes succeed for authenticated admin JWTs."""
+    reset_auth_config_for_tests()
+    private_key = generate_es256_keypair()
+    monkeypatch.setenv("DATABASE_URL", database_url())
+    monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
+    set_auth_config_for_tests(make_auth_config(private_key))
+    from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
+
+    client = TestClient(create_app(eval_embed_fn=eval_embed_fn, eval_judge=MockEvalJudge()))
+    owner_id = uuid4()
+    token = sign_test_jwt(private_key, sub=owner_id, role="admin")
+    headers = {"Authorization": f"Bearer {token}"}
+    preset_id: UUID | None = None
+    try:
+        create = client.post(
+            "/internal/v1/eval/config-presets",
+            json={"name": "route-preset", "config": {"top_k": 6}, "shared": False},
+            headers=headers,
+        )
+        assert create.status_code == HTTPStatus.CREATED
+        preset_id = UUID(json_str(response_json_object(create), "preset_id"))
+
+        listing = client.get(
+            "/internal/v1/eval/config-presets",
+            headers=headers,
+        )
+        assert listing.status_code == HTTPStatus.OK
+
+        fetched = client.get(
+            f"/internal/v1/eval/config-presets/{preset_id}",
+            headers=headers,
+        )
+        assert fetched.status_code == HTTPStatus.OK
+
+        patched = client.patch(
+            f"/internal/v1/eval/config-presets/{preset_id}",
+            json={"name": "route-preset-v2"},
+            headers=headers,
+        )
+        assert patched.status_code == HTTPStatus.OK
+        assert json_str(response_json_object(patched), "name") == "route-preset-v2"
+    finally:
+        reset_auth_config_for_tests()
+        if preset_id is not None:
+            with engine.begin() as conn:
+                conn.execute(
+                    text("DELETE FROM eval_config_presets WHERE id = :id"),
+                    {"id": preset_id},
+                )
+
+
+def test_create_eval_run_with_preset_requires_operator_jwt(
+    eval_write_client: TestClient,
+) -> None:
+    """POST /eval/runs rejects preset_id when only the service key is provided."""
+    with patch("vecinita_internal_write_api.app.execute_eval_run"):
+        response = eval_write_client.post(
+            "/internal/v1/eval/runs",
+            json={"preset_id": str(uuid4())},
+            headers=auth_headers(),
+        )
+    assert response.status_code == HTTPStatus.FORBIDDEN
 
 
 def test_ingest_audit_event_service_key(engine: Engine, monkeypatch: pytest.MonkeyPatch) -> None:

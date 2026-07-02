@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from http import HTTPStatus
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from fastapi.testclient import TestClient
@@ -26,7 +26,7 @@ _EXPECTED_JOB_COUNT_WITH_EVAL = 2
 class _EvalRunsClient:
     """Stub internal-write client returning a running eval run."""
 
-    def __init__(self, run_id: str) -> None:
+    def __init__(self, run_id: UUID) -> None:
         self._run_id = run_id
 
     def list_eval_runs(self, *, page: int = 1, page_size: int = 100) -> EvalRunListResponse:

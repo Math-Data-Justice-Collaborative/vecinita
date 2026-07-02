@@ -19,8 +19,12 @@ from vecinita_internal_write_api.eval_service import (
     get_eval_timeseries,
     list_eval_runs,
 )
-from vecinita_shared_schemas.eval_config import EvalConfigPartial
-from vecinita_shared_schemas.internal_write import EvalMetricsSummary
+from vecinita_shared_schemas.eval_config import (
+    EvalConfig,
+    EvalConfigPartial,
+    EvalConfigPresetCreateRequest,
+)
+from vecinita_shared_schemas.internal_write import EvalMetricsSummary, EvalRunCreateRequest
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
@@ -195,9 +199,14 @@ def test_execute_eval_run_passes_config_snapshot_to_runner(
                 embed_fn=eval_embed_fn,
                 judge=MockEvalJudge(),
             )
-        config = mock_run.call_args.kwargs["config"]
+        config = cast(
+            EvalConfigPartial,
+            mock_run.call_args.kwargs["config"],
+        )
         assert config.top_k == _EXPECTED_CONFIG_TOP_K
-        assert config.min_retrieval_score == pytest.approx(_EXPECTED_CONFIG_MIN_SCORE)
+        assert config.min_retrieval_score == pytest.approx(
+            _EXPECTED_CONFIG_MIN_SCORE
+        )
     finally:
         with engine.begin() as conn:
             conn.execute(
@@ -840,3 +849,288 @@ def test_get_eval_run_optional_int_bool_latency_p95(
     detail = get_eval_run(engine, run_id=eval_run_id)
     assert detail is not None
     assert detail.metrics_summary.latency_p95_ms is None
+
+
+def test_resolve_eval_run_config_merges_shared_preset(
+    engine: Engine,
+) -> None:
+    """resolve_eval_run_config loads preset config before applying overrides."""
+    from vecinita_internal_write_api.eval_config_presets_service import (  # noqa: PLC0415
+        create_eval_config_preset,
+    )
+    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
+        resolve_eval_run_config,
+    )
+
+    owner_id = uuid4()
+    preset = create_eval_config_preset(
+        engine,
+        owner_id=owner_id,
+        body=EvalConfigPresetCreateRequest(
+            name="preset-base",
+            config=EvalConfig(top_k=_EXPECTED_CONFIG_TOP_K),
+            shared=True,
+        ),
+    )
+    try:
+        resolved = resolve_eval_run_config(
+            engine,
+            requester_id=uuid4(),
+            body=EvalRunCreateRequest(
+                preset_id=preset.preset_id,
+                config=EvalConfigPartial(min_retrieval_score=_EXPECTED_CONFIG_MIN_SCORE),
+            ),
+        )
+        assert resolved.top_k == _EXPECTED_CONFIG_TOP_K
+        assert resolved.min_retrieval_score == pytest.approx(_EXPECTED_CONFIG_MIN_SCORE)
+    finally:
+        with engine.begin() as conn:
+            conn.execute(
+                text("DELETE FROM eval_config_presets WHERE id = :id"),
+                {"id": preset.preset_id},
+            )
+
+
+def test_resolve_eval_run_config_raises_for_missing_preset(engine: Engine) -> None:
+    """resolve_eval_run_config raises EvalRunPresetNotFoundError for unknown ids."""
+    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
+        EvalRunPresetNotFoundError,
+        resolve_eval_run_config,
+    )
+
+    with pytest.raises(EvalRunPresetNotFoundError, match="preset not found"):
+        resolve_eval_run_config(
+            engine,
+            requester_id=uuid4(),
+            body=EvalRunCreateRequest(preset_id=uuid4()),
+        )
+
+
+def test_resolve_eval_run_config_raises_for_private_preset(
+    engine: Engine,
+) -> None:
+    """resolve_eval_run_config maps preset access errors to EvalRunPresetAccessError."""
+    from vecinita_internal_write_api.eval_config_presets_service import (  # noqa: PLC0415
+        create_eval_config_preset,
+    )
+    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
+        EvalRunPresetAccessError,
+        resolve_eval_run_config,
+    )
+    from vecinita_shared_schemas.eval_config import EvalConfigPresetCreateRequest  # noqa: PLC0415
+
+    owner_id = uuid4()
+    preset = create_eval_config_preset(
+        engine,
+        owner_id=owner_id,
+        body=EvalConfigPresetCreateRequest(name="private", shared=False),
+    )
+    try:
+        with pytest.raises(EvalRunPresetAccessError):
+            resolve_eval_run_config(
+                engine,
+                requester_id=uuid4(),
+                body=EvalRunCreateRequest(preset_id=preset.preset_id),
+            )
+    finally:
+        with engine.begin() as conn:
+            conn.execute(
+                text("DELETE FROM eval_config_presets WHERE id = :id"),
+                {"id": preset.preset_id},
+            )
+
+
+def test_get_eval_run_parses_string_preset_id_and_json_config(
+    engine: Engine,
+    eval_run_id: UUID,
+) -> None:
+    """get_eval_run reads preset_id strings and JSON config snapshots."""
+    from vecinita_internal_write_api.eval_config_presets_service import (  # noqa: PLC0415
+        create_eval_config_preset,
+    )
+
+    owner_id = uuid4()
+    preset = create_eval_config_preset(
+        engine,
+        owner_id=owner_id,
+        body=EvalConfigPresetCreateRequest(name="linked-preset", shared=False),
+    )
+    try:
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    """
+                    UPDATE eval_runs
+                    SET preset_id = :preset_id,
+                        config_snapshot = CAST(:config AS jsonb),
+                        mode = 'adhoc'
+                    WHERE id = :id
+                    """
+                ),
+                {
+                    "id": eval_run_id,
+                    "preset_id": str(preset.preset_id),
+                    "config": json.dumps({"top_k": _EXPECTED_CONFIG_TOP_K}),
+                },
+            )
+        detail = get_eval_run(engine, run_id=eval_run_id)
+        assert detail is not None
+        assert detail.preset_id == preset.preset_id
+        assert detail.mode == "adhoc"
+        assert detail.config_snapshot.top_k == _EXPECTED_CONFIG_TOP_K
+    finally:
+        with engine.begin() as conn:
+            conn.execute(
+                text("DELETE FROM eval_config_presets WHERE id = :id"),
+                {"id": preset.preset_id},
+            )
+
+
+def test_resolve_eval_runtime_modal_llm_with_llamaindex_judge() -> None:
+    """_resolve_eval_runtime rebuilds judge + synthesis for Modal HTTP LLMs."""
+    from unittest.mock import MagicMock
+
+    from vecinita_eval.judges import LlamaIndexJudgeClient
+    from vecinita_eval.modal_llm import ModalHttpLLM
+    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
+        _resolve_eval_runtime,  # pyright: ignore[reportPrivateUsage]
+    )
+    from vecinita_shared_schemas.eval_config import EvalConfig
+
+    modal_llm = MagicMock(spec=ModalHttpLLM)
+    judge = LlamaIndexJudgeClient(llm=MagicMock())
+    synthesis = MagicMock()
+    with (
+        patch(
+            "vecinita_internal_write_api.eval_service.synthesis_llm_from_config",
+            return_value=synthesis,
+        ) as mock_synthesis,
+        patch(
+            "vecinita_internal_write_api.eval_service.judge_llm_from_config",
+            return_value=MagicMock(),
+        ) as mock_judge_llm,
+    ):
+        resolved_judge, resolved_llm = _resolve_eval_runtime(
+            EvalConfig(),
+            judge,
+            modal_llm,
+        )
+    mock_synthesis.assert_called_once()
+    mock_judge_llm.assert_called_once()
+    assert isinstance(resolved_judge, LlamaIndexJudgeClient)
+    assert resolved_llm is synthesis
+
+
+def test_resolve_eval_runtime_modal_llm_without_llamaindex_judge() -> None:
+    """_resolve_eval_runtime keeps a custom judge when synthesis uses Modal HTTP."""
+    from unittest.mock import MagicMock
+
+    from vecinita_eval.modal_llm import ModalHttpLLM
+    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
+        _resolve_eval_runtime,  # pyright: ignore[reportPrivateUsage]
+    )
+    from vecinita_shared_schemas.eval_config import EvalConfig
+
+    modal_llm = MagicMock(spec=ModalHttpLLM)
+    judge = MagicMock()
+    synthesis = MagicMock()
+    with patch(
+        "vecinita_internal_write_api.eval_service.synthesis_llm_from_config",
+        return_value=synthesis,
+    ):
+        resolved_judge, resolved_llm = _resolve_eval_runtime(
+            EvalConfig(),
+            judge,
+            modal_llm,
+        )
+    assert resolved_judge is judge
+    assert resolved_llm is synthesis
+
+
+def test_resolve_eval_runtime_uses_factory_when_judge_or_llm_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """_resolve_eval_runtime delegates to eval_runtime_for_config when inputs are absent."""
+    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
+        _resolve_eval_runtime,  # pyright: ignore[reportPrivateUsage]
+    )
+    from vecinita_shared_schemas.eval_config import EvalConfig
+
+    sentinel_judge = object()
+    sentinel_llm = object()
+    with patch(
+        "vecinita_internal_write_api.eval_service.eval_runtime_for_config",
+        return_value=(sentinel_judge, sentinel_llm),
+    ) as mock_factory:
+        resolved = _resolve_eval_runtime(EvalConfig(), None, None)
+    mock_factory.assert_called_once()
+    assert resolved == (sentinel_judge, sentinel_llm)
+
+
+def test_criteria_for_config_filters_enabled_criteria(
+    engine: Engine,
+    eval_run_id: UUID,
+) -> None:
+    """execute_eval_run passes only configured criteria ids to the harness."""
+    from vecinita_internal_write_api.eval_criteria_service import create_eval_criterion
+    from vecinita_shared_schemas.internal_write import EvalCriterionCreateRequest
+
+    slug_a = f"unit-a-{uuid4().hex[:8]}"
+    slug_b = f"unit-b-{uuid4().hex[:8]}"
+    created_a = create_eval_criterion(
+        engine,
+        body=EvalCriterionCreateRequest(
+            slug=slug_a,
+            label="A",
+            rubric="Rubric A",
+            scorer_type="llm_rubric",
+            enabled=True,
+        ),
+    )
+    created_b = create_eval_criterion(
+        engine,
+        body=EvalCriterionCreateRequest(
+            slug=slug_b,
+            label="B",
+            rubric="Rubric B",
+            scorer_type="llm_rubric",
+            enabled=True,
+        ),
+    )
+    try:
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    """
+                    UPDATE eval_runs
+                    SET config_snapshot = CAST(:config AS jsonb)
+                    WHERE id = :id
+                    """
+                ),
+                {
+                    "id": eval_run_id,
+                    "config": json.dumps({"criteria_ids": [str(created_a.criterion_id)]}),
+                },
+            )
+        with patch(
+            "vecinita_internal_write_api.eval_service.run_golden_eval",
+            return_value=([_sample_row_result()], _sample_summary()),
+        ) as mock_run:
+            execute_eval_run(
+                engine,
+                run_id=eval_run_id,
+                embed_fn=eval_embed_fn,
+                judge=MockEvalJudge(),
+            )
+        criteria = cast(
+            "list[object]",
+            mock_run.call_args.kwargs["criteria"],
+        )
+        assert len(criteria) == 1
+        assert getattr(criteria[0], "slug") == slug_a
+    finally:
+        with engine.begin() as conn:
+            conn.execute(
+                text("DELETE FROM eval_criteria WHERE id IN (:a, :b)"),
+                {"a": created_a.criterion_id, "b": created_b.criterion_id},
+            )

@@ -15,7 +15,12 @@ from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_c
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
-from tests.helpers.json_response import json_object_get, json_str, response_json_object
+from tests.helpers.json_response import (
+    json_object_get,
+    json_object_list,
+    json_str,
+    response_json_object,
+)
 from tests.helpers.user_mgmt_e2e import VIEWER_ID
 from tests.unit.rag.conftest import seed_eval_corpus
 from tests.unit.shared_schemas.auth_fixtures import (
@@ -104,12 +109,8 @@ def test_owner_crud_and_shared_clone(
     )
     assert listing.status_code == HTTPStatus.OK
     listing_body = response_json_object(listing)
-    items_raw = listing_body.get("items")
-    assert isinstance(items_raw, list)
-    assert any(
-        isinstance(item, dict) and json_str(item, "preset_id") == str(preset_id)
-        for item in items_raw
-    )
+    items = json_object_list(listing_body, "items")
+    assert any(json_str(item, "preset_id") == str(preset_id) for item in items)
 
     patch = client.patch(
         f"/internal/v1/eval/config-presets/{preset_id}",

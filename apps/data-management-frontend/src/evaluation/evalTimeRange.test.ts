@@ -44,7 +44,30 @@ describe("evalTimeRange", () => {
   });
 
   it("formats chart labels by granularity", () => {
-    const label = formatEvalChartLabel("2026-07-01T12:01:00Z", "hour");
-    expect(label.length).toBeGreaterThan(0);
+    const hourLabel = formatEvalChartLabel("2026-07-01T12:01:00Z", "hour");
+    expect(hourLabel.length).toBeGreaterThan(0);
+    const dayLabel = formatEvalChartLabel("2026-07-01T12:01:00Z", "day");
+    expect(dayLabel.length).toBeGreaterThan(0);
+    const monthLabel = formatEvalChartLabel("2026-07-01T12:01:00Z", "month");
+    expect(monthLabel.length).toBeGreaterThan(0);
+  });
+
+  it("returns all points for custom preset without both bounds", () => {
+    expect(filterEvalTimeseriesPoints(POINTS, "custom", null, null)).toEqual(
+      POINTS,
+    );
+    expect(
+      filterEvalTimeseriesPoints(POINTS, "custom", "invalid", "2026-07-02"),
+    ).toEqual(POINTS);
+  });
+
+  it("filters points inside a custom date window", () => {
+    const filtered = filterEvalTimeseriesPoints(
+      POINTS,
+      "custom",
+      "2026-07-01",
+      "2026-07-02",
+    );
+    expect(filtered).toHaveLength(1);
   });
 });

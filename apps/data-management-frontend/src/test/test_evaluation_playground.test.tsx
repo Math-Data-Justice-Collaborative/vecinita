@@ -516,6 +516,284 @@ describe("EvaluationPlayground (UJ-045)", () => {
     });
   });
 
+  it("surfaces preset create failure in dialog (TC-127 UI)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          if (
+            url.includes("/internal/v1/eval/config-presets") &&
+            method === "POST"
+          ) {
+            return Promise.resolve({ ok: false, status: 500 });
+          }
+          return Promise.resolve(defaultPlaygroundFetch(url));
+        }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-preset-save")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("eval-playground-preset-save"));
+    fireEvent.change(screen.getByTestId("eval-playground-preset-name"), {
+      target: { value: "broken preset" },
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-preset-confirm")).not.toBeDisabled();
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-preset-confirm"));
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert", { hidden: true })).toHaveTextContent(
+        /Eval config preset create failed \(500\)/i,
+      );
+    });
+  });
+
+  it("shows shared-by-owner badge for owned shared presets (TC-127 UI)", async () => {
+    const ownedSharedPreset = {
+      ...SAVED_PRESET_BODY,
+      owner_id: ADMIN_USER_ID,
+      shared: true,
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/eval/config-presets")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ items: [ownedSharedPreset] }),
+          });
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+    });
+    fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
+      target: { value: PRESET_ID },
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/^Shared$/i)).toBeInTheDocument();
+    });
+  });
+
+  it("updates numeric playground fields and shared checkbox state", async () => {
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("evaluation-playground")).toBeInTheDocument();
+    });
+
+    fireEvent.change(document.getElementById("eval-playground-min-score")!, {
+      target: { value: "0.35" },
+    });
+    fireEvent.change(document.getElementById("eval-playground-max-tokens")!, {
+      target: { value: "512" },
+    });
+    fireEvent.change(document.getElementById("eval-playground-temperature")!, {
+      target: { value: "0.5" },
+    });
+    fireEvent.change(
+      document.getElementById("eval-playground-judge-temperature")!,
+      {
+        target: { value: "0.4" },
+      },
+    );
+
+    fireEvent.click(screen.getByTestId("eval-playground-preset-save"));
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-preset-dialog")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-preset-shared"));
+    expect(screen.getByTestId("eval-playground-preset-shared")).toBeChecked();
+    fireEvent.click(screen.getByTestId("eval-playground-preset-shared"));
+    expect(screen.getByTestId("eval-playground-preset-shared")).not.toBeChecked();
+  });
+
+  it("surfaces translated preset load failure for non-Error rejections", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/eval/config-presets")) {
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
+          return Promise.reject("presets offline");
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /Failed to load presets/i,
+      );
+    });
+  });
+
+  it("tolerates malformed preset list payload", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/eval/config-presets")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ items: "not-an-array" }),
+          });
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+    });
+    expect(screen.getByTestId("eval-playground-preset-select")).toHaveValue("");
+  });
+
+  it("surfaces translated model load failure for non-Error rejections", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/models/ollama")) {
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
+          return Promise.reject("models offline");
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /Failed to load Ollama models/i,
+      );
+    });
+  });
+
+  it("surfaces update preset failure in dialog (TC-127 UI)", async () => {
+    const ownedPreset = {
+      ...SAVED_PRESET_BODY,
+      owner_id: ADMIN_USER_ID,
+      shared: false,
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          if (
+            url.includes(`/internal/v1/eval/config-presets/${PRESET_ID}`) &&
+            method === "PATCH"
+          ) {
+            return Promise.resolve({ ok: false, status: 403 });
+          }
+          if (url.includes("/internal/v1/eval/config-presets")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({ items: [ownedPreset] }),
+            });
+          }
+          return Promise.resolve(defaultPlaygroundFetch(url));
+        }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+    });
+    fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
+      target: { value: PRESET_ID },
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-preset-update"));
+    fireEvent.change(screen.getByTestId("eval-playground-preset-name"), {
+      target: { value: "baseline-v2" },
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-preset-confirm"));
+    await waitFor(() => {
+      expect(screen.getByRole("alert", { hidden: true })).toHaveTextContent(
+        /Eval config preset update failed \(403\)/i,
+      );
+    });
+  });
+
+  it("ignores preset selection when id is not in the loaded list", async () => {
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+    });
+    fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
+      target: { value: "00000000-0000-0000-0000-000000000099" },
+    });
+    expect(screen.getByTestId("eval-playground-top-k")).toHaveValue(5);
+  });
+
+  it("ignores stale model load errors after unmount", async () => {
+    let rejectModels: ((reason?: unknown) => void) | undefined;
+    const modelsGate = new Promise<Response>((_resolve, reject) => {
+      rejectModels = reject;
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/models/ollama")) {
+          return modelsGate;
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    const view = await renderAppRoutesReady("/evaluation?tab=playground");
+    view.unmount();
+    rejectModels?.(new Error("models failed after unmount"));
+    await Promise.resolve();
+  });
+
+  it("changes the selected Ollama model from the picker", async () => {
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-model-id")).toBeInTheDocument();
+    });
+    fireEvent.change(screen.getByTestId("eval-playground-model-id"), {
+      target: { value: "llama3.2:3b" },
+    });
+    expect(screen.getByTestId("eval-playground-model-id")).toHaveValue(
+      "llama3.2:3b",
+    );
+  });
+
+  it("closes the preset dialog with cancel", async () => {
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-preset-save")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-preset-save"));
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-preset-dialog")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId("eval-playground-preset-dialog"),
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it("persists last preset id when running golden batch with a preset selected (RD-129)", async () => {
     const PLAYGROUND_STORAGE_KEY = "vecinita.eval.playground.v1";
     vi.stubGlobal(

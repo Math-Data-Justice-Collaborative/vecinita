@@ -99,6 +99,24 @@ describe("evalDashboardStorage", () => {
     expect(loadEvalDashboardLayout().showThresholds).toBe(false);
   });
 
+  it("loadEvalDashboardLayout falls back for unknown time range preset", () => {
+    localStorage.setItem(
+      DASHBOARD_KEY,
+      JSON.stringify({
+        collapsedPanels: {},
+        selectedMetrics: ["faithfulness"],
+        chartType: "line",
+        showThresholds: true,
+        timeRangePreset: "invalid",
+        customRangeStart: 123,
+        customRangeEnd: null,
+      }),
+    );
+    const layout = loadEvalDashboardLayout();
+    expect(layout.timeRangePreset).toBe("7D");
+    expect(layout.customRangeStart).toBeNull();
+  });
+
   it("saveEvalDashboardLayout persists layout and degrades on quota errors", () => {
     const layout: EvalDashboardLayout = {
       collapsedPanels: {},
