@@ -6,14 +6,18 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Self, cast
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from uuid import UUID, uuid4
 
 import pytest
 from sqlalchemy import text
 from vecinita_eval.golden import GoldenRow
+from vecinita_eval.judges import LlamaIndexJudgeClient
+from vecinita_eval.modal_llm import ModalHttpLLM
 from vecinita_eval.runner import EvalSummary, RowMetrics, RowResult
+from vecinita_internal_write_api.eval_criteria_service import create_eval_criterion
 from vecinita_internal_write_api.eval_service import (
+    _resolve_eval_runtime,  # pyright: ignore[reportPrivateUsage]
     execute_eval_run,
     get_eval_run,
     get_eval_timeseries,
@@ -24,7 +28,11 @@ from vecinita_shared_schemas.eval_config import (
     EvalConfigPartial,
     EvalConfigPresetCreateRequest,
 )
-from vecinita_shared_schemas.internal_write import EvalMetricsSummary, EvalRunCreateRequest
+from vecinita_shared_schemas.internal_write import (
+    EvalCriterionCreateRequest,
+    EvalMetricsSummary,
+    EvalRunCreateRequest,
+)
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
@@ -200,7 +208,7 @@ def test_execute_eval_run_passes_config_snapshot_to_runner(
                 judge=MockEvalJudge(),
             )
         config = cast(
-            EvalConfigPartial,
+            "EvalConfigPartial",
             mock_run.call_args.kwargs["config"],
         )
         assert config.top_k == _EXPECTED_CONFIG_TOP_K
@@ -988,15 +996,6 @@ def test_get_eval_run_parses_string_preset_id_and_json_config(
 
 def test_resolve_eval_runtime_modal_llm_with_llamaindex_judge() -> None:
     """_resolve_eval_runtime rebuilds judge + synthesis for Modal HTTP LLMs."""
-    from unittest.mock import MagicMock
-
-    from vecinita_eval.judges import LlamaIndexJudgeClient
-    from vecinita_eval.modal_llm import ModalHttpLLM
-    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
-        _resolve_eval_runtime,  # pyright: ignore[reportPrivateUsage]
-    )
-    from vecinita_shared_schemas.eval_config import EvalConfig
-
     modal_llm = MagicMock(spec=ModalHttpLLM)
     judge = LlamaIndexJudgeClient(llm=MagicMock())
     synthesis = MagicMock()
@@ -1023,14 +1022,6 @@ def test_resolve_eval_runtime_modal_llm_with_llamaindex_judge() -> None:
 
 def test_resolve_eval_runtime_modal_llm_without_llamaindex_judge() -> None:
     """_resolve_eval_runtime keeps a custom judge when synthesis uses Modal HTTP."""
-    from unittest.mock import MagicMock
-
-    from vecinita_eval.modal_llm import ModalHttpLLM
-    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
-        _resolve_eval_runtime,  # pyright: ignore[reportPrivateUsage]
-    )
-    from vecinita_shared_schemas.eval_config import EvalConfig
-
     modal_llm = MagicMock(spec=ModalHttpLLM)
     judge = MagicMock()
     synthesis = MagicMock()
@@ -1047,15 +1038,8 @@ def test_resolve_eval_runtime_modal_llm_without_llamaindex_judge() -> None:
     assert resolved_llm is synthesis
 
 
-def test_resolve_eval_runtime_uses_factory_when_judge_or_llm_missing(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
+def test_resolve_eval_runtime_uses_factory_when_judge_or_llm_missing() -> None:
     """_resolve_eval_runtime delegates to eval_runtime_for_config when inputs are absent."""
-    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
-        _resolve_eval_runtime,  # pyright: ignore[reportPrivateUsage]
-    )
-    from vecinita_shared_schemas.eval_config import EvalConfig
-
     sentinel_judge = object()
     sentinel_llm = object()
     with patch(
@@ -1072,9 +1056,6 @@ def test_criteria_for_config_filters_enabled_criteria(
     eval_run_id: UUID,
 ) -> None:
     """execute_eval_run passes only configured criteria ids to the harness."""
-    from vecinita_internal_write_api.eval_criteria_service import create_eval_criterion
-    from vecinita_shared_schemas.internal_write import EvalCriterionCreateRequest
-
     slug_a = f"unit-a-{uuid4().hex[:8]}"
     slug_b = f"unit-b-{uuid4().hex[:8]}"
     created_a = create_eval_criterion(
@@ -1127,7 +1108,7 @@ def test_criteria_for_config_filters_enabled_criteria(
             mock_run.call_args.kwargs["criteria"],
         )
         assert len(criteria) == 1
-        assert getattr(criteria[0], "slug") == slug_a
+        assert criteria[0].slug == slug_a  # type: ignore[attr-defined]
     finally:
         with engine.begin() as conn:
             conn.execute(

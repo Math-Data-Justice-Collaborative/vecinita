@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import text
 from vecinita_eval.runner import EvalSummary
 from vecinita_internal_write_api.eval_service import create_eval_run
+from vecinita_internal_write_api.ollama_models_client import OllamaModelsClientError
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_config_for_tests
 from vecinita_shared_schemas.internal_write import EvalRunCreateRequest
 
@@ -25,16 +26,15 @@ from tests.unit.shared_schemas.auth_fixtures import (
     make_auth_config,
     sign_test_jwt,
 )
-from vecinita_internal_write_api.ollama_models_client import OllamaModelsClientError
-from vecinita_shared_schemas.ollama_models import (
-    OllamaModelListResponse,
-    OllamaModelPullResponse,
-)
 
 _MAX_EVAL_PAGE_SIZE = 100
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
+    from vecinita_shared_schemas.ollama_models import (
+        OllamaModelListResponse,
+        OllamaModelPullResponse,
+    )
 
 
 @pytest.fixture
@@ -344,6 +344,7 @@ class _FailingOllamaClient:
         raise OllamaModelsClientError(msg)
 
     def start_pull(self, model_id: str) -> OllamaModelPullResponse:
+        _ = model_id
         msg = "pull upstream down"
         raise OllamaModelsClientError(msg)
 

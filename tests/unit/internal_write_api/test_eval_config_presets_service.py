@@ -117,7 +117,6 @@ def test_list_includes_shared_presets_from_other_owners(
 
 def test_get_private_preset_denies_non_owner(
     engine: Engine,
-    preset_owner_id: object,
     created_preset_id: object,
 ) -> None:
     """Private presets raise EvalConfigPresetAccessError for other admins."""
@@ -182,7 +181,6 @@ def test_get_and_update_return_none_for_missing_preset(
 
 def test_update_preset_denies_non_owner(
     engine: Engine,
-    preset_owner_id: object,
     created_preset_id: object,
 ) -> None:
     """Only the owner may patch a preset."""
