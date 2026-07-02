@@ -252,9 +252,7 @@ def test_list_jobs_includes_eval_runs_from_internal_write_api() -> None:
     assert response.status_code == HTTPStatus.OK
     jobs = json_list(response_json_object(response), "jobs")
     assert len(jobs) == _EXPECTED_JOB_LIST_COUNT
-    eval_job = next(
-        job for job in jobs if json_str(as_json_object(job), "job_type") == "eval"
-    )
+    eval_job = next(job for job in jobs if json_str(as_json_object(job), "job_type") == "eval")
     assert json_str(as_json_object(eval_job), "job_id") == str(eval_run_id)
     assert json_str(as_json_object(eval_job), "status") == "running"
 

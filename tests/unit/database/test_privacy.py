@@ -264,7 +264,9 @@ def test_find_identity_columns_on_eval_config_tables_reports_violations() -> Non
             return_value=inspector,
         ),
     ):
-        violations = find_identity_columns_on_eval_config_tables("postgresql+psycopg://localhost/db")
+        violations = find_identity_columns_on_eval_config_tables(
+            "postgresql+psycopg://localhost/db"
+        )
 
     assert violations["eval_config_presets"] == ["email"]
     assert violations["rag_production_config"] == ["user_id"]
@@ -290,6 +292,8 @@ def test_find_identity_columns_on_eval_config_tables_returns_empty_when_complian
             return_value=inspector,
         ),
     ):
-        violations = find_identity_columns_on_eval_config_tables("postgresql+psycopg://localhost/db")
+        violations = find_identity_columns_on_eval_config_tables(
+            "postgresql+psycopg://localhost/db"
+        )
 
     assert violations == {}

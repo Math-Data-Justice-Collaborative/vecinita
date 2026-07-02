@@ -130,9 +130,7 @@ def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectab
     runner = pipeline_runner
     require_admin = require_role("admin")
     resolved_eval_client = (
-        eval_runs_client
-        if eval_runs_client is not None
-        else _default_eval_runs_client()
+        eval_runs_client if eval_runs_client is not None else _default_eval_runs_client()
     )
 
     def auth_dep(

@@ -63,9 +63,7 @@ def test_uj044_unified_jobs_list_includes_eval_run_with_status() -> None:
     assert response.status_code == HTTPStatus.OK
     jobs = json_list(response_json_object(response), "jobs")
     assert len(jobs) == _EXPECTED_JOB_COUNT_WITH_EVAL
-    eval_job = next(
-        job for job in jobs if json_str(as_json_object(job), "job_type") == "eval"
-    )
+    eval_job = next(job for job in jobs if json_str(as_json_object(job), "job_type") == "eval")
     eval_body = as_json_object(eval_job)
     assert json_str(eval_body, "job_id") == str(eval_run_id)
     assert json_str(eval_body, "status") == "running"
