@@ -5,6 +5,7 @@ import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   type EvalRunDetailApi,
@@ -15,6 +16,7 @@ import {
 import { requireCorpusConfig } from "@/config";
 import { useAdminT } from "@/hooks/useAdminT";
 import { cn } from "@/lib/utils";
+import { EvaluationCompareView } from "@/evaluation/EvaluationCompareView";
 import { EvaluationCriteriaTab } from "@/evaluation/EvaluationCriteriaTab";
 import { EvaluationDashboardTab } from "@/evaluation/EvaluationDashboardTab";
 import { EvaluationDrilldownTable } from "@/evaluation/EvaluationDrilldownTable";
@@ -59,6 +61,11 @@ export function EvaluationPage() {
   const [selectedRun, setSelectedRun] = useState<EvalRunDetailApi | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [compareRunAId, setCompareRunAId] = useState<string>("");
+  const [compareRunBId, setCompareRunBId] = useState<string>("");
+  const [compareRunA, setCompareRunA] = useState<EvalRunDetailApi | null>(null);
+  const [compareRunB, setCompareRunB] = useState<EvalRunDetailApi | null>(null);
 
   const loadHistory = useCallback(
     async (isActive: () => boolean) => {
@@ -173,6 +180,33 @@ export function EvaluationPage() {
       return next;
     });
   }, [setSearchParams]);
+
+  useEffect(() => {
+    if (!compareOpen || !compareRunAId || !compareRunBId) {
+      setCompareRunA(null);
+      setCompareRunB(null);
+      return;
+    }
+    let active = true;
+    const client = requireCorpusConfig();
+    void Promise.all([
+      fetchEvalRunDetail(client, compareRunAId),
+      fetchEvalRunDetail(client, compareRunBId),
+    ])
+      .then(([runA, runB]) => {
+        if (!active) return;
+        setCompareRunA(runA);
+        setCompareRunB(runB);
+      })
+      .catch(() => {
+        if (!active) return;
+        setCompareRunA(null);
+        setCompareRunB(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [compareOpen, compareRunAId, compareRunBId]);
 
   const summary = selectedRun?.metrics_summary;
   const judgesLikelySkipped =
@@ -308,10 +342,70 @@ export function EvaluationPage() {
           ) : null}
 
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
               <CardTitle>{tr("admin.evaluation.history")}</CardTitle>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                data-testid="eval-compare-toggle"
+                onClick={() => {
+                  setCompareOpen((open) => !open);
+                }}
+              >
+                {tr("admin.evaluation.compare.toggle")}
+              </Button>
             </CardHeader>
             <CardContent>
+              {compareOpen ? (
+                <div
+                  className="mb-4 grid gap-3 sm:grid-cols-2"
+                  data-testid="eval-compare-selectors"
+                >
+                  <div className="space-y-2">
+                    <Label htmlFor="eval-compare-run-a-select">
+                      {tr("admin.evaluation.compare.runA")}
+                    </Label>
+                    <select
+                      id="eval-compare-run-a-select"
+                      data-testid="eval-compare-run-a-select"
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                      value={compareRunAId}
+                      onChange={(event) => {
+                        setCompareRunAId(event.target.value);
+                      }}
+                    >
+                      <option value="">—</option>
+                      {runs.map((run) => (
+                        <option key={run.run_id} value={run.run_id}>
+                          {run.run_id}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="eval-compare-run-b-select">
+                      {tr("admin.evaluation.compare.runB")}
+                    </Label>
+                    <select
+                      id="eval-compare-run-b-select"
+                      data-testid="eval-compare-run-b-select"
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                      value={compareRunBId}
+                      onChange={(event) => {
+                        setCompareRunBId(event.target.value);
+                      }}
+                    >
+                      <option value="">—</option>
+                      {runs.map((run) => (
+                        <option key={run.run_id} value={run.run_id}>
+                          {run.run_id}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              ) : null}
               {loading && runs.length === 0 ? (
                 <p className="text-muted-foreground">{tr("shared.loading")}</p>
               ) : null}
@@ -343,6 +437,17 @@ export function EvaluationPage() {
               </ul>
             </CardContent>
           </Card>
+
+          {compareOpen && compareRunA && compareRunB ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>{tr("admin.evaluation.compare.toggle")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <EvaluationCompareView runA={compareRunA} runB={compareRunB} />
+              </CardContent>
+            </Card>
+          ) : null}
 
           {selectedRun ? (
             <Card>

@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 15: EV-009 — Eval UX polish + playground (F36 follow-ons + F37) |
-| **Active milestone** | M69: Playground UI (golden + ad-hoc + compare) |
-| **Active task** | **T69.9** — TC-128/129/130 Vitest + E2E green *(next)* |
-| **Tasks completed** | Phase 14 M59–M64 complete (S007); Phase 15 M65–M67 complete (S008); M68 complete (S008); T69.4–T69.8 complete (S008) |
+| **Active milestone** | M70: Super-admin promote + ChatRAG config reader |
+| **Active task** | **T70.1** — Super-admin bootstrap *(next)* |
+| **Tasks completed** | Phase 14 M59–M64 complete (S007); Phase 15 M65–M67 complete (S008); M68 complete (S008); M69 complete (S008) |
 | **Last updated** | 2026-07-02 |
 | **Evolve cycle** | EV-009 (F36 follow-ons + F37) — **04-tech-plan complete** |
 | **Git branch** | `feat/S008-eval-ux-playground` |
@@ -1394,7 +1394,7 @@ Playground with versioned presets and super-admin runtime promote to ChatRAG.
 | T69.6 | Code: Runs tab **Run evaluation** → Playground with last preset (RD-129) | Code | completed | UJ-039, RD-129 | T69.3 | — | S008 | F37 | 2026-07-02 |
 | T69.7 | Test: `tests/e2e/test_uj045_eval_playground.py` — TC-128/129 — red | Test | completed | test-plan, UJ-045 | T68.7 | D3 | S008 | F37 | 2026-07-02 |
 | T69.8 | Test (Playwright): `tests/ui/admin/uj045-eval-playground.spec.ts` — T0-ui | Test | completed | test-plan, connectivity-gates | T69.6 | — | S008 | F37 | 2026-07-02 |
-| T69.9 | Code: TC-128/129/130 Vitest + E2E green | Code | pending | test-plan | T69.1–T69.8 | D3 | S008 | F37 |
+| T69.9 | Code: TC-128/129/130 Vitest + E2E green | Code | completed | test-plan | T69.1–T69.8 | D3 | S008 | F37 | 2026-07-02 |
 
 #### M70: Super-admin promote + ChatRAG config reader
 
@@ -1972,7 +1972,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T69.6 | M69 | 15 | Code | completed | T69.3 | — | S008 | F37 | 2026-07-02 |
 | T69.7 | M69 | 15 | Test | completed | T68.7 | D3 | S008 | F37 | 2026-07-02 |
 | T69.8 | M69 | 15 | Test | completed | T69.6 | — | S008 | F37 | 2026-07-02 |
-| T69.9 | M69 | 15 | Code | pending | T69.1–T69.8 | D3 | S008 | F37 |
+| T69.9 | M69 | 15 | Code | completed | T69.1–T69.8 | D3 | S008 | F37 | 2026-07-02 |
 | T70.1 | M70 | 15 | Code | pending | — | — | S008 | F37 |
 | T70.2 | M70 | 15 | Test | pending | T70.1 | — | S008 | F37 |
 | T70.3 | M70 | 15 | Code | pending | T68.2, T70.1 | — | S008 | F37 |
