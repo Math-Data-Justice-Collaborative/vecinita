@@ -515,4 +515,64 @@ describe("EvaluationPlayground (UJ-045)", () => {
       expect(cloneCall).toBeDefined();
     });
   });
+
+  it("persists last preset id when running golden batch with a preset selected (RD-129)", async () => {
+    const PLAYGROUND_STORAGE_KEY = "vecinita.eval.playground.v1";
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          if (url.includes("/internal/v1/eval/runs") && method === "POST") {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({
+                run_id: NEW_RUN_ID,
+                status: "pending",
+                created_at: "2026-07-02T12:00:00Z",
+              }),
+            });
+          }
+          if (url.includes("/internal/v1/eval/config-presets")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({ items: [SAVED_PRESET_BODY] }),
+            });
+          }
+          return Promise.resolve(defaultPlaygroundFetch(url));
+        }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+    });
+    fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
+      target: { value: PRESET_ID },
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-run-button"));
+
+    await waitFor(() => {
+      const stored = JSON.parse(
+        localStorage.getItem(PLAYGROUND_STORAGE_KEY) ?? "{}",
+      ) as { lastPresetId?: string };
+      expect(stored.lastPresetId).toBe(PRESET_ID);
+    });
+  });
+
+  it("ignores stale last preset id when preset no longer exists (RD-129)", async () => {
+    const PLAYGROUND_STORAGE_KEY = "vecinita.eval.playground.v1";
+    localStorage.setItem(
+      PLAYGROUND_STORAGE_KEY,
+      JSON.stringify({ lastPresetId: PRESET_ID }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-top-k")).toHaveValue(5);
+    });
+    expect(screen.getByTestId("eval-playground-preset-select")).toHaveValue("");
+  });
 });
