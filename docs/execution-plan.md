@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 15: EV-009 — Eval UX polish + playground (F36 follow-ons + F37) |
 | **Active milestone** | M68: Config schema + preset API + DB (+ Ollama model picker) |
-| **Active task** | **T68.9** — TC-127 integration green *(next)* |
-| **Tasks completed** | Phase 14 M59–M64 complete (S007); Phase 15 M65–M67 complete (S008); M68 T68.1–T68.8 complete |
+| **Active task** | **T68.10** — TC-134 Ollama models list red test *(next)* |
+| **Tasks completed** | Phase 14 M59–M64 complete (S007); Phase 15 M65–M67 complete (S008); M68 T68.1–T68.9 complete |
 | **Last updated** | 2026-07-02 |
 | **Evolve cycle** | EV-009 (F36 follow-ons + F37) — **04-tech-plan complete** |
 | **Git branch** | `feat/S008-eval-ux-playground` |
@@ -1373,7 +1373,7 @@ Playground with versioned presets and super-admin runtime promote to ChatRAG.
 | T68.6 | Code: Extend `POST /eval/runs` — `mode`, `config`, `preset_id`; `config_snapshot` persist | Code | completed | api-contract §EV-009, ADR-035 §6 | T68.3, T61.4 | D3 | S008 | F37 | 2026-07-02 |
 | T68.7 | Code: `packages/eval` runner — accept per-run config overrides (sandbox) | Code | completed | ADR-035 §6, feature-list F37 | T68.6, T60.5 | D3 | S008 | F37 | 2026-07-02 |
 | T68.8 | Config: OpenAPI `internal-write.yaml` — EV-009 routes | Config | completed | ADR-011, api-contract §EV-009 | T68.5, T68.6 | — | S008 | F37 | 2026-07-02 |
-| T68.9 | Code: TC-127 integration green | Code | pending | test-plan TC-127 | T68.4, T68.5, T68.7 | — | S008 | F37 |
+| T68.9 | Code: TC-127 integration green | Code | completed | test-plan TC-127 | T68.4, T68.5, T68.7 | — | S008 | F37 | 2026-07-02 |
 | T68.10 | Test: `tests/integration/test_ollama_models_list.py` — TC-134 — red | Test | pending | test-plan TC-134, RD-139–141 | T68.3 | — | S008 | F37 |
 | T68.11 | Code: Modal Ollama model list + pull job routes (`GET /models/ollama`, `POST /models/ollama/pull`) | Code | pending | ADR-035 §6, RD-140–141 | T68.3 | D3 | S008 | F37 |
 | T68.12 | Code: Eval runner + ChatRAG — route LLM calls via selected `model_id` (Ollama SDK) | Code | pending | ADR-035 §6–7, RD-139, RD-142 | T68.7, T68.11 | D3 | S008 | F37 |
