@@ -47,8 +47,15 @@ vi.mock("recharts", async () => {
         { "data-testid": "mock-area-chart" },
         children,
       ),
+    ScatterChart: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        "div",
+        { "data-testid": "mock-scatter-chart" },
+        children,
+      ),
     Line: () => null,
     Area: () => null,
+    Scatter: () => null,
     CartesianGrid: () => null,
     XAxis: () => null,
     YAxis: () => null,
