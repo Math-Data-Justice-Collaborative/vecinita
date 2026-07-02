@@ -321,7 +321,7 @@ def _resolve_eval_runtime(
             judge_llm = judge_llm_from_config(llm, config)
             return LlamaIndexJudgeClient(llm=judge_llm), synthesis
         return judge, synthesis
-    if judge is None or llm is None:
+    if judge is None and llm is None:
         return eval_runtime_for_config(config)
     return judge, llm
 

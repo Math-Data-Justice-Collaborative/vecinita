@@ -1049,6 +1049,18 @@ def test_resolve_eval_runtime_uses_factory_when_judge_or_llm_missing() -> None:
     assert resolved == (sentinel_judge, sentinel_llm)
 
 
+def test_resolve_eval_runtime_preserves_injected_judge_when_llm_missing() -> None:
+    """Injected test judges must not be replaced when synthesis LLM is absent."""
+    judge = MockEvalJudge()
+    with patch(
+        "vecinita_internal_write_api.eval_service.eval_runtime_for_config",
+    ) as mock_factory:
+        resolved_judge, resolved_llm = _resolve_eval_runtime(EvalConfig(), judge, None)
+    mock_factory.assert_not_called()
+    assert resolved_judge is judge
+    assert resolved_llm is None
+
+
 def test_criteria_for_config_filters_enabled_criteria(
     engine: Engine,
     eval_run_id: UUID,
