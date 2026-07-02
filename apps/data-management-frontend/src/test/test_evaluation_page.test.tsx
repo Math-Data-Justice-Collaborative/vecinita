@@ -231,6 +231,69 @@ describe("EvaluationPage", () => {
     });
   });
 
+  it("prepends a new run to history immediately after create (TC-123)", async () => {
+    const NEW_RUN_ID = "00000000-0000-0000-0000-0000000000bb";
+    let releasePoll: (() => void) | undefined;
+    const pollGate = new Promise<void>((resolve) => {
+      releasePoll = resolve;
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          if (url.includes("/internal/v1/eval/runs") && method === "POST") {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({
+                run_id: NEW_RUN_ID,
+                status: "pending",
+                created_at: "2026-07-02T12:00:00Z",
+              }),
+            });
+          }
+          if (url.includes(`/internal/v1/eval/runs/${NEW_RUN_ID}`)) {
+            return pollGate.then(() => ({
+              ok: true,
+              json: async () => ({
+                ...DETAIL_BODY,
+                run_id: NEW_RUN_ID,
+                status: "completed",
+              }),
+            }));
+          }
+          if (url.includes("/internal/v1/eval/runs/")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => DETAIL_BODY,
+            });
+          }
+          if (url.includes("/internal/v1/eval/runs")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => LIST_BODY,
+            });
+          }
+          return Promise.resolve(defaultEvalFetch(url));
+        }),
+    );
+    await renderAppRoutesReady("/evaluation");
+    await waitFor(() => {
+      expect(screen.getByTestId("evaluation-run-button")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("evaluation-run-button"));
+    await waitFor(() => {
+      expect(screen.getByText(NEW_RUN_ID)).toBeInTheDocument();
+      expect(screen.getByText(/Pending/i)).toBeInTheDocument();
+    });
+    releasePoll?.();
+    await waitFor(() => {
+      expect(screen.getByText(/Completed/i)).toBeInTheDocument();
+    });
+  });
+
   it("triggers a new eval run and refreshes detail", async () => {
     await renderAppRoutesReady("/evaluation");
     await waitFor(() => {

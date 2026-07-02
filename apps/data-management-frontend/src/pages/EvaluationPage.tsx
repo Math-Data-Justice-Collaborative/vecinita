@@ -91,6 +91,12 @@ export function EvaluationPage() {
     [tr],
   );
 
+  const handleSelectRun = useCallback(async (runId: string) => {
+    const client = requireCorpusConfig();
+    const detail = await fetchEvalRunDetail(client, runId);
+    setSelectedRun(detail);
+  }, []);
+
   useEffect(() => {
     let active = true;
     void loadHistory(() => active);
@@ -99,12 +105,34 @@ export function EvaluationPage() {
     };
   }, [loadHistory]);
 
+  const runFromQuery = searchParams.get("run");
+
+  useEffect(() => {
+    if (!runFromQuery || loading) return;
+    const exists = runs.some((run) => run.run_id === runFromQuery);
+    if (!exists) return;
+    if (selectedRun?.run_id === runFromQuery) return;
+    void handleSelectRun(runFromQuery);
+  }, [runFromQuery, runs, loading, selectedRun?.run_id, handleSelectRun]);
+
   const pollRun = useCallback(
     async (runId: string) => {
       const client = requireCorpusConfig();
       for (let attempt = 0; attempt < 40; attempt += 1) {
         const detail = await fetchEvalRunDetail(client, runId);
         setSelectedRun(detail);
+        setRuns((prev) =>
+          prev.map((run) =>
+            run.run_id === runId
+              ? {
+                  ...run,
+                  status: detail.status,
+                  metrics_summary: detail.metrics_summary,
+                  error_message: detail.error_message,
+                }
+              : run,
+          ),
+        );
         if (detail.status === "completed" || detail.status === "failed") {
           break;
         }
@@ -123,6 +151,21 @@ export function EvaluationPage() {
     try {
       const client = requireCorpusConfig();
       const created = await triggerEvalRun(client, "fixture");
+      const optimisticRun: EvalRunListItemApi = {
+        run_id: created.run_id,
+        status: "pending",
+        metrics_summary: {},
+      };
+      setRuns((prev) => [
+        optimisticRun,
+        ...prev.filter((run) => run.run_id !== created.run_id),
+      ]);
+      setSelectedRun({
+        run_id: created.run_id,
+        status: "pending",
+        metrics_summary: {},
+        items: [],
+      });
       await pollRun(created.run_id);
     } catch (err) {
       setError(
@@ -132,12 +175,6 @@ export function EvaluationPage() {
       setRunning(false);
     }
   }, [pollRun, tr]);
-
-  const handleSelectRun = useCallback(async (runId: string) => {
-    const client = requireCorpusConfig();
-    const detail = await fetchEvalRunDetail(client, runId);
-    setSelectedRun(detail);
-  }, []);
 
   const summary = selectedRun?.metrics_summary;
   const judgesLikelySkipped =
