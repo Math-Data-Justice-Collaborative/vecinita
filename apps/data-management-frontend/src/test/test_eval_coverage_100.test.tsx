@@ -14,7 +14,6 @@ import { type EvalRunDetailApi } from "@/api/admin";
 import { AuthProvider } from "@/auth/AuthContext";
 import { EvaluationCompareView } from "@/evaluation/EvaluationCompareView";
 import { EvaluationPlaygroundTab } from "@/evaluation/EvaluationPlaygroundTab";
-import { EvaluationPage } from "@/pages/EvaluationPage";
 
 import { fetchInputUrl } from "./fetch-mock";
 import { renderAppRoutesReady } from "./renderAppHelpers";
