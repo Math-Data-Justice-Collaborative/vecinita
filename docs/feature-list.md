@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-06-28 (S004/EV-005 F34 — Supabase Auth for admin surfaces, #75)
+> **Last updated**: 2026-07-02 (S008/EV-009 F37 — eval UX polish + playground + super-admin promote)
 
 ## Summary
 
@@ -45,6 +45,8 @@
 | F33 | Browser-local persistent chat history (localStorage + previous-chats list) | Planned | ChatRAG | chat-rag-frontend | S003 2026-06-26; ADR-025 2026-06-28 |
 | F34 | Supabase Auth for admin surfaces (invite-only, admin+viewer) | Planned | Cross-cutting (admin) | data-management-frontend, data-management-backend, internal-write-api | S004/EV-005 2026-06-28; ADR-026 (#75) |
 | F35 | Admin user management + remember-me + Resend SMTP/templates | Planned | Cross-cutting (admin) | data-management-frontend, data-management-backend, supabase config + CI | S005/EV-006 2026-06-29; ADR-029 (#75) |
+| F36 | Admin RAG evaluation tab + golden eval set | Implemented | Data Management | data-management-frontend, internal-write-api, packages/eval | S007/EV-008 2026-07-01; #99 |
+| F37 | Eval UX polish + playground + runtime config promote | Planned | Data Management + ChatRAG | data-management-frontend, internal-write-api, data-management-backend, chat-rag-backend | S008/EV-009 2026-07-02 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -608,6 +610,44 @@
 - **Priority**: High — GitHub #99 (unblocks tooling decision R63).
 - **Source**: S007 / EV-008 interview 2026-07-01 (RD-099–RD-110); context `docs/context/rag-eval.md`;
   R63, R64, R67; #99, #83, #84, #94.
+- **S008 follow-ons (EV-009)**: Optimistic run-list refresh (M65); unified `job_type=eval` on Jobs tab
+  (M66); dashboard scatter + time-range presets including custom date picker (M67). Playground and
+  promote are **F37** — not extensions of F36 limitations.
+
+### F37: Eval UX polish + playground + runtime config promote
+
+- **What it does**: Closes post-F36 evaluation UX gaps and adds an admin **Playground** tab for
+  sandboxed RAG + judge experiments with versioned per-user presets, side-by-side run comparison,
+  and super-admin **Promote to production** via a DB-backed active config that ChatRAG reads at
+  request time (no redeploy).
+- **Inputs**: Admin operator (`role=admin`); super-admin (`role=super-admin`, seeded from
+  `VECINITA_SUPER_ADMIN_EMAIL`) for promote; golden fixture and/or ad-hoc question text;
+  editable RAG overrides (`top_k`, `min_retrieval_score`, `system_prompt`, `max_tokens`,
+  `temperature`, `corpus_profile`, `model_id`); judge criteria selection + judge `temperature`;
+  **Ollama model picker** on Modal — list stashed models, background pull job for missing models
+  (RD-139–RD-141).
+- **Outputs**: Immediate eval run row in history sidebar; eval runs in unified `GET /jobs` with
+  `job_type=eval`; enriched dashboard charts; `eval_config_presets` + `eval_runs.config_snapshot`;
+  `rag_production_config` active row; promoted config applied to ChatRAG on next ask.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `data-management-frontend` | Optimistic run list; Jobs tab `eval` rows; dashboard chart controls; **Playground** tab (`?tab=playground`); compare view; promote button (super-admin) |
+  | `data-management-backend` | Unified jobs list includes `job_type=eval` |
+  | `internal-write-api` | Config preset CRUD; eval run create accepts `config` overrides; promote endpoint |
+  | `chat-rag-backend` | Read active production config from DB (fallback to env defaults) |
+  | `packages/rag` + eval runner | Per-run config override injection (sandbox); Ollama `model_id` routing |
+  | Modal Ollama app | Model list API; background pull into `vecinita-models` volume |
+- **Auth**: Admin — playground run/view/compare/presets; super-admin — promote only; viewer → `403`.
+- **Privacy**: Ad-hoc operator questions stored in `eval_run_items` with same retention as eval runs
+  (ADR-004 — operator content, not visitor PII).
+- **Limitations / scope**: Sandbox until promote; no Langfuse/Phoenix; no external Ollama hosts in v1
+  (Modal volume only); no in-app redeploy button; guardrails v1 = single `system_prompt` textarea;
+  structured guardrail toggles deferred.
+- **Milestones**: M65 (run list refresh) → M66 (unified jobs) → M67 (charts) → M68 (config schema +
+  presets API) → M69 (playground UI) → M70 (super-admin promote + ChatRAG reader).
+- **Source**: S008 / EV-009 interview 2026-07-02 (RD-114–RD-127); context
+  `docs/context/eval-ux-playground.md`; R68–R75.
 
 ## Planned / Deferred (post-v1)
 

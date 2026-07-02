@@ -241,7 +241,7 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
     {
       "job_id": "uuid",
       "status": "pending | running | completed | failed",
-      "job_type": "ingest | retag",
+      "job_type": "ingest | retag | eval",
       "urls": ["string"],
       "error_code": "string | null",
       "error_message": "string | null",
@@ -671,6 +671,78 @@ Optional body fields (04-tech-plan): `corpus_profile` (`fixture` \| `staging`), 
 ```
 
 - **Errors**: `404` unknown run; `403` viewer.
+
+### GET `/internal/v1/eval/runs/timeseries`
+
+- **Purpose**: Completed runs for dashboard charts (client-side range/chart filtering in F37).
+- **Auth**: Admin JWT required.
+- **Query**: `limit` (default 100, max 500).
+- **Response** `200`: `{ "points": [...], "available_metrics": [...] }` per ADR-034.
+
+### GET/POST/PATCH `/internal/v1/eval/criteria`
+
+- Per ADR-034 / F36 — custom judge rubric CRUD.
+
+---
+
+## EV-009 — Eval UX polish + playground (F37)
+
+Base path: `/internal/v1/eval` and `/internal/v1/rag/config` (admin JWT; promote requires `super-admin`).
+
+### POST `/internal/v1/eval/runs` (extended)
+
+- **Purpose**: Trigger golden-set or ad-hoc eval run with optional sandbox config overrides.
+- **Request** `202` body (extends F36):
+
+```json
+{
+  "corpus_profile": "fixture | staging",
+  "mode": "golden | adhoc",
+  "question": "string (required when mode=adhoc)",
+  "config": {
+    "top_k": 5,
+    "min_retrieval_score": 0.2,
+    "system_prompt": "string",
+    "max_tokens": 256,
+    "temperature": 0.2,
+    "corpus_profile": "fixture",
+    "criteria_ids": ["uuid"],
+    "judge_temperature": 0.2
+  },
+  "preset_id": "uuid | null"
+}
+```
+
+- **Side effects**: Creates `eval_runs` row with `config_snapshot`; registers unified job (`job_type=eval`); sandbox overrides do not change production ChatRAG until promote.
+
+### GET/POST/PATCH `/internal/v1/eval/config-presets`
+
+- **Purpose**: Per-user versioned experiment presets (private default; `shared: true` enables share-read clone).
+- **Auth**: Admin JWT; owner write; non-owner read when shared.
+- **POST body**: `{ "name": "string", "config": { ... }, "shared": false }`
+- **Response**: `{ "preset_id", "version", "name", "config", "shared", "created_at", "updated_at" }`
+
+### POST `/internal/v1/rag/config/promote`
+
+- **Purpose**: Super-admin sets active production RAG config (runtime switch — no redeploy).
+- **Auth**: `role=super-admin` only; `admin` → `403`.
+- **Request**:
+
+```json
+{
+  "source": "preset | run",
+  "preset_id": "uuid",
+  "run_id": "uuid"
+}
+```
+
+- **Response** `200`: `{ "config_version": int, "promoted_at": "ISO8601", "promoted_by": "uuid" }`
+- **Side effects**: Upserts `rag_production_config` active row; audit log entry.
+
+### GET `/internal/v1/rag/config/active`
+
+- **Purpose**: Read active production config (admin read; ChatRAG reads via internal path or shared DB).
+- **Response** `200`: Same shape as `config` object above + `config_version`, `promoted_at`.
 
 ---
 
