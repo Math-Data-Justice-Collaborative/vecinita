@@ -83,6 +83,11 @@ from vecinita_shared_schemas.internal_write import (
     TopServedResponse,
 )
 from vecinita_shared_schemas.json_types import as_json_object
+from vecinita_shared_schemas.ollama_models import (
+    OllamaModelListResponse,
+    OllamaModelPullRequest,
+    OllamaModelPullResponse,
+)
 
 from vecinita_internal_write_api.audit import (
     cleanup_audit_log,
@@ -114,6 +119,11 @@ from vecinita_internal_write_api.eval_service import (
 from vecinita_internal_write_api.jobs_client import (
     DataManagementJobsClient,
     DataManagementJobsClientError,
+)
+from vecinita_internal_write_api.ollama_models_client import (
+    OllamaModelsClient,
+    OllamaModelsClientError,
+    OllamaModelsClientProtocol,
 )
 from vecinita_internal_write_api.tags import (
     replace_chunk_tags,
@@ -226,17 +236,31 @@ def _default_jobs_client() -> DataManagementJobsClient | None:
         return None
 
 
+def _default_ollama_models_client() -> OllamaModelsClient | None:
+    """Auto-create an OllamaModelsClient from env vars when available."""
+    try:
+        return OllamaModelsClient()
+    except OllamaModelsClientError:
+        return None
+
+
 def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route handlers inline
     *,
     jobs_client: DataManagementJobsClient | None = None,
     eval_embed_fn: Callable[[str], list[float]] | None = None,
     eval_judge: JudgeClient | None = None,
+    ollama_models_client: OllamaModelsClientProtocol | None = None,
 ) -> FastAPI:
     """Build the internal write API (sole holder of DATABASE_URL)."""
     app = FastAPI(title="Vecinita Internal Write API", version="0.1.0")
     configure_cors(app, extra_allow_headers=["Authorization"])
     engine = _engine()
     retag_jobs = jobs_client if jobs_client is not None else _default_jobs_client()
+    ollama_models = (
+        ollama_models_client
+        if ollama_models_client is not None
+        else _default_ollama_models_client()
+    )
 
     @app.get("/health", response_model=HealthResponse)
     def health() -> HealthResponse:  # pyright: ignore[reportUnusedFunction]
@@ -1533,6 +1557,48 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Not found",
+            ) from exc
+
+    @app.get(
+        "/internal/v1/models/ollama",
+        response_model=OllamaModelListResponse,
+    )
+    def list_ollama_models_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+    ) -> OllamaModelListResponse:
+        if ollama_models is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Ollama models client not configured",
+            )
+        try:
+            return ollama_models.list_models()
+        except OllamaModelsClientError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=str(exc),
+            ) from exc
+
+    @app.post(
+        "/internal/v1/models/ollama/pull",
+        response_model=OllamaModelPullResponse,
+        status_code=status.HTTP_202_ACCEPTED,
+    )
+    def pull_ollama_model_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+        body: OllamaModelPullRequest,
+    ) -> OllamaModelPullResponse:
+        if ollama_models is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Ollama models client not configured",
+            )
+        try:
+            return ollama_models.start_pull(body.model_id)
+        except OllamaModelsClientError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=str(exc),
             ) from exc
 
     @app.get(
