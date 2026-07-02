@@ -1,5 +1,5 @@
 export type JobStatus = "pending" | "running" | "completed" | "failed";
-export type JobType = "ingest" | "retag";
+export type JobType = "ingest" | "retag" | "eval";
 
 export interface Job {
   job_id: string;

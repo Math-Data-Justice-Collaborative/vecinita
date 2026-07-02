@@ -57,7 +57,7 @@ class Job(BaseModel):
 
     job_id: UUID
     status: Literal["pending", "running", "completed", "failed"]
-    job_type: Literal["ingest", "retag"] = "ingest"
+    job_type: Literal["ingest", "retag", "eval"] = "ingest"
     urls: list[HttpUrl]
     error_code: str | None = None
     error_message: str | None = None

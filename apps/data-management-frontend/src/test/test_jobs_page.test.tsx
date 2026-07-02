@@ -1,6 +1,8 @@
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+import type { ReactElement } from "react";
 
 import { JobsPage } from "@/pages/JobsPage";
 
@@ -9,6 +11,17 @@ function jsonResponse(body: object): Response {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
+}
+
+function renderJobsPage(ui: ReactElement = <JobsPage />) {
+  return renderWithProviders(
+    <MemoryRouter initialEntries={["/jobs"]}>
+      <Routes>
+        <Route path="/jobs" element={ui} />
+        <Route path="/evaluation" element={<div data-testid="evaluation-route" />} />
+      </Routes>
+    </MemoryRouter>,
+  );
 }
 
 const MOCK_JOBS = {
@@ -52,10 +65,43 @@ describe("JobsPage", () => {
     vi.restoreAllMocks();
   });
 
+  it("renders eval job type and navigates to evaluation on row click (TC-124)", async () => {
+    const EVAL_JOB_ID = "55555555-5555-4555-8555-555555555555";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          jobs: [
+            {
+              job_id: EVAL_JOB_ID,
+              status: "running",
+              job_type: "eval",
+              urls: [],
+              error_code: null,
+              error_message: null,
+              created_at: "2026-07-02T12:00:00Z",
+              updated_at: "2026-07-02T12:00:05Z",
+            },
+          ],
+        }),
+      ),
+    );
+
+    renderJobsPage(<JobsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Eval/)).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("job-row"));
+    await waitFor(() => {
+      expect(screen.getByTestId("evaluation-route")).toBeInTheDocument();
+    });
+  });
+
   it("lists jobs returned from the server", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(MOCK_JOBS)));
 
-    renderWithProviders(<JobsPage />);
+    renderJobsPage();
 
     await waitFor(() => {
       expect(screen.getAllByTestId("job-row")).toHaveLength(3);
@@ -72,7 +118,7 @@ describe("JobsPage", () => {
       vi.fn().mockResolvedValue(jsonResponse({ jobs: [] })),
     );
 
-    renderWithProviders(<JobsPage />);
+    renderJobsPage();
 
     await waitFor(() => {
       expect(screen.getByText(/no jobs yet/i)).toBeInTheDocument();
@@ -85,7 +131,7 @@ describe("JobsPage", () => {
       vi.fn().mockResolvedValue(new Response("boom", { status: 500 })),
     );
 
-    renderWithProviders(<JobsPage />);
+    renderJobsPage();
 
     await waitFor(() => {
       expect(screen.getByRole("alert")).toBeInTheDocument();
@@ -95,7 +141,7 @@ describe("JobsPage", () => {
   it("shows a generic error for non-Error failures", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue("network down"));
 
-    renderWithProviders(<JobsPage />);
+    renderJobsPage();
 
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent(
@@ -122,7 +168,7 @@ describe("JobsPage", () => {
       ),
     );
 
-    renderWithProviders(<JobsPage />);
+    renderJobsPage();
 
     await waitFor(() => {
       expect(screen.getByTestId("job-row")).toBeInTheDocument();
@@ -134,7 +180,7 @@ describe("JobsPage", () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ jobs: [] }));
     vi.stubGlobal("fetch", fetchMock);
 
-    renderWithProviders(<JobsPage />);
+    renderJobsPage();
 
     await waitFor(() => {
       expect(screen.getByText(/no jobs yet/i)).toBeInTheDocument();
@@ -152,7 +198,7 @@ describe("JobsPage", () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ jobs: [] }));
     vi.stubGlobal("fetch", fetchMock);
 
-    renderWithProviders(<JobsPage />);
+    renderJobsPage();
     await vi.advanceTimersByTimeAsync(4500);
 
     expect(fetchMock.mock.calls.length).toBeGreaterThan(1);
@@ -170,7 +216,7 @@ describe("JobsPage", () => {
       ),
     );
 
-    const { unmount } = renderWithProviders(<JobsPage />);
+    const { unmount } = renderJobsPage();
     unmount();
     resolve?.(jsonResponse({ jobs: [] }));
     await Promise.resolve();
@@ -188,7 +234,7 @@ describe("JobsPage", () => {
       ),
     );
 
-    const { unmount } = renderWithProviders(<JobsPage />);
+    const { unmount } = renderJobsPage();
     unmount();
     reject?.(new Error("late failure"));
     await Promise.resolve();
