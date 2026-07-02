@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Vecinita DO Internal Write API
-  version: 0.3.0
+  version: 0.4.0
   description: Service-to-service writes from Modal workers (sole DATABASE_URL holder).
 servers:
   - url: /internal/v1
@@ -442,7 +442,7 @@ paths:
   /eval/runs:
     post:
       operationId: createEvalRun
-      summary: Trigger golden-set RAG evaluation run (EV-008 F36)
+      summary: Trigger golden-set or ad-hoc eval run with sandbox config (EV-009 F37)
       security:
         - bearerAuth: []
         - internalApiKey: []
@@ -459,10 +459,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/EvalRunCreateResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
     get:
       operationId: listEvalRuns
       summary: List eval run history (EV-008 F36)
@@ -494,6 +498,32 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Unauthorized"
+  /eval/runs/timeseries:
+    get:
+      operationId: getEvalRunsTimeseries
+      summary: Completed eval runs for dashboard charts (EV-008 F36 / EV-009 F37)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+      responses:
+        "200":
+          description: Timeseries points for charting
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvalTimeseriesResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
   /eval/runs/{run_id}:
     get:
       operationId: getEvalRun
@@ -515,6 +545,223 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/EvalRunDetailResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /eval/criteria:
+    get:
+      operationId: listEvalCriteria
+      summary: List admin-defined eval judge criteria (EV-008 F36)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      responses:
+        "200":
+          description: Eval criteria list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvalCriterionListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createEvalCriterion
+      summary: Create eval judge criterion (EV-008 F36)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvalCriterionCreateRequest"
+      responses:
+        "201":
+          description: Criterion created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvalCriterionResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+  /eval/criteria/{criterion_id}:
+    patch:
+      operationId: updateEvalCriterion
+      summary: Update eval judge criterion (EV-008 F36)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: criterion_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvalCriterionUpdateRequest"
+      responses:
+        "200":
+          description: Updated criterion
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvalCriterionResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /eval/config-presets:
+    get:
+      operationId: listEvalConfigPresets
+      summary: List per-user eval config presets (EV-009 F37)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      responses:
+        "200":
+          description: Preset list for authenticated operator
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvalConfigPresetListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createEvalConfigPreset
+      summary: Create eval config preset (EV-009 F37)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvalConfigPresetCreateRequest"
+      responses:
+        "201":
+          description: Preset created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvalConfigPresetResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+  /eval/config-presets/{preset_id}:
+    get:
+      operationId: getEvalConfigPreset
+      summary: Get eval config preset by id (EV-009 F37)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: preset_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Preset detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvalConfigPresetResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateEvalConfigPreset
+      summary: Update eval config preset (EV-009 F37)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: preset_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvalConfigPresetUpdateRequest"
+      responses:
+        "200":
+          description: Preset updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvalConfigPresetResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /eval/config-presets/{preset_id}/clone:
+    post:
+      operationId: cloneEvalConfigPreset
+      summary: Clone shared eval config preset for current operator (EV-009 F37)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: preset_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvalConfigPresetCloneRequest"
+      responses:
+        "201":
+          description: Cloned preset for requester
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvalConfigPresetResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":
@@ -954,6 +1201,7 @@ components:
             - ok
     EvalRunCreateRequest:
       type: object
+      additionalProperties: false
       properties:
         corpus_profile:
           type: string
@@ -961,6 +1209,23 @@ components:
             - fixture
             - staging
           default: fixture
+        mode:
+          type: string
+          enum:
+            - golden
+            - adhoc
+          default: golden
+        question:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Required when mode is adhoc
+        config:
+          $ref: "#/components/schemas/EvalConfigPartial"
+        preset_id:
+          type: string
+          format: uuid
+          nullable: true
     EvalRunCreateResponse:
       type: object
       required:
@@ -996,6 +1261,298 @@ components:
         latency_p95_ms:
           type: integer
           nullable: true
+        custom_scores:
+          type: object
+          additionalProperties:
+            type: number
+          nullable: true
+    EvalTimeseriesPoint:
+      type: object
+      required:
+        - run_id
+        - completed_at
+        - metrics_summary
+      properties:
+        run_id:
+          type: string
+          format: uuid
+        completed_at:
+          type: string
+          format: date-time
+        metrics_summary:
+          $ref: "#/components/schemas/EvalMetricsSummary"
+    EvalTimeseriesResponse:
+      type: object
+      required:
+        - points
+        - available_metrics
+      properties:
+        points:
+          type: array
+          items:
+            $ref: "#/components/schemas/EvalTimeseriesPoint"
+        available_metrics:
+          type: array
+          items:
+            type: string
+    EvalCriterionCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - slug
+        - label
+        - rubric
+      properties:
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 64
+        label:
+          type: string
+          minLength: 1
+          maxLength: 128
+        description:
+          type: string
+          nullable: true
+        scorer_type:
+          type: string
+          enum:
+            - llm_rubric
+          default: llm_rubric
+        rubric:
+          type: string
+          minLength: 1
+        enabled:
+          type: boolean
+          default: true
+    EvalCriterionUpdateRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        label:
+          type: string
+          minLength: 1
+          maxLength: 128
+        description:
+          type: string
+          nullable: true
+        rubric:
+          type: string
+          minLength: 1
+        enabled:
+          type: boolean
+    EvalCriterionResponse:
+      type: object
+      required:
+        - criterion_id
+        - slug
+        - label
+        - scorer_type
+        - rubric
+        - enabled
+        - created_at
+        - updated_at
+      properties:
+        criterion_id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        label:
+          type: string
+        description:
+          type: string
+          nullable: true
+        scorer_type:
+          type: string
+          enum:
+            - llm_rubric
+        rubric:
+          type: string
+        enabled:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    EvalCriterionListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EvalCriterionResponse"
+    EvalConfig:
+      type: object
+      additionalProperties: false
+      properties:
+        top_k:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 5
+        min_retrieval_score:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 0.2
+        system_prompt:
+          type: string
+          minLength: 1
+          maxLength: 8000
+        max_tokens:
+          type: integer
+          minimum: 1
+          maximum: 1024
+          default: 256
+        temperature:
+          type: number
+          minimum: 0
+          maximum: 2
+          default: 0.2
+        corpus_profile:
+          type: string
+          enum:
+            - fixture
+            - staging
+          default: fixture
+        criteria_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        judge_temperature:
+          type: number
+          minimum: 0
+          maximum: 2
+          default: 0.2
+        model_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          default: qwen2.5:1.5b-instruct
+    EvalConfigPartial:
+      type: object
+      additionalProperties: false
+      properties:
+        top_k:
+          type: integer
+          minimum: 1
+          maximum: 50
+        min_retrieval_score:
+          type: number
+          minimum: 0
+          maximum: 1
+        system_prompt:
+          type: string
+          minLength: 1
+          maxLength: 8000
+        max_tokens:
+          type: integer
+          minimum: 1
+          maximum: 1024
+        temperature:
+          type: number
+          minimum: 0
+          maximum: 2
+        corpus_profile:
+          type: string
+          enum:
+            - fixture
+            - staging
+        criteria_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        judge_temperature:
+          type: number
+          minimum: 0
+          maximum: 2
+        model_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+    EvalConfigPresetCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
+        config:
+          $ref: "#/components/schemas/EvalConfig"
+        shared:
+          type: boolean
+          default: false
+    EvalConfigPresetUpdateRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
+        config:
+          $ref: "#/components/schemas/EvalConfig"
+        shared:
+          type: boolean
+    EvalConfigPresetResponse:
+      type: object
+      required:
+        - preset_id
+        - version
+        - name
+        - config
+        - shared
+        - owner_id
+        - created_at
+        - updated_at
+      properties:
+        preset_id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+        name:
+          type: string
+        config:
+          $ref: "#/components/schemas/EvalConfig"
+        shared:
+          type: boolean
+        owner_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    EvalConfigPresetListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EvalConfigPresetResponse"
+    EvalConfigPresetCloneRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
     EvalRunListItem:
       type: object
       required:
@@ -1060,6 +1617,11 @@ components:
           nullable: true
         latency_ms:
           type: integer
+        custom_scores:
+          type: object
+          additionalProperties:
+            type: number
+          nullable: true
     EvalRunItemDetail:
       type: object
       required:
@@ -1105,6 +1667,18 @@ components:
             - running
             - completed
             - failed
+        mode:
+          type: string
+          enum:
+            - golden
+            - adhoc
+          default: golden
+        preset_id:
+          type: string
+          format: uuid
+          nullable: true
+        config_snapshot:
+          $ref: "#/components/schemas/EvalConfig"
         metrics_summary:
           $ref: "#/components/schemas/EvalMetricsSummary"
         error_message:
