@@ -37,11 +37,13 @@ describe("evalDrilldownStorage", () => {
   });
 
   it("loads persisted layout and filters unknown columns", () => {
-    const saved: EvalDrilldownLayout = {
-      visibleColumns: ["question", "locale", "not-a-column"],
-      wrapCells: false,
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        visibleColumns: ["question", "locale", "not-a-column"],
+        wrapCells: false,
+      }),
+    );
     expect(loadEvalDrilldownLayout()).toEqual({
       visibleColumns: ["question", "locale"],
       wrapCells: false,

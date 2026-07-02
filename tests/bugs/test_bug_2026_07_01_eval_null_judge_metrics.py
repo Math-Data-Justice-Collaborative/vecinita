@@ -91,9 +91,10 @@ def test_default_eval_runtime_returns_none_without_modal_url(
 
 def test_answer_relevancy_scored_when_judge_wired_but_retrieval_empty() -> None:
     """Judge must score answer relevancy even when pgvector returns no chunks."""
+    expected_answer_relevancy = 0.68
     repo_root = Path(__file__).resolve().parents[2]
     fixture_path = repo_root / "data/fixtures/eval/qa_pairs.json"
-    judge = MockEvalJudge(answer_relevancy_score=0.68)
+    judge = MockEvalJudge(answer_relevancy_score=expected_answer_relevancy)
     with patch.object(CorpusPgvectorRetriever, "retrieve_chunks", return_value=[]):
         results, summary = run_golden_eval(
             embed_fn=lambda _question: [0.0] * 384,
@@ -103,7 +104,10 @@ def test_answer_relevancy_scored_when_judge_wired_but_retrieval_empty() -> None:
             fixture_path=fixture_path,
         )
     assert results, "golden fixture must yield rows"
-    assert all(result.metrics.answer_relevancy == 0.68 for result in results)
+    assert all(
+        result.metrics.answer_relevancy == pytest.approx(expected_answer_relevancy)
+        for result in results
+    )
     assert all(result.metrics.faithfulness is None for result in results)
-    assert summary.answer_relevancy == pytest.approx(0.68)
+    assert summary.answer_relevancy == pytest.approx(expected_answer_relevancy)
     assert summary.faithfulness is None
