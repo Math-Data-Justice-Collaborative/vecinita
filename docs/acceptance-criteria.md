@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-07-01 (S007/EV-008 F36 — AC-E12–AC-E16 RAG evaluation, #99)
+> **Last updated**: 2026-07-02 (S008/EV-009 F37 — AC-E22–AC-E26 eval UX + playground)
 
 ## Per-feature criteria
 
@@ -121,6 +121,22 @@
 - [x] **AC-E14**: Faithfulness ≥0.60 and answer relevancy ≥0.60 on golden set aggregate in CI; admin highlights rows &lt;0.70 (TC-112, UJ-040). — build complete (S007)
 - [x] **AC-E15**: Admin Evaluation tab triggers runs, shows per-metric summary + per-question drill-down + history; en/es UI chrome (UJ-039, UJ-040, TC-114, TC-116). — build complete (S007)
 - [x] **AC-E16**: Eval routes are admin-only (`viewer` → 403); no visitor PII in eval persistence (TC-115, ADR-004). — build complete (S007)
+
+### EV-008 — Interactive eval dashboard (F36 extension)
+
+- [x] **AC-E17**: Dashboard tab renders time-series charts for eval metrics with metric/axis selectors (UJ-041, TC-117). — build complete (S007 M64)
+- [x] **AC-E18**: Explore tab renders pivot-style table with row/column/value axis selectors (UJ-042, TC-118). — build complete (S007 M64)
+- [x] **AC-E19**: Criteria tab supports create/edit/disable custom eval rubrics (UJ-043, TC-120/121). — build complete (S007 M64)
+- [x] **AC-E20**: Dashboard chart panels are collapsible; layout prefs persist in `localStorage` (TC-119). — build complete (S007 M64)
+- [x] **AC-E21**: Timeseries API returns paginated metric points for dashboard (TC-122). — build complete (S007 M64)
+
+### EV-009 — Eval UX polish + playground (F37)
+
+- [x] **AC-E22**: New eval run appears in history immediately without manual page refresh; status updates while polling (UJ-039, TC-123). — S008 M65 (T2; deploy pending)
+- [x] **AC-E23**: Eval runs appear on Jobs tab with `job_type=eval` and live status; click navigates to `/evaluation?run=<id>` (UJ-044, TC-124). — S008 M66 (T2; deploy pending)
+- [x] **AC-E24**: Dashboard supports scatter chart type and time-range presets 1D/7D/10D/1M/1Y/custom with empty state (UJ-041, TC-125/126). — S008 M67 (T2; deploy pending)
+- [ ] **AC-E25**: Playground supports golden + ad-hoc runs with sandbox config overrides, versioned presets, and side-by-side compare (UJ-045/046, TC-127–TC-130). — pending S008 M68–M69
+- [ ] **AC-E26**: Super-admin can promote sandbox config to production; ChatRAG reads active config from DB; non-super-admin denied (UJ-047, TC-131–TC-133). — pending S008 M70
 
 ## Quantitative benchmarks
 
