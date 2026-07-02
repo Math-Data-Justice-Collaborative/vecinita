@@ -9,16 +9,12 @@ from typing import TYPE_CHECKING, TypedDict, cast
 from uuid import UUID, uuid4
 
 import httpx
-import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_internal_write_api.app import create_app as create_write_app
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_config_for_tests
-from vecinita_shared_schemas.internal_write import (
-    AuditEventRequest,
-)
 from vecinita_shared_schemas.json_types import as_json_object
 from vecinita_shared_schemas.supabase_admin import SupabaseAdminClient
 
@@ -32,8 +28,10 @@ from tests.unit.shared_schemas.auth_fixtures import (
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
+    import pytest
     from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
     from sqlalchemy.engine import Engine
+    from vecinita_shared_schemas.internal_write import AuditEventRequest
 
 API_KEY = "test-internal-key"
 PROXY_KEY = "test-proxy-key"

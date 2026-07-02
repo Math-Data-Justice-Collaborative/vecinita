@@ -179,7 +179,7 @@ export function EvaluationPlaygroundTab() {
     try {
       const client = requireCorpusConfig();
       const data = await fetchEvalConfigPresets(client);
-      setPresets(data.items ?? []);
+      setPresets(Array.isArray(data.items) ? data.items : []);
     } catch (err) {
       setError(
         err instanceof Error
