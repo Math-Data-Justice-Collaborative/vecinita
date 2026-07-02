@@ -1,4 +1,11 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Copy, FlaskConical, Save } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +35,10 @@ import {
 } from "@/api/admin";
 import { requireCorpusConfig } from "@/config";
 import { useAdminT } from "@/hooks/useAdminT";
+import {
+  loadEvalPlaygroundPreferences,
+  saveEvalPlaygroundLastPresetId,
+} from "./evalPlaygroundStorage";
 
 const DEFAULT_TOP_K = 5;
 const DEFAULT_MIN_RETRIEVAL_SCORE = 0.2;
@@ -85,7 +96,13 @@ function applyConfigToForm(
   setters.setModelId(config.model_id);
 }
 
-export function EvaluationPlaygroundTab() {
+export interface EvaluationPlaygroundTabProps {
+  onRunCreated?: (runId: string) => void;
+}
+
+export function EvaluationPlaygroundTab({
+  onRunCreated,
+}: EvaluationPlaygroundTabProps) {
   const tr = useAdminT();
   const authCtx = useContext(AuthContext);
   const user = authCtx?.user ?? null;
@@ -120,6 +137,7 @@ export function EvaluationPlaygroundTab() {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastRunId, setLastRunId] = useState<string | null>(null);
+  const initialPresetApplied = useRef(false);
 
   const selectedPreset = useMemo(
     () => presets.find((preset) => preset.preset_id === selectedPresetId) ?? null,
@@ -225,9 +243,21 @@ export function EvaluationPlaygroundTab() {
     };
   }, [loadPresets, tr]);
 
+  useEffect(() => {
+    if (presetsLoading || initialPresetApplied.current) return;
+    initialPresetApplied.current = true;
+    const lastPresetId = loadEvalPlaygroundPreferences().lastPresetId;
+    if (!lastPresetId) return;
+    const preset = presets.find((item) => item.preset_id === lastPresetId);
+    if (!preset) return;
+    setSelectedPresetId(lastPresetId);
+    applyConfigToForm(preset.config, formSetters);
+  }, [formSetters, presets, presetsLoading]);
+
   const handlePresetSelect = useCallback(
     (presetId: string) => {
       setSelectedPresetId(presetId);
+      saveEvalPlaygroundLastPresetId(presetId || null);
       if (!presetId) return;
       const preset = presets.find((item) => item.preset_id === presetId);
       if (!preset) return;
@@ -273,6 +303,7 @@ export function EvaluationPlaygroundTab() {
           ),
         );
         setSelectedPresetId(updated.preset_id);
+        saveEvalPlaygroundLastPresetId(updated.preset_id);
       } else {
         const created = await createEvalConfigPreset(client, {
           name: presetName.trim(),
@@ -281,6 +312,7 @@ export function EvaluationPlaygroundTab() {
         });
         setPresets((current) => [created, ...current]);
         setSelectedPresetId(created.preset_id);
+        saveEvalPlaygroundLastPresetId(created.preset_id);
       }
       setPresetDialogOpen(false);
     } catch (err) {
@@ -314,6 +346,7 @@ export function EvaluationPlaygroundTab() {
       );
       setPresets((current) => [cloned, ...current]);
       setSelectedPresetId(cloned.preset_id);
+      saveEvalPlaygroundLastPresetId(cloned.preset_id);
       applyConfigToForm(cloned.config, formSetters);
     } catch (err) {
       setError(
@@ -354,6 +387,10 @@ export function EvaluationPlaygroundTab() {
         ...(mode === "adhoc" ? { question: adhocQuestion.trim() } : {}),
       });
       setLastRunId(created.run_id);
+      if (selectedPresetId) {
+        saveEvalPlaygroundLastPresetId(selectedPresetId);
+      }
+      onRunCreated?.(created.run_id);
     } catch (err) {
       setError(
         err instanceof Error
@@ -371,6 +408,7 @@ export function EvaluationPlaygroundTab() {
     minRetrievalScore,
     mode,
     modelId,
+    onRunCreated,
     selectedPresetId,
     systemPrompt,
     temperature,

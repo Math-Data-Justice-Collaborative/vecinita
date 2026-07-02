@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderAppRoutesReady } from "./renderAppHelpers";
@@ -82,6 +82,9 @@ function defaultEvalFetch(
   if (url.includes("/internal/v1/eval/criteria")) {
     return { ok: true, json: async () => ({ items: [] }) };
   }
+  if (url.includes("/internal/v1/eval/config-presets")) {
+    return { ok: true, json: async () => ({ items: [] }) };
+  }
   if (url.includes("/internal/v1/models/ollama")) {
     return {
       ok: true,
@@ -121,8 +124,24 @@ function defaultEvalFetch(
   return { ok: true, json: async () => ({}) };
 }
 
+const PLAYGROUND_STORAGE_KEY = "vecinita.eval.playground.v1";
+const LAST_PRESET_ID = "00000000-0000-0000-0000-0000000000aa";
+
+async function openPlaygroundFromRunButton(): Promise<void> {
+  fireEvent.click(screen.getByTestId("evaluation-run-button"));
+  await waitFor(() => {
+    expect(screen.getByTestId("evaluation-playground")).toBeInTheDocument();
+  });
+}
+
+async function triggerPlaygroundGoldenRun(): Promise<void> {
+  await openPlaygroundFromRunButton();
+  fireEvent.click(screen.getByTestId("eval-playground-run-button"));
+}
+
 describe("EvaluationPage", () => {
   beforeEach(() => {
+    localStorage.removeItem(PLAYGROUND_STORAGE_KEY);
     vi.stubGlobal(
       "fetch",
       vi.fn().mockImplementation((input: RequestInfo | URL) => {
@@ -134,7 +153,71 @@ describe("EvaluationPage", () => {
 
   afterEach(() => {
     cleanup();
+    localStorage.removeItem(PLAYGROUND_STORAGE_KEY);
     vi.restoreAllMocks();
+  });
+
+  it("navigates to playground when Run evaluation is clicked (RD-129)", async () => {
+    await renderAppRoutesReady("/evaluation");
+    await waitFor(() => {
+      expect(screen.getByTestId("evaluation-run-button")).toBeInTheDocument();
+    });
+    await openPlaygroundFromRunButton();
+    expect(screen.getByTestId("eval-tab-playground")).toHaveAttribute(
+      "data-state",
+      "active",
+    );
+  });
+
+  it("loads last-used preset when opening playground from Run evaluation (RD-129)", async () => {
+    localStorage.setItem(
+      PLAYGROUND_STORAGE_KEY,
+      JSON.stringify({ lastPresetId: LAST_PRESET_ID }),
+    );
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/eval/config-presets")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              items: [
+                {
+                  preset_id: LAST_PRESET_ID,
+                  version: 1,
+                  name: "saved baseline",
+                  config: {
+                    top_k: 9,
+                    min_retrieval_score: 0.2,
+                    system_prompt: "Preset sandbox prompt.",
+                    max_tokens: 256,
+                    temperature: 0.2,
+                    corpus_profile: "fixture",
+                    criteria_ids: [],
+                    judge_temperature: 0.2,
+                    model_id: "qwen2.5:1.5b-instruct",
+                  },
+                  shared: false,
+                  owner_id: "11111111-1111-1111-1111-111111111111",
+                  created_at: "2026-07-01T10:00:00Z",
+                  updated_at: "2026-07-01T10:00:00Z",
+                },
+              ],
+            }),
+          });
+        }
+        return Promise.resolve(defaultEvalFetch(url));
+      }),
+    );
+    await renderAppRoutesReady("/evaluation");
+    await openPlaygroundFromRunButton();
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-top-k")).toHaveValue(9);
+      expect(screen.getByTestId("eval-playground-system-prompt")).toHaveValue(
+        "Preset sandbox prompt.",
+      );
+    });
   });
 
   it("loads history and per-question drill-down (TC-116)", async () => {
@@ -294,24 +377,32 @@ describe("EvaluationPage", () => {
     await waitFor(() => {
       expect(screen.getByTestId("evaluation-run-button")).toBeInTheDocument();
     });
-    fireEvent.click(screen.getByTestId("evaluation-run-button"));
+    await openPlaygroundFromRunButton();
+    fireEvent.click(screen.getByTestId("eval-playground-run-button"));
     await waitFor(() => {
-      expect(screen.getByText(NEW_RUN_ID)).toBeInTheDocument();
-      expect(screen.getByText(/Pending/i)).toBeInTheDocument();
+      expect(screen.getByTestId("eval-playground-last-run")).toHaveTextContent(
+        NEW_RUN_ID,
+      );
+    });
+    await waitFor(() => {
+      const history = screen.getByTestId("evaluation-history");
+      expect(within(history).getByText(NEW_RUN_ID)).toBeInTheDocument();
+      expect(within(history).getByText(/Pending/i)).toBeInTheDocument();
     });
     releasePoll?.();
+    fireEvent.click(screen.getByTestId("eval-tab-runs"));
     await waitFor(() => {
       expect(screen.getByText(/Completed/i)).toBeInTheDocument();
     });
   });
 
-  it("triggers a new eval run and refreshes detail", async () => {
+  it("triggers a new eval run from playground and posts to the API", async () => {
     await renderAppRoutesReady("/evaluation");
     await waitFor(() => {
       expect(screen.getByTestId("evaluation-run-button")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId("evaluation-run-button"));
+    await triggerPlaygroundGoldenRun();
 
     await waitFor(() => {
       expect(globalThis.fetch).toHaveBeenCalled();
@@ -551,7 +642,7 @@ describe("EvaluationPage", () => {
     });
   });
 
-  it("shows an error when triggering a new eval run fails", async () => {
+  it("shows an error when triggering a playground eval run fails", async () => {
     vi.stubGlobal(
       "fetch",
       vi
@@ -566,13 +657,10 @@ describe("EvaluationPage", () => {
         }),
     );
     await renderAppRoutesReady("/evaluation");
-    await waitFor(() => {
-      expect(screen.getByTestId("evaluation-run-button")).toBeInTheDocument();
-    });
-    fireEvent.click(screen.getByTestId("evaluation-run-button"));
+    await triggerPlaygroundGoldenRun();
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent(
-        /Eval run trigger failed/i,
+        /Eval run trigger failed \(500\)/i,
       );
     });
   });
@@ -625,10 +713,7 @@ describe("EvaluationPage", () => {
         }),
     );
     await renderAppRoutesReady("/evaluation");
-    await waitFor(() => {
-      expect(screen.getByTestId("evaluation-run-button")).toBeInTheDocument();
-    });
-    fireEvent.click(screen.getByTestId("evaluation-run-button"));
+    await triggerPlaygroundGoldenRun();
     await waitFor(
       () => {
         expect(pollDetailCalls).toBeGreaterThanOrEqual(2);
@@ -657,7 +742,7 @@ describe("EvaluationPage", () => {
     });
   });
 
-  it("stops polling when a triggered run fails", async () => {
+  it("stops polling when a playground-triggered run fails", async () => {
     let detailCalls = 0;
     vi.stubGlobal(
       "fetch",
@@ -699,20 +784,16 @@ describe("EvaluationPage", () => {
         }),
     );
     await renderAppRoutesReady("/evaluation");
-    await waitFor(() => {
-      expect(screen.getByTestId("evaluation-run-button")).toBeInTheDocument();
-    });
-    fireEvent.click(screen.getByTestId("evaluation-run-button"));
+    await triggerPlaygroundGoldenRun();
     await waitFor(() => {
       expect(detailCalls).toBeGreaterThanOrEqual(1);
-      expect(screen.getByTestId("evaluation-run-button")).not.toBeDisabled();
       expect(screen.getByTestId("evaluation-run-error")).toHaveTextContent(
         "modal-http: invalid function call",
       );
     });
   });
 
-  it("shows running label while a new eval run is in flight", async () => {
+  it("shows running label while a playground eval run is in flight", async () => {
     let resolvePost: (() => void) | undefined;
     const postGate = new Promise<void>((resolve) => {
       resolvePost = resolve;
@@ -738,17 +819,14 @@ describe("EvaluationPage", () => {
         }),
     );
     await renderAppRoutesReady("/evaluation");
+    await openPlaygroundFromRunButton();
+    fireEvent.click(screen.getByTestId("eval-playground-run-button"));
     await waitFor(() => {
-      expect(screen.getByTestId("evaluation-run-button")).toBeInTheDocument();
-    });
-    fireEvent.click(screen.getByTestId("evaluation-run-button"));
-    await waitFor(() => {
-      expect(screen.getByText(/Running…/)).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /refresh/i })).toBeDisabled();
+      expect(screen.getByText(/Starting run…/)).toBeInTheDocument();
     });
     resolvePost?.();
     await waitFor(() => {
-      expect(screen.queryByText(/Running…/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Starting run…/)).not.toBeInTheDocument();
     });
   });
 
@@ -781,7 +859,7 @@ describe("EvaluationPage", () => {
     });
   });
 
-  it("uses translated trigger error for non-Error rejections", async () => {
+  it("uses translated playground trigger error for non-Error rejections", async () => {
     vi.stubGlobal(
       "fetch",
       vi
@@ -797,13 +875,10 @@ describe("EvaluationPage", () => {
         }),
     );
     await renderAppRoutesReady("/evaluation");
-    await waitFor(() => {
-      expect(screen.getByTestId("evaluation-run-button")).toBeInTheDocument();
-    });
-    fireEvent.click(screen.getByTestId("evaluation-run-button"));
+    await triggerPlaygroundGoldenRun();
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent(
-        /Failed to load evaluation runs/i,
+        /Failed to start playground run/i,
       );
     });
   });

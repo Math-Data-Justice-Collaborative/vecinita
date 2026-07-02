@@ -11,7 +11,6 @@ import {
   type EvalRunListItemApi,
   fetchEvalRunDetail,
   fetchEvalRuns,
-  triggerEvalRun,
 } from "@/api/admin";
 import { requireCorpusConfig } from "@/config";
 import { useAdminT } from "@/hooks/useAdminT";
@@ -59,7 +58,6 @@ export function EvaluationPage() {
   const [runs, setRuns] = useState<EvalRunListItemApi[]>([]);
   const [selectedRun, setSelectedRun] = useState<EvalRunDetailApi | null>(null);
   const [loading, setLoading] = useState(true);
-  const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadHistory = useCallback(
@@ -146,36 +144,35 @@ export function EvaluationPage() {
     [loadHistory],
   );
 
-  const handleRun = useCallback(async () => {
-    setRunning(true);
-    setError(null);
-    try {
-      const client = requireCorpusConfig();
-      const created = await triggerEvalRun(client, "fixture");
+  const handlePlaygroundRunCreated = useCallback(
+    (runId: string) => {
       const optimisticRun: EvalRunListItemApi = {
-        run_id: created.run_id,
+        run_id: runId,
         status: "pending",
         metrics_summary: {},
       };
       setRuns((prev) => [
         optimisticRun,
-        ...prev.filter((run) => run.run_id !== created.run_id),
+        ...prev.filter((run) => run.run_id !== runId),
       ]);
       setSelectedRun({
-        run_id: created.run_id,
+        run_id: runId,
         status: "pending",
         metrics_summary: {},
         items: [],
       });
-      await pollRun(created.run_id);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : tr("admin.evaluation.loadFailed"),
-      );
-    } finally {
-      setRunning(false);
-    }
-  }, [pollRun, tr]);
+      void pollRun(runId);
+    },
+    [pollRun],
+  );
+
+  const handleOpenPlayground = useCallback(() => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("tab", "playground");
+      return next;
+    });
+  }, [setSearchParams]);
 
   const summary = selectedRun?.metrics_summary;
   const judgesLikelySkipped =
@@ -201,23 +198,18 @@ export function EvaluationPage() {
             onClick={() => {
               void loadHistory(() => true);
             }}
-            disabled={loading || running}
+            disabled={loading}
           >
             <RefreshCw className="mr-2 h-4 w-4" />
             {tr("shared.refresh")}
           </Button>
           <Button
             type="button"
-            onClick={() => {
-              void handleRun();
-            }}
-            disabled={running}
+            onClick={handleOpenPlayground}
             data-testid="evaluation-run-button"
           >
             <FlaskConical className="mr-2 h-4 w-4" />
-            {running
-              ? tr("admin.evaluation.running")
-              : tr("admin.evaluation.run")}
+            {tr("admin.evaluation.run")}
           </Button>
         </div>
       </div>
@@ -263,7 +255,7 @@ export function EvaluationPage() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="runs" className="space-y-6">
+        <TabsContent value="runs" className="space-y-6" forceMount>
           {summary ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <Card>
@@ -385,7 +377,7 @@ export function EvaluationPage() {
         </TabsContent>
 
         <TabsContent value="playground">
-          <EvaluationPlaygroundTab />
+          <EvaluationPlaygroundTab onRunCreated={handlePlaygroundRunCreated} />
         </TabsContent>
       </Tabs>
     </div>
