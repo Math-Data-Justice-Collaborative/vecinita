@@ -1,6 +1,6 @@
 # BUG-2026-07-02 — Admin sidebar does not stay on left when scrolling
 
-**Status:** verifying  
+**Status:** resolved  
 **Severity:** medium  
 **Feature:** F31 — Admin frontend layout  
 **Reported:** 2026-07-02
@@ -72,7 +72,12 @@ Code bug — outer layout allowed document height to exceed viewport (`min-h-scr
 - [x] Repro test red→green (layout class assertions)
 - [x] data-management-frontend lint pass
 - [x] data-management-frontend 469 tests pass
-- [ ] Full main CI parity (local) — pending user request for PR
+- [x] PR branch CI success
+- [x] main CI success (7fde976)
+
+### Layer 4 — Production
+- [x] Deploy DigitalOcean success — https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/28595313375
+- [x] User production verify — sidebar stays on left when scrolling (2026-07-02)
 
 ## Verification plan
 
@@ -87,3 +92,8 @@ Code bug — outer layout allowed document height to exceed viewport (`min-h-scr
 | # | Action | Result |
 |---|--------|--------|
 | 1 | Phase 0 intake | User confirmed production, every time, medium, local-first |
+
+## Prevention & countermeasures
+
+- Automated: repro test only (user choice)
+- Cursor rule: `.cursor/rules/admin-layout-scroll-containment.mdc`

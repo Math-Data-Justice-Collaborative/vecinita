@@ -1,0 +1,34 @@
+---
+description: Admin shell layouts must viewport-lock sidebar and scroll only main content
+globs: apps/data-management-frontend/src/components/AdminLayout.tsx
+alwaysApply: false
+---
+
+# Admin layout scroll containment
+
+Evidence: BUG-2026-07-02 — sidebar scrolled away on long pages when outer shell used `min-h-screen`.
+
+Desktop admin shells with a persistent left sidebar must **not** let the document body scroll past the sidebar.
+
+## Required pattern
+
+```tsx
+// Root — lock to viewport; no document scroll
+<div className="flex h-screen overflow-hidden" data-testid="admin-layout">
+  <aside className="... md:h-screen md:shrink-0 ..." data-testid="admin-sidebar" />
+  <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <main className="min-h-0 flex-1 overflow-auto" data-testid="admin-main">
+```
+
+## Rules
+
+1. **Root shell:** `h-screen overflow-hidden` (not `min-h-screen` alone).
+2. **Scroll column:** `min-h-0` on flex children between root and `main` — required for `overflow-auto` to work in nested flex.
+3. **Sidebar:** `md:h-screen md:shrink-0` so it stays full-height and does not compress.
+4. **Only `main` scrolls** — sidebar/header chrome stay fixed while content scrolls.
+
+## Regression guard
+
+`apps/data-management-frontend/src/test/test_bug_2026_07_02_admin_sidebar_scroll.test.tsx`
+
+When changing `AdminLayout` or similar admin shells, run that test (or extend it) before merge.
