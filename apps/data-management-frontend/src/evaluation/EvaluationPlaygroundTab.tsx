@@ -56,13 +56,12 @@ export function EvaluationPlaygroundTab() {
         const client = requireCorpusConfig();
         const data = await fetchOllamaModels(client);
         if (!active) return;
-        setModels(data.items ?? []);
+        setModels(data.items);
         setModelId((current) => {
-          const items = data.items ?? [];
-          if (items.some((item) => item.model_id === current)) {
+          if (data.items.some((item) => item.model_id === current)) {
             return current;
           }
-          return items[0]?.model_id ?? DEFAULT_MODEL_ID;
+          return data.items[0]?.model_id ?? DEFAULT_MODEL_ID;
         });
       } catch (err) {
         if (!active) return;
