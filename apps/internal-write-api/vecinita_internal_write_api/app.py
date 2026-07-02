@@ -31,6 +31,13 @@ from vecinita_shared_schemas.db_mapping import (
     scalar_int,
     scalar_uuid,
 )
+from vecinita_shared_schemas.eval_config import (
+    EvalConfigPresetCloneRequest,
+    EvalConfigPresetCreateRequest,
+    EvalConfigPresetListResponse,
+    EvalConfigPresetResponse,
+    EvalConfigPresetUpdateRequest,
+)
 from vecinita_shared_schemas.internal_write import (
     AuditCleanupResponse,
     AuditEventRequest,
@@ -81,6 +88,14 @@ from vecinita_internal_write_api.audit import (
     cleanup_audit_log,
     create_document_version,
     emit_audit_event,
+)
+from vecinita_internal_write_api.eval_config_presets_service import (
+    EvalConfigPresetAccessError,
+    clone_eval_config_preset,
+    create_eval_config_preset,
+    get_eval_config_preset,
+    list_eval_config_presets,
+    update_eval_config_preset,
 )
 from vecinita_internal_write_api.eval_criteria_service import (
     create_eval_criterion,
@@ -1378,6 +1393,133 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         if updated is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
         return updated
+
+    @app.get(
+        "/internal/v1/eval/config-presets",
+        response_model=EvalConfigPresetListResponse,
+    )
+    def list_eval_config_presets_route(  # pyright: ignore[reportUnusedFunction]
+        actor: WriteActorDep,
+    ) -> EvalConfigPresetListResponse:
+        owner_id, _role = actor
+        if owner_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Operator identity required",
+            )
+        return list_eval_config_presets(engine, owner_id=owner_id)
+
+    @app.post(
+        "/internal/v1/eval/config-presets",
+        response_model=EvalConfigPresetResponse,
+        status_code=status.HTTP_201_CREATED,
+    )
+    def create_eval_config_preset_route(  # pyright: ignore[reportUnusedFunction]
+        actor: WriteActorDep,
+        body: EvalConfigPresetCreateRequest,
+    ) -> EvalConfigPresetResponse:
+        owner_id, _role = actor
+        if owner_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Operator identity required",
+            )
+        return create_eval_config_preset(engine, owner_id=owner_id, body=body)
+
+    @app.get(
+        "/internal/v1/eval/config-presets/{preset_id}",
+        response_model=EvalConfigPresetResponse,
+    )
+    def get_eval_config_preset_route(  # pyright: ignore[reportUnusedFunction]
+        preset_id: UUID,
+        actor: WriteActorDep,
+    ) -> EvalConfigPresetResponse:
+        owner_id, _role = actor
+        if owner_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Operator identity required",
+            )
+        try:
+            preset = get_eval_config_preset(
+                engine,
+                preset_id=preset_id,
+                requester_id=owner_id,
+            )
+        except EvalConfigPresetAccessError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Forbidden",
+            ) from exc
+        if preset is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        return preset
+
+    @app.patch(
+        "/internal/v1/eval/config-presets/{preset_id}",
+        response_model=EvalConfigPresetResponse,
+    )
+    def update_eval_config_preset_route(  # pyright: ignore[reportUnusedFunction]
+        preset_id: UUID,
+        actor: WriteActorDep,
+        body: EvalConfigPresetUpdateRequest,
+    ) -> EvalConfigPresetResponse:
+        owner_id, _role = actor
+        if owner_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Operator identity required",
+            )
+        try:
+            updated = update_eval_config_preset(
+                engine,
+                preset_id=preset_id,
+                owner_id=owner_id,
+                body=body,
+            )
+        except EvalConfigPresetAccessError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Forbidden",
+            ) from exc
+        if updated is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        return updated
+
+    @app.post(
+        "/internal/v1/eval/config-presets/{preset_id}/clone",
+        response_model=EvalConfigPresetResponse,
+        status_code=status.HTTP_201_CREATED,
+    )
+    def clone_eval_config_preset_route(  # pyright: ignore[reportUnusedFunction]
+        preset_id: UUID,
+        actor: WriteActorDep,
+        body: EvalConfigPresetCloneRequest | None = None,
+    ) -> EvalConfigPresetResponse:
+        owner_id, _role = actor
+        if owner_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Operator identity required",
+            )
+        request = body or EvalConfigPresetCloneRequest()
+        try:
+            return clone_eval_config_preset(
+                engine,
+                preset_id=preset_id,
+                cloner_id=owner_id,
+                name=request.name,
+            )
+        except EvalConfigPresetAccessError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Forbidden",
+            ) from exc
+        except LookupError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Not found",
+            ) from exc
 
     @app.get(
         "/internal/v1/eval/runs/{run_id}",
