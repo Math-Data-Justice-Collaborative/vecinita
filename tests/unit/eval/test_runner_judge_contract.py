@@ -15,9 +15,7 @@ from tests.helpers.eval_judge import MockEvalJudge
 
 pytestmark = pytest.mark.unit
 
-_FIXTURE_PATH = (
-    Path(__file__).resolve().parents[3] / "data/fixtures/eval/qa_pairs.json"
-)
+_FIXTURE_PATH = Path(__file__).resolve().parents[3] / "data/fixtures/eval/qa_pairs.json"
 _UNUSED_DB = "postgresql+psycopg://unused"
 
 
