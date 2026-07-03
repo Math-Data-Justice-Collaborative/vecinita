@@ -1,43 +1,67 @@
 ---
-description: Local CI parity — auto-fix hooks vs agent-fix checks before session end
+description: Local CI parity — fast agent hooks vs medium pre-push vs full PR-ready
 alwaysApply: true
 ---
 
 # Local CI Parity
 
-Hooks and `make ci` split **auto-fixable** checks from **agent-fixable** checks.
+Three tiers for day-to-day work; **full CI parity only before opening a PR**. GitHub Actions
+remains the merge gate.
 
-## Auto-fixed on edit (hooks)
+## When to run what
 
-After saves under `apps/`, `packages/`, or `tests/`:
+| When | Command | What |
+|------|---------|------|
+| While editing | Hooks (auto) | `format` + `lint-fix` + scoped typecheck on edited file |
+| Agent stop | `make check-fast` + `make test-fast` | Lint + typecheck; scoped unit tests |
+| Before commit | `make check` | Lint + format-check + typecheck (manual) |
+| **git push** (Husky) | `make check` + `make test-fast` | Medium tier — fast pushes |
+| **Before opening PR** | `make ci-push` or `make ci-pr-ready` | Full CI parity locally |
 
-| Stack | Hook order | Behavior |
-|-------|------------|----------|
-| Python | 1 → 2 | `make format-py lint-fix-py`, then basedpyright on the edited file |
-| Frontend apps + packages | 1 → 2 | Scoped Prettier + ESLint --fix for the edited workspace, then scoped `npm run typecheck` |
+Hook scripts: `.cursor/hooks/make_format_lint_fix.py`, `.cursor/hooks/typecheck.py`,
+`.cursor/hooks/make_ci_on_stop.py`.
 
-Hook scripts: `.cursor/hooks/make_format_lint_fix.py`, `.cursor/hooks/typecheck.py`.
+Stop-hook failures are **advisory** (do not block ending the session).
 
-Unfixable issues are injected as `additional_context` — fix them before ending the session.
+## Tier 1 — Fast (agent edit + stop hook)
+
+| When | Command | What |
+|------|---------|------|
+| After save | Hooks | `format` + `lint-fix` + scoped `typecheck` on edited file |
+| Agent stop | `make check-fast` + `make test-fast` | Lint + typecheck; unit tests for changed components only |
+
+## Tier 2 — Medium (before commit + git push)
+
+```bash
+make check          # lint + format-check + typecheck
+make test-fast      # scoped unit tests
+make test-coverage-fe FE_APP=data-management-frontend  # one app's coverage loop
+```
+
+Husky `.husky/pre-push` runs **Tier 2** (`make check` + `make test-fast`) — not full CI.
+
+## Tier 3 — Full (before PR; optional on push)
+
+```bash
+make ci-push        # or: make ci-pr-ready
+```
+
+Includes: `ci-guards`, lint, format-check, typecheck, audit, full pytest, both Vitest suites,
+unit coverage gate, frontend production build.
+
+Run manually **before marking a PR ready for review**. GitHub CI runs the same checks on push.
+
+Opt-in full parity on every push: `VECINITA_FULL_PRE_PUSH=1 git push`.
+
+Skip pre-push entirely (emergencies only): `VECINITA_SKIP_PRE_PUSH=1 git push`.
+
+`make ci` still includes `install` for explicit full local runs; `ci-push` skips reinstall.
 
 ## Agent must fix manually
 
-Before ending, ensure `make ci` would pass for:
-
-- Type errors (basedpyright / tsc) the hooks reported
-- Lint issues ruff or eslint cannot auto-fix
-- Tests: `make test-py`, `make test-fe`
-- CI guards: `make ci-guards`
-- Security audit: `make audit`
-- Production build: `make build-frontend`
-
-While working, run targeted checks: `make check`, `make test`, `make typecheck`.
-
-## Stop hook (advisory)
-
-`make ci` runs on agent stop. Failures log to stderr but do **not** block ending.
-Treat stderr output as required follow-up unless the user explicitly waived CI.
+Issues hooks cannot auto-fix: type errors, non-auto-fixable lint, test failures, CI guards, audit CVEs.
 
 ## Reference
 
-Full parity: `make ci` in the repo Makefile (matches `.github/workflows/ci.yml`).
+Full GitHub parity: `.github/workflows/ci.yml` (+ `deploy-preflight.yml` on `main` push).
+Human-readable guide: `docs/LOCAL_DEV.md` §Fast checks vs full CI.

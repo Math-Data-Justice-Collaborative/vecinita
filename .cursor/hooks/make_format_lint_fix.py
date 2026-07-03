@@ -26,7 +26,6 @@ def run_frontend_format_lint(
     repo: Path, workspace: str
 ) -> subprocess.CompletedProcess[str] | None:
     shell_cmd = (
-        "bash scripts/npm_workspaces.sh install && "
         f"bash scripts/npm_workspaces.sh run format {workspace} && "
         f"npm exec -w {workspace} -- eslint src --fix"
     )

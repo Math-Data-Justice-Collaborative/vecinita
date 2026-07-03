@@ -113,6 +113,33 @@ make test-ui
 
 Requires Node 24 and a one-time Chromium install (`npx playwright install chromium`, included in `run_playwright.sh`).
 
+## Fast checks vs full CI
+
+| Tier | When | Command |
+|------|------|---------|
+| Fast | Agent stop hook | `make check-fast` + `make test-fast` |
+| Medium | Before commit; **git push** (Husky) | `make check` + `make test-fast` |
+| Full | **Before opening a PR** | `make ci-push` (alias: `make ci-pr-ready`) |
+
+```bash
+make check-fast    # lint + typecheck (no format-check)
+make test-fast     # unit tests for locally changed apps/packages only
+make test-coverage-fe FE_APP=data-management-frontend  # one frontend coverage loop
+make ci-push       # full CI parity — run before marking a PR ready
+make ci-pr-ready   # alias for ci-push
+```
+
+Husky installs on `npm ci` (`prepare` script). Pre-push runs **medium tier** only; GitHub
+CI is the merge gate for full parity.
+
+```bash
+# Opt-in full local parity on every push:
+VECINITA_FULL_PRE_PUSH=1 git push
+
+# Skip pre-push entirely (emergencies only):
+VECINITA_SKIP_PRE_PUSH=1 git push
+```
+
 ## Unit coverage gate (F31 / ADR-019)
 
 Per-component **≥95% line and branch** coverage on all twelve `packages/*` and `apps/*` components. Enforced locally and in CI via `scripts/test/print_unit_coverage_summary.py --enforce`.

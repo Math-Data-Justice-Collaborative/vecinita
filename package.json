@@ -9,6 +9,7 @@
     "node": ">=24"
   },
   "scripts": {
+    "prepare": "husky",
     "test:frontend-i18n": "npm test -w vecinita-frontend-i18n",
     "test:frontend-ui": "npm test -w vecinita-frontend-ui",
     "build:ui-e2e": "bash scripts/ui/build_for_playwright.sh",
@@ -18,6 +19,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",
-    "@vitest/coverage-v8": "^4.1.8"
+    "@vitest/coverage-v8": "^4.1.8",
+    "husky": "^9.1.7"
   }
 }

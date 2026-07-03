@@ -36,12 +36,14 @@ _MIGRATION_REVISION = re.compile(r"^(\d{8}_\d{4})_", re.MULTILINE)
 _PUSH_TRIGGERS = ("git push", "gh pr create")
 
 _PUSH_REMINDER = """\
-[common-ci-failures] Verify before push (patterns that repeatedly fail CI):
-  1. make check  — ruff lint + format-check + typecheck
-  2. Frontend tests: eslint unused imports in apps/*/src/test/*.test.tsx
-  3. Python tests: top-level imports only (ruff PLC0415); drop unused fixtures (ARG001)
-  4. New Alembic migration: update tests/integration/test_ev002_schema.py head assertion
-  5. eval_service _resolve_eval_runtime: factory fallback only when BOTH judge and llm are None
+[common-ci-failures] Fast checks on agent stop: make check-fast + make test-fast.
+Pre-push (Husky): make check + make test-fast. Before PR: make ci-push.
+Opt-in full pre-push: VECINITA_FULL_PRE_PUSH=1. Skip: VECINITA_SKIP_PRE_PUSH=1.
+Also verify before push:
+  1. Frontend tests: eslint unused imports in apps/*/src/test/*.test.tsx
+  2. Python tests: top-level imports only (ruff PLC0415); drop unused fixtures (ARG001)
+  3. New Alembic migration: update tests/integration/test_ev002_schema.py head assertion
+  4. eval_service _resolve_eval_runtime: factory fallback only when BOTH judge and llm are None
 After push: bash scripts/ci/watch_github_ci.sh [branch] (on main: ci.yml + deploy-preflight.yml)"""
 
 

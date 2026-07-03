@@ -64,7 +64,7 @@
     "stop": [
       {
         "command": "uv run python .cursor/hooks/make_ci_on_stop.py",
-        "timeout": 3600
+        "timeout": 900
       }
     ]
   }

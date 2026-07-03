@@ -24,9 +24,9 @@ NPM_WS := bash scripts/npm_workspaces.sh
 	lint lint-py lint-fe lint-fix lint-fix-py lint-fix-fe \
 	format format-py format-fe format-check format-check-py format-fe-check \
 	typecheck typecheck-py typecheck-fe \
-	test test-py test-fe test-ui test-unit test-unit-coverage test-integration test-e2e test-smoke test-privacy test-live \
+	test test-py test-fe test-ui test-unit test-unit-coverage test-fast test-coverage-fe test-integration test-e2e test-smoke test-privacy test-live \
 	verify-connectivity \
-	build-frontend ci ci-guards audit audit-fe audit-fix check
+	build-frontend ci ci-push ci-pr-ready ci-guards audit audit-fe audit-fix check check-fast
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage: make \033[36m<target>\033[0m\n\nTargets:\n"} \
@@ -35,6 +35,10 @@ help: ## Show available targets
 	@echo "Examples:"
 	@echo "  make install          # uv sync + npm ci (both frontends)"
 	@echo "  make check            # lint + format-check + typecheck"
+	@echo "  make check-fast       # lint + typecheck only (agent stop hook)"
+	@echo "  make test-fast        # unit tests for locally changed components"
+	@echo "  make ci-push          # full CI parity — run before opening a PR"
+	@echo "  make ci-pr-ready      # alias for ci-push"
 	@echo "  make audit            # pip-audit (Python, with ignore list)"
 	@echo "  make audit-fix        # auto-fix CVEs, re-audit, then make check"
 	@echo "  make test             # full Python suite + frontend Vitest"
@@ -109,6 +113,13 @@ test-unit: ## Pytest unit tests
 test-unit-coverage: ## Unit tests with per-package/app coverage summary (htmlcov/, coverage/)
 	bash scripts/test/unit_coverage.sh
 
+test-fast: ## Unit tests for changed components only (fast agent feedback)
+	bash scripts/ci/test_fast.sh
+
+test-coverage-fe: ## Vitest coverage for one frontend (FE_APP=chat-rag-frontend|data-management-frontend)
+	@test -n "$(FE_APP)" || (echo "Usage: make test-coverage-fe FE_APP=chat-rag-frontend" && exit 1)
+	@$(NPM_LOCK) npm run test:coverage -w vecinita-$(FE_APP)
+
 test-integration: migrate ## Pytest integration tests (starts DB + migrates)
 	$(UV) run pytest tests/integration
 
@@ -182,6 +193,12 @@ audit-fix: ## Auto-fix dependency CVEs (Python + frontends), then verify
 	$(MAKE) audit-fe
 	$(MAKE) check
 
-check: lint format-check typecheck ## Quick pre-push: lint + format-check + typecheck
+check: lint format-check typecheck ## Pre-commit: lint + format-check + typecheck
+
+check-fast: lint typecheck ## Fast agent gate: lint + typecheck (no format-check, no tests)
 
 ci: install ci-guards lint format-check typecheck audit test-py test-fe build-frontend ## Full CI-parity run (fail fast)
+
+ci-push: ci-guards lint format-check typecheck audit test-py test-fe test-unit-coverage build-frontend ## Full CI parity before opening a PR (no reinstall)
+
+ci-pr-ready: ci-push ## Alias — run before marking a PR ready for review

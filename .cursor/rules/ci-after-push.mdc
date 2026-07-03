@@ -26,6 +26,11 @@ job before live deploy. `deploy-digitalocean.yml` does not deploy on CI alone.
 
 ## After every push (required)
 
+Husky **pre-push** runs **medium tier** (`make check` + `make test-fast`) before `git push`.
+Run **`make ci-push`** (or `make ci-pr-ready`) **before opening a PR**. GitHub CI is the merge
+gate. Opt-in full local parity on every push: `VECINITA_FULL_PRE_PUSH=1 git push`. Skip
+pre-push: `VECINITA_SKIP_PRE_PUSH=1 git push`.
+
 ```bash
 # From repo root; branch defaults to current
 bash scripts/ci/watch_github_ci.sh [branch]
@@ -52,9 +57,12 @@ done
 | **cancelled** (0 jobs on preflight) | Another push superseded this run — finish watch before pushing again |
 | **User waives** | AskQuestion only; note waiver in PR/summary |
 
-## Before the first push (local parity)
+## Before opening a PR (local parity)
 
-When changes touch Python, frontends, workflows, Modal, or secrets:
+Run `make ci-push` before marking a PR ready for review. Day-to-day `git push` only runs
+medium tier locally; GitHub CI enforces full parity on the branch.
+
+When changes touch Python, frontends, workflows, Modal, or secrets (full local run):
 
 ```bash
 uv sync --group dev

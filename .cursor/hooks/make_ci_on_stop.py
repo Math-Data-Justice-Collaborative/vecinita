@@ -1,8 +1,8 @@
-"""Cursor stop hook: advisory full CI parity (`make ci`) when the agent session ends.
+"""Cursor stop hook: fast checks when the agent session ends.
 
-Make serializes npm via scripts/npm_with_lock.sh; do not hold the same flock here
-(deadlock). Test output goes to stderr. Failures are advisory — no followup_message.
-Always exits 0.
+Runs `make check-fast` (lint + typecheck) and `make test-fast` (scoped unit tests)
+when source files have local changes. Pre-push runs medium tier (`make check` +
+`make test-fast`); run `make ci-push` before opening a PR. Advisory only — always exits 0.
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-OUTPUT_TAIL_CHARS = 8000
+OUTPUT_TAIL_CHARS = 4000
 
 
 def find_repo_root() -> Path | None:
@@ -21,6 +21,38 @@ def find_repo_root() -> Path | None:
         if (candidate / "pyproject.toml").is_file() or (candidate / ".git").is_dir():
             return candidate
     return None
+
+
+def _run_make(repo: Path, target: str, timeout: int) -> subprocess.CompletedProcess[str] | None:
+    try:
+        return subprocess.run(
+            ["make", target],
+            cwd=repo,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
+        sys.stderr.write(f"[check_fast_on_stop] could not run make {target}: {exc}\n")
+        return None
+
+
+def _log_result(label: str, proc: subprocess.CompletedProcess[str] | None) -> None:
+    if proc is None:
+        return
+    sys.stderr.write(proc.stdout)
+    sys.stderr.write(proc.stderr)
+    if proc.returncode != 0:
+        combined = proc.stdout + proc.stderr
+        tail = combined[-OUTPUT_TAIL_CHARS:] if len(combined) > OUTPUT_TAIL_CHARS else combined
+        sys.stderr.write(
+            f"\n[check_fast_on_stop] {label} exit {proc.returncode} "
+            "(advisory — full CI runs on git push via husky)\n"
+        )
+        sys.stderr.write(tail.strip())
+        sys.stderr.write("\n")
+    else:
+        sys.stderr.write(f"\n[check_fast_on_stop] {label} passed\n")
 
 
 def main() -> int:
@@ -34,34 +66,11 @@ def main() -> int:
         print("{}")
         return 0
 
-    # Do not hold repo_make_lock here: make ci uses scripts/npm_with_lock.sh on the
-    # same flock file and would deadlock until the hook subprocess is killed (SIGTERM).
-    try:
-        proc = subprocess.run(
-            ["make", "ci"],
-            cwd=repo,
-            capture_output=True,
-            text=True,
-            timeout=3600,
-        )
-    except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
-        sys.stderr.write(f"[make_ci_on_stop] could not run make ci: {exc}\n")
-        print("{}")
-        return 0
+    check_proc = _run_make(repo, "check-fast", timeout=600)
+    _log_result("check-fast", check_proc)
 
-    sys.stderr.write(proc.stdout)
-    sys.stderr.write(proc.stderr)
-
-    if proc.returncode != 0:
-        combined = proc.stdout + proc.stderr
-        tail = combined[-OUTPUT_TAIL_CHARS:] if len(combined) > OUTPUT_TAIL_CHARS else combined
-        sys.stderr.write(
-            f"\n[make_ci_on_stop] exit {proc.returncode} (advisory — session may still end)\n"
-        )
-        sys.stderr.write(tail.strip())
-        sys.stderr.write("\n")
-    else:
-        sys.stderr.write("\n[make_ci_on_stop] make ci passed\n")
+    test_proc = _run_make(repo, "test-fast", timeout=900)
+    _log_result("test-fast", test_proc)
 
     print("{}")
     return 0
