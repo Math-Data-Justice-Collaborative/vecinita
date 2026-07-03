@@ -17,7 +17,13 @@ from vecinita_eval.modal_llm import ModalHttpLLM
 from vecinita_eval.runner import EvalSummary, RowMetrics, RowResult
 from vecinita_internal_write_api.eval_criteria_service import create_eval_criterion
 from vecinita_internal_write_api.eval_service import (
+    EvalRunNotFoundError,
+    _config_from_json,  # pyright: ignore[reportPrivateUsage]
+    _load_eval_run,  # pyright: ignore[reportPrivateUsage]
+    _optional_uuid,  # pyright: ignore[reportPrivateUsage]
+    _require_adhoc_question,  # pyright: ignore[reportPrivateUsage]
     _resolve_eval_runtime,  # pyright: ignore[reportPrivateUsage]
+    _run_mode,  # pyright: ignore[reportPrivateUsage]
     execute_eval_run,
     get_eval_run,
     get_eval_timeseries,
@@ -1086,6 +1092,32 @@ def test_resolve_eval_runtime_preserves_injected_judge_when_llm_missing() -> Non
     mock_factory.assert_not_called()
     assert resolved_judge is judge
     assert resolved_llm is None
+
+
+def test_eval_service_json_helpers_and_guards() -> None:
+    """Private eval helpers parse config JSON, modes, UUIDs, and adhoc questions."""
+    sample = EvalConfig(top_k=_EXPECTED_CONFIG_TOP_K)
+    assert _config_from_json(sample.model_dump_json()).top_k == _EXPECTED_CONFIG_TOP_K
+    assert _config_from_json(sample.model_dump()).top_k == _EXPECTED_CONFIG_TOP_K
+    assert _config_from_json(None).top_k == EvalConfig().top_k
+    assert _run_mode("golden") == "golden"
+    assert _run_mode("adhoc") == "adhoc"
+    assert _run_mode("unknown") == "golden"
+    run_id = uuid4()
+    assert _optional_uuid(run_id) == run_id
+    assert _optional_uuid(str(run_id)) == run_id
+    assert _optional_uuid(None) is None
+    assert _require_adhoc_question("What are pantry hours?") == "What are pantry hours?"
+    with pytest.raises(ValueError, match="question is required"):
+        _require_adhoc_question(None)
+    with pytest.raises(ValueError, match="question is required"):
+        _require_adhoc_question("")
+
+
+def test_load_eval_run_raises_when_missing(engine: Engine) -> None:
+    """_load_eval_run raises EvalRunNotFoundError for unknown run ids."""
+    with pytest.raises(EvalRunNotFoundError, match="eval run not found"):
+        _load_eval_run(engine, run_id=uuid4())
 
 
 def test_criteria_for_config_filters_enabled_criteria(
