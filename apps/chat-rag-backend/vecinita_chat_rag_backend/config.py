@@ -5,7 +5,14 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
-from vecinita_shared_schemas.eval_config import DEFAULT_EVAL_MODEL_ID
+from vecinita_shared_schemas.eval_config import (
+    DEFAULT_EVAL_MAX_TOKENS,
+    DEFAULT_EVAL_MIN_RETRIEVAL_SCORE,
+    DEFAULT_EVAL_MODEL_ID,
+    DEFAULT_EVAL_SYSTEM_PROMPT,
+    DEFAULT_EVAL_TEMPERATURE,
+    DEFAULT_EVAL_TOP_K,
+)
 
 
 def _int_env(name: str, default: int) -> int:
@@ -20,6 +27,13 @@ def _float_env(name: str, default: float) -> float:
     if raw is None:
         return default
     return float(raw)
+
+
+def _str_env(name: str, default: str) -> str:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw
 
 
 def _bool_env(name: str, default: bool) -> bool:  # noqa: FBT001  # internal helper mirrors _int_env/_float_env positional default style
@@ -51,6 +65,12 @@ class ChatRagSettings:
     internal_api_key: str | None = None
     stats_enabled: bool = True
     llm_model_id: str | None = None
+    fallback_top_k: int = DEFAULT_EVAL_TOP_K
+    fallback_min_retrieval_score: float = DEFAULT_EVAL_MIN_RETRIEVAL_SCORE
+    fallback_system_prompt: str = DEFAULT_EVAL_SYSTEM_PROMPT
+    fallback_max_tokens: int = DEFAULT_EVAL_MAX_TOKENS
+    fallback_temperature: float = DEFAULT_EVAL_TEMPERATURE
+    fallback_model_id: str = DEFAULT_EVAL_MODEL_ID
 
     @classmethod
     def from_env(cls) -> ChatRagSettings:
@@ -75,4 +95,25 @@ class ChatRagSettings:
             llm_model_id=os.environ.get("VECINITA_OLLAMA_MODEL_ID", DEFAULT_EVAL_MODEL_ID)
             if os.environ.get("VECINITA_MODAL_OLLAMA_URL")
             else None,
+            fallback_top_k=_int_env("VECINITA_RAG_CONFIG_FALLBACK_TOP_K", DEFAULT_EVAL_TOP_K),
+            fallback_min_retrieval_score=_float_env(
+                "VECINITA_RAG_CONFIG_FALLBACK_MIN_RETRIEVAL_SCORE",
+                DEFAULT_EVAL_MIN_RETRIEVAL_SCORE,
+            ),
+            fallback_system_prompt=_str_env(
+                "VECINITA_RAG_CONFIG_FALLBACK_SYSTEM_PROMPT",
+                DEFAULT_EVAL_SYSTEM_PROMPT,
+            ),
+            fallback_max_tokens=_int_env(
+                "VECINITA_RAG_CONFIG_FALLBACK_MAX_TOKENS",
+                DEFAULT_EVAL_MAX_TOKENS,
+            ),
+            fallback_temperature=_float_env(
+                "VECINITA_RAG_CONFIG_FALLBACK_TEMPERATURE",
+                DEFAULT_EVAL_TEMPERATURE,
+            ),
+            fallback_model_id=os.environ.get(
+                "VECINITA_RAG_CONFIG_FALLBACK_MODEL_ID",
+                DEFAULT_EVAL_MODEL_ID,
+            ),
         )

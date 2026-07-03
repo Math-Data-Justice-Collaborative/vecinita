@@ -306,9 +306,9 @@ describe("eval coverage gaps", () => {
       />,
     );
 
-    expect(screen.getByTestId("eval-compare-metric-faithfulness")).toHaveTextContent(
-      "+0.40",
-    );
+    expect(
+      screen.getByTestId("eval-compare-metric-faithfulness"),
+    ).toHaveTextContent("+0.40");
     expect(
       screen.queryByTestId("eval-compare-regression-improved"),
     ).not.toBeInTheDocument();
@@ -331,7 +331,9 @@ describe("eval coverage gaps", () => {
 
     renderWithProviders(<EvaluationPlaygroundTab />);
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent(/503|models offline/i);
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /503|models offline/i,
+      );
     });
   });
 
@@ -341,7 +343,10 @@ describe("eval coverage gaps", () => {
       vi.fn().mockImplementation((input: RequestInfo | URL) => {
         const url = fetchInputUrl(input);
         if (url.includes("/internal/v1/models/ollama")) {
-          return Promise.resolve({ ok: true, json: async () => ({ items: [] }) });
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ items: [] }),
+          });
         }
         return Promise.resolve(defaultEvalFetch(url));
       }),
@@ -349,7 +354,9 @@ describe("eval coverage gaps", () => {
 
     renderWithProviders(<EvaluationPlaygroundTab />);
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-model-id")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-model-id"),
+      ).toBeInTheDocument();
     });
   });
 
@@ -414,7 +421,9 @@ describe("eval coverage gaps", () => {
           const url = fetchInputUrl(input);
           const method = (init?.method ?? "GET").toUpperCase();
           if (
-            url.includes(`/internal/v1/eval/config-presets/${presetId}/clone`) &&
+            url.includes(
+              `/internal/v1/eval/config-presets/${presetId}/clone`,
+            ) &&
             method === "POST"
           ) {
             // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
@@ -455,13 +464,17 @@ describe("eval coverage gaps", () => {
 
     renderWithProviders(<EvaluationPlaygroundTab />);
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-preset-select"),
+      ).toBeInTheDocument();
     });
     fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
       target: { value: presetId },
     });
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-preset-clone")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-preset-clone"),
+      ).toBeInTheDocument();
     });
     fireEvent.click(screen.getByTestId("eval-playground-preset-clone"));
     await waitFor(() => {
@@ -472,7 +485,9 @@ describe("eval coverage gaps", () => {
   });
 
   it("EvaluationPage ignores unknown run query param", async () => {
-    await renderAppRoutesReady("/evaluation?run=00000000-0000-0000-0000-0000000000ff");
+    await renderAppRoutesReady(
+      "/evaluation?run=00000000-0000-0000-0000-0000000000ff",
+    );
     await waitFor(() => {
       expect(screen.getByTestId("evaluation-history")).toBeInTheDocument();
     });
@@ -522,7 +537,9 @@ describe("eval coverage gaps", () => {
 
     renderWithProviders(<EvaluationPlaygroundTab />);
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-run-button")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-run-button"),
+      ).toBeInTheDocument();
     });
     fireEvent.click(screen.getByTestId("eval-playground-run-button"));
     await waitFor(() => {
@@ -573,7 +590,9 @@ describe("eval coverage gaps", () => {
 
     renderWithProviders(<EvaluationPlaygroundTab />);
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-preset-select"),
+      ).toBeInTheDocument();
     });
     fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
       target: { value: presetId },
@@ -581,30 +600,35 @@ describe("eval coverage gaps", () => {
     fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
       target: { value: "" },
     });
-    fireEvent.change(document.getElementById("eval-playground-corpus-profile")!, {
-      target: { value: "staging" },
-    });
-    expect(document.getElementById("eval-playground-corpus-profile")).toHaveValue(
-      "staging",
+    fireEvent.change(
+      document.getElementById("eval-playground-corpus-profile")!,
+      {
+        target: { value: "staging" },
+      },
     );
+    expect(
+      document.getElementById("eval-playground-corpus-profile"),
+    ).toHaveValue("staging");
   });
 
   it("EvaluationPlaygroundTab uses translated errors for non-Error rejections", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
-        const url = fetchInputUrl(input);
-        const method = (init?.method ?? "GET").toUpperCase();
-        if (url.includes("/internal/v1/eval/runs") && method === "POST") {
-          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
-          return Promise.reject("offline");
-        }
-        if (url.includes("/internal/v1/eval/config-presets")) {
-          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
-          return Promise.reject("presets offline");
-        }
-        return Promise.resolve(defaultEvalFetch(url));
-      }),
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          if (url.includes("/internal/v1/eval/runs") && method === "POST") {
+            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
+            return Promise.reject("offline");
+          }
+          if (url.includes("/internal/v1/eval/config-presets")) {
+            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
+            return Promise.reject("presets offline");
+          }
+          return Promise.resolve(defaultEvalFetch(url));
+        }),
     );
 
     renderWithProviders(<EvaluationPlaygroundTab />);
@@ -639,9 +663,9 @@ describe("eval coverage gaps", () => {
         }}
       />,
     );
-    expect(screen.getByTestId("eval-compare-metric-faithfulness")).toHaveTextContent(
-      "0.00",
-    );
+    expect(
+      screen.getByTestId("eval-compare-metric-faithfulness"),
+    ).toHaveTextContent("0.00");
   });
 
   it("EvaluationCompareView skips regression when run B stays above threshold", () => {

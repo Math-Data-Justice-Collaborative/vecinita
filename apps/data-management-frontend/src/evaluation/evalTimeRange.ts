@@ -6,7 +6,10 @@ export type EvalXAxisGranularity = "hour" | "day" | "month";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-const PRESET_WINDOW_MS: Record<Exclude<EvalTimeRangePreset, "custom">, number> = {
+const PRESET_WINDOW_MS: Record<
+  Exclude<EvalTimeRangePreset, "custom">,
+  number
+> = {
   "1D": DAY_MS,
   "7D": 7 * DAY_MS,
   "10D": 10 * DAY_MS,

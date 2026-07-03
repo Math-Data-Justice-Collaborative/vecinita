@@ -275,7 +275,9 @@ describe("Evaluation dashboard tabs", () => {
     await waitFor(() => {
       expect(screen.getByText(/Scatter chart/i)).toBeInTheDocument();
     });
-    expect(screen.getAllByTestId("mock-scatter-chart").length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId("mock-scatter-chart").length).toBeGreaterThan(
+      0,
+    );
     vi.useRealTimers();
   });
 

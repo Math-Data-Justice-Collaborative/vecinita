@@ -1,7 +1,10 @@
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { renderAppRoutesReady } from "./renderAppHelpers";
+import {
+  renderAppRoutesReady,
+  renderSuperAdminAppRoutesReady,
+} from "./renderAppHelpers";
 import { fetchInputUrl } from "./fetch-mock";
 
 const RUN_ID = "00000000-0000-0000-0000-000000000099";
@@ -199,16 +202,14 @@ describe("EvaluationPlayground (UJ-045)", () => {
     fireEvent.click(screen.getByTestId("eval-playground-run-button"));
 
     await waitFor(() => {
-      const postCall = vi
-        .mocked(globalThis.fetch)
-        .mock.calls.find((call) => {
-          const init = call[1];
-          const method = (init?.method ?? "GET").toUpperCase();
-          return (
-            fetchInputUrl(call[0]).includes("/internal/v1/eval/runs") &&
-            method === "POST"
-          );
-        });
+      const postCall = vi.mocked(globalThis.fetch).mock.calls.find((call) => {
+        const init = call[1];
+        const method = (init?.method ?? "GET").toUpperCase();
+        return (
+          fetchInputUrl(call[0]).includes("/internal/v1/eval/runs") &&
+          method === "POST"
+        );
+      });
       expect(postCall).toBeDefined();
       const body = parsePostBody(postCall?.[1]);
       expect(body?.["mode"]).toBe("golden");
@@ -253,16 +254,14 @@ describe("EvaluationPlayground (UJ-045)", () => {
     fireEvent.click(screen.getByTestId("eval-playground-run-button"));
 
     await waitFor(() => {
-      const postCall = vi
-        .mocked(globalThis.fetch)
-        .mock.calls.find((call) => {
-          const init = call[1];
-          const method = (init?.method ?? "GET").toUpperCase();
-          return (
-            fetchInputUrl(call[0]).includes("/internal/v1/eval/runs") &&
-            method === "POST"
-          );
-        });
+      const postCall = vi.mocked(globalThis.fetch).mock.calls.find((call) => {
+        const init = call[1];
+        const method = (init?.method ?? "GET").toUpperCase();
+        return (
+          fetchInputUrl(call[0]).includes("/internal/v1/eval/runs") &&
+          method === "POST"
+        );
+      });
       expect(postCall).toBeDefined();
       const body = parsePostBody(postCall?.[1]);
       expect(body?.["mode"]).toBe("adhoc");
@@ -273,10 +272,16 @@ describe("EvaluationPlayground (UJ-045)", () => {
   it("loads Ollama models for the model picker (RD-139)", async () => {
     await renderAppRoutesReady("/evaluation?tab=playground");
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-model-id")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-model-id"),
+      ).toBeInTheDocument();
     });
-    expect(screen.getByRole("option", { name: /qwen2\.5:1\.5b-instruct/i })).toBeInTheDocument();
-    expect(screen.getByRole("option", { name: /llama3\.2:3b/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("option", { name: /qwen2\.5:1\.5b-instruct/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("option", { name: /llama3\.2:3b/i }),
+    ).toBeInTheDocument();
   });
 
   it("disables run button until ad-hoc question is provided (TC-129)", async () => {
@@ -311,7 +316,9 @@ describe("EvaluationPlayground (UJ-045)", () => {
 
     await renderAppRoutesReady("/evaluation?tab=playground");
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-preset-select"),
+      ).toBeInTheDocument();
     });
 
     fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
@@ -323,9 +330,9 @@ describe("EvaluationPlayground (UJ-045)", () => {
       expect(screen.getByTestId("eval-playground-system-prompt")).toHaveValue(
         "Preset sandbox prompt.",
       );
-      expect(screen.getByTestId("eval-playground-preset-version")).toHaveTextContent(
-        "Version 1",
-      );
+      expect(
+        screen.getByTestId("eval-playground-preset-version"),
+      ).toHaveTextContent("Version 1");
     });
   });
 
@@ -337,7 +344,10 @@ describe("EvaluationPlayground (UJ-045)", () => {
         .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
           const url = fetchInputUrl(input);
           const method = (init?.method ?? "GET").toUpperCase();
-          if (url.includes("/internal/v1/eval/config-presets") && method === "POST") {
+          if (
+            url.includes("/internal/v1/eval/config-presets") &&
+            method === "POST"
+          ) {
             return Promise.resolve({
               ok: true,
               json: async () => ({
@@ -361,7 +371,9 @@ describe("EvaluationPlayground (UJ-045)", () => {
 
     await renderAppRoutesReady("/evaluation?tab=playground");
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-preset-save")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-preset-save"),
+      ).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByTestId("eval-playground-preset-save"));
@@ -371,16 +383,14 @@ describe("EvaluationPlayground (UJ-045)", () => {
     fireEvent.click(screen.getByTestId("eval-playground-preset-confirm"));
 
     await waitFor(() => {
-      const postCall = vi
-        .mocked(globalThis.fetch)
-        .mock.calls.find((call) => {
-          const init = call[1];
-          const method = (init?.method ?? "GET").toUpperCase();
-          return (
-            fetchInputUrl(call[0]).includes("/internal/v1/eval/config-presets") &&
-            method === "POST"
-          );
-        });
+      const postCall = vi.mocked(globalThis.fetch).mock.calls.find((call) => {
+        const init = call[1];
+        const method = (init?.method ?? "GET").toUpperCase();
+        return (
+          fetchInputUrl(call[0]).includes("/internal/v1/eval/config-presets") &&
+          method === "POST"
+        );
+      });
       expect(postCall).toBeDefined();
       const body = parsePostBody(postCall?.[1]);
       expect(body?.["name"]).toBe("my preset");
@@ -426,7 +436,9 @@ describe("EvaluationPlayground (UJ-045)", () => {
 
     await renderAppRoutesReady("/evaluation?tab=playground");
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-preset-select"),
+      ).toBeInTheDocument();
     });
 
     fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
@@ -439,17 +451,15 @@ describe("EvaluationPlayground (UJ-045)", () => {
     fireEvent.click(screen.getByTestId("eval-playground-preset-confirm"));
 
     await waitFor(() => {
-      const patchCall = vi
-        .mocked(globalThis.fetch)
-        .mock.calls.find((call) => {
-          const init = call[1];
-          const method = (init?.method ?? "GET").toUpperCase();
-          return (
-            fetchInputUrl(call[0]).includes(
-              `/internal/v1/eval/config-presets/${PRESET_ID}`,
-            ) && method === "PATCH"
-          );
-        });
+      const patchCall = vi.mocked(globalThis.fetch).mock.calls.find((call) => {
+        const init = call[1];
+        const method = (init?.method ?? "GET").toUpperCase();
+        return (
+          fetchInputUrl(call[0]).includes(
+            `/internal/v1/eval/config-presets/${PRESET_ID}`,
+          ) && method === "PATCH"
+        );
+      });
       expect(patchCall).toBeDefined();
       const body = parsePostBody(patchCall?.[1]);
       expect(body?.["name"]).toBe("baseline-v2");
@@ -465,7 +475,9 @@ describe("EvaluationPlayground (UJ-045)", () => {
           const url = fetchInputUrl(input);
           const method = (init?.method ?? "GET").toUpperCase();
           if (
-            url.includes(`/internal/v1/eval/config-presets/${PRESET_ID}/clone`) &&
+            url.includes(
+              `/internal/v1/eval/config-presets/${PRESET_ID}/clone`,
+            ) &&
             method === "POST"
           ) {
             return Promise.resolve({
@@ -492,7 +504,9 @@ describe("EvaluationPlayground (UJ-045)", () => {
 
     await renderAppRoutesReady("/evaluation?tab=playground");
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-preset-select"),
+      ).toBeInTheDocument();
     });
 
     fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
@@ -501,17 +515,15 @@ describe("EvaluationPlayground (UJ-045)", () => {
     fireEvent.click(screen.getByTestId("eval-playground-preset-clone"));
 
     await waitFor(() => {
-      const cloneCall = vi
-        .mocked(globalThis.fetch)
-        .mock.calls.find((call) => {
-          const init = call[1];
-          const method = (init?.method ?? "GET").toUpperCase();
-          return (
-            fetchInputUrl(call[0]).includes(
-              `/internal/v1/eval/config-presets/${PRESET_ID}/clone`,
-            ) && method === "POST"
-          );
-        });
+      const cloneCall = vi.mocked(globalThis.fetch).mock.calls.find((call) => {
+        const init = call[1];
+        const method = (init?.method ?? "GET").toUpperCase();
+        return (
+          fetchInputUrl(call[0]).includes(
+            `/internal/v1/eval/config-presets/${PRESET_ID}/clone`,
+          ) && method === "POST"
+        );
+      });
       expect(cloneCall).toBeDefined();
     });
   });
@@ -536,7 +548,9 @@ describe("EvaluationPlayground (UJ-045)", () => {
 
     await renderAppRoutesReady("/evaluation?tab=playground");
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-preset-save")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-preset-save"),
+      ).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByTestId("eval-playground-preset-save"));
@@ -544,7 +558,9 @@ describe("EvaluationPlayground (UJ-045)", () => {
       target: { value: "broken preset" },
     });
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-preset-confirm")).not.toBeDisabled();
+      expect(
+        screen.getByTestId("eval-playground-preset-confirm"),
+      ).not.toBeDisabled();
     });
     fireEvent.click(screen.getByTestId("eval-playground-preset-confirm"));
 
@@ -577,7 +593,9 @@ describe("EvaluationPlayground (UJ-045)", () => {
 
     await renderAppRoutesReady("/evaluation?tab=playground");
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-preset-select"),
+      ).toBeInTheDocument();
     });
     fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
       target: { value: PRESET_ID },
@@ -611,12 +629,16 @@ describe("EvaluationPlayground (UJ-045)", () => {
 
     fireEvent.click(screen.getByTestId("eval-playground-preset-save"));
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-preset-dialog")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-preset-dialog"),
+      ).toBeInTheDocument();
     });
     fireEvent.click(screen.getByTestId("eval-playground-preset-shared"));
     expect(screen.getByTestId("eval-playground-preset-shared")).toBeChecked();
     fireEvent.click(screen.getByTestId("eval-playground-preset-shared"));
-    expect(screen.getByTestId("eval-playground-preset-shared")).not.toBeChecked();
+    expect(
+      screen.getByTestId("eval-playground-preset-shared"),
+    ).not.toBeChecked();
   });
 
   it("surfaces translated preset load failure for non-Error rejections", async () => {
@@ -657,7 +679,9 @@ describe("EvaluationPlayground (UJ-045)", () => {
 
     await renderAppRoutesReady("/evaluation?tab=playground");
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-preset-select"),
+      ).toBeInTheDocument();
     });
     expect(screen.getByTestId("eval-playground-preset-select")).toHaveValue("");
   });
@@ -714,7 +738,9 @@ describe("EvaluationPlayground (UJ-045)", () => {
 
     await renderAppRoutesReady("/evaluation?tab=playground");
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-preset-select"),
+      ).toBeInTheDocument();
     });
     fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
       target: { value: PRESET_ID },
@@ -734,7 +760,9 @@ describe("EvaluationPlayground (UJ-045)", () => {
   it("ignores preset selection when id is not in the loaded list", async () => {
     await renderAppRoutesReady("/evaluation?tab=playground");
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-preset-select"),
+      ).toBeInTheDocument();
     });
     fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
       target: { value: "00000000-0000-0000-0000-000000000099" },
@@ -767,7 +795,9 @@ describe("EvaluationPlayground (UJ-045)", () => {
   it("changes the selected Ollama model from the picker", async () => {
     await renderAppRoutesReady("/evaluation?tab=playground");
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-model-id")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-model-id"),
+      ).toBeInTheDocument();
     });
     fireEvent.change(screen.getByTestId("eval-playground-model-id"), {
       target: { value: "llama3.2:3b" },
@@ -780,11 +810,15 @@ describe("EvaluationPlayground (UJ-045)", () => {
   it("closes the preset dialog with cancel", async () => {
     await renderAppRoutesReady("/evaluation?tab=playground");
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-preset-save")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-preset-save"),
+      ).toBeInTheDocument();
     });
     fireEvent.click(screen.getByTestId("eval-playground-preset-save"));
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-preset-dialog")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-preset-dialog"),
+      ).toBeInTheDocument();
     });
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
     await waitFor(() => {
@@ -825,7 +859,9 @@ describe("EvaluationPlayground (UJ-045)", () => {
 
     await renderAppRoutesReady("/evaluation?tab=playground");
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-preset-select")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-preset-select"),
+      ).toBeInTheDocument();
     });
     fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
       target: { value: PRESET_ID },
@@ -852,5 +888,59 @@ describe("EvaluationPlayground (UJ-045)", () => {
       expect(screen.getByTestId("eval-playground-top-k")).toHaveValue(5);
     });
     expect(screen.getByTestId("eval-playground-preset-select")).toHaveValue("");
+  });
+
+  it("shows promote button for super-admin and confirms promote (UJ-047)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/rag/config/promote")) {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: async () => ({
+              config_version: 3,
+              promoted_at: "2026-07-02T12:00:00Z",
+              promoted_by: "44444444-4444-4444-4444-444444444444",
+            }),
+          });
+        }
+        if (url.includes("/internal/v1/eval/config-presets")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ items: [SAVED_PRESET_BODY] }),
+          });
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-promote-button"),
+      ).toBeInTheDocument();
+    });
+    fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
+      target: { value: PRESET_ID },
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-promote-button"),
+      ).not.toBeDisabled();
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-promote-button"));
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-promote-dialog"),
+      ).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-promote-confirm"));
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-promote-version"),
+      ).toHaveTextContent("3");
+    });
   });
 });

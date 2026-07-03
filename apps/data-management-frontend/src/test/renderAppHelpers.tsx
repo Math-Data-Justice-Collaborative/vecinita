@@ -13,7 +13,10 @@ import { AuthProvider } from "@/auth/AuthContext";
 import App from "@/App";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
-import { installAuthenticatedSupabaseMock } from "./supabaseMock";
+import {
+  installAuthenticatedSupabaseMock,
+  installSuperAdminSupabaseMock,
+} from "./supabaseMock";
 import { renderWithProviders } from "./renderWithProviders";
 
 const { useMediaQueryMock } = vi.hoisted(() => ({
@@ -54,6 +57,33 @@ export async function renderAppRoutesReady(
   initialRoute = "/dashboard",
 ): Promise<RenderResult> {
   const result = renderAppRoutes(initialRoute);
+  await waitForAuthReady();
+  return result;
+}
+
+export function renderSuperAdminAppRoutes(
+  initialRoute = "/dashboard",
+): RenderResult {
+  installSuperAdminSupabaseMock();
+  return render(
+    <LocaleProvider>
+      <ThemeProvider>
+        <MemoryRouter initialEntries={[initialRoute]}>
+          <AuthProvider>
+            <Routes>
+              <Route path="/*" element={<App />} />
+            </Routes>
+          </AuthProvider>
+        </MemoryRouter>
+      </ThemeProvider>
+    </LocaleProvider>,
+  );
+}
+
+export async function renderSuperAdminAppRoutesReady(
+  initialRoute = "/dashboard",
+): Promise<RenderResult> {
+  const result = renderSuperAdminAppRoutes(initialRoute);
   await waitForAuthReady();
   return result;
 }

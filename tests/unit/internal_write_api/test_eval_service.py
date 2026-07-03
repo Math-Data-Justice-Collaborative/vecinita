@@ -626,6 +626,33 @@ def test_get_eval_timeseries_returns_completed_points(engine: Engine, eval_run_i
     assert "tone-friendly" in series.available_metrics
 
 
+def test_get_eval_timeseries_returns_recent_runs_in_chronological_order(
+    engine: Engine,
+    eval_run_id: UUID,
+) -> None:
+    """Recent completed runs are included under LIMIT and returned oldest-first for charts."""
+    completed_at = datetime.now(UTC)
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                """
+                UPDATE eval_runs
+                SET status = 'completed',
+                    started_at = :completed_at,
+                    completed_at = :completed_at,
+                    metrics_summary = '{}'::jsonb
+                WHERE id = :id
+                """
+            ),
+            {"id": eval_run_id, "completed_at": completed_at},
+        )
+    series = get_eval_timeseries(engine, limit=5)
+    matching = [point for point in series.points if point.run_id == eval_run_id]
+    assert len(matching) == 1
+    completed_times = [point.completed_at for point in series.points]
+    assert completed_times == sorted(completed_times)
+
+
 def test_get_eval_timeseries_skips_rows_without_completed_at(
     engine: Engine,
     eval_run_id: UUID,

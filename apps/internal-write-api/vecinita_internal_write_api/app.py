@@ -16,9 +16,12 @@ from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, status
 from sqlalchemy import create_engine, text
 from vecinita_shared_schemas.auth import (
     AuthContext,
+    AuthPrincipal,
+    is_admin_role,
     require_admin_write,
     require_authenticated,
     require_service,
+    require_super_admin,
 )
 from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.db_mapping import (
@@ -37,6 +40,9 @@ from vecinita_shared_schemas.eval_config import (
     EvalConfigPresetListResponse,
     EvalConfigPresetResponse,
     EvalConfigPresetUpdateRequest,
+    RagConfigActiveResponse,
+    RagConfigPromoteRequest,
+    RagConfigPromoteResponse,
 )
 from vecinita_shared_schemas.internal_write import (
     AuditCleanupResponse,
@@ -124,6 +130,11 @@ from vecinita_internal_write_api.ollama_models_client import (
     OllamaModelsClient,
     OllamaModelsClientError,
     OllamaModelsClientProtocol,
+)
+from vecinita_internal_write_api.rag_production_config_service import (
+    RagConfigPromoteNotFoundError,
+    get_active_rag_config,
+    promote_rag_config,
 )
 from vecinita_internal_write_api.tags import (
     replace_chunk_tags,
@@ -222,6 +233,28 @@ def _resolve_read_actor(
     if ctx.is_service or ctx.principal is None:
         return (None, None)
     return (ctx.principal.sub, ctx.principal.role)
+
+
+def _resolve_admin_read_actor(
+    ctx: Annotated[AuthContext, Depends(require_authenticated)],
+) -> AuthPrincipal:
+    """Admin or super-admin operator JWT for production config read routes."""
+    if ctx.is_service or ctx.principal is None or not is_admin_role(ctx.principal.role):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    return ctx.principal
+
+
+def _resolve_super_admin_actor(
+    ctx: Annotated[AuthContext, Depends(require_super_admin)],
+) -> UUID:
+    """Super-admin operator id for promote routes."""
+    if ctx.principal is None:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    return ctx.principal.sub
+
+
+AdminReadActorDep = Annotated[AuthPrincipal, Depends(_resolve_admin_read_actor)]
+SuperAdminActorDep = Annotated[UUID, Depends(_resolve_super_admin_actor)]
 
 
 WriteActorDep = Annotated[tuple[UUID | None, str | None], Depends(_resolve_write_actor)]
@@ -1554,6 +1587,34 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                 detail="Forbidden",
             ) from exc
         except LookupError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Not found",
+            ) from exc
+
+    @app.get(
+        "/internal/v1/rag/config/active",
+        response_model=RagConfigActiveResponse,
+    )
+    def get_active_rag_config_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: AdminReadActorDep,
+    ) -> RagConfigActiveResponse:
+        active = get_active_rag_config(engine)
+        if active is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        return active
+
+    @app.post(
+        "/internal/v1/rag/config/promote",
+        response_model=RagConfigPromoteResponse,
+    )
+    def promote_rag_config_route(  # pyright: ignore[reportUnusedFunction]
+        actor_id: SuperAdminActorDep,
+        body: RagConfigPromoteRequest,
+    ) -> RagConfigPromoteResponse:
+        try:
+            return promote_rag_config(engine, promoted_by=actor_id, body=body)
+        except RagConfigPromoteNotFoundError as exc:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Not found",

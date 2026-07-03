@@ -239,7 +239,8 @@ const enStrings = {
   "admin.evaluation.playground.run": "Run in sandbox",
   "admin.evaluation.playground.running": "Starting run…",
   "admin.evaluation.playground.recentRun": "Latest run",
-  "admin.evaluation.playground.loadModelsFailed": "Failed to load Ollama models",
+  "admin.evaluation.playground.loadModelsFailed":
+    "Failed to load Ollama models",
   "admin.evaluation.playground.runFailed": "Failed to start playground run",
   "admin.evaluation.playground.presetsTitle": "Saved presets",
   "admin.evaluation.playground.presetsLoad": "Load preset",
@@ -251,12 +252,24 @@ const enStrings = {
   "admin.evaluation.playground.presetsUpdate": "Update preset",
   "admin.evaluation.playground.presetsClone": "Clone to my presets",
   "admin.evaluation.playground.presetsName": "Preset name",
-  "admin.evaluation.playground.presetsShareRead": "Allow other admins to view and clone",
-  "admin.evaluation.playground.presetsSaveDialogTitle": "Save playground preset",
-  "admin.evaluation.playground.presetsUpdateDialogTitle": "Update playground preset",
+  "admin.evaluation.playground.presetsShareRead":
+    "Allow other admins to view and clone",
+  "admin.evaluation.playground.presetsSaveDialogTitle":
+    "Save playground preset",
+  "admin.evaluation.playground.presetsUpdateDialogTitle":
+    "Update playground preset",
   "admin.evaluation.playground.presetsLoadFailed": "Failed to load presets",
   "admin.evaluation.playground.presetsSaveFailed": "Failed to save preset",
   "admin.evaluation.playground.presetsCloneFailed": "Failed to clone preset",
+  "admin.evaluation.playground.promote": "Promote to production",
+  "admin.evaluation.playground.promoteConfirm": "Promote config",
+  "admin.evaluation.playground.promoteDialogBody":
+    "This updates live ChatRAG retrieval and prompt settings. Sandbox eval runs are unchanged.",
+  "admin.evaluation.playground.promoteDialogTitle": "Promote to production?",
+  "admin.evaluation.playground.promoteFailed":
+    "Failed to promote production config",
+  "admin.evaluation.playground.promoteVersion": "Production config v{version}",
+  "admin.evaluation.playground.promoting": "Promoting…",
   "admin.audit.title": "Audit Log",
   "admin.audit.subtitle": "Event history and document changes.",
   "admin.audit.loadFailed": "Failed to load audit log",
@@ -621,7 +634,8 @@ const esStrings = {
   "admin.evaluation.playground.modeGolden": "Lote golden-set",
   "admin.evaluation.playground.modeAdhoc": "Pregunta ad hoc",
   "admin.evaluation.playground.topK": "Top K",
-  "admin.evaluation.playground.minRetrievalScore": "Puntaje mínimo de recuperación",
+  "admin.evaluation.playground.minRetrievalScore":
+    "Puntaje mínimo de recuperación",
   "admin.evaluation.playground.systemPrompt": "Prompt del sistema",
   "admin.evaluation.playground.maxTokens": "Tokens máximos",
   "admin.evaluation.playground.temperature": "Temperatura",
@@ -641,17 +655,34 @@ const esStrings = {
   "admin.evaluation.playground.presetsNone": "Ningún preset seleccionado",
   "admin.evaluation.playground.presetsVersion": "Versión {version}",
   "admin.evaluation.playground.presetsShared": "Compartido",
-  "admin.evaluation.playground.presetsSharedByOther": "Compartido por otro administrador",
+  "admin.evaluation.playground.presetsSharedByOther":
+    "Compartido por otro administrador",
   "admin.evaluation.playground.presetsSave": "Guardar como preset nuevo",
   "admin.evaluation.playground.presetsUpdate": "Actualizar preset",
   "admin.evaluation.playground.presetsClone": "Clonar a mis presets",
   "admin.evaluation.playground.presetsName": "Nombre del preset",
-  "admin.evaluation.playground.presetsShareRead": "Permitir que otros administradores vean y clonen",
-  "admin.evaluation.playground.presetsSaveDialogTitle": "Guardar preset del laboratorio",
-  "admin.evaluation.playground.presetsUpdateDialogTitle": "Actualizar preset del laboratorio",
-  "admin.evaluation.playground.presetsLoadFailed": "No se pudieron cargar los presets",
-  "admin.evaluation.playground.presetsSaveFailed": "No se pudo guardar el preset",
-  "admin.evaluation.playground.presetsCloneFailed": "No se pudo clonar el preset",
+  "admin.evaluation.playground.presetsShareRead":
+    "Permitir que otros administradores vean y clonen",
+  "admin.evaluation.playground.presetsSaveDialogTitle":
+    "Guardar preset del laboratorio",
+  "admin.evaluation.playground.presetsUpdateDialogTitle":
+    "Actualizar preset del laboratorio",
+  "admin.evaluation.playground.presetsLoadFailed":
+    "No se pudieron cargar los presets",
+  "admin.evaluation.playground.presetsSaveFailed":
+    "No se pudo guardar el preset",
+  "admin.evaluation.playground.presetsCloneFailed":
+    "No se pudo clonar el preset",
+  "admin.evaluation.playground.promote": "Promover a producción",
+  "admin.evaluation.playground.promoteConfirm": "Promover configuración",
+  "admin.evaluation.playground.promoteDialogBody":
+    "Esto actualiza la recuperación y el prompt en ChatRAG en vivo. Las ejecuciones sandbox no cambian.",
+  "admin.evaluation.playground.promoteDialogTitle": "¿Promover a producción?",
+  "admin.evaluation.playground.promoteFailed":
+    "No se pudo promover la configuración de producción",
+  "admin.evaluation.playground.promoteVersion":
+    "Configuración de producción v{version}",
+  "admin.evaluation.playground.promoting": "Promoviendo…",
   "admin.audit.title": "Registro de auditoría",
   "admin.audit.subtitle": "Historial de eventos y cambios en documentos.",
   "admin.audit.loadFailed": "No se pudo cargar el registro de auditoría",

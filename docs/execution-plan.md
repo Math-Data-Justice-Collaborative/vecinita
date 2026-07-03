@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 15: EV-009 — Eval UX polish + playground (F36 follow-ons + F37) |
-| **Active milestone** | M70: Super-admin promote + ChatRAG config reader |
-| **Active task** | **T70.1** — Super-admin bootstrap *(next)* |
-| **Tasks completed** | Phase 14 M59–M64 complete (S007); Phase 15 M65–M67 complete (S008); M68 complete (S008); M69 complete (S008) |
+| **Active milestone** | M70: Super-admin promote + ChatRAG config reader *(complete)* |
+| **Active task** | **T70.8** — Phase 15 gate checklist *(next: phase gate / PR-51)* |
+| **Tasks completed** | Phase 14 M59–M64 complete (S007); Phase 15 M65–M70 complete (S008) |
 | **Last updated** | 2026-07-02 |
 | **Evolve cycle** | EV-009 (F36 follow-ons + F37) — **04-tech-plan complete** |
 | **Git branch** | `feat/S008-eval-ux-playground` |
@@ -1403,18 +1403,18 @@ Playground with versioned presets and super-admin runtime promote to ChatRAG.
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
 |---|------|------|--------|-------------|------------|-----------|---------|---------|
-| T70.1 | Code: Super-admin bootstrap — `VECINITA_SUPER_ADMIN_EMAIL` seed in auth layer | Code | pending | ADR-035 §9, config-spec, RD-127 | — | — | S008 | F37 |
-| T70.2 | Test: `tests/e2e/test_uj047_eval_promote_config.py` — TC-131/132 — red | Test | pending | test-plan TC-131/132, UJ-047 | T70.1 | — | S008 | F37 |
-| T70.3 | Code: `POST /rag/config/promote` + `GET /rag/config/active` on internal-write-api | Code | pending | api-contract §EV-009, ADR-035 §10 | T68.2, T70.1 | — | S008 | F37 |
-| T70.4 | Code: `chat-rag-backend` — read `rag_production_config` with env fallback (RD-134) | Code | pending | ADR-035 §11, config-spec | T68.2 | — | S008 | F37 |
-| T70.5 | Test: `tests/integration/test_rag_production_config.py` — TC-133 — red | Test | pending | test-plan TC-133, UJ-047 | T70.4 | — | S008 | F37 |
-| T70.6 | Code: Playground promote button (super-admin only) + confirm dialog | Code | pending | UJ-047, ADR-035 §10 | T70.3, T69.4 | — | S008 | F37 |
-| T70.7 | Config: `docs/staging-secrets-matrix.md` — `VECINITA_SUPER_ADMIN_EMAIL` | Config | pending | config-spec §Eval playground | T70.1 | — | S008 | F37 |
-| T70.8 | Docs: Phase 15 gate checklist + session 04-tech-plan report | Docs | pending | 08-verify-build | T65.3–T70.6 | — | S008 | F37 |
+| T70.1 | Code: Super-admin bootstrap — `VECINITA_SUPER_ADMIN_EMAIL` seed in auth layer | Code | completed | ADR-035 §9, config-spec, RD-127 | — | — | S008 | F37 | 2026-07-02 |
+| T70.2 | Test: `tests/e2e/test_uj047_eval_promote_config.py` — TC-131/132 — red | Test | completed | test-plan TC-131/132, UJ-047 | T70.1 | — | S008 | F37 | 2026-07-02 |
+| T70.3 | Code: `POST /rag/config/promote` + `GET /rag/config/active` on internal-write-api | Code | completed | api-contract §EV-009, ADR-035 §10 | T68.2, T70.1 | — | S008 | F37 | 2026-07-02 |
+| T70.4 | Code: `chat-rag-backend` — read `rag_production_config` with env fallback (RD-134) | Code | completed | ADR-035 §11, config-spec | T68.2 | — | S008 | F37 | 2026-07-02 |
+| T70.5 | Test: `tests/integration/test_rag_production_config.py` — TC-133 — red | Test | completed | test-plan TC-133, UJ-047 | T70.4 | — | S008 | F37 | 2026-07-02 |
+| T70.6 | Code: Playground promote button (super-admin only) + confirm dialog | Code | completed | UJ-047, ADR-035 §10 | T70.3, T69.4 | — | S008 | F37 | 2026-07-02 |
+| T70.7 | Config: `docs/staging-secrets-matrix.md` — `VECINITA_SUPER_ADMIN_EMAIL` | Config | completed | config-spec §Eval playground | T70.1 | — | S008 | F37 | 2026-07-02 |
+| T70.8 | Docs: Phase 15 gate checklist + session 04-tech-plan report | Docs | in_progress | 08-verify-build | T65.3–T70.6 | — | S008 | F37 |
 
 #### Phase 15 Gate Check
 
-- [ ] All M65–M70 tasks completed (T65.1–T70.8)
+- [x] All M65–M70 tasks completed (T65.1–T70.7; T70.8 gate doc in progress)
 - [ ] TC-123–TC-133 green; UJ-044–047 covered (T2)
 - [ ] AC-E22–AC-E26 satisfied at T2; live promote smoke at 13-deploy-smoke (T3)
 - [ ] `eval_config_presets` / `rag_production_config` migrations applied; privacy tests green

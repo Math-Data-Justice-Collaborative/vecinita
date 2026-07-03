@@ -636,7 +636,7 @@ def get_eval_timeseries(engine: Engine, *, limit: int = 100) -> EvalTimeseriesRe
                     SELECT id, completed_at, metrics_summary
                     FROM eval_runs
                     WHERE status = 'completed' AND completed_at IS NOT NULL
-                    ORDER BY completed_at ASC
+                    ORDER BY completed_at DESC
                     LIMIT :limit
                     """
                 ),
@@ -662,5 +662,6 @@ def get_eval_timeseries(engine: Engine, *, limit: int = 100) -> EvalTimeseriesRe
                 metrics_summary=summary,
             )
         )
+    points.reverse()
     available = list(_BUILTIN_METRICS) + sorted(custom_slugs)
     return EvalTimeseriesResponse(points=points, available_metrics=available)

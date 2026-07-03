@@ -15,7 +15,7 @@ from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 from fastapi import Depends, Header, HTTPException, status
 from jwt import PyJWKClient, PyJWTError
 
-Role = Literal["admin", "viewer"]
+Role = Literal["admin", "viewer", "super-admin"]
 _DEV_BYPASS_SUB = UUID("00000000-0000-0000-0000-000000000000")
 
 
@@ -119,11 +119,29 @@ def _role_from_payload(payload: dict[str, object]) -> Role:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     app_metadata = cast("dict[str, object]", app_meta)
     role_raw = app_metadata.get("role")
+    if role_raw == "super-admin":
+        return "super-admin"
     if role_raw == "admin":
         return "admin"
     if role_raw == "viewer":
         return "viewer"
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
+
+def is_admin_role(role: Role) -> bool:
+    """Return True when the role may perform admin write actions (ADR-035 §9)."""
+    return role in {"admin", "super-admin"}
+
+
+def is_super_admin_role(role: Role) -> bool:
+    """Return True when the role may promote production RAG config."""
+    return role == "super-admin"
+
+
+def _role_satisfies(required: Role, actual: Role) -> bool:
+    if actual == required:
+        return True
+    return required == "admin" and actual == "super-admin"
 
 
 def verify_supabase_jwt(
@@ -200,7 +218,7 @@ def require_role(required: Role) -> Callable[..., AuthPrincipal]:
     def _dep(
         principal: Annotated[AuthPrincipal, Depends(get_principal)],
     ) -> AuthPrincipal:
-        if principal.role != required:
+        if not _role_satisfies(required, principal.role):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
         return principal
 
@@ -241,7 +259,16 @@ def require_admin_write(
     """Write routes: service key passes; operator JWT must have role `admin`."""
     if ctx.is_service:
         return ctx
-    if ctx.principal is None or ctx.principal.role != "admin":
+    if ctx.principal is None or not is_admin_role(ctx.principal.role):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    return ctx
+
+
+def require_super_admin(
+    ctx: Annotated[AuthContext, Depends(resolve_operator_or_service)],
+) -> AuthContext:
+    """Promote routes: operator JWT must have role `super-admin` (ADR-035 §10)."""
+    if ctx.is_service or ctx.principal is None or not is_super_admin_role(ctx.principal.role):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     return ctx
 

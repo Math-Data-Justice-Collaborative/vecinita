@@ -582,6 +582,7 @@ components:
           enum:
             - admin
             - viewer
+            - super-admin
           nullable: true
         status:
           type: string

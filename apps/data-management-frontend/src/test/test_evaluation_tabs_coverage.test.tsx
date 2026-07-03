@@ -506,7 +506,9 @@ describe("evaluation tab branch coverage", () => {
 
     renderTab(<EvaluationDashboardTab />);
     await waitFor(() => {
-      expect(screen.getByTestId("evaluation-dashboard-tab")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("evaluation-dashboard-tab"),
+      ).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByTestId("eval-time-preset-custom"));
@@ -530,7 +532,9 @@ describe("evaluation tab branch coverage", () => {
   });
 
   it("EvaluationDashboardTab surfaces Error message from fetchEvalTimeseries", async () => {
-    vi.mocked(fetchEvalTimeseries).mockRejectedValue(new Error("timeseries down"));
+    vi.mocked(fetchEvalTimeseries).mockRejectedValue(
+      new Error("timeseries down"),
+    );
     renderTab(<EvaluationDashboardTab />);
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent("timeseries down");

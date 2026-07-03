@@ -147,7 +147,9 @@ export function JobsPage() {
                     <TableRow
                       key={job.job_id}
                       data-testid="job-row"
-                      className={isEval ? "cursor-pointer hover:bg-muted/50" : undefined}
+                      className={
+                        isEval ? "cursor-pointer hover:bg-muted/50" : undefined
+                      }
                       onClick={() => {
                         if (isEval) {
                           void navigate(

@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Copy, FlaskConical, Save } from "lucide-react";
+import { Copy, FlaskConical, Rocket, Save } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ import {
   createEvalConfigPreset,
   fetchEvalConfigPresets,
   fetchOllamaModels,
+  promoteRagConfig,
   triggerPlaygroundEvalRun,
   updateEvalConfigPreset,
 } from "@/api/admin";
@@ -106,6 +107,7 @@ export function EvaluationPlaygroundTab({
   const tr = useAdminT();
   const authCtx = useContext(AuthContext);
   const user = authCtx?.user ?? null;
+  const isSuperAdmin = authCtx?.role === "super-admin";
   const [mode, setMode] = useState<EvalRunModeApi>("golden");
   const [topK, setTopK] = useState(DEFAULT_TOP_K);
   const [minRetrievalScore, setMinRetrievalScore] = useState(
@@ -137,10 +139,14 @@ export function EvaluationPlaygroundTab({
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastRunId, setLastRunId] = useState<string | null>(null);
+  const [promoteDialogOpen, setPromoteDialogOpen] = useState(false);
+  const [promoting, setPromoting] = useState(false);
+  const [promoteVersion, setPromoteVersion] = useState<number | null>(null);
   const initialPresetApplied = useRef(false);
 
   const selectedPreset = useMemo(
-    () => presets.find((preset) => preset.preset_id === selectedPresetId) ?? null,
+    () =>
+      presets.find((preset) => preset.preset_id === selectedPresetId) ?? null,
     [presets, selectedPresetId],
   );
 
@@ -365,6 +371,33 @@ export function EvaluationPlaygroundTab({
     return false;
   }, [adhocQuestion, mode, running]);
 
+  const promoteDisabled = useMemo(() => {
+    if (promoting) return true;
+    return !selectedPresetId && !lastRunId;
+  }, [lastRunId, promoting, selectedPresetId]);
+
+  const handlePromote = useCallback(async () => {
+    setPromoting(true);
+    setError(null);
+    try {
+      const client = requireCorpusConfig();
+      const body = selectedPresetId
+        ? { source: "preset" as const, preset_id: selectedPresetId }
+        : { source: "run" as const, run_id: lastRunId ?? "" };
+      const result = await promoteRagConfig(client, body);
+      setPromoteVersion(result.config_version);
+      setPromoteDialogOpen(false);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : tr("admin.evaluation.playground.promoteFailed"),
+      );
+    } finally {
+      setPromoting(false);
+    }
+  }, [lastRunId, selectedPresetId, tr]);
+
   const handleRun = useCallback(async () => {
     setRunning(true);
     setError(null);
@@ -485,7 +518,9 @@ export function EvaluationPlaygroundTab({
                     <Badge variant="outline">
                       {isPresetOwner
                         ? tr("admin.evaluation.playground.presetsShared")
-                        : tr("admin.evaluation.playground.presetsSharedByOther")}
+                        : tr(
+                            "admin.evaluation.playground.presetsSharedByOther",
+                          )}
                     </Badge>
                   ) : null}
                 </div>
@@ -740,13 +775,78 @@ export function EvaluationPlaygroundTab({
                 : tr("admin.evaluation.playground.run")}
             </Button>
             {lastRunId ? (
-              <p className="font-mono text-xs" data-testid="eval-playground-last-run">
+              <p
+                className="font-mono text-xs"
+                data-testid="eval-playground-last-run"
+              >
                 {lastRunId}
               </p>
+            ) : null}
+            {isSuperAdmin ? (
+              <>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={promoteDisabled}
+                  data-testid="eval-playground-promote-button"
+                  onClick={() => {
+                    setPromoteDialogOpen(true);
+                  }}
+                >
+                  <Rocket className="mr-2 h-4 w-4" />
+                  {tr("admin.evaluation.playground.promote")}
+                </Button>
+                {promoteVersion !== null ? (
+                  <p
+                    className="text-xs text-muted-foreground"
+                    data-testid="eval-playground-promote-version"
+                  >
+                    {tr("admin.evaluation.playground.promoteVersion", {
+                      version: promoteVersion,
+                    })}
+                  </p>
+                ) : null}
+              </>
             ) : null}
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={promoteDialogOpen} onOpenChange={setPromoteDialogOpen}>
+        <DialogContent data-testid="eval-playground-promote-dialog">
+          <DialogHeader>
+            <DialogTitle>
+              {tr("admin.evaluation.playground.promoteDialogTitle")}
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            {tr("admin.evaluation.playground.promoteDialogBody")}
+          </p>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setPromoteDialogOpen(false);
+              }}
+            >
+              {tr("shared.cancel")}
+            </Button>
+            <Button
+              type="button"
+              disabled={promoting}
+              data-testid="eval-playground-promote-confirm"
+              onClick={() => {
+                void handlePromote();
+              }}
+            >
+              {promoting
+                ? tr("admin.evaluation.playground.promoting")
+                : tr("admin.evaluation.playground.promoteConfirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={presetDialogOpen} onOpenChange={setPresetDialogOpen}>
         <DialogContent data-testid="eval-playground-preset-dialog">

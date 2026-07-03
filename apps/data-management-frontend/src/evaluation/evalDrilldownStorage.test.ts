@@ -112,10 +112,7 @@ describe("evalDrilldownStorage", () => {
   });
 
   it("loadEvalDrilldownLayout uses defaults when visibleColumns is omitted", () => {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ wrapCells: false }),
-    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ wrapCells: false }));
     expect(loadEvalDrilldownLayout().visibleColumns).toEqual([
       "question",
       "answer",

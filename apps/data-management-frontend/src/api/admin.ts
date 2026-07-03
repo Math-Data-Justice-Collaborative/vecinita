@@ -475,7 +475,9 @@ export async function fetchEvalConfigPresets(
     },
   );
   if (!response.ok) {
-    throw new Error(`Eval config presets list failed (${String(response.status)})`);
+    throw new Error(
+      `Eval config presets list failed (${String(response.status)})`,
+    );
   }
   return response.json() as Promise<{ items: EvalConfigPresetApi[] }>;
 }
@@ -496,7 +498,9 @@ export async function createEvalConfigPreset(
     },
   );
   if (!response.ok) {
-    throw new Error(`Eval config preset create failed (${String(response.status)})`);
+    throw new Error(
+      `Eval config preset create failed (${String(response.status)})`,
+    );
   }
   return response.json() as Promise<EvalConfigPresetApi>;
 }
@@ -518,7 +522,9 @@ export async function updateEvalConfigPreset(
     },
   );
   if (!response.ok) {
-    throw new Error(`Eval config preset update failed (${String(response.status)})`);
+    throw new Error(
+      `Eval config preset update failed (${String(response.status)})`,
+    );
   }
   return response.json() as Promise<EvalConfigPresetApi>;
 }
@@ -540,9 +546,70 @@ export async function cloneEvalConfigPreset(
     },
   );
   if (!response.ok) {
-    throw new Error(`Eval config preset clone failed (${String(response.status)})`);
+    throw new Error(
+      `Eval config preset clone failed (${String(response.status)})`,
+    );
   }
   return response.json() as Promise<EvalConfigPresetApi>;
+}
+
+export interface RagConfigPromoteRequestApi {
+  source: "preset" | "run";
+  preset_id?: string;
+  run_id?: string;
+}
+
+export interface RagConfigPromoteResponseApi {
+  config_version: number;
+  promoted_at: string;
+  promoted_by: string;
+}
+
+export interface RagConfigActiveResponseApi {
+  config: EvalConfigApi;
+  config_version: number;
+  promoted_at?: string | null;
+  promoted_by?: string | null;
+}
+
+export async function promoteRagConfig(
+  options: CorpusClientOptions,
+  body: RagConfigPromoteRequestApi,
+): Promise<RagConfigPromoteResponseApi> {
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/rag/config/promote`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`RAG config promote failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<RagConfigPromoteResponseApi>;
+}
+
+export async function fetchActiveRagConfig(
+  options: CorpusClientOptions,
+): Promise<RagConfigActiveResponseApi> {
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/rag/config/active`,
+    {
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+      },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Active RAG config fetch failed (${String(response.status)})`,
+    );
+  }
+  return response.json() as Promise<RagConfigActiveResponseApi>;
 }
 
 export interface PlaygroundEvalRunRequestApi {
@@ -582,14 +649,11 @@ export interface OllamaModelSummaryApi {
 export async function fetchOllamaModels(
   options: CorpusClientOptions,
 ): Promise<{ items: OllamaModelSummaryApi[] }> {
-  const response = await fetch(
-    `${options.baseUrl}/internal/v1/models/ollama`,
-    {
-      headers: {
-        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
-      },
+  const response = await fetch(`${options.baseUrl}/internal/v1/models/ollama`, {
+    headers: {
+      Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
     },
-  );
+  });
   if (!response.ok) {
     throw new Error(`Ollama models list failed (${String(response.status)})`);
   }

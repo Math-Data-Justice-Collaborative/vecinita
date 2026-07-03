@@ -54,7 +54,9 @@ export function loadEvalDashboardLayout(): EvalDashboardLayout {
           ? parsed.customRangeStart
           : null,
       customRangeEnd:
-        typeof parsed.customRangeEnd === "string" ? parsed.customRangeEnd : null,
+        typeof parsed.customRangeEnd === "string"
+          ? parsed.customRangeEnd
+          : null,
     };
   } catch {
     return DEFAULT_LAYOUT;

@@ -172,9 +172,7 @@ export function EvaluationDashboardTab() {
             key={preset}
             type="button"
             size="sm"
-            variant={
-              layout.timeRangePreset === preset ? "default" : "outline"
-            }
+            variant={layout.timeRangePreset === preset ? "default" : "outline"}
             onClick={() => {
               updateLayout({ ...layout, timeRangePreset: preset });
             }}
@@ -281,43 +279,43 @@ export function EvaluationDashboardTab() {
 
       {!customRangeEmpty &&
         layout.selectedMetrics.map((metricId) => {
-        const collapsed = layout.collapsedPanels[metricId] ?? false;
-        return (
-          <Card key={metricId} data-testid={`eval-panel-${metricId}`}>
-            <CardHeader className="flex flex-row items-center justify-between py-3">
-              <CardTitle className="text-base">
-                {metricLabel(metricId, tr)}
-              </CardTitle>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                aria-expanded={!collapsed}
-                onClick={() => {
-                  togglePanel(metricId);
-                }}
-                data-testid={`eval-panel-toggle-${metricId}`}
-              >
-                {collapsed ? (
-                  <ChevronDown className="h-4 w-4" />
-                ) : (
-                  <ChevronUp className="h-4 w-4" />
-                )}
-              </Button>
-            </CardHeader>
-            <CardContent className={cn(collapsed && "hidden")}>
-              <EvalMetricChart
-                points={filteredPoints}
-                metricId={metricId}
-                metricLabel={metricLabel(metricId, tr)}
-                chartType={layout.chartType}
-                showThreshold={layout.showThresholds}
-                xAxisGranularity={granularity}
-              />
-            </CardContent>
-          </Card>
-        );
-      })}
+          const collapsed = layout.collapsedPanels[metricId] ?? false;
+          return (
+            <Card key={metricId} data-testid={`eval-panel-${metricId}`}>
+              <CardHeader className="flex flex-row items-center justify-between py-3">
+                <CardTitle className="text-base">
+                  {metricLabel(metricId, tr)}
+                </CardTitle>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  aria-expanded={!collapsed}
+                  onClick={() => {
+                    togglePanel(metricId);
+                  }}
+                  data-testid={`eval-panel-toggle-${metricId}`}
+                >
+                  {collapsed ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronUp className="h-4 w-4" />
+                  )}
+                </Button>
+              </CardHeader>
+              <CardContent className={cn(collapsed && "hidden")}>
+                <EvalMetricChart
+                  points={filteredPoints}
+                  metricId={metricId}
+                  metricLabel={metricLabel(metricId, tr)}
+                  chartType={layout.chartType}
+                  showThreshold={layout.showThresholds}
+                  xAxisGranularity={granularity}
+                />
+              </CardContent>
+            </Card>
+          );
+        })}
     </div>
   );
 }

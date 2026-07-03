@@ -113,10 +113,7 @@ const ADHOC_RUN: EvalRunDetailApi = {
   ],
 };
 
-function renderCompare(
-  runA: EvalRunDetailApi,
-  runB: EvalRunDetailApi,
-) {
+function renderCompare(runA: EvalRunDetailApi, runB: EvalRunDetailApi) {
   return render(
     <LocaleProvider>
       <EvaluationCompareView runA={runA} runB={runB} />
@@ -165,9 +162,7 @@ describe("EvaluationCompareView (UJ-046)", () => {
     const pantryRow = compareRoot().getByTestId(
       "eval-compare-row-community-food-pantry",
     );
-    expect(pantryRow).toHaveTextContent(
-      "When are food pantry hours updated?",
-    );
+    expect(pantryRow).toHaveTextContent("When are food pantry hours updated?");
     expect(pantryRow).toHaveTextContent("Food pantry hours are posted weekly.");
     expect(pantryRow).toHaveTextContent("Hours update every Monday morning.");
     expect(pantryRow).toHaveTextContent("0.85");

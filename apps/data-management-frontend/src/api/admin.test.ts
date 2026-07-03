@@ -11,6 +11,7 @@ import {
   createEvalCriterion,
   fetchAuditLog,
   fetchDocumentHistory,
+  fetchActiveRagConfig,
   fetchEvalConfigPresets,
   fetchEvalCriteria,
   fetchEvalRunDetail,
@@ -22,6 +23,7 @@ import {
   parseAuditLogResponse,
   parseHealthAggregate,
   parseStatsSummary,
+  promoteRagConfig,
   triggerEvalRun,
   triggerPlaygroundEvalRun,
   updateEvalConfigPreset,
@@ -620,13 +622,19 @@ describe("admin API eval helpers", () => {
   it("updateEvalConfigPreset patches preset", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        jsonResponse({ ...EVAL_PRESET, version: 2, name: "baseline-v2" }),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse({ ...EVAL_PRESET, version: 2, name: "baseline-v2" }),
+        ),
     );
-    const updated = await updateEvalConfigPreset(CLIENT, EVAL_PRESET.preset_id, {
-      name: "baseline-v2",
-    });
+    const updated = await updateEvalConfigPreset(
+      CLIENT,
+      EVAL_PRESET.preset_id,
+      {
+        name: "baseline-v2",
+      },
+    );
     expect(updated.version).toBe(2);
   });
 
@@ -644,7 +652,10 @@ describe("admin API eval helpers", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
-        jsonResponse({ ...EVAL_PRESET, preset_id: "00000000-0000-0000-0000-0000000000bb" }),
+        jsonResponse({
+          ...EVAL_PRESET,
+          preset_id: "00000000-0000-0000-0000-0000000000bb",
+        }),
       ),
     );
     await cloneEvalConfigPreset(CLIENT, EVAL_PRESET.preset_id, "copy");
@@ -656,7 +667,10 @@ describe("admin API eval helpers", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
-        jsonResponse({ ...EVAL_PRESET, preset_id: "00000000-0000-0000-0000-0000000000cc" }),
+        jsonResponse({
+          ...EVAL_PRESET,
+          preset_id: "00000000-0000-0000-0000-0000000000cc",
+        }),
       ),
     );
     await cloneEvalConfigPreset(CLIENT, EVAL_PRESET.preset_id);
@@ -671,6 +685,46 @@ describe("admin API eval helpers", () => {
     await expect(
       cloneEvalConfigPreset(CLIENT, EVAL_PRESET.preset_id),
     ).rejects.toThrow(/409/);
+  });
+
+  it("promoteRagConfig posts preset source body", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          config_version: 2,
+          promoted_at: "2026-07-02T12:00:00Z",
+          promoted_by: "44444444-4444-4444-4444-444444444444",
+        }),
+      ),
+    );
+    await promoteRagConfig(JWT_CLIENT, {
+      source: "preset",
+      preset_id: EVAL_PRESET.preset_id,
+    });
+    expect(mockFetchUrl()).toContain("/internal/v1/rag/config/promote");
+    expect(mockFetchJsonBody()).toEqual({
+      source: "preset",
+      preset_id: EVAL_PRESET.preset_id,
+    });
+    expectBearerJwt(vi.mocked(fetch).mock.calls[0]?.[1]);
+  });
+
+  it("fetchActiveRagConfig reads active production config", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          config: EVAL_PRESET.config,
+          config_version: 1,
+          promoted_at: "2026-07-02T12:00:00Z",
+          promoted_by: "44444444-4444-4444-4444-444444444444",
+        }),
+      ),
+    );
+    const active = await fetchActiveRagConfig(JWT_CLIENT);
+    expect(active.config_version).toBe(1);
+    expect(mockFetchUrl()).toContain("/internal/v1/rag/config/active");
   });
 
   it("triggerPlaygroundEvalRun posts playground body", async () => {
@@ -729,9 +783,9 @@ describe("admin API eval helpers", () => {
   it("fetchEvalTimeseries fetches with limit", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        jsonResponse({ points: [], available_metrics: [] }),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(jsonResponse({ points: [], available_metrics: [] })),
     );
     await fetchEvalTimeseries(CLIENT, 50);
     const url = mockFetchUrl();
@@ -796,9 +850,9 @@ describe("admin API eval helpers", () => {
   it("updateEvalCriterion patches criterion", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        jsonResponse({ ...EVAL_CRITERION, enabled: false }),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(jsonResponse({ ...EVAL_CRITERION, enabled: false })),
     );
     const updated = await updateEvalCriterion(
       CLIENT,
@@ -866,7 +920,9 @@ describe("admin API eval helpers", () => {
           return Promise.resolve(jsonResponse({ items: [] }));
         }
         if (url.includes("/eval/runs") && url.includes("timeseries")) {
-          return Promise.resolve(jsonResponse({ points: [], available_metrics: [] }));
+          return Promise.resolve(
+            jsonResponse({ points: [], available_metrics: [] }),
+          );
         }
         if (url.includes("/eval/runs/")) {
           return Promise.resolve(
@@ -944,7 +1000,10 @@ describe("admin API eval helpers", () => {
         items: [],
       }),
     );
-    await fetchEvalRunDetail(JWT_CLIENT, "00000000-0000-0000-0000-000000000099");
+    await fetchEvalRunDetail(
+      JWT_CLIENT,
+      "00000000-0000-0000-0000-000000000099",
+    );
     expectBearerJwt(vi.mocked(fetch).mock.calls[1]?.[1]);
 
     vi.mocked(fetch).mockResolvedValue(
@@ -977,7 +1036,10 @@ describe("admin API eval helpers", () => {
     expectBearerJwt(vi.mocked(fetch).mock.calls[5]?.[1]);
 
     vi.mocked(fetch).mockResolvedValue(
-      jsonResponse({ ...EVAL_PRESET, preset_id: "00000000-0000-0000-0000-0000000000bb" }),
+      jsonResponse({
+        ...EVAL_PRESET,
+        preset_id: "00000000-0000-0000-0000-0000000000bb",
+      }),
     );
     await cloneEvalConfigPreset(JWT_CLIENT, EVAL_PRESET.preset_id);
     expectBearerJwt(vi.mocked(fetch).mock.calls[6]?.[1]);
@@ -1006,7 +1068,9 @@ describe("admin API eval helpers", () => {
     await fetchEvalTimeseries(JWT_CLIENT);
     expectBearerJwt(vi.mocked(fetch).mock.calls[9]?.[1]);
 
-    vi.mocked(fetch).mockResolvedValue(jsonResponse({ items: [EVAL_CRITERION] }));
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({ items: [EVAL_CRITERION] }),
+    );
     await fetchEvalCriteria(JWT_CLIENT);
     expectBearerJwt(vi.mocked(fetch).mock.calls[10]?.[1]);
 

@@ -136,7 +136,7 @@
 - [x] **AC-E23**: Eval runs appear on Jobs tab with `job_type=eval` and live status; click navigates to `/evaluation?run=<id>` (UJ-044, TC-124). — S008 M66 (T2; deploy pending)
 - [x] **AC-E24**: Dashboard supports scatter chart type and time-range presets 1D/7D/10D/1M/1Y/custom with empty state (UJ-041, TC-125/126). — S008 M67 (T2; deploy pending)
 - [ ] **AC-E25**: Playground supports golden + ad-hoc runs with sandbox config overrides, versioned presets, and side-by-side compare (UJ-045/046, TC-127–TC-130). — pending S008 M68–M69
-- [ ] **AC-E26**: Super-admin can promote sandbox config to production; ChatRAG reads active config from DB; non-super-admin denied (UJ-047, TC-131–TC-133). — pending S008 M70
+- [x] **AC-E26**: Super-admin can promote sandbox config to production; ChatRAG reads active config from DB; non-super-admin denied (UJ-047, TC-131–TC-133). — S008 M70
 
 ## Quantitative benchmarks
 

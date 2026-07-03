@@ -106,7 +106,10 @@ export function EvalMetricChart({
               type="number"
               domain={["dataMin", "dataMax"]}
               tickFormatter={(value: number) =>
-                formatEvalChartLabel(new Date(value).toISOString(), xAxisGranularity)
+                formatEvalChartLabel(
+                  new Date(value).toISOString(),
+                  xAxisGranularity,
+                )
               }
               tick={{ fontSize: 11 }}
             />

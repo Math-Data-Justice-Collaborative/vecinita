@@ -49,8 +49,11 @@ class StubRetriever:
         *,
         tag_slugs: list[str] | None = None,
         language: str = "en",
+        top_k: int | None = None,
+        score_threshold: float | None = None,
     ) -> list[RetrievedChunk]:
         """Retrieve chunks."""
+        _ = (top_k, score_threshold)
         self.calls.append((question, tag_slugs, language))
         if tag_slugs and not self.chunks:
             return []
@@ -120,7 +123,11 @@ def _service(
 def test_build_prompt_includes_question_and_context() -> None:
     """Test build prompt includes question and context."""
     chunk = _chunk()
-    prompt = _build_prompt("When is the clinic open?", [chunk])
+    prompt = _build_prompt(
+        "When is the clinic open?",
+        [chunk],
+        system_prompt="Use only the context below.",
+    )
     assert "When is the clinic open?" in prompt
     assert chunk.text in prompt
     assert "<|im_start|>assistant" in prompt
@@ -155,7 +162,7 @@ def test_ask_generates_answer_from_retrieved_chunks() -> None:
     response = service.ask(AskRequest(question="clinic hours"))
     assert response.answer
     assert len(response.sources) == 1
-    assert llm.model_ids == ["llama3.2:3b"]
+    assert llm.model_ids == ["qwen2.5:1.5b-instruct"]
 
 
 def test_ask_uses_explicit_language() -> None:
@@ -179,8 +186,11 @@ def test_ask_retries_without_tags_when_tag_filter_empty() -> None:
             *,
             tag_slugs: list[str] | None = None,
             language: str = "en",
+            top_k: int | None = None,
+            score_threshold: float | None = None,
         ) -> list[RetrievedChunk]:
             """Retrieve chunks."""
+            _ = (top_k, score_threshold)
             self.calls.append((question, tag_slugs, language))
             if tag_slugs:
                 return []

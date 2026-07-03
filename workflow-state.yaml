@@ -175,17 +175,24 @@ project:
           eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS
           change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed.'
     08-verify-build:
-      status: completed
-      completed_at: '2026-06-29'
-      session_id: S004-supabase-auth
-      branch: feat/S004-supabase-auth
-      overall_result: PASS
-      report: docs/verification-report.md
-      blocking_failures: []
-      last_interim: S005/EV-006 F35 interim milestone-boundary verify PASS (2026-06-30, after in-session remediation) — see
-        s005 slice. Baseline top-level stays S004 PASS; S005 cleared for the Phase 12 gate.
-      note: S004/EV-005 F34 milestone-boundary verify PASS (2026-06-29, re-run after remediation). Prior blocking failures
-        (cryptography CVEs; admin FE branch coverage 92.46% < 95%) resolved.
+      status: in_progress
+      started_at: '2026-07-03'
+      session_id: S008-eval-ux-playground
+      branch: feat/S008-eval-ux-playground
+      evolve_cycle_id: EV-009
+      report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
+      note: 'Interim delta verify PASS after fixes — 07-build prerequisite still unmet; routing_plan 08 remains pending until
+        formal milestone close'
+      s004_baseline:
+        status: completed
+        completed_at: '2026-06-29'
+        session_id: S004-supabase-auth
+        branch: feat/S004-supabase-auth
+        overall_result: PASS
+        report: docs/verification-report.md
+        blocking_failures: []
+        note: S004/EV-005 F34 milestone-boundary verify PASS (2026-06-29, re-run after remediation). Prior blocking failures
+          (cryptography CVEs; admin FE branch coverage 92.46% < 95%) resolved.
       s005:
         status: completed
         completed_at: '2026-06-30'
@@ -385,6 +392,28 @@ project:
       evolve_cycle_id: EV-008
       report: docs/sessions/S007-rag-eval/reports/verify-impl.md
       note: F36 delta approved; prerequisite waiver recorded
+      s008:
+        status: completed
+        completed_at: '2026-07-02'
+        partial_rerun_at: '2026-07-02'
+        partial_rerun_note: 'Partial — M65-M69 verified inline; M70/UJ-047/AC-E26 deferred; journey AskQuestion skipped (user
+          waiver 2026-07-02)'
+        session_id: S008-eval-ux-playground
+        branch: feat/S008-eval-ux-playground
+        evolve_cycle_id: EV-009
+        report: docs/sessions/S008-eval-ux-playground/reports/verify-impl.md
+        verified_milestones:
+        - M65
+        - M66
+        - M67
+        - M68
+        - M69
+        deferred:
+        - M70
+        - UJ-047
+        - AC-E26
+        note: 'S008/EV-009 partial 11-verify-impl — M65-M69 verified inline; M70 playground build pending; formal 08→09→10
+          still required before deploy stages'
     13-deploy-smoke:
       status: completed
       started_at: '2026-06-26'
@@ -428,7 +457,9 @@ active_session:
   evolve_cycle_id: EV-009
   artifacts_dir: docs/sessions/S008-eval-ux-playground/
   started_at: '2026-07-02'
-  current_stage: 07-build
+  current_stage: 08-verify-build
+  current_stage_note: 'Interim delta verify PASS after fixes — 07-build prerequisite still unmet; routing_plan 08 remains
+    pending until formal milestone close'
   routing_plan:
   - stage: 00-context
     status: completed
@@ -452,7 +483,12 @@ active_session:
   - stage: 10-e2e
     status: pending
   - stage: 11-verify-impl
-    status: pending
+    status: completed
+    invoked_at: '2026-07-02'
+    completed_at: '2026-07-02'
+    report: docs/sessions/S008-eval-ux-playground/reports/verify-impl.md
+    note: 'Partial completion — M65-M69 verified inline; M70/UJ-047/AC-E26 deferred; journey AskQuestion skipped (user waiver
+      2026-07-02). Outstanding: M70 build, then 08→09→10 formal pass.'
   - stage: 12-verify-deploy
     status: pending
   - stage: 13-deploy-smoke
@@ -509,6 +545,14 @@ active_session:
     kind: adr
     session_id: S008-eval-ux-playground
     stage: 04-tech-plan
+  - path: docs/sessions/S008-eval-ux-playground/reports/verify-impl.md
+    kind: stage-report
+    session_id: S008-eval-ux-playground
+    stage: 11-verify-impl
+  - path: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
+    kind: report
+    session_id: S008-eval-ux-playground
+    stage: 08-verify-build
 sessions:
 - id: S007-rag-eval
   type: feature
@@ -1690,16 +1734,27 @@ stages:
         OpenAPI (signout/email-test/q), runbook (force-signout RPC apply, test-send workflow, AC-U10-U16). DM FE Vitest 303/303;
         new Python tests pass; ESLint+tsc clean; OpenAPI parses. Next: 08-verify-build then Phase 12 gate + major PR-48.'
   08-verify-build:
-    status: completed
-    started_at: '2026-06-25'
-    completed_at: '2026-06-28'
+    status: in_progress
+    started_at: '2026-07-03'
+    session_id: S008-eval-ux-playground
+    branch: feat/S008-eval-ux-playground
+    evolve_cycle_id: EV-009
+    report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
+    note: 'Interim delta verify PASS after fixes — 07-build prerequisite still unmet; routing_plan 08 remains pending until
+      formal milestone close'
+    s008:
+      session_id: S008-eval-ux-playground
+      branch: feat/S008-eval-ux-playground
+      evolve_cycle_id: EV-009
+      started_at: '2026-07-03'
+      status: in_progress
+      report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
+      note: 'Interim delta verify PASS after fixes — 07-build prerequisite still unmet'
     partial_rerun_at: '2026-06-28'
     partial_rerun_note: S003 — milestone-boundary verify PASS (frontend-only F33 chat-history delta; main@9bd7a50 with uncommitted
       S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED — frontend-only
       delta)
     scope: standalone
-    overall: pass
-    report: docs/verification-report.md
     notes: 'EV-004: 522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override
       bumps (aiohttp, msgpack, pypdf, starlette) | S001: milestone-boundary verify PASS; T12 still pending in 07-build; 2
       uncommitted eslint/prettier auto-fixes | S003: milestone-boundary verify PASS; frontend-only F33 chat-history delta;
@@ -1707,7 +1762,7 @@ stages:
       lint, typecheck, FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed; final make check + make test-unit-coverage
       green, 681+ pytest + 312 vitest admin'
     substeps:
-      phase: complete
+      phase: interim
     s003:
       session_id: S003-persistent-chat-history
       branch: main
@@ -2979,7 +3034,7 @@ evolve_cycles:
   status: in_progress
   started: '2026-07-02'
   session_id: S008-eval-ux-playground
-  current_stage: 07-build
+  current_stage: 08-verify-build
   stages:
     00-context:
       status: completed
@@ -3001,6 +3056,12 @@ evolve_cycles:
       started: '2026-07-02'
       substeps:
         current_task: T69.7
+    08-verify-build:
+      status: in_progress
+      started: '2026-07-03'
+      report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
+      note: 'Interim delta verify PASS after fixes — 07-build prerequisite still unmet; routing_plan 08 remains pending until
+        formal milestone close'
   checkpoints:
     phase_a: pending
     phase_b: pending
@@ -4247,6 +4308,10 @@ decisions_log:
 - 'R73 (2026-07-02, EV-009/S008): Charts v1 — fe_only presets + scatter on existing timeseries.'
 - 'R74 (2026-07-02, EV-009/S008): Config visibility — share_read per-user presets.'
 - 'R75 (2026-07-02, EV-009/S008): Routing — evolve-lite 00→01→04→07→08→09→10→11→12→13.'
+- date: '2026-07-02'
+  note: '11-verify-impl invoked 2026-07-02 — blocked: 07-build in_progress (M70 pending), 08/09/10 pending for S008'
+- 'S008 11-verify-impl partial waiver approved 2026-07-02 — M65-M69 verified inline; M70/UJ-047/AC-E26 deferred; journey
+  AskQuestion skipped'
 artifacts:
 - docs/context-brief.md
 - docs/audits.md#product-plan-audit-report
@@ -4477,6 +4542,14 @@ artifacts:
   kind: adr
   session_id: S008-eval-ux-playground
   stage: 04-tech-plan
+- path: docs/sessions/S008-eval-ux-playground/reports/verify-impl.md
+  kind: stage-report
+  session_id: S008-eval-ux-playground
+  stage: 11-verify-impl
+- path: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
+  kind: report
+  session_id: S008-eval-ux-playground
+  stage: 08-verify-build
 - path: docs/implementation-verification.md
   kind: implementation-verification
 - docs/sessions/S007-rag-eval/reports/verification-report.md

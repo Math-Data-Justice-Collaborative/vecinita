@@ -8,6 +8,7 @@ import httpx
 import pytest
 from scripts.seed_first_admin import (
     seed_first_admin,
+    seed_super_admin,
 )
 
 pytestmark = pytest.mark.unit
@@ -160,6 +161,55 @@ def test_seed_first_admin_idempotent_on_duplicate_create(monkeypatch: pytest.Mon
         supabase_url="https://test.supabase.co",
         secret_key=_STUB_SUPABASE_KEY,
         email="admin@vecinita.admin",
+        password=_STUB_ADMIN_CREDENTIAL,
+    )
+    assert result == f"updated_role:{user_id}"
+
+
+def test_seed_super_admin_sets_super_admin_role(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Super-admin seed sets app_metadata.role=super-admin (ADR-035 §9)."""
+    user_id = "44444444-4444-4444-4444-444444444444"
+
+    class FakeClient:
+        """FakeClient."""
+
+        def __init__(self, *args: object, **kwargs: object) -> None:
+            """Init  ."""
+            _ = (args, kwargs)
+
+        def __enter__(self) -> Self:
+            return self
+
+        def __exit__(self, *args: object) -> None:
+            _ = args
+
+        def get(self, path: str, **kwargs: object) -> httpx.Response:
+            """Get."""
+            _ = (path, kwargs)
+            return httpx.Response(
+                200,
+                json={"users": [{"id": user_id, "email": "super@vecinita.admin"}]},
+            )
+
+        def post(self, path: str, **kwargs: object) -> httpx.Response:
+            """Post."""
+            _ = (path, kwargs)
+            msg = "should not create when user exists"
+            raise AssertionError(msg)
+
+        def put(self, path: str, **_kwargs: object) -> httpx.Response:
+            """Put."""
+            assert path == f"/auth/v1/admin/users/{user_id}"
+            body = cast("dict[str, object]", _kwargs.get("json"))
+            assert body == {"app_metadata": {"role": "super-admin"}}
+            return httpx.Response(200, json={})
+
+    monkeypatch.setattr(httpx, "Client", FakeClient)
+
+    result = seed_super_admin(
+        supabase_url="https://test.supabase.co",
+        secret_key=_STUB_SUPABASE_KEY,
+        email="super@vecinita.admin",
         password=_STUB_ADMIN_CREDENTIAL,
     )
     assert result == f"updated_role:{user_id}"

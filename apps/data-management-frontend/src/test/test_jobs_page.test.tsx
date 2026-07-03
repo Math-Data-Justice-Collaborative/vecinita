@@ -18,7 +18,10 @@ function renderJobsPage(ui: ReactElement = <JobsPage />) {
     <MemoryRouter initialEntries={["/jobs"]}>
       <Routes>
         <Route path="/jobs" element={ui} />
-        <Route path="/evaluation" element={<div data-testid="evaluation-route" />} />
+        <Route
+          path="/evaluation"
+          element={<div data-testid="evaluation-route" />}
+        />
       </Routes>
     </MemoryRouter>,
   );
