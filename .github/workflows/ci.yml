@@ -116,35 +116,62 @@ jobs:
       DATABASE_URL: postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect coverage-relevant changes
+        id: coverage_changes
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          elif [[ -n "${{ github.event.before }}" && "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]]; then
+            BASE="${{ github.event.before }}"
+          else
+            BASE="$(git rev-parse HEAD~1 2>/dev/null || echo HEAD)"
+          fi
+          if git diff --name-only "$BASE" HEAD | grep -qE '^(apps|packages|tests/unit)/'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping coverage job — no apps/packages/tests/unit changes"
+          fi
 
       - name: Install uv
+        if: steps.coverage_changes.outputs.run == 'true'
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
 
       - name: Python 3.11
+        if: steps.coverage_changes.outputs.run == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Sync dependencies
+        if: steps.coverage_changes.outputs.run == 'true'
         run: uv sync --group dev
 
       - name: Apply database migrations
+        if: steps.coverage_changes.outputs.run == 'true'
         working-directory: apps/database
         run: uv run alembic upgrade head
 
       - uses: actions/setup-node@v4
+        if: steps.coverage_changes.outputs.run == 'true'
         with:
           node-version: "24"
           cache: npm
           cache-dependency-path: package-lock.json
 
       - name: Install workspace dependencies
+        if: steps.coverage_changes.outputs.run == 'true'
         working-directory: .
         run: npm ci
 
       - name: Unit coverage gate (F31 / ADR-019)
+        if: steps.coverage_changes.outputs.run == 'true'
         run: make test-unit-coverage
 
   frontend:
