@@ -388,6 +388,7 @@ export function EvaluationPlaygroundTab({
       setPromoteVersion(result.config_version);
       setPromoteDialogOpen(false);
     } catch (err) {
+      setPromoteDialogOpen(false);
       setError(
         err instanceof Error
           ? err.message

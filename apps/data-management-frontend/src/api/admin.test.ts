@@ -710,6 +710,19 @@ describe("admin API eval helpers", () => {
     expectBearerJwt(vi.mocked(fetch).mock.calls[0]?.[1]);
   });
 
+  it("promoteRagConfig throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 403 })),
+    );
+    await expect(
+      promoteRagConfig(JWT_CLIENT, {
+        source: "preset",
+        preset_id: EVAL_PRESET.preset_id,
+      }),
+    ).rejects.toThrow(/403/);
+  });
+
   it("fetchActiveRagConfig reads active production config", async () => {
     vi.stubGlobal(
       "fetch",
@@ -725,6 +738,14 @@ describe("admin API eval helpers", () => {
     const active = await fetchActiveRagConfig(JWT_CLIENT);
     expect(active.config_version).toBe(1);
     expect(mockFetchUrl()).toContain("/internal/v1/rag/config/active");
+  });
+
+  it("fetchActiveRagConfig throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 404 })),
+    );
+    await expect(fetchActiveRagConfig(JWT_CLIENT)).rejects.toThrow(/404/);
   });
 
   it("triggerPlaygroundEvalRun posts playground body", async () => {
@@ -946,6 +967,23 @@ describe("admin API eval helpers", () => {
         if (url.includes("/eval/criteria")) {
           return Promise.resolve(jsonResponse({ items: [EVAL_CRITERION] }));
         }
+        if (url.includes("/rag/config/promote")) {
+          return Promise.resolve(
+            jsonResponse({
+              config_version: 1,
+              promoted_at: "2026-07-02T12:00:00Z",
+              promoted_by: "44444444-4444-4444-4444-444444444444",
+            }),
+          );
+        }
+        if (url.includes("/rag/config/active")) {
+          return Promise.resolve(
+            jsonResponse({
+              config: EVAL_PRESET.config,
+              config_version: 1,
+            }),
+          );
+        }
         return Promise.resolve(jsonResponse({ items: [] }));
       }),
     );
@@ -955,6 +993,11 @@ describe("admin API eval helpers", () => {
     await updateEvalConfigPreset(bare, EVAL_PRESET.preset_id, { name: "y" });
     await cloneEvalConfigPreset(bare, EVAL_PRESET.preset_id);
     await triggerPlaygroundEvalRun(bare, { mode: "golden" });
+    await promoteRagConfig(bare, {
+      source: "preset",
+      preset_id: EVAL_PRESET.preset_id,
+    });
+    await fetchActiveRagConfig(bare);
     await fetchOllamaModels(bare);
     await fetchEvalTimeseries(bare);
     await fetchEvalRunDetail(bare, "00000000-0000-0000-0000-000000000099");
@@ -1089,5 +1132,62 @@ describe("admin API eval helpers", () => {
       enabled: false,
     });
     expectBearerJwt(vi.mocked(fetch).mock.calls[12]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        config_version: 2,
+        promoted_at: "2026-07-02T12:00:00Z",
+        promoted_by: "44444444-4444-4444-4444-444444444444",
+      }),
+    );
+    await promoteRagConfig(JWT_CLIENT, {
+      source: "preset",
+      preset_id: EVAL_PRESET.preset_id,
+    });
+    expectBearerJwt(vi.mocked(fetch).mock.calls[13]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        config: EVAL_PRESET.config,
+        config_version: 1,
+      }),
+    );
+    await fetchActiveRagConfig(JWT_CLIENT);
+    expectBearerJwt(vi.mocked(fetch).mock.calls[14]?.[1]);
+  });
+
+  it("rag config helpers use apiKey when accessToken is absent", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          config_version: 1,
+          promoted_at: "2026-07-02T12:00:00Z",
+          promoted_by: "44444444-4444-4444-4444-444444444444",
+        }),
+      ),
+    );
+    await promoteRagConfig(CLIENT, {
+      source: "preset",
+      preset_id: EVAL_PRESET.preset_id,
+    });
+    const promoteHeaders = vi.mocked(fetch).mock.calls[0]?.[1]?.headers as Record<
+      string,
+      string
+    >;
+    expect(promoteHeaders["Authorization"]).toBe("Bearer test-key");
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        config: EVAL_PRESET.config,
+        config_version: 1,
+      }),
+    );
+    await fetchActiveRagConfig(CLIENT);
+    const activeHeaders = vi.mocked(fetch).mock.calls[1]?.[1]?.headers as Record<
+      string,
+      string
+    >;
+    expect(activeHeaders["Authorization"]).toBe("Bearer test-key");
   });
 });

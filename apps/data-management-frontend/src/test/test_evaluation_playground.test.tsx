@@ -6,6 +6,7 @@ import {
   renderSuperAdminAppRoutesReady,
 } from "./renderAppHelpers";
 import { fetchInputUrl } from "./fetch-mock";
+import * as adminApi from "@/api/admin";
 
 const RUN_ID = "00000000-0000-0000-0000-000000000099";
 const NEW_RUN_ID = "00000000-0000-0000-0000-0000000000cc";
@@ -941,6 +942,173 @@ describe("EvaluationPlayground (UJ-045)", () => {
       expect(
         screen.getByTestId("eval-playground-promote-version"),
       ).toHaveTextContent("3");
+    });
+  });
+
+  it("shows promote failure message when promote API rejects", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/rag/config/promote")) {
+          return Promise.resolve({
+            ok: false,
+            status: 403,
+            json: async () => ({}),
+          });
+        }
+        if (url.includes("/internal/v1/eval/config-presets")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ items: [SAVED_PRESET_BODY] }),
+          });
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-promote-button"),
+      ).toBeInTheDocument();
+    });
+    fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
+      target: { value: PRESET_ID },
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-promote-button"),
+      ).not.toBeDisabled();
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-promote-button"));
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-promote-dialog"),
+      ).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-promote-confirm"));
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /RAG config promote failed \(403\)/i,
+      );
+    });
+  });
+
+  it("shows generic promote failure when promote throws a non-Error", async () => {
+    vi.spyOn(adminApi, "promoteRagConfig").mockRejectedValueOnce("offline");
+
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-promote-button"),
+      ).toBeInTheDocument();
+    });
+    fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
+      target: { value: PRESET_ID },
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-promote-button"),
+      ).not.toBeDisabled();
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-promote-button"));
+    fireEvent.click(screen.getByTestId("eval-playground-promote-confirm"));
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /Failed to promote configuration/i,
+      );
+    });
+  });
+
+  it("shows presets load failure when preset fetch rejects", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/eval/config-presets")) {
+          return Promise.reject(new Error("presets offline"));
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(/presets offline/i);
+    });
+  });
+
+  it("shows presets load failure when preset list is invalid", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/eval/config-presets")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ items: "not-an-array" }),
+          });
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-preset-select")).toHaveValue(
+        "",
+      );
+    });
+  });
+
+  it("promotes from last run when no preset is selected (super-admin)", async () => {
+    let promoteBody: Record<string, unknown> | null = null;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = fetchInputUrl(input);
+        const method = (init?.method ?? "GET").toUpperCase();
+        if (url.includes("/internal/v1/eval/runs") && method === "POST") {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              run_id: NEW_RUN_ID,
+              status: "pending",
+              created_at: "2026-07-02T12:00:00Z",
+            }),
+          });
+        }
+        if (url.includes("/internal/v1/rag/config/promote") && method === "POST") {
+          promoteBody = parsePostBody(init);
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: async () => ({
+              config_version: 4,
+              promoted_at: "2026-07-02T12:00:00Z",
+              promoted_by: "44444444-4444-4444-4444-444444444444",
+            }),
+          });
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-run-button")).toBeEnabled();
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-run-button"));
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-last-run")).toHaveTextContent(
+        NEW_RUN_ID,
+      );
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-promote-button"));
+    fireEvent.click(screen.getByTestId("eval-playground-promote-confirm"));
+    await waitFor(() => {
+      expect(promoteBody).toEqual({ source: "run", run_id: NEW_RUN_ID });
     });
   });
 });
