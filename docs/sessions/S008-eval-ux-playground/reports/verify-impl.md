@@ -1,11 +1,10 @@
-# Implementation Verification — S008 / EV-009 (partial)
+# Implementation Verification — S008 / EV-009
 
-> **Generated**: 2026-07-02  
-> **Skill**: 11-verify-impl (partial waiver — M65–M69 / F36 follow-ons + F37 playground)  
+> **Generated**: 2026-07-02 (updated 2026-07-03 — manual inspection + M70)  
+> **Skill**: 11-verify-impl  
 > **Session**: S008-eval-ux-playground  
 > **Branch**: `feat/S008-eval-ux-playground`  
-> **Features in scope**: F36 follow-ons (M65–M67), F37 partial (M68–M69)  
-> **Deferred**: M70 (UJ-047, AC-E26) — super-admin promote + ChatRAG config reader
+> **Features in scope**: F36 follow-ons (M65–M67), F37 (M68–M70)
 
 ## Prerequisite waiver
 
@@ -88,14 +87,34 @@ test_jobs_page.test.tsx
 
 | Journey | Scope | T0 | User signoff | Notes |
 |---------|-------|----|--------------|-------|
-| UJ-039 | Optimistic run list (delta) | PASS | **Pending interview** | AskQuestion skipped |
-| UJ-041 | Dashboard scatter + presets (delta) | PASS | **Pending interview** | AskQuestion skipped |
-| UJ-044 | Eval on Jobs tab | PASS | **Pending interview** | AskQuestion skipped |
-| UJ-045 | Playground sandbox runs | PASS | **Pending interview** | AskQuestion skipped |
-| UJ-046 | Compare two runs | PASS | **Pending interview** | Vitest only (no dedicated pytest) |
-| UJ-047 | Super-admin promote | **Deferred** | N/A | M70 not built |
+| UJ-039 | Optimistic run list (delta) | PASS | **Approved** | Local inspection 2026-07-03 |
+| UJ-041 | Dashboard scatter + presets (delta) | PASS | **Approved** | Local inspection 2026-07-03 |
+| UJ-044 | Eval on Jobs tab | PASS | **Deferred** | Jobs UI blocked without DM API locally |
+| UJ-045 | Playground sandbox runs | PASS | **Approved** | Local inspection 2026-07-03 |
+| UJ-046 | Compare two runs | PASS | **Approved** | Local inspection 2026-07-03 |
+| UJ-047 | Super-admin promote | T0 (pytest) | **Approved** (local inspection) | Promote API in Swagger; button hidden for regular admin — expected |
 
-**Advisory VI-S008-001**: Re-run journey AskQuestion before deploy gate or record explicit approval in 12-verify-deploy.
+## Manual inspection (feature-inspection, 2026-07-03)
+
+Environment: **local dev** — admin FE `:5174`, internal write API `:8005` (8002 occupied by chroma;
+`VECINITA_CORS_ORIGINS=http://localhost:5174` required). Signed in as `admin@vecinita.admin`.
+
+| Feature | Env | UI URL | Swagger URL | OpenAPI ops | Verdict |
+|---------|-----|--------|-------------|-------------|---------|
+| F36 — optimistic runs (UJ-039) | local | `/evaluation` (Runs) | `localhost:8005/docs` | `listEvalRuns`, `getEvalRun` | **Approved** |
+| F36 — dashboard (UJ-041) | local | `/evaluation?tab=dashboard` | `…/eval/runs/timeseries` | `getEvalTimeseries` | **Approved** (tab + API; charts slow on cold load) |
+| F36 — Jobs eval rows (UJ-044) | local | `/jobs` | DM API `/jobs` | `listJobs` | **Deferred** — DM API not running (`modal serve` or staging CORS) |
+| F37 — Playground (UJ-045) | local | `/evaluation?tab=playground` | `…/eval/config-presets`, `…/eval/runs` | `createEvalPreset`, `triggerEvalRun` | **Approved** |
+| F37 — Compare (UJ-046) | local | `/evaluation` Compare runs | `…/eval/runs/{run_id}` | `getEvalRun` | **Approved** |
+| F37 — Promote (UJ-047) | local | Playground (super-admin only) | `…/rag/config/promote` | `promoteRagConfig` | **Approved** (API visible; UI gated for non-super-admin) |
+
+**User verdict (AskQuestion)**: Approve — matches expectations.
+
+**Local caveats noted during walkthrough**:
+
+- Playground intermittent `Failed to fetch` / presets `403` without full Modal LLM stack locally.
+- Jobs tab needs Data Management API (`modal serve infra/modal/data_management_app.py`) on `VITE_VECINITA_ADMIN_API_URL`.
+- Live OpenAPI includes `POST /internal/v1/rag/config/promote`; repo `openapi/internal-write.yaml` may need sync (ADR-011 drift check).
 
 ## Scope analysis
 

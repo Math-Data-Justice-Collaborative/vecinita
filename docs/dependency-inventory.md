@@ -1,13 +1,13 @@
 # Dependency Inventory
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-02 (S008/EV-009 F37 — no new Python deps; recharts reuse for scatter)
+> **Last updated**: 2026-07-03 (S008 QA — llama-index 0.14.x bump)
 
 ## Runtime dependencies (Python — planned)
 
 | Package | Version pin | Purpose | License | Notes |
 |---------|-------------|---------|---------|-------|
-| **llama-index** | **0.13.x** (`>=0.13.0,<0.14`) | **Core** RAG — retriever, query engine, synthesizer | MIT | RD-005, RD-023, ADR-006; bumped for pip-audit (CI) |
+| **llama-index** | **0.14.x** (`>=0.14.0,<0.15`) | **Core** RAG — retriever, query engine, synthesizer | MIT | RD-005, RD-023, ADR-006; bumped QA-S008-004 (2026-07-03) |
 | **llama-index-vector-stores-postgres** | **0.2.x–0.8.x** (with core) | pgvector adapter (pinned; custom retriever uses corpus tables) | MIT | ADR-005 |
 | **langdetect** | **1.0.9+** | Bilingual query detection (ADR-013) | Apache-2.0 | T8.4 |
 | fastapi | TBD | HTTP APIs (DO) | MIT | |

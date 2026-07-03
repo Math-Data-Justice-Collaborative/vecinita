@@ -86,3 +86,13 @@ def test_from_env_requires_database_url(monkeypatch: pytest.MonkeyPatch) -> None
     monkeypatch.delenv("DATABASE_URL", raising=False)
     with pytest.raises(RuntimeError, match="DATABASE_URL"):
         ChatRagSettings.from_env()
+
+
+def test_str_env_parses_value(monkeypatch: pytest.MonkeyPatch) -> None:
+    """String env helper returns the configured value when set."""
+    from vecinita_chat_rag_backend.config import (  # noqa: PLC0415
+        _str_env,  # pyright: ignore[reportPrivateUsage]
+    )
+
+    monkeypatch.setenv("VECINITA_TEST_STR", "custom-model")
+    assert _str_env("VECINITA_TEST_STR", "default-model") == "custom-model"

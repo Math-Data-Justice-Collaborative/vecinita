@@ -16,4 +16,4 @@ if [[ $# -eq 0 ]]; then
   set -- tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval tests/bugs
 fi
 
-exec uv run pytest "$@"
+exec bash scripts/ci/with_local_postgres.sh uv run pytest "$@"

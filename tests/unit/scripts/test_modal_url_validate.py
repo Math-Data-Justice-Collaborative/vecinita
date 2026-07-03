@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import pytest
-from modal_url_validate import validate_modal_service_url
+from deploy.modal_url_validate import validate_modal_service_url
 
 pytestmark = pytest.mark.unit
 

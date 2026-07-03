@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-07-02 (S008/EV-009: UJ-039–041 deltas + UJ-044–047 eval UX + playground; F37)
+> **Last updated**: 2026-07-03 (diagrams: journey, sequence, state, flowchart)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -53,6 +53,109 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-045 | Admin configures and runs eval in Playground | Admin operator | DM UI `/evaluation?tab=playground` → preset + run APIs | F37 (EV-009) | local |
 | UJ-046 | Admin compares two eval runs | Admin operator | DM UI `/evaluation` compare view | F37 (EV-009) | local |
 | UJ-047 | Super-admin promotes config to production ChatRAG | Super-admin | Playground → promote API → ChatRAG active config | F37 (EV-009) | local |
+
+## Visual journey maps
+
+Mermaid **journey**, **sequence**, and **flowchart** diagrams for representative paths. Color legend: [data-flow.md §Color legend](data-flow.md#color-legend). Additional diagrams: [data-flow.md §15–16](data-flow.md#15-user-journey-maps-mermaid-journey).
+
+### Journey overview by actor
+
+```mermaid
+flowchart TB
+    subgraph Community["Community member — cool blue"]
+        UJ001[UJ-001 Ask streaming]
+        UJ005[UJ-005 No context]
+        UJ009[UJ-009 Browse corpus]
+        UJ012[UJ-012 Tag filter ask]
+        UJ024[UJ-024 localStorage chat]
+    end
+
+    subgraph Operator["Corpus operator — purple"]
+        UJ002[UJ-002 Ingest URLs]
+        UJ011[UJ-011 Edit tags]
+        UJ015[UJ-015 Bulk delete]
+        UJ023[UJ-023 Jobs tab]
+        UJ039[UJ-039 Golden eval]
+        UJ045[UJ-045 Eval playground]
+    end
+
+    subgraph Admin["Admin operator — purple"]
+        UJ026[UJ-026 Login]
+        UJ027[UJ-027 Invite accept]
+        UJ030[UJ-030 User management]
+        UJ047[UJ-047 Promote config]
+    end
+
+    classDef community fill:#e3f2fd,stroke:#1565c0,color:#0d47a1
+    classDef operator fill:#f3e5f5,stroke:#7b1fa2,color:#4a148c
+
+    class UJ001,UJ005,UJ009,UJ012,UJ024 community
+    class UJ002,UJ011,UJ015,UJ023,UJ039,UJ045,UJ026,UJ027,UJ030,UJ047 operator
+```
+
+### UJ-001 — Ask community question (sequence)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor CM as Community member
+    participant CF as ChatRAG Frontend
+    participant CB as ChatRAG Backend
+    participant FE as Modal FastEmbed
+    participant PG as Postgres
+    participant LLM as Modal vLLM
+
+    CM->>CF: Type question (EN/ES)
+    CF->>CB: POST /api/v1/ask/stream
+    CB->>FE: Embed query
+    FE-->>CB: vector(384)
+    CB->>PG: pgvector retrieval
+    PG-->>CB: top_k chunks
+    CB->>LLM: Generate stream
+    LLM-->>CB: SSE tokens
+    CB-->>CF: Stream answer + sources
+    CF-->>CM: Render bilingual response
+```
+
+### UJ-027 — Invite accept (state)
+
+```mermaid
+stateDiagram-v2
+    [*] --> invited: admin sends Supabase invite
+    invited --> email_link: operator opens email
+    email_link --> accept_page: /accept-invite callback
+    accept_page --> set_password: valid token
+    set_password --> authenticated: password saved
+    authenticated --> admin_ui: JWT session
+    admin_ui --> [*]
+
+    accept_page --> expired: token invalid
+    expired --> [*]
+```
+
+### UJ-039 — Golden-set evaluation (flowchart)
+
+```mermaid
+flowchart TD
+    Start([Admin opens /evaluation]) --> Run[POST /internal/v1/eval/runs]
+    Run --> Loop{More golden cases?}
+    Loop -->|yes| Ask[ChatRAG POST /api/v1/ask]
+    Ask --> Judge[Modal vLLM judge metrics]
+    Judge --> Store[Persist eval_run_items]
+    Store --> Loop
+    Loop -->|no| Summary[Aggregate metrics_summary]
+    Summary --> Dashboard[Dashboard + drill-down UJ-040]
+    Dashboard --> End([History retained in Postgres])
+
+    classDef operator fill:#f3e5f5,stroke:#7b1fa2,color:#4a148c
+    classDef do fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef modal fill:#e8eaf6,stroke:#3949ab,color:#1a237e
+    classDef datastore fill:#e0f2f1,stroke:#00695c,color:#004d40
+
+    class Start,Dashboard,End operator
+    class Run,Ask,Store,Summary do
+    class Judge modal
+```
 
 ## Journey Details
 

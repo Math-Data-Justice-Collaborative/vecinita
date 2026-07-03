@@ -19,6 +19,8 @@ paths = [
   # Gitignored local secret stores (never commit; see .gitignore + no-operator-spec-commits rule)
   '''(?:^|/)\.deploy-keys\.local$''',
   '''(?:^|/)prod\.env$''',
+  '''(?:^|/)apps/[^/]+-frontend/\.env$''',
+  '''(?:^|/)supabase/\.env$''',
   '''(?:^|/)\.tmp(?:/.*)?$''',
   '''(?:^|/)(?:admin-fe-spec|internal-write-api-spec|chat-rag-spec)\.yaml$''',
   # Removed backend / scraper-worker tree

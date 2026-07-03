@@ -83,6 +83,8 @@ committed:
 | Path | Purpose |
 |------|---------|
 | `prod.env` | Staging/prod env vars for smokes and deploy scripts |
+| `apps/*-frontend/.env` | Local Vite env (Supabase publishable key, dev API URLs) |
+| `supabase/.env` | Local Supabase CLI secrets |
 | `.deploy-keys.local` | Generated API keys for local deploy |
 | `.tmp/` | Ephemeral operator artifacts (e.g. DO secret JSON exports) |
 | `*-spec.yaml` (root) | Local `doctl apps spec get` exports (encrypted secrets) |
@@ -99,6 +101,7 @@ under `apps/`, `packages/`, `tests/`, `infra/`, `openapi/`.
 | Supabase demo anon JWT in `scripts/ui/build_for_playwright.sh` | Path allowlist + regex for `iss":"supabase-demo"` prefix |
 | Bundled JWT in `apps/*/dist/` after Playwright build | Path allowlist for `dist/` (gitignored build output) |
 | QA reports quoting the above for traceability | Path allowlist for `docs/sessions/*/reports/qa-report.md` |
+| Supabase publishable key in `apps/*-frontend/.env` (local Vite dev) | Path allowlist — gitignored; use `.env.example` placeholders in repo |
 
 Re-verify: `gitleaks detect --no-git --config .gitleaks.toml` → **0 leaks**.
 

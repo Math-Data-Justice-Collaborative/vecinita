@@ -81,11 +81,15 @@ def test_supabase_config_toml_invite_only_and_canonical_project() -> None:
 
 
 def test_sync_production_job_gated_on_main_and_secrets() -> None:
-    """Production sync runs only on main pushes; token detection happens in a step."""
+    """Production sync job is manual-only; main-path sync runs in deploy-modal supabase-sync."""
     text = _workflow_text()
-    assert "refs/heads/main" in text
-    assert "Detect Supabase access token" in text
-    assert "sync-production:" in text
+    sync_start = text.index("sync-production:")
+    sync_section = text[sync_start:]
+    assert "if: github.event_name == 'workflow_dispatch'" in sync_section
+    assert "Detect Supabase access token" in sync_section
+    deploy_modal = (REPO_ROOT / ".github/workflows/deploy-modal.yml").read_text(encoding="utf-8")
+    assert "supabase-sync:" in deploy_modal
+    assert "head_branch == 'main'" in deploy_modal
 
 
 # --- EV-006 F35: Resend SMTP + versioned email templates (TC-094, TC-095) ---
