@@ -12,6 +12,7 @@ on:
       - "scripts/check_supabase_config.sh"
       - "scripts/supabase/**"
   pull_request:
+    types: [opened, synchronize, reopened, closed]
     branches: [main, "phase/**"]
     paths:
       - "supabase/**"
@@ -29,6 +30,7 @@ permissions:
 
 env:
   SUPABASE_PROJECT_REF: cfuvghdsuwactfeamtym
+  SUPABASE_PROJECT_ID: cfuvghdsuwactfeamtym
   # Pinned Supabase CLI. Constraint per ADR-030 §8 (TP-S005-09): >=2.70,<3 guarantees email
   # template HTML upload via `supabase config push` (CLI PR #5686, merged 2026-06-25).
   SUPABASE_CLI_VERSION: "2.84.2"
@@ -36,6 +38,7 @@ env:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -88,7 +91,9 @@ jobs:
   preview-branch:
     runs-on: ubuntu-latest
     needs: validate
-    if: github.event_name == 'pull_request'
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.action != 'closed'
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
@@ -117,11 +122,37 @@ jobs:
         run: |
           BRANCH="preview-pr-${{ github.event.pull_request.number }}"
           bash scripts/supabase/ci_sync.sh preview-branch "$BRANCH"
-          echo "SUPABASE_PREVIEW_BRANCH=${BRANCH}" >> "$GITHUB_ENV"
+
+  delete-preview-branch:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.action == 'closed'
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect Supabase access token
+        id: supabase_token
+        run: |
+          if [ -z "${SUPABASE_ACCESS_TOKEN}" ]; then
+            echo "SUPABASE_ACCESS_TOKEN not configured — skipping preview branch delete"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Supabase CLI
+        if: steps.supabase_token.outputs.skip != 'true'
+        uses: supabase/setup-cli@v1
+        with:
+          version: ${{ env.SUPABASE_CLI_VERSION }}
 
       - name: Tear down preview branch
-        if: always() && steps.supabase_token.outputs.skip != 'true'
-        run: bash scripts/supabase/ci_sync.sh delete-preview "${SUPABASE_PREVIEW_BRANCH}"
+        if: steps.supabase_token.outputs.skip != 'true'
+        run: bash scripts/supabase/ci_sync.sh delete-preview "preview-pr-${{ github.event.pull_request.number }}"
 
   sync-production:
     runs-on: ubuntu-latest

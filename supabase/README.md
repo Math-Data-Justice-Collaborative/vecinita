@@ -51,7 +51,8 @@ Per ADR-027 §6 — validates and syncs Supabase identity config independently o
 | Job | Trigger | Requires secrets | Action |
 |-----|---------|------------------|--------|
 | **validate** | PR + push | No | Offline `config.toml` contract; `supabase start`; lint/reset migrations when present; optional `supabase test db` |
-| **preview-branch** | PR | `SUPABASE_ACCESS_TOKEN` (+ optional `SUPABASE_DB_PASSWORD`) | Ephemeral preview branch, apply repo state, tear down |
+| **preview-branch** | PR opened/sync/reopened | `SUPABASE_ACCESS_TOKEN` (+ optional `SUPABASE_DB_PASSWORD`) | Ephemeral preview branch, apply repo state (persists for review) |
+| **delete-preview-branch** | PR closed | Same token | Tear down the ephemeral preview branch |
 | **sync-production** | push to `main` | Same | `supabase config push` (+ `db push` when migrations exist) |
 
 Cloud jobs **skip gracefully** when `SUPABASE_ACCESS_TOKEN` is not configured in GitHub
