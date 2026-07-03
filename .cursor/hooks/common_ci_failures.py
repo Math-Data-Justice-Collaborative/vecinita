@@ -37,8 +37,8 @@ _PUSH_TRIGGERS = ("git push", "gh pr create")
 
 _PUSH_REMINDER = """\
 [common-ci-failures] Fast checks on agent stop: make check-fast + make test-fast.
-Pre-push (Husky): make check + make test-fast. Before PR: make ci-push.
-Opt-in full pre-push: VECINITA_FULL_PRE_PUSH=1. Skip: VECINITA_SKIP_PRE_PUSH=1.
+Pre-push (Husky): make check-fast + make test-fast. Before PR: make ci-push.
+Opt-in medium pre-push: VECINITA_MEDIUM_PRE_PUSH=1. Opt-in full: VECINITA_FULL_PRE_PUSH=1. Skip: VECINITA_SKIP_PRE_PUSH=1.
 Also verify before push:
   1. Frontend tests: eslint unused imports in apps/*/src/test/*.test.tsx
   2. Python tests: top-level imports only (ruff PLC0415); drop unused fixtures (ARG001)

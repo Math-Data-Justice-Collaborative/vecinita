@@ -1,8 +1,8 @@
 """Cursor stop hook: fast checks when the agent session ends.
 
 Runs `make check-fast` (lint + typecheck) and `make test-fast` (scoped unit tests)
-when source files have local changes. Pre-push runs medium tier (`make check` +
-`make test-fast`); run `make ci-push` before opening a PR. Advisory only — always exits 0.
+when source files have local changes. Pre-push runs the same fast tier; run `make ci-push`
+before opening a PR. Advisory only — always exits 0.
 """
 
 from __future__ import annotations

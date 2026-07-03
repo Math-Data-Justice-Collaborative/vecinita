@@ -94,9 +94,10 @@ Launch agents in **one** message:
 
 **Agent 4 — Test Suite**: Run full test suite, parse results. Must include **H0c**
 `tests/unit/test_cors_policy.py` (blocking for hybrid UI deploys). **Before opening a PR**,
-run `make ci-push` (includes `test-unit-coverage`). Day-to-day `git push` runs medium tier
-via Husky (`make check` + `make test-fast`). During milestone verify, `make test-fast`
-plus scoped `make test-coverage-fe` for touched frontends is enough unless F31 is in scope.
+run `make ci-push` (includes `test-unit-coverage`). Day-to-day `git push` runs fast tier
+(`make check-fast` + `make test-fast`); format-check and full parity are in GitHub CI.
+During milestone verify, `make test-fast` plus scoped `make test-coverage-fe` for touched
+frontends is enough unless F31 is in scope.
 Watch for uncovered branches in new React components: poll intervals, refresh handlers,
 unmount guards, and error/`??` fallbacks.
 

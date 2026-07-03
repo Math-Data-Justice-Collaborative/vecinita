@@ -117,8 +117,8 @@ Requires Node 24 and a one-time Chromium install (`npx playwright install chromi
 
 | Tier | When | Command |
 |------|------|---------|
-| Fast | Agent stop hook | `make check-fast` + `make test-fast` |
-| Medium | Before commit; **git push** (Husky) | `make check` + `make test-fast` |
+| Fast | Agent stop hook; **git push** (Husky) | `make check-fast` + `make test-fast` |
+| Medium | Before commit (optional) | `make check` + `make test-fast` |
 | Full | **Before opening a PR** | `make ci-push` (alias: `make ci-pr-ready`) |
 
 ```bash
@@ -129,10 +129,13 @@ make ci-push       # full CI parity — run before marking a PR ready
 make ci-pr-ready   # alias for ci-push
 ```
 
-Husky installs on `npm ci` (`prepare` script). Pre-push runs **medium tier** only; GitHub
-CI is the merge gate for full parity.
+Husky installs on `npm ci` (`prepare` script). Pre-push runs **fast tier** only; GitHub
+CI is the merge gate for format-check, audit, full tests, coverage, and production builds.
 
 ```bash
+# Opt-in medium tier on push (adds format-check):
+VECINITA_MEDIUM_PRE_PUSH=1 git push
+
 # Opt-in full local parity on every push:
 VECINITA_FULL_PRE_PUSH=1 git push
 

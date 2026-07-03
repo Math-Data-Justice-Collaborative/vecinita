@@ -126,7 +126,9 @@ jobs:
   sync-production:
     runs-on: ubuntu-latest
     needs: validate
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Production Supabase sync is CI-gated via deploy-modal.yml `supabase-sync` after CI passes.
+    # Keep this job for manual operator runs only.
+    if: github.event_name == 'workflow_dispatch'
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}

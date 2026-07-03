@@ -26,7 +26,7 @@ NPM_WS := bash scripts/npm_workspaces.sh
 	typecheck typecheck-py typecheck-fe \
 	test test-py test-fe test-ui test-unit test-unit-coverage test-fast test-coverage-fe test-integration test-e2e test-smoke test-privacy test-live \
 	verify-connectivity \
-	build-frontend ci ci-push ci-pr-ready ci-guards audit audit-fe audit-fix check check-fast
+	build-frontend ci ci-push ci-pr-ready ci-guards audit audit-fe audit-fix 	check check-fast pre-push
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage: make \033[36m<target>\033[0m\n\nTargets:\n"} \
@@ -35,7 +35,8 @@ help: ## Show available targets
 	@echo "Examples:"
 	@echo "  make install          # uv sync + npm ci (both frontends)"
 	@echo "  make check            # lint + format-check + typecheck"
-	@echo "  make check-fast       # lint + typecheck only (agent stop hook)"
+	@echo "  make check-fast       # lint + typecheck only (agent stop + pre-push hook)"
+	@echo "  make pre-push         # same as Husky pre-push (check-fast + test-fast)"
 	@echo "  make test-fast        # unit tests for locally changed components"
 	@echo "  make ci-push          # full CI parity — run before opening a PR"
 	@echo "  make ci-pr-ready      # alias for ci-push"
@@ -195,7 +196,9 @@ audit-fix: ## Auto-fix dependency CVEs (Python + frontends), then verify
 
 check: lint format-check typecheck ## Pre-commit: lint + format-check + typecheck
 
-check-fast: lint typecheck ## Fast agent gate: lint + typecheck (no format-check, no tests)
+check-fast: lint typecheck ## Fast gate: lint + typecheck (no format-check; Husky pre-push)
+
+pre-push: check-fast test-fast ## Husky pre-push tier (fast local gate before git push)
 
 ci: install ci-guards lint format-check typecheck audit test-py test-fe build-frontend ## Full CI-parity run (fail fast)
 

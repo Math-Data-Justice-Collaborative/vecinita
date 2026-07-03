@@ -55,6 +55,8 @@ jobs:
       VITE_VECINITA_CHAT_API_URL: ${{ secrets.VITE_VECINITA_CHAT_API_URL }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Require DigitalOcean token
         run: |

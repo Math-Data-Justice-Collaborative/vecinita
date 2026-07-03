@@ -15,7 +15,7 @@ remains the merge gate.
 | While editing | Hooks (auto) | `format` + `lint-fix` + scoped typecheck on edited file |
 | Agent stop | `make check-fast` + `make test-fast` | Lint + typecheck; scoped unit tests |
 | Before commit | `make check` | Lint + format-check + typecheck (manual) |
-| **git push** (Husky) | `make check` + `make test-fast` | Medium tier — fast pushes |
+| **git push** (Husky) | `make check-fast` + `make test-fast` | Fast tier — lint + typecheck + scoped unit tests |
 | **Before opening PR** | `make ci-push` or `make ci-pr-ready` | Full CI parity locally |
 
 Hook scripts: `.cursor/hooks/make_format_lint_fix.py`, `.cursor/hooks/typecheck.py`,
@@ -30,7 +30,7 @@ Stop-hook failures are **advisory** (do not block ending the session).
 | After save | Hooks | `format` + `lint-fix` + scoped `typecheck` on edited file |
 | Agent stop | `make check-fast` + `make test-fast` | Lint + typecheck; unit tests for changed components only |
 
-## Tier 2 — Medium (before commit + git push)
+## Tier 2 — Medium (before commit; optional on push)
 
 ```bash
 make check          # lint + format-check + typecheck
@@ -38,7 +38,10 @@ make test-fast      # scoped unit tests
 make test-coverage-fe FE_APP=data-management-frontend  # one app's coverage loop
 ```
 
-Husky `.husky/pre-push` runs **Tier 2** (`make check` + `make test-fast`) — not full CI.
+Husky `.husky/pre-push` runs **Tier 1** (`make check-fast` + `make test-fast`) — not full CI.
+Format-check, audit, full pytest, coverage gate, and frontend production builds run in GitHub CI.
+
+Opt-in medium pre-push: `VECINITA_MEDIUM_PRE_PUSH=1 git push` (adds format-check).
 
 ## Tier 3 — Full (before PR; optional on push)
 
