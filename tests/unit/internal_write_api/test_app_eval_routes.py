@@ -30,6 +30,7 @@ from tests.unit.shared_schemas.auth_fixtures import (
 _MAX_EVAL_PAGE_SIZE = 100
 
 if TYPE_CHECKING:
+    from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
     from sqlalchemy.engine import Engine
     from vecinita_shared_schemas.ollama_models import (
         OllamaModelListResponse,
@@ -516,7 +517,7 @@ def test_ingest_audit_event_service_key(engine: Engine, monkeypatch: pytest.Monk
 
 
 def _jwt_client_for_key(
-    private_key: object,
+    private_key: EllipticCurvePrivateKey,
     *,
     role: str,
     sub: UUID,
@@ -534,7 +535,7 @@ def _admin_jwt_client(
     *,
     role: str = "admin",
     sub: UUID | None = None,
-) -> tuple[TestClient, UUID, dict[str, str], object]:
+) -> tuple[TestClient, UUID, dict[str, str], EllipticCurvePrivateKey]:
     """Build a TestClient authenticated with an operator JWT."""
     reset_auth_config_for_tests()
     private_key = generate_es256_keypair()
