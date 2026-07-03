@@ -10,10 +10,10 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 15: EV-009 — Eval UX polish + playground (F36 follow-ons + F37) |
-| **Active milestone** | M70: Super-admin promote + ChatRAG config reader *(complete)* |
-| **Active task** | **T70.8** — Phase 15 gate checklist *(next: phase gate / PR-51)* |
-| **Tasks completed** | Phase 14 M59–M64 complete (S007); Phase 15 M65–M70 complete (S008) |
-| **Last updated** | 2026-07-02 |
+| **Active milestone** | M66: Unified jobs API + Jobs tab eval rows *(complete)* |
+| **Active task** | **T70.8** — Phase 15 gate checklist *(next)* |
+| **Tasks completed** | Phase 14 M59–M64 complete (S007); Phase 15 M65–M70 code complete; T67.4 Playwright complete (S008) |
+| **Last updated** | 2026-07-03 |
 | **Evolve cycle** | EV-009 (F36 follow-ons + F37) — **04-tech-plan complete** |
 | **Git branch** | `feat/S008-eval-ux-playground` |
 | **Active session** | S008-eval-ux-playground — evolve-lite. 04-tech-plan approved (ADR-035, TP-S008-01–16). Build order M65→M70. |
@@ -1342,7 +1342,7 @@ Playground with versioned presets and super-admin runtime promote to ChatRAG.
 | T66.2 | Test (Vitest): `test_jobs_page.test.tsx` — eval row + nav — red | Test | completed | UJ-044, RD-138 | — | — | S008 | F36 |
 | T66.3 | Code: DM backend `list_jobs` — HTTP aggregate eval runs from internal-write-api | Code | completed | ADR-035 §3, api-contract §EV-009 | — | — | S008 | F36 |
 | T66.4 | Code: Extend `JobType` + `JobsPage` — eval badge, click → `/evaluation?run=<id>` | Code | completed | UJ-044, RD-138 | T66.3 | — | S008 | F36 |
-| T66.5 | Test (Playwright): `tests/ui/admin/uj044-eval-jobs-tab.spec.ts` — T0-ui | Test | pending | test-plan, connectivity-gates | T66.4 | — | S008 | F36 |
+| T66.5 | Test (Playwright): `tests/ui/admin/uj044-eval-jobs-tab.spec.ts` — T0-ui | Test | completed | test-plan, connectivity-gates | T66.4 | — | S008 | F36 |
 | T66.6 | Code: TC-124 E2E + Vitest green | Code | completed | test-plan TC-124 | T66.1, T66.2, T66.3, T66.4 | D3 | S008 | F36 |
 
 #### M67: Dashboard scatter + time-range presets
@@ -1355,7 +1355,7 @@ Playground with versioned presets and super-admin runtime promote to ChatRAG.
 | T67.1 | Test (Vitest): `test_evaluation_dashboard.test.tsx` — TC-125/126 — red | Test | completed | test-plan TC-125/126, UJ-041, ADR-035 §4 | — | — | S008 | F36 |
 | T67.2 | Code: `EvalMetricChart` — scatter type + dynamic x-axis granularity | Code | completed | ADR-035 §4, RD-117 | T67.1 | — | S008 | F36 |
 | T67.3 | Code: `EvaluationDashboardTab` — time-range presets + custom date picker + client filter | Code | completed | ADR-035 §4, RD-117 | T67.2 | — | S008 | F36 |
-| T67.4 | Test (Playwright): extend `uj041-eval-dashboard-tabs.spec.ts` — scatter + presets | Test | pending | test-plan, connectivity-gates | T67.3 | — | S008 | F36 |
+| T67.4 | Test (Playwright): extend `uj041-eval-dashboard-tabs.spec.ts` — scatter + presets | Test | completed | test-plan, connectivity-gates | T67.3 | — | S008 | F36 |
 | T67.5 | Code: TC-125/126 Vitest green | Code | completed | test-plan | T67.1, T67.2, T67.3 | — | S008 | F36 |
 
 #### M68: Config schema + preset API + DB
@@ -1944,12 +1944,12 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T66.2 | M66 | 15 | Test | pending | — | — | S008 | F36 |
 | T66.3 | M66 | 15 | Code | pending | — | — | S008 | F36 |
 | T66.4 | M66 | 15 | Code | pending | T66.3 | — | S008 | F36 |
-| T66.5 | M66 | 15 | Test | pending | T66.4 | — | S008 | F36 |
+| T66.5 | M66 | 15 | Test | completed | T66.4 | — | S008 | F36 |
 | T66.6 | M66 | 15 | Code | pending | T66.1–T66.4 | D3 | S008 | F36 |
 | T67.1 | M67 | 15 | Test | pending | — | — | S008 | F36 |
 | T67.2 | M67 | 15 | Code | pending | T67.1 | — | S008 | F36 |
 | T67.3 | M67 | 15 | Code | pending | T67.2 | — | S008 | F36 |
-| T67.4 | M67 | 15 | Test | pending | T67.3 | — | S008 | F36 |
+| T67.4 | M67 | 15 | Test | completed | T67.3 | — | S008 | F36 |
 | T67.5 | M67 | 15 | Code | pending | T67.1–T67.3 | — | S008 | F36 |
 | T68.1 | M68 | 15 | Test | pending | — | — | S008 | F37 |
 | T68.2 | M68 | 15 | Code | pending | T68.1 | — | S008 | F37 |

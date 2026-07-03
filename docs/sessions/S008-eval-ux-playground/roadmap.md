@@ -33,7 +33,7 @@ to production ChatRAG — without redeploying Modal/DO for every config tweak.
 | 00-context | ✅ Complete | [eval-ux-playground.md](../../context/eval-ux-playground.md) |
 | 01-requirements | ✅ Complete | F37 + F36 follow-ons; RD-114–RD-130 |
 | 04-tech-plan | ✅ Complete | ADR-035, TP-S008-01–16, Phase 15 |
-| 07-build M65–M70 | 🟡 Nearly complete | T66.5, T67.4 Playwright pending; T70.8 gate doc in progress |
+| 07-build M65–M70 | 🟡 Nearly complete | T67.4 Playwright pending; T70.8 gate doc in progress |
 | 08–10 verify | ⬜ Pending | Formal verify-build, QA, E2E |
 | 11-verify-impl | 🟡 Partial | M65–M69 inline; full signoff after M70 + formal 09/10 |
 | 12–13 deploy | ⬜ Pending | Migration → API → FE redeploy order per TP-S008-16 |
@@ -49,7 +49,7 @@ Proposed issues for this session. Create the **epic first**, then sub-issues; li
 |----|-------|--------|-----------------|------------|--------|
 | **GH-S008-0** | `[EV-009] Epic — Eval UX polish + Playground (S008)` | `evolve`, `app:admin` | Phase 15 gate | — | ⬜ Create |
 | **GH-S008-1** | `[EV-009][F36] M65 — Optimistic eval run list + poll UX` | `evolve`, `app:admin` | T65.1–T65.3 | — | ✅ Done |
-| **GH-S008-2** | `[EV-009][F36] M66 — Unified jobs API + Jobs tab eval rows` | `evolve`, `app:admin` | T66.1–T66.6 | GH-S008-1 | 🟡 T66.5 Playwright open |
+| **GH-S008-2** | `[EV-009][F36] M66 — Unified jobs API + Jobs tab eval rows` | `evolve`, `app:admin` | T66.1–T66.6 | GH-S008-1 | ✅ Complete |
 | **GH-S008-3** | `[EV-009][F36] M67 — Dashboard scatter + time-range presets` | `evolve`, `app:admin` | T67.1–T67.5 | GH-S008-1 | 🟡 T67.4 Playwright open |
 | **GH-S008-4** | `[EV-009][F37] M68 — Config schema + preset API + DB` | `evolve`, `app:admin`, `app:infra` | T68.1–T68.13 | GH-S008-1 | ✅ Done |
 | **GH-S008-5** | `[EV-009][F37] M69 — Playground UI (golden + ad-hoc + compare)` | `evolve`, `app:admin` | T69.1–T69.9 | GH-S008-4 | ✅ Done |
@@ -97,9 +97,9 @@ Each milestone issue should include:
 |------|-----------|------|--------|------|
 | T65.1–T65.3 | M65 | Test + Code | ✅ | TC-123, UJ-039 |
 | T66.1–T66.4, T66.6 | M66 | Test + Code | ✅ | TC-124, UJ-044 |
-| T66.5 | M66 | Playwright | ⬜ | `uj044-eval-jobs-tab.spec.ts` |
+| T66.5 | M66 | Playwright | ✅ | `uj044-eval-jobs-tab.spec.ts` |
 | T67.1–T67.3, T67.5 | M67 | Test + Code | ✅ | TC-125/126, UJ-041 |
-| T67.4 | M67 | Playwright | ⬜ | extend `uj041-eval-dashboard-tabs.spec.ts` |
+| T67.4 | M67 | Playwright | ✅ | extend `uj041-eval-dashboard-tabs.spec.ts` |
 | T68.1–T68.13 | M68 | Test + Code + Config | ✅ | TC-127, TC-134 |
 | T69.1–T69.9 | M69 | Test + Code | ✅ | TC-128–130, UJ-045/046 |
 | T70.1–T70.7 | M70 | Test + Code + Config | ✅ | TC-131–133, UJ-047 |

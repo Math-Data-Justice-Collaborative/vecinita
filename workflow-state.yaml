@@ -120,9 +120,11 @@ project:
       branch: feat/S008-eval-ux-playground
       evolve_cycle_id: EV-009
       substeps:
-        current_task: T69.7
+        current_task: T70.8
+        completed_tasks_recent:
+        - T67.4
       feature: F36
-      phase: Phase EV-009 (M65-M69)
+      phase: Phase EV-009 (M65-M70)
       reconciliation_note: S004/EV-005 F34 build (Phase 11 M43-M47) reconciled to completed during 10-e2e — 08-verify-build,
         09-qa (remediated), and 10-e2e all completed downstream on feat/S004-supabase-auth. Reopened for active S005/EV-006
         F35 build (see s005); closed out completed 2026-06-30 (M53 22/22).
@@ -1648,7 +1650,7 @@ stages:
     partial_rerun_at: '2026-06-25'
     partial_rerun_note: S001 — Modal cold-start reduction (instrumentation, levers, pre-warm, GPU snapshot spike)
     substeps:
-      current_task: T69.7
+      current_task: T70.8
       milestone: M32 completed
       completed_tasks:
       - S001-T1
@@ -3055,7 +3057,9 @@ evolve_cycles:
       status: in_progress
       started: '2026-07-02'
       substeps:
-        current_task: T69.7
+        current_task: T70.8
+        completed_tasks_recent:
+        - T67.4
     08-verify-build:
       status: in_progress
       started: '2026-07-03'
@@ -5034,6 +5038,13 @@ git_history:
     session_id: S006-invite-acceptance
     files_changed: 1
     timestamp: '2026-06-30T23:53:58Z'
+  - sha: pending-t67.4
+    branch: feat/S008-eval-ux-playground
+    message: '[T67.4] test: extend uj041-eval-dashboard-tabs Playwright — scatter + presets (TC-125/126)'
+    stage: 07-build
+    session_id: S008-eval-ux-playground
+    files_changed: 3
+    timestamp: '2026-07-03T16:39:00Z'
 constraints:
   cost:
     target_usd_per_month: 25
