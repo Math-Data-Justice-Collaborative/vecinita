@@ -114,15 +114,21 @@ project:
           T43.1-T47.6, 29 tasks) appended to execution-plan. R53 unblocked via Supabase CLI (MCP-independent). Commit DEFERRED
           (commit-only-when-asked override). Baseline partial_rerun info preserved in legacy stages.04-tech-plan.'
     07-build:
-      status: in_progress
+      status: completed
       started_at: '2026-07-02'
+      completed_at: '2026-07-03'
       session_id: S008-eval-ux-playground
       branch: feat/S008-eval-ux-playground
       evolve_cycle_id: EV-009
+      report: docs/sessions/S008-eval-ux-playground/reports/phase-15-gate-check.md
       substeps:
-        current_task: T70.8
+        current_task: 08-verify-build — formal phase verify
         completed_tasks_recent:
+        - T70.8
         - T67.4
+      execution_plan:
+        active_task: 08-verify-build — formal phase verify
+        phase_15_gate: T2_PASS
       feature: F36
       phase: Phase EV-009 (M65-M70)
       reconciliation_note: S004/EV-005 F34 build (Phase 11 M43-M47) reconciled to completed during 10-e2e — 08-verify-build,
@@ -459,9 +465,8 @@ active_session:
   evolve_cycle_id: EV-009
   artifacts_dir: docs/sessions/S008-eval-ux-playground/
   started_at: '2026-07-02'
-  current_stage: 08-verify-build
-  current_stage_note: 'Interim delta verify PASS after fixes — 07-build prerequisite still unmet; routing_plan 08 remains
-    pending until formal milestone close'
+  current_stage: 07-build
+  current_stage_note: T70.8 Phase 15 gate checklist complete — T2 PASS
   routing_plan:
   - stage: 00-context
     status: completed
@@ -476,8 +481,9 @@ active_session:
     started_at: '2026-07-02'
     completed_at: '2026-07-02'
   - stage: 07-build
-    status: in_progress
+    status: completed
     started_at: '2026-07-02'
+    completed_at: '2026-07-03'
   - stage: 08-verify-build
     status: pending
   - stage: 09-qa
@@ -555,6 +561,10 @@ active_session:
     kind: report
     session_id: S008-eval-ux-playground
     stage: 08-verify-build
+  - path: docs/sessions/S008-eval-ux-playground/reports/phase-15-gate-check.md
+    kind: gate_report
+    session_id: S008-eval-ux-playground
+    stage: 07-build
 sessions:
 - id: S007-rag-eval
   type: feature
@@ -1642,15 +1652,17 @@ stages:
     - .github/workflows/ci.yml
     verification: passed
   07-build:
-    status: in_progress
+    status: completed
     started_at: '2026-07-02'
+    completed_at: '2026-07-03'
     session_id: S008-eval-ux-playground
     branch: feat/S008-eval-ux-playground
     evolve_cycle_id: EV-009
+    report: docs/sessions/S008-eval-ux-playground/reports/phase-15-gate-check.md
     partial_rerun_at: '2026-06-25'
     partial_rerun_note: S001 — Modal cold-start reduction (instrumentation, levers, pre-warm, GPU snapshot spike)
     substeps:
-      current_task: T70.8
+      current_task: 08-verify-build — formal phase verify
       milestone: M32 completed
       completed_tasks:
       - S001-T1
@@ -1662,8 +1674,14 @@ stages:
       - S001-T9
       - S001-T10
       - S001-T11
+      completed_tasks_recent:
+      - T70.8
+      - T67.4
       note: T8 deploy done; snapshot restore confirmed; cold /generate 21.5s vs ~68s baseline
-    note: S001 07-build — T1-T9,T10,T11 shipped; T12 CPU-snapshot/collapse web-fn hop next
+    execution_plan:
+      active_task: 08-verify-build — formal phase verify
+      phase_15_gate: T2_PASS
+    note: S008/EV-009 F36+F37 build — Phase 15 gate T2 PASS (T70.8); M65–M70 complete; handoff to 08-verify-build
     s003:
       status: completed
       session_id: S003-persistent-chat-history
@@ -3054,12 +3072,19 @@ evolve_cycles:
       completed: '2026-07-02'
       note: 'EV-009/S008 delta — F36 follow-ons (M65–M67) + F37 eval playground + super-admin runtime promote (ADR-035, TP-S008-01–16).'
     07-build:
-      status: in_progress
+      status: completed
       started: '2026-07-02'
+      completed: '2026-07-03'
+      report: docs/sessions/S008-eval-ux-playground/reports/phase-15-gate-check.md
       substeps:
-        current_task: T70.8
+        current_task: 08-verify-build — formal phase verify
         completed_tasks_recent:
+        - T70.8
         - T67.4
+      execution_plan:
+        active_task: 08-verify-build — formal phase verify
+        phase_15_gate: T2_PASS
+      note: S008/EV-009 F36+F37 build — Phase 15 gate T2 PASS (T70.8); M65–M70 complete; handoff to 08-verify-build
     08-verify-build:
       status: in_progress
       started: '2026-07-03'
@@ -4554,6 +4579,10 @@ artifacts:
   kind: report
   session_id: S008-eval-ux-playground
   stage: 08-verify-build
+- path: docs/sessions/S008-eval-ux-playground/reports/phase-15-gate-check.md
+  kind: gate_report
+  session_id: S008-eval-ux-playground
+  stage: 07-build
 - path: docs/implementation-verification.md
   kind: implementation-verification
 - docs/sessions/S007-rag-eval/reports/verification-report.md

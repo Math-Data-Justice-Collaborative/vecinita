@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 15: EV-009 — Eval UX polish + playground (F36 follow-ons + F37) |
-| **Active milestone** | M66: Unified jobs API + Jobs tab eval rows *(complete)* |
-| **Active task** | **T70.8** — Phase 15 gate checklist *(next)* |
-| **Tasks completed** | Phase 14 M59–M64 complete (S007); Phase 15 M65–M70 code complete; T67.4 Playwright complete (S008) |
+| **Active milestone** | M70: Super-admin promote + ChatRAG config reader *(complete)* |
+| **Active task** | **08-verify-build** — formal phase verify *(next)* |
+| **Tasks completed** | Phase 15 M65–M70 complete (S008); T70.8 gate checklist PASS at T2 (2026-07-03) |
 | **Last updated** | 2026-07-03 |
 | **Evolve cycle** | EV-009 (F36 follow-ons + F37) — **04-tech-plan complete** |
 | **Git branch** | `feat/S008-eval-ux-playground` |
@@ -1410,17 +1410,24 @@ Playground with versioned presets and super-admin runtime promote to ChatRAG.
 | T70.5 | Test: `tests/integration/test_rag_production_config.py` — TC-133 — red | Test | completed | test-plan TC-133, UJ-047 | T70.4 | — | S008 | F37 | 2026-07-02 |
 | T70.6 | Code: Playground promote button (super-admin only) + confirm dialog | Code | completed | UJ-047, ADR-035 §10 | T70.3, T69.4 | — | S008 | F37 | 2026-07-02 |
 | T70.7 | Config: `docs/staging-secrets-matrix.md` — `VECINITA_SUPER_ADMIN_EMAIL` | Config | completed | config-spec §Eval playground | T70.1 | — | S008 | F37 | 2026-07-02 |
-| T70.8 | Docs: Phase 15 gate checklist + session 04-tech-plan report | Docs | in_progress | 08-verify-build | T65.3–T70.6 | — | S008 | F37 |
+| T70.8 | Docs: Phase 15 gate checklist + session 04-tech-plan report | Docs | completed | 08-verify-build | T65.3–T70.6 | — | S008 | F37 | 2026-07-03 |
 
 #### Phase 15 Gate Check
 
-- [x] All M65–M70 tasks completed (T65.1–T70.7; T70.8 gate doc in progress)
-- [ ] TC-123–TC-133 green; UJ-044–047 covered (T2)
-- [ ] AC-E22–AC-E26 satisfied at T2; live promote smoke at 13-deploy-smoke (T3)
-- [ ] `eval_config_presets` / `rag_production_config` migrations applied; privacy tests green
-- [ ] No new Python runtime dependencies (ADR-035 §15)
-- [ ] CORS preflight covers new EV-009 routes
-- [ ] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green
+- [x] All M65–M70 tasks completed (T65.1–T70.8)
+- [x] TC-123–TC-133 green; UJ-044–047 covered (T2)
+- [x] AC-E22–AC-E26 satisfied at T2; live promote smoke at 13-deploy-smoke (T3) — **T3 pending**
+- [x] `eval_config_presets` / `rag_production_config` migrations applied; privacy tests green
+- [x] No new Python runtime dependencies (ADR-035 §15)
+- [x] CORS preflight covers new EV-009 routes
+- [x] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green
+
+**Phase Gate Log — Phase 15 (2026-07-03):** T2 PASS. M65–M70 complete (T65.1–T70.8). TC-123–TC-133
+and UJ-044–047 green at T2; AC-E22–AC-E26 met at T2. Privacy tests green for
+`eval_config_presets` / `rag_production_config`. No new Python runtime deps (ADR-035). EV-009 CORS
+preflight tests added. Full backend + DM-frontend Vitest suites green. T3 live promote smoke and
+PR-51 merge pending (13-deploy-smoke). Report:
+`docs/sessions/S008-eval-ux-playground/reports/phase-15-gate-check.md`.
 
 ---
 
@@ -1980,7 +1987,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T70.5 | M70 | 15 | Test | pending | T70.4 | — | S008 | F37 |
 | T70.6 | M70 | 15 | Code | pending | T70.3, T69.4 | — | S008 | F37 |
 | T70.7 | M70 | 15 | Config | pending | T70.1 | — | S008 | F37 |
-| T70.8 | M70 | 15 | Docs | pending | T65.3–T70.6 | — | S008 | F37 |
+| T70.8 | M70 | 15 | Docs | completed | T65.3–T70.6 | — | S008 | F37 | 2026-07-03 |
 
 ## Phase Gate Log
 

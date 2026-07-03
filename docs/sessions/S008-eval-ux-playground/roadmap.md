@@ -243,13 +243,13 @@ flowchart TB
 
 From execution-plan Phase 15 gate:
 
-- [ ] All M65–M70 tasks completed (incl. T66.5, T67.4, T70.8)
-- [ ] TC-123–TC-133 green; UJ-044–047 covered at T2
-- [ ] AC-E22–AC-E26 satisfied at T2; live promote smoke at T3 (13-deploy-smoke)
-- [ ] Migrations applied; privacy tests green
-- [ ] No new Python runtime deps (ADR-035 §15)
-- [ ] CORS preflight covers EV-009 routes
-- [ ] ruff / basedpyright / ESLint clean; full suites green
+- [x] All M65–M70 tasks completed (incl. T66.5, T67.4, T70.8) — 2026-07-03
+- [x] TC-123–TC-133 green; UJ-044–047 covered at T2 — 2026-07-03
+- [x] AC-E22–AC-E26 satisfied at T2; live promote smoke at T3 (13-deploy-smoke) — **T3 pending**
+- [x] Migrations applied; privacy tests green — 2026-07-03
+- [x] No new Python runtime deps (ADR-035 §15) — 2026-07-03
+- [x] CORS preflight covers EV-009 routes — 2026-07-03
+- [x] ruff / basedpyright / ESLint clean; full suites green — 2026-07-03
 - [ ] PR-51 merged; CI + deploy-preflight green on `main`
 
 ---

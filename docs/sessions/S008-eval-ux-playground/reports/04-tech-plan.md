@@ -3,7 +3,7 @@
 **Session:** S008-eval-ux-playground  
 **Evolve cycle:** EV-009 (F36 follow-ons + F37)  
 **Date:** 2026-07-02  
-**Status:** Complete (pending user approval)
+**Status:** Complete — Phase 15 T2 gate PASS (2026-07-03, T70.8)
 
 ## Intent
 
@@ -69,8 +69,24 @@ promote.
 | Staging secrets | `docs/staging-secrets-matrix.md` — `VECINITA_SUPER_ADMIN_EMAIL` |
 | Context brief | `docs/context/eval-ux-playground.md` — gaps closed |
 
+## Phase 15 gate close-out (T70.8 — 2026-07-03)
+
+| Gate item | Result |
+|-----------|--------|
+| M65–M70 tasks | Complete (T65.1–T70.8) |
+| TC-123–TC-133 / UJ-044–047 | Green at T2 |
+| AC-E22–AC-E26 | Met at T2 |
+| Migrations + privacy | `eval_config_presets`, `rag_production_config` — green |
+| Python deps | No new runtime deps (ADR-035 §178) |
+| CORS EV-009 | Preflight tests for presets, rag/config, ollama routes |
+| Lint / typecheck / tests | Backend + DM-frontend suites green |
+
+Full evidence: [phase-15-gate-check.md](./phase-15-gate-check.md).
+
+**T3 pending:** live promote smoke (13-deploy-smoke); PR-51 merge + CI on `main`.
+
 ## Handoff
 
-**Next stage:** 07-build — start **T65.1** (TC-123 Vitest red).
+**Next stage:** **08-verify-build** (formal phase verify) → 09-qa → 10-e2e → re-invoke 11-verify-impl for M70/UJ-047.
 
 **Coordinate:** S007 deploy stages 12–13 remain deferred on S007 backlog; S008 does not block.
