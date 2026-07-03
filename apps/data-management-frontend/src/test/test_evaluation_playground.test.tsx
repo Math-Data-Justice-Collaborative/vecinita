@@ -945,6 +945,49 @@ describe("EvaluationPlayground (UJ-045)", () => {
     });
   });
 
+  it("closes promote dialog when cancel is clicked", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/eval/config-presets")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ items: [SAVED_PRESET_BODY] }),
+          });
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-promote-button"),
+      ).toBeInTheDocument();
+    });
+    fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
+      target: { value: PRESET_ID },
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-promote-button"),
+      ).not.toBeDisabled();
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-promote-button"));
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-promote-dialog"),
+      ).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^Cancel$/i }));
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId("eval-playground-promote-dialog"),
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it("shows promote failure message when promote API rejects", async () => {
     vi.stubGlobal(
       "fetch",
@@ -996,6 +1039,19 @@ describe("EvaluationPlayground (UJ-045)", () => {
   });
 
   it("shows generic promote failure when promote throws a non-Error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/eval/config-presets")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ items: [SAVED_PRESET_BODY] }),
+          });
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
     vi.spyOn(adminApi, "promoteRagConfig").mockRejectedValueOnce("offline");
 
     await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
@@ -1016,7 +1072,7 @@ describe("EvaluationPlayground (UJ-045)", () => {
     fireEvent.click(screen.getByTestId("eval-playground-promote-confirm"));
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent(
-        /Failed to promote configuration/i,
+        /Failed to promote production config/i,
       );
     });
   });
@@ -1066,33 +1122,38 @@ describe("EvaluationPlayground (UJ-045)", () => {
     let promoteBody: Record<string, unknown> | null = null;
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
-        const url = fetchInputUrl(input);
-        const method = (init?.method ?? "GET").toUpperCase();
-        if (url.includes("/internal/v1/eval/runs") && method === "POST") {
-          return Promise.resolve({
-            ok: true,
-            json: async () => ({
-              run_id: NEW_RUN_ID,
-              status: "pending",
-              created_at: "2026-07-02T12:00:00Z",
-            }),
-          });
-        }
-        if (url.includes("/internal/v1/rag/config/promote") && method === "POST") {
-          promoteBody = parsePostBody(init);
-          return Promise.resolve({
-            ok: true,
-            status: 200,
-            json: async () => ({
-              config_version: 4,
-              promoted_at: "2026-07-02T12:00:00Z",
-              promoted_by: "44444444-4444-4444-4444-444444444444",
-            }),
-          });
-        }
-        return Promise.resolve(defaultPlaygroundFetch(url));
-      }),
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          if (url.includes("/internal/v1/eval/runs") && method === "POST") {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({
+                run_id: NEW_RUN_ID,
+                status: "pending",
+                created_at: "2026-07-02T12:00:00Z",
+              }),
+            });
+          }
+          if (
+            url.includes("/internal/v1/rag/config/promote") &&
+            method === "POST"
+          ) {
+            promoteBody = parsePostBody(init);
+            return Promise.resolve({
+              ok: true,
+              status: 200,
+              json: async () => ({
+                config_version: 4,
+                promoted_at: "2026-07-02T12:00:00Z",
+                promoted_by: "44444444-4444-4444-4444-444444444444",
+              }),
+            });
+          }
+          return Promise.resolve(defaultPlaygroundFetch(url));
+        }),
     );
 
     await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");

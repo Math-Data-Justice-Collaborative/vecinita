@@ -288,7 +288,6 @@ export function EvaluationPlaygroundTab({
   }, [selectedPreset]);
 
   const handleSavePreset = useCallback(async () => {
-    if (!presetName.trim()) return;
     setPresetSaving(true);
     setError(null);
     try {

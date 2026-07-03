@@ -1171,10 +1171,8 @@ describe("admin API eval helpers", () => {
       source: "preset",
       preset_id: EVAL_PRESET.preset_id,
     });
-    const promoteHeaders = vi.mocked(fetch).mock.calls[0]?.[1]?.headers as Record<
-      string,
-      string
-    >;
+    const promoteHeaders = vi.mocked(fetch).mock.calls[0]?.[1]
+      ?.headers as Record<string, string>;
     expect(promoteHeaders["Authorization"]).toBe("Bearer test-key");
 
     vi.mocked(fetch).mockResolvedValue(
@@ -1184,10 +1182,8 @@ describe("admin API eval helpers", () => {
       }),
     );
     await fetchActiveRagConfig(CLIENT);
-    const activeHeaders = vi.mocked(fetch).mock.calls[1]?.[1]?.headers as Record<
-      string,
-      string
-    >;
+    const activeHeaders = vi.mocked(fetch).mock.calls[1]?.[1]
+      ?.headers as Record<string, string>;
     expect(activeHeaders["Authorization"]).toBe("Bearer test-key");
   });
 });
