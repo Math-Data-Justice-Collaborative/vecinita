@@ -23,7 +23,8 @@ checkpoints, and evolve summaries.
 ## 1. Roadmap
 
 **When relevant**: Always — every project benefits from a phased plan.
-**Path**: `docs/reference.md#roadmap`
+**Path**: Session-scoped: `docs/sessions/{session-id}/roadmap.md` (GitHub issues + mermaid deps).
+Standing product phases remain at `docs/reference.md#roadmap`.
 
 ```markdown
 # Roadmap

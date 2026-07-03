@@ -49,6 +49,7 @@ docs/sessions/
   S042-live-e2e/
     session-brief.md                # intent, type, scope, branch, links
     routing-plan.md                 # approved stage list + skip rationale
+    roadmap.md                      # GitHub issue decomposition + dependency diagrams (after 04-tech-plan)
     reports/                        # stage outputs for this session
       qa-report.md
       e2e-report.md

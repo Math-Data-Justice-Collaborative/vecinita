@@ -42,6 +42,11 @@ with per-user versioned presets and super-admin runtime promotion to production 
 
 See [routing-plan.md](./routing-plan.md).
 
+## Roadmap
+
+GitHub issue decomposition and dependency diagrams:
+[roadmap.md](./roadmap.md).
+
 ## Links
 
 - Prior: [S007 session brief](../S007-rag-eval/session-brief.md)
