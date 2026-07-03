@@ -48,6 +48,8 @@ const STATS_BODY = {
 const RUN_A_ID = "00000000-0000-0000-0000-000000000099";
 const RUN_B_ID = "00000000-0000-0000-0000-000000000088";
 const PLAYGROUND_RUN_ID = "00000000-0000-0000-0000-0000000000aa";
+/** Eval run surfaced on unified GET /jobs (UJ-044 / TC-124). */
+export const EVAL_JOB_ID = "55555555-5555-4555-8555-555555555555";
 
 const OLLAMA_MODELS_BODY = {
   items: [
@@ -160,7 +162,10 @@ async function fulfillJobsRoute(route: Route): Promise<void> {
       body: JSON.stringify({
         job_id: "job-playwright-001",
         status: "completed",
-        type: "ingest",
+        job_type: "ingest",
+        urls: ["https://example.com/page-a"],
+        error_code: null,
+        error_message: null,
         created_at: "2026-07-01T12:00:00Z",
         updated_at: "2026-07-01T12:01:00Z",
       }),
@@ -176,9 +181,22 @@ async function fulfillJobsRoute(route: Route): Promise<void> {
           {
             job_id: "job-playwright-001",
             status: "completed",
-            type: "ingest",
+            job_type: "ingest",
+            urls: ["https://example.com/page-a"],
+            error_code: null,
+            error_message: null,
             created_at: "2026-07-01T12:00:00Z",
             updated_at: "2026-07-01T12:01:00Z",
+          },
+          {
+            job_id: EVAL_JOB_ID,
+            status: "running",
+            job_type: "eval",
+            urls: [],
+            error_code: null,
+            error_message: null,
+            created_at: "2026-07-02T12:00:00Z",
+            updated_at: "2026-07-02T12:00:05Z",
           },
         ],
       }),
@@ -307,7 +325,7 @@ async function fulfillAdminRoute(route: Route): Promise<void> {
 
 /** Mock internal-write-api routes for authenticated admin navigation tests. */
 export async function mockAdminApi(page: Page): Promise<void> {
-  await page.route("**/jobs**", fulfillJobsRoute);
+  await page.route("http://127.0.0.1:8001/jobs**", fulfillJobsRoute);
   await page.route("**/internal/v1/**", fulfillAdminRoute);
 }
 
