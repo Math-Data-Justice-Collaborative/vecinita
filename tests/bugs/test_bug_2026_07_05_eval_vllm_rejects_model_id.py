@@ -17,6 +17,30 @@ if TYPE_CHECKING:
 _VLLM_BASE = "https://vecinita--vecinita-llm-fastapi-app.modal.run"
 
 
+def _patched_llm_client_class(
+    transport: httpx.MockTransport,
+) -> type[LlmClient]:
+    class PatchedLlmClient(LlmClient):
+        def __init__(
+            self,
+            base_url: str | None = None,
+            *,
+            model_id: str | None = None,
+            proxy_key: str | None = None,
+            timeout: float = 120.0,
+            http_client: httpx.Client | None = None,
+        ) -> None:
+            super().__init__(
+                base_url or "http://llm.test",
+                model_id=model_id,
+                proxy_key=proxy_key or "proxy-secret",
+                http_client=http_client
+                or httpx.Client(transport=transport, base_url="http://llm.test"),
+            )
+
+    return PatchedLlmClient
+
+
 def test_llm_client_omits_model_id_for_vllm_generate() -> None:
     """VLLM GenerateRequest forbids model_id — LlmClient must not send it."""
     captured: dict[str, object] = {}
@@ -56,12 +80,7 @@ def test_eval_runtime_for_config_omits_model_id_when_only_vllm_configured(
     monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", "proxy-secret")
     monkeypatch.setattr(
         "vecinita_eval.modal_llm.LlmClient",
-        lambda **kwargs: LlmClient(  # pyright: ignore[reportUnknownArgumentType, reportUnknownLambdaType]
-            "http://llm.test",
-            model_id=kwargs.get("model_id"),
-            proxy_key="proxy-secret",
-            http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
-        ),
+        _patched_llm_client_class(transport),
     )
 
     _judge, synthesis = eval_runtime_for_config(
