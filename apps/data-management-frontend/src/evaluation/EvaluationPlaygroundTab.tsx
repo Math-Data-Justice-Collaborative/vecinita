@@ -51,6 +51,18 @@ const DEFAULT_TEMPERATURE = 0.2;
 const DEFAULT_JUDGE_TEMPERATURE = 0.2;
 const DEFAULT_MODEL_ID = "qwen2.5:1.5b-instruct";
 
+/** vLLM-only deployments omit Modal Ollama; playground still needs a selectable model tag. */
+const VLLM_FALLBACK_MODELS: readonly OllamaModelSummaryApi[] = [
+  { model_id: DEFAULT_MODEL_ID, available: true },
+];
+
+function isOllamaModelsUnavailableError(err: unknown): boolean {
+  if (!(err instanceof Error)) {
+    return false;
+  }
+  return /\((502|503|504)\)/.test(err.message);
+}
+
 function buildFullConfig(input: {
   topK: number;
   minRetrievalScore: number;
@@ -233,11 +245,16 @@ export function EvaluationPlaygroundTab({
         });
       } catch (err) {
         if (!active) return;
-        setError(
-          err instanceof Error
-            ? err.message
-            : tr("admin.evaluation.playground.loadModelsFailed"),
-        );
+        if (isOllamaModelsUnavailableError(err)) {
+          setModels([...VLLM_FALLBACK_MODELS]);
+          setModelId(DEFAULT_MODEL_ID);
+        } else {
+          setError(
+            err instanceof Error
+              ? err.message
+              : tr("admin.evaluation.playground.loadModelsFailed"),
+          );
+        }
       } finally {
         if (active) setModelsLoading(false);
       }

@@ -35,6 +35,7 @@ from vecinita_shared_schemas.db_mapping import (
     scalar_uuid,
 )
 from vecinita_shared_schemas.eval_config import (
+    DEFAULT_EVAL_MODEL_ID,
     EvalConfigPresetCloneRequest,
     EvalConfigPresetCreateRequest,
     EvalConfigPresetListResponse,
@@ -93,6 +94,7 @@ from vecinita_shared_schemas.ollama_models import (
     OllamaModelListResponse,
     OllamaModelPullRequest,
     OllamaModelPullResponse,
+    OllamaModelSummary,
 )
 
 from vecinita_internal_write_api.audit import (
@@ -275,6 +277,18 @@ def _default_ollama_models_client() -> OllamaModelsClient | None:
         return OllamaModelsClient()
     except OllamaModelsClientError:
         return None
+
+
+def _vllm_fallback_model_list() -> OllamaModelListResponse:
+    """Default model picker entries when Modal Ollama is not wired (vLLM-only eval)."""
+    return OllamaModelListResponse(
+        items=[
+            OllamaModelSummary(
+                model_id=DEFAULT_EVAL_MODEL_ID,
+                available=True,
+            ),
+        ],
+    )
 
 
 def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route handlers inline
@@ -1628,17 +1642,11 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         _actor: WriteActorDep,
     ) -> OllamaModelListResponse:
         if ollama_models is None:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Ollama models client not configured",
-            )
+            return _vllm_fallback_model_list()
         try:
             return ollama_models.list_models()
-        except OllamaModelsClientError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=str(exc),
-            ) from exc
+        except OllamaModelsClientError:
+            return _vllm_fallback_model_list()
 
     @app.post(
         "/internal/v1/models/ollama/pull",

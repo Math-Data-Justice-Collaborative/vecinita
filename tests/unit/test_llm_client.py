@@ -33,8 +33,11 @@ def test_generate_returns_text() -> None:
     client.close()
 
 
-def test_generate_includes_model_id_and_proxy_key() -> None:
+def test_generate_includes_model_id_and_proxy_key(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Generate forwards model_id and proxy auth for Modal Ollama."""
+    monkeypatch.setenv("VECINITA_MODAL_OLLAMA_URL", "http://ollama.test")
 
     def handler(request: httpx.Request) -> httpx.Response:
         payload = as_json_object(cast("object", json_lib.loads(request.content.decode())))
@@ -50,6 +53,37 @@ def test_generate_includes_model_id_and_proxy_key() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://ollama.test"),
     )
     assert client.generate("hello") == "Routed answer."
+    client.close()
+
+
+def test_generate_omits_model_id_when_ollama_env_points_elsewhere(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """model_id is only sent when the client base URL matches VECINITA_MODAL_OLLAMA_URL."""
+    monkeypatch.setenv(
+        "VECINITA_MODAL_OLLAMA_URL",
+        "https://vecinita--vecinita-ollama-fastapi-app.modal.run",
+    )
+    monkeypatch.setenv(
+        "VECINITA_MODAL_LLM_URL",
+        "https://vecinita--vecinita-llm-fastapi-app.modal.run",
+    )
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        payload = as_json_object(cast("object", json_lib.loads(request.content.decode())))
+        assert "model_id" not in payload
+        return httpx.Response(200, json={"text": "vllm answer"})
+
+    transport = httpx.MockTransport(handler)
+    client = LlmClient(
+        "https://vecinita--vecinita-llm-fastapi-app.modal.run",
+        model_id="qwen2.5:1.5b-instruct",
+        http_client=httpx.Client(
+            transport=transport,
+            base_url="https://vecinita--vecinita-llm-fastapi-app.modal.run",
+        ),
+    )
+    assert client.generate("hello", model_id="qwen2.5:1.5b-instruct") == "vllm answer"
     client.close()
 
 
@@ -74,8 +108,11 @@ def test_generate_omits_model_id_for_vllm_endpoint() -> None:
     client.close()
 
 
-def test_generate_allows_per_call_model_id_override() -> None:
+def test_generate_allows_per_call_model_id_override(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Per-call model_id overrides the client default."""
+    monkeypatch.setenv("VECINITA_MODAL_OLLAMA_URL", "http://ollama.test")
 
     def handler(request: httpx.Request) -> httpx.Response:
         payload = as_json_object(cast("object", json_lib.loads(request.content.decode())))

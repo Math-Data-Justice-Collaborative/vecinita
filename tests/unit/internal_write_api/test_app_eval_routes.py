@@ -18,7 +18,13 @@ from vecinita_shared_schemas.internal_write import EvalRunCreateRequest
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
-from tests.helpers.json_response import json_int, json_str, response_json_object
+from tests.helpers.json_response import (
+    find_json_object_by_str,
+    json_int,
+    json_list,
+    json_str,
+    response_json_object,
+)
 from tests.helpers.ollama_models_mock import MockOllamaModelsClient
 from tests.unit.internal_write_api.conftest import auth_headers, database_url
 from tests.unit.shared_schemas.auth_fixtures import (
@@ -318,17 +324,30 @@ def test_eval_config_preset_routes_return_404_for_missing_ids(
         reset_auth_config_for_tests()
 
 
-def test_ollama_model_routes_require_configured_client(
+def test_ollama_model_list_returns_vllm_fallback_when_unconfigured(
     eval_write_client: TestClient,
 ) -> None:
-    """Ollama list/pull return 503 when no client is wired."""
-    assert (
-        eval_write_client.get(
-            "/internal/v1/models/ollama",
-            headers=auth_headers(),
-        ).status_code
-        == HTTPStatus.SERVICE_UNAVAILABLE
+    """Model picker works on vLLM-only deployments (DO maps 503 JSON to 504 HTML)."""
+    from vecinita_shared_schemas.eval_config import DEFAULT_EVAL_MODEL_ID  # noqa: PLC0415
+
+    response = eval_write_client.get(
+        "/internal/v1/models/ollama",
+        headers=auth_headers(),
     )
+    assert response.status_code == HTTPStatus.OK
+    body = response_json_object(response)
+    default_model = find_json_object_by_str(
+        json_list(body, "items"),
+        "model_id",
+        DEFAULT_EVAL_MODEL_ID,
+    )
+    assert default_model.get("available") is True
+
+
+def test_ollama_model_pull_requires_configured_client(
+    eval_write_client: TestClient,
+) -> None:
+    """Pull remains unavailable when Modal Ollama is not wired."""
     assert (
         eval_write_client.post(
             "/internal/v1/models/ollama/pull",
@@ -356,7 +375,7 @@ class _FailingOllamaClient:
 def test_ollama_model_routes_map_client_errors_to_502(
     internal_api_env: None,
 ) -> None:
-    """Ollama routes translate OllamaModelsClientError to 502."""
+    """List falls back to vLLM defaults; pull still surfaces upstream errors."""
     _ = internal_api_env
     from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
 
@@ -367,13 +386,11 @@ def test_ollama_model_routes_map_client_errors_to_502(
             ollama_models_client=_FailingOllamaClient(),
         )
     )
-    assert (
-        client.get(
-            "/internal/v1/models/ollama",
-            headers=auth_headers(),
-        ).status_code
-        == HTTPStatus.BAD_GATEWAY
+    list_response = client.get(
+        "/internal/v1/models/ollama",
+        headers=auth_headers(),
     )
+    assert list_response.status_code == HTTPStatus.OK
     assert (
         client.post(
             "/internal/v1/models/ollama/pull",
