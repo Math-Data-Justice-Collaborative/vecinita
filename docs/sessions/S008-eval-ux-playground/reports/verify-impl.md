@@ -25,7 +25,7 @@ Recorded in `workflow-state.yaml` `decisions_log` (2026-07-02).
 |--------|--------|-------|
 | `docs/sessions/S008-eval-ux-playground/reports/01-requirements.md` | Complete | RD-114–RD-127 |
 | `docs/sessions/S008-eval-ux-playground/reports/04-tech-plan.md` | Complete | ADR-035, TP-S008-01–16 |
-| `docs/execution-plan.md` Phase 15 | M65–M69 complete | M70 pending |
+| `docs/sessions/S000-internal-docs-archive/execution-plan.md` Phase 15 | M65–M69 complete | M70 pending |
 | Formal 09-qa / 10-e2e reports | **Absent** | Waived — inline runs below |
 | `docs/acceptance-criteria.md` | AC-E22–E24 ✓; AC-E25 partial; AC-E26 deferred | |
 

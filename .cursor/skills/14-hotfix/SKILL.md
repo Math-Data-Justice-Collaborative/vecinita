@@ -238,7 +238,7 @@ or architectural changes (new ADR + plan update).
 
 1. **Deployed codebase**: Pipeline stages 07-build through 13-deploy-smoke have run
    (at minimum, 07-build is `completed` so code exists to patch)
-2. `docs/execution-plan.md` — for tech stack, branch strategy, test commands
+2. `docs/sessions/S000-internal-docs-archive/execution-plan.md` — for tech stack, branch strategy, test commands
 3. **Spec suite** (see Spec conformance §Spec registry) — at minimum `docs/feature-list.md`,
    `docs/spec.md`; plus `config-spec.md`, `api-contract.md`, `deployment-integration.md` when relevant
 4. Git repo is clean (no uncommitted work)
@@ -264,7 +264,7 @@ substep. **Do not** edit `workflow-state.yaml` directly.
 
 (append section if missing). Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
-### Hotfix log: `docs/hotfix-log.md`
+### Hotfix log: `docs/sessions/S000-internal-docs-archive/hotfix-log.md`
 
 Index of all hotfixes applied. Created on first invocation if absent. One row per
 resolved bug; links to the full bug report.
@@ -294,8 +294,8 @@ Step 0.5 onward; prevention filled in Phase 5).
 ### On invocation
 
 1. Read `workflow-state.yaml` — confirm pipeline has reached at least Phase C
-2. Read `docs/hotfix-log.md` (create if absent)
-3. Read `docs/deploy-state.md` and `docs/deploy-report.md` if present (last deploy URL)
+2. Read `docs/sessions/S000-internal-docs-archive/hotfix-log.md` (create if absent)
+3. Read `docs/sessions/S000-internal-docs-archive/deploy-state.md` and `docs/sessions/S000-internal-docs-archive/deploy-report.md` if present (last deploy URL)
 4. Skim `docs/feature-list.md` and `docs/spec.md` §Component Overview (spec baseline)
 5. Report current state in chat (status summary only — not a question), then **immediately
    call AskQuestion Step 0.1** — do not jump to code.
@@ -355,7 +355,7 @@ Call **AskQuestion** first — do not assume this is a new bug.
 | Deploy ready fix | Skip to Phase 4 (confirm deploy + live verification) |
 | Investigate only | Phase 1 through classification; stop before Phase 2 unless user approves |
 | Config / dependency | Problem intake (lighter) → Phase 1 classify → Phase 2 |
-| Review history | Summarize `docs/hotfix-log.md` + deploy state; ask if they want Step 0.1 again |
+| Review history | Summarize `docs/sessions/S000-internal-docs-archive/hotfix-log.md` + deploy state; ask if they want Step 0.1 again |
 | Exit | No code; optional note in workflow-state only |
 
 #### Step 0.2 — Problem intake (from the user)
@@ -458,7 +458,7 @@ section.
 1. Read `docs/acceptance-criteria.md` for the affected feature (F1–F9).
 2. Read `docs/test-plan.md` for matching TC-IDs (e.g. TC-001 for pipeline smoke).
 3. Map to concrete commands: `pytest tests/…`, `python tests/e2e_verify.py`, ` curl or httpx …`,
-   or the smoke payload from `docs/deploy-report.md` / `tests/e2e_verify.py`.
+   or the smoke payload from `docs/sessions/S000-internal-docs-archive/deploy-report.md` / `tests/e2e_verify.py`.
 
 | Symptom area | Typical Layer 3 smoke |
 |--------------|----------------------|
@@ -485,7 +485,7 @@ from Phase 0. **When the user described a concrete failure**, Phase 1.25 (repro 
 
 **Primary source:** Phase 0 interview answers (already in the bug report).
 
-**Secondary source:** codebase, CI, Modal logs, `docs/deploy-report.md`, prior bug reports.
+**Secondary source:** codebase, CI, Modal logs, `docs/sessions/S000-internal-docs-archive/deploy-report.md`, prior bug reports.
 
 Add or refine:
 - **Scope**: Which feature / endpoint / component is affected?
@@ -866,7 +866,7 @@ If the user approves deploy, complete **all** items before closing the bug repor
 
 1. Deploy the hotfix branch/commit (` platform deploy -m src.app` or project's deploy command).
 2. Capture deploy stdout/stderr; record app URL, commit SHA, and timestamp in the bug report
-   report and `docs/deploy-state.md` (hotfix deploy row).
+   report and `docs/sessions/S000-internal-docs-archive/deploy-state.md` (hotfix deploy row).
 
 **Post-deploy checks (required)**
 
@@ -1022,7 +1022,7 @@ e.g. "CORS `allow_methods` must include every HTTP verb exposed by FastAPI route
 
 #### Step 5.3 — Update hotfix log
 
-Append to `docs/hotfix-log.md`:
+Append to `docs/sessions/S000-internal-docs-archive/hotfix-log.md`:
 
 | Field | Value |
 |-------|-------|
@@ -1067,7 +1067,7 @@ Hotfix Complete.
   Commit:      [SHA]
 
   Bug report:  docs/bug-reports/BUG-YYYY-MM-DD-[slug].md
-  Hotfix log:  docs/hotfix-log.md (#[N])
+  Hotfix log:  docs/sessions/S000-internal-docs-archive/hotfix-log.md (#[N])
   Follow-ups:  [any larger issues noted during fix]
 ```
 

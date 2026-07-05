@@ -1,6 +1,6 @@
 """Phase 4 staging gate criteria (QA-006).
 
-Maps to ``docs/execution-plan.md`` Phase 4 Gate Check and ``docs/staging-runbook.md``.
+Maps to ``docs/sessions/S000-internal-docs-archive/execution-plan.md`` Phase 4 Gate Check and ``docs/staging-runbook.md``.
 Live H1-H3 tiers skip when ``VECINITA_STAGING_*`` / ``DATABASE_URL`` are unset.
 """
 
@@ -32,7 +32,7 @@ def test_gate_cost_monitoring_documented() -> None:
 
 
 def test_gate_data_staging_state_tracked() -> None:
-    """Gate: data assets tracked in docs/data-staging-state.md."""
+    """Gate: data assets tracked in docs/sessions/S000-internal-docs-archive/data-staging-state.md."""
     assert (_REPO_ROOT / "docs" / "data-staging-state.md").is_file()
 
 

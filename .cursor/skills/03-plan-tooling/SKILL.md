@@ -43,7 +43,7 @@ Do not mark 03 complete if specs lack connectivity tiers and no ADR waives brows
 1. **02-verify-plan** must be `completed`. Spec documents must be audited.
 2. At minimum: `docs/feature-list.md`, `docs/spec.md`, `docs/user-journeys.md` with audit
    verdicts applied.
-3. `docs/audits.md#product-plan-audit-report` and `docs/decisions.md#product-decisions-02-verify-plan` must exist.
+3. `docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report` and `docs/decisions.md#product-decisions-02-verify-plan` must exist.
 
 ## Why This Stage Blocks
 
@@ -184,7 +184,7 @@ Create `.cursor/hooks/` scripts and update `.cursor/hooks.json`:
 **`feature-drift.sh`** (fires on `afterFileEdit`):
 - Reads the edited file path
 - Lightweight check: is this file related to the current task/feature?
-- Cross-references with `docs/execution-plan.md` §Current State (when it exists later)
+- Cross-references with `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Current State (when it exists later)
 - Returns context about which feature/component this file belongs to
 
 Hook scripts:

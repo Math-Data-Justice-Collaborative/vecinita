@@ -54,7 +54,7 @@ Match ChatRAG: browser `en*` → `en`, `es*` → `es`, otherwise **ES**.
 
 ## References
 
-- `docs/context-brief.md` §13 (EV-004 delta), R28–R38
+- `docs/sessions/S000-internal-docs-archive/context-brief.md` §13 (EV-004 delta), R28–R38
 - ADR-020 (shared frontend UI components)
 - `apps/chat-rag-frontend/src/i18n/messages.ts`
 - `docs/bug-reports/BUG-2026-06-05-english-query-spanish-corpus.md` (ChatRAG i18n follow-up)

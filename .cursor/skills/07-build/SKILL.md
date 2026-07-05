@@ -43,7 +43,7 @@ dependencies, data management, branches, and checks allow — across **multiple 
    - 05-verify-tech `completed` — tech plan audited
    - 06-tech-tooling `completed` — dev tooling installed
 2. Required:
-   - `docs/execution-plan.md` with at least one approved phase
+   - `docs/sessions/S000-internal-docs-archive/execution-plan.md` with at least one approved phase
    - `.cursor/rules/` — spec-adherence, tdd, atomic-commits, build-execution rules
    - `.cursor/hooks.json` — hooks installed
 3. **Data management** (if applicable): Check `docs/data-management-plan.md`. Tasks with data
@@ -68,11 +68,11 @@ Invoke **workflow-state-manager** `read_context` before any other action; `updat
 substep. **Do not** edit `workflow-state.yaml` directly.
 
 
-**Detail:** `docs/execution-plan.md` §Current State — update **both** on every task/milestone change.
+**Detail:** `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Current State — update **both** on every task/milestone change.
 
 ### On invocation
 
-1. Read `docs/execution-plan.md` §Current State
+1. Read `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Current State
 2. Determine active phase, milestone, task
 3. Report current position:
 
@@ -270,7 +270,7 @@ marking the implementation task complete:
 | Upstream minima (e.g. `chunk_size` ≥ 15) | config-spec, upstream CLI |
 | Required fields for stage | api-contract, spec.md |
 
-Reference hotfix incidents in `docs/hotfix-log.md` when adding validation — do not
+Reference hotfix incidents in `docs/sessions/S000-internal-docs-archive/hotfix-log.md` when adding validation — do not
 repeat post-deploy surprises (RET-001).
 
 ## Output Rules

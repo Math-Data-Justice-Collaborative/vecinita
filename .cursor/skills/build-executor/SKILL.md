@@ -40,7 +40,7 @@ data management, branches, and checks allow—across **multiple milestones** whe
 
 ## Prerequisites
 
-1. **Execution plan**: `docs/execution-plan.md` must exist and have at least one approved phase.
+1. **Execution plan**: `docs/sessions/S000-internal-docs-archive/execution-plan.md` must exist and have at least one approved phase.
    If missing, inform the user and invoke build-planner first.
 2. **Data management**: Check `docs/data-management-state.md` for status. If any task in the
    execution plan has data dependencies (Data Deps column is non-empty):
@@ -61,11 +61,11 @@ data management, branches, and checks allow—across **multiple milestones** whe
 **Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.07-build`.
 Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
-**Detail:** `docs/execution-plan.md` §Current State — update **both** on every task/milestone change.
+**Detail:** `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Current State — update **both** on every task/milestone change.
 
 ### On invocation
 
-1. Read `workflow-state.yaml` §`stages.07-build` and `docs/execution-plan.md` §Current State.
+1. Read `workflow-state.yaml` §`stages.07-build` and `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Current State.
 2. Determine the active phase, milestone, and task.
 3. Report the current position to the user:
 
@@ -135,7 +135,7 @@ Before starting any task:
 4. Refactor if needed (refactor phase), keeping tests green.
 
 **For either type**:
-- Follow all tech choices from `docs/execution-plan.md` §Tech Stack Summary.
+- Follow all tech choices from `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Tech Stack Summary.
 - If anything is unclear, raise it via AskQuestion per the Uncertainty Resolution Protocol.
   Do not guess.
 - If a new dependency or pattern is needed, raise as `[Decision]`, then back-add to specs.

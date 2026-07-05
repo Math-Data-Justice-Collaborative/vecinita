@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Last updated**: 2026-06-30  
-> **Source**: `docs/data-management-plan.md`, `docs/execution-plan.md`
+> **Source**: `docs/data-management-plan.md`, `docs/sessions/S000-internal-docs-archive/execution-plan.md`
 
 Track asset staging before build tasks with Data Deps run.
 

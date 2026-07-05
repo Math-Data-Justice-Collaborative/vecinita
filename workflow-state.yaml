@@ -9,13 +9,13 @@ project:
       started_at: '2026-07-02'
       completed_at: '2026-07-02'
       partial_rerun_at: '2026-07-02'
-      partial_rerun_note: 'EV-009/S008 delta — eval UX polish + playground + super-admin runtime promote; context brief docs/context/eval-ux-playground.md;
+      partial_rerun_note: 'EV-009/S008 delta — eval UX polish + playground + super-admin runtime promote; context brief docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md;
         F36 follow-ons (items 1–3) + F37 proposed; decisions R68–R75.'
       session_id: S008-eval-ux-playground
       branch: feat/S008-eval-ux-playground
       evolve_cycle_id: EV-009
       note: 'S008/EV-009 scoped delta — evaluation UX polish, unified jobs API, dashboard charts, eval playground + super-admin
-        promote. 00-context completed 2026-07-02; context brief docs/context/eval-ux-playground.md. Build order 1→2→3→4 (R70).'
+        promote. 00-context completed 2026-07-02; context brief docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md. Build order 1→2→3→4 (R70).'
       s007_baseline:
         status: paused
         paused_at: '2026-07-02'
@@ -200,7 +200,7 @@ project:
         session_id: S004-supabase-auth
         branch: feat/S004-supabase-auth
         overall_result: PASS
-        report: docs/verification-report.md
+        report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
         blocking_failures: []
         note: S004/EV-005 F34 milestone-boundary verify PASS (2026-06-29, re-run after remediation). Prior blocking failures
           (cryptography CVEs; admin FE branch coverage 92.46% < 95%) resolved.
@@ -212,7 +212,7 @@ project:
         feature: F35
         milestone: M53
         overall_result: PASS
-        report: docs/verification-report.md
+        report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
         session_report: docs/sessions/S005-user-mgmt-auth/reports/verification-report.md
         blocking_failures: []
         remediated:
@@ -259,7 +259,7 @@ project:
         overall: fail
         report: docs/sessions/S007-rag-eval/reports/qa-report.md
         reports:
-        - docs/qa-report.md
+        - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
         - docs/sessions/S007-rag-eval/reports/qa-report.md
         blocking:
         - id: QA-S007-B05
@@ -283,14 +283,14 @@ project:
         overall: pass_with_advisories
         report: docs/sessions/S006-invite-acceptance/reports/qa-report.md
         reports:
-        - docs/qa-report.md
+        - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
         - docs/sessions/S006-invite-acceptance/reports/qa-report.md
         results:
           python: 729 passed — PASS
           frontend: all green — PASS
           coverage_gate: PASS
         note: 'S006/EV-007 F35 ext full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 729 passed; all
-          frontend Vitest suites green; coverage gate PASS. Reports: docs/qa-report.md + docs/sessions/S006-invite-acceptance/reports/qa-report.md.
+          frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S006-invite-acceptance/reports/qa-report.md.
           Handoff to 10-e2e.'
       s005:
         status: completed
@@ -300,16 +300,16 @@ project:
         branch: feat/S005-user-mgmt-auth
         feature: F35
         overall: pass_with_advisories
-        report: docs/qa-report.md
+        report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
         reports:
-        - docs/qa-report.md
+        - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
         - docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
         results:
           python: 703 passed — PASS
           frontend: all green — PASS
           coverage_gate: PASS
         note: 'S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed;
-          all frontend Vitest suites green; coverage gate PASS. Reports: docs/qa-report.md + docs/sessions/S005-user-mgmt-auth/reports/qa-report.md.
+          all frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S005-user-mgmt-auth/reports/qa-report.md.
           Handoff to 10-e2e.'
       s004:
         status: completed
@@ -321,9 +321,9 @@ project:
         rerun_overall: fail
         remediation_at: '2026-06-29'
         remediation_overall: pass_with_advisories
-        report: docs/qa-report.md
+        report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
         reports:
-        - docs/qa-report.md
+        - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
         - docs/sessions/S004-supabase-auth/reports/qa-report.md
         blocking: []
         resolved:
@@ -360,7 +360,7 @@ project:
           unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression test; admin FE Vitest
           now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage gate PASS combined
           100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. QA-S004-003 resolved; QA-S004-004/012
-          accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes the 2026-06-29 RE-RUN FAIL. Reports: docs/qa-report.md
+          accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes the 2026-06-29 RE-RUN FAIL. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
           + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
     10-e2e:
       status: completed
@@ -388,7 +388,7 @@ project:
         completed_at: '2026-06-30'
         session_id: S005-user-mgmt-auth
         branch: feat/S005-user-mgmt-auth
-        report: docs/e2e-report.md
+        report: docs/sessions/S000-internal-docs-archive/reports/e2e-report.md
         note: S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract;
           T3 deferred
     11-verify-impl:
@@ -513,7 +513,7 @@ active_session:
   - stage: 06-tech-tooling
     reason: evolve-lite — no new tooling/guardrails (2026-07-02).
   artifacts:
-  - path: docs/context/eval-ux-playground.md
+  - path: docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md
     kind: context-brief
     session_id: S008-eval-ux-playground
     stage: 00-context
@@ -638,7 +638,7 @@ sessions:
   - stage: 06-tech-tooling
     reason: evolve-lite — no new tooling/guardrails (2026-07-01).
   artifacts:
-  - path: docs/context/rag-eval.md
+  - path: docs/sessions/S000-internal-docs-archive/context/rag-eval.md
     kind: context-brief
     session_id: S007-rag-eval
     stage: 00-context
@@ -695,7 +695,7 @@ sessions:
     session_id: S007-rag-eval
     stage: 09-qa
     note: Rerun 2026-07-01 @ 9361e4a — B01-B04 resolved; overall FAIL (QA-S007-B05 coverage gate)
-  - path: docs/qa-report.md
+  - path: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
     kind: qa-report
     session_id: S007-rag-eval
     stage: 09-qa
@@ -771,7 +771,7 @@ sessions:
     kind: routing-plan
     session_id: S006-invite-acceptance
     stage: 00-context
-  - path: docs/context/invite-acceptance-flow.md
+  - path: docs/sessions/S000-internal-docs-archive/context/invite-acceptance-flow.md
     kind: context-brief
     session_id: S006-invite-acceptance
     stage: 00-context
@@ -819,7 +819,7 @@ sessions:
     kind: qa-report
     session_id: S006-invite-acceptance
     stage: 09-qa
-  - path: docs/qa-report.md
+  - path: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
     kind: qa-report
     session_id: S006-invite-acceptance
     stage: 09-qa
@@ -888,7 +888,7 @@ sessions:
     status: completed
     completed_at: '2026-06-30'
     overall_result: PASS
-    report: docs/verification-report.md
+    report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
     session_report: docs/sessions/S005-user-mgmt-auth/reports/verification-report.md
     note: 'S005 interim verify on feat/S005-user-mgmt-auth — PASS after remediation. Initial FAIL (Python lint, typecheck,
       FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed in-session. Final: make check green, make test-unit-coverage
@@ -899,7 +899,7 @@ sessions:
     started_at: '2026-06-30'
     completed_at: '2026-06-30'
     overall: pass_with_advisories
-    report: docs/qa-report.md
+    report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
     session_report: docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
     note: S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed; all frontend
       Vitest suites green; coverage gate PASS. Handoff to 10-e2e.
@@ -948,7 +948,7 @@ sessions:
     kind: stage-report
     session_id: S005-user-mgmt-auth
     stage: 01-requirements
-  - path: docs/qa-report.md
+  - path: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
     kind: qa-report
     session_id: S005-user-mgmt-auth
     stage: 09-qa
@@ -956,7 +956,7 @@ sessions:
     kind: qa-report
     session_id: S005-user-mgmt-auth
     stage: 09-qa
-  - path: docs/e2e-report.md
+  - path: docs/sessions/S000-internal-docs-archive/reports/e2e-report.md
     kind: e2e-report
     session_id: S005-user-mgmt-auth
     stage: 10-e2e
@@ -964,7 +964,7 @@ sessions:
     kind: e2e-report
     session_id: S005-user-mgmt-auth
     stage: 10-e2e
-  - path: docs/implementation-verification.md
+  - path: docs/sessions/S000-internal-docs-archive/reports/implementation-verification.md
     kind: verify-impl-report
     session_id: S005-user-mgmt-auth
     stage: 11-verify-impl
@@ -1041,7 +1041,7 @@ sessions:
     started_at: '2026-06-29'
     completed_at: '2026-06-29'
     note: 'Milestone-boundary verify PASS (re-run after remediation). Prior blocking failures (cryptography CVEs; admin FE
-      branch coverage 92.46% < 95%) resolved. Report: docs/verification-report.md.'
+      branch coverage 92.46% < 95%) resolved. Report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md.'
   - stage: 09-qa
     status: completed
     completed_at: '2026-06-29'
@@ -1053,7 +1053,7 @@ sessions:
       on DashboardPage/HealthPage/AuditPage; fixed test_auth_login_protected_routes.test.tsx; regression test test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx;
       admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage gate
       PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. Supersedes the RE-RUN
-      2026-06-29 FAIL. Reports: docs/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
+      2026-06-29 FAIL. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
   - stage: 10-e2e
     status: completed
     started_at: '2026-06-29'
@@ -1092,7 +1092,7 @@ sessions:
     kind: routing-plan
     session_id: S004-supabase-auth
     stage: 00-context
-  - path: docs/context-brief.md
+  - path: docs/sessions/S000-internal-docs-archive/context-brief.md
     kind: context-brief-delta
     session_id: S004-supabase-auth
     stage: 00-context
@@ -1144,7 +1144,7 @@ sessions:
     kind: tech-plan-report
     session_id: S004-supabase-auth
     stage: 04-tech-plan
-  - path: docs/execution-plan.md
+  - path: docs/sessions/S000-internal-docs-archive/execution-plan.md
     kind: execution-plan
     session_id: S004-supabase-auth
     stage: 04-tech-plan
@@ -1168,11 +1168,11 @@ sessions:
     kind: qa-report
     session_id: S004-supabase-auth
     stage: 09-qa
-  - path: docs/qa-report.md
+  - path: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
     kind: qa-report
     session_id: S004-supabase-auth
     stage: 09-qa
-  - path: docs/e2e-report.md
+  - path: docs/sessions/S000-internal-docs-archive/reports/e2e-report.md
     kind: e2e-report
     session_id: S004-supabase-auth
     stage: 10-e2e
@@ -1225,7 +1225,7 @@ sessions:
     user_amended: true
     note: 'User invoked /08-verify-build explicitly (not in original S003 routing plan). Milestone-boundary verify PASS; frontend-only
       F33 chat-history delta; main@9bd7a50 + uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend
-      tests; Modal smoke SKIPPED. Reports: docs/verification-report.md + docs/sessions/S003-persistent-chat-history/reports/verification-report.md'
+      tests; Modal smoke SKIPPED. Reports: docs/sessions/S000-internal-docs-archive/reports/verification-report.md + docs/sessions/S003-persistent-chat-history/reports/verification-report.md'
   - stage: 09-qa
     status: skipped
     note: Deferred by user at session close (2026-06-28). F33 merged to main (#96/#97); QA to be picked up in a later maintenance/integration
@@ -1455,13 +1455,13 @@ stages:
     started_at: '2026-05-19'
     completed_at: '2026-07-02'
     partial_rerun_at: '2026-07-02'
-    partial_rerun_note: 'EV-009/S008 delta — eval UX polish + playground + super-admin runtime promote; context brief docs/context/eval-ux-playground.md;
+    partial_rerun_note: 'EV-009/S008 delta — eval UX polish + playground + super-admin runtime promote; context brief docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md;
       F36 follow-ons + F37 proposed (R68–R75).'
     session_id: S008-eval-ux-playground
     branch: feat/S008-eval-ux-playground
     evolve_cycle_id: EV-009
     artifacts:
-    - docs/context/eval-ux-playground.md
+    - docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md
     s007_baseline:
       status: paused
       paused_at: '2026-07-02'
@@ -1487,7 +1487,7 @@ stages:
       phase4_context_brief:
         status: completed
         artifacts:
-        - docs/context-brief.md §13
+        - docs/sessions/S000-internal-docs-archive/context-brief.md §13
         - docs/adr/ADR-019-shared-frontend-i18n.md
         - docs/adr/ADR-020-shared-frontend-ui.md
   01-requirements:
@@ -1796,7 +1796,7 @@ stages:
       branch: main
       completed_at: '2026-06-28'
       overall_result: PASS
-      report: docs/verification-report.md
+      report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
       session_report: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
       user_invoked: true
       notes:
@@ -1808,7 +1808,7 @@ stages:
       branch: feat/S004-supabase-auth
       completed_at: '2026-06-29'
       overall_result: PASS
-      report: docs/verification-report.md
+      report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
       blocking_failures: []
       note: S004/EV-005 F34 milestone-boundary verify PASS (re-run after remediation). Prior blocking failures (cryptography
         CVEs; admin FE branch coverage) resolved.
@@ -1819,7 +1819,7 @@ stages:
       feature: F35
       milestone: M53
       overall_result: PASS
-      report: docs/verification-report.md
+      report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
       session_report: docs/sessions/S005-user-mgmt-auth/reports/verification-report.md
       blocking_failures: []
       remediated:
@@ -1875,7 +1875,7 @@ stages:
       branch: feat/S005-user-mgmt-auth
       feature: F35
       overall: pass_with_advisories
-      report: docs/qa-report.md
+      report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
       session_report: docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
       results:
         python: 703 passed — PASS
@@ -1999,7 +1999,7 @@ stages:
     completed_at: '2026-06-30'
     partial_rerun_at: '2026-06-30'
     partial_rerun_note: S005/EV-006 F35 — UJ-030–UJ-038 + feature signoff; 0 flags; T3 deferred to 13
-    report: docs/implementation-verification.md
+    report: docs/sessions/S000-internal-docs-archive/reports/implementation-verification.md
     session_id: S005-user-mgmt-auth
     session_report: docs/sessions/S005-user-mgmt-auth/reports/verify-impl.md
     substeps:
@@ -2275,7 +2275,7 @@ evolve_cycles:
       status: completed
       completed: '2026-05-24'
       artifacts_updated:
-      - docs/context-brief.md
+      - docs/sessions/S000-internal-docs-archive/context-brief.md
       - docs/adr/ADR-014-corpus-tagging-and-browse.md
     01-requirements:
       status: completed
@@ -2291,15 +2291,15 @@ evolve_cycles:
       - docs/deployment-integration.md
       - docs/acceptance-criteria.md
       - docs/dependency-inventory.md
-      - docs/reference.md#roadmap
+      - docs/sessions/S000-internal-docs-archive/reference.md#roadmap
       - docs/decisions.md#requirements-decisions-01-requirements
-      - docs/reference.md#glossary
-      - docs/reference.md#risk-register
+      - docs/sessions/S000-internal-docs-archive/reference.md#glossary
+      - docs/sessions/S000-internal-docs-archive/reference.md#risk-register
     02-verify-plan:
       status: completed
       completed: '2026-05-24'
       artifacts_updated:
-      - docs/audits.md#product-plan-audit-report
+      - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
       - docs/decisions.md#product-decisions-02-verify-plan
       - docs/test-plan.md
       - docs/acceptance-criteria.md
@@ -2308,7 +2308,7 @@ evolve_cycles:
       completed: '2026-05-24'
       started: '2026-05-24'
       artifacts_updated:
-      - docs/execution-plan.md
+      - docs/sessions/S000-internal-docs-archive/execution-plan.md
       - docs/adr/ADR-015-ev001-tagging-implementation.md
       - docs/decisions.md#requirements-decisions-01-requirements
       - docs/decisions.md#technical-decisions-05-verify-tech
@@ -2316,9 +2316,9 @@ evolve_cycles:
       status: completed
       completed: '2026-05-24'
       artifacts_updated:
-      - docs/audits.md#technical-plan-audit-report
+      - docs/sessions/S000-internal-docs-archive/audits.md#technical-plan-audit-report
       - docs/decisions.md#technical-decisions-05-verify-tech
-      - docs/execution-plan.md
+      - docs/sessions/S000-internal-docs-archive/execution-plan.md
       - docs/test-plan.md
       - docs/spec.md
       - docs/dependency-inventory.md
@@ -2328,17 +2328,17 @@ evolve_cycles:
       status: completed
       completed: '2026-05-25'
       artifacts_updated:
-      - docs/qa-report.md
+      - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
     10-e2e:
       status: completed
       completed: '2026-05-25'
       artifacts_updated:
-      - docs/e2e-report.md
+      - docs/sessions/S000-internal-docs-archive/reports/e2e-report.md
     11-verify-impl:
       status: completed
       completed: '2026-05-25'
       artifacts_updated:
-      - docs/implementation-verification.md
+      - docs/sessions/S000-internal-docs-archive/reports/implementation-verification.md
       - docs/feature-list.md
       - docs/acceptance-criteria.md
     12-verify-deploy:
@@ -2366,7 +2366,7 @@ evolve_cycles:
       status: completed
       started_at: '2026-05-25'
       completed: '2026-05-25'
-      report: docs/deploy-report.md
+      report: docs/sessions/S000-internal-docs-archive/deploy-report.md
       results:
         h1: pass
         h2: pass
@@ -2391,7 +2391,7 @@ evolve_cycles:
   - docs/adr/ADR-014-corpus-tagging-and-browse.md
   - docs/adr/ADR-015-ev001-tagging-implementation.md
   artifacts:
-  - path: docs/context-brief.md
+  - path: docs/sessions/S000-internal-docs-archive/context-brief.md
     status: completed
   - path: docs/adr/ADR-014-corpus-tagging-and-browse.md
     status: completed
@@ -2415,13 +2415,13 @@ evolve_cycles:
     status: completed
   - path: docs/dependency-inventory.md
     status: completed
-  - path: docs/reference.md#roadmap
+  - path: docs/sessions/S000-internal-docs-archive/reference.md#roadmap
     status: completed
   - path: docs/decisions.md#requirements-decisions-01-requirements
     status: completed
-  - path: docs/reference.md#glossary
+  - path: docs/sessions/S000-internal-docs-archive/reference.md#glossary
     status: completed
-  - path: docs/reference.md#risk-register
+  - path: docs/sessions/S000-internal-docs-archive/reference.md#risk-register
     status: completed
   - path: data/fixtures/tags/seed_tags.json
     status: completed
@@ -2479,7 +2479,7 @@ evolve_cycles:
       status: completed
       completed: '2026-05-26'
       artifacts_updated:
-      - docs/context-brief.md
+      - docs/sessions/S000-internal-docs-archive/context-brief.md
     01-requirements:
       status: completed
       completed: '2026-05-26'
@@ -2498,7 +2498,7 @@ evolve_cycles:
       status: completed
       completed: '2026-05-26'
       artifacts_updated:
-      - docs/audits.md#product-plan-audit-report
+      - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
       - docs/decisions.md#product-decisions-02-verify-plan
       - docs/acceptance-criteria.md
       - docs/user-journeys.md
@@ -2508,7 +2508,7 @@ evolve_cycles:
       started: '2026-05-26'
       completed: '2026-05-26'
       artifacts_updated:
-      - docs/execution-plan.md
+      - docs/sessions/S000-internal-docs-archive/execution-plan.md
       - docs/adr/ADR-017-ev002-implementation.md
       - docs/dependency-inventory.md
       - docs/staging-secrets-matrix.md
@@ -2516,19 +2516,19 @@ evolve_cycles:
       status: completed
       completed: '2026-05-26'
       artifacts_updated:
-      - docs/audits.md#technical-plan-audit-report
+      - docs/sessions/S000-internal-docs-archive/audits.md#technical-plan-audit-report
       - docs/decisions.md#technical-decisions-05-verify-tech
       - docs/config-spec.md
       - docs/api-contract.md
       - docs/acceptance-criteria.md
       - docs/spec.md
       - docs/staging-secrets-matrix.md
-      - docs/execution-plan.md
+      - docs/sessions/S000-internal-docs-archive/execution-plan.md
     10-e2e:
       status: completed
       completed: '2026-05-27'
       artifacts_updated:
-      - docs/e2e-report.md
+      - docs/sessions/S000-internal-docs-archive/reports/e2e-report.md
     11-verify-impl:
       status: completed
       completed_at: '2026-05-27'
@@ -2540,7 +2540,7 @@ evolve_cycles:
     13-deploy-smoke:
       status: completed
       completed_at: '2026-05-27'
-      report: docs/deploy-report.md
+      report: docs/sessions/S000-internal-docs-archive/deploy-report.md
   gates:
     a_to_b: passed
     b_to_c: passed
@@ -2556,7 +2556,7 @@ evolve_cycles:
   - docs/adr/ADR-016-audit-log-no-ip.md
   - docs/adr/ADR-017-ev002-implementation.md
   artifacts:
-  - path: docs/context-brief.md
+  - path: docs/sessions/S000-internal-docs-archive/context-brief.md
     status: completed
   issues: []
 - id: EV-004
@@ -2603,7 +2603,7 @@ evolve_cycles:
       status: completed
       completed: '2026-06-13'
       artifacts_updated:
-      - docs/context-brief.md
+      - docs/sessions/S000-internal-docs-archive/context-brief.md
       - docs/adr/ADR-019-shared-frontend-i18n.md
       - docs/adr/ADR-020-shared-frontend-ui.md
     01-requirements:
@@ -2620,9 +2620,9 @@ evolve_cycles:
       - docs/deployment-integration.md
       - docs/acceptance-criteria.md
       - docs/dependency-inventory.md
-      - docs/reference.md#roadmap
-      - docs/reference.md#glossary
-      - docs/reference.md#risk-register
+      - docs/sessions/S000-internal-docs-archive/reference.md#roadmap
+      - docs/sessions/S000-internal-docs-archive/reference.md#glossary
+      - docs/sessions/S000-internal-docs-archive/reference.md#risk-register
       - docs/data-management-plan.md
       - docs/decisions.md#requirements-decisions-01-requirements
       - docs/adr/ADR-020-shared-frontend-ui.md
@@ -2631,14 +2631,14 @@ evolve_cycles:
       started: '2026-06-13'
       completed: '2026-06-13'
       artifacts_updated:
-      - docs/audits.md#product-plan-audit-report
+      - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
       - docs/decisions.md#product-decisions-02-verify-plan
       - docs/feature-list.md
       - docs/user-journeys.md
       - docs/test-plan.md
       - docs/acceptance-criteria.md
       - docs/spec.md
-      - docs/context-brief.md
+      - docs/sessions/S000-internal-docs-archive/context-brief.md
       - docs/deployment-integration.md
       - docs/adr/ADR-019-shared-frontend-i18n.md
       - docs/adr/ADR-020-shared-frontend-ui.md
@@ -2647,7 +2647,7 @@ evolve_cycles:
       status: completed
       completed: '2026-06-13'
       artifacts_updated:
-      - docs/execution-plan.md
+      - docs/sessions/S000-internal-docs-archive/execution-plan.md
       - docs/adr/ADR-021-ev004-implementation.md
       - docs/decisions.md#technical-decisions-05-verify-tech
       - docs/deployment-integration.md
@@ -2656,16 +2656,16 @@ evolve_cycles:
       status: completed
       completed: '2026-06-13'
       artifacts_updated:
-      - docs/audits.md#technical-plan-audit-report
+      - docs/sessions/S000-internal-docs-archive/audits.md#technical-plan-audit-report
       - docs/decisions.md#technical-decisions-05-verify-tech
-      - docs/execution-plan.md
+      - docs/sessions/S000-internal-docs-archive/execution-plan.md
       - docs/test-plan.md
       - docs/acceptance-criteria.md
       - docs/deployment-integration.md
       - docs/staging-secrets-matrix.md
       - docs/adr/ADR-019-shared-frontend-i18n.md
       - docs/adr/ADR-020-shared-frontend-ui.md
-      - docs/audits.md#product-plan-audit-report
+      - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
     07-build:
       status: in_progress
       started: '2026-06-13'
@@ -2689,7 +2689,7 @@ evolve_cycles:
   - docs/adr/ADR-020-shared-frontend-ui.md
   - docs/adr/ADR-021-ev004-implementation.md
   artifacts:
-  - path: docs/context-brief.md
+  - path: docs/sessions/S000-internal-docs-archive/context-brief.md
     status: completed
   - path: docs/adr/ADR-019-shared-frontend-i18n.md
     status: completed
@@ -2713,17 +2713,17 @@ evolve_cycles:
     status: completed
   - path: docs/dependency-inventory.md
     status: completed
-  - path: docs/reference.md#roadmap
+  - path: docs/sessions/S000-internal-docs-archive/reference.md#roadmap
     status: completed
-  - path: docs/reference.md#glossary
+  - path: docs/sessions/S000-internal-docs-archive/reference.md#glossary
     status: completed
-  - path: docs/reference.md#risk-register
+  - path: docs/sessions/S000-internal-docs-archive/reference.md#risk-register
     status: completed
   - path: docs/data-management-plan.md
     status: completed
   - path: docs/decisions.md#requirements-decisions-01-requirements
     status: completed
-  - path: docs/execution-plan.md
+  - path: docs/sessions/S000-internal-docs-archive/execution-plan.md
     status: completed
   - path: docs/adr/ADR-021-ev004-implementation.md
     status: completed
@@ -2785,7 +2785,7 @@ evolve_cycles:
       artifacts_updated:
       - docs/adr/ADR-027-supabase-auth-verification-and-env-sync.md
       - docs/sessions/S004-supabase-auth/reports/tech-plan.md
-      - docs/execution-plan.md
+      - docs/sessions/S000-internal-docs-archive/execution-plan.md
       - docs/decisions.md
       - docs/dependency-inventory.md
       - docs/config-spec.md
@@ -2813,7 +2813,7 @@ evolve_cycles:
       status: completed
       completed_at: '2026-06-29'
       overall_result: PASS
-      report: docs/verification-report.md
+      report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
       blocking_failures: []
       note: Milestone-boundary verify PASS on feat/S004-supabase-auth (re-run after remediation). Prior blocking failures
         (cryptography CVEs; admin FE branch coverage 92.46% < 95%) resolved. Cleared for 09-qa.
@@ -2924,7 +2924,7 @@ evolve_cycles:
       status: completed
       completed: '2026-06-30'
       overall_result: PASS
-      report: docs/verification-report.md
+      report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
       session_report: docs/sessions/S005-user-mgmt-auth/reports/verification-report.md
       blocking_failures: []
       remediated:
@@ -2941,7 +2941,7 @@ evolve_cycles:
       status: completed
       completed: '2026-06-30'
       overall: pass_with_advisories
-      report: docs/qa-report.md
+      report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
       session_report: docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
       results:
         python: 703 passed — PASS
@@ -3011,7 +3011,7 @@ evolve_cycles:
   decisions:
   - 'R60 (2026-06-30, EV-007/S006): Keep Supabase-managed invite/recovery mail via Resend SMTP (not Resend REST API).'
   - 'R61 (2026-06-30, EV-007/S006): New POST /admin/users/{id}/revoke-invite endpoint + distinct UI + audit user.invite_revoked.'
-  - 'R62 (2026-06-30, EV-007/S006): Scoped context brief at docs/context/invite-acceptance-flow.md.'
+  - 'R62 (2026-06-30, EV-007/S006): Scoped context brief at docs/sessions/S000-internal-docs-archive/context/invite-acceptance-flow.md.'
   note: 'F35 extension from S005/EV-006 — completes invite acceptance flow (redirect URLs, auth callback, password setup,
     invitation admin) for GitHub #109. EV-006 paused with deploy stages deferred. EV-007 paused 2026-07-01 for S007/EV-008.'
 - id: EV-008
@@ -3031,7 +3031,7 @@ evolve_cycles:
       status: completed
       started: '2026-07-01'
       completed: '2026-07-01'
-      note: 'EV-008 opened — GitHub #99 admin RAG evaluation tab; F36 (not F34). Context brief docs/context/rag-eval.md.'
+      note: 'EV-008 opened — GitHub #99 admin RAG evaluation tab; F36 (not F34). Context brief docs/sessions/S000-internal-docs-archive/context/rag-eval.md.'
     01-requirements:
       status: completed
       started: '2026-07-01'
@@ -3080,7 +3080,7 @@ evolve_cycles:
       status: completed
       started: '2026-07-02'
       completed: '2026-07-02'
-      note: 'EV-009 opened — S008 eval UX polish + playground; context brief docs/context/eval-ux-playground.md; F36 follow-ons
+      note: 'EV-009 opened — S008 eval UX polish + playground; context brief docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md; F36 follow-ons
         (items 1–3) + F37 proposed.'
     01-requirements:
       status: completed
@@ -4137,7 +4137,7 @@ decisions_log:
 - date: '2026-06-25'
   note: 'S001 09-qa user-invoked (not in original S001 routing plan; stage amended into routing_plan with user_amended=true).
     Full-repo QA on feat/S001-modal-cold-start-snapshot @ 4f3f741 — overall pass_with_advisories, all blocking checks green
-    (500 passed/38 skipped Python; 271 FE tests). Advisories QA-001–011 (QA-010 resolved in CI). Reports: docs/qa-report.md
+    (500 passed/38 skipped Python; 271 FE tests). Advisories QA-001–011 (QA-010 resolved in CI). Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
     + docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md.'
 - S001 13-deploy-smoke COMPLETE 2026-06-26 — H1-H5 pass; cold+prewarm ask 14.3s; DO chat on feat branch
 - date: '2026-06-25'
@@ -4199,7 +4199,7 @@ decisions_log:
   note: 'S003 08-verify-build COMPLETE (user-invoked /08-verify-build; amended into S003 routing plan with user_amended=true
     — was not in original 00→01→04→07→09→10→12→13 plan). Milestone-boundary verify result PASS. Frontend-only F33 chat-history
     delta on main@9bd7a50 with uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests;
-    Modal smoke SKIPPED (frontend-only delta). Reports: docs/verification-report.md + docs/sessions/S003-persistent-chat-history/reports/verification-report.md.
+    Modal smoke SKIPPED (frontend-only delta). Reports: docs/sessions/S000-internal-docs-archive/reports/verification-report.md + docs/sessions/S003-persistent-chat-history/reports/verification-report.md.
     Recorded in project.stages.08-verify-build (canonical) + stages.08-verify-build.s003 (legacy mirror). active_session.current_stage
     unchanged (remains 09-qa — next pending).'
 - date: '2026-06-28'
@@ -4236,7 +4236,7 @@ decisions_log:
     unchanged (07-build). Next: Phase 11 gate check + 08-verify-build.'
 - date: '2026-06-29'
   note: 'S004/EV-005 08-verify-build FAIL (F34 Supabase admin auth, feat/S004-supabase-auth). Milestone-boundary verify overall_result
-    FAIL. Blocking: cryptography CVEs (pip-audit); admin FE branch coverage 92.46% < 95%. Report: docs/verification-report.md.
+    FAIL. Blocking: cryptography CVEs (pip-audit); admin FE branch coverage 92.46% < 95%. Report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md.
     Updated project.stages.08-verify-build + stages.08-verify-build.s004 + EV-005.stages.08-verify-build; active_session.current_stage
     = 08-verify-build; routing_plan 08-verify-build status failed (not completed — remediation required before downstream
     stages).'
@@ -4281,7 +4281,7 @@ decisions_log:
     /admin/users*, config-spec SMTP/template/remember-me env, staging-secrets-matrix EV-006; stage report docs/sessions/S005-user-mgmt-auth/reports/01-requirements.md.
     Commit DEFERRED (commit-only-when-asked override); open items handed to 04-tech-plan. active_session + EV-006 current_stage
     = 01-requirements; routing_plan + EV-006.stages 01-requirements completed; project.stages.01-requirements mirrored (last_delta
-    S005/EV-006). ADVISORY (non-blocking): docs/execution-plan.md §Current State remains stale (still S004/Phase 11) and should
+    S005/EV-006). ADVISORY (non-blocking): docs/sessions/S000-internal-docs-archive/execution-plan.md §Current State remains stale (still S004/Phase 11) and should
     be advanced for S005/EV-006.'
 - date: '2026-06-29'
   note: 'S005/EV-006 04-tech-plan SCOPE ADDITION (in-place re-run; 04-tech-plan remains completed). User approved adding 4
@@ -4307,7 +4307,7 @@ decisions_log:
   deferred'
 - 'R60: Keep Supabase-managed invite/recovery mail via Resend SMTP (not Resend REST API)'
 - 'R61: New POST /admin/users/{id}/revoke-invite endpoint + distinct UI + audit user.invite_revoked'
-- 'R62: Scoped context brief at docs/context/invite-acceptance-flow.md'
+- 'R62: Scoped context brief at docs/sessions/S000-internal-docs-archive/context/invite-acceptance-flow.md'
 - date: '2026-06-30'
   note: 'S006-invite-acceptance OPENED (session_counter=6; type feature; orchestrator 16-evolve; branch feat/S006-invite-acceptance;
     evolve_cycle_id EV-007). GitHub #109 — invite acceptance flow F35 extension from S005/EV-006. Decisions R60-R62. User-approved
@@ -4370,8 +4370,8 @@ decisions_log:
 - 'S008 11-verify-impl partial waiver approved 2026-07-02 — M65-M69 verified inline; M70/UJ-047/AC-E26 deferred; journey
   AskQuestion skipped'
 artifacts:
-- docs/context-brief.md
-- docs/audits.md#product-plan-audit-report
+- docs/sessions/S000-internal-docs-archive/context-brief.md
+- docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
 - docs/decisions.md#product-decisions-02-verify-plan
 - docs/feature-list.md
 - docs/spec.md
@@ -4383,9 +4383,9 @@ artifacts:
 - docs/deployment-integration.md
 - docs/acceptance-criteria.md
 - docs/dependency-inventory.md
-- docs/reference.md#roadmap
-- docs/reference.md#glossary
-- docs/reference.md#risk-register
+- docs/sessions/S000-internal-docs-archive/reference.md#roadmap
+- docs/sessions/S000-internal-docs-archive/reference.md#glossary
+- docs/sessions/S000-internal-docs-archive/reference.md#risk-register
 - docs/decisions.md#requirements-decisions-01-requirements
 - docs/adr/ADR-001-five-app-architecture.md
 - docs/adr/ADR-002-hybrid-modal-digitalocean.md
@@ -4398,18 +4398,18 @@ artifacts:
 - docs/adr/ADR-021-ev004-implementation.md
 - docs/adr/ADR-031-ev006-auth-ux-hardening.md
 - docs/adr/README.md
-- docs/execution-plan.md
-- docs/data-staging-state.md
-- docs/audits.md#technical-plan-audit-report
+- docs/sessions/S000-internal-docs-archive/execution-plan.md
+- docs/sessions/S000-internal-docs-archive/data-staging-state.md
+- docs/sessions/S000-internal-docs-archive/audits.md#technical-plan-audit-report
 - docs/decisions.md#technical-decisions-05-verify-tech
 - pyproject.toml
 - pyrightconfig.json
 - .github/workflows/ci.yml
-- docs/verification-report.md
-- docs/qa-report.md
-- docs/e2e-report.md
+- docs/sessions/S000-internal-docs-archive/reports/verification-report.md
+- docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+- docs/sessions/S000-internal-docs-archive/reports/e2e-report.md
 - docs/deploy-checklist.md
-- docs/implementation-verification.md
+- docs/sessions/S000-internal-docs-archive/reports/implementation-verification.md
 - data/fixtures/tags/seed_tags.json
 - openapi/chat-rag.yaml (0.2.0)
 - openapi/internal-write.yaml (0.2.0)
@@ -4424,7 +4424,7 @@ artifacts:
 - docs/sessions/S002-admin-job-management/reports/e2e-report.md
 - docs/sessions/S002-admin-job-management/reports/verify-impl.md
 - docs/sessions/S002-admin-job-management/reports/deploy-checklist.md
-- path: docs/qa-report.md
+- path: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
   kind: qa-report
   session_id: S005-user-mgmt-auth
   stage: 09-qa
@@ -4448,7 +4448,7 @@ artifacts:
   kind: routing-plan
   session_id: S006-invite-acceptance
   stage: 00-context
-- path: docs/context/invite-acceptance-flow.md
+- path: docs/sessions/S000-internal-docs-archive/context/invite-acceptance-flow.md
   kind: context-brief
   session_id: S006-invite-acceptance
   stage: 00-context
@@ -4475,7 +4475,7 @@ artifacts:
   kind: qa-report
   session_id: S006-invite-acceptance
   stage: 09-qa
-- path: docs/qa-report.md
+- path: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
   kind: qa-report
   session_id: S006-invite-acceptance
   stage: 09-qa
@@ -4491,7 +4491,7 @@ artifacts:
   kind: pr-remediation-report
   session_id: S006-invite-acceptance
   stage: 19-address-pr-review
-- path: docs/context/rag-eval.md
+- path: docs/sessions/S000-internal-docs-archive/context/rag-eval.md
   kind: context-brief
   session_id: S007-rag-eval
   stage: 00-context
@@ -4548,7 +4548,7 @@ artifacts:
   session_id: S007-rag-eval
   stage: 09-qa
   note: Rerun 2026-07-01 @ 9361e4a — B01-B04 resolved; overall FAIL (QA-S007-B05 coverage gate)
-- path: docs/qa-report.md
+- path: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
   kind: qa-report
   session_id: S007-rag-eval
   stage: 09-qa
@@ -4557,7 +4557,7 @@ artifacts:
   kind: stage-report
   session_id: S007-rag-eval
   stage: 11-verify-impl
-- path: docs/context/eval-ux-playground.md
+- path: docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md
   kind: context-brief
   session_id: S008-eval-ux-playground
   stage: 00-context
@@ -4615,7 +4615,7 @@ artifacts:
   kind: qa-report
   session_id: S008-eval-ux-playground
   stage: 09-qa
-- path: docs/implementation-verification.md
+- path: docs/sessions/S000-internal-docs-archive/reports/implementation-verification.md
   kind: implementation-verification
 - docs/sessions/S007-rag-eval/reports/verification-report.md
 - infra/staging/.env.example

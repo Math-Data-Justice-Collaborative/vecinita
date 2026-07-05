@@ -62,7 +62,7 @@ Adopt **F31 — per-component unit coverage gate**:
 - Add Vitest `coverage.thresholds` (lines + branches **95**) per frontend app, aligned with the same target.
 - Repo-wide pytest `[tool.coverage.report] fail_under` is **not** used; per-component aggregation in the summary script is the single source of truth.
 
-**Build tasks:** Phase 9 in `docs/execution-plan.md` (T32.1–T36.4).
+**Build tasks:** Phase 9 in `docs/sessions/S000-internal-docs-archive/execution-plan.md` (T32.1–T36.4).
 
 ## Consequences
 

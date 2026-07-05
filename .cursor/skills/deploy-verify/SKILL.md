@@ -15,7 +15,7 @@ the deployment against `docs/deployment-integration.md`.
 
 ## Prerequisites
 
-1. `docs/execution-plan.md` — deploy phase ready
+1. `docs/sessions/S000-internal-docs-archive/execution-plan.md` — deploy phase ready
 2. `docs/deployment-integration.md` — services, secrets, migrate hook
 3. `docs/data-management-plan.md` — migration revision, seed policy
 4. Build/verify green (08-verify-build / 09-qa) unless user waives
@@ -25,7 +25,7 @@ the deployment against `docs/deployment-integration.md`.
 **Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.13-deploy-smoke`.
 Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
-**Detail:** `docs/deploy-state.md` — status, URL, commit, step log (sync with YAML on each deploy step).
+**Detail:** `docs/sessions/S000-internal-docs-archive/deploy-state.md` — status, URL, commit, step log (sync with YAML on each deploy step).
 
 ## Workflow (summary)
 

@@ -21,7 +21,7 @@ implementation.
 This is a **planning stage** (see [pipeline-preamble.md](../pipeline-preamble.md) §18). It creates
 **dev tooling and config** (`.cursor/` hooks/rules, linter/formatter/typechecker/test-runner config,
 CI workflow validation) — it does **not** write product/feature source code under `src/`, `apps/`,
-or `packages/`. Implementation is executed in **07-build** from `docs/execution-plan.md`. If the user
+or `packages/`. Implementation is executed in **07-build** from `docs/sessions/S000-internal-docs-archive/execution-plan.md`. If the user
 asks to implement a feature now, AskQuestion `[Scope Drift]` rather than writing application code here.
 
 ## Connectivity (stage 06)
@@ -43,7 +43,7 @@ Record verification in stage `workflow-state.yaml` block (06 `verification`).
 
 1. **05-verify-tech** must be `completed`. Technical plan audited.
 2. Required:
-   - `docs/execution-plan.md` — §Tech Stack Summary for tool choices
+   - `docs/sessions/S000-internal-docs-archive/execution-plan.md` — §Tech Stack Summary for tool choices
    - `docs/dependency-inventory.md` — for package versions
 3. Plan tooling from 03-plan-tooling must still be installed.
 
@@ -101,7 +101,7 @@ Run when evolve cycle adds **new dependencies, hooks, CI steps, or formatters**:
 
 ### Phase 1 — Load Tool Configuration
 
-Read `docs/execution-plan.md` §Tech Stack Summary to determine:
+Read `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Tech Stack Summary to determine:
 
 | Category | Tool | Config File | Command |
 |----------|------|------------|---------|

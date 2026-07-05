@@ -106,7 +106,7 @@ PR/migration). The org spend cap stays **ON** for non-branch usage.
 | D10 | Frontend i18n messages | workspace_package | repo-local | verified | T33.1–T33.4, T36.3–T36.6 |
 | D11 | Frontend UI components | workspace_package | repo-local | verified | T34.1–T34.7 |
 
-**Data management gate:** Assets must be `verified` in `docs/data-staging-state.md` before dependent tasks start.
+**Data management gate:** Assets must be `verified` in `docs/sessions/S000-internal-docs-archive/data-staging-state.md` before dependent tasks start.
 
 ## Implementation Phases
 
@@ -340,8 +340,8 @@ PR/migration). The org spend cap stays **ON** for non-branch usage.
 
 - [x] Full `pytest` + vitest green in CI (main CI run 2026-05-19; local 53 passed, 3 skipped; vitest 4/4)
 - [ ] Staging H1–H3 succeed — **deferred** until deploy URLs exist; operator procedure: [staging-runbook.md](staging-runbook.md) (`scripts/deploy/staging_smoke.sh`, `tests/smoke/test_staging_health.py`)
-- [x] Cost estimate documented ≤ $50 (`docs/reference.md#cost-monitoring-baseline-adr-004` pilot ~$42–48/mo)
-- [ ] `docs/data-staging-state.md` all required assets `verified` — D1–D5 verified; **D6/D7 pending** (Modal weights on first deploy)
+- [x] Cost estimate documented ≤ $50 (`docs/sessions/S000-internal-docs-archive/reference.md#cost-monitoring-baseline-adr-004` pilot ~$42–48/mo)
+- [ ] `docs/sessions/S000-internal-docs-archive/data-staging-state.md` all required assets `verified` — D1–D5 verified; **D6/D7 pending** (Modal weights on first deploy)
 
 ---
 
@@ -439,8 +439,8 @@ PR/migration). The org spend cap stays **ON** for non-branch usage.
 - [x] TC-046 CORS on browse GET passes locally (H0c); live H4 in `verify_connectivity.sh` when staging URLs set
 - [x] H5 frontend bundle wiring (TC-048 Vitest; live H5 in `verify_connectivity.sh` when URLs set)
 - [x] TC-049 admin PATCH CORS preflight passes locally (H0c); live H4 when staging URLs set
-- [x] D8, D9 verified in `docs/data-staging-state.md`
-- [x] Cost note: EV-001 LLM tagging within ≤ $50/mo pilot cap (ADR-015 TP-017) — see `docs/reference.md#cost-monitoring-baseline-adr-004`
+- [x] D8, D9 verified in `docs/sessions/S000-internal-docs-archive/data-staging-state.md`
+- [x] Cost note: EV-001 LLM tagging within ≤ $50/mo pilot cap (ADR-015 TP-017) — see `docs/sessions/S000-internal-docs-archive/reference.md#cost-monitoring-baseline-adr-004`
 
 ---
 

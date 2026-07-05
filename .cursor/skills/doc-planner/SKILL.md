@@ -237,7 +237,7 @@ Generated:
   docs/test-plan.md            — 3 gaps, 1 assumption
   docs/feature-list.md         — complete
   docs/adr/001-model-arch.md   — 1 gap, 1 assumption
-  docs/reference.md#roadmap              — 5 gaps
+  docs/sessions/S000-internal-docs-archive/reference.md#roadmap              — 5 gaps
   docs/config-spec.md          — complete
   docs/dependency-inventory.md — 1 assumption
   README.md                    — synthesized from specs  [mandatory]

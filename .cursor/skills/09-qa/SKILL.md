@@ -48,7 +48,7 @@ Do not mark QA PASS if H0c fails. See connectivity-gates §Stage 09.
 
 1. **Build gate**: Execution plan tasks for the active phase are `completed` (or user
    explicitly requests QA mid-build — note partial scope in the report).
-2. **`docs/execution-plan.md`** §Tech Stack Summary — tool commands.
+2. **`docs/sessions/S000-internal-docs-archive/execution-plan.md`** §Tech Stack Summary — tool commands.
 3. **`workflow-state.yaml`** §`template` — conformance checks (Vecinita: `api+worker`).
 4. Baseline expectation: **08-verify-build** recently **PASS** (re-run full checks anyway;
    do not assume).
@@ -101,10 +101,10 @@ Read from disk (do not guess commands):
 
 | Source | Use for |
 |--------|---------|
-| `docs/execution-plan.md` §Tech Stack Summary | ruff, basedpyright, pytest, pip-audit, vitest |
+| `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Tech Stack Summary | ruff, basedpyright, pytest, pip-audit, vitest |
 | `docs/typing-policy.md` | No `Any`/`any` (ADR-018) |
 | `.github/workflows/ci.yml` | CI parity (exact paths, ignore files, frontend matrix) |
-| `docs/data-staging-state.md` | D1–D7 asset status |
+| `docs/sessions/S000-internal-docs-archive/data-staging-state.md` | D1–D7 asset status |
 | `workflow-state.yaml` §`template` | Layout / Modal / deploy pattern |
 | `infra/modal/README.md` | Modal app names, workspace, volumes |
 
@@ -239,11 +239,11 @@ Read [template-registry.md](../template-registry.md) and verify:
 - If `VECINITA_MODAL_EMBED_URL` / `VECINITA_MODAL_LLM_URL` set: run `modal_url_validate.py`, then
   `bash scripts/infra/do_verify_required_secrets.sh` (see [do-secrets-sync](../do-secrets-sync/SKILL.md))
 - ChatRAG `/health`: `dependencies.modal_embed` and `modal_llm` must be `ok`
-- Else: read `docs/data-staging-state.md` for D6/D7 status
+- Else: read `docs/sessions/S000-internal-docs-archive/data-staging-state.md` for D6/D7 status
 
 #### Agent 9 — Data staging & deploy readiness (Vecinita)
 
-Read `docs/data-staging-state.md` and `docs/execution-plan.md` Phase 4 gate:
+Read `docs/sessions/S000-internal-docs-archive/data-staging-state.md` and `docs/sessions/S000-internal-docs-archive/execution-plan.md` Phase 4 gate:
 
 | Asset / gate | Report |
 |--------------|--------|
@@ -308,7 +308,7 @@ report, use a **follow-up pass** (not a re-run of 09):
 
 1. Read the active session `reports/qa-report.md` §Findings.
 2. Spawn **parallel Task agents** (one concern per agent), e.g.:
-   - **D6/D7** — `scripts/stage_modal_weights.sh`, `scripts/modal_ensure_workspace.sh`, update `docs/data-staging-state.md`; enforce **vecinita** Modal profile; stop mistaken deploys on other workspaces via `scripts/teardown_fontface_vecinita.sh`
+   - **D6/D7** — `scripts/stage_modal_weights.sh`, `scripts/modal_ensure_workspace.sh`, update `docs/sessions/S000-internal-docs-archive/data-staging-state.md`; enforce **vecinita** Modal profile; stop mistaken deploys on other workspaces via `scripts/teardown_fontface_vecinita.sh`
    - **Secrets history** — `.gitleaks.toml`, `scripts/check_secrets.sh`, CI `--no-git`, `docs/security/gitleaks-resolution.md` (no history rewrite unless user requests)
    - **Docstrings** — public symbols in `apps/` + `packages/`; verify ruff/basedpyright (no `Any`)
    - **Phase 4 staging** — H2 in `staging_smoke.sh`, `docs/staging-runbook.md`, skip-safe `tests/smoke/test_staging_health.py`

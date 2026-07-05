@@ -170,7 +170,7 @@ Deliver a **cost-conscious, US-hosted, zero-PII** bilingual community Q&A platfo
 ## Cost monitoring baseline (ADR-004)
 
 > **Cap:** ≤ **$50/mo** hard limit · **Target:** ≤ **$25/mo** preferred  
-> **Source:** `#risk-register` R1, `docs/execution-plan.md` §Cost Estimate (T14.4)
+> **Source:** `#risk-register` R1, `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Cost Estimate (T14.4)
 
 ## Pilot line items (2026-05-19)
 

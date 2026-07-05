@@ -135,13 +135,13 @@ Never commit connection strings or API keys.
 
 ## Phase 4 gate checklist
 
-Mark items in [execution-plan.md](execution-plan.md) Phase 4 Gate Check after evidence:
+Mark items in [execution-plan.md](sessions/S000-internal-docs-archive/execution-plan.md) Phase 4 Gate Check after evidence:
 
 | Gate item | How to verify |
 |-----------|----------------|
 | CI pytest + vitest green | GitHub Actions `main` green |
 | Staging H1–H3 | `staging_smoke.sh` or smoke pytest with URLs set |
-| Cost ≤ $50 documented | [docs/reference.md#cost-monitoring-baseline-adr-004](reference.md#cost-monitoring-baseline-adr-004) |
+| Cost ≤ $50 documented | [docs/sessions/S000-internal-docs-archive/reference.md#cost-monitoring-baseline-adr-004](reference.md#cost-monitoring-baseline-adr-004) |
 | Data assets D1–D7 | [data-staging-state.md](data-staging-state.md) — D6/D7 after first Modal deploy |
 
 ## Troubleshooting

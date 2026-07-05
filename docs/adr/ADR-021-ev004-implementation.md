@@ -128,4 +128,4 @@ unchanged but regression guard required.
 - ADR-020 (shared frontend UI)
 - `docs/deployment-integration.md` §EV-004
 - `docs/test-plan.md` TC-065–TC-069
-- `docs/execution-plan.md` Phase 9
+- `docs/sessions/S000-internal-docs-archive/execution-plan.md` Phase 9

@@ -56,6 +56,6 @@ Next: record deployed web URLs and verify live endpoints.
 5. Pytest smoke (optional):
      uv run pytest tests/smoke/test_modal_weights_staged.py -v
 
-6. After successful checks, set D6/D7 to verified in docs/data-staging-state.md.
+6. After successful checks, set D6/D7 to verified in docs/sessions/S000-internal-docs-archive/data-staging-state.md.
 
 EOF

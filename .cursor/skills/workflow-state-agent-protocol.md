@@ -58,7 +58,7 @@ artifact paths. Update `active_session.routing_plan` entry for this stage. Mirro
 **Session close:** When all routing-plan stages complete, orchestrator or 00 runs checkpoint
 AskQuestion, archives to `sessions[]`, sets `active_session: null`.
 
-Detail trackers (`docs/execution-plan.md`, session reports, etc.) must agree with agent state.
+Detail trackers (`docs/sessions/S000-internal-docs-archive/execution-plan.md`, session reports, etc.) must agree with agent state.
 
 ## Feature addition at any stage
 

@@ -58,7 +58,7 @@ cd /path/to/vecinita
 set -a && source prod.env && set +a
 ```
 
-Ensure `prod.env` contains correct Modal URLs (from `modal deploy` output or `docs/deploy-state.md`).
+Ensure `prod.env` contains correct Modal URLs (from `modal deploy` output or `docs/sessions/S000-internal-docs-archive/deploy-state.md`).
 **Do not** run `pytest` / `make test-py` in the same shell if `DATABASE_URL` points at
 `.ondigitalocean.com` — see [corpus-db-safety](../corpus-db-safety/SKILL.md).
 

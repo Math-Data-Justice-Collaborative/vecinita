@@ -154,7 +154,7 @@ Expected stderr from negative tests (`useAuth must be used within AuthProvider`,
 | No `DATABASE_URL` in Modal paths | OK |
 | OpenAPI YAML parse | OK |
 | Operator specs not tracked | OK |
-| Modal workspace | `vecinita` per `docs/data-staging-state.md` D6 |
+| Modal workspace | `vecinita` per `docs/sessions/S000-internal-docs-archive/data-staging-state.md` D6 |
 
 ### Data staging & deploy — advisories
 

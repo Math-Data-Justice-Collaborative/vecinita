@@ -39,7 +39,7 @@ ephemeral (billed outside the spend cap at `$0.01344`/branch/hour).
 - **Updated**: `docs/decisions.md` (EV-005 04-tech-plan decisions; unresolved list closed),
   `docs/dependency-inventory.md` (pins + Supabase CLI), `docs/config-spec.md`
   (`SUPABASE_JWT_SECRET`; mechanism/role resolved; SMTP), `docs/api-contract.md` (HS256 + app_metadata),
-  `docs/execution-plan.md` (Phase 11, Current State, Cost Estimate, Task Tracking, PR-47, Open Questions)
+  `docs/sessions/S000-internal-docs-archive/execution-plan.md` (Phase 11, Current State, Cost Estimate, Task Tracking, PR-47, Open Questions)
 
 ## Execution plan delta
 

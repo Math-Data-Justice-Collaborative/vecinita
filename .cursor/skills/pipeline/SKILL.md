@@ -270,7 +270,7 @@ If gate fails, report unmet criteria and ask user how to proceed.
 
 ### Stage 07 — Technical Execution (Build)
 
-**Check**: Read `docs/execution-plan.md` §Current State
+**Check**: Read `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Current State
 - If all tasks `completed`: skip
 - If in progress: invoke to resume
 - If not started: invoke [07-build](../07-build/SKILL.md)
@@ -324,7 +324,7 @@ Not part of the linear pipeline. Available any time after Phase C (code exists).
 - Does not reset or re-run any pipeline phase
 - Test-driven: user failure → failing repro test (red) → interactive confirm → fix → green;
   verification plan, layered checks, optional 15-service-health follow-up
-- Records all fixes in `docs/hotfix-log.md`
+- Records all fixes in `docs/sessions/S000-internal-docs-archive/hotfix-log.md`
 
 ### Stage 15 — Service Health (On-Demand, Repeatable)
 
@@ -335,7 +335,7 @@ or evidence before a hotfix.
 - Invoke [15-service-health](../15-service-health/SKILL.md)
 - Interview → infra (health, migrations, secrets) + behavior (H3 + **H4–H5** on UI issues)
 - Test-driven failures; 14-hotfix handoff with repro test
-- Records in `docs/service-health-reports/` and `docs/service-health-state.md`
+- Records in `docs/service-health-reports/` and `docs/sessions/S000-internal-docs-archive/service-health-state.md`
 
 ### Stage 16 — Evolve (On-Demand, Repeatable)
 
@@ -466,7 +466,7 @@ Pipeline Complete.
     13-deploy-smoke ───── completed ([URL])
 
   Phase E: Maintenance & Ops
-    14-hotfix ──────────── [N] applied (docs/hotfix-log.md)
+    14-hotfix ──────────── [N] applied (docs/sessions/S000-internal-docs-archive/hotfix-log.md)
     15-service-health ────── [last: healthy | degraded | none]
 
   Phase F: Evolve

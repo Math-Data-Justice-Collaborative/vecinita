@@ -164,6 +164,7 @@ ci-guards: ## CI static guard scripts (secrets, OpenAPI, Modal boundary)
 	bash scripts/check_no_operator_specs_tracked.sh
 	bash scripts/check_corpus_reset_guard.sh
 	bash scripts/check_do_required_secrets.sh
+	bash scripts/check_doc_archive_paths.sh
 	@if command -v gitleaks >/dev/null 2>&1; then \
 		gitleaks detect --no-git --config .gitleaks.toml; \
 	else \

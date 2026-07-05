@@ -1,6 +1,6 @@
 # Deploy Report Template
 
-Template for `docs/deploy-report.md`.
+Template for `docs/sessions/S000-internal-docs-archive/deploy-report.md`.
 
 ```markdown
 # Deployment Report

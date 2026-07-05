@@ -78,5 +78,5 @@ Enforcement is **verified** in QA (09) and deploy smoke (13), not assumed from d
 
 ## References
 
-- Resolutions R9, R10, R11 (`docs/context-brief.md`)
+- Resolutions R9, R10, R11 (`docs/sessions/S000-internal-docs-archive/context-brief.md`)
 - User confirmation: option B (no personal data including admin accounts)

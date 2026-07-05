@@ -45,4 +45,4 @@ doctl apps spec get <app-id> -o yaml > admin-fe-spec.yaml
 bash scripts/check_no_operator_specs_tracked.sh
 ```
 
-See `docs/deploy-report.md` §Operator spec files.
+See `docs/sessions/S000-internal-docs-archive/deploy-report.md` §Operator spec files.

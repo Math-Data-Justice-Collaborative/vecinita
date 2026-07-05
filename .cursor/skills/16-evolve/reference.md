@@ -120,7 +120,7 @@ When invoking child skills during evolve:
 
 ### 04-tech-plan (delta)
 
-- Append tasks to `docs/execution-plan.md`; do not reset completed tasks.
+- Append tasks to `docs/sessions/S000-internal-docs-archive/execution-plan.md`; do not reset completed tasks.
 - New milestone/phase only if scope warrants; user approves via AskQuestion.
 
 ### 07-build (delta)
@@ -321,7 +321,7 @@ After phases A, B, C, D, and deploy — present to user before continuing:
 | `docs/acceptance-criteria.md` | Fn acceptance |
 | `docs/config-spec.md` | New parameters |
 | `docs/api-contract.md` | New/changed endpoints |
-| `docs/execution-plan.md` | Tasks, milestones |
+| `docs/sessions/S000-internal-docs-archive/execution-plan.md` | Tasks, milestones |
 | `docs/dependency-inventory.md` | New packages |
 | `docs/data-management-plan.md` | Corpus/schema if ingest changes |
 

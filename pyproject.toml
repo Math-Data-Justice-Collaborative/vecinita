@@ -94,6 +94,8 @@ ignore = [
 "tests/unit/data_management/test_user_admin_routes.py" = ["D103"]
 "tests/unit/test_corpus_db_guard.py" = ["D103"]
 "tests/unit/scripts/test_modal_url_validate.py" = ["D103"]
+"tests/unit/scripts/test_sync_github_wiki.py" = ["D103"]
+"tests/unit/scripts/test_check_doc_archive_paths.py" = ["D103"]
 "tests/unit/shared_schemas/test_data_management_validators.py" = ["D103"]
 # Pydantic v2 evaluates field annotations at runtime, so datetime/UUID/JsonObject must be
 # real imports — flake8-type-checking (TC001/2/3) would wrongly move them into a

@@ -17,7 +17,8 @@ under `docs/sessions/{session-id}/`.
 | **Project (standing)** | `docs/` root | `spec.md`, `feature-list.md`, `test-plan.md`, `deploy-checklist.md`, `api-contract.md`, `docs/decisions.md#product-decisions-02-verify-plan`, `docs/decisions.md#evolve-cycle-decisions` |
 | **Session (ephemeral)** | `docs/sessions/{session-id}/` | `session-brief.md`, `routing-plan.md`, `reports/*`, `checkpoints/*` |
 
-Scoped context briefs (`docs/context/<slug>.md`) remain valid; link them from
+Scoped context briefs (`docs/sessions/S000-internal-docs-archive/context/<slug>.md` for archived
+briefs; new session work links from `session-brief.md`) remain valid; link them from
 `session-brief.md` when used.
 
 ---
@@ -177,7 +178,7 @@ When a session updates standing docs, append (do not replace prior entries):
 ## 9. Per-stage session report paths
 
 Write session reports under `docs/sessions/{id}/reports/` (not project root).
-Legacy root paths (`docs/qa-report.md`, etc.) are historical read-only.
+Legacy root paths (`docs/sessions/S000-internal-docs-archive/reports/qa-report.md`, etc.) are historical read-only.
 
 | Stage | Session report path |
 |-------|---------------------|

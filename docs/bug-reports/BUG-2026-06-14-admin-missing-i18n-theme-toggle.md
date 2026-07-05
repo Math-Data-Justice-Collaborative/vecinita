@@ -35,7 +35,7 @@ None provided (user: no screenshots/logs yet).
 | Time | Finding |
 |------|---------|
 | 2026-06-14 | `AdminLayout.tsx` has `ThemeToggle` in desktop sidebar footer + mobile nav sheet only — **no `LanguageToggle`**, no `LocaleProvider` in `main.tsx`. |
-| 2026-06-14 | F31 / EV-004 M36 tasks (`T36.1`–`T36.10`) still **pending** in `docs/execution-plan.md`. |
+| 2026-06-14 | F31 / EV-004 M36 tasks (`T36.1`–`T36.10`) still **pending** in `docs/sessions/S000-internal-docs-archive/execution-plan.md`. |
 | 2026-06-14 | `packages/frontend-ui` is a stub (`export {}`); `packages/frontend-i18n` `t()` throws — shared packages not ready for admin wiring. |
 | 2026-06-14 | `docs/user-journeys.md` UJ-022 expects EN/ES toggle beside theme in sidebar footer — **spec vs implementation drift**. |
 | 2026-06-14 | Current admin strings are hardcoded English in source — user report of "defaulting to Spanish" may be browser translate, ChatRAG confusion, or undeployed partial build; needs confirmation on production bundle. |

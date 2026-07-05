@@ -11,7 +11,7 @@ Each entry defines when the document is relevant, its file path convention, and 
 
 **Ephemeral / session** outputs live under `docs/sessions/{session-id}/` or `workflow-state.yaml`
 §`artifacts` — never as standing `docs/` root files: execution-plan, config-spec, research-brief,
-context-brief (project mode), scoped briefs under `docs/context/`, and session reports
+context-brief (project mode), scoped briefs under `docs/sessions/S000-internal-docs-archive/context/`, and session reports
 (`reports/qa-report.md`, `reports/e2e-report.md`, `reports/verification-report.md`, etc.),
 checkpoints, and evolve summaries.
 
@@ -24,7 +24,7 @@ checkpoints, and evolve summaries.
 
 **When relevant**: Always — every project benefits from a phased plan.
 **Path**: Session-scoped: `docs/sessions/{session-id}/roadmap.md` (GitHub issues + mermaid deps).
-Standing product phases remain at `docs/reference.md#roadmap`.
+Standing product phases remain at `docs/sessions/S000-internal-docs-archive/reference.md#roadmap`.
 
 ```markdown
 # Roadmap
@@ -353,7 +353,7 @@ Non-numeric conditions that must be met.
 
 **When relevant**: Domain-specific terminology that could confuse contributors
 (especially common in scientific software).
-**Path**: `docs/reference.md#glossary`
+**Path**: `docs/sessions/S000-internal-docs-archive/reference.md#glossary`
 
 ```markdown
 # Glossary
@@ -369,7 +369,7 @@ Non-numeric conditions that must be met.
 
 **When relevant**: Project has known failure modes, security concerns, or operational risks
 mentioned in the paper or visible in the codebase.
-**Path**: `docs/reference.md#risk-register`
+**Path**: `docs/sessions/S000-internal-docs-archive/reference.md#risk-register`
 
 ```markdown
 # Risk Register

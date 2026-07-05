@@ -40,6 +40,6 @@ Embedding dimension must match pgvector column definition (ADR-005). Siblings an
 
 ## References
 
-- RD-007, R8 (`docs/context-brief.md`, `docs/decisions.md#requirements-decisions-01-requirements`)
+- RD-007, R8 (`docs/sessions/S000-internal-docs-archive/context-brief.md`, `docs/decisions.md#requirements-decisions-01-requirements`)
 - feature-list F10 (`docs/feature-list.md`)
 - ADR-004, ADR-005, ADR-007

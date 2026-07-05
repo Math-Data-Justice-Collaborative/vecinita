@@ -91,7 +91,7 @@ active_session:
       skip_rationale: null
   current_stage: 10-e2e
   started_at: "2026-06-22"
-  context_briefs: []         # paths under docs/context/
+  context_briefs: []         # paths under docs/sessions/S000-internal-docs-archive/context/ (archive) or session folder
 ```
 
 ### `sessions[]` archive entry
@@ -298,20 +298,20 @@ Use `started_at` / `completed_at` (ISO date `YYYY-MM-DD`) when transitioning.
 | `audit-docs` | `stages.audit-docs` | `docs/audit-state.md` (mirror counts) |
 | `03-plan-tooling` | `stages.03-plan-tooling` | — |
 | `04-tech-plan` | `stages.04-tech-plan` | — |
-| `build-planner` | `stages.build-planner` | seeds `docs/execution-plan.md` |
+| `build-planner` | `stages.build-planner` | seeds `docs/sessions/S000-internal-docs-archive/execution-plan.md` |
 | `05-verify-tech` | `stages.05-verify-tech` | — |
 | `06-tech-tooling` | `stages.06-tech-tooling` | — |
-| `07-build` / `build-executor` | `stages.07-build` | `docs/execution-plan.md` §Current State |
+| `07-build` / `build-executor` | `stages.07-build` | `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Current State |
 | `08-verify-build` / `verify-build` | `stages.08-verify-build` | `docs/sessions/{id}/reports/verification-report.md` |
 | `data-management` | `stages.data-management` | `docs/data-management-state.md` |
 | `09-qa` | `stages.09-qa` | `docs/sessions/{id}/reports/qa-report.md` |
 | `10-e2e` | `stages.10-e2e` | `docs/sessions/{id}/reports/e2e-report.md` |
 | `11-verify-impl` | `stages.11-verify-impl` | `docs/sessions/{id}/reports/verify-impl.md` |
 | `12-verify-deploy` | `stages.12-verify-deploy` | `docs/sessions/{id}/reports/deploy-checklist.md` |
-| `13-deploy-smoke` / `deploy-verify` | `stages.13-deploy-smoke` | `docs/deploy-state.md` |
+| `13-deploy-smoke` / `deploy-verify` | `stages.13-deploy-smoke` | `docs/sessions/S000-internal-docs-archive/deploy-state.md` |
 | `14-hotfix` | `stages.14-hotfix` | `docs/bug-reports/BUG-*.md` |
 | `bug-investigation` | (via `14-hotfix` or `issue_log`) | repro test in `tests/bugs/` |
-| `15-service-health` | `stages.15-service-health` | `docs/service-health-state.md` |
+| `15-service-health` | `stages.15-service-health` | `docs/sessions/S000-internal-docs-archive/service-health-state.md` |
 | `16-evolve` | `evolve_cycles[]` | per `16-evolve/reference.md` |
 | `17-retrospective` | `retrospective_cycles[]` | per `17-retrospective/reference.md` |
 | `18-pr-review` | `pr_review_cycles[]` | per `18-pr-review/reference.md` |

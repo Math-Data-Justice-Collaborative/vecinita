@@ -199,7 +199,7 @@ Raw `uv run pip-audit` (without ignore list) reports `PYSEC-2026-597` — **non-
 
 ### Data staging & Modal — ADVISORY
 
-Per `docs/data-staging-state.md` (2026-06-30):
+Per `docs/sessions/S000-internal-docs-archive/data-staging-state.md` (2026-06-30):
 
 | Asset | Status |
 |-------|--------|

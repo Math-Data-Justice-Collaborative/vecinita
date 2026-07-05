@@ -148,4 +148,4 @@ to create the first admin from `SUPABASE_ADMIN_EMAIL` / `SUPABASE_ADMIN_PASSWORD
 - API: `docs/api-contract.md` §Authentication
 - Deps: `docs/dependency-inventory.md` §EV-005
 - Tests: `docs/test-plan.md` TC-077–TC-086; `docs/acceptance-criteria.md` AC-A1–AC-A10
-- Plan: `docs/execution-plan.md` §Phase 11 (EV-005)
+- Plan: `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Phase 11 (EV-005)

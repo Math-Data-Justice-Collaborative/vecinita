@@ -286,6 +286,6 @@ Full schemas: `docs/api-contract.md`; OpenAPI files in repo (required).
 ## References
 
 - [feature-list.md](feature-list.md)
-- [context-brief.md](context-brief.md)
+- [context-brief.md](sessions/S000-internal-docs-archive/context-brief.md)
 - [ADR index](adr/README.md) — ADR-001 through ADR-016
 - [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)

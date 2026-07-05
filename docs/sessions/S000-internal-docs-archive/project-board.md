@@ -12,8 +12,8 @@ This board tracks **issues and PRs in flight**. Specs live in [`docs/`](https://
 | Area | Status |
 |------|--------|
 | v1 (F1–F18) + EV-001/002/003 | Shipped |
-| Staging | Live — [deploy-state](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/deploy-state.md) |
-| Backlog | [roadmap](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/reference.md#roadmap) Phase 6 |
+| Staging | Live — [deploy-state](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/sessions/S000-internal-docs-archive/deploy-state.md) |
+| Backlog | [roadmap](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/sessions/S000-internal-docs-archive/reference.md#roadmap) Phase 6 |
 
 ## Columns
 
@@ -68,7 +68,7 @@ Hotfixes: bug report in `docs/bug-reports/` + repro test (red → green).
 
 ## Key docs
 
-[feature-list](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/feature-list.md) · [execution-plan](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/execution-plan.md) · [user-journeys](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/user-journeys.md) · [acceptance-criteria](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/acceptance-criteria.md) · [deploy-checklist](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/deploy-checklist.md) · [adr/](https://github.com/Math-Data-Justice-Collaborative/vecinita/tree/main/docs/adr)
+[feature-list](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/feature-list.md) · [execution-plan](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/sessions/S000-internal-docs-archive/execution-plan.md) · [user-journeys](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/user-journeys.md) · [acceptance-criteria](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/acceptance-criteria.md) · [deploy-checklist](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/deploy-checklist.md) · [adr/](https://github.com/Math-Data-Justice-Collaborative/vecinita/tree/main/docs/adr)
 
 ## Priorities
 

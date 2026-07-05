@@ -39,7 +39,7 @@ Auto-approve only when product plan already requires connectivity tiers (02 pass
 
 1. **04-tech-plan** must be `completed`.
 2. Required documents:
-   - `docs/execution-plan.md` — the technical execution plan
+   - `docs/sessions/S000-internal-docs-archive/execution-plan.md` — the technical execution plan
    - `docs/dependency-inventory.md` — dependency list
    - Any ADRs in `docs/adr/`
    - Deployment plan document
@@ -181,7 +181,7 @@ Same as 02-verify-plan Phase 6.
 
 Write to output directory:
 
-1. **`docs/audits.md#technical-plan-audit-report`** — Full technical audit report
+1. **`docs/sessions/S000-internal-docs-archive/audits.md#technical-plan-audit-report`** — Full technical audit report
 2. **`docs/decisions.md#technical-decisions-05-verify-tech`** — Technical decision log (extends from product decisions)
 
 ### Phase 8 — Summary
@@ -207,7 +207,7 @@ Consistency checks:
 Source documents updated: [N] changes across [M] documents
 
 Artifacts:
-  docs/audits.md#technical-plan-audit-report      — technical audit report
+  docs/sessions/S000-internal-docs-archive/audits.md#technical-plan-audit-report      — technical audit report
   docs/decisions.md#technical-decisions-05-verify-tech   — technical decision log
   docs/adr/                — [N] ADRs created from tech audit verdicts
 

@@ -206,7 +206,7 @@ All QA-S007-001 through QA-S007-006 advisories addressed. See findings table bel
 
 ## Phase / execution-plan alignment
 
-- **Phase 14 (EV-008)** M59–M64 marked complete in `docs/execution-plan.md`.
+- **Phase 14 (EV-008)** M59–M64 marked complete in `docs/sessions/S000-internal-docs-archive/execution-plan.md`.
 - **08-verify-build** not yet recorded complete in workflow-state routing (07/08 still `pending`).
 - **Handoff:** 10-e2e may proceed in parallel per routing plan, but **12-verify-deploy blocked** until QA-S007-B05 resolved.
 

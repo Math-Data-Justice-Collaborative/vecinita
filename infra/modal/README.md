@@ -70,7 +70,7 @@ Requires the **internal write API** running locally on port 8002 with `DATABASE_
 
 ## Staging model weights (D6 / D7)
 
-Before marking FastEmbed or Qwen assets **verified** in `docs/data-staging-state.md`, populate Modal volumes:
+Before marking FastEmbed or Qwen assets **verified** in `docs/sessions/S000-internal-docs-archive/data-staging-state.md`, populate Modal volumes:
 
 ```bash
 ./scripts/stage_modal_weights.sh
@@ -126,7 +126,7 @@ If `VECINITA_CORS_ORIGINS` is omitted, the app falls back to staging DO origins 
 
 First deploy downloads weights into the Modal volume; allow several minutes on cold start.
 
-**Staging:** `./scripts/stage_modal_weights.sh` (see `docs/data-staging-state.md`).
+**Staging:** `./scripts/stage_modal_weights.sh` (see `docs/sessions/S000-internal-docs-archive/data-staging-state.md`).
 
 ## vecinita-llm (vLLM)
 

@@ -5,6 +5,6 @@
 > **Branch:** `feat/S005-user-mgmt-auth`
 > **Skill:** 08-verify-build
 
-**Overall: PASS** (after remediation). See canonical report at [`docs/verification-report.md`](../../../verification-report.md).
+**Overall: PASS** (after remediation). See canonical report at [`docs/sessions/S000-internal-docs-archive/reports/verification-report.md`](../../../verification-report.md).
 
 Initial run failed on lint, typecheck, format, and coverage; all blockers fixed in-session per user approval.

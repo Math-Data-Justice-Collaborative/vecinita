@@ -8,8 +8,8 @@ intent: "GitHub #75 — add Supabase Auth authentication for ADMIN surfaces only
 orchestrator: 16-evolve
 evolve_cycle_id: EV-005
 linked_issues: [75]
-context_briefs: [docs/context-brief.md#15-ev-005-supabase-admin-auth-75]
-standing_docs_touched: [docs/context-brief.md]
+context_briefs: [docs/sessions/S000-internal-docs-archive/context-brief.md#15-ev-005-supabase-admin-auth-75]
+standing_docs_touched: [docs/sessions/S000-internal-docs-archive/context-brief.md]
 ---
 
 # S004 — Supabase Auth (admin surfaces) — #75
@@ -93,6 +93,6 @@ See [routing-plan.md](./routing-plan.md). Lite evolve path; handoff to 01-requir
 ## Links
 
 - Issue: [#75](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/75)
-- Standing: [context-brief.md](../../context-brief.md), [feature-list.md](../../feature-list.md),
+- Standing: [context-brief.md](../../sessions/S000-internal-docs-archive/context-brief.md), [feature-list.md](../../feature-list.md),
   [spec.md](../../spec.md), [api-contract.md](../../api-contract.md),
   [adr/ADR-004](../../adr/ADR-004-cost-sovereignty-zero-personal-data.md)

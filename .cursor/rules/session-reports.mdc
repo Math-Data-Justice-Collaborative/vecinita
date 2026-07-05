@@ -33,19 +33,22 @@ root report paths.
 
 | Blocked path | Use instead |
 |--------------|-------------|
-| `docs/qa-report.md` | `docs/sessions/{id}/reports/qa-report.md` |
-| `docs/verification-report.md` | `docs/sessions/{id}/reports/verification-report.md` |
-| `docs/e2e-report.md` | `docs/sessions/{id}/reports/e2e-report.md` |
-| `docs/implementation-verification.md` | `docs/sessions/{id}/reports/verify-impl.md` |
+| `docs/sessions/S000-internal-docs-archive/reports/qa-report.md` | `docs/sessions/{id}/reports/qa-report.md` |
+| `docs/sessions/S000-internal-docs-archive/reports/verification-report.md` | `docs/sessions/{id}/reports/verification-report.md` |
+| `docs/sessions/S000-internal-docs-archive/reports/e2e-report.md` | `docs/sessions/{id}/reports/e2e-report.md` |
+| `docs/sessions/S000-internal-docs-archive/reports/implementation-verification.md` | `docs/sessions/{id}/reports/verify-impl.md` |
 
-Pre-session files at `docs/` root are **historical read-only**; overwrite or create new reports
-there only when explicitly migrating an archive.
+Pre-session reports archived under `docs/sessions/S000-internal-docs-archive/reports/` are
+**historical read-only**. New QA, verification, E2E, and verify-impl reports **must** use
+`docs/sessions/{id}/reports/`.
 
 ## Standing docs (still at docs root)
 
 Long-lived specs remain at `docs/` root: `spec.md`, `feature-list.md`, `test-plan.md`,
-`deploy-checklist.md` (template), `execution-plan.md`, `deploy-state.md`, `service-health-state.md`,
-bug reports under `docs/bug-reports/`, etc.
+`deploy-checklist.md`, `architecture.md`, bug reports under `docs/bug-reports/`, etc.
+
+Agent/ops trackers live under `docs/sessions/S000-internal-docs-archive/` (execution plan,
+deploy state, project board, historical root reports).
 
 ## State sync
 

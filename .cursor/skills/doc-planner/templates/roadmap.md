@@ -80,7 +80,7 @@ Unresolved decisions that affect the roadmap:
 ## GitHub issue decomposition
 
 Map milestones or workstreams to trackable issues for the project board
-([project-board.md](../../../docs/project-board.md)).
+([project-board.md](../../../docs/sessions/S000-internal-docs-archive/project-board.md)).
 
 | Issue ID | Title | Labels | Tasks | Depends on | Status |
 |----------|-------|--------|-------|------------|--------|
@@ -139,4 +139,4 @@ flowchart LR
 
 - [Paper §X — relevant section]
 - [Repo: relevant file or directory]
-- [execution-plan.md](../../../docs/execution-plan.md) — task IDs and Depends On column
+- [execution-plan.md](../../../docs/sessions/S000-internal-docs-archive/execution-plan.md) — task IDs and Depends On column

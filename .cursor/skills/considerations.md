@@ -51,7 +51,7 @@ The default pipeline is **linear**, but **recovery** is allowed when validation 
 Atomic commits and PRs use structured messages, but **nothing automatically becomes** user-facing **release notes**.
 
 **Convention** (when cutting a release or completing 13-deploy-smoke):
-- Append a release section to `docs/deploy-report.md` or maintain `docs/CHANGELOG.md`
+- Append a release section to `docs/sessions/S000-internal-docs-archive/deploy-report.md` or maintain `docs/CHANGELOG.md`
 - Aggregate merge commits and PR titles since the last deploy tag
 - Include: version/date, deployment URL, merged milestones, notable decisions
 
@@ -241,8 +241,8 @@ canonical pipeline state file. Full schema, skill→key mapping, and update rule
 
 ### Per-skill detail state
 
-Detail files (e.g. `docs/execution-plan.md` §Current State for 07-build,
-`docs/deploy-state.md` for deploy) hold substeps. **Stage completion** must still be written
+Detail files (e.g. `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Current State for 07-build,
+`docs/sessions/S000-internal-docs-archive/deploy-state.md` for deploy) hold substeps. **Stage completion** must still be written
 to `workflow-state.yaml` immediately. Do not use legacy-only files
 (`gather-context-state.md`, `audit-state.md`) without mirroring into YAML.
 

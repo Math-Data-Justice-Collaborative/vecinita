@@ -111,7 +111,7 @@ Integration tests use synthetic values such as `test-internal-key` for `VECINITA
 
 ## References
 
-- QA report: `docs/qa-report.md` (Security — Git history)
+- QA report: `docs/sessions/S000-internal-docs-archive/reports/qa-report.md` (Security — Git history)
 - Finding: **QA-005**
 - Config: `.gitleaks.toml`
 - Script: `scripts/check_secrets.sh`

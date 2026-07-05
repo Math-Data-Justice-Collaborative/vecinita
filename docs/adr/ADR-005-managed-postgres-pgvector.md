@@ -46,7 +46,7 @@ Forbidden tables/columns per ADR-004: `users`, `accounts`, `sessions`, `messages
 
 ## References
 
-- Resolution R4 (`docs/context-brief.md`)
+- Resolution R4 (`docs/sessions/S000-internal-docs-archive/context-brief.md`)
 - RD-007, RD-009 (`docs/decisions.md#requirements-decisions-01-requirements`)
 - feature-list F5, F13 (`docs/feature-list.md`)
 - ADR-001, ADR-004

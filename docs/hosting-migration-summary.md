@@ -28,7 +28,7 @@ Full migration (Postgres + all APIs to Brown) is **high effort** and should foll
 | Supabase Pro (admin auth) | Cloud | ~$25 |
 | **Total** | Hybrid cloud | **~$67–75/mo** (post EV-005); pilot target was ≤$50 (ADR-004) |
 
-**Live staging:** [deploy-state.md](deploy-state.md) (URLs verified 2026-06-26).
+**Live staging:** [deploy-state.md](sessions/S000-internal-docs-archive/deploy-state.md) (URLs verified 2026-06-26).
 
 **Privacy model:** Corpus DB is **zero PII** (ADR-004). Chat is anonymous. Operators authenticate via Supabase — identity never stored in corpus Postgres (ADR-026).
 
@@ -200,7 +200,7 @@ flowchart LR
 | [architecture.md](architecture.md) | Service map, env matrix, deploy pipeline |
 | [data-flow.md](data-flow.md) | ERD, sequences, state, class, requirement, journey diagrams |
 | [deployment-integration.md](deployment-integration.md) | EV-specific redeploy order |
-| [deploy-state.md](deploy-state.md) | Live staging URLs |
+| [deploy-state.md](sessions/S000-internal-docs-archive/deploy-state.md) | Live staging URLs |
 | [infra/do/README.md](../infra/do/README.md) | DO App Platform specs |
 | [infra/modal/README.md](../infra/modal/README.md) | Modal apps |
 | [adr/README.md](adr/README.md) | Architectural decisions |

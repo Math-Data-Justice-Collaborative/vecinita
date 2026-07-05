@@ -71,7 +71,7 @@ Rules:
 
 ## Prerequisites
 
-1. **Optional**: `docs/context-brief.md` from 00-context. If it exists, pre-populate
+1. **Optional**: `docs/sessions/S000-internal-docs-archive/context-brief.md` from 00-context. If it exists, pre-populate
    interview answers from it and ask user to confirm/modify rather than starting from
    scratch.
 2. **Optional**: Template selection from `workflow-state.yaml` §template. If a template

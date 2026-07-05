@@ -13,7 +13,7 @@ skills invoke the agent for `read_context` and `update`; they do not edit the YA
 **Schema and protocol:** [workflow-state-reference.md](workflow-state-reference.md),
 [workflow-state-agent-protocol.md](workflow-state-agent-protocol.md)
 
-Detail trackers (`docs/execution-plan.md`, `docs/deploy-state.md`, etc.) supplement but do not
+Detail trackers (`docs/sessions/S000-internal-docs-archive/execution-plan.md`, `docs/sessions/S000-internal-docs-archive/deploy-state.md`, etc.) supplement but do not
 replace workflow-state.
 
 ## Sessions (session-first work model)

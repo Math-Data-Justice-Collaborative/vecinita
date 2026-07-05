@@ -38,7 +38,7 @@ playground + super-admin runtime promote.
 | `docs/api-contract.md` | §EV-009 presets, extended eval run, promote |
 | `docs/config-spec.md` | Super-admin email + RAG config fallback env vars |
 | `docs/decisions.md` | RD-114–RD-130 |
-| `docs/context/eval-ux-playground.md` | Gaps closed → 04-tech-plan |
+| `docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md` | Gaps closed → 04-tech-plan |
 
 ## Milestones (for 04-tech-plan)
 

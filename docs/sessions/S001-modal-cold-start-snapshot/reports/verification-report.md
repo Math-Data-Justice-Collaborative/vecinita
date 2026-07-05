@@ -26,4 +26,4 @@ Milestone-boundary verification for shipped S001 tasks (instrumentation, budget-
 - Re-run 08-verify-build after T12
 - Then 13-deploy-smoke / 15-service-health per routing plan
 
-Canonical report: `docs/verification-report.md`
+Canonical report: `docs/sessions/S000-internal-docs-archive/reports/verification-report.md`

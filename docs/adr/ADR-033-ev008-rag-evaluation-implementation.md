@@ -235,4 +235,4 @@ dependency-inventory §EV-008 evaluation.
 
 ## Alternatives considered
 
-See §1 rejected options and `docs/context/rag-eval.md` §Eval framework provider re-evaluation.
+See §1 rejected options and `docs/sessions/S000-internal-docs-archive/context/rag-eval.md` §Eval framework provider re-evaluation.

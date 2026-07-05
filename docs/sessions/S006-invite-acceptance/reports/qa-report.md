@@ -31,7 +31,7 @@ QA Results:
 | ID | Status | Resolution |
 |----|--------|------------|
 | QA-S006-001 | **resolved** | Added `scripts/ensure_node24.sh`; wired into `scripts/npm_with_lock.sh` so `make lint-fe`, `make test-fe`, and CI-parity npm targets auto-activate Node 24 via fnm. Documented in `docs/LOCAL_DEV.md`. |
-| QA-S006-002 | **resolved** | Live checks: embed + LLM `/health` OK; `tests/smoke/test_modal_weights_staged.py` 3/3 PASS (384-dim embed). D7 set to `verified` in `docs/data-staging-state.md`. |
+| QA-S006-002 | **resolved** | Live checks: embed + LLM `/health` OK; `tests/smoke/test_modal_weights_staged.py` 3/3 PASS (384-dim embed). D7 set to `verified` in `docs/sessions/S000-internal-docs-archive/data-staging-state.md`. |
 | QA-S006-003 | **resolved** | Ran `scripts/deploy/verify_connectivity.sh` with DO staging URLs from `do_apps.py urls --frontend` + Modal admin API. H0c 26 passed; H4/H5 live 19 passed. |
 | QA-S006-004 | **partial** | Offline: `check_supabase_config.sh` OK; `test_supabase_ci_contract.py` 17/17 PASS (TC-109). Staging admin `/accept-invite` returns 200 (SPA). **Live T3** (send invite → email link → set password → login) still requires merge + redeploy + `supabase config push` with `SUPABASE_ACCESS_TOKEN` — defer to **13-deploy-smoke**. |
 | QA-S006-005 | **resolved** | Reconciled during initial 09-qa run (workflow-state-manager). |
