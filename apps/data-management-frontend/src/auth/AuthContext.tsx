@@ -27,9 +27,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     getSupabaseClientVersion,
   );
 
-  useEffect(() => {
-    setOperatorAccessToken(session?.access_token ?? null);
-  }, [session?.access_token]);
+  // Sync before child effects fetch — parent useEffect runs after children (BUG-2026-07-05).
+  setOperatorAccessToken(session?.access_token ?? null);
 
   useEffect(() => {
     const supabase = getSupabaseClient();
