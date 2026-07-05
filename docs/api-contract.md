@@ -746,6 +746,68 @@ Base path: `/internal/v1/eval` and `/internal/v1/rag/config` (admin JWT; promote
 
 ---
 
+## EV-010 — Playground model download (F38)
+
+Base path: `/internal/v1/models/ollama` (admin JWT for list; pull requires `super-admin`).
+
+### GET `/internal/v1/models/ollama`
+
+- **Purpose**: List Ollama models on the Modal `vecinita-models` volume for the Playground picker.
+- **Auth**: `WriteActorDep` (`admin` or `super-admin`); `viewer` → `403`.
+- **Response** `200`:
+
+```json
+{
+  "items": [
+    { "model_id": "qwen2.5:1.5b-instruct", "available": true },
+    { "model_id": "qwen2.5:3b-instruct", "available": false }
+  ]
+}
+```
+
+- **Fallback**: When `VECINITA_MODAL_OLLAMA_URL` is unset, returns a single vLLM default model entry (existing F37 behavior).
+
+### POST `/internal/v1/models/ollama/pull`
+
+- **Purpose**: Enqueue a background Ollama pull into the **Modal Volume `vecinita-models`** (super-admin operator action).
+- **Auth**: `SuperAdminActorDep` only; `admin` → `403`; `viewer` → `403`.
+- **Request**:
+
+```json
+{ "model_id": "qwen2.5:3b-instruct" }
+```
+
+- **Validation**: `model_id` non-empty, max 128 characters (free-text Ollama tag — no allow-list v1).
+- **Response** `202`:
+
+```json
+{
+  "job_id": "uuid",
+  "model_id": "qwen2.5:3b-instruct",
+  "status": "pulling"
+}
+```
+
+- **Concurrent pulls**: Parallel requests for the same tag are allowed (duplicate Modal jobs acceptable in v1).
+- **Errors**: `503` when Ollama client not configured; `502` when Modal proxy fails; `422` on invalid body.
+
+### Client polling contract (Playground UI)
+
+- After `202`, poll `GET /internal/v1/models/ollama` every **10s** until matching `model_id` has `available: true` or **30 min** elapses (timeout error; operator may retry).
+- No separate job-status endpoint in v1.
+
+### Storage contract (Modal)
+
+| Item | Value |
+|------|-------|
+| Volume | `vecinita-models` (Modal) |
+| Mount path | `/models` (`OLLAMA_MODELS=/models` in `vecinita-ollama`) |
+| Manifest | `/models/manifest.json` — `{ models: [{ model_id, available }] }` |
+| Pull execution | Modal function `pull_model_job` — `ollama pull` + `model_volume.commit()` |
+| Non-storage | Model weights are **not** written to DO Postgres, DO disk, or browser storage |
+
+---
+
 ## EV-004 — Client-only i18n (F31)
 
 **No new HTTP endpoints.** Bilingual admin UI and shared frontend packages do not change request/response schemas, auth, or error codes.

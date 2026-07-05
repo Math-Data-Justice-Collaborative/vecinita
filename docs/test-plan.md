@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-02 (S008/EV-009 F37 — eval UX TC-123–TC-133, playground UJ-044–047)  
+> **Last updated**: 2026-07-05 (S009/EV-010 F38 — UJ-048, TC-134–TC-139 playground model download)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -72,6 +72,7 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-045 Eval Playground configure + run | `tests/e2e/test_uj045_eval_playground.py` | TC-127, TC-128, TC-129 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
 | UJ-046 Eval run side-by-side compare | Vitest `test_evaluation_compare.test.tsx` | TC-130 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
 | UJ-047 Super-admin promote RAG config | `tests/e2e/test_uj047_eval_promote_config.py` | TC-131, TC-132, TC-133 | — |
+| UJ-048 Super-admin downloads Playground model | `tests/e2e/test_uj048_playground_model_download.py` | TC-134, TC-138, TC-139 | `tests/ui/admin/uj048-playground-model-download.spec.ts` |
 
 **E2E tier (v1):** `local` — TestClient, test Postgres (Docker/testcontainers), **mocked Modal** HTTP.
 
@@ -789,11 +790,52 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Input**: `tests/integration/test_rag_production_config.py` — promote then `POST /api/v1/ask` (mocked LLM captures prompt).
 - **Expected**: Prompt/context assembly reflects promoted `system_prompt` and `top_k`.
 
-### TC-134: Ollama model list + pull API (UJ-045, F37, EV-009)
+### TC-134: Ollama model list + pull API auth (UJ-045 list, UJ-048 pull, F37/F38, EV-009/EV-010)
 
-- **Objective**: Playground model picker lists stashed Modal Ollama models and can trigger a background pull.
+- **Objective**: Playground model picker lists stashed Modal Ollama models; **only super-admin** can trigger a background pull.
 - **Input**: `tests/integration/test_ollama_models_list.py` — `GET/POST /internal/v1/models/ollama`.
-- **Expected**: Admin receives model list with `model_id` + `available`; pull returns `202` with `job_id`; viewer → `403`.
+- **Payloads**:
+  - `GET` as `admin` → `200` with `{ items: [{ model_id, available }] }`.
+  - `POST { "model_id": "qwen2.5:3b-instruct" }` as `super-admin` → `202` with `{ job_id, model_id, status: "pulling" }`.
+  - Same `POST` as `admin` → `403`.
+  - Same `POST` as `viewer` → `403`.
+  - `POST` with empty `model_id` → `422`.
+- **Expected**: List unchanged for admin; pull restricted to super-admin; viewer denied on all model routes.
+
+### TC-135: Super-admin Playground download UI — trigger + poll success (UJ-048, F38, EV-010)
+
+- **Objective**: Super-admin download panel submits pull and polls until model is available.
+- **Input**: Vitest `test_evaluation_playground.test.tsx` — mock `POST /internal/v1/models/ollama/pull` (`202`) and sequential `GET /internal/v1/models/ollama` (`available: false` → `true`).
+- **Payloads**: Enter `qwen2.5:3b-instruct`; assert pull called once; assert poll interval ~10s (fake timers); assert success state and picker includes new model.
+- **Expected**: Download button enabled for super-admin; in-progress indicator while polling; success when `available=true`.
+
+### TC-136: Admin Playground — download UI hidden (UJ-048, F38, EV-010)
+
+- **Objective**: Regular admin does not see download controls.
+- **Input**: Vitest `test_evaluation_playground.test.tsx` — render Playground with `role=admin` auth context.
+- **Expected**: No download form / pull button in DOM; model picker still loads via `GET /internal/v1/models/ollama`.
+
+### TC-137: Playwright super-admin download journey (UJ-048, F38, EV-010, T0-ui)
+
+- **Objective**: Browser-level cross-component flow — download panel, API mocks, picker update.
+- **Input**: `tests/ui/admin/uj048-playground-model-download.spec.ts` — navigate `/evaluation?tab=playground` as super-admin with route mocks.
+- **Expected**: Enter tag → Download → polling UI → model appears in select; admin fixture run confirms download section absent.
+
+### TC-138: API E2E super-admin pull journey (UJ-048, F38, EV-010)
+
+- **Objective**: Caller-facing pull route through FastAPI app + mocked Modal Ollama client.
+- **Input**: `tests/e2e/test_uj048_playground_model_download.py` — super-admin JWT `POST` pull then `GET` list shows pulling/available entry.
+- **Expected**: `202` on pull; subsequent list includes requested `model_id`; admin JWT pull in same module → `403`.
+
+### TC-139: Modal volume manifest storage contract (F38, EV-010, TP-S009-17)
+
+- **Objective**: Playground model downloads target Modal Volume **`vecinita-models`** — manifest read/write marks models `available` after pull.
+- **Input**: `tests/unit/modal/test_ollama_volume_manifest.py` — exercise `_read_manifest` / `_write_manifest` / `_list_models_payload` from `infra/modal/ollama_app.py` against a temp directory (no live Modal).
+- **Payloads**:
+  - Empty manifest → default model entry.
+  - Append model with `available: false` during pull → list shows unavailable.
+  - Update to `available: true` → list reflects ready state.
+- **Expected**: Manifest shape matches api-contract §EV-010 storage contract; no DO/Postgres paths involved.
 
 ## Test Data
 

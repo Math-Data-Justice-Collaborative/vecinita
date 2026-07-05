@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-07-03 (diagrams: journey, sequence, state, flowchart)
+> **Last updated**: 2026-07-05 (S009/EV-010 F38 — UJ-048 super-admin model download)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -53,6 +53,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-045 | Admin configures and runs eval in Playground | Admin operator | DM UI `/evaluation?tab=playground` → preset + run APIs | F37 (EV-009) | local |
 | UJ-046 | Admin compares two eval runs | Admin operator | DM UI `/evaluation` compare view | F37 (EV-009) | local |
 | UJ-047 | Super-admin promotes config to production ChatRAG | Super-admin | Playground → promote API → ChatRAG active config | F37 (EV-009) | local |
+| UJ-048 | Super-admin downloads Ollama model for Playground | Super-admin | DM UI Playground download panel → pull + poll APIs | F38 (EV-010) | local |
 
 ## Visual journey maps
 
@@ -1172,3 +1173,32 @@ flowchart TD
 **Automated tests**: `tests/e2e/test_uj047_eval_promote_config.py` (TC-131, TC-132); `tests/integration/test_rag_production_config.py` (TC-133).
 
 **E2E tier**: local (staging T3 for live ChatRAG read-after-promote optional).
+
+---
+
+### UJ-048: Super-admin downloads Ollama model for Playground
+
+**Actor**: Super-admin (`role=super-admin`, seeded from `VECINITA_SUPER_ADMIN_EMAIL`)
+
+**Goal**: Download an additional Ollama model tag onto the Modal `vecinita-models` volume so eval playground experiments can use it.
+
+**Preconditions**: Super-admin authenticated; `VECINITA_MODAL_OLLAMA_URL` configured on internal-write-api (otherwise pull returns `503`).
+
+**Steps**:
+
+1. Open `/evaluation?tab=playground` as super-admin.
+2. **Download model** panel is visible (regular `admin` operators do **not** see this section).
+3. Enter a free-text Ollama `model_id` tag (e.g. `qwen2.5:3b-instruct`).
+4. Click **Download** → `POST /internal/v1/models/ollama/pull` with `{ "model_id": "..." }` → `202` with `job_id` and `status: "pulling"`.
+5. UI shows in-progress state and polls `GET /internal/v1/models/ollama` every **10 seconds**.
+6. When the matching entry reports `available: true`, UI shows success and the model appears in the shared model picker.
+7. If `available` stays `false` for **30 minutes**, UI shows a timeout error; super-admin may retry (parallel duplicate pulls allowed in v1).
+8. Regular `admin` can list and select the downloaded model for playground runs but receives `403` on pull API and has no download UI.
+
+**Cross-component interactions**: `EvaluationPlaygroundTab` download panel ↔ `admin.ts` `pullOllamaModel()` ↔ internal-write-api pull route ↔ Modal Ollama proxy; poll loop refreshes the same model picker used by UJ-045 run flow.
+
+**Acceptance**: Super-admin pull succeeds (`202`); admin pull → `403`; viewer → `403`; downloaded model selectable in picker once `available=true`.
+
+**Automated tests**: `tests/e2e/test_uj048_playground_model_download.py` (TC-134, TC-138); Vitest `test_evaluation_playground.test.tsx` (TC-135, TC-136); Playwright `tests/ui/admin/uj048-playground-model-download.spec.ts` (TC-137).
+
+**E2E tier**: local.

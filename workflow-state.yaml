@@ -6,23 +6,30 @@ project:
   stages:
     00-context:
       status: completed
-      started_at: '2026-07-02'
-      completed_at: '2026-07-02'
-      partial_rerun_at: '2026-07-02'
-      partial_rerun_note: 'EV-009/S008 delta — eval UX polish + playground + super-admin runtime promote; context brief docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md;
-        F36 follow-ons (items 1–3) + F37 proposed; decisions R68–R75.'
-      session_id: S008-eval-ux-playground
-      branch: feat/S008-eval-ux-playground
-      evolve_cycle_id: EV-009
-      note: 'S008/EV-009 scoped delta — evaluation UX polish, unified jobs API, dashboard charts, eval playground + super-admin
-        promote. 00-context completed 2026-07-02; context brief docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md. Build order 1→2→3→4 (R70).'
+      started_at: '2026-07-05'
+      completed_at: '2026-07-05'
+      partial_rerun_at: '2026-07-05'
+      partial_rerun_note: EV-010/S009 delta — F38 playground model download; super-admin Ollama model download UI for eval
+        playground
+      session_id: S009-playground-model-download
+      branch: feat/S009-playground-model-download
+      evolve_cycle_id: EV-010
+      note: S009/EV-010 scoped delta — F38 super-admin-only Ollama model download UI for eval playground; admin list+select
+        only; full-stack tests. 00-context completed 2026-07-05.
+      s008_baseline: &id001
+        status: paused
+        paused_at: '2026-07-05'
+        session_id: S008-eval-ux-playground
+        branch: feat/S008-eval-ux-playground
+        evolve_cycle_id: EV-009
+        note: S008/EV-009 parked 2026-07-05 — coverage gate QA-S008-B05 open; S009 opened for F38 playground model download.
       s007_baseline:
         status: paused
         paused_at: '2026-07-02'
         session_id: S007-rag-eval
         branch: feat/S007-rag-eval
         evolve_cycle_id: EV-008
-        note: 'S007/EV-008 scope boundary closed; deploy stages 12–13 deferred; S008 opened for eval UX follow-on.'
+        note: S007/EV-008 scope boundary closed; deploy stages 12–13 deferred; S008 opened for eval UX follow-on.
       s006_baseline:
         status: paused
         paused_at: '2026-07-01'
@@ -37,12 +44,23 @@ project:
         note: S005/EV-006 F35 00-context completed 2026-06-29; session paused 2026-06-30 before deploy stages.
     01-requirements:
       status: completed
-      started_at: '2026-07-02'
-      completed_at: '2026-07-02'
-      session_id: S008-eval-ux-playground
-      branch: feat/S008-eval-ux-playground
-      evolve_cycle_id: EV-009
-      report: docs/sessions/S008-eval-ux-playground/reports/01-requirements.md
+      started_at: '2026-07-05'
+      completed_at: '2026-07-05'
+      partial_rerun_at: '2026-07-05'
+      partial_rerun_note: EV-010/S009 delta — F38 playground model download requirements complete
+      session_id: S009-playground-model-download
+      branch: feat/S009-playground-model-download
+      evolve_cycle_id: EV-010
+      report: docs/sessions/S009-playground-model-download/reports/01-requirements.md
+      s008_baseline:
+        status: completed
+        started_at: '2026-07-02'
+        completed_at: '2026-07-02'
+        session_id: S008-eval-ux-playground
+        branch: feat/S008-eval-ux-playground
+        evolve_cycle_id: EV-009
+        report: docs/sessions/S008-eval-ux-playground/reports/01-requirements.md
+        note: EV-009/S008 delta — prior 01-requirements complete 2026-07-02.
       s007_baseline:
         status: completed
         completed_at: '2026-07-01'
@@ -62,15 +80,27 @@ project:
         report: docs/sessions/S006-invite-acceptance/reports/01-requirements.md
     04-tech-plan:
       status: completed
-      started_at: '2026-07-02'
-      completed_at: '2026-07-02'
-      partial_rerun_at: '2026-07-02'
-      partial_rerun_note: 'EV-009/S008 delta — F36 follow-ons (M65–M67) + F37 eval playground + super-admin runtime promote
-        (ADR-035, TP-S008-01–16).'
-      session_id: S008-eval-ux-playground
-      branch: feat/S008-eval-ux-playground
-      evolve_cycle_id: EV-009
-      report: docs/sessions/S008-eval-ux-playground/reports/04-tech-plan.md
+      started_at: '2026-07-05'
+      completed_at: '2026-07-05'
+      partial_rerun_at: '2026-07-05'
+      partial_rerun_note: EV-010/S009 delta — F38 playground model download tech plan complete (ADR-036, TP-S009-01–16; Phase
+        16 M71–M73).
+      session_id: S009-playground-model-download
+      branch: feat/S009-playground-model-download
+      evolve_cycle_id: EV-010
+      report: docs/sessions/S009-playground-model-download/reports/04-tech-plan.md
+      s008_baseline:
+        status: completed
+        started_at: '2026-07-02'
+        completed_at: '2026-07-02'
+        partial_rerun_at: '2026-07-02'
+        partial_rerun_note: EV-009/S008 delta — F36 follow-ons (M65–M67) + F37 eval playground + super-admin runtime promote
+          (ADR-035, TP-S008-01–16).
+        session_id: S008-eval-ux-playground
+        branch: feat/S008-eval-ux-playground
+        evolve_cycle_id: EV-009
+        report: docs/sessions/S008-eval-ux-playground/reports/04-tech-plan.md
+        note: EV-009/S008 delta — prior 04-tech-plan complete 2026-07-02.
       s007_baseline:
         status: completed
         started_at: '2026-07-01'
@@ -245,8 +275,8 @@ project:
       evolve_cycle_id: EV-009
       report: docs/sessions/S008-eval-ux-playground/reports/qa-report.md
       overall: fail
-      note: 'S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage gate FAIL (internal-write-api
-        + chat-rag-backend below 95%); QA-S008-B05 blocking'
+      note: S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage gate FAIL (internal-write-api
+        + chat-rag-backend below 95%); QA-S008-B05 blocking
       s007:
         status: completed
         started_at: '2026-07-01'
@@ -290,8 +320,8 @@ project:
           frontend: all green — PASS
           coverage_gate: PASS
         note: 'S006/EV-007 F35 ext full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 729 passed; all
-          frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S006-invite-acceptance/reports/qa-report.md.
-          Handoff to 10-e2e.'
+          frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+          + docs/sessions/S006-invite-acceptance/reports/qa-report.md. Handoff to 10-e2e.'
       s005:
         status: completed
         started_at: '2026-06-30'
@@ -309,8 +339,8 @@ project:
           frontend: all green — PASS
           coverage_gate: PASS
         note: 'S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed;
-          all frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S005-user-mgmt-auth/reports/qa-report.md.
-          Handoff to 10-e2e.'
+          all frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+          + docs/sessions/S005-user-mgmt-auth/reports/qa-report.md. Handoff to 10-e2e.'
       s004:
         status: completed
         started_at: '2026-06-29'
@@ -403,8 +433,8 @@ project:
         status: completed
         completed_at: '2026-07-02'
         partial_rerun_at: '2026-07-02'
-        partial_rerun_note: 'Partial — M65-M69 verified inline; M70/UJ-047/AC-E26 deferred; journey AskQuestion skipped (user
-          waiver 2026-07-02)'
+        partial_rerun_note: Partial — M65-M69 verified inline; M70/UJ-047/AC-E26 deferred; journey AskQuestion skipped (user
+          waiver 2026-07-02)
         session_id: S008-eval-ux-playground
         branch: feat/S008-eval-ux-playground
         evolve_cycle_id: EV-009
@@ -419,8 +449,8 @@ project:
         - M70
         - UJ-047
         - AC-E26
-        note: 'S008/EV-009 partial 11-verify-impl — M65-M69 verified inline; M70 playground build pending; formal 08→09→10
-          still required before deploy stages'
+        note: S008/EV-009 partial 11-verify-impl — M65-M69 verified inline; M70 playground build pending; formal 08→09→10
+          still required before deploy stages
     13-deploy-smoke:
       status: completed
       started_at: '2026-06-26'
@@ -453,11 +483,49 @@ project:
       - modal_h4_cors_waived_proxy_auth
       - s001_t12_pending
       - h0ci_blocking_after_merge
-session_counter: 8
+session_counter: 9
 active_session:
-  id: S008-eval-ux-playground
+  id: S009-playground-model-download
   type: feature
   status: in_progress
+  intent: Super-admin-only Ollama model download UI for eval playground; admin list+select only; full-stack tests
+  branch: feat/S009-playground-model-download
+  orchestrator: 16-evolve
+  evolve_cycle_id: EV-010
+  artifacts_dir: docs/sessions/S009-playground-model-download/
+  started_at: '2026-07-05'
+  current_stage: 07-build
+  routing_plan:
+  - stage: 00-context
+    status: completed
+    completed_at: '2026-07-05'
+  - stage: 01-requirements
+    status: completed
+    started_at: '2026-07-05'
+    completed_at: '2026-07-05'
+  - stage: 04-tech-plan
+    status: completed
+    started_at: '2026-07-05'
+    completed_at: '2026-07-05'
+  - stage: 07-build
+    status: pending
+  - stage: 08-verify-build
+    status: pending
+  - stage: 09-qa
+    status: pending
+  - stage: 10-e2e
+    status: pending
+  - stage: 11-verify-impl
+    status: pending
+  - stage: 12-verify-deploy
+    status: pending
+  - stage: 13-deploy-smoke
+    status: pending
+  artifacts: []
+sessions:
+- id: S008-eval-ux-playground
+  type: feature
+  status: paused
   intent: Evaluation UX polish + eval playground + super-admin runtime promote
   branch: feat/S008-eval-ux-playground
   orchestrator: 16-evolve
@@ -571,7 +639,8 @@ active_session:
     kind: qa-report
     session_id: S008-eval-ux-playground
     stage: 09-qa
-sessions:
+  paused_at: '2026-07-05'
+  pause_note: S008 parked 2026-07-05 — coverage gate QA-S008-B05 open; S009 opened for F38 playground model download
 - id: S007-rag-eval
   type: feature
   status: paused
@@ -584,8 +653,8 @@ sessions:
   started_at: '2026-07-01'
   paused_at: '2026-07-02'
   current_stage: 12-verify-deploy
-  pause_note: 'Scope boundary closed 2026-07-02 — user opened S008/EV-009 for eval UX follow-on; deploy stages 12-verify-deploy
-    and 13-deploy-smoke deferred on S007 record.'
+  pause_note: Scope boundary closed 2026-07-02 — user opened S008/EV-009 for eval UX follow-on; deploy stages 12-verify-deploy
+    and 13-deploy-smoke deferred on S007 record.
   linked_issues:
   - 99
   routing_plan:
@@ -1452,14 +1521,13 @@ sessions:
 stages:
   00-context:
     status: completed
-    started_at: '2026-05-19'
-    completed_at: '2026-07-02'
-    partial_rerun_at: '2026-07-02'
-    partial_rerun_note: 'EV-009/S008 delta — eval UX polish + playground + super-admin runtime promote; context brief docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md;
-      F36 follow-ons + F37 proposed (R68–R75).'
-    session_id: S008-eval-ux-playground
-    branch: feat/S008-eval-ux-playground
-    evolve_cycle_id: EV-009
+    started_at: '2026-07-05'
+    completed_at: '2026-07-05'
+    partial_rerun_at: '2026-07-05'
+    partial_rerun_note: EV-010/S009 delta — F38 playground model download; super-admin Ollama model download UI for eval playground
+    session_id: S009-playground-model-download
+    branch: feat/S009-playground-model-download
+    evolve_cycle_id: EV-010
     artifacts:
     - docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md
     s007_baseline:
@@ -1490,16 +1558,30 @@ stages:
         - docs/sessions/S000-internal-docs-archive/context-brief.md §13
         - docs/adr/ADR-019-shared-frontend-i18n.md
         - docs/adr/ADR-020-shared-frontend-ui.md
+    s008_baseline: *id001
+    note: S009/EV-010 scoped delta — F38 super-admin-only Ollama model download UI for eval playground; admin list+select
+      only; full-stack tests. 00-context completed 2026-07-05.
   01-requirements:
     status: completed
-    started_at: '2026-07-02'
-    completed_at: '2026-07-02'
-    partial_rerun_at: '2026-07-02'
-    partial_rerun_note: 'EV-009/S008 delta — F36 follow-ons (items 1–3) + F37 eval playground + super-admin runtime promote.'
-    session_id: S008-eval-ux-playground
-    branch: feat/S008-eval-ux-playground
-    evolve_cycle_id: EV-009
-    report: docs/sessions/S008-eval-ux-playground/reports/01-requirements.md
+    started_at: '2026-07-05'
+    completed_at: '2026-07-05'
+    partial_rerun_at: '2026-07-05'
+    partial_rerun_note: EV-010/S009 delta — F38 playground model download requirements complete
+    session_id: S009-playground-model-download
+    branch: feat/S009-playground-model-download
+    evolve_cycle_id: EV-010
+    report: docs/sessions/S009-playground-model-download/reports/01-requirements.md
+    s008_baseline:
+      status: completed
+      started_at: '2026-07-02'
+      completed_at: '2026-07-02'
+      partial_rerun_at: '2026-07-02'
+      partial_rerun_note: EV-009/S008 delta — F36 follow-ons (items 1–3) + F37 eval playground + super-admin runtime promote.
+      session_id: S008-eval-ux-playground
+      branch: feat/S008-eval-ux-playground
+      evolve_cycle_id: EV-009
+      report: docs/sessions/S008-eval-ux-playground/reports/01-requirements.md
+      note: EV-009/S008 delta — prior 01-requirements complete 2026-07-02.
     s007_baseline:
       status: completed
       started_at: '2026-07-01'
@@ -1588,8 +1670,8 @@ stages:
     started_at: '2026-07-02'
     completed_at: '2026-07-02'
     partial_rerun_at: '2026-07-02'
-    partial_rerun_note: 'EV-009/S008 delta — F36 follow-ons (M65–M67) + F37 eval playground + super-admin runtime promote
-      (ADR-035, TP-S008-01–16).'
+    partial_rerun_note: EV-009/S008 delta — F36 follow-ons (M65–M67) + F37 eval playground + super-admin runtime promote (ADR-035,
+      TP-S008-01–16).
     session_id: S008-eval-ux-playground
     branch: feat/S008-eval-ux-playground
     evolve_cycle_id: EV-009
@@ -1841,8 +1923,8 @@ stages:
     evolve_cycle_id: EV-009
     report: docs/sessions/S008-eval-ux-playground/reports/qa-report.md
     overall: fail
-    note: 'S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage gate FAIL (internal-write-api
-      + chat-rag-backend below 95%); QA-S008-B05 blocking'
+    note: S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage gate FAIL (internal-write-api
+      + chat-rag-backend below 95%); QA-S008-B05 blocking
     s008:
       status: completed
       started_at: '2026-07-03'
@@ -1852,8 +1934,8 @@ stages:
       evolve_cycle_id: EV-009
       overall: fail
       report: docs/sessions/S008-eval-ux-playground/reports/qa-report.md
-      note: 'S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage gate FAIL (internal-write-api
-        + chat-rag-backend below 95%); QA-S008-B05 blocking'
+      note: S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage gate FAIL (internal-write-api
+        + chat-rag-backend below 95%); QA-S008-B05 blocking
     s001:
       report: docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md
       branch: feat/S001-modal-cold-start-snapshot
@@ -2244,15 +2326,11 @@ evolve_cycles:
   started: '2026-05-24'
   completed: '2026-05-25'
   note: Deployed 2026-05-25 — all tiers pass (H4 Modal waiver); 2 deploy-time fixes
-  scope_summary: 'Community members browse and filter corpus documents by tags (full text on open).
-
+  scope_summary: |
+    Community members browse and filter corpus documents by tags (full text on open).
     LLM auto-tags at ingest; admins view chunks and edit document/chunk tags (human or LLM).
-
     Tag-aware RAG: optional user tag filter + LLM-inferred tags from question.
-
     Public read API on chat-rag-backend; admin writes via existing protected paths.
-
-    '
   routing_plan:
     required_stages:
     - 00-context
@@ -2444,19 +2522,13 @@ evolve_cycles:
   started: '2026-05-26'
   completed: '2026-05-27'
   note: Deployed 2026-05-27 @ 0a2f813 — H1-H5 + T3 pass (H4 Modal waiver); drift vs HEAD 98bb7f8
-  scope_summary: 'F23: Admin UI overhaul (Tailwind CSS + React Router navigation).
-
+  scope_summary: |
+    F23: Admin UI overhaul (Tailwind CSS + React Router navigation).
     F24: Admin summary statistics dashboard (document/chunk/tag/job aggregates).
-
     F25: System health check dashboard (live service status polling).
-
     F26: Bulk corpus document operations (metadata editing, bulk delete, bulk tags).
-
     F27: Document retrieval usage statistics (new table, counter on RAG responses).
-
     F28: Corpus audit log & version history (new table, hashed IP, JSONB diffs).
-
-    '
   routing_plan:
     required_stages:
     - 00-context
@@ -2567,19 +2639,13 @@ evolve_cycles:
   status: in_progress
   started: '2026-06-13'
   completed: null
-  scope_summary: 'F31: Admin UI bilingual (en/es) — mirror ChatRAG i18n.
-
+  scope_summary: |
+    F31: Admin UI bilingual (en/es) — mirror ChatRAG i18n.
     Shared packages/frontend-i18n + packages/frontend-ui (shared Tailwind UI components).
-
     vecinita.locale persistence (R28, R29).
-
     Sidebar EN/ES toggle beside ThemeToggle (R31); UI chrome only (R30).
-
     Component extraction from ChatRAG/admin into frontend-ui (R34-R38).
-
     No backend or API contract changes.
-
-    '
   routing_plan:
     required_stages:
     - 00-context
@@ -3063,15 +3129,15 @@ evolve_cycles:
   - 'TP-S007-01–16 (2026-07-01, EV-008/S007, 04-tech-plan): F36 RAG evaluation tech plan — ADR-033; execution-plan Phase EV-008
     (M59–M63). LlamaIndex evaluators + custom harness; packages/eval; DO BackgroundTasks runner; admin-only access.'
   note: 'F36 — admin RAG evaluation tab with golden eval set; LlamaIndex evaluators + custom harness. GitHub #99. Evolve-lite
-    routing 00→01→04→07→08→09→10→12→13 (skip 02,03,05,06,11). Build complete; scope boundary closed 2026-07-02 — deploy
-    stages 12–13 deferred on S007; S008/EV-009 opened for eval UX follow-on.'
+    routing 00→01→04→07→08→09→10→12→13 (skip 02,03,05,06,11). Build complete; scope boundary closed 2026-07-02 — deploy stages
+    12–13 deferred on S007; S008/EV-009 opened for eval UX follow-on.'
 - id: EV-009
   cycle_type: feature
   feature_ids:
   - F36
   - F37
   title: Evaluation UX polish + eval playground + super-admin runtime promote
-  status: in_progress
+  status: paused
   started: '2026-07-02'
   session_id: S008-eval-ux-playground
   current_stage: 09-qa
@@ -3080,8 +3146,8 @@ evolve_cycles:
       status: completed
       started: '2026-07-02'
       completed: '2026-07-02'
-      note: 'EV-009 opened — S008 eval UX polish + playground; context brief docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md; F36 follow-ons
-        (items 1–3) + F37 proposed.'
+      note: EV-009 opened — S008 eval UX polish + playground; context brief docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md;
+        F36 follow-ons (items 1–3) + F37 proposed.
     01-requirements:
       status: completed
       started: '2026-07-02'
@@ -3090,7 +3156,7 @@ evolve_cycles:
       status: completed
       started: '2026-07-02'
       completed: '2026-07-02'
-      note: 'EV-009/S008 delta — F36 follow-ons (M65–M67) + F37 eval playground + super-admin runtime promote (ADR-035, TP-S008-01–16).'
+      note: EV-009/S008 delta — F36 follow-ons (M65–M67) + F37 eval playground + super-admin runtime promote (ADR-035, TP-S008-01–16).
     07-build:
       status: completed
       started: '2026-07-02'
@@ -3117,8 +3183,8 @@ evolve_cycles:
       completed: '2026-07-03'
       overall: fail
       report: docs/sessions/S008-eval-ux-playground/reports/qa-report.md
-      note: 'S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage gate FAIL (internal-write-api
-        + chat-rag-backend below 95%); QA-S008-B05 blocking'
+      note: S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage gate FAIL (internal-write-api
+        + chat-rag-backend below 95%); QA-S008-B05 blocking
   checkpoints:
     phase_a: pending
     phase_b: pending
@@ -3134,8 +3200,40 @@ evolve_cycles:
   - 'R73 (2026-07-02, EV-009/S008): Charts v1 — fe_only presets + scatter on existing timeseries.'
   - 'R74 (2026-07-02, EV-009/S008): Config visibility — share_read per-user presets.'
   - 'R75 (2026-07-02, EV-009/S008): Routing — evolve-lite 00→01→04→07→08→09→10→11→12→13.'
-  note: 'F36 follow-ons (run list refresh, unified jobs, dashboard charts) + F37 eval playground + super-admin runtime promote.
-    Evolve-lite routing 00→01→04→07→08→09→10→11→12→13 (skip 02,03,05,06). Prior session S007/EV-008 deploy 12–13 deferred.'
+  note: F36 follow-ons (run list refresh, unified jobs, dashboard charts) + F37 eval playground + super-admin runtime promote.
+    Evolve-lite routing 00→01→04→07→08→09→10→11→12→13 (skip 02,03,05,06). Prior session S007/EV-008 deploy 12–13 deferred.
+  paused_at: '2026-07-05'
+  pause_note: S008 parked 2026-07-05 — coverage gate QA-S008-B05 open; S009/EV-010 opened for F38 playground model download
+- id: EV-010
+  cycle_type: feature
+  feature_ids:
+  - F38
+  title: Playground model download (F38)
+  status: in_progress
+  started: '2026-07-05'
+  session_id: S009-playground-model-download
+  current_stage: 07-build
+  stages:
+    00-context:
+      status: completed
+      started: '2026-07-05'
+      completed: '2026-07-05'
+      note: EV-010 opened — S009 F38 playground model download; super-admin Ollama model download UI.
+    01-requirements:
+      status: completed
+      started: '2026-07-05'
+      completed: '2026-07-05'
+    04-tech-plan:
+      status: completed
+      started: '2026-07-05'
+      completed: '2026-07-05'
+  checkpoints:
+    phase_a: pending
+    phase_b: pending
+    phase_c: pending
+    phase_d: pending
+    deploy: pending
+  note: F38 — super-admin-only Ollama model download UI for eval playground; admin list+select only; full-stack tests.
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -4199,9 +4297,10 @@ decisions_log:
   note: 'S003 08-verify-build COMPLETE (user-invoked /08-verify-build; amended into S003 routing plan with user_amended=true
     — was not in original 00→01→04→07→09→10→12→13 plan). Milestone-boundary verify result PASS. Frontend-only F33 chat-history
     delta on main@9bd7a50 with uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests;
-    Modal smoke SKIPPED (frontend-only delta). Reports: docs/sessions/S000-internal-docs-archive/reports/verification-report.md + docs/sessions/S003-persistent-chat-history/reports/verification-report.md.
-    Recorded in project.stages.08-verify-build (canonical) + stages.08-verify-build.s003 (legacy mirror). active_session.current_stage
-    unchanged (remains 09-qa — next pending).'
+    Modal smoke SKIPPED (frontend-only delta). Reports: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
+    + docs/sessions/S003-persistent-chat-history/reports/verification-report.md. Recorded in project.stages.08-verify-build
+    (canonical) + stages.08-verify-build.s003 (legacy mirror). active_session.current_stage unchanged (remains 09-qa — next
+    pending).'
 - date: '2026-06-28'
   note: 'S003 closed by user (2026-06-28) with 09-qa/10-e2e/12-verify-deploy/13-deploy-smoke deferred; F33 already merged
     to main via PRs #96/#97 (working tree clean on main). Closing to start auth session for GitHub #75. Session archived to
@@ -4281,8 +4380,8 @@ decisions_log:
     /admin/users*, config-spec SMTP/template/remember-me env, staging-secrets-matrix EV-006; stage report docs/sessions/S005-user-mgmt-auth/reports/01-requirements.md.
     Commit DEFERRED (commit-only-when-asked override); open items handed to 04-tech-plan. active_session + EV-006 current_stage
     = 01-requirements; routing_plan + EV-006.stages 01-requirements completed; project.stages.01-requirements mirrored (last_delta
-    S005/EV-006). ADVISORY (non-blocking): docs/sessions/S000-internal-docs-archive/execution-plan.md §Current State remains stale (still S004/Phase 11) and should
-    be advanced for S005/EV-006.'
+    S005/EV-006). ADVISORY (non-blocking): docs/sessions/S000-internal-docs-archive/execution-plan.md §Current State remains
+    stale (still S004/Phase 11) and should be advanced for S005/EV-006.'
 - date: '2026-06-29'
   note: 'S005/EV-006 04-tech-plan SCOPE ADDITION (in-place re-run; 04-tech-plan remains completed). User approved adding 4
     items; MFA/2FA + bulk CSV import remain deferred. ADR-031 (docs/adr/ADR-031-ev006-auth-ux-hardening.md) captures TP-S005-17
@@ -4351,12 +4450,12 @@ decisions_log:
     passed.'
 - 'S007/EV-008: 11-verify-impl user override — waived evolve-lite skip + 10-e2e formal report; F36 approved'
 - date: '2026-07-02'
-  note: 'S008-eval-ux-playground OPENED (session_counter=8; type feature; orchestrator 16-evolve; branch feat/S008-eval-ux-playground;
+  note: S008-eval-ux-playground OPENED (session_counter=8; type feature; orchestrator 16-evolve; branch feat/S008-eval-ux-playground;
     evolve_cycle_id EV-009). Evaluation UX polish + eval playground + super-admin runtime promote. Decisions R68–R75. User-approved
     evolve-lite routing 00→01→04→07→08→09→10→11→12→13 (skip 02,03,05,06). S007 archived paused; EV-008 paused; deploy 12–13
-    deferred on S007.'
-- 'S007 scope boundary closed 2026-07-02 — user opened S008/EV-009 for eval UX follow-on; stages 12-verify-deploy + 13-deploy-smoke
-  deferred on S007 record'
+    deferred on S007.
+- S007 scope boundary closed 2026-07-02 — user opened S008/EV-009 for eval UX follow-on; stages 12-verify-deploy + 13-deploy-smoke
+  deferred on S007 record
 - 'R68 (2026-07-02, EV-009/S008): Session — close S007 scope boundary; open S008-eval-ux-playground.'
 - 'R69 (2026-07-02, EV-009/S008): Magnitude — all evolve (not hotfix).'
 - 'R70 (2026-07-02, EV-009/S008): Build order — 1→2→3→4 (UX first, playground last).'
@@ -4367,8 +4466,11 @@ decisions_log:
 - 'R75 (2026-07-02, EV-009/S008): Routing — evolve-lite 00→01→04→07→08→09→10→11→12→13.'
 - date: '2026-07-02'
   note: '11-verify-impl invoked 2026-07-02 — blocked: 07-build in_progress (M70 pending), 08/09/10 pending for S008'
-- 'S008 11-verify-impl partial waiver approved 2026-07-02 — M65-M69 verified inline; M70/UJ-047/AC-E26 deferred; journey
-  AskQuestion skipped'
+- S008 11-verify-impl partial waiver approved 2026-07-02 — M65-M69 verified inline; M70/UJ-047/AC-E26 deferred; journey AskQuestion
+  skipped
+- S008 parked 2026-07-05 — coverage gate QA-S008-B05 open; S009 opened for F38 playground model download
+- 'EV-010/S009 01-requirements complete — F38 RD-146–RD-153; TC-134 revised; UJ-048 added'
+- EV-010/S009 04-tech-plan complete — ADR-036, TP-S009-01–16, Phase 16 M71–M73
 artifacts:
 - docs/sessions/S000-internal-docs-archive/context-brief.md
 - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
@@ -4620,15 +4722,48 @@ artifacts:
 - docs/sessions/S007-rag-eval/reports/verification-report.md
 - infra/staging/.env.example
 - docs/security/gitleaks-resolution.md
+- path: docs/sessions/S009-playground-model-download/reports/01-requirements.md
+  session_id: S009-playground-model-download
+  stage: 01-requirements
+- path: docs/feature-list.md
+  session_id: S009-playground-model-download
+  stage: 01-requirements
+- path: docs/user-journeys.md
+  session_id: S009-playground-model-download
+  stage: 01-requirements
+- path: docs/test-plan.md
+  session_id: S009-playground-model-download
+  stage: 01-requirements
+- path: docs/api-contract.md
+  session_id: S009-playground-model-download
+  stage: 01-requirements
+- path: docs/acceptance-criteria.md
+  session_id: S009-playground-model-download
+  stage: 01-requirements
+- path: docs/sessions/S009-playground-model-download/reports/04-tech-plan.md
+  session_id: S009-playground-model-download
+  stage: 04-tech-plan
+- path: docs/sessions/S009-playground-model-download/roadmap.md
+  session_id: S009-playground-model-download
+  stage: 04-tech-plan
+- path: docs/adr/ADR-036-ev010-playground-model-download.md
+  session_id: S009-playground-model-download
+  stage: 04-tech-plan
 git_history:
-  current_branch: feat/S008-eval-ux-playground
+  current_branch: feat/S009-playground-model-download
   branches:
-  - name: feat/S008-eval-ux-playground
-    purpose: 'EV-009 / S008 — evaluation UX polish, unified jobs API, dashboard charts, eval playground + super-admin runtime
-      promote'
+  - name: feat/S009-playground-model-download
+    purpose: EV-010 / S009 — F38 playground model download (super-admin Ollama UI)
     base: main
     status: open
+    created_at: '2026-07-05'
+  - name: feat/S008-eval-ux-playground
+    purpose: EV-009 / S008 — evaluation UX polish, unified jobs API, dashboard charts, eval playground + super-admin runtime
+      promote
+    base: main
+    status: paused
     created_at: '2026-07-02'
+    pause_note: S008 parked 2026-07-05 — coverage gate QA-S008-B05 open; S009 opened for F38 playground model download
   - name: feat/S007-rag-eval
     purpose: 'EV-008 / GitHub #99 admin RAG evaluation tab — F36 golden eval set, LlamaIndex evaluators + custom harness'
     base: main

@@ -1,4 +1,4 @@
-"""EV-009 F37 — Modal Ollama model list + pull (TC-134, UJ-045)."""
+"""EV-009/EV-010 F37/F38 — Modal Ollama model list + pull (TC-134, UJ-045, UJ-048)."""
 
 from __future__ import annotations
 
@@ -64,11 +64,11 @@ def ollama_models_client(
     reset_auth_config_for_tests()
 
 
-def test_admin_lists_models_and_triggers_pull(
+def test_admin_lists_ollama_models(
     ollama_models_client: tuple[TestClient, EllipticCurvePrivateKey, MockOllamaModelsClient],
 ) -> None:
-    """TC-134: admin lists Ollama models and can start a background pull."""
-    client, private_key, mock_client = ollama_models_client
+    """TC-134: admin lists Ollama models for the Playground picker."""
+    client, private_key, _mock_client = ollama_models_client
     token = sign_test_jwt(private_key, role="admin")
 
     listing = client.get(
@@ -83,6 +83,30 @@ def test_admin_lists_models_and_triggers_pull(
         "qwen2.5:1.5b-instruct",
     )
     assert default_model.get("available") is True
+
+
+def test_admin_cannot_trigger_ollama_pull(
+    ollama_models_client: tuple[TestClient, EllipticCurvePrivateKey, MockOllamaModelsClient],
+) -> None:
+    """TC-134 / F38: admin receives 403 on pull — super-admin only (RD-147)."""
+    client, private_key, mock_client = ollama_models_client
+    token = sign_test_jwt(private_key, role="admin")
+
+    pull = client.post(
+        "/internal/v1/models/ollama/pull",
+        json={"model_id": "llama3.2:3b"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert pull.status_code == HTTPStatus.FORBIDDEN
+    assert mock_client.pull_requests == []
+
+
+def test_super_admin_triggers_ollama_pull(
+    ollama_models_client: tuple[TestClient, EllipticCurvePrivateKey, MockOllamaModelsClient],
+) -> None:
+    """TC-134 / F38: super-admin can start a background Ollama pull (UJ-048)."""
+    client, private_key, mock_client = ollama_models_client
+    token = sign_test_jwt(private_key, role="super-admin")
 
     pull = client.post(
         "/internal/v1/models/ollama/pull",
