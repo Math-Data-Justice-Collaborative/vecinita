@@ -233,6 +233,18 @@ def write_wiki_tree(
     )
 
 
+def build_wiki_remote_url(*, repository: str, token: str, actor: str) -> str:
+    """Build authenticated git remote URL for a GitHub Wiki repository.
+
+    Fine-grained and classic PATs use ``actor:token`` auth; ``GITHUB_TOKEN`` uses
+    ``x-access-token:token`` (see Publish Wiki workflow).
+    """
+    wiki_host = f"github.com/{repository}.wiki.git"
+    if token.startswith(("ghp_", "github_pat_")):
+        return f"https://{actor}:{token}@{wiki_host}"
+    return f"https://x-access-token:{token}@{wiki_host}"
+
+
 def git_push_wiki(wiki_dir: Path, *, remote_url: str, message: str) -> None:
     env = {"GIT_TERMINAL_PROMPT": "0"}
     subprocess.run(["git", "init"], cwd=wiki_dir, check=True, env=env)
