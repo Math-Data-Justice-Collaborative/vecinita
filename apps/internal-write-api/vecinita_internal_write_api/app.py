@@ -9,16 +9,19 @@ import uuid as _uuid
 from datetime import UTC, datetime
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Annotated, cast
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import httpx
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, status
 from sqlalchemy import create_engine, text
 from vecinita_shared_schemas.auth import (
     AuthContext,
+    AuthPrincipal,
+    is_admin_role,
     require_admin_write,
     require_authenticated,
     require_service,
+    require_super_admin,
 )
 from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.db_mapping import (
@@ -30,6 +33,16 @@ from vecinita_shared_schemas.db_mapping import (
     row_value,
     scalar_int,
     scalar_uuid,
+)
+from vecinita_shared_schemas.eval_config import (
+    EvalConfigPresetCloneRequest,
+    EvalConfigPresetCreateRequest,
+    EvalConfigPresetListResponse,
+    EvalConfigPresetResponse,
+    EvalConfigPresetUpdateRequest,
+    RagConfigActiveResponse,
+    RagConfigPromoteRequest,
+    RagConfigPromoteResponse,
 )
 from vecinita_shared_schemas.internal_write import (
     AuditCleanupResponse,
@@ -76,11 +89,24 @@ from vecinita_shared_schemas.internal_write import (
     TopServedResponse,
 )
 from vecinita_shared_schemas.json_types import as_json_object
+from vecinita_shared_schemas.ollama_models import (
+    OllamaModelListResponse,
+    OllamaModelPullRequest,
+    OllamaModelPullResponse,
+)
 
 from vecinita_internal_write_api.audit import (
     cleanup_audit_log,
     create_document_version,
     emit_audit_event,
+)
+from vecinita_internal_write_api.eval_config_presets_service import (
+    EvalConfigPresetAccessError,
+    clone_eval_config_preset,
+    create_eval_config_preset,
+    get_eval_config_preset,
+    list_eval_config_presets,
+    update_eval_config_preset,
 )
 from vecinita_internal_write_api.eval_criteria_service import (
     create_eval_criterion,
@@ -88,6 +114,8 @@ from vecinita_internal_write_api.eval_criteria_service import (
     update_eval_criterion,
 )
 from vecinita_internal_write_api.eval_service import (
+    EvalRunPresetAccessError,
+    EvalRunPresetNotFoundError,
     create_eval_run,
     execute_eval_run,
     get_eval_run,
@@ -97,6 +125,16 @@ from vecinita_internal_write_api.eval_service import (
 from vecinita_internal_write_api.jobs_client import (
     DataManagementJobsClient,
     DataManagementJobsClientError,
+)
+from vecinita_internal_write_api.ollama_models_client import (
+    OllamaModelsClient,
+    OllamaModelsClientError,
+    OllamaModelsClientProtocol,
+)
+from vecinita_internal_write_api.rag_production_config_service import (
+    RagConfigPromoteNotFoundError,
+    get_active_rag_config,
+    promote_rag_config,
 )
 from vecinita_internal_write_api.tags import (
     replace_chunk_tags,
@@ -197,6 +235,28 @@ def _resolve_read_actor(
     return (ctx.principal.sub, ctx.principal.role)
 
 
+def _resolve_admin_read_actor(
+    ctx: Annotated[AuthContext, Depends(require_authenticated)],
+) -> AuthPrincipal:
+    """Admin or super-admin operator JWT for production config read routes."""
+    if ctx.is_service or ctx.principal is None or not is_admin_role(ctx.principal.role):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    return ctx.principal
+
+
+def _resolve_super_admin_actor(
+    ctx: Annotated[AuthContext, Depends(require_super_admin)],
+) -> UUID:
+    """Super-admin operator id for promote routes."""
+    if ctx.principal is None:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    return ctx.principal.sub
+
+
+AdminReadActorDep = Annotated[AuthPrincipal, Depends(_resolve_admin_read_actor)]
+SuperAdminActorDep = Annotated[UUID, Depends(_resolve_super_admin_actor)]
+
+
 WriteActorDep = Annotated[tuple[UUID | None, str | None], Depends(_resolve_write_actor)]
 ReadActorDep = Annotated[tuple[UUID | None, str | None], Depends(_resolve_read_actor)]
 
@@ -209,17 +269,31 @@ def _default_jobs_client() -> DataManagementJobsClient | None:
         return None
 
 
+def _default_ollama_models_client() -> OllamaModelsClient | None:
+    """Auto-create an OllamaModelsClient from env vars when available."""
+    try:
+        return OllamaModelsClient()
+    except OllamaModelsClientError:
+        return None
+
+
 def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route handlers inline
     *,
     jobs_client: DataManagementJobsClient | None = None,
     eval_embed_fn: Callable[[str], list[float]] | None = None,
     eval_judge: JudgeClient | None = None,
+    ollama_models_client: OllamaModelsClientProtocol | None = None,
 ) -> FastAPI:
     """Build the internal write API (sole holder of DATABASE_URL)."""
     app = FastAPI(title="Vecinita Internal Write API", version="0.1.0")
     configure_cors(app, extra_allow_headers=["Authorization"])
     engine = _engine()
     retag_jobs = jobs_client if jobs_client is not None else _default_jobs_client()
+    ollama_models = (
+        ollama_models_client
+        if ollama_models_client is not None
+        else _default_ollama_models_client()
+    )
 
     @app.get("/health", response_model=HealthResponse)
     def health() -> HealthResponse:  # pyright: ignore[reportUnusedFunction]
@@ -1303,23 +1377,35 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
     )
     def create_eval_run_route(  # pyright: ignore[reportUnusedFunction]
         background_tasks: BackgroundTasks,
-        _actor: WriteActorDep,
+        actor: WriteActorDep,
         body: EvalRunCreateRequest | None = None,
     ) -> EvalRunCreateResponse:
         request = body or EvalRunCreateRequest()
-        created = create_eval_run(engine, corpus_profile=request.corpus_profile)
+        owner_id, _role = actor
+        if request.preset_id is not None and owner_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="authenticated user id required",
+            )
+        requester_id = owner_id if owner_id is not None else uuid4()
+        try:
+            created = create_eval_run(engine, body=request, requester_id=requester_id)
+        except EvalRunPresetNotFoundError as exc:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        except EvalRunPresetAccessError as exc:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
 
         def _run() -> None:
             execute_eval_run(
                 engine,
-                run_id=created.run_id,
-                corpus_profile=request.corpus_profile,
+                run_id=created.response.run_id,
+                question=created.question,
                 embed_fn=eval_embed_fn,
                 judge=eval_judge,
             )
 
         background_tasks.add_task(_run)
-        return created
+        return created.response
 
     @app.get(
         "/internal/v1/eval/runs",
@@ -1378,6 +1464,203 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         if updated is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
         return updated
+
+    @app.get(
+        "/internal/v1/eval/config-presets",
+        response_model=EvalConfigPresetListResponse,
+    )
+    def list_eval_config_presets_route(  # pyright: ignore[reportUnusedFunction]
+        actor: WriteActorDep,
+    ) -> EvalConfigPresetListResponse:
+        owner_id, _role = actor
+        if owner_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Operator identity required",
+            )
+        return list_eval_config_presets(engine, owner_id=owner_id)
+
+    @app.post(
+        "/internal/v1/eval/config-presets",
+        response_model=EvalConfigPresetResponse,
+        status_code=status.HTTP_201_CREATED,
+    )
+    def create_eval_config_preset_route(  # pyright: ignore[reportUnusedFunction]
+        actor: WriteActorDep,
+        body: EvalConfigPresetCreateRequest,
+    ) -> EvalConfigPresetResponse:
+        owner_id, _role = actor
+        if owner_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Operator identity required",
+            )
+        return create_eval_config_preset(engine, owner_id=owner_id, body=body)
+
+    @app.get(
+        "/internal/v1/eval/config-presets/{preset_id}",
+        response_model=EvalConfigPresetResponse,
+    )
+    def get_eval_config_preset_route(  # pyright: ignore[reportUnusedFunction]
+        preset_id: UUID,
+        actor: WriteActorDep,
+    ) -> EvalConfigPresetResponse:
+        owner_id, _role = actor
+        if owner_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Operator identity required",
+            )
+        try:
+            preset = get_eval_config_preset(
+                engine,
+                preset_id=preset_id,
+                requester_id=owner_id,
+            )
+        except EvalConfigPresetAccessError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Forbidden",
+            ) from exc
+        if preset is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        return preset
+
+    @app.patch(
+        "/internal/v1/eval/config-presets/{preset_id}",
+        response_model=EvalConfigPresetResponse,
+    )
+    def update_eval_config_preset_route(  # pyright: ignore[reportUnusedFunction]
+        preset_id: UUID,
+        actor: WriteActorDep,
+        body: EvalConfigPresetUpdateRequest,
+    ) -> EvalConfigPresetResponse:
+        owner_id, _role = actor
+        if owner_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Operator identity required",
+            )
+        try:
+            updated = update_eval_config_preset(
+                engine,
+                preset_id=preset_id,
+                owner_id=owner_id,
+                body=body,
+            )
+        except EvalConfigPresetAccessError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Forbidden",
+            ) from exc
+        if updated is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        return updated
+
+    @app.post(
+        "/internal/v1/eval/config-presets/{preset_id}/clone",
+        response_model=EvalConfigPresetResponse,
+        status_code=status.HTTP_201_CREATED,
+    )
+    def clone_eval_config_preset_route(  # pyright: ignore[reportUnusedFunction]
+        preset_id: UUID,
+        actor: WriteActorDep,
+        body: EvalConfigPresetCloneRequest | None = None,
+    ) -> EvalConfigPresetResponse:
+        owner_id, _role = actor
+        if owner_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Operator identity required",
+            )
+        request = body or EvalConfigPresetCloneRequest()
+        try:
+            return clone_eval_config_preset(
+                engine,
+                preset_id=preset_id,
+                cloner_id=owner_id,
+                name=request.name,
+            )
+        except EvalConfigPresetAccessError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Forbidden",
+            ) from exc
+        except LookupError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Not found",
+            ) from exc
+
+    @app.get(
+        "/internal/v1/rag/config/active",
+        response_model=RagConfigActiveResponse,
+    )
+    def get_active_rag_config_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: AdminReadActorDep,
+    ) -> RagConfigActiveResponse:
+        active = get_active_rag_config(engine)
+        if active is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        return active
+
+    @app.post(
+        "/internal/v1/rag/config/promote",
+        response_model=RagConfigPromoteResponse,
+    )
+    def promote_rag_config_route(  # pyright: ignore[reportUnusedFunction]
+        actor_id: SuperAdminActorDep,
+        body: RagConfigPromoteRequest,
+    ) -> RagConfigPromoteResponse:
+        try:
+            return promote_rag_config(engine, promoted_by=actor_id, body=body)
+        except RagConfigPromoteNotFoundError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Not found",
+            ) from exc
+
+    @app.get(
+        "/internal/v1/models/ollama",
+        response_model=OllamaModelListResponse,
+    )
+    def list_ollama_models_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+    ) -> OllamaModelListResponse:
+        if ollama_models is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Ollama models client not configured",
+            )
+        try:
+            return ollama_models.list_models()
+        except OllamaModelsClientError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=str(exc),
+            ) from exc
+
+    @app.post(
+        "/internal/v1/models/ollama/pull",
+        response_model=OllamaModelPullResponse,
+        status_code=status.HTTP_202_ACCEPTED,
+    )
+    def pull_ollama_model_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+        body: OllamaModelPullRequest,
+    ) -> OllamaModelPullResponse:
+        if ollama_models is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Ollama models client not configured",
+            )
+        try:
+            return ollama_models.start_pull(body.model_id)
+        except OllamaModelsClientError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=str(exc),
+            ) from exc
 
     @app.get(
         "/internal/v1/eval/runs/{run_id}",

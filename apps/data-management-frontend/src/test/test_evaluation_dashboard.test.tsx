@@ -21,8 +21,15 @@ vi.mock("recharts", async () => {
         { "data-testid": "mock-area-chart" },
         children,
       ),
+    ScatterChart: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        "div",
+        { "data-testid": "mock-scatter-chart" },
+        children,
+      ),
     Line: () => null,
     Area: () => null,
+    Scatter: () => null,
     CartesianGrid: () => null,
     XAxis: () => null,
     YAxis: () => null,
@@ -254,6 +261,44 @@ describe("Evaluation dashboard tabs", () => {
     fireEvent.click(screen.getByTestId("eval-panel-toggle-faithfulness"));
     fireEvent.click(screen.getByTestId("eval-panel-toggle-faithfulness"));
     expect(screen.getByTestId("eval-panel-faithfulness")).toBeInTheDocument();
+  });
+
+  it("supports scatter chart type and time-range presets (TC-125)", async () => {
+    vi.setSystemTime(new Date("2026-07-02T18:00:00Z"));
+    await renderAppRoutesReady("/evaluation?tab=dashboard");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-time-preset-7D")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("eval-time-preset-1D"));
+    fireEvent.click(screen.getByTestId("eval-chart-type-toggle"));
+    fireEvent.click(screen.getByTestId("eval-chart-type-toggle"));
+    await waitFor(() => {
+      expect(screen.getByText(/Scatter chart/i)).toBeInTheDocument();
+    });
+    expect(screen.getAllByTestId("mock-scatter-chart").length).toBeGreaterThan(
+      0,
+    );
+    vi.useRealTimers();
+  });
+
+  it("shows empty state for custom date range with no points (TC-126)", async () => {
+    await renderAppRoutesReady("/evaluation?tab=dashboard");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-time-preset-custom")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("eval-time-preset-custom"));
+    fireEvent.change(screen.getByTestId("eval-custom-range-start"), {
+      target: { value: "2025-01-01" },
+    });
+    fireEvent.change(screen.getByTestId("eval-custom-range-end"), {
+      target: { value: "2025-01-31" },
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-custom-range-empty")).toBeInTheDocument();
+    });
+    expect(
+      screen.queryByTestId("eval-chart-retrieval_relevance"),
+    ).not.toBeInTheDocument();
   });
 
   it("exports explore pivot CSV and changes column/value axes", async () => {

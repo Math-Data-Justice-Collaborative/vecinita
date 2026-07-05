@@ -57,6 +57,7 @@ Makefile: `make test-ui` (build + Playwright).
 | `tests/ui/chat/uj009-corpus-navigation.spec.ts` | ChatRAG | Sidebar ↔ CorpusBrowse |
 | `tests/ui/admin/uj020-admin-navigation.spec.ts` | Admin | AdminLayout nav ↔ page outlet |
 | `tests/ui/admin/uj041-eval-dashboard-tabs.spec.ts` | Admin | Evaluation tabs ↔ URL ↔ panels |
+| `tests/ui/admin/uj044-eval-jobs-tab.spec.ts` | Admin | Jobs tab ↔ eval rows ↔ evaluation drill-down |
 | `tests/ui/admin/uj026-login-page.spec.ts` | Admin | Login shell (unauthenticated) |
 | `tests/ui/helpers/` | Shared | Route mocks, Supabase session seed |
 

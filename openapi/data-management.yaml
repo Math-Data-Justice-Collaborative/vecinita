@@ -527,6 +527,7 @@ components:
           enum:
             - ingest
             - retag
+            - eval
           default: ingest
         urls:
           type: array
@@ -581,6 +582,7 @@ components:
           enum:
             - admin
             - viewer
+            - super-admin
           nullable: true
         status:
           type: string

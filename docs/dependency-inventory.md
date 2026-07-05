@@ -1,13 +1,13 @@
 # Dependency Inventory
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-01 (S007/EV-008 F36 — LlamaIndex eval harness, no new deps)
+> **Last updated**: 2026-07-03 (S008 QA — llama-index 0.14.x bump)
 
 ## Runtime dependencies (Python — planned)
 
 | Package | Version pin | Purpose | License | Notes |
 |---------|-------------|---------|---------|-------|
-| **llama-index** | **0.13.x** (`>=0.13.0,<0.14`) | **Core** RAG — retriever, query engine, synthesizer | MIT | RD-005, RD-023, ADR-006; bumped for pip-audit (CI) |
+| **llama-index** | **0.14.x** (`>=0.14.0,<0.15`) | **Core** RAG — retriever, query engine, synthesizer | MIT | RD-005, RD-023, ADR-006; bumped QA-S008-004 (2026-07-03) |
 | **llama-index-vector-stores-postgres** | **0.2.x–0.8.x** (with core) | pgvector adapter (pinned; custom retriever uses corpus tables) | MIT | ADR-005 |
 | **langdetect** | **1.0.9+** | Bilingual query detection (ADR-013) | Apache-2.0 | T8.4 |
 | fastapi | TBD | HTTP APIs (DO) | MIT | |
@@ -44,6 +44,18 @@
 **Explicitly not added v1:** `ragas`, `deepeval`, `langfuse`, `arize-phoenix`.
 
 **Revisit:** Ragas if LlamaIndex judge scores unstable after golden-set tuning (ADR-033 §1).
+
+### EV-009 — Eval playground + production config (F37, ADR-035)
+
+| Component | Package | New dep? | Notes |
+|-----------|---------|----------|-------|
+| Config presets | Postgres `eval_config_presets` | No | Per-user versioned sandbox presets |
+| Production config | Postgres `rag_production_config` | No | Runtime promote; ChatRAG DB reader |
+| Unified jobs | DM backend HTTP → internal-write-api | No | Aggregate `eval_runs` into `GET /jobs` |
+| Playground UI | `data-management-frontend` | No | Two-column layout; reuse **recharts** for scatter |
+| Super-admin role | Supabase `app_metadata.role` | No | `VECINITA_SUPER_ADMIN_EMAIL` seed |
+
+**Explicitly not added v1:** external LLM APIs, Langfuse/Phoenix, model picker UI, in-app redeploy.
 
 ### vLLM evaluation (RD-021)
 

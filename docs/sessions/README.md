@@ -43,6 +43,7 @@ Then invoke stages from the approved plan (e.g. `@10-e2e`, `@16-evolve`).
 docs/sessions/SNNN-slug/
   session-brief.md      # intent, type, scope, links to standing docs
   routing-plan.md       # approved stage list + skip rationale
+  roadmap.md            # GitHub issue decomposition + dependency diagrams (after 04-tech-plan)
   reports/              # qa-report, e2e-report, verification-report, etc.
   checkpoints/          # optional phase gate digests
 ```

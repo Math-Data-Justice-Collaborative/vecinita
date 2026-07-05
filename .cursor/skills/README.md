@@ -42,6 +42,7 @@ Every bounded unit of work runs inside a **session** (`S{NNN}-slug`) opened by
 | Bug fix after deploy | [14-hotfix](14-hotfix/SKILL.md) |
 | GitHub Projects board setup | [github-projects](github-projects/SKILL.md) |
 | CORS / UI wiring gates (all stages) | [connectivity-gates](connectivity-gates.md) |
+| Manual UI + Swagger inspection (stage 11) | [feature-inspection](feature-inspection/SKILL.md) |
 
 **Any stage 00–17** can accept "add features X, Y, Z" during an active `feature`/`new_service`
 session with an evolve cycle (delta mode). Without a session,

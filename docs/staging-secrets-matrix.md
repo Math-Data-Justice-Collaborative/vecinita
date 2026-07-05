@@ -52,6 +52,8 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 | `VECINITA_EVAL_LATENCY_P95_DISPLAY_MS` | No | Default `30000` — informational only |
 | `VECINITA_EVAL_JUDGE_QUERY_LANGUAGE` | No | Default `true` — judge rubric follows question locale |
 | `VECINITA_EVAL_CORPUS_PROFILE` | No | Default `fixture`; set `staging` for live-corpus eval runs |
+| `VECINITA_SUPER_ADMIN_EMAIL` | Yes (EV-009) | Canonical operator email with `role=super-admin` for promote (internal-write-api + auth seed) |
+| `VECINITA_RAG_CONFIG_FALLBACK_*` | No | ChatRAG bootstrap when no `rag_production_config` row (see config-spec §Eval playground) |
 
 ## DigitalOcean — Static frontends (build time)
 

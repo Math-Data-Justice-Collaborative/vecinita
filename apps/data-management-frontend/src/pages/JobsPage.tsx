@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { type StringMessageKey } from "vecinita-frontend-i18n";
 import { useLocale } from "vecinita-frontend-ui";
+import { useNavigate } from "react-router-dom";
 
 import { listJobs } from "@/api/jobs";
 import type { Job, JobStatus, JobType } from "@/api/types";
@@ -41,10 +42,12 @@ const STATUS_KEY: Record<JobStatus, StringMessageKey> = {
 const TYPE_KEY: Record<JobType, StringMessageKey> = {
   ingest: "admin.jobs.type.ingest",
   retag: "admin.jobs.type.retag",
+  eval: "admin.jobs.type.eval",
 };
 
 export function JobsPage() {
   const tr = useAdminT();
+  const navigate = useNavigate();
   // Decouple the load path from `tr` (its identity changes on EN/ES switch) so a
   // locale toggle does not refire polling — same lesson as BUG-2026-06-25.
   const trRef = useRef(tr);
@@ -139,8 +142,22 @@ export function JobsPage() {
               <TableBody>
                 {jobs.map((job) => {
                   const jobType: JobType = job.job_type ?? "ingest";
+                  const isEval = jobType === "eval";
                   return (
-                    <TableRow key={job.job_id} data-testid="job-row">
+                    <TableRow
+                      key={job.job_id}
+                      data-testid="job-row"
+                      className={
+                        isEval ? "cursor-pointer hover:bg-muted/50" : undefined
+                      }
+                      onClick={() => {
+                        if (isEval) {
+                          void navigate(
+                            `/evaluation?run=${encodeURIComponent(job.job_id)}&tab=runs`,
+                          );
+                        }
+                      }}
+                    >
                       <TableCell>
                         <code className="font-mono text-xs" title={job.job_id}>
                           {job.job_id.slice(0, 8)}

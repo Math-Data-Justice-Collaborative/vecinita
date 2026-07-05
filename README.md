@@ -45,6 +45,12 @@ Full bootstrap: **[docs/LOCAL_DEV.md](docs/LOCAL_DEV.md)** · non-secret default
 
 ## Docs
 
+- [Architecture overview](docs/architecture.md) — service map, environments, deploy pipeline
+- [Data flow diagrams](docs/data-flow.md) — Mermaid ingest/query/admin paths
+- [Hosting migration summary](docs/hosting-migration-summary.md) — infrastructure switch overview
+- [OSCAR feasibility (Carlos review)](docs/oscar-hosting-feasibility.md)
+- [Data management dev guide](docs/runbooks/data-management-dev-guide.md)
+- [Corpus operator guide](docs/runbooks/corpus-operator-guide.md)
 - [Feature list](docs/feature-list.md) — F1–F31
 - [Execution plan](docs/execution-plan.md)
 - [API contract](docs/api-contract.md)

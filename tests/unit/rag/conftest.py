@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import os
+from typing import TYPE_CHECKING
 
 import pytest
 from sqlalchemy import create_engine, text
 from vecinita_database.seeds.load import load_corpus
 from vecinita_database.seeds.tags import load_tagged_corpus
-from vecinita_rag.retriever import EmbedFn  # noqa: TC002
 from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
+
+if TYPE_CHECKING:
+    from vecinita_rag.retriever import EmbedFn
 
 from tests.corpus_db_lock import corpus_db_lock
 from tests.helpers.corpus_db_guard import assert_corpus_reset_allowed

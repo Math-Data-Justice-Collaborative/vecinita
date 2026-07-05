@@ -12,6 +12,7 @@ PYTEST_DEFAULT := tests/unit tests/integration tests/privacy tests/e2e tests/smo
 COMPOSE_FILE := infra/docker-compose.yml
 DATABASE_URL ?= postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita
 export DATABASE_URL
+WITH_POSTGRES := bash scripts/ci/with_local_postgres.sh
 
 FRONTENDS := chat-rag-frontend data-management-frontend
 FE_WORKSPACES := vecinita-frontend-i18n vecinita-frontend-ui \
@@ -20,13 +21,13 @@ NPM_LOCK := bash scripts/npm_with_lock.sh
 NPM_WS := bash scripts/npm_workspaces.sh
 
 .PHONY: help install \
-	db-up db-wait db-ready db-down migrate \
+	db-up db-wait db-ready db-down migrate migrate-only \
 	lint lint-py lint-fe lint-fix lint-fix-py lint-fix-fe \
 	format format-py format-fe format-check format-check-py format-fe-check \
 	typecheck typecheck-py typecheck-fe \
-	test test-py test-fe test-ui test-unit test-unit-coverage test-integration test-e2e test-smoke test-privacy test-live \
+	test test-py test-fe test-ui test-unit test-unit-coverage test-fast test-coverage-fe test-integration test-e2e test-smoke test-privacy test-live \
 	verify-connectivity \
-	build-frontend ci ci-guards audit audit-fe audit-fix check
+	build-frontend ci ci-push ci-push-py ci-pr-ready ci-guards audit audit-fe audit-fix 	check check-fast pre-push
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage: make \033[36m<target>\033[0m\n\nTargets:\n"} \
@@ -35,6 +36,11 @@ help: ## Show available targets
 	@echo "Examples:"
 	@echo "  make install          # uv sync + npm ci (both frontends)"
 	@echo "  make check            # lint + format-check + typecheck"
+	@echo "  make check-fast       # lint + typecheck only (agent stop + pre-push hook)"
+	@echo "  make pre-push         # same as Husky pre-push (check-fast + test-fast)"
+	@echo "  make test-fast        # unit tests for locally changed components"
+	@echo "  make ci-push          # full CI parity — run before opening a PR"
+	@echo "  make ci-pr-ready      # alias for ci-push"
 	@echo "  make audit            # pip-audit (Python, with ignore list)"
 	@echo "  make audit-fix        # auto-fix CVEs, re-audit, then make check"
 	@echo "  make test             # full Python suite + frontend Vitest"
@@ -56,7 +62,9 @@ db-ready: db-up db-wait ## Start Postgres and wait until ready
 db-down: ## Stop local Postgres
 	docker compose -f $(COMPOSE_FILE) down
 
-migrate: db-ready ## Apply Alembic migrations
+migrate: db-ready migrate-only ## Start Postgres and apply migrations
+
+migrate-only: ## Apply Alembic migrations (Postgres must already be up)
 	cd apps/database && $(UV) run alembic upgrade head
 
 lint-py: ## Ruff lint (Python)
@@ -107,22 +115,29 @@ test-unit: ## Pytest unit tests
 	$(UV) run pytest tests/unit
 
 test-unit-coverage: ## Unit tests with per-package/app coverage summary (htmlcov/, coverage/)
-	bash scripts/test/unit_coverage.sh
+	$(WITH_POSTGRES) bash scripts/test/unit_coverage.sh
 
-test-integration: migrate ## Pytest integration tests (starts DB + migrates)
-	$(UV) run pytest tests/integration
+test-fast: ## Unit tests for changed components only (fast agent feedback)
+	bash scripts/ci/test_fast.sh
 
-test-e2e: migrate ## Pytest local E2E user journeys (starts DB + migrates)
-	$(UV) run pytest tests/e2e -m "e2e and not live"
+test-coverage-fe: ## Vitest coverage for one frontend (FE_APP=chat-rag-frontend|data-management-frontend)
+	@test -n "$(FE_APP)" || (echo "Usage: make test-coverage-fe FE_APP=chat-rag-frontend" && exit 1)
+	@$(NPM_LOCK) npm run test:coverage -w vecinita-$(FE_APP)
 
-test-smoke: migrate ## Pytest smoke tests (starts DB + migrates)
-	$(UV) run pytest tests/smoke -m "not live"
+test-integration: ## Pytest integration tests (starts/stops compose postgres when needed)
+	$(WITH_POSTGRES) $(UV) run pytest tests/integration
 
-test-privacy: migrate ## Pytest privacy guardrail tests (starts DB + migrates)
-	$(UV) run pytest tests/privacy
+test-e2e: ## Pytest local E2E user journeys (starts/stops compose postgres when needed)
+	$(WITH_POSTGRES) $(UV) run pytest tests/e2e -m "e2e and not live"
 
-test-py: migrate ## Full Python test suite (matches CI pytest paths)
-	$(UV) run pytest $(PYTEST_DEFAULT)
+test-smoke: ## Pytest smoke tests (starts/stops compose postgres when needed)
+	$(WITH_POSTGRES) $(UV) run pytest tests/smoke -m "not live"
+
+test-privacy: ## Pytest privacy guardrail tests (starts/stops compose postgres when needed)
+	$(WITH_POSTGRES) $(UV) run pytest tests/privacy
+
+test-py: ## Full Python test suite (starts/stops compose postgres when needed)
+	$(WITH_POSTGRES) $(UV) run pytest $(PYTEST_DEFAULT)
 
 test-fe: ## Vitest (both frontends)
 	@$(NPM_LOCK) $(NPM_WS) run test
@@ -182,6 +197,17 @@ audit-fix: ## Auto-fix dependency CVEs (Python + frontends), then verify
 	$(MAKE) audit-fe
 	$(MAKE) check
 
-check: lint format-check typecheck ## Quick pre-push: lint + format-check + typecheck
+check: lint format-check typecheck ## Pre-commit: lint + format-check + typecheck
+
+check-fast: lint typecheck ## Fast gate: lint + typecheck (no format-check; Husky pre-push)
+
+pre-push: check-fast test-fast ## Husky pre-push tier (fast local gate before git push)
 
 ci: install ci-guards lint format-check typecheck audit test-py test-fe build-frontend ## Full CI-parity run (fail fast)
+
+ci-push: ci-guards lint format-check typecheck audit ci-push-py test-fe build-frontend ## Full CI parity before opening a PR (no reinstall)
+
+ci-push-py: ## Python tests + unit coverage in one Postgres session (compose torn down if we started it)
+	$(WITH_POSTGRES) bash scripts/ci/run_pytest_ci_push.sh
+
+ci-pr-ready: ci-push ## Alias — run before marking a PR ready for review

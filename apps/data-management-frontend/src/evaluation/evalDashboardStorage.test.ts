@@ -13,6 +13,12 @@ import {
 
 const DASHBOARD_KEY = "vecinita.eval.dashboard.v1";
 
+const TIME_RANGE_DEFAULTS = {
+  timeRangePreset: "7D" as const,
+  customRangeStart: null,
+  customRangeEnd: null,
+};
+
 describe("evalDashboardStorage", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -40,6 +46,7 @@ describe("evalDashboardStorage", () => {
       selectedMetrics: ["latency_p95_ms"],
       chartType: "area",
       showThresholds: false,
+      ...TIME_RANGE_DEFAULTS,
     };
     localStorage.setItem(DASHBOARD_KEY, JSON.stringify(saved));
     expect(loadEvalDashboardLayout()).toEqual(saved);
@@ -92,12 +99,31 @@ describe("evalDashboardStorage", () => {
     expect(loadEvalDashboardLayout().showThresholds).toBe(false);
   });
 
+  it("loadEvalDashboardLayout falls back for unknown time range preset", () => {
+    localStorage.setItem(
+      DASHBOARD_KEY,
+      JSON.stringify({
+        collapsedPanels: {},
+        selectedMetrics: ["faithfulness"],
+        chartType: "line",
+        showThresholds: true,
+        timeRangePreset: "invalid",
+        customRangeStart: 123,
+        customRangeEnd: null,
+      }),
+    );
+    const layout = loadEvalDashboardLayout();
+    expect(layout.timeRangePreset).toBe("7D");
+    expect(layout.customRangeStart).toBeNull();
+  });
+
   it("saveEvalDashboardLayout persists layout and degrades on quota errors", () => {
     const layout: EvalDashboardLayout = {
       collapsedPanels: {},
       selectedMetrics: ["faithfulness"],
       chartType: "line",
       showThresholds: true,
+      ...TIME_RANGE_DEFAULTS,
     };
     saveEvalDashboardLayout(layout);
     expect(JSON.parse(localStorage.getItem(DASHBOARD_KEY) ?? "{}")).toEqual(

@@ -6,24 +6,43 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Self, cast
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from uuid import UUID, uuid4
 
 import pytest
 from sqlalchemy import text
 from vecinita_eval.golden import GoldenRow
+from vecinita_eval.judges import LlamaIndexJudgeClient
+from vecinita_eval.modal_llm import ModalHttpLLM
 from vecinita_eval.runner import EvalSummary, RowMetrics, RowResult
+from vecinita_internal_write_api.eval_criteria_service import create_eval_criterion
 from vecinita_internal_write_api.eval_service import (
-    create_eval_run,
+    EvalRunNotFoundError,
+    _config_from_json,  # pyright: ignore[reportPrivateUsage]
+    _load_eval_run,  # pyright: ignore[reportPrivateUsage]
+    _optional_uuid,  # pyright: ignore[reportPrivateUsage]
+    _require_adhoc_question,  # pyright: ignore[reportPrivateUsage]
+    _resolve_eval_runtime,  # pyright: ignore[reportPrivateUsage]
+    _run_mode,  # pyright: ignore[reportPrivateUsage]
     execute_eval_run,
     get_eval_run,
     get_eval_timeseries,
     list_eval_runs,
 )
-from vecinita_shared_schemas.internal_write import EvalMetricsSummary
+from vecinita_shared_schemas.eval_config import (
+    EvalConfig,
+    EvalConfigPartial,
+    EvalConfigPresetCreateRequest,
+)
+from vecinita_shared_schemas.internal_write import (
+    EvalCriterionCreateRequest,
+    EvalMetricsSummary,
+    EvalRunCreateRequest,
+)
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
+from tests.helpers.eval_runs import create_test_eval_run
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -31,6 +50,8 @@ if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
 
 _EXPECTED_ROW_LATENCY_MS = 1500
+_EXPECTED_CONFIG_TOP_K = 7
+_EXPECTED_CONFIG_MIN_SCORE = 0.55
 _EXPECTED_METRIC_LATENCY_MS = 99
 _EXPECTED_LATENCY_P95_MS = 12
 
@@ -71,30 +92,32 @@ def _sample_summary() -> EvalSummary:
 @pytest.fixture
 def eval_run_id(engine: Engine) -> Iterator[UUID]:
     """Create a pending eval run and delete it after the test."""
-    created = create_eval_run(engine, corpus_profile="fixture")
-    yield created.run_id
+    created = create_test_eval_run(engine, corpus_profile="fixture")
+    yield created.response.run_id
     with engine.begin() as conn:
         conn.execute(
             text("DELETE FROM eval_run_items WHERE run_id = :id"),
-            {"id": created.run_id},
+            {"id": created.response.run_id},
         )
-        conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": created.run_id})
+        conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": created.response.run_id})
 
 
 def test_create_eval_run_inserts_pending_row(engine: Engine) -> None:
     """create_eval_run returns pending status and persists the row."""
-    created = create_eval_run(engine, corpus_profile="fixture")
+    created = create_test_eval_run(engine, corpus_profile="fixture")
     try:
-        assert created.status == "pending"
+        assert created.response.status == "pending"
         listed = list_eval_runs(engine, page=1, page_size=20)
-        assert any(item.run_id == created.run_id for item in listed.items)
+        assert any(item.run_id == created.response.run_id for item in listed.items)
     finally:
         with engine.begin() as conn:
             conn.execute(
                 text("DELETE FROM eval_run_items WHERE run_id = :id"),
-                {"id": created.run_id},
+                {"id": created.response.run_id},
             )
-            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": created.run_id})
+            conn.execute(
+                text("DELETE FROM eval_runs WHERE id = :id"), {"id": created.response.run_id}
+            )
 
 
 def test_execute_eval_run_persists_completed_results(
@@ -113,7 +136,6 @@ def test_execute_eval_run_persists_completed_results(
         execute_eval_run(
             engine,
             run_id=run_id,
-            corpus_profile="fixture",
             embed_fn=eval_embed_fn,
             judge=MockEvalJudge(),
         )
@@ -155,12 +177,95 @@ def test_execute_eval_run_resolves_default_judge_when_not_injected(
         execute_eval_run(
             engine,
             run_id=run_id,
-            corpus_profile="fixture",
             embed_fn=eval_embed_fn,
         )
     kwargs = mock_run.call_args.kwargs
     assert kwargs["judge"] is not None
     assert kwargs["llm"] is not None
+    assert kwargs["config"] is not None
+
+
+def test_execute_eval_run_passes_config_snapshot_to_runner(
+    engine: Engine,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Persisted config_snapshot overrides are forwarded to run_golden_eval."""
+    monkeypatch.setenv(
+        "DATABASE_URL",
+        "postgresql://vecinita:vecinita@localhost:5432/vecinita",
+    )
+    created = create_test_eval_run(
+        engine,
+        corpus_profile="fixture",
+        config=EvalConfigPartial(
+            top_k=_EXPECTED_CONFIG_TOP_K, min_retrieval_score=_EXPECTED_CONFIG_MIN_SCORE
+        ),
+    )
+    run_id = created.response.run_id
+    try:
+        with patch(
+            "vecinita_internal_write_api.eval_service.run_golden_eval",
+            return_value=([_sample_row_result()], _sample_summary()),
+        ) as mock_run:
+            execute_eval_run(
+                engine,
+                run_id=run_id,
+                embed_fn=eval_embed_fn,
+                judge=MockEvalJudge(),
+            )
+        config = cast(
+            "EvalConfigPartial",
+            mock_run.call_args.kwargs["config"],
+        )
+        assert config.top_k == _EXPECTED_CONFIG_TOP_K
+        assert config.min_retrieval_score == pytest.approx(_EXPECTED_CONFIG_MIN_SCORE)
+    finally:
+        with engine.begin() as conn:
+            conn.execute(
+                text("DELETE FROM eval_run_items WHERE run_id = :id"),
+                {"id": run_id},
+            )
+            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
+
+
+def test_execute_eval_run_adhoc_dispatches_single_question(
+    engine: Engine,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Ad-hoc mode routes to run_adhoc_eval with the operator question."""
+    monkeypatch.setenv(
+        "DATABASE_URL",
+        "postgresql://vecinita:vecinita@localhost:5432/vecinita",
+    )
+    question = "What are food pantry hours?"
+    created = create_test_eval_run(
+        engine,
+        corpus_profile="fixture",
+        mode="adhoc",
+        question=question,
+    )
+    run_id = created.response.run_id
+    try:
+        with patch(
+            "vecinita_internal_write_api.eval_service.run_adhoc_eval",
+            return_value=([_sample_row_result()], _sample_summary()),
+        ) as mock_run:
+            execute_eval_run(
+                engine,
+                run_id=run_id,
+                question=question,
+                embed_fn=eval_embed_fn,
+                judge=MockEvalJudge(),
+            )
+        assert mock_run.call_args.kwargs["question"] == question
+        assert mock_run.call_args.kwargs["config"] is not None
+    finally:
+        with engine.begin() as conn:
+            conn.execute(
+                text("DELETE FROM eval_run_items WHERE run_id = :id"),
+                {"id": run_id},
+            )
+            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
 
 
 def test_execute_eval_run_marks_failed_on_exception(
@@ -178,7 +283,6 @@ def test_execute_eval_run_marks_failed_on_exception(
         execute_eval_run(
             engine,
             run_id=eval_run_id,
-            corpus_profile="fixture",
             embed_fn=eval_embed_fn,
         )
     detail = get_eval_run(engine, run_id=eval_run_id)
@@ -197,7 +301,8 @@ def test_list_eval_runs_paginates(engine: Engine) -> None:
     min_total_runs = 2
     try:
         created_ids.extend(
-            create_eval_run(engine, corpus_profile="fixture").run_id for _ in range(min_total_runs)
+            create_test_eval_run(engine, corpus_profile="fixture").response.run_id
+            for _ in range(min_total_runs)
         )
         page = list_eval_runs(engine, page=1, page_size=1)
         assert page.page == 1
@@ -285,7 +390,6 @@ def test_execute_eval_run_requires_database_url(
         execute_eval_run(
             engine,
             run_id=eval_run_id,
-            corpus_profile="staging",
             embed_fn=eval_embed_fn,
         )
 
@@ -452,6 +556,11 @@ def test_execute_eval_run_staging_profile_omits_fixture_path(
         "DATABASE_URL",
         "postgresql://vecinita:vecinita@localhost:5432/vecinita",
     )
+    with engine.begin() as conn:
+        conn.execute(
+            text("UPDATE eval_runs SET corpus_profile = 'staging' WHERE id = :id"),
+            {"id": eval_run_id},
+        )
     with patch(
         "vecinita_internal_write_api.eval_service.run_golden_eval",
         return_value=([_sample_row_result()], _sample_summary()),
@@ -459,10 +568,10 @@ def test_execute_eval_run_staging_profile_omits_fixture_path(
         execute_eval_run(
             engine,
             run_id=eval_run_id,
-            corpus_profile="staging",
             embed_fn=eval_embed_fn,
         )
     assert mock_run.call_args.kwargs["fixture_path"] is None
+    assert mock_run.call_args.kwargs["config"] is not None
 
 
 def test_list_eval_runs_parses_optional_timestamps(engine: Engine, eval_run_id: UUID) -> None:
@@ -521,6 +630,33 @@ def test_get_eval_timeseries_returns_completed_points(engine: Engine, eval_run_i
     assert len(matching) == 1
     assert matching[0].metrics_summary.custom_scores == {"tone-friendly": 0.85}
     assert "tone-friendly" in series.available_metrics
+
+
+def test_get_eval_timeseries_returns_recent_runs_in_chronological_order(
+    engine: Engine,
+    eval_run_id: UUID,
+) -> None:
+    """Recent completed runs are included under LIMIT and returned oldest-first for charts."""
+    completed_at = datetime.now(UTC)
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                """
+                UPDATE eval_runs
+                SET status = 'completed',
+                    started_at = :completed_at,
+                    completed_at = :completed_at,
+                    metrics_summary = '{}'::jsonb
+                WHERE id = :id
+                """
+            ),
+            {"id": eval_run_id, "completed_at": completed_at},
+        )
+    series = get_eval_timeseries(engine, limit=5)
+    matching = [point for point in series.points if point.run_id == eval_run_id]
+    assert len(matching) == 1
+    completed_times = [point.completed_at for point in series.points]
+    assert completed_times == sorted(completed_times)
 
 
 def test_get_eval_timeseries_skips_rows_without_completed_at(
@@ -603,7 +739,6 @@ def test_execute_eval_run_omits_custom_scores_when_empty(
         execute_eval_run(
             engine,
             run_id=eval_run_id,
-            corpus_profile="fixture",
             embed_fn=eval_embed_fn,
         )
     with engine.connect() as conn:
@@ -639,16 +774,19 @@ def test_create_eval_run_fallback_created_at(
         "vecinita_internal_write_api.eval_service.sqlalchemy_scalar_one",
         return_value="not-a-datetime",
     ):
-        created = create_eval_run(engine, corpus_profile="fixture")
+        created = create_test_eval_run(engine, corpus_profile="fixture")
     try:
-        assert created.created_at.tzinfo is UTC
+        assert created.response.created_at.tzinfo is UTC
     finally:
         with engine.begin() as conn:
             conn.execute(
                 text("DELETE FROM eval_run_items WHERE run_id = :id"),
-                {"id": created.run_id},
+                {"id": created.response.run_id},
             )
-            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": created.run_id})
+            conn.execute(
+                text("DELETE FROM eval_runs WHERE id = :id"),
+                {"id": created.response.run_id},
+            )
 
 
 def test_latency_ms_defaults_when_item_latency_is_float(
@@ -750,3 +888,299 @@ def test_get_eval_run_optional_int_bool_latency_p95(
     detail = get_eval_run(engine, run_id=eval_run_id)
     assert detail is not None
     assert detail.metrics_summary.latency_p95_ms is None
+
+
+def test_resolve_eval_run_config_merges_shared_preset(
+    engine: Engine,
+) -> None:
+    """resolve_eval_run_config loads preset config before applying overrides."""
+    from vecinita_internal_write_api.eval_config_presets_service import (  # noqa: PLC0415
+        create_eval_config_preset,
+    )
+    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
+        resolve_eval_run_config,
+    )
+
+    owner_id = uuid4()
+    preset = create_eval_config_preset(
+        engine,
+        owner_id=owner_id,
+        body=EvalConfigPresetCreateRequest(
+            name="preset-base",
+            config=EvalConfig(top_k=_EXPECTED_CONFIG_TOP_K),
+            shared=True,
+        ),
+    )
+    try:
+        resolved = resolve_eval_run_config(
+            engine,
+            requester_id=uuid4(),
+            body=EvalRunCreateRequest(
+                preset_id=preset.preset_id,
+                config=EvalConfigPartial(min_retrieval_score=_EXPECTED_CONFIG_MIN_SCORE),
+            ),
+        )
+        assert resolved.top_k == _EXPECTED_CONFIG_TOP_K
+        assert resolved.min_retrieval_score == pytest.approx(_EXPECTED_CONFIG_MIN_SCORE)
+    finally:
+        with engine.begin() as conn:
+            conn.execute(
+                text("DELETE FROM eval_config_presets WHERE id = :id"),
+                {"id": preset.preset_id},
+            )
+
+
+def test_resolve_eval_run_config_raises_for_missing_preset(engine: Engine) -> None:
+    """resolve_eval_run_config raises EvalRunPresetNotFoundError for unknown ids."""
+    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
+        EvalRunPresetNotFoundError,
+        resolve_eval_run_config,
+    )
+
+    with pytest.raises(EvalRunPresetNotFoundError, match="preset not found"):
+        resolve_eval_run_config(
+            engine,
+            requester_id=uuid4(),
+            body=EvalRunCreateRequest(preset_id=uuid4()),
+        )
+
+
+def test_resolve_eval_run_config_raises_for_private_preset(
+    engine: Engine,
+) -> None:
+    """resolve_eval_run_config maps preset access errors to EvalRunPresetAccessError."""
+    from vecinita_internal_write_api.eval_config_presets_service import (  # noqa: PLC0415
+        create_eval_config_preset,
+    )
+    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
+        EvalRunPresetAccessError,
+        resolve_eval_run_config,
+    )
+    from vecinita_shared_schemas.eval_config import EvalConfigPresetCreateRequest  # noqa: PLC0415
+
+    owner_id = uuid4()
+    preset = create_eval_config_preset(
+        engine,
+        owner_id=owner_id,
+        body=EvalConfigPresetCreateRequest(name="private", shared=False),
+    )
+    try:
+        with pytest.raises(EvalRunPresetAccessError):
+            resolve_eval_run_config(
+                engine,
+                requester_id=uuid4(),
+                body=EvalRunCreateRequest(preset_id=preset.preset_id),
+            )
+    finally:
+        with engine.begin() as conn:
+            conn.execute(
+                text("DELETE FROM eval_config_presets WHERE id = :id"),
+                {"id": preset.preset_id},
+            )
+
+
+def test_get_eval_run_parses_string_preset_id_and_json_config(
+    engine: Engine,
+    eval_run_id: UUID,
+) -> None:
+    """get_eval_run reads preset_id strings and JSON config snapshots."""
+    from vecinita_internal_write_api.eval_config_presets_service import (  # noqa: PLC0415
+        create_eval_config_preset,
+    )
+
+    owner_id = uuid4()
+    preset = create_eval_config_preset(
+        engine,
+        owner_id=owner_id,
+        body=EvalConfigPresetCreateRequest(name="linked-preset", shared=False),
+    )
+    try:
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    """
+                    UPDATE eval_runs
+                    SET preset_id = :preset_id,
+                        config_snapshot = CAST(:config AS jsonb),
+                        mode = 'adhoc'
+                    WHERE id = :id
+                    """
+                ),
+                {
+                    "id": eval_run_id,
+                    "preset_id": str(preset.preset_id),
+                    "config": json.dumps({"top_k": _EXPECTED_CONFIG_TOP_K}),
+                },
+            )
+        detail = get_eval_run(engine, run_id=eval_run_id)
+        assert detail is not None
+        assert detail.preset_id == preset.preset_id
+        assert detail.mode == "adhoc"
+        assert detail.config_snapshot.top_k == _EXPECTED_CONFIG_TOP_K
+    finally:
+        with engine.begin() as conn:
+            conn.execute(
+                text("DELETE FROM eval_config_presets WHERE id = :id"),
+                {"id": preset.preset_id},
+            )
+
+
+def test_resolve_eval_runtime_modal_llm_with_llamaindex_judge() -> None:
+    """_resolve_eval_runtime rebuilds judge + synthesis for Modal HTTP LLMs."""
+    modal_llm = MagicMock(spec=ModalHttpLLM)
+    judge = LlamaIndexJudgeClient(llm=MagicMock())
+    synthesis = MagicMock()
+    with (
+        patch(
+            "vecinita_internal_write_api.eval_service.synthesis_llm_from_config",
+            return_value=synthesis,
+        ) as mock_synthesis,
+        patch(
+            "vecinita_internal_write_api.eval_service.judge_llm_from_config",
+            return_value=MagicMock(),
+        ) as mock_judge_llm,
+    ):
+        resolved_judge, resolved_llm = _resolve_eval_runtime(
+            EvalConfig(),
+            judge,
+            modal_llm,
+        )
+    mock_synthesis.assert_called_once()
+    mock_judge_llm.assert_called_once()
+    assert isinstance(resolved_judge, LlamaIndexJudgeClient)
+    assert resolved_llm is synthesis
+
+
+def test_resolve_eval_runtime_modal_llm_without_llamaindex_judge() -> None:
+    """_resolve_eval_runtime keeps a custom judge when synthesis uses Modal HTTP."""
+    modal_llm = MagicMock(spec=ModalHttpLLM)
+    judge = MagicMock()
+    synthesis = MagicMock()
+    with patch(
+        "vecinita_internal_write_api.eval_service.synthesis_llm_from_config",
+        return_value=synthesis,
+    ):
+        resolved_judge, resolved_llm = _resolve_eval_runtime(
+            EvalConfig(),
+            judge,
+            modal_llm,
+        )
+    assert resolved_judge is judge
+    assert resolved_llm is synthesis
+
+
+def test_resolve_eval_runtime_uses_factory_when_judge_or_llm_missing() -> None:
+    """_resolve_eval_runtime delegates to eval_runtime_for_config when inputs are absent."""
+    sentinel_judge = object()
+    sentinel_llm = object()
+    with patch(
+        "vecinita_internal_write_api.eval_service.eval_runtime_for_config",
+        return_value=(sentinel_judge, sentinel_llm),
+    ) as mock_factory:
+        resolved = _resolve_eval_runtime(EvalConfig(), None, None)
+    mock_factory.assert_called_once()
+    assert resolved == (sentinel_judge, sentinel_llm)
+
+
+def test_resolve_eval_runtime_preserves_injected_judge_when_llm_missing() -> None:
+    """Injected test judges must not be replaced when synthesis LLM is absent."""
+    judge = MockEvalJudge()
+    with patch(
+        "vecinita_internal_write_api.eval_service.eval_runtime_for_config",
+    ) as mock_factory:
+        resolved_judge, resolved_llm = _resolve_eval_runtime(EvalConfig(), judge, None)
+    mock_factory.assert_not_called()
+    assert resolved_judge is judge
+    assert resolved_llm is None
+
+
+def test_eval_service_json_helpers_and_guards() -> None:
+    """Private eval helpers parse config JSON, modes, UUIDs, and adhoc questions."""
+    sample = EvalConfig(top_k=_EXPECTED_CONFIG_TOP_K)
+    assert _config_from_json(sample.model_dump_json()).top_k == _EXPECTED_CONFIG_TOP_K
+    assert _config_from_json(sample.model_dump()).top_k == _EXPECTED_CONFIG_TOP_K
+    assert _config_from_json(None).top_k == EvalConfig().top_k
+    assert _run_mode("golden") == "golden"
+    assert _run_mode("adhoc") == "adhoc"
+    assert _run_mode("unknown") == "golden"
+    run_id = uuid4()
+    assert _optional_uuid(run_id) == run_id
+    assert _optional_uuid(str(run_id)) == run_id
+    assert _optional_uuid(None) is None
+    assert _require_adhoc_question("What are pantry hours?") == "What are pantry hours?"
+    with pytest.raises(ValueError, match="question is required"):
+        _require_adhoc_question(None)
+    with pytest.raises(ValueError, match="question is required"):
+        _require_adhoc_question("")
+
+
+def test_load_eval_run_raises_when_missing(engine: Engine) -> None:
+    """_load_eval_run raises EvalRunNotFoundError for unknown run ids."""
+    with pytest.raises(EvalRunNotFoundError, match="eval run not found"):
+        _load_eval_run(engine, run_id=uuid4())
+
+
+def test_criteria_for_config_filters_enabled_criteria(
+    engine: Engine,
+    eval_run_id: UUID,
+) -> None:
+    """execute_eval_run passes only configured criteria ids to the harness."""
+    slug_a = f"unit-a-{uuid4().hex[:8]}"
+    slug_b = f"unit-b-{uuid4().hex[:8]}"
+    created_a = create_eval_criterion(
+        engine,
+        body=EvalCriterionCreateRequest(
+            slug=slug_a,
+            label="A",
+            rubric="Rubric A",
+            scorer_type="llm_rubric",
+            enabled=True,
+        ),
+    )
+    created_b = create_eval_criterion(
+        engine,
+        body=EvalCriterionCreateRequest(
+            slug=slug_b,
+            label="B",
+            rubric="Rubric B",
+            scorer_type="llm_rubric",
+            enabled=True,
+        ),
+    )
+    try:
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    """
+                    UPDATE eval_runs
+                    SET config_snapshot = CAST(:config AS jsonb)
+                    WHERE id = :id
+                    """
+                ),
+                {
+                    "id": eval_run_id,
+                    "config": json.dumps({"criteria_ids": [str(created_a.criterion_id)]}),
+                },
+            )
+        with patch(
+            "vecinita_internal_write_api.eval_service.run_golden_eval",
+            return_value=([_sample_row_result()], _sample_summary()),
+        ) as mock_run:
+            execute_eval_run(
+                engine,
+                run_id=eval_run_id,
+                embed_fn=eval_embed_fn,
+                judge=MockEvalJudge(),
+            )
+        criteria = cast(
+            "list[object]",
+            mock_run.call_args.kwargs["criteria"],
+        )
+        assert len(criteria) == 1
+        assert criteria[0].slug == slug_a  # type: ignore[attr-defined]
+    finally:
+        with engine.begin() as conn:
+            conn.execute(
+                text("DELETE FROM eval_criteria WHERE id IN (:a, :b)"),
+                {"a": created_a.criterion_id, "b": created_b.criterion_id},
+            )

@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-01 (S007/EV-008 F36 — eval harness TC-111–TC-122, dashboard UJ-041–043, #99)  
+> **Last updated**: 2026-07-02 (S008/EV-009 F37 — eval UX TC-123–TC-133, playground UJ-044–047)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -68,6 +68,10 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-041 Admin eval dashboard charts | Vitest in `data-management-frontend` | TC-117, TC-119 | `tests/ui/admin/uj041-eval-dashboard-tabs.spec.ts` |
 | UJ-042 Admin eval pivot explore | Vitest in `data-management-frontend` | TC-118 | `tests/ui/admin/uj041-eval-dashboard-tabs.spec.ts` |
 | UJ-043 Admin eval criteria CRUD | `tests/integration/test_eval_dashboard_routes.py` | TC-120, TC-121 | `tests/ui/admin/uj041-eval-dashboard-tabs.spec.ts` |
+| UJ-044 Eval jobs on Jobs tab | `tests/e2e/test_uj044_eval_jobs_tab.py` | TC-124 | `tests/ui/admin/uj044-eval-jobs-tab.spec.ts` |
+| UJ-045 Eval Playground configure + run | `tests/e2e/test_uj045_eval_playground.py` | TC-127, TC-128, TC-129 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
+| UJ-046 Eval run side-by-side compare | Vitest `test_evaluation_compare.test.tsx` | TC-130 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
+| UJ-047 Super-admin promote RAG config | `tests/e2e/test_uj047_eval_promote_config.py` | TC-131, TC-132, TC-133 | — |
 
 **E2E tier (v1):** `local` — TestClient, test Postgres (Docker/testcontainers), **mocked Modal** HTTP.
 
@@ -718,6 +722,78 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Objective**: Timeseries endpoint returns completed runs ordered by `completed_at`.
 - **Input**: `tests/integration/test_eval_dashboard_routes.py` — `GET /internal/v1/eval/runs/timeseries`.
 - **Expected**: `points` and `available_metrics` arrays present; admin JWT required.
+
+### TC-123: Optimistic eval run in history sidebar (UJ-039, F37, EV-009)
+
+- **Objective**: After `POST /internal/v1/eval/runs`, new run appears in history list without manual refresh.
+- **Input**: Vitest `test_evaluation_page.test.tsx` — mock POST returns `run_id`; assert sidebar row with `pending`/`running` before poll completes.
+- **Expected**: `runs` state includes new `run_id` immediately after create; no full-page reload.
+
+### TC-124: Unified jobs list includes eval (UJ-044, F37, EV-009)
+
+- **Objective**: `GET /jobs` returns eval runs with `job_type: "eval"` and status fields.
+- **Input**: `tests/e2e/test_uj044_eval_jobs_tab.py` — trigger eval run; poll `GET /jobs`.
+- **Expected**: Eval job row present with matching `job_id`/`status`; Vitest Jobs page renders eval badge.
+
+### TC-125: Dashboard scatter + time-range presets (UJ-041, F37, EV-009)
+
+- **Objective**: Dashboard supports 1D/7D/10D/1M/1Y presets and scatter chart type on existing timeseries data.
+- **Input**: Vitest `test_evaluation_dashboard.test.tsx` — mock timeseries points; toggle preset and chart type.
+- **Expected**: Filtered point count matches preset window; scatter chart mode selected in layout state.
+
+### TC-126: Dashboard custom date range empty state (UJ-041, F37, EV-009)
+
+- **Objective**: Custom date picker shows empty state when no runs fall in selected window.
+- **Input**: Vitest — set custom range outside all `completed_at` timestamps.
+- **Expected**: Empty-state message; no chart crash.
+
+### TC-127: Eval config preset CRUD API (UJ-045, F37, EV-009)
+
+- **Objective**: Per-user preset save/list/get with share-read clone.
+- **Input**: `tests/integration/test_eval_config_presets.py` — `POST/GET/PATCH /internal/v1/eval/config-presets`.
+- **Expected**: Owner can CRUD; other admin can read shared preset and clone; viewer → `403`.
+
+### TC-128: Playground golden batch with overrides (UJ-045, F37, EV-009)
+
+- **Objective**: Eval run accepts full RAG override object and persists `config_snapshot` on run.
+- **Input**: `tests/e2e/test_uj045_eval_playground.py` — POST with `mode: "golden"`, `config: { top_k, system_prompt, ... }`.
+- **Expected**: Runner uses overrides; `GET /eval/runs/{id}` returns snapshot matching request.
+
+### TC-129: Playground ad-hoc single question (UJ-045, F37, EV-009)
+
+- **Objective**: Ad-hoc mode runs one operator question through sandbox RAG + judge.
+- **Input**: POST with `mode: "adhoc"`, `question: "..."`.
+- **Expected**: Single `eval_run_items` row; question text persisted; metrics populated.
+
+### TC-130: Side-by-side eval run compare (UJ-046, F37, EV-009)
+
+- **Objective**: Compare view shows metric delta and per-question rows for two runs.
+- **Input**: Vitest `test_evaluation_compare.test.tsx` — two mock run details.
+- **Expected**: Aggregate delta columns; per-question match by `case_id`.
+
+### TC-131: Super-admin promote config (UJ-047, F37, EV-009)
+
+- **Objective**: `POST /internal/v1/rag/config/promote` sets active production config.
+- **Input**: `tests/e2e/test_uj047_eval_promote_config.py` — JWT with `role=super-admin`.
+- **Expected**: `200`; `rag_production_config` active row updated; audit entry created.
+
+### TC-132: Non-super-admin denied promote (UJ-047, F37, EV-009)
+
+- **Objective**: Regular `admin` cannot promote.
+- **Input**: Same endpoint with `role=admin` JWT.
+- **Expected**: `403`; active config unchanged.
+
+### TC-133: ChatRAG reads active production config (UJ-047, F37, EV-009)
+
+- **Objective**: After promote, ChatRAG ask uses DB-backed `system_prompt` / retrieval params.
+- **Input**: `tests/integration/test_rag_production_config.py` — promote then `POST /api/v1/ask` (mocked LLM captures prompt).
+- **Expected**: Prompt/context assembly reflects promoted `system_prompt` and `top_k`.
+
+### TC-134: Ollama model list + pull API (UJ-045, F37, EV-009)
+
+- **Objective**: Playground model picker lists stashed Modal Ollama models and can trigger a background pull.
+- **Input**: `tests/integration/test_ollama_models_list.py` — `GET/POST /internal/v1/models/ollama`.
+- **Expected**: Admin receives model list with `model_id` + `available`; pull returns `202` with `job_id`; viewer → `403`.
 
 ## Test Data
 

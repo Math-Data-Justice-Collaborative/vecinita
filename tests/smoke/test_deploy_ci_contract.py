@@ -34,9 +34,11 @@ def test_all_deploy_workflows_exist() -> None:
 
 
 def test_deploy_modal_chained_after_ci() -> None:
-    """Modal deploy runs only after CI succeeds on main (or manual dispatch)."""
+    """Modal deploy runs after Deploy preflight (post-CI gate) on main or manual dispatch."""
     text = _read("deploy_modal")
-    assert 'workflows: ["CI"]' in text
+    assert 'workflows: ["Deploy preflight"]' in text
+    preflight = _read("deploy_preflight")
+    assert 'workflows: ["CI"]' in preflight
     assert "workflow_run:" in text
     assert "workflow_dispatch" in text
     assert "head_branch == 'main'" in text

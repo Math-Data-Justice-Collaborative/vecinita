@@ -1,23 +1,35 @@
 # Pre-deploy gate on main — build smoke + Modal secrets (no live deploy).
+# Triggered only after the full CI suite passes on main.
 # Modal has no `deploy --dry-run`; verify_build.sh imports app modules instead.
 name: Deploy preflight
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
 # Do not cancel in-progress runs: rapid main pushes otherwise leave every run as
 # "failure" with 0 jobs (agents only watched ci.yml and thought main was green).
 concurrency:
-  group: deploy-preflight-${{ github.ref }}
+  group: deploy-preflight-${{ github.event.workflow_run.head_branch || github.ref_name }}
   cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
   build-smoke:
     runs-on: ubuntu-latest
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event.workflow_run.conclusion == 'success' &&
+           github.event.workflow_run.head_branch == 'main') }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -34,12 +46,19 @@ jobs:
 
   modal-secrets:
     runs-on: ubuntu-latest
+    needs: build-smoke
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event.workflow_run.conclusion == 'success' &&
+           github.event.workflow_run.head_branch == 'main') }}
     # secrets.* is not allowed in job-level `if` — detect tokens in a step instead.
     env:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
       MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Detect Modal GitHub secrets
         id: modal_tokens

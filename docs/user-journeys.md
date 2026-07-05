@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-07-01 (S007/EV-008: UJ-039–UJ-043 admin RAG evaluation + dashboard; F36, #99)
+> **Last updated**: 2026-07-03 (diagrams: journey, sequence, state, flowchart)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -49,6 +49,113 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-041 | Admin views eval metric trends (dashboard) | Admin operator | DM UI `/evaluation?tab=dashboard` → timeseries API | F36 (#99) | local |
 | UJ-042 | Admin explores eval runs via pivot table | Admin operator | DM UI `/evaluation?tab=explore` | F36 (#99) | local |
 | UJ-043 | Admin manages custom eval criteria | Admin operator | DM UI `/evaluation?tab=criteria` → criteria CRUD API | F36 (#99) | local |
+| UJ-044 | Admin sees eval runs on Jobs tab | Admin operator | DM UI `/jobs` → unified `GET /jobs` (`job_type=eval`) | F37 (EV-009) | local |
+| UJ-045 | Admin configures and runs eval in Playground | Admin operator | DM UI `/evaluation?tab=playground` → preset + run APIs | F37 (EV-009) | local |
+| UJ-046 | Admin compares two eval runs | Admin operator | DM UI `/evaluation` compare view | F37 (EV-009) | local |
+| UJ-047 | Super-admin promotes config to production ChatRAG | Super-admin | Playground → promote API → ChatRAG active config | F37 (EV-009) | local |
+
+## Visual journey maps
+
+Mermaid **journey**, **sequence**, and **flowchart** diagrams for representative paths. Color legend: [data-flow.md §Color legend](data-flow.md#color-legend). Additional diagrams: [data-flow.md §15–16](data-flow.md#15-user-journey-maps-mermaid-journey).
+
+### Journey overview by actor
+
+```mermaid
+flowchart TB
+    subgraph Community["Community member — cool blue"]
+        UJ001[UJ-001 Ask streaming]
+        UJ005[UJ-005 No context]
+        UJ009[UJ-009 Browse corpus]
+        UJ012[UJ-012 Tag filter ask]
+        UJ024[UJ-024 localStorage chat]
+    end
+
+    subgraph Operator["Corpus operator — purple"]
+        UJ002[UJ-002 Ingest URLs]
+        UJ011[UJ-011 Edit tags]
+        UJ015[UJ-015 Bulk delete]
+        UJ023[UJ-023 Jobs tab]
+        UJ039[UJ-039 Golden eval]
+        UJ045[UJ-045 Eval playground]
+    end
+
+    subgraph Admin["Admin operator — purple"]
+        UJ026[UJ-026 Login]
+        UJ027[UJ-027 Invite accept]
+        UJ030[UJ-030 User management]
+        UJ047[UJ-047 Promote config]
+    end
+
+    classDef community fill:#e3f2fd,stroke:#1565c0,color:#0d47a1
+    classDef operator fill:#f3e5f5,stroke:#7b1fa2,color:#4a148c
+
+    class UJ001,UJ005,UJ009,UJ012,UJ024 community
+    class UJ002,UJ011,UJ015,UJ023,UJ039,UJ045,UJ026,UJ027,UJ030,UJ047 operator
+```
+
+### UJ-001 — Ask community question (sequence)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor CM as Community member
+    participant CF as ChatRAG Frontend
+    participant CB as ChatRAG Backend
+    participant FE as Modal FastEmbed
+    participant PG as Postgres
+    participant LLM as Modal vLLM
+
+    CM->>CF: Type question (EN/ES)
+    CF->>CB: POST /api/v1/ask/stream
+    CB->>FE: Embed query
+    FE-->>CB: vector(384)
+    CB->>PG: pgvector retrieval
+    PG-->>CB: top_k chunks
+    CB->>LLM: Generate stream
+    LLM-->>CB: SSE tokens
+    CB-->>CF: Stream answer + sources
+    CF-->>CM: Render bilingual response
+```
+
+### UJ-027 — Invite accept (state)
+
+```mermaid
+stateDiagram-v2
+    [*] --> invited: admin sends Supabase invite
+    invited --> email_link: operator opens email
+    email_link --> accept_page: /accept-invite callback
+    accept_page --> set_password: valid token
+    set_password --> authenticated: password saved
+    authenticated --> admin_ui: JWT session
+    admin_ui --> [*]
+
+    accept_page --> expired: token invalid
+    expired --> [*]
+```
+
+### UJ-039 — Golden-set evaluation (flowchart)
+
+```mermaid
+flowchart TD
+    Start([Admin opens /evaluation]) --> Run[POST /internal/v1/eval/runs]
+    Run --> Loop{More golden cases?}
+    Loop -->|yes| Ask[ChatRAG POST /api/v1/ask]
+    Ask --> Judge[Modal vLLM judge metrics]
+    Judge --> Store[Persist eval_run_items]
+    Store --> Loop
+    Loop -->|no| Summary[Aggregate metrics_summary]
+    Summary --> Dashboard[Dashboard + drill-down UJ-040]
+    Dashboard --> End([History retained in Postgres])
+
+    classDef operator fill:#f3e5f5,stroke:#7b1fa2,color:#4a148c
+    classDef do fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef modal fill:#e8eaf6,stroke:#3949ab,color:#1a237e
+    classDef datastore fill:#e0f2f1,stroke:#00695c,color:#004d40
+
+    class Start,Dashboard,End operator
+    class Run,Ask,Store,Summary do
+    class Judge modal
+```
 
 ## Journey Details
 
@@ -874,14 +981,15 @@ Product-facing journeys describe what a **caller** does — not internal module 
 **Steps**:
 
 1. Open Data Management admin UI → **Evaluation** (`/evaluation`) in the sidebar (en/es label `admin.nav.evaluation`).
-2. Review the golden set summary (case count, last run, aggregate scores if any).
-3. Click **Run evaluation** → UI calls `POST /internal/v1/eval/runs` on internal-write-api with JWT.
+2. On the **Runs** tab, click **Run evaluation** → UI navigates to **Playground** tab with the last-used preset (or defaults).
+3. Confirm or adjust config and click **Run** → `POST /internal/v1/eval/runs` with optional `config` overrides on internal-write-api with JWT.
 4. Backend enqueues or executes the eval runner: each golden row through `packages/rag` (same path as ChatRAG) with Modal LLM for judge metrics.
-5. UI polls until run status is `completed` or `failed`; summary shows retrieval %, faithfulness, answer relevancy, latency p95.
+5. New run appears **immediately** in the Runs history sidebar as `pending`/`running` (optimistic prepend + poll); no manual refresh required.
+6. UI polls until run status is `completed` or `failed`; summary shows retrieval %, faithfulness, answer relevancy, latency p95.
 
-**Acceptance**: Admin can trigger a run; run completes with per-metric aggregates; no PII from live visitors stored (fixture questions only). `viewer` cannot trigger (403).
+**Acceptance**: Run row visible in sidebar without refresh; run completes with per-metric aggregates; ad-hoc and fixture questions only (no visitor PII). `viewer` cannot trigger (403).
 
-**Automated tests**: `tests/e2e/test_uj039_eval_run_trigger.py` (TC-114, TC-115); Vitest `test_evaluation_page.test.tsx`.
+**Automated tests**: `tests/e2e/test_uj039_eval_run_trigger.py` (TC-114, TC-115, TC-123); Vitest `test_evaluation_page.test.tsx`; Playwright `tests/ui/admin/uj045-eval-playground.spec.ts`.
 
 **E2E tier**: local (mocked Modal LLM + test Postgres).
 
@@ -917,12 +1025,14 @@ Product-facing journeys describe what a **caller** does — not internal module 
 **Steps**:
 
 1. Open `/evaluation` and select the **Dashboard** tab (or navigate to `?tab=dashboard`).
-2. UI loads `GET /internal/v1/eval/runs/timeseries` and renders line/area charts per metric.
-3. Optionally collapse a chart panel; layout preference persists in browser `localStorage`.
+2. UI loads `GET /internal/v1/eval/runs/timeseries` and filters client-side by selected time range.
+3. Select time span: **1D**, **7D**, **10D**, **1M**, **1Y**, or **Custom** (date-range picker).
+4. Per metric panel, toggle chart type: **line**, **area**, or **scatter**.
+5. Optionally collapse a chart panel; layout preference persists in browser `localStorage`.
 
-**Acceptance**: Charts render for available metrics; tab state reflected in URL; panel collapse survives refresh (device-local only).
+**Acceptance**: Charts respect selected range; custom range shows empty state when no points fall in window; scatter plots individual runs; tab state reflected in URL; panel collapse survives refresh (device-local only).
 
-**Automated tests**: Vitest `test_evaluation_dashboard.test.tsx` (TC-117, TC-119); Playwright `tests/ui/admin/uj041-eval-dashboard-tabs.spec.ts`.
+**Automated tests**: Vitest `test_evaluation_dashboard.test.tsx` (TC-117, TC-119, TC-125, TC-126); Playwright `tests/ui/admin/uj041-eval-dashboard-tabs.spec.ts`.
 
 **E2E tier**: local.
 
@@ -966,3 +1076,99 @@ Product-facing journeys describe what a **caller** does — not internal module 
 **Automated tests**: `tests/integration/test_eval_dashboard_routes.py` (TC-120); Vitest + Playwright `uj041-eval-dashboard-tabs.spec.ts` (TC-121).
 
 **E2E tier**: local.
+
+---
+
+### UJ-044: Admin sees eval runs on Jobs tab
+
+**Actor**: Admin operator
+
+**Goal**: Monitor eval runs alongside ingest and retag jobs from the unified Jobs page.
+
+**Preconditions**: Admin authenticated; at least one eval run exists or is triggered.
+
+**Steps**:
+
+1. Open Data Management admin UI → **Jobs** (`/jobs`).
+2. UI polls `GET /jobs` every ~4s (same as ingest/retag).
+3. Eval runs appear with `job_type: "eval"`, status (`pending` | `running` | `completed` | `failed`), timestamps, and error message when failed.
+4. Clicking an eval job navigates to `/evaluation` with the run selected (or shows eval-specific detail).
+
+**Acceptance**: Newly started eval run visible on Jobs tab without navigating away from Jobs; ingest/retag behavior unchanged.
+
+**Automated tests**: `tests/e2e/test_uj044_eval_jobs_tab.py` (TC-124); Vitest `test_jobs_page.test.tsx`; Playwright `tests/ui/admin/uj044-eval-jobs-tab.spec.ts`.
+
+**E2E tier**: local.
+
+---
+
+### UJ-045: Admin configures and runs eval in Playground
+
+**Actor**: Admin operator
+
+**Goal**: Experiment with RAG and judge hyper-parameters in an isolated sandbox before promoting a winning config.
+
+**Preconditions**: Admin authenticated.
+
+**Steps**:
+
+1. Open `/evaluation?tab=playground` (or click **Run evaluation** from Runs tab — opens Playground with last-used preset).
+2. Edit RAG overrides: `top_k`, `min_retrieval_score`, `system_prompt` (includes guardrail/rules text), `max_tokens`, `temperature`, `corpus_profile`.
+3. Select judge criteria from existing eval criteria list; set judge `temperature`.
+4. Choose run mode: **Golden-set batch** or **Ad-hoc single question** (operator types question text).
+5. Optionally save/load/version a named preset (private by default; **share-read** lets other admins view and clone).
+6. Click **Run** → `POST /internal/v1/eval/runs` with `mode` and `config` body; run executes in **sandbox** (does not change live ChatRAG).
+7. View results on Runs tab / drill-down when complete.
+
+**Acceptance**: Overrides affect eval run only; preset save/load works per user; ad-hoc question stored in `eval_run_items`; viewer → `403`.
+
+**Automated tests**: `tests/e2e/test_uj045_eval_playground.py` (TC-127–TC-129); Vitest `test_evaluation_playground.test.tsx`; Playwright `tests/ui/admin/uj045-eval-playground.spec.ts`.
+
+**E2E tier**: local.
+
+---
+
+### UJ-046: Admin compares two eval runs
+
+**Actor**: Admin operator
+
+**Goal**: Side-by-side comparison of metrics and per-question results between two experiment runs.
+
+**Preconditions**: At least two completed eval runs.
+
+**Steps**:
+
+1. On `/evaluation` (Runs tab or Playground), select **Compare runs**.
+2. Pick run A and run B from history.
+3. UI shows aggregate metric delta and per-question table (matched by `case_id` or ad-hoc row).
+4. Highlight regressions (metric drop below display threshold).
+
+**Acceptance**: Compare view renders for two selected runs; mismatched ad-hoc-only runs show appropriate single-row compare.
+
+**Automated tests**: Vitest `test_evaluation_compare.test.tsx` (TC-130); Playwright `tests/ui/admin/uj045-eval-playground.spec.ts` (compare flow).
+
+**E2E tier**: local.
+
+---
+
+### UJ-047: Super-admin promotes config to production ChatRAG
+
+**Actor**: Super-admin (`role=super-admin`, seeded from `VECINITA_SUPER_ADMIN_EMAIL`)
+
+**Goal**: Apply a validated playground preset as the active production RAG configuration without redeploy.
+
+**Preconditions**: Super-admin authenticated; sandbox eval run completed with desired config.
+
+**Steps**:
+
+1. From Playground, open a saved preset or completed run config.
+2. Click **Promote to production** → confirm dialog.
+3. `POST /internal/v1/rag/config/promote` writes active row to `rag_production_config` (versioned audit).
+4. ChatRAG backend reads active config on next `POST /api/v1/ask` (fallback to env defaults if none).
+5. Regular `admin` operators see promote button disabled/hidden (`403` on API).
+
+**Acceptance**: After promote, staging ChatRAG answers reflect new `system_prompt` / retrieval params; non-super-admin cannot promote.
+
+**Automated tests**: `tests/e2e/test_uj047_eval_promote_config.py` (TC-131, TC-132); `tests/integration/test_rag_production_config.py` (TC-133).
+
+**E2E tier**: local (staging T3 for live ChatRAG read-after-promote optional).

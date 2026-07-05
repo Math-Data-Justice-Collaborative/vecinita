@@ -33,6 +33,45 @@ def test_generate_returns_text() -> None:
     client.close()
 
 
+def test_generate_includes_model_id_and_proxy_key() -> None:
+    """Generate forwards model_id and proxy auth for Modal Ollama."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        payload = as_json_object(cast("object", json_lib.loads(request.content.decode())))
+        assert payload["model_id"] == "llama3.2:3b"
+        assert request.headers.get("X-Vecinita-Proxy-Key") == "proxy-secret"
+        return httpx.Response(200, json={"text": "Routed answer."})
+
+    transport = httpx.MockTransport(handler)
+    client = LlmClient(
+        "http://ollama.test",
+        model_id="llama3.2:3b",
+        proxy_key="proxy-secret",
+        http_client=httpx.Client(transport=transport, base_url="http://ollama.test"),
+    )
+    assert client.generate("hello") == "Routed answer."
+    client.close()
+
+
+def test_generate_allows_per_call_model_id_override() -> None:
+    """Per-call model_id overrides the client default."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        payload = as_json_object(cast("object", json_lib.loads(request.content.decode())))
+        assert payload["model_id"] == "mistral:7b"
+        return httpx.Response(200, json={"text": "override"})
+
+    transport = httpx.MockTransport(handler)
+    client = LlmClient(
+        "http://ollama.test",
+        model_id="llama3.2:3b",
+        proxy_key="proxy-secret",
+        http_client=httpx.Client(transport=transport, base_url="http://ollama.test"),
+    )
+    assert client.generate("hello", model_id="mistral:7b") == "override"
+    client.close()
+
+
 def test_generate_stream_yields_tokens() -> None:
     """Generate-stream yields tokens parsed from the SSE stream."""
 
@@ -77,7 +116,7 @@ def test_llm_client_requires_base_url_or_env(monkeypatch: pytest.MonkeyPatch) ->
     """LLM client raises when neither base URL nor env var is set."""
     monkeypatch.delenv("VECINITA_MODAL_LLM_URL", raising=False)
 
-    with pytest.raises(LlmClientError, match="VECINITA_MODAL_LLM_URL"):
+    with pytest.raises(LlmClientError, match="VECINITA_MODAL_OLLAMA_URL"):
         LlmClient(base_url=None)
 
 

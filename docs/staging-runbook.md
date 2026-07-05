@@ -29,10 +29,15 @@ bash scripts/deploy/verify_build.sh
 bash scripts/deploy/verify_secrets.sh   # requires Modal auth + vecinita-data-management secret
 ```
 
-CI on `main`: `.github/workflows/deploy-preflight.yml` (needs GitHub `MODAL_TOKEN_*` for secrets job).
+CI on `main`: `.github/workflows/ci.yml` must pass first. Then
+`.github/workflows/deploy-preflight.yml` runs via `workflow_run` (needs GitHub `MODAL_TOKEN_*`
+for secrets job).
 
-**Modal CD on `main`:** `.github/workflows/deploy-modal.yml` runs after **CI** succeeds on
-`main`. Job order inside that workflow: **Supabase sync** (`config push` + migrations, including
+**CD chain on `main`:** CI → Deploy preflight → Deploy Modal → Deploy DigitalOcean. Each step
+uses `workflow_run` and checks out the CI-tested commit (`head_sha`).
+
+**Modal CD on `main`:** `.github/workflows/deploy-modal.yml` runs after **Deploy preflight**
+succeeds on `main`. Job order inside that workflow: **Supabase sync** (`config push` + migrations,
 Resend SMTP via `SUPABASE_SMTP_PASS`) → **Modal deploy** (embedding, data-management, llm).
 Requires repo secrets `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` and `SUPABASE_ACCESS_TOKEN`
 ([Modal continuous deployment](https://modal.com/docs/guide/continuous-deployment)).
@@ -42,10 +47,10 @@ DO apps after **Deploy Modal** succeeds on `main` (EV-007 order: Supabase → Mo
 `deploy_on_push` is **disabled** in `infra/do/*.yaml` so deploys are CI-gated. Requires repo
 secret `DIGITALOCEAN_TOKEN`.
 
-**Supabase on `main`:** `.github/workflows/supabase.yml` also path-filters on `supabase/**`
-for offline validate + optional duplicate `sync-production` on direct pushes. Production auth
-config, email templates, and migrations are pushed on every main deploy via the Modal workflow's
-`supabase-sync` job (idempotent).
+**Supabase on `main`:** `.github/workflows/supabase.yml` path-filters on `supabase/**` for
+offline validate on PRs and feature branches. Production auth config, email templates, and
+migrations are pushed on every main deploy via the Modal workflow's `supabase-sync` job after
+CI passes (idempotent). Use `workflow_dispatch` on `supabase.yml` for manual `sync-production`.
 
 **Resend:** No standalone deploy workflow. SMTP delivery is configured through Supabase
 `config push` (`SUPABASE_SMTP_PASS` GitHub secret). In-app test-send uses `RESEND_API_KEY` on

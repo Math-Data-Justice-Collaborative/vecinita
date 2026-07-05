@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from http import HTTPStatus
 from uuid import UUID, uuid4
 
@@ -14,6 +15,11 @@ from vecinita_data_management_backend.app import (
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_data_management_backend.write_client import InternalWriteClient
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests
+from vecinita_shared_schemas.internal_write import (
+    EvalMetricsSummary,
+    EvalRunListItem,
+    EvalRunListResponse,
+)
 from vecinita_shared_schemas.json_types import as_json_object
 
 from tests.helpers.json_response import (
@@ -203,6 +209,52 @@ def test_list_jobs_returns_all_jobs() -> None:
     body = response_json_object(response)
     jobs = json_list(body, "jobs")
     assert len(jobs) == _EXPECTED_JOB_LIST_COUNT
+
+
+def test_list_jobs_includes_eval_runs_from_internal_write_api() -> None:
+    """Test list jobs merges eval runs with job_type=eval (TC-124, ADR-035 §3)."""
+    eval_run_id = uuid4()
+
+    class _EvalRunsClient:
+        def list_eval_runs(
+            self,
+            *,
+            page: int = 1,
+            page_size: int = 100,
+        ) -> EvalRunListResponse:
+            _ = (page, page_size)
+            return EvalRunListResponse(
+                items=[
+                    EvalRunListItem(
+                        run_id=eval_run_id,
+                        status="running",
+                        started_at=datetime(2026, 7, 2, 12, 0, tzinfo=UTC),
+                        metrics_summary=EvalMetricsSummary(),
+                    )
+                ],
+                page=1,
+                page_size=100,
+                total_count=1,
+            )
+
+    store = InMemoryJobStore()
+    store.create_job(urls=["https://example.com/a"])
+    client = TestClient(
+        create_app(
+            store=store,
+            require_proxy_auth=False,
+            eval_runs_client=_EvalRunsClient(),  # type: ignore[arg-type]
+        )
+    )
+
+    response = client.get("/jobs")
+
+    assert response.status_code == HTTPStatus.OK
+    jobs = json_list(response_json_object(response), "jobs")
+    assert len(jobs) == _EXPECTED_JOB_LIST_COUNT
+    eval_job = next(job for job in jobs if json_str(as_json_object(job), "job_type") == "eval")
+    assert json_str(as_json_object(eval_job), "job_id") == str(eval_run_id)
+    assert json_str(as_json_object(eval_job), "status") == "running"
 
 
 def test_list_jobs_filters_by_status() -> None:

@@ -45,31 +45,93 @@ const STATS_BODY = {
   top_served: [],
 };
 
+const RUN_A_ID = "00000000-0000-0000-0000-000000000099";
+const RUN_B_ID = "00000000-0000-0000-0000-000000000088";
+const PLAYGROUND_RUN_ID = "00000000-0000-0000-0000-0000000000aa";
+/** Eval run surfaced on unified GET /jobs (UJ-044 / TC-124). */
+export const EVAL_JOB_ID = "55555555-5555-4555-8555-555555555555";
+
+const OLLAMA_MODELS_BODY = {
+  items: [
+    { model_id: "qwen2.5:1.5b-instruct", available: true },
+    { model_id: "llama3.2:3b", available: true },
+  ],
+};
+
+const EVAL_CONFIG_PRESETS_BODY = { items: [] };
+
 function evalRunsList() {
   return {
     items: [
       {
-        run_id: "00000000-0000-0000-0000-000000000099",
+        run_id: RUN_A_ID,
         status: "completed",
-        metrics_summary: TIMESERIES_BODY.points[0].metrics_summary,
+        metrics_summary: {
+          retrieval_relevance: 0.91,
+          faithfulness: 0.85,
+          answer_relevancy: 0.8,
+          latency_p95_ms: 3200,
+        },
+      },
+      {
+        run_id: RUN_B_ID,
+        status: "completed",
+        metrics_summary: {
+          retrieval_relevance: 0.88,
+          faithfulness: 0.55,
+          answer_relevancy: 0.72,
+          latency_p95_ms: 4100,
+        },
       },
     ],
     page: 1,
     page_size: 20,
-    total_count: 1,
+    total_count: 2,
   };
 }
 
-function evalRunDetail() {
+function evalRunDetail(runId: string) {
+  if (runId === RUN_B_ID) {
+    return {
+      run_id: RUN_B_ID,
+      status: "completed",
+      metrics_summary: {
+        retrieval_relevance: 0.88,
+        faithfulness: 0.55,
+        answer_relevancy: 0.72,
+        latency_p95_ms: 4100,
+      },
+      items: [
+        {
+          case_id: "community-food-pantry",
+          locale: "en",
+          question: "When are food pantry hours updated?",
+          answer: "Hours update every Monday morning.",
+          metrics: {
+            retrieval_pass: true,
+            faithfulness: 0.55,
+            answer_relevancy: 0.72,
+            latency_ms: 3900,
+          },
+        },
+      ],
+    };
+  }
   return {
-    run_id: "00000000-0000-0000-0000-000000000099",
+    run_id: runId,
     status: "completed",
-    metrics_summary: TIMESERIES_BODY.points[0].metrics_summary,
+    metrics_summary: {
+      retrieval_relevance: 0.91,
+      faithfulness: 0.85,
+      answer_relevancy: 0.8,
+      latency_p95_ms: 3200,
+    },
     items: [
       {
         case_id: "community-food-pantry",
         locale: "en",
         question: "When are food pantry hours updated?",
+        answer: "Food pantry hours are posted weekly.",
         metrics: {
           retrieval_pass: true,
           faithfulness: 0.85,
@@ -100,7 +162,10 @@ async function fulfillJobsRoute(route: Route): Promise<void> {
       body: JSON.stringify({
         job_id: "job-playwright-001",
         status: "completed",
-        type: "ingest",
+        job_type: "ingest",
+        urls: ["https://example.com/page-a"],
+        error_code: null,
+        error_message: null,
         created_at: "2026-07-01T12:00:00Z",
         updated_at: "2026-07-01T12:01:00Z",
       }),
@@ -116,9 +181,22 @@ async function fulfillJobsRoute(route: Route): Promise<void> {
           {
             job_id: "job-playwright-001",
             status: "completed",
-            type: "ingest",
+            job_type: "ingest",
+            urls: ["https://example.com/page-a"],
+            error_code: null,
+            error_message: null,
             created_at: "2026-07-01T12:00:00Z",
             updated_at: "2026-07-01T12:01:00Z",
+          },
+          {
+            job_id: EVAL_JOB_ID,
+            status: "running",
+            job_type: "eval",
+            urls: [],
+            error_code: null,
+            error_message: null,
+            created_at: "2026-07-02T12:00:00Z",
+            updated_at: "2026-07-02T12:00:05Z",
           },
         ],
       }),
@@ -193,15 +271,28 @@ async function fulfillAdminRoute(route: Route): Promise<void> {
     });
     return;
   }
-  if (url.includes("/internal/v1/eval/runs/") && method === "GET") {
+  if (url.includes("/internal/v1/models/ollama")) {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify({
-        ...evalRunDetail(),
-        run_id: url.split("/").pop() ?? evalRunDetail().run_id,
-        status: "completed",
-      }),
+      body: JSON.stringify(OLLAMA_MODELS_BODY),
+    });
+    return;
+  }
+  if (url.includes("/internal/v1/eval/config-presets")) {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(EVAL_CONFIG_PRESETS_BODY),
+    });
+    return;
+  }
+  if (url.includes("/internal/v1/eval/runs/") && method === "GET") {
+    const runId = url.split("/").pop() ?? RUN_A_ID;
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(evalRunDetail(runId)),
     });
     return;
   }
@@ -215,11 +306,12 @@ async function fulfillAdminRoute(route: Route): Promise<void> {
   }
   if (url.includes("/internal/v1/eval/runs") && method === "POST") {
     await route.fulfill({
-      status: 200,
+      status: 202,
       contentType: "application/json",
       body: JSON.stringify({
-        run_id: "00000000-0000-0000-0000-0000000000aa",
+        run_id: PLAYGROUND_RUN_ID,
         status: "pending",
+        created_at: "2026-07-02T12:00:00Z",
       }),
     });
     return;
@@ -233,7 +325,7 @@ async function fulfillAdminRoute(route: Route): Promise<void> {
 
 /** Mock internal-write-api routes for authenticated admin navigation tests. */
 export async function mockAdminApi(page: Page): Promise<void> {
-  await page.route("**/jobs**", fulfillJobsRoute);
+  await page.route("http://127.0.0.1:8001/jobs**", fulfillJobsRoute);
   await page.route("**/internal/v1/**", fulfillAdminRoute);
 }
 

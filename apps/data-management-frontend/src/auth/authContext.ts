@@ -30,5 +30,10 @@ export function useAuth(): AuthState {
 
 export function useIsAdmin(): boolean {
   const { role } = useAuth();
-  return role === "admin";
+  return role === "admin" || role === "super-admin";
+}
+
+export function useIsSuperAdmin(): boolean {
+  const { role } = useAuth();
+  return role === "super-admin";
 }

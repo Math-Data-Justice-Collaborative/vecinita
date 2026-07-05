@@ -93,11 +93,13 @@ Launch agents in **one** message:
 **Agent 3 — Typechecker**: Run typecheck, parse errors.
 
 **Agent 4 — Test Suite**: Run full test suite, parse results. Must include **H0c**
-`tests/unit/test_cors_policy.py` (blocking for hybrid UI deploys). **Before any PR**, run
-the CI coverage gate (`make test-unit-coverage`) — plain `vitest run` does **not** enforce
-the 95% frontend branch gate, so a green test run can still fail CI. Watch for uncovered
-branches in new React components: poll intervals, refresh handlers, unmount guards, and
-error/`??` fallbacks.
+`tests/unit/test_cors_policy.py` (blocking for hybrid UI deploys). **Before opening a PR**,
+run `make ci-push` (includes `test-unit-coverage`). Day-to-day `git push` runs fast tier
+(`make check-fast` + `make test-fast`); format-check and full parity are in GitHub CI.
+During milestone verify, `make test-fast` plus scoped `make test-coverage-fe` for touched
+frontends is enough unless F31 is in scope.
+Watch for uncovered branches in new React components: poll intervals, refresh handlers,
+unmount guards, and error/`??` fallbacks.
 
 **Agent 4b — Connectivity policy** (Vecinita hybrid): Confirm `configure_cors` on browser-facing
 FastAPI apps and `tests/smoke/test_staging_connectivity.py` exists per connectivity-gates.

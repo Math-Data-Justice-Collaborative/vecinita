@@ -27,9 +27,11 @@ class _EmptyRetriever:
         *,
         tag_slugs: list[str] | None = None,
         language: str | None = None,
+        top_k: int | None = None,
+        score_threshold: float | None = None,
     ) -> list[object]:
         """Retrieve chunks."""
-        _ = (query, tag_slugs, language)
+        _ = (query, tag_slugs, language, top_k, score_threshold)
         return []
 
 

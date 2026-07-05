@@ -325,6 +325,77 @@ config-spec `VECINITA_ADMIN_FRONTEND_URL` on Modal DM; deployment-integration §
 | RD-112 | Tooling (from 00-context) | **LlamaIndex evaluators + custom harness** — no Langfuse/Ragas/DeepEval v1 (R63) | EV-008 / R63 |
 | RD-113 | Feature ID (from 00-context) | **F36** (not F34 — already Supabase auth) (R64) | EV-008 / R64 |
 
+### EV-009 requirements decisions (2026-07-02) — RD-114–RD-127
+
+S008 / F37 eval UX polish + playground. Items 1–3 are F36 follow-ons; playground + promote are **F37**.
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-114 | Feature ID | **F37** new feature; items 1–3 remain F36 follow-ons (M65–M67) | EV-009 interview batch 1 |
+| RD-115 | Run list refresh | **Optimistic prepend** + live status while polling | EV-009 item 1 |
+| RD-116 | Jobs integration | **Unified `GET /jobs`** with `job_type=eval` | EV-009 item 2 |
+| RD-117 | Dashboard charts v1 | **FE-only** — presets 1D/7D/10D/1M/1Y + custom date picker + scatter | EV-009 item 3 |
+| RD-118 | Playground placement | New **`?tab=playground`** on `/evaluation` | EV-009 batch 2 |
+| RD-119 | Run modes | **Golden batch + ad-hoc** single question | EV-009 batch 2 |
+| RD-120 | Config persistence | **Versioned per-user presets** + run `config_snapshot` | EV-009 batch 2 |
+| RD-121 | Preset sharing | **Private default; share-read clone** for other admins | EV-009 batch 2 |
+| RD-122 | RAG params v1 | `top_k`, `min_retrieval_score`, `system_prompt`, `max_tokens`, `temperature`, `corpus_profile` | EV-009 batch 3 |
+| RD-123 | Model selection v1 | **Modal LLM hyperparams only** — no external model picker | EV-009 batch 3 |
+| RD-124 | Judge config | Existing **criteria tab** + per-run criteria selection + judge `temperature` | EV-009 batch 3 |
+| RD-125 | Guardrails v1 | **Editable system rules text** within `system_prompt` | EV-009 batch 3 |
+| RD-126 | Sandbox + promote | **Sandbox** eval only until **super-admin runtime promote** to DB active config | EV-009 batch 4 |
+| RD-127 | Super-admin bootstrap | Seed from **`VECINITA_SUPER_ADMIN_EMAIL`**; existing admins stay `admin` | EV-009 batch 4 |
+| RD-128 | Ad-hoc retention | Store in **`eval_run_items`**; same retention as eval runs | EV-009 batch 4 |
+| RD-129 | Run button UX | **Run evaluation** opens Playground with last-used preset | EV-009 batch 5 |
+| RD-130 | Compare runs | **Side-by-side** metrics + per-question diff in v1 | EV-009 batch 5 |
+
+### EV-009 04-tech-plan decisions (2026-07-02) — TP-S008-01–16, RD-131–138
+
+04-tech-plan interview locked remaining engineering choices for S008.
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-131 | Items 1–3 scope | **Approved** as scoped in 01-requirements (RD-115–117) | EV-009 04-tech-plan batch 1 |
+| RD-132 | Model v1 | **Fixed Modal LLM** — hyperparams + `system_prompt` only | EV-009 04-tech-plan batch 1 |
+| RD-133 | Guardrails UI | **Single `system_prompt` textarea** | EV-009 04-tech-plan batch 1 |
+| RD-134 | ChatRAG config read | **Direct Postgres** `rag_production_config` | EV-009 04-tech-plan batch 1 |
+| RD-135 | Promote rollback | **Forward-only** — re-promote older preset/run | EV-009 04-tech-plan batch 1 |
+| RD-136 | Playground layout | **Two-column** — config left, run/results right | EV-009 04-tech-plan batch 2 |
+| RD-137 | Default form values | **Hardcoded defaults** matching ChatRAG env | EV-009 04-tech-plan batch 2 |
+| RD-138 | Jobs click nav | **`/evaluation?run=<id>`** | EV-009 04-tech-plan batch 2 |
+
+### EV-009 07-build interview decisions (2026-07-02) — RD-139–RD-141
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-139 | Model v1 (supersedes RD-132) | **Ollama model picker** — any model on Modal Ollama API | EV-009 07-build playground interview |
+| RD-140 | Ollama runtime | **Modal Ollama** on `vecinita-models` volume (not external host) | EV-009 07-build follow-up |
+| RD-141 | Model download | **Modal background pull job** when selected model missing from volume | EV-009 07-build follow-up |
+| RD-142 | Promote model | **Full config promote** includes `model_id` — production ChatRAG switches LLM | EV-009 07-build follow-up |
+| RD-143 | Guardrails UI | **Single `system_prompt` textarea** (confirmed) | EV-009 07-build interview |
+| RD-144 | Run modes | **Golden batch + ad-hoc** single-question (confirmed) | EV-009 07-build interview |
+| RD-145 | Preset sharing | **Per-user private default; share-read clone** (confirmed) | EV-009 07-build interview |
+| TP-S008-01 | Build order | M65→M70 on `feat/S008-eval-ux-playground` | ADR-035 §1 |
+| TP-S008-02 | Run list refresh | Optimistic prepend + in-place poll status (FE) | ADR-035 §2 |
+| TP-S008-03 | Unified jobs | DM backend **HTTP aggregate** eval runs from internal-write-api | ADR-035 §3 |
+| TP-S008-04 | Dashboard charts | FE scatter + time presets on existing timeseries | ADR-035 §4 |
+| TP-S008-05 | Config schema | `eval_config_presets` + `rag_production_config`; `EvalConfig` bounds | ADR-035 §5 |
+| TP-S008-06 | Model picker | **Deferred** — Qwen2.5 Modal only v1 | ADR-035 §5 |
+| TP-S008-07 | Sandbox | Overrides in eval runner only until promote | ADR-035 §6 |
+| TP-S008-08 | Preset sharing | Private default; share-read clone | ADR-035 §7 |
+| TP-S008-09 | Playground UI | `?tab=playground` two-column | ADR-035 §8 |
+| TP-S008-10 | Super-admin | `VECINITA_SUPER_ADMIN_EMAIL` seed; `super-admin` > `admin` | ADR-035 §9 |
+| TP-S008-11 | Promote | Versioned `rag_production_config`; audit log | ADR-035 §10 |
+| TP-S008-12 | ChatRAG reader | DB read per ask; env fallback | ADR-035 §11 |
+| TP-S008-13 | Jobs nav | Eval row → `/evaluation?run=<id>` | ADR-035 §12 |
+| TP-S008-14 | Tests | TC-123–TC-133 + Playwright uj044/uj045 | ADR-035 §14 |
+| TP-S008-15 | Dependencies | **No new Python runtime deps** | ADR-035 §15 |
+| TP-S008-16 | Deploy order | migration → write-api → DM backend → chat-rag → admin FE | ADR-035 §16 |
+
+EV-009 artifacts: feature-list F37; user-journeys UJ-039/041 deltas + UJ-044–047; test-plan TC-123–TC-133;
+api-contract §EV-009; config-spec §Eval playground; context `docs/context/eval-ux-playground.md`;
+ADR-035; execution-plan Phase 15; acceptance-criteria AC-E22–AC-E26.
+
 EV-008 artifacts: feature-list F36; user-journeys UJ-039–UJ-040; test-plan TC-111–TC-116;
 acceptance-criteria AC-E12–AC-E16; api-contract §EV-008 eval routes; config-spec §RAG evaluation;
 `docs/eval-golden-set.md`; expanded `data/fixtures/eval/qa_pairs.json`; deployment-integration §EV-008.

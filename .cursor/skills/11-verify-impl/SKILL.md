@@ -136,6 +136,22 @@ Use AskQuestion (one journey per call or batch of 2):
 Do **not** mark 11-verify-impl `completed` if any **modal-tier** journey lacks T0 pass
 or documented T3 waiver. Feed flags into Phase 4 patches or 14-hotfix / 16-evolve routing.
 
+### Phase 3b — Manual feature inspection (required)
+
+Before Phase 3 feature AskQuestion, run [feature-inspection](../feature-inspection/SKILL.md)
+for **each feature** in the active cycle that touches UI and/or HTTP API:
+
+1. Classify UI / API / both from feature-list + UJ + OpenAPI deltas.
+2. **AskQuestion:** local vs staging (every time).
+3. If both surfaces: **AskQuestion** — UI first or API first.
+4. Browser: navigate to the UJ route; screenshot the feature area.
+5. API: open FastAPI `/docs`; screenshot relevant operations (cross-check `openapi/*.yaml`).
+6. **AskQuestion:** Approve · Flag · Defer · Explain — block until answered.
+
+Record results in `verify-impl.md` §Manual inspection. **Flag** routes to Phase 4; **Defer**
+blocks completion for that feature unless waived. Skip only for pure internal refactors with
+no user-visible or contract change — note the waiver in the report.
+
 ### Phase 3 — Present to User
 
 Present a unified view via AskQuestion, feature by feature:

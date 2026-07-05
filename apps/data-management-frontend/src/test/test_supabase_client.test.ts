@@ -10,6 +10,7 @@ describe("supabaseClient", () => {
     const { roleFromAppMetadata } = await import("@/auth/supabaseClient");
     expect(roleFromAppMetadata({ role: "admin" })).toBe("admin");
     expect(roleFromAppMetadata({ role: "viewer" })).toBe("viewer");
+    expect(roleFromAppMetadata({ role: "super-admin" })).toBe("super-admin");
     expect(roleFromAppMetadata({ role: "guest" })).toBeNull();
     expect(roleFromAppMetadata(undefined)).toBeNull();
   });

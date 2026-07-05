@@ -19,6 +19,11 @@
         "timeout": 10
       },
       {
+        "command": "uv run python .cursor/hooks/common_ci_failures.py",
+        "matcher": "Shell",
+        "timeout": 10
+      },
+      {
         "command": "uv run python .cursor/hooks/shell_deploy_guard.py",
         "matcher": "Shell",
         "timeout": 10
@@ -29,6 +34,11 @@
         "command": "uv run python .cursor/hooks/make_format_lint_fix.py",
         "matcher": "Write|TabWrite",
         "timeout": 300
+      },
+      {
+        "command": "uv run python .cursor/hooks/common_ci_failures.py",
+        "matcher": "Write|TabWrite",
+        "timeout": 180
       },
       {
         "command": "uv run python .cursor/hooks/typecheck.py",
@@ -54,7 +64,7 @@
     "stop": [
       {
         "command": "uv run python .cursor/hooks/make_ci_on_stop.py",
-        "timeout": 3600
+        "timeout": 900
       }
     ]
   }

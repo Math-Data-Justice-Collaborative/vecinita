@@ -127,7 +127,7 @@ cd apps/chat-rag-frontend && npm run lint && npm test
 cd apps/data-management-frontend && npm run lint && npm test
 ```
 
-Full pre-push parity: [ci-after-push.mdc](../../rules/ci-after-push.mdc) §Before the first push.
+Full CI before PR: `make ci-push` — see [ci-after-push.mdc](../../rules/ci-after-push.mdc) §Before opening a PR.
 
 ---
 

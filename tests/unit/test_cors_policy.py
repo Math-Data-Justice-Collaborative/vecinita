@@ -310,6 +310,86 @@ def test_internal_write_cors_preflight_on_eval_timeseries_get(
     assert "GET" in allow_methods
 
 
+def test_internal_write_cors_preflight_on_eval_config_presets(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """EV-009: CORS preflight allows POST/PATCH on eval config preset routes."""
+    if not os.environ.get("DATABASE_URL"):
+        pytest.skip("DATABASE_URL required for internal write app import")
+    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", "test-key")
+    client = TestClient(create_write_app())
+    preset_id = "00000000-0000-0000-0000-000000000001"
+    for path, method in (
+        ("/internal/v1/eval/config-presets", "POST"),
+        (f"/internal/v1/eval/config-presets/{preset_id}", "PATCH"),
+        (f"/internal/v1/eval/config-presets/{preset_id}/clone", "POST"),
+    ):
+        response = client.options(
+            path,
+            headers={
+                "Origin": ADMIN_ORIGIN,
+                "Access-Control-Request-Method": method,
+                "Access-Control-Request-Headers": "authorization, content-type",
+            },
+        )
+        assert response.status_code == HTTPStatus.OK
+        assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
+        allow_methods = header_str(response.headers, "access-control-allow-methods").upper()
+        assert method in allow_methods
+
+
+def test_internal_write_cors_preflight_on_rag_config_routes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """EV-009: CORS preflight allows GET/POST on rag production config routes."""
+    if not os.environ.get("DATABASE_URL"):
+        pytest.skip("DATABASE_URL required for internal write app import")
+    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", "test-key")
+    client = TestClient(create_write_app())
+    for path, method in (
+        ("/internal/v1/rag/config/active", "GET"),
+        ("/internal/v1/rag/config/promote", "POST"),
+    ):
+        response = client.options(
+            path,
+            headers={
+                "Origin": ADMIN_ORIGIN,
+                "Access-Control-Request-Method": method,
+                "Access-Control-Request-Headers": "authorization, content-type",
+            },
+        )
+        assert response.status_code == HTTPStatus.OK
+        assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
+        allow_methods = header_str(response.headers, "access-control-allow-methods").upper()
+        assert method in allow_methods
+
+
+def test_internal_write_cors_preflight_on_ollama_model_routes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """EV-009: CORS preflight allows GET/POST on Ollama model list/pull routes."""
+    if not os.environ.get("DATABASE_URL"):
+        pytest.skip("DATABASE_URL required for internal write app import")
+    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", "test-key")
+    client = TestClient(create_write_app())
+    for path, method in (
+        ("/internal/v1/models/ollama", "GET"),
+        ("/internal/v1/models/ollama/pull", "POST"),
+    ):
+        response = client.options(
+            path,
+            headers={
+                "Origin": ADMIN_ORIGIN,
+                "Access-Control-Request-Method": method,
+                "Access-Control-Request-Headers": "authorization, content-type",
+            },
+        )
+        assert response.status_code == HTTPStatus.OK
+        assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
+        allow_methods = header_str(response.headers, "access-control-allow-methods").upper()
+        assert method in allow_methods
+
+
 def test_no_cors_middleware_when_origins_unset(monkeypatch: pytest.MonkeyPatch) -> None:
     """No CORS headers are returned when no allowed origins are configured."""
     monkeypatch.delenv("VECINITA_CORS_ORIGINS", raising=False)

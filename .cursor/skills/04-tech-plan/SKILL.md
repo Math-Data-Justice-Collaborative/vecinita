@@ -285,6 +285,30 @@ Each task must:
 - **UI-facing milestones**: include **Vitest** tasks for component logic **and** **Playwright** tasks
   for cross-component interaction (write failing `tests/ui/**/*.spec.ts` before or with the UI change)
 
+### Phase 3B — Session roadmap (GitHub issues + dependencies)
+
+After `docs/execution-plan.md` is drafted and before user review (Phase 4), write
+`docs/sessions/{active_session.id}/roadmap.md` using
+[doc-planner/templates/roadmap.md](../doc-planner/templates/roadmap.md).
+
+**Inputs:** execution-plan tasks (Depends On column), routing plan, feature IDs, UJ/TC mapping.
+
+**Outputs:**
+
+1. **GitHub issue table** — epic (GH-{session}-0) + one row per milestone or parallel workstream;
+   map execution tasks (T*.n), labels, and issue-to-issue dependencies.
+2. **Mermaid diagrams** (minimum):
+   - Milestone build order (from TP decisions / M* sequencing)
+   - GitHub issue dependency graph
+   - Session pipeline stage graph (from routing-plan.md)
+   - Critical path for remaining open work (update through 07-build)
+3. **Phase gate checklist** — copy exit criteria from execution-plan phase gate.
+4. **Issue creation commands** — optional `gh issue create` snippets (do not create issues without
+   user approval unless they explicitly ask).
+
+Link `roadmap.md` from `session-brief.md`. Update task/issue status in the roadmap as build and
+verify stages progress.
+
 ### Phase 4 — User Review
 
 Present the technical plan for review using AskQuestion:
@@ -385,6 +409,7 @@ Before marking 04-tech-plan `completed`, verify these items are **tasks or ADRs*
 - [ ] Modal testing tiers per [ADR-004](../../docs/adr/ADR-004.md) (T0–T3) assigned to stages
 - [ ] deploy targets in plan match [deployment-catalog.md](../deployment-catalog.md) and
   `workflow-state.yaml` §template.gpu_tiers (or all ten if unset); drift documented if deferred
+- [ ] Session `roadmap.md` exists under `docs/sessions/{id}/` with GitHub issue map + mermaid deps
 
 ## Output Rules
 

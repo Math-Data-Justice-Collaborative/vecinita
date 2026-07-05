@@ -1,23 +1,23 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–033
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–035
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 14: EV-008 — Admin RAG evaluation (F36, #99) — **M64 complete** |
-| **Active milestone** | M64: Interactive eval dashboard — **completed** |
-| **Active task** | **—** (M59–M64 complete; next: 08-verify-build) |
-| **Tasks completed** | Phase 14 M59–M64 complete (S007) |
-| **Last updated** | 2026-07-01 |
-| **Evolve cycle** | EV-008 (F36, #99) — **07-build complete (M64)** |
-| **Git branch** | `feat/S007-rag-eval` |
-| **Active session** | S007-rag-eval — evolve-lite. M59–M63 complete. **M64 dashboard** (R68): time-series, pivot explore, criteria CRUD, collapsible panels |
-| **Scope addition** | 2026-07-01 — R68 extends F36 with interactive eval dashboard (ADR-034, UJ-041–043, TC-117–122, AC-E17–E21). Baseline M59–M63 delivered in same PR ([#113](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/113)). |
+| **Active phase** | Phase 15: EV-009 — Eval UX polish + playground (F36 follow-ons + F37) |
+| **Active milestone** | M70: Super-admin promote + ChatRAG config reader *(complete)* |
+| **Active task** | **08-verify-build** — formal phase verify *(next)* |
+| **Tasks completed** | Phase 15 M65–M70 complete (S008); T70.8 gate checklist PASS at T2 (2026-07-03) |
+| **Last updated** | 2026-07-03 |
+| **Evolve cycle** | EV-009 (F36 follow-ons + F37) — **04-tech-plan complete** |
+| **Git branch** | `feat/S008-eval-ux-playground` |
+| **Active session** | S008-eval-ux-playground — evolve-lite. 04-tech-plan approved (ADR-035, TP-S008-01–16). Build order M65→M70. |
+| **Scope addition** | 2026-07-02 — S008/EV-009: run list refresh, unified jobs, dashboard charts, Playground + super-admin promote (ADR-035, UJ-044–047, TC-123–TC-133). |
 
 ## Template
 
@@ -1310,6 +1310,127 @@ frontend auth callback, retract invitation, template polish, live invite smoke (
 
 ---
 
+### Phase 15: EV-009 — Eval UX polish + playground (F36 follow-ons + F37)
+
+> **Session:** S008-eval-ux-playground · **Evolve cycle:** EV-009 · **Feature IDs:** F36 (M65–M67), F37 (M68–M70)  
+> **Branch:** `feat/S008-eval-ux-playground` → `main` (PR-51) · **ADR:** ADR-035 · **Build order:** M65→M70
+
+**Objective:** Fix eval page UX nits, unify eval runs on Jobs tab, enrich dashboard charts, deliver
+Playground with versioned presets and super-admin runtime promote to ChatRAG.  
+**Entry gate:** 04-tech-plan approved (ADR-035, TP-S008-01–16).  
+**Exit gate:** TC-123–TC-133 green; UJ-044–047 covered; AC-E22–AC-E26 satisfied at T2; live promote smoke at T3.
+
+#### M65: Optimistic eval run list + poll UX
+
+**Goal:** New eval run appears in history immediately; status updates live while polling.  
+**Branch:** `feat/S008-eval-ux-playground`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
+|---|------|------|--------|-------------|------------|-----------|---------|---------|
+| T65.1 | Test (Vitest): `test_evaluation_page.test.tsx` — TC-123 optimistic prepend — red | Test | completed | test-plan TC-123, UJ-039, ADR-035 §2 | — | — | S008 | F36 |
+| T65.2 | Code: `EvaluationPage` — prepend pending run on create; update status in list during `pollRun` | Code | completed | ADR-035 §2, RD-115 | T65.1 | — | S008 | F36 |
+| T65.3 | Code: TC-123 Vitest green | Code | completed | test-plan TC-123 | T65.1, T65.2 | — | S008 | F36 |
+
+#### M66: Unified jobs API + Jobs tab eval rows
+
+**Goal:** `GET /jobs` includes `job_type=eval`; Jobs tab shows eval runs with status.  
+**Branch:** `feat/S008-eval-ux-playground`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
+|---|------|------|--------|-------------|------------|-----------|---------|---------|
+| T66.1 | Test: `tests/e2e/test_uj044_eval_jobs_tab.py` — TC-124 — red | Test | completed | test-plan TC-124, UJ-044, ADR-035 §3 | — | D3 | S008 | F36 |
+| T66.2 | Test (Vitest): `test_jobs_page.test.tsx` — eval row + nav — red | Test | completed | UJ-044, RD-138 | — | — | S008 | F36 |
+| T66.3 | Code: DM backend `list_jobs` — HTTP aggregate eval runs from internal-write-api | Code | completed | ADR-035 §3, api-contract §EV-009 | — | — | S008 | F36 |
+| T66.4 | Code: Extend `JobType` + `JobsPage` — eval badge, click → `/evaluation?run=<id>` | Code | completed | UJ-044, RD-138 | T66.3 | — | S008 | F36 |
+| T66.5 | Test (Playwright): `tests/ui/admin/uj044-eval-jobs-tab.spec.ts` — T0-ui | Test | completed | test-plan, connectivity-gates | T66.4 | — | S008 | F36 |
+| T66.6 | Code: TC-124 E2E + Vitest green | Code | completed | test-plan TC-124 | T66.1, T66.2, T66.3, T66.4 | D3 | S008 | F36 |
+
+#### M67: Dashboard scatter + time-range presets
+
+**Goal:** Scatter chart type; presets 1D/7D/10D/1M/1Y/custom; FE filter on timeseries.  
+**Branch:** `feat/S008-eval-ux-playground`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
+|---|------|------|--------|-------------|------------|-----------|---------|---------|
+| T67.1 | Test (Vitest): `test_evaluation_dashboard.test.tsx` — TC-125/126 — red | Test | completed | test-plan TC-125/126, UJ-041, ADR-035 §4 | — | — | S008 | F36 |
+| T67.2 | Code: `EvalMetricChart` — scatter type + dynamic x-axis granularity | Code | completed | ADR-035 §4, RD-117 | T67.1 | — | S008 | F36 |
+| T67.3 | Code: `EvaluationDashboardTab` — time-range presets + custom date picker + client filter | Code | completed | ADR-035 §4, RD-117 | T67.2 | — | S008 | F36 |
+| T67.4 | Test (Playwright): extend `uj041-eval-dashboard-tabs.spec.ts` — scatter + presets | Test | completed | test-plan, connectivity-gates | T67.3 | — | S008 | F36 |
+| T67.5 | Code: TC-125/126 Vitest green | Code | completed | test-plan | T67.1, T67.2, T67.3 | — | S008 | F36 |
+
+#### M68: Config schema + preset API + DB
+
+**Goal:** `eval_config_presets`, `rag_production_config`, extended eval run create with overrides.  
+**Branch:** `feat/S008-eval-ux-playground`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
+|---|------|------|--------|-------------|------------|-----------|---------|---------|
+| T68.1 | Test: `tests/privacy/test_eval_config_tables.py` — no PII columns — red | Test | completed | ADR-004, ADR-035 §5 | — | — | S008 | F37 |
+| T68.2 | Code: Alembic — `eval_config_presets`, `rag_production_config`, `eval_runs` extensions | Code | completed | ADR-035 §5, api-contract §EV-009 | T68.1 | — | S008 | F37 |
+| T68.3 | Code: Pydantic `EvalConfig*`, preset models in `vecinita_shared_schemas` | Code | completed | ADR-035 §5, config-spec §EvalConfig | T68.2 | — | S008 | F37 |
+| T68.4 | Test: `tests/integration/test_eval_config_presets.py` — TC-127 — red | Test | completed | test-plan TC-127, UJ-045 | T68.3 | — | S008 | F37 |
+| T68.5 | Code: Preset CRUD routes on internal-write-api | Code | completed | api-contract §EV-009 | T68.3 | — | S008 | F37 |
+| T68.6 | Code: Extend `POST /eval/runs` — `mode`, `config`, `preset_id`; `config_snapshot` persist | Code | completed | api-contract §EV-009, ADR-035 §6 | T68.3, T61.4 | D3 | S008 | F37 | 2026-07-02 |
+| T68.7 | Code: `packages/eval` runner — accept per-run config overrides (sandbox) | Code | completed | ADR-035 §6, feature-list F37 | T68.6, T60.5 | D3 | S008 | F37 | 2026-07-02 |
+| T68.8 | Config: OpenAPI `internal-write.yaml` — EV-009 routes | Config | completed | ADR-011, api-contract §EV-009 | T68.5, T68.6 | — | S008 | F37 | 2026-07-02 |
+| T68.9 | Code: TC-127 integration green | Code | completed | test-plan TC-127 | T68.4, T68.5, T68.7 | — | S008 | F37 | 2026-07-02 |
+| T68.10 | Test: `tests/integration/test_ollama_models_list.py` — TC-134 — red | Test | completed | test-plan TC-134, RD-139–141 | T68.3 | — | S008 | F37 | 2026-07-02 |
+| T68.11 | Code: Modal Ollama model list + pull job routes (`GET /models/ollama`, `POST /models/ollama/pull`) | Code | completed | ADR-035 §6, RD-140–141 | T68.3 | D3 | S008 | F37 | 2026-07-02 |
+| T68.12 | Code: Eval runner + ChatRAG — route LLM calls via selected `model_id` (Ollama SDK) | Code | completed | ADR-035 §6–7, RD-139, RD-142 | T68.7, T68.11 | D3 | S008 | F37 | 2026-07-02 |
+| T68.13 | Code: TC-134 integration green | Code | completed | test-plan TC-134 | T68.10, T68.11, T68.12 | — | S008 | F37 | 2026-07-02 |
+
+#### M69: Playground UI (golden + ad-hoc + compare)
+
+**Goal:** `/evaluation?tab=playground` two-column UI; golden + ad-hoc runs; compare view.  
+**Branch:** `feat/S008-eval-ux-playground`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
+|---|------|------|--------|-------------|------------|-----------|---------|---------|
+| T69.1 | Test (Vitest): `test_evaluation_playground.test.tsx` — TC-128/129 — red | Test | completed | test-plan TC-128/129, UJ-045 | — | — | S008 | F37 | 2026-07-02 |
+| T69.2 | Test (Vitest): `test_evaluation_compare.test.tsx` — TC-130 — red | Test | completed | test-plan TC-130, UJ-046 | — | — | S008 | F37 | 2026-07-02 |
+| T69.3 | Code: `EvaluationPlaygroundTab` — two-column layout, defaults + Ollama model picker (RD-137, RD-139) | Code | completed | ADR-035 §8, UJ-045, RD-136 | T68.13 | D10 | S008 | F37 | 2026-07-02 |
+| T69.4 | Code: Preset save/load/version UI + share-read clone | Code | completed | ADR-035 §8, RD-121 | T69.3, T68.5 | — | S008 | F37 | 2026-07-02 |
+| T69.5 | Code: Compare runs view — side-by-side metrics + per-question diff | Code | completed | UJ-046, RD-130 | T69.3 | — | S008 | F37 | 2026-07-02 |
+| T69.6 | Code: Runs tab **Run evaluation** → Playground with last preset (RD-129) | Code | completed | UJ-039, RD-129 | T69.3 | — | S008 | F37 | 2026-07-02 |
+| T69.7 | Test: `tests/e2e/test_uj045_eval_playground.py` — TC-128/129 — red | Test | completed | test-plan, UJ-045 | T68.7 | D3 | S008 | F37 | 2026-07-02 |
+| T69.8 | Test (Playwright): `tests/ui/admin/uj045-eval-playground.spec.ts` — T0-ui | Test | completed | test-plan, connectivity-gates | T69.6 | — | S008 | F37 | 2026-07-02 |
+| T69.9 | Code: TC-128/129/130 Vitest + E2E green | Code | completed | test-plan | T69.1–T69.8 | D3 | S008 | F37 | 2026-07-02 |
+
+#### M70: Super-admin promote + ChatRAG config reader
+
+**Goal:** `super-admin` role; promote endpoint; ChatRAG reads active production config from DB.  
+**Branch:** `feat/S008-eval-ux-playground`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
+|---|------|------|--------|-------------|------------|-----------|---------|---------|
+| T70.1 | Code: Super-admin bootstrap — `VECINITA_SUPER_ADMIN_EMAIL` seed in auth layer | Code | completed | ADR-035 §9, config-spec, RD-127 | — | — | S008 | F37 | 2026-07-02 |
+| T70.2 | Test: `tests/e2e/test_uj047_eval_promote_config.py` — TC-131/132 — red | Test | completed | test-plan TC-131/132, UJ-047 | T70.1 | — | S008 | F37 | 2026-07-02 |
+| T70.3 | Code: `POST /rag/config/promote` + `GET /rag/config/active` on internal-write-api | Code | completed | api-contract §EV-009, ADR-035 §10 | T68.2, T70.1 | — | S008 | F37 | 2026-07-02 |
+| T70.4 | Code: `chat-rag-backend` — read `rag_production_config` with env fallback (RD-134) | Code | completed | ADR-035 §11, config-spec | T68.2 | — | S008 | F37 | 2026-07-02 |
+| T70.5 | Test: `tests/integration/test_rag_production_config.py` — TC-133 — red | Test | completed | test-plan TC-133, UJ-047 | T70.4 | — | S008 | F37 | 2026-07-02 |
+| T70.6 | Code: Playground promote button (super-admin only) + confirm dialog | Code | completed | UJ-047, ADR-035 §10 | T70.3, T69.4 | — | S008 | F37 | 2026-07-02 |
+| T70.7 | Config: `docs/staging-secrets-matrix.md` — `VECINITA_SUPER_ADMIN_EMAIL` | Config | completed | config-spec §Eval playground | T70.1 | — | S008 | F37 | 2026-07-02 |
+| T70.8 | Docs: Phase 15 gate checklist + session 04-tech-plan report | Docs | completed | 08-verify-build | T65.3–T70.6 | — | S008 | F37 | 2026-07-03 |
+
+#### Phase 15 Gate Check
+
+- [x] All M65–M70 tasks completed (T65.1–T70.8)
+- [x] TC-123–TC-133 green; UJ-044–047 covered (T2)
+- [x] AC-E22–AC-E26 satisfied at T2; live promote smoke at 13-deploy-smoke (T3) — **T3 pending**
+- [x] `eval_config_presets` / `rag_production_config` migrations applied; privacy tests green
+- [x] No new Python runtime dependencies (ADR-035 §15)
+- [x] CORS preflight covers new EV-009 routes
+- [x] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green
+
+**Phase Gate Log — Phase 15 (2026-07-03):** T2 PASS. M65–M70 complete (T65.1–T70.8). TC-123–TC-133
+and UJ-044–047 green at T2; AC-E22–AC-E26 met at T2. Privacy tests green for
+`eval_config_presets` / `rag_production_config`. No new Python runtime deps (ADR-035). EV-009 CORS
+preflight tests added. Full backend + DM-frontend Vitest suites green. T3 live promote smoke and
+PR-51 merge pending (13-deploy-smoke). Report:
+`docs/sessions/S008-eval-ux-playground/reports/phase-15-gate-check.md`.
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -1421,6 +1542,7 @@ main
 | PR-48 | Major | Phase 12 / S005 (EV-006) | feat/S005-user-mgmt-auth | main | pending ([#75](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/75)) |
 | PR-49 | Major | Phase 13 / S006 (EV-007) | feat/S006-invite-acceptance | main | open ([#109](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/109), [PR #110](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/110)) |
 | PR-50 | Major | Phase 14 / S007 (EV-008) | feat/S007-rag-eval | main | pending ([#99](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/99)) |
+| PR-51 | Major | Phase 15 / S008 (EV-009) | feat/S008-eval-ux-playground | main | pending (F37 eval UX + playground) |
 
 S003 is evolve-lite + frontend-only: M39–M42 land as atomic commits on the single
 `feat/S003-persistent-chat-history` branch (one PR to `main`, PR-46), matching the S002 pattern.
@@ -1437,6 +1559,9 @@ S006 (EV-007) is evolve-lite: M54–M58 land as atomic commits on the single
 
 S007 (EV-008) is evolve-lite: M59–M63 land as atomic commits on the single
 `feat/S007-rag-eval` branch (one PR to `main`, PR-50), closing #99 RAG evaluation tab + golden harness.
+
+S008 (EV-009) is evolve-lite: M65–M70 land as atomic commits on the single
+`feat/S008-eval-ux-playground` branch (one PR to `main`, PR-51), delivering F36 follow-ons + F37 playground.
 
 ## Task Tracking
 
@@ -1811,6 +1936,58 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T63.2 | M63 | 14 | Docs | completed | T60.5 | — | S007 | F36 |
 | T63.3 | M63 | 14 | Docs | completed | T62.4, T61.7, T60.5 | — | S007 | F36 |
 | T63.4 | M63 | 14 | Docs | completed | T63.1–T63.3 | — | S007 | F36 |
+| T64.1 | M64 | 14 | Test | completed | T61.7 | — | S007 | F36 |
+| T64.2 | M64 | 14 | Code | completed | T64.1 | — | S007 | F36 |
+| T64.3 | M64 | 14 | Code | completed | T64.2 | — | S007 | F36 |
+| T64.4 | M64 | 14 | Code | completed | T64.3 | — | S007 | F36 |
+| T64.5 | M64 | 14 | Test | completed | — | — | S007 | F36 |
+| T64.6 | M64 | 14 | Code | completed | T64.3 | D10 | S007 | F36 |
+| T64.7 | M64 | 14 | Code | completed | T64.4–T64.6 | — | S007 | F36 |
+| T64.8 | M64 | 14 | Docs | completed | T64.7 | — | S007 | F36 |
+| T65.1 | M65 | 15 | Test | pending | — | — | S008 | F36 |
+| T65.2 | M65 | 15 | Code | pending | T65.1 | — | S008 | F36 |
+| T65.3 | M65 | 15 | Code | pending | T65.1, T65.2 | — | S008 | F36 |
+| T66.1 | M66 | 15 | Test | pending | — | D3 | S008 | F36 |
+| T66.2 | M66 | 15 | Test | pending | — | — | S008 | F36 |
+| T66.3 | M66 | 15 | Code | pending | — | — | S008 | F36 |
+| T66.4 | M66 | 15 | Code | pending | T66.3 | — | S008 | F36 |
+| T66.5 | M66 | 15 | Test | completed | T66.4 | — | S008 | F36 |
+| T66.6 | M66 | 15 | Code | pending | T66.1–T66.4 | D3 | S008 | F36 |
+| T67.1 | M67 | 15 | Test | pending | — | — | S008 | F36 |
+| T67.2 | M67 | 15 | Code | pending | T67.1 | — | S008 | F36 |
+| T67.3 | M67 | 15 | Code | pending | T67.2 | — | S008 | F36 |
+| T67.4 | M67 | 15 | Test | completed | T67.3 | — | S008 | F36 |
+| T67.5 | M67 | 15 | Code | pending | T67.1–T67.3 | — | S008 | F36 |
+| T68.1 | M68 | 15 | Test | pending | — | — | S008 | F37 |
+| T68.2 | M68 | 15 | Code | pending | T68.1 | — | S008 | F37 |
+| T68.3 | M68 | 15 | Code | pending | T68.2 | — | S008 | F37 |
+| T68.4 | M68 | 15 | Test | pending | T68.3 | — | S008 | F37 |
+| T68.5 | M68 | 15 | Code | pending | T68.3 | — | S008 | F37 |
+| T68.6 | M68 | 15 | Code | completed | T68.3, T61.4 | D3 | S008 | F37 |
+| T68.7 | M68 | 15 | Code | completed | T68.6, T60.5 | D3 | S008 | F37 | 2026-07-02 |
+| T68.8 | M68 | 15 | Config | completed | T68.5, T68.6 | — | S008 | F37 | 2026-07-02 |
+| T68.9 | M68 | 15 | Code | completed | T68.4, T68.5, T68.7 | — | S008 | F37 | 2026-07-02 |
+| T68.10 | M68 | 15 | Test | completed | T68.3 | — | S008 | F37 | 2026-07-02 |
+| T68.11 | M68 | 15 | Code | completed | T68.3 | D3 | S008 | F37 | 2026-07-02 |
+| T68.12 | M68 | 15 | Code | pending | T68.7, T68.11 | D3 | S008 | F37 |
+| T68.13 | M68 | 15 | Code | completed | T68.10, T68.11, T68.12 | — | S008 | F37 | 2026-07-02 |
+| T69.1 | M69 | 15 | Test | pending | — | — | S008 | F37 |
+| T69.2 | M69 | 15 | Test | pending | — | — | S008 | F37 |
+| T69.3 | M69 | 15 | Code | pending | T68.13 | D10 | S008 | F37 |
+| T69.4 | M69 | 15 | Code | pending | T69.3, T68.5 | — | S008 | F37 |
+| T69.5 | M69 | 15 | Code | pending | T69.3 | — | S008 | F37 |
+| T69.6 | M69 | 15 | Code | completed | T69.3 | — | S008 | F37 | 2026-07-02 |
+| T69.7 | M69 | 15 | Test | completed | T68.7 | D3 | S008 | F37 | 2026-07-02 |
+| T69.8 | M69 | 15 | Test | completed | T69.6 | — | S008 | F37 | 2026-07-02 |
+| T69.9 | M69 | 15 | Code | completed | T69.1–T69.8 | D3 | S008 | F37 | 2026-07-02 |
+| T70.1 | M70 | 15 | Code | pending | — | — | S008 | F37 |
+| T70.2 | M70 | 15 | Test | pending | T70.1 | — | S008 | F37 |
+| T70.3 | M70 | 15 | Code | pending | T68.2, T70.1 | — | S008 | F37 |
+| T70.4 | M70 | 15 | Code | pending | T68.2 | — | S008 | F37 |
+| T70.5 | M70 | 15 | Test | pending | T70.4 | — | S008 | F37 |
+| T70.6 | M70 | 15 | Code | pending | T70.3, T69.4 | — | S008 | F37 |
+| T70.7 | M70 | 15 | Config | pending | T70.1 | — | S008 | F37 |
+| T70.8 | M70 | 15 | Docs | completed | T65.3–T70.6 | — | S008 | F37 | 2026-07-03 |
 
 ## Phase Gate Log
 
@@ -1891,3 +2068,8 @@ CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, ba
 - [x] EV-008 runner placement — DO BackgroundTasks on internal-write-api; not new Modal app v1 (TP-S007-04)
 - [x] EV-008 viewer policy — admin-only eval routes; viewer → 403 (TP-S007-06, RD-110)
 - [x] EV-008 #84 coordination — `GroundednessScorer` adapter stub; FaithfulnessEvaluator default (TP-S007-09)
+- [x] EV-009 build order — M65→M70 UX first, playground last (TP-S008-01, R70)
+- [x] EV-009 unified jobs — DM backend HTTP aggregate eval runs (TP-S008-03, RD-116)
+- [x] EV-009 playground model — fixed Modal LLM; no picker v1 (TP-S008-06, RD-132)
+- [x] EV-009 ChatRAG config — direct Postgres read + env fallback (TP-S008-12, RD-134)
+- [x] EV-009 super-admin — `VECINITA_SUPER_ADMIN_EMAIL` seed (TP-S008-10, RD-127)

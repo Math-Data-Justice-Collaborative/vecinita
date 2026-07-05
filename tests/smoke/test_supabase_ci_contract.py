@@ -69,6 +69,50 @@ def test_supabase_ci_sync_script_exists() -> None:
     assert CI_SYNC.is_file()
 
 
+def test_supabase_ci_sync_preview_branch_links_before_create() -> None:
+    """Preview branch flow must link the canonical project before branches create."""
+    script = CI_SYNC.read_text(encoding="utf-8")
+    preview_start = script.index("preview_branch()")
+    preview_end = script.index("delete_preview_branch()")
+    preview_section = script[preview_start:preview_end]
+    link_pos = preview_section.index("link_project")
+    create_pos = preview_section.index("branches create")
+    assert link_pos < create_pos, "link_project must run before supabase branches create"
+    assert '--project-ref "$PROJECT_REF"' in preview_section
+
+
+def test_supabase_ci_sync_preview_branch_targets_branch_not_production() -> None:
+    """Preview sync pushes migrations/config to the branch project, not the canonical ref."""
+    script = CI_SYNC.read_text(encoding="utf-8")
+    preview_start = script.index("wait_for_preview_branch()")
+    preview_end = script.index("sync_production()")
+    preview_section = script[preview_start:preview_end]
+    assert "branches get" in preview_section
+    assert "db push --db-url" in preview_section
+    assert 'config push --project-ref "$branch_ref"' in preview_section
+    assert "wait_for_preview_branch" in preview_section
+
+
+def test_supabase_ci_sync_accepts_supabase_project_id_alias() -> None:
+    """CLI sync accepts SUPABASE_PROJECT_ID per Supabase managing-environments docs."""
+    script = CI_SYNC.read_text(encoding="utf-8")
+    assert "SUPABASE_PROJECT_ID" in script
+
+
+def test_supabase_workflow_deletes_preview_branch_on_pr_close() -> None:
+    """Preview branches persist during review and tear down when the PR closes."""
+    text = _workflow_text()
+    assert "types: [opened, synchronize, reopened, closed]" in text
+    delete_start = text.index("delete-preview-branch:")
+    delete_section = text[delete_start:]
+    assert "github.event.action == 'closed'" in delete_section
+    assert "delete-preview" in delete_section
+    preview_start = text.index("preview-branch:")
+    preview_end = text.index("delete-preview-branch:")
+    preview_section = text[preview_start:preview_end]
+    assert "delete-preview" not in preview_section
+
+
 def test_supabase_config_toml_invite_only_and_canonical_project() -> None:
     """config.toml disables public signup and pins the canonical project ref."""
     text = CONFIG_TOML.read_text(encoding="utf-8")
@@ -81,11 +125,15 @@ def test_supabase_config_toml_invite_only_and_canonical_project() -> None:
 
 
 def test_sync_production_job_gated_on_main_and_secrets() -> None:
-    """Production sync runs only on main pushes; token detection happens in a step."""
+    """Production sync job is manual-only; main-path sync runs in deploy-modal supabase-sync."""
     text = _workflow_text()
-    assert "refs/heads/main" in text
-    assert "Detect Supabase access token" in text
-    assert "sync-production:" in text
+    sync_start = text.index("sync-production:")
+    sync_section = text[sync_start:]
+    assert "if: github.event_name == 'workflow_dispatch'" in sync_section
+    assert "Detect Supabase access token" in sync_section
+    deploy_modal = (REPO_ROOT / ".github/workflows/deploy-modal.yml").read_text(encoding="utf-8")
+    assert "supabase-sync:" in deploy_modal
+    assert "head_branch == 'main'" in deploy_modal
 
 
 # --- EV-006 F35: Resend SMTP + versioned email templates (TC-094, TC-095) ---

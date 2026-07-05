@@ -119,6 +119,8 @@ ignore = [
     "PLC0415",
     "BLE001",
     "S110",
+    "S310",
+    "C901",
     "ANN201",
     "ANN202",
     "INP001",
@@ -185,7 +187,7 @@ indent-style = "space"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = [".", "scripts/deploy"]
+pythonpath = [".", "scripts"]
 addopts = "-q --tb=short"
 markers = [
     "integration: integration tests (may need docker-compose DB)",
@@ -233,7 +235,7 @@ exclude_also = [
 [tool.basedpyright]
 include = ["apps", "packages", "tests", "infra", "scripts"]
 exclude = ["**/__pycache__", ".venv", ".pytest_cache", "**/node_modules"]
-extraPaths = [".cursor/hooks", "scripts/deploy"]
+extraPaths = [".cursor/hooks", "scripts"]
 stubPath = "stubs"
 pythonVersion = "3.11"
 typeCheckingMode = "strict"
@@ -250,7 +252,7 @@ reportAny = "error"
 # untyped-library-glue families that would otherwise drown out those signals.
 [[tool.basedpyright.executionEnvironments]]
 root = "tests"
-extraPaths = [".cursor/hooks", "scripts/deploy"]
+extraPaths = [".cursor/hooks", "scripts"]
 
 [[tool.basedpyright.executionEnvironments]]
 root = "infra"

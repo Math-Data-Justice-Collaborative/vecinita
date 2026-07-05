@@ -71,6 +71,42 @@ Eval runner and thresholds for golden-set harness + admin tab. Judge LLM reuses 
 | `VECINITA_EVAL_JUDGE_QUERY_LANGUAGE` | string | `true` | No | When `true`, LlamaIndex judge rubric follows question locale (RD-109) |
 | `VECINITA_EVAL_CORPUS_PROFILE` | string | `fixture` | No | `fixture` \| `staging` — which corpus to run against (04-tech-plan) |
 
+### Eval playground + production config (EV-009 F37)
+
+Sandbox eval overrides are per-run / per-preset (API body), not env vars. Production values
+after promote are stored in `rag_production_config` (DB); env vars below are bootstrap/fallback only.
+
+| Variable | Type | Default | Required | Description |
+|----------|------|---------|----------|-------------|
+| `VECINITA_SUPER_ADMIN_EMAIL` | string | — | Yes (staging/prod) | Canonical operator email seeded with `role=super-admin` for promote |
+| `VECINITA_RAG_CONFIG_FALLBACK_TOP_K` | int | `5` | No | ChatRAG fallback when no active DB config |
+| `VECINITA_RAG_CONFIG_FALLBACK_MIN_RETRIEVAL_SCORE` | float | `0.2` | No | Fallback min similarity |
+| `VECINITA_RAG_CONFIG_FALLBACK_SYSTEM_PROMPT` | string | (built-in) | No | Fallback system rules text |
+| `VECINITA_RAG_CONFIG_FALLBACK_MAX_TOKENS` | int | `256` | No | Fallback LLM max tokens |
+| `VECINITA_RAG_CONFIG_FALLBACK_TEMPERATURE` | float | `0.2` | No | Fallback LLM temperature |
+| `VECINITA_EVAL_JUDGE_TEMPERATURE_DEFAULT` | float | `0.2` | No | Default judge temperature in playground |
+
+#### `EvalConfig` validation bounds (API body / preset / promote)
+
+Validated in `vecinita_shared_schemas` per ADR-035 §5. Playground form defaults match ChatRAG env
+defaults (RD-137), not live production DB config until user loads a preset.
+
+| Field | Type | Bounds | Default |
+|-------|------|--------|---------|
+| `top_k` | int | 1–50 | 5 |
+| `min_retrieval_score` | float | 0.0–1.0 | 0.2 |
+| `system_prompt` | string | 1–8000 chars | built-in ChatRAG default |
+| `max_tokens` | int | 1–1024 | 256 |
+| `temperature` | float | 0.0–2.0 | 0.2 |
+| `corpus_profile` | enum | `fixture` \| `staging` | `fixture` |
+| `criteria_ids` | uuid[] | must reference enabled `eval_criteria` rows | all active |
+| `judge_temperature` | float | 0.0–2.0 | 0.2 |
+| `model_id` | string | valid Ollama tag on Modal `vecinita-models` volume | `qwen2.5:1.5b-instruct` |
+
+Model selection: **Ollama model picker** on Modal (RD-139–RD-141). Playground lists models via
+Ollama API; missing models trigger a Modal background pull job into `vecinita-models`. Promote
+includes `model_id` so production ChatRAG switches LLM at runtime.
+
 ### Admin auth — Supabase (EV-005 F34)
 
 Used by the **Data Management API** and the **Internal Write API** to verify operator Supabase

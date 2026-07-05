@@ -13,6 +13,8 @@ Vecinita is a **five-application monorepo** delivering a **bilingual (English/Sp
 
 Five deployable applications share Postgres (pgvector) and internal packages. **Only DigitalOcean backends hold `DATABASE_URL`**; Modal workers persist data by calling a **DO internal write API** (RD-016).
 
+**Diagrams:** Mermaid deployment topology, ERD, sequences, state machines, and class diagrams live in [data-flow.md](data-flow.md) and [architecture.md](architecture.md). User journey maps: [user-journeys.md](user-journeys.md#visual-journey-maps).
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                         DigitalOcean (US: nyc1/sfo3)                          │

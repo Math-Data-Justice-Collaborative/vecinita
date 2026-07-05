@@ -21,11 +21,11 @@ from urllib.parse import parse_qs, urlparse
 
 import yaml
 
-_DEPLOY_DIR = Path(__file__).resolve().parent
-if str(_DEPLOY_DIR) not in sys.path:
-    sys.path.insert(0, str(_DEPLOY_DIR))
+_SCRIPTS_DIR = Path(__file__).resolve().parent.parent
+if str(_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS_DIR))
 
-from modal_url_validate import validate_modal_service_url  # noqa: E402
+from deploy.modal_url_validate import validate_modal_service_url  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SPECS = [

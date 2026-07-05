@@ -19,6 +19,7 @@ from vecinita_shared_schemas.data_management import (
 from vecinita_shared_schemas.supabase_admin import SupabaseAdminClient, SupabaseAdminError
 
 from vecinita_data_management_backend.email_test import ResendClient
+from vecinita_data_management_backend.eval_jobs import eval_run_to_job
 from vecinita_data_management_backend.rate_limit import SlidingWindowRateLimiter
 from vecinita_data_management_backend.store import InMemoryJobStore, JobStore, job_record_to_schema
 from vecinita_data_management_backend.user_admin_routes import register_user_admin_routes
@@ -84,6 +85,25 @@ def _check_proxy_auth(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
 
+def _default_eval_runs_client() -> InternalWriteClient | None:
+    """Build internal-write client for eval run aggregation, or None when unconfigured."""
+    try:
+        return InternalWriteClient()
+    except InternalWriteClientError:
+        return None
+
+
+def _fetch_eval_jobs(eval_client: InternalWriteClient | None) -> list[Job]:
+    """Return eval runs mapped to Job rows; empty when client is absent or request fails."""
+    if eval_client is None:
+        return []
+    try:
+        listing = eval_client.list_eval_runs(page_size=100)
+    except InternalWriteClientError:
+        return []
+    return [eval_run_to_job(item) for item in listing.items]
+
+
 _STAGING_CORS_ORIGINS = "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app,https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app"
 
 
@@ -98,6 +118,7 @@ def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectab
     invite_limiter: SlidingWindowRateLimiter | None = None,
     resend_client: ResendClient | None = None,
     email_test_limiter: SlidingWindowRateLimiter | None = None,
+    eval_runs_client: InternalWriteClient | None = None,
 ) -> FastAPI:
     """Build the Data Management ASGI app with job routes and optional pipeline runner."""
     app = FastAPI(title="Vecinita Data Management", version="0.1.0")
@@ -108,6 +129,9 @@ def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectab
     job_store = store or InMemoryJobStore()
     runner = pipeline_runner
     require_admin = require_role("admin")
+    resolved_eval_client = (
+        eval_runs_client if eval_runs_client is not None else _default_eval_runs_client()
+    )
 
     def auth_dep(
         modal_key: Annotated[str | None, Header(alias=_PROXY_HEADER)] = None,
@@ -163,9 +187,12 @@ def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectab
         ] = None,
     ) -> JobList:
         records = job_store.list_jobs()
+        jobs = [job_record_to_schema(record) for record in records]
+        jobs.extend(_fetch_eval_jobs(resolved_eval_client))
         if status_filter is not None:
-            records = [record for record in records if record.status == status_filter]
-        return JobList(jobs=[job_record_to_schema(record) for record in records])
+            jobs = [job for job in jobs if job.status == status_filter]
+        jobs.sort(key=lambda job: job.updated_at, reverse=True)
+        return JobList(jobs=jobs)
 
     @app.get("/jobs/{job_id}", response_model=Job)
     def get_job(  # pyright: ignore[reportUnusedFunction]

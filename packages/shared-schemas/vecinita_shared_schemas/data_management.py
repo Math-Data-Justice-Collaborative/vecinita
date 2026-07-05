@@ -10,7 +10,8 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator, model_validator
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-Role = Literal["admin", "viewer"]
+AssignableRole = Literal["admin", "viewer"]
+Role = Literal["admin", "viewer", "super-admin"]
 UserStatus = Literal["active", "invited", "disabled"]
 
 
@@ -57,7 +58,7 @@ class Job(BaseModel):
 
     job_id: UUID
     status: Literal["pending", "running", "completed", "failed"]
-    job_type: Literal["ingest", "retag"] = "ingest"
+    job_type: Literal["ingest", "retag", "eval"] = "ingest"
     urls: list[HttpUrl]
     error_code: str | None = None
     error_message: str | None = None
@@ -106,7 +107,7 @@ class InviteUserRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     email: str
-    role: Role = "viewer"
+    role: AssignableRole = "viewer"
 
     @field_validator("email")
     @classmethod
@@ -122,7 +123,7 @@ class RoleUpdateRequest(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    role: Role
+    role: AssignableRole
 
 
 class AcknowledgedResponse(BaseModel):

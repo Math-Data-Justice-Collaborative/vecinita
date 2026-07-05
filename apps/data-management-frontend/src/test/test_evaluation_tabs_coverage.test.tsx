@@ -47,8 +47,15 @@ vi.mock("recharts", async () => {
         { "data-testid": "mock-area-chart" },
         children,
       ),
+    ScatterChart: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        "div",
+        { "data-testid": "mock-scatter-chart" },
+        children,
+      ),
     Line: () => null,
     Area: () => null,
+    Scatter: () => null,
     CartesianGrid: () => null,
     XAxis: () => null,
     YAxis: () => null,
@@ -416,5 +423,121 @@ describe("evaluation tab branch coverage", () => {
     });
     fireEvent.click(screen.getByTestId("eval-chart-type-toggle"));
     expect(screen.getByTestId("evaluation-dashboard-tab")).toBeInTheDocument();
+  });
+
+  it("EvaluationExploreTab formats latency pivot values above one", async () => {
+    vi.mocked(fetchEvalRuns).mockResolvedValue({
+      items: [
+        {
+          run_id: "20260701-0000-0000-0000-000000000099",
+          status: "completed",
+          metrics_summary: {},
+        },
+      ],
+      page: 1,
+      page_size: 20,
+      total_count: 1,
+    });
+    vi.mocked(fetchEvalRunDetail).mockResolvedValue({
+      run_id: "20260701-0000-0000-0000-000000000099",
+      status: "completed",
+      metrics_summary: {},
+      items: [
+        {
+          case_id: "case-a",
+          locale: "en",
+          question: "Q?",
+          retrieved_urls: [],
+          metrics: {
+            retrieval_pass: true,
+            faithfulness: 0.8,
+            answer_relevancy: 0.7,
+            latency_ms: 4200,
+          },
+        },
+      ],
+    });
+
+    renderTab(<EvaluationExploreTab />);
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-pivot-table")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId("eval-pivot-row-axis"), {
+      target: { value: "metric" },
+    });
+    fireEvent.change(screen.getByTestId("eval-pivot-col-axis"), {
+      target: { value: "locale" },
+    });
+    expect(screen.getByTestId("eval-pivot-table")).toHaveTextContent("4200");
+  });
+
+  it("EvaluationDashboardTab supports custom range, scatter charts, thresholds, and collapse", async () => {
+    vi.mocked(fetchEvalTimeseries).mockResolvedValue({
+      points: [
+        {
+          run_id: "00000000-0000-0000-0000-000000000099",
+          completed_at: "2026-07-01T12:01:00Z",
+          metrics_summary: {
+            retrieval_relevance: 0.9,
+            faithfulness: 0.8,
+            answer_relevancy: 0.7,
+            latency_p95_ms: 4200,
+          },
+        },
+        {
+          run_id: "00000000-0000-0000-0000-000000000088",
+          completed_at: "2025-01-01T12:01:00Z",
+          metrics_summary: {
+            retrieval_relevance: 0.5,
+            faithfulness: 0.4,
+            answer_relevancy: 0.3,
+            latency_p95_ms: 5000,
+          },
+        },
+      ],
+      available_metrics: [
+        "retrieval_relevance",
+        "faithfulness",
+        "answer_relevancy",
+        "latency_p95_ms",
+      ],
+    });
+
+    renderTab(<EvaluationDashboardTab />);
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("evaluation-dashboard-tab"),
+      ).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("eval-time-preset-custom"));
+    fireEvent.change(screen.getByTestId("eval-custom-range-start"), {
+      target: { value: "2024-01-01" },
+    });
+    fireEvent.change(screen.getByTestId("eval-custom-range-end"), {
+      target: { value: "2024-01-31" },
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-custom-range-empty")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("eval-time-preset-7D"));
+    fireEvent.click(screen.getByTestId("eval-chart-type-toggle"));
+    fireEvent.click(screen.getByTestId("eval-chart-type-toggle"));
+    fireEvent.click(screen.getByTestId("eval-chart-type-toggle"));
+    fireEvent.click(screen.getByRole("button", { name: /threshold/i }));
+    fireEvent.click(screen.getByTestId("eval-panel-toggle-faithfulness"));
+    expect(screen.getByTestId("eval-panel-faithfulness")).toBeInTheDocument();
+  });
+
+  it("EvaluationDashboardTab surfaces Error message from fetchEvalTimeseries", async () => {
+    vi.mocked(fetchEvalTimeseries).mockRejectedValue(
+      new Error("timeseries down"),
+    );
+    renderTab(<EvaluationDashboardTab />);
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent("timeseries down");
+    });
   });
 });

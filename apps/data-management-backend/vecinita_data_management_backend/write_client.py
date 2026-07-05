@@ -12,6 +12,7 @@ from vecinita_shared_schemas.internal_write import (
     BatchUpsertRequest,
     BatchUpsertResponse,
     DocumentDetail,
+    EvalRunListResponse,
     TagInput,
     TagPatchRequest,
     TagPatchResponse,
@@ -104,3 +105,15 @@ class InternalWriteClient:
         if response.status_code >= HTTPStatus.BAD_REQUEST:
             msg = f"post_audit_event failed: {response.status_code} {response.text}"
             raise InternalWriteClientError(msg)
+
+    def list_eval_runs(self, *, page: int = 1, page_size: int = 100) -> EvalRunListResponse:
+        """Fetch eval run history for unified jobs aggregation (ADR-035 §3)."""
+        response = self._client.get(
+            "/internal/v1/eval/runs",
+            params={"page": page, "page_size": page_size},
+            headers=self._headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"list_eval_runs failed: {response.status_code} {response.text}"
+            raise InternalWriteClientError(msg)
+        return EvalRunListResponse.model_validate(response.json())

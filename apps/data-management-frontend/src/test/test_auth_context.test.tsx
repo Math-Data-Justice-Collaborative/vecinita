@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { AuthProvider } from "@/auth/AuthContext";
-import { useAuth, useIsAdmin } from "@/auth/authContext";
+import { useAuth, useIsAdmin, useIsSuperAdmin } from "@/auth/authContext";
 
 describe("AuthContext hooks", () => {
   it("updates the session when Supabase emits an auth state change", async () => {
@@ -122,6 +122,105 @@ describe("AuthContext hooks", () => {
     const { result } = renderHook(() => useIsAdmin(), { wrapper });
     await waitFor(() => {
       expect(result.current).toBe(true);
+    });
+  });
+
+  it("useIsAdmin returns true for super-admin role", async () => {
+    const { setSupabaseClientForTests } = await import("@/auth/supabaseClient");
+    setSupabaseClientForTests({
+      auth: {
+        getSession: vi.fn().mockResolvedValue({
+          data: {
+            session: {
+              access_token: "jwt",
+              user: {
+                id: "s1",
+                email: "super@vecinita.admin",
+                app_metadata: { role: "super-admin" },
+              },
+            },
+          },
+        }),
+        onAuthStateChange: vi.fn().mockReturnValue({
+          data: { subscription: { unsubscribe: vi.fn() } },
+        }),
+        signInWithPassword: vi.fn(),
+        signOut: vi.fn(),
+      },
+    } as never);
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <AuthProvider>{children}</AuthProvider>
+    );
+    const { result } = renderHook(() => useIsAdmin(), { wrapper });
+    await waitFor(() => {
+      expect(result.current).toBe(true);
+    });
+  });
+
+  it("useIsSuperAdmin returns true only for super-admin role", async () => {
+    const { setSupabaseClientForTests } = await import("@/auth/supabaseClient");
+    setSupabaseClientForTests({
+      auth: {
+        getSession: vi.fn().mockResolvedValue({
+          data: {
+            session: {
+              access_token: "jwt",
+              user: {
+                id: "s1",
+                email: "super@vecinita.admin",
+                app_metadata: { role: "super-admin" },
+              },
+            },
+          },
+        }),
+        onAuthStateChange: vi.fn().mockReturnValue({
+          data: { subscription: { unsubscribe: vi.fn() } },
+        }),
+        signInWithPassword: vi.fn(),
+        signOut: vi.fn(),
+      },
+    } as never);
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <AuthProvider>{children}</AuthProvider>
+    );
+    const { result } = renderHook(() => useIsSuperAdmin(), { wrapper });
+    await waitFor(() => {
+      expect(result.current).toBe(true);
+    });
+  });
+
+  it("useIsSuperAdmin returns false for admin role", async () => {
+    const { setSupabaseClientForTests } = await import("@/auth/supabaseClient");
+    setSupabaseClientForTests({
+      auth: {
+        getSession: vi.fn().mockResolvedValue({
+          data: {
+            session: {
+              access_token: "jwt",
+              user: {
+                id: "a1",
+                email: "admin@vecinita.admin",
+                app_metadata: { role: "admin" },
+              },
+            },
+          },
+        }),
+        onAuthStateChange: vi.fn().mockReturnValue({
+          data: { subscription: { unsubscribe: vi.fn() } },
+        }),
+        signInWithPassword: vi.fn(),
+        signOut: vi.fn(),
+      },
+    } as never);
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <AuthProvider>{children}</AuthProvider>
+    );
+    const { result } = renderHook(() => useIsSuperAdmin(), { wrapper });
+    await waitFor(() => {
+      expect(result.current).toBe(false);
     });
   });
 

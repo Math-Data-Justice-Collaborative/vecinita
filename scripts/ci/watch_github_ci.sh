@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Watch GitHub Actions for a branch after push.
-# - All branches: ci.yml (python + frontend)
-# - main only: deploy-preflight.yml (build-smoke + modal-secrets)
+# - All branches: ci.yml (python + frontend + packages + ui-e2e + coverage)
+# - main only: deploy-preflight.yml (after CI succeeds; build-smoke + modal-secrets)
+#
+# CD chain on main (not watched here — see ci-after-push.mdc):
+#   CI → Deploy preflight → Deploy Modal → Deploy DigitalOcean
 #
 # Usage: scripts/ci/watch_github_ci.sh [branch]
 set -euo pipefail

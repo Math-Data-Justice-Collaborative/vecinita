@@ -11,11 +11,12 @@ import pytest
 from sqlalchemy import create_engine, text
 from vecinita_eval.modal_llm import default_eval_runtime
 from vecinita_eval.runner import EvalSummary, run_golden_eval
-from vecinita_internal_write_api.eval_service import create_eval_run, execute_eval_run
+from vecinita_internal_write_api.eval_service import execute_eval_run
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
+from tests.helpers.eval_runs import create_test_eval_run
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -47,8 +48,8 @@ def test_execute_eval_run_wires_default_judge_and_llm_when_modal_url_set(
 ) -> None:
     """Factory eval path must pass judge + LLM when VECINITA_MODAL_LLM_URL is configured."""
     monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://llm.test")
-    created = create_eval_run(engine, corpus_profile="fixture")
-    run_id = created.run_id
+    created = create_test_eval_run(engine, corpus_profile="fixture")
+    run_id = created.response.run_id
     summary = EvalSummary(
         retrieval_relevance=0.5,
         faithfulness=0.75,
@@ -63,7 +64,6 @@ def test_execute_eval_run_wires_default_judge_and_llm_when_modal_url_set(
             execute_eval_run(
                 engine,
                 run_id=run_id,
-                corpus_profile="fixture",
                 embed_fn=eval_embed_fn,
             )
 

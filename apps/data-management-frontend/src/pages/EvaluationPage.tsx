@@ -5,21 +5,23 @@ import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   type EvalRunDetailApi,
   type EvalRunListItemApi,
   fetchEvalRunDetail,
   fetchEvalRuns,
-  triggerEvalRun,
 } from "@/api/admin";
 import { requireCorpusConfig } from "@/config";
 import { useAdminT } from "@/hooks/useAdminT";
 import { cn } from "@/lib/utils";
+import { EvaluationCompareView } from "@/evaluation/EvaluationCompareView";
 import { EvaluationCriteriaTab } from "@/evaluation/EvaluationCriteriaTab";
 import { EvaluationDashboardTab } from "@/evaluation/EvaluationDashboardTab";
 import { EvaluationDrilldownTable } from "@/evaluation/EvaluationDrilldownTable";
 import { EvaluationExploreTab } from "@/evaluation/EvaluationExploreTab";
+import { EvaluationPlaygroundTab } from "@/evaluation/EvaluationPlaygroundTab";
 
 const DISPLAY_MIN = 0.7;
 
@@ -58,8 +60,12 @@ export function EvaluationPage() {
   const [runs, setRuns] = useState<EvalRunListItemApi[]>([]);
   const [selectedRun, setSelectedRun] = useState<EvalRunDetailApi | null>(null);
   const [loading, setLoading] = useState(true);
-  const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [compareRunAId, setCompareRunAId] = useState<string>("");
+  const [compareRunBId, setCompareRunBId] = useState<string>("");
+  const [compareRunA, setCompareRunA] = useState<EvalRunDetailApi | null>(null);
+  const [compareRunB, setCompareRunB] = useState<EvalRunDetailApi | null>(null);
 
   const loadHistory = useCallback(
     async (isActive: () => boolean) => {
@@ -91,6 +97,12 @@ export function EvaluationPage() {
     [tr],
   );
 
+  const handleSelectRun = useCallback(async (runId: string) => {
+    const client = requireCorpusConfig();
+    const detail = await fetchEvalRunDetail(client, runId);
+    setSelectedRun(detail);
+  }, []);
+
   useEffect(() => {
     let active = true;
     void loadHistory(() => active);
@@ -99,12 +111,34 @@ export function EvaluationPage() {
     };
   }, [loadHistory]);
 
+  const runFromQuery = searchParams.get("run");
+
+  useEffect(() => {
+    if (!runFromQuery || loading) return;
+    const exists = runs.some((run) => run.run_id === runFromQuery);
+    if (!exists) return;
+    if (selectedRun?.run_id === runFromQuery) return;
+    void handleSelectRun(runFromQuery);
+  }, [runFromQuery, runs, loading, selectedRun?.run_id, handleSelectRun]);
+
   const pollRun = useCallback(
     async (runId: string) => {
       const client = requireCorpusConfig();
       for (let attempt = 0; attempt < 40; attempt += 1) {
         const detail = await fetchEvalRunDetail(client, runId);
         setSelectedRun(detail);
+        setRuns((prev) =>
+          prev.map((run) =>
+            run.run_id === runId
+              ? {
+                  ...run,
+                  status: detail.status,
+                  metrics_summary: detail.metrics_summary,
+                  error_message: detail.error_message ?? null,
+                }
+              : run,
+          ),
+        );
         if (detail.status === "completed" || detail.status === "failed") {
           break;
         }
@@ -117,27 +151,62 @@ export function EvaluationPage() {
     [loadHistory],
   );
 
-  const handleRun = useCallback(async () => {
-    setRunning(true);
-    setError(null);
-    try {
-      const client = requireCorpusConfig();
-      const created = await triggerEvalRun(client, "fixture");
-      await pollRun(created.run_id);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : tr("admin.evaluation.loadFailed"),
-      );
-    } finally {
-      setRunning(false);
-    }
-  }, [pollRun, tr]);
+  const handlePlaygroundRunCreated = useCallback(
+    (runId: string) => {
+      const optimisticRun: EvalRunListItemApi = {
+        run_id: runId,
+        status: "pending",
+        metrics_summary: {},
+      };
+      setRuns((prev) => [
+        optimisticRun,
+        ...prev.filter((run) => run.run_id !== runId),
+      ]);
+      setSelectedRun({
+        run_id: runId,
+        status: "pending",
+        metrics_summary: {},
+        items: [],
+      });
+      void pollRun(runId);
+    },
+    [pollRun],
+  );
 
-  const handleSelectRun = useCallback(async (runId: string) => {
+  const handleOpenPlayground = useCallback(() => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("tab", "playground");
+      return next;
+    });
+  }, [setSearchParams]);
+
+  useEffect(() => {
+    if (!compareOpen || !compareRunAId || !compareRunBId) {
+      setCompareRunA(null);
+      setCompareRunB(null);
+      return;
+    }
+    let active = true;
     const client = requireCorpusConfig();
-    const detail = await fetchEvalRunDetail(client, runId);
-    setSelectedRun(detail);
-  }, []);
+    void Promise.all([
+      fetchEvalRunDetail(client, compareRunAId),
+      fetchEvalRunDetail(client, compareRunBId),
+    ])
+      .then(([runA, runB]) => {
+        if (!active) return;
+        setCompareRunA(runA);
+        setCompareRunB(runB);
+      })
+      .catch(() => {
+        if (!active) return;
+        setCompareRunA(null);
+        setCompareRunB(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [compareOpen, compareRunAId, compareRunBId]);
 
   const summary = selectedRun?.metrics_summary;
   const judgesLikelySkipped =
@@ -163,23 +232,18 @@ export function EvaluationPage() {
             onClick={() => {
               void loadHistory(() => true);
             }}
-            disabled={loading || running}
+            disabled={loading}
           >
             <RefreshCw className="mr-2 h-4 w-4" />
             {tr("shared.refresh")}
           </Button>
           <Button
             type="button"
-            onClick={() => {
-              void handleRun();
-            }}
-            disabled={running}
+            onClick={handleOpenPlayground}
             data-testid="evaluation-run-button"
           >
             <FlaskConical className="mr-2 h-4 w-4" />
-            {running
-              ? tr("admin.evaluation.running")
-              : tr("admin.evaluation.run")}
+            {tr("admin.evaluation.run")}
           </Button>
         </div>
       </div>
@@ -220,9 +284,12 @@ export function EvaluationPage() {
           <TabsTrigger value="criteria" data-testid="eval-tab-criteria">
             {tr("admin.evaluation.tab.criteria")}
           </TabsTrigger>
+          <TabsTrigger value="playground" data-testid="eval-tab-playground">
+            {tr("admin.evaluation.tab.playground")}
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="runs" className="space-y-6">
+        <TabsContent value="runs" className="space-y-6" forceMount>
           {summary ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <Card>
@@ -275,10 +342,70 @@ export function EvaluationPage() {
           ) : null}
 
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
               <CardTitle>{tr("admin.evaluation.history")}</CardTitle>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                data-testid="eval-compare-toggle"
+                onClick={() => {
+                  setCompareOpen((open) => !open);
+                }}
+              >
+                {tr("admin.evaluation.compare.toggle")}
+              </Button>
             </CardHeader>
             <CardContent>
+              {compareOpen ? (
+                <div
+                  className="mb-4 grid gap-3 sm:grid-cols-2"
+                  data-testid="eval-compare-selectors"
+                >
+                  <div className="space-y-2">
+                    <Label htmlFor="eval-compare-run-a-select">
+                      {tr("admin.evaluation.compare.runA")}
+                    </Label>
+                    <select
+                      id="eval-compare-run-a-select"
+                      data-testid="eval-compare-run-a-select"
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                      value={compareRunAId}
+                      onChange={(event) => {
+                        setCompareRunAId(event.target.value);
+                      }}
+                    >
+                      <option value="">—</option>
+                      {runs.map((run) => (
+                        <option key={run.run_id} value={run.run_id}>
+                          {run.run_id}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="eval-compare-run-b-select">
+                      {tr("admin.evaluation.compare.runB")}
+                    </Label>
+                    <select
+                      id="eval-compare-run-b-select"
+                      data-testid="eval-compare-run-b-select"
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                      value={compareRunBId}
+                      onChange={(event) => {
+                        setCompareRunBId(event.target.value);
+                      }}
+                    >
+                      <option value="">—</option>
+                      {runs.map((run) => (
+                        <option key={run.run_id} value={run.run_id}>
+                          {run.run_id}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              ) : null}
               {loading && runs.length === 0 ? (
                 <p className="text-muted-foreground">{tr("shared.loading")}</p>
               ) : null}
@@ -311,6 +438,17 @@ export function EvaluationPage() {
             </CardContent>
           </Card>
 
+          {compareOpen && compareRunA && compareRunB ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>{tr("admin.evaluation.compare.toggle")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <EvaluationCompareView runA={compareRunA} runB={compareRunB} />
+              </CardContent>
+            </Card>
+          ) : null}
+
           {selectedRun ? (
             <Card>
               <CardHeader>
@@ -341,6 +479,10 @@ export function EvaluationPage() {
 
         <TabsContent value="criteria">
           <EvaluationCriteriaTab />
+        </TabsContent>
+
+        <TabsContent value="playground">
+          <EvaluationPlaygroundTab onRunCreated={handlePlaygroundRunCreated} />
         </TabsContent>
       </Tabs>
     </div>

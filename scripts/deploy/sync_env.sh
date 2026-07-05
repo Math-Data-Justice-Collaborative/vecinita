@@ -92,8 +92,15 @@ if [[ "$DO_SUPABASE" -eq 1 ]]; then
     if [[ "$APPLY" -eq 1 ]]; then
       echo "==> [Supabase] seeding first admin (idempotent)"
       uv run --with httpx python scripts/seed_first_admin.py
+      if [[ -n "${VECINITA_SUPER_ADMIN_EMAIL:-}" ]]; then
+        echo "==> [Supabase] seeding super-admin (idempotent)"
+        uv run --with httpx python scripts/seed_super_admin.py
+      fi
     else
       echo "    Dry run: would run scripts/seed_first_admin.py for ${SUPABASE_ADMIN_EMAIL}."
+      if [[ -n "${VECINITA_SUPER_ADMIN_EMAIL:-}" ]]; then
+        echo "    Dry run: would run scripts/seed_super_admin.py for ${VECINITA_SUPER_ADMIN_EMAIL}."
+      fi
     fi
   fi
 fi

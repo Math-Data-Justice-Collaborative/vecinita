@@ -136,6 +136,54 @@ def test_require_role_admin_allows_admin() -> None:
     assert response.status_code == HTTPStatus.OK
 
 
+def test_require_role_admin_allows_super_admin() -> None:
+    """Super-admin satisfies admin-only role checks (ADR-035 §9)."""
+    app = FastAPI()
+    private_key = generate_es256_keypair()
+    cfg = make_auth_config(private_key)
+    super_admin_token = sign_test_jwt(private_key, role="super-admin")
+
+    @app.get("/write", dependencies=[Depends(require_role("admin"))])
+    def write_route() -> dict[str, str]:  # pyright: ignore[reportUnusedFunction]
+        """Write route."""
+        return {"ok": "true"}
+
+    def override_principal() -> AuthPrincipal:
+        """Override principal."""
+        return verify_supabase_jwt(super_admin_token, config=cfg)
+
+    app.dependency_overrides[get_principal] = override_principal
+    client = TestClient(app)
+    response = client.get("/write")
+    assert response.status_code == HTTPStatus.OK
+
+
+def test_verify_super_admin_jwt_returns_super_admin_role() -> None:
+    """Test verify valid super-admin jwt returns super-admin role."""
+    private_key = generate_es256_keypair()
+    user_id = uuid4()
+    token = sign_test_jwt(private_key, sub=user_id, role="super-admin")
+    cfg = make_auth_config(private_key)
+
+    principal = verify_supabase_jwt(token, config=cfg)
+
+    assert principal.sub == user_id
+    assert principal.role == "super-admin"
+
+
+def test_require_admin_write_allows_super_admin() -> None:
+    """Super-admin passes admin write dependency."""
+    private_key = generate_es256_keypair()
+    cfg = make_auth_config(private_key)
+    super_admin = verify_supabase_jwt(
+        sign_test_jwt(private_key, role="super-admin"),
+        config=cfg,
+    )
+    ctx = require_admin_write(AuthContext(principal=super_admin, is_service=False))
+    assert ctx.principal is not None
+    assert ctx.principal.role == "super-admin"
+
+
 def test_resolve_operator_or_service_accepts_internal_api_key() -> None:
     """Test resolve operator or service accepts internal api key."""
     private_key = generate_es256_keypair()

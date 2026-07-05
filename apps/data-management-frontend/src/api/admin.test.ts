@@ -6,13 +6,28 @@ import {
   bulkDeleteDocuments,
   bulkTagDocuments,
   bulkUpdateMetadata,
+  cloneEvalConfigPreset,
+  createEvalConfigPreset,
+  createEvalCriterion,
   fetchAuditLog,
   fetchDocumentHistory,
+  fetchActiveRagConfig,
+  fetchEvalConfigPresets,
+  fetchEvalCriteria,
+  fetchEvalRunDetail,
+  fetchEvalRuns,
+  fetchEvalTimeseries,
   fetchHealthAggregate,
+  fetchOllamaModels,
   fetchStatsSummary,
   parseAuditLogResponse,
   parseHealthAggregate,
   parseStatsSummary,
+  promoteRagConfig,
+  triggerEvalRun,
+  triggerPlaygroundEvalRun,
+  updateEvalConfigPreset,
+  updateEvalCriterion,
 } from "./admin";
 
 const CLIENT = { baseUrl: "http://localhost:8002", apiKey: "test-key" };
@@ -443,5 +458,732 @@ describe("admin API fetch helpers", () => {
     await bulkDeleteDocuments(bare, []);
     await bulkTagDocuments(bare, [], [], []);
     await bulkUpdateMetadata(bare, [], {});
+  });
+});
+
+const EVAL_CONFIG = {
+  top_k: 5,
+  min_retrieval_score: 0.2,
+  system_prompt: "Test prompt",
+  max_tokens: 256,
+  temperature: 0.2,
+  corpus_profile: "fixture" as const,
+  criteria_ids: [] as string[],
+  judge_temperature: 0.2,
+  model_id: "qwen2.5:1.5b-instruct",
+};
+
+const EVAL_PRESET = {
+  preset_id: "00000000-0000-0000-0000-0000000000aa",
+  version: 1,
+  name: "baseline",
+  config: EVAL_CONFIG,
+  shared: false,
+  owner_id: "11111111-1111-1111-1111-111111111111",
+  created_at: "2026-07-01T10:00:00Z",
+  updated_at: "2026-07-01T10:00:00Z",
+};
+
+const EVAL_CRITERION = {
+  criterion_id: "00000000-0000-0000-0000-000000000077",
+  slug: "tone-friendly",
+  label: "Friendly tone",
+  rubric: "Supportive tone",
+  scorer_type: "llm_rubric" as const,
+  enabled: true,
+  created_at: "2026-07-01T10:00:00Z",
+  updated_at: "2026-07-01T10:00:00Z",
+};
+
+describe("admin API eval helpers", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("fetchEvalRuns fetches list", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          items: [],
+          page: 1,
+          page_size: 20,
+          total_count: 0,
+        }),
+      ),
+    );
+    const runs = await fetchEvalRuns(CLIENT);
+    expect(runs.total_count).toBe(0);
+  });
+
+  it("fetchEvalRuns throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 503 })),
+    );
+    await expect(fetchEvalRuns(CLIENT)).rejects.toThrow(/503/);
+  });
+
+  it("fetchEvalRunDetail fetches detail", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          run_id: "00000000-0000-0000-0000-000000000099",
+          status: "completed",
+          metrics_summary: {},
+          items: [],
+        }),
+      ),
+    );
+    const detail = await fetchEvalRunDetail(
+      CLIENT,
+      "00000000-0000-0000-0000-000000000099",
+    );
+    expect(detail.status).toBe("completed");
+  });
+
+  it("fetchEvalRunDetail throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 404 })),
+    );
+    await expect(fetchEvalRunDetail(CLIENT, "missing")).rejects.toThrow(/404/);
+  });
+
+  it("triggerEvalRun posts corpus profile", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          run_id: "00000000-0000-0000-0000-000000000099",
+          status: "pending",
+          created_at: "2026-07-01T12:00:00Z",
+        }),
+      ),
+    );
+    const created = await triggerEvalRun(CLIENT, "staging");
+    expect(created.status).toBe("pending");
+    const body = mockFetchJsonBody();
+    expect(body["corpus_profile"]).toBe("staging");
+  });
+
+  it("triggerEvalRun throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
+    );
+    await expect(triggerEvalRun(CLIENT)).rejects.toThrow(/500/);
+  });
+
+  it("fetchEvalConfigPresets fetches presets", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(jsonResponse({ items: [EVAL_PRESET] })),
+    );
+    const presets = await fetchEvalConfigPresets(CLIENT);
+    expect(presets.items[0]?.name).toBe("baseline");
+  });
+
+  it("fetchEvalConfigPresets throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
+    );
+    await expect(fetchEvalConfigPresets(CLIENT)).rejects.toThrow(/500/);
+  });
+
+  it("createEvalConfigPreset posts body", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(jsonResponse(EVAL_PRESET)),
+    );
+    const created = await createEvalConfigPreset(CLIENT, {
+      name: "baseline",
+      config: EVAL_CONFIG,
+      shared: true,
+    });
+    expect(created.preset_id).toBe(EVAL_PRESET.preset_id);
+  });
+
+  it("createEvalConfigPreset throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 422 })),
+    );
+    await expect(
+      createEvalConfigPreset(CLIENT, {
+        name: "baseline",
+        config: EVAL_CONFIG,
+      }),
+    ).rejects.toThrow(/422/);
+  });
+
+  it("updateEvalConfigPreset patches preset", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse({ ...EVAL_PRESET, version: 2, name: "baseline-v2" }),
+        ),
+    );
+    const updated = await updateEvalConfigPreset(
+      CLIENT,
+      EVAL_PRESET.preset_id,
+      {
+        name: "baseline-v2",
+      },
+    );
+    expect(updated.version).toBe(2);
+  });
+
+  it("updateEvalConfigPreset throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 403 })),
+    );
+    await expect(
+      updateEvalConfigPreset(CLIENT, EVAL_PRESET.preset_id, { name: "x" }),
+    ).rejects.toThrow(/403/);
+  });
+
+  it("cloneEvalConfigPreset posts optional name", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          ...EVAL_PRESET,
+          preset_id: "00000000-0000-0000-0000-0000000000bb",
+        }),
+      ),
+    );
+    await cloneEvalConfigPreset(CLIENT, EVAL_PRESET.preset_id, "copy");
+    const body = mockFetchJsonBody();
+    expect(body["name"]).toBe("copy");
+  });
+
+  it("cloneEvalConfigPreset posts empty body when name omitted", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          ...EVAL_PRESET,
+          preset_id: "00000000-0000-0000-0000-0000000000cc",
+        }),
+      ),
+    );
+    await cloneEvalConfigPreset(CLIENT, EVAL_PRESET.preset_id);
+    expect(mockFetchJsonBody()).toEqual({});
+  });
+
+  it("cloneEvalConfigPreset throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 409 })),
+    );
+    await expect(
+      cloneEvalConfigPreset(CLIENT, EVAL_PRESET.preset_id),
+    ).rejects.toThrow(/409/);
+  });
+
+  it("promoteRagConfig posts preset source body", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          config_version: 2,
+          promoted_at: "2026-07-02T12:00:00Z",
+          promoted_by: "44444444-4444-4444-4444-444444444444",
+        }),
+      ),
+    );
+    await promoteRagConfig(JWT_CLIENT, {
+      source: "preset",
+      preset_id: EVAL_PRESET.preset_id,
+    });
+    expect(mockFetchUrl()).toContain("/internal/v1/rag/config/promote");
+    expect(mockFetchJsonBody()).toEqual({
+      source: "preset",
+      preset_id: EVAL_PRESET.preset_id,
+    });
+    expectBearerJwt(vi.mocked(fetch).mock.calls[0]?.[1]);
+  });
+
+  it("promoteRagConfig throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 403 })),
+    );
+    await expect(
+      promoteRagConfig(JWT_CLIENT, {
+        source: "preset",
+        preset_id: EVAL_PRESET.preset_id,
+      }),
+    ).rejects.toThrow(/403/);
+  });
+
+  it("fetchActiveRagConfig reads active production config", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          config: EVAL_PRESET.config,
+          config_version: 1,
+          promoted_at: "2026-07-02T12:00:00Z",
+          promoted_by: "44444444-4444-4444-4444-444444444444",
+        }),
+      ),
+    );
+    const active = await fetchActiveRagConfig(JWT_CLIENT);
+    expect(active.config_version).toBe(1);
+    expect(mockFetchUrl()).toContain("/internal/v1/rag/config/active");
+  });
+
+  it("fetchActiveRagConfig throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 404 })),
+    );
+    await expect(fetchActiveRagConfig(JWT_CLIENT)).rejects.toThrow(/404/);
+  });
+
+  it("triggerPlaygroundEvalRun posts playground body", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          run_id: "00000000-0000-0000-0000-000000000099",
+          status: "pending",
+          created_at: "2026-07-01T12:00:00Z",
+        }),
+      ),
+    );
+    await triggerPlaygroundEvalRun(CLIENT, {
+      mode: "adhoc",
+      question: "Test?",
+      config: { top_k: 3 },
+      preset_id: EVAL_PRESET.preset_id,
+    });
+    const body = mockFetchJsonBody();
+    expect(body["mode"]).toBe("adhoc");
+    expect(body["question"]).toBe("Test?");
+  });
+
+  it("triggerPlaygroundEvalRun throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
+    );
+    await expect(
+      triggerPlaygroundEvalRun(CLIENT, { mode: "golden" }),
+    ).rejects.toThrow(/500/);
+  });
+
+  it("fetchOllamaModels fetches models", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          items: [{ model_id: "qwen2.5:1.5b-instruct", available: true }],
+        }),
+      ),
+    );
+    const models = await fetchOllamaModels(CLIENT);
+    expect(models.items[0]?.model_id).toContain("qwen");
+  });
+
+  it("fetchOllamaModels throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 502 })),
+    );
+    await expect(fetchOllamaModels(CLIENT)).rejects.toThrow(/502/);
+  });
+
+  it("fetchEvalTimeseries fetches with limit", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(jsonResponse({ points: [], available_metrics: [] })),
+    );
+    await fetchEvalTimeseries(CLIENT, 50);
+    const url = mockFetchUrl();
+    expect(url).toContain("limit=50");
+  });
+
+  it("fetchEvalTimeseries throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
+    );
+    await expect(fetchEvalTimeseries(CLIENT)).rejects.toThrow(/500/);
+  });
+
+  it("fetchEvalCriteria fetches criteria", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(jsonResponse({ items: [EVAL_CRITERION] })),
+    );
+    const criteria = await fetchEvalCriteria(CLIENT);
+    expect(criteria.items[0]?.slug).toBe("tone-friendly");
+  });
+
+  it("fetchEvalCriteria throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
+    );
+    await expect(fetchEvalCriteria(CLIENT)).rejects.toThrow(/500/);
+  });
+
+  it("createEvalCriterion posts criterion", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(jsonResponse(EVAL_CRITERION)),
+    );
+    const created = await createEvalCriterion(CLIENT, {
+      slug: "tone-friendly",
+      label: "Friendly tone",
+      rubric: "Supportive tone",
+      enabled: false,
+    });
+    expect(created.enabled).toBe(true);
+    const body = mockFetchJsonBody();
+    expect(body["scorer_type"]).toBe("llm_rubric");
+  });
+
+  it("createEvalCriterion throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 400 })),
+    );
+    await expect(
+      createEvalCriterion(CLIENT, {
+        slug: "x",
+        label: "X",
+        rubric: "R",
+      }),
+    ).rejects.toThrow(/400/);
+  });
+
+  it("updateEvalCriterion patches criterion", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(jsonResponse({ ...EVAL_CRITERION, enabled: false })),
+    );
+    const updated = await updateEvalCriterion(
+      CLIENT,
+      EVAL_CRITERION.criterion_id,
+      { enabled: false },
+    );
+    expect(updated.enabled).toBe(false);
+  });
+
+  it("updateEvalCriterion throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 404 })),
+    );
+    await expect(
+      updateEvalCriterion(CLIENT, EVAL_CRITERION.criterion_id, {
+        label: "New",
+      }),
+    ).rejects.toThrow(/404/);
+  });
+
+  it("triggerEvalRun defaults corpus profile to fixture", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          run_id: "00000000-0000-0000-0000-000000000099",
+          status: "pending",
+          created_at: "2026-07-01T12:00:00Z",
+        }),
+      ),
+    );
+    await triggerEvalRun(CLIENT);
+    expect(mockFetchJsonBody()["corpus_profile"]).toBe("fixture");
+  });
+
+  it("createEvalCriterion defaults enabled to true when omitted", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(jsonResponse(EVAL_CRITERION)),
+    );
+    await createEvalCriterion(CLIENT, {
+      slug: "tone-friendly",
+      label: "Friendly tone",
+      rubric: "Supportive tone",
+    });
+    expect(mockFetchJsonBody()["enabled"]).toBe(true);
+  });
+
+  it("eval fetch helpers send empty bearer when no token or api key", async () => {
+    const bare = { baseUrl: CLIENT.baseUrl };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((url: string) => {
+        if (url.includes("/eval/config-presets") && !url.includes("/clone")) {
+          if (url.endsWith("/eval/config-presets")) {
+            return Promise.resolve(jsonResponse({ items: [] }));
+          }
+          return Promise.resolve(jsonResponse(EVAL_PRESET));
+        }
+        if (url.includes("/clone")) {
+          return Promise.resolve(jsonResponse(EVAL_PRESET));
+        }
+        if (url.includes("/models/ollama")) {
+          return Promise.resolve(jsonResponse({ items: [] }));
+        }
+        if (url.includes("/eval/runs") && url.includes("timeseries")) {
+          return Promise.resolve(
+            jsonResponse({ points: [], available_metrics: [] }),
+          );
+        }
+        if (url.includes("/eval/runs/")) {
+          return Promise.resolve(
+            jsonResponse({
+              run_id: "00000000-0000-0000-0000-000000000099",
+              status: "completed",
+              metrics_summary: {},
+              items: [],
+            }),
+          );
+        }
+        if (url.includes("/eval/runs")) {
+          return Promise.resolve(
+            jsonResponse({
+              run_id: "00000000-0000-0000-0000-000000000099",
+              status: "pending",
+              created_at: "2026-07-01T12:00:00Z",
+            }),
+          );
+        }
+        if (url.includes("/eval/criteria")) {
+          return Promise.resolve(jsonResponse({ items: [EVAL_CRITERION] }));
+        }
+        if (url.includes("/rag/config/promote")) {
+          return Promise.resolve(
+            jsonResponse({
+              config_version: 1,
+              promoted_at: "2026-07-02T12:00:00Z",
+              promoted_by: "44444444-4444-4444-4444-444444444444",
+            }),
+          );
+        }
+        if (url.includes("/rag/config/active")) {
+          return Promise.resolve(
+            jsonResponse({
+              config: EVAL_PRESET.config,
+              config_version: 1,
+            }),
+          );
+        }
+        return Promise.resolve(jsonResponse({ items: [] }));
+      }),
+    );
+
+    await fetchEvalConfigPresets(bare);
+    await createEvalConfigPreset(bare, { name: "x", config: EVAL_CONFIG });
+    await updateEvalConfigPreset(bare, EVAL_PRESET.preset_id, { name: "y" });
+    await cloneEvalConfigPreset(bare, EVAL_PRESET.preset_id);
+    await triggerPlaygroundEvalRun(bare, { mode: "golden" });
+    await promoteRagConfig(bare, {
+      source: "preset",
+      preset_id: EVAL_PRESET.preset_id,
+    });
+    await fetchActiveRagConfig(bare);
+    await fetchOllamaModels(bare);
+    await fetchEvalTimeseries(bare);
+    await fetchEvalRunDetail(bare, "00000000-0000-0000-0000-000000000099");
+    await fetchEvalRuns(bare);
+    await triggerEvalRun(bare);
+    await fetchEvalCriteria(bare);
+    await createEvalCriterion(bare, {
+      slug: "x",
+      label: "X",
+      rubric: "R",
+    });
+    await updateEvalCriterion(bare, EVAL_CRITERION.criterion_id, {
+      label: "Y",
+    });
+
+    const headers = vi.mocked(fetch).mock.calls.at(-1)?.[1]?.headers as Record<
+      string,
+      string
+    >;
+    expect(headers["Authorization"]).toBe("Bearer ");
+  });
+
+  it("eval fetch helpers prefer accessToken over apiKey", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          items: [],
+          page: 1,
+          page_size: 20,
+          total_count: 0,
+        }),
+      ),
+    );
+    await fetchEvalRuns(JWT_CLIENT);
+    expectBearerJwt(vi.mocked(fetch).mock.calls[0]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        run_id: "00000000-0000-0000-0000-000000000099",
+        status: "completed",
+        metrics_summary: {},
+        items: [],
+      }),
+    );
+    await fetchEvalRunDetail(
+      JWT_CLIENT,
+      "00000000-0000-0000-0000-000000000099",
+    );
+    expectBearerJwt(vi.mocked(fetch).mock.calls[1]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        run_id: "00000000-0000-0000-0000-000000000099",
+        status: "pending",
+        created_at: "2026-07-01T12:00:00Z",
+      }),
+    );
+    await triggerEvalRun(JWT_CLIENT);
+    expectBearerJwt(vi.mocked(fetch).mock.calls[2]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(jsonResponse({ items: [EVAL_PRESET] }));
+    await fetchEvalConfigPresets(JWT_CLIENT);
+    expectBearerJwt(vi.mocked(fetch).mock.calls[3]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(jsonResponse(EVAL_PRESET));
+    await createEvalConfigPreset(JWT_CLIENT, {
+      name: "baseline",
+      config: EVAL_CONFIG,
+    });
+    expectBearerJwt(vi.mocked(fetch).mock.calls[4]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({ ...EVAL_PRESET, version: 2 }),
+    );
+    await updateEvalConfigPreset(JWT_CLIENT, EVAL_PRESET.preset_id, {
+      name: "baseline-v2",
+    });
+    expectBearerJwt(vi.mocked(fetch).mock.calls[5]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        ...EVAL_PRESET,
+        preset_id: "00000000-0000-0000-0000-0000000000bb",
+      }),
+    );
+    await cloneEvalConfigPreset(JWT_CLIENT, EVAL_PRESET.preset_id);
+    expectBearerJwt(vi.mocked(fetch).mock.calls[6]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        run_id: "00000000-0000-0000-0000-000000000099",
+        status: "pending",
+        created_at: "2026-07-01T12:00:00Z",
+      }),
+    );
+    await triggerPlaygroundEvalRun(JWT_CLIENT, { mode: "golden" });
+    expectBearerJwt(vi.mocked(fetch).mock.calls[7]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        items: [{ model_id: "qwen2.5:1.5b-instruct", available: true }],
+      }),
+    );
+    await fetchOllamaModels(JWT_CLIENT);
+    expectBearerJwt(vi.mocked(fetch).mock.calls[8]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({ points: [], available_metrics: [] }),
+    );
+    await fetchEvalTimeseries(JWT_CLIENT);
+    expectBearerJwt(vi.mocked(fetch).mock.calls[9]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({ items: [EVAL_CRITERION] }),
+    );
+    await fetchEvalCriteria(JWT_CLIENT);
+    expectBearerJwt(vi.mocked(fetch).mock.calls[10]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(jsonResponse(EVAL_CRITERION));
+    await createEvalCriterion(JWT_CLIENT, {
+      slug: "tone-friendly",
+      label: "Friendly tone",
+      rubric: "Supportive tone",
+    });
+    expectBearerJwt(vi.mocked(fetch).mock.calls[11]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({ ...EVAL_CRITERION, enabled: false }),
+    );
+    await updateEvalCriterion(JWT_CLIENT, EVAL_CRITERION.criterion_id, {
+      enabled: false,
+    });
+    expectBearerJwt(vi.mocked(fetch).mock.calls[12]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        config_version: 2,
+        promoted_at: "2026-07-02T12:00:00Z",
+        promoted_by: "44444444-4444-4444-4444-444444444444",
+      }),
+    );
+    await promoteRagConfig(JWT_CLIENT, {
+      source: "preset",
+      preset_id: EVAL_PRESET.preset_id,
+    });
+    expectBearerJwt(vi.mocked(fetch).mock.calls[13]?.[1]);
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        config: EVAL_PRESET.config,
+        config_version: 1,
+      }),
+    );
+    await fetchActiveRagConfig(JWT_CLIENT);
+    expectBearerJwt(vi.mocked(fetch).mock.calls[14]?.[1]);
+  });
+
+  it("rag config helpers use apiKey when accessToken is absent", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          config_version: 1,
+          promoted_at: "2026-07-02T12:00:00Z",
+          promoted_by: "44444444-4444-4444-4444-444444444444",
+        }),
+      ),
+    );
+    await promoteRagConfig(CLIENT, {
+      source: "preset",
+      preset_id: EVAL_PRESET.preset_id,
+    });
+    const promoteHeaders = vi.mocked(fetch).mock.calls[0]?.[1]
+      ?.headers as Record<string, string>;
+    expect(promoteHeaders["Authorization"]).toBe("Bearer test-key");
+
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        config: EVAL_PRESET.config,
+        config_version: 1,
+      }),
+    );
+    await fetchActiveRagConfig(CLIENT);
+    const activeHeaders = vi.mocked(fetch).mock.calls[1]?.[1]
+      ?.headers as Record<string, string>;
+    expect(activeHeaders["Authorization"]).toBe("Bearer test-key");
   });
 });

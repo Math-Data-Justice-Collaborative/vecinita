@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+import fcntl
 import hashlib
-import os
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -21,12 +21,10 @@ def repo_lock(repo: Path, name: str, *, exclusive: bool, blocking: bool) -> Iter
     handle = path.open("w")
     acquired = False
     try:
-        operation = os.LOCK_EX if exclusive else os.LOCK_SH
+        operation = fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH
         if not blocking:
-            operation |= os.LOCK_NB
+            operation |= fcntl.LOCK_NB
         try:
-            import fcntl
-
             fcntl.flock(handle.fileno(), operation)
             acquired = True
         except BlockingIOError:
@@ -34,7 +32,5 @@ def repo_lock(repo: Path, name: str, *, exclusive: bool, blocking: bool) -> Iter
         yield acquired
     finally:
         if acquired:
-            import fcntl
-
-            fcntl.flock(handle.fileno(), os.LOCK_UN)
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
         handle.close()

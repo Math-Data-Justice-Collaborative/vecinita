@@ -1,12 +1,17 @@
 const STORAGE_KEY = "vecinita.eval.dashboard.v1";
 
-export type EvalChartType = "line" | "area";
+export type EvalChartType = "line" | "area" | "scatter";
+
+export type EvalTimeRangePreset = "1D" | "7D" | "10D" | "1M" | "1Y" | "custom";
 
 export interface EvalDashboardLayout {
   collapsedPanels: Record<string, boolean>;
   selectedMetrics: string[];
   chartType: EvalChartType;
   showThresholds: boolean;
+  timeRangePreset: EvalTimeRangePreset;
+  customRangeStart: string | null;
+  customRangeEnd: string | null;
 }
 
 const DEFAULT_LAYOUT: EvalDashboardLayout = {
@@ -14,6 +19,9 @@ const DEFAULT_LAYOUT: EvalDashboardLayout = {
   selectedMetrics: ["retrieval_relevance", "faithfulness", "answer_relevancy"],
   chartType: "line",
   showThresholds: true,
+  timeRangePreset: "7D",
+  customRangeStart: null,
+  customRangeEnd: null,
 };
 
 export function loadEvalDashboardLayout(): EvalDashboardLayout {
@@ -27,8 +35,28 @@ export function loadEvalDashboardLayout(): EvalDashboardLayout {
         parsed.selectedMetrics && parsed.selectedMetrics.length > 0
           ? parsed.selectedMetrics
           : DEFAULT_LAYOUT.selectedMetrics,
-      chartType: parsed.chartType === "area" ? "area" : "line",
+      chartType:
+        parsed.chartType === "area" || parsed.chartType === "scatter"
+          ? parsed.chartType
+          : "line",
       showThresholds: parsed.showThresholds ?? true,
+      timeRangePreset:
+        parsed.timeRangePreset === "1D" ||
+        parsed.timeRangePreset === "7D" ||
+        parsed.timeRangePreset === "10D" ||
+        parsed.timeRangePreset === "1M" ||
+        parsed.timeRangePreset === "1Y" ||
+        parsed.timeRangePreset === "custom"
+          ? parsed.timeRangePreset
+          : DEFAULT_LAYOUT.timeRangePreset,
+      customRangeStart:
+        typeof parsed.customRangeStart === "string"
+          ? parsed.customRangeStart
+          : null,
+      customRangeEnd:
+        typeof parsed.customRangeEnd === "string"
+          ? parsed.customRangeEnd
+          : null,
     };
   } catch {
     return DEFAULT_LAYOUT;

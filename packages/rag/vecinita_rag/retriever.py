@@ -96,13 +96,19 @@ class CorpusPgvectorRetriever(BaseRetriever):
         *,
         tag_slugs: list[str] | None = None,
         language: str | None = None,
+        top_k: int | None = None,
+        score_threshold: float | None = None,
     ) -> list[RetrievedChunk]:
         """Run pgvector search and return ranked chunks with optional tag/language filters."""
         query_vector = self._embed_fn(query)
         literal = _vector_literal(query_vector)
         tag_clause = ""
         language_clause = ""
-        params: dict[str, object] = {"query_embedding": literal, "top_k": self._top_k}
+        effective_top_k = top_k if top_k is not None else self._top_k
+        effective_threshold = (
+            score_threshold if score_threshold is not None else self._score_threshold
+        )
+        params: dict[str, object] = {"query_embedding": literal, "top_k": effective_top_k}
         if language is not None:
             language_clause = "AND d.language = :language"
             params["language"] = language
@@ -144,7 +150,7 @@ class CorpusPgvectorRetriever(BaseRetriever):
         for raw_row in rows:
             row = mapping_row(raw_row)
             score = scalar_float(row["score"])
-            if self._score_threshold is not None and score < self._score_threshold:
+            if effective_threshold is not None and score < effective_threshold:
                 continue
             chunks.append(
                 RetrievedChunk(

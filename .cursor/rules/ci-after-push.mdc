@@ -13,18 +13,29 @@ session, open a PR as ready, or mark work complete after `git push` without watc
 | Branch | Workflows | Must pass |
 |--------|-----------|-----------|
 | Any (`main`, `feat/**`, PRs) | `.github/workflows/ci.yml` | `python`, `frontend` (matrix) |
-| **`main` only** | `.github/workflows/deploy-preflight.yml` | `build-smoke`; `modal-secrets` if repo secrets set |
+| **`main` only** | `.github/workflows/deploy-preflight.yml` | `build-smoke`; `modal-secrets` if repo secrets set (runs after CI via `workflow_run`) |
 
 **Common mistake:** Watching only `ci.yml` while `deploy-preflight` stays red on `main`.
 That workflow runs on every `main` push (Modal import smoke + optional secrets check).
 
 **CD (not a push gate):** `.github/workflows/deploy-modal.yml` and
 `.github/workflows/deploy-digitalocean.yml` are **continuous deployment** — not pre-merge checks.
-They trigger via `workflow_run` after **CI succeeds on `main`**: Modal deploy (Supabase sync →
-Modal apps) first, then DO apps after Modal succeeds. Re-run build-smoke + secrets in the Modal
-job before live deploy. `deploy-digitalocean.yml` does not deploy on CI alone.
+They trigger via `workflow_run` after **CI succeeds on `main`**, through this chain:
+
+1. **CI** (`ci.yml`) — all jobs including `ci-success`
+2. **Deploy preflight** — `workflow_run` after CI success (`build-smoke`, `modal-secrets`)
+3. **Deploy Modal** — `workflow_run` after Deploy preflight success (Supabase sync → Modal deploy)
+4. **Deploy DigitalOcean** — `workflow_run` after Deploy Modal success
+
+Each CD workflow checks out `github.event.workflow_run.head_sha` so deploys match the CI-tested commit.
 
 ## After every push (required)
+
+Husky **pre-push** runs **fast tier** (`make check-fast` + `make test-fast`) before `git push`.
+Run **`make ci-push`** (or `make ci-pr-ready`) **before opening a PR**. GitHub CI is the merge
+gate. Opt-in full local parity on push: `VECINITA_FULL_PRE_PUSH=1 git push`. Opt-in medium
+(format-check): `VECINITA_MEDIUM_PRE_PUSH=1 git push`. Skip
+pre-push: `VECINITA_SKIP_PRE_PUSH=1 git push`.
 
 ```bash
 # From repo root; branch defaults to current
@@ -52,9 +63,13 @@ done
 | **cancelled** (0 jobs on preflight) | Another push superseded this run — finish watch before pushing again |
 | **User waives** | AskQuestion only; note waiver in PR/summary |
 
-## Before the first push (local parity)
+## Before opening a PR (local parity)
 
-When changes touch Python, frontends, workflows, Modal, or secrets:
+Run `make ci-push` before marking a PR ready for review. Day-to-day `git push` runs fast tier
+(`make check-fast` + `make test-fast`); format-check, audit, full pytest, coverage, and frontend
+builds are enforced in `.github/workflows/ci.yml`.
+
+When changes touch Python, frontends, workflows, Modal, or secrets (full local run):
 
 ```bash
 uv sync --group dev

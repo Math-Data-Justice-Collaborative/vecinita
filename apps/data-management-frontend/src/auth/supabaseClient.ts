@@ -122,13 +122,13 @@ export function setSupabaseClientForTests(mock: SupabaseClient | null): void {
   testClientInjected = mock !== null;
 }
 
-export type OperatorRole = "admin" | "viewer";
+export type OperatorRole = "admin" | "viewer" | "super-admin";
 
 export function roleFromAppMetadata(
   appMetadata: Record<string, unknown> | undefined,
 ): OperatorRole | null {
   const role = appMetadata?.["role"];
-  if (role === "admin" || role === "viewer") {
+  if (role === "admin" || role === "viewer" || role === "super-admin") {
     return role;
   }
   return null;
