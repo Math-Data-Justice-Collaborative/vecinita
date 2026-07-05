@@ -43,23 +43,23 @@ jobs:
 
       - name: Dry-run wiki build (validate manifest + links)
         run: |
-          INCLUDE_OP=false
+          OP_FLAGS="--no-include-operator"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.include_operator }}" = "true" ]; then
-            INCLUDE_OP=true
+            OP_FLAGS="--include-operator"
           fi
           uv run python scripts/docs/sync_github_wiki.py \
             --dry-run \
-            --include-operator="$INCLUDE_OP"
+            $OP_FLAGS
 
       - name: Push to GitHub Wiki
         env:
           WIKI_REMOTE: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git
         run: |
-          INCLUDE_OP=false
+          OP_FLAGS="--no-include-operator"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.include_operator }}" = "true" ]; then
-            INCLUDE_OP=true
+            OP_FLAGS="--include-operator"
           fi
           uv run python scripts/docs/sync_github_wiki.py \
             --remote-url "$WIKI_REMOTE" \
             --message "Sync docs from ${{ github.sha }}" \
-            --include-operator="$INCLUDE_OP"
+            $OP_FLAGS
