@@ -53,6 +53,27 @@ def test_generate_includes_model_id_and_proxy_key() -> None:
     client.close()
 
 
+def test_generate_omits_model_id_for_vllm_endpoint() -> None:
+    """vecinita-llm GenerateRequest rejects model_id (extra=forbid)."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        payload = as_json_object(cast("object", json_lib.loads(request.content.decode())))
+        assert "model_id" not in payload
+        return httpx.Response(200, json={"text": "vllm answer"})
+
+    transport = httpx.MockTransport(handler)
+    client = LlmClient(
+        "https://vecinita--vecinita-llm-fastapi-app.modal.run",
+        model_id="qwen2.5:1.5b-instruct",
+        http_client=httpx.Client(
+            transport=transport,
+            base_url="https://vecinita--vecinita-llm-fastapi-app.modal.run",
+        ),
+    )
+    assert client.generate("hello", model_id="qwen2.5:1.5b-instruct") == "vllm answer"
+    client.close()
+
+
 def test_generate_allows_per_call_model_id_override() -> None:
     """Per-call model_id overrides the client default."""
 

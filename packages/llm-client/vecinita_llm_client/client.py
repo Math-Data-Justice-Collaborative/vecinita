@@ -74,6 +74,10 @@ class LlmClient:
             return {_PROXY_HEADER: self._proxy_key}
         return {}
 
+    def _supports_model_id_in_body(self) -> bool:
+        """Ollama `/generate` accepts model_id; vecinita-llm (vLLM) rejects it."""
+        return "ollama" in self._base_url.lower()
+
     def _generate_body(
         self,
         prompt: str,
@@ -88,7 +92,7 @@ class LlmClient:
             "temperature": temperature,
         }
         resolved_model = model_id or self._model_id
-        if resolved_model:
+        if resolved_model and self._supports_model_id_in_body():
             body["model_id"] = resolved_model
         return body
 
