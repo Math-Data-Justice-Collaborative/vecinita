@@ -1,6 +1,6 @@
 # BUG-2026-07-05 — Eval run 422: model_id rejected by vecinita-llm
 
-**Status:** fixing (local patch ready; deploy pending user approval)  
+**Status:** resolved (production verified 2026-07-05)  
 **Severity:** high  
 **Feature:** F36 / EV-009 eval playground (ADR-035)  
 **Reported:** 2026-07-05  
@@ -63,6 +63,23 @@ Local-first fix → PR → deploy after user approval.
 
 - `packages/llm-client/vecinita_llm_client/client.py` — only include `model_id` when base URL contains `ollama`
 - `infra/do/internal-write-api.yaml` + `scripts/deploy/do_apps.py` — declare/sync `VECINITA_MODAL_OLLAMA_URL` for future Ollama routing
+
+## Verification
+
+### Layer 1 — Automated (2026-07-05)
+
+- [x] Repro test red → green (`tests/bugs/test_bug_2026_07_05_eval_vllm_rejects_model_id.py`)
+- [x] Full pytest suite pass
+- [x] CI parity (local): ci-guards, ruff, format-check, basedpyright, pytest, both Vitest suites
+
+### Layer 2–4
+
+- [x] Layer 2 — User confirmed new eval playground run completes (2026-07-05)
+- [x] Layer 4 — Production verified by user after internal-write-api deploy (~21:56 UTC)
+
+## Frontend follow-up (optional deploy)
+
+- `EvaluationPlaygroundTab.tsx` — when `/models/ollama` returns 503 (Ollama not configured), fall back to vLLM default model instead of blocking the page with an error. Local change + Vitest; not yet committed/deployed.
 
 ## Spec conformance
 

@@ -76,7 +76,10 @@ class LlmClient:
 
     def _supports_model_id_in_body(self) -> bool:
         """Ollama `/generate` accepts model_id; vecinita-llm (vLLM) rejects it."""
-        return "ollama" in self._base_url.lower()
+        ollama_url = os.environ.get(_ENV_OLLAMA_URL)
+        if not ollama_url:
+            return False
+        return self._base_url.rstrip("/") == ollama_url.rstrip("/")
 
     def _generate_body(
         self,

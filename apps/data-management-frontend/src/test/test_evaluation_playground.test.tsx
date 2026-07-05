@@ -708,6 +708,48 @@ describe("EvaluationPlayground (UJ-045)", () => {
     });
   });
 
+  it("falls back to vLLM default model when Ollama list returns 503", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/models/ollama")) {
+          return Promise.resolve({ ok: false, status: 503 });
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-model-id")).toHaveValue(
+        "qwen2.5:1.5b-instruct",
+      );
+    });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("falls back to vLLM default model when Ollama list returns 504", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/models/ollama")) {
+          return Promise.resolve({ ok: false, status: 504 });
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-model-id")).toHaveValue(
+        "qwen2.5:1.5b-instruct",
+      );
+    });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("surfaces update preset failure in dialog (TC-127 UI)", async () => {
     const ownedPreset = {
       ...SAVED_PRESET_BODY,
