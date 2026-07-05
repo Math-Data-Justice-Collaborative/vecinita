@@ -11,7 +11,7 @@ static_sites:
       # (push-webhook deploys bypass CI). Re-enable only if dropping the CD workflow.
       deploy_on_push: false
     source_dir: apps/chat-rag-frontend
-    build_command: npm ci && npm run build
+    build_command: HUSKY=0 npm ci && npm run build
     output_dir: dist
     index_document: index.html
     catchall_document: index.html
