@@ -34,6 +34,7 @@ def _patched_llm_client_class(
                 base_url or "http://llm.test",
                 model_id=model_id,
                 proxy_key=proxy_key or "proxy-secret",
+                timeout=timeout,
                 http_client=http_client
                 or httpx.Client(transport=transport, base_url="http://llm.test"),
             )
