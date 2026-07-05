@@ -9,7 +9,7 @@
     "node": ">=24"
   },
   "scripts": {
-    "prepare": "husky",
+    "prepare": "node scripts/prepare-husky.mjs",
     "test:frontend-i18n": "npm test -w vecinita-frontend-i18n",
     "test:frontend-ui": "npm test -w vecinita-frontend-ui",
     "build:ui-e2e": "bash scripts/ui/build_for_playwright.sh",
