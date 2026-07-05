@@ -5,7 +5,7 @@ description: Configure GitHub Projects v2 boards via gh CLI — labels, Status o
 
 # GitHub Projects v2
 
-Board policy: [`docs/project-board.md`](../../../docs/project-board.md)  
+Board policy: [`docs/sessions/S000-internal-docs-archive/project-board.md`](../../../docs/sessions/S000-internal-docs-archive/project-board.md)  
 Bootstrap: `bash scripts/ci/setup_github_project.sh`
 
 **Defaults:** org `Math-Data-Justice-Collaborative`, project **#3**, repo `Math-Data-Justice-Collaborative/vecinita`.
@@ -39,7 +39,7 @@ Labels → link repo → Status options → README → views (skips existing vie
 | `gh label create`, `gh project link` | `createProjectV2View` GraphQL |
 
 Status mutation **replaces all options** — see [reference.md](reference.md).  
-View filters and labels: defined in `docs/project-board.md` and the setup script.
+View filters and labels: defined in `docs/sessions/S000-internal-docs-archive/project-board.md` and the setup script.
 
 ## Filters (pitfalls)
 
@@ -49,5 +49,5 @@ View filters and labels: defined in `docs/project-board.md` and the setup script
 
 ## Updates
 
-1. Edit `docs/project-board.md`
+1. Edit `docs/sessions/S000-internal-docs-archive/project-board.md`
 2. Re-run setup script (or snippets in [reference.md](reference.md))

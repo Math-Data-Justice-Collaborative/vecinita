@@ -60,7 +60,7 @@ resolve the tooling blocker, produce ADR + execution-plan Phase 14 tasks for adm
 | Artifact | Path |
 |----------|------|
 | ADR | `docs/adr/ADR-033-ev008-rag-evaluation-implementation.md` |
-| Execution plan | `docs/execution-plan.md` — Phase 14, Current State, PR-50 |
+| Execution plan | `docs/sessions/S000-internal-docs-archive/execution-plan.md` — Phase 14, Current State, PR-50 |
 | Dependency inventory | `docs/dependency-inventory.md` — §EV-008 evaluation |
 | Staging secrets | `docs/staging-secrets-matrix.md` — `VECINITA_EVAL_*` |
 | Decisions log | `docs/decisions.md` — TP-S007-01–16 |

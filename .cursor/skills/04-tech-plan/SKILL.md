@@ -22,7 +22,7 @@ inventory, ADRs, deployment plan, and data management plan.
 This is a **planning stage** (see [pipeline-preamble.md](../pipeline-preamble.md) §18). It produces
 the execution plan and technical `docs/` — it does **not** write product/feature source code under
 `src/`, `apps/`, or `packages/`. Implementation (including any scaffold) is captured as **tasks** in
-`docs/execution-plan.md` and executed in **07-build**. If the user asks to implement now, AskQuestion
+`docs/sessions/S000-internal-docs-archive/execution-plan.md` and executed in **07-build**. If the user asks to implement now, AskQuestion
 `[Scope Drift]` rather than writing application code here.
 
 ## Connectivity (stage 04)
@@ -31,7 +31,7 @@ Technical plan **must** include executable connectivity work **and UI test infra
 
 | Deliverable | Content |
 |-------------|---------|
-| `docs/execution-plan.md` | Tasks: `configure_cors` on each browser-facing FastAPI app; `tests/unit/test_cors_policy.py`; `tests/smoke/test_staging_connectivity.py`; `scripts/deploy/verify_connectivity.sh`; **`tests/ui/` Playwright specs** per UJ with browser steps; **`ui-e2e` CI job**; `make test-ui` |
+| `docs/sessions/S000-internal-docs-archive/execution-plan.md` | Tasks: `configure_cors` on each browser-facing FastAPI app; `tests/unit/test_cors_policy.py`; `tests/smoke/test_staging_connectivity.py`; `scripts/deploy/verify_connectivity.sh`; **`tests/ui/` Playwright specs** per UJ with browser steps; **`ui-e2e` CI job**; `make test-ui` |
 | `docs/staging-secrets-matrix.md` | `VECINITA_CORS_ORIGINS`, all `VITE_*`, staging `VECINITA_STAGING_*_FRONTEND_URL` (for **T3-ui**) |
 | `docs/test-plan.md` | **Test strategy table** includes Vitest, Playwright T0-ui, pytest API E2E; **hybrid mock strategy** (route mocks in CI; optional local-stack / staging tiers) |
 | `docs/dependency-inventory.md` | `@playwright/test` (Node devDependency) when frontends exist |
@@ -51,7 +51,7 @@ Interview: confirm frontend↔API origin map for staging and production; confirm
    - `docs/spec.md` — approved component architecture
    - `docs/user-journeys.md` — approved caller-facing flows (UJ-NNN)
    - `docs/test-plan.md` — approved test strategy (UJ ↔ TC mapping)
-   - `docs/audits.md#product-plan-audit-report` — audit results
+   - `docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report` — audit results
 3. Plan tooling must be installed (`.cursor/rules/plan-adherence.mdc` etc.)
 
 ## Uncertainty Resolution Protocol
@@ -98,7 +98,7 @@ Record every commit in `workflow-state.yaml` §`git_history.commits` with
 
 ## Delta / feature-addition mode
 
-- **Append** tasks/milestones to `docs/execution-plan.md`; do not reset completed work.
+- **Append** tasks/milestones to `docs/sessions/S000-internal-docs-archive/execution-plan.md`; do not reset completed work.
 - Tag new tasks with `evolve_cycle_id` and `feature_ids`.
 - New phase/milestone only if scope warrants — user approves via AskQuestion.
 
@@ -240,7 +240,7 @@ If the project needs external data (corpus fixtures, datasets, etc.):
 
 ### Phase 3 — Build Execution Plan
 
-Produce `docs/execution-plan.md` using the template from
+Produce `docs/sessions/S000-internal-docs-archive/execution-plan.md` using the template from
 [execution-plan-template.md](../build-planner/execution-plan-template.md).
 
 Organize implementation into **phases**, each containing **milestones**, each containing
@@ -287,7 +287,7 @@ Each task must:
 
 ### Phase 3B — Session roadmap (GitHub issues + dependencies)
 
-After `docs/execution-plan.md` is drafted and before user review (Phase 4), write
+After `docs/sessions/S000-internal-docs-archive/execution-plan.md` is drafted and before user review (Phase 4), write
 `docs/sessions/{active_session.id}/roadmap.md` using
 [doc-planner/templates/roadmap.md](../doc-planner/templates/roadmap.md).
 
@@ -350,7 +350,7 @@ Write remaining documents:
 ```
 Technical Planning Complete.
 
-Execution plan: docs/execution-plan.md
+Execution plan: docs/sessions/S000-internal-docs-archive/execution-plan.md
   Phases:     [N]
   Milestones: [N]
   Tasks:      [N] ([N] test, [N] code, [N] config)
@@ -368,7 +368,7 @@ Deployment: [platform]
   GPU/Compute: [requirements]
 
 Documents generated: [N]
-  docs/execution-plan.md
+  docs/sessions/S000-internal-docs-archive/execution-plan.md
   docs/dependency-inventory.md
   docs/adr/001-[name].md (x[N])
   docs/[deployment-plan].md
@@ -397,7 +397,7 @@ On re-invocation:
 ## Handoff checklist (00/01 → execution plan)
 
 Before marking 04-tech-plan `completed`, verify these items are **tasks or ADRs** in
-`docs/execution-plan.md`:
+`docs/sessions/S000-internal-docs-archive/execution-plan.md`:
 
 - [ ] Every `[Decision]` / `resolution_id` from `workflow-state.yaml` §decisions_log
 - [ ] Every config parameter in config-spec marked **include** vs **exclude** for v1

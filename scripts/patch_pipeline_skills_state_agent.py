@@ -34,7 +34,7 @@ DELTA_SECTIONS: dict[str, str] = {
 
 When invoked from **16-evolve** or user adds features with new upstream paper/repo context:
 
-- Run only for **new external context** not already in `docs/context-brief.md`.
+- Run only for **new external context** not already in `docs/sessions/S000-internal-docs-archive/context-brief.md`.
 - Merge findings into context-brief; do not regenerate unrelated sections.
 - Tag agent updates with `evolve_cycle_id` and affected `feature_ids`.""",
     "01-requirements": """## Delta / feature-addition mode
@@ -61,7 +61,7 @@ When new features need guardrails:
 - Register **workflow-state-manager** in agents if not already present.""",
     "04-tech-plan": """## Delta / feature-addition mode
 
-- **Append** tasks/milestones to `docs/execution-plan.md`; do not reset completed work.
+- **Append** tasks/milestones to `docs/sessions/S000-internal-docs-archive/execution-plan.md`; do not reset completed work.
 - Tag new tasks with `evolve_cycle_id` and `feature_ids`.
 - New phase/milestone only if scope warrants — user approves via AskQuestion.""",
     "05-verify-tech": """## Delta / feature-addition mode

@@ -32,7 +32,7 @@ ADR-024 records the full persistence design.
 
 ## Plan delta
 
-- **Phase 10** added to `docs/execution-plan.md`: **M39** store/persistence layer →
+- **Phase 10** added to `docs/sessions/S000-internal-docs-archive/execution-plan.md`: **M39** store/persistence layer →
   **M40** wire into shell + rehydration → **M41** previous-chats UI + actions/i18n →
   **M42** rule verify + privacy + full suite. **17 tasks** (T39.1–T42.3); total **239**.
 - TDD ordering preserved (test-before-code within each milestone).
@@ -40,7 +40,7 @@ ADR-024 records the full persistence design.
 
 ## Artifacts changed
 
-- `docs/execution-plan.md` — Phase 10, Current State, PR Plan, Task Tracking, Open Questions, header
+- `docs/sessions/S000-internal-docs-archive/execution-plan.md` — Phase 10, Current State, PR Plan, Task Tracking, Open Questions, header
 - `docs/decisions.md#technical-decisions-05-verify-tech` — §S003 (TP-S003-01–12, TV-S003-01) + merge-coordination note
 - `docs/adr/ADR-024-chat-history-persistence-design.md` (new) + `docs/adr/README.md` index
 - `docs/decisions.md#requirements-decisions-01-requirements` — F33 unresolved items marked resolved

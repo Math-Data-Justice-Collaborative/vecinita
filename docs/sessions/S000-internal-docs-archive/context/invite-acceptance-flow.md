@@ -56,7 +56,7 @@ CORS (already configured for admin FE → Modal), this flow depends on:
 |----|----------|-------|------------|
 | R60 | Decision | Invite mail channel | **Supabase-managed mail via Resend SMTP** (`config.toml`) — not Resend REST API |
 | R61 | Decision | Retract invitation | **New `POST /admin/users/{id}/revoke-invite`** + distinct UI + audit `user.invite_revoked` |
-| R62 | Decision | Context brief location | **Scoped brief** at `docs/context/invite-acceptance-flow.md` (this file) |
+| R62 | Decision | Context brief location | **Scoped brief** at `docs/sessions/S000-internal-docs-archive/context/invite-acceptance-flow.md` (this file) |
 | R63 | Assumed | `additional_redirect_urls` shape | Include **full paths** (`…/accept-invite`, `…/reset-password`) plus dev origins — verify after backend `redirect_to` wired |
 | R64 | Assumed | Feature ID | **F35 extension** under EV-007 (not new F36) — extends UJ-031 / AC-U3 |
 

@@ -145,7 +145,7 @@ flowchart TB
 |--------|-------|---------|------------|
 | **Postgres** | Docker (`infra/docker-compose.yml`) | DO Managed Postgres | DO Managed Postgres |
 | **Modal workspace** | `vecinita` (or `modal serve`) | `vecinita` | `vecinita` |
-| **DO apps** | Not required (uvicorn locally) | 4 DO apps (see [deploy-state.md](deploy-state.md)) | Same topology |
+| **DO apps** | Not required (uvicorn locally) | 4 DO apps (see [deploy-state.md](sessions/S000-internal-docs-archive/deploy-state.md)) | Same topology |
 | **Supabase** | Local stack optional; staging project for auth | Canonical project + branching | Production auth config |
 | **Corpus** | Fixtures + seeds (`data/fixtures/`) | Fixtures + pilot URLs | Ingested public URLs + seeds |
 | **Secrets** | `prod.env` (gitignored) / `.env.example` | [staging-secrets-matrix.md](staging-secrets-matrix.md) | Same matrix, prod values |
@@ -153,7 +153,7 @@ flowchart TB
 
 ### Live staging URLs (2026-06-26)
 
-From [deploy-state.md](deploy-state.md):
+From [deploy-state.md](sessions/S000-internal-docs-archive/deploy-state.md):
 
 | Service | URL |
 |---------|-----|
@@ -304,7 +304,7 @@ Detail: [deployment-integration.md](deployment-integration.md) §Cost estimation
 | Topic | Covered by | Gap / action |
 |-------|------------|--------------|
 | Component details | [spec.md](spec.md) | Keep spec as deep reference; this doc is overview |
-| Deploy URLs | [deploy-state.md](deploy-state.md) | Update when staging redeploys; drift noted there |
+| Deploy URLs | [deploy-state.md](sessions/S000-internal-docs-archive/deploy-state.md) | Update when staging redeploys; drift noted there |
 | DO app shapes | [infra/do/*.yaml](../infra/do/) | Placeholder SECRET types only in git |
 | Operator secrets | `prod.env` (gitignored) | Never commit; use staging-secrets-matrix |
 | Data workflows | **NEW** [runbooks/](runbooks/) | Dev + operator guides (#52) |

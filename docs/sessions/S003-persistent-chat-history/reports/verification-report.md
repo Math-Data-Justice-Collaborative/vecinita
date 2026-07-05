@@ -11,7 +11,7 @@
 
 All blocking checks green: lint, format, typecheck, full Python suite (556 passed), frontend Vitest (327 passed), coverage gate (99.4% combined), CI guards, pip-audit, production frontend builds.
 
-See full detail in repo-root [`docs/verification-report.md`](../../../verification-report.md).
+See full detail in repo-root [`docs/sessions/S000-internal-docs-archive/reports/verification-report.md`](../../../verification-report.md).
 
 ## Delta scope verified
 

@@ -8,7 +8,7 @@ intent: "Evaluation UX polish (run list refresh, jobs tab integration, dashboard
 orchestrator: 16-evolve
 evolve_cycle_id: EV-009
 context_briefs:
-  - docs/context/eval-ux-playground.md
+  - docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md
 standing_docs_touched: []
 linked_issues: []
 prior_session: S007-rag-eval
@@ -50,5 +50,5 @@ GitHub issue decomposition and dependency diagrams:
 ## Links
 
 - Prior: [S007 session brief](../S007-rag-eval/session-brief.md)
-- Context: [eval-ux-playground.md](../../context/eval-ux-playground.md)
-- F36 baseline: [rag-eval.md](../../context/rag-eval.md)
+- Context: [eval-ux-playground.md](../../sessions/S000-internal-docs-archive/context/eval-ux-playground.md)
+- F36 baseline: [rag-eval.md](../../sessions/S000-internal-docs-archive/context/rag-eval.md)

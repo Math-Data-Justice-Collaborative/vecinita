@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "description": "Docs published to GitHub Wiki. Source paths are repo-relative.",
+  "home": {
+    "source_readme": "README.md",
+    "intro_source": "docs/architecture.md",
+    "intro_max_lines": 12
+  },
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Overview",
+      "pages": [
+        {"source": "docs/architecture.md", "wiki": "Architecture"},
+        {"source": "docs/data-flow.md", "wiki": "Data-Flow"},
+        {"source": "docs/feature-list.md", "wiki": "Features"},
+        {"source": "docs/user-journeys.md", "wiki": "User-Journeys"},
+        {"source": "docs/decisions.md", "wiki": "Product-Decisions"}
+      ]
+    },
+    {
+      "id": "specs",
+      "title": "Specifications",
+      "pages": [
+        {"source": "docs/spec.md", "wiki": "Spec"},
+        {"source": "docs/api-contract.md", "wiki": "API-Contract"},
+        {"source": "docs/config-spec.md", "wiki": "Config-Spec"},
+        {"source": "docs/acceptance-criteria.md", "wiki": "Acceptance-Criteria"},
+        {"source": "docs/deployment-integration.md", "wiki": "Deployment-Integration"}
+      ]
+    },
+    {
+      "id": "development",
+      "title": "Development",
+      "pages": [
+        {"source": "docs/LOCAL_DEV.md", "wiki": "Local-Development"},
+        {"source": "docs/runbooks/data-management-dev-guide.md", "wiki": "Runbooks/Data-Management-Dev-Guide"},
+        {"source": "docs/typing-policy.md", "wiki": "Typing-Policy"},
+        {"source": "docs/eval-golden-set.md", "wiki": "Eval-Golden-Set"},
+        {"source": "docs/dependency-inventory.md", "wiki": "Dependency-Inventory"}
+      ]
+    },
+    {
+      "id": "operators",
+      "title": "Operators",
+      "pages": [
+        {"source": "docs/runbooks/corpus-operator-guide.md", "wiki": "Runbooks/Corpus-Operator-Guide"}
+      ]
+    },
+    {
+      "id": "bug-reports",
+      "title": "Bug Reports",
+      "glob": {
+        "pattern": "docs/bug-reports/BUG-*.md",
+        "wiki_prefix": "Bug-Reports/"
+      }
+    },
+    {
+      "id": "adr",
+      "title": "Architecture Decisions",
+      "pages": [
+        {"source": "docs/adr/README.md", "wiki": "ADR-Index"}
+      ],
+      "glob": {
+        "pattern": "docs/adr/ADR-*.md",
+        "wiki_prefix": "ADR/"
+      }
+    },
+    {
+      "id": "hosting",
+      "title": "Hosting",
+      "pages": [
+        {"source": "docs/hosting-migration-summary.md", "wiki": "Hosting-Migration-Summary"},
+        {"source": "docs/oscar-hosting-feasibility.md", "wiki": "OSCAR-Hosting-Feasibility"}
+      ]
+    }
+  ],
+  "operator_only_sections": [
+    {
+      "id": "operator-runbooks",
+      "title": "Operator Runbooks (restricted)",
+      "pages": [
+        {"source": "docs/staging-runbook.md", "wiki": "Runbooks/Staging"},
+        {"source": "docs/staging-secrets-matrix.md", "wiki": "Runbooks/Staging-Secrets-Matrix"},
+        {"source": "docs/deploy-checklist.md", "wiki": "Runbooks/Deploy-Checklist"}
+      ]
+    }
+  ],
+  "exclude_from_wiki": [
+    "docs/sessions/**",
+    "docs/security/**",
+    "docs/test-plan.md",
+    "docs/data-management-plan.md"
+  ]
+}

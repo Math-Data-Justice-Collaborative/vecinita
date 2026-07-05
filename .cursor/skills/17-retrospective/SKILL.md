@@ -185,9 +185,9 @@ Build an internal **Evidence digest** (not shown verbatim to user until validate
 | Source | Extract |
 |--------|---------|
 | `workflow-state.yaml` | Stage statuses, dates, `issue_log`, `decisions_log`, evolve cycles |
-| `docs/execution-plan.md` | Task churn, blocked tasks, gate log |
-| `docs/hotfix-log.md`, `docs/incidents/` | Post-deploy pain |
-| `docs/deploy-report.md`, service-health reports | Ops friction |
+| `docs/sessions/S000-internal-docs-archive/execution-plan.md` | Task churn, blocked tasks, gate log |
+| `docs/sessions/S000-internal-docs-archive/hotfix-log.md`, `docs/incidents/` | Post-deploy pain |
+| `docs/sessions/S000-internal-docs-archive/deploy-report.md`, service-health reports | Ops friction |
 | `docs/*-decisions.md`, `docs/adr/` | Decision volume and rework |
 | Agent transcripts | User goals, skill invocations, loops, AskQuestion density — [reference.md](reference.md) |
 | `git log --oneline` (scoped) | Commit cadence, fix churn |

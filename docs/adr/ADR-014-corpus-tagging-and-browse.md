@@ -8,7 +8,7 @@
 
 Community members need to discover corpus documents and filter by tags. Operators need to view chunks and curate tags (LLM-generated or human-edited) to improve RAG retrieval. The current schema has `documents`, `chunks`, and `embeddings` only — no tags, no public read API, and no chunk viewer in the admin UI.
 
-Evolve cycle **EV-001** intake (2026-05-24) resolved product decisions R12–R18 in `docs/context-brief.md` §11.
+Evolve cycle **EV-001** intake (2026-05-24) resolved product decisions R12–R18 in `docs/sessions/S000-internal-docs-archive/context-brief.md` §11.
 
 ## Decision
 
@@ -75,4 +75,4 @@ Evolve cycle **EV-001** intake (2026-05-24) resolved product decisions R12–R18
 - ADR-004 (zero personal data)
 - ADR-010 (multi-app DO topology)
 - ADR-011 (OpenAPI source of truth)
-- Resolution log R12–R18 in `docs/context-brief.md` §11
+- Resolution log R12–R18 in `docs/sessions/S000-internal-docs-archive/context-brief.md` §11

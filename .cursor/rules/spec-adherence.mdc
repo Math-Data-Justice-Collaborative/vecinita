@@ -12,7 +12,7 @@ Before making any code change, verify:
    covers this change, raise a `[Decision]` via AskQuestion: proceed without a spec, or
    create one first.
 
-2. **Phased workflow**: Check `docs/execution-plan.md` §Current State for the active phase,
+2. **Phased workflow**: Check `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Current State for the active phase,
    milestone, and task. The work being done must belong to the active phase.
    - If the work is in a **future phase**, stop and raise a `[Decision]`: "This task belongs
      to Phase N but we are in Phase M. Skip ahead, or complete current phase first?"
@@ -31,7 +31,7 @@ Before making any code change, verify:
    - Record the gate check result in the Phase Gate Log
 
 4. **Tech choices**: Use only the tools, libraries, and patterns documented in the specs.
-   Primary references: `docs/execution-plan.md` §Tech Stack Summary and
+   Primary references: `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Tech Stack Summary and
    `docs/dependency-inventory.md`. If a new dependency or tool is needed:
    - Raise it as a `[Decision]` via AskQuestion with a recommendation
    - On approval, back-add the choice to the relevant spec document
@@ -48,7 +48,7 @@ Before making any code change, verify:
 6. **Back-add on-the-fly decisions**: When any tech choice or design decision is made during
    implementation that isn't already in the specs:
    - Update the relevant spec document in `docs/`
-   - Update `docs/execution-plan.md` if it affects the plan
+   - Update `docs/sessions/S000-internal-docs-archive/execution-plan.md` if it affects the plan
    - Append to the Resolution Log in `docs/research-brief.md`
    - If the decision creates a new convention, add or update a rule in `.cursor/rules/`
 

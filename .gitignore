@@ -10,6 +10,7 @@ prod.env
 /internal-write-api-spec.yaml
 /chat-rag-spec.yaml
 .tmp/
+.wiki-build/
 
 # Supabase CLI local state (`supabase link`, config push) — never commit
 supabase/.temp/

@@ -234,4 +234,4 @@ disables). Compare on two deploys after T8 snapshot capture:
 - Modal Memory Snapshots: https://modal.com/docs/guide/memory-snapshot
 - Modal cold start guide: https://modal.com/docs/guide/cold-start
 - Modal vLLM + memory-snapshot example (KV-cache pattern) — locate via Modal examples repo
-- ADR-009 (vLLM on T4), ADR-004 (cost), BUG-2026-05-22 (cold-start UX), docs/reference.md#cost-monitoring-baseline-adr-004
+- ADR-009 (vLLM on T4), ADR-004 (cost), BUG-2026-05-22 (cold-start UX), docs/sessions/S000-internal-docs-archive/reference.md#cost-monitoring-baseline-adr-004

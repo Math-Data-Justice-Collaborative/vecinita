@@ -23,9 +23,9 @@ Consolidated product and technical plan audit reports.
 | 8 | Deployment Integration | docs/deployment-integration.md | 5 | 4 | Pass 1 done |
 | 9 | Data Management Plan | docs/data-management-plan.md | 4 | 3 | Pass 1 done |
 | 10 | Dependency Inventory | docs/dependency-inventory.md | 3 | 3 | Pass 1 done |
-| 11 | Roadmap | docs/reference.md#roadmap | 2 | 2 | Pass 1 done |
-| 12 | Glossary | docs/reference.md#glossary | 1 | 2 | Pass 1 done |
-| 13 | Risk Register | docs/reference.md#risk-register | 2 | 3 | Pass 1 done |
+| 11 | Roadmap | docs/sessions/S000-internal-docs-archive/reference.md#roadmap | 2 | 2 | Pass 1 done |
+| 12 | Glossary | docs/sessions/S000-internal-docs-archive/reference.md#glossary | 1 | 2 | Pass 1 done |
+| 13 | Risk Register | docs/sessions/S000-internal-docs-archive/reference.md#risk-register | 2 | 3 | Pass 1 done |
 
 Skipped (reference input): `docs/decisions.md#requirements-decisions-01-requirements`, `context-brief.md`.
 
@@ -363,7 +363,7 @@ All derived directly from user interview (RD-053–RD-066, RD-067 partial):
 | Contradictions resolved | 2 |
 | Source documents updated | 10 |
 
-**Next step (EV-004 routing):** [05-verify-tech](.cursor/skills/05-verify-tech/SKILL.md) complete — see `docs/audits.md#technical-plan-audit-report` §EV-004 delta (2026-06-13) for task-count reconciliation (TV-041–TV-052).
+**Next step (EV-004 routing):** [05-verify-tech](.cursor/skills/05-verify-tech/SKILL.md) complete — see `docs/sessions/S000-internal-docs-archive/audits.md#technical-plan-audit-report` §EV-004 delta (2026-06-13) for task-count reconciliation (TV-041–TV-052).
 
 ## Technical plan audit report
 
@@ -376,7 +376,7 @@ All derived directly from user interview (RD-053–RD-066, RD-067 partial):
 
 | # | Document | Path | Statements | Result |
 |---|----------|------|------------|--------|
-| 1 | Execution Plan | docs/execution-plan.md | 22 | Updated (8 tasks + deps + cost) |
+| 1 | Execution Plan | docs/sessions/S000-internal-docs-archive/execution-plan.md | 22 | Updated (8 tasks + deps + cost) |
 | 2 | Deployment Integration | docs/deployment-integration.md | 6 | Updated (cost gate note) |
 | 3 | Dependency Inventory | docs/dependency-inventory.md | 5 | Pass |
 | 4 | Data Management Plan | docs/data-management-plan.md | 4 | Pass |
@@ -447,9 +447,9 @@ See `docs/decisions.md#technical-decisions-05-verify-tech` and audit Pass 1 tabl
 
 ## Artifacts
 
-- `docs/audits.md#technical-plan-audit-report` (this file)
+- `docs/sessions/S000-internal-docs-archive/audits.md#technical-plan-audit-report` (this file)
 - `docs/decisions.md#technical-decisions-05-verify-tech`
-- Updated: `docs/execution-plan.md`, `docs/test-plan.md`, `docs/adr/ADR-001-*`, `docs/adr/ADR-002-*`, `docs/deployment-integration.md`, `workflow-state.yaml`
+- Updated: `docs/sessions/S000-internal-docs-archive/execution-plan.md`, `docs/test-plan.md`, `docs/adr/ADR-001-*`, `docs/adr/ADR-002-*`, `docs/deployment-integration.md`, `workflow-state.yaml`
 
 ---
 

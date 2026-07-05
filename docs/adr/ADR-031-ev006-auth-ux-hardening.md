@@ -157,7 +157,7 @@ operator prerequisites. No code; the test-send button (TP-S005-22) is the verifi
 ## References
 
 - [ADR-029](ADR-029-admin-user-management-and-auth-ux.md), [ADR-030](ADR-030-ev006-user-mgmt-implementation.md)
-- `docs/execution-plan.md` Phase 12 **M53**
+- `docs/sessions/S000-internal-docs-archive/execution-plan.md` Phase 12 **M53**
 - `docs/api-contract.md` §Admin user management (F35) — `q`, `/signout`, `/admin/email/test`
 - `docs/user-journeys.md` UJ-034–UJ-038; `docs/test-plan.md` TC-096–TC-103; `docs/acceptance-criteria.md` AC-U10–AC-U16
 - Research (verified 2026-06-29): supabase-js `signOut` scopes (global/local/others); GoTrue Admin

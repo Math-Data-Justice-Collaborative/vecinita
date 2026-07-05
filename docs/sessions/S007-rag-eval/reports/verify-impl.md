@@ -20,7 +20,7 @@ User approved proceeding with F36 delta verification despite:
 |--------|--------|-------|
 | `docs/sessions/S007-rag-eval/reports/qa-report.md` | Remediated | Initial FAIL 2026-07-01; re-run green |
 | `docs/sessions/S007-rag-eval/reports/07-build.md` | Complete | M59–M63 |
-| `docs/e2e-report.md` | S006 baseline | S007 formal 10-e2e waived |
+| `docs/sessions/S000-internal-docs-archive/reports/e2e-report.md` | S006 baseline | S007 formal 10-e2e waived |
 | `docs/acceptance-criteria.md` | AC-E12–E16 | All marked complete at T0 |
 | `docs/user-journeys.md` | UJ-039–UJ-043 | Interview prompts |
 

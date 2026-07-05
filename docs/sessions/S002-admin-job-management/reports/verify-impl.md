@@ -55,6 +55,6 @@ Missing features:             0
 - `docs/sessions/S002-admin-job-management/reports/qa-report.md`
 - `docs/sessions/S002-admin-job-management/reports/e2e-report.md`
 - `docs/sessions/S002-admin-job-management/reports/deploy-checklist.md`
-- `docs/implementation-verification.md` (summary pointer)
+- `docs/sessions/S000-internal-docs-archive/reports/implementation-verification.md` (summary pointer)
 
 **Next step:** User journey + feature approval via AskQuestion; then 13-deploy-smoke after Modal + admin FE deploy.

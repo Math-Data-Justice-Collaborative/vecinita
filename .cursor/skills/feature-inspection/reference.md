@@ -12,7 +12,7 @@
 | Internal write API | `http://localhost:8002` | `/docs` |
 | Data Management API | Modal `serve` URL (printed in terminal) | `/docs` |
 
-### Staging (`docs/deploy-state.md`)
+### Staging (`docs/sessions/S000-internal-docs-archive/deploy-state.md`)
 
 | Service | Env var | Typical URL pattern |
 |---------|---------|---------------------|

@@ -81,7 +81,7 @@ For staging smokes, set `VECINITA_STAGING_INTERNAL_API_KEY` in `prod.env` (not c
 
 ## Previous deploy
 
-EV-001 report (2026-05-25, `4a1598f`): browse/tags/admin chunk editor — see git history `docs/deploy-report.md` @ `4a1598f`.
+EV-001 report (2026-05-25, `4a1598f`): browse/tags/admin chunk editor — see git history `docs/sessions/S000-internal-docs-archive/deploy-report.md` @ `4a1598f`.
 
 ## Changelog
 

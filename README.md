@@ -52,8 +52,8 @@ Full bootstrap: **[docs/LOCAL_DEV.md](docs/LOCAL_DEV.md)** · non-secret default
 - [Data management dev guide](docs/runbooks/data-management-dev-guide.md)
 - [Corpus operator guide](docs/runbooks/corpus-operator-guide.md)
 - [Feature list](docs/feature-list.md) — F1–F31
-- [Execution plan](docs/execution-plan.md)
 - [API contract](docs/api-contract.md)
 - [Config spec](docs/config-spec.md)
 - [ADR index](docs/adr/README.md)
 - [Modal apps](infra/modal/README.md)
+- [GitHub Wiki](https://github.com/Math-Data-Justice-Collaborative/vecinita/wiki) — auto-synced public docs subset

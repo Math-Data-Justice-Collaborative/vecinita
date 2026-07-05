@@ -90,6 +90,6 @@ Root `package.json` declares npm workspaces for `apps/*` and `packages/frontend-
 
 - ADR-012 (monorepo packages boundary)
 - ADR-019 (shared frontend i18n)
-- `docs/context-brief.md` §13, R34–R38
+- `docs/sessions/S000-internal-docs-archive/context-brief.md` §13, R34–R38
 - [Repo: `apps/chat-rag-frontend/src/components/`]
 - [Repo: `apps/data-management-frontend/src/components/`]

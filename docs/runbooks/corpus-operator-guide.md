@@ -182,7 +182,7 @@ Both UIs share locale preference when using the same browser profile.
 
 | Environment | Admin URL | Notes |
 |-------------|-----------|-------|
-| Staging | See [deploy-state.md](../deploy-state.md) | Safe for training; corpus may include fixtures |
+| Staging | See [deploy-state.md](../sessions/S000-internal-docs-archive/deploy-state.md) | Safe for training; corpus may include fixtures |
 | Production | TBD at cutover | Ingest only vetted public URLs |
 
 **Corpus protection:** Staging Postgres has backup verification — do not run destructive test scripts against `.ondigitalocean.com` hosts. See [staging-runbook.md](../staging-runbook.md) §Corpus protection.

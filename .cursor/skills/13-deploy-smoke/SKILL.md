@@ -49,7 +49,7 @@ Invoke **workflow-state-manager** `read_context` before any other action; `updat
 substep. **Do not** edit `workflow-state.yaml` directly.
 
 
-**Detail:** `docs/deploy-state.md` — sync URL/status with YAML on each deploy step.
+**Detail:** `docs/sessions/S000-internal-docs-archive/deploy-state.md` — sync URL/status with YAML on each deploy step.
 
 ### Deployment record (`workflow-state.yaml` §`deployment`)
 
@@ -84,7 +84,7 @@ asking the user a blocking question. Branch type per
 Record every commit in `workflow-state.yaml` §`git_history.commits` with
 `stage: "13-deploy-smoke"`.
 
-### State file: `docs/deploy-state.md`
+### State file: `docs/sessions/S000-internal-docs-archive/deploy-state.md`
 
 ```markdown
 # Deploy State
@@ -228,7 +228,7 @@ Aggregate commits and PRs into a structured changelog:
 
 ### Phase 5 — Generate Deploy Report
 
-Write `docs/deploy-report.md`:
+Write `docs/sessions/S000-internal-docs-archive/deploy-report.md`:
 
 ```markdown
 # Deploy Report
@@ -282,8 +282,8 @@ Deploy & Smoke Check Complete.
   Changelog:      CHANGELOG.md (v[version]-deploy)
   Monitoring:     baseline recorded
 
-  Report: docs/deploy-report.md
-  State:  docs/deploy-state.md (status: deployed)
+  Report: docs/sessions/S000-internal-docs-archive/deploy-report.md
+  State:  docs/sessions/S000-internal-docs-archive/deploy-state.md (status: deployed)
 
 Pipeline Complete ✓
 
@@ -298,7 +298,7 @@ Pipeline Complete ✓
 ```
 
 Update `workflow-state.yaml` overall status to `completed`.
-Update `docs/deploy-state.md` status to `deployed`.
+Update `docs/sessions/S000-internal-docs-archive/deploy-state.md` status to `deployed`.
 
 ## Rollback
 

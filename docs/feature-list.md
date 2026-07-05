@@ -608,7 +608,7 @@
 - **Limitations / scope**: No public eval UI; no auto prompt tuning; no Langfuse/Phoenix v1; housing/legal
   golden rows en-only until bilingual corpus expands.
 - **Priority**: High — GitHub #99 (unblocks tooling decision R63).
-- **Source**: S007 / EV-008 interview 2026-07-01 (RD-099–RD-110); context `docs/context/rag-eval.md`;
+- **Source**: S007 / EV-008 interview 2026-07-01 (RD-099–RD-110); context `docs/sessions/S000-internal-docs-archive/context/rag-eval.md`;
   R63, R64, R67; #99, #83, #84, #94.
 - **S008 follow-ons (EV-009)**: Optimistic run-list refresh (M65); unified `job_type=eval` on Jobs tab
   (M66); dashboard scatter + time-range presets including custom date picker (M67). Playground and
@@ -647,7 +647,7 @@
 - **Milestones**: M65 (run list refresh) → M66 (unified jobs) → M67 (charts) → M68 (config schema +
   presets API) → M69 (playground UI) → M70 (super-admin promote + ChatRAG reader).
 - **Source**: S008 / EV-009 interview 2026-07-02 (RD-114–RD-127); context
-  `docs/context/eval-ux-playground.md`; R68–R75.
+  `docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md`; R68–R75.
 
 ## Planned / Deferred (post-v1)
 

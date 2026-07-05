@@ -138,7 +138,7 @@ connectivity-gates — hybrid deploys (static UI + separate API) are never “AP
 5. If **`pending`** or **`skipped`**: Start or remain skipped per stage rules.
 6. After work begins, invoke agent `update` to set `in_progress` + `started_at`.
 
-Detail state may also live in stage reports (`docs/execution-plan.md`, session `reports/*.md`, etc.);
+Detail state may also live in stage reports (`docs/sessions/S000-internal-docs-archive/execution-plan.md`, session `reports/*.md`, etc.);
 **stage completion** must still be mirrored via agent `update`.
 
 Schema detail: [workflow-state-reference.md](workflow-state-reference.md).
@@ -255,7 +255,7 @@ Classify failures per considerations §1: **spec** vs **code** vs **infra** vs *
 |------------|--------|
 | **Output directory** | Default `docs/` (`workflow-state.yaml` §project.output_directory) |
 | **Templates** | Stage 01 fills from `templates/`; manifest user-approved before generation |
-| **Execution plan** | `docs/execution-plan.md` — 07-build source of truth for tasks |
+| **Execution plan** | `docs/sessions/S000-internal-docs-archive/execution-plan.md` — 07-build source of truth for tasks |
 | **No invention** | Do not add requirements, SLOs, or dependencies not in specs or user answers |
 | **Scope drift** | Work outside approved feature list → `[Scope Drift]` AskQuestion |
 
@@ -285,7 +285,7 @@ user to paste tokens when `prod.env` exists.
 
 | Skill | Primary output | Blocks |
 |-------|----------------|--------|
-| **00-context** | `docs/context-brief.md` | Optional |
+| **00-context** | `docs/sessions/S000-internal-docs-archive/context-brief.md` | Optional |
 | **01-requirements** | Product spec suite | Yes (start of A) |
 | **02-verify-plan** | Audit report, verified specs | Yes |
 | **03-plan-tooling** | Cursor rules, hooks, skills, agents | Yes |
@@ -350,7 +350,7 @@ Repo-root **`prod.env`** is the canonical **local operator secrets file** (gitig
 | **Never commit** | Do not add `prod.env` to git; do not echo secret values in chat, logs, or bug reports |
 | **Corpus safety** | If `DATABASE_URL` host is `.ondigitalocean.com`, do **not** run `pytest` / corpus seeds in the same shell — see [corpus-db-safety](corpus-db-safety/SKILL.md) |
 | **Missing file** | AskQuestion: user provides path, creates `prod.env`, or pastes vars for one-off use |
-| **Staging URLs** | Not stored in `prod.env` by default — derive via `do_apps.py urls` (below) or `docs/deploy-state.md` |
+| **Staging URLs** | Not stored in `prod.env` by default — derive via `do_apps.py urls` (below) or `docs/sessions/S000-internal-docs-archive/deploy-state.md` |
 
 ### Load pattern (bash)
 
@@ -391,7 +391,7 @@ set -a && source prod.env && set +a
 eval "$(uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend)"
 ```
 
-Set Modal admin API separately (from last `modal deploy` or `docs/deploy-state.md`):
+Set Modal admin API separately (from last `modal deploy` or `docs/sessions/S000-internal-docs-archive/deploy-state.md`):
 
 ```bash
 export VECINITA_STAGING_ADMIN_API_URL=https://vecinita--vecinita-data-management-fastapi-app.modal.run
@@ -404,7 +404,7 @@ bash scripts/deploy/verify_connectivity.sh
 # or: uv run pytest tests/smoke -m live -v
 ```
 
-Canonical live URL table: `docs/deploy-state.md` §Live URLs.
+Canonical live URL table: `docs/sessions/S000-internal-docs-archive/deploy-state.md` §Live URLs.
 
 ### Example: DO hotfix redeploy
 
@@ -455,7 +455,7 @@ first stage that writes application/feature source code is **07-build**.
 
 **Boundary:** "software" / "the build" = the product's feature implementation (business logic,
 API handlers, UI components, jobs that fulfil F-numbers). That is **always deferred to 07-build**
-and tracked as tasks in `docs/execution-plan.md`. Planning stages may write docs, guardrail/dev
+and tracked as tasks in `docs/sessions/S000-internal-docs-archive/execution-plan.md`. Planning stages may write docs, guardrail/dev
 **tooling**, and **config** scaffolding only when a spec or the execution plan calls for it — never
 the feature implementation itself.
 

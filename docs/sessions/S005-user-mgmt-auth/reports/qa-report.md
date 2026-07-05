@@ -166,7 +166,7 @@ FE branch gate (≥95%) satisfied.
 
 | Asset | Status | Notes |
 |-------|--------|-------|
-| D1–D5, D8–D9 | verified | Per `docs/data-staging-state.md` |
+| D1–D5, D8–D9 | verified | Per `docs/sessions/S000-internal-docs-archive/data-staging-state.md` |
 | D6 FastEmbed | verified | `vecinita` workspace; 384-dim |
 | D7 Qwen LLM | staged_procedure | Run `stage_llm_weights` to verify volume |
 

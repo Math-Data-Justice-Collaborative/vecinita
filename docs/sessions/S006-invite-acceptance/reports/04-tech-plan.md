@@ -17,7 +17,7 @@ captured as tasks only (no product source written in this planning stage).
 ## Interview outcome
 
 Requirements interview (01-requirements) locked RD-091–RD-098 on 2026-06-30. Technical
-planning applied **recommended defaults** from gap analysis (`docs/context/invite-acceptance-flow.md`)
+planning applied **recommended defaults** from gap analysis (`docs/sessions/S000-internal-docs-archive/context/invite-acceptance-flow.md`)
 and #109 root-cause table — documented as TP-S006-01–16 in ADR-032.
 
 ## Pre-built solutions (verified 2026-06-30)
@@ -61,7 +61,7 @@ See [ADR-032](../../adr/ADR-032-ev007-invite-acceptance-implementation.md). Summ
 
 - **New**: `docs/adr/ADR-032-ev007-invite-acceptance-implementation.md`
 - **Updated**: `docs/decisions.md` (TP-S006), `docs/staging-secrets-matrix.md` (EV-007 section),
-  `docs/execution-plan.md` (Phase 13, Current State, Task Tracking, PR-49),
+  `docs/sessions/S000-internal-docs-archive/execution-plan.md` (Phase 13, Current State, Task Tracking, PR-49),
   `docs/adr/README.md` (ADR-032 index entry)
 
 ## Execution plan delta

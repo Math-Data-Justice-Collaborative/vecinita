@@ -8,7 +8,7 @@ intent: "GitHub #109 — complete invite acceptance flow (redirect URLs, auth ca
 orchestrator: 16-evolve
 evolve_cycle_id: EV-007
 context_briefs:
-  - docs/context/invite-acceptance-flow.md
+  - docs/sessions/S000-internal-docs-archive/context/invite-acceptance-flow.md
 standing_docs_touched: []
 linked_issues:
   - 109
@@ -53,11 +53,11 @@ See [routing-plan.md](./routing-plan.md).
 |----|----------|
 | R60 | Keep Supabase-managed invite/recovery mail via Resend SMTP |
 | R61 | New `POST /admin/users/{id}/revoke-invite` + distinct UI + audit `user.invite_revoked` |
-| R62 | Scoped context brief at `docs/context/invite-acceptance-flow.md` |
+| R62 | Scoped context brief at `docs/sessions/S000-internal-docs-archive/context/invite-acceptance-flow.md` |
 
 ## Links
 
-- Context: [invite-acceptance-flow.md](../../context/invite-acceptance-flow.md)
+- Context: [invite-acceptance-flow.md](../../sessions/S000-internal-docs-archive/context/invite-acceptance-flow.md)
 - Prior session: [S005-user-mgmt-auth](../S005-user-mgmt-auth/session-brief.md) (paused; deploy 12/13 deferred)
 - ADR-030 (F35 implementation baseline), ADR-029 (email templates)
 - UJ-031, AC-U3 (to be revised in 01-requirements)

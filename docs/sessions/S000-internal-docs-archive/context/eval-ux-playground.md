@@ -152,4 +152,4 @@ F36 v1 ([`feature-list.md` §F36](../feature-list.md)): golden-set batch runs;
 | `docs/feature-list.md` §F36 | Baseline eval tab; limitations inform F37 boundary |
 | `docs/config-spec.md` §RAG evaluation | Env thresholds only; no per-run overrides today |
 | `packages/rag/vecinita_rag/engine.py` | `top_k`, LLM assembly — override injection point for sandbox |
-| S007 `docs/context/rag-eval.md` | Prior F36 context; superseded for playground by this brief |
+| S007 `docs/sessions/S000-internal-docs-archive/context/rag-eval.md` | Prior F36 context; superseded for playground by this brief |

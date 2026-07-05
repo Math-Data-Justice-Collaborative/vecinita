@@ -188,7 +188,7 @@ No redeploy required: chat-rag-backend, internal-write-api, Modal apps, Postgres
 
 ## Cost estimation
 
-See **`docs/execution-plan.md` §Cost Estimate** for line items (2026-05-19).
+See **`docs/sessions/S000-internal-docs-archive/execution-plan.md` §Cost Estimate** for line items (2026-05-19).
 
 | Resource | Est. $/mo (pilot) | Notes |
 |----------|-------------------|-------|

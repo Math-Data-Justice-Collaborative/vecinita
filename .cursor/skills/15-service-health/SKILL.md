@@ -51,7 +51,7 @@ Invoke **workflow-state-manager** `read_context` before any other action; `updat
 substep. **Do not** edit `workflow-state.yaml` directly.
 
 
-**Detail:** `docs/service-health-state.md` and per-run reports under `docs/service-health-reports/`.
+**Detail:** `docs/sessions/S000-internal-docs-archive/service-health-state.md` and per-run reports under `docs/service-health-reports/`.
 
 ### Deployment record (consumed from `workflow-state.yaml` §`deployment`)
 
@@ -194,14 +194,14 @@ Write `docs/service-health-reports/YYYY-MM-DD-[slug].md`:
 - Interview record, commands run, pass/fail per tier (include **H0ci** with run URL)
 - **Remediation:** none | config | data reindex | **fix main CI** | **14-hotfix** (code)
 
-Update `docs/service-health-state.md` and `workflow-state.yaml` §stages.15-service-health.
+Update `docs/sessions/S000-internal-docs-archive/service-health-state.md` and `workflow-state.yaml` §stages.15-service-health.
 
 ## Artifacts
 
 | File | Purpose |
 |------|---------|
 | `docs/service-health-reports/*.md` | Per-run reports |
-| `docs/service-health-state.md` | Last overall status |
+| `docs/sessions/S000-internal-docs-archive/service-health-state.md` | Last overall status |
 | `workflow-state.yaml` | Stage pointer |
 
 ## Output rules

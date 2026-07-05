@@ -8,8 +8,8 @@ intent: "Extend F34 admin auth — user management page (invite/list/role/resend
 orchestrator: 16-evolve
 evolve_cycle_id: EV-006
 linked_issues: [75]
-context_briefs: [docs/context-brief.md#16-ev-006-admin-user-mgmt-auth-ux]
-standing_docs_touched: [docs/context-brief.md]
+context_briefs: [docs/sessions/S000-internal-docs-archive/context-brief.md#16-ev-006-admin-user-mgmt-auth-ux]
+standing_docs_touched: [docs/sessions/S000-internal-docs-archive/context-brief.md]
 parent_session: S004-supabase-auth
 ---
 
@@ -84,6 +84,6 @@ See [routing-plan.md](./routing-plan.md). Lite evolve path. **01-requirements co
 ## Links
 
 - Parent: [S004 session brief](../S004-supabase-auth/session-brief.md)
-- Standing: [context-brief.md §16](../../context-brief.md), [feature-list.md](../../feature-list.md),
+- Standing: [context-brief.md §16](../../sessions/S000-internal-docs-archive/context-brief.md), [feature-list.md](../../feature-list.md),
   [ADR-026](../../adr/ADR-026-supabase-admin-auth.md), [ADR-027](../../adr/ADR-027-supabase-auth-verification-and-env-sync.md)
 - Issue: [#75](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/75) (auth umbrella)

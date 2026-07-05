@@ -62,7 +62,7 @@ update_status_options() {
 update_readme() {
   local project_id readme_file
   project_id="$(gh project view "$PROJECT_NUMBER" --owner "$OWNER" --format json --jq .id)"
-  readme_file="${ROOT}/docs/project-board.md"
+  readme_file="${ROOT}/docs/sessions/S000-internal-docs-archive/project-board.md"
   jq -n --arg projectId "$project_id" --rawfile readme "$readme_file" '{
     query: "mutation($projectId: ID!, $readme: String!) { updateProjectV2(input: { projectId: $projectId, readme: $readme }) { projectV2 { id title } } }",
     variables: { projectId: $projectId, readme: $readme }

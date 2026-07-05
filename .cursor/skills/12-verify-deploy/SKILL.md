@@ -28,7 +28,7 @@ See connectivity-gates §Stage 12.
 1. **11-verify-impl** must be `completed` — implementation verified by user
 2. Required:
    - Deployment plan document (e.g., `docs/deployment-integration.md`, `docs/deployment-plan.md`)
-   - `docs/execution-plan.md` — §Tech Stack for deployment tools
+   - `docs/sessions/S000-internal-docs-archive/execution-plan.md` — §Tech Stack for deployment tools
    - `{active_session.artifacts_dir}/reports/verify-impl.md` — confirmation implementation is approved
 3. If data assets exist: `docs/data-management-plan.md` and `docs/data-management-state.md`
 

@@ -189,7 +189,7 @@ Link related Modal health report in **Related** when both exist.
 
 ## Index
 
-Append closed bugs to `docs/hotfix-log.md` (column **Bug report** → `docs/bug-reports/BUG-….md`).
+Append closed bugs to `docs/sessions/S000-internal-docs-archive/hotfix-log.md` (column **Bug report** → `docs/bug-reports/BUG-….md`).
 Optional rolling list in `docs/bug-reports/README.md` only if the team maintains it.
 
 ## Output rules

@@ -45,5 +45,5 @@ The deployment integration batch selected **vLLM as primary** (RD-021) for highe
 - RD-006, RD-021 (`docs/decisions.md#requirements-decisions-01-requirements`)
 - `docs/deployment-integration.md` §Services
 - `docs/dependency-inventory.md` §vLLM evaluation
-- `docs/reference.md#risk-register` R1
+- `docs/sessions/S000-internal-docs-archive/reference.md#risk-register` R1
 - ADR-002, ADR-004, ADR-006

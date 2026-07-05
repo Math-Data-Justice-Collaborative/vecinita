@@ -220,7 +220,7 @@ Existing stack covers all work: `httpx`, `supabase-js`, Supabase CLI, Resend SMT
 
 ## References
 
-- `docs/context/invite-acceptance-flow.md` — gap analysis
+- `docs/sessions/S000-internal-docs-archive/context/invite-acceptance-flow.md` — gap analysis
 - `docs/deployment-integration.md` §EV-007
 - `docs/test-plan.md` TC-104–TC-110
 - `docs/user-journeys.md` UJ-031, UJ-033

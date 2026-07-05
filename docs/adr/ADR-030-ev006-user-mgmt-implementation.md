@@ -171,7 +171,7 @@ after domain verification.
 ## References
 
 - [ADR-029](ADR-029-admin-user-management-and-auth-ux.md) — product decisions RD-080–RD-090
-- `docs/execution-plan.md` Phase 12 (M48–M52)
+- `docs/sessions/S000-internal-docs-archive/execution-plan.md` Phase 12 (M48–M52)
 - `docs/sessions/S005-user-mgmt-auth/reports/04-tech-plan.md`
 - CLI [#5686](https://github.com/supabase/cli/pull/5686), [#5124](https://github.com/supabase/cli/issues/5124)
 - Supabase Admin API (GoTrue `/auth/v1/admin/*`); supabase-js `auth.storage` option

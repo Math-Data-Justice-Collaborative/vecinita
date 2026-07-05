@@ -5,7 +5,7 @@
 > **Features:** F36 follow-ons (M65–M67), F37 (M68–M70)  
 > **Branch:** `feat/S008-eval-ux-playground` → `main` (PR-51)  
 > **Last updated:** 2026-07-03  
-> **Sources:** [session-brief](./session-brief.md) · [routing-plan](./routing-plan.md) · [execution-plan](../../execution-plan.md) Phase 15 · [ADR-035](../../adr/ADR-035-ev009-eval-playground-production-config.md)
+> **Sources:** [session-brief](./session-brief.md) · [routing-plan](./routing-plan.md) · [execution-plan](../../sessions/S000-internal-docs-archive/execution-plan.md) Phase 15 · [ADR-035](../../adr/ADR-035-ev009-eval-playground-production-config.md)
 
 ## Purpose
 
@@ -14,7 +14,7 @@ dependencies. It is produced after **01-requirements** and **04-tech-plan** (exe
 exist) and updated through **07-build** and deploy stages.
 
 **Board:** [Math-Data-Justice-Collaborative/vecinita Project #3](https://github.com/orgs/Math-Data-Justice-Collaborative/projects/3)  
-**Issue conventions:** [project-board.md](../../project-board.md)
+**Issue conventions:** [project-board.md](../../sessions/S000-internal-docs-archive/project-board.md)
 
 ---
 
@@ -30,7 +30,7 @@ to production ChatRAG — without redeploying Modal/DO for every config tweak.
 
 | Track | Status | Notes |
 |-------|--------|-------|
-| 00-context | ✅ Complete | [eval-ux-playground.md](../../context/eval-ux-playground.md) |
+| 00-context | ✅ Complete | [eval-ux-playground.md](../../sessions/S000-internal-docs-archive/context/eval-ux-playground.md) |
 | 01-requirements | ✅ Complete | F37 + F36 follow-ons; RD-114–RD-130 |
 | 04-tech-plan | ✅ Complete | ADR-035, TP-S008-01–16, Phase 15 |
 | 07-build M65–M70 | 🟡 Nearly complete | T67.4 Playwright pending; T70.8 gate doc in progress |
@@ -297,7 +297,7 @@ gh issue create --repo Math-Data-Justice-Collaborative/vecinita \
   --body "Closes gap T66.5 + T67.4. See docs/sessions/S008-eval-ux-playground/roadmap.md GH-S008-7."
 ```
 
-Add each issue to Project #3 and set Status per [project-board.md](../../project-board.md).
+Add each issue to Project #3 and set Status per [project-board.md](../../sessions/S000-internal-docs-archive/project-board.md).
 
 ---
 

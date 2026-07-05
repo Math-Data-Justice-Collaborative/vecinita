@@ -121,7 +121,7 @@ Skip `docs/decisions.md#requirements-decisions-01-requirements` (reference input
 ### Phase 2 — Extract Provable Statements
 
 When a statement covers **runtime validation** or **deploy behavior**, cross-check
-`docs/hotfix-log.md` and `docs/incidents/`. If a hotfix superseded the statement, create
+`docs/sessions/S000-internal-docs-archive/hotfix-log.md` and `docs/incidents/`. If a hotfix superseded the statement, create
 a Low-confidence follow-up: "Statement may be stale post-hotfix #N" with link to incident.
 
 For each document, read section-by-section and extract **provable statements** —
@@ -252,7 +252,7 @@ options:
 
 1. Update `workflow-state.yaml` — increment counters, advance position
 2. Append to `docs/decisions.md#product-decisions-02-verify-plan`
-3. Update `docs/audits.md#product-plan-audit-report` with verdict
+3. Update `docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report` with verdict
 4. If Deny or Modify: update the source spec document surgically
 5. If the verdict resolves a `[Decision]`, `[Contradiction]`, or `[Ambiguity]` between
    multiple valid approaches (including Deny or Modify that changes an architectural
@@ -282,7 +282,7 @@ as pending?" Process if the user chooses to review.
 
 Write to output directory:
 
-1. **`docs/audits.md#product-plan-audit-report`** — Full audit report: per-statement records with section,
+1. **`docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report`** — Full audit report: per-statement records with section,
    claim, source, confidence, verdict, user feedback, action taken.
 
 2. **`docs/decisions.md#product-decisions-02-verify-plan`** — Chronological decision log: timestamped table of
@@ -309,7 +309,7 @@ Results:
 Source documents updated: [N] changes across [M] documents
 
 Artifacts:
-  docs/audits.md#product-plan-audit-report      — full audit report
+  docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report      — full audit report
   docs/decisions.md#product-decisions-02-verify-plan  — decision log
   docs/adr/                  — [N] ADRs created from audit verdicts
 

@@ -8,7 +8,7 @@ intent: "GitHub #99 — admin RAG evaluation tab, expanded bilingual golden set,
 orchestrator: 16-evolve
 evolve_cycle_id: EV-008
 context_briefs:
-  - docs/context/rag-eval.md
+  - docs/sessions/S000-internal-docs-archive/context/rag-eval.md
 standing_docs_touched:
   - docs/feature-list.md
   - docs/user-journeys.md
@@ -73,7 +73,7 @@ See [routing-plan.md](./routing-plan.md).
 
 ## Links
 
-- Context: [rag-eval.md](../../context/rag-eval.md)
+- Context: [rag-eval.md](../../sessions/S000-internal-docs-archive/context/rag-eval.md)
 - Eval interview plan: [eval-curation-plan.md](./reports/eval-curation-plan.md)
 - Paused: [S006-invite-acceptance](../S006-invite-acceptance/session-brief.md) (#109)
 - Related issues: #83 (reranking), #84 (groundedness), #94 (corpus)

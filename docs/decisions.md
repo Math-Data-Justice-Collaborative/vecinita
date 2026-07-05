@@ -393,7 +393,7 @@ S008 / F37 eval UX polish + playground. Items 1–3 are F36 follow-ons; playgrou
 | TP-S008-16 | Deploy order | migration → write-api → DM backend → chat-rag → admin FE | ADR-035 §16 |
 
 EV-009 artifacts: feature-list F37; user-journeys UJ-039/041 deltas + UJ-044–047; test-plan TC-123–TC-133;
-api-contract §EV-009; config-spec §Eval playground; context `docs/context/eval-ux-playground.md`;
+api-contract §EV-009; config-spec §Eval playground; context `docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md`;
 ADR-035; execution-plan Phase 15; acceptance-criteria AC-E22–AC-E26.
 
 EV-008 artifacts: feature-list F36; user-journeys UJ-039–UJ-040; test-plan TC-111–TC-116;

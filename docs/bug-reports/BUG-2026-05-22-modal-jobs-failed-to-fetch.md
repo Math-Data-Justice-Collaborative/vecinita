@@ -75,7 +75,7 @@ Fixed: `_resolve_repo_root()`.
 |-----|--------|
 | `docs/feature-list.md` F8 | In scope (ingest job API) |
 | `connectivity-gates.md` H4 | Implementation drift — Modal H4 was waived; browser POST /jobs requires fix |
-| `docs/deploy-report.md` | Documented deferred resolution — now implementing app-level auth |
+| `docs/sessions/S000-internal-docs-archive/deploy-report.md` | Documented deferred resolution — now implementing app-level auth |
 | ADR-002 | Hybrid Modal/DO — browser-facing Modal HTTP must be CORS-reachable |
 
 **Blocking drift:** none.

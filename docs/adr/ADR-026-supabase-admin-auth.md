@@ -97,7 +97,7 @@ untouched.
 
 - Supersedes (in part): [ADR-004](ADR-004-cost-sovereignty-zero-personal-data.md) §Data management access, §Excluded dependencies
 - Feature: `docs/feature-list.md` §F34
-- Context: `docs/context-brief.md` §15 (EV-005); resolutions R49–R53
+- Context: `docs/sessions/S000-internal-docs-archive/context-brief.md` §15 (EV-005); resolutions R49–R53
 - Decisions: `docs/decisions.md#requirements-decisions-01-requirements` (RD-073–RD-079)
 - Journeys: `docs/user-journeys.md` UJ-026–UJ-029
 - Acceptance: `docs/acceptance-criteria.md` AC-A1–AC-A10

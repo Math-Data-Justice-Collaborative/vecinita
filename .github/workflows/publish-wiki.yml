@@ -1,0 +1,65 @@
+# Publish docs/ subset to GitHub Wiki — see docs/wiki-manifest.json
+name: Publish Wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "README.md"
+      - "docs/wiki-manifest.json"
+      - "scripts/docs/**"
+      - ".github/workflows/publish-wiki.yml"
+  workflow_dispatch:
+    inputs:
+      include_operator:
+        description: Include operator-only runbooks (staging URLs, secrets matrix)
+        type: boolean
+        default: false
+
+concurrency:
+  group: publish-wiki-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Dry-run wiki build (validate manifest + links)
+        run: |
+          INCLUDE_OP=false
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.include_operator }}" = "true" ]; then
+            INCLUDE_OP=true
+          fi
+          uv run python scripts/docs/sync_github_wiki.py \
+            --dry-run \
+            --include-operator="$INCLUDE_OP"
+
+      - name: Push to GitHub Wiki
+        env:
+          WIKI_REMOTE: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git
+        run: |
+          INCLUDE_OP=false
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.include_operator }}" = "true" ]; then
+            INCLUDE_OP=true
+          fi
+          uv run python scripts/docs/sync_github_wiki.py \
+            --remote-url "$WIKI_REMOTE" \
+            --message "Sync docs from ${{ github.sha }}" \
+            --include-operator="$INCLUDE_OP"

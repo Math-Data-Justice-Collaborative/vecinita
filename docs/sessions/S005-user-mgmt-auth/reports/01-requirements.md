@@ -55,6 +55,6 @@ Dashboard-vs-CI contradiction; **6 stacked-bilingual** templates; CI sync via `s
 
 ## Notes / advisories
 
-- `docs/execution-plan.md` §Current State is stale (still S004/Phase 11) — should be advanced for
+- `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Current State is stale (still S004/Phase 11) — should be advanced for
   S005/EV-006 (flagged to workflow-state).
 - Commit deferred per the standing commit-only-when-asked override (same as S004).

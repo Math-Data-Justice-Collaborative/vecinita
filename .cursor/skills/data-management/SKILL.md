@@ -34,7 +34,7 @@ Data-management enables **H0i/H2/H3** (DB + server-side RAG). It does **not** re
 
 1. `docs/data-management-plan.md` (from doc-planner or 04-tech-plan)
 2. `docs/deployment-integration.md` — DB URL pattern, migration hook
-3. `docs/execution-plan.md` — tasks listing data deps
+3. `docs/sessions/S000-internal-docs-archive/execution-plan.md` — tasks listing data deps
 
 ## State management
 

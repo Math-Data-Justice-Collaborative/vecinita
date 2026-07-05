@@ -37,7 +37,7 @@ to have been run first.
 **Canonical:** repo-root [`workflow-state.yaml`](../../workflow-state.yaml) §`stages.build-planner`.
 Rules: [workflow-state-reference.md](../workflow-state-reference.md).
 
-On invocation: read §`stages.build-planner`. When `docs/execution-plan.md` is approved, set
+On invocation: read §`stages.build-planner`. When `docs/sessions/S000-internal-docs-archive/execution-plan.md` is approved, set
 `status: completed`, record `completed_at`, and append the plan to `artifacts`. Pipeline path
 uses `04-tech-plan` instead — then keep `stages.build-planner.status: skipped`.
 
@@ -107,7 +107,7 @@ Read all doc-planner outputs from the output directory. At minimum, expect:
 | `user-journeys.md` | If exists | Caller-facing UJ-NNN flows; E2E tier; feeds test-plan and 10-e2e |
 | `test-plan.md` | If exists | Test strategy, test cases, metrics (UJ ↔ TC mapping) |
 | `dependency-inventory.md` | If exists | Runtime/build deps, hardware |
-| `docs/reference.md#roadmap` | If exists | Phasing and priorities |
+| `docs/sessions/S000-internal-docs-archive/reference.md#roadmap` | If exists | Phasing and priorities |
 | `acceptance-criteria.md` | If exists | Pass/fail conditions |
 
 For each document read, extract:
@@ -383,7 +383,7 @@ Report completion:
 ```
 Build Planner Complete.
 
-Execution plan written to: docs/execution-plan.md
+Execution plan written to: docs/sessions/S000-internal-docs-archive/execution-plan.md
   Phases:     [N] implementation phases defined
   Milestones: [N] ([N] approved, [N] deferred)
   Total tasks: [N] ([N] test tasks, [N] code tasks)

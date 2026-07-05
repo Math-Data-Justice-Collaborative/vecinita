@@ -57,7 +57,7 @@ See [ADR-030](../../adr/ADR-030-ev006-user-mgmt-implementation.md). Summary:
 - **New**: `docs/adr/ADR-030-ev006-user-mgmt-implementation.md`
 - **Updated**: `docs/decisions.md` (TP-S005), `docs/dependency-inventory.md`,
   `docs/config-spec.md` (rate limits, paths, password policy), `docs/staging-secrets-matrix.md`,
-  `docs/execution-plan.md` (Phase 12, Current State, Task Tracking, PR-48)
+  `docs/sessions/S000-internal-docs-archive/execution-plan.md` (Phase 12, Current State, Task Tracking, PR-48)
 
 ## Execution plan delta
 

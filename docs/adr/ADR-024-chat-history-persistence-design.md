@@ -109,5 +109,5 @@ working, persistence is silently disabled, no uncaught error (TC-073, AC-S2).
 - Tests: `docs/test-plan.md` TC-072–TC-076
 - Acceptance: `docs/acceptance-criteria.md` AC-S1–AC-S7
 - Decisions: `docs/decisions.md#technical-decisions-05-verify-tech` §S003 (TP-S003-01–12, TV-S003-01); `docs/decisions.md#requirements-decisions-01-requirements` RD-068–RD-072
-- Plan: `docs/execution-plan.md` §Phase 10
+- Plan: `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Phase 10
 - Related: ADR-004 (zero personal data / stateless chat)

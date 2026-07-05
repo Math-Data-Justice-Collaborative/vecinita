@@ -86,7 +86,7 @@ options:
 Resolve URLs from [reference.md](reference.md):
 
 - **Local:** `docs/LOCAL_DEV.md` ports (5173 chat FE, 5174 admin FE, 8000 chat API, 8002 write API; Modal `serve` for DM API).
-- **Staging:** `docs/deploy-state.md` §Live URLs or `workflow-state.yaml` §`deployment.staging.urls`.
+- **Staging:** `docs/sessions/S000-internal-docs-archive/deploy-state.md` §Live URLs or `workflow-state.yaml` §`deployment.staging.urls`.
 
 If the chosen environment is not running, say so and offer: start instructions, switch environment, or skip.
 

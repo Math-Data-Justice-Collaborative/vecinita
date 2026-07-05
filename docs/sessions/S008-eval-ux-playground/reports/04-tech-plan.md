@@ -63,11 +63,11 @@ promote.
 | Artifact | Path |
 |----------|------|
 | ADR | `docs/adr/ADR-035-ev009-eval-playground-production-config.md` |
-| Execution plan | `docs/execution-plan.md` — Phase 15, Current State, PR-51 |
+| Execution plan | `docs/sessions/S000-internal-docs-archive/execution-plan.md` — Phase 15, Current State, PR-51 |
 | Decisions log | `docs/decisions.md` — TP-S008-01–16, RD-131–138 |
 | Config spec | `docs/config-spec.md` — `EvalConfig` validation bounds |
 | Staging secrets | `docs/staging-secrets-matrix.md` — `VECINITA_SUPER_ADMIN_EMAIL` |
-| Context brief | `docs/context/eval-ux-playground.md` — gaps closed |
+| Context brief | `docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md` — gaps closed |
 
 ## Phase 15 gate close-out (T70.8 — 2026-07-03)
 

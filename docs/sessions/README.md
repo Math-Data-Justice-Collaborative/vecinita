@@ -24,6 +24,7 @@ Then invoke stages from the approved plan (e.g. `@10-e2e`, `@16-evolve`).
 
 | Session ID | Type | Status | Intent | Branch | Started | Completed |
 |------------|------|--------|--------|--------|---------|-----------|
+| S000 | process | completed | Internal docs archive (moved off `docs/` root for wiki hygiene) | `feat/wiki-docs-publish` | 2026-07-05 | 2026-07-05 |
 | S001 | ops | in_progress | Modal LLM cold-start reduction via GPU memory snapshots | `feat/S001-modal-cold-start-snapshot` | 2026-06-25 | — |
 | S002 | feature | paused | Admin job management + ingest tag resilience (#88/#89) | `feat/S002-admin-job-management` | 2026-06-26 | — |
 | S003 | feature | completed | Browser-local persistent chat history (F33) | `feat/S003-persistent-chat-history` | 2026-06-26 | 2026-06-28 (QA/e2e/deploy deferred) |
@@ -54,8 +55,9 @@ docs/sessions/SNNN-slug/
 |------|----------|
 | Long-lived specs | `docs/spec.md`, `feature-list.md`, `test-plan.md`, `deploy-checklist.md`, … |
 | Session outputs | `docs/sessions/{id}/reports/*.md` |
-| Scoped discovery | `docs/context/{slug}.md` |
+| Scoped discovery | `docs/sessions/S000-internal-docs-archive/context/{slug}.md` (new work: link from session brief) |
+| Agent/ops archive | `docs/sessions/S000-internal-docs-archive/` |
 
-Pre-session reports at `docs/` root (e.g. `docs/qa-report.md`) are **historical read-only**.
+Pre-session reports archived under `docs/sessions/S000-internal-docs-archive/reports/` are **historical read-only**.
 New QA, verification, E2E, and verify-impl reports **must** use `docs/sessions/{id}/reports/`.
 See `.cursor/rules/session-reports.mdc`.

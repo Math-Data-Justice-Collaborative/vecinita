@@ -77,7 +77,7 @@ Classification: **Config / infra** — missing migration step, not application l
 | Doc | Result |
 |-----|--------|
 | `docs/feature-list.md` F36 | In scope |
-| `docs/execution-plan.md` T59.3/T61.x | Migrations exist in repo |
+| `docs/sessions/S000-internal-docs-archive/execution-plan.md` T59.3/T61.x | Migrations exist in repo |
 | `.github/workflows/deploy-digitalocean.yml` | Alembic gated on `DATABASE_URL` — working as designed |
 | `docs/staging-secrets-matrix.md` | `DATABASE_URL` marked required for CI Alembic |
 

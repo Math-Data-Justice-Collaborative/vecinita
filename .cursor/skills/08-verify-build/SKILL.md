@@ -46,7 +46,7 @@ Unlike a traditional gate that blocks until everything is clean, this skill uses
 
 ## Prerequisites
 
-1. `docs/execution-plan.md` — §Tech Stack Summary for tool commands
+1. `docs/sessions/S000-internal-docs-archive/execution-plan.md` — §Tech Stack Summary for tool commands
 2. Source files and tests must exist
 
 ## Session management
@@ -80,7 +80,7 @@ substep. **Do not** edit `workflow-state.yaml` directly.
 
 ### Phase 1 — Load Configuration
 
-Read `docs/execution-plan.md` §Tech Stack Summary for tool commands.
+Read `docs/sessions/S000-internal-docs-archive/execution-plan.md` §Tech Stack Summary for tool commands.
 
 ### Phase 2 — Run Checks (Parallel)
 

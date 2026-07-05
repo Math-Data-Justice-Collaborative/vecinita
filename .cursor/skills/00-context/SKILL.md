@@ -56,7 +56,7 @@ session orchestration (record via agent `decisions_log`).
 
 ## Connectivity (stage 00)
 
-In `docs/context-brief.md`, document **multi-app topology**: which deployables are browser-facing,
+In `docs/sessions/S000-internal-docs-archive/context-brief.md`, document **multi-app topology**: which deployables are browser-facing,
 which API origins they call, and whether CORS or a BFF is planned. Flag **browser integration risk**
 when static UI and APIs are on different hosts (Vecinita hybrid default).
 
@@ -176,7 +176,7 @@ Record every commit in `workflow-state.yaml` §`git_history.commits` with
 
 When invoked from **16-evolve** or user adds features with new upstream paper/repo context:
 
-- Run only for **new external context** not already in `docs/context-brief.md`.
+- Run only for **new external context** not already in `docs/sessions/S000-internal-docs-archive/context-brief.md`.
 - Merge findings into context-brief; do not regenerate unrelated sections.
 - Tag agent updates with `evolve_cycle_id` and affected `feature_ids`.
 
@@ -565,7 +565,7 @@ Report to user:
 ```
 Context Gathering Complete.
 
-Context brief written to: docs/context-brief.md
+Context brief written to: docs/sessions/S000-internal-docs-archive/context-brief.md
 
 Sources analyzed:
   [list of sources with key metrics]
