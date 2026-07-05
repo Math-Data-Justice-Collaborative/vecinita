@@ -51,3 +51,15 @@ Local-first fix → PR → deploy after user approval.
 ## Fix
 
 - `apps/data-management-frontend/src/auth/AuthContext.tsx` — call `setOperatorAccessToken()` during render so child `useEffect` fetches include `Authorization`
+
+## Verification
+
+### Layer 1 — Automated (2026-07-05)
+
+- [x] Repro test red → green (`test_bug_2026_07_05_jobs_auth_token_race.test.tsx`)
+- [x] data-management-frontend Vitest 584 pass
+- [x] CI parity (local) green with eval 422 fix on same branch
+
+### Layer 2–4
+
+- Pending PR merge + production deploy + user verification
