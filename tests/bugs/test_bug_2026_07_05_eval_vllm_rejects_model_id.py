@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 import json as json_lib
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import httpx
-import pytest
 from vecinita_eval.modal_llm import eval_runtime_for_config
 from vecinita_llm_client import LlmClient
 from vecinita_shared_schemas.eval_config import EvalConfig
 from vecinita_shared_schemas.json_types import as_json_object
+
+if TYPE_CHECKING:
+    from _pytest.monkeypatch import MonkeyPatch
 
 _VLLM_BASE = "https://vecinita--vecinita-llm-fastapi-app.modal.run"
 
@@ -37,7 +39,7 @@ def test_llm_client_omits_model_id_for_vllm_generate() -> None:
 
 
 def test_eval_runtime_for_config_omits_model_id_when_only_vllm_configured(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: MonkeyPatch,
 ) -> None:
     """Production fallback (LLM URL only) must not forward Ollama model_id."""
     captured: dict[str, object] = {}
