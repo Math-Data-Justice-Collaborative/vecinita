@@ -1,4 +1,10 @@
 # Publish docs/ subset to GitHub Wiki — see docs/wiki-manifest.json
+#
+# Wiki push authentication:
+#   GitHub's default GITHUB_TOKEN cannot push to *.wiki.git reliably — wiki repos
+#   sit in a separate permission scope. Create a fine-grained PAT (Contents: Read and
+#   write on this repo) or classic PAT with `repo` scope, save as repo secret
+#   WIKI_PUSH_TOKEN. The workflow falls back to GITHUB_TOKEN with a warning if unset.
 name: Publish Wiki
 
 on:
@@ -53,12 +59,31 @@ jobs:
 
       - name: Push to GitHub Wiki
         env:
-          WIKI_REMOTE: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git
+          WIKI_TOKEN: ${{ secrets.WIKI_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
+          WIKI_ACTOR: ${{ github.actor }}
+          WIKI_REPOSITORY: ${{ github.repository }}
         run: |
           OP_FLAGS="--no-include-operator"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.include_operator }}" = "true" ]; then
             OP_FLAGS="--include-operator"
           fi
+          if [ -z "${{ secrets.WIKI_PUSH_TOKEN }}" ]; then
+            echo "::warning::WIKI_PUSH_TOKEN is not set — using GITHUB_TOKEN for wiki push (often fails with 403/404). Add a PAT as WIKI_PUSH_TOKEN repo secret."
+          else
+            echo "Using WIKI_PUSH_TOKEN for wiki push."
+          fi
+          WIKI_REMOTE="$(uv run python - <<'PY'
+          import os
+          from scripts.docs.sync_github_wiki import build_wiki_remote_url
+          print(
+              build_wiki_remote_url(
+                  repository=os.environ["WIKI_REPOSITORY"],
+                  token=os.environ["WIKI_TOKEN"],
+                  actor=os.environ["WIKI_ACTOR"],
+              )
+          )
+          PY
+          )"
           uv run python scripts/docs/sync_github_wiki.py \
             --remote-url "$WIKI_REMOTE" \
             --message "Sync docs from ${{ github.sha }}" \
