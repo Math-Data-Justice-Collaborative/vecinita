@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { FlaskConical, RefreshCw } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 
@@ -14,6 +14,7 @@ import {
   fetchEvalRuns,
 } from "@/api/admin";
 import { requireCorpusConfig } from "@/config";
+import { AuthContext } from "@/auth/authContext";
 import { useAdminT } from "@/hooks/useAdminT";
 import { cn } from "@/lib/utils";
 import { EvaluationCompareView } from "@/evaluation/EvaluationCompareView";
@@ -21,6 +22,7 @@ import { EvaluationCriteriaTab } from "@/evaluation/EvaluationCriteriaTab";
 import { EvaluationDashboardTab } from "@/evaluation/EvaluationDashboardTab";
 import { EvaluationDrilldownTable } from "@/evaluation/EvaluationDrilldownTable";
 import { EvaluationExploreTab } from "@/evaluation/EvaluationExploreTab";
+import { EvaluationModelDownloadTab } from "@/evaluation/EvaluationModelDownloadTab";
 import { EvaluationPlaygroundTab } from "@/evaluation/EvaluationPlaygroundTab";
 
 const DISPLAY_MIN = 0.7;
@@ -55,6 +57,8 @@ function statusLabelKey(
 
 export function EvaluationPage() {
   const tr = useAdminT();
+  const authCtx = useContext(AuthContext);
+  const isSuperAdmin = authCtx?.role === "super-admin";
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") ?? "runs";
   const [runs, setRuns] = useState<EvalRunListItemApi[]>([]);
@@ -287,6 +291,11 @@ export function EvaluationPage() {
           <TabsTrigger value="playground" data-testid="eval-tab-playground">
             {tr("admin.evaluation.tab.playground")}
           </TabsTrigger>
+          {isSuperAdmin ? (
+            <TabsTrigger value="models" data-testid="eval-tab-models">
+              {tr("admin.evaluation.tab.models")}
+            </TabsTrigger>
+          ) : null}
         </TabsList>
 
         <TabsContent value="runs" className="space-y-6" forceMount>
@@ -484,6 +493,12 @@ export function EvaluationPage() {
         <TabsContent value="playground">
           <EvaluationPlaygroundTab onRunCreated={handlePlaygroundRunCreated} />
         </TabsContent>
+
+        {isSuperAdmin ? (
+          <TabsContent value="models">
+            <EvaluationModelDownloadTab />
+          </TabsContent>
+        ) : null}
       </Tabs>
     </div>
   );

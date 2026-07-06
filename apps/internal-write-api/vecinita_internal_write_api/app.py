@@ -90,6 +90,7 @@ from vecinita_shared_schemas.internal_write import (
     TopServedResponse,
 )
 from vecinita_shared_schemas.json_types import as_json_object
+from vecinita_shared_schemas.ollama_catalog import merge_ollama_catalog_with_volume
 from vecinita_shared_schemas.ollama_models import (
     OllamaModelListResponse,
     OllamaModelPullRequest,
@@ -282,12 +283,21 @@ def _default_ollama_models_client() -> OllamaModelsClient | None:
 def _vllm_fallback_model_list() -> OllamaModelListResponse:
     """Default model picker entries when Modal Ollama is not wired (vLLM-only eval)."""
     return OllamaModelListResponse(
-        items=[
-            OllamaModelSummary(
-                model_id=DEFAULT_EVAL_MODEL_ID,
-                available=True,
-            ),
-        ],
+        items=merge_ollama_catalog_with_volume(
+            [
+                OllamaModelSummary(
+                    model_id=DEFAULT_EVAL_MODEL_ID,
+                    available=True,
+                ),
+            ],
+        ),
+    )
+
+
+def _merge_ollama_model_list(response: OllamaModelListResponse) -> OllamaModelListResponse:
+    """Overlay volume manifest onto the curated playground catalog."""
+    return OllamaModelListResponse(
+        items=merge_ollama_catalog_with_volume(list(response.items)),
     )
 
 
@@ -1644,7 +1654,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         if ollama_models is None:
             return _vllm_fallback_model_list()
         try:
-            return ollama_models.list_models()
+            return _merge_ollama_model_list(ollama_models.list_models())
         except OllamaModelsClientError:
             return _vllm_fallback_model_list()
 

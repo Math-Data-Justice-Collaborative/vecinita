@@ -222,6 +222,29 @@ const enStrings = {
   "admin.evaluation.criteria.loadFailed": "Failed to load criteria",
   "admin.evaluation.criteria.saveFailed": "Failed to save criterion",
   "admin.evaluation.tab.playground": "Playground",
+  "admin.evaluation.tab.models": "Model download",
+  "admin.evaluation.playground.modelNotDownloaded": "(not downloaded)",
+  "admin.evaluation.models.title": "Ollama model download",
+  "admin.evaluation.models.subtitle":
+    "Download models and quantizations to the Modal volume for playground eval runs.",
+  "admin.evaluation.models.catalogTitle": "Available models",
+  "admin.evaluation.models.statusAvailable": "Downloaded",
+  "admin.evaluation.models.statusNotDownloaded": "Not downloaded",
+  "admin.evaluation.models.downloadButton": "Download",
+  "admin.evaluation.models.downloadPulling": "Downloading…",
+  "admin.evaluation.models.downloadStatusIdle":
+    "Select a model from the catalog or enter a custom tag.",
+  "admin.evaluation.models.downloadStatusPulling":
+    "Pull in progress — checking availability every 10 seconds…",
+  "admin.evaluation.models.downloadStatusSuccess": "Model is available.",
+  "admin.evaluation.models.downloadStatusTimeout":
+    "Download timed out after 30 minutes. Retry when ready.",
+  "admin.evaluation.models.downloadFailed": "Model download failed",
+  "admin.evaluation.models.customTitle": "Custom model tag",
+  "admin.evaluation.models.customHint":
+    "Pull any valid Ollama tag not listed in the catalog.",
+  "admin.evaluation.models.customModelLabel": "Ollama model tag",
+  "admin.evaluation.models.customModelPlaceholder": "qwen2.5:3b-instruct",
   "admin.evaluation.playground.title": "Evaluation playground",
   "admin.evaluation.playground.subtitle":
     "Experiment with RAG and judge settings in an isolated sandbox.",
@@ -646,6 +669,29 @@ const esStrings = {
   "admin.evaluation.criteria.loadFailed": "No se pudieron cargar los criterios",
   "admin.evaluation.criteria.saveFailed": "No se pudo guardar el criterio",
   "admin.evaluation.tab.playground": "Laboratorio",
+  "admin.evaluation.tab.models": "Descarga de modelos",
+  "admin.evaluation.playground.modelNotDownloaded": "(no descargado)",
+  "admin.evaluation.models.title": "Descarga de modelos Ollama",
+  "admin.evaluation.models.subtitle":
+    "Descarga modelos y cuantizaciones al volumen Modal para ejecuciones del laboratorio.",
+  "admin.evaluation.models.catalogTitle": "Modelos disponibles",
+  "admin.evaluation.models.statusAvailable": "Descargado",
+  "admin.evaluation.models.statusNotDownloaded": "No descargado",
+  "admin.evaluation.models.downloadButton": "Descargar",
+  "admin.evaluation.models.downloadPulling": "Descargando…",
+  "admin.evaluation.models.downloadStatusIdle":
+    "Selecciona un modelo del catálogo o introduce una etiqueta personalizada.",
+  "admin.evaluation.models.downloadStatusPulling":
+    "Descarga en curso — comprobando disponibilidad cada 10 segundos…",
+  "admin.evaluation.models.downloadStatusSuccess": "El modelo ya está disponible.",
+  "admin.evaluation.models.downloadStatusTimeout":
+    "La descarga superó 30 minutos. Reintenta cuando quieras.",
+  "admin.evaluation.models.downloadFailed": "Error al descargar el modelo",
+  "admin.evaluation.models.customTitle": "Etiqueta de modelo personalizada",
+  "admin.evaluation.models.customHint":
+    "Descarga cualquier etiqueta Ollama válida que no esté en el catálogo.",
+  "admin.evaluation.models.customModelLabel": "Etiqueta de modelo Ollama",
+  "admin.evaluation.models.customModelPlaceholder": "qwen2.5:3b-instruct",
   "admin.evaluation.playground.title": "Laboratorio de evaluación",
   "admin.evaluation.playground.subtitle":
     "Experimenta con ajustes de RAG y juez en un entorno aislado.",
