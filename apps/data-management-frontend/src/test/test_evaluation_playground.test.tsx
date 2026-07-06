@@ -1223,10 +1223,46 @@ describe("EvaluationPlayground (UJ-045)", () => {
 describe("EvaluationPlayground model download (UJ-048)", () => {
   const DOWNLOAD_MODEL_ID = "qwen2.5:3b-instruct";
 
+  const catalogItems = (
+    overrides: Partial<Record<string, boolean>> = {},
+  ): { model_id: string; available: boolean }[] => [
+    { model_id: "qwen2.5:1.5b-instruct", available: overrides["qwen2.5:1.5b-instruct"] ?? true },
+    {
+      model_id: DOWNLOAD_MODEL_ID,
+      available: overrides[DOWNLOAD_MODEL_ID] ?? false,
+    },
+    { model_id: "qwen2.5:7b-instruct", available: overrides["qwen2.5:7b-instruct"] ?? false },
+  ];
+
   afterEach(() => {
     vi.useRealTimers();
     cleanup();
     vi.restoreAllMocks();
+  });
+
+  it("lists undownloaded models as disabled in playground picker", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/models/ollama")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ items: catalogItems() }),
+          });
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-model-id")).toBeInTheDocument();
+    });
+    const option = screen.getByRole("option", {
+      name: new RegExp(`${DOWNLOAD_MODEL_ID}.*not downloaded|no descargado`, "i"),
+    });
+    expect(option).toBeDisabled();
   });
 
   it("super-admin triggers download and polls until model is available (TC-135)", async () => {
@@ -1256,10 +1292,7 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
           return Promise.resolve({
             ok: true,
             json: async () => ({
-              items: [
-                { model_id: "qwen2.5:1.5b-instruct", available: true },
-                { model_id: DOWNLOAD_MODEL_ID, available },
-              ],
+              items: catalogItems({ [DOWNLOAD_MODEL_ID]: available }),
             }),
           });
         }
@@ -1267,42 +1300,33 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
       }),
     );
 
-    await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
     await waitFor(() => {
       expect(
-        screen.getByTestId("eval-playground-download-card"),
+        screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
       ).toBeInTheDocument();
     });
 
-    fireEvent.change(screen.getByTestId("eval-playground-download-model-id"), {
-      target: { value: DOWNLOAD_MODEL_ID },
-    });
-    await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-download-model-id")).toHaveValue(
-        DOWNLOAD_MODEL_ID,
-      );
-    });
-    fireEvent.click(screen.getByTestId("eval-playground-download-button"));
+    fireEvent.click(
+      screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
+    );
 
     await waitFor(() => {
       expect(pullCalled).toBe(true);
     });
-    expect(
-      screen.getByTestId("eval-playground-download-status"),
-    ).toHaveTextContent(/checking availability|comprobando/i);
+    expect(screen.getByTestId("eval-models-download-status")).toHaveTextContent(
+      /checking availability|comprobando/i,
+    );
 
     await vi.advanceTimersByTimeAsync(10_000);
     await waitFor(() => {
-      expect(
-        screen.getByTestId("eval-playground-download-status"),
-      ).toHaveTextContent(/available|disponible/i);
+      expect(screen.getByTestId("eval-models-download-status")).toHaveTextContent(
+        /available|disponible/i,
+      );
     });
-    expect(screen.getByTestId("eval-playground-model-id")).toHaveValue(
-      DOWNLOAD_MODEL_ID,
-    );
   });
 
-  it("hides download panel for regular admin (TC-136)", async () => {
+  it("hides model download tab for regular admin (TC-136)", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockImplementation((input: RequestInfo | URL) => {
@@ -1315,26 +1339,30 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
     await waitFor(() => {
       expect(screen.getByTestId("eval-playground-model-id")).toBeInTheDocument();
     });
-    expect(
-      screen.queryByTestId("eval-playground-download-card"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("eval-tab-models")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("evaluation-models-download")).not.toBeInTheDocument();
   });
 
   it("surfaces pull failure and poll errors for super-admin", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({
+      items: catalogItems(),
+    });
     vi.spyOn(adminApi, "pullOllamaModel").mockRejectedValueOnce(
       new Error("Ollama model pull failed (403)"),
     );
 
-    await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
-    fireEvent.change(screen.getByTestId("eval-playground-download-model-id"), {
-      target: { value: DOWNLOAD_MODEL_ID },
-    });
-    fireEvent.click(screen.getByTestId("eval-playground-download-button"));
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
     await waitFor(() => {
       expect(
-        screen.getByTestId("eval-playground-download-status"),
-      ).toHaveTextContent(/403/);
+        screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
+      ).toBeInTheDocument();
+    });
+    fireEvent.click(
+      screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-models-download-status")).toHaveTextContent(/403/);
     });
 
     vi.mocked(adminApi.pullOllamaModel).mockResolvedValueOnce({
@@ -1343,26 +1371,35 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
       status: "pulling",
     });
     vi.spyOn(adminApi, "fetchOllamaModels").mockRejectedValueOnce("poll failed");
-    fireEvent.click(screen.getByTestId("eval-playground-download-button"));
+    fireEvent.click(
+      screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
+    );
     await vi.advanceTimersByTimeAsync(10_000);
     await waitFor(() => {
-      expect(
-        screen.getByTestId("eval-playground-download-status"),
-      ).toHaveTextContent(/refresh model list|actualizar la lista/i);
+      expect(screen.getByTestId("eval-models-download-status")).toHaveTextContent(
+        /poll failed/i,
+      );
     });
   });
 
   it("shows translated error for non-Error pull rejection", async () => {
-    vi.spyOn(adminApi, "pullOllamaModel").mockRejectedValueOnce("pull failed");
-    await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
-    fireEvent.change(screen.getByTestId("eval-playground-download-model-id"), {
-      target: { value: DOWNLOAD_MODEL_ID },
+    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({
+      items: catalogItems(),
     });
-    fireEvent.click(screen.getByTestId("eval-playground-download-button"));
+    vi.spyOn(adminApi, "pullOllamaModel").mockRejectedValueOnce("pull failed");
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
     await waitFor(() => {
       expect(
-        screen.getByTestId("eval-playground-download-status"),
-      ).toHaveTextContent(/Model download failed|Error al descargar/i);
+        screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
+      ).toBeInTheDocument();
+    });
+    fireEvent.click(
+      screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-models-download-status")).toHaveTextContent(
+        /Download failed/i,
+      );
     });
   });
 
@@ -1390,10 +1427,7 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
           return Promise.resolve({
             ok: true,
             json: async () => ({
-              items: [
-                { model_id: "qwen2.5:1.5b-instruct", available: true },
-                { model_id: DOWNLOAD_MODEL_ID, available: false },
-              ],
+              items: catalogItems(),
             }),
           });
         }
@@ -1401,18 +1435,22 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
       }),
     );
 
-    await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
-    fireEvent.change(screen.getByTestId("eval-playground-download-model-id"), {
-      target: { value: DOWNLOAD_MODEL_ID },
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
+      ).toBeInTheDocument();
     });
-    fireEvent.click(screen.getByTestId("eval-playground-download-button"));
+    fireEvent.click(
+      screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
+    );
     await vi.advanceTimersByTimeAsync(10_000);
     vi.setSystemTime(startMs + 30 * 60 * 1000 + 1);
     await vi.advanceTimersByTimeAsync(10_000);
     await waitFor(() => {
-      expect(
-        screen.getByTestId("eval-playground-download-status"),
-      ).toHaveTextContent(/timed out|superó 30/i);
+      expect(screen.getByTestId("eval-models-download-status")).toHaveTextContent(
+        /timed out|superó 30/i,
+      );
     });
   });
 
@@ -1425,23 +1463,24 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
     });
     vi.spyOn(adminApi, "fetchOllamaModels")
       .mockResolvedValueOnce({
-        items: [
-          { model_id: "qwen2.5:1.5b-instruct", available: true },
-          { model_id: DOWNLOAD_MODEL_ID, available: false },
-        ],
+        items: catalogItems(),
       })
       .mockRejectedValueOnce(new Error("poll list failed"));
 
-    await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
-    fireEvent.change(screen.getByTestId("eval-playground-download-model-id"), {
-      target: { value: DOWNLOAD_MODEL_ID },
-    });
-    fireEvent.click(screen.getByTestId("eval-playground-download-button"));
-    await vi.advanceTimersByTimeAsync(10_000);
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
     await waitFor(() => {
       expect(
-        screen.getByTestId("eval-playground-download-status"),
-      ).toHaveTextContent(/poll list failed/i);
+        screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
+      ).toBeInTheDocument();
+    });
+    fireEvent.click(
+      screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
+    );
+    await vi.advanceTimersByTimeAsync(10_000);
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-models-download-status")).toHaveTextContent(
+        /poll list failed/i,
+      );
     });
   });
 
@@ -1464,19 +1503,29 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
             }),
           });
         }
+        if (url.includes("/internal/v1/models/ollama") && method === "GET") {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ items: catalogItems() }),
+          });
+        }
         return Promise.resolve(defaultPlaygroundFetch(url));
       }),
     );
 
-    const view = await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
-    fireEvent.change(screen.getByTestId("eval-playground-download-model-id"), {
-      target: { value: DOWNLOAD_MODEL_ID },
-    });
-    fireEvent.click(screen.getByTestId("eval-playground-download-button"));
+    const view = await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
     await waitFor(() => {
       expect(
-        screen.getByTestId("eval-playground-download-status"),
-      ).toHaveTextContent(/checking availability|comprobando/i);
+        screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
+      ).toBeInTheDocument();
+    });
+    fireEvent.click(
+      screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-models-download-status")).toHaveTextContent(
+        /checking availability|comprobando/i,
+      );
     });
     view.unmount();
     expect(clearTimeoutSpy).toHaveBeenCalled();

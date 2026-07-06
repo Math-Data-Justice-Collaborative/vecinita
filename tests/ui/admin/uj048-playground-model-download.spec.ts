@@ -7,9 +7,9 @@ import {
 
 const DOWNLOAD_MODEL_ID = "qwen2.5:3b-instruct";
 
-/** UJ-048 / TC-137: super-admin model download panel + poll UX. */
+/** UJ-048 / TC-137: super-admin model download tab + poll UX. */
 test.describe("Playground model download (UJ-048)", () => {
-  test("super-admin downloads model and picker updates (TC-137)", async ({
+  test("super-admin downloads model from models tab (TC-137)", async ({
     page,
   }) => {
     let listCallCount = 0;
@@ -39,6 +39,7 @@ test.describe("Playground model download (UJ-048)", () => {
             items: [
               { model_id: "qwen2.5:1.5b-instruct", available: true },
               { model_id: DOWNLOAD_MODEL_ID, available },
+              { model_id: "qwen2.5:7b-instruct", available: false },
             ],
           }),
         });
@@ -47,27 +48,24 @@ test.describe("Playground model download (UJ-048)", () => {
       await route.continue();
     });
 
-    await page.goto("/evaluation?tab=playground");
-    await expect(page.getByTestId("eval-playground-download-card")).toBeVisible();
-    await page.getByTestId("eval-playground-download-model-id").fill(DOWNLOAD_MODEL_ID);
-    await page.getByTestId("eval-playground-download-button").click();
+    await page.goto("/evaluation?tab=models");
+    await expect(page.getByTestId("evaluation-models-download")).toBeVisible();
+    await page.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`).click();
 
-    await expect(page.getByTestId("eval-playground-download-status")).toContainText(
+    await expect(page.getByTestId("eval-models-download-status")).toContainText(
       /checking availability|comprobando/i,
     );
-    await expect(page.getByTestId("eval-playground-download-status")).toContainText(
+    await expect(page.getByTestId("eval-models-download-status")).toContainText(
       /available|disponible/i,
       { timeout: 15_000 },
     );
-    await expect(page.getByTestId("eval-playground-model-id")).toHaveValue(
-      DOWNLOAD_MODEL_ID,
-    );
   });
 
-  test("admin does not see download panel (TC-136)", async ({ page }) => {
+  test("admin does not see model download tab (TC-136)", async ({ page }) => {
     await mockAuthenticatedAdmin(page);
     await page.goto("/evaluation?tab=playground");
     await expect(page.getByTestId("eval-playground-model-id")).toBeVisible();
-    await expect(page.getByTestId("eval-playground-download-card")).toHaveCount(0);
+    await expect(page.getByTestId("eval-tab-models")).toHaveCount(0);
+    await expect(page.getByTestId("evaluation-models-download")).toHaveCount(0);
   });
 });

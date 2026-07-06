@@ -22,7 +22,10 @@ def main(argv: list[str] | None = None) -> int:
 
     supabase_url = os.environ.get("SUPABASE_URL", "").strip()
     secret_key = os.environ.get("SUPABASE_SECRET_KEY", "").strip()
-    email = os.environ.get("VECINITA_SUPER_ADMIN_EMAIL", "").strip()
+    email = (
+        os.environ.get("VECINITA_SUPER_ADMIN_EMAIL", "").strip()
+        or os.environ.get("SUPABASE_ADMIN_EMAIL", "").strip()
+    )
     password = os.environ.get("SUPABASE_ADMIN_PASSWORD", "").strip()
 
     missing = [
@@ -30,7 +33,7 @@ def main(argv: list[str] | None = None) -> int:
         for name, value in (
             ("SUPABASE_URL", supabase_url),
             ("SUPABASE_SECRET_KEY", secret_key),
-            ("VECINITA_SUPER_ADMIN_EMAIL", email),
+            ("VECINITA_SUPER_ADMIN_EMAIL or SUPABASE_ADMIN_EMAIL", email),
         )
         if not value
     ]

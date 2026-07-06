@@ -83,6 +83,12 @@ def test_admin_lists_ollama_models(
         "qwen2.5:1.5b-instruct",
     )
     assert default_model.get("available") is True
+    undownloaded = find_json_object_by_str(
+        json_list(listing_body, "items"),
+        "model_id",
+        "qwen2.5:3b-instruct",
+    )
+    assert undownloaded.get("available") is False
 
 
 def test_admin_cannot_trigger_ollama_pull(
