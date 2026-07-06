@@ -660,6 +660,33 @@ export async function fetchOllamaModels(
   return response.json() as Promise<{ items: OllamaModelSummaryApi[] }>;
 }
 
+export interface OllamaModelPullResponseApi {
+  job_id: string;
+  model_id: string;
+  status: "pulling" | "available";
+}
+
+export async function pullOllamaModel(
+  options: CorpusClientOptions,
+  modelId: string,
+): Promise<OllamaModelPullResponseApi> {
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/models/ollama/pull`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ model_id: modelId }),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Ollama model pull failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<OllamaModelPullResponseApi>;
+}
+
 export interface EvalTimeseriesPointApi {
   run_id: string;
   completed_at: string;

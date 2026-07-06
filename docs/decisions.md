@@ -393,8 +393,56 @@ S008 / F37 eval UX polish + playground. Items 1–3 are F36 follow-ons; playgrou
 | TP-S008-16 | Deploy order | migration → write-api → DM backend → chat-rag → admin FE | ADR-035 §16 |
 
 EV-009 artifacts: feature-list F37; user-journeys UJ-039/041 deltas + UJ-044–047; test-plan TC-123–TC-133;
-api-contract §EV-009; config-spec §Eval playground; context `docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md`;
+api-contract §EV-009; config-spec §Eval playground; context `docs/sessions/S000-internal-docs-archive/context/playground-model-download.md`;
 ADR-035; execution-plan Phase 15; acceptance-criteria AC-E22–AC-E26.
+
+### EV-010 requirements decisions (2026-07-05) — RD-146–RD-153
+
+Context decisions R76–R82 set in 00-context (`playground-model-download.md`). The 01-requirements
+interview resolved remaining product gaps (RD-146–RD-153):
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-146 | Document manifest | Delta update **feature-list, user-journeys, test-plan, api-contract, acceptance-criteria** only | F38 interview Q `manifest` |
+| RD-147 | Pull auth (supersedes TC-134 admin pull) | **`super-admin` only** on `POST /internal/v1/models/ollama/pull`; `admin` → `403`; list remains `admin+` | 00-context R78; F38 interview |
+| RD-148 | Model tag policy | **Free-text Ollama tag** — validate non-empty + max 128 chars only | F38 interview Q `model_tags` |
+| RD-149 | Concurrent pulls | **Allow parallel** duplicate pull requests (no idempotency / 409 in v1) | F38 interview Q `concurrent_pulls` |
+| RD-150 | Pull progress UX | Poll `GET /models/ollama` every **10s** for up to **30 min**, then timeout error + retry | F38 interview Q `pull_failure_ux`; 00-context R79 |
+| RD-151 | Admin download UI | **Hidden entirely** for non-super-admin (not disabled-with-tooltip) | F38 interview Q `admin_ui_visibility` |
+| RD-152 | Testing scope | **Full stack** — integration auth (TC-134), Vitest (TC-135–136), API E2E (TC-138), Playwright T0-ui (TC-137) | 00-context R80 |
+| RD-153 | Feature ID | **F38** — playground model download; separate from F37 promote/list UX | 00-context R82 |
+
+EV-010 artifacts: feature-list F38; user-journeys UJ-048; test-plan TC-134–TC-138 (TC-134 revised);
+api-contract §EV-010; acceptance-criteria AC-E27–AC-E29; context
+`docs/sessions/S000-internal-docs-archive/context/playground-model-download.md`.
+
+### EV-010 04-tech-plan decisions (2026-07-05) — TP-S009-01–16
+
+Requirements locked RD-146–RD-153 in 01-requirements; implementation details resolved in 04-tech-plan:
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| TP-S009-01 | Build order | **M71 → M72 → M73** on `feat/S009-playground-model-download` | ADR-036 §1 |
+| TP-S009-02 | Branch base | From **`main`** at 07-build (confirm F37 playground baseline present) | session-brief; context gap #4 |
+| TP-S009-03 | Pull auth | `SuperAdminActorDep` on pull; `WriteActorDep` on list unchanged | ADR-036 §2, RD-147 |
+| TP-S009-04 | Modal Ollama app | **No changes** in F38 v1 | ADR-036 §3 |
+| TP-S009-05 | FE API client | `pullOllamaModel()` in `admin.ts` | ADR-036 §4 |
+| TP-S009-06 | Poll contract | Re-fetch model list every **10s**, **30 min** max | ADR-036 §5, RD-150 |
+| TP-S009-07 | UI visibility | Download card **hidden** for non-super-admin; below model picker | ADR-036 §5, RD-151 |
+| TP-S009-08 | i18n | Keys in `packages/frontend-i18n` | ADR-036 §6 |
+| TP-S009-09 | Playwright | New `mockAuthenticatedSuperAdmin` in `tests/ui/helpers/mock-admin-auth.ts` | ADR-036 §7 |
+| TP-S009-10 | Dependencies | **No new** Python/Node runtime deps | ADR-036 §11 |
+| TP-S009-11 | Deploy order | internal-write-api → data-management-frontend; no migration | ADR-036 §10 |
+| TP-S009-12 | CORS | Existing POST preflight on pull route sufficient | ADR-036 §8 |
+| TP-S009-13 | OpenAPI | Update `internal-write.yaml` EV-010 pull auth | ADR-036 §9 |
+| TP-S009-14 | Integration tests | Split admin list vs super-admin pull vs admin pull 403 | ADR-036 §7 |
+| TP-S009-15 | TDD | Red tests before implementation per milestone | build-execution.mdc |
+| TP-S009-16 | PR | Single evolve-lite **PR-52** to `main` | execution-plan Phase 16 |
+| TP-S009-17 | Model storage | **Modal Volume `vecinita-models` only** — Ollama blobs + `manifest.json` at `/models`; no DO disk/Postgres/S3 for weights | ADR-036 §3, RD-140 |
+
+EV-010 tech-plan artifacts: ADR-036; execution-plan Phase 16 (M71–M73, T71.1–T73.6); roadmap
+`docs/sessions/S009-playground-model-download/roadmap.md`; report
+`docs/sessions/S009-playground-model-download/reports/04-tech-plan.md`.
 
 EV-008 artifacts: feature-list F36; user-journeys UJ-039–UJ-040; test-plan TC-111–TC-116;
 acceptance-criteria AC-E12–AC-E16; api-contract §EV-008 eval routes; config-spec §RAG evaluation;

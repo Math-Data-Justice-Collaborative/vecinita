@@ -1654,7 +1654,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         status_code=status.HTTP_202_ACCEPTED,
     )
     def pull_ollama_model_route(  # pyright: ignore[reportUnusedFunction]
-        _actor: WriteActorDep,
+        _actor: SuperAdminActorDep,
         body: OllamaModelPullRequest,
     ) -> OllamaModelPullResponse:
         if ollama_models is None:

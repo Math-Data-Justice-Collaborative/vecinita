@@ -24,6 +24,7 @@ import {
   parseHealthAggregate,
   parseStatsSummary,
   promoteRagConfig,
+  pullOllamaModel,
   triggerEvalRun,
   triggerPlaygroundEvalRun,
   updateEvalConfigPreset,
@@ -799,6 +800,81 @@ describe("admin API eval helpers", () => {
       vi.fn().mockResolvedValue(new Response("", { status: 502 })),
     );
     await expect(fetchOllamaModels(CLIENT)).rejects.toThrow(/502/);
+  });
+
+  it("pullOllamaModel POSTs pull route with model_id (TC-135)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse(
+          {
+            job_id: "00000000-0000-0000-0000-0000000000dd",
+            model_id: "qwen2.5:3b-instruct",
+            status: "pulling",
+          },
+          202,
+        ),
+      ),
+    );
+    const result = await pullOllamaModel(JWT_CLIENT, "qwen2.5:3b-instruct");
+    expect(result.status).toBe("pulling");
+    expect(mockFetchUrl()).toContain("/internal/v1/models/ollama/pull");
+    expect(mockFetchJsonBody()).toEqual({ model_id: "qwen2.5:3b-instruct" });
+    expectBearerJwt(vi.mocked(fetch).mock.calls[0]?.[1]);
+  });
+
+  it("pullOllamaModel throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 403 })),
+    );
+    await expect(
+      pullOllamaModel(JWT_CLIENT, "qwen2.5:3b-instruct"),
+    ).rejects.toThrow(/403/);
+  });
+
+  it("pullOllamaModel uses apiKey when accessToken is absent", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse(
+          {
+            job_id: "00000000-0000-0000-0000-0000000000dd",
+            model_id: "qwen2.5:3b-instruct",
+            status: "pulling",
+          },
+          202,
+        ),
+      ),
+    );
+    await pullOllamaModel(CLIENT, "qwen2.5:3b-instruct");
+    const headers = vi.mocked(fetch).mock.calls[0]?.[1]?.headers as Record<
+      string,
+      string
+    >;
+    expect(headers["Authorization"]).toBe("Bearer test-key");
+  });
+
+  it("pullOllamaModel sends empty bearer when auth options are absent", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse(
+          {
+            job_id: "00000000-0000-0000-0000-0000000000dd",
+            model_id: "qwen2.5:3b-instruct",
+            status: "pulling",
+          },
+          202,
+        ),
+      ),
+    );
+    await pullOllamaModel({ baseUrl: "http://localhost:8002" }, "qwen2.5:3b-instruct");
+    const headers = vi.mocked(fetch).mock.calls[0]?.[1]?.headers as Record<
+      string,
+      string
+    >;
+    expect(headers["Authorization"]).toBe("Bearer ");
   });
 
   it("fetchEvalTimeseries fetches with limit", async () => {

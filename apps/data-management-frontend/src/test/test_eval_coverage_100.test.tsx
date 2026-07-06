@@ -611,6 +611,30 @@ describe("eval coverage gaps", () => {
     ).toHaveValue("staging");
   });
 
+  it("EvaluationPlaygroundTab selects fixture corpus profile", async () => {
+    renderWithProviders(<EvaluationPlaygroundTab />);
+    await waitFor(() => {
+      expect(
+        document.getElementById("eval-playground-corpus-profile"),
+      ).toBeInTheDocument();
+    });
+    fireEvent.change(
+      document.getElementById("eval-playground-corpus-profile")!,
+      {
+        target: { value: "staging" },
+      },
+    );
+    fireEvent.change(
+      document.getElementById("eval-playground-corpus-profile")!,
+      {
+        target: { value: "fixture" },
+      },
+    );
+    expect(
+      document.getElementById("eval-playground-corpus-profile"),
+    ).toHaveValue("fixture");
+  });
+
   it("EvaluationPlaygroundTab uses translated errors for non-Error rejections", async () => {
     vi.stubGlobal(
       "fetch",

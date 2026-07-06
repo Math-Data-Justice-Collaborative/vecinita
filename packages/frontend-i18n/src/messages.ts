@@ -261,6 +261,24 @@ const enStrings = {
   "admin.evaluation.playground.presetsLoadFailed": "Failed to load presets",
   "admin.evaluation.playground.presetsSaveFailed": "Failed to save preset",
   "admin.evaluation.playground.presetsCloneFailed": "Failed to clone preset",
+  "admin.evaluation.playground.downloadTitle": "Download model",
+  "admin.evaluation.playground.downloadHint":
+    "Pull an Ollama model tag into the Modal volume for playground eval runs.",
+  "admin.evaluation.playground.downloadModelLabel": "Ollama model tag",
+  "admin.evaluation.playground.downloadModelPlaceholder": "qwen2.5:3b-instruct",
+  "admin.evaluation.playground.downloadButton": "Download",
+  "admin.evaluation.playground.downloadPulling": "Downloading…",
+  "admin.evaluation.playground.downloadStatusIdle":
+    "Enter a tag and download to add a model.",
+  "admin.evaluation.playground.downloadStatusPulling":
+    "Pull in progress — checking availability every 10 seconds…",
+  "admin.evaluation.playground.downloadStatusSuccess":
+    "Model is available in the picker.",
+  "admin.evaluation.playground.downloadStatusTimeout":
+    "Download timed out after 30 minutes. Retry when ready.",
+  "admin.evaluation.playground.downloadFailed": "Model download failed",
+  "admin.evaluation.playground.downloadPollFailed":
+    "Failed to refresh model list while downloading",
   "admin.evaluation.playground.promote": "Promote to production",
   "admin.evaluation.playground.promoteConfirm": "Promote config",
   "admin.evaluation.playground.promoteDialogBody":
@@ -673,6 +691,24 @@ const esStrings = {
     "No se pudo guardar el preset",
   "admin.evaluation.playground.presetsCloneFailed":
     "No se pudo clonar el preset",
+  "admin.evaluation.playground.downloadTitle": "Descargar modelo",
+  "admin.evaluation.playground.downloadHint":
+    "Descarga una etiqueta Ollama al volumen Modal para evaluaciones del laboratorio.",
+  "admin.evaluation.playground.downloadModelLabel": "Etiqueta del modelo Ollama",
+  "admin.evaluation.playground.downloadModelPlaceholder": "qwen2.5:3b-instruct",
+  "admin.evaluation.playground.downloadButton": "Descargar",
+  "admin.evaluation.playground.downloadPulling": "Descargando…",
+  "admin.evaluation.playground.downloadStatusIdle":
+    "Introduce una etiqueta y descarga para añadir un modelo.",
+  "admin.evaluation.playground.downloadStatusPulling":
+    "Descarga en curso — comprobando disponibilidad cada 10 segundos…",
+  "admin.evaluation.playground.downloadStatusSuccess":
+    "El modelo ya está disponible en el selector.",
+  "admin.evaluation.playground.downloadStatusTimeout":
+    "La descarga superó 30 minutos. Reintenta cuando quieras.",
+  "admin.evaluation.playground.downloadFailed": "Error al descargar el modelo",
+  "admin.evaluation.playground.downloadPollFailed":
+    "No se pudo actualizar la lista de modelos durante la descarga",
   "admin.evaluation.playground.promote": "Promover a producción",
   "admin.evaluation.playground.promoteConfirm": "Promover configuración",
   "admin.evaluation.playground.promoteDialogBody":

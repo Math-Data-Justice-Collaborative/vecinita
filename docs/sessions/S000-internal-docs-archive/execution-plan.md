@@ -1,23 +1,23 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–035
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–036
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 15: EV-009 — Eval UX polish + playground (F36 follow-ons + F37) |
-| **Active milestone** | M70: Super-admin promote + ChatRAG config reader *(complete)* |
-| **Active task** | **08-verify-build** — formal phase verify *(next)* |
-| **Tasks completed** | Phase 15 M65–M70 complete (S008); T70.8 gate checklist PASS at T2 (2026-07-03) |
-| **Last updated** | 2026-07-03 |
-| **Evolve cycle** | EV-009 (F36 follow-ons + F37) — **04-tech-plan complete** |
-| **Git branch** | `feat/S008-eval-ux-playground` |
-| **Active session** | S008-eval-ux-playground — evolve-lite. 04-tech-plan approved (ADR-035, TP-S008-01–16). Build order M65→M70. |
-| **Scope addition** | 2026-07-02 — S008/EV-009: run list refresh, unified jobs, dashboard charts, Playground + super-admin promote (ADR-035, UJ-044–047, TC-123–TC-133). |
+| **Active phase** | Phase 16: EV-010 — Playground model download (F38) |
+| **Active milestone** | M73: Full-stack tests + phase gate |
+| **Active task** | **T73.5** — Phase 16 gate checklist *(next — 08-verify-build)* |
+| **Tasks completed** | Phase 16 M71–M72 complete; M73 T73.1–T73.4, T73.6 complete (S009/F38) |
+| **Last updated** | 2026-07-05 |
+| **Evolve cycle** | EV-010 (F38) — **04-tech-plan complete** |
+| **Git branch** | `feat/S009-playground-model-download` |
+| **Active session** | S009-playground-model-download — evolve-lite. 04-tech-plan approved (ADR-036, TP-S009-01–16). Build order M71→M73. |
+| **Scope addition** | 2026-07-05 — S009/EV-010: super-admin Ollama model download UI + auth tighten + full-stack tests (ADR-036, UJ-048, TC-134–TC-138). |
 
 ## Template
 
@@ -1431,6 +1431,71 @@ PR-51 merge pending (13-deploy-smoke). Report:
 
 ---
 
+### Phase 16: EV-010 — Playground model download (F38)
+
+> **Session:** S009-playground-model-download · **Evolve cycle:** EV-010 · **Feature ID:** F38  
+> **Branch:** `feat/S009-playground-model-download` → `main` (PR-52) · **ADR:** ADR-036 · **Build order:** M71→M73
+
+**Objective:** Super-admin-only Ollama model download from Evaluation Playground — tighten pull API
+auth, add download UI with model-list polling, full-stack test coverage (TC-134–TC-138, UJ-048).  
+**Entry gate:** 04-tech-plan approved (ADR-036, TP-S009-01–16).  
+**Exit gate:** TC-134–TC-138 green; UJ-048 covered; AC-E27–AC-E29 satisfied at T2.
+
+#### M71: API auth — super-admin-only pull
+
+**Goal:** `POST /internal/v1/models/ollama/pull` requires super-admin; admin list unchanged.  
+**Branch:** `feat/S009-playground-model-download`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
+|---|------|------|--------|-------------|------------|-----------|---------|---------|
+| T71.1 | Test: `tests/integration/test_ollama_models_list.py` — TC-134 auth matrix (admin list OK, admin pull 403, super-admin pull 202) — red | Test | completed | test-plan TC-134, UJ-048, ADR-036 §7 | — | 2026-07-05 | S009 | F38 |
+| T71.2 | Test: `tests/unit/internal_write_api/test_app_eval_routes.py` — pull route super-admin vs admin matrix — red | Test | completed | test-plan TC-134, api-contract §EV-010 | — | 2026-07-05 | S009 | F38 |
+| T71.3 | Code: Change `pull_ollama_model_route` dependency to `SuperAdminActorDep` | Code | completed | ADR-036 §2, RD-147 | T71.1, T71.2 | 2026-07-05 | S009 | F38 |
+| T71.4 | Code: TC-134 integration + unit auth tests green | Code | completed | test-plan TC-134 | T71.1, T71.2, T71.3 | 2026-07-05 | S009 | F38 |
+| T71.5 | Config: OpenAPI `internal-write.yaml` — EV-010 pull SuperAdminActorDep | Config | completed | ADR-036 §9, api-contract §EV-010 | T71.3 | 2026-07-05 | S009 | F38 |
+| T71.6 | Docs: `deployment-integration.md` §EV-010 — Modal `vecinita-models` storage path + deploy prereqs | Docs | completed | ADR-036 §3, TP-S009-17 | — | 2026-07-05 | S009 | F38 |
+
+#### M72: Playground download UI + poll-until-available
+
+**Goal:** Super-admin download panel on Playground; poll model list every 10s up to 30 min.  
+**Branch:** `feat/S009-playground-model-download`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
+|---|------|------|--------|-------------|------------|-----------|---------|---------|
+| T72.1 | Test (Vitest): `test_evaluation_playground.test.tsx` — TC-135 super-admin download + poll success — red | Test | completed | test-plan TC-135, UJ-048, ADR-036 §5 | T71.4 | 2026-07-05 | S009 | F38 |
+| T72.2 | Test (Vitest): `test_evaluation_playground.test.tsx` — TC-136 admin download UI hidden — red | Test | completed | test-plan TC-136, RD-151 | — | 2026-07-05 | S009 | F38 |
+| T72.3 | Test (Vitest): `admin.test.ts` — `pullOllamaModel()` client — red | Test | completed | ADR-036 §4 | — | 2026-07-05 | S009 | F38 |
+| T72.4 | Code: `pullOllamaModel()` in `admin.ts` | Code | completed | ADR-036 §4, api-contract §EV-010 | T72.3 | 2026-07-05 | S009 | F38 |
+| T72.5 | Code: `EvaluationPlaygroundTab` — Download model card + 10s poll / 30 min timeout | Code | completed | ADR-036 §5, UJ-048, RD-150 | T72.1, T71.4 | 2026-07-05 | S009 | F38 |
+| T72.6 | Code: i18n keys `admin.evaluation.playground.download*` (EN/ES) | Code | completed | ADR-036 §6 | T72.5 | 2026-07-05 | S009 | F38 |
+| T72.7 | Code: TC-135/136 Vitest + admin.test.ts green | Code | completed | test-plan TC-135, TC-136 | T72.1–T72.6 | 2026-07-05 | S009 | F38 |
+
+#### M73: Full-stack tests + phase gate
+
+**Goal:** API E2E + Playwright T0-ui for UJ-048; Phase 16 gate checklist.  
+**Branch:** `feat/S009-playground-model-download`
+
+| # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
+|---|------|------|--------|-------------|------------|-----------|---------|---------|
+| T73.1 | Test: `tests/e2e/test_uj048_playground_model_download.py` — TC-138 — red | Test | completed | test-plan TC-138, UJ-048 | T71.4 | 2026-07-05 | S009 | F38 |
+| T73.2 | Test (Playwright): `tests/ui/admin/uj048-playground-model-download.spec.ts` + `mockAuthenticatedSuperAdmin` — TC-137 — red | Test | completed | test-plan TC-137, ADR-036 §7 | T72.7 | 2026-07-05 | S009 | F38 |
+| T73.3 | Code: TC-138 API E2E green | Code | completed | test-plan TC-138, AC-E27 | T73.1, T72.7 | 2026-07-05 | S009 | F38 |
+| T73.4 | Code: TC-137 Playwright green | Code | completed | test-plan TC-137, AC-E27 | T73.2, T72.7 | 2026-07-05 | S009 | F38 |
+| T73.5 | Docs: Phase 16 gate checklist + session verify reports pointer | Docs | pending | 08-verify-build | T71.4–T73.4 | — | S009 | F38 |
+| T73.6 | Test: `tests/unit/modal/test_ollama_volume_manifest.py` — TC-139 Modal manifest/volume contract — red | Test | completed | ADR-036 §3, test-plan TC-139 | — | 2026-07-05 | S009 | F38 |
+
+#### Phase 16 Gate Check
+
+- [ ] All M71–M73 tasks completed (T71.1–T73.6)
+- [ ] TC-134–TC-139 green; UJ-048 covered (T2)
+- [ ] AC-E27–AC-E30 satisfied at T2; optional T3 staging pull smoke at 13-deploy-smoke
+- [ ] No DB migration; no new Python runtime dependencies (ADR-036 §11)
+- [ ] **Modal storage:** pulls target `vecinita-models` volume; manifest contract verified (TC-139)
+- [ ] CORS preflight for ollama pull route still green (EV-009 baseline)
+- [ ] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -1543,6 +1608,7 @@ main
 | PR-49 | Major | Phase 13 / S006 (EV-007) | feat/S006-invite-acceptance | main | open ([#109](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/109), [PR #110](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/110)) |
 | PR-50 | Major | Phase 14 / S007 (EV-008) | feat/S007-rag-eval | main | pending ([#99](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/99)) |
 | PR-51 | Major | Phase 15 / S008 (EV-009) | feat/S008-eval-ux-playground | main | pending (F37 eval UX + playground) |
+| PR-52 | Major | Phase 16 / S009 (EV-010) | feat/S009-playground-model-download | main | pending (F38 playground model download) |
 
 S003 is evolve-lite + frontend-only: M39–M42 land as atomic commits on the single
 `feat/S003-persistent-chat-history` branch (one PR to `main`, PR-46), matching the S002 pattern.
@@ -1562,6 +1628,10 @@ S007 (EV-008) is evolve-lite: M59–M63 land as atomic commits on the single
 
 S008 (EV-009) is evolve-lite: M65–M70 land as atomic commits on the single
 `feat/S008-eval-ux-playground` branch (one PR to `main`, PR-51), delivering F36 follow-ons + F37 playground.
+
+S009 (EV-010) is evolve-lite: M71–M73 land as atomic commits on the single
+`feat/S009-playground-model-download` branch (one PR to `main`, PR-52), delivering F38 super-admin
+playground model download + full-stack tests.
 
 ## Task Tracking
 
@@ -1988,6 +2058,25 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T70.6 | M70 | 15 | Code | pending | T70.3, T69.4 | — | S008 | F37 |
 | T70.7 | M70 | 15 | Config | pending | T70.1 | — | S008 | F37 |
 | T70.8 | M70 | 15 | Docs | completed | T65.3–T70.6 | — | S008 | F37 | 2026-07-03 |
+| T71.1 | M71 | 16 | Test | pending | — | — | S009 | F38 | — |
+| T71.2 | M71 | 16 | Test | pending | — | — | S009 | F38 | — |
+| T71.3 | M71 | 16 | Code | pending | T71.1, T71.2 | — | S009 | F38 | — |
+| T71.4 | M71 | 16 | Code | pending | T71.1, T71.2, T71.3 | — | S009 | F38 | — |
+| T71.5 | M71 | 16 | Config | pending | T71.3 | — | S009 | F38 | — |
+| T71.6 | M71 | 16 | Docs | pending | — | — | S009 | F38 | — |
+| T72.1 | M72 | 16 | Test | pending | T71.4 | — | S009 | F38 | — |
+| T72.2 | M72 | 16 | Test | pending | — | — | S009 | F38 | — |
+| T72.3 | M72 | 16 | Test | pending | — | — | S009 | F38 | — |
+| T72.4 | M72 | 16 | Code | pending | T72.3 | — | S009 | F38 | — |
+| T72.5 | M72 | 16 | Code | pending | T72.1, T71.4 | — | S009 | F38 | — |
+| T72.6 | M72 | 16 | Code | pending | T72.5 | — | S009 | F38 | — |
+| T72.7 | M72 | 16 | Code | pending | T72.1–T72.6 | — | S009 | F38 | — |
+| T73.1 | M73 | 16 | Test | pending | T71.4 | D3 | S009 | F38 | — |
+| T73.2 | M73 | 16 | Test | pending | T72.7 | — | S009 | F38 | — |
+| T73.3 | M73 | 16 | Code | pending | T73.1, T72.7 | D3 | S009 | F38 | — |
+| T73.4 | M73 | 16 | Code | pending | T73.2, T72.7 | — | S009 | F38 | — |
+| T73.5 | M73 | 16 | Docs | pending | T71.4–T73.4 | — | S009 | F38 | — |
+| T73.6 | M73 | 16 | Test | pending | — | — | S009 | F38 | — |
 
 ## Phase Gate Log
 
@@ -2073,3 +2162,7 @@ CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, ba
 - [x] EV-009 playground model — fixed Modal LLM; no picker v1 (TP-S008-06, RD-132)
 - [x] EV-009 ChatRAG config — direct Postgres read + env fallback (TP-S008-12, RD-134)
 - [x] EV-009 super-admin — `VECINITA_SUPER_ADMIN_EMAIL` seed (TP-S008-10, RD-127)
+- [x] EV-010 build order — M71→M73 auth then UI then tests (TP-S009-01, RD-146–153)
+- [x] EV-010 pull auth — super-admin only; admin list unchanged (TP-S009-03, RD-147)
+- [x] EV-010 poll UX — 10s interval, 30 min timeout (TP-S009-06, RD-150)
+- [x] EV-010 model storage — Modal Volume `vecinita-models` only (TP-S009-17, RD-140)

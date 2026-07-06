@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-07-02 (S008/EV-009 F37 — AC-E22–AC-E26 eval UX + playground)
+> **Last updated**: 2026-07-05 (S009/EV-010 F38 — AC-E27–AC-E30 playground model download)
 
 ## Per-feature criteria
 
@@ -137,6 +137,13 @@
 - [x] **AC-E24**: Dashboard supports scatter chart type and time-range presets 1D/7D/10D/1M/1Y/custom with empty state (UJ-041, TC-125/126). — S008 M67 (T2; deploy pending)
 - [x] **AC-E25**: Playground supports golden + ad-hoc runs with sandbox config overrides, versioned presets, and side-by-side compare (UJ-045/046, TC-127–TC-130). — S008 M68–M69 (T2; deploy pending)
 - [x] **AC-E26**: Super-admin can promote sandbox config to production; ChatRAG reads active config from DB; non-super-admin denied (UJ-047, TC-131–TC-133). — S008 M70
+
+### EV-010 — Playground model download (F38)
+
+- [ ] **AC-E27**: Super-admin can download an Ollama model from the Playground UI; UI polls until `available=true` or 30 min timeout (UJ-048, TC-135, TC-137, TC-138).
+- [ ] **AC-E28**: Regular admin can list/select models but cannot pull (`403` API) and does not see the download panel (UJ-048, TC-134, TC-136).
+- [ ] **AC-E29**: Full-stack test matrix green in CI — integration auth (TC-134), Vitest UI (TC-135–TC-136), API E2E (TC-138), Playwright T0-ui (TC-137).
+- [ ] **AC-E30**: Downloaded models persist on Modal Volume **`vecinita-models`** — manifest marks `available: true` after pull; TC-139 unit contract + optional T3 staging verify (TP-S009-17, ADR-036 §3).
 
 ## Quantitative benchmarks
 

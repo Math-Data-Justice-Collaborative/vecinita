@@ -31,6 +31,7 @@ import {
   fetchEvalConfigPresets,
   fetchOllamaModels,
   promoteRagConfig,
+  pullOllamaModel,
   triggerPlaygroundEvalRun,
   updateEvalConfigPreset,
 } from "@/api/admin";
@@ -50,6 +51,15 @@ const DEFAULT_MAX_TOKENS = 256;
 const DEFAULT_TEMPERATURE = 0.2;
 const DEFAULT_JUDGE_TEMPERATURE = 0.2;
 const DEFAULT_MODEL_ID = "qwen2.5:1.5b-instruct";
+const MODEL_PULL_POLL_INTERVAL_MS = 10_000;
+const MODEL_PULL_TIMEOUT_MS = 30 * 60 * 1000;
+
+type ModelDownloadStatus =
+  | "idle"
+  | "pulling"
+  | "success"
+  | "timeout"
+  | "error";
 
 /** vLLM-only deployments omit Modal Ollama; playground still needs a selectable model tag. */
 const VLLM_FALLBACK_MODELS: readonly OllamaModelSummaryApi[] = [
@@ -154,7 +164,13 @@ export function EvaluationPlaygroundTab({
   const [promoteDialogOpen, setPromoteDialogOpen] = useState(false);
   const [promoting, setPromoting] = useState(false);
   const [promoteVersion, setPromoteVersion] = useState<number | null>(null);
+  const [downloadModelTag, setDownloadModelTag] = useState("");
+  const [downloadStatus, setDownloadStatus] =
+    useState<ModelDownloadStatus>("idle");
+  const [downloadError, setDownloadError] = useState<string | null>(null);
   const initialPresetApplied = useRef(false);
+  const downloadPollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const downloadPollStartedAt = useRef<number | null>(null);
 
   const selectedPreset = useMemo(
     () =>
@@ -265,6 +281,95 @@ export function EvaluationPlaygroundTab({
       active = false;
     };
   }, [loadPresets, tr]);
+
+  useEffect(() => {
+    return () => {
+      if (downloadPollTimer.current !== null) {
+        clearTimeout(downloadPollTimer.current);
+      }
+    };
+  }, []);
+
+  const clearDownloadPoll = useCallback(() => {
+    if (downloadPollTimer.current !== null) {
+      clearTimeout(downloadPollTimer.current);
+      downloadPollTimer.current = null;
+    }
+    downloadPollStartedAt.current = null;
+  }, []);
+
+  const refreshModelsFromApi = useCallback(
+    async (modelTag: string): Promise<boolean> => {
+      const client = requireCorpusConfig();
+      const data = await fetchOllamaModels(client);
+      setModels(data.items);
+      return data.items.some(
+        (item) => item.model_id === modelTag && item.available,
+      );
+    },
+    [],
+  );
+
+  const scheduleDownloadPoll = useCallback(
+    (modelTag: string) => {
+      clearDownloadPoll();
+      downloadPollStartedAt.current = Date.now();
+      const poll = async () => {
+        if (downloadPollStartedAt.current === null) return;
+        const elapsed = Date.now() - downloadPollStartedAt.current;
+        if (elapsed >= MODEL_PULL_TIMEOUT_MS) {
+          clearDownloadPoll();
+          setDownloadStatus("timeout");
+          return;
+        }
+        try {
+          const ready = await refreshModelsFromApi(modelTag);
+          if (ready) {
+            clearDownloadPoll();
+            setModelId(modelTag);
+            setDownloadStatus("success");
+            return;
+          }
+        } catch (err) {
+          clearDownloadPoll();
+          setDownloadStatus("error");
+          setDownloadError(
+            err instanceof Error
+              ? err.message
+              : tr("admin.evaluation.playground.downloadPollFailed"),
+          );
+          return;
+        }
+        downloadPollTimer.current = setTimeout(() => {
+          void poll();
+        }, MODEL_PULL_POLL_INTERVAL_MS);
+      };
+      downloadPollTimer.current = setTimeout(() => {
+        void poll();
+      }, MODEL_PULL_POLL_INTERVAL_MS);
+    },
+    [clearDownloadPoll, refreshModelsFromApi, tr],
+  );
+
+  const handleDownloadModel = useCallback(async () => {
+    const tag = downloadModelTag.trim();
+    if (!tag) return;
+    setDownloadError(null);
+    setDownloadStatus("pulling");
+    try {
+      const client = requireCorpusConfig();
+      await pullOllamaModel(client, tag);
+      scheduleDownloadPoll(tag);
+    } catch (err) {
+      clearDownloadPoll();
+      setDownloadStatus("error");
+      setDownloadError(
+        err instanceof Error
+          ? err.message
+          : tr("admin.evaluation.playground.downloadFailed"),
+      );
+    }
+  }, [clearDownloadPoll, downloadModelTag, scheduleDownloadPoll, tr]);
 
   useEffect(() => {
     if (presetsLoading || initialPresetApplied.current) return;
@@ -738,6 +843,76 @@ export function EvaluationPlaygroundTab({
                 ))}
               </select>
             </div>
+
+            {isSuperAdmin ? (
+              <Card data-testid="eval-playground-download-card">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">
+                    {tr("admin.evaluation.playground.downloadTitle")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    {tr("admin.evaluation.playground.downloadHint")}
+                  </p>
+                  <div className="space-y-2">
+                    <Label htmlFor="eval-playground-download-model-id">
+                      {tr("admin.evaluation.playground.downloadModelLabel")}
+                    </Label>
+                    <input
+                      id="eval-playground-download-model-id"
+                      data-testid="eval-playground-download-model-id"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      value={downloadModelTag}
+                      disabled={downloadStatus === "pulling"}
+                      placeholder={tr(
+                        "admin.evaluation.playground.downloadModelPlaceholder",
+                      )}
+                      onChange={(event) => {
+                        setDownloadModelTag(event.target.value);
+                      }}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    data-testid="eval-playground-download-button"
+                    disabled={
+                      downloadStatus === "pulling" ||
+                      downloadModelTag.trim().length === 0
+                    }
+                    onClick={() => {
+                      void handleDownloadModel();
+                    }}
+                  >
+                    {downloadStatus === "pulling"
+                      ? tr("admin.evaluation.playground.downloadPulling")
+                      : tr("admin.evaluation.playground.downloadButton")}
+                  </Button>
+                  <p
+                    className="text-sm text-muted-foreground"
+                    data-testid="eval-playground-download-status"
+                  >
+                    {downloadStatus === "idle"
+                      ? tr("admin.evaluation.playground.downloadStatusIdle")
+                      : null}
+                    {downloadStatus === "pulling"
+                      ? tr("admin.evaluation.playground.downloadStatusPulling")
+                      : null}
+                    {downloadStatus === "success"
+                      ? tr("admin.evaluation.playground.downloadStatusSuccess")
+                      : null}
+                    {downloadStatus === "timeout"
+                      ? tr("admin.evaluation.playground.downloadStatusTimeout")
+                      : null}
+                    {downloadStatus === "error"
+                      ? (downloadError ??
+                        tr("admin.evaluation.playground.downloadFailed"))
+                      : null}
+                  </p>
+                </CardContent>
+              </Card>
+            ) : null}
 
             <div className="space-y-2">
               <Label htmlFor="eval-playground-system-prompt">

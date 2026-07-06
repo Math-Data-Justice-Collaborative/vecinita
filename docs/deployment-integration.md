@@ -1,7 +1,7 @@
 # Deployment Integration Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-01 (EV-008 F36 eval runner wiring)
+> **Last updated**: 2026-07-05 (EV-010 F38 — Modal `vecinita-models` playground storage)
 
 ## Overview
 
@@ -18,6 +18,7 @@ Hybrid deployment: **DigitalOcean** (US `nyc1` or `sfo3`) for ChatRAG Backend, i
 | data-management-modal | Modal | ASGI + queues + scrape |
 | vecinita-embedding | Modal | FastEmbed 384-dim |
 | vecinita-llm | Modal | **vLLM** — **Qwen2.5-1.5B-Instruct** on **T4** (scale-to-zero) |
+| vecinita-ollama | Modal | Playground Ollama — model list/pull/generate; **storage:** volume `vecinita-models` |
 | database | DO Managed Postgres | Smallest viable tier |
 
 **Topology note (RD-022):** User selected **multi-app** on DO (separate deployables per backend). **05-verify-tech / TP-009:** pilot **~$42–48/mo** fits ≤ **$50** cap with scale-to-zero GPU; consolidate DO if overrun.
@@ -148,6 +149,26 @@ No redeploy required: chat-rag-backend, internal-write-api, Modal apps, Postgres
 **CORS:** No change — admin frontend already authorized for internal-write-api with `Authorization` header (F34). Eval routes follow same admin JWT policy.
 
 **Post-deploy validation:** Admin triggers golden run on staging; verify history + drill-down; harness green in CI.
+
+### EV-010 — Playground model download + Modal storage (F38)
+
+**Storage target:** all playground Ollama model weights on Modal Volume **`vecinita-models`**
+(mounted `/models` in `vecinita-ollama`). DO services **never** store model blobs.
+
+| Variable | App | Purpose |
+|----------|-----|---------|
+| `VECINITA_MODAL_OLLAMA_URL` | internal-write-api | Proxy to Modal ASGI `vecinita-ollama` list/pull routes |
+| `VECINITA_MODAL_PROXY_KEY` | internal-write-api + Modal secret `vecinita-ollama` | `X-Vecinita-Proxy-Key` auth on Modal HTTP |
+| `vecinita-models` volume | Modal | Persistent Ollama weights + `manifest.json` |
+
+**Redeploy order (EV-010):**
+
+1. **`vecinita-ollama` Modal app** — must be deployed with `vecinita-models` volume (F37 baseline)
+2. **internal-write-api** — `VECINITA_MODAL_OLLAMA_URL` + super-admin pull auth (F38)
+3. **data-management-frontend** — super-admin download UI
+
+**Post-deploy validation (T3):** Super-admin pulls a small tag (e.g. `qwen2.5:3b-instruct`); poll until
+`available: true` in Playground picker; optional `modal volume ls vecinita-models` operator check.
 
 ## Entrypoints & triggers
 

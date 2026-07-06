@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-07-02 (S008/EV-009 F37 — eval UX polish + playground + super-admin promote)
+> **Last updated**: 2026-07-05 (S009/EV-010 F38 — super-admin playground model download)
 
 ## Summary
 
@@ -47,6 +47,7 @@
 | F35 | Admin user management + remember-me + Resend SMTP/templates | Planned | Cross-cutting (admin) | data-management-frontend, data-management-backend, supabase config + CI | S005/EV-006 2026-06-29; ADR-029 (#75) |
 | F36 | Admin RAG evaluation tab + golden eval set | Implemented | Data Management | data-management-frontend, internal-write-api, packages/eval | S007/EV-008 2026-07-01; #99 |
 | F37 | Eval UX polish + playground + runtime config promote | Planned | Data Management + ChatRAG | data-management-frontend, internal-write-api, data-management-backend, chat-rag-backend | S008/EV-009 2026-07-02 |
+| F38 | Playground model download (super-admin) | Implemented | Data Management | data-management-frontend, internal-write-api, Modal Ollama app | S009/EV-010 2026-07-05 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -638,7 +639,7 @@
   | `chat-rag-backend` | Read active production config from DB (fallback to env defaults) |
   | `packages/rag` + eval runner | Per-run config override injection (sandbox); Ollama `model_id` routing |
   | Modal Ollama app | Model list API; background pull into `vecinita-models` volume |
-- **Auth**: Admin — playground run/view/compare/presets; super-admin — promote only; viewer → `403`.
+- **Auth**: Admin — playground run/view/compare/presets + **list/select Ollama models**; super-admin — promote only; **model pull/download is F38**; viewer → `403`.
 - **Privacy**: Ad-hoc operator questions stored in `eval_run_items` with same retention as eval runs
   (ADR-004 — operator content, not visitor PII).
 - **Limitations / scope**: Sandbox until promote; no Langfuse/Phoenix; no external Ollama hosts in v1
@@ -648,6 +649,35 @@
   presets API) → M69 (playground UI) → M70 (super-admin promote + ChatRAG reader).
 - **Source**: S008 / EV-009 interview 2026-07-02 (RD-114–RD-127); context
   `docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md`; R68–R75.
+
+### F38: Playground model download (super-admin)
+
+- **What it does**: Lets **super-admins** download additional Ollama model tags into the Modal
+  `vecinita-models` volume from the Evaluation **Playground** tab so sandbox eval runs can use
+  models beyond the default `qwen2.5:1.5b-instruct`. Regular **admins** list and select available
+  models for playground runs but cannot trigger pulls.
+- **Inputs**: Super-admin operator (`role=super-admin`); free-text Ollama `model_id` tag
+  (non-empty, max 128 chars — e.g. `qwen2.5:3b-instruct`); existing Modal Ollama pull
+  infrastructure (`POST /models/ollama/pull` on `vecinita-ollama`).
+- **Outputs**: Background Modal pull job (`202` + `job_id`); manifest entry with
+  `available: false` while pulling, `available: true` when complete; model appears in Playground
+  picker for all admins once available.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `data-management-frontend` | Super-admin-only **Download model** panel on Playground — enter tag, trigger pull, poll list every **10s** for up to **30 min**; hidden for `admin`/`viewer` |
+  | `internal-write-api` | Tighten `POST /internal/v1/models/ollama/pull` to `SuperAdminActorDep`; keep `GET /internal/v1/models/ollama` on `WriteActorDep` (admin list) |
+  | Modal Ollama app | **Storage:** `vecinita-models` volume (`/models`, `manifest.json`); existing `pull_model_job` — no code change v1 |
+- **Storage**: Playground Ollama weights live **only** on Modal Volume **`vecinita-models`** (not DO disk, Postgres, or S3). Download UI triggers pull into this volume; eval runs read models from the same volume via Modal Ollama API (TP-S009-17, ADR-036 §3).
+- **Auth**: Super-admin — pull; admin — list + select (no download UI, `403` on pull API); viewer → `403` on all model routes.
+- **UX rules**:
+  - **Progress**: Poll `GET /internal/v1/models/ollama` until entry `available=true` or **30 min timeout** (then show error; super-admin may retry).
+  - **Concurrent pulls**: Allow parallel pull requests for the same tag (duplicate Modal jobs acceptable in v1).
+  - **Tag policy**: Free-text Ollama tag; server validates non-empty + length only (no allow-list v1).
+- **Limitations / scope**: Pull UI only — no Ollama library catalog browser; no auto-pull on eval run when model missing; requires `VECINITA_MODAL_OLLAMA_URL` configured (deploy prerequisite, not F38 blocker).
+- **Milestones**: M71 (API auth: super-admin-only pull) → M72 (Playground download UI + poll) → M73 (full-stack tests).
+- **Source**: S009 / EV-010 interview 2026-07-05 (RD-142–RD-148); context
+  `docs/sessions/S000-internal-docs-archive/context/playground-model-download.md`; supersedes TC-134 admin-pull expectation from F37.
 
 ## Planned / Deferred (post-v1)
 
