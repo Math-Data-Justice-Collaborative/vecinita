@@ -17,7 +17,6 @@ import { EvaluationPlaygroundTab } from "@/evaluation/EvaluationPlaygroundTab";
 
 import { fetchInputUrl } from "./fetch-mock";
 import { renderAppRoutesReady } from "./renderAppHelpers";
-import { installSuperAdminSupabaseMock } from "./supabaseMock";
 
 const RUN_A_ID = "00000000-0000-0000-0000-0000000000aa";
 const RUN_B_ID = "00000000-0000-0000-0000-0000000000bb";
