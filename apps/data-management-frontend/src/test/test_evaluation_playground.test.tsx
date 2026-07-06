@@ -1,12 +1,12 @@
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import * as adminApi from "@/api/admin";
+import { fetchInputUrl } from "./fetch-mock";
 import {
   renderAppRoutesReady,
   renderSuperAdminAppRoutesReady,
 } from "./renderAppHelpers";
-import { fetchInputUrl } from "./fetch-mock";
-import * as adminApi from "@/api/admin";
 
 const RUN_ID = "00000000-0000-0000-0000-000000000099";
 const NEW_RUN_ID = "00000000-0000-0000-0000-0000000000cc";
@@ -91,7 +91,10 @@ function defaultPlaygroundFetch(
   if (url.includes("/internal/v1/eval/criteria")) {
     return { ok: true, json: async () => CRITERIA_BODY };
   }
-  if (url.includes("/internal/v1/models/ollama")) {
+  if (
+    url.includes("/internal/v1/models/ollama") &&
+    !url.includes("/internal/v1/models/ollama/pull")
+  ) {
     return { ok: true, json: async () => OLLAMA_MODELS_BODY };
   }
   if (url.includes("/internal/v1/eval/config-presets")) {
@@ -832,6 +835,7 @@ describe("EvaluationPlayground (UJ-045)", () => {
     const view = await renderAppRoutesReady("/evaluation?tab=playground");
     view.unmount();
     rejectModels?.(new Error("models failed after unmount"));
+    await modelsGate.catch(() => undefined);
     await Promise.resolve();
   });
 
@@ -1314,5 +1318,168 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
     expect(
       screen.queryByTestId("eval-playground-download-card"),
     ).not.toBeInTheDocument();
+  });
+
+  it("surfaces pull failure and poll errors for super-admin", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.spyOn(adminApi, "pullOllamaModel").mockRejectedValueOnce(
+      new Error("Ollama model pull failed (403)"),
+    );
+
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
+    fireEvent.change(screen.getByTestId("eval-playground-download-model-id"), {
+      target: { value: DOWNLOAD_MODEL_ID },
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-download-button"));
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-download-status"),
+      ).toHaveTextContent(/403/);
+    });
+
+    vi.mocked(adminApi.pullOllamaModel).mockResolvedValueOnce({
+      job_id: "00000000-0000-0000-0000-0000000000dd",
+      model_id: DOWNLOAD_MODEL_ID,
+      status: "pulling",
+    });
+    vi.spyOn(adminApi, "fetchOllamaModels").mockRejectedValueOnce("poll failed");
+    fireEvent.click(screen.getByTestId("eval-playground-download-button"));
+    await vi.advanceTimersByTimeAsync(10_000);
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-download-status"),
+      ).toHaveTextContent(/refresh model list|actualizar la lista/i);
+    });
+  });
+
+  it("shows translated error for non-Error pull rejection", async () => {
+    vi.spyOn(adminApi, "pullOllamaModel").mockRejectedValueOnce("pull failed");
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
+    fireEvent.change(screen.getByTestId("eval-playground-download-model-id"), {
+      target: { value: DOWNLOAD_MODEL_ID },
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-download-button"));
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-download-status"),
+      ).toHaveTextContent(/Model download failed|Error al descargar/i);
+    });
+  });
+
+  it("shows download timeout after 30 minutes", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const startMs = 1_700_000_000_000;
+    vi.setSystemTime(startMs);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = fetchInputUrl(input);
+        const method = (init?.method ?? "GET").toUpperCase();
+        if (url.includes("/internal/v1/models/ollama/pull") && method === "POST") {
+          return Promise.resolve({
+            ok: true,
+            status: 202,
+            json: async () => ({
+              job_id: "00000000-0000-0000-0000-0000000000dd",
+              model_id: DOWNLOAD_MODEL_ID,
+              status: "pulling",
+            }),
+          });
+        }
+        if (url.includes("/internal/v1/models/ollama") && method === "GET") {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              items: [
+                { model_id: "qwen2.5:1.5b-instruct", available: true },
+                { model_id: DOWNLOAD_MODEL_ID, available: false },
+              ],
+            }),
+          });
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
+    fireEvent.change(screen.getByTestId("eval-playground-download-model-id"), {
+      target: { value: DOWNLOAD_MODEL_ID },
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-download-button"));
+    await vi.advanceTimersByTimeAsync(10_000);
+    vi.setSystemTime(startMs + 30 * 60 * 1000 + 1);
+    await vi.advanceTimersByTimeAsync(10_000);
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-download-status"),
+      ).toHaveTextContent(/timed out|superó 30/i);
+    });
+  });
+
+  it("surfaces poll Error during model download", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.spyOn(adminApi, "pullOllamaModel").mockResolvedValueOnce({
+      job_id: "00000000-0000-0000-0000-0000000000dd",
+      model_id: DOWNLOAD_MODEL_ID,
+      status: "pulling",
+    });
+    vi.spyOn(adminApi, "fetchOllamaModels")
+      .mockResolvedValueOnce({
+        items: [
+          { model_id: "qwen2.5:1.5b-instruct", available: true },
+          { model_id: DOWNLOAD_MODEL_ID, available: false },
+        ],
+      })
+      .mockRejectedValueOnce(new Error("poll list failed"));
+
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
+    fireEvent.change(screen.getByTestId("eval-playground-download-model-id"), {
+      target: { value: DOWNLOAD_MODEL_ID },
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-download-button"));
+    await vi.advanceTimersByTimeAsync(10_000);
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-download-status"),
+      ).toHaveTextContent(/poll list failed/i);
+    });
+  });
+
+  it("clears download poll timer on unmount", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const clearTimeoutSpy = vi.spyOn(globalThis, "clearTimeout");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = fetchInputUrl(input);
+        const method = (init?.method ?? "GET").toUpperCase();
+        if (url.includes("/internal/v1/models/ollama/pull") && method === "POST") {
+          return Promise.resolve({
+            ok: true,
+            status: 202,
+            json: async () => ({
+              job_id: "00000000-0000-0000-0000-0000000000dd",
+              model_id: DOWNLOAD_MODEL_ID,
+              status: "pulling",
+            }),
+          });
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    const view = await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
+    fireEvent.change(screen.getByTestId("eval-playground-download-model-id"), {
+      target: { value: DOWNLOAD_MODEL_ID },
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-download-button"));
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-download-status"),
+      ).toHaveTextContent(/checking availability|comprobando/i);
+    });
+    view.unmount();
+    expect(clearTimeoutSpy).toHaveBeenCalled();
+    clearTimeoutSpy.mockRestore();
   });
 });

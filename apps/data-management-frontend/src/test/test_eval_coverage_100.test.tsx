@@ -17,6 +17,7 @@ import { EvaluationPlaygroundTab } from "@/evaluation/EvaluationPlaygroundTab";
 
 import { fetchInputUrl } from "./fetch-mock";
 import { renderAppRoutesReady } from "./renderAppHelpers";
+import { installSuperAdminSupabaseMock } from "./supabaseMock";
 
 const RUN_A_ID = "00000000-0000-0000-0000-0000000000aa";
 const RUN_B_ID = "00000000-0000-0000-0000-0000000000bb";
@@ -609,6 +610,30 @@ describe("eval coverage gaps", () => {
     expect(
       document.getElementById("eval-playground-corpus-profile"),
     ).toHaveValue("staging");
+  });
+
+  it("EvaluationPlaygroundTab selects fixture corpus profile", async () => {
+    renderWithProviders(<EvaluationPlaygroundTab />);
+    await waitFor(() => {
+      expect(
+        document.getElementById("eval-playground-corpus-profile"),
+      ).toBeInTheDocument();
+    });
+    fireEvent.change(
+      document.getElementById("eval-playground-corpus-profile")!,
+      {
+        target: { value: "staging" },
+      },
+    );
+    fireEvent.change(
+      document.getElementById("eval-playground-corpus-profile")!,
+      {
+        target: { value: "fixture" },
+      },
+    );
+    expect(
+      document.getElementById("eval-playground-corpus-profile"),
+    ).toHaveValue("fixture");
   });
 
   it("EvaluationPlaygroundTab uses translated errors for non-Error rejections", async () => {
