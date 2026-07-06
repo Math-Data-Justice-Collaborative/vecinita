@@ -1531,4 +1531,59 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
     expect(clearTimeoutSpy).toHaveBeenCalled();
     clearTimeoutSpy.mockRestore();
   });
+
+  it("refreshes catalog and downloads a custom model tag from models tab", async () => {
+    let listCallCount = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = fetchInputUrl(input);
+        const method = (init?.method ?? "GET").toUpperCase();
+        if (url.includes("/internal/v1/models/ollama/pull") && method === "POST") {
+          return Promise.resolve({
+            ok: true,
+            status: 202,
+            json: async () => ({
+              job_id: "00000000-0000-0000-0000-0000000000dd",
+              model_id: "custom:7b-instruct",
+              status: "pulling",
+            }),
+          });
+        }
+        if (url.includes("/internal/v1/models/ollama") && method === "GET") {
+          listCallCount += 1;
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              items: catalogItems({
+                "custom:7b-instruct": listCallCount >= 2,
+              }),
+            }),
+          });
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-models-refresh")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("eval-models-refresh"));
+    await waitFor(() => {
+      expect(listCallCount).toBeGreaterThanOrEqual(2);
+    });
+
+    fireEvent.change(screen.getByTestId("eval-models-custom-model-id"), {
+      target: { value: "custom:7b-instruct" },
+    });
+    fireEvent.click(screen.getByTestId("eval-models-custom-download-button"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-models-download-status")).toHaveTextContent(
+        /checking availability|comprobando/i,
+      );
+    });
+  });
 });
