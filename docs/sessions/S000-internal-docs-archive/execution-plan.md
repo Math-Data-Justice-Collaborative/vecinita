@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 16: EV-010 — Playground model download (F38) |
-| **Active milestone** | M71: API auth — super-admin-only pull |
-| **Active task** | **T71.1** — integration auth matrix test (red) *(next — 07-build)* |
-| **Tasks completed** | Phase 15 M65–M70 complete (S008); Phase 16 not started |
+| **Active milestone** | M73: Full-stack tests + phase gate |
+| **Active task** | **T73.5** — Phase 16 gate checklist *(next — 08-verify-build)* |
+| **Tasks completed** | Phase 16 M71–M72 complete; M73 T73.1–T73.4, T73.6 complete (S009/F38) |
 | **Last updated** | 2026-07-05 |
 | **Evolve cycle** | EV-010 (F38) — **04-tech-plan complete** |
 | **Git branch** | `feat/S009-playground-model-download` |
@@ -1448,12 +1448,12 @@ auth, add download UI with model-list polling, full-stack test coverage (TC-134�
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
 |---|------|------|--------|-------------|------------|-----------|---------|---------|
-| T71.1 | Test: `tests/integration/test_ollama_models_list.py` — TC-134 auth matrix (admin list OK, admin pull 403, super-admin pull 202) — red | Test | pending | test-plan TC-134, UJ-048, ADR-036 §7 | — | — | S009 | F38 |
-| T71.2 | Test: `tests/unit/internal_write_api/test_app_eval_routes.py` — pull route super-admin vs admin matrix — red | Test | pending | test-plan TC-134, api-contract §EV-010 | — | — | S009 | F38 |
-| T71.3 | Code: Change `pull_ollama_model_route` dependency to `SuperAdminActorDep` | Code | pending | ADR-036 §2, RD-147 | T71.1, T71.2 | — | S009 | F38 |
-| T71.4 | Code: TC-134 integration + unit auth tests green | Code | pending | test-plan TC-134 | T71.1, T71.2, T71.3 | — | S009 | F38 |
-| T71.5 | Config: OpenAPI `internal-write.yaml` — EV-010 pull SuperAdminActorDep | Config | pending | ADR-036 §9, api-contract §EV-010 | T71.3 | — | S009 | F38 |
-| T71.6 | Docs: `deployment-integration.md` §EV-010 — Modal `vecinita-models` storage path + deploy prereqs | Docs | pending | ADR-036 §3, TP-S009-17 | — | — | S009 | F38 |
+| T71.1 | Test: `tests/integration/test_ollama_models_list.py` — TC-134 auth matrix (admin list OK, admin pull 403, super-admin pull 202) — red | Test | completed | test-plan TC-134, UJ-048, ADR-036 §7 | — | 2026-07-05 | S009 | F38 |
+| T71.2 | Test: `tests/unit/internal_write_api/test_app_eval_routes.py` — pull route super-admin vs admin matrix — red | Test | completed | test-plan TC-134, api-contract §EV-010 | — | 2026-07-05 | S009 | F38 |
+| T71.3 | Code: Change `pull_ollama_model_route` dependency to `SuperAdminActorDep` | Code | completed | ADR-036 §2, RD-147 | T71.1, T71.2 | 2026-07-05 | S009 | F38 |
+| T71.4 | Code: TC-134 integration + unit auth tests green | Code | completed | test-plan TC-134 | T71.1, T71.2, T71.3 | 2026-07-05 | S009 | F38 |
+| T71.5 | Config: OpenAPI `internal-write.yaml` — EV-010 pull SuperAdminActorDep | Config | completed | ADR-036 §9, api-contract §EV-010 | T71.3 | 2026-07-05 | S009 | F38 |
+| T71.6 | Docs: `deployment-integration.md` §EV-010 — Modal `vecinita-models` storage path + deploy prereqs | Docs | completed | ADR-036 §3, TP-S009-17 | — | 2026-07-05 | S009 | F38 |
 
 #### M72: Playground download UI + poll-until-available
 
@@ -1462,13 +1462,13 @@ auth, add download UI with model-list polling, full-stack test coverage (TC-134�
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
 |---|------|------|--------|-------------|------------|-----------|---------|---------|
-| T72.1 | Test (Vitest): `test_evaluation_playground.test.tsx` — TC-135 super-admin download + poll success — red | Test | pending | test-plan TC-135, UJ-048, ADR-036 §5 | T71.4 | — | S009 | F38 |
-| T72.2 | Test (Vitest): `test_evaluation_playground.test.tsx` — TC-136 admin download UI hidden — red | Test | pending | test-plan TC-136, RD-151 | — | — | S009 | F38 |
-| T72.3 | Test (Vitest): `admin.test.ts` — `pullOllamaModel()` client — red | Test | pending | ADR-036 §4 | — | — | S009 | F38 |
-| T72.4 | Code: `pullOllamaModel()` in `admin.ts` | Code | pending | ADR-036 §4, api-contract §EV-010 | T72.3 | — | S009 | F38 |
-| T72.5 | Code: `EvaluationPlaygroundTab` — Download model card + 10s poll / 30 min timeout | Code | pending | ADR-036 §5, UJ-048, RD-150 | T72.1, T71.4 | — | S009 | F38 |
-| T72.6 | Code: i18n keys `admin.evaluation.playground.download*` (EN/ES) | Code | pending | ADR-036 §6 | T72.5 | — | S009 | F38 |
-| T72.7 | Code: TC-135/136 Vitest + admin.test.ts green | Code | pending | test-plan TC-135, TC-136 | T72.1–T72.6 | — | S009 | F38 |
+| T72.1 | Test (Vitest): `test_evaluation_playground.test.tsx` — TC-135 super-admin download + poll success — red | Test | completed | test-plan TC-135, UJ-048, ADR-036 §5 | T71.4 | 2026-07-05 | S009 | F38 |
+| T72.2 | Test (Vitest): `test_evaluation_playground.test.tsx` — TC-136 admin download UI hidden — red | Test | completed | test-plan TC-136, RD-151 | — | 2026-07-05 | S009 | F38 |
+| T72.3 | Test (Vitest): `admin.test.ts` — `pullOllamaModel()` client — red | Test | completed | ADR-036 §4 | — | 2026-07-05 | S009 | F38 |
+| T72.4 | Code: `pullOllamaModel()` in `admin.ts` | Code | completed | ADR-036 §4, api-contract §EV-010 | T72.3 | 2026-07-05 | S009 | F38 |
+| T72.5 | Code: `EvaluationPlaygroundTab` — Download model card + 10s poll / 30 min timeout | Code | completed | ADR-036 §5, UJ-048, RD-150 | T72.1, T71.4 | 2026-07-05 | S009 | F38 |
+| T72.6 | Code: i18n keys `admin.evaluation.playground.download*` (EN/ES) | Code | completed | ADR-036 §6 | T72.5 | 2026-07-05 | S009 | F38 |
+| T72.7 | Code: TC-135/136 Vitest + admin.test.ts green | Code | completed | test-plan TC-135, TC-136 | T72.1–T72.6 | 2026-07-05 | S009 | F38 |
 
 #### M73: Full-stack tests + phase gate
 
@@ -1477,12 +1477,12 @@ auth, add download UI with model-list polling, full-stack test coverage (TC-134�
 
 | # | Task | Type | Status | Spec Source | Depends On | Data Deps | Session | Feature |
 |---|------|------|--------|-------------|------------|-----------|---------|---------|
-| T73.1 | Test: `tests/e2e/test_uj048_playground_model_download.py` — TC-138 — red | Test | pending | test-plan TC-138, UJ-048 | T71.4 | D3 | S009 | F38 |
-| T73.2 | Test (Playwright): `tests/ui/admin/uj048-playground-model-download.spec.ts` + `mockAuthenticatedSuperAdmin` — TC-137 — red | Test | pending | test-plan TC-137, ADR-036 §7 | T72.7 | — | S009 | F38 |
-| T73.3 | Code: TC-138 API E2E green | Code | pending | test-plan TC-138, AC-E27 | T73.1, T72.7 | D3 | S009 | F38 |
-| T73.4 | Code: TC-137 Playwright green | Code | pending | test-plan TC-137, AC-E27 | T73.2, T72.7 | — | S009 | F38 |
+| T73.1 | Test: `tests/e2e/test_uj048_playground_model_download.py` — TC-138 — red | Test | completed | test-plan TC-138, UJ-048 | T71.4 | 2026-07-05 | S009 | F38 |
+| T73.2 | Test (Playwright): `tests/ui/admin/uj048-playground-model-download.spec.ts` + `mockAuthenticatedSuperAdmin` — TC-137 — red | Test | completed | test-plan TC-137, ADR-036 §7 | T72.7 | 2026-07-05 | S009 | F38 |
+| T73.3 | Code: TC-138 API E2E green | Code | completed | test-plan TC-138, AC-E27 | T73.1, T72.7 | 2026-07-05 | S009 | F38 |
+| T73.4 | Code: TC-137 Playwright green | Code | completed | test-plan TC-137, AC-E27 | T73.2, T72.7 | 2026-07-05 | S009 | F38 |
 | T73.5 | Docs: Phase 16 gate checklist + session verify reports pointer | Docs | pending | 08-verify-build | T71.4–T73.4 | — | S009 | F38 |
-| T73.6 | Test: `tests/unit/modal/test_ollama_volume_manifest.py` — TC-139 Modal manifest/volume contract — red | Test | pending | ADR-036 §3, test-plan TC-139 | — | — | S009 | F38 |
+| T73.6 | Test: `tests/unit/modal/test_ollama_volume_manifest.py` — TC-139 Modal manifest/volume contract — red | Test | completed | ADR-036 §3, test-plan TC-139 | — | 2026-07-05 | S009 | F38 |
 
 #### Phase 16 Gate Check
 

@@ -335,6 +335,12 @@ export async function mockAuthenticatedAdmin(page: Page): Promise<void> {
   await mockAdminApi(page);
 }
 
+export async function mockAuthenticatedSuperAdmin(page: Page): Promise<void> {
+  const { seedSuperAdminSession } = await import("./mock-admin-auth");
+  await seedSuperAdminSession(page);
+  await mockAdminApi(page);
+}
+
 export async function mockAuthenticatedViewer(page: Page): Promise<void> {
   const { seedViewerSession } = await import("./mock-admin-auth");
   await seedViewerSession(page);

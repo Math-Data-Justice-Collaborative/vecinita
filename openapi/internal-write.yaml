@@ -768,6 +768,67 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
+  /models/ollama:
+    get:
+      operationId: listOllamaModels
+      summary: List Ollama models on Modal vecinita-models volume (EV-010 F38)
+      description: >
+        Playground model picker. Requires operator JWT with role admin or super-admin.
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      responses:
+        "200":
+          description: Model list with availability from volume manifest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OllamaModelListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+  /models/ollama/pull:
+    post:
+      operationId: pullOllamaModel
+      summary: Enqueue Ollama model pull into Modal volume (EV-010 F38)
+      description: >
+        Super-admin only. Admin and viewer receive 403. Poll GET /models/ollama until
+        model_id is available.
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OllamaModelPullRequest"
+      responses:
+        "202":
+          description: Background pull job accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OllamaModelPullResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+        "502":
+          description: Modal Ollama upstream error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Ollama client not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
 components:
   securitySchemes:
     bearerAuth:
@@ -1693,6 +1754,55 @@ components:
       properties:
         detail:
           type: string
+    OllamaModelSummary:
+      type: object
+      required:
+        - model_id
+        - available
+      properties:
+        model_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        available:
+          type: boolean
+    OllamaModelListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OllamaModelSummary"
+    OllamaModelPullRequest:
+      type: object
+      required:
+        - model_id
+      properties:
+        model_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+    OllamaModelPullResponse:
+      type: object
+      required:
+        - job_id
+        - model_id
+        - status
+      properties:
+        job_id:
+          type: string
+          format: uuid
+        model_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        status:
+          type: string
+          enum:
+            - pulling
+            - available
   responses:
     ValidationError:
       description: Invalid payload

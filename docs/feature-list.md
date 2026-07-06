@@ -47,7 +47,7 @@
 | F35 | Admin user management + remember-me + Resend SMTP/templates | Planned | Cross-cutting (admin) | data-management-frontend, data-management-backend, supabase config + CI | S005/EV-006 2026-06-29; ADR-029 (#75) |
 | F36 | Admin RAG evaluation tab + golden eval set | Implemented | Data Management | data-management-frontend, internal-write-api, packages/eval | S007/EV-008 2026-07-01; #99 |
 | F37 | Eval UX polish + playground + runtime config promote | Planned | Data Management + ChatRAG | data-management-frontend, internal-write-api, data-management-backend, chat-rag-backend | S008/EV-009 2026-07-02 |
-| F38 | Playground model download (super-admin) | Planned | Data Management | data-management-frontend, internal-write-api, Modal Ollama app | S009/EV-010 2026-07-05 |
+| F38 | Playground model download (super-admin) | Implemented | Data Management | data-management-frontend, internal-write-api, Modal Ollama app | S009/EV-010 2026-07-05 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 

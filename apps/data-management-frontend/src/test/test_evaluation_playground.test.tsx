@@ -1215,3 +1215,104 @@ describe("EvaluationPlayground (UJ-045)", () => {
     });
   });
 });
+
+describe("EvaluationPlayground model download (UJ-048)", () => {
+  const DOWNLOAD_MODEL_ID = "qwen2.5:3b-instruct";
+
+  afterEach(() => {
+    vi.useRealTimers();
+    cleanup();
+    vi.restoreAllMocks();
+  });
+
+  it("super-admin triggers download and polls until model is available (TC-135)", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    let listCallCount = 0;
+    let pullCalled = false;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = fetchInputUrl(input);
+        const method = (init?.method ?? "GET").toUpperCase();
+        if (url.includes("/internal/v1/models/ollama/pull") && method === "POST") {
+          pullCalled = true;
+          return Promise.resolve({
+            ok: true,
+            status: 202,
+            json: async () => ({
+              job_id: "00000000-0000-0000-0000-0000000000dd",
+              model_id: DOWNLOAD_MODEL_ID,
+              status: "pulling",
+            }),
+          });
+        }
+        if (url.includes("/internal/v1/models/ollama") && method === "GET") {
+          listCallCount += 1;
+          const available = listCallCount >= 2;
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              items: [
+                { model_id: "qwen2.5:1.5b-instruct", available: true },
+                { model_id: DOWNLOAD_MODEL_ID, available },
+              ],
+            }),
+          });
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-download-card"),
+      ).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId("eval-playground-download-model-id"), {
+      target: { value: DOWNLOAD_MODEL_ID },
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-download-model-id")).toHaveValue(
+        DOWNLOAD_MODEL_ID,
+      );
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-download-button"));
+
+    await waitFor(() => {
+      expect(pullCalled).toBe(true);
+    });
+    expect(
+      screen.getByTestId("eval-playground-download-status"),
+    ).toHaveTextContent(/checking availability|comprobando/i);
+
+    await vi.advanceTimersByTimeAsync(10_000);
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-download-status"),
+      ).toHaveTextContent(/available|disponible/i);
+    });
+    expect(screen.getByTestId("eval-playground-model-id")).toHaveValue(
+      DOWNLOAD_MODEL_ID,
+    );
+  });
+
+  it("hides download panel for regular admin (TC-136)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+
+    await renderAppRoutesReady("/evaluation?tab=playground");
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-model-id")).toBeInTheDocument();
+    });
+    expect(
+      screen.queryByTestId("eval-playground-download-card"),
+    ).not.toBeInTheDocument();
+  });
+});

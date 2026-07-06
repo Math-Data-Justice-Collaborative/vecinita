@@ -414,6 +414,53 @@ def test_ollama_model_routes_map_client_errors_to_502(
         reset_auth_config_for_tests()
 
 
+def test_ollama_model_pull_auth_matrix(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-134 / F38: admin pull 403; super-admin pull 202; admin list still OK."""
+    reset_auth_config_for_tests()
+    private_key = generate_es256_keypair()
+    monkeypatch.setenv("DATABASE_URL", database_url())
+    monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
+    set_auth_config_for_tests(make_auth_config(private_key))
+    from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
+
+    mock_client = MockOllamaModelsClient()
+    client = TestClient(
+        create_app(
+            eval_embed_fn=eval_embed_fn,
+            eval_judge=MockEvalJudge(),
+            ollama_models_client=mock_client,
+        )
+    )
+    admin_headers = {"Authorization": f"Bearer {sign_test_jwt(private_key, role='admin')}"}
+    super_headers = {"Authorization": f"Bearer {sign_test_jwt(private_key, role='super-admin')}"}
+    try:
+        listing = client.get(
+            "/internal/v1/models/ollama",
+            headers=admin_headers,
+        )
+        assert listing.status_code == HTTPStatus.OK
+
+        admin_pull = client.post(
+            "/internal/v1/models/ollama/pull",
+            json={"model_id": "llama3.2:3b"},
+            headers=admin_headers,
+        )
+        assert admin_pull.status_code == HTTPStatus.FORBIDDEN
+        assert mock_client.pull_requests == []
+
+        super_pull = client.post(
+            "/internal/v1/models/ollama/pull",
+            json={"model_id": "llama3.2:3b"},
+            headers=super_headers,
+        )
+        assert super_pull.status_code == HTTPStatus.ACCEPTED
+        assert mock_client.pull_requests == ["llama3.2:3b"]
+    finally:
+        reset_auth_config_for_tests()
+
+
 def test_ollama_model_routes_delegate_to_injected_client(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
