@@ -374,6 +374,8 @@ def test_internal_write_cors_preflight_on_ollama_model_routes(
     client = TestClient(create_write_app())
     for path, method in (
         ("/internal/v1/models/ollama", "GET"),
+        ("/internal/v1/models/ollama/catalog", "GET"),
+        ("/internal/v1/models/ollama/catalog/qwen2.5", "GET"),
         ("/internal/v1/models/ollama/pull", "POST"),
     ):
         response = client.options(

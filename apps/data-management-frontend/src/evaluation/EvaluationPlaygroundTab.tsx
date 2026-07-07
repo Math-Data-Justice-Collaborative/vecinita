@@ -40,7 +40,10 @@ import {
   loadEvalPlaygroundPreferences,
   saveEvalPlaygroundLastPresetId,
 } from "./evalPlaygroundStorage";
-import { firstAvailableModelId, modelOptionLabel } from "./useOllamaModelDownload";
+import {
+  firstAvailableModelId,
+  modelOptionLabel,
+} from "./useOllamaModelDownload";
 
 const DEFAULT_TOP_K = 5;
 const DEFAULT_MIN_RETRIEVAL_SCORE = 0.2;
@@ -239,7 +242,9 @@ export function EvaluationPlaygroundTab({
         if (!active) return;
         setModels(data.items);
         setModelId((current) => {
-          const currentModel = data.items.find((item) => item.model_id === current);
+          const currentModel = data.items.find(
+            (item) => item.model_id === current,
+          );
           if (currentModel?.available) {
             return current;
           }

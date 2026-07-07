@@ -16,6 +16,7 @@ import { EvaluationCompareView } from "@/evaluation/EvaluationCompareView";
 import { EvaluationPlaygroundTab } from "@/evaluation/EvaluationPlaygroundTab";
 
 import { fetchInputUrl } from "./fetch-mock";
+import { mockOllamaApiFetch } from "./helpers/mockOllamaApi";
 import { renderAppRoutesReady } from "./renderAppHelpers";
 
 const RUN_A_ID = "00000000-0000-0000-0000-0000000000aa";
@@ -84,13 +85,9 @@ function defaultEvalFetch(
   if (url.includes("/internal/v1/eval/config-presets")) {
     return { ok: true, json: async () => ({ items: [] }) };
   }
-  if (url.includes("/internal/v1/models/ollama")) {
-    return {
-      ok: true,
-      json: async () => ({
-        items: [{ model_id: "qwen2.5:1.5b-instruct", available: true }],
-      }),
-    };
+  const ollamaMock = mockOllamaApiFetch(url);
+  if (ollamaMock !== null) {
+    return ollamaMock;
   }
   if (url.includes("/internal/v1/eval/runs/timeseries")) {
     return {

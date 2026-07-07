@@ -13,6 +13,8 @@ import { useState } from "react";
 import { LanguageToggle, useLocale } from "vecinita-frontend-ui";
 
 import { useAuth, useIsAdmin } from "@/auth/authContext";
+import { ModelDownloadProgressIndicator } from "@/evaluation/ModelDownloadProgressIndicator";
+import { OllamaModelDownloadProvider } from "@/evaluation/ollamaModelDownloadContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -127,8 +129,14 @@ function NavItems({ onClick }: { onClick?: () => void }) {
             )
           }
         >
-          <Icon className="h-4 w-4" />
-          {label}
+          <Icon className="h-4 w-4 shrink-0" />
+          <span className="min-w-0 flex-1">{label}</span>
+          {to === "/evaluation" ? (
+            <ModelDownloadProgressIndicator
+              className="ml-auto shrink-0 text-xs"
+              testId="admin-nav-ollama-download-in-progress"
+            />
+          ) : null}
         </NavLink>
       ))}
     </nav>
@@ -205,18 +213,20 @@ export function AdminLayout() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   return (
-    <div className="flex h-screen overflow-hidden" data-testid="admin-layout">
-      <IdleTimeoutGuard />
-      <DesktopSidebar showChrome={isDesktop} />
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <MobileHeader showChrome={!isDesktop} />
-        <main
-          className="min-h-0 flex-1 overflow-auto p-4 md:p-6 lg:p-8"
-          data-testid="admin-main"
-        >
-          <Outlet />
-        </main>
+    <OllamaModelDownloadProvider>
+      <div className="flex h-screen overflow-hidden" data-testid="admin-layout">
+        <IdleTimeoutGuard />
+        <DesktopSidebar showChrome={isDesktop} />
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <MobileHeader showChrome={!isDesktop} />
+          <main
+            className="min-h-0 flex-1 overflow-auto p-4 md:p-6 lg:p-8"
+            data-testid="admin-main"
+          >
+            <Outlet />
+          </main>
+        </div>
       </div>
-    </div>
+    </OllamaModelDownloadProvider>
   );
 }

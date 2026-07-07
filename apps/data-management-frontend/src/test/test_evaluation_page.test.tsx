@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderAppRoutesReady } from "./renderAppHelpers";
 import { fetchInputUrl } from "./fetch-mock";
+import { mockOllamaApiFetch } from "./helpers/mockOllamaApi";
 
 const RUN_ID = "00000000-0000-0000-0000-000000000099";
 const RUN_ID_B = "00000000-0000-0000-0000-000000000088";
@@ -91,13 +92,9 @@ function defaultEvalFetch(
   if (url.includes("/internal/v1/eval/config-presets")) {
     return { ok: true, json: async () => ({ items: [] }) };
   }
-  if (url.includes("/internal/v1/models/ollama")) {
-    return {
-      ok: true,
-      json: async () => ({
-        items: [{ model_id: "qwen2.5:1.5b-instruct", available: true }],
-      }),
-    };
+  const ollamaMock = mockOllamaApiFetch(url);
+  if (ollamaMock !== null) {
+    return ollamaMock;
   }
   if (url.includes("/internal/v1/eval/runs/")) {
     return {

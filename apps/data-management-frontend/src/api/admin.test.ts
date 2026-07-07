@@ -18,6 +18,8 @@ import {
   fetchEvalRuns,
   fetchEvalTimeseries,
   fetchHealthAggregate,
+  fetchOllamaCatalogFamilies,
+  fetchOllamaCatalogFamilyTags,
   fetchOllamaModels,
   fetchStatsSummary,
   parseAuditLogResponse,
@@ -802,6 +804,64 @@ describe("admin API eval helpers", () => {
     await expect(fetchOllamaModels(CLIENT)).rejects.toThrow(/502/);
   });
 
+  it("fetchOllamaCatalogFamilies fetches catalog families", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          families: [{ slug: "qwen2.5" }],
+        }),
+      ),
+    );
+    const catalog = await fetchOllamaCatalogFamilies(JWT_CLIENT);
+    expect(catalog.families[0]?.slug).toBe("qwen2.5");
+    expect(mockFetchUrl()).toContain("/internal/v1/models/ollama/catalog");
+    expectBearerJwt(vi.mocked(fetch).mock.calls[0]?.[1]);
+  });
+
+  it("fetchOllamaCatalogFamilies throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 503 })),
+    );
+    await expect(fetchOllamaCatalogFamilies(CLIENT)).rejects.toThrow(/503/);
+  });
+
+  it("fetchOllamaCatalogFamilyTags fetches tags for a family slug", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          slug: "qwen2.5",
+          tags: [{ model_id: "qwen2.5:3b-instruct", available: false }],
+        }),
+      ),
+    );
+    const tags = await fetchOllamaCatalogFamilyTags(CLIENT, "qwen2.5");
+    expect(tags.tags[0]?.model_id).toBe("qwen2.5:3b-instruct");
+    expect(mockFetchUrl()).toContain(
+      "/internal/v1/models/ollama/catalog/qwen2.5",
+    );
+    const headers = vi.mocked(fetch).mock.calls[0]?.[1]?.headers as Record<
+      string,
+      string
+    >;
+    expect(headers["Authorization"]).toBe("Bearer test-key");
+  });
+
+  it("fetchOllamaCatalogFamilyTags throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 404 })),
+    );
+    await expect(
+      fetchOllamaCatalogFamilyTags(
+        { baseUrl: "http://localhost:8002" },
+        "missing",
+      ),
+    ).rejects.toThrow(/404/);
+  });
+
   it("pullOllamaModel POSTs pull route with model_id (TC-135)", async () => {
     vi.stubGlobal(
       "fetch",
@@ -869,7 +929,10 @@ describe("admin API eval helpers", () => {
         ),
       ),
     );
-    await pullOllamaModel({ baseUrl: "http://localhost:8002" }, "qwen2.5:3b-instruct");
+    await pullOllamaModel(
+      { baseUrl: "http://localhost:8002" },
+      "qwen2.5:3b-instruct",
+    );
     const headers = vi.mocked(fetch).mock.calls[0]?.[1]?.headers as Record<
       string,
       string

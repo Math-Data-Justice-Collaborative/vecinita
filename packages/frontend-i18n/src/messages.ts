@@ -228,6 +228,8 @@ const enStrings = {
   "admin.evaluation.models.subtitle":
     "Download models and quantizations to the Modal volume for playground eval runs.",
   "admin.evaluation.models.catalogTitle": "Available models",
+  "admin.evaluation.models.catalogTreeHint":
+    "Browse the full Ollama library. Expand a model slug to see all versions and quantizations, then download into the Modal volume.",
   "admin.evaluation.models.statusAvailable": "Downloaded",
   "admin.evaluation.models.statusNotDownloaded": "Not downloaded",
   "admin.evaluation.models.downloadButton": "Download",
@@ -675,6 +677,8 @@ const esStrings = {
   "admin.evaluation.models.subtitle":
     "Descarga modelos y cuantizaciones al volumen Modal para ejecuciones del laboratorio.",
   "admin.evaluation.models.catalogTitle": "Modelos disponibles",
+  "admin.evaluation.models.catalogTreeHint":
+    "Explore la biblioteca completa de Ollama. Expanda un slug de modelo para ver todas las versiones y cuantizaciones y descargar al volumen Modal.",
   "admin.evaluation.models.statusAvailable": "Descargado",
   "admin.evaluation.models.statusNotDownloaded": "No descargado",
   "admin.evaluation.models.downloadButton": "Descargar",
@@ -683,7 +687,8 @@ const esStrings = {
     "Selecciona un modelo del catálogo o introduce una etiqueta personalizada.",
   "admin.evaluation.models.downloadStatusPulling":
     "Descarga en curso — comprobando disponibilidad cada 10 segundos…",
-  "admin.evaluation.models.downloadStatusSuccess": "El modelo ya está disponible.",
+  "admin.evaluation.models.downloadStatusSuccess":
+    "El modelo ya está disponible.",
   "admin.evaluation.models.downloadStatusTimeout":
     "La descarga superó 30 minutos. Reintenta cuando quieras.",
   "admin.evaluation.models.downloadFailed": "Error al descargar el modelo",
@@ -740,7 +745,8 @@ const esStrings = {
   "admin.evaluation.playground.downloadTitle": "Descargar modelo",
   "admin.evaluation.playground.downloadHint":
     "Descarga una etiqueta Ollama al volumen Modal para evaluaciones del laboratorio.",
-  "admin.evaluation.playground.downloadModelLabel": "Etiqueta del modelo Ollama",
+  "admin.evaluation.playground.downloadModelLabel":
+    "Etiqueta del modelo Ollama",
   "admin.evaluation.playground.downloadModelPlaceholder": "qwen2.5:3b-instruct",
   "admin.evaluation.playground.downloadButton": "Descargar",
   "admin.evaluation.playground.downloadPulling": "Descargando…",

@@ -646,6 +646,15 @@ export interface OllamaModelSummaryApi {
   available: boolean;
 }
 
+export interface OllamaModelCatalogFamilyApi {
+  slug: string;
+}
+
+export interface OllamaModelCatalogTagApi {
+  model_id: string;
+  available: boolean;
+}
+
 export async function fetchOllamaModels(
   options: CorpusClientOptions,
 ): Promise<{ items: OllamaModelSummaryApi[] }> {
@@ -658,6 +667,50 @@ export async function fetchOllamaModels(
     throw new Error(`Ollama models list failed (${String(response.status)})`);
   }
   return response.json() as Promise<{ items: OllamaModelSummaryApi[] }>;
+}
+
+export async function fetchOllamaCatalogFamilies(
+  options: CorpusClientOptions,
+): Promise<{ families: OllamaModelCatalogFamilyApi[] }> {
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/models/ollama/catalog`,
+    {
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+      },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Ollama catalog families failed (${String(response.status)})`,
+    );
+  }
+  return response.json() as Promise<{
+    families: OllamaModelCatalogFamilyApi[];
+  }>;
+}
+
+export async function fetchOllamaCatalogFamilyTags(
+  options: CorpusClientOptions,
+  slug: string,
+): Promise<{ slug: string; tags: OllamaModelCatalogTagApi[] }> {
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/models/ollama/catalog/${encodeURIComponent(slug)}`,
+    {
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+      },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Ollama catalog tags failed (${String(response.status)})`,
+    );
+  }
+  return response.json() as Promise<{
+    slug: string;
+    tags: OllamaModelCatalogTagApi[];
+  }>;
 }
 
 export interface OllamaModelPullResponseApi {

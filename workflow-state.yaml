@@ -268,15 +268,26 @@ project:
         session_report: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
     09-qa:
       status: completed
-      started_at: '2026-07-03'
-      completed_at: '2026-07-03'
-      session_id: S008-eval-ux-playground
-      branch: feat/S008-eval-ux-playground
-      evolve_cycle_id: EV-009
-      report: docs/sessions/S008-eval-ux-playground/reports/qa-report.md
+      started_at: '2026-07-07'
+      completed_at: '2026-07-07'
+      partial_rerun_at: '2026-07-07'
+      partial_rerun_note: EV-010/S009 delta — F38 playground model download QA complete
+      session_id: S009-playground-model-download
+      branch: feat/S009-playground-model-download
+      evolve_cycle_id: EV-010
+      report: docs/sessions/S009-playground-model-download/reports/qa-report.md
       overall: fail
-      note: S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage gate FAIL (internal-write-api
-        + chat-rag-backend below 95%); QA-S008-B05 blocking
+      s008_baseline:
+        status: completed
+        started_at: '2026-07-03'
+        completed_at: '2026-07-03'
+        session_id: S008-eval-ux-playground
+        branch: feat/S008-eval-ux-playground
+        evolve_cycle_id: EV-009
+        report: docs/sessions/S008-eval-ux-playground/reports/qa-report.md
+        overall: fail
+        note: S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage gate FAIL (internal-write-api
+          + chat-rag-backend below 95%); QA-S008-B05 blocking
       s007:
         status: completed
         started_at: '2026-07-01'
@@ -503,7 +514,7 @@ active_session:
   evolve_cycle_id: EV-010
   artifacts_dir: docs/sessions/S009-playground-model-download/
   started_at: '2026-07-05'
-  current_stage: 07-build
+  current_stage: 10-e2e
   routing_plan:
   - stage: 00-context
     status: completed
@@ -521,7 +532,11 @@ active_session:
   - stage: 08-verify-build
     status: pending
   - stage: 09-qa
-    status: pending
+    status: completed
+    started_at: '2026-07-07'
+    completed_at: '2026-07-07'
+    report: docs/sessions/S009-playground-model-download/reports/qa-report.md
+    overall: fail
   - stage: 10-e2e
     status: pending
   - stage: 11-verify-impl
@@ -539,6 +554,10 @@ active_session:
     kind: verify-impl-report
     session_id: S009-playground-model-download
     stage: 11-verify-impl
+  - path: docs/sessions/S009-playground-model-download/reports/qa-report.md
+    kind: qa-report
+    session_id: S009-playground-model-download
+    stage: 09-qa
 sessions:
 - id: S008-eval-ux-playground
   type: feature
@@ -1933,15 +1952,15 @@ stages:
         FAIL; cleared for Phase 12 gate.
   09-qa:
     status: completed
-    started_at: '2026-07-03'
-    completed_at: '2026-07-03'
-    session_id: S008-eval-ux-playground
-    branch: feat/S008-eval-ux-playground
-    evolve_cycle_id: EV-009
-    report: docs/sessions/S008-eval-ux-playground/reports/qa-report.md
+    started_at: '2026-07-07'
+    completed_at: '2026-07-07'
+    partial_rerun_at: '2026-07-07'
+    partial_rerun_note: EV-010/S009 delta — F38 playground model download QA complete
+    session_id: S009-playground-model-download
+    branch: feat/S009-playground-model-download
+    evolve_cycle_id: EV-010
+    report: docs/sessions/S009-playground-model-download/reports/qa-report.md
     overall: fail
-    note: S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage gate FAIL (internal-write-api
-      + chat-rag-backend below 95%); QA-S008-B05 blocking
     s008:
       status: completed
       started_at: '2026-07-03'
@@ -4496,6 +4515,7 @@ decisions_log:
 - EV-010/S009 04-tech-plan complete — ADR-036, TP-S009-01–16, Phase 16 M71–M73
 - 'S009/EV-010 11-verify-impl complete 2026-07-06 — F38 catalog extension approved; UJ-048 approved; super-admin seeded
   for admin@vecinita.admin; 07-build build extension uncommitted'
+- 'S009/EV-010 09-qa complete 2026-07-07 — overall FAIL (coverage gate); report at docs/sessions/S009-playground-model-download/reports/qa-report.md'
 artifacts:
 - docs/sessions/S000-internal-docs-archive/context-brief.md
 - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
@@ -4778,6 +4798,10 @@ artifacts:
   kind: verify-impl-report
   session_id: S009-playground-model-download
   stage: 11-verify-impl
+- path: docs/sessions/S009-playground-model-download/reports/qa-report.md
+  kind: qa-report
+  session_id: S009-playground-model-download
+  stage: 09-qa
 git_history:
   current_branch: feat/S009-playground-model-download
   branches:
