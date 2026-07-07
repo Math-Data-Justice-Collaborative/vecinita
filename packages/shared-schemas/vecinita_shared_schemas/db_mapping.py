@@ -53,6 +53,16 @@ def row_uuid(row: Mapping[str, object], key: str) -> UUID:
     return UUID(str(value))
 
 
+def row_uuid_optional(row: Mapping[str, object], key: str) -> UUID | None:
+    """Return ``key`` as ``UUID`` or ``None`` when the column value is null."""
+    value = row[key]
+    if value is None:
+        return None
+    if isinstance(value, UUID):
+        return value
+    return UUID(str(value))
+
+
 def scalar_int(value: object) -> int:
     """Coerce a scalar database value to ``int``."""
     if isinstance(value, int):

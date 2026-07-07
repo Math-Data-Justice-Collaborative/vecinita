@@ -171,7 +171,7 @@ describe("AuditPage user events (TC-101, UJ-038)", () => {
       const auditCall = fetchMock.mock.calls.find((call) =>
         String(call[0]).includes("/internal/v1/audit"),
       );
-      expect(auditCall?.[0]).toContain(`entity_id=${USER_ID}`);
+      expect(auditCall?.[0]).toContain(`actor_id=${USER_ID}`);
     });
   });
 });

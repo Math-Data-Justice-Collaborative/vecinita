@@ -16,6 +16,7 @@ from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_data_management_backend.write_client import InternalWriteClient
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests
 from vecinita_shared_schemas.internal_write import (
+    AuditEventRequest,
     EvalMetricsSummary,
     EvalRunListItem,
     EvalRunListResponse,
@@ -105,6 +106,31 @@ def test_create_job_accepts_retag_options() -> None:
     assert record.job_type == "retag"
     assert record.options["document_id"] == str(document_id)
     assert record.options["chunk_size_tokens"] == _CHUNK_SIZE_TOKENS
+
+
+def test_create_job_emits_job_created_audit() -> None:
+    """POST /jobs records job.created with the initiating operator."""
+    captured: list[AuditEventRequest] = []
+    store = InMemoryJobStore()
+    client = TestClient(
+        create_app(
+            store=store,
+            require_proxy_auth=False,
+            audit_emit=captured.append,
+        )
+    )
+
+    response = client.post("/jobs", json={"urls": ["https://example.com/page"]})
+
+    assert response.status_code == HTTPStatus.ACCEPTED
+    assert len(captured) == 1
+    assert captured[0].event_type == "job.created"
+    assert captured[0].entity_type == "job"
+    assert captured[0].actor_id is not None
+    job_id = UUID(json_str(response_json_object(response), "job_id"))
+    record = store.get_job(job_id)
+    assert record is not None
+    assert record.initiated_by_user_id == captured[0].actor_id
 
 
 def test_create_job_schedules_pipeline_runner() -> None:

@@ -7,6 +7,10 @@ from http import HTTPStatus
 from typing import TYPE_CHECKING, Final
 
 import httpx
+from vecinita_shared_schemas.audit_headers import (
+    AUDIT_ACTOR_ID_HEADER,
+    AUDIT_ACTOR_ROLE_HEADER,
+)
 from vecinita_shared_schemas.internal_write import (
     AuditEventRequest,
     BatchUpsertRequest,
@@ -32,13 +36,15 @@ class InternalWriteClientError(RuntimeError):
 class InternalWriteClient:
     """Call DO internal write API document and tag routes."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913  # audit actor fields mirror with_audit_actor factory
         self,
         base_url: str | None = None,
         api_key: str | None = None,
         *,
         http_client: httpx.Client | None = None,
         timeout: float = 60.0,
+        audit_actor_id: UUID | None = None,
+        audit_actor_role: str | None = None,
     ) -> None:
         """Resolve base URL and API key from arguments or environment."""
         resolved_url = base_url or os.environ.get(_ENV_WRITE_URL)
@@ -50,6 +56,22 @@ class InternalWriteClient:
         self._api_key = resolved_key
         self._owns = http_client is None
         self._client = http_client or httpx.Client(base_url=self._base_url, timeout=timeout)
+        self._audit_actor_id = audit_actor_id
+        self._audit_actor_role = audit_actor_role
+
+    def with_audit_actor(
+        self,
+        actor_id: UUID | None,
+        actor_role: str | None,
+    ) -> InternalWriteClient:
+        """Return a client that forwards operator attribution on service-key writes."""
+        return InternalWriteClient(
+            base_url=self._base_url,
+            api_key=self._api_key,
+            http_client=self._client,
+            audit_actor_id=actor_id,
+            audit_actor_role=actor_role,
+        )
 
     def close(self) -> None:
         """Close the owned HTTP client when this wrapper created it."""
@@ -57,7 +79,12 @@ class InternalWriteClient:
             self._client.close()
 
     def _headers(self) -> dict[str, str]:
-        return {"Authorization": f"Bearer {self._api_key}"}
+        headers = {"Authorization": f"Bearer {self._api_key}"}
+        if self._audit_actor_id is not None:
+            headers[AUDIT_ACTOR_ID_HEADER] = str(self._audit_actor_id)
+        if self._audit_actor_role is not None:
+            headers[AUDIT_ACTOR_ROLE_HEADER] = self._audit_actor_role
+        return headers
 
     def upsert_batch(self, body: BatchUpsertRequest) -> BatchUpsertResponse:
         """POST a batch document upsert to the internal write API."""

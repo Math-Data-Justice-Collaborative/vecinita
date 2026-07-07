@@ -119,6 +119,8 @@ class AuditLogEntry(BaseModel):
     request_id: UUID
     payload: JsonObject = Field(default_factory=dict)
     created_at: datetime
+    actor_id: UUID | None = None
+    actor_role: str | None = None
 
 
 class AuditLogResponse(BaseModel):

@@ -529,7 +529,7 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
 ### GET `/internal/v1/audit` (EV-002 / F29)
 
 - **Purpose**: Global audit log (paginated, filterable).
-- **Query**: `page` (default 1), `page_size` (default 50, max 200), `event_type` (filter), `entity_type` (filter), `entity_id` (filter), `since` (ISO8601), `until` (ISO8601).
+- **Query**: `page` (default 1), `page_size` (default 50, max 200), `event_type` (filter), `entity_type` (filter), `entity_id` (filter), `actor_id` (filter — operator who initiated the action; use for user activity), `since` (ISO8601), `until` (ISO8601).
 - **Response** `200`:
 
 ```json

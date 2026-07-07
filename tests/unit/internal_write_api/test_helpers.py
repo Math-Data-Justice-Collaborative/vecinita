@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
+from starlette.requests import Request
 from vecinita_internal_write_api.app import (
     _dependency_health_url,  # pyright: ignore[reportPrivateUsage]
     _normalize_database_url,  # pyright: ignore[reportPrivateUsage]
@@ -75,14 +76,19 @@ def test_tags_snapshot_list_returns_empty_for_non_list() -> None:
     assert _tags_snapshot_list({"not": "a list"}) == []
 
 
+def _empty_request() -> Request:
+    """Minimal Starlette request for helper unit tests."""
+    return Request({"type": "http", "method": "GET", "path": "/", "headers": []})
+
+
 def test_resolve_write_actor_returns_principal_sub_and_role() -> None:
     """Operator writes attribute audit rows to the principal's sub and role."""
     sub = uuid4()
     ctx = AuthContext(principal=AuthPrincipal(sub=sub, role="admin"), is_service=False)
-    assert _resolve_write_actor(ctx) == (sub, "admin")
+    assert _resolve_write_actor(ctx, _empty_request()) == (sub, "admin")
 
 
 def test_resolve_write_actor_returns_none_for_service_caller() -> None:
     """Service-key writes carry no operator attribution."""
     ctx = AuthContext(principal=None, is_service=True)
-    assert _resolve_write_actor(ctx) == (None, None)
+    assert _resolve_write_actor(ctx, _empty_request()) == (None, None)

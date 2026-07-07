@@ -246,6 +246,41 @@ def test_write_client_does_not_close_injected_http_client() -> None:
     assert closed == []
 
 
+def test_upsert_batch_forwards_audit_actor_headers() -> None:
+    """with_audit_actor() forwards operator attribution on service-key writes."""
+    actor_id = uuid4()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.headers.get("X-Vecinita-Audit-Actor-Id") == str(actor_id)
+        assert request.headers.get("X-Vecinita-Audit-Actor-Role") == "admin"
+        return httpx.Response(HTTPStatus.OK, json={"upserted_chunks": 1})
+
+    transport = httpx.MockTransport(handler)
+    base = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    client = base.with_audit_actor(actor_id, "admin")
+    client.upsert_batch(
+        BatchUpsertRequest(
+            documents=[
+                DocumentUpsert(
+                    url=HttpUrl("https://example.com/page"),
+                    chunks=[
+                        ChunkUpsert(
+                            chunk_index=0,
+                            text="hello",
+                            embedding=[0.1] * 384,
+                        )
+                    ],
+                )
+            ]
+        )
+    )
+    base.close()
+
+
 def test_post_audit_event_posts_payload() -> None:
     """post_audit_event serializes the request body to the ingest route."""
     seen: list[dict[str, object]] = []

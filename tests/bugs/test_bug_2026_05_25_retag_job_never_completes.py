@@ -30,6 +30,19 @@ class _MockEmbedClient:
 
 
 class _MockWriteClient:
+    def with_audit_actor(
+        self,
+        actor_id: UUID | None,
+        actor_role: str | None,
+    ) -> _MockWriteClient:
+        """Return self — audit actor scoping is a no-op in this stub."""
+        _ = (actor_id, actor_role)
+        return self
+
+    def post_audit_event(self, event: object) -> None:
+        """No-op audit emit for this stub."""
+        _ = event
+
     def get_document_detail(self, document_id: UUID) -> object:
         _ = document_id
         msg = "should not be called when tag_client is None"

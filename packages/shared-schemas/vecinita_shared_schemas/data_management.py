@@ -64,6 +64,8 @@ class Job(BaseModel):
     error_message: str | None = None
     created_at: datetime
     updated_at: datetime
+    initiated_by_user_id: UUID | None = None
+    initiated_by_role: str | None = None
 
 
 class JobList(BaseModel):

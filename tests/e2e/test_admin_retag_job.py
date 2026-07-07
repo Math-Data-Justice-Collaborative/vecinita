@@ -15,7 +15,12 @@ from vecinita_data_management_backend.jobs import run_job
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_embedding_client import EMBEDDING_DIMENSION
 from vecinita_internal_write_api.app import create_app as create_write_app
+from vecinita_shared_schemas.audit_headers import (
+    AUDIT_ACTOR_ID_HEADER,
+    AUDIT_ACTOR_ROLE_HEADER,
+)
 from vecinita_shared_schemas.internal_write import (
+    AuditEventRequest,
     BatchUpsertRequest,
     BatchUpsertResponse,
     ChunkUpsert,
@@ -74,15 +79,43 @@ class _MockEmbedClient:
 class _TestClientWriteClient:
     """Adapt FastAPI TestClient to InternalWriteClient surface for tests."""
 
-    def __init__(self, client: TestClient) -> None:
+    def __init__(
+        self,
+        client: TestClient,
+        *,
+        audit_actor_id: UUID | None = None,
+        audit_actor_role: str | None = None,
+    ) -> None:
         self._client = client
+        self._audit_actor_id = audit_actor_id
+        self._audit_actor_role = audit_actor_role
+
+    def with_audit_actor(
+        self,
+        actor_id: UUID | None,
+        actor_role: str | None,
+    ) -> _TestClientWriteClient:
+        """Return a client that forwards operator attribution on service-key writes."""
+        return _TestClientWriteClient(
+            self._client,
+            audit_actor_id=actor_id,
+            audit_actor_role=actor_role,
+        )
+
+    def _headers(self) -> dict[str, str]:
+        headers = {"Authorization": f"Bearer {_WRITE_KEY}"}
+        if self._audit_actor_id is not None:
+            headers[AUDIT_ACTOR_ID_HEADER] = str(self._audit_actor_id)
+        if self._audit_actor_role is not None:
+            headers[AUDIT_ACTOR_ROLE_HEADER] = self._audit_actor_role
+        return headers
 
     def upsert_batch(self, body: BatchUpsertRequest) -> BatchUpsertResponse:
         """Upsert batch."""
         response = self._client.post(
             "/internal/v1/documents/batch",
             json=body.model_dump(mode="json"),
-            headers={"Authorization": f"Bearer {_WRITE_KEY}"},
+            headers=self._headers(),
         )
         assert response.status_code == HTTPStatus.OK, response.text
         return BatchUpsertResponse.model_validate(response.json())
@@ -91,7 +124,7 @@ class _TestClientWriteClient:
         """Get document detail."""
         response = self._client.get(
             f"/internal/v1/documents/{document_id}",
-            headers={"Authorization": f"Bearer {_WRITE_KEY}"},
+            headers=self._headers(),
         )
         assert response.status_code == HTTPStatus.OK, response.text
         return DocumentDetail.model_validate(response.json())
@@ -101,10 +134,19 @@ class _TestClientWriteClient:
         response = self._client.patch(
             f"/internal/v1/documents/{document_id}/tags",
             json={"tags": [tag.model_dump(mode="json") for tag in tags], "source": "llm"},
-            headers={"Authorization": f"Bearer {_WRITE_KEY}"},
+            headers=self._headers(),
         )
         assert response.status_code == HTTPStatus.OK, response.text
         return TagPatchResponse.model_validate(response.json())
+
+    def post_audit_event(self, event: AuditEventRequest) -> None:
+        """Emit audit event via internal write API."""
+        response = self._client.post(
+            "/internal/v1/audit/event",
+            json=event.model_dump(mode="json"),
+            headers=self._headers(),
+        )
+        assert response.status_code == HTTPStatus.OK, response.text
 
     def close(self) -> None:
         """Close."""

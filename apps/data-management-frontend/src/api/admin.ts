@@ -205,6 +205,8 @@ export interface AuditLogEntryApi {
   request_id: string;
   payload: Record<string, unknown>;
   created_at: string;
+  actor_id?: string | null;
+  actor_role?: string | null;
 }
 
 export interface AuditLogResponseApi {
@@ -221,6 +223,8 @@ export interface AuditEvent {
   entity_id: string;
   timestamp: string;
   payload: Record<string, unknown>;
+  actor_id?: string | null;
+  actor_role?: string | null;
 }
 
 /** Normalized for AuditPage rendering. */
@@ -243,6 +247,8 @@ export function parseAuditLogResponse(raw: AuditLogResponseApi): AuditPage {
       entity_id: item.entity_id,
       timestamp: item.created_at,
       payload: item.payload,
+      actor_id: item.actor_id ?? null,
+      actor_role: item.actor_role ?? null,
     })),
   };
 }
@@ -253,6 +259,7 @@ export async function fetchAuditLog(
     event_type?: string;
     entity_id?: string;
     entity_type?: string;
+    actor_id?: string;
     page?: number;
   },
 ): Promise<AuditPage> {
@@ -262,6 +269,7 @@ export async function fetchAuditLog(
   if (params?.entity_type) {
     url.searchParams.set("entity_type", params.entity_type);
   }
+  if (params?.actor_id) url.searchParams.set("actor_id", params.actor_id);
   if (params?.page) url.searchParams.set("page", String(params.page));
   const response = await fetch(url.toString(), {
     headers: {

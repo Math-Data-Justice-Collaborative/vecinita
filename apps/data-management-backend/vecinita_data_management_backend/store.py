@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from threading import Lock
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, NotRequired, TypedDict
 from uuid import UUID, uuid4
 
 from vecinita_shared_schemas.data_management import Job
@@ -27,6 +27,8 @@ class JobRecord:
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     options: dict[str, object] = field(default_factory=dict)
+    initiated_by_user_id: UUID | None = None
+    initiated_by_role: str | None = None
 
 
 class JobPayload(TypedDict):
@@ -41,6 +43,8 @@ class JobPayload(TypedDict):
     created_at: str
     updated_at: str
     options: dict[str, object]
+    initiated_by_user_id: NotRequired[str]
+    initiated_by_role: NotRequired[str]
 
 
 class JobStore:
@@ -52,6 +56,8 @@ class JobStore:
         options: dict[str, object] | None = None,
         *,
         job_type: str = "ingest",
+        initiated_by_user_id: UUID | None = None,
+        initiated_by_role: str | None = None,
     ) -> JobRecord:
         """Create a pending job record."""
         raise NotImplementedError
@@ -77,7 +83,7 @@ class JobStore:
 
 
 def _record_to_payload(record: JobRecord) -> JobPayload:
-    return {
+    payload: JobPayload = {
         "job_id": str(record.job_id),
         "status": record.status,
         "urls": record.urls,
@@ -88,9 +94,15 @@ def _record_to_payload(record: JobRecord) -> JobPayload:
         "updated_at": record.updated_at.isoformat(),
         "options": record.options,
     }
+    if record.initiated_by_user_id is not None:
+        payload["initiated_by_user_id"] = str(record.initiated_by_user_id)
+    if record.initiated_by_role is not None:
+        payload["initiated_by_role"] = record.initiated_by_role
+    return payload
 
 
 def _payload_to_record(payload: JobPayload) -> JobRecord:
+    initiated_raw = payload.get("initiated_by_user_id")
     return JobRecord(
         job_id=UUID(str(payload["job_id"])),
         status=str(payload["status"]),
@@ -101,6 +113,8 @@ def _payload_to_record(payload: JobPayload) -> JobRecord:
         created_at=datetime.fromisoformat(str(payload["created_at"])),
         updated_at=datetime.fromisoformat(str(payload["updated_at"])),
         options=dict(payload.get("options") or {}),
+        initiated_by_user_id=UUID(str(initiated_raw)) if initiated_raw else None,
+        initiated_by_role=payload.get("initiated_by_role"),
     )
 
 
@@ -117,6 +131,8 @@ class DictJobStore(JobStore):
         options: dict[str, object] | None = None,
         *,
         job_type: str = "ingest",
+        initiated_by_user_id: UUID | None = None,
+        initiated_by_role: str | None = None,
     ) -> JobRecord:
         """Persist a new pending job in the shared mapping."""
         record = JobRecord(
@@ -125,6 +141,8 @@ class DictJobStore(JobStore):
             urls=urls,
             job_type=job_type,
             options=options or {},
+            initiated_by_user_id=initiated_by_user_id,
+            initiated_by_role=initiated_by_role,
         )
         self._jobs[str(record.job_id)] = _record_to_payload(record)
         return record
@@ -181,6 +199,8 @@ class InMemoryJobStore(JobStore):
         options: dict[str, object] | None = None,
         *,
         job_type: str = "ingest",
+        initiated_by_user_id: UUID | None = None,
+        initiated_by_role: str | None = None,
     ) -> JobRecord:
         """Create a pending job in memory."""
         record = JobRecord(
@@ -189,6 +209,8 @@ class InMemoryJobStore(JobStore):
             urls=urls,
             job_type=job_type,
             options=options or {},
+            initiated_by_user_id=initiated_by_user_id,
+            initiated_by_role=initiated_by_role,
         )
         with self._lock:
             self._jobs[record.job_id] = record
