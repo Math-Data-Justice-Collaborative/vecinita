@@ -92,6 +92,10 @@ from vecinita_shared_schemas.internal_write import (
 from vecinita_shared_schemas.json_types import as_json_object
 from vecinita_shared_schemas.ollama_catalog import merge_ollama_catalog_with_volume
 from vecinita_shared_schemas.ollama_models import (
+    OllamaModelCatalogFamiliesResponse,
+    OllamaModelCatalogFamily,
+    OllamaModelCatalogFamilyTagsResponse,
+    OllamaModelCatalogTag,
     OllamaModelListResponse,
     OllamaModelPullRequest,
     OllamaModelPullResponse,
@@ -128,6 +132,11 @@ from vecinita_internal_write_api.eval_service import (
 from vecinita_internal_write_api.jobs_client import (
     DataManagementJobsClient,
     DataManagementJobsClientError,
+)
+from vecinita_internal_write_api.ollama_library_client import (
+    OllamaLibraryClient,
+    OllamaLibraryClientError,
+    OllamaLibraryClientProtocol,
 )
 from vecinita_internal_write_api.ollama_models_client import (
     OllamaModelsClient,
@@ -301,12 +310,31 @@ def _merge_ollama_model_list(response: OllamaModelListResponse) -> OllamaModelLi
     )
 
 
+def _ollama_volume_availability(
+    ollama_models: OllamaModelsClientProtocol | None,
+) -> dict[str, bool]:
+    """Map model_id to volume availability for catalog tag overlays."""
+    if ollama_models is None:
+        return {}
+    try:
+        response = _merge_ollama_model_list(ollama_models.list_models())
+    except OllamaModelsClientError:
+        return {}
+    return {item.model_id: item.available for item in response.items}
+
+
+def _default_ollama_library_client() -> OllamaLibraryClient:
+    """Auto-create the public Ollama library scraper."""
+    return OllamaLibraryClient()
+
+
 def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route handlers inline
     *,
     jobs_client: DataManagementJobsClient | None = None,
     eval_embed_fn: Callable[[str], list[float]] | None = None,
     eval_judge: JudgeClient | None = None,
     ollama_models_client: OllamaModelsClientProtocol | None = None,
+    ollama_library_client: OllamaLibraryClientProtocol | None = None,
 ) -> FastAPI:
     """Build the internal write API (sole holder of DATABASE_URL)."""
     app = FastAPI(title="Vecinita Internal Write API", version="0.1.0")
@@ -317,6 +345,11 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         ollama_models_client
         if ollama_models_client is not None
         else _default_ollama_models_client()
+    )
+    ollama_library = (
+        ollama_library_client
+        if ollama_library_client is not None
+        else _default_ollama_library_client()
     )
 
     @app.get("/health", response_model=HealthResponse)
@@ -1679,6 +1712,51 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail=str(exc),
             ) from exc
+
+    @app.get(
+        "/internal/v1/models/ollama/catalog",
+        response_model=OllamaModelCatalogFamiliesResponse,
+    )
+    def list_ollama_catalog_families_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: SuperAdminActorDep,
+    ) -> OllamaModelCatalogFamiliesResponse:
+        try:
+            slugs = ollama_library.list_families()
+        except OllamaLibraryClientError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=str(exc),
+            ) from exc
+        return OllamaModelCatalogFamiliesResponse(
+            families=[OllamaModelCatalogFamily(slug=slug) for slug in slugs],
+        )
+
+    @app.get(
+        "/internal/v1/models/ollama/catalog/{slug}",
+        response_model=OllamaModelCatalogFamilyTagsResponse,
+    )
+    def list_ollama_catalog_family_tags_route(  # pyright: ignore[reportUnusedFunction]
+        slug: str,
+        _actor: SuperAdminActorDep,
+    ) -> OllamaModelCatalogFamilyTagsResponse:
+        availability = _ollama_volume_availability(ollama_models)
+        try:
+            tags = ollama_library.list_tags(slug)
+        except OllamaLibraryClientError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=str(exc),
+            ) from exc
+        return OllamaModelCatalogFamilyTagsResponse(
+            slug=slug,
+            tags=[
+                OllamaModelCatalogTag(
+                    model_id=tag,
+                    available=availability.get(tag, False),
+                )
+                for tag in tags
+            ],
+        )
 
     @app.get(
         "/internal/v1/eval/runs/{run_id}",

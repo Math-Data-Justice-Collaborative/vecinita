@@ -271,6 +271,30 @@ async function fulfillAdminRoute(route: Route): Promise<void> {
     });
     return;
   }
+  if (url.includes("/internal/v1/models/ollama/catalog/")) {
+    const slug = decodeURIComponent(
+      url.split("/internal/v1/models/ollama/catalog/")[1] ?? "",
+    );
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        slug,
+        tags: OLLAMA_MODELS_BODY.items,
+      }),
+    });
+    return;
+  }
+  if (url.includes("/internal/v1/models/ollama/catalog")) {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        families: [{ slug: "qwen2.5" }],
+      }),
+    });
+    return;
+  }
   if (url.includes("/internal/v1/models/ollama")) {
     await route.fulfill({
       status: 200,

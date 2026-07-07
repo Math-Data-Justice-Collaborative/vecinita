@@ -1,14 +1,19 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
+import { createElement, type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import * as adminApi from "@/api/admin";
 
 import {
-  MODEL_PULL_POLL_INTERVAL_MS,
+  OllamaModelDownloadProvider,
   firstAvailableModelId,
   modelOptionLabel,
   useOllamaModelDownload,
 } from "./useOllamaModelDownload";
+
+function providerWrapper({ children }: { children: ReactNode }) {
+  return createElement(OllamaModelDownloadProvider, null, children);
+}
 
 describe("useOllamaModelDownload helpers", () => {
   it("firstAvailableModelId returns null when no model is available", () => {
@@ -36,7 +41,9 @@ describe("useOllamaModelDownload hook", () => {
 
   it("refreshModels surfaces non-Error list failures", async () => {
     vi.spyOn(adminApi, "fetchOllamaModels").mockRejectedValue("list failed");
-    const { result } = renderHook(() => useOllamaModelDownload());
+    const { result } = renderHook(() => useOllamaModelDownload(), {
+      wrapper: providerWrapper,
+    });
 
     await act(async () => {
       await result.current.refreshModels();
@@ -50,7 +57,9 @@ describe("useOllamaModelDownload hook", () => {
   it("downloadModel ignores whitespace-only tags", async () => {
     vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({ items: [] });
     const pullSpy = vi.spyOn(adminApi, "pullOllamaModel");
-    const { result } = renderHook(() => useOllamaModelDownload());
+    const { result } = renderHook(() => useOllamaModelDownload(), {
+      wrapper: providerWrapper,
+    });
 
     await waitFor(() => {
       expect(result.current.modelsLoading).toBe(false);
@@ -64,7 +73,7 @@ describe("useOllamaModelDownload hook", () => {
     expect(result.current.downloadStatus).toBe("idle");
   });
 
-  it("poll exits early after clearDownloadPoll unmount cleanup", async () => {
+  it("clears download poll timer when provider unmounts", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({
       items: [{ model_id: "qwen2.5:3b-instruct", available: false }],
@@ -74,8 +83,11 @@ describe("useOllamaModelDownload hook", () => {
       model_id: "qwen2.5:3b-instruct",
       status: "pulling",
     });
+    const clearTimeoutSpy = vi.spyOn(globalThis, "clearTimeout");
 
-    const { result, unmount } = renderHook(() => useOllamaModelDownload());
+    const { result, unmount } = renderHook(() => useOllamaModelDownload(), {
+      wrapper: providerWrapper,
+    });
     await waitFor(() => {
       expect(result.current.modelsLoading).toBe(false);
     });
@@ -85,10 +97,8 @@ describe("useOllamaModelDownload hook", () => {
     });
 
     unmount();
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(MODEL_PULL_POLL_INTERVAL_MS);
-    });
-
+    expect(clearTimeoutSpy).toHaveBeenCalled();
+    clearTimeoutSpy.mockRestore();
     vi.useRealTimers();
   });
 });

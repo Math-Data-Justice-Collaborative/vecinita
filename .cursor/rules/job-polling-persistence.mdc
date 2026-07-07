@@ -1,0 +1,52 @@
+---
+description: Long-running job poll state must survive in-app navigation and tab switches
+globs: apps/*/src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Job polling persistence across navigation
+
+Progress for long-running jobs (ingest, retag, eval runs, model downloads) must still
+be visible when the user navigates to another page/tab and returns. Component-local
+poll state that unmounts with the view is a regression (BUG-2026-06-25 / #53, #89).
+
+See also: `frontend-session-state-lifting.mdc` for the general lift-above-unmount rule.
+
+## Required patterns (pick one or combine)
+
+1. **Server as source of truth.** Persist the job/run id and re-fetch status on mount.
+   On return, show the latest server status immediately, then resume polling until
+   terminal (`completed` / `failed`). Example: `JobsPage` + `GET /jobs`.
+2. **Lift poll state above the view.** Hold `jobId`, `status`, and progress message in
+   an always-mounted layout or Context provider (e.g. `OllamaModelDownloadProvider` in
+   `AdminLayout`). Child tabs read from context; polling continues across tab switches.
+3. **Rehydrate before polling.** When remounting a view with an in-flight job, call the
+   status endpoint once synchronously so the user sees current progress, not a blank
+   form, then start the interval.
+
+## Poll implementation rules
+
+- Use `isActive` / `cancelled` guards so unmount does not call `setState`; **do not**
+  treat unmount as "forget the job" when the backend still has it running.
+- Stop timers on unmount (`clearInterval` / `clearTimeout`); resume on remount or keep
+  the timer in the lifted provider.
+- Decouple poll callbacks from unstable deps (`tr`, inline objects) via `useRef` so
+  locale/tab changes do not restart or kill polling (`JobsPage` pattern).
+- Terminal states stop polling; non-terminal states keep polling until terminal or
+  explicit user cancel.
+
+## UI requirements
+
+- Show a persistent progress/status message (badge, alert, row) for every in-flight job.
+- Returning to the originating view or a dedicated jobs view must surface the same job
+  without requiring the user to resubmit.
+- Poll/transport errors surface in the UI; do not silently drop in-flight tracking.
+
+## Tests (required for new polling UI)
+
+Add a Vitest navigation test that: starts a long-running job, navigates away (route or
+tab), returns, and asserts the progress/terminal status is still visible.
+
+Regression guards:
+- `apps/data-management-frontend/src/test/test_job_management_navigation.test.tsx` (#89)
+- `apps/chat-rag-frontend/src/test/test_bug_2026_06_25_chat_corpus_tab_state_loss.test.tsx` (#53)

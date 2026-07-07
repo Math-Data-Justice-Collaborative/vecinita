@@ -824,7 +824,69 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Ollama client not configured
+          description: Ollama models client not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+  /models/ollama/catalog:
+    get:
+      operationId: listOllamaCatalogFamilies
+      summary: List Ollama.com library model families (EV-010 F38 extension)
+      description: >
+        Super-admin only. Returns model family slugs from ollama.com/library for the
+        download tree browser. Expand a family via GET /models/ollama/catalog/{slug}.
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      responses:
+        "200":
+          description: Sorted model family slugs from the public Ollama library
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OllamaModelCatalogFamiliesResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+        "502":
+          description: Ollama library upstream error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+  /models/ollama/catalog/{slug}:
+    get:
+      operationId: listOllamaCatalogFamilyTags
+      summary: List tags for one Ollama library model family (EV-010 F38 extension)
+      description: >
+        Super-admin only. Returns all published tags (versions and quantizations) for
+        one model family slug, with Modal volume availability overlaid.
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+      responses:
+        "200":
+          description: Tags for the requested model family
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OllamaModelCatalogFamilyTagsResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+        "502":
+          description: Ollama library upstream error
           content:
             application/json:
               schema:
@@ -1803,6 +1865,50 @@ components:
           enum:
             - pulling
             - available
+    OllamaModelCatalogFamily:
+      type: object
+      required:
+        - slug
+      properties:
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 128
+    OllamaModelCatalogFamiliesResponse:
+      type: object
+      required:
+        - families
+      properties:
+        families:
+          type: array
+          items:
+            $ref: "#/components/schemas/OllamaModelCatalogFamily"
+    OllamaModelCatalogTag:
+      type: object
+      required:
+        - model_id
+        - available
+      properties:
+        model_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        available:
+          type: boolean
+    OllamaModelCatalogFamilyTagsResponse:
+      type: object
+      required:
+        - slug
+        - tags
+      properties:
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 128
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/OllamaModelCatalogTag"
   responses:
     ValidationError:
       description: Invalid payload

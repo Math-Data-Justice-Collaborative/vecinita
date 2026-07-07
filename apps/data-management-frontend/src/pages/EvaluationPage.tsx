@@ -24,6 +24,7 @@ import { EvaluationDrilldownTable } from "@/evaluation/EvaluationDrilldownTable"
 import { EvaluationExploreTab } from "@/evaluation/EvaluationExploreTab";
 import { EvaluationModelDownloadTab } from "@/evaluation/EvaluationModelDownloadTab";
 import { EvaluationPlaygroundTab } from "@/evaluation/EvaluationPlaygroundTab";
+import { ModelDownloadProgressIndicator } from "@/evaluation/ModelDownloadProgressIndicator";
 
 const DISPLAY_MIN = 0.7;
 
@@ -271,7 +272,11 @@ export function EvaluationPage() {
       <Tabs
         value={activeTab}
         onValueChange={(value) => {
-          setSearchParams({ tab: value });
+          setSearchParams((prev) => {
+            const next = new URLSearchParams(prev);
+            next.set("tab", value);
+            return next;
+          });
         }}
         data-testid="evaluation-tabs"
       >
@@ -292,8 +297,15 @@ export function EvaluationPage() {
             {tr("admin.evaluation.tab.playground")}
           </TabsTrigger>
           {isSuperAdmin ? (
-            <TabsTrigger value="models" data-testid="eval-tab-models">
+            <TabsTrigger
+              value="models"
+              data-testid="eval-tab-models"
+              className="gap-2"
+            >
               {tr("admin.evaluation.tab.models")}
+              <ModelDownloadProgressIndicator
+                testId="eval-tab-models-download-in-progress"
+              />
             </TabsTrigger>
           ) : null}
         </TabsList>

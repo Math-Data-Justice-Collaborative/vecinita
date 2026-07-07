@@ -3,9 +3,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import * as adminApi from "@/api/admin";
 import { fetchInputUrl } from "./fetch-mock";
+import { mockOllamaApiFetch } from "./helpers/mockOllamaApi";
 import {
   renderAppRoutesReady,
   renderSuperAdminAppRoutesReady,
+  renderSuperAdminAppWithRouterReady,
 } from "./renderAppHelpers";
 
 const RUN_ID = "00000000-0000-0000-0000-000000000099";
@@ -46,19 +48,6 @@ const CRITERIA_BODY = {
   ],
 };
 
-const OLLAMA_MODELS_BODY = {
-  items: [
-    {
-      model_id: "qwen2.5:1.5b-instruct",
-      available: true,
-    },
-    {
-      model_id: "llama3.2:3b",
-      available: true,
-    },
-  ],
-};
-
 const ADMIN_USER_ID = "11111111-1111-1111-1111-111111111111";
 const OTHER_ADMIN_ID = "33333333-3333-3333-3333-333333333333";
 const PRESET_ID = "00000000-0000-0000-0000-0000000000aa";
@@ -91,11 +80,9 @@ function defaultPlaygroundFetch(
   if (url.includes("/internal/v1/eval/criteria")) {
     return { ok: true, json: async () => CRITERIA_BODY };
   }
-  if (
-    url.includes("/internal/v1/models/ollama") &&
-    !url.includes("/internal/v1/models/ollama/pull")
-  ) {
-    return { ok: true, json: async () => OLLAMA_MODELS_BODY };
+  const ollamaMock = mockOllamaApiFetch(url);
+  if (ollamaMock !== null) {
+    return ollamaMock;
   }
   if (url.includes("/internal/v1/eval/config-presets")) {
     return { ok: true, json: async () => ({ items: [] }) };
@@ -1222,6 +1209,7 @@ describe("EvaluationPlayground (UJ-045)", () => {
 
 describe("EvaluationPlayground model download (UJ-048)", () => {
   const DOWNLOAD_MODEL_ID = "qwen2.5:3b-instruct";
+  const DOWNLOAD_FAMILY = "qwen2.5";
 
   const catalogItems = (
     overrides: Partial<Record<string, boolean>> = {},
@@ -1239,6 +1227,41 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
       available: overrides["qwen2.5:7b-instruct"] ?? false,
     },
   ];
+
+  const catalogFamilyTagsBody = (
+    overrides: Partial<Record<string, boolean>> = {},
+  ) => ({
+    slug: DOWNLOAD_FAMILY,
+    tags: catalogItems(overrides),
+  });
+
+  async function expandDownloadFamily() {
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(`eval-models-family-${DOWNLOAD_FAMILY}`),
+      ).toBeInTheDocument();
+    });
+    const family = screen.getByTestId(`eval-models-family-${DOWNLOAD_FAMILY}`);
+    const summary = family.querySelector("summary");
+    if (summary !== null) {
+      fireEvent.click(summary);
+    }
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
+      ).toBeInTheDocument();
+    });
+  }
+
+  beforeEach(() => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
+  });
 
   afterEach(() => {
     vi.useRealTimers();
@@ -1278,58 +1301,46 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
 
   it("super-admin triggers download and polls until model is available (TC-135)", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
-    let listCallCount = 0;
-    let pullCalled = false;
-    vi.stubGlobal(
-      "fetch",
-      vi
-        .fn()
-        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
-          const url = fetchInputUrl(input);
-          const method = (init?.method ?? "GET").toUpperCase();
-          if (
-            url.includes("/internal/v1/models/ollama/pull") &&
-            method === "POST"
-          ) {
-            pullCalled = true;
-            return Promise.resolve({
-              ok: true,
-              status: 202,
-              json: async () => ({
-                job_id: "00000000-0000-0000-0000-0000000000dd",
-                model_id: DOWNLOAD_MODEL_ID,
-                status: "pulling",
-              }),
-            });
-          }
-          if (url.includes("/internal/v1/models/ollama") && method === "GET") {
-            listCallCount += 1;
-            const available = listCallCount >= 2;
-            return Promise.resolve({
-              ok: true,
-              json: async () => ({
-                items: catalogItems({ [DOWNLOAD_MODEL_ID]: available }),
-              }),
-            });
-          }
-          return Promise.resolve(defaultPlaygroundFetch(url));
-        }),
+    let listPollCount = 0;
+    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockResolvedValue({
+      families: [{ slug: DOWNLOAD_FAMILY }],
+    });
+    vi.spyOn(adminApi, "fetchOllamaCatalogFamilyTags").mockImplementation(
+      async () => {
+        return catalogFamilyTagsBody({
+          [DOWNLOAD_MODEL_ID]: listPollCount >= 2,
+        });
+      },
     );
+    vi.spyOn(adminApi, "fetchOllamaModels").mockImplementation(async () => {
+      listPollCount += 1;
+      return {
+        items: catalogItems({
+          [DOWNLOAD_MODEL_ID]: listPollCount >= 2,
+        }),
+      };
+    });
+    const pullSpy = vi.spyOn(adminApi, "pullOllamaModel").mockResolvedValue({
+      job_id: "00000000-0000-0000-0000-0000000000dd",
+      model_id: DOWNLOAD_MODEL_ID,
+      status: "pulling",
+    });
 
     await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
-    await waitFor(() => {
-      expect(
-        screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
-      ).toBeInTheDocument();
-    });
+    await expandDownloadFamily();
 
     fireEvent.click(
       screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
     );
 
     await waitFor(() => {
-      expect(pullCalled).toBe(true);
+      expect(pullSpy).toHaveBeenCalled();
     });
+    const pullCall = pullSpy.mock.calls[0];
+    expect(pullCall?.[0]).toEqual(
+      expect.objectContaining({ baseUrl: "http://localhost:8002" }),
+    );
+    expect(pullCall?.[1]).toBe(DOWNLOAD_MODEL_ID);
     expect(screen.getByTestId("eval-models-download-status")).toHaveTextContent(
       /checking availability|comprobando/i,
     );
@@ -1368,16 +1379,18 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
     vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({
       items: catalogItems(),
     });
+    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockResolvedValue({
+      families: [{ slug: DOWNLOAD_FAMILY }],
+    });
+    vi.spyOn(adminApi, "fetchOllamaCatalogFamilyTags").mockResolvedValue(
+      catalogFamilyTagsBody(),
+    );
     vi.spyOn(adminApi, "pullOllamaModel").mockRejectedValueOnce(
       new Error("Ollama model pull failed (403)"),
     );
 
     await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
-    await waitFor(() => {
-      expect(
-        screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
-      ).toBeInTheDocument();
-    });
+    await expandDownloadFamily();
     fireEvent.click(
       screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
     );
@@ -1410,13 +1423,15 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
     vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({
       items: catalogItems(),
     });
+    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockResolvedValue({
+      families: [{ slug: DOWNLOAD_FAMILY }],
+    });
+    vi.spyOn(adminApi, "fetchOllamaCatalogFamilyTags").mockResolvedValue(
+      catalogFamilyTagsBody(),
+    );
     vi.spyOn(adminApi, "pullOllamaModel").mockRejectedValueOnce("pull failed");
     await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
-    await waitFor(() => {
-      expect(
-        screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
-      ).toBeInTheDocument();
-    });
+    await expandDownloadFamily();
     fireEvent.click(
       screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
     );
@@ -1455,9 +1470,15 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
           if (url.includes("/internal/v1/models/ollama") && method === "GET") {
             return Promise.resolve({
               ok: true,
-              json: async () => ({
-                items: catalogItems(),
-              }),
+              json: async () => {
+                if (url.includes("/internal/v1/models/ollama/catalog/qwen2.5")) {
+                  return catalogFamilyTagsBody();
+                }
+                if (url.includes("/internal/v1/models/ollama/catalog")) {
+                  return { families: [{ slug: DOWNLOAD_FAMILY }] };
+                }
+                return { items: catalogItems() };
+              },
             });
           }
           return Promise.resolve(defaultPlaygroundFetch(url));
@@ -1465,11 +1486,7 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
     );
 
     await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
-    await waitFor(() => {
-      expect(
-        screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
-      ).toBeInTheDocument();
-    });
+    await expandDownloadFamily();
     fireEvent.click(
       screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
     );
@@ -1485,6 +1502,12 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
 
   it("surfaces poll Error during model download", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockResolvedValue({
+      families: [{ slug: DOWNLOAD_FAMILY }],
+    });
+    vi.spyOn(adminApi, "fetchOllamaCatalogFamilyTags").mockResolvedValue(
+      catalogFamilyTagsBody(),
+    );
     vi.spyOn(adminApi, "pullOllamaModel").mockResolvedValueOnce({
       job_id: "00000000-0000-0000-0000-0000000000dd",
       model_id: DOWNLOAD_MODEL_ID,
@@ -1497,11 +1520,7 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
       .mockRejectedValueOnce(new Error("poll list failed"));
 
     await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
-    await waitFor(() => {
-      expect(
-        screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
-      ).toBeInTheDocument();
-    });
+    await expandDownloadFamily();
     fireEvent.click(
       screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
     );
@@ -1510,6 +1529,97 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
       expect(
         screen.getByTestId("eval-models-download-status"),
       ).toHaveTextContent(/poll list failed/i);
+    });
+  });
+
+  it("keeps download in progress after switching evaluation tabs", async () => {
+    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockResolvedValue({
+      families: [{ slug: DOWNLOAD_FAMILY }],
+    });
+    vi.spyOn(adminApi, "fetchOllamaCatalogFamilyTags").mockResolvedValue(
+      catalogFamilyTagsBody(),
+    );
+    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({
+      items: catalogItems(),
+    });
+    vi.spyOn(adminApi, "pullOllamaModel").mockResolvedValue({
+      job_id: "00000000-0000-0000-0000-0000000000dd",
+      model_id: DOWNLOAD_MODEL_ID,
+      status: "pulling",
+    });
+
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
+    await expandDownloadFamily();
+    fireEvent.click(
+      screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
+    );
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-models-download-status"),
+      ).toHaveTextContent(/checking availability|comprobando/i);
+    });
+
+    fireEvent.click(screen.getByTestId("eval-tab-runs"));
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-tab-models-download-in-progress"),
+      ).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("eval-tab-models"));
+    await waitFor(() => {
+      expect(screen.getByTestId("evaluation-models-download")).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-models-download-status"),
+      ).toHaveTextContent(/checking availability|comprobando/i);
+    });
+  });
+
+  it("keeps download in progress after navigating away from evaluation", async () => {
+    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockResolvedValue({
+      families: [{ slug: DOWNLOAD_FAMILY }],
+    });
+    vi.spyOn(adminApi, "fetchOllamaCatalogFamilyTags").mockResolvedValue(
+      catalogFamilyTagsBody(),
+    );
+    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({
+      items: catalogItems(),
+    });
+    vi.spyOn(adminApi, "pullOllamaModel").mockResolvedValue({
+      job_id: "00000000-0000-0000-0000-0000000000dd",
+      model_id: DOWNLOAD_MODEL_ID,
+      status: "pulling",
+    });
+
+    const { router } = await renderSuperAdminAppWithRouterReady(
+      "/evaluation?tab=models",
+    );
+    await expandDownloadFamily();
+    fireEvent.click(
+      screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
+    );
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-models-download-status"),
+      ).toHaveTextContent(/checking availability|comprobando/i);
+    });
+
+    await router.navigate("/dashboard");
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("admin-nav-ollama-download-in-progress"),
+      ).toBeInTheDocument();
+    });
+
+    await router.navigate("/evaluation?tab=models");
+    await waitFor(() => {
+      expect(screen.getByTestId("evaluation-models-download")).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-models-download-status"),
+      ).toHaveTextContent(/checking availability|comprobando/i);
     });
   });
 
@@ -1540,7 +1650,15 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
           if (url.includes("/internal/v1/models/ollama") && method === "GET") {
             return Promise.resolve({
               ok: true,
-              json: async () => ({ items: catalogItems() }),
+              json: async () => {
+                if (url.includes("/internal/v1/models/ollama/catalog/qwen2.5")) {
+                  return catalogFamilyTagsBody();
+                }
+                if (url.includes("/internal/v1/models/ollama/catalog")) {
+                  return { families: [{ slug: DOWNLOAD_FAMILY }] };
+                }
+                return { items: catalogItems() };
+              },
             });
           }
           return Promise.resolve(defaultPlaygroundFetch(url));
@@ -1548,11 +1666,7 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
     );
 
     const view = await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
-    await waitFor(() => {
-      expect(
-        screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
-      ).toBeInTheDocument();
-    });
+    await expandDownloadFamily();
     fireEvent.click(
       screen.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
     );
@@ -1593,11 +1707,19 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
             listCallCount += 1;
             return Promise.resolve({
               ok: true,
-              json: async () => ({
-                items: catalogItems({
-                  "custom:7b-instruct": listCallCount >= 2,
-                }),
-              }),
+              json: async () => {
+                if (url.includes("/internal/v1/models/ollama/catalog/qwen2.5")) {
+                  return catalogFamilyTagsBody();
+                }
+                if (url.includes("/internal/v1/models/ollama/catalog")) {
+                  return { families: [{ slug: DOWNLOAD_FAMILY }] };
+                }
+                return {
+                  items: catalogItems({
+                    "custom:7b-instruct": listCallCount >= 2,
+                  }),
+                };
+              },
             });
           }
           return Promise.resolve(defaultPlaygroundFetch(url));

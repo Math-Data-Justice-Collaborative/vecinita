@@ -8,8 +8,11 @@ import { LocaleProvider } from "vecinita-frontend-ui";
 import { EvaluationPage } from "@/pages/EvaluationPage";
 
 import { fetchInputUrl } from "./fetch-mock";
+import { mockOllamaApiFetch } from "./helpers/mockOllamaApi";
 
-const setSearchParams = vi.fn();
+const setSearchParams = vi.fn<
+  (updater: (prev: URLSearchParams) => URLSearchParams) => void
+>();
 
 vi.mock("@/config", () => ({
   requireCorpusConfig: () => ({
@@ -121,11 +124,9 @@ describe("EvaluationPage search params", () => {
             json: async () => ({ points: [], available_metrics: [] }),
           });
         }
-        if (url.includes("/internal/v1/models/ollama")) {
-          return Promise.resolve({
-            ok: true,
-            json: async () => ({ items: [] }),
-          });
+        const ollamaMock = mockOllamaApiFetch(url);
+        if (ollamaMock !== null) {
+          return Promise.resolve(ollamaMock);
         }
         if (url.includes("/internal/v1/eval/config-presets")) {
           return Promise.resolve({
@@ -154,6 +155,10 @@ describe("EvaluationPage search params", () => {
       expect(screen.getByTestId("eval-tab-explore")).toBeInTheDocument();
     });
     fireEvent.click(screen.getByTestId("eval-tab-explore"));
-    expect(setSearchParams).toHaveBeenCalledWith({ tab: "explore" });
+    expect(setSearchParams).toHaveBeenCalledTimes(1);
+    const updater = setSearchParams.mock.calls[0]?.[0];
+    expect(updater).toBeDefined();
+    const next = updater(new URLSearchParams({ tab: "runs" }));
+    expect(next.get("tab")).toBe("explore");
   });
 });

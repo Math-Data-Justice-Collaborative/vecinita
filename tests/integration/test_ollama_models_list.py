@@ -10,6 +10,7 @@ import pytest
 from fastapi.testclient import TestClient
 from vecinita_internal_write_api.app import create_app
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_config_for_tests
+from vecinita_shared_schemas.json_types import as_json_object
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
@@ -19,6 +20,7 @@ from tests.helpers.json_response import (
     json_str,
     response_json_object,
 )
+from tests.helpers.ollama_library_mock import MockOllamaLibraryClient
 from tests.helpers.ollama_models_mock import MockOllamaModelsClient
 from tests.helpers.user_mgmt_e2e import VIEWER_ID
 from tests.unit.rag.conftest import seed_eval_corpus
@@ -54,10 +56,12 @@ def ollama_models_client(
     set_auth_config_for_tests(make_auth_config(private_key))
     seed_eval_corpus(database_url=database_url)
     mock_client = MockOllamaModelsClient()
+    mock_library = MockOllamaLibraryClient()
     app = create_app(
         eval_embed_fn=eval_embed_fn,
         eval_judge=MockEvalJudge(),
         ollama_models_client=mock_client,
+        ollama_library_client=mock_library,
     )
     with TestClient(app) as client:
         yield client, private_key, mock_client
@@ -149,3 +153,51 @@ def test_viewer_denied_on_ollama_model_routes(
         ).status_code
         == HTTPStatus.FORBIDDEN
     )
+
+
+def test_admin_cannot_list_ollama_catalog_families(
+    ollama_models_client: tuple[TestClient, EllipticCurvePrivateKey, MockOllamaModelsClient],
+) -> None:
+    """F38 catalog tree is super-admin only — admin receives 403."""
+    client, private_key, _mock_client = ollama_models_client
+    token = sign_test_jwt(private_key, role="admin")
+
+    assert (
+        client.get(
+            "/internal/v1/models/ollama/catalog",
+            headers={"Authorization": f"Bearer {token}"},
+        ).status_code
+        == HTTPStatus.FORBIDDEN
+    )
+
+
+def test_super_admin_lists_ollama_catalog_tree(
+    ollama_models_client: tuple[TestClient, EllipticCurvePrivateKey, MockOllamaModelsClient],
+) -> None:
+    """Super-admin can browse Ollama library families and tags with availability."""
+    client, private_key, _mock_client = ollama_models_client
+    token = sign_test_jwt(private_key, role="super-admin")
+
+    families = client.get(
+        "/internal/v1/models/ollama/catalog",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert families.status_code == HTTPStatus.OK
+    families_body = response_json_object(families)
+    slugs = [
+        json_str(as_json_object(item), "slug") for item in json_list(families_body, "families")
+    ]
+    assert "qwen2.5" in slugs
+
+    tags = client.get(
+        "/internal/v1/models/ollama/catalog/qwen2.5",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert tags.status_code == HTTPStatus.OK
+    tags_body = response_json_object(tags)
+    assert json_str(tags_body, "slug") == "qwen2.5"
+    tag_items = json_list(tags_body, "tags")
+    default_model = find_json_object_by_str(tag_items, "model_id", "qwen2.5:1.5b-instruct")
+    assert default_model.get("available") is True
+    missing = find_json_object_by_str(tag_items, "model_id", "qwen2.5:3b-instruct")
+    assert missing.get("available") is False

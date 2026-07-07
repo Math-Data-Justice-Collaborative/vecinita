@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Download, RefreshCw } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronRight, Download, RefreshCw } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,20 +8,118 @@ import { Label } from "@/components/ui/label";
 import { useAdminT } from "@/hooks/useAdminT";
 import { useOllamaModelDownload } from "./useOllamaModelDownload";
 
+function CatalogFamilyRow({
+  slug,
+  tags,
+  tagsLoading,
+  tagsError,
+  activeModelId,
+  downloadStatus,
+  onExpand,
+  onDownload,
+  onResetDownloadStatus,
+}: {
+  slug: string;
+  tags: readonly { model_id: string; available: boolean }[] | undefined;
+  tagsLoading: boolean;
+  tagsError: string | null | undefined;
+  activeModelId: string | null;
+  downloadStatus: string;
+  onExpand: (slug: string) => void;
+  onDownload: (modelId: string) => void;
+  onResetDownloadStatus: () => void;
+}) {
+  const tr = useAdminT();
+
+  return (
+    <details
+      className="group rounded-md border"
+      data-testid={`eval-models-family-${slug}`}
+      onToggle={(event) => {
+        if (event.currentTarget.open) {
+          onExpand(slug);
+        }
+      }}
+    >
+      <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 font-mono text-sm font-semibold [&::-webkit-details-marker]:hidden">
+        <ChevronRight className="h-4 w-4 shrink-0 transition-transform group-open:rotate-90" />
+        {slug}
+      </summary>
+      <div className="space-y-2 border-t px-3 py-2" data-testid={`eval-models-tags-${slug}`}>
+        {tagsLoading ? (
+          <p className="text-sm text-muted-foreground">{tr("shared.loading")}</p>
+        ) : null}
+        {tagsError ? (
+          <p role="alert" className="text-sm text-destructive">
+            {tagsError}
+          </p>
+        ) : null}
+        {tags?.map((model) => {
+          const isPulling =
+            downloadStatus === "pulling" && activeModelId === model.model_id;
+          return (
+            <div
+              key={model.model_id}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2"
+              data-testid={`eval-models-row-${model.model_id}`}
+            >
+              <span className="font-mono text-sm">{model.model_id}</span>
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant={model.available ? "default" : "secondary"}
+                  data-testid={`eval-models-status-${model.model_id}`}
+                >
+                  {model.available
+                    ? tr("admin.evaluation.models.statusAvailable")
+                    : tr("admin.evaluation.models.statusNotDownloaded")}
+                </Badge>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={model.available || isPulling}
+                  data-testid={`eval-models-download-${model.model_id}`}
+                  onClick={() => {
+                    onResetDownloadStatus();
+                    onDownload(model.model_id);
+                  }}
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  {isPulling
+                    ? tr("admin.evaluation.models.downloadPulling")
+                    : tr("admin.evaluation.models.downloadButton")}
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </details>
+  );
+}
+
 export function EvaluationModelDownloadTab() {
   const tr = useAdminT();
   const {
-    models,
-    modelsLoading,
-    modelsError,
+    catalogFamilies,
+    catalogLoading,
+    catalogError,
+    familyTags,
+    familyTagsLoading,
+    familyTagsError,
     activeModelId,
     downloadStatus,
     downloadError,
-    refreshModels,
+    refreshCatalog,
+    loadFamilyTags,
     downloadModel,
     resetDownloadStatus,
   } = useOllamaModelDownload();
   const [customModelTag, setCustomModelTag] = useState("");
+
+  useEffect(() => {
+    void refreshCatalog();
+  }, [refreshCatalog]);
 
   const statusMessage = (() => {
     if (downloadStatus === "idle") {
@@ -50,9 +148,9 @@ export function EvaluationModelDownloadTab() {
         </p>
       </div>
 
-      {modelsError ? (
+      {catalogError ? (
         <p role="alert" className="text-sm text-destructive">
-          {modelsError}
+          {catalogError}
         </p>
       ) : null}
 
@@ -65,64 +163,45 @@ export function EvaluationModelDownloadTab() {
             type="button"
             size="sm"
             variant="outline"
-            disabled={modelsLoading}
+            disabled={catalogLoading}
             data-testid="eval-models-refresh"
             onClick={() => {
-              void refreshModels();
+              void refreshCatalog();
             }}
           >
             <RefreshCw className="mr-2 h-4 w-4" />
             {tr("shared.refresh")}
           </Button>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {modelsLoading && models.length === 0 ? (
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            {tr("admin.evaluation.models.catalogTreeHint")}
+          </p>
+          {catalogLoading && catalogFamilies.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {tr("shared.loading")}
             </p>
           ) : null}
-          <ul className="space-y-2" data-testid="eval-models-catalog">
-            {models.map((model) => {
-              const isPulling =
-                downloadStatus === "pulling" &&
-                activeModelId === model.model_id;
-              return (
-                <li
-                  key={model.model_id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2"
-                  data-testid={`eval-models-row-${model.model_id}`}
-                >
-                  <span className="font-mono text-sm">{model.model_id}</span>
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant={model.available ? "default" : "secondary"}
-                      data-testid={`eval-models-status-${model.model_id}`}
-                    >
-                      {model.available
-                        ? tr("admin.evaluation.models.statusAvailable")
-                        : tr("admin.evaluation.models.statusNotDownloaded")}
-                    </Badge>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      disabled={model.available || isPulling}
-                      data-testid={`eval-models-download-${model.model_id}`}
-                      onClick={() => {
-                        resetDownloadStatus();
-                        void downloadModel(model.model_id);
-                      }}
-                    >
-                      <Download className="mr-2 h-4 w-4" />
-                      {isPulling
-                        ? tr("admin.evaluation.models.downloadPulling")
-                        : tr("admin.evaluation.models.downloadButton")}
-                    </Button>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+          <div className="space-y-2" data-testid="eval-models-catalog">
+            {catalogFamilies.map((slug) => (
+              <CatalogFamilyRow
+                key={slug}
+                slug={slug}
+                tags={familyTags[slug]}
+                tagsLoading={familyTagsLoading[slug] ?? false}
+                tagsError={familyTagsError[slug]}
+                activeModelId={activeModelId}
+                downloadStatus={downloadStatus}
+                onExpand={(familySlug) => {
+                  void loadFamilyTags(familySlug);
+                }}
+                onDownload={(modelId) => {
+                  void downloadModel(modelId);
+                }}
+                onResetDownloadStatus={resetDownloadStatus}
+              />
+            ))}
+          </div>
         </CardContent>
       </Card>
 

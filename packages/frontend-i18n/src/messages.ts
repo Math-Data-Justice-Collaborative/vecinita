@@ -228,6 +228,8 @@ const enStrings = {
   "admin.evaluation.models.subtitle":
     "Download models and quantizations to the Modal volume for playground eval runs.",
   "admin.evaluation.models.catalogTitle": "Available models",
+  "admin.evaluation.models.catalogTreeHint":
+    "Browse the full Ollama library. Expand a model slug to see all versions and quantizations, then download into the Modal volume.",
   "admin.evaluation.models.statusAvailable": "Downloaded",
   "admin.evaluation.models.statusNotDownloaded": "Not downloaded",
   "admin.evaluation.models.downloadButton": "Download",
@@ -675,6 +677,8 @@ const esStrings = {
   "admin.evaluation.models.subtitle":
     "Descarga modelos y cuantizaciones al volumen Modal para ejecuciones del laboratorio.",
   "admin.evaluation.models.catalogTitle": "Modelos disponibles",
+  "admin.evaluation.models.catalogTreeHint":
+    "Explore la biblioteca completa de Ollama. Expanda un slug de modelo para ver todas las versiones y cuantizaciones y descargar al volumen Modal.",
   "admin.evaluation.models.statusAvailable": "Descargado",
   "admin.evaluation.models.statusNotDownloaded": "No descargado",
   "admin.evaluation.models.downloadButton": "Descargar",
