@@ -1747,4 +1747,72 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
       ).toHaveTextContent(/checking availability|comprobando/i);
     });
   });
+
+  it("shows catalog loading state before families load", async () => {
+    let resolveCatalog:
+      | ((value: { families: { slug: string }[] }) => void)
+      | undefined;
+    const catalogPromise = new Promise<{ families: { slug: string }[] }>(
+      (resolve) => {
+        resolveCatalog = resolve;
+      },
+    );
+    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({ items: [] });
+    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockReturnValue(
+      catalogPromise,
+    );
+
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
+    expect(screen.getByTestId("eval-models-catalog")).toBeInTheDocument();
+    expect(screen.getAllByText(/loading|cargando/i).length).toBeGreaterThan(0);
+
+    resolveCatalog?.({ families: [{ slug: DOWNLOAD_FAMILY }] });
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(`eval-models-family-${DOWNLOAD_FAMILY}`),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("surfaces catalog load errors on models tab", async () => {
+    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({ items: [] });
+    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockRejectedValue(
+      new Error("catalog down"),
+    );
+
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(/catalog down/i);
+    });
+  });
+
+  it("surfaces family tag load errors when expanding a catalog family", async () => {
+    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({ items: [] });
+    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockResolvedValue({
+      families: [{ slug: DOWNLOAD_FAMILY }],
+    });
+    vi.spyOn(adminApi, "fetchOllamaCatalogFamilyTags").mockRejectedValue(
+      new Error("tags down"),
+    );
+
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(`eval-models-family-${DOWNLOAD_FAMILY}`),
+      ).toBeInTheDocument();
+    });
+    const family = screen.getByTestId(`eval-models-family-${DOWNLOAD_FAMILY}`);
+    const summary = family.querySelector("summary");
+    if (summary !== null) {
+      fireEvent.click(summary);
+    }
+    await waitFor(() => {
+      expect(screen.getByText(/tags down/i)).toBeInTheDocument();
+    });
+
+    if (summary !== null) {
+      fireEvent.click(summary);
+    }
+    expect(family).toBeInTheDocument();
+  });
 });
