@@ -42,7 +42,7 @@ pull_jobs = modal.Dict.from_name("vecinita-ollama-pull-jobs", create_if_missing=
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
-    .apt_install("curl", "ca-certificates")
+    .apt_install("curl", "ca-certificates", "zstd")
     .run_commands("curl -fsSL https://ollama.com/install.sh | sh")
     .pip_install("pydantic>=2.7,<3", "starlette>=0.37,<1")
     .env({"OLLAMA_MODELS": "/models"})
@@ -86,6 +86,7 @@ def _list_models_payload() -> dict[str, object]:
 
 
 def _run_ollama_pull(model_id: str) -> None:
+    _ensure_ollama_serve()
     subprocess.run(  # noqa: S603
         [_OLLAMA_BIN, "pull", model_id],
         check=True,
@@ -252,7 +253,12 @@ def pull_model_job(job_id: str, model_id: str) -> str:
         return model_id
 
 
-@app.function(image=image, volumes={"/models": model_volume}, timeout=120)
+@app.function(
+    image=image,
+    volumes={"/models": model_volume},
+    timeout=120,
+    secrets=[modal.Secret.from_name("vecinita-ollama")],
+)
 @modal.asgi_app()
 def ollama_api():
     from pydantic import BaseModel, ConfigDict, Field, ValidationError

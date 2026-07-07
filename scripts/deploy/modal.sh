@@ -17,4 +17,7 @@ modal deploy infra/modal/data_management_app.py
 echo "Deploying vecinita-llm..."
 modal deploy infra/modal/llm_app.py
 
-echo "Done. Record embed/LLM URLs in DO ChatRAG secrets (see docs/staging-secrets-matrix.md)."
+echo "Deploying vecinita-ollama..."
+modal deploy infra/modal/ollama_app.py
+
+echo "Done. Record embed/LLM/Ollama URLs in DO secrets (see docs/staging-secrets-matrix.md)."

@@ -869,7 +869,10 @@ describe("admin API eval helpers", () => {
         ),
       ),
     );
-    await pullOllamaModel({ baseUrl: "http://localhost:8002" }, "qwen2.5:3b-instruct");
+    await pullOllamaModel(
+      { baseUrl: "http://localhost:8002" },
+      "qwen2.5:3b-instruct",
+    );
     const headers = vi.mocked(fetch).mock.calls[0]?.[1]?.headers as Record<
       string,
       string

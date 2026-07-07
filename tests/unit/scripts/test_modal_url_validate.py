@@ -9,6 +9,7 @@ pytestmark = pytest.mark.unit
 
 GOOD_EMBED = "https://vecinita--vecinita-embedding-embedding-api.modal.run"
 GOOD_LLM = "https://vecinita--vecinita-llm-fastapi-app.modal.run"
+GOOD_OLLAMA = "https://vecinita--vecinita-ollama-ollama-api.modal.run"
 
 
 def test_validate_accepts_correct_embed_url() -> None:
@@ -33,4 +34,16 @@ def test_validate_rejects_wrong_embedding_app_host() -> None:
         validate_modal_service_url(
             "VECINITA_MODAL_EMBED_URL",
             "https://vecinita--other-app.modal.run",
+        )
+
+
+def test_validate_accepts_correct_ollama_url() -> None:
+    validate_modal_service_url("VECINITA_MODAL_OLLAMA_URL", GOOD_OLLAMA)
+
+
+def test_validate_rejects_wrong_ollama_app_host() -> None:
+    with pytest.raises(ValueError, match="vecinita-ollama"):
+        validate_modal_service_url(
+            "VECINITA_MODAL_OLLAMA_URL",
+            "https://vecinita--vecinita-llm-fastapi-app.modal.run",
         )

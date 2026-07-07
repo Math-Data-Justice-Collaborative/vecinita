@@ -683,7 +683,8 @@ const esStrings = {
     "Selecciona un modelo del catálogo o introduce una etiqueta personalizada.",
   "admin.evaluation.models.downloadStatusPulling":
     "Descarga en curso — comprobando disponibilidad cada 10 segundos…",
-  "admin.evaluation.models.downloadStatusSuccess": "El modelo ya está disponible.",
+  "admin.evaluation.models.downloadStatusSuccess":
+    "El modelo ya está disponible.",
   "admin.evaluation.models.downloadStatusTimeout":
     "La descarga superó 30 minutos. Reintenta cuando quieras.",
   "admin.evaluation.models.downloadFailed": "Error al descargar el modelo",
@@ -740,7 +741,8 @@ const esStrings = {
   "admin.evaluation.playground.downloadTitle": "Descargar modelo",
   "admin.evaluation.playground.downloadHint":
     "Descarga una etiqueta Ollama al volumen Modal para evaluaciones del laboratorio.",
-  "admin.evaluation.playground.downloadModelLabel": "Etiqueta del modelo Ollama",
+  "admin.evaluation.playground.downloadModelLabel":
+    "Etiqueta del modelo Ollama",
   "admin.evaluation.playground.downloadModelPlaceholder": "qwen2.5:3b-instruct",
   "admin.evaluation.playground.downloadButton": "Descargar",
   "admin.evaluation.playground.downloadPulling": "Descargando…",

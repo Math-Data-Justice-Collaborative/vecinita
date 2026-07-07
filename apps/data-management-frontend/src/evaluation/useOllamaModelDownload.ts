@@ -65,7 +65,9 @@ export function useOllamaModelDownload(): UseOllamaModelDownloadResult {
     downloadPollStartedAt.current = null;
   }, []);
 
-  const refreshModelsFromApi = useCallback(async (): Promise<OllamaModelSummaryApi[]> => {
+  const refreshModelsFromApi = useCallback(async (): Promise<
+    OllamaModelSummaryApi[]
+  > => {
     const client = requireCorpusConfig();
     const data = await fetchOllamaModels(client);
     setModels(data.items);
@@ -78,7 +80,9 @@ export function useOllamaModelDownload(): UseOllamaModelDownloadResult {
     try {
       await refreshModelsFromApi();
     } catch (err) {
-      setModelsError(err instanceof Error ? err.message : "Failed to load models");
+      setModelsError(
+        err instanceof Error ? err.message : "Failed to load models",
+      );
     } finally {
       setModelsLoading(false);
     }
@@ -149,7 +153,9 @@ export function useOllamaModelDownload(): UseOllamaModelDownloadResult {
       } catch (err) {
         clearDownloadPoll();
         setDownloadStatus("error");
-        setDownloadError(err instanceof Error ? err.message : "Download failed");
+        setDownloadError(
+          err instanceof Error ? err.message : "Download failed",
+        );
       }
     },
     [clearDownloadPoll, scheduleDownloadPoll],

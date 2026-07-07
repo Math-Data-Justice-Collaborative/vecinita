@@ -77,7 +77,9 @@ export function EvaluationModelDownloadTab() {
         </CardHeader>
         <CardContent className="space-y-4">
           {modelsLoading && models.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{tr("shared.loading")}</p>
+            <p className="text-sm text-muted-foreground">
+              {tr("shared.loading")}
+            </p>
           ) : null}
           <ul className="space-y-2" data-testid="eval-models-catalog">
             {models.map((model) => {
