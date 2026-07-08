@@ -22,6 +22,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 _LLM_APP = _REPO_ROOT / "infra" / "modal" / "llm_app.py"
 
 _DEFAULT_CLIENT_TIMEOUT_SECONDS = 120.0
+_MIN_LLM_SERVICE_TIMEOUT_SECONDS = 900
 
 
 def _parse_llm_app() -> ast.Module:
@@ -55,8 +56,9 @@ def test_llm_service_class_timeout_covers_slow_generation() -> None:
     tree = _parse_llm_app()
     class_timeout = _class_decorator_timeout(tree, "LlmService")
     assert class_timeout is not None, "LlmService must declare a Modal class timeout"
-    assert class_timeout >= 900, (
-        f"LlmService timeout ({class_timeout}s) must be >= 900s for golden eval batches"
+    assert class_timeout >= _MIN_LLM_SERVICE_TIMEOUT_SECONDS, (
+        f"LlmService timeout ({class_timeout}s) must be >= {_MIN_LLM_SERVICE_TIMEOUT_SECONDS}s "
+        "for golden eval batches"
     )
 
 

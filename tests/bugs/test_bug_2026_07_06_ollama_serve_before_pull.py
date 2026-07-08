@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 from types import ModuleType
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from _pytest.monkeypatch import MonkeyPatch
 
 
