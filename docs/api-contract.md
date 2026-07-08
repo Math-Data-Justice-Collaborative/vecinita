@@ -311,6 +311,12 @@ Base path: `/internal/v1` (audited S6.2).
 
 **Auth:** `Authorization: Bearer <VECINITA_INTERNAL_API_KEY>` or mTLS.
 
+**Service audit attribution:** When authenticated with the internal API key, only trusted
+Vecinita backends (data-management Modal ASGI → internal-write-api) may set
+`X-Vecinita-Audit-Actor-Id` and `X-Vecinita-Audit-Actor-Role` on mutating requests so
+pipeline writes record the initiating operator. Browser clients and external callers must not
+send these headers; they are honored only on the service-key path (BUG-2026-07-07).
+
 ### POST `/internal/v1/documents/batch`
 
 - **Purpose**: Upsert documents, chunks, embeddings from Modal workers.
