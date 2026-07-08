@@ -94,6 +94,10 @@ Database migrations are **not** automated — run `alembic upgrade head` per the
    **EV-002 redeploy order (TP-029):** `alembic upgrade head` → `internal-write-api` →
    `chat-rag-backend` → `data-management-frontend`. Modal apps do not need redeploy.
 
+   **Audit actor index (20260707_0008):** Before deploy smoke for the user-activity hotfix,
+   confirm `alembic current` includes revision `20260707_0008` on staging Postgres so
+   `GET /internal/v1/audit?actor_id=…` uses `ix_audit_log_actor_id_created_at`.
+
 5. **Smoke** — after DO apps report running:
 
    ```bash
