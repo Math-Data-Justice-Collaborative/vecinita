@@ -150,25 +150,32 @@ No redeploy required: chat-rag-backend, internal-write-api, Modal apps, Postgres
 
 **Post-deploy validation:** Admin triggers golden run on staging; verify history + drill-down; harness green in CI.
 
-### EV-010 — Playground model download + Modal storage (F38)
+### EV-010 — Playground model download + Modal storage (F38, ADR-037 unified)
 
-**Storage target:** all playground Ollama model weights on Modal Volume **`vecinita-models`**
-(mounted `/models` in `vecinita-ollama`). DO services **never** store model blobs.
+**Storage target:** all playground model weights on Modal Volume **`llm-models`**
+(mounted `/models` in **`vecinita-llm`**). Downloads use **HuggingFace Hub** (`pull_model_job`,
+`stage_default_model`); vLLM serves from staged safetensors. DO services **never** store model blobs.
 
 | Variable | App | Purpose |
 |----------|-----|---------|
-| `VECINITA_MODAL_OLLAMA_URL` | internal-write-api | Proxy to Modal ASGI `vecinita-ollama` list/pull routes |
-| `VECINITA_MODAL_PROXY_KEY` | internal-write-api + Modal secret `vecinita-ollama` | `X-Vecinita-Proxy-Key` auth on Modal HTTP |
-| `vecinita-models` volume | Modal | Persistent Ollama weights + `manifest.json` |
+| `VECINITA_MODAL_LLM_URL` | internal-write-api, chat-rag-backend | Unified Modal ASGI: generate, warm, list/pull |
+| `VECINITA_MODAL_PROXY_KEY` | internal-write-api + Modal secret `vecinita-ollama`* | `X-Vecinita-Proxy-Key` on model routes |
 
-**Redeploy order (EV-010):**
+\*Proxy key remains in Modal secret `vecinita-ollama` until merged into `vecinita-llm` (migration).
 
-1. **`vecinita-ollama` Modal app** — must be deployed with `vecinita-models` volume (F37 baseline)
-2. **internal-write-api** — `VECINITA_MODAL_OLLAMA_URL` + super-admin pull auth (F38)
-3. **data-management-frontend** — super-admin download UI
+**`vecinita-llm` runtime (ADR-037):** vLLM on **GPU T4**, **`timeout=900s`**, **`scaledown_window=300`**.
+`POST /warm {"model_id": ...}` preloads the resolved HF model. One active vLLM engine per container;
+switching `model_id` reloads the engine (~60–120s). **`vecinita-ollama` is deprecated** — do not deploy.
 
-**Post-deploy validation (T3):** Super-admin pulls a small tag (e.g. `qwen2.5:3b-instruct`); poll until
-`available: true` in Playground picker; optional `modal volume ls vecinita-models` operator check.
+**Redeploy order (EV-010 + ADR-037):**
+
+1. **`vecinita-llm` Modal app** — deploy unified app; run `stage_default_model` or `stage_llm_weights`
+2. **internal-write-api** — `VECINITA_MODAL_LLM_URL` only (remove `VECINITA_MODAL_OLLAMA_URL`)
+3. **De-deploy** — `modal app stop vecinita-ollama` after smoke
+4. **data-management-frontend** — unchanged API surface (`/internal/v1/models/ollama/*`)
+
+**Post-deploy validation:** Super-admin pulls a catalog tag; poll until `available: true`; golden eval
+uses `VECINITA_MODAL_LLM_URL` with sandbox `model_id`.
 
 ## Entrypoints & triggers
 

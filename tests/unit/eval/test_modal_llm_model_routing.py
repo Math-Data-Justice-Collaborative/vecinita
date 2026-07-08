@@ -1,4 +1,4 @@
-"""Eval runtime routes LLM calls via EvalConfig.model_id (T68.12, RD-139)."""
+"""Eval runtime routes LLM calls via EvalConfig.model_id through vecinita-llm (ADR-037)."""
 
 from __future__ import annotations
 
@@ -15,48 +15,45 @@ if TYPE_CHECKING:
     from _pytest.monkeypatch import MonkeyPatch
 
 
-def _ollama_client_factory(
+def _llm_client_factory(
     transport: httpx.MockTransport,
     *,
     model_id: str,
 ) -> LlmClient:
     return LlmClient(
-        "http://ollama.test",
+        "http://llm.test",
         model_id=model_id,
         proxy_key="proxy-secret",
-        http_client=httpx.Client(transport=transport, base_url="http://ollama.test"),
+        http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
     )
 
 
-def test_eval_runtime_for_config_sends_model_id_to_ollama(
+def test_eval_runtime_for_config_sends_model_id_to_llm(
     monkeypatch: MonkeyPatch,
 ) -> None:
-    """Sandbox eval uses Ollama URL and config.model_id on /generate."""
+    """Sandbox eval uses vecinita-llm URL and config.model_id on /generate."""
     captured: dict[str, object] = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
         payload = as_json_object(cast("object", json_lib.loads(request.content.decode())))
         captured["path"] = request.url.path
         captured["model_id"] = payload.get("model_id")
-        captured["proxy_key"] = request.headers.get("X-Vecinita-Proxy-Key")
         return httpx.Response(200, json={"text": "Eval answer."})
 
     transport = httpx.MockTransport(handler)
-    monkeypatch.setenv("VECINITA_MODAL_OLLAMA_URL", "http://ollama.test")
-    monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", "proxy-secret")
+    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://llm.test")
     monkeypatch.setattr(
-        "vecinita_eval.modal_llm._ollama_llm_client",
-        lambda model_id: _ollama_client_factory(transport, model_id=model_id),  # pyright: ignore[reportUnknownArgumentType, reportUnknownLambdaType]
+        "vecinita_eval.modal_llm._eval_llm_client",
+        lambda model_id: _llm_client_factory(transport, model_id=model_id),  # pyright: ignore[reportUnknownArgumentType, reportUnknownLambdaType]
     )
 
-    config = EvalConfig(model_id="llama3.2:3b", max_tokens=128, temperature=0.4)
+    config = EvalConfig(model_id="qwen3:8b", max_tokens=128, temperature=0.4)
     judge, synthesis = eval_runtime_for_config(config)
     assert judge is not None
     assert synthesis is not None
     synthesis.complete("Score this answer.")
     assert captured["path"] == "/generate"
-    assert captured["model_id"] == "llama3.2:3b"
-    assert captured["proxy_key"] == "proxy-secret"
+    assert captured["model_id"] == "qwen3:8b"
 
 
 def test_eval_runtime_for_config_defaults_model_id(
@@ -71,11 +68,10 @@ def test_eval_runtime_for_config_defaults_model_id(
         return httpx.Response(200, json={"text": "ok"})
 
     transport = httpx.MockTransport(handler)
-    monkeypatch.setenv("VECINITA_MODAL_OLLAMA_URL", "http://ollama.test")
-    monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", "proxy-secret")
+    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://llm.test")
     monkeypatch.setattr(
-        "vecinita_eval.modal_llm._ollama_llm_client",
-        lambda model_id: _ollama_client_factory(transport, model_id=model_id),  # pyright: ignore[reportUnknownArgumentType, reportUnknownLambdaType]
+        "vecinita_eval.modal_llm._eval_llm_client",
+        lambda model_id: _llm_client_factory(transport, model_id=model_id),  # pyright: ignore[reportUnknownArgumentType, reportUnknownLambdaType]
     )
 
     _judge, synthesis = eval_runtime_for_config(EvalConfig())

@@ -43,6 +43,7 @@ def super_admin_write_client(
         ),
     )
     monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
+    monkeypatch.delenv("VECINITA_MODAL_LLM_URL", raising=False)
     monkeypatch.delenv("VECINITA_MODAL_OLLAMA_URL", raising=False)
     monkeypatch.delenv("VECINITA_MODAL_PROXY_KEY", raising=False)
     set_auth_config_for_tests(make_auth_config(private_key))
@@ -123,8 +124,8 @@ def test_ollama_pull_returns_202_when_client_configured(
     assert isinstance(body.get("job_id"), str)
 
 
-def test_infra_do_spec_declares_modal_ollama_url() -> None:
-    """Repo spec includes Ollama URL — live DO drift is the production failure mode."""
+def test_infra_do_spec_declares_modal_llm_url() -> None:
+    """Repo spec includes LLM URL — live DO drift is the production failure mode."""
     spec_path = Path(__file__).resolve().parents[2] / "infra" / "do" / "internal-write-api.yaml"
     content = spec_path.read_text(encoding="utf-8")
-    assert "VECINITA_MODAL_OLLAMA_URL" in content
+    assert "VECINITA_MODAL_LLM_URL" in content

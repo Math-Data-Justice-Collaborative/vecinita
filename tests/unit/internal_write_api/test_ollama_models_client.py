@@ -17,10 +17,11 @@ from vecinita_shared_schemas.json_types import as_json_object
 
 
 def test_client_requires_url_and_proxy_key(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Constructor raises when Modal Ollama env vars are missing."""
+    """Constructor raises when Modal LLM env vars are missing."""
+    monkeypatch.delenv("VECINITA_MODAL_LLM_URL", raising=False)
     monkeypatch.delenv("VECINITA_MODAL_OLLAMA_URL", raising=False)
     monkeypatch.delenv("VECINITA_MODAL_PROXY_KEY", raising=False)
-    with pytest.raises(OllamaModelsClientError, match="VECINITA_MODAL_OLLAMA_URL"):
+    with pytest.raises(OllamaModelsClientError, match="VECINITA_MODAL_LLM_URL"):
         OllamaModelsClient()
 
 

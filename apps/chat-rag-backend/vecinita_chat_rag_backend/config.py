@@ -86,15 +86,13 @@ class ChatRagSettings:
             chat_max_tokens=_int_env("VECINITA_CHAT_MAX_TOKENS", 256),
             browse_page_size=_int_env("VECINITA_BROWSE_PAGE_SIZE", 20),
             embed_url=os.environ.get("VECINITA_MODAL_EMBED_URL"),
-            llm_url=os.environ.get("VECINITA_MODAL_OLLAMA_URL")
-            or os.environ.get("VECINITA_MODAL_LLM_URL"),
+            llm_url=os.environ.get("VECINITA_MODAL_LLM_URL"),
             request_timeout_s=float(os.environ.get("VECINITA_REQUEST_TIMEOUT_S", "120")),
             internal_write_url=os.environ.get("VECINITA_INTERNAL_WRITE_URL"),
             internal_api_key=os.environ.get("VECINITA_INTERNAL_API_KEY"),
             stats_enabled=_bool_env("VECINITA_STATS_ENABLED", default=True),
-            llm_model_id=os.environ.get("VECINITA_OLLAMA_MODEL_ID", DEFAULT_EVAL_MODEL_ID)
-            if os.environ.get("VECINITA_MODAL_OLLAMA_URL")
-            else None,
+            llm_model_id=os.environ.get("VECINITA_LLM_MODEL_ID")
+            or os.environ.get("VECINITA_OLLAMA_MODEL_ID", DEFAULT_EVAL_MODEL_ID),
             fallback_top_k=_int_env("VECINITA_RAG_CONFIG_FALLBACK_TOP_K", DEFAULT_EVAL_TOP_K),
             fallback_min_retrieval_score=_float_env(
                 "VECINITA_RAG_CONFIG_FALLBACK_MIN_RETRIEVAL_SCORE",

@@ -1,0 +1,36 @@
+---
+description: Unified vecinita-llm Modal app — single LLM surface (ADR-037)
+alwaysApply: true
+---
+
+# Unified vecinita-llm Modal app (ADR-037)
+
+Vecinita has **one** Modal LLM deployable: **`vecinita-llm`** (`infra/modal/llm_app.py`).
+
+## Do
+
+- Route **all** LLM HTTP (chat, eval, ingest/retag, playground list/pull) through
+  `VECINITA_MODAL_LLM_URL` + optional `VECINITA_MODAL_PROXY_KEY`.
+- Use **vLLM** for inference; **HuggingFace Hub** (`huggingface_hub.snapshot_download`) for
+  `pull_model_job` / `stage_default_model` — not `ollama pull`.
+- Keep API path compat: `GET/POST /models/ollama` on `vecinita-llm` (Ollama-style tags in UI;
+  tag→HF mapping in `infra/modal/llm_model_registry.py`).
+- Store weights on Modal volume **`llm-models`** only; manifest at `/models/manifest.json`.
+- Accept optional `model_id` on `/generate`, `/warm` (playground tags).
+
+## Do not
+
+- Deploy or add routes to **`vecinita-ollama`** — deprecated; de-deploy after unified smoke.
+- Add `VECINITA_MODAL_OLLAMA_URL` to new DO specs or sync lists (legacy env may warn-only in clients).
+- Assume vLLM can read Ollama blob cache — incompatible formats.
+
+## Model switching
+
+One vLLM engine per GPU class instance; changing `model_id` reloads the engine (~60–120s).
+Use `/warm` before eval batches.
+
+## References
+
+- `docs/adr/ADR-037-unified-vecinita-llm-modal-app.md`
+- `docs/deployment-integration.md` §EV-010
+- ADR-009 (vLLM primary)

@@ -1,4 +1,4 @@
-"""LlamaIndex LLM adapter for vecinita-llm / vecinita-ollama HTTP clients."""
+"""LlamaIndex LLM adapter for vecinita-llm HTTP client (ADR-037)."""
 
 from __future__ import annotations
 
@@ -19,8 +19,12 @@ if TYPE_CHECKING:
 
     from vecinita_eval.judges import JudgeClient
 
-_ENV_OLLAMA_URL: Final[str] = "VECINITA_MODAL_OLLAMA_URL"
+_ENV_LLM_URL: Final[str] = "VECINITA_MODAL_LLM_URL"
 _ENV_PROXY_KEY: Final[str] = "VECINITA_MODAL_PROXY_KEY"
+
+# Golden/ad-hoc eval batches drive slow first-token generation; use a read timeout well
+# above the 120s LlmClient default (BUG-2026-07-08). Scoped to eval only.
+_EVAL_LLM_TIMEOUT_S: Final[float] = 900.0
 
 
 def _qwen_instruct_prompt(prompt: str) -> str:
@@ -41,7 +45,7 @@ def warm_modal_llm(client: LlmClient) -> None:
 
 
 class ModalHttpLLM(CustomLLM):
-    """Bridge Modal LLM HTTP `/generate` to LlamaIndex evaluators and synthesis."""
+    """Bridge Modal LLM HTTP ``/generate`` to LlamaIndex evaluators and synthesis."""
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -66,7 +70,7 @@ class ModalHttpLLM(CustomLLM):
         formatted: bool = False,  # noqa: FBT001, FBT002
         **kwargs: object,
     ) -> CompletionResponse:
-        """Complete a prompt via Modal LLM HTTP `/generate`."""
+        """Complete a prompt via Modal LLM HTTP ``/generate``."""
         _ = (formatted, kwargs)
         text = self.client.generate(
             _qwen_instruct_prompt(prompt),
@@ -82,7 +86,7 @@ class ModalHttpLLM(CustomLLM):
         formatted: bool = False,  # noqa: FBT001, FBT002
         **kwargs: object,
     ) -> Generator[CompletionResponse, None, None]:
-        """Stream completion tokens from Modal LLM HTTP `/generate/stream`."""
+        """Stream completion tokens from Modal LLM HTTP ``/generate/stream``."""
         _ = (formatted, kwargs)
         parts: list[str] = []
         for token in self.client.generate_stream(
@@ -118,24 +122,21 @@ def judge_llm_from_config(llm: ModalHttpLLM, config: EvalConfig) -> ModalHttpLLM
     )
 
 
-def _ollama_llm_client(model_id: str) -> LlmClient | None:
-    """Create an Ollama-backed client when Modal Ollama env vars are configured."""
-    if not os.environ.get(_ENV_OLLAMA_URL) or not os.environ.get(_ENV_PROXY_KEY):
+def _eval_llm_client(model_id: str) -> LlmClient | None:
+    """Create a vecinita-llm client when Modal LLM env vars are configured."""
+    if not os.environ.get(_ENV_LLM_URL):
         return None
     try:
-        return LlmClient(model_id=model_id)
+        return LlmClient(model_id=model_id, timeout=_EVAL_LLM_TIMEOUT_S)
     except LlmClientError:
         return None
 
 
 def default_eval_runtime() -> tuple[JudgeClient | None, ModalHttpLLM | None]:
-    """Create shared judge + LLM from Modal Ollama or vecinita-llm when configured."""
-    client = _ollama_llm_client(DEFAULT_EVAL_MODEL_ID)
+    """Create shared judge + LLM from vecinita-llm when configured."""
+    client = _eval_llm_client(DEFAULT_EVAL_MODEL_ID)
     if client is None:
-        try:
-            client = LlmClient()
-        except LlmClientError:
-            return None, None
+        return None, None
     warm_modal_llm(client)
     llm = ModalHttpLLM(client=client, model_id=client.default_model_id)
     return LlamaIndexJudgeClient(llm=llm), llm
@@ -145,16 +146,9 @@ def eval_runtime_for_config(
     config: EvalConfig,
 ) -> tuple[JudgeClient | None, ModalHttpLLM | None]:
     """Create judge + synthesis LLM with sandbox config including model_id."""
-    client = _ollama_llm_client(config.model_id)
+    client = _eval_llm_client(config.model_id)
     if client is None:
-        judge, synthesis_llm = default_eval_runtime()
-        if synthesis_llm is None:
-            return judge, None
-        configured_synthesis = synthesis_llm_from_config(synthesis_llm, config)
-        if judge is None:
-            return None, configured_synthesis
-        judge_llm = judge_llm_from_config(synthesis_llm, config)
-        return LlamaIndexJudgeClient(llm=judge_llm), configured_synthesis
+        return default_eval_runtime()
 
     warm_modal_llm(client)
     base_llm = ModalHttpLLM(

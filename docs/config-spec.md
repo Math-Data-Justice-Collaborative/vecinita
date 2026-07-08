@@ -107,6 +107,12 @@ Model selection: **Ollama model picker** on Modal (RD-139–RD-141). Playground 
 Ollama API; missing models trigger a Modal background pull job into `vecinita-models`. Promote
 includes `model_id` so production ChatRAG switches LLM at runtime.
 
+**Eval LLM read timeout (BUG-2026-07-08):** eval batches build their `LlmClient` with a
+**900s** read timeout (`vecinita_eval.modal_llm._EVAL_LLM_TIMEOUT_S`), well above the 120s
+`LlmClient` default. This is **scoped to eval only** — interactive chat keeps the 120s default.
+Golden/ad-hoc first-token latency on a freshly-loaded model otherwise surfaced as
+`"The read operation timed out"`.
+
 ### Admin auth — Supabase (EV-005 F34)
 
 Used by the **Data Management API** and the **Internal Write API** to verify operator Supabase
